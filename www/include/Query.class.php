@@ -528,49 +528,16 @@ class Query {
 		return false;
 	}
 
-	public function getRemoteCaseData($year_month) {
-		$this->db->parse(
-			"-- 每月遠途先審明細查詢 
-				SELECT t.RM01,
-					t.RM02,
-					t.RM03,
-					t.RM09,
-					w.KCNT,
-					t.RM07_1,
-					u.LIDN,
-					u.LNAM,
-					u.LADR,
-					v.AB01,
-					v.AB02,
-					v.AB03,
-					t.RM13,
-					t.RM16
-				FROM MOICAS.CRSMS t
-				LEFT JOIN MOICAD.RLNID u
-					ON t.RM18 = u.LIDN -- 權利人 
-				LEFT JOIN MOICAS.CABRP v
-					ON t.RM24 = v.AB01 -- 代理人 
-				LEFT JOIN MOIADM.RKEYN w
-					ON t.RM09 = w.KCDE_2
-				AND w.KCDE_1 = '06' -- 登記原因 
-				WHERE
-					t.RM07_1 LIKE :bv_year_month
-					AND (u.LADR NOT LIKE '%".iconv("utf-8", "big5", "桃園市")."%' AND u.LADR NOT LIKE '%".iconv("utf-8", "big5", "桃園縣")."%')
-					AND (v.AB03 NOT LIKE '%".iconv("utf-8", "big5", "桃園市")."%' AND v.AB03 NOT LIKE '%".iconv("utf-8", "big5", "桃園縣")."%')
-				ORDER BY t.RM07_1 ASC"
-        );
-        
-        $this->db->bind(":bv_year_month", $year_month."%");
-
-		$this->db->execute();
-		return $this->db->fetchAll();
-	}
-
 	public function getSelectSQLData($sql) {
 		// non-select statement will skip
 		if (!eregi("^SELECT.+\$", $sql)) {
 			return false;
 		}
+		// second defense line
+		if (eregi("^.*(INSERT|DELETE|UPDATE).*$", $sql)) {
+			return false;
+		}
+
 		$this->db->parse(iconv("utf-8", "big5", rtrim($sql, ";")));
 		$this->db->execute();
 		return $this->db->fetchAll();
