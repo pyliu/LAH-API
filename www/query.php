@@ -166,49 +166,45 @@ fieldset fieldset legend {
       </fieldset>
       <fieldset>
         <legend>CSV報表匯出</legend>
-        <fieldset>
-          <legend>遠途先審</legend>
-          <label for="remote_case_month">指定年月</label>
-          <input name="remote_case_month" id="remote_case_month" title='輸入檢測' data-trigger="manual" data-toggle="popover" data-placement="top" class="remote_cases_export_action_grp" />
-          <button id="remote_case_csv_button" class="remote_cases_export_action_grp">匯出</button>
-          <button id="remote_case_quote_button">備註</button>
-          <blockquote id="remote_case_blockquote" class="hide">
-            -- 每月遠途先審明細查詢 <br/>
-            SELECT <br/>
-            　　　t.RM01 AS "收件年", <br/>
-            　　　t.RM02 AS "收件字", <br/>
-            　　　t.RM03 AS "收件號", <br/>
-            　　　t.RM09 AS "登記原因代碼", <br/>
-            　　　w.KCNT AS "登記原因", <br/>
-            　　　t.RM07_1 AS "收件日期", <br/>
-            　　　u.LIDN AS "權利人統編", <br/>
-            　　　u.LNAM AS "權利人名稱", <br/>
-            　　　u.LADR AS "權利人地址", <br/>
-            　　　v.AB01 AS "代理人統編", <br/>
-            　　　v.AB02 AS "代理人名稱", <br/>
-            　　　v.AB03 AS "代理人地址", <br/>
-            　　　t.RM13 AS "筆數", <br/>
-            　　　t.RM16 AS "棟數" <br/>
-            FROM MOICAS.CRSMS t <br/>
-            　　　LEFT JOIN MOICAD.RLNID u ON t.RM18 = u.LIDN  -- 權利人 <br/>
-            　　　LEFT JOIN MOICAS.CABRP v ON t.RM24 = v.AB01  -- 代理人 <br/>
-            　　　LEFT JOIN MOIADM.RKEYN w ON t.RM09 = w.KCDE_2 AND w.KCDE_1 = '06'   -- 登記原因 <br/>
-            WHERE  <br/>
-            　　　-- t.RM02 = 'HB06' AND  <br/>
-            　　　t.RM07_1 LIKE '10803%' AND  <br/>
-            　　　(u.LADR NOT LIKE '%桃園市%' AND u.LADR NOT LIKE '%桃園縣%') AND  <br/>
-            　　　(v.AB03 NOT LIKE '%桃園市%' AND v.AB03 NOT LIKE '%桃園縣%')
-          </blockquote>
-        </fieldset>
-        <fieldset>
-          <legend>SQL</legend>
-          <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">SELECT * FROM SCRSMS WHERE RM09 IN ('CU', 'CW') AND RM30 IN ('F', 'Z') AND (RM07_1 BETWEEN '1080101' AND '1080531')</textarea>
-          <button id="sql_csv_text_button">匯出</button>
-          <button id="sql_csv_quote_button">備註</button>
-          <blockquote id="XXX_blockquote" class="hide">
-            輸入SELECT SQL指令匯出查詢結果。
-          </blockquote>
-        </fieldset>
+        <label for="preload_sql_select">預載查詢：</label>
+        <select id="preload_sql_select">
+          <option></option>
+          <option value="SELECT t.rm01, t.rm02, t.rm03, t.rm07_1, t.rm07_2, t.rm09, s.kcnt, t.rm30
+FROM SCRSMS t
+LEFT JOIN SRKEYN s
+  ON t.rm09 = s.kcde_2
+WHERE s.kcde_1 = '06'
+  AND RM07_1 LIKE '10805%'
+ORDER BY RM09">每月登記案件</option>
+          <option value="SELECT
+      t.RM01,
+      t.RM02,
+      t.RM03,
+      t.RM09,
+      w.KCNT,
+      t.RM07_1,
+      u.LIDN,
+      u.LNAM,
+      u.LADR,
+      v.AB01,
+      v.AB02,
+      v.AB03,
+      t.RM13,
+      t.RM16
+FROM MOICAS.CRSMS t
+    LEFT JOIN MOICAD.RLNID u ON t.RM18 = u.LIDN
+    LEFT JOIN MOICAS.CABRP v ON t.RM24 = v.AB01
+    LEFT JOIN MOIADM.RKEYN w ON t.RM09 = w.KCDE_2 AND w.KCDE_1 = '06'
+WHERE t.RM07_1 LIKE '10805%'
+      AND (u.LADR NOT LIKE '%桃園市%' AND u.LADR NOT LIKE '%桃園縣%')
+      AND (v.AB03 NOT LIKE '%桃園市%' AND v.AB03 NOT LIKE '%桃園縣%')">每月遠途先審案件</option>
+        </select>
+        <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">SELECT * FROM SCRSMS WHERE RM09 IN ('CU', 'CW') AND RM30 IN ('F', 'Z') AND (RM07_1 BETWEEN '1080101' AND '1080531')</textarea>
+        <button id="sql_csv_text_button">匯出</button>
+        <button id="sql_csv_quote_button">備註</button>
+        <blockquote id="XXX_blockquote" class="hide">
+          輸入SELECT SQL指令匯出查詢結果。
+        </blockquote>
       </fieldset>
       <fieldset>
         <legend>使用者對應表</legend>
@@ -225,7 +221,12 @@ fieldset fieldset legend {
       </fieldset>
     </div>
   </section><!-- /section -->
-  <small id="copyright" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded"><p id="copyright" class="text-center my-2"><strong>&copy; <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong></p></small>
+  <small id="copyright" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded">
+    <p id="copyright" class="text-center my-2">
+    <a href="https://github.com/pyliu/Land-Affairs-Helper" target="_blank" title="View project on Github!"><svg class="octicon octicon-mark-github v-align-middle" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg></a>
+      <strong>&copy; <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
+    </p>
+  </small>
   <!-- Bootstrap core JavaScript
   ================================================== -->
   <!-- Placed at the end of the document so the pages load faster -->
@@ -309,12 +310,11 @@ fieldset fieldset legend {
         }, 1000);
       });
 
-      // remote case csv export
-      $("#remote_case_csv_button").on("click", xhrExportRemoteCases);
-      bindPressEnterEvent("#remote_case_month", xhrExportRemoteCases);
-
       // sql csv export
       $("#sql_csv_text_button").on("click", xhrExportSQLCsv);
+      $("#preload_sql_select").on("change", function(e) {
+        $("#sql_csv_text").val($("#preload_sql_select").val());
+      });
     });
   </script>
 </body>

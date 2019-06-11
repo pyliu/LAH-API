@@ -998,56 +998,7 @@ var xhrUpdateExpaaAA100 = function(e) {
 	}
 }
 
-var xhrExportRemoteCases = function(e) {
-	// basic checking for tw date input
-	var regex = /^\d{5}$/;
-	var val = $("#remote_case_month").val();
-	
-	if (val.match(regex) == null) {
-	  showPopper("#remote_case_month", "輸入民國年月共五碼(e.g. 10804)");
-	  return;
-	}
-
-	var year = val.substr(0, 3);
-	if (parseInt(year) > this_year || parseInt(year) < 0) {
-	  showPopper("#remote_case_month", "年份錯誤");
-	  return;
-	}
-
-	var month = val.substr(3, 2);
-	if (parseInt(month) > 12 || parseInt(month) < 0) {
-	  showPopper("#remote_case_month", "月份錯誤");
-	  return;
-	}
-
-	toggle(".remote_cases_export_action_grp");
-
-	var body = new FormData();
-	body.append("type", "file_remote_case_monthly");
-	body.append("year_month", val);
-	fetch("export_file_api.php", {
-		method: 'POST',
-			body: body
-	}).then(function(response) {
-	  return response.blob();
-	}).then(function (blob) {
-		var url = window.URL.createObjectURL(blob);
-		var a = document.createElement('a');
-		a.href = url;
-		a.download = val + ".csv";
-		document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-		a.click();    
-		a.remove();  //afterwards we remove the element again
-		// release object in memory
-		window.URL.revokeObjectURL(url);
-		toggle(".remote_cases_export_action_grp");
-	}).catch(function(ex) {
-	  console.error("xhrExportRemoteCases parsing failed", ex);
-	  alert("XHR連線查詢有問題!!【" + ex + "】");
-	});
-  };
-
-  var xhrExportSQLCsv = function(e) {
+var xhrExportSQLCsv = function(e) {
 	var val = $("#sql_csv_text").val();
 
 	toggle(e.target);
@@ -1059,7 +1010,7 @@ var xhrExportRemoteCases = function(e) {
 		method: 'POST',
 			body: body
 	}).then(function(response) {
-	  return response.blob();
+		return response.blob();
 	}).then(function (blob) {
 		var d = new Date();
 		var url = window.URL.createObjectURL(blob);
@@ -1075,8 +1026,8 @@ var xhrExportRemoteCases = function(e) {
 		window.URL.revokeObjectURL(url);
 		toggle(e.target);
 	}).catch(function(ex) {
-	  console.error("xhrExportSQLCsv parsing failed", ex);
-	  alert("XHR連線查詢有問題!!【" + ex + "】");
+		console.error("xhrExportSQLCsv parsing failed", ex);
+		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
-  };
+};
 //]]>

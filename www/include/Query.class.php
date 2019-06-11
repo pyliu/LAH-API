@@ -571,7 +571,7 @@ class Query {
 		if (!eregi("^SELECT.+\$", $sql)) {
 			return false;
 		}
-		$this->db->parse(iconv("utf-8", "big5", trim($sql, ";")));
+		$this->db->parse(iconv("utf-8", "big5", rtrim($sql, ";")));
 		$this->db->execute();
 		return $this->db->fetchAll();
 	}
