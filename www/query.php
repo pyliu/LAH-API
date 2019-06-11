@@ -294,13 +294,32 @@ GROUP BY q.AA48, q.KCNT;">段小段土地標示部筆數</option>
    AND RM99 = 'Y'
  GROUP BY RM101, KCNT;">跨所各登記原因案件統計 by 收件所</option>
           <option value="SELECT DISTINCT t.RM01,
-                t.RM02,
-                t.RM03,
-                t.RM07_1,
-                t.RM09,
-                r.kcnt AS &quot;登記原因&quot;,
-                t.RM99  AS &quot;是否跨所&quot;,
-                t.RM101 AS &quot;資料管轄所&quot;
+		t.RM02,
+		t.RM03,
+		t.RM07_1,
+		t.RM09,
+		r.kcnt AS &quot;登記原因&quot;,
+		t.RM99  AS &quot;是否跨所&quot;,
+		(CASE
+        WHEN t.RM101 = 'HA' THEN '桃園' 
+        WHEN t.RM101 = 'HB' THEN '中壢' 
+        WHEN t.RM101 = 'HC' THEN '大溪' 
+        WHEN t.RM101 = 'HD' THEN '楊梅' 
+        WHEN t.RM101 = 'HE' THEN '蘆竹' 
+        WHEN t.RM101 = 'HF' THEN '八德' 
+        WHEN t.RM101 = 'HG' THEN '平鎮' 
+        WHEN t.RM101 = 'HH' THEN '龜山' 
+ END) AS &quot;資料收件所&quot;,
+		(CASE
+        WHEN t.RM100 = 'HA' THEN '桃園' 
+        WHEN t.RM100 = 'HB' THEN '中壢' 
+        WHEN t.RM100 = 'HC' THEN '大溪' 
+        WHEN t.RM100 = 'HD' THEN '楊梅' 
+        WHEN t.RM100 = 'HE' THEN '蘆竹' 
+        WHEN t.RM100 = 'HF' THEN '八德' 
+        WHEN t.RM100 = 'HG' THEN '平鎮' 
+        WHEN t.RM100 = 'HH' THEN '龜山' 
+ END) AS &quot;資料管轄所&quot;
   FROM MOICAS.CRSMS t
   LEFT JOIN MOIADM.RKEYN r
     on (t.RM09 = r.KCDE_2 and r.KCDE_1 = '06')
