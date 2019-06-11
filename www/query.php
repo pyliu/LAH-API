@@ -198,8 +198,118 @@ FROM MOICAS.CRSMS t
 WHERE t.RM07_1 LIKE '10805%'
       AND (u.LADR NOT LIKE '%桃園市%' AND u.LADR NOT LIKE '%桃園縣%')
       AND (v.AB03 NOT LIKE '%桃園市%' AND v.AB03 NOT LIKE '%桃園縣%')">每月遠途先審案件</option>
+          <option value="SELECT q.AA48 AS &quot;段代碼&quot;, q.KCNT AS &quot;段名稱&quot;, COUNT(*) AS &quot;土地標示部筆數&quot;
+FROM (
+     SELECT t.AA48, m.KCNT
+     FROM MOICAD.RALID t
+     LEFT JOIN MOIADM.RKEYN m on (m.KCDE_1 = '48' and m.KCDE_2 = t.AA48)
+) q
+GROUP BY q.AA48, q.KCNT;">段小段土地標示部筆數</option>
+          <option value="SELECT * FROM SCRSMS where RM99 = 'Y' AND RM101  = 'HB' AND RM101_1 = 'H' AND RM07_1 LIKE '10805%'">本所代收他所案件</option>
+          <option value="SELECT DISTINCT t.RM01   AS &quot;收件年&quot;,
+                t.RM02   AS &quot;收件字&quot;,
+                t.RM03   AS &quot;收件號&quot;,
+                t.RM07_1 AS &quot;收件日期&quot;,
+                w.KCNT   AS &quot;收件原因&quot;,
+                t.RM99   AS &quot;是否跨所?&quot;,
+                t.RM100  AS &quot;跨所-資料管轄所所別&quot;,
+                t.RM101  AS &quot;跨所-收件所所別&quot;
+  FROM MOICAS.CRSMS t
+  LEFT JOIN MOIADM.RKEYN w
+    ON t.RM09 = w.KCDE_2
+   AND w.KCDE_1 = '06' -- 登記原因
+ WHERE RM07_1 BETWEEN '1080501' and '1080531'
+   AND RM101 <> 'HB'
+   AND RM99 = 'Y'">非本所收件之跨所案件</option>
+          <option value="select AA48 AS &quot;段代碼&quot;, m.KCNT AS &quot;段名稱&quot;, SUM(AA10) AS &quot;面積&quot;, COUNT(AA10) AS &quot;筆數&quot;
+  from SRALID t
+  LEFT JOIN MOIADM.RKEYN m
+            on (m.KCDE_1 = '48' and m.KCDE_2 = t.AA48)
+--where aa48 = '0313' or aa48 = '0315' or aa48 = '0316'
+ group by t.AA48, m.KCNT">段小段面積統計</option>
+          <option value="SELECT SQ.RM01,
+       SQ.RM02,
+       SQ.RM03,
+       SQ.RM09,
+       k.KCNT,
+       SQ.RM07_1,
+       SQ.RM58_1,
+       SQ.RM18,
+       SQ.RM19,
+       SQ.RM21,
+       SQ.RM22,
+       SQ.RM30,
+       SQ.RM31
+  FROM (SELECT *
+          FROM MOICAD.RLNID p, MOICAS.CRSMS tt
+         WHERE tt.RM07_1 LIKE '10805%'
+           AND p.LCDE In ('2', '8', 'C', 'D')
+           AND (tt.RM18 = p.LIDN OR tt.RM21 = p.LIDN)) SQ
+  LEFT JOIN MOICAD.RKEYN k
+    ON k.KCDE_2 = SQ.RM09
+ WHERE k.KCDE_1 = '06'">每月權利人＆義務人為外國人案件</option>
+          <option value="select MU11 AS &quot;收件人員代碼&quot;, COUNT(*) AS &quot;總量&quot;
+  from MOICAS.CUSMM t
+ where MU11 in ('HB0227', 'HB0506') -- HB0227 自強鍾嘉萍 HB0506 觀音劉淑慧
+   and MU12 like '108%'
+ group by MU11">外站人員謄本核發量</option>
+          <option value="SELECT SQ.RM01   AS &quot;收件年&quot;,
+       SQ.RM02   AS &quot;收件字&quot;,
+       SQ.RM03   AS &quot;收件號&quot;,
+       SQ.RM09   AS &quot;登記原因代碼&quot;,
+       k.KCNT    AS &quot;登記原因&quot;,
+       SQ.RM07_1 AS &quot;收件日期&quot;,
+       SQ.RM58_1 AS &quot;結案日期&quot;,
+       SQ.RM18   AS &quot;權利人統一編號&quot;,
+       SQ.RM19   AS &quot;權利人姓名&quot;,
+       SQ.RM21   AS &quot;義務人統一編號&quot;,
+       SQ.RM22   AS &quot;義務人姓名&quot;,
+       SQ.RM30   AS &quot;辦理情形&quot;,
+       SQ.RM31   AS &quot;結案已否&quot;
+  FROM (SELECT *
+          FROM MOICAS.CRSMS tt
+         WHERE tt.rm07_1 LIKE '10805%'
+           AND tt.rm02 LIKE 'H%B1' -- 本所處理跨所案件
+           AND tt.RM03 NOT LIKE '%0' -- 子號案件
+        ) SQ
+  LEFT JOIN MOICAD.RKEYN k
+    ON k.KCDE_2 = SQ.RM09
+ WHERE k.KCDE_1 = '06';">本所處理跨所子號案件</option>
+          <option value="SELECT  (CASE
+        WHEN RM101 = 'HA' THEN '桃園' 
+        WHEN RM101 = 'HB' THEN '中壢' 
+        WHEN RM101 = 'HC' THEN '大溪' 
+        WHEN RM101 = 'HD' THEN '楊梅' 
+        WHEN RM101 = 'HE' THEN '蘆竹' 
+        WHEN RM101 = 'HF' THEN '八德' 
+        WHEN RM101 = 'HG' THEN '平鎮' 
+        WHEN RM101 = 'HH' THEN '龜山' 
+ END) AS &quot;收件所&quot;, KCNT AS &quot;登記原因&quot;, COUNT(*) AS &quot;件數&quot;
+  FROM MOICAS.CRSMS t
+  LEFT JOIN MOIADM.RKEYN w
+    ON t.RM09 = w.KCDE_2
+   AND w.KCDE_1 = '06' -- 登記原因
+ WHERE RM07_1 BETWEEN '1080501' and '1080531'
+   AND RM101 <> 'HB'
+   AND RM99 = 'Y'
+ GROUP BY RM101, KCNT;">跨所各登記原因案件統計 by 收件所</option>
+          <option value="SELECT DISTINCT t.RM01,
+                t.RM02,
+                t.RM03,
+                t.RM07_1,
+                t.RM09,
+                r.kcnt AS &quot;登記原因&quot;,
+                t.RM99  AS &quot;是否跨所&quot;,
+                t.RM101 AS &quot;資料管轄所&quot;
+  FROM MOICAS.CRSMS t
+  LEFT JOIN MOIADM.RKEYN r
+    on (t.RM09 = r.KCDE_2 and r.KCDE_1 = '06')
+ WHERE (t.RM07_1 BETWEEN '1080501' AND '1080531')
+   AND t.RM09 = '48'
+   -- AND t.RM02 = 'HB04'
+ ORDER BY t.RM07_1">登記原因案件查詢</option>
         </select>
-        <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">SELECT * FROM SCRSMS WHERE RM09 IN ('CU', 'CW') AND RM30 IN ('F', 'Z') AND (RM07_1 BETWEEN '1080101' AND '1080531')</textarea>
+        <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">Input SELECT SQL here ... </textarea>
         <button id="sql_csv_text_button">匯出</button>
         <button id="sql_csv_quote_button">備註</button>
         <blockquote id="XXX_blockquote" class="hide">

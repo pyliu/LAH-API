@@ -530,7 +530,7 @@ class Query {
 
 	public function getSelectSQLData($sql) {
 		// non-select statement will skip
-		if (!eregi("^SELECT.+\$", $sql)) {
+		if (!eregi("^SELECT.+$", $sql)) {
 			return false;
 		}
 		// second defense line
