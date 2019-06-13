@@ -998,6 +998,39 @@ var xhrUpdateExpaaAA100 = function(e) {
 	}
 }
 
+var xhrLoadSQL = function(e) {
+	var val = $("#preload_sql_select").val();
+
+	if (isEmpty(val)) {
+		return;
+	}
+
+	toggle(e.target);
+
+	var body = new FormData();
+	body.append("type", "load_select_sql");
+	body.append("file_name", val);
+	fetch("load_file_api.php", {
+		method: 'POST',
+			body: body
+	}).then(function(response) {
+		if (response.status != 200) {
+			throw new Error("XHR連線異常，回應非200");
+		}
+		return response.json();
+	}).then(function (jsonObj) {
+		if (jsonObj.status == 1) {
+			$("#sql_csv_text").val(jsonObj.data);
+			toggle(e.target);
+		} else {
+			throw new Error("讀取異常，jsonObj.status非為1");
+		}
+	}).catch(function(ex) {
+		console.error("xhrLoadSQL parsing failed", ex);
+		alert("XHR連線查詢有問題!!【" + ex + "】");
+	});
+};
+
 var xhrExportSQLCsv = function(e) {
 	var val = $("#sql_csv_text").val();
 
