@@ -36,17 +36,6 @@ class Query {
 		return true;
 	}
 
-	private function prepareXCaseDiffSetStatement($diff, $wanted_column = "") {
-		$set_str = "";
-		foreach ($diff as $col_name => $arr_vals) {
-			if (!empty($wanted_column) && $col_name != $wanted_column) {
-				continue;
-			}
-			$set_str .= $col_name." = '".$arr_vals["REMOTE"]."',";
-		}
-		return rtrim($set_str, ",");
-	}
-
     function __construct() {
         $this->db = new OraDB();
     }
@@ -523,7 +512,14 @@ class Query {
 			$code = substr($id, 3, 4);
 			$number = substr($id, 7, 6);
 
-			$set_str = $this->prepareXCaseDiffSetStatement($diff, $column);
+			$set_str = "";
+			foreach ($diff as $col_name => $arr_vals) {
+				if (!empty($wanted_column) && $col_name != $column) {
+					continue;
+				}
+				$set_str .= $col_name." = '".$arr_vals["REMOTE"]."',";
+			}
+			$set_str = rtrim($set_str, ",");
 
 			$this->db->parse("
 				UPDATE MOICAS.CRSMS SET ".$set_str." WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
