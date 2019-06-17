@@ -665,8 +665,8 @@ var xhrCompareXCase = function(e) {
 				html += "<tr>";
 				html += "<td>" + jsonObj.raw[key]["TEXT"] + "</td>";
 				html += "<td>" + jsonObj.raw[key]["COLUMN"] + "</td>";
-				html += "<td>" + jsonObj.raw[key]["REMOTE"] + "</td>";
-				html += "<td>" + jsonObj.raw[key]["LOCAL"] + "</td>";
+				html += "<td class='text-danger'>" + jsonObj.raw[key]["REMOTE"] + "</td>";
+				html += "<td class='text-info'>" + jsonObj.raw[key]["LOCAL"] + "</td>";
 				html += "<td><button data-column='" + jsonObj.raw[key]["COLUMN"] + "' class='sync_column_button'>同步本欄位</button></td>";
 				//html += jsonObj.raw[key]["TEXT"] + "【" + jsonObj.raw[key]["COLUMN"] + "】：局端「<strong class='text-info'>" + jsonObj.raw[key]["REMOTE"] + "</strong>」 本所「<strong class='text-warning'>" + jsonObj.raw[key]["LOCAL"] + "</strong>」";
 				html += "</tr>";
