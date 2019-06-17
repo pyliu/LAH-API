@@ -36,6 +36,17 @@ class Query {
 		return true;
 	}
 
+	private function prepareXCaseDiffSetStatement($diff, $wanted_column = "") {
+		$set_str = "";
+		foreach ($diff as $col_name => $arr_vals) {
+			if (!empty($wanted_column) && $col_name != $wanted_column) {
+				continue;
+			}
+			$set_str .= $col_name." = '".$arr_vals["REMOTE"]."',";
+		}
+		return rtrim($set_str, ",");
+	}
+
     function __construct() {
         $this->db = new OraDB();
     }
@@ -502,19 +513,20 @@ class Query {
 	}
 
 	public function syncXCase($id) {
+		return $this->syncXCaseColumn($id, "");
+	}
+
+	public function syncXCaseColumn($id, $column) {
 		$diff = $this->getXCaseDiff($id);
 		if (!empty($diff)) {
 			$year = substr($id, 0, 3);
 			$code = substr($id, 3, 4);
 			$number = substr($id, 7, 6);
 
-			$set_str = "";
-			foreach ($diff as $col_name => $arr_vals) {
-				$set_str .= $col_name." = '".$arr_vals["REMOTE"]."',";
-			}
+			$set_str = $this->prepareXCaseDiffSetStatement($diff, $column);
 
 			$this->db->parse("
-				UPDATE MOICAS.CRSMS SET ".rtrim($set_str, ",")." WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
+				UPDATE MOICAS.CRSMS SET ".$set_str." WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
 			");
 
 			$this->db->bind(":bv_rm01_year", $year);
@@ -527,7 +539,7 @@ class Query {
 		}
 		return false;
 	}
-
+	
 	public function getSelectSQLData($sql) {
 		// non-select statement will skip
 		if (!eregi("^SELECT.+$", $sql)) {

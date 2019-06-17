@@ -658,21 +658,23 @@ var xhrCompareXCase = function(e) {
 	}).then(function(jsonObj) {
 		var html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + year + "-" + code + "-" + number + "</a><div>";
 		if (jsonObj.status == 1) {
-			html += "<span class='rounded-circle bg-warning'> 　 </span> 請參考下列資訊： <button id='sync_x_case_confirm_button'>同步！</button>";
+			html += "<span class='rounded-circle bg-warning'> 　 </span> 請參考下列資訊： <button id='sync_x_case_confirm_button'>同步全部資料</button>";
 			html += "<table border='1' class='table-hover text-center mt-1'>";
-			html += "<tr><th>欄位名稱</th><th>欄位代碼</th><th>局端</th><th>本所</th></tr>";
+			html += "<tr><th>欄位名稱</th><th>欄位代碼</th><th>局端</th><th>本所</th><th>同步按鈕</th></tr>";
 			for (var key in jsonObj.raw) {
 				html += "<tr>";
 				html += "<td>" + jsonObj.raw[key]["TEXT"] + "</td>";
 				html += "<td>" + jsonObj.raw[key]["COLUMN"] + "</td>";
 				html += "<td>" + jsonObj.raw[key]["REMOTE"] + "</td>";
 				html += "<td>" + jsonObj.raw[key]["LOCAL"] + "</td>";
+				html += "<td><button data-column='" + jsonObj.raw[key]["COLUMN"] + "' class='sync_column_button'>同步本欄位</button></td>";
 				//html += jsonObj.raw[key]["TEXT"] + "【" + jsonObj.raw[key]["COLUMN"] + "】：局端「<strong class='text-info'>" + jsonObj.raw[key]["REMOTE"] + "</strong>」 本所「<strong class='text-warning'>" + jsonObj.raw[key]["LOCAL"] + "</strong>」";
 				html += "</tr>";
 			};
 			html += "</table>";
 			$("#sync_x_case_display").html(html);
 			$("#sync_x_case_confirm_button").on("click", xhrSyncXCase.bind(id));
+			$(".sync_column_button").on("click", xhrSyncXCaseColumn.bind(id));
 		} else if (jsonObj.status == -2) {
 			html += "<div><span class='rounded-circle bg-warning'> 　 </span> " + jsonObj.message + " <button id='inst_x_case_confirm_button'>新增本地端資料</button></div>"
 			$("#sync_x_case_display").html(html);
@@ -743,6 +745,41 @@ var xhrSyncXCase = function(e) {
 		}).catch(function(ex) {
 			console.error("xhrSyncXCase parsing failed", ex);
 			$("#sync_x_case_display").html("<span class='text-danger'>" + ex + "</span>");
+		});
+	}
+}
+
+var xhrSyncXCaseColumn = function(e) {
+	var the_btn = $(e.target);
+	if (confirm("確定要同步" + the_btn.attr("data-column") + "？")) {
+		// this binded as case id
+		var id = this;
+		var body = new FormData();
+		body.append("type", "sync_xcase_column");
+		body.append("id", id);
+		body.append("column", the_btn.attr("data-column"));
+		
+		var td = the_btn.parent();
+		the_btn.remove();
+
+		fetch("query_json_api.php", {
+			method: "POST",
+			body: body
+		}).then(function(response) {
+			if (response.status != 200) {
+				throw new Error("XHR連線異常，回應非200");
+			}
+			return response.json();
+		}).then(function(jsonObj) {
+			if (jsonObj.status == 1) {
+				td.html("<span class='text-success'>" + the_btn.attr("data-column") + " 同步成功！</span>");
+			} else {
+				td.html("<span class='text-danger'>" + jsonObj.message + "</span>");
+			}
+
+		}).catch(function(ex) {
+			console.error("xhrSyncXCaseColumn parsing failed", ex);
+			td.html("<span class='text-danger'>" + ex + "</span>");
 		});
 	}
 }
