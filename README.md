@@ -1,5 +1,5 @@
-# Land Office Affairs Helper
-A helper web site for land affairs in Taoyuan
+# Taoyuan Land Office Affairs Helper
+A helper web app for land affairs in Taoyuan
 
 1. To connect to Oracle 9i database, we need to put required dlls (oci8 from PECL) to c:\AppServ\php5\ext\.
 2. Edit php.ini to enable extension oci8 (extension=php_oci8_11g.dll).
