@@ -658,13 +658,19 @@ var xhrCompareXCase = function(e) {
 	}).then(function(jsonObj) {
 		var html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + year + "-" + code + "-" + number + "</a><div>";
 		if (jsonObj.status == 1) {
-			html += "<span class='rounded-circle bg-warning'> 　 </span> 請參考下列資訊： <button id='sync_x_case_confirm_button'>同步！</button> <ul>";
+			html += "<span class='rounded-circle bg-warning'> 　 </span> 請參考下列資訊： <button id='sync_x_case_confirm_button'>同步！</button>";
+			html += "<table border='1' class='table-hover text-center mt-1'>";
+			html += "<tr><th>欄位名稱</th><th>欄位代碼</th><th>局端</th><th>本所</th></tr>";
 			for (var key in jsonObj.raw) {
-				html += "<li>";
-				html += jsonObj.raw[key]["TEXT"] + "【" + jsonObj.raw[key]["COLUMN"] + "】：局端「<strong class='text-info'>" + jsonObj.raw[key]["REMOTE"] + "</strong>」 本所「<strong class='text-warning'>" + jsonObj.raw[key]["LOCAL"] + "</strong>」";
-				html += "</li>";
+				html += "<tr>";
+				html += "<td>" + jsonObj.raw[key]["TEXT"] + "</td>";
+				html += "<td>" + jsonObj.raw[key]["COLUMN"] + "</td>";
+				html += "<td>" + jsonObj.raw[key]["REMOTE"] + "</td>";
+				html += "<td>" + jsonObj.raw[key]["LOCAL"] + "</td>";
+				//html += jsonObj.raw[key]["TEXT"] + "【" + jsonObj.raw[key]["COLUMN"] + "】：局端「<strong class='text-info'>" + jsonObj.raw[key]["REMOTE"] + "</strong>」 本所「<strong class='text-warning'>" + jsonObj.raw[key]["LOCAL"] + "</strong>」";
+				html += "</tr>";
 			};
-			html += "</ul>";;
+			html += "</table>";
 			$("#sync_x_case_display").html(html);
 			$("#sync_x_case_confirm_button").on("click", xhrSyncXCase.bind(id));
 		} else if (jsonObj.status == -2) {
@@ -1002,6 +1008,7 @@ var xhrLoadSQL = function(e) {
 	var val = $("#preload_sql_select").val();
 
 	if (isEmpty(val)) {
+		$("#sql_csv_text").val("");
 		return;
 	}
 
