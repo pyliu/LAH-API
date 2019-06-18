@@ -116,7 +116,8 @@ fieldset fieldset legend {
         </select>
         字
         <input type="text" id="query_num" name="query_num" data-toggle='tooltip' title='輸入案件號' />號
-        <button id="query_button">查詢</button>
+        <button id="query_button">登記收件資料查詢</button>
+        <button id="query_prc_button">地價收件資料查詢</button>
         <div id="query_display"></div>
       </fieldset>
       <fieldset>
@@ -180,6 +181,7 @@ fieldset fieldset legend {
           <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
           <option value="05_adm_area_size.sql">段小段面積統計</option>
           <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
+          <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
         </select>
         <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">Input SELECT SQL here ... </textarea>
         <button id="sql_csv_text_button">匯出</button>
@@ -209,6 +211,24 @@ fieldset fieldset legend {
       <strong>&copy; <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
     </p>
   </small>
+
+  <!-- Modal -->
+  <div class="modal fade" id="ajax_modal" role="dialog">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">案件詳情</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>詳情顯示在這邊</p>
+        </div>
+        <!-- <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">關閉</button>
+        </div> -->
+      </div>
+    </div>
+  </div>
   <!-- Bootstrap core JavaScript
   ================================================== -->
   <!-- Placed at the end of the document so the pages load faster -->
@@ -241,10 +261,12 @@ fieldset fieldset legend {
         number_id: "query_num",
         display_id: "query_display"
       }));
-      // 查詢按鍵
-      $("#query_button").on("click", xhrQueryCase);
+      // 登記查詢按鍵
+      $("#query_button").on("click", xhrRegQueryCase);
       // 號
-      bindPressEnterEvent("#query_num", xhrQueryCase);
+      bindPressEnterEvent("#query_num", xhrRegQueryCase);
+      // 地價查詢按鍵
+      $("#query_prc_button").on("click", xhrPrcQueryCase);
 
       // query section data event
       $("#data_query_button").on("click", xhrGetSectionRALIDCount);

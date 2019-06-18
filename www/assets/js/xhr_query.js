@@ -43,21 +43,13 @@ var xhrGetCaseLatestNum = function(e) {
 	});
 };
 
-var showCaseDetail = function(jsonObj, use_modal) {
-	//console.log(jsonObj);
+var showRegCaseDetail = function(jsonObj, use_modal) {
+	var html = "<p>" + jsonObj.tr_html + "</p>";
 	if (jsonObj.status == 0) {
-		var msg = "<strong class='text-danger'>" + jsonObj.message + "</strong>";
-		if (use_modal) {
-			$("#ajax_modal .modal-body p").html(msg);
-			$("#ajax_modal").modal();
-		} else {
-			$("#query_display").html(msg);
-		}
-		return;
+		html = "<strong class='text-danger'>" + jsonObj.message + "</strong>";
 	} else if (jsonObj.status == -1) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	}
-	//console.log(jsonObj);
 	var area = "其他(" + jsonObj.資料管轄所 + "區)";
 	switch (jsonObj.raw.RM10) {
 		case "03":
@@ -69,7 +61,7 @@ var showCaseDetail = function(jsonObj, use_modal) {
 		default:
 			break;
 	}
-	var html = "<p>" + jsonObj.tr_html + "</p>";
+
 	html += (jsonObj.跨所 == "Y" ? "<span class='bg-info text-white rounded p-1'>跨所案件 (" + jsonObj.資料收件所 + " => " + jsonObj.資料管轄所 + ")</span><br />" : "");
 	
 	// http://220.1.35.34:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=108&word=HB04&code=005001&sdlyn=N&RM90=
@@ -132,14 +124,30 @@ var showCaseDetail = function(jsonObj, use_modal) {
 	}
 }
 
-var xhrQueryCaseDialog = function(e) {
+var showPrcCaseDetail = function(jsonObj, use_modal) {
+	var html = "<p>" + jsonObj.html + "</p>";
+	if (jsonObj.status == 0) {
+		html = "<strong class='text-danger'>" + jsonObj.message + "</strong>";
+	} else if (jsonObj.status == -1) {
+		throw new Error("查詢失敗：" + jsonObj.message);
+	}
+	if (use_modal) {
+		$("#ajax_modal .modal-body p").html(html);
+		$("#ajax_modal").modal();
+	} else {
+		$("#query_display").html(html);
+		$(".prc_case_serial").on("click", xhrRegQueryCaseDialog);
+	}
+}
+
+var xhrRegQueryCaseDialog = function(e) {
 	// ajax event binding
 	var clicked_element = $(e.target);
 	// remove additional characters for querying
 	var id = trim(clicked_element.text());
-	
+
 	var body = new FormData();
-	body.append("type", "case");
+	body.append("type", "reg_case");
 	body.append("id", id);
 
 	fetch("query_json_api.php", {
@@ -151,13 +159,13 @@ var xhrQueryCaseDialog = function(e) {
 		}
 		return response.json();
 	}).then(function(jsonObj) {
-		showCaseDetail(jsonObj, true);
+		showRegCaseDetail(jsonObj, true);
 	}).catch(function(ex) {
-		console.error("xhrQueryCaseDialog parsing failed", ex);
+		console.error("xhrRegQueryCaseDialog parsing failed", ex);
 	});
 }
 
-var xhrQueryCase = function(e) {
+var xhrRegQueryCase = function(e) {
 	var year = $("#query_year").val().replace(/\D/g, "");
 	var code = $("#query_code").val();
 	var number = $("#query_num").val().replace(/\D/g, "");
@@ -178,7 +186,7 @@ var xhrQueryCase = function(e) {
 	// prepare post params
 	var id = trim(year + code + number);
 	var body = new FormData();
-	body.append("type", "case");
+	body.append("type", "reg_case");
 	body.append("id", id);
 	
 	setLoadingHTML("#query_display");
@@ -190,9 +198,48 @@ var xhrQueryCase = function(e) {
 	}).then(function(response) {
 		return response.json();
 	}).then(function(jsonObj) {
-		showCaseDetail(jsonObj);
+		showRegCaseDetail(jsonObj);
 	}).catch(function(ex) {
-		console.log("xhrQueryCase parsing failed", ex);
+		console.error("xhrRegQueryCase parsing failed", ex);
+		$("#query_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
+	});
+}
+
+var xhrPrcQueryCase = function(e) {
+	var year = $("#query_year").val().replace(/\D/g, "");
+	var code = $("#query_code").val();
+	var number = $("#query_num").val().replace(/\D/g, "");
+	// make total number length is 6
+	var offset = 6 - number.length;
+	if (offset < 0) {
+		$("#query_display").html("<strong class='text-danger'>號的長度不能超過6個數字!</strong>");
+		$("#query_num").focus();
+		return false;
+	} else if (offset > 0) {
+		for (var i = 0; i < offset; i++) {
+			number = "0" + number;
+		}
+	}
+	
+	$("#query_num").val(number);
+
+	// prepare post params
+	var id = trim(year + code + number);
+	var body = new FormData();
+	body.append("type", "prc_case");
+	body.append("id", id);
+	
+	setLoadingHTML("#query_display");
+
+	fetch("query_json_api.php", {
+		method: "POST",
+		body: body
+	}).then(function(response) {
+		return response.json();
+	}).then(function(jsonObj) {
+		showPrcCaseDetail(jsonObj);
+	}).catch(function(ex) {
+		console.error("xhrPrcQueryCase parsing failed", ex);
 		$("#query_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
 	});
 }
@@ -216,7 +263,7 @@ var xhrCheckProblematicXCase = function(e) {
 			html += "<button id='fix_xcase_button'>修正</button> ";
 			html += "<span id='fix_xcase_button_msg'></span>";
 			$("#cross_case_check_query_display").html(html);
-			$(".query_case_dialog").on("click", xhrQueryCaseDialog);
+			$(".query_case_dialog").on("click", xhrRegQueryCaseDialog);
 			$("#fix_xcase_button").on("click", xhrFixProblematicXCase.bind(jsonObj.收件字號));
 		} else if (jsonObj.status == 0) {
 			var now = new Date();
@@ -539,7 +586,7 @@ var xhrGetExpacItems = function(e) {
 				html += "</div>";
 			}
 			$("#expac_query_display").html(html);
-			$(".query_case_dialog").on("click", xhrQueryCaseDialog);
+			$(".query_case_dialog").on("click", xhrRegQueryCaseDialog);
 		}
 		toggle("#expac_query_button");
 	}).catch(function(ex) {
@@ -682,7 +729,7 @@ var xhrCompareXCase = function(e) {
 			html += "<div><span class='rounded-circle bg-success'> 　 </span> " + jsonObj.message + "</div>"
 			$("#sync_x_case_display").html(html);
 		}
-		$("#sync_x_case_serial").on("click", xhrQueryCaseDialog);
+		$("#sync_x_case_serial").on("click", xhrRegQueryCaseDialog);
 		toggle("#sync_x_case_button");
 	}).catch(function(ex) {
 		console.error("xhrCompareXCase parsing failed", ex);

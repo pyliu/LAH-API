@@ -349,7 +349,7 @@ class Query {
 		return $this->db->fetchAll();
     }
 
-    public function getCaseDetail($id) {
+    public function getRegCaseDetail($id) {
         if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
             return "";
 		}
@@ -373,6 +373,63 @@ class Query {
 
 		$this->db->execute();
 		return $this->db->fetch();
+	}
+
+	public function getPrcCaseAll($id) {
+        if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
+            return "";
+		}
+
+		$sql = "
+			SELECT
+				t.ss06 || '：' || q.kcnt AS \"SS06_M\",
+				(CASE
+					WHEN t.SP_CODE = 'B' THEN 'B：登記中' 
+					WHEN t.SP_CODE = 'R' THEN 'R：登錄完成' 
+					WHEN t.SP_CODE = 'D' THEN 'D：校對中' 
+					WHEN t.SP_CODE = 'C' THEN 'C：校對正確' 
+					WHEN t.SP_CODE = 'E' THEN 'E：校對有誤' 
+					WHEN t.SP_CODE = 'S' THEN 'S：異動開始' 
+					WHEN t.SP_CODE = 'G' THEN 'G：異動有誤' 
+					WHEN t.SP_CODE = 'F' THEN 'F：異動完成' 
+				END) AS \"SP_CODE_M\",
+				t.sp_date || ' ' || t.sp_time AS \"SP_DATE_M\",
+				(CASE
+					WHEN t.SS100 = 'HA' THEN '桃園' 
+					WHEN t.SS100 = 'HB' THEN '中壢' 
+					WHEN t.SS100 = 'HC' THEN '大溪' 
+					WHEN t.SS100 = 'HD' THEN '楊梅' 
+					WHEN t.SS100 = 'HE' THEN '蘆竹' 
+					WHEN t.SS100 = 'HF' THEN '八德' 
+					WHEN t.SS100 = 'HG' THEN '平鎮' 
+					WHEN t.SS100 = 'HH' THEN '龜山' 
+				END) AS \"SS100_M\",
+				(CASE
+					WHEN t.SS101 = 'HA' THEN '桃園' 
+					WHEN t.SS101 = 'HB' THEN '中壢' 
+					WHEN t.SS101 = 'HC' THEN '大溪' 
+					WHEN t.SS101 = 'HD' THEN '楊梅' 
+					WHEN t.SS101 = 'HE' THEN '蘆竹' 
+					WHEN t.SS101 = 'HF' THEN '八德' 
+					WHEN t.SS101 = 'HG' THEN '平鎮' 
+					WHEN t.SS101 = 'HH' THEN '龜山' 
+				END) AS \"SS101_M\",
+				t.*
+			FROM MOIPRC.PSCRN t
+			LEFT JOIN SRKEYN q ON t.SS06  = q.kcde_2 AND q.kcde_1 = '06'
+			WHERE
+				SS03 = :bv_ss03_year AND
+				SS04_1 = :bv_ss04_1_code AND
+				SS04_2 = :bv_ss04_2_number
+		";
+		$this->db->parse(iconv("utf-8", "big5", $sql));
+		
+        $this->db->bind(":bv_ss03_year", substr($id, 0, 3));
+        $this->db->bind(":bv_ss04_1_code", substr($id, 3, 4));
+        $this->db->bind(":bv_ss04_2_number", substr($id, 7, 6));
+
+		$this->db->execute();
+		return $this->db->fetchAll();
 	}
 	
 	public function getXCaseDiff($id) {

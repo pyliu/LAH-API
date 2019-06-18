@@ -1,6 +1,7 @@
 <?php
 require_once("./include/init.php");
 require_once("./include/RegCaseData.class.php");
+require_once("./include/PrcAllCasesData.class.php");
 require_once("./include/Query.class.php");
 require_once("./include/JSONAPICommandFactory.class.php");
 
@@ -128,17 +129,30 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("更新失敗【".$_POST["qday"].", ".$_POST["pc_num"]."】");
 		}
 		break;
-	case "case":
+	case "reg_case":
 		if (empty($_POST["id"])) {
 			echoErrorJSONString();
 			break;
 		}
-		$row = $query->getCaseDetail($_POST["id"]);
+		$row = $query->getRegCaseDetail($_POST["id"]);
 		if (empty($row)) {
 			echoErrorJSONString();
 		} else {
 			$data = new RegCaseData($row);
 			echo $data->getJsonHtmlData();
+		}
+		break;
+	case "prc_case":
+		$rows = $query->getPrcCaseAll($_POST["id"]);
+		if (empty($rows)) {
+			echoErrorJSONString();
+		} else {
+			$data = new PrcAllCasesData($rows);
+			echo json_encode(array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($rows),
+				"html" => $data->getTableHtml()
+			), 0);
 		}
 		break;
 	case "expac":

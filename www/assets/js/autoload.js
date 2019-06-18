@@ -84,7 +84,7 @@ function adjustTableContent() {
 		
         $.ajax({
             url: "query_json_api.php",
-            data: "type=case&id=" + id,
+            data: "type=reg_case&id=" + id,
             method: "POST",
             dataType: "json",
             success: function(jsonObj) {
