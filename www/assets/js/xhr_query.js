@@ -49,78 +49,80 @@ var showRegCaseDetail = function(jsonObj, use_modal) {
 		html = "<strong class='text-danger'>" + jsonObj.message + "</strong>";
 	} else if (jsonObj.status == -1) {
 		throw new Error("查詢失敗：" + jsonObj.message);
-	}
-	var area = "其他(" + jsonObj.資料管轄所 + "區)";
-	switch (jsonObj.raw.RM10) {
-		case "03":
-			area = "中壢區";
+	} else {
+		var area = "其他(" + jsonObj.資料管轄所 + "區)";
+		switch (jsonObj.raw.RM10) {
+			case "03":
+				area = "中壢區";
+				break;
+			case "12":
+				area = "觀音區";
+				break;
+			default:
+				break;
+		}
+
+		html += (jsonObj.跨所 == "Y" ? "<span class='bg-info text-white rounded p-1'>跨所案件 (" + jsonObj.資料收件所 + " => " + jsonObj.資料管轄所 + ")</span><br />" : "");
+		
+		// http://220.1.35.34:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=108&word=HB04&code=005001&sdlyn=N&RM90=
+		html += "收件字號：" + "<a title='案件辦理情形 on " + landhb_svr + "' href='#' onclick='javascript:window.open(\"http://\"\+landhb_svr\+\":9080/LandHB/CAS/CCD02/CCD0202.jsp?year="+ jsonObj.raw["RM01"] +"&word="+ jsonObj.raw["RM02"] +"&code="+ jsonObj.raw["RM03"] +"&sdlyn=N&RM90=\")'>" + jsonObj.收件字號 + "</a> ";
+		
+		// options for switching server
+		html += "<label for='reg1_svr'><input type='radio' id='reg1_svr' name='svr_opts' value='220.1.35.31' onclick='javascript:landhb_svr=\"220.1.35.31\"' /> 登記主機1</label> ";
+		html += "<label for='reg2_svr'><input type='radio' id='reg2_svr' name='svr_opts' value='220.1.35.32' onclick='javascript:landhb_svr=\"220.1.35.32\"' /> 登記主機2</label> ";
+		html += "<label for='val_svr'><input type='radio' id='val_svr' name='svr_opts' value='220.1.35.31' onclick='javascript:landhb_svr=\"220.1.35.33\"' /> 地價主機</label> ";
+		html += "<label for='sur_svr'><input type='radio' id='sur_svr' name='svr_opts' value='220.1.35.31' onclick='javascript:landhb_svr=\"220.1.35.34\"' /> 測量主機</label> ";
+		html += "<label for='cross_svr'><input type='radio' id='cross_svr' name='svr_opts' value='220.1.35.31' onclick='javascript:landhb_svr=\"220.1.35.35\"' /> 跨所主機</label> <br />";
+		
+		html += isEmpty(jsonObj.結案已否) ? "<div class='text-danger'>尚未結案！</div>" : "";
+
+		html += "收件時間：" + jsonObj.收件時間 + "<br/>";
+		html += "限辦期限：" + jsonObj.限辦期限 + "<br/>";
+		html += "作業人員：" + jsonObj.作業人員 + "<br/>";
+		html += "辦理情形：" + jsonObj.辦理情形 + "<br/>";
+		html += "登記原因：" + jsonObj.登記原因 + "<br/>";
+		html += "區域：" + area + "【" + jsonObj.raw.RM10 + "】<br/>";
+		html += "段小段：" + jsonObj.段小段 + "【" + jsonObj.段代碼 + "】<br/>";
+		html += "地號：" + jsonObj.地號 + "<br/>";
+		html += "建號：" + jsonObj.建號 + "<br/>";
+		html += "件數：" + jsonObj.件數 + "<br/>";
+		html += "登記處理註記：" + jsonObj.登記處理註記 + "<br/>";
+		html += "地價處理註記：" + jsonObj.地價處理註記 + "<br/>";
+		html += "權利人統編：" + jsonObj.權利人統編 + "<br/>";
+		html += "權利人姓名：" + jsonObj.權利人姓名 + "<br/>";
+		html += "義務人統編：" + jsonObj.義務人統編 + "<br/>";
+		html += "義務人姓名：" + jsonObj.義務人姓名 + "<br/>";
+		html += "義務人人數：" + jsonObj.義務人人數 + "<br/>";
+		html += "代理人統編：" + jsonObj.代理人統編 + "<br/>";
+		html += "代理人姓名：" + jsonObj.代理人姓名 + "<br/>";
+		html += "手機號碼：" + jsonObj.手機號碼 + "<br/>";
+		
+		// check the radio
+		switch (landhb_svr) {
+		case "220.1.35.31":
+			$("#reg1_svr").attr("checked", true);
 			break;
-		case "12":
-			area = "觀音區";
+		case "220.1.35.32":
+			$("#reg2_svr").attr("checked", true);
+			break;
+		case "220.1.35.33":
+			$("#val_svr").attr("checked", true);
+			break;
+		case "220.1.35.35":
+			$("#cross_svr").attr("checked", true);
 			break;
 		default:
+			$("#sur_svr").attr("checked", true);
+			landhb_svr = "220.1.35.34";
 			break;
+		}
 	}
-
-	html += (jsonObj.跨所 == "Y" ? "<span class='bg-info text-white rounded p-1'>跨所案件 (" + jsonObj.資料收件所 + " => " + jsonObj.資料管轄所 + ")</span><br />" : "");
-	
-	// http://220.1.35.34:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=108&word=HB04&code=005001&sdlyn=N&RM90=
-	html += "收件字號：" + "<a title='案件辦理情形 on " + landhb_svr + "' href='#' onclick='javascript:window.open(\"http://\"\+landhb_svr\+\":9080/LandHB/CAS/CCD02/CCD0202.jsp?year="+ jsonObj.raw["RM01"] +"&word="+ jsonObj.raw["RM02"] +"&code="+ jsonObj.raw["RM03"] +"&sdlyn=N&RM90=\")'>" + jsonObj.收件字號 + "</a> ";
-	
-	// options for switching server
-	html += "<label for='reg1_svr'><input type='radio' id='reg1_svr' name='svr_opts' value='220.1.35.31' onclick='javascript:landhb_svr=\"220.1.35.31\"' /> 登記主機1</label> ";
-	html += "<label for='reg2_svr'><input type='radio' id='reg2_svr' name='svr_opts' value='220.1.35.32' onclick='javascript:landhb_svr=\"220.1.35.32\"' /> 登記主機2</label> ";
-	html += "<label for='val_svr'><input type='radio' id='val_svr' name='svr_opts' value='220.1.35.31' onclick='javascript:landhb_svr=\"220.1.35.33\"' /> 地價主機</label> ";
-	html += "<label for='sur_svr'><input type='radio' id='sur_svr' name='svr_opts' value='220.1.35.31' onclick='javascript:landhb_svr=\"220.1.35.34\"' /> 測量主機</label> ";
-	html += "<label for='cross_svr'><input type='radio' id='cross_svr' name='svr_opts' value='220.1.35.31' onclick='javascript:landhb_svr=\"220.1.35.35\"' /> 跨所主機</label> <br />";
-	
-	html += isEmpty(jsonObj.結案已否) ? "<div class='text-danger'>尚未結案！</div>" : "";
-
-	html += "收件時間：" + jsonObj.收件時間 + "<br/>";
-	html += "限辦期限：" + jsonObj.限辦期限 + "<br/>";
-	html += "作業人員：" + jsonObj.作業人員 + "<br/>";
-	html += "辦理情形：" + jsonObj.辦理情形 + "<br/>";
-	html += "登記原因：" + jsonObj.登記原因 + "<br/>";
-	html += "區域：" + area + "【" + jsonObj.raw.RM10 + "】<br/>";
-	html += "段小段：" + jsonObj.段小段 + "【" + jsonObj.段代碼 + "】<br/>";
-	html += "地號：" + jsonObj.地號 + "<br/>";
-	html += "建號：" + jsonObj.建號 + "<br/>";
-	html += "件數：" + jsonObj.件數 + "<br/>";
-	html += "登記處理註記：" + jsonObj.登記處理註記 + "<br/>";
-	html += "地價處理註記：" + jsonObj.地價處理註記 + "<br/>";
-	html += "權利人統編：" + jsonObj.權利人統編 + "<br/>";
-	html += "權利人姓名：" + jsonObj.權利人姓名 + "<br/>";
-	html += "義務人統編：" + jsonObj.義務人統編 + "<br/>";
-	html += "義務人姓名：" + jsonObj.義務人姓名 + "<br/>";
-	html += "義務人人數：" + jsonObj.義務人人數 + "<br/>";
-	html += "代理人統編：" + jsonObj.代理人統編 + "<br/>";
-	html += "代理人姓名：" + jsonObj.代理人姓名 + "<br/>";
-	html += "手機號碼：" + jsonObj.手機號碼 + "<br/>";
 	
 	if (use_modal) {
 		$("#ajax_modal .modal-body p").html(html);
 		$("#ajax_modal").modal();
 	} else {
 		$("#query_display").html(html);
-	}
-	// check the radio
-	switch (landhb_svr) {
-	case "220.1.35.31":
-		$("#reg1_svr").attr("checked", true);
-		break;
-	case "220.1.35.32":
-		$("#reg2_svr").attr("checked", true);
-		break;
-	case "220.1.35.33":
-		$("#val_svr").attr("checked", true);
-		break;
-	case "220.1.35.35":
-		$("#cross_svr").attr("checked", true);
-		break;
-	default:
-		$("#sur_svr").attr("checked", true);
-		landhb_svr = "220.1.35.34";
-		break;
 	}
 }
 
