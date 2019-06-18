@@ -343,7 +343,7 @@ class Query {
         if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
         }
-        $this->db->parse("SELECT * FROM SCRSMS WHERE RM07_1 BETWEEN :bv_qday and :bv_qday ORDER BY RM07_1, RM07_2 DESC");
+        $this->db->parse("SELECT * FROM SCRSMS LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2 WHERE RM07_1 BETWEEN :bv_qday and :bv_qday ORDER BY RM07_1, RM07_2 DESC");
         $this->db->bind(":bv_qday", $qday);
 		$this->db->execute();
 		return $this->db->fetchAll();
@@ -616,8 +616,8 @@ class Query {
         $str .= "<thead id='case_table_header'><tr class='header'>".
             "<th id='fixed_th1' data-toggle='tooltip' title='依「收件字號」排序'>收件字號</th>\n".
             "<th id='fixed_th2' data-toggle='tooltip' title='依「收件時間」排序'>收件時間</th>\n".
-            "<th id='fixed_th3' data-toggle='tooltip' title='依「限辦時限」排序'>限辦</th>\n".
-            "<th id='fixed_th4' data-toggle='tooltip' title='依「辦理情形」排序'>情形</th>\n".
+            "<th id='fixed_th3' data-toggle='tooltip' title='依「登記原因」排序'>登記原因</th>\n".
+            "<th id='fixed_th4' data-toggle='tooltip' title='依「辦理情形」排序'>狀態</th>\n".
             "<th id='fixed_th5' data-toggle='tooltip' title='依「收件人員」排序'>收件人員</th>\n".
             "<th id='fixed_th6' data-toggle='tooltip' title='依「作業人員」排序'>作業人員</th>\n".
             "<th id='fixed_th7' data-toggle='tooltip' title='依「初審人員」排序'>初審人員</th>\n".
@@ -634,8 +634,9 @@ class Query {
             $data = new RegCaseData($row);
             $str .= "<tr class='".$data->getStatusCss()."'>\n";
             $str .= "<td class='text-right px-3'><a class='case ajax ".($data->isDanger() ? "text-danger" : "")."' href='#'>".$data->getReceiveSerial()."</a></td>\n".
-                "<td data-toggle='tooltip' title='收件時間'>".$data->getReceiveTime()."</td>\n".
-                "<td data-toggle='tooltip' data-placement='right' title='限辦期限：".$data->getDueDate()."'>".$data->getDueHrs()."</td>\n".
+                "<td data-toggle='tooltip' title='限辦期限：".$data->getDueDate()."'>".$data->getReceiveTime()."</td>\n".
+				//"<td data-toggle='tooltip' data-placement='right' title='限辦期限：".$data->getDueDate()."'>".$data->getDueHrs()."</td>\n".
+				"<td data-toggle='tooltip' data-placement='right' title='登記原因'>".$data->getCaseReason()."</td>\n".
                 "<td data-toggle='tooltip' title='辦理情形'>".$data->getStatus()."</td>\n".
                 "<td ".$data->getReceptionistTooltipAttr().">".$data->getReceptionist()."</td>\n".
                 "<td ".$data->getCurrentOperatorTooltipAttr().">".$data->getCurrentOperator()."</td>\n".

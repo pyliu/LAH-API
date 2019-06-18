@@ -191,6 +191,10 @@ class RegCaseData {
         return $this->toDate($this->row["RM29_1"])." ".$this->toDate($this->row["RM29_2"]);
     }
 
+    public function getCaseReason() {
+        return $this->row["KCNT"];
+    }
+
     public function getStatus() {
         return CASE_STATUS[$this->row["RM30"]];
     }

@@ -87,8 +87,8 @@ require_once("./include/RegCaseData.class.php");
             <tr id="header_tr" class="header">
               <th id="float_th1">收件字號</th>
               <th id="float_th2">收件時間</th>
-              <th id="float_th3">限辦</th>
-              <th id="float_th4">情形</th>
+              <th id="float_th3">登記原因</th>
+              <th id="float_th4">狀態</th>
               <th id="float_th5">收件人員</th>
               <th id="float_th6">作業人員</th>
               <th id="float_th7">初審人員</th>
