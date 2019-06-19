@@ -120,7 +120,7 @@ fieldset fieldset legend {
         <div id="query_display"></div>
       </fieldset>
       <fieldset>
-        <legend>中壢轄區各段土地標示部筆數＆面積查詢</legend>
+        <legend>轄區各段土地標示部筆數＆面積查詢</legend>
         <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
         <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
         <input id="data_query_text" name="data_query_text" type="text" data-toggle='tooltip' title='輸入關鍵字或是段代碼' />
@@ -187,7 +187,8 @@ fieldset fieldset legend {
         <button id="sql_csv_text_button">匯出</button>
         <button id="sql_csv_quote_button">備註</button>
         <blockquote id="XXX_blockquote" class="hide">
-          輸入SELECT SQL指令匯出查詢結果。
+          <p>輸入SELECT SQL指令匯出查詢結果。</p>
+          <img src="assets/img/csv_export_method.jpg" class="w-auto" />
         </blockquote>
       </fieldset>
       <fieldset>
