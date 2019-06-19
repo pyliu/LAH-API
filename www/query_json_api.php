@@ -189,15 +189,16 @@ switch ($_POST["type"]) {
 		} else if (count($rows) == 1 && $_POST["list_mode"] == "false") {
 			$mapping = array();
 			// AA39 is 承辦人員, AA89 is 修改人員代碼
-			$users = OracleDB::getDBUserList();
+			$users = GetDBUserMapping();
 			foreach ($rows[0] as $key => $value) {
 				if (is_null($value)) {
 					continue;
 				}
-				if (empty(COL_MAPPING[$key])) {
+				$col_mapping = include("./include/Config.ColsNameMapping.EXPAA.php");
+				if (empty($col_mapping[$key])) {
 					$mapping[$key] = $value;
 				} else {
-					$mapping[COL_MAPPING[$key]] = ($key == "AA39" || $key == "AA89") ? $users[$value]."【${value}】" : $value;
+					$mapping[$col_mapping[$key]] = ($key == "AA39" || $key == "AA89") ? $users[$value]."【${value}】" : $value;
 				}
 			}
 			$result = array(
