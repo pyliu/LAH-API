@@ -1,7 +1,6 @@
 <?php
 require_once("./include/init.php");
-require_once("./include/OraDB.class.php");
-$operators = OraDB::getDBUserList();
+$operators = GetDBUserMapping();
 ksort($operators);
 ?>
 <!DOCTYPE html>
