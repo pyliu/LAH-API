@@ -181,6 +181,7 @@ fieldset fieldset legend {
           <option value="05_adm_area_size.sql">段小段面積統計</option>
           <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
           <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
+          <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
         </select>
         <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">Input SELECT SQL here ... </textarea>
         <button id="sql_csv_text_button">匯出</button>
