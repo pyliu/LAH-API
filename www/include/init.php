@@ -16,6 +16,7 @@ if (!in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
 
 
 date_default_timezone_set("ASIA/TAIPEI");
+session_start();
 
 $tw_date = new Datetime("now");
 $tw_date->modify("-1911 year");
@@ -24,10 +25,8 @@ $today = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080325
 $tw_date->modify("-1 week");
 $week_ago = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080318
 
-session_start();
-
 $qday = $_REQUEST["date"];
-$qday = str_replace("-", "", $qday);
+$qday = preg_replace("/\D+/", "", $qday);
 if (empty($qday) || !ereg("^[0-9]{7}$", $qday)) {
   $qday = (date("Y")-1911).date("md"); // 今天
 }
