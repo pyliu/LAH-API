@@ -139,8 +139,8 @@ class RegCaseData {
             "登記處理註記" => empty(REG_NOTE[$row["RM39"]]) ? "" : REG_NOTE[$row["RM39"]],
             "地價處理註記" => empty(VAL_NOTE[$row["RM42"]]) ? "" : VAL_NOTE[$row["RM42"]],
             "跨所" => $row["RM99"],
-            "資料管轄所" => OFFICE[$row["RM100"]],
-            "資料收件所" => OFFICE[$row["RM101"]],
+            "資料管轄所" => OFFICE[$row["RM100"]] ? OFFICE[$row["RM100"]] : $row["RM100"],
+            "資料收件所" => OFFICE[$row["RM101"]] ? OFFICE[$row["RM101"]] : $row["RM101"],
             "結案已否" => $row["RM31"],
             "tr_html" => $this->getTableHtml(),
             "raw" => $row
