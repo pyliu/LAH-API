@@ -129,25 +129,6 @@ function adjustTableContent() {
                 html += "手機號碼：" + jsonObj.手機號碼 + "<br/>";
                 $("#ajax_modal .modal-body p").html(html);
                 $("#ajax_modal").modal();
-                // check the radio
-				switch (landhb_svr) {
-					case "220.1.35.31":
-						$("#reg1_svr").attr("checked", true);
-						break;
-					case "220.1.35.32":
-						$("#reg2_svr").attr("checked", true);
-						break;
-					case "220.1.35.33":
-						$("#val_svr").attr("checked", true);
-						break;
-					case "220.1.35.35":
-						$("#cross_svr").attr("checked", true);
-						break;
-					default:
-						$("#sur_svr").attr("checked", true);
-						landhb_svr = "220.1.35.34";
-						break;
-				}
             },
             error: function() {
                 alert("無法取得 " + id + " 資訊!");

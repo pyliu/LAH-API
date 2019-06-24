@@ -93,26 +93,6 @@ var showRegCaseDetail = function(jsonObj, use_modal) {
 		html += "代理人統編：" + jsonObj.代理人統編 + "<br/>";
 		html += "代理人姓名：" + jsonObj.代理人姓名 + "<br/>";
 		html += "手機號碼：" + jsonObj.手機號碼 + "<br/>";
-		
-		// check the radio
-		switch (landhb_svr) {
-		case "220.1.35.31":
-			$("#reg1_svr").attr("checked", true);
-			break;
-		case "220.1.35.32":
-			$("#reg2_svr").attr("checked", true);
-			break;
-		case "220.1.35.33":
-			$("#val_svr").attr("checked", true);
-			break;
-		case "220.1.35.35":
-			$("#cross_svr").attr("checked", true);
-			break;
-		default:
-			$("#sur_svr").attr("checked", true);
-			landhb_svr = "220.1.35.34";
-			break;
-		}
 	}
 	
 	if (use_modal) {
