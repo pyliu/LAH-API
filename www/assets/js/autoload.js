@@ -101,14 +101,9 @@ function adjustTableContent() {
 					default:
 						break;
 				}
-				// options for switching server
-				html += "<label for='reg1_svr'><input type='radio' id='reg1_svr' name='svr_opts' value='220.1.35.31' onclick='javascript:landhb_svr=\"220.1.35.31\"' /> 登記主機1</label> ";
-				html += "<label for='reg2_svr'><input type='radio' id='reg2_svr' name='svr_opts' value='220.1.35.32' onclick='javascript:landhb_svr=\"220.1.35.32\"' /> 登記主機2</label> ";
-				html += "<label for='val_svr'><input type='radio' id='val_svr' name='svr_opts' value='220.1.35.31' onclick='javascript:landhb_svr=\"220.1.35.33\"' /> 地價主機</label> ";
-				html += "<label for='sur_svr'><input type='radio' id='sur_svr' name='svr_opts' value='220.1.35.31' onclick='javascript:landhb_svr=\"220.1.35.34\"' /> 測量主機</label> ";
-				html += "<label for='cross_svr'><input type='radio' id='cross_svr' name='svr_opts' value='220.1.35.31' onclick='javascript:landhb_svr=\"220.1.35.35\"' /> 跨所主機</label> <br />";
-                
-                html += (jsonObj.結案已否 === undefined || $.trim(jsonObj.結案已否) == "") ? "<div class='text-danger'>尚未結案！</div>" : "";
+                // options for switching server
+                //html += "<label for='cross_svr'><input type='radio' id='cross_svr' name='svr_opts' value='220.1.35.123' onclick='javascript:landhb_svr=\"220.1.35.123\"' /> 跨縣市主機</label> <br />";
+                html += (jsonObj.結案已否 === undefined || $.trim(jsonObj.結案已否) == "") ? "<div class='text-danger'><strong>尚未結案！</strong></div>" : "";
                 
                 // http://220.1.35.34:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=108&word=HB04&code=005001&sdlyn=N&RM90=
                 html += "收件字號：" + "<a title='案件辦理情形 on " + landhb_svr + "' href='#' onclick='javascript:window.open(\"http://\"\+landhb_svr\+\":9080/LandHB/CAS/CCD02/CCD0202.jsp?year="+ jsonObj.raw["RM01"] +"&word="+ jsonObj.raw["RM02"] +"&code="+ jsonObj.raw["RM03"] +"&sdlyn=N&RM90=\")'>" + id + "</a>" + "<br/>";

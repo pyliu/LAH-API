@@ -1,5 +1,6 @@
 //<![CDATA[
-var landhb_svr = "220.1.35.34";
+// 跨縣市主機
+var landhb_svr = "220.1.35.123";
 
 var trim = function(text) {
 	//return text.replace(/[\-字號第年桃登跨德壢溪楊蘆平山資總更速標永\s\(\)]/g, "");
