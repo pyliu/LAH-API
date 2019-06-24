@@ -51,7 +51,8 @@ var showRegCaseDetail = function(jsonObj, use_modal) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	} else {
 		var area = "其他(" + jsonObj.資料管轄所 + "區)";
-		switch (jsonObj.raw.RM10) {
+		var rm10 = jsonObj.raw.RM10 ? jsonObj.raw.RM10 : "XX";
+		switch (rm10) {
 			case "03":
 				area = "中壢區";
 				break;

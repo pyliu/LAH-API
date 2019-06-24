@@ -80,7 +80,7 @@ function adjustTableContent() {
 		}
 		
         // remove additional characters for querying
-        var id = clicked_element.text().replace(/[\-字號第年桃登跨德壢溪楊蘆平山資總更速標永\s\(\)]/g, "");
+        var id = clicked_element.text().replace(/[^a-zA-Z0-9]/g, "");
 		
         $.ajax({
             url: "query_json_api.php",
@@ -89,8 +89,9 @@ function adjustTableContent() {
             dataType: "json",
             success: function(jsonObj) {
                 var html = jsonObj.跨所 == "Y" ? "<span class='bg-info text-white rounded p-1'>跨所案件 (" + jsonObj.資料收件所 + " => " + jsonObj.資料管轄所 + ")</span><br />" : "";
-				var area = "其他(" + jsonObj.資料管轄所 + "區)";
-				switch (jsonObj.raw["RM10"]) {
+                var area = "其他(" + jsonObj.資料管轄所 + "區)";
+                var rm10 = jsonObj.raw.RM10 ? jsonObj.raw.RM10 : "XX";
+				switch (rm10) {
 					case "03":
 						area = "中壢區";
 						break;
