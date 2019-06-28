@@ -305,7 +305,10 @@ var xhrGetSectionRALIDCount = function(e) {
 				this_count = this_count < 1000 ? 1000 : this_count;
 				var dollar = this_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 				var blow = jsonObj.raw[i]["土地標示部筆數"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-				var size = jsonObj.raw[i]["面積"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+				var size = 0;
+				if (jsonObj.raw[i]["面積"]) {
+					size = jsonObj.raw[i]["面積"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+				}
 				html += "【<span class='text-info'>" + jsonObj.raw[i]["段代碼"]  + "</span>】" + jsonObj.raw[i]["段名稱"] + "：土地標示部 <span class='text-primary'>" + blow + "</span> 筆【面積：" + size + "】。";
 				html += " (應收費 NTD " + dollar + " 元整) <br />";
 			}

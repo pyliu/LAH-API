@@ -46,21 +46,21 @@ class Query {
 
 	public function getSectionRALIDCount($cond = "") {
 		$prefix = "
-			-- 段小段面積計算 (RALID 登記－土地標示部)
-			select AA48 as \"段代碼\",
+			select m.KCDE_2 as \"段代碼\",
 				m.KCNT as \"段名稱\",
-				SUM(AA10) as \"面積\",
-				COUNT(AA10) as \"土地標示部筆數\"
-			FROM MOICAD.RALID t
-			LEFT JOIN MOIADM.RKEYN m on (m.KCDE_1 = '48' and m.KCDE_2 = t.AA48)
+				SUM(t.AA10) as \"面積\",
+				COUNT(t.AA10) as \"土地標示部筆數\"
+			FROM MOIADM.RKEYN m
+			LEFT JOIN MOICAD.RALID t on m.KCDE_2 = t.AA48 -- 段小段面積計算 (RALID 登記－土地標示部)
+			WHERE m.KCDE_1 = '48'
 		";
 		if (is_numeric($cond)) {
-			$prefix .= "WHERE t.AA48 LIKE '%' || :bv_cond";
+			$prefix .= "AND m.KCDE_2 LIKE '_' || :bv_cond";
 		} else if (!empty($cond)) {
-			$prefix .= "WHERE m.KCNT LIKE '%' || :bv_cond || '%'";
+			$prefix .= "AND m.KCNT LIKE '%' || :bv_cond || '%'";
 		}
 		$postfix = "
-			GROUP BY t.AA48, m.KCNT
+			GROUP BY m.KCDE_2, m.KCNT
 		";
 		$this->db->parse($prefix.$postfix);
 		if (!empty($cond)) {
