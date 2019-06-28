@@ -178,6 +178,7 @@ fieldset fieldset legend {
           <option value="10_reg_reason_stats_monthly.sql">每月跨所各登記原因案件統計 by 收件所</option>
           <option value="07_reg_foreign_case_monthly.sql">每月權利人＆義務人為外國人案件</option>
           <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
+          <option value="14_sur_rain_delay_case.sql">因雨延期測量案件數</option>
           <option value="05_adm_area_size.sql">段小段面積統計</option>
           <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
           <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>

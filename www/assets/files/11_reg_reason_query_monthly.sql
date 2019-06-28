@@ -29,6 +29,6 @@ SELECT DISTINCT t.RM01,
   LEFT JOIN MOIADM.RKEYN r
     on (t.RM09 = r.KCDE_2 and r.KCDE_1 = '06')
  WHERE (t.RM07_1 BETWEEN '1080601' AND '1080614')
-   AND t.RM09 in ( 'CU', 'CW') -- 信託、塗銷信託
+   AND t.RM09 in ( 'CU', 'CW') -- 信託 CU、塗銷信託 CW、共有物分割 38
    -- AND t.RM02 = 'HB04'
  ORDER BY t.RM07_1, t.RM09
