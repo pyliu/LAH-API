@@ -301,6 +301,9 @@ var xhrGetSectionRALIDCount = function(e) {
 			var count = jsonObj.data_count;
 			var html = "";
 			for (var i=0; i<count; i++) {
+				if (isNaN(jsonObj.raw[i]["段代碼"])) {
+					continue;
+				}
 				var this_count = parseInt(jsonObj.raw[i]["土地標示部筆數"]);
 				this_count = this_count < 1000 ? 1000 : this_count;
 				var dollar = this_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
