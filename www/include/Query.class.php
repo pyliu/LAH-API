@@ -636,7 +636,7 @@ class Query {
             $str .= "<td class='text-right px-3'><a class='case ajax ".($data->isDanger() ? "text-danger" : "")."' href='#'>".$data->getReceiveSerial()."</a></td>\n".
                 "<td data-toggle='tooltip' title='限辦期限：".$data->getDueDate()."'>".$data->getReceiveTime()."</td>\n".
 				//"<td data-toggle='tooltip' data-placement='right' title='限辦期限：".$data->getDueDate()."'>".$data->getDueHrs()."</td>\n".
-				"<td data-toggle='tooltip' data-placement='right' title='登記原因'>".$data->getCaseReason()."</td>\n".
+				"<td data-toggle='tooltip' data-placement='right' title='登記原因'>".$row["RM09"]."：".$data->getCaseReason()."</td>\n".
                 "<td data-toggle='tooltip' title='辦理情形'>".$data->getStatus()."</td>\n".
                 "<td ".$data->getReceptionistTooltipAttr().">".$data->getReceptionist()."</td>\n".
                 "<td ".$data->getCurrentOperatorTooltipAttr().">".$data->getCurrentOperator()."</td>\n".
