@@ -18,5 +18,6 @@ return "(CASE
     WHEN RM30 = 'L' THEN '公告初核'
     WHEN RM30 = 'E' THEN '請示'
     WHEN RM30 = 'D' THEN '展期'
+    ELSE RM30
 END)";
 ?>

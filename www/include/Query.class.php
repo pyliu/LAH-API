@@ -384,14 +384,15 @@ class Query {
 			SELECT
 				t.ss06 || '：' || q.kcnt AS \"SS06_M\",
 				(CASE
-					WHEN t.SP_CODE = 'B' THEN 'B：登記中' 
-					WHEN t.SP_CODE = 'R' THEN 'R：登錄完成' 
-					WHEN t.SP_CODE = 'D' THEN 'D：校對中' 
-					WHEN t.SP_CODE = 'C' THEN 'C：校對正確' 
-					WHEN t.SP_CODE = 'E' THEN 'E：校對有誤' 
-					WHEN t.SP_CODE = 'S' THEN 'S：異動開始' 
-					WHEN t.SP_CODE = 'G' THEN 'G：異動有誤' 
-					WHEN t.SP_CODE = 'F' THEN 'F：異動完成' 
+					WHEN t.SP_CODE = 'B' THEN 'B：登記中'
+					WHEN t.SP_CODE = 'R' THEN 'R：登錄完成'
+					WHEN t.SP_CODE = 'D' THEN 'D：校對中'
+					WHEN t.SP_CODE = 'C' THEN 'C：校對正確'
+					WHEN t.SP_CODE = 'E' THEN 'E：校對有誤'
+					WHEN t.SP_CODE = 'S' THEN 'S：異動開始'
+					WHEN t.SP_CODE = 'G' THEN 'G：異動有誤'
+					WHEN t.SP_CODE = 'F' THEN 'F：異動完成'
+					ELSE t.SP_CODE
 				END) AS \"SP_CODE_M\",
 				t.sp_date || ' ' || t.sp_time AS \"SP_DATE_M\",
 				(CASE
@@ -403,6 +404,7 @@ class Query {
 					WHEN t.SS100 = 'HF' THEN '八德' 
 					WHEN t.SS100 = 'HG' THEN '平鎮' 
 					WHEN t.SS100 = 'HH' THEN '龜山' 
+					ELSE t.SS100
 				END) AS \"SS100_M\",
 				(CASE
 					WHEN t.SS101 = 'HA' THEN '桃園' 
@@ -413,6 +415,7 @@ class Query {
 					WHEN t.SS101 = 'HF' THEN '八德' 
 					WHEN t.SS101 = 'HG' THEN '平鎮' 
 					WHEN t.SS101 = 'HH' THEN '龜山' 
+					ELSE t.SS101
 				END) AS \"SS101_M\",
 				t.*
 			FROM MOIPRC.PSCRN t

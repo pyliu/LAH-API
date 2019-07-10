@@ -34,5 +34,6 @@ return "(CASE
     WHEN RM02 = 'HHB1' THEN '壢山登跨'
     WHEN RM02 = 'HBD1' THEN '楊壢登跨'
     WHEN RM02 = 'HBC1' THEN '溪壢登跨'
+    ELSE RM02
 END)";
 ?>

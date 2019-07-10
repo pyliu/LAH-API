@@ -9,6 +9,7 @@ return "(CASE
         WHEN SP_CODE = 'S' THEN '校對有誤' 
         WHEN SP_CODE = 'G' THEN '異動開始'
         WHEN SP_CODE = 'F' THEN '異動完成'
+        ELSE SP_CODE
  END)";
  ?>
  

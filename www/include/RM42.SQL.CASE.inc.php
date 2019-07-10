@@ -10,5 +10,6 @@ return "(CASE
     WHEN RM42 = 'S' THEN '異動開始'
     WHEN RM42 = 'F' THEN '異動完成'
     WHEN RM42 = 'G' THEN '異動有誤'
+    ELSE RM42
 END)";
 ?>

@@ -9,5 +9,6 @@ return "(CASE
     WHEN RM39 = 'F' THEN '異動完成'
     WHEN RM39 = 'G' THEN '異動有誤'
     WHEN RM39 = 'P' THEN '競合暫停'
+    ELSE RM39
 END)";
 ?>
