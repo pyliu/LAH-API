@@ -6,7 +6,6 @@ require_once("RegCaseData.class.php");
 class Query {
 
     private $db;
-    private $stid;
 
 	private function checkPID($id) {
 		if( !$id ) {
