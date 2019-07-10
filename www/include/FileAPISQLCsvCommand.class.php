@@ -32,7 +32,7 @@ class FileAPISQLCsvCommand extends FileAPICommand {
     public function execute() {
         $q = new Query();
         $data = $q->getSelectSQLData($this->sql);
-        $this->output($data);
+        $this->outputCSV($data);
     }
 }
 ?>
