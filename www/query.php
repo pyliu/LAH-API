@@ -165,10 +165,10 @@ fieldset fieldset legend {
         <div id="id_query_cmsms_result"></div>
       </fieldset>
       <fieldset>
-        <legend>CSV報表匯出</legend>
+        <legend>報表匯出</legend>
         <label for="preload_sql_select">預載查詢：</label>
         <select id="preload_sql_select">
-          <option></option>
+          <option value="">=== 所內統計 ===</option>
           <option value="01_reg_case_monthly.sql">每月登記案件</option>
           <option value="11_reg_reason_query_monthly.sql">每月登記案件 by 登記原因</option>
           <option value="02_reg_remote_case_monthly.sql">每月遠途先審案件</option>
@@ -183,11 +183,15 @@ fieldset fieldset legend {
           <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
           <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
           <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
+          <option value="">=== 地籍資料 ====</option>
+          <option value="txt_AI00701.sql">AI00701 - 建物標示部資料</option>
+          <option value="txt_AI00801.sql">AI00801 - 基地坐落資料</option>
         </select>
         <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">Input SELECT SQL here ... </textarea>
-        <button id="sql_csv_text_button">匯出</button>
+        <button id="sql_csv_text_button">匯出CSV</button>
+        <button id="sql_txt_text_button">匯出TXT</button>
         <button id="sql_csv_quote_button">備註</button>
-        <blockquote id="XXX_blockquote" class="hide">
+        <blockquote id="sql_report_blockquote" class="hide">
           <p>輸入SELECT SQL指令匯出查詢結果。</p>
           <img src="assets/img/csv_export_method.jpg" class="w-auto" />
         </blockquote>
@@ -318,6 +322,7 @@ fieldset fieldset legend {
 
       // sql csv export
       $("#sql_csv_text_button").on("click", xhrExportSQLCsv);
+      $("#sql_txt_text_button").on("click", xhrExportSQLTxt);
       $("#preload_sql_select").on("change", xhrLoadSQL);
     });
   </script>
