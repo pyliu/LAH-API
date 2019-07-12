@@ -184,6 +184,7 @@ fieldset fieldset legend {
           <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
           <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
           <option value="">=== 地籍資料 ====</option>
+          <option value="txt_AI00401.sql">AI00401 - 土地所有權部資料</option>
           <option value="txt_AI00601_B.sql">AI00601 - 土地管理者資料</option>
           <option value="txt_AI00601_E.sql">AI00601 - 建物管理者資料</option>
           <option value="txt_AI00701.sql">AI00701 - 建物標示部資料</option>

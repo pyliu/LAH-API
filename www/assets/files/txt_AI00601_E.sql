@@ -9,3 +9,4 @@ select a.MM00 || a.MM48 || a.MM49 || LPAD(a.MM01, 4, '0') ||
    and (b.ED49 = a.MM49)
    and (b.EE01 = a.MM01)
    and (c.LIDN = a.MM13)
+ order by a.MM48, a.MM49
