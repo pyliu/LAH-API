@@ -186,6 +186,7 @@ fieldset fieldset legend {
           <option value="">=== 地籍資料 ====</option>
           <option value="txt_AI00701.sql">AI00701 - 建物標示部資料</option>
           <option value="txt_AI00801.sql">AI00801 - 基地坐落資料</option>
+          <option value="txt_AI00901.sql">AI00901 - 建物分層及附屬資料</option>
         </select>
         <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">Input SELECT SQL here ... </textarea>
         <button id="sql_csv_text_button">匯出CSV</button>
