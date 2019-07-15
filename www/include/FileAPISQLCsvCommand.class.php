@@ -46,8 +46,6 @@ class FileAPISQLCsvCommand extends FileAPICommand {
                     fputcsv($out, $firstline, ',', '"');
                     $firstline_flag = true;
                 }
-                array_walk($row, array($this, "cleanData"));
-                //array_walk($row, "self::cleanData");
                 fputcsv($out, array_values($row), ',', '"');
             }
         } else {
@@ -59,7 +57,8 @@ class FileAPISQLCsvCommand extends FileAPICommand {
 
     public function execute() {
         $q = new Query();
-        $data = $q->getSelectSQLData($this->sql);
+        // get raw big5 data for file output
+        $data = $q->getSelectSQLData($this->sql, true);
         $this->outputCSV($data);
     }
 }

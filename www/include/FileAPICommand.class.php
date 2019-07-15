@@ -6,7 +6,7 @@ abstract class FileAPICommand {
     protected $colsNameMapping;
     
     abstract public function execute();
-    
+
     protected function cleanData(&$str) {
         if ($str == 't') $str = 'TRUE';
         if ($str == 'f') $str = 'FALSE';
@@ -15,11 +15,14 @@ abstract class FileAPICommand {
             $str = "$str";
         }
         if (strstr($str, '"')) $str = '"' . str_replace('"', '""', $str) . '"';
-        $str = iconv("utf-8", "big5", $str);
+        $converted = mb_convert_encoding($str, "big5", "utf-8");
+        if (!empty($converted)) {
+            $str = $converted;
+        }
     }
 
     protected function mapColumns($input) {
-        return array_key_exists($input, $this->colsNameMapping) ? iconv("utf-8", "big5", $this->colsNameMapping[$input]) : $input;
+        return array_key_exists($input, $this->colsNameMapping) ? mb_convert_encoding($this->colsNameMapping[$input], "big5", "utf-8") : $input;
     }
 }
 ?>

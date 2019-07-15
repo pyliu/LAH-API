@@ -14,15 +14,18 @@ class FileAPISQLTxtCommand extends FileAPICommand {
         header("Content-Type: text/txt");
         $out = fopen("php://output", 'w'); 
         if (is_array($data)) {
+            $count = 0;
             foreach ($data as $row) {
-                array_walk($row, array($this, "cleanData"));
-                fwrite($out, implode(",", array_values($row))."\n");
+                //array_walk($row, array($this, "cleanData"));
+                $flat_text = implode(",", array_values($row));
+                fwrite($out, $flat_text."\n");
+                $count++;
             }
             if ($print_count) {
-                fwrite($out, iconv("utf-8", "big5", "##### TAG #####共產製 ".count($data)." 筆資料"));
+                fwrite($out, mb_convert_encoding("##### TAG #####共產製 ".$count." 筆資料", "big5", "utf-8"));
             }
         } else {
-            fwrite($out, iconv("utf-8", "big5", "錯誤說明：傳入之參數非陣列格式無法匯出！\n"));
+            fwrite($out, mb_convert_encoding("錯誤說明：傳入之參數非陣列格式無法匯出！\n", "big5", "utf-8"));
             fwrite($out, print_r($data, true));
         }
         fclose($out);
@@ -30,7 +33,8 @@ class FileAPISQLTxtCommand extends FileAPICommand {
 
     public function execute() {
         $q = new Query();
-        $data = $q->getSelectSQLData($this->sql);
+        // get raw big5 data
+        $data = $q->getSelectSQLData($this->sql, true);
         $this->txt($data);
     }
 }
