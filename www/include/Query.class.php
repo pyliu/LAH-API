@@ -595,7 +595,7 @@ class Query {
 		return false;
 	}
 	
-	public function getSelectSQLData($sql) {
+	public function getSelectSQLData($sql, $raw = false) {
 		// non-select statement will skip
 		if (!eregi("^SELECT.+$", $sql)) {
 			return false;
@@ -605,9 +605,9 @@ class Query {
 			return false;
 		}
 
-		$this->db->parse(iconv("utf-8", "big5", rtrim($sql, ";")));
+		$this->db->parse(mb_convert_encoding(rtrim($sql, ";"), "big5", "utf-8"));
 		$this->db->execute();
-		return $this->db->fetchAll();
+		return $this->db->fetchAll($raw);
 	}
 
     public function echoAllCasesHTML($qday) {

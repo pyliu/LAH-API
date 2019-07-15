@@ -78,23 +78,31 @@ class OraDB {
         return $this->stid;
     }
 
-	public function fetch() {
+	public function fetch($raw = false) {
         $result = oci_fetch_assoc($this->stid); // oci_fetch_assoc is faster than oci_fetch_array
         $convert = array();
         if (!empty($result)) {
             foreach ($result as $key=>$value) {
-                $convert[$key] = empty($value) ? $value : iconv("big5", "utf-8", $value);
+                if ($raw) {
+                    $row[$key] = $value;
+                } else {
+                    $convert[$key] = empty($value) ? $value : $this->convert($value, "big5", "utf-8");
+                }
             }
         }
         return $convert;
     }
     
-    public function fetchAll() {
+    public function fetchAll($raw = false) {
         $this->numrows = 0;
         $results = array();
         while ($row = oci_fetch_assoc($this->stid)) {
             foreach ($row as $key=>$value) {
-                $row[$key] = empty($value) ? $value : iconv("big5", "utf-8", $value);
+                if ($raw) {
+                    $row[$key] = $value;
+                } else {
+                    $row[$key] = empty($value) ? $value : $this->convert($value, "big5", "utf-8");
+                }
             }
             $results[] = $row;
             $this->numrows++;
@@ -127,6 +135,14 @@ class OraDB {
 
     function __destruct() {
         $this->close();
+    }
+
+    private function convert($str, $src_charset, $dest_charset) {
+        mb_regex_encoding($dest_charset); // 宣告 要進行 regex 的多位元編碼轉換格式 為 $dest_charset
+        mb_substitute_character('long'); // 宣告 缺碼字改以U+16進位碼為標記取代
+        $str = mb_convert_encoding($str, $dest_charset, $src_charset);
+        $str = preg_replace('/U\+([0-9A-F]{4})/e', '"&#".intval("\\1",16).";"', $str); // 將U+16進位碼標記轉換為UnicodeHTML碼
+        return $str;
     }
 }
 ?>
