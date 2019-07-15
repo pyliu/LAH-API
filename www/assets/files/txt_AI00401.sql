@@ -1,3 +1,4 @@
+--碰到有罕字會有問題，請複製下面SQL去PL/SQL Developer匯出
 select a.BA48 || a.BA49 || a.BB01 ||
        LPAD(CASE
             WHEN a.BB05 IS NULL THEN ' '
