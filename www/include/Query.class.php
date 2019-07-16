@@ -371,6 +371,7 @@ class Query {
         $this->db->bind(":bv_rm03_number", substr($id, 7, 6));
 
 		$this->db->execute();
+		// true -> raw data with converting to utf-8
 		return $this->db->fetch();
 	}
 

@@ -44,7 +44,21 @@ class RegCaseData {
     private function convertCharset() {
         $convert = array();
         foreach ($this->row as $key=>$value) {
-            $convert[$key] = empty($value) ? $value : iconv("big5", "utf-8", $value);
+            if (!empty($value)) {
+                $conv_str = iconv("big5", "utf-8", $value);
+                if (empty($conv_str)) {
+                    // has rare word inside
+                    mb_regex_encoding("utf-8"); // 宣告 要進行 regex 的多位元編碼轉換格式
+                    mb_substitute_character('long'); // 宣告 缺碼字改以U+16進位碼為標記取代
+                    $conv_str = mb_convert_encoding($value, "utf-8", "big5");
+                    //$conv_str = preg_replace('/U\+([0-9A-F]{4})/e', '"&#".intval("\\1",16).";"', $conv_str); // 將U+16進位碼標記轉換為UnicodeHTML碼
+                    $conv_str = preg_replace('/U\+([0-9A-F]{4})/e', '？', $conv_str); // 將U+16進位碼標記轉換為？
+                }
+                $convert[$key] = $conv_str;
+            } else {
+                $convert[$key] = "";
+            }
+            //$convert[$key] = empty($value) ? $value : mb_convert_encoding($value, "utf-8", "big5");
         }
         return $convert;
     }
@@ -115,7 +129,7 @@ class RegCaseData {
     public function getJsonHtmlData($flag = 0) {
         // database charset is big5, so we need to convert it to utf-8 for frontend
         //$row = $this->convertCharset();
-        $row = $this->row;
+        $row = &$this->row;
         $result = array(
             "收件字號" => $row["RM01"].$row["RM02"].$row["RM03"],
             "收件時間" => RegCaseData::toDate($row["RM07_1"])." ".RegCaseData::toDate($row["RM07_2"]),

@@ -80,14 +80,13 @@ class OraDB {
 
 	public function fetch($raw = false) {
         $result = oci_fetch_assoc($this->stid); // oci_fetch_assoc is faster than oci_fetch_array
+        if ($raw) {
+            return $result;
+        }
         $convert = array();
         if (!empty($result)) {
             foreach ($result as $key=>$value) {
-                if ($raw) {
-                    $row[$key] = $value;
-                } else {
-                    $convert[$key] = empty($value) ? $value : $this->convert($value, "big5", "utf-8");
-                }
+                $convert[$key] = empty($value) ? $value : $this->convert($value, "big5", "utf-8");
             }
         }
         return $convert;
