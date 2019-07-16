@@ -193,6 +193,8 @@ fieldset fieldset legend {
           <option value="txt_AI00901.sql">AI00901 - 建物分層及附屬資料</option>
           <option value="txt_AI01001.sql">AI01001 - 主建物與共同使用部分資料</option>
           <option value="txt_AI01101.sql">AI01101 - 建物所有權部資料</option>
+          <option value="txt_AI02901_B.sql">AI02901 - 土地各部別之其他登記事項列印</option>
+          <option value="txt_AI02901_E.sql">AI02901 - 建物各部別之其他登記事項列印</option>
         </select>
         <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">Input SELECT SQL here ... </textarea>
         <button id="sql_csv_text_button">匯出CSV</button>

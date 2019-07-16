@@ -1,5 +1,5 @@
---碰到有罕字會有問題，請複製下面SQL去PL/SQL Developer匯出
 select a.BA48 || a.BA49 || a.BB01 ||
+--碰到有罕字會有問題，請 Ctrl+a 複製SQL去PL/SQL Developer匯出
        LPAD(NVL(a.BB05, ' '), 7, ' ') ||
        a.BB06 ||
        LPAD(NVL(a.BB07, ' '), 7, ' ') ||
@@ -13,6 +13,7 @@ select a.BA48 || a.BA49 || a.BB01 ||
        RPAD(b.LADR, 60, ' ')
        AS AI00401
   FROM SRBLOW a, SRLNID b
- WHERE (a.BA48 || a.BA49 BETWEEN '036200000000' AND '036399999999')
+ WHERE --(a.BA48 || a.BA49 BETWEEN '036200000000' AND '036399999999')
+   a.BA48 in ('0362', '0363')
    AND (b.LIDN = a.BB09)
  ORDER BY a.BA48, a.BA49
