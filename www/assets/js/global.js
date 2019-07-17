@@ -29,6 +29,14 @@ var showPopper = function(selector, content) {
 	scrollToElement(selector);
 }
 
+function showModal(body, title) {
+    if (!isEmpty(title)) {
+        $("#ajax_modal .modal-title").html(title);
+    }
+	$("#ajax_modal .modal-body p").html(body);
+	$("#ajax_modal").modal();
+}
+
 var toggle = function(selector) {
 	var el = $(selector);
 	el.attr("disabled") ? el.attr("disabled", false) : el.attr("disabled", true);
