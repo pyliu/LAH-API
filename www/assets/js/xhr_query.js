@@ -1159,9 +1159,9 @@ var xhrQueryAnnouncementData = function(e) {
 		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
 		var count = jsonObj.data_count;
 		// 組合選單介面
-		var html = "公告項目：<select id='prereg_announcement_select' class='mt-1'><option value=''>=========請選擇=========</option>";
+		var html = "公告項目：<select id='prereg_announcement_select' class='mt-1 no-cache'><option value=''>========= 請選擇須更新之登記原因 =========</option>";
 		for (var i=0; i<count; i++) {
-			html += "<option>" + jsonObj.raw[i]["RA01"] + "," + jsonObj.raw[i]["KCNT"] + "," + jsonObj.raw[i]["RA02"] + "," + jsonObj.raw[i]["RA03"] + "</option>";
+			html += "<option value='" + jsonObj.raw[i]["RA01"] + "," + jsonObj.raw[i]["KCNT"] + "," + jsonObj.raw[i]["RA02"] + "," + jsonObj.raw[i]["RA03"] + "'>" + jsonObj.raw[i]["RA01"] + "：" + jsonObj.raw[i]["KCNT"] + "【公告 <span class='text-info'>" + jsonObj.raw[i]["RA02"] + "</span> 天期間" + (jsonObj.raw[i]["RA03"] == "Y" ? " 「可」 准登" : " 不可 准登")+ "】</option>";
 		}
 		html += "</select> <div id='prereg_update_ui' class='mt-1'></div>";
 		$("#prereg_query_display").html(html);
@@ -1174,13 +1174,13 @@ var xhrQueryAnnouncementData = function(e) {
 			var data = csv.split(",");
 			var html = "登記代碼：" + data[0] + "<br />" +
 					   "登記原因：" + data[1] + "<br />";
-				html += "公告天數：<select id='ann_day_" + data[0] + "'><option>15</option><option>30</option><option>45</option><option>60</option><option>75</option><option>90</option></select><br />";
-				html += "先行准登：<select id='ann_reg_flag_" + data[0] + "'><option>N</option><option>Y</option></select><br />";
+				html += "公告天數：<select id='ann_day_" + data[0] + "' class='no-cache'><option>15</option><option>30</option><option>45</option><option>60</option><option>75</option><option>90</option></select><br />";
+				html += "先行准登：<select id='ann_reg_flag_" + data[0] + "' class='no-cache'><option>N</option><option>Y</option></select><br />";
 				html += "<button id='ann_upd_btn_" + data[0] + "'>更新</button>";
 			$("#prereg_update_ui").html(html);
 			$("#ann_day_" + data[0]).val(data[2]);
 			$("#ann_reg_flag_" + data[0]).val(data[3]);
-			$("#ann_upd_btn_" + data[0]).on("click", xhrUpdateAnnouncementData.bind(data[0]));
+			$("#ann_upd_btn_" + data[0]).on("click", xhrUpdateAnnouncementData.bind(data));
 		});
 	}).catch(function(ex) {
 		console.error("xhrQueryAnnouncementData parsing failed", ex);
@@ -1189,7 +1189,13 @@ var xhrQueryAnnouncementData = function(e) {
 };
 
 var xhrUpdateAnnouncementData = function(e) {
-	var reason_code = this;
+	var reason_code = this[0];
+	var day = $("#ann_day_"+reason_code).val();
+	var flag = $("#ann_reg_flag_"+reason_code).val();
+	if (this[2] == day && this[3] == flag) {
+		showModal("無變更，不需更新！", "訊息通知");
+		return;
+	}
 	console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
 	$(e.target).remove();
 	var form_body = new FormData();

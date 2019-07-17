@@ -64,27 +64,6 @@ var bindPressEnterEvent = function(selector, callback_func) {
 }
 
 $(document).ready(function(e) {
-	// for cache purpose
-	if (localStorage) {
-		var cacheIt = function(el) {
-			var this_text_input = $(el);
-			var val = this_text_input.val();
-			var ele_id = this_text_input.attr("id");
-			if (val === undefined || $.trim(val) == "") {
-				localStorage.removeItem(ele_id);
-			} else {
-				localStorage[ele_id] = val;
-			}
-		}
-		window.pyliuIntTimer = setInterval(function(e) {
-			$("input[type='text'], select, textarea").each(function(index, el) {
-				cacheIt(el);
-			});
-		}, 10000);
-		$("input[type='text'], select, textarea").on("blur", function(e) {
-			cacheIt(e.target);
-		});
-	}
 	// add responsive and thumbnail style to blockquote img
 	$("blockquote img").addClass("img-responsive img-thumbnail");
 	// control blockquote block for *_quote_button
