@@ -85,10 +85,11 @@ blockquote img {
         <button id="cross_case_check_query_button" data-toggle='tooltip' title='系統每10分鐘自動檢查'>立刻檢查</button>
         <button id="cross_case_check_quote_button">備註</button>
         <blockquote id="cross_case_check_quote" class="hide">
+          <h5><span class="text-danger">※</span>通常發生的情況是案件內的權利人/義務人/代理人姓名內有罕字造成。</h5>
           QUERY: <br />
           SELECT * <br />
             FROM SCRSMS <br />
-          WHERE RM07_1 >= '1080415' <br />
+          WHERE RM07_1 >= '1080715' <br />
             AND RM02 LIKE 'H%1' <br />
             AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL) 
           <br /><br />
@@ -97,6 +98,17 @@ blockquote img {
 			    WHERE RM01 = '收件年' AND RM02 = '收件字' AND RM03 = '收件號'
         </blockquote>
         <div id="cross_case_check_query_display"></div>
+      </fieldset>
+      <fieldset>
+        <legend>先行准登(公告期限維護)</legend>
+        <button id="prereg_query_button">取得公告期限資料</button>
+        <button id="prereg_clear_button" class="text-danger">》清除先行准登《</button>
+        <button id="prereg_quote_button">備註</button>
+        <blockquote id="prereg_quote" class="hide">
+          <h5><span class="text-danger">※</span>注意：中壢所規定超過30件案件才能執行此功能，並於完成時須馬上關掉以免其他案件誤登。</h5>
+          <img src="assets/howto/登記原因先行准登設定.jpg" />
+        </blockquote>
+        <div id="prereg_query_display"></div>
       </fieldset>
       <fieldset>
         <legend>規費收費項目(EXPAC)修正</legend>
@@ -162,6 +174,41 @@ blockquote img {
         <div id="easycard_query_display"></div>
       </fieldset>
       <fieldset>
+        <legend>案件暫存檔清除(NOT READY)</legend>
+        <select id="temp_clr_year" name="temp_clr_year">
+          <option selected>108</option>
+        </select>
+        年
+        <select id="temp_clr_code" name="temp_clr_code" data-trigger="manual" data-toggle="popover" data-content='請選擇案件字' title='案件字' data-placement="top">
+          <option></option>
+          <option>HB04 壢登    </option>
+          <option>HB05 壢永    </option>
+          <option>HB06 壢速    </option>
+          <option>HAB1 壢桃登跨</option>
+          <option>HCB1 壢溪登跨</option>
+          <option>HDB1 壢楊登跨</option>
+          <option>HEB1 壢蘆登跨</option>
+          <option>HFB1 壢德登跨</option>
+          <option>HGB1 壢平登跨</option>
+          <option>HHB1 壢山登跨</option>
+          <option>HBA1 桃壢登跨</option>
+          <option>HBC1 溪壢登跨</option>
+          <option>HBD1 楊壢登跨</option>
+          <option>HBE1 蘆壢登跨</option>
+          <option>HBF1 德壢登跨</option>
+          <option>HBG1 平壢登跨</option>
+          <option>HBH1 山壢登跨</option>
+        </select>
+        字
+        <input type="text" id="temp_clr_num" name="temp_clr_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號【最大6位數】' title='案件號' data-placement="top" />
+        號
+        <button id="temp_clr_button">清除</button>
+        <button id="temp_clr_quote_button">備註</button>
+        <blockquote id="temp_clr_quote" class="hide">
+        </blockquote>
+        <div id="temp_clr_display"></div>
+      </fieldset>
+      <fieldset>
         <legend>同步局端跨所案件資料</legend>
         <select id="sync_x_case_year" name="sync_x_case_year">
           <option selected>108</option>
@@ -183,7 +230,8 @@ blockquote img {
         <button id="sync_x_case_button">比對</button>
         <button id="sync_x_case_quote_button">備註</button>
         <blockquote id="sync_x_case_quote" class="hide">
-          將局端跨所資料同步回本所資料庫
+          <h6>將局端跨所資料同步回本所資料庫</h6>
+          <span class="text-danger">※</span>新版跨縣市回寫機制會在每一分鐘時自動回寫，故局端資料有可能會比較慢更新。【2019-06-26】
         </blockquote>
         <div id="sync_x_case_display"></div>
       </fieldset>
@@ -275,6 +323,10 @@ blockquote img {
         number_id: "sync_x_case_num",
         display_id: "sync_x_case_display"
       }));
+
+      // query for announcement
+      $("#prereg_query_button").on("click", xhrQueryAnnouncementData);
+      $("#prereg_clear_button").on("click", xhrClearAnnouncementFlag);
     });
   </script>
 </body>

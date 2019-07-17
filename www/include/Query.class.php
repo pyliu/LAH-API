@@ -657,6 +657,40 @@ class Query {
         $str = "<span>日期: ".$qday." 共 <span class='text-primary' id='record_count'>".$count."</span> 筆資料</span>\n" . $str;
 
         echo $str;
-    }
+	}
+	
+	public function getAnnouncementData() {
+		$this->db->parse("
+			SELECT t.RA01, m.kcnt, t.RA02, t.RA03
+			FROM MOICAS.CRACD t
+			LEFT JOIN MOIADM.RKEYN m
+			ON t.RA01 = m.kcde_2
+			WHERE m.kcde_1 = '06'
+			ORDER BY RA01
+		");
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
+	public function updateAnnouncementData($code, $day, $flag) {
+		$this->db->parse("
+			UPDATE MOICAS.CRACD SET RA02 = :bv_ra02_day, RA03 = :bv_ra03_flag WHERE RA01 = :bv_ra01_code
+		");
+
+		$this->db->bind(":bv_ra01_code", $code);
+		$this->db->bind(":bv_ra02_day", $day);
+		$this->db->bind(":bv_ra03_flag", $flag == "Y" ? $flag : "N");
+		
+		$this->db->execute();
+		return true;
+	}
+
+	public function clearAnnouncementFlag() {
+		$this->db->parse("
+			UPDATE MOICAS.CRACD SET RA03 = 'N' WHERE 1 = 1
+		");
+		$this->db->execute();
+		return true;
+	}
 }
 ?>

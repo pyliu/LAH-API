@@ -96,8 +96,7 @@ var showRegCaseDetail = function(jsonObj, use_modal) {
 	}
 	
 	if (use_modal) {
-		$("#ajax_modal .modal-body p").html(html);
-		$("#ajax_modal").modal();
+		showModal(html, "登記案件詳情");
 	} else {
 		$("#query_display").html(html);
 	}
@@ -111,8 +110,7 @@ var showPrcCaseDetail = function(jsonObj, use_modal) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	}
 	if (use_modal) {
-		$("#ajax_modal .modal-body p").html(html);
-		$("#ajax_modal").modal();
+		showModal(html, "登記案件詳情");
 	} else {
 		$("#query_display").html(html);
 		$(".prc_case_serial").on("click", xhrRegQueryCaseDialog);
@@ -1107,16 +1105,24 @@ var xhrLoadSQL = function(e) {
 };
 
 var xhrExportSQLCsv = function(e) {
-	var val = $("#sql_csv_text").val();
-
-	toggle(e.target);
-
 	var body = new FormData();
 	body.append("type", "file_sql_csv");
-	body.append("sql", val);
+	xhrExportSQLReport(e, body);
+};
+
+var xhrExportSQLTxt = function(e) {
+	var body = new FormData();
+	body.append("type", "file_sql_txt");
+	xhrExportSQLReport(e, body);
+};
+
+var xhrExportSQLReport = function(e, form_body) {
+	var text = $("#preload_sql_select option:selected").text();
+	form_body.append("sql", $("#sql_csv_text").val());
+	toggle(e.target);
 	fetch("export_file_api.php", {
 		method: 'POST',
-			body: body
+		body: form_body
 	}).then(function(response) {
 		return response.blob();
 	}).then(function (blob) {
@@ -1124,9 +1130,7 @@ var xhrExportSQLCsv = function(e) {
 		var url = window.URL.createObjectURL(blob);
 		var a = document.createElement('a');
 		a.href = url;
-		a.download = (d.getFullYear() - 1911)
-			+ ("0" + (d.getMonth()+1)).slice(-2)
-			+ ("0" + d.getDate()).slice(-2) + ".csv";
+		a.download = text + (form_body.get("type") == "file_sql_txt" ? ".txt" : ".csv");
 		document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
 		a.click();    
 		a.remove();  //afterwards we remove the element again
@@ -1134,8 +1138,103 @@ var xhrExportSQLCsv = function(e) {
 		window.URL.revokeObjectURL(url);
 		toggle(e.target);
 	}).catch(function(ex) {
-		console.error("xhrExportSQLCsv parsing failed", ex);
+		console.error("xhrExportSQLReport parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 };
+
+var xhrQueryAnnouncementData = function(e) {
+	var form_body = new FormData();
+	form_body.append("type", "announcement_data");
+	$(e.target).remove();
+	fetch("query_json_api.php", {
+		method: 'POST',
+		body: form_body
+	}).then(function(response) {
+		if (response.status != 200) {
+			throw new Error("XHR連線異常，回應非200");
+		}
+		return response.json();
+	}).then(function (jsonObj) {
+		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
+		var count = jsonObj.data_count;
+		// 組合選單介面
+		var html = "公告項目：<select id='prereg_announcement_select' class='mt-1'><option value=''>=========請選擇=========</option>";
+		for (var i=0; i<count; i++) {
+			html += "<option>" + jsonObj.raw[i]["RA01"] + "," + jsonObj.raw[i]["KCNT"] + "," + jsonObj.raw[i]["RA02"] + "," + jsonObj.raw[i]["RA03"] + "</option>";
+		}
+		html += "</select> <div id='prereg_update_ui' class='mt-1'></div>";
+		$("#prereg_query_display").html(html);
+		$("#prereg_announcement_select").on("change", function(e) {
+			$("#prereg_update_ui").empty();
+			var csv = $("#prereg_announcement_select option:selected").val();
+			if (isEmpty(csv)) {
+				return;
+			}
+			var data = csv.split(",");
+			var html = "登記代碼：" + data[0] + "<br />" +
+					   "登記原因：" + data[1] + "<br />";
+				html += "公告天數：<select id='ann_day_" + data[0] + "'><option>15</option><option>30</option><option>45</option><option>60</option><option>75</option><option>90</option></select><br />";
+				html += "先行准登：<select id='ann_reg_flag_" + data[0] + "'><option>N</option><option>Y</option></select><br />";
+				html += "<button id='ann_upd_btn_" + data[0] + "'>更新</button>";
+			$("#prereg_update_ui").html(html);
+			$("#ann_day_" + data[0]).val(data[2]);
+			$("#ann_reg_flag_" + data[0]).val(data[3]);
+			$("#ann_upd_btn_" + data[0]).on("click", xhrUpdateAnnouncementData.bind(data[0]));
+		});
+	}).catch(function(ex) {
+		console.error("xhrQueryAnnouncementData parsing failed", ex);
+		alert("XHR連線查詢有問題!!【" + ex + "】");
+	});
+};
+
+var xhrUpdateAnnouncementData = function(e) {
+	var reason_code = this;
+	console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
+	$(e.target).remove();
+	var form_body = new FormData();
+	form_body.append("type", "update_announcement_data");
+	form_body.append("code", reason_code);
+	form_body.append("day", $("#ann_day_"+reason_code).val());
+	form_body.append("flag", $("#ann_reg_flag_"+reason_code).val());
+	fetch("query_json_api.php", {
+		method: 'POST',
+		body: form_body
+	}).then(function(response) {
+		if (response.status != 200) {
+			throw new Error("XHR連線異常，回應非200");
+		}
+		return response.json();
+	}).then(function (jsonObj) {
+		console.assert(jsonObj.status == 1, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
+		showModal("<strong class='text-success'>更新完成</strong>", "公告期限更新");
+		// refresh the select list
+		xhrQueryAnnouncementData.call(null, [e]);
+	}).catch(function(ex) {
+		console.error("xhrUpdateAnnouncementData parsing failed", ex);
+		alert("XHR連線查詢有問題!!【" + ex + "】");
+	});
+}
+
+var xhrClearAnnouncementFlag = function(e) {
+	var form_body = new FormData();
+	form_body.append("type", "clear_announcement_flag");
+	fetch("query_json_api.php", {
+		method: 'POST',
+		body: form_body
+	}).then(function(response) {
+		if (response.status != 200) {
+			throw new Error("XHR連線異常，回應非200");
+		}
+		return response.json();
+	}).then(function (jsonObj) {
+		console.assert(jsonObj.status == 1, "清除先行准登回傳狀態碼有問題【" + jsonObj.status + "】");
+		showModal("<strong class='text-success'>已全部清除完成</strong>", "清除先行准登");
+		// refresh the select list
+		xhrQueryAnnouncementData.call(null, [e]);
+	}).catch(function(ex) {
+		console.error("xhrUpdateAnnouncementData parsing failed", ex);
+		alert("XHR連線查詢有問題!!【" + ex + "】");
+	});
+}
 //]]>
