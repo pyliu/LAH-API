@@ -30,9 +30,10 @@ var showPopper = function(selector, content) {
 }
 
 function showModal(body, title) {
-    if (!isEmpty(title)) {
-        $("#ajax_modal .modal-title").html(title);
-    }
+	if (isEmpty(title)) {
+		title = "案件詳情";
+	}
+    $("#ajax_modal .modal-title").html(title);
 	$("#ajax_modal .modal-body p").html(body);
 	$("#ajax_modal").modal();
 }
