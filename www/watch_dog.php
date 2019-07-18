@@ -113,7 +113,9 @@ blockquote img {
       <fieldset>
         <legend>規費收費項目(EXPAC)修正</legend>
         <label for="expac_query_year" data-toggle='tooltip' title='欄位:AC25'>規費年度：</label>
-        <input type="text" id="expac_query_year" name="expac_query_year" data-trigger="manual" data-toggle="popover" data-content="需輸入3位數民國年分，如「108」。" data-placement="bottom" value="108" />
+        <select id="expac_query_year" name="expac_query_year">
+          <option selected>108</option>
+        </select>
         <label for="expac_query_number" data-toggle='tooltip' title='欄位:AC04'>電腦給號：</label>
         <input type="text" id="expac_query_number" name="expac_query_number" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
         <button id="expac_query_button">查詢</button>

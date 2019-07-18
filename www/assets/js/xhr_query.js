@@ -508,15 +508,8 @@ var xhrEasycardPaymentQuery = function(e) {
 }
 
 var xhrGetExpacItems = function(e) {
-	var year = $("#expac_query_year").val().replace(/\D/g, "");
 	var number = $("#expac_query_number").val().replace(/\D/g, "");
-	
-	// basic checking for tw date input
-	var regex = /^\d{3}$/;
-	if (isEmpty(year) || year.match(regex) == null) {
-		showPopper("#expac_query_year");
-		return;
-	}
+	// only allow number
 	if (isEmpty(number) || isNaN(number)) {
 		showPopper("#expac_query_number");
 		return;
