@@ -140,7 +140,7 @@ blockquote img {
       <fieldset>
         <legend>規費資料集(EXPAA)修正</legend>
         <label for="expaa_query_date" data-toggle='tooltip' title='欄位:AA01'>　　日期：</label>
-        <input type="text" id="expaa_query_date" class="date_picker" name="expaa_query_date" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080426」。" data-placement="bottom" value="<?php echo $today; ?>" />
+        <input type="text" id="expaa_query_date" class="date_picker no-cache" name="expaa_query_date" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080426」。" data-placement="bottom" value="<?php echo $today; ?>" />
         <button id="expaa_query_date_button">查詢</button><br />
         <label for="expaa_query_number" data-toggle='tooltip' title='欄位:AA04'>電腦給號：</label>
         <input type="text" id="expaa_query_number" name="expaa_query_number" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
@@ -159,7 +159,7 @@ blockquote img {
       <fieldset>
         <legend>悠遊卡自動加值付款失敗回復</legend>
         <label for="easycard_query_day" data-toggle='tooltip' title='輸入查詢日期'>日期：</label>
-        <input type="text" id="easycard_query_day" name="easycard_query_day" class="easycard_query date_picker" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080321」。" data-placement="bottom" value="<?php echo $today; ?>" />
+        <input type="text" id="easycard_query_day" name="easycard_query_day" class="easycard_query date_picker no-cache" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080321」。" data-placement="bottom" value="<?php echo $today; ?>" />
         <button id="easycard_query_button" class="easycard_query">查詢</button>
         <button id="easycard_quote_button">備註</button>
         <blockquote id="easycard_quote" class="hide">
