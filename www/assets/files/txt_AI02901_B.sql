@@ -9,8 +9,13 @@ SELECT GG00 || ',' ||
        GG30_2 || ',' ||
        CASE WHEN GG_FLAG = 'Y' THEN '查封註記' ELSE GG_FLAG END AS AI02901_B
   FROM SRGALL A, SRKEYN B, SRKEYN C
- WHERE --(A.GG48 || A.GG49 BETWEEN '03620000-0000' AND '03639999-9999')
-   A.GG48 in ('0362', '0363')
+ WHERE
+   A.GG48 in ('0362', '0363') -- A20
+    -- A.GG48 in ('0200', '0202', '0205', '0210') -- A21
+    -- A.GG48 in ('0255') -- 草漯
+    -- A.GG48 in ('0255', '0275', '0277', '0278', '0377') -- 草漯UNIT3
+    -- A.GG48 in ('0255', '0377', '0392') -- 草漯UNIT6
+    --(A.GG48 || A.GG49 between '031800000000' and '032299999999') -- 中壢運動公園
    AND (B.KCDE_1 = '48')
    AND (A.GG48 = B.KCDE_2)
    AND (C.KCDE_1 = '30')

@@ -12,6 +12,11 @@ SELECT a.ED48 ||
        RPAD(b.LNAM, 60, ' ') ||
        RPAD (b.LADR, 60, ' ') AS AI01101
   FROM SREBOW a, SRLNID b
- WHERE --(a.ED48 || a.ED49 BETWEEN '036200000000' AND '036399999999')
-   a.ED48 in ('0362', '0363')
+ WHERE
+   a.ED48 in ('0362', '0363') -- A20
+    -- a.ED48 in ('0200', '0202', '0205', '0210') -- A21
+    -- a.ED48 in ('0255') -- 草漯
+    -- a.ED48 in ('0255', '0275', '0277', '0278', '0377') -- 草漯UNIT3
+    -- a.ED48 in ('0255', '0377', '0392') -- 草漯UNIT6
+    --(a.ED48 || a.ED49 between '031800000000' and '032299999999') -- 中壢運動公園
    AND (b.LIDN = a.EE09)

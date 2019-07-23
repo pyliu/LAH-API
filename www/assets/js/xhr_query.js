@@ -533,7 +533,7 @@ var xhrGetExpacItems = function(e) {
 
 	var body = new FormData();
 	body.append("type", "expac");
-	body.append("year", year);
+	body.append("year", $("#expac_query_year").val());
 	body.append("num", number);
 
 	fetch("query_json_api.php", {
