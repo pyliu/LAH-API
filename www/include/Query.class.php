@@ -99,18 +99,18 @@ class Query {
 		return true;
 	}
 	
-	public function getMaxNumByYearWord($year, $word) {
+	public function getMaxNumByYearWord($year, $code) {
 		if (!filter_var($year, FILTER_SANITIZE_NUMBER_INT)) {
 			return false;
 		}
 		$this->db->parse("
 			SELECT * from MOICAS.CRSMS t
-			WHERE RM01 = :bv_year AND RM02 = :bv_word AND rownum = 1
+			WHERE RM01 = :bv_year AND RM02 = :bv_code AND rownum = 1
 			ORDER BY RM01 DESC, RM03 DESC
 		");
 		
 		$this->db->bind(":bv_year", $year);
-		$this->db->bind(":bv_word", trim($word));
+		$this->db->bind(":bv_code", trim($code));
 		$this->db->execute();
 		$row = $this->db->fetch();
 		return empty($row) ? "0" : ltrim($row["RM03"], "0");
@@ -690,6 +690,26 @@ class Query {
 			UPDATE MOICAS.CRACD SET RA03 = 'N' WHERE 1 = 1
 		");
 		$this->db->execute();
+		return true;
+	}
+
+	public function clearCaseTemp($year, $code, $number) {
+		if (empty($year) || empty($code) || empty($number)) {
+			return false;
+		}
+		// an array to express temp tables and key field names that need to be checked.
+		$temp_tables = include("Config.TempTables.php");
+		foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
+			$this->db->parse("
+				DELETE FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = :bv_year AND ".$key_fields[1]." = :bv_code AND ".$key_fields[2]." = :bv_number
+			");
+
+			$this->db->bind(":bv_year", $year);
+			$this->db->bind(":bv_code", $code);
+			$this->db->bind(":bv_number", $number);
+			
+			$this->db->execute();
+		}
 		return true;
 	}
 }

@@ -176,7 +176,7 @@ blockquote img {
         <div id="easycard_query_display"></div>
       </fieldset>
       <fieldset>
-        <legend>案件暫存檔清除(NOT READY)</legend>
+        <legend>案件暫存檔清除</legend>
         <select id="temp_clr_year" name="temp_clr_year">
           <option selected>108</option>
         </select>
@@ -329,6 +329,9 @@ blockquote img {
       // query for announcement
       $("#prereg_query_button").on("click", xhrQueryAnnouncementData);
       $("#prereg_clear_button").on("click", xhrClearAnnouncementFlag);
+
+      // clear temp data
+      $("#temp_clr_button").on("click", xhrClearTempData);
     });
   </script>
 </body>
