@@ -1273,16 +1273,16 @@ var xhrQueryTempData = function(e) {
 		return response.json();
 	}).then(function (jsonObj) {
 		console.assert(jsonObj.status == 1, "查詢暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
-		if (jsonObj.status == 0) {
-			showModal("案件 " + year + "-" + code + "-" + number + " 查無暫存資料", "查詢暫存資料");
-			return;
-		}
 		var html = "";
 		for (var i = 0; i < jsonObj.data_count; i++) {
 			if(jsonObj.raw[i][1].length == 0) {
 				continue;
 			}
 			html += jsonObj.raw[i][0] + ": " + jsonObj.raw[i][1].length + "<br />";
+		}
+		if (isEmpty(html)) {
+			showModal("案件 " + year + "-" + code + "-" + number + " 查無暫存資料", "查詢暫存資料");
+			return;
 		}
 		html += "<button class='mt-1' id='temp_clr_button'>我要清除</button> <strong class='text-danger'>暫存檔刪除後無法復原，請確認後再繼續！！</strong>";
 		showModal(html, year + "-" + code + "-" + number + " 案件暫存檔統計");
