@@ -1286,7 +1286,11 @@ var xhrQueryTempData = function(e) {
 		}
 		html += "<button class='mt-1' id='temp_clr_button'>我要清除</button> <strong class='text-danger'>暫存檔刪除後無法復原，請確認後再繼續！！</strong>";
 		showModal(html, year + "-" + code + "-" + number + " 案件暫存檔統計");
-		$("#temp_clr_button").on("click", xhrClearTempData);
+		$("#temp_clr_button").on("click", xhrClearTempData.bind({
+			year: year,
+			code: code,
+			number: number
+		}));
 
 	}).catch(function(ex) {
 		console.error("xhrClearTempData parsing failed", ex);
@@ -1295,35 +1299,17 @@ var xhrQueryTempData = function(e) {
 }
 
 var xhrClearTempData = function(e) {
-	if(!confirm("確定要清除按件暫存檔?")) {
+	var bindArgsObj = this;
+	
+	if(!confirm("確定要清除案件 " + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + " 暫存檔?")) {
 		return;
-	}
-
-	if (isEmpty($("#temp_clr_code").val())) {
-		showPopper("#temp_clr_code");
-		return false;
-	}
-
-	var year = $("#temp_clr_year").val().replace(/\D/g, "");
-	var code = $("#temp_clr_code").val();
-	var number = $("#temp_clr_num").val().replace(/\D/g, "");
-
-	// make total number length is 6
-	var offset = 6 - number.length;
-	if (offset < 0) {
-		showPopper("#temp_clr_num");
-		return false;
-	} else if (offset > 0) {
-		for (var i = 0; i < offset; i++) {
-			number = "0" + number;
-		}
 	}
 
 	var form_body = new FormData();
 	form_body.append("type", "clear_temp_data");
-	form_body.append("year", year);
-	form_body.append("code", trim(code));
-	form_body.append("number", number);
+	form_body.append("year", bindArgsObj.year);
+	form_body.append("code", bindArgsObj.code);
+	form_body.append("number", bindArgsObj.number);
 	fetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body
