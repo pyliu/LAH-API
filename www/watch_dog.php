@@ -102,7 +102,7 @@ blockquote img {
       <fieldset>
         <legend>先行准登(公告期限維護)</legend>
         <button id="prereg_query_button">取得公告期限資料</button>
-        <button id="prereg_clear_button" class="text-danger">》清除先行准登《</button>
+        <button id="prereg_clear_button" class="text-danger">》一鍵清除准登《</button>
         <button id="prereg_quote_button">備註</button>
         <blockquote id="prereg_quote" class="hide">
           <h5><span class="text-danger">※</span>注意：中壢所規定超過30件案件才能執行此功能，並於完成時須馬上關掉以免其他案件誤登。</h5>
@@ -207,6 +207,31 @@ blockquote img {
         <button id="query_temp_clr_button">查詢</button>
         <button id="temp_clr_quote_button">備註</button>
         <blockquote id="temp_clr_quote" class="hide">
+          <h6 class="text-info">目前會去檢查下列的TABLE</h6>
+          <ul>
+            <!-- // 登記 -->
+            <li>"MOICAT.RBLOW" => array("B03", "B04_1", "B04_2")</li>   <!--// YEAR, WORD, NUMBER-->
+            <li>"MOICAT.REBOW" => array("E03", "E04_1", "E04_2")</li>
+            <li>"MOICAT.RINDX" => array("II03", "II04_1", "II04_2")</li>
+            <li>"MOICAT.RLNID" => array("L03", "L04_1", "L04_2")</li>
+            <li>"MOICAT.RRLSQ" => array("R03", "R04_1", "R04_2")</li>
+            <!-- // 地價 -->
+            <li>"MOIPRT.PPRCE" => array("MA03", "MA04_1", "MA04_2")</li>
+            <li>"MOIPRT.PGALL" => array("GG03", "GG04_1", "GG04_2")</li>
+            <li>"MOIPRT.PBLOW" => array("LA03", "LA04_1", "LA04_2")</li>
+            <li>"MOIPRT.PALID" => array("KA03", "KA04_1", "KA04_2")</li>
+            <li>"MOIPRT.PNLPO" => array("NA03", "NA04_1", "NA04_2")</li>
+            <li>"MOIPRT.PBLNV" => array("BA03", "BA04_1", "BA04_2")</li>
+            <li>"MOIPRT.PCLPR" => array("CA03", "CA04_1", "CA04_2")</li>
+            <li>"MOIPRT.PFOLP" => array("FA03", "FA04_1", "FA04_2")</li>
+            <li>"MOIPRT.PGOBP" => array("GA03", "GA04_1", "GA04_2")</li>
+            <li>"MOIPRT.PAPRC" => array("AA03", "AA04_1", "AA04_2")</li>
+            <li>"MOIPRT.PEOPR" => array("EA03", "EA04_1", "EA04_2")</li>
+            <li>"MOIPRT.POA11" => array("OA03", "OA04_1", "OA04_2")</li>
+            <li>"MOIPRT.PGOBPN" => array("GA03", "GA04_1", "GA04_2")</li>
+            <!--<li>"MOIPRC.PKCLS" => array("KK03", "KK04_1", "KK04_2")</li>-->
+            <li>"MOIPRT.PPRCE" => array("MA03", "MA04_1", "MA04_2")</li>
+          </ul>
         </blockquote>
         <div id="temp_clr_display"></div>
       </fieldset>
