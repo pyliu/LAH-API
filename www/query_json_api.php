@@ -333,6 +333,19 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("清除先行准登失敗");
 		}
 		break;
+	case "query_temp_data":
+		$rows = $query->getCaseTemp($_POST["year"], $_POST["code"], $_POST["number"]);
+		if (!empty($rows)) {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($rows),	// how many tables that have temp data for this case
+				"raw" => $rows
+			);
+			echo json_encode($result, 0);
+		} else {
+			echoErrorJSONString("本案件查無暫存資料。");
+		}
+		break;
 	case "clear_temp_data":
 		$result_flag = $query->clearCaseTemp($_POST["year"], $_POST["code"], $_POST["number"]);
 		if ($result_flag) {

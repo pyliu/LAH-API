@@ -1236,4 +1236,108 @@ var xhrClearAnnouncementFlag = function(e) {
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 }
+
+var xhrQueryTempData = function(e) {
+	if (isEmpty($("#temp_clr_code").val())) {
+		showPopper("#temp_clr_code");
+		return false;
+	}
+
+	var year = $("#temp_clr_year").val().replace(/\D/g, "");
+	var code = trim($("#temp_clr_code").val());
+	var number = $("#temp_clr_num").val().replace(/\D/g, "");
+
+	// make total number length is 6
+	var offset = 6 - number.length;
+	if (offset < 0) {
+		showPopper("#temp_clr_num");
+		return false;
+	} else if (offset > 0) {
+		for (var i = 0; i < offset; i++) {
+			number = "0" + number;
+		}
+	}
+
+	var form_body = new FormData();
+	form_body.append("type", "query_temp_data");
+	form_body.append("year", year);
+	form_body.append("code", code);
+	form_body.append("number", number);
+	fetch("query_json_api.php", {
+		method: 'POST',
+		body: form_body
+	}).then(function(response) {
+		if (response.status != 200) {
+			throw new Error("XHR連線異常，回應非200");
+		}
+		return response.json();
+	}).then(function (jsonObj) {
+		console.assert(jsonObj.status == 1, "查詢暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
+		if (jsonObj.status == 0) {
+			showModal("案件 " + year + "-" + code + "-" + number + " 查無暫存資料", "查詢暫存資料");
+			return;
+		}
+		var html = "";
+		for (var i = 0; i < jsonObj.data_count; i++) {
+			if(jsonObj.raw[i][1].length == 0) {
+				continue;
+			}
+			html += jsonObj.raw[i][0] + ": " + jsonObj.raw[i][1].length + "<br />";
+		}
+		html += "<button class='mt-1' id='temp_clr_button'>我要清除</button> <strong class='text-danger'>暫存檔刪除後無法復原，請確認後再繼續！！</strong>";
+		showModal(html, year + "-" + code + "-" + number + " 案件暫存檔統計");
+		$("#temp_clr_button").on("click", xhrClearTempData);
+
+	}).catch(function(ex) {
+		console.error("xhrClearTempData parsing failed", ex);
+		alert("XHR連線查詢有問題!!【" + ex + "】");
+	});
+}
+
+var xhrClearTempData = function(e) {
+	if(!confirm("確定要清除按件暫存檔?")) {
+		return;
+	}
+
+	if (isEmpty($("#temp_clr_code").val())) {
+		showPopper("#temp_clr_code");
+		return false;
+	}
+
+	var year = $("#temp_clr_year").val().replace(/\D/g, "");
+	var code = $("#temp_clr_code").val();
+	var number = $("#temp_clr_num").val().replace(/\D/g, "");
+
+	// make total number length is 6
+	var offset = 6 - number.length;
+	if (offset < 0) {
+		showPopper("#temp_clr_num");
+		return false;
+	} else if (offset > 0) {
+		for (var i = 0; i < offset; i++) {
+			number = "0" + number;
+		}
+	}
+
+	var form_body = new FormData();
+	form_body.append("type", "clear_temp_data");
+	form_body.append("year", year);
+	form_body.append("code", trim(code));
+	form_body.append("number", number);
+	fetch("query_json_api.php", {
+		method: 'POST',
+		body: form_body
+	}).then(function(response) {
+		if (response.status != 200) {
+			throw new Error("XHR連線異常，回應非200");
+		}
+		return response.json();
+	}).then(function (jsonObj) {
+		console.assert(jsonObj.status == 1, "清除暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
+		showModal("<strong class='text-success'>已全部清除完成</strong><p>"+jsonObj.query_string+"</p>", "清除暫存資料");
+	}).catch(function(ex) {
+		console.error("xhrClearTempData parsing failed", ex);
+		alert("XHR連線查詢有問題!!【" + ex + "】");
+	});
+}
 //]]>

@@ -693,6 +693,29 @@ class Query {
 		return true;
 	}
 
+	public function getCaseTemp($year, $code, $number) {
+		$result = array();
+		if (empty($year) || empty($code) || empty($number)) {
+			return $result;
+		}
+		// an array to express temp tables and key field names that need to be checked.
+		$temp_tables = include("Config.TempTables.php");
+		foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
+			$this->db->parse("
+				SELECT * FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = :bv_year AND ".$key_fields[1]." = :bv_code AND ".$key_fields[2]." = :bv_number
+			");
+
+			$this->db->bind(":bv_year", $year);
+			$this->db->bind(":bv_code", $code);
+			$this->db->bind(":bv_number", $number);
+			
+			$this->db->execute();
+			// for FE, 0 -> table name, 1 -> data
+			$result[] = array($tmp_tbl_name, $this->db->fetchAll());
+		}
+		return $result;
+	}
+
 	public function clearCaseTemp($year, $code, $number) {
 		if (empty($year) || empty($code) || empty($number)) {
 			return false;

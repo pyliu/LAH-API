@@ -204,7 +204,7 @@ blockquote img {
         字
         <input type="text" id="temp_clr_num" name="temp_clr_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號【最大6位數】' title='案件號' data-placement="top" />
         號
-        <button id="temp_clr_button">清除</button>
+        <button id="query_temp_clr_button">查詢</button>
         <button id="temp_clr_quote_button">備註</button>
         <blockquote id="temp_clr_quote" class="hide">
         </blockquote>
@@ -331,7 +331,7 @@ blockquote img {
       $("#prereg_clear_button").on("click", xhrClearAnnouncementFlag);
 
       // clear temp data
-      $("#temp_clr_button").on("click", xhrClearTempData);
+      $("#query_temp_clr_button").on("click", xhrQueryTempData);
     });
   </script>
 </body>
