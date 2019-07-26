@@ -147,8 +147,7 @@ require_once("./include/RegCaseData.class.php");
   <script src="assets/js/autoload.js"></script>
   <!-- fixed table header -->
   <script src="assets/js/fixed_header.js"></script>
-  <!-- balls canvas -->
-  <!-- <script src="assets/js/balls.js"></script> -->
+  <script src="assets/js/global.js"></script>
   <!-- bs datepicker -->
   <script src="assets/js/bootstrap-datepicker.min.js"></script>
   <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>

@@ -127,8 +127,8 @@ function adjustTableContent() {
                 html += "代理人統編：" + jsonObj.代理人統編 + "<br/>";
 				html += "代理人姓名：" + jsonObj.代理人姓名 + "<br/>";
                 html += "手機號碼：" + jsonObj.手機號碼 + "<br/>";
-                $("#ajax_modal .modal-body p").html(html);
-                $("#ajax_modal").modal();
+                showModal(html);
+                scrollToElement(clicked_element);
             },
             error: function() {
                 alert("無法取得 " + id + " 資訊!");
