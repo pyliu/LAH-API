@@ -18,14 +18,14 @@ var isEmpty = function(variable) {
 	return false;
 }
 
-var showPopper = function(selector, content) {
+var showPopper = function(selector, content, timeout) {
 	if (!isEmpty(content)) {
 		$(selector).attr("data-content", content);
 	}
 	$(selector).popover('show');
 	setTimeout(function() {
 		$(selector).popover('hide');
-	}, 2000);
+	}, isEmpty(timeout) || isNaN(timeout) ? 2000 : timeout);
 	scrollToElement(selector);
 }
 

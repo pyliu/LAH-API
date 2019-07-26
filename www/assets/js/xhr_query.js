@@ -1278,20 +1278,23 @@ var xhrQueryTempData = function(e) {
 			if(jsonObj.raw[i][1].length == 0) {
 				continue;
 			}
-			html += jsonObj.raw[i][0] + ": " + jsonObj.raw[i][1].length + "<br />";
+			html += "● " + jsonObj.raw[i][0] + ": <span class='text-danger'>" + jsonObj.raw[i][1].length + "</span><br />"
+			html += "　<small>－　" + jsonObj.raw[i][2] + "</small><br />";
 		}
 		if (isEmpty(html)) {
 			showModal("案件 " + year + "-" + code + "-" + number + " 查無暫存資料", "查詢暫存資料");
 			return;
 		}
-		html += "<button class='mt-1' id='temp_clr_button'>我要清除</button> <strong class='text-danger'>暫存檔刪除後無法復原，請確認後再繼續！！</strong>";
+		html += "<button class='mt-1' id='temp_clr_button' data-trigger='manual' data-toggle='popover' data-placement='bottom'>清除</button> <strong class='text-danger'>★ 暫存檔刪除後無法復原！！</strong>";
 		showModal(html, year + "-" + code + "-" + number + " 案件暫存檔統計");
 		$("#temp_clr_button").on("click", xhrClearTempData.bind({
 			year: year,
 			code: code,
 			number: number
 		}));
-
+		setTimeout(function() {
+			showPopper("#temp_clr_button", "請確認後再選擇清除", 10000)
+		}, 1000);
 	}).catch(function(ex) {
 		console.error("xhrClearTempData parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");

@@ -710,8 +710,8 @@ class Query {
 			$this->db->bind(":bv_number", $number);
 			
 			$this->db->execute();
-			// for FE, 0 -> table name, 1 -> data
-			$result[] = array($tmp_tbl_name, $this->db->fetchAll());
+			// for FE, 0 -> table name, 1 -> data, 2 -> SQL statement
+			$result[] = array($tmp_tbl_name, $this->db->fetchAll(), "SELECT * FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = '$year' ".$key_fields[1]." = '$code' AND ".$key_fields[2]." = '$number'");
 		}
 		return $result;
 	}
