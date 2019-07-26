@@ -1258,6 +1258,8 @@ var xhrQueryTempData = function(e) {
 		}
 	}
 
+	toggle(e.target);
+
 	var form_body = new FormData();
 	form_body.append("type", "query_temp_data");
 	form_body.append("year", year);
@@ -1273,6 +1275,7 @@ var xhrQueryTempData = function(e) {
 		return response.json();
 	}).then(function (jsonObj) {
 		console.assert(jsonObj.status == 1, "查詢暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
+		
 		var html = "";
 		for (var i = 0; i < jsonObj.data_count; i++) {
 			if(jsonObj.raw[i][1].length == 0) {
@@ -1281,6 +1284,9 @@ var xhrQueryTempData = function(e) {
 			html += "● " + jsonObj.raw[i][0] + ": <span class='text-danger'>" + jsonObj.raw[i][1].length + "</span><br />"
 			html += "　<small>－　" + jsonObj.raw[i][2] + "</small><br />";
 		}
+
+		toggle(e.target);
+		
 		if (isEmpty(html)) {
 			showModal("案件 " + year + "-" + code + "-" + number + " 查無暫存資料", "查詢暫存資料");
 			return;
@@ -1307,6 +1313,8 @@ var xhrClearTempData = function(e) {
 	if(!confirm("確定要清除案件 " + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + " 暫存檔?")) {
 		return;
 	}
+
+	$(e.target).remove();
 
 	var form_body = new FormData();
 	form_body.append("type", "clear_temp_data");
