@@ -357,6 +357,7 @@ blockquote img {
 
       // clear temp data
       $("#query_temp_clr_button").on("click", xhrQueryTempData);
+      bindPressEnterEvent("#temp_clr_num", xhrQueryTempData);
     });
   </script>
 </body>
