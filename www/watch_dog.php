@@ -358,6 +358,13 @@ blockquote img {
       // clear temp data
       $("#query_temp_clr_button").on("click", xhrQueryTempData);
       bindPressEnterEvent("#temp_clr_num", xhrQueryTempData);
+      // clear temp code event
+      $("#temp_clr_code").on("change", xhrGetCaseLatestNum.bind({
+        code_id: "temp_clr_code",
+        year_id: "temp_clr_year",
+        number_id: "temp_clr_num",
+        display_id: "temp_clr_display"
+      }));
     });
   </script>
 </body>

@@ -207,6 +207,7 @@ fieldset fieldset legend {
       </fieldset>
       <fieldset>
         <legend>給局端地籍資料TXT檔</legend>
+        <button id="export_txt_button">未實作 ... </button>
         <button id="export_txt_quote_button">備註</button>
         <blockquote id="export_txt_blockquote" class="hide">
           產生輸入段代碼之打包TXT檔案。 <br/> <br/>
