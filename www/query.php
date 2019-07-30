@@ -94,24 +94,29 @@ fieldset fieldset legend {
         </select>
         年
         <select id="query_code" name="query_code">
-		      <option></option>
-          <option>HB04 壢登    </option>
-          <option>HB05 壢永    </option>
-          <option>HB06 壢速    </option>
-          <option>HAB1 壢桃登跨</option>
-          <option>HCB1 壢溪登跨</option>
-          <option>HDB1 壢楊登跨</option>
-          <option>HEB1 壢蘆登跨</option>
-          <option>HFB1 壢德登跨</option>
-          <option>HGB1 壢平登跨</option>
-          <option>HHB1 壢山登跨</option>
-          <option>HBA1 桃壢登跨</option>
-          <option>HBC1 溪壢登跨</option>
-          <option>HBD1 楊壢登跨</option>
-          <option>HBE1 蘆壢登跨</option>
-          <option>HBF1 德壢登跨</option>
-          <option>HBG1 平壢登跨</option>
-          <option>HBH1 山壢登跨</option>
+          <optgroup label="本所">
+            <option>HB04 壢登</option>
+            <option>HB05 壢永</option>
+            <option>HB06 壢速</option>
+          </optgroup>
+          <optgroup label="本所收件(跨所)">
+            <option>HAB1 壢桃登跨</option>
+            <option>HCB1 壢溪登跨</option>
+            <option>HDB1 壢楊登跨</option>
+            <option>HEB1 壢蘆登跨</option>
+            <option>HFB1 壢德登跨</option>
+            <option>HGB1 壢平登跨</option>
+            <option>HHB1 壢山登跨</option>
+          </optgroup>
+          <optgroup label="他所收件(跨所)">
+            <option>HBA1 桃壢登跨</option>
+            <option>HBC1 溪壢登跨</option>
+            <option>HBD1 楊壢登跨</option>
+            <option>HBE1 蘆壢登跨</option>
+            <option>HBF1 德壢登跨</option>
+            <option>HBG1 平壢登跨</option>
+            <option>HBH1 山壢登跨</option>
+          </optgroup>
         </select>
         字
         <input type="text" id="query_num" name="query_num" data-toggle='tooltip' title='輸入案件號' />號
@@ -168,33 +173,35 @@ fieldset fieldset legend {
         <legend>報表匯出</legend>
         <label for="preload_sql_select">預載查詢：</label>
         <select id="preload_sql_select">
-          <option value="">=== 所內統計 ===</option>
-          <option value="01_reg_case_monthly.sql">每月登記案件</option>
-          <option value="11_reg_reason_query_monthly.sql">每月登記案件 by 登記原因</option>
-          <option value="02_reg_remote_case_monthly.sql">每月遠途先審案件</option>
-          <option value="03_reg_other_office_case_monthly.sql">每月跨所案件【本所代收】</option>
-          <option value="04_reg_other_office_case_2_monthly.sql">每月跨所案件【非本所收件】</option>
-          <option value="09_reg_other_office_case_3_monthly.sql">每月跨所子號案件【本所代收】</option>
-          <option value="10_reg_reason_stats_monthly.sql">每月跨所各登記原因案件統計 by 收件所</option>
-          <option value="07_reg_foreign_case_monthly.sql">每月權利人＆義務人為外國人案件</option>
-          <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
-          <option value="14_sur_rain_delay_case.sql">因雨延期測量案件數</option>
-          <option value="05_adm_area_size.sql">段小段面積統計</option>
-          <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
-          <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
-          <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
-          <option value="">=== 地籍資料 ====</option>
-          <option value="txt_AI00301.sql">AI00301 - 土地標示部資料</option>
-          <option value="txt_AI00401.sql">AI00401 - 土地所有權部資料</option>
-          <option value="txt_AI00601_B.sql">AI00601 - 土地管理者資料</option>
-          <option value="txt_AI00601_E.sql">AI00601 - 建物管理者資料</option>
-          <option value="txt_AI00701.sql">AI00701 - 建物標示部資料</option>
-          <option value="txt_AI00801.sql">AI00801 - 基地坐落資料</option>
-          <option value="txt_AI00901.sql">AI00901 - 建物分層及附屬資料</option>
-          <option value="txt_AI01001.sql">AI01001 - 主建物與共同使用部分資料</option>
-          <option value="txt_AI01101.sql">AI01101 - 建物所有權部資料</option>
-          <option value="txt_AI02901_B.sql">AI02901 - 土地各部別之其他登記事項列印</option>
-          <option value="txt_AI02901_E.sql">AI02901 - 建物各部別之其他登記事項列印</option>
+          <optgroup label="==== 所內統計 ====">
+            <option value="01_reg_case_monthly.sql">每月登記案件</option>
+            <option value="11_reg_reason_query_monthly.sql">每月登記案件 by 登記原因</option>
+            <option value="02_reg_remote_case_monthly.sql">每月遠途先審案件</option>
+            <option value="03_reg_other_office_case_monthly.sql">每月跨所案件【本所代收】</option>
+            <option value="04_reg_other_office_case_2_monthly.sql">每月跨所案件【非本所收件】</option>
+            <option value="09_reg_other_office_case_3_monthly.sql">每月跨所子號案件【本所代收】</option>
+            <option value="10_reg_reason_stats_monthly.sql">每月跨所各登記原因案件統計 by 收件所</option>
+            <option value="07_reg_foreign_case_monthly.sql">每月權利人＆義務人為外國人案件</option>
+            <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
+            <option value="14_sur_rain_delay_case.sql">因雨延期測量案件數</option>
+            <option value="05_adm_area_size.sql">段小段面積統計</option>
+            <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
+            <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
+            <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
+          </optgroup>
+          <optgroup label="==== 地籍資料 ====" class="bg-secondary text-white">
+            <option value="txt_AI00301.sql">AI00301 - 土地標示部資料</option>
+            <option value="txt_AI00401.sql">AI00401 - 土地所有權部資料</option>
+            <option value="txt_AI00601_B.sql">AI00601 - 土地管理者資料</option>
+            <option value="txt_AI00601_E.sql">AI00601 - 建物管理者資料</option>
+            <option value="txt_AI00701.sql">AI00701 - 建物標示部資料</option>
+            <option value="txt_AI00801.sql">AI00801 - 基地坐落資料</option>
+            <option value="txt_AI00901.sql">AI00901 - 建物分層及附屬資料</option>
+            <option value="txt_AI01001.sql">AI01001 - 主建物與共同使用部分資料</option>
+            <option value="txt_AI01101.sql">AI01101 - 建物所有權部資料</option>
+            <option value="txt_AI02901_B.sql">AI02901 - 土地各部別之其他登記事項列印</option>
+            <option value="txt_AI02901_E.sql">AI02901 - 建物各部別之其他登記事項列印</option>
+          </optgroup>
         </select>
         <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">Input SELECT SQL here ... </textarea>
         <button id="sql_csv_text_button">匯出CSV</button>
