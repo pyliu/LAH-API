@@ -93,31 +93,7 @@ fieldset fieldset legend {
           <option selected>108</option>
         </select>
         年
-        <select id="query_code" name="query_code">
-          <optgroup label="本所">
-            <option>HB04 壢登</option>
-            <option>HB05 壢永</option>
-            <option>HB06 壢速</option>
-          </optgroup>
-          <optgroup label="本所收件(跨所)">
-            <option>HAB1 壢桃登跨</option>
-            <option>HCB1 壢溪登跨</option>
-            <option>HDB1 壢楊登跨</option>
-            <option>HEB1 壢蘆登跨</option>
-            <option>HFB1 壢德登跨</option>
-            <option>HGB1 壢平登跨</option>
-            <option>HHB1 壢山登跨</option>
-          </optgroup>
-          <optgroup label="他所收件(跨所)">
-            <option>HBA1 桃壢登跨</option>
-            <option>HBC1 溪壢登跨</option>
-            <option>HBD1 楊壢登跨</option>
-            <option>HBE1 蘆壢登跨</option>
-            <option>HBF1 德壢登跨</option>
-            <option>HBG1 平壢登跨</option>
-            <option>HBH1 山壢登跨</option>
-          </optgroup>
-        </select>
+        <?php echo getCodeSelectHTML("query_code"); ?>
         字
         <input type="text" id="query_num" name="query_num" data-toggle='tooltip' title='輸入案件號' />號
         <button id="query_button">登記收件資料查詢</button>
@@ -189,7 +165,7 @@ fieldset fieldset legend {
             <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
             <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
           </optgroup>
-          <optgroup label="==== 地籍資料 ====" class="bg-secondary text-white">
+          <optgroup label="==== 地籍資料 ====" class="bg-light">
             <option value="txt_AI00301.sql">AI00301 - 土地標示部資料</option>
             <option value="txt_AI00401.sql">AI00401 - 土地所有權部資料</option>
             <option value="txt_AI00601_B.sql">AI00601 - 土地管理者資料</option>
@@ -204,8 +180,11 @@ fieldset fieldset legend {
           </optgroup>
         </select>
         <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">Input SELECT SQL here ... </textarea>
+        <button id="sql_export_button">匯出</button>
+        <!--
         <button id="sql_csv_text_button">匯出CSV</button>
         <button id="sql_txt_text_button">匯出TXT</button>
+        -->
         <button id="sql_csv_quote_button">備註</button>
         <blockquote id="sql_report_blockquote" class="hide">
           <p>輸入SELECT SQL指令匯出查詢結果。</p>
@@ -369,8 +348,14 @@ fieldset fieldset legend {
       });
 
       // sql csv export
+      /*
       $("#sql_csv_text_button").on("click", xhrExportSQLCsv);
       $("#sql_txt_text_button").on("click", xhrExportSQLTxt);
+      */
+      $("#sql_export_button").on("click", function(e) {
+        var selected = $("#preload_sql_select").val();
+        selected.startsWith("txt_") ? xhrExportSQLTxt(e) : xhrExportSQLCsv(e);
+      });
       $("#preload_sql_select").on("change", xhrLoadSQL);
     });
   </script>
