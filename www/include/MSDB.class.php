@@ -3,60 +3,57 @@ require_once("init.php");
 require_once("SQLSRV_DataBase.class.php");
 
 class MSDB {
-    private $sqlsrv_db;
-    private $conn;
-    private $svr_name;
-    private $conn_info;
-    private $last_result;
+    private $dbo;
 
-
-    public function connect() {
-        $this->conn = sqlsrv_connect($this->svr_name, $this->conn_info);
-        if(!$this->conn) {
-            die( print_r( sqlsrv_errors(), true));
-        }
-    }
-
-    public function close() {
-        sqlsrv_close($this->conn);
-    }
-
-    public function query($sql) {
-        return sqlsrv_query($this->conn, $sql);
-    }
-
-	public function fetch() {
-        $this->last_result = $this->query("SELECT TOP 10 * FROM [dbo].[Message]");
-        if($this->last_result === false) {
-            die( print_r( sqlsrv_errors(), true) );
-        } else {
-            return sqlsrv_fetch_array($this->last_result, SQLSRV_FETCH_ASSOC);
-        }
+	public function fetch($sql) {
+        return $this->dbo->get_row($sql, "array");
     }
     
-    public function fetchAll() {
+    public function fetchAll($sql) {
+        return $this->dbo->get_results($sql, "array");
     }
 
-    function __construct() {
-        $this->sqlsrv_db = new SQLSRV_DataBase(SYSTEM_CONFIG["MS_DB_UID"], SYSTEM_CONFIG["MS_DB_PWD"], SYSTEM_CONFIG["MS_DB_DATABASE"], SYSTEM_CONFIG["MS_DB_SVR"]);
-
-
-        $this->svr_name = SYSTEM_CONFIG["MS_DB_SVR"];
-        $this->conn_info = array(
-            "Database"=> SYSTEM_CONFIG["MS_DB_DATABASE"],
-            "UID"=> SYSTEM_CONFIG["MS_DB_UID"],
-            "PWD"=> SYSTEM_CONFIG["MS_DB_PWD"],
-            "CharacterSet" => SYSTEM_CONFIG["MS_DB_CHARSET"]
-        );
-        $this->connect();
+    function __construct($conn_info = array()) {
+        if (empty($conn_info)) {
+            // default connect via config
+            $this->dbo = new SQLSRV_DataBase(
+                SYSTEM_CONFIG["MS_DB_UID"],
+                SYSTEM_CONFIG["MS_DB_PWD"],
+                SYSTEM_CONFIG["MS_DB_DATABASE"],
+                SYSTEM_CONFIG["MS_DB_SVR"],
+                SYSTEM_CONFIG["MS_DB_CHARSET"]
+            );
+        } else {
+            $this->dbo = new SQLSRV_DataBase(
+                $conn_info["MS_DB_UID"],
+                $conn_info["MS_DB_PWD"],
+                $conn_info["MS_DB_DATABASE"],
+                $conn_info["MS_DB_SVR"],
+                $conn_info["MS_DB_CHARSET"]
+            );
+        }
     }
 
-    function __destruct() {
-        $this->close();
+    function __destruct() {}
+    /**
+	 * Return the last ran query in its entirety
+	 * @return string
+	 */
+    public function getLastQuery() {
+        return $this->dbo->get_last_query();
     }
-
+    /**
+	 * If a connection ot the database exists
+	 * @return bool
+	 */
     public function isConnected() {
-        return $this->sqlsrv_db->is_connected;
+        return $this->dbo->is_connected;
+    }
+    /**
+	 * @return array|bool
+	 */
+    public function hasError() {
+        return $this->dbo->hasError();
     }
 }
 ?>

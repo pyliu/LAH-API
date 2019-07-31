@@ -131,6 +131,12 @@ class SQLSRV_DataBase {
 	protected $dbport;
 
 	/**
+	 * Database Character Set
+	 * @since x.x.x
+	 * @var string
+	 */
+	protected $dbcharset;
+	/**
 	 * SQLSRV_DataBase constructor.
 	 *
 	 * @since 0.1.0
@@ -143,12 +149,13 @@ class SQLSRV_DataBase {
 	 * @param int    $dbport       MSSQL database port
 	 * @param mixed  $build_schema Where (if at all) to store the DB schema
 	 */
-	public function __construct( $dbuser, $dbpassword, $dbname, $dbhost, $dbport = 1433, $build_schema = false ) {
+	public function __construct( $dbuser, $dbpassword, $dbname, $dbhost, $dbcharset = "UTF-8", $dbport = 1433, $build_schema = false ) {
 		$this->dbuser       = $dbuser;
 		$this->dbpassword   = $dbpassword;
 		$this->dbname       = $dbname;
 		$this->dbhost       = $dbhost;
 		$this->dbport       = $dbport;
+		$this->dbcharset	= $dbcharset;
 
 		$this->is_connected = $this->db_connect();
 
@@ -176,7 +183,8 @@ class SQLSRV_DataBase {
 		$connectionOptions = array(
 			"Database" => $this->dbname,
 			"UID"      => $this->dbuser,
-			"PWD"      => $this->dbpassword
+			"PWD"      => $this->dbpassword,
+			"CharacterSet"	=> $this->dbcharset
 		);
 
 		// Create the connection resource
@@ -591,7 +599,7 @@ class SQLSRV_DataBase {
 		}
 		$this->prepare();
 		$this->last_query = $query;
-
+		
 		$doing_query = sqlsrv_query( $this->db, $query );
 
 		if ( false === $doing_query ) {
