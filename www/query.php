@@ -149,16 +149,19 @@ fieldset fieldset legend {
         <legend>報表匯出</legend>
         <label for="preload_sql_select">預載查詢：</label>
         <select id="preload_sql_select">
-          <optgroup label="==== 所內統計 ====">
-            <option value="01_reg_case_monthly.sql">每月登記案件</option>
-            <option value="11_reg_reason_query_monthly.sql">每月登記案件 by 登記原因</option>
+          <optgroup label="==== 所內登記案件統計 ====">
+            <option value="01_reg_case_monthly.sql">每月案件統計</option>
+            <option value="11_reg_reason_query_monthly.sql">每月案件 by 登記原因</option>
             <option value="02_reg_remote_case_monthly.sql">每月遠途先審案件</option>
             <option value="03_reg_other_office_case_monthly.sql">每月跨所案件【本所代收】</option>
             <option value="04_reg_other_office_case_2_monthly.sql">每月跨所案件【非本所收件】</option>
             <option value="09_reg_other_office_case_3_monthly.sql">每月跨所子號案件【本所代收】</option>
             <option value="10_reg_reason_stats_monthly.sql">每月跨所各登記原因案件統計 by 收件所</option>
             <option value="07_reg_foreign_case_monthly.sql">每月權利人＆義務人為外國人案件</option>
+            <option value="16_reg_finished_cases_monthly.sql">每月已結案案件</option>
             <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
+          </optgroup>
+          <optgroup label="==== 所內其他統計 ====">
             <option value="14_sur_rain_delay_case.sql">因雨延期測量案件數</option>
             <option value="05_adm_area_size.sql">段小段面積統計</option>
             <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
