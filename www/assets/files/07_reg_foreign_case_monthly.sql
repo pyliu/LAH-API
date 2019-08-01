@@ -3,14 +3,29 @@ SELECT DISTINCT
   t.RM02   AS "收件字",
   t.RM03   AS "收件號",
   t.RM09   AS "登記原因代碼",
-  k.KCNT    AS "登記原因",
+  r.KCNT    AS "登記原因",
   t.RM07_1 AS "收件日期",
   t.RM58_1 AS "結案日期",
   t.RM18   AS "權利人統一編號",
   t.RM19   AS "權利人姓名",
   t.RM21   AS "義務人統一編號",
   t.RM22   AS "義務人姓名",
-  p.LBIR_1 AS "外國人類別",
+  (CASE
+    WHEN q.LCDE = '1' THEN '本國人'
+    WHEN q.LCDE = '2' THEN '外國人'
+    WHEN q.LCDE = '3' THEN '國有（中央機關）'
+    WHEN q.LCDE = '4' THEN '省市有（省市機關）'
+    WHEN q.LCDE = '5' THEN '縣市有（縣市機關）'
+    WHEN q.LCDE = '6' THEN '鄉鎮市有（鄉鎮市機關）'
+    WHEN q.LCDE = '7' THEN '本國私法人'
+    WHEN q.LCDE = '8' THEN '外國法人'
+    WHEN q.LCDE = '9' THEN '祭祀公業'
+    WHEN q.LCDE = 'A' THEN '其他'
+    WHEN q.LCDE = 'B' THEN '銀行法人'
+    WHEN q.LCDE = 'C' THEN '大陸地區自然人'
+    WHEN q.LCDE = 'D' THEN '大陸地區法人'
+    ELSE q.LCDE
+  END) AS "權利/義務人別",
   (CASE
     WHEN t.RM30 = 'A' THEN '初審'
     WHEN t.RM30 = 'B' THEN '複審'
@@ -30,7 +45,7 @@ SELECT DISTINCT
     WHEN t.RM30 = 'E' THEN '請示'
     WHEN t.RM30 = 'D' THEN '展期'
     ELSE t.RM30
-END) AS "辦理情形",
+  END) AS "辦理情形",
   (CASE
     WHEN t.RM31 = 'A' THEN '結案'
     WHEN t.RM31 = 'B' THEN '撤回'
@@ -38,13 +53,13 @@ END) AS "辦理情形",
     WHEN t.RM31 = 'D' THEN '駁回'
     WHEN t.RM31 = 'E' THEN '請示'
     ELSE t.RM31
-END) AS "結案與否"
-FROM MOICAD.RLNID p, MOICAS.CRSMS t, MOICAD.RKEYN k 
+  END) AS "結案與否"
+FROM
+  MOICAS.CRSMS t,
+  (select * from MOICAD.RLNID p where p.LCDE in ('2', '8', 'C', 'D')) q, -- 代碼檔 09
+  (select * from MOICAD.RKEYN k where k.KCDE_1 = '06') r
 WHERE
-  t.RM07_1 LIKE '10807%'
---AND p.LCDE in ('2', '8', 'C', 'D')
-  AND p.LCDE not in ('1', '3', '4', '5', '6', '7', '9', 'A', 'B')
-  AND (t.RM18 = p.LIDN OR t.RM21 = p.LIDN)
-  AND t.RM09 in ('64', '65') -- 買賣 64, 贈與 65
-  AND k.KCDE_2 = t.RM09
-  AND k.KCDE_1 = '06'
+  t.RM56_1 LIKE '10807%' AND  -- 查詢校對時間
+  t.RM09 in ('64', '65') AND -- 64 買賣 65 贈與
+  ( t.RM18 = q.LIDN OR t.RM21 = q.LIDN ) AND
+  r.KCDE_2 = t.RM09

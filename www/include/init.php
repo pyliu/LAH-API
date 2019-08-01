@@ -3,6 +3,9 @@ require_once("Config.inc.php");
 require_once("GlobalConstants.inc.php");
 require_once("GlobalFunctions.inc.php");
 
+// some query take long time ...
+set_time_limit(0);
+
 $client_ip = $_SERVER["REMOTE_ADDR"];
 if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
     $client_ip = $_SERVER["HTTP_CLIENT_IP"];
