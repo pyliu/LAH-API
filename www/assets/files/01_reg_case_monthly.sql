@@ -1,4 +1,24 @@
-SELECT t.rm01, t.rm02, t.rm03, t.rm07_1, t.rm07_2, t.rm09, s.kcnt, t.rm30
+SELECT t.rm01, t.rm02, t.rm03, t.rm07_1, t.rm07_2, t.rm09, s.kcnt,
+  (CASE
+    WHEN SQ.RM30 = 'A' THEN '初審'
+    WHEN SQ.RM30 = 'B' THEN '複審'
+    WHEN SQ.RM30 = 'H' THEN '公告'
+    WHEN SQ.RM30 = 'I' THEN '補正'
+    WHEN SQ.RM30 = 'R' THEN '登錄'
+    WHEN SQ.RM30 = 'C' THEN '校對'
+    WHEN SQ.RM30 = 'U' THEN '異動完成'
+    WHEN SQ.RM30 = 'F' THEN '結案'
+    WHEN SQ.RM30 = 'X' THEN '補正初核'
+    WHEN SQ.RM30 = 'Y' THEN '駁回初核'
+    WHEN SQ.RM30 = 'J' THEN '撤回初核'
+    WHEN SQ.RM30 = 'K' THEN '撤回'
+    WHEN SQ.RM30 = 'Z' THEN '歸檔'
+    WHEN SQ.RM30 = 'N' THEN '駁回'
+    WHEN SQ.RM30 = 'L' THEN '公告初核'
+    WHEN SQ.RM30 = 'E' THEN '請示'
+    WHEN SQ.RM30 = 'D' THEN '展期'
+    ELSE t.RM30
+  END) AS "辦理情形"
 FROM SCRSMS t
 LEFT JOIN SRKEYN s
   ON t.rm09 = s.kcde_2
