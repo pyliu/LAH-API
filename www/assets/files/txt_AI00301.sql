@@ -17,8 +17,9 @@ SELECT ( A.AA45 || A.AA46 || A.AA48 || A.AA49 ||
   LPAD(A.AA21 * 1000, 10, ' ') ||
   LPAD(A.AA22 * 1000, 10, ' ') ||
   CASE
-    WHEN LPAD(NVL(A.AA23, 0), 3, ' ') = '  0' THEN '   '
-    ELSE LPAD(NVL(A.AA23, 0), 3, ' ')
+    WHEN A.AA23 IS NULL THEN '   '
+    WHEN A.AA23 = '' THEN '   '
+    ELSE LPAD(A.AA23, 3, ' ')
   END
 ) AS AI03001
   from SRALID A
