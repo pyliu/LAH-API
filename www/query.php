@@ -158,7 +158,6 @@ fieldset fieldset legend {
             <option value="09_reg_other_office_case_3_monthly.sql">每月跨所子號案件【本所代收】</option>
             <option value="10_reg_reason_stats_monthly.sql">每月跨所各登記原因案件統計 by 收件所</option>
             <option value="07_reg_foreign_case_monthly.sql">每月權利人＆義務人為外國人案件</option>
-            <option value="16_reg_finished_cases_monthly.sql">每月已結案案件</option>
             <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
           </optgroup>
           <optgroup label="==== 所內其他統計 ====">

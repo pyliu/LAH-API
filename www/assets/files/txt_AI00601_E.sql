@@ -1,6 +1,9 @@
-select a.MM00 || a.MM48 || a.MM49 || LPAD(a.MM01, 4, '0') ||
-       LPAD(b.EE09, 10, ' ') || LPAD(a.MM13, 10, ' ') ||
-       RPAD(c.LNAM, 60, ' ') || RPAD(c.LADR, 60, ' ') AS AI00601_E
+select a.MM00 || a.MM48 || a.MM49 ||
+    LPAD(a.MM01, 4, '0') ||
+    LPAD(b.EE09, 10, ' ') ||
+    LPAD(a.MM13, 10, ' ') ||
+    RPAD(NVL(c.LNAM, ' '), 60, ' ') ||
+    RPAD(NVL(c.LADR, ' '), 60, ' ') AS AI00601_E
   from SRMNGR a, SREBOW b, SRLNID c
  where
    a.MM48 in ('0362', '0363')

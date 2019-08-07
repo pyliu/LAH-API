@@ -6,11 +6,11 @@ SELECT a.ED48 ||
        LPAD(NVL(a.EE07, ' '), 7, ' ') ||
        LPAD(a.EE09, 10, ' ') ||
        NVL(a.EE15_1, ' ') ||
-       LPAD(a.EE15_2, 10, ' ') ||
-       LPAD(a.EE15_3, 10, ' ') ||
+       LPAD(NVL(TO_CHAR(a.EE15_2), ' '), 10, ' ') ||
+       LPAD(NVL(TO_CHAR(a.EE15_3), ' '), 10, ' ') ||
        LPAD(NVL(a.EE16, ' '), 10, ' ') ||
-       RPAD(b.LNAM, 60, ' ') ||
-       RPAD (b.LADR, 60, ' ') AS AI01101
+       RPAD(NVL(b.LNAM, ' '), 60, ' ') ||
+       RPAD (NVL(b.LADR, ' '), 60, ' ') AS AI01101
   FROM SREBOW a, SRLNID b
  WHERE
    a.ED48 in ('0362', '0363') -- A20

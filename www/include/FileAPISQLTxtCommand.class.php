@@ -16,10 +16,9 @@ class FileAPISQLTxtCommand extends FileAPICommand {
         if (is_array($data)) {
             $count = 0;
             foreach ($data as $row) {
-                //array_walk($row, array($this, "cleanData"));
+                $count++;
                 $flat_text = implode(",", array_values($row));
                 fwrite($out, $flat_text."\n");
-                $count++;
             }
             if ($print_count) {
                 fwrite($out, mb_convert_encoding("##### TAG #####共產製 ".$count." 筆資料", "big5", "utf-8"));

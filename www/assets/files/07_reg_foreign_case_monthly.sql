@@ -6,6 +6,7 @@ SELECT DISTINCT
   r.KCNT    AS "登記原因",
   t.RM07_1 AS "收件日期",
   t.RM58_1 AS "結案日期",
+  t.RM56_1 AS "校對日期",
   t.RM18   AS "權利人統一編號",
   t.RM19   AS "權利人姓名",
   t.RM21   AS "義務人統一編號",

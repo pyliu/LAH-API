@@ -1,6 +1,8 @@
-select A.MM00 || A.MM48 || A.MM49 || A.MM01 || LPAD(B.BB09, 10, ' ') ||
-       LPAD(A.MM13, 10, ' ') || RPAD(C.LNAM, 60, ' ') ||
-       RPAD(C.LADR, 60, ' ') AS AI00601_B
+select A.MM00 || A.MM48 || A.MM49 || A.MM01 ||
+    LPAD(B.BB09, 10, ' ') ||
+    LPAD(A.MM13, 10, ' ') ||
+    RPAD(NVL(C.LNAM, ' '), 60, ' ') ||
+    RPAD(NVL(C.LADR, ' '), 60, ' ') AS AI00601_B
   from SRMNGR A, SRBLOW B, SRLNID C
  where --(A.MM48 || A.MM49 between '036200000000' and '036399999999')
    a.MM48 in ('0362', '0363')

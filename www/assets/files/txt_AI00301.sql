@@ -1,4 +1,7 @@
-select ( A.AA45 || A.AA46 || A.AA48 || A.AA49 || A.AA05 || A.AA06 || A.AA08 ||
+SELECT ( A.AA45 || A.AA46 || A.AA48 || A.AA49 ||
+  NVL(A.AA05, '       ') ||
+  NVL(A.AA06, '  ') ||
+  NVL(A.AA08, ' ') ||
   LPAD(NVL(A.AA09, ' '), 2, ' ') ||
   LPAD(A.AA10 * 100, 9, ' ') ||
   LPAD(NVL(A.AA11, ' '), 2, ' ') ||

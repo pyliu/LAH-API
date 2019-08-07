@@ -44,7 +44,6 @@ switch ($_POST["type"]) {
 		} else {
 			echoErrorJSONString("更新失敗【".$_POST["serial"]."】");
 		}
-
 		break;
 	case "max":
 		$year = $_POST["year"];
