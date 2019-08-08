@@ -306,11 +306,13 @@ var xhrGetSectionRALIDCount = function(e) {
 				this_count = this_count < 1000 ? 1000 : this_count;
 				var dollar = this_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 				var blow = jsonObj.raw[i]["土地標示部筆數"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-				var size = 0;
+				var size = 0, size_o = 0;
 				if (jsonObj.raw[i]["面積"]) {
 					size = jsonObj.raw[i]["面積"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+					size_o = (jsonObj.raw[i]["面積"] * 3025 / 10000).toFixed(2);
+					size_o = size_o.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 				}
-				html += "【<span class='text-info'>" + jsonObj.raw[i]["段代碼"]  + "</span>】" + jsonObj.raw[i]["段名稱"] + "：土地標示部 <span class='text-primary'>" + blow + "</span> 筆【面積：" + size + "】。";
+				html += "【<span class='text-info'>" + jsonObj.raw[i]["段代碼"]  + "</span>】" + jsonObj.raw[i]["段名稱"] + "：土地標示部 <span class='text-primary'>" + blow + "</span> 筆【面積：" + size + " &#x33A1; | " + size_o + " 坪】。";
 				html += " (應收費 NTD " + dollar + " 元整) <br />";
 			}
 			$("#data_query_result").html(html);
@@ -1293,16 +1295,16 @@ var xhrQueryTempData = function(e) {
 		}
 		html += "<button class='mt-1' id='temp_clr_button' data-trigger='manual' data-toggle='popover' data-placement='bottom'>清除</button> <strong class='text-danger'>★ 暫存檔刪除後無法復原！！</strong>";
 		showModal(html, year + "-" + code + "-" + number + " 案件暫存檔統計");
-		$("#temp_clr_button").on("click", xhrClearTempData.bind({
-			year: year,
-			code: code,
-			number: number
-		}));
 		setTimeout(function() {
-			showPopper("#temp_clr_button", "請確認後再選擇清除", 10000)
+			$("#temp_clr_button").on("click", xhrClearTempData.bind({
+				year: year,
+				code: code,
+				number: number
+			}));
+			showPopper("#temp_clr_button", "請確認後再選擇清除", 10000);
 		}, 1000);
 	}).catch(function(ex) {
-		console.error("xhrClearTempData parsing failed", ex);
+		console.error("xhrQueryTempData parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 }
@@ -1310,7 +1312,7 @@ var xhrQueryTempData = function(e) {
 var xhrClearTempData = function(e) {
 	var bindArgsObj = this;
 	
-	if(!confirm("確定要清除案件 " + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + " 暫存檔?")) {
+	if(!confirm("確定要清除案件 " + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + " 暫存檔?\n ★ 無法復原，除非你有備份!!")) {
 		return;
 	}
 
@@ -1331,7 +1333,8 @@ var xhrClearTempData = function(e) {
 		return response.json();
 	}).then(function (jsonObj) {
 		console.assert(jsonObj.status == 1, "清除暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
-		showModal("<strong class='text-success'>已全部清除完成</strong><p>"+jsonObj.query_string+"</p>", "清除暫存資料");
+		closeModal();
+		showModal("<strong class='text-success'>已全部清除完成</strong><p>" + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + "</p>", "清除暫存資料");
 	}).catch(function(ex) {
 		console.error("xhrClearTempData parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");

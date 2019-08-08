@@ -38,6 +38,10 @@ function showModal(body, title) {
 	$("#ajax_modal").modal();
 }
 
+function closeModal() {
+	$("#ajax_modal").modal("hide");
+}
+
 var toggle = function(selector) {
 	var el = $(selector);
 	el.attr("disabled") ? el.attr("disabled", false) : el.attr("disabled", true);

@@ -6,6 +6,9 @@ return array(
     //"MOICAT.RINDX" => array("II03", "II04_1", "II04_2"),  // RINDX must be kept
     "MOICAT.RLNID" => array("L03", "L04_1", "L04_2"),
     "MOICAT.RRLSQ" => array("R03", "R04_1", "R04_2"),
+    "MOICAT.RGALL" => array("G03", "G04_1", "G04_2"),
+    "MOICAT.RMNGR" => array("M03", "M04_1", "M04_2"),
+    "MOICAT.RRLSQ" => array("R03", "R04_1", "R04_2"),
     // 地價
     "MOIPRT.PPRCE" => array("MA03", "MA04_1", "MA04_2"),
     "MOIPRT.PGALL" => array("GG03", "GG04_1", "GG04_2"),
