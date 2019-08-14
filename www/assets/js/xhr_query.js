@@ -1343,4 +1343,108 @@ var xhrClearTempData = function(e) {
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 }
+
+var xhrRM30UpdateQuery = function(e) {
+	var year = $("#rm30_update_year").val().replace(/\D/g, "");
+	var code = $("#rm30_update_code").val();
+	var number = $("#rm30_update_num").val().replace(/\D/g, "");
+	// make total number length is 6
+	var offset = 6 - number.length;
+	if (offset < 0) {
+		$("#rm30_update_display").html("<strong class='text-danger'>號的長度不能超過6個數字!</strong>");
+		$("#rm30_update_num").focus();
+		return false;
+	} else if (offset > 0) {
+		for (var i = 0; i < offset; i++) {
+			number = "0" + number;
+		}
+	}
+	
+	$("#rm30_update_num").val(number);
+
+	// prepare post params
+	var id = trim(year + code + number);
+	var body = new FormData();
+	body.append("type", "reg_case");
+	body.append("id", id);
+	
+	setLoadingHTML("#rm30_update_display");
+
+	fetch("query_json_api.php", {
+		method: "POST",
+		//headers: { "Content-Type": "application/json" },
+		body: body
+	}).then(function(response) {
+		return response.json();
+	}).then(function(jsonObj) {
+		showRM30UpdateCaseDetail(jsonObj);
+	}).catch(function(ex) {
+		console.error("xhrRM30UpdateQuery parsing failed", ex);
+		$("#rm30_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
+	});
+}
+
+var showRM30UpdateCaseDetail = function(jsonObj) {
+	if (jsonObj.status == 0) {
+		$("#rm30_update_display").html("<strong class='text-danger'>" + jsonObj.message + "</strong>");
+	} else if (jsonObj.status == -1) {
+		throw new Error("查詢失敗：" + jsonObj.message);
+	}
+	var html = "辦理情形：<select id='rm30_update_select'>";
+	html += '<option value="A">A: 初審</option>';
+	html += '<option value="B">B: 複審</option>';
+	html += '<option value="H">H: 公告</option>';
+	html += '<option value="I">I: 補正</option>';
+	html += '<option value="R">I: 登錄</option>';
+	html += '<option value="C">C: 校對</option>';
+	html += '<option value="U">U: 異動完成</option>';
+	html += '<option value="F">F: 結案</option>';
+	html += '<option value="X">X: 補正初核</option>';
+	html += '<option value="Y">Y: 駁回初核</option>';
+	html += '<option value="J">J: 撤回初核</option>';
+	html += '<option value="K">K: 撤回</option>';
+	html += '<option value="Z">Z: 歸檔</option>';
+	html += '<option value="N">N: 駁回</option>';
+	html += '<option value="L">L: 公告初核</option>';
+	html += '<option value="E">E: 請示</option>';
+	html += '<option value="D">D: 展期</option>';
+	html += "</select>";
+	if (isEmpty(jsonObj.raw["RM31"])) {
+		html += " <button id='rm30_update_button'>更新</button><br/>";
+	} else {
+		html += " <strong class='text-danger'>本案已結案，無法變更狀態！</strong>";
+	}
+	html += "<p>" + jsonObj.tr_html + "</p>";
+	$("#rm30_update_display").html(html);
+	$("#rm30_update_select").val(jsonObj.raw["RM30"]);
+
+	// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
+	$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
+	$(".reg_case_id").attr("title", "click me for more info!");
+	// update button xhr event
+	$("#rm30_update_button").on("click", function(e) {
+		var selected = $("#rm30_update_select").val();
+		if (selected != jsonObj.raw["RM30"] && confirm("確認更新狀態？")) {
+			$(e.target).remove();
+			var body = new FormData();
+			body.append("type", "reg_upd_rm30");
+			body.append("rm01", jsonObj.raw["RM01"]);
+			body.append("rm02", jsonObj.raw["RM02"]);
+			body.append("rm03", jsonObj.raw["RM03"]);
+			body.append("rm30", selected);
+			fetch("query_json_api.php", {
+				method: "POST",
+				body: body
+			}).then(function(response) {
+				return response.json();
+			}).then(function(jsonObj) {
+				console.assert(jsonObj.status == 1, "更新辦理情形回傳狀態碼有問題【" + jsonObj.status + "】");
+				showModal("<strong class='text-success'>辦理情形狀態更新完成</strong><p>" + jsonObj.query_string + "</p>", "更新辦理情形");
+			}).catch(function(ex) {
+				console.error("xhrRM30UpdateQuery parsing failed", ex);
+				$("#rm30_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
+			});
+		}
+	});
+}
 //]]>

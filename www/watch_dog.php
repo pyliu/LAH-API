@@ -106,9 +106,30 @@ blockquote img {
         <button id="prereg_quote_button">備註</button>
         <blockquote id="prereg_quote" class="hide">
           <h5><span class="text-danger">※</span>注意：中壢所規定超過30件案件才能執行此功能，並於完成時須馬上關掉以免其他案件誤登。</h5>
+          <h5><span class="text-danger">※</span>注意：准登完後該案件須手動於資料庫中調整辦理情形（RM30）為「公告」（H）。</h5>
           <img src="assets/howto/登記原因先行准登設定.jpg" />
         </blockquote>
         <div id="prereg_query_display"></div>
+      </fieldset>
+      <fieldset>
+        <legend>調整案件辦理情形</legend>
+        <select id="rm30_update_year" name="_update_year">
+          <option selected>108</option>
+        </select>
+        年
+        <?php echo getCodeSelectHTML("rm30_update_code"); ?>
+        字
+        <input type="text" id="rm30_update_num" name="rm30_update_num" data-toggle='tooltip' title='輸入案件號' />號
+
+        <button id="rm30_update_query">取得案件資料</button>
+        <button id="rm30_update_quote_button">備註</button>
+        <blockquote id="rm30_update_quote" class="hide">
+          <ul>
+            <li>使用情境1：先行准登後案件須回復至公告</li>
+            <li>使用情境2：案件卡住需退回初審</li>
+          </ul>
+        </blockquote>
+        <div id="rm30_update_display"></div>
       </fieldset>
       <fieldset>
         <legend>規費資料集修正<small>(EXPAA)</small></legend>
@@ -348,6 +369,17 @@ blockquote img {
         number_id: "temp_clr_num",
         display_id: "temp_clr_display"
       }));
+
+      // RM30 Update
+      $("#rm30_update_code").on("change", xhrGetCaseLatestNum.bind({
+        code_id: "rm30_update_code",
+        year_id: "rm30_update_year",
+        number_id: "rm30_update_num",
+        display_id: "rm30_update_display"
+      }));
+      $("#rm30_update_query").on("click", xhrRM30UpdateQuery);
+      bindPressEnterEvent("#rm30_update_num", xhrRM30UpdateQuery);
+
     });
   </script>
 </body>

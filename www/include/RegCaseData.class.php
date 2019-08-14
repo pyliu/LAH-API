@@ -108,7 +108,7 @@ class RegCaseData {
             "</tr></thead>\n";
         $str .= "<tbody>\n";
         $str .= "<tr class='".$this->getStatusCss()."'>\n";
-        $str .= "<td class='text-center px-3 ".($this->isDanger() ? "text-danger" : "")."'>".$this->getReceiveSerial()."</td>\n".
+        $str .= "<td class='text-center px-3 ".($this->isDanger() ? "text-danger" : "")." reg_case_id'>".$this->getReceiveSerial()."</td>\n".
             "<td data-toggle='tooltip'>".$this->getReceiveDate()."</td>\n".
             "<td data-toggle='tooltip' data-placement='right' title='限辦期限：".$this->getDueDate()."'>".$this->getDueHrs()."</td>\n".
             "<td data-toggle='tooltip'>".$this->getStatus()."</td>\n".
