@@ -171,7 +171,7 @@ class RegCaseData {
         if ($this->isDanger()) {
 			return $this->row["RM01"]."年 ".$this->row["RM02"]." 第 ".$this->row["RM03"]." 號";
         }
-        return "<strong>".$this->row["RM01"]."</strong>年 ".REG_WORD[$this->row["RM02"]]."(<strong>".$this->row["RM02"]."</strong>)字 第 <strong>".$this->row["RM03"]."</strong> 號";
+        return $this->row["RM01"]."年 ".REG_WORD[$this->row["RM02"]]."(".$this->row["RM02"].")字 第 ".$this->row["RM03"]." 號";
     }
 	
     public function getReceiveDate() {
