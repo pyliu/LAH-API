@@ -146,6 +146,19 @@ fieldset fieldset legend {
         <div id="id_query_cmsms_result"></div>
       </fieldset>
       <fieldset>
+        <legend>使用者對應表</legend>
+        <div class="float-clear"><input type="text" id="filter_input" name="filter_input" value="HB" /> <span id="filter_info" class="text-info">
+        <?php
+          echo count($operators); 
+        ?>筆</span></div>
+        <?php
+          foreach ($operators as $id => $name) {
+            //echo $id.": ".($name == false ? "無此人!" : $name)."</br>";
+            echo "<div class='float-left m-2 user_tag' style='width: 200px'>".$id.": ".($name == false ? "無此人!" : $name)."</div>";
+          }
+		    ?>
+      </fieldset>
+      <fieldset>
         <legend>報表匯出</legend>
         <label for="preload_sql_select">預載查詢：</label>
         <select id="preload_sql_select">
@@ -225,19 +238,6 @@ fieldset fieldset legend {
             
           登記子系統/列印/清冊報表/土地建物地籍整理清冊【土地、建物各產一次存PDF，請至地政系統WEB版產出】 <br/>
         </blockquote>
-      </fieldset>
-      <fieldset>
-        <legend>使用者對應表</legend>
-        <div class="float-clear"><input type="text" id="filter_input" name="filter_input" value="HB" /> <span id="filter_info" class="text-info">
-        <?php
-          echo count($operators); 
-        ?>筆</span></div>
-        <?php
-          foreach ($operators as $id => $name) {
-            //echo $id.": ".($name == false ? "無此人!" : $name)."</br>";
-            echo "<div class='float-left m-2 user_tag' style='width: 200px'>".$id.": ".($name == false ? "無此人!" : $name)."</div>";
-          }
-		    ?>
       </fieldset>
     </div>
   </section><!-- /section -->

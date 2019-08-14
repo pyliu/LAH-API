@@ -1218,6 +1218,9 @@ var xhrUpdateAnnouncementData = function(e) {
 }
 
 var xhrClearAnnouncementFlag = function(e) {
+	if (!confirm("請確認要是否要清除所有登記原因的准登旗標？")) {
+		return;
+	}
 	var form_body = new FormData();
 	form_body.append("type", "clear_announcement_flag");
 	fetch("query_json_api.php", {
