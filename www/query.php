@@ -333,7 +333,6 @@ fieldset fieldset legend {
         if (val == prevVal) {
           return;
         }
-        var keyword = new RegExp(val, "ig");
         $(".user_tag").unmark(val, {
           "className": "highlight"
         });
@@ -342,12 +341,14 @@ fieldset fieldset legend {
           $("#filter_info").text("<?php echo count($operators); ?>筆");
         } else {
           $(".user_tag").each(function(idx, div) {
+            var keyword = new RegExp(val, "ig");
             keyword.test($(div).text()) ? $(div).removeClass("hide") : $(div).addClass("hide");
-          }).mark(val, {
-            "element" : "strong",
-            "className": "highlight"
+            $(div).mark(val, {
+              "element" : "strong",
+              "className": "highlight"
+            });
           });
-          $("#filter_info").text($(".user_tag").length - $(".user_tag.hide").length + "筆");
+          $("#filter_info").text((<?php echo count($operators); ?> - $(".user_tag.hide").length) + "筆");
         }
         prevVal = val;
       };
