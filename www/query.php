@@ -121,124 +121,136 @@ fieldset fieldset legend {
         </blockquote>
         <div id="data_query_result"></div>
       </fieldset>
-      <fieldset>
-        <legend>法院來函查統編</legend>
-        <input id="id_query_text" name="id_query_text" type="text" class="id_query_grp" data-toggle='tooltip' title='輸入統編' />
-        <button id="id_query_button" class="id_query_grp">查詢</button>
-        <button id="id_quote_button">備註</button>
-        <blockquote id="id_sql" class="hide">
-          -- 【法院來函查統編】MOICAS_CRSMS 土地登記案件查詢-權利人+義務人+代理人+複代 <br/>
-          SELECT t.* <br/>
-            FROM MOICAS.CRSMS t <br/>
-          WHERE t.RM18 = 'H221350201' <br/>
-              OR t.RM21 = 'H221350201' <br/>
-              OR t.RM24 = 'H221350201' <br/>
-              OR t.RM25 = 'H221350201'; <br/>
-          <br/>
-          -- 【法院來函查統編】MOICAS_CMSMS 測量案件資料查詢-申請人+代理人+複代 <br/>
-          SELECT t.* <br/>
-            FROM MOICAS.CMSMS t <br/>
-          WHERE t.MM13 = 'H221350201' <br/>
-              OR t.MM17_1 = 'H221350201' <br/>
-              OR t.MM17_2 = 'H221350201';
-        </blockquote>
-        <div id="id_query_crsms_result"></div>
-        <div id="id_query_cmsms_result"></div>
-      </fieldset>
-      <fieldset>
-        <legend>使用者對應表</legend>
-        <div class="float-clear"><input type="text" id="filter_input" name="filter_input" value="HB" /> <span id="filter_info" class="text-info">
-        <?php
-          echo count($operators); 
-        ?>筆</span></div>
-        <?php
-          foreach ($operators as $id => $name) {
-            //echo $id.": ".($name == false ? "無此人!" : $name)."</br>";
-            echo "<div class='float-left m-2 user_tag' style='width: 200px'>".$id.": ".($name == false ? "無此人!" : $name)."</div>";
-          }
-		    ?>
-      </fieldset>
-      <fieldset>
-        <legend>報表匯出</legend>
-        <label for="preload_sql_select">預載查詢：</label>
-        <select id="preload_sql_select">
-          <optgroup label="==== 所內登記案件統計 ====">
-            <option value="01_reg_case_monthly.sql">每月案件統計</option>
-            <option value="11_reg_reason_query_monthly.sql">每月案件 by 登記原因</option>
-            <option value="02_reg_remote_case_monthly.sql">每月遠途先審案件</option>
-            <option value="03_reg_other_office_case_monthly.sql">每月跨所案件【本所代收】</option>
-            <option value="04_reg_other_office_case_2_monthly.sql">每月跨所案件【非本所收件】</option>
-            <option value="09_reg_other_office_case_3_monthly.sql">每月跨所子號案件【本所代收】</option>
-            <option value="10_reg_reason_stats_monthly.sql">每月跨所各登記原因案件統計 by 收件所</option>
-            <option value="07_reg_foreign_case_monthly.sql">每月權利人＆義務人為外國人案件</option>
-            <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
-          </optgroup>
-          <optgroup label="==== 所內其他統計 ====">
-            <option value="14_sur_rain_delay_case.sql">因雨延期測量案件數</option>
-            <option value="05_adm_area_size.sql">段小段面積統計</option>
-            <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
-            <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
-            <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
-            <option value="15_reg_land_stats.sql">某段之土地所有權人清冊資料</option>
-          </optgroup>
-          <optgroup label="==== 地籍資料 ====" class="bg-light">
-            <option value="txt_AI00301.sql">AI00301 - 土地標示部資料</option>
-            <option value="txt_AI00401.sql">AI00401 - 土地所有權部資料</option>
-            <option value="txt_AI00601_B.sql">AI00601 - 土地管理者資料</option>
-            <option value="txt_AI00601_E.sql">AI00601 - 建物管理者資料</option>
-            <option value="txt_AI00701.sql">AI00701 - 建物標示部資料</option>
-            <option value="txt_AI00801.sql">AI00801 - 基地坐落資料</option>
-            <option value="txt_AI00901.sql">AI00901 - 建物分層及附屬資料</option>
-            <option value="txt_AI01001.sql">AI01001 - 主建物與共同使用部分資料</option>
-            <option value="txt_AI01101.sql">AI01101 - 建物所有權部資料</option>
-            <option value="txt_AI02901_B.sql">AI02901 - 土地各部別之其他登記事項列印</option>
-            <option value="txt_AI02901_E.sql">AI02901 - 建物各部別之其他登記事項列印</option>
-          </optgroup>
-        </select>
-        <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">Input SELECT SQL here ... </textarea>
-        <button id="sql_export_button">匯出</button>
-        <!--
-        <button id="sql_csv_text_button">匯出CSV</button>
-        <button id="sql_txt_text_button">匯出TXT</button>
-        -->
-        <button id="sql_csv_quote_button">備註</button>
-        <blockquote id="sql_report_blockquote" class="hide">
-          <p>輸入SELECT SQL指令匯出查詢結果。</p>
-          <img src="assets/img/csv_export_method.jpg" class="w-auto" />
-        </blockquote>
-      </fieldset>
-      <fieldset>
-        <legend>給局端地籍資料TXT檔</legend>
-        <button id="export_txt_button">未實作 ... </button>
-        <button id="export_txt_quote_button">備註</button>
-        <blockquote id="export_txt_blockquote" class="hide">
-          產生輸入段代碼之打包TXT檔案。 <br/> <br/>
-          系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
-          　AI001-10 <br/>
-          　　AI00301 - 土地標示部 <br/>
-          　　AI00401 - 土地所有權部 <br/>
-          　　AI00601 - 管理者資料【土地、建物各做一次】 <br/>
-          　　AI00701 - 建物標示部 <br/>
-          　　AI00801 - 基地坐落 <br/>
-          　　AI00901 - 建物分層及附屬 <br/>
-          　　AI01001 - 主建物與共同使用部分 <br/>
-          　AI011-20 <br/>
-          　　AI01101 - 建物所有權部 <br/>
-          　　AI01901 - 土地各部別 <br/>
-          　AI021-40 <br/>
-          　　AI02101 - 土地他項權利部 <br/>
-          　　AI02201 - 建物他項權利部 <br/>
-          　　AI02901 - 各部別之其他登記事項【土地、建物各做一次】 <br/><br/>
+      <div class="row">
+        <div class="col-6">
+          <fieldset>
+            <legend>法院來函查統編</legend>
+            <input id="id_query_text" name="id_query_text" type="text" class="id_query_grp" data-toggle='tooltip' title='輸入統編' />
+            <button id="id_query_button" class="id_query_grp">查詢</button>
+            <button id="id_quote_button">備註</button>
+            <blockquote id="id_sql" class="hide">
+              -- 【法院來函查統編】MOICAS_CRSMS 土地登記案件查詢-權利人+義務人+代理人+複代 <br/>
+              SELECT t.* <br/>
+                FROM MOICAS.CRSMS t <br/>
+              WHERE t.RM18 = 'H221350201' <br/>
+                  OR t.RM21 = 'H221350201' <br/>
+                  OR t.RM24 = 'H221350201' <br/>
+                  OR t.RM25 = 'H221350201'; <br/>
+              <br/>
+              -- 【法院來函查統編】MOICAS_CMSMS 測量案件資料查詢-申請人+代理人+複代 <br/>
+              SELECT t.* <br/>
+                FROM MOICAS.CMSMS t <br/>
+              WHERE t.MM13 = 'H221350201' <br/>
+                  OR t.MM17_1 = 'H221350201' <br/>
+                  OR t.MM17_2 = 'H221350201';
+            </blockquote>
+            <div id="id_query_crsms_result"></div>
+            <div id="id_query_cmsms_result"></div>
+          </fieldset>
+        </div>
+        <div class="col-6">
+          <fieldset>
+            <legend>使用者對應表</legend>
+            <div class="float-clear"><input type="text" id="filter_input" name="filter_input" value="HB" /> <span id="filter_info" class="text-info">
+            <?php
+              echo count($operators); 
+            ?>筆</span></div>
+            <?php
+              foreach ($operators as $id => $name) {
+                //echo $id.": ".($name == false ? "無此人!" : $name)."</br>";
+                echo "<div class='float-left m-2 user_tag' style='width: 200px'>".$id.": ".($name == false ? "無此人!" : $name)."</div>";
+              }
+            ?>
+          </fieldset>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          <fieldset>
+            <legend>報表匯出</legend>
+            <label for="preload_sql_select">預載查詢：</label>
+            <select id="preload_sql_select">
+              <optgroup label="==== 所內登記案件統計 ====">
+                <option value="01_reg_case_monthly.sql">每月案件統計</option>
+                <option value="11_reg_reason_query_monthly.sql">每月案件 by 登記原因</option>
+                <option value="02_reg_remote_case_monthly.sql">每月遠途先審案件</option>
+                <option value="03_reg_other_office_case_monthly.sql">每月跨所案件【本所代收】</option>
+                <option value="04_reg_other_office_case_2_monthly.sql">每月跨所案件【非本所收件】</option>
+                <option value="09_reg_other_office_case_3_monthly.sql">每月跨所子號案件【本所代收】</option>
+                <option value="10_reg_reason_stats_monthly.sql">每月跨所各登記原因案件統計 by 收件所</option>
+                <option value="07_reg_foreign_case_monthly.sql">每月權利人＆義務人為外國人案件</option>
+                <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
+              </optgroup>
+              <optgroup label="==== 所內其他統計 ====">
+                <option value="14_sur_rain_delay_case.sql">因雨延期測量案件數</option>
+                <option value="05_adm_area_size.sql">段小段面積統計</option>
+                <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
+                <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
+                <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
+                <option value="15_reg_land_stats.sql">某段之土地所有權人清冊資料</option>
+              </optgroup>
+              <optgroup label="==== 地籍資料 ====" class="bg-light">
+                <option value="txt_AI00301.sql">AI00301 - 土地標示部資料</option>
+                <option value="txt_AI00401.sql">AI00401 - 土地所有權部資料</option>
+                <option value="txt_AI00601_B.sql">AI00601 - 土地管理者資料</option>
+                <option value="txt_AI00601_E.sql">AI00601 - 建物管理者資料</option>
+                <option value="txt_AI00701.sql">AI00701 - 建物標示部資料</option>
+                <option value="txt_AI00801.sql">AI00801 - 基地坐落資料</option>
+                <option value="txt_AI00901.sql">AI00901 - 建物分層及附屬資料</option>
+                <option value="txt_AI01001.sql">AI01001 - 主建物與共同使用部分資料</option>
+                <option value="txt_AI01101.sql">AI01101 - 建物所有權部資料</option>
+                <option value="txt_AI02901_B.sql">AI02901 - 土地各部別之其他登記事項列印</option>
+                <option value="txt_AI02901_E.sql">AI02901 - 建物各部別之其他登記事項列印</option>
+              </optgroup>
+            </select>
+            <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">Input SELECT SQL here ... </textarea>
+            <button id="sql_export_button">匯出</button>
+            <!--
+            <button id="sql_csv_text_button">匯出CSV</button>
+            <button id="sql_txt_text_button">匯出TXT</button>
+            -->
+            <button id="sql_csv_quote_button">備註</button>
+            <blockquote id="sql_report_blockquote" class="hide">
+              <p>輸入SELECT SQL指令匯出查詢結果。</p>
+              <img src="assets/img/csv_export_method.jpg" class="w-auto" />
+            </blockquote>
+          </fieldset>
+        </div>
+        <div class="col-6">
+          <fieldset>
+            <legend>給局端地籍資料TXT檔</legend>
+            <button id="export_txt_button">未實作 ... </button>
+            <button id="export_txt_quote_button">備註</button>
+            <blockquote id="export_txt_blockquote" class="hide">
+              產生輸入段代碼之打包TXT檔案。 <br/> <br/>
+              系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
+              　AI001-10 <br/>
+              　　AI00301 - 土地標示部 <br/>
+              　　AI00401 - 土地所有權部 <br/>
+              　　AI00601 - 管理者資料【土地、建物各做一次】 <br/>
+              　　AI00701 - 建物標示部 <br/>
+              　　AI00801 - 基地坐落 <br/>
+              　　AI00901 - 建物分層及附屬 <br/>
+              　　AI01001 - 主建物與共同使用部分 <br/>
+              　AI011-20 <br/>
+              　　AI01101 - 建物所有權部 <br/>
+              　　AI01901 - 土地各部別 <br/>
+              　AI021-40 <br/>
+              　　AI02101 - 土地他項權利部 <br/>
+              　　AI02201 - 建物他項權利部 <br/>
+              　　AI02901 - 各部別之其他登記事項【土地、建物各做一次】 <br/><br/>
 
-          測量子系統/測量資料管理/資料輸出入 【請至地政系統WEB版產出】<br/>
-          　地籍圖轉出(數值地籍) <br/>
-          　　* 輸出DXF圖檔【含控制點】及 NEC重測輸出檔 <br/>
-          　地籍圖轉出(圖解數化) <br/>
-          　　* 同上兩種類皆輸出，並將【分幅管理者先接合】下選項皆勾選 <br/><br/>
-            
-          登記子系統/列印/清冊報表/土地建物地籍整理清冊【土地、建物各產一次存PDF，請至地政系統WEB版產出】 <br/>
-        </blockquote>
-      </fieldset>
+              測量子系統/測量資料管理/資料輸出入 【請至地政系統WEB版產出】<br/>
+              　地籍圖轉出(數值地籍) <br/>
+              　　* 輸出DXF圖檔【含控制點】及 NEC重測輸出檔 <br/>
+              　地籍圖轉出(圖解數化) <br/>
+              　　* 同上兩種類皆輸出，並將【分幅管理者先接合】下選項皆勾選 <br/><br/>
+                
+              登記子系統/列印/清冊報表/土地建物地籍整理清冊【土地、建物各產一次存PDF，請至地政系統WEB版產出】 <br/>
+            </blockquote>
+          </fieldset>
+        </div>
+      </div>
     </div>
   </section><!-- /section -->
   <small id="copyright" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded">
