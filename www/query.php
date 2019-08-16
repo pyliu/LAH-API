@@ -1,8 +1,3 @@
-<?php
-require_once("./include/init.php");
-$operators = GetDBUserMapping();
-ksort($operators);
-?>
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -10,273 +5,485 @@ ksort($operators);
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="For tracking taoyuan land registration cases">
 <meta name="author" content="LIU, PANG-YU">
-<title>桃園市中壢地政事務所</title>
+<title>登記案件繼承審查檢核表(BETA)</title>
 
 <!-- Bootstrap core CSS -->
 <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-
 <!-- Custom styles for this template -->
 <link href="assets/css/starter-template.css" rel="stylesheet">
 <link href="assets/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
-<link href="assets/css/basic.css" rel="stylesheet">
+<link href="assets/css/bootstrap-treeview.min.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
-<style type="text/css">
-#contact a:link, a:visited, a:hover {
-	color: gray;
-}
-
-#dropdown01 img {
-  width: 32px;
-  height: auto;
-  vertical-align: middle;
-}
-
-fieldset fieldset {
-  border: 2px solid #04c;
-  border-bottom: 0;
-  border-left: 0;
-  border-right: 0;
-  border-radius: 0;
-}
-
-fieldset fieldset legend {
-  font-size: 18px;
-}
-</style>
 </head>
 
-<body>
+<body id="body" class="bg-light-blue">
 
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <img src="assets/img/tao.png" style="vertical-align: middle;" />　
-    <a class="navbar-brand" href="query.php">地政輔助系統 <span class="small">(α)</span></a>
+  <nav class="navbar navbar-expand-md navbar-dark bg-zhongli fixed-top">
+    <!--<img src="assets/img/tao.png" style="vertical-align: middle;" />　-->
+    <a class="navbar-brand" href="http://www.zhongli-land.tycg.gov.tw/" target="_blank"><img src="assets/img/zhongli_logo.png" width="85%" height="auto" /></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item mt-3">
-          <a class="nav-link" href="/index.php">登記案件追蹤</a>
+      <ul class="navbar-nav ml-auto">
+        <!--
+        <li class="nav-item active">
+          <a class="nav-link" href="/">登記案件追蹤 <span class="sr-only">(current)</span></a>
         </li>
-		<li class="nav-item mt-3 active">
-          <a class="nav-link" href="/query.php">業務小幫手</a>
+        <li class="nav-item">
+          <a class="nav-link" href="http://www.taoyuan-land.tycg.gov.tw" target="_blank">地所首頁</a>
         </li>
-        <li class="nav-item mt-3">
-          <a class="nav-link" href="/watch_dog.php">地政看門狗</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle hamburger" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="assets/img/menu.png" /></a>
-          <div class="dropdown-menu" aria-labelledby="dropdown01">
-            <a class="dropdown-item" href="http://220.1.35.87/" target="_blank">內部知識網</a>
+        -->
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle hamburger" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="assets/img/menu.png" width="32" height="auto" /></a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown01">
+            <a class="dropdown-item" href="index.html" target="_self">繼承輕鬆審系統</span></a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="http://www.zhongli-land.tycg.gov.tw/" target="_blank">地所首頁</a>
-            <a class="dropdown-item" href="http://webitr.tycg.gov.tw:8080/WebITR/" target="_blank">差勤系統</a>
-            <a class="dropdown-item" href="/index.html" target="_blank">繼承案件輕鬆審<span class="text-mute small">(beta)</span></a>
-            <a class="dropdown-item" href="http://tycgcloud.tycg.gov.tw/" target="_blank">公務雲</a>
-            <a class="dropdown-item" href="http://220.1.35.24/Web/ap06.asp" target="_blank">分機查詢</a>
-            <a class="dropdown-item" href="http://220.1.35.42:9080/SMS98/" target="_blank">案件辦理情形通知系統（簡訊＆EMAIL）</a>
-            <a class="dropdown-item" href="/shortcuts.html" target="_blank">各類WEB版應用黃頁</a>
+			<a class="dropdown-item" href="shortcuts.html">各WEB系統黃頁</a>
+            <a class="dropdown-item" href="https://law.moj.gov.tw/Law/LawSearchResult.aspx?ty=LAW&kw=%E7%B9%BC%E6%89%BF" target="_blank">繼承法規查詢(需外網)</a>
           </div>
         </li>
       </ul>
     </div>
   </nav>
-  <section id="main_content_section" class="mb-5">
-    <div class="container-fluid">
-      <fieldset>
-        <legend>登記案件查詢</legend>
-        <select id="query_year" name="query_year">
-          <option>105</option>
-          <option>106</option>
-          <option>107</option>
-          <option selected>108</option>
-        </select>
-        年
-        <?php echo getCodeSelectHTML("query_code"); ?>
-        字
-        <input type="text" id="query_num" name="query_num" data-toggle='tooltip' title='輸入案件號' />號
-        <button id="query_button">登記收件資料查詢</button>
-        <button id="query_prc_button">地價收件資料查詢</button>
-        <div id="query_display"></div>
-      </fieldset>
-      <fieldset>
-        <legend>轄區各段土地標示部筆數＆面積查詢</legend>
-        <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
-        <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
-        <input id="data_query_text" name="data_query_text" type="text" data-toggle='tooltip' title='輸入關鍵字或是段代碼' />
-        <button id="data_query_button">查詢</button>
-        <button id="data_quote_button">備註</button>
-        <blockquote id="data_blockquote" class="hide">
-          -- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>
-          SELECT t.AA48 as "段代碼", <br/>
-              m.KCNT as "段名稱", <br/>
-              SUM(t.AA10) as "面積", <br/>
-              COUNT(t.AA10) as "筆數" <br/>
-          FROM MOICAD.RALID t <br/>
-          LEFT JOIN MOIADM.RKEYN m ON (m.KCDE_1 = '48' and m.KCDE_2 = t.AA48) <br/>
-          --WHERE t.AA48 = '%【輸入數字】'<br/>
-          --WHERE m.KCNT = '%【輸入文字】%'<br/>
-          GROUP BY t.AA48, m.KCNT;
-        </blockquote>
-        <div id="data_query_result"></div>
-      </fieldset>
+  <section class="more-gap">
+    <div class="container-fluid container-custom-width">
       <div class="row">
-        <div class="col-6">
-          <fieldset>
-            <legend>法院來函查統編</legend>
-            <input id="id_query_text" name="id_query_text" type="text" class="id_query_grp" data-toggle='tooltip' title='輸入統編' />
-            <button id="id_query_button" class="id_query_grp">查詢</button>
-            <button id="id_quote_button">備註</button>
-            <blockquote id="id_sql" class="hide">
-              -- 【法院來函查統編】MOICAS_CRSMS 土地登記案件查詢-權利人+義務人+代理人+複代 <br/>
-              SELECT t.* <br/>
-                FROM MOICAS.CRSMS t <br/>
-              WHERE t.RM18 = 'H221350201' <br/>
-                  OR t.RM21 = 'H221350201' <br/>
-                  OR t.RM24 = 'H221350201' <br/>
-                  OR t.RM25 = 'H221350201'; <br/>
-              <br/>
-              -- 【法院來函查統編】MOICAS_CMSMS 測量案件資料查詢-申請人+代理人+複代 <br/>
-              SELECT t.* <br/>
-                FROM MOICAS.CMSMS t <br/>
-              WHERE t.MM13 = 'H221350201' <br/>
-                  OR t.MM17_1 = 'H221350201' <br/>
-                  OR t.MM17_2 = 'H221350201';
-            </blockquote>
-            <div id="id_query_crsms_result"></div>
-            <div id="id_query_cmsms_result"></div>
-          </fieldset>
+        <div class="col" id="preview">
+          <!-- preview selected result here -->
+          <div id="tree"></div>
         </div>
-        <div class="col-6">
-          <fieldset>
-            <legend>使用者對應表</legend>
-            <div class="float-clear"><input type="text" id="filter_input" name="filter_input" value="HB" /> <span id="filter_info" class="text-info">
-            <?php
-              echo count($operators); 
-            ?>筆</span></div>
-            <?php
-              foreach ($operators as $id => $name) {
-                //echo $id.": ".($name == false ? "無此人!" : $name)."</br>";
-                echo "<div class='float-left m-2 user_tag' style='width: 200px'>".$id.": ".($name == false ? "無此人!" : $name)."</div>";
-              }
-            ?>
-          </fieldset>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-6">
-          <fieldset>
-            <legend>報表匯出</legend>
-            <label for="preload_sql_select">預載查詢：</label>
-            <select id="preload_sql_select">
-              <optgroup label="==== 所內登記案件統計 ====">
-                <option value="01_reg_case_monthly.sql">每月案件統計</option>
-                <option value="11_reg_reason_query_monthly.sql">每月案件 by 登記原因</option>
-                <option value="02_reg_remote_case_monthly.sql">每月遠途先審案件</option>
-                <option value="03_reg_other_office_case_monthly.sql">每月跨所案件【本所代收】</option>
-                <option value="04_reg_other_office_case_2_monthly.sql">每月跨所案件【非本所收件】</option>
-                <option value="09_reg_other_office_case_3_monthly.sql">每月跨所子號案件【本所代收】</option>
-                <option value="10_reg_reason_stats_monthly.sql">每月跨所各登記原因案件統計 by 收件所</option>
-                <option value="07_reg_foreign_case_monthly.sql">每月權利人＆義務人為外國人案件</option>
-                <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
-              </optgroup>
-              <optgroup label="==== 所內其他統計 ====">
-                <option value="14_sur_rain_delay_case.sql">因雨延期測量案件數</option>
-                <option value="05_adm_area_size.sql">段小段面積統計</option>
-                <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
-                <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
-                <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
-                <option value="15_reg_land_stats.sql">某段之土地所有權人清冊資料</option>
-              </optgroup>
-              <optgroup label="==== 地籍資料 ====" class="bg-light">
-                <option value="txt_AI00301.sql">AI00301 - 土地標示部資料</option>
-                <option value="txt_AI00401.sql">AI00401 - 土地所有權部資料</option>
-                <option value="txt_AI00601_B.sql">AI00601 - 土地管理者資料</option>
-                <option value="txt_AI00601_E.sql">AI00601 - 建物管理者資料</option>
-                <option value="txt_AI00701.sql">AI00701 - 建物標示部資料</option>
-                <option value="txt_AI00801.sql">AI00801 - 基地坐落資料</option>
-                <option value="txt_AI00901.sql">AI00901 - 建物分層及附屬資料</option>
-                <option value="txt_AI01001.sql">AI01001 - 主建物與共同使用部分資料</option>
-                <option value="txt_AI01101.sql">AI01101 - 建物所有權部資料</option>
-                <option value="txt_AI02901_B.sql">AI02901 - 土地各部別之其他登記事項列印</option>
-                <option value="txt_AI02901_E.sql">AI02901 - 建物各部別之其他登記事項列印</option>
-              </optgroup>
-            </select>
-            <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">Input SELECT SQL here ... </textarea>
-            <button id="sql_export_button">匯出</button>
-            <!--
-            <button id="sql_csv_text_button">匯出CSV</button>
-            <button id="sql_txt_text_button">匯出TXT</button>
-            -->
-            <button id="sql_csv_quote_button">備註</button>
-            <blockquote id="sql_report_blockquote" class="hide">
-              <p>輸入SELECT SQL指令匯出查詢結果。</p>
-              <img src="assets/img/csv_export_method.jpg" class="w-auto" />
-            </blockquote>
-          </fieldset>
-        </div>
-        <div class="col-6">
-          <fieldset>
-            <legend>給局端地籍資料TXT檔</legend>
-            <button id="export_txt_button">未實作 ... </button>
-            <button id="export_txt_quote_button">備註</button>
-            <blockquote id="export_txt_blockquote" class="hide">
-              產生輸入段代碼之打包TXT檔案。 <br/> <br/>
-              系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
-              　AI001-10 <br/>
-              　　AI00301 - 土地標示部 <br/>
-              　　AI00401 - 土地所有權部 <br/>
-              　　AI00601 - 管理者資料【土地、建物各做一次】 <br/>
-              　　AI00701 - 建物標示部 <br/>
-              　　AI00801 - 基地坐落 <br/>
-              　　AI00901 - 建物分層及附屬 <br/>
-              　　AI01001 - 主建物與共同使用部分 <br/>
-              　AI011-20 <br/>
-              　　AI01101 - 建物所有權部 <br/>
-              　　AI01901 - 土地各部別 <br/>
-              　AI021-40 <br/>
-              　　AI02101 - 土地他項權利部 <br/>
-              　　AI02201 - 建物他項權利部 <br/>
-              　　AI02901 - 各部別之其他登記事項【土地、建物各做一次】 <br/><br/>
+        <div class="col-8 text-center">
+          <form id="inheritance_form" name="inheritance_form" action="">
 
-              測量子系統/測量資料管理/資料輸出入 【請至地政系統WEB版產出】<br/>
-              　地籍圖轉出(數值地籍) <br/>
-              　　* 輸出DXF圖檔【含控制點】及 NEC重測輸出檔 <br/>
-              　地籍圖轉出(圖解數化) <br/>
-              　　* 同上兩種類皆輸出，並將【分幅管理者先接合】下選項皆勾選 <br/><br/>
-                
-              登記子系統/列印/清冊報表/土地建物地籍整理清冊【土地、建物各產一次存PDF，請至地政系統WEB版產出】 <br/>
-            </blockquote>
-          </fieldset>
+            <div id="no0_btn_grp" class="btn_grp">
+              <button id="no0_btn_next" class="btn btn-outline-light" title="下一步"><img src="assets/img/right.png" /></button>
+            </div>
+            
+            <fieldset class="layer1" id="layer1_input_case">
+              <legend><span class="text-danger">*</span>收件資訊</legend>
+              <label for="serial">收件年期字號：</label>
+              <input type="text" id="serial" name="serial" value="" data-trigger="focus" data-toggle="popover" data-content="如：107-HA81-012345" data-placement="bottom" />
+              <label for="heir">被繼承人姓名：</label>
+              <input type="text" id="heir" name="heir" value="" data-trigger="focus" data-toggle="popover" data-content="繼承人姓名不能空值！" />
+            </fieldset>
+            
+            <div id="no1_btn_grp" class="hide btn_grp">
+              <button id="no1_btn_prev" class="btn btn-outline-light" title="上一步"><img src="assets/img/left.png" /></button>
+              <button id="no1_btn_next" class="btn btn-outline-light" title="下一步"><img src="assets/img/right.png" /></button>
+            </div>
+
+            <fieldset class="layer1 hide" id="layer1_select_type">
+              <legend id="heir_reg_type_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇繼承登記類型！" data-placement="right"><span class="text-danger">*</span>繼承登記類型</legend>
+              <div class="heir_reg_type">
+				<div class="fl">
+					<label for="type_0_law_heir"><input type="radio" id="type_0_law_heir" name="heir_reg_type" value="type_0_law_heir" /> 繼承</label>
+				</div>
+				<div class="fl">
+					<label for="type_1_split_heir"><input type="radio" id="type_1_split_heir" name="heir_reg_type" value="type_1_split_heir" /> 分割繼承</label>
+                </div>
+				<div class="fl">
+					<label for="type_2_share_heir"><input type="radio" id="type_2_share_heir" name="heir_reg_type" value="type_2_share_heir" /> 公同共有繼承</label>
+                </div>
+				<div class="fl">
+					<label for="type_3_modify"><input type="radio" id="type_3_modify" name="heir_reg_type" value="type_3_modify" /> 名義更正</label> <a href="assets/files/10_名義更正.pdf" title="相關法令" target="_blank"><img src="assets/img/pdf.png" class="pdf" /></a>
+                </div>
+				<div class="fl">
+					<label for="type_4_will_heir"><input type="radio" id="type_4_will_heir" name="heir_reg_type" value="type_4_will_heir" /> 遺囑繼承</label> <a href="assets/files/08_遺囑繼承.pdf" title="相關法令" target="_blank"><img src="assets/img/pdf.png" class="pdf" /></a>
+                </div>
+				<div class="fl">
+					<div><label for="type_5_judge_heir"><input type="radio" id="type_5_judge_heir" name="heir_reg_type" value="type_5_judge_heir" /> 判決繼承</label></div>
+					<div><label for="type_7"><input type="radio" id="type_7" name="heir_reg_type" value="type_7" /> 和解繼承</label></div>
+					<div><label for="type_8"><input type="radio" id="type_8" name="heir_reg_type" value="type_8" /> 調解繼承</label></div>
+                </div>
+				<div class="fl">
+					<div><input type="radio" id="type_6_nobody_heir" name="heir_reg_type" value="type_6_nobody_heir" class="hide" />無人承認<div>
+					<div class="ml-4"><label for="type_9"><input type="radio" id="type_9" name="heir_reg_type" value="type_9" /> 遺產管理人</label></div>
+					<div class="ml-2"><label for="type_10"><input type="radio" id="type_10" name="heir_reg_type" value="type_10" /> 收歸國有</label></div>
+				</div>
+              </div>
+            </fieldset>
+
+            <div id="no2_btn_grp" class="hide btn_grp">
+              <button id="no2_btn_prev" class="btn btn-outline-light" title="上一步"><img src="assets/img/left.png" /></button>
+              <button id="no2_btn_next" class="btn btn-outline-light" title="下一步"><img src="assets/img/right.png" /></button>
+            </div>
+
+            <fieldset class="layer1 hide" id="layer1_target_check_items">
+              <legend>被繼承人審查項目</legend>
+              <fieldset class="layer2 fix">
+                <legend id="death_period_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇死亡日期！" data-placement="right">死亡日期</legend>
+                <label for="jp"><input type="radio" id="jp" name="death_period" value="jp" /> 日據時期(民國34年10月24日前死亡)</label> <a href="assets/files/01_日據時期繼承.pdf" title="相關法令" target="_blank"><img src="assets/img/pdf.png" class="pdf" /></a><br/>
+                  <fieldset class="layer3" id="death_period_jp_layer3">
+                    <legend id="house_owner_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇被繼承人身分！" data-placement="right">被繼承人身分</legend>
+                    <label for="house_owner_yes"><input type="radio" id="house_owner_yes" name="house_owner" value="yes" /> 戶主</label> <br/>
+                      <fieldset class="layer4" id="house_owner_yes_layer4">
+                        <legend id="house_owner_yes_heir_seq_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇繼承人順位(戶主)！" data-placement="right">繼承人順位(戶主)</legend>
+                        <label for="house_owner_yes_heir_seq_1"><input type="radio" id="house_owner_yes_heir_seq_1" name="house_owner_yes_heir_seq" value="1" /> 1.法定戶主繼承人-同一戶內男子直系卑親屬(親等近者為先)</label> <br/>
+                          <fieldset class="layer5" id="house_owner_yes_heir_seq_one_layer5">
+                            <legend></legend>
+                            <label for="house_owner_yes_heir_seq_1_children_1"><input type="checkbox" id="house_owner_yes_heir_seq_1_children_1" name="house_owner_yes_heir_seq_1_children_1" value="1" /> 婚、私生子</label> <br/>
+                            <label for="house_owner_yes_heir_seq_1_children_2"><input type="checkbox" id="house_owner_yes_heir_seq_1_children_2" name="house_owner_yes_heir_seq_1_children_2" value="2" /> 養子</label> <br/>
+                            <label for="house_owner_yes_heir_seq_1_children_3"><input type="checkbox" id="house_owner_yes_heir_seq_1_children_3" name="house_owner_yes_heir_seq_1_children_3" value="3" /> 過房子</label> <br/>
+                            <label for="house_owner_yes_heir_seq_1_children_4"><input type="checkbox" id="house_owner_yes_heir_seq_1_children_4" name="house_owner_yes_heir_seq_1_children_4" value="4" /> 螟蛉子</label> <br/>
+                            <fieldset class="layer6" id="house_owner_yes_heir_seq_1_children_fourth_layer6">
+                              <legend>代位或再轉</legend>
+                              <label for="house_owner_yes_heir_seq_method_subrogation"><input type="checkbox" id="house_owner_yes_heir_seq_method_subrogation" name="house_owner_yes_heir_seq_method_subrogation" value="subrogation" /> 代位</label> <br/>
+                              <label for="house_owner_yes_heir_seq_method_transfer"><input type="checkbox" id="house_owner_yes_heir_seq_method_transfer" name="house_owner_yes_heir_seq_method_transfer" value="transfer" /> 再轉</label> <br/>
+                            </fieldset>
+                          </fieldset>
+                        <label for="house_owner_yes_heir_seq_2"><input type="radio" id="house_owner_yes_heir_seq_2" name="house_owner_yes_heir_seq" value="2" /> 2.指定戶主繼承人-依當時戶籍登記為準</label> <br/>
+                        <label for="house_owner_yes_heir_seq_3"><input type="radio" id="house_owner_yes_heir_seq_3" name="house_owner_yes_heir_seq" value="3" /> 3.選定戶主繼承人-依當時戶籍登記為準</label> <br/>
+                      </fieldset>
+                      <label for="house_owner_no"><input type="radio" id="house_owner_no" name="house_owner" value="no" /> 非戶主</label> <br/>
+                      <fieldset class="layer4" id="house_owner_no_layer4">
+                        <legend id="house_owner_no_heir_seq_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇繼承人順位(非戶主)！" data-placement="right">繼承人順位(非戶主)</legend>
+                        <label for="house_owner_no_heir_seq_1"><input type="radio" id="house_owner_no_heir_seq_1" name="house_owner_no_heir_seq" value="1" /> 1.直系卑親屬(親等近者為先)</label> <br/>
+                          <fieldset class="layer5" id="house_owner_no_heir_seq_one_layer5">
+                            <legend></legend>
+                            <label for="house_owner_no_heir_seq_1_children_1"><input type="checkbox" id="house_owner_no_heir_seq_1_children_1" name="house_owner_no_heir_seq_1_children_1" value="1" /> 婚、私生子</label> <br/>
+                            <label for="house_owner_no_heir_seq_1_children_2"><input type="checkbox" id="house_owner_no_heir_seq_1_children_2" name="house_owner_no_heir_seq_1_children_2" value="2" /> 養子</label> <br/>
+                            <label for="house_owner_no_heir_seq_1_children_3"><input type="checkbox" id="house_owner_no_heir_seq_1_children_3" name="house_owner_no_heir_seq_1_children_3" value="3" /> 過房子</label> <br/>
+                            <label for="house_owner_no_heir_seq_1_children_4"><input type="checkbox" id="house_owner_no_heir_seq_1_children_4" name="house_owner_no_heir_seq_1_children_4" value="4" /> 螟蛉子</label> <br/>
+                            <fieldset class="layer6" id="house_owner_no_heir_seq_1_children_fourth_layer6">
+                              <legend>代位或再轉</legend>
+                              <label for="house_owner_no_heir_seq_method_subrogation"><input type="checkbox" id="house_owner_no_heir_seq_method_subrogation" name="house_owner_no_heir_seq_method_subrogation" value="subrogation" /> 代位</label> <br/>
+                              <label for="house_owner_no_heir_seq_method_transfer"><input type="checkbox" id="house_owner_no_heir_seq_method_transfer" name="house_owner_no_heir_seq_method_transfer" value="transfer" /> 再轉</label> <br/>
+                            </fieldset>
+                          </fieldset>
+                        <label for="house_owner_no_heir_seq_2"><input type="radio" id="house_owner_no_heir_seq_2" name="house_owner_no_heir_seq" value="2" /> 2.配偶</label> <br/>
+                        <label for="house_owner_no_heir_seq_3"><input type="radio" id="house_owner_no_heir_seq_3" name="house_owner_no_heir_seq" value="3" /> 3.直系尊親屬(親等近者為先)</label> <br/>
+                        <label for="house_owner_no_heir_seq_4"><input type="radio" id="house_owner_no_heir_seq_4" name="house_owner_no_heir_seq" value="4" /> 4.戶主</label> <br/>
+                      </fieldset>
+                  </fieldset>
+                <label for="tw"><input type="radio" id="tw" name="death_period" value="tw" /> 光復後(民國34年10月25日後死亡)</label> <a href="assets/files/02_光復後繼承.pdf" title="相關法令" target="_blank"><img src="assets/img/pdf.png" class="pdf" /></a> <br/>
+                  <fieldset class="layer3" id="death_period_tw_layer3">
+                    <legend id="tw_death_period_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇確切時間！" data-placement="right">確切時間</legend>
+                    <label for="tw34_74"><input type="radio" id="tw34_74" name="tw_death_period" value="tw34_74" /> 民法修正前(民國34年10月25日~74年6月4日前)</label> <br/>
+                    <label for="after_tw74"><input type="radio" id="after_tw74" name="tw_death_period" value="after_tw74" /> 民法修正後(民國74年6月5日後)</label> <br/>
+                    <fieldset class="layer4" id="tw_death_period_layer4">
+                      <legend id="tw_death_period_heir_seq_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇繼承人順位！" data-placement="right">繼承人順位</legend>
+                      <label for="tw_death_period_heir_spouse"><input type="checkbox" id="tw_death_period_heir_spouse" name="tw_death_period_heir_spouse" value="yes" /> 配偶</label> <br/>
+                      <fieldset class="layer5" id="tw_death_period_heir_spouse_yes_layer5">
+                        <legend id="tw_death_period_heir_spouse_live_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇配偶存歿！" data-placement="right">存歿</legend>
+                        <label for="tw_death_period_heir_spouse_live_yes"><input type="radio" id="tw_death_period_heir_spouse_live_yes" name="tw_death_period_heir_spouse_live" value="yes" /> 生存</label>
+                        <label for="tw_death_period_heir_spouse_live_no"><input type="radio" id="tw_death_period_heir_spouse_live_no" name="tw_death_period_heir_spouse_live" value="no" /> 亡歿</label>
+                      </fieldset>
+                      <label for="tw_death_period_heir_seq_1"><input type="radio" id="tw_death_period_heir_seq_1" name="tw_death_period_heir_seq" value="1" /> 1. 直系血親卑親屬(親等近者為先)</label> <br/>
+                      <fieldset class="layer5" id="tw_death_period_heir_seq_one_layer5">
+                        <legend>名份</legend>
+                        <label for="tw_death_period_heir_seq_1_option1"><input type="checkbox" id="tw_death_period_heir_seq_1_option1" name="tw_death_period_heir_seq_1_option1" value="1" /> 1. 婚生子女</label> <br/>
+                        <label for="tw_death_period_heir_seq_1_option2"><input type="checkbox" id="tw_death_period_heir_seq_1_option2" name="tw_death_period_heir_seq_1_option2" value="2" /> 2. 認領</label> <br/>
+                        <label for="tw_death_period_heir_seq_1_option3"><input type="checkbox" id="tw_death_period_heir_seq_1_option3" name="tw_death_period_heir_seq_1_option3" value="3" /> 3. 養子女</label> <br/>
+                        <fieldset class="layer6" id="tw_death_period_heir_seq_1_option_third_layer6">
+                          <legend>代位或再轉</legend>
+                          <label for="tw_death_period_heir_seq_1_option_method_1"><input type="checkbox" id="tw_death_period_heir_seq_1_option_method_1" name="tw_death_period_heir_seq_1_option_method_1" value="1" /> 代位</label> <br/>
+                          <label for="tw_death_period_heir_seq_1_option_method_2"><input type="checkbox" id="tw_death_period_heir_seq_1_option_method_2" name="tw_death_period_heir_seq_1_option_method_2" value="2" /> 再轉</label> <br/>
+                        </fieldset>
+                      </fieldset>
+                      <label for="tw_death_period_heir_seq_2"><input type="radio" id="tw_death_period_heir_seq_2" name="tw_death_period_heir_seq" value="2" /> 2. 父母</label> <br/>
+                      <label for="tw_death_period_heir_seq_3"><input type="radio" id="tw_death_period_heir_seq_3" name="tw_death_period_heir_seq" value="3" /> 3. 兄弟姊妹</label> <br/>
+                      <fieldset class="layer5" id="tw_death_period_heir_seq_third_layer5">
+                        <legend></legend>
+                        <label for="tw_death_period_heir_seq_3_method"><input type="checkbox" id="tw_death_period_heir_seq_3_method" name="tw_death_period_heir_seq_3_method" value="transfer" /> 再轉</label> <br/>
+                      </fieldset>
+                      <label for="tw_death_period_heir_seq_4"><input type="radio" id="tw_death_period_heir_seq_4" name="tw_death_period_heir_seq" value="4" /> 4. 祖父母</label> <br/>
+                    </fieldset>
+                  </fieldset>
+              </fieldset>
+            </fieldset>
+
+            <div id="no3_btn_grp" class="hide btn_grp">
+              <button id="no3_btn_prev" class="btn btn-outline-light" title="上一步"><img src="assets/img/left.png" /></button>
+              <button id="no3_btn_next" class="btn btn-outline-light" title="下一步"><img src="assets/img/right.png" /></button>
+            </div>
+
+            <fieldset class="layer1 hide" id="layer1_heir_check_items">
+              <legend id="heir_method_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇繼承人審查項目！" data-placement="right">繼承人審查項目</legend>
+              <div class="left">
+                <label for="heir_method_subrogation"><input type="checkbox" id="heir_method_subrogation" name="heir_method_subrogation" value="subrogation" class="heir_method_checkbox" /> 代位</label> <a href="assets/files/03_代位及再轉繼承之規定.pdf" title="相關法令" target="_blank"><img src="assets/img/pdf.png" class="pdf" /></a> <br/>
+                <label for="heir_method_transfer"><input type="checkbox" id="heir_method_transfer" name="heir_method_transfer" value="transfer" class="heir_method_checkbox" /> 再轉</label> <a href="assets/files/03_代位及再轉繼承之規定.pdf" title="相關法令" target="_blank"><img src="assets/img/pdf.png" class="pdf" /></a> <br/>
+                <label for="heir_method_abandon"><input type="checkbox" id="heir_method_abandon" name="heir_method_abandon" value="abandon" class="heir_method_checkbox" /> 繼承權拋棄</label> <a href="assets/files/04_繼承之喪失及拋棄.pdf" title="相關法令" target="_blank"><img src="assets/img/pdf.png" class="pdf" /></a> <br/>
+                <fieldset class="layer2" id="heir_method_abandon_layer2">
+                  <legend id="heir_method_abandon_yn_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇有或無！" data-placement="right">Y/N</legend>
+                  <label for="heir_method_abandon_yes"><input type="radio" id="heir_method_abandon_yes" name="heir_method_abandon_yn" value="yes" /> 有</label> 
+                  <label for="heir_method_abandon_no"><input type="radio" id="heir_method_abandon_no" name="heir_method_abandon_yn" value="no" /> 無</label>
+                </fieldset>
+                <label for="heir_method_lost"><input type="checkbox" id="heir_method_lost" name="heir_method_lost" value="lost" class="heir_method_checkbox" /> 繼承權喪失</label> <a href="assets/files/04_繼承之喪失及拋棄.pdf" title="相關法令" target="_blank"><img src="assets/img/pdf.png" class="pdf" /></a> <br/>
+                <fieldset class="layer2" id="heir_method_lost_layer2">
+                  <legend id="heir_method_lost_yn_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇有或無！" data-placement="right">Y/N</legend>
+                  <label for="heir_method_lost_yes"><input type="radio" id="heir_method_lost_yes" name="heir_method_lost_yn" value="yes" /> 有</label>
+                  <label for="heir_method_lost_no"><input type="radio" id="heir_method_lost_no" name="heir_method_lost_yn" value="no" /> 無</label>
+                </fieldset>
+                <label for="heir_method_domestic"><input type="checkbox" id="heir_method_domestic" name="heir_method_domestic" value="domestic" class="heir_method_checkbox" /> 本國人繼承</label> <a href="assets/files/05_本國人繼承.pdf" title="相關法令" target="_blank"><img src="assets/img/pdf.png" class="pdf" /></a> <br/>
+                <fieldset class="layer2" id="heir_method_domestic_layer2">
+                  <legend></legend>
+                  <label for="heir_method_domestic_opt1"><input type="checkbox" id="heir_method_domestic_opt1" name="heir_method_domestic_opt1" value="1" class="heir_method_domestic_opt" /> 有行為能力(滿20歲或未成年已結婚者)</label> <br/>
+                  <label for="heir_method_domestic_opt2"><input type="checkbox" id="heir_method_domestic_opt2" name="heir_method_domestic_opt2" value="2" class="heir_method_domestic_opt" /> 限制行為能力(7-20歲或受輔助宣告之人)</label> <br/>
+                  <label for="heir_method_domestic_opt3"><input type="checkbox" id="heir_method_domestic_opt3" name="heir_method_domestic_opt3" value="3" class="heir_method_domestic_opt" /> 無行為能力(7歲以下或受監護宣告之人)</label> <br/>
+                  <label for="heir_method_domestic_opt4"><input type="checkbox" id="heir_method_domestic_opt4" name="heir_method_domestic_opt4" value="4" class="heir_method_domestic_opt" /> 養子女</label> <br/>
+                  <label for="heir_method_domestic_opt5"><input type="checkbox" id="heir_method_domestic_opt5" name="heir_method_domestic_opt5" value="5" class="heir_method_domestic_opt" /> 胎兒</label> <br/>
+                  <fieldset class="layer3" id="heir_method_domestic_opt5_layer3">
+                    <legend></legend>
+                    <label for="heir_method_domestic_opt5_rename"><input type="checkbox" id="heir_method_domestic_opt5_rename" name="heir_method_domestic_opt5_rename" value="rename" /> 更名登記</label> <br/>
+                    <label for="heir_method_domestic_opt5_correct"><input type="checkbox" id="heir_method_domestic_opt5_correct" name="heir_method_domestic_opt5_correct" value="correct" /> 更正登記</label> <br/>
+                  </fieldset>
+                </fieldset>
+                <label for="heir_method_foreign"><input type="checkbox" id="heir_method_foreign" name="heir_method_foreign" value="foreign" class="heir_method_checkbox" /> 外國人繼承</label> <a href="assets/files/06_外國人繼承.pdf" title="相關法令" target="_blank"><img src="assets/img/pdf.png" class="pdf" /></a> <br/>
+                <fieldset class="layer2" id="heir_method_foreign_layer2">
+                  <legend></legend>
+                  <label for="heir_method_foreign_opt1"><input type="checkbox" id="heir_method_foreign_opt1" name="heir_method_foreign_opt1" value="1" class="heir_method_foreign_opt" /> 平等互惠(土地法第18條)</label> <br/>
+                  <fieldset class="layer3" id="heir_method_foreign_opt1_layer3">
+                    <legend id="heir_method_foreign_opt1_yn_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇有或無！" data-placement="right">Y/N</legend>
+                    <label for="heir_method_foreign_opt1_yes"><input type="radio" id="heir_method_foreign_opt1_yes" name="heir_method_foreign_opt1_yn" value="yes" /> 有</label>
+                    <label for="heir_method_foreign_opt1_no"><input type="radio" id="heir_method_foreign_opt1_no" name="heir_method_foreign_opt1_yn" value="no" /> 無</label>
+                  </fieldset>
+                  <label for="heir_method_foreign_opt2"><input type="checkbox" id="heir_method_foreign_opt2" name="heir_method_foreign_opt2" value="2" class="heir_method_foreign_opt" /> 繼承土地法第17條第1項土地</label> <br/>
+                  <fieldset class="layer3" id="heir_method_foreign_opt2_layer3">
+                    <legend id="heir_method_foreign_opt2_yn_legend" data-trigger="manual" data-toggle="popover" data-content="請選擇有或無！" data-placement="right">Y/N</legend>
+                    <label for="heir_method_foreign_opt2_yes"><input type="radio" id="heir_method_foreign_opt2_yes" name="heir_method_foreign_opt2_yn" value="yes" /> 有</label>
+                    <label for="heir_method_foreign_opt2_no"><input type="radio" id="heir_method_foreign_opt2_no" name="heir_method_foreign_opt2_yn" value="no" /> 無</label>
+                  </fieldset>
+                  <label for="heir_method_foreign_opt3"><input type="checkbox" id="heir_method_foreign_opt3" name="heir_method_foreign_opt3" value="3" class="heir_method_foreign_opt" /> 有行為能力(滿20歲或未成年已結婚者)</label> <br/>
+                  <label for="heir_method_foreign_opt4"><input type="checkbox" id="heir_method_foreign_opt4" name="heir_method_foreign_opt4" value="4" class="heir_method_foreign_opt" /> 限制行為能力(7-20歲或受輔助宣告之人)</label> <br/>
+                  <label for="heir_method_foreign_opt5"><input type="checkbox" id="heir_method_foreign_opt5" name="heir_method_foreign_opt5" value="5" class="heir_method_foreign_opt" /> 無行為能力(7歲以下或受監護宣告之人)</label> <br/>
+                  <label for="heir_method_foreign_opt6"><input type="checkbox" id="heir_method_foreign_opt6" name="heir_method_foreign_opt6" value="6" class="heir_method_foreign_opt" /> 養子女</label> <br/>
+                  <label for="heir_method_foreign_opt7"><input type="checkbox" id="heir_method_foreign_opt7" name="heir_method_foreign_opt7" value="7" class="heir_method_foreign_opt" /> 胎兒</label> <br/>
+                  <fieldset class="layer3" id="heir_method_foreign_opt7_layer3">
+                    <legend></legend>
+                    <label for="heir_method_foreign_opt7_rename"><input type="checkbox" id="heir_method_foreign_opt7_rename" name="heir_method_foreign_opt7_rename" value="rename" /> 更名登記</label> <br/>
+                    <label for="heir_method_foreign_opt7_correct"><input type="checkbox" id="heir_method_foreign_opt7_correct" name="heir_method_foreign_opt7_correct" value="correct" /> 更正登記</label> <br/>
+                  </fieldset>
+                </fieldset>
+                <label for="heir_method_china"><input type="checkbox" id="heir_method_china" name="heir_method_china" value="china" class="heir_method_checkbox" /> 大陸地區人民繼承</label> <a href="assets/files/07_大陸地區人民繼承.pdf" title="相關法令" target="_blank"><img src="assets/img/pdf.png" class="pdf" /></a> <br/>
+                <fieldset class="layer2" id="heir_method_china_layer2">
+                  <legend></legend>
+                  <label for="heir_method_china_opt1"><input type="checkbox" id="heir_method_china_opt1" name="heir_method_china_opt1" value="1" /> 依兩岸人民關係條例-不得繼承不動產</label> <br/>
+                  <label for="heir_method_china_opt2"><input type="checkbox" id="heir_method_china_opt2" name="heir_method_china_opt2" value="2" /> 配偶(長期居留許可者)</label> <br/>
+                  <label for="heir_method_china_opt3"><input type="checkbox" id="heir_method_china_opt3" name="heir_method_china_opt3" value="3" /> 繼承土地法第17條第1項土地</label> <br/>
+                  <label for="heir_method_china_opt4"><input type="checkbox" id="heir_method_china_opt4" name="heir_method_china_opt4" value="4" /> 台灣地區繼承人賴以居住</label> <br/>
+                </fieldset>
+              </div>
+            </fieldset>
+
+            <div id="no4_btn_grp" class="hide btn_grp">
+              <label for="is_luzhu_table" class="luzhu-table-checkbox"><input type="checkbox" id="is_luzhu_table" name="is_luzhu_table" value="yes" /> 輸出蘆竹版表格</label>
+              <button id="no4_btn_prev" class="btn btn-outline-light" title="上一步"><img src="assets/img/left.png" /></button>
+              <button id='GEN_btn' class="btn btn-outline-light" title="產製審查表格"><img src="assets/img/right.png" /></button>
+              <!--<button id='GEN_btn' class='btn btn-success' title="GENERATE TABLE">產製審查表格</button>-->
+            </div>
+
+            <fieldset class="layer1 hide" id="layer1_result">
+              <legend>
+                應附文件
+              </legend>
+              <div class="container-fluid left">
+				<div id="luzhu_doc">
+					<div class="w3-row">
+					  <label for="heir_death_remove_cert" class="w3-col"><input type="checkbox" id="heir_death_remove_cert" name="heir_death_remove_cert" value="yes" /> 被繼承人死亡除戶戶籍謄本</label>
+					  <label for="heir_now_cert" class="w3-col"><input type="checkbox" id="heir_now_cert" name="heir_now_cert" value="yes" /> 繼承人現在戶籍謄本</label>
+					  <label for="heir_sys_table" class="w3-col"><input type="checkbox" id="heir_sys_table" name="heir_sys_table" value="yes" /> 繼承系統表</label>
+					  <label for="heir_drop_doc" class="w3-col"><input type="checkbox" id="heir_drop_doc" name="heir_drop_doc" value="yes" /> 拋棄繼承權證明文件</label>
+					  <label for="heir_tax_doc" class="w3-col"><input type="checkbox" id="heir_tax_doc" name="heir_tax_doc" value="yes" /> 遺產稅完免納證明文件</label>
+					  <label for="heir_affidavit_doc" class="w3-col"><input type="checkbox" id="heir_affidavit_doc" name="heir_affidavit_doc" value="yes" /> 權利書狀或切結書</label>
+					</div>
+					<div class="w3-row">
+					  <label for="heir_split_doc" class="w3-col"><input type="checkbox" id="heir_split_doc" name="heir_split_doc" value="yes" /> 遺產分割協議書</label>
+					  <label for="heir_stamp_doc" class="w3-col"><input type="checkbox" id="heir_stamp_doc" name="heir_stamp_doc" value="yes" /> 繼承人之印鑑證明書</label>
+					  <label for="heir_check_id" class="w3-col"><input type="checkbox" id="heir_check_id" name="heir_check_id" value="yes" /> 親自到場核對身分</label>
+					  <label for="heir_oversea_doc" class="w3-col"><input type="checkbox" id="heir_oversea_doc" name="heir_oversea_doc" value="yes" /> 海外授權書</label>
+					  <label for="heir_court_doc" class="w3-col"><input type="checkbox" id="heir_court_doc" name="heir_court_doc" value="yes" /> 法院判決書及確定證明書</label>
+					  <label for="heir_will_doc" class="w3-col"><input type="checkbox" id="heir_will_doc" name="heir_will_doc" value="yes" /> 遺囑</label>
+					</div>
+					<div class="w3-row">
+					  <label for="heir_other_doc" class="w3-rest"><input type="checkbox" id="heir_other_doc" name="heir_other_doc" value="yes" /> 其他 <input id="heir_other_doc_text" name="heir_other_doc_text" type="text" value="" disabled/></label>
+					</div>
+				</div>
+				<div id="taoyuan_doc">
+					<div id="taoyuan_doc_type_0_law_heir_type_2_share_heir" class="taoyuan_doc_item">
+						<p><strong>繼承、共同共有繼承</strong></p>
+						<label for="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt1"><input id="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt1" type="checkbox" name="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt1" value="1" /> 被繼承人除戶戶籍謄本</label>
+						<label for="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt2"><input id="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt2" type="checkbox" name="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt2" value="2" /> 繼承人現戶戶籍謄本</label>
+						<label for="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt3"><input id="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt3" type="checkbox" name="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt3" value="3" /> 登記清冊</label>
+						<label for="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt4"><input id="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt4" type="checkbox" name="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt4" value="4" /> 遺產稅免稅或繳納證明書</label>
+						<label for="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt5"><input id="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt5" type="checkbox" name="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt5" value="5" /> 繼承系統表</label>
+						<label for="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt6">
+							<input id="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt6" type="checkbox" name="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt6" value="6" /> 權利書狀，未能檢附權利書狀：
+							<label style="display:inline" for="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt7"><input id="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt7" type="checkbox" name="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt7" value="7" /> 切結書</label>
+						</label>
+						<ul>
+							<li>其他：</li>
+						</ul>
+						<label for="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt8">
+							<input id="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt8" type="checkbox" name="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt8" value="8" /> 拋棄繼承時-法院拋棄繼承文件、
+							<label style="display:inline" for="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt9"><input id="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt9" type="checkbox" name="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt9" value="9" /> 繼承人在國外-海外授權書、</label>
+						</label>
+						<label for="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt10">
+							<input id="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt10" type="checkbox" name="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt10" value="10" />
+							<input id="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt11" type="text" name="taoyuan_doc_type_0_law_heir_type_2_share_heir_opt11" />
+						</label>
+					</div>
+					
+					<div id="taoyuan_doc_type_1_split_heir" class="taoyuan_doc_item">
+						<p><strong>分割繼承</strong></p>
+						<label for="taoyuan_doc_type_1_split_heir_opt1"><input id="taoyuan_doc_type_1_split_heir_opt1" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt1" value="1" /> 被繼承人除戶戶籍謄本</label>
+						<label for="taoyuan_doc_type_1_split_heir_opt2"><input id="taoyuan_doc_type_1_split_heir_opt2" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt2" value="2" /> 繼承人現戶戶籍謄本</label>
+						<label for="taoyuan_doc_type_1_split_heir_opt3"><input id="taoyuan_doc_type_1_split_heir_opt3" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt3" value="3" /> 登記清冊</label>
+						<label for="taoyuan_doc_type_1_split_heir_opt4"><input id="taoyuan_doc_type_1_split_heir_opt4" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt4" value="4" /> 分割協議書-含應繳納印花稅</label>
+						<label for="taoyuan_doc_type_1_split_heir_opt5">
+							<input id="taoyuan_doc_type_1_split_heir_opt5" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt5" value="5" /> 印鑑證明，或
+							<label style="display:inline" for="taoyuan_doc_type_1_split_heir_opt6"><input id="taoyuan_doc_type_1_split_heir_opt6" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt6" value="6" /> 親自到場核對身分</label>
+						</label>
+						<label for="taoyuan_doc_type_1_split_heir_opt7"><input id="taoyuan_doc_type_1_split_heir_opt7" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt7" value="7" /> 遺產稅免稅或繳納證明書</label>
+						<label for="taoyuan_doc_type_1_split_heir_opt8"><input id="taoyuan_doc_type_1_split_heir_opt8" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt8" value="8" /> 繼承系統表</label>
+						<label for="taoyuan_doc_type_1_split_heir_opt9">
+							<input id="taoyuan_doc_type_1_split_heir_opt9" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt9" value="9" /> 權利書狀，未能檢附權利書狀：
+							<label style="display:inline" for="taoyuan_doc_type_1_split_heir_opt10"><input id="taoyuan_doc_type_1_split_heir_opt10" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt10" value="10" /> 切結書</label>
+						</label>
+						<ul>
+							<li>其他：</li>
+						</ul>
+						<label for="taoyuan_doc_type_1_split_heir_opt11">
+							<input id="taoyuan_doc_type_1_split_heir_opt11" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt11" value="11" /> 拋棄繼承時-法院拋棄繼承文件、
+							<label style="display:inline" for="taoyuan_doc_type_1_split_heir_opt12"><input id="taoyuan_doc_type_1_split_heir_opt12" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt12" value="12" /> 繼承人在國外-海外授權書、</label>
+						</label>
+						<label for="taoyuan_doc_type_1_split_heir_opt13">
+							<input id="taoyuan_doc_type_1_split_heir_opt13" type="checkbox" name="taoyuan_doc_type_1_split_heir_opt13" value="13" />
+							<input id="taoyuan_doc_type_1_split_heir_opt14" type="text" name="taoyuan_doc_type_1_split_heir_opt14" />
+						</label>
+					</div>
+					
+					<div id="taoyuan_doc_type_3_modify" class="taoyuan_doc_item">
+						<p><strong>名義更正</strong></p>
+						<label for="taoyuan_doc_type_3_modify_opt1"><input id="taoyuan_doc_type_3_modify_opt1" type="checkbox" name="taoyuan_doc_type_3_modify_opt1" value="1" /> 被繼承人除戶戶籍謄本</label>
+						<label for="taoyuan_doc_type_3_modify_opt2"><input id="taoyuan_doc_type_3_modify_opt2" type="checkbox" name="taoyuan_doc_type_3_modify_opt2" value="2" /> 繼承人現戶戶籍謄本(含台灣光復初期原合法繼承人戶籍謄本)</label>
+						<label for="taoyuan_doc_type_3_modify_opt3"><input id="taoyuan_doc_type_3_modify_opt3" type="checkbox" name="taoyuan_doc_type_3_modify_opt3" value="3" /> 登記清冊</label>
+						<label for="taoyuan_doc_type_3_modify_opt4"><input id="taoyuan_doc_type_3_modify_opt4" type="checkbox" name="taoyuan_doc_type_3_modify_opt4" value="4" /> 遺產稅免稅或繳納證明書</label>
+						<label for="taoyuan_doc_type_3_modify_opt5"><input id="taoyuan_doc_type_3_modify_opt5" type="checkbox" name="taoyuan_doc_type_3_modify_opt5" value="5" /> 繼承系統表</label>
+						<label for="taoyuan_doc_type_3_modify_opt6">
+							<input id="taoyuan_doc_type_3_modify_opt6" type="checkbox" name="taoyuan_doc_type_3_modify_opt6" value="6" /> 權利書狀，未能檢附權利書狀：
+							<label style="display:inline" for="taoyuan_doc_type_3_modify_opt7"><input id="taoyuan_doc_type_3_modify_opt7" type="checkbox" name="taoyuan_doc_type_3_modify_opt7" value="7" /> 切結書</label>
+						</label>
+						<ul>
+							<li>其他：</li>
+						</ul>
+						<label for="taoyuan_doc_type_3_modify_opt8">
+							<input id="taoyuan_doc_type_3_modify_opt8" type="checkbox" name="taoyuan_doc_type_3_modify_opt8" value="8" />
+							<input id="taoyuan_doc_type_3_modify_opt9" type="text" name="taoyuan_doc_type_3_modify_opt9" />
+						</label>
+					</div>
+					
+					<div id="taoyuan_doc_type_4_will_heir" class="taoyuan_doc_item">
+						<p><strong>遺囑繼承</strong></p>
+						<label for="taoyuan_doc_type_4_will_heir_opt1"><input id="taoyuan_doc_type_4_will_heir_opt1" type="checkbox" name="taoyuan_doc_type_4_will_heir_opt1" value="1" /> 被繼承人除戶戶籍謄本</label>
+						<label for="taoyuan_doc_type_4_will_heir_opt2"><input id="taoyuan_doc_type_4_will_heir_opt2" type="checkbox" name="taoyuan_doc_type_4_will_heir_opt2" value="2" /> 繼承人現戶戶籍謄本</label>
+						<label for="taoyuan_doc_type_4_will_heir_opt3"><input id="taoyuan_doc_type_4_will_heir_opt3" type="checkbox" name="taoyuan_doc_type_4_will_heir_opt3" value="3" /> 遺產稅免稅或繳納證明書</label>
+						<label for="taoyuan_doc_type_4_will_heir_opt4"><input id="taoyuan_doc_type_4_will_heir_opt4" type="checkbox" name="taoyuan_doc_type_4_will_heir_opt4" value="4" /> 繼承系統表</label>
+						<label for="taoyuan_doc_type_4_will_heir_opt5"><input id="taoyuan_doc_type_4_will_heir_opt5" type="checkbox" name="taoyuan_doc_type_4_will_heir_opt5" value="5" /> 遺囑</label>
+						<label for="taoyuan_doc_type_4_will_heir_opt6">
+							<input id="taoyuan_doc_type_4_will_heir_opt6" type="checkbox" name="taoyuan_doc_type_4_will_heir_opt6" value="6" /> 權利書狀，未能檢附權利書狀：
+							<label style="display:inline" for="taoyuan_doc_type_4_will_heir_opt7"><input id="taoyuan_doc_type_4_will_heir_opt7" type="checkbox" name="taoyuan_doc_type_4_will_heir_opt7" value="7" /> 切結書</label>
+						</label>
+						<ul>
+							<li>其他：</li>
+						</ul>
+						<label for="taoyuan_doc_type_4_will_heir_opt8"><input id="taoyuan_doc_type_4_will_heir_opt8" type="checkbox" name="taoyuan_doc_type_4_will_heir_opt8" value="8" /> 代筆遺囑-見證人身分證明文件</label>
+						<label for="taoyuan_doc_type_4_will_heir_opt9">
+							<input id="taoyuan_doc_type_4_will_heir_opt9" type="checkbox" name="taoyuan_doc_type_4_will_heir_opt9" value="9" />
+							<input id="taoyuan_doc_type_4_will_heir_opt10" type="text" name="taoyuan_doc_type_4_will_heir_opt10" />
+						</label>
+					</div>
+					
+					<div id="taoyuan_doc_type_5_judge_heir_type_7_type_8" class="taoyuan_doc_item">
+						<p><strong>判決、調解、和解繼承</strong></p>
+						<label for="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt1"><input id="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt1" type="checkbox" name="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt1" value="1" /> 被繼承人除戶戶籍謄本</label>
+						<label for="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt2"><input id="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt2" type="checkbox" name="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt2" value="2" /> 繼承人現戶戶籍謄本</label>
+						<label for="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt3"><input id="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt3" type="checkbox" name="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt3" value="3" /> 遺產稅免稅或繳納證明書</label>
+						<label for="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt4"><input id="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt4" type="checkbox" name="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt4" value="4" /> 繼承系統表</label>
+						<div>
+							判決繼承：
+							<label for="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt5" style="display:inline"><input id="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt5" type="checkbox" name="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt5" value="5" /> 判決書，</label>
+							<label for="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt6" style="display:inline"><input id="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt6" type="checkbox" name="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt6" value="6" /> 判決確定證明書</label>
+						</div>
+						<div>
+							調解繼承：
+							<label for="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt7" style="display:inline"><input id="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt7" type="checkbox" name="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt7" value="7" /> 調解筆錄</label>
+						</div>
+						<div>
+							和解繼承：
+							<label for="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt8" style="display:inline"><input id="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt8" type="checkbox" name="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt8" value="8" /> 和解筆錄</label>
+						</div>
+						<label for="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt9">
+							<input id="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt9" type="checkbox" name="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt9" value="9" /> 權利書狀，未能檢附權利書狀：
+							<label style="display:inline" for="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt10"><input id="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt10" type="checkbox" name="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt10" value="10" /> 切結書</label>
+						</label>
+						<ul>
+							<li>
+								其他：
+								<label for="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt11" style="display:inline">
+									<input id="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt11" type="checkbox" name="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt11" value="11" />
+									<input id="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt12" type="text" name="taoyuan_doc_type_5_judge_heir_type_7_type_8_opt12" />
+								</label>
+							</li>
+						</ul>
+					</div>
+
+					<div id="taoyuan_doc_type_9" class="taoyuan_doc_item">
+						<p><strong>無人承認繼承-遺產管理人</strong></p>
+						<label for="taoyuan_doc_type_9_opt1"><input id="taoyuan_doc_type_9_opt1" type="checkbox" name="taoyuan_doc_type_9_opt1" value="1" /> 被繼承人除戶戶籍謄本</label>
+						<label for="taoyuan_doc_type_9_opt2"><input id="taoyuan_doc_type_9_opt2" type="checkbox" name="taoyuan_doc_type_9_opt2" value="2" /> 登記清冊</label>
+						<label for="taoyuan_doc_type_9_opt3"><input id="taoyuan_doc_type_9_opt3" type="checkbox" name="taoyuan_doc_type_9_opt3" value="3" /> 親屬會議選定或經法院指定之證明文件</label>
+						<label for="taoyuan_doc_type_9_opt4"><input id="taoyuan_doc_type_9_opt4" type="checkbox" name="taoyuan_doc_type_9_opt4" value="4" /> 遺產管理人身分證明文件</label>
+						<ul>
+							<li>
+								其他：
+								<label for="taoyuan_doc_type_9_opt5" style="display:inline">
+									<input id="taoyuan_doc_type_9_opt5" type="checkbox" name="taoyuan_doc_type_9_opt5" value="5" />
+									<input id="taoyuan_doc_type_9_opt6" type="text" name="taoyuan_doc_type_9_opt6" />
+								</label>
+							</li>
+						</ul>
+					</div>
+					
+					<div id="taoyuan_doc_type_10" class="taoyuan_doc_item">
+						<p><strong>無人承認繼承-收歸國有</strong></p>
+						<label for="taoyuan_doc_type_10_opt1"><input id="taoyuan_doc_type_10_opt1" type="checkbox" name="taoyuan_doc_type_10_opt1" value="1" /> 被繼承人除戶戶籍謄本</label>
+						<label for="taoyuan_doc_type_10_opt2"><input id="taoyuan_doc_type_10_opt2" type="checkbox" name="taoyuan_doc_type_10_opt2" value="2" /> 登記清冊</label>
+						<label for="taoyuan_doc_type_10_opt3"><input id="taoyuan_doc_type_10_opt3" type="checkbox" name="taoyuan_doc_type_10_opt3" value="3" /> 移交清冊</label>
+						<label for="taoyuan_doc_type_10_opt4"><input id="taoyuan_doc_type_10_opt4" type="checkbox" name="taoyuan_doc_type_10_opt4" value="4" /> 切結已完成公示催告無人報明債權及受遺贈人</label>
+						<label for="taoyuan_doc_type_10_opt5"><input id="taoyuan_doc_type_10_opt5" type="checkbox" name="taoyuan_doc_type_10_opt5" value="5" /> 公示催告裁定書</label>
+						<label for="taoyuan_doc_type_10_opt6"><input id="taoyuan_doc_type_10_opt6" type="checkbox" name="taoyuan_doc_type_10_opt6" value="6" /> 刊報影本</label>
+						<label for="taoyuan_doc_type_10_opt7"><input id="taoyuan_doc_type_10_opt7" type="checkbox" name="taoyuan_doc_type_10_opt7" value="7" /> 遺產稅免稅或繳納證明書</label>
+						<label for="taoyuan_doc_type_10_opt8">
+							<input id="taoyuan_doc_type_10_opt8" type="checkbox" name="taoyuan_doc_type_10_opt8" value="8" /> 權利書狀，未能檢附權利書狀：
+							<label style="display:inline" for="taoyuan_doc_type_10_opt9"><input id="taoyuan_doc_type_10_opt9" type="checkbox" name="taoyuan_doc_type_10_opt9" value="9" /> 切結書</label>
+						</label>
+						<ul>
+							<li>
+								其他：
+								<label for="taoyuan_doc_type_10_opt10" style="display:inline">
+									<input id="taoyuan_doc_type_10_opt10" type="checkbox" name="taoyuan_doc_type_10_opt10" value="10" />
+									<input id="taoyuan_doc_type_10_opt11" type="text" name="taoyuan_doc_type_10_opt11" />
+								</label>
+							</li>
+						</ul>
+					</div>
+				</div>
+              </div>
+            </fieldset>
+
+          </form>
         </div>
+        <div class="col"></div>
       </div>
+      <p id="contact" class="text-center">
+        <small id="copyright" class="text-muted my-2">&copy; 2018, 2019 <strong><a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a></strong> at <a href="http://www.taoyuan-land.tycg.gov.tw/" target="_blank">Taoyuan-Land Office</a>.</small>
+      </p>
     </div>
   </section><!-- /section -->
-  <small id="copyright" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded">
-    <p id="copyright" class="text-center my-2">
-    <a href="https://github.com/pyliu/Land-Affairs-Helper" target="_blank" title="View project on Github!"><svg class="octicon octicon-mark-github v-align-middle" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg></a>
-      <strong>&copy; <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
-    </p>
-  </small>
 
-  <!-- Modal -->
-  <div class="modal fade" id="ajax_modal" role="dialog">
-    <div class="modal-dialog modal-md">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">案件詳情</h4>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <p>詳情顯示在這邊</p>
-        </div>
-        <!-- <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">關閉</button>
-        </div> -->
-      </div>
-    </div>
-  </div>
   <!-- Bootstrap core JavaScript
   ================================================== -->
   <!-- Placed at the end of the document so the pages load faster -->
@@ -284,96 +491,20 @@ fieldset fieldset legend {
   <!-- <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery.min.js"><\/script>')</script> -->
   <script src="assets/js/popper.min.js"></script>
   <script src="assets/js/bootstrap.min.js"></script>
+  <script src="assets/js/bootstrap-treeview.min.js"></script>
   <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
   <script src="assets/js/ie10-viewport-bug-workaround.js"></script>
-  <script src="assets/js/global.js"></script>
-  <!-- xhr js -->
-  <script src="assets/js/xhr_query.js"></script>
-  <!-- for mark highlight -->
-  <script src="assets/js/mark.jquery.min.js"></script>
-  <!-- cache reload -->
-  <script src="assets/js/cache.js"></script>
-  <script type="text/javascript">
-    // place this variable in global to use this int for condition jufgement, e.g. 108
-    var this_year = <?php echo $this_year; ?>;
-    $(document).ready(function(e) {
-      // unsupported IE detection
-      if (window.attachEvent) {
-        document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援舊版IE瀏覽器, 請使用Chrome/Firefox/IE11瀏覽器。</h2>';
-        return;
-      }
-      // 選擇【字】的事件
-      $("#query_code").on("change", xhrGetCaseLatestNum.bind({
-        code_id: "query_code",
-        year_id: "query_year",
-        number_id: "query_num",
-        display_id: "query_display"
-      }));
-      // 登記查詢按鍵
-      $("#query_button").on("click", xhrRegQueryCase);
-      // 號
-      bindPressEnterEvent("#query_num", xhrRegQueryCase);
-      // 地價查詢按鍵
-      $("#query_prc_button").on("click", xhrPrcQueryCase);
-
-      // query section data event
-      $("#data_query_button").on("click", xhrGetSectionRALIDCount);
-      bindPressEnterEvent("#data_query_text", xhrGetSectionRALIDCount);
-
-      // query case by id event
-      $("#id_query_button").on("click", xhrGetCasesByID);
-      bindPressEnterEvent("#id_query_text", xhrGetCasesByID);
-
-      /**
-       * For User Mapping
-       */
-      var prevVal = null;
-      var filter_user = function(el) {
-        var val = $(el).val();
-        if (val == prevVal) {
-          return;
-        }
-        $(".user_tag").unmark(val, {
-          "className": "highlight"
-        });
-        if (isEmpty(val)) {
-          $(".user_tag").removeClass("hide");
-          $("#filter_info").text("<?php echo count($operators); ?>筆");
-        } else {
-          $(".user_tag").each(function(idx, div) {
-            var keyword = new RegExp(val, "ig");
-            keyword.test($(div).text()) ? $(div).removeClass("hide") : $(div).addClass("hide");
-            $(div).mark(val, {
-              "element" : "strong",
-              "className": "highlight"
-            });
-          });
-          $("#filter_info").text((<?php echo count($operators); ?> - $(".user_tag.hide").length) + "筆");
-        }
-        prevVal = val;
-      };
-
-      filter_user("#filter_input");
-
-      var delayTimer = null;
-      $("#filter_input").on("keyup", function(e) {
-        clearTimeout(delayTimer);
-        delayTimer = setTimeout(function() {
-          filter_user(e.target);
-        }, 1000);
-      });
-
-      // sql csv export
-      /*
-      $("#sql_csv_text_button").on("click", xhrExportSQLCsv);
-      $("#sql_txt_text_button").on("click", xhrExportSQLTxt);
-      */
-      $("#sql_export_button").on("click", function(e) {
-        var selected = $("#preload_sql_select").val();
-        selected.startsWith("txt_") ? xhrExportSQLTxt(e) : xhrExportSQLCsv(e);
-      });
-      $("#preload_sql_select").on("change", xhrLoadSQL);
-    });
+  <!-- Custom scripts for UI event handling -->
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/ready.js"></script>
+  <script src="assets/js/wizard.js"></script>
+  <script src="assets/js/preview.js"></script>
+  <script>
+    // other custom scripts start here
+    var btype = getBrowserType();
+    if (btype == "0" || (btype.indexOf('IE') !== -1 && btype != "IE11")) {
+      document.getElementById("body").innerHTML = "<h1 style='font-weight:bolder; color: red; text-align: center;'>抱歉，本網頁只支援IE11瀏覽器、Chrome或是Firefox。</h1>";
+    }
   </script>
 </body>
 </html>

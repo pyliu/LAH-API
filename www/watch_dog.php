@@ -83,7 +83,7 @@ blockquote img {
       <div class="row">
         <div class="col-6">
           <fieldset>
-            <legend>跨所註記遺失檢測＆修正(一周內)</legend>
+            <legend>跨所註記遺失檢測<small>(一周內)</small></legend>
             <button id="cross_case_check_query_button" data-toggle='tooltip' title='系統每10分鐘自動檢查'>立刻檢查</button>
             <button id="cross_case_check_quote_button">備註</button>
             <blockquote id="cross_case_check_quote" class="hide">
@@ -125,7 +125,7 @@ blockquote img {
       <div class="row">
         <div class="col-6">
           <fieldset>
-            <legend>先行准登(公告期限維護)</legend>
+            <legend>公告期限維護<small>(先行准登)</small></legend>
             <button id="prereg_query_button">取得公告期限資料</button>
             <button id="prereg_clear_button" class="text-danger">》一鍵清除准登《</button>
             <button id="prereg_quote_button">備註</button>
