@@ -1414,13 +1414,14 @@ var showRM30UpdateCaseDetail = function(jsonObj) {
 	} else {
 		html += " <strong class='text-danger'>本案已結案，無法變更狀態！</strong>";
 	}
+	
 	html += "<p>" + jsonObj.tr_html + "</p>";
 	$("#rm30_update_display").html(html);
 	$("#rm30_update_select").val(jsonObj.raw["RM30"]);
 
 	// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
 	$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
-	$(".reg_case_id").attr("title", "click me for more info!");
+	$(".reg_case_id").attr("title", "點我取得更多資訊！");
 	// update button xhr event
 	$("#rm30_update_button").on("click", function(e) {
 		var selected = $("#rm30_update_select").val();

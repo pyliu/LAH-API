@@ -38,6 +38,12 @@ blockquote img {
   display: block;
 }
 
+.reg_case_id:hover {
+  background-color: yellow;
+  text-decoration: underline;
+  font-weight: bold;
+  cursor: pointer;
+}
 </style>
 </head>
 
