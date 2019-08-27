@@ -926,6 +926,7 @@ var xhrGetExpaaData = function(e) {
 				$("#expaa_query_number").val(pc_num);
 				$("#expac_query_number").val(pc_num);
 				xhrGetExpaaData.call(null, [e]);
+				xhrGetExpacItems.call(null, [e]);
 			});
 		} else {
 			$("#expaa_query_display").html("<span class='text-danger'>" + jsonObj.message.replace(", ", "") + "</span>");
