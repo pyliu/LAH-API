@@ -185,6 +185,7 @@ blockquote img {
               <ul>
                 <!-- // 登記 -->
                 <li>"MOICAT.RBLOW" => array("B03", "B04_1", "B04_2")</li>   <!--// YEAR, WORD, NUMBER-->
+                <li>"MOICAT.RCLOR" => array("C03", "C04_1", "C04_2")</li>
                 <li>"MOICAT.REBOW" => array("E03", "E04_1", "E04_2")</li>
                 <!--<li>"MOICAT.RINDX" => array("II03", "II04_1", "II04_2")</li>-->
                 <li>"MOICAT.RLNID" => array("L03", "L04_1", "L04_2")</li>

@@ -3,6 +3,7 @@ return array(
     // 登記
     "MOICAT.RBLOW" => array("B03", "B04_1", "B04_2"),   // YEAR, WORD, NUMBER
     "MOICAT.REBOW" => array("E03", "E04_1", "E04_2"),
+    "MOICAT.RCLOR" => array("C03", "C04_1", "C04_2"),
     //"MOICAT.RINDX" => array("II03", "II04_1", "II04_2"),  // RINDX must be kept
     "MOICAT.RLNID" => array("L03", "L04_1", "L04_2"),
     "MOICAT.RRLSQ" => array("R03", "R04_1", "R04_2"),
