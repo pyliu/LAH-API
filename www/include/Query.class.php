@@ -103,17 +103,25 @@ class Query {
 		if (!filter_var($year, FILTER_SANITIZE_NUMBER_INT)) {
 			return false;
 		}
-		$this->db->parse("
-			SELECT * from MOICAS.CRSMS t
-			WHERE RM01 = :bv_year AND RM02 = :bv_code AND rownum = 1
-			ORDER BY RM01 DESC, RM03 DESC
-		");
-		
+
+		if (array_key_exists($code, SUR_WORD)) {
+			$this->db->parse("
+				SELECT * from MOICAS.CMSMS t
+				WHERE MM01 = :bv_year AND MM02 = :bv_code AND rownum = 1
+				ORDER BY MM01 DESC, MM03 DESC
+			");
+		} else {
+			$this->db->parse("
+				SELECT * from MOICAS.CRSMS t
+				WHERE RM01 = :bv_year AND RM02 = :bv_code AND rownum = 1
+				ORDER BY RM01 DESC, RM03 DESC
+			");
+		}
 		$this->db->bind(":bv_year", $year);
 		$this->db->bind(":bv_code", trim($code));
 		$this->db->execute();
 		$row = $this->db->fetch();
-		return empty($row) ? "0" : ltrim($row["RM03"], "0");
+		return empty($row) ? "0" : ltrim(array_key_exists($code, SUR_WORD) ? $row["MM03"] : $row["RM03"], "0");
 	}
 
 	public function getCRSMSCasesByID($id) {
@@ -373,6 +381,68 @@ class Query {
 		$this->db->execute();
 		// true -> raw data with converting to utf-8
 		return $this->db->fetch();
+	}
+
+    public function getSurCaseDetail($id) {
+        if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
+            return "";
+		}
+		
+		$this->db->parse(
+			"select t.*, s.*, u.KCNT
+			from MOICAS.CMSMS t
+			left join MOICAS.CMSDS s
+			  on t.mm01 = s.md01
+			 and t.mm02 = s.md02
+			 and t.mm03 = s.md03
+			left join MOIADM.RKEYN u
+			  on t.mm06 = u.kcde_2
+			 and u.kcde_1 = 'M3'
+			where
+			 t.mm01 = :bv_year
+			 and t.mm02 = :bv_code
+			 and t.mm03 = :bv_number"
+        );
+        
+        $this->db->bind(":bv_year", substr($id, 0, 3));
+        $this->db->bind(":bv_code", substr($id, 3, 4));
+        $this->db->bind(":bv_number", substr($id, 7, 6));
+
+		$this->db->execute();
+		// true -> raw data with converting to utf-8
+		return $this->db->fetch();
+	}
+
+	public function fixSurDelayCase($id) {
+		if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
+            return false;
+		}
+
+		$year = substr($id, 0, 3);
+		$code = substr($id, 3, 4);
+		$number = substr($id, 7, 6);
+		
+		$this->db->parse("
+			UPDATE MOICAS.CMSMS SET MM22 = 'D'
+			WHERE MM01 = :bv_year AND MM02 = :bv_code AND MM03 = :bv_number
+		");
+		$this->db->bind(":bv_year", $year);
+        $this->db->bind(":bv_code", $code);
+		$this->db->bind(":bv_number", $number);
+		// UPDATE/INSERT can not use fetch after execute ... 
+		$this->db->execute();
+
+		$this->db->parse("
+			UPDATE MOICAS.CMSDS SET MD12 = '', MD13_1 = '', MD13_2 = ''
+			WHERE MD01 = :bv_year AND MD02 = :bv_code AND MD03 = :bv_number
+		");
+		$this->db->bind(":bv_year", $year);
+		$this->db->bind(":bv_code", $code);
+		$this->db->bind(":bv_number", $number);
+		// UPDATE/INSERT can not use fetch after execute ... 
+		$this->db->execute();
+
+		return true;
 	}
 
 	public function updateRegCaseRM30($rm01, $rm02, $rm03, $rm30_val) {

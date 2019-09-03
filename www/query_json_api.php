@@ -1,6 +1,7 @@
 <?php
 require_once("./include/init.php");
 require_once("./include/RegCaseData.class.php");
+require_once("./include/SurCaseData.class.php");
 require_once("./include/PrcAllCasesData.class.php");
 require_once("./include/Query.class.php");
 require_once("./include/JSONAPICommandFactory.class.php");
@@ -139,6 +140,36 @@ switch ($_POST["type"]) {
 		} else {
 			$data = new RegCaseData($row);
 			echo $data->getJsonHtmlData();
+		}
+		break;
+	case "sur_case":
+		if (empty($_POST["id"])) {
+			echoErrorJSONString();
+			break;
+		}
+		$row = $query->getSurCaseDetail($_POST["id"]);
+		if (empty($row)) {
+			echoErrorJSONString();
+		} else {
+			$data = new SurCaseData($row);
+			echo $data->getJsonHtmlData();
+		}
+		break;
+	case "fix_sur_delay_case":
+		if (empty($_POST["id"])) {
+			echoErrorJSONString();
+			break;
+		}
+		$result_flag = $query->fixSurDelayCase($_POST["id"]);
+		if ($result_flag) {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => "0",
+				"raw" => $result_flag
+			);
+			echo json_encode($result, 0);
+		} else {
+			echoErrorJSONString("更新失敗【".$_POST["id"]."】");
 		}
 		break;
 	case "prc_case":

@@ -1449,4 +1449,104 @@ var showRM30UpdateCaseDetail = function(jsonObj) {
 		}
 	});
 }
+
+var xhrGetSURCase = function(e) {
+	var year = $("#sur_delay_case_fix_year").val().replace(/\D/g, "");
+	var code = $("#sur_delay_case_fix_code").val();
+	var number = $("#sur_delay_case_fix_num").val().replace(/\D/g, "");
+
+	if (isEmpty(code)) {
+		showPopper("#sur_delay_case_fix_code");
+		return;
+	}
+
+	if (isEmpty(number)) {
+		showPopper("#sur_delay_case_fix_num");
+		return;
+	}
+
+	// make total number length is 6
+	var offset = 6 - number.length;
+	if (offset < 0) {
+		$("#sur_delay_case_fix_display").html("<strong class='text-danger'>號的長度不能超過6個數字!</strong>");
+		$("#sur_delay_case_fix_num").focus();
+		return false;
+	} else if (offset > 0) {
+		for (var i = 0; i < offset; i++) {
+			number = "0" + number;
+		}
+	}
+	
+	$("#sur_delay_case_fix_num").val(number);
+
+	// prepare post params
+	var id = trim(year + code + number);
+	var body = new FormData();
+	body.append("type", "sur_case");
+	body.append("id", id);
+	
+	setLoadingHTML("#sur_delay_case_fix_display");
+
+	fetch("query_json_api.php", {
+		method: "POST",
+		body: body
+	}).then(function(response) {
+		return response.json();
+	}).then(function(jsonObj) {
+		showSURCaseDetail(jsonObj);
+	}).catch(function(ex) {
+		console.error("xhrGetSURCase parsing failed", ex);
+		$("#sur_delay_case_fix_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
+	});
+}
+
+var showSURCaseDetail = function(jsonObj) {
+	if (jsonObj.status == 0) {
+		var html = "收件字號：" + "<a title='案件辦理情形 on " + landhb_svr + "' href='#' onclick='javascript:window.open(\"http://\"\+landhb_svr\+\":9080/LandHB/Dispatcher?REQ=CMC0202&GRP=CAS&MM01="+ jsonObj.raw["MM01"] +"&MM02="+ jsonObj.raw["MM02"] +"&MM03="+ jsonObj.raw["MM03"] +"&RM90=\")'>" + jsonObj.收件字號 + "</a> </br>";
+		html += "收件時間：" + jsonObj.收件時間 + " <br/>";
+		html += "申請事由：" + jsonObj.raw["MM06"] + "：" + jsonObj.申請事由 + " <br/>";
+		html += "　段小段：" + jsonObj.raw["MM08"] + " <br/>";
+		html += "　　地號：" + jsonObj.raw["MM09"] + " <br/>";
+		html += "　　建號：" + (isEmpty(jsonObj.raw["MM10"]) ? "" : jsonObj.raw["MM10"]) + " <br/>";
+		html += "辦理情形：" + jsonObj.辦理情形 + " <br/>";
+		html += "結案狀態：" + jsonObj.結案狀態 + " <br/>";
+		html += "延期原因：" + jsonObj.延期原因 + " <br/>";
+		html += "延期時間：" + jsonObj.延期時間 + " <br/>";
+		if (jsonObj.結案已否 && !isEmpty(jsonObj.延期時間)) {
+			html += '<p><span class="text-danger">※</span> ' + "發現 " + jsonObj.收件字號 + " 已結案但有延期時間!" + '</p>';
+			html += "<button id='sur_delay_case_fix_button' class='text-danger'>修正</button><br/>";
+		}
+		$("#sur_delay_case_fix_display").html(html);
+		$("#sur_delay_case_fix_button").on("click", xhrFixSurDelayCase.bind(jsonObj.收件字號));
+	} else if (jsonObj.status == -1) {
+		throw new Error("查詢失敗：" + jsonObj.message);
+	}
+}
+
+var xhrFixSurDelayCase = function(e) {
+	if (confirm("確定要修正本案件?")) {
+		$(e.target).remove();
+		var id = this;
+		//fix_sur_delay_case
+		var body = new FormData();
+		body.append("type", "fix_sur_delay_case");
+		body.append("id", id);
+		fetch("query_json_api.php", {
+			method: "POST",
+			body: body
+		}).then(function(response) {
+			return response.json();
+		}).then(function(jsonObj) {
+			if (jsonObj.status == 1) {
+				showModal(id + " 複丈案件修正成功!", "延期複丈案件修正");
+			} else {
+				showModal(jsonObj.message, "延期複丈案件修正");
+				throw new Error("回傳狀態碼不正確!【" + jsonObj.message + "】");
+			}
+		}).catch(function(ex) {
+			console.error("xhrFixSurDelayCase parsing failed", ex);
+			$("#sur_delay_case_fix_display").html("<strong class='text-danger'>修正 " + id + " 失敗!【" + ex + "】</strong>");
+		});
+	}
+}
 //]]>

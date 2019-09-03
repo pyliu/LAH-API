@@ -200,9 +200,11 @@ blockquote {
   color: #666;
   background-color: #FFF;
   padding: 15px;
-  margin-top: 5px;
-  border-left: 5px solid #00aae1;
-  border-right: 2px solid #00aae1;
+	margin-top: 5px;
+  border-left: 25px solid #00aae1;
+	border-right: 2px solid #00aae1;
+	border-top: 2px solid #00aae1;
+	border-bottom: 2px solid #00aae1;
   box-shadow: 2px 2px 15px #ccc;
 }
 

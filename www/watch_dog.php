@@ -184,11 +184,11 @@ blockquote img {
               <h6 class="text-info">目前會去檢查下列的TABLE</h6>
               <ul>
                 <!-- // 登記 -->
-                <li>"MOICAT.RBLOW" => array("B03", "B04_1", "B04_2")</li>   <!--// YEAR, WORD, NUMBER-->
-                <li>"MOICAT.RCLOR" => array("C03", "C04_1", "C04_2")</li>
+                <li>"MOICAT.RBLOW" => array("B03", "B04_1", "B04_2") 土地標示部</li>   <!--// YEAR, WORD, NUMBER-->
+                <li>"MOICAT.RCLOR" => array("C03", "C04_1", "C04_2") 他項權利部</li>
                 <li>"MOICAT.REBOW" => array("E03", "E04_1", "E04_2")</li>
                 <!--<li>"MOICAT.RINDX" => array("II03", "II04_1", "II04_2")</li>-->
-                <li>"MOICAT.RLNID" => array("L03", "L04_1", "L04_2")</li>
+                <li>"MOICAT.RLNID" => array("L03", "L04_1", "L04_2") 人檔</li>
                 <li>"MOICAT.RRLSQ" => array("R03", "R04_1", "R04_2")</li>
                 <li>"MOICAT.RGALL" => array("G03", "G04_1", "G04_2")</li>
                 <li>"MOICAT.RMNGR" => array("M03", "M04_1", "M04_2")</li>
@@ -240,6 +240,38 @@ blockquote img {
               <span class="text-danger">※</span>新版跨縣市回寫機制會在每一分鐘時自動回寫，故局端資料有可能會比較慢更新。【2019-06-26】
             </blockquote>
             <div id="sync_x_case_display"></div>
+          </fieldset>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <fieldset>
+            <legend>已結案複丈案件清除延期資料</legend>
+            <select id="sur_delay_case_fix_year" name="sur_delay_case_fix_year">
+              <option selected>108</option>
+            </select>
+            年
+            <select id="sur_delay_case_fix_code" name="sur_delay_case_fix_code" data-trigger="manual" data-toggle="popover" data-content='請選擇案件字' title='案件字' data-placement="top">
+              <option></option>
+              <!--
+              <option value="HB11">HB11 中地測數</option>
+              <option value="HB14">HB14 中地測法</option>
+              -->
+              <option value="HB12">HB12 中地測丈</option>
+              <option value="HB13">HB13 中地測建</option>
+              <option value="HB17">HB17 中地法土</option>
+              <option value="HB18">HB18 中地法建</option>
+            </select>
+            字
+            <input type="text" id="sur_delay_case_fix_num" name="sur_delay_case_fix_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號【最大6位數】' title='案件號' data-placement="top" />
+            號
+            <button id="sur_delay_case_fix_search_button">查詢</button>
+            <button id="sur_delay_case_fix_quote_button">備註</button>
+            <blockquote id="sur_delay_case_fix_quote" class="hide">
+              <h5><span class="text-danger">※</span>注意：本功能會清除如下圖之欄位資料並將案件辦理情形改為【核定】，請確認後再執行。</h5>
+              <img src="assets/howto/107-HB18-3490_測丈已結案案件辦理情形出現(逾期)延期複丈問題調整【參考】.jpg" />
+            </blockquote>
+            <div id="sur_delay_case_fix_display"></div>
           </fieldset>
         </div>
       </div>
@@ -411,6 +443,15 @@ blockquote img {
       $("#rm30_update_query").on("click", xhrRM30UpdateQuery);
       bindPressEnterEvent("#rm30_update_num", xhrRM30UpdateQuery);
 
+      // SUR Delay Case Fix
+      $("#sur_delay_case_fix_code").on("change", xhrGetCaseLatestNum.bind({
+        code_id: "sur_delay_case_fix_code",
+        year_id: "sur_delay_case_fix_year",
+        number_id: "sur_delay_case_fix_num",
+        display_id: "sur_delay_case_fix_display"
+      }));
+      $("#sur_delay_case_fix_search_button").on("click", xhrGetSURCase);
+      bindPressEnterEvent("#sur_delay_case_fix_num", xhrGetSURCase);
     });
   </script>
 </body>
