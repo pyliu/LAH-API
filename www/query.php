@@ -222,6 +222,7 @@ fieldset fieldset legend {
                 <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
               </optgroup>
               <optgroup label="==== 所內其他統計 ====">
+                <option value="16_sur_close_delay_case.sql">已結卻延期之複丈案件</option>
                 <option value="14_sur_rain_delay_case.sql">因雨延期測量案件數</option>
                 <option value="05_adm_area_size.sql">段小段面積統計</option>
                 <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
