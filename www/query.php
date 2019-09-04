@@ -258,12 +258,11 @@ fieldset fieldset legend {
         </div>
         <div class="col-6">
           <fieldset>
-            <legend>給局端地籍資料TXT檔</legend>
-            <button id="export_txt_button">未實作 ... </button>
+            <legend>地政局索取地籍資料</legend>
             <button id="export_txt_quote_button">備註</button>
-            <blockquote id="export_txt_blockquote" class="hide">
-              產生輸入段代碼之打包TXT檔案。 <br/> <br/>
-              系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
+            <blockquote id="export_txt_blockquote">
+              <span class="text-danger">※</span> 系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
+              　- <small class="mt-2 mb-2"> 除下面標示為黃色部分須至地政系統產出並下載，其餘皆可於「報表匯出」區塊產出。</small> <br/>
               　AI001-10 <br/>
               　　AI00301 - 土地標示部 <br/>
               　　AI00401 - 土地所有權部 <br/>
@@ -274,19 +273,19 @@ fieldset fieldset legend {
               　　AI01001 - 主建物與共同使用部分 <br/>
               　AI011-20 <br/>
               　　AI01101 - 建物所有權部 <br/>
-              　　AI01901 - 土地各部別 <br/>
+              　　<span class="text-warning">AI01901 - 土地各部別</span> <br/>
               　AI021-40 <br/>
-              　　AI02101 - 土地他項權利部 <br/>
-              　　AI02201 - 建物他項權利部 <br/>
+              　　<span class="text-warning">AI02101 - 土地他項權利部</span> <br/>
+              　　<span class="text-warning">AI02201 - 建物他項權利部</span> <br/>
               　　AI02901 - 各部別之其他登記事項【土地、建物各做一次】 <br/><br/>
 
-              測量子系統/測量資料管理/資料輸出入 【請至地政系統WEB版產出】<br/>
+              <span class="text-danger">※</span> 測量子系統/測量資料管理/資料輸出入 【請至地政系統WEB版產出】<br/>
               　地籍圖轉出(數值地籍) <br/>
               　　* 輸出DXF圖檔【含控制點】及 NEC重測輸出檔 <br/>
               　地籍圖轉出(圖解數化) <br/>
               　　* 同上兩種類皆輸出，並將【分幅管理者先接合】下選項皆勾選 <br/><br/>
                 
-              登記子系統/列印/清冊報表/土地建物地籍整理清冊【土地、建物各產一次存PDF，請至地政系統WEB版產出】 <br/>
+              <span class="text-danger">※</span> 登記子系統/列印/清冊報表/土地建物地籍整理清冊【土地、建物各產一次存PDF，請至地政系統WEB版產出】 <br/>
             </blockquote>
           </fieldset>
         </div>

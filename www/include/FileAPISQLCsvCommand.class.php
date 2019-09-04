@@ -8,6 +8,7 @@ class FileAPISQLCsvCommand extends FileAPICommand {
         $this->sql = $sql;
         // parent class has $colsNameMapping var for translating column header
         $this->colsNameMapping = include("Config.ColsNameMapping.CRSMS.php");
+        $this->colsNameMapping += include("Config.ColsNameMapping.CMSMS.php");
         $this->colsNameMapping += include("Config.ColsNameMapping.CABRP.php");
         $this->colsNameMapping += include("Config.ColsNameMapping.EXPAA.php");
         $this->colsNameMapping += include("Config.ColsNameMapping.EXPAB.php");
