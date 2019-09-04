@@ -98,7 +98,7 @@ fieldset fieldset legend {
             年
             <?php echo getCodeSelectHTML("query_code"); ?>
             字
-            <input type="text" id="query_num" name="query_num" data-toggle='tooltip' title='輸入案件號' />號
+            <input type="text" id="query_num" name="query_num" data-toggle='tooltip' data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="bottom" />號
             <button id="query_button">登記</button>
             <button id="query_prc_button">地價</button>
             <div id="query_display"></div>
@@ -123,7 +123,7 @@ fieldset fieldset legend {
               <option value="HB18">HB18 中地法建</option>
             </select>
             字
-            <input type="text" id="sur_delay_case_fix_num" name="sur_delay_case_fix_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號【最大6位數】' title='案件號' data-placement="top" />
+            <input type="text" id="sur_delay_case_fix_num" name="sur_delay_case_fix_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
             號
             <button id="sur_delay_case_fix_search_button">查詢</button>
             <button id="sur_delay_case_fix_quote_button">備註</button>

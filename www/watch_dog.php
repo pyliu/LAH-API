@@ -152,7 +152,7 @@ blockquote img {
             年
             <?php echo getCodeSelectHTML("rm30_update_code"); ?>
             字
-            <input type="text" id="rm30_update_num" name="rm30_update_num" data-toggle='tooltip' title='輸入案件號' />號
+            <input type="text" id="rm30_update_num" name="rm30_update_num" data-toggle='tooltip' data-content='請輸入案件號(最多6碼)' title='案件號' />號
 
             <button id="rm30_update_query">取得案件資料</button>
             <button id="rm30_update_quote_button">備註</button>
@@ -176,7 +176,7 @@ blockquote img {
             年
             <?php echo getCodeSelectHTML("temp_clr_code", 'data-trigger="manual" data-toggle="popover" data-content="請選擇案件字" title="案件字" data-placement="top"'); ?>
             字
-            <input type="text" id="temp_clr_num" name="temp_clr_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號【最大6位數】' title='案件號' data-placement="top" />
+            <input type="text" id="temp_clr_num" name="temp_clr_num" data-trigger="manual" data-toggle="popover"  data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
             號
             <button id="query_temp_clr_button">查詢</button>
             <button id="temp_clr_quote_button">備註</button>
@@ -231,7 +231,7 @@ blockquote img {
               <option>HHB1 壢山登跨</option>
             </select>
             字
-            <input type="text" id="sync_x_case_num" name="sync_x_case_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號【最大6位數】' title='案件號' data-placement="top" />
+            <input type="text" id="sync_x_case_num" name="sync_x_case_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
             號
             <button id="sync_x_case_button">比對</button>
             <button id="sync_x_case_quote_button">備註</button>
