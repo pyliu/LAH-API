@@ -174,6 +174,8 @@ class SurCaseData {
             "結案已否" => $this->isClose(),
             "結案狀態" => $this->getCloseState(),
             "延期原因" => $this->getDelayReason(),
+            "建號" => trim(substr($row["MM10"], 0, 5), "0").(empty(trim(substr($row["MM10"], 5, 3), "0")) ? "" : "-".trim(substr($row["MM10"], 5, 3), "0")),
+            "地號" => trim(substr($row["MM09"], 0, 4), "0").(empty(trim(substr($row["MM09"], 4, 4), "0")) ? "" : "-".trim(substr($row["MM09"], 4, 4), "0")),
             "延期時間" => $this->toDate($row["MD13_1"])." ".$this->toDate($row["MD13_2"]),
             "raw" => $row
         );

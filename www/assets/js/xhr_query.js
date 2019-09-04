@@ -1419,14 +1419,14 @@ var showSURCaseDetail = function(jsonObj) {
 		html += "收件時間：" + jsonObj.收件時間 + " <br/>";
 		html += "申請事由：" + jsonObj.raw["MM06"] + "：" + jsonObj.申請事由 + " <br/>";
 		html += "　段小段：" + jsonObj.raw["MM08"] + " <br/>";
-		html += "　　地號：" + jsonObj.raw["MM09"] + " <br/>";
-		html += "　　建號：" + (isEmpty(jsonObj.raw["MM10"]) ? "" : jsonObj.raw["MM10"]) + " <br/>";
+		html += "　　地號：" + (isEmpty(jsonObj.raw["MM09"]) ? "" : jsonObj.地號) + " <br/>";
+		html += "　　建號：" + (isEmpty(jsonObj.raw["MM10"]) ? "" : jsonObj.建號) + " <br/>";
 		html += "<span class='text-info'>辦理情形</span>：" + jsonObj.辦理情形 + " <br/>";
 		html += "結案狀態：" + jsonObj.結案狀態 + " <br/>";
 		html += "<span class='text-info'>延期原因</span>：" + jsonObj.延期原因 + " <br/>";
 		html += "<span class='text-info'>延期時間</span>：" + jsonObj.延期時間 + " <br/>";
-		if (jsonObj.結案已否 && (!isEmpty(jsonObj.延期時間) || jsonObj.raw["MM22"] == "C")) {
-			html += '<h6 class="mt-2 mb-2"><span class="text-danger">※</span> ' + "發現 " + jsonObj.收件字號 + " 已「結案」但有「延期時間」或辦理情形為「延期複丈」!" + '</h6>';
+		if (jsonObj.結案已否 && jsonObj.raw["MM22"] == "C") {
+			html += '<h6 class="mt-2 mb-2"><span class="text-danger">※</span> ' + "發現 " + jsonObj.收件字號 + " 已「結案」但辦理情形為「延期複丈」!" + '</h6>';
 			html += "<button id='sur_delay_case_fix_button' class='text-danger' data-trigger='manual' data-toggle='popover' data-content='需勾選右邊其中一個選項才能進行修正' title='錯誤訊息' data-placement='top'>修正</button> ";
 			html += "<label for='sur_delay_case_fix_set_D'><input id='sur_delay_case_fix_set_D' type='checkbox' checked /> 辦理情形改為核定</label> ";
 			html += "<label for='sur_delay_case_fix_clear_delay_datetime'><input id='sur_delay_case_fix_clear_delay_datetime' type='checkbox' checked /> 清除延期時間</label> ";
