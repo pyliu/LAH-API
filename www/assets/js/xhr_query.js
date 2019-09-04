@@ -1425,8 +1425,8 @@ var showSURCaseDetail = function(jsonObj) {
 		html += "結案狀態：" + jsonObj.結案狀態 + " <br/>";
 		html += "延期原因：" + jsonObj.延期原因 + " <br/>";
 		html += "延期時間：" + jsonObj.延期時間 + " <br/>";
-		if (jsonObj.結案已否 && !isEmpty(jsonObj.延期時間)) {
-			html += '<p><span class="text-danger">※</span> ' + "發現 " + jsonObj.收件字號 + " 已結案但有延期時間!" + '</p>';
+		if (jsonObj.結案已否 && (!isEmpty(jsonObj.延期時間) || jsonObj.raw["MM22"] == "C")) {
+			html += '<p><span class="text-danger">※</span> ' + "發現 " + jsonObj.收件字號 + " 已結案但有「延期時間」或辦理情形為「延期複丈」!" + '</p>';
 			html += "<button id='sur_delay_case_fix_button' class='text-danger'>修正</button><br/>";
 		}
 		$("#sur_delay_case_fix_display").html(html);
@@ -1452,6 +1452,8 @@ var xhrFixSurDelayCase = function(e) {
 		}).then(function(jsonObj) {
 			if (jsonObj.status == 1) {
 				showModal(id + " 複丈案件修正成功!", "延期複丈案件修正");
+				// refresh case status
+				xhrGetSURCase.call(null, e);
 			} else {
 				showModal(jsonObj.message, "延期複丈案件修正");
 				throw new Error("回傳狀態碼不正確!【" + jsonObj.message + "】");
