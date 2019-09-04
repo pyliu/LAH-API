@@ -160,7 +160,7 @@ switch ($_POST["type"]) {
 			echoErrorJSONString();
 			break;
 		}
-		$result_flag = $query->fixSurDelayCase($_POST["id"]);
+		$result_flag = $query->fixSurDelayCase($_POST["id"], $_POST["UPD_MM22"], $_POST["CLR_DELAY"]);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,

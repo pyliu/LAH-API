@@ -413,7 +413,7 @@ class Query {
 		return $this->db->fetch();
 	}
 
-	public function fixSurDelayCase($id) {
+	public function fixSurDelayCase($id, $upd_mm22, $clr_delay) {
 		if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
             return false;
 		}
@@ -422,25 +422,29 @@ class Query {
 		$code = substr($id, 3, 4);
 		$number = substr($id, 7, 6);
 		
-		$this->db->parse("
-			UPDATE MOICAS.CMSMS SET MM22 = 'D'
-			WHERE MM01 = :bv_year AND MM02 = :bv_code AND MM03 = :bv_number
-		");
-		$this->db->bind(":bv_year", $year);
-        $this->db->bind(":bv_code", $code);
-		$this->db->bind(":bv_number", $number);
-		// UPDATE/INSERT can not use fetch after execute ... 
-		$this->db->execute();
+		if ($upd_mm22 == "true") {
+			$this->db->parse("
+				UPDATE MOICAS.CMSMS SET MM22 = 'D'
+				WHERE MM01 = :bv_year AND MM02 = :bv_code AND MM03 = :bv_number
+			");
+			$this->db->bind(":bv_year", $year);
+			$this->db->bind(":bv_code", $code);
+			$this->db->bind(":bv_number", $number);
+			// UPDATE/INSERT can not use fetch after execute ... 
+			$this->db->execute();
+		}
 
-		$this->db->parse("
-			UPDATE MOICAS.CMSDS SET MD12 = '', MD13_1 = '', MD13_2 = ''
-			WHERE MD01 = :bv_year AND MD02 = :bv_code AND MD03 = :bv_number
-		");
-		$this->db->bind(":bv_year", $year);
-		$this->db->bind(":bv_code", $code);
-		$this->db->bind(":bv_number", $number);
-		// UPDATE/INSERT can not use fetch after execute ... 
-		$this->db->execute();
+		if ($clr_delay == "true") {
+			$this->db->parse("
+				UPDATE MOICAS.CMSDS SET MD12 = '', MD13_1 = '', MD13_2 = ''
+				WHERE MD01 = :bv_year AND MD02 = :bv_code AND MD03 = :bv_number
+			");
+			$this->db->bind(":bv_year", $year);
+			$this->db->bind(":bv_code", $code);
+			$this->db->bind(":bv_number", $number);
+			// UPDATE/INSERT can not use fetch after execute ... 
+			$this->db->execute();
+		}
 
 		return true;
 	}
