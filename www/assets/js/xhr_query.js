@@ -143,23 +143,12 @@ var xhrRegQueryCaseDialog = function(e) {
 }
 
 var xhrRegQueryCase = function(e) {
+	if (!validateCaseInput("#query_year", "#query_code", "#query_num", "#query_display")) {
+		return false;
+	}
 	var year = $("#query_year").val().replace(/\D/g, "");
 	var code = $("#query_code").val();
 	var number = $("#query_num").val().replace(/\D/g, "");
-	// make total number length is 6
-	var offset = 6 - number.length;
-	if (offset < 0) {
-		$("#query_display").html("<strong class='text-danger'>號的長度不能超過6個數字!</strong>");
-		$("#query_num").focus();
-		return false;
-	} else if (offset > 0) {
-		for (var i = 0; i < offset; i++) {
-			number = "0" + number;
-		}
-	}
-	
-	$("#query_num").val(number);
-
 	// prepare post params
 	var id = trim(year + code + number);
 	var body = new FormData();
@@ -183,23 +172,12 @@ var xhrRegQueryCase = function(e) {
 }
 
 var xhrPrcQueryCase = function(e) {
+	if (!validateCaseInput("#query_year", "#query_code", "#query_num", "#query_display")) {
+		return false;
+	}
 	var year = $("#query_year").val().replace(/\D/g, "");
 	var code = $("#query_code").val();
 	var number = $("#query_num").val().replace(/\D/g, "");
-	// make total number length is 6
-	var offset = 6 - number.length;
-	if (offset < 0) {
-		$("#query_display").html("<strong class='text-danger'>號的長度不能超過6個數字!</strong>");
-		$("#query_num").focus();
-		return false;
-	} else if (offset > 0) {
-		for (var i = 0; i < offset; i++) {
-			number = "0" + number;
-		}
-	}
-	
-	$("#query_num").val(number);
-
 	// prepare post params
 	var id = trim(year + code + number);
 	var body = new FormData();
@@ -635,34 +613,14 @@ var xhrModifyExpacItem = function(year_ac25, num_ac04, now_code_ac20, amount_ac3
 }
 
 var xhrCompareXCase = function(e) {
+	if (!validateCaseInput("#sync_x_case_year", "#sync_x_case_code", "#sync_x_case_num", "#sync_x_case_display")) {
+		return false;
+	}
+	
 	var year = $("#sync_x_case_year").val().replace(/\D/g, "");
 	var code = trim($("#sync_x_case_code").val());
 	var number = $("#sync_x_case_num").val().replace(/\D/g, "");
 	
-	if (isEmpty(code)) {
-		showPopper("#sync_x_case_code");
-		return;
-	}
-
-	// basic checking for number input
-	if (isEmpty(number) || isNaN(number)) {
-		showPopper("#sync_x_case_num");
-		return;
-	}
-
-	// make total number length is 6
-	var offset = 6 - number.length;
-	if (offset < 0) {
-		showPopper("#sync_x_case_num");
-		return;
-	} else if (offset > 0) {
-		for (var i = 0; i < offset; i++) {
-			number = "0" + number;
-		}
-	}
-
-	$("#sync_x_case_num").val(number);
-
 	// toggle button disable attr
 	toggle("#sync_x_case_button");
 
@@ -1244,25 +1202,13 @@ var xhrClearAnnouncementFlag = function(e) {
 }
 
 var xhrQueryTempData = function(e) {
-	if (isEmpty($("#temp_clr_code").val())) {
-		showPopper("#temp_clr_code");
+	if (!validateCaseInput("#temp_clr_year", "#temp_clr_code", "#temp_clr_num", "#temp_clr_display")) {
 		return false;
 	}
 
 	var year = $("#temp_clr_year").val().replace(/\D/g, "");
 	var code = trim($("#temp_clr_code").val());
 	var number = $("#temp_clr_num").val().replace(/\D/g, "");
-
-	// make total number length is 6
-	var offset = 6 - number.length;
-	if (offset < 0) {
-		showPopper("#temp_clr_num");
-		return false;
-	} else if (offset > 0) {
-		for (var i = 0; i < offset; i++) {
-			number = "0" + number;
-		}
-	}
 
 	toggle(e.target);
 
@@ -1346,23 +1292,12 @@ var xhrClearTempData = function(e) {
 }
 
 var xhrRM30UpdateQuery = function(e) {
+	if (!validateCaseInput("#rm30_update_year", "#rm30_update_code", "#rm30_update_num", "#rm30_update_display")) {
+		return false;
+	}
 	var year = $("#rm30_update_year").val().replace(/\D/g, "");
 	var code = $("#rm30_update_code").val();
 	var number = $("#rm30_update_num").val().replace(/\D/g, "");
-	// make total number length is 6
-	var offset = 6 - number.length;
-	if (offset < 0) {
-		$("#rm30_update_display").html("<strong class='text-danger'>號的長度不能超過6個數字!</strong>");
-		$("#rm30_update_num").focus();
-		return false;
-	} else if (offset > 0) {
-		for (var i = 0; i < offset; i++) {
-			number = "0" + number;
-		}
-	}
-	
-	$("#rm30_update_num").val(number);
-
 	// prepare post params
 	var id = trim(year + code + number);
 	var body = new FormData();
@@ -1451,34 +1386,12 @@ var showRM30UpdateCaseDetail = function(jsonObj) {
 }
 
 var xhrGetSURCase = function(e) {
+	if (!validateCaseInput("#sur_delay_case_fix_year", "#sur_delay_case_fix_code", "#sur_delay_case_fix_num", "#sur_delay_case_fix_display")) {
+		return false;
+	}
 	var year = $("#sur_delay_case_fix_year").val().replace(/\D/g, "");
 	var code = $("#sur_delay_case_fix_code").val();
 	var number = $("#sur_delay_case_fix_num").val().replace(/\D/g, "");
-
-	if (isEmpty(code)) {
-		showPopper("#sur_delay_case_fix_code");
-		return;
-	}
-
-	if (isEmpty(number)) {
-		showPopper("#sur_delay_case_fix_num");
-		return;
-	}
-
-	// make total number length is 6
-	var offset = 6 - number.length;
-	if (offset < 0) {
-		$("#sur_delay_case_fix_display").html("<strong class='text-danger'>號的長度不能超過6個數字!</strong>");
-		$("#sur_delay_case_fix_num").focus();
-		return false;
-	} else if (offset > 0) {
-		for (var i = 0; i < offset; i++) {
-			number = "0" + number;
-		}
-	}
-	
-	$("#sur_delay_case_fix_num").val(number);
-
 	// prepare post params
 	var id = trim(year + code + number);
 	var body = new FormData();

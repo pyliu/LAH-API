@@ -38,7 +38,7 @@ require_once("./include/RegCaseData.class.php");
         <li class="nav-item mt-3 active">
           <a class="nav-link" href="/index.php">登記案件追蹤</a>
         </li>
-		    <li class="nav-item mt-3 active">
+		    <li class="nav-item mt-3">
           <a class="nav-link" href="/query.php">查詢＆報表</a>
         </li>
         <li class="nav-item mt-3">

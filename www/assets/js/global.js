@@ -18,6 +18,44 @@ var isEmpty = function(variable) {
 	return false;
 }
 
+var validateCaseInput = function(year_id_selector, code_id_selector, number_id_selector, output_id_selector) {
+	var year = $(year_id_selector).val().replace(/\D/g, "");
+	
+	var code = $(code_id_selector).val();
+	if (isEmpty(code)) {
+		showPopper(code_id_selector);
+		return false;
+	}
+
+	var number_element = $(number_id_selector);
+	if (number_element.length) {
+		var number = $(number_id_selector).val().replace(/\D/g, "");
+		if (isEmpty(number) || isNaN(number)) {
+			showPopper(number_id_selector);
+			return false;
+		}
+
+		// make total number length is 6
+		var offset = 6 - number.length;
+		if (offset < 0) {
+			// check element existence
+			if ($(output_id_selector).length) {
+				$(output_id_selector).html("<strong class='text-danger'>號的長度為6個數字！</strong>");
+			} else {
+				alert("號的長度為6個數字！");
+			}
+			number_element.focus();
+			return false;
+		} else if (offset > 0) {
+			for (var i = 0; i < offset; i++) {
+				number = "0" + number;
+			}
+			number_element.val(number);
+		}
+	}
+	return true;
+}
+
 var showPopper = function(selector, content, timeout) {
 	if (!isEmpty(content)) {
 		$(selector).attr("data-content", content);
