@@ -59,11 +59,11 @@ fieldset fieldset legend {
         <li class="nav-item mt-3">
           <a class="nav-link" href="/index.php">登記案件追蹤</a>
         </li>
-		<li class="nav-item mt-3 active">
-          <a class="nav-link" href="/query.php">業務小幫手</a>
+		    <li class="nav-item mt-3 active">
+          <a class="nav-link" href="/query.php">查詢＆報表</a>
         </li>
         <li class="nav-item mt-3">
-          <a class="nav-link" href="/watch_dog.php">地政看門狗</a>
+          <a class="nav-link" href="/watch_dog.php">監控＆修正</a>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle hamburger" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="assets/img/menu.png" /></a>
@@ -84,43 +84,82 @@ fieldset fieldset legend {
   </nav>
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
-      <fieldset>
-        <legend>登記案件查詢</legend>
-        <select id="query_year" name="query_year">
-          <option>105</option>
-          <option>106</option>
-          <option>107</option>
-          <option selected>108</option>
-        </select>
-        年
-        <?php echo getCodeSelectHTML("query_code"); ?>
-        字
-        <input type="text" id="query_num" name="query_num" data-toggle='tooltip' title='輸入案件號' />號
-        <button id="query_button">登記收件資料查詢</button>
-        <button id="query_prc_button">地價收件資料查詢</button>
-        <div id="query_display"></div>
-      </fieldset>
-      <fieldset>
-        <legend>轄區各段土地標示部筆數＆面積查詢</legend>
-        <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
-        <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
-        <input id="data_query_text" name="data_query_text" type="text" data-toggle='tooltip' title='輸入關鍵字或是段代碼' />
-        <button id="data_query_button">查詢</button>
-        <button id="data_quote_button">備註</button>
-        <blockquote id="data_blockquote" class="hide">
-          -- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>
-          SELECT t.AA48 as "段代碼", <br/>
-              m.KCNT as "段名稱", <br/>
-              SUM(t.AA10) as "面積", <br/>
-              COUNT(t.AA10) as "筆數" <br/>
-          FROM MOICAD.RALID t <br/>
-          LEFT JOIN MOIADM.RKEYN m ON (m.KCDE_1 = '48' and m.KCDE_2 = t.AA48) <br/>
-          --WHERE t.AA48 = '%【輸入數字】'<br/>
-          --WHERE m.KCNT = '%【輸入文字】%'<br/>
-          GROUP BY t.AA48, m.KCNT;
-        </blockquote>
-        <div id="data_query_result"></div>
-      </fieldset>
+      
+    <div class="row">
+        <div class="col-6">
+          <fieldset>
+            <legend>登記案件查詢</legend>
+            <select id="query_year" name="query_year">
+              <option>105</option>
+              <option>106</option>
+              <option>107</option>
+              <option selected>108</option>
+            </select>
+            年
+            <?php echo getCodeSelectHTML("query_code"); ?>
+            字
+            <input type="text" id="query_num" name="query_num" data-toggle='tooltip' title='輸入案件號' />號
+            <button id="query_button">登記</button>
+            <button id="query_prc_button">地價</button>
+            <div id="query_display"></div>
+          </fieldset>
+        </div>
+        <div class="col-6">
+          <fieldset>
+            <legend>複丈案件查詢<small>(清除延期)</small></legend>
+            <select id="sur_delay_case_fix_year" name="sur_delay_case_fix_year">
+              <option selected>108</option>
+            </select>
+            年
+            <select id="sur_delay_case_fix_code" name="sur_delay_case_fix_code" data-trigger="manual" data-toggle="popover" data-content='請選擇案件字' title='案件字' data-placement="top">
+              <option></option>
+              <!--
+              <option value="HB11">HB11 中地測數</option>
+              <option value="HB14">HB14 中地測法</option>
+              -->
+              <option value="HB12">HB12 中地測丈</option>
+              <option value="HB13">HB13 中地測建</option>
+              <option value="HB17">HB17 中地法土</option>
+              <option value="HB18">HB18 中地法建</option>
+            </select>
+            字
+            <input type="text" id="sur_delay_case_fix_num" name="sur_delay_case_fix_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號【最大6位數】' title='案件號' data-placement="top" />
+            號
+            <button id="sur_delay_case_fix_search_button">查詢</button>
+            <button id="sur_delay_case_fix_quote_button">備註</button>
+            <blockquote id="sur_delay_case_fix_quote" class="hide">
+              <h5><span class="text-danger">※</span>注意：本功能會清除如下圖之欄位資料並將案件辦理情形改為【核定】，請確認後再執行。</h5>
+              <img src="assets/howto/107-HB18-3490_測丈已結案案件辦理情形出現(逾期)延期複丈問題調整【參考】.jpg" />
+            </blockquote>
+            <div id="sur_delay_case_fix_display"></div>
+          </fieldset>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <fieldset>
+            <legend>轄區各段土地標示部筆數＆面積查詢</legend>
+            <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
+            <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
+            <input id="data_query_text" name="data_query_text" type="text" data-toggle='tooltip' title='輸入關鍵字或是段代碼' />
+            <button id="data_query_button">查詢</button>
+            <button id="data_quote_button">備註</button>
+            <blockquote id="data_blockquote" class="hide">
+              -- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>
+              SELECT t.AA48 as "段代碼", <br/>
+                  m.KCNT as "段名稱", <br/>
+                  SUM(t.AA10) as "面積", <br/>
+                  COUNT(t.AA10) as "筆數" <br/>
+              FROM MOICAD.RALID t <br/>
+              LEFT JOIN MOIADM.RKEYN m ON (m.KCDE_1 = '48' and m.KCDE_2 = t.AA48) <br/>
+              --WHERE t.AA48 = '%【輸入數字】'<br/>
+              --WHERE m.KCNT = '%【輸入文字】%'<br/>
+              GROUP BY t.AA48, m.KCNT;
+            </blockquote>
+            <div id="data_query_result"></div>
+          </fieldset>
+        </div>
+      </div>
       <div class="row">
         <div class="col-6">
           <fieldset>
@@ -376,6 +415,16 @@ fieldset fieldset legend {
         selected.startsWith("txt_") ? xhrExportSQLTxt(e) : xhrExportSQLCsv(e);
       });
       $("#preload_sql_select").on("change", xhrLoadSQL);
+
+      // SUR Case Query & Delay Case Fix
+      $("#sur_delay_case_fix_code").on("change", xhrGetCaseLatestNum.bind({
+        code_id: "sur_delay_case_fix_code",
+        year_id: "sur_delay_case_fix_year",
+        number_id: "sur_delay_case_fix_num",
+        display_id: "sur_delay_case_fix_display"
+      }));
+      $("#sur_delay_case_fix_search_button").on("click", xhrGetSURCase);
+      bindPressEnterEvent("#sur_delay_case_fix_num", xhrGetSURCase);
     });
   </script>
 </body>

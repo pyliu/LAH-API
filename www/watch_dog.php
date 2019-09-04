@@ -62,10 +62,10 @@ blockquote img {
           <a class="nav-link" href="/index.php">登記案件追蹤</a>
         </li>
 		    <li class="nav-item mt-3">
-          <a class="nav-link" href="/query.php">業務小幫手</a>
+          <a class="nav-link" href="/query.php">查詢＆報表</a>
         </li>
         <li class="nav-item mt-3 active">
-          <a class="nav-link" href="/watch_dog.php">地政看門狗</a>
+          <a class="nav-link" href="/watch_dog.php">監控＆修正</a>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle hamburger" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="assets/img/menu.png" /></a>
@@ -244,38 +244,6 @@ blockquote img {
         </div>
       </div>
       <div class="row">
-        <div class="col-12">
-          <fieldset>
-            <legend>已結案複丈案件清除延期資料</legend>
-            <select id="sur_delay_case_fix_year" name="sur_delay_case_fix_year">
-              <option selected>108</option>
-            </select>
-            年
-            <select id="sur_delay_case_fix_code" name="sur_delay_case_fix_code" data-trigger="manual" data-toggle="popover" data-content='請選擇案件字' title='案件字' data-placement="top">
-              <option></option>
-              <!--
-              <option value="HB11">HB11 中地測數</option>
-              <option value="HB14">HB14 中地測法</option>
-              -->
-              <option value="HB12">HB12 中地測丈</option>
-              <option value="HB13">HB13 中地測建</option>
-              <option value="HB17">HB17 中地法土</option>
-              <option value="HB18">HB18 中地法建</option>
-            </select>
-            字
-            <input type="text" id="sur_delay_case_fix_num" name="sur_delay_case_fix_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號【最大6位數】' title='案件號' data-placement="top" />
-            號
-            <button id="sur_delay_case_fix_search_button">查詢</button>
-            <button id="sur_delay_case_fix_quote_button">備註</button>
-            <blockquote id="sur_delay_case_fix_quote" class="hide">
-              <h5><span class="text-danger">※</span>注意：本功能會清除如下圖之欄位資料並將案件辦理情形改為【核定】，請確認後再執行。</h5>
-              <img src="assets/howto/107-HB18-3490_測丈已結案案件辦理情形出現(逾期)延期複丈問題調整【參考】.jpg" />
-            </blockquote>
-            <div id="sur_delay_case_fix_display"></div>
-          </fieldset>
-        </div>
-      </div>
-      <div class="row">
         <div class="col-6">
           <fieldset>
             <legend>規費資料集修正<small>(EXPAA)</small></legend>
@@ -442,16 +410,6 @@ blockquote img {
       }));
       $("#rm30_update_query").on("click", xhrRM30UpdateQuery);
       bindPressEnterEvent("#rm30_update_num", xhrRM30UpdateQuery);
-
-      // SUR Delay Case Fix
-      $("#sur_delay_case_fix_code").on("change", xhrGetCaseLatestNum.bind({
-        code_id: "sur_delay_case_fix_code",
-        year_id: "sur_delay_case_fix_year",
-        number_id: "sur_delay_case_fix_num",
-        display_id: "sur_delay_case_fix_display"
-      }));
-      $("#sur_delay_case_fix_search_button").on("click", xhrGetSURCase);
-      bindPressEnterEvent("#sur_delay_case_fix_num", xhrGetSURCase);
     });
   </script>
 </body>

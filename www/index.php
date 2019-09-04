@@ -38,11 +38,11 @@ require_once("./include/RegCaseData.class.php");
         <li class="nav-item mt-3 active">
           <a class="nav-link" href="/index.php">登記案件追蹤</a>
         </li>
-		    <li class="nav-item mt-3">
-          <a class="nav-link" href="/query.php">業務小幫手</a>
+		    <li class="nav-item mt-3 active">
+          <a class="nav-link" href="/query.php">查詢＆報表</a>
         </li>
         <li class="nav-item mt-3">
-          <a class="nav-link" href="/watch_dog.php">地政看門狗</a>
+          <a class="nav-link" href="/watch_dog.php">監控＆修正</a>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle hamburger" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="assets/img/menu.png" width="32" /></a>
