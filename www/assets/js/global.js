@@ -86,7 +86,7 @@ var toggle = function(selector) {
 }
 
 var scrollToElement = function (element) {
-	var pos = $(element).offset().top - 100;
+	var pos = $(element).offset().top - 120;
 	if (pos < 0) return;
 	$("html, body").animate({
 		scrollTop: pos

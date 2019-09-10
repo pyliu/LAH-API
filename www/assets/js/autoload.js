@@ -129,6 +129,8 @@ function adjustTableContent() {
                 html += "手機號碼：" + jsonObj.手機號碼 + "<br/>";
                 showModal(html);
                 scrollToElement(clicked_element);
+                $(".focused-element").removeClass("focused-element");
+                clicked_element.addClass("focused-element");
             },
             error: function() {
                 alert("無法取得 " + id + " 資訊!");

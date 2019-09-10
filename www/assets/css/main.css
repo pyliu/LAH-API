@@ -13,8 +13,13 @@ body {
   padding: 5px;
   font-size: 16px;
 }
+
 .optgrp, #relative_law_result, .left {
   text-align: left;
+}
+
+.focused-element {
+	background-color: yellow;
 }
 
 fieldset {
