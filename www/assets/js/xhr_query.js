@@ -1118,9 +1118,9 @@ var xhrQueryAnnouncementData = function(e) {
 		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
 		var count = jsonObj.data_count;
 		// 組合選單介面
-		var html = "公告項目：<select id='prereg_announcement_select' class='mt-1 no-cache'><option value=''>========= 請選擇須更新之登記原因 =========</option>";
+		var html = "公告項目：<select id='prereg_announcement_select' class='mt-1 no-cache'><option value=''>======= 請選擇登記原因 =======</option>";
 		for (var i=0; i<count; i++) {
-			html += "<option value='" + jsonObj.raw[i]["RA01"] + "," + jsonObj.raw[i]["KCNT"] + "," + jsonObj.raw[i]["RA02"] + "," + jsonObj.raw[i]["RA03"] + "'>" + jsonObj.raw[i]["RA01"] + "：" + jsonObj.raw[i]["KCNT"] + "【公告 <span class='text-info'>" + jsonObj.raw[i]["RA02"] + "</span> 天期間" + (jsonObj.raw[i]["RA03"] == "Y" ? " 「可」 准登" : " 不可 准登")+ "】</option>";
+			html += "<option value='" + jsonObj.raw[i]["RA01"] + "," + jsonObj.raw[i]["KCNT"] + "," + jsonObj.raw[i]["RA02"] + "," + jsonObj.raw[i]["RA03"] + "'>" + jsonObj.raw[i]["RA01"] + "：" + jsonObj.raw[i]["KCNT"] + "【" + jsonObj.raw[i]["RA02"] + "天, " + jsonObj.raw[i]["RA03"] + "】</option>";
 		}
 		html += "</select> <div id='prereg_update_ui' class='mt-1'></div>";
 		$("#prereg_query_display").html(html);
