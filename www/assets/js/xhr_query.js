@@ -99,6 +99,9 @@ var showRegCaseDetail = function(jsonObj, use_modal) {
 		showModal(html, "登記案件詳情");
 	} else {
 		$("#query_display").html(html);
+		// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
+		$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
+		$(".reg_case_id").attr("title", "點我取得更多資訊！");
 	}
 }
 
@@ -323,10 +326,13 @@ var xhrGetCasesByID = function(e) {
 			} else {
 				var html = "<p>登記案件：";
 				for (var i=0; i<count; i++) {
-					html += "<div>" + jsonObj.raw[i]["RM01"] + "-" + jsonObj.raw[i]["RM02"]  + "-" + jsonObj.raw[i]["RM03"] + "</div>";
+					html += "<div class='reg_case_id'>" + jsonObj.raw[i]["RM01"] + "-" + jsonObj.raw[i]["RM02"]  + "-" + jsonObj.raw[i]["RM03"] + "</div>";
 				}
 				html += "</p>";
 				$("#id_query_crsms_result").html(html);
+				// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
+				$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
+				$(".reg_case_id").attr("title", "點我取得更多資訊！");
 			}
 			finish_count++;
 			if (finish_count >= 2) {
@@ -1100,7 +1106,6 @@ var xhrExportSQLReport = function(e, form_body) {
 var xhrQueryAnnouncementData = function(e) {
 	var form_body = new FormData();
 	form_body.append("type", "announcement_data");
-	$(e.target).remove();
 	fetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body

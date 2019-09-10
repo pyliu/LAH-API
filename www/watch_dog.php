@@ -37,13 +37,6 @@ blockquote img {
   /*width: 80%;*/
   display: block;
 }
-
-.reg_case_id:hover {
-  background-color: yellow;
-  text-decoration: underline;
-  font-weight: bold;
-  cursor: pointer;
-}
 </style>
 </head>
 
@@ -61,7 +54,7 @@ blockquote img {
         <li class="nav-item mt-3">
           <a class="nav-link" href="/index.php">登記案件追蹤</a>
         </li>
-		    <li class="nav-item mt-3">
+        <li class="nav-item mt-3">
           <a class="nav-link" href="/query.php">查詢＆報表</a>
         </li>
         <li class="nav-item mt-3 active">
@@ -132,15 +125,14 @@ blockquote img {
         <div class="col-6">
           <fieldset>
             <legend>公告期限維護<small>(先行准登)</small></legend>
-            <button id="prereg_query_button">取得公告期限資料</button>
-            <button id="prereg_clear_button" class="text-danger">》一鍵清除准登《</button>
+            <div id="prereg_query_display" class="mb-2"></div>
+            <button id="prereg_clear_button" class="text-danger">★清除准登★</button>
             <button id="prereg_quote_button">備註</button>
             <blockquote id="prereg_quote" class="hide">
               <h5><span class="text-danger">※</span>注意：中壢所規定超過30件案件才能執行此功能，並於完成時須馬上關掉以免其他案件誤登。</h5>
               <h5><span class="text-danger">※</span>注意：准登完後該案件須手動於資料庫中調整辦理情形（RM30）為「公告」（H）。</h5>
               <img src="assets/howto/登記原因先行准登設定.jpg" />
             </blockquote>
-            <div id="prereg_query_display"></div>
           </fieldset>
         </div>
         <div class="col-6">
@@ -387,7 +379,7 @@ blockquote img {
       }));
 
       // query for announcement
-      $("#prereg_query_button").on("click", xhrQueryAnnouncementData);
+      xhrQueryAnnouncementData.call(e, null);
       $("#prereg_clear_button").on("click", xhrClearAnnouncementFlag);
 
       // clear temp data
