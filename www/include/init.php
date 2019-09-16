@@ -1,10 +1,13 @@
 <?
+date_default_timezone_set("ASIA/TAIPEI");
+session_start();
+// some query take long time ...
+set_time_limit(0);
+
 require_once("Config.inc.php");
 require_once("GlobalConstants.inc.php");
 require_once("GlobalFunctions.inc.php");
-
-// some query take long time ...
-set_time_limit(0);
+require_once("Logger.class.php");
 
 $client_ip = $_SERVER["REMOTE_ADDR"];
 if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
@@ -13,13 +16,15 @@ if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
     $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
 }
 
+$today_ad = date('Y-m-d');  // ex: 2019-09-16
+$log = new Logger('logs/log-' . $today_ad . '.log');
+
 if (!in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
+    $log->warning($client_ip." tried to access the mgt system.");
     die("<(￣ ﹌ ￣)> ".$client_ip);
 }
 
 
-date_default_timezone_set("ASIA/TAIPEI");
-session_start();
 
 $tw_date = new Datetime("now");
 $tw_date->modify("-1911 year");
@@ -33,4 +38,5 @@ $qday = preg_replace("/\D+/", "", $qday);
 if (empty($qday) || !ereg("^[0-9]{7}$", $qday)) {
   $qday = (date("Y")-1911).date("md"); // 今天
 }
+
 ?>
