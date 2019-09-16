@@ -530,8 +530,13 @@ class Query {
 		}
 		
 		$diff_result = array();
+		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
+		$num = substr($id, 7, 6);
 		$db_user = "L1H".$code[1]."0H03";
+
+		global $log;
+		$log->info(__METHOD__.": 找遠端 ${db_user}.CRSMS 的案件資料【${year}, ${code}, ${num}】");
 
 		// connection switch to L1HWEB
 		$this->db->connect(CONNECTION_TYPE::L1HWEB);
@@ -540,16 +545,19 @@ class Query {
 			FROM $db_user.CRSMS t
 			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
 		");
-        $this->db->bind(":bv_rm01_year", substr($id, 0, 3));
+        $this->db->bind(":bv_rm01_year", $year);
         $this->db->bind(":bv_rm02_code", $code);
-        $this->db->bind(":bv_rm03_number", substr($id, 7, 6));
+        $this->db->bind(":bv_rm03_number", $num);
 		$this->db->execute();
 		$remote_row = $this->db->fetch();
 
 		// 遠端無此資料
 		if (empty($remote_row)) {
+			$log->warning(__METHOD__.": 遠端 ${db_user}.CRSMS 查無 ${year}-${code}-${num} 案件資料");
 			return -2;
 		}
+
+		$log->info(__METHOD__.": 找本地 MOICAS.CRSMS 的案件資料【${year}, ${code}, ${num}】");
 
 		// connection switch to MAIN
 		$this->db->connect(CONNECTION_TYPE::MAIN);
@@ -558,14 +566,15 @@ class Query {
 			FROM MOICAS.CRSMS t
 			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
 		");
-        $this->db->bind(":bv_rm01_year", substr($id, 0, 3));
+        $this->db->bind(":bv_rm01_year", $year);
         $this->db->bind(":bv_rm02_code", $code);
-        $this->db->bind(":bv_rm03_number", substr($id, 7, 6));
+        $this->db->bind(":bv_rm03_number", $num);
 		$this->db->execute();
 		$local_row = $this->db->fetch();
 
 		// 本地無此資料
 		if (empty($local_row)) {
+			$log->warning(__METHOD__.": 本地 MOICAS.CRSMS 查無 ${year}-${code}-${num} 案件資料");
 			return -3;
 		}
 
@@ -589,9 +598,12 @@ class Query {
 		if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
             return -1;
 		}
-		
+
+		global $log;
 		$diff_result = array();
+		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
+		$num = substr($id, 7, 6);
 		$db_user = "L1H".$code[1]."0H03";
 
 		// connection switch to L1HWEB
@@ -601,14 +613,15 @@ class Query {
 			FROM $db_user.CRSMS t
 			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
 		");
-        $this->db->bind(":bv_rm01_year", substr($id, 0, 3));
+        $this->db->bind(":bv_rm01_year", $year);
         $this->db->bind(":bv_rm02_code", $code);
-        $this->db->bind(":bv_rm03_number", substr($id, 7, 6));
+        $this->db->bind(":bv_rm03_number", $num);
 		$this->db->execute();
 		$remote_row = $this->db->fetch();
 
 		// 遠端無此資料
 		if (empty($remote_row)) {
+			$log->warning(__METHOD__.": 遠端 ${db_user}.CRSMS 查無 ${year}-${code}-${num} 案件資料");
 			return -2;
 		}
 
@@ -619,9 +632,9 @@ class Query {
 			FROM MOICAS.CRSMS t
 			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
 		");
-        $this->db->bind(":bv_rm01_year", substr($id, 0, 3));
+        $this->db->bind(":bv_rm01_year", $year);
         $this->db->bind(":bv_rm02_code", $code);
-        $this->db->bind(":bv_rm03_number", substr($id, 7, 6));
+        $this->db->bind(":bv_rm03_number", $num);
 		$this->db->execute();
 		$local_row = $this->db->fetch();
 
@@ -642,11 +655,12 @@ class Query {
 				INSERT INTO MOICAS.CRSMS ".$columns." VALUES ".$values."
 			");
 
+			$log->info(__METHOD__.": 插入 SQL \"INSERT INTO MOICAS.CRSMS ".$columns." VALUES ".$values."\"");
 			$this->db->execute();
 
 			return true;
 		}
-
+		$log->error(__METHOD__.": 本地 MOICAS.CRSMS 已有 ${year}-${code}-${num} 案件資料");
 		return false;
 	}
 
@@ -657,6 +671,7 @@ class Query {
 	public function syncXCaseColumn($id, $column) {
 		$diff = $this->getXCaseDiff($id);
 		if (!empty($diff)) {
+			global $log;
 			$year = substr($id, 0, 3);
 			$code = substr($id, 3, 4);
 			$number = substr($id, 7, 6);
@@ -677,7 +692,9 @@ class Query {
 			$this->db->bind(":bv_rm01_year", $year);
 			$this->db->bind(":bv_rm02_code", $code);
 			$this->db->bind(":bv_rm03_number", $number);
-			
+
+			$log->info(__METHOD__.": 更新 SQL \"UPDATE MOICAS.CRSMS SET ".$set_str." WHERE RM01 = '$year' AND RM02 = '$code' AND RM03 = '$number'\"");
+
 			$this->db->execute();
 
 			return true;
@@ -787,9 +804,15 @@ class Query {
 		if (empty($year) || empty($code) || empty($number)) {
 			return $result;
 		}
+
+		global $log;
+
 		// an array to express temp tables and key field names that need to be checked.
 		$temp_tables = include("Config.TempTables.php");
 		foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
+
+			$log->info(__METHOD__.": 查詢 $tmp_tbl_name 的暫存資料 ... 【".$key_fields[0].", ".$key_fields[1].", ".$key_fields[2]."】");
+			
 			$this->db->parse("
 				SELECT * FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = :bv_year AND ".$key_fields[1]." = :bv_code AND ".$key_fields[2]." = :bv_number
 			");
