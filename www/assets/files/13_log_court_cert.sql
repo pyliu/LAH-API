@@ -19,7 +19,7 @@ SELECT t.MD01             AS "收件年",
     ON (t.MD03 = r.SR03)
    AND (t.MD02 = r.SR02)
    AND (t.MD01 = r.SR01)
--- WHERE r.SR09 ='J000000000';  -- 依統編查詢
+-- WHERE r.SR09 ='J000000000';
 -- WHERE r.SR10 LIKE '星展%' AND t.MD06 = '0223'
- WHERE t.MD06 in ( '0229' ) -- 段代碼
-   AND t.MD08 in ('21470003', '01117000');  -- 地/建號
+ WHERE t.MD06 in ( '0223' )
+   AND t.MD08 in ('08250000', '06941000')
