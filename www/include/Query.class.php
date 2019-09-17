@@ -524,7 +524,7 @@ class Query {
 		return $this->db->fetchAll();
 	}
 	
-	public function getXCaseDiff($id) {
+	public function getXCaseDiff($id, $raw = false) {
         if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
             return -1;
 		}
@@ -549,7 +549,7 @@ class Query {
         $this->db->bind(":bv_rm02_code", $code);
         $this->db->bind(":bv_rm03_number", $num);
 		$this->db->execute();
-		$remote_row = $this->db->fetch();
+		$remote_row = $this->db->fetch($raw);
 
 		// 遠端無此資料
 		if (empty($remote_row)) {
@@ -570,7 +570,7 @@ class Query {
         $this->db->bind(":bv_rm02_code", $code);
         $this->db->bind(":bv_rm03_number", $num);
 		$this->db->execute();
-		$local_row = $this->db->fetch();
+		$local_row = $this->db->fetch($raw);
 
 		// 本地無此資料
 		if (empty($local_row)) {
@@ -594,7 +594,7 @@ class Query {
 		return $diff_result;
 	}
 	
-	public function instXCase($id) {
+	public function instXCase($id, $raw = true) {
 		if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
             return -1;
 		}
@@ -617,7 +617,7 @@ class Query {
         $this->db->bind(":bv_rm02_code", $code);
         $this->db->bind(":bv_rm03_number", $num);
 		$this->db->execute();
-		$remote_row = $this->db->fetch();
+		$remote_row = $this->db->fetch($raw);
 
 		// 遠端無此資料
 		if (empty($remote_row)) {
@@ -636,7 +636,7 @@ class Query {
         $this->db->bind(":bv_rm02_code", $code);
         $this->db->bind(":bv_rm03_number", $num);
 		$this->db->execute();
-		$local_row = $this->db->fetch();
+		$local_row = $this->db->fetch($raw);
 
 		// 本地無此資料才能新增
 		if (empty($local_row)) {
@@ -646,7 +646,7 @@ class Query {
 			$values = "(";
 			foreach ($remote_row as $key => $value) {
 				$columns .= $key.",";
-				$values .= "'".iconv("utf-8", "big5", $value)."',";
+				$values .= "'".($raw ? $value : iconv("utf-8", "big5", $value))."',";
 			}
 			$columns = rtrim($columns, ",").")";
 			$values = rtrim($values, ",").")";
@@ -669,7 +669,7 @@ class Query {
 	}
 
 	public function syncXCaseColumn($id, $column) {
-		$diff = $this->getXCaseDiff($id);
+		$diff = $this->getXCaseDiff($id, true);	// true -> use raw data to update
 		if (!empty($diff)) {
 			global $log;
 			$year = substr($id, 0, 3);
