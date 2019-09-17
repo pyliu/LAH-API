@@ -449,21 +449,6 @@ class Query {
 		return true;
 	}
 
-	public function updateRegCaseRM30($rm01, $rm02, $rm03, $rm30_val) {
-		$this->db->parse("
-			UPDATE MOICAS.CRSMS SET RM30 = :bv_rm30_val WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
-		");
-
-		$this->db->bind(":bv_rm01_year", $rm01);
-		$this->db->bind(":bv_rm02_code", $rm02);
-		$this->db->bind(":bv_rm03_number", $rm03);
-		$this->db->bind(":bv_rm30_val", $rm30_val);
-		
-		$this->db->execute();
-
-		return true;
-	}
-
 	public function getPrcCaseAll($id) {
         if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
             return "";

@@ -1365,7 +1365,7 @@ var showRM30UpdateCaseDetail = function(jsonObj) {
 	html += '<option value="B">B: 複審</option>';
 	html += '<option value="H">H: 公告</option>';
 	html += '<option value="I">I: 補正</option>';
-	html += '<option value="R">I: 登錄</option>';
+	html += '<option value="R">R: 登錄</option>';
 	html += '<option value="C">C: 校對</option>';
 	html += '<option value="U">U: 異動完成</option>';
 	html += '<option value="F">F: 結案</option>';

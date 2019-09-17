@@ -473,7 +473,7 @@ switch ($_POST["type"]) {
 		break;
 	case "reg_upd_rm30":
 		$log->info("XHR [reg_upd_rm30] 查詢請求 【".$_POST["rm01"].", ".$_POST["rm02"].", ".$_POST["rm03"].", ".$_POST["rm30"]."】");
-		$result_flag = $query->updateRegCaseRM30($_POST["rm01"], $_POST["rm02"], $_POST["rm03"], $_POST["rm30"]);
+		$result_flag = $query->updateCaseColumnData($_POST["rm01"].$_POST["rm02"].$_POST["rm03"], "MOICAS.CRSMS", "RM30", $_POST["rm30"]);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
