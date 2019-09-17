@@ -1,4 +1,4 @@
-<?
+<?php
 date_default_timezone_set("ASIA/TAIPEI");
 session_start();
 // some query take long time ...
