@@ -61,7 +61,7 @@ require_once("./include/RegCaseData.class.php");
       </ul>
       <form id="search_form" class="form-inline my-2 my-lg-0" onsubmit="return false">
         <label class="text-white" for="date_input">日期：</label>
-        <input id="date_input" class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" value="<?php echo RegCaseData::toDate($qday); ?>" readonly />
+        <input id="date_input" class="date_picker form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" value="<?php echo RegCaseData::toDate($qday); ?>" readonly />
         <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜尋</button>
       </form>
     </div>
@@ -238,33 +238,9 @@ require_once("./include/RegCaseData.class.php");
       $("#search_form").on("submit", function(e) {
         window.location = "index.php?date=" + $("#date_input").val();
       });
-    
-      $("#date_input").datepicker({
-        daysOfWeekDisabled: "",
-        language: "zh-TW",
-        daysOfWeekHighlighted: "1,2,3,4,5",
-        todayBtn: true,
-        todayHighlight: true,
-        autoclose: true,
-        format: {
-          /*
-          * Say our UI should display a week ahead,
-          * but textbox should store the actual date.
-          * This is useful if we need UI to select local dates,
-          * but store in UTC
-          */
-          toDisplay: function (date, format, language) {
-            var d = new Date(date);
-            return (d.getFullYear() - 1911) + "-"
-                  + ("0" + (d.getMonth()+1)).slice(-2) + "-"
-                  + ("0" + d.getDate()).slice(-2);
-          },
-          toValue: function (date, format, language) {
-            // initialize to now
-            return new Date();
-          }
-        }
-      }).on("changeDate", function(e) {
+      
+      // datepicker auto attached via .date_picker class
+      $("#date_input").on("changeDate", function(e) {
         window.location = "index.php?date=" + $("#date_input").val();
       });
     });

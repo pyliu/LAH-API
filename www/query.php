@@ -136,7 +136,7 @@ fieldset fieldset legend {
         </div>
       </div>
       <div class="row">
-        <div class="col-12">
+        <div class="col-6">
           <fieldset>
             <legend>轄區各段土地標示部筆數＆面積查詢</legend>
             <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
@@ -157,6 +157,17 @@ fieldset fieldset legend {
               GROUP BY t.AA48, m.KCNT;
             </blockquote>
             <div id="data_query_result"></div>
+          </fieldset>
+        </div>
+        <div class="col-6">
+          <fieldset>
+            <legend>記錄檔</legend>
+            <input class="no-cache" id="log_date_text" name="log_date_text" type="text" title='輸入日期' value="<?php echo $today_ad; ?>" />
+            <button id="log_button">輸出</button>
+            <button id="log_quote_button">備註</button>
+            <blockquote id="log_blockquote" class="hide">
+              根據日期取得本伺服器之紀錄檔案。
+            </blockquote>
           </fieldset>
         </div>
       </div>
@@ -230,7 +241,7 @@ fieldset fieldset legend {
                 <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
                 <option value="15_reg_land_stats.sql">某段之土地所有權人清冊資料</option>
               </optgroup>
-              <optgroup label="==== 地籍資料 ====" class="bg-light">
+              <optgroup label="==== 地籍資料 ====" class="bg-success text-white">
                 <option value="txt_AI00301.sql">AI00301 - 土地標示部資料</option>
                 <option value="txt_AI00401.sql">AI00401 - 土地所有權部資料</option>
                 <option value="txt_AI00601_B.sql">AI00601 - 土地管理者資料</option>
@@ -333,6 +344,9 @@ fieldset fieldset legend {
   <script src="assets/js/mark.jquery.min.js"></script>
   <!-- cache reload -->
   <script src="assets/js/cache.js"></script>
+  <!-- bs datepicker -->
+  <script src="assets/js/bootstrap-datepicker.min.js"></script>
+  <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
   <script type="text/javascript">
     // place this variable in global to use this int for condition jufgement, e.g. 108
     var this_year = <?php echo $this_year; ?>;
@@ -406,15 +420,22 @@ fieldset fieldset legend {
       });
 
       // sql csv export
-      /*
-      $("#sql_csv_text_button").on("click", xhrExportSQLCsv);
-      $("#sql_txt_text_button").on("click", xhrExportSQLTxt);
-      */
       $("#sql_export_button").on("click", function(e) {
         var selected = $("#preload_sql_select").val();
         selected.startsWith("txt_") ? xhrExportSQLTxt(e) : xhrExportSQLCsv(e);
       });
       $("#preload_sql_select").on("change", xhrLoadSQL);
+
+      // log export
+      $("#log_button").on("click", xhrExportLog);
+      $("#log_date_text").datepicker({
+        language: "zh-TW",
+        daysOfWeekHighlighted: "1,2,3,4,5",
+        clearBtn: true,
+        todayHighlight: true,
+        autoclose: true,
+        format: "yyyy-mm-dd"
+      });
 
       // SUR Case Query & Delay Case Fix
       $("#sur_delay_case_fix_code").on("change", xhrGetCaseLatestNum.bind({

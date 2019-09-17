@@ -293,8 +293,8 @@ var xhrGetSectionRALIDCount = function(e) {
 					size_o = (jsonObj.raw[i]["面積"] * 3025 / 10000).toFixed(2);
 					size_o = size_o.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 				}
-				html += "【<span class='text-info'>" + jsonObj.raw[i]["段代碼"]  + "</span>】" + jsonObj.raw[i]["段名稱"] + "：土地標示部 <span class='text-primary'>" + blow + "</span> 筆【面積：" + size + " &#x33A1; | " + size_o + " 坪】。";
-				html += " (應收費 NTD " + dollar + " 元整) <br />";
+				html += "【<span class='text-info'>" + jsonObj.raw[i]["段代碼"]  + "</span>】" + jsonObj.raw[i]["段名稱"] + "：土地標示部 <span class='text-primary'>" + blow + "</span> 筆【面積：" + size + " &#x33A1; | " + size_o + " 坪】 <br />";
+				//html += " (應收費 NTD " + dollar + " 元整) <br />";
 			}
 			$("#data_query_result").html(html);
 		},
@@ -1099,6 +1099,35 @@ var xhrExportSQLReport = function(e, form_body) {
 		toggle(e.target);
 	}).catch(function(ex) {
 		console.error("xhrExportSQLReport parsing failed", ex);
+		alert("XHR連線查詢有問題!!【" + ex + "】");
+	});
+};
+
+var xhrExportLog = function(e) {
+	var date = $("#log_date_text").val();
+	var form_body = new FormData();
+	form_body.append("type", "file_log");
+	form_body.append("date", date);
+	toggle(e.target);
+	fetch("export_file_api.php", {
+		method: 'POST',
+		body: form_body
+	}).then(function(response) {
+		return response.blob();
+	}).then(function (blob) {
+		var d = new Date();
+		var url = window.URL.createObjectURL(blob);
+		var a = document.createElement('a');
+		a.href = url;
+		a.download = date + ".log";
+		document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+		a.click();    
+		a.remove();  //afterwards we remove the element again
+		// release object in memory
+		window.URL.revokeObjectURL(url);
+		toggle(e.target);
+	}).catch(function(ex) {
+		console.error("xhrExportLog parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 };
