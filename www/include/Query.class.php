@@ -451,17 +451,17 @@ class Query {
 
 	public function updateRegCaseRM30($rm01, $rm02, $rm03, $rm30_val) {
 		$this->db->parse("
-				UPDATE MOICAS.CRSMS SET RM30 = :bv_rm30_val WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
-			");
+			UPDATE MOICAS.CRSMS SET RM30 = :bv_rm30_val WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
+		");
 
-			$this->db->bind(":bv_rm01_year", $rm01);
-			$this->db->bind(":bv_rm02_code", $rm02);
-			$this->db->bind(":bv_rm03_number", $rm03);
-			$this->db->bind(":bv_rm30_val", $rm30_val);
-			
-			$this->db->execute();
+		$this->db->bind(":bv_rm01_year", $rm01);
+		$this->db->bind(":bv_rm02_code", $rm02);
+		$this->db->bind(":bv_rm03_number", $rm03);
+		$this->db->bind(":bv_rm30_val", $rm30_val);
+		
+		$this->db->execute();
 
-			return true;
+		return true;
 	}
 
 	public function getPrcCaseAll($id) {
@@ -829,9 +829,13 @@ class Query {
 	}
 
 	public function clearCaseTemp($year, $code, $number) {
+		global $log;
+
 		if (empty($year) || empty($code) || empty($number)) {
+			$log->error(__METHOD__."：輸入參數不能為空白【${year}, ${code}, ${number}】");
 			return false;
 		}
+		
 		// an array to express temp tables and key field names that need to be checked.
 		$temp_tables = include("Config.TempTables.php");
 		foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
@@ -845,6 +849,43 @@ class Query {
 			
 			$this->db->execute();
 		}
+		return true;
+	}
+
+	public function updateCaseColumnData($id, $table, $column, $val) {
+		global $log;
+
+		if (empty($id) || empty($table) || empty($column) || empty($val)) {
+			$log->error(__METHOD__."：輸入參數不能為空白【${id}, ${table}, ${column}, ${val}】");
+			return false;
+		}
+
+		if (!ereg("^[0-9A-Za-z]{13}$", $id)) {
+			$log->error(__METHOD__."：ID格式不正確【應為13碼，目前：${id}】");
+			return false;
+		}
+
+		$year_col = strpos($table, "CRSMS") ? "RM01" : "MM01";
+		$code_col = strpos($table, "CRSMS") ? "RM02" : "MM02";
+		$num_col = strpos($table, "CRSMS") ? "RM03" : "MM03";
+
+		$year = substr($id, 0, 3);
+		$code = substr($id, 3, 4);
+		$num = substr($id, 7, 6);
+
+		$sql = "UPDATE ${table} SET ${column} = :bv_val WHERE ${year_col} = :bv_year AND ${code_col} = :bv_code AND ${num_col} = :bv_number";
+		
+		$log->info(__METHOD__."：預備執行 $sql");
+
+		$this->db->parse($sql);
+
+		$this->db->bind(":bv_year", $year);
+		$this->db->bind(":bv_code", $code);
+		$this->db->bind(":bv_number", $num);
+		$this->db->bind(":bv_val", $val);
+		
+		$this->db->execute();
+
 		return true;
 	}
 }

@@ -1422,6 +1422,7 @@ var showSURCaseDetail = function(jsonObj) {
 	if (jsonObj.status == 0) {
 		var html = "收件字號：" + "<a title='案件辦理情形 on " + landhb_svr + "' href='#' onclick='javascript:window.open(\"http://\"\+landhb_svr\+\":9080/LandHB/Dispatcher?REQ=CMC0202&GRP=CAS&MM01="+ jsonObj.raw["MM01"] +"&MM02="+ jsonObj.raw["MM02"] +"&MM03="+ jsonObj.raw["MM03"] +"&RM90=\")'>" + jsonObj.收件字號 + "</a> </br>";
 		html += "收件時間：" + jsonObj.收件時間 + " <br/>";
+		html += "　連件數：<input type='text' id='mm24_upd_text' value='" + jsonObj.raw["MM24"] + "' /> <button id='mm24_upd_btn' data-table='SCMSMS' data-case-id='" + jsonObj.收件字號 + "' data-origin-value='" + jsonObj.raw["MM24"] + "' data-column='MM24' data-input-id='mm24_upd_text' data-title=' " + jsonObj.raw["MM01"] + "-" + jsonObj.raw["MM02"] + "-" + jsonObj.raw["MM03"] + " 連件數'>更新</button><br/>";
 		html += "申請事由：" + jsonObj.raw["MM06"] + "：" + jsonObj.申請事由 + " <br/>";
 		html += "　段小段：" + jsonObj.raw["MM08"] + " <br/>";
 		html += "　　地號：" + (isEmpty(jsonObj.raw["MM09"]) ? "" : jsonObj.地號) + " <br/>";
@@ -1438,6 +1439,12 @@ var showSURCaseDetail = function(jsonObj) {
 		}
 		$("#sur_delay_case_fix_display").html(html);
 		$("#sur_delay_case_fix_button").on("click", xhrFixSurDelayCase.bind(jsonObj.收件字號));
+		$("#mm24_upd_btn").on("click", function(e) {
+			// input validation
+			var number = $("#mm24_upd_text").val().replace(/\D/g, "");
+			$("#mm24_upd_text").val(number);
+			xhrUpdateCaseColumnData(e);
+		});
 	} else if (jsonObj.status == -1) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	}
@@ -1476,6 +1483,48 @@ var xhrFixSurDelayCase = function(e) {
 		}).catch(function(ex) {
 			console.error("xhrFixSurDelayCase parsing failed", ex);
 			$("#sur_delay_case_fix_display").html("<strong class='text-danger'>修正 " + id + " 失敗!【" + ex + "】</strong>");
+		});
+	}
+}
+
+var xhrUpdateCaseColumnData = function(e) {
+	/**
+	 * add various data attrs in the button tag
+	 */
+	var the_btn = $(e.target);
+	var origin_val = the_btn.attr("data-origin-value");
+	var upd_val = $("#"+the_btn.attr("data-input-id")).val();
+	var title = the_btn.attr("data-title");
+	if (origin_val != upd_val && confirm("確定要修改 " + title + " 為「" + upd_val + "」？")) {
+		var id = the_btn.attr("data-case-id");
+		var column = the_btn.attr("data-column");
+		var table = the_btn.attr("data-table");
+		var body = new FormData();
+		body.append("type", "upd_case_column");
+		body.append("id", id);
+		body.append("table", table);
+		body.append("column", column);
+		body.append("value", upd_val);
+
+		the_btn.remove();
+
+		fetch("query_json_api.php", {
+			method: "POST",
+			body: body
+		}).then(function(response) {
+			if (response.status != 200) {
+				throw new Error("XHR連線異常，回應非200");
+			}
+			return response.json();
+		}).then(function(jsonObj) {
+			if (jsonObj.status == 1) {
+				showModal(title + "更新成功", "更新欄位");
+			} else {
+				showModal(jsonObj.message, "更新欄位失敗");
+			}
+		}).catch(function(ex) {
+			console.error("xhrUpdateCaseColumnData parsing failed", ex);
+			showModal(ex.toString(), "更新欄位失敗");
 		});
 	}
 }

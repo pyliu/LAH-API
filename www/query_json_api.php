@@ -157,6 +157,7 @@ switch ($_POST["type"]) {
 			echoErrorJSONString();
 			break;
 		}
+		$log->info("XHR [reg_case] 查詢請求【".$_POST["id"]."】");
 		$row = $query->getRegCaseDetail($_POST["id"]);
 		if (empty($row)) {
 			$log->info("XHR [reg_case] 查無資料");
@@ -486,6 +487,23 @@ switch ($_POST["type"]) {
 			$log->error("XHR [reg_upd_rm30] 更新案件辦理情形失敗");
 			echoErrorJSONString("更新案件辦理情形失敗");
 		}
+		break;
+	case "upd_case_column":
+			$log->info("XHR [upd_case_column] 查詢請求 【".$_POST["id"].", ".$_POST["table"].", ".$_POST["column"].", ".$_POST["value"]."】");
+			$result_flag = $query->updateCaseColumnData($_POST["id"], $_POST["table"], $_POST["column"], $_POST["value"]);
+			if ($result_flag) {
+				$result = array(
+					"status" => STATUS_CODE::SUCCESS_NORMAL,
+					"data_count" => "0",
+					"raw" => $result_flag,
+					"query_string" => "id=".$_POST["id"]."&table=".$_POST["table"]."&column=".$_POST["column"]."&value=".$_POST["value"]
+				);
+				$log->info("XHR [upd_case_column] 更新".$_POST["table"].".".$_POST["column"]."欄位為「".$_POST["value"]."」成功");
+				echo json_encode($result, 0);
+			} else {
+				$log->error("XHR [upd_case_column] 更新".$_POST["table"].".".$_POST["column"]."欄位為「".$_POST["value"]."」失敗");
+				echoErrorJSONString("更新".$_POST["table"].".".$_POST["column"]."欄位為「".$_POST["value"]."」失敗");
+			}
 		break;
 	case "unittest":
 		echo '{"\u6536\u4ef6\u5b57\u865f":"108HB04064420","\u6536\u4ef6\u6642\u9593":"108-04-08 11:55:48","\u767b\u8a18\u539f\u56e0":"\u62b5\u7e73\u7a05\u6b3e","\u9650\u8fa6\u671f\u9650":"<span class=\'\'>108-04-11 11:55:48<\/span>","\u4f5c\u696d\u4eba\u54e1":"\u674e\u52dd\u96f2","\u8fa6\u7406\u60c5\u5f62":"\u521d\u5be9","\u6b0a\u5229\u4eba\u7d71\u7de8":"03732401","\u6b0a\u5229\u4eba\u59d3\u540d":"\u8ca1\u653f\u90e8\u570b\u6709\u8ca1\u7522\u7f72","\u7fa9\u52d9\u4eba\u7d71\u7de8":"A120895766","\u7fa9\u52d9\u4eba\u59d3\u540d":"\u59da\u932b\u7fd4","\u7fa9\u52d9\u4eba\u4eba\u6578":"4","\u624b\u6a5f\u865f\u78bc":"0938016860","\u4ee3\u7406\u4eba\u7d71\u7de8":"A120895766","\u4ee3\u7406\u4eba\u59d3\u540d":" \u59da\u932b\u7fd4","\u6bb5\u4ee3\u78bc":"0224","\u6bb5\u5c0f\u6bb5":"\u4e2d\u539f\u6bb5","\u5730\u865f":"1093-0001","\u5efa\u865f":"","\u4ef6\u6578":"2","\u767b\u8a18\u8655\u7406\u8a3b\u8a18":"","\u5730\u50f9\u8655\u7406\u8a3b\u8a18":"","\u8de8\u6240":null,"\u8cc7\u6599\u7ba1\u8f44\u6240":null,"\u8cc7\u6599\u6536\u4ef6\u6240":null,"tr_html":"<div>unittest</div>","raw":{"RM01":"108","RM02":"HB04","RM03":"064420","RM04":null,"RM05":null,"RM06":null,"RM07_1":"1080408","RM07_2":"115548","RM08":"1","RM09":"AZ","RM10":"03","RM11":"0224","RM12":"10930001","RM13":"1","RM14":"211","RM15":null,"RM16":null,"RM17":null,"RM18":"03732401","RM19":"\u8ca1\u653f\u90e8\u570b\u6709\u8ca1\u7522\u7f72","RM20":"1","RM21":"A120895766","RM22":"\u59da\u932b\u7fd4","RM23":"4","RM24":"A120895766","RM25":null,"RM26":"1","RM27":"24","RM28":null,"RM29_1":"1080411","RM29_2":"115548","RM30":"A","RM30_1":"HB1203","RM31":null,"RM33":null,"RM34":null,"RM35":null,"RM36":null,"RM37":null,"RM38":null,"RM39":null,"RM40":null,"RM41":null,"RM42":null,"RM43":null,"RM44_1":null,"RM44_2":null,"RM45":"HB1203","RM46_1":null,"RM46_2":null,"RM47":"HB0142","RM48_1":null,"RM48_2":null,"RM49":null,"RM49_TYPE":null,"RM49_DAY":null,"RM50":null,"RM51":null,"RM52":null,"RM52_TYPE":null,"RM52_DAY":null,"RM53_1":null,"RM53_2":null,"RM54_1":null,"RM54_2":null,"RM55":null,"RM56_1":null,"RM56_2":null,"RM57":null,"RM58_1":null,"RM58_2":null,"RM59":null,"RM60":null,"RM61":null,"RM62_1":null,"RM62_2":null,"RM63":null,"RM64":null,"RM32":"2","RM65":"A","RM65_1":"HB1135","RM66":null,"RM67":null,"RM65_2":null,"RM68":null,"RM80":null,"RM81":null,"RM82":null,"RM83":null,"RM84":null,"RM85":null,"RM86":null,"RM87":null,"RM88":null,"RM89":null,"RM25_2":null,"RM70":"U","SS_FLAG":null,"RM91":null,"RM91_1":null,"RM91_2":null,"RM90":null,"RM92":null,"RM93_1":null,"RM93_2":null,"RM93":null,"RM94":null,"RM95":null,"RM96":"HB1117","RM97":null,"RM98":null,"RM99":null,"RM100":null,"RM100_1":null,"RM101":null,"RM101_1":null,"RM91_3":null,"RM102":"0938016860","RM106":null,"RM106_1":null,"RM106_2":null,"RM107":null,"RM107_1":null,"RM107_2":null,"RM91_4":null,"RM24_OTHER":null,"RM25_OTHER":null,"RM97_OTHER":null,"RM108":null,"KCNT":"\u62b5\u7e73\u7a05\u6b3e","AB02":" \u59da\u932b\u7fd4","RM11_CNT":"\u4e2d\u539f\u6bb5"}}';

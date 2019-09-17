@@ -106,7 +106,7 @@ fieldset fieldset legend {
         </div>
         <div class="col-6">
           <fieldset>
-            <legend>複丈案件查詢<small>(清除延期)</small></legend>
+            <legend>複丈案件查詢<small>(修正已結延期、修改連件數)</small></legend>
             <select id="sur_delay_case_fix_year" name="sur_delay_case_fix_year">
               <option selected>108</option>
             </select>
