@@ -1,7 +1,7 @@
 <?php
 require_once("Config.inc.php");
 
-function GetDBUserMapping() {
+function GetDBUserMapping($refresh = false) {
     $tmp_path = sys_get_temp_dir();
     $file     = $tmp_path . "\\tyland_user.map";
     $time = filemtime($file);
