@@ -1,4 +1,4 @@
-<?
+<?php
 require_once("./include/init.php");
 
 function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
