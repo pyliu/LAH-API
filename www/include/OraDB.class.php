@@ -140,7 +140,7 @@ class OraDB {
         mb_regex_encoding($dest_charset); // 宣告 要進行 regex 的多位元編碼轉換格式 為 $dest_charset
         mb_substitute_character('long'); // 宣告 缺碼字改以U+16進位碼為標記取代
         $str = mb_convert_encoding($str, $dest_charset, $src_charset);
-        $str = preg_replace('/U\+([0-9A-F]{4})/e', '"&#".intval("\\1",16).";"', $str); // 將U+16進位碼標記轉換為UnicodeHTML碼
+        //$str = preg_replace('/U\+([0-9A-F]{4})/e', '"&#".intval("\\1",16).";"', $str); // 將U+16進位碼標記轉換為UnicodeHTML碼
         return $str;
     }
 }

@@ -13,8 +13,7 @@ class Query {
 		}
 		$id = strtoupper(trim($id));
 		// first char is Alphabet, second is [12ABCD], rest are digits
-		$ereg_pattern = "^[A-Z]{1}[12ABCD]{1}[[:digit:]]{8}$";
-		if(!ereg($ereg_pattern, $id)) {
+		if(!preg_match("/^[A-Z]{1}[12ABCD]{1}[[:digit:]]{8}$/i", $id)) {
 			return false;
 		}
 		// key str
@@ -31,6 +30,13 @@ class Query {
 		$sum += $d1 + (int)$id[9];
 		if($sum%10 != 0) {
 			return false;
+		}
+		return true;
+	}
+
+	private function checkCaseID($id) {
+		if (empty($id) || !preg_match("/^[0-9A-Za-z]{13}$/i", $id)) {
+            return false;
 		}
 		return true;
 	}
@@ -78,7 +84,7 @@ class Query {
 	}
 
 	public function fixProblematicCrossCases($id) {
-		if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
+		if (!$this->checkCaseID($id)) {
             return false;
 		}
 		
@@ -357,7 +363,7 @@ class Query {
     }
 
     public function getRegCaseDetail($id) {
-        if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
+        if (!$this->checkCaseID($id)) {
             return "";
 		}
 		
@@ -384,7 +390,7 @@ class Query {
 	}
 
     public function getSurCaseDetail($id) {
-        if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
+        if (!$this->checkCaseID($id)) {
             return "";
 		}
 		
@@ -414,7 +420,7 @@ class Query {
 	}
 
 	public function fixSurDelayCase($id, $upd_mm22, $clr_delay) {
-		if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
+		if (!$this->checkCaseID($id)) {
             return false;
 		}
 
@@ -450,7 +456,7 @@ class Query {
 	}
 
 	public function getPrcCaseAll($id) {
-        if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
+        if (!$this->checkCaseID($id)) {
             return "";
 		}
 
@@ -510,7 +516,7 @@ class Query {
 	}
 	
 	public function getXCaseDiff($id, $raw = false) {
-        if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
+        if (!$this->checkCaseID($id)) {
             return -1;
 		}
 		
@@ -580,7 +586,7 @@ class Query {
 	}
 	
 	public function instXCase($id, $raw = true) {
-		if (empty($id) || !ereg("^[0-9A-Za-z]{13}$", $id)) {
+		if (!$this->checkCaseID($id)) {
             return -1;
 		}
 
@@ -689,11 +695,11 @@ class Query {
 	
 	public function getSelectSQLData($sql, $raw = false) {
 		// non-select statement will skip
-		if (!eregi("^SELECT.+$", $sql)) {
+		if (!preg_match("/^SELECT.+$/i", $sql)) {
 			return false;
 		}
 		// second defense line
-		if (eregi("^.*(INSERT|DELETE|UPDATE).*$", $sql)) {
+		if (preg_match("/^.*(INSERT|DELETE|UPDATE).*$/i", $sql)) {
 			return false;
 		}
 
@@ -845,7 +851,7 @@ class Query {
 			return false;
 		}
 
-		if (!ereg("^[0-9A-Za-z]{13}$", $id)) {
+		if (!$this->checkCaseID($id)) {
 			$log->error(__METHOD__."：ID格式不正確【應為13碼，目前：${id}】");
 			return false;
 		}

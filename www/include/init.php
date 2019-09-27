@@ -35,7 +35,7 @@ $week_ago = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080318
 
 $qday = $_REQUEST["date"];
 $qday = preg_replace("/\D+/", "", $qday);
-if (empty($qday) || !ereg("^[0-9]{7}$", $qday)) {
+if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   $qday = (date("Y")-1911).date("md"); // 今天
 }
 
