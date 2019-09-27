@@ -694,12 +694,17 @@ class Query {
 	}
 	
 	public function getSelectSQLData($sql, $raw = false) {
+		global $log;
 		// non-select statement will skip
-		if (!preg_match("/^SELECT.+$/i", $sql)) {
+		if (!preg_match("/^SELECT/i", $sql)) {
+			$log->error(__METHOD__.": 非SELECT起始之SQL!");
+			$log->error(__METHOD__.": $sql");
 			return false;
 		}
 		// second defense line
-		if (preg_match("/^.*(INSERT|DELETE|UPDATE).*$/i", $sql)) {
+		if (preg_match("/^.*(INSERT|DELETE|UPDATE)/i", $sql)) {
+			$log->error(__METHOD__.": 不能使用非SELECT起始之SQL!");
+			$log->error(__METHOD__.": $sql");
 			return false;
 		}
 
