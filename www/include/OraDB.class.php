@@ -144,6 +144,7 @@ class OraDB {
             "/U\+([0-9A-F]{4})/",
             function($matches) {
                 foreach($matches as $match){
+                    // find first one and return
                     return "&#".intval($match, 16).";";
                 }
             }, 

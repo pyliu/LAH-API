@@ -78,4 +78,35 @@ function getCodeSelectHTML($element_id, $other_attrs = "") {
     </optgroup>
   </select>';
 }
+
+function zipLogs() {
+    global $log;
+    // Enter the name of directory
+    $pathdir = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs";
+    $dir = opendir($pathdir); 
+    $today = date("Y-m-d");
+    while($file = readdir($dir)) {
+        // skip today
+        if (stristr($file, $today)) {
+            $log->info("Skipping today's log for compression.【${file}】");
+            continue;
+        }
+        $full_filename = $pathdir.DIRECTORY_SEPARATOR.$file;
+        if(is_file($full_filename)) {
+            $pinfo = pathinfo($full_filename);
+            if ($pinfo["extension"] != "log") {
+                continue;
+            }
+            $zipcreated = $pinfo["dirname"].DIRECTORY_SEPARATOR.$pinfo["filename"].".zip";
+            $zip = new ZipArchive();
+            if($zip->open($zipcreated, ZipArchive::CREATE ) === TRUE) {
+                $log->info("New zip file created.【${zipcreated}】");
+                $zip->addFile($full_filename, $file);
+                $zip ->close();
+            }
+            $log->info("remove log file.【".$pinfo["basename"]."】");
+            @unlink($full_filename);
+        }
+    }
+}
 ?>

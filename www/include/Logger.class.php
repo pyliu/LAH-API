@@ -57,6 +57,46 @@ class Logger {
     }
 
     /**
+    * Zip method (zip the log file)
+    * @param string $date
+    * @return void
+    */
+    public function zip($date){
+        if (!preg_match("/^[[:digit:]]{4}\-[[:digit:]]{2}\-[[:digit:]]{2}$/", $date)) {
+            $this->error("The input date format is wrong! ($date, correct param is like '2019-10-01')");
+            return false;
+        }
+        $today = date("Y-m-d");
+        if ($date == $today) {
+            $this->warning("We should not zip today's log!");
+            return false;
+        }
+
+        // Enter the name of directory
+        $pathdir = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs";
+        // Enter the name to creating zipped directory
+        $zipcreated = "log-${date}.zip";
+        $zip_file = $pathdir.DIRECTORY_SEPARATOR.$zipcreated;
+        $log_path = $pathdir.DIRECTORY_SEPARATOR."log-${date}.log";
+
+        if (file_exists($zip_file)) {
+            $this->warning("Zip file already exists! 【${zip_file}】");
+            return false;
+        }
+ 
+        $zip = new ZipArchive(); 
+        if($zip->open($zip_file, ZipArchive::OVERWRITE ) === TRUE) { 
+            if(is_file($log_path)) { 
+                $zip->addFile($log_path);
+            }
+            $zip ->close();
+            @unlink($log_path);
+        } 
+
+        return true;
+    }
+
+    /**
     * Info method (write info message)
     * @param string $message
     * @return void
