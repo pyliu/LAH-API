@@ -13,24 +13,25 @@ class FileAPILogExportCommand extends FileAPICommand {
     function __destruct() {}
 
     public function execute() {
-        $path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs".DIRECTORY_SEPARATOR."log-".$this->date.".log";
+        $logs_folder = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs";
+        $path = $logs_folder.DIRECTORY_SEPARATOR."log-".$this->date.".log";
         $data = null;
         if (file_exists($path)) {
             $data = file_get_contents($path);
         } else {
-            $zippath = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs".DIRECTORY_SEPARATOR."log-".$this->date.".zip";
+            $zippath = $logs_folder.DIRECTORY_SEPARATOR."log-".$this->date.".zip";
             if (file_exists($zippath)) {
                 // extract the log for downloading
                 $zip = new ZipArchive($zippath);
                 if ($zip->open($zippath)) {
-                    $zip->extractTo(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs");
+                    $zip->extractTo($logs_folder);
                     $zip->close();
                     $data = file_get_contents($path);
                     @unlink($path);
                 }
             } else {
                 // fall back to get today's log
-                $path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs".DIRECTORY_SEPARATOR."log-".date('Y-m-d').".log";
+                $path = $logs_folder.DIRECTORY_SEPARATOR."log-".date('Y-m-d').".log";
                 $data = file_get_contents($path);
             }
         }
