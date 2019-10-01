@@ -208,6 +208,7 @@ blockquote img {
         <div class="col-6">
           <fieldset>
             <legend>同步局端跨所案件資料</legend>
+            <div><span class="text-danger">※</span>主機IP不在局端<span class="text-info">白名單</span>內將無法使用本功能，目前為<span class="text-danger"><?php echo $_SERVER["SERVER_ADDR"] ?></span>。</div>
             <select id="sync_x_case_year" name="sync_x_case_year">
               <option selected>108</option>
             </select>
@@ -229,7 +230,8 @@ blockquote img {
             <button id="sync_x_case_quote_button">備註</button>
             <blockquote id="sync_x_case_quote" class="hide">
               <h6>將局端跨所資料同步回本所資料庫</h6>
-              <span class="text-danger">※</span>新版跨縣市回寫機制會在每一分鐘時自動回寫，故局端資料有可能會比較慢更新。【2019-06-26】
+              <div><span class="text-danger">※</span>新版跨縣市回寫機制會在每一分鐘時自動回寫，故局端資料有可能會比較慢更新。【2019-06-26】</div>
+              <div><span class="text-danger">※</span>局端針對遠端連線同步異動資料庫有鎖IP，故<span class="text-danger">IP不在局端白名單內的主機將無法使用本功能</span>，目前主機IP為 <span class="text-warning"><?php echo $_SERVER["SERVER_ADDR"] ?></span> 。【2019-10-01】</div>
             </blockquote>
             <div id="sync_x_case_display"></div>
           </fieldset>
