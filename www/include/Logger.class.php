@@ -85,7 +85,7 @@ class Logger {
         }
  
         $zip = new ZipArchive(); 
-        if($zip->open($zip_file, ZipArchive::OVERWRITE ) === TRUE) { 
+        if($zip->open($zip_file, ZipArchive::CREATE ) === TRUE) { 
             if(is_file($log_path)) { 
                 $zip->addFile($log_path);
             }

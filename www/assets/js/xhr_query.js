@@ -1132,6 +1132,28 @@ var xhrExportLog = function(e) {
 	});
 };
 
+var xhrZipLog = function(e) {
+	var form_body = new FormData();
+	form_body.append("type", "zip_log");
+	toggle(e.target);
+	fetch("query_json_api.php", {
+		method: 'POST',
+		body: form_body
+	}).then(function(response) {
+		if (response.status != 200) {
+			throw new Error("XHR連線異常，回應非200");
+		}
+		return response.json();
+	}).then(function (jsonObj) {
+		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
+		showModal("<strong class='text-success'>壓縮完成</strong>", "LOG檔壓縮");
+		toggle(e.target);
+	}).catch(function(ex) {
+		console.error("xhrZipLog parsing failed", ex);
+		alert("XHR連線查詢有問題!!【" + ex + "】");
+	});
+}
+
 var xhrQueryAnnouncementData = function(e) {
 	var form_body = new FormData();
 	form_body.append("type", "announcement_data");

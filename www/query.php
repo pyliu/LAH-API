@@ -166,9 +166,13 @@ fieldset fieldset legend {
             <legend>記錄檔</legend>
             <input class="no-cache" id="log_date_text" name="log_date_text" type="text" title='輸入日期' value="<?php echo $today_ad; ?>" />
             <button id="log_button">輸出</button>
+            <button id="log_zip_button">壓縮</button>
             <button id="log_quote_button">備註</button>
             <blockquote id="log_blockquote" class="hide">
-              根據日期取得本伺服器之紀錄檔案。
+              <ol>
+                <li>根據日期取得本伺服器之紀錄檔案。</li>
+                <li>按壓縮按鈕可手動壓縮主機端LOG原始檔。</li>
+              </ol>
             </blockquote>
           </fieldset>
         </div>
@@ -438,6 +442,7 @@ fieldset fieldset legend {
         autoclose: true,
         format: "yyyy-mm-dd"
       });
+      $("#log_zip_button").on("click", xhrZipLog);
 
       // SUR Case Query & Delay Case Fix
       $("#sur_delay_case_fix_code").on("change", xhrGetCaseLatestNum.bind({

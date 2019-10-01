@@ -1,5 +1,4 @@
 <?php
-require_once("GlobalFunctions.inc.php");
 require_once("FileAPICommand.class.php");
 
 class FileAPILogExportCommand extends FileAPICommand {
@@ -14,31 +13,32 @@ class FileAPILogExportCommand extends FileAPICommand {
     function __destruct() {}
 
     public function execute() {
-        global $log;
         $path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs".DIRECTORY_SEPARATOR."log-".$this->date.".log";
-        if (!file_exists($path)) {
+        $data = null;
+        if (file_exists($path)) {
+            $data = file_get_contents($path);
+        } else {
             $zippath = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs".DIRECTORY_SEPARATOR."log-".$this->date.".zip";
             if (file_exists($zippath)) {
-                $log->info("extract the zipped log for downloading.【${zippath}】");
                 // extract the log for downloading
                 $zip = new ZipArchive($zippath);
                 if ($zip->open($zippath)) {
                     $zip->extractTo(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs");
                     $zip->close();
+                    $data = file_get_contents($path);
+                    @unlink($path);
                 }
             } else {
                 // fall back to get today's log
                 $path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs".DIRECTORY_SEPARATOR."log-".date('Y-m-d').".log";
+                $data = file_get_contents($path);
             }
         }
 
         header("Content-Type: text/log");
         $out = fopen("php://output", 'w'); 
-        fwrite($out, file_get_contents($path));
+        fwrite($out, $data);
         fclose($out);
-
-        // zip other logs after downloading
-        zipLogs();
     }
 }
 ?>
