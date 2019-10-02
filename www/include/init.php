@@ -37,11 +37,4 @@ $this_year = ltrim($tw_date->format("Y"), "0");	// ex: 108
 $today = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080325
 $tw_date->modify("-1 week");
 $week_ago = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080318
-
-$qday = $_REQUEST["date"];
-$qday = preg_replace("/\D+/", "", $qday);
-if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
-  $qday = (date("Y")-1911).date("md"); // 今天
-}
-
 ?>
