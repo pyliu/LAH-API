@@ -165,7 +165,7 @@ fieldset fieldset legend {
           <fieldset>
             <legend>記錄檔</legend>
             <input class="no-cache" id="log_date_text" name="log_date_text" type="text" title='輸入日期' value="<?php echo $today_ad; ?>" />
-            <button id="log_button">輸出</button>
+            <button id="log_button">下載</button>
             <button id="log_zip_button">壓縮</button>
             <button id="log_quote_button">備註</button>
             <blockquote id="log_blockquote" class="hide">

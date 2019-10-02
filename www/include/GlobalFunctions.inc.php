@@ -99,10 +99,10 @@ function zipLogs() {
             }
             $zipcreated = $pinfo["dirname"].DIRECTORY_SEPARATOR.$pinfo["filename"].".zip";
             $zip = new ZipArchive();
-            if($zip->open($zipcreated, ZipArchive::CREATE ) === TRUE) {
+            if($zip->open($zipcreated, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
                 $log->info("New zip file created.【${zipcreated}】");
                 $zip->addFile($full_filename, $file);
-                $zip ->close();
+                $zip->close();
             }
             $log->info("remove log file.【".$pinfo["basename"]."】");
             @unlink($full_filename);

@@ -66,9 +66,10 @@ class Logger {
             $this->error("The input date format is wrong! ($date, correct param is like '2019-10-01')");
             return false;
         }
+
         $today = date("Y-m-d");
         if ($date == $today) {
-            $this->warning("We should not zip today's log!");
+            $this->warning("We should not zip today's log! Skip compression operation.");
             return false;
         }
 
@@ -77,20 +78,22 @@ class Logger {
         // Enter the name to creating zipped directory
         $zipcreated = "log-${date}.zip";
         $zip_file = $pathdir.DIRECTORY_SEPARATOR.$zipcreated;
-        $log_path = $pathdir.DIRECTORY_SEPARATOR."log-${date}.log";
+        $log_file = "log-${date}.log";
+        $log_path = $pathdir.DIRECTORY_SEPARATOR.$log_file;
 
-        if (file_exists($zip_file)) {
-            $this->warning("Zip file already exists! 【${zip_file}】");
+        if (!file_exists($log_path)) {
+            $this->error("log file doesn't exists! 【${log_path}】");
             return false;
         }
- 
+
         $zip = new ZipArchive(); 
-        if($zip->open($zip_file, ZipArchive::CREATE ) === TRUE) { 
+        if($zip->open($zip_file, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) { 
             if(is_file($log_path)) { 
-                $zip->addFile($log_path);
+                $zip->addFile($log_path, $log_file);
             }
-            $zip ->close();
+            $zip->close();
             @unlink($log_path);
+            $this->info("$log_file removed.");
         } 
 
         return true;
