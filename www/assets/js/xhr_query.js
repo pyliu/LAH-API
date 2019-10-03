@@ -1614,18 +1614,19 @@ var xhrQueryUserInfo = function(e) {
 		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
 		var html = jsonObj.message;
 		if (jsonObj.status == 1) {
-			html = jsonObj.raw[0]["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + jsonObj.raw[0]["AP_OFF_DATE"] + "】</p>";
-			html += "ID：" + jsonObj.raw[0]["DocUserID"] + "<br />"
-				+ "電腦：" + jsonObj.raw[0]["AP_PCIP"] + "<br />"
-				+ "姓名：" + jsonObj.raw[0]["AP_USER_NAME"] + "<br />"
-				+ "生日：" + jsonObj.raw[0]["AP_BIRTH"] + "<br />"
-				+ "單位：" + jsonObj.raw[0]["AP_UNIT_NAME"] + "<br />"
-				+ "工作：" + jsonObj.raw[0]["AP_WORK"] + "<br />"
-				+ "職稱：" + jsonObj.raw[0]["AP_JOB"] + "<br />"
-				+ "學歷：" + jsonObj.raw[0]["AP_HI_SCHOOL"] + "<br />"
-				+ "考試：" + jsonObj.raw[0]["AP_TEST"] + "<br />"
-				+ "手機：" + jsonObj.raw[0]["AP_SEL"] + "<br />"
-				+ "到職：" + (isEmpty(jsonObj.raw[0]["AP_ON_DATE"]) ? "" : jsonObj.raw[0]["AP_ON_DATE"].date.split(" ")[0]) + "<br />"
+			var latest = jsonObj.data_count - 1;
+			html = jsonObj.raw[latest]["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + jsonObj.raw[latest]["AP_OFF_DATE"] + "】</p>";
+			html += "ID：" + jsonObj.raw[latest]["DocUserID"] + "<br />"
+				+ "電腦：" + jsonObj.raw[latest]["AP_PCIP"] + "<br />"
+				+ "姓名：" + jsonObj.raw[latest]["AP_USER_NAME"] + "<br />"
+				+ "生日：" + jsonObj.raw[latest]["AP_BIRTH"] + "<br />"
+				+ "單位：" + jsonObj.raw[latest]["AP_UNIT_NAME"] + "<br />"
+				+ "工作：" + jsonObj.raw[latest]["AP_WORK"] + "<br />"
+				+ "職稱：" + jsonObj.raw[latest]["AP_JOB"] + "<br />"
+				+ "學歷：" + jsonObj.raw[latest]["AP_HI_SCHOOL"] + "<br />"
+				+ "考試：" + jsonObj.raw[latest]["AP_TEST"] + "<br />"
+				+ "手機：" + jsonObj.raw[latest]["AP_SEL"] + "<br />"
+				+ "到職：" + (isEmpty(jsonObj.raw[latest]["AP_ON_DATE"]) ? "" : jsonObj.raw[latest]["AP_ON_DATE"].date.split(" ")[latest]) + "<br />"
 				;
 		}
 		showModal(html, "使用者資訊");
