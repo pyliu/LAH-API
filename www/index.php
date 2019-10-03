@@ -154,6 +154,8 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   <!-- fixed table header -->
   <script src="assets/js/fixed_header.js"></script>
   <script src="assets/js/global.js"></script>
+  <!-- xhr js -->
+  <script src="assets/js/xhr_query.js"></script>
   <!-- bs datepicker -->
   <script src="assets/js/bootstrap-datepicker.min.js"></script>
   <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>

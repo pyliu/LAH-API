@@ -214,7 +214,7 @@ fieldset fieldset legend {
             <?php
               foreach ($operators as $id => $name) {
                 //echo $id.": ".($name == false ? "無此人!" : $name)."</br>";
-                echo "<div class='float-left m-2 user_tag' style='width: 200px'>".$id.": ".($name == false ? "無此人!" : $name)."</div>";
+                echo "<div class='float-left m-2 user_tag' style='width: 200px' data-id='".$id."' data-name='".($name == false ? "XXXXXX" : $name)."'>".$id.": ".($name == false ? "XXXXXX" : $name)."</div>";
               }
             ?>
           </fieldset>
@@ -454,6 +454,9 @@ fieldset fieldset legend {
       }));
       $("#sur_delay_case_fix_search_button").on("click", xhrGetSURCase);
       bindPressEnterEvent("#sur_delay_case_fix_num", xhrGetSURCase);
+
+      // user info
+      $(".user_tag").on("click", xhrQueryUserInfo);
     });
   </script>
 </body>

@@ -1580,4 +1580,59 @@ var xhrUpdateCaseColumnData = function(e) {
 		});
 	}
 }
+
+
+var xhrQueryUserInfo = function(e) {
+	var clicked_element = $(e.target);
+	if (!clicked_element.hasClass("user_tag")) {
+		console.warn("Clicked element doesn't have user_tag class ... find its parent");
+		clicked_element = $(clicked_element.closest(".user_tag"));
+	}
+
+	var name = $.trim(clicked_element.data("name"));
+	var id = trim(clicked_element.data("id"));
+
+	if(isEmpty(name) || isEmpty(id)) {
+		console.warn("Require query params are empty, skip xhr querying. (" + id + ", " + name + ")");
+		return;
+	}
+
+	var form_body = new FormData();
+	form_body.append("type", "user_info");
+	form_body.append("name", name);
+	form_body.append("id", id);
+
+	fetch("query_json_api.php", {
+		method: 'POST',
+		body: form_body
+	}).then(function(response) {
+		if (response.status != 200) {
+			throw new Error("XHR連線異常，回應非200");
+		}
+		return response.json();
+	}).then(function (jsonObj) {
+		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
+		var html = jsonObj.message;
+		if (jsonObj.status == 1) {
+			html = jsonObj.raw[0]["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + jsonObj.raw[0]["AP_OFF_DATE"] + "】</p>";
+			html += "ID：" + jsonObj.raw[0]["DocUserID"] + "<br />"
+				+ "電腦：" + jsonObj.raw[0]["AP_PCIP"] + "<br />"
+				+ "姓名：" + jsonObj.raw[0]["AP_USER_NAME"] + "<br />"
+				+ "生日：" + jsonObj.raw[0]["AP_BIRTH"] + "<br />"
+				+ "單位：" + jsonObj.raw[0]["AP_UNIT_NAME"] + "<br />"
+				+ "工作：" + jsonObj.raw[0]["AP_WORK"] + "<br />"
+				+ "職稱：" + jsonObj.raw[0]["AP_JOB"] + "<br />"
+				+ "學歷：" + jsonObj.raw[0]["AP_HI_SCHOOL"] + "<br />"
+				+ "考試：" + jsonObj.raw[0]["AP_TEST"] + "<br />"
+				+ "手機：" + jsonObj.raw[0]["AP_SEL"] + "<br />"
+				+ "到職：" + (isEmpty(jsonObj.raw[0]["AP_ON_DATE"]) ? "" : jsonObj.raw[0]["AP_ON_DATE"].date.split(" ")[0]) + "<br />"
+				;
+		}
+		showModal(html, "使用者資訊");
+	}).catch(function(ex) {
+		console.error("xhrQueryUserInfo parsing failed", ex);
+		alert("XHR連線查詢有問題!!【" + ex + "】");
+	});
+}
+
 //]]>

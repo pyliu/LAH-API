@@ -24,6 +24,19 @@ class MSDB {
                 SYSTEM_CONFIG["MS_DB_CHARSET"]
             );
         } else {
+            $require_keys = array(
+                "MS_DB_UID",
+                "MS_DB_PWD",
+                "MS_DB_DATABASE",
+                "MS_DB_SVR",
+                "MS_DB_CHARSET"
+            );
+            $argu_keys = array_keys($conn_info);
+            foreach ($require_keys as $key) {
+                if (!in_array($key, $argu_keys)) {
+                    die(__FILE__.": MSDB connection needs ${key} value for connection.");
+                }
+            }
             $this->dbo = new SQLSRV_DataBase(
                 $conn_info["MS_DB_UID"],
                 $conn_info["MS_DB_PWD"],
@@ -43,7 +56,7 @@ class MSDB {
         return $this->dbo->get_last_query();
     }
     /**
-	 * If a connection ot the database exists
+	 * Is a connection to the database exists?
 	 * @return bool
 	 */
     public function isConnected() {
@@ -54,6 +67,13 @@ class MSDB {
 	 */
     public function hasError() {
         return $this->dbo->hasError();
+    }
+    /**
+     * Return lastest error return null if no error occurs
+     * @return null/array
+     */
+    public function getLastError() {
+        return sqlsrv_errors();
     }
 }
 ?>

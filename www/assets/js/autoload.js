@@ -26,6 +26,8 @@ function startRefresh() {
             } else {
                 console.log("Query date is not " + today + ", no auto table refresh enabled.");
             }
+            // user info event
+            $(".user_tag").on("click", xhrQueryUserInfo);
         });
     }
 }
