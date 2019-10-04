@@ -123,10 +123,12 @@ function getTdocUserInfo($id, $name) {
     $results = null;
     // query by id
     if (!empty($id)) {
+        $id = preg_replace("/[^0-9A-Za-z]/i", "", $id);
         $log->info("Search By ID: $id");
         $results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE DocUserID LIKE '%${id}%'");
     }
-    if (empty($results)) {
+    if (empty($results) && !empty($name)) {
+        $name = trim($name);
         // query by name
         $log->info("Search By Name: $name");
         $results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_USER_NAME LIKE '%${name}%'");
