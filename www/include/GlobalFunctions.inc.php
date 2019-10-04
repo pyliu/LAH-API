@@ -110,7 +110,7 @@ function zipLogs() {
     }
 }
 
-function getTdocUserInfo($name_or_id) {
+function getTdocUserInfo($id, $name) {
     require_once("MSDB.class.php");
     $tdoc_db = new MSDB(array(
         "MS_DB_UID" => SYSTEM_CONFIG["MS_TDOC_DB_UID"],
@@ -119,10 +119,18 @@ function getTdocUserInfo($name_or_id) {
         "MS_DB_SVR" => SYSTEM_CONFIG["MS_TDOC_DB_SVR"],
         "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
     ));
-    if (preg_match("/^HB[0-9]+$/i", $name_or_id)) {
-        return $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE DocUserID LIKE '%${name_or_id}%'");
+    global $log;
+    $results = null;
+    // query by id
+    if (!empty($id)) {
+        $log->info("Search By ID: $id");
+        $results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE DocUserID LIKE '%${id}%'");
     }
-    // query by name may have multiple records
-    return $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_USER_NAME LIKE '%${name_or_id}%'");
+    if (empty($results)) {
+        // query by name
+        $log->info("Search By Name: $name");
+        $results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_USER_NAME LIKE '%${name}%'");
+    }
+    return $results;
 }
 ?>
