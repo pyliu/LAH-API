@@ -264,16 +264,9 @@ blockquote {
   font-weight: bold;
 }
 
-.reg_case_id:hover {
+.reg_case_id:hover, .user_tag:hover {
   background-color: yellow;
   text-decoration: underline;
   font-weight: bold;
   cursor: pointer;
-}
-
-.user_tag:hover {
-	background-color: yellow;
-	text-decoration: underline;
-	font-weight: bold;
-	cursor: pointer;
 }

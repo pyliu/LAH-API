@@ -1615,7 +1615,8 @@ var xhrQueryUserInfo = function(e) {
 		var html = jsonObj.message;
 		if (jsonObj.status == 1) {
 			var latest = jsonObj.data_count - 1;
-			html = jsonObj.raw[latest]["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + jsonObj.raw[latest]["AP_OFF_DATE"] + "】</p>";
+			html = '<a href="get_pho_img.php?name=' + name + '" target="_blank"><img src="get_pho_img.php?name=' + name + '" width="180" /></a> </br />';
+			html += jsonObj.raw[latest]["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + jsonObj.raw[latest]["AP_OFF_DATE"] + "】</p>";
 			html += "ID：" + jsonObj.raw[latest]["DocUserID"] + "<br />"
 				+ "電腦：" + jsonObj.raw[latest]["AP_PCIP"] + "<br />"
 				+ "姓名：" + jsonObj.raw[latest]["AP_USER_NAME"] + "<br />"
