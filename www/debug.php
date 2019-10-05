@@ -7,13 +7,16 @@ require_once("./include/Logger.class.php");
 
 //$xkey = (random_int(1, 255) * date("H") * date("i", strtotime("1 min")) * date("s", strtotime("1 second"))) % 65535;
 //echo $xkey;
-/*
-$msg = new Messsage();
-echo $msg->getXKey();
-var_dump($msg->sendMessage("test", "220.1.35.48"));
-*/
-var_dump(getTdocUserInfo("hb0541"));
 
-//$ms_db = new MSDB();
-//var_dump(print_r($ms_db->fetchAll("SELECT TOP 10 * FROM Message"), true));
+$msg = new Messsage();
+var_dump($msg->sendMessage("中文", "test content 我是中文", "HB0541"));
+var_dump(sqlsrv_errors());
+
+//var_dump(getTdocUserInfo("hb0541"));
+/*
+$ms_db = new MSDB();
+var_dump(print_r($ms_db->fetch("select top 1 sn from Message order by sn desc"), true));
+
+echo date("Y-m-d 23:59:59");
+*/
 ?>
