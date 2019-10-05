@@ -102,8 +102,8 @@ var showRegCaseDetail = function(jsonObj, use_modal) {
 		// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
 		$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
 		$(".reg_case_id").attr("title", "點我取得更多資訊！");
-		// user info
-		$(".user_tag").on("click", xhrQueryUserInfo);
+		// user info dialog event
+		addUserInfoEvent();
 	}
 }
 
@@ -1413,7 +1413,7 @@ var showRM30UpdateCaseDetail = function(jsonObj) {
 	$("#rm30_update_display").html(html);
 	$("#rm30_update_select").val(jsonObj.raw["RM30"]);
 	// user info event
-	$(".user_tag").on("click", xhrQueryUserInfo);
+	addUserInfoEvent();
 
 	// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
 	$(".reg_case_id").on("click", xhrRegQueryCaseDialog);

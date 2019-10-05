@@ -20,6 +20,11 @@ var isEmpty = function(variable) {
 	return false;
 }
 
+var addUserInfoEvent = function() {
+	$(".user_tag").off("click");
+	$(".user_tag").on("click", xhrQueryUserInfo);
+}
+
 var validateCaseInput = function(year_id_selector, code_id_selector, number_id_selector, output_id_selector) {
 	var year = $(year_id_selector).val().replace(/\D/g, "");
 	
