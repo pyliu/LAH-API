@@ -1617,12 +1617,19 @@ var xhrQueryUserInfo = function(e) {
 		var html = jsonObj.message;
 		if (jsonObj.status == 1) {
 			var latest = jsonObj.data_count - 1;
+
+			var birth_regex = /^\d{3}\/\d{2}\/\d{2}$/;
+			var age = undefined;
+			if (jsonObj.raw[latest]["AP_BIRTH"].match(birth_regex)) {
+				age = new Date().getFullYear() - (parseInt(jsonObj.raw[latest]["AP_BIRTH"].substring(0, 3)) + 1911);
+			}
+
 			html = '<a href="get_pho_img.php?name=' + name + '" target="_blank"><img src="get_pho_img.php?name=' + name + '" width="180" /></a> </br />';
 			html += jsonObj.raw[latest]["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + jsonObj.raw[latest]["AP_OFF_DATE"] + "】</p>";
 			html += "ID：" + jsonObj.raw[latest]["DocUserID"] + "<br />"
 				+ "電腦：" + jsonObj.raw[latest]["AP_PCIP"] + "<br />"
 				+ "姓名：" + jsonObj.raw[latest]["AP_USER_NAME"] + "<br />"
-				+ "生日：" + jsonObj.raw[latest]["AP_BIRTH"] + "<br />"
+				+ "生日：" + jsonObj.raw[latest]["AP_BIRTH"] + (isEmpty(age) ? "" : "(" + age + ")") + "<br />"
 				+ "單位：" + jsonObj.raw[latest]["AP_UNIT_NAME"] + "<br />"
 				+ "工作：" + jsonObj.raw[latest]["AP_WORK"] + "<br />"
 				+ "職稱：" + jsonObj.raw[latest]["AP_JOB"] + "<br />"
