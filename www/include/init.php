@@ -29,6 +29,7 @@ if (!in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
 $yesterday_ad = date("Y-m-d", strtotime("-1 days"));
 if (file_exists('logs/log-' . $yesterday_ad . '.log')) {
     $log->zip($yesterday_ad);
+    $log->info($yesterday_ad.' log zipped.');
 }
 
 $tw_date = new Datetime("now");

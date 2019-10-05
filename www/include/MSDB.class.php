@@ -13,6 +13,11 @@ class MSDB {
         return $this->dbo->get_results($sql, "array");
     }
 
+    public function insert($table, $data) {
+        $this->dbo->insert($table, $data);
+        return $this->dbo->last_insert_id();
+    }
+
     function __construct($conn_info = array()) {
         if (empty($conn_info)) {
             // default connect via config
