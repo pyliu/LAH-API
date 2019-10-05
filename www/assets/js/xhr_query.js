@@ -1410,6 +1410,8 @@ var showRM30UpdateCaseDetail = function(jsonObj) {
 	html += "<p>" + jsonObj.tr_html + "</p>";
 	$("#rm30_update_display").html(html);
 	$("#rm30_update_select").val(jsonObj.raw["RM30"]);
+	// user info event
+	$(".user_tag").on("click", xhrQueryUserInfo);
 
 	// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
 	$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
