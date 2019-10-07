@@ -5,19 +5,17 @@ require_once("SQLSRV_DataBase.class.php");
 class MSDB {
     private $dbo;
 
-	public function fetch($sql) {
-        return $this->dbo->get_row($sql, "array");
+    private function prepareVal($value){
+        if ( null === $value ) {
+			return 'NULL';
+		} elseif ( ctype_digit( str_replace( array( '.', '-' ), '', $value ) ) && substr_count( $value, '.' ) < 2 ) {
+			return $value;
+		} else {
+            // can't use utf8_decode it will cause 中文亂碼！
+			return "N'" . addslashes( $value ) . "'";
+		}
     }
     
-    public function fetchAll($sql) {
-        return $this->dbo->get_results($sql, "array");
-    }
-
-    public function insert($table, $data) {
-        $this->dbo->insert($table, $data);
-        return $this->dbo->last_insert_id();
-    }
-
     function __construct($conn_info = array()) {
         if (empty($conn_info)) {
             // default connect via config
@@ -53,6 +51,71 @@ class MSDB {
     }
 
     function __destruct() {}
+
+    public function fetch($sql) {
+        return $this->dbo->get_row($sql, "array");
+    }
+    
+    public function fetchAll($sql) {
+        return $this->dbo->get_results($sql, "array");
+    }
+    /**
+	 * Insert wrapper function
+	 * @return int
+	 */
+    public function insert($table, $data) {
+        $fields = array();
+        $values = array();
+
+        foreach( $data AS $field => $value ) {
+            $fields[] = $table . '.' . trim( $field );
+            $values[] =$this->prepareVal( trim( $value ) );
+        }
+
+        $sql = "INSERT INTO " . $table . " ( " . implode(',', $fields) . " ) VALUES ( " . implode(',', $values) . " )";
+        $result = $this->dbo->query( $sql, false );
+
+        global $log;
+        $log->warning($sql);
+        
+        return $this->dbo->last_insert_id();
+    }
+    /**
+	 * Update wrapper function
+	 * @return void
+	 */
+    public function update($table, $what, $where) {
+        $set   = '';
+        $check = '';
+
+        foreach( $what AS $field => $value ) {
+            $field = trim( $field );
+            $value = trim( $value );
+
+            if ( ! empty( $set ) ) {
+                $set .= ', ';
+            }
+            $set .=  $table . '.' . $field . ' = ';
+
+            $set .= $this->prepareVal( $value );
+        }
+
+        foreach( $where AS $field => $value ) {
+            $check .= ' AND ' . $table . '.' . $field;
+            if ( null === $value ) {
+                $check .= ' IS NULL';
+            }
+            elseif ( ctype_digit( str_replace( array( '.', '-' ), '', $value ) ) && substr_count( $value, '.' ) < 2 ) {
+                $check .= ' = ' . $value;
+            }
+            else {
+                $check .= " = '" . addslashes( $value ) . "'";
+            }
+        }
+
+        $sql = "UPDATE " . $table . " SET " . $set . " WHERE 1 = 1 " . $check;
+        $result = $this->dbo->query( $sql, false );
+    }
     /**
 	 * Return the last ran query in its entirety
 	 * @return string

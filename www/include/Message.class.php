@@ -36,7 +36,13 @@ class Messsage {
         $this->jungli_in_db = null;
     }
     
-    public function sendMessage($title, $content, $to_who) : int {
+    public function update($data, $where) {
+        if (is_array($data) && is_array($where)) {
+            $this->jungli_in_db->update("Message", $data, $where);
+        }
+    }
+
+    public function send($title, $content, $to_who) : int {
         /*
             AP_OFF_JOB: 離職 (Y/N)
 			DocUserID: 使用者代碼 (HB0123)
@@ -54,13 +60,13 @@ class Messsage {
         $user_info = $this->getUserInfo($to_who);
 
         $pctype = "SVR";
-        $sendcname = iconv("UTF-8", "BIG5//IGNORE", "地政輔助系統");
+        $sendcname = "地政系管輔助系統";
         $presn = "0";   // map to MessageMain topic
         $xkey = $this->getXKey();
         $sender = "HBADMIN";
         $receiver = $user_info["DocUserID"];
-        $xname = iconv("UTF-8", "BIG5//IGNORE", trim($title));
-        $xcontent = iconv("UTF-8", "BIG5//IGNORE", trim($content));
+        $xname = trim($title);  // nvarchar(50)
+        $xcontent = trim($content); // nvarchar(1000)
         $sendtype = "1";
         $sendIP = $_SERVER["SERVER_ADDR"];
         $recIP = $user_info["AP_PCIP"];
