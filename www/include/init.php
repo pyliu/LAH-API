@@ -28,7 +28,7 @@ if (!in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
 if (date("w") == "1" && !$_SESSION["LOG_COMPRESSION_DONE"]) {
     $log->info("今天星期一，開始壓縮LOG檔！");
     zipLogs();
-    $_SESSION["LOG_COMPRESS_DONE"] = true;
+    $_SESSION["LOG_COMPRESSION_DONE"] = true;
     $log->info("壓縮LOG檔結束！");
     
 }
