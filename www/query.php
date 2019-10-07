@@ -207,16 +207,31 @@ fieldset fieldset legend {
         <div class="col-6">
           <fieldset>
             <legend>使用者對應表</legend>
-            <div class="float-clear"><input type="text" id="filter_input" name="filter_input" value="HB" /> <span id="filter_info" class="text-info">
-            <?php
-              echo count($operators); 
-            ?>筆</span></div>
+            <div class="float-clear">
+              <label for="msg_who">
+                姓名：
+                <input type="text" id="msg_who" name="msg_who" placeholder="輸入關鍵字，如 HB0541" />
+              </label>
+              <span id="filter_info" class="text-info">
+                <?php
+                  echo count($operators); 
+                ?>筆
+              </span>
+            </div>
+            <div><label for="msg_title">訊息標題：<input name="msg_title" id="msg_title" placeholder="請輸入訊息的標題" /></label></div>
+            <div>
+              <label for="msg_content">訊息內容：</label>
+              <button id="msg_button">傳送訊息</button><br />
+              <textarea id="msg_content" name="msg_content" class="w-100" placeholder="請輸入訊息內容(最多500字)"></textarea>
+            </div>
+            <div id="user_list">
             <?php
               foreach ($operators as $id => $name) {
                 //echo $id.": ".($name == false ? "無此人!" : $name)."</br>";
                 echo "<div class='float-left m-2 user_tag' style='width: 200px' data-id='".$id."' data-name='".($name == false ? "XXXXXX" : $name)."'>".$id.": ".($name == false ? "XXXXXX" : $name)."</div>";
               }
             ?>
+            </div>
           </fieldset>
         </div>
       </div>
@@ -416,10 +431,10 @@ fieldset fieldset legend {
         prevVal = val;
       };
 
-      filter_user("#filter_input");
+      filter_user("#msg_who");
 
       var delayTimer = null;
-      $("#filter_input").on("keyup", function(e) {
+      $("#msg_who").on("keyup", function(e) {
         clearTimeout(delayTimer);
         delayTimer = setTimeout(function() {
           filter_user(e.target);
@@ -457,6 +472,9 @@ fieldset fieldset legend {
 
       // user info
       $(".user_tag").on("click", xhrQueryUserInfo);
+
+      // message
+      $("#msg_button").on("click", xhrSendMessage);
     });
   </script>
 </body>

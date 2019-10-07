@@ -4,6 +4,7 @@ require_once("./include/RegCaseData.class.php");
 require_once("./include/SurCaseData.class.php");
 require_once("./include/PrcAllCasesData.class.php");
 require_once("./include/Query.class.php");
+require_once("./include/Message.class.php");
 require_once("./include/JSONAPICommandFactory.class.php");
 
 function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
@@ -18,7 +19,7 @@ $query = new Query();
 
 switch ($_POST["type"]) {
 	case "x":
-		$log->info("XHR [x] 查詢請求【跨所註記遺失】");
+		$log->info("XHR [x] 查詢跨所註記遺失 請求");
 		$query_result = $query->getProblematicCrossCases();
 		if (empty($query_result)) {
 			$log->info("XHR [x] 查無資料");
@@ -37,7 +38,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "fix_xcase":
-		$log->info("XHR [fix_xcase] 查詢請求【".$_POST["id"]."】 修正跨所註記遺失");
+		$log->info("XHR [fix_xcase] 修正跨所註記遺失【".$_POST["id"]."】請求");
 		$result_flag = $query->fixProblematicCrossCases($_POST["id"]);
 		if ($result_flag) {
 			$result = array(
@@ -52,7 +53,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "max":
-		$log->info("XHR [max] 查詢請求【".$_POST["year"].", ".$_POST["code"]."】");
+		$log->info("XHR [max] 查詢案件最大號【".$_POST["year"].", ".$_POST["code"]."】 請求");
 		$year = $_POST["year"];
 		$code = $_POST["code"];
 		$max_num = $query->getMaxNumByYearWord($year, $code);
@@ -64,7 +65,7 @@ switch ($_POST["type"]) {
 		), 0);
 		break;
 	case "ralid":
-		$log->info("XHR [ralid] 查詢請求【".$_POST["text"]."】");
+		$log->info("XHR [ralid] 查詢土地標示部資料【".$_POST["text"]."】請求");
 		$query_result = $query->getSectionRALIDCount($_POST["text"]);
 		if (empty($query_result)) {
 			$log->info("XHR [ralid] 查無資料");
@@ -81,7 +82,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "crsms":
-		$log->info("XHR [crsms] 查詢請求【".$_POST["id"]."】");
+		$log->info("XHR [crsms] 查詢登記案件資料【".$_POST["id"]."】請求");
 		$query_result = $query->getCRSMSCasesByID($_POST["id"]);
 		if (empty($query_result)) {
 			$log->info("XHR [crsms] 查無資料");
@@ -98,7 +99,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "cmsms":
-		$log->info("XHR [cmsms] 查詢請求【".$_POST["id"]."】");
+		$log->info("XHR [cmsms] 查詢測量案件資料【".$_POST["id"]."】請求");
 		$query_result = $query->getCMSMSCasesByID($_POST["id"]);
 		if (empty($query_result)) {
 			$log->info("XHR [cmsms] 查無資料");
@@ -115,7 +116,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "easycard":
-		$log->info("XHR [easycard] 查詢請求【".$_POST["qday"]."】");
+		$log->info("XHR [easycard] 查詢悠遊卡資料【".$_POST["qday"]."】請求");
 		$query_result = $query->getEasycardPayment($_POST["qday"]);
 		if (empty($query_result)) {
 			$msg = $_POST["qday"] ."查無悠遊卡交易異常資料！";
@@ -136,7 +137,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "fix_easycard":
-		$log->info("XHR [fix_easycard] 查詢請求【".$_POST["qday"].", ".$_POST["pc_num"]."】");
+		$log->info("XHR [fix_easycard] 修正悠遊卡交易【".$_POST["qday"].", ".$_POST["pc_num"]."】請求");
 		$result_flag = $query->fixEasycardPayment($_POST["qday"], $_POST["pc_num"]);
 		if ($result_flag) {
 			$result = array(
@@ -157,7 +158,7 @@ switch ($_POST["type"]) {
 			echoErrorJSONString();
 			break;
 		}
-		$log->info("XHR [reg_case] 查詢請求【".$_POST["id"]."】");
+		$log->info("XHR [reg_case] 查詢登記案件【".$_POST["id"]."】請求");
 		$row = $query->getRegCaseDetail($_POST["id"]);
 		if (empty($row)) {
 			$log->info("XHR [reg_case] 查無資料");
@@ -174,7 +175,7 @@ switch ($_POST["type"]) {
 			echoErrorJSONString();
 			break;
 		}
-		$log->info("XHR [sur_case] 查詢請求【".$_POST["id"]."】");
+		$log->info("XHR [sur_case] 查詢測量案件【".$_POST["id"]."】請求");
 		$row = $query->getSurCaseDetail($_POST["id"]);
 		if (empty($row)) {
 			$log->info("XHR [sur_case] 查無資料");
@@ -191,7 +192,7 @@ switch ($_POST["type"]) {
 			echoErrorJSONString();
 			break;
 		}
-		$log->info("XHR [fix_sur_delay_case] 查詢請求【".$_POST["id"].", ".$_POST["UPD_MM22"].", ".$_POST["CLR_DELAY"]."】");
+		$log->info("XHR [fix_sur_delay_case] 修正測量延期案件【".$_POST["id"].", ".$_POST["UPD_MM22"].", ".$_POST["CLR_DELAY"]."】請求");
 		$result_flag = $query->fixSurDelayCase($_POST["id"], $_POST["UPD_MM22"], $_POST["CLR_DELAY"]);
 		if ($result_flag) {
 			$result = array(
@@ -207,7 +208,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "prc_case":
-		$log->info("XHR [prc_case] 查詢請求【".$_POST["id"]."】");
+		$log->info("XHR [prc_case] 查詢地價案件【".$_POST["id"]."】請求");
 		$rows = $query->getPrcCaseAll($_POST["id"]);
 		if (empty($rows)) {
 			$log->info("XHR [prc_case] 查無資料");
@@ -223,7 +224,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "expac":
-		$log->info("XHR [expac] 查詢請求【".$_POST["year"].", ".$_POST["num"]."】");
+		$log->info("XHR [expac] 查詢規費收費項目【".$_POST["year"].", ".$_POST["num"]."】請求");
 		$rows = $query->getExpacItems($_POST["year"], $_POST["num"]);
 		if (empty($rows)) {
 			$log->info("XHR [expac] 查無資料");
@@ -240,7 +241,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "mod_expac":
-		$log->info("XHR [mod_expac] 查詢請求【".$_POST["year"].", ".$_POST["num"].", ".$_POST["code"].", ".$_POST["amount"]."】");
+		$log->info("XHR [mod_expac] 修正規費金額【".$_POST["year"].", ".$_POST["num"].", ".$_POST["code"].", ".$_POST["amount"]."】請求");
 		$result_flag = $query->modifyExpacItem($_POST["year"], $_POST["num"], $_POST["code"], $_POST["amount"]);
 		if ($result_flag) {
 			$result = array(
@@ -256,7 +257,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "expaa":
-		$log->info("XHR [expaa] 查詢請求【".$_POST["qday"].", ".$_POST["num"]."】");
+		$log->info("XHR [expaa] 查詢規費資料【".$_POST["qday"].", ".$_POST["num"]."】請求");
 		$rows = $query->getExpaaData($_POST["qday"], $_POST["num"]);
 		if (empty($rows)) {
 			$log->info("XHR [expaa] 查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
@@ -299,7 +300,7 @@ switch ($_POST["type"]) {
 	case "expaa_AA09_update":
 	case "expaa_AA100_update":
 		$column = $_POST["type"] == "expaa_AA09_update" ? "AA09" : "AA100";
-		$log->info("XHR [expaa_AA09_update/expaa_AA100_update] 查詢請求【$column".", ".$_POST["date"].", ".$_POST["number"].", ".$_POST["update_value"]."】");
+		$log->info("XHR [expaa_AA09_update/expaa_AA100_update] 修正規費資料【$column".", ".$_POST["date"].", ".$_POST["number"].", ".$_POST["update_value"]."】請求");
 		$result_flag = $query->updateExpaaData($column, $_POST["date"], $_POST["number"], $_POST["update_value"]);
 		if ($result_flag) {
 			$result = array(
@@ -316,7 +317,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "diff_xcase":
-		$log->info("XHR [diff_xcase] 查詢請求【".$_POST["id"]."】");
+		$log->info("XHR [diff_xcase] 查詢同步案件資料【".$_POST["id"]."】請求");
 		$rows = $query->getXCaseDiff($_POST["id"]);
 		if ($rows === -1) {
 			$log->warning("XHR [diff_xcase] 參數格式錯誤【".$_POST["id"]."】");
@@ -342,7 +343,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "inst_xcase":
-		$log->info("XHR [inst_xcase] 查詢請求【".$_POST["id"]."】");
+		$log->info("XHR [inst_xcase] 插入遠端案件【".$_POST["id"]."】請求");
 		$result_flag = $query->instXCase($_POST["id"]);
 		if ($result_flag === true) {
 			$result = array(
@@ -364,7 +365,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "sync_xcase":
-		$log->info("XHR [sync_xcase] 查詢請求【".$_POST["id"]."】");
+		$log->info("XHR [sync_xcase] 同步遠端案件【".$_POST["id"]."】請求");
 		$result_flag = $query->syncXCase($_POST["id"]);
 		if ($result_flag) {
 			$result = array(
@@ -380,7 +381,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "sync_xcase_column":
-	$log->info("XHR [sync_xcase_column] 查詢請求【".$_POST["id"].", ".$_POST["column"]."】");
+	$log->info("XHR [sync_xcase_column] 同步遠端案件之特定欄位【".$_POST["id"].", ".$_POST["column"]."】請求");
 		$result_flag = $query->syncXCaseColumn($_POST["id"], $_POST["column"]);
 		if ($result_flag) {
 			$result = array(
@@ -396,7 +397,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "announcement_data":
-		$log->info("XHR [announcement_data] 查詢請求");
+		$log->info("XHR [announcement_data] 查詢公告資料請求");
 		$rows = $query->getAnnouncementData();
 		$result = array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -407,7 +408,7 @@ switch ($_POST["type"]) {
 		echo json_encode($result, 0);
 		break;
 	case "update_announcement_data":
-		$log->info("XHR [update_announcement_data] 查詢請求 【".$_POST["code"].",".$_POST["day"].",".$_POST["flag"]."】");
+		$log->info("XHR [update_announcement_data] 更新公告資料【".$_POST["code"].",".$_POST["day"].",".$_POST["flag"]."】請求");
 		$result_flag = $query->updateAnnouncementData($_POST["code"], $_POST["day"], $_POST["flag"]);
 		if ($result_flag) {
 			$result = array(
@@ -423,7 +424,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "clear_announcement_flag":
-		$log->info("XHR [clear_announcement_flag] 查詢請求");
+		$log->info("XHR [clear_announcement_flag] 清除先行准登旗標請求");
 		$result_flag = $query->clearAnnouncementFlag();
 		if ($result_flag) {
 			$result = array(
@@ -431,7 +432,7 @@ switch ($_POST["type"]) {
 				"data_count" => "0",
 				"raw" => $result_flag
 			);
-			$log->info("XHR [clear_announcement_flag] 查詢成功");
+			$log->info("XHR [clear_announcement_flag] 清除成功");
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [clear_announcement_flag] 清除先行准登失敗");
@@ -439,7 +440,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "query_temp_data":
-		$log->info("XHR [query_temp_data] 查詢請求 【".$_POST["year"].", ".$_POST["code"].", ".$_POST["number"]."】");
+		$log->info("XHR [query_temp_data] 查詢暫存資料【".$_POST["year"].", ".$_POST["code"].", ".$_POST["number"]."】請求");
 		$rows = $query->getCaseTemp($_POST["year"], $_POST["code"], $_POST["number"]);
 		if (!empty($rows)) {
 			$result = array(
@@ -455,7 +456,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "clear_temp_data":
-		$log->info("XHR [clear_temp_data] 查詢請求 【".$_POST["year"].", ".$_POST["code"].", ".$_POST["number"]."】");
+		$log->info("XHR [clear_temp_data] 清除暫存【".$_POST["year"].", ".$_POST["code"].", ".$_POST["number"]."】請求");
 		$result_flag = $query->clearCaseTemp($_POST["year"], $_POST["code"], $_POST["number"]);
 		if ($result_flag) {
 			$result = array(
@@ -472,7 +473,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_upd_rm30":
-		$log->info("XHR [reg_upd_rm30] 查詢請求 【".$_POST["rm01"].", ".$_POST["rm02"].", ".$_POST["rm03"].", ".$_POST["rm30"]."】");
+		$log->info("XHR [reg_upd_rm30] 更新案件辦理情形【".$_POST["rm01"].", ".$_POST["rm02"].", ".$_POST["rm03"].", ".$_POST["rm30"]."】請求");
 		$result_flag = $query->updateCaseColumnData($_POST["rm01"].$_POST["rm02"].$_POST["rm03"], "MOICAS.CRSMS", "RM30", $_POST["rm30"]);
 		if ($result_flag) {
 			$result = array(
@@ -489,7 +490,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "upd_case_column":
-			$log->info("XHR [upd_case_column] 查詢請求 【".$_POST["id"].", ".$_POST["table"].", ".$_POST["column"].", ".$_POST["value"]."】");
+			$log->info("XHR [upd_case_column] 更新案件特定欄位【".$_POST["id"].", ".$_POST["table"].", ".$_POST["column"].", ".$_POST["value"]."】請求");
 			$result_flag = $query->updateCaseColumnData($_POST["id"], $_POST["table"], $_POST["column"], $_POST["value"]);
 			if ($result_flag) {
 				$result = array(
@@ -506,7 +507,7 @@ switch ($_POST["type"]) {
 			}
 		break;
 	case "zip_log":
-		$log->info("XHR [zip_log] 查詢請求");
+		$log->info("XHR [zip_log] 壓縮LOG資料請求");
 		zipLogs();
 		$result = array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -516,7 +517,7 @@ switch ($_POST["type"]) {
 		echo json_encode($result, 0);
 		break;
 	case "user_info":
-		$log->info("XHR [user_info] 查詢請求");
+		$log->info("XHR [user_info] 查詢使用者資料【".$_POST["id"].", ".$_POST["name"]."】請求");
 		$results = getTdocUserInfo($_POST["id"], $_POST["name"]);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ".$_POST["name"]." 資料。");
@@ -530,6 +531,25 @@ switch ($_POST["type"]) {
 			);
 			$log->info("XHR [user_info] 查詢 ".$_POST["name"]." 成功。");
 			echo json_encode($result, 0);
+		}
+		break;
+	case "send_message":
+		$log->info("XHR [send_message] 送出訊息【".$_POST["title"].", ".$_POST["content"].", ".$_POST["who"]."】請求");
+		$msg = new Messsage();
+		$id = $msg->send($_POST["title"], $_POST["content"], $_POST["who"]);
+		if ($id > 0) {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => 1,
+				"sn" => $id,
+				"query_string" => "title=".$_POST["title"]."&content=".$_POST["content"]."&who=".$_POST["who"],
+				"message" => "傳送成功 (sn: $id)"
+			);
+			$log->info("XHR [send_message] 訊息「".$_POST["title"]."」已寫入內網資料庫【sn: $id 】");
+			echo json_encode($result, 0);
+		} else {
+			echoErrorJSONString("新增 ".$_POST["title"]." 訊息失敗【${id}】。");
+			$log->info("XHR [send_message] 新增「".$_POST["title"]."」訊息失敗【${id}】。");
 		}
 		break;
 	case "unittest":

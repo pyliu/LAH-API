@@ -287,7 +287,6 @@ var xhrGetSectionRALIDCount = function(e) {
 				}
 				var this_count = parseInt(jsonObj.raw[i]["土地標示部筆數"]);
 				this_count = this_count < 1000 ? 1000 : this_count;
-				var dollar = this_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 				var blow = jsonObj.raw[i]["土地標示部筆數"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 				var size = 0, size_o = 0;
 				if (jsonObj.raw[i]["面積"]) {
@@ -296,7 +295,6 @@ var xhrGetSectionRALIDCount = function(e) {
 					size_o = size_o.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 				}
 				html += "【<span class='text-info'>" + jsonObj.raw[i]["段代碼"]  + "</span>】" + jsonObj.raw[i]["段名稱"] + "：土地標示部 <span class='text-primary'>" + blow + "</span> 筆【面積：" + size + " &#x33A1; | " + size_o + " 坪】 <br />";
-				//html += " (應收費 NTD " + dollar + " 元整) <br />";
 			}
 			$("#data_query_result").html(html);
 		},
@@ -1648,4 +1646,53 @@ var xhrQueryUserInfo = function(e) {
 	});
 }
 
+var xhrSendMessage = function(e) {
+	var title = $("#msg_title").val();
+	var content = $("#msg_content").val();
+	var who = $("#msg_who").val();
+
+	if (!confirm("確認要送 「" + title + "」 給 「" + who + "」？")) {
+		return false;
+	}
+
+	if(isEmpty(title) || isEmpty(content) || isEmpty(who)) {
+		console.warn("Require query params are empty, skip xhr querying. (" + title + ", " + content + ")");
+		showModal("<span class='text-danger'>標題或是內容為空白。</span>", "輸入錯誤");
+		return;
+	}
+
+	if (content.length > 1000) {
+		console.warn("Content should not exceed 1000 chars, skip xhr querying. (" + content.length + ")");
+		showModal("<span class='text-danger'>內容不能超過1000個字元。</span><p>" + content + "</p>", "內容錯誤");
+		return;
+	}
+
+	var clicked_element = $(e.target);
+	toggle(clicked_element);
+
+	var form_body = new FormData();
+	form_body.append("type", "send_message");
+	form_body.append("title", title);
+	form_body.append("content", content);
+	form_body.append("who", who);
+
+
+	fetch("query_json_api.php", {
+		method: 'POST',
+		body: form_body
+	}).then(function(response) {
+		if (response.status != 200) {
+			throw new Error("XHR連線異常，回應非200");
+		}
+		return response.json();
+	}).then(function (jsonObj) {
+		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
+		var html = jsonObj.message;
+		showModal(html, "訊息送出結果");
+		toggle(clicked_element);
+	}).catch(function(ex) {
+		console.error("xhrSendMessage parsing failed", ex);
+		alert("XHR連線查詢有問題!!【" + ex + "】");
+	});
+}
 //]]>

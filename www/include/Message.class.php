@@ -113,7 +113,6 @@ class Messsage {
             'modifier' => $modifier
         );
         return $this->jungli_in_db->insert("Message", $data);
-        //return $this->jungli_in_db->fetch("select top 1 sn from Message order by sn desc")["sn"];
     }
 }
 ?>

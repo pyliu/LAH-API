@@ -75,9 +75,6 @@ class MSDB {
         $sql = "INSERT INTO " . $table . " ( " . implode(',', $fields) . " ) VALUES ( " . implode(',', $values) . " )";
         $result = $this->dbo->query( $sql, false );
 
-        global $log;
-        $log->warning($sql);
-        
         return $this->dbo->last_insert_id();
     }
     /**
@@ -142,6 +139,20 @@ class MSDB {
      */
     public function getLastError() {
         return sqlsrv_errors();
+    }
+    /**
+     * Return last row number affected
+     * @return int
+     */
+    public function getLastNumRows() {
+        return $this->dbo->num_rows;
+    }
+    /**
+     * Return does any rows affected since last query
+	 * @return bool
+	 */
+    public function hasRows() {
+        return $this->dbo->has_rows;
     }
 }
 ?>
