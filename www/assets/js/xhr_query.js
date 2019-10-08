@@ -1639,6 +1639,15 @@ var xhrQueryUserInfo = function(e) {
 				var temp = Date.parse(on_board_date.replace('/-/g', "/"));
 				if (temp) {
 					var on = new Date(temp);
+					if (jsonObj.raw[latest]["AP_OFF_JOB"] == "Y") {
+						var off_board_date = jsonObj.raw[latest]["AP_OFF_DATE"];
+						off_board_date = (parseInt(off_board_date.substring(0, 3)) + 1911) + off_board_date.substring(3);
+						temp = Date.parse(off_board_date.replace('/-/g', "/"));
+						if (temp) {
+							// replace now Date to off board date
+							now = new Date(temp);
+						}
+					}
 					on_board_date += " (" + ((now - on) / year).toFixed(1) + "年)";
 				}
 			}
