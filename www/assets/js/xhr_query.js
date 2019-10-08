@@ -1618,10 +1618,29 @@ var xhrQueryUserInfo = function(e) {
 		if (jsonObj.status == 1) {
 			var latest = jsonObj.data_count - 1;
 
-			var birth_regex = /^\d{3}\/\d{2}\/\d{2}$/;
+			var year = 31536000000;
+			var now = new Date();
 			var age = "";
-			if (jsonObj.raw[latest]["AP_BIRTH"].match(birth_regex)) {
-				age = " (" + (new Date().getFullYear() - (parseInt(jsonObj.raw[latest]["AP_BIRTH"].substring(0, 3)) + 1911)) + ")";
+			var birth = jsonObj.raw[latest]["AP_BIRTH"];
+			var birth_regex = /^\d{3}\/\d{2}\/\d{2}$/;
+			if (birth.match(birth_regex)) {
+				birth = (parseInt(birth.substring(0, 3)) + 1911) + birth.substring(3);
+				console.log(birth);
+				var temp = Date.parse(birth);
+				if (temp) {
+					var born = new Date(temp);
+					age += " (" + ((now - born) / year).toFixed(1) + "歲)";
+				}
+			}
+
+			var on_board_date = "";
+			if(!isEmpty(jsonObj.raw[latest]["AP_ON_DATE"])) {
+				on_board_date = jsonObj.raw[latest]["AP_ON_DATE"].date.split(" ")[0];
+				var temp = Date.parse(on_board_date.replace('/-/g', "/"));
+				if (temp) {
+					var on = new Date(temp);
+					on_board_date += " (" + ((now - on) / year).toFixed(1) + "年)";
+				}
 			}
 
 			html = '<a href="get_pho_img.php?name=' + name + '" target="_blank"><img src="get_pho_img.php?name=' + name + '" width="180" /></a> </br />';
@@ -1636,7 +1655,7 @@ var xhrQueryUserInfo = function(e) {
 				+ "學歷：" + jsonObj.raw[latest]["AP_HI_SCHOOL"] + "<br />"
 				+ "考試：" + jsonObj.raw[latest]["AP_TEST"] + "<br />"
 				+ "手機：" + jsonObj.raw[latest]["AP_SEL"] + "<br />"
-				+ "到職：" + (isEmpty(jsonObj.raw[latest]["AP_ON_DATE"]) ? "" : jsonObj.raw[latest]["AP_ON_DATE"].date.split(" ")[latest]) + "<br />"
+				+ "到職：" + on_board_date + "<br />"
 				;
 		}
 		showModal(html, "使用者資訊");

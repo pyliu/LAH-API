@@ -473,8 +473,6 @@ fieldset fieldset legend {
       bindPressEnterEvent("#sur_delay_case_fix_num", xhrGetSURCase);
 
       // user info
-      $(".user_tag").on("click", xhrQueryUserInfo);
-      // .user_tag click also bring the name to #msg_who
       $(".user_tag").on("click", function(e) {
         var clicked_element = $(e.target);
         if (!clicked_element.hasClass("user_tag")) {
@@ -483,6 +481,7 @@ fieldset fieldset legend {
         }
         var user_data = clicked_element.text().split(":");
         $("#msg_who").val($.trim(user_data[1]));
+        xhrQueryUserInfo(e);
       });
 
       // message
