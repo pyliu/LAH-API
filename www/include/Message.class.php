@@ -8,7 +8,7 @@ class Messsage {
         return (random_int(1, 255) * date("H") * date("i", strtotime("1 min")) * date("s", strtotime("1 second"))) % 65535;
     }
 
-    private function getUserInfo($name_or_id) {
+    private function getUserInfo($name_or_id_or_ip) {
         $tdoc_db = new MSDB(array(
             "MS_DB_UID" => SYSTEM_CONFIG["MS_TDOC_DB_UID"],
             "MS_DB_PWD" => SYSTEM_CONFIG["MS_TDOC_DB_PWD"],
@@ -16,10 +16,13 @@ class Messsage {
             "MS_DB_SVR" => SYSTEM_CONFIG["MS_TDOC_DB_SVR"],
             "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
         ));
-        $name_or_id = trim($name_or_id);
-        $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE DocUserID LIKE '%${name_or_id}%'");
+        $name_or_id_or_ip = trim($name_or_id_or_ip);
+        $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE DocUserID LIKE '%${name_or_id_or_ip}%'");
         if (empty($res)) {
-            $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_USER_NAME LIKE '%${name_or_id}%'");
+            $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_USER_NAME LIKE '%${name_or_id_or_ip}%' ORDER BY AP_ON_DATE");
+        }
+        if (empty($res)) {
+            $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_PCIP = '${name_or_id_or_ip}' ORDER BY DocUserID");
         }
         if (empty($res)) {
             return false;
@@ -58,17 +61,20 @@ class Messsage {
 			AP_ON_DATE: 到職日
          */
         $user_info = $this->getUserInfo($to_who);
+        
+        global $client_ip;
+        $sender_info = $this->getUserInfo($client_ip);
 
         $pctype = "SVR";
-        $sendcname = "地政系管輔助系統";
+        $sendcname = empty($sender_info) ? "地政系管輔助系統" : $sender_info["AP_USER_NAME"];
         $presn = "0";   // map to MessageMain topic
         $xkey = $this->getXKey();
-        $sender = "HBADMIN";
+        $sender = empty($sender_info) ? "HBADMIN" : $sender_info["DocUserID"];
         $receiver = $user_info["DocUserID"];
         $xname = trim($title);  // nvarchar(50)
         $xcontent = trim($content); // nvarchar(1000)
         $sendtype = "1";
-        $sendIP = $_SERVER["SERVER_ADDR"];
+        $sendIP = empty($sender_info) ? $_SERVER["SERVER_ADDR"] : $client_ip;
         $recIP = $user_info["AP_PCIP"];
         $sendtime = date("Y-m-d H:i:s").".000";
         $xtime = "1";

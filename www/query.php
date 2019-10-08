@@ -89,7 +89,7 @@ fieldset fieldset legend {
         <div class="col-6">
           <fieldset>
             <legend>登記案件查詢</legend>
-            <select id="query_year" name="query_year">
+            <select id="query_year" name="query_year" class="no-cache">
               <option>105</option>
               <option>106</option>
               <option>107</option>
@@ -107,7 +107,7 @@ fieldset fieldset legend {
         <div class="col-6">
           <fieldset>
             <legend>複丈案件查詢<small>(修正已結延期、修改連件數)</small></legend>
-            <select id="sur_delay_case_fix_year" name="sur_delay_case_fix_year">
+            <select id="sur_delay_case_fix_year" name="sur_delay_case_fix_year" class="no-cache">
               <option selected>108</option>
             </select>
             年
@@ -210,7 +210,7 @@ fieldset fieldset legend {
             <div class="float-clear">
               <label for="msg_who">
                 姓名：
-                <input type="text" id="msg_who" name="msg_who" placeholder="輸入關鍵字，如 HB0541" />
+                <input type="text" id="msg_who" name="msg_who" placeholder="HB0541" />
               </label>
               <span id="filter_info" class="text-info">
                 <?php
@@ -218,17 +218,17 @@ fieldset fieldset legend {
                 ?>筆
               </span>
             </div>
-            <div><label for="msg_title">訊息標題：<input name="msg_title" id="msg_title" placeholder="請輸入訊息的標題" /></label></div>
+            <div><label for="msg_title">訊息標題：</label><input type="text" name="msg_title" id="msg_title" placeholder="訊息的標題" /></div>
             <div>
               <label for="msg_content">訊息內容：</label>
               <button id="msg_button">傳送訊息</button><br />
-              <textarea id="msg_content" name="msg_content" class="w-100" placeholder="請輸入訊息內容(最多500字)"></textarea>
+              <textarea id="msg_content" name="msg_content" class="w-100" placeholder="訊息內容(最多500字)"></textarea>
             </div>
             <div id="user_list">
             <?php
               foreach ($operators as $id => $name) {
                 //echo $id.": ".($name == false ? "無此人!" : $name)."</br>";
-                echo "<div class='float-left m-2 user_tag' style='width: 200px' data-id='".$id."' data-name='".($name == false ? "XXXXXX" : $name)."'>".$id.": ".($name == false ? "XXXXXX" : $name)."</div>";
+                echo "<div class='float-left m-2 user_tag hide' style='width: 200px' data-id='".$id."' data-name='".($name == false ? "XXXXXX" : $name)."'>".$id.": ".($name == false ? "XXXXXX" : $name)."</div>";
               }
             ?>
             </div>
