@@ -545,8 +545,10 @@ switch ($_POST["type"]) {
 				"query_string" => "title=".$_POST["title"]."&content=".$_POST["content"]."&who=".$_POST["who"],
 				"message" => "傳送成功 (sn: $id)"
 			);
-			$log->info("XHR [send_message] 訊息「".$_POST["title"]."」已寫入內網資料庫【sn: $id 】");
+			$log->info("XHR [send_message] 給「".$_POST["who"]."」訊息「".$_POST["title"]."」已寫入內網資料庫【sn: $id 】");
 			echo json_encode($result, 0);
+		} else if ($id == -1) {
+			echoErrorJSONString("找不到 ".$_POST["who"]." 故無法傳送訊息。");
 		} else {
 			echoErrorJSONString("新增 ".$_POST["title"]." 訊息失敗【${id}】。");
 			$log->info("XHR [send_message] 新增「".$_POST["title"]."」訊息失敗【${id}】。");

@@ -24,10 +24,10 @@ class Messsage {
         if (empty($res)) {
             $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_PCIP = '${name_or_id_or_ip}' ORDER BY DocUserID");
         }
-        if (empty($res)) {
+        if (empty($res) || count($res) != 1) {
             return false;
         }
-        return $res[count($res) - 1];
+        return $res[0];
     }
 
     function __construct() {
@@ -61,64 +61,67 @@ class Messsage {
 			AP_ON_DATE: 到職日
          */
         $user_info = $this->getUserInfo($to_who);
+        if ($user_info != false) {
         
-        global $client_ip;
-        $sender_info = $this->getUserInfo($client_ip);
+            global $client_ip;
+            $sender_info = $this->getUserInfo($client_ip);
 
-        $pctype = "SVR";
-        $sendcname = empty($sender_info) ? "地政系管輔助系統" : $sender_info["AP_USER_NAME"];
-        $presn = "0";   // map to MessageMain topic
-        $xkey = $this->getXKey();
-        $sender = empty($sender_info) ? "HBADMIN" : $sender_info["DocUserID"];
-        $receiver = $user_info["DocUserID"];
-        $xname = trim($title);  // nvarchar(50)
-        $xcontent = trim($content); // nvarchar(1000)
-        $sendtype = "1";
-        $sendIP = empty($sender_info) ? $_SERVER["SERVER_ADDR"] : $client_ip;
-        $recIP = $user_info["AP_PCIP"];
-        $sendtime = date("Y-m-d H:i:s").".000";
-        $xtime = "1";
-        $intertime = "15";
-        $timetype = "0";
-        $done = "0";
-        $createdate = $sendtime;
-        $createunit = "5";
-        $creator = $sender;
-        $modifydate = $sendtime;
-        $modunit = "5";
-        $modifier = $sender;
-        $enddate = date("Y-m-d 23:59:59");
-        /*
-        $sdate = 
-        $shour = 
-        $smin = 
-        */
-        $data = array(
-            'pctype' => $pctype,
-            'sendcname' => $sendcname,
-            'presn' => $presn,
-            'xkey' => $xkey,
-            'enddate' => $enddate,
-            'sender' => $sender,
-            'receiver' => $receiver,
-            'xname' => $xname,
-            'xcontent' => $xcontent,
-            'sendtype' => $sendtype,
-            'sendIP' => $sendIP,
-            'recIP' => $recIP,
-            'xtime' => $xtime,
-            'intertime' => $intertime,
-            'timetype' => $timetype,
-            'sendtime' => $sendtime,
-            'done' => $done,
-            'createdate' => $createdate,
-            'createunit' => $createunit,
-            'creator' => $creator,
-            'modifydate' => $modifydate,
-            'modunit' => $modunit,
-            'modifier' => $modifier
-        );
-        return $this->jungli_in_db->insert("Message", $data);
+            $pctype = "SVR";
+            $sendcname = empty($sender_info) ? "地政系管輔助系統" : $sender_info["AP_USER_NAME"];
+            $presn = "0";   // map to MessageMain topic
+            $xkey = $this->getXKey();
+            $sender = empty($sender_info) ? "HBADMIN" : $sender_info["DocUserID"];
+            $receiver = $user_info["DocUserID"];
+            $xname = trim($title);  // nvarchar(50)
+            $xcontent = trim($content); // nvarchar(1000)
+            $sendtype = "1";
+            $sendIP = empty($sender_info) ? $_SERVER["SERVER_ADDR"] : $client_ip;
+            $recIP = $user_info["AP_PCIP"];
+            $sendtime = date("Y-m-d H:i:s").".000";
+            $xtime = "1";
+            $intertime = "15";
+            $timetype = "0";
+            $done = "0";
+            $createdate = $sendtime;
+            $createunit = "5";
+            $creator = $sender;
+            $modifydate = $sendtime;
+            $modunit = "5";
+            $modifier = $sender;
+            $enddate = date("Y-m-d 23:59:59");
+            /*
+            $sdate = 
+            $shour = 
+            $smin = 
+            */
+            $data = array(
+                'pctype' => $pctype,
+                'sendcname' => $sendcname,
+                'presn' => $presn,
+                'xkey' => $xkey,
+                'enddate' => $enddate,
+                'sender' => $sender,
+                'receiver' => $receiver,
+                'xname' => $xname,
+                'xcontent' => $xcontent,
+                'sendtype' => $sendtype,
+                'sendIP' => $sendIP,
+                'recIP' => $recIP,
+                'xtime' => $xtime,
+                'intertime' => $intertime,
+                'timetype' => $timetype,
+                'sendtime' => $sendtime,
+                'done' => $done,
+                'createdate' => $createdate,
+                'createunit' => $createunit,
+                'creator' => $creator,
+                'modifydate' => $modifydate,
+                'modunit' => $modunit,
+                'modifier' => $modifier
+            );
+            return $this->jungli_in_db->insert("Message", $data);
+        }
+        return -1;
     }
 }
 ?>

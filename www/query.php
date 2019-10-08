@@ -206,10 +206,10 @@ fieldset fieldset legend {
         </div>
         <div class="col-6">
           <fieldset>
-            <legend>使用者對應表</legend>
+            <legend>使用者＆訊息</legend>
             <div class="float-clear">
               <label for="msg_who">
-                姓名：
+                　關鍵字：
                 <input type="text" id="msg_who" name="msg_who" placeholder="HB0541" />
               </label>
               <span id="filter_info" class="text-info">
@@ -218,7 +218,10 @@ fieldset fieldset legend {
                 ?>筆
               </span>
             </div>
-            <div><label for="msg_title">訊息標題：</label><input type="text" name="msg_title" id="msg_title" placeholder="訊息的標題" /></div>
+            <div>
+              <label for="msg_title">訊息標題：</label>
+              <input type="text" name="msg_title" id="msg_title" placeholder="訊息的標題" />
+            </div>
             <div>
               <label for="msg_content">訊息內容：</label>
               <button id="msg_button">傳送訊息</button><br />
