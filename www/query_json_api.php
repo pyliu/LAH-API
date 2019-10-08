@@ -548,7 +548,7 @@ switch ($_POST["type"]) {
 			$log->info("XHR [send_message] 給「".$_POST["who"]."」訊息「".$_POST["title"]."」已寫入內網資料庫【sn: $id 】");
 			echo json_encode($result, 0);
 		} else if ($id == -1) {
-			echoErrorJSONString("找不到 ".$_POST["who"]." 故無法傳送訊息。");
+			echoErrorJSONString("現職人員找不到 ".$_POST["who"]." 故無法傳送訊息。");
 		} else {
 			echoErrorJSONString("新增 ".$_POST["title"]." 訊息失敗【${id}】。");
 			$log->info("XHR [send_message] 新增「".$_POST["title"]."」訊息失敗【${id}】。");

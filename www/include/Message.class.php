@@ -17,12 +17,12 @@ class Messsage {
             "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
         ));
         $name_or_id_or_ip = trim($name_or_id_or_ip);
-        $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE DocUserID LIKE '%${name_or_id_or_ip}%'");
+        $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE DocUserID LIKE '%${name_or_id_or_ip}%' AND AP_OFF_JOB <> 'Y'");
         if (empty($res)) {
-            $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_USER_NAME LIKE '%${name_or_id_or_ip}%' ORDER BY AP_ON_DATE");
+            $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_USER_NAME LIKE '%${name_or_id_or_ip}%' AND AP_OFF_JOB <> 'Y' ORDER BY AP_ON_DATE");
         }
         if (empty($res)) {
-            $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_PCIP = '${name_or_id_or_ip}' ORDER BY DocUserID");
+            $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_PCIP = '${name_or_id_or_ip}' AND AP_OFF_JOB <> 'Y' ORDER BY DocUserID");
         }
         if (empty($res) || count($res) != 1) {
             return false;

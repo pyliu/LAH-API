@@ -210,7 +210,7 @@ fieldset fieldset legend {
             <div class="float-clear">
               <label for="msg_who">
                 　關鍵字：
-                <input type="text" id="msg_who" name="msg_who" placeholder="HB0541" />
+                <input type="text" id="msg_who" name="msg_who" placeholder="HB0541" value="HB054" />
               </label>
               <span id="filter_info" class="text-info">
                 <?php
@@ -433,7 +433,6 @@ fieldset fieldset legend {
         }
         prevVal = val;
       };
-
       filter_user("#msg_who");
 
       var delayTimer = null;
@@ -475,6 +474,16 @@ fieldset fieldset legend {
 
       // user info
       $(".user_tag").on("click", xhrQueryUserInfo);
+      // .user_tag click also bring the name to #msg_who
+      $(".user_tag").on("click", function(e) {
+        var clicked_element = $(e.target);
+        if (!clicked_element.hasClass("user_tag")) {
+          console.warn("clicked element doesn't have user_tag class ... find its closet parent");
+          clicked_element = $(clicked_element.closest(".user_tag"));
+        }
+        var user_data = clicked_element.text().split(":");
+        $("#msg_who").val($.trim(user_data[1]));
+      });
 
       // message
       $("#msg_button").on("click", xhrSendMessage);

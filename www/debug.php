@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once("./include/init.php");
 require_once("./include/Query.class.php");
 require_once("./include/Message.class.php");
@@ -9,7 +9,12 @@ require_once("./include/Logger.class.php");
 //echo $xkey;
 
 $msg = new Messsage();
-var_dump($msg->sendMessage("中文", "test content 我是中文", "HB0541"));
+var_dump($msg->send("我是測試 1081007", "系統測試~收到請回覆", "HB0541"));
+/*$msg->update(array(
+    'xcontent' => iconv('UTF-8', 'BIG5//IGNORE', '測試')
+), array(
+    'sn' => '299213'
+));*/
 var_dump(sqlsrv_errors());
 
 //var_dump(getTdocUserInfo("hb0541"));
