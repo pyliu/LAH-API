@@ -19,9 +19,9 @@ if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
 $today_ad = date('Y-m-d');  // ex: 2019-09-16
 $log = new Logger('logs/log-' . $today_ad . '.log');
 
-if (!in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
+if (!in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"]) && php_sapi_name() != "cli") {
     $log->warning($client_ip." tried to access the mgt system.");
-    die("<(￣ ﹌ ￣)> ".$client_ip);
+    die("<(￣ ﹌ ￣)> you bad boy ... ".$client_ip);
 }
 
 // compress all log every monday

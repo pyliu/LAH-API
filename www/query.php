@@ -206,7 +206,7 @@ fieldset fieldset legend {
         </div>
         <div class="col-6">
           <fieldset>
-            <legend>使用者＆訊息</legend>
+            <legend>使用者＆信差訊息</legend>
             <div class="float-clear">
               <label for="msg_who">
                 　關鍵字：
@@ -421,6 +421,7 @@ fieldset fieldset legend {
         } else {
           // Don't add 'g' because I only a line everytime.
           // If use 'g' flag regexp object will remember last found index, that will possibly case the subsequent test failure.
+          val = val.replace("?", ""); // prevent out of memory
           var keyword = new RegExp(val, "i");
           $(".user_tag").each(function(idx, div) {
             keyword.test($(div).text()) ? $(div).removeClass("hide") : $(div).addClass("hide");

@@ -1,4 +1,5 @@
 <?php
+
 abstract class STATUS_CODE {
 	const SUCCESS_NORMAL = 1;
     const SUCCESS_WITH_MULTIPLE_RECORDS = 2;
@@ -7,7 +8,9 @@ abstract class STATUS_CODE {
     const FAIL_WITH_LOCAL_NO_RECORD = -2;
 }
 
-const CASE_STATUS = array(
+define('ROOT_DIR', dirname(dirname(__FILE__)));
+
+define('CASE_STATUS',[
     "A" => "初審",
     "B" => "複審",
     "H" => "公告",
@@ -25,9 +28,9 @@ const CASE_STATUS = array(
     "L" => "公告初核",
     "E" => "請示",
     "D" => "展期"
-);
+]);
 
-const REG_NOTE = array(
+define('REG_NOTE', [
     "B" => "登錄開始",
     "R" => "登錄完成",
     "C" => "校對結束",
@@ -36,9 +39,9 @@ const REG_NOTE = array(
     "F" => "異動完成",
     "G" => "異動有誤",
     "P" => "競合暫停"
-);
+]);
 
-const VAL_NOTE = array(
+define('VAL_NOTE', [
     "0" => "登記移案",
     "B" => "登錄中",
     "R" => "登錄完成",
@@ -48,10 +51,10 @@ const VAL_NOTE = array(
     "S" => "異動開始",
     "F" => "異動完成",
     "G" => "異動有誤"
-);
+]);
 
 
-const OFFICE = array(
+define('OFFICE', [
     "HA" => "桃園",
     "HB" => "中壢",
     "HC" => "大溪",
@@ -163,18 +166,18 @@ const OFFICE = array(
     'WA' => '金門',
     'XA' => '澎湖',
     'ZA' => '連江'
-);
+]);
 
-const SUR_WORD = array(
+define('SUR_WORD', [
     //"HB11" => "中地測數",
     "HB12" => "中地測丈",
     "HB13" => "中地測建",
     //"HB14" => "中地測法",
     "HB17" => "中地法土",
-    "HB18" => "中地法建",
-);
+    "HB18" => "中地法建"
+]);
 
-const REG_WORD = array(
+define('REG_WORD', [
 	"HA81" => "桃資登",
 	"HA82" => "桃資總",
 	"HA83" => "桃資更",
@@ -433,5 +436,5 @@ const REG_WORD = array(
     'H2WA' => '跨縣市（中壢金門）',
     'H2XA' => '跨縣市（中壢澎湖）',
     'H2ZA' => '跨縣市（中壢連江）'
-);
+]);
 ?>
