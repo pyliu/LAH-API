@@ -218,13 +218,16 @@ var xhrCheckProblematicXCase = function(e) {
 		return response.json();
 	}).then(function(jsonObj) {
 		if (jsonObj.status == 1) {
-			var html = "<div class='mt-1'><span class='rounded-circle bg-danger'> 　 </span> <strong class='text-danger'>找到下列資料：</strong></div>";
-			html += "<a href='javascript:void(0)' class='query_case_dialog'>" + jsonObj.收件字號 + "</a> ";
-			html += "<button id='fix_xcase_button'>修正</button> ";
-			html += "<span id='fix_xcase_button_msg'></span>";
+			var html = "<div class='mt-1'><span class='rounded-circle bg-danger'> 　 </span> <strong class='text-info'>請查看並修正下列案件：</strong></div>";
+			for (var i = 0; i < jsonObj.data_count; i++) {
+				var id = jsonObj.raw[i]["RM01"] + "-" + jsonObj.raw[i]["RM02"] + "-" + jsonObj.raw[i]["RM03"];
+				html += "<a href='javascript:void(0)' class='reg_case_id'>" + id + "</a> ";
+				html += "<button class='fix_xcase_button' data-id='" + id + "'>修正</button> ";
+				html += "<span id='fix_xcase_button_msg'></span> <br />";
+			}
 			$("#cross_case_check_query_display").html(html);
-			$(".query_case_dialog").on("click", xhrRegQueryCaseDialog);
-			$("#fix_xcase_button").on("click", xhrFixProblematicXCase.bind(jsonObj.收件字號));
+			$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
+			$(".fix_xcase_button").on("click", xhrFixProblematicXCase);
 		} else if (jsonObj.status == 0) {
 			var now = new Date();
 			$("#cross_case_check_query_display").html("<div class='mt-1'><span class='rounded-circle bg-success'> 　 </span> 目前一切良好！【" + now.toLocaleString() + "】</div>");
@@ -237,14 +240,14 @@ var xhrCheckProblematicXCase = function(e) {
 };
 
 var xhrFixProblematicXCase = function(e) {
-	var id = trim(this);
+	var id = trim($(e.target).data("id"));
 	console.log("The problematic xcase id: "+id);
 
 	var body = new FormData();
 	body.append("type", "fix_xcase");
 	body.append("id", id);
 
-	$("#fix_xcase_button").remove();
+	$(e.target).remove();
 
 	fetch("query_json_api.php", {
 		method: "POST",

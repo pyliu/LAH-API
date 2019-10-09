@@ -51,7 +51,7 @@ function GetDBUserMapping($refresh = false) {
                 "MS_DB_SVR" => SYSTEM_CONFIG["MS_TDOC_DB_SVR"],
                 "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
             ));
-            $users_results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_OFF_JOB <> 'Y'");
+            $users_results = $tdoc_db->fetchAll("SELECT * FROM AP_USER");
             foreach($users_results as $this_user) {
                 $user_id =trim($this_user["DocUserID"]);
                 if (empty($user_id)) {
