@@ -38,7 +38,7 @@ var xhrGetCaseLatestNum = function(e) {
 		toggle(code_select);
 		toggle(number);
 	}).catch(function(ex) {
-		console.log("xhrGetCaseLatestNum parsing failed", ex);
+		console.error("xhrGetCaseLatestNum parsing failed", ex);
 	  	display.html("<strong class='text-danger'>" + "查詢最大號碼失敗~【" + code_val + "】" + "</strong>");
 	});
 };
@@ -231,7 +231,7 @@ var xhrCheckProblematicXCase = function(e) {
 		}
 		toggle("#cross_case_check_query_button");
 	}).catch(function(ex) {
-		console.log("xhrCheckProblematicXCase parsing failed", ex);
+		console.error("xhrCheckProblematicXCase parsing failed", ex);
 	  $("#cross_case_check_query_display").html("<strong class='text-danger'>XHR連線查詢有問題!!【" + ex + "】</strong>");
 	});
 };
@@ -446,7 +446,6 @@ var xhrEasycardPaymentQuery = function(e) {
 	// basic checking for tw date input
 	var regex = /^\d{7}$/;
 	var txt = $("#easycard_query_day").val();
-	//console.log(txt);
 	if (!isEmpty(txt) && txt.match(regex) == null) {
 		showPopper("#easycard_query_day");
 		return;
@@ -1625,7 +1624,6 @@ var xhrQueryUserInfo = function(e) {
 			var birth_regex = /^\d{3}\/\d{2}\/\d{2}$/;
 			if (birth.match(birth_regex)) {
 				birth = (parseInt(birth.substring(0, 3)) + 1911) + birth.substring(3);
-				console.log(birth);
 				var temp = Date.parse(birth);
 				if (temp) {
 					var born = new Date(temp);
@@ -1679,7 +1677,7 @@ var xhrSendMessage = function(e) {
 	var content = $("#msg_content").val();
 	var who = $("#msg_who").val();
 
-	if (!confirm("確認要送 「" + title + "」 給 「" + who + "」？")) {
+	if (!confirm("確認要送 「" + title + "」 給 「" + who + "」？\n\n" + content)) {
 		return false;
 	}
 
