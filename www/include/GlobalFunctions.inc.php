@@ -53,7 +53,11 @@ function GetDBUserMapping($refresh = false) {
         ));
         $users_results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_OFF_JOB <> 'Y'");
         foreach($users_results as $this_user) {
-            $result[trim($this_user["DocUserID"])] = preg_replace('/\d+/', "", trim($this_user["AP_USER_NAME"]));
+            $user_id =trim($this_user["DocUserID"]);
+            if (empty($user_id)) {
+                continue;
+            }
+            $result[$user_id] = preg_replace('/\d+/', "", trim($this_user["AP_USER_NAME"]));
         }
 
         // cache
