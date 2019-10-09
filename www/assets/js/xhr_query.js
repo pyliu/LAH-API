@@ -1674,7 +1674,7 @@ var xhrQueryUserInfo = function(e) {
 
 var xhrSendMessage = function(e) {
 	var title = $("#msg_title").val();
-	var content = $("#msg_content").val();
+	var content = $("#msg_content").val().replace(/\n/g, "\r\n");	// Messenger client is Windows app, so I need to replace \n to \r\n
 	var who = $("#msg_who").val();
 
 	if (!confirm("確認要送 「" + title + "」 給 「" + who + "」？\n\n" + content)) {
