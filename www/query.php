@@ -209,7 +209,7 @@ fieldset fieldset legend {
             <legend>使用者＆信差訊息</legend>
             <div class="float-clear">
               <label for="msg_who">
-                　關鍵字：
+              　　姓名：
                 <input type="text" id="msg_who" name="msg_who" placeholder="HB0541" value="HB054" />
               </label>
               <span id="filter_info" class="text-info">
@@ -407,30 +407,40 @@ fieldset fieldset legend {
        * For User Mapping
        */
       var prevVal = null;
+      var total_ops = <?php echo count($operators); ?>;
       var filter_user = function(el) {
         var val = $(el).val();
         if (val == prevVal) {
           return;
         }
+        // clean
         $(".user_tag").unmark(val, {
           "className": "highlight"
-        });
+        }).addClass("hide");
+        
         if (isEmpty(val)) {
           $(".user_tag").removeClass("hide");
-          $("#filter_info").text("<?php echo count($operators); ?>筆");
+          $("#filter_info").text(total_ops + "筆");
         } else {
           // Don't add 'g' because I only a line everytime.
           // If use 'g' flag regexp object will remember last found index, that will possibly case the subsequent test failure.
           val = val.replace("?", ""); // prevent out of memory
           var keyword = new RegExp(val, "i");
           $(".user_tag").each(function(idx, div) {
-            keyword.test($(div).text()) ? $(div).removeClass("hide") : $(div).addClass("hide");
-            $(div).mark(val, {
-              "element" : "strong",
-              "className": "highlight"
-            });
+            if (keyword.test($(div).text())) {
+              $(div).removeClass("hide");  
+              // $("#msg_who").val($.trim(user_data[1]));
+              $(div).mark(val, {
+                "element" : "strong",
+                "className": "highlight"
+              });
+            }
           });
-          $("#filter_info").text((<?php echo count($operators); ?> - $(".user_tag.hide").length) + "筆");
+          $("#filter_info").text((total_ops - $(".user_tag.hide").length) + "筆");
+          if ((total_ops - $(".user_tag.hide").length) == 1) {
+            var user_data = $(".user_tag:not(.hide)").text().split(":");
+            $("#msg_who").val($.trim(user_data[1]));
+          }
         }
         prevVal = val;
       };
