@@ -30,7 +30,7 @@ function GetDBUserMapping($refresh = false) {
         
         $result = array();
         while ($row = oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS)) {
-            $result[$row["USER_ID"]] = iconv("big-5", "utf-8", $row["USER_NAME"]);
+            $result[$row["USER_ID"]] = mb_convert_encoding($row["USER_NAME"], "UTF-8", "BIG5");
         }
         
         if ($stid) {
@@ -40,6 +40,22 @@ function GetDBUserMapping($refresh = false) {
             oci_close($conn);
         }
         
+        /**
+         * Also get user info from internal DB
+         */
+        require_once("MSDB.class.php");
+        $tdoc_db = new MSDB(array(
+            "MS_DB_UID" => SYSTEM_CONFIG["MS_TDOC_DB_UID"],
+            "MS_DB_PWD" => SYSTEM_CONFIG["MS_TDOC_DB_PWD"],
+            "MS_DB_DATABASE" => SYSTEM_CONFIG["MS_TDOC_DB_DATABASE"],
+            "MS_DB_SVR" => SYSTEM_CONFIG["MS_TDOC_DB_SVR"],
+            "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
+        ));
+        $users_results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_OFF_JOB <> 'Y'");
+        foreach($users_results as $this_user) {
+            $result[trim($this_user["DocUserID"])] = preg_replace('/\d+/', "", trim($this_user["AP_USER_NAME"]));
+        }
+
         // cache
         $content = serialize($result);
         file_put_contents($file, $content);
