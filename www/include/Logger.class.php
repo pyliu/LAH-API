@@ -162,7 +162,6 @@ class Logger {
         // Write time, url, & message to end of file
         fwrite($this->file, "[$time] [$path] : [$severity] - $message [$client_ip]" . PHP_EOL);
     }
-
     /**
     * Open log file
     * @return void

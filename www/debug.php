@@ -8,15 +8,16 @@ require_once("./include/Logger.class.php");
 //$xkey = (random_int(1, 255) * date("H") * date("i", strtotime("1 min")) * date("s", strtotime("1 second"))) % 65535;
 //echo $xkey;
 
-$msg = new Messsage();
-var_dump($msg->send("我是測試 1081007", "系統測試~收到請回覆", "HB0541"));
-/*$msg->update(array(
-    'xcontent' => iconv('UTF-8', 'BIG5//IGNORE', '測試')
-), array(
-    'sn' => '299213'
-));*/
-var_dump(sqlsrv_errors());
-
+        $tdoc_db = new MSDB(array(
+            "MS_DB_UID" => SYSTEM_CONFIG["MS_TDOC_DB_UID"],
+            "MS_DB_PWD" => SYSTEM_CONFIG["MS_TDOC_DB_PWD"],
+            "MS_DB_DATABASE" => SYSTEM_CONFIG["MS_TDOC_DB_DATABASE"],
+            "MS_DB_SVR" => SYSTEM_CONFIG["MS_TDOC_DB_SVR"],
+            "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
+        ));
+        $users_results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_OFF_JOB <> 'Y'");
+        var_dump($users_results);
+        var_dump($tdoc_db->getLastQuery());
 //var_dump(getTdocUserInfo("hb0541"));
 /*
 $ms_db = new MSDB();

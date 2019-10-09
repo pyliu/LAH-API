@@ -161,4 +161,20 @@ function getTdocUserInfo($id, $name) {
     }
     return $results;
 }
+/**
+ * Find the local host IP
+ * @return string
+ */
+function getLocalhostIP() {
+    // find this server ip
+    $host_ip = gethostname();
+    $host_ips = gethostbynamel($host_ip);
+    foreach ($host_ips as $this_ip) {
+        if (preg_match("/220\.1\.35/", $this_ip)) {
+            $host_ip = $this_ip;
+            break;
+        }
+    }
+    return $host_ip;
+}
 ?>

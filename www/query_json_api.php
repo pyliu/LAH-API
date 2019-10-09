@@ -25,15 +25,13 @@ switch ($_POST["type"]) {
 			$log->info("XHR [x] 查無資料");
 			echoErrorJSONString();
 		} else {
-			$row = $query_result;
+			$rows = $query_result;
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => "1",
-				"收件字號" => $row["RM01"]."-".$row["RM02"]."-".$row["RM03"],
-				"收件時間" => RegCaseData::toDate($row["RM07_1"])." ".RegCaseData::toDate($row["RM07_2"]),
-				"raw" => $row
+				"data_count" => count($rows),
+				"raw" => $rows
 			);
-			$log->info("XHR [x] 找到遺失註記案件【".$row["RM01"]."-".$row["RM02"]."-".$row["RM03"]."】");
+			$log->info("XHR [x] 找到".count($rows)."件案件遺失註記");
 			echo json_encode($result, 0);
 		}
 		break;
@@ -535,7 +533,7 @@ switch ($_POST["type"]) {
 		break;
 	case "send_message":
 		$log->info("XHR [send_message] 送出訊息【".$_POST["title"].", ".$_POST["content"].", ".$_POST["who"]."】請求");
-		$msg = new Messsage();
+		$msg = new Message();
 		$id = $msg->send($_POST["title"], $_POST["content"], $_POST["who"]);
 		if ($id > 0) {
 			$result = array(

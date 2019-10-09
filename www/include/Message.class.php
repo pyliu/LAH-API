@@ -1,7 +1,7 @@
 <?php
 require_once("MSDB.class.php");
 
-class Messsage {
+class Message {
     private $jungli_in_db;
 
     private function getXKey() : int {
