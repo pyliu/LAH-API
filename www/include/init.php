@@ -39,4 +39,9 @@ $this_year = ltrim($tw_date->format("Y"), "0");	// ex: 108
 $today = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080325
 $tw_date->modify("-1 week");
 $week_ago = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080318
+
+set_exception_handler(function(Exception $e) {
+    global $log;
+    $log->error($e->getMessage());
+});
 ?>

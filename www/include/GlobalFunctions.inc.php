@@ -3,8 +3,8 @@ require_once("Config.inc.php");
 
 function GetDBUserMapping($refresh = false) {
     $tmp_path = sys_get_temp_dir();
-    $file     = $tmp_path . "\\tyland_user.map";
-    $time = filemtime($file);
+    $file = $tmp_path . "\\tyland_user.map";
+    $time = @filemtime($file);
     
     if ($refresh === true || $time === false || mktime() - $time > 86400) {
         $db = SYSTEM_CONFIG["ORA_DB_MAIN"];
@@ -30,7 +30,7 @@ function GetDBUserMapping($refresh = false) {
         
         $result = array();
         while ($row = oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS)) {
-            $result[$row["USER_ID"]] = mb_convert_encoding($row["USER_NAME"], "UTF-8", "BIG5");
+            $result[$row["USER_ID"]] = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", "BIG5");
         }
         
         if ($stid) {
@@ -39,30 +39,36 @@ function GetDBUserMapping($refresh = false) {
         if ($conn) {
             oci_close($conn);
         }
-        
-        /**
-         * Also get user info from internal DB
-         */
-        require_once("MSDB.class.php");
-        $tdoc_db = new MSDB(array(
-            "MS_DB_UID" => SYSTEM_CONFIG["MS_TDOC_DB_UID"],
-            "MS_DB_PWD" => SYSTEM_CONFIG["MS_TDOC_DB_PWD"],
-            "MS_DB_DATABASE" => SYSTEM_CONFIG["MS_TDOC_DB_DATABASE"],
-            "MS_DB_SVR" => SYSTEM_CONFIG["MS_TDOC_DB_SVR"],
-            "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
-        ));
-        $users_results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_OFF_JOB <> 'Y'");
-        foreach($users_results as $this_user) {
-            $user_id =trim($this_user["DocUserID"]);
-            if (empty($user_id)) {
-                continue;
+        try {
+            /**
+             * Also get user info from internal DB
+             */
+            require_once("MSDB.class.php");
+            $tdoc_db = new MSDB(array(
+                "MS_DB_UID" => SYSTEM_CONFIG["MS_TDOC_DB_UID"],
+                "MS_DB_PWD" => SYSTEM_CONFIG["MS_TDOC_DB_PWD"],
+                "MS_DB_DATABASE" => SYSTEM_CONFIG["MS_TDOC_DB_DATABASE"],
+                "MS_DB_SVR" => SYSTEM_CONFIG["MS_TDOC_DB_SVR"],
+                "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
+            ));
+            $users_results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_OFF_JOB <> 'Y'");
+            foreach($users_results as $this_user) {
+                $user_id =trim($this_user["DocUserID"]);
+                if (empty($user_id)) {
+                    continue;
+                }
+                $result[$user_id] = preg_replace('/\d+/', "", trim($this_user["AP_USER_NAME"]));
             }
-            $result[$user_id] = preg_replace('/\d+/', "", trim($this_user["AP_USER_NAME"]));
-        }
+        } catch (\Throwable $th) {
+            //throw $th;
+            global $log;
+            $log->error("取得內網使用者失敗。【".$th->getMessage()."】");
 
-        // cache
-        $content = serialize($result);
-        file_put_contents($file, $content);
+        } finally {
+            // cache
+            $content = serialize($result);
+            file_put_contents($file, $content);
+        }
         
         return $result;
     }
