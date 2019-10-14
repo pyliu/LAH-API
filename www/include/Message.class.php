@@ -45,7 +45,7 @@ class Message {
         }
     }
 
-    public function send($title, $content, $to_who) : int {
+    public function send($title, $content, $to_who, $date_offset = "+8 hour") : int {
         /*
             AP_OFF_JOB: 離職 (Y/N)
 			DocUserID: 使用者代碼 (HB0123)
@@ -88,7 +88,11 @@ class Message {
             $modifydate = $sendtime;
             $modunit = "5";
             $modifier = $sender;
-            $enddate = date("Y-m-d 23:59:59");
+
+            $end_datetime = new Datetime("now");
+            $end_datetime->modify($date_offset);
+            $enddate = $end_datetime->format("Y-m-d H:i:s");
+            
             /*
             $sdate = 
             $shour = 
