@@ -26,11 +26,28 @@ switch ($_POST["type"]) {
 			echoErrorJSONString();
 		} else {
 			$rows = $query_result;
+			$case_ids = [];
+			foreach ($rows as $row) {
+				$case_ids[] = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
+			}
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"case_ids" => $case_ids,
 				"data_count" => count($rows),
 				"raw" => $rows
 			);
+			
+			// Send Message to Admins
+			$msg = new Message();
+			$content = "系統目前找到下列跨所註記遺失案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/watch_dog.php 修正。";
+			foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
+				if ($adm_ip == '::1') {
+					continue;
+				}
+				$sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, "+9 minute");
+				$log->info("訊息已送出(${sn})給 ${adm_ip}");
+			}
+
 			$log->info("XHR [x] 找到".count($rows)."件案件遺失註記");
 			echo json_encode($result, 0);
 		}

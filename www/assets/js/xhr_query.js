@@ -220,10 +220,9 @@ var xhrCheckProblematicXCase = function(e) {
 		if (jsonObj.status == 1) {
 			var html = "<div class='mt-1'><span class='rounded-circle bg-danger'> 　 </span> <strong class='text-info'>請查看並修正下列案件：</strong></div>";
 			for (var i = 0; i < jsonObj.data_count; i++) {
-				var id = jsonObj.raw[i]["RM01"] + "-" + jsonObj.raw[i]["RM02"] + "-" + jsonObj.raw[i]["RM03"];
-				html += "<a href='javascript:void(0)' class='reg_case_id'>" + id + "</a> ";
-				html += "<button class='fix_xcase_button' data-id='" + id + "'>修正</button> ";
-				html += "<span id='fix_xcase_button_msg'></span> <br />";
+				html += "<a href='javascript:void(0)' class='reg_case_id'>" + jsonObj.case_ids[i] + "</a> ";
+				html += "<button class='fix_xcase_button' data-id='" + jsonObj.case_ids[i] + "'>修正</button> ";
+				html += "<span id='" + jsonObj.case_ids[i] + "'></span> <br />";
 			}
 			$("#cross_case_check_query_display").html(html);
 			$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
@@ -258,10 +257,11 @@ var xhrFixProblematicXCase = function(e) {
 		}
 		return response.json();
 	}).then(function(jsonObj) {
+		var msg_span_id = "#" + id;
 		if (jsonObj.status == 1) {
-			$("#fix_xcase_button_msg").html("<span class='text-success'>跨所註記修正完成!</span>");
+			$(msg_span_id).html("<span class='text-success'>跨所註記修正完成!</span>");
 		} else {
-			$("#fix_xcase_button_msg").html("<span class='text-danger'>跨所註記修正失敗!</span>");
+			$(msg_span_id).html("<span class='text-danger'>跨所註記修正失敗!</span>");
 		}
 	}).catch(function(ex) {
 		console.error("xhrFixProblematicXCase parsing failed", ex);
