@@ -216,7 +216,6 @@ var xhrCallWatchDog = function(e) {
 		// normal success
 		if (jsonObj.status == 1) {
 			// do nothing
-			concole.log("Watchdog is OK.");	// TODO: remove ...
 		} else if (jsonObj.status == 0) {
 			showModal(jsonObj.message, "警告");
 		}
