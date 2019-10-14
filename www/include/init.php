@@ -9,15 +9,7 @@ require_once("GlobalConstants.inc.php");
 require_once("GlobalFunctions.inc.php");
 require_once("Logger.class.php");
 
-$client_ip = getLocalhostIP();
-if (isset($_SERVER)) {
-    $client_ip = $_SERVER["REMOTE_ADDR"];
-    if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
-        $client_ip = $_SERVER["HTTP_CLIENT_IP"];
-    } elseif (!empty($_SERVER["HTTP_X_FORWARDED_FOR"])) {
-        $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
-    }
-}
+$client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $_SERVER["REMOTE_ADDR"] ?? getLocalhostIP();
 
 $today_ad = date('Y-m-d');  // ex: 2019-09-16
 $log = new Logger('logs/log-' . $today_ad . '.log');
