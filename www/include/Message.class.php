@@ -67,15 +67,15 @@ class Message {
             $sender_info = $this->getUserInfo($client_ip);
 
             $pctype = "SVR";
-            $sendcname = empty($sender_info) ? "地政系管輔助系統" : $sender_info["AP_USER_NAME"];
+            $sendcname = $sender_info["AP_USER_NAME"] ?? "地政系管輔助系統";
             $presn = "0";   // map to MessageMain topic
             $xkey = $this->getXKey();
-            $sender = empty($sender_info) ? "HBADMIN" : $sender_info["DocUserID"];
+            $sender = $sender_info["DocUserID"] ?? "HBADMIN";
             $receiver = $user_info["DocUserID"];
             $xname = trim($title);  // nvarchar(50)
             $xcontent = trim($content); // nvarchar(1000)
             $sendtype = "1";
-            $sendIP = empty($sender_info) ? $_SERVER["SERVER_ADDR"] : $client_ip;
+            $sendIP = $sender_info["AP_PCIP"] ?? $_SERVER["SERVER_ADDR"];
             $recIP = $user_info["AP_PCIP"];
             $sendtime = date("Y-m-d H:i:s").".000";
             $xtime = "1";
