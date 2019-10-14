@@ -5,18 +5,8 @@ require_once('include/Message.class.php');
 
 $query = new Query();
 
-// find this server ip
-$host_ip = gethostname();
-$host_ips = gethostbynamel($host_ip);
-foreach ($host_ips as $this_ip) {
-    if (preg_match("/220\.1\.35/", $this_ip)) {
-        $host_ip = $this_ip;
-        break;
-    }
-}
-
-$_SERVER["REQUEST_URI"] = basename(__FILE__);
-$_SERVER["REMOTE_ADDR"] = $host_ip;
+$_SERVER["REQUEST_URI"] = $_SERVER["REQUEST_URI"] ?? DIRECTORY_SEPARATOR.basename(__FILE__);
+$_SERVER["REMOTE_ADDR"] = $_SERVER["REMOTE_ADDR"] ?? getLocalhostIP();
 
 // check reg case missing RM99~RM101 data
 $log->info('開始跨所註記遺失檢查 ... ');
