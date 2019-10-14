@@ -14,18 +14,19 @@ $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $
 $today_ad = date('Y-m-d');  // ex: 2019-09-16
 $log = new Logger('logs/log-' . $today_ad . '.log');
 
-if (!in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"]) && php_sapi_name() != "cli") {
-    $log->warning($client_ip." tried to access the mgt system.");
-    die("<(￣ ﹌ ￣)> you bad boy ... ".$client_ip);
-}
-
-// compress all log every monday
-if (date("w") == "1" && !isset($_SESSION["LOG_COMPRESSION_DONE"])) {
-    $log->info("今天星期一，開始壓縮LOG檔！");
-    zipLogs();
-    $_SESSION["LOG_COMPRESSION_DONE"] = true;
-    $log->info("壓縮LOG檔結束！");
-    
+if (php_sapi_name() != "cli") {
+    if (!in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
+        $log->warning($client_ip." tried to access the mgt system.");
+        die("<(￣ ﹌ ￣)> you bad boy ... ".$client_ip);
+    }
+    // compress all log every monday
+    if (date("w") == "1" && !isset($_SESSION["LOG_COMPRESSION_DONE"])) {
+        $log->info("今天星期一，開始壓縮LOG檔！");
+        zipLogs();
+        $_SESSION["LOG_COMPRESSION_DONE"] = true;
+        $log->info("壓縮LOG檔結束！");
+        
+    }
 }
 
 $tw_date = new Datetime("now");
