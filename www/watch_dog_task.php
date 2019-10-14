@@ -25,7 +25,7 @@ if (!empty($rows)) {
         if ($adm_ip == '::1') {
             continue;
         }
-        $sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip);
+        $sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, "+9 minute");
         $log->info("訊息已送出(${sn})給 ${adm_ip}");
     }
 }
