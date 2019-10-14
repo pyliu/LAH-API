@@ -162,5 +162,11 @@ $(document).ready(function(e) {
 			}
 		});
 	}
+	// Enable watchdog
+	if (xhrCallWatchDog) {
+		// automatic check every 15 minutes
+		window.pyliuChkTimer = setInterval(xhrCallWatchDog, 900000);
+		console.log("Watchdog Enabled.");
+	}
 });
 //]]>

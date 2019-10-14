@@ -83,7 +83,7 @@ blockquote img {
         <div class="col-6">
           <fieldset>
             <legend>跨所註記遺失檢測<small>(一周內)</small></legend>
-            <button id="cross_case_check_query_button" data-toggle='tooltip' title='系統每10分鐘自動檢查'>立刻檢查</button>
+            <button id="cross_case_check_query_button" data-toggle='tooltip'>立即檢測</button>
             <button id="cross_case_check_quote_button">備註</button>
             <blockquote id="cross_case_check_quote" class="hide">
               <h5><span class="text-danger">※</span>通常發生的情況是案件內的權利人/義務人/代理人姓名內有罕字造成。</h5>
@@ -349,8 +349,6 @@ blockquote img {
       
       // 跨所註記檢測
       $("#cross_case_check_query_button").on("click", xhrCheckProblematicXCase);
-      // automatic check every 10 minutes
-      window.pyliuChkTimer = setInterval(xhrCheckProblematicXCase, 600000);
 
       // query section data event
       $("#easycard_query_button").on("click", xhrEasycardPaymentQuery);

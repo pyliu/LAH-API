@@ -5,6 +5,7 @@ require_once("./include/SurCaseData.class.php");
 require_once("./include/PrcAllCasesData.class.php");
 require_once("./include/Query.class.php");
 require_once("./include/Message.class.php");
+require_once("./include/WatchDog.class.php");
 require_once("./include/JSONAPICommandFactory.class.php");
 
 function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
@@ -18,8 +19,24 @@ function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 $query = new Query();
 
 switch ($_POST["type"]) {
+	case "watchdog":
+		$log->info("XHR [watchdog] 監控請求");
+		$watchdog = new WatchDog();
+		$done = $watchdog->do();
+		if ($done) {
+			$log->info("XHR [watchdog] 檢查完成");
+			echo json_encode(array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => 0,
+				"raw" => $done
+			), 0);
+		} else {
+			$log->warning("XHR [watchdog] 檢查完成，但回傳值有問題【${done}】");
+			echoErrorJSONString("XHR [watchdog] 檢查完成，但回傳值有問題【${done}】");
+		}
+		break;
 	case "x":
-		$log->info("XHR [x] 查詢跨所註記遺失 請求");
+		$log->info("XHR [x] 查詢跨所註記遺失請求");
 		$query_result = $query->getProblematicCrossCases();
 		if (empty($query_result)) {
 			$log->info("XHR [x] 查無資料");
@@ -68,7 +85,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "max":
-		$log->info("XHR [max] 查詢案件最大號【".$_POST["year"].", ".$_POST["code"]."】 請求");
+		$log->info("XHR [max] 查詢案件最大號【".$_POST["year"].", ".$_POST["code"]."】請求");
 		$year = $_POST["year"];
 		$code = $_POST["code"];
 		$max_num = $query->getMaxNumByYearWord($year, $code);

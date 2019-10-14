@@ -204,6 +204,27 @@ var xhrPrcQueryCase = function(e) {
 	});
 }
 
+var xhrCallWatchDog = function(e) {
+	var body = new FormData();
+	body.append("type", "watchdog");
+	fetch("query_json_api.php", {
+		method: "POST",
+		body: body
+	}).then(function(response) {
+		return response.json();
+	}).then(function(jsonObj) {
+		// normal success
+		if (jsonObj.status == 1) {
+			// do nothing
+			concole.log("Watchdog is OK.");	// TODO: remove ...
+		} else if (jsonObj.status == 0) {
+			showModal(jsonObj.message, "警告");
+		}
+	}).catch(function(ex) {
+		console.error("xhrCallWatchDog parsing failed", ex);
+	});
+}
+
 var xhrCheckProblematicXCase = function(e) {
   setLoadingHTML("#cross_case_check_query_display");
 	toggle("#cross_case_check_query_button");
