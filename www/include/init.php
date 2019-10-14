@@ -9,11 +9,14 @@ require_once("GlobalConstants.inc.php");
 require_once("GlobalFunctions.inc.php");
 require_once("Logger.class.php");
 
-$client_ip = $_SERVER["REMOTE_ADDR"];
-if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
-    $client_ip = $_SERVER["HTTP_CLIENT_IP"];
-} elseif (!empty($_SERVER["HTTP_X_FORWARDED_FOR"])) {
-    $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
+$client_ip = getLocalhostIP();
+if (isset($_SERVER)) {
+    $client_ip = $_SERVER["REMOTE_ADDR"];
+    if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
+        $client_ip = $_SERVER["HTTP_CLIENT_IP"];
+    } elseif (!empty($_SERVER["HTTP_X_FORWARDED_FOR"])) {
+        $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
+    }
 }
 
 $today_ad = date('Y-m-d');  // ex: 2019-09-16
@@ -25,7 +28,7 @@ if (!in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"]) && php_sapi_name() != "cli")
 }
 
 // compress all log every monday
-if (date("w") == "1" && !$_SESSION["LOG_COMPRESSION_DONE"]) {
+if (date("w") == "1" && !isset($_SESSION["LOG_COMPRESSION_DONE"])) {
     $log->info("今天星期一，開始壓縮LOG檔！");
     zipLogs();
     $_SESSION["LOG_COMPRESSION_DONE"] = true;

@@ -147,18 +147,8 @@ class Logger {
             $this->openLog();
         }
 
+        global $client_ip;
         $path = "NONE";
-        $client_ip = "CLI";
-        if (isset($_SERVER)) {
-            // grab the url path ( for troubleshooting )
-            $path = $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
-            $client_ip = $_SERVER["REMOTE_ADDR"];
-            if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
-                $client_ip = $_SERVER["HTTP_CLIENT_IP"];
-            } elseif (!empty($_SERVER["HTTP_X_FORWARDED_FOR"])) {
-                $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
-            }
-        }
 
         //Grab time - based on timezone in php.ini
         $time = date($this->params['dateFormat']);
