@@ -148,7 +148,7 @@ class Logger {
         }
 
         global $client_ip;
-        $path = $_SERVER["SERVER_NAME"] ?? getLocalhostIP() . $_SERVER["REQUEST_URI"] ?? 'CLI';
+        $path = ($_SERVER["SERVER_NAME"] ?? getLocalhostIP()) . ($_SERVER["REQUEST_URI"] ?? '/CLI');
 
         //Grab time - based on timezone in php.ini
         $time = date($this->params['dateFormat']);
