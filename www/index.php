@@ -149,8 +149,6 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   <script src="assets/js/ie10-viewport-bug-workaround.js"></script>
   <!-- sorting by table header script -->
   <script src="assets/js/table_sort.js"></script>
-  <!-- load table content -->
-  <script src="assets/js/autoload.js"></script>
   <!-- fixed table header -->
   <script src="assets/js/fixed_header.js"></script>
   <script src="assets/js/global.js"></script>
@@ -159,6 +157,8 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   <!-- bs datepicker -->
   <script src="assets/js/bootstrap-datepicker.min.js"></script>
   <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
+  <!-- load table content -->
+  <script src="assets/js/autoload.js"></script>
   <script type="text/javascript">
     $(document).ready(function(e) {
       // unsupported IE detection
