@@ -280,7 +280,7 @@ fieldset fieldset legend {
                 <option value="txt_AI02901_E.sql">AI02901 - 建物各部別之其他登記事項列印</option>
               </optgroup>
             </select>
-            <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px">Input SELECT SQL here ... </textarea>
+            <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px" placeholder="輸入SELECT SQL ..."></textarea>
             <button id="sql_export_button">匯出</button>
             <!--
             <button id="sql_csv_text_button">匯出CSV</button>

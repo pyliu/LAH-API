@@ -1,6 +1,7 @@
 //<![CDATA[
 // 跨縣市主機
-var landhb_svr = "220.1.35.123";
+const landhb_svr = "220.1.35.123";
+const WATCHDOG_ENABLE = false; 
 
 var trim = function(text) {
 	if (isEmpty(text)) {
@@ -162,8 +163,8 @@ $(document).ready(function(e) {
 			}
 		});
 	}
-	// Enable watchdog
-	if (xhrCallWatchDog) {
+
+	if (WATCHDOG_ENABLE && xhrCallWatchDog) {
 		// automatic check every 15 minutes
 		window.pyliuChkTimer = setInterval(function(e) {
 			let now = new Date();
@@ -175,11 +176,14 @@ $(document).ready(function(e) {
 				}
 			}
 		}, 900000);	// 1000 * 60 * 15
-		console.log("Watchdog Enabled.");
+		console.log("Watchdog enabled.");
+		// reload page after 8 hours
+		setTimeout(function(e) {
+			window.location.reload(true);
+		}, 28800000);	// 1000 * 60 * 60 * 8
+	} else {
+		console.warn("Watchdog disabled. (Want to enable? Please check global.js for the setting.)");
 	}
-	// reload page after 8 hours
-	setTimeout(function(e) {
-		window.location.reload(true);
-	}, 28800000);	// 1000 * 60 * 60 * 8
+	
 });
 //]]>
