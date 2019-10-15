@@ -165,8 +165,21 @@ $(document).ready(function(e) {
 	// Enable watchdog
 	if (xhrCallWatchDog) {
 		// automatic check every 15 minutes
-		window.pyliuChkTimer = setInterval(xhrCallWatchDog, 900000);
+		window.pyliuChkTimer = setInterval(function(e) {
+			let now = new Date();
+			let weekday = now.getDay();
+			if (weekday != 0 && weekday != 6) {
+				let hour = now.getHours();
+				if (hour > 7 && hour < 18) {
+					xhrCallWatchDog(e);
+				}
+			}
+		}, 900000);	// 1000 * 60 * 15
 		console.log("Watchdog Enabled.");
 	}
+	// reload page after 8 hours
+	setTimeout(function(e) {
+		window.location.reload(true);
+	}, 28800000);	// 1000 * 60 * 60 * 8
 });
 //]]>
