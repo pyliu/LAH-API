@@ -21,18 +21,24 @@ $query = new Query();
 switch ($_POST["type"]) {
 	case "watchdog":
 		$log->info("XHR [watchdog] 監控請求");
-		$watchdog = new WatchDog();
-		$done = $watchdog->do();
-		if ($done) {
-			$log->info("XHR [watchdog] 檢查完成");
-			echo json_encode(array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => 0,
-				"raw" => $done
-			), 0);
+		// use http://localhost the client will be "::1"
+		// if you want to enable the watchdog, open above link with chrome on server. (do not close it)
+		if ($client_ip == "::1") {
+			$watchdog = new WatchDog();
+			$done = $watchdog->do();
+			if ($done) {
+				$log->info("XHR [watchdog] 檢查完成");
+				echo json_encode(array(
+					"status" => STATUS_CODE::SUCCESS_NORMAL,
+					"data_count" => 0,
+					"raw" => $done
+				), 0);
+			} else {
+				$log->warning("XHR [watchdog] 檢查完成，但回傳值有問題【${done}】");
+				echoErrorJSONString("XHR [watchdog] 檢查完成，但回傳值有問題【${done}】");
+			}
 		} else {
-			$log->warning("XHR [watchdog] 檢查完成，但回傳值有問題【${done}】");
-			echoErrorJSONString("XHR [watchdog] 檢查完成，但回傳值有問題【${done}】");
+			$log->warning("XHR [watchdog] 跳過執行，因為IP不為「::1」");
 		}
 		break;
 	case "x":
