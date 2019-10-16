@@ -1672,6 +1672,90 @@ var xhrUpdateCaseColumnData = function(e) {
 	}
 }
 
+var xhrSearchUsers = function(e) {
+	let keyword = $.trim($("#msg_who").val());
+	if (isEmpty(keyword)) {
+		console.warn("Keyword field should not be empty.");
+		return;
+	}
+	
+	var form_body = new FormData();
+	form_body.append("type", "search_user");
+	form_body.append("keyword", keyword);
+
+	
+	fetch("query_json_api.php", {
+		method: 'POST',
+		body: form_body
+	}).then(function(response) {
+		if (response.status != 200) {
+			throw new Error("XHR連線異常，回應非200");
+		}
+		return response.json();
+	}).then(function (jsonObj) {
+		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
+		var html = jsonObj.message;
+		if (jsonObj.status == 1) {
+			showUserInfoByRAW(jsonObj.raw[jsonObj.data_count - 1]);
+		} else {
+			showModal("查無資料", "查詢使用者")
+		}
+	}).catch(function(ex) {
+		console.error("xhrSearchUsers parsing failed", ex);
+		alert("XHR連線查詢有問題!!【" + ex + "】");
+	});
+}
+
+var showUserInfoByRAW = function(tdoc_raw) {
+	var year = 31536000000;
+	var now = new Date();
+	var age = "";
+	var birth = tdoc_raw["AP_BIRTH"];
+	var birth_regex = /^\d{3}\/\d{2}\/\d{2}$/;
+	if (birth.match(birth_regex)) {
+		birth = (parseInt(birth.substring(0, 3)) + 1911) + birth.substring(3);
+		var temp = Date.parse(birth);
+		if (temp) {
+			var born = new Date(temp);
+			age += " (" + ((now - born) / year).toFixed(1) + "歲)";
+		}
+	}
+
+	var on_board_date = "";
+	if(!isEmpty(tdoc_raw["AP_ON_DATE"])) {
+		on_board_date = tdoc_raw["AP_ON_DATE"].date.split(" ")[0];
+		var temp = Date.parse(on_board_date.replace('/-/g', "/"));
+		if (temp) {
+			var on = new Date(temp);
+			if (tdoc_raw["AP_OFF_JOB"] == "Y") {
+				var off_board_date = tdoc_raw["AP_OFF_DATE"];
+				off_board_date = (parseInt(off_board_date.substring(0, 3)) + 1911) + off_board_date.substring(3);
+				temp = Date.parse(off_board_date.replace('/-/g', "/"));
+				if (temp) {
+					// replace now Date to off board date
+					now = new Date(temp);
+				}
+			}
+			on_board_date += " (" + ((now - on) / year).toFixed(1) + "年)";
+		}
+	}
+
+	html = '<a href="get_pho_img.php?name=' + tdoc_raw["AP_USER_NAME"] + '" target="_blank"><img src="get_pho_img.php?name=' + tdoc_raw["AP_USER_NAME"] + '" width="180" /></a> </br />';
+	html += tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + tdoc_raw["AP_OFF_DATE"] + "】</p>";
+	html += "ID：" + tdoc_raw["DocUserID"] + "<br />"
+		+ "電腦：" + tdoc_raw["AP_PCIP"] + "<br />"
+		+ "姓名：" + tdoc_raw["AP_USER_NAME"] + "<br />"
+		+ "生日：" + tdoc_raw["AP_BIRTH"] + age + "<br />"
+		+ "單位：" + tdoc_raw["AP_UNIT_NAME"] + "<br />"
+		+ "工作：" + tdoc_raw["AP_WORK"] + "<br />"
+		+ "職稱：" + tdoc_raw["AP_JOB"] + "<br />"
+		+ "學歷：" + tdoc_raw["AP_HI_SCHOOL"] + "<br />"
+		+ "考試：" + tdoc_raw["AP_TEST"] + "<br />"
+		+ "手機：" + tdoc_raw["AP_SEL"] + "<br />"
+		+ "到職：" + on_board_date + "<br />"
+		;
+	showModal(html, "使用者資訊");
+}
 
 var xhrQueryUserInfo = function(e) {
 	var clicked_element = $(e.target);
@@ -1683,7 +1767,7 @@ var xhrQueryUserInfo = function(e) {
 	var name = $.trim(clicked_element.data("name"));
 	var id = trim(clicked_element.data("id"));
 
-	if(isEmpty(name) || isEmpty(id)) {
+	if (isEmpty(name) || isEmpty(id)) {
 		console.warn("Require query params are empty, skip xhr querying. (" + id + ", " + name + ")");
 		return;
 	}
@@ -1706,56 +1790,8 @@ var xhrQueryUserInfo = function(e) {
 		var html = jsonObj.message;
 		if (jsonObj.status == 1) {
 			var latest = jsonObj.data_count - 1;
-
-			var year = 31536000000;
-			var now = new Date();
-			var age = "";
-			var birth = jsonObj.raw[latest]["AP_BIRTH"];
-			var birth_regex = /^\d{3}\/\d{2}\/\d{2}$/;
-			if (birth.match(birth_regex)) {
-				birth = (parseInt(birth.substring(0, 3)) + 1911) + birth.substring(3);
-				var temp = Date.parse(birth);
-				if (temp) {
-					var born = new Date(temp);
-					age += " (" + ((now - born) / year).toFixed(1) + "歲)";
-				}
-			}
-
-			var on_board_date = "";
-			if(!isEmpty(jsonObj.raw[latest]["AP_ON_DATE"])) {
-				on_board_date = jsonObj.raw[latest]["AP_ON_DATE"].date.split(" ")[0];
-				var temp = Date.parse(on_board_date.replace('/-/g', "/"));
-				if (temp) {
-					var on = new Date(temp);
-					if (jsonObj.raw[latest]["AP_OFF_JOB"] == "Y") {
-						var off_board_date = jsonObj.raw[latest]["AP_OFF_DATE"];
-						off_board_date = (parseInt(off_board_date.substring(0, 3)) + 1911) + off_board_date.substring(3);
-						temp = Date.parse(off_board_date.replace('/-/g', "/"));
-						if (temp) {
-							// replace now Date to off board date
-							now = new Date(temp);
-						}
-					}
-					on_board_date += " (" + ((now - on) / year).toFixed(1) + "年)";
-				}
-			}
-
-			html = '<a href="get_pho_img.php?name=' + name + '" target="_blank"><img src="get_pho_img.php?name=' + name + '" width="180" /></a> </br />';
-			html += jsonObj.raw[latest]["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + jsonObj.raw[latest]["AP_OFF_DATE"] + "】</p>";
-			html += "ID：" + jsonObj.raw[latest]["DocUserID"] + "<br />"
-				+ "電腦：" + jsonObj.raw[latest]["AP_PCIP"] + "<br />"
-				+ "姓名：" + jsonObj.raw[latest]["AP_USER_NAME"] + "<br />"
-				+ "生日：" + jsonObj.raw[latest]["AP_BIRTH"] + age + "<br />"
-				+ "單位：" + jsonObj.raw[latest]["AP_UNIT_NAME"] + "<br />"
-				+ "工作：" + jsonObj.raw[latest]["AP_WORK"] + "<br />"
-				+ "職稱：" + jsonObj.raw[latest]["AP_JOB"] + "<br />"
-				+ "學歷：" + jsonObj.raw[latest]["AP_HI_SCHOOL"] + "<br />"
-				+ "考試：" + jsonObj.raw[latest]["AP_TEST"] + "<br />"
-				+ "手機：" + jsonObj.raw[latest]["AP_SEL"] + "<br />"
-				+ "到職：" + on_board_date + "<br />"
-				;
+			showUserInfoByRAW(jsonObj.raw[latest]);
 		}
-		showModal(html, "使用者資訊");
 	}).catch(function(ex) {
 		console.error("xhrQueryUserInfo parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
