@@ -209,9 +209,10 @@ fieldset fieldset legend {
             <legend>使用者＆信差訊息</legend>
             <div class="float-clear">
               <label for="msg_who">
-              　　姓名：
+              　關鍵字：
                 <input type="text" id="msg_who" name="msg_who" placeholder="HB0541" value="HB054" />
               </label>
+              <button id="search_user_button">搜尋</button>
               <span id="filter_info" class="text-info">
                 <?php
                   echo count($operators); 
@@ -497,6 +498,10 @@ fieldset fieldset legend {
 
       // message
       $("#msg_button").on("click", xhrSendMessage);
+
+      // search users
+      $("#search_user_button").on("click", xhrSearchUsers);
+      bindPressEnterEvent("#msg_who", xhrSearchUsers);
     });
   </script>
 </body>

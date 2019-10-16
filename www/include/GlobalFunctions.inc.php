@@ -135,32 +135,6 @@ function zipLogs() {
         }
     }
 }
-
-function getTdocUserInfo($id, $name) {
-    require_once("MSDB.class.php");
-    $tdoc_db = new MSDB(array(
-        "MS_DB_UID" => SYSTEM_CONFIG["MS_TDOC_DB_UID"],
-        "MS_DB_PWD" => SYSTEM_CONFIG["MS_TDOC_DB_PWD"],
-        "MS_DB_DATABASE" => SYSTEM_CONFIG["MS_TDOC_DB_DATABASE"],
-        "MS_DB_SVR" => SYSTEM_CONFIG["MS_TDOC_DB_SVR"],
-        "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
-    ));
-    global $log;
-    $results = null;
-    // query by id
-    if (!empty($id)) {
-        $id = preg_replace("/[^0-9A-Za-z]/i", "", $id);
-        $log->info("Search By ID: $id");
-        $results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE DocUserID LIKE '%${id}%'");
-    }
-    if (empty($results) && !empty($name)) {
-        $name = trim($name);
-        // query by name
-        $log->info("Search By Name: $name");
-        $results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_USER_NAME LIKE '%${name}%'");
-    }
-    return $results;
-}
 /**
  * Find the local host IP
  * @return string

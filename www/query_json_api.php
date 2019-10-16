@@ -7,6 +7,7 @@ require_once("./include/Query.class.php");
 require_once("./include/Message.class.php");
 require_once("./include/WatchDog.class.php");
 require_once("./include/JSONAPICommandFactory.class.php");
+require_once("./include/UserInfo.class.php");
 
 function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 	echo json_encode(array(
@@ -555,9 +556,40 @@ switch ($_POST["type"]) {
 		$log->info("XHR [zip_log] 壓縮LOG成功");
 		echo json_encode($result, 0);
 		break;
+	case "search_user":
+		$log->info("XHR [search_user] 查詢使用者資料【".$_POST["keyword"]."】請求");
+		$user_info = new UserInfo();
+		$results = false;
+		if (filter_var($_POST["keyword"], FILTER_VALIDATE_IP)) {
+			$results = $user_info->searchByIP($_POST["keyword"]);
+		}
+		if (empty($results)) {
+			$results = $user_info->searchByID($_POST["keyword"]);
+			if (empty($results)) {
+				$results = $user_info->searchByName($_POST["keyword"]);
+			}
+		}
+		if (empty($results)) {
+			echoErrorJSONString("查無 ".$_POST["keyword"]." 資料。");
+			$log->info("XHR [user_info] 查無 ".$_POST["keyword"]." 資料。");
+		} else {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($results),
+				"raw" => $results,
+				"query_string" => "keyword=".$_POST["keyword"]
+			);
+			$log->info("XHR [user_info] 查詢 ".$_POST["keyword"]." 成功。");
+			echo json_encode($result, 0);
+		}
+		break;
 	case "user_info":
 		$log->info("XHR [user_info] 查詢使用者資料【".$_POST["id"].", ".$_POST["name"]."】請求");
-		$results = getTdocUserInfo($_POST["id"], $_POST["name"]);
+		$user_info = new UserInfo();
+		$results = $user_info->searchByID($_POST["id"]);
+		if (empty($results)) {
+			$results = $user_info->searchByName($_POST["name"]);
+		}
 		if (empty($results)) {
 			echoErrorJSONString("查無 ".$_POST["name"]." 資料。");
 			$log->info("XHR [user_info] 查無 ".$_POST["name"]." 資料。");
