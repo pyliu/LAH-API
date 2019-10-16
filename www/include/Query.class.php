@@ -824,17 +824,24 @@ class Query {
 		return $result;
 	}
 
-	public function clearCaseTemp($year, $code, $number) {
+	public function clearCaseTemp($year, $code, $number, $table = "") {
 		global $log;
 
 		if (empty($year) || empty($code) || empty($number)) {
-			$log->error(__METHOD__."：輸入參數不能為空白【${year}, ${code}, ${number}】");
+			$log->error(__METHOD__."：輸入案件參數不能為空白【${year}, ${code}, ${number}】");
 			return false;
 		}
-		
+
 		// an array to express temp tables and key field names that need to be checked.
 		$temp_tables = include("Config.TempTables.php");
 		foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
+			if (!empty($table) && $tmp_tbl_name != $table) {
+				$log->info(__METHOD__."：指定刪除 $table 故跳過 $tmp_tbl_name 。");
+				continue;
+			}
+			
+			$log->info(__METHOD__."：刪除 $tmp_tbl_name 資料 ... ");
+			
 			$this->db->parse("
 				DELETE FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = :bv_year AND ".$key_fields[1]." = :bv_code AND ".$key_fields[2]." = :bv_number
 			");
@@ -844,6 +851,7 @@ class Query {
 			$this->db->bind(":bv_number", $number);
 			
 			$this->db->execute();
+			
 		}
 		return true;
 	}

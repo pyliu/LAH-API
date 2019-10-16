@@ -171,7 +171,7 @@ $(document).ready(function(e) {
 			let weekday = now.getDay();
 			if (weekday != 0 && weekday != 6) {
 				let hour = now.getHours();
-				if (hour > 7 && hour < 18) {
+				if (hour > 8 && hour < 17) {
 					xhrCallWatchDog(e);
 				}
 			}

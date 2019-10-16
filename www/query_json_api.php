@@ -488,14 +488,14 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "clear_temp_data":
-		$log->info("XHR [clear_temp_data] 清除暫存【".$_POST["year"].", ".$_POST["code"].", ".$_POST["number"]."】請求");
-		$result_flag = $query->clearCaseTemp($_POST["year"], $_POST["code"], $_POST["number"]);
+		$log->info("XHR [clear_temp_data] 清除暫存【".$_POST["year"].", ".$_POST["code"].", ".$_POST["number"].", ".$_POST["table"]."】請求");
+		$result_flag = $query->clearCaseTemp($_POST["year"], $_POST["code"], $_POST["number"], $_POST["table"]);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => "0",
 				"raw" => $result_flag,
-				"query_string" => "year=".$_POST["year"]."&code=".$_POST["code"]."&number=".$_POST["number"]
+				"query_string" => "year=".$_POST["year"]."&code=".$_POST["code"]."&number=".$_POST["number"]."&table=".$_POST["table"]
 			);
 			$log->info("XHR [clear_temp_data] 清除暫存資料成功");
 			echo json_encode($result, 0);

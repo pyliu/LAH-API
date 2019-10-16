@@ -1311,8 +1311,29 @@ var xhrQueryTempData = function(e) {
 			if(jsonObj.raw[i][1].length == 0) {
 				continue;
 			}
-			html += "● " + jsonObj.raw[i][0] + ": <span class='text-danger'>" + jsonObj.raw[i][1].length + "</span><br />"
-			html += "　<small>－　" + jsonObj.raw[i][2] + "</small><br />";
+			// 0: Table, 1: all raw data, 2: SQL
+			html += "● " + jsonObj.raw[i][0] + ": <span class='text-danger'>" + jsonObj.raw[i][1].length + "</span> "
+			// use saveAs to download backup SQL file
+			if (saveAs) {
+				let filename_prefix = year + "-" + code + "-" + number;
+				// Prepare INS SQL text for BACKUP
+				let INS_SQL = "";
+				for (let y = 0; y < jsonObj.raw[i][1].length; y++) {
+					let this_row = jsonObj.raw[i][1][y];
+					let fields = [];
+					let values = [];
+					for (let key in this_row) {
+						fields.push(key);
+						values.push(isEmpty(this_row[key]) ? "null" : "'" + this_row[key] + "'");
+					}
+					INS_SQL += "insert into " + jsonObj.raw[i][0] + " (" + fields.join(",") + ")";
+					INS_SQL += " values (" + values.join(",") + ");\n";
+				}
+				html += "　<small><button data-filename='" + filename_prefix + "-" + jsonObj.raw[i][0] + "' class='backup_tbl_temp_data'>備份</button>"
+						+ "<span class='hide ins_sql'>" + INS_SQL + "</span> "
+						+ " <button data-tbl='" + jsonObj.raw[i][0] + "' class='clean_tbl_temp_data'>清除</button></small>";
+			}
+			html += "<br />　<small>－　" + jsonObj.raw[i][2] + "</small> <br />";
 		}
 
 		toggle(e.target);
@@ -1321,16 +1342,54 @@ var xhrQueryTempData = function(e) {
 			showModal("案件 " + year + "-" + code + "-" + number + " 查無暫存資料", "查詢暫存資料");
 			return;
 		}
-		html += "<button class='mt-1' id='temp_clr_button' data-trigger='manual' data-toggle='popover' data-placement='bottom'>清除</button> <strong class='text-danger'>★ 暫存檔刪除後無法復原！！</strong>";
+		html += "<button id='temp_backup_button' class='mt-2'>全部備份</button> <button class='mt-2' id='temp_clr_button' data-trigger='manual' data-toggle='popover' data-placement='bottom'>全部清除</button>";
 		showModal(html, year + "-" + code + "-" + number + " 案件暫存檔統計");
 		setTimeout(function() {
 			$("#temp_clr_button").on("click", xhrClearTempData.bind({
 				year: year,
 				code: code,
-				number: number
+				number: number,
+				table: ""
 			}));
-			showPopper("#temp_clr_button", "請確認後再選擇清除", 10000);
+			showPopper("#temp_clr_button", "請「備份後」再選擇清除", 5000);
+
+			$("#temp_backup_button").on("click", (e) => {
+				toggle(e.target);
+				let filename = year + "-" + code + "-" + number + "-TEMP-DATA";
+				// any kind of extension (.txt,.cpp,.cs,.bat)
+				filename += ".sql";
+				let all_content = "";
+				$(".ins_sql").each((index, hidden_span) => {
+					all_content += $(hidden_span).text();
+				});
+				let blob = new Blob([all_content], {
+					type: "text/plain;charset=utf-8"
+				});
+				saveAs(blob, filename);
+			});
 		}, 1000);
+		// attach backup event to the buttons
+		$(".backup_tbl_temp_data").on("click", function(e) {
+			let filename = $(e.target).data("filename");
+			// any kind of extension (.txt,.cpp,.cs,.bat)
+			filename += ".sql";
+			let hidden_data = $(e.target).next("span"); // find DIRECT next span of the clicked button
+			let content = hidden_data.text();
+			let blob = new Blob([content], {
+				type: "text/plain;charset=utf-8"
+			});
+			saveAs(blob, filename);
+		});
+		// attach clean event to the buttons
+		$(".clean_tbl_temp_data").on("click", function(e) {
+			let table_name = $(e.target).data("tbl");
+			xhrClearTempData.call({
+				year: year,
+				code: code,
+				number: number,
+				table: table_name
+			}, e);
+		});
 	}).catch(function(ex) {
 		console.error("xhrQueryTempData parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
@@ -1338,9 +1397,14 @@ var xhrQueryTempData = function(e) {
 }
 
 var xhrClearTempData = function(e) {
-	var bindArgsObj = this;
-	
-	if(!confirm("確定要清除案件 " + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + " 暫存檔?\n ★ 無法復原，除非你有備份!!")) {
+	let bindArgsObj = this;
+
+	let msg = "確定要清除案件 " + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + " 全部暫存檔?\n ★ 警告：無法復原，除非你有備份!!";
+	if (!isEmpty(bindArgsObj.table)) {
+		msg = "確定要清除案件 " + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + " " + bindArgsObj.table + " 表格的暫存檔?\n ★ 警告：無法復原，除非你有備份!!";
+	}
+
+	if(!confirm(msg)) {
 		return;
 	}
 
@@ -1351,6 +1415,7 @@ var xhrClearTempData = function(e) {
 	form_body.append("year", bindArgsObj.year);
 	form_body.append("code", bindArgsObj.code);
 	form_body.append("number", bindArgsObj.number);
+	form_body.append("table", bindArgsObj.table);
 	fetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body
@@ -1362,7 +1427,9 @@ var xhrClearTempData = function(e) {
 	}).then(function (jsonObj) {
 		console.assert(jsonObj.status == 1, "清除暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
 		closeModal();
-		showModal("<strong class='text-success'>已全部清除完成</strong><p>" + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + "</p>", "清除暫存資料");
+		setTimeout(() => {
+			showModal("<strong class='text-success'>已清除完成</strong><p>" + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + (bindArgsObj.table ? " 表格：" + bindArgsObj.table : "") + "</p>", "清除暫存資料");
+		}, 500);
 	}).catch(function(ex) {
 		console.error("xhrClearTempData parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");

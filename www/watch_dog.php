@@ -331,6 +331,8 @@ blockquote img {
   <script src="assets/js/polyfill.min.js"></script>
   <!-- fetch library -->
   <script src="assets/js/fetch.min.js"></script>
+  <!-- FileSaver -->
+  <script src="assets/js/FileSaver.min.js"></script>
   <script src="assets/js/global.js"></script>
   <!-- xhr js -->
   <script src="assets/js/xhr_query.js"></script>
