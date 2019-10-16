@@ -39,6 +39,7 @@ switch ($_POST["type"]) {
 			}
 		} else {
 			$log->warning("XHR [watchdog] 跳過執行，因為IP不為「::1」");
+			echoErrorJSONString("XHR [watchdog] 跳過執行，因為IP不為「::1」");
 		}
 		break;
 	case "x":
