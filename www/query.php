@@ -210,8 +210,8 @@ fieldset fieldset legend {
             <div class="float-clear">
               <label for="msg_who">
               　關鍵字：
-                <input type="text" id="msg_who" name="msg_who" placeholder="HB0541" value="HB054" />
               </label>
+              <input type="text" id="msg_who" name="msg_who" placeholder="HB0541" value="HB054" title="ID、姓名、IP" />
               <button id="search_user_button">搜尋</button>
               <span id="filter_info" class="text-info">
                 <?php
