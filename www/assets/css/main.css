@@ -270,3 +270,8 @@ blockquote {
   font-weight: bold;
   cursor: pointer;
 }
+
+.loader-icon {
+	font-size:12px;
+}
+  
