@@ -39,7 +39,7 @@ switch ($_POST["type"]) {
 				echoErrorJSONString("XHR [watchdog] 檢查完成，但回傳值有問題【${done}】");
 			}
 		} else {
-			$log->warning("XHR [watchdog] 跳過執行，因為IP不為「::1」");
+			$log->info("XHR [watchdog] 跳過執行，因為IP不為「::1」");
 			echoErrorJSONString("XHR [watchdog] 跳過執行，因為IP不為「::1」", STATUS_CODE::SUCCESS_NORMAL);
 		}
 		break;

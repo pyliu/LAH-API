@@ -140,25 +140,56 @@ fieldset fieldset legend {
       <div class="row">
         <div class="col-6">
           <fieldset>
-            <legend>轄區各段土地標示部筆數＆面積查詢</legend>
-            <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
-            <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
-            <input id="data_query_text" name="data_query_text" type="text" data-toggle='tooltip' title='輸入關鍵字或是段代碼' />
-            <button id="data_query_button">查詢</button>
-            <button id="data_quote_button">備註</button>
-            <blockquote id="data_blockquote" class="hide">
-              -- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>
-              SELECT t.AA48 as "段代碼", <br/>
-                  m.KCNT as "段名稱", <br/>
-                  SUM(t.AA10) as "面積", <br/>
-                  COUNT(t.AA10) as "筆數" <br/>
-              FROM MOICAD.RALID t <br/>
-              LEFT JOIN MOIADM.RKEYN m ON (m.KCDE_1 = '48' and m.KCDE_2 = t.AA48) <br/>
-              --WHERE t.AA48 = '%【輸入數字】'<br/>
-              --WHERE m.KCNT = '%【輸入文字】%'<br/>
-              GROUP BY t.AA48, m.KCNT;
+            <legend>報表匯出</legend>
+            <label for="preload_sql_select">預載查詢：</label>
+            <select id="preload_sql_select">
+              <optgroup label="==== 所內登記案件統計 ====">
+                <option value="01_reg_case_monthly.sql">每月案件統計</option>
+                <option value="11_reg_reason_query_monthly.sql">每月案件 by 登記原因</option>
+                <option value="02_reg_remote_case_monthly.sql">每月遠途先審案件</option>
+                <option value="03_reg_other_office_case_monthly.sql">每月跨所案件【本所代收】</option>
+                <option value="04_reg_other_office_case_2_monthly.sql">每月跨所案件【非本所收件】</option>
+                <option value="09_reg_other_office_case_3_monthly.sql">每月跨所子號案件【本所代收】</option>
+                <option value="10_reg_reason_stats_monthly.sql">每月跨所各登記原因案件統計 by 收件所</option>
+                <option value="07_reg_foreign_case_monthly.sql">每月權利人＆義務人為外國人案件</option>
+                <option value="07_regf_foreign_case_monthly.sql">每月外國人地權登記統計</option>
+                <option value="17_rega_case_stats_monthly.sql">每月土地建物登記統計檔</option>
+                <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
+              </optgroup>
+              <optgroup label="==== 所內其他統計 ====">
+                <option value="16_sur_close_delay_case.sql">已結卻延期之複丈案件</option>
+                <option value="14_sur_rain_delay_case.sql">因雨延期測量案件數</option>
+                <option value="05_adm_area_size.sql">段小段面積統計</option>
+                <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
+                <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
+                <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
+                <option value="15_reg_land_stats.sql">某段之土地所有權人清冊資料</option>
+              </optgroup>
+              <optgroup label="==== 地籍資料 ====" class="bg-success text-white">
+                <option value="txt_AI00301.sql">AI00301 - 土地標示部資料</option>
+                <option value="txt_AI00401.sql">AI00401 - 土地所有權部資料</option>
+                <option value="txt_AI00601_B.sql">AI00601 - 土地管理者資料</option>
+                <option value="txt_AI00601_E.sql">AI00601 - 建物管理者資料</option>
+                <option value="txt_AI00701.sql">AI00701 - 建物標示部資料</option>
+                <option value="txt_AI00801.sql">AI00801 - 基地坐落資料</option>
+                <option value="txt_AI00901.sql">AI00901 - 建物分層及附屬資料</option>
+                <option value="txt_AI01001.sql">AI01001 - 主建物與共同使用部分資料</option>
+                <option value="txt_AI01101.sql">AI01101 - 建物所有權部資料</option>
+                <option value="txt_AI02901_B.sql">AI02901 - 土地各部別之其他登記事項列印</option>
+                <option value="txt_AI02901_E.sql">AI02901 - 建物各部別之其他登記事項列印</option>
+              </optgroup>
+            </select>
+            <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px" placeholder="輸入SELECT SQL ..."></textarea>
+            <button id="sql_export_button">匯出</button>
+            <!--
+            <button id="sql_csv_text_button">匯出CSV</button>
+            <button id="sql_txt_text_button">匯出TXT</button>
+            -->
+            <button id="sql_csv_quote_button">備註</button>
+            <blockquote id="sql_report_blockquote" class="hide">
+              <p>輸入SELECT SQL指令匯出查詢結果。</p>
+              <img src="assets/img/csv_export_method.jpg" class="w-auto" />
             </blockquote>
-            <div id="data_query_result"></div>
           </fieldset>
         </div>
         <div class="col-6">
@@ -243,63 +274,32 @@ fieldset fieldset legend {
       <div class="row">
         <div class="col-6">
           <fieldset>
-            <legend>報表匯出</legend>
-            <label for="preload_sql_select">預載查詢：</label>
-            <select id="preload_sql_select">
-              <optgroup label="==== 所內登記案件統計 ====">
-                <option value="01_reg_case_monthly.sql">每月案件統計</option>
-                <option value="11_reg_reason_query_monthly.sql">每月案件 by 登記原因</option>
-                <option value="02_reg_remote_case_monthly.sql">每月遠途先審案件</option>
-                <option value="03_reg_other_office_case_monthly.sql">每月跨所案件【本所代收】</option>
-                <option value="04_reg_other_office_case_2_monthly.sql">每月跨所案件【非本所收件】</option>
-                <option value="09_reg_other_office_case_3_monthly.sql">每月跨所子號案件【本所代收】</option>
-                <option value="10_reg_reason_stats_monthly.sql">每月跨所各登記原因案件統計 by 收件所</option>
-                <option value="07_reg_foreign_case_monthly.sql">每月權利人＆義務人為外國人案件</option>
-                <option value="07_regf_foreign_case_monthly.sql">每月外國人地權登記統計</option>
-                <option value="17_rega_case_stats_monthly.sql">每月土地建物登記統計檔</option>
-                <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
-              </optgroup>
-              <optgroup label="==== 所內其他統計 ====">
-                <option value="16_sur_close_delay_case.sql">已結卻延期之複丈案件</option>
-                <option value="14_sur_rain_delay_case.sql">因雨延期測量案件數</option>
-                <option value="05_adm_area_size.sql">段小段面積統計</option>
-                <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
-                <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
-                <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
-                <option value="15_reg_land_stats.sql">某段之土地所有權人清冊資料</option>
-              </optgroup>
-              <optgroup label="==== 地籍資料 ====" class="bg-success text-white">
-                <option value="txt_AI00301.sql">AI00301 - 土地標示部資料</option>
-                <option value="txt_AI00401.sql">AI00401 - 土地所有權部資料</option>
-                <option value="txt_AI00601_B.sql">AI00601 - 土地管理者資料</option>
-                <option value="txt_AI00601_E.sql">AI00601 - 建物管理者資料</option>
-                <option value="txt_AI00701.sql">AI00701 - 建物標示部資料</option>
-                <option value="txt_AI00801.sql">AI00801 - 基地坐落資料</option>
-                <option value="txt_AI00901.sql">AI00901 - 建物分層及附屬資料</option>
-                <option value="txt_AI01001.sql">AI01001 - 主建物與共同使用部分資料</option>
-                <option value="txt_AI01101.sql">AI01101 - 建物所有權部資料</option>
-                <option value="txt_AI02901_B.sql">AI02901 - 土地各部別之其他登記事項列印</option>
-                <option value="txt_AI02901_E.sql">AI02901 - 建物各部別之其他登記事項列印</option>
-              </optgroup>
-            </select>
-            <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px" placeholder="輸入SELECT SQL ..."></textarea>
-            <button id="sql_export_button">匯出</button>
-            <!--
-            <button id="sql_csv_text_button">匯出CSV</button>
-            <button id="sql_txt_text_button">匯出TXT</button>
-            -->
-            <button id="sql_csv_quote_button">備註</button>
-            <blockquote id="sql_report_blockquote" class="hide">
-              <p>輸入SELECT SQL指令匯出查詢結果。</p>
-              <img src="assets/img/csv_export_method.jpg" class="w-auto" />
+            <legend>轄區各段土地標示部筆數＆面積查詢</legend>
+            <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
+            <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
+            <input id="data_query_text" name="data_query_text" type="text" data-toggle='tooltip' title='輸入關鍵字或是段代碼' />
+            <button id="data_query_button">查詢</button>
+            <button id="data_quote_button">備註</button>
+            <blockquote id="data_blockquote" class="hide">
+              -- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>
+              SELECT t.AA48 as "段代碼", <br/>
+                  m.KCNT as "段名稱", <br/>
+                  SUM(t.AA10) as "面積", <br/>
+                  COUNT(t.AA10) as "筆數" <br/>
+              FROM MOICAD.RALID t <br/>
+              LEFT JOIN MOIADM.RKEYN m ON (m.KCDE_1 = '48' and m.KCDE_2 = t.AA48) <br/>
+              --WHERE t.AA48 = '%【輸入數字】'<br/>
+              --WHERE m.KCNT = '%【輸入文字】%'<br/>
+              GROUP BY t.AA48, m.KCNT;
             </blockquote>
+            <div id="data_query_result"></div>
           </fieldset>
         </div>
         <div class="col-6">
           <fieldset>
             <legend>地政局索取地籍資料</legend>
             <button id="export_txt_quote_button">備註</button>
-            <blockquote id="export_txt_blockquote">
+            <blockquote id="export_txt_blockquote" class="hide">
               <span class="text-danger">※</span> 系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
               　- <small class="mt-2 mb-2"> 除下面標示為黃色部分須至地政系統產出並下載，其餘皆可於「報表匯出」區塊產出。</small> <br/>
               　AI001-10 <br/>

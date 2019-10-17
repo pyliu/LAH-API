@@ -161,12 +161,6 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   <script src="assets/js/autoload.js"></script>
   <script type="text/javascript">
     $(document).ready(function(e) {
-      // unsupported IE detection
-      if (window.attachEvent) {
-        document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援舊版IE瀏覽器, 請使用Chrome/Firefox/IE11瀏覽器。</h2>';
-      }
-
-      // filter button event
       // filter button
       $("#red_btn").on("click", function(e) {
           var state = $("#table_container").data("active");
