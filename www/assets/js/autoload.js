@@ -20,16 +20,17 @@ function startRefresh() {
         target.load("allcases.php", "date=" + $("#date_input").val(), function() {
             adjustQueryTime();
             adjustTableContent();
+            // only today that needs to update regularly
             if (today == $("#date_input").val()) {
-                // only today that needs to update regularly
-                clearInterval(loading_timeout_handle);
-                loading_timeout_handle = setTimeout(startRefresh, refresh_time);
-                console.log("Auto refresh after " + refresh_time / 1000 + " secs.");
+                let hour = new Date().getHours();
+                // only refresh within work hour
+				if (hour > 7 && hour < 18) {
+                    clearInterval(loading_timeout_handle);
+                    loading_timeout_handle = setTimeout(startRefresh, refresh_time);
+                }
             } else {
-                console.log("Query date is not " + today + ", no auto table refresh enabled.");
+                console.warn("Query date is not " + today + ", no auto table refresh enabled.");
             }
-            // user info dialog event
-            addUserInfoEvent();
         });
     }
 }
@@ -46,7 +47,7 @@ function adjustQueryTime() {
 }
 
 function adjustTableContent() {
-    console.log("table loaded, going to attach events to html elements.");
+    console.log("case table loaded, going to attach UI events.");
     // show/hide rows by filter condition
     $("#case_results tbody tr").hide();
     var state = $("#table_container").data("active");
@@ -141,6 +142,9 @@ function adjustTableContent() {
             }
         });
     });
+    // user info dialog event
+    console.assert(addUserInfoEvent, "Can't find addUserInfoEvent function ... do you include global.js")
+    addUserInfoEvent();
 }
 
 $(document).ready(startRefresh);
