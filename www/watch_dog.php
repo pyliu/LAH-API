@@ -211,7 +211,7 @@ blockquote img {
           </fieldset>
         </div>
         <div class="col-6">
-          <fieldset>
+          <fieldset class="ld-over">
             <legend>同步局端跨所案件資料</legend>
             <div><span class="text-danger">※</span>主機IP不在局端<span class="text-info">白名單</span>內將無法使用本功能，目前為<span class="text-danger"><?php echo $_SERVER["SERVER_ADDR"] ?></span>。</div>
             <select id="sync_x_case_year" name="sync_x_case_year">
@@ -239,6 +239,7 @@ blockquote img {
               <div><span class="text-danger">※</span>局端針對遠端連線同步異動資料庫有鎖IP，故<span class="text-danger">IP不在局端白名單內的主機將無法使用本功能</span>，目前主機IP為 <span class="text-warning"><?php echo $_SERVER["SERVER_ADDR"] ?></span> 。【2019-10-01】</div>
             </blockquote>
             <div id="sync_x_case_display"></div>
+            <div class="ld ld-square ld-blur"></div>
           </fieldset>
         </div>
       </div>

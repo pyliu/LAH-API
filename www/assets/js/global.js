@@ -92,6 +92,11 @@ var toggle = function(selector) {
 	el.attr("disabled") ? el.attr("disabled", false) : el.attr("disabled", true);
 	// for loading spinner
 	el.hasClass("running") ? el.removeClass("running") : el.addClass("running");
+	// also find cover container
+	let container = el.closest(".ld-over");
+	if (container.length > 0) {
+		container.hasClass("running") ? container.removeClass("running") : container.addClass("running");
+	}
 }
 
 var scrollToElement = function (element) {

@@ -227,7 +227,8 @@ fieldset fieldset legend {
       </div>
       <div class="row">
         <div class="col-6">
-          <fieldset>
+          <!-- ld-over the loading covering container-->
+          <fieldset class="ld-over">
             <legend>法院來函查統編</legend>
             <input id="id_query_text" name="id_query_text" type="text" class="id_query_grp" data-toggle='tooltip' title='輸入統編' />
             <button id="id_query_button" class="id_query_grp ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
@@ -250,6 +251,9 @@ fieldset fieldset legend {
             </blockquote>
             <div id="id_query_crsms_result"></div>
             <div id="id_query_cmsms_result"></div>
+            <!-- spinner div for loading-->
+            <!-- ld-ring + ld-spin, ld-pie + ld-heartbeat, ld-ball + ld-bounce, ld-square + ld-blur -->
+            <div class="ld ld-ball ld-bounce"></div>
           </fieldset>
         </div>
         <div class="col-6">
