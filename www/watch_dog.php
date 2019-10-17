@@ -176,14 +176,14 @@ blockquote img {
               <h6 class="text-info">目前會去檢查下列的TABLE</h6>
               <ul>
                 <!-- // 登記 -->
-                <li>"MOICAT.RBLOW" => array("B03", "B04_1", "B04_2") 土地標示部</li>   <!--// YEAR, WORD, NUMBER-->
+                <li>"MOICAT.RBLOW" => array("B03", "B04_1", "B04_2") 標示部</li>   <!--// YEAR, WORD, NUMBER-->
                 <li>"MOICAT.RCLOR" => array("C03", "C04_1", "C04_2") 他項權利部</li>
-                <li>"MOICAT.REBOW" => array("E03", "E04_1", "E04_2")</li>
-                <!--<li>"MOICAT.RINDX" => array("II03", "II04_1", "II04_2")</li>-->
+                <li>"MOICAT.REBOW" => array("E03", "E04_1", "E04_2") 所有權部</li>
+                <!--<li>"MOICAT.RINDX" => array("II03", "II04_1", "II04_2") 異動索引</li>-->
                 <li>"MOICAT.RLNID" => array("L03", "L04_1", "L04_2") 人檔</li>
                 <li>"MOICAT.RRLSQ" => array("R03", "R04_1", "R04_2")</li>
-                <li>"MOICAT.RGALL" => array("G03", "G04_1", "G04_2")</li>
-                <li>"MOICAT.RMNGR" => array("M03", "M04_1", "M04_2")</li>
+                <li>"MOICAT.RGALL" => array("G03", "G04_1", "G04_2") 註記</li>
+                <li>"MOICAT.RMNGR" => array("M03", "M04_1", "M04_2") 管理者</li>
                 <!-- // 地價 -->
                 <li>"MOIPRT.PPRCE" => array("MA03", "MA04_1", "MA04_2")</li>
                 <li>"MOIPRT.PGALL" => array("GG03", "GG04_1", "GG04_2")</li>
