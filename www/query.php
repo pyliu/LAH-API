@@ -190,7 +190,7 @@ fieldset fieldset legend {
               foreach ($operators as $id => $name) {
                 // prevent rare word issue
                 $name = preg_replace("/[a-zA-Z?]+/", "", $name);
-                echo "<div class='float-left m-2 user_tag hide' style='width: 150px' data-id='".$id."' data-name='".($name == false ? "XXXXXX" : $name)."'>".$id.": ".($name == false ? "XXXXXX" : $name)."</div>";
+                echo "<div class='float-left m-2 user_tag hide' style='width: 150px' data-id='".$id."' data-name='".($name ?? "XXXXXX")."'>".$id.": ".($name ?? "XXXXXX")."</div>";
               }
             ?>
             </div>
