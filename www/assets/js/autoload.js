@@ -47,7 +47,7 @@ function adjustQueryTime() {
 }
 
 function adjustTableContent() {
-    console.log("case table loaded, going to attach UI events.");
+    //console.log("case table loaded, going to attach UI events.");
     // show/hide rows by filter condition
     $("#case_results tbody tr").hide();
     var state = $("#table_container").data("active");
