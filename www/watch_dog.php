@@ -163,6 +163,7 @@ blockquote img {
           <fieldset>
             <legend>案件暫存檔清除</legend>
             <select id="temp_clr_year" name="temp_clr_year">
+              <option>107</option>
               <option selected>108</option>
             </select>
             年
@@ -173,33 +174,36 @@ blockquote img {
             <button id="query_temp_clr_button">查詢</button>
             <button id="temp_clr_quote_button">備註</button>
             <blockquote id="temp_clr_quote" class="hide">
-              <h6 class="text-info">目前會去檢查下列的TABLE</h6>
+              <h6 class="text-info">檢查下列的表格</h6>
               <ul>
                 <!-- // 登記 -->
-                <li>"MOICAT.RBLOW" => array("B03", "B04_1", "B04_2") 標示部</li>   <!--// YEAR, WORD, NUMBER-->
-                <li>"MOICAT.RCLOR" => array("C03", "C04_1", "C04_2") 他項權利部</li>
-                <li>"MOICAT.REBOW" => array("E03", "E04_1", "E04_2") 所有權部</li>
-                <!--<li>"MOICAT.RINDX" => array("II03", "II04_1", "II04_2") 異動索引</li>-->
-                <li>"MOICAT.RLNID" => array("L03", "L04_1", "L04_2") 人檔</li>
-                <li>"MOICAT.RRLSQ" => array("R03", "R04_1", "R04_2")</li>
-                <li>"MOICAT.RGALL" => array("G03", "G04_1", "G04_2") 註記</li>
-                <li>"MOICAT.RMNGR" => array("M03", "M04_1", "M04_2") 管理者</li>
+                <li>"MOICAT.RALID" => "A"   // 土地標示部</li>
+                <li>"MOICAT.RBLOW" => "B"   // 土地所有權部</li>
+                <li>"MOICAT.RCLOR" => "C"   // 他項權利部</li>
+                <li>"MOICAT.RDBID" => "D"   // 建物標示部</li>
+                <li>"MOICAT.REBOW" => "E"   // 建物所有權部</li>
+                <li>"MOICAT.RLNID" => "L"   // 人檔</li>
+                <li>"MOICAT.RRLSQ" => "R"   // 權利標的</li>
+                <li>"MOICAT.RGALL" => "G"   // 其他登記事項</li>
+                <li>"MOICAT.RMNGR" => "M"   // 管理者</li>
+                <li>"MOICAT.RTOGH" => "T"   // 他項權利檔</li>
+                <li>"MOICAT.RHD10" => "H"   // 基地坐落／地上建物</li>
                 <!-- // 地價 -->
-                <li>"MOIPRT.PPRCE" => array("MA03", "MA04_1", "MA04_2")</li>
-                <li>"MOIPRT.PGALL" => array("GG03", "GG04_1", "GG04_2")</li>
-                <li>"MOIPRT.PBLOW" => array("LA03", "LA04_1", "LA04_2")</li>
-                <li>"MOIPRT.PALID" => array("KA03", "KA04_1", "KA04_2")</li>
-                <li>"MOIPRT.PNLPO" => array("NA03", "NA04_1", "NA04_2")</li>
-                <li>"MOIPRT.PBLNV" => array("BA03", "BA04_1", "BA04_2")</li>
-                <li>"MOIPRT.PCLPR" => array("CA03", "CA04_1", "CA04_2")</li>
-                <li>"MOIPRT.PFOLP" => array("FA03", "FA04_1", "FA04_2")</li>
-                <li>"MOIPRT.PGOBP" => array("GA03", "GA04_1", "GA04_2")</li>
-                <li>"MOIPRT.PAPRC" => array("AA03", "AA04_1", "AA04_2")</li>
-                <li>"MOIPRT.PEOPR" => array("EA03", "EA04_1", "EA04_2")</li>
-                <li>"MOIPRT.POA11" => array("OA03", "OA04_1", "OA04_2")</li>
-                <li>"MOIPRT.PGOBPN" => array("GA03", "GA04_1", "GA04_2")</li>
-                <!--<li>"MOIPRC.PKCLS" => array("KK03", "KK04_1", "KK04_2")</li>-->
-                <li>"MOIPRT.PPRCE" => array("MA03", "MA04_1", "MA04_2")</li>
+                <li>"MOIPRT.PPRCE" => "MA"</li>
+                <li>"MOIPRT.PGALL" => "GG"</li>
+                <li>"MOIPRT.PBLOW" => "LA"</li>
+                <li>"MOIPRT.PALID" => "KA"</li>
+                <li>"MOIPRT.PNLPO" => "NA"</li>
+                <li>"MOIPRT.PBLNV" => "BA"</li>
+                <li>"MOIPRT.PCLPR" => "CA"</li>
+                <li>"MOIPRT.PFOLP" => "FA"</li>
+                <li>"MOIPRT.PGOBP" => "GA"</li>
+                <li>"MOIPRT.PAPRC" => "AA"</li>
+                <li>"MOIPRT.PEOPR" => "EA"</li>
+                <li>"MOIPRT.POA11" => "OA"</li>
+                <li>"MOIPRT.PGOBPN" => "GA"</li>
+                <!--<li>"MOIPRC.PKCLS" => "KK"</li>-->
+                <li>"MOIPRT.PPRCE" => "MA"</li>
               </ul>
             </blockquote>
             <div id="temp_clr_display"></div>

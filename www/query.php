@@ -163,17 +163,37 @@ fieldset fieldset legend {
         </div>
         <div class="col-6">
           <fieldset>
-            <legend>記錄檔</legend>
-            <input class="no-cache" id="log_date_text" name="log_date_text" type="text" title='輸入日期' value="<?php echo $today_ad; ?>" />
-            <button id="log_button">下載</button>
-            <button id="log_zip_button">壓縮</button>
-            <button id="log_quote_button">備註</button>
-            <blockquote id="log_blockquote" class="hide">
-              <ol>
-                <li>根據日期取得本伺服器之紀錄檔案。</li>
-                <li>按壓縮按鈕可手動壓縮主機端LOG原始檔。</li>
-              </ol>
-            </blockquote>
+            <legend>使用者＆信差訊息</legend>
+            <div class="float-clear">
+              <label for="msg_who">
+              　關鍵字：
+              </label>
+              <input type="text" id="msg_who" name="msg_who" placeholder="HB0541" value="HB054" title="ID、姓名、IP" />
+              <button id="search_user_button">搜尋</button>
+              <span id="filter_info" class="text-info">
+                <?php
+                  echo count($operators); 
+                ?>筆
+              </span>
+            </div>
+            <div>
+              <label for="msg_title">訊息標題：</label>
+              <input type="text" name="msg_title" id="msg_title" placeholder="訊息的標題" />
+            </div>
+            <div>
+              <label for="msg_content">訊息內容：</label>
+              <button id="msg_button">傳送訊息</button><br />
+              <textarea id="msg_content" name="msg_content" class="w-100" placeholder="訊息內容(最多500字)"></textarea>
+            </div>
+            <div id="user_list">
+            <?php
+              foreach ($operators as $id => $name) {
+                // prevent rare word issue
+                $name = preg_replace("/[a-zA-Z?]+/", "", $name);
+                echo "<div class='float-left m-2 user_tag hide' style='width: 150px' data-id='".$id."' data-name='".($name == false ? "XXXXXX" : $name)."'>".$id.": ".($name == false ? "XXXXXX" : $name)."</div>";
+              }
+            ?>
+            </div>
           </fieldset>
         </div>
       </div>
@@ -206,36 +226,17 @@ fieldset fieldset legend {
         </div>
         <div class="col-6">
           <fieldset>
-            <legend>使用者＆信差訊息</legend>
-            <div class="float-clear">
-              <label for="msg_who">
-              　關鍵字：
-              </label>
-              <input type="text" id="msg_who" name="msg_who" placeholder="HB0541" value="HB054" title="ID、姓名、IP" />
-              <button id="search_user_button">搜尋</button>
-              <span id="filter_info" class="text-info">
-                <?php
-                  echo count($operators); 
-                ?>筆
-              </span>
-            </div>
-            <div>
-              <label for="msg_title">訊息標題：</label>
-              <input type="text" name="msg_title" id="msg_title" placeholder="訊息的標題" />
-            </div>
-            <div>
-              <label for="msg_content">訊息內容：</label>
-              <button id="msg_button">傳送訊息</button><br />
-              <textarea id="msg_content" name="msg_content" class="w-100" placeholder="訊息內容(最多500字)"></textarea>
-            </div>
-            <div id="user_list">
-            <?php
-              foreach ($operators as $id => $name) {
-                //echo $id.": ".($name == false ? "無此人!" : $name)."</br>";
-                echo "<div class='float-left m-2 user_tag hide' style='width: 200px' data-id='".$id."' data-name='".($name == false ? "XXXXXX" : $name)."'>".$id.": ".($name == false ? "XXXXXX" : $name)."</div>";
-              }
-            ?>
-            </div>
+            <legend>記錄檔</legend>
+            <input class="no-cache" id="log_date_text" name="log_date_text" type="text" title='輸入日期' value="<?php echo $today_ad; ?>" />
+            <button id="log_button">下載</button>
+            <button id="log_zip_button">壓縮</button>
+            <button id="log_quote_button">備註</button>
+            <blockquote id="log_blockquote" class="hide">
+              <ol>
+                <li>根據日期取得本伺服器之紀錄檔案。</li>
+                <li>按壓縮按鈕可手動壓縮主機端LOG原始檔。</li>
+              </ol>
+            </blockquote>
           </fieldset>
         </div>
       </div>

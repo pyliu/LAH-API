@@ -1673,7 +1673,7 @@ var xhrUpdateCaseColumnData = function(e) {
 }
 
 var xhrSearchUsers = function(e) {
-	let keyword = $.trim($("#msg_who").val());
+	let keyword = $.trim($("#msg_who").val().replace(/\?/g, ""));
 	if (isEmpty(keyword)) {
 		console.warn("Keyword field should not be empty.");
 		return;
@@ -1764,7 +1764,7 @@ var xhrQueryUserInfo = function(e) {
 		clicked_element = $(clicked_element.closest(".user_tag"));
 	}
 
-	var name = $.trim(clicked_element.data("name"));
+	var name = $.trim(clicked_element.data("name").replace(/\?A-Za-z0-9/g, ""));
 	var id = trim(clicked_element.data("id"));
 
 	if (isEmpty(name) || isEmpty(id)) {

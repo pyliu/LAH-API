@@ -1,30 +1,34 @@
 <?php
+// YEAR(?03), WORD(?04_1), NUMBER(?04_2)
 return array(
     // 登記
-    "MOICAT.RBLOW" => array("B03", "B04_1", "B04_2"),   // YEAR, WORD, NUMBER
-    "MOICAT.REBOW" => array("E03", "E04_1", "E04_2"),
-    "MOICAT.RCLOR" => array("C03", "C04_1", "C04_2"),
-    //"MOICAT.RINDX" => array("II03", "II04_1", "II04_2"),  // RINDX must be kept
-    "MOICAT.RLNID" => array("L03", "L04_1", "L04_2"),
-    "MOICAT.RRLSQ" => array("R03", "R04_1", "R04_2"),
-    "MOICAT.RGALL" => array("G03", "G04_1", "G04_2"),
-    "MOICAT.RMNGR" => array("M03", "M04_1", "M04_2"),
-    "MOICAT.RRLSQ" => array("R03", "R04_1", "R04_2"),
+    "MOICAT.RALID" => "A",   // 土地標示部
+    "MOICAT.RBLOW" => "B",   // 土地所有權部
+    "MOICAT.RCLOR" => "C",   // 他項權利部
+    "MOICAT.RDBID" => "D",   // 建物標示部
+    "MOICAT.REBOW" => "E",   // 建物所有權部
+    "MOICAT.RLNID" => "L",   // 人檔
+    "MOICAT.RRLSQ" => "R",   // 權利標的
+    "MOICAT.RGALL" => "G",   // 其他登記事項
+    "MOICAT.RMNGR" => "M",   // 管理者
+    "MOICAT.RTOGH" => "T",   // 他項權利檔
+    "MOICAT.RHD10" => "H",   // 基地坐落／地上建物
+    //"MOICAT.RINDX" => "II",  // RINDX must be kept, 案件索引
     // 地價
-    "MOIPRT.PPRCE" => array("MA03", "MA04_1", "MA04_2"),
-    "MOIPRT.PGALL" => array("GG03", "GG04_1", "GG04_2"),
-    "MOIPRT.PBLOW" => array("LA03", "LA04_1", "LA04_2"),
-    "MOIPRT.PALID" => array("KA03", "KA04_1", "KA04_2"),
-    "MOIPRT.PNLPO" => array("NA03", "NA04_1", "NA04_2"),
-    "MOIPRT.PBLNV" => array("BA03", "BA04_1", "BA04_2"),
-    "MOIPRT.PCLPR" => array("CA03", "CA04_1", "CA04_2"),
-    "MOIPRT.PFOLP" => array("FA03", "FA04_1", "FA04_2"),
-    "MOIPRT.PGOBP" => array("GA03", "GA04_1", "GA04_2"),
-    "MOIPRT.PAPRC" => array("AA03", "AA04_1", "AA04_2"),
-    "MOIPRT.PEOPR" => array("EA03", "EA04_1", "EA04_2"),
-    "MOIPRT.POA11" => array("OA03", "OA04_1", "OA04_2"),
-    "MOIPRT.PGOBPN" => array("GA03", "GA04_1", "GA04_2"),
-    //"MOIPRC.PKCLS" => array("KK03", "KK04_1", "KK04_2"),
-    "MOIPRT.PPRCE" => array("MA03", "MA04_1", "MA04_2")
+    "MOIPRT.PPRCE" => "MA",
+    "MOIPRT.PGALL" => "GG",
+    "MOIPRT.PBLOW" => "LA",
+    "MOIPRT.PALID" => "KA",
+    "MOIPRT.PNLPO" => "NA",
+    "MOIPRT.PBLNV" => "BA",
+    "MOIPRT.PCLPR" => "CA",
+    "MOIPRT.PFOLP" => "FA",
+    "MOIPRT.PGOBP" => "GA",
+    "MOIPRT.PAPRC" => "AA",
+    "MOIPRT.PEOPR" => "EA",
+    "MOIPRT.POA11" => "OA",
+    "MOIPRT.PGOBPN" => "GA",
+    //"MOIPRC.PKCLS" => "KK",
+    "MOIPRT.PPRCE" => "MA"
 );
 ?>

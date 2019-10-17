@@ -805,12 +805,17 @@ class Query {
 
 		// an array to express temp tables and key field names that need to be checked.
 		$temp_tables = include("Config.TempTables.php");
-		foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
-
+		//foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
+		foreach ($temp_tables as $tmp_tbl_name => $key) {
+			/*
 			$log->info(__METHOD__.": 查詢 $tmp_tbl_name 的暫存資料 ... 【".$key_fields[0].", ".$key_fields[1].", ".$key_fields[2]."】");
-			
 			$this->db->parse("
 				SELECT * FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = :bv_year AND ".$key_fields[1]." = :bv_code AND ".$key_fields[2]." = :bv_number
+			");
+			*/
+			$log->info(__METHOD__.": 查詢 $tmp_tbl_name 的暫存資料 ... 【".$key."03, ".$key."04_1, ".$key."04_2】");
+			$this->db->parse("
+				SELECT * FROM ".$tmp_tbl_name." WHERE ".$key."03 = :bv_year AND ".$key."04_1 = :bv_code AND ".$key."04_2 = :bv_number
 			");
 
 			$this->db->bind(":bv_year", $year);
@@ -819,7 +824,8 @@ class Query {
 			
 			$this->db->execute();
 			// for FE, 0 -> table name, 1 -> data, 2 -> SQL statement
-			$result[] = array($tmp_tbl_name, $this->db->fetchAll(), "SELECT * FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = '$year' AND ".$key_fields[1]." = '$code' AND ".$key_fields[2]." = '$number'");
+			//$result[] = array($tmp_tbl_name, $this->db->fetchAll(), "SELECT * FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = '$year' AND ".$key_fields[1]." = '$code' AND ".$key_fields[2]." = '$number'");
+			$result[] = array($tmp_tbl_name, $this->db->fetchAll(), "SELECT * FROM ".$tmp_tbl_name." WHERE ".$key."03 = '$year' AND ".$key."04_1 = '$code' AND ".$key."04_2 = '$number'");
 		}
 		return $result;
 	}
@@ -834,7 +840,8 @@ class Query {
 
 		// an array to express temp tables and key field names that need to be checked.
 		$temp_tables = include("Config.TempTables.php");
-		foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
+		//foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
+		foreach ($temp_tables as $tmp_tbl_name => $key) {
 			if (!empty($table) && $tmp_tbl_name != $table) {
 				$log->info(__METHOD__."：指定刪除 $table 故跳過 $tmp_tbl_name 。");
 				continue;
@@ -842,8 +849,11 @@ class Query {
 			
 			$log->info(__METHOD__."：刪除 $tmp_tbl_name 資料 ... ");
 			
-			$this->db->parse("
+			/*$this->db->parse("
 				DELETE FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = :bv_year AND ".$key_fields[1]." = :bv_code AND ".$key_fields[2]." = :bv_number
+			");*/
+			$this->db->parse("
+				DELETE FROM ".$tmp_tbl_name." WHERE ".$key."03 = :bv_year AND ".$key."04_1 = :bv_code AND ".$key."04_2 = :bv_number
 			");
 
 			$this->db->bind(":bv_year", $year);
