@@ -259,19 +259,22 @@ blockquote {
 }
 
 .highlight {
-  background-color: #28a745;
-  color: #FFF;
-  font-weight: bold;
+	background-color: #28a745;
+	color: #FFF;
+	font-weight: bold;
 }
 
 .reg_case_id:hover, .user_tag:hover {
-  background-color: yellow;
-  text-decoration: underline;
-  font-weight: bold;
-  cursor: pointer;
+	background-color: yellow;
+	text-decoration: underline;
+	font-weight: bold;
+	cursor: pointer;
 }
 
-.loader-icon {
-	font-size:12px;
+.quit_bg {
+	background-image:url("/assets/img/quit.png");
+	background-repeat: no-repeat;
+	background-size: 30%;
+	background-position: 80% 5%;
+
 }
-  

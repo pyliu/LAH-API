@@ -1828,7 +1828,8 @@ var showUserInfoByRAW = function(tdoc_raw) {
 	showModal({
 		body: html,
 		title: "使用者資訊",
-		size: "md"
+		size: "md",
+		class: tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "quit_bg"
 	});
 }
 

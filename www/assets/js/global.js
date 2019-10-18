@@ -94,7 +94,12 @@ function showModal(opts) {
 	}
     modal_element.find(".modal-title").html(title);
 	modal_element.find(".modal-body p").html(body);
-	modal_element.find(".modal-dialog").removeClass("modal-md").removeClass("modal-sm").removeClass("modal-lg").addClass("modal-"+size);
+	modal_element.find(".modal-dialog").attr("className", "modal-dialog modal-"+size);
+	if (isEmpty(opts.class)) {
+		modal_element.find(".modal-body").removeClass().addClass("modal-body");
+	} else {
+		modal_element.find(".modal-body").addClass(opts.class);
+	}
 	modal_element.modal();
 }
 
@@ -120,7 +125,7 @@ var toggle = function(selector) {
 		}
 		// for loading spinner, https://loading.io element
 		/*if (el.is("button")) {
-			// ex: <button class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
+			// ex: <button class="ld-ext-left"><span class="ld ld-ring ld-cycle small"></span>查詢</button>
 			// position opts: ld-ext-top, ld-ext-bottom, ld-ext-left, ld-ext-right
 			if (el.hasClass("ld-ext-left")) {
 				el.removeClass("ld-ext-left");
@@ -157,7 +162,7 @@ var scrollToElement = function (element) {
 }
 
 var setLoadingHTML = function(selector) {
-	$(selector).html("<img src='assets/img/walking.gif' border='0' title='loading ...... ' width='25' height='25' />");
+	$(selector).html('<span class="spinner-border spinner-border-md" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>');
 }
 
 var bindPressEnterEvent = function(selector, callback_func) {
