@@ -90,12 +90,43 @@ function closeModal() {
 var toggle = function(selector) {
 	var el = $(selector);
 	el.attr("disabled") ? el.attr("disabled", false) : el.attr("disabled", true);
-	// for loading spinner
-	el.hasClass("running") ? el.removeClass("running") : el.addClass("running");
-	// also find cover container
-	let container = el.closest(".ld-over");
-	if (container.length > 0) {
-		container.hasClass("running") ? container.removeClass("running") : container.addClass("running");
+	// also find cover container (https://loading.io)
+	let container = el.closest("fieldset");
+	if (container.length == 0) {
+		// add bootstrap spinner
+		if (el.is("button")) {
+			let spans = el.find(".spinner-border,.sr-only");
+			if (spans.length > 0) {
+				spans.remove();
+			} else {
+				spans = jQuery.parseHTML('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>');
+				el.prepend(spans);
+			}
+		}
+		// for loading spinner, https://loading.io element
+		/*if (el.is("button")) {
+			// <button class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
+			if (el.hasClass("ld-ext-left")) {
+				el.removeClass("ld-ext-left");
+				el.find(".auto-add-spinner").remove();
+				el.removeClass("running");
+			} else {
+				el.addClass("ld-ext-left");
+				el.prepend(jQuery.parseHTML('<span class="ld ld-ring ld-cycle small auto-add-spinner"></span>'));
+				el.addClass("running");
+			}
+		}*/
+	} else {
+		if (container.hasClass("ld-over")) {
+			container.removeClass("ld-over");
+			container.find(".auto-add-spinner").remove();
+			container.removeClass("running");
+		} else {
+			container.addClass("ld-over");
+			container.addClass("running");
+			// <!-- ld-ring + ld-spin, ld-pie + ld-heartbeat, ld-ball + ld-bounce, ld-square + ld-blur -->
+			container.append(jQuery.parseHTML('<div class="ld ld-ball ld-bounce auto-add-spinner"></div>'));
+		}
 	}
 }
 

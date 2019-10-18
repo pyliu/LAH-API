@@ -100,8 +100,8 @@ fieldset fieldset legend {
             <?php echo getCodeSelectHTML("query_code"); ?>
             字
             <input type="text" id="query_num" name="query_num" data-toggle='tooltip' data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="bottom" />號
-            <button id="query_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>登記</button>
-            <button id="query_prc_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>地價</button>
+            <button id="query_button">登記</button>
+            <button id="query_prc_button">地價</button>
             <div id="query_display"></div>
           </fieldset>
         </div>
@@ -126,7 +126,7 @@ fieldset fieldset legend {
             字
             <input type="text" id="sur_delay_case_fix_num" name="sur_delay_case_fix_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
             號
-            <button id="sur_delay_case_fix_search_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
+            <button id="sur_delay_case_fix_search_button">查詢</button>
             <button id="sur_delay_case_fix_quote_button">備註</button>
             <blockquote id="sur_delay_case_fix_quote" class="hide">
               <h5><span class="text-danger">※</span>注意：本功能會清除如下圖之欄位資料並將案件辦理情形改為【核定】，請確認後再執行。</h5>
@@ -181,7 +181,7 @@ fieldset fieldset legend {
               </optgroup>
             </select>
             <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px" placeholder="輸入SELECT SQL ..."></textarea>
-            <button id="sql_export_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>匯出</button>
+            <button id="sql_export_button">匯出</button>
             <button id="sql_csv_quote_button">備註</button>
             <blockquote id="sql_report_blockquote" class="hide">
               <p>輸入SELECT SQL指令匯出查詢結果。</p>
@@ -197,7 +197,7 @@ fieldset fieldset legend {
               　關鍵字：
               </label>
               <input type="text" id="msg_who" name="msg_who" placeholder="HB0541" value="HB054" title="ID、姓名、IP" />
-              <button id="search_user_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>搜尋</button>
+              <button id="search_user_button">搜尋</button>
               <span id="filter_info" class="text-info">
                 <?php
                   echo count($operators); 
@@ -228,10 +228,10 @@ fieldset fieldset legend {
       <div class="row">
         <div class="col-6">
           <!-- ld-over the loading covering container-->
-          <fieldset class="ld-over">
+          <fieldset>
             <legend>法院來函查統編</legend>
             <input id="id_query_text" name="id_query_text" type="text" class="id_query_grp" data-toggle='tooltip' title='輸入統編' />
-            <button id="id_query_button" class="id_query_grp ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
+            <button id="id_query_button" class="id_query_grp">查詢</button>
             <button id="id_quote_button">備註</button>
             <blockquote id="id_sql" class="hide">
               -- 【法院來函查統編】MOICAS_CRSMS 土地登記案件查詢-權利人+義務人+代理人+複代 <br/>
@@ -251,17 +251,14 @@ fieldset fieldset legend {
             </blockquote>
             <div id="id_query_crsms_result"></div>
             <div id="id_query_cmsms_result"></div>
-            <!-- spinner div for loading-->
-            <!-- ld-ring + ld-spin, ld-pie + ld-heartbeat, ld-ball + ld-bounce, ld-square + ld-blur -->
-            <div class="ld ld-ball ld-bounce"></div>
           </fieldset>
         </div>
         <div class="col-6">
           <fieldset>
             <legend>記錄檔</legend>
             <input class="no-cache" id="log_date_text" name="log_date_text" type="text" title='輸入日期' value="<?php echo $today_ad; ?>" />
-            <button id="log_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>下載</button>
-            <button id="log_zip_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>壓縮</button>
+            <button id="log_button">下載</button>
+            <button id="log_zip_button">壓縮</button>
             <button id="log_quote_button">備註</button>
             <blockquote id="log_blockquote" class="hide">
               <ol>
@@ -279,7 +276,7 @@ fieldset fieldset legend {
             <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
             <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
             <input id="data_query_text" name="data_query_text" type="text" data-toggle='tooltip' title='輸入關鍵字或是段代碼' />
-            <button id="data_query_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
+            <button id="data_query_button">查詢</button>
             <button id="data_quote_button">備註</button>
             <blockquote id="data_blockquote" class="hide">
               -- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>

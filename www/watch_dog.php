@@ -84,7 +84,7 @@ blockquote img {
         <div class="col-6">
           <fieldset>
             <legend>跨所註記遺失檢測<small>(一周內)</small></legend>
-            <button id="cross_case_check_query_button" data-toggle='tooltip'class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>立即檢測</button>
+            <button id="cross_case_check_query_button" data-toggle='tooltip'>立即檢測</button>
             <button id="cross_case_check_quote_button">備註</button>
             <blockquote id="cross_case_check_quote" class="hide">
               <h5><span class="text-danger">※</span>通常發生的情況是案件內的權利人/義務人/代理人姓名內有罕字造成。</h5>
@@ -107,7 +107,7 @@ blockquote img {
             <legend>悠遊卡自動加值付款失敗回復</legend>
             <label for="easycard_query_day" data-toggle='tooltip' title='輸入查詢日期'>日期：</label>
             <input type="text" id="easycard_query_day" name="easycard_query_day" class="easycard_query date_picker no-cache" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080321」。" data-placement="bottom" value="<?php echo $today; ?>" />
-            <button id="easycard_query_button" class="easycard_query ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
+            <button id="easycard_query_button" class="easycard_query">查詢</button>
             <button id="easycard_quote_button">備註</button>
             <blockquote id="easycard_quote" class="hide">
               <ol>
@@ -127,7 +127,7 @@ blockquote img {
           <fieldset>
             <legend>公告期限維護<small>(先行准登)</small></legend>
             <div id="prereg_query_display" class="mb-2"></div>
-            <button id="prereg_clear_button" class="text-danger ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>★清除准登★</button>
+            <button id="prereg_clear_button" class="text-danger">★清除准登★</button>
             <button id="prereg_quote_button">備註</button>
             <blockquote id="prereg_quote" class="hide">
               <h5><span class="text-danger">※</span>注意：中壢所規定超過30件案件才能執行此功能，並於完成時須馬上關掉以免其他案件誤登。</h5>
@@ -147,7 +147,7 @@ blockquote img {
             字
             <input type="text" id="rm30_update_num" name="rm30_update_num" data-toggle='tooltip' data-content='請輸入案件號(最多6碼)' title='案件號' />號
 
-            <button id="rm30_update_query" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
+            <button id="rm30_update_query">查詢</button>
             <button id="rm30_update_quote_button">備註</button>
             <blockquote id="rm30_update_quote" class="hide">
               <ul>
@@ -172,7 +172,7 @@ blockquote img {
             字
             <input type="text" id="temp_clr_num" name="temp_clr_num" data-trigger="manual" data-toggle="popover"  data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
             號
-            <button id="query_temp_clr_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
+            <button id="query_temp_clr_button">查詢</button>
             <button id="temp_clr_quote_button">備註</button>
             <blockquote id="temp_clr_quote" class="hide">
               <h6 class="text-info">檢查下列的表格</h6>
@@ -211,7 +211,7 @@ blockquote img {
           </fieldset>
         </div>
         <div class="col-6">
-          <fieldset class="ld-over">
+          <fieldset>
             <legend>同步局端跨所案件資料</legend>
             <div><span class="text-danger">※</span>主機IP不在局端<span class="text-info">白名單</span>內將無法使用本功能，目前為<span class="text-danger"><?php echo $_SERVER["SERVER_ADDR"] ?></span>。</div>
             <select id="sync_x_case_year" name="sync_x_case_year">
@@ -231,7 +231,7 @@ blockquote img {
             字
             <input type="text" id="sync_x_case_num" name="sync_x_case_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
             號
-            <button id="sync_x_case_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>比對</button>
+            <button id="sync_x_case_button">比對</button>
             <button id="sync_x_case_quote_button">備註</button>
             <blockquote id="sync_x_case_quote" class="hide">
               <h6>將局端跨所資料同步回本所資料庫</h6>
@@ -239,7 +239,6 @@ blockquote img {
               <div><span class="text-danger">※</span>局端針對遠端連線同步異動資料庫有鎖IP，故<span class="text-danger">IP不在局端白名單內的主機將無法使用本功能</span>，目前主機IP為 <span class="text-warning"><?php echo $_SERVER["SERVER_ADDR"] ?></span> 。【2019-10-01】</div>
             </blockquote>
             <div id="sync_x_case_display"></div>
-            <div class="ld ld-square ld-blur"></div>
           </fieldset>
         </div>
       </div>
@@ -249,10 +248,10 @@ blockquote img {
             <legend>規費資料集修正<small>(EXPAA)</small></legend>
             <label for="expaa_query_date" data-toggle='tooltip' title='欄位:AA01'>　　日期：</label>
             <input type="text" id="expaa_query_date" class="date_picker no-cache" name="expaa_query_date" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080426」。" data-placement="bottom" value="<?php echo $today; ?>" />
-            <button id="expaa_query_date_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button><br />
+            <button id="expaa_query_date_button">查詢</button><br />
             <label for="expaa_query_number" data-toggle='tooltip' title='欄位:AA04'>電腦給號：</label>
             <input type="text" id="expaa_query_number" name="expaa_query_number" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
-            <button id="expaa_query_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
+            <button id="expaa_query_button">查詢</button>
             <button id="expaa_quote_button">備註</button>
             <blockquote id="expaa_quote" class="hide">
               AA09 - 列印註記【1：已印，0：未印】<br />
@@ -274,7 +273,7 @@ blockquote img {
             </select>
             <label for="expac_query_number" data-toggle='tooltip' title='欄位:AC04'>電腦給號：</label>
             <input type="text" id="expac_query_number" name="expac_query_number" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
-            <button id="expac_query_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
+            <button id="expac_query_button">查詢</button>
             <button id="expac_quote_button">備註</button>
             <blockquote id="expac_quote" class="hide">
               <img src="assets/img/correct_payment_screenshot.jpg" />
