@@ -1828,7 +1828,7 @@ var showUserInfoByRAW = function(tdoc_raw) {
 	showModal({
 		body: html,
 		title: "使用者資訊",
-		size: "sm"
+		size: "md"
 	});
 }
 

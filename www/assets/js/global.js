@@ -120,7 +120,8 @@ var toggle = function(selector) {
 		}
 		// for loading spinner, https://loading.io element
 		/*if (el.is("button")) {
-			// <button class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
+			// ex: <button class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
+			// position opts: ld-ext-top, ld-ext-bottom, ld-ext-left, ld-ext-right
 			if (el.hasClass("ld-ext-left")) {
 				el.removeClass("ld-ext-left");
 				el.find(".auto-add-spinner").remove();
@@ -132,12 +133,14 @@ var toggle = function(selector) {
 			}
 		}*/
 	} else {
-		if (container.hasClass("ld-over")) {
-			container.removeClass("ld-over");
+		// cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
+		let style = "ld-over-inverse";
+		if (container.hasClass(style)) {
+			container.removeClass(style);
 			container.find(".auto-add-spinner").remove();
 			container.removeClass("running");
 		} else {
-			container.addClass("ld-over");
+			container.addClass(style);
 			container.addClass("running");
 			// <!-- ld-ring + ld-spin, ld-pie + ld-heartbeat, ld-ball + ld-bounce, ld-square + ld-blur -->
 			container.append(jQuery.parseHTML('<div class="ld ld-ball ld-bounce auto-add-spinner"></div>'));
