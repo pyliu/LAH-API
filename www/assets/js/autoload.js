@@ -132,7 +132,11 @@ function adjustTableContent() {
                 html += "代理人統編：" + jsonObj.代理人統編 + "<br/>";
 				html += "代理人姓名：" + jsonObj.代理人姓名 + "<br/>";
                 html += "手機號碼：" + jsonObj.手機號碼 + "<br/>";
-                showModal(html);
+                showModal({
+                    body: html,
+                    title: "案件詳情",
+                    size: "lg"
+                });
                 scrollToElement(clicked_element);
                 $(".focused-element").removeClass("focused-element");
                 clicked_element.addClass("focused-element");

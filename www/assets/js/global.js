@@ -74,17 +74,32 @@ var showPopper = function(selector, content, timeout) {
 	scrollToElement(selector);
 }
 
-function showModal(body, title) {
+function showModal(opts) {
+	let body = opts.body;
+	let title = opts.title;
+	let size = opts.size;	// sm, md, lg
 	if (isEmpty(title)) {
-		title = "案件詳情";
+		title = "... 請輸入指定標題 ...";
 	}
-    $("#ajax_modal .modal-title").html(title);
-	$("#ajax_modal .modal-body p").html(body);
-	$("#ajax_modal").modal();
+	if (isEmpty(body)) {
+		body = "... 請輸入指定內文 ...";
+	}
+	if (isEmpty(size)) {
+		size = "md";
+	}
+	let modal_element = $("#bs_modal_template");
+	if (!modal_element.length) {
+		modal_element = $(jQuery.parseHTML('<div class="modal fade" id="bs_modal_template" role="dialog"><div class="modal-dialog modal-md"><div class="modal-content"><div class="modal-header"><h4 class="modal-title">案件詳情</h4><button type="button" class="close" data-dismiss="modal">&times;</button></div><div class="modal-body"><p>詳情顯示在這邊</p></div><!-- <div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">關閉</button></div> --></div></div></div>'));
+		$("body").append(modal_element);
+	}
+    modal_element.find(".modal-title").html(title);
+	modal_element.find(".modal-body p").html(body);
+	modal_element.find(".modal-dialog").removeClass("modal-md").removeClass("modal-sm").removeClass("modal-lg").addClass("modal-"+size);
+	modal_element.modal();
 }
 
 function closeModal() {
-	$("#ajax_modal").modal("hide");
+	$("#bs_modal_template").modal("hide");
 }
 
 var toggle = function(selector) {

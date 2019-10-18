@@ -96,7 +96,11 @@ var showRegCaseDetail = function(jsonObj, use_modal) {
 	}
 	
 	if (use_modal) {
-		showModal(html, "登記案件詳情");
+		showModal({
+			body: html,
+			title: "登記案件詳情",
+			size: "lg"
+		});
 	} else {
 		$("#query_display").html(html);
 		// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
@@ -115,7 +119,11 @@ var showPrcCaseDetail = function(jsonObj, use_modal) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	}
 	if (use_modal) {
-		showModal(html, "登記案件詳情");
+		showModal({
+			body: html,
+			title: "登記案件詳情",
+			size: "lg"
+		});
 	} else {
 		$("#query_display").html(html);
 		$(".prc_case_serial").on("click", xhrRegQueryCaseDialog);
@@ -160,7 +168,7 @@ var xhrRegQueryCase = function(e) {
 	body.append("type", "reg_case");
 	body.append("id", id);
 	
-	setLoadingHTML("#query_display");
+	toggle(e.target);
 
 	fetch("query_json_api.php", {
 		method: "POST",
@@ -170,6 +178,7 @@ var xhrRegQueryCase = function(e) {
 		return response.json();
 	}).then(function(jsonObj) {
 		showRegCaseDetail(jsonObj);
+		toggle(e.target);
 	}).catch(function(ex) {
 		console.error("xhrRegQueryCase parsing failed", ex);
 		$("#query_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
@@ -189,7 +198,7 @@ var xhrPrcQueryCase = function(e) {
 	body.append("type", "prc_case");
 	body.append("id", id);
 	
-	setLoadingHTML("#query_display");
+	toggle(e.target);
 
 	fetch("query_json_api.php", {
 		method: "POST",
@@ -198,6 +207,7 @@ var xhrPrcQueryCase = function(e) {
 		return response.json();
 	}).then(function(jsonObj) {
 		showPrcCaseDetail(jsonObj);
+		toggle(e.target);
 	}).catch(function(ex) {
 		console.error("xhrPrcQueryCase parsing failed", ex);
 		$("#query_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
@@ -217,7 +227,11 @@ var xhrCallWatchDog = function(e) {
 		if (jsonObj.status == 1) {
 			// do nothing
 		} else if (jsonObj.status == 0) {
-			showModal(jsonObj.message, "警告");
+			showModal({
+				body: jsonObj.message,
+				title: "警告",
+				size: "sm"
+			});
 		}
 	}).catch(function(ex) {
 		console.error("xhrCallWatchDog parsing failed", ex);
@@ -225,8 +239,7 @@ var xhrCallWatchDog = function(e) {
 }
 
 var xhrCheckProblematicXCase = function(e) {
-  setLoadingHTML("#cross_case_check_query_display");
-	toggle("#cross_case_check_query_button");
+	toggle(e.target);
 	
 	var body = new FormData();
 	body.append("type", "x");
@@ -251,7 +264,7 @@ var xhrCheckProblematicXCase = function(e) {
 			var now = new Date();
 			$("#cross_case_check_query_display").html("<div class='mt-1'><span class='rounded-circle bg-success'> 　 </span> 目前一切良好！【" + now.toLocaleString() + "】</div>");
 		}
-		toggle("#cross_case_check_query_button");
+		toggle(e.target);
 	}).catch(function(ex) {
 		console.error("xhrCheckProblematicXCase parsing failed", ex);
 	  $("#cross_case_check_query_display").html("<strong class='text-danger'>XHR連線查詢有問題!!【" + ex + "】</strong>");
@@ -1168,7 +1181,11 @@ var xhrZipLog = function(e) {
 		return response.json();
 	}).then(function (jsonObj) {
 		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
-		showModal("<strong class='text-success'>壓縮完成</strong>", "LOG檔壓縮");
+		showModal({
+			body: "<strong class='text-success'>壓縮完成</strong>",
+			title: "LOG檔壓縮",
+			size: "sm"
+		});
 		toggle(e.target);
 	}).catch(function(ex) {
 		console.error("xhrZipLog parsing failed", ex);
@@ -1225,7 +1242,11 @@ var xhrUpdateAnnouncementData = function(e) {
 	var day = $("#ann_day_"+reason_code).val();
 	var flag = $("#ann_reg_flag_"+reason_code).val();
 	if (this[2] == day && this[3] == flag) {
-		showModal("無變更，不需更新！", "訊息通知");
+		showModal({
+			body: "無變更，不需更新！",
+			title: "訊息通知",
+			size: "sm"
+		});
 		return;
 	}
 	console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
@@ -1245,7 +1266,11 @@ var xhrUpdateAnnouncementData = function(e) {
 		return response.json();
 	}).then(function (jsonObj) {
 		console.assert(jsonObj.status == 1, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
-		showModal("<strong class='text-success'>更新完成</strong>", "公告期限更新");
+		showModal({
+			body: "<strong class='text-success'>更新完成</strong>",
+			title: "公告期限更新",
+			size: "sm"
+		});
 		// refresh the select list
 		xhrQueryAnnouncementData.call(null, [e]);
 	}).catch(function(ex) {
@@ -1270,7 +1295,11 @@ var xhrClearAnnouncementFlag = function(e) {
 		return response.json();
 	}).then(function (jsonObj) {
 		console.assert(jsonObj.status == 1, "清除先行准登回傳狀態碼有問題【" + jsonObj.status + "】");
-		showModal("<strong class='text-success'>已全部清除完成</strong>", "清除先行准登");
+		showModal({
+			body: "<strong class='text-success'>已全部清除完成</strong>",
+			title: "清除先行准登",
+			size: "sm"
+		});
 		// refresh the select list
 		xhrQueryAnnouncementData.call(null, [e]);
 	}).catch(function(ex) {
@@ -1339,11 +1368,19 @@ var xhrQueryTempData = function(e) {
 		toggle(e.target);
 		
 		if (isEmpty(html)) {
-			showModal("案件 " + year + "-" + code + "-" + number + " 查無暫存資料", "查詢暫存資料");
+			showModal({
+				body: "案件 " + year + "-" + code + "-" + number + " 查無暫存資料",
+				title: "查詢暫存資料",
+				size: "sm"
+			});
 			return;
 		}
 		html += "<button id='temp_backup_button' class='mt-2'>全部備份</button> <button class='mt-2' id='temp_clr_button' data-trigger='manual' data-toggle='popover' data-placement='bottom'>全部清除</button>";
-		showModal(html, year + "-" + code + "-" + number + " 案件暫存檔統計");
+		showModal({
+			body: html,
+			title: year + "-" + code + "-" + number + " 案件暫存檔統計",
+			size: "sm"
+		});
 		setTimeout(function() {
 			$("#temp_clr_button").on("click", xhrClearTempData.bind({
 				year: year,
@@ -1428,7 +1465,11 @@ var xhrClearTempData = function(e) {
 		console.assert(jsonObj.status == 1, "清除暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
 		closeModal();
 		setTimeout(() => {
-			showModal("<strong class='text-success'>已清除完成</strong><p>" + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + (bindArgsObj.table ? " 表格：" + bindArgsObj.table : "") + "</p>", "清除暫存資料");
+			showModal({
+				body: "<strong class='text-success'>已清除完成</strong><p>" + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + (bindArgsObj.table ? " 表格：" + bindArgsObj.table : "") + "</p>",
+				title: "清除暫存資料",
+				size: "md"
+			});
 		}, 500);
 	}).catch(function(ex) {
 		console.error("xhrClearTempData parsing failed", ex);
@@ -1449,7 +1490,7 @@ var xhrRM30UpdateQuery = function(e) {
 	body.append("type", "reg_case");
 	body.append("id", id);
 	
-	setLoadingHTML("#rm30_update_display");
+	toggle(e.target);
 
 	fetch("query_json_api.php", {
 		method: "POST",
@@ -1459,6 +1500,7 @@ var xhrRM30UpdateQuery = function(e) {
 		return response.json();
 	}).then(function(jsonObj) {
 		showRM30UpdateCaseDetail(jsonObj);
+		toggle(e.target);
 	}).catch(function(ex) {
 		console.error("xhrRM30UpdateQuery parsing failed", ex);
 		$("#rm30_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
@@ -1523,7 +1565,11 @@ var showRM30UpdateCaseDetail = function(jsonObj) {
 				return response.json();
 			}).then(function(jsonObj) {
 				console.assert(jsonObj.status == 1, "更新辦理情形回傳狀態碼有問題【" + jsonObj.status + "】");
-				showModal("<strong class='text-success'>辦理情形狀態更新完成</strong><p>" + jsonObj.query_string + "</p>", "更新辦理情形");
+				showModal({
+					body: "<strong class='text-success'>辦理情形狀態更新完成</strong><p>" + jsonObj.query_string + "</p>",
+					title: "更新辦理情形",
+					size: "sm"
+				});
 			}).catch(function(ex) {
 				console.error("xhrRM30UpdateQuery parsing failed", ex);
 				$("#rm30_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
@@ -1545,7 +1591,7 @@ var xhrGetSURCase = function(e) {
 	body.append("type", "sur_case");
 	body.append("id", id);
 	
-	setLoadingHTML("#sur_delay_case_fix_display");
+	toggle(e.target);
 
 	fetch("query_json_api.php", {
 		method: "POST",
@@ -1554,6 +1600,7 @@ var xhrGetSURCase = function(e) {
 		return response.json();
 	}).then(function(jsonObj) {
 		showSURCaseDetail(jsonObj);
+		toggle(e.target);
 	}).catch(function(ex) {
 		console.error("xhrGetSURCase parsing failed", ex);
 		$("#sur_delay_case_fix_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
@@ -1616,11 +1663,19 @@ var xhrFixSurDelayCase = function(e) {
 			return response.json();
 		}).then(function(jsonObj) {
 			if (jsonObj.status == 1) {
-				showModal(id + " 複丈案件修正成功!", "延期複丈案件修正");
+				showModal({
+					body: id + " 複丈案件修正成功!",
+					title: "延期複丈案件修正",
+					size: "sm"
+				});
 				// refresh case status
 				xhrGetSURCase.call(null, e);
 			} else {
-				showModal(jsonObj.message, "延期複丈案件修正");
+				showModal({
+					body: jsonObj.message,
+					title: "延期複丈案件修正",
+					size: "sm"
+				});
 				throw new Error("回傳狀態碼不正確!【" + jsonObj.message + "】");
 			}
 		}).catch(function(ex) {
@@ -1661,13 +1716,25 @@ var xhrUpdateCaseColumnData = function(e) {
 			return response.json();
 		}).then(function(jsonObj) {
 			if (jsonObj.status == 1) {
-				showModal(title + "更新成功", "更新欄位");
+				showModal({
+					body: title + "更新成功",
+					title: "更新欄位",
+					size: "sm"
+				});
 			} else {
-				showModal(jsonObj.message, "更新欄位失敗");
+				showModal({
+					body: jsonObj.message,
+					title: "更新欄位失敗",
+					size: "sm"
+				});
 			}
 		}).catch(function(ex) {
 			console.error("xhrUpdateCaseColumnData parsing failed", ex);
-			showModal(ex.toString(), "更新欄位失敗");
+			showModal({
+				body: ex.toString(),
+				title: "更新欄位失敗",
+				size: "sm"
+			});
 		});
 	}
 }
@@ -1698,7 +1765,11 @@ var xhrSearchUsers = function(e) {
 		if (jsonObj.status == 1) {
 			showUserInfoByRAW(jsonObj.raw[jsonObj.data_count - 1]);
 		} else {
-			showModal("查無資料", "查詢使用者")
+			showModal({
+				body: "查無資料",
+				title: "查詢使用者",
+				size: "sm"
+			});
 		}
 	}).catch(function(ex) {
 		console.error("xhrSearchUsers parsing failed", ex);
@@ -1754,7 +1825,11 @@ var showUserInfoByRAW = function(tdoc_raw) {
 		+ "手機：" + tdoc_raw["AP_SEL"] + "<br />"
 		+ "到職：" + on_board_date + "<br />"
 		;
-	showModal(html, "使用者資訊");
+	showModal({
+		body: html,
+		title: "使用者資訊",
+		size: "sm"
+	});
 }
 
 var xhrQueryUserInfo = function(e) {
@@ -1809,13 +1884,21 @@ var xhrSendMessage = function(e) {
 
 	if(isEmpty(title) || isEmpty(content) || isEmpty(who)) {
 		console.warn("Require query params are empty, skip xhr querying. (" + title + ", " + content + ")");
-		showModal("<span class='text-danger'>標題或是內容為空白。</span>", "輸入錯誤");
+		showModal({
+			body: "<span class='text-danger'>標題或是內容為空白。</span>",
+			title: "輸入錯誤",
+			size: "sm"
+		});
 		return;
 	}
 
 	if (content.length > 1000) {
 		console.warn("Content should not exceed 1000 chars, skip xhr querying. (" + content.length + ")");
-		showModal("<span class='text-danger'>內容不能超過1000個字元。</span><p>" + content + "</p>", "內容錯誤");
+		showModal({
+			body: "<span class='text-danger'>內容不能超過1000個字元。</span><p>" + content + "</p>",
+			title: "內容錯誤",
+			size: "sm"
+		});
 		return;
 	}
 
@@ -1840,7 +1923,11 @@ var xhrSendMessage = function(e) {
 	}).then(function (jsonObj) {
 		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
 		var html = jsonObj.message;
-		showModal(html, "訊息送出結果");
+		showModal({
+			body: html,
+			title: "訊息送出結果",
+			size: "sm"
+		});
 		toggle(clicked_element);
 	}).catch(function(ex) {
 		console.error("xhrSendMessage parsing failed", ex);
