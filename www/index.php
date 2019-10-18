@@ -64,6 +64,9 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
           </div>
         </li>
       </ul>
+      <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
       <form id="search_form" class="form-inline my-2 my-lg-0" onsubmit="return false">
         <label class="text-white" for="date_input">日期：</label>
         <input id="date_input" class="date_picker form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" value="<?php echo RegCaseData::toDate($qday); ?>" readonly />
@@ -140,7 +143,7 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   <!-- Bootstrap core JavaScript
   ================================================== -->
   <!-- Placed at the end of the document so the pages load faster -->
-  <script src="assets/js/jquery-3.2.1.min.js"></script>
+  <script src="assets/js/jquery-3.4.1.min.js"></script>
   <!-- <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery.min.js"><\/script>')</script> -->
   <script src="assets/js/popper.min.js"></script>
   <script src="assets/js/bootstrap.min.js"></script>

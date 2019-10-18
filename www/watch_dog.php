@@ -147,7 +147,7 @@ blockquote img {
             字
             <input type="text" id="rm30_update_num" name="rm30_update_num" data-toggle='tooltip' data-content='請輸入案件號(最多6碼)' title='案件號' />號
 
-            <button id="rm30_update_query" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>取得案件資料</button>
+            <button id="rm30_update_query" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>查詢</button>
             <button id="rm30_update_quote_button">備註</button>
             <blockquote id="rm30_update_quote" class="hide">
               <ul>
@@ -327,7 +327,7 @@ blockquote img {
   <!-- Bootstrap core JavaScript
   ================================================== -->
   <!-- Placed at the end of the document so the pages load faster -->
-  <script src="assets/js/jquery-3.2.1.min.js"></script>
+  <script src="assets/js/jquery-3.4.1.min.js"></script>
   <!-- <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery.min.js"><\/script>')</script> -->
   <script src="assets/js/popper.min.js"></script>
   <script src="assets/js/bootstrap.min.js"></script>
