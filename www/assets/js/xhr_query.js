@@ -101,13 +101,13 @@ var showRegCaseDetail = function(jsonObj, use_modal) {
 			title: "登記案件詳情",
 			size: "lg"
 		});
+		// user info dialog event
+		addUserInfoEvent();
 	} else {
 		$("#query_display").html(html);
 		// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
 		$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
 		$(".reg_case_id").attr("title", "點我取得更多資訊！");
-		// user info dialog event
-		addUserInfoEvent();
 	}
 }
 
@@ -223,15 +223,12 @@ var xhrCallWatchDog = function(e) {
 	}).then(function(response) {
 		return response.json();
 	}).then(function(jsonObj) {
-		// normal success
-		if (jsonObj.status == 1) {
-			// do nothing
-		} else if (jsonObj.status == 0) {
-			showModal({
-				body: jsonObj.message,
-				title: "警告",
-				size: "sm"
-			});
+		// normal success jsonObj.status == 1
+		if (jsonObj.status != 1) {
+			console.error(jsonObj.message);
+			// stop interval timer
+			clearTimeout(window.pyliuChkTimer);
+			console.info("停止全域WATCHDOG定時器。");
 		}
 	}).catch(function(ex) {
 		console.error("xhrCallWatchDog parsing failed", ex);

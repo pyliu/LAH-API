@@ -6,6 +6,7 @@ abstract class STATUS_CODE {
 	const DEFAULT_FAIL = 0;
 	const UNSUPPORT_FAIL = -1;
     const FAIL_WITH_LOCAL_NO_RECORD = -2;
+    const FAIL_NOT_VALID_SERVER = -3;
 }
 
 define('ROOT_DIR', dirname(dirname(__FILE__)));
