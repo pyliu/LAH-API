@@ -94,7 +94,7 @@ function showModal(opts) {
 	}
     modal_element.find(".modal-title").html(title);
 	modal_element.find(".modal-body p").html(body);
-	modal_element.find(".modal-dialog").attr("className", "modal-dialog modal-"+size);
+	modal_element.find(".modal-dialog").attr("class", "modal-dialog modal-"+size);
 	if (isEmpty(opts.class)) {
 		modal_element.find(".modal-body").removeClass().addClass("modal-body");
 	} else {
