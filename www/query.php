@@ -469,7 +469,7 @@ fieldset fieldset legend {
       $(".user_tag").on("click", function(e) {
         var clicked_element = $(e.target);
         if (!clicked_element.hasClass("user_tag")) {
-          console.warn("clicked element doesn't have user_tag class ... find its closet parent");
+          console.warn("clicked element(" + clicked_element.prop("tagName") + ") doesn't have user_tag class ... find its closest parent");
           clicked_element = $(clicked_element.closest(".user_tag"));
         }
         var user_data = clicked_element.text().split(":");

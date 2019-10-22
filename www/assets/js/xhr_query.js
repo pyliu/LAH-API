@@ -1836,7 +1836,7 @@ var showUserInfoByRAW = function(tdoc_raw) {
 var xhrQueryUserInfo = function(e) {
 	var clicked_element = $(e.target);
 	if (!clicked_element.hasClass("user_tag")) {
-		console.warn("Clicked element doesn't have user_tag class ... find its parent");
+		console.warn("Clicked element(" + clicked_element.prop("tagName") + ") doesn't have user_tag class ... find its closest parent");
 		clicked_element = $(clicked_element.closest(".user_tag"));
 	}
 
