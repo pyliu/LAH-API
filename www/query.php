@@ -165,6 +165,7 @@ fieldset fieldset legend {
                 <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
                 <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
                 <option value="15_reg_land_stats.sql">某段之土地所有權人清冊資料</option>
+                <option value="18_cross_county_crsms.sql">全國跨縣市收件資料(108年)</option>
               </optgroup>
               <optgroup label="==== 地籍資料 ====" class="bg-success text-white">
                 <option value="txt_AI00301.sql">AI00301 - 土地標示部資料</option>
