@@ -2,14 +2,14 @@
 // 跨縣市主機
 const landhb_svr = "220.1.35.123";
 
-let trim = (text) => {
+let trim = text => {
 	if (isEmpty(text)) {
 		return "";
 	}
 	return text.replace(/[^a-zA-Z0-9]/g, "");
 }
 
-let isEmpty = (variable) => {
+let isEmpty = variable => {
 	if (variable === undefined || $.trim(variable) == "") {
 		return true;
 	}
@@ -74,7 +74,7 @@ let showPopper = (selector, content, timeout) => {
 	scrollToElement(selector);
 }
 
-let showModal = (opts) => {
+let showModal = opts => {
 	let body = opts.body;
 	let title = opts.title;
 	let size = opts.size;	// sm, md, lg
@@ -103,7 +103,7 @@ let closeModal = () => {
 	$("#bs_modal_template").modal("hide");
 }
 
-let toggle = (selector) => {
+let toggle = selector => {
 	var el = $(selector);
 	el.attr("disabled") ? el.attr("disabled", false) : el.attr("disabled", true);
 	// also find cover container (https://loading.io)
@@ -149,7 +149,7 @@ let toggle = (selector) => {
 	}
 }
 
-let scrollToElement = (element) => {
+let scrollToElement = element => {
 	var pos = $(element).offset().top - 120;
 	if (pos < 0) return;
 	$("html, body").animate({
@@ -157,7 +157,7 @@ let scrollToElement = (element) => {
 	}, 1000);
 }
 
-let setLoadingHTML = (selector) => {
+let setLoadingHTML = selector => {
 	$(selector).html('<span class="spinner-border spinner-border-md" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>');
 }
 
