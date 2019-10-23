@@ -336,26 +336,25 @@ fieldset fieldset legend {
       <strong>&copy; <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
     </p>
   </small>
-  <!-- Bootstrap core JavaScript
-  ================================================== -->
+  <!-- Bootstrap core JavaScript -->
   <!-- Placed at the end of the document so the pages load faster -->
   <script src="assets/js/jquery-3.4.1.min.js"></script>
-  <!-- <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery.min.js"><\/script>')</script> -->
   <script src="assets/js/popper.min.js"></script>
   <script src="assets/js/bootstrap.min.js"></script>
-  <script src="assets/js/vue.js"></script>
-  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-  <script src="assets/js/ie10-viewport-bug-workaround.js"></script>
-  <script src="assets/js/global.js"></script>
-  <!-- xhr js -->
-  <script src="assets/js/xhr_query.js"></script>
-  <!-- for mark highlight -->
-  <script src="assets/js/mark.jquery.min.js"></script>
-  <!-- cache reload -->
-  <script src="assets/js/cache.js"></script>
   <!-- bs datepicker -->
   <script src="assets/js/bootstrap-datepicker.min.js"></script>
   <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
+  <!-- Promise library -->
+  <script src="assets/js/polyfill.min.js"></script>
+  <!-- fetch library -->
+  <script src="assets/js/fetch.min.js"></script>
+
+  <script src="assets/js/vue.js"></script>
+  <script src="assets/js/global.js"></script>
+  <script src="assets/js/xhr_query.js"></script>
+  <script src="assets/js/cache.js"></script>
+  <script src="assets/js/mark.jquery.min.js"></script>
+
   <script type="text/javascript">
     // place this variable in global to use this int for condition jufgement, e.g. 108
     let this_year = <?php echo $this_year; ?>;

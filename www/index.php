@@ -136,29 +136,23 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
       <strong data-placement='bottom' data-toggle="tooltip" title="CLICK for SURPRISE!">&copy; <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
     </p>
   </small>
-
-  <!-- Bootstrap core JavaScript
-  ================================================== -->
+  <!-- Bootstrap core JavaScript -->
   <!-- Placed at the end of the document so the pages load faster -->
   <script src="assets/js/jquery-3.4.1.min.js"></script>
-  <!-- <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery.min.js"><\/script>')</script> -->
   <script src="assets/js/popper.min.js"></script>
   <script src="assets/js/bootstrap.min.js"></script>
-  <script src="assets/js/vue.js"></script>
-  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-  <script src="assets/js/ie10-viewport-bug-workaround.js"></script>
-  <!-- sorting by table header script -->
-  <script src="assets/js/table_sort.js"></script>
-  <!-- fixed table header -->
-  <script src="assets/js/fixed_header.js"></script>
-  <script src="assets/js/global.js"></script>
-  <!-- xhr js -->
-  <script src="assets/js/xhr_query.js"></script>
   <!-- bs datepicker -->
   <script src="assets/js/bootstrap-datepicker.min.js"></script>
   <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
-  <!-- load table content -->
+
+  <script src="assets/js/vue.js"></script>
+  <script src="assets/js/global.js"></script>
+  <script src="assets/js/xhr_query.js"></script>
+
+  <script src="assets/js/table_sort.js"></script>
+  <script src="assets/js/fixed_header.js"></script>
   <script src="assets/js/autoload.js"></script>
+
   <script type="text/javascript">
     $(document).ready(e => {
       // filter button
