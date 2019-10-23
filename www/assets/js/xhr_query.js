@@ -1,22 +1,22 @@
 //<![CDATA[
 
-var xhrGetCaseLatestNum = function(e) {
-	var code_select = $("#"+this.code_id);
-	var code_val = code_select.val();
+let xhrGetCaseLatestNum = e => {
+	let code_select = $("#"+this.code_id);
+	let code_val = code_select.val();
 	if (isEmpty(code_val)) {
 		return;
 	}
 	
-	var year = $("#"+this.year_id).val().replace(/\D/g, "");
-	var code = trim(code_val);
+	let year = $("#"+this.year_id).val().replace(/\D/g, "");
+	let code = trim(code_val);
 
-	var body = new FormData();
+	let body = new FormData();
 	body.append("type", "max");
 	body.append("year", year);
 	body.append("code", code);
 	
-	var display = $("#"+this.display_id);
-	var number = $("#"+this.number_id);
+	let display = $("#"+this.display_id);
+	let number = $("#"+this.number_id);
 
 	toggle(code_select);
 	toggle(number);
@@ -24,9 +24,9 @@ var xhrGetCaseLatestNum = function(e) {
 	fetch("query_json_api.php", {
 		method: "POST",
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		return response.json();
-	}).then(function(jsonObj) {
+	}).then(jsonObj => {
 		if (jsonObj.status == 1) {
 			display.html("目前 " + code_val + " 最新案件號為 " + jsonObj.max);
 			number.val(jsonObj.max);
@@ -37,21 +37,21 @@ var xhrGetCaseLatestNum = function(e) {
 		}
 		toggle(code_select);
 		toggle(number);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrGetCaseLatestNum parsing failed", ex);
 	  	display.html("<strong class='text-danger'>" + "查詢最大號碼失敗~【" + code_val + "】" + "</strong>");
 	});
 };
 
-var showRegCaseDetail = function(jsonObj, use_modal) {
-	var html = "<p>" + jsonObj.tr_html + "</p>";
+let showRegCaseDetail = (jsonObj, use_modal) => {
+	let html = "<p>" + jsonObj.tr_html + "</p>";
 	if (jsonObj.status == 0) {
 		html = "<strong class='text-danger'>" + jsonObj.message + "</strong>";
 	} else if (jsonObj.status == -1) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	} else {
-		var area = "其他(" + jsonObj.資料管轄所 + "區)";
-		var rm10 = jsonObj.raw.RM10 ? jsonObj.raw.RM10 : "XX";
+		let area = "其他(" + jsonObj.資料管轄所 + "區)";
+		let rm10 = jsonObj.raw.RM10 ? jsonObj.raw.RM10 : "XX";
 		switch (rm10) {
 			case "03":
 				area = "中壢區";
@@ -111,8 +111,8 @@ var showRegCaseDetail = function(jsonObj, use_modal) {
 	addUserInfoEvent();
 }
 
-var showPrcCaseDetail = function(jsonObj, use_modal) {
-	var html = "<p>" + jsonObj.html + "</p>";
+let showPrcCaseDetail = (jsonObj, use_modal) => {
+	let html = "<p>" + jsonObj.html + "</p>";
 	if (jsonObj.status == 0) {
 		html = "<strong class='text-danger'>" + jsonObj.message + "</strong>";
 	} else if (jsonObj.status == -1) {
@@ -130,41 +130,41 @@ var showPrcCaseDetail = function(jsonObj, use_modal) {
 	}
 }
 
-var xhrRegQueryCaseDialog = function(e) {
+let xhrRegQueryCaseDialog = e => {
 	// ajax event binding
-	var clicked_element = $(e.target);
+	let clicked_element = $(e.target);
 	// remove additional characters for querying
-	var id = trim(clicked_element.text());
+	let id = trim(clicked_element.text());
 
-	var body = new FormData();
+	let body = new FormData();
 	body.append("type", "reg_case");
 	body.append("id", id);
 
 	fetch("query_json_api.php", {
 		method: "POST",
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function(jsonObj) {
+	}).then(jsonObj => {
 		showRegCaseDetail(jsonObj, true);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrRegQueryCaseDialog parsing failed", ex);
 	});
 }
 
-var xhrRegQueryCase = function(e) {
+let xhrRegQueryCase = e => {
 	if (!validateCaseInput("#query_year", "#query_code", "#query_num", "#query_display")) {
 		return false;
 	}
-	var year = $("#query_year").val().replace(/\D/g, "");
-	var code = $("#query_code").val();
-	var number = $("#query_num").val().replace(/\D/g, "");
+	let year = $("#query_year").val().replace(/\D/g, "");
+	let code = $("#query_code").val();
+	let number = $("#query_num").val().replace(/\D/g, "");
 	// prepare post params
-	var id = trim(year + code + number);
-	var body = new FormData();
+	let id = trim(year + code + number);
+	let body = new FormData();
 	body.append("type", "reg_case");
 	body.append("id", id);
 	
@@ -174,27 +174,27 @@ var xhrRegQueryCase = function(e) {
 		method: "POST",
 		//headers: { "Content-Type": "application/json" },
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		return response.json();
-	}).then(function(jsonObj) {
+	}).then(jsonObj => {
 		showRegCaseDetail(jsonObj);
 		toggle(e.target);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrRegQueryCase parsing failed", ex);
 		$("#query_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
 	});
 }
 
-var xhrPrcQueryCase = function(e) {
+let xhrPrcQueryCase = e => {
 	if (!validateCaseInput("#query_year", "#query_code", "#query_num", "#query_display")) {
 		return false;
 	}
-	var year = $("#query_year").val().replace(/\D/g, "");
-	var code = $("#query_code").val();
-	var number = $("#query_num").val().replace(/\D/g, "");
+	let year = $("#query_year").val().replace(/\D/g, "");
+	let code = $("#query_code").val();
+	let number = $("#query_num").val().replace(/\D/g, "");
 	// prepare post params
-	var id = trim(year + code + number);
-	var body = new FormData();
+	let id = trim(year + code + number);
+	let body = new FormData();
 	body.append("type", "prc_case");
 	body.append("id", id);
 	
@@ -203,26 +203,26 @@ var xhrPrcQueryCase = function(e) {
 	fetch("query_json_api.php", {
 		method: "POST",
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		return response.json();
-	}).then(function(jsonObj) {
+	}).then(jsonObj => {
 		showPrcCaseDetail(jsonObj);
 		toggle(e.target);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrPrcQueryCase parsing failed", ex);
 		$("#query_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
 	});
 }
 
-var xhrCallWatchDog = function(e) {
-	var body = new FormData();
+let xhrCallWatchDog = e => {
+	let body = new FormData();
 	body.append("type", "watchdog");
 	fetch("query_json_api.php", {
 		method: "POST",
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		return response.json();
-	}).then(function(jsonObj) {
+	}).then(jsonObj => {
 		// normal success jsonObj.status == 1
 		if (jsonObj.status != 1) {
 			console.error(jsonObj.message);
@@ -230,26 +230,26 @@ var xhrCallWatchDog = function(e) {
 			clearTimeout(window.pyliuChkTimer);
 			console.info("停止全域WATCHDOG定時器。");
 		}
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrCallWatchDog parsing failed", ex);
 	});
 }
 
-var xhrCheckProblematicXCase = function(e) {
+let xhrCheckProblematicXCase = e => {
 	toggle(e.target);
 	
-	var body = new FormData();
+	let body = new FormData();
 	body.append("type", "x");
 
 	fetch("query_json_api.php", {
 		method: "POST",
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		return response.json();
-	}).then(function(jsonObj) {
+	}).then(jsonObj => {
 		if (jsonObj.status == 1) {
-			var html = "<div class='mt-1'><span class='rounded-circle bg-danger'> 　 </span> <strong class='text-info'>請查看並修正下列案件：</strong></div>";
-			for (var i = 0; i < jsonObj.data_count; i++) {
+			let html = "<div class='mt-1'><span class='rounded-circle bg-danger'> 　 </span> <strong class='text-info'>請查看並修正下列案件：</strong></div>";
+			for (let i = 0; i < jsonObj.data_count; i++) {
 				html += "<a href='javascript:void(0)' class='reg_case_id'>" + jsonObj.case_ids[i] + "</a> ";
 				html += "<button class='fix_xcase_button' data-id='" + jsonObj.case_ids[i] + "'>修正</button> ";
 				html += "<span id='" + jsonObj.case_ids[i] + "'></span> <br />";
@@ -258,21 +258,21 @@ var xhrCheckProblematicXCase = function(e) {
 			$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
 			$(".fix_xcase_button").on("click", xhrFixProblematicXCase);
 		} else if (jsonObj.status == 0) {
-			var now = new Date();
+			let now = new Date();
 			$("#cross_case_check_query_display").html("<div class='mt-1'><span class='rounded-circle bg-success'> 　 </span> 目前一切良好！【" + now.toLocaleString() + "】</div>");
 		}
 		toggle(e.target);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrCheckProblematicXCase parsing failed", ex);
 	  $("#cross_case_check_query_display").html("<strong class='text-danger'>XHR連線查詢有問題!!【" + ex + "】</strong>");
 	});
 };
 
-var xhrFixProblematicXCase = function(e) {
-	var id = trim($(e.target).data("id"));
+let xhrFixProblematicXCase = e => {
+	let id = trim($(e.target).data("id"));
 	console.log("The problematic xcase id: "+id);
 
-	var body = new FormData();
+	let body = new FormData();
 	body.append("type", "fix_xcase");
 	body.append("id", id);
 
@@ -281,19 +281,19 @@ var xhrFixProblematicXCase = function(e) {
 	fetch("query_json_api.php", {
 		method: "POST",
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function(jsonObj) {
-		var msg_span_id = "#" + id;
+	}).then(jsonObj => {
+		let msg_span_id = "#" + id;
 		if (jsonObj.status == 1) {
 			$(msg_span_id).html("<span class='text-success'>跨所註記修正完成!</span>");
 		} else {
 			$(msg_span_id).html("<span class='text-danger'>跨所註記修正失敗!</span>");
 		}
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrFixProblematicXCase parsing failed", ex);
 		$("#cross_case_check_query_display").html("<span class='text-danger'>" + ex + "</span>");
 	});
@@ -301,27 +301,27 @@ var xhrFixProblematicXCase = function(e) {
 
 }
 
-var xhrGetSectionRALIDCount = function(e) {
-	var el = $(e.target);
+let xhrGetSectionRALIDCount = e => {
+	let el = $(e.target);
 	toggle(el);
-	var text = $("#data_query_text").val();
-	var xhr = $.ajax({
+	let text = $("#data_query_text").val();
+	let xhr = $.ajax({
 		url: "query_json_api.php",
 		data: "type=ralid&text="+text,
 		method: "POST",
 		dataType: "json",
-		success: function(jsonObj) {
+		success: jsonObj => {
 			toggle(el);
-			var count = jsonObj.data_count;
-			var html = "";
-			for (var i=0; i<count; i++) {
+			let count = jsonObj.data_count;
+			let html = "";
+			for (let i=0; i<count; i++) {
 				if (isNaN(jsonObj.raw[i]["段代碼"])) {
 					continue;
 				}
-				var this_count = parseInt(jsonObj.raw[i]["土地標示部筆數"]);
+				let this_count = parseInt(jsonObj.raw[i]["土地標示部筆數"]);
 				this_count = this_count < 1000 ? 1000 : this_count;
-				var blow = jsonObj.raw[i]["土地標示部筆數"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-				var size = 0, size_o = 0;
+				let blow = jsonObj.raw[i]["土地標示部筆數"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+				let size = 0, size_o = 0;
 				if (jsonObj.raw[i]["面積"]) {
 					size = jsonObj.raw[i]["面積"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 					size_o = (jsonObj.raw[i]["面積"] * 3025 / 10000).toFixed(2);
@@ -331,7 +331,7 @@ var xhrGetSectionRALIDCount = function(e) {
 			}
 			$("#data_query_result").html(html);
 		},
-		error: function(obj) {
+		error: obj => {
 			toggle(el);
 		}
 	});
@@ -340,25 +340,25 @@ var xhrGetSectionRALIDCount = function(e) {
 /*
 	行政課來文查詢某統編是否有申請案件 ....
 */
-var xhrGetCasesByID = function(e) {
-	var el = $(e.target);
+let xhrGetCasesByID = e => {
+	let el = $(e.target);
 	toggle(".id_query_grp");
-	var text = $("#id_query_text").val();
+	let text = $("#id_query_text").val();
 
-	var finish_count = 0;
+	let finish_count = 0;
 
-	var xhr_crsms = $.ajax({
+	let xhr_crsms = $.ajax({
 		url: "query_json_api.php",
 		data: "type=crsms&id="+text,
 		method: "POST",
 		dataType: "json",
-		success: function(jsonObj) {
-			var count = jsonObj.data_count;
+		success: jsonObj => {
+			let count = jsonObj.data_count;
 			if (count == 0) {
 				$("#id_query_crsms_result").html("本所登記案件資料庫查無統編「"+text+"」收件資料。");
 			} else {
-				var html = "<p>登記案件：";
-				for (var i=0; i<count; i++) {
+				let html = "<p>登記案件：";
+				for (let i=0; i<count; i++) {
 					html += "<div class='reg_case_id'>" + jsonObj.raw[i]["RM01"] + "-" + jsonObj.raw[i]["RM02"]  + "-" + jsonObj.raw[i]["RM03"] + "</div>";
 				}
 				html += "</p>";
@@ -372,25 +372,25 @@ var xhrGetCasesByID = function(e) {
 				toggle(".id_query_grp");
 			}
 		},
-		error: function(obj) {
+		error: obj => {
 			finish_count++;
 			if (finish_count >= 2) {
 				toggle(".id_query_grp");
 			}
 		}
 	});
-	var xhr_cmsms = $.ajax({
+	let xhr_cmsms = $.ajax({
 		url: "query_json_api.php",
 		data: "type=cmsms&id="+text,
 		method: "POST",
 		dataType: "json",
-		success: function(jsonObj) {
-			var count = jsonObj.data_count;
+		success: jsonObj => {
+			let count = jsonObj.data_count;
 			if (count == 0) {
 				$("#id_query_cmsms_result").html("本所測量案件資料庫查無統編「"+text+"」收件資料。");
 			} else {
-				var html = "<p>測量案件：";
-				for (var i=0; i<count; i++) {
+				let html = "<p>測量案件：";
+				for (let i=0; i<count; i++) {
 					html += "<div>" + jsonObj.raw[i]["MM01"] + "-" + jsonObj.raw[i]["MM02"]  + "-" + jsonObj.raw[i]["MM03"] + "</div>";
 				}
 				html += "</p>";
@@ -401,7 +401,7 @@ var xhrGetCasesByID = function(e) {
 				toggle(".id_query_grp");
 			}
 		},
-		error: function(obj) {
+		error: obj => {
 			finish_count++;
 			if (finish_count >= 2) {
 				toggle(".id_query_grp");
@@ -410,8 +410,8 @@ var xhrGetCasesByID = function(e) {
 	});
 }
 
-var getEasycardPaymentStatus = function(code) {
-	var status = "未知的狀態碼【" + code + "】";
+let getEasycardPaymentStatus = code => {
+	let status = "未知的狀態碼【" + code + "】";
 	/*
 		1：扣款成功
 		2：扣款失敗
@@ -441,13 +441,13 @@ var getEasycardPaymentStatus = function(code) {
 	return status;
 }
 
-var xhrFixEasycardPayment = function(qday, pc_number, amount, btn_id) {
-	var message = "確定要修正 日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料?";
+let xhrFixEasycardPayment = (qday, pc_number, amount, btn_id) => {
+	let message = "確定要修正 日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料?";
 	if (confirm(message)) {
-		var el = $("#"+btn_id);
+		let el = $("#"+btn_id);
 		toggle(el);
 
-		var body = new FormData();
+		let body = new FormData();
 		body.append("type", "fix_easycard");
 		body.append("qday", qday);
 		body.append("pc_num", pc_number);
@@ -455,12 +455,12 @@ var xhrFixEasycardPayment = function(qday, pc_number, amount, btn_id) {
 		fetch("query_json_api.php", {
 			method: "POST",
 			body: body
-		}).then(function(response) {
+		}).then(response => {
 			if (response.status != 200) {
 				throw new Error("XHR連線異常，回應非200");
 			}
 			return response.json();
-		}).then(function(jsonObj) {
+		}).then(jsonObj => {
 			if (jsonObj.status == 1) {
 				alert("日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料修正成功!");
 				// 移除BTN及該筆
@@ -469,16 +469,16 @@ var xhrFixEasycardPayment = function(qday, pc_number, amount, btn_id) {
 			} else {
 				throw new Error("回傳狀態碼不正確!【" + jsonObj.message + "】");
 			}
-		}).catch(function(ex) {
+		}).catch(ex => {
 			console.error("xhrFixEasycardPayment parsing failed", ex);
 		});
 	}
 }
 
-var xhrEasycardPaymentQuery = function(e) {
+let xhrEasycardPaymentQuery = e => {
 	// basic checking for tw date input
-	var regex = /^\d{7}$/;
-	var txt = $("#easycard_query_day").val();
+	let regex = /^\d{7}$/;
+	let txt = $("#easycard_query_day").val();
 	if (!isEmpty(txt) && txt.match(regex) == null) {
 		showPopper("#easycard_query_day");
 		return;
@@ -486,24 +486,24 @@ var xhrEasycardPaymentQuery = function(e) {
 
 	toggle(".easycard_query");
 
-	var body = new FormData();
+	let body = new FormData();
 	body.append("type", "easycard");
 	body.append("qday", txt);
 
 	fetch("query_json_api.php", {
 		method: "POST",
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function(jsonObj) {
+	}).then(jsonObj => {
 		if (jsonObj.status == 0) {
 			$("#easycard_query_display").html("<span class='rounded-circle bg-success'> 　 </span> " + jsonObj.message);
 		} else {
-			var html = "<div><span class='rounded-circle bg-warning'> 　 </span> <strong class='text-danger'>找到下列資料：</strong></div>";
-			for (var i = 0; i < jsonObj.data_count; i++) {
+			let html = "<div><span class='rounded-circle bg-warning'> 　 </span> <strong class='text-danger'>找到下列資料：</strong></div>";
+			for (let i = 0; i < jsonObj.data_count; i++) {
 				html += "<div class='easycard_item'>日期: " + jsonObj.raw[i]["AA01"]
 					 + ", 電腦給號: " + jsonObj.raw[i]["AA04"]
 					 + ", 實收金額: " + jsonObj.raw[i]["AA28"]
@@ -519,14 +519,14 @@ var xhrEasycardPaymentQuery = function(e) {
 			$("#easycard_query_display").html(html);
 		}
 		toggle(".easycard_query");
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrEasycardPaymentQuery parsing failed", ex);
 		$("#easycard_query_display").html("<strong class='text-danger'>XHR連線查詢有問題!!【" + ex + "】</strong>");
 	});
 }
 
-var xhrGetExpacItems = function(e) {
-	var number = $("#expac_query_number").val().replace(/\D/g, "");
+let xhrGetExpacItems = e => {
+	let number = $("#expac_query_number").val().replace(/\D/g, "");
 	// only allow number
 	if (isEmpty(number) || isNaN(number)) {
 		showPopper("#expac_query_number");
@@ -534,12 +534,12 @@ var xhrGetExpacItems = function(e) {
 	}
 
 	// make total pc number length is 7
-	var offset = 7 - number.length;
+	let offset = 7 - number.length;
 	if (offset < 0) {
 		showPopper("#expac_query_number");
 		return;
 	} else if (offset > 0) {
-		for (var i = 0; i < offset; i++) {
+		for (let i = 0; i < offset; i++) {
 			number = "0" + number;
 		}
 	}
@@ -549,7 +549,7 @@ var xhrGetExpacItems = function(e) {
 	// should be the query button (#expac_query_button)
 	toggle("#expac_query_button");
 
-	var body = new FormData();
+	let body = new FormData();
 	body.append("type", "expac");
 	body.append("year", $("#expac_query_year").val());
 	body.append("num", number);
@@ -557,17 +557,17 @@ var xhrGetExpacItems = function(e) {
 	fetch("query_json_api.php", {
 		method: "POST",
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function(jsonObj) {
+	}).then(jsonObj => {
 		if (jsonObj.status == 0) {
 			$("#expac_query_display").html("找不到規費收費項目資料！【電腦給號：" + number + "】");
 		} else {
-			var html = "<div><strong class='text-danger'>找到下列資料：</strong></div>";
-			for (var i = 0; i < jsonObj.data_count; i++) {
+			let html = "<div><strong class='text-danger'>找到下列資料：</strong></div>";
+			for (let i = 0; i < jsonObj.data_count; i++) {
 				html += "<div class='expac_item'>"
 					 + "<a href='javascript:void(0)' class='query_case_dialog'>" + jsonObj.raw[i]["AC16"] + "-" + jsonObj.raw[i]["AC17"] + "-" + jsonObj.raw[i]["AC18"] + "</a>"
 					 + " 規費年度: " + jsonObj.raw[i]["AC25"]
@@ -583,14 +583,14 @@ var xhrGetExpacItems = function(e) {
 			$(".query_case_dialog").on("click", xhrRegQueryCaseDialog);
 		}
 		toggle("#expac_query_button");
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrGetExpacItems parsing failed", ex);
 		toggle("#expac_query_button");
 		$("#expac_query_display").html("<strong class='text-danger'>XHR連線查詢有問題!!【" + ex + "】</strong>");
 	});
 }
 
-var getExpacItemOptions = function(selected_ac20) {
+let getExpacItemOptions = selected_ac20 => {
 	return  "<option " + (selected_ac20 == "01" ? "selected" : "") + " value='01'>【01】土地法65條登記費</option>"
 			+ "<option " + (selected_ac20 == "02" ? "selected" : "") + " value='02'>【02】土地法76條登記費</option>"
 			+ "<option " + (selected_ac20 == "03" ? "selected" : "") + " value='03'>【03】土地法67條書狀費</option>"
@@ -617,10 +617,10 @@ var getExpacItemOptions = function(selected_ac20) {
 			+ "<option " + (selected_ac20 == "41" ? "selected" : "") + " value='41'>【41】108年度登記罰鍰</option>";
 }
 
-var xhrModifyExpacItem = function(year_ac25, num_ac04, now_code_ac20, amount_ac30, select_id) {
-	var this_select = $("#" + select_id);
+let xhrModifyExpacItem = (year_ac25, num_ac04, now_code_ac20, amount_ac30, select_id) => {
+	let this_select = $("#" + select_id);
 	if (this_select && this_select.val() != now_code_ac20) {
-		var body = new FormData();
+		let body = new FormData();
 		body.append("type", "mod_expac");
 		body.append("year", year_ac25);
 		body.append("num", num_ac04);
@@ -632,57 +632,57 @@ var xhrModifyExpacItem = function(year_ac25, num_ac04, now_code_ac20, amount_ac3
 		fetch("query_json_api.php", {
 			method: "POST",
 			body: body
-		}).then(function(response) {
+		}).then(response => {
 			if (response.status != 200) {
 				throw new Error("XHR連線異常，回應非200");
 			}
 			return response.json();
-		}).then(function(jsonObj) {
+		}).then(jsonObj => {
 			if (jsonObj.status == 1) {
 				$("#" + select_id + "_msg").html("<span class='text-success'>修改完成!</span>");
 			} else {
 				$("#" + select_id + "_msg").html("<span class='text-danger'>修改失敗!</span>");
 			}
-		}).catch(function(ex) {
+		}).catch(ex => {
 			console.error("xhrGetExpacItems parsing failed", ex);
 			$("#" + select_id + "_msg").html("<span class='text-danger'>" + ex + "</span>");
 		});
 	}
 }
 
-var xhrCompareXCase = function(e) {
+let xhrCompareXCase = e => {
 	if (!validateCaseInput("#sync_x_case_year", "#sync_x_case_code", "#sync_x_case_num", "#sync_x_case_display")) {
 		return false;
 	}
 	
-	var year = $("#sync_x_case_year").val().replace(/\D/g, "");
-	var code = trim($("#sync_x_case_code").val());
-	var number = $("#sync_x_case_num").val().replace(/\D/g, "");
+	let year = $("#sync_x_case_year").val().replace(/\D/g, "");
+	let code = trim($("#sync_x_case_code").val());
+	let number = $("#sync_x_case_num").val().replace(/\D/g, "");
 	
 	// toggle button disable attr
 	toggle("#sync_x_case_button");
 
 	// prepare post params
-	var id = trim(year + code + number);
-	var body = new FormData();
+	let id = trim(year + code + number);
+	let body = new FormData();
 	body.append("type", "diff_xcase");
 	body.append("id", id);
 
 	fetch("query_json_api.php", {
 		method: "POST",
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function(jsonObj) {
-		var html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + year + "-" + code + "-" + number + "</a><div>";
+	}).then(jsonObj => {
+		let html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + year + "-" + code + "-" + number + "</a><div>";
 		if (jsonObj.status == 1) {
 			html += "<span class='rounded-circle bg-warning'> 　 </span> 請參考下列資訊： <button id='sync_x_case_confirm_button'>同步全部資料</button>";
 			html += "<table border='1' class='table-hover text-center mt-1'>";
 			html += "<tr><th>欄位名稱</th><th>欄位代碼</th><th>局端</th><th>本所</th><th>同步按鈕</th></tr>";
-			for (var key in jsonObj.raw) {
+			for (let key in jsonObj.raw) {
 				html += "<tr>";
 				html += "<td>" + jsonObj.raw[key]["TEXT"] + "</td>";
 				html += "<td>" + jsonObj.raw[key]["COLUMN"] + "</td>";
@@ -705,115 +705,115 @@ var xhrCompareXCase = function(e) {
 		}
 		$("#sync_x_case_serial").on("click", xhrRegQueryCaseDialog);
 		toggle("#sync_x_case_button");
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrCompareXCase parsing failed", ex);
 		$("#sync_x_case_display").html("<span class='text-danger'>" + ex + "</span>");
 	});
 }
 
-var xhrInsertXCase = function(e) {
+let xhrInsertXCase = e => {
 	if (confirm("確定要拉回局端資料新增於本所資料庫(CRSMS)？")) {
 		// this binded as case id
-		var id = this;
-		var body = new FormData();
+		let id = this;
+		let body = new FormData();
 		body.append("type", "inst_xcase");
 		body.append("id", id);
 		$("#inst_x_case_confirm_button").remove();
 		fetch("query_json_api.php", {
 			method: "POST",
 			body: body
-		}).then(function(response) {
+		}).then(response => {
 			if (response.status != 200) {
 				throw new Error("XHR連線異常，回應非200");
 			}
 			return response.json();
-		}).then(function(jsonObj) {
+		}).then(jsonObj => {
 			if (jsonObj.status == 1) {
 				$("#sync_x_case_display").html("<span class='text-success'>" + id + " 新增成功！</span>");
 			} else {
 				$("#sync_x_case_display").html("<span class='text-danger'>" + jsonObj.message + "</span>");
 			}
-		}).catch(function(ex) {
+		}).catch(ex => {
 			console.error("xhrInsertXCase parsing failed", ex);
 			$("#sync_x_case_display").html("<span class='text-danger'>" + ex + "</span>");
 		});
 	}
 }
 
-var xhrSyncXCase = function(e) {
+let xhrSyncXCase = e => {
 	if (confirm("確定要拉回局端資料覆蓋本所資料庫？")) {
 		// this binded as case id
-		var id = this;
-		var body = new FormData();
+		let id = this;
+		let body = new FormData();
 		body.append("type", "sync_xcase");
 		body.append("id", id);
 		$("#sync_x_case_confirm_button").remove();
 		fetch("query_json_api.php", {
 			method: "POST",
 			body: body
-		}).then(function(response) {
+		}).then(response => {
 			if (response.status != 200) {
 				throw new Error("XHR連線異常，回應非200");
 			}
 			return response.json();
-		}).then(function(jsonObj) {
+		}).then(jsonObj => {
 			if (jsonObj.status == 1) {
 				$("#sync_x_case_display").html("<span class='text-success'>" + id + " 同步成功！</span>");
 			} else {
 				$("#sync_x_case_display").html("<span class='text-danger'>" + jsonObj.message + "</span>");
 			}
-		}).catch(function(ex) {
+		}).catch(ex => {
 			console.error("xhrSyncXCase parsing failed", ex);
 			$("#sync_x_case_display").html("<span class='text-danger'>" + ex + "</span>");
 		});
 	}
 }
 
-var xhrSyncXCaseColumn = function(e) {
-	var the_btn = $(e.target);
+let xhrSyncXCaseColumn = e => {
+	let the_btn = $(e.target);
 	if (confirm("確定要同步" + the_btn.attr("data-column") + "？")) {
 		// this binded as case id
-		var id = this;
-		var body = new FormData();
+		let id = this;
+		let body = new FormData();
 		body.append("type", "sync_xcase_column");
 		body.append("id", id);
 		body.append("column", the_btn.attr("data-column"));
 		
-		var td = the_btn.parent();
+		let td = the_btn.parent();
 		the_btn.remove();
 
 		fetch("query_json_api.php", {
 			method: "POST",
 			body: body
-		}).then(function(response) {
+		}).then(response => {
 			if (response.status != 200) {
 				throw new Error("XHR連線異常，回應非200");
 			}
 			return response.json();
-		}).then(function(jsonObj) {
+		}).then(jsonObj => {
 			if (jsonObj.status == 1) {
 				td.html("<span class='text-success'>" + the_btn.attr("data-column") + " 同步成功！</span>");
 			} else {
 				td.html("<span class='text-danger'>" + jsonObj.message + "</span>");
 			}
 
-		}).catch(function(ex) {
+		}).catch(ex => {
 			console.error("xhrSyncXCaseColumn parsing failed", ex);
 			td.html("<span class='text-danger'>" + ex + "</span>");
 		});
 	}
 }
 
-var xhrGetExpaaData = function(e) {
+let xhrGetExpaaData = e => {
 	// basic checking for tw date input
-	var regex = /^\d{7}$/;
-	var txt = $("#expaa_query_date").val();
+	let regex = /^\d{7}$/;
+	let txt = $("#expaa_query_date").val();
 	if (txt.match(regex) == null) {
 		showPopper("#expaa_query_date");
 		return;
 	}
 	
-	var number = $.trim($("#expaa_query_number").val().replace(/\D/g, ""));
+	let number = $.trim($("#expaa_query_number").val().replace(/\D/g, ""));
 	if (!isEmpty(number)) {
 		// basic checking for number input
 		if (isNaN(number)) {
@@ -822,12 +822,12 @@ var xhrGetExpaaData = function(e) {
 		}
 
 		// make total number length is 7
-		var offset = 7 - number.length;
+		let offset = 7 - number.length;
 		if (offset < 0) {
 			showPopper("#expaa_query_number");
 			return;
 		} else if (offset > 0) {
-			for (var i = 0; i < offset; i++) {
+			for (let i = 0; i < offset; i++) {
 				number = "0" + number;
 			}
 		}
@@ -836,7 +836,7 @@ var xhrGetExpaaData = function(e) {
 
 	toggle("[id*=expaa_query_]");
 
-	var body = new FormData();
+	let body = new FormData();
 	body.append("type", "expaa");
 	body.append("qday", txt);
 	body.append("num", number);
@@ -844,17 +844,17 @@ var xhrGetExpaaData = function(e) {
 	fetch("query_json_api.php", {
 		method: "POST",
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function(jsonObj) {
+	}).then(jsonObj => {
 		// only has one record
 		if (jsonObj.status == 1) {
-			var html = "<div class='text-info'>規費資料：</div>";
+			let html = "<div class='text-info'>規費資料：</div>";
 			html += "<ul>";
-			for (var key in jsonObj.raw) {
+			for (let key in jsonObj.raw) {
 				html += "<li>";
 				html += key + "：";
 				if (key == "列印註記") {
@@ -897,7 +897,7 @@ var xhrGetExpaaData = function(e) {
 			}));
 		} else if (jsonObj.status == 2) {
 			// has many records
-			var html = "<div>" 
+			let html = "<div>" 
 					+ "<span class='block-secondary'>現金</span> "
 					+ "<span class='block-primary'>悠遊卡</span> "
 					+ "<span class='block-warning'>信用卡</span> "
@@ -905,7 +905,7 @@ var xhrGetExpaaData = function(e) {
 					+ "<span class='block-dark'>其他方式</span> "
 					+ "</div>";
 			html += "<div class='text-success'>" + jsonObj.message + "</div>";
-			for (var i = 0; i < jsonObj.data_count; i++) {
+			for (let i = 0; i < jsonObj.data_count; i++) {
 				html += "<a href='javascript:void(0)' class='float-left mr-2 mb-2 expaa_a_aa04 "
 					+ getAA04DisplayCss(jsonObj.raw[i])
 					+ " "
@@ -917,8 +917,8 @@ var xhrGetExpaaData = function(e) {
 					+ "</a>";
 			}
 			$("#expaa_query_display").html(html);
-			$("a.expaa_a_aa04").on("click", function(e) {
-				var pc_num = $(e.target).text();
+			$("a.expaa_a_aa04").on("click", e => {
+				let pc_num = $(e.target).text();
 				$("#expaa_query_number").val(pc_num);
 				$("#expac_query_number").val(pc_num);
 				xhrGetExpaaData.call(null, [e]);
@@ -928,14 +928,14 @@ var xhrGetExpaaData = function(e) {
 			$("#expaa_query_display").html("<span class='text-danger'>" + jsonObj.message.replace(", ", "") + "</span>");
 		}
 		toggle("[id*=expaa_query_]");
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrGetExpaaData parsing failed", ex);
 		$("#expaa_query_display").html("<span class='text-danger'>" + ex + "</span>");
 	});
 }
 
-var getAA04DisplayCss = function(row) {
-	var css = "block-dark";
+let getAA04DisplayCss = row => {
+	let css = "block-dark";
 	switch (row["AA100"]) {
 		case "01":	// 現金
 			css = "block-secondary";
@@ -962,8 +962,8 @@ var getAA04DisplayCss = function(row) {
 	return css;
 }
 
-var getExpaaTooltip = function(row) {
-	var title = row["AA09"] == 1 ? "規費收據已印" : "規費收據未印";
+let getExpaaTooltip = row => {
+	let title = row["AA09"] == 1 ? "規費收據已印" : "規費收據未印";
 	switch (row["AA100"]) {
 		case "01":
 			title += ", 現金";
@@ -1000,7 +1000,7 @@ var getExpaaTooltip = function(row) {
 	return title;
 }
 
-var getExpaaAA100Options = function(selected_aa100) {
+let getExpaaAA100Options = selected_aa100 => {
 	return  "<option " + (selected_aa100 == "01" ? "selected" : "") + " value='01'>【01】現金</option>"
 			+ "<option " + (selected_aa100 == "02" ? "selected" : "") + " value='02'>【02】支票</option>"
 			+ "<option " + (selected_aa100 == "03" ? "selected" : "") + " value='03'>【03】匯票</option>"
@@ -1012,10 +1012,10 @@ var getExpaaAA100Options = function(selected_aa100) {
 			+ "<option " + (selected_aa100 == "09" ? "selected" : "") + " value='09'>【09】行動支付</option>";
 }
 
-var xhrUpdateExpaaAA09 = function(e) {
+let xhrUpdateExpaaAA09 = e => {
 	if (confirm("確定要修改列印註記？")) {
-		var bindObj = this;
-		var body = new FormData();
+		let bindObj = this;
+		let body = new FormData();
 		body.append("type", "expaa_AA09_update");
 		body.append("date", bindObj.date);
 		body.append("number", bindObj.number);
@@ -1026,21 +1026,21 @@ var xhrUpdateExpaaAA09 = function(e) {
 		fetch("query_json_api.php", {
 			method: "POST",
 			body: body
-		}).then(function(response) {
+		}).then(response => {
 			if (response.status != 200) {
 				throw new Error("XHR連線異常，回應非200");
 			}
 			return response.json();
-		}).then(function(jsonObj) {
+		}).then(jsonObj => {
 			$("#exapp_print_status").html("<span class='text-" + ((jsonObj.status == 1) ? "success" : "danger") + "'>" + jsonObj.message + "</span>");
 		});
 	}
 }
 
-var xhrUpdateExpaaAA100 = function(e) {
+let xhrUpdateExpaaAA100 = e => {
 	if (confirm("確定要規費付款方式？")) {
-		var bindObj = this;
-		var body = new FormData();
+		let bindObj = this;
+		let body = new FormData();
 		body.append("type", "expaa_AA100_update");
 		body.append("date", bindObj.date);
 		body.append("number", bindObj.number);
@@ -1051,19 +1051,19 @@ var xhrUpdateExpaaAA100 = function(e) {
 		fetch("query_json_api.php", {
 			method: "POST",
 			body: body
-		}).then(function(response) {
+		}).then(response => {
 			if (response.status != 200) {
 				throw new Error("XHR連線異常，回應非200");
 			}
 			return response.json();
-		}).then(function(jsonObj) {
+		}).then(jsonObj => {
 			$("#exapp_method_status").html("<span class='text-" + ((jsonObj.status == 1) ? "success" : "danger") + "'>" + jsonObj.message + "</span>");
 		});
 	}
 }
 
-var xhrLoadSQL = function(e) {
-	var val = $("#preload_sql_select").val();
+let xhrLoadSQL = e => {
+	let val = $("#preload_sql_select").val();
 
 	if (isEmpty(val)) {
 		$("#sql_csv_text").val("");
@@ -1072,55 +1072,55 @@ var xhrLoadSQL = function(e) {
 
 	toggle(e.target);
 
-	var body = new FormData();
+	let body = new FormData();
 	body.append("type", "load_select_sql");
 	body.append("file_name", val);
 	fetch("load_file_api.php", {
 		method: 'POST',
 			body: body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function (jsonObj) {
+	}).then(jsonObj => {
 		if (jsonObj.status == 1) {
 			$("#sql_csv_text").val(jsonObj.data);
 			toggle(e.target);
 		} else {
 			throw new Error("讀取異常，jsonObj.status非為1");
 		}
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrLoadSQL parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 };
 
-var xhrExportSQLCsv = function(e) {
-	var body = new FormData();
+let xhrExportSQLCsv = e => {
+	let body = new FormData();
 	body.append("type", "file_sql_csv");
 	xhrExportSQLReport(e, body);
 };
 
-var xhrExportSQLTxt = function(e) {
-	var body = new FormData();
+let xhrExportSQLTxt = e => {
+	let body = new FormData();
 	body.append("type", "file_sql_txt");
 	xhrExportSQLReport(e, body);
 };
 
-var xhrExportSQLReport = function(e, form_body) {
-	var text = $("#preload_sql_select option:selected").text();
+let xhrExportSQLReport = (e, form_body) => {
+	let text = $("#preload_sql_select option:selected").text();
 	form_body.append("sql", $("#sql_csv_text").val());
 	toggle(e.target);
 	fetch("export_file_api.php", {
 		method: 'POST',
 		body: form_body
-	}).then(function(response) {
+	}).then(response => {
 		return response.blob();
-	}).then(function (blob) {
-		var d = new Date();
-		var url = window.URL.createObjectURL(blob);
-		var a = document.createElement('a');
+	}).then(blob => {
+		let d = new Date();
+		let url = window.URL.createObjectURL(blob);
+		let a = document.createElement('a');
 		a.href = url;
 		a.download = text + (form_body.get("type") == "file_sql_txt" ? ".txt" : ".csv");
 		document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
@@ -1129,27 +1129,27 @@ var xhrExportSQLReport = function(e, form_body) {
 		// release object in memory
 		window.URL.revokeObjectURL(url);
 		toggle(e.target);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrExportSQLReport parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 };
 
-var xhrExportLog = function(e) {
-	var date = $("#log_date_text").val();
-	var form_body = new FormData();
+let xhrExportLog = e => {
+	let date = $("#log_date_text").val();
+	let form_body = new FormData();
 	form_body.append("type", "file_log");
 	form_body.append("date", date);
 	toggle(e.target);
 	fetch("export_file_api.php", {
 		method: 'POST',
 		body: form_body
-	}).then(function(response) {
+	}).then(response => {
 		return response.blob();
-	}).then(function (blob) {
-		var d = new Date();
-		var url = window.URL.createObjectURL(blob);
-		var a = document.createElement('a');
+	}).then(blob => {
+		let d = new Date();
+		let url = window.URL.createObjectURL(blob);
+		let a = document.createElement('a');
 		a.href = url;
 		a.download = date + ".log";
 		document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
@@ -1158,25 +1158,25 @@ var xhrExportLog = function(e) {
 		// release object in memory
 		window.URL.revokeObjectURL(url);
 		toggle(e.target);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrExportLog parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 };
 
-var xhrZipLog = function(e) {
-	var form_body = new FormData();
+let xhrZipLog = e => {
+	let form_body = new FormData();
 	form_body.append("type", "zip_log");
 	toggle(e.target);
 	fetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function (jsonObj) {
+	}).then(jsonObj => {
 		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
 		showModal({
 			body: "<strong class='text-success'>壓縮完成</strong>",
@@ -1184,41 +1184,41 @@ var xhrZipLog = function(e) {
 			size: "sm"
 		});
 		toggle(e.target);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrZipLog parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 }
 
-var xhrQueryAnnouncementData = function(e) {
-	var form_body = new FormData();
+let xhrQueryAnnouncementData = e => {
+	let form_body = new FormData();
 	form_body.append("type", "announcement_data");
 	fetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function (jsonObj) {
+	}).then(jsonObj => {
 		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
-		var count = jsonObj.data_count;
+		let count = jsonObj.data_count;
 		// 組合選單介面
-		var html = "公告項目：<select id='prereg_announcement_select' class='mt-1 no-cache'><option value=''>======= 請選擇登記原因 =======</option>";
-		for (var i=0; i<count; i++) {
+		let html = "公告項目：<select id='prereg_announcement_select' class='mt-1 no-cache'><option value=''>======= 請選擇登記原因 =======</option>";
+		for (let i=0; i<count; i++) {
 			html += "<option value='" + jsonObj.raw[i]["RA01"] + "," + jsonObj.raw[i]["KCNT"] + "," + jsonObj.raw[i]["RA02"] + "," + jsonObj.raw[i]["RA03"] + "'>" + jsonObj.raw[i]["RA01"] + "：" + jsonObj.raw[i]["KCNT"] + "【" + jsonObj.raw[i]["RA02"] + "天, " + jsonObj.raw[i]["RA03"] + "】</option>";
 		}
 		html += "</select> <div id='prereg_update_ui' class='mt-1'></div>";
 		$("#prereg_query_display").html(html);
-		$("#prereg_announcement_select").on("change", function(e) {
+		$("#prereg_announcement_select").on("change", e => {
 			$("#prereg_update_ui").empty();
-			var csv = $("#prereg_announcement_select option:selected").val();
+			let csv = $("#prereg_announcement_select option:selected").val();
 			if (isEmpty(csv)) {
 				return;
 			}
-			var data = csv.split(",");
-			var html = "登記代碼：" + data[0] + "<br />" +
+			let data = csv.split(",");
+			let html = "登記代碼：" + data[0] + "<br />" +
 					   "登記原因：" + data[1] + "<br />";
 				html += "公告天數：<select id='ann_day_" + data[0] + "' class='no-cache'><option>15</option><option>30</option><option>45</option><option>60</option><option>75</option><option>90</option></select><br />";
 				html += "先行准登：<select id='ann_reg_flag_" + data[0] + "' class='no-cache'><option>N</option><option>Y</option></select><br />";
@@ -1228,16 +1228,16 @@ var xhrQueryAnnouncementData = function(e) {
 			$("#ann_reg_flag_" + data[0]).val(data[3]);
 			$("#ann_upd_btn_" + data[0]).on("click", xhrUpdateAnnouncementData.bind(data));
 		});
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrQueryAnnouncementData parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 };
 
-var xhrUpdateAnnouncementData = function(e) {
-	var reason_code = this[0];
-	var day = $("#ann_day_"+reason_code).val();
-	var flag = $("#ann_reg_flag_"+reason_code).val();
+let xhrUpdateAnnouncementData = e => {
+	let reason_code = this[0];
+	let day = $("#ann_day_"+reason_code).val();
+	let flag = $("#ann_reg_flag_"+reason_code).val();
 	if (this[2] == day && this[3] == flag) {
 		showModal({
 			body: "無變更，不需更新！",
@@ -1248,7 +1248,7 @@ var xhrUpdateAnnouncementData = function(e) {
 	}
 	console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
 	$(e.target).remove();
-	var form_body = new FormData();
+	let form_body = new FormData();
 	form_body.append("type", "update_announcement_data");
 	form_body.append("code", reason_code);
 	form_body.append("day", $("#ann_day_"+reason_code).val());
@@ -1256,12 +1256,12 @@ var xhrUpdateAnnouncementData = function(e) {
 	fetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function (jsonObj) {
+	}).then(jsonObj => {
 		console.assert(jsonObj.status == 1, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
 		showModal({
 			body: "<strong class='text-success'>更新完成</strong>",
@@ -1270,27 +1270,27 @@ var xhrUpdateAnnouncementData = function(e) {
 		});
 		// refresh the select list
 		xhrQueryAnnouncementData.call(null, [e]);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrUpdateAnnouncementData parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 }
 
-var xhrClearAnnouncementFlag = function(e) {
+let xhrClearAnnouncementFlag = e => {
 	if (!confirm("請確認要是否要清除所有登記原因的准登旗標？")) {
 		return;
 	}
-	var form_body = new FormData();
+	let form_body = new FormData();
 	form_body.append("type", "clear_announcement_flag");
 	fetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function (jsonObj) {
+	}).then(jsonObj => {
 		console.assert(jsonObj.status == 1, "清除先行准登回傳狀態碼有問題【" + jsonObj.status + "】");
 		showModal({
 			body: "<strong class='text-success'>已全部清除完成</strong>",
@@ -1299,24 +1299,24 @@ var xhrClearAnnouncementFlag = function(e) {
 		});
 		// refresh the select list
 		xhrQueryAnnouncementData.call(null, [e]);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrUpdateAnnouncementData parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 }
 
-var xhrQueryTempData = function(e) {
+let xhrQueryTempData = e => {
 	if (!validateCaseInput("#temp_clr_year", "#temp_clr_code", "#temp_clr_num", "#temp_clr_display")) {
 		return false;
 	}
 
-	var year = $("#temp_clr_year").val().replace(/\D/g, "");
-	var code = trim($("#temp_clr_code").val());
-	var number = $("#temp_clr_num").val().replace(/\D/g, "");
+	let year = $("#temp_clr_year").val().replace(/\D/g, "");
+	let code = trim($("#temp_clr_code").val());
+	let number = $("#temp_clr_num").val().replace(/\D/g, "");
 
 	toggle(e.target);
 
-	var form_body = new FormData();
+	let form_body = new FormData();
 	form_body.append("type", "query_temp_data");
 	form_body.append("year", year);
 	form_body.append("code", code);
@@ -1324,16 +1324,16 @@ var xhrQueryTempData = function(e) {
 	fetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function (jsonObj) {
+	}).then(jsonObj => {
 		console.assert(jsonObj.status == 1, "查詢暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
 		
-		var html = "";
-		for (var i = 0; i < jsonObj.data_count; i++) {
+		let html = "";
+		for (let i = 0; i < jsonObj.data_count; i++) {
 			if(jsonObj.raw[i][1].length == 0) {
 				continue;
 			}
@@ -1378,7 +1378,7 @@ var xhrQueryTempData = function(e) {
 			title: year + "-" + code + "-" + number + " 案件暫存檔統計",
 			size: "sm"
 		});
-		setTimeout(function() {
+		setTimeout(() => {
 			$("#temp_clr_button").on("click", xhrClearTempData.bind({
 				year: year,
 				code: code,
@@ -1403,7 +1403,7 @@ var xhrQueryTempData = function(e) {
 			});
 		}, 1000);
 		// attach backup event to the buttons
-		$(".backup_tbl_temp_data").on("click", function(e) {
+		$(".backup_tbl_temp_data").on("click", e => {
 			let filename = $(e.target).data("filename");
 			// any kind of extension (.txt,.cpp,.cs,.bat)
 			filename += ".sql";
@@ -1415,7 +1415,7 @@ var xhrQueryTempData = function(e) {
 			saveAs(blob, filename);
 		});
 		// attach clean event to the buttons
-		$(".clean_tbl_temp_data").on("click", function(e) {
+		$(".clean_tbl_temp_data").on("click", e => {
 			let table_name = $(e.target).data("tbl");
 			xhrClearTempData.call({
 				year: year,
@@ -1424,13 +1424,13 @@ var xhrQueryTempData = function(e) {
 				table: table_name
 			}, e);
 		});
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrQueryTempData parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 }
 
-var xhrClearTempData = function(e) {
+let xhrClearTempData = e => {
 	let bindArgsObj = this;
 
 	let msg = "確定要清除案件 " + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + " 全部暫存檔?\n ★ 警告：無法復原，除非你有備份!!";
@@ -1444,7 +1444,7 @@ var xhrClearTempData = function(e) {
 
 	$(e.target).remove();
 
-	var form_body = new FormData();
+	let form_body = new FormData();
 	form_body.append("type", "clear_temp_data");
 	form_body.append("year", bindArgsObj.year);
 	form_body.append("code", bindArgsObj.code);
@@ -1453,12 +1453,12 @@ var xhrClearTempData = function(e) {
 	fetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function (jsonObj) {
+	}).then(jsonObj => {
 		console.assert(jsonObj.status == 1, "清除暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
 		closeModal();
 		setTimeout(() => {
@@ -1468,22 +1468,22 @@ var xhrClearTempData = function(e) {
 				size: "md"
 			});
 		}, 500);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrClearTempData parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 }
 
-var xhrRM30UpdateQuery = function(e) {
+let xhrRM30UpdateQuery = e => {
 	if (!validateCaseInput("#rm30_update_year", "#rm30_update_code", "#rm30_update_num", "#rm30_update_display")) {
 		return false;
 	}
-	var year = $("#rm30_update_year").val().replace(/\D/g, "");
-	var code = $("#rm30_update_code").val();
-	var number = $("#rm30_update_num").val().replace(/\D/g, "");
+	let year = $("#rm30_update_year").val().replace(/\D/g, "");
+	let code = $("#rm30_update_code").val();
+	let number = $("#rm30_update_num").val().replace(/\D/g, "");
 	// prepare post params
-	var id = trim(year + code + number);
-	var body = new FormData();
+	let id = trim(year + code + number);
+	let body = new FormData();
 	body.append("type", "reg_case");
 	body.append("id", id);
 	
@@ -1493,24 +1493,24 @@ var xhrRM30UpdateQuery = function(e) {
 		method: "POST",
 		//headers: { "Content-Type": "application/json" },
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		return response.json();
-	}).then(function(jsonObj) {
+	}).then(jsonObj => {
 		showRM30UpdateCaseDetail(jsonObj);
 		toggle(e.target);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrRM30UpdateQuery parsing failed", ex);
 		$("#rm30_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
 	});
 }
 
-var showRM30UpdateCaseDetail = function(jsonObj) {
+let showRM30UpdateCaseDetail = jsonObj => {
 	if (jsonObj.status == 0) {
 		$("#rm30_update_display").html("<strong class='text-danger'>" + jsonObj.message + "</strong>");
 	} else if (jsonObj.status == -1) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	}
-	var html = "辦理情形：<select id='rm30_update_select'>";
+	let html = "辦理情形：<select id='rm30_update_select'>";
 	html += '<option value="A">A: 初審</option>';
 	html += '<option value="B">B: 複審</option>';
 	html += '<option value="H">H: 公告</option>';
@@ -1545,11 +1545,11 @@ var showRM30UpdateCaseDetail = function(jsonObj) {
 	$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
 	$(".reg_case_id").attr("title", "點我取得更多資訊！");
 	// update button xhr event
-	$("#rm30_update_button").on("click", function(e) {
-		var selected = $("#rm30_update_select").val();
+	$("#rm30_update_button").on("click", e => {
+		let selected = $("#rm30_update_select").val();
 		if (selected != jsonObj.raw["RM30"] && confirm("確認更新狀態？")) {
 			$(e.target).remove();
-			var body = new FormData();
+			let body = new FormData();
 			body.append("type", "reg_upd_rm30");
 			body.append("rm01", jsonObj.raw["RM01"]);
 			body.append("rm02", jsonObj.raw["RM02"]);
@@ -1558,16 +1558,16 @@ var showRM30UpdateCaseDetail = function(jsonObj) {
 			fetch("query_json_api.php", {
 				method: "POST",
 				body: body
-			}).then(function(response) {
+			}).then(response => {
 				return response.json();
-			}).then(function(jsonObj) {
+			}).then(jsonObj => {
 				console.assert(jsonObj.status == 1, "更新辦理情形回傳狀態碼有問題【" + jsonObj.status + "】");
 				showModal({
 					body: "<strong class='text-success'>辦理情形狀態更新完成</strong><p>" + jsonObj.query_string + "</p>",
 					title: "更新辦理情形",
 					size: "sm"
 				});
-			}).catch(function(ex) {
+			}).catch(ex => {
 				console.error("xhrRM30UpdateQuery parsing failed", ex);
 				$("#rm30_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
 			});
@@ -1575,16 +1575,16 @@ var showRM30UpdateCaseDetail = function(jsonObj) {
 	});
 }
 
-var xhrGetSURCase = function(e) {
+let xhrGetSURCase = e => {
 	if (!validateCaseInput("#sur_delay_case_fix_year", "#sur_delay_case_fix_code", "#sur_delay_case_fix_num", "#sur_delay_case_fix_display")) {
 		return false;
 	}
-	var year = $("#sur_delay_case_fix_year").val().replace(/\D/g, "");
-	var code = $("#sur_delay_case_fix_code").val();
-	var number = $("#sur_delay_case_fix_num").val().replace(/\D/g, "");
+	let year = $("#sur_delay_case_fix_year").val().replace(/\D/g, "");
+	let code = $("#sur_delay_case_fix_code").val();
+	let number = $("#sur_delay_case_fix_num").val().replace(/\D/g, "");
 	// prepare post params
-	var id = trim(year + code + number);
-	var body = new FormData();
+	let id = trim(year + code + number);
+	let body = new FormData();
 	body.append("type", "sur_case");
 	body.append("id", id);
 	
@@ -1593,20 +1593,20 @@ var xhrGetSURCase = function(e) {
 	fetch("query_json_api.php", {
 		method: "POST",
 		body: body
-	}).then(function(response) {
+	}).then(response => {
 		return response.json();
-	}).then(function(jsonObj) {
+	}).then(jsonObj => {
 		showSURCaseDetail(jsonObj);
 		toggle(e.target);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrGetSURCase parsing failed", ex);
 		$("#sur_delay_case_fix_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
 	});
 }
 
-var showSURCaseDetail = function(jsonObj) {
+let showSURCaseDetail = jsonObj => {
 	if (jsonObj.status == 0) {
-		var html = "收件字號：" + "<a title='案件辦理情形 on " + landhb_svr + "' href='#' onclick='javascript:window.open(\"http://\"\+landhb_svr\+\":9080/LandHB/Dispatcher?REQ=CMC0202&GRP=CAS&MM01="+ jsonObj.raw["MM01"] +"&MM02="+ jsonObj.raw["MM02"] +"&MM03="+ jsonObj.raw["MM03"] +"&RM90=\")'>" + jsonObj.收件字號 + "</a> </br>";
+		let html = "收件字號：" + "<a title='案件辦理情形 on " + landhb_svr + "' href='#' onclick='javascript:window.open(\"http://\"\+landhb_svr\+\":9080/LandHB/Dispatcher?REQ=CMC0202&GRP=CAS&MM01="+ jsonObj.raw["MM01"] +"&MM02="+ jsonObj.raw["MM02"] +"&MM03="+ jsonObj.raw["MM03"] +"&RM90=\")'>" + jsonObj.收件字號 + "</a> </br>";
 		html += "收件時間：" + jsonObj.收件時間 + " <br/>";
 		html += "收件人員：" + jsonObj.收件人員 + " <br/>";
 		html += "　連件數：<input type='text' id='mm24_upd_text' value='" + jsonObj.raw["MM24"] + "' /> <button id='mm24_upd_btn' data-table='SCMSMS' data-case-id='" + jsonObj.收件字號 + "' data-origin-value='" + jsonObj.raw["MM24"] + "' data-column='MM24' data-input-id='mm24_upd_text' data-title=' " + jsonObj.raw["MM01"] + "-" + jsonObj.raw["MM02"] + "-" + jsonObj.raw["MM03"] + " 連件數'>更新</button><br/>";
@@ -1626,9 +1626,9 @@ var showSURCaseDetail = function(jsonObj) {
 		}
 		$("#sur_delay_case_fix_display").html(html);
 		$("#sur_delay_case_fix_button").on("click", xhrFixSurDelayCase.bind(jsonObj.收件字號));
-		$("#mm24_upd_btn").on("click", function(e) {
+		$("#mm24_upd_btn").on("click", e => {
 			// input validation
-			var number = $("#mm24_upd_text").val().replace(/\D/g, "");
+			let number = $("#mm24_upd_text").val().replace(/\D/g, "");
 			$("#mm24_upd_text").val(number);
 			xhrUpdateCaseColumnData(e);
 		});
@@ -1637,18 +1637,18 @@ var showSURCaseDetail = function(jsonObj) {
 	}
 }
 
-var xhrFixSurDelayCase = function(e) {
-	var is_checked_upd_mm22 = $("#sur_delay_case_fix_set_D").is(":checked");
-	var is_checked_clr_delay = $("#sur_delay_case_fix_clear_delay_datetime").is(":checked");
+let xhrFixSurDelayCase = e => {
+	let is_checked_upd_mm22 = $("#sur_delay_case_fix_set_D").is(":checked");
+	let is_checked_clr_delay = $("#sur_delay_case_fix_clear_delay_datetime").is(":checked");
 	if (!is_checked_clr_delay && !is_checked_upd_mm22) {
 		showPopper("#sur_delay_case_fix_button");
 		return;
 	}
 	if (confirm("確定要修正本案件?")) {
 		$(e.target).remove();
-		var id = this;
+		let id = this;
 		//fix_sur_delay_case
-		var body = new FormData();
+		let body = new FormData();
 		body.append("type", "fix_sur_delay_case");
 		body.append("id", id);
 		body.append("UPD_MM22", is_checked_upd_mm22);
@@ -1656,9 +1656,9 @@ var xhrFixSurDelayCase = function(e) {
 		fetch("query_json_api.php", {
 			method: "POST",
 			body: body
-		}).then(function(response) {
+		}).then(response => {
 			return response.json();
-		}).then(function(jsonObj) {
+		}).then(jsonObj => {
 			if (jsonObj.status == 1) {
 				showModal({
 					body: id + " 複丈案件修正成功!",
@@ -1675,26 +1675,26 @@ var xhrFixSurDelayCase = function(e) {
 				});
 				throw new Error("回傳狀態碼不正確!【" + jsonObj.message + "】");
 			}
-		}).catch(function(ex) {
+		}).catch(ex => {
 			console.error("xhrFixSurDelayCase parsing failed", ex);
 			$("#sur_delay_case_fix_display").html("<strong class='text-danger'>修正 " + id + " 失敗!【" + ex + "】</strong>");
 		});
 	}
 }
 
-var xhrUpdateCaseColumnData = function(e) {
+let xhrUpdateCaseColumnData = e => {
 	/**
 	 * add various data attrs in the button tag
 	 */
-	var the_btn = $(e.target);
-	var origin_val = the_btn.attr("data-origin-value");
-	var upd_val = $("#"+the_btn.attr("data-input-id")).val();
-	var title = the_btn.attr("data-title");
+	let the_btn = $(e.target);
+	let origin_val = the_btn.attr("data-origin-value");
+	let upd_val = $("#"+the_btn.attr("data-input-id")).val();
+	let title = the_btn.attr("data-title");
 	if (origin_val != upd_val && confirm("確定要修改 " + title + " 為「" + upd_val + "」？")) {
-		var id = the_btn.attr("data-case-id");
-		var column = the_btn.attr("data-column");
-		var table = the_btn.attr("data-table");
-		var body = new FormData();
+		let id = the_btn.attr("data-case-id");
+		let column = the_btn.attr("data-column");
+		let table = the_btn.attr("data-table");
+		let body = new FormData();
 		body.append("type", "upd_case_column");
 		body.append("id", id);
 		body.append("table", table);
@@ -1706,12 +1706,12 @@ var xhrUpdateCaseColumnData = function(e) {
 		fetch("query_json_api.php", {
 			method: "POST",
 			body: body
-		}).then(function(response) {
+		}).then(response => {
 			if (response.status != 200) {
 				throw new Error("XHR連線異常，回應非200");
 			}
 			return response.json();
-		}).then(function(jsonObj) {
+		}).then(jsonObj => {
 			if (jsonObj.status == 1) {
 				showModal({
 					body: title + "更新成功",
@@ -1725,7 +1725,7 @@ var xhrUpdateCaseColumnData = function(e) {
 					size: "sm"
 				});
 			}
-		}).catch(function(ex) {
+		}).catch(ex => {
 			console.error("xhrUpdateCaseColumnData parsing failed", ex);
 			showModal({
 				body: ex.toString(),
@@ -1736,14 +1736,14 @@ var xhrUpdateCaseColumnData = function(e) {
 	}
 }
 
-var xhrSearchUsers = function(e) {
+let xhrSearchUsers = e => {
 	let keyword = $.trim($("#msg_who").val().replace(/\?/g, ""));
 	if (isEmpty(keyword)) {
 		console.warn("Keyword field should not be empty.");
 		return;
 	}
 	
-	var form_body = new FormData();
+	let form_body = new FormData();
 	form_body.append("type", "search_user");
 	form_body.append("keyword", keyword);
 
@@ -1751,14 +1751,14 @@ var xhrSearchUsers = function(e) {
 	fetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function (jsonObj) {
+	}).then(jsonObj => {
 		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
-		var html = jsonObj.message;
+		let html = jsonObj.message;
 		if (jsonObj.status == 1) {
 			showUserInfoByRAW(jsonObj.raw[jsonObj.data_count - 1]);
 		} else {
@@ -1768,35 +1768,35 @@ var xhrSearchUsers = function(e) {
 				size: "sm"
 			});
 		}
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrSearchUsers parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 }
 
-var showUserInfoByRAW = function(tdoc_raw) {
-	var year = 31536000000;
-	var now = new Date();
-	var age = "";
-	var birth = tdoc_raw["AP_BIRTH"];
-	var birth_regex = /^\d{3}\/\d{2}\/\d{2}$/;
+let showUserInfoByRAW = tdoc_raw => {
+	let year = 31536000000;
+	let now = new Date();
+	let age = "";
+	let birth = tdoc_raw["AP_BIRTH"];
+	let birth_regex = /^\d{3}\/\d{2}\/\d{2}$/;
 	if (birth.match(birth_regex)) {
 		birth = (parseInt(birth.substring(0, 3)) + 1911) + birth.substring(3);
-		var temp = Date.parse(birth);
+		let temp = Date.parse(birth);
 		if (temp) {
-			var born = new Date(temp);
+			let born = new Date(temp);
 			age += " (" + ((now - born) / year).toFixed(1) + "歲)";
 		}
 	}
 
-	var on_board_date = "";
+	let on_board_date = "";
 	if(!isEmpty(tdoc_raw["AP_ON_DATE"])) {
 		on_board_date = tdoc_raw["AP_ON_DATE"].date.split(" ")[0];
-		var temp = Date.parse(on_board_date.replace('/-/g', "/"));
+		let temp = Date.parse(on_board_date.replace('/-/g', "/"));
 		if (temp) {
-			var on = new Date(temp);
+			let on = new Date(temp);
 			if (tdoc_raw["AP_OFF_JOB"] == "Y") {
-				var off_board_date = tdoc_raw["AP_OFF_DATE"];
+				let off_board_date = tdoc_raw["AP_OFF_DATE"];
 				off_board_date = (parseInt(off_board_date.substring(0, 3)) + 1911) + off_board_date.substring(3);
 				temp = Date.parse(off_board_date.replace('/-/g', "/"));
 				if (temp) {
@@ -1830,22 +1830,22 @@ var showUserInfoByRAW = function(tdoc_raw) {
 	});
 }
 
-var xhrQueryUserInfo = function(e) {
-	var clicked_element = $(e.target);
+let xhrQueryUserInfo = e => {
+	let clicked_element = $(e.target);
 	if (!clicked_element.hasClass("user_tag")) {
 		console.warn("Clicked element(" + clicked_element.prop("tagName") + ") doesn't have user_tag class ... find its closest parent");
 		clicked_element = $(clicked_element.closest(".user_tag"));
 	}
 
-	var name = $.trim(clicked_element.data("name").replace(/\?A-Za-z0-9/g, ""));
-	var id = trim(clicked_element.data("id"));
+	let name = $.trim(clicked_element.data("name").replace(/\?A-Za-z0-9/g, ""));
+	let id = trim(clicked_element.data("id"));
 
 	if (isEmpty(name) || isEmpty(id)) {
 		console.warn("Require query params are empty, skip xhr querying. (" + id + ", " + name + ")");
 		return;
 	}
 
-	var form_body = new FormData();
+	let form_body = new FormData();
 	form_body.append("type", "user_info");
 	form_body.append("name", name);
 	form_body.append("id", id);
@@ -1853,28 +1853,28 @@ var xhrQueryUserInfo = function(e) {
 	fetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function (jsonObj) {
+	}).then(jsonObj => {
 		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
-		var html = jsonObj.message;
+		let html = jsonObj.message;
 		if (jsonObj.status == 1) {
-			var latest = jsonObj.data_count - 1;
+			let latest = jsonObj.data_count - 1;
 			showUserInfoByRAW(jsonObj.raw[latest]);
 		}
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrQueryUserInfo parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 }
 
-var xhrSendMessage = function(e) {
-	var title = $("#msg_title").val();
-	var content = $("#msg_content").val().replace(/\n/g, "\r\n");	// Messenger client is Windows app, so I need to replace \n to \r\n
-	var who = $("#msg_who").val();
+let xhrSendMessage = e => {
+	let title = $("#msg_title").val();
+	let content = $("#msg_content").val().replace(/\n/g, "\r\n");	// Messenger client is Windows app, so I need to replace \n to \r\n
+	let who = $("#msg_who").val();
 
 	if (!confirm("確認要送 「" + title + "」 給 「" + who + "」？\n\n" + content)) {
 		return false;
@@ -1900,10 +1900,10 @@ var xhrSendMessage = function(e) {
 		return;
 	}
 
-	var clicked_element = $(e.target);
+	let clicked_element = $(e.target);
 	toggle(clicked_element);
 
-	var form_body = new FormData();
+	let form_body = new FormData();
 	form_body.append("type", "send_message");
 	form_body.append("title", title);
 	form_body.append("content", content);
@@ -1913,21 +1913,21 @@ var xhrSendMessage = function(e) {
 	fetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body
-	}).then(function(response) {
+	}).then(response => {
 		if (response.status != 200) {
 			throw new Error("XHR連線異常，回應非200");
 		}
 		return response.json();
-	}).then(function (jsonObj) {
+	}).then(jsonObj => {
 		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
-		var html = jsonObj.message;
+		let html = jsonObj.message;
 		showModal({
 			body: html,
 			title: "訊息送出結果",
 			size: "sm"
 		});
 		toggle(clicked_element);
-	}).catch(function(ex) {
+	}).catch(ex => {
 		console.error("xhrSendMessage parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
