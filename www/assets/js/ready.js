@@ -1,4 +1,4 @@
-$(document).ready(function(e) {
+$(document).ready(e => {
 
     // one way to initialize all popovers on a page would be to select them by their data-toggle attribute:
     $(function () {

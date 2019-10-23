@@ -306,7 +306,7 @@ let initModalUI = () => {
 	}
 }
 
-$(document).ready(function(e) {
+$(document).ready(e => {
 	// Block IE
 	if (detectIE()) {
 		document.getElementsByTagName("body")[0].innerHTML = '<h2 style="margin-top: 50px; text-align: center;" class="text-danger">請使用Chrome/Firefox瀏覽器</h2>';

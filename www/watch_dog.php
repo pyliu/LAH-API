@@ -329,7 +329,7 @@ blockquote img {
   <!-- cache reload -->
   <script src="assets/js/cache.js"></script>
   <script type="text/javascript">
-    $(document).ready(function(e) {
+    $(document).ready(e => {
       // unsupported IE detection
       if (window.attachEvent) {
         document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援舊版IE瀏覽器, 請使用Chrome/Firefox/IE11瀏覽器。</h2>';
@@ -349,12 +349,12 @@ blockquote img {
       
       // query EXPAA data event
       $("#expaa_query_button").on("click", xhrGetExpaaData);
-      $("#expaa_query_date_button").on("click", function(e) {
+      $("#expaa_query_date_button").on("click", e => {
         $("#expaa_query_number").val("");
         xhrGetExpaaData(e);
       });
       // for query by date, so we need to clear #expaa_query_number value first
-      bindPressEnterEvent("#expaa_query_date", function(e) { $("#expaa_query_number").val(""); });
+      bindPressEnterEvent("#expaa_query_date", e => { $("#expaa_query_number").val(""); });
       bindPressEnterEvent("input[id*=expaa_query_", xhrGetExpaaData);
       
       // check diff xcase 

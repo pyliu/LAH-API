@@ -358,8 +358,8 @@ fieldset fieldset legend {
   <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
   <script type="text/javascript">
     // place this variable in global to use this int for condition jufgement, e.g. 108
-    var this_year = <?php echo $this_year; ?>;
-    $(document).ready(function(e) {
+    let this_year = <?php echo $this_year; ?>;
+    $(document).ready(e => {
       // unsupported IE detection
       if (window.attachEvent) {
         document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援舊版IE瀏覽器, 請使用Chrome/Firefox/IE11瀏覽器。</h2>';
@@ -390,10 +390,10 @@ fieldset fieldset legend {
       /**
        * For User Mapping
        */
-      var prevVal = null;
-      var total_ops = <?php echo count($operators); ?>;
-      var filter_user = function(el) {
-        var val = $(el).val();
+      let prevVal = null;
+      let total_ops = <?php echo count($operators); ?>;
+      let filter_user = function(el) {
+        let val = $(el).val();
         if (val == prevVal) {
           return;
         }
@@ -409,7 +409,7 @@ fieldset fieldset legend {
           // Don't add 'g' because I only a line everytime.
           // If use 'g' flag regexp object will remember last found index, that will possibly case the subsequent test failure.
           val = val.replace("?", ""); // prevent out of memory
-          var keyword = new RegExp(val, "i");
+          let keyword = new RegExp(val, "i");
           $(".user_tag").each(function(idx, div) {
             if (keyword.test($(div).text())) {
               $(div).removeClass("hide");  
@@ -422,7 +422,7 @@ fieldset fieldset legend {
           });
           $("#filter_info").text((total_ops - $(".user_tag.hide").length) + "筆");
           if ((total_ops - $(".user_tag.hide").length) == 1) {
-            var user_data = $(".user_tag:not(.hide)").text().split(":");
+            let user_data = $(".user_tag:not(.hide)").text().split(":");
             $("#msg_who").val($.trim(user_data[1]));
           }
         }
@@ -430,8 +430,8 @@ fieldset fieldset legend {
       };
       filter_user("#msg_who");
 
-      var delayTimer = null;
-      $("#msg_who").on("keyup", function(e) {
+      let delayTimer = null;
+      $("#msg_who").on("keyup", e => {
         clearTimeout(delayTimer);
         delayTimer = setTimeout(function() {
           filter_user(e.target);
@@ -439,8 +439,8 @@ fieldset fieldset legend {
       });
 
       // sql csv export
-      $("#sql_export_button").on("click", function(e) {
-        var selected = $("#preload_sql_select").val();
+      $("#sql_export_button").on("click", e => {
+        let selected = $("#preload_sql_select").val();
         selected.startsWith("txt_") ? xhrExportSQLTxt(e) : xhrExportSQLCsv(e);
       });
       $("#preload_sql_select").on("change", xhrLoadSQL);
@@ -468,13 +468,13 @@ fieldset fieldset legend {
       bindPressEnterEvent("#sur_delay_case_fix_num", xhrGetSURCase);
 
       // user info
-      $(".user_tag").on("click", function(e) {
-        var clicked_element = $(e.target);
+      $(".user_tag").on("click", e => {
+        let clicked_element = $(e.target);
         if (!clicked_element.hasClass("user_tag")) {
           console.warn("clicked element(" + clicked_element.prop("tagName") + ") doesn't have user_tag class ... find its closest parent");
           clicked_element = $(clicked_element.closest(".user_tag"));
         }
-        var user_data = clicked_element.text().split(":");
+        let user_data = clicked_element.text().split(":");
         $("#msg_who").val($.trim(user_data[1]));
         xhrQueryUserInfo(e);
       });

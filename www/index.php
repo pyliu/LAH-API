@@ -160,10 +160,10 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   <!-- load table content -->
   <script src="assets/js/autoload.js"></script>
   <script type="text/javascript">
-    $(document).ready(function(e) {
+    $(document).ready(e => {
       // filter button
-      $("#red_btn").on("click", function(e) {
-          var state = $("#table_container").data("active");
+      $("#red_btn").on("click", e => {
+          let state = $("#table_container").data("active");
           if (state != "red") {
               $("#table_container").data("active", "red");
               $("#case_results tbody tr").hide();
@@ -174,8 +174,8 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
           }
       });
     
-      $("#yellow_btn").on("click", function(e) {
-          var state = $("#table_container").data("active");
+      $("#yellow_btn").on("click", e => {
+          let state = $("#table_container").data("active");
           if (state != "yellow") {
               $("#table_container").data("active", "yellow");
               $("#case_results tbody tr").hide();
@@ -186,8 +186,8 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
           }
       });
     
-      $("#green_btn").on("click", function(e) {
-          var state = $("#table_container").data("active");
+      $("#green_btn").on("click", e => {
+          let state = $("#table_container").data("active");
           if (state != "green") {
               $("#table_container").data("active", "green");
               $("#case_results tbody tr").hide();
@@ -198,8 +198,8 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
           }
       });
     
-      $("#info_btn").on("click", function(e) {
-          var state = $("#table_container").data("active");
+      $("#info_btn").on("click", e => {
+          let state = $("#table_container").data("active");
           if (state != "info") {
               $("#table_container").data("active", "info");
               $("#case_results tbody tr").show();
@@ -217,8 +217,8 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
           }
       });
     
-      $("#gray_btn").on("click", function(e) {
-          var state = $("#table_container").data("active");
+      $("#gray_btn").on("click", e => {
+          let state = $("#table_container").data("active");
           if (state != "all") {
               $("#table_container").data("active", "all");
               $("#case_results tbody tr").show();
@@ -229,20 +229,20 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
       });
     
       // easter egg :)
-      $("#copyright").on("click", function(e) {
-          var script = document.createElement("script");
+      $("#copyright").on("click", e => {
+          let script = document.createElement("script");
           script.src = "assets/js/balls.js";
           $("#copyright").after(script);
           $("#copyright").remove();
       });
     
       // form event
-      $("#search_form").on("submit", function(e) {
+      $("#search_form").on("submit", e => {
         window.location = "index.php?date=" + $("#date_input").val();
       });
       
       // datepicker auto attached via .date_picker class
-      $("#date_input").on("changeDate", function(e) {
+      $("#date_input").on("changeDate", e => {
         window.location = "index.php?date=" + $("#date_input").val();
       });
     });
