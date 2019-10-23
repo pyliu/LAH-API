@@ -101,14 +101,14 @@ var showRegCaseDetail = function(jsonObj, use_modal) {
 			title: "登記案件詳情",
 			size: "lg"
 		});
-		// user info dialog event
-		addUserInfoEvent();
 	} else {
 		$("#query_display").html(html);
 		// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
 		$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
 		$(".reg_case_id").attr("title", "點我取得更多資訊！");
 	}
+	// user info dialog event
+	addUserInfoEvent();
 }
 
 var showPrcCaseDetail = function(jsonObj, use_modal) {
