@@ -87,19 +87,15 @@ function showModal(opts) {
 	if (isEmpty(size)) {
 		size = "md";
 	}
+	
 	let modal_element = $("#bs_modal_template");
-	if (!modal_element.length) {
-		modal_element = $(jQuery.parseHTML('<div class="modal fade" id="bs_modal_template" role="dialog"><div class="modal-dialog modal-md"><div class="modal-content"><div class="modal-header"><h4 class="modal-title">案件詳情</h4><button type="button" class="close" data-dismiss="modal">&times;</button></div><div class="modal-body"><p>詳情顯示在這邊</p></div><!-- <div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">關閉</button></div> --></div></div></div>'));
-		$("body").append(modal_element);
-	}
-    modal_element.find(".modal-title").html(title);
-	modal_element.find(".modal-body p").html(body);
-	modal_element.find(".modal-dialog").attr("class", "modal-dialog modal-"+size);
-	if (isEmpty(opts.class)) {
-		modal_element.find(".modal-body").removeClass().addClass("modal-body");
-	} else {
-		modal_element.find(".modal-body").addClass(opts.class);
-	}
+	
+	// Try to use Vue.js
+	window.modalApp.title = title;
+	window.modalApp.body = body;
+	window.modalApp.sizeClass = "modal-" + size;
+	window.modalApp.optsClass = isEmpty(opts.class) ? "" : opts.class;
+
 	modal_element.modal();
 }
 
@@ -292,5 +288,21 @@ $(document).ready(function(e) {
 		console.warn("Watchdog disabled. (xhrCallWatchDog not defined)");
 	}
 	
+	// add modal element to show the popup html message
+	let modal_element = $("#bs_modal_template");
+	if (!modal_element.length) {
+		modal_element = $(jQuery.parseHTML('<div class="modal fade" id="bs_modal_template" role="dialog"><div class="modal-dialog" v-bind:class="[sizeClass, optsClass]"><div class="modal-content"><div class="modal-header"><h4 class="modal-title"><span v-html="title"></span></h4><button type="button" class="close" data-dismiss="modal">&times;</button></div><div class="modal-body"><p><span v-html="body"></span></p></div><!-- <div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">關閉</button></div> --></div></div></div>'));
+		$("body").append(modal_element);
+		// Try to use Vue.js
+		window.modalApp = new Vue({
+			el: '#bs_modal_template',
+			data: {
+				body: 'Hello Vue!',
+				title: 'Hello Vue!',
+				sizeClass: 'modal-md',
+				optsClass: ''
+			}
+		});
+	}
 });
 //]]>
