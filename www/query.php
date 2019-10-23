@@ -352,6 +352,7 @@ fieldset fieldset legend {
   <script src="assets/js/vue.js"></script>
   <script src="assets/js/global.js"></script>
   <script src="assets/js/xhr_query.js"></script>
+  
   <script src="assets/js/cache.js"></script>
   <script src="assets/js/mark.jquery.min.js"></script>
 
