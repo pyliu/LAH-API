@@ -2,14 +2,14 @@
 // 跨縣市主機
 const landhb_svr = "220.1.35.123";
 
-var trim = function(text) {
+let trim = (text) => {
 	if (isEmpty(text)) {
 		return "";
 	}
 	return text.replace(/[^a-zA-Z0-9]/g, "");
 }
 
-var isEmpty = function(variable) {
+let isEmpty = (variable) => {
 	if (variable === undefined || $.trim(variable) == "") {
 		return true;
 	}
@@ -20,12 +20,12 @@ var isEmpty = function(variable) {
 	return false;
 }
 
-var addUserInfoEvent = function() {
+let addUserInfoEvent = () => {
 	$(".user_tag").off("click");
 	$(".user_tag").on("click", xhrQueryUserInfo);
 }
 
-var validateCaseInput = function(year_id_selector, code_id_selector, number_id_selector, output_id_selector) {
+let validateCaseInput = (year_id_selector, code_id_selector, number_id_selector, output_id_selector) => {
 	var year = $(year_id_selector).val().replace(/\D/g, "");
 	
 	var code = $(code_id_selector).val();
@@ -63,7 +63,7 @@ var validateCaseInput = function(year_id_selector, code_id_selector, number_id_s
 	return true;
 }
 
-var showPopper = function(selector, content, timeout) {
+let showPopper = (selector, content, timeout) => {
 	if (!isEmpty(content)) {
 		$(selector).attr("data-content", content);
 	}
@@ -74,7 +74,7 @@ var showPopper = function(selector, content, timeout) {
 	scrollToElement(selector);
 }
 
-function showModal(opts) {
+let showModal = (opts) => {
 	let body = opts.body;
 	let title = opts.title;
 	let size = opts.size;	// sm, md, lg
@@ -99,11 +99,11 @@ function showModal(opts) {
 	modal_element.modal();
 }
 
-function closeModal() {
+let closeModal = () => {
 	$("#bs_modal_template").modal("hide");
 }
 
-var toggle = function(selector) {
+let toggle = (selector) => {
 	var el = $(selector);
 	el.attr("disabled") ? el.attr("disabled", false) : el.attr("disabled", true);
 	// also find cover container (https://loading.io)
@@ -149,7 +149,7 @@ var toggle = function(selector) {
 	}
 }
 
-var scrollToElement = function (element) {
+let scrollToElement = (element) => {
 	var pos = $(element).offset().top - 120;
 	if (pos < 0) return;
 	$("html, body").animate({
@@ -157,11 +157,11 @@ var scrollToElement = function (element) {
 	}, 1000);
 }
 
-var setLoadingHTML = function(selector) {
+let setLoadingHTML = (selector) => {
 	$(selector).html('<span class="spinner-border spinner-border-md" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>');
 }
 
-var bindPressEnterEvent = function(selector, callback_func) {
+let bindPressEnterEvent = (selector, callback_func) => {
 	$(selector).on("keypress", function(e) {
 		var keynum = (e.keyCode ? e.keyCode : e.which);
 		if (keynum == '13') {
@@ -173,20 +173,16 @@ var bindPressEnterEvent = function(selector, callback_func) {
  * detect IE
  * returns version of IE or false, if browser is not Internet Explorer
  */
-var detectIE = function() {
+let detectIE = () => {
 	var ua = window.navigator.userAgent;
 
 	// Test values; Uncomment to check result …
-
 	// IE 10
 	// ua = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)';
-
 	// IE 11
 	// ua = 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko';
-
 	// Edge 12 (Spartan)
 	// ua = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0';
-
 	// Edge 13
 	// ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586';
 
@@ -213,27 +209,7 @@ var detectIE = function() {
 	return false;
 }
 
-$(document).ready(function(e) {
-	// Block IE
-	if (detectIE()) {
-		document.getElementsByTagName("body")[0].innerHTML = '<h2 style="margin-top: 50px; text-align: center;" class="text-danger">請使用Chrome/Firefox瀏覽器</h2>';
-	}
-
-	// add responsive and thumbnail style to blockquote img
-	$("blockquote img").addClass("img-responsive img-thumbnail");
-	// control blockquote block for *_quote_button
-	$("button[id*='_quote_button']").on("click", function(e) {
-		var quote = $(e.target).next("blockquote"); // find DIRECT next element by selector
-		quote.hasClass("hide") ? quote.removeClass("hide") : quote.addClass("hide");
-	});
-	
-	// tooltip enablement
-	$('[data-toggle="tooltip"]').tooltip({
-		delay: {
-			show: 300,
-			hide: 100
-		}
-	});
+let initDatepicker = () => {
 	// for any field that needs date picking purpose (add .date_picker to its class)
 	/**
 	 * <script src="assets/js/bootstrap-datepicker.min.js"></script>
@@ -267,7 +243,29 @@ $(document).ready(function(e) {
 			}
 		});
 	}
+}
 
+let initTooltip = () => {
+	// tooltip enablement
+	$('[data-toggle="tooltip"]').tooltip({
+		delay: {
+			show: 300,
+			hide: 100
+		}
+	});
+}
+
+let initBlockquoteToggle = () => {
+	// add responsive and thumbnail style to blockquote img
+	$("blockquote img").addClass("img-responsive img-thumbnail");
+	// control blockquote block for *_quote_button
+	$("button[id*='_quote_button']").on("click", function(e) {
+		var quote = $(e.target).next("blockquote"); // find DIRECT next element by selector
+		quote.hasClass("hide") ? quote.removeClass("hide") : quote.addClass("hide");
+	});
+}
+
+let initWatchdog = () => {
 	if (xhrCallWatchDog) {
 		// automatic check every 15 minutes
 		window.pyliuChkTimer = setInterval(function(e) {
@@ -287,7 +285,9 @@ $(document).ready(function(e) {
 	} else {
 		console.warn("Watchdog disabled. (xhrCallWatchDog not defined)");
 	}
-	
+}
+
+let initModalUI = () => {
 	// add modal element to show the popup html message
 	let modal_element = $("#bs_modal_template");
 	if (!modal_element.length) {
@@ -304,5 +304,18 @@ $(document).ready(function(e) {
 			}
 		});
 	}
+}
+
+$(document).ready(function(e) {
+	// Block IE
+	if (detectIE()) {
+		document.getElementsByTagName("body")[0].innerHTML = '<h2 style="margin-top: 50px; text-align: center;" class="text-danger">請使用Chrome/Firefox瀏覽器</h2>';
+	}
+
+	initBlockquoteToggle();
+	initTooltip();
+	initDatepicker();
+	initWatchdog();
+	initModalUI();
 });
 //]]>
