@@ -1,6 +1,6 @@
 //<![CDATA[
 
-let xhrGetCaseLatestNum = e => {
+let xhrGetCaseLatestNum = function(e) {
 	let code_select = $("#"+this.code_id);
 	let code_val = code_select.val();
 	if (isEmpty(code_val)) {
@@ -41,7 +41,7 @@ let xhrGetCaseLatestNum = e => {
 		console.error("xhrGetCaseLatestNum parsing failed", ex);
 	  	display.html("<strong class='text-danger'>" + "查詢最大號碼失敗~【" + code_val + "】" + "</strong>");
 	});
-};
+}
 
 let showRegCaseDetail = (jsonObj, use_modal) => {
 	let html = "<p>" + jsonObj.tr_html + "</p>";
