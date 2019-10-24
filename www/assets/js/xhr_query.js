@@ -525,7 +525,7 @@ let xhrEasycardPaymentQuery = e => {
 	});
 }
 
-let xhrGetExpacItems = e => {
+let xhrGetExpacItems = function(e) {
 	let number = $("#expac_query_number").val().replace(/\D/g, "");
 	// only allow number
 	if (isEmpty(number) || isNaN(number)) {
@@ -804,7 +804,7 @@ let xhrSyncXCaseColumn = function(e) {
 	}
 }
 
-let xhrGetExpaaData = e => {
+let xhrGetExpaaData = function(e) {
 	// basic checking for tw date input
 	let regex = /^\d{7}$/;
 	let txt = $("#expaa_query_date").val();
@@ -1190,7 +1190,7 @@ let xhrZipLog = e => {
 	});
 }
 
-let xhrQueryAnnouncementData = e => {
+let xhrQueryAnnouncementData = function(e) {
 	let form_body = new FormData();
 	form_body.append("type", "announcement_data");
 	fetch("query_json_api.php", {
@@ -1575,7 +1575,7 @@ let showRM30UpdateCaseDetail = jsonObj => {
 	});
 }
 
-let xhrGetSURCase = e => {
+let xhrGetSURCase = function(e) {
 	if (!validateCaseInput("#sur_delay_case_fix_year", "#sur_delay_case_fix_code", "#sur_delay_case_fix_num", "#sur_delay_case_fix_display")) {
 		return false;
 	}
