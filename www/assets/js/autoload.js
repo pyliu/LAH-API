@@ -25,8 +25,10 @@ function startRefresh() {
                 let hour = new Date().getHours();
                 // only refresh within work hour
 				if (hour > 7 && hour < 18) {
-                    clearInterval(loading_timeout_handle);
+                    clearTimeout(loading_timeout_handle);
                     loading_timeout_handle = setTimeout(startRefresh, refresh_time);
+                } else {
+                    console.warn("Not office hour, stop refresh.");
                 }
             } else {
                 console.warn("Query date is not " + today + ", no auto table refresh enabled.");
