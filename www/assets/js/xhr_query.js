@@ -711,7 +711,7 @@ let xhrCompareXCase = e => {
 	});
 }
 
-let xhrInsertXCase = e => {
+let xhrInsertXCase = function(e) {
 	if (confirm("確定要拉回局端資料新增於本所資料庫(CRSMS)？")) {
 		// this binded as case id
 		let id = this;
@@ -740,7 +740,7 @@ let xhrInsertXCase = e => {
 	}
 }
 
-let xhrSyncXCase = e => {
+let xhrSyncXCase = function(e) {
 	if (confirm("確定要拉回局端資料覆蓋本所資料庫？")) {
 		// this binded as case id
 		let id = this;
@@ -769,7 +769,7 @@ let xhrSyncXCase = e => {
 	}
 }
 
-let xhrSyncXCaseColumn = e => {
+let xhrSyncXCaseColumn = function(e) {
 	let the_btn = $(e.target);
 	if (confirm("確定要同步" + the_btn.attr("data-column") + "？")) {
 		// this binded as case id
@@ -1012,7 +1012,7 @@ let getExpaaAA100Options = selected_aa100 => {
 			+ "<option " + (selected_aa100 == "09" ? "selected" : "") + " value='09'>【09】行動支付</option>";
 }
 
-let xhrUpdateExpaaAA09 = e => {
+let xhrUpdateExpaaAA09 = function(e) {
 	if (confirm("確定要修改列印註記？")) {
 		let bindObj = this;
 		let body = new FormData();
@@ -1037,7 +1037,7 @@ let xhrUpdateExpaaAA09 = e => {
 	}
 }
 
-let xhrUpdateExpaaAA100 = e => {
+let xhrUpdateExpaaAA100 = function(e) {
 	if (confirm("確定要規費付款方式？")) {
 		let bindObj = this;
 		let body = new FormData();
@@ -1234,7 +1234,7 @@ let xhrQueryAnnouncementData = e => {
 	});
 };
 
-let xhrUpdateAnnouncementData = e => {
+let xhrUpdateAnnouncementData = function(e) {
 	let reason_code = this[0];
 	let day = $("#ann_day_"+reason_code).val();
 	let flag = $("#ann_reg_flag_"+reason_code).val();
@@ -1430,7 +1430,7 @@ let xhrQueryTempData = e => {
 	});
 }
 
-let xhrClearTempData = e => {
+let xhrClearTempData = function(e) {
 	let bindArgsObj = this;
 
 	let msg = "確定要清除案件 " + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + " 全部暫存檔?\n ★ 警告：無法復原，除非你有備份!!";
@@ -1637,7 +1637,7 @@ let showSURCaseDetail = jsonObj => {
 	}
 }
 
-let xhrFixSurDelayCase = e => {
+let xhrFixSurDelayCase = function(e) {
 	let is_checked_upd_mm22 = $("#sur_delay_case_fix_set_D").is(":checked");
 	let is_checked_clr_delay = $("#sur_delay_case_fix_clear_delay_datetime").is(":checked");
 	if (!is_checked_clr_delay && !is_checked_upd_mm22) {
