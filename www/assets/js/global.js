@@ -106,36 +106,21 @@ let closeModal = () => {
 let toggle = selector => {
 	var el = $(selector);
 	el.attr("disabled") ? el.attr("disabled", false) : el.attr("disabled", true);
-	// also find cover container (https://loading.io)
+	// also find cover container
 	let container = el.closest("fieldset");
 	if (container.length == 0) {
-		// add bootstrap spinner
 		if (el.is("button")) {
-			let spans = el.find(".spinner-border,.sr-only");
-			if (spans.length > 0) {
-				spans.remove();
-			} else {
-				spans = jQuery.parseHTML('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>');
-				el.prepend(spans);
-			}
+			toggleInsideSpinner(el);
 		}
-		// for loading spinner, https://loading.io element
-		/*if (el.is("button")) {
-			// ex: <button class="ld-ext-left"><span class="ld ld-ring ld-cycle small"></span>查詢</button>
-			// position opts: ld-ext-top, ld-ext-bottom, ld-ext-left, ld-ext-right
-			if (el.hasClass("ld-ext-left")) {
-				el.removeClass("ld-ext-left");
-				el.find(".auto-add-spinner").remove();
-				el.removeClass("running");
-			} else {
-				el.addClass("ld-ext-left");
-				el.prepend(jQuery.parseHTML('<span class="ld ld-ring ld-cycle small auto-add-spinner"></span>'));
-				el.addClass("running");
-			}
-		}*/
 	} else {
-		// cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
-		let style = "ld-over-inverse";
+		toggleCoverSpinner(container);
+	}
+}
+
+let toggleCoverSpinner = (selector, style = "ld-over-inverse") => {
+	// cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
+	let container = $(selector);
+	if (container.length > 0) {
 		if (container.hasClass(style)) {
 			container.removeClass(style);
 			container.find(".auto-add-spinner").remove();
@@ -149,16 +134,40 @@ let toggle = selector => {
 	}
 }
 
+let toggleInsideSpinner = (selector, size = "sm") => {
+	let el = $(selector);
+	if (el.length > 0) {
+		// add bootstrap spinner
+		let spans = el.find(".spinner-border,.sr-only");
+		if (spans.length > 0) {
+			spans.remove();
+		} else {
+			spans = jQuery.parseHTML('<span class="spinner-border spinner-border-' + size + '" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>');
+			el.prepend(spans);
+		}
+		/*
+		// loading.io spinner, https://loading.io element
+		// ex: <button class="ld-ext-left"><span class="ld ld-ring ld-cycle small"></span>查詢</button>
+		// position opts: ld-ext-top, ld-ext-bottom, ld-ext-left, ld-ext-right
+		if (el.hasClass("ld-ext-left")) {
+			el.removeClass("ld-ext-left");
+			el.find(".auto-add-spinner").remove();
+			el.removeClass("running");
+		} else {
+			el.addClass("ld-ext-left");
+			el.prepend(jQuery.parseHTML('<span class="ld ld-ring ld-cycle small auto-add-spinner"></span>'));
+			el.addClass("running");
+		}
+		*/
+	}
+}
+
 let scrollToElement = element => {
 	var pos = $(element).offset().top - 120;
 	if (pos < 0) return;
 	$("html, body").animate({
 		scrollTop: pos
 	}, 1000);
-}
-
-let setLoadingHTML = selector => {
-	$(selector).html('<span class="spinner-border spinner-border-md" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>');
 }
 
 let bindPressEnterEvent = (selector, callback_func) => {

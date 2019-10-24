@@ -25,6 +25,8 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
 <!-- Custom styles for this template -->
 <link href="assets/css/starter-template.css" rel="stylesheet">
 <link href="assets/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/loading.css">
+<link rel="stylesheet" href="assets/css/loading-btn.css">
 <link href="assets/css/basic.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
 </head>
