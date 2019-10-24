@@ -19,7 +19,7 @@ body {
 }
 
 .focused-element {
-	background-color: yellow;
+	background-color: rgb(233, 218, 13);
 }
 
 fieldset {
@@ -265,7 +265,7 @@ blockquote {
 }
 
 .reg_case_id:hover, .user_tag:hover {
-	background-color: yellow;
+	background-color:  rgb(233, 218, 13);
 	text-decoration: underline;
 	font-weight: bold;
 	cursor: pointer;

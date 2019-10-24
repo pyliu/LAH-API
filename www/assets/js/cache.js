@@ -28,7 +28,7 @@ if (jQuery && localStorage) {
                 localStorage[ele_id] = val;
             }
         }
-        window.pyliuIntTimer = setInterval(function(e) {
+        window.pyliuCacheTimer = setInterval(function(e) {
             $("input[type='text'], select, textarea").each(function(index, el) {
                 if (!$(el).hasClass("no-cache")) {
                     cacheIt(el);

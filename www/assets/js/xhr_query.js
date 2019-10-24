@@ -43,7 +43,7 @@ let xhrGetCaseLatestNum = function(e) {
 	});
 }
 
-let showRegCaseDetail = (jsonObj, use_modal) => {
+let showRegCaseDetail = (jsonObj, use_modal = false) => {
 	let html = "<p>" + jsonObj.tr_html + "</p>";
 	if (jsonObj.status == 0) {
 		html = "<strong class='text-danger'>" + jsonObj.message + "</strong>";
@@ -107,8 +107,8 @@ let showRegCaseDetail = (jsonObj, use_modal) => {
 		$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
 		$(".reg_case_id").attr("title", "點我取得更多資訊！");
 	}
-	// user info dialog event
-	addUserInfoEvent();
+	// user info dialog event ... delay 250ms
+	setTimeout(addUserInfoEvent, 250);
 }
 
 let showPrcCaseDetail = (jsonObj, use_modal) => {

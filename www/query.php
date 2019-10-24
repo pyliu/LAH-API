@@ -100,7 +100,7 @@ fieldset fieldset legend {
             <?php echo getCodeSelectHTML("query_code"); ?>
             字
             <input type="text" id="query_num" name="query_num" data-toggle='tooltip' data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="bottom" />號
-            <button id="query_button">登記</button>
+            <button id="query_button" @click="xhrRegQueryCase">登記</button>
             <button id="query_prc_button">地價</button>
             <div id="query_display"></div>
           </fieldset>
@@ -365,6 +365,7 @@ fieldset fieldset legend {
         document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援舊版IE瀏覽器, 請使用Chrome/Firefox/IE11瀏覽器。</h2>';
         return;
       }
+
       // 選擇【字】的事件
       $("#query_code").on("change", xhrGetCaseLatestNum.bind({
         code_id: "query_code",
