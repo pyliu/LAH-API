@@ -218,7 +218,7 @@ fieldset fieldset legend {
             <?php
               foreach ($operators as $id => $name) {
                 // prevent rare word issue
-                $name = preg_replace("/[a-zA-Z?]+/", "", $name);
+                $name = preg_replace("/[a-zA-Z?0-9+]+/", "", $name);
                 echo "<div class='float-left m-2 user_tag hide' style='width: 150px' data-id='".$id."' data-name='".($name ?? "XXXXXX")."'>".$id.": ".($name ?? "XXXXXX")."</div>";
               }
             ?>
@@ -475,7 +475,7 @@ fieldset fieldset legend {
           clicked_element = $(clicked_element.closest(".user_tag"));
         }
         let user_data = clicked_element.text().split(":");
-        $("#msg_who").val($.trim(user_data[1]));
+        $("#msg_who").val($.trim(user_data[1]).replace(/[\?A-Za-z0-9\+]/g, ""));
         xhrQueryUserInfo(e);
       });
 
