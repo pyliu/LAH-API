@@ -1837,7 +1837,7 @@ let xhrQueryUserInfo = e => {
 		clicked_element = $(clicked_element.closest(".user_tag"));
 	}
 
-	let name = $.trim(clicked_element.data("name").replace(/\?A-Za-z0-9/g, ""));
+	let name = $.trim(clicked_element.data("name").replace(/[\?A-Za-z0-9\+]/g, ""));
 	let id = trim(clicked_element.data("id"));
 
 	if (isEmpty(name) || isEmpty(id)) {

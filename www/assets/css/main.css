@@ -214,47 +214,47 @@ blockquote {
 }
 
 .block-primary {
-	border-left: 10px solid #007bff !important;
+	border-left: 15px solid #007bff !important;
 	padding-left:5px;
 }
 
 .block-secondary {
-	border-left: 10px solid #868e96 !important;
+	border-left: 15px solid #868e96 !important;
 	padding-left:5px;
 }
 
 .block-success {
-	border-left: 10px solid #28a745 !important;;
+	border-left: 15px solid #28a745 !important;;
 	padding-left:5px;
 }
 
 .block-info {
-	border-left: 10px solid #17a2b8 !important;
+	border-left: 15px solid #17a2b8 !important;
 	padding-left:5px;
 }
 
 .block-warning {
-	border-left: 10px solid #ffc107 !important;
+	border-left: 15px solid #ffc107 !important;
 	padding-left:5px;
 }
 
 .block-danger {
-	border-left: 10px solid #dc3545 !important;
+	border-left: 15px solid #dc3545 !important;
 	padding-left:5px;
 }
 
 .block-light {
-	border-left: 10px solid #f8f9fa !important;
+	border-left: 15px solid #f8f9fa !important;
 	padding-left:5px;
 }
 
 .block-dark {
-	border-left: 10px solid #343a40 !important;
+	border-left: 15px solid #343a40 !important;
 	padding-left:5px;
 }
 
 .block-white {
-	border-left: 10px solid #fff !important;
+	border-left: 15px solid #fff !important;
 	padding-left:5px;
 }
 
