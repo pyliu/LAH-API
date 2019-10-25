@@ -77,7 +77,7 @@ let showPopper = (selector, content, timeout) => {
 let showModal = opts => {
 	let body = opts.body;
 	let title = opts.title;
-	let size = opts.size;	// sm, md, lg
+	let size = opts.size;	// sm, md, lg, xl
 	if (isEmpty(title)) {
 		title = "... 請輸入指定標題 ...";
 	}
@@ -95,8 +95,8 @@ let showModal = opts => {
 	window.modalApp.body = body;
 	window.modalApp.sizeClass = "modal-" + size;
 	window.modalApp.optsClass = opts.class || "";
-
-	modal_element.modal();
+	// backdrop: 'static' => not close by clicking outside dislog
+	modal_element.modal({backdrop: 'static'});
 }
 
 let closeModal = () => {
@@ -300,8 +300,8 @@ let initModalUI = () => {
 	// add modal element to show the popup html message
 	if ($("#bs_modal_template").length == 0) {
 		$("body").append($.parseHTML(`
-			<div class="modal fade" id="bs_modal_template" role="dialog">
-				<div class="modal-dialog" v-bind:class="sizeClass">
+			<div class="modal fade" id="bs_modal_template" tabindex="-1" role="dialog" aria-labelledby="bs_modal_template" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" v-bind:class="sizeClass" role="document">
 					<div class="modal-content">
 						<div class="modal-header">
 							<h4 class="modal-title"><span v-html="title"></span></h4>

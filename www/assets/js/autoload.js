@@ -82,9 +82,9 @@ function adjustTableContent() {
     // case xhr event
     $(".case.ajax").on("click", function(e) {
         var clicked_element = $(e.target).closest("td");
-        scrollToElement(clicked_element);
         $(".focused-element").removeClass("focused-element");
         clicked_element.addClass("focused-element");
+        scrollToElement(clicked_element);
         xhrRegQueryCaseDialog(e);
     });
     // user info dialog event

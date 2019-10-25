@@ -99,7 +99,7 @@ let showRegCaseDetail = (jsonObj, use_modal = false) => {
 		showModal({
 			body: html,
 			title: "登記案件詳情",
-			size: "lg"
+			size: "xl"
 		});
 	} else {
 		$("#query_display").html(html);
@@ -122,7 +122,7 @@ let showPrcCaseDetail = (jsonObj, use_modal) => {
 		showModal({
 			body: html,
 			title: "登記案件詳情",
-			size: "lg"
+			size: "xl"
 		});
 	} else {
 		$("#query_display").html(html);
@@ -916,14 +916,22 @@ let xhrGetExpaaData = function(e) {
 					+ jsonObj.raw[i]["AA04"]
 					+ "</a>";
 			}
-			$("#expaa_query_display").html(html);
-			$("a.expaa_a_aa04").on("click", e => {
-				let pc_num = $(e.target).text();
-				$("#expaa_query_number").val(pc_num);
-				$("#expac_query_number").val(pc_num);
-				xhrGetExpaaData.call(null, [e]);
-				xhrGetExpacItems.call(null, [e]);
+			//$("#expaa_query_display").html(html);
+			showModal({
+				body: html,
+				title: "搜尋規費列表",
+				size: "lg"
 			});
+			setTimeout(() => {
+				$("a.expaa_a_aa04").on("click", e => {
+					let pc_num = $(e.target).text();
+					$("#expaa_query_number").val(pc_num);
+					$("#expac_query_number").val(pc_num);
+					xhrGetExpaaData.call(null, [e]);
+					xhrGetExpacItems.call(null, [e]);
+					closeModal();
+				});
+			}, 250)
 		} else {
 			$("#expaa_query_display").html("<span class='text-danger'>" + jsonObj.message.replace(", ", "") + "</span>");
 		}
