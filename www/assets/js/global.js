@@ -298,10 +298,25 @@ let initWatchdog = () => {
 
 let initModalUI = () => {
 	// add modal element to show the popup html message
-	let modal_element = $("#bs_modal_template");
-	if (!modal_element.length) {
-		modal_element = $(jQuery.parseHTML('<div class="modal fade" id="bs_modal_template" role="dialog"><div class="modal-dialog" v-bind:class="sizeClass"><div class="modal-content"><div class="modal-header"><h4 class="modal-title"><span v-html="title"></span></h4><button type="button" class="close" data-dismiss="modal">&times;</button></div><div class="modal-body" v-bind:class="optsClass"><p><span v-html="body"></span></p></div><!-- <div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">關閉</button></div> --></div></div></div>'));
-		$("body").append(modal_element);
+	if ($("#bs_modal_template").length == 0) {
+		$("body").append($.parseHTML(`
+			<div class="modal fade" id="bs_modal_template" role="dialog">
+				<div class="modal-dialog" v-bind:class="sizeClass">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h4 class="modal-title"><span v-html="title"></span></h4>
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+						</div>
+						<div class="modal-body" v-bind:class="optsClass">
+							<p><span v-html="body"></span></p>
+						</div>
+						<div class="modal-footer">
+							<com-footer-btn></com-footer-btn>
+						</div>
+					</div>
+				</div>
+			</div>
+		`));
 		// Try to use Vue.js
 		window.modalApp = new Vue({
 			el: '#bs_modal_template',
@@ -310,6 +325,16 @@ let initModalUI = () => {
 				title: 'Hello Vue!',
 				sizeClass: 'modal-md',
 				optsClass: ''
+			},
+			components: {
+				"com-footer-btn": {
+					data: function() {
+						return {
+							btnText: '關閉'
+						}
+					},
+					template: '<button type="button" class="btn btn-light" data-dismiss="modal">{{btnText}}</button>'
+				}
 			}
 		});
 	}

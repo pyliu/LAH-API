@@ -143,48 +143,5 @@ function getBrowserType() {
     if (isSafari) { return "Safari"; } 
     if (isChrome) { return "Chrome"; } 
     if (isEdge) { return "Edge"; } 
-}  
-  
-  function switchResultDocs() {
-	  if ($("#is_luzhu_table").is(":checked")) {
-		  $("#taoyuan_doc").hide();
-		  $("#luzhu_doc").show();
-	  } else {
-		  $("#luzhu_doc").hide();
-		  $("#taoyuan_doc").show();
-		  // control sub items
-		  $(".taoyuan_doc_item").hide();
-		  var heir_type = $("input[name='heir_reg_type']:checked").val();
-		  switch (heir_type) {
-			case "type_0_law_heir":
-			case "type_2_share_heir":
-				$("#taoyuan_doc_type_0_law_heir_type_2_share_heir").show();
-				break;
-			case "type_1_split_heir":
-				$("#taoyuan_doc_type_1_split_heir").show();
-				break;
-			case "type_3_modify":
-				$("#taoyuan_doc_type_3_modify").show();
-				break;
-			case "type_4_will_heir":
-				$("#taoyuan_doc_type_4_will_heir").show();
-				break;
-			case "type_5_judge_heir":
-			case "type_7":
-			case "type_8":
-				$("#taoyuan_doc_type_5_judge_heir_type_7_type_8").show();
-				break;
-			case "type_9":
-				$("#taoyuan_doc_type_9").show();
-				break;
-			case "type_10":
-				$("#taoyuan_doc_type_10").show();
-				break;
-			default:
-				console.log("Not a valid type: " + heir_type);
-				break;
-				
-		  }
-	  }
-  }
+}
   
