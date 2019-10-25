@@ -168,7 +168,7 @@ class SurCaseData {
             "status" => 0,
             "收件字號" => $row["MM01"].$row["MM02"].$row["MM03"],
             "收件時間" => $this->toDate($row["MM04_1"])." ".$this->toDate($row["MM04_2"]),
-            "收件人員" => empty($operators[$row["MM31"]]) ? $row["MM31"] : $operators[$row["MM31"]]."【".$row["MM31"]."】",
+            "收件人員" => empty($operators[$row["MM31"]]) ? $row["MM31"] : "<span class='user_tag' data-id='".$row["MM31"]."' data-name='".$operators[$row["MM31"]]."'>".$operators[$row["MM31"]]."【".$row["MM31"]."】</span>",
 			"申請事由" => $row["KCNT"],
             "辦理情形" => $this->getStatus(),
             "結案已否" => $this->isClose(),

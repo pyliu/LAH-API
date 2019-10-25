@@ -126,14 +126,15 @@ blockquote img {
         <div class="col-6">
           <fieldset>
             <legend>公告期限維護<small>(先行准登)</small></legend>
-            <div id="prereg_query_display" class="mb-2"></div>
-            <button id="prereg_clear_button" class="text-danger">★清除准登★</button>
+            <span id="prereg_query_display"></span>
+            <button id="prereg_clear_button" class="text-danger">清除准登</button>
             <button id="prereg_quote_button">備註</button>
             <blockquote id="prereg_quote" class="hide">
               <h5><span class="text-danger">※</span>注意：中壢所規定超過30件案件才能執行此功能，並於完成時須馬上關掉以免其他案件誤登。</h5>
               <h5><span class="text-danger">※</span>注意：准登完後該案件須手動於資料庫中調整辦理情形（RM30）為「公告」（H）。</h5>
               <img src="assets/howto/登記原因先行准登設定.jpg" />
             </blockquote>
+            <div id='prereg_update_ui' class='mt-1'></div>
           </fieldset>
         </div>
         <div class="col-6">

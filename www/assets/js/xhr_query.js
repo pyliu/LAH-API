@@ -1203,11 +1203,11 @@ let xhrQueryAnnouncementData = function(e) {
 		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
 		let count = jsonObj.data_count;
 		// 組合選單介面
-		let html = "公告項目：<select id='prereg_announcement_select' class='mt-1 no-cache'><option value=''>======= 請選擇登記原因 =======</option>";
+		let html = "公告項目：<select id='prereg_announcement_select' class='no-cache'><option value=''>======= 請選擇登記原因 =======</option>";
 		for (let i=0; i<count; i++) {
 			html += "<option value='" + jsonObj.raw[i]["RA01"] + "," + jsonObj.raw[i]["KCNT"] + "," + jsonObj.raw[i]["RA02"] + "," + jsonObj.raw[i]["RA03"] + "'>" + jsonObj.raw[i]["RA01"] + "：" + jsonObj.raw[i]["KCNT"] + "【" + jsonObj.raw[i]["RA02"] + "天, " + jsonObj.raw[i]["RA03"] + "】</option>";
 		}
-		html += "</select> <div id='prereg_update_ui' class='mt-1'></div>";
+		html += "</select>";
 		$("#prereg_query_display").html(html);
 		$("#prereg_announcement_select").on("change", e => {
 			$("#prereg_update_ui").empty();
@@ -1635,6 +1635,7 @@ let showSURCaseDetail = jsonObj => {
 					$("#mm24_upd_text").val(number);
 					xhrUpdateCaseColumnData(e);
 				});
+				addUserInfoEvent();
 			}
 		});
 	} else if (jsonObj.status == -1) {
