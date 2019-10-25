@@ -78,6 +78,7 @@ let showModal = opts => {
 	let body = opts.body;
 	let title = opts.title;
 	let size = opts.size;	// sm, md, lg, xl
+	let callback = opts.callback;
 	if (isEmpty(title)) {
 		title = "... 請輸入指定標題 ...";
 	}
@@ -95,6 +96,11 @@ let showModal = opts => {
 	window.modalApp.body = body;
 	window.modalApp.sizeClass = "modal-" + size;
 	window.modalApp.optsClass = opts.class || "";
+
+	if (typeof callback == "function") {
+		modal_element.one('shown.bs.modal', callback);
+	}
+
 	// backdrop: 'static' => not close by clicking outside dislog
 	modal_element.modal({backdrop: 'static'});
 }

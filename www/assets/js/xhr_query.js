@@ -43,7 +43,7 @@ let xhrGetCaseLatestNum = function(e) {
 	});
 }
 
-let showRegCaseDetail = (jsonObj, use_modal = false) => {
+let showRegCaseDetail = (jsonObj) => {
 	let html = "<p>" + jsonObj.tr_html + "</p>";
 	if (jsonObj.status == 0) {
 		html = "<strong class='text-danger'>" + jsonObj.message + "</strong>";
@@ -95,39 +95,29 @@ let showRegCaseDetail = (jsonObj, use_modal = false) => {
 		html += "手機號碼：" + jsonObj.手機號碼 + "<br/>";
 	}
 	
-	if (use_modal) {
-		showModal({
-			body: html,
-			title: "登記案件詳情",
-			size: "xl"
-		});
-	} else {
-		$("#query_display").html(html);
-		// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
-		$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
-		$(".reg_case_id").attr("title", "點我取得更多資訊！");
-	}
-	// user info dialog event ... delay 250ms
-	setTimeout(addUserInfoEvent, 250);
+	showModal({
+		body: html,
+		title: "登記案件詳情",
+		size: "xl",
+		callback: addUserInfoEvent
+	});
 }
 
-let showPrcCaseDetail = (jsonObj, use_modal) => {
+let showPrcCaseDetail = (jsonObj) => {
 	let html = "<p>" + jsonObj.html + "</p>";
+	let modal_size = "lg";
 	if (jsonObj.status == 0) {
 		html = "<strong class='text-danger'>" + jsonObj.message + "</strong>";
+		modal_size = "sm";
 	} else if (jsonObj.status == -1) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	}
-	if (use_modal) {
-		showModal({
-			body: html,
-			title: "登記案件詳情",
-			size: "xl"
-		});
-	} else {
-		$("#query_display").html(html);
-		$(".prc_case_serial").on("click", xhrRegQueryCaseDialog);
-	}
+	showModal({
+		body: html,
+		title: "地價案件詳情",
+		size: modal_size,
+		callback: () => { $(".prc_case_serial").on("click", xhrRegQueryCaseDialog); }
+	});
 }
 
 let xhrRegQueryCaseDialog = e => {
@@ -149,7 +139,7 @@ let xhrRegQueryCaseDialog = e => {
 		}
 		return response.json();
 	}).then(jsonObj => {
-		showRegCaseDetail(jsonObj, true);
+		showRegCaseDetail(jsonObj);
 	}).catch(ex => {
 		console.error("xhrRegQueryCaseDialog parsing failed", ex);
 	});
@@ -920,18 +910,18 @@ let xhrGetExpaaData = function(e) {
 			showModal({
 				body: html,
 				title: "搜尋規費列表",
-				size: "lg"
+				size: "lg",
+				callback: () => {
+					$("a.expaa_a_aa04").on("click", e => {
+						let pc_num = $(e.target).text();
+						$("#expaa_query_number").val(pc_num);
+						$("#expac_query_number").val(pc_num);
+						xhrGetExpaaData.call(null, [e]);
+						xhrGetExpacItems.call(null, [e]);
+						closeModal();
+					});
+				}
 			});
-			setTimeout(() => {
-				$("a.expaa_a_aa04").on("click", e => {
-					let pc_num = $(e.target).text();
-					$("#expaa_query_number").val(pc_num);
-					$("#expac_query_number").val(pc_num);
-					xhrGetExpaaData.call(null, [e]);
-					xhrGetExpacItems.call(null, [e]);
-					closeModal();
-				});
-			}, 250)
 		} else {
 			$("#expaa_query_display").html("<span class='text-danger'>" + jsonObj.message.replace(", ", "") + "</span>");
 		}
@@ -1632,13 +1622,20 @@ let showSURCaseDetail = jsonObj => {
 			html += "<label for='sur_delay_case_fix_set_D'><input id='sur_delay_case_fix_set_D' type='checkbox' checked /> 辦理情形改為核定</label> ";
 			html += "<label for='sur_delay_case_fix_clear_delay_datetime'><input id='sur_delay_case_fix_clear_delay_datetime' type='checkbox' checked /> 清除延期時間</label> ";
 		}
-		$("#sur_delay_case_fix_display").html(html);
-		$("#sur_delay_case_fix_button").on("click", xhrFixSurDelayCase.bind(jsonObj.收件字號));
-		$("#mm24_upd_btn").on("click", e => {
-			// input validation
-			let number = $("#mm24_upd_text").val().replace(/\D/g, "");
-			$("#mm24_upd_text").val(number);
-			xhrUpdateCaseColumnData(e);
+		//$("#sur_delay_case_fix_display").html(html);
+		showModal({
+			title: "測量案件查詢",
+			body: html,
+			size: "md",
+			callback: function() {
+				$("#sur_delay_case_fix_button").on("click", xhrFixSurDelayCase.bind(jsonObj.收件字號));
+				$("#mm24_upd_btn").on("click", e => {
+					// input validation
+					let number = $("#mm24_upd_text").val().replace(/\D/g, "");
+					$("#mm24_upd_text").val(number);
+					xhrUpdateCaseColumnData(e);
+				});
+			}
 		});
 	} else if (jsonObj.status == -1) {
 		throw new Error("查詢失敗：" + jsonObj.message);
@@ -1738,7 +1735,7 @@ let xhrUpdateCaseColumnData = e => {
 			showModal({
 				body: ex.toString(),
 				title: "更新欄位失敗",
-				size: "sm"
+				size: "md"
 			});
 		});
 	}

@@ -821,7 +821,7 @@ class Query {
 	public function updateCaseColumnData($id, $table, $column, $val) {
 		global $log;
 
-		if (empty($id) || empty($table) || empty($column) || empty($val)) {
+		if (empty($id) || empty($table) || empty($column) || (empty($val) && $val !== '0')) {
 			$log->error(__METHOD__."：輸入參數不能為空白【${id}, ${table}, ${column}, ${val}】");
 			return false;
 		}
