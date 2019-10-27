@@ -144,4 +144,17 @@ function getBrowserType() {
     if (isChrome) { return "Chrome"; } 
     if (isEdge) { return "Edge"; } 
 }
-  
+
+// other custom scripts start here
+$(document).ready(() => {
+    let wizard_steps = {
+        s1: "步驟一，選擇事實發生區間"
+    };
+    window.vueApp = new Vue({
+        el: "#app",
+        data: {
+            factBound: "2",
+            step: wizard_steps.s1
+        }
+    });
+});
