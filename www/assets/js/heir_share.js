@@ -115,7 +115,9 @@ $(document).ready(() => {
             factBound: "2",
             step: wizard_steps.s1,
             VueOK: true
+        },
+        mounted: function() {
+            $("#VueOK").show();
         }
     });
-    $("#VueOK").show();
 });
