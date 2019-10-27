@@ -41,36 +41,38 @@
 
   <section class="more-gap">
     
-    <div class="container-fluid container-custom-width">
-      
-      <div id="app">
-        <div class="mt-4 mb-2 mx-2">
-          <blockquote class="blockquote">
-              <h3 class="mb-0">登記案件繼承人應繼分</h3>
-              <footer class="blockquote-footer">{{step}}</footer>
-          </blockquote>
-          <div class="text-right fixed-top sticky-btn-offset">
-            <button class="btn btn-success btn-circle btn-custom">&lt;</button>
-            <button class="btn btn-success btn-circle btn-custom">&gt;</button>
-          </div>
-        </div>
-        <fieldset class="clearfix">
-          <legend>事實發生區間</legend>
-          <div class="row">
-            <label class="col-4"><input type="radio" v-model="factBound" value="0" />民國34年10月24日以前</label>
-            <label class="col-4"><input type="radio" v-model="factBound" value="1" />民國34年10月25日至74年6月4日</label>
-            <label class="col-4"><input type="radio" v-model="factBound" value="2" />民國74年6月5日以後</label>
-          </div>
-          <div>selected = {{factBound}}</div>
-        </fieldset>
-        
-      </div>
-      <!-- footer -->
-      <p id="contact" class="text-center text-muted my-2 mx-3 fixed-bottom bg-white border rounded float-right">
-        <small id="copyright" class="text-muted my-2">&copy; 2019 <strong><a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a></strong> at <a href="https://www.zhongli-land.tycg.gov.tw/" target="_blank">Zhongli-Land Office</a>.</small>
-      </p>
 
-    </div>
+      <div id="app">
+      
+        <div id="VueOK" v-if="VueOK" class="container-fluid container-custom-width hide">
+          <div class="mt-4 mb-2 mx-2">
+            <blockquote class="blockquote">
+                <h3 class="mb-0">登記案件繼承人應繼分</h3>
+                <footer class="blockquote-footer">{{step}}</footer>
+            </blockquote>
+            <div class="text-right fixed-top sticky-btn-offset">
+              <button class="btn btn-success btn-circle btn-custom">&lt;</button>
+              <button class="btn btn-success btn-circle btn-custom">&gt;</button>
+            </div>
+          </div>
+          <fieldset class="clearfix">
+            <legend>事實發生區間</legend>
+            <div class="row">
+              <label class="col-4"><input type="radio" v-model="factBound" value="0" />民國34年10月24日以前</label>
+              <label class="col-4"><input type="radio" v-model="factBound" value="1" />民國34年10月25日至74年6月4日</label>
+              <label class="col-4"><input type="radio" v-model="factBound" value="2" />民國74年6月5日以後</label>
+            </div>
+            <div>selected = {{factBound}}</div>
+          </fieldset>
+          
+          <!-- footer -->
+          <p id="contact" class="text-center text-muted my-2 mx-3 fixed-bottom bg-white border rounded float-right">
+            <small id="copyright" class="text-muted my-2">&copy; 2019 <strong><a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a></strong> at <a href="https://www.zhongli-land.tycg.gov.tw/" target="_blank">Zhongli-Land Office</a>.</small>
+          </p>
+        </div>
+        <h1 v-else class="text-danger font-weight-bold text-center">抱歉，本網站只支援Chrome或是Firefox。</h1>
+
+      </div>
 
   </section>
 
@@ -86,10 +88,6 @@
   <script src="assets/js/heir_share.js"></script>
 
   <script>
-    let btype = getBrowserType();
-    if (btype == "0" || (btype.indexOf('IE') !== -1 && btype != "IE11")) {
-      document.getElementsByTagName("body")[0].innerHTML = "<h1 style='font-weight:bolder; color: red; text-align: center;'>抱歉，本網頁只支援IE11瀏覽器、Chrome或是Firefox。</h1>";
-    }
   </script>
 </body>
 </html>
