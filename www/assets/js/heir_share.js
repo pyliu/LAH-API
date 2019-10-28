@@ -117,7 +117,7 @@ $(document).ready(() => {
             VueOK: true
         },
         mounted: function() {
-            $("#VueOK").show();
+            $("#VueOK").removeClass("d-none");
         }
     });
 });
