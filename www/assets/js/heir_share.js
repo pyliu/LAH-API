@@ -12,15 +12,10 @@ $(document).ready((e) => {
         data: {
             wizard: {
                 s0: {   // 34年10月24日以前
-                    title: "步驟1，選擇事實發生區間",
+                    title: "步驟0，選擇事實發生區間",
                     seen: true,
                     value: "",
                     children: {
-                        s1_1: {
-                            title: "步驟1-1，家產繼承",
-                            seen: false,
-                            value: ""
-                        },
                         s1_2: {
                             title: "步驟1-2，私產繼承",
                             seen: false,
@@ -29,7 +24,9 @@ $(document).ready((e) => {
                     }
                 },
                 s1: {
-
+                    title: "步驟1，家產 OR 私產？",
+                    seen: false,
+                    value: "",
                 },
                 s2: {   // 74年6月4日以前
 
@@ -59,8 +56,8 @@ $(document).ready((e) => {
                 switch(this.wizard.s0.value) {
                     case "0":
                         this.wizard.s0.seen = false;
-                        this.wizard.s0.children.s1_1.seen = true;
-                        this.now_step = this.wizard.s0.children.s1_1;
+                        this.wizard.s1.seen = true;
+                        this.now_step = this.wizard.s1;
                         this.prev_step = this.wizard.s0;
                         break;
                     default:
