@@ -46,7 +46,7 @@ $(document).ready((e) => {
             },
             prev: function(e) {
                 this.debug = `PREV Clicked ${e.target.tagName}`;
-                if (this.prev_step !== this.wizard.s0 && this.prev_step.seen !== undefined) {
+                if (this.now_step !== this.wizard.s0 && this.prev_step.seen !== undefined) {
                     this.prev_step.seen = true;
                     this.now_step.seen = false;
                     this.now_step = this.prev_step;
