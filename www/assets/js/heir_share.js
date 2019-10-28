@@ -55,16 +55,16 @@ $(document).ready((e) => {
                     this.now_step = this.prev_step;
                 } 
             },
-            s1ValueSelected: function(e) {
-                switch(this.wizard.s1.value) {
+            s0ValueSelected: function(e) {
+                switch(this.wizard.s0.value) {
                     case "0":
                         this.wizard.s0.seen = false;
-                        this.wizard.s1.children.s1_1.seen = true;
-                        this.now_step = this.wizard.s1.children.s1_1;
-                        this.prev_step = this.wizard.s1;
+                        this.wizard.s0.children.s1_1.seen = true;
+                        this.now_step = this.wizard.s0.children.s1_1;
+                        this.prev_step = this.wizard.s0;
                         break;
                     default:
-                        console.error(`Wrong value selected ${this.wizard.s1.value}.`);
+                        console.error(`Wrong value selected ${this.wizard.s0.value}.`);
                 }
                 this.next.call(this, e);
             }
