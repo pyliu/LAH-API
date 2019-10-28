@@ -1374,7 +1374,7 @@ let xhrQueryTempData = e => {
 		showModal({
 			body: html,
 			title: year + "-" + code + "-" + number + " 案件暫存檔統計",
-			size: "sm"
+			size: "lg"
 		});
 		setTimeout(() => {
 			$("#temp_clr_button").on("click", xhrClearTempData.bind({
