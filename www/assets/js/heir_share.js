@@ -42,7 +42,13 @@ $(document).ready((e) => {
         },
         methods: {
             next: function(e) {
-                this.debug = `NEXT triggered. ${e.target.tagName}`;
+                switch(this.now_step) {
+                    case this.wizard.s0:
+                        console.log("next: No on S0");
+                        break;
+                    default:
+                        break;
+                }
             },
             prev: function(e) {
                 this.debug = `PREV Clicked ${e.target.tagName}`;
@@ -59,6 +65,13 @@ $(document).ready((e) => {
                         this.wizard.s1.seen = true;
                         this.now_step = this.wizard.s1;
                         this.prev_step = this.wizard.s0;
+                        console.log("S0: 34年10月24日以前 selected");
+                        break;
+                    case "1":
+                        console.log("S0: 74年6月4日以前 selected");
+                        break;
+                    case "2":
+                        console.log("S0: 74年6月5日以後 selected");
                         break;
                     default:
                         console.error(`Wrong value selected ${this.wizard.s0.value}.`);
