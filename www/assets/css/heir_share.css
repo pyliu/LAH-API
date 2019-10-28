@@ -23,6 +23,7 @@ fieldset {
 	margin-top: 5px;
 	margin-bottom: 10px;
 	background: #EEE;
+	clear: both;
 
 	border-radius: 8px;
 	-moz-border-radius: 8px;

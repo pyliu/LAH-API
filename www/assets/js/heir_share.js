@@ -1,94 +1,3 @@
-function clearTextFields() {
-    // find all input fields and clear their value
-    $("input[type='text']").each(function(e) {
-        $(this).val("");
-    });
-}
-
-function clearAllRadioBoxes() {
-    // find all radio boxes and clear their checked prop
-    $("input[type='radio']").each(function(e) {
-        $(this).prop("checked", false);
-    });
-}
-
-function clearAllCheckBoxes() {
-    // find all radio boxes and clear their checked prop
-    $("input[type='checkbox']").each(function(e) {
-        if ($(this).attr("name") == "is_luzhu_table") return;
-        $(this).prop("checked", false);
-    });
-}
-
-function clearBoxesByElement(element) {
-    $(element).find("input[type='radio']").each(function(e) {
-        if (!$(this).hasClass("skip")) {
-            $(this).prop("checked", false);
-        }
-    });
-    $(element).find("input[type='checkbox']").each(function(e) {
-        if (!$(this).hasClass("skip")) {
-            $(this).prop("checked", false);
-        }
-    });
-}
-
-function clearAll() {
-    clearTextFields();
-    clearAllRadioBoxes();
-    clearAllCheckBoxes();
-    hideAllFieldset();
-    $("#NEXT_btn").addClass("hide");
-}
-
-function hideAllFieldset() {
-    // hide all fieldset except .fix
-    $("fieldset").each(function(e) {
-        if (!$(this).hasClass("fix")) {
-            deactivateElement(this);
-        }
-        $(this).removeClass("table-warning");
-    });
-}
-
-function hideFieldsetsByElement(element) {
-    $(element).find("fieldset").each(function(e) {
-        if (!$(this).hasClass("fix")) {
-            deactivateElement(this);
-        }
-    });
-    // always hide result fieldset
-    deactivateElement("#layer1_result");
-}
-
-function activateElement(element) {
-    $(element).removeClass("hide");
-    $(".table-warning").each(function(e) {
-        $(this).removeClass("table-warning");
-    });
-    $(element).addClass("table-warning");
-}
-
-function deactivateElement(element) {
-    $(element).addClass("hide");
-    $(element).removeClass("table-warning");
-}
-
-function scrollToElement(element) {
-    var pos = $(element).offset().top - 100;
-    if (pos < 0) return;
-    $("html, body").animate({
-        scrollTop: pos
-    }, 1000);
-}
-
-function disableAllButtons(flag) {
-    $("button").each(function() {
-        var ele = $(this);
-        ele.prop("disabled", flag);
-    });
-}
-
 function isEmpty(variable) {
     if (variable === undefined || $.trim(variable) == "") {
         return true;
@@ -96,28 +5,73 @@ function isEmpty(variable) {
     return false;
 }
 
-function showPopper(selector) {
-    $(selector).popover('show');
-    setTimeout(function() {
-        $(selector).popover('hide');
-    }, 2000);
-    scrollToElement(selector);
-}
-
 // other custom scripts start here
-$(document).ready(() => {
-    let wizard_steps = {
-        s1: "步驟一，選擇事實發生區間"
-    };
+$(document).ready((e) => {
     window.vueApp = new Vue({
         el: "#app",
         data: {
-            factBound: "2",
-            step: wizard_steps.s1,
-            VueOK: true
+            wizard: {
+                s0: {   // 34年10月24日以前
+                    title: "步驟1，選擇事實發生區間",
+                    seen: true,
+                    value: "",
+                    children: {
+                        s1_1: {
+                            title: "步驟1-1，家產繼承",
+                            seen: false,
+                            value: ""
+                        },
+                        s1_2: {
+                            title: "步驟1-2，私產繼承",
+                            seen: false,
+                            value: ""
+                        }
+                    }
+                },
+                s1: {
+
+                },
+                s2: {   // 74年6月4日以前
+
+                },
+                s3: {   // 74年6月5日以後
+
+                }
+            },
+            prev_step: {},
+            now_step: {},
+            VueOK: true,
+            debug: ""
         },
-        mounted: function() {
-            $("#VueOK").removeClass("d-none");
+        methods: {
+            next: function(e) {
+                this.debug = `NEXT triggered. ${e.target.tagName}`;
+            },
+            prev: function(e) {
+                this.debug = `PREV Clicked ${e.target.tagName}`;
+                if (this.prev_step.seen !== undefined) {
+                    this.prev_step.seen = true;
+                    this.now_step.seen = false;
+                    this.now_step = this.prev_step;
+                } 
+            },
+            s1ValueSelected: function(e) {
+                switch(this.wizard.s1.value) {
+                    case "0":
+                        this.wizard.s0.seen = false;
+                        this.wizard.s1.children.s1_1.seen = true;
+                        this.now_step = this.wizard.s1.children.s1_1;
+                        this.prev_step = this.wizard.s1;
+                        break;
+                    default:
+                        console.error(`Wrong value selected ${this.wizard.s1.value}.`);
+                }
+                this.next.call(this, e);
+            }
+        },
+        mounted: function() {  // like jQuery ready
+            $("#VueOK").toggleClass("d-none");
+            this.now_step = this.wizard.s0;
         }
     });
 });

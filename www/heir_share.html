@@ -44,34 +44,39 @@
 
       <div id="app">
       
-        <div id="VueOK" v-if="VueOK" class="container-fluid container-custom-width d-none">
+        <div id="VueOK" v-if="VueOK" data-toggle="collapse" class="container-fluid container-custom-width d-none">
           <div class="mt-4 mb-2 mx-2">
             <blockquote class="blockquote">
                 <h3 class="mb-0">登記案件繼承人應繼分</h3>
-                <footer class="blockquote-footer">{{step}}</footer>
+                <footer class="blockquote-footer">{{now_step.title}}</footer>
             </blockquote>
             <div class="text-right fixed-top sticky-btn-offset">
-              <button class="btn btn-success btn-circle btn-custom">&lt;</button>
-              <button class="btn btn-success btn-circle btn-custom">&gt;</button>
+              <button class="btn btn-success btn-circle btn-custom" @click.stop="prev">&lt;</button>
+              <button class="btn btn-success btn-circle btn-custom" @click.stop="next">&gt;</button>
             </div>
           </div>
-          <fieldset class="clearfix">
+          <!-- step 1 -->
+          <fieldset v-show="wizard.s1.seen">
             <legend>事實發生區間</legend>
             <div class="row">
-              <label class="col-4"><input type="radio" v-model="factBound" value="0" />民國34年10月24日以前</label>
-              <label class="col-4"><input type="radio" v-model="factBound" value="1" />民國34年10月25日至74年6月4日</label>
-              <label class="col-4"><input type="radio" v-model="factBound" value="2" />民國74年6月5日以後</label>
+              <label class="col-4"><input type="radio" v-model="wizard.s1.value" value="0" @change="s1ValueSelected" />民國34年10月24日以前</label>
+              <label class="col-4"><input type="radio" v-model="wizard.s1.value" value="1" @change="s1ValueSelected" />民國34年10月25日至74年6月4日</label>
+              <label class="col-4"><input type="radio" v-model="wizard.s1.value" value="2" @change="s1ValueSelected" />民國74年6月5日以後</label>
             </div>
-            <div>selected = {{factBound}}</div>
           </fieldset>
-          
+          <!-- step 1-1 -->
+          <fieldset v-show="wizard.s1.children.s1_1.seen">
+            <legend>繼承方式</legend>
+          </fieldset>
+          <!-- step 1-2 -->
           <!-- footer -->
           <p id="contact" class="text-center text-muted my-2 mx-3 fixed-bottom bg-white border rounded float-right">
             <small id="copyright" class="text-muted my-2">&copy; 2019 <strong><a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a></strong> at <a href="https://www.zhongli-land.tycg.gov.tw/" target="_blank">Zhongli-Land Office</a>.</small>
           </p>
         </div>
-        <h1 v-else class="text-danger font-weight-bold text-center">抱歉，本網站只支援Chrome或是Firefox。</h1>
-
+        <h1 v-else class="text-danger font-weight-bold text-center">抱歉，此瀏覽器不支援本網站框架請換一個試試看。</h1>
+        
+        debug: {{debug}}
       </div>
 
   </section>
