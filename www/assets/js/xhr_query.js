@@ -1398,6 +1398,7 @@ let xhrQueryTempData = e => {
 					type: "text/plain;charset=utf-8"
 				});
 				saveAs(blob, filename);
+				$(e.target).remove();
 			});
 		}, 1000);
 		// attach backup event to the buttons
