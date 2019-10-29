@@ -1866,11 +1866,12 @@ let xhrQueryUserInfo = e => {
 		}
 		return response.json();
 	}).then(jsonObj => {
-		console.assert(jsonObj.status == 1, "回傳之json object status異常【" + jsonObj.message + "】");
 		let html = jsonObj.message;
 		if (jsonObj.status == 1) {
 			let latest = jsonObj.data_count - 1;
 			showUserInfoByRAW(jsonObj.raw[latest]);
+		} else {
+			console.warn(jsonObj.message);
 		}
 	}).catch(ex => {
 		console.error("xhrQueryUserInfo parsing failed", ex);
