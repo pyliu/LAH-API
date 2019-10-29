@@ -1672,8 +1672,6 @@ let xhrFixSurDelayCase = function(e) {
 					title: "延期複丈案件修正",
 					size: "sm"
 				});
-				// refresh case status
-				xhrGetSURCase.call(null, e);
 			} else {
 				showModal({
 					body: jsonObj.message,
