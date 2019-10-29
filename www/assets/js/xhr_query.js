@@ -116,7 +116,7 @@ let showPrcCaseDetail = (jsonObj) => {
 		body: html,
 		title: "地價案件詳情",
 		size: modal_size,
-		callback: () => { $(".prc_case_serial").on("click", xhrRegQueryCaseDialog); }
+		callback: () => { $(".prc_case_serial").off("click").on("click", xhrRegQueryCaseDialog); }
 	});
 }
 
@@ -245,8 +245,8 @@ let xhrCheckProblematicXCase = e => {
 				html += "<span id='" + jsonObj.case_ids[i] + "'></span> <br />";
 			}
 			$("#cross_case_check_query_display").html(html);
-			$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
-			$(".fix_xcase_button").on("click", xhrFixProblematicXCase);
+			$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
+			$(".fix_xcase_button").one("click", xhrFixProblematicXCase);
 		} else if (jsonObj.status == 0) {
 			let now = new Date();
 			$("#cross_case_check_query_display").html("<div class='mt-1'><span class='rounded-circle bg-success'> 　 </span> 目前一切良好！【" + now.toLocaleString() + "】</div>");
@@ -354,7 +354,7 @@ let xhrGetCasesByID = e => {
 				html += "</p>";
 				$("#id_query_crsms_result").html(html);
 				// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
-				$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
+				$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
 				$(".reg_case_id").attr("title", "點我取得更多資訊！");
 			}
 			finish_count++;
@@ -570,7 +570,7 @@ let xhrGetExpacItems = function(e) {
 				html += "</div>";
 			}
 			$("#expac_query_display").html(html);
-			$(".query_case_dialog").on("click", xhrRegQueryCaseDialog);
+			$(".query_case_dialog").off("click").on("click", xhrRegQueryCaseDialog);
 		}
 		toggle("#expac_query_button");
 	}).catch(ex => {
@@ -683,17 +683,17 @@ let xhrCompareXCase = e => {
 			};
 			html += "</table>";
 			$("#sync_x_case_display").html(html);
-			$("#sync_x_case_confirm_button").on("click", xhrSyncXCase.bind(id));
-			$(".sync_column_button").on("click", xhrSyncXCaseColumn.bind(id));
+			$("#sync_x_case_confirm_button").off("click").on("click", xhrSyncXCase.bind(id));
+			$(".sync_column_button").off("click").on("click", xhrSyncXCaseColumn.bind(id));
 		} else if (jsonObj.status == -2) {
 			html += "<div><span class='rounded-circle bg-warning'> 　 </span> " + jsonObj.message + " <button id='inst_x_case_confirm_button'>新增本地端資料</button></div>"
 			$("#sync_x_case_display").html(html);
-			$("#inst_x_case_confirm_button").on("click", xhrInsertXCase.bind(id));
+			$("#inst_x_case_confirm_button").off("click").on("click", xhrInsertXCase.bind(id));
 		} else {
 			html += "<div><span class='rounded-circle bg-success'> 　 </span> " + jsonObj.message + "</div>"
 			$("#sync_x_case_display").html(html);
 		}
-		$("#sync_x_case_serial").on("click", xhrRegQueryCaseDialog);
+		$("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
 		toggle("#sync_x_case_button");
 	}).catch(ex => {
 		console.error("xhrCompareXCase parsing failed", ex);
@@ -875,12 +875,12 @@ let xhrGetExpaaData = function(e) {
 			html += "</ul>";
 			$("#expaa_query_display").html(html);
 			// attach event handler for the buttons
-			$("#exapp_print_button").on("click", xhrUpdateExpaaAA09.bind({
+			$("#exapp_print_button").off("click").on("click", xhrUpdateExpaaAA09.bind({
 				date: $("#expaa_query_date").val(),
 				number: $("#expaa_query_number").val(),
 				select_id: "exapp_print_select"
 			}));
-			$("#exapp_method_button").on("click", xhrUpdateExpaaAA100.bind({
+			$("#exapp_method_button").off("click").on("click", xhrUpdateExpaaAA100.bind({
 				date: $("#expaa_query_date").val(),
 				number: $("#expaa_query_number").val(),
 				select_id: "exapp_method_select"
@@ -912,7 +912,7 @@ let xhrGetExpaaData = function(e) {
 				title: "搜尋規費列表",
 				size: "lg",
 				callback: () => {
-					$("a.expaa_a_aa04").on("click", e => {
+					$("a.expaa_a_aa04").off("click").on("click", e => {
 						let pc_num = $(e.target).text();
 						$("#expaa_query_number").val(pc_num);
 						$("#expac_query_number").val(pc_num);
@@ -1224,7 +1224,7 @@ let xhrQueryAnnouncementData = function(e) {
 			$("#prereg_update_ui").html(html);
 			$("#ann_day_" + data[0]).val(data[2]);
 			$("#ann_reg_flag_" + data[0]).val(data[3]);
-			$("#ann_upd_btn_" + data[0]).on("click", xhrUpdateAnnouncementData.bind(data));
+			$("#ann_upd_btn_" + data[0]).off("click").on("click", xhrUpdateAnnouncementData.bind(data));
 		});
 	}).catch(ex => {
 		console.error("xhrQueryAnnouncementData parsing failed", ex);
@@ -1374,54 +1374,55 @@ let xhrQueryTempData = e => {
 		showModal({
 			body: html,
 			title: year + "-" + code + "-" + number + " 案件暫存檔統計",
-			size: "lg"
-		});
-		setTimeout(() => {
-			$("#temp_clr_button").on("click", xhrClearTempData.bind({
-				year: year,
-				code: code,
-				number: number,
-				table: ""
-			}));
-			showPopper("#temp_clr_button", "請「備份後」再選擇清除", 5000);
+			size: "lg",
+			callback: () => {
+				$("#temp_clr_button").off("click").on("click", xhrClearTempData.bind({
+					year: year,
+					code: code,
+					number: number,
+					table: ""
+				}));
 
-			$("#temp_backup_button").on("click", (e) => {
-				toggle(e.target);
-				let filename = year + "-" + code + "-" + number + "-TEMP-DATA";
-				// any kind of extension (.txt,.cpp,.cs,.bat)
-				filename += ".sql";
-				let all_content = "";
-				$(".ins_sql").each((index, hidden_span) => {
-					all_content += $(hidden_span).text();
+				showPopper("#temp_clr_button", "請「備份後」再選擇清除", 5000);
+				
+				$("#temp_backup_button").off("click").on("click", (e) => {
+					toggle(e.target);
+					let filename = year + "-" + code + "-" + number + "-TEMP-DATA";
+					// any kind of extension (.txt,.cpp,.cs,.bat)
+					filename += ".sql";
+					let all_content = "";
+					$(".ins_sql").each((index, hidden_span) => {
+						all_content += $(hidden_span).text();
+					});
+					let blob = new Blob([all_content], {
+						type: "text/plain;charset=utf-8"
+					});
+					saveAs(blob, filename);
+					$(e.target).remove();
 				});
-				let blob = new Blob([all_content], {
-					type: "text/plain;charset=utf-8"
+				// attach backup event to the buttons
+				$(".backup_tbl_temp_data").off("click").on("click", e => {
+					let filename = $(e.target).data("filename");
+					// any kind of extension (.txt,.cpp,.cs,.bat)
+					filename += ".sql";
+					let hidden_data = $(e.target).next("span"); // find DIRECT next span of the clicked button
+					let content = hidden_data.text();
+					let blob = new Blob([content], {
+						type: "text/plain;charset=utf-8"
+					});
+					saveAs(blob, filename);
 				});
-				saveAs(blob, filename);
-				$(e.target).remove();
-			});
-		}, 1000);
-		// attach backup event to the buttons
-		$(".backup_tbl_temp_data").on("click", e => {
-			let filename = $(e.target).data("filename");
-			// any kind of extension (.txt,.cpp,.cs,.bat)
-			filename += ".sql";
-			let hidden_data = $(e.target).next("span"); // find DIRECT next span of the clicked button
-			let content = hidden_data.text();
-			let blob = new Blob([content], {
-				type: "text/plain;charset=utf-8"
-			});
-			saveAs(blob, filename);
-		});
-		// attach clean event to the buttons
-		$(".clean_tbl_temp_data").on("click", e => {
-			let table_name = $(e.target).data("tbl");
-			xhrClearTempData.call({
-				year: year,
-				code: code,
-				number: number,
-				table: table_name
-			}, e);
+				// attach clean event to the buttons
+				$(".clean_tbl_temp_data").off("click").on("click", e => {
+					let table_name = $(e.target).data("tbl");
+					xhrClearTempData.call({
+						year: year,
+						code: code,
+						number: number,
+						table: table_name
+					}, e);
+				});
+			}
 		});
 	}).catch(ex => {
 		console.error("xhrQueryTempData parsing failed", ex);
@@ -1459,14 +1460,13 @@ let xhrClearTempData = function(e) {
 		return response.json();
 	}).then(jsonObj => {
 		console.assert(jsonObj.status == 1, "清除暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
-		closeModal();
-		setTimeout(() => {
+		closeModal(() => {
 			showModal({
 				body: "<strong class='text-success'>已清除完成</strong><p>" + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + (bindArgsObj.table ? " 表格：" + bindArgsObj.table : "") + "</p>",
 				title: "清除暫存資料",
 				size: "md"
 			});
-		}, 500);
+		});
 	}).catch(ex => {
 		console.error("xhrClearTempData parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
@@ -1541,10 +1541,10 @@ let showRM30UpdateCaseDetail = jsonObj => {
 	addUserInfoEvent();
 
 	// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
-	$(".reg_case_id").on("click", xhrRegQueryCaseDialog);
+	$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
 	$(".reg_case_id").attr("title", "點我取得更多資訊！");
 	// update button xhr event
-	$("#rm30_update_button").on("click", e => {
+	$("#rm30_update_button").one("click", e => {
 		let selected = $("#rm30_update_select").val();
 		if (selected != jsonObj.raw["RM30"] && confirm("確認更新狀態？")) {
 			$(e.target).remove();
@@ -1629,10 +1629,8 @@ let showSURCaseDetail = jsonObj => {
 			body: html,
 			size: "md",
 			callback: function() {
-				$("#sur_delay_case_fix_button").off("click");
-				$("#sur_delay_case_fix_button").on("click", xhrFixSurDelayCase.bind(jsonObj.收件字號));
-				$("#mm24_upd_btn").off("click");
-				$("#mm24_upd_btn").on("click", e => {
+				$("#sur_delay_case_fix_button").one("click", xhrFixSurDelayCase.bind(jsonObj.收件字號));
+				$("#mm24_upd_btn").one("click", e => {
 					// input validation
 					let number = $("#mm24_upd_text").val().replace(/\D/g, "");
 					$("#mm24_upd_text").val(number);

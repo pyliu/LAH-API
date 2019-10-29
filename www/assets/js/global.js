@@ -105,7 +105,10 @@ let showModal = opts => {
 	modal_element.modal({backdrop: 'static'});
 }
 
-let closeModal = () => {
+let closeModal = callback => {
+	if (typeof callback == "function") {
+		$("#bs_modal_template").one('hidden.bs.modal', callback);
+	}
 	$("#bs_modal_template").modal("hide");
 }
 
