@@ -1544,7 +1544,7 @@ let showRM30UpdateCaseDetail = jsonObj => {
 	$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
 	$(".reg_case_id").attr("title", "點我取得更多資訊！");
 	// update button xhr event
-	$("#rm30_update_button").one("click", e => {
+	$("#rm30_update_button").off("click").on("click", e => {
 		let selected = $("#rm30_update_select").val();
 		if (selected != jsonObj.raw["RM30"] && confirm("確認更新狀態？")) {
 			$(e.target).remove();
@@ -1629,8 +1629,8 @@ let showSURCaseDetail = jsonObj => {
 			body: html,
 			size: "md",
 			callback: function() {
-				$("#sur_delay_case_fix_button").one("click", xhrFixSurDelayCase.bind(jsonObj.收件字號));
-				$("#mm24_upd_btn").one("click", e => {
+				$("#sur_delay_case_fix_button").off("click").one("click", xhrFixSurDelayCase.bind(jsonObj.收件字號));
+				$("#mm24_upd_btn").off("click").one("click", e => {
 					// input validation
 					let number = $("#mm24_upd_text").val().replace(/\D/g, "");
 					$("#mm24_upd_text").val(number);
