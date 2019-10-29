@@ -1629,7 +1629,9 @@ let showSURCaseDetail = jsonObj => {
 			body: html,
 			size: "md",
 			callback: function() {
+				$("#sur_delay_case_fix_button").off("click");
 				$("#sur_delay_case_fix_button").on("click", xhrFixSurDelayCase.bind(jsonObj.收件字號));
+				$("#mm24_upd_btn").off("click");
 				$("#mm24_upd_btn").on("click", e => {
 					// input validation
 					let number = $("#mm24_upd_text").val().replace(/\D/g, "");
