@@ -15,6 +15,7 @@ $(document).ready((e) => {
                     title: "步驟0，選擇事實發生區間",
                     seen: true,
                     value: "",
+                    is76after: false,
                     children: {
                         s1_2: {
                             title: "步驟1-2，私產繼承",
