@@ -11,29 +11,21 @@ $(document).ready((e) => {
         el: "#app",
         data: {
             wizard: {
-                s0: {   // 34年10月24日以前
-                    title: "步驟0，選擇事實發生區間",
+                s0: {
+                    title: "步驟1，選擇事實發生區間",
                     seen: true,
                     value: "",
-                    is76after: false,
-                    children: {
-                        s1_2: {
-                            title: "步驟1-2，私產繼承",
-                            seen: false,
-                            value: ""
-                        }
-                    }
+                    is76after: false
                 },
-                s1: {
-                    title: "步驟1，家產 OR 私產？",
+                s01: {  // 光復前
+                    title: "步驟2，家產 OR 私產？",
                     seen: false,
-                    value: "",
+                    value: ""
                 },
-                s2: {   // 74年6月4日以前
-
-                },
-                s3: {   // 74年6月5日以後
-
+                s02: {   // 光復後
+                    title: "步驟2，輸入各項目人數",
+                    seen: false,
+                    value: ""
                 }
             },
             prev_step: {},
@@ -45,7 +37,10 @@ $(document).ready((e) => {
             next: function(e) {
                 switch(this.now_step) {
                     case this.wizard.s0:
-                        console.log("next: No on S0");
+                        console.log("next: Now on S0");
+                        break;
+                    case this.wizard.s01:
+                        console.log("next: Now on S01");
                         break;
                     default:
                         break;
@@ -61,21 +56,32 @@ $(document).ready((e) => {
             },
             s0ValueSelected: function(e) {
                 switch(this.wizard.s0.value) {
-                    case "0":
+                    case "before":
                         this.wizard.s0.seen = false;
-                        this.wizard.s1.seen = true;
-                        this.now_step = this.wizard.s1;
+                        this.wizard.s01.seen = true;
+                        this.now_step = this.wizard.s01;
                         this.prev_step = this.wizard.s0;
-                        console.log("S0: 34年10月24日以前 selected");
+                        console.log("S0: 光復前 selected");
                         break;
-                    case "1":
-                        console.log("S0: 74年6月4日以前 selected");
-                        break;
-                    case "2":
-                        console.log("S0: 74年6月5日以後 selected");
+                    case "after":
+                        console.log("S0: 光復後 selected");
+                        console.log(`S0: 民國74年6月5日以後: ${this.wizard.s0.is76after}`);
                         break;
                     default:
-                        console.error(`Wrong value selected ${this.wizard.s0.value}.`);
+                        console.error(`Not supported: ${this.wizard.s0.value}.`);
+                }
+                this.next.call(this, e);
+            },
+            s01ValueSelected: function(e) {
+                switch(this.wizard.s01.value) {
+                    case "public":
+                        console.log(`S01: 家產 ${this.wizard.s01.value} selected`);
+                        break;
+                    case "private":
+                        console.log(`S01: 私產 ${this.wizard.s01.value} selected`);
+                        break;
+                    default:
+                        console.error(`Not supported: ${this.wizard.s01.value}.`);
                 }
                 this.next.call(this, e);
             }
