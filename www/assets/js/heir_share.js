@@ -20,7 +20,11 @@ let showModal = opts => {
 		size = "md";
 	}
 	
-	let modal_element = $("#bs_modal_template");
+    let modal_element = $("#bs_modal_template");
+    if (modal_element.length == 0) {
+        initModalUI();
+        modal_element = $("#bs_modal_template");
+    }
 	
 	// Try to use Vue.js
 	window.modalApp.title = title;
@@ -108,7 +112,7 @@ $(document).ready((e) => {
                     legend: "被繼承財產種類",
                     seen: false,
                     value: "",
-                    public_count: 0
+                    public_count: 1
                 },
                 s02: {   // 光復後
                     title: "步驟2，輸入各項目人數",
@@ -139,6 +143,7 @@ $(document).ready((e) => {
                 this.debug = `PREV Clicked ${e.target.tagName}`;
                 if (this.now_step !== this.wizard.s0 && this.prev_step.seen !== undefined) {
                     this.prev_step.seen = true;
+                    this.prev_step.value = "";
                     this.now_step.seen = false;
                     this.now_step.value = "";
                     this.now_step = this.prev_step;
@@ -161,7 +166,8 @@ $(document).ready((e) => {
                         console.log(`to: ${to}??`);
                         showModal({
                             title: "錯誤訊息",
-                            body: `to: ${to}, val: ${val}`
+                            body: `to: ${to}, val: ${val}`,
+                            size: "sm"
                         });
                 }
             },
@@ -170,13 +176,22 @@ $(document).ready((e) => {
                     case "before":
                         this.wizard.s0.seen = false;
                         this.wizard.s01.seen = true;
+                        this.wizard.s02.seen = false;
+                        
                         this.now_step = this.wizard.s01;
                         this.prev_step = this.wizard.s0;
-                        console.log("S0: 光復前 selected");
+
+                        this.now_step.legend = "光復前【民國34年10月24日以前】";
                         break;
                     case "after":
-                        console.log("S0: 光復後 selected");
-                        console.log(`S0: 民國74年6月5日以後: ${this.wizard.s0.is76after}`);
+                        this.wizard.s0.seen = false;
+                        this.wizard.s01.seen = false;
+                        this.wizard.s02.seen = true;
+                        
+                        this.now_step = this.wizard.s02;
+                        this.prev_step = this.wizard.s0;
+
+                        this.now_step.legend = '光復後【民國74年6月' + (this.wizard.s0.is76after ? "5日以後】" : "4日以前】");
                         break;
                     default:
                         console.error(`Not supported: ${this.wizard.s0.value}.`);
@@ -200,7 +215,6 @@ $(document).ready((e) => {
         mounted: function() {  // like jQuery ready
             $("#VueOK").toggleClass("d-none");
             this.now_step = this.wizard.s0;
-            initModalUI();
         }
     });
 });
