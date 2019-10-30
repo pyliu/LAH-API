@@ -325,7 +325,7 @@ let initModalUI = () => {
 							<h4 class="modal-title"><span v-html="title"></span></h4>
 							<button type="button" class="close" data-dismiss="modal">&times;</button>
 						</div>
-						<div class="modal-body" v-bind:class="optsClass">
+						<div class="modal-body" :class="optsClass">
 							<p><span v-html="body"></span></p>
 						</div>
 						<com-footer></com-footer>
@@ -349,7 +349,11 @@ let initModalUI = () => {
 							btnText: '關閉'
 						}
 					},
-					template: '<div class="modal-footer"><button type="button" class="btn btn-light" data-dismiss="modal">{{btnText}}</button></div>'
+					template: `
+						<div class="modal-footer">
+							<button type="button" class="btn btn-light" data-dismiss="modal">{{btnText}}</button>
+						</div>
+					`
 				}
 			}
 		});
