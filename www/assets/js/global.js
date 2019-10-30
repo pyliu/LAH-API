@@ -321,13 +321,8 @@ let initModalUI = () => {
 			<div class="modal fade" id="bs_modal_template" tabindex="-1" role="dialog" aria-labelledby="bs_modal_template" aria-hidden="true">
 				<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" v-bind:class="sizeClass" role="document">
 					<div class="modal-content">
-						<div class="modal-header">
-							<h4 class="modal-title"><span v-html="title"></span></h4>
-							<button type="button" class="close" data-dismiss="modal">&times;</button>
-						</div>
-						<div class="modal-body" :class="optsClass">
-							<p><span v-html="body"></span></p>
-						</div>
+						<com-header :in-title="title"></com-header>
+						<com-body :in-body="body" :in-opts-class="optsClass"></com-body>
 						<com-footer></com-footer>
 					</div>
 				</div>
@@ -343,17 +338,23 @@ let initModalUI = () => {
 				optsClass: ''
 			},
 			components: {
+				"com-header": {
+					props: ["inTitle"],
+					template: `<div class="modal-header">
+						<h4 class="modal-title"><span v-html="inTitle"></span></h4>
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+					</div>`
+				},
+				"com-body": {
+					props: ["inOptsClass", "inBody"],
+					template: `<div class="modal-body" :class="inOptsClass">
+					<p><span v-html="inBody"></span></p>
+				</div>`
+				},
 				"com-footer": {
-					data: function() {
-						return {
-							btnText: '關閉'
-						}
-					},
-					template: `
-						<div class="modal-footer">
-							<button type="button" class="btn btn-light" data-dismiss="modal">{{btnText}}</button>
-						</div>
-					`
+					template: `<div class="modal-footer">
+						<button type="button" class="btn btn-light" data-dismiss="modal">關閉</button>
+					</div>`
 				}
 			}
 		});
