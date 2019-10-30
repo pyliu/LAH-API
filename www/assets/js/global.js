@@ -328,9 +328,7 @@ let initModalUI = () => {
 						<div class="modal-body" v-bind:class="optsClass">
 							<p><span v-html="body"></span></p>
 						</div>
-						<div class="modal-footer">
-							<com-footer-btn></com-footer-btn>
-						</div>
+						<com-footer></com-footer>
 					</div>
 				</div>
 			</div>
@@ -345,13 +343,13 @@ let initModalUI = () => {
 				optsClass: ''
 			},
 			components: {
-				"com-footer-btn": {
+				"com-footer": {
 					data: function() {
 						return {
 							btnText: '關閉'
 						}
 					},
-					template: '<button type="button" class="btn btn-light" data-dismiss="modal">{{btnText}}</button>'
+					template: '<div class="modal-footer"><button type="button" class="btn btn-light" data-dismiss="modal">{{btnText}}</button></div>'
 				}
 			}
 		});
