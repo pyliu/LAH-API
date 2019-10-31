@@ -46,15 +46,11 @@
       
         <div id="VueOK" v-if="VueOK" data-toggle="collapse" class="container-fluid container-custom-width d-none">
           <!-- title and nav button area -->
-          <nav aria-label="breadcrumb bg-light">
+          <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
               <li v-for="(item, index) in breadcrumb">
-                index: ${ index },
-                name: ${ item.legend }
+                <small>{{index == 0 ? item.legend : "　/　" + item.legend}} </small>
               </li>
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item"><a href="#">Library</a></li>
-              <li class="breadcrumb-item active" aria-current="page">Data</li>
             </ol>
           </nav>
           <div class="mt-4 mb-2 mx-2">
@@ -72,9 +68,9 @@
               <button class="btn btn-success btn-circle btn-custom" @click.stop="next">&gt;</button>
             </div>
             被繼承人持分：
-            1 分之
             <!-- only add .lazy modifier will trigger onchange event (default is input event) -->
             <input type="text" data-filter-to="heir_denominator" v-model.lazy="heir_denominator" @change="filter" />
+            分之 1
           </div>
 
           <!-- step 0 -->
@@ -99,7 +95,7 @@
                   <li>法定推定財產繼承人係<strong class="text-primary">男子</strong>直系卑親屬，以親等近者為優先。親等相同之<strong class="text-primary">男子</strong>有數人時，共同均分繼承。</li>
                   <li>無法定之推定戶主繼承人時，指定及選定之財產繼承人繼承。</li>
                 </ol>
-                人數：<input type="text" data-filter-to="wizard.s01.public_count" v-model.number="wizard.s01.public_count" @input="filter" /> 每人之應繼份為 <span class="text-primary">1 分之 {{wizard.s01.public_count * heir_denominator}}</span>。
+                人數：<input type="text" data-filter-to="wizard.s01.public_count" v-model.number="wizard.s01.public_count" @input="filter" /> 每人之應繼份為 <span class="text-primary">{{wizard.s01.public_count * heir_denominator}} 分之 1</span>。
               </div>
               <div class="mx-5 border-top border-primary pt-2" v-show="wizard.s01.value == 'private'">
                 <h6>* 僅有法定繼承人，順序如下：</h6>

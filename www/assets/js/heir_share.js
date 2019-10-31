@@ -123,7 +123,7 @@ $(document).ready((e) => {
             heir_denominator: 1,
             prev_step: {},
             now_step: {},
-            breadcrumb: [this.s0],
+            breadcrumb: [],
             VueOK: true,
             debug: ""
         },
@@ -149,6 +149,7 @@ $(document).ready((e) => {
                     this.now_step.seen = false;
                     this.now_step.value = "";
                     this.now_step = this.prev_step;
+                    this.breadcrumb.pop();
                 } 
             },
             filter: function(e) {
@@ -199,6 +200,7 @@ $(document).ready((e) => {
                     default:
                         console.error(`Not supported: ${this.wizard.s0.value}.`);
                 }
+                this.breadcrumb.push(this.now_step);
                 this.next.call(this, e);
             },
             s01ValueSelected: function(e) {
@@ -218,6 +220,10 @@ $(document).ready((e) => {
         mounted: function() {  // like jQuery ready
             $("#VueOK").toggleClass("d-none");
             this.now_step = this.wizard.s0;
+            this.breadcrumb.push({
+                legend: "家"
+            });
+            this.breadcrumb.push(this.wizard.s0);
         }
     });
 });
