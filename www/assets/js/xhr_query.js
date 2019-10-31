@@ -1473,13 +1473,13 @@ let xhrClearTempData = function(e) {
 	});
 }
 
-let xhrRM30UpdateQuery = e => {
-	if (!validateCaseInput("#rm30_update_year", "#rm30_update_code", "#rm30_update_num", "#rm30_update_display")) {
+let xhrRegCaseUpdateQuery = e => {
+	if (!validateCaseInput("#reg_case_update_year", "#reg_case_update_code", "#reg_case_update_num", "#reg_case_update_display")) {
 		return false;
 	}
-	let year = $("#rm30_update_year").val().replace(/\D/g, "");
-	let code = $("#rm30_update_code").val();
-	let number = $("#rm30_update_num").val().replace(/\D/g, "");
+	let year = $("#reg_case_update_year").val().replace(/\D/g, "");
+	let code = $("#reg_case_update_code").val();
+	let number = $("#reg_case_update_num").val().replace(/\D/g, "");
 	// prepare post params
 	let id = trim(year + code + number);
 	let body = new FormData();
@@ -1495,21 +1495,21 @@ let xhrRM30UpdateQuery = e => {
 	}).then(response => {
 		return response.json();
 	}).then(jsonObj => {
-		showRM30UpdateCaseDetail(jsonObj);
+		showRegCaseUpdateDetail(jsonObj);
 		toggle(e.target);
 	}).catch(ex => {
-		console.error("xhrRM30UpdateQuery parsing failed", ex);
-		$("#rm30_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
+		console.error("xhrRegCaseUpdateQuery parsing failed", ex);
+		$("#reg_case_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
 	});
 }
 
-let showRM30UpdateCaseDetail = jsonObj => {
+let showRegCaseUpdateDetail = jsonObj => {
 	if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-		$("#rm30_update_display").html("<strong class='text-danger'>" + jsonObj.message + "</strong>");
+		$("#reg_case_update_display").html("<strong class='text-danger'>" + jsonObj.message + "</strong>");
 	} else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	}
-	let html = "辦理情形：<select id='rm30_update_select'>";
+	let html = "辦理情形：<select id='reg_case_update_select'>";
 	html += '<option value="A">A: 初審</option>';
 	html += '<option value="B">B: 複審</option>';
 	html += '<option value="H">H: 公告</option>';
@@ -1529,14 +1529,31 @@ let showRM30UpdateCaseDetail = jsonObj => {
 	html += '<option value="D">D: 展期</option>';
 	html += "</select>";
 	if (isEmpty(jsonObj.raw["RM31"])) {
-		html += " <button id='rm30_update_button'>更新</button><br/>";
+		html += " <button id='reg_case_update_button'>更新</button><br/>";
+	} else {
+		html += " <strong class='text-danger'>本案已結案，無法變更狀態！</strong>";
+	}
+	html += "登記處理註記：<select id='reg_case_update_RM39_select'>";
+	html += '<option value=""></option>';
+	html += '<option value="B">B: 登錄開始</option>';
+	html += '<option value="R">R: 登錄完成</option>';
+	html += '<option value="C">C: 校對開始</option>';
+	html += '<option value="D">D: 校對完成</option>';
+	html += '<option value="S">S: 異動開始</option>';
+	html += '<option value="F">F: 異動完成</option>';
+	html += '<option value="G">G: 異動有誤</option>';
+	html += '<option value="P">P: 競合暫停</option>';
+	html += "</select>";
+	if (isEmpty(jsonObj.raw["RM31"])) {
+		html += " <button id='reg_case_update_RM39_button'>更新</button><br/>";
 	} else {
 		html += " <strong class='text-danger'>本案已結案，無法變更狀態！</strong>";
 	}
 	
 	html += "<p>" + jsonObj.tr_html + "</p>";
-	$("#rm30_update_display").html(html);
-	$("#rm30_update_select").val(jsonObj.raw["RM30"]);
+	$("#reg_case_update_display").html(html);
+	$("#reg_case_update_select").val(jsonObj.raw["RM30"]);
+	$("#reg_case_update_RM39_select").val(jsonObj.raw["RM39"]);
 	// user info event
 	addUserInfoEvent();
 
@@ -1544,9 +1561,9 @@ let showRM30UpdateCaseDetail = jsonObj => {
 	$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
 	$(".reg_case_id").attr("title", "點我取得更多資訊！");
 	// update button xhr event
-	$("#rm30_update_button").off("click").on("click", e => {
-		let selected = $("#rm30_update_select").val();
-		if (selected != jsonObj.raw["RM30"] && confirm("確認更新狀態？")) {
+	$("#reg_case_update_button").off("click").on("click", e => {
+		let selected = $("#reg_case_update_select").val();
+		if (selected != jsonObj.raw["RM30"] && confirm("確認更新「案件辦理情形」狀態？")) {
 			$(e.target).remove();
 			let body = new FormData();
 			body.append("type", "reg_upd_rm30");
@@ -1562,13 +1579,41 @@ let showRM30UpdateCaseDetail = jsonObj => {
 			}).then(jsonObj => {
 				console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新辦理情形回傳狀態碼有問題【" + jsonObj.status + "】");
 				showModal({
-					body: "<strong class='text-success'>辦理情形狀態更新完成</strong><p>" + jsonObj.query_string + "</p>",
+					body: "<strong class='text-success'>「辦理情形」狀態更新完成</strong>",
 					title: "更新辦理情形",
 					size: "sm"
 				});
 			}).catch(ex => {
-				console.error("xhrRM30UpdateQuery parsing failed", ex);
-				$("#rm30_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
+				console.error("showRegCaseUpdateDetail parsing failed", ex);
+				$("#reg_case_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
+			});
+		}
+	});
+	$("#reg_case_update_RM39_button").off("click").on("click", e => {
+		let selected = $("#reg_case_update_RM39_select").val();
+		if (selected != jsonObj.raw["RM39"] && confirm("確認更新「登記處理註記」狀態？")) {
+			$(e.target).remove();
+			let body = new FormData();
+			body.append("type", "reg_upd_rm39");
+			body.append("rm01", jsonObj.raw["RM01"]);
+			body.append("rm02", jsonObj.raw["RM02"]);
+			body.append("rm03", jsonObj.raw["RM03"]);
+			body.append("rm39", selected);
+			fetch("query_json_api.php", {
+				method: "POST",
+				body: body
+			}).then(response => {
+				return response.json();
+			}).then(jsonObj => {
+				console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新登記處理註記回傳狀態碼有問題【" + jsonObj.status + "】");
+				showModal({
+					body: "<strong class='text-success'>「登記處理註記」狀態更新完成</strong>",
+					title: "更新登記處理註記",
+					size: "sm"
+				});
+			}).catch(ex => {
+				console.error("showRegCaseUpdateDetail parsing failed", ex);
+				$("#reg_case_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
 			});
 		}
 	});

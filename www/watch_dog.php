@@ -140,24 +140,25 @@ blockquote img {
         </div>
         <div class="col-6">
           <fieldset>
-            <legend>調整案件辦理情形</legend>
-            <select id="rm30_update_year" name="_update_year">
+            <legend>調整案件欄位</legend>
+            <select id="reg_case_update_year" name="_update_year">
               <option selected>108</option>
             </select>
             年
-            <?php echo getCodeSelectHTML("rm30_update_code"); ?>
+            <?php echo getCodeSelectHTML("reg_case_update_code"); ?>
             字
-            <input type="text" id="rm30_update_num" name="rm30_update_num" data-toggle='tooltip' data-content='請輸入案件號(最多6碼)' title='案件號' />號
+            <input type="text" id="reg_case_update_num" name="reg_case_update_num" data-toggle='tooltip' data-content='請輸入案件號(最多6碼)' title='案件號' />號
 
-            <button id="rm30_update_query">查詢</button>
-            <button id="rm30_update_quote_button">備註</button>
-            <blockquote id="rm30_update_quote" class="hide">
+            <button id="reg_case_update_query">查詢</button>
+            <button id="reg_case_update_quote_button">備註</button>
+            <blockquote id="reg_case_update_quote" class="hide">
               <ul>
                 <li>使用情境1：先行准登後案件須回復至公告</li>
                 <li>使用情境2：案件卡住需退回初審</li>
+                <li>使用情境3：案件辦理情形與登記處理註記不同步造成地價課無法登錄收件卡住</li>
               </ul>
             </blockquote>
-            <div id="rm30_update_display"></div>
+            <div id="reg_case_update_display"></div>
           </fieldset>
         </div>
       </div>
@@ -429,14 +430,14 @@ blockquote img {
       }));
 
       // RM30 Update
-      $("#rm30_update_code").on("change", xhrGetCaseLatestNum.bind({
-        code_id: "rm30_update_code",
-        year_id: "rm30_update_year",
-        number_id: "rm30_update_num",
-        display_id: "rm30_update_display"
+      $("#reg_case_update_code").on("change", xhrGetCaseLatestNum.bind({
+        code_id: "reg_case_update_code",
+        year_id: "reg_case_update_year",
+        number_id: "reg_case_update_num",
+        display_id: "reg_case_update_display"
       }));
-      $("#rm30_update_query").on("click", xhrRM30UpdateQuery);
-      bindPressEnterEvent("#rm30_update_num", xhrRM30UpdateQuery);
+      $("#reg_case_update_query").on("click", xhrRegCaseUpdateQuery);
+      bindPressEnterEvent("#reg_case_update_num", xhrRegCaseUpdateQuery);
     });
   </script>
 </body>
