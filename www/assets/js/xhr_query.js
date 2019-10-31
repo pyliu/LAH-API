@@ -1563,35 +1563,24 @@ let showRegCaseUpdateDetail = jsonObj => {
 	// update button xhr event
 	$("#reg_case_update_button").off("click").on("click", e => {
 		let selected = $("#reg_case_update_select").val();
-		if (selected != jsonObj.raw["RM30"] && confirm("確認更新「案件辦理情形」狀態？")) {
-			$(e.target).remove();
-			let body = new FormData();
-			body.append("type", "reg_upd_rm30");
-			body.append("rm01", jsonObj.raw["RM01"]);
-			body.append("rm02", jsonObj.raw["RM02"]);
-			body.append("rm03", jsonObj.raw["RM03"]);
-			body.append("rm30", selected);
-			fetch("query_json_api.php", {
-				method: "POST",
-				body: body
-			}).then(response => {
-				return response.json();
-			}).then(jsonObj => {
-				console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新辦理情形回傳狀態碼有問題【" + jsonObj.status + "】");
-				showModal({
-					body: "<strong class='text-success'>「辦理情形」狀態更新完成</strong>",
-					title: "更新辦理情形",
-					size: "sm"
-				});
-			}).catch(ex => {
-				console.error("showRegCaseUpdateDetail parsing failed", ex);
-				$("#reg_case_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
+		if (selected != jsonObj.raw["RM30"]) {
+			xhrUpdateRegCaseCol({
+				rm01: jsonObj.raw["RM01"],
+				rm02: jsonObj.raw["RM02"],
+				rm03: jsonObj.raw["RM03"],
+				col: "RM30",
+				val: selected,
+				el: e.target
 			});
 		}
 	});
 	$("#reg_case_update_RM39_button").off("click").on("click", e => {
 		let selected = $("#reg_case_update_RM39_select").val();
-		if (selected != jsonObj.raw["RM39"] && confirm("確認更新「登記處理註記」狀態？")) {
+		if (isEmpty(jsonObj.raw["RM39"]) && isEmpty(selected)) {
+			return;
+		}
+		if (selected != jsonObj.raw["RM39"]) {
+			/*
 			$(e.target).remove();
 			let body = new FormData();
 			body.append("type", "reg_upd_rm39");
@@ -1615,8 +1604,53 @@ let showRegCaseUpdateDetail = jsonObj => {
 				console.error("showRegCaseUpdateDetail parsing failed", ex);
 				$("#reg_case_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
 			});
+			*/
+			xhrUpdateRegCaseCol({
+				rm01: jsonObj.raw["RM01"],
+				rm02: jsonObj.raw["RM02"],
+				rm03: jsonObj.raw["RM03"],
+				col: "RM39",
+				val: selected,
+				el: e.target
+			});
 		}
 	});
+}
+
+let xhrUpdateRegCaseCol = function(arguments) {
+	if (confirm(`確認更新「${arguments.col}」欄位？`)) {
+		if ($(arguments.el).length > 0) {
+			// remove the button
+			$(arguments.el).remove();
+		}
+		let body = new FormData();
+		body.append("type", "reg_upd_col");
+		body.append("rm01", arguments.rm01);
+		body.append("rm02", arguments.rm02);
+		body.append("rm03", arguments.rm03);
+		body.append("col", arguments.col);
+		body.append("val", arguments.val);
+		fetch("query_json_api.php", {
+			method: "POST",
+			body: body
+		}).then(response => {
+			return response.json();
+		}).then(jsonObj => {
+			console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `更新案件「${arguments.col}」欄位回傳狀態碼有問題【${jsonObj.status}】`);
+			showModal({
+				body: "<strong class='text-success'>更新完成</strong>",
+				title: `更新案件欄位「${arguments.col}」`,
+				size: "md"
+			});
+		}).catch(ex => {
+			console.error("xhrUpdateRegCaseCol parsing failed", ex);
+			showModal({
+				body: `<strong class='text-danger'>更新欄位「${arguments.col}」失敗</strong><p>${arguments.rm01}, ${arguments.rm02}, ${arguments.rm03}, ${arguments.val}</p>`,
+				title: `更新案件欄位「${arguments.col}」`,
+				size: "md"
+			});
+		});
+	}
 }
 
 let xhrGetSURCase = function(e) {

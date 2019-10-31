@@ -512,38 +512,21 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("清除暫存資料失敗");
 		}
 		break;
-	case "reg_upd_rm30":
-		$log->info("XHR [reg_upd_rm30] 更新案件辦理情形【".$_POST["rm01"].", ".$_POST["rm02"].", ".$_POST["rm03"].", ".$_POST["rm30"]."】請求");
-		$result_flag = $query->updateCaseColumnData($_POST["rm01"].$_POST["rm02"].$_POST["rm03"], "MOICAS.CRSMS", "RM30", $_POST["rm30"]);
+	case "reg_upd_col":
+		$log->info("XHR [reg_upd_col] 更新案件欄位【".$_POST["rm01"].", ".$_POST["rm02"].", ".$_POST["rm03"].", ".$_POST["col"].", ".$_POST["val"]."】請求");
+		$result_flag = $query->updateCaseColumnData($_POST["rm01"].$_POST["rm02"].$_POST["rm03"], "MOICAS.CRSMS", $_POST["col"], $_POST["val"]);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => "0",
 				"raw" => $result_flag,
-				"query_string" => "RM01=".$_POST["rm01"]."&RM02=".$_POST["rm02"]."&RM03=".$_POST["rm03"]."&RM30=".$_POST["rm30"]
+				"query_string" => "RM01=".$_POST["rm01"]."&RM02=".$_POST["rm02"]."&RM03=".$_POST["rm03"]."&COL=".$_POST["col"]."&VAL=".$_POST["val"]
 			);
-			$log->info("XHR [reg_upd_rm30] 更新案件辦理情形成功");
+			$log->info("XHR [reg_upd_col] 更新案件欄位成功");
 			echo json_encode($result, 0);
 		} else {
-			$log->error("XHR [reg_upd_rm30] 更新案件辦理情形失敗");
-			echoErrorJSONString("更新案件辦理情形失敗");
-		}
-		break;
-	case "reg_upd_rm39":
-		$log->info("XHR [reg_upd_rm39] 更新登記處理註記【".$_POST["rm01"].", ".$_POST["rm02"].", ".$_POST["rm03"].", ".$_POST["rm39"]."】請求");
-		$result_flag = $query->updateCaseColumnData($_POST["rm01"].$_POST["rm02"].$_POST["rm03"], "MOICAS.CRSMS", "RM39", $_POST["rm39"]);
-		if ($result_flag) {
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => "0",
-				"raw" => $result_flag,
-				"query_string" => "RM01=".$_POST["rm01"]."&RM02=".$_POST["rm02"]."&RM03=".$_POST["rm03"]."&RM39=".$_POST["rm39"]
-			);
-			$log->info("XHR [reg_upd_rm39] 更新登記處理註記成功");
-			echo json_encode($result, 0);
-		} else {
-			$log->error("XHR [reg_upd_rm39] 更新登記處理註記失敗");
-			echoErrorJSONString("更新登記處理註記失敗");
+			$log->error("XHR [reg_upd_col] 更新案件欄位失敗");
+			echoErrorJSONString("更新案件欄位失敗");
 		}
 		break;
 	case "upd_case_column":
