@@ -239,6 +239,22 @@ blockquote img {
                 <li>"MOIPRT.PGOBPN" => "GA"</li>
                 <!--<li>"MOIPRC.PKCLS" => "KK"</li>-->
                 <li>"MOIPRT.PPRCE" => "MA"</li>
+                <li>"MOIPRT.P76SCRN" => "SS"</li>
+                <li>"MOIPRT.P21T01" => "TA"</li>
+                <li>"MOIPRT.P76ALID" => "AS"</li>
+                <li>"MOIPRT.P76BLOW" => "BS"</li>
+                <li>"MOIPRT.P76CRED" => "BS"</li>
+                <li>"MOIPRT.P76INDX" => "II"</li>
+                <li>"MOIPRT.P76PRCE" => "UP"</li>
+                <li>"MOIPRT.P76SCRN" => "SS"</li>
+                <li>"MOIPRT.PAE0301" => "MA"</li>
+                <li>"MOIPRT.PB010" => "TP"</li>
+                <li>"MOIPRT.PB014" => "TB"</li>
+                <li>"MOIPRT.PB015" => "TB"</li>
+                <li>"MOIPRT.PB016" => "TB"</li>
+                <li>"MOIPRT.PHIND" => "II"</li>
+                <li>"MOIPRT.PNLPO" => "NA"</li>
+                <li>"MOIPRT.POA11" => "OA"</li>
               </ul>
             </blockquote>
             <div id="temp_clr_display"></div>

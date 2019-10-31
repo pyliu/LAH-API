@@ -60,6 +60,22 @@ return array(
     "MOIPRT.POA11" => "OA",
     "MOIPRT.PGOBPN" => "GA",
     //"MOIPRC.PKCLS" => "KK",
-    "MOIPRT.PPRCE" => "MA"
+    "MOIPRT.PPRCE" => "MA",
+    "MOIPRT.P76SCRN" => "SS",
+    "MOIPRT.P21T01" => "TA",
+    "MOIPRT.P76ALID" => "AS",
+    "MOIPRT.P76BLOW" => "BS",
+    "MOIPRT.P76CRED" => "BS",
+    "MOIPRT.P76INDX" => "II",
+    "MOIPRT.P76PRCE" => "UP",
+    "MOIPRT.P76SCRN" => "SS",
+    "MOIPRT.PAE0301" => "MA",
+    "MOIPRT.PB010" => "TP",
+    "MOIPRT.PB014" => "TB",
+    "MOIPRT.PB015" => "TB",
+    "MOIPRT.PB016" => "TB",
+    "MOIPRT.PHIND" => "II",
+    "MOIPRT.PNLPO" => "NA",
+    "MOIPRT.POA11" => "OA"
 );
 ?>
