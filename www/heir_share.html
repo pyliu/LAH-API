@@ -69,11 +69,9 @@
           <fieldset v-show="wizard.s0.seen">
             <legend>{{wizard.s0.legend}}</legend>
             <div class="row text-center">
-              <label class="col-6"><input type="radio" v-model="wizard.s0.value" value="before" @change="s0ValueSelected" /> 光復前【民國34年10月24日以前】</label>
-              <label class="col-6">
-                <input type="radio" v-model="wizard.s0.value" value="after" @change="s0ValueSelected" /> 光復後
-                <label class="small"><input type="checkbox" v-model.boolean="wizard.s0.is76after" /> 民國74年6月5日以後</label>
-              </label>
+              <label class="col-4"><input type="radio" v-model.number="wizard.s0.value" value="-1" @change="s0ValueSelected" /> 光復前【民國34年10月24日以前】</label>
+              <label class="col-4"><input type="radio" v-model.number="wizard.s0.value" value="0" @change="s0ValueSelected" /> 光復後【民國74年6月4日以前】</label>
+              <label class="col-4"><input type="radio" v-model.number="wizard.s0.value" value="1" @change="s0ValueSelected" /> 光復後【民國74年6月5日以後】</label>
             </div>
           </fieldset>
 
@@ -81,8 +79,8 @@
           <fieldset v-show="wizard.s01.seen">
             <legend>{{wizard.s01.legend}}</legend>
               <div class="row mx-5">
-                <label class="col-6" v-show="wizard.s01.value == '' || wizard.s01.value == 'public'"><input type="radio" v-model="wizard.s01.value" value="public" @change="s01ValueSelected" /> 家產</label>
-                <label class="col-6" v-show="wizard.s01.value == '' || wizard.s01.value == 'private'"><input type="radio" v-model="wizard.s01.value" value="private" @change="s01ValueSelected" /> 私產</label>
+                <label class="col-6"><input type="radio" v-model="wizard.s01.value" value="public" @change="s01ValueSelected" /> 家產</label>
+                <label class="col-6"><input type="radio" v-model="wizard.s01.value" value="private" @change="s01ValueSelected" /> 私產</label>
               </div>
               <div class="mx-5 border-top border-primary pt-2" v-show="wizard.s01.value == 'public'">
                 <ol class="d-block">

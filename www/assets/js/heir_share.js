@@ -104,8 +104,7 @@ $(document).ready((e) => {
                     title: "步驟1，選擇事實發生區間",
                     legend: "被繼承人死亡時間",
                     seen: true,
-                    value: "",
-                    is76after: false
+                    value: ""
                 },
                 s01: {  // 光復前
                     title: "步驟2，家產 OR 私產？",
@@ -173,7 +172,7 @@ $(document).ready((e) => {
             },
             s0ValueSelected: function(e) {
                 switch(this.wizard.s0.value) {
-                    case "before":
+                    case -1:
                         this.wizard.s0.seen = false;
                         this.wizard.s01.seen = true;
                         this.wizard.s02.seen = false;
@@ -183,7 +182,8 @@ $(document).ready((e) => {
 
                         this.now_step.legend = "光復前【民國34年10月24日以前】";
                         break;
-                    case "after":
+                    case 0:
+                    case 1:
                         this.wizard.s0.seen = false;
                         this.wizard.s01.seen = false;
                         this.wizard.s02.seen = true;
@@ -191,7 +191,7 @@ $(document).ready((e) => {
                         this.now_step = this.wizard.s02;
                         this.prev_step = this.wizard.s0;
 
-                        this.now_step.legend = '光復後【民國74年6月' + (this.wizard.s0.is76after ? "5日以後】" : "4日以前】");
+                        this.now_step.legend = '光復後【民國74年6月' + (this.wizard.s0.value == 1 ? "5日以後】" : "4日以前】");
                         break;
                     default:
                         console.error(`Not supported: ${this.wizard.s0.value}.`);
