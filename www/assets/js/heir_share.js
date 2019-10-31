@@ -115,6 +115,7 @@ $(document).ready((e) => {
                 },
                 s02: {   // 光復後
                     title: "步驟2，輸入各項目人數",
+                    legend: "TODO",
                     seen: false,
                     value: ""
                 }
@@ -122,6 +123,7 @@ $(document).ready((e) => {
             heir_denominator: 1,
             prev_step: {},
             now_step: {},
+            breadcrumb: [this.s0],
             VueOK: true,
             debug: ""
         },
@@ -137,9 +139,10 @@ $(document).ready((e) => {
                     default:
                         break;
                 }
+                this.debug = `next Clicked ${e.target.tagName}`;
             },
             prev: function(e) {
-                this.debug = `PREV Clicked ${e.target.tagName}`;
+                this.debug = `prev Clicked ${e.target.tagName}`;
                 if (this.now_step !== this.wizard.s0 && this.prev_step.seen !== undefined) {
                     this.prev_step.seen = true;
                     this.prev_step.value = "";
