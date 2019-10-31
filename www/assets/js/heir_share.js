@@ -129,27 +129,35 @@ $(document).ready((e) => {
         },
         methods: {
             next: function(e) {
+                this.debug = `next triggered ${e.target.tagName}`;
                 switch(this.now_step) {
                     case this.wizard.s0:
                         console.log("next: Now on S0");
+                        this.s0ValueSelected.call(this, e);
                         break;
                     case this.wizard.s01:
                         console.log("next: Now on S01");
+                        this.s01ValueSelected.call(this, e);
                         break;
                     default:
                         break;
                 }
-                this.debug = `next Clicked ${e.target.tagName}`;
             },
             prev: function(e) {
-                this.debug = `prev Clicked ${e.target.tagName}`;
-                if (this.now_step !== this.wizard.s0 && this.prev_step.seen !== undefined) {
+                this.debug = `prev triggered ${e.target.tagName}`;
+                if (this.breadcrumb.length > 2) {
+                    this.prev_step = this.breadcrumb.pop();
+                    this.now_step = this.breadcrumb[this.breadcrumb.length - 1];
+                    this.prev_step.seen = false;
+                    this.now_step.seen = true;
+                    /*
                     this.prev_step.seen = true;
                     this.prev_step.value = "";
                     this.now_step.seen = false;
                     this.now_step.value = "";
                     this.now_step = this.prev_step;
-                    this.breadcrumb.pop();
+                    */
+                    
                 } 
             },
             filter: function(e) {
@@ -175,33 +183,32 @@ $(document).ready((e) => {
                 }
             },
             s0ValueSelected: function(e) {
+                this.prev_step = this.breadcrumb[this.breadcrumb.length - 1];
                 switch(this.wizard.s0.value) {
                     case -1:
-                        this.wizard.s0.seen = false;
-                        this.wizard.s01.seen = true;
-                        this.wizard.s02.seen = false;
-                        
                         this.now_step = this.wizard.s01;
-                        this.prev_step = this.wizard.s0;
-
                         this.now_step.legend = "光復前【民國34年10月24日以前】";
                         break;
                     case 0:
                     case 1:
-                        this.wizard.s0.seen = false;
-                        this.wizard.s01.seen = false;
-                        this.wizard.s02.seen = true;
-                        
                         this.now_step = this.wizard.s02;
-                        this.prev_step = this.wizard.s0;
-
                         this.now_step.legend = '光復後【民國74年6月' + (this.wizard.s0.value == 1 ? "5日以後】" : "4日以前】");
                         break;
                     default:
                         console.error(`Not supported: ${this.wizard.s0.value}.`);
+                        showModal({
+                            title: this.now_step.title,
+                            body: "請選擇事實發生區間！",
+                            size: "md"
+                        });
+                        return;
                 }
+                // hide all steps first
+                for (let step in this.wizard) {
+                    this.wizard[step].seen = false;
+                }
+                this.now_step.seen = true;
                 this.breadcrumb.push(this.now_step);
-                this.next.call(this, e);
             },
             s01ValueSelected: function(e) {
                 switch(this.wizard.s01.value) {
@@ -213,15 +220,20 @@ $(document).ready((e) => {
                         break;
                     default:
                         console.error(`Not supported: ${this.wizard.s01.value}.`);
+                        showModal({
+                            title: this.now_step.title,
+                            body: "請選擇【家產】或【私產】！",
+                            size: "md"
+                        });
+                        return;
                 }
-                this.next.call(this, e);
             }
         },
         mounted: function() {  // like jQuery ready
             $("#VueOK").toggleClass("d-none");
             this.now_step = this.wizard.s0;
             this.breadcrumb.push({
-                legend: "家"
+                legend: "/　"
             });
             this.breadcrumb.push(this.wizard.s0);
         }
