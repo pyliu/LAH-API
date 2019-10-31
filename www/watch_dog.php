@@ -140,7 +140,7 @@ blockquote img {
         </div>
         <div class="col-6">
           <fieldset>
-            <legend>調整案件欄位</legend>
+            <legend>調整登記案件欄位資料</legend>
             <select id="reg_case_update_year" name="_update_year">
               <option selected>108</option>
             </select>
@@ -429,7 +429,7 @@ blockquote img {
         display_id: "temp_clr_display"
       }));
 
-      // RM30 Update
+      // reg case data update
       $("#reg_case_update_code").on("change", xhrGetCaseLatestNum.bind({
         code_id: "reg_case_update_code",
         year_id: "reg_case_update_year",

@@ -1505,11 +1505,16 @@ let xhrRegCaseUpdateQuery = e => {
 
 let showRegCaseUpdateDetail = jsonObj => {
 	if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-		$("#reg_case_update_display").html("<strong class='text-danger'>" + jsonObj.message + "</strong>");
+		showModal({
+			title: "登記案件查詢錯誤",
+			body: "<strong class='text-danger'>" + jsonObj.message + "</strong>",
+			size: "md"
+		});
+		return;
 	} else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	}
-	let html = "辦理情形：<select id='reg_case_update_select'>";
+	let html = "辦理情形：<select id='reg_case_RM30_select'>";
 	html += '<option value="A">A: 初審</option>';
 	html += '<option value="B">B: 複審</option>';
 	html += '<option value="H">H: 公告</option>';
@@ -1529,11 +1534,11 @@ let showRegCaseUpdateDetail = jsonObj => {
 	html += '<option value="D">D: 展期</option>';
 	html += "</select>";
 	if (isEmpty(jsonObj.raw["RM31"])) {
-		html += " <button id='reg_case_update_button'>更新</button><br/>";
+		html += " <button id='reg_case_RM30_button'>更新</button><br/>";
 	} else {
 		html += " <strong class='text-danger'>本案已結案，無法變更狀態！</strong>";
 	}
-	html += "登記處理註記：<select id='reg_case_update_RM39_select'>";
+	html += "登記處理註記：<select id='reg_case_RM39_select'>";
 	html += '<option value=""></option>';
 	html += '<option value="B">B: 登錄開始</option>';
 	html += '<option value="R">R: 登錄完成</option>';
@@ -1545,15 +1550,15 @@ let showRegCaseUpdateDetail = jsonObj => {
 	html += '<option value="P">P: 競合暫停</option>';
 	html += "</select>";
 	if (isEmpty(jsonObj.raw["RM31"])) {
-		html += " <button id='reg_case_update_RM39_button'>更新</button><br/>";
+		html += " <button id='reg_case_RM39_button'>更新</button><br/>";
 	} else {
 		html += " <strong class='text-danger'>本案已結案，無法變更狀態！</strong>";
 	}
 	
 	html += "<p>" + jsonObj.tr_html + "</p>";
 	$("#reg_case_update_display").html(html);
-	$("#reg_case_update_select").val(jsonObj.raw["RM30"]);
-	$("#reg_case_update_RM39_select").val(jsonObj.raw["RM39"]);
+	$("#reg_case_RM30_select").val(jsonObj.raw["RM30"]);
+	$("#reg_case_RM39_select").val(jsonObj.raw["RM39"]);
 	// user info event
 	addUserInfoEvent();
 
@@ -1561,8 +1566,8 @@ let showRegCaseUpdateDetail = jsonObj => {
 	$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
 	$(".reg_case_id").attr("title", "點我取得更多資訊！");
 	// update button xhr event
-	$("#reg_case_update_button").off("click").on("click", e => {
-		let selected = $("#reg_case_update_select").val();
+	$("#reg_case_RM30_button").off("click").on("click", e => {
+		let selected = $("#reg_case_RM30_select").val();
 		if (selected != jsonObj.raw["RM30"]) {
 			xhrUpdateRegCaseCol({
 				rm01: jsonObj.raw["RM01"],
@@ -1574,37 +1579,12 @@ let showRegCaseUpdateDetail = jsonObj => {
 			});
 		}
 	});
-	$("#reg_case_update_RM39_button").off("click").on("click", e => {
-		let selected = $("#reg_case_update_RM39_select").val();
+	$("#reg_case_RM39_button").off("click").on("click", e => {
+		let selected = $("#reg_case_RM39_select").val();
 		if (isEmpty(jsonObj.raw["RM39"]) && isEmpty(selected)) {
 			return;
 		}
 		if (selected != jsonObj.raw["RM39"]) {
-			/*
-			$(e.target).remove();
-			let body = new FormData();
-			body.append("type", "reg_upd_rm39");
-			body.append("rm01", jsonObj.raw["RM01"]);
-			body.append("rm02", jsonObj.raw["RM02"]);
-			body.append("rm03", jsonObj.raw["RM03"]);
-			body.append("rm39", selected);
-			fetch("query_json_api.php", {
-				method: "POST",
-				body: body
-			}).then(response => {
-				return response.json();
-			}).then(jsonObj => {
-				console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新登記處理註記回傳狀態碼有問題【" + jsonObj.status + "】");
-				showModal({
-					body: "<strong class='text-success'>「登記處理註記」狀態更新完成</strong>",
-					title: "更新登記處理註記",
-					size: "sm"
-				});
-			}).catch(ex => {
-				console.error("showRegCaseUpdateDetail parsing failed", ex);
-				$("#reg_case_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
-			});
-			*/
 			xhrUpdateRegCaseCol({
 				rm01: jsonObj.raw["RM01"],
 				rm02: jsonObj.raw["RM02"],
