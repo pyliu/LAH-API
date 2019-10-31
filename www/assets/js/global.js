@@ -99,6 +99,10 @@ let showModal = opts => {
 	}
 	
 	let modal_element = $("#bs_modal_template");
+	if (modal_element.length == 0) {
+        initModalUI();
+        modal_element = $("#bs_modal_template");
+    }
 	
 	// Try to use Vue.js
 	window.modalApp.title = title;
@@ -371,6 +375,5 @@ $(document).ready(e => {
 	initTooltip();
 	initDatepicker();
 	initWatchdog();
-	initModalUI();
 });
 //]]>
