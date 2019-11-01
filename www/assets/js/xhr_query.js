@@ -1871,7 +1871,7 @@ let showUserInfoByRAW = tdoc_raw => {
 		}
 	}
 
-	html = '<a href="get_pho_img.php?name=' + tdoc_raw["AP_USER_NAME"] + '" target="_blank"><img src="get_pho_img.php?name=' + tdoc_raw["AP_USER_NAME"] + '" width="180" /></a> </br />';
+	html = '<a href="get_pho_img.php?name=' + tdoc_raw["AP_USER_NAME"] + '" target="_blank"><img class="img-thumbnail" src="get_pho_img.php?name=' + tdoc_raw["AP_USER_NAME"] + '" width="180" /></a> </br />';
 	html += tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + tdoc_raw["AP_OFF_DATE"] + "】</p>";
 	html += "ID：" + tdoc_raw["DocUserID"] + "<br />"
 		+ "電腦：" + tdoc_raw["AP_PCIP"] + "<br />"
