@@ -46,7 +46,7 @@
       
         <div id="VueOK" v-if="VueOK" data-toggle="collapse" class="container-fluid container-custom-width d-none">
           <!-- title and nav button area -->
-          <nav aria-label="breadcrumb">
+          <nav aria-label="breadcrumb" class="shadow">
             <ol class="breadcrumb">
               <li v-for="(item, index) in breadcrumb" v-bind:class="{active : index === (breadcrumb.length - 1)}">
                 <small>{{index == 0 ? item.legend : item.legend + "　/　"}} </small>
@@ -67,7 +67,7 @@
               <button class="btn btn-success btn-circle btn-custom" @click.stop="prev">&lt;</button>
               <button class="btn btn-success btn-circle btn-custom" @click.stop="next">&gt;</button>
             </div>
-            <span>＊</span> 被繼承人持分：
+            <span class="text-danger font-weight-bold">＊</span> 被繼承人持分：
             <!-- only add .lazy modifier will trigger onchange event (default is input event) -->
             <input type="text" data-filter-to="heir_denominator" v-model.lazy="heir_denominator" @change="filter" />
             分之 1
