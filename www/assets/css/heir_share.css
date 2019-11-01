@@ -122,3 +122,67 @@ legend {
 	font-size: 12px; 
 	text-align: center; 
 } 
+
+.qty .count {
+    color: #000;
+    display: inline-block;
+    vertical-align: top;
+    /* font-size: 25px; */
+    font-weight: 700;
+    /* line-height: 30px; */
+    padding: 0 2px;
+    min-width: 35px;
+    text-align: center;
+}
+.qty .plus {
+    cursor: pointer;
+    display: inline-block;
+    vertical-align: top;
+    color: white;
+    width: 20px;
+    height: 20px;
+    font: 20px/1 Arial,sans-serif;
+    text-align: center;
+    border-radius: 50%;
+    }
+.qty .minus {
+    cursor: pointer;
+    display: inline-block;
+    vertical-align: top;
+    color: white;
+    width: 20px;
+    height: 20px;
+    font: 20px/1 Arial,sans-serif;
+    text-align: center;
+    border-radius: 50%;
+    background-clip: padding-box;
+}
+.qty div {
+    text-align: center;
+}
+.qty .minus:hover{
+    background-color: #717fe0 !important;
+}
+.qty .plus:hover{
+    background-color: #717fe0 !important;
+}
+/*Prevent text selection*/
+.qty span{
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+.qty input{  
+    border: 0;
+    width: 10px;
+}
+
+.qty input::-webkit-outer-spin-button,
+.qty input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.qty input:disabled{
+    background-color:white;
+}

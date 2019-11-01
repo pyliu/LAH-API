@@ -95,7 +95,14 @@
                   <li>法定推定財產繼承人係<strong class="text-primary">男子</strong>直系卑親屬，以親等近者為優先。親等相同之<strong class="text-primary">男子</strong>有數人時，共同均分繼承。</li>
                   <li>無法定之推定戶主繼承人時，指定及選定之財產繼承人繼承。</li>
                 </ol>
-                人數：<input type="text" data-filter-to="wizard.s1.public_count" v-model.number="wizard.s1.public_count" @input="filter" /> 每人之應繼份為 <span class="text-primary">{{wizard.s1.public_count * heir_denominator}} 分之 1</span>。
+                <div class="qty">
+                  人數：
+                  <span class="minus bg-dark" @click="if (wizard.s1.public_count > 0) { wizard.s1.public_count -= 1; }">-</span>
+                  <input type="number" data-filter-to="wizard.s1.public_count" class="count" name="qty" value="1" v-model.number="wizard.s1.public_count" @input="filter">
+                  <span class="plus bg-dark" @click="wizard.s1.public_count += 1">+</span>
+                  每人之應繼份為 <span class="text-primary">{{wizard.s1.public_count * heir_denominator}} 分之 1</span>。
+                </div>
+                <!-- 人數：<input type="text" data-filter-to="wizard.s1.public_count" v-model.number="wizard.s1.public_count" @input="filter" /> 每人之應繼份為 <span class="text-primary">{{wizard.s1.public_count * heir_denominator}} 分之 1</span>。 -->
               </div>
               <div class="mx-5 border-top border-primary pt-2" v-show="wizard.s1.value == 'private'">
                 <h6>* 僅有法定繼承人，順序如下：</h6>
