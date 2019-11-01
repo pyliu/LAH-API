@@ -128,7 +128,7 @@ blockquote img {
           <fieldset>
             <legend>公告期限維護<small>(先行准登)</small></legend>
             <span id="prereg_query_display"></span>
-            <button id="prereg_clear_button" class="text-danger">清除准登</button>
+            <button id="prereg_clear_button" class="btn-outline-danger">清除准登</button>
             <button id="prereg_quote_button">備註</button>
             <blockquote id="prereg_quote" class="hide">
               <h5><span class="text-danger">※</span>注意：中壢所規定超過30件案件才能執行此功能，並於完成時須馬上關掉以免其他案件誤登。</h5>
@@ -299,7 +299,8 @@ blockquote img {
             <legend>規費資料集修正<small>(EXPAA)</small></legend>
             <label for="expaa_query_date" data-toggle='tooltip' title='欄位:AA01'>　　日期：</label>
             <input type="text" id="expaa_query_date" class="date_picker no-cache" name="expaa_query_date" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080426」。" data-placement="bottom" value="<?php echo $today; ?>" />
-            <button id="expaa_query_date_button">查詢</button><br />
+            <button id="expaa_query_date_button">查詢</button>
+            <button id="expaa_add_obsolete_button" title="新增作廢假資料以利空白規費單作廢" class="btn-outline-danger">作廢</button><br />
             <label for="expaa_query_number" data-toggle='tooltip' title='欄位:AA04'>電腦給號：</label>
             <input type="text" id="expaa_query_number" name="expaa_query_number" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
             <button id="expaa_query_button">查詢</button>

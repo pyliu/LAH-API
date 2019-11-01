@@ -49,7 +49,7 @@
           <nav aria-label="breadcrumb" class="shadow">
             <ol class="breadcrumb">
               <li v-for="(item, index) in breadcrumb" v-bind:class="{active : index === (breadcrumb.length - 1)}">
-                <small>{{index == 0 ? item.legend : item.legend + "　/　"}} </small>
+                <small>{{index == 0 ? item.legend : item.legend + "　/　"}}</small>
               </li>
             </ol>
           </nav>
