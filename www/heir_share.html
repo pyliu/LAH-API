@@ -67,7 +67,7 @@
               <button class="btn btn-success btn-circle btn-custom" @click.stop="prev">&lt;</button>
               <button class="btn btn-success btn-circle btn-custom" @click.stop="next">&gt;</button>
             </div>
-            被繼承人持分：
+            <span>＊</span> 被繼承人持分：
             <!-- only add .lazy modifier will trigger onchange event (default is input event) -->
             <input type="text" data-filter-to="heir_denominator" v-model.lazy="heir_denominator" @change="filter" />
             分之 1
