@@ -57,7 +57,7 @@ SELECT DISTINCT
   END) AS "結案與否"
 FROM
   -- CRSMS 只找相同年份的買賣、贈與(校對時間)之案件以加快查詢速度
-  (select * from MOICAS.CRSMS where RM07_1 LIKE '108%' AND RM09 in ('64', '65') AND RM56_1 LIKE '10807%') t,
+  (select * from MOICAS.CRSMS where RM07_1 LIKE '108%' AND RM09 in ('64', '65') AND RM56_1 LIKE '10810%') t,
   (select * from MOICAD.RLNID p where p.LCDE in ('2', '8', 'C', 'D') ) q, -- 代碼檔 09, 外國 人/法人
   (select * from MOICAD.RKEYN k where k.KCDE_1 = '06') r  -- 代碼檔 06，登記原因
 WHERE ( t.RM18 = q.LIDN OR t.RM21 = q.LIDN ) AND r.KCDE_2 = t.RM09

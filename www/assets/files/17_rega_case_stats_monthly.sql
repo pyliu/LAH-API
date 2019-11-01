@@ -15,5 +15,5 @@ SELECT DISTINCT -- REGA 登記主檔－土地建物登記統計檔 (SREGA)
 END)  AS "鄉鎮市區",
   AA16T AS "土地公告現值總額"
 FROM MOICAD.REGA t
-WHERE t.RA40 LIKE '10809%' and t.RE46 = '03' -- 03 中壢, 12 觀音
+WHERE t.RA40 LIKE '10810%' and t.RE46 = '03' -- 03 中壢, 12 觀音
 ORDER BY t.RA40;
