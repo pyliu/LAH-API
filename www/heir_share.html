@@ -84,20 +84,20 @@
           </fieldset>
 
           <!-- step 01 光復前 -->
-          <fieldset v-show="wizard.s01.seen">
-            <legend>{{wizard.s01.legend}}</legend>
+          <fieldset v-show="wizard.s1.seen">
+            <legend>{{wizard.s1.legend}}</legend>
               <div class="row mx-5">
-                <label class="col-6"><input type="radio" v-model="wizard.s01.value" value="public" @change="s01ValueSelected" /> 家產</label>
-                <label class="col-6"><input type="radio" v-model="wizard.s01.value" value="private" @change="s01ValueSelected" /> 私產</label>
+                <label class="col-6"><input type="radio" v-model="wizard.s1.value" value="public" @change="s1ValueSelected" /> 家產</label>
+                <label class="col-6"><input type="radio" v-model="wizard.s1.value" value="private" @change="s1ValueSelected" /> 私產</label>
               </div>
-              <div class="mx-5 border-top border-primary pt-2" v-show="wizard.s01.value == 'public'">
+              <div class="mx-5 border-top border-primary pt-2" v-show="wizard.s1.value == 'public'">
                 <ol class="d-block">
                   <li>法定推定財產繼承人係<strong class="text-primary">男子</strong>直系卑親屬，以親等近者為優先。親等相同之<strong class="text-primary">男子</strong>有數人時，共同均分繼承。</li>
                   <li>無法定之推定戶主繼承人時，指定及選定之財產繼承人繼承。</li>
                 </ol>
-                人數：<input type="text" data-filter-to="wizard.s01.public_count" v-model.number="wizard.s01.public_count" @input="filter" /> 每人之應繼份為 <span class="text-primary">{{wizard.s01.public_count * heir_denominator}} 分之 1</span>。
+                人數：<input type="text" data-filter-to="wizard.s1.public_count" v-model.number="wizard.s1.public_count" @input="filter" /> 每人之應繼份為 <span class="text-primary">{{wizard.s1.public_count * heir_denominator}} 分之 1</span>。
               </div>
-              <div class="mx-5 border-top border-primary pt-2" v-show="wizard.s01.value == 'private'">
+              <div class="mx-5 border-top border-primary pt-2" v-show="wizard.s1.value == 'private'">
                 <h6>* 僅有法定繼承人，順序如下：</h6>
                 <ol class="d-block">
                   <li>直系卑親屬，以親等近者為優先。親等相同之男子有數人時，共同均分之。</li>

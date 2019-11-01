@@ -106,7 +106,7 @@ $(document).ready((e) => {
                     seen: true,
                     value: ""
                 },
-                s01: {  // 光復前
+                s1: {  // 光復前
                     title: "步驟2，家產 OR 私產？",
                     legend: "被繼承財產種類",
                     seen: false,
@@ -135,9 +135,9 @@ $(document).ready((e) => {
                         console.log("next: Now on S0");
                         this.s0ValueSelected.call(this, e);
                         break;
-                    case this.wizard.s01:
-                        console.log("next: Now on S01");
-                        this.s01ValueSelected.call(this, e);
+                    case this.wizard.s1:
+                        console.log("next: Now on s1");
+                        this.s1ValueSelected.call(this, e);
                         break;
                     default:
                         break;
@@ -162,8 +162,8 @@ $(document).ready((e) => {
                     case "heir_denominator":
                         this.heir_denominator = val;
                         break;
-                    case "wizard.s01.public_count":
-                        this.wizard.s01.public_count = val;
+                    case "wizard.s1.public_count":
+                        this.wizard.s1.public_count = val;
                         break;
                     default:
                         console.log(`to: ${to}??`);
@@ -178,7 +178,7 @@ $(document).ready((e) => {
                 this.prev_step = this.breadcrumb[this.breadcrumb.length - 1];
                 switch(this.wizard.s0.value) {
                     case -1:
-                        this.now_step = this.wizard.s01;
+                        this.now_step = this.wizard.s1;
                         this.now_step.legend = "光復前【民國34年10月24日以前】";
                         break;
                     case 0:
@@ -202,16 +202,16 @@ $(document).ready((e) => {
                 this.now_step.seen = true;
                 this.breadcrumb.push(this.now_step);
             },
-            s01ValueSelected: function(e) {
-                switch(this.wizard.s01.value) {
+            s1ValueSelected: function(e) {
+                switch(this.wizard.s1.value) {
                     case "public":
-                        console.log(`S01: 家產 ${this.wizard.s01.value} selected`);
+                        console.log(`s1: 家產 ${this.wizard.s1.value} selected`);
                         break;
                     case "private":
-                        console.log(`S01: 私產 ${this.wizard.s01.value} selected`);
+                        console.log(`s1: 私產 ${this.wizard.s1.value} selected`);
                         break;
                     default:
-                        console.error(`Not supported: ${this.wizard.s01.value}.`);
+                        console.error(`Not supported: ${this.wizard.s1.value}.`);
                         showModal({
                             title: this.now_step.title,
                             body: "請選擇【家產】或【私產】！",
