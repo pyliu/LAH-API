@@ -1536,7 +1536,7 @@ let showRegCaseUpdateDetail = jsonObj => {
 	if (isEmpty(jsonObj.raw["RM31"])) {
 		html += " <button id='reg_case_RM30_button'>更新</button><br/>";
 	} else {
-		html += " <strong class='text-danger'>本案已結案，無法變更狀態！</strong>";
+		html += " <strong class='text-danger'>本案已結案，無法變更狀態！</strong><br/>";
 	}
 	html += "登記處理註記：<select id='reg_case_RM39_select'>";
 	html += '<option value=""></option>';
@@ -1552,7 +1552,7 @@ let showRegCaseUpdateDetail = jsonObj => {
 	if (isEmpty(jsonObj.raw["RM31"])) {
 		html += " <button id='reg_case_RM39_button'>更新</button><br/>";
 	} else {
-		html += " <strong class='text-danger'>本案已結案，無法變更狀態！</strong>";
+		html += " <strong class='text-danger'>本案已結案，無法變更狀態！</strong><br/>";
 	}
 	
 	html += "<p>" + jsonObj.tr_html + "</p>";

@@ -150,14 +150,6 @@ $(document).ready((e) => {
                     this.now_step = this.breadcrumb[this.breadcrumb.length - 1];
                     this.prev_step.seen = false;
                     this.now_step.seen = true;
-                    /*
-                    this.prev_step.seen = true;
-                    this.prev_step.value = "";
-                    this.now_step.seen = false;
-                    this.now_step.value = "";
-                    this.now_step = this.prev_step;
-                    */
-                    
                 } 
             },
             filter: function(e) {
