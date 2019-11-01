@@ -48,7 +48,7 @@
           <!-- title and nav button area -->
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-              <li v-for="(item, index) in breadcrumb">
+              <li v-for="(item, index) in breadcrumb" v-bind:class="{active : index === (breadcrumb.length - 1)}">
                 <small>{{index == 0 ? item.legend : item.legend + "　/　"}} </small>
               </li>
             </ol>
