@@ -143,16 +143,16 @@ $(document).ready((e) => {
                 },
                 template: `<span class="qty">
                     <span class="minus bg-dark" @click="minusClick">-</span>
-                    <input type="number" class="count" value="0" :value="count">
+                    <input type="number" class="count" value="0" :value="count" readonly>
                     <span class="plus bg-dark" @click="plusClick">+</span>
                 </span>`,
                 methods: {
-                    minusClick() {
+                    minusClick: function(e) {
                         if (this.count > 0) { this.count -= 1; }
                         // To emit input event to parent => v-model will use the event to update the value watched. 
                         this.$emit('input', this.count);
                     },
-                    plusClick() {
+                    plusClick: function(e) {
                         this.count += 1;
                         this.$emit('input', this.count);
                     }

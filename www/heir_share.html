@@ -106,9 +106,18 @@
                     直系卑親屬，以親等近者為優先。親等相同之男子有數人時，共同均分之。
                     <counter-input v-model="wizard.s1.private.child"></counter-input>
                   </li>
-                  <li>配偶</li>
-                  <li>直系尊親屬，親等不同以親等近者為先，同一親等有2人以上，共同均分之。</li>
-                  <li>戶主</li>
+                  <li>
+                    配偶
+                    <counter-input v-model="wizard.s1.private.spouse"></counter-input>
+                  </li>
+                  <li>
+                    直系尊親屬，親等不同以親等近者為先，同一親等有2人以上，共同均分之。
+                    <counter-input v-model="wizard.s1.private.parent"></counter-input>
+                  </li>
+                  <li>
+                    戶主
+                    <counter-input v-model="wizard.s1.private.household"></counter-input>
+                  </li>
                 </ol>
               </div>
           </fieldset>
