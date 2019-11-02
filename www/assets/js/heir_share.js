@@ -143,17 +143,17 @@ $(document).ready((e) => {
                 },
                 template: `<span class="qty">
                     <span class="minus bg-dark" @click="minusClick">-</span>
-                    <input type="number" class="count" value="0" :value="count" readonly>
+                    <input type="number" min=0 class="count" value="0" :value="count" readonly>
                     <span class="plus bg-dark" @click="plusClick">+</span>
                 </span>`,
                 methods: {
                     minusClick: function(e) {
-                        if (this.count > 0) { this.count -= 1; }
+                        if (this.count > 0) { this.count--; }
                         // To emit input event to parent => v-model will use the event to update the value watched. 
                         this.$emit('input', this.count);
                     },
                     plusClick: function(e) {
-                        this.count += 1;
+                        this.count++;
                         this.$emit('input', this.count);
                     }
                 },
@@ -187,28 +187,7 @@ $(document).ready((e) => {
             filter: function(e) {
                 let val = e.target.value.replace(/[^0-9]/g, "");    // remove non-digit chars
                 val = val.replace(/^0+/, '');   // remove leading zero
-                if (val == "" || val == undefined) {
-                    val = 1;
-                }
-                let to = $(e.target).data("filter-to");
-                switch(to) {
-                    case "heir_denominator":
-                        this.heir_denominator = val;
-                        break;
-                    case "wizard.s1.public.count":
-                        this.wizard.s1.public.count = val;
-                        break;
-                    case "wizard.s1.private.child":
-                        this.wizard.s1.private.child = val;
-                        break;
-                    default:
-                        console.log(`to: ${to}??`);
-                        showModal({
-                            title: "錯誤訊息",
-                            body: `to: ${to}, val: ${val}`,
-                            size: "sm"
-                        });
-                }
+                this.heir_denominator = val || 1;
             },
             s0ValueSelected: function(e) {
                 this.prev_step = this.breadcrumb[this.breadcrumb.length - 1];
