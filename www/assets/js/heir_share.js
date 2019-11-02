@@ -36,7 +36,7 @@ let showModal = opts => {
 		modal_element.one('shown.bs.modal', callback);
 	}
 
-	// backdrop: 'static' => not close by clicking outside dislog
+	// backdrop: 'static' => not close by clicking outside dialog
 	modal_element.modal({backdrop: 'static'});
 }
 
