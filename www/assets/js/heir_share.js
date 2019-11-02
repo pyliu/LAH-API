@@ -111,7 +111,7 @@ $(document).ready((e) => {
                     legend: "被繼承財產種類",
                     seen: false,
                     value: "",
-                    public_count: 1
+                    public: { count: 1 }
                 },
                 s02: {   // 光復後
                     title: "步驟2，輸入各項目人數",
@@ -162,8 +162,8 @@ $(document).ready((e) => {
                     case "heir_denominator":
                         this.heir_denominator = val;
                         break;
-                    case "wizard.s1.public_count":
-                        this.wizard.s1.public_count = val;
+                    case "wizard.s1.public.count":
+                        this.wizard.s1.public.count = val;
                         break;
                     default:
                         console.log(`to: ${to}??`);
