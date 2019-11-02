@@ -111,7 +111,13 @@ $(document).ready((e) => {
                     legend: "被繼承財產種類",
                     seen: false,
                     value: "",
-                    public: { count: 1 }
+                    public: { count: 1 },
+                    private: {
+                        child: 0,
+                        spouse: 0,
+                        parent: 0,
+                        household: 0
+                    }
                 },
                 s02: {   // 光復後
                     title: "步驟2，輸入各項目人數",
@@ -126,6 +132,32 @@ $(document).ready((e) => {
             breadcrumb: [],
             VueOK: true,
             debug: ""
+        },
+        components: {
+            "counter-input": {
+                data: function() {
+                    return {
+                        // parent use v-model syntax to get the value changed count
+                        count: 0
+                    }
+                },
+                template: `<span class="qty">
+                    <span class="minus bg-dark" @click="minusClick">-</span>
+                    <input type="number" class="count" value="0" :value="count">
+                    <span class="plus bg-dark" @click="plusClick">+</span>
+                </span>`,
+                methods: {
+                    minusClick() {
+                        if (this.count > 0) { this.count -= 1; }
+                        // To emit input event to parent => v-model will use the event to update the value watched. 
+                        this.$emit('input', this.count);
+                    },
+                    plusClick() {
+                        this.count += 1;
+                        this.$emit('input', this.count);
+                    }
+                },
+            }
         },
         methods: {
             next: function(e) {
@@ -153,8 +185,9 @@ $(document).ready((e) => {
                 } 
             },
             filter: function(e) {
-                let val = e.target.value.replace(/[^0-9]/g, "");
-                if (val == "" || val == "0" || val == 0) {
+                let val = e.target.value.replace(/[^0-9]/g, "");    // remove non-digit chars
+                val = val.replace(/^0+/, '');   // remove leading zero
+                if (val == "" || val == undefined) {
                     val = 1;
                 }
                 let to = $(e.target).data("filter-to");
@@ -164,6 +197,9 @@ $(document).ready((e) => {
                         break;
                     case "wizard.s1.public.count":
                         this.wizard.s1.public.count = val;
+                        break;
+                    case "wizard.s1.private.child":
+                        this.wizard.s1.private.child = val;
                         break;
                     default:
                         console.log(`to: ${to}??`);
