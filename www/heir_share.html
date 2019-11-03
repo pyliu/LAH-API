@@ -97,7 +97,7 @@
                 </ol>
                 人數：
                 <counter-input v-model="wizard.s1.public.count"></counter-input>
-                每人之應繼份為 <span class="text-primary">{{wizard.s1.public.count * heir_denominator}} 分之 1</span>。
+                <span v-show="wizard.s1.public.count > 0">每人之應繼份為 <span class="text-primary">{{wizard.s1.public.count * heir_denominator}} 分之 1</span>。</span>
               </div>
               <div class="mx-5 border-top border-primary pt-2" v-show="wizard.s1.value == 'private'">
                 <h6>* 僅有法定繼承人，順序如下：</h6>

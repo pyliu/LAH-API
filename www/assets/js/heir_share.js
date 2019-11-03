@@ -111,7 +111,7 @@ $(document).ready((e) => {
                     legend: "被繼承財產種類",
                     seen: false,
                     value: "",
-                    public: { count: 1 },
+                    public: { count: 0 },
                     private: {
                         child: 0,
                         spouse: 0,
