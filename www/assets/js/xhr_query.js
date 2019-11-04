@@ -1060,6 +1060,15 @@ let xhrUpdateExpaaAA100 = function(e) {
 	}
 }
 
+let xhrQueryObsoleteFees = e => {
+	// query first then do the creation
+
+}
+
+let xhrCreateDummyObsoleteFeesData = e => {
+
+}
+
 let xhrLoadSQL = e => {
 	let val = $("#preload_sql_select").val();
 

@@ -405,7 +405,7 @@ blockquote img {
       bindPressEnterEvent("#expaa_query_date", e => { $("#expaa_query_number").val(""); });
       bindPressEnterEvent("input[id*=expaa_query_", xhrGetExpaaData);
       // obselete event
-      $("#expaa_add_obsolete_button").on("click", xhrGetExpaaData);
+      $("#expaa_add_obsolete_button").on("click", xhrQueryObsoleteFees);
       
       // check diff xcase 
       $("#sync_x_case_button").on("click", xhrCompareXCase);
