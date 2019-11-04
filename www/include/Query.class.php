@@ -302,6 +302,27 @@ class Query {
 		return true;
 	}
 
+	public function getDummyObFees() {
+		$tw_date = new Datetime("now");
+		$tw_date->modify("-1911 year");
+		$this_year = ltrim($tw_date->format("Y"), "0");	// ex: 108
+
+		// suppose the obsolete fees request will not over 99 cases => 999900 ~ 999999
+		$this->db->parse("
+			select * from MOIEXP.EXPAA t
+			where aa01 like :bv_year || '%'
+			and aa04 like '9999%'
+			order by AA01 desc, AA04 desc
+		");
+		$this->db->bind(":bv_year", $this_year);
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
+	public function addDummyObFees($date, $pc_num, $operator, $fee_number) {
+		return true;
+	}
+
 	public function getForeignCasesByYearMonth($year_month) {
 		if (!filter_var($year_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;

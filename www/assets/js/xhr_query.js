@@ -1063,7 +1063,7 @@ let xhrUpdateExpaaAA100 = function(e) {
 let xhrQueryObsoleteFees = e => {
 	// query first then do the creation
 	let body = new FormData();
-	body.append("type", "get_ob_fees");
+	body.append("type", "get_dummy_ob_fees");
 
 	toggle(e.target);
 
@@ -1078,22 +1078,85 @@ let xhrQueryObsoleteFees = e => {
 	}).then(jsonObj => {
 		toggle(e.target);
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+			var now = new Date();
+			let last_pc_number = jsonObj.raw[0]["AA04"];
+			let html = `目前系統中(${now.getFullYear() - 1911}年度)的假資料有 ${jsonObj.data_count} 筆：<br /><ul>`;
+			for (let i = 0; i <jsonObj.data_count; i++) {
+				html += `<li>日期：${jsonObj.raw[i]["AA01"]}, 電腦給號：${jsonObj.raw[i]["AA04"]}, 收據編號：${jsonObj.raw[i]["AA05"]}, 原因：${jsonObj.raw[i]["AA104"]}, 作業人員：${jsonObj.raw[i]["AA39"]}</li>`;
+			}
+			html += "</ul><br />";
 
+			let today = (now.getFullYear() - 1911) +
+				("0" + (now.getMonth() + 1)).slice(-2) +
+				("0" + now.getDate()).slice(-2);
+
+			html += `下一筆假資料：<br />
+				※ 電腦給號：${++last_pc_number} <br />
+				※ 日期：${today} <br />
+			<button class="btn btn-outline-danger" id="add_dummy_expaa_btn">新增</button>`;
+			
+			showModal({
+				title: "查詢系統中的假資料",
+				body: html,
+				size: "lg",
+				callback: () => {
+					$("#add_dummy_expaa_btn").off("click").on("click", xhrCreateDummyObsoleteFeesData.bind({
+						pc_number: last_pc_number,
+						today: today,
+						operator: "TODO: e.g. HB1128",
+						fee_number: "TODO: e.g AB00099480"
+					}));
+				}
+			});
 		} else {
 			throw new Error(`查詢作廢規費回應不正常【${jsonObj.status}】`);
 		}
 	}).catch(ex => {
 		console.error("xhrQueryObsoleteFees parsing failed", ex);
 		showModal({
-			title: "錯誤訊息",
+			title: "錯誤訊息 - 查詢假規費資料",
 			body: ex.message,
 			size: "sm"
-		})
+		});
 	});
 }
 
-let xhrCreateDummyObsoleteFeesData = e => {
+let xhrCreateDummyObsoleteFeesData = function(e) {
+	$(e.target).remove();
+	let args = this;
+	let body = new FormData();
+	body.append("type", "create_dummy_ob_fees");
+	body.append("today", args.today);
+	body.append("pc_number", args.pc_number);
+	body.append("operator", args.operator);
+	body.append("fee_number", args.fee_number);
 
+	toggle(e.target);
+
+	fetch("query_json_api.php", {
+		method: "POST",
+		body: body
+	}).then(response => {
+		if (response.status != 200) {
+			throw new Error("XHR連線異常，回應非200");
+		}
+		return response.json();
+	}).then(jsonObj => {
+		closeModal(() => {
+			showModal({
+				title: "新增假規費資料",
+				body: `已於 <span class="text-info">${args.today}</span> 新增一筆電腦給號為 <span class="text-info">${args.pc_number}</span> 的假資料。`,
+				size: "md"
+			});
+		});
+	}).catch(ex => {
+		console.error("xhrCreateDummyObsoleteFeesData parsing failed", ex);
+		showModal({
+			title: "錯誤訊息 - 新增假規費資料",
+			body: ex.message,
+			size: "sm"
+		});
+	});
 }
 
 let xhrLoadSQL = e => {

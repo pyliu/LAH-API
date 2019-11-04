@@ -356,6 +356,42 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("更新規費欄位失敗【".$_POST["date"].", ".$_POST["number"].", ".$column.", ".$_POST["update_value"]."】");
 		}
 		break;
+	case "get_dummy_ob_fees":
+		$log->info("XHR [get_dummy_ob_fees] 查詢作廢規費假資料 請求");
+		$rows = $query->getDummyObFees();
+		$len = count($rows);
+		if ($len > 0) {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => $len,
+				"raw" => $rows,
+				"message" => "更新 ${column} 成功"
+			);
+			$log->info("XHR [get_dummy_ob_fees] 取得 ${len} 件假資料");
+			echo json_encode($result, 0);
+		} else {
+			$log->error("XHR [get_dummy_ob_fees] 本年度(${this_year})查無作廢規費假資料");
+			echoErrorJSONString("本年度(${this_year})查無作廢規費假資料");
+		}
+		break;
+	case "create_dummy_ob_fees":
+		$log->info("XHR [create_dummy_ob_fees] 新增作廢規費假資料 請求");
+		$pc_number = $query->addDummyObFees($_POST["today"], $_POST["pc_number"], $_POST["operator"], $_POST["fee_number"]);
+		if ($result_flag) {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => "0",
+				"pc_number" => $_POST["pc_number"],
+				"raw" => $result_flag,
+				"message" => "新增假資料成功"
+			);
+			$log->info("XHR [create_dummy_ob_fees] 新增假資料成功");
+			echo json_encode($result, 0);
+		} else {
+			$log->error("XHR [expaa_AA09_update/expaa_AA100_update] 更新規費欄位失敗【".$_POST["date"].", ".$_POST["number"].", ".$column.", ".$_POST["update_value"]."】");
+			echoErrorJSONString("更新規費欄位失敗【".$_POST["date"].", ".$_POST["number"].", ".$column.", ".$_POST["update_value"]."】");
+		}
+		break;
 	case "diff_xcase":
 		$log->info("XHR [diff_xcase] 查詢同步案件資料【".$_POST["id"]."】請求");
 		$rows = $query->getXCaseDiff($_POST["id"]);
