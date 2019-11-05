@@ -130,7 +130,8 @@ $(document).ready((e) => {
             prev_step: {},
             now_step: {},
             breadcrumb: [],
-            VueOK: true
+            VueOK: true,
+            debug: true
         },
         components: {
             "counter-input": {
