@@ -103,7 +103,7 @@ let showRegCaseDetail = (jsonObj) => {
 	showModal({
 		body: html,
 		title: "登記案件詳情",
-		size: "xl",
+		size: "lg",
 		callback: addUserInfoEvent
 	});
 }
