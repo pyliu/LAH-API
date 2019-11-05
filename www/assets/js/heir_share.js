@@ -107,7 +107,7 @@ $(document).ready((e) => {
                     value: ""
                 },
                 s1: {  // 光復前
-                    title: "步驟2，家產 OR 私產？",
+                    title: "步驟2，繼承財產分類",
                     legend: "被繼承財產種類",
                     seen: false,
                     value: "",
@@ -119,8 +119,8 @@ $(document).ready((e) => {
                         household: 0
                     }
                 },
-                s02: {   // 光復後
-                    title: "步驟2，輸入各項目人數",
+                s2: {   // 光復後
+                    title: "步驟2，選擇輸入繼承人數",
                     legend: "TODO",
                     seen: false,
                     value: ""
@@ -209,7 +209,7 @@ $(document).ready((e) => {
                         break;
                     case 0:
                     case 1:
-                        this.now_step = this.wizard.s02;
+                        this.now_step = this.wizard.s2;
                         this.now_step.legend = '光復後【民國74年6月' + (this.wizard.s0.value == 1 ? "5日以後】" : "4日以前】");
                         break;
                     default:
