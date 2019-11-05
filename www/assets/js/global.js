@@ -113,6 +113,7 @@ let showModal = opts => {
 	if (typeof callback == "function") {
 		modal_element.one('shown.bs.modal', callback);
 	}
+	modal_element.one('hidden.bs.modal', () => { window.modalApp.body = ""; });
 
 	// backdrop: 'static' => not close by clicking outside dislog
 	modal_element.modal({backdrop: 'static'});

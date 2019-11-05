@@ -73,9 +73,11 @@ let showRegCaseDetail = (jsonObj) => {
 
 		html += isEmpty(jsonObj.結案已否) ? "<div class='text-danger'><strong>尚未結案！</strong></div>" : "";
 
+		html += "<div class='row'>";
+		html += "<div class='col-6'>";
 		html += "收件時間：" + jsonObj.收件時間 + "<br/>";
 		html += "限辦期限：" + jsonObj.限辦期限 + "<br/>";
-		html += "作業人員：" + jsonObj.作業人員 + "<br/>";
+		html += "作業人員：<span class='user_tag' data-display-selector='#in_modal_display' data-name='" + jsonObj.作業人員 + "'>" + jsonObj.作業人員 + "</span><br/>";
 		html += "辦理情形：" + jsonObj.辦理情形 + "<br/>";
 		html += "登記原因：" + jsonObj.登記原因 + "<br/>";
 		html += "區域：" + area + "【" + jsonObj.raw.RM10 + "】<br/>";
@@ -92,7 +94,10 @@ let showRegCaseDetail = (jsonObj) => {
 		html += "義務人人數：" + jsonObj.義務人人數 + "<br/>";
 		html += "代理人統編：" + jsonObj.代理人統編 + "<br/>";
 		html += "代理人姓名：" + jsonObj.代理人姓名 + "<br/>";
-		html += "手機號碼：" + jsonObj.手機號碼 + "<br/>";
+		html += "手機號碼：" + jsonObj.手機號碼;
+		html += "</div>";
+		html += "<div id='in_modal_display' class='col-6'></div>";
+		html += "</div>";
 	}
 	
 	showModal({
@@ -1134,7 +1139,7 @@ let xhrQueryObsoleteFees = e => {
 			html += `</table>`;
 			
 			showModal({
-				title: "查詢系統中的假資料",
+				title: "規費作廢假資料",
 				body: html,
 				size: "lg",
 				callback: () => {
@@ -1154,7 +1159,7 @@ let xhrQueryObsoleteFees = e => {
 	}).catch(ex => {
 		console.error("xhrQueryObsoleteFees parsing failed", ex);
 		showModal({
-			title: "錯誤訊息 - 查詢假規費資料",
+			title: "錯誤訊息 - 假規費資料作業",
 			body: ex.message,
 			size: "sm"
 		});
@@ -1976,7 +1981,7 @@ let xhrSearchUsers = e => {
 	});
 }
 
-let showUserInfoByRAW = tdoc_raw => {
+let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 	let year = 31536000000;
 	let now = new Date();
 	let age = "";
@@ -2024,12 +2029,17 @@ let showUserInfoByRAW = tdoc_raw => {
 		+ "手機：" + tdoc_raw["AP_SEL"] + "<br />"
 		+ "到職：" + on_board_date + "<br />"
 		;
-	showModal({
-		body: html,
-		title: "使用者資訊",
-		size: "md",
-		class: tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "quit_bg"
-	});
+	
+	if ($(selector).length > 0) {
+		$(selector).html(html);
+	} else {
+		showModal({
+			body: html,
+			title: "使用者資訊",
+			size: "md",
+			class: tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "quit_bg"
+		});
+	}
 }
 
 let xhrQueryUserInfo = e => {
@@ -2044,6 +2054,8 @@ let xhrQueryUserInfo = e => {
 		name = name.replace(/[\?A-Za-z0-9\+]/g, "");
 	}
 	let id = trim(clicked_element.data("id"));
+	// use data-el HTML attribute to specify the display container, empty will use the modal popup window instead.
+	let el_selector = clicked_element.data("display-selector");
 
 	if (isEmpty(name) && isEmpty(id)) {
 		console.warn("Require query params are all empty, skip xhr querying. (add attr to the element => data-id=" + id + ", data-name=" + name + ")");
@@ -2067,7 +2079,7 @@ let xhrQueryUserInfo = e => {
 		let html = jsonObj.message;
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
 			let latest = jsonObj.data_count - 1;
-			showUserInfoByRAW(jsonObj.raw[latest]);
+			showUserInfoByRAW(jsonObj.raw[latest], el_selector);
 		} else {
 			console.warn(jsonObj.message);
 		}
