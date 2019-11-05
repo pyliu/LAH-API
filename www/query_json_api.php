@@ -376,7 +376,7 @@ switch ($_POST["type"]) {
 		break;
 	case "create_dummy_ob_fees":
 		$log->info("XHR [create_dummy_ob_fees] 新增作廢規費假資料 請求");
-		$pc_number = $query->addDummyObFees($_POST["today"], $_POST["pc_number"], $_POST["operator"], $_POST["fee_number"]);
+		$pc_number = $query->addDummyObFees($_POST["today"], $_POST["pc_number"], $_POST["operator"], $_POST["fee_number"], $_POST["reason"]);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -388,8 +388,8 @@ switch ($_POST["type"]) {
 			$log->info("XHR [create_dummy_ob_fees] 新增假資料成功");
 			echo json_encode($result, 0);
 		} else {
-			$log->error("XHR [expaa_AA09_update/expaa_AA100_update] 更新規費欄位失敗【".$_POST["date"].", ".$_POST["number"].", ".$column.", ".$_POST["update_value"]."】");
-			echoErrorJSONString("更新規費欄位失敗【".$_POST["date"].", ".$_POST["number"].", ".$column.", ".$_POST["update_value"]."】");
+			$log->error("XHR [create_dummy_ob_fees] 新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
+			echoErrorJSONString("新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
 		}
 		break;
 	case "diff_xcase":

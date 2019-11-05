@@ -319,7 +319,7 @@ class Query {
 		return $this->db->fetchAll();
 	}
 
-	public function addDummyObFees($date, $pc_num, $operator, $fee_number) {
+	public function addDummyObFees($date, $pc_num, $operator, $fee_number, $reason) {
 		return true;
 	}
 
