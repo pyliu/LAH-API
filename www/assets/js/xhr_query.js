@@ -1145,10 +1145,7 @@ let xhrQueryObsoleteFees = e => {
 				callback: () => {
 					$("#add_dummy_expaa_btn").off("click").on("click", xhrCreateDummyObsoleteFeesData.bind({
 						pc_number: last_pc_number,
-						today: today,
-						operator: $("#dummy_operator").val(),
-						fee_number: $("#dummy_fee_number").val(),
-						reason: $("#dummy_obsolete_reason").val()
+						today: today
 					}));
 					addUserInfoEvent();
 				}
@@ -1169,12 +1166,12 @@ let xhrQueryObsoleteFees = e => {
 let xhrCreateDummyObsoleteFeesData = function(e) {
 	let args = this;
 	let body = new FormData();
-	body.append("type", "create_dummy_ob_fees");
+	body.append("type", "add_dummy_ob_fees");
 	body.append("today", args.today);
 	body.append("pc_number", args.pc_number);
-	body.append("operator", args.operator);
-	body.append("fee_number", args.fee_number);
-	body.append("reason", args.reason);
+	body.append("operator", $("#dummy_operator").val());
+	body.append("fee_number", $("#dummy_fee_number").val());
+	body.append("reason", $("#dummy_obsolete_reason").val());
 
 	$(e.target).remove();
 
@@ -1190,7 +1187,7 @@ let xhrCreateDummyObsoleteFeesData = function(e) {
 		closeModal(() => {
 			showModal({
 				title: "新增假規費資料",
-				body: `已於 <span class="text-info">${args.today}</span> 新增一筆電腦給號為 <span class="text-info">${args.pc_number}</span> 的假資料。`,
+				body: jsonObj.message,
 				size: "md"
 			});
 		});

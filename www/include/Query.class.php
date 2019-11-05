@@ -320,6 +320,25 @@ class Query {
 	}
 
 	public function addDummyObFees($date, $pc_num, $operator, $fee_number, $reason) {
+		global $log;
+		if (empty($date) || empty($pc_num) || empty($operator) || empty($fee_number) || empty($reason)) {
+			$log->error(__METHOD__.": One of the parameters is empty. The system can not add obsolete fee expaa data.");
+			$log->warning(__METHOD__.": The input params: ${date}, ${pc_num}, ${operator}, ${fee_number}, ${reason}.");
+			return false;
+		}
+
+		$sql = "INSERT INTO MOIEXP.EXPAA (AA01,AA04,AA05,AA06,AA07,AA08,AA09,AA02,AA24,AA25,AA39,AA104) VALUES (:bv_date, :bv_pc_num, :bv_fee_num, '1', '0', '0', '1', :bv_date, :bv_date, :bv_year, :bv_operator, :bv_reason)";
+		$this->db->parse($sql);
+		$this->db->bind(":bv_date", $date);
+		$this->db->bind(":bv_year", substr($date, 0, 3));
+		$this->db->bind(":bv_pc_num", $pc_num);
+		$this->db->bind(":bv_fee_num", $fee_number);
+		$this->db->bind(":bv_operator", $operator);
+		$this->db->bind(":bv_reason", iconv("utf-8", "big5", $reason));
+
+		$log->info(__METHOD__.": 插入 SQL \"$sql\"");
+
+		$this->db->execute();
 		return true;
 	}
 

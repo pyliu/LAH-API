@@ -374,21 +374,21 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("本年度(${this_year})查無作廢規費假資料");
 		}
 		break;
-	case "create_dummy_ob_fees":
-		$log->info("XHR [create_dummy_ob_fees] 新增作廢規費假資料 請求");
-		$pc_number = $query->addDummyObFees($_POST["today"], $_POST["pc_number"], $_POST["operator"], $_POST["fee_number"], $_POST["reason"]);
+	case "add_dummy_ob_fees":
+		$log->info("XHR [add_dummy_ob_fees] 新增作廢規費假資料 請求");
+		$result_flag = $query->addDummyObFees($_POST["today"], $_POST["pc_number"], $_POST["operator"], $_POST["fee_number"], $_POST["reason"]);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => "0",
 				"pc_number" => $_POST["pc_number"],
 				"raw" => $result_flag,
-				"message" => "新增假資料成功"
+				"message" => "新增假資料成功【".$_POST["today"].", ".$_POST["pc_number"]."】"
 			);
-			$log->info("XHR [create_dummy_ob_fees] 新增假資料成功");
+			$log->info("XHR [add_dummy_ob_fees] 新增假資料成功");
 			echo json_encode($result, 0);
 		} else {
-			$log->error("XHR [create_dummy_ob_fees] 新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
+			$log->error("XHR [add_dummy_ob_fees] 新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
 			echoErrorJSONString("新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
 		}
 		break;
