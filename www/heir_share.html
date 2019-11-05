@@ -104,19 +104,23 @@
                 <ol class="d-block">
                   <li v-show="wizard.s1.private.spouse == 0 && wizard.s1.private.parent == 0 && wizard.s1.private.household == 0">
                     直系卑親屬，以親等近者為優先。親等相同之男子有數人時，共同均分之。
-                    <counter-input v-model="wizard.s1.private.child"></counter-input>
+                    <counter-input v-model="wizard.s1.private.child"></counter-input> <br />
+                    <span v-show="wizard.s1.private.child > 0">每人之應繼份為 <span class="text-primary">{{wizard.s1.private.child * heir_denominator}} 分之 1</span>。</span>
                   </li>
                   <li v-show="wizard.s1.private.child == 0 && wizard.s1.private.parent == 0 && wizard.s1.private.household == 0">
                     配偶
-                    <counter-input max="1" v-model="wizard.s1.private.spouse"></counter-input>
+                    <counter-input max="1" v-model="wizard.s1.private.spouse"></counter-input> <br />
+                    <span v-show="wizard.s1.private.spouse > 0">每人之應繼份為 <span class="text-primary">{{wizard.s1.private.spouse * heir_denominator}} 分之 1</span>。</span>
                   </li>
                   <li v-show="wizard.s1.private.spouse == 0 && wizard.s1.private.child == 0 && wizard.s1.private.household == 0">
                     直系尊親屬，親等不同以親等近者為先，同一親等有2人以上，共同均分之。
-                    <counter-input v-model="wizard.s1.private.parent"></counter-input>
+                    <counter-input v-model="wizard.s1.private.parent"></counter-input> <br />
+                    <span v-show="wizard.s1.private.parent > 0">每人之應繼份為 <span class="text-primary">{{wizard.s1.private.parent * heir_denominator}} 分之 1</span>。</span>
                   </li>
                   <li v-show="wizard.s1.private.spouse == 0 && wizard.s1.private.parent == 0 && wizard.s1.private.child == 0">
                     戶主
-                    <counter-input max="1" v-model="wizard.s1.private.household"></counter-input>
+                    <counter-input max="1" v-model="wizard.s1.private.household"></counter-input> <br />
+                    <span v-show="wizard.s1.private.household > 0">每人之應繼份為 <span class="text-primary">{{wizard.s1.private.household * heir_denominator}} 分之 1</span>。</span>
                   </li>
                 </ol>
               </div>
