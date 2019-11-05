@@ -102,21 +102,21 @@
               <div class="mx-5 border-top border-primary pt-2" v-show="wizard.s1.value == 'private'">
                 <h6>* 僅有法定繼承人，順序如下：</h6>
                 <ol class="d-block">
-                  <li>
+                  <li v-show="wizard.s1.private.spouse == 0 && wizard.s1.private.parent == 0 && wizard.s1.private.household == 0">
                     直系卑親屬，以親等近者為優先。親等相同之男子有數人時，共同均分之。
                     <counter-input v-model="wizard.s1.private.child"></counter-input>
                   </li>
-                  <li>
+                  <li v-show="wizard.s1.private.child == 0 && wizard.s1.private.parent == 0 && wizard.s1.private.household == 0">
                     配偶
-                    <counter-input v-model="wizard.s1.private.spouse"></counter-input>
+                    <counter-input max="1" v-model="wizard.s1.private.spouse"></counter-input>
                   </li>
-                  <li>
+                  <li v-show="wizard.s1.private.spouse == 0 && wizard.s1.private.child == 0 && wizard.s1.private.household == 0">
                     直系尊親屬，親等不同以親等近者為先，同一親等有2人以上，共同均分之。
                     <counter-input v-model="wizard.s1.private.parent"></counter-input>
                   </li>
-                  <li>
+                  <li v-show="wizard.s1.private.spouse == 0 && wizard.s1.private.parent == 0 && wizard.s1.private.child == 0">
                     戶主
-                    <counter-input v-model="wizard.s1.private.household"></counter-input>
+                    <counter-input max="1" v-model="wizard.s1.private.household"></counter-input>
                   </li>
                 </ol>
               </div>

@@ -134,6 +134,7 @@ $(document).ready((e) => {
         },
         components: {
             "counter-input": {
+                props: [ "max", "min" ],
                 data: function() {
                     return {
                         // parent use v-model syntax to get the value changed count
@@ -142,17 +143,27 @@ $(document).ready((e) => {
                 },
                 template: `<span class="qty">
                     <span class="minus bg-dark" @click="minusClick">-</span>
-                    <input type="number" min=0 class="count" value="0" :value="count" readonly>
+                    <input type="number" class="count" value="0" :value="count" readonly>
                     <span class="plus bg-dark" @click="plusClick">+</span>
                 </span>`,
                 methods: {
                     minusClick: function(e) {
-                        if (this.count > 0) { this.count--; }
+                        if (this.min) {
+                            if (this.count > this.min) { this.count--; }
+                        } else {
+                            // default limit the min to 0
+                            if (this.count > 0) { this.count--; }
+                        }
+                        
                         // To emit input event to parent => v-model will use the event to update the value watched. 
                         this.$emit('input', this.count);
                     },
                     plusClick: function(e) {
-                        this.count++;
+                        if (this.max) {
+                            if (this.count < this.max) { this.count++; }
+                        } else {
+                            this.count++;
+                        }
                         this.$emit('input', this.count);
                     }
                 },
