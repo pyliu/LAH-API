@@ -1087,27 +1087,29 @@ let xhrQueryObsoleteFees = e => {
 			html = `下一筆假資料：<br />
 				※ 電腦給號：${++last_pc_number} <br />
 				※ 日期：${today} <br />
-				<div class="row">
-					<div class="input-group input-group-sm col-6">
+				<div class="form-row">
+					<div class="input-group input-group-sm col-3">
 						<div class="input-group-prepend">
 							<span class="input-group-text bg-danger text-white" id="inputGroup-operator">作業人員</span>
 						</div>
-						<input id="dummy_operator" type="text" placeholder="e.g. HB1128" class="form-control" aria-label="作業人員" aria-describedby="inputGroup-operator" required>
+						<input id="dummy_operator" type="text" placeholder="HB1128" class="form-control" aria-label="作業人員" aria-describedby="inputGroup-operator" required>
 					</div>
-					<div class="input-group input-group-sm col-6">
+					<div class="input-group input-group-sm col-3">
 						<div class="input-group-prepend">
 							<span class="input-group-text bg-danger text-white" id="inputGroup-fee-number">收據號碼</span>
 						</div>
-						<input id="dummy_fee_number" type="text" placeholder="e.g AB00099480" class="form-control" aria-label="收據號碼" aria-describedby="inputGroup-fee-number" required>
+						<input id="dummy_fee_number" type="text" placeholder="AB00099480" class="form-control" aria-label="收據號碼" aria-describedby="inputGroup-fee-number" required>
 					</div>
-				</div>
-				<div class="input-group input-group-sm my-1">
-					<div class="input-group-prepend">
-						<span class="input-group-text bg-danger text-white" id="inputGroup-obsolete-reason">作廢原因</span>
+					<div class="input-group input-group-sm col">
+						<div class="input-group-prepend">
+							<span class="input-group-text bg-danger text-white" id="inputGroup-obsolete-reason">作廢原因</span>
+						</div>
+						<input id="dummy_obsolete_reason" type="text" placeholder="e.g 空白單據作廢" class="form-control" aria-label="作廢原因" aria-describedby="inputGroup-obsolete-reason" required>
 					</div>
-					<input id="dummy_obsolete_reason" type="text" placeholder="e.g 空白單據作廢" class="form-control" aria-label="作廢原因" aria-describedby="inputGroup-obsolete-reason" required>
-				</div>
-				<button class="btn btn-outline-success" id="add_dummy_expaa_btn">新增</button>`;
+					<div class="btn-group-sm col-2">
+						<button class="btn btn-outline-success" id="add_dummy_expaa_btn">新增</button>
+					</div>
+				</div>`;
 
 			html += `<hr>目前系統中(${now.getFullYear() - 1911}年度)的假資料有 ${jsonObj.data_count} 筆：<br />`;
 			html += `<table class="table text-center">
