@@ -1143,7 +1143,7 @@ let xhrQueryObsoleteFees = e => {
 				body: html,
 				size: "lg",
 				callback: () => {
-					$("#add_dummy_expaa_btn").off("click").on("click", xhrCreateDummyObsoleteFeesData.bind({
+					$("#add_dummy_expaa_btn").off("click").on("click", xhrAddDummyObsoleteFeesData.bind({
 						pc_number: last_pc_number,
 						today: today
 					}));
@@ -1163,15 +1163,29 @@ let xhrQueryObsoleteFees = e => {
 	});
 }
 
-let xhrCreateDummyObsoleteFeesData = function(e) {
+let xhrAddDummyObsoleteFeesData = function(e) {
+	let operator = $("#dummy_operator").val().replace(/[^A-Za-z0-9]/g, "");
+	let fee_number = $("#dummy_fee_number").val().replace(/[^A-Za-z0-9]/g, "");
+	let reason = $("#dummy_obsolete_reason").val().replace(/[\'\"]/g, "");
+
+	if (isEmpty(operator) || isEmpty(fee_number) || isEmpty(reason)) {
+		alert("需求欄位有問題，請檢查！");
+		return false;
+	}
+	
+	if (!confirm("確定要新增一個新的假資料？")) {
+		return false;
+	}
+
+
 	let args = this;
 	let body = new FormData();
 	body.append("type", "add_dummy_ob_fees");
 	body.append("today", args.today);
 	body.append("pc_number", args.pc_number);
-	body.append("operator", $("#dummy_operator").val());
-	body.append("fee_number", $("#dummy_fee_number").val());
-	body.append("reason", $("#dummy_obsolete_reason").val());
+	body.append("operator", operator);
+	body.append("fee_number",fee_number);
+	body.append("reason", reason);
 
 	$(e.target).remove();
 
@@ -1192,7 +1206,7 @@ let xhrCreateDummyObsoleteFeesData = function(e) {
 			});
 		});
 	}).catch(ex => {
-		console.error("xhrCreateDummyObsoleteFeesData parsing failed", ex);
+		console.error("xhrAddDummyObsoleteFeesData parsing failed", ex);
 		showModal({
 			title: "錯誤訊息 - 新增假規費資料",
 			body: ex.message,
