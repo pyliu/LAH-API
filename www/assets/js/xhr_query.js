@@ -1104,10 +1104,10 @@ let xhrQueryObsoleteFees = e => {
 						<div class="input-group-prepend">
 							<span class="input-group-text bg-danger text-white" id="inputGroup-obsolete-reason">作廢原因</span>
 						</div>
-						<input id="dummy_obsolete_reason" type="text" placeholder="e.g 空白單據作廢" class="form-control" aria-label="作廢原因" aria-describedby="inputGroup-obsolete-reason" required>
+						<input id="dummy_obsolete_reason" type="text" placeholder="空白單據作廢" class="form-control" aria-label="作廢原因" aria-describedby="inputGroup-obsolete-reason" required>
 					</div>
-					<div class="btn-group-sm col-2">
-						<button class="btn btn-outline-success" id="add_dummy_expaa_btn">新增</button>
+					<div class="btn-group-sm col-1" role="group">
+						<button class="btn btn-outline-primary" id="add_dummy_expaa_btn">新增</button>
 					</div>
 				</div>`;
 
@@ -1128,7 +1128,7 @@ let xhrQueryObsoleteFees = e => {
 					<td>${jsonObj.raw[i]["AA04"]}</td>
 					<td>${jsonObj.raw[i]["AA05"]}</td>
 					<td>${jsonObj.raw[i]["AA104"]}</td>
-					<td>${jsonObj.raw[i]["AA39"]}</td>
+					<td><span data-id="${jsonObj.raw[i]["AA39"]}" class="user_tag">${jsonObj.raw[i]["AA39"]}</span></td>
 				</tr>`;
 			}
 			html += `</table>`;
@@ -1145,6 +1145,7 @@ let xhrQueryObsoleteFees = e => {
 						fee_number: $("#dummy_fee_number").val(),
 						reason: $("#dummy_obsolete_reason").val()
 					}));
+					addUserInfoEvent();
 				}
 			});
 		} else {
@@ -2038,11 +2039,14 @@ let xhrQueryUserInfo = e => {
 		clicked_element = $(clicked_element.closest(".user_tag"));
 	}
 
-	let name = $.trim(clicked_element.data("name").replace(/[\?A-Za-z0-9\+]/g, ""));
+	let name = $.trim(clicked_element.data("name"));
+	if (name) {
+		name = name.replace(/[\?A-Za-z0-9\+]/g, "");
+	}
 	let id = trim(clicked_element.data("id"));
 
-	if (isEmpty(name) || isEmpty(id)) {
-		console.warn("Require query params are empty, skip xhr querying. (" + id + ", " + name + ")");
+	if (isEmpty(name) && isEmpty(id)) {
+		console.warn("Require query params are all empty, skip xhr querying. (add attr to the element => data-id=" + id + ", data-name=" + name + ")");
 		return;
 	}
 
