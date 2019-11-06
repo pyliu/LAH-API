@@ -176,48 +176,58 @@ fieldset fieldset legend {
         <div class="col-6">
           <fieldset>
             <legend>報表匯出</legend>
-            <label for="preload_sql_select">預載查詢：</label>
-            <select id="preload_sql_select">
-              <optgroup label="==== 所內登記案件統計 ====">
-                <option value="01_reg_case_monthly.sql">每月案件統計</option>
-                <option value="11_reg_reason_query_monthly.sql">每月案件 by 登記原因</option>
-                <option value="02_reg_remote_case_monthly.sql">每月遠途先審案件</option>
-                <option value="03_reg_other_office_case_monthly.sql">每月跨所案件【本所代收】</option>
-                <option value="04_reg_other_office_case_2_monthly.sql">每月跨所案件【非本所收件】</option>
-                <option value="09_reg_other_office_case_3_monthly.sql">每月跨所子號案件【本所代收】</option>
-                <option value="10_reg_reason_stats_monthly.sql">每月跨所各登記原因案件統計 by 收件所</option>
-                <option value="07_reg_foreign_case_monthly.sql">每月權利人＆義務人為外國人案件</option>
-                <option value="07_regf_foreign_case_monthly.sql">每月外國人地權登記統計</option>
-                <option value="17_rega_case_stats_monthly.sql">每月土地建物登記統計檔</option>
-                <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
-              </optgroup>
-              <optgroup label="==== 所內其他統計 ====">
-                <option value="16_sur_close_delay_case.sql">已結卻延期之複丈案件</option>
-                <option value="14_sur_rain_delay_case.sql">因雨延期測量案件數</option>
-                <option value="05_adm_area_size.sql">段小段面積統計</option>
-                <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
-                <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
-                <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
-                <option value="15_reg_land_stats.sql">某段之土地所有權人清冊資料</option>
-                <option value="18_cross_county_crsms.sql">全國跨縣市收件資料(108年)</option>
-              </optgroup>
-              <optgroup label="==== 地籍資料 ====" class="bg-success text-white">
-                <option value="txt_AI00301.sql">AI00301 - 土地標示部資料</option>
-                <option value="txt_AI00401.sql">AI00401 - 土地所有權部資料</option>
-                <option value="txt_AI00601_B.sql">AI00601 - 土地管理者資料</option>
-                <option value="txt_AI00601_E.sql">AI00601 - 建物管理者資料</option>
-                <option value="txt_AI00701.sql">AI00701 - 建物標示部資料</option>
-                <option value="txt_AI00801.sql">AI00801 - 基地坐落資料</option>
-                <option value="txt_AI00901.sql">AI00901 - 建物分層及附屬資料</option>
-                <option value="txt_AI01001.sql">AI01001 - 主建物與共同使用部分資料</option>
-                <option value="txt_AI01101.sql">AI01101 - 建物所有權部資料</option>
-                <option value="txt_AI02901_B.sql">AI02901 - 土地各部別之其他登記事項列印</option>
-                <option value="txt_AI02901_E.sql">AI02901 - 建物各部別之其他登記事項列印</option>
-              </optgroup>
-            </select>
-            <textarea id="sql_csv_text" class="mw-100 w-100" style="height: 150px" placeholder="輸入SELECT SQL ..."></textarea>
-            <button id="sql_export_button">匯出</button>
-            <button id="sql_csv_quote_button">備註</button>
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroup-preload_sql_select">預載查詢</span>
+                  </div>
+                  <select id="preload_sql_select" name="preload_sql_select" class="form-control" required>
+                    <optgroup label="==== 所內登記案件統計 ====">
+                      <option value="01_reg_case_monthly.sql">每月案件統計</option>
+                      <option value="11_reg_reason_query_monthly.sql">每月案件 by 登記原因</option>
+                      <option value="02_reg_remote_case_monthly.sql">每月遠途先審案件</option>
+                      <option value="03_reg_other_office_case_monthly.sql">每月跨所案件【本所代收】</option>
+                      <option value="04_reg_other_office_case_2_monthly.sql">每月跨所案件【非本所收件】</option>
+                      <option value="09_reg_other_office_case_3_monthly.sql">每月跨所子號案件【本所代收】</option>
+                      <option value="10_reg_reason_stats_monthly.sql">每月跨所各登記原因案件統計 by 收件所</option>
+                      <option value="07_reg_foreign_case_monthly.sql">每月權利人＆義務人為外國人案件</option>
+                      <option value="07_regf_foreign_case_monthly.sql">每月外國人地權登記統計</option>
+                      <option value="17_rega_case_stats_monthly.sql">每月土地建物登記統計檔</option>
+                      <option value="08_reg_workstation_case.sql">外站人員謄本核發量</option>
+                    </optgroup>
+                    <optgroup label="==== 所內其他統計 ====">
+                      <option value="16_sur_close_delay_case.sql">已結卻延期之複丈案件</option>
+                      <option value="14_sur_rain_delay_case.sql">因雨延期測量案件數</option>
+                      <option value="05_adm_area_size.sql">段小段面積統計</option>
+                      <option value="06_adm_area_blow_count.sql">段小段土地標示部筆數</option>
+                      <option value="12_prc_not_F_case.sql">未完成地價收件資料</option>
+                      <option value="13_log_court_cert.sql">法院謄本申請LOG檔查詢 BY 段、地建號</option>
+                      <option value="15_reg_land_stats.sql">某段之土地所有權人清冊資料</option>
+                      <option value="18_cross_county_crsms.sql">全國跨縣市收件資料(108年)</option>
+                    </optgroup>
+                    <optgroup label="==== 地籍資料 ====" class="bg-success text-white">
+                      <option value="txt_AI00301.sql">AI00301 - 土地標示部資料</option>
+                      <option value="txt_AI00401.sql">AI00401 - 土地所有權部資料</option>
+                      <option value="txt_AI00601_B.sql">AI00601 - 土地管理者資料</option>
+                      <option value="txt_AI00601_E.sql">AI00601 - 建物管理者資料</option>
+                      <option value="txt_AI00701.sql">AI00701 - 建物標示部資料</option>
+                      <option value="txt_AI00801.sql">AI00801 - 基地坐落資料</option>
+                      <option value="txt_AI00901.sql">AI00901 - 建物分層及附屬資料</option>
+                      <option value="txt_AI01001.sql">AI01001 - 主建物與共同使用部分資料</option>
+                      <option value="txt_AI01101.sql">AI01101 - 建物所有權部資料</option>
+                      <option value="txt_AI02901_B.sql">AI02901 - 土地各部別之其他登記事項列印</option>
+                      <option value="txt_AI02901_E.sql">AI02901 - 建物各部別之其他登記事項列印</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="filter-btn-group col">
+                  <button id="sql_export_button" class="btn btn-sm btn-primary">匯出</button>
+                  <button id="sql_csv_quote_button" class="btn btn-sm btn-light">備註</button>
+                </div>
+            </div>
+            <div class="form-row mt-1">
+              <textarea id="sql_csv_text" class="form-control" rows="5" placeholder="輸入SELECT SQL ..."></textarea>
+            </div>
             <blockquote id="sql_report_blockquote" class="hide">
               <p>輸入SELECT SQL指令匯出查詢結果。</p>
               <img src="assets/img/csv_export_method.jpg" class="w-auto" />
@@ -228,32 +238,36 @@ fieldset fieldset legend {
           <fieldset>
             <legend>使用者＆信差訊息</legend>
             <div class="float-clear">
-              <label for="msg_who">
-              　關鍵字：
-              </label>
-              <input type="text" id="msg_who" name="msg_who" placeholder="HB0541" value="HB054" title="ID、姓名、IP" />
-              <button id="search_user_button">搜尋</button>
-              <span id="filter_info" class="text-info">
-                <?php
-                  echo count($operators); 
-                ?>筆
-              </span>
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-msg_who">關鍵字</span>
+                </div>
+                <input type="text" id="msg_who" name="msg_who" class="form-control" placeholder="HB0541" value="HB054" title="ID、姓名、IP" />
+              </div>
+              <div class="filter-btn-group col">
+                <button id="search_user_button" class="btn btn-sm btn-primary">搜尋</button>
+                <button id="msg_button" class="btn btn-sm btn-secondary">傳送訊息</button>
+                <span id="filter_info" class="text-muted small"><?php echo count($operators); ?>筆</span>
+              </div>
             </div>
-            <div>
-              <label for="msg_title">訊息標題：</label>
-              <input type="text" name="msg_title" id="msg_title" placeholder="訊息的標題" />
+            <div class="form-row mt-1">
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-msg_title">訊息標題</span>
+                </div>
+                <input type="text" id="msg_title" name="msg_title" class="form-control" placeholder="訊息的標題" />
+              </div>
             </div>
-            <div>
-              <label for="msg_content">訊息內容：</label>
-              <button id="msg_button" class="ld-ext-left"><span class="ld ld-ring ld-cycle loader-icon"></span>傳送訊息</button><br />
-              <textarea id="msg_content" name="msg_content" class="w-100" placeholder="訊息內容(最多500字)"></textarea>
+            <div class="form-row mt-1">
+              <textarea class="form-control" id="msg_content" rows="5" placeholder="訊息內容(最多500字)"></textarea>
             </div>
             <div id="user_list">
             <?php
               foreach ($operators as $id => $name) {
                 // prevent rare word issue
                 $name = preg_replace("/[a-zA-Z?0-9+]+/", "", $name);
-                echo "<div class='float-left m-2 user_tag hide' style='width: 150px' data-id='".$id."' data-name='".($name ?? "XXXXXX")."'>".$id.": ".($name ?? "XXXXXX")."</div>";
+                echo "<div class='float-left m-2 user_tag hide' style='font-size: .875rem;' data-id='".$id."' data-name='".($name ?? "XXXXXX")."'>".$id.": ".($name ?? "XXXXXX")."</div>";
               }
             ?>
             </div>
