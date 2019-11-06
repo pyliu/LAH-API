@@ -285,11 +285,11 @@ fieldset fieldset legend {
                 <div class="input-group-prepend">
                   <span class="input-group-text" id="inputGroup-id_query_text">統編</span>
                 </div>
-                <input type="text" id="id_query_text" name="id_query_text" data-toggle='tooltip' title='輸入統編' class="form-control id_query_grp" placeholder="A123456789" />
+                <input type="text" id="id_query_text" name="id_query_text" class="form-control id_query_grp" placeholder="A123456789" />
               </div>
               <div class="filter-btn-group col">
                 <button id="id_query_button" class="btn btn-sm btn-primary">查詢</button>
-                <button id="id_quote_button" class="btn btn-sm btn-secondary">備註</button>
+                <button id="id_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>
             
@@ -316,10 +316,21 @@ fieldset fieldset legend {
         <div class="col-6">
           <fieldset>
             <legend>記錄檔</legend>
-            <input class="no-cache" id="log_date_text" name="log_date_text" type="text" title='輸入日期' value="<?php echo $today_ad; ?>" />
-            <button id="log_button">下載</button>
-            <button id="log_zip_button">壓縮</button>
-            <button id="log_quote_button">備註</button>
+
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-log_date_text">日期</span>
+                </div>
+                <input type="text" id="log_date_text" name="log_date_text" class="form-control no-cache" value="<?php echo $today_ad; ?>" />
+              </div>
+              <div class="filter-btn-group col">
+                <button id="log_button" class="btn btn-sm btn-primary">下載</button>
+                <button id="log_zip_button" class="btn btn-sm btn-secondary">壓縮</button>
+                <button id="log_quote_button" class="btn btn-sm btn-light">備註</button>
+              </div>
+            </div>
+
             <blockquote id="log_blockquote" class="hide">
               <ol>
                 <li>根據日期取得本伺服器之紀錄檔案。</li>
@@ -335,9 +346,20 @@ fieldset fieldset legend {
             <legend>轄區各段土地標示部筆數＆面積查詢</legend>
             <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
             <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
-            <input id="data_query_text" name="data_query_text" type="text" data-toggle='tooltip' title='輸入關鍵字或是段代碼' />
-            <button id="data_query_button">查詢</button>
-            <button id="data_quote_button">備註</button>
+            
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-data_query_text">關鍵字/段代碼</span>
+                </div>
+                <input type="text" id="data_query_text" name="data_query_text" class="form-control" placeholder="榮民段" />
+              </div>
+              <div class="filter-btn-group col">
+                <button id="data_query_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="data_quote_button" class="btn btn-sm btn-light">備註</button>
+              </div>
+            </div>
+            
             <blockquote id="data_blockquote" class="hide">
               -- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>
               SELECT t.AA48 as "段代碼", <br/>
