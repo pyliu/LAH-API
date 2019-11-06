@@ -1825,6 +1825,14 @@ let xhrGetSURCase = function(e) {
 
 let showSURCaseDetail = jsonObj => {
 	if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
+		if (!jsonObj.data_count == 0) {
+			showModal({
+				title: "測量案件查詢",
+				body: "查無測量案件資料",
+				size: "sm"
+			});
+			return;
+		}
 		let html = "收件字號：" + "<a title='案件辦理情形 on " + landhb_svr + "' href='#' onclick='javascript:window.open(\"http://\"\+landhb_svr\+\":9080/LandHB/Dispatcher?REQ=CMC0202&GRP=CAS&MM01="+ jsonObj.raw["MM01"] +"&MM02="+ jsonObj.raw["MM02"] +"&MM03="+ jsonObj.raw["MM03"] +"&RM90=\")'>" + jsonObj.收件字號 + "</a> </br>";
 		html += "收件時間：" + jsonObj.收件時間 + " <br/>";
 		html += "收件人員：" + jsonObj.收件人員 + " <br/>";
