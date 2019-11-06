@@ -106,10 +106,20 @@ blockquote img {
         <div class="col-6">
           <fieldset>
             <legend>悠遊卡自動加值付款失敗回復</legend>
-            <label for="easycard_query_day" data-toggle='tooltip' title='輸入查詢日期'>日期：</label>
-            <input type="text" id="easycard_query_day" name="easycard_query_day" class="easycard_query date_picker no-cache" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080321」。" data-placement="bottom" value="<?php echo $today; ?>" />
-            <button id="easycard_query_button" class="easycard_query">查詢</button>
-            <button id="easycard_quote_button">備註</button>
+            
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-easycard_query_day">日期</span>
+                </div>
+                <input type="text" id="easycard_query_day" name="easycard_query_day" class="form-control easycard_query date_picker no-cache" placeholder="1081106"  data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1081106」。" data-placement="bottom" value="<?php echo $today; ?>" />
+              </div>
+              <div class="filter-btn-group col">
+                <button id="easycard_query_button" class="btn btn-sm btn-primary easycard_query">查詢</button>
+                <button id="easycard_quote_button" class="btn btn-sm btn-light">備註</button>
+              </div>
+            </div>
+            
             <blockquote id="easycard_quote" class="hide">
               <ol>
                 <li>櫃台來電通知悠遊卡扣款成功但地政系統卻顯示扣款失敗，需跟櫃台要【電腦給號】</li>
