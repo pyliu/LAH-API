@@ -279,9 +279,20 @@ fieldset fieldset legend {
           <!-- ld-over the loading covering container-->
           <fieldset>
             <legend>法院來函查統編</legend>
-            <input id="id_query_text" name="id_query_text" type="text" class="id_query_grp" data-toggle='tooltip' title='輸入統編' />
-            <button id="id_query_button" class="id_query_grp">查詢</button>
-            <button id="id_quote_button">備註</button>
+
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-id_query_text">統編</span>
+                </div>
+                <input type="text" id="id_query_text" name="id_query_text" data-toggle='tooltip' title='輸入統編' class="form-control id_query_grp" placeholder="A123456789" />
+              </div>
+              <div class="filter-btn-group col">
+                <button id="id_query_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="id_quote_button" class="btn btn-sm btn-secondary">備註</button>
+              </div>
+            </div>
+            
             <blockquote id="id_sql" class="hide">
               -- 【法院來函查統編】MOICAS_CRSMS 土地登記案件查詢-權利人+義務人+代理人+複代 <br/>
               SELECT t.* <br/>
