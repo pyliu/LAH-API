@@ -136,6 +136,7 @@ class RegCaseData {
 			"登記原因" => $row["KCNT"],
             "限辦期限" => "<span class='".$this->getStatusCss()."'>".$this->getDueDate()."</span>",
             "作業人員" => $this->getCurrentOperator(),
+            "作業人員ID" => $this->getCurrentOperatorID(),
             "辦理情形" => $this->getStatus(),
             "權利人統編" => empty($row["RM18"]) ? "" : $row["RM18"],
             "權利人姓名" => empty($row["RM19"]) ? "" : $row["RM19"],
@@ -252,6 +253,10 @@ class RegCaseData {
 
     public function getCurrentOperator() {
         return $this->getIDorName($this->row["RM30_1"]);
+    }
+
+    public function getCurrentOperatorID() {
+        return $this->row["RM30_1"];
     }
 
     public function getCurrentOperatorTooltipAttr() {

@@ -3,7 +3,7 @@ if (jQuery && localStorage) {
     // restore cached data from localStorage
     $(document).ready(function(e) {
         for (var key in localStorage) {
-            if (key == "length" || key == "key" || key == "getItem" || key == "setItem" || key == "removeItem" || key == "clear") {
+            if (key == "length" || key == "key" || key == "getItem" || key == "setItem" || key == "removeItem" || key == "clear" || key == "" || key == undefined) {
                 continue;
             }
             let el = $("#"+key);

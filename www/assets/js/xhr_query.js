@@ -78,7 +78,7 @@ let showRegCaseDetail = (jsonObj) => {
 
 		html += "收件時間：" + jsonObj.收件時間 + "<br/>";
 		html += "限辦期限：" + jsonObj.限辦期限 + "<br/>";
-		html += "作業人員：<span class='user_tag' data-display-selector='#in_modal_display' data-name='" + jsonObj.作業人員 + "'>" + jsonObj.作業人員 + "</span><br/>";
+		html += "作業人員：<span id='the_incase_operator_span' class='user_tag' data-display-selector='#in_modal_display' data-id='" + jsonObj.作業人員ID + "' data-name='" + jsonObj.作業人員 + "'>" + jsonObj.作業人員 + "</span><br/>";
 		html += "辦理情形：" + jsonObj.辦理情形 + "<br/>";
 		html += "登記原因：" + jsonObj.登記原因 + "<br/>";
 		html += "區域：" + area + "【" + jsonObj.raw.RM10 + "】<br/>";
@@ -106,7 +106,12 @@ let showRegCaseDetail = (jsonObj) => {
 		body: html,
 		title: "登記案件詳情",
 		size: "lg",
-		callback: addUserInfoEvent
+		callback: () => {
+			addUserInfoEvent();
+			xhrQueryUserInfo({
+				target: "#the_incase_operator_span"
+			});
+		}
 	});
 }
 
@@ -2118,8 +2123,8 @@ let xhrQueryUserInfo = e => {
 			// cache to local storage
 			if (localStorage) {
 				let json_str = JSON.stringify(jsonObj);
-				localStorage[id] = json_str;
-				localStorage[name] = json_str;
+				if (!isEmpty(id)) { localStorage[id] = json_str; }
+				if (!isEmpty(name)) { localStorage[name] = json_str; }
 			}
 		} else {
 			console.warn(jsonObj.message);
