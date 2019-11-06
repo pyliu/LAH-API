@@ -108,9 +108,8 @@ let showRegCaseDetail = (jsonObj) => {
 		size: "lg",
 		callback: () => {
 			addUserInfoEvent();
-			xhrQueryUserInfo({
-				target: "#the_incase_operator_span"
-			});
+			// load current operator user info
+			$("#the_incase_operator_span").trigger("click");
 		}
 	});
 }
