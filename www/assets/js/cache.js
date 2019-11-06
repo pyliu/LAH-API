@@ -6,15 +6,14 @@ if (jQuery && localStorage) {
             if (key == "length" || key == "key" || key == "getItem" || key == "setItem" || key == "removeItem" || key == "clear") {
                 continue;
             }
-            /*
-            var regex = /\_select$/;
-            if (key.match(regex)) {
-                console.log("restoring #"+key, "selected value to " + localStorage[key]);
+            let el = $("#"+key);
+            if (el.length > 0 && el.is("input[type='text'], select, textarea")) {
+                console.log(`Found #${key}! Set element value to ${localStorage[key]}`);
                 $("#"+key).val(localStorage[key]);
-            } else {*/
-                console.log("restoring #"+key, "element value to " + localStorage[key]);
-                $("#"+key).val(localStorage[key]);
-            //}
+            } else {
+                // remove non input type cached data
+                localStorage.removeItem(key);
+            }
         }
 
         // for cache purpose

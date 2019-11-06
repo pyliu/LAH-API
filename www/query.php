@@ -473,7 +473,6 @@ fieldset fieldset legend {
       $(".user_tag").on("click", e => {
         let clicked_element = $(e.target);
         if (!clicked_element.hasClass("user_tag")) {
-          console.warn("clicked element(" + clicked_element.prop("tagName") + ") doesn't have user_tag class ... find its closest parent");
           clicked_element = $(clicked_element.closest(".user_tag"));
         }
         let user_data = clicked_element.text().split(":");

@@ -63,6 +63,9 @@ let showRegCaseDetail = (jsonObj) => {
 				break;
 		}
 
+		html += "<div class='row'>";
+		html += "<div class='col-5'>";
+
 		html += (jsonObj.跨所 == "Y" ? "<span class='bg-info text-white rounded p-1'>跨所案件 (" + jsonObj.資料收件所 + " => " + jsonObj.資料管轄所 + ")</span><br />" : "");
 		
 		// http://220.1.35.34:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=108&word=HB04&code=005001&sdlyn=N&RM90=
@@ -73,8 +76,6 @@ let showRegCaseDetail = (jsonObj) => {
 
 		html += isEmpty(jsonObj.結案已否) ? "<div class='text-danger'><strong>尚未結案！</strong></div>" : "";
 
-		html += "<div class='row'>";
-		html += "<div class='col-6'>";
 		html += "收件時間：" + jsonObj.收件時間 + "<br/>";
 		html += "限辦期限：" + jsonObj.限辦期限 + "<br/>";
 		html += "作業人員：<span class='user_tag' data-display-selector='#in_modal_display' data-name='" + jsonObj.作業人員 + "'>" + jsonObj.作業人員 + "</span><br/>";
@@ -95,6 +96,7 @@ let showRegCaseDetail = (jsonObj) => {
 		html += "代理人統編：" + jsonObj.代理人統編 + "<br/>";
 		html += "代理人姓名：" + jsonObj.代理人姓名 + "<br/>";
 		html += "手機號碼：" + jsonObj.手機號碼;
+
 		html += "</div>";
 		html += "<div id='in_modal_display' class='col-6'></div>";
 		html += "</div>";
@@ -1966,6 +1968,9 @@ let xhrSearchUsers = e => {
 	form_body.append("type", "search_user");
 	form_body.append("keyword", keyword);
 
+	if (showUserInfoFromCache(keyword, keyword)) {
+		return;
+	}
 	
 	fetch("query_json_api.php", {
 		method: 'POST',
@@ -1990,6 +1995,21 @@ let xhrSearchUsers = e => {
 		console.error("xhrSearchUsers parsing failed", ex);
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
+}
+
+let showUserInfoFromCache = (id, name, el_selector = undefined) => {
+	// reduce user query traffic
+	if (localStorage) {
+		let json_str = localStorage[id] || localStorage[name];
+		if (!isEmpty(json_str)) {
+			console.log(`cache hit ${id}:${name}, user info from localStorage.`);
+			let jsonObj = JSON.parse(json_str);
+			let latest = jsonObj.data_count - 1;
+			showUserInfoByRAW(jsonObj.raw[latest], el_selector);
+			return true;
+		}
+	}
+	return false;
 }
 
 let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
@@ -2056,7 +2076,6 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 let xhrQueryUserInfo = e => {
 	let clicked_element = $(e.target);
 	if (!clicked_element.hasClass("user_tag")) {
-		console.warn("Clicked element(" + clicked_element.prop("tagName") + ") doesn't have user_tag class ... find its closest parent");
 		clicked_element = $(clicked_element.closest(".user_tag"));
 	}
 
@@ -2073,6 +2092,11 @@ let xhrQueryUserInfo = e => {
 		return;
 	}
 
+	// reduce user query traffic
+	if (showUserInfoFromCache(id, name, el_selector)) {
+		return;
+	}
+	
 	let form_body = new FormData();
 	form_body.append("type", "user_info");
 	form_body.append("name", name);
@@ -2091,6 +2115,12 @@ let xhrQueryUserInfo = e => {
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
 			let latest = jsonObj.data_count - 1;
 			showUserInfoByRAW(jsonObj.raw[latest], el_selector);
+			// cache to local storage
+			if (localStorage) {
+				let json_str = JSON.stringify(jsonObj);
+				localStorage[id] = json_str;
+				localStorage[name] = json_str;
+			}
 		} else {
 			console.warn(jsonObj.message);
 		}
