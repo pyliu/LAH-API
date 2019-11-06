@@ -282,8 +282,10 @@ blockquote img {
             字
             <input type="text" id="sync_x_case_num" name="sync_x_case_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
             號
-            <button id="sync_x_case_button">比對</button>
-            <button id="sync_x_case_quote_button">備註</button>
+            <div class="filter-btn-group">
+              <button id="sync_x_case_button" class="btn btn-primary">比對</button>
+              <button id="sync_x_case_quote_button" class="btn btn-light">備註</button>
+            </div>
             <blockquote id="sync_x_case_quote" class="hide">
               <h6>將局端跨所資料同步回本所資料庫</h6>
               <div><span class="text-danger">※</span>新版跨縣市回寫機制會在每一分鐘時自動回寫，故局端資料有可能會比較慢更新。【2019-06-26】</div>

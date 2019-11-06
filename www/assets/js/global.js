@@ -292,7 +292,13 @@ let initBlockquoteToggle = () => {
 	$("blockquote img").addClass("img-responsive img-thumbnail");
 	// control blockquote block for *_quote_button
 	$("button[id*='_quote_button']").on("click", function(e) {
-		var quote = $(e.target).next("blockquote"); // find DIRECT next element by selector
+		let el = $(e.target);
+		let quote = el.next("blockquote"); // find DIRECT next element by selector
+		// fallback to get the one under fieldset 
+		if (quote.length == 0) {
+			let fs = $(el.closest("fieldset"));
+			quote = fs.find("blockquote");
+		}
 		quote.hasClass("hide") ? quote.removeClass("hide") : quote.addClass("hide");
 	});
 }
