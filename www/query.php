@@ -91,44 +91,77 @@ fieldset fieldset legend {
         <div class="col-6">
           <fieldset>
             <legend>登記案件查詢</legend>
-            <select id="query_year" name="query_year" class="no-cache">
-              <option>105</option>
-              <option>106</option>
-              <option>107</option>
-              <option selected>108</option>
-            </select>
-            年
-            <?php echo getCodeSelectHTML("query_code"); ?>
-            字
-            <input type="text" id="query_num" name="query_num" data-toggle='tooltip' data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="bottom" />號
-            <button id="query_button" @click="xhrRegQueryCase">登記</button>
-            <button id="query_prc_button">地價</button>
-            <!-- <div id="query_display"></div> -->
+
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <select id="query_year" name="query_year" class="form-control no-cache" aria-label="年" aria-describedby="inputGroup-query_year" required>
+                  <option>105</option>
+                  <option>106</option>
+                  <option>107</option>
+                  <option selected>108</option>
+                </select>
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-query_year">年</span>
+                </div>
+              </div>
+              <div class="input-group input-group-sm col">
+              <?php echo getCodeSelectHTML("query_code", 'class="form-control" data-trigger="manual" data-toggle="popover" data-content="請選擇案件字" title="案件字" data-placement="top" aria-label="字" aria-describedby="inputGroup-query_code" required'); ?>
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-query_code">字</span>
+                </div>
+              </div>
+              <div class="input-group input-group-sm col">
+                <input type="text" id="query_num" name="query_num" class="form-control" aria-label="號" aria-describedby="inputGroup-query_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-query_num">號</span>
+                </div>
+              </div>
+              <div class="filter-btn-group col">
+                <button id="query_button" class="btn btn-sm btn-primary">登記</button>
+                <button id="query_prc_button" class="btn btn-sm btn-secondary">地價</button>
+              </div>
+            </div>
+
           </fieldset>
         </div>
         <div class="col-6">
           <fieldset>
             <legend>複丈案件查詢<small>(修正已結延期、修改連件數)</small></legend>
-            <select id="sur_delay_case_fix_year" name="sur_delay_case_fix_year" class="no-cache">
-              <option selected>108</option>
-            </select>
-            年
-            <select id="sur_delay_case_fix_code" name="sur_delay_case_fix_code" data-trigger="manual" data-toggle="popover" data-content='請選擇案件字' title='案件字' data-placement="top">
-              <option></option>
-              <!--
-              <option value="HB11">HB11 中地測數</option>
-              <option value="HB14">HB14 中地測法</option>
-              -->
-              <option value="HB12">HB12 中地測丈</option>
-              <option value="HB13">HB13 中地測建</option>
-              <option value="HB17">HB17 中地法土</option>
-              <option value="HB18">HB18 中地法建</option>
-            </select>
-            字
-            <input type="text" id="sur_delay_case_fix_num" name="sur_delay_case_fix_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
-            號
-            <button id="sur_delay_case_fix_search_button">查詢</button>
-            <button id="sur_delay_case_fix_quote_button">備註</button>
+
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <select id="sur_delay_case_fix_year" name="sur_delay_case_fix_year" class="form-control no-cache" aria-label="年" aria-describedby="inputGroup-sur_delay_case_fix_year" required>
+                  <option>107</option>
+                  <option selected>108</option>
+                </select>
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-sur_delay_case_fix_year">年</span>
+                </div>
+              </div>
+              <div class="input-group input-group-sm col">
+                <select id="sur_delay_case_fix_code" name="sur_delay_case_fix_code" class="form-control" data-trigger="manual" data-toggle="popover" data-content='請選擇案件字' title='案件字' data-placement="top" aria-label="字" aria-describedby="inputGroup-sur_delay_case_fix_code" required>
+                  <option></option>
+                  <option value="HB12">HB12 中地測丈</option>
+                  <option value="HB13">HB13 中地測建</option>
+                  <option value="HB17">HB17 中地法土</option>
+                  <option value="HB18">HB18 中地法建</option>
+                </select>
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-sur_delay_case_fix_code">字</span>
+                </div>
+              </div>
+              <div class="input-group input-group-sm col">
+                <input type="text" id="sur_delay_case_fix_num" name="sur_delay_case_fix_num" class="form-control" aria-label="號" aria-describedby="inputGroup-sur_delay_case_fix_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-sur_delay_case_fix_num">號</span>
+                </div>
+              </div>
+              <div class="filter-btn-group col">
+                <button id="sur_delay_case_fix_search_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="sur_delay_case_fix_quote_button" class="btn btn-sm btn-light">備註</button>
+              </div>
+            </div>
+
             <blockquote id="sur_delay_case_fix_quote" class="hide">
               <h5><span class="text-danger">※</span>注意：本功能會清除如下圖之欄位資料並將案件辦理情形改為【核定】，請確認後再執行。</h5>
               <img src="assets/howto/107-HB18-3490_測丈已結案案件辦理情形出現(逾期)延期複丈問題調整【參考】.jpg" />

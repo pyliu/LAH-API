@@ -141,16 +141,35 @@ blockquote img {
         <div class="col-6">
           <fieldset>
             <legend>調整登記案件欄位資料</legend>
-            <select id="reg_case_update_year" name="_update_year">
-              <option selected>108</option>
-            </select>
-            年
-            <?php echo getCodeSelectHTML("reg_case_update_code"); ?>
-            字
-            <input type="text" id="reg_case_update_num" name="reg_case_update_num" data-toggle='tooltip' data-content='請輸入案件號(最多6碼)' title='案件號' />號
+            
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <select id="reg_case_update_year" name="reg_case_update_year" class="form-control" aria-label="年" aria-describedby="inputGroup-reg_case_update_year" required>
+                  <option>107</option>
+                  <option selected>108</option>
+                </select>
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-temp_clr_year">年</span>
+                </div>
+              </div>
+              <div class="input-group input-group-sm col">
+              <?php echo getCodeSelectHTML("reg_case_update_code", 'class="form-control" data-trigger="manual" data-toggle="popover" data-content="請選擇案件字" title="案件字" data-placement="top" aria-label="字" aria-describedby="inputGroup-reg_case_update_code" required'); ?>
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-temp_clr_code">字</span>
+                </div>
+              </div>
+              <div class="input-group input-group-sm col">
+                <input type="text" id="reg_case_update_num" name="reg_case_update_num" class="form-control" aria-label="號" aria-describedby="inputGroup-reg_case_update_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-reg_case_update_num">號</span>
+                </div>
+              </div>
+              <div class="filter-btn-group col">
+                <button id="reg_case_update_query" class="btn btn-sm btn-primary">查詢</button>
+                <button id="reg_case_update_quote_button" class="btn btn-sm btn-light">備註</button>
+              </div>
+            </div>
 
-            <button id="reg_case_update_query">查詢</button>
-            <button id="reg_case_update_quote_button">備註</button>
             <blockquote id="reg_case_update_quote" class="hide">
               <ul>
                 <li>使用情境1：先行准登後案件須回復至公告</li>
@@ -166,17 +185,35 @@ blockquote img {
         <div class="col-6">
           <fieldset>
             <legend>案件暫存檔清除</legend>
-            <select id="temp_clr_year" name="temp_clr_year">
-              <option>107</option>
-              <option selected>108</option>
-            </select>
-            年
-            <?php echo getCodeSelectHTML("temp_clr_code", 'data-trigger="manual" data-toggle="popover" data-content="請選擇案件字" title="案件字" data-placement="top"'); ?>
-            字
-            <input type="text" id="temp_clr_num" name="temp_clr_num" data-trigger="manual" data-toggle="popover"  data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
-            號
-            <button id="query_temp_clr_button">查詢</button>
-            <button id="temp_clr_quote_button">備註</button>
+
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <select id="temp_clr_year" name="temp_clr_year" class="form-control" aria-label="年" aria-describedby="inputGroup-temp_clr_year" required>
+                  <option>107</option>
+                  <option selected>108</option>
+                </select>
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-temp_clr_year">年</span>
+                </div>
+              </div>
+              <div class="input-group input-group-sm col">
+              <?php echo getCodeSelectHTML("temp_clr_code", 'class="form-control" data-trigger="manual" data-toggle="popover" data-content="請選擇案件字" title="案件字" data-placement="top" aria-label="字" aria-describedby="inputGroup-temp_clr_code" required'); ?>
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-temp_clr_code">字</span>
+                </div>
+              </div>
+              <div class="input-group input-group-sm col">
+                <input type="text" id="temp_clr_num" name="temp_clr_num" class="form-control" aria-label="號" aria-describedby="inputGroup-temp_clr_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-temp_clr_num">號</span>
+                </div>
+              </div>
+              <div class="filter-btn-group col">
+                <button id="query_temp_clr_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="temp_clr_quote_button" class="btn btn-sm btn-light">備註</button>
+              </div>
+            </div>
+
             <blockquote id="temp_clr_quote" class="hide">
               <h6 class="text-info">檢查下列的表格</h6>
               <ul>
@@ -265,27 +302,43 @@ blockquote img {
           <fieldset>
             <legend>同步局端跨所案件資料</legend>
             <div><span class="text-danger">※</span>主機IP不在局端<span class="text-info">白名單</span>內將無法使用本功能，目前為<span class="text-danger"><?php echo $_SERVER["SERVER_ADDR"] ?></span>。</div>
-            <select id="sync_x_case_year" name="sync_x_case_year">
-              <option selected>108</option>
-            </select>
-            年
-            <select id="sync_x_case_code" name="sync_x_case_code" data-trigger="manual" data-toggle="popover" data-content='請選擇案件字' title='案件字' data-placement="top">
-              <option></option>
-              <option>HAB1 壢桃登跨</option>
-              <option>HCB1 壢溪登跨</option>
-              <option>HDB1 壢楊登跨</option>
-              <option>HEB1 壢蘆登跨</option>
-              <option>HFB1 壢德登跨</option>
-              <option>HGB1 壢平登跨</option>
-              <option>HHB1 壢山登跨</option>
-            </select>
-            字
-            <input type="text" id="sync_x_case_num" name="sync_x_case_num" data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
-            號
-            <div class="filter-btn-group">
-              <button id="sync_x_case_button" class="btn btn-primary">比對</button>
-              <button id="sync_x_case_quote_button" class="btn btn-light">備註</button>
+            
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <select id="sync_x_case_year" name="sync_x_case_year" class="form-control" aria-label="年" aria-describedby="inputGroup-sync_x_case_year" required>
+                  <option selected>108</option>
+                </select>
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-sync_x_case_year">年</span>
+                </div>
+              </div>
+              <div class="input-group input-group-sm col">
+                <select id="sync_x_case_code" name="sync_x_case_code" class="form-control"  data-trigger="manual" data-toggle="popover" data-content='請選擇案件字' title='案件字' data-placement="top" aria-label="年" aria-describedby="inputGroup-sync_x_case_code" required>
+                  <option></option>
+                  <option>HAB1 壢桃登跨</option>
+                  <option>HCB1 壢溪登跨</option>
+                  <option>HDB1 壢楊登跨</option>
+                  <option>HEB1 壢蘆登跨</option>
+                  <option>HFB1 壢德登跨</option>
+                  <option>HGB1 壢平登跨</option>
+                  <option>HHB1 壢山登跨</option>
+              </select>
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-sync_x_case_code">字</span>
+                </div>
+              </div>
+              <div class="input-group input-group-sm col">
+                <input type="text" id="sync_x_case_num" name="sync_x_case_num" class="form-control" aria-label="號" aria-describedby="inputGroup-sync_x_case_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
+                <div class="input-group-append">
+                  <span class="input-group-text" id="inputGroup-sync_x_case_num">號</span>
+                </div>
+              </div>
+              <div class="filter-btn-group col">
+                <button id="sync_x_case_button" class="btn btn-sm btn-primary">比對</button>
+                <button id="sync_x_case_quote_button" class="btn btn-sm btn-light">備註</button>
+              </div>
             </div>
+            
             <blockquote id="sync_x_case_quote" class="hide">
               <h6>將局端跨所資料同步回本所資料庫</h6>
               <div><span class="text-danger">※</span>新版跨縣市回寫機制會在每一分鐘時自動回寫，故局端資料有可能會比較慢更新。【2019-06-26】</div>
