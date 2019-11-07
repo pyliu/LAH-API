@@ -85,8 +85,14 @@ blockquote img {
         <div class="col-6">
           <fieldset>
             <legend>跨所註記遺失檢測<small>(一周內)</small></legend>
-            <button id="cross_case_check_query_button" data-toggle='tooltip'>立即檢測</button>
-            <button id="cross_case_check_quote_button">備註</button>
+
+            <div class="form-row">
+              <div class="filter-btn-group col">
+                <button id="cross_case_check_query_button" class="btn btn-sm btn-primary" data-toggle='tooltip'>立即檢測</button>
+                <button id="cross_case_check_quote_button" class="btn btn-sm btn-light">備註</button>
+              </div>
+            </div>
+
             <blockquote id="cross_case_check_quote" class="hide">
               <h5><span class="text-danger">※</span>通常發生的情況是案件內的權利人/義務人/代理人姓名內有罕字造成。</h5>
               QUERY: <br />
@@ -137,15 +143,22 @@ blockquote img {
         <div class="col-6">
           <fieldset>
             <legend>公告期限維護<small>(先行准登)</small></legend>
-            <span id="prereg_query_display"></span>
-            <button id="prereg_clear_button" class="btn-outline-danger">清除准登</button>
-            <button id="prereg_quote_button">備註</button>
-            <blockquote id="prereg_quote" class="hide">
+
+            <div class="form-row">
+              <span id="prereg_query_display"></span>
+              <div class="filter-btn-group col">
+                <button id="prereg_clear_button" class="btn btn-sm btn-outline-danger" >清除准登</button>
+                <button id="prereg_quote_button" class="btn btn-sm btn-light">備註</button>
+              </div>
+            </div>
+
+            <div id='prereg_update_ui' class='mt-1'></div>
+
+            <blockquote id="prereg_quote" class="hide mt-1">
               <h5><span class="text-danger">※</span>注意：中壢所規定超過30件案件才能執行此功能，並於完成時須馬上關掉以免其他案件誤登。</h5>
               <h5><span class="text-danger">※</span>注意：准登完後該案件須手動於資料庫中調整辦理情形（RM30）為「公告」（H）。</h5>
               <img src="assets/howto/登記原因先行准登設定.jpg" />
             </blockquote>
-            <div id='prereg_update_ui' class='mt-1'></div>
           </fieldset>
         </div>
         <div class="col-6">

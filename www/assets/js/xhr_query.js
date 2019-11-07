@@ -1364,11 +1364,17 @@ let xhrQueryAnnouncementData = function(e) {
 		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + jsonObj.message + "】");
 		let count = jsonObj.data_count;
 		// 組合選單介面
-		let html = "公告項目：<select id='prereg_announcement_select' class='no-cache'><option value=''>======= 請選擇登記原因 =======</option>";
+		let html = `
+			<div class="input-group input-group-sm col">
+				<div class="input-group-prepend">
+					<span class="input-group-text" id="inputGroup-prereg_announcement_select">公告項目</span>
+				</div>
+				<select id='prereg_announcement_select' class='no-cache form-control'><option value=''>======= 請選擇登記原因 =======</option>
+		`;
 		for (let i=0; i<count; i++) {
 			html += "<option value='" + jsonObj.raw[i]["RA01"] + "," + jsonObj.raw[i]["KCNT"] + "," + jsonObj.raw[i]["RA02"] + "," + jsonObj.raw[i]["RA03"] + "'>" + jsonObj.raw[i]["RA01"] + "：" + jsonObj.raw[i]["KCNT"] + "【" + jsonObj.raw[i]["RA02"] + "天, " + jsonObj.raw[i]["RA03"] + "】</option>";
 		}
-		html += "</select>";
+		html += "</select></div>";
 		$("#prereg_query_display").html(html);
 		$("#prereg_announcement_select").on("change", e => {
 			$("#prereg_update_ui").empty();
@@ -1377,15 +1383,46 @@ let xhrQueryAnnouncementData = function(e) {
 				return;
 			}
 			let data = csv.split(",");
-			let html = "登記代碼：" + data[0] + "<br />" +
-					   "登記原因：" + data[1] + "<br />";
-				html += "公告天數：<select id='ann_day_" + data[0] + "' class='no-cache'><option>15</option><option>30</option><option>45</option><option>60</option><option>75</option><option>90</option></select><br />";
-				html += "先行准登：<select id='ann_reg_flag_" + data[0] + "' class='no-cache'><option>N</option><option>Y</option></select><br />";
-				html += "<button id='ann_upd_btn_" + data[0] + "'>更新</button>";
+			let html = `<div class="form-row">
+				<div class="input-group input-group-sm col">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="inputGroup-annoumcement_code">登記代碼</span>
+					</div>
+					<input type="text" id="annoumcement_code" name="annoumcement_code" class="form-control" value="${data[0]}" readonly />
+				</div>
+				<div class="input-group input-group-sm col">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="inputGroup-annoumcement_reason">登記原因</span>
+					</div>
+					<input type="text" id="annoumcement_reason" name="annoumcement_reason" class="form-control" value="${data[1]}" readonly />
+				</div>
+			</div>
+			<div class="form-row mt-1">
+				<div class="input-group input-group-sm col">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="inputGroup-ann_day_${data[0]}">公告天數</span>
+					</div>
+					<select id='ann_day_${data[0]}' class='no-cache form-control'><option>15</option><option>30</option><option>45</option><option>60</option><option>75</option><option>90</option></select>
+				</div>
+				<div class="input-group input-group-sm col">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="inputGroup-ann_reg_flag_${data[0]}">先行准登</span>
+					</div>
+					<select id='ann_reg_flag_${data[0]}' class='no-cache form-control'><option>N</option><option>Y</option></select>
+				</div>
+				<div class="filter-btn-group col">
+					<button id="ann_upd_btn_${data[0]}" class="btn btn-sm btn-primary easycard_query">更新</button>
+				</div>
+			</div>`;
 			$("#prereg_update_ui").html(html);
 			$("#ann_day_" + data[0]).val(data[2]);
 			$("#ann_reg_flag_" + data[0]).val(data[3]);
-			$("#ann_upd_btn_" + data[0]).off("click").on("click", xhrUpdateAnnouncementData.bind(data));
+			$("#ann_upd_btn_" + data[0]).off("click").on("click", xhrUpdateAnnouncementData.bind({
+				reason_code: data[0],
+				day_el: $("#ann_day_" + data[0]),
+				flag_el: $("#ann_reg_flag_" + data[0]),
+				orig_data: data
+			}));
 		});
 	}).catch(ex => {
 		console.error("xhrQueryAnnouncementData parsing failed", ex);
@@ -1394,10 +1431,10 @@ let xhrQueryAnnouncementData = function(e) {
 };
 
 let xhrUpdateAnnouncementData = function(e) {
-	let reason_code = this[0];
-	let day = $("#ann_day_"+reason_code).val();
-	let flag = $("#ann_reg_flag_"+reason_code).val();
-	if (this[2] == day && this[3] == flag) {
+	let reason_code = this.reason_code
+	let day = this.day_el.val();
+	let flag = this.flag_el.val();
+	if (this.orig_data[2] == day && this.orig_data[3] == flag) {
 		showModal({
 			body: "無變更，不需更新！",
 			title: "訊息通知",
@@ -1406,33 +1443,37 @@ let xhrUpdateAnnouncementData = function(e) {
 		return;
 	}
 	console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
-	$(e.target).remove();
-	let form_body = new FormData();
-	form_body.append("type", "update_announcement_data");
-	form_body.append("code", reason_code);
-	form_body.append("day", $("#ann_day_"+reason_code).val());
-	form_body.append("flag", $("#ann_reg_flag_"+reason_code).val());
-	fetch("query_json_api.php", {
-		method: 'POST',
-		body: form_body
-	}).then(response => {
-		if (response.status != 200) {
-			throw new Error("XHR連線異常，回應非200");
-		}
-		return response.json();
-	}).then(jsonObj => {
-		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
-		showModal({
-			body: "<strong class='text-success'>更新完成</strong>",
-			title: "公告期限更新",
-			size: "sm"
+	if (confirm("確定要更新公告資料？")) {
+		toggle(e.target);
+		let form_body = new FormData();
+		form_body.append("type", "update_announcement_data");
+		form_body.append("code", reason_code);
+		form_body.append("day", day);
+		form_body.append("flag", flag);
+		fetch("query_json_api.php", {
+			method: 'POST',
+			body: form_body
+		}).then(response => {
+			if (response.status != 200) {
+				throw new Error("XHR連線異常，回應非200");
+			}
+			return response.json();
+		}).then(jsonObj => {
+			console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
+			showModal({
+				body: "<strong class='text-success'>更新完成</strong>",
+				title: "公告期限更新",
+				size: "sm"
+			});
+			// refresh the select list
+			xhrQueryAnnouncementData.call(null, [e]);
+			toggle(e.target);
+			$("#prereg_update_ui").html("");
+		}).catch(ex => {
+			console.error("xhrUpdateAnnouncementData parsing failed", ex);
+			alert("XHR連線查詢有問題!!【" + ex + "】");
 		});
-		// refresh the select list
-		xhrQueryAnnouncementData.call(null, [e]);
-	}).catch(ex => {
-		console.error("xhrUpdateAnnouncementData parsing failed", ex);
-		alert("XHR連線查詢有問題!!【" + ex + "】");
-	});
+	}
 }
 
 let xhrClearAnnouncementFlag = e => {
