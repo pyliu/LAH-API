@@ -111,7 +111,7 @@ fieldset fieldset legend {
                 </div>
               </div>
               <div class="input-group input-group-sm col">
-                <input type="text" id="query_num" name="query_num" class="form-control" aria-label="號" aria-describedby="inputGroup-query_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
+                <input type="number" step="10" min="10" max="999999" id="query_num" name="query_num" class="form-control" aria-label="號" aria-describedby="inputGroup-query_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
                 <div class="input-group-append">
                   <span class="input-group-text" id="inputGroup-query_num">號</span>
                 </div>
@@ -151,7 +151,7 @@ fieldset fieldset legend {
                 </div>
               </div>
               <div class="input-group input-group-sm col">
-                <input type="text" id="sur_delay_case_fix_num" name="sur_delay_case_fix_num" class="form-control" aria-label="號" aria-describedby="inputGroup-sur_delay_case_fix_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
+                <input type="number" step="100" min="100" max="999999" id="sur_delay_case_fix_num" name="sur_delay_case_fix_num" class="form-control" aria-label="號" aria-describedby="inputGroup-sur_delay_case_fix_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
                 <div class="input-group-append">
                   <span class="input-group-text" id="inputGroup-sur_delay_case_fix_num">號</span>
                 </div>
@@ -378,7 +378,11 @@ fieldset fieldset legend {
         <div class="col-6">
           <fieldset>
             <legend>地政局索取地籍資料</legend>
-            <button id="export_txt_quote_button">打開說明</button>
+            <div class="form-row">
+              <div class="filter-btn-group col">
+                <button id="export_txt_quote_button" class="btn btn-sm btn-outline-success">打開說明</button>
+              </div>
+            </div>
             <blockquote id="export_txt_blockquote" class="hide">
               <span class="text-danger">※</span> 系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
               　- <small class="mt-2 mb-2"> 除下面標示為黃色部分須至地政系統產出並下載，其餘皆可於「報表匯出」區塊產出。</small> <br/>

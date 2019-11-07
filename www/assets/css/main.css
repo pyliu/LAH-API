@@ -278,3 +278,9 @@ blockquote {
 	background-position: 80% 5%;
 
 }
+
+.message {
+	font-size: .9rem;
+	margin-top: .25rem;
+	margin-bottom: .25rem;
+}

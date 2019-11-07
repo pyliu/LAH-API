@@ -106,7 +106,7 @@ blockquote img {
               UPDATE MOICAS.CRSMS SET RM99 = 'Y', RM100 = '資料管轄所代碼', RM100_1 = '資料管轄所縣市代碼', RM101 = '收件所代碼', RM101_1 = '收件所縣市代碼' <br />
               WHERE RM01 = '收件年' AND RM02 = '收件字' AND RM03 = '收件號'
             </blockquote>
-            <div id="cross_case_check_query_display"></div>
+            <div id="cross_case_check_query_display" class="message"></div>
           </fieldset>
         </div>
         <div class="col-6">
@@ -135,7 +135,7 @@ blockquote img {
               </ol>
               <img src="assets/img/easycard_screenshot.jpg" />
             </blockquote>
-            <div id="easycard_query_display"></div>
+            <div id="easycard_query_display" class="message"></div>
           </fieldset>
         </div>
       </div>
@@ -145,7 +145,7 @@ blockquote img {
             <legend>公告期限維護<small>(先行准登)</small></legend>
 
             <div class="form-row">
-              <span id="prereg_query_display"></span>
+              <span id="prereg_query_display" class="message"></span>
               <div class="filter-btn-group col">
                 <button id="prereg_clear_button" class="btn btn-sm btn-outline-danger" >清除准登</button>
                 <button id="prereg_quote_button" class="btn btn-sm btn-light">備註</button>
@@ -182,7 +182,7 @@ blockquote img {
                 </div>
               </div>
               <div class="input-group input-group-sm col">
-                <input type="text" id="reg_case_update_num" name="reg_case_update_num" class="form-control" aria-label="號" aria-describedby="inputGroup-reg_case_update_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
+                <input type="number" step="10" min="10" max="999999" id="reg_case_update_num" name="reg_case_update_num" class="form-control" aria-label="號" aria-describedby="inputGroup-reg_case_update_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
                 <div class="input-group-append">
                   <span class="input-group-text" id="inputGroup-reg_case_update_num">號</span>
                 </div>
@@ -192,6 +192,8 @@ blockquote img {
                 <button id="reg_case_update_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>
+            
+            <div id="reg_case_update_display" class="message"></div>
 
             <blockquote id="reg_case_update_quote" class="hide">
               <ul>
@@ -200,7 +202,6 @@ blockquote img {
                 <li>使用情境3：案件辦理情形與登記處理註記不同步造成地價課無法登錄收件卡住</li>
               </ul>
             </blockquote>
-            <div id="reg_case_update_display"></div>
           </fieldset>
         </div>
       </div>
@@ -226,7 +227,7 @@ blockquote img {
                 </div>
               </div>
               <div class="input-group input-group-sm col">
-                <input type="text" id="temp_clr_num" name="temp_clr_num" class="form-control" aria-label="號" aria-describedby="inputGroup-temp_clr_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
+                <input type="number" step="10" min="10" max="999999" id="temp_clr_num" name="temp_clr_num" class="form-control" aria-label="號" aria-describedby="inputGroup-temp_clr_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
                 <div class="input-group-append">
                   <span class="input-group-text" id="inputGroup-temp_clr_num">號</span>
                 </div>
@@ -318,13 +319,13 @@ blockquote img {
                 <li>"MOIPRT.POA11" => "OA"</li>
               </ul>
             </blockquote>
-            <div id="temp_clr_display"></div>
+            <div id="temp_clr_display" class="message"></div>
           </fieldset>
         </div>
         <div class="col-6">
           <fieldset>
             <legend>同步局端跨所案件資料</legend>
-            <div><span class="text-danger">※</span>主機IP不在局端<span class="text-info">白名單</span>內將無法使用本功能，目前為<span class="text-danger"><?php echo $_SERVER["SERVER_ADDR"] ?></span>。</div>
+            <div class="message"><span class="text-danger">※</span>主機IP不在局端<span class="text-info">白名單</span>內將無法使用本功能，目前為<span class="text-danger"><?php echo $_SERVER["SERVER_ADDR"] ?></span>。</div>
             
             <div class="form-row">
               <div class="input-group input-group-sm col">
@@ -351,7 +352,7 @@ blockquote img {
                 </div>
               </div>
               <div class="input-group input-group-sm col">
-                <input type="text" id="sync_x_case_num" name="sync_x_case_num" class="form-control" aria-label="號" aria-describedby="inputGroup-sync_x_case_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
+                <input type="number" step="10" min="10" max="999999" id="sync_x_case_num" name="sync_x_case_num" class="form-control" aria-label="號" aria-describedby="inputGroup-sync_x_case_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
                 <div class="input-group-append">
                   <span class="input-group-text" id="inputGroup-sync_x_case_num">號</span>
                 </div>
@@ -367,7 +368,7 @@ blockquote img {
               <div><span class="text-danger">※</span>新版跨縣市回寫機制會在每一分鐘時自動回寫，故局端資料有可能會比較慢更新。【2019-06-26】</div>
               <div><span class="text-danger">※</span>局端針對遠端連線同步異動資料庫有鎖IP，故<span class="text-danger">IP不在局端白名單內的主機將無法使用本功能</span>，目前主機IP為 <span class="text-warning"><?php echo $_SERVER["SERVER_ADDR"] ?></span> 。【2019-10-01】</div>
             </blockquote>
-            <div id="sync_x_case_display"></div>
+            <div id="sync_x_case_display" class="message"></div>
           </fieldset>
         </div>
       </div>
@@ -375,14 +376,32 @@ blockquote img {
         <div class="col-6">
           <fieldset>
             <legend>規費資料集修正<small>(EXPAA)</small></legend>
-            <label for="expaa_query_date" data-toggle='tooltip' title='欄位:AA01'>　　日期：</label>
-            <input type="text" id="expaa_query_date" class="date_picker no-cache" name="expaa_query_date" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080426」。" data-placement="bottom" value="<?php echo $today; ?>" />
-            <button id="expaa_query_date_button">查詢</button>
-            <button id="expaa_add_obsolete_button" title="新增作廢假資料以利空白規費單作廢" class="btn-outline-danger">作廢</button><br />
-            <label for="expaa_query_number" data-toggle='tooltip' title='欄位:AA04'>電腦給號：</label>
-            <input type="text" id="expaa_query_number" name="expaa_query_number" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
-            <button id="expaa_query_button">查詢</button>
-            <button id="expaa_quote_button">備註</button>
+
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-expaa_query_date">日期</span>
+                </div>
+                <input type="text" id="expaa_query_date" name="expaa_query_date" class="form-control date_picker no-cache" placeholder="1081107" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080426」。" data-placement="bottom" value="<?php echo $today; ?>" />
+              </div>
+              <div class="filter-btn-group col">
+                <button id="expaa_query_date_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="expaa_add_obsolete_button" class="btn btn-sm btn-outline-danger" title="新增作廢假資料以利空白規費單作廢">作廢</button>
+              </div>
+            </div>
+            <div class="form-row mt-1">
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-expaa_query_number">電腦給號</span>
+                </div>
+                <input type="number" max="9999999" min="1" id="expaa_query_number" name="expaa_query_number" class="form-control" placeholder="0006574" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
+              </div>
+              <div class="filter-btn-group col">
+                <button id="expaa_query_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="expaa_quote_button" class="btn btn-sm btn-light">備註</button>
+              </div>
+            </div>
+
             <blockquote id="expaa_quote" class="hide">
               AA09 - 列印註記【1：已印，0：未印】<br />
               AA100 - 付款方式<br />
@@ -391,20 +410,36 @@ blockquote img {
               AA107 - 悠遊卡交易流水號<br />
               <img src="assets/img/easycard_screenshot.jpg" />
             </blockquote>
-            <div id="expaa_query_display"></div>
+            <div id="expaa_query_display" class="message"></div>
           </fieldset>
         </div>
         <div class="col-6">
           <fieldset>
             <legend>規費收費項目修正<small>(EXPAC)</small></legend>
-            <label for="expac_query_year" data-toggle='tooltip' title='欄位:AC25'>規費年度：</label>
-            <select id="expac_query_year" name="expac_query_year">
-              <option selected>108</option>
-            </select>
-            <label for="expac_query_number" data-toggle='tooltip' title='欄位:AC04'>電腦給號：</label>
-            <input type="text" id="expac_query_number" name="expac_query_number" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
-            <button id="expac_query_button">查詢</button>
-            <button id="expac_quote_button">備註</button>
+
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-expac_query_year">規費年度</span>
+                </div>
+                <select id="expac_query_year" name="expac_query_year" class="form-control no-cache">
+                  <option>107</option>
+                  <option selected>108</option>
+                  <option selected>109</option>
+                </select>
+              </div>
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-expac_query_number">電腦給號</span>
+                </div>
+                <input type="number" min="1" max="9999999" id="expac_query_number" name="expac_query_number" class="form-control" placeholder="0021131" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
+              </div>
+              <div class="filter-btn-group col">
+                <button id="expac_query_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="expac_quote_button" class="btn btn-sm btn-light">備註</button>
+              </div>
+            </div>
+            <div id="expac_query_display" class="message"></div>
             <blockquote id="expac_quote" class="hide">
               <img src="assets/img/correct_payment_screenshot.jpg" />
               -- 規費收費項目<br/>
@@ -422,7 +457,6 @@ blockquote img {
                   ON p.E20 = t.AC20<br/>
               WHERE t.AC04 = '0021131' AND t.AC25 = '108'
             </blockquote>
-            <div id="expac_query_display"></div>
           </fieldset>
         </div>
       </div>

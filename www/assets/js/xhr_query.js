@@ -574,10 +574,15 @@ let xhrGetExpacItems = function(e) {
 					 + " 規費年度: " + jsonObj.raw[i]["AC25"]
 					 + ", 電腦給號: " + jsonObj.raw[i]["AC04"]
 					 + ", 實收金額: " + jsonObj.raw[i]["AC30"]
-					 + ", <select id='modify_expac_item_" + i + "'>" + getExpacItemOptions(jsonObj.raw[i]["AC20"]) + "</select>";
-				// modify button
-				html += " <button id='modify_expac_item_" + i + "_btn' onclick='xhrModifyExpacItem(\"" + jsonObj.raw[i]["AC25"] + "\", \"" + jsonObj.raw[i]["AC04"] + "\", \"" + jsonObj.raw[i]["AC20"] + "\", \"" + jsonObj.raw[i]["AC30"] + "\", \"modify_expac_item_" + i + "\")'>修改</button>";
-				html += " <span id='modify_expac_item_" + i + "_msg'></span>";
+					 + `<div class='form-row form-inline'>
+					 		<div class='input-group input-group-sm col'>
+						 		<select class='form-control' id='modify_expac_item_${i}'>${getExpacItemOptions(jsonObj.raw[i]["AC20"])}</select>
+							</div>
+							<div class='filter-btn-group col'>
+								<button class='btn btn-sm btn-primary' id='modify_expac_item_${i}_btn' onclick='xhrModifyExpacItem("${jsonObj.raw[i]["AC25"]}", "${jsonObj.raw[i]["AC04"]}", "${jsonObj.raw[i]["AC20"]}", "${jsonObj.raw[i]["AC30"]}", "modify_expac_item_${i}")'>修改</button>
+								<span id='modify_expac_item_${i}_msg'></span>
+							</div>
+						</div>`;
 				html += "</div>";
 			}
 			$("#expac_query_display").html(html);
@@ -859,18 +864,30 @@ let xhrGetExpaaData = function(e) {
 				html += "<li>";
 				html += key + "：";
 				if (key == "列印註記") {
-					html += "<select id='exapp_print_select'>"
+					html += "<div class='form-row form-inline'>"
+						  + "<div class='input-group input-group-sm col-3'>"
+						  + "<select id='exapp_print_select' class='form-control'>"
 						  + "<option value='0'" + (jsonObj.raw[key] == 0 ? "selected" : "") + ">【0】未印</option>"
 						  + "<option value='1'" + (jsonObj.raw[key] == 1 ? "selected" : "") + ">【1】已印</option>"
 						  + "</select> "
-						  + "<button id='exapp_print_button'>修改</button>"
-						  + "<span id='exapp_print_status'></span>";
+						  + "</div>"
+						  + `<div class='filter-btn-group col'>
+						  		<button id='exapp_print_button' class='btn btn-sm btn-primary'>修改</button>
+								<span id='exapp_print_status'></span>
+							</div>`
+						  + "</div>";
 				} else if (key == "繳費方式代碼") {
-					html += "<select id='exapp_method_select'>"
+					html += "<div class='form-row form-inline'>"
+						  + "<div class='input-group input-group-sm col-3'>"
+						  + "<select id='exapp_method_select' class='form-control'>"
 						  + getExpaaAA100Options(jsonObj.raw[key])
 						  + "</select> "
-						  + "<button id='exapp_method_button'>修改</button>"
-						  + "<span id='exapp_method_status'></span>";
+						  + "</div>"
+						  + `<div class='filter-btn-group col'>
+								  <button id='exapp_method_button' class='btn btn-sm btn-primary'>修改</button>
+								  <span id='exapp_method_status'></span>
+							</div>`
+						  + "</div>";
 				} else if (key == "悠遊卡繳費扣款結果") {
 					html += getEasycardPaymentStatus(jsonObj.raw[key]) + "【" + jsonObj.raw[key] + "】";
 					//  無作廢原因才可進行修正
@@ -1716,47 +1733,56 @@ let showRegCaseUpdateDetail = jsonObj => {
 	} else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	}
-	let html = "辦理情形：<select id='reg_case_RM30_select'>";
-	html += '<option value="A">A: 初審</option>';
-	html += '<option value="B">B: 複審</option>';
-	html += '<option value="H">H: 公告</option>';
-	html += '<option value="I">I: 補正</option>';
-	html += '<option value="R">R: 登錄</option>';
-	html += '<option value="C">C: 校對</option>';
-	html += '<option value="U">U: 異動完成</option>';
-	html += '<option value="F">F: 結案</option>';
-	html += '<option value="X">X: 補正初核</option>';
-	html += '<option value="Y">Y: 駁回初核</option>';
-	html += '<option value="J">J: 撤回初核</option>';
-	html += '<option value="K">K: 撤回</option>';
-	html += '<option value="Z">Z: 歸檔</option>';
-	html += '<option value="N">N: 駁回</option>';
-	html += '<option value="L">L: 公告初核</option>';
-	html += '<option value="E">E: 請示</option>';
-	html += '<option value="D">D: 展期</option>';
-	html += "</select>";
-	if (isEmpty(jsonObj.raw["RM31"])) {
-		html += " <button id='reg_case_RM30_button'>更新</button><br/>";
-	} else {
-		html += " <strong class='text-danger'>本案已結案，無法變更狀態！</strong><br/>";
-	}
-	html += "登記處理註記：<select id='reg_case_RM39_select'>";
-	html += '<option value=""></option>';
-	html += '<option value="B">B: 登錄開始</option>';
-	html += '<option value="R">R: 登錄完成</option>';
-	html += '<option value="C">C: 校對開始</option>';
-	html += '<option value="D">D: 校對完成</option>';
-	html += '<option value="S">S: 異動開始</option>';
-	html += '<option value="F">F: 異動完成</option>';
-	html += '<option value="G">G: 異動有誤</option>';
-	html += '<option value="P">P: 競合暫停</option>';
-	html += "</select>";
-	if (isEmpty(jsonObj.raw["RM31"])) {
-		html += " <button id='reg_case_RM39_button'>更新</button><br/>";
-	} else {
-		html += " <strong class='text-danger'>本案已結案，無法變更狀態！</strong><br/>";
-	}
-	
+	let html = `<div class="form-row mt-1">
+		<div class="input-group input-group-sm col">	
+			<div class="input-group-prepend">
+				<span class="input-group-text" id="inputGroup-reg_case_RM30_select">案件辦理情形</span>
+			</div>
+			<select id='reg_case_RM30_select' class="form-control" aria-label="案件辦理情形" aria-describedby="inputGroup-reg_case_RM30_select" required>
+				<option value="A">A: 初審</option>
+				<option value="B">B: 複審</option>
+				<option value="H">H: 公告</option>
+				<option value="I">I: 補正</option>
+				<option value="R">R: 登錄</option>
+				<option value="C">C: 校對</option>
+				<option value="U">U: 異動完成</option>
+				<option value="F">F: 結案</option>
+				<option value="X">X: 補正初核</option>
+				<option value="Y">Y: 駁回初核</option>
+				<option value="J">J: 撤回初核</option>
+				<option value="K">K: 撤回</option>
+				<option value="Z">Z: 歸檔</option>
+				<option value="N">N: 駁回</option>
+				<option value="L">L: 公告初核</option>
+				<option value="E">E: 請示</option>
+				<option value="D">D: 展期</option>
+			</select>
+		</div>
+		<div class="filter-btn-group col-auto">
+			<button id="reg_case_RM30_button" class="btn btn-sm btn-primary" ${isEmpty(jsonObj.raw["RM31"]) ? "" : "disabled"}>更新</button>
+		</div>
+	</div>
+	<div class="form-row mt-1">
+		<div class="input-group input-group-sm col">	
+			<div class="input-group-prepend">
+				<span class="input-group-text" id="inputGroup-reg_case_RM39_select">登記處理註記</span>
+			</div>
+			<select id='reg_case_RM39_select' class="form-control" aria-label="登記處理註記" aria-describedby="inputGroup-reg_case_RM39_select" required>
+				<option value=""></option>
+				<option value="B">B: 登錄開始</option>
+				<option value="R">R: 登錄完成</option>
+				<option value="C">C: 校對開始</option>
+				<option value="D">D: 校對完成</option>
+				<option value="S">S: 異動開始</option>
+				<option value="F">F: 異動完成</option>
+				<option value="G">G: 異動有誤</option>
+				<option value="P">P: 競合暫停</option>
+			</select>
+		</div>
+		<div class="filter-btn-group col-auto">
+			<button id="reg_case_RM39_button" class="btn btn-sm btn-primary" ${isEmpty(jsonObj.raw["RM31"]) ? "" : "disabled"}>更新</button>
+		</div>
+	</div>`;
 	html += "<p>" + jsonObj.tr_html + "</p>";
 	$("#reg_case_update_display").html(html);
 	$("#reg_case_RM30_select").val(jsonObj.raw["RM30"]);
@@ -1766,37 +1792,28 @@ let showRegCaseUpdateDetail = jsonObj => {
 
 	// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
 	$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
-	$(".reg_case_id").attr("title", "點我取得更多資訊！");
-	// update button xhr event
-	$("#reg_case_RM30_button").off("click").on("click", e => {
-		let selected = $("#reg_case_RM30_select").val();
-		if (selected != jsonObj.raw["RM30"]) {
-			xhrUpdateRegCaseCol({
-				rm01: jsonObj.raw["RM01"],
-				rm02: jsonObj.raw["RM02"],
-				rm03: jsonObj.raw["RM03"],
-				col: "RM30",
-				val: selected,
-				el: e.target
-			});
-		}
-	});
-	$("#reg_case_RM39_button").off("click").on("click", e => {
-		let selected = $("#reg_case_RM39_select").val();
-		if (isEmpty(jsonObj.raw["RM39"]) && isEmpty(selected)) {
-			return;
-		}
-		if (selected != jsonObj.raw["RM39"]) {
-			xhrUpdateRegCaseCol({
-				rm01: jsonObj.raw["RM01"],
-				rm02: jsonObj.raw["RM02"],
-				rm03: jsonObj.raw["RM03"],
-				col: "RM39",
-				val: selected,
-				el: e.target
-			});
-		}
-	});
+	$("#reg_case_RM30_button").off("click");
+	$("#reg_case_RM39_button").off("click");
+	if (isEmpty(jsonObj.raw["RM31"])) {
+		// update button xhr event
+		$("#reg_case_RM30_button").on("click", xhrUpdateRegCaseColAdapter.bind($("#reg_case_RM30_button"), $("#reg_case_RM30_select"), "RM30", jsonObj));
+		$("#reg_case_RM39_button").on("click", xhrUpdateRegCaseColAdapter.bind($("#reg_case_RM39_button"), $("#reg_case_RM39_select"), "RM39", jsonObj));
+	}
+}
+
+let xhrUpdateRegCaseColAdapter = (el, col, jsonObj) => {
+	let selected = el.val();
+	if (selected != jsonObj.raw[col]) {
+		xhrUpdateRegCaseCol({
+			rm01: jsonObj.raw["RM01"],
+			rm02: jsonObj.raw["RM02"],
+			rm03: jsonObj.raw["RM03"],
+			col: col,
+			val: selected
+		});
+	} else {
+		console.warn(`${col} value not changed, skip the update process.`);
+	}
 }
 
 let xhrUpdateRegCaseCol = function(arguments) {
