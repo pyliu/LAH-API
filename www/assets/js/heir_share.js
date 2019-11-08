@@ -134,7 +134,17 @@ $(document).ready((e) => {
             debug: true
         },
         computed: {
-
+            seen_s1_public: function() { return this.wizard.s1.value == 'public'; },
+            seen_s1_pub_msg: function() { return this.wizard.s1.public.count > 0; },
+            seen_s1_private: function() { return this.wizard.s1.value == 'private'; },
+            seen_s1_private_1: function() { return this.wizard.s1.private.spouse == 0 && this.wizard.s1.private.parent == 0 && this.wizard.s1.private.household == 0; },
+            seen_s1_private_1_msg: function() { return this.wizard.s1.private.child > 0; },
+            seen_s1_private_2: function() { return this.wizard.s1.private.child == 0 && this.wizard.s1.private.parent == 0 && this.wizard.s1.private.household == 0; },
+            seen_s1_private_2_msg: function() { return this.wizard.s1.private.spouse > 0; },
+            seen_s1_private_3: function() { return this.wizard.s1.private.spouse == 0 && this.wizard.s1.private.child == 0 && this.wizard.s1.private.household == 0; },
+            seen_s1_private_3_msg: function() { return this.wizard.s1.private.parent > 0; },
+            seen_s1_private_4: function() { return this.wizard.s1.private.spouse == 0 && this.wizard.s1.private.parent == 0 && this.wizard.s1.private.child == 0; },
+            seen_s1_private_4_msg: function() { return this.wizard.s1.private.household > 0; }
         },
         components: {
             "counter-input": {
