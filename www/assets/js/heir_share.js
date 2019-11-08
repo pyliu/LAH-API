@@ -133,6 +133,9 @@ $(document).ready((e) => {
             VueOK: true,
             debug: true
         },
+        computed: {
+
+        },
         components: {
             "counter-input": {
                 props: [ "max", "min" ],
