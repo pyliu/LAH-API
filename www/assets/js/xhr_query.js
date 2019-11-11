@@ -467,7 +467,7 @@ let xhrFixEasycardPayment = (qday, pc_number, amount, btn_id) => {
 					title: "修正悠遊卡扣款失敗",
 					body: "日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料修正成功!",
 					size: "md"
-				};
+				});
 				// 移除BTN及該筆
 				el.remove();
 				el.closest(".easycard_item").remove();
