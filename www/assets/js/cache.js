@@ -24,13 +24,13 @@ if (jQuery && localStorage) {
             }
             let el = $("#"+key);
             if (el.length > 0 && el.is(cached_el_selector)) {
-                console.log(`Found #${key}! Set element value to ${localStorage[key]}`);
+                //console.log(`Found #${key}! Set element value to ${localStorage[key]}`);
                 el.val(localStorage[key]);
             }
             if (localStorage[key] && isJSON(localStorage[key])) {
                 // remove json type cached data
                 localStorage.removeItem(key);
-                console.log(`Removed JSON object cached data in ${key}`);
+                //console.log(`Removed JSON object cached data in ${key}`);
             }
         }
 

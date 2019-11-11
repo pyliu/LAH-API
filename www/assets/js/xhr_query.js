@@ -463,10 +463,15 @@ let xhrFixEasycardPayment = (qday, pc_number, amount, btn_id) => {
 			return response.json();
 		}).then(jsonObj => {
 			if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-				alert("日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料修正成功!");
+				showModal({
+					title: "修正悠遊卡扣款失敗",
+					body: "日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料修正成功!",
+					size: "md"
+				};
 				// 移除BTN及該筆
 				el.remove();
 				el.closest(".easycard_item").remove();
+				toggle(el);
 			} else {
 				throw new Error("回傳狀態碼不正確!【" + jsonObj.message + "】");
 			}
