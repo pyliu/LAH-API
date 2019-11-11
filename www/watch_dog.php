@@ -89,7 +89,7 @@ blockquote img {
             <div class="form-row">
               <div class="filter-btn-group col">
                 <button id="cross_case_check_query_button" class="btn btn-sm btn-outline-primary" data-toggle='tooltip'>立即檢測</button>
-                <button id="cross_case_check_quote_button" class="btn btn-sm btn-light">備註</button>
+                <button id="cross_case_check_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
 
@@ -122,7 +122,7 @@ blockquote img {
               </div>
               <div class="filter-btn-group col">
                 <button id="easycard_query_button" class="btn btn-sm btn-outline-primary easycard_query">查詢</button>
-                <button id="easycard_quote_button" class="btn btn-sm btn-light">備註</button>
+                <button id="easycard_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
             
@@ -148,7 +148,7 @@ blockquote img {
               <span id="prereg_query_display" class="message"></span>
               <div class="filter-btn-group col">
                 <button id="prereg_clear_button" class="btn btn-sm btn-outline-danger" >清除准登</button>
-                <button id="prereg_quote_button" class="btn btn-sm btn-light">備註</button>
+                <button id="prereg_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
 
@@ -189,7 +189,7 @@ blockquote img {
               </div>
               <div class="filter-btn-group col">
                 <button id="reg_case_update_query" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="reg_case_update_quote_button" class="btn btn-sm btn-light">備註</button>
+                <button id="reg_case_update_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
             
@@ -234,7 +234,7 @@ blockquote img {
               </div>
               <div class="filter-btn-group col">
                 <button id="query_temp_clr_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="temp_clr_quote_button" class="btn btn-sm btn-light">備註</button>
+                <button id="temp_clr_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
 
@@ -359,7 +359,7 @@ blockquote img {
               </div>
               <div class="filter-btn-group col">
                 <button id="sync_x_case_button" class="btn btn-sm btn-outline-primary">比對</button>
-                <button id="sync_x_case_quote_button" class="btn btn-sm btn-light">備註</button>
+                <button id="sync_x_case_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
             
@@ -398,7 +398,7 @@ blockquote img {
               </div>
               <div class="filter-btn-group col">
                 <button id="expaa_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="expaa_quote_button" class="btn btn-sm btn-light">備註</button>
+                <button id="expaa_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
 
@@ -436,7 +436,7 @@ blockquote img {
               </div>
               <div class="filter-btn-group col">
                 <button id="expac_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="expac_quote_button" class="btn btn-sm btn-light">備註</button>
+                <button id="expac_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
             <div id="expac_query_display" class="message"></div>

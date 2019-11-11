@@ -158,7 +158,7 @@ fieldset fieldset legend {
               </div>
               <div class="filter-btn-group col">
                 <button id="sur_delay_case_fix_search_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="sur_delay_case_fix_quote_button" class="btn btn-sm btn-light">備註</button>
+                <button id="sur_delay_case_fix_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
 
@@ -222,7 +222,7 @@ fieldset fieldset legend {
                 </div>
                 <div class="filter-btn-group col">
                   <button id="sql_export_button" class="btn btn-sm btn-outline-primary">匯出</button>
-                  <button id="sql_csv_quote_button" class="btn btn-sm btn-light">備註</button>
+                  <button id="sql_csv_quote_button" class="btn btn-sm btn-outline-success">備註</button>
                 </div>
             </div>
             <div class="form-row mt-1">
@@ -289,7 +289,7 @@ fieldset fieldset legend {
               </div>
               <div class="filter-btn-group col">
                 <button id="id_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="id_quote_button" class="btn btn-sm btn-light">備註</button>
+                <button id="id_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
             
@@ -327,7 +327,7 @@ fieldset fieldset legend {
               <div class="filter-btn-group col">
                 <button id="log_button" class="btn btn-sm btn-outline-primary">下載</button>
                 <button id="log_zip_button" class="btn btn-sm btn-outline-secondary">壓縮</button>
-                <button id="log_quote_button" class="btn btn-sm btn-light">備註</button>
+                <button id="log_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
 
@@ -356,7 +356,7 @@ fieldset fieldset legend {
               </div>
               <div class="filter-btn-group col">
                 <button id="data_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="data_quote_button" class="btn btn-sm btn-light">備註</button>
+                <button id="data_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
             
