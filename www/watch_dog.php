@@ -88,7 +88,7 @@ blockquote img {
 
             <div class="form-row">
               <div class="filter-btn-group col">
-                <button id="cross_case_check_query_button" class="btn btn-sm btn-primary" data-toggle='tooltip'>立即檢測</button>
+                <button id="cross_case_check_query_button" class="btn btn-sm btn-outline-primary" data-toggle='tooltip'>立即檢測</button>
                 <button id="cross_case_check_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>
@@ -121,7 +121,7 @@ blockquote img {
                 <input type="text" id="easycard_query_day" name="easycard_query_day" class="form-control easycard_query date_picker no-cache" placeholder="1081106"  data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1081106」。" data-placement="bottom" value="<?php echo $today; ?>" />
               </div>
               <div class="filter-btn-group col">
-                <button id="easycard_query_button" class="btn btn-sm btn-primary easycard_query">查詢</button>
+                <button id="easycard_query_button" class="btn btn-sm btn-outline-primary easycard_query">查詢</button>
                 <button id="easycard_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>
@@ -188,7 +188,7 @@ blockquote img {
                 </div>
               </div>
               <div class="filter-btn-group col">
-                <button id="reg_case_update_query" class="btn btn-sm btn-primary">查詢</button>
+                <button id="reg_case_update_query" class="btn btn-sm btn-outline-primary">查詢</button>
                 <button id="reg_case_update_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>
@@ -233,7 +233,7 @@ blockquote img {
                 </div>
               </div>
               <div class="filter-btn-group col">
-                <button id="query_temp_clr_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="query_temp_clr_button" class="btn btn-sm btn-outline-primary">查詢</button>
                 <button id="temp_clr_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>
@@ -358,7 +358,7 @@ blockquote img {
                 </div>
               </div>
               <div class="filter-btn-group col">
-                <button id="sync_x_case_button" class="btn btn-sm btn-primary">比對</button>
+                <button id="sync_x_case_button" class="btn btn-sm btn-outline-primary">比對</button>
                 <button id="sync_x_case_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>
@@ -385,7 +385,7 @@ blockquote img {
                 <input type="text" id="expaa_query_date" name="expaa_query_date" class="form-control date_picker no-cache" placeholder="1081107" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080426」。" data-placement="bottom" value="<?php echo $today; ?>" />
               </div>
               <div class="filter-btn-group col">
-                <button id="expaa_query_date_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="expaa_query_date_button" class="btn btn-sm btn-outline-primary">查詢</button>
                 <button id="expaa_add_obsolete_button" class="btn btn-sm btn-outline-danger" title="新增作廢假資料以利空白規費單作廢">作廢</button>
               </div>
             </div>
@@ -397,7 +397,7 @@ blockquote img {
                 <input type="number" max="9999999" min="1" id="expaa_query_number" name="expaa_query_number" class="form-control" placeholder="0006574" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
               </div>
               <div class="filter-btn-group col">
-                <button id="expaa_query_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="expaa_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
                 <button id="expaa_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>
@@ -435,7 +435,7 @@ blockquote img {
                 <input type="number" min="1" max="9999999" id="expac_query_number" name="expac_query_number" class="form-control" placeholder="0021131" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
               </div>
               <div class="filter-btn-group col">
-                <button id="expac_query_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="expac_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
                 <button id="expac_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>

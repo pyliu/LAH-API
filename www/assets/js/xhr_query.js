@@ -584,7 +584,7 @@ let xhrGetExpacItems = function(e) {
 						 		<select class='form-control' id='modify_expac_item_${i}'>${getExpacItemOptions(jsonObj.raw[i]["AC20"])}</select>
 							</div>
 							<div class='filter-btn-group col'>
-								<button class='btn btn-sm btn-primary' id='modify_expac_item_${i}_btn' onclick='xhrModifyExpacItem("${jsonObj.raw[i]["AC25"]}", "${jsonObj.raw[i]["AC04"]}", "${jsonObj.raw[i]["AC20"]}", "${jsonObj.raw[i]["AC30"]}", "modify_expac_item_${i}")'>修改</button>
+								<button class='btn btn-sm btn-outline-primary' id='modify_expac_item_${i}_btn' onclick='xhrModifyExpacItem("${jsonObj.raw[i]["AC25"]}", "${jsonObj.raw[i]["AC04"]}", "${jsonObj.raw[i]["AC20"]}", "${jsonObj.raw[i]["AC30"]}", "modify_expac_item_${i}")'>修改</button>
 								<span id='modify_expac_item_${i}_msg'></span>
 							</div>
 						</div>`;
@@ -877,7 +877,7 @@ let xhrGetExpaaData = function(e) {
 						  + "</select> "
 						  + "</div>"
 						  + `<div class='filter-btn-group col'>
-						  		<button id='exapp_print_button' class='btn btn-sm btn-primary'>修改</button>
+						  		<button id='exapp_print_button' class='btn btn-sm btn-outline-primary'>修改</button>
 								<span id='exapp_print_status'></span>
 							</div>`
 						  + "</div>";
@@ -889,7 +889,7 @@ let xhrGetExpaaData = function(e) {
 						  + "</select> "
 						  + "</div>"
 						  + `<div class='filter-btn-group col'>
-								  <button id='exapp_method_button' class='btn btn-sm btn-primary'>修改</button>
+								  <button id='exapp_method_button' class='btn btn-sm btn-outline-primary'>修改</button>
 								  <span id='exapp_method_status'></span>
 							</div>`
 						  + "</div>";
@@ -1433,7 +1433,7 @@ let xhrQueryAnnouncementData = function(e) {
 					<select id='ann_reg_flag_${data[0]}' class='no-cache form-control'><option>N</option><option>Y</option></select>
 				</div>
 				<div class="filter-btn-group col">
-					<button id="ann_upd_btn_${data[0]}" class="btn btn-sm btn-primary easycard_query">更新</button>
+					<button id="ann_upd_btn_${data[0]}" class="btn btn-sm btn-outline-primary easycard_query">更新</button>
 				</div>
 			</div>`;
 			$("#prereg_update_ui").html(html);
@@ -1764,7 +1764,7 @@ let showRegCaseUpdateDetail = jsonObj => {
 			</select>
 		</div>
 		<div class="filter-btn-group col-auto">
-			<button id="reg_case_RM30_button" class="btn btn-sm btn-primary" ${isEmpty(jsonObj.raw["RM31"]) ? "" : "disabled"}>更新</button>
+			<button id="reg_case_RM30_button" class="btn btn-sm btn-outline-primary" ${isEmpty(jsonObj.raw["RM31"]) ? "" : "disabled"}>更新</button>
 		</div>
 	</div>
 	<div class="form-row mt-1">
@@ -1785,7 +1785,7 @@ let showRegCaseUpdateDetail = jsonObj => {
 			</select>
 		</div>
 		<div class="filter-btn-group col-auto">
-			<button id="reg_case_RM39_button" class="btn btn-sm btn-primary" ${isEmpty(jsonObj.raw["RM31"]) ? "" : "disabled"}>更新</button>
+			<button id="reg_case_RM39_button" class="btn btn-sm btn-outline-primary" ${isEmpty(jsonObj.raw["RM31"]) ? "" : "disabled"}>更新</button>
 		</div>
 	</div>`;
 	html += "<p>" + jsonObj.tr_html + "</p>";

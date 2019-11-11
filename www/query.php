@@ -117,8 +117,8 @@ fieldset fieldset legend {
                 </div>
               </div>
               <div class="filter-btn-group col">
-                <button id="query_button" class="btn btn-sm btn-primary">登記</button>
-                <button id="query_prc_button" class="btn btn-sm btn-secondary">地價</button>
+                <button id="query_button" class="btn btn-sm btn-outline-primary">登記</button>
+                <button id="query_prc_button" class="btn btn-sm btn-outline-secondary">地價</button>
               </div>
             </div>
 
@@ -157,7 +157,7 @@ fieldset fieldset legend {
                 </div>
               </div>
               <div class="filter-btn-group col">
-                <button id="sur_delay_case_fix_search_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="sur_delay_case_fix_search_button" class="btn btn-sm btn-outline-primary">查詢</button>
                 <button id="sur_delay_case_fix_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>
@@ -221,7 +221,7 @@ fieldset fieldset legend {
                   </select>
                 </div>
                 <div class="filter-btn-group col">
-                  <button id="sql_export_button" class="btn btn-sm btn-primary">匯出</button>
+                  <button id="sql_export_button" class="btn btn-sm btn-outline-primary">匯出</button>
                   <button id="sql_csv_quote_button" class="btn btn-sm btn-light">備註</button>
                 </div>
             </div>
@@ -246,8 +246,8 @@ fieldset fieldset legend {
                 <input type="text" id="msg_who" name="msg_who" class="form-control" placeholder="HB0541" value="HB054" title="ID、姓名、IP" />
               </div>
               <div class="filter-btn-group col">
-                <button id="search_user_button" class="btn btn-sm btn-primary">搜尋</button>
-                <button id="msg_button" class="btn btn-sm btn-secondary">傳送訊息</button>
+                <button id="search_user_button" class="btn btn-sm btn-outline-primary">搜尋</button>
+                <button id="msg_button" class="btn btn-sm btn-outline-secondary">傳送訊息</button>
                 <span id="filter_info" class="text-muted small"><?php echo count($operators); ?>筆</span>
               </div>
             </div>
@@ -288,7 +288,7 @@ fieldset fieldset legend {
                 <input type="text" id="id_query_text" name="id_query_text" class="form-control id_query_grp" placeholder="A123456789" />
               </div>
               <div class="filter-btn-group col">
-                <button id="id_query_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="id_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
                 <button id="id_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>
@@ -325,8 +325,8 @@ fieldset fieldset legend {
                 <input type="text" id="log_date_text" name="log_date_text" class="form-control no-cache" value="<?php echo $today_ad; ?>" />
               </div>
               <div class="filter-btn-group col">
-                <button id="log_button" class="btn btn-sm btn-primary">下載</button>
-                <button id="log_zip_button" class="btn btn-sm btn-secondary">壓縮</button>
+                <button id="log_button" class="btn btn-sm btn-outline-primary">下載</button>
+                <button id="log_zip_button" class="btn btn-sm btn-outline-secondary">壓縮</button>
                 <button id="log_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>
@@ -355,7 +355,7 @@ fieldset fieldset legend {
                 <input type="text" id="data_query_text" name="data_query_text" class="form-control" placeholder="榮民段" />
               </div>
               <div class="filter-btn-group col">
-                <button id="data_query_button" class="btn btn-sm btn-primary">查詢</button>
+                <button id="data_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
                 <button id="data_quote_button" class="btn btn-sm btn-light">備註</button>
               </div>
             </div>
