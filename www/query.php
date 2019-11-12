@@ -99,6 +99,7 @@ fieldset fieldset legend {
                   <option>106</option>
                   <option>107</option>
                   <option selected>108</option>
+                  <option>109</option>
                 </select>
                 <div class="input-group-append">
                   <span class="input-group-text" id="inputGroup-query_year">年</span>
@@ -133,6 +134,7 @@ fieldset fieldset legend {
                 <select id="sur_delay_case_fix_year" name="sur_delay_case_fix_year" class="form-control no-cache" aria-label="年" aria-describedby="inputGroup-sur_delay_case_fix_year" required>
                   <option>107</option>
                   <option selected>108</option>
+                  <option>109</option>
                 </select>
                 <div class="input-group-append">
                   <span class="input-group-text" id="inputGroup-sur_delay_case_fix_year">年</span>

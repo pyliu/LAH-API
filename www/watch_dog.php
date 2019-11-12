@@ -170,6 +170,7 @@ blockquote img {
                 <select id="reg_case_update_year" name="reg_case_update_year" class="form-control" aria-label="年" aria-describedby="inputGroup-reg_case_update_year" required>
                   <option>107</option>
                   <option selected>108</option>
+                  <option>109</option>
                 </select>
                 <div class="input-group-append">
                   <span class="input-group-text" id="inputGroup-temp_clr_year">年</span>
@@ -215,6 +216,7 @@ blockquote img {
                 <select id="temp_clr_year" name="temp_clr_year" class="form-control" aria-label="年" aria-describedby="inputGroup-temp_clr_year" required>
                   <option>107</option>
                   <option selected>108</option>
+                  <option>109</option>
                 </select>
                 <div class="input-group-append">
                   <span class="input-group-text" id="inputGroup-temp_clr_year">年</span>
@@ -330,7 +332,9 @@ blockquote img {
             <div class="form-row">
               <div class="input-group input-group-sm col">
                 <select id="sync_x_case_year" name="sync_x_case_year" class="form-control" aria-label="年" aria-describedby="inputGroup-sync_x_case_year" required>
+                  <option>107</option>
                   <option selected>108</option>
+                  <option>109</option>
                 </select>
                 <div class="input-group-append">
                   <span class="input-group-text" id="inputGroup-sync_x_case_year">年</span>
