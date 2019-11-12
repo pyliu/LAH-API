@@ -284,3 +284,12 @@ blockquote {
 	margin-top: .25rem;
 	margin-bottom: .25rem;
 }
+
+.alert-fixed {
+	position: fixed;
+    top: 8.2%;
+    left: 5%;
+    width: 90%;
+    z-index: 9999;
+    border-radius: 10px;
+}

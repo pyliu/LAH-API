@@ -472,6 +472,7 @@ blockquote img {
       <strong>&copy; <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
     </p>
   </small>
+
   <!-- Bootstrap core JavaScript -->
   <!-- Placed at the end of the document so the pages load faster -->
   <script src="assets/js/jquery-3.4.1.min.js"></script>

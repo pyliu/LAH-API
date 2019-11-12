@@ -1197,7 +1197,10 @@ let xhrAddDummyObsoleteFeesData = function(e) {
 	let reason = $("#dummy_obsolete_reason").val().replace(/[\'\"]/g, "");
 
 	if (isEmpty(operator) || isEmpty(fee_number) || isEmpty(reason)) {
-		alert("需求欄位有問題，請檢查！");
+		showAlert({
+			message: "需求欄位有問題，請檢查！",
+			type: "danger"
+		});
 		return false;
 	}
 	

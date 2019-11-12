@@ -83,6 +83,44 @@ let showPopper = (selector, content, timeout) => {
 	scrollToElement(selector);
 }
 
+let showAlert = opts => {
+	let msg = opts.message;
+	if (!isEmpty(msg)) {
+		let type = "alert-warning";
+		switch (opts.type) {
+			case "danger":
+			case "red":
+				type = "alert-danger";
+				break;
+			case "warning":
+			case "yellow":
+				type = "alert-warning";
+				break;
+			case "success":
+			case "green":
+				type = "alert-success";
+				break;
+			default:
+				type = "alert-info";
+				break;
+		}
+		let alert_element = $("#bs_alert_template");
+		if (alert_element.length == 0) {
+			initAlertUI();
+			alert_element = $("#bs_modal_template");
+		}
+
+		let callback = opts.callback;
+		if (typeof callback == "function") {
+			alert_element.one('close.bs.alert', callback);
+		}
+		alert_element.one('closed.bs.alert', () => { window.alertApp.message = ""; });
+		window.alertApp.message = msg;
+		window.alertApp.type = type;
+		window.alertApp.seen = true;
+	}
+}
+
 let showModal = opts => {
 	let body = opts.body;
 	let title = opts.title;
@@ -367,6 +405,29 @@ let initModalUI = () => {
 						<button type="button" class="btn btn-light" data-dismiss="modal">關閉</button>
 					</div>`
 				}
+			}
+		});
+	}
+}
+
+let initAlertUI = () => {
+	// add modal element to show the popup html message
+	if ($("#bs_alert_template").length == 0) {
+		$("body").append($.parseHTML(`
+			<div v-show="seen" id="bs_alert_template" class="alert alert-dismissible alert-fixed" :class="type" role="alert">
+				<small>{{message}}</small>
+				<button type="button" class="close" @click="seen = false">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+		`));
+		// Try to use Vue.js
+		window.alertApp = new Vue({
+			el: '#bs_alert_template',
+			data: {
+				message: 'Hello Alert Vue!',
+				type: 'alert-warning',
+				seen: false
 			}
 		});
 	}
