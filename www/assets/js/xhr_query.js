@@ -1117,7 +1117,7 @@ let xhrQueryObsoleteFees = e => {
 				("0" + (now.getMonth() + 1)).slice(-2) +
 				("0" + now.getDate()).slice(-2);
 
-			html = `下一筆假資料：<br />
+			html = `<small>下一筆假資料：<br />
 				※ 電腦給號：${++last_pc_number} <br />
 				※ 日期：${today} <br />
 				<div class="form-row">
@@ -1164,7 +1164,7 @@ let xhrQueryObsoleteFees = e => {
 					<td><span data-id="${jsonObj.raw[i]["AA39"]}" class="user_tag">${jsonObj.raw[i]["AA39"]}</span></td>
 				</tr>`;
 			}
-			html += `</table>`;
+			html += `</table></small>`;
 			
 			showModal({
 				title: "規費作廢假資料",
