@@ -104,17 +104,12 @@ let showAlert = opts => {
 				type = "alert-info";
 				break;
 		}
-		let alert_element = $("#bs_alert_template");
-		if (alert_element.length == 0) {
+		
+		// singleton :D
+		if (!window.alertApp) {
 			initAlertUI();
-			alert_element = $("#bs_modal_template");
 		}
 
-		let callback = opts.callback;
-		if (typeof callback == "function") {
-			alert_element.one('close.bs.alert', callback);
-		}
-		alert_element.one('closed.bs.alert', () => { window.alertApp.message = ""; });
 		window.alertApp.message = msg;
 		window.alertApp.type = type;
 		window.alertApp.seen = true;
