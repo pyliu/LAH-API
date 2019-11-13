@@ -381,7 +381,7 @@ let initModalUI = () => {
 					<div class="modal-content">
 						<com-header :in-title="title"></com-header>
 						<com-body :in-body="body" :in-opts-class="optsClass"></com-body>
-						<com-footer></com-footer>
+						<!-- <com-footer></com-footer> -->
 					</div>
 				</div>
 			</div>

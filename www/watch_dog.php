@@ -391,7 +391,7 @@ blockquote img {
               </div>
               <div class="input-group input-group-sm col">
                 <div class="input-group-prepend">
-                  <span class="input-group-text" id="inputGroup-expaa_query_number">電腦給號</span>
+                  <span class="input-group-text" id="inputGroup-expaa_query_number">給號</span>
                 </div>
                 <input type="number" max="9999999" min="1" id="expaa_query_number" name="expaa_query_number" class="form-control" placeholder="0006574" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
                 <button id="expaa_query_num_button" class="btn btn-sm btn-outline-secondary" title="針對電腦給號查詢">查詢</button>

@@ -1614,7 +1614,7 @@ let xhrQueryTempData = e => {
 		if (isEmpty(html)) {
 			showAlert({
 				message: "案件 " + year + "-" + code + "-" + number + " 查無暫存資料",
-				type: "success"
+				type: "warning"
 			});
 			return;
 		}
