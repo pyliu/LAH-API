@@ -113,6 +113,12 @@ let showAlert = opts => {
 		window.alertApp.message = msg;
 		window.alertApp.type = type;
 		window.alertApp.seen = true;
+		// close alert after 2 secs
+		if (window.alertApp.hide_timer_handle !== null) { clearTimeout(window.alertApp.hide_timer_handle); }
+		window.alertApp.hide_timer_handle = setTimeout(() => {
+			window.alertApp.seen = false;
+			window.alertApp.hide_timer_handle = null;
+		}, 2000);
 	}
 }
 
@@ -422,7 +428,8 @@ let initAlertUI = () => {
 			data: {
 				message: 'Hello Alert Vue!',
 				type: 'alert-warning',
-				seen: false
+				seen: false,
+				hide_timer_handle: null
 			}
 		});
 	}
