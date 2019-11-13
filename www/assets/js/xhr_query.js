@@ -1461,7 +1461,7 @@ let xhrQueryAnnouncementData = function(e) {
 					<select id='ann_reg_flag_${data[0]}' class='no-cache form-control'><option>N</option><option>Y</option></select>
 				</div>
 				<div class="filter-btn-group col">
-					<button id="ann_upd_btn_${data[0]}" class="btn btn-sm btn-outline-primary easycard_query">更新</button>
+					<button id="ann_upd_btn_${data[0]}" class="btn btn-sm btn-outline-primary">更新</button>
 				</div>
 			</div>`;
 			$("#prereg_update_ui").html(html);

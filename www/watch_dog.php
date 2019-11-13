@@ -387,21 +387,18 @@ blockquote img {
                   <span class="input-group-text" id="inputGroup-expaa_query_date">日期</span>
                 </div>
                 <input type="text" id="expaa_query_date" name="expaa_query_date" class="form-control date_picker no-cache" placeholder="1081107" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080426」。" data-placement="bottom" value="<?php echo $today; ?>" />
-              </div>
-              <div class="filter-btn-group col">
                 <button id="expaa_query_date_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="expaa_add_obsolete_button" class="btn btn-sm btn-outline-danger" title="新增作廢假資料以利空白規費單作廢">作廢</button>
               </div>
-            </div>
-            <div class="form-row mt-1">
               <div class="input-group input-group-sm col">
                 <div class="input-group-prepend">
                   <span class="input-group-text" id="inputGroup-expaa_query_number">電腦給號</span>
                 </div>
                 <input type="number" max="9999999" min="1" id="expaa_query_number" name="expaa_query_number" class="form-control" placeholder="0006574" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
+                <button id="expaa_query_num_button" class="btn btn-sm btn-outline-secondary" title="針對電腦給號查詢">查詢</button>
               </div>
               <div class="filter-btn-group col">
-                <button id="expaa_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
+                <!-- <button id="expaa_query_date_button" class="btn btn-sm btn-outline-primary">查詢</button> -->
+                <button id="expaa_add_obsolete_button" class="btn btn-sm btn-outline-danger" title="新增作廢假資料以利空白規費單作廢">作廢</button>
                 <button id="expaa_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
@@ -513,7 +510,7 @@ blockquote img {
       bindPressEnterEvent("#expac_query_number", xhrGetExpacItems);
       
       // query EXPAA data event
-      $("#expaa_query_button").on("click", xhrGetExpaaData);
+      $("#expaa_query_num_button").on("click", xhrGetExpaaData);
       $("#expaa_query_date_button").on("click", e => {
         $("#expaa_query_number").val("");
         xhrGetExpaaData(e);
