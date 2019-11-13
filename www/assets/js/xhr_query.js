@@ -693,35 +693,42 @@ let xhrCompareXCase = e => {
 	}).then(jsonObj => {
 		let html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + year + "-" + code + "-" + number + "</a><div>";
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-			html += "<span class='rounded-circle bg-warning'> 　 </span> 請參考下列資訊： <button id='sync_x_case_confirm_button'>同步全部資料</button>";
+			html += "<span class='rounded-circle bg-warning'> 　 </span> 請參考下列資訊： <button id='sync_x_case_confirm_button' class='btn btn-sm btn-success' title='同步全部欄位'>同步</button>";
 			html += "<table border='1' class='table-hover text-center mt-1'>";
-			html += "<tr><th>欄位名稱</th><th>欄位代碼</th><th>局端</th><th>本所</th><th>同步按鈕</th></tr>";
+			html += "<tr><th>欄位名稱</th><th>欄位代碼</th><th>局端</th><th>本所</th><th>單欄同步</th></tr>";
 			for (let key in jsonObj.raw) {
 				html += "<tr>";
 				html += "<td>" + jsonObj.raw[key]["TEXT"] + "</td>";
 				html += "<td>" + jsonObj.raw[key]["COLUMN"] + "</td>";
 				html += "<td class='text-danger'>" + jsonObj.raw[key]["REMOTE"] + "</td>";
 				html += "<td class='text-info'>" + jsonObj.raw[key]["LOCAL"] + "</td>";
-				html += "<td><button data-column='" + jsonObj.raw[key]["COLUMN"] + "' class='sync_column_button'>同步" + jsonObj.raw[key]["COLUMN"] + "</button></td>";
+				html += "<td><button data-column='" + jsonObj.raw[key]["COLUMN"] + "' class='btn btn-sm btn-outline-dark sync_column_button'>同步" + jsonObj.raw[key]["COLUMN"] + "</button></td>";
 				html += "</tr>";
 			};
 			html += "</table>";
-			$("#sync_x_case_display").html(html);
-			$("#sync_x_case_confirm_button").off("click").on("click", xhrSyncXCase.bind(id));
-			$(".sync_column_button").off("click").on("click", xhrSyncXCaseColumn.bind(id));
 		} else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_LOCAL_NO_RECORD) {
-			html += "<div><span class='rounded-circle bg-warning'> 　 </span> " + jsonObj.message + " <button id='inst_x_case_confirm_button'>新增本地端資料</button></div>"
-			$("#sync_x_case_display").html(html);
-			$("#inst_x_case_confirm_button").off("click").on("click", xhrInsertXCase.bind(id));
+			html += "<div><span class='rounded-circle bg-warning'> 　 </span> " + jsonObj.message + " <button id='inst_x_case_confirm_button'>新增本地端資料</button></div>";
 		} else {
-			html += "<div><span class='rounded-circle bg-success'> 　 </span> " + jsonObj.message + "</div>"
-			$("#sync_x_case_display").html(html);
+			html += "<div><span class='rounded-circle bg-success'> 　 </span> " + jsonObj.message + "</div>";
 		}
-		$("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
 		toggle("#sync_x_case_button");
+		showModal({
+			title: "案件比對詳情",
+			body: html,
+			callback: () => {
+				$("#sync_x_case_confirm_button").off("click").on("click", xhrSyncXCase.bind(id));
+				$(".sync_column_button").off("click").on("click", xhrSyncXCaseColumn.bind(id));
+				$("#inst_x_case_confirm_button").off("click").on("click", xhrInsertXCase.bind(id));
+				$("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
+			},
+			size: "md"
+		});
 	}).catch(ex => {
 		console.error("xhrCompareXCase parsing failed", ex);
-		$("#sync_x_case_display").html("<span class='text-danger'>" + ex + "</span>");
+		showAlert({
+			message: ex.toString(),
+			type: "danger"
+		});
 	});
 }
 
@@ -743,13 +750,22 @@ let xhrInsertXCase = function(e) {
 			return response.json();
 		}).then(jsonObj => {
 			if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-				$("#sync_x_case_display").html("<span class='text-success'>" + id + " 新增成功！</span>");
+				showAlert({
+					message: id + " 新增成功！",
+					type: "success"
+				});
 			} else {
-				$("#sync_x_case_display").html("<span class='text-danger'>" + jsonObj.message + "</span>");
+				showAlert({
+					message: jsonObj.message,
+					type: "success"
+				});
 			}
 		}).catch(ex => {
 			console.error("xhrInsertXCase parsing failed", ex);
-			$("#sync_x_case_display").html("<span class='text-danger'>" + ex + "</span>");
+			showAlert({
+				message: ex.toString(),
+				type: "danger"
+			});
 		});
 	}
 }
@@ -772,26 +788,35 @@ let xhrSyncXCase = function(e) {
 			return response.json();
 		}).then(jsonObj => {
 			if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-				$("#sync_x_case_display").html("<span class='text-success'>" + id + " 同步成功！</span>");
+				showAlert({
+					message: id + " 同步成功！",
+					type: "success"
+				});
 			} else {
-				$("#sync_x_case_display").html("<span class='text-danger'>" + jsonObj.message + "</span>");
+				showAlert({
+					message: jsonObj.message,
+					type: "danger"
+				});
 			}
 		}).catch(ex => {
 			console.error("xhrSyncXCase parsing failed", ex);
-			$("#sync_x_case_display").html("<span class='text-danger'>" + ex + "</span>");
+			showAlert({
+				message: ex.toString(),
+				type: "danger"
+			});
 		});
 	}
 }
 
 let xhrSyncXCaseColumn = function(e) {
 	let the_btn = $(e.target);
-	if (confirm("確定要同步" + the_btn.attr("data-column") + "？")) {
+	if (confirm("確定要同步" + the_btn.data("column") + "？")) {
 		// this binded as case id
 		let id = this;
 		let body = new FormData();
 		body.append("type", "sync_xcase_column");
 		body.append("id", id);
-		body.append("column", the_btn.attr("data-column"));
+		body.append("column", the_btn.data("column"));
 		
 		let td = the_btn.parent();
 		the_btn.remove();

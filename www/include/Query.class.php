@@ -699,7 +699,7 @@ class Query {
 		return $this->syncXCaseColumn($id, "");
 	}
 
-	public function syncXCaseColumn($id, $column) {
+	public function syncXCaseColumn($id, $wanted_column) {
 		$diff = $this->getXCaseDiff($id, true);	// true -> use raw data to update
 		if (!empty($diff)) {
 			global $log;
@@ -709,7 +709,7 @@ class Query {
 
 			$set_str = "";
 			foreach ($diff as $col_name => $arr_vals) {
-				if (!empty($wanted_column) && $col_name != $column) {
+				if (!empty($wanted_column) && $col_name != $wanted_column) {
 					continue;
 				}
 				$set_str .= $col_name." = '".$arr_vals["REMOTE"]."',";
