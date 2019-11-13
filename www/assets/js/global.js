@@ -341,7 +341,7 @@ let initBlockquoteModal = () => {
 		if (quote.length > 0) {
 			//quote.hasClass("hide") ? quote.removeClass("hide") : quote.addClass("hide");
 			showModal({
-				title: "小幫手提示",
+				title: quote.data("title") + " 小幫手提示",
 				body: quote.html(),
 				size: "lg"
 			});

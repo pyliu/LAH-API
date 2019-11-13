@@ -93,7 +93,7 @@ blockquote img {
               </div>
             </div>
 
-            <blockquote id="cross_case_check_quote" class="hide">
+            <blockquote id="cross_case_check_quote" class="hide" data-title="跨所註記遺失檢測">
               <h5><span class="text-danger">※</span>通常發生的情況是案件內的權利人/義務人/代理人姓名內有罕字造成。</h5>
               QUERY: <br />
               SELECT * <br />
@@ -126,7 +126,7 @@ blockquote img {
               </div>
             </div>
             
-            <blockquote id="easycard_quote" class="hide">
+            <blockquote id="easycard_quote" class="hide" data-title="悠遊卡自動加值付款失敗回復">
               <ol>
                 <li>櫃台來電通知悠遊卡扣款成功但地政系統卻顯示扣款失敗，需跟櫃台要【電腦給號】</li>
                 <li>管理師處理方法：AA106為'2' OR '8'將AA106更正為'1'即可【AA01:事發日期、AA04:電腦給號】。<br />
@@ -154,7 +154,7 @@ blockquote img {
 
             <div id='prereg_update_ui' class='mt-1'></div>
 
-            <blockquote id="prereg_quote" class="hide mt-1">
+            <blockquote id="prereg_quote" class="hide mt-1" data-title="公告期限維護">
               <h5><span class="text-danger">※</span>注意：中壢所規定超過30件案件才能執行此功能，並於完成時須馬上關掉以免其他案件誤登。</h5>
               <h5><span class="text-danger">※</span>注意：准登完後該案件須手動於資料庫中調整辦理情形（RM30）為「公告」（H）。</h5>
               <img src="assets/howto/登記原因先行准登設定.jpg" />
@@ -196,7 +196,7 @@ blockquote img {
             
             <div id="reg_case_update_display" class="message"></div>
 
-            <blockquote id="reg_case_update_quote" class="hide">
+            <blockquote id="reg_case_update_quote" class="hide" data-title="調整登記案件欄位資料">
               <ul>
                 <li>使用情境1：先行准登後案件須回復至公告</li>
                 <li>使用情境2：案件卡住需退回初審</li>
@@ -240,7 +240,7 @@ blockquote img {
               </div>
             </div>
 
-            <blockquote id="temp_clr_quote" class="hide">
+            <blockquote id="temp_clr_quote" class="hide" data-title="案件暫存檔清除">
               <h6 class="text-info">檢查下列的表格</h6>
               <ul>
                 <!-- // 登記 -->
@@ -367,7 +367,7 @@ blockquote img {
               </div>
             </div>
             
-            <blockquote id="sync_x_case_quote" class="hide">
+            <blockquote id="sync_x_case_quote" class="hide" data-title="同步局端跨所案件資料">
               <h6>將局端跨所資料同步回本所資料庫</h6>
               <div><span class="text-danger">※</span>新版跨縣市回寫機制會在每一分鐘時自動回寫，故局端資料有可能會比較慢更新。【2019-06-26】</div>
               <div><span class="text-danger">※</span>局端針對遠端連線同步異動資料庫有鎖IP，故<span class="text-danger">IP不在局端白名單內的主機將無法使用本功能</span>，目前主機IP為 <span class="text-warning"><?php echo $_SERVER["SERVER_ADDR"] ?></span> 。【2019-10-01】</div>
@@ -406,7 +406,7 @@ blockquote img {
               </div>
             </div>
 
-            <blockquote id="expaa_quote" class="hide">
+            <blockquote id="expaa_quote" class="hide" data-title="規費資料集修正">
               AA09 - 列印註記【1：已印，0：未印】<br />
               AA100 - 付款方式<br />
               <img src="assets/img/EXPAA_AA100_Update.jpg" /><br />
@@ -444,7 +444,7 @@ blockquote img {
               </div>
             </div>
             <div id="expac_query_display" class="message"></div>
-            <blockquote id="expac_quote" class="hide">
+            <blockquote id="expac_quote" class="hide" data-title="規費收費項目修正">
               <img src="assets/img/correct_payment_screenshot.jpg" />
               -- 規費收費項目<br/>
               SELECT t.AC25 AS "規費年度",<br/>

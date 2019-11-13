@@ -164,7 +164,7 @@ fieldset fieldset legend {
               </div>
             </div>
 
-            <blockquote id="sur_delay_case_fix_quote" class="hide">
+            <blockquote id="sur_delay_case_fix_quote" class="hide" data-title="複丈案件查詢">
               <h5><span class="text-danger">※</span>注意：本功能會清除如下圖之欄位資料並將案件辦理情形改為【核定】，請確認後再執行。</h5>
               <img src="assets/howto/107-HB18-3490_測丈已結案案件辦理情形出現(逾期)延期複丈問題調整【參考】.jpg" />
               <h5><span class="text-danger">※</span> 問題原因說明</h5>
@@ -230,7 +230,7 @@ fieldset fieldset legend {
             <div class="form-row mt-1">
               <textarea id="sql_csv_text" class="form-control" rows="5" placeholder="輸入SELECT SQL ..."></textarea>
             </div>
-            <blockquote id="sql_report_blockquote" class="hide">
+            <blockquote id="sql_report_blockquote" class="hide" data-title="報表匯出">
               <p>輸入SELECT SQL指令匯出查詢結果。</p>
               <img src="assets/img/csv_export_method.jpg" class="w-auto" />
             </blockquote>
@@ -295,7 +295,7 @@ fieldset fieldset legend {
               </div>
             </div>
             
-            <blockquote id="id_sql" class="hide">
+            <blockquote id="id_sql" class="hide" data-title="法院來函查統編">
               -- 【法院來函查統編】MOICAS_CRSMS 土地登記案件查詢-權利人+義務人+代理人+複代 <br/>
               SELECT t.* <br/>
                 FROM MOICAS.CRSMS t <br/>
@@ -333,7 +333,7 @@ fieldset fieldset legend {
               </div>
             </div>
 
-            <blockquote id="log_blockquote" class="hide">
+            <blockquote id="log_blockquote" class="hide" data-title="記錄檔">
               <ol>
                 <li>根據日期取得本伺服器之紀錄檔案。</li>
                 <li>按壓縮按鈕可手動壓縮主機端LOG原始檔。</li>
@@ -362,7 +362,7 @@ fieldset fieldset legend {
               </div>
             </div>
             
-            <blockquote id="data_blockquote" class="hide">
+            <blockquote id="data_blockquote" class="hide" data-title="土地標示部筆數＆面積查詢">
               -- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>
               SELECT t.AA48 as "段代碼", <br/>
                   m.KCNT as "段名稱", <br/>
@@ -385,7 +385,7 @@ fieldset fieldset legend {
                 <button id="export_txt_quote_button" class="btn btn-sm btn-outline-success">打開說明</button>
               </div>
             </div>
-            <blockquote id="export_txt_blockquote" class="hide">
+            <blockquote id="export_txt_blockquote" class="hide" data-title="地政局索取地籍資料">
               <span class="text-danger">※</span> 系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
               　- <small class="mt-2 mb-2"> 除下面標示為黃色部分須至地政系統產出並下載，其餘皆可於「報表匯出」區塊產出。</small> <br/>
               　AI001-10 <br/>
