@@ -113,12 +113,13 @@ let showAlert = opts => {
 		window.alertApp.message = msg;
 		window.alertApp.type = type;
 		window.alertApp.seen = true;
+		let timeout = opts.timeout;
 		// close alert after 2 secs
 		if (window.alertApp.hide_timer_handle !== null) { clearTimeout(window.alertApp.hide_timer_handle); }
 		window.alertApp.hide_timer_handle = setTimeout(() => {
 			window.alertApp.seen = false;
 			window.alertApp.hide_timer_handle = null;
-		}, 2000);
+		}, isEmpty(timeout) || isNaN(timeout) ? 5000 : timeout);
 	}
 }
 
@@ -422,8 +423,8 @@ let initAlertUI = () => {
 	// add modal element to show the popup html message
 	if ($("#bs_alert_template").length == 0) {
 		$("body").append($.parseHTML(`
-			<div v-show="seen" id="bs_alert_template" class="alert alert-dismissible alert-fixed" :class="type" role="alert">
-				<small>{{message}}</small>
+			<div v-show="seen" id="bs_alert_template" class="alert alert-dismissible alert-fixed shadow" :class="type" role="alert">
+				<small v-html="message"></small>
 				<button type="button" class="close" @click="seen = false">
 					<span aria-hidden="true">&times;</span>
 				</button>

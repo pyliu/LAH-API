@@ -115,14 +115,17 @@ let showRegCaseDetail = (jsonObj) => {
 }
 
 let showPrcCaseDetail = (jsonObj) => {
-	let html = "<p>" + jsonObj.html + "</p>";
-	let modal_size = "lg";
 	if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-		html = "<strong class='text-danger'>" + jsonObj.message + "</strong>";
-		modal_size = "sm";
+		showAlert({
+			message: "查無地價案件資料",
+			type: "warning"
+		});
+		return;
 	} else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	}
+	let html = "<p>" + jsonObj.html + "</p>";
+	let modal_size = "lg";
 	showModal({
 		body: html,
 		title: "地價案件詳情",
@@ -1183,10 +1186,9 @@ let xhrQueryObsoleteFees = e => {
 		}
 	}).catch(ex => {
 		console.error("xhrQueryObsoleteFees parsing failed", ex);
-		showModal({
-			title: "錯誤訊息 - 假規費資料作業",
-			body: ex.message,
-			size: "sm"
+		showAlert({
+			message: ex.message,
+			type: "danger"
 		});
 	});
 }
@@ -1238,10 +1240,9 @@ let xhrAddDummyObsoleteFeesData = function(e) {
 		});
 	}).catch(ex => {
 		console.error("xhrAddDummyObsoleteFeesData parsing failed", ex);
-		showModal({
-			title: "錯誤訊息 - 新增假規費資料",
-			body: ex.message,
-			size: "sm"
+		showAlert({
+			message: ex.message,
+			type: "danger"
 		});
 	});
 }
@@ -1362,10 +1363,9 @@ let xhrZipLog = e => {
 		return response.json();
 	}).then(jsonObj => {
 		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + jsonObj.message + "】");
-		showModal({
-			body: "<strong class='text-success'>壓縮完成</strong>",
-			title: "LOG檔壓縮",
-			size: "sm"
+		showAlert({
+			message: "<strong class='text-success'>壓縮完成</strong>",
+			type: "success"
 		});
 		toggle(e.target);
 	}).catch(ex => {
@@ -1460,10 +1460,9 @@ let xhrUpdateAnnouncementData = function(e) {
 	let day = this.day_el.val();
 	let flag = this.flag_el.val();
 	if (this.orig_data[2] == day && this.orig_data[3] == flag) {
-		showModal({
-			body: "無變更，不需更新！",
-			title: "訊息通知",
-			size: "sm"
+		showAlert({
+			message: "無變更，不需更新！",
+			type: "warning"
 		});
 		return;
 	}
@@ -1485,10 +1484,9 @@ let xhrUpdateAnnouncementData = function(e) {
 			return response.json();
 		}).then(jsonObj => {
 			console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
-			showModal({
-				body: "<strong class='text-success'>更新完成</strong>",
-				title: "公告期限更新",
-				size: "sm"
+			showAlert({
+				message: "<strong class='text-success'>更新完成</strong>",
+				type: "success"
 			});
 			// refresh the select list
 			xhrQueryAnnouncementData.call(null, [e]);
@@ -1517,10 +1515,9 @@ let xhrClearAnnouncementFlag = e => {
 		return response.json();
 	}).then(jsonObj => {
 		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + jsonObj.status + "】");
-		showModal({
-			body: "<strong class='text-success'>已全部清除完成</strong>",
-			title: "清除先行准登",
-			size: "sm"
+		showAlert({
+			message:  "<strong class='text-success'>已全部清除完成</strong>",
+			type: "success"
 		});
 		// refresh the select list
 		xhrQueryAnnouncementData.call(null, [e]);
@@ -1590,10 +1587,9 @@ let xhrQueryTempData = e => {
 		toggle(e.target);
 		
 		if (isEmpty(html)) {
-			showModal({
-				body: "案件 " + year + "-" + code + "-" + number + " 查無暫存資料",
-				title: "查詢暫存資料",
-				size: "sm"
+			showAlert({
+				message: "案件 " + year + "-" + code + "-" + number + " 查無暫存資料",
+				type: "success"
 			});
 			return;
 		}
@@ -1732,10 +1728,9 @@ let xhrRegCaseUpdateQuery = e => {
 
 let showRegCaseUpdateDetail = jsonObj => {
 	if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-		showModal({
-			title: "登記案件查詢錯誤",
-			body: "<strong class='text-danger'>" + jsonObj.message + "</strong>",
-			size: "md"
+		showAlert({
+			message: jsonObj.message,
+			type: "danger"
 		});
 		return;
 	} else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
@@ -1892,10 +1887,9 @@ let xhrGetSURCase = function(e) {
 let showSURCaseDetail = jsonObj => {
 	if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
 		if (!jsonObj.data_count == 0) {
-			showModal({
-				title: "測量案件查詢",
-				body: "查無測量案件資料",
-				size: "sm"
+			showAlert({
+				message: "查無測量案件資料",
+				type: "warning"
 			});
 			return;
 		}
@@ -1961,16 +1955,14 @@ let xhrFixSurDelayCase = function(e) {
 			return response.json();
 		}).then(jsonObj => {
 			if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-				showModal({
-					body: id + " 複丈案件修正成功!",
-					title: "延期複丈案件修正",
-					size: "sm"
+				showAlert({
+					message: id + " 複丈案件修正成功!",
+					type: "success"
 				});
 			} else {
-				showModal({
-					body: jsonObj.message,
-					title: "延期複丈案件修正",
-					size: "sm"
+				showAlert({
+					message: jsonObj.message,
+					type: "danger"
 				});
 				throw new Error("回傳狀態碼不正確!【" + jsonObj.message + "】");
 			}
@@ -2012,16 +2004,14 @@ let xhrUpdateCaseColumnData = e => {
 			return response.json();
 		}).then(jsonObj => {
 			if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-				showModal({
-					body: title + "更新成功",
-					title: "更新欄位",
-					size: "sm"
+				showAlert({
+					message: title + "更新成功",
+					type: "success"
 				});
 			} else {
-				showModal({
-					body: jsonObj.message,
-					title: "更新欄位失敗",
-					size: "sm"
+				showAlert({
+					message: jsonObj.message,
+					type: "danger"
 				});
 			}
 		}).catch(ex => {
@@ -2062,10 +2052,9 @@ let xhrSearchUsers = e => {
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
 			showUserInfoByRAW(jsonObj.raw[jsonObj.data_count - 1]);
 		} else {
-			showModal({
-				body: jsonObj.message,
-				title: "查詢使用者",
-				size: "sm"
+			showAlert({
+				message: jsonObj.message,
+				type: "warning"
 			});
 			console.warn(jsonObj.message);
 		}
@@ -2219,20 +2208,18 @@ let xhrSendMessage = e => {
 
 	if(isEmpty(title) || isEmpty(content) || isEmpty(who)) {
 		console.warn("Require query params are empty, skip xhr querying. (" + title + ", " + content + ")");
-		showModal({
-			body: "<span class='text-danger'>標題或是內容為空白。</span>",
-			title: "輸入錯誤",
-			size: "sm"
+		showAlert({
+			message: "<span class='text-danger'>標題或是內容為空白。</span>",
+			type: "warning"
 		});
 		return;
 	}
 
 	if (content.length > 1000) {
 		console.warn("Content should not exceed 1000 chars, skip xhr querying. (" + content.length + ")");
-		showModal({
-			body: "<span class='text-danger'>內容不能超過1000個字元。</span><p>" + content + "</p>",
-			title: "內容錯誤",
-			size: "sm"
+		showAlert({
+			message: "<span class='text-danger'>內容不能超過1000個字元。</span><p>" + content + "</p>",
+			type: "warning"
 		});
 		return;
 	}
@@ -2257,11 +2244,9 @@ let xhrSendMessage = e => {
 		return response.json();
 	}).then(jsonObj => {
 		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + jsonObj.message + "】");
-		let html = jsonObj.message;
-		showModal({
-			body: html,
-			title: "訊息送出結果",
-			size: "sm"
+		showAlert({
+			message: jsonObj.message,
+			type: "success"
 		});
 		toggle(clicked_element);
 	}).catch(ex => {
