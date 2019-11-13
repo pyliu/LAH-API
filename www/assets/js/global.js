@@ -326,7 +326,7 @@ let initTooltip = () => {
 	});
 }
 
-let initBlockquoteToggle = () => {
+let initBlockquoteModal = () => {
 	// add responsive and thumbnail style to blockquote img
 	$("blockquote img").addClass("img-responsive img-thumbnail");
 	// control blockquote block for *_quote_button
@@ -338,7 +338,14 @@ let initBlockquoteToggle = () => {
 			let fs = $(el.closest("fieldset"));
 			quote = fs.find("blockquote");
 		}
-		quote.hasClass("hide") ? quote.removeClass("hide") : quote.addClass("hide");
+		if (quote.length > 0) {
+			//quote.hasClass("hide") ? quote.removeClass("hide") : quote.addClass("hide");
+			showModal({
+				title: "小幫手提示",
+				body: quote.html(),
+				size: "lg"
+			});
+		}
 	});
 }
 
@@ -441,7 +448,7 @@ $(document).ready(e => {
 		document.getElementsByTagName("body")[0].innerHTML = '<h2 style="margin-top: 50px; text-align: center;" class="text-danger">請使用Chrome/Firefox瀏覽器</h2>';
 	}
 
-	initBlockquoteToggle();
+	initBlockquoteModal();
 	initTooltip();
 	initDatepicker();
 	initWatchdog();
