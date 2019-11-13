@@ -15,7 +15,6 @@ let xhrGetCaseLatestNum = function(e) {
 	body.append("year", year);
 	body.append("code", code);
 	
-	let display = $("#"+this.display_id);
 	let number = $("#"+this.number_id);
 
 	toggle(code_select);
@@ -28,18 +27,18 @@ let xhrGetCaseLatestNum = function(e) {
 		return response.json();
 	}).then(jsonObj => {
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-			display.html("目前 " + code_val + " 最新案件號為 " + jsonObj.max);
+			showAlert({message: "目前 " + code_val + " 最新案件號為 " + jsonObj.max, type: "success"});
 			number.val(jsonObj.max);
 		} else if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-			display.html("<strong class='text-danger'>" + jsonObj.message + "</strong>");
+			showAlert({message: jsonObj.message, type: "danger"});
 		} else {
-			display.html("<strong class='text-danger'>" + code_val + "</strong>");
+			showAlert({message: code_val, type: "danger"});
 		}
 		toggle(code_select);
 		toggle(number);
 	}).catch(ex => {
 		console.error("xhrGetCaseLatestNum parsing failed", ex);
-	  	display.html("<strong class='text-danger'>" + "查詢最大號碼失敗~【" + code_val + "】" + "</strong>");
+		showAlert({message: "查詢最大號碼失敗~【" + code_val + "】", type: "danger"});
 	});
 }
 
@@ -798,6 +797,7 @@ let xhrSyncXCase = function(e) {
 					type: "danger"
 				});
 			}
+			closeModal();
 		}).catch(ex => {
 			console.error("xhrSyncXCase parsing failed", ex);
 			showAlert({

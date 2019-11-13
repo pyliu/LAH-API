@@ -530,8 +530,7 @@ blockquote img {
       $("#sync_x_case_code").on("change", xhrGetCaseLatestNum.bind({
         code_id: "sync_x_case_code",
         year_id: "sync_x_case_year",
-        number_id: "sync_x_case_num",
-        display_id: "sync_x_case_display"
+        number_id: "sync_x_case_num"
       }));
 
       // query for announcement
@@ -545,16 +544,14 @@ blockquote img {
       $("#temp_clr_code").on("change", xhrGetCaseLatestNum.bind({
         code_id: "temp_clr_code",
         year_id: "temp_clr_year",
-        number_id: "temp_clr_num",
-        display_id: "temp_clr_display"
+        number_id: "temp_clr_num"
       }));
 
       // reg case data update
       $("#reg_case_update_code").on("change", xhrGetCaseLatestNum.bind({
         code_id: "reg_case_update_code",
         year_id: "reg_case_update_year",
-        number_id: "reg_case_update_num",
-        display_id: "reg_case_update_display"
+        number_id: "reg_case_update_num"
       }));
       $("#reg_case_update_query").on("click", xhrRegCaseUpdateQuery);
       bindPressEnterEvent("#reg_case_update_num", xhrRegCaseUpdateQuery);
