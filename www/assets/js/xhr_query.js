@@ -184,7 +184,7 @@ let xhrRegQueryCase = e => {
 		toggle(e.target);
 	}).catch(ex => {
 		console.error("xhrRegQueryCase parsing failed", ex);
-		$("#query_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
+		showAlert({message: "無法取得 " + id + " 資訊!【" + ex + "】", type: "danger"});
 	});
 }
 
@@ -213,7 +213,7 @@ let xhrPrcQueryCase = e => {
 		toggle(e.target);
 	}).catch(ex => {
 		console.error("xhrPrcQueryCase parsing failed", ex);
-		$("#query_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
+		showAlert({message: "無法取得 " + id + " 資訊!【" + ex + "】", type: "danger"});
 	});
 }
 
@@ -257,17 +257,23 @@ let xhrCheckProblematicXCase = e => {
 				html += "<button class='fix_xcase_button' data-id='" + jsonObj.case_ids[i] + "'>修正</button> ";
 				html += "<span id='" + jsonObj.case_ids[i] + "'></span> <br />";
 			}
-			$("#cross_case_check_query_display").html(html);
-			$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
-			$(".fix_xcase_button").one("click", xhrFixProblematicXCase);
+			showModal({
+				title: "跨所註記遺失查詢",
+				body: html,
+				size: "md",
+				callback: () => {
+					$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
+					$(".fix_xcase_button").one("click", xhrFixProblematicXCase);
+				}
+			});
+			
 		} else if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-			let now = new Date();
-			$("#cross_case_check_query_display").html("<div class='mt-1'><span class='rounded-circle bg-success'> 　 </span> 目前一切良好！【" + now.toLocaleString() + "】</div>");
+			showAlert({message: "<span class='rounded-circle bg-success'> 　 </span> 目前一切良好！【" + new Date().toLocaleString() + "】", type: "success"});
 		}
 		toggle(e.target);
 	}).catch(ex => {
 		console.error("xhrCheckProblematicXCase parsing failed", ex);
-	  $("#cross_case_check_query_display").html("<strong class='text-danger'>XHR連線查詢有問題!!【" + ex + "】</strong>");
+		showAlert({message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
 	});
 };
 
@@ -298,7 +304,7 @@ let xhrFixProblematicXCase = e => {
 		}
 	}).catch(ex => {
 		console.error("xhrFixProblematicXCase parsing failed", ex);
-		$("#cross_case_check_query_display").html("<span class='text-danger'>" + ex + "</span>");
+		showAlert({message: ex.toString(), type: "danger"});
 	});
 
 
@@ -508,7 +514,7 @@ let xhrEasycardPaymentQuery = e => {
 		return response.json();
 	}).then(jsonObj => {
 		if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-			$("#easycard_query_display").html("<span class='rounded-circle bg-success'> 　 </span> " + jsonObj.message);
+			showAlert({message: "<span class='rounded-circle bg-success'> 　 </span> " + jsonObj.message, type: "success"});
 		} else {
 			let html = "<div><span class='rounded-circle bg-warning'> 　 </span> <strong class='text-danger'>找到下列資料：</strong></div>";
 			for (let i = 0; i < jsonObj.data_count; i++) {
@@ -524,12 +530,16 @@ let xhrEasycardPaymentQuery = e => {
 				}
 				html += "</div>";
 			}
-			$("#easycard_query_display").html(html);
+			showModal({
+				title: "悠遊卡付款失敗修正",
+				body: html,
+				size: "md"
+			});
 		}
 		toggle(".easycard_query");
 	}).catch(ex => {
 		console.error("xhrEasycardPaymentQuery parsing failed", ex);
-		$("#easycard_query_display").html("<strong class='text-danger'>XHR連線查詢有問題!!【" + ex + "】</strong>");
+		showAlert({message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
 	});
 }
 
@@ -572,7 +582,7 @@ let xhrGetExpacItems = function(e) {
 		return response.json();
 	}).then(jsonObj => {
 		if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-			$("#expac_query_display").html("找不到規費收費項目資料！【電腦給號：" + number + "】");
+			showAlert({message: "找不到規費收費項目資料！【電腦給號：" + number + "】", type: "warning"});
 		} else {
 			let html = "<div><strong class='text-danger'>找到下列資料：</strong></div>";
 			for (let i = 0; i < jsonObj.data_count; i++) {
@@ -598,8 +608,7 @@ let xhrGetExpacItems = function(e) {
 		toggle("#expac_query_button");
 	}).catch(ex => {
 		console.error("xhrGetExpacItems parsing failed", ex);
-		toggle("#expac_query_button");
-		$("#expac_query_display").html("<strong class='text-danger'>XHR連線查詢有問題!!【" + ex + "】</strong>");
+		showAlert({message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
 	});
 }
 
@@ -946,7 +955,7 @@ let xhrGetExpaaData = function(e) {
 				number: $("#expaa_query_number").val(),
 				select_id: "exapp_method_select"
 			}));
-		} else if (jsonObj.status == 2) {
+		} else if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS) {
 			// has many records
 			let html = "<div>" 
 					+ "<span class='block-secondary'>現金</span> "
@@ -967,7 +976,6 @@ let xhrGetExpaaData = function(e) {
 					+ jsonObj.raw[i]["AA04"]
 					+ "</a>";
 			}
-			//$("#expaa_query_display").html(html);
 			showModal({
 				body: html,
 				title: "搜尋規費列表",
@@ -984,12 +992,12 @@ let xhrGetExpaaData = function(e) {
 				}
 			});
 		} else {
-			$("#expaa_query_display").html("<span class='text-danger'>" + jsonObj.message.replace(", ", "") + "</span>");
+			showAlert({message: jsonObj.message.replace(", ", ""), type: "danger"});
 		}
 		toggle("[id*=expaa_query_]");
 	}).catch(ex => {
 		console.error("xhrGetExpaaData parsing failed", ex);
-		$("#expaa_query_display").html("<span class='text-danger'>" + ex + "</span>");
+		showAlert({message: ex.toString(), type: "danger"});
 	});
 }
 
@@ -1747,7 +1755,7 @@ let xhrRegCaseUpdateQuery = e => {
 		toggle(e.target);
 	}).catch(ex => {
 		console.error("xhrRegCaseUpdateQuery parsing failed", ex);
-		$("#reg_case_update_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
+		showAlert({message: "無法取得 " + id + " 資訊!【" + ex.toString() + "】", type: "danger"});
 	});
 }
 
@@ -1812,21 +1820,27 @@ let showRegCaseUpdateDetail = jsonObj => {
 		</div>
 	</div>`;
 	html += "<p>" + jsonObj.tr_html + "</p>";
-	$("#reg_case_update_display").html(html);
-	$("#reg_case_RM30_select").val(jsonObj.raw["RM30"]);
-	$("#reg_case_RM39_select").val(jsonObj.raw["RM39"]);
-	// user info event
-	addUserInfoEvent();
+	showModal({
+		title: "調整登記案件欄位資料",
+		body: html,
+		size: "md",
+		callback: () => {
+			$("#reg_case_RM30_select").val(jsonObj.raw["RM30"]);
+			$("#reg_case_RM39_select").val(jsonObj.raw["RM39"]);
+			// user info event
+			addUserInfoEvent();
 
-	// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
-	$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
-	$("#reg_case_RM30_button").off("click");
-	$("#reg_case_RM39_button").off("click");
-	if (isEmpty(jsonObj.raw["RM31"])) {
-		// update button xhr event
-		$("#reg_case_RM30_button").on("click", xhrUpdateRegCaseColAdapter.bind($("#reg_case_RM30_button"), $("#reg_case_RM30_select"), "RM30", jsonObj));
-		$("#reg_case_RM39_button").on("click", xhrUpdateRegCaseColAdapter.bind($("#reg_case_RM39_button"), $("#reg_case_RM39_select"), "RM39", jsonObj));
-	}
+			// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
+			$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
+			$("#reg_case_RM30_button").off("click");
+			$("#reg_case_RM39_button").off("click");
+			if (isEmpty(jsonObj.raw["RM31"])) {
+				// update button xhr event
+				$("#reg_case_RM30_button").on("click", xhrUpdateRegCaseColAdapter.bind($("#reg_case_RM30_button"), $("#reg_case_RM30_select"), "RM30", jsonObj));
+				$("#reg_case_RM39_button").on("click", xhrUpdateRegCaseColAdapter.bind($("#reg_case_RM39_button"), $("#reg_case_RM39_select"), "RM39", jsonObj));
+			}
+		}
+	});
 }
 
 let xhrUpdateRegCaseColAdapter = (el, col, jsonObj) => {
@@ -1936,7 +1950,6 @@ let showSURCaseDetail = jsonObj => {
 			html += "<label for='sur_delay_case_fix_set_D'><input id='sur_delay_case_fix_set_D' type='checkbox' checked /> 辦理情形改為核定</label> ";
 			html += "<label for='sur_delay_case_fix_clear_delay_datetime'><input id='sur_delay_case_fix_clear_delay_datetime' type='checkbox' checked /> 清除延期時間</label> ";
 		}
-		//$("#sur_delay_case_fix_display").html(html);
 		showModal({
 			title: "測量案件查詢",
 			body: html,
@@ -1993,7 +2006,7 @@ let xhrFixSurDelayCase = function(e) {
 			}
 		}).catch(ex => {
 			console.error("xhrFixSurDelayCase parsing failed", ex);
-			$("#sur_delay_case_fix_display").html("<strong class='text-danger'>修正 " + id + " 失敗!【" + ex + "】</strong>");
+			showAlert({message: "修正 " + id + " 失敗!【" + ex.toString() + "】", type: "danger"});
 		});
 	}
 }
