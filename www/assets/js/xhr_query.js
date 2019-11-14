@@ -566,6 +566,8 @@ let xhrGetExpacItems = function(e) {
 
 	// should be the query button (#expac_query_button)
 	toggle("#expac_query_button");
+	// clean display area before querying
+	$("#expac_query_display").html("");
 
 	let body = new FormData();
 	body.append("type", "expac");
@@ -582,7 +584,7 @@ let xhrGetExpacItems = function(e) {
 		return response.json();
 	}).then(jsonObj => {
 		if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-			showAlert({message: "找不到規費收費項目資料！【電腦給號：" + number + "】", type: "warning"});
+			showAlert({message: "找不到規費收費項目資料！【年度：" + $("#expac_query_year").val() + ", 電腦給號：" + number + "】", type: "warning"});
 		} else {
 			let html = "<div><strong class='text-danger'>找到下列資料：</strong></div>";
 			for (let i = 0; i < jsonObj.data_count; i++) {
@@ -992,7 +994,7 @@ let xhrGetExpaaData = function(e) {
 				}
 			});
 		} else {
-			showAlert({message: jsonObj.message.replace(", ", ""), type: "danger"});
+			showAlert({message: `找不到規費資料【日期：${txt}, 電腦給號：${number}】`, type: "warning"});
 		}
 		toggle("[id*=expaa_query_]");
 	}).catch(ex => {
