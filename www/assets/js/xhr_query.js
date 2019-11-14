@@ -356,6 +356,9 @@ let xhrGetCasesByID = e => {
 
 	let finish_count = 0;
 
+	toggleInsideSpinner("#id_query_crsms_result");
+	toggleInsideSpinner("#id_query_cmsms_result");
+
 	let xhr_crsms = $.ajax({
 		url: "query_json_api.php",
 		data: "type=crsms&id="+text,
