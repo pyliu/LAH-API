@@ -33,7 +33,7 @@ $count = 0;
 foreach ($all as $row) {
     $count++;
     $data = new RegCaseData($row);
-    $str .= "<tr class='".$data->getStatusCss()."'>\n";
+    $str .= "<tr class='".$data->getStatusCss()."' style='font-size: .95rem;'>\n";
     $str .= "<td class='text-right px-3'><a class='case ajax ".($data->isDanger() ? "text-danger" : "")."' href='#'>".$data->getReceiveSerial()."</a></td>\n".
         "<td data-toggle='tooltip' title='限辦期限：".$data->getDueDate()."'>".$data->getReceiveTime()."</td>\n".
 //"<td data-toggle='tooltip' data-placement='right' title='限辦期限：".$data->getDueDate()."'>".$data->getDueHrs()."</td>\n".
