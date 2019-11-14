@@ -1850,7 +1850,7 @@ let showRegCaseUpdateDetail = jsonObj => {
 
 let xhrUpdateRegCaseColAdapter = (el, col, jsonObj) => {
 	let selected = el.val();
-	if (selected != jsonObj.raw[col]) {
+	if (selected != jsonObj.raw[col] && !(isEmpty(selected) && isEmpty(jsonObj.raw[col]))) {
 		xhrUpdateRegCaseCol({
 			rm01: jsonObj.raw["RM01"],
 			rm02: jsonObj.raw["RM02"],
