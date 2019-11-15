@@ -144,6 +144,11 @@ let showModal = opts => {
         modal_element = $("#bs_modal_template");
     }
 	
+	if (modal_element.is(":visible")) {
+		closeModal(() => { showModal(opts); });
+		return;
+	}
+
 	// Try to use Vue.js
 	window.modalApp.title = title;
 	window.modalApp.body = body;
