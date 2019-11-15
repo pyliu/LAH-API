@@ -45,7 +45,7 @@ let xhrGetCaseLatestNum = function(e) {
 let showRegCaseDetail = (jsonObj) => {
 	let html = "<p>" + jsonObj.tr_html + "</p>";
 	if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-		html = "<strong class='text-danger'>" + jsonObj.message + "</strong>";
+		showAlert({message: jsonObj.message, type: "danger"});
 	} else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	} else {
