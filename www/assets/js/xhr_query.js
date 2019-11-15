@@ -46,6 +46,7 @@ let showRegCaseDetail = (jsonObj) => {
 	let html = "<p>" + jsonObj.tr_html + "</p>";
 	if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
 		showAlert({message: jsonObj.message, type: "danger"});
+		return;
 	} else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
 		throw new Error("查詢失敗：" + jsonObj.message);
 	} else {
@@ -592,7 +593,7 @@ let xhrGetExpacItems = function(e) {
 			let html = "<div><strong class='text-danger'>找到下列資料：</strong></div>";
 			for (let i = 0; i < jsonObj.data_count; i++) {
 				html += "<div class='expac_item'>"
-					 + "<a href='javascript:void(0)' class='query_case_dialog'>" + jsonObj.raw[i]["AC16"] + "-" + jsonObj.raw[i]["AC17"] + "-" + jsonObj.raw[i]["AC18"] + "</a>"
+					 + "<a href='javascript:void(0)' class='reg_case_id'>" + jsonObj.raw[i]["AC16"] + "-" + jsonObj.raw[i]["AC17"] + "-" + jsonObj.raw[i]["AC18"] + "</a>"
 					 + " 規費年度: " + jsonObj.raw[i]["AC25"]
 					 + ", 電腦給號: " + jsonObj.raw[i]["AC04"]
 					 + ", 實收金額: " + jsonObj.raw[i]["AC30"]
@@ -608,7 +609,7 @@ let xhrGetExpacItems = function(e) {
 				html += "</div>";
 			}
 			$("#expac_query_display").html(html);
-			$(".query_case_dialog").off("click").on("click", xhrRegQueryCaseDialog);
+			$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
 		}
 		toggle("#expac_query_button");
 	}).catch(ex => {
