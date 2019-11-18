@@ -433,6 +433,9 @@ let initAlertUI = () => {
 				<button type="button" class="close" @click="seen = false">
 					<span aria-hidden="true">&times;</span>
 				</button>
+				<div class="progress" style="height:.2rem">
+					<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+				</div>
 			</div>
 		`));
 		// Try to use Vue.js
@@ -442,19 +445,45 @@ let initAlertUI = () => {
 				message: 'Hello Alert Vue!',
 				type: 'alert-warning',
 				seen: false,
-				hide_timer_handle: null
+				hide_timer_handle: null,
+				progress_timer_handle: null,
+				progress_counter: 1
 			},
 			methods: {
 				mouseOver: function(e) {
 					if (window.alertApp.hide_timer_handle !== null) { clearTimeout(window.alertApp.hide_timer_handle); }
+					window.alertApp.disableProgress();
 				},
 				mouseOut: function(e) {
 					window.alertApp.hide_timer_handle = setTimeout(() => {
 						window.alertApp.seen = false;
 						window.alertApp.hide_timer_handle = null;
 					}, 5000);
+					window.alertApp.enableProgress();
+				},
+				enableProgress: () => {
+					window.alertApp.progress_timer_handle = setInterval(function() {
+						let wp = Math.round(((++this.progress_counter) / 33.33) * 100) + "%";
+						$("#bs_alert_template .progress .progress-bar").css("width", wp);
+						console.log($("#bs_alert_template .progress .progress-bar").css("width"));
+					}, 150);
+				},
+				disableProgress: () => {
+					clearTimeout(window.alertApp.progress_timer_handle);
+					$("#bs_alert_template .progress .progress-bar").css("width", "0%");
+					this.progress_counter = 1;
 				}
-			}
+			},
+			watch: {
+				seen: val => {
+					val === true ? window.alertApp.enableProgress() : window.alertApp.disableProgress();
+				},
+				message: val => {
+					window.alertApp.disableProgress();
+					window.alertApp.enableProgress();
+				}
+			},
+			mounted: function() { }
 		});
 	}
 }
