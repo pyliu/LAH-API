@@ -720,23 +720,33 @@ let xhrCompareXCase = e => {
 				html += "</tr>";
 			};
 			html += "</table>";
+			showModal({
+				title: "案件比對詳情",
+				body: html,
+				callback: () => {
+					$("#sync_x_case_confirm_button").off("click").on("click", xhrSyncXCase.bind(id));
+					$(".sync_column_button").off("click").on("click", xhrSyncXCaseColumn.bind(id));
+					$("#inst_x_case_confirm_button").off("click").on("click", xhrInsertXCase.bind(id));
+					$("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
+				},
+				size: "lg"
+			});
 		} else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_LOCAL_NO_RECORD) {
 			html += "<div><span class='rounded-circle bg-warning'> 　 </span> " + jsonObj.message + " <button id='inst_x_case_confirm_button'>新增本地端資料</button></div>";
+			showAlert({
+				message: html,
+				type: "warning",
+				callback: () => { $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog); }
+			});
 		} else {
 			html += "<div><span class='rounded-circle bg-success'> 　 </span> " + jsonObj.message + "</div>";
+			showAlert({
+				message: html,
+				type: "success",
+				callback: () => { $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog); }
+			});
 		}
 		toggle("#sync_x_case_button");
-		showModal({
-			title: "案件比對詳情",
-			body: html,
-			callback: () => {
-				$("#sync_x_case_confirm_button").off("click").on("click", xhrSyncXCase.bind(id));
-				$(".sync_column_button").off("click").on("click", xhrSyncXCaseColumn.bind(id));
-				$("#inst_x_case_confirm_button").off("click").on("click", xhrInsertXCase.bind(id));
-				$("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
-			},
-			size: "md"
-		});
 	}).catch(ex => {
 		console.error("xhrCompareXCase parsing failed", ex);
 		showAlert({

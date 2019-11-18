@@ -110,16 +110,22 @@ let showAlert = opts => {
 			initAlertUI();
 		}
 
-		window.alertApp.message = msg;
-		window.alertApp.type = type;
-		window.alertApp.seen = true;
-		let timeout = opts.timeout;
 		// close alert after 5 secs
+		let timeout = opts.timeout;
 		if (window.alertApp.hide_timer_handle !== null) { clearTimeout(window.alertApp.hide_timer_handle); }
 		window.alertApp.hide_timer_handle = setTimeout(() => {
 			window.alertApp.seen = false;
 			window.alertApp.hide_timer_handle = null;
 		}, isEmpty(timeout) || isNaN(timeout) ? 5000 : timeout);
+
+		window.alertApp.message = msg;
+		window.alertApp.type = type;
+		window.alertApp.seen = true;
+
+		// normal usage, you want to attach event to the element in the alert window
+		if (typeof opts.callback == "function") {
+			setTimeout(opts.callback, 250);
+		}
 	}
 }
 
@@ -433,7 +439,7 @@ let initAlertUI = () => {
 				<button type="button" class="close" @click="seen = false">
 					<span aria-hidden="true">&times;</span>
 				</button>
-				<div class="progress" style="height:.2rem">
+				<div class="progress mt-1" style="height:.2rem">
 					<div class="progress-bar bg-light" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
 				</div>
 			</div>
