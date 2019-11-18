@@ -468,6 +468,7 @@ let initAlertUI = () => {
 					window.alertApp.enableProgress();
 				},
 				enableProgress: () => {
+					window.alertApp.disableProgress();
 					window.alertApp.progress_timer_handle = setInterval(function() {
 						let p = (100 - Math.round(((++this.progress_counter) / 33.33) * 100));
 						let wp = p < 0 ? "0%" : `${p}%`;
