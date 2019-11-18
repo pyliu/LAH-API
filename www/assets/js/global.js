@@ -447,7 +447,7 @@ let initAlertUI = () => {
 				seen: false,
 				hide_timer_handle: null,
 				progress_timer_handle: null,
-				progress_counter: 0
+				progress_counter: 1
 			},
 			methods: {
 				mouseOver: function(e) {
@@ -471,7 +471,7 @@ let initAlertUI = () => {
 				disableProgress: () => {
 					clearTimeout(window.alertApp.progress_timer_handle);
 					$("#bs_alert_template .progress .progress-bar").css("width", "100%");
-					this.progress_counter = 0;
+					this.progress_counter = 1;
 				}
 			},
 			watch: {
