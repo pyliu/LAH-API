@@ -434,7 +434,7 @@ let initAlertUI = () => {
 					<span aria-hidden="true">&times;</span>
 				</button>
 				<div class="progress" style="height:.2rem">
-					<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+					<div class="progress-bar bg-light" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
 				</div>
 			</div>
 		`));
@@ -447,7 +447,7 @@ let initAlertUI = () => {
 				seen: false,
 				hide_timer_handle: null,
 				progress_timer_handle: null,
-				progress_counter: 1
+				progress_counter: 0
 			},
 			methods: {
 				mouseOver: function(e) {
@@ -463,15 +463,15 @@ let initAlertUI = () => {
 				},
 				enableProgress: () => {
 					window.alertApp.progress_timer_handle = setInterval(function() {
-						let wp = Math.round(((++this.progress_counter) / 33.33) * 100) + "%";
+						let p = (100 - Math.round(((++this.progress_counter) / 33.33) * 100));
+						let wp = p < 0 ? "0%" : `${p}%`;
 						$("#bs_alert_template .progress .progress-bar").css("width", wp);
-						console.log($("#bs_alert_template .progress .progress-bar").css("width"));
 					}, 150);
 				},
 				disableProgress: () => {
 					clearTimeout(window.alertApp.progress_timer_handle);
-					$("#bs_alert_template .progress .progress-bar").css("width", "0%");
-					this.progress_counter = 1;
+					$("#bs_alert_template .progress .progress-bar").css("width", "100%");
+					this.progress_counter = 0;
 				}
 			},
 			watch: {
