@@ -486,7 +486,7 @@ let initAlertUI = () => {
 					val === true ? window.alertApp.enableProgress() : window.alertApp.disableProgress();
 				},
 				message: val => {
-					window.alertApp.disableProgress();
+					// always disableProgress inside
 					window.alertApp.enableProgress();
 				}
 			},
