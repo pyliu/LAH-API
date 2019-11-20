@@ -255,7 +255,7 @@ blockquote img {
                 <li>"MOICAT.RMNGR" => "M"   // 管理者</li>
                 <li>"MOICAT.RTOGH" => "T"   // 他項權利檔</li>
                 <li>"MOICAT.RHD10" => "H"   // 基地坐落／地上建物</li>
-                <li class="text-danger">"MOICAT.RINDX" => "II"  // 案件異動索引，通常需留存，除非你要刪除整個案件</li>
+                <li class="text-danger">"MOICAT.RINDX" => "II"  // 案件異動索引【不會清除】</li>
                 <li>"MOICAT.RINXD" => "ID"</li>
                 <li>"MOICAT.RINXR" => "IR"</li>
                 <li>"MOICAT.RINXR_EN" => "IRE"</li>
