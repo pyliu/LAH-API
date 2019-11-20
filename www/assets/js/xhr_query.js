@@ -1732,16 +1732,20 @@ let xhrClearTempData = function(e) {
 		return response.json();
 	}).then(jsonObj => {
 		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
-		closeModal(() => {
-			showModal({
-				body: "<strong class='text-success'>已清除完成</strong><p>" + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + (bindArgsObj.table ? " 表格：" + bindArgsObj.table : "") + "</p>",
-				title: "清除暫存資料",
-				size: "md"
-			});
+		showAlert({
+			message: "暫存檔已清除完成。<p>" + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + (bindArgsObj.table ? " 表格：" + bindArgsObj.table : "") + "</p>",
+			type: "success"
 		});
+		if (!bindArgsObj.table) {
+			// means click clean all button
+			closeModal();
+		}
 	}).catch(ex => {
 		console.error("xhrClearTempData parsing failed", ex);
-		alert("XHR連線查詢有問題!!【" + ex + "】");
+		showAlert({
+			message: "XHR連線查詢有問題!!【" + ex + "】",
+			type: "danger"
+		});
 	});
 }
 

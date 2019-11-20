@@ -13,7 +13,7 @@ return array(
     "MOICAT.RMNGR" => "M",   // 管理者
     "MOICAT.RTOGH" => "T",   // 他項權利檔
     "MOICAT.RHD10" => "H",   // 基地坐落／地上建物
-    "MOICAT.RINDX" => "II",  // 案件索引, RINDX must be kept usually (unless you want to delete whole case)
+    //"MOICAT.RINDX" => "II",  // 案件索引, RINDX must be kept usually (unless you want to delete whole case)
     "MOICAT.RINXD" => "ID",
     "MOICAT.RINXR" => "IR",
     "MOICAT.RINXR_EN" => "IRE",
