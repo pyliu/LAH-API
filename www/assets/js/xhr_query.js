@@ -476,19 +476,20 @@ let xhrFixEasycardPayment = (qday, pc_number, amount, btn_id) => {
 		}).then(jsonObj => {
 			if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
 				showModal({
-					title: "修正悠遊卡扣款失敗",
+					title: "悠遊卡自動加值扣款失敗修正",
 					body: "日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料修正成功!",
 					size: "md"
 				});
+				toggle(el);
 				// 移除BTN及該筆
 				el.remove();
 				el.closest(".easycard_item").remove();
-				toggle(el);
 			} else {
 				throw new Error("回傳狀態碼不正確!【" + jsonObj.message + "】");
 			}
 		}).catch(ex => {
 			console.error("xhrFixEasycardPayment parsing failed", ex);
+			showAlert({message: `xhrFixEasycardPayment parsing failed. ${ex.toString()}`, type: "danger"});
 		});
 	}
 }
@@ -950,7 +951,7 @@ let xhrGetExpaaData = function(e) {
 					html += getEasycardPaymentStatus(jsonObj.raw[key]) + "【" + jsonObj.raw[key] + "】";
 					//  無作廢原因才可進行修正
 					if (isEmpty(jsonObj.raw["作廢原因"]) && jsonObj.raw[key] != 1) {
-						html += "<button id='fix_exapp_easycard_payment_btn" + "' onclick='xhrFixEasycardPayment(\"" + jsonObj.raw["開單日期"] + "\", \"" + jsonObj.raw["電腦給號"] + "\", \"" + jsonObj.raw["實收總金額"] + "\", \"fix_exapp_easycard_payment_btn" + "\")'>修正為扣款成功</button>";
+						html += "<button class='btn btn-sm btn-outline-warning' id='fix_exapp_easycard_payment_btn" + "' onclick='xhrFixEasycardPayment(\"" + jsonObj.raw["開單日期"] + "\", \"" + jsonObj.raw["電腦給號"] + "\", \"" + jsonObj.raw["實收總金額"] + "\", \"fix_exapp_easycard_payment_btn" + "\")'>修正為扣款成功</button>";
 					}
 				} else {
 					// others just show info
@@ -1642,7 +1643,7 @@ let xhrQueryTempData = e => {
 			});
 			return;
 		}
-		html += "<button id='temp_backup_button' class='mt-2'>全部備份</button> <button class='mt-2' id='temp_clr_button' data-trigger='manual' data-toggle='popover' data-placement='bottom'>全部清除</button>";
+		html += "<button id='temp_backup_button' class='mt-2' data-trigger='manual' data-toggle='popover' data-placement='bottom'>全部備份</button> <button class='mt-2' id='temp_clr_button'>全部清除</button>";
 		showModal({
 			body: html,
 			title: year + "-" + code + "-" + number + " 案件暫存檔統計",
@@ -1655,7 +1656,7 @@ let xhrQueryTempData = e => {
 					table: ""
 				}));
 
-				showPopper("#temp_clr_button", "請「備份後」再選擇清除", 5000);
+				showPopper("#temp_backup_button", "請「備份後」再選擇清除", 5000);
 				
 				$("#temp_backup_button").off("click").on("click", (e) => {
 					toggle(e.target);
