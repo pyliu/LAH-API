@@ -431,7 +431,7 @@ let initModalUI = () => {
 }
 
 let initAlertUI = () => {
-	// add modal element to show the popup html message
+	// add alert element to show the alert message
 	if ($("#bs_alert_template").length == 0) {
 		$("body").append($.parseHTML(`
 			<div v-show="seen" id="bs_alert_template" class="alert alert-dismissible alert-fixed shadow" :class="type" role="alert" @mouseover="mouseOver" @mouseout="mouseOut">
@@ -495,6 +495,67 @@ let initAlertUI = () => {
 	}
 }
 
+let initToastUI = () => {
+	// add modal element to show the popup html message
+	if ($("#bs_toast_template").length == 0) {
+		$("body").prepend($.parseHTML(`
+			<div id="bs_toast_template" class="position-absolute w-100 d-flex flex-column p-4" style="z-index:9999">
+				<div id="bs_toast_align_right_wrapper" style="position: absolute; top: 0; right: 0;"></div>
+			</div>
+		`));
+		// Try to use Vue.js
+		window.toastApp = new Vue({
+			el: '#bs_toast_template',
+			data: {
+				count: 0,
+				serial: 0
+			},
+			methods: {
+				removeToast: function(selector) {
+					$(selector).remove();
+					this.count--;
+				},
+				makeToast: function(opts) {
+					let toast_id = `pyliu_toast_${this.serial}`;
+					$("#bs_toast_align_right_wrapper").prepend($.parseHTML(`
+						<div
+							id="${toast_id}"
+							class="toast mr-3"
+							data-animation="${opts.animation || true}"
+							data-autohide="${opts.autohide || true}"
+							data-delay="${opts.delay || 1000}"
+							style="min-width: 350px;"
+						>
+							<div class="toast-header">
+								<strong class="mr-auto text-primary">${opts.header}</strong>
+								<small class="text-muted">${opts.subtitle}</small>
+								<button type="button" class="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
+							</div>
+							<div class="toast-body">
+								${opts.body}
+							</div>
+						</div>
+					`));
+					let that = this;
+					let this_toast = $(`#${toast_id}`);
+					this_toast.toast(opts);
+					this_toast.on('hidden.bs.toast', function(e) {
+						that.removeToast(this_toast);
+					});
+					$(`#${toast_id} .toast-header button`).on('click', function(e) {
+						that.removeToast(this_toast);
+					});
+					this_toast.toast('show');
+					this.count++;
+					this.serial++;
+				}
+			},
+			watch: { },
+			mounted: function() { }
+		});
+	}
+}
+
 $(document).ready(e => {
 	// Block IE
 	if (detectIE()) {
@@ -505,5 +566,6 @@ $(document).ready(e => {
 	initTooltip();
 	initDatepicker();
 	initWatchdog();
+	initToastUI();
 });
 //]]>
