@@ -83,6 +83,21 @@ let showPopper = (selector, content, timeout) => {
 	scrollToElement(selector);
 }
 
+let addNotification = opts => {
+	// singleton :D
+	if (!window.toastApp) {
+		initToastUI();
+	}
+	window.toastApp.makeToast(Object.assign({
+		header: "通知",
+		subtitle: "",
+		body: "Please fill the message to show on the toast body!",
+		autohide: true,
+		delay: 2000,
+		animation: true
+	}, opts));
+}
+
 let showAlert = opts => {
 	let msg = opts.message;
 	if (!isEmpty(msg)) {
@@ -538,14 +553,13 @@ let initToastUI = () => {
 					`));
 					let that = this;
 					let this_toast = $(`#${toast_id}`);
-					this_toast.toast(opts);
 					this_toast.on('hidden.bs.toast', function(e) {
 						that.removeToast(this_toast);
 					});
 					$(`#${toast_id} .toast-header button`).on('click', function(e) {
 						that.removeToast(this_toast);
 					});
-					this_toast.toast('show');
+					this_toast.toast(opts).toast('show');
 					this.count++;
 					this.serial++;
 				}
@@ -561,11 +575,9 @@ $(document).ready(e => {
 	if (detectIE()) {
 		document.getElementsByTagName("body")[0].innerHTML = '<h2 style="margin-top: 50px; text-align: center;" class="text-danger">請使用Chrome/Firefox瀏覽器</h2>';
 	}
-
 	initBlockquoteModal();
 	initTooltip();
 	initDatepicker();
 	initWatchdog();
-	initToastUI();
 });
 //]]>
