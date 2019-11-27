@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="playground">
+    <meta name="author" content="LIU, PANG-YU">
+    <title>桃園市中壢地政事務所-Vue</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link href="assets/css/bootstrap-vue.min.css" rel="stylesheet">
+    <link href="assets/css/starter-template.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <style type="text/css">
+        body {
+            font-family: "微軟正黑體", "Microsoft JhenHei", sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <img src="assets/img/tao.png" style="vertical-align: middle;" />　
+        <a class="navbar-brand" href="query.php">地政輔助系統 <span class="small">(α)</span></a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item mt-3">
+                    <a class="nav-link" href="/index.php">登記案件追蹤</a>
+                </li>
+                <li class="nav-item mt-3 active">
+                    <a class="nav-link" href="/query.php">查詢＆報表</a>
+                </li>
+                <li class="nav-item mt-3">
+                    <a class="nav-link" href="/watch_dog.php">監控＆修正</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div id="app" class="container-fluid">
+        <div class="p-3 bg-secondary progress-bar-striped" style="min-height: 170px;">
+            <b-button class="mb-2" variant="primary" @click="$bvToast.show('example-toast')">
+                Show toast
+            </b-button>
+            <b-toast id="example-toast" title="BootstrapVue" static no-auto-hide>
+                Hello, world! This is a toast message.
+            </b-toast>
+        </div>
+        <b-badge variant="danger">test</b-badge>
+    </div>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/vue.js"></script>
+    <script src="assets/js/bootstrap-vue.min.js"></script>
+
+    <script type="text/javascript">
+        window.app = new Vue({
+            el: "#app",
+            data() {
+                return {
+                    toastCount: 0
+                }
+            },
+            methods: {
+                makeToast(append = false) {
+                    this.toastCount++
+                    this.$bvToast.toast(`This is toast number ${this.toastCount}`, {
+                        title: 'BootstrapVue Toast',
+                        autoHideDelay: 5000,
+                        appendToast: append
+                    })
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
