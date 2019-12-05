@@ -737,7 +737,10 @@ let xhrCompareXCase = e => {
 			showAlert({
 				message: html,
 				type: "warning",
-				callback: () => { $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog); }
+				callback: () => {
+					$("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
+					$("#inst_x_case_confirm_button").off("click").on("click", xhrInsertXCase.bind(id));
+				}
 			});
 		} else {
 			html += "<div><span class='rounded-circle bg-success'> 　 </span> " + jsonObj.message + "</div>";
