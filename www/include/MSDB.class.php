@@ -18,6 +18,9 @@ class MSDB {
     
     function __construct($conn_info = array()) {
         if (empty($conn_info)) {
+            if (SYSTEM_CONFIG["MS_DB_SVR"] == "xxx.xxx.xxx.xxx") {
+                die(__FILE__.": MSDB SVR not configured. Current: xxx.xxx.xxx.xxx");
+            }
             // default connect via config
             $this->dbo = new SQLSRV_DataBase(
                 SYSTEM_CONFIG["MS_DB_UID"],
@@ -39,6 +42,9 @@ class MSDB {
                 if (!in_array($key, $argu_keys)) {
                     die(__FILE__.": MSDB connection needs ${key} value for connection.");
                 }
+            }
+            if ($conn_info["MS_DB_SVR"] == "xxx.xxx.xxx.xxx") {
+                die(__FILE__.": MSDB SVR not configured. Current: xxx.xxx.xxx.xxx");
             }
             $this->dbo = new SQLSRV_DataBase(
                 $conn_info["MS_DB_UID"],
