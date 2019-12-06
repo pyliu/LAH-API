@@ -88,9 +88,17 @@ let addNotification = opts => {
 	if (!window.toastApp) {
 		initToastUI();
 	}
+
+	var currentdate = new Date();
+    var datetime = currentdate.getFullYear() + "-" +
+        ("0" + (currentdate.getMonth() + 1)).slice(-2) + "-" +
+        ("0" + currentdate.getDate()).slice(-2) + " " +
+        ("0" + currentdate.getHours()).slice(-2) + ":" +
+        ("0" + currentdate.getMinutes()).slice(-2) + ":" +
+        ("0" + currentdate.getSeconds()).slice(-2);
 	window.toastApp.makeToast(Object.assign({
 		header: "通知",
-		subtitle: "",
+		subtitle: datetime,
 		body: "Please fill the message to show on the toast body!",
 		autohide: true,
 		delay: 5000,

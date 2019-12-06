@@ -48,6 +48,11 @@ function adjustQueryTime() {
         ("0" + currentdate.getMinutes()).slice(-2) + ":" +
         ("0" + currentdate.getSeconds()).slice(-2);
     $("#current_time").html(datetime);
+    if (addNotification) {
+        addNotification({
+            body: `更新時間：${datetime}`
+        });
+    }
 }
 
 function adjustTableContent() {
@@ -90,6 +95,11 @@ function adjustTableContent() {
     // user info dialog event
     console.assert(addUserInfoEvent, "Can't find addUserInfoEvent function ... do you include global.js?")
     addUserInfoEvent();
+    if (addNotification) {
+        addNotification({
+            body: `表格設定完成`
+        });
+    }
 }
 
 $(document).ready(startRefresh);
