@@ -288,8 +288,8 @@ blockquote {
 .alert-fixed {
 	position: fixed;
     top: 8.5%;
-    right: 1%;
-    width: auto;
+	margin: auto 25%;
+    width: 50%;
     z-index: 9999;
     border-radius: 10px;
 }

@@ -93,7 +93,7 @@ let addNotification = opts => {
 		subtitle: "",
 		body: "Please fill the message to show on the toast body!",
 		autohide: true,
-		delay: 2000,
+		delay: 5000,
 		animation: true
 	}, opts));
 }
@@ -124,23 +124,25 @@ let showAlert = opts => {
 		if (!window.alertApp) {
 			initAlertUI();
 		}
-
-		// close alert after 5 secs
-		let timeout = opts.timeout;
-		if (window.alertApp.hide_timer_handle !== null) { clearTimeout(window.alertApp.hide_timer_handle); }
-		window.alertApp.hide_timer_handle = setTimeout(() => {
-			window.alertApp.seen = false;
-			window.alertApp.hide_timer_handle = null;
-		}, isEmpty(timeout) || isNaN(timeout) ? 5000 : timeout);
-
-		window.alertApp.message = msg;
-		window.alertApp.type = type;
-		window.alertApp.seen = true;
-
+		
 		// normal usage, you want to attach event to the element in the alert window
 		if (typeof opts.callback == "function") {
 			setTimeout(opts.callback, 250);
 		}
+
+		window.alertApp.autohide = opts.autohide || false;
+		if (window.alertApp.autohide) {
+			// close alert after 5 secs
+			let timeout = opts.timeout;
+			if (window.alertApp.hide_timer_handle !== null) { clearTimeout(window.alertApp.hide_timer_handle); }
+			window.alertApp.hide_timer_handle = setTimeout(() => {
+				window.alertApp.seen = false;
+				window.alertApp.hide_timer_handle = null;
+			}, isEmpty(timeout) || isNaN(timeout) ? 5000 : timeout);
+		}
+		window.alertApp.message = msg;
+		window.alertApp.type = type;
+		window.alertApp.seen = true;
 	}
 }
 
@@ -468,7 +470,8 @@ let initAlertUI = () => {
 				seen: false,
 				hide_timer_handle: null,
 				progress_timer_handle: null,
-				progress_counter: 1
+				progress_counter: 1,
+				autohide: false
 			},
 			methods: {
 				mouseOver: function(e) {
@@ -476,11 +479,13 @@ let initAlertUI = () => {
 					window.alertApp.disableProgress();
 				},
 				mouseOut: function(e) {
-					window.alertApp.hide_timer_handle = setTimeout(() => {
-						window.alertApp.seen = false;
-						window.alertApp.hide_timer_handle = null;
-					}, 5000);
-					window.alertApp.enableProgress();
+					if (window.alertApp.autohide) {
+						window.alertApp.hide_timer_handle = setTimeout(() => {
+							window.alertApp.seen = false;
+							window.alertApp.hide_timer_handle = null;
+						}, 5000);
+						window.alertApp.enableProgress();
+					}
 				},
 				enableProgress: () => {
 					window.alertApp.disableProgress();
@@ -498,11 +503,13 @@ let initAlertUI = () => {
 			},
 			watch: {
 				seen: val => {
-					val === true ? window.alertApp.enableProgress() : window.alertApp.disableProgress();
-				},
-				message: val => {
-					// always disableProgress inside
-					window.alertApp.enableProgress();
+					if (val === true) {
+						if (window.alertApp.autohide) {
+							window.alertApp.enableProgress();
+						}
+					} else {
+						window.alertApp.disableProgress();
+					}
 				}
 			},
 			mounted: function() { }
