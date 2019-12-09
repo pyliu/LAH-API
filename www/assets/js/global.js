@@ -530,8 +530,8 @@ let initToastUI = () => {
 	// add modal element to show the popup html message
 	if ($("#bs_toast_template").length == 0) {
 		$("body").prepend($.parseHTML(`
-			<div id="bs_toast_template" class="fixed-top d-flex flex-row-reverse pt-5" style="z-index:9999">
-				<div id="bs_toast_align_right_wrapper" class="mt-5"></div>
+			<div id="bs_toast_template" class="fixed-bottom d-flex flex-row-reverse pb-5">
+				<div id="bs_toast_align_right_wrapper" class="mb-3"></div>
 			</div>
 		`));
 		// Try to use Vue.js
