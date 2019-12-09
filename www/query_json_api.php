@@ -400,7 +400,7 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("參數格式錯誤【".$_POST["id"]."】");
 		} else if ($rows === -2) {
 			$log->warning("XHR [diff_xcase] 遠端查無資料【".$_POST["id"]."】");
-			echoErrorJSONString("遠端查無資料【".$_POST["id"]."】");
+			echoErrorJSONString("遠端查無資料【".$_POST["id"]."】", STATUS_CODE::FAIL_WITH_REMOTE_NO_RECORD);
 		} else if ($rows === -3) {
 			$log->warning("XHR [diff_xcase] 本地查無資料【".$_POST["id"]."】");
 			echoErrorJSONString("本地查無資料【".$_POST["id"]."】", STATUS_CODE::FAIL_WITH_LOCAL_NO_RECORD);

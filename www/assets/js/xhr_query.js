@@ -748,6 +748,12 @@ let xhrCompareXCase = e => {
 					$("#inst_x_case_confirm_button").off("click").on("click", xhrInsertXCase.bind(id));
 				}
 			});
+		} else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_REMOTE_NO_RECORD) {
+			html += "<div><span class='rounded-circle bg-light'> 　 </span> " + jsonObj.message + "</div>";
+			showAlert({
+				message: html,
+				type: "warning"
+			});
 		} else {
 			html += "<div><span class='rounded-circle bg-success'> 　 </span> " + jsonObj.message + "</div>";
 			showAlert({
