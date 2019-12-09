@@ -254,7 +254,7 @@ let xhrCheckProblematicXCase = e => {
 		return response.json();
 	}).then(jsonObj => {
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-			let html = "<div class='mt-1'><span class='rounded-circle bg-danger'> 　 </span> <strong class='text-info'>請查看並修正下列案件：</strong></div>";
+			let html = "<div class='mt-1'><span class='rounded-circle bg-danger'> &emsp; </span>&ensp;<strong class='text-info'>請查看並修正下列案件：</strong></div>";
 			for (let i = 0; i < jsonObj.data_count; i++) {
 				html += "<a href='javascript:void(0)' class='reg_case_id'>" + jsonObj.case_ids[i] + "</a> ";
 				html += "<button class='fix_xcase_button' data-id='" + jsonObj.case_ids[i] + "'>修正</button> ";
@@ -272,7 +272,7 @@ let xhrCheckProblematicXCase = e => {
 			
 		} else if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
 			addNotification({
-				body: "<span class='rounded-circle bg-success'> 　 </span> 目前一切良好！【" + new Date().toLocaleString() + "】"
+				body: "<span class='rounded-circle bg-success'> &emsp; </span>&ensp;目前一切良好！【" + new Date().toLocaleString() + "】"
 			});
 		}
 		toggle(e.target);
@@ -524,10 +524,10 @@ let xhrEasycardPaymentQuery = e => {
 	}).then(jsonObj => {
 		if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
 			addNotification({
-				body: "<span class='rounded-circle bg-success'> 　 </span> " + jsonObj.message
+				body: "<span class='rounded-circle bg-success'> &emsp; </span>&ensp;" + jsonObj.message
 			});
 		} else {
-			let html = "<div><span class='rounded-circle bg-warning'> 　 </span> <strong class='text-danger'>找到下列資料：</strong></div>";
+			let html = "<div><span class='rounded-circle bg-warning'> &emsp; </span>&ensp;<strong class='text-danger'>找到下列資料：</strong></div>";
 			for (let i = 0; i < jsonObj.data_count; i++) {
 				html += "<div class='easycard_item'>日期: " + jsonObj.raw[i]["AA01"]
 					 + ", 電腦給號: " + jsonObj.raw[i]["AA04"]
@@ -714,7 +714,7 @@ let xhrCompareXCase = e => {
 	}).then(jsonObj => {
 		let html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + year + "-" + code + "-" + number + "</a><div>";
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-			html += "<span class='rounded-circle bg-warning'> 　 </span> 請參考下列資訊： <button id='sync_x_case_confirm_button' class='btn btn-sm btn-success' title='同步全部欄位'>同步</button>";
+			html += "<span class='rounded-circle bg-warning'> &emsp; </span>&ensp;請參考下列資訊： <button id='sync_x_case_confirm_button' class='btn btn-sm btn-success' title='同步全部欄位'>同步</button>";
 			html += "<table class='table table-hover text-center mt-1'>";
 			html += "<tr><th>欄位名稱</th><th>欄位代碼</th><th>局端</th><th>本所</th><th>單欄同步</th></tr>";
 			for (let key in jsonObj.raw) {
@@ -739,7 +739,7 @@ let xhrCompareXCase = e => {
 				size: "lg"
 			});
 		} else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_LOCAL_NO_RECORD) {
-			html += "<div><span class='rounded-circle bg-warning'> 　 </span> " + jsonObj.message + " <button id='inst_x_case_confirm_button'>新增本地端資料</button></div>";
+			html += "<div><span class='rounded-circle bg-warning'> &emsp; </span>&ensp;" + jsonObj.message + " <button id='inst_x_case_confirm_button'>新增本地端資料</button></div>";
 			showAlert({
 				message: html,
 				type: "warning",
@@ -749,13 +749,13 @@ let xhrCompareXCase = e => {
 				}
 			});
 		} else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_REMOTE_NO_RECORD) {
-			html += "<div><span class='rounded-circle bg-light'> 　 </span> " + jsonObj.message + "</div>";
+			html += "<div><span class='rounded-circle bg-light'> &emsp; </span>&ensp;" + jsonObj.message + "</div>";
 			showAlert({
 				message: html,
 				type: "warning"
 			});
 		} else {
-			html += "<div><span class='rounded-circle bg-success'> 　 </span> " + jsonObj.message + "</div>";
+			html += "<div><span class='rounded-circle bg-success'> &emsp; </span>&ensp;" + jsonObj.message + "</div>";
 			showAlert({
 				message: html,
 				type: "success",
