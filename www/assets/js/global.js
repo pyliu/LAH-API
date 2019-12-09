@@ -413,7 +413,7 @@ let initModalUI = () => {
 	// add modal element to show the popup html message
 	if ($("#bs_modal_template").length == 0) {
 		$("body").append($.parseHTML(`
-			<div class="modal fade" id="bs_modal_template" tabindex="-1" role="dialog" aria-labelledby="bs_modal_template" aria-hidden="true">
+			<div class="modal fade" id="bs_modal_template" tabindex="-1" role="dialog" aria-labelledby="bs_modal_template" aria-hidden="true" style="z-index:9998">
 				<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" v-bind:class="sizeClass" role="document">
 					<div class="modal-content">
 						<com-header :in-title="title"></com-header>
@@ -460,7 +460,7 @@ let initAlertUI = () => {
 	// add alert element to show the alert message
 	if ($("#bs_alert_template").length == 0) {
 		$("body").append($.parseHTML(`
-			<div v-show="seen" id="bs_alert_template" class="alert alert-dismissible alert-fixed shadow" :class="type" role="alert" @mouseover="mouseOver" @mouseout="mouseOut">
+			<div v-show="seen" id="bs_alert_template" class="alert alert-dismissible alert-fixed shadow" :class="type" role="alert" @mouseover="mouseOver" @mouseout="mouseOut" style="z-index:9997">
 				<small v-html="message"></small>
 				<button type="button" class="close" @click="seen = false">
 					<span aria-hidden="true">&times;</span>
