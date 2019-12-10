@@ -24,6 +24,7 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
 <link rel="stylesheet" href="assets/css/bootstrap.min.css">
 <!-- Custom styles for this template -->
 <link href="assets/css/starter-template.css" rel="stylesheet">
+<link href="assets/css/bootstrap-vue.min.css" rel="stylesheet">
 <link href="assets/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/loading.css">
 <link rel="stylesheet" href="assets/css/loading-btn.css">
@@ -112,25 +113,6 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
         </table>
       </div>
     </div><!-- /.container -->
-    <!-- Modal -->
-    <div class="modal fade" id="ajax_modal" role="dialog">
-      <div class="modal-dialog modal-md">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title">案件詳情</h4>
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-          </div>
-          <div class="modal-body">
-            <p>詳情顯示在這邊</p>
-          </div>
-		  <!--
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">關閉</button>
-          </div>
-		  -->
-        </div>
-      </div>
-    </div>
   </section><!-- /section -->
   <!-- <canvas id = "balls_canvas" class"fade"></canvas> -->
   <small id="copyright" class="text-muted my-2 mx-3 fixed-bottom bg-white border rounded">
@@ -141,7 +123,7 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   </small>
   <!-- Bootstrap core JavaScript -->
   <!-- Placed at the end of the document so the pages load faster -->
-  <script src="assets/js/jquery-3.4.1.min.js"></script>
+  <script src="assets/js/jquery.min.js"></script>
   <script src="assets/js/popper.min.js"></script>
   <script src="assets/js/bootstrap.min.js"></script>
   <!-- bs datepicker -->
@@ -149,6 +131,7 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
 
   <script src="assets/js/vue.js"></script>
+  <script src="assets/js/bootstrap-vue.min.js"></script>
   <script src="assets/js/global.js"></script>
   <script src="assets/js/xhr_query.js"></script>
 
