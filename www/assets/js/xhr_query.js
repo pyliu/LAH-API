@@ -272,7 +272,7 @@ let xhrCheckProblematicXCase = e => {
 			
 		} else if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
 			addNotification({
-				body: "<span class='rounded-circle bg-success'> &emsp; </span>&ensp;目前一切良好！【" + new Date().toLocaleString() + "】"
+				body: "<span class='rounded-circle bg-success'> &emsp; </span>&ensp;目前無跨所註記遺失問題。"
 			});
 		}
 		toggle(e.target);
