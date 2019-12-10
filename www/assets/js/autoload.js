@@ -14,14 +14,14 @@ $.ajaxSetup({ cache: false });
 function startRefresh() {
     var target = $("#table_container");
     if (target) {
-        toggleCoverSpinner(target, "ld-over-full-inverse");
+        //toggleCoverSpinner(target, "ld-over-full-inverse");
         // prevent extra tooltip element occupied
         $(".tooltip").remove();
         toggleInsideSpinner("#current_time", "sm");
         target.load("allcases.php", "date=" + $("#date_input").val(), function() {
             adjustQueryTime();
             adjustTableContent();
-            toggleCoverSpinner(target, "ld-over-full-inverse");
+            //toggleCoverSpinner(target, "ld-over-full-inverse");
             // only today that needs to update regularly
             if (today == $("#date_input").val()) {
                 let hour = new Date().getHours();
