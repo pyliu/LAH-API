@@ -2182,14 +2182,15 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 			}
 			let work_age = ((now - on) / year).toFixed(1);
 			if (work_age < 5) {
-				on_board_date += " <b-badge variant='info'>" + work_age + "年</b-badge>";	
+				on_board_date += " <b-badge variant='info'>";
 			} else if (work_age < 10) {
-				on_board_date += " <b-badge variant='primary'>" + work_age + "年</b-badge>";
+				on_board_date += " <b-badge variant='primary'>";
 			} else if (work_age < 20) {
-				on_board_date += " <b-badge variant='warning'>" + work_age + "年</b-badge>";
+				on_board_date += " <b-badge variant='warning'>";
 			} else {
-				on_board_date += " <b-badge variant='danger'>" + work_age + "年</b-badge>";
+				on_board_date += " <b-badge variant='danger'>";
 			}
+			on_board_date +=  work_age + "年</b-badge>";
 		}
 	}
 	let vue_card_text = tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + tdoc_raw["AP_OFF_DATE"] + "】</p>";
