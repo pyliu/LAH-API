@@ -66,7 +66,7 @@ let showRegCaseDetail = (jsonObj) => {
 		}
 
 		html += "<div class='row'>";
-		html += "<div class='col-5'>";
+		html += "<div class='col-4'>";
 
 		html += (jsonObj.跨所 == "Y" ? "<span class='bg-info text-white rounded p-1'>跨所案件 (" + jsonObj.資料收件所 + " => " + jsonObj.資料管轄所 + ")</span><br />" : "");
 		
@@ -100,7 +100,7 @@ let showRegCaseDetail = (jsonObj) => {
 		html += "手機號碼：" + jsonObj.手機號碼;
 
 		html += "</div>";
-		html += "<div id='in_modal_display' class='col-6'></div>";
+		html += "<div id='in_modal_display' class='col-8'></div>";
 		html += "</div>";
 	}
 	
