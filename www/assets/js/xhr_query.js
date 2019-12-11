@@ -2183,22 +2183,6 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 			on_board_date += " (" + ((now - on) / year).toFixed(1) + "年)";
 		}
 	}
-	/*
-	html = '<a href="get_pho_img.php?name=' + tdoc_raw["AP_USER_NAME"] + '" target="_blank"><img class="img-thumbnail" src="get_pho_img.php?name=' + tdoc_raw["AP_USER_NAME"] + '" width="180" /></a> </br />';
-	html += tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + tdoc_raw["AP_OFF_DATE"] + "】</p>";
-	html += "ID：" + tdoc_raw["DocUserID"] + "<br />"
-		+ "電腦：" + tdoc_raw["AP_PCIP"] + "<br />"
-		+ "姓名：" + tdoc_raw["AP_USER_NAME"] + "<br />"
-		+ "生日：" + tdoc_raw["AP_BIRTH"] + age + "<br />"
-		+ "單位：" + tdoc_raw["AP_UNIT_NAME"] + "<br />"
-		+ "工作：" + tdoc_raw["AP_WORK"] + "<br />"
-		+ "職稱：" + tdoc_raw["AP_JOB"] + "<br />"
-		+ "學歷：" + tdoc_raw["AP_HI_SCHOOL"] + "<br />"
-		+ "考試：" + tdoc_raw["AP_TEST"] + "<br />"
-		+ "手機：" + tdoc_raw["AP_SEL"] + "<br />"
-		+ "到職：" + on_board_date + "<br />"
-		;
-	*/
 	let vue_card_text = tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + tdoc_raw["AP_OFF_DATE"] + "】</p>";
 	vue_card_text += "ID：" + tdoc_raw["DocUserID"] + "<br />"
 		+ "電腦：" + tdoc_raw["AP_PCIP"] + "<br />"
@@ -2239,8 +2223,7 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 		});
 	} else {
 		showModal({
-			body: vue_html,//html,
-			title: "使用者資訊",
+			body: vue_html,
 			size: "md",
 			class: tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "quit_bg",
 			callback: () => {
