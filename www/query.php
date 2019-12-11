@@ -14,6 +14,7 @@ ksort($operators);
 
 <!-- Bootstrap core CSS -->
 <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+<link href="assets/css/bootstrap-vue.min.css" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/loading.css">
 <link rel="stylesheet" href="assets/css/loading-btn.css">
 <!-- Custom styles for this template -->
@@ -437,6 +438,7 @@ fieldset fieldset legend {
   <script src="assets/js/fetch.min.js"></script>
 
   <script src="assets/js/vue.js"></script>
+  <script src="assets/js/bootstrap-vue.min.js"></script>
   <script src="assets/js/global.js"></script>
   <script src="assets/js/xhr_query.js"></script>
   

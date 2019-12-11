@@ -2183,7 +2183,7 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 			on_board_date += " (" + ((now - on) / year).toFixed(1) + "年)";
 		}
 	}
-
+	/*
 	html = '<a href="get_pho_img.php?name=' + tdoc_raw["AP_USER_NAME"] + '" target="_blank"><img class="img-thumbnail" src="get_pho_img.php?name=' + tdoc_raw["AP_USER_NAME"] + '" width="180" /></a> </br />';
 	html += tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + tdoc_raw["AP_OFF_DATE"] + "】</p>";
 	html += "ID：" + tdoc_raw["DocUserID"] + "<br />"
@@ -2198,15 +2198,57 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 		+ "手機：" + tdoc_raw["AP_SEL"] + "<br />"
 		+ "到職：" + on_board_date + "<br />"
 		;
-	
+	*/
+	let vue_card_text = tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + tdoc_raw["AP_OFF_DATE"] + "】</p>";
+	vue_card_text += "ID：" + tdoc_raw["DocUserID"] + "<br />"
+		+ "電腦：" + tdoc_raw["AP_PCIP"] + "<br />"
+		+ "生日：" + tdoc_raw["AP_BIRTH"] + age + "<br />"
+		+ "單位：" + tdoc_raw["AP_UNIT_NAME"] + "<br />"
+		+ "工作：" + tdoc_raw["AP_WORK"] + "<br />"
+		+ "職稱：" + tdoc_raw["AP_JOB"] + "<br />"
+		+ "學歷：" + tdoc_raw["AP_HI_SCHOOL"] + "<br />"
+		+ "考試：" + tdoc_raw["AP_TEST"] + "<br />"
+		+ "手機：" + tdoc_raw["AP_SEL"] + "<br />"
+		+ "到職：" + on_board_date + "<br />"
+		;
+	let vue_html = `
+		<div id="user_info_app">
+			<b-card class="overflow-hidden" style="max-width: 540px; font-size: 0.9rem;" title="${tdoc_raw["AP_USER_NAME"]}">
+				<b-row>
+					<b-col md="6">
+						<b-card-text>${vue_card_text}</b-card-text>
+					</b-col>
+					<b-col md="6">
+						<b-card-img
+							src="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}"
+							alt="${tdoc_raw["AP_USER_NAME"]}"
+							class="img-thumbnail"
+							right
+						></b-card-img>
+					</b-col>
+				</b-row>
+			</b-card>
+		</div>
+	`;
+
 	if ($(selector).length > 0) {
-		$(selector).html(html);
+		$(selector).html(vue_html);
+		new Vue({
+			el: "#user_info_app",
+			components: [ "b-card" ]
+		});
 	} else {
 		showModal({
-			body: html,
+			body: vue_html,//html,
 			title: "使用者資訊",
 			size: "md",
-			class: tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "quit_bg"
+			class: tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "quit_bg",
+			callback: () => {
+				new Vue({
+					el: "#user_info_app",
+					components: [ "b-card" ]
+				});
+			}
 		});
 	}
 }
