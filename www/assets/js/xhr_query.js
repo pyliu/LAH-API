@@ -2180,7 +2180,16 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 					now = new Date(temp);
 				}
 			}
-			on_board_date += " (" + ((now - on) / year).toFixed(1) + "年)";
+			let work_age = ((now - on) / year).toFixed(1);
+			if (work_age < 5) {
+				on_board_date += " <b-badge variant='info'>" + work_age + "年</b-badge>";	
+			} else if (work_age < 10) {
+				on_board_date += " <b-badge variant='primary'>" + work_age + "年</b-badge>";
+			} else if (work_age < 20) {
+				on_board_date += " <b-badge variant='warning'>" + work_age + "年</b-badge>";
+			} else {
+				on_board_date += " <b-badge variant='danger'>" + work_age + "年</b-badge>";
+			}
 		}
 	}
 	let vue_card_text = tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + tdoc_raw["AP_OFF_DATE"] + "】</p>";
@@ -2203,12 +2212,13 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 						<b-card-text>${vue_card_text}</b-card-text>
 					</b-col>
 					<b-col md="6">
-						<b-card-img
-							src="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}"
-							alt="${tdoc_raw["AP_USER_NAME"]}"
-							class="img-thumbnail"
-							right
-						></b-card-img>
+						<b-link href="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}" target="_blank">
+							<b-card-img
+								src="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}"
+								alt="${tdoc_raw["AP_USER_NAME"]}"
+								class="img-thumbnail"
+							></b-card-img>
+						</b-link>
 					</b-col>
 				</b-row>
 			</b-card>
@@ -2219,17 +2229,17 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 		$(selector).html(vue_html);
 		new Vue({
 			el: "#user_info_app",
-			components: [ "b-card" ]
+			components: [ "b-card", "b-link", "b-badge" ]
 		});
 	} else {
 		showModal({
+			title: "使用者資訊",
 			body: vue_html,
 			size: "md",
-			class: tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "quit_bg",
 			callback: () => {
 				new Vue({
 					el: "#user_info_app",
-					components: [ "b-card" ]
+					components: [ "b-card", "b-link", "b-badge" ]
 				});
 			}
 		});
