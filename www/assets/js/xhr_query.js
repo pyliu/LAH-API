@@ -2199,7 +2199,6 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 		+ "生日：" + tdoc_raw["AP_BIRTH"] + age + "<br />"
 		+ "單位：" + tdoc_raw["AP_UNIT_NAME"] + "<br />"
 		+ "工作：" + tdoc_raw["AP_WORK"] + "<br />"
-		+ "職稱：" + tdoc_raw["AP_JOB"] + "<br />"
 		+ "學歷：" + tdoc_raw["AP_HI_SCHOOL"] + "<br />"
 		+ "考試：" + tdoc_raw["AP_TEST"] + "<br />"
 		+ "手機：" + tdoc_raw["AP_SEL"] + "<br />"
@@ -2207,21 +2206,16 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 		;
 	let vue_html = `
 		<div id="user_info_app">
-			<b-card class="overflow-hidden" style="max-width: 540px; font-size: 0.9rem;" title="${tdoc_raw["AP_USER_NAME"]}">
-				<b-row>
-					<b-col md="6">
-						<b-card-text>${vue_card_text}</b-card-text>
-					</b-col>
-					<b-col md="6">
-						<b-link href="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}" target="_blank">
-							<b-card-img
-								src="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}"
-								alt="${tdoc_raw["AP_USER_NAME"]}"
-								class="img-thumbnail"
-							></b-card-img>
-						</b-link>
-					</b-col>
-				</b-row>
+			<b-card class="overflow-hidden bg-light" style="max-width: 540px; font-size: 0.9rem;" title="${tdoc_raw["AP_USER_NAME"]}" sub-title="${tdoc_raw["AP_JOB"]}">
+				<b-link href="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}" target="_blank">
+					<b-card-img
+						src="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}"
+						alt="${tdoc_raw["AP_USER_NAME"]}"
+						class="img-thumbnail float-right ml-2"
+						style="max-width: 220px"
+					></b-card-img>
+				</b-link>
+				<b-card-text>${vue_card_text}</b-card-text>
 			</b-card>
 		</div>
 	`;
