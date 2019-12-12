@@ -472,14 +472,13 @@ blockquote img {
 
   <script type="text/javascript">
     $(document).ready(e => {
-
-      new Vue({el: "#lah-xcase-check"});
-
       // unsupported IE detection
       if (window.attachEvent) {
         document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援舊版IE瀏覽器, 請使用Chrome/Firefox/IE11瀏覽器。</h2>';
         return;
       }
+
+      window.xCaseCheckVue = new Vue({el: "#lah-xcase-check"});
       
       // query section data event
       $("#easycard_query_button").on("click", xhrEasycardPaymentQuery);
