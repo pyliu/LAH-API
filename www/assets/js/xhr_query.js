@@ -2161,7 +2161,19 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 		let temp = Date.parse(birth);
 		if (temp) {
 			let born = new Date(temp);
-			age += " (" + ((now - born) / year).toFixed(1) + "歲)";
+			let badge_age = ((now - born) / year).toFixed(1);
+			if (badge_age < 30) {
+				age += " <b-badge variant='success' pill>";
+			} else if (badge_age < 40) {
+				age += " <b-badge variant='primary' pill>";
+			} else if (badge_age < 50) {
+				age += " <b-badge variant='warning' pill>";
+			} else if (badge_age < 60) {
+				age += " <b-badge variant='danger' pill>";
+			} else {
+				age += " <b-badge variant='dark' pill>";
+			}
+			age += badge_age + "歲</b-badge>"
 		}
 	}
 
@@ -2182,7 +2194,7 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 			}
 			let work_age = ((now - on) / year).toFixed(1);
 			if (work_age < 5) {
-				on_board_date += " <b-badge variant='info'>";
+				on_board_date += " <b-badge variant='success'>";
 			} else if (work_age < 10) {
 				on_board_date += " <b-badge variant='primary'>";
 			} else if (work_age < 20) {
