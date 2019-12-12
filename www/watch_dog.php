@@ -83,32 +83,8 @@ blockquote img {
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-6">
-          <fieldset>
-            <legend>跨所註記遺失檢測<small>(一周內)</small></legend>
-
-            <div class="form-row">
-              <div class="filter-btn-group col">
-                <button id="cross_case_check_query_button" class="btn btn-sm btn-outline-primary" data-toggle='tooltip'>立即檢測</button>
-                <button id="cross_case_check_quote_button" class="btn btn-sm btn-outline-success">備註</button>
-              </div>
-            </div>
-
-            <blockquote id="cross_case_check_quote" class="hide" data-title="跨所註記遺失檢測">
-              <h5><span class="text-danger">※</span>通常發生的情況是案件內的權利人/義務人/代理人姓名內有罕字造成。</h5>
-              QUERY: <br />
-              SELECT * <br />
-                FROM SCRSMS <br />
-              WHERE RM07_1 >= '1080715' <br />
-                AND RM02 LIKE 'H%1' <br />
-                AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL) 
-              <br /><br />
-              FIX: <br />
-              UPDATE MOICAS.CRSMS SET RM99 = 'Y', RM100 = '資料管轄所代碼', RM100_1 = '資料管轄所縣市代碼', RM101 = '收件所代碼', RM101_1 = '收件所縣市代碼' <br />
-              WHERE RM01 = '收件年' AND RM02 = '收件字' AND RM03 = '收件號'
-            </blockquote>
-            <div id="cross_case_check_query_display" class="message"></div>
-          </fieldset>
+        <div id="lah-xcase-check" class="col-6">
+          <lah-xcase-check></lah-xcase-check>
         </div>
         <div class="col-6">
           <fieldset>
@@ -492,17 +468,19 @@ blockquote img {
   <script src="assets/js/cache.js"></script>
   <script src="assets/js/FileSaver.min.js"></script>
 
+  <script src="assets/js/components/lah-xcase-check.js"></script>
+
   <script type="text/javascript">
     $(document).ready(e => {
+
+      new Vue({el: "#lah-xcase-check"});
+
       // unsupported IE detection
       if (window.attachEvent) {
         document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援舊版IE瀏覽器, 請使用Chrome/Firefox/IE11瀏覽器。</h2>';
         return;
       }
       
-      // 跨所註記檢測
-      $("#cross_case_check_query_button").on("click", xhrCheckProblematicXCase);
-
       // query section data event
       $("#easycard_query_button").on("click", xhrEasycardPaymentQuery);
       bindPressEnterEvent("#easycard_query_day", xhrEasycardPaymentQuery);
