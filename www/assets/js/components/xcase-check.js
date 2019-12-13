@@ -25,7 +25,7 @@ if (Vue) {
                         let html = "<div class='mt-1'><span class='rounded-circle bg-danger'> &emsp; </span>&ensp;<strong class='text-info'>請查看並修正下列案件：</strong></div>";
                         for (let i = 0; i < jsonObj.data_count; i++) {
                             html += "<a href='javascript:void(0)' class='reg_case_id'>" + jsonObj.case_ids[i] + "</a> ";
-                            html += "<button class='fix_xcase_button' data-id='" + jsonObj.case_ids[i] + "'>修正</button> ";
+                            html += "<button class='fix_xcase_button btn btn-sm btn-outline-primary' data-id='" + jsonObj.case_ids[i] + "'>修正</button> ";
                             html += "<span id='" + jsonObj.case_ids[i] + "'></span> <br />";
                         }
                         showModal({
