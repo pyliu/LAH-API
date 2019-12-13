@@ -241,47 +241,6 @@ let xhrCallWatchDog = e => {
 	});
 }
 
-let xhrCheckProblematicXCase = e => {
-	toggle(e.target);
-	
-	let body = new FormData();
-	body.append("type", "x");
-
-	fetch("query_json_api.php", {
-		method: "POST",
-		body: body
-	}).then(response => {
-		return response.json();
-	}).then(jsonObj => {
-		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-			let html = "<div class='mt-1'><span class='rounded-circle bg-danger'> &emsp; </span>&ensp;<strong class='text-info'>請查看並修正下列案件：</strong></div>";
-			for (let i = 0; i < jsonObj.data_count; i++) {
-				html += "<a href='javascript:void(0)' class='reg_case_id'>" + jsonObj.case_ids[i] + "</a> ";
-				html += "<button class='fix_xcase_button' data-id='" + jsonObj.case_ids[i] + "'>修正</button> ";
-				html += "<span id='" + jsonObj.case_ids[i] + "'></span> <br />";
-			}
-			showModal({
-				title: "跨所註記遺失查詢",
-				body: html,
-				size: "md",
-				callback: () => {
-					$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
-					$(".fix_xcase_button").one("click", xhrFixProblematicXCase);
-				}
-			});
-			
-		} else if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-			addNotification({
-				body: "<span class='rounded-circle bg-success'> &emsp; </span>&ensp;目前無跨所註記遺失問題。"
-			});
-		}
-		toggle(e.target);
-	}).catch(ex => {
-		console.error("xhrCheckProblematicXCase parsing failed", ex);
-		showAlert({message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
-	});
-};
-
 let xhrFixProblematicXCase = e => {
 	let id = trim($(e.target).data("id"));
 	console.log("The problematic xcase id: "+id);
@@ -301,18 +260,15 @@ let xhrFixProblematicXCase = e => {
 		}
 		return response.json();
 	}).then(jsonObj => {
-		let msg_span_id = "#" + id;
-		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-			$(msg_span_id).html("<span class='text-success'>跨所註記修正完成!</span>");
-		} else {
-			$(msg_span_id).html("<span class='text-danger'>跨所註記修正失敗!</span>");
+		let msg = `<strong class='text-success'>${id} 跨所註記修正完成!</strong>`;
+		if (jsonObj.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
+			msg = `<span class='text-danger'>${id} 跨所註記修正失敗! (${jsonObj.status})</span>`;
 		}
+		addNotification({ body: msg });
 	}).catch(ex => {
 		console.error("xhrFixProblematicXCase parsing failed", ex);
 		showAlert({message: ex.toString(), type: "danger"});
 	});
-
-
 }
 
 let xhrGetSectionRALIDCount = e => {

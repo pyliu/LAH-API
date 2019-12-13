@@ -83,8 +83,8 @@ blockquote img {
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
       <div class="row">
-        <div id="lah-xcase-check" class="col-6">
-          <lah-xcase-check></lah-xcase-check>
+        <div id="xcase-check" class="col-6">
+          <xcase-check></xcase-check>
         </div>
         <div class="col-6">
           <fieldset>
@@ -468,7 +468,7 @@ blockquote img {
   <script src="assets/js/cache.js"></script>
   <script src="assets/js/FileSaver.min.js"></script>
 
-  <script src="assets/js/components/lah-xcase-check.js"></script>
+  <script src="assets/js/components/xcase-check.js"></script>
 
   <script type="text/javascript">
     $(document).ready(e => {
@@ -478,7 +478,7 @@ blockquote img {
         return;
       }
 
-      window.xCaseCheckVue = new Vue({el: "#lah-xcase-check"});
+      window.xCaseCheckVue = new Vue({el: "#xcase-check"});
       
       // query section data event
       $("#easycard_query_button").on("click", xhrEasycardPaymentQuery);
