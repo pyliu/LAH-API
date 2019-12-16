@@ -1,15 +1,12 @@
 if (Vue) {
     // this puts inside xcase-check will not seeable by dynamic Vue generation
     Vue.component("xcase-check-item", {
-        template: `<div style="font-size: 0.9rem">
-            <div class='my-1'><span class='rounded-circle bg-danger'> &emsp; </span>&ensp;<strong class='text-info'>請查看並修正下列案件：</strong></div>
-            <ul>
-                <li v-for="(item, index) in ids">
-                    <a href='javascript:void(0)' class='reg_case_id' @click="query">{{item}}</a>
-                    <button class='fix_xcase_button btn btn-sm btn-outline-success' :data-id='item' @click.once="fix">修正</button>
-                </li>
-            </ul>
-        </div>`,
+        template: `<ul style="font-size: 0.9rem">
+            <li v-for="(item, index) in ids">
+                <a href='javascript:void(0)' class='reg_case_id' @click="query">{{item}}</a>
+                <button class='fix_xcase_button btn btn-sm btn-outline-success' :data-id='item' @click.once="fix">修正</button>
+            </li>
+        </ul>`,
         props: ["ids"],
         methods: {
             query: function(e) {
@@ -69,7 +66,7 @@ if (Vue) {
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         showModal({
-                            title: "跨所註記遺失查詢",
+                            title: "<span class='rounded-circle bg-danger'> &emsp; </span>&ensp;<strong class='text-info'>請查看並修正下列案件</strong>",
                             body: `<div id='xcase_check_item_app_012'><xcase-check-item :ids='found'></xcase-check-item></div>`,
                             size: "md",
                             callback: () => {

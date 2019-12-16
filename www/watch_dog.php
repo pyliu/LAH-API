@@ -83,34 +83,16 @@ blockquote img {
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
       <div class="row">
-        <div id="xcase-check" class="col-6">
+        <div id="xcase-check" class="col">
           <xcase-check></xcase-check>
         </div>
-        <div id="easycard-payment-check" class="col-6">
+        <div id="easycard-payment-check" class="col">
           <easycard-payment-check></easycard-payment-check>
         </div>
       </div>
       <div class="row">
-        <div class="col-6">
-          <fieldset>
-            <legend>公告期限維護<small>(先行准登)</small></legend>
-
-            <div class="form-row">
-              <span id="prereg_query_display" class="message"></span>
-              <div class="filter-btn-group col">
-                <button id="prereg_clear_button" class="btn btn-sm btn-outline-danger" >清除准登</button>
-                <button id="prereg_quote_button" class="btn btn-sm btn-outline-success">備註</button>
-              </div>
-            </div>
-
-            <div id='prereg_update_ui' class='mt-1'></div>
-
-            <blockquote id="prereg_quote" class="hide mt-1" data-title="公告期限維護">
-              <h5><span class="text-danger">※</span>注意：中壢所規定超過30件案件才能執行此功能，並於完成時須馬上關掉以免其他案件誤登。</h5>
-              <h5><span class="text-danger">※</span>注意：准登完後該案件須手動於資料庫中調整辦理情形（RM30）為「公告」（H）。</h5>
-              <img src="assets/howto/登記原因先行准登設定.jpg" />
-            </blockquote>
-          </fieldset>
+        <div id="announcement-mgt" class="col-6">
+          <announcement-mgt></announcement-mgt>
         </div>
         <div class="col-6">
           <fieldset>
@@ -444,6 +426,7 @@ blockquote img {
 
   <script src="assets/js/components/xcase-check.js"></script>
   <script src="assets/js/components/easycard-payment-check.js"></script>
+  <script src="assets/js/components/announcement-mgt.js"></script>
 
   <script type="text/javascript">
     $(document).ready(e => {
@@ -455,6 +438,7 @@ blockquote img {
 
       window.xCaseCheckVue = new Vue({el: "#xcase-check"});
       window.ezCardPaymentCheckVue = new Vue({el: "#easycard-payment-check"});
+      window.announcementMgtVue = new Vue({el: "#announcement-mgt"});
 
       // query EXPAC items event
       $("#expac_query_button").on("click", xhrGetExpacItems);
@@ -480,10 +464,6 @@ blockquote img {
         year_id: "sync_x_case_year",
         number_id: "sync_x_case_num"
       }));
-
-      // query for announcement
-      xhrQueryAnnouncementData.call(e, null);
-      $("#prereg_clear_button").on("click", xhrClearAnnouncementFlag);
 
       // clear temp data
       $("#query_temp_clr_button").on("click", xhrQueryTempData);
