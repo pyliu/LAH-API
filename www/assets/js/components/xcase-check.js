@@ -49,13 +49,11 @@ if (Vue) {
         }
     });
     Vue.component("xcase-check", {
-        template: `<div>
-            <fieldset>
-                <legend>跨所註記遺失檢測<small>(一周內)</small></legend>
-                <button @click="check" class="btn btn-sm btn-outline-primary" data-toggle='tooltip'>立即檢測</button>
-                <button @click="popup" class="btn btn-sm btn-outline-success">備註</button>
-            </fieldset>
-        </div>`,
+        template: `<fieldset>
+            <legend>跨所註記遺失檢測<small>(一周內)</small></legend>
+            <button @click="check" class="btn btn-sm btn-outline-primary" data-toggle='tooltip'>立即檢測</button>
+            <button @click="popup" class="btn btn-sm btn-outline-success">備註</button>
+        </fieldset>`,
         methods: {
             check: function(e) {
                 toggle(e.target);
