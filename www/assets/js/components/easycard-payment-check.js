@@ -159,7 +159,35 @@ if (Vue) {
         },
         mounted: function() {
             var d = new Date();
-			this.today = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+            this.today = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+            if ($("#easycard_query_day").datepicker) {
+                $("#easycard_query_day").datepicker({
+                    daysOfWeekDisabled: "",
+                    language: "zh-TW",
+                    daysOfWeekHighlighted: "1,2,3,4,5",
+                    //todayBtn: true,
+                    todayHighlight: true,
+                    autoclose: true,
+                    format: {
+                        /*
+                        * Say our UI should display a week ahead,
+                        * but textbox should store the actual date.
+                        * This is useful if we need UI to select local dates,
+                        * but store in UTC
+                        */
+                        toDisplay: function (date, format, language) {
+                        var d = new Date(date);
+                        return (d.getFullYear() - 1911)
+                                + ("0" + (d.getMonth()+1)).slice(-2)
+                                + ("0" + d.getDate()).slice(-2);
+                        },
+                        toValue: function (date, format, language) {
+                            // initialize to now
+                            return new Date();
+                        }
+                    }
+                });
+            }
         }
     });
 } else {
