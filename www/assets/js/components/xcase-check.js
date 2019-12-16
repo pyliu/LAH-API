@@ -1,13 +1,12 @@
 if (Vue) {
     // this puts inside xcase-check will not seeable by dynamic Vue generation
     Vue.component("xcase-check-item", {
-        template: `<div>
+        template: `<div style="font-size: 0.9rem">
             <div class='my-1'><span class='rounded-circle bg-danger'> &emsp; </span>&ensp;<strong class='text-info'>請查看並修正下列案件：</strong></div>
-            <ul v-for="(item, index) in ids">
-                <li>
+            <ul>
+                <li v-for="(item, index) in ids">
                     <a href='javascript:void(0)' class='reg_case_id' @click="query">{{item}}</a>
                     <button class='fix_xcase_button btn btn-sm btn-outline-success' :data-id='item' @click.once="fix">修正</button>
-                    <span :id='item'></span>
                 </li>
             </ul>
         </div>`,
@@ -17,7 +16,35 @@ if (Vue) {
                 xhrRegQueryCaseDialog(e);
             },
             fix: function(e) {
-                xhrFixProblematicXCase(e);
+                let id = $(e.target).data("id").replace(/[^a-zA-Z0-9]/g, "");
+                console.log("The problematic xcase id: "+id);
+
+                let body = new FormData();
+                body.append("type", "fix_xcase");
+                body.append("id", id);
+
+                let li = $(e.target).closest("li");
+                $(e.target).remove();
+
+                fetch("query_json_api.php", {
+                    method: "POST",
+                    body: body
+                }).then(response => {
+                    if (response.status != 200) {
+                        throw new Error("XHR連線異常，回應非200");
+                    }
+                    return response.json();
+                }).then(jsonObj => {
+                    let msg = `<strong class='text-success'>${id} 跨所註記修正完成!</strong>`;
+                    if (jsonObj.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        msg = `<span class='text-danger'>${id} 跨所註記修正失敗! (${jsonObj.status})</span>`;
+                    }
+                    addNotification({ body: msg });
+                    li.html(msg);
+                }).catch(ex => {
+                    console.error("xhrFixProblematicXCase parsing failed", ex);
+                    showAlert({message: ex.toString(), type: "danger"});
+                });
             }
         }
     });
@@ -27,7 +54,6 @@ if (Vue) {
                 <legend>跨所註記遺失檢測<small>(一周內)</small></legend>
                 <button @click="check" class="btn btn-sm btn-outline-primary" data-toggle='tooltip'>立即檢測</button>
                 <button @click="popup" class="btn btn-sm btn-outline-success">備註</button>
-                <div id="cross_case_check_query_display" class="message"></div>
             </fieldset>
         </div>`,
         methods: {
@@ -35,7 +61,7 @@ if (Vue) {
                 toggle(e.target);
 	
                 let body = new FormData();
-                body.append("type", "x");
+                body.append("type", "xcase-check");
 
                 fetch("query_json_api.php", {
                     method: "POST",
@@ -63,6 +89,8 @@ if (Vue) {
                         addNotification({
                             body: "<span class='rounded-circle bg-success'> &emsp; </span>&ensp;目前無跨所註記遺失問題。"
                         });
+                    } else {
+                        showAlert({message: jsonObj.message, type: "danger"});
                     }
                     toggle(e.target);
                 }).catch(ex => {

@@ -43,11 +43,11 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("XHR [watchdog] 跳過執行，因為IP不為「::1」", STATUS_CODE::FAIL_NOT_VALID_SERVER);
 		}
 		break;
-	case "x":
-		$log->info("XHR [x] 查詢跨所註記遺失請求");
+	case "xcase-check":
+		$log->info("XHR [xcase-check] 查詢跨所註記遺失請求");
 		$query_result = $query->getProblematicCrossCases();
 		if (empty($query_result)) {
-			$log->info("XHR [x] 查無資料");
+			$log->info("XHR [xcase-check] 查無資料");
 			echoErrorJSONString();
 		} else {
 			$rows = $query_result;
@@ -64,7 +64,7 @@ switch ($_POST["type"]) {
 			
 			// Send Message to Admins
 			$msg = new Message();
-			$content = "系統目前找到下列跨所註記遺失案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/watch_dog.php 修正。";
+			$content = "系統目前找到下列跨所註記遺失案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://".$_SERVER["SERVER_ADDR"]."/watch_dog.php 修正。";
 			foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
 				if ($adm_ip == '::1') {
 					continue;
@@ -73,7 +73,7 @@ switch ($_POST["type"]) {
 				$log->info("訊息已送出(${sn})給 ${adm_ip}");
 			}
 
-			$log->info("XHR [x] 找到".count($rows)."件案件遺失註記");
+			$log->info("XHR [xcase-check] 找到".count($rows)."件案件遺失註記");
 			echo json_encode($result, 0);
 		}
 		break;

@@ -241,36 +241,6 @@ let xhrCallWatchDog = e => {
 	});
 }
 
-let xhrFixProblematicXCase = e => {
-	let id = trim($(e.target).data("id"));
-	console.log("The problematic xcase id: "+id);
-
-	let body = new FormData();
-	body.append("type", "fix_xcase");
-	body.append("id", id);
-
-	$(e.target).remove();
-
-	fetch("query_json_api.php", {
-		method: "POST",
-		body: body
-	}).then(response => {
-		if (response.status != 200) {
-			throw new Error("XHR連線異常，回應非200");
-		}
-		return response.json();
-	}).then(jsonObj => {
-		let msg = `<strong class='text-success'>${id} 跨所註記修正完成!</strong>`;
-		if (jsonObj.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
-			msg = `<span class='text-danger'>${id} 跨所註記修正失敗! (${jsonObj.status})</span>`;
-		}
-		addNotification({ body: msg });
-	}).catch(ex => {
-		console.error("xhrFixProblematicXCase parsing failed", ex);
-		showAlert({message: ex.toString(), type: "danger"});
-	});
-}
-
 let xhrGetSectionRALIDCount = e => {
 	let el = $(e.target);
 	toggle(el);
