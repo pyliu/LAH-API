@@ -1,4 +1,5 @@
 if (Vue) {
+    // this puts inside xcase-check will not seeable by dynamic Vue generation
     Vue.component("xcase-check-item", {
         template: `<div>
             <div class='my-1'><span class='rounded-circle bg-danger'> &emsp; </span>&ensp;<strong class='text-info'>請查看並修正下列案件：</strong></div>
