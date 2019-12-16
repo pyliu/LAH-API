@@ -1,4 +1,25 @@
 if (Vue) {
+    Vue.component("xcase-check-item", {
+        template: `<div>
+            <div class='my-1'><span class='rounded-circle bg-danger'> &emsp; </span>&ensp;<strong class='text-info'>請查看並修正下列案件：</strong></div>
+            <ul v-for="(item, index) in ids">
+                <li>
+                    <a href='javascript:void(0)' class='reg_case_id' @click="query">{{item}}</a>
+                    <button class='fix_xcase_button btn btn-sm btn-outline-success' :data-id='item' @click.once="fix">修正</button>
+                    <span :id='item'></span>
+                </li>
+            </ul>
+        </div>`,
+        props: ["ids"],
+        methods: {
+            query: function(e) {
+                xhrRegQueryCaseDialog(e);
+            },
+            fix: function(e) {
+                xhrFixProblematicXCase(e);
+            }
+        }
+    });
     Vue.component("xcase-check", {
         template: `<div>
             <fieldset>
@@ -22,22 +43,21 @@ if (Vue) {
                     return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        let html = "<div class='mt-1'><span class='rounded-circle bg-danger'> &emsp; </span>&ensp;<strong class='text-info'>請查看並修正下列案件：</strong></div>";
-                        for (let i = 0; i < jsonObj.data_count; i++) {
-                            html += "<a href='javascript:void(0)' class='reg_case_id'>" + jsonObj.case_ids[i] + "</a> ";
-                            html += "<button class='fix_xcase_button btn btn-sm btn-outline-primary' data-id='" + jsonObj.case_ids[i] + "'>修正</button> ";
-                            html += "<span id='" + jsonObj.case_ids[i] + "'></span> <br />";
-                        }
                         showModal({
                             title: "跨所註記遺失查詢",
-                            body: html,
+                            body: `<div id='xcase_check_item_app_012'><xcase-check-item :ids='found'></xcase-check-item></div>`,
                             size: "md",
                             callback: () => {
-                                $(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
-                                $(".fix_xcase_button").one("click", xhrFixProblematicXCase);
+                                new Vue({
+                                    el: "#xcase_check_item_app_012",
+                                    data: function() {
+                                        return {
+                                            found: jsonObj.case_ids
+                                        }
+                                    },
+                                });
                             }
                         });
-                        
                     } else if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({
                             body: "<span class='rounded-circle bg-success'> &emsp; </span>&ensp;目前無跨所註記遺失問題。"
