@@ -107,6 +107,16 @@ if (Vue) {
             <div id='prereg_update_ui' class='mt-1'></div>
         </fieldset>`,
         methods: {
+            reload: function(e) {
+                // reload the Vue (hack ... not beautiful ... i know)
+                if (window.announcementMgtVue) {
+                    $("#announcement-mgt").html("<announcement-mgt></announcement-mgt>");
+                    window.announcementMgtVue.$destroy();
+                    window.announcementMgtVue = new Vue({
+                        el: "#announcement-mgt"
+                    });
+                }
+            },
             clear: function(e) {
                 if (!confirm("請確認要是否要清除所有登記原因的准登旗標？")) {
                     return;
@@ -125,6 +135,7 @@ if (Vue) {
                 }).then(jsonObj => {
                     console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + jsonObj.status + "】");
                     addNotification({ body: "<strong class='text-success'>已全部清除完成</strong>" });
+                    that.reload();
                 }).catch(ex => {
                     console.error("announcement-mgt::clear parsing failed", ex);
                     showAlert({message: "announcement-mgt::clear XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
