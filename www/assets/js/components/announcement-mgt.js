@@ -29,7 +29,7 @@ if (Vue) {
                     <select v-model="flag" class='no-cache form-control'><option>N</option><option>Y</option></select>
                 </div>
                 <div class="filter-btn-group col">
-                    <button id="'ann_upd_btn_'+data[0]" class="btn btn-sm btn-outline-primary" @click="update">更新</button>
+                    <button :id="'ann_upd_btn_'+data[0]" class="btn btn-sm btn-outline-primary" @click="update">更新</button>
                 </div>
             </div>
         </div>`,
