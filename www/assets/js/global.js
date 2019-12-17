@@ -35,6 +35,30 @@ let addUserInfoEvent = () => {
 	$(".user_tag").on("click", xhrQueryUserInfo);
 }
 
+let checkCaseUIData = (data) => {
+	let year = data.year;
+	let code = data.code;
+	let num = data.num;
+	if (isEmpty(code)) {
+		showAlert({
+			message: "「字」不能為空白!",
+			type: "danger"
+		});
+		return false;
+	}
+
+	let number = num.replace(/\D/g, "");
+	let offset = 6 - number.length;
+	if (isEmpty(number) || isNaN(number) || offset < 0) {
+		showAlert({
+			message: `「號」格式有問題，請查明修正【${num}】`,
+			type: "danger"
+		});
+		return false;
+	}
+	return true;
+}
+
 let validateCaseInput = (year_id_selector, code_id_selector, number_id_selector, output_id_selector) => {
 	var year = $(year_id_selector).val().replace(/\D/g, "");
 	

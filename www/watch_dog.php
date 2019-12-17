@@ -94,49 +94,8 @@ blockquote img {
         <div id="announcement-mgt" class="col-6">
           <announcement-mgt></announcement-mgt>
         </div>
-        <div class="col-6">
-          <fieldset>
-            <legend>調整登記案件欄位資料</legend>
-            
-            <div class="form-row">
-              <div class="input-group input-group-sm col">
-                <select id="reg_case_update_year" name="reg_case_update_year" class="form-control" aria-label="年" aria-describedby="inputGroup-reg_case_update_year" required>
-                  <option>107</option>
-                  <option selected>108</option>
-                  <option>109</option>
-                </select>
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-temp_clr_year">年</span>
-                </div>
-              </div>
-              <div class="input-group input-group-sm col">
-              <?php echo getCodeSelectHTML("reg_case_update_code", 'class="form-control" data-trigger="manual" data-toggle="popover" data-content="請選擇案件字" title="案件字" data-placement="top" aria-label="字" aria-describedby="inputGroup-reg_case_update_code" required'); ?>
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-temp_clr_code">字</span>
-                </div>
-              </div>
-              <div class="input-group input-group-sm col">
-                <input type="number" step="10" min="10" max="999999" id="reg_case_update_num" name="reg_case_update_num" class="form-control" aria-label="號" aria-describedby="inputGroup-reg_case_update_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-reg_case_update_num">號</span>
-                </div>
-              </div>
-              <div class="filter-btn-group col">
-                <button id="reg_case_update_query" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="reg_case_update_quote_button" class="btn btn-sm btn-outline-success">備註</button>
-              </div>
-            </div>
-            
-            <div id="reg_case_update_display" class="message"></div>
-
-            <blockquote id="reg_case_update_quote" class="hide" data-title="調整登記案件欄位資料">
-              <ul>
-                <li>使用情境1：先行准登後案件須回復至公告</li>
-                <li>使用情境2：案件卡住需退回初審</li>
-                <li>使用情境3：案件辦理情形與登記處理註記不同步造成地價課無法登錄收件卡住</li>
-              </ul>
-            </blockquote>
-          </fieldset>
+        <div id="case-state-mgt" class="col-6">
+          <case-state-mgt></case-state-mgt>
         </div>
       </div>
       <div class="row">
@@ -427,6 +386,8 @@ blockquote img {
   <script src="assets/js/components/xcase-check.js"></script>
   <script src="assets/js/components/easycard-payment-check.js"></script>
   <script src="assets/js/components/announcement-mgt.js"></script>
+  <script src="assets/js/components/case-input-group-ui.js"></script>
+  <script src="assets/js/components/case-state-mgt.js"></script>
 
   <script type="text/javascript">
     $(document).ready(e => {
@@ -439,6 +400,7 @@ blockquote img {
       window.xCaseCheckVue = new Vue({el: "#xcase-check"});
       window.ezCardPaymentCheckVue = new Vue({el: "#easycard-payment-check"});
       window.announcementMgtVue = new Vue({el: "#announcement-mgt"});
+      window.caseStateMgtVue = new Vue({el: "#case-state-mgt"});
 
       // query EXPAC items event
       $("#expac_query_button").on("click", xhrGetExpacItems);
@@ -474,15 +436,6 @@ blockquote img {
         year_id: "temp_clr_year",
         number_id: "temp_clr_num"
       }));
-
-      // reg case data update
-      $("#reg_case_update_code").on("change", xhrGetCaseLatestNum.bind({
-        code_id: "reg_case_update_code",
-        year_id: "reg_case_update_year",
-        number_id: "reg_case_update_num"
-      }));
-      $("#reg_case_update_query").on("click", xhrRegCaseUpdateQuery);
-      bindPressEnterEvent("#reg_case_update_num", xhrRegCaseUpdateQuery);
     });
   </script>
 </body>
