@@ -1,4 +1,8 @@
 //<![CDATA[
+const CONFIG = {
+	DISABLE_MSDB_QUERY: true,
+	TEST_MODE: false
+}
 // 跨縣市主機
 const landhb_svr = "220.1.35.123";
 // the status code must be the same as server side response
