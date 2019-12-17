@@ -80,7 +80,7 @@ if (Vue) {
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-easycard_query_day">日期</span>
                     </div>
-                    <input @keyup.enter="query" type="text" id="easycard_query_day" name="easycard_query_day" class="form-control easycard_query date_picker no-cache" placeholder="1081106"  data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1081106」。" data-placement="bottom" :value="today" />
+                    <input @keyup.enter="query" type="text" id="easycard_query_day" name="easycard_query_day" class="form-control easycard_query date_picker no-cache" placeholder="1081217"  data-trigger="manual" data-toggle="popover" data-content="e.g. 1081217" data-placement="bottom" v-model="date" />
                 </div>
                 <div class="filter-btn-group col">
                     <button id="easycard_query_button" class="btn btn-sm btn-outline-primary easycard_query" @click="query">查詢</button>
@@ -90,7 +90,7 @@ if (Vue) {
         </fieldset>`,
         data: () => {
             return {
-                today: null
+                date: null
             }
         },
         methods: {
@@ -159,7 +159,7 @@ if (Vue) {
         },
         mounted: function() {
             var d = new Date();
-            this.today = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+            this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
             if ($("#easycard_query_day").datepicker) {
                 $("#easycard_query_day").datepicker({
                     daysOfWeekDisabled: "",
