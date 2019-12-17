@@ -353,37 +353,6 @@ let xhrGetCasesByID = e => {
 	});
 }
 
-let getEasycardPaymentStatus = code => {
-	let status = "未知的狀態碼【" + code + "】";
-	/*
-		1：扣款成功
-		2：扣款失敗
-		3：取消扣款
-		8：扣款異常交易
-		9：取消扣款異常交易
-	*/
-	switch(code) {
-		case "1":
-			status = "扣款成功";
-			break;
-		case "2":
-			status = "扣款失敗";
-			break;
-		case "3":
-			status = "取消扣款";
-			break;
-		case "8":
-			status = "扣款異常交易";
-			break;
-		case "9":
-			status = "取消扣款異常交易";
-			break;
-		default:
-			break;
-	}
-	return status;
-}
-
 let xhrGetExpacItems = function(e) {
 	let number = $("#expac_query_number").val().replace(/\D/g, "");
 	// only allow number
@@ -1647,6 +1616,10 @@ let xhrUpdateCaseColumnData = e => {
 }
 
 let xhrSearchUsers = e => {
+	if (CONFIG.DISABLE_MSDB_QUERY) {
+		console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping xhrSearchUsers.");
+		return;
+	}
 	let keyword = $.trim($("#msg_who").val().replace(/\?/g, ""));
 	if (isEmpty(keyword)) {
 		console.warn("Keyword field should not be empty.");
@@ -1804,6 +1777,11 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 }
 
 let xhrQueryUserInfo = e => {
+	if (CONFIG.DISABLE_MSDB_QUERY) {
+		console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping xhrQueryUSerInfo.");
+		return;
+	}
+
 	let clicked_element = $(e.target);
 	if (!clicked_element.hasClass("user_tag")) {
 		clicked_element = $(clicked_element.closest(".user_tag"));
@@ -1861,6 +1839,10 @@ let xhrQueryUserInfo = e => {
 }
 
 let xhrSendMessage = e => {
+	if (CONFIG.DISABLE_MSDB_QUERY) {
+		console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping xhrSendMessage.");
+		return;
+	}
 	let title = $("#msg_title").val();
 	let content = $("#msg_content").val().replace(/\n/g, "\r\n");	// Messenger client is Windows app, so I need to replace \n to \r\n
 	let who = $("#msg_who").val();
