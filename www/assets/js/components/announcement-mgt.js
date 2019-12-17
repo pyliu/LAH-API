@@ -171,7 +171,7 @@ if (Vue) {
                         </option>
                     </select>
                     &ensp;
-                    <button class="btn btn-sm btn-outline-primary" @click="change">更新</button>
+                    <button class="btn btn-sm btn-outline-primary" @click="change">變更</button>
                 </div>`,
                 data: () => {
                     return {
