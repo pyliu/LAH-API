@@ -47,9 +47,9 @@ if (Vue) {
                     label: "測量案件",
                     options: ["HB12 中地測丈", "HB13 中地測建", "HB17 中地法土", "HB18 中地法建"]
                 },
-                year: "108",
-                code: "HB04",
-                num: "000010",
+                year: "",
+                code: "",
+                num: "",
                 num_step: 10,
                 num_min: 10,
                 code_data: []
@@ -64,7 +64,7 @@ if (Vue) {
                 });
             },
             getMaxNumber: function(e) {
-                let year = this.year.replace(/\D/g, "");
+                let year = this.year;
                 let code = this.code;
                 if (isEmpty(code) || isEmpty(year)) {
                     addNotification({message: "案件年或案件字為空白，無法取得案件目前最大號碼。"});
@@ -111,6 +111,8 @@ if (Vue) {
                     this.num_step = this.num_min = 100;
                     this.num = "000100";
                     break;
+                case "sync":
+                    this.code_data.push(this.remote_local_reg_case_code);
                 default:
                     this.code_data.push(this.local_reg_case_code);
                     this.code_data.push(this.remote_local_reg_case_code);
@@ -118,6 +120,9 @@ if (Vue) {
                     this.code_data.push(this.local_sur_case_code);
                     break;
             }
+            // set default year
+            var d = new Date();
+            this.year = (d.getFullYear() - 1911);
             this.uiUpdate(e);
         }
     });
