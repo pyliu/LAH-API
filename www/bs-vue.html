@@ -72,12 +72,6 @@
         </div>
         <b-badge variant="danger">test</b-badge>
     </div>
-    <div id="app_demo">
-            <button @click="show = !show">Toggle</button>
-            <transition @enter="enter" @leave="leave" @after-enter="afterEnter" @after-leave="afterLeave">
-              <div v-if="show">Hello World!</div>
-            </transition>
-          </div>
 
     <!-- Bootstrap core JavaScript -->
     <!-- Placed at the end of the document so the pages load faster -->
@@ -101,33 +95,96 @@
                     this.$bvToast.toast(`This is toast number ${this.toastCount}`, {
                         title: 'BootstrapVue Toast',
                         autoHideDelay: 5000,
-                        appendToast: append
+                        appendToast: append,
+						variant: "info",
+						solid: true
                     })
                 }
             }
         });
+		
+		window.toastApp = new Vue({
+			data: {
+				counter: 0
+			},
+			methods: {
+			  toast(toaster, append = false) {
+				this.counter++
+				this.$bvToast.toast(`Toast ${this.counter} body content`, {
+				  title: `Toaster ${toaster}`,
+				  toaster: toaster,
+				  solid: true,
+				  appendToast: append
+				})
+			  },
+				makeToast: function(message, opts) {
+					// for sub-title
+					var currentdate = new Date();
+					var datetime = ("0" + currentdate.getHours()).slice(-2) + ":" +
+						("0" + currentdate.getMinutes()).slice(-2) + ":" +
+						("0" + currentdate.getSeconds()).slice(-2);
+					let merged = Object.assign({
+						title: "通知",
+						subtitle: datetime,
+						href: "",
+						noAutoHide: false,
+						autoHideDelay: 5000,
+						solid: true,
+						toaster: "b-toaster-bottom-right",
+						appendToast: true,
+						variant: "default"
+					}, opts);
+					// Use a shorter name for this.$createElement
+					const h = this.$createElement
+					// Create the title
+					let vNodesTitle = h(
+					  'div',
+					  { class: ['d-flex', 'flex-grow-1', 'align-items-baseline', 'mr-2'] },
+					  [
+						h('strong', { class: 'mr-2' }, merged.title),
+						h('small', { class: 'ml-auto text-italics' }, merged.subtitle)
+					  ]
+					);
+					// Pass the VNodes as an array for title
+					merged.title = [vNodesTitle];
+					this.$bvToast.toast(message, merged);
+				},
+				popToast() {
+					// Use a shorter name for this.$createElement
+					const h = this.$createElement
+					// Increment the toast count
+					this.count++
+					// Create the message
+					const vNodesMsg = h(
+					  'p',
+					  { class: ['text-center', 'mb-0'] },
+					  [
+						h('b-spinner', { props: { type: 'grow', small: true } }),
+						' Flashy ',
+						h('strong', {}, 'toast'),
+						` message #${this.count} `,
+						h('b-spinner', { props: { type: 'grow', small: true } })
+					  ]
+					)
+					// Create the title
+					const vNodesTitle = h(
+					  'div',
+					  { class: ['d-flex', 'flex-grow-1', 'align-items-baseline', 'mr-2'] },
+					  [
+						h('strong', { class: 'mr-2' }, 'The Title'),
+						h('small', { class: 'ml-auto text-italics' }, '5 minutes ago')
+					  ]
+					)
+					// Pass the VNodes as an array for message and title
+					this.$bvToast.toast([vNodesMsg], {
+					  title: [vNodesTitle],
+					  solid: true,
+					  variant: 'info'
+					})
+				  }
+			}
+		});
         
-        var vm = new Vue({
-  el: "#app_demo",
-  data: {
-    show: true
-  },
-  methods: {
-    enter: function() {
-      console.log("enter!");
-    },
-    leave: function() {
-      console.log("leave!");
-    },
-    afterEnter: function() {
-      console.log("afterEnter!");
-    },
-    afterLeave: function() {
-      console.log("afterLeave!");
-    }
-  }
-});
-
     </script>
 </body>
 

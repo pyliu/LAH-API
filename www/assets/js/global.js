@@ -113,26 +113,7 @@ let showPopper = (selector, content, timeout) => {
 }
 
 let addNotification = opts => {
-	// singleton :D
-	if (!window.toastApp) {
-		initToastUI();
-	}
-
-	var currentdate = new Date();
-    var datetime = currentdate.getFullYear() + "-" +
-        ("0" + (currentdate.getMonth() + 1)).slice(-2) + "-" +
-        ("0" + currentdate.getDate()).slice(-2) + " " +
-        ("0" + currentdate.getHours()).slice(-2) + ":" +
-        ("0" + currentdate.getMinutes()).slice(-2) + ":" +
-        ("0" + currentdate.getSeconds()).slice(-2);
-	window.toastApp.makeToast(Object.assign({
-		header: "通知",
-		subtitle: datetime,
-		body: "Please fill the message to show on the toast body!",
-		autohide: true,
-		delay: 5000,
-		animation: true
-	}, opts));
+	window.utilApp.makeToast(opts.body || opts.message, opts);
 }
 
 let showAlert = opts => {
@@ -572,64 +553,49 @@ let initAlertUI = () => {
 	}
 }
 
-let initToastUI = () => {
-	// add modal element to show the popup html message
-	if ($("#bs_toast_template").length == 0) {
-		$("body").prepend($.parseHTML(`
-			<div id="bs_toast_template" class="fixed-bottom d-flex flex-row-reverse pb-5">
-				<div id="bs_toast_align_right_wrapper" class="mb-3"></div>
-			</div>
-		`));
-		// Try to use Vue.js
-		window.toastApp = new Vue({
-			el: '#bs_toast_template',
-			data: {
-				count: 0,
-				serial: 0
-			},
-			methods: {
-				removeToast: function(selector) {
-					$(selector).remove();
-					this.count--;
-				},
-				makeToast: function(opts) {
-					let toast_id = `pyliu_toast_${this.serial}`;
-					$("#bs_toast_align_right_wrapper").prepend($.parseHTML(`
-						<div
-							id="${toast_id}"
-							class="toast mr-3"
-							data-animation="${opts.animation || true}"
-							data-autohide="${opts.autohide || true}"
-							data-delay="${opts.delay || 1000}"
-							style="min-width: 350px"
-						>
-							<div class="toast-header">
-								<strong class="mr-auto text-primary">${opts.header}</strong>
-								<small class="text-muted">${opts.subtitle}</small>
-								<button type="button" class="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
-							</div>
-							<div class="toast-body">
-								${opts.body}
-							</div>
-						</div>
-					`));
-					let that = this;
-					let this_toast = $(`#${toast_id}`);
-					this_toast.on('hidden.bs.toast', function(e) {
-						that.removeToast(this_toast);
-					});
-					$(`#${toast_id} .toast-header button`).on('click', function(e) {
-						that.removeToast(this_toast);
-					});
-					this_toast.toast(opts).toast('show');
-					this.count++;
-					this.serial++;
-				}
-			},
-			watch: { },
-			mounted: function() { }
-		});
-	}
+let initUtilApp = () => {
+	if (window.utilApp) { return; }
+	window.utilApp = new Vue({
+		data: {
+			toastCounter: 0
+		},
+		methods: {
+			// make simple, short popup notice message
+			makeToast: function(message, opts) {
+				// for sub-title
+				var currentdate = new Date();
+				var datetime = ("0" + currentdate.getHours()).slice(-2) + ":" +
+					("0" + currentdate.getMinutes()).slice(-2) + ":" +
+					("0" + currentdate.getSeconds()).slice(-2);
+				let merged = Object.assign({
+					title: "通知",
+					subtitle: datetime,
+					href: "",
+					noAutoHide: false,
+					autoHideDelay: 5000,
+					solid: true,
+					toaster: "b-toaster-bottom-right",
+					appendToast: true,
+					variant: "default"
+				}, opts);
+				// Use a shorter name for this.$createElement
+				const h = this.$createElement
+				// Create the title
+				let vNodesTitle = h(
+				  'div',
+				  { class: ['d-flex', 'flex-grow-1', 'align-items-baseline', 'mr-2'] },
+				  [
+					h('strong', { class: 'mr-2' }, merged.title),
+					h('small', { class: 'ml-auto text-italics' }, merged.subtitle)
+				  ]
+				);
+				// Pass the VNodes as an array for title
+				merged.title = [vNodesTitle];
+				this.$bvToast.toast(message, merged);
+				this.toastCounter++;
+			}
+		}
+	});
 }
 
 $(document).ready(e => {
@@ -641,5 +607,6 @@ $(document).ready(e => {
 	initTooltip();
 	initDatepicker();
 	initWatchdog();
+	initUtilApp();
 });
 //]]>
