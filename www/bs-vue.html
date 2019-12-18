@@ -108,15 +108,6 @@
 				counter: 0
 			},
 			methods: {
-			  toast(toaster, append = false) {
-				this.counter++
-				this.$bvToast.toast(`Toast ${this.counter} body content`, {
-				  title: `Toaster ${toaster}`,
-				  toaster: toaster,
-				  solid: true,
-				  appendToast: append
-				})
-			  },
 				makeToast: function(message, opts) {
 					// for sub-title
 					var currentdate = new Date();
@@ -148,40 +139,7 @@
 					// Pass the VNodes as an array for title
 					merged.title = [vNodesTitle];
 					this.$bvToast.toast(message, merged);
-				},
-				popToast() {
-					// Use a shorter name for this.$createElement
-					const h = this.$createElement
-					// Increment the toast count
-					this.count++
-					// Create the message
-					const vNodesMsg = h(
-					  'p',
-					  { class: ['text-center', 'mb-0'] },
-					  [
-						h('b-spinner', { props: { type: 'grow', small: true } }),
-						' Flashy ',
-						h('strong', {}, 'toast'),
-						` message #${this.count} `,
-						h('b-spinner', { props: { type: 'grow', small: true } })
-					  ]
-					)
-					// Create the title
-					const vNodesTitle = h(
-					  'div',
-					  { class: ['d-flex', 'flex-grow-1', 'align-items-baseline', 'mr-2'] },
-					  [
-						h('strong', { class: 'mr-2' }, 'The Title'),
-						h('small', { class: 'ml-auto text-italics' }, '5 minutes ago')
-					  ]
-					)
-					// Pass the VNodes as an array for message and title
-					this.$bvToast.toast([vNodesMsg], {
-					  title: [vNodesTitle],
-					  solid: true,
-					  variant: 'info'
-					})
-				  }
+				}
 			}
 		});
         
