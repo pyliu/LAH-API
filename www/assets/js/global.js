@@ -1,6 +1,6 @@
 //<![CDATA[
 const CONFIG = {
-	DISABLE_MSDB_QUERY: true,
+	DISABLE_MSDB_QUERY: false,
 	TEST_MODE: false
 }
 // 跨縣市主機
@@ -487,17 +487,19 @@ let initModalUI = () => {
 let initAlertUI = () => {
 	// add alert element to show the alert message
 	if ($("#bs_alert_template").length == 0) {
-		$("body").append($.parseHTML(`
-			<div v-show="seen" id="bs_alert_template" class="alert alert-dismissible alert-fixed shadow" :class="type" role="alert" @mouseover="mouseOver" @mouseout="mouseOut">
-				<small v-html="message"></small>
-				<button type="button" class="close" @click="seen = false">
-					<span aria-hidden="true">&times;</span>
-				</button>
-				<div class="progress mt-1" style="height:.2rem">
-					<div class="progress-bar bg-light" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+		$("body").append($.parseHTML(`<div id="bs_alert_template">
+			<transition @enter="enter" @leave="leave" @after-enter="afterEnter" @after-leave="afterLeave">
+				<div v-show="seen" class="alert alert-dismissible alert-fixed shadow" :class="type" role="alert" @mouseover="mouseOver" @mouseout="mouseOut">
+					<small v-html="message"></small>
+					<button type="button" class="close" @click="seen = false">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<div class="progress mt-1" style="height:.2rem">
+						<div class="progress-bar bg-light" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+					</div>
 				</div>
-			</div>
-		`));
+			</transition>
+		</div>`));
 		// Try to use Vue.js
 		window.alertApp = new Vue({
 			el: '#bs_alert_template',
@@ -536,6 +538,18 @@ let initAlertUI = () => {
 					clearTimeout(window.alertApp.progress_timer_handle);
 					$("#bs_alert_template .progress .progress-bar").css("width", "100%");
 					this.progress_counter = 1;
+				},
+				enter: function() {
+					//console.log("enter!");
+				},
+				leave: function() {
+					//console.log("leave!");
+				},
+				afterEnter: function() {
+					//console.log("afterEnter!");
+				},
+				afterLeave: function() {
+					//console.log("afterLeave!");
 				}
 			},
 			watch: {
