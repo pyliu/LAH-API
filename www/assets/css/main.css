@@ -293,29 +293,3 @@ blockquote {
     z-index: 9999;
     border-radius: 10px;
 }
-/**
- * Vue Animation
- */
-.v-leave  {
-	opacity: 1;
-}
-
-.v-leave-active {
-	transition: opacity .5s
-}
-
-.v-leave-to {
-	opacity: 0;
-}
-
-.v-enter {
-	opacity: 0;
-}
-
-.v-enter-active {
-	transition: opacity .5s
-}
-
-.v-enter-to {
-	opacity: 1;
-}

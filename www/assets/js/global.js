@@ -485,6 +485,9 @@ let initAlertUI = () => {
 	if (!window.alertApp) {
 		$("body").append($.parseHTML(`<div id="bs_alert_template">
 			<transition
+				name="bounce"
+				enter-active-class="animated bounceInDown"
+				leave-active-class="animated bounceOutUp"
 				@enter="enter"
 				@leave="leave"
 				@after-enter="afterEnter"
