@@ -296,6 +296,10 @@ blockquote {
 /**
  * Vue Animation
  */
+.v-leave  {
+	opacity: 1;
+}
+
 .v-leave-active {
 	transition: opacity .5s
 }

@@ -157,10 +157,8 @@ let showAlert = opts => {
 				break;
 		}
 		
-		// singleton :D
-		if (!window.alertApp) {
-			initAlertUI();
-		}
+		// singleton inside :D
+		initAlertUI();
 		
 		// normal usage, you want to attach event to the element in the alert window
 		if (typeof opts.callback == "function") {
@@ -198,12 +196,10 @@ let showModal = opts => {
 		size = "md";
 	}
 	
-	let modal_element = $("#bs_modal_template");
-	if (modal_element.length == 0) {
-        initModalUI();
-        modal_element = $("#bs_modal_template");
-    }
+	// no worry, singleton impl
+	initModalUI();
 	
+	let modal_element = $("#bs_modal_template");
 	if (modal_element.is(":visible")) {
 		closeModal(() => { showModal(opts); });
 		return;
@@ -439,8 +435,8 @@ let initWatchdog = () => {
 
 let initModalUI = () => {
 	// add modal element to show the popup html message
-	if ($("#bs_modal_template").length == 0) {
-		$("body").append($.parseHTML(`
+	if (!window.modalApp) {
+		$("body").append($.parseHTML(`<div id="bs_modal_app">
 			<div class="modal fade" id="bs_modal_template" tabindex="-1" role="dialog" aria-labelledby="bs_modal_template" aria-hidden="true">
 				<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" v-bind:class="sizeClass" role="document">
 					<div class="modal-content">
@@ -450,10 +446,10 @@ let initModalUI = () => {
 					</div>
 				</div>
 			</div>
-		`));
+		</div>`));
 		// Try to use Vue.js
 		window.modalApp = new Vue({
-			el: '#bs_modal_template',
+			el: '#bs_modal_app',
 			data: {
 				body: 'Hello Vue!',
 				title: 'Hello Vue!',
@@ -486,9 +482,14 @@ let initModalUI = () => {
 
 let initAlertUI = () => {
 	// add alert element to show the alert message
-	if ($("#bs_alert_template").length == 0) {
+	if (!window.alertApp) {
 		$("body").append($.parseHTML(`<div id="bs_alert_template">
-			<transition @enter="enter" @leave="leave" @after-enter="afterEnter" @after-leave="afterLeave">
+			<transition
+				@enter="enter"
+				@leave="leave"
+				@after-enter="afterEnter"
+				@after-leave="afterLeave"
+			>
 				<div v-show="seen" class="alert alert-dismissible alert-fixed shadow" :class="type" role="alert" @mouseover="mouseOver" @mouseout="mouseOut">
 					<small v-html="message"></small>
 					<button type="button" class="close" @click="seen = false">

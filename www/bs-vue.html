@@ -12,11 +12,31 @@
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link href="assets/css/bootstrap-vue.min.css" rel="stylesheet">
     <link href="assets/css/starter-template.css" rel="stylesheet">
+    <link href="assets/css/animate.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <style type="text/css">
         body {
             font-family: "微軟正黑體", "Microsoft JhenHei", sans-serif;
         }
+        .v-leave-active {
+	transition: opacity 1.5s
+}
+
+.v-leave-to {
+	opacity: 0;
+}
+
+.v-enter {
+	opacity: 0;
+}
+
+.v-enter-active {
+	transition: opacity 1.5s
+}
+
+.v-enter-to {
+	opacity: 1;
+}
     </style>
 </head>
 
@@ -52,6 +72,12 @@
         </div>
         <b-badge variant="danger">test</b-badge>
     </div>
+    <div id="app_demo">
+            <button @click="show = !show">Toggle</button>
+            <transition @enter="enter" @leave="leave" @after-enter="afterEnter" @after-leave="afterLeave">
+              <div v-if="show">Hello World!</div>
+            </transition>
+          </div>
 
     <!-- Bootstrap core JavaScript -->
     <!-- Placed at the end of the document so the pages load faster -->
@@ -80,6 +106,28 @@
                 }
             }
         });
+        
+        var vm = new Vue({
+  el: "#app_demo",
+  data: {
+    show: true
+  },
+  methods: {
+    enter: function() {
+      console.log("enter!");
+    },
+    leave: function() {
+      console.log("leave!");
+    },
+    afterEnter: function() {
+      console.log("afterEnter!");
+    },
+    afterLeave: function() {
+      console.log("afterLeave!");
+    }
+  }
+});
+
     </script>
 </body>
 

@@ -30,6 +30,7 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
 <link rel="stylesheet" href="assets/css/loading-btn.css">
 <link href="assets/css/basic.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
+<link href="assets/css/animate.css" rel="stylesheet">
 </head>
 
 <body id="html_body">
