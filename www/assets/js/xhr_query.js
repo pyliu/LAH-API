@@ -545,7 +545,7 @@ let xhrCompareXCase = e => {
 				callback: () => {
 					$("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
 					$("#inst_x_case_confirm_button").off("click").on("click", xhrInsertXCase.bind(id));
-				}
+				},
 			});
 		} else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_REMOTE_NO_RECORD) {
 			html += "<div><span class='rounded-circle bg-light'> &emsp; </span>&ensp;" + jsonObj.message + "</div>";
@@ -589,8 +589,13 @@ let xhrInsertXCase = function(e) {
 			return response.json();
 		}).then(jsonObj => {
 			if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+				let msg = id + " 新增成功！";
+				showAlert({
+					message: msg,
+					type: "success"
+				});
 				addNotification({
-					body: id + " 新增成功！"
+					body: msg
 				});
 			} else {
 				addNotification({
