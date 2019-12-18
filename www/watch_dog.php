@@ -20,6 +20,7 @@ require_once("./include/init.php");
 <link href="assets/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
 <link href="assets/css/basic.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
+<link href="assets/css/animate.css" rel="stylesheet">
 <style type="text/css">
 #contact a:link, a:visited, a:hover {
 	color: gray;
