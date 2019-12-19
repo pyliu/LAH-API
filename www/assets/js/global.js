@@ -625,7 +625,8 @@ let initUtilApp = () => {
 					cancelTitle: '取消',
 					footerClass: 'p-2',
 					hideHeaderClose: false,
-					centered: false
+					centered: false,
+					noStacking: false
 				}, opts);
 				this.$bvModal.msgBoxConfirm(message, merged)
 				.then(value => {

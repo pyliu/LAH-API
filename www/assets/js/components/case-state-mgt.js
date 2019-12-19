@@ -76,26 +76,73 @@ if (Vue) {
                 let that = this;
                 window.utilApp.confirm(`您確定要更新辦理情形為「${that.rm30}」?`, {
                     title: '請確認更新案件辦理情形',
-                    callback: this.callXhrRM30Request
+                    callback: () => {
+                        xhrUpdateRegCaseCol({
+                            rm01: this.raw["RM01"],
+                            rm02: this.raw["RM02"],
+                            rm03: this.raw["RM03"],
+                            col: "RM30",
+                            val: this.rm30
+                        });
+                        if (this.sync_rm30_1) {
+                            /**
+                             * RM45 - 初審 A
+                             * RM47 - 複審 B
+                             * RM55 - 登錄 R
+                             * RM57 - 校對 C
+                             * RM59 - 結案 F
+                             * RM82 - 請示 E
+                             * RM88 - 展期 D
+                             * RM93 - 撤回 K
+                             * RM91_4 - 歸檔 Z
+                             */
+                            let rm30_1 = "XXXXXXXX";
+                            switch (this.rm30) {
+                                case "A":
+                                    rm30_1 = this.raw["RM45"];
+                                    break;
+                                case "B":
+                                    rm30_1 = this.raw["RM47"];
+                                    break;
+                                case "R":
+                                    rm30_1 = this.raw["RM55"];
+                                    break;
+                                case "C":
+                                    rm30_1 = this.raw["RM57"];
+                                    break;
+                                case "F":
+                                    rm30_1 = this.raw["RM59"];
+                                    break;
+                                case "E":
+                                    rm30_1 = this.raw["RM82"];
+                                    break;
+                                case "D":
+                                    rm30_1 = this.raw["RM88"];
+                                    break;
+                                case "K":
+                                    rm30_1 = this.raw["RM93"];
+                                    break;
+                                case "Z":
+                                    rm30_1 = this.raw["RM91_4"];
+                                    break;
+                            }
+                            xhrUpdateRegCaseCol({
+                                rm01: this.raw["RM01"],
+                                rm02: this.raw["RM02"],
+                                rm03: this.raw["RM03"],
+                                col: "RM30_1",
+                                val: rm30_1
+                            });
+                        }
+                    }
                 });
             },
             updateRM39: function(e) {
                 closeModal();
                 let that = this;
-                this.$bvModal.msgBoxConfirm(`您確定要更新登記處理註記為「${that.rm39}」?`, {
-					title: '請確認更新登記處理註記',
-					size: 'sm',
-					buttonSize: 'sm',
-					okVariant: 'outline-success',
-                    okTitle: '確定',
-                    cancelVariant: 'secondary',
-					cancelTitle: '取消',
-					footerClass: 'p-2',
-					hideHeaderClose: false,
-                    centered: false,
-                    noStacking: true
-				}).then(value => {
-					if (value) {
+                window.utilApp.confirm(`您確定要更新登記處理註記為「${that.rm39}」?`, {
+                    title: '請確認更新登記處理註記',
+                    callback: () => {
                         xhrUpdateRegCaseCol({
                             rm01: that.raw["RM01"],
                             rm02: that.raw["RM02"],
@@ -104,68 +151,7 @@ if (Vue) {
                             val: that.rm39
                         });
                     }
-				}).catch(err => {
-					console.error(err);
-				});
-            },
-            callXhrRM30Request: function() {
-                xhrUpdateRegCaseCol({
-                    rm01: this.raw["RM01"],
-                    rm02: this.raw["RM02"],
-                    rm03: this.raw["RM03"],
-                    col: "RM30",
-                    val: this.rm30
                 });
-                if (this.sync_rm30_1) {
-                    /**
-                     * RM45 - 初審 A
-                     * RM47 - 複審 B
-                     * RM55 - 登錄 R
-                     * RM57 - 校對 C
-                     * RM59 - 結案 F
-                     * RM82 - 請示 E
-                     * RM88 - 展期 D
-                     * RM93 - 撤回 K
-                     * RM91_4 - 歸檔 Z
-                     */
-                    let rm30_1 = "XXXXXXXX";
-                    switch (this.rm30) {
-                        case "A":
-                            rm30_1 = this.raw["RM45"];
-                            break;
-                        case "B":
-                            rm30_1 = this.raw["RM47"];
-                            break;
-                        case "R":
-                            rm30_1 = this.raw["RM55"];
-                            break;
-                        case "C":
-                            rm30_1 = this.raw["RM57"];
-                            break;
-                        case "F":
-                            rm30_1 = this.raw["RM59"];
-                            break;
-                        case "E":
-                            rm30_1 = this.raw["RM82"];
-                            break;
-                        case "D":
-                            rm30_1 = this.raw["RM88"];
-                            break;
-                        case "K":
-                            rm30_1 = this.raw["RM93"];
-                            break;
-                        case "Z":
-                            rm30_1 = this.raw["RM91_4"];
-                            break;
-                    }
-                    xhrUpdateRegCaseCol({
-                        rm01: this.raw["RM01"],
-                        rm02: this.raw["RM02"],
-                        rm03: this.raw["RM03"],
-                        col: "RM30_1",
-                        val: rm30_1
-                    });
-                }
             }
         },
         mounted: function(e) {
