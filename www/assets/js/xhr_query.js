@@ -1418,39 +1418,32 @@ let xhrClearTempData = function(e) {
 }
 
 let xhrUpdateRegCaseCol = function(arguments) {
-	if (confirm(`確認更新「${arguments.col}」欄位？`)) {
-		if ($(arguments.el).length > 0) {
-			// remove the button
-			$(arguments.el).remove();
-		}
-		let body = new FormData();
-		body.append("type", "reg_upd_col");
-		body.append("rm01", arguments.rm01);
-		body.append("rm02", arguments.rm02);
-		body.append("rm03", arguments.rm03);
-		body.append("col", arguments.col);
-		body.append("val", arguments.val);
-		fetch("query_json_api.php", {
-			method: "POST",
-			body: body
-		}).then(response => {
-			return response.json();
-		}).then(jsonObj => {
-			console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `更新案件「${arguments.col}」欄位回傳狀態碼有問題【${jsonObj.status}】`);
-			showModal({
-				body: "<strong class='text-success'>更新完成</strong>",
-				title: `更新案件欄位「${arguments.col}」`,
-				size: "md"
-			});
-		}).catch(ex => {
-			console.error("xhrUpdateRegCaseCol parsing failed", ex);
-			showModal({
-				body: `<strong class='text-danger'>更新欄位「${arguments.col}」失敗</strong><p>${arguments.rm01}, ${arguments.rm02}, ${arguments.rm03}, ${arguments.val}</p>`,
-				title: `更新案件欄位「${arguments.col}」`,
-				size: "md"
-			});
-		});
+	if ($(arguments.el).length > 0) {
+		// remove the button
+		$(arguments.el).remove();
 	}
+	let body = new FormData();
+	body.append("type", "reg_upd_col");
+	body.append("rm01", arguments.rm01);
+	body.append("rm02", arguments.rm02);
+	body.append("rm03", arguments.rm03);
+	body.append("col", arguments.col);
+	body.append("val", arguments.val);
+	fetch("query_json_api.php", {
+		method: "POST",
+		body: body
+	}).then(response => {
+		return response.json();
+	}).then(jsonObj => {
+		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `更新案件「${arguments.col}」欄位回傳狀態碼有問題【${jsonObj.status}】`);
+		addNotification({message: `「${arguments.col}」更新完成`, variant: "success"});
+	}).catch(ex => {
+		console.error("xhrUpdateRegCaseCol parsing failed", ex);
+		showAlert({
+			message: `<strong class='text-danger'>更新欄位「${arguments.col}」失敗</strong><p>${arguments.rm01}, ${arguments.rm02}, ${arguments.rm03}, ${arguments.val}</p>`,
+			type: "danger"
+		});
+	});
 }
 
 let xhrGetSURCase = function(e) {
