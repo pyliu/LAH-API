@@ -146,16 +146,7 @@ let showAlert = opts => {
 			setTimeout(opts.callback, 250);
 		}
 
-		window.alertApp.autohide = opts.autohide || false;
-		if (window.alertApp.autohide) {
-			// close alert after 5 secs
-			let timeout = opts.timeout;
-			if (window.alertApp.hide_timer_handle !== null) { clearTimeout(window.alertApp.hide_timer_handle); }
-			window.alertApp.hide_timer_handle = setTimeout(() => {
-				window.alertApp.seen = false;
-				window.alertApp.hide_timer_handle = null;
-			}, isEmpty(timeout) || isNaN(timeout) ? 5000 : timeout);
-		}
+		window.alertApp.autohide = opts.autohide || true;
 		window.alertApp.message = msg;
 		window.alertApp.type = type;
 		window.alertApp.seen = true;
@@ -475,7 +466,7 @@ let initAlertUI = () => {
 				@after-leave="afterLeave"
 			>
 				<div v-show="seen" class="alert alert-dismissible alert-fixed shadow" :class="type" role="alert" @mouseover="mouseOver" @mouseout="mouseOut">
-					<small v-html="message"></small>
+					<p v-html="message" style="font-size: .9rem"></p>
 					<button type="button" class="close" @click="seen = false">
 						<span aria-hidden="true">&times;</span>
 					</button>
@@ -495,7 +486,8 @@ let initAlertUI = () => {
 				hide_timer_handle: null,
 				progress_timer_handle: null,
 				progress_counter: 1,
-				autohide: false
+				autohide: true,
+				delay: 15000
 			},
 			methods: {
 				mouseOver: function(e) {
@@ -507,48 +499,49 @@ let initAlertUI = () => {
 						window.alertApp.hide_timer_handle = setTimeout(() => {
 							window.alertApp.seen = false;
 							window.alertApp.hide_timer_handle = null;
-						}, 5000);
+						}, window.alertApp.delay);
 						window.alertApp.enableProgress();
 					}
 				},
-				enableProgress: () => {
-					window.alertApp.disableProgress();
-					window.alertApp.progress_timer_handle = setInterval(function() {
-						let p = (100 - Math.round(((++this.progress_counter) / 33.33) * 100));
+				enableProgress: function() {
+					this.disableProgress();
+					//console.log("enableProgress!");
+					let that = this;
+					this.progress_timer_handle = setInterval(function() {
+						let p = (100 - Math.round(((++that.progress_counter) / (that.delay / 200.0)) * 100));
 						let wp = p < 0 ? "0%" : `${p}%`;
 						$("#bs_alert_template .progress .progress-bar").css("width", wp);
-					}, 150);
+					}, 200);
 				},
-				disableProgress: () => {
-					clearTimeout(window.alertApp.progress_timer_handle);
+				disableProgress: function() {
+					//console.log("disableProgress!");
+					clearTimeout(this.progress_timer_handle);
 					$("#bs_alert_template .progress .progress-bar").css("width", "100%");
 					this.progress_counter = 1;
 				},
 				enter: function() {
-					//console.log("enter!");
+					// close alert after 15 secs (default)
+					if (this.autohide) {
+						let that = this;
+						if (this.hide_timer_handle !== null) { clearTimeout(this.hide_timer_handle); }
+						window.alertApp.hide_timer_handle = setTimeout(() => {
+							that.seen = false;
+							that.hide_timer_handle = null;
+						}, this.delay);
+					}
 				},
 				leave: function() {
 					//console.log("leave!");
 				},
 				afterEnter: function() {
-					//console.log("afterEnter!");
+					if (this.autohide) {
+						this.enableProgress();
+					}
 				},
 				afterLeave: function() {
-					//console.log("afterLeave!");
+					this.disableProgress();
 				}
-			},
-			watch: {
-				seen: val => {
-					if (val === true) {
-						if (window.alertApp.autohide) {
-							window.alertApp.enableProgress();
-						}
-					} else {
-						window.alertApp.disableProgress();
-					}
-				}
-			},
-			mounted: function() { }
+			}
 		});
 	}
 }
