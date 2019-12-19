@@ -58,7 +58,7 @@ if (jQuery && localStorage) {
                     cacheIt(e.target);
                 }
             });
-        }, 250);
+        }, 100);
     });
 } else {
     console.error("jQuery and localStorage are required to use cache.js!");
