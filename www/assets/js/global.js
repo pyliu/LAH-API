@@ -523,22 +523,17 @@ let initAlertUI = () => {
 					$("#bs_alert_template .progress .progress-bar").css("width", "100%");
 					this.progress_counter = 1;
 				},
-				enter: function() {
+				enter: function() { },
+				leave: function() { },
+				afterEnter: function() {
 					// close alert after 15 secs (default)
 					if (this.autohide) {
 						let that = this;
 						if (this.hide_timer_handle !== null) { clearTimeout(this.hide_timer_handle); }
-						window.alertApp.hide_timer_handle = setTimeout(() => {
+						this.hide_timer_handle = setTimeout(() => {
 							that.seen = false;
 							that.hide_timer_handle = null;
 						}, this.delay);
-					}
-				},
-				leave: function() {
-					//console.log("leave!");
-				},
-				afterEnter: function() {
-					if (this.autohide) {
 						this.enableProgress();
 					}
 				},
