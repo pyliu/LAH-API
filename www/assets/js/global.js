@@ -113,7 +113,11 @@ let showPopper = (selector, content, timeout) => {
 }
 
 let addNotification = opts => {
-	window.utilApp.makeToast(opts.body || opts.message, opts);
+	if (typeof opts == "object") {
+		window.utilApp.makeToast(opts.body || opts.message, opts);
+	} else {
+		window.utilApp.makeToast(opts);
+	}
 }
 
 let showAlert = opts => {
@@ -548,13 +552,15 @@ let initAlertUI = () => {
 
 let initUtilApp = () => {
 	if (window.utilApp) { return; }
+	// bootstrap-vue will add $bvToast and $bvModal to every vue instance, I will leverage it to show toast and modal window
 	window.utilApp = new Vue({
 		data: {
-			toastCounter: 0
+			toastCounter: 0,
+			confirmAnswer: false
 		},
 		methods: {
 			// make simple, short popup notice message
-			makeToast: function(message, opts) {
+			makeToast: function(message, opts = {}) {
 				// for sub-title
 				var currentdate = new Date();
 				var datetime = ("0" + currentdate.getHours()).slice(-2) + ":" +
@@ -569,7 +575,8 @@ let initUtilApp = () => {
 					solid: true,
 					toaster: "b-toaster-bottom-right",
 					appendToast: true,
-					variant: "default"
+					variant: "default",
+					successSpinner: false
 				}, opts);
 				// Use a shorter name for this.$createElement
 				const h = this.$createElement
@@ -584,8 +591,45 @@ let initUtilApp = () => {
 				);
 				// Pass the VNodes as an array for title
 				merged.title = [vNodesTitle];
-				this.$bvToast.toast(message, merged);
+
+				if (merged.successSpinner) {
+					// Create the message
+					const vNodesMsg = h(
+						'p',
+						{ class: ['mb-0'] },
+						[
+							h('b-spinner', { props: { type: 'grow', small: true, variant: 'success' } }),
+							//h('strong', {}, 'toast'),
+							message
+						]
+					)
+					this.$bvToast.toast([vNodesMsg], merged);
+				} else {
+					this.$bvToast.toast(message, merged);
+				}
+				
 				this.toastCounter++;
+			},
+			message: function(message, opts) {
+
+			},
+			confirm: function(message, opts) {
+				this.confirmAnswer = false;
+				this.$bvModal.msgBoxConfirm(message, {
+					title: 'Please Confirm',
+					size: 'sm',
+					buttonSize: 'sm',
+					okVariant: 'danger',
+					okTitle: 'YES',
+					cancelTitle: 'NO',
+					footerClass: 'p-2',
+					hideHeaderClose: false,
+					centered: true
+				}).then(value => {
+					this.confirmAnswer = value;
+				}).catch(err => {
+					console.error(err);
+				});
 			}
 		}
 	});
