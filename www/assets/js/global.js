@@ -184,10 +184,10 @@ let showModal = opts => {
 }
 
 let closeModal = callback => {
+	window.utilApp.hideModal();
 	if (typeof callback == "function") {
-		$("#bs_modal_template").one('hidden.bs.modal', callback);
+		setTimeout(callback, 100);
 	}
-	$("#bs_modal_template").modal("hide");
 }
 
 let toggle = selector => {
@@ -547,6 +547,16 @@ let initUtilApp = () => {
 			},
 			showModal: function(id) {
 				this.$bvModal.show(id);
+			},
+			hideModal: function(id = "") {
+				let that = this;
+				if (id == "" || id == undefined) {
+					$('div.modal.show').each(function(idx, el) {
+						that.$bvModal.hide($(el).attr("id"));
+					});
+				} else {
+					that.$bvModal.hide(id);
+				}
 			},
 			modal: function(message, opts) {
 				let merged = Object.assign({
