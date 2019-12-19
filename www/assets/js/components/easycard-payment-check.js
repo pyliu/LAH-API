@@ -120,7 +120,8 @@ if (Vue) {
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({
-                            body: "<span class='rounded-circle bg-success'> &emsp; </span>&ensp;" + jsonObj.message
+                            message: jsonObj.message,
+                            successSpinner: true
                         });
                     } else {
                         showModal({
@@ -137,7 +138,7 @@ if (Vue) {
                     }
                     toggle(".easycard_query");
                 }).catch(ex => {
-                    console.error("xhrEasycardPaymentQuery parsing failed", ex);
+                    console.error("easycard-payment-check::query parsing failed", ex);
                     showAlert({message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
                 });
             },
