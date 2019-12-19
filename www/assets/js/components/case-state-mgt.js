@@ -74,25 +74,10 @@ if (Vue) {
             updateRM30: function(e) {
                 closeModal();
                 let that = this;
-                this.$bvModal.msgBoxConfirm(`您確定要更新辦理情形為「${that.rm30}」?`, {
-					title: '請確認更新案件辦理情形',
-					size: 'sm',
-					buttonSize: 'sm',
-					okVariant: 'outline-success',
-                    okTitle: '確定',
-                    cancelVariant: 'secondary',
-					cancelTitle: '取消',
-					footerClass: 'p-2',
-					hideHeaderClose: false,
-                    centered: false,
-                    noStacking: true
-				}).then(value => {
-					if (value) {
-                        that.callXhrRM30Request();
-                    }
-				}).catch(err => {
-					console.error(err);
-				});
+                window.utilApp.confirm(`您確定要更新辦理情形為「${that.rm30}」?`, {
+                    title: '請確認更新案件辦理情形',
+                    callback: this.callXhrRM30Request
+                });
             },
             updateRM39: function(e) {
                 closeModal();
@@ -143,7 +128,7 @@ if (Vue) {
                      * RM93 - 撤回 K
                      * RM91_4 - 歸檔 Z
                      */
-                    let rm30_1 = "";
+                    let rm30_1 = "XXXXXXXX";
                     switch (this.rm30) {
                         case "A":
                             rm30_1 = this.raw["RM45"];

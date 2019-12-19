@@ -607,7 +607,7 @@ let initUtilApp = () => {
 				} else {
 					this.$bvToast.toast(message, merged);
 				}
-				
+
 				this.toastCounter++;
 			},
 			message: function(message, opts) {
@@ -615,18 +615,24 @@ let initUtilApp = () => {
 			},
 			confirm: function(message, opts) {
 				this.confirmAnswer = false;
-				this.$bvModal.msgBoxConfirm(message, {
-					title: 'Please Confirm',
+				let merged = Object.assign({
+					title: '請確認',
 					size: 'sm',
 					buttonSize: 'sm',
-					okVariant: 'danger',
-					okTitle: 'YES',
-					cancelTitle: 'NO',
+					okVariant: 'outline-success',
+					okTitle: '確定',
+					cancelVariant: 'secondary',
+					cancelTitle: '取消',
 					footerClass: 'p-2',
 					hideHeaderClose: false,
-					centered: true
-				}).then(value => {
+					centered: false
+				}, opts);
+				this.$bvModal.msgBoxConfirm(message, merged)
+				.then(value => {
 					this.confirmAnswer = value;
+					if (this.confirmAnswer && merged.callback && typeof merged.callback == "function") {
+						merged.callback();
+					}
 				}).catch(err => {
 					console.error(err);
 				});
