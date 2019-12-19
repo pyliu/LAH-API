@@ -72,6 +72,38 @@ if (Vue) {
         },
         methods: {
             updateRM30: function(e) {
+                closeModal();
+                let that = this;
+                this.$bvModal.msgBoxConfirm(`您確定要更新辦理情形為「${that.rm30}」?`, {
+					title: '請確認更新案件辦理情形',
+					size: 'sm',
+					buttonSize: 'sm',
+					okVariant: 'outline-success',
+                    okTitle: '確定',
+                    cancelVariant: 'secondary',
+					cancelTitle: '取消',
+					footerClass: 'p-2',
+					hideHeaderClose: false,
+                    centered: false,
+                    noStacking: true
+				}).then(value => {
+					if (value) {
+                        that.callXhrRM30Request();
+                    }
+				}).catch(err => {
+					console.error(err);
+				});
+            },
+            updateRM39: function(e) {
+                xhrUpdateRegCaseCol({
+                    rm01: this.raw["RM01"],
+                    rm02: this.raw["RM02"],
+                    rm03: this.raw["RM03"],
+                    col: "RM39",
+                    val: this.rm39
+                });
+            },
+            callXhrRM30Request: function() {
                 xhrUpdateRegCaseCol({
                     rm01: this.raw["RM01"],
                     rm02: this.raw["RM02"],
@@ -129,15 +161,6 @@ if (Vue) {
                         val: rm30_1
                     });
                 }
-            },
-            updateRM39: function(e) {
-                xhrUpdateRegCaseCol({
-                    rm01: this.raw["RM01"],
-                    rm02: this.raw["RM02"],
-                    rm03: this.raw["RM03"],
-                    col: "RM39",
-                    val: this.rm39
-                });
             }
         },
         mounted: function(e) {
