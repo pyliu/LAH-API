@@ -113,10 +113,14 @@ let showPopper = (selector, content, timeout) => {
 }
 
 let addNotification = opts => {
+	let tmp = document.createElement("div");
 	if (typeof opts == "object") {
-		window.utilApp.makeToast(opts.body || opts.message, opts);
+		let msg = opts.body || opts.message;
+		tmp.innerHTML = msg;
+		window.utilApp.makeToast(tmp.textContent || tmp.innerText || "無法轉譯訊息文字", opts);
 	} else {
-		window.utilApp.makeToast(opts);
+		tmp.innerHTML = opts;
+		window.utilApp.makeToast(tmp.textContent || tmp.innerText || "無法轉譯訊息文字");
 	}
 }
 
@@ -171,29 +175,12 @@ let showModal = opts => {
 	if (isEmpty(size)) {
 		size = "md";
 	}
-	
-	// no worry, singleton impl
-	initModalUI();
-	
-	let modal_element = $("#bs_modal_template");
-	if (modal_element.is(":visible")) {
-		closeModal(() => { showModal(opts); });
-		return;
-	}
-
-	// Try to use Vue.js
-	window.modalApp.title = title;
-	window.modalApp.body = body;
-	window.modalApp.sizeClass = "modal-" + size;
-	window.modalApp.optsClass = opts.class || "";
-
-	if (typeof callback == "function") {
-		modal_element.one('shown.bs.modal', callback);
-	}
-	modal_element.one('hidden.bs.modal', () => { window.modalApp.body = ""; });
-
-	// backdrop: 'static' => not close by clicking outside dislog
-	modal_element.modal({backdrop: 'static'});
+	window.utilApp.modal(body, {
+		title: title,
+		size: size,
+		html: true,
+		callback: callback
+	});
 }
 
 let closeModal = callback => {
@@ -409,53 +396,6 @@ let initWatchdog = () => {
 	}
 }
 
-let initModalUI = () => {
-	// add modal element to show the popup html message
-	if (!window.modalApp) {
-		$("body").append($.parseHTML(`<div id="bs_modal_app">
-			<div class="modal fade" id="bs_modal_template" tabindex="-1" role="dialog" aria-labelledby="bs_modal_template" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" v-bind:class="sizeClass" role="document">
-					<div class="modal-content">
-						<com-header :in-title="title"></com-header>
-						<com-body :in-body="body" :in-opts-class="optsClass"></com-body>
-						<!-- <com-footer></com-footer> -->
-					</div>
-				</div>
-			</div>
-		</div>`));
-		// Try to use Vue.js
-		window.modalApp = new Vue({
-			el: '#bs_modal_app',
-			data: {
-				body: 'Hello Vue!',
-				title: 'Hello Vue!',
-				sizeClass: 'modal-md',
-				optsClass: ''
-			},
-			components: {
-				"com-header": {
-					props: ["inTitle"],
-					template: `<div class="modal-header">
-						<h4 class="modal-title"><span v-html="inTitle"></span></h4>
-						<button type="button" class="close" data-dismiss="modal">&times;</button>
-					</div>`
-				},
-				"com-body": {
-					props: ["inOptsClass", "inBody"],
-					template: `<div class="modal-body" :class="inOptsClass">
-					<p><span v-html="inBody"></span></p>
-				</div>`
-				},
-				"com-footer": {
-					template: `<div class="modal-footer">
-						<button type="button" class="btn btn-light" data-dismiss="modal">關閉</button>
-					</div>`
-				}
-			}
-		});
-	}
-}
-
 let initAlertUI = () => {
 	// add alert element to show the alert message
 	if (!window.alertApp) {
@@ -605,8 +545,44 @@ let initUtilApp = () => {
 
 				this.toastCounter++;
 			},
-			message: function(message, opts) {
-
+			showModal: function(id) {
+				this.$bvModal.show(id);
+			},
+			modal: function(message, opts) {
+				let merged = Object.assign({
+					title: '訊息',
+					size: 'md',
+					buttonSize: 'sm',
+					okVariant: 'outline-secondary',
+					okTitle: '關閉',
+					hideHeaderClose: false,
+					centered: true,
+                	scrollable: true,
+                	hideFooter: true,
+                	noCloseOnBackdrop: true,
+					contentClass: "shadow",
+					html: false
+				}, opts);
+				// use d-none to hide footer
+				merged.footerClass = merged.hideFooter ? "d-none" : "p-2";
+				if (merged.html) {
+					merged.titleHtml = merged.title;
+					merged.title = undefined;
+					if (typeof message == "array") {
+						// assume the message is VNode array
+						this.$bvModal.msgBoxOk(message, merged);
+					} else {
+						const h = this.$createElement;
+						const msgVNode = h('div', { domProps: { innerHTML: message } });
+						this.$bvModal.msgBoxOk([msgVNode], merged);
+					}
+					// to initialize Vue component purpose
+					if (merged.callback && typeof merged.callback == "function") {
+						setTimeout(merged.callback, 50);
+					}
+				} else {
+					this.$bvModal.msgBoxOk(message, merged);
+				}
 			},
 			confirm: function(message, opts) {
 				this.confirmAnswer = false;
@@ -620,8 +596,7 @@ let initUtilApp = () => {
 					cancelTitle: '取消',
 					footerClass: 'p-2',
 					hideHeaderClose: false,
-					centered: false,
-					noStacking: false
+					centered: false
 				}, opts);
 				this.$bvModal.msgBoxConfirm(message, merged)
 				.then(value => {
