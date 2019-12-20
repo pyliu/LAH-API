@@ -122,6 +122,7 @@ let addNotification = opts => {
 	let tmp = document.createElement("div");
 	if (typeof opts == "object") {
 		let msg = opts.body || opts.message;
+		opts.variant = opts.type || "default";
 		tmp.innerHTML = msg;
 		window.utilApp.makeToast(tmp.textContent || tmp.innerText || "無法轉譯訊息文字", opts);
 	} else {

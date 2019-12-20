@@ -27,11 +27,9 @@ if (Vue) {
                         <option value="D">D: 展期</option>
                     </select>
                 </div>
-                <div v-if="wip" class="input-group input-group-sm col">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-reg_case_RM30_1_checkbox">同步作業人員</span>
-                    </div>
-                    <input v-model="sync_rm30_1" type="checkbox" id="reg_case_RM30_1_checkbox" class="form-control" aria-label="同步作業人員" aria-describedby="inputGroup-reg_case_RM30_1_checkbox" required />
+                <div v-if="wip" class="input-group input-group-sm col-3 small">
+                    <input v-model="sync_rm30_1" type="checkbox" id="reg_case_RM30_1_checkbox" class="my-auto mr-2" aria-label="同步作業人員" aria-describedby="inputGroup-reg_case_RM30_1_checkbox" required />
+                    <label for="reg_case_RM30_1_checkbox" class="my-auto">同步作業人員</label>
                 </div>
                 <div v-if="wip" class="filter-btn-group col-auto">
                     <button @click="updateRM30" class="btn btn-sm btn-outline-primary">更新</button>
@@ -64,7 +62,9 @@ if (Vue) {
         data: () => {
             return {
                 rm30: "",
+                rm30_orig: "",
                 rm39: "",
+                rm39_orig: "",
                 rm31: "",
                 sync_rm30_1: true,
                 wip: false
@@ -72,6 +72,10 @@ if (Vue) {
         },
         methods: {
             updateRM30: function(e) {
+                if (this.rm30 == this.rm30_orig) {
+                    addNotification({ message: "案件辦理情形沒變動", type: "warning"});
+                    return;
+                }
                 let that = this;
                 window.utilApp.confirm(`您確定要更新辦理情形為「${that.rm30}」?`, {
                     title: '請確認更新案件辦理情形',
@@ -137,6 +141,10 @@ if (Vue) {
                 });
             },
             updateRM39: function(e) {
+                if (this.rm39 == this.rm39_orig) {
+                    addNotification({ message: "登記處理註記沒變動", type: "warning"});
+                    return;
+                }
                 let that = this;
                 window.utilApp.confirm(`您確定要更新登記處理註記為「${that.rm39}」?`, {
                     title: '請確認更新登記處理註記',
@@ -155,6 +163,8 @@ if (Vue) {
         mounted: function(e) {
             this.rm30 = this.raw["RM30"] || "";
             this.rm39 = this.raw["RM39"] || "";
+            this.rm30_orig = this.raw["RM30"] || "";
+            this.rm39_orig = this.raw["RM39"] || "";
             this.rm31 = this.raw["RM31"];
             this.wip = isEmpty(this.rm31);
             addUserInfoEvent(e);
