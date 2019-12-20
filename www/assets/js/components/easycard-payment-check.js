@@ -13,7 +13,7 @@ if (Vue) {
                 let el = $("#fix_ez_btn"+index);
                 let qday = item["AA01"], pc_number = item["AA04"], amount = item["AA28"];
                 let message = "確定要修正 日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料?";
-                if (confirm(message)) {
+                showConfirm(message, () => {
                     let body = new FormData();
                     body.append("type", "fix_easycard");
                     body.append("qday", qday);
@@ -38,7 +38,7 @@ if (Vue) {
                         console.error("easycard-payment-check-item::fix parsing failed", ex);
                         showAlert({message: `easycard-payment-check-item::fix parsing failed. ${ex.toString()}`, type: "danger"});
                     });
-                }
+                });
             },
             status: function(AA106) {
                 let status = "未知的狀態碼【" + AA106 + "】";
