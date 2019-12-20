@@ -217,7 +217,7 @@ let toggle = selector => {
 	}
 }
 
-let toggleCoverSpinner = (selector, style = "ld-over") => {
+let toggleCoverSpinner = (selector, style = "ld-over-inverse") => {
 	// cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
 	let container = $(selector);
 	if (container.length > 0) {
@@ -231,12 +231,15 @@ let toggleCoverSpinner = (selector, style = "ld-over") => {
 
 			// <!-- ld-ring + ld-spin, ld-pie + ld-heartbeat, ld-ball + ld-bounce, ld-square + ld-blur -->
 			// randomize it for fun
-			let materials = ["ld-ring", "ld-pie", "ld-ball", "ld-square"];
-			let effects = ["ld-spin", "ld-heartbeat", "ld-bounce", "ld-blur"];
 			let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
-			cover_el.addClass(materials[Math.floor(Math.random() * Math.floor(4))]);
-			cover_el.addClass(effects[Math.floor(Math.random() * Math.floor(4))]);
+			
+			let materials = ["ld-ring", "ld-pie", "ld-ball", "ld-square", "ld-hourglass", "ld-loader", "ld-cross", "ld-spinner"];
+			let effects = ["ld-spin", "ld-heartbeat", "ld-bounce", "ld-blur"];
+			cover_el.addClass(materials[Math.floor(Math.random() * Math.floor(materials.length))]);
+			cover_el.addClass(effects[Math.floor(Math.random() * Math.floor(effects.length))]);
 
+			// let loading_style = ["lds-circle", "lds-dual-ring", ""]
+			// cover_el.addClass(loading_style[Math.floor(Math.random() * Math.floor(loading_style.length))]);
 			container.append(cover_el);
 		}
 	}
