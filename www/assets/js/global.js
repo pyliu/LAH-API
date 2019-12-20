@@ -43,14 +43,20 @@ let checkCaseUIData = (data) => {
 	let year = data.year;
 	let code = data.code;
 	let num = data.num;
-	if (isEmpty(code)) {
+	if (isEmpty(year)) {
 		showAlert({
-			message: "「字」不能為空白!",
+			message: "請重新選擇「年」欄位!",
 			type: "danger"
 		});
 		return false;
 	}
-
+	if (isEmpty(code)) {
+		showAlert({
+			message: "請重新選擇「字」欄位!",
+			type: "danger"
+		});
+		return false;
+	}
 	let number = num.replace(/\D/g, "");
 	let offset = 6 - number.length;
 	if (isEmpty(number) || isNaN(number) || offset < 0) {
@@ -614,8 +620,9 @@ let initUtilApp = () => {
 					cancelVariant: 'secondary',
 					cancelTitle: '取消',
 					footerClass: 'p-2',
-					hideHeaderClose: false,
-					centered: false
+					hideHeaderClose: true,
+					noCloseOnBackdrop: true,
+					centered: true
 				}, opts);
 				this.$bvModal.msgBoxConfirm(message, merged)
 				.then(value => {
@@ -627,6 +634,11 @@ let initUtilApp = () => {
 					console.error(err);
 				});
 			}
+		},
+		mounted: function(e) {
+			this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
+				console.log('Modal is about to be shown', bvEvent, modalId)
+			});
 		}
 	});
 }
