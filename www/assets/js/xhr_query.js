@@ -767,7 +767,7 @@ let xhrGetExpaaData = function(e) {
 					html += jsonObj.raw[key];
 					//  無作廢原因才可進行修正
 					if (isEmpty(jsonObj.raw["作廢原因"]) && jsonObj.raw[key] != 1) {
-						html += "<button class='btn btn-sm btn-outline-warning' id='fix_exapp_easycard_payment_btn" + "' onclick='xhrFixEasycardPayment(\"" + jsonObj.raw["開單日期"] + "\", \"" + jsonObj.raw["電腦給號"] + "\", \"" + jsonObj.raw["實收總金額"] + "\", \"fix_exapp_easycard_payment_btn" + "\")'>修正為扣款成功</button>";
+						html += "&ensp;<button class='btn btn-sm btn-outline-danger' id='fix_exapp_easycard_payment_btn" + "' onclick='xhrFixEasycardPayment(\"" + jsonObj.raw["開單日期"] + "\", \"" + jsonObj.raw["電腦給號"] + "\", \"" + jsonObj.raw["實收總金額"] + "\", \"fix_exapp_easycard_payment_btn" + "\")'>修正為扣款成功</button>";
 					}
 				} else {
 					// others just show info
