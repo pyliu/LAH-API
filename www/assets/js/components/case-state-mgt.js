@@ -72,7 +72,6 @@ if (Vue) {
         },
         methods: {
             updateRM30: function(e) {
-                closeModal();
                 let that = this;
                 window.utilApp.confirm(`您確定要更新辦理情形為「${that.rm30}」?`, {
                     title: '請確認更新案件辦理情形',
@@ -138,7 +137,6 @@ if (Vue) {
                 });
             },
             updateRM39: function(e) {
-                closeModal();
                 let that = this;
                 window.utilApp.confirm(`您確定要更新登記處理註記為「${that.rm39}」?`, {
                     title: '請確認更新登記處理註記',
@@ -193,7 +191,7 @@ if (Vue) {
             query: function(e) {
                 let data = {year: this.year, code: this.code, num: this.num};
                 if (!checkCaseUIData(data)) {
-                    addNotification({body: `輸入案件資料格式有誤，無法查詢案件。`});
+                    addNotification({body: `輸入資料格式有誤，無法查詢 ${data.year}-${data.code}-${data.num}`});
                     return false;
                 }
                 let year = this.year;

@@ -96,7 +96,29 @@ if (Vue) {
                     console.error("case-input-group-ui::getMaxNumber parsing failed", ex);
                     showAlert({message: "查詢最大號碼失敗~【" + code + "】", type: "danger"});
                 });
+            },
+            newCustomEvent: (name, val, target) => {
+                let evt = new CustomEvent(name, {
+                    detail: val,
+                    bubbles: true
+                });
+                Object.defineProperty(evt, 'target', {writable: false, value: target});
+                return evt;
             }
+        },
+        watch: {
+            year: function(val) {
+                let evt = this.newCustomEvent('code-updated', val, $(this.$el).find("#case_update_year")[0]);
+                this.$emit("year-updated", evt);
+            },
+            code: function(val) {
+                let evt = this.newCustomEvent('code-updated', val, $(this.$el).find("#case_update_code")[0]);
+                this.$emit("code-updated", evt);
+            },
+            num: function(val) {
+                let evt = this.newCustomEvent('code-updated', val, $(this.$el).find("#case_update_num")[0]);
+                this.$emit("num-updated", evt);
+            },
         },
         mounted: function(e) {
             switch(this.type) {
@@ -123,7 +145,15 @@ if (Vue) {
             // set default year
             var d = new Date();
             this.year = (d.getFullYear() - 1911);
-            this.uiUpdate(e);
+            // setup delay timer to allow cached data update to the input/select element
+            let that = this;
+            let mounted_el = $(this.$el);
+            setTimeout(() => {
+                this.year = mounted_el.find("#case_update_year").val();
+                this.code = mounted_el.find("#case_update_code").val();
+                this.num = mounted_el.find("#case_update_num").val();
+                that.uiUpdate(e);
+            }, 150);    // cache.js delay 100ms to wait Vue instance ready, so here delays 150ms
         }
     });
 } else {
