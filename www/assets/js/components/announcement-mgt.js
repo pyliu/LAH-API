@@ -99,7 +99,7 @@ if (Vue) {
             <div class="form-row">
                 <announcement-mgt-item :data="announcement_data"></announcement-mgt-item>
                 <div class="filter-btn-group col">
-                    <button class="btn btn-sm btn-outline-danger" @click="clear">清除准登</button>
+                    <button class="btn btn-sm btn-outline-primary" @click="clear">清除准登</button>
                     <button class="btn btn-sm btn-outline-success" @click="popup">備註</button>
                 </div>
             </div>
@@ -118,27 +118,26 @@ if (Vue) {
                 }
             },
             clear: function(e) {
-                if (!confirm("請確認要是否要清除所有登記原因的准登旗標？")) {
-                    return;
-                }
                 let that = this;
-                let form_body = new FormData();
-                form_body.append("type", "clear_announcement_flag");
-                fetch("query_json_api.php", {
-                    method: 'POST',
-                    body: form_body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
-                }).then(jsonObj => {
-                    console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + jsonObj.status + "】");
-                    addNotification({ body: "<strong class='text-success'>已全部清除完成</strong>" });
-                    that.reload();
-                }).catch(ex => {
-                    console.error("announcement-mgt::clear parsing failed", ex);
-                    showAlert({message: "announcement-mgt::clear XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+                showConfirm("請確認要是否要清除所有登記原因的准登旗標？", () => {
+                    let form_body = new FormData();
+                    form_body.append("type", "clear_announcement_flag");
+                    fetch("query_json_api.php", {
+                        method: 'POST',
+                        body: form_body
+                    }).then(response => {
+                        if (response.status != 200) {
+                            throw new Error("XHR連線異常，回應非200");
+                        }
+                        return response.json();
+                    }).then(jsonObj => {
+                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + jsonObj.status + "】");
+                        addNotification({ message: "<strong class='text-success'>已全部清除完成</strong>", type: "success" });
+                        that.reload();
+                    }).catch(ex => {
+                        console.error("announcement-mgt::clear parsing failed", ex);
+                        showAlert({message: "announcement-mgt::clear XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+                    });
                 });
             },
             popup: function(e) {
@@ -164,7 +163,7 @@ if (Vue) {
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-prereg_announcement_select">公告項目</span>
                     </div>
-                    <select @change.lazy="change" id='prereg_announcement_select' class='no-cache form-control' v-model="val">
+                    <select @change.lazy="change" id='prereg_announcement_select' class='form-control' v-model="val">
                         <option value=''></option>
                         <option v-for="(item, index) in data" :value="item['RA01'] + ',' + item['KCNT'] + ',' + item['RA02'] + ',' + item['RA03']">
                             {{item["RA01"]}} : {{item["KCNT"]}} 【{{item['RA02']}}, {{item['RA03']}}】

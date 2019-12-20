@@ -190,6 +190,12 @@ let showModal = opts => {
 	});
 }
 
+let showConfirm = (message, callback) => {
+	window.utilApp.confirm(message, {
+		callback: callback
+	});
+}
+
 let closeModal = callback => {
 	window.utilApp.hideModal();
 	if (typeof callback == "function") {
