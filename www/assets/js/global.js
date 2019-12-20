@@ -233,13 +233,11 @@ let toggleCoverSpinner = (selector, style = "ld-over") => {
 			// randomize it for fun
 			let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
 			
-			let materials = ["ld-ring", "ld-pie", "ld-ball", "ld-square", "ld-hourglass", "ld-loader", "ld-cross", "ld-spinner"];
-			let effects = ["ld-spin", "ld-heartbeat", "ld-bounce", "ld-blur"];
-			cover_el.addClass(materials[Math.floor(Math.random() * Math.floor(materials.length))]);
+			let shapes = ["ld-ring", "ld-pie", "ld-ball", "ld-square", "ld-hourglass", "ld-cross", "ld-spinner"];
+			let effects = ["ld-spin", "ld-heartbeat", "ld-beat", "ld-blink", "ld-bounce", "ld-bounceAlt", "ld-breath", "ld-blur", "ld-clock", "ld-coin-h", "ld-coin-v"];
+			cover_el.addClass(shapes[Math.floor(Math.random() * Math.floor(materials.length))]);
 			cover_el.addClass(effects[Math.floor(Math.random() * Math.floor(effects.length))]);
 
-			// let loading_style = ["lds-circle", "lds-dual-ring", ""]
-			// cover_el.addClass(loading_style[Math.floor(Math.random() * Math.floor(loading_style.length))]);
 			container.append(cover_el);
 		}
 	}
