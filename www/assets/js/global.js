@@ -217,7 +217,7 @@ let toggle = selector => {
 	}
 }
 
-let toggleCoverSpinner = (selector, style = "ld-over-inverse") => {
+let toggleCoverSpinner = (selector, style = "ld-over") => {
 	// cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
 	let container = $(selector);
 	if (container.length > 0) {
@@ -228,8 +228,16 @@ let toggleCoverSpinner = (selector, style = "ld-over-inverse") => {
 		} else {
 			container.addClass(style);
 			container.addClass("running");
+
 			// <!-- ld-ring + ld-spin, ld-pie + ld-heartbeat, ld-ball + ld-bounce, ld-square + ld-blur -->
-			container.append(jQuery.parseHTML('<div class="ld ld-ball ld-bounce auto-add-spinner"></div>'));
+			// randomize it for fun
+			let materials = ["ld-ring", "ld-pie", "ld-ball", "ld-square"];
+			let effects = ["ld-spin", "ld-heartbeat", "ld-bounce", "ld-blur"];
+			let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
+			cover_el.addClass(materials[Math.floor(Math.random() * Math.floor(4))]);
+			cover_el.addClass(effects[Math.floor(Math.random() * Math.floor(4))]);
+
+			container.append(cover_el);
 		}
 	}
 }
