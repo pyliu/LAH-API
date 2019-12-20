@@ -834,6 +834,46 @@ let xhrGetExpaaData = function(e) {
 	});
 }
 
+let xhrFixEasycardPayment = (qday, pc_number, amount, btn_id) => {
+	let message = "確定要修正 日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料?";
+	showConfirm(message, () => {
+		let el = $("#"+btn_id);
+		toggle(el);
+
+		let body = new FormData();
+		body.append("type", "fix_easycard");
+		body.append("qday", qday);
+		body.append("pc_num", pc_number);
+
+		fetch("query_json_api.php", {
+			method: "POST",
+			body: body
+		}).then(response => {
+			if (response.status != 200) {
+				throw new Error("XHR連線異常，回應非200");
+			}
+			return response.json();
+		}).then(jsonObj => {
+			if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+				showModal({
+					title: "悠遊卡自動加值扣款失敗修正",
+					body: "日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料修正成功!",
+					size: "md"
+				});
+				toggle(el);
+				// 移除BTN及該筆
+				el.remove();
+				el.closest(".easycard_item").remove();
+			} else {
+				throw new Error("回傳狀態碼不正確!【" + jsonObj.message + "】");
+			}
+		}).catch(ex => {
+			console.error("xhrFixEasycardPayment parsing failed", ex);
+			showAlert({message: `xhrFixEasycardPayment parsing failed. ${ex.toString()}`, type: "danger"});
+		});
+	});
+}
+
 let getAA04DisplayCss = row => {
 	let css = "block-dark";
 	switch (row["AA100"]) {
