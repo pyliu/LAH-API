@@ -234,7 +234,7 @@ let toggleCoverSpinner = (selector, style = "ld-over") => {
 			let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
 			
 			let shapes = ["ld-ring", "ld-pie", "ld-ball", "ld-square", "ld-hourglass", "ld-cross", "ld-spinner", "ld-loader"];
-			let effects = ["ld-spin", "ld-heartbeat", "ld-beat", "ld-blink", "ld-bounce", "ld-bounceAlt", "ld-breath", "ld-blur", "ld-clock", "ld-coin-h", "ld-coin-v"];
+			let effects = ["ld-spin", "ld-heartbeat", "ld-beat", "ld-blink", "ld-bounce", "ld-bounceAlt", "ld-breath", "ld-blur", "ld-clock", "ld-coin-h", "ld-coin-v", "ld-jump", "ld-fade", "ld-flip", "ld-float", "ld-hit", "ld-move-ltr", "ld-move-rtl", "ld-move-ttb", "ld-move-btt", "ld-move-fade-ltr", "ld-move-fade-rtl", "ld-move-fade-ttb", "ld-move-fade-btt", "ld-dim", "ld-swing", "ld-wander", "ld-pulse"];
 			cover_el.addClass(shapes[Math.floor(Math.random() * Math.floor(materials.length))]);
 			cover_el.addClass(effects[Math.floor(Math.random() * Math.floor(effects.length))]);
 
