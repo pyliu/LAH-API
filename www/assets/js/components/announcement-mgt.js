@@ -201,6 +201,7 @@ if (Vue) {
                 },
                 mounted: function(e) {
                     let that = this;
+                    
                     let form_body = new FormData();
                     form_body.append("type", "announcement_data");
                     fetch("query_json_api.php", {
@@ -217,7 +218,7 @@ if (Vue) {
 
                     let mounted_el = $(this.$el);
                     setTimeout(() => {
-                        this.val = mounted_el.find("#prereg_announcement_select").val();
+                        that.val = mounted_el.find("#prereg_announcement_select").val();
                     }, 150);    // cache.js delay 100ms to wait Vue instance ready, so here delays 150ms
                 }
             }
