@@ -132,39 +132,39 @@ let addNotification = opts => {
 }
 
 let showAlert = opts => {
-	let msg = opts.message;
-	if (!isEmpty(msg)) {
-		let type = "alert-warning";
+	if (!isEmpty(opts.message)) {
 		switch (opts.type) {
 			case "danger":
 			case "red":
-				type = "alert-danger";
+				opts.type = "alert-danger";
 				break;
 			case "warning":
 			case "yellow":
-				type = "alert-warning";
+				opts.type = "alert-warning";
 				break;
 			case "success":
 			case "green":
-				type = "alert-success";
+				opts.type = "alert-success";
 				break;
 			default:
-				type = "alert-info";
+				opts.type = "alert-info";
 				break;
 		}
-		
+
 		// singleton inside :D
 		initAlertUI();
 		
-		// normal usage, you want to attach event to the element in the alert window
-		if (typeof opts.callback == "function") {
-			setTimeout(opts.callback, 250);
-		}
+		window.alertApp.show(opts, () => {
+			// normal usage, you want to attach event to the element in the alert window
+			if (typeof opts.callback == "function") {
+				setTimeout(opts.callback, 250);
+			}
 
-		window.alertApp.autohide = opts.autohide || true;
-		window.alertApp.message = msg;
-		window.alertApp.type = type;
-		window.alertApp.seen = true;
+			window.alertApp.autohide = opts.autohide || true;
+			window.alertApp.message = opts.message;
+			window.alertApp.type = opts.type;
+			window.alertApp.seen = true;
+		});
 	}
 }
 
@@ -475,6 +475,25 @@ let initAlertUI = () => {
 					clearTimeout(this.progress_timer_handle);
 					$("#bs_alert_template .progress .progress-bar").css("width", "100%");
 					this.progress_counter = 1;
+				},
+				show: function(opts) {
+					if (this.seen) {
+						this.seen = false;
+						// the slide up animation is 0.5s
+						setTimeout(() => this.setData(opts), 500);
+					} else {
+						this.setData(opts);
+					}
+				},
+				setData: function(opts) {
+					// normal usage, you want to attach event to the element in the alert window
+					if (typeof opts.callback == "function") {
+						setTimeout(opts.callback, 500);
+					}
+					this.autohide = opts.autohide || true;
+					this.message = opts.message;
+					this.type = opts.type;
+					this.seen = true;
 				},
 				enter: function() { },
 				leave: function() { },
