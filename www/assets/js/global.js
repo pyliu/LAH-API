@@ -546,16 +546,22 @@ let initUtilApp = () => {
 				this.toastCounter++;
 			},
 			showModal: function(id) {
-				this.$bvModal.show(id);
+				$(`#${id}`).slideDown(function() {
+					this.$bvModal.show(id);
+				});
 			},
 			hideModal: function(id = "") {
 				let that = this;
 				if (id == "" || id == undefined) {
 					$('div.modal.show').each(function(idx, el) {
-						that.$bvModal.hide($(el).attr("id"));
+						$(el).hide(400, function() {
+							that.$bvModal.hide(el.id);
+						});
 					});
 				} else {
-					that.$bvModal.hide(id);
+					$(`#${id}`).hide(400, function() {
+						that.$bvModal.hide(id);
+					});
 				}
 			},
 			modal: function(message, opts) {
@@ -570,7 +576,7 @@ let initUtilApp = () => {
                 	scrollable: true,
                 	hideFooter: true,
                 	noCloseOnBackdrop: true,
-					contentClass: "shadow",
+					contentClass: "shadow hide", // add hide class to .modal-content then use slideDown to show up
 					html: false
 				}, opts);
 				// use d-none to hide footer
@@ -593,6 +599,9 @@ let initUtilApp = () => {
 				} else {
 					this.$bvModal.msgBoxOk(message, merged);
 				}
+				// since the modal fade effect broken ... use jQuery instead
+				setTimeout(() => $('div.modal.show .modal-content').slideDown(400), 50);
+				
 			},
 			confirm: function(message, opts) {
 				this.confirmAnswer = false;
