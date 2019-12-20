@@ -22,7 +22,7 @@ if (Vue) {
                 </div>
             </div>
             <div class="input-group input-group-sm col">
-                <input v-model="num" @input="uiUpdate" @keyup.enter="$emit('enter', $event.target)" type="number" :step="num_step" :min="num_min" max="999999" id="case_update_num" class="form-control w-100" aria-label="號" aria-describedby="inputGroup-case_update_num" required data-trigger="manual" data-toggle="popover" data-content='案件號(最多6碼)' title='案件號' data-placement="top" />
+                <input v-model="num" @input="uiUpdate" @keyup.enter="$emit('enter', $event)" type="number" :step="num_step" :min="num_min" max="999999" id="case_update_num" class="form-control w-100" aria-label="號" aria-describedby="inputGroup-case_update_num" required data-trigger="manual" data-toggle="popover" data-content='案件號(最多6碼)' title='案件號' data-placement="top" />
                 <div class="input-group-append">
                     <span class="input-group-text" id="inputGroup-case_update_num">號</span>
                 </div>
