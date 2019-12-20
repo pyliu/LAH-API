@@ -176,7 +176,7 @@ if (Vue) {
             <legend>調整登記案件欄位資料</legend>
             <div class="form-row">
             <div class="col-9">
-                <case-input-group-ui @update="handleUpdate" type="reg"></case-input-group-ui>
+                <case-input-group-ui @update="handleUpdate" @enter="query" type="reg"></case-input-group-ui>
             </div>
             <div class="filter-btn-group col-3">
                 <button @click="query" class="btn btn-sm btn-outline-primary">查詢</button>
