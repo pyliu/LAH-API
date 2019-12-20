@@ -217,7 +217,7 @@ let toggle = selector => {
 	}
 }
 
-let toggleCoverSpinner = (selector, style = "ld-over-inverse") => {
+let toggleCoverSpinner = (selector, style = "ld-over") => {
 	// cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
 	let container = $(selector);
 	if (container.length > 0) {
