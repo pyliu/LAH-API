@@ -214,6 +214,11 @@ if (Vue) {
                     }).then(jsonObj => {
                         that.data = jsonObj.raw;
                     });
+
+                    let mounted_el = $(this.$el);
+                    setTimeout(() => {
+                        this.val = mounted_el.find("#prereg_announcement_select").val();
+                    }, 150);    // cache.js delay 100ms to wait Vue instance ready, so here delays 150ms
                 }
             }
         }
