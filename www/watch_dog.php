@@ -392,9 +392,8 @@ blockquote img {
 
   <script type="text/javascript">
     $(document).ready(e => {
-      // unsupported IE detection
-      if (window.attachEvent) {
-        document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援舊版IE瀏覽器, 請使用Chrome/Firefox/IE11瀏覽器。</h2>';
+      if (detectIE()) {
+        document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援IE瀏覽器, 請使用Chrome/Firefox瀏覽器。</h2>';
         return;
       }
 
