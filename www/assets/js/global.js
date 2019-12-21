@@ -15,6 +15,19 @@ const XHR_STATUS_CODE = {
 	FAIL_NOT_VALID_SERVER: -3,
 	FAIL_WITH_REMOTE_NO_RECORD: -4
 }
+const LOADING_SHAPES = ["ld-ring", "ld-pie", "ld-ball", "ld-square", "ld-hourglass", "ld-cross", "ld-spinner"];
+const LOADING_MOVEMENTS = [
+	"ld-heartbeat", "ld-beat", "ld-blink", "ld-bounce", "ld-bounceAlt", "ld-breath", "ld-wrench", "ld-surprise",
+	"ld-blur", "ld-clock", "ld-jump", "ld-hit", "ld-fade", "ld-flip", "ld-float", "ld-move-ltr", "ld-tremble",
+	"ld-move-rtl", "ld-move-ttb", "ld-move-btt", "ld-move-fade-ltr", "ld-move-fade-rtl", "ld-move-fade-ttb",
+	"ld-move-fade-btt", "ld-dim", "ld-swing", "ld-wander", "ld-pulse", "ld-cycle", "ld-cycle-alt", "ld-damage",
+	"ld-fade", "ld-flip", "ld-flip-h", "ld-flip-v", "ld-float", "ld-jelly", "ld-jelly-alt", "ld-jingle",
+	"ld-measure", "ld-metronome", "ld-orbit", "ld-rubber-h", "ld-rubber-v", "ld-rush-btt", "ld-rush-ttb",
+	"ld-rush-ltr", "ld-rush-rtl", "ld-shake-h", "ld-shake-v", "ld-shiver", "ld-skew", "ld-skew-alt", "ld-slide-btt",
+	"ld-slide-ltr", "ld-slide-rtl", "ld-slide-ttb", "ld-smash", "ld-spin", "ld-spin-fast", "ld-squeeze",
+	"ld-swim", "ld-swing", "ld-tick", "ld-tick-alt", "ld-vortex", "ld-vortex-alt", "ld-wander-h",
+	"ld-wander-v"
+];
 
 let trim = text => {
 	if (isEmpty(text)) {
@@ -229,15 +242,10 @@ let toggleCoverSpinner = (selector, style = "ld-over") => {
 			container.addClass(style);
 			container.addClass("running");
 
-			// <!-- ld-ring + ld-spin, ld-pie + ld-heartbeat, ld-ball + ld-bounce, ld-square + ld-blur -->
-			// randomize it for fun
+			// randomize loading.io css for fun
 			let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
-			
-			let shapes = ["ld-ring", "ld-pie", "ld-ball", "ld-square", "ld-hourglass", "ld-cross", "ld-spinner", "ld-loader"];
-			let effects = ["ld-spin", "ld-heartbeat", "ld-beat", "ld-blink", "ld-bounce", "ld-bounceAlt", "ld-breath", "ld-blur", "ld-clock", "ld-coin-h", "ld-coin-v", "ld-jump", "ld-fade", "ld-flip", "ld-float", "ld-hit", "ld-move-ltr", "ld-move-rtl", "ld-move-ttb", "ld-move-btt", "ld-move-fade-ltr", "ld-move-fade-rtl", "ld-move-fade-ttb", "ld-move-fade-btt", "ld-dim", "ld-swing", "ld-wander", "ld-pulse"];
-			cover_el.addClass(shapes[Math.floor(Math.random() * Math.floor(materials.length))]);
-			cover_el.addClass(effects[Math.floor(Math.random() * Math.floor(effects.length))]);
-
+			cover_el.addClass(LOADING_SHAPES[Math.floor(Math.random() * Math.floor(LOADING_SHAPES.length))])
+					.addClass(LOADING_MOVEMENTS[Math.floor(Math.random() * Math.floor(LOADING_MOVEMENTS.length))]);
 			container.append(cover_el);
 		}
 	}
@@ -251,12 +259,12 @@ let toggleInsideSpinner = (selector, size = "sm") => {
 		if (spans.length > 0) {
 			spans.remove();
 		} else {
-			spans = jQuery.parseHTML('<span class="spinner-border spinner-border-' + size + '" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>');
+			spans = jQuery.parseHTML('<span class="spinner-border spinner-border-' + size + '" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>&ensp;');
 			el.prepend(spans);
 		}
 		/*
 		// loading.io spinner, https://loading.io element
-		// ex: <button class="ld-ext-left"><span class="ld ld-ring ld-cycle small"></span>查詢</button>
+		// ex: <button class="ld-ext-left"><span class="ld ld-ring ld-cycle small"></span> 查詢</button>
 		// position opts: ld-ext-top, ld-ext-bottom, ld-ext-left, ld-ext-right
 		if (el.hasClass("ld-ext-left")) {
 			el.removeClass("ld-ext-left");
