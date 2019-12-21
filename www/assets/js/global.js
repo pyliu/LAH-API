@@ -181,7 +181,7 @@ let showAlert = opts => {
 }
 
 let showModal = opts => {
-	let body = opts.body;
+	let body = opts.body || opts.message;
 	let title = opts.title;
 	let size = opts.size;	// sm, md, lg, xl
 	let callback = opts.callback;
