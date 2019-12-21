@@ -28,7 +28,7 @@ let xhrGetCaseLatestNum = function(e) {
 	}).then(jsonObj => {
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
 			addNotification({
-				body: "目前 " + code_val + " 最新案件號為 " + jsonObj.max
+				message: "目前 " + code_val + " 最新案件號為 " + jsonObj.max
 			});
 			number.val(jsonObj.max);
 		} else if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
@@ -595,11 +595,11 @@ let xhrInsertXCase = function(e) {
 					type: "success"
 				});
 				addNotification({
-					body: msg
+					message: msg
 				});
 			} else {
 				addNotification({
-					body: jsonObj.message
+					message: jsonObj.message
 				});
 			}
 		}).catch(ex => {
@@ -631,7 +631,7 @@ let xhrSyncXCase = function(e) {
 		}).then(jsonObj => {
 			if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
 				addNotification({
-					body: id + " 同步成功！"
+					message: id + " 同步成功！"
 				});
 			} else {
 				showAlert({
@@ -974,7 +974,7 @@ let xhrUpdateExpaaAA09 = function(e) {
 		}).then(jsonObj => {
 			$("#exapp_print_status").html("<span class='text-" + ((jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) ? "success" : "danger") + "'>" + jsonObj.message + "</span>");
 			addNotification({
-				body: "<span class='text-" + ((jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) ? "success" : "danger") + "'>" + jsonObj.message + "</span>"
+				message: "<span class='text-" + ((jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) ? "success" : "danger") + "'>" + jsonObj.message + "</span>"
 			});
 		});
 	}
@@ -1002,7 +1002,7 @@ let xhrUpdateExpaaAA100 = function(e) {
 		}).then(jsonObj => {
 			$("#exapp_method_status").html("<span class='text-" + ((jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) ? "success" : "danger") + "'>" + jsonObj.message + "</span>");
 			addNotification({
-				body: "<span class='text-" + ((jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) ? "success" : "danger") + "'>" + jsonObj.message + "</span>"
+				message: "<span class='text-" + ((jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) ? "success" : "danger") + "'>" + jsonObj.message + "</span>"
 			});
 		});
 	}
@@ -1276,7 +1276,7 @@ let xhrZipLog = e => {
 	}).then(jsonObj => {
 		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + jsonObj.message + "】");
 		addNotification({
-			body: "<strong class='text-success'>壓縮完成</strong>"
+			message: "<strong class='text-success'>壓縮完成</strong>"
 		});
 		toggle(e.target);
 	}).catch(ex => {
@@ -1442,7 +1442,7 @@ let xhrClearTempData = function(e) {
 	}).then(jsonObj => {
 		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
 		addNotification({
-			body: "暫存檔已清除完成。<p>" + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + (bindArgsObj.table ? " 表格：" + bindArgsObj.table : "") + "</p>",
+			message: "暫存檔已清除完成。<p>" + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + (bindArgsObj.table ? " 表格：" + bindArgsObj.table : "") + "</p>",
 		});
 		if (!bindArgsObj.table) {
 			// means click clean all button
@@ -1586,7 +1586,7 @@ let xhrFixSurDelayCase = function(e) {
 		}).then(jsonObj => {
 			if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
 				addNotification({
-					body: id + " 複丈案件修正成功!"
+					message: id + " 複丈案件修正成功!"
 				});
 			} else {
 				showAlert({
@@ -1634,7 +1634,7 @@ let xhrUpdateCaseColumnData = e => {
 		}).then(jsonObj => {
 			if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
 				addNotification({
-					body: title + "更新成功"
+					message: title + "更新成功"
 				});
 			} else {
 				showAlert({
@@ -1928,7 +1928,7 @@ let xhrSendMessage = e => {
 	}).then(jsonObj => {
 		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + jsonObj.message + "】");
 		addNotification({
-			body: jsonObj.message
+			message: jsonObj.message
 		});
 		toggle(clicked_element);
 	}).catch(ex => {
