@@ -16,7 +16,7 @@ const XHR_STATUS_CODE = {
 	FAIL_WITH_REMOTE_NO_RECORD: -4
 }
 const LOADING_SHAPES = ["ld-ring", "ld-pie", "ld-ball", "ld-square", "ld-hourglass", "ld-cross", "ld-spinner"];
-const LOADING_MOVEMENTS = [
+const LOADING_PATTERNS = [
 	"ld-heartbeat", "ld-beat", "ld-blink", "ld-bounce", "ld-bounceAlt", "ld-breath", "ld-wrench", "ld-surprise",
 	"ld-clock", "ld-jump", "ld-hit", "ld-fade", "ld-flip", "ld-float", "ld-move-ltr", "ld-tremble", "ld-tick",
 	"ld-move-rtl", "ld-move-ttb", "ld-move-btt", "ld-move-fade-ltr", "ld-move-fade-rtl", "ld-move-fade-ttb",
@@ -27,6 +27,15 @@ const LOADING_MOVEMENTS = [
 	"ld-slide-ltr", "ld-slide-rtl", "ld-slide-ttb", "ld-smash", "ld-spin", "ld-spin-fast", "ld-squeeze",
 	"ld-swim", "ld-swing", "ld-tick-alt", "ld-vortex", "ld-vortex-alt", "ld-wander-h", "ld-wander-v"
 ];
+const LOADING_PREDEFINED = [
+	["ld-ball", "ld-bounce"],
+	["ld-hourglass", "ld-spin-fast"],
+	["ld-ring", "ld-cycle"],
+	["ld-square", "ld-swim"],
+	["ld-cross", "ld-vortex"],
+	["ld-spinner", "ld-orbit"],
+	["ld-pie", "ld-flip"]
+]
 
 let trim = text => {
 	if (isEmpty(text)) {
@@ -215,6 +224,30 @@ let closeModal = callback => {
 	}
 }
 
+let addAnimation = (selector, which) => {
+	let el = clearAnimation(selector);
+	if (el) {
+		el.addClass("ld");
+		if (!which) {
+			el.each(function (idx, el) {
+				$(el).addClass(LOADING_PATTERNS[Math.floor(Math.random() * Math.floor(LOADING_PATTERNS.length))]);
+			});
+		} else {
+			el.addClass(which);
+		}
+	}
+	return el;
+}
+
+let clearAnimation = (selector) => {
+	if (isEmpty(selector)) {
+		return false;
+	}
+	return $(selector).removeClass("ld").attr('class', function(i, c){
+		return c ? c.replace(/(^|\s+)ld-\S+/g, '') : "";
+	});
+}
+
 let toggle = selector => {
 	var el = $(selector);
 	el.attr("disabled") ? el.attr("disabled", false) : el.attr("disabled", true);
@@ -243,8 +276,7 @@ let toggleCoverSpinner = (selector, style = "ld-over") => {
 
 			// randomize loading.io css for fun
 			let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
-			cover_el.addClass(LOADING_SHAPES[Math.floor(Math.random() * Math.floor(LOADING_SHAPES.length))])
-					.addClass(LOADING_MOVEMENTS[Math.floor(Math.random() * Math.floor(LOADING_MOVEMENTS.length))]);
+			LOADING_PREDEFINED[Math.floor(Math.random() * Math.floor(LOADING_PREDEFINED.length))].forEach(css => cover_el.addClass(css));
 			container.append(cover_el);
 		}
 	}
