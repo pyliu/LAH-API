@@ -90,7 +90,7 @@ blockquote img {
 <body>
 
   <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <img src="assets/img/tao.png" class="my-auto" />　
+    <img id="tao" src="assets/img/tao.png" class="my-auto" />　
     <a class="navbar-brand" href="watch_dog.php">地政輔助系統 <span class="small">(α)</span></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -436,6 +436,7 @@ blockquote img {
 
   <script type="text/javascript">
     $(document).ready(e => {
+      addAnimation("#tao");
       if (detectIE()) {
         document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援IE瀏覽器, 請使用Chrome/Firefox瀏覽器。</h2>';
         return;

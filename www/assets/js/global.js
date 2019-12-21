@@ -230,7 +230,9 @@ let addAnimation = (selector, which) => {
 		el.addClass("ld");
 		if (!which) {
 			el.each(function (idx, el) {
-				$(el).addClass(LOADING_PATTERNS[Math.floor(Math.random() * Math.floor(LOADING_PATTERNS.length))]);
+				if (!$(el).is("body")) {
+					$(el).addClass(LOADING_PATTERNS[Math.floor(Math.random() * Math.floor(LOADING_PATTERNS.length))]);
+				}
 			});
 		} else {
 			el.addClass(which);
@@ -240,10 +242,7 @@ let addAnimation = (selector, which) => {
 }
 
 let clearAnimation = (selector) => {
-	if (isEmpty(selector)) {
-		return false;
-	}
-	return $(selector).removeClass("ld").attr('class', function(i, c){
+	return $(selector || "*").removeClass("ld").attr('class', function(i, c){
 		return c ? c.replace(/(^|\s+)ld-\S+/g, '') : "";
 	});
 }
