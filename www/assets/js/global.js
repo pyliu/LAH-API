@@ -36,6 +36,7 @@ const LOADING_PREDEFINED = [
 	["ld-spinner", "ld-orbit"],
 	["ld-pie", "ld-flip"]
 ]
+const TEXT_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
 
 let trim = text => {
 	if (isEmpty(text)) {
@@ -224,6 +225,10 @@ let closeModal = callback => {
 	}
 }
 
+let rand = (range) => {
+	return Math.floor(Math.random() * Math.floor(range || 100));
+}
+
 let addAnimation = (selector, which) => {
 	let el = clearAnimation(selector);
 	if (el) {
@@ -231,7 +236,7 @@ let addAnimation = (selector, which) => {
 		if (!which) {
 			el.each(function (idx, el) {
 				if (!$(el).is("body")) {
-					$(el).addClass(LOADING_PATTERNS[Math.floor(Math.random() * Math.floor(LOADING_PATTERNS.length))]);
+					$(el).addClass(LOADING_PATTERNS[rand(LOADING_PATTERNS.length)]);
 				}
 			});
 		} else {
@@ -275,7 +280,8 @@ let toggleCoverSpinner = (selector, style = "ld-over") => {
 
 			// randomize loading.io css for fun
 			let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
-			LOADING_PREDEFINED[Math.floor(Math.random() * Math.floor(LOADING_PREDEFINED.length))].forEach(css => cover_el.addClass(css));
+			LOADING_PREDEFINED[rand(LOADING_PREDEFINED.length)].forEach(css => cover_el.addClass(css));
+			cover_el.addClass(TEXT_COLOR[rand(TEXT_COLOR.length)]);
 			container.append(cover_el);
 		}
 	}
