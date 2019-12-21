@@ -673,7 +673,7 @@ let xhrSyncXCaseColumn = function(e) {
 			return response.json();
 		}).then(jsonObj => {
 			if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-				td.html("<span class='text-success'>" + the_btn.attr("data-column") + " 同步成功！</span>");
+				td.html("<span class='text-success'>" + the_btn.data("column") + " 同步成功！</span>");
 			} else {
 				td.html("<span class='text-danger'>" + jsonObj.message + "</span>");
 			}
@@ -1607,13 +1607,13 @@ let xhrUpdateCaseColumnData = e => {
 	 * add various data attrs in the button tag
 	 */
 	let the_btn = $(e.target);
-	let origin_val = the_btn.attr("data-origin-value");
-	let upd_val = $("#"+the_btn.attr("data-input-id")).val();
-	let title = the_btn.attr("data-title");
+	let origin_val = the_btn.data("origin-value");
+	let upd_val = $("#"+the_btn.data("input-id")).val();
+	let title = the_btn.data("title");
 	if (origin_val != upd_val && confirm("確定要修改 " + title + " 為「" + upd_val + "」？")) {
-		let id = the_btn.attr("data-case-id");
-		let column = the_btn.attr("data-column");
-		let table = the_btn.attr("data-table");
+		let id = the_btn.data("case-id");
+		let column = the_btn.data("column");
+		let table = the_btn.data("table");
 		let body = new FormData();
 		body.append("type", "upd_case_column");
 		body.append("id", id);
