@@ -36,7 +36,7 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
 <body id="html_body">
 
   <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <img src="assets/img/tao.png" style="vertical-align: middle;" />　
+    <img src="assets/img/tao.png" class="my-auto" />　
     <a class="navbar-brand" href="index.php">地政輔助系統 <span class="small">(α)</span></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
