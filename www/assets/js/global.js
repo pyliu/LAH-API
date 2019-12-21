@@ -468,8 +468,8 @@ let initAlertUI = () => {
 		$("body").append($.parseHTML(`<div id="bs_alert_template">
 			<transition
 				name="bounce"
-				enter-active-class="animated bounceInDown"
-				leave-active-class="animated bounceOutUp"
+				:enter-active-class="animated_in"
+				:leave-active-class="animated_out"
 				@enter="enter"
 				@leave="leave"
 				@after-enter="afterEnter"
@@ -497,7 +497,9 @@ let initAlertUI = () => {
 				progress_timer_handle: null,
 				progress_counter: 1,
 				autohide: true,
-				delay: 15000
+				delay: 15000,
+				animated_in: "animated bounceInDown",
+				animated_out: "animated bounceOutUp"
 			},
 			methods: {
 				mouseOver: function(e) {
