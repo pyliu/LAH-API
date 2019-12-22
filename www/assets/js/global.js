@@ -611,11 +611,12 @@ let initAlertUI = () => {
 					this.seen = true;
 				},
 				randAnimation: function() {
-					let count = this.animated_opts.length;
-					let this_time = this.animated_opts[rand(count)];
-					this.animated_in = this_time.in;
-					this.animated_out = this_time.out;
-					console.log(this.animated_in, this.animated_out);
+					if (this.animated_opts) {
+						let count = this.animated_opts.length;
+						let this_time = this.animated_opts[rand(count)];
+						this.animated_in = this_time.in;
+						this.animated_out = this_time.out;
+					}
 				},
 				enter: function() { },
 				leave: function() { this.randAnimation(); },
