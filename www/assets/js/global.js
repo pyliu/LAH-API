@@ -40,7 +40,9 @@ const LOADING_PREDEFINED = [
 	["ld-spinner", "ld-orbit"],
 	["ld-pie", "ld-flip"],
 	["fas fa-sync", "ld-spin"],
-	["fas fa-sync-alt", "ld-spin-fast"]
+	["fas fa-sync-alt", "ld-spin"],
+	["fas fa-radiation-alt fa-2x", "ld-vortex"],
+	["fas fa-radiation fa-2x", "ld-spin-fast"]
 ]
 const LOADING_SHAPES_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
 
