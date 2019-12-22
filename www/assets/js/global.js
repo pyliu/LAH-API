@@ -813,7 +813,7 @@ $(document).ready(e => {
 				addAnimatedCSS($(el).find("legend"), { name: "pulse" });
 			})
 		});
-		$(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this/*, {name: "pulse"}*/); });
+		$(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
 	}, 150);
 
 	/**
