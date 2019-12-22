@@ -302,7 +302,7 @@ let clearLDAnimation = (selector) => {
 let addAnimatedCSS = function(selector, opts) {
 	const node = $(selector);
 	if (node) {
-		opts = Object.assign({name: ANIMATED_PATTERNS[rand(11)]}, opts);
+		opts = Object.assign({name: ANIMATED_PATTERNS[rand(ANIMATED_PATTERNS.length)]}, opts);
 		node.addClass(`animated ${opts.name}`);
 		function handleAnimationEnd() {
 			node.removeClass(`animated ${opts.name}`);
