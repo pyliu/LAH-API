@@ -38,58 +38,14 @@ blockquote img {
   /*width: 80%;*/
   display: block;
 }
-.lds-circle {
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #fff;
-  animation: lds-circle 2.4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
-}
-@keyframes lds-circle {
-  0%, 100% {
-    animation-timing-function: cubic-bezier(0.5, 0, 1, 0.5);
-  }
-  0% {
-    transform: rotateY(0deg);
-  }
-  50% {
-    transform: rotateY(1800deg);
-    animation-timing-function: cubic-bezier(0, 0.5, 0.5, 1);
-  }
-  100% {
-    transform: rotateY(3600deg);
-  }
-}
-.lds-dual-ring {
-  display: inline-block;
-  width: 40px;
-  height: 40px;
-}
-.lds-dual-ring:after {
-  content: " ";
-  display: block;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 3px solid #fff;
-  border-color: #fff transparent #fff transparent;
-  animation: lds-dual-ring 1.2s linear infinite;
-}
-@keyframes lds-dual-ring {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 </style>
 </head>
 
 <body>
-
+  <i class="fas fa-user"></i> <!-- uses solid style -->
+  <i class="far fa-user"></i> <!-- uses regular style -->
+  <!--brand icon-->
+  <i class="fab fa-github-square"></i> <!-- uses brands style -->
   <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
     <img id="tao" src="assets/img/tao.png" class="my-auto my-once-anim-cfg" />　
     <a class="navbar-brand my-auto" href="watch_dog.php">地政輔助系統 <span class="small">(α)</span></a>

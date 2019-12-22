@@ -14,13 +14,14 @@ require_once("./include/init.php");
 <link rel="stylesheet" href="assets/css/bootstrap.min.css">
 <link rel="stylesheet" href="assets/css/loading.css">
 <link rel="stylesheet" href="assets/css/loading-btn.css">
+<link href="assets/css/animate.css" rel="stylesheet">
+<link href="assets/css/awesome-font.css" rel="stylesheet">
 <!-- Custom styles for this template -->
 <link href="assets/css/starter-template.css" rel="stylesheet">
 <link href="assets/css/bootstrap-vue.min.css" rel="stylesheet">
 <link href="assets/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
 <link href="assets/css/basic.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
-<link href="assets/css/animate.css" rel="stylesheet">
 <style type="text/css">
 #contact a:link, a:visited, a:hover {
 	color: gray;
