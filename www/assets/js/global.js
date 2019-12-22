@@ -310,7 +310,6 @@ let addAnimatedCSS = function(selector, opts) {
 			if (typeof opts.callback === 'function') opts.callback();
 		}
 		node.on('animationend', handleAnimationEnd);
-		console.log(node);
 	}
 	return node;
 }
