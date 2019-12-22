@@ -36,7 +36,7 @@ const LOADING_PREDEFINED = [
 	["ld-spinner", "ld-orbit"],
 	["ld-pie", "ld-flip"]
 ]
-const TEXT_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
+const LOADING_SHAPES_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
 
 const ANIMATED_PATTERNS = ["bounce", "flash", "pulse", "rubberBand", "shake", "headShake", "swing", "tada", "wobble", "jello", "hinge"];
 const ANIMATED_TRANSITIONS = [
@@ -277,7 +277,7 @@ let rand = (range) => {
 }
 
 let addLDAnimation = (selector, which) => {
-	let el = clearAnimation(selector);
+	let el = clearLDAnimation(selector);
 	if (el) {
 		el.addClass("ld");
 		if (!which) {
@@ -344,7 +344,7 @@ let toggleCoverSpinner = (selector, style = "ld-over") => {
 			// randomize loading.io css for fun
 			let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
 			LOADING_PREDEFINED[rand(LOADING_PREDEFINED.length)].forEach(css => cover_el.addClass(css));
-			cover_el.addClass(TEXT_COLOR[rand(TEXT_COLOR.length)]);
+			cover_el.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)]);
 			container.append(cover_el);
 		}
 	}
