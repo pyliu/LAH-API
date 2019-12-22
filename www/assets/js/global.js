@@ -38,7 +38,7 @@ const LOADING_PREDEFINED = [
 ]
 const TEXT_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
 
-const ANIMATED_PATTERNS = ["bounce", "flash", "pulse", "rubberBand", "shake", "headShake", "swing", "tada", "wobble", "jello", "hinge", "jackInTheBox", "heartBeat"];
+const ANIMATED_PATTERNS = ["bounce", "flash", "pulse", "rubberBand", "shake", "headShake", "swing", "tada", "wobble", "jello", "hinge"];
 const ANIMATED_TRANSITIONS = [
 	// rotate
 	{ in: "animated rotateIn", out: "animated rotateOut" },
@@ -276,7 +276,7 @@ let rand = (range) => {
 	return Math.floor(Math.random() * Math.floor(range || 100));
 }
 
-let addAnimation = (selector, which) => {
+let addLDAnimation = (selector, which) => {
 	let el = clearAnimation(selector);
 	if (el) {
 		el.addClass("ld");
@@ -293,22 +293,25 @@ let addAnimation = (selector, which) => {
 	return el;
 }
 
-let clearAnimation = (selector) => {
+let clearLDAnimation = (selector) => {
 	return $(selector || "*").removeClass("ld").attr('class', function(i, c){
 		return c ? c.replace(/(^|\s+)ld-\S+/g, '') : "";
 	});
 }
 
-let animateCSS = function(element, animationName, callback) {
-    const node = document.querySelector(element);
-    node.classList.add('animated', animationName);
-    function handleAnimationEnd() {
-        node.classList.remove('animated', animationName);
-        node.removeEventListener('animationend', handleAnimationEnd);
-
-        if (typeof callback === 'function') callback();
-    }
-    node.addEventListener('animationend', handleAnimationEnd);
+let addAnimatedCSS = function(selector, opts) {
+	const node = $(selector);
+	if (node) {
+		opts = Object.assign({name: ANIMATED_PATTERNS[rand(11)]}, opts);
+		node.addClass(`animated ${opts.name}`);
+		function handleAnimationEnd() {
+			node.removeClass(`animated ${opts.name}`);
+			node.off('animationend', "**", handleAnimationEnd);
+			if (typeof opts.callback === 'function') opts.callback();
+		}
+		node.on('animationend', handleAnimationEnd);
+	}
+	return node;
 }
 
 let toggle = selector => {
@@ -804,5 +807,12 @@ $(document).ready(e => {
 	initDatepicker();
 	initWatchdog();
 	initUtilApp();
+	setTimeout(function () {
+		$("fieldset").each(function(idx, el) {
+			$(el).on("mouseenter", function(e) {
+				addAnimatedCSS($(el).find("legend"), { name: "pulse" });
+			})
+		});
+	}, 150);
 });
 //]]>
