@@ -306,10 +306,11 @@ let addAnimatedCSS = function(selector, opts) {
 		node.addClass(`animated ${opts.name}`);
 		function handleAnimationEnd() {
 			node.removeClass(`animated ${opts.name}`);
-			node.off('animationend', "**", handleAnimationEnd);
+			node.off('animationend');
 			if (typeof opts.callback === 'function') opts.callback();
 		}
 		node.on('animationend', handleAnimationEnd);
+		console.log(node);
 	}
 	return node;
 }
