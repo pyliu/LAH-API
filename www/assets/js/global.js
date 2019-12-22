@@ -15,7 +15,12 @@ const XHR_STATUS_CODE = {
 	FAIL_NOT_VALID_SERVER: -3,
 	FAIL_WITH_REMOTE_NO_RECORD: -4
 }
-const LOADING_SHAPES = ["ld-ring", "ld-pie", "ld-ball", "ld-square", "ld-hourglass", "ld-cross", "ld-spinner"];
+const LOADING_SHAPES = [
+	// loading.io predefined shapes
+	"ld-ring", "ld-pie", "ld-ball", "ld-hourglass", "ld-cross", "ld-spinner",
+	// awesome font shapes
+	"fas fa-radiation", "fas fa-radiation-alt", "fas fa-sync", "fas fa-sync-alt"
+];
 const LOADING_PATTERNS = [
 	"ld-heartbeat", "ld-beat", "ld-blink", "ld-bounce", "ld-bounceAlt", "ld-breath", "ld-wrench", "ld-surprise",
 	"ld-clock", "ld-jump", "ld-hit", "ld-fade", "ld-flip", "ld-float", "ld-move-ltr", "ld-tremble", "ld-tick",
@@ -31,10 +36,11 @@ const LOADING_PREDEFINED = [
 	["ld-ball", "ld-bounce"],
 	["ld-hourglass", "ld-spin-fast"],
 	["ld-ring", "ld-cycle"],
-	["ld-square", "ld-swim"],
 	["ld-cross", "ld-vortex"],
 	["ld-spinner", "ld-orbit"],
-	["ld-pie", "ld-flip"]
+	["ld-pie", "ld-flip"],
+	["fas fa-sync", "ld-spin"],
+	["fas fa-sync-alt", "ld-spin-fast"]
 ]
 const LOADING_SHAPES_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
 
@@ -343,7 +349,8 @@ let toggleCoverSpinner = (selector, style = "ld-over") => {
 			// randomize loading.io css for fun
 			let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
 			LOADING_PREDEFINED[rand(LOADING_PREDEFINED.length)].forEach(css => cover_el.addClass(css));
-			cover_el.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)]);
+			cover_el.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])
+					.addClass("fa-lg");
 			container.append(cover_el);
 		}
 	}
