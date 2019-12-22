@@ -814,5 +814,24 @@ $(document).ready(e => {
 			})
 		});
 	}, 150);
+
+	/**
+	 * detect page idle and add animation for fun
+	 */
+	window.onload = resetTimer;
+	window.onmousemove = resetTimer;
+	window.onmousedown = resetTimer;  // catches touchscreen presses as well      
+	window.ontouchstart = resetTimer; // catches touchscreen swipes as well 
+	window.onclick = resetTimer;      // catches touchpad clicks as well
+	window.onkeypress = resetTimer;   
+	window.addEventListener('scroll', resetTimer, true); // improved; see comments
+	let idle_timer;
+	function resetTimer() {
+		clearTimeout(idle_timer);
+		idle_timer = setTimeout(() => {
+			addLDAnimation("fieldset button");
+		}, 300000);  // 5mins
+		clearLDAnimation("fieldset button");
+	}
 });
 //]]>
