@@ -293,3 +293,15 @@ blockquote {
     z-index: 9999;
     border-radius: 10px;
 }
+
+.my-once-anim-cfg {
+	animation-duration: 0.4s;
+	/* animation-delay: 2s; */
+	animation-iteration-count: 1;
+}
+
+.my-inf-anim-cfg {
+	animation-duration: 0.4s;
+	/* animation-delay: 2s; */
+	animation-iteration-count: infinite;
+}

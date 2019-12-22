@@ -38,6 +38,50 @@ const LOADING_PREDEFINED = [
 ]
 const TEXT_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
 
+const ANIMATED_PATTERNS = ["bounce", "flash", "pulse", "rubberBand", "shake", "headShake", "swing", "tada", "wobble", "jello", "hinge", "jackInTheBox", "heartBeat"];
+const ANIMATED_TRANSITIONS = [
+	// rotate
+	{ in: "animated rotateIn", out: "animated rotateOut" },
+	{ in: "animated rotateInDownLeft", out: "animated rotateOutDownLeft" },
+	{ in: "animated rotateInDownRight", out: "animated rotateOutDownRight" },
+	{ in: "animated rotateInUpLeft", out: "animated rotateOutUpLeft" },
+	{ in: "animated rotateInUpRight", out: "animated rotateOutUpRight" },
+	// bounce
+	{ in: "animated bounceIn", out: "animated bounceOut" },
+	{ in: "animated bounceInUp", out: "animated bounceOutDown" },
+	{ in: "animated bounceInDown", out: "animated bounceOutUp" },
+	{ in: "animated bounceInRight", out: "animated bounceOutLeft" },
+	{ in: "animated bounceInLeft", out: "animated bounceOutRight" },
+	// fade
+	{ in: "animated fadeIn", out: "animated fadeOut" },
+	{ in: "animated fadeInDown", out: "animated fadeOutUp" },
+	{ in: "animated fadeInDownBig", out: "animated fadeOutUpBig" },
+	{ in: "animated fadeInLeft", out: "animated fadeOutRight" },
+	{ in: "animated fadeInLeftBig", out: "animated fadeOutRightBig" },
+	{ in: "animated fadeInRight", out: "animated fadeOutLeft" },
+	{ in: "animated fadeInRightBig", out: "animated fadeOutLeftBig" },
+	{ in: "animated fadeInUp", out: "animated fadeOutDown" },
+	{ in: "animated fadeInUpBig", out: "animated fadeOutDownBig" },
+	// flip
+	{ in: "animated flipInX", out: "animated flipOutX" },
+	{ in: "animated flipInY", out: "animated flipOutY" },
+	// lightspeed
+	{ in: "animated lightSpeedIn", out: "animated lightSpeedOut" },
+	// roll
+	{ in: "animated rollIn", out: "animated rollOut" },
+	// zoom
+	{ in: "animated zoomIn", out: "animated zoomOut" },
+	{ in: "animated zoomInDown", out: "animated zoomOutUp" },
+	{ in: "animated zoomInLeft", out: "animated zoomOutRight" },
+	{ in: "animated zoomInRight", out: "animated zoomOutLeft" },
+	{ in: "animated zoomInUp", out: "animated zoomOutDown" },
+	// slide
+	{ in: "animated slideInDown", out: "animated slideOutUp" },
+	{ in: "animated slideInUp", out: "animated slideOutDown" },
+	{ in: "animated slideInLeft", out: "animated slideOutRight" },
+	{ in: "animated slideInRight", out: "animated slideOutLeft" }
+];
+
 let trim = text => {
 	if (isEmpty(text)) {
 		return "";
@@ -154,6 +198,9 @@ let addNotification = opts => {
 }
 
 let showAlert = opts => {
+	if (typeof opts == "string") {
+		opts = {message: opts}
+	}
 	if (!isEmpty(opts.message)) {
 		switch (opts.type) {
 			case "danger":
@@ -250,6 +297,18 @@ let clearAnimation = (selector) => {
 	return $(selector || "*").removeClass("ld").attr('class', function(i, c){
 		return c ? c.replace(/(^|\s+)ld-\S+/g, '') : "";
 	});
+}
+
+let animateCSS = function(element, animationName, callback) {
+    const node = document.querySelector(element);
+    node.classList.add('animated', animationName);
+    function handleAnimationEnd() {
+        node.classList.remove('animated', animationName);
+        node.removeEventListener('animationend', handleAnimationEnd);
+
+        if (typeof callback === 'function') callback();
+    }
+    node.addEventListener('animationend', handleAnimationEnd);
 }
 
 let toggle = selector => {
@@ -499,7 +558,8 @@ let initAlertUI = () => {
 				autohide: true,
 				delay: 15000,
 				animated_in: "animated bounceInDown",
-				animated_out: "animated bounceOutUp"
+				animated_out: "animated bounceOutUp",
+				animated_opts: ANIMATED_TRANSITIONS
 			},
 			methods: {
 				mouseOver: function(e) {
@@ -550,8 +610,15 @@ let initAlertUI = () => {
 					this.type = opts.type;
 					this.seen = true;
 				},
+				randAnimation: function() {
+					let count = this.animated_opts.length;
+					let this_time = this.animated_opts[rand(count)];
+					this.animated_in = this_time.in;
+					this.animated_out = this_time.out;
+					console.log(this.animated_in, this.animated_out);
+				},
 				enter: function() { },
-				leave: function() { },
+				leave: function() { this.randAnimation(); },
 				afterEnter: function() {
 					// close alert after 15 secs (default)
 					if (this.autohide) {
@@ -567,6 +634,9 @@ let initAlertUI = () => {
 				afterLeave: function() {
 					this.disableProgress();
 				}
+			},
+			mounted() {
+				this.randAnimation();
 			}
 		});
 	}
@@ -625,11 +695,10 @@ let initUtilApp = () => {
 							message
 						]
 					)
-					this.$bvToast.toast([vNodesMsg], merged);
+					toast_el = this.$bvToast.toast([vNodesMsg], merged);
 				} else {
-					this.$bvToast.toast(message, merged);
+					toast_el = this.$bvToast.toast(message, merged);
 				}
-
 				this.toastCounter++;
 			},
 			showModal: function(id) {
