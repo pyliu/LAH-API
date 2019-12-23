@@ -851,6 +851,7 @@ let sleep = () => {
 	let cover_el = $(jQuery.parseHTML('<div id="screensaver" class="ld auto-add-spinner"></div>'));
 	let patterns = ["fas fa-bolt ld-bounce", "fas fa-bed ld-swim", "fas fa-biking ld-move-ltr", "fas fa-biohazard ld-damage"];
 	cover_el.addClass(patterns[rand(patterns.length)])
+			.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])
 			.addClass("fa-10x");
 	container.append(cover_el);
 	addLDAnimation(".navbar i.fas", "ld-bounce");
