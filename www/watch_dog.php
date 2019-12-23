@@ -47,7 +47,7 @@ blockquote img {
 <body>
 
   <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <i class="my-auto fas fa-user-secret fa-2x text-light"></i>　
+    <i class="my-auto fas fa-user-secret fa-2x text-light"></i>&ensp;
     <a class="navbar-brand" href="watch_dog.php">地政輔助系統 <span class="small">(α)</span></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
