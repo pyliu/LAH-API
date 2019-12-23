@@ -58,6 +58,7 @@ if (jQuery && localStorage) {
                     cacheIt(e.target);
                 }
             });
+            localStorage.clear();
         }, 100);
     });
 } else {
