@@ -33,16 +33,16 @@ const LOADING_PATTERNS = [
 	"ld-swim", "ld-swing", "ld-tick-alt", "ld-vortex", "ld-vortex-alt", "ld-wander-h", "ld-wander-v"
 ];
 const LOADING_PREDEFINED = [
-	["ld-ball", "ld-bounce"],
-	["ld-hourglass", "ld-spin-fast"],
-	["ld-ring", "ld-cycle"],
-	["ld-cross", "ld-vortex"],
-	["ld-spinner", "ld-orbit"],
-	["ld-pie", "ld-flip"],
-	["fas fa-sync", "ld-spin"],
-	["fas fa-sync-alt", "ld-spin"],
-	["fas fa-radiation-alt", "ld-vortex"],
-	["fas fa-radiation", "ld-spin-fast"]
+	"ld-ball ld-bounce",
+	"ld-hourglass ld-spin-fast",
+	"ld-ring ld-cycle",
+	"ld-cross ld-vortex",
+	"ld-spinner ld-orbit",
+	"ld-pie ld-flip",
+	"fas fa-sync ld-spin",
+	"fas fa-sync-alt ld-spin",
+	"fas fa-radiation-alt ld-vortex",
+	"fas fa-radiation ld-spin-fast"
 ]
 const LOADING_SHAPES_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
 
@@ -350,9 +350,9 @@ let toggleCoverSpinner = (selector, style = "ld-over") => {
 
 			// randomize loading.io css for fun
 			let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
-			LOADING_PREDEFINED[rand(LOADING_PREDEFINED.length)].forEach(css => cover_el.addClass(css));
-			cover_el.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])
-					.addClass("fa-lg");
+			cover_el.addClass(LOADING_PREDEFINED[rand(LOADING_PREDEFINED.length)])		// predefined pattern
+					.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])	// color
+					.addClass("fa-lg");												// shape size
 			container.append(cover_el);
 		}
 	}
@@ -813,6 +813,29 @@ let initUtilApp = () => {
 	});
 }
 
+let sleep = () => {
+	wakeup();
+	let container = $("body");
+	// cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
+	let style = "ld-over-full";
+	container.addClass(style);
+	container.addClass("running");
+	let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
+	cover_el.addClass("fas fa-bed ld-swim")
+			.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])
+			.addClass("fa-10x");
+	container.append(cover_el);
+}
+
+let wakeup = () => {
+	let container = $("body");
+	if (container.hasClass("ld-over-full")) {
+		container.removeClass("ld-over-full");
+		container.find(".auto-add-spinner").remove();
+		container.removeClass("running");
+	}
+}
+
 $(document).ready(e => {
 	// Block IE
 	if (detectIE()) {
@@ -846,10 +869,12 @@ $(document).ready(e => {
 	function resetTimer() {
 		clearTimeout(idle_timer);
 		idle_timer = setTimeout(() => {
-			addLDAnimation("button, i.fas.text-light");
+			sleep();
+			//addLDAnimation("button, i.fas.text-light");
 			// addLDAnimation("i.fas.text-light", "ld-bounce");
 		}, 300000);  // 5mins
-		clearLDAnimation("button, i.fas.text-light");
+		// clearLDAnimation("button, i.fas.text-light");
+		wakeup();
 	}
 });
 //]]>
