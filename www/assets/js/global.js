@@ -860,6 +860,7 @@ let sleep = () => {
 	cover_el.addClass(patterns[rand(patterns.length)])
 			.addClass("fa-10x");
 	container.append(cover_el);
+	addLDAnimation(".navbar i.fas", "ld-bounce");
 }
 
 let wakeup = () => {
@@ -869,6 +870,7 @@ let wakeup = () => {
 		container.find("#screensaver").remove();
 		container.removeClass("running");
 	}
+	clearLDAnimation(".navbar i.fas");
 }
 
 $(document).ready(e => {
