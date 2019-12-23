@@ -805,10 +805,11 @@ let initUtilApp = () => {
 				});
 			}
 		},
-		mounted: function(e) {
+		created: function(e) {
 			this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
 				console.log('Modal is about to be shown', bvEvent, modalId)
 			});
+			console.log(this.transition_in);
 		}
 	});
 }
@@ -854,7 +855,6 @@ $(document).ready(e => {
 		});
 		$(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
 	}, 150);
-
 	/**
 	 * detect page idle and add animation for fun
 	 */
@@ -876,5 +876,10 @@ $(document).ready(e => {
 		// clearLDAnimation("button, i.fas.text-light");
 		wakeup();
 	}
+	// hide footer after 10s
+	setTimeout(() => addAnimatedCSS("#copyright", {
+		name: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)].out,
+		callback: () => { $("#copyright").hide() }
+	}), 10000);
 });
 //]]>
