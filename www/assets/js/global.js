@@ -846,10 +846,10 @@ $(document).ready(e => {
 	function resetTimer() {
 		clearTimeout(idle_timer);
 		idle_timer = setTimeout(() => {
-			addLDAnimation("fieldset button");
-			addLDAnimation("i.fas.text-light", "ld-bounce");
+			addLDAnimation("button, i.fas.text-light");
+			// addLDAnimation("i.fas.text-light", "ld-bounce");
 		}, 300000);  // 5mins
-		clearLDAnimation("fieldset button, i.fas.text-light");
+		clearLDAnimation("button, i.fas.text-light");
 	}
 });
 //]]>
