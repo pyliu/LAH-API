@@ -27,7 +27,6 @@ const LOADING_PATTERNS = [
 	"ld-swim", "ld-swing", "ld-tick-alt", "ld-vortex", "ld-vortex-alt", "ld-wander-h", "ld-wander-v"
 ];
 const LOADING_PREDEFINED = [
-	"ld-hourglass ld-spin-fast fa-lg",
 	"fa fa-snowflake ld-swim fa-2x",
 	"ld-spinner ld-orbit fa-lg",
 	"ld-pie ld-flip fa-lg",
