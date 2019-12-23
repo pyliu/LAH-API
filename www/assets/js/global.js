@@ -276,7 +276,7 @@ let showConfirm = (message, callback) => {
 let closeModal = callback => {
 	window.utilApp.hideModal();
 	if (typeof callback == "function") {
-		setTimeout(callback, 100);
+		setTimeout(callback, 400);
 	}
 }
 
@@ -662,7 +662,7 @@ let initUtilApp = () => {
 		data: {
 			toastCounter: 0,
 			confirmAnswer: false,
-			transition_in: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)].in
+			transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)]
 		},
 		methods: {
 			// make simple, short popup notice message
@@ -720,9 +720,9 @@ let initUtilApp = () => {
 					this.$bvModal.show(id);
 				});
 			},
-			hideModal: function(id = "") {
+			hideModal: function(id) {
 				let that = this;
-				if (id == "" || id == undefined) {
+				if (id == "" || id == undefined || id == null) {
 					$('div.modal.show').each(function(idx, el) {
 						$(el).hide(400, function() {
 							that.$bvModal.hide(el.id);
@@ -769,15 +769,6 @@ let initUtilApp = () => {
 				} else {
 					this.$bvModal.msgBoxOk(message, merged);
 				}
-				// since the modal fade effect broken ... use jQuery instead
-				//setTimeout(() => $('div.modal.show .modal-content').slideDown(400), 50);
-				setTimeout(() => {
-					$('div.modal.show .modal-content').removeClass("hide");
-					addAnimatedCSS($('div.modal.show .modal-content'), {
-						name: this.transition_in
-					});
-				}, 50);
-				$('div.modal.show .modal-content').removeClass("hide");
 			},
 			confirm: function(message, opts) {
 				this.confirmAnswer = false;
@@ -792,7 +783,8 @@ let initUtilApp = () => {
 					footerClass: 'p-2',
 					hideHeaderClose: true,
 					noCloseOnBackdrop: true,
-					centered: true
+					centered: true,
+					contentClass: "shadow hide"
 				}, opts);
 				this.$bvModal.msgBoxConfirm(message, merged)
 				.then(value => {
@@ -807,9 +799,32 @@ let initUtilApp = () => {
 		},
 		created: function(e) {
 			this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
-				console.log('Modal is about to be shown', bvEvent, modalId)
+				//console.log('Modal is about to be shown', bvEvent, modalId)
 			});
-			console.log(this.transition_in);
+			this.$root.$on('bv::modal::shown', (bvEvent, modalId) => {
+				//console.log('Modal is shown', bvEvent, modalId)
+				let modal_content = $(`#${modalId} .modal-content`);
+				modal_content.removeClass("hide");
+				addAnimatedCSS(modal_content, {
+					name: this.transition.in
+				});
+			});
+			this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
+				//console.log('Modal is about to hide', bvEvent, modalId)
+				bvEvent.preventDefault();
+				let modal_content = $(`#${modalId} .modal-content`);
+				let that = this;
+				addAnimatedCSS(modal_content, {
+					name: this.transition.out,
+					callback: () => {
+						that.$bvModal.hide(modalId);
+						$(`#${modalId}___BV_modal_outer_`).remove();
+					}
+				});
+			});
+			this.$root.$on('bv::modal::hidden', (bvEvent, modalId) => {
+				//console.log('Modal is hidden', bvEvent, modalId)
+			});
 		}
 	});
 }
