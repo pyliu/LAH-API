@@ -33,15 +33,15 @@ const LOADING_PATTERNS = [
 	"ld-swim", "ld-swing", "ld-tick-alt", "ld-vortex", "ld-vortex-alt", "ld-wander-h", "ld-wander-v"
 ];
 const LOADING_PREDEFINED = [
-	"ld-hourglass ld-spin-fast",
+	"ld-hourglass ld-spin-fast fa-lg",
 	"fa fa-snowflake ld-swim fa-2x",
-	"ld-spinner ld-orbit",
-	"ld-pie ld-flip",
-	"fas fa-sync ld-spin",
-	"fas fa-spinner fa-spin",
+	"ld-spinner ld-orbit fa-lg",
+	"ld-pie ld-flip fa-lg",
+	"fas fa-sync ld-spin fa-lg",
+	"fas fa-spinner fa-spin fa-2x",
 	"fas fa-radiation-alt ld-cycle fa-2x",
 	"fas fa-radiation ld-spin-fast fa-2x",
-	"fas fa-asterisk ld-spin",
+	"fas fa-asterisk ld-spin fa-lg",
 	"fas fa-bolt ld-bounce fa-2x",
 	"fas fa-biking ld-move-ltr fa-2x",
 	"fas fa-yin-yang fa-spin fa-2x",
@@ -363,8 +363,7 @@ let toggleCoverSpinner = (selector, style = "ld-over") => {
 			// randomize loading.io css for fun
 			let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
 			cover_el.addClass(LOADING_PREDEFINED[rand(LOADING_PREDEFINED.length)])		// predefined pattern
-					.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])	// color
-					.addClass("fa-lg");													// shape size
+					.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)]);	// color
 			container.append(cover_el);
 		}
 	}
@@ -856,7 +855,7 @@ let sleep = () => {
 	let style = "ld-over-full-inverse";
 	container.addClass(style);
 	container.addClass("running");
-	let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
+	let cover_el = $(jQuery.parseHTML('<div id="screensaver" class="ld auto-add-spinner"></div>'));
 	let patterns = ["fas fa-bolt ld-bounce", "fas fa-bed ld-swim", "fas fa-biking ld-move-ltr", "fas fa-biohazard ld-damage"];
 	cover_el.addClass(patterns[rand(patterns.length)])
 			.addClass("fa-10x");
@@ -867,7 +866,7 @@ let wakeup = () => {
 	let container = $("body");
 	if (container.hasClass("ld-over-full-inverse")) {
 		container.removeClass("ld-over-full-inverse");
-		container.find(".auto-add-spinner").remove();
+		container.find("#screensaver").remove();
 		container.removeClass("running");
 	}
 }
