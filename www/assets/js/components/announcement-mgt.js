@@ -54,6 +54,43 @@ if (Vue) {
                     return;
                 }
                 console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
+                let that = this;
+                showConfirm("確定要更新公告資料？", () => {
+                    let form_body = new FormData();
+                    form_body.append("type", "update_announcement_data");
+                    form_body.append("code", reason_code);
+                    form_body.append("day", day);
+                    form_body.append("flag", flag);
+                    
+                    fetch("query_json_api.php", {
+                        method: 'POST',
+                        body: form_body
+                    }).then(response => {
+                        if (response.status != 200) {
+                            throw new Error("XHR連線異常，回應非200");
+                        }
+                        return response.json();
+                    }).then(jsonObj => {
+                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
+                        addNotification({
+                            body: "<strong class='text-success'>更新完成</strong>"
+                        });
+                        // reload the Vue (hack ... not beautiful ... i know)
+                        if (window.announcementMgtVue) {
+                            $("#announcement-mgt").html("<announcement-mgt></announcement-mgt>");
+                            window.announcementMgtVue.$destroy();
+                            window.announcementMgtVue = new Vue({
+                                el: "#announcement-mgt"
+                            });
+                        }
+                        closeModal();
+                    }).catch(ex => {
+                        console.error("announcement-mgt-dialog::update parsing failed", ex);
+                        showAlert({message: "announcement-mgt-dialog::update XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+                    });
+                    
+                })
+                /*
                 if (confirm("確定要更新公告資料？")) {
                     let el = $("#ann_upd_btn_"+this.data[0]);
                     toggle(el);
@@ -90,6 +127,7 @@ if (Vue) {
                         showAlert({message: "announcement-mgt-dialog::update XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
                     });
                 }
+                */
             }
         }
     });

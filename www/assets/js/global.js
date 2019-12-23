@@ -661,6 +661,7 @@ let initUtilApp = () => {
 	window.utilApp = new Vue({
 		data: {
 			toastCounter: 0,
+			openConfirm: false,
 			confirmAnswer: false,
 			transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)]
 		},
@@ -716,21 +717,32 @@ let initUtilApp = () => {
 				this.toastCounter++;
 			},
 			showModal: function(id) {
-				$(`#${id}`).slideDown(function() {
-					this.$bvModal.show(id);
+				let that = this;
+				let modal_content = $(`#${id} .modal-content`);
+				modal_content.removeClass("hide");
+				addAnimatedCSS(modal_content, {
+					name: that.transition.in
 				});
 			},
 			hideModal: function(id) {
 				let that = this;
 				if (id == "" || id == undefined || id == null) {
 					$('div.modal.show').each(function(idx, el) {
-						$(el).hide(400, function() {
-							that.$bvModal.hide(el.id);
-						});
+						that.removeModal(el.id);
 					});
 				} else {
-					$(`#${id}`).hide(400, function() {
-						that.$bvModal.hide(id);
+					that.removeModal(id);
+				}
+			},
+			removeModal: function(id) {
+				if (!this.openConfirm) {
+					let that = this;
+					let modal_content = $(`#${id} .modal-content`);
+					addAnimatedCSS(modal_content, {
+						name: that.transition.out,
+						callback: () => {
+							$(`#${id}___BV_modal_outer_`).remove();
+						}
 					});
 				}
 			},
@@ -772,6 +784,7 @@ let initUtilApp = () => {
 			},
 			confirm: function(message, opts) {
 				this.confirmAnswer = false;
+				this.openConfirm = true;
 				let merged = Object.assign({
 					title: '請確認',
 					size: 'sm',
@@ -784,7 +797,7 @@ let initUtilApp = () => {
 					hideHeaderClose: true,
 					noCloseOnBackdrop: true,
 					centered: true,
-					contentClass: "shadow hide"
+					contentClass: "shadow"
 				}, opts);
 				this.$bvModal.msgBoxConfirm(message, merged)
 				.then(value => {
@@ -803,24 +816,19 @@ let initUtilApp = () => {
 			});
 			this.$root.$on('bv::modal::shown', (bvEvent, modalId) => {
 				//console.log('Modal is shown', bvEvent, modalId)
-				let modal_content = $(`#${modalId} .modal-content`);
-				modal_content.removeClass("hide");
-				addAnimatedCSS(modal_content, {
-					name: this.transition.in
-				});
+				if (!this.openConfirm) {
+					this.showModal(modalId);
+				}
 			});
 			this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
 				//console.log('Modal is about to hide', bvEvent, modalId)
-				bvEvent.preventDefault();
-				let modal_content = $(`#${modalId} .modal-content`);
-				let that = this;
-				addAnimatedCSS(modal_content, {
-					name: this.transition.out,
-					callback: () => {
-						that.$bvModal.hide(modalId);
-						$(`#${modalId}___BV_modal_outer_`).remove();
-					}
-				});
+				// animation will break confirm Promise, so skip it
+				if (this.openConfirm) {
+					this.openConfirm = false;
+				} else {
+					bvEvent.preventDefault();
+					this.hideModal(modalId);
+				}
 			});
 			this.$root.$on('bv::modal::hidden', (bvEvent, modalId) => {
 				//console.log('Modal is hidden', bvEvent, modalId)
