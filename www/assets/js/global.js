@@ -41,8 +41,8 @@ const LOADING_PREDEFINED = [
 	["ld-pie", "ld-flip"],
 	["fas fa-sync", "ld-spin"],
 	["fas fa-sync-alt", "ld-spin"],
-	["fas fa-radiation-alt fa-2x", "ld-vortex"],
-	["fas fa-radiation fa-2x", "ld-spin-fast"]
+	["fas fa-radiation-alt", "ld-vortex"],
+	["fas fa-radiation", "ld-spin-fast"]
 ]
 const LOADING_SHAPES_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
 
@@ -631,7 +631,7 @@ let initAlertUI = () => {
 					}
 				},
 				enter: function() { },
-				leave: function() { this.randAnimation(); },
+				leave: function() { /*this.randAnimation();*/ },
 				afterEnter: function() {
 					// close alert after 15 secs (default)
 					if (this.autohide) {
@@ -661,7 +661,8 @@ let initUtilApp = () => {
 	window.utilApp = new Vue({
 		data: {
 			toastCounter: 0,
-			confirmAnswer: false
+			confirmAnswer: false,
+			transition_in: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)].in
 		},
 		methods: {
 			// make simple, short popup notice message
@@ -769,8 +770,14 @@ let initUtilApp = () => {
 					this.$bvModal.msgBoxOk(message, merged);
 				}
 				// since the modal fade effect broken ... use jQuery instead
-				setTimeout(() => $('div.modal.show .modal-content').slideDown(400), 50);
-				
+				//setTimeout(() => $('div.modal.show .modal-content').slideDown(400), 50);
+				setTimeout(() => {
+					$('div.modal.show .modal-content').removeClass("hide");
+					addAnimatedCSS($('div.modal.show .modal-content'), {
+						name: this.transition_in
+					});
+				}, 50);
+				$('div.modal.show .modal-content').removeClass("hide");
 			},
 			confirm: function(message, opts) {
 				this.confirmAnswer = false;
