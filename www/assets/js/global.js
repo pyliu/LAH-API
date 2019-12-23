@@ -34,7 +34,6 @@ const LOADING_PATTERNS = [
 ];
 const LOADING_PREDEFINED = [
 	"ld-hourglass ld-spin-fast",
-	"ld-ring ld-cycle",
 	"fa fa-snowflake ld-swim fa-2x",
 	"ld-spinner ld-orbit",
 	"ld-pie ld-flip",
