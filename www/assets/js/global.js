@@ -15,12 +15,6 @@ const XHR_STATUS_CODE = {
 	FAIL_NOT_VALID_SERVER: -3,
 	FAIL_WITH_REMOTE_NO_RECORD: -4
 }
-const LOADING_SHAPES = [
-	// loading.io predefined shapes
-	"ld-ring", "ld-pie", "ld-ball", "ld-hourglass", "ld-cross", "ld-spinner",
-	// awesome font shapes
-	"fas fa-radiation", "fas fa-radiation-alt", "fas fa-sync", "fas fa-sync-alt"
-];
 const LOADING_PATTERNS = [
 	"ld-heartbeat", "ld-beat", "ld-blink", "ld-bounce", "ld-bounceAlt", "ld-breath", "ld-wrench", "ld-surprise",
 	"ld-clock", "ld-jump", "ld-hit", "ld-fade", "ld-flip", "ld-float", "ld-move-ltr", "ld-tremble", "ld-tick",
