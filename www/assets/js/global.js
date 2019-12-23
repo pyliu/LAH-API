@@ -37,6 +37,7 @@ const LOADING_PREDEFINED = [
 	"fas fa-asterisk ld-spin fa-lg",
 	"fas fa-bolt ld-bounce fa-2x",
 	"fas fa-biking ld-move-ltr fa-2x",
+	"fas fa-snowboarding ld-rush-ltr fa-2x",
 	"fas fa-yin-yang fa-spin fa-2x",
 	"fas fa-biohazard ld-damage fa-2x",
 	"fas fa-baseball-ball ld-bounce fa-2x",
@@ -849,7 +850,7 @@ let sleep = () => {
 	container.addClass(style);
 	container.addClass("running");
 	let cover_el = $(jQuery.parseHTML('<div id="screensaver" class="ld auto-add-spinner"></div>'));
-	let patterns = ["fas fa-bolt ld-bounce", "fas fa-bed ld-swim", "fas fa-biking ld-move-ltr", "fas fa-biohazard ld-damage"];
+	let patterns = ["fas fa-bolt ld-bounce", "fas fa-bed ld-swim", "fas fa-biking ld-move-ltr", "fas fa-biohazard ld-damage", "fas fa-snowboarding ld-rush-ltr"];
 	cover_el.addClass(patterns[rand(patterns.length)])
 			.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])
 			.addClass("fa-10x");
