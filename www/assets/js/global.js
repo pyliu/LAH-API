@@ -32,52 +32,30 @@ const LOADING_PATTERNS = [
 	"ld-slide-ltr", "ld-slide-rtl", "ld-slide-ttb", "ld-smash", "ld-spin", "ld-spin-fast", "ld-squeeze",
 	"ld-swim", "ld-swing", "ld-tick-alt", "ld-vortex", "ld-vortex-alt", "ld-wander-h", "ld-wander-v"
 ];
-/**
- * fa-spin fa-pulse
-
-asterisk
-atom
-bahai
-certificate
-circle-notch
-cog
-compact-disc
-compass fas/far
-crosshairs
-dharmachakra
-fan
-lifering fas/far
-ring
-slash
-snowflake fas/far
-spinner
-stroopwafel
-sun fas/far
-sync
-sync-alt
-
-arrows-alt
-bandcamp
-arrow-*  up down left right
-ban
-baseball-ball
-basketball-ball
- */
 const LOADING_PREDEFINED = [
 	"ld-hourglass ld-spin-fast",
 	"ld-ring ld-cycle",
-	"ld-cross ld-vortex",
+	"fa fa-snowflake ld-swim fa-2x",
 	"ld-spinner ld-orbit",
 	"ld-pie ld-flip",
 	"fas fa-sync ld-spin",
-	"fas fa-sync-alt ld-spin",
-	"fas fa-radiation-alt ld-vortex",
-	"fas fa-radiation ld-spin-fast",
+	"fas fa-spinner fa-spin",
+	"fas fa-radiation-alt ld-cycle fa-2x",
+	"fas fa-radiation ld-spin-fast fa-2x",
 	"fas fa-asterisk ld-spin",
-	"fas fa-bolt ld-bounce",
+	"fas fa-bolt ld-bounce fa-2x",
 	"fas fa-biking ld-move-ltr fa-2x",
-	"fas fa-yin-yang fa-spin",
-	"fas fa-biohazard ld-damage"
+	"fas fa-yin-yang fa-spin fa-2x",
+	"fas fa-biohazard ld-damage fa-2x",
+	"fas fa-baseball-ball ld-bounce fa-2x",
+	"fas fa-basketball-ball ld-bounceAlt fa-2x",
+	"fas fa-stroopwafel ld-metronome fa-2x",
+	"fas fa-fan ld-spin-fast fa-2x",
+	"fas fa-cog ld-swing fa-2x",
+	"fas fa-compact-disc ld-spin-fast fa-2x",
+	"fas fa-crosshairs ld-swim fa-2x",
+	"far fa-compass ld-tick fa-2x",
+	"fas fa-compass fa-pulse fa-2x"
 ]
 const LOADING_SHAPES_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
 
