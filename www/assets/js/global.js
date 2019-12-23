@@ -32,8 +32,38 @@ const LOADING_PATTERNS = [
 	"ld-slide-ltr", "ld-slide-rtl", "ld-slide-ttb", "ld-smash", "ld-spin", "ld-spin-fast", "ld-squeeze",
 	"ld-swim", "ld-swing", "ld-tick-alt", "ld-vortex", "ld-vortex-alt", "ld-wander-h", "ld-wander-v"
 ];
+/**
+ * fa-spin fa-pulse
+
+asterisk
+atom
+bahai
+certificate
+circle-notch
+cog
+compact-disc
+compass fas/far
+crosshairs
+dharmachakra
+fan
+lifering fas/far
+ring
+slash
+snowflake fas/far
+spinner
+stroopwafel
+sun fas/far
+sync
+sync-alt
+
+arrows-alt
+bandcamp
+arrow-*  up down left right
+ban
+baseball-ball
+basketball-ball
+ */
 const LOADING_PREDEFINED = [
-	"ld-ball ld-bounce",
 	"ld-hourglass ld-spin-fast",
 	"ld-ring ld-cycle",
 	"ld-cross ld-vortex",
@@ -42,7 +72,12 @@ const LOADING_PREDEFINED = [
 	"fas fa-sync ld-spin",
 	"fas fa-sync-alt ld-spin",
 	"fas fa-radiation-alt ld-vortex",
-	"fas fa-radiation ld-spin-fast"
+	"fas fa-radiation ld-spin-fast",
+	"fas fa-asterisk ld-spin",
+	"fas fa-bolt ld-bounce",
+	"fas fa-biking ld-move-ltr fa-2x",
+	"fas fa-yin-yang fa-spin",
+	"fas fa-biohazard ld-damage"
 ]
 const LOADING_SHAPES_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
 
@@ -352,7 +387,7 @@ let toggleCoverSpinner = (selector, style = "ld-over") => {
 			let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
 			cover_el.addClass(LOADING_PREDEFINED[rand(LOADING_PREDEFINED.length)])		// predefined pattern
 					.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])	// color
-					.addClass("fa-lg");												// shape size
+					.addClass("fa-lg");													// shape size
 			container.append(cover_el);
 		}
 	}
@@ -845,8 +880,8 @@ let sleep = () => {
 	container.addClass(style);
 	container.addClass("running");
 	let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
-	cover_el.addClass("fas fa-bed ld-swim")
-			.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])
+	let patterns = ["fas fa-bolt ld-bounce", "fas fa-bed ld-swim", "fas fa-biking ld-move-ltr", "fas fa-biohazard ld-damage"];
+	cover_el.addClass(patterns[rand(patterns.length)])
 			.addClass("fa-10x");
 	container.append(cover_el);
 }
