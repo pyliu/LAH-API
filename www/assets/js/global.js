@@ -29,7 +29,7 @@ const LOADING_PATTERNS = [
 const LOADING_PREDEFINED = [
 	"fa fa-snowflake ld-swim fa-2x",
 	"ld-spinner ld-orbit fa-lg",
-	"ld-pie ld-flip fa-lg",
+	"ld-pie ld-flip fa-2x",
 	"fas fa-sync ld-spin fa-lg",
 	"fas fa-spinner fa-spin fa-2x",
 	"fas fa-radiation-alt ld-cycle fa-2x",
