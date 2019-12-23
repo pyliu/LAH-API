@@ -829,8 +829,8 @@ let sleep = () => {
 
 let wakeup = () => {
 	let container = $("body");
-	if (container.hasClass("ld-over-full")) {
-		container.removeClass("ld-over-full");
+	if (container.hasClass("ld-over-full-inverse")) {
+		container.removeClass("ld-over-full-inverse");
 		container.find(".auto-add-spinner").remove();
 		container.removeClass("running");
 	}
