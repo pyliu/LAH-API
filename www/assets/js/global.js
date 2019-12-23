@@ -817,7 +817,7 @@ let sleep = () => {
 	wakeup();
 	let container = $("body");
 	// cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
-	let style = "ld-over-full";
+	let style = "ld-over-full-inverse";
 	container.addClass(style);
 	container.addClass("running");
 	let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
