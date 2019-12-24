@@ -747,7 +747,7 @@ let initUtilApp = () => {
 					okTitle: '關閉',
 					hideHeaderClose: false,
 					centered: true,
-                	scrollable: false,
+                	scrollable: true,
                 	hideFooter: true,
                 	noCloseOnBackdrop: true,
 					contentClass: "shadow hide", // add hide class to .modal-content then use slideDown to show up
