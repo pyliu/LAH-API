@@ -773,9 +773,9 @@ let initUtilApp = () => {
 				if (merged.html) {
 					merged.titleHtml = merged.title;
 					merged.title = undefined;
-					if (typeof message == "array") {
-						// assume the message is VNode array
-						this.$bvModal.msgBoxOk(message, merged);
+					if (typeof message == "object") {
+						// assume the message is VNode
+						this.$bvModal.msgBoxOk([message], merged);
 					} else {
 						const h = this.$createElement;
 						const msgVNode = h('div', { domProps: { innerHTML: message } });

@@ -1,136 +1,4 @@
 if (Vue) {
-    Vue.component("announcement-mgt-dialog", {
-        template: `<div>
-            <div class="form-row">
-                <div class="input-group input-group-sm col">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-annoumcement_code">登記代碼</span>
-                    </div>
-                    <input type="text" id="annoumcement_code" name="annoumcement_code" class="form-control" :value="data[0]" readonly />
-                </div>
-                <div class="input-group input-group-sm col">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-annoumcement_reason">登記原因</span>
-                    </div>
-                    <input type="text" id="annoumcement_reason" name="annoumcement_reason" class="form-control" :value="data[1]" readonly />
-                </div>
-            </div>
-            <div class="form-row mt-1">
-                <div class="input-group input-group-sm col">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" :id="'inputGroup-ann_day_'+data[0]">公告天數</span>
-                    </div>
-                    <select class='no-cache form-control' v-model="day"><option>15</option><option>30</option><option>45</option><option>60</option><option>75</option><option>90</option></select>
-                </div>
-                <div class="input-group input-group-sm col">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" :id="'inputGroup-ann_reg_flag_'+data[0]">先行准登</span>
-                    </div>
-                    <select v-model="flag" class='no-cache form-control'><option>N</option><option>Y</option></select>
-                </div>
-                <div class="filter-btn-group col">
-                    <button :id="'ann_upd_btn_'+data[0]" class="btn btn-sm btn-outline-primary" @click="update">更新</button>
-                </div>
-            </div>
-        </div>`,
-        props: ["data"],
-        data: function(e) {
-            return {
-                reason_code: this.data[0],
-                day: this.data[2],
-                flag: this.data[3]
-            }
-        },
-        methods: {
-            update: function(e) {
-                let reason_code = this.data[0];
-                let day = this.day;
-                let flag = this.flag;
-                if (this.data[2] == day && this.data[3] == flag) {
-                    showAlert({
-                        message: "無變更，不需更新！",
-                        type: "warning"
-                    });
-                    return;
-                }
-                console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
-                let that = this;
-                showConfirm("確定要更新公告資料？", () => {
-                    let form_body = new FormData();
-                    form_body.append("type", "update_announcement_data");
-                    form_body.append("code", reason_code);
-                    form_body.append("day", day);
-                    form_body.append("flag", flag);
-                    
-                    fetch("query_json_api.php", {
-                        method: 'POST',
-                        body: form_body
-                    }).then(response => {
-                        if (response.status != 200) {
-                            throw new Error("XHR連線異常，回應非200");
-                        }
-                        return response.json();
-                    }).then(jsonObj => {
-                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
-                        addNotification({
-                            body: "<strong class='text-success'>更新完成</strong>"
-                        });
-                        // reload the Vue (hack ... not beautiful ... i know)
-                        if (window.announcementMgtVue) {
-                            $("#announcement-mgt").html("<announcement-mgt></announcement-mgt>");
-                            window.announcementMgtVue.$destroy();
-                            window.announcementMgtVue = new Vue({
-                                el: "#announcement-mgt"
-                            });
-                        }
-                        closeModal();
-                    }).catch(ex => {
-                        console.error("announcement-mgt-dialog::update parsing failed", ex);
-                        showAlert({message: "announcement-mgt-dialog::update XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
-                    });
-                    
-                })
-                /*
-                if (confirm("確定要更新公告資料？")) {
-                    let el = $("#ann_upd_btn_"+this.data[0]);
-                    toggle(el);
-                    let form_body = new FormData();
-                    form_body.append("type", "update_announcement_data");
-                    form_body.append("code", reason_code);
-                    form_body.append("day", day);
-                    form_body.append("flag", flag);
-                    fetch("query_json_api.php", {
-                        method: 'POST',
-                        body: form_body
-                    }).then(response => {
-                        if (response.status != 200) {
-                            throw new Error("XHR連線異常，回應非200");
-                        }
-                        return response.json();
-                    }).then(jsonObj => {
-                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
-                        addNotification({
-                            body: "<strong class='text-success'>更新完成</strong>"
-                        });
-                        toggle(el);
-                        closeModal();
-                        // reload the Vue (hack ... not beautiful ... i know)
-                        if (window.announcementMgtVue) {
-                            $("#announcement-mgt").html("<announcement-mgt></announcement-mgt>");
-                            window.announcementMgtVue.$destroy();
-                            window.announcementMgtVue = new Vue({
-                                el: "#announcement-mgt"
-                            });
-                        }
-                    }).catch(ex => {
-                        console.error("announcement-mgt-dialog::update parsing failed", ex);
-                        showAlert({message: "announcement-mgt-dialog::update XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
-                    });
-                }
-                */
-            }
-        }
-    });
     Vue.component("announcement-mgt", {
         template: `<fieldset>
             <legend>公告期限維護<small>(先行准登)</small></legend>
@@ -190,7 +58,7 @@ if (Vue) {
                 });
             }
         },
-        data: function(e) {
+        data: () => {
             return {
                 announcement_data: []
             }
@@ -221,19 +89,15 @@ if (Vue) {
                         if (isEmpty(this.val)) {
                             return;
                         }
-                        let data_array = this.val.split(",");
+                        let vnode = this.$createElement("announcement-mgt-dialog", {
+                            props: {
+                                data: this.val.split(",")
+                            }
+                        });
                         showModal({
                             title: "更新公告資料",
-                            body: `<div id="announcement-mgt-dialog-app"><announcement-mgt-dialog :data="inData"></announcement-mgt-dialog></div>`,
-                            size: "md",
-                            callback: () => {
-                                new Vue({
-                                    el: "#announcement-mgt-dialog-app",
-                                    data: {
-                                        inData: data_array
-                                    }
-                                });
-                            }
+                            body: vnode,
+                            size: "md"
                         });
                     }
                 },
@@ -258,6 +122,102 @@ if (Vue) {
                     setTimeout(() => {
                         that.val = mounted_el.find("#prereg_announcement_select").val();
                     }, 150);    // cache.js delay 100ms to wait Vue instance ready, so here delays 150ms
+                },
+                components: {
+                    "announcement-mgt-dialog": {
+                        template: `<div>
+                            <div class="form-row">
+                                <div class="input-group input-group-sm col">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="inputGroup-annoumcement_code">登記代碼</span>
+                                    </div>
+                                    <input type="text" id="annoumcement_code" name="annoumcement_code" class="form-control" :value="data[0]" readonly />
+                                </div>
+                                <div class="input-group input-group-sm col">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="inputGroup-annoumcement_reason">登記原因</span>
+                                    </div>
+                                    <input type="text" id="annoumcement_reason" name="annoumcement_reason" class="form-control" :value="data[1]" readonly />
+                                </div>
+                            </div>
+                            <div class="form-row mt-1">
+                                <div class="input-group input-group-sm col">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" :id="'inputGroup-ann_day_'+data[0]">公告天數</span>
+                                    </div>
+                                    <select class='no-cache form-control' v-model="day"><option>15</option><option>30</option><option>45</option><option>60</option><option>75</option><option>90</option></select>
+                                </div>
+                                <div class="input-group input-group-sm col">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" :id="'inputGroup-ann_reg_flag_'+data[0]">先行准登</span>
+                                    </div>
+                                    <select v-model="flag" class='no-cache form-control'><option>N</option><option>Y</option></select>
+                                </div>
+                                <div class="filter-btn-group col">
+                                    <button :id="'ann_upd_btn_'+data[0]" class="btn btn-sm btn-outline-primary" @click="update">更新</button>
+                                </div>
+                            </div>
+                        </div>`,
+                        props: ["data"],
+                        data: function(e) {
+                            return {
+                                reason_code: this.data[0],
+                                day: this.data[2],
+                                flag: this.data[3]
+                            }
+                        },
+                        methods: {
+                            update: function(e) {
+                                let reason_code = this.data[0];
+                                let day = this.day;
+                                let flag = this.flag;
+                                if (this.data[2] == day && this.data[3] == flag) {
+                                    showAlert({
+                                        message: "無變更，不需更新！",
+                                        type: "warning"
+                                    });
+                                    return;
+                                }
+                                console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
+                                let that = this;
+                                showConfirm("確定要更新公告資料？", () => {
+                                    let form_body = new FormData();
+                                    form_body.append("type", "update_announcement_data");
+                                    form_body.append("code", reason_code);
+                                    form_body.append("day", day);
+                                    form_body.append("flag", flag);
+                                    
+                                    fetch("query_json_api.php", {
+                                        method: 'POST',
+                                        body: form_body
+                                    }).then(response => {
+                                        if (response.status != 200) {
+                                            throw new Error("XHR連線異常，回應非200");
+                                        }
+                                        return response.json();
+                                    }).then(jsonObj => {
+                                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
+                                        addNotification({
+                                            body: "<strong class='text-success'>更新完成</strong>"
+                                        });
+                                        // reload the Vue (hack ... not beautiful ... i know)
+                                        if (window.announcementMgtVue) {
+                                            $("#announcement-mgt").html("<announcement-mgt></announcement-mgt>");
+                                            window.announcementMgtVue.$destroy();
+                                            window.announcementMgtVue = new Vue({
+                                                el: "#announcement-mgt"
+                                            });
+                                        }
+                                        closeModal();
+                                    }).catch(ex => {
+                                        console.error("announcement-mgt-dialog::update parsing failed", ex);
+                                        showAlert({message: "announcement-mgt-dialog::update XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+                                    });
+                                    
+                                });
+                            }
+                        }
+                    }
                 }
             }
         }

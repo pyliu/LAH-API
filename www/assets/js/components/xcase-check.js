@@ -1,50 +1,4 @@
 if (Vue) {
-    // this puts inside xcase-check will not seeable by dynamic Vue generation
-    Vue.component("xcase-check-item", {
-        template: `<ul style="font-size: 0.9rem">
-            <li v-for="(item, index) in ids">
-                <a href='javascript:void(0)' class='reg_case_id' @click="query">{{item}}</a>
-                <button class='fix_xcase_button btn btn-sm btn-outline-success' :data-id='item' @click.once="fix">修正</button>
-            </li>
-        </ul>`,
-        props: ["ids"],
-        methods: {
-            query: function(e) {
-                xhrRegQueryCaseDialog(e);
-            },
-            fix: function(e) {
-                let id = $(e.target).data("id").replace(/[^a-zA-Z0-9]/g, "");
-                console.log("The problematic xcase id: "+id);
-
-                let body = new FormData();
-                body.append("type", "fix_xcase");
-                body.append("id", id);
-
-                let li = $(e.target).closest("li");
-                $(e.target).remove();
-
-                fetch("query_json_api.php", {
-                    method: "POST",
-                    body: body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
-                }).then(jsonObj => {
-                    let msg = `<strong class='text-success'>${id} 跨所註記修正完成!</strong>`;
-                    if (jsonObj.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        msg = `<span class='text-danger'>${id} 跨所註記修正失敗! (${jsonObj.status})</span>`;
-                    }
-                    addNotification({ message: msg, variant: "success" });
-                    li.html(msg);
-                }).catch(ex => {
-                    console.error("xcase-check-item::fix parsing failed", ex);
-                    showAlert({message: ex.toString(), type: "danger"});
-                });
-            }
-        }
-    });
     Vue.component("xcase-check", {
         template: `<fieldset>
             <legend>跨所註記遺失檢測<small>(一周內)</small></legend>
@@ -91,20 +45,15 @@ if (Vue) {
                     return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        showModal({
-                            title: "<span class='rounded-circle bg-danger'> &emsp; </span>&ensp;<strong class='text-info'>請查看並修正下列案件</strong>",
-                            body: `<div id='xcase_check_item_app_012'><xcase-check-item :ids='found'></xcase-check-item></div>`,
-                            size: "md",
-                            callback: () => {
-                                new Vue({
-                                    el: "#xcase_check_item_app_012",
-                                    data: function() {
-                                        return {
-                                            found: jsonObj.case_ids
-                                        }
-                                    },
-                                });
+                        let vnode = h("xcase-check-item", {
+                            props: {
+                                ids: jsonObj.case_ids
                             }
+                        });
+                        showModal({
+                            title: "<i class='fas fa-circle text-danger'></i>&ensp;<strong class='text-info'>請查看並修正下列案件</strong>",
+                            body: vnode,
+                            size: "md"
                         });
                     } else if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({
@@ -119,6 +68,53 @@ if (Vue) {
                     console.error("xcase-check::check parsing failed", ex);
                     showAlert({message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
                 });
+            }
+        },
+        components: {
+            "xcase-check-item": {
+                template: `<ul style="font-size: 0.9rem">
+                    <li v-for="(item, index) in ids">
+                        <a href='javascript:void(0)' class='reg_case_id' @click="query">{{item}}</a>
+                        <button class='fix_xcase_button btn btn-sm btn-outline-success' :data-id='item' @click.once="fix">修正</button>
+                    </li>
+                </ul>`,
+                props: ["ids"],
+                methods: {
+                    query: function(e) {
+                        xhrRegQueryCaseDialog(e);
+                    },
+                    fix: function(e) {
+                        let id = $(e.target).data("id").replace(/[^a-zA-Z0-9]/g, "");
+                        console.log("The problematic xcase id: "+id);
+        
+                        let body = new FormData();
+                        body.append("type", "fix_xcase");
+                        body.append("id", id);
+        
+                        let li = $(e.target).closest("li");
+                        $(e.target).remove();
+        
+                        fetch("query_json_api.php", {
+                            method: "POST",
+                            body: body
+                        }).then(response => {
+                            if (response.status != 200) {
+                                throw new Error("XHR連線異常，回應非200");
+                            }
+                            return response.json();
+                        }).then(jsonObj => {
+                            let msg = `<strong class='text-success'>${id} 跨所註記修正完成!</strong>`;
+                            if (jsonObj.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                msg = `<span class='text-danger'>${id} 跨所註記修正失敗! (${jsonObj.status})</span>`;
+                            }
+                            addNotification({ message: msg, variant: "success" });
+                            li.html(msg);
+                        }).catch(ex => {
+                            console.error("xcase-check-item::fix parsing failed", ex);
+                            showAlert({message: ex.toString(), type: "danger"});
+                        });
+                    }
+                }
             }
         }
     });
