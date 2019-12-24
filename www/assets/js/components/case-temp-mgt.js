@@ -57,7 +57,7 @@ if (Vue) {
 
                     toggle(e.target);
 
-                    console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "查詢暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
+                    console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢暫存資料回傳狀態碼有問題【${jsonObj.status}】`);
                     
                     let html = "";
                     // jsonObj.raw structure: 0 - Table, 1 - all raw data, 2 - SQL
@@ -66,10 +66,10 @@ if (Vue) {
                         if(jsonObj.raw[i][1].length == 0) {
                             continue;
                         }
-                        html += "● " + jsonObj.raw[i][0] + ": <span class='text-danger'>" + jsonObj.raw[i][1].length + "</span> "
+                        html += `● ${jsonObj.raw[i][0]}: <span class='text-danger'>${jsonObj.raw[i][1].length}</span> `
                         // use saveAs to download backup SQL file
                         if (saveAs) {
-                            let filename_prefix = year + "-" + code + "-" + number;
+                            let filename_prefix = `${year}-${code}-${number}`;
                             // Prepare INS SQL text for BACKUP
                             let INS_SQL = "";
                             for (let y = 0; y < jsonObj.raw[i][1].length; y++) {
@@ -78,16 +78,16 @@ if (Vue) {
                                 let values = [];
                                 for (let key in this_row) {
                                     fields.push(key);
-                                    values.push(isEmpty(this_row[key]) ? "null" : "'" + this_row[key] + "'");
+                                    values.push(isEmpty(this_row[key]) ? "null" : `'${this_row[key]}'`);
                                 }
-                                INS_SQL += "insert into " + jsonObj.raw[i][0] + " (" + fields.join(",") + ")";
-                                INS_SQL += " values (" + values.join(",") + ");\n";
+                                INS_SQL += `insert into ${jsonObj.raw[i][0]} (${fields.join(",")})`;
+                                INS_SQL += ` values (${values.join(",")});\n`;
                             }
-                            html += "　<small><button data-filename='" + filename_prefix + "-" + jsonObj.raw[i][0] + "' class='backup_tbl_temp_data'>備份</button>"
-                                    + "<span class='hide ins_sql'>" + INS_SQL + "</span> "
-                                    + " <button data-tbl='" + jsonObj.raw[i][0] + "' class='clean_tbl_temp_data'>清除</button></small>";
+                            html += `　<small><button data-filename='${filename_prefix}-${jsonObj.raw[i][0]}' class='backup_tbl_temp_data'>備份</button>`
+                                    + `<span class='hide ins_sql'>${INS_SQL}</span> `
+                                    + ` <button data-tbl='${jsonObj.raw[i][0]}' class='clean_tbl_temp_data'>清除</button></small>`;
                         }
-                        html += "<br />　<small>－　" + jsonObj.raw[i][2] + "</small> <br />";
+                        html += `<br />&emsp;<small>－&emsp;${jsonObj.raw[i][2]}</small> <br />`;
                     }
             
                     
