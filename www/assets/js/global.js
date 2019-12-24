@@ -905,5 +905,6 @@ $(document).ready(e => {
 		name: "animated bounceOut",
 		callback: () => { $("#copyright").hide() }
 	}), 10000);
+	$(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
 });
 //]]>
