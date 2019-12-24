@@ -200,13 +200,17 @@ let showPopper = (selector, content, timeout) => {
 	scrollToElement(selector);
 }
 
-let addNotification = opts => {
-	if (typeof opts == "object") {
-		let msg = opts.body || opts.message;
-		opts.variant = opts.type || "default";
+let addNotification = (msg, opts) => {
+	// previous only use one object param
+	if (typeof msg == "object") {
+		let message = msg.body || msg.message;
+		msg.variant = msg.type || "default";
+		window.utilApp.makeToast(message, msg);
+	} else if (typeof msg == "string") {
 		window.utilApp.makeToast(msg, opts);
 	} else {
-		window.utilApp.makeToast(opts);
+		showAlert({message: "addNotification 傳入參數有誤(請查看console)", type: "danger"});
+		console.error(msg, opts);
 	}
 }
 
