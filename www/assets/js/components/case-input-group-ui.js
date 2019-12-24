@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("case-input-group-ui", {
         template: `<div class="form-row">
             <div class="input-group input-group-sm col">
-                <select v-model="year" @change="uiUpdate" @change="getMaxNumber" id="case_update_year" class="form-control w-100" aria-label="年" aria-describedby="inputGroup-case_update_year" required>
+                <select v-model="year" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_year'" class="form-control w-100" aria-label="年" aria-describedby="inputGroup-case_update_year" required>
                     <option>107</option>
                     <option>108</option>
                     <option>109</option>
@@ -12,7 +12,7 @@ if (Vue) {
                 </div>
             </div>
             <div class="input-group input-group-sm col">
-                <select v-model="code" @change="uiUpdate" @change="getMaxNumber" id="case_update_code" class="form-control w-100" data-trigger="manual" data-toggle="popover" data-content="請選擇案件字" title="案件字" data-placement="top" required>
+                <select v-model="code" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_code'" class="form-control w-100" data-trigger="manual" data-toggle="popover" data-content="請選擇案件字" title="案件字" data-placement="top" required>
                     <optgroup v-for="obj in code_data" :label="obj.label">
                         <option v-for="item in obj.options" :value="item.replace(/[^A-Za-z0-9]/g, '')">{{item}}</option>
                     </optgroup>
@@ -22,13 +22,13 @@ if (Vue) {
                 </div>
             </div>
             <div class="input-group input-group-sm col">
-                <input v-model="num" @input="uiUpdate" @keyup.enter="$emit('enter', $event)" type="number" :step="num_step" :min="num_min" max="999999" id="case_update_num" class="form-control w-100" aria-label="號" aria-describedby="inputGroup-case_update_num" required data-trigger="manual" data-toggle="popover" data-content='案件號(最多6碼)' title='案件號' data-placement="top" />
+                <input v-model="num" @input="uiUpdate" @keyup.enter="$emit('enter', $event)" type="number" :step="num_step" :min="num_min" max="999999" :id="prefix+'_case_update_num'" class="form-control w-100" aria-label="號" aria-describedby="inputGroup-case_update_num" required data-trigger="manual" data-toggle="popover" data-content='案件號(最多6碼)' title='案件號' data-placement="top" />
                 <div class="input-group-append">
                     <span class="input-group-text" id="inputGroup-case_update_num">號</span>
                 </div>
             </div>
         </div>`,
-        props: ["type"],
+        props: ["type", "prefix"],
         data: function(e) {
             return {
                 local_reg_case_code: {
@@ -108,15 +108,15 @@ if (Vue) {
         },
         watch: {
             year: function(val) {
-                let evt = this.newCustomEvent('code-updated', val, $(this.$el).find("#case_update_year")[0]);
+                let evt = this.newCustomEvent('code-updated', val, $(this.$el).find(`#${this.prefix}_case_update_year`)[0]);
                 this.$emit("year-updated", evt);
             },
             code: function(val) {
-                let evt = this.newCustomEvent('code-updated', val, $(this.$el).find("#case_update_code")[0]);
+                let evt = this.newCustomEvent('code-updated', val, $(this.$el).find(`#${this.prefix}_case_update_code`)[0]);
                 this.$emit("code-updated", evt);
             },
             num: function(val) {
-                let evt = this.newCustomEvent('code-updated', val, $(this.$el).find("#case_update_num")[0]);
+                let evt = this.newCustomEvent('code-updated', val, $(this.$el).find(`#${this.prefix}_case_update_num`)[0]);
                 this.$emit("num-updated", evt);
             },
         },
@@ -149,9 +149,9 @@ if (Vue) {
             let that = this;
             let mounted_el = $(this.$el);
             setTimeout(() => {
-                this.year = mounted_el.find("#case_update_year").val();
-                this.code = mounted_el.find("#case_update_code").val();
-                this.num = mounted_el.find("#case_update_num").val();
+                this.year = mounted_el.find(`#${this.prefix}_case_update_year`).val();
+                this.code = mounted_el.find(`#${this.prefix}_case_update_code`).val();
+                this.num = mounted_el.find(`#${this.prefix}_case_update_num`).val();
                 that.uiUpdate(e);
             }, 150);    // cache.js delay 100ms to wait Vue instance ready, so here delays 150ms
         }

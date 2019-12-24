@@ -4,7 +4,7 @@ if (Vue) {
             <legend>案件暫存檔清除</legend>
             <div class="form-row">
             <div class="col-9">
-                <case-input-group-ui @update="handleUpdate" @enter="query" type="reg"></case-input-group-ui>
+                <case-input-group-ui @update="handleUpdate" @enter="query" type="reg" prefix="case_temp"></case-input-group-ui>
             </div>
             <div class="filter-btn-group col-3">
                 <button @click="query" class="btn btn-sm btn-outline-primary">查詢</button>
