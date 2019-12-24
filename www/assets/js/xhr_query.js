@@ -1795,11 +1795,11 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 
 	if ($(selector).length > 0) {
 		$(selector).html(vue_html);
-		addAnimatedCSS(selector, { name: "pulse" });
 		new Vue({
 			el: "#user_info_app",
 			components: [ "b-card", "b-link", "b-badge" ]
 		});
+		addAnimatedCSS(selector, { name: "pulse" });
 	} else {
 		showModal({
 			title: "使用者資訊",
