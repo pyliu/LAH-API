@@ -37,6 +37,7 @@ if (Vue) {
                 body.append("qday", txt);
 
                 const h = this.$createElement;
+
                 fetch("query_json_api.php", {
                     method: "POST",
                     body: body
@@ -47,17 +48,11 @@ if (Vue) {
                     return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-                        addNotification({
-                            message: jsonObj.message,
-                            successSpinner: true
-                        });
+                        addNotification({ message: `<i class='fas fa-circle text-success'></i>&ensp;${jsonObj.message}` });
                     } else {
-                        let vnode = h("easycard-payment-check-item", {
-                            props: { data: jsonObj.raw }
-                        });
                         showModal({
                             title: "<i class='fas fa-circle text-warning'></i>&ensp;<strong class='text-danger'>找到下列資料</strong>",
-                            body: vnode,
+                            body: h("easycard-payment-check-item", { props: { data: jsonObj.raw } }),
                             size: "md"
                         });
                     }

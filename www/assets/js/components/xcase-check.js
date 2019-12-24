@@ -45,11 +45,7 @@ if (Vue) {
                     return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        let vnode = h("xcase-check-item", {
-                            props: {
-                                ids: jsonObj.case_ids
-                            }
-                        });
+                        let vnode = h("xcase-check-item", { props: { ids: jsonObj.case_ids } });
                         showModal({
                             title: "<i class='fas fa-circle text-danger'></i>&ensp;<strong class='text-info'>請查看並修正下列案件</strong>",
                             body: vnode,
@@ -57,8 +53,7 @@ if (Vue) {
                         });
                     } else if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({
-                            message: "目前無跨所註記遺失問題",
-                            successSpinner: true
+                            message: "<i class='fas fa-circle text-success'></i>&ensp;目前無跨所註記遺失問題",
                         });
                     } else {
                         showAlert({message: jsonObj.message, type: "danger"});

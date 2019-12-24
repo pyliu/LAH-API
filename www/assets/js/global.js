@@ -201,15 +201,12 @@ let showPopper = (selector, content, timeout) => {
 }
 
 let addNotification = opts => {
-	let tmp = document.createElement("div");
 	if (typeof opts == "object") {
 		let msg = opts.body || opts.message;
 		opts.variant = opts.type || "default";
-		tmp.innerHTML = msg;
-		window.utilApp.makeToast(tmp.textContent || tmp.innerText || "無法轉譯訊息文字", opts);
+		window.utilApp.makeToast(msg, opts);
 	} else {
-		tmp.innerHTML = opts;
-		window.utilApp.makeToast(tmp.textContent || tmp.innerText || "無法轉譯訊息文字");
+		window.utilApp.makeToast(opts);
 	}
 }
 
@@ -689,8 +686,7 @@ let initUtilApp = () => {
 					solid: true,
 					toaster: "b-toaster-bottom-right",
 					appendToast: true,
-					variant: "default",
-					successSpinner: false
+					variant: "default"
 				}, opts);
 				// Use a shorter name for this.$createElement
 				const h = this.$createElement
@@ -705,22 +701,9 @@ let initUtilApp = () => {
 				);
 				// Pass the VNodes as an array for title
 				merged.title = [vNodesTitle];
-
-				if (merged.successSpinner) {
-					// Create the message
-					const vNodesMsg = h(
-						'p',
-						{ class: ['mb-0'] },
-						[
-							h('b-spinner', { props: { type: 'grow', small: true, variant: 'success' } }),
-							//h('strong', {}, 'toast'),
-							message
-						]
-					)
-					toast_el = this.$bvToast.toast([vNodesMsg], merged);
-				} else {
-					toast_el = this.$bvToast.toast(message, merged);
-				}
+				// use vNode for HTML content
+				const msgVNode = h('div', { domProps: { innerHTML: message } });
+				this.$bvToast.toast([msgVNode], merged);	
 				this.toastCounter++;
 			},
 			showModal: function(id) {
