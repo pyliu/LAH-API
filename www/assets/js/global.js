@@ -289,9 +289,7 @@ let closeModal = callback => {
 	}
 }
 
-let rand = (range) => {
-	return Math.floor(Math.random() * Math.floor(range || 100));
-}
+let rand = (range) => Math.floor(Math.random() * Math.floor(range || 100));
 
 let addLDAnimation = (selector, which) => {
 	let el = clearLDAnimation(selector);
