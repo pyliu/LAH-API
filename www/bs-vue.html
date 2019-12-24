@@ -97,122 +97,8 @@ blockquote img {
         </div>
       </div>
       <div class="row">
-        <div class="col-6">
-          <fieldset>
-            <legend>案件暫存檔清除</legend>
-
-            <div class="form-row">
-              <div class="input-group input-group-sm col">
-                <select id="temp_clr_year" name="temp_clr_year" class="form-control" aria-label="年" aria-describedby="inputGroup-temp_clr_year" required>
-                  <option>107</option>
-                  <option selected>108</option>
-                  <option>109</option>
-                </select>
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-temp_clr_year">年</span>
-                </div>
-              </div>
-              <div class="input-group input-group-sm col">
-              
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-temp_clr_code">字</span>
-                </div>
-              </div>
-              <div class="input-group input-group-sm col">
-                <input type="number" step="10" min="10" max="999999" id="temp_clr_num" name="temp_clr_num" class="form-control" aria-label="號" aria-describedby="inputGroup-temp_clr_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-temp_clr_num">號</span>
-                </div>
-              </div>
-              <div class="filter-btn-group col">
-                <button id="query_temp_clr_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="temp_clr_quote_button" class="btn btn-sm btn-outline-success">備註</button>
-              </div>
-            </div>
-
-            <blockquote id="temp_clr_quote" class="hide" data-title="案件暫存檔清除">
-              <h6 class="text-info">檢查下列的表格</h6>
-              <ul>
-                <!-- // 登記 -->
-                <li>"MOICAT.RALID" => "A"   // 土地標示部</li>
-                <li>"MOICAT.RBLOW" => "B"   // 土地所有權部</li>
-                <li>"MOICAT.RCLOR" => "C"   // 他項權利部</li>
-                <li>"MOICAT.RDBID" => "D"   // 建物標示部</li>
-                <li>"MOICAT.REBOW" => "E"   // 建物所有權部</li>
-                <li>"MOICAT.RLNID" => "L"   // 人檔</li>
-                <li>"MOICAT.RRLSQ" => "R"   // 權利標的</li>
-                <li>"MOICAT.RGALL" => "G"   // 其他登記事項</li>
-                <li>"MOICAT.RMNGR" => "M"   // 管理者</li>
-                <li>"MOICAT.RTOGH" => "T"   // 他項權利檔</li>
-                <li>"MOICAT.RHD10" => "H"   // 基地坐落／地上建物</li>
-                <li class="text-danger">"MOICAT.RINDX" => "II"  // 案件異動索引【不會清除】</li>
-                <li>"MOICAT.RINXD" => "ID"</li>
-                <li>"MOICAT.RINXR" => "IR"</li>
-                <li>"MOICAT.RINXR_EN" => "IRE"</li>
-                <li>"MOICAT.RJD14" => "J"</li>
-                <li>"MOICAT.ROD31" => "O"</li>
-                <li>"MOICAT.RPARK" => "P"</li>
-                <li>"MOICAT.RPRCE" => "PB"</li>
-                <li>"MOICAT.RSCNR" => "SR"</li>
-                <li>"MOICAT.RSCNR_EN" => "SRE"</li>
-                <li>"MOICAT.RVBLOW" => "VB"</li>
-                <li>"MOICAT.RVCLOR" => "VC"</li>
-                <li>"MOICAT.RVGALL" => "VG"</li>
-                <li>"MOICAT.RVMNGR" => "VM"</li>
-                <li>"MOICAT.RVPON" => "VP"  // 重測/重劃暫存</li>
-                <li>"MOICAT.RVRLSQ" => "VR"</li>
-                <li>"MOICAT.RXIDD04" => "ID"</li>
-                <li>"MOICAT.RXLND" => "XL"</li>
-                <li>"MOICAT.RXPRI" => "XP"</li>
-                <li>"MOICAT.RXSEQ" => "XS"</li>
-                <li>"MOICAT.B2104" => "BR"</li>
-                <li>"MOICAT.B2118" => "BR"</li>
-                <li>"MOICAT.BGALL" => "G"</li>
-                <li>"MOICAT.BHD10" => "H"</li>
-                <li>"MOICAT.BJD14" => "J"</li>
-                <li>"MOICAT.BMNGR" => "M"</li>
-                <li>"MOICAT.BOD31" => "O"</li>
-                <li>"MOICAT.BPARK" => "P"</li>
-                <li>"MOICAT.BRA26" => "C"</li>
-                <li>"MOICAT.BRLSQ" => "R"</li>
-                <li>"MOICAT.BXPRI" => "XP"</li>
-                <li>"MOICAT.DGALL" => "G"</li>
-                <!-- // 地價 -->
-                <li>"MOIPRT.PPRCE" => "MA"</li>
-                <li>"MOIPRT.PGALL" => "GG"</li>
-                <li>"MOIPRT.PBLOW" => "LA"</li>
-                <li>"MOIPRT.PALID" => "KA"</li>
-                <li>"MOIPRT.PNLPO" => "NA"</li>
-                <li>"MOIPRT.PBLNV" => "BA"</li>
-                <li>"MOIPRT.PCLPR" => "CA"</li>
-                <li>"MOIPRT.PFOLP" => "FA"</li>
-                <li>"MOIPRT.PGOBP" => "GA"</li>
-                <li>"MOIPRT.PAPRC" => "AA"</li>
-                <li>"MOIPRT.PEOPR" => "EA"</li>
-                <li>"MOIPRT.POA11" => "OA"</li>
-                <li>"MOIPRT.PGOBPN" => "GA"</li>
-                <!--<li>"MOIPRC.PKCLS" => "KK"</li>-->
-                <li>"MOIPRT.PPRCE" => "MA"</li>
-                <li>"MOIPRT.P76SCRN" => "SS"</li>
-                <li>"MOIPRT.P21T01" => "TA"</li>
-                <li>"MOIPRT.P76ALID" => "AS"</li>
-                <li>"MOIPRT.P76BLOW" => "BS"</li>
-                <li>"MOIPRT.P76CRED" => "BS"</li>
-                <li>"MOIPRT.P76INDX" => "II"</li>
-                <li>"MOIPRT.P76PRCE" => "UP"</li>
-                <li>"MOIPRT.P76SCRN" => "SS"</li>
-                <li>"MOIPRT.PAE0301" => "MA"</li>
-                <li>"MOIPRT.PB010" => "TP"</li>
-                <li>"MOIPRT.PB014" => "TB"</li>
-                <li>"MOIPRT.PB015" => "TB"</li>
-                <li>"MOIPRT.PB016" => "TB"</li>
-                <li>"MOIPRT.PHIND" => "II"</li>
-                <li>"MOIPRT.PNLPO" => "NA"</li>
-                <li>"MOIPRT.POA11" => "OA"</li>
-              </ul>
-            </blockquote>
-            <div id="temp_clr_display" class="message"></div>
-          </fieldset>
+        <div id="case-temp-mgt" class="col-6">
+          <case-temp-mgt></case-temp-mgt>
         </div>
         <div class="col-6">
           <fieldset>
@@ -386,6 +272,7 @@ blockquote img {
   <script src="assets/js/components/announcement-mgt.js"></script>
   <script src="assets/js/components/case-input-group-ui.js"></script>
   <script src="assets/js/components/case-state-mgt.js"></script>
+  <script src="assets/js/components/case-temp-mgt.js"></script>
 
   <script type="text/javascript">
     $(document).ready(e => {
@@ -399,6 +286,7 @@ blockquote img {
       window.ezCardPaymentCheckVue = new Vue({el: "#easycard-payment-check"});
       window.announcementMgtVue = new Vue({el: "#announcement-mgt"});
       window.caseStateMgtVue = new Vue({el: "#case-state-mgt"});
+      window.caseTempMgtVue = new Vue({el: "#case-temp-mgt"});
 
       // query EXPAC items event
       $("#expac_query_button").on("click", xhrGetExpacItems);
@@ -423,16 +311,6 @@ blockquote img {
         code_id: "sync_x_case_code",
         year_id: "sync_x_case_year",
         number_id: "sync_x_case_num"
-      }));
-
-      // clear temp data
-      $("#query_temp_clr_button").on("click", xhrQueryTempData);
-      bindPressEnterEvent("#temp_clr_num", xhrQueryTempData);
-      // clear temp code event
-      $("#temp_clr_code").on("change", xhrGetCaseLatestNum.bind({
-        code_id: "temp_clr_code",
-        year_id: "temp_clr_year",
-        number_id: "temp_clr_num"
       }));
     });
   </script>
