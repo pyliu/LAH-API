@@ -29,7 +29,7 @@ if (Vue) {
             query: function(e) {
                 let data = {year: this.year, code: this.code, num: this.num};
                 if (!checkCaseUIData(data)) {
-                    addNotification({body: `輸入資料格式有誤，無法查詢 ${data.year}-${data.code}-${data.num}`});
+                    addNotification({message: `輸入資料格式有誤，無法查詢 ${data.year}-${data.code}-${data.num}`, type: "warning"});
                     return false;
                 }
                 let year = this.year;

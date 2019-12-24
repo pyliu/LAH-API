@@ -1284,7 +1284,7 @@ let xhrZipLog = e => {
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 }
-
+/*
 let xhrQueryTempData = e => {
 	if (!validateCaseInput("#temp_clr_year", "#temp_clr_code", "#temp_clr_num", "#temp_clr_display")) {
 		return false;
@@ -1456,7 +1456,7 @@ let xhrClearTempData = function(e) {
 		});
 	});
 }
-
+*/
 let xhrUpdateRegCaseCol = function(arguments) {
 	if ($(arguments.el).length > 0) {
 		// remove the button

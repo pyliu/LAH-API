@@ -869,6 +869,7 @@ $(document).ready(e => {
 	initDatepicker();
 	initWatchdog();
 	initUtilApp();
+	/*
 	setTimeout(function () {
 		$("fieldset").each(function(idx, el) {
 			$(el).on("mouseenter", function(e) {
@@ -877,6 +878,7 @@ $(document).ready(e => {
 		});
 		$(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
 	}, 150);
+	*/
 	/**
 	 * detect page idle and add animation for fun
 	 */
@@ -900,7 +902,7 @@ $(document).ready(e => {
 	}
 	// hide footer after 10s
 	setTimeout(() => addAnimatedCSS("#copyright", {
-		name: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)].out,
+		name: "animated bounceOut",
 		callback: () => { $("#copyright").hide() }
 	}), 10000);
 });
