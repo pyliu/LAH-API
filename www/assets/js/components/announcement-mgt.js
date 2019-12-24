@@ -26,6 +26,7 @@ if (Vue) {
             clear: function(e) {
                 let that = this;
                 showConfirm("請確認要是否要清除所有登記原因的准登旗標？", () => {
+                    toggle(e.target);
                     let form_body = new FormData();
                     form_body.append("type", "clear_announcement_flag");
                     fetch("query_json_api.php", {
@@ -40,6 +41,7 @@ if (Vue) {
                         console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + jsonObj.status + "】");
                         addNotification({ message: "<strong class='text-success'>已全部清除完成</strong>", type: "success" });
                         that.reload();
+                        toggle(e.target);
                     }).catch(ex => {
                         console.error("announcement-mgt::clear parsing failed", ex);
                         showAlert({message: "announcement-mgt::clear XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
