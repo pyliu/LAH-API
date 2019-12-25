@@ -669,7 +669,8 @@ let initUtilApp = () => {
 			toastCounter: 0,
 			openConfirm: false,
 			confirmAnswer: false,
-			transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)]
+			transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)],
+			callback_queue: []
 		},
 		methods: {
 			// make simple, short popup notice message
@@ -713,7 +714,8 @@ let initUtilApp = () => {
 				let modal_content = $(`#${id} .modal-content`);
 				modal_content.removeClass("hide");
 				addAnimatedCSS(modal_content, {
-					name: that.transition.in
+					name: that.transition.in,
+					callback: this.callback_queue.pop()
 				});
 			},
 			hideModal: function(id) {
@@ -734,6 +736,7 @@ let initUtilApp = () => {
 						name: that.transition.out,
 						callback: () => {
 							$(`#${id}___BV_modal_outer_`).remove();
+							$(".popover").remove();
 						}
 					});
 				}
@@ -768,7 +771,7 @@ let initUtilApp = () => {
 					}
 					// to initialize Vue component purpose
 					if (merged.callback && typeof merged.callback == "function") {
-						setTimeout(merged.callback, 50);
+						this.callback_queue.push(merged.callback);
 					}
 				} else {
 					this.$bvModal.msgBoxOk(message, merged);
