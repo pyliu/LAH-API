@@ -301,7 +301,7 @@ switch ($_POST["type"]) {
 	case "expaa":
 		$log->info("XHR [expaa] 查詢規費資料【".$_POST["qday"].", ".$_POST["num"]."】請求");
 		// make total number length is 7
-		$rows = $query->getExpaaData($_POST["qday"], str_pad($_POST["num"], 7, '0', STR_PAD_LEFT));
+		$rows = $query->getExpaaData($_POST["qday"], empty($_POST["num"]) ? "" : str_pad($_POST["num"], 7, '0', STR_PAD_LEFT));
 		if (empty($rows)) {
 			$log->info("XHR [expaa] 查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
 			echoErrorJSONString("查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
