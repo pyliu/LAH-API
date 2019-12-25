@@ -794,7 +794,10 @@ let initUtilApp = () => {
 					centered: true,
 					contentClass: "shadow"
 				}, opts);
-				this.$bvModal.msgBoxConfirm(message, merged)
+				// use HTML content
+				const h = this.$createElement;
+				const msgVNode = h('div', { domProps: { innerHTML: message } });
+				this.$bvModal.msgBoxConfirm([msgVNode], merged)
 				.then(value => {
 					this.confirmAnswer = value;
 					if (this.confirmAnswer && merged.callback && typeof merged.callback == "function") {

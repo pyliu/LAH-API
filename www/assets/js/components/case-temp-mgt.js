@@ -83,9 +83,9 @@ if (Vue) {
                                 INS_SQL += `insert into ${jsonObj.raw[i][0]} (${fields.join(",")})`;
                                 INS_SQL += ` values (${values.join(",")});\n`;
                             }
-                            html += `　<small><button data-filename='${filename_prefix}-${jsonObj.raw[i][0]}' class='backup_tbl_temp_data'>備份</button>`
+                            html += `　<small><button id='backup_temp_btn_${i}' data-clean-btn-id='clean_temp_btn_${i}' data-filename='${filename_prefix}-${jsonObj.raw[i][0]}' class='backup_tbl_temp_data btn btn-sm btn-outline-primary'>備份</button>`
                                     + `<span class='hide ins_sql'>${INS_SQL}</span> `
-                                    + ` <button data-tbl='${jsonObj.raw[i][0]}' class='clean_tbl_temp_data'>清除</button></small>`;
+                                    + ` <button id='clean_temp_btn_${i}' data-tbl='${jsonObj.raw[i][0]}' data-backup-btn-id='backup_temp_btn_${i}' class='clean_tbl_temp_data btn btn-sm btn-outline-danger'>清除</button></small>`;
                         }
                         html += `<br />&emsp;<small>－&emsp;${jsonObj.raw[i][2]}</small> <br />`;
                     }
@@ -99,25 +99,33 @@ if (Vue) {
                         return;
                     }
 
-                    html += "<button id='temp_backup_button' class='mt-2' data-trigger='manual' data-toggle='popover' data-placement='bottom'>全部備份</button> <button class='mt-2' id='temp_clr_button'>全部清除</button>";
+                    html += `
+                        <button id='temp_backup_button' data-clean-btn-id='temp_clean_button' class='mt-2 btn btn-sm btn-outline-primary' data-trigger='manual' data-toggle='popover' data-placement='bottom'>全部備份</button>
+                        <button id='temp_clean_button' data-backup-btn-id='temp_backup_button' class='mt-2 btn btn-sm btn-outline-danger' id='temp_clr_button'>全部清除</button>
+                    `;
                     
                     showModal({
                         body: html,
                         title: year + "-" + code + "-" + number + " 案件暫存檔統計",
                         size: "lg",
                         callback: () => {
-                            $("#temp_clr_button").off("click").on("click", that.fix.bind({
+                            showPopper("#temp_backup_button", "請「備份後」再選擇清除", 5000);
+                            
+                            $("#temp_clean_button").off("click").on("click", e => that.fix({
                                 year: year,
                                 code: code,
                                 number: number,
-                                table: ""
+                                table: "",
+                                target: e.target,
+                                clean_all: true
                             }));
             
-                            showPopper("#temp_backup_button", "請「備份後」再選擇清除", 5000);
-                            
                             $("#temp_backup_button").off("click").on("click", (e) => {
                                 toggle(e.target);
                                 let filename = year + "-" + code + "-" + number + "-TEMP-DATA";
+                                let clean_btn_id = $(e.target).data("clean-btn-id");
+                                // attach clicked flag to the clean button
+                                $(`#${clean_btn_id}`).data("backup_flag", true);
                                 // any kind of extension (.txt,.cpp,.cs,.bat)
                                 filename += ".sql";
                                 let all_content = "";
@@ -133,6 +141,9 @@ if (Vue) {
                             // attach backup event to the buttons
                             $(".backup_tbl_temp_data").off("click").on("click", e => {
                                 let filename = $(e.target).data("filename");
+                                let clean_btn_id = $(e.target).data("clean-btn-id");
+                                // attach clicked flag to the clean button
+                                $(`#${clean_btn_id}`).data("backup_flag", true);
                                 // any kind of extension (.txt,.cpp,.cs,.bat)
                                 filename += ".sql";
                                 let hidden_data = $(e.target).next("span"); // find DIRECT next span of the clicked button
@@ -143,64 +154,62 @@ if (Vue) {
                                 saveAs(blob, filename);
                             });
                             // attach clean event to the buttons
-                            $(".clean_tbl_temp_data").off("click").on("click", e => {
-                                let table_name = $(e.target).data("tbl");
-                                that.fix.call({
+                            $(".clean_tbl_temp_data").off("click").on("click", e => that.fix({
                                     year: year,
                                     code: code,
                                     number: number,
-                                    table: table_name
-                                }, e);
-                            });
+                                    table: $(e.target).data("tbl"),
+                                    target: e.target,
+                                    clean_all: false
+                                })
+                            );
                         }
                     });
                 }).catch(ex => {
                     console.error("case-temp-mgt::query parsing failed", ex);
-                    showAlert({ message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger" });
+                    showAlert({ message: "case-temp-mgt::query XHR連線查詢有問題!!【" + ex + "】", type: "danger" });
                 });
             },
-            fix: function(e) {
-                let bindArgsObj = this;
-
-                let msg = "確定要清除案件 " + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + " 全部暫存檔?\n ★ 警告：無法復原，除非你有備份!!";
-                if (!isEmpty(bindArgsObj.table)) {
-                    msg = "確定要清除案件 " + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + " " + bindArgsObj.table + " 表格的暫存檔?\n ★ 警告：無法復原，除非你有備份!!";
-                }
-
-                if(!confirm(msg)) {
+            fix: function(data) {
+                let backup_flag = $(data.target).data("backup_flag");
+                console.log(data)
+                if (backup_flag !== true) {
+                    showAlert({ message: "請先點選備份按鍵!", type: "warning" });
+                    addAnimatedCSS(`#${$(data.target).data("backup-btn-id")}`, { name: "tada" });
                     return;
                 }
-
-                $(e.target).remove();
-
-                let form_body = new FormData();
-                form_body.append("type", "clear_temp_data");
-                form_body.append("year", bindArgsObj.year);
-                form_body.append("code", bindArgsObj.code);
-                form_body.append("number", bindArgsObj.number);
-                form_body.append("table", bindArgsObj.table);
-                fetch("query_json_api.php", {
-                    method: 'POST',
-                    body: form_body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
-                }).then(jsonObj => {
-                    console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
-                    addNotification({
-                        message: "暫存檔已清除完成。<p>" + bindArgsObj.year + "-" + bindArgsObj.code + "-" + bindArgsObj.number + (bindArgsObj.table ? " 表格：" + bindArgsObj.table : "") + "</p>",
-                    });
-                    if (!bindArgsObj.table) {
-                        // means click clean all button
-                        closeModal();
-                    }
-                }).catch(ex => {
-                    console.error("case-temp-mgt::fix parsing failed", ex);
-                    showAlert({
-                        message: "case-temp-mgt::fix XHR連線查詢有問題!!【" + ex + "】",
-                        type: "danger"
+                let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + data.year + "-" + data.code + "-" + data.number + (data.clean_all ? " 全部暫存檔?" : " " + data.table + " 表格的暫存檔?");
+                showConfirm(msg, () => {
+                    $(data.target).remove();
+                    let form_body = new FormData();
+                    form_body.append("type", "clear_temp_data");
+                    form_body.append("year", data.year);
+                    form_body.append("code", data.code);
+                    form_body.append("number", data.number);
+                    form_body.append("table", data.table);
+                    fetch("query_json_api.php", {
+                        method: 'POST',
+                        body: form_body
+                    }).then(response => {
+                        if (response.status != 200) {
+                            throw new Error("XHR連線異常，回應非200");
+                        }
+                        return response.json();
+                    }).then(jsonObj => {
+                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
+                        addNotification({
+                            message: "暫存檔已清除完成。<p>" + data.year + "-" + data.code + "-" + data.number + (data.table ? " 表格：" + data.table : "") + "</p>",
+                            type: "success"
+                        });
+                        if (data.clean_all) {
+                            closeModal();
+                        }
+                    }).catch(ex => {
+                        console.error("case-temp-mgt::fix parsing failed", ex);
+                        showAlert({
+                            message: "case-temp-mgt::fix XHR連線查詢有問題!!【" + ex + "】",
+                            type: "danger"
+                        });
                     });
                 });
             },
