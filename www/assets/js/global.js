@@ -50,7 +50,8 @@ const LOADING_PREDEFINED = [
 	"far fa-compass ld-tick fa-2x",
 	"fas fa-compass fa-pulse fa-2x",
 	"fas fa-anchor ld-swing fa-2x",
-	"fas fa-fingerprint ld-damage fa-2x"
+	"fas fa-fingerprint ld-damage fa-2x",
+	"fab fa-angellist ld-metronome fa-2x"
 ]
 const LOADING_SHAPES_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
 
@@ -847,8 +848,8 @@ let sleep = () => {
 	let cover_el = $(jQuery.parseHTML('<div id="screensaver" class="ld auto-add-spinner"></div>'));
 	let patterns = [
 		"fas fa-bolt ld-bounce", "fas fa-bed ld-swim", "fas fa-biking ld-move-ltr",
-		"fas fa-biohazard ld-damage", "fas fa-snowboarding ld-rush-ltr", "fas fa-anchor ld-swing",
-		"fas fa-fingerprint ld-damage"
+		"fas fa-biohazard ld-metronome", "fas fa-snowboarding ld-rush-ltr", "fas fa-anchor ld-swing",
+		"fas fa-fingerprint ld-damage", "fab fa-angellist ld-metronome"
 	];
 	cover_el.addClass(patterns[rand(patterns.length)])
 			.addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])
@@ -910,7 +911,7 @@ $(document).ready(e => {
 	}
 	// hide footer after 10s
 	setTimeout(() => addAnimatedCSS("#copyright", {
-		name: "animated bounceOut",
+		name: "animated slideOutDown",
 		callback: () => { $("#copyright").hide() }
 	}), 10000);
 	$(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
