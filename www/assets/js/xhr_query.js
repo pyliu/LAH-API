@@ -558,7 +558,7 @@ let xhrCompareXCase = e => {
 			name: "rollOut",
 			callback: () => {
 				fieldset.remove();
-				container.append(jQuery.parseHTML('<i class="fas fa-ban text-danger fa-3x mx-auto"></i>')).addClass("my-auto text-center");
+				container.append(jQuery.parseHTML('<i class="ld ld-breath fas fa-ban text-danger fa-3x mx-auto"></i>')).addClass("my-auto text-center");
 			}
 		});
 		console.error("xhrCompareXCase parsing failed", ex);
