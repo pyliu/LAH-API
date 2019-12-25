@@ -265,7 +265,8 @@ switch ($_POST["type"]) {
 		break;
 	case "expac":
 		$log->info("XHR [expac] 查詢規費收費項目【".$_POST["year"].", ".$_POST["num"]."】請求");
-		$rows = $query->getExpacItems($_POST["year"], $_POST["num"]);
+		// make total number length is 7
+		$rows = $query->getExpacItems($_POST["year"], str_pad($_POST["num"], 7, '0', STR_PAD_LEFT));
 		if (empty($rows)) {
 			$log->info("XHR [expac] 查無資料");
 			echoErrorJSONString();
@@ -282,7 +283,8 @@ switch ($_POST["type"]) {
 		break;
 	case "mod_expac":
 		$log->info("XHR [mod_expac] 修正規費金額【".$_POST["year"].", ".$_POST["num"].", ".$_POST["code"].", ".$_POST["amount"]."】請求");
-		$result_flag = $query->modifyExpacItem($_POST["year"], $_POST["num"], $_POST["code"], $_POST["amount"]);
+		// make total number length is 7
+		$result_flag = $query->modifyExpacItem($_POST["year"], str_pad($_POST["num"], 7, '0', STR_PAD_LEFT), $_POST["code"], $_POST["amount"]);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -298,7 +300,8 @@ switch ($_POST["type"]) {
 		break;
 	case "expaa":
 		$log->info("XHR [expaa] 查詢規費資料【".$_POST["qday"].", ".$_POST["num"]."】請求");
-		$rows = $query->getExpaaData($_POST["qday"], $_POST["num"]);
+		// make total number length is 7
+		$rows = $query->getExpaaData($_POST["qday"], str_pad($_POST["num"], 7, '0', STR_PAD_LEFT));
 		if (empty($rows)) {
 			$log->info("XHR [expaa] 查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
 			echoErrorJSONString("查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
@@ -341,7 +344,7 @@ switch ($_POST["type"]) {
 	case "expaa_AA100_update":
 		$column = $_POST["type"] == "expaa_AA09_update" ? "AA09" : "AA100";
 		$log->info("XHR [expaa_AA09_update/expaa_AA100_update] 修正規費資料【$column".", ".$_POST["date"].", ".$_POST["number"].", ".$_POST["update_value"]."】請求");
-		$result_flag = $query->updateExpaaData($column, $_POST["date"], $_POST["number"], $_POST["update_value"]);
+		$result_flag = $query->updateExpaaData($column, $_POST["date"], str_pad($_POST["number"], 7, '0', STR_PAD_LEFT), $_POST["update_value"]);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -517,7 +520,7 @@ switch ($_POST["type"]) {
 		break;
 	case "query_temp_data":
 		$log->info("XHR [query_temp_data] 查詢暫存資料【".$_POST["year"].", ".$_POST["code"].", ".$_POST["number"]."】請求");
-		$rows = $query->getCaseTemp($_POST["year"], $_POST["code"], $_POST["number"]);
+		$rows = $query->getCaseTemp($_POST["year"], $_POST["code"], str_pad($_POST["number"], 6, '0', STR_PAD_LEFT));
 		if (!empty($rows)) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -533,7 +536,7 @@ switch ($_POST["type"]) {
 		break;
 	case "clear_temp_data":
 		$log->info("XHR [clear_temp_data] 清除暫存【".$_POST["year"].", ".$_POST["code"].", ".$_POST["number"].", ".$_POST["table"]."】請求");
-		$result_flag = $query->clearCaseTemp($_POST["year"], $_POST["code"], $_POST["number"], $_POST["table"]);
+		$result_flag = $query->clearCaseTemp($_POST["year"], $_POST["code"], str_pad($_POST["number"], 6, '0', STR_PAD_LEFT), $_POST["table"]);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,

@@ -361,19 +361,6 @@ let xhrGetExpacItems = function(e) {
 		return;
 	}
 
-	// make total pc number length is 7
-	let offset = 7 - number.length;
-	if (offset < 0) {
-		showPopper("#expac_query_number");
-		return;
-	} else if (offset > 0) {
-		for (let i = 0; i < offset; i++) {
-			number = "0" + number;
-		}
-	}
-
-	$("#expac_query_number").val(number);
-
 	// should be the query button (#expac_query_button)
 	toggle("#expac_query_button");
 	// clean display area before querying
@@ -701,18 +688,6 @@ let xhrGetExpaaData = function(e) {
 			showPopper("#expaa_query_number");
 			return;
 		}
-
-		// make total number length is 7
-		let offset = 7 - number.length;
-		if (offset < 0) {
-			showPopper("#expaa_query_number");
-			return;
-		} else if (offset > 0) {
-			for (let i = 0; i < offset; i++) {
-				number = "0" + number;
-			}
-		}
-		$("#expaa_query_number").val(number);
 	}
 
 	toggle("[id*=expaa_query_]");
