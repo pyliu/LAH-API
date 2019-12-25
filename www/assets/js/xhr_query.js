@@ -550,6 +550,17 @@ let xhrCompareXCase = e => {
 		}
 		toggle("#sync_x_case_button");
 	}).catch(ex => {
+		toggle("#sync_x_case_button");
+		// remove the fieldset since the function is not working ... 
+		let container = $("#sync_x_case_button").closest("div.col-6");
+		let fieldset = $("#sync_x_case_button").closest("fieldset");
+		addAnimatedCSS(fieldset, {
+			name: "rollOut",
+			callback: () => {
+				fieldset.remove();
+				container.append(jQuery.parseHTML('<i class="fas fa-ban text-danger fa-3x mx-auto"></i>')).addClass("my-auto text-center");
+			}
+		});
 		console.error("xhrCompareXCase parsing failed", ex);
 		showAlert({
 			message: ex.toString(),
