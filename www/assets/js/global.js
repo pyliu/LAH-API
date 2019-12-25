@@ -41,7 +41,7 @@ const LOADING_PREDEFINED = [
 	"fas fa-yin-yang fa-spin fa-2x",
 	"fas fa-biohazard ld-damage fa-2x",
 	"fas fa-baseball-ball ld-bounce fa-2x",
-	"fas fa-basketball-ball ld-bounceAlt fa-2x",
+	"fas fa-basketball-ball ld-beat fa-2x",
 	"fas fa-stroopwafel ld-metronome fa-2x",
 	"fas fa-fan ld-spin-fast fa-2x",
 	"fas fa-cog ld-swing fa-2x",
