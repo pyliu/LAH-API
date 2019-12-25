@@ -322,6 +322,8 @@ let addAnimatedCSS = function(selector, opts) {
 		function handleAnimationEnd() {
 			node.removeClass(`animated ${opts.name}`);
 			node.off('animationend');
+			// clear ld animation also
+			clearLDAnimation(selector);
 			if (typeof opts.callback === 'function') opts.callback();
 		}
 		node.on('animationend', handleAnimationEnd);
