@@ -61,37 +61,11 @@ if (Vue) {
                     
                     let html = "";
                     // jsonObj.raw structure: 0 - Table, 1 - all raw data, 2 - SQL
-                    for (let i = 0; i < jsonObj.data_count; i++) {
-                        // check if there is no temp data in the array
-                        if(jsonObj.raw[i][1].length == 0) {
-                            continue;
-                        }
-                        html += `● ${jsonObj.raw[i][0]}: <span class='text-danger'>${jsonObj.raw[i][1].length}</span> `
-                        // use saveAs to download backup SQL file
-                        if (saveAs) {
-                            let filename_prefix = `${year}-${code}-${number}`;
-                            // Prepare INS SQL text for BACKUP
-                            let INS_SQL = "";
-                            for (let y = 0; y < jsonObj.raw[i][1].length; y++) {
-                                let this_row = jsonObj.raw[i][1][y];
-                                let fields = [];
-                                let values = [];
-                                for (let key in this_row) {
-                                    fields.push(key);
-                                    values.push(isEmpty(this_row[key]) ? "null" : `'${this_row[key]}'`);
-                                }
-                                INS_SQL += `insert into ${jsonObj.raw[i][0]} (${fields.join(",")})`;
-                                INS_SQL += ` values (${values.join(",")});\n`;
-                            }
-                            html += `　<small><button id='backup_temp_btn_${i}' data-clean-btn-id='clean_temp_btn_${i}' data-filename='${filename_prefix}-${jsonObj.raw[i][0]}' class='backup_tbl_temp_data btn btn-sm btn-outline-primary'>備份</button>`
-                                    + `<span class='hide ins_sql'>${INS_SQL}</span> `
-                                    + ` <button id='clean_temp_btn_${i}' data-tbl='${jsonObj.raw[i][0]}' data-backup-btn-id='backup_temp_btn_${i}' class='clean_tbl_temp_data btn btn-sm btn-outline-danger'>清除</button></small>`;
-                        }
-                        html += `<br />&emsp;<small>－&emsp;${jsonObj.raw[i][2]}</small> <br />`;
-                    }
-            
-                    
-                    if (isEmpty(html)) {
+                    let filtered = jsonObj.raw.filter(function(item, index, array) {
+                        return item[1].length > 0;
+                    });
+
+                    if (filtered.length == 0) {
                         addNotification({
                             message: "案件 " + year + "-" + code + "-" + number + " 查無暫存資料",
                             type: "warning"
@@ -99,6 +73,31 @@ if (Vue) {
                         return;
                     }
 
+                    filtered.forEach(function(item, i, array) {
+                        html += `● ${item[0]}: <span class='text-danger'>${item[1].length}</span> `
+                        // use saveAs to download backup SQL file
+                        if (saveAs) {
+                            let filename_prefix = `${year}-${code}-${number}`;
+                            // Prepare INS SQL text for BACKUP
+                            let INS_SQL = "";
+                            for (let y = 0; y < item[1].length; y++) {
+                                let this_row = item[1][y];
+                                let fields = [];
+                                let values = [];
+                                for (let key in this_row) {
+                                    fields.push(key);
+                                    values.push(isEmpty(this_row[key]) ? "null" : `'${this_row[key]}'`);
+                                }
+                                INS_SQL += `insert into ${item[0]} (${fields.join(",")})`;
+                                INS_SQL += ` values (${values.join(",")});\n`;
+                            }
+                            html += `　<small><button id='backup_temp_btn_${i}' data-clean-btn-id='clean_temp_btn_${i}' data-filename='${filename_prefix}-${item[0]}' class='backup_tbl_temp_data btn btn-sm btn-outline-primary'>備份</button>`
+                                    + `<span class='hide ins_sql'>${INS_SQL}</span> `
+                                    + ` <button id='clean_temp_btn_${i}' data-tbl='${item[0]}' data-backup-btn-id='backup_temp_btn_${i}' class='clean_tbl_temp_data btn btn-sm btn-outline-danger'>清除</button></small>`;
+                        }
+                        html += `<br />&emsp;<small>－&emsp;${item[2]}</small> <br />`;
+                    });
+                    
                     html += `
                         <button id='temp_backup_button' data-clean-btn-id='temp_clean_button' class='mt-2 btn btn-sm btn-outline-primary' data-trigger='manual' data-toggle='popover' data-placement='bottom'>全部備份</button>
                         <button id='temp_clean_button' data-backup-btn-id='temp_backup_button' class='mt-2 btn btn-sm btn-outline-danger' id='temp_clr_button'>全部清除</button>
