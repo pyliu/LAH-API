@@ -276,7 +276,7 @@ let showConfirm = (message, callback) => {
 let closeModal = callback => {
 	window.utilApp.hideModal();
 	if (typeof callback == "function") {
-		setTimeout(callback, 400);
+		setTimeout(callback, 500);
 	}
 }
 
