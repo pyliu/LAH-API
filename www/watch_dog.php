@@ -206,7 +206,7 @@ blockquote img {
                 <select id="expac_query_year" name="expac_query_year" class="form-control no-cache">
                   <option>107</option>
                   <option selected>108</option>
-                  <option selected>109</option>
+                  <option>109</option>
                 </select>
               </div>
               <div class="input-group input-group-sm col">
@@ -259,9 +259,9 @@ blockquote img {
   <script src="assets/js/bootstrap-datepicker.min.js"></script>
   <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
   <!-- Promise library -->
-  <script src="assets/js/polyfill.min.js"></script>
+  <!--<script src="assets/js/polyfill.min.js"></script>-->
   <!-- fetch library -->
-  <script src="assets/js/fetch.min.js"></script>
+  <!-- <script src="assets/js/fetch.min.js"></script> -->
 
   <script src="assets/js/vue.js"></script>
   <script src="assets/js/bootstrap-vue.min.js"></script>
@@ -270,7 +270,7 @@ blockquote img {
   
   <script src="assets/js/cache.js"></script>
   <script src="assets/js/FileSaver.min.js"></script>
-
+  <!-- Vue components -->
   <script src="assets/js/components/xcase-check.js"></script>
   <script src="assets/js/components/easycard-payment-check.js"></script>
   <script src="assets/js/components/announcement-mgt.js"></script>
