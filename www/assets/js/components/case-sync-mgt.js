@@ -115,7 +115,6 @@ if (Vue) {
                             callback: () => {
                                 $("#sync_x_case_confirm_button").off("click").on("click", xhrSyncXCase.bind(id));
                                 $(".sync_column_button").off("click").on("click", xhrSyncXCaseColumn.bind(id));
-                                $("#inst_x_case_confirm_button").off("click").on("click", xhrInsertXCase.bind(id));
                                 $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
                             },
                             size: "lg"
@@ -130,7 +129,7 @@ if (Vue) {
                             </div>`,
                             callback: () => {
                                 $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
-                                $("#inst_x_case_confirm_button").off("click").on("click", xhrInsertXCase.bind(id));
+                                $("#inst_x_case_confirm_button").off("click").on("click", this.instRemoteCase.bind(this, id));
                             },
                             size: "md"
                         });
@@ -168,6 +167,47 @@ if (Vue) {
                     showAlert({
                         message: ex.toString(),
                         type: "danger"
+                    });
+                });
+            },
+            instRemoteCase: function(id) {
+                showConfirm("確定要拉回局端資料新增於本所資料庫(CRSMS)？", function() {
+                    console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
+                    // this binded as case id
+                    let body = new FormData();
+                    body.append("type", "inst_xcase");
+                    body.append("id", id);
+                    $("#inst_x_case_confirm_button").remove();
+                    fetch("query_json_api.php", {
+                        method: "POST",
+                        body: body
+                    }).then(response => {
+                        if (response.status != 200) {
+                            throw new Error("XHR連線異常，回應非200");
+                        }
+                        return response.json();
+                    }).then(jsonObj => {
+                        if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            addNotification({
+                                title: "新增遠端案件資料",
+                                subtitle: id,
+                                message: "新增成功",
+                                type: "success"
+                            });
+                        } else {
+                            addNotification({
+                                title: "新增遠端案件資料",
+                                subtitle: id,
+                                message: jsonObj.message,
+                                type: "danger"
+                            });
+                        }
+                    }).catch(ex => {
+                        console.error("case-sync-mgt::instRemoteCase parsing failed", ex);
+                        showAlert({
+                            message: ex.toString(),
+                            type: "danger"
+                        });
                     });
                 });
             },
