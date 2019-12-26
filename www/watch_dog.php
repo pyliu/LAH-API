@@ -104,56 +104,8 @@ blockquote img {
         <div id="case-temp-mgt" class="col-6">
           <case-temp-mgt></case-temp-mgt>
         </div>
-        <div class="col-6">
-          <fieldset>
-            <legend>同步局端跨所案件資料</legend>
-            <div class="message"><span class="text-danger">※</span>主機IP不在局端<span class="text-info">白名單</span>內將無法使用本功能，目前為<span class="text-danger"><?php echo $_SERVER["SERVER_ADDR"] ?></span>。</div>
-            
-            <div class="form-row">
-              <div class="input-group input-group-sm col">
-                <select id="sync_x_case_year" name="sync_x_case_year" class="form-control" aria-label="年" aria-describedby="inputGroup-sync_x_case_year" required>
-                  <option>107</option>
-                  <option selected>108</option>
-                  <option>109</option>
-                </select>
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-sync_x_case_year">年</span>
-                </div>
-              </div>
-              <div class="input-group input-group-sm col">
-                <select id="sync_x_case_code" name="sync_x_case_code" class="form-control"  data-trigger="manual" data-toggle="popover" data-content='請選擇案件字' title='案件字' data-placement="top" aria-label="年" aria-describedby="inputGroup-sync_x_case_code" required>
-                  <option></option>
-                  <option>HAB1 壢桃登跨</option>
-                  <option>HCB1 壢溪登跨</option>
-                  <option>HDB1 壢楊登跨</option>
-                  <option>HEB1 壢蘆登跨</option>
-                  <option>HFB1 壢德登跨</option>
-                  <option>HGB1 壢平登跨</option>
-                  <option>HHB1 壢山登跨</option>
-              </select>
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-sync_x_case_code">字</span>
-                </div>
-              </div>
-              <div class="input-group input-group-sm col">
-                <input type="number" step="10" min="10" max="999999" id="sync_x_case_num" name="sync_x_case_num" class="form-control" aria-label="號" aria-describedby="inputGroup-sync_x_case_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-sync_x_case_num">號</span>
-                </div>
-              </div>
-              <div class="filter-btn-group col">
-                <button id="sync_x_case_button" class="btn btn-sm btn-outline-primary">比對</button>
-                <button id="sync_x_case_quote_button" class="btn btn-sm btn-outline-success">備註</button>
-              </div>
-            </div>
-            
-            <blockquote id="sync_x_case_quote" class="hide" data-title="同步局端跨所案件資料">
-              <h6>將局端跨所資料同步回本所資料庫</h6>
-              <div><span class="text-danger">※</span>新版跨縣市回寫機制會在每一分鐘時自動回寫，故局端資料有可能會比較慢更新。【2019-06-26】</div>
-              <div><span class="text-danger">※</span>局端針對遠端連線同步異動資料庫有鎖IP，故<span class="text-danger">IP不在局端白名單內的主機將無法使用本功能</span>，目前主機IP為 <span class="text-warning"><?php echo $_SERVER["SERVER_ADDR"] ?></span> 。【2019-10-01】</div>
-            </blockquote>
-            <div id="sync_x_case_display" class="message"></div>
-          </fieldset>
+        <div id="case-sync-mgt"  class="col-6">
+          <case-sync-mgt></case-sync-mgt>
         </div>
       </div>
       <div class="row">
@@ -277,6 +229,7 @@ blockquote img {
   <script src="assets/js/components/case-input-group-ui.js"></script>
   <script src="assets/js/components/case-state-mgt.js"></script>
   <script src="assets/js/components/case-temp-mgt.js"></script>
+  <script src="assets/js/components/case-sync-mgt.js"></script>
 
   <script type="text/javascript">
     $(document).ready(e => {
@@ -290,6 +243,7 @@ blockquote img {
       window.announcementMgtVue = new Vue({el: "#announcement-mgt"});
       window.caseStateMgtVue = new Vue({el: "#case-state-mgt"});
       window.caseTempMgtVue = new Vue({el: "#case-temp-mgt"});
+      window.caseSyncMgtVue = new Vue({el: "#case-sync-mgt"});
 
       // query EXPAC items event
       $("#expac_query_button").on("click", xhrGetExpacItems);
@@ -306,15 +260,6 @@ blockquote img {
       bindPressEnterEvent("input[id*=expaa_query_", xhrGetExpaaData);
       // obselete event
       $("#expaa_add_obsolete_button").on("click", xhrQueryObsoleteFees);
-      
-      // check diff xcase 
-      $("#sync_x_case_button").on("click", xhrCompareXCase);
-      bindPressEnterEvent("#sync_x_case_num", xhrCompareXCase);
-      $("#sync_x_case_code").on("change", xhrGetCaseLatestNum.bind({
-        code_id: "sync_x_case_code",
-        year_id: "sync_x_case_year",
-        number_id: "sync_x_case_num"
-      }));
     });
   </script>
 </body>

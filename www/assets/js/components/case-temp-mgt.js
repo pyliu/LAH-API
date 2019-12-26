@@ -16,8 +16,7 @@ if (Vue) {
             return {
                 year: "108",
                 code: "HB04",
-                num: "000010",
-                dialog: null
+                num: "000010"
             }
         },
         methods: {
