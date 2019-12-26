@@ -144,7 +144,7 @@ let checkCaseUIData = (data) => {
 	let offset = 6 - number.length;
 	if (isEmpty(number) || isNaN(number) || offset < 0) {
 		showAlert({
-			message: `「號」格式有問題，請查明修正【${num}】`,
+			message: `「號」格式有問題，請查明修正【目前：${num}】`,
 			type: "danger"
 		});
 		return false;
@@ -241,17 +241,7 @@ let showAlert = opts => {
 		// singleton inside :D
 		initAlertUI();
 		
-		window.alertApp.show(opts, () => {
-			// normal usage, you want to attach event to the element in the alert window
-			if (typeof opts.callback == "function") {
-				setTimeout(opts.callback, 250);
-			}
-
-			window.alertApp.autohide = opts.autohide || true;
-			window.alertApp.message = opts.message;
-			window.alertApp.type = opts.type;
-			window.alertApp.seen = true;
-		});
+		window.alertApp.show(opts);
 	}
 }
 
