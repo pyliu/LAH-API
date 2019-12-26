@@ -4,7 +4,7 @@ if (Vue) {
             <legend>公告期限維護<small>(先行准登)</small></legend>
             <div class="form-row">
                 <announcement-mgt-item :data="announcement_data" @update="update"></announcement-mgt-item>
-                <div class="filter-btn-group col">
+                <div class="filter-btn-group col-3">
                     <button class="btn btn-sm btn-outline-primary" @click="clear">清除准登</button>
                     <button class="btn btn-sm btn-outline-success" @click="popup">備註</button>
                 </div>
