@@ -3,7 +3,7 @@ if (Vue) {
         template: `<fieldset>
             <legend>公告期限維護<small>(先行准登)</small></legend>
             <div class="form-row">
-                <announcement-mgt-item :data="announcement_data"></announcement-mgt-item>
+                <announcement-mgt-item :data="announcement_data" @update="update"></announcement-mgt-item>
                 <div class="filter-btn-group col">
                     <button class="btn btn-sm btn-outline-primary" @click="clear">清除准登</button>
                     <button class="btn btn-sm btn-outline-success" @click="popup">備註</button>
@@ -12,19 +12,16 @@ if (Vue) {
 
             <div id='prereg_update_ui' class='mt-1'></div>
         </fieldset>`,
+        data: () => {
+            return {
+                announcement_data: []
+            }
+        },
         methods: {
-            reload: function(e) {
-                // reload the Vue (hack ... not beautiful ... i know)
-                if (window.announcementMgtVue) {
-                    $("#announcement-mgt").html("<announcement-mgt></announcement-mgt>");
-                    window.announcementMgtVue.$destroy();
-                    window.announcementMgtVue = new Vue({
-                        el: "#announcement-mgt"
-                    });
-                }
+            update: function(updated_data) {
+                //console.log(updated_data);
             },
             clear: function(e) {
-                let that = this;
                 showConfirm("請確認要是否要清除所有登記原因的准登旗標？", () => {
                     toggle(e.target);
                     let form_body = new FormData();
@@ -39,8 +36,8 @@ if (Vue) {
                         return response.json();
                     }).then(jsonObj => {
                         console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + jsonObj.status + "】");
-                        addNotification({ message: "<strong class='text-success'>已全部清除完成</strong>", type: "success" });
-                        that.reload();
+                        addNotification({ message: "已全部清除完成", type: "success" });
+                        this.reload();
                         toggle(e.target);
                     }).catch(ex => {
                         console.error("announcement-mgt::clear parsing failed", ex);
@@ -58,11 +55,6 @@ if (Vue) {
                     `,
                     size: "lg"
                 });
-            }
-        },
-        data: () => {
-            return {
-                announcement_data: []
             }
         },
         components: {
@@ -94,6 +86,9 @@ if (Vue) {
                         let vnode = this.$createElement("announcement-mgt-dialog", {
                             props: {
                                 data: this.val.split(",")
+                            },
+                            on: {
+                                "announcement-update": this.update
                             }
                         });
                         showModal({
@@ -101,11 +96,20 @@ if (Vue) {
                             body: vnode,
                             size: "md"
                         });
+                    },
+                    update: function(data) {
+                        this.data.forEach(element => {
+                            if (element["RA01"] == data.reason_code) {
+                                element["RA02"] = data.day;
+                                element["RA03"] = data.flag;
+                                // set selected value
+                                this.val = element['RA01'] + ',' + element['KCNT'] + ',' + element['RA02'] + ',' + element['RA03'];
+                            }
+                        });
+                        this.$emit("update", data);
                     }
                 },
                 mounted: function(e) {
-                    let that = this;
-                    
                     let form_body = new FormData();
                     form_body.append("type", "announcement_data");
                     fetch("query_json_api.php", {
@@ -117,13 +121,10 @@ if (Vue) {
                         }
                         return response.json();
                     }).then(jsonObj => {
-                        that.data = jsonObj.raw;
+                        this.data = jsonObj.raw;
                     });
-
-                    let mounted_el = $(this.$el);
-                    setTimeout(() => {
-                        that.val = mounted_el.find("#prereg_announcement_select").val();
-                    }, 150);    // cache.js delay 100ms to wait Vue instance ready, so here delays 150ms
+                    // get cached data
+                    this.val = localStorage.getItem("prereg_announcement_select");
                 },
                 components: {
                     "announcement-mgt-dialog": {
@@ -171,17 +172,18 @@ if (Vue) {
                         methods: {
                             update: function(e) {
                                 let reason_code = this.data[0];
+                                let reason_cnt = this.data[1];
                                 let day = this.day;
                                 let flag = this.flag;
                                 if (this.data[2] == day && this.data[3] == flag) {
-                                    showAlert({
+                                    addNotification({
+                                        title: "更新公告資料",
                                         message: "無變更，不需更新！",
                                         type: "warning"
                                     });
                                     return;
                                 }
                                 console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
-                                let that = this;
                                 showConfirm("確定要更新公告資料？", () => {
                                     let form_body = new FormData();
                                     form_body.append("type", "update_announcement_data");
@@ -200,17 +202,18 @@ if (Vue) {
                                     }).then(jsonObj => {
                                         console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
                                         addNotification({
-                                            body: "<strong class='text-success'>更新完成</strong>"
+                                            title: reason_cnt,
+                                            message: `公告已更新【天數：${this.data[2]} => ${day}, 准登：${this.data[3]} => ${flag}】`,
+                                            type: "success"
                                         });
-                                        // reload the Vue (hack ... not beautiful ... i know)
-                                        if (window.announcementMgtVue) {
-                                            $("#announcement-mgt").html("<announcement-mgt></announcement-mgt>");
-                                            window.announcementMgtVue.$destroy();
-                                            window.announcementMgtVue = new Vue({
-                                                el: "#announcement-mgt"
-                                            });
-                                        }
-                                        closeModal();
+                                        this.data[2] = day;
+                                        this.data[3] = flag;
+                                        // notify parent the data is changed
+                                        this.$emit("announcement-update", {
+                                            reason_code: reason_code,
+                                            day: day,
+                                            flag: flag
+                                        });
                                     }).catch(ex => {
                                         console.error("announcement-mgt-dialog::update parsing failed", ex);
                                         showAlert({message: "announcement-mgt-dialog::update XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
