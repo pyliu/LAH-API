@@ -315,7 +315,7 @@ let addAnimatedCSS = function(selector, opts) {
 			node.off('animationend');
 			// clear ld animation also
 			clearLDAnimation(selector);
-			if (typeof opts.callback === 'function') opts.callback();
+			if (typeof opts.callback === 'function') opts.callback.apply(this, arguments);
 		}
 		node.on('animationend', handleAnimationEnd);
 	}
@@ -699,7 +699,10 @@ let initUtilApp = () => {
 				merged.title = [vNodesTitle];
 				// use vNode for HTML content
 				const msgVNode = h('div', { domProps: { innerHTML: message } });
-				this.$bvToast.toast([msgVNode], merged);	
+				this.$bvToast.toast([msgVNode], merged);
+
+				if (typeof merged.callback === 'function') merged.callback.apply(this, arguments);
+
 				this.toastCounter++;
 			},
 			showModal: function(id) {
@@ -794,7 +797,7 @@ let initUtilApp = () => {
 				.then(value => {
 					this.confirmAnswer = value;
 					if (this.confirmAnswer && merged.callback && typeof merged.callback == "function") {
-						merged.callback();
+						merged.callback.apply(this, arguments);
 					}
 				}).catch(err => {
 					console.error(err);
