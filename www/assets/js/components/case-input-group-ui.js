@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("case-input-group-ui", {
         template: `<div class="form-row">
-            <div class="input-group input-group-sm col">
+            <div class="input-group input-group-sm col-3">
                 <select v-model="year" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_year'" class="form-control w-100" aria-label="年" :aria-describedby="'inputGroup-'+prefix+'_case_update_year'" required>
                     <option>107</option>
                     <option>108</option>
@@ -21,7 +21,7 @@ if (Vue) {
                     <span class="input-group-text" :id="'inputGroup-'+prefix+'_case_update_code'">字</span>
                 </div>
             </div>
-            <div class="input-group input-group-sm col">
+            <div class="input-group input-group-sm col-4">
                 <input v-model="num" @input="uiUpdate" @keyup.enter="$emit('enter', $event)" type="number" :step="num_step" :min="num_min" max="999999" :id="prefix+'_case_update_num'" class="form-control w-100" aria-label="號" :aria-describedby="'inputGroup-'+prefix+'_case_update_num'" required data-trigger="manual" data-toggle="popover" data-content='案件號(最多6碼)' title='案件號' data-placement="top" />
                 <div class="input-group-append">
                     <span class="input-group-text" :id="'inputGroup-'+prefix+'_case_update_num'">號</span>

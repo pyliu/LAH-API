@@ -29,7 +29,11 @@ if (Vue) {
             query: function(e) {
                 let data = {year: this.year, code: this.code, num: this.num};
                 if (!checkCaseUIData(data)) {
-                    addNotification({message: `輸入資料格式有誤，無法查詢 ${data.year}-${data.code}-${data.num}`, type: "warning"});
+                    addNotification({
+                        title: "案件查詢",
+                        subtitle: `${data.year}-${data.code}-${data.num}`,
+                        message: `輸入資料格式有誤，無法查詢。`,
+                        type: "warning"});
                     return false;
                 }
                 let year = this.year;
@@ -58,9 +62,11 @@ if (Vue) {
                     return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-                        showAlert({
+                        addNotification({
+                            title: "案件查詢",
+                            subtitle: id,
                             message: jsonObj.message,
-                            type: "danger"
+                            type: "warning"
                         });
                     } else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
                         throw new Error("查詢失敗：" + jsonObj.message);
