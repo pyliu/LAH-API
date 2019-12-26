@@ -3,7 +3,7 @@ if (Vue) {
         template: `<fieldset>
             <legend>公告期限維護<small>(先行准登)</small></legend>
             <div class="form-row">
-                <announcement-mgt-item :data="announcement_data" @update="update"></announcement-mgt-item>
+                <announcement-mgt-item :reset-flag="reset_flag" @update-announcement-done="updated" @reset-flags-done="done"></announcement-mgt-item>
                 <div class="filter-btn-group col-3">
                     <button class="btn btn-sm btn-outline-primary" @click="clear">清除准登</button>
                     <button class="btn btn-sm btn-outline-success" @click="popup">備註</button>
@@ -14,15 +14,19 @@ if (Vue) {
         </fieldset>`,
         data: () => {
             return {
-                announcement_data: []
+                reset_flag: false
             }
         },
         methods: {
-            update: function(updated_data) {
+            updated: function(updated_data) {
                 //console.log(updated_data);
             },
+            done: () => {
+                this.reset_flag = false;
+            },
             clear: function(e) {
-                showConfirm("請確認要是否要清除所有登記原因的准登旗標？", () => {
+                let that = this;
+                showConfirm("請確認清除所有登記原因的准登旗標？", () => {
                     toggle(e.target);
                     let form_body = new FormData();
                     form_body.append("type", "clear_announcement_flag");
@@ -35,9 +39,10 @@ if (Vue) {
                         }
                         return response.json();
                     }).then(jsonObj => {
+                        // let component knows it needs to clear the flag
+                        this.reset_flag = true;
                         console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + jsonObj.status + "】");
-                        addNotification({ message: "已全部清除完成", type: "success" });
-                        this.reload();
+                        addNotification({ title: "清除全部先行准登旗標", message: "已清除完成", type: "success" });
                         toggle(e.target);
                     }).catch(ex => {
                         console.error("announcement-mgt::clear parsing failed", ex);
@@ -72,10 +77,25 @@ if (Vue) {
                     &ensp;
                     <button class="btn btn-sm btn-outline-primary" @click="change">變更</button>
                 </div>`,
+                props: ["resetFlag"],
                 data: () => {
                     return {
                         data: [],
                         val: ""
+                    }
+                },
+                watch: {
+                    resetFlag: function(nval, oval) {
+                        if (nval) {
+                            this.data.forEach(element => {
+                                if (element["RA03"] != 'N') {
+                                    element["RA03"] = 'N';
+                                    // set selected value
+                                    this.val = element['RA01'] + ',' + element['KCNT'] + ',' + element['RA02'] + ',' + element['RA03'];
+                                }
+                            });
+                            this.$emit("reset-flags-done");
+                        }
                     }
                 },
                 methods: {
@@ -106,7 +126,7 @@ if (Vue) {
                                 this.val = element['RA01'] + ',' + element['KCNT'] + ',' + element['RA02'] + ',' + element['RA03'];
                             }
                         });
-                        this.$emit("update", data);
+                        this.$emit("update-announcement-done", data);
                     }
                 },
                 mounted: function(e) {
@@ -214,6 +234,7 @@ if (Vue) {
                                             day: day,
                                             flag: flag
                                         });
+                                        closeModal();
                                     }).catch(ex => {
                                         console.error("announcement-mgt-dialog::update parsing failed", ex);
                                         showAlert({message: "announcement-mgt-dialog::update XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
