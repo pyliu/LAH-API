@@ -172,7 +172,12 @@ if (Vue) {
                 let backup_flag = $(data.target).data("backup_flag");
                 console.log(data)
                 if (backup_flag !== true) {
-                    showAlert({ message: "請先點選備份按鍵!", type: "warning" });
+                    addNotification({
+                        title: "清除暫存檔",
+                        subtitle: `${data.year}-${data.code}-${data.number}`,
+                        message: "清除前請先備份!",
+                        type: "warning"
+                    });
                     addAnimatedCSS(`#${$(data.target).data("backup-btn-id")}`, { name: "tada" });
                     return;
                 }
