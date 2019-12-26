@@ -57,8 +57,6 @@ if (Vue) {
         },
         methods: {
             uiUpdate: function(e) {
-                // padding leading zero for the number
-                this.num = this.num.padStart(6, "0");
                 this.$emit("update", e, {
                     year: this.year,
                     code: this.code,

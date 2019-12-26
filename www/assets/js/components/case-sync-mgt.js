@@ -67,6 +67,12 @@ if (Vue) {
                 // toggle button disable attr
                 toggle(e.target);
             
+                let offset = 6 - number.length;
+                if (offset > 0) {
+                    // padding leading zero for the number
+                    number = number.padStart(6, "0");
+                }
+
                 // prepare post params
                 let id = trim(year + code + number);
                 let body = new FormData();
