@@ -109,14 +109,18 @@ if (Vue) {
                             size: "lg"
                         });
                     } else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_LOCAL_NO_RECORD) {
-                        html += "<div><i class='fas fa-circle text-warning'></i>&ensp;" + jsonObj.message + " <button id='inst_x_case_confirm_button'>新增本地端資料</button></div>";
-                        showAlert({
-                            message: html,
-                            type: "warning",
+                        showModal({
+                            title: "本地端無資料",
+                            body: `<div>
+                                <i class='fas fa-circle text-warning'></i>&ensp;
+                                ${jsonObj.message}
+                                <button id='inst_x_case_confirm_button'>新增本地端資料</button>
+                            </div>`,
                             callback: () => {
                                 $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
                                 $("#inst_x_case_confirm_button").off("click").on("click", xhrInsertXCase.bind(id));
                             },
+                            size: "md"
                         });
                     } else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_REMOTE_NO_RECORD) {
                         html += "<div><i class='fas fa-circle text-secondary'></i>&ensp;" + jsonObj.message + "</div>";
@@ -126,10 +130,10 @@ if (Vue) {
                         });
                     } else {
                         html += "<div><i class='fas fa-circle text-success'></i>&ensp;" + jsonObj.message + "</div>";
-                        showAlert({
+                        addNotification({
                             message: html,
                             type: "success",
-                            callback: () => { $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog); }
+                            callback: () => $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog)
                         });
                     }
                     toggle(e.target);

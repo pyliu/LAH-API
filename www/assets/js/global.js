@@ -701,8 +701,10 @@ let initUtilApp = () => {
 				const msgVNode = h('div', { domProps: { innerHTML: message } });
 				this.$bvToast.toast([msgVNode], merged);
 
-				if (typeof merged.callback === 'function') merged.callback.apply(this, arguments);
-
+				if (typeof merged.callback === 'function') {
+					let that = this;
+					setTimeout(() => merged.callback.apply(that, arguments), 100);
+				}
 				this.toastCounter++;
 			},
 			showModal: function(id) {
