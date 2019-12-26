@@ -680,8 +680,8 @@ let initUtilApp = () => {
 					noAutoHide: false,
 					autoHideDelay: 5000,
 					solid: true,
-					toaster: "b-toaster-top-right",
-					appendToast: false,
+					toaster: "b-toaster-bottom-right",
+					appendToast: true,
 					variant: "default"
 				}, opts);
 				// Use a shorter name for this.$createElement

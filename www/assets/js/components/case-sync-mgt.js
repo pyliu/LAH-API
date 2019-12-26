@@ -30,23 +30,29 @@ if (Vue) {
                 let code = this.code;
                 let num = this.num;
                 if (isEmpty(year)) {
-                    showAlert({
+                    addNotification({
+                        title: "查詢遠端案件資料",
+                        subtitle: `${year}-${code}-${num}`,
                         message: "請重新選擇「年」欄位!",
-                        type: "danger"
+                        type: "warning"
                     });
                     return false;
                 }
                 if (isEmpty(code)) {
-                    showAlert({
+                    addNotification({
+                        title: "查詢遠端案件資料",
+                        subtitle: `${year}-${code}-${num}`,
                         message: "請重新選擇「字」欄位!",
-                        type: "danger"
+                        type: "warning"
                     });
                     return false;
                 }
                 let number = num.replace(/\D/g, "");
                 let offset = 6 - number.length;
                 if (isEmpty(number) || isNaN(number) || offset < 0) {
-                    showAlert({
+                    addNotification({
+                        title: "查詢遠端案件資料",
+                        subtitle: `${year}-${code}-${number}`,
                         message: `「號」格式有問題，請查明修正【目前：${num}】`,
                         type: "danger"
                     });
@@ -130,13 +136,17 @@ if (Vue) {
                         });
                     } else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_REMOTE_NO_RECORD) {
                         html += "<div><i class='fas fa-circle text-secondary'></i>&ensp;" + jsonObj.message + "</div>";
-                        showAlert({
+                        addNotification({
+                            title: "查詢遠端案件資料",
+                            subtitle: `${year}-${code}-${number}`,
                             message: html,
                             type: "warning"
                         });
                     } else {
                         html += "<div><i class='fas fa-circle text-success'></i>&ensp;" + jsonObj.message + "</div>";
                         addNotification({
+                            title: "查詢遠端案件資料",
+                            subtitle: `${year}-${code}-${number}`,
                             message: html,
                             type: "success",
                             callback: () => $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog)
