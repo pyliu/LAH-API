@@ -57,6 +57,8 @@ if (Vue) {
         },
         methods: {
             uiUpdate: function(e) {
+                // padding leading zero for the number
+                this.num = this.num.padStart(6, "0");
                 this.$emit("update", e, {
                     year: this.year,
                     code: this.code,
@@ -135,6 +137,7 @@ if (Vue) {
                     break;
                 case "sync":
                     this.code_data.push(this.remote_local_reg_case_code);
+                    break;
                 default:
                     this.code_data.push(this.local_reg_case_code);
                     this.code_data.push(this.remote_local_reg_case_code);
