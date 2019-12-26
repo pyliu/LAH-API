@@ -1,6 +1,6 @@
 if (Vue) {
     Vue.component("case-sync-mgt", {
-        template: `<fieldset>
+        template: `<fieldset id="case-sync-mgt-fieldset">
             <legend>同步跨所案件資料</legend>
             <div class="form-row">
             <div class="col-9">
@@ -84,7 +84,7 @@ if (Vue) {
                 }).then(jsonObj => {
                     let html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + year + "-" + code + "-" + number + "</a><div>";
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        html += "<span class='rounded-circle bg-warning'> &emsp; </span>&ensp;請參考下列資訊： <button id='sync_x_case_confirm_button' class='btn btn-sm btn-success' title='同步全部欄位'>同步</button>";
+                        html += "<i class='fas fa-circle text-warning'></i>&ensp;請參考下列資訊： <button id='sync_x_case_confirm_button' class='btn btn-sm btn-success' title='同步全部欄位'>同步</button>";
                         html += "<table class='table table-hover text-center mt-1'>";
                         html += "<tr><th>欄位名稱</th><th>欄位代碼</th><th>局端</th><th>本所</th><th>單欄同步</th></tr>";
                         for (let key in jsonObj.raw) {
@@ -109,7 +109,7 @@ if (Vue) {
                             size: "lg"
                         });
                     } else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_LOCAL_NO_RECORD) {
-                        html += "<div><span class='rounded-circle bg-warning'> &emsp; </span>&ensp;" + jsonObj.message + " <button id='inst_x_case_confirm_button'>新增本地端資料</button></div>";
+                        html += "<div><i class='fas fa-circle text-warning'></i>&ensp;" + jsonObj.message + " <button id='inst_x_case_confirm_button'>新增本地端資料</button></div>";
                         showAlert({
                             message: html,
                             type: "warning",
@@ -119,13 +119,13 @@ if (Vue) {
                             },
                         });
                     } else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_REMOTE_NO_RECORD) {
-                        html += "<div><span class='rounded-circle bg-light'> &emsp; </span>&ensp;" + jsonObj.message + "</div>";
+                        html += "<div><i class='fas fa-circle text-secondary'></i>&ensp;" + jsonObj.message + "</div>";
                         showAlert({
                             message: html,
                             type: "warning"
                         });
                     } else {
-                        html += "<div><span class='rounded-circle bg-success'> &emsp; </span>&ensp;" + jsonObj.message + "</div>";
+                        html += "<div><i class='fas fa-circle text-success'></i>&ensp;" + jsonObj.message + "</div>";
                         showAlert({
                             message: html,
                             type: "success",
@@ -135,8 +135,8 @@ if (Vue) {
                     toggle(e.target);
                 }).catch(ex => {
                     // remove the fieldset since the function is not working ... 
-                    let container = $("#sync_x_case_button").closest("div.col-6");
-                    let fieldset = $("#sync_x_case_button").closest("fieldset");
+                    let fieldset = $("#case-sync-mgt-fieldset");
+                    let container = fieldset.closest("div.col-6");
                     addAnimatedCSS(fieldset, {
                         name: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)].out,
                         callback: () => {
