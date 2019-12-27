@@ -109,7 +109,8 @@ blockquote img {
         </div>
       </div>
       <div class="row">
-        <div class="col-6">
+        <div id="expaa-mgt" class="col-6">
+          <expaa-mgt></expaa-mgt>
           <fieldset>
             <legend>規費資料集修正<small>(EXPAA)</small></legend>
 
@@ -230,6 +231,7 @@ blockquote img {
   <script src="assets/js/components/case-state-mgt.js"></script>
   <script src="assets/js/components/case-temp-mgt.js"></script>
   <script src="assets/js/components/case-sync-mgt.js"></script>
+  <script src="assets/js/components/expaa-mgt.js"></script>
 
   <script type="text/javascript">
     $(document).ready(e => {
@@ -244,6 +246,7 @@ blockquote img {
       window.caseStateMgtVue = new Vue({el: "#case-state-mgt"});
       window.caseTempMgtVue = new Vue({el: "#case-temp-mgt"});
       window.caseSyncMgtVue = new Vue({el: "#case-sync-mgt"});
+      window.expaaMgtVue = new Vue({el: "#expaa-mgt"});
 
       // query EXPAC items event
       $("#expac_query_button").on("click", xhrGetExpacItems);
