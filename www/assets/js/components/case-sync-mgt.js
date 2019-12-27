@@ -105,7 +105,7 @@ if (Vue) {
                             html += "<td>" + jsonObj.raw[key]["COLUMN"] + "</td>";
                             html += "<td class='text-danger'>" + jsonObj.raw[key]["REMOTE"] + "</td>";
                             html += "<td class='text-info'>" + jsonObj.raw[key]["LOCAL"] + "</td>";
-                            html += "<td><button data-column='" + jsonObj.raw[key]["COLUMN"] + "' class='btn btn-sm btn-outline-dark sync_column_button'>同步" + jsonObj.raw[key]["COLUMN"] + "</button></td>";
+                            html += "<td><button id='sync_column_" + jsonObj.raw[key]["COLUMN"] + "' data-column='" + jsonObj.raw[key]["COLUMN"] + "' class='btn btn-sm btn-outline-dark sync_column_button'>同步" + jsonObj.raw[key]["COLUMN"] + "</button></td>";
                             html += "</tr>";
                         };
                         html += "</table>";
@@ -113,9 +113,12 @@ if (Vue) {
                             title: "案件比對詳情",
                             body: html,
                             callback: () => {
-                                $("#sync_x_case_confirm_button").off("click").on("click", xhrSyncXCase.bind(id));
-                                $(".sync_column_button").off("click").on("click", xhrSyncXCaseColumn.bind(id));
-                                $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
+                                $("#sync_x_case_confirm_button").off("click").on("click", this.syncWholeCase.bind(this, id));
+                                let that = this;
+                                $(".sync_column_button").off("click").each((idx, element) => {
+                                    let column = $(element).data("column");
+                                    $(element).on("click", that.syncCaseColumn.bind(that, id, column));
+                                });
                                 $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
                             },
                             size: "lg"
@@ -168,6 +171,76 @@ if (Vue) {
                     showAlert({
                         message: ex.toString(),
                         type: "danger"
+                    });
+                });
+            },
+            syncCaseColumn: function(id, column) {
+                showConfirm(`確定要同步${column}？`, function() {
+                    console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
+                    let body = new FormData();
+                    body.append("type", "sync_xcase_column");
+                    body.append("id", id);
+                    body.append("column", column);
+
+                    let td = $(`#sync_column_${column}`).parent();
+                    $(`#sync_column_${column}`).remove();
+
+                    fetch("query_json_api.php", {
+                        method: "POST",
+                        body: body
+                    }).then(response => {
+                        if (response.status != 200) {
+                            throw new Error("XHR連線異常，回應非200");
+                        }
+                        return response.json();
+                    }).then(jsonObj => {
+                        if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            td.html("<span class='text-success'>" + column + " 同步成功！</span>");
+                        } else {
+                            td.html("<span class='text-danger'>" + jsonObj.message + "</span>");
+                        }
+                    }).catch(ex => {
+                        console.error("case-sync-mgt::syncCaseColumn parsing failed", ex);
+                        td.html("<span class='text-danger'>" + ex + "</span>");
+                    });
+                });
+            },
+            syncWholeCase: function(id) {
+                showConfirm(`同步局端資料至本所資料庫【${id}】？`, function() {
+                    console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
+                    let body = new FormData();
+                    body.append("type", "sync_xcase");
+                    body.append("id", id);
+                    $("#sync_x_case_confirm_button").remove();
+                    fetch("query_json_api.php", {
+                        method: "POST",
+                        body: body
+                    }).then(response => {
+                        if (response.status != 200) {
+                            throw new Error("XHR連線異常，回應非200");
+                        }
+                        return response.json();
+                    }).then(jsonObj => {
+                        if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            addNotification({
+                                title: "同步局端資料至本所資料庫",
+                                subtitle: id,
+                                message: "同步成功！",
+                                type: "success"
+                            });
+                        } else {
+                            showAlert({
+                                message: jsonObj.message,
+                                type: "danger"
+                            });
+                        }
+                        closeModal();
+                    }).catch(ex => {
+                        console.error("case-sync-mgt::syncWholeCase parsing failed", ex);
+                        showAlert({
+                            message: ex.toString(),
+                            type: "danger"
+                        });
                     });
                 });
             },
