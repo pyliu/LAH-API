@@ -129,7 +129,10 @@ if (Vue) {
                         this.$emit("update-announcement-done", data);
                     }
                 },
-                mounted: function(e) {
+                created: function(e) {
+                    let cached_date = localStorage.getItem("prereg_announcement_fetched_date");
+                    let cached_data = localStorage.getItem("prereg_announcement_fetched_json");
+
                     let form_body = new FormData();
                     form_body.append("type", "announcement_data");
                     fetch("query_json_api.php", {
@@ -143,7 +146,9 @@ if (Vue) {
                     }).then(jsonObj => {
                         this.data = jsonObj.raw;
                     });
-                    // get cached data
+                },
+                mounted: function(e) {
+                    // get cached data and set selected option
                     this.val = localStorage.getItem("prereg_announcement_select");
                 },
                 components: {
