@@ -39,7 +39,7 @@ const LOADING_PREDEFINED = [
 	"fas fa-biking ld-move-ltr fa-2x",
 	"fas fa-snowboarding ld-rush-ltr fa-2x",
 	"fas fa-yin-yang fa-spin fa-2x",
-	"fas fa-biohazard ld-damage fa-2x",
+	"fas fa-biohazard ld-metronome fa-2x",
 	"fas fa-baseball-ball ld-bounce fa-2x",
 	"fas fa-basketball-ball ld-beat fa-2x",
 	"fas fa-stroopwafel ld-metronome fa-2x",
