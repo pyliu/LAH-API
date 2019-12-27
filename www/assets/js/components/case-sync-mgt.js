@@ -116,6 +116,7 @@ if (Vue) {
                                 $("#sync_x_case_confirm_button").off("click").on("click", xhrSyncXCase.bind(id));
                                 $(".sync_column_button").off("click").on("click", xhrSyncXCaseColumn.bind(id));
                                 $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
+                                $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
                             },
                             size: "lg"
                         });
@@ -202,6 +203,7 @@ if (Vue) {
                                 type: "danger"
                             });
                         }
+                        closeModal();
                     }).catch(ex => {
                         console.error("case-sync-mgt::instRemoteCase parsing failed", ex);
                         showAlert({
