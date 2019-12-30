@@ -7,8 +7,19 @@ if (Vue) {
                     <div class="input-group-prepend">
                     <span class="input-group-text" id="inputGroup-expaa_query_date">日期</span>
                     </div>
-                    <b-form-input v-model="date" id="expaa_query_date" placeholder="Enter the $$" :state="isDateValid" size="sm" :class="['form-control', 'date_picker', 'no-cache']"></b-form-input>
+                    <b-form-input
+                        v-model="date"
+                        id="expaa_query_date"
+                        placeholder="輸入民國年月日共7碼"
+                        :state="isDateValid"
+                        size="sm"
+                        :class="['form-control', 'date_picker', 'no-cache']"
+                        aria-describedby="input-live-help input-live-feedback"
+                    >
+                    </b-form-input>
                     <button id="expaa_query_date_button" class="btn btn-sm btn-outline-primary">查詢</button>
+                    <b-form-invalid-feedback id="input-live-feedback">範例：1081230</b-form-invalid-feedback>
+                    <b-form-text id="input-live-help" :class="['d-block']">請輸入7碼民國年月日</b-form-invalid-feedback>
                 </div>
                 <div class="input-group input-group-sm col">
                     <div class="input-group-prepend">
@@ -26,22 +37,20 @@ if (Vue) {
         </fieldset>`,
         data: () => {
             return {
-                isDateValid: null,
                 date: "1081230"
             }
         },
-        watch: {
-            date: function(val) {
-                if (val == '' || val == undefined) {
-                    this.isDateValid = null;
-                } else if (val.length == 7) {
-                    this.isDateValid = true;
-                } else {
-                    this.isDateValid = false;
+        computed: {
+            isDateValid: function () {
+                if (this.date == '' || this.date == undefined) {
+                    return null;
+                } else if (this.date.length == 7) {
+                    return true;
                 }
-                console.log(this.date);
+                return false;
             }
         },
+        watch: { },
         methods: {
             popup: function(e) {
                 showModal({
