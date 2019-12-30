@@ -558,7 +558,10 @@ let initAlertUI = () => {
 				@after-leave="afterLeave"
 			>
 				<div v-show="seen" class="alert alert-dismissible alert-fixed shadow" :class="type" role="alert" @mouseover="mouseOver" @mouseout="mouseOut">
-					<h6 v-show="title != ''" v-html="title"></h6>
+					<div v-show="title != ''">
+						<h6 v-html="title"></h6>
+						<hr>
+					</div>
 					<p v-html="message" style="font-size: .9rem"></p>
 					<button type="button" class="close" @click="seen = false">
 						<span aria-hidden="true">&times;</span>
