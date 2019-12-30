@@ -176,7 +176,7 @@ if (Vue) {
                 methods: {
                     updateRM30: function(e) {
                         if (this.rm30 == this.rm30_orig) {
-                            addNotification({ message: "案件辦理情形沒變動", type: "warning"});
+                            addNotification({title: "更新案件辦理情形",  message: "案件辦理情形沒變動", type: "warning"});
                             return;
                         }
                         let that = this;
@@ -245,7 +245,7 @@ if (Vue) {
                     },
                     updateRM39: function(e) {
                         if (this.rm39 == this.rm39_orig) {
-                            addNotification({ message: "登記處理註記沒變動", type: "warning"});
+                            addNotification({title: "更新登記處理註記", message: "登記處理註記沒變動", type: "warning"});
                             return;
                         }
                         let that = this;
