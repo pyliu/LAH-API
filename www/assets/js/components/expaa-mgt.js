@@ -10,16 +10,13 @@ if (Vue) {
                     <b-form-input
                         v-model="date"
                         id="expaa_query_date"
-                        placeholder="輸入民國年月日共7碼"
+                        placeholder="民國年月日"
                         :state="isDateValid"
                         size="sm"
                         :class="['form-control', 'date_picker', 'no-cache']"
-                        aria-describedby="input-live-help input-live-feedback"
                     >
                     </b-form-input>
                     <button id="expaa_query_date_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                    <b-form-invalid-feedback id="input-live-feedback">範例：1081230</b-form-invalid-feedback>
-                    <b-form-text id="input-live-help" :class="['d-block']">請輸入7碼民國年月日</b-form-invalid-feedback>
                 </div>
                 <div class="input-group input-group-sm col">
                     <div class="input-group-prepend">
@@ -62,6 +59,29 @@ if (Vue) {
                     AA107 - 悠遊卡交易流水號<br />
                     <img src="assets/img/easycard_screenshot.jpg" class="img-responsive img-thumbnail my-1" />`,
                     size: "lg"
+                });
+            }
+        },
+        mounted: function() {
+            var d = new Date();
+            this.date = toTWDate(d);
+            if ($("#expaa_query_date").datepicker) {
+                $("#expaa_query_date").datepicker({
+                    daysOfWeekDisabled: "",
+                    language: "zh-TW",
+                    daysOfWeekHighlighted: "1,2,3,4,5",
+                    todayHighlight: true,
+                    autoclose: true,
+                    format: {
+                        toDisplay: function (date, format, language) {
+                            var d = new Date(date);
+                            return toTWDate(d);
+                        },
+                        toValue: function (date, format, language) {
+                            // initialize to now
+                            return new Date();
+                        }
+                    }
                 });
             }
         }
