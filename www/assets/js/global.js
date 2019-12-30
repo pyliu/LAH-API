@@ -233,8 +233,20 @@ let showAlert = opts => {
 			case "green":
 				opts.type = "alert-success";
 				break;
-			default:
+			case "dark":
+				opts.type = "alert-dark";
+				break;
+			case "info":
 				opts.type = "alert-info";
+				break;
+			case "primary":
+				opts.type = "alert-primary";
+				break;
+			case "secondary":
+				opts.type = "alert-secondary";
+				break;
+			default:
+				opts.type = "alert-light";
 				break;
 		}
 
@@ -546,6 +558,7 @@ let initAlertUI = () => {
 				@after-leave="afterLeave"
 			>
 				<div v-show="seen" class="alert alert-dismissible alert-fixed shadow" :class="type" role="alert" @mouseover="mouseOver" @mouseout="mouseOut">
+					<h6 v-show="title != ''" v-html="title"></h6>
 					<p v-html="message" style="font-size: .9rem"></p>
 					<button type="button" class="close" @click="seen = false">
 						<span aria-hidden="true">&times;</span>
@@ -560,6 +573,7 @@ let initAlertUI = () => {
 		window.alertApp = new Vue({
 			el: '#bs_alert_template',
 			data: {
+				title: "",
 				message: 'Hello Alert Vue!',
 				type: 'alert-warning',
 				seen: false,
@@ -616,6 +630,7 @@ let initAlertUI = () => {
 					if (typeof opts.callback == "function") {
 						setTimeout(opts.callback, 500);
 					}
+					this.title = opts.title || "";
 					this.autohide = opts.autohide || true;
 					this.message = opts.message;
 					this.type = opts.type;
