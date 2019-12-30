@@ -582,8 +582,8 @@ let initAlertUI = () => {
 				progress_counter: 1,
 				autohide: true,
 				delay: 15000,
-				animated_in: "animated bounceInDown",
-				animated_out: "animated bounceOutUp",
+				animated_in: "animated zoomInDown",
+				animated_out: "animated zoomOutUp",
 				animated_opts: ANIMATED_TRANSITIONS
 			},
 			methods: {
@@ -662,7 +662,7 @@ let initAlertUI = () => {
 					this.disableProgress();
 				}
 			},
-			mounted() {
+			created: function() {
 				this.randAnimation();
 			}
 		});
