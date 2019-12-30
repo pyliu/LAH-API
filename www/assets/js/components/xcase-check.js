@@ -53,10 +53,12 @@ if (Vue) {
                         });
                     } else if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({
+                            title: "檢測系統跨所註記遺失問題",
                             message: "<i class='fas fa-circle text-success'></i>&ensp;目前無跨所註記遺失問題",
+                            type: "success"
                         });
                     } else {
-                        showAlert({message: jsonObj.message, type: "danger"});
+                        showAlert({ title: "檢測系統跨所註記遺失問題", message: jsonObj.message, type: "danger" });
                     }
                     toggle(e.target);
                 }).catch(ex => {

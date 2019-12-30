@@ -48,7 +48,11 @@ if (Vue) {
                     return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-                        addNotification({ message: `<i class='fas fa-circle text-success'></i>&ensp;${jsonObj.message}` });
+                        addNotification({
+                            title: "檢測悠遊卡自動加值失敗",
+                            message: `<i class='fas fa-circle text-success'></i>&ensp;${jsonObj.message}`,
+                            type: "success"
+                        });
                     } else {
                         showModal({
                             title: "<i class='fas fa-circle text-warning'></i>&ensp;<strong class='text-danger'>找到下列資料</strong>",
