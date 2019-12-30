@@ -109,8 +109,7 @@ blockquote img {
         </div>
       </div>
       <div class="row">
-        <div id="expaa-mgt" class="col-6">
-          <expaa-mgt></expaa-mgt>
+        <div class="col-6">
           <fieldset>
             <legend>規費資料集修正<small>(EXPAA)</small></legend>
 
@@ -192,6 +191,11 @@ blockquote img {
               WHERE t.AC04 = '0021131' AND t.AC25 = '108'
             </blockquote>
           </fieldset>
+        </div>
+      </div>
+      <div class="row">
+        <div id="expaa-mgt" class="col">
+          <expaa-mgt></expaa-mgt>
         </div>
       </div>
     </div>
