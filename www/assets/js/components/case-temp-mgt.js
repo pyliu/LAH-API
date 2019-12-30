@@ -28,7 +28,11 @@ if (Vue) {
             query: function(e) {
                 let data = {year: this.year, code: this.code, num: this.num};
                 if (!checkCaseUIData(data)) {
-                    addNotification({message: `輸入資料格式有誤，無法查詢 ${data.year}-${data.code}-${data.num}`, type: "warning"});
+                    addNotification({
+                        title: "清除暫存檔",
+                        message: `輸入資料格式有誤，無法查詢 ${data.year}-${data.code}-${data.num}`,
+                        type: "warning"
+                    });
                     return false;
                 }
             
@@ -66,6 +70,7 @@ if (Vue) {
 
                     if (filtered.length == 0) {
                         addNotification({
+                            title: "清除暫存檔",
                             message: "案件 " + year + "-" + code + "-" + number + " 查無暫存資料",
                             type: "warning"
                         });
@@ -201,7 +206,8 @@ if (Vue) {
                     }).then(jsonObj => {
                         console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
                         addNotification({
-                            message: "暫存檔已清除完成。<p>" + data.year + "-" + data.code + "-" + data.number + (data.table ? " 表格：" + data.table : "") + "</p>",
+                            title: "清除暫存檔",
+                            message: "已清除完成。<p>" + data.year + "-" + data.code + "-" + data.number + (data.table ? " 表格：" + data.table : "") + "</p>",
                             type: "success"
                         });
                         if (data.clean_all) {
