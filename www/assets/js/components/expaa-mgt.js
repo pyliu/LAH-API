@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("expaa-mgt", {
         template: `<fieldset>
             <legend>規費資料</legend>
-            <b-container :class="['form-row']">
+            <b-container :class="['form-row']" fluid>
                 <div class="input-group input-group-sm col">
                     <div class="input-group-prepend">
                     <span class="input-group-text" id="inputGroup-fee_query_date">日期</span>
@@ -16,6 +16,8 @@ if (Vue) {
                         :class="['form-control', 'no-cache', 'border']"
                         size="sm"
                         plaintext
+                        lazy-formatter
+                        :formatter="format"
                     >
                     </b-form-input>
                     <button id="fee_query_date_button" class="btn btn-sm btn-outline-primary">查詢</button>
@@ -51,6 +53,10 @@ if (Vue) {
         },
         watch: { },
         methods: {
+            format: function(val, e) {
+                // to handle input field content
+                return val;
+            },
             popup: function(e) {
                 showModal({
                     title: "規費資料 小幫手提示",
@@ -59,7 +65,11 @@ if (Vue) {
                     <img src="assets/img/EXPAA_AA100_Update.jpg" class="img-responsive img-thumbnail my-1" /><br />
                     AA106 - 悠遊卡繳費扣款結果<br />
                     AA107 - 悠遊卡交易流水號<br />
-                    <img src="assets/img/easycard_screenshot.jpg" class="img-responsive img-thumbnail my-1" />`,
+                    <img src="assets/img/easycard_screenshot.jpg" class="img-responsive img-thumbnail my-1" />
+                    AA28、AA39 - 規費資料集(EXPAA)中記載金額的兩個欄位<br />
+                    AC29、AC30 - 規費項目資料集(EXPAC)中記載收費項目之金額<br />
+                    <img src="assets/howto/EXPAA_EXPAC_AMOUNT_MOD.jpg" class="img-responsive img-thumbnail my-1" />
+                    `,
                     size: "lg"
                 });
             }
