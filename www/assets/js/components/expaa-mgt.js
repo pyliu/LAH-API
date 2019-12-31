@@ -15,6 +15,7 @@ if (Vue) {
                         :class="['no-cache', 'bg-light', 'border', 'pl-2']"
                         size="sm"
                         plaintext
+                        trim
                     >
                     </b-form-input>
                     <div class="input-group-prepend ml-1">
@@ -27,8 +28,10 @@ if (Vue) {
                         placeholder="七碼電腦給號"
                         :state="isNumberValid"
                         size="sm"
-                        max="9999999"
-                        min="1"
+                        max=9999999
+                        min=1
+                        trim
+                        number
                     >
                     </b-form-input>
                     &ensp;
@@ -58,7 +61,7 @@ if (Vue) {
             isNumberValid: function() {
                 if (this.number == '' || this.number == undefined) {
                     return null;
-                } else if (this.number.length <= 7) {
+                } else if (this.number.toString().length <= 7) {
                     return true;
                 }
                 return false;
