@@ -5,18 +5,20 @@ if (Vue) {
             <b-container :class="['form-row']">
                 <div class="input-group input-group-sm col">
                     <div class="input-group-prepend">
-                    <span class="input-group-text" id="inputGroup-expaa_query_date">日期</span>
+                    <span class="input-group-text" id="inputGroup-fee_query_date">日期</span>
                     </div>
                     <b-form-input
                         v-model="date"
-                        id="expaa_query_date"
+                        id="fee_query_date"
                         placeholder="民國年月日"
+                        autocomplete="false"
                         :state="isDateValid"
+                        :class="['form-control', 'no-cache', 'border']"
                         size="sm"
-                        :class="['form-control', 'date_picker', 'no-cache']"
+                        plaintext
                     >
                     </b-form-input>
-                    <button id="expaa_query_date_button" class="btn btn-sm btn-outline-primary">查詢</button>
+                    <button id="fee_query_date_button" class="btn btn-sm btn-outline-primary">查詢</button>
                 </div>
                 <div class="input-group input-group-sm col">
                     <div class="input-group-prepend">
@@ -26,7 +28,7 @@ if (Vue) {
                     <button id="expaa_query_num_button" class="btn btn-sm btn-outline-secondary" title="針對電腦給號查詢">查詢</button>
                 </div>
                 <div class="filter-btn-group col">
-                    <!-- <button id="expaa_query_date_button" class="btn btn-sm btn-outline-primary">查詢</button> -->
+                    <!-- <button id="fee_query_date_button" class="btn btn-sm btn-outline-primary">查詢</button> -->
                     <button id="expaa_add_obsolete_button" class="btn btn-sm btn-outline-danger" title="新增作廢假資料以利空白規費單作廢">作廢</button>
                     <button @click="popup" class="btn btn-sm btn-outline-success">備註</button>
                 </div>
@@ -34,11 +36,11 @@ if (Vue) {
         </fieldset>`,
         data: () => {
             return {
-                date: "1081230"
+                date: "1081231"
             }
         },
         computed: {
-            isDateValid: function () {
+            isDateValid: () => {
                 if (this.date == '' || this.date == undefined) {
                     return null;
                 } else if (this.date.length == 7) {
@@ -65,22 +67,16 @@ if (Vue) {
         mounted: function() {
             var d = new Date();
             this.date = toTWDate(d);
-            if ($("#expaa_query_date").datepicker) {
-                $("#expaa_query_date").datepicker({
+            if ($("#fee_query_date").datepicker) {
+                $("#fee_query_date").datepicker({
                     daysOfWeekDisabled: "",
                     language: "zh-TW",
                     daysOfWeekHighlighted: "1,2,3,4,5",
                     todayHighlight: true,
                     autoclose: true,
                     format: {
-                        toDisplay: function (date, format, language) {
-                            var d = new Date(date);
-                            return toTWDate(d);
-                        },
-                        toValue: function (date, format, language) {
-                            // initialize to now
-                            return new Date();
-                        }
+                        toDisplay: (date, format, language) => toTWDate(new Date(date)),
+                        toValue: (date, format, language) => new Date()
                     }
                 });
             }
