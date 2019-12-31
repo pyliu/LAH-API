@@ -12,7 +12,7 @@ if (Vue) {
                         id="fee_query_date"
                         placeholder="民國年月日"
                         :state="isDateValid"
-                        :class="['no-cache', 'border', 'bg-light', 'text-center']"
+                        :class="['no-cache', 'bg-light', 'border', 'pl-2']"
                         size="sm"
                         plaintext
                     >
@@ -26,8 +26,9 @@ if (Vue) {
                         type="number"
                         placeholder="七碼電腦給號"
                         :state="isNumberValid"
-                        :formatter="format"
                         size="sm"
+                        max="9999999"
+                        min="1"
                     >
                     </b-form-input>
                     &ensp;
@@ -41,7 +42,7 @@ if (Vue) {
         </fieldset>`,
         data: () => {
             return {
-                date: "1081231",
+                date: "",
                 number: ""
             }
         },
@@ -63,12 +64,12 @@ if (Vue) {
                 return false;
             }
         },
-        watch: { },
+        watch: {
+            number: function(nVal, oVal) {
+                this.number = nVal.replace(/\D/g, '').substr(0, 7);
+            }
+        },
         methods: {
-            format: function(val, e) {
-                // to handle input field content
-                return val.replace(/\D/g, '').substr(0, 7);
-            },
             popup: function(e) {
                 showModal({
                     title: "規費資料 小幫手提示",
