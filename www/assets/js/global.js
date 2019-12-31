@@ -478,16 +478,8 @@ let initDatepicker = () => {
 				* This is useful if we need UI to select local dates,
 				* but store in UTC
 				*/
-				toDisplay: function (date, format, language) {
-				var d = new Date(date);
-				return (d.getFullYear() - 1911)
-						+ ("0" + (d.getMonth()+1)).slice(-2)
-						+ ("0" + d.getDate()).slice(-2);
-				},
-				toValue: function (date, format, language) {
-				// initialize to now
-				return new Date();
-				}
+				toDisplay: (date, format, language) => toTWDate(new Date(date)),
+				toValue: (date, format, language) => new Date()
 			}
 		});
 	}
