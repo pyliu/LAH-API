@@ -3,7 +3,7 @@ if (Vue) {
         template: `<fieldset>
             <legend>悠遊卡自動加值付款失敗回復</legend>
             <div class="form-row">
-                <div class="input-group input-group-sm col">
+                <div class="input-group input-group-sm col-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-easycard_query_day">日期</span>
                     </div>
@@ -12,7 +12,7 @@ if (Vue) {
                         type="text"
                         id="easycard_query_day"
                         name="easycard_query_day"
-                        class="form-control easycard_query no-cache"
+                        class="form-control easycard_query no-cache bg-light"
                         placeholder="1081231"
                         data-trigger="manual"
                         data-toggle="popover"
