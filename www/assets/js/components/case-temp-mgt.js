@@ -175,7 +175,6 @@ if (Vue) {
             },
             fix: function(data) {
                 let backup_flag = $(data.target).data("backup_flag");
-                console.log(data)
                 if (backup_flag !== true) {
                     addNotification({
                         title: "清除暫存檔",
