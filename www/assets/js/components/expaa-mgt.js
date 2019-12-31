@@ -66,7 +66,8 @@ if (Vue) {
         },
         watch: {
             number: function(nVal, oVal) {
-                this.number = nVal.replace(/\D/g, '').substr(0, 7);
+                if (this.number > 9999999) this.number = 9999999;
+                else if (this.number < 1) this.number = 1;
             }
         },
         methods: {
@@ -103,6 +104,8 @@ if (Vue) {
                     }
                 });
             }
+            if (this.number > 9999999) this.number = 9999999;
+            else if (this.number < 1) this.number = 1;
         }
     });
 } else {
