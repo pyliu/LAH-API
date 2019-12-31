@@ -7,7 +7,20 @@ if (Vue) {
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-easycard_query_day">日期</span>
                     </div>
-                    <input @keyup.enter="query" type="text" id="easycard_query_day" name="easycard_query_day" class="form-control easycard_query date_picker no-cache" placeholder="1081217"  data-trigger="manual" data-toggle="popover" data-content="e.g. 1081217" data-placement="bottom" v-model="date" />
+                    <input
+                        @keyup.enter="query"
+                        type="text"
+                        id="easycard_query_day"
+                        name="easycard_query_day"
+                        class="form-control easycard_query no-cache"
+                        placeholder="1081231"
+                        data-trigger="manual"
+                        data-toggle="popover"
+                        data-content="e.g. 1081217"
+                        data-placement="bottom"
+                        v-model="date"
+                        readonly
+                    />
                 </div>
                 <div class="filter-btn-group col">
                     <button id="easycard_query_button" class="btn btn-sm btn-outline-primary easycard_query" @click="query">查詢</button>
@@ -158,32 +171,17 @@ if (Vue) {
         },
         mounted: function() {
             var d = new Date();
-            this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+            this.date = toTWDate(d);
             if ($("#easycard_query_day").datepicker) {
                 $("#easycard_query_day").datepicker({
                     daysOfWeekDisabled: "",
                     language: "zh-TW",
                     daysOfWeekHighlighted: "1,2,3,4,5",
-                    //todayBtn: true,
                     todayHighlight: true,
                     autoclose: true,
                     format: {
-                        /*
-                        * Say our UI should display a week ahead,
-                        * but textbox should store the actual date.
-                        * This is useful if we need UI to select local dates,
-                        * but store in UTC
-                        */
-                        toDisplay: function (date, format, language) {
-                        var d = new Date(date);
-                        return (d.getFullYear() - 1911)
-                                + ("0" + (d.getMonth()+1)).slice(-2)
-                                + ("0" + d.getDate()).slice(-2);
-                        },
-                        toValue: function (date, format, language) {
-                            // initialize to now
-                            return new Date();
-                        }
+                        toDisplay: (date, format, language) => toTWDate(new Date(date)),
+                        toValue: (date, format, language) => new Date()
                     }
                 });
             }
