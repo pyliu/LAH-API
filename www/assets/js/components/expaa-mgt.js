@@ -37,16 +37,46 @@ if (Vue) {
                     &ensp;
                     <button id="fee_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
                     &ensp;
-                    <button id="expaa_add_obsolete_button" class="btn btn-sm btn-outline-danger" title="新增作廢假資料以利空白規費單作廢">作廢</button>
+                    <button @click="popup" class="btn btn-sm btn-outline-success">備註</button>
                     &ensp;
-                    <button @click="popup" class="btn btn-sm btn-outline-success">備註</button>&ensp;
+                    <button id="expaa_add_obsolete_button" class="btn btn-sm btn-outline-danger" title="新增作廢假資料以利空白規費單作廢"><i class="fas fa-ban"></i></button>
                 </div>
             </b-container>
         </fieldset>`,
         data: () => {
             return {
                 date: "",
-                number: ""
+                number: "",
+                expe: { // from MOIEXP.EXPE
+                    "01": "土地法65條登記費",
+                    "02": "土地法76條登記費",
+                    "03": "土地法67條書狀費",
+                    "04": "地籍謄本工本費",
+                    "06": "檔案閱覽抄錄複製費",
+                    "07": "閱覽費",
+                    "08": "門牌查詢費",
+                    "09": "複丈費及建物測量費",
+                    "10": "地目變更勘查費",
+                    "14": "電子謄本列印",
+                    "18": "塑膠樁土地界標",
+                    "19": "鋼釘土地界標(大)",
+                    "30": "104年度登記罰鍰",
+                    "31": "100年度登記罰鍰",
+                    "32": "101年度登記罰鍰",
+                    "33": "102年度登記罰鍰",
+                    "34": "103年度登記罰鍰",
+                    "35": "其他",
+                    "36": "鋼釘土地界標(小)",
+                    "37": "105年度登記罰鍰",
+                    "38": "106年度登記罰鍰",
+                    "39": "塑膠樁土地界標(大)",
+                    "40": "107年度登記罰鍰",
+                    "41": "108年度登記罰鍰",
+                    "42": "土地法第76條登記費（跨縣市）",
+                    "43": "書狀費（跨縣市）",
+                    "44": "罰鍰（跨縣市）",
+                    "45": "109年度登記罰鍰"
+                }
             }
         },
         computed: {
