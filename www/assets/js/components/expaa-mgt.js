@@ -142,8 +142,9 @@ if (Vue) {
                     let today = (now.getFullYear() - 1911) +
                         ("0" + (now.getMonth() + 1)).slice(-2) +
                         ("0" + now.getDate()).slice(-2);
-                    let h =  this.$createElement;
-                    let VNode = h("expaa-obsolete-mgt", {
+
+                    // use the expaa-obsolete-mgt sub-component to do the addition
+                    let VNode = this.$createElement("expaa-obsolete-mgt", {
                         props: {
                             raw_data: jsonObj.raw
                         }
@@ -235,7 +236,7 @@ if (Vue) {
                             <td>{{item["AA04"]}}</td>
                             <td>{{item["AA05"]}}</td>
                             <td>{{item["AA104"]}}</td>
-                            <td><span data-id="{{item["AA39"]}}" class="user_tag">{{item["AA39"]}}</span></td>
+                            <td><span :data-id="item['AA39']" class="user_tag">{{item['AA39']}}</span></td>
                         </tr>
                     </table>
                 </div>`,
@@ -243,7 +244,7 @@ if (Vue) {
                 data: function() {
                     return {
                         year: "109",
-                        next_pc_number: "9109001",  // 9 + year (3 digits) + serial (3 digits)
+                        next_pc_number: 9109001,  // 9 + year (3 digits) + serial (3 digits)
                         today: "",
                         operator: "",   // 作業人員
                         AB_number: "",  // 收據編號
@@ -265,7 +266,7 @@ if (Vue) {
                         ("0" + (now.getMonth() + 1)).slice(-2) +
                         ("0" + now.getDate()).slice(-2);
                     if (!this.raw_data) this.raw_data = [];
-                    this.next_pc_number = this.raw_data.length > 0 ? this.raw_data[0]["AA04"] : `9${this.year}001`;
+                    this.next_pc_number = this.raw_data.length > 0 ? parseInt(this.raw_data[0]["AA04"]) + 1 : `9${this.year}001`;
                 }
             }
         }
