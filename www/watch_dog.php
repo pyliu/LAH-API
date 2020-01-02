@@ -157,8 +157,8 @@ blockquote img {
                 </div>
                 <select id="expac_query_year" name="expac_query_year" class="form-control no-cache">
                   <option>107</option>
-                  <option selected>108</option>
-                  <option>109</option>
+                  <option>108</option>
+                  <option selected>109</option>
                 </select>
               </div>
               <div class="input-group input-group-sm col">
