@@ -305,13 +305,12 @@ class Query {
 	public function getDummyObFees() {
 		$tw_date = new Datetime("now");
 		$tw_date->modify("-1911 year");
-		$this_year = ltrim($tw_date->format("Y"), "0");	// ex: 108
+		$this_year = ltrim($tw_date->format("Y"), "0");	// ex: 109
 
-		// suppose the obsolete fees request will not over 99 cases => 999900 ~ 999999
+		// use '9' + year(3 digits) + '000' to stand for the obsolete fee application
 		$this->db->parse("
 			select * from MOIEXP.EXPAA t
-			where aa01 like :bv_year || '%'
-			and aa04 like '9999%'
+			where aa04 like '9' || :bv_year || '%'
 			order by AA01 desc, AA04 desc
 		");
 		$this->db->bind(":bv_year", $this_year);

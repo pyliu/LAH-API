@@ -803,80 +803,77 @@ let xhrQueryObsoleteFees = e => {
 		return response.json();
 	}).then(jsonObj => {
 		toggle(e.target);
-		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-			var now = new Date();
-			let last_pc_number = jsonObj.raw[0]["AA04"];
-			let today = (now.getFullYear() - 1911) +
-				("0" + (now.getMonth() + 1)).slice(-2) +
-				("0" + now.getDate()).slice(-2);
+		var now = new Date();
+		let last_pc_number = jsonObj.raw ? jsonObj.raw[0]["AA04"] : 0;
+		let today = (now.getFullYear() - 1911) +
+			("0" + (now.getMonth() + 1)).slice(-2) +
+			("0" + now.getDate()).slice(-2);
 
-			html = `<small>下一筆假資料：<br />
-				※ 電腦給號：${++last_pc_number} <br />
-				※ 日期：${today} <br />
-				<div class="form-row">
-					<div class="input-group input-group-sm col-3">
-						<div class="input-group-prepend">
-							<span class="input-group-text bg-danger text-white" id="inputGroup-operator">作業人員</span>
-						</div>
-						<input id="dummy_operator" type="text" placeholder="HB1128" class="form-control" aria-label="作業人員" aria-describedby="inputGroup-operator" required>
+		html = `<small>下一筆假資料：<br />
+			※ 電腦給號：${++last_pc_number} <br />
+			※ 日期：${today} <br />
+			<div class="form-row">
+				<div class="input-group input-group-sm col-3">
+					<div class="input-group-prepend">
+						<span class="input-group-text bg-danger text-white" id="inputGroup-operator">作業人員</span>
 					</div>
-					<div class="input-group input-group-sm col-3">
-						<div class="input-group-prepend">
-							<span class="input-group-text bg-danger text-white" id="inputGroup-fee-number">收據號碼</span>
-						</div>
-						<input id="dummy_fee_number" type="text" placeholder="AB00099480" class="form-control" aria-label="收據號碼" aria-describedby="inputGroup-fee-number" required>
+					<input id="dummy_operator" type="text" placeholder="HB1128" class="form-control" aria-label="作業人員" aria-describedby="inputGroup-operator" required>
+				</div>
+				<div class="input-group input-group-sm col-3">
+					<div class="input-group-prepend">
+						<span class="input-group-text bg-danger text-white" id="inputGroup-fee-number">收據號碼</span>
 					</div>
-					<div class="input-group input-group-sm col">
-						<div class="input-group-prepend">
-							<span class="input-group-text bg-danger text-white" id="inputGroup-obsolete-reason">作廢原因</span>
-						</div>
-						<input id="dummy_obsolete_reason" type="text" placeholder="空白單據作廢" class="form-control" aria-label="作廢原因" aria-describedby="inputGroup-obsolete-reason" required>
+					<input id="dummy_fee_number" type="text" placeholder="AB00099480" class="form-control" aria-label="收據號碼" aria-describedby="inputGroup-fee-number" required>
+				</div>
+				<div class="input-group input-group-sm col">
+					<div class="input-group-prepend">
+						<span class="input-group-text bg-danger text-white" id="inputGroup-obsolete-reason">作廢原因</span>
 					</div>
-					<div class="btn-group-sm col-1" role="group">
-						<button class="btn btn-outline-primary" id="add_dummy_expaa_btn">新增</button>
-					</div>
-				</div>`;
+					<input id="dummy_obsolete_reason" type="text" placeholder="空白單據作廢" class="form-control" aria-label="作廢原因" aria-describedby="inputGroup-obsolete-reason" required>
+				</div>
+				<div class="btn-group-sm col-1" role="group">
+					<button class="btn btn-outline-primary" id="add_dummy_expaa_btn">新增</button>
+				</div>
+			</div>`;
 
-			html += `<hr>目前系統中(${now.getFullYear() - 1911}年度)的假資料有 ${jsonObj.data_count} 筆：<br />`;
-			html += `<table class="table text-center">
-				<tr>
-					<th>日期</th>
-					<th>電腦給號</th>
-					<th>收據編號</th>
-					<th>作廢原因</th>
-					<th>作業人員</th>
-				</tr>
-			`;
-			for (let i = 0; i <jsonObj.data_count; i++) {
-				html += `
-				<tr>
-					<td>${jsonObj.raw[i]["AA01"]}</td>
-					<td>${jsonObj.raw[i]["AA04"]}</td>
-					<td>${jsonObj.raw[i]["AA05"]}</td>
-					<td>${jsonObj.raw[i]["AA104"]}</td>
-					<td><span data-id="${jsonObj.raw[i]["AA39"]}" class="user_tag">${jsonObj.raw[i]["AA39"]}</span></td>
-				</tr>`;
-			}
-			html += `</table></small>`;
-			
-			showModal({
-				title: "規費作廢假資料",
-				body: html,
-				size: "lg",
-				callback: () => {
-					$("#add_dummy_expaa_btn").off("click").on("click", xhrAddDummyObsoleteFeesData.bind({
-						pc_number: last_pc_number,
-						today: today
-					}));
-					addUserInfoEvent();
-				}
-			});
-		} else {
-			throw new Error(`查詢作廢規費回應不正常【${jsonObj.status}】`);
+		html += `<hr>目前系統中(${now.getFullYear() - 1911}年度)的假資料有 ${jsonObj.data_count} 筆：<br />`;
+		html += `<table class="table text-center">
+			<tr>
+				<th>日期</th>
+				<th>電腦給號</th>
+				<th>收據編號</th>
+				<th>作廢原因</th>
+				<th>作業人員</th>
+			</tr>
+		`;
+		for (let i = 0; i <jsonObj.data_count; i++) {
+			html += `
+			<tr>
+				<td>${jsonObj.raw[i]["AA01"]}</td>
+				<td>${jsonObj.raw[i]["AA04"]}</td>
+				<td>${jsonObj.raw[i]["AA05"]}</td>
+				<td>${jsonObj.raw[i]["AA104"]}</td>
+				<td><span data-id="${jsonObj.raw[i]["AA39"]}" class="user_tag">${jsonObj.raw[i]["AA39"]}</span></td>
+			</tr>`;
 		}
+		html += `</table></small>`;
+		
+		showModal({
+			title: "規費作廢假資料",
+			body: html,
+			size: "lg",
+			callback: () => {
+				$("#add_dummy_expaa_btn").off("click").on("click", xhrAddDummyObsoleteFeesData.bind({
+					pc_number: last_pc_number,
+					today: today
+				}));
+				addUserInfoEvent();
+			}
+		});
 	}).catch(ex => {
 		console.error("xhrQueryObsoleteFees parsing failed", ex);
 		showAlert({
+			title: "查詢作廢規費回應不正常",
 			message: ex.message,
 			type: "danger"
 		});
