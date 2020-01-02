@@ -435,7 +435,11 @@ let getExpacItemOptions = selected_ac20 => {
 			+ "<option " + (selected_ac20 == "38" ? "selected" : "") + " value='38'>【38】106年度登記罰鍰</option>"
 			+ "<option " + (selected_ac20 == "39" ? "selected" : "") + " value='39'>【39】塑膠樁土地界標(大)</option>"
 			+ "<option " + (selected_ac20 == "40" ? "selected" : "") + " value='40'>【40】107年度登記罰鍰</option>"
-			+ "<option " + (selected_ac20 == "41" ? "selected" : "") + " value='41'>【41】108年度登記罰鍰</option>";
+			+ "<option " + (selected_ac20 == "41" ? "selected" : "") + " value='41'>【41】108年度登記罰鍰</option>"
+			+ "<option " + (selected_ac20 == "42" ? "selected" : "") + " value='42'>【42】土地法第76條登記費(跨縣市)</option>"
+			+ "<option " + (selected_ac20 == "43" ? "selected" : "") + " value='43'>【43】書狀費（跨縣市）</option>"
+			+ "<option " + (selected_ac20 == "44" ? "selected" : "") + " value='44'>【44】罰鍰（跨縣市）</option>"
+			+ "<option " + (selected_ac20 == "45" ? "selected" : "") + " value='45'>【45】109年度登記罰鍰</option>";
 }
 
 let xhrModifyExpacItem = (year_ac25, num_ac04, now_code_ac20, amount_ac30, select_id) => {
