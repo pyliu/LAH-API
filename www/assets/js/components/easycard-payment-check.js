@@ -169,9 +169,11 @@ if (Vue) {
                 }
             }
         },
-        mounted: function() {
+        created: function() {
             var d = new Date();
             this.date = toTWDate(d);
+        },
+        mounted: function() {
             if ($("#easycard_query_day").datepicker) {
                 $("#easycard_query_day").datepicker({
                     daysOfWeekDisabled: "",

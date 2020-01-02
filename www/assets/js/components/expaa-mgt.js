@@ -121,9 +121,13 @@ if (Vue) {
                 });
             }
         },
-        mounted: function() {
+        created: function() {
             var d = new Date();
             this.date = toTWDate(d);
+            if (this.number > 9999999) this.number = 9999999;
+            else if (this.number < 1) this.number = 1;
+        },
+        mounted: function() {
             if ($("#fee_query_date").datepicker) {
                 $("#fee_query_date").datepicker({
                     daysOfWeekDisabled: "",
@@ -137,8 +141,6 @@ if (Vue) {
                     }
                 });
             }
-            if (this.number > 9999999) this.number = 9999999;
-            else if (this.number < 1) this.number = 1;
         }
     });
 } else {
