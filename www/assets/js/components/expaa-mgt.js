@@ -83,7 +83,7 @@ if (Vue) {
             isDateValid: function() {
                 if (this.date == '' || this.date == undefined) {
                     return null;
-                } else if (this.date.length == 7) {
+                } else if (this.date.length == 7 && !isNaN(this.date)) {
                     return true;
                 }
                 return false;
@@ -91,7 +91,7 @@ if (Vue) {
             isNumberValid: function() {
                 if (this.number == '' || this.number == undefined) {
                     return null;
-                } else if (this.number.toString().length <= 7) {
+                } else if (this.number.toString().length <= 7 && !isNaN(this.number)) {
                     return true;
                 }
                 return false;
@@ -312,6 +312,26 @@ if (Vue) {
             }
         },
         components: {
+            "expaa-list-mgt": {
+                template: `<div id="expaa-list-container">
+                </div>`,
+                props: ["raw_data"],
+                data: () => {
+                    return {
+                        raw_data: []
+                    }
+                },
+                computed: {
+                    count_cash: function() {},
+                    count_ezcard: function() {},
+                    count_mobile: function() {},
+                    count_other: function() {},
+                    count_credit: function() {}
+                },
+                methods: {},
+                created: function () {},
+                mounted: function () {}
+            },
             "expaa-obsolete-mgt": {
                 template: `<div class="small">
                     下一筆假資料：<br />

@@ -250,22 +250,6 @@ blockquote img {
       window.caseTempMgtVue = new Vue({el: "#case-temp-mgt"});
       window.caseSyncMgtVue = new Vue({el: "#case-sync-mgt"});
       window.expaaMgtVue = new Vue({el: "#expaa-mgt"});
-
-      // query EXPAC items event
-      $("#expac_query_button").on("click", xhrGetExpacItems);
-      bindPressEnterEvent("#expac_query_number", xhrGetExpacItems);
-      
-      // query EXPAA data event
-      $("#expaa_query_num_button").on("click", xhrGetExpaaData);
-      $("#expaa_query_date_button").on("click", e => {
-        $("#expaa_query_number").val("");
-        xhrGetExpaaData(e);
-      });
-      // for query by date, so we need to clear #expaa_query_number value first
-      bindPressEnterEvent("#expaa_query_date", e => { $("#expaa_query_number").val(""); });
-      bindPressEnterEvent("input[id*=expaa_query_", xhrGetExpaaData);
-      // obselete event
-      $("#expaa_add_obsolete_button").on("click", xhrQueryObsoleteFees);
     });
   </script>
 </body>
