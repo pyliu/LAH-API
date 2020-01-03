@@ -12,7 +12,7 @@ if (Vue) {
                         id="fee_query_date"
                         placeholder="民國年月日"
                         :state="isDateValid"
-                        :class="['no-cache', 'bg-light', 'border', 'pl-2']"
+                        :class="['no-cache', 'bg-light', 'border', 'pl-2', 'h-100']"
                         size="sm"
                         plaintext
                         trim
@@ -32,14 +32,20 @@ if (Vue) {
                         min=1
                         trim
                         number
+                        :class="['h-100']"
                     >
                     </b-form-input>
                     &ensp;
-                    <button @click="query" class="btn btn-sm btn-outline-primary">查詢</button>
+                    <b-button @click="query" variant="outline-primary" size="sm">查詢</b-button>
                     &ensp;
-                    <button @click="popup" class="btn btn-sm btn-outline-success">備註</button>
+                    <b-button @click="popup" variant="outline-success" size="sm">備註</b-button>
                     &ensp;
-                    <button @click="obsolete" class="btn btn-sm btn-outline-danger" title="新增作廢假資料"><i class="fas fa-ban"></i></button>
+                    <b-button @click="obsolete" variant="outline-secondary" size="sm" title="新增作廢假資料">
+                        <span class="text-danger fa-stack">    
+                            <i class="fas fa-file-alt fa-stack-1x"></i>
+                            <i class="fas fa-ban fa-2x"></i>
+                        </span>
+                    </b-button>
                 </div>
             </b-container>
         </fieldset>`,

@@ -68,7 +68,7 @@ if (Vue) {
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-prereg_announcement_select">公告項目</span>
                     </div>
-                    <select @change.lazy="change" id='prereg_announcement_select' class='form-control' v-model="val">
+                    <select @change.lazy="change" id='prereg_announcement_select' class='form-control h-100' v-model="val">
                         <option value=''></option>
                         <option v-for="(item, index) in data" :value="item['RA01'] + ',' + item['KCNT'] + ',' + item['RA02'] + ',' + item['RA03']">
                             {{item["RA01"]}} : {{item["KCNT"]}} 【{{item['RA02']}}, {{item['RA03']}}】

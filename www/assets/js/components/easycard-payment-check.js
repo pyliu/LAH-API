@@ -12,7 +12,7 @@ if (Vue) {
                         type="text"
                         id="easycard_query_day"
                         name="easycard_query_day"
-                        class="form-control easycard_query no-cache bg-light"
+                        class="form-control easycard_query no-cache bg-light h-100"
                         placeholder="1081231"
                         data-trigger="manual"
                         data-toggle="popover"
