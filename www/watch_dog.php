@@ -129,8 +129,6 @@ blockquote img {
                 <button id="expaa_query_num_button" class="btn btn-sm btn-outline-secondary" title="針對電腦給號查詢">查詢</button>
               </div>
               <div class="filter-btn-group col">
-                <!-- <button id="expaa_query_date_button" class="btn btn-sm btn-outline-primary">查詢</button> -->
-                <button id="expaa_add_obsolete_button" class="btn btn-sm btn-outline-danger" title="新增作廢假資料以利空白規費單作廢">作廢</button>
                 <button id="expaa_quote_button" class="btn btn-sm btn-outline-success">備註</button>
               </div>
             </div>
@@ -266,7 +264,7 @@ blockquote img {
       bindPressEnterEvent("#expaa_query_date", e => { $("#expaa_query_number").val(""); });
       bindPressEnterEvent("input[id*=expaa_query_", xhrGetExpaaData);
       // obselete event
-      $("#expaa_add_obsolete_button").on("click", xhrQueryObsoleteFees);
+      //$("#expaa_add_obsolete_button").on("click", xhrQueryObsoleteFees);
     });
   </script>
 </body>

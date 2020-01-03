@@ -35,7 +35,7 @@ if (Vue) {
                     >
                     </b-form-input>
                     &ensp;
-                    <button id="fee_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
+                    <button @click="query" class="btn btn-sm btn-outline-primary">查詢</button>
                     &ensp;
                     <button @click="popup" class="btn btn-sm btn-outline-success">備註</button>
                     &ensp;
@@ -104,6 +104,126 @@ if (Vue) {
             }
         },
         methods: {
+            query: function(e) {
+                console.log(this.date, this.number);
+                return;
+
+                let body = new FormData();
+                body.append("type", "expaa");
+                body.append("qday", this.date);
+                body.append("num", this.number);
+                body.append("list_mode", true);
+                fetch("query_json_api.php", {
+                    method: "POST",
+                    body: body
+                }).then(response => {
+                    if (response.status != 200) {
+                        throw new Error("XHR連線異常，回應非200");
+                    }
+                    return response.json();
+                }).then(jsonObj => {
+                    // only has one record
+                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        let html = "<div class='text-info'>規費資料：</div>";
+                        html += "<ul>";
+                        for (let key in jsonObj.raw) {
+                            html += "<li>";
+                            html += key + "：";
+                            if (key == "列印註記") {
+                                html += "<div class='form-row form-inline'>"
+                                    + "<div class='input-group input-group-sm col-3'>"
+                                    + "<select id='exapp_print_select' class='form-control'>"
+                                    + "<option value='0'" + (jsonObj.raw[key] == 0 ? "selected" : "") + ">【0】未印</option>"
+                                    + "<option value='1'" + (jsonObj.raw[key] == 1 ? "selected" : "") + ">【1】已印</option>"
+                                    + "</select> "
+                                    + "</div>"
+                                    + `<div class='filter-btn-group col'>
+                                            <button id='exapp_print_button' class='btn btn-sm btn-outline-primary'>修改</button>
+                                            <span id='exapp_print_status'></span>
+                                        </div>`
+                                    + "</div>";
+                            } else if (key == "繳費方式代碼") {
+                                html += "<div class='form-row form-inline'>"
+                                    + "<div class='input-group input-group-sm col-3'>"
+                                    + "<select id='exapp_method_select' class='form-control'>"
+                                    + getExpaaAA100Options(jsonObj.raw[key])
+                                    + "</select> "
+                                    + "</div>"
+                                    + `<div class='filter-btn-group col'>
+                                            <button id='exapp_method_button' class='btn btn-sm btn-outline-primary'>修改</button>
+                                            <span id='exapp_method_status'></span>
+                                        </div>`
+                                    + "</div>";
+                            } else if (key == "悠遊卡繳費扣款結果") {
+                                html += jsonObj.raw[key];
+                                //  無作廢原因才可進行修正
+                                if (isEmpty(jsonObj.raw["作廢原因"]) && jsonObj.raw[key] != 1) {
+                                    html += "&ensp;<button class='btn btn-sm btn-outline-danger' id='fix_exapp_easycard_payment_btn" + "' onclick='xhrFixEasycardPayment(\"" + jsonObj.raw["開單日期"] + "\", \"" + jsonObj.raw["電腦給號"] + "\", \"" + jsonObj.raw["實收總金額"] + "\", \"fix_exapp_easycard_payment_btn" + "\")'>修正為扣款成功</button>";
+                                }
+                            } else {
+                                // others just show info
+                                html += jsonObj.raw[key];
+                            }
+                            html += "</li>";
+                        };
+                        html += "</ul>";
+                        $("#expaa_query_display").html(html);
+                        // attach event handler for the buttons
+                        $("#exapp_print_button").off("click").on("click", xhrUpdateExpaaAA09.bind({
+                            date: $("#expaa_query_date").val(),
+                            number: $("#expaa_query_number").val(),
+                            select_id: "exapp_print_select"
+                        }));
+                        $("#exapp_method_button").off("click").on("click", xhrUpdateExpaaAA100.bind({
+                            date: $("#expaa_query_date").val(),
+                            number: $("#expaa_query_number").val(),
+                            select_id: "exapp_method_select"
+                        }));
+                    } else if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS) {
+                        // has many records
+                        let html = "<div>" 
+                                + "<span class='block-secondary'>現金</span> "
+                                + "<span class='block-primary'>悠遊卡</span> "
+                                + "<span class='block-warning'>信用卡</span> "
+                                + "<span class='block-danger'>行動支付</span> "
+                                + "<span class='block-dark'>其他方式</span> "
+                                + "</div>";
+                        html += "<div class='text-success'>" + jsonObj.message + "</div>";
+                        for (let i = 0; i < jsonObj.data_count; i++) {
+                            html += "<a href='javascript:void(0)' class='float-left mr-2 mb-2 expaa_a_aa04 "
+                                + getAA04DisplayCss(jsonObj.raw[i])
+                                + " "
+                                + (jsonObj.raw[i]["AA09"] == 1 ? "text-secondary" : "text-danger font-weight-bold")
+                                + " ' title='"
+                                + getExpaaTooltip(jsonObj.raw[i])
+                                + "'>"
+                                + jsonObj.raw[i]["AA04"]
+                                + "</a>";
+                        }
+                        showModal({
+                            body: html,
+                            title: "搜尋規費列表",
+                            size: "lg",
+                            callback: () => {
+                                $("a.expaa_a_aa04").off("click").on("click", e => {
+                                    let pc_num = $(e.target).text();
+                                    $("#expaa_query_number").val(pc_num);
+                                    $("#expac_query_number").val(pc_num);
+                                    xhrGetExpaaData.call(null, [e]);
+                                    xhrGetExpacItems.call(null, [e]);
+                                    closeModal();
+                                });
+                            }
+                        });
+                    } else {
+                        showAlert({message: `找不到規費資料【日期：${txt}, 電腦給號：${number}】`, type: "warning"});
+                    }
+                    toggle("[id*=expaa_query_]");
+                }).catch(ex => {
+                    console.error("xhrGetExpaaData parsing failed", ex);
+                    showAlert({message: ex.toString(), type: "danger"});
+                });
+            },
             popup: function(e) {
                 showModal({
                     title: "規費資料 小幫手提示",
@@ -155,17 +275,13 @@ if (Vue) {
                         message: VNode,
                         size: "lg",
                         callback: () => {
-                            $("#add_dummy_expaa_btn").off("click").on("click", xhrAddDummyObsoleteFeesData.bind({
-                                pc_number: last_pc_number,
-                                today: today
-                            }));
                             addUserInfoEvent();
                         }
                     });
                 }).catch(ex => {
-                    console.error("xhrQueryObsoleteFees parsing failed", ex);
+                    console.error("expaa-mgt::obsolete parsing failed", ex);
                     showAlert({
-                        title: "查詢作廢規費回應不正常",
+                        title: "expaa-mgt::obsolete",
                         message: ex.message,
                         type: "danger"
                     });
@@ -179,6 +295,8 @@ if (Vue) {
             else if (this.number < 1) this.number = 1;
         },
         mounted: function() {
+            let that = this;
+            setTimeout(() => that.number = $("#fee_query_number").val(), 150);
             if ($("#fee_query_date").datepicker) {
                 $("#fee_query_date").datepicker({
                     daysOfWeekDisabled: "",
