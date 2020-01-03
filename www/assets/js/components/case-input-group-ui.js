@@ -120,6 +120,11 @@ if (Vue) {
                 this.$emit("num-updated", evt);
             },
         },
+        created: function() {
+            // set default year
+            var d = new Date();
+            this.year = (d.getFullYear() - 1911);
+        },
         mounted: function(e) {
             switch(this.type) {
                 case "reg":
@@ -143,9 +148,6 @@ if (Vue) {
                     this.code_data.push(this.local_sur_case_code);
                     break;
             }
-            // set default year
-            var d = new Date();
-            this.year = (d.getFullYear() - 1911);
             // setup delay timer to allow cached data update to the input/select element
             let that = this;
             let mounted_el = $(this.$el);
