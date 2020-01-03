@@ -687,6 +687,36 @@ let initUtilApp = () => {
 				var datetime = ("0" + currentdate.getHours()).slice(-2) + ":" +
 					("0" + currentdate.getMinutes()).slice(-2) + ":" +
 					("0" + currentdate.getSeconds()).slice(-2);
+				// position adapter
+				switch(opts.pos) {
+					case "tr":
+						opts.toaster = "b-toaster-top-right";
+						break;
+					case "tl":
+						opts.toaster = "b-toaster-top-left";
+						break;
+					case "br":
+						opts.toaster = "b-toaster-bottom-right";
+						break;
+					case "bl":
+						opts.toaster = "b-toaster-bottom-left";
+						break;
+					case "tc":
+						opts.toaster = "b-toaster-top-center";
+						break;
+					case "tf":
+						opts.toaster = "b-toaster-top-full";
+						break;
+					case "bc":
+						opts.toaster = "b-toaster-bottom-center";
+						break;
+					case "bf":
+						opts.toaster = "b-toaster-bottom-full";
+						break;
+					default:
+						opts.toaster = "b-toaster-bottom-right";
+				}
+				// merge default setting
 				let merged = Object.assign({
 					title: "通知",
 					subtitle: datetime,
