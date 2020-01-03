@@ -198,31 +198,57 @@ if (Vue) {
                 template: `<div class="small">
                     下一筆假資料：<br />
                     ※ 電腦給號：{{next_pc_number}} <br />
-                    ※ 日期：{{today}} <br />
-                    <div class="form-row">
+                    ※ 日期：{{today}}
+                    <hr>
+                    <div id="obsolete_container" class="form-row">
                         <div class="input-group input-group-sm col-3">
                             <div class="input-group-prepend">
-                                <span class="input-group-text bg-danger text-white" id="inputGroup-operator">作業人員</span>
+                                <span class="input-group-text" id="inputGroup-operator">作業人員</span>
                             </div>
-                            <input v-model="operator" id="dummy_operator" type="text" placeholder="HB1128" class="form-control" aria-label="作業人員" aria-describedby="inputGroup-operator" required>
+                            <b-form-input
+                                v-model="operator"
+                                id="dummy_operator"
+                                placeholder="HBXXXX"
+                                :state="isOperatorValid"
+                                size="sm"
+                                trim
+                            >
+                            </b-form-input>
                         </div>
-                        <div class="input-group input-group-sm col-3">
+                        <div class="input-group input-group-sm col-4">
                             <div class="input-group-prepend">
-                                <span class="input-group-text bg-danger text-white" id="inputGroup-fee-number">收據號碼</span>
+                                <span class="input-group-text" id="inputGroup-fee-number">收據號碼</span>
                             </div>
-                            <input v-model="AB_number" id="dummy_fee_number" type="text" placeholder="AB00099480" class="form-control" aria-label="收據號碼" aria-describedby="inputGroup-fee-number" required>
+                            <b-form-input
+                                v-model="AB_number"
+                                id="dummy_fee_number"
+                                placeholder="ABXXXXXXXX"
+                                :state="isNumberValid"
+                                size="sm"
+                                trim
+                            >
+                            </b-form-input>
                         </div>
-                        <div class="input-group input-group-sm col">
+                        <div class="input-group input-group-sm col-4">
                             <div class="input-group-prepend">
-                                <span class="input-group-text bg-danger text-white" id="inputGroup-obsolete-reason">作廢原因</span>
+                                <span class="input-group-text" id="inputGroup-obsolete-reason">作廢原因</span>
                             </div>
-                            <input v-model="reason" id="dummy_obsolete_reason" type="text" placeholder="空白單據作廢" class="form-control" aria-label="作廢原因" aria-describedby="inputGroup-obsolete-reason" required>
+                            <b-form-input
+                                v-model="reason"
+                                id="dummy_obsolete_reason"
+                                placeholder="卡紙"
+                                :state="isReasonValid"
+                                size="sm"
+                                trim
+                            >
+                            </b-form-input>
                         </div>
                         <div class="btn-group-sm col-1" role="group">
-                            <button class="btn btn-outline-primary">新增</button>
+                            <b-button @click="add" variant="outline-primary" :disabled="isDisabled" size="sm" pill>新增</b-button>
                         </div>
                     </div>
-                    <hr>目前系統中({{year}}年度)的假資料有 {{count}} 筆：<br />
+                    <hr>
+                    <p>目前系統中({{year}}年度)的假資料有 {{count}} 筆：</p>
                     <table class="table text-center">
                         <tr>
                             <th>日期</th>
@@ -254,10 +280,96 @@ if (Vue) {
                 computed: {
                     count: function() {
                         return this.raw_data.length;
+                    },
+                    isOperatorValid: function() {
+                        let regex = /^HB/i;
+                        return regex.test(this.operator) && this.operator.length == 6;
+                    },
+                    isReasonValid: function() {
+                        return this.reason != '' && this.reason != undefined && this.reason != null;
+                    },
+                    isNumberValid: function() {
+                        let regex = /^AB/i;
+                        return regex.test(this.AB_number) && this.AB_number.length == 10;
+                    },
+                    isDisabled: function() {
+                        return !this.isOperatorValid || !this.isNumberValid || !this.isReasonValid;
                     }
                 },
                 methods: {
-                    
+                    add: function(e) {
+                        let operator = this.operator.replace(/[^A-Za-z0-9]/g, "");
+                        let fee_number = this.AB_number.replace(/[^A-Za-z0-9]/g, "");
+                        let reason = this.reason.replace(/[\'\"]/g, "");
+
+                        if (!this.isOperatorValid) {
+                            addAnimatedCSS("#dummy_operator", { name: "tada", callback: () => $("#dummy_operator").focus() });
+                            addNotification({
+                                title: "作廢資料",
+                                message: "請填入作業人員代碼！",
+                                pos: "tr",
+                                type: "warning"
+                            });
+                            return false;
+                        }
+                        if (!this.isNumberValid) {
+                            addAnimatedCSS("#dummy_fee_number", { name: "tada", callback: () => $("#dummy_fee_number").focus() });
+                            return false;
+                        }
+                        if (!this.isReasonValid) {
+                            addAnimatedCSS("#dummy_obsolete_reason", { name: "tada", callback: () => $("#dummy_obsolete_reason").focus() });
+                            return false;
+                        }
+
+                        if (isEmpty(operator) || isEmpty(fee_number) || isEmpty(reason)) {
+                            addNotification({
+                                title: "作廢資料",
+                                message: "需求欄位有問題，請檢查！",
+                                type: "danger"
+                            });
+                            addAnimatedCSS("#obsolete_container input", { name: "tada" });
+                            return false;
+                        }
+
+                        let that = this;
+                        showConfirm("確定要新增一個新的假資料？", () => {
+                            let body = new FormData();
+                            body.append("type", "add_dummy_ob_fees");
+                            body.append("today", that.today);
+                            body.append("pc_number", that.next_pc_number);
+                            body.append("operator", operator);
+                            body.append("fee_number", fee_number);
+                            body.append("reason", reason);
+
+                            toggle(e.target);
+
+                            fetch("query_json_api.php", {
+                                method: "POST",
+                                body: body
+                            }).then(response => {
+                                if (response.status != 200) {
+                                    throw new Error("XHR連線異常，回應非200");
+                                }
+                                return response.json();
+                            }).then(jsonObj => {
+                                closeModal(() => {
+                                    addNotification({
+                                        title: "新增假規費資料",
+                                        body: jsonObj.message,
+                                        type: "success",
+                                        pos: "tc"
+                                    });
+                                });
+                            }).catch(ex => {
+                                console.error("expaa-obsolete-mgt::add parsing failed", ex);
+                                showAlert({
+                                    title: "expaa-obsolete-mgt::add",
+                                    message: ex.message,
+                                    type: "danger"
+                                });
+                            });
+                        });
+                    }
                 },
                 created: function() {
                     var now = new Date();
