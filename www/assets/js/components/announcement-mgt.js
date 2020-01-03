@@ -5,7 +5,7 @@ if (Vue) {
             <div class="form-row">
                 <announcement-mgt-item :reset-flag="reset_flag" @update-announcement-done="updated" @reset-flags-done="done"></announcement-mgt-item>
                 <div class="filter-btn-group col-3">
-                    <button class="btn btn-sm btn-outline-primary" @click="clear">清除准登</button>
+                    <button class="btn btn-sm btn-outline-secondary" @click="clear">清除准登</button>
                     <button class="btn btn-sm btn-outline-success" @click="popup">備註</button>
                 </div>
             </div>
