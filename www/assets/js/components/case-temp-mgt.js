@@ -3,12 +3,12 @@ if (Vue) {
         template: `<fieldset>
             <legend>案件暫存檔清除</legend>
             <div class="form-row">
-            <div class="col-9">
+            <div class="col-8">
                 <case-input-group-ui @update="handleUpdate" @enter="query" type="reg" prefix="case_temp"></case-input-group-ui>
             </div>
-            <div class="filter-btn-group col-3">
-                <button @click="query" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button @click="popup" class="btn btn-sm btn-outline-success">備註</button>
+            <div class="filter-btn-group col-4">
+                <b-button @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button>
+                <b-button @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
             </div>
             </div>
         </fieldset>`,
