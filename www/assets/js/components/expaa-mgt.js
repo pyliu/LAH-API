@@ -36,14 +36,14 @@ if (Vue) {
                     >
                     </b-form-input>
                     &ensp;
-                    <b-button @click="query" variant="outline-primary" size="sm">查詢</b-button>
+                    <b-button @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button>
                     &ensp;
-                    <b-button @click="popup" variant="outline-success" size="sm">備註</b-button>
+                    <b-button @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
                     &ensp;
                     <b-button @click="obsolete" variant="outline-secondary" size="sm" title="作廢假資料">
-                        <span class="text-danger fa-stack">    
+                        <span class="fa-stack">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
-                            <i class="fas fa-ban fa-2x"></i>
+                            <i class="fas fa-ban fa-2x text-danger"></i>
                         </span>
                     </b-button>
                 </div>
