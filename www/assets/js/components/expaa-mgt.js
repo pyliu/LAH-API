@@ -97,7 +97,7 @@ if (Vue) {
         watch: {
             number: function(nVal, oVal) {
                 if (this.number > 9999999) this.number = 9999999;
-                else if (this.number < 1) this.number = 1;
+                else if (this.number < 1) this.number = '';
             }
         },
         methods: {
@@ -442,30 +442,32 @@ if (Vue) {
                             addNotification({
                                 title: "作廢資料",
                                 message: "請填入作業人員代碼！",
-                                pos: "tr",
+                                pos: "tc",
                                 type: "warning"
                             });
                             return false;
                         }
                         if (!this.isNumberValid) {
                             addAnimatedCSS("#dummy_fee_number", { name: "tada", callback: () => $("#dummy_fee_number").focus() });
+                            addNotification({
+                                title: "作廢資料",
+                                message: "請填入收據編號！",
+                                pos: "tc",
+                                type: "warning"
+                            });
                             return false;
                         }
                         if (!this.isReasonValid) {
                             addAnimatedCSS("#dummy_obsolete_reason", { name: "tada", callback: () => $("#dummy_obsolete_reason").focus() });
-                            return false;
-                        }
-
-                        if (isEmpty(operator) || isEmpty(fee_number) || isEmpty(reason)) {
                             addNotification({
                                 title: "作廢資料",
-                                message: "需求欄位有問題，請檢查！",
-                                type: "danger"
+                                message: "請填入作廢原因！",
+                                pos: "tc",
+                                type: "warning"
                             });
-                            addAnimatedCSS("#obsolete_container input", { name: "tada" });
                             return false;
                         }
-
+                        
                         let that = this;
                         showConfirm("確定要新增一個新的假資料？", () => {
                             let body = new FormData();
