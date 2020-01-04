@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("announcement-mgt", {
         template: `<fieldset>
-            <legend>公告期限維護<small>(先行准登)</small></legend>
+            <legend>公告維護</legend>
             <div class="form-row">
                 <announcement-mgt-item :reset-flag="reset_flag" @update-announcement-done="updated" @reset-flags-done="done"></announcement-mgt-item>
                 <div class="filter-btn-group col-3">

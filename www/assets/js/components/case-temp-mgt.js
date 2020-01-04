@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("case-temp-mgt", {
         template: `<fieldset>
-            <legend>案件暫存檔清除</legend>
+            <legend>暫存檔查詢</legend>
             <div class="form-row">
             <div class="col-8">
                 <case-input-group-ui @update="handleUpdate" @enter="query" type="reg" prefix="case_temp"></case-input-group-ui>

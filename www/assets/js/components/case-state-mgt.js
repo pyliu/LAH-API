@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("case-state-mgt", {
         template: `<fieldset>
-            <legend>調整登記案件欄位資料</legend>
+            <legend>案件狀態調整</legend>
             <div class="form-row">
             <div class="col-8">
                 <case-input-group-ui @update="handleUpdate" @enter="query" type="reg" prefix="case_state"></case-input-group-ui>

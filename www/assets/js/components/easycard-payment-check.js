@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("easycard-payment-check", {
         template: `<fieldset>
-            <legend>悠遊卡自動加值付款失敗回復</legend>
+            <legend>悠遊卡檢測</legend>
             <div class="form-row">
                 <div class="input-group input-group-sm col-3 small">
                     <div class="input-group-prepend">

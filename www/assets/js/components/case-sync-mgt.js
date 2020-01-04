@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("case-sync-mgt", {
         template: `<fieldset id="case-sync-mgt-fieldset">
-            <legend>同步跨所案件資料</legend>
+            <legend>同步案件</legend>
             <div class="form-row">
             <div class="col-8">
                 <case-input-group-ui @update="handleUpdate" @enter="check" type="sync" prefix="case_sync"></case-input-group-ui>
