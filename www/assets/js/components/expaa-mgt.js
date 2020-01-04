@@ -11,8 +11,7 @@ if (Vue) {
                         v-model="date"
                         id="fee_query_date"
                         placeholder="民國年月日"
-                        :state="isDateValid"
-                        :class="['no-cache', 'bg-light', 'border', 'pl-2', 'h-100']"
+                        :class="['form-control', 'no-cache', 'bg-light', 'border', 'pl-2', 'h-100']"
                         size="sm"
                         plaintext
                         trim
@@ -32,7 +31,7 @@ if (Vue) {
                         min=1
                         trim
                         number
-                        :class="['h-100']"
+                        :class="['form-control', 'h-100']"
                     >
                     </b-form-input>
                     &ensp;
@@ -86,14 +85,6 @@ if (Vue) {
             }
         },
         computed: {
-            isDateValid: function() {
-                if (this.date == '' || this.date == undefined) {
-                    return null;
-                } else if (this.date.length == 7 && !isNaN(this.date)) {
-                    return true;
-                }
-                return false;
-            },
             isNumberValid: function() {
                 if (this.number == '' || this.number == undefined) {
                     return null;
