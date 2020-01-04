@@ -445,17 +445,29 @@ if (Vue) {
                             addNotification({
                                 title: "作廢資料",
                                 message: "請填入作業人員代碼！",
-                                pos: "tr",
+                                pos: "tc",
                                 type: "warning"
                             });
                             return false;
                         }
                         if (!this.isNumberValid) {
                             addAnimatedCSS("#dummy_fee_number", { name: "tada", callback: () => $("#dummy_fee_number").focus() });
+                            addNotification({
+                                title: "作廢資料",
+                                message: "請填入收據編號！",
+                                pos: "tc",
+                                type: "warning"
+                            });
                             return false;
                         }
                         if (!this.isReasonValid) {
                             addAnimatedCSS("#dummy_obsolete_reason", { name: "tada", callback: () => $("#dummy_obsolete_reason").focus() });
+                            addNotification({
+                                title: "作廢資料",
+                                message: "請填入作廢原因！",
+                                pos: "tc",
+                                type: "warning"
+                            });
                             return false;
                         }
 
