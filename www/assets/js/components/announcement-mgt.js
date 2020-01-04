@@ -6,7 +6,7 @@ if (Vue) {
                 <announcement-mgt-item :reset-flag="reset_flag" @update-announcement-done="updated" @reset-flags-done="done"></announcement-mgt-item>
                 <div class="filter-btn-group col-3">
                     <b-button @click="clear" variant="outline-secondary" size="sm" title="清除准登旗標"><i class="fas fa-broom"></i></b-button>
-                    <b-button @click="popup" variant="outline-success" size="sm" title="備註"><i class="far fa-comment"></i></b-button>
+                    <b-button @click="popup" variant="outline-success" size="sm" title="備註"><i class="far fa-comment"></i> 備註</b-button>
                 </div>
             </div>
 
