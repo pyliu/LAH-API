@@ -43,7 +43,7 @@ if (Vue) {
                     <b-button @click="obsolete" variant="outline-secondary" size="sm" title="作廢假資料">
                         <span class="fa-stack">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
-                            <i class="fas fa-ban fa-2x text-danger"></i>
+                            <i class="fas fa-ban fa-stack-2x text-danger"></i>
                         </span>
                     </b-button>
                 </div>
