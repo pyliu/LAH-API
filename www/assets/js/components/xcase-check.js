@@ -2,8 +2,8 @@ if (Vue) {
     Vue.component("xcase-check", {
         template: `<fieldset>
             <legend>跨所註記遺失檢測<small>(一周內)</small></legend>
-            <button @click="check" class="btn btn-sm btn-outline-primary" data-toggle='tooltip'>立即檢測</button>
-            <button @click="showNote" class="btn btn-sm btn-outline-success">備註</button>
+            <b-button @click="check" size="sm" variant="outline-primary"><i class="fas fa-cogs"></i> 檢測</b-button>
+            <b-button @click="showNote" size="sm" variant="outline-success"><i class="far fa-comment"></i> 備註</b-button>
         </fieldset>`,
         methods: {
             showNote: function(e) {
