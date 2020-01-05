@@ -80,8 +80,8 @@ const ANIMATED_TRANSITIONS = [
 	{ in: "animated fadeInUp", out: "animated fadeOutDown" },
 	{ in: "animated fadeInUpBig", out: "animated fadeOutDownBig" },
 	// flip
-	{ in: "animated flipInX", out: "animated flipOutX" },
-	{ in: "animated flipInY", out: "animated flipOutY" },
+	{ in: "animated flipInX", out: "animated flipOutY" },
+	{ in: "animated flipInY", out: "animated flipOutX" },
 	// lightspeed
 	{ in: "animated lightSpeedIn", out: "animated lightSpeedOut" },
 	// roll
