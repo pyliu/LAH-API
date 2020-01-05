@@ -1,12 +1,12 @@
 if (Vue) {
     Vue.component("announcement-mgt", {
         template: `<fieldset>
-            <legend>公告期限維護<small>(先行准登)</small></legend>
+            <legend>公告維護</legend>
             <div class="form-row">
                 <announcement-mgt-item :reset-flag="reset_flag" @update-announcement-done="updated" @reset-flags-done="done"></announcement-mgt-item>
                 <div class="filter-btn-group col-3">
-                    <button class="btn btn-sm btn-outline-primary" @click="clear">清除准登</button>
-                    <button class="btn btn-sm btn-outline-success" @click="popup">備註</button>
+                    <b-button @click="clear" variant="outline-secondary" size="sm" title="清除准登旗標"><i class="fas fa-broom"></i></b-button>
+                    <b-button @click="popup" variant="outline-success" size="sm" title="備註"><i class="far fa-comment"></i> 備註</b-button>
                 </div>
             </div>
 
@@ -68,14 +68,14 @@ if (Vue) {
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-prereg_announcement_select">公告項目</span>
                     </div>
-                    <select @change.lazy="change" id='prereg_announcement_select' class='form-control' v-model="val">
+                    <select @change.lazy="change" id='prereg_announcement_select' class='form-control h-100' v-model="val">
                         <option value=''></option>
                         <option v-for="(item, index) in data" :value="item['RA01'] + ',' + item['KCNT'] + ',' + item['RA02'] + ',' + item['RA03']">
                             {{item["RA01"]}} : {{item["KCNT"]}} 【{{item['RA02']}}, {{item['RA03']}}】
                         </option>
                     </select>
                     &ensp;
-                    <button class="btn btn-sm btn-outline-primary" @click="change">變更</button>
+                    <b-button @click="change" variant="outline-primary" size="sm" title="開啟編輯視窗"><i class="fas fa-external-link-alt"></i></b-button>
                 </div>`,
                 props: ["resetFlag"],
                 data: () => {

@@ -1,30 +1,29 @@
 if (Vue) {
     Vue.component("easycard-payment-check", {
         template: `<fieldset>
-            <legend>悠遊卡自動加值付款失敗回復</legend>
+            <legend>悠遊卡檢測</legend>
             <div class="form-row">
-                <div class="input-group input-group-sm col-3">
+                <div class="input-group input-group-sm col-3 small">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-easycard_query_day">日期</span>
                     </div>
-                    <input
+                    <b-form-input
                         @keyup.enter="query"
-                        type="text"
                         id="easycard_query_day"
-                        name="easycard_query_day"
-                        class="form-control easycard_query no-cache bg-light"
+                        :class="['form-control', 'no-cache', 'bg-light', 'h-100', 'pl-2', 'border']"
                         placeholder="1081231"
                         data-trigger="manual"
                         data-toggle="popover"
                         data-content="e.g. 1081217"
                         data-placement="bottom"
                         v-model="date"
-                        readonly
-                    />
+                        plaintext
+                    >
+                    </b-form-input>
                 </div>
                 <div class="filter-btn-group col">
-                    <button id="easycard_query_button" class="btn btn-sm btn-outline-primary easycard_query" @click="query">查詢</button>
-                    <button id="easycard_quote_button" class="btn btn-sm btn-outline-success" @click="popup">備註</button>
+                    <b-button @click="query" size="sm" variant="outline-primary"><i class="fas fa-cogs"></i> 檢測</b-button>
+                    <b-button @click="popup" size="sm" variant="outline-success"><i class="far fa-comment"></i> 備註</b-button>
                 </div>
             </div>
         </fieldset>`,
@@ -37,17 +36,16 @@ if (Vue) {
             query: function(e) {
                 // basic checking for tw date input
                 let regex = /^\d{7}$/;
-                let txt = $("#easycard_query_day").val();
-                if (!isEmpty(txt) && txt.match(regex) == null) {
+                if (!isEmpty(this.date) && this.date.match(regex) == null) {
                     showPopper("#easycard_query_day");
                     return;
                 }
 
-                toggle(".easycard_query");
+                toggle(e.target);
 
                 let body = new FormData();
                 body.append("type", "easycard");
-                body.append("qday", txt);
+                body.append("qday", this.date);
 
                 const h = this.$createElement;
 
@@ -73,10 +71,10 @@ if (Vue) {
                             size: "md"
                         });
                     }
-                    toggle(".easycard_query");
+                    toggle(e.target);
                 }).catch(ex => {
                     console.error("easycard-payment-check::query parsing failed", ex);
-                    showAlert({message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+                    showAlert({title: "easycard-payment-check::query", message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
                 });
             },
             popup: () => {

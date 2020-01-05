@@ -1,9 +1,9 @@
 if (Vue) {
     Vue.component("xcase-check", {
         template: `<fieldset>
-            <legend>跨所註記遺失檢測<small>(一周內)</small></legend>
-            <button @click="check" class="btn btn-sm btn-outline-primary" data-toggle='tooltip'>立即檢測</button>
-            <button @click="showNote" class="btn btn-sm btn-outline-success">備註</button>
+            <legend>跨所註記檢測</legend>
+            <b-button @click="check" size="sm" variant="outline-primary"><i class="fas fa-cogs"></i> 檢測</b-button>
+            <b-button @click="showNote" size="sm" variant="outline-success"><i class="far fa-comment"></i> 備註</b-button>
         </fieldset>`,
         methods: {
             showNote: function(e) {
@@ -11,6 +11,7 @@ if (Vue) {
                     title: "跨所註記遺失檢測 小幫手提示",
                     body: `<div class="d-block">
                         <h5><span class="text-danger">※</span>通常發生的情況是案件內的權利人/義務人/代理人姓名內有罕字造成。</h5>
+                        <h5><span class="text-danger">※</span>僅檢測一周內資料。</h5>
                         <p class="text-info">QUERY:</p>
                         &emsp;SELECT * <br />
                         &emsp;FROM SCRSMS <br />

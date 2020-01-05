@@ -11,8 +11,7 @@ if (Vue) {
                         v-model="date"
                         id="fee_query_date"
                         placeholder="民國年月日"
-                        :state="isDateValid"
-                        :class="['no-cache', 'bg-light', 'border', 'pl-2']"
+                        :class="['form-control', 'no-cache', 'bg-light', 'border', 'pl-2', 'h-100']"
                         size="sm"
                         plaintext
                         trim
@@ -32,14 +31,20 @@ if (Vue) {
                         min=1
                         trim
                         number
+                        :class="['form-control', 'h-100']"
                     >
                     </b-form-input>
                     &ensp;
-                    <button @click="query" class="btn btn-sm btn-outline-primary">查詢</button>
+                    <b-button @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button>
                     &ensp;
-                    <button @click="popup" class="btn btn-sm btn-outline-success">備註</button>
+                    <b-button @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
                     &ensp;
-                    <button @click="obsolete" class="btn btn-sm btn-outline-danger" title="新增作廢假資料"><i class="fas fa-ban"></i></button>
+                    <b-button @click="obsolete" variant="outline-secondary" size="sm" title="作廢假資料">
+                        <span class="fa-stack">
+                            <i class="fas fa-file-alt fa-stack-1x"></i>
+                            <i class="fas fa-ban fa-stack-2x text-danger"></i>
+                        </span>
+                    </b-button>
                 </div>
             </b-container>
         </fieldset>`,
@@ -80,14 +85,6 @@ if (Vue) {
             }
         },
         computed: {
-            isDateValid: function() {
-                if (this.date == '' || this.date == undefined) {
-                    return null;
-                } else if (this.date.length == 7 && !isNaN(this.date)) {
-                    return true;
-                }
-                return false;
-            },
             isNumberValid: function() {
                 if (this.number == '' || this.number == undefined) {
                     return null;
@@ -100,128 +97,204 @@ if (Vue) {
         watch: {
             number: function(nVal, oVal) {
                 if (this.number > 9999999) this.number = 9999999;
-                else if (this.number < 1) this.number = 1;
+                else if (this.number < 1) this.number = '';
             }
         },
         methods: {
             query: function(e) {
-                console.log(this.date, this.number);
-                return;
-
-                let body = new FormData();
-                body.append("type", "expaa");
-                body.append("qday", this.date);
-                body.append("num", this.number);
-                body.append("list_mode", true);
-                fetch("query_json_api.php", {
-                    method: "POST",
-                    body: body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
+                let jsonObj = JSON.parse(`
+                {
+                    "status": 2,
+                    "data_count": 250,
+                    "message": "\u65bc 1090103 \u627e\u5230 250 \u7b46\u8cc7\u6599",
+                    "query_string": "qday=1090103",
+                    "raw": [
+                      {
+                        "AA01": "1090103",
+                        "AA04": "0000377",
+                        "AA05": "AB00117257",
+                        "AA06": "1",
+                        "AA07": "0",
+                        "AA08": "1",
+                        "AA09": "1",
+                        "AA10": "H200864399",
+                        "AA11": "\u9127\u5982\u6842",
+                        "AA12": null,
+                        "AA13": "H200864399",
+                        "AA14": null,
+                        "AA02": null,
+                        "AA24": "1090103",
+                        "AA25": "109",
+                        "AA27": "20",
+                        "AA28": "20",
+                        "AA39": "HB0514",
+                        "AA95": null,
+                        "AA96": "1",
+                        "AA88": "0",
+                        "AA89": null,
+                        "AA09F": "0",
+                        "AA40": null,
+                        "AA100": "01",
+                        "AA101": null,
+                        "AA102": null,
+                        "AA103": null,
+                        "AA104": null,
+                        "AA105": "HB",
+                        "AA106": null,
+                        "AA107": null,
+                        "AA108": null
+                      },
+                      {
+                        "AA01": "1090103",
+                        "AA04": "0000378",
+                        "AA05": "AB00117258",
+                        "AA06": "1",
+                        "AA07": "0",
+                        "AA08": "1",
+                        "AA09": "1",
+                        "AA10": "H122007305",
+                        "AA11": "\u9ec3\u51a0\u9298",
+                        "AA12": null,
+                        "AA13": "H122007305",
+                        "AA14": null,
+                        "AA02": null,
+                        "AA24": "1090103",
+                        "AA25": "109",
+                        "AA27": "60",
+                        "AA28": "60",
+                        "AA39": "HB0514",
+                        "AA95": null,
+                        "AA96": "1",
+                        "AA88": "0",
+                        "AA89": null,
+                        "AA09F": "0",
+                        "AA40": null,
+                        "AA100": "08",
+                        "AA101": null,
+                        "AA102": null,
+                        "AA103": null,
+                        "AA104": null,
+                        "AA105": "HB",
+                        "AA106": null,
+                        "AA107": null,
+                        "AA108": null
+                      },
+                      {
+                        "AA01": "1090103",
+                        "AA04": "0000379",
+                        "AA05": "AB00108571",
+                        "AA06": "1",
+                        "AA07": "0",
+                        "AA08": "1",
+                        "AA09": "1",
+                        "AA10": "P120246587",
+                        "AA11": "\u66fe\u660e\u5c71",
+                        "AA12": null,
+                        "AA13": "P120246587",
+                        "AA14": null,
+                        "AA02": null,
+                        "AA24": "1090103",
+                        "AA25": "109",
+                        "AA27": "40",
+                        "AA28": "40",
+                        "AA39": "HB1213",
+                        "AA95": null,
+                        "AA96": "1",
+                        "AA88": "0",
+                        "AA89": null,
+                        "AA09F": "0",
+                        "AA40": null,
+                        "AA100": "06",
+                        "AA101": null,
+                        "AA102": null,
+                        "AA103": null,
+                        "AA104": null,
+                        "AA105": "HB",
+                        "AA106": "1",
+                        "AA107": "00003791090103081948",
+                        "AA108": null
+                      },
+                      {
+                        "AA01": "1090103",
+                        "AA04": "0000625",
+                        "AA05": "AB00109993",
+                        "AA06": "1",
+                        "AA07": "0",
+                        "AA08": "1",
+                        "AA09": "1",
+                        "AA10": "H100739844",
+                        "AA11": "\u5433\u5609\u70b3",
+                        "AA12": null,
+                        "AA13": "H100739844",
+                        "AA14": null,
+                        "AA02": null,
+                        "AA24": "1090103",
+                        "AA25": "109",
+                        "AA27": "60",
+                        "AA28": "60",
+                        "AA39": "HB1200",
+                        "AA95": null,
+                        "AA96": "1",
+                        "AA88": "0",
+                        "AA89": null,
+                        "AA09F": "0",
+                        "AA40": null,
+                        "AA100": "05",
+                        "AA101": null,
+                        "AA102": null,
+                        "AA103": null,
+                        "AA104": null,
+                        "AA105": "HB",
+                        "AA106": null,
+                        "AA107": null,
+                        "AA108": null
+                      },
+                      {
+                        "AA01": "1080103",
+                        "AA04": "0000626",
+                        "AA05": "AB00116125",
+                        "AA06": "1",
+                        "AA07": "0",
+                        "AA08": "1",
+                        "AA09": "1",
+                        "AA10": "H122217356",
+                        "AA11": "\u8cf4\u660e\u7687",
+                        "AA12": "\u8cb7\u8ce3",
+                        "AA13": "H122217356",
+                        "AA14": "\u8cf4\u660e\u7687",
+                        "AA02": null,
+                        "AA24": "1090103",
+                        "AA25": "109",
+                        "AA27": "3055",
+                        "AA28": "3055",
+                        "AA39": "HB0167",
+                        "AA95": null,
+                        "AA96": null,
+                        "AA88": "1",
+                        "AA89": "HB0167",
+                        "AA09F": "0",
+                        "AA40": null,
+                        "AA100": "09",
+                        "AA101": null,
+                        "AA102": null,
+                        "AA103": null,
+                        "AA104": null,
+                        "AA105": "HB",
+                        "AA106": null,
+                        "AA107": null,
+                        "AA108": null
+                      }
+                    ]
+                  }
+                `);
+                let VNode = this.$createElement("expaa-category-dashboard", {
+                    props: {
+                        raw_data: jsonObj.raw
                     }
-                    return response.json();
-                }).then(jsonObj => {
-                    // only has one record
-                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        let html = "<div class='text-info'>規費資料：</div>";
-                        html += "<ul>";
-                        for (let key in jsonObj.raw) {
-                            html += "<li>";
-                            html += key + "：";
-                            if (key == "列印註記") {
-                                html += "<div class='form-row form-inline'>"
-                                    + "<div class='input-group input-group-sm col-3'>"
-                                    + "<select id='exapp_print_select' class='form-control'>"
-                                    + "<option value='0'" + (jsonObj.raw[key] == 0 ? "selected" : "") + ">【0】未印</option>"
-                                    + "<option value='1'" + (jsonObj.raw[key] == 1 ? "selected" : "") + ">【1】已印</option>"
-                                    + "</select> "
-                                    + "</div>"
-                                    + `<div class='filter-btn-group col'>
-                                            <button id='exapp_print_button' class='btn btn-sm btn-outline-primary'>修改</button>
-                                            <span id='exapp_print_status'></span>
-                                        </div>`
-                                    + "</div>";
-                            } else if (key == "繳費方式代碼") {
-                                html += "<div class='form-row form-inline'>"
-                                    + "<div class='input-group input-group-sm col-3'>"
-                                    + "<select id='exapp_method_select' class='form-control'>"
-                                    + getExpaaAA100Options(jsonObj.raw[key])
-                                    + "</select> "
-                                    + "</div>"
-                                    + `<div class='filter-btn-group col'>
-                                            <button id='exapp_method_button' class='btn btn-sm btn-outline-primary'>修改</button>
-                                            <span id='exapp_method_status'></span>
-                                        </div>`
-                                    + "</div>";
-                            } else if (key == "悠遊卡繳費扣款結果") {
-                                html += jsonObj.raw[key];
-                                //  無作廢原因才可進行修正
-                                if (isEmpty(jsonObj.raw["作廢原因"]) && jsonObj.raw[key] != 1) {
-                                    html += "&ensp;<button class='btn btn-sm btn-outline-danger' id='fix_exapp_easycard_payment_btn" + "' onclick='xhrFixEasycardPayment(\"" + jsonObj.raw["開單日期"] + "\", \"" + jsonObj.raw["電腦給號"] + "\", \"" + jsonObj.raw["實收總金額"] + "\", \"fix_exapp_easycard_payment_btn" + "\")'>修正為扣款成功</button>";
-                                }
-                            } else {
-                                // others just show info
-                                html += jsonObj.raw[key];
-                            }
-                            html += "</li>";
-                        };
-                        html += "</ul>";
-                        $("#expaa_query_display").html(html);
-                        // attach event handler for the buttons
-                        $("#exapp_print_button").off("click").on("click", xhrUpdateExpaaAA09.bind({
-                            date: $("#expaa_query_date").val(),
-                            number: $("#expaa_query_number").val(),
-                            select_id: "exapp_print_select"
-                        }));
-                        $("#exapp_method_button").off("click").on("click", xhrUpdateExpaaAA100.bind({
-                            date: $("#expaa_query_date").val(),
-                            number: $("#expaa_query_number").val(),
-                            select_id: "exapp_method_select"
-                        }));
-                    } else if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS) {
-                        // has many records
-                        let html = "<div>" 
-                                + "<span class='block-secondary'>現金</span> "
-                                + "<span class='block-primary'>悠遊卡</span> "
-                                + "<span class='block-warning'>信用卡</span> "
-                                + "<span class='block-danger'>行動支付</span> "
-                                + "<span class='block-dark'>其他方式</span> "
-                                + "</div>";
-                        html += "<div class='text-success'>" + jsonObj.message + "</div>";
-                        for (let i = 0; i < jsonObj.data_count; i++) {
-                            html += "<a href='javascript:void(0)' class='float-left mr-2 mb-2 expaa_a_aa04 "
-                                + getAA04DisplayCss(jsonObj.raw[i])
-                                + " "
-                                + (jsonObj.raw[i]["AA09"] == 1 ? "text-secondary" : "text-danger font-weight-bold")
-                                + " ' title='"
-                                + getExpaaTooltip(jsonObj.raw[i])
-                                + "'>"
-                                + jsonObj.raw[i]["AA04"]
-                                + "</a>";
-                        }
-                        showModal({
-                            body: html,
-                            title: "搜尋規費列表",
-                            size: "lg",
-                            callback: () => {
-                                $("a.expaa_a_aa04").off("click").on("click", e => {
-                                    let pc_num = $(e.target).text();
-                                    $("#expaa_query_number").val(pc_num);
-                                    $("#expac_query_number").val(pc_num);
-                                    xhrGetExpaaData.call(null, [e]);
-                                    xhrGetExpacItems.call(null, [e]);
-                                    closeModal();
-                                });
-                            }
-                        });
-                    } else {
-                        showAlert({message: `找不到規費資料【日期：${txt}, 電腦給號：${number}】`, type: "warning"});
-                    }
-                    toggle("[id*=expaa_query_]");
-                }).catch(ex => {
-                    console.error("xhrGetExpaaData parsing failed", ex);
-                    showAlert({message: ex.toString(), type: "danger"});
+                });
+                showModal({
+                    message: VNode,
+                    title: `${this.date} 規費`
                 });
             },
             popup: function(e) {
@@ -257,11 +330,6 @@ if (Vue) {
                     return response.json();
                 }).then(jsonObj => {
                     toggle(e.target);
-                    var now = new Date();
-                    let last_pc_number = jsonObj.raw ? jsonObj.raw[0]["AA04"] : 0;
-                    let today = (now.getFullYear() - 1911) +
-                        ("0" + (now.getMonth() + 1)).slice(-2) +
-                        ("0" + now.getDate()).slice(-2);
 
                     // use the expaa-obsolete-mgt sub-component to do the addition
                     let VNode = this.$createElement("expaa-obsolete-mgt", {
@@ -292,7 +360,7 @@ if (Vue) {
             var d = new Date();
             this.date = toTWDate(d);
             if (this.number > 9999999) this.number = 9999999;
-            else if (this.number < 1) this.number = 1;
+            else if (this.number < 1) this.number = '';
         },
         mounted: function() {
             let that = this;
@@ -312,25 +380,114 @@ if (Vue) {
             }
         },
         components: {
-            "expaa-list-mgt": {
-                template: `<div id="expaa-list-container">
-                </div>`,
+            "expaa-category-dashboard": {
+                template: `<b-container id="expaa-list-container" fluid :class="['small', 'text-center']">
+                    <b-row>
+                        <b-col>
+                            <b-button variant="info" block @click="open('全部規費列表', raw_data)">
+                                全部 <b-badge variant="light">{{count_all}} <span class="sr-only">全部收費數量</span></b-badge>
+                            </b-button>
+                        </b-col>
+                        <b-col>
+                            <b-button variant="success" block @click="open('現金規費列表', cash)">
+                                現金 <b-badge variant="light">{{count_cash}} <span class="sr-only">現金收費數量</span></b-badge>
+                            </b-button>
+                        </b-col>
+                        <b-col>
+                            <b-button variant="primary" block @click="open('悠遊卡規費列表', ezcard)">
+                                悠遊卡 <b-badge variant="light">{{count_ezcard}} <span class="sr-only">悠遊卡收費數量</span></b-badge>
+                            </b-button>
+                        </b-col>
+                    </b-row>
+                    <b-row :class="['mt-1']">
+                        <b-col>
+                            <b-button variant="danger" block @click="open('行動支付規費列表', mobile)">
+                                行動支付 <b-badge variant="light">{{count_mobile}} <span class="sr-only">行動支付收費數量</span></b-badge>
+                            </b-button>
+                        </b-col>
+                        <b-col>
+                            <b-button variant="warning" block @click="open('信用卡規費列表', credit)">
+                                信用卡 <b-badge variant="light">{{count_credit}} <span class="sr-only">信用卡收費數量</span></b-badge>
+                            </b-button>
+                        </b-col>
+                        <b-col>
+                            <b-button variant="secondary" block @click="open('其他規費列表', other)">
+                                其他 <b-badge variant="light">{{count_other}} <span class="sr-only">其他收費數量</span></b-badge>
+                            </b-button>
+                        </b-col>
+                    </b-row>
+                </b-container>`,
                 props: ["raw_data"],
                 data: () => {
                     return {
-                        raw_data: []
+                        cash: [],
+                        ezcard: [],
+                        mobile: [],
+                        credit: [],
+                        other: []
                     }
                 },
                 computed: {
-                    count_cash: function() {},
-                    count_ezcard: function() {},
-                    count_mobile: function() {},
-                    count_other: function() {},
-                    count_credit: function() {}
+                    count_cash: function() { return this.cash.length; },
+                    count_ezcard: function() { return this.ezcard.length; },
+                    count_mobile: function() { return this.mobile.length; },
+                    count_other: function() { return this.other.length; },
+                    count_credit: function() { return this.credit.length; },
+                    count_all: function() { return this.raw_data.length; }
                 },
-                methods: {},
-                created: function () {},
-                mounted: function () {}
+                created: function () {
+                    /* AA100 mapping
+                        "01","現金"
+                        "02","支票"
+                        "03","匯票"
+                        "04","iBon"
+                        "05","ATM"
+                        "06","悠遊卡"
+                        "07","其他匯款"
+                        "08","信用卡"
+                        "09","行動支付"
+                    */
+                    this.cash = this.raw_data.filter(this_record => this_record["AA100"] == "01");
+                    this.ezcard = this.raw_data.filter(this_record => this_record["AA100"] == "06");
+                    this.mobile = this.raw_data.filter(this_record => this_record["AA100"] == "09");
+                    this.credit = this.raw_data.filter(this_record => this_record["AA100"] == "08");
+                    this.other = this.raw_data.filter(this_record => {
+                        return this_record["AA100"] != "06" && this_record["AA100"] != "01" && this_record["AA100"] != "08" && this_record["AA100"] != "09";
+                    });
+                },
+                methods: {
+                    open: function(title, data) {
+                        if (data.length == 0) {
+                            return false;
+                        }
+                        showModal({
+                            title: title,
+                            message: this.$createElement("expaa-list-mgt", { props: { items: data || [] } }),
+                            size: "lg",
+                            backdrop_close: true
+                        });
+                    }
+                },
+                components: {
+                    "expaa-list-mgt": {
+                        template: `<b-container fluid>
+                            <b-button @click="open(item['AA01'], item['AA04'])" variant="outline-primary" pill size="sm" :class="['float-left', 'mr-2', 'mb-2']" v-for="(item, idx) in items">{{item["AA04"]}}</b-button>
+                        </b-container>`,
+                        props: ["items"],
+                        methods: {
+                          open: function(date, pc_number) {
+                            let VNode = this.$createElement("expaa-fee-detail", {
+                              props: { date: date, pc_number: pc_number}
+                            });
+                            showModal({
+                              message: VNode,
+                              title: "規費資料詳情",
+                              backdrop_close: true
+                            })
+                          }
+                        }
+                    }
+                }
             },
             "expaa-obsolete-mgt": {
                 template: `<div class="small">
@@ -470,17 +627,7 @@ if (Vue) {
                             });
                             return false;
                         }
-
-                        if (isEmpty(operator) || isEmpty(fee_number) || isEmpty(reason)) {
-                            addNotification({
-                                title: "作廢資料",
-                                message: "需求欄位有問題，請檢查！",
-                                type: "danger"
-                            });
-                            addAnimatedCSS("#obsolete_container input", { name: "tada" });
-                            return false;
-                        }
-
+                        
                         let that = this;
                         showConfirm("確定要新增一個新的假資料？", () => {
                             let body = new FormData();
@@ -531,6 +678,28 @@ if (Vue) {
                     this.next_pc_number = this.raw_data.length > 0 ? parseInt(this.raw_data[0]["AA04"]) + 1 : `9${this.year}001`;
                 }
             }
+        }
+    });
+
+    Vue.component("expaa-fee-detail", {
+        template: `<b-container fluid>
+            <h6 v-if="expaa_data.length == 0"><i class="fas fa-star text-danger"></i> {{date}} 找不到 {{pc_number}} 規費詳細資料</h6>
+            <h6 v-if="expac_data.length == 0"><i class="fas fa-star text-danger"></i> {{date}} 找不到 {{pc_number}} 付款項目詳細資料</h6>
+        </b-container>`,
+        props: ["date", "pc_number"],
+        data: function() {
+            return {
+                expaa_data: [],
+                expac_data: [],
+                expac_year: "109"
+            }
+        },
+        created: function() {
+            this.expac_year = this.date.substring(0, 3) || "109";
+            // todo: fetch remote expaa, expac data
+        },
+        mounted: function() {
+            
         }
     });
 } else {
