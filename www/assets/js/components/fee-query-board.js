@@ -58,7 +58,9 @@ if (Vue) {
             isNumberValid: function() {
                 if (this.number == '' || this.number == undefined) {
                     return null;
-                } else if (this.number.toString().length <= 7 && !isNaN(this.number)) {
+                }
+                let intVal = parseInt(this.number);
+                if (intVal < 9999999 && intVal > 0) {
                     return true;
                 }
                 return false;
