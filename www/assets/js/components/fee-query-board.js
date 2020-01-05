@@ -37,14 +37,14 @@ if (Vue) {
                     &ensp;
                     <b-button @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button>
                     &ensp;
-                    <b-button @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
-                    &ensp;
                     <b-button @click="obsolete" variant="outline-secondary" size="sm" title="作廢假資料">
                         <span class="fa-stack">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
                             <i class="fas fa-ban fa-stack-2x text-danger"></i>
                         </span>
                     </b-button>
+                    &ensp;
+                    <b-button @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
                 </div>
             </b-container>
         </fieldset>`,
