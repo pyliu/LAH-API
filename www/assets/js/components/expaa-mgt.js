@@ -51,37 +51,7 @@ if (Vue) {
         data: () => {
             return {
                 date: "",
-                number: "",
-                expe: { // from MOIEXP.EXPE
-                    "01": "土地法65條登記費",
-                    "02": "土地法76條登記費",
-                    "03": "土地法67條書狀費",
-                    "04": "地籍謄本工本費",
-                    "06": "檔案閱覽抄錄複製費",
-                    "07": "閱覽費",
-                    "08": "門牌查詢費",
-                    "09": "複丈費及建物測量費",
-                    "10": "地目變更勘查費",
-                    "14": "電子謄本列印",
-                    "18": "塑膠樁土地界標",
-                    "19": "鋼釘土地界標(大)",
-                    "30": "104年度登記罰鍰",
-                    "31": "100年度登記罰鍰",
-                    "32": "101年度登記罰鍰",
-                    "33": "102年度登記罰鍰",
-                    "34": "103年度登記罰鍰",
-                    "35": "其他",
-                    "36": "鋼釘土地界標(小)",
-                    "37": "105年度登記罰鍰",
-                    "38": "106年度登記罰鍰",
-                    "39": "塑膠樁土地界標(大)",
-                    "40": "107年度登記罰鍰",
-                    "41": "108年度登記罰鍰",
-                    "42": "土地法第76條登記費（跨縣市）",
-                    "43": "書狀費（跨縣市）",
-                    "44": "罰鍰（跨縣市）",
-                    "45": "109年度登記罰鍰"
-                }
+                number: ""
             }
         },
         computed: {
@@ -476,7 +446,7 @@ if (Vue) {
                         props: ["items"],
                         methods: {
                           open: function(date, pc_number) {
-                            let VNode = this.$createElement("expaa-fee-detail", {
+                            let VNode = this.$createElement("fee-detail-mgt", {
                               props: { date: date, pc_number: pc_number}
                             });
                             showModal({
@@ -681,7 +651,7 @@ if (Vue) {
         }
     });
     // It needs to be used in expaa-list-mgt & expaa-mgt, so register it to global scope 
-    Vue.component("expaa-fee-detail", {
+    Vue.component("fee-detail-mgt", {
         template: `<b-container fluid>
             <h6 v-if="expaa_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 規費詳細資料</h6>
             <h6 v-if="expac_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 付款項目詳細資料</h6>
@@ -691,15 +661,87 @@ if (Vue) {
             return {
                 expaa_data: [],
                 expac_data: [],
-                expac_year: "109"
+                expac_year: "109",
+                expe: { // from MOIEXP.EXPE
+                    "01": "土地法65條登記費",
+                    "02": "土地法76條登記費",
+                    "03": "土地法67條書狀費",
+                    "04": "地籍謄本工本費",
+                    "06": "檔案閱覽抄錄複製費",
+                    "07": "閱覽費",
+                    "08": "門牌查詢費",
+                    "09": "複丈費及建物測量費",
+                    "10": "地目變更勘查費",
+                    "14": "電子謄本列印",
+                    "18": "塑膠樁土地界標",
+                    "19": "鋼釘土地界標(大)",
+                    "30": "104年度登記罰鍰",
+                    "31": "100年度登記罰鍰",
+                    "32": "101年度登記罰鍰",
+                    "33": "102年度登記罰鍰",
+                    "34": "103年度登記罰鍰",
+                    "35": "其他",
+                    "36": "鋼釘土地界標(小)",
+                    "37": "105年度登記罰鍰",
+                    "38": "106年度登記罰鍰",
+                    "39": "塑膠樁土地界標(大)",
+                    "40": "107年度登記罰鍰",
+                    "41": "108年度登記罰鍰",
+                    "42": "土地法第76條登記費（跨縣市）",
+                    "43": "書狀費（跨縣市）",
+                    "44": "罰鍰（跨縣市）",
+                    "45": "109年度登記罰鍰"
+                }
             }
         },
         created: function() {
             this.expac_year = this.date.substring(0, 3) || "109";
-            // todo: fetch remote expaa, expac data
+            this.fetchEXPAA();
+            this.fetchEXPAC();
         },
-        mounted: function() {
-            
+        methods: {
+            fetchEXPAA: function() {
+                let body = new FormData();
+                body.append("type", "expaa");
+                body.append("qday", this.date);
+                body.append("num", this.pc_number);
+                body.append("list_mode", false);
+                fetch("query_json_api.php", {
+                    method: "POST",
+                    body: body
+                }).then(response => {
+                    if (response.status != 200) {
+                        throw new Error("XHR連線異常，回應非200");
+                    }
+                    return response.json();
+                }).then(jsonObj => {
+
+                }).catch(ex => {
+                    console.error("fee-detail-mgt::fetchEXPAA parsing failed", ex);
+                    showAlert({title: "fee-detail-mgt::fetchEXPAA", message: ex.toString(), type: "danger"});
+                });
+            },
+            fetchEXPAC: function() {
+                // EXPAC data fetch
+                let body = new FormData();
+                body.append("type", "expac");
+                body.append("year", this.expac_year);
+                body.append("num", this.pc_number);
+                fetch("query_json_api.php", {
+                    method: "POST",
+                    body: body
+                }).then(response => {
+                    if (response.status != 200) {
+                        throw new Error("XHR連線異常，回應非200");
+                    }
+                    return response.json();
+                }).then(jsonObj => {
+
+                }).catch(ex => {
+                    console.error("fee-detail-mgt::fetchEXPAC parsing failed", ex);
+                    showAlert({title: "fee-detail-mgt::fetchEXPAC", message: ex.toString(), type: "danger"});
+                });
+            }
         }
     });
 } else {
