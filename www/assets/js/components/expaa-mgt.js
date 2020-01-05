@@ -683,8 +683,8 @@ if (Vue) {
 
     Vue.component("expaa-fee-detail", {
         template: `<b-container fluid>
-            <h6 v-if="expaa_data.length == 0"><i class="fas fa-star text-danger"></i> {{date}} 找不到 {{pc_number}} 規費詳細資料</h6>
-            <h6 v-if="expac_data.length == 0"><i class="fas fa-star text-danger"></i> {{date}} 找不到 {{pc_number}} 付款項目詳細資料</h6>
+            <h6 v-if="expaa_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 規費詳細資料</h6>
+            <h6 v-if="expac_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 付款項目詳細資料</h6>
         </b-container>`,
         props: ["date", "pc_number"],
         data: function() {
