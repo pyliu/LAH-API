@@ -59,10 +59,10 @@ const ANIMATED_PATTERNS = ["bounce", "flash", "pulse", "rubberBand", "shake", "h
 const ANIMATED_TRANSITIONS = [
 	// rotate
 	{ in: "animated rotateIn", out: "animated rotateOut" },
-	{ in: "animated rotateInDownLeft", out: "animated rotateOutDownLeft" },
-	{ in: "animated rotateInDownRight", out: "animated rotateOutDownRight" },
-	{ in: "animated rotateInUpLeft", out: "animated rotateOutUpLeft" },
-	{ in: "animated rotateInUpRight", out: "animated rotateOutUpRight" },
+	{ in: "animated rotateInDownLeft", out: "animated rotateOutDownRight" },
+	{ in: "animated rotateInDownRight", out: "animated rotateOutDownLeft" },
+	{ in: "animated rotateInUpLeft", out: "animated rotateOutUpRight" },
+	{ in: "animated rotateInUpRight", out: "animated rotateOutUpLeft" },
 	// bounce
 	{ in: "animated bounceIn", out: "animated bounceOut" },
 	{ in: "animated bounceInUp", out: "animated bounceOutDown" },
@@ -80,8 +80,8 @@ const ANIMATED_TRANSITIONS = [
 	{ in: "animated fadeInUp", out: "animated fadeOutDown" },
 	{ in: "animated fadeInUpBig", out: "animated fadeOutDownBig" },
 	// flip
-	{ in: "animated flipInX", out: "animated flipOutY" },
-	{ in: "animated flipInY", out: "animated flipOutX" },
+	{ in: "animated flipInX", out: "animated flipOutX" },
+	{ in: "animated flipInY", out: "animated flipOutY" },
 	// lightspeed
 	{ in: "animated lightSpeedIn", out: "animated lightSpeedOut" },
 	// roll
