@@ -31,7 +31,7 @@ if (Vue) {
                         min=1
                         trim
                         number
-                        :class="['form-control', 'h-100']"
+                        :class="['form-control', 'h-100', 'no-cache']"
                     >
                     </b-form-input>
                     &ensp;
@@ -680,7 +680,7 @@ if (Vue) {
             }
         }
     });
-
+    // It needs to be used in expaa-list-mgt & expaa-mgt, so register it to global scope 
     Vue.component("expaa-fee-detail", {
         template: `<b-container fluid>
             <h6 v-if="expaa_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 規費詳細資料</h6>
