@@ -279,7 +279,8 @@ let showModal = opts => {
 		title: title,
 		size: size,
 		html: true,
-		callback: callback
+		callback: callback,
+		noCloseOnBackdrop: !opts.backdrop_close
 	});
 }
 

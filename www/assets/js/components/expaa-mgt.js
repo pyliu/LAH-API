@@ -463,7 +463,8 @@ if (Vue) {
                         showModal({
                             title: title,
                             message: this.$createElement("expaa-list-mgt", { props: { items: data || [] } }),
-                            size: "lg"
+                            size: "lg",
+                            backdrop_close: true
                         });
                     }
                 },
@@ -475,7 +476,31 @@ if (Vue) {
                         props: ["items"],
                         methods: {
                           open: function(date, pc_number) {
-                            console.log(date, pc_number);
+                            let VNode = this.$createElement("expaa-fee-detail", {
+                              props: { date: date, pc_number: pc_number}
+                            });
+                            showModal({
+                              message: VNode,
+                              title: "規費資料詳情",
+                              backdrop_close: true
+                            })
+                          }
+                        },
+                        components: {
+                          "expaa-fee-detail": {
+                            template: `<b-container fluid>
+                              {{date}}, {{pc_number}}
+                            </b-container>`,
+                            props: ["date", "pc_number"],
+                            data: function() {
+                              return {
+                                expaa_data: [],
+                                expac_data: []
+                              }
+                            },
+                            created: function() {
+                              // todo: fetch remote expaa, expac data
+                            }
                           }
                         }
                     }
