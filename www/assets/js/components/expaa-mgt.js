@@ -301,8 +301,8 @@ if (Vue) {
                 }).then(jsonObj => {
                     toggle(e.target);
 
-                    // use the expaa-obsolete-mgt sub-component to do the addition
-                    let VNode = this.$createElement("expaa-obsolete-mgt", {
+                    // use the fee-obsolete-mgt sub-component to do the addition
+                    let VNode = this.$createElement("fee-obsolete-mgt", {
                         props: {
                             raw_data: jsonObj.raw
                         }
@@ -459,7 +459,7 @@ if (Vue) {
                     }
                 }
             },
-            "expaa-obsolete-mgt": {
+            "fee-obsolete-mgt": {
                 template: `<div class="small">
                     下一筆假資料：<br />
                     ※ 電腦給號：{{next_pc_number}} <br />
@@ -628,9 +628,9 @@ if (Vue) {
                                     });
                                 });
                             }).catch(ex => {
-                                console.error("expaa-obsolete-mgt::add parsing failed", ex);
+                                console.error("fee-obsolete-mgt::add parsing failed", ex);
                                 showAlert({
-                                    title: "expaa-obsolete-mgt::add",
+                                    title: "fee-obsolete-mgt::add",
                                     message: ex.message,
                                     type: "danger"
                                 });
