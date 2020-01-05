@@ -68,12 +68,27 @@ if (Vue) {
         },
         watch: {
             number: function(nVal, oVal) {
-                if (this.number > 9999999) this.number = 9999999;
-                else if (this.number < 1) this.number = '';
+                let intVal = parseInt(this.number);
+                if (intVal > 9999999) this.number = 9999999;
+                else if (intVal < 1) this.number = '';
             }
         },
         methods: {
             query: function(e) {
+                if (isEmpty(this.number)) {
+                    this.fetchList();
+                } else {
+                    let VNode = this.$createElement("fee-detail-mgt", {
+                        props: { date: this.date, pc_number: this.number.toString().padStart(7, "0")}
+                    });
+                    showModal({
+                        message: VNode,
+                        title: "規費資料詳情",
+                        size: "lg"
+                    });
+                }
+            },
+            fetchList: function() {
                 let jsonObj = JSON.parse(`
                 {
                     "status": 2,
@@ -266,7 +281,7 @@ if (Vue) {
                 });
                 showModal({
                     message: VNode,
-                    title: `${this.date} 規費`
+                    title: `${this.date} 規費統計`
                 });
             },
             popup: function(e) {
@@ -454,8 +469,9 @@ if (Vue) {
                             showModal({
                               message: VNode,
                               title: "規費資料詳情",
-                              backdrop_close: true
-                            })
+                              backdrop_close: true,
+                              size: "lg"
+                            });
                           }
                         }
                     }
