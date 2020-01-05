@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("expaa-mgt", {
+    Vue.component("fee-query-board", {
         template: `<fieldset>
             <legend>規費資料</legend>
             <b-container :class="['form-row']" fluid>
@@ -317,9 +317,9 @@ if (Vue) {
                         }
                     });
                 }).catch(ex => {
-                    console.error("expaa-mgt::obsolete parsing failed", ex);
+                    console.error("fee-query-board::obsolete parsing failed", ex);
                     showAlert({
-                        title: "expaa-mgt::obsolete",
+                        title: "fee-query-board::obsolete",
                         message: ex.message,
                         type: "danger"
                     });
@@ -650,7 +650,7 @@ if (Vue) {
             }
         }
     });
-    // It needs to be used in expaa-list-mgt & expaa-mgt, so register it to global scope 
+    // It needs to be used in expaa-list-mgt & fee-query-board, so register it to global scope 
     Vue.component("fee-detail-mgt", {
         template: `<b-container fluid>
             <h6 v-if="expaa_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 規費詳細資料</h6>
@@ -745,5 +745,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... expaa-mgt component can not be loaded.");
+    console.error("vue.js not ready ... fee-query-board component can not be loaded.");
 }
