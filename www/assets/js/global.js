@@ -59,10 +59,10 @@ const ANIMATED_PATTERNS = ["bounce", "flash", "pulse", "rubberBand", "shake", "h
 const ANIMATED_TRANSITIONS = [
 	// rotate
 	{ in: "animated rotateIn", out: "animated rotateOut" },
-	{ in: "animated rotateInDownLeft", out: "animated rotateOutDownRight" },
-	{ in: "animated rotateInDownRight", out: "animated rotateOutDownLeft" },
-	{ in: "animated rotateInUpLeft", out: "animated rotateOutUpRight" },
-	{ in: "animated rotateInUpRight", out: "animated rotateOutUpLeft" },
+	{ in: "animated rotateInDownLeft", out: "animated rotateOutDownLeft" },
+	{ in: "animated rotateInDownRight", out: "animated rotateOutDownRight" },
+	{ in: "animated rotateInUpLeft", out: "animated rotateOutUpLeft" },
+	{ in: "animated rotateInUpRight", out: "animated rotateOutUpRight" },
 	// bounce
 	{ in: "animated bounceIn", out: "animated bounceOut" },
 	{ in: "animated bounceInUp", out: "animated bounceOutDown" },
