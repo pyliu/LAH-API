@@ -95,6 +95,8 @@
           <easycard-payment-check></easycard-payment-check>
         </div>
       </div>
+      <div id="test" class="row">
+      </div>
     </div>
   </section><!-- /section -->
   <small id="copyright" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded">
@@ -145,6 +147,26 @@
       window.caseTempMgtVue = new Vue({el: "#case-temp-mgt"});
       window.caseSyncMgtVue = new Vue({el: "#case-sync-mgt"});
       window.feeQueryBoardVue = new Vue({el: "#fee-query-board"});
+
+      new Vue({
+        el: "#test",
+        template: `<div>
+          <b-form-select v-model="selected" :options="options"></b-form-select>
+          <div class="mt-3">Selected: <strong>{{ selected }}</strong></div>
+        </div>`,
+        data() {
+          return {
+            selected: null,
+            options: [
+              { value: null, text: 'Please select some item' },
+              { value: 'a', text: 'This is First option' },
+              { value: 'b', text: 'Default Selected Option' },
+              { value: 'c', text: 'This is another option' },
+              { value: 'd', text: 'This one is disabled', disabled: true }
+            ]
+          }
+        }
+      });
     });
   </script>
 </body>

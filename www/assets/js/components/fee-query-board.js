@@ -650,6 +650,7 @@ if (Vue) {
                 props: ["list", "date", "pc_number"],
                 data: function() {
                     return {
+                        selected: [],
                         expe: { // from MOIEXP.EXPE
                             "01": "土地法65條登記費",
                             "02": "土地法76條登記費",
@@ -721,7 +722,11 @@ if (Vue) {
                                     });
                                 }
                             }).catch(ex => {
-                                console.error("fee-detail-expac-mgt::updateExpacItem parsing failed", ex);
+                                showAlert({
+                                    title: "fee-detail-expac-mgt::updateExpacItem",
+                                    message: ex.toString(),
+                                    type: "danger"
+                                });
                             });
                         }
                     }
