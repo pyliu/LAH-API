@@ -69,8 +69,10 @@ if (Vue) {
         watch: {
             number: function(nVal, oVal) {
                 let intVal = parseInt(this.number);
-                if (intVal > 9999999) this.number = 9999999;
-                else if (Number.isNaN(intVal) || intVal < 1) this.number = '';
+                if (intVal > 9999999)
+                    this.number = 9999999;
+                else if (Number.isNaN(intVal) || intVal < 1)
+                    this.number = '';
             }
         },
         methods: {
@@ -506,6 +508,7 @@ if (Vue) {
         template: `<b-container fluid>
             <h6 v-if="expaa_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 規費詳細資料</h6>
             <h6 v-if="expac_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 付款項目詳細資料</h6>
+            <div id="fee_detail_plate"></div>
         </b-container>`,
         props: ["date", "pc_number"],
         data: function() {
@@ -566,7 +569,63 @@ if (Vue) {
                     }
                     return response.json();
                 }).then(jsonObj => {
-
+                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        let html = "<div class='text-info'>規費資料：</div>";
+                        html += "<ul>";
+                        for (let key in jsonObj.raw) {
+                            html += "<li>";
+                            html += key + "：";
+                            if (key == "列印註記") {
+                                html += "<div class='form-row form-inline'>"
+                                    + "<div class='input-group input-group-sm col-3'>"
+                                    + "<select id='exapp_print_select' class='form-control'>"
+                                    + "<option value='0'" + (jsonObj.raw[key] == 0 ? "selected" : "") + ">【0】未印</option>"
+                                    + "<option value='1'" + (jsonObj.raw[key] == 1 ? "selected" : "") + ">【1】已印</option>"
+                                    + "</select> "
+                                    + "</div>"
+                                    + `<div class='filter-btn-group col'>
+                                            <button id='exapp_print_button' class='btn btn-sm btn-outline-primary'>修改</button>
+                                            <span id='exapp_print_status'></span>
+                                        </div>`
+                                    + "</div>";
+                            } else if (key == "繳費方式代碼") {
+                                html += "<div class='form-row form-inline'>"
+                                    + "<div class='input-group input-group-sm col-3'>"
+                                    + "<select id='exapp_method_select' class='form-control'>"
+                                    + getExpaaAA100Options(jsonObj.raw[key])
+                                    + "</select> "
+                                    + "</div>"
+                                    + `<div class='filter-btn-group col'>
+                                            <button id='exapp_method_button' class='btn btn-sm btn-outline-primary'>修改</button>
+                                            <span id='exapp_method_status'></span>
+                                        </div>`
+                                    + "</div>";
+                            } else if (key == "悠遊卡繳費扣款結果") {
+                                html += jsonObj.raw[key];
+                                //  無作廢原因才可進行修正
+                                if (isEmpty(jsonObj.raw["作廢原因"]) && jsonObj.raw[key] != 1) {
+                                    html += "&ensp;<button class='btn btn-sm btn-outline-danger' id='fix_exapp_easycard_payment_btn" + "' onclick='xhrFixEasycardPayment(\"" + jsonObj.raw["開單日期"] + "\", \"" + jsonObj.raw["電腦給號"] + "\", \"" + jsonObj.raw["實收總金額"] + "\", \"fix_exapp_easycard_payment_btn" + "\")'>修正為扣款成功</button>";
+                                }
+                            } else {
+                                // others just show info
+                                html += jsonObj.raw[key];
+                            }
+                            html += "</li>";
+                        };
+                        html += "</ul>";
+                        $("#fee_detail_plate").html(html);
+                        // attach event handler for the buttons
+                        $("#exapp_print_button").off("click").on("click", xhrUpdateExpaaAA09.bind({
+                            date: $("#expaa_query_date").val(),
+                            number: $("#expaa_query_number").val(),
+                            select_id: "exapp_print_select"
+                        }));
+                        $("#exapp_method_button").off("click").on("click", xhrUpdateExpaaAA100.bind({
+                            date: $("#expaa_query_date").val(),
+                            number: $("#expaa_query_number").val(),
+                            select_id: "exapp_method_select"
+                        }));
+                    }
                 }).catch(ex => {
                     console.error("fee-detail-mgt::fetchEXPAA parsing failed", ex);
                     showAlert({title: "fee-detail-mgt::fetchEXPAA", message: ex.toString(), type: "danger"});
