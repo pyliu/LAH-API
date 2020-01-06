@@ -70,34 +70,30 @@
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
       <div class="row">
-        <div id="xcase-check" class="col">
-          <xcase-check></xcase-check>
-        </div>
-        <div id="easycard-payment-check" class="col">
-          <easycard-payment-check></easycard-payment-check>
-        </div>
-      </div>
-      <div class="row">
-        <div id="announcement-mgt" class="col-6">
-          <announcement-mgt></announcement-mgt>
-        </div>
         <div id="case-state-mgt" class="col-6">
           <case-state-mgt></case-state-mgt>
-        </div>
-      </div>
-      <div class="row">
-        <div id="case-temp-mgt" class="col-6">
-          <case-temp-mgt></case-temp-mgt>
         </div>
         <div id="case-sync-mgt"  class="col-6">
           <case-sync-mgt></case-sync-mgt>
         </div>
       </div>
       <div class="row">
-        <div id="fee-query-board" class="col-6">
+        <div id="case-temp-mgt" class="col-6">
+          <case-temp-mgt></case-temp-mgt>
+        </div>
+        <div id="announcement-mgt" class="col-6">
+          <announcement-mgt></announcement-mgt>
+        </div>
+      </div>
+      <div class="row">
+        <div id="fee-query-board" class="col-8">
           <fee-query-board></fee-query-board>
         </div>
-        <div class="col-6">
+        <div id="xcase-check" class="col">
+          <xcase-check></xcase-check>
+        </div>
+        <div id="easycard-payment-check" class="col">
+          <easycard-payment-check></easycard-payment-check>
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ if (Vue) {
         template: `<fieldset>
             <legend>悠遊卡檢測</legend>
             <div class="form-row">
-                <div class="input-group input-group-sm col-3 small">
+                <div class="input-group input-group-sm col-3 small d-none">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-easycard_query_day">日期</span>
                     </div>

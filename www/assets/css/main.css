@@ -49,6 +49,7 @@ fieldset {
 legend {
 	width: auto;
 	padding:5px 10px;
+	font-size: 1.25rem;
 	background-color:#343a40;
 	color:#FFF;
 	font-weight: bold;
