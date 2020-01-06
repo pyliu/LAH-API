@@ -31,7 +31,7 @@ if (Vue) {
                         min=1
                         trim
                         number
-                        :class="['form-control', 'h-100']"
+                        :class="['form-control', 'h-100', 'no-cache']"
                     >
                     </b-form-input>
                     &ensp;
@@ -555,7 +555,7 @@ if (Vue) {
                     <fieldset>
                         <legend>收費項目資料集</legend>
                         <h6 v-if="expac_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 付款項目詳細資料</h6>
-                        <fee-detail-expac-mgt :list="expac_data" :date="date" :pc_number="pc_number"></fee-detail-expac-mgt>
+                        <fee-detail-expac-mgt :expac_list="expac_data" :date="date" :pc_number="pc_number"></fee-detail-expac-mgt>
                     </fieldset>
                 </b-col>
             </b-row>
@@ -564,7 +564,16 @@ if (Vue) {
         data: function() {
             return {
                 expaa_data: [],
-                expac_data: [],
+                expac_data: [{  // mock data
+                    AC16: "108",
+                    AC17: "HB04",
+                    AC18: "000010",
+                    AC25: "108",
+                    AC04: "0000001",
+                    AC29: "100",
+                    AC30: "80",
+                    AC20: "07"
+                }],
                 expac_year: "109"
             }
         },
@@ -630,64 +639,92 @@ if (Vue) {
         components: {
             "fee-detail-expac-mgt": {
                 template: `<div>
-                    <div class='expac_item' v-for="(record, idx) in list">
-                        <a href='javascript:void(0)' class='reg_case_id'>{{record["AC16"]}}-{{record["AC17"]}}-{{record["AC18"]}}</a>
-                        規費年度：{{record["AC25"]}}
-                        電腦給號：{{record["AC04"]}}
-                        實收金額：{{record["AC30"]}}
+                    <h6>
+                        <b-button variant="outline-info" :pressed="true">
+                            規費年度
+                            <b-badge variant="light">{{date.substring(0, 3)}} <span class="sr-only">規費年度</span></b-badge>
+                        </b-button>
+                        &ensp;
+                        <b-button variant="outline-info" :pressed="true">
+                            電腦給號
+                            <b-badge variant="light">{{pc_number}} <span class="sr-only">電腦給號</span></b-badge>
+                        </b-button>
+                    </h6>
+                    <div class='border border-dark rounded p-2' v-for="(record, idx) in expac_list">
+                        <div class="mb-1">
+                            <b-button variant="warning" :class="['reg_case_id']">
+                                案號
+                                <b-badge variant="light">{{record["AC16"]}}-{{record["AC17"]}}-{{record["AC18"]}} <span class="sr-only">案件號</span></b-badge>
+                            </b-button>
+                            應收：{{record["AC29"]}}
+                        </div>
                         <div class='form-row form-inline'>
-                            <div class='input-group input-group-sm col'>
-                                <select class='form-control' :id="'modify_expac_item_' + idx" :value="record['AC20']" :data-orig="record['AC20']">
-                                    <option v-for="obj in expe_list" :value="obj.value">{{obj.value}} : {{obj.text}}</option>
-                                </select>
+                            <div class='input-group input-group-sm col-7'>
+                                <b-form-select
+                                    :value="record['AC20']"
+                                    :data-orig="record['AC20']"
+                                    :options="expe_list"
+                                    :id="'modify_expac_item_' + idx"
+                                    size="sm"
+                                >
+                                <template v-slot:first>
+                                    <option value="" disabled>-- 請選擇一個項目 --</option>
+                                </template>
+                                </b-form-select>
                             </div>
+                            <div class="col-2" title="實收金額">{{record["AC30"]}}元</div>
                             <div class='filter-btn-group col'>
-                                <b-button @click="updateExpacItem(record, 'modify_expac_item_' + idx)" size="sm" variant="outline-primary" :id="'modify_expac_item_' + idx + '_btn'"><i class="fas fa-edit"></i> 修改</b-button>
+                                <b-button @click="update($event, record)" size="sm" variant="outline-primary" :data-select-el="'modify_expac_item_' + idx"><i class="fas fa-edit"></i> 修改</b-button>
                             </div>
                         </div>
                     </div>
                 </div>`,
-                props: ["list", "date", "pc_number"],
+                props: ["expac_list", "date", "pc_number"],
                 data: function() {
                     return {
-                        selected: [],
                         expe_list: [ // from MOIEXP.EXPE
-                            { value: "01", text: "土地法65條登記費" },
-                            { value: "02", text: "土地法76條登記費" },
-                            { value: "03", text: "土地法67條書狀費" },
-                            { value: "04", text: "地籍謄本工本費" },
-                            { value: "06", text: "檔案閱覽抄錄複製費" },
-                            { value: "07", text: "閱覽費" },
-                            { value: "08", text: "門牌查詢費" },
-                            { value: "09", text: "複丈費及建物測量費" },
-                            { value: "10", text: "地目變更勘查費" },
-                            { value: "14", text: "電子謄本列印" },
-                            { value: "18", text: "塑膠樁土地界標" },
-                            { value: "19", text: "鋼釘土地界標(大)" },
-                            { value: "30", text: "104年度登記罰鍰" },
-                            { value: "31", text: "100年度登記罰鍰" },
-                            { value: "32", text: "101年度登記罰鍰" },
-                            { value: "33", text: "102年度登記罰鍰" },
-                            { value: "34", text: "103年度登記罰鍰" },
-                            { value: "35", text: "其他" },
-                            { value: "36", text: "鋼釘土地界標(小)" },
-                            { value: "37", text: "105年度登記罰鍰" },
-                            { value: "38", text: "106年度登記罰鍰" },
-                            { value: "39", text: "塑膠樁土地界標(大)" },
-                            { value: "40", text: "107年度登記罰鍰" },
-                            { value: "41", text: "108年度登記罰鍰" },
-                            { value: "42", text: "土地法第76條登記費（跨縣市）" },
-                            { value: "43", text: "書狀費（跨縣市）" },
-                            { value: "44", text: "罰鍰（跨縣市）" },
-                            { value: "45", text: "109年度登記罰鍰" }
+                            { value: "01", text: "01：土地法65條登記費" },
+                            { value: "02", text: "02：土地法76條登記費" },
+                            { value: "03", text: "03：土地法67條書狀費" },
+                            { value: "04", text: "04：地籍謄本工本費" },
+                            { value: "06", text: "06：檔案閱覽抄錄複製費" },
+                            { value: "07", text: "07：閱覽費" },
+                            { value: "08", text: "08：門牌查詢費" },
+                            { value: "09", text: "09：複丈費及建物測量費" },
+                            { value: "10", text: "10：地目變更勘查費" },
+                            { value: "14", text: "14：電子謄本列印" },
+                            { value: "18", text: "18：塑膠樁土地界標" },
+                            { value: "19", text: "19：鋼釘土地界標(大)" },
+                            { value: "30", text: "30：104年度登記罰鍰" },
+                            { value: "31", text: "31：100年度登記罰鍰" },
+                            { value: "32", text: "32：101年度登記罰鍰" },
+                            { value: "33", text: "33：102年度登記罰鍰" },
+                            { value: "34", text: "34：103年度登記罰鍰" },
+                            { value: "35", text: "35：其他" },
+                            { value: "36", text: "36：鋼釘土地界標(小)" },
+                            { value: "37", text: "37：105年度登記罰鍰" },
+                            { value: "38", text: "38：106年度登記罰鍰" },
+                            { value: "39", text: "39：塑膠樁土地界標(大)" },
+                            { value: "40", text: "40：107年度登記罰鍰" },
+                            { value: "41", text: "41：108年度登記罰鍰" },
+                            { value: "42", text: "42：土地法第76條登記費（跨縣市）" },
+                            { value: "43", text: "43：書狀費（跨縣市）" },
+                            { value: "44", text: "44：罰鍰（跨縣市）" },
+                            { value: "45", text: "45：109年度登記罰鍰" }
                         ]
                     }
                 },
                 methods: {
-                    updateExpacItem: function(record, select_id) {
-                        let this_select = $("#" + select_id);
+                    update: function(e, record) {
+                        let this_select = $("#" + $(e.target).data("select-el"));
                         let code = this_select.val();
-                        if (this_select && code != this_select.data("orig")) {
+                        if (code == this_select.data("orig")) {
+                            addNotification({
+                                title: `${record["AC25"]}-${record["AC04"]} ${record["AC30"]}元 項目`,
+                                message: "選項沒變，不需更新",
+                                type: "warning"
+                            });
+                        } else {
                             let body = new FormData();
                             body.append("type", "mod_expac");
                             body.append("year", record["AC25"]);
@@ -695,7 +732,7 @@ if (Vue) {
                             body.append("code", code);
                             body.append("amount", record["AC30"]);
 
-                            $("#" + select_id + "_btn").remove();
+                            toggle(e.target);
 
                             fetch("query_json_api.php", {
                                 method: "POST",
@@ -721,9 +758,10 @@ if (Vue) {
                                         type: "danger"
                                     });
                                 }
+                                toggle(e.target);
                             }).catch(ex => {
                                 showAlert({
-                                    title: "fee-detail-expac-mgt::updateExpacItem",
+                                    title: "fee-detail-expac-mgt::update",
                                     message: ex.toString(),
                                     type: "danger"
                                 });
@@ -732,7 +770,7 @@ if (Vue) {
                     }
                 },
                 mounted: function() { 
-                    $(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
+                    $(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog).removeClass("reg_case_id");
                 }
             },
             "fee-detail-fix-ezcard": {
