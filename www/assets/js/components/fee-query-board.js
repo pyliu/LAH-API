@@ -538,7 +538,9 @@ if (Vue) {
                             <span v-if="key == '列印註記'">
                                 <fee-detail-print-mgt :value="item" :date="date" :pc_number="pc_number"></fee-detail-print-mgt>
                             </span>
-                            <span v-else-if="key == '繳費方式代碼'">{{key}}</span>
+                            <span v-else-if="key == '繳費方式代碼'">
+                                <fee-detail-payment-mgt :value="item" :date="date" :pc_number="pc_number"></fee-detail-print-mgt>
+                            </span>
                             <span v-else-if="key == '悠遊卡繳費扣款結果'">{{key}}</span>
                             <span v-else>{{key}}：{{item}}</span>
                         </li>
@@ -549,6 +551,61 @@ if (Vue) {
         </b-container>`,
         props: ["date", "pc_number"],
         components: {
+            "fee-detail-payment-mgt": {
+                template: `<div class='form-row form-inline'>
+                    <div class='input-group input-group-sm col-9'>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-exapp_method_select">付款方式</span>
+                        </div>
+                        <select id='exapp_method_select' class='form-control' v-model="value">
+                            <option value='01'>【01】現金</option>
+                            <option value='02'>【02】支票</option>
+                            <option value='03'>【03】匯票</option>
+                            <option value='04'>【04】iBon</option>
+                            <option value='05'>【05】ATM</option>
+                            <option value='06'>【06】悠遊卡</option>
+                            <option value='07'>【07】其他匯款</option>
+                            <option value='08'>【08】信用卡</option>
+                            <option value='09'>【09】行動支付</option>
+                        </select>
+                    </div>
+                    <div class='filter-btn-group col'>
+                        <b-button @click="updateExpaaAA100" size="sm" variant="outline-primary"><i class="fas fa-edit"></i> 修改</button>
+                    </div>
+                </div>`,
+                props: ["value", "date", "pc_number"],
+                methods: {
+                    updateExpaaAA100: function(e) {
+                        let that = this;
+                        showConfirm("確定要規費付款方式？", () => {
+                            let body = new FormData();
+                            body.append("type", "expaa_AA100_update");
+                            body.append("date", that.date);
+                            body.append("number", that.pc_number);
+                            body.append("update_value", that.value);
+                    
+                            toggle(e.target);
+                    
+                            fetch("query_json_api.php", {
+                                method: "POST",
+                                body: body
+                            }).then(response => {
+                                if (response.status != 200) {
+                                    throw new Error("XHR連線異常，回應非200");
+                                }
+                                return response.json();
+                            }).then(jsonObj => {
+                                addNotification({
+                                    title: "修改規費付款方式",
+                                    message: jsonObj.message,
+                                    type: jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
+                                });
+                                $(e.target).remove();
+                            });
+                        });
+                    }
+                }
+            },
             "fee-detail-print-mgt": {
                 template: `<div class='form-row form-inline'>
                     <div class='input-group input-group-sm col-8'>
@@ -660,32 +717,7 @@ if (Vue) {
                         for (let key in jsonObj.raw) {
                             html += "<li>";
                             html += key + "：";
-                            if (key == "列印註記") {
-                                html += "<div class='form-row form-inline'>"
-                                    + "<div class='input-group input-group-sm col-3'>"
-                                    + "<select id='exapp_print_select' class='form-control'>"
-                                    + "<option value='0'" + (jsonObj.raw[key] == 0 ? "selected" : "") + ">【0】未印</option>"
-                                    + "<option value='1'" + (jsonObj.raw[key] == 1 ? "selected" : "") + ">【1】已印</option>"
-                                    + "</select> "
-                                    + "</div>"
-                                    + `<div class='filter-btn-group col'>
-                                            <button id='exapp_print_button' class='btn btn-sm btn-outline-primary'>修改</button>
-                                            <span id='exapp_print_status'></span>
-                                        </div>`
-                                    + "</div>";
-                            } else if (key == "繳費方式代碼") {
-                                html += "<div class='form-row form-inline'>"
-                                    + "<div class='input-group input-group-sm col-3'>"
-                                    + "<select id='exapp_method_select' class='form-control'>"
-                                    + getExpaaAA100Options(jsonObj.raw[key])
-                                    + "</select> "
-                                    + "</div>"
-                                    + `<div class='filter-btn-group col'>
-                                            <button id='exapp_method_button' class='btn btn-sm btn-outline-primary'>修改</button>
-                                            <span id='exapp_method_status'></span>
-                                        </div>`
-                                    + "</div>";
-                            } else if (key == "悠遊卡繳費扣款結果") {
+                            if (key == "悠遊卡繳費扣款結果") {
                                 html += jsonObj.raw[key];
                                 //  無作廢原因才可進行修正
                                 if (isEmpty(jsonObj.raw["作廢原因"]) && jsonObj.raw[key] != 1) {
@@ -698,18 +730,6 @@ if (Vue) {
                             html += "</li>";
                         };
                         html += "</ul>";
-                        //$("#fee_detail_plate").html(html);
-                        // attach event handler for the buttons
-                        $("#exapp_print_button").off("click").on("click", xhrUpdateExpaaAA09.bind({
-                            date: $("#expaa_query_date").val(),
-                            number: $("#expaa_query_number").val(),
-                            select_id: "exapp_print_select"
-                        }));
-                        $("#exapp_method_button").off("click").on("click", xhrUpdateExpaaAA100.bind({
-                            date: $("#expaa_query_date").val(),
-                            number: $("#expaa_query_number").val(),
-                            select_id: "exapp_method_select"
-                        }));
                     }
                 }).catch(ex => {
                     console.error("fee-detail-mgt::fetchEXPAA parsing failed", ex);

@@ -718,6 +718,7 @@ let getExpaaTooltip = row => {
 	return title;
 }
 
+/*
 let getExpaaAA100Options = selected_aa100 => {
 	return  "<option " + (selected_aa100 == "01" ? "selected" : "") + " value='01'>【01】現金</option>"
 			+ "<option " + (selected_aa100 == "02" ? "selected" : "") + " value='02'>【02】支票</option>"
@@ -729,7 +730,6 @@ let getExpaaAA100Options = selected_aa100 => {
 			+ "<option " + (selected_aa100 == "08" ? "selected" : "") + " value='08'>【08】信用卡</option>"
 			+ "<option " + (selected_aa100 == "09" ? "selected" : "") + " value='09'>【09】行動支付</option>";
 }
-
 let xhrUpdateExpaaAA09 = function(e) {
 	if (confirm("確定要修改列印註記？")) {
 		let bindObj = this;
@@ -757,7 +757,7 @@ let xhrUpdateExpaaAA09 = function(e) {
 		});
 	}
 }
-
+*/
 let xhrUpdateExpaaAA100 = function(e) {
 	if (confirm("確定要規費付款方式？")) {
 		let bindObj = this;
