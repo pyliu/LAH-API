@@ -541,7 +541,9 @@ if (Vue) {
                             <span v-else-if="key == '繳費方式代碼'">
                                 <fee-detail-payment-mgt :value="item" :date="date" :pc_number="pc_number"></fee-detail-print-mgt>
                             </span>
-                            <span v-else-if="key == '悠遊卡繳費扣款結果'">{{key}}</span>
+                            <span v-else-if="key == '悠遊卡繳費扣款結果'">
+                                <fee-detail-fix-ezcard :raw="expaa_data" :date="date" :pc_number="pc_number"></fee-detail-fix-ezcard>
+                            </span>
                             <span v-else>{{key}}：{{item}}</span>
                         </li>
                     <ul>
@@ -551,6 +553,62 @@ if (Vue) {
         </b-container>`,
         props: ["date", "pc_number"],
         components: {
+            "fee-detail-fix-ezcard": {
+                template: `<div class='form-row form-inline'>
+                    <div class='input-group input-group-sm col-auto'>
+                        悠遊卡付款狀態：{{raw['悠遊卡繳費扣款結果']}}
+                    </div>
+                    <div class='filter-btn-group col' v-show="(raw['作廢原因'] == '' || raw['作廢原因'] == undefined) && raw['悠遊卡繳費扣款結果'] != 1">
+                        <b-button @click="fixEzcardPayment" size="sm" variant="outline-primary"><i class="fas fa-tools"></i> 修正</button>
+                    </div>
+                </div>`,
+                props: ["raw", "date", "pc_number"],
+                methods: {
+                    fixEzcardPayment: function(e) {
+                        //console.log(this.raw);
+                        let amount = this.raw["應收總金額"];
+                        let qday = this.date;
+                        let pc_number = this.pc_number;
+                        let message = `確定要修正 日期: ${qday}, 電腦給號: ${pc_number}, 金額: ${amount} 悠遊卡付款資料為正常？`;
+                        showConfirm(message, () => {
+                            toggle(e.target);
+
+                            let body = new FormData();
+                            body.append("type", "fix_easycard");
+                            body.append("qday", qday);
+                            body.append("pc_num", pc_number);
+
+                            fetch("query_json_api.php", {
+                                method: "POST",
+                                body: body
+                            }).then(response => {
+                                if (response.status != 200) {
+                                    throw new Error("XHR連線異常，回應非200");
+                                }
+                                return response.json();
+                            }).then(jsonObj => {
+                                if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                    addNotification({
+                                        title: "悠遊卡自動加值扣款失敗修正",
+                                        message: `日期: ${qday}, 電腦給號: ${pc_number}, 金額: ${amount} 悠遊卡付款資料修正成功!`,
+                                        type: "success"
+                                    });
+                                    $(e.target).remove();
+                                } else {
+                                    throw new Error("回傳狀態碼不正確!【" + jsonObj.message + "】");
+                                }
+                            }).catch(ex => {
+                                console.error("fee-detail-fix-ezcard::fixEzcardPayment parsing failed", ex);
+                                showAlert({
+                                    title: "fee-detail-fix-ezcard::fixEzcardPayment",
+                                    message: ex.toString(),
+                                    type: "danger"
+                                });
+                            });
+                        });
+                    }
+                }
+            },
             "fee-detail-payment-mgt": {
                 template: `<div class='form-row form-inline'>
                     <div class='input-group input-group-sm col-9'>
@@ -712,24 +770,6 @@ if (Vue) {
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         this.expaa_data = jsonObj.raw;
-                        let html = "";
-                        html += "<ul>";
-                        for (let key in jsonObj.raw) {
-                            html += "<li>";
-                            html += key + "：";
-                            if (key == "悠遊卡繳費扣款結果") {
-                                html += jsonObj.raw[key];
-                                //  無作廢原因才可進行修正
-                                if (isEmpty(jsonObj.raw["作廢原因"]) && jsonObj.raw[key] != 1) {
-                                    html += "&ensp;<button class='btn btn-sm btn-outline-danger' id='fix_exapp_easycard_payment_btn" + "' onclick='xhrFixEasycardPayment(\"" + jsonObj.raw["開單日期"] + "\", \"" + jsonObj.raw["電腦給號"] + "\", \"" + jsonObj.raw["實收總金額"] + "\", \"fix_exapp_easycard_payment_btn" + "\")'>修正為扣款成功</button>";
-                                }
-                            } else {
-                                // others just show info
-                                html += jsonObj.raw[key];
-                            }
-                            html += "</li>";
-                        };
-                        html += "</ul>";
                     }
                 }).catch(ex => {
                     console.error("fee-detail-mgt::fetchEXPAA parsing failed", ex);

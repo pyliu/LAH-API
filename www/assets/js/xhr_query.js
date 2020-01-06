@@ -611,7 +611,7 @@ let xhrGetExpaaData = function(e) {
 		showAlert({message: ex.toString(), type: "danger"});
 	});
 }
-
+/*
 let xhrFixEasycardPayment = (qday, pc_number, amount, btn_id) => {
 	let message = "確定要修正 日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料?";
 	showConfirm(message, () => {
@@ -651,7 +651,7 @@ let xhrFixEasycardPayment = (qday, pc_number, amount, btn_id) => {
 		});
 	});
 }
-
+*/
 let getAA04DisplayCss = row => {
 	let css = "block-dark";
 	switch (row["AA100"]) {
@@ -757,7 +757,6 @@ let xhrUpdateExpaaAA09 = function(e) {
 		});
 	}
 }
-*/
 let xhrUpdateExpaaAA100 = function(e) {
 	if (confirm("確定要規費付款方式？")) {
 		let bindObj = this;
@@ -785,6 +784,7 @@ let xhrUpdateExpaaAA100 = function(e) {
 		});
 	}
 }
+*/
 
 let xhrLoadSQL = e => {
 	let val = $("#preload_sql_select").val();
