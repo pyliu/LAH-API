@@ -105,6 +105,14 @@ if (Vue) {
                     }
                     return response.json();
                 }).then(jsonObj => {
+                    if (jsonObj.data_count == 0) {
+                        addNotification({
+                            title: "查詢規費統計",
+                            message: `${this.date} 查無資料`,
+                            type: "warning"
+                        });
+                        return;
+                    }
                     let that = this;
                     let VNode = this.$createElement("expaa-category-dashboard", {
                         props: {
@@ -527,7 +535,9 @@ if (Vue) {
                 <b-col id="fee_detail_plate" cols="6">
                     <ul>
                         <li v-for="(item, key) in expaa_data">
-                            <span v-if="key == '列印註記'">{{key}}</span>
+                            <span v-if="key == '列印註記'">
+                                <fee-detail-print-mgt :value="item" :date="date" :pc_number="pc_number"></fee-detail-print-mgt>
+                            </span>
                             <span v-else-if="key == '繳費方式代碼'">{{key}}</span>
                             <span v-else-if="key == '悠遊卡繳費扣款結果'">{{key}}</span>
                             <span v-else>{{key}}：{{item}}</span>
@@ -538,6 +548,53 @@ if (Vue) {
             </b-row>
         </b-container>`,
         props: ["date", "pc_number"],
+        components: {
+            "fee-detail-print-mgt": {
+                template: `<div class='form-row form-inline'>
+                    <div class='input-group input-group-sm col-8'>
+                        <select id='exapp_print_select' class='form-control' v-model="value">
+                            <option value='0'>【0】未印</option>
+                            <option value='1'>【1】已印</option>
+                        </select>
+                    </div>
+                    <div class='filter-btn-group col-4'>
+                        <b-button @click="updateExpaaAA09" size="sm" variant="outline-primary"><i class="fas fa-edit"></i> 修改</button>
+                    </div>
+                </div>`,
+                props: ["value", "date", "pc_number"],
+                methods: {
+                    updateExpaaAA09: function(e) {
+                        let that = this;
+                        showConfirm("確定要修改列印註記？", () => {
+                            let body = new FormData();
+                            body.append("type", "expaa_AA09_update");
+                            body.append("date", that.date);
+                            body.append("number", that.pc_number);
+                            body.append("update_value", that.value);
+                    
+                            toggle(e.target);
+                    
+                            fetch("query_json_api.php", {
+                                method: "POST",
+                                body: body
+                            }).then(response => {
+                                if (response.status != 200) {
+                                    throw new Error("XHR連線異常，回應非200");
+                                }
+                                return response.json();
+                            }).then(jsonObj => {
+                                addNotification({
+                                    title: "修改列印註記",
+                                    message: jsonObj.message,
+                                    type: jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
+                                });
+                                $(e.target).remove();
+                            });
+                        });
+                    }
+                }
+            }
+        },
         data: function() {
             return {
                 expaa_data: [],
