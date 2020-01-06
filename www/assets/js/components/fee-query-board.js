@@ -89,199 +89,32 @@ if (Vue) {
                 }
             },
             fetchList: function() {
-                let jsonObj = JSON.parse(`
-                {
-                    "status": 2,
-                    "data_count": 250,
-                    "message": "\u65bc 1090103 \u627e\u5230 250 \u7b46\u8cc7\u6599",
-                    "query_string": "qday=1090103",
-                    "raw": [
-                      {
-                        "AA01": "1090103",
-                        "AA04": "0000377",
-                        "AA05": "AB00117257",
-                        "AA06": "1",
-                        "AA07": "0",
-                        "AA08": "1",
-                        "AA09": "1",
-                        "AA10": "H200864399",
-                        "AA11": "\u9127\u5982\u6842",
-                        "AA12": null,
-                        "AA13": "H200864399",
-                        "AA14": null,
-                        "AA02": null,
-                        "AA24": "1090103",
-                        "AA25": "109",
-                        "AA27": "20",
-                        "AA28": "20",
-                        "AA39": "HB0514",
-                        "AA95": null,
-                        "AA96": "1",
-                        "AA88": "0",
-                        "AA89": null,
-                        "AA09F": "0",
-                        "AA40": null,
-                        "AA100": "01",
-                        "AA101": null,
-                        "AA102": null,
-                        "AA103": null,
-                        "AA104": null,
-                        "AA105": "HB",
-                        "AA106": null,
-                        "AA107": null,
-                        "AA108": null
-                      },
-                      {
-                        "AA01": "1090103",
-                        "AA04": "0000378",
-                        "AA05": "AB00117258",
-                        "AA06": "1",
-                        "AA07": "0",
-                        "AA08": "1",
-                        "AA09": "1",
-                        "AA10": "H122007305",
-                        "AA11": "\u9ec3\u51a0\u9298",
-                        "AA12": null,
-                        "AA13": "H122007305",
-                        "AA14": null,
-                        "AA02": null,
-                        "AA24": "1090103",
-                        "AA25": "109",
-                        "AA27": "60",
-                        "AA28": "60",
-                        "AA39": "HB0514",
-                        "AA95": null,
-                        "AA96": "1",
-                        "AA88": "0",
-                        "AA89": null,
-                        "AA09F": "0",
-                        "AA40": null,
-                        "AA100": "08",
-                        "AA101": null,
-                        "AA102": null,
-                        "AA103": null,
-                        "AA104": null,
-                        "AA105": "HB",
-                        "AA106": null,
-                        "AA107": null,
-                        "AA108": null
-                      },
-                      {
-                        "AA01": "1090103",
-                        "AA04": "0000379",
-                        "AA05": "AB00108571",
-                        "AA06": "1",
-                        "AA07": "0",
-                        "AA08": "1",
-                        "AA09": "1",
-                        "AA10": "P120246587",
-                        "AA11": "\u66fe\u660e\u5c71",
-                        "AA12": null,
-                        "AA13": "P120246587",
-                        "AA14": null,
-                        "AA02": null,
-                        "AA24": "1090103",
-                        "AA25": "109",
-                        "AA27": "40",
-                        "AA28": "40",
-                        "AA39": "HB1213",
-                        "AA95": null,
-                        "AA96": "1",
-                        "AA88": "0",
-                        "AA89": null,
-                        "AA09F": "0",
-                        "AA40": null,
-                        "AA100": "06",
-                        "AA101": null,
-                        "AA102": null,
-                        "AA103": null,
-                        "AA104": null,
-                        "AA105": "HB",
-                        "AA106": "1",
-                        "AA107": "00003791090103081948",
-                        "AA108": null
-                      },
-                      {
-                        "AA01": "1090103",
-                        "AA04": "0000625",
-                        "AA05": "AB00109993",
-                        "AA06": "1",
-                        "AA07": "0",
-                        "AA08": "1",
-                        "AA09": "1",
-                        "AA10": "H100739844",
-                        "AA11": "\u5433\u5609\u70b3",
-                        "AA12": null,
-                        "AA13": "H100739844",
-                        "AA14": null,
-                        "AA02": null,
-                        "AA24": "1090103",
-                        "AA25": "109",
-                        "AA27": "60",
-                        "AA28": "60",
-                        "AA39": "HB1200",
-                        "AA95": null,
-                        "AA96": "1",
-                        "AA88": "0",
-                        "AA89": null,
-                        "AA09F": "0",
-                        "AA40": null,
-                        "AA100": "05",
-                        "AA101": null,
-                        "AA102": null,
-                        "AA103": null,
-                        "AA104": null,
-                        "AA105": "HB",
-                        "AA106": null,
-                        "AA107": null,
-                        "AA108": null
-                      },
-                      {
-                        "AA01": "1080103",
-                        "AA04": "0000626",
-                        "AA05": "AB00116125",
-                        "AA06": "1",
-                        "AA07": "0",
-                        "AA08": "1",
-                        "AA09": "1",
-                        "AA10": "H122217356",
-                        "AA11": "\u8cf4\u660e\u7687",
-                        "AA12": "\u8cb7\u8ce3",
-                        "AA13": "H122217356",
-                        "AA14": "\u8cf4\u660e\u7687",
-                        "AA02": null,
-                        "AA24": "1090103",
-                        "AA25": "109",
-                        "AA27": "3055",
-                        "AA28": "3055",
-                        "AA39": "HB0167",
-                        "AA95": null,
-                        "AA96": null,
-                        "AA88": "1",
-                        "AA89": "HB0167",
-                        "AA09F": "0",
-                        "AA40": null,
-                        "AA100": "09",
-                        "AA101": null,
-                        "AA102": null,
-                        "AA103": null,
-                        "AA104": null,
-                        "AA105": "HB",
-                        "AA106": null,
-                        "AA107": null,
-                        "AA108": null
-                      }
-                    ]
-                  }
-                `);
-                let VNode = this.$createElement("expaa-category-dashboard", {
-                    props: {
-                        raw_data: jsonObj.raw
+                let body = new FormData();
+                body.append("type", "expaa");
+                body.append("qday", this.date);
+                body.append("num", this.number);
+                body.append("list_mode", true);
+                fetch("query_json_api.php", {
+                    method: "POST",
+                    body: body
+                }).then(response => {
+                    if (response.status != 200) {
+                        throw new Error("XHR連線異常，回應非200");
                     }
-                });
-                showModal({
-                    message: VNode,
-                    title: `${this.date} 規費統計`
+                    return response.json();
+                }).then(jsonObj => {
+                    let VNode = this.$createElement("expaa-category-dashboard", {
+                        props: {
+                            raw_data: jsonObj.raw
+                        }
+                    });
+                    showModal({
+                        message: VNode,
+                        title: `${this.date} 規費統計`
+                    });
+                }).catch(ex => {
+                    console.error("fee-query-board::fetchList parsing failed", ex);
+                    showAlert({title: "fee-query-board::fetchList", message: ex.toString(), type: "danger"});
                 });
             },
             popup: function(e) {
