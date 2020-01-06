@@ -70,7 +70,7 @@ if (Vue) {
             number: function(nVal, oVal) {
                 let intVal = parseInt(this.number);
                 if (intVal > 9999999) this.number = 9999999;
-                else if (intVal < 1) this.number = '';
+                else if (Number.isNaN(intVal) || intVal < 1) this.number = '';
             }
         },
         methods: {
