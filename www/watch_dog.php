@@ -113,50 +113,6 @@ blockquote img {
           <fee-query-board></fee-query-board>
         </div>
         <div class="col-6">
-          <fieldset>
-            <legend>規費收費項目修正<small>(EXPAC)</small></legend>
-
-            <div class="form-row">
-              <div class="input-group input-group-sm col">
-                <div class="input-group-prepend">
-                  <span class="input-group-text" id="inputGroup-expac_query_year">規費年度</span>
-                </div>
-                <select id="expac_query_year" name="expac_query_year" class="form-control no-cache">
-                  <option>107</option>
-                  <option>108</option>
-                  <option selected>109</option>
-                </select>
-              </div>
-              <div class="input-group input-group-sm col">
-                <div class="input-group-prepend">
-                  <span class="input-group-text" id="inputGroup-expac_query_number">電腦給號</span>
-                </div>
-                <input type="number" min="1" max="9999999" id="expac_query_number" name="expac_query_number" class="form-control" placeholder="0021131" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
-              </div>
-              <div class="filter-btn-group col">
-                <button id="expac_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="expac_quote_button" class="btn btn-sm btn-outline-success">備註</button>
-              </div>
-            </div>
-            <div id="expac_query_display" class="message"></div>
-            <blockquote id="expac_quote" class="hide" data-title="規費收費項目修正">
-              <img src="assets/img/correct_payment_screenshot.jpg" />
-              -- 規費收費項目<br/>
-              SELECT t.AC25 AS "規費年度",<br/>
-                    t.AC04 AS "電腦給號",<br/>
-                    t.AC16 AS "收件年",<br/>
-                    t.AC17 AS "收件字",<br/>
-                    t.AC18 AS "收件號",<br/>
-                    t.AC20 AS "收件項目代碼",<br/>
-                    p.e21  AS "收費項目名稱",<br/>
-                    t.AC29 AS "應收金額",<br/>
-                    t.AC30 AS "實收金額"<br/>
-              FROM MOIEXP.EXPAC t<br/>
-              LEFT JOIN MOIEXP.EXPE p<br/>
-                  ON p.E20 = t.AC20<br/>
-              WHERE t.AC04 = '0021131' AND t.AC25 = '108'
-            </blockquote>
-          </fieldset>
         </div>
       </div>
     </div>
@@ -212,22 +168,7 @@ blockquote img {
       window.caseTempMgtVue = new Vue({el: "#case-temp-mgt"});
       window.caseSyncMgtVue = new Vue({el: "#case-sync-mgt"});
       window.expaaMgtVue = new Vue({el: "#fee-query-board"});
-
-      // query EXPAC items event
-      $("#expac_query_button").on("click", xhrGetExpacItems);
-      bindPressEnterEvent("#expac_query_number", xhrGetExpacItems);
       
-      // query EXPAA data event
-      $("#expaa_query_num_button").on("click", xhrGetExpaaData);
-      $("#expaa_query_date_button").on("click", e => {
-        $("#expaa_query_number").val("");
-        xhrGetExpaaData(e);
-      });
-      // for query by date, so we need to clear #expaa_query_number value first
-      bindPressEnterEvent("#expaa_query_date", e => { $("#expaa_query_number").val(""); });
-      bindPressEnterEvent("input[id*=expaa_query_", xhrGetExpaaData);
-      // obselete event
-      //$("#expaa_add_obsolete_button").on("click", xhrQueryObsoleteFees);
     });
   </script>
 </body>

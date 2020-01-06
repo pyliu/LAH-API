@@ -172,6 +172,7 @@ if (Vue) {
             this.date = toTWDate(d);
         },
         mounted: function() {
+            let that = this;
             if ($("#easycard_query_day").datepicker) {
                 $("#easycard_query_day").datepicker({
                     daysOfWeekDisabled: "",
@@ -180,7 +181,10 @@ if (Vue) {
                     todayHighlight: true,
                     autoclose: true,
                     format: {
-                        toDisplay: (date, format, language) => toTWDate(new Date(date)),
+                        toDisplay: (date, format, language)  => {
+                            that.date = toTWDate(new Date(date));
+                            return that.date;
+                        },
                         toValue: (date, format, language) => new Date()
                     }
                 });

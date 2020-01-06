@@ -31,7 +31,7 @@ if (Vue) {
                         min=1
                         trim
                         number
-                        :class="['form-control', 'h-100', 'no-cache']"
+                        :class="['form-control', 'h-100']"
                     >
                     </b-form-input>
                     &ensp;
@@ -209,7 +209,10 @@ if (Vue) {
                     todayHighlight: true,
                     autoclose: true,
                     format: {
-                        toDisplay: (date, format, language) => toTWDate(new Date(date)),
+                        toDisplay: (date, format, language) => {
+                            that.date = toTWDate(new Date(date));
+                            return that.date;
+                        },
                         toValue: (date, format, language) => new Date()
                     }
                 });
@@ -552,12 +555,181 @@ if (Vue) {
                     <fieldset>
                         <legend>收費項目資料集</legend>
                         <h6 v-if="expac_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 付款項目詳細資料</h6>
+                        <fee-detail-expac-mgt :list="expac_data" :date="date" :pc_number="pc_number"></fee-detail-expac-mgt>
                     </fieldset>
                 </b-col>
             </b-row>
         </b-container>`,
         props: ["date", "pc_number"],
+        data: function() {
+            return {
+                expaa_data: [],
+                expac_data: [],
+                expac_year: "109"
+            }
+        },
+        created: function() {
+            this.expac_year = this.date.substring(0, 3) || "109";
+            this.fetchEXPAA();
+            this.fetchEXPAC();
+        },
+        methods: {
+            fetchEXPAA: function() {
+                let body = new FormData();
+                body.append("type", "expaa");
+                body.append("qday", this.date);
+                body.append("num", this.pc_number);
+                body.append("list_mode", false);
+                fetch("query_json_api.php", {
+                    method: "POST",
+                    body: body
+                }).then(response => {
+                    if (response.status != 200) {
+                        throw new Error("XHR連線異常，回應非200");
+                    }
+                    return response.json();
+                }).then(jsonObj => {
+                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        this.expaa_data = jsonObj.raw;
+                    }
+                }).catch(ex => {
+                    console.error("fee-detail-mgt::fetchEXPAA parsing failed", ex);
+                    showAlert({title: "fee-detail-mgt::fetchEXPAA", message: ex.toString(), type: "danger"});
+                });
+            },
+            fetchEXPAC: function() {
+                // EXPAC data fetch
+                let body = new FormData();
+                body.append("type", "expac");
+                body.append("year", this.expac_year);
+                body.append("num", this.pc_number);
+                fetch("query_json_api.php", {
+                    method: "POST",
+                    body: body
+                }).then(response => {
+                    if (response.status != 200) {
+                        throw new Error("XHR連線異常，回應非200");
+                    }
+                    return response.json();
+                }).then(jsonObj => {
+                    if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
+                        addNotification({
+                            title: "查詢收費項目資料集",
+                            message: `找不到規費收費項目資料！【年度： ${this.expac_year}, 電腦給號： ${this.pc_number}】`,
+                            type: "warning"
+                        });
+                    } else {
+                        this.expac_data = jsonObj.raw;
+                    }
+                }).catch(ex => {
+                    console.error("fee-detail-mgt::fetchEXPAC parsing failed", ex);
+                    showAlert({title: "fee-detail-mgt::fetchEXPAC", message: ex.toString(), type: "danger"});
+                });
+            }
+        },
         components: {
+            "fee-detail-expac-mgt": {
+                template: `<div>
+                    <div class='expac_item' v-for="(record, idx) in list">
+                        <a href='javascript:void(0)' class='reg_case_id'>{{record["AC16"]}}-{{record["AC17"]}}-{{record["AC18"]}}</a>
+                        規費年度：{{record["AC25"]}}
+                        電腦給號：{{record["AC04"]}}
+                        實收金額：{{record["AC30"]}}
+                        <div class='form-row form-inline'>
+                            <div class='input-group input-group-sm col'>
+                                <select class='form-control' :id="'modify_expac_item_' + idx" :value="record['AC20']" :data-orig="record['AC20']">
+                                    <option v-for="(val, key) in expe" :value="key">{{key}} : {{val}}</option>
+                                </select>
+                            </div>
+                            <div class='filter-btn-group col'>
+                                <b-button @click="updateExpacItem(record, 'modify_expac_item_' + idx)" size="sm" variant="outline-primary" :id="'modify_expac_item_' + idx + '_btn'"><i class="fas fa-edit"></i> 修改</b-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`,
+                props: ["list", "date", "pc_number"],
+                data: function() {
+                    return {
+                        expe: { // from MOIEXP.EXPE
+                            "01": "土地法65條登記費",
+                            "02": "土地法76條登記費",
+                            "03": "土地法67條書狀費",
+                            "04": "地籍謄本工本費",
+                            "06": "檔案閱覽抄錄複製費",
+                            "07": "閱覽費",
+                            "08": "門牌查詢費",
+                            "09": "複丈費及建物測量費",
+                            "10": "地目變更勘查費",
+                            "14": "電子謄本列印",
+                            "18": "塑膠樁土地界標",
+                            "19": "鋼釘土地界標(大)",
+                            "30": "104年度登記罰鍰",
+                            "31": "100年度登記罰鍰",
+                            "32": "101年度登記罰鍰",
+                            "33": "102年度登記罰鍰",
+                            "34": "103年度登記罰鍰",
+                            "35": "其他",
+                            "36": "鋼釘土地界標(小)",
+                            "37": "105年度登記罰鍰",
+                            "38": "106年度登記罰鍰",
+                            "39": "塑膠樁土地界標(大)",
+                            "40": "107年度登記罰鍰",
+                            "41": "108年度登記罰鍰",
+                            "42": "土地法第76條登記費（跨縣市）",
+                            "43": "書狀費（跨縣市）",
+                            "44": "罰鍰（跨縣市）",
+                            "45": "109年度登記罰鍰"
+                        }
+                    }
+                },
+                methods: {
+                    updateExpacItem: function(record, select_id) {
+                        let this_select = $("#" + select_id);
+                        let code = this_select.val();
+                        if (this_select && code != this_select.data("orig")) {
+                            let body = new FormData();
+                            body.append("type", "mod_expac");
+                            body.append("year", record["AC25"]);
+                            body.append("num", record["AC04"]);
+                            body.append("code", code);
+                            body.append("amount", record["AC30"]);
+
+                            $("#" + select_id + "_btn").remove();
+
+                            fetch("query_json_api.php", {
+                                method: "POST",
+                                body: body
+                            }).then(response => {
+                                if (response.status != 200) {
+                                    throw new Error("XHR連線異常，回應非200");
+                                }
+                                return response.json();
+                            }).then(jsonObj => {
+                                if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                    addNotification({
+                                        title: "修改收費項目",
+                                        subtitle: `${record["AC25"]}-${record["AC04"]}`,
+                                        message: `金額 ${record["AC30"]} 項目修正為「${this.expe[code]}」完成`,
+                                        type: "success"
+                                    });
+                                } else {
+                                    addNotification({
+                                        title: "修改收費項目",
+                                        subtitle: `${record["AC25"]}-${record["AC04"]}`,
+                                        message: `金額 ${record["AC30"]} 項目修正為「${this.expe[code]}」失敗`,
+                                        type: "danger"
+                                    });
+                                }
+                            }).catch(ex => {
+                                console.error("fee-detail-expac-mgt::updateExpacItem parsing failed", ex);
+                            });
+                        }
+                    }
+                },
+                mounted: function() { 
+                    $(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
+                }
+            },
             "fee-detail-fix-ezcard": {
                 template: `<div class='form-row form-inline'>
                     <div class='input-group input-group-sm col-auto'>
@@ -716,94 +888,6 @@ if (Vue) {
                         });
                     }
                 }
-            }
-        },
-        data: function() {
-            return {
-                expaa_data: [],
-                expac_data: [],
-                expac_year: "109",
-                expe: { // from MOIEXP.EXPE
-                    "01": "土地法65條登記費",
-                    "02": "土地法76條登記費",
-                    "03": "土地法67條書狀費",
-                    "04": "地籍謄本工本費",
-                    "06": "檔案閱覽抄錄複製費",
-                    "07": "閱覽費",
-                    "08": "門牌查詢費",
-                    "09": "複丈費及建物測量費",
-                    "10": "地目變更勘查費",
-                    "14": "電子謄本列印",
-                    "18": "塑膠樁土地界標",
-                    "19": "鋼釘土地界標(大)",
-                    "30": "104年度登記罰鍰",
-                    "31": "100年度登記罰鍰",
-                    "32": "101年度登記罰鍰",
-                    "33": "102年度登記罰鍰",
-                    "34": "103年度登記罰鍰",
-                    "35": "其他",
-                    "36": "鋼釘土地界標(小)",
-                    "37": "105年度登記罰鍰",
-                    "38": "106年度登記罰鍰",
-                    "39": "塑膠樁土地界標(大)",
-                    "40": "107年度登記罰鍰",
-                    "41": "108年度登記罰鍰",
-                    "42": "土地法第76條登記費（跨縣市）",
-                    "43": "書狀費（跨縣市）",
-                    "44": "罰鍰（跨縣市）",
-                    "45": "109年度登記罰鍰"
-                }
-            }
-        },
-        created: function() {
-            this.expac_year = this.date.substring(0, 3) || "109";
-            this.fetchEXPAA();
-            this.fetchEXPAC();
-        },
-        methods: {
-            fetchEXPAA: function() {
-                let body = new FormData();
-                body.append("type", "expaa");
-                body.append("qday", this.date);
-                body.append("num", this.pc_number);
-                body.append("list_mode", false);
-                fetch("query_json_api.php", {
-                    method: "POST",
-                    body: body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
-                }).then(jsonObj => {
-                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        this.expaa_data = jsonObj.raw;
-                    }
-                }).catch(ex => {
-                    console.error("fee-detail-mgt::fetchEXPAA parsing failed", ex);
-                    showAlert({title: "fee-detail-mgt::fetchEXPAA", message: ex.toString(), type: "danger"});
-                });
-            },
-            fetchEXPAC: function() {
-                // EXPAC data fetch
-                let body = new FormData();
-                body.append("type", "expac");
-                body.append("year", this.expac_year);
-                body.append("num", this.pc_number);
-                fetch("query_json_api.php", {
-                    method: "POST",
-                    body: body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
-                }).then(jsonObj => {
-
-                }).catch(ex => {
-                    console.error("fee-detail-mgt::fetchEXPAC parsing failed", ex);
-                    showAlert({title: "fee-detail-mgt::fetchEXPAC", message: ex.toString(), type: "danger"});
-                });
             }
         }
     });
