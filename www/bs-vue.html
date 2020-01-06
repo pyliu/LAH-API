@@ -20,23 +20,10 @@
 <link href="assets/css/basic.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
 <style type="text/css">
-#contact a:link, a:visited, a:hover {
-	color: gray;
-}
-
 #dropdown01 img {
   width: 32px;
   height: auto;
   vertical-align: middle;
-}
-
-.expac_item {
-  margin-bottom: 5px;
-}
-
-blockquote img {
-  /*width: 80%;*/
-  display: block;
 }
 </style>
 </head>
@@ -152,19 +139,13 @@ blockquote img {
   <script type="text/javascript">
     
     $(document).ready(e => {
-      addAnimatedCSS("#tao");
-      if (detectIE()) {
-        document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援IE瀏覽器, 請使用Chrome/Firefox瀏覽器。</h2>';
-        return;
-      }
-
       window.xCaseCheckVue = new Vue({el: "#xcase-check"});
       window.ezCardPaymentCheckVue = new Vue({el: "#easycard-payment-check"});
       window.announcementMgtVue = new Vue({el: "#announcement-mgt"});
       window.caseStateMgtVue = new Vue({el: "#case-state-mgt"});
       window.caseTempMgtVue = new Vue({el: "#case-temp-mgt"});
       window.caseSyncMgtVue = new Vue({el: "#case-sync-mgt"});
-      window.expaaMgtVue = new Vue({el: "#fee-query-board"});
+      window.feeQueryBoardVue = new Vue({el: "#fee-query-board"});
     });
   </script>
 </body>

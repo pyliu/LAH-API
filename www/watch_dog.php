@@ -21,23 +21,10 @@
 <link href="assets/css/basic.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
 <style type="text/css">
-#contact a:link, a:visited, a:hover {
-	color: gray;
-}
-
 #dropdown01 img {
   width: 32px;
   height: auto;
   vertical-align: middle;
-}
-
-.expac_item {
-  margin-bottom: 5px;
-}
-
-blockquote img {
-  /*width: 80%;*/
-  display: block;
 }
 </style>
 </head>
@@ -130,16 +117,12 @@ blockquote img {
   <!-- bs datepicker -->
   <script src="assets/js/bootstrap-datepicker.min.js"></script>
   <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
-  <!-- Promise library -->
-  <!--<script src="assets/js/polyfill.min.js"></script>-->
-  <!-- fetch library -->
-  <!-- <script src="assets/js/fetch.min.js"></script> -->
-
+  <!-- Vue -->
   <script src="assets/js/vue.js"></script>
   <script src="assets/js/bootstrap-vue.min.js"></script>
+  <!-- Custom -->
   <script src="assets/js/global.js"></script>
   <script src="assets/js/xhr_query.js"></script>
-  
   <script src="assets/js/cache.js"></script>
   <script src="assets/js/FileSaver.min.js"></script>
   <!-- Vue components -->
@@ -165,7 +148,7 @@ blockquote img {
       window.caseStateMgtVue = new Vue({el: "#case-state-mgt"});
       window.caseTempMgtVue = new Vue({el: "#case-temp-mgt"});
       window.caseSyncMgtVue = new Vue({el: "#case-sync-mgt"});
-      window.expaaMgtVue = new Vue({el: "#fee-query-board"});
+      window.feeQueryBoardVue = new Vue({el: "#fee-query-board"});
       
     });
   </script>
