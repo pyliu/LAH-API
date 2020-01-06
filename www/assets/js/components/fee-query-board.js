@@ -638,7 +638,7 @@ if (Vue) {
                         <div class='form-row form-inline'>
                             <div class='input-group input-group-sm col'>
                                 <select class='form-control' :id="'modify_expac_item_' + idx" :value="record['AC20']" :data-orig="record['AC20']">
-                                    <option v-for="(val, key) in expe" :value="key">{{key}} : {{val}}</option>
+                                    <option v-for="obj in expe_list" :value="obj.value">{{obj.value}} : {{obj.text}}</option>
                                 </select>
                             </div>
                             <div class='filter-btn-group col'>
@@ -651,36 +651,36 @@ if (Vue) {
                 data: function() {
                     return {
                         selected: [],
-                        expe: { // from MOIEXP.EXPE
-                            "01": "土地法65條登記費",
-                            "02": "土地法76條登記費",
-                            "03": "土地法67條書狀費",
-                            "04": "地籍謄本工本費",
-                            "06": "檔案閱覽抄錄複製費",
-                            "07": "閱覽費",
-                            "08": "門牌查詢費",
-                            "09": "複丈費及建物測量費",
-                            "10": "地目變更勘查費",
-                            "14": "電子謄本列印",
-                            "18": "塑膠樁土地界標",
-                            "19": "鋼釘土地界標(大)",
-                            "30": "104年度登記罰鍰",
-                            "31": "100年度登記罰鍰",
-                            "32": "101年度登記罰鍰",
-                            "33": "102年度登記罰鍰",
-                            "34": "103年度登記罰鍰",
-                            "35": "其他",
-                            "36": "鋼釘土地界標(小)",
-                            "37": "105年度登記罰鍰",
-                            "38": "106年度登記罰鍰",
-                            "39": "塑膠樁土地界標(大)",
-                            "40": "107年度登記罰鍰",
-                            "41": "108年度登記罰鍰",
-                            "42": "土地法第76條登記費（跨縣市）",
-                            "43": "書狀費（跨縣市）",
-                            "44": "罰鍰（跨縣市）",
-                            "45": "109年度登記罰鍰"
-                        }
+                        expe_list: [ // from MOIEXP.EXPE
+                            { value: "01", text: "土地法65條登記費" },
+                            { value: "02", text: "土地法76條登記費" },
+                            { value: "03", text: "土地法67條書狀費" },
+                            { value: "04", text: "地籍謄本工本費" },
+                            { value: "06", text: "檔案閱覽抄錄複製費" },
+                            { value: "07", text: "閱覽費" },
+                            { value: "08", text: "門牌查詢費" },
+                            { value: "09", text: "複丈費及建物測量費" },
+                            { value: "10", text: "地目變更勘查費" },
+                            { value: "14", text: "電子謄本列印" },
+                            { value: "18", text: "塑膠樁土地界標" },
+                            { value: "19", text: "鋼釘土地界標(大)" },
+                            { value: "30", text: "104年度登記罰鍰" },
+                            { value: "31", text: "100年度登記罰鍰" },
+                            { value: "32", text: "101年度登記罰鍰" },
+                            { value: "33", text: "102年度登記罰鍰" },
+                            { value: "34", text: "103年度登記罰鍰" },
+                            { value: "35", text: "其他" },
+                            { value: "36", text: "鋼釘土地界標(小)" },
+                            { value: "37", text: "105年度登記罰鍰" },
+                            { value: "38", text: "106年度登記罰鍰" },
+                            { value: "39", text: "塑膠樁土地界標(大)" },
+                            { value: "40", text: "107年度登記罰鍰" },
+                            { value: "41", text: "108年度登記罰鍰" },
+                            { value: "42", text: "土地法第76條登記費（跨縣市）" },
+                            { value: "43", text: "書狀費（跨縣市）" },
+                            { value: "44", text: "罰鍰（跨縣市）" },
+                            { value: "45", text: "109年度登記罰鍰" }
+                        ]
                     }
                 },
                 methods: {
