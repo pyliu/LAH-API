@@ -529,12 +529,12 @@ if (Vue) {
     // It needs to be used in expaa-list-mgt & fee-query-board, so register it to global scope 
     Vue.component("fee-detail-mgt", {
         template: `<b-container fluid>
-            <h6 v-if="expaa_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 規費詳細資料</h6>
-            <h6 v-if="expac_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 付款項目詳細資料</h6>
             <b-row>
                 <b-col id="fee_detail_plate" cols="6">
-                    <ul>
-                        <li v-for="(item, key) in expaa_data">
+                    <fieldset>
+                        <legend>規費資料集</legend>
+                        <h6 v-if="expaa_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 規費詳細資料</h6>
+                        <div v-for="(item, key) in expaa_data">
                             <span v-if="key == '列印註記'">
                                 <fee-detail-print-mgt :value="item" :date="date" :pc_number="pc_number"></fee-detail-print-mgt>
                             </span>
@@ -545,10 +545,15 @@ if (Vue) {
                                 <fee-detail-fix-ezcard :raw="expaa_data" :date="date" :pc_number="pc_number"></fee-detail-fix-ezcard>
                             </span>
                             <span v-else>{{key}}：{{item}}</span>
-                        </li>
-                    <ul>
+                        </div>
+                    </fieldset>
                 </b-col>
-                <b-col cols="6"></b-col>
+                <b-col cols="6">
+                    <fieldset>
+                        <legend>收費項目資料集</legend>
+                        <h6 v-if="expac_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 付款項目詳細資料</h6>
+                    </fieldset>
+                </b-col>
             </b-row>
         </b-container>`,
         props: ["date", "pc_number"],

@@ -109,40 +109,8 @@ blockquote img {
         </div>
       </div>
       <div class="row">
-        <div class="col-6">
-          <fieldset>
-            <legend>規費資料集修正<small>(EXPAA)</small></legend>
-
-            <div class="form-row">
-              <div class="input-group input-group-sm col">
-                <div class="input-group-prepend">
-                  <span class="input-group-text" id="inputGroup-expaa_query_date">日期</span>
-                </div>
-                <input type="text" id="expaa_query_date" name="expaa_query_date" class="form-control date_picker no-cache" placeholder="1081107" data-trigger="manual" data-toggle="popover" data-content="需輸入7位數民國日期，如「1080426」。" data-placement="bottom" value="<?php echo $today; ?>" />
-                <button id="expaa_query_date_button" class="btn btn-sm btn-outline-primary">查詢</button>
-              </div>
-              <div class="input-group input-group-sm col">
-                <div class="input-group-prepend">
-                  <span class="input-group-text" id="inputGroup-expaa_query_number">給號</span>
-                </div>
-                <input type="number" max="9999999" min="1" id="expaa_query_number" name="expaa_query_number" class="form-control" placeholder="0006574" data-toggle="popover" data-content="需輸入7位數電腦給號，如「0021131」。" data-placement="bottom" />
-                <button id="expaa_query_num_button" class="btn btn-sm btn-outline-secondary" title="針對電腦給號查詢">查詢</button>
-              </div>
-              <div class="filter-btn-group col">
-                <button id="expaa_quote_button" class="btn btn-sm btn-outline-success">備註</button>
-              </div>
-            </div>
-
-            <blockquote id="expaa_quote" class="hide" data-title="規費資料集修正">
-              AA09 - 列印註記【1：已印，0：未印】<br />
-              AA100 - 付款方式<br />
-              <img src="assets/img/EXPAA_AA100_Update.jpg" /><br />
-              AA106 - 悠遊卡繳費扣款結果<br />
-              AA107 - 悠遊卡交易流水號<br />
-              <img src="assets/img/easycard_screenshot.jpg" />
-            </blockquote>
-            <div id="expaa_query_display" class="message"></div>
-          </fieldset>
+        <div id="fee-query-board" class="col-6">
+          <fee-query-board></fee-query-board>
         </div>
         <div class="col-6">
           <fieldset>
@@ -189,11 +157,6 @@ blockquote img {
               WHERE t.AC04 = '0021131' AND t.AC25 = '108'
             </blockquote>
           </fieldset>
-        </div>
-      </div>
-      <div class="row">
-        <div id="fee-query-board" class="col-6">
-          <fee-query-board></fee-query-board>
         </div>
       </div>
     </div>
