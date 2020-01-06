@@ -639,7 +639,7 @@ if (Vue) {
         components: {
             "fee-detail-expac-mgt": {
                 template: `<div>
-                    <h6>
+                    <h6 v-if="expac_list.length > 0">
                         <b-button variant="outline-info" :pressed="true">
                             規費年度
                             <b-badge variant="light">{{date.substring(0, 3)}} <span class="sr-only">規費年度</span></b-badge>
