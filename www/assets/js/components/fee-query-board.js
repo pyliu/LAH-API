@@ -666,13 +666,16 @@ if (Vue) {
             },
             "fee-detail-print-mgt": {
                 template: `<div class='form-row form-inline'>
-                    <div class='input-group input-group-sm col-8'>
+                    <div class='input-group input-group-sm col-9'>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-exapp_print_select">列印狀態</span>
+                        </div>
                         <select id='exapp_print_select' class='form-control' v-model="value">
                             <option value='0'>【0】未印</option>
                             <option value='1'>【1】已印</option>
                         </select>
                     </div>
-                    <div class='filter-btn-group col-4'>
+                    <div class='filter-btn-group col'>
                         <b-button @click="updateExpaaAA09" size="sm" variant="outline-primary"><i class="fas fa-edit"></i> 修改</button>
                     </div>
                 </div>`,
