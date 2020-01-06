@@ -1,6 +1,4 @@
-<?php
-require_once("./include/init.php");
-?>
+<?php require_once("./include/init.php"); ?>
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
