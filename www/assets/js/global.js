@@ -275,6 +275,7 @@
         if (isEmpty(size)) {
             size = "md";
         }
+
         window.utilApp.modal(body, {
             title: title,
             size: size,
@@ -325,10 +326,13 @@
     let addAnimatedCSS = function(selector, opts) {
         const node = $(selector);
         if (node) {
-            opts = Object.assign({name: ANIMATED_PATTERNS[rand(ANIMATED_PATTERNS.length)]}, opts);
-            node.addClass(`animated ${opts.name}`);
+            opts = Object.assign({
+                name: ANIMATED_PATTERNS[rand(ANIMATED_PATTERNS.length)],
+                duration: ""    // a css class to control speed
+            }, opts);
+            node.addClass(`animated ${opts.name} ${opts.duration}`);
             function handleAnimationEnd() {
-                node.removeClass(`animated ${opts.name}`);
+                node.removeClass(`animated ${opts.name} ${opts.duration}`);
                 node.off('animationend');
                 // clear ld animation also
                 clearLDAnimation(selector);
@@ -677,9 +681,8 @@
                 toastCounter: 0,
                 openConfirm: false,
                 confirmAnswer: false,
-                //transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)],
-                transition: { in: "animated fadeInLeft", out: "animated fadeOutRight" },
-                callback_queue: []
+                transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)],
+                callbackQueue: []
             },
             methods: {
                 // make simple, short popup notice message
@@ -753,12 +756,13 @@
                     }
                     this.toastCounter++;
                 },
-                showModal: function(id) {
+                showModal: function(id, duration) {
                     let modal_content = $(`#${id} .modal-content`);
                     modal_content.removeClass("hide");
                     addAnimatedCSS(modal_content, {
                         name: this.transition.in,
-                        callback: this.callback_queue.pop()
+                        duration: duration || "once-anim-cfg",
+                        callback: this.callbackQueue.pop()
                     });
                 },
                 hideModal: function(id) {
@@ -771,12 +775,12 @@
                         that.removeModal(id);
                     }
                 },
-                removeModal: function(id) {
+                removeModal: function(id, duration) {
                     if (!this.openConfirm) {
-                        let that = this;
                         let modal_content = $(`#${id} .modal-content`);
                         addAnimatedCSS(modal_content, {
-                            name: that.transition.out,
+                            name: this.transition.out,
+                            duration: duration || "once-anim-cfg",
                             callback: () => {
                                 $(`#${id}___BV_modal_outer_`).remove();
                                 $(".popover").remove();
@@ -814,7 +818,7 @@
                         }
                         // to initialize Vue component purpose
                         if (merged.callback && typeof merged.callback == "function") {
-                            this.callback_queue.push(merged.callback);
+                            this.callbackQueue.push(merged.callback);
                         }
                     } else {
                         this.$bvModal.msgBoxOk(message, merged);
