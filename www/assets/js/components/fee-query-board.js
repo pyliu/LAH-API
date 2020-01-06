@@ -105,9 +105,15 @@ if (Vue) {
                     }
                     return response.json();
                 }).then(jsonObj => {
+                    let that = this;
                     let VNode = this.$createElement("expaa-category-dashboard", {
                         props: {
                             raw_data: jsonObj.raw
+                        },
+                        on: {
+                            "number_clicked": function(number) {
+                               that.number = number;
+                            }
                         }
                     });
                     showModal({
@@ -282,9 +288,17 @@ if (Vue) {
                         if (data.length == 0) {
                             return false;
                         }
+                        let that = this;
                         showModal({
                             title: title,
-                            message: this.$createElement("expaa-list-mgt", { props: { items: data || [] } }),
+                            message: this.$createElement("expaa-list-mgt", {
+                                props: { items: data || [] },
+                                on: {
+                                    "number_clicked": function(number) {
+                                        that.$emit("number_clicked", number);
+                                    }
+                                }
+                            }),
                             size: "lg",
                             backdrop_close: true
                         });
@@ -297,17 +311,18 @@ if (Vue) {
                         </b-container>`,
                         props: ["items"],
                         methods: {
-                          open: function(date, pc_number) {
-                            let VNode = this.$createElement("fee-detail-mgt", {
-                              props: { date: date, pc_number: pc_number}
-                            });
-                            showModal({
-                              message: VNode,
-                              title: "規費資料詳情",
-                              backdrop_close: true,
-                              size: "lg"
-                            });
-                          }
+                            open: function(date, pc_number) {
+                                let VNode = this.$createElement("fee-detail-mgt", {
+                                    props: { date: date, pc_number: pc_number}
+                                });
+                                showModal({
+                                    message: VNode,
+                                    title: "規費資料詳情",
+                                    backdrop_close: true,
+                                    size: "lg"
+                                });
+                                this.$emit("number_clicked", pc_number);
+                            }
                         }
                     }
                 }
@@ -508,7 +523,19 @@ if (Vue) {
         template: `<b-container fluid>
             <h6 v-if="expaa_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 規費詳細資料</h6>
             <h6 v-if="expac_data.length == 0"><i class="fas fa-exclamation-circle text-danger"></i> {{date}} 找不到 {{pc_number}} 付款項目詳細資料</h6>
-            <div id="fee_detail_plate"></div>
+            <b-row>
+                <b-col id="fee_detail_plate" cols="6">
+                    <ul>
+                        <li v-for="(item, key) in expaa_data">
+                            <span v-if="key == '列印註記'">{{key}}</span>
+                            <span v-else-if="key == '繳費方式代碼'">{{key}}</span>
+                            <span v-else-if="key == '悠遊卡繳費扣款結果'">{{key}}</span>
+                            <span v-else>{{key}}：{{item}}</span>
+                        </li>
+                    <ul>
+                </b-col>
+                <b-col cols="6"></b-col>
+            </b-row>
         </b-container>`,
         props: ["date", "pc_number"],
         data: function() {
@@ -570,7 +597,8 @@ if (Vue) {
                     return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        let html = "<div class='text-info'>規費資料：</div>";
+                        this.expaa_data = jsonObj.raw;
+                        let html = "";
                         html += "<ul>";
                         for (let key in jsonObj.raw) {
                             html += "<li>";
@@ -613,7 +641,7 @@ if (Vue) {
                             html += "</li>";
                         };
                         html += "</ul>";
-                        $("#fee_detail_plate").html(html);
+                        //$("#fee_detail_plate").html(html);
                         // attach event handler for the buttons
                         $("#exapp_print_button").off("click").on("click", xhrUpdateExpaaAA09.bind({
                             date: $("#expaa_query_date").val(),
