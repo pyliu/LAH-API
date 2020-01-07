@@ -211,6 +211,8 @@ if (Vue) {
                     format: {
                         toDisplay: (date, format, language) => {
                             that.date = toTWDate(new Date(date));
+                            // clear pc number also
+                            that.number = '';
                             return that.date;
                         },
                         toValue: (date, format, language) => new Date()
@@ -650,7 +652,7 @@ if (Vue) {
                             <b-badge variant="light">{{pc_number}} <span class="sr-only">電腦給號</span></b-badge>
                         </b-button>
                     </h6>
-                    <div class='border border-dark rounded p-2' v-for="(record, idx) in expac_list">
+                    <div class='border border-dark rounded p-2 mb-2' v-for="(record, idx) in expac_list">
                         <div class="mb-1">
                             <b-button variant="warning" :class="['reg_case_id']">
                                 案號
@@ -770,7 +772,7 @@ if (Vue) {
                     }
                 },
                 mounted: function() { 
-                    $(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog).removeClass("reg_case_id");
+                    setTimeout(() => $(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog).removeClass("reg_case_id"), 400);
                 }
             },
             "fee-detail-fix-ezcard": {
