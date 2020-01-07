@@ -47,10 +47,10 @@ if (Vue) {
                 &ensp;
                 <b-col>
                     <b-button block pill @click="obsolete" variant="outline-secondary" size="sm" v-b-popover.hover.focus.top="'新增作廢假資料'">
-                        <span class="fa-stack">
+                        <span class="fa-stack" style="font-size: 0.5rem">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
                             <i class="fas fa-ban fa-stack-2x text-danger"></i>
-                        </span>&ensp;
+                        </span>
                         作廢
                     </b-button>
                 </b-col>
@@ -88,7 +88,7 @@ if (Vue) {
         methods: {
             query: function(e) {
                 if (isEmpty(this.number)) {
-                    this.fetchList();
+                    this.fetchList(e);
                 } else {
                     let VNode = this.$createElement("fee-detail-mgt", {
                         props: { date: this.date, pc_number: this.number.toString().padStart(7, "0")}
@@ -100,12 +100,15 @@ if (Vue) {
                     });
                 }
             },
-            fetchList: function() {
+            fetchList: function(e) {
                 let body = new FormData();
                 body.append("type", "expaa");
                 body.append("qday", this.date);
                 body.append("num", this.number);
                 body.append("list_mode", true);
+                
+                toggle(e.target);
+
                 fetch("query_json_api.php", {
                     method: "POST",
                     body: body
@@ -138,6 +141,9 @@ if (Vue) {
                         message: VNode,
                         title: `${this.date} 規費統計`
                     });
+
+                    toggle(e.target);
+                    
                 }).catch(ex => {
                     console.error("fee-query-board::fetchList parsing failed", ex);
                     showAlert({title: "fee-query-board::fetchList", message: ex.toString(), type: "danger"});
