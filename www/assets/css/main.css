@@ -308,3 +308,7 @@ blockquote {
 	/* animation-delay: 2s; */
 	animation-iteration-count: infinite;
 }
+
+.small-font {
+	font-size: .85rem;
+}

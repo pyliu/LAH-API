@@ -320,7 +320,15 @@ if (Vue) {
                 components: {
                     "expaa-list-mgt": {
                         template: `<b-container fluid>
-                            <b-button @click="open(item['AA01'], item['AA04'])" variant="outline-primary" pill size="sm" :class="['float-left', 'mr-2', 'mb-2']" v-for="(item, idx) in items">{{item["AA04"]}}</b-button>
+                            <b-button
+                                @click="open(item['AA01'], item['AA04'])"
+                                variant="outline-primary"
+                                pill
+                                size="sm" 
+                                :class="['float-left', 'mr-2', 'mb-2']"
+                                v-for="(item, idx) in items"
+                                v-b-popover.hover="'金額:'+item['AA28']+'元'"
+                            >{{item["AA04"]}}</b-button>
                         </b-container>`,
                         props: ["items"],
                         methods: {
@@ -533,7 +541,7 @@ if (Vue) {
     });
     // It needs to be used in expaa-list-mgt & fee-query-board, so register it to global scope 
     Vue.component("fee-detail-mgt", {
-        template: `<b-container fluid>
+        template: `<b-container fluid :class="['small-font']">
             <b-row>
                 <b-col id="fee_detail_plate" cols="6">
                     <fieldset>
@@ -658,10 +666,11 @@ if (Vue) {
                                 案號
                                 <b-badge variant="light">{{record["AC16"]}}-{{record["AC17"]}}-{{record["AC18"]}} <span class="sr-only">案件號</span></b-badge>
                             </b-button>
-                            應收：{{record["AC29"]}}
+                            <!--應收：{{record["AC29"]}}-->
+                            <span v-b-popover.hover.top="'實收金額'">實收金額：{{record["AC30"]}}元</span>
                         </div>
                         <div class='form-row form-inline'>
-                            <div class='input-group input-group-sm col-7'>
+                            <div class='input-group input-group-sm col-9'>
                                 <b-form-select
                                     :value="record['AC20']"
                                     :data-orig="record['AC20']"
@@ -674,7 +683,6 @@ if (Vue) {
                                 </template>
                                 </b-form-select>
                             </div>
-                            <div class="col-2" title="實收金額">{{record["AC30"]}}元</div>
                             <div class='filter-btn-group col'>
                                 <b-button @click="update($event, record)" size="sm" variant="outline-primary" :data-select-el="'modify_expac_item_' + idx"><i class="fas fa-edit"></i> 修改</b-button>
                             </div>
