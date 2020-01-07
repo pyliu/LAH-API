@@ -721,7 +721,7 @@ if (Vue) {
         data: function() {
             return {
                 expaa_data: [],
-                expac_data: [{  // mock data
+                expac_data: [/*{  // mock data
                     AC16: "108",
                     AC17: "HB04",
                     AC18: "000010",
@@ -730,7 +730,7 @@ if (Vue) {
                     AC29: "100",
                     AC30: "80",
                     AC20: "07"
-                }],
+                }*/],
                 expac_year: "109"
             }
         },
