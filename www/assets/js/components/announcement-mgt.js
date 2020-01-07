@@ -73,12 +73,19 @@ if (Vue) {
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-prereg_announcement_select">公告項目</span>
                     </div>
-                    <select @change.lazy="change" id='prereg_announcement_select' class='form-control h-100' v-model="val">
-                        <option value=''></option>
+                    <b-form-select
+                        v-model="val"
+                        size="sm"
+                        :id="prereg_announcement_select"
+                        :class="['h-100']"
+                    >
+                        <template v-slot:first>
+                            <option value="" disabled>-- 請選擇一個項目 --</option>
+                        </template>
                         <option v-for="(item, index) in data" :value="item['RA01'] + ',' + item['KCNT'] + ',' + item['RA02'] + ',' + item['RA03']">
                             {{item["RA01"]}} : {{item["KCNT"]}} 【{{item['RA02']}}, {{item['RA03']}}】
                         </option>
-                    </select>
+                    </b-form-select>
                     &ensp;
                     <b-button @click="change" variant="outline-primary" size="sm" v-b-popover.hover.focus.top="'開啟編輯視窗'"><i class="fas fa-external-link-alt"></i> 編輯</b-button>
                 </div>`,
