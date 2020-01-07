@@ -37,7 +37,7 @@ if (Vue) {
                     &ensp;
                     <b-button @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button>
                     &ensp;
-                    <b-button @click="obsolete" variant="outline-secondary" size="sm" title="作廢假資料">
+                    <b-button @click="obsolete" variant="outline-secondary" size="sm" v-b-popover.hover.focus.top="'新增作廢假資料'">
                         <span class="fa-stack">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
                             <i class="fas fa-ban fa-stack-2x text-danger"></i>
