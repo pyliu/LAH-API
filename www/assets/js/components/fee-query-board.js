@@ -327,7 +327,8 @@ if (Vue) {
                                 size="sm" 
                                 :class="['float-left', 'mr-2', 'mb-2']"
                                 v-for="(item, idx) in items"
-                                v-b-popover.hover="'金額:'+item['AA28']+'元'"
+                                v-b-popover.hover="'金額: '+item['AA28']+'元'"
+                                :title="'憑證序號: '+item['AA05']"
                             >{{item["AA04"]}}</b-button>
                         </b-container>`,
                         props: ["items"],
