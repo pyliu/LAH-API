@@ -721,7 +721,7 @@ if (Vue) {
         data: function() {
             return {
                 expaa_data: [],
-                expac_data: [/*{  // mock data
+                expac_data: [{  // mock data
                     AC16: "108",
                     AC17: "HB04",
                     AC18: "000010",
@@ -730,7 +730,7 @@ if (Vue) {
                     AC29: "100",
                     AC30: "80",
                     AC20: "07"
-                }*/],
+                }],
                 expac_year: "109"
             }
         },
@@ -819,10 +819,8 @@ if (Vue) {
                         <div class='form-row form-inline'>
                             <div class='input-group input-group-sm col-9'>
                                 <b-form-select
-                                    :value="record['AC20']"
-                                    :data-orig="record['AC20']"
+                                    v-model="expac_list[idx]['AC20']"
                                     :options="expe_list"
-                                    :id="'modify_expac_item_' + idx"
                                     size="sm"
                                 >
                                 <template v-slot:first>
@@ -831,7 +829,7 @@ if (Vue) {
                                 </b-form-select>
                             </div>
                             <div class='filter-btn-group col'>
-                                <b-button @click="update($event, record)" size="sm" variant="outline-primary" :data-select-el="'modify_expac_item_' + idx"><i class="fas fa-edit"></i> 修改</b-button>
+                                <b-button @click="update($event, idx)" size="sm" variant="outline-primary" :data-orig="record['AC20']"><i class="fas fa-edit"></i> 修改</b-button>
                             </div>
                         </div>
                     </div>
@@ -872,10 +870,9 @@ if (Vue) {
                     }
                 },
                 methods: {
-                    update: function(e, record) {
-                        let this_select = $("#" + $(e.target).data("select-el"));
-                        let code = this_select.val();
-                        if (code == this_select.data("orig")) {
+                    update: function(e, idx) {
+                        let record = this.expac_list[idx];
+                        if (record["AC20"] == $(e.target).data("orig")) {
                             addNotification({
                                 title: `${record["AC25"]}-${record["AC04"]} ${record["AC30"]}元 項目`,
                                 message: "選項沒變，不需更新",
@@ -886,7 +883,7 @@ if (Vue) {
                             body.append("type", "mod_expac");
                             body.append("year", record["AC25"]);
                             body.append("num", record["AC04"]);
-                            body.append("code", code);
+                            body.append("code", record["AC20"]);
                             body.append("amount", record["AC30"]);
 
                             toggle(e.target);
