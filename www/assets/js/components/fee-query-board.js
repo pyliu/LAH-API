@@ -2,51 +2,61 @@ if (Vue) {
     Vue.component("fee-query-board", {
         template: `<fieldset>
             <legend>規費資料</legend>
-            <b-container :class="['form-row']" fluid>
-                <div class="input-group input-group-sm col">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-fee_query_date">日期</span>
+            <b-row class="mb-2">
+                <b-col>
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-fee_query_date">日期</span>
+                        </div>
+                        <b-form-input
+                            v-model="date"
+                            id="fee_query_date"
+                            placeholder="民國年月日"
+                            :class="['form-control', 'no-cache', 'bg-light', 'border', 'pl-2', 'h-100']"
+                            size="sm"
+                            plaintext
+                            trim
+                        >
+                        </b-form-input>
                     </div>
-                    <b-form-input
-                        v-model="date"
-                        id="fee_query_date"
-                        placeholder="民國年月日"
-                        :class="['form-control', 'no-cache', 'bg-light', 'border', 'pl-2', 'h-100']"
-                        size="sm"
-                        plaintext
-                        trim
-                    >
-                    </b-form-input>
-                    <div class="input-group-prepend ml-1">
-                        <span class="input-group-text" id="inputGroup-fee_query_number">電腦給號</span>
+                </b-col>
+                <b-col>
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend ml-1">
+                            <span class="input-group-text" id="inputGroup-fee_query_number">電腦給號</span>
+                        </div>
+                        <b-form-input
+                            v-model="number"
+                            id="fee_query_number"
+                            type="number"
+                            placeholder="七碼電腦給號"
+                            :state="isNumberValid"
+                            size="sm"
+                            max=9999999
+                            min=1
+                            trim
+                            number
+                            :class="['form-control', 'h-100', 'no-cache']"
+                        >
+                        </b-form-input>
                     </div>
-                    <b-form-input
-                        v-model="number"
-                        id="fee_query_number"
-                        type="number"
-                        placeholder="七碼電腦給號"
-                        :state="isNumberValid"
-                        size="sm"
-                        max=9999999
-                        min=1
-                        trim
-                        number
-                        :class="['form-control', 'h-100', 'no-cache']"
-                    >
-                    </b-form-input>
-                    &ensp;
-                    <b-button @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button>
-                    &ensp;
-                    <b-button @click="obsolete" variant="outline-secondary" size="sm" v-b-popover.hover.focus.top="'新增作廢假資料'">
+                </b-col>
+            </b-row>
+            <b-row no-gutters>
+                <b-col><b-button pill block @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button></b-col>
+                &ensp;
+                <b-col>
+                    <b-button block pill @click="obsolete" variant="outline-secondary" size="sm" v-b-popover.hover.focus.top="'新增作廢假資料'">
                         <span class="fa-stack">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
                             <i class="fas fa-ban fa-stack-2x text-danger"></i>
-                        </span>
+                        </span>&ensp;
+                        作廢
                     </b-button>
-                    &ensp;
-                    <b-button @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
-                </div>
-            </b-container>
+                </b-col>
+                &ensp;
+                <b-col><b-button block pill @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button></b-col>
+            </b-row>
         </fieldset>`,
         data: () => {
             return {
