@@ -547,6 +547,7 @@ if (Vue) {
         }
     });
 
+    // It needs to be used in popover, so register it to global scope
     Vue.component("fee-detail-payment-mgt", {
         template: `<div class='form-row form-inline small-font'>
             <div class='input-group input-group-sm col-8'>
@@ -610,6 +611,7 @@ if (Vue) {
         }
     });
 
+    // It needs to be used in popover, so register it to global scope
     Vue.component("fee-detail-print-mgt", {
         template: `<div class='form-row form-inline small-font'>
             <div class='input-group input-group-sm col-8'>
