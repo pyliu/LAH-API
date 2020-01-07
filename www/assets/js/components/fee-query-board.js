@@ -327,9 +327,15 @@ if (Vue) {
                                 size="sm" 
                                 :class="['float-left', 'mr-2', 'mb-2']"
                                 v-for="(item, idx) in items"
-                                v-b-popover.hover="'金額: '+item['AA28']+'元'"
-                                :title="'憑證序號: '+item['AA05']"
-                            >{{item["AA04"]}}</b-button>
+                                :id="'fee_btn_'+idx"
+                            >
+                                {{item["AA04"]}}
+                                <b-popover :target="'fee_btn_'+idx" triggers="hover focus">
+                                    <template v-slot:title>序號: {{item["AA05"]}} 金額: {{item['AA28']}}元</template>
+                                    <fee-detail-print-mgt :value="item['AA09']" :date="item['AA01']" :pc_number="item['AA04']" :no-confirm=true></fee-detail-print-mgt>
+                                    <fee-detail-payment-mgt :value="item['AA100']" :date="item['AA01']" :pc_number="item['AA04']" :no-confirm=true></fee-detail-payment-mgt>
+                                </b-popover>
+                            </b-button>
                         </b-container>`,
                         props: ["items"],
                         methods: {
@@ -540,7 +546,129 @@ if (Vue) {
             }
         }
     });
-    // It needs to be used in expaa-list-mgt & fee-query-board, so register it to global scope 
+
+    Vue.component("fee-detail-payment-mgt", {
+        template: `<div class='form-row form-inline small-font'>
+            <div class='input-group input-group-sm col-8'>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroup-exapp_method_select">付款方式</span>
+                </div>
+                <select id='exapp_method_select' class='form-control' v-model="value">
+                    <option value='01'>現金[01]</option>
+                    <option value='02'>支票[02]</option>
+                    <option value='03'>匯票[03]</option>
+                    <option value='04'>iBon[04]</option>
+                    <option value='05'>ATM[05]</option>
+                    <option value='06'>悠遊卡[06]</option>
+                    <option value='07'>其他匯款[07]</option>
+                    <option value='08'>信用卡[08]</option>
+                    <option value='09'>行動支付[09]</option>
+                </select>
+            </div>
+            <div class='filter-btn-group col'>
+                <b-button @click="update" size="sm" variant="outline-primary"><i class="fas fa-edit"></i> 修改</button>
+            </div>
+        </div>`,
+        props: ["value", "date", "pc_number", "noConfirm"],
+        methods: {
+            update: function(e) {
+                if (this.noConfirm) {
+                    this.doUpdate(e);
+                } else {
+                    let that = this;
+                    showConfirm("確定要規費付款方式？", () => that.doUpdate(e));
+                }
+            },
+            doUpdate: function(e) {
+                let body = new FormData();
+                body.append("type", "expaa_AA100_update");
+                body.append("date", this.date);
+                body.append("number", this.pc_number);
+                body.append("update_value", this.value);
+        
+                toggle(e.target);
+        
+                fetch("query_json_api.php", {
+                    method: "POST",
+                    body: body
+                }).then(response => {
+                    if (response.status != 200) {
+                        throw new Error("XHR連線異常，回應非200");
+                    }
+                    return response.json();
+                }).then(jsonObj => {
+                    addNotification({
+                        title: "修改規費付款方式",
+                        subtitle: `${this.date} ${this.pc_number}`,
+                        message: jsonObj.message,
+                        type: jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
+                    });
+                    toggle(e.target);
+                    closeModal();
+                });
+            }
+        }
+    });
+
+    Vue.component("fee-detail-print-mgt", {
+        template: `<div class='form-row form-inline small-font'>
+            <div class='input-group input-group-sm col-8'>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroup-exapp_print_select">列印狀態</span>
+                </div>
+                <select id='exapp_print_select' class='form-control' v-model="value">
+                    <option value='0'>未印[0]</option>
+                    <option value='1'>已印[1]</option>
+                </select>
+            </div>
+            <div class='filter-btn-group col'>
+                <b-button @click="update" size="sm" variant="outline-primary"><i class="fas fa-edit"></i> 修改</button>
+            </div>
+        </div>`,
+        props: ["value", "date", "pc_number", "noConfirm"],
+        methods: {
+            update: function(e) {
+                if (this.noConfirm) {
+                    this.doUpdate(e);
+                } else {
+                    let that = this;
+                    showConfirm("確定要修改列印註記？", (e) => {
+                        that.doUpdate(e);
+                    });
+                }
+            },
+            doUpdate: function(e) {
+                let body = new FormData();
+                body.append("type", "expaa_AA09_update");
+                body.append("date", this.date);
+                body.append("number", this.pc_number);
+                body.append("update_value", this.value);
+        
+                toggle(e.target);
+        
+                fetch("query_json_api.php", {
+                    method: "POST",
+                    body: body
+                }).then(response => {
+                    if (response.status != 200) {
+                        throw new Error("XHR連線異常，回應非200");
+                    }
+                    return response.json();
+                }).then(jsonObj => {
+                    addNotification({
+                        title: "修改列印註記",
+                        subtitle: `${this.date} ${this.pc_number}`,
+                        message: jsonObj.message,
+                        type: jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
+                    });
+                    toggle(e.target);
+                    closeModal();
+                });
+            }
+        }
+    });
+
+    // It needs to be used in expaa-list-mgt & fee-query-board, so register it to global scope
     Vue.component("fee-detail-mgt", {
         template: `<b-container fluid :class="['small-font']">
             <b-row>
@@ -803,12 +931,12 @@ if (Vue) {
                         let message = `確定要修正 日期: ${qday}, 電腦給號: ${pc_number}, 金額: ${amount} 悠遊卡付款資料為正常？`;
                         showConfirm(message, () => {
                             toggle(e.target);
-
+        
                             let body = new FormData();
                             body.append("type", "fix_easycard");
                             body.append("qday", qday);
                             body.append("pc_num", pc_number);
-
+        
                             fetch("query_json_api.php", {
                                 method: "POST",
                                 body: body
@@ -835,109 +963,6 @@ if (Vue) {
                                     message: ex.toString(),
                                     type: "danger"
                                 });
-                            });
-                        });
-                    }
-                }
-            },
-            "fee-detail-payment-mgt": {
-                template: `<div class='form-row form-inline'>
-                    <div class='input-group input-group-sm col-9'>
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="inputGroup-exapp_method_select">付款方式</span>
-                        </div>
-                        <select id='exapp_method_select' class='form-control' v-model="value">
-                            <option value='01'>【01】現金</option>
-                            <option value='02'>【02】支票</option>
-                            <option value='03'>【03】匯票</option>
-                            <option value='04'>【04】iBon</option>
-                            <option value='05'>【05】ATM</option>
-                            <option value='06'>【06】悠遊卡</option>
-                            <option value='07'>【07】其他匯款</option>
-                            <option value='08'>【08】信用卡</option>
-                            <option value='09'>【09】行動支付</option>
-                        </select>
-                    </div>
-                    <div class='filter-btn-group col'>
-                        <b-button @click="updateExpaaAA100" size="sm" variant="outline-primary"><i class="fas fa-edit"></i> 修改</button>
-                    </div>
-                </div>`,
-                props: ["value", "date", "pc_number"],
-                methods: {
-                    updateExpaaAA100: function(e) {
-                        let that = this;
-                        showConfirm("確定要規費付款方式？", () => {
-                            let body = new FormData();
-                            body.append("type", "expaa_AA100_update");
-                            body.append("date", that.date);
-                            body.append("number", that.pc_number);
-                            body.append("update_value", that.value);
-                    
-                            toggle(e.target);
-                    
-                            fetch("query_json_api.php", {
-                                method: "POST",
-                                body: body
-                            }).then(response => {
-                                if (response.status != 200) {
-                                    throw new Error("XHR連線異常，回應非200");
-                                }
-                                return response.json();
-                            }).then(jsonObj => {
-                                addNotification({
-                                    title: "修改規費付款方式",
-                                    message: jsonObj.message,
-                                    type: jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
-                                });
-                                $(e.target).remove();
-                            });
-                        });
-                    }
-                }
-            },
-            "fee-detail-print-mgt": {
-                template: `<div class='form-row form-inline'>
-                    <div class='input-group input-group-sm col-9'>
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="inputGroup-exapp_print_select">列印狀態</span>
-                        </div>
-                        <select id='exapp_print_select' class='form-control' v-model="value">
-                            <option value='0'>【0】未印</option>
-                            <option value='1'>【1】已印</option>
-                        </select>
-                    </div>
-                    <div class='filter-btn-group col'>
-                        <b-button @click="updateExpaaAA09" size="sm" variant="outline-primary"><i class="fas fa-edit"></i> 修改</button>
-                    </div>
-                </div>`,
-                props: ["value", "date", "pc_number"],
-                methods: {
-                    updateExpaaAA09: function(e) {
-                        let that = this;
-                        showConfirm("確定要修改列印註記？", () => {
-                            let body = new FormData();
-                            body.append("type", "expaa_AA09_update");
-                            body.append("date", that.date);
-                            body.append("number", that.pc_number);
-                            body.append("update_value", that.value);
-                    
-                            toggle(e.target);
-                    
-                            fetch("query_json_api.php", {
-                                method: "POST",
-                                body: body
-                            }).then(response => {
-                                if (response.status != 200) {
-                                    throw new Error("XHR連線異常，回應非200");
-                                }
-                                return response.json();
-                            }).then(jsonObj => {
-                                addNotification({
-                                    title: "修改列印註記",
-                                    message: jsonObj.message,
-                                    type: jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
-                                });
-                                $(e.target).remove();
                             });
                         });
                     }
