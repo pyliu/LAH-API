@@ -23,9 +23,9 @@ if (Vue) {
                 </div>
             </div>
             <b-row no-gutters>
-                <b-col><b-button block @click="query" size="sm" variant="outline-primary"><i class="fas fa-cogs"></i> 檢測</b-button></b-col>
+                <b-col><b-button pill block @click="query" size="sm" variant="outline-primary"><i class="fas fa-cogs"></i> 檢測</b-button></b-col>
                 &ensp;
-                <b-col><b-button block @click="popup" size="sm" variant="outline-success"><i class="far fa-comment"></i> 備註</b-button></b-col>
+                <b-col><b-button pill block @click="popup" size="sm" variant="outline-success"><i class="far fa-comment"></i> 備註</b-button></b-col>
             </b-row>
         </fieldset>`,
         data: () => {
