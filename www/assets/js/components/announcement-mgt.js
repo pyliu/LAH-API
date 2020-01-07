@@ -2,15 +2,20 @@ if (Vue) {
     Vue.component("announcement-mgt", {
         template: `<fieldset>
             <legend>公告維護</legend>
-            <div class="form-row">
-                <announcement-mgt-item :reset-flag="reset_flag" @update-announcement-done="updated" @reset-flags-done="done"></announcement-mgt-item>
-                <div class="filter-btn-group col-3">
-                    <b-button @click="clear" variant="outline-secondary" size="sm" v-b-popover.hover.focus.top="'清除准登旗標'"><i class="fas fa-broom"></i></b-button>
-                    <b-button @click="popup" variant="outline-success" size="sm" title="備註"><i class="far fa-comment"></i> 備註</b-button>
-                </div>
-            </div>
-
-            <div id='prereg_update_ui' class='mt-1'></div>
+            <b-row class="mb-2">
+                <b-col>
+                    <announcement-mgt-item :reset-flag="reset_flag" @update-announcement-done="updated" @reset-flags-done="done"></announcement-mgt-item>
+                </b-col>
+            </b-row>
+            <b-row no-gutters>
+                <b-col>
+                    <b-button block pill @click="clear" variant="outline-secondary" size="sm" v-b-popover.hover.focus.top="'清除准登旗標'"><i class="fas fa-broom"></i> 清除准登旗標</b-button>
+                </b-col>
+                &ensp;
+                <b-col>
+                    <b-button block pill @click="popup" variant="outline-success" size="sm" title="備註"><i class="far fa-comment"></i> 備註</b-button>
+                </b-col>
+            </b-row>
         </fieldset>`,
         data: () => {
             return {
@@ -64,7 +69,7 @@ if (Vue) {
         },
         components: {
             "announcement-mgt-item": {
-                template: `<div class="input-group input-group-sm col">
+                template: `<div class="input-group input-group-sm">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-prereg_announcement_select">公告項目</span>
                     </div>
@@ -75,7 +80,7 @@ if (Vue) {
                         </option>
                     </select>
                     &ensp;
-                    <b-button @click="change" variant="outline-primary" size="sm" title="開啟編輯視窗"><i class="fas fa-external-link-alt"></i></b-button>
+                    <b-button @click="change" variant="outline-primary" size="sm" v-b-popover.hover.focus.top="'開啟編輯視窗'"><i class="fas fa-external-link-alt"></i> 編輯</b-button>
                 </div>`,
                 props: ["resetFlag"],
                 data: () => {
@@ -130,9 +135,6 @@ if (Vue) {
                     }
                 },
                 created: function(e) {
-                    let cached_date = localStorage.getItem("prereg_announcement_fetched_date");
-                    let cached_data = localStorage.getItem("prereg_announcement_fetched_json");
-
                     let form_body = new FormData();
                     form_body.append("type", "announcement_data");
                     fetch("query_json_api.php", {
