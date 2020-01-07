@@ -71,12 +71,12 @@ if (Vue) {
             "announcement-mgt-item": {
                 template: `<div class="input-group input-group-sm">
                     <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-prereg_announcement_select">公告項目</span>
+                        <span class="input-group-text" id="inputGroup-announcement_list">公告項目</span>
                     </div>
                     <b-form-select
                         v-model="val"
                         size="sm"
-                        :id="prereg_announcement_select"
+                        id="announcement_list"
                         :class="['h-100']"
                     >
                         <template v-slot:first>
@@ -158,7 +158,7 @@ if (Vue) {
                 },
                 mounted: function(e) {
                     // get cached data and set selected option
-                    this.val = localStorage.getItem("prereg_announcement_select");
+                    this.val = localStorage.getItem("announcement_list");
                 },
                 components: {
                     "announcement-mgt-dialog": {
