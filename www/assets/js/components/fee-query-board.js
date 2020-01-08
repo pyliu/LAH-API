@@ -45,7 +45,7 @@ if (Vue) {
                 <b-col><b-button pill block @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button></b-col>
                 &ensp;
                 <b-col>
-                    <b-button block pill @click="obsolete" variant="outline-secondary" size="sm" v-b-popover.hover.focus.top="'新增作廢假資料'">
+                    <b-button block pill @click="obsolete" variant="outline-secondary" size="sm" v-b-popover.hover.focus.bottom="'新增作廢假資料'">
                         <span class="fa-stack" style="font-size: 0.5rem">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
                             <i class="fas fa-ban fa-stack-2x text-danger"></i>

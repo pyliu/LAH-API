@@ -88,7 +88,7 @@ if (Vue) {
                         </option>
                     </b-form-select>
                     &ensp;
-                    <b-button @click="change" variant="outline-primary" size="sm" v-b-popover.hover.focus.top="'開啟編輯視窗'"><i class="fas fa-external-link-alt"></i> 編輯</b-button>
+                    <b-button @click="change" variant="outline-primary" size="sm" v-b-popover.hover.focus.bottom="'開啟編輯視窗'"><i class="fas fa-external-link-alt"></i> 編輯</b-button>
                 </div>`,
                 props: ["resetFlag"],
                 data: () => {
