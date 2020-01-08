@@ -299,6 +299,10 @@
     }
     
     let rand = (range) => Math.floor(Math.random() * Math.floor(range || 100));
+
+    let randRGB = (opacity = 1.0) => {
+        return `rgba(${rand(255)}, ${rand(255)}, ${rand(255)}, ${opacity})`;
+    }
     
     let addLDAnimation = (selector, which) => {
         let el = clearLDAnimation(selector);

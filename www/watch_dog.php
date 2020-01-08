@@ -130,6 +130,10 @@
   <script src="assets/js/components/case-temp-mgt.js"></script>
   <script src="assets/js/components/case-sync-mgt.js"></script>
   <script src="assets/js/components/fee-query-board.js"></script>
+  <!-- Vue Chart Components -->
+  <script src="assets/js/Chart.min.js"></script>
+  <script src="assets/js/vue-chartjs.min.js"></script>
+  <script src="assets/js/components/chart-bar.js"></script>
 
   <script type="text/javascript">
     $(document).ready(e => {

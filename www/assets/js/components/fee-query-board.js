@@ -260,7 +260,7 @@ if (Vue) {
                         </b-col>
                     </b-row>
                     <b-row>
-                        <b-col></b-col><line-chart :chart-data="chartData"></line-chart></b-col>
+                        <b-col></b-col><chart-bar :chart-data="chartData"></chart-bar></b-col>
                     </b-row>
                 </b-container>`,
                 props: ["raw_data"],
@@ -270,7 +270,16 @@ if (Vue) {
                         ezcard: [],
                         mobile: [],
                         credit: [],
-                        other: []
+                        other: [],
+                        chartData: {
+                            labels:[],
+                            datasets:[{
+                                label: "規費統計",
+                                backgroundColor:[],
+                                data: [],
+                                borderColor:[]
+                            }]
+                        }
                     }
                 },
                 computed: {
@@ -300,6 +309,16 @@ if (Vue) {
                     this.other = this.raw_data.filter(this_record => {
                         return this_record["AA100"] != "06" && this_record["AA100"] != "01" && this_record["AA100"] != "08" && this_record["AA100"] != "09";
                     });
+                    this.chartData.labels = ["現金", "悠遊卡", "信用卡", "行動支付", "其他"];
+                    this.chartData.datasets[0].backgroundColor = [randRGB(0.8), randRGB(0.8), randRGB(0.8), randRGB(0.8), randRGB(0.8)];
+                    this.chartData.datasets[0].data = [
+                        this.cash.length,
+                        this.ezcard.length,
+                        this.credit.length,
+                        this.mobile.length,
+                        this.other.length
+                    ];
+                    this.chartData.datasets[0].borderColor = [randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0)];
                 },
                 methods: {
                     open: function(title, data) {
