@@ -152,18 +152,13 @@
 
       Vue.component('line-chart', {
         extends: VueChartJs.Line,
-        mounted () {
-          this.renderChart({
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-            datasets: [
-              {
-                label: 'Data One',
-                backgroundColor: '#f87979',
-                data: [40, 39, 10, 40, 39, 80, 40]
-              }
-            ]
-          }, {responsive: true, maintainAspectRatio: false})
-        }
+        props: ["chartData"],
+        watch: {
+          chartData: function(n, o) {
+            this.renderChart(n, {responsive: true, maintainAspectRatio: false});
+          }
+        },
+        mounted () { }
         
       });
 
@@ -175,7 +170,7 @@
           <b-button-close text-variant="danger"></b-button-close>
           <b-form-input type="date" v-model="date" size="sm" :formatter="dateFormat"></b-form-input>
           <div class="mt-3">Date: <strong>{{ date }}, {{tw_date}}</strong></div>
-          <line-chart :chart-data="datacollection"></line-chart>
+          <b-container fluid><line-chart :chart-data="datacollection"></line-chart></b-container>
           <button @click="fillData()">Randomize</button>
         </div>`,
         data() {
@@ -201,16 +196,12 @@
           },
           fillData () {
             this.datacollection = {
-              labels: [this.getRandomInt(), this.getRandomInt()],
+              labels: [this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt()],
               datasets: [
                 {
                   label: 'Data One',
                   backgroundColor: '#f87979',
-                  data: [this.getRandomInt(), this.getRandomInt()]
-                }, {
-                  label: 'Data One',
-                  backgroundColor: '#f87979',
-                  data: [this.getRandomInt(), this.getRandomInt()]
+                  data: [this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt()]
                 }
               ]
             }
