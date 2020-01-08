@@ -83,12 +83,6 @@ if (Vue) {
                     this.number = 9999999;
                 else if (Number.isNaN(intVal) || intVal < 1)
                     this.number = '';
-            },
-            date: function(nVal) {
-                if (nVal == "NaNaNaN" || nVal == "" || nVal == undefined) {
-                    let d = new Date();
-                    this.bc_date = d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
-                }
             }
         },
         methods: {
@@ -100,6 +94,10 @@ if (Vue) {
                 return val;
             },
             query: function(e) {
+                if (this.bc_date == "NaNaNaN" || this.bc_date == "" || this.bc_date == undefined) {
+                    let d = new Date();
+                    this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+                }
                 if (isEmpty(this.number)) {
                     this.fetchList(e);
                 } else {
