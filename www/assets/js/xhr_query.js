@@ -821,7 +821,7 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 			el: "#user_info_app",
 			components: [ "b-card", "b-link", "b-badge" ]
 		});
-		addAnimatedCSS(selector, { name: "pulse" });
+		addAnimatedCSS(selector, { name: "pulse", duration: "once-anim-cfg" });
 	} else {
 		showModal({
 			title: "使用者資訊",
