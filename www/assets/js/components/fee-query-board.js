@@ -89,6 +89,8 @@ if (Vue) {
             convertTWDate: function(val) {
                 let d = new Date(val);
                 this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+                // also clear the number for query by date purpose
+                this.number = '';
                 return val;
             },
             query: function(e) {
