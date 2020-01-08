@@ -312,7 +312,7 @@ if (Vue) {
                                     }
                                 }
                             }),
-                            size: "lg",
+                            size: data.length < 8 ? "md" : data.length < 168 ? "lg" : "xl",
                             backdrop_close: true
                         });
                     }
