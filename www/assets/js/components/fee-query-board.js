@@ -83,6 +83,12 @@ if (Vue) {
                     this.number = 9999999;
                 else if (Number.isNaN(intVal) || intVal < 1)
                     this.number = '';
+            },
+            date: function(nVal) {
+                if (nVal == "NaNaNaN") {
+                    let d = new Date(val);
+                    this.bc_date = d.getFullYear() + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+                }
             }
         },
         methods: {
@@ -114,8 +120,6 @@ if (Vue) {
                 body.append("num", this.number);
                 body.append("list_mode", true);
                 
-                toggle(e.target);
-
                 fetch("query_json_api.php", {
                     method: "POST",
                     body: body
@@ -148,9 +152,6 @@ if (Vue) {
                         message: VNode,
                         title: `${this.date} 規費統計`
                     });
-
-                    toggle(e.target);
-                    
                 }).catch(ex => {
                     console.error("fee-query-board::fetchList parsing failed", ex);
                     showAlert({title: "fee-query-board::fetchList", message: ex.toString(), type: "danger"});
