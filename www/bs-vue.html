@@ -152,9 +152,9 @@
 
       Vue.component('line-chart', {
         extends: VueChartJs.Line,
-        props: ["chartData"],
+        props: ["dataset"],
         watch: {
-          chartData: function(n, o) {
+          dataset: function(n, o) {
             this.renderChart(n, {responsive: true, maintainAspectRatio: false});
           }
         },
@@ -170,7 +170,7 @@
           <b-button-close text-variant="danger"></b-button-close>
           <b-form-input type="date" v-model="date" size="sm" :formatter="dateFormat"></b-form-input>
           <div class="mt-3">Date: <strong>{{ date }}, {{tw_date}}</strong></div>
-          <b-container fluid><line-chart :chart-data="datacollection"></line-chart></b-container>
+          <b-container fluid><line-chart :dataset="datacollection"></line-chart></b-container>
           <button @click="fillData()">Randomize</button>
         </div>`,
         data() {
@@ -200,7 +200,12 @@
               datasets: [
                 {
                   label: 'Data One',
-                  backgroundColor: '#f87979',
+                  backgroundColor: `rgb(${rand(255)}, ${rand(255)}, ${rand(255)}, ${Math.random()})`,
+                  data: [this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt()]
+                },
+                {
+                  label: 'Data Two',
+                  backgroundColor: `rgb(${rand(255)}, ${rand(255)}, ${rand(255)}, ${Math.random()})`,
                   data: [this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt()]
                 }
               ]
