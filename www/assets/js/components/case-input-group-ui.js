@@ -3,9 +3,8 @@ if (Vue) {
         template: `<div class="form-row">
             <div class="input-group input-group-sm col-3">
                 <select v-model="year" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_year'" class="form-control w-100 h-100" aria-label="年" :aria-describedby="'inputGroup-'+prefix+'_case_update_year'" required>
-                    <option>107</option>
-                    <option>108</option>
-                    <option>109</option>
+                    <option disabled>---- 請選擇年分 ----</option>
+                    <option v-for="the_year in years">{{the_year}}</option>
                 </select>
                 <div class="input-group-append">
                     <span class="input-group-text" :id="'inputGroup-'+prefix+'_case_update_year'">年</span>
@@ -52,7 +51,8 @@ if (Vue) {
                 num: "",
                 num_step: 10,
                 num_min: 10,
-                code_data: []
+                code_data: [],
+                years: []
             }
         },
         methods: {
@@ -124,6 +124,10 @@ if (Vue) {
             // set default year
             var d = new Date();
             this.year = (d.getFullYear() - 1911);
+            let len = this.year - 105;
+            for (let i = 0; i <= len; i++) {
+                this.years.push(105 + i);
+            }
         },
         mounted: function(e) {
             switch(this.type) {

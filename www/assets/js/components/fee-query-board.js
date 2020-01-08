@@ -314,14 +314,14 @@ if (Vue) {
                                     }
                                 }
                             }),
-                            size: data.length < 8 ? "md" : data.length < 168 ? "lg" : "xl",
+                            size: data.length < 51 ? "md" : data.length < 145 ? "lg" : "xl",
                             backdrop_close: true
                         });
                     }
                 },
                 components: {
                     "expaa-list-mgt": {
-                        template: `<b-container fluid>
+                        template: `<div>
                             <b-button
                                 @click="open(item['AA01'], item['AA04'])"
                                 :variant="item['AA09'] == 1 ? 'outline-primary' : item['AA08'] == 1 ? 'danger' : 'dark'"
@@ -338,7 +338,7 @@ if (Vue) {
                                     <fee-detail-payment-mgt :value="item['AA100']" :date="item['AA01']" :pc_number="item['AA04']" :no-confirm=true></fee-detail-payment-mgt>
                                 </b-popover>
                             </b-button>
-                        </b-container>`,
+                        </div>`,
                         props: ["items"],
                         methods: {
                             open: function(date, pc_number) {
