@@ -259,6 +259,9 @@ if (Vue) {
                             </b-button>
                         </b-col>
                     </b-row>
+                    <b-row>
+                        <b-col></b-col><line-chart :dataset="datacollection"></line-chart></b-col>
+                    </b-row>
                 </b-container>`,
                 props: ["raw_data"],
                 data: () => {
