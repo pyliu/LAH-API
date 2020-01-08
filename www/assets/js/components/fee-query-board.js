@@ -346,7 +346,7 @@ if (Vue) {
                                 :id="'fee_btn_'+idx"
                             >
                                 {{item["AA04"]}}
-                                <b-popover :target="'fee_btn_'+idx" triggers="hover focus">
+                                <b-popover :target="'fee_btn_'+idx" triggers="hover focus" delay="750">
                                     <template v-slot:title>序號: {{item["AA05"]}} 金額: {{item['AA28']}}元</template>
                                     <fee-detail-print-mgt :value="item['AA09']" :date="item['AA01']" :pc_number="item['AA04']" :no-confirm=true></fee-detail-print-mgt>
                                     <fee-detail-payment-mgt :value="item['AA100']" :date="item['AA01']" :pc_number="item['AA04']" :no-confirm=true></fee-detail-payment-mgt>
