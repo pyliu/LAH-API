@@ -959,4 +959,25 @@ let xhrSendMessage = e => {
 		alert("XHR連線查詢有問題!!【" + ex + "】");
 	});
 }
+
+let xhrTest = () => {
+	let form_body = new FormData();
+	form_body.append("type", "reg_stats");
+	form_body.append("year_month", "10812");
+
+	fetch("query_json_api.php", {
+		method: 'POST',
+		body: form_body
+	}).then(response => {
+		if (response.status != 200) {
+			throw new Error("XHR連線異常，回應非200");
+		}
+		return response.json();
+	}).then(jsonObj => {
+		console.log(jsonObj);
+	}).catch(ex => {
+		console.error("xhrTest parsing failed", ex);
+		showAlert({ title: "測試XHR連線", message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+	});
+}
 //]]>

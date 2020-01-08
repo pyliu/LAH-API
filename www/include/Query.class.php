@@ -401,6 +401,33 @@ class Query {
 		return $this->db->fetchAll();
     }
 
+	public function getRegCaseStatsMonthly($year_month) {
+		global $log;
+        // only allow int number for $qday
+        if (!filter_var($year_month, FILTER_SANITIZE_NUMBER_INT)) {
+			$log->info(__METHOD__.": 不允許非數字參數【${year_month}】");
+            return false;
+        }
+		if (strlen($year_month) != 5) {
+			$log->info(__METHOD__.": 參數須為5碼【${year_month}】");
+			return false;
+		}
+		
+		$this->db->parse(
+			"SELECT s.kcnt AS \"reason\", COUNT(*) AS \"count\"
+			FROM SCRSMS t
+			LEFT JOIN SRKEYN s
+			  ON t.rm09 = s.kcde_2
+			WHERE s.kcde_1 = '06'
+			  AND RM07_1 LIKE :bv_year_month || '%'
+			GROUP BY s.kcnt"
+        );
+        
+		$this->db->bind(":bv_year_month", $year_month);
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
     public function getRegCaseDetail($id) {
         if (!$this->checkCaseID($id)) {
             return "";

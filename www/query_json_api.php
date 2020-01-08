@@ -209,6 +209,27 @@ switch ($_POST["type"]) {
 			echo $data->getJsonHtmlData();
 		}
 		break;
+	case "reg_stats":
+		if (empty($_POST["year_month"])) {
+			$log->error("XHR [reg_stats] 查詢年月為空值");
+			echoErrorJSONString();
+			break;
+		}
+		$log->info("XHR [reg_stats] 查詢登記案件統計【".$_POST["year_month"]."】請求");
+		$rows = $query->getRegCaseStatsMonthly($_POST["year_month"]);
+		if (empty($rows)) {
+			$log->info("XHR [reg_stats] 查無資料");
+			echoErrorJSONString();
+		} else {
+			$log->info("XHR [reg_stats] 查詢成功");
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($rows),
+				"raw" => $rows	// each record key is reason, count
+			);
+			echo json_encode($result, 0);
+		}
+		break;
 	case "sur_case":
 		if (empty($_POST["id"])) {
 			$log->error("XHR [sur_case] 查詢ID為空值");
