@@ -86,7 +86,7 @@
         </div>
       </div>
       <div class="row">
-        <div id="fee-query-board" class="col-8">
+        <div id="fee-query-board" class="col-6">
           <fee-query-board></fee-query-board>
         </div>
         <div id="xcase-check" class="col">

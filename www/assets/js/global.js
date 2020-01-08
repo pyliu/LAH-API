@@ -644,8 +644,8 @@
                         if (this.animated_opts) {
                             let count = this.animated_opts.length;
                             let this_time = this.animated_opts[rand(count)];
-                            this.animated_in = this_time.in;
-                            this.animated_out = this_time.out;
+                            this.animated_in = `${this_time.in} once-anim-cfg`;
+                            this.animated_out = `${this_time.out} once-anim-cfg`;
                         }
                     },
                     enter: function() { },

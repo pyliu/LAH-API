@@ -85,7 +85,7 @@
         </div>
       </div>
       <div class="row">
-        <div id="fee-query-board" class="col-8">
+        <div id="fee-query-board" class="col-6">
           <fee-query-board></fee-query-board>
         </div>
         <div id="xcase-check" class="col">
@@ -153,6 +153,7 @@
         template: `<div>
           <b-form-select v-model="selected" :options="options"></b-form-select>
           <div class="mt-3">Selected: <strong>{{ selected }}</strong></div>
+          <b-button-close text-variant="danger"></b-button-close>
         </div>`,
         data() {
           return {

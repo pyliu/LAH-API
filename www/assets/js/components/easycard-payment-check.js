@@ -2,8 +2,8 @@ if (Vue) {
     Vue.component("easycard-payment-check", {
         template: `<fieldset>
             <legend>悠遊卡檢測</legend>
-            <div class="form-row">
-                <div class="input-group input-group-sm col-3 small d-none">
+            <div class="form-row d-none">
+                <div class="input-group input-group-sm col small">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-easycard_query_day">日期</span>
                     </div>
@@ -21,11 +21,12 @@ if (Vue) {
                     >
                     </b-form-input>
                 </div>
-                <div class="filter-btn-group col">
-                    <b-button @click="query" size="sm" variant="outline-primary"><i class="fas fa-cogs"></i> 檢測</b-button>
-                    <b-button @click="popup" size="sm" variant="outline-success"><i class="far fa-comment"></i> 備註</b-button>
-                </div>
             </div>
+            <b-row no-gutters>
+                <b-col><b-button pill block @click="query" size="sm" variant="outline-primary"><i class="fas fa-cogs"></i> 檢測</b-button></b-col>
+                &ensp;
+                <b-col><b-button pill block @click="popup" size="sm" variant="outline-success"><i class="far fa-comment"></i> 備註</b-button></b-col>
+            </b-row>
         </fieldset>`,
         data: () => {
             return {

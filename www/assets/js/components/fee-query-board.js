@@ -2,51 +2,61 @@ if (Vue) {
     Vue.component("fee-query-board", {
         template: `<fieldset>
             <legend>規費資料</legend>
-            <b-container :class="['form-row']" fluid>
-                <div class="input-group input-group-sm col">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-fee_query_date">日期</span>
+            <b-row class="mb-2">
+                <b-col>
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-fee_query_date">日期</span>
+                        </div>
+                        <b-form-input
+                            v-model="date"
+                            id="fee_query_date"
+                            placeholder="民國年月日"
+                            :class="['form-control', 'no-cache', 'bg-light', 'border', 'pl-2', 'h-100']"
+                            size="sm"
+                            plaintext
+                            trim
+                        >
+                        </b-form-input>
                     </div>
-                    <b-form-input
-                        v-model="date"
-                        id="fee_query_date"
-                        placeholder="民國年月日"
-                        :class="['form-control', 'no-cache', 'bg-light', 'border', 'pl-2', 'h-100']"
-                        size="sm"
-                        plaintext
-                        trim
-                    >
-                    </b-form-input>
-                    <div class="input-group-prepend ml-1">
-                        <span class="input-group-text" id="inputGroup-fee_query_number">電腦給號</span>
+                </b-col>
+                <b-col>
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend ml-1">
+                            <span class="input-group-text" id="inputGroup-fee_query_number">電腦給號</span>
+                        </div>
+                        <b-form-input
+                            v-model="number"
+                            id="fee_query_number"
+                            type="number"
+                            placeholder="七碼電腦給號"
+                            :state="isNumberValid"
+                            size="sm"
+                            max=9999999
+                            min=1
+                            trim
+                            number
+                            :class="['form-control', 'h-100', 'no-cache']"
+                        >
+                        </b-form-input>
                     </div>
-                    <b-form-input
-                        v-model="number"
-                        id="fee_query_number"
-                        type="number"
-                        placeholder="七碼電腦給號"
-                        :state="isNumberValid"
-                        size="sm"
-                        max=9999999
-                        min=1
-                        trim
-                        number
-                        :class="['form-control', 'h-100', 'no-cache']"
-                    >
-                    </b-form-input>
-                    &ensp;
-                    <b-button @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button>
-                    &ensp;
-                    <b-button @click="obsolete" variant="outline-secondary" size="sm" title="作廢假資料">
-                        <span class="fa-stack">
+                </b-col>
+            </b-row>
+            <b-row no-gutters>
+                <b-col><b-button pill block @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button></b-col>
+                &ensp;
+                <b-col>
+                    <b-button block pill @click="obsolete" variant="outline-secondary" size="sm" v-b-popover.hover.focus.top="'新增作廢假資料'">
+                        <span class="fa-stack" style="font-size: 0.5rem">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
                             <i class="fas fa-ban fa-stack-2x text-danger"></i>
                         </span>
+                        作廢
                     </b-button>
-                    &ensp;
-                    <b-button @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
-                </div>
-            </b-container>
+                </b-col>
+                &ensp;
+                <b-col><b-button block pill @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button></b-col>
+            </b-row>
         </fieldset>`,
         data: () => {
             return {
@@ -78,7 +88,7 @@ if (Vue) {
         methods: {
             query: function(e) {
                 if (isEmpty(this.number)) {
-                    this.fetchList();
+                    this.fetchList(e);
                 } else {
                     let VNode = this.$createElement("fee-detail-mgt", {
                         props: { date: this.date, pc_number: this.number.toString().padStart(7, "0")}
@@ -90,12 +100,15 @@ if (Vue) {
                     });
                 }
             },
-            fetchList: function() {
+            fetchList: function(e) {
                 let body = new FormData();
                 body.append("type", "expaa");
                 body.append("qday", this.date);
                 body.append("num", this.number);
                 body.append("list_mode", true);
+                
+                toggle(e.target);
+
                 fetch("query_json_api.php", {
                     method: "POST",
                     body: body
@@ -128,6 +141,9 @@ if (Vue) {
                         message: VNode,
                         title: `${this.date} 規費統計`
                     });
+
+                    toggle(e.target);
+                    
                 }).catch(ex => {
                     console.error("fee-query-board::fetchList parsing failed", ex);
                     showAlert({title: "fee-query-board::fetchList", message: ex.toString(), type: "danger"});
@@ -547,6 +563,7 @@ if (Vue) {
         }
     });
 
+    // It needs to be used in popover, so register it to global scope
     Vue.component("fee-detail-payment-mgt", {
         template: `<div class='form-row form-inline small-font'>
             <div class='input-group input-group-sm col-8'>
@@ -610,6 +627,7 @@ if (Vue) {
         }
     });
 
+    // It needs to be used in popover, so register it to global scope
     Vue.component("fee-detail-print-mgt", {
         template: `<div class='form-row form-inline small-font'>
             <div class='input-group input-group-sm col-8'>
@@ -801,10 +819,8 @@ if (Vue) {
                         <div class='form-row form-inline'>
                             <div class='input-group input-group-sm col-9'>
                                 <b-form-select
-                                    :value="record['AC20']"
-                                    :data-orig="record['AC20']"
+                                    v-model="expac_list[idx]['AC20']"
                                     :options="expe_list"
-                                    :id="'modify_expac_item_' + idx"
                                     size="sm"
                                 >
                                 <template v-slot:first>
@@ -813,7 +829,7 @@ if (Vue) {
                                 </b-form-select>
                             </div>
                             <div class='filter-btn-group col'>
-                                <b-button @click="update($event, record)" size="sm" variant="outline-primary" :data-select-el="'modify_expac_item_' + idx"><i class="fas fa-edit"></i> 修改</b-button>
+                                <b-button @click="update($event, idx)" size="sm" variant="outline-primary" :data-orig="record['AC20']"><i class="fas fa-edit"></i> 修改</b-button>
                             </div>
                         </div>
                     </div>
@@ -854,10 +870,9 @@ if (Vue) {
                     }
                 },
                 methods: {
-                    update: function(e, record) {
-                        let this_select = $("#" + $(e.target).data("select-el"));
-                        let code = this_select.val();
-                        if (code == this_select.data("orig")) {
+                    update: function(e, idx) {
+                        let record = this.expac_list[idx];
+                        if (record["AC20"] == $(e.target).data("orig")) {
                             addNotification({
                                 title: `${record["AC25"]}-${record["AC04"]} ${record["AC30"]}元 項目`,
                                 message: "選項沒變，不需更新",
@@ -868,7 +883,7 @@ if (Vue) {
                             body.append("type", "mod_expac");
                             body.append("year", record["AC25"]);
                             body.append("num", record["AC04"]);
-                            body.append("code", code);
+                            body.append("code", record["AC20"]);
                             body.append("amount", record["AC30"]);
 
                             toggle(e.target);
