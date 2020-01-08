@@ -12,6 +12,7 @@ if (Vue) {
             </div>
             <div class="input-group input-group-sm col">
                 <select v-model="code" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_code'" class="form-control w-100 h-100" data-trigger="manual" data-toggle="popover" data-content="請選擇案件字" title="案件字" data-placement="top" aria-label="字" :aria-describedby="'inputGroup-'+prefix+'_case_update_code'" required>
+                    <option disabled>---- 請選擇案件字 ----</option>    
                     <optgroup v-for="obj in code_data" :label="obj.label">
                         <option v-for="item in obj.options" :value="item.replace(/[^A-Za-z0-9]/g, '')">{{item}}</option>
                     </optgroup>
