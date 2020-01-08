@@ -9,7 +9,7 @@ if (Vue) {
             </b-row>
             <b-row no-gutters>
                 <b-col>
-                    <b-button block pill @click="clear" variant="outline-secondary" size="sm" v-b-popover.hover.focus.top="'清除准登旗標'"><i class="fas fa-broom"></i> 清除</b-button>
+                    <b-button block pill @click="clear" variant="outline-secondary" size="sm" v-b-popover.hover.focus.bottom="'清除准登旗標'"><i class="fas fa-broom"></i> 清除</b-button>
                 </b-col>
                 &ensp;
                 <b-col>
