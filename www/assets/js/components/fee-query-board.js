@@ -2,21 +2,20 @@ if (Vue) {
     Vue.component("fee-query-board", {
         template: `<fieldset>
             <legend>規費資料</legend>
-            <b-row class="mb-2">
+            <b-row class="mb-2" no-gutters>
                 <b-col>
                     <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="inputGroup-fee_query_date">日期</span>
                         </div>
                         <b-form-input
-                            v-model="date"
                             id="fee_query_date"
-                            placeholder="民國年月日"
-                            :class="['form-control', 'no-cache', 'bg-light', 'border', 'pl-2', 'h-100']"
+                            type="date"
+                            v-model="bc_date"
                             size="sm"
-                            plaintext
-                            trim
-                        >
+                            :class="['no-cache']"
+                            :formatter="convertTWDate"
+                        ></b-form-input>
                         </b-form-input>
                     </div>
                 </b-col>
@@ -61,6 +60,7 @@ if (Vue) {
         data: () => {
             return {
                 date: "",
+                bc_date: "1090108",
                 number: ""
             }
         },
@@ -86,6 +86,11 @@ if (Vue) {
             }
         },
         methods: {
+            convertTWDate: function(val) {
+                let d = new Date(val);
+                this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+                return val;
+            },
             query: function(e) {
                 if (isEmpty(this.number)) {
                     this.fetchList(e);
@@ -209,32 +214,15 @@ if (Vue) {
             }
         },
         created: function() {
-            var d = new Date();
-            this.date = toTWDate(d);
+            let d = new Date();
+            this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+            this.bc_date = d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
             if (this.number > 9999999) this.number = 9999999;
             else if (this.number < 1) this.number = '';
         },
         mounted: function() {
             let that = this;
             setTimeout(() => that.number = $("#fee_query_number").val(), 150);
-            if ($("#fee_query_date").datepicker) {
-                $("#fee_query_date").datepicker({
-                    daysOfWeekDisabled: "",
-                    language: "zh-TW",
-                    daysOfWeekHighlighted: "1,2,3,4,5",
-                    todayHighlight: true,
-                    autoclose: true,
-                    format: {
-                        toDisplay: (date, format, language) => {
-                            that.date = toTWDate(new Date(date));
-                            // clear pc number also
-                            that.number = '';
-                            return that.date;
-                        },
-                        toValue: (date, format, language) => new Date()
-                    }
-                });
-            }
         },
         components: {
             "expaa-category-dashboard": {

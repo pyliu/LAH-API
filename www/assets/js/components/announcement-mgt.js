@@ -78,6 +78,7 @@ if (Vue) {
                         size="sm"
                         id="announcement_list"
                         :class="['h-100']"
+                        @change="change"
                     >
                         <template v-slot:first>
                             <option value="" disabled>-- 請選擇一個項目 --</option>

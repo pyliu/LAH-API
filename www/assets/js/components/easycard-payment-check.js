@@ -7,6 +7,7 @@ if (Vue) {
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-easycard_query_day">日期</span>
                     </div>
+                    <!--
                     <b-form-input
                         @keyup.enter="query"
                         id="easycard_query_day"
@@ -20,6 +21,15 @@ if (Vue) {
                         plaintext
                     >
                     </b-form-input>
+                    -->
+                    <b-form-input
+                        id="easycard_query_day"
+                        type="date"
+                        v-model="bc_date"
+                        size="sm"
+                        :class="['no-cache']"
+                        :formatter="convertTWDate"
+                    ></b-form-input>
                 </div>
             </div>
             <b-row no-gutters>
@@ -30,10 +40,16 @@ if (Vue) {
         </fieldset>`,
         data: () => {
             return {
-                date: null
+                date: "",
+                bc_date: "2020-01-08"
             }
         },
         methods: {
+            convertTWDate: function(val) {
+                let d = new Date(val);
+                this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+                return val;
+            },
             query: function(e) {
                 // basic checking for tw date input
                 let regex = /^\d{7}$/;
@@ -169,28 +185,11 @@ if (Vue) {
             }
         },
         created: function() {
-            var d = new Date();
-            this.date = toTWDate(d);
+            let d = new Date();
+            this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+            this.bc_date = d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
         },
-        mounted: function() {
-            let that = this;
-            if ($("#easycard_query_day").datepicker) {
-                $("#easycard_query_day").datepicker({
-                    daysOfWeekDisabled: "",
-                    language: "zh-TW",
-                    daysOfWeekHighlighted: "1,2,3,4,5",
-                    todayHighlight: true,
-                    autoclose: true,
-                    format: {
-                        toDisplay: (date, format, language)  => {
-                            that.date = toTWDate(new Date(date));
-                            return that.date;
-                        },
-                        toValue: (date, format, language) => new Date()
-                    }
-                });
-            }
-        }
+        mounted: function() { }
     });
 } else {
     console.error("vue.js not ready ... easycard-payment-check component can not be loaded.");
