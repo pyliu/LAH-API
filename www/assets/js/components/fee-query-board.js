@@ -60,7 +60,7 @@ if (Vue) {
         data: () => {
             return {
                 date: "",
-                bc_date: "1090108",
+                bc_date: "2020-01-08",
                 number: ""
             }
         },
@@ -85,9 +85,9 @@ if (Vue) {
                     this.number = '';
             },
             date: function(nVal) {
-                if (nVal == "NaNaNaN") {
-                    let d = new Date(val);
-                    this.bc_date = d.getFullYear() + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+                if (nVal == "NaNaNaN" || nVal == "" || nVal == undefined) {
+                    let d = new Date();
+                    this.bc_date = d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
                 }
             }
         },
@@ -168,8 +168,7 @@ if (Vue) {
                     <img src="assets/img/easycard_screenshot.jpg" class="img-responsive img-thumbnail my-1" />
                     AA28、AA39 - 規費資料集(EXPAA)中記載金額的兩個欄位<br />
                     AC29、AC30 - 規費項目資料集(EXPAC)中記載收費項目之金額<br />
-                    <img src="assets/howto/EXPAA_EXPAC_AMOUNT_MOD.jpg" class="img-responsive img-thumbnail my-1" />
-                    `,
+                    <img src="assets/howto/EXPAA_EXPAC_AMOUNT_MOD.jpg" class="img-responsive img-thumbnail my-1" />`,
                     size: "lg"
                 });
             },
@@ -202,9 +201,7 @@ if (Vue) {
                         title: "規費作廢假資料",
                         message: VNode,
                         size: "lg",
-                        callback: () => {
-                            addUserInfoEvent();
-                        }
+                        callback: () => addUserInfoEvent()
                     });
                 }).catch(ex => {
                     console.error("fee-query-board::obsolete parsing failed", ex);
