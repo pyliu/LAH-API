@@ -324,7 +324,7 @@ if (Vue) {
                         template: `<b-container fluid>
                             <b-button
                                 @click="open(item['AA01'], item['AA04'])"
-                                variant="outline-primary"
+                                :variant="item['AA09'] == 1 ? 'outline-primary' : item['AA08'] == 1 ? 'danger' : 'dark'"
                                 pill
                                 size="sm" 
                                 :class="['float-left', 'mr-2', 'mb-2']"
