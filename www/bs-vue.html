@@ -151,10 +151,32 @@
       window.feeQueryBoardVue = new Vue({el: "#fee-query-board"});
 
       Vue.component('line-chart', {
-        extends: VueChartJs.Line,
+        /*
+          Bar: (...)
+          HorizontalBar: (...)
+          Doughnut: (...)
+          Line: (...)
+          Pie: (...)
+          PolarArea: (...)
+          Radar: (...)
+          Bubble: (...)
+          Scatter: (...)
+        */
+        extends: VueChartJs.HorizontalBar,
         mixins: [VueChartJs.mixins.reactiveProp], // auto use chartData prop and reactively update
+        data: function () {
+          return {
+            options: {responsive: true, maintainAspectRatio: false}
+          }
+        },
+        /*props: ["chartData"],
+        watch: {
+          chartData: function(val) {
+            this.renderChart(val, {responsive: true, maintainAspectRatio: false});
+          }
+        },*/
         mounted () {
-            this.renderChart(this.chartData, {responsive: true, maintainAspectRatio: false});
+            console.log(VueChartJs);
         }
       });
 
@@ -195,13 +217,8 @@
               labels: [this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt()],
               datasets: [
                 {
-                  label: 'Data One',
-                  backgroundColor: `rgb(${rand(255)}, ${rand(255)}, ${rand(255)}, ${Math.random()})`,
-                  data: [this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt()]
-                },
-                {
-                  label: 'Data Two',
-                  backgroundColor: `rgb(${rand(255)}, ${rand(255)}, ${rand(255)}, ${Math.random()})`,
+                  label: '案件數',
+                  backgroundColor: [this.getRandomRGB(), this.getRandomRGB(), this.getRandomRGB(), this.getRandomRGB(), this.getRandomRGB()],
                   data: [this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt(), this.getRandomInt()]
                 }
               ]
@@ -209,6 +226,9 @@
           },
           getRandomInt () {
             return Math.floor(Math.random() * (50 - 5 + 1)) + 5
+          },
+          getRandomRGB: function() {
+            return `rgb(${rand(255)}, ${rand(255)}, ${rand(255)}})`;
           }
         },
         mounted() {

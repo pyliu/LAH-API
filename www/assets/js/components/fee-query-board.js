@@ -260,7 +260,7 @@ if (Vue) {
                         </b-col>
                     </b-row>
                     <b-row>
-                        <b-col></b-col><line-chart :dataset="datacollection"></line-chart></b-col>
+                        <b-col></b-col><line-chart :chart-data="chartData"></line-chart></b-col>
                     </b-row>
                 </b-container>`,
                 props: ["raw_data"],
