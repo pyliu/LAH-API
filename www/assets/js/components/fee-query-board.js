@@ -14,7 +14,7 @@ if (Vue) {
                             v-model="bc_date"
                             size="sm"
                             :class="['no-cache']"
-                            :formatter="convertTWDate"
+                            :formatter="toTWDate"
                         ></b-form-input>
                         </b-form-input>
                     </div>
@@ -28,7 +28,7 @@ if (Vue) {
                             v-model="number"
                             id="fee_query_number"
                             type="number"
-                            placeholder="七碼電腦給號"
+                            placeholder="7碼數字"
                             :state="isNumberValid"
                             size="sm"
                             max=9999999
@@ -60,7 +60,7 @@ if (Vue) {
         data: () => {
             return {
                 date: "",
-                bc_date: "2020-01-08",
+                bc_date: "2020-01-09",
                 number: ""
             }
         },
@@ -86,7 +86,7 @@ if (Vue) {
             }
         },
         methods: {
-            convertTWDate: function(val) {
+            toTWDate: function(val) {
                 let d = new Date(val);
                 this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
                 // also clear the number for query by date purpose
