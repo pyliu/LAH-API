@@ -385,7 +385,7 @@ if (Vue) {
                     let bar_opacity = this.chartData.datasets[0].opacity;
                     this.chartData.datasets[0].backgroundColor = [`rgb(92, 184, 92, ${bar_opacity})`, `rgb(2, 117, 216, ${bar_opacity})`, `rgb(240, 173, 78, ${bar_opacity})`, `rgb(217, 83, 79, ${bar_opacity})`, `rgb(41, 43, 44, ${bar_opacity})`];
                     let line_opacity = this.chartData.datasets[1].opacity;
-                    this.chartData.datasets[1].backgroundColor = [randRGB(line_opacity), randRGB(line_opacity), randRGB(line_opacity), randRGB(line_opacity), randRGB(line_opacity)];
+                    this.chartData.datasets[1].backgroundColor = [`rgb(92, 184, 92, ${line_opacity})`, `rgb(2, 117, 216, ${line_opacity})`, `rgb(240, 173, 78, ${line_opacity})`, `rgb(217, 83, 79, ${line_opacity})`, `rgb(41, 43, 44, ${line_opacity})`];
                     this.chartData.datasets[0].data = [
                         this.count_cash,
                         this.count_ezcard,
