@@ -191,6 +191,7 @@
           <b-container fluid><chart-bar :chart-data="datacollection"></chart-bar></b-container>
           <b-btn variant="danger" @click="fillData()">Randomize</b-btn>
           <b-btn @click="open">open</b-btn>
+          {{total}}
         </div>`,
         data() {
           return {
@@ -204,7 +205,8 @@
               { value: 'c', text: 'This is another option' },
               { value: 'd', text: 'This one is disabled', disabled: true }
             ],
-            datacollection: null
+            datacollection: null,
+            total: 0
           }
         },
         methods: {
@@ -244,6 +246,9 @@
               that.datacollection.datasets[0].borderColor.push(randRGB(1.0));
               that.datacollection.datasets[1].borderColor.push(randRGB(1.0));
             });
+            this.total = jsonObj.raw.reduce(function(acc, element) {
+              return acc += parseInt(element.count);
+            }, 0);
           },
           open: function(e) {
             let vn = this.$createElement("chart-bar", {
