@@ -44,7 +44,8 @@ if (Vue) {
                     }
                 }
             }
-        }
+        },
+        mounted() { }
     });
 } else {
     console.error("vue.js not ready ... chart-bar component can not be loaded.");

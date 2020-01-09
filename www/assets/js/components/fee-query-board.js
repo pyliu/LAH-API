@@ -218,10 +218,7 @@ if (Vue) {
             if (this.number > 9999999) this.number = 9999999;
             else if (this.number < 1) this.number = '';
         },
-        mounted: function() {
-            let that = this;
-            setTimeout(() => that.number = $("#fee_query_number").val(), 150);
-        },
+        mounted: function() { },
         components: {
             "expaa-category-dashboard": {
                 template: `<b-container id="expaa-list-container" fluid :class="['small', 'text-center']">
@@ -242,7 +239,7 @@ if (Vue) {
                             </b-button>
                         </b-col>
                     </b-row>
-                    <b-row :class="['mt-1']">
+                    <b-row :class="['my-1']">
                         <b-col>
                             <b-button variant="danger" block @click="open('行動支付規費列表', mobile)">
                                 行動支付 <b-badge variant="light">{{count_mobile}} <span class="sr-only">行動支付收費數量</span></b-badge>
@@ -259,9 +256,7 @@ if (Vue) {
                             </b-button>
                         </b-col>
                     </b-row>
-                    <b-row>
-                        <b-col></b-col><chart-bar :chart-data="chartData"></chart-bar></b-col>
-                    </b-row>
+                    <chart-bar :chart-data="chartData"></chart-bar>
                 </b-container>`,
                 props: ["raw_data"],
                 data: () => {
@@ -289,36 +284,6 @@ if (Vue) {
                     count_other: function() { return this.other.length; },
                     count_credit: function() { return this.credit.length; },
                     count_all: function() { return this.raw_data.length; }
-                },
-                created: function () {
-                    /* AA100 mapping
-                        "01","現金"
-                        "02","支票"
-                        "03","匯票"
-                        "04","iBon"
-                        "05","ATM"
-                        "06","悠遊卡"
-                        "07","其他匯款"
-                        "08","信用卡"
-                        "09","行動支付"
-                    */
-                    this.cash = this.raw_data.filter(this_record => this_record["AA100"] == "01");
-                    this.ezcard = this.raw_data.filter(this_record => this_record["AA100"] == "06");
-                    this.mobile = this.raw_data.filter(this_record => this_record["AA100"] == "09");
-                    this.credit = this.raw_data.filter(this_record => this_record["AA100"] == "08");
-                    this.other = this.raw_data.filter(this_record => {
-                        return this_record["AA100"] != "06" && this_record["AA100"] != "01" && this_record["AA100"] != "08" && this_record["AA100"] != "09";
-                    });
-                    this.chartData.labels = ["現金", "悠遊卡", "信用卡", "行動支付", "其他"];
-                    this.chartData.datasets[0].backgroundColor = [randRGB(0.8), randRGB(0.8), randRGB(0.8), randRGB(0.8), randRGB(0.8)];
-                    this.chartData.datasets[0].data = [
-                        this.cash.length,
-                        this.ezcard.length,
-                        this.credit.length,
-                        this.mobile.length,
-                        this.other.length
-                    ];
-                    this.chartData.datasets[0].borderColor = [randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0)];
                 },
                 methods: {
                     open: function(title, data) {
@@ -377,6 +342,39 @@ if (Vue) {
                             }
                         }
                     }
+                },
+                created: function () {
+                    /* AA100 mapping
+                        "01","現金"
+                        "02","支票"
+                        "03","匯票"
+                        "04","iBon"
+                        "05","ATM"
+                        "06","悠遊卡"
+                        "07","其他匯款"
+                        "08","信用卡"
+                        "09","行動支付"
+                    */
+                    this.cash = this.raw_data.filter(this_record => this_record["AA100"] == "01");
+                    this.ezcard = this.raw_data.filter(this_record => this_record["AA100"] == "06");
+                    this.mobile = this.raw_data.filter(this_record => this_record["AA100"] == "09");
+                    this.credit = this.raw_data.filter(this_record => this_record["AA100"] == "08");
+                    this.other = this.raw_data.filter(this_record => {
+                        return this_record["AA100"] != "06" && this_record["AA100"] != "01" && this_record["AA100"] != "08" && this_record["AA100"] != "09";
+                    });
+                },
+                mounted: function() {
+                    // prepare chart data
+                    this.chartData.labels = ["現金", "悠遊卡", "信用卡", "行動支付", "其他"];
+                    this.chartData.datasets[0].backgroundColor = [randRGB(0.8), randRGB(0.8), randRGB(0.8), randRGB(0.8), randRGB(0.8)];
+                    this.chartData.datasets[0].data = [
+                        this.count_cash,
+                        this.count_ezcard,
+                        this.count_credit,
+                        this.count_mobile,
+                        this.count_other
+                    ];
+                    this.chartData.datasets[0].borderColor = [randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0)];
                 }
             },
             "fee-obsolete-mgt": {
