@@ -190,6 +190,7 @@
           <div class="mt-3">Date: <strong>{{ date }}, {{tw_date}}</strong></div>
           <b-container fluid><chart-bar :chart-data="datacollection"></chart-bar></b-container>
           <button @click="fillData()">Randomize</button>
+          <b-btn @click="open">open</b-btn>
         </div>`,
         data() {
           return {
@@ -242,6 +243,17 @@
               that.datacollection.datasets[1].data.push(/*this_record.count*/rand(255));
               that.datacollection.datasets[0].borderColor.push(randRGB(1.0));
               that.datacollection.datasets[1].borderColor.push(randRGB(1.0));
+            });
+          },
+          open: function(e) {
+            let vn = this.$createElement("chart-bar", {
+              props: {
+                chartData: this.datacollection
+              }
+            });
+            showModal({
+              message: vn,
+              title: "test"
             });
           }
         },
