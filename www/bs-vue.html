@@ -246,9 +246,7 @@
               that.datacollection.datasets[0].borderColor.push(randRGB(1.0));
               that.datacollection.datasets[1].borderColor.push(randRGB(1.0));
             });
-            this.total = jsonObj.raw.reduce(function(acc, element) {
-              return acc += parseInt(element.count);
-            }, 0);
+            this.total = jsonObj.raw.map(element => element.count).reduce((acc, curr) => acc + parseInt(curr), 0);
           },
           open: function(e) {
             let vn = this.$createElement("chart-bar", {
