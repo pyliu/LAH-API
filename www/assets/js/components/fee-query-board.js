@@ -330,7 +330,7 @@ if (Vue) {
                     sum: function(collection) {
                         return collection.reduce(function(acc, curr) {
                             return acc + parseInt(curr["AA28"]);
-                        });
+                        }, 0);
                     }
                 },
                 components: {
