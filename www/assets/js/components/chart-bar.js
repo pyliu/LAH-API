@@ -28,6 +28,12 @@ if (Vue) {
         */
         extends: VueChartJs.Bar,
         mixins: [VueChartJs.mixins.reactiveProp], // auto use chartData prop and reactively update
+        /*props: ["chartData"],
+        watch: {
+            chartData: (val) => {
+                this.renderChart(val, this.options);
+            }
+        },*/
         data: function () {
             return {
                 options: {
@@ -38,14 +44,13 @@ if (Vue) {
                         display: true,
                         position: "top",
                         reverse: false
-                    },
-                    title: {
-                        display: false
                     }
                 }
             }
         },
-        mounted() { }
+        mounted() {
+            //this.renderChart(this.chartData, this.options);
+        }
     });
 } else {
     console.error("vue.js not ready ... chart-bar component can not be loaded.");

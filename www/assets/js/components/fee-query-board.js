@@ -222,41 +222,43 @@ if (Vue) {
         components: {
             "expaa-category-dashboard": {
                 template: `<b-container id="expaa-list-container" fluid :class="['small', 'text-center']">
-                    <b-row>
-                        <b-col>
+                    <b-row no-gutters>
+                        <b-col class="mx-1">
                             <b-button variant="info" block @click="open('全部規費列表', raw_data)">
                                 全部 <b-badge variant="light">{{count_all}} <span class="sr-only">全部收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col>
+                        <b-col class="mx-1">
                             <b-button variant="success" block @click="open('現金規費列表', cash)">
                                 現金 <b-badge variant="light">{{count_cash}} <span class="sr-only">現金收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col>
+                        <b-col class="mx-1">
                             <b-button variant="primary" block @click="open('悠遊卡規費列表', ezcard)">
                                 悠遊卡 <b-badge variant="light">{{count_ezcard}} <span class="sr-only">悠遊卡收費數量</span></b-badge>
                             </b-button>
                         </b-col>
                     </b-row>
-                    <b-row :class="['my-1']">
-                        <b-col>
+                    <b-row :class="['mt-1', 'mb-2']" no-gutters>
+                        <b-col class="mx-1">
                             <b-button variant="danger" block @click="open('行動支付規費列表', mobile)">
                                 行動支付 <b-badge variant="light">{{count_mobile}} <span class="sr-only">行動支付收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col>
+                        <b-col class="mx-1">
                             <b-button variant="warning" block @click="open('信用卡規費列表', credit)">
                                 信用卡 <b-badge variant="light">{{count_credit}} <span class="sr-only">信用卡收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col>
+                        <b-col class="mx-1">
                             <b-button variant="secondary" block @click="open('其他規費列表', other)">
                                 其他 <b-badge variant="light">{{count_other}} <span class="sr-only">其他收費數量</span></b-badge>
                             </b-button>
                         </b-col>
                     </b-row>
-                    <chart-bar :chart-data="chartData"></chart-bar>
+                    <b-row no-gutters>
+                        <b-col><canvas id="feeBarChart" class="w-100"></canvas></b-col>
+                    </b-row>
                 </b-container>`,
                 props: ["raw_data"],
                 data: () => {
@@ -266,13 +268,27 @@ if (Vue) {
                         mobile: [],
                         credit: [],
                         other: [],
+                        chartInst: null,
                         chartData: {
                             labels:[],
                             datasets:[{
-                                label: "規費統計",
+                                label: "規費統計 Bar",
                                 backgroundColor:[],
                                 data: [],
-                                borderColor:[]
+                                borderColor:[],
+                                fill: true,
+                                type: "bar",
+                                order: 1,
+                                opacity: 0.8
+                            }, {
+                                label: "規費統計 Line",
+                                backgroundColor:[],
+                                data: [],
+                                borderColor:[],
+                                fill: false,
+                                type: "line",
+                                order: 2,
+                                opacity: 1.0
                             }]
                         }
                     }
@@ -366,7 +382,10 @@ if (Vue) {
                 mounted: function() {
                     // prepare chart data
                     this.chartData.labels = ["現金", "悠遊卡", "信用卡", "行動支付", "其他"];
-                    this.chartData.datasets[0].backgroundColor = [randRGB(0.8), randRGB(0.8), randRGB(0.8), randRGB(0.8), randRGB(0.8)];
+                    let bar_opacity = this.chartData.datasets[0].opacity;
+                    this.chartData.datasets[0].backgroundColor = [randRGB(bar_opacity), randRGB(bar_opacity), randRGB(bar_opacity), randRGB(bar_opacity), randRGB(bar_opacity)];
+                    let line_opacity = this.chartData.datasets[1].opacity;
+                    this.chartData.datasets[1].backgroundColor = [randRGB(line_opacity), randRGB(line_opacity), randRGB(line_opacity), randRGB(line_opacity), randRGB(line_opacity)];
                     this.chartData.datasets[0].data = [
                         this.count_cash,
                         this.count_ezcard,
@@ -374,7 +393,32 @@ if (Vue) {
                         this.count_mobile,
                         this.count_other
                     ];
+                    this.chartData.datasets[1].data = [
+                        this.count_cash,
+                        this.count_ezcard,
+                        this.count_credit,
+                        this.count_mobile,
+                        this.count_other
+                    ];
                     this.chartData.datasets[0].borderColor = [randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0)];
+                    this.chartData.datasets[1].borderColor = [randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0)];
+                    // use chart.js directly
+                    let ctx = document.getElementById('feeBarChart').getContext('2d');
+                    this.chartInst = new Chart(ctx, {
+                        type: 'bar',
+                        data: this.chartData,
+                        options: {
+                            legend: { display: false },
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: true
+                                    }
+                                }]
+                            }
+                        }
+                    });
+
                 }
             },
             "fee-obsolete-mgt": {

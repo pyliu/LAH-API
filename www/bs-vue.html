@@ -178,6 +178,8 @@
           }]
       };
 
+      console.log(VueChartJs);
+
       new Vue({
         el: "#test",
         template: `<div>
@@ -234,12 +236,12 @@
             let that = this;
             jsonObj.raw.forEach(this_record => {
               that.datacollection.labels.push(this_record.reason);
-              that.datacollection.datasets[0].backgroundColor.push(that.getRandomRGB(0.8));
-              that.datacollection.datasets[1].backgroundColor.push(that.getRandomRGB(0.8));
+              that.datacollection.datasets[0].backgroundColor.push(randRGB(0.8));
+              that.datacollection.datasets[1].backgroundColor.push(randRGB(0.8));
               that.datacollection.datasets[0].data.push(/*this_record.count*/rand(255));
               that.datacollection.datasets[1].data.push(/*this_record.count*/rand(255));
-              that.datacollection.datasets[0].borderColor.push(that.getRandomRGB(1.0));
-              that.datacollection.datasets[1].borderColor.push(that.getRandomRGB(1.0));
+              that.datacollection.datasets[0].borderColor.push(randRGB(1.0));
+              that.datacollection.datasets[1].borderColor.push(randRGB(1.0));
             });
           }
         },
