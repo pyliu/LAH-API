@@ -328,8 +328,8 @@ if (Vue) {
                         });
                     },
                     sum: function(collection) {
-                        // To use map to return the result array of AA28 list then uses reduce to accumulate them and return.
-                        return collection.map(element => element["AA28"]).reduce((acc, curr) => acc + parseInt(curr), 0);
+                        // To use map function to make the result array of AA28 ($$) list (exclude the obsolete one, AA02 is the obsolete date) then uses reduce function to accumulate the numbers and return.
+                        return collection.map(element => isEmpty(element["AA02"]) ? ["AA28"] : 0).reduce((acc, curr) => acc + parseInt(curr), 0);
                     }
                 },
                 components: {
