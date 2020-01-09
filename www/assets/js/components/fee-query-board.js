@@ -383,7 +383,7 @@ if (Vue) {
                     // prepare chart data
                     this.chartData.labels = ["現金", "悠遊卡", "信用卡", "行動支付", "其他"];
                     let bar_opacity = this.chartData.datasets[0].opacity;
-                    this.chartData.datasets[0].backgroundColor = [randRGB(bar_opacity), randRGB(bar_opacity), randRGB(bar_opacity), randRGB(bar_opacity), randRGB(bar_opacity)];
+                    this.chartData.datasets[0].backgroundColor = [`rgb(92, 184, 92, ${bar_opacity})`, `rgb(2, 117, 216, ${bar_opacity})`, `rgb(240, 173, 78, ${bar_opacity})`, `rgb(217, 83, 79, ${bar_opacity})`, `rgb(41, 43, 44, ${bar_opacity})`];
                     let line_opacity = this.chartData.datasets[1].opacity;
                     this.chartData.datasets[1].backgroundColor = [randRGB(line_opacity), randRGB(line_opacity), randRGB(line_opacity), randRGB(line_opacity), randRGB(line_opacity)];
                     this.chartData.datasets[0].data = [
