@@ -328,11 +328,9 @@ if (Vue) {
                         });
                     },
                     sum: function(collection) {
-                        let total = 0;
-                        collection.forEach(function(element) {
-                            total += parseInt(element["AA28"]);
+                        return collection.reduce(function(acc, curr) {
+                            return acc + parseInt(curr["AA28"]);
                         });
-                        return total;
                     }
                 },
                 components: {
