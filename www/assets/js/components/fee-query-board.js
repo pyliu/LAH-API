@@ -328,9 +328,8 @@ if (Vue) {
                         });
                     },
                     sum: function(collection) {
-                        return collection.reduce(function(acc, curr) {
-                            return acc + parseInt(curr["AA28"]);
-                        }, 0);
+                        // To use map to return the result array of AA28 list then uses reduce to accumulate them and return.
+                        return collection.map(element => element["AA28"]).reduce((acc, curr) => acc + parseInt(curr), 0);
                     }
                 },
                 components: {
