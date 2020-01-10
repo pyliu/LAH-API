@@ -90,14 +90,8 @@ if (Vue) {
                 body.append("type", "diff_xcase");
                 body.append("id", id);
             
-                fetch("query_json_api.php", {
-                    method: "POST",
+                asyncFetch("query_json_api.php", {
                     body: body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
                 }).then(jsonObj => {
                     let html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + year + "-" + code + "-" + number + "</a><div>";
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
@@ -190,14 +184,8 @@ if (Vue) {
                     let td = $(`#sync_column_${column}`).parent();
                     $(`#sync_column_${column}`).remove();
 
-                    fetch("query_json_api.php", {
-                        method: "POST",
+                    asyncFetch("query_json_api.php", {
                         body: body
-                    }).then(response => {
-                        if (response.status != 200) {
-                            throw new Error("XHR連線異常，回應非200");
-                        }
-                        return response.json();
                     }).then(jsonObj => {
                         if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             td.html("<span class='text-success'>" + column + " 同步成功！</span>");
@@ -217,14 +205,8 @@ if (Vue) {
                     body.append("type", "sync_xcase");
                     body.append("id", id);
                     $("#sync_x_case_confirm_button").remove();
-                    fetch("query_json_api.php", {
-                        method: "POST",
+                    asyncFetch("query_json_api.php", {
                         body: body
-                    }).then(response => {
-                        if (response.status != 200) {
-                            throw new Error("XHR連線異常，回應非200");
-                        }
-                        return response.json();
                     }).then(jsonObj => {
                         if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             addNotification({
@@ -257,14 +239,8 @@ if (Vue) {
                     body.append("type", "inst_xcase");
                     body.append("id", id);
                     $("#inst_x_case_confirm_button").remove();
-                    fetch("query_json_api.php", {
-                        method: "POST",
+                    asyncFetch("query_json_api.php", {
                         body: body
-                    }).then(response => {
-                        if (response.status != 200) {
-                            throw new Error("XHR連線異常，回應非200");
-                        }
-                        return response.json();
                     }).then(jsonObj => {
                         if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             addNotification({
