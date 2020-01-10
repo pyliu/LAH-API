@@ -875,7 +875,6 @@ let xhrQueryUserInfo = e => {
 		method: 'POST',
 		body: form_body
 	}).then(jsonObj => {
-		let html = jsonObj.message;
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
 			let latest = jsonObj.data_count - 1;
 			showUserInfoByRAW(jsonObj.raw[latest], el_selector);
@@ -935,23 +934,18 @@ let xhrSendMessage = e => {
 	form_body.append("who", who);
 
 
-	fetch("query_json_api.php", {
-		method: 'POST',
+	asyncFetch("query_json_api.php", {
 		body: form_body
-	}).then(response => {
-		if (response.status != 200) {
-			throw new Error("XHR連線異常，回應非200");
-		}
-		return response.json();
 	}).then(jsonObj => {
 		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + jsonObj.message + "】");
 		addNotification({
+			title: "傳送訊息",
 			message: jsonObj.message
 		});
 		toggle(clicked_element);
 	}).catch(ex => {
 		console.error("xhrSendMessage parsing failed", ex);
-		alert("XHR連線查詢有問題!!【" + ex + "】");
+		showAlert({ title: "傳送訊息", message: `XHR連線查詢有問題!!【${ex}】`, type: "danger" });
 	});
 }
 
