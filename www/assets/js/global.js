@@ -814,7 +814,7 @@ let initUtilApp = () => {
                     scrollable: true,
                     hideFooter: true,
                     noCloseOnBackdrop: true,
-                    contentClass: "shadow hide", // add hide class to .modal-content then use slideDown to show up
+                    contentClass: "shadow hide", // add hide class to .modal-content then use Animated.css for animation show up
                     html: false
                 }, opts);
                 // use d-none to hide footer
