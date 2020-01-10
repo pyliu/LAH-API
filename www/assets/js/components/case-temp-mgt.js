@@ -61,7 +61,6 @@ if (Vue) {
 
                     console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢暫存資料回傳狀態碼有問題【${jsonObj.status}】`);
                     
-                    let html = "";
                     // jsonObj.raw structure: 0 - Table, 1 - all raw data, 2 - SQL
                     let filtered = jsonObj.raw.filter(function(item, index, array) {
                         return item[1].length > 0;
@@ -76,8 +75,9 @@ if (Vue) {
                         return;
                     }
 
+                    let html = "";
                     filtered.forEach(function(item, i, array) {
-                        html += `<button type="button" class="btn btn-sm btn-info">
+                        html += `<button type="button" class="btn btn-sm btn-primary active tmp_tbl_btn" data-sql-id="sql_${i}" data-tbl="${item[0]}">
                                     ${item[0]} <span class="badge badge-light">${item[1].length} <span class="sr-only">暫存檔數量</span></span>
                                 </button>`;
                         // use saveAs to download backup SQL file
@@ -98,7 +98,7 @@ if (Vue) {
                             }
                             html += "<small>"
                                  + `　<button id='backup_temp_btn_${i}' data-clean-btn-id='clean_temp_btn_${i}' data-filename='${filename_prefix}-${item[0]}' class='backup_tbl_temp_data btn btn-sm btn-outline-primary'>備份</button>`
-                                 + `<span class='hide ins_sql'>${INS_SQL}</span> `
+                                 + `<span class='hide ins_sql' id="sql_${i}">${INS_SQL}</span> `
                                  + ` <button id='clean_temp_btn_${i}' data-tbl='${item[0]}' data-backup-btn-id='backup_temp_btn_${i}' class='clean_tbl_temp_data btn btn-sm btn-outline-danger' ${item[0] == "MOICAT.RINDX" ? "disabled": ""}>清除</button>`
                                  + "</small>";
                         }
@@ -169,11 +169,21 @@ if (Vue) {
                                     clean_all: false
                                 })
                             );
+                            $(".tmp_tbl_btn").off("click").on("click", that.showSQL);
                         }
                     });
                 }).catch(ex => {
                     console.error("case-temp-mgt::query parsing failed", ex);
                     showAlert({ message: "case-temp-mgt::query XHR連線查詢有問題!!【" + ex + "】", type: "danger" });
+                });
+            },
+            showSQL: function(e) {
+                let btn = $(e.target);
+                let sql_span = $(`#${btn.data("sql-id")}`);
+                showModal({
+                    title: `INSERT SQL of ${btn.data("tbl")}`,
+                    message: sql_span.html().replace(/\n/g, "<br /><br />"),
+                    size: "xl"
                 });
             },
             fix: function(data) {
