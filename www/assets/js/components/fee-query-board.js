@@ -271,24 +271,30 @@ if (Vue) {
                         chartInst: null,
                         chartData: {
                             labels:[],
+                            legend: {
+                                display: true,
+                                labels: { boxWidth: 20 }
+                            },
                             datasets:[{
-                                label: "數量統計 Bar",
+                                label: "數量統計",
                                 backgroundColor:[],
                                 data: [],
                                 borderColor:[],
                                 fill: true,
                                 type: "bar",
                                 order: 1,
-                                opacity: 0.8
+                                opacity: 0.8,
+                                snapGaps: true
                             }, {
-                                label: "金額統計 Line",
+                                label: "金額統計",
                                 backgroundColor:[],
                                 data: [],
                                 borderColor:[],
                                 fill: false,
                                 type: "line",
                                 order: 2,
-                                opacity: 1.0
+                                opacity: 1.0,
+                                snapGaps: true
                             }]
                         }
                     }
@@ -410,13 +416,16 @@ if (Vue) {
                         this.money_mobile,
                         this.money_other
                     ];
-                    this.chartData.datasets[0].borderColor = [randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0)];
-                    this.chartData.datasets[1].borderColor = [randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0)];
+                    this.chartData.datasets[0].borderColor = `rgb(2, 117, 216)`;
+                    this.chartData.datasets[1].borderColor = `rgb(41, 43, 44)`;
                     // use chart.js directly
-                    let ctx = document.getElementById('feeBarChart').getContext('2d');
+                    let ctx = $('#feeBarChart');
                     this.chartInst = new Chart(ctx, {
                         type: 'bar',
-                        data: this.chartData
+                        data: this.chartData,
+                        options: {
+                            legend: { display: true, labels: { fontColor: "black" } }
+                        }
                     });
 
                 }
