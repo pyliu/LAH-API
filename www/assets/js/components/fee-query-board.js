@@ -245,7 +245,7 @@ if (Vue) {
                                 行動支付 <b-badge variant="light">{{count_mobile}} <span class="sr-only">行動支付收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col class="mx-1" v-b-popover.hover.d250="credit_all+'元'">
+                        <b-col class="mx-1" v-b-popover.hover.d250="money_credit+'元'">
                             <b-button variant="warning" block @click="open('信用卡規費列表', credit)">
                                 信用卡 <b-badge variant="light">{{count_credit}} <span class="sr-only">信用卡收費數量</span></b-badge>
                             </b-button>
@@ -329,7 +329,7 @@ if (Vue) {
                     },
                     sum: function(collection) {
                         // To use map function to make the result array of AA28 ($$) list (exclude the obsolete one, AA02 is the obsolete date) then uses reduce function to accumulate the numbers and return.
-                        return collection.map(element => isEmpty(element["AA02"]) ? ["AA28"] : 0).reduce((acc, curr) => acc + parseInt(curr), 0);
+                        return collection.map(element => isEmpty(element["AA02"]) ? element["AA28"] : 0).reduce((acc, curr) => acc + parseInt(curr), 0);
                     }
                 },
                 components: {
