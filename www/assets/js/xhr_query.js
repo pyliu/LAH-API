@@ -871,14 +871,9 @@ let xhrQueryUserInfo = e => {
 	form_body.append("name", name);
 	form_body.append("id", id);
 
-	fetch("query_json_api.php", {
+	asyncFetch("query_json_api.php", {
 		method: 'POST',
 		body: form_body
-	}).then(response => {
-		if (response.status != 200) {
-			throw new Error("XHR連線異常，回應非200");
-		}
-		return response.json();
 	}).then(jsonObj => {
 		let html = jsonObj.message;
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
@@ -891,11 +886,11 @@ let xhrQueryUserInfo = e => {
 				if (!isEmpty(name)) { localStorage[name] = json_str; }
 			}
 		} else {
-			console.warn(jsonObj.message);
+			addNotification({ message: jsonObj.message, type: "warning" });
 		}
 	}).catch(ex => {
 		console.error("xhrQueryUserInfo parsing failed", ex);
-		alert("XHR連線查詢有問題!!【" + ex + "】");
+		showAlert({ title: "查詢使用者資訊", message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger" });
 	});
 }
 
