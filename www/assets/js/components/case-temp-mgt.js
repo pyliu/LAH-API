@@ -19,7 +19,7 @@ if (Vue) {
         </fieldset>`,
         data: () => {
             return {
-                year: "108",
+                year: "109",
                 code: "HB04",
                 num: "000010"
             }
@@ -53,14 +53,8 @@ if (Vue) {
                 form_body.append("year", year);
                 form_body.append("code", code);
                 form_body.append("number", number);
-                fetch("query_json_api.php", {
-                    method: 'POST',
+                asyncFetch("query_json_api.php", {
                     body: form_body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
                 }).then(jsonObj => {
 
                     toggle(e.target);
@@ -83,7 +77,9 @@ if (Vue) {
                     }
 
                     filtered.forEach(function(item, i, array) {
-                        html += `● ${item[0]}: <span class='text-danger'>${item[1].length}</span> `
+                        html += `<button type="button" class="btn btn-sm btn-info">
+                                    ${item[0]} <span class="badge badge-light">${item[1].length} <span class="sr-only">暫存檔數量</span></span>
+                                </button>`;
                         // use saveAs to download backup SQL file
                         if (saveAs) {
                             let filename_prefix = `${year}-${code}-${number}`;
@@ -100,9 +96,11 @@ if (Vue) {
                                 INS_SQL += `insert into ${item[0]} (${fields.join(",")})`;
                                 INS_SQL += ` values (${values.join(",")});\n`;
                             }
-                            html += `　<small><button id='backup_temp_btn_${i}' data-clean-btn-id='clean_temp_btn_${i}' data-filename='${filename_prefix}-${item[0]}' class='backup_tbl_temp_data btn btn-sm btn-outline-primary'>備份</button>`
-                                    + `<span class='hide ins_sql'>${INS_SQL}</span> `
-                                    + ` <button id='clean_temp_btn_${i}' data-tbl='${item[0]}' data-backup-btn-id='backup_temp_btn_${i}' class='clean_tbl_temp_data btn btn-sm btn-outline-danger'>清除</button></small>`;
+                            html += "<small>"
+                                 + `　<button id='backup_temp_btn_${i}' data-clean-btn-id='clean_temp_btn_${i}' data-filename='${filename_prefix}-${item[0]}' class='backup_tbl_temp_data btn btn-sm btn-outline-primary'>備份</button>`
+                                 + `<span class='hide ins_sql'>${INS_SQL}</span> `
+                                 + ` <button id='clean_temp_btn_${i}' data-tbl='${item[0]}' data-backup-btn-id='backup_temp_btn_${i}' class='clean_tbl_temp_data btn btn-sm btn-outline-danger' ${item[0] == "MOICAT.RINDX" ? "disabled": ""}>清除</button>`
+                                 + "</small>";
                         }
                         html += `<br />&emsp;<small>－&emsp;${item[2]}</small> <br />`;
                     });

@@ -223,34 +223,34 @@ if (Vue) {
             "expaa-category-dashboard": {
                 template: `<b-container id="expaa-list-container" fluid :class="['small', 'text-center']">
                     <b-row no-gutters>
-                        <b-col class="mx-1" v-b-popover.hover.d250="money_all+'元'">
+                        <b-col class="mx-1" v-b-popover.hover.top.d750="money_all+'元'">
                             <b-button variant="info" block @click="open('全部規費列表', raw_data)">
                                 全部 <b-badge variant="light">{{count_all}} <span class="sr-only">全部收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col class="mx-1" v-b-popover.hover.d250="money_cash+'元'">
+                        <b-col class="mx-1" v-b-popover.hover.top.d750="money_cash+'元'">
                             <b-button variant="success" block @click="open('現金規費列表', cash)">
                                 現金 <b-badge variant="light">{{count_cash}} <span class="sr-only">現金收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col class="mx-1" v-b-popover.hover.d250="money_ezcard+'元'">
+                        <b-col class="mx-1" v-b-popover.hover.top.d750="money_ezcard+'元'">
                             <b-button variant="primary" block @click="open('悠遊卡規費列表', ezcard)">
                                 悠遊卡 <b-badge variant="light">{{count_ezcard}} <span class="sr-only">悠遊卡收費數量</span></b-badge>
                             </b-button>
                         </b-col>
                     </b-row>
                     <b-row :class="['mt-1', 'mb-2']" no-gutters>
-                        <b-col class="mx-1" v-b-popover.hover.d250="money_mobile+'元'">
+                        <b-col class="mx-1" v-b-popover.hover.bottom.d750="money_mobile+'元'">
                             <b-button variant="danger" block @click="open('行動支付規費列表', mobile)">
                                 行動支付 <b-badge variant="light">{{count_mobile}} <span class="sr-only">行動支付收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col class="mx-1" v-b-popover.hover.d250="money_credit+'元'">
+                        <b-col class="mx-1" v-b-popover.hover.bottom.d750="money_credit+'元'">
                             <b-button variant="warning" block @click="open('信用卡規費列表', credit)">
                                 信用卡 <b-badge variant="light">{{count_credit}} <span class="sr-only">信用卡收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col class="mx-1" v-b-popover.hover.d250="money_other+'元'">
+                        <b-col class="mx-1" v-b-popover.hover.bottom.d750="money_other+'元'">
                             <b-button variant="secondary" block @click="open('其他規費列表', other)">
                                 其他 <b-badge variant="light">{{count_other}} <span class="sr-only">其他收費數量</span></b-badge>
                             </b-button>
