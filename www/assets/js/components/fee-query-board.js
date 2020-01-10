@@ -14,7 +14,7 @@ if (Vue) {
                             v-model="bc_date"
                             size="sm"
                             :class="['no-cache']"
-                            :formatter="convertTWDate"
+                            :formatter="toTWDate"
                         ></b-form-input>
                         </b-form-input>
                     </div>
@@ -28,7 +28,7 @@ if (Vue) {
                             v-model="number"
                             id="fee_query_number"
                             type="number"
-                            placeholder="七碼電腦給號"
+                            placeholder="7碼數字"
                             :state="isNumberValid"
                             size="sm"
                             max=9999999
@@ -60,7 +60,7 @@ if (Vue) {
         data: () => {
             return {
                 date: "",
-                bc_date: "2020-01-08",
+                bc_date: "2020-01-09",
                 number: ""
             }
         },
@@ -86,7 +86,7 @@ if (Vue) {
             }
         },
         methods: {
-            convertTWDate: function(val) {
+            toTWDate: function(val) {
                 let d = new Date(val);
                 this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
                 // also clear the number for query by date purpose
@@ -223,34 +223,34 @@ if (Vue) {
             "expaa-category-dashboard": {
                 template: `<b-container id="expaa-list-container" fluid :class="['small', 'text-center']">
                     <b-row no-gutters>
-                        <b-col class="mx-1">
+                        <b-col class="mx-1" v-b-popover.hover.d250="money_all+'元'">
                             <b-button variant="info" block @click="open('全部規費列表', raw_data)">
                                 全部 <b-badge variant="light">{{count_all}} <span class="sr-only">全部收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col class="mx-1">
+                        <b-col class="mx-1" v-b-popover.hover.d250="money_cash+'元'">
                             <b-button variant="success" block @click="open('現金規費列表', cash)">
                                 現金 <b-badge variant="light">{{count_cash}} <span class="sr-only">現金收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col class="mx-1">
+                        <b-col class="mx-1" v-b-popover.hover.d250="money_ezcard+'元'">
                             <b-button variant="primary" block @click="open('悠遊卡規費列表', ezcard)">
                                 悠遊卡 <b-badge variant="light">{{count_ezcard}} <span class="sr-only">悠遊卡收費數量</span></b-badge>
                             </b-button>
                         </b-col>
                     </b-row>
                     <b-row :class="['mt-1', 'mb-2']" no-gutters>
-                        <b-col class="mx-1">
+                        <b-col class="mx-1" v-b-popover.hover.d250="money_mobile+'元'">
                             <b-button variant="danger" block @click="open('行動支付規費列表', mobile)">
                                 行動支付 <b-badge variant="light">{{count_mobile}} <span class="sr-only">行動支付收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col class="mx-1">
+                        <b-col class="mx-1" v-b-popover.hover.d250="credit_all+'元'">
                             <b-button variant="warning" block @click="open('信用卡規費列表', credit)">
                                 信用卡 <b-badge variant="light">{{count_credit}} <span class="sr-only">信用卡收費數量</span></b-badge>
                             </b-button>
                         </b-col>
-                        <b-col class="mx-1">
+                        <b-col class="mx-1" v-b-popover.hover.d250="money_other+'元'">
                             <b-button variant="secondary" block @click="open('其他規費列表', other)">
                                 其他 <b-badge variant="light">{{count_other}} <span class="sr-only">其他收費數量</span></b-badge>
                             </b-button>
@@ -272,7 +272,7 @@ if (Vue) {
                         chartData: {
                             labels:[],
                             datasets:[{
-                                label: "規費統計 Bar",
+                                label: "數量統計 Bar",
                                 backgroundColor:[],
                                 data: [],
                                 borderColor:[],
@@ -281,7 +281,7 @@ if (Vue) {
                                 order: 1,
                                 opacity: 0.8
                             }, {
-                                label: "規費統計 Line",
+                                label: "金額統計 Line",
                                 backgroundColor:[],
                                 data: [],
                                 borderColor:[],
@@ -299,7 +299,13 @@ if (Vue) {
                     count_mobile: function() { return this.mobile.length; },
                     count_other: function() { return this.other.length; },
                     count_credit: function() { return this.credit.length; },
-                    count_all: function() { return this.raw_data.length; }
+                    count_all: function() { return this.raw_data.length; },
+                    money_cash: function() { return this.sum(this.cash); },
+                    money_ezcard: function() { return this.sum(this.ezcard); },
+                    money_mobile: function() { return this.sum(this.mobile); },
+                    money_other: function() { return this.sum(this.other); },
+                    money_credit: function() { return this.sum(this.credit); },
+                    money_all: function() { return this.sum(this.raw_data); },
                 },
                 methods: {
                     open: function(title, data) {
@@ -320,6 +326,10 @@ if (Vue) {
                             size: data.length < 51 ? "md" : data.length < 145 ? "lg" : "xl",
                             backdrop_close: true
                         });
+                    },
+                    sum: function(collection) {
+                        // To use map function to make the result array of AA28 ($$) list (exclude the obsolete one, AA02 is the obsolete date) then uses reduce function to accumulate the numbers and return.
+                        return collection.map(element => isEmpty(element["AA02"]) ? ["AA28"] : 0).reduce((acc, curr) => acc + parseInt(curr), 0);
                     }
                 },
                 components: {
@@ -394,11 +404,11 @@ if (Vue) {
                         this.count_other
                     ];
                     this.chartData.datasets[1].data = [
-                        this.count_cash,
-                        this.count_ezcard,
-                        this.count_credit,
-                        this.count_mobile,
-                        this.count_other
+                        this.money_cash,
+                        this.money_ezcard,
+                        this.money_credit,
+                        this.money_mobile,
+                        this.money_other
                     ];
                     this.chartData.datasets[0].borderColor = [randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0)];
                     this.chartData.datasets[1].borderColor = [randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0), randRGB(1.0)];
