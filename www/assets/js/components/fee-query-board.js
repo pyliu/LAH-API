@@ -416,17 +416,7 @@ if (Vue) {
                     let ctx = document.getElementById('feeBarChart').getContext('2d');
                     this.chartInst = new Chart(ctx, {
                         type: 'bar',
-                        data: this.chartData,
-                        options: {
-                            legend: { display: false },
-                            scales: {
-                                yAxes: [{
-                                    ticks: {
-                                        beginAtZero: true
-                                    }
-                                }]
-                            }
-                        }
+                        data: this.chartData
                     });
 
                 }
