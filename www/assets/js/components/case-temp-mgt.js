@@ -112,7 +112,7 @@ if (Vue) {
                     
                     showModal({
                         body: html,
-                        title: year + "-" + code + "-" + number + " 案件暫存檔統計",
+                        title: `<span class="reg_case_id">${year}-${code}-${number}</span> 案件暫存檔統計`,
                         size: "lg",
                         callback: () => {
                             showPopper("#temp_backup_button", "請「備份後」再選擇清除", 5000);
@@ -170,6 +170,7 @@ if (Vue) {
                                 })
                             );
                             $(".tmp_tbl_btn").off("click").on("click", that.showSQL);
+                            $(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
                         }
                     });
                 }).catch(ex => {
