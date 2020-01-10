@@ -886,7 +886,7 @@ let xhrQueryUserInfo = e => {
 				if (!isEmpty(name)) { localStorage[name] = json_str; }
 			}
 		} else {
-			addNotification({ message: jsonObj.message, type: "warning" });
+			addNotification({ message: `找不到 ${name} ${id} 資料`, type: "warning" });
 		}
 	}).catch(ex => {
 		console.error("xhrQueryUserInfo parsing failed", ex);
