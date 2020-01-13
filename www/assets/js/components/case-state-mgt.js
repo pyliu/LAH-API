@@ -2,20 +2,19 @@ if (Vue) {
     Vue.component("case-state-mgt", {
         template: `<fieldset>
             <legend>案件狀態</legend>
-            <b-row class="mb-2">
+            <b-form-row class="mb-2">
                 <b-col>
                     <case-input-group-ui @update="handleUpdate" @enter="query" type="reg" prefix="case_state"></case-input-group-ui>
                 </b-col>
-            </b-row>
-            <b-row no-gutters>
+            </b-form-row>
+            <b-form-row>
                 <b-col>
                     <b-button block pill @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button>
                 </b-col>
-                &ensp;
                 <b-col>
                     <b-button block pill  @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
                 </b-col>
-            </b-row>
+            </b-form-row>
         </fieldset>`,
         data: () => {
             return {

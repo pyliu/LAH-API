@@ -2,20 +2,19 @@ if (Vue) {
     Vue.component("announcement-mgt", {
         template: `<fieldset>
             <legend>公告維護</legend>
-            <b-row class="mb-2">
+            <b-form-row class="mb-2">
                 <b-col>
                     <announcement-mgt-item :reset-flag="reset_flag" @update-announcement-done="updated" @reset-flags-done="done"></announcement-mgt-item>
                 </b-col>
-            </b-row>
-            <b-row no-gutters>
+            </b-form-row>
+            <b-form-row>
                 <b-col>
                     <b-button block pill @click="clear" variant="outline-secondary" size="sm" v-b-popover.hover.focus.bottom="'清除准登旗標'"><i class="fas fa-broom"></i> 清除</b-button>
                 </b-col>
-                &ensp;
                 <b-col>
                     <b-button block pill @click="popup" variant="outline-success" size="sm" title="備註"><i class="far fa-comment"></i> 備註</b-button>
                 </b-col>
-            </b-row>
+            </b-form-row>
         </fieldset>`,
         data: () => {
             return {

@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("fee-query-board", {
         template: `<fieldset>
             <legend>規費資料</legend>
-            <b-row class="mb-2" no-gutters>
+            <b-form-row class="mb-2" no-gutters>
                 <b-col>
                     <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
@@ -40,10 +40,9 @@ if (Vue) {
                         </b-form-input>
                     </div>
                 </b-col>
-            </b-row>
-            <b-row no-gutters>
+            </b-form-row>
+            <b-form-row>
                 <b-col><b-button pill block @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button></b-col>
-                &ensp;
                 <b-col>
                     <b-button block pill @click="obsolete" variant="outline-secondary" size="sm" v-b-popover.hover.focus.bottom="'新增作廢假資料'">
                         <span class="fa-stack" style="font-size: 0.5rem">
@@ -53,9 +52,8 @@ if (Vue) {
                         作廢
                     </b-button>
                 </b-col>
-                &ensp;
                 <b-col><b-button block pill @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button></b-col>
-            </b-row>
+            </b-form-row>
         </fieldset>`,
         data: () => {
             return {
