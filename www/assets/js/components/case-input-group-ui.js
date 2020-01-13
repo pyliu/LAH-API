@@ -30,7 +30,7 @@ if (Vue) {
                     :min="num_min"
                     max="999999"
                     :id="prefix+'_case_update_num'"
-                    v-b-popover.focus="'最多六碼數字'"
+                    v-b-tooltip.focus="'最多6個數字'"
                 ></b-form-input>
                 <b-input-group-append is-text>號</b-input-group-append>
             </b-input-group>
