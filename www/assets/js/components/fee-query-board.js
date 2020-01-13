@@ -290,10 +290,10 @@ if (Vue) {
                                 backgroundColor:[],
                                 data: [],
                                 borderColor:[],
-                                fill: false,
+                                fill: true,
                                 type: "line",
                                 order: 2,
-                                opacity: 1.0,
+                                opacity: 0.7,
                                 snapGaps: true
                             }]
                         }
@@ -399,9 +399,9 @@ if (Vue) {
                     // prepare chart data
                     this.chartData.labels = ["現金", "悠遊卡", "信用卡", "行動支付", "其他"];
                     let bar_opacity = this.chartData.datasets[0].opacity;
-                    this.chartData.datasets[0].backgroundColor = [`rgb(92, 184, 92, ${bar_opacity})`, `rgb(2, 117, 216, ${bar_opacity})`, `rgb(240, 173, 78, ${bar_opacity})`, `rgb(217, 83, 79, ${bar_opacity})`, `rgb(41, 43, 44, ${bar_opacity})`];
+                    this.chartData.datasets[0].backgroundColor = [`rgb(92, 184, 92, ${bar_opacity})`, `rgb(2, 117, 216, ${bar_opacity})`, `rgb(240, 173, 78, ${bar_opacity})`, `rgb(217, 83, 79, ${bar_opacity})`, `rgb(108, 117, 126, ${bar_opacity})`];
                     let line_opacity = this.chartData.datasets[1].opacity;
-                    this.chartData.datasets[1].backgroundColor = [`rgb(92, 184, 92, ${line_opacity})`, `rgb(2, 117, 216, ${line_opacity})`, `rgb(240, 173, 78, ${line_opacity})`, `rgb(217, 83, 79, ${line_opacity})`, `rgb(41, 43, 44, ${line_opacity})`];
+                    this.chartData.datasets[1].backgroundColor = [`rgb(92, 184, 92, ${line_opacity})`, `rgb(2, 117, 216, ${line_opacity})`, `rgb(240, 173, 78, ${line_opacity})`, `rgb(217, 83, 79, ${line_opacity})`, `rgb(108, 117, 126, ${line_opacity})`];
                     this.chartData.datasets[0].data = [
                         this.count_cash,
                         this.count_ezcard,
@@ -417,7 +417,7 @@ if (Vue) {
                         this.money_other
                     ];
                     this.chartData.datasets[0].borderColor = `rgb(2, 117, 216)`;
-                    this.chartData.datasets[1].borderColor = `rgb(41, 43, 44)`;
+                    this.chartData.datasets[1].borderColor = `rgb(2, 117, 216, ${line_opacity})`;
                     // use chart.js directly
                     let ctx = $('#feeBarChart');
                     this.chartInst = new Chart(ctx, {
