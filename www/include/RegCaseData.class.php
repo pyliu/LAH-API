@@ -131,8 +131,9 @@ class RegCaseData {
         //$row = $this->convertCharset();
         $row = &$this->row;
         $result = array(
-            "收件字號" => $row["RM01"].$row["RM02"].$row["RM03"],
+            "收件字號" => $row["RM01"]."-".$row["RM02"]."-".$row["RM03"],
             "收件時間" => RegCaseData::toDate($row["RM07_1"])." ".RegCaseData::toDate($row["RM07_2"]),
+            "測量案件" => $row["RM04"]."-".$row["RM05"]."-".$row["RM06"],
 			"登記原因" => $row["KCNT"],
             "限辦期限" => "<span class='".$this->getStatusCss()."'>".$this->getDueDate()."</span>",
             "作業人員" => $this->getCurrentOperator(),

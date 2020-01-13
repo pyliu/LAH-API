@@ -79,6 +79,7 @@ let showRegCaseDetail = (jsonObj) => {
 		html += isEmpty(jsonObj.結案已否) ? "<div class='text-danger'><strong>尚未結案！</strong></div>" : "";
 
 		html += "收件時間：" + jsonObj.收件時間 + "<br/>";
+		html += "測量案件：" + jsonObj.測量案件 + "<br/>";
 		html += "限辦期限：" + jsonObj.限辦期限 + "<br/>";
 		html += "作業人員：<span id='the_incase_operator_span' class='user_tag' data-display-selector='#in_modal_display' data-id='" + jsonObj.作業人員ID + "' data-name='" + jsonObj.作業人員 + "'>" + jsonObj.作業人員 + "</span><br/>";
 		html += "辦理情形：" + jsonObj.辦理情形 + "<br/>";
