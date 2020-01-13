@@ -21,7 +21,17 @@ if (Vue) {
                 <b-input-group-append is-text>字</b-input-group-append>
             </b-input-group>
             <b-input-group size="sm" class="col-4">
-                <b-form-input v-model="num" @input="uiUpdate" @keyup.enter="$emit('enter', $event)" type="number" :step="num_step" :min="num_min" max="999999" :id="prefix+'_case_update_num'" class="form-control w-100 h-100" aria-label="號" :aria-describedby="'inputGroup-'+prefix+'_case_update_num'" required data-trigger="manual" data-toggle="popover" data-content='案件號(最多6碼)' title='案件號' data-placement="top"></b-form-input>
+                <b-form-input
+                    v-model="num"
+                    @input="uiUpdate"
+                    @keyup.enter="$emit('enter', $event)"
+                    type="number"
+                    :step="num_step"
+                    :min="num_min"
+                    max="999999"
+                    :id="prefix+'_case_update_num'"
+                    v-b-popover.focus="'最多六碼數字'"
+                ></b-form-input>
                 <b-input-group-append is-text>號</b-input-group-append>
             </b-input-group>
         </b-form-row>`,
