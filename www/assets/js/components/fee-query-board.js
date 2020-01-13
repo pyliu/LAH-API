@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("fee-query-board", {
         template: `<fieldset>
             <legend>規費資料</legend>
-            <b-form-row class="mb-2" no-gutters>
+            <b-form-row class="mb-2">
                 <b-col>
                     <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
