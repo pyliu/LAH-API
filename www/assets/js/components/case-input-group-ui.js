@@ -2,29 +2,27 @@ if (Vue) {
     Vue.component("case-input-group-ui", {
         template: `<b-form-row>
             <b-input-group size="sm" class="col-3">
-                <b-input-group-append is-text>年</b-input-group-append>
                 <b-form-select v-model="year" :options="years" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_year'">
                     <template v-slot:first>
-                        <b-form-select-option :value="null" disabled>-- 請選擇年分 --</b-form-select-option>
+                        <b-form-select-option :value="null" disabled>-- 請選擇年份 --</b-form-select-option>
                     </template>
                 </b-form-select>
+                <b-input-group-append is-text>年</b-input-group-append>
             </b-input-group>
             <b-input-group size="sm" class="col">
-                <select v-model="code" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_code'" class="form-control w-100 h-100" data-trigger="manual" data-toggle="popover" data-content="請選擇案件字" title="案件字" data-placement="top" aria-label="字" :aria-describedby="'inputGroup-'+prefix+'_case_update_code'" required>
-                    <option disabled>---- 請選擇案件字 ----</option>    
+                <b-form-select v-model="code" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_code'">
+                    <template v-slot:first>
+                        <b-form-select-option :value="null" disabled>-- 請選擇案件字 --</b-form-select-option>
+                    </template>
                     <optgroup v-for="obj in code_data" :label="obj.label">
                         <option v-for="item in obj.options" :value="item.replace(/[^A-Za-z0-9]/g, '')">{{item}}</option>
                     </optgroup>
-                </select>
-                <div class="input-group-append">
-                    <span class="input-group-text" :id="'inputGroup-'+prefix+'_case_update_code'">字</span>
-                </div>
+                </b-form-select>
+                <b-input-group-append is-text>字</b-input-group-append>
             </b-input-group>
             <b-input-group size="sm" class="col-4">
-                <input v-model="num" @input="uiUpdate" @keyup.enter="$emit('enter', $event)" type="number" :step="num_step" :min="num_min" max="999999" :id="prefix+'_case_update_num'" class="form-control w-100 h-100" aria-label="號" :aria-describedby="'inputGroup-'+prefix+'_case_update_num'" required data-trigger="manual" data-toggle="popover" data-content='案件號(最多6碼)' title='案件號' data-placement="top" />
-                <div class="input-group-append">
-                    <span class="input-group-text" :id="'inputGroup-'+prefix+'_case_update_num'">號</span>
-                </div>
+                <b-form-input v-model="num" @input="uiUpdate" @keyup.enter="$emit('enter', $event)" type="number" :step="num_step" :min="num_min" max="999999" :id="prefix+'_case_update_num'" class="form-control w-100 h-100" aria-label="號" :aria-describedby="'inputGroup-'+prefix+'_case_update_num'" required data-trigger="manual" data-toggle="popover" data-content='案件號(最多6碼)' title='案件號' data-placement="top"></b-form-input>
+                <b-input-group-append is-text>號</b-input-group-append>
             </b-input-group>
         </b-form-row>`,
         props: ["type", "prefix"],
