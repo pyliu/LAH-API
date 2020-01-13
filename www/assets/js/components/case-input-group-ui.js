@@ -1,15 +1,14 @@
 if (Vue) {
     Vue.component("case-input-group-ui", {
-        template: `<div class="form-row">
-            <div class="input-group input-group-sm col-3">
-                <select v-model="year" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_year'" class="form-control w-100 h-100" aria-label="年" :aria-describedby="'inputGroup-'+prefix+'_case_update_year'" required>
-                    <option disabled>---- 請選擇年分 ----</option>
-                    <option v-for="the_year in years">{{the_year}}</option>
-                </select>
-                <div class="input-group-append">
-                    <span class="input-group-text" :id="'inputGroup-'+prefix+'_case_update_year'">年</span>
-                </div>
-            </div>
+        template: `<b-form-row>
+            <b-input-group size="sm" class="mb-2 col-3">
+                <b-input-group-append is-text>年</b-input-group-append>
+                <b-form-select v-model="year" :options="years" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_year'">
+                    <template v-slot:first>
+                        <b-form-select-option :value="null" disabled>-- 請選擇年分 --</b-form-select-option>
+                    </template>
+                </b-form-select>
+            </b-input-group>
             <div class="input-group input-group-sm col">
                 <select v-model="code" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_code'" class="form-control w-100 h-100" data-trigger="manual" data-toggle="popover" data-content="請選擇案件字" title="案件字" data-placement="top" aria-label="字" :aria-describedby="'inputGroup-'+prefix+'_case_update_code'" required>
                     <option disabled>---- 請選擇案件字 ----</option>    
@@ -27,7 +26,7 @@ if (Vue) {
                     <span class="input-group-text" :id="'inputGroup-'+prefix+'_case_update_num'">號</span>
                 </div>
             </div>
-        </div>`,
+        </b-form-row>`,
         props: ["type", "prefix"],
         data: function(e) {
             return {
@@ -122,12 +121,12 @@ if (Vue) {
             },
         },
         created: function() {
-            // set default year
+            // set year select options
             var d = new Date();
             this.year = (d.getFullYear() - 1911);
             let len = this.year - 105;
             for (let i = 0; i <= len; i++) {
-                this.years.push(105 + i);
+                this.years.push({value: 105 + i, text: 105 + i});
             }
         },
         mounted: function(e) {
