@@ -127,6 +127,7 @@
   
   <script src="assets/js/cache.js"></script>
   <script src="assets/js/FileSaver.min.js"></script>
+
   <script src="assets/js/Chart.min.js"></script>
   <script src="assets/js/vue-chartjs.min.js"></script>
   <script src="assets/js/components/chart-bar.js"></script>
@@ -188,7 +189,7 @@
           <b-button-close text-variant="danger"></b-button-close>
           <b-form-input type="date" v-model="date" size="sm" :formatter="dateFormat"></b-form-input>
           <div class="mt-3">Date: <strong>{{ date }}, {{tw_date}}</strong></div>
-          <b-container fluid><chart-bar :chart-data="datacollection"></chart-bar></b-container>
+          <b-container fluid id="chart_container"><chart-bar :chart-data="datacollection"></chart-bar></b-container>
           <b-btn variant="danger" @click="fillData()">Randomize</b-btn>
           <b-btn @click="open">open</b-btn>
           {{total}}
@@ -249,14 +250,18 @@
             this.total = jsonObj.raw.map(element => element.count).reduce((acc, curr) => acc + parseInt(curr), 0);
           },
           open: function(e) {
-            let vn = this.$createElement("chart-bar", {
-              props: {
-                chartData: this.datacollection
-              }
-            });
+            let that = this;
             showModal({
-              message: vn,
-              title: "test"
+              message: `<b-container fluid id="chart_vue"><chart-bar :id="'testtesttest'" :chart-data="datasets"></chart-bar></b-container>`,
+              title: "test",
+              callback: () => {
+                new Vue({
+                  el: "#chart_vue",
+                  data: {
+                    datasets: that.datacollection
+                  }
+                });
+              }
             });
           }
         },
