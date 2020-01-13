@@ -31,6 +31,7 @@ if (Vue) {
                     max="999999"
                     :id="prefix+'_case_update_num'"
                     v-b-tooltip.focus="'最多6個數字'"
+                    :state="num > 0 && num < 999999"
                 ></b-form-input>
                 <b-input-group-append is-text>號</b-input-group-append>
             </b-input-group>
