@@ -23,15 +23,15 @@ if (Vue) {
             <b-input-group size="sm" class="col-4">
                 <b-form-input
                     v-model="num"
+                    v-b-tooltip.hover="'最多6個數字'"
                     @input="uiUpdate"
                     @keyup.enter="$emit('enter', $event)"
                     type="number"
                     :step="num_step"
                     :min="num_min"
-                    max="999999"
+                    :max="num_max"
                     :id="prefix+'_case_update_num'"
-                    v-b-tooltip.focus="'最多6個數字'"
-                    :state="num > 0 && num < 999999"
+                    :state="num > num_min && num < num_max"
                 ></b-form-input>
                 <b-input-group-append is-text>號</b-input-group-append>
             </b-input-group>
@@ -60,6 +60,7 @@ if (Vue) {
                 num: "",
                 num_step: 10,
                 num_min: 10,
+                num_max: 999999,
                 code_data: [],
                 years: []
             }
