@@ -451,12 +451,6 @@ fieldset fieldset legend {
     // place this variable in global to use this int for condition jufgement, e.g. 108
     let this_year = <?php echo $this_year; ?>;
     $(document).ready(e => {
-      // unsupported IE detection
-      if (window.attachEvent) {
-        document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援舊版IE瀏覽器, 請使用Chrome/Firefox/IE11瀏覽器。</h2>';
-        return;
-      }
-
       // 選擇【字】的事件
       $("#query_code").on("change", xhrGetCaseLatestNum.bind({
         code_id: "query_code",

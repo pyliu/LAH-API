@@ -50,7 +50,9 @@
           <a class="nav-link" href="/watch_dog.php">監控＆修正</a>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle hamburger" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="assets/img/menu.png" /></a>
+          <a class="nav-link dropdown-toggle hamburger" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <img src="assets/img/menu.png" />
+          </a>
           <div class="dropdown-menu" aria-labelledby="dropdown01">
             <a class="dropdown-item" href="http://220.1.35.87/" target="_blank">內部知識網</a>
             <div class="dropdown-divider"></div>
@@ -137,11 +139,6 @@
 
   <script type="text/javascript">
     $(document).ready(e => {
-      if (detectIE()) {
-        document.getElementById("main_content_section").innerHTML = '<h2 style="margin-top: 50px; text-align: center; color: red;">不支援IE瀏覽器, 請使用Chrome/Firefox瀏覽器。</h2>';
-        return;
-      }
-
       window.xCaseCheckVue = new Vue({el: "#xcase-check"});
       window.ezCardPaymentCheckVue = new Vue({el: "#easycard-payment-check"});
       window.announcementMgtVue = new Vue({el: "#announcement-mgt"});
