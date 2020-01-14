@@ -36,11 +36,15 @@ if (Vue) {
                     </b-input-group>
                 </b-col>
             </b-form-row>
-            <b-form-row class="text-center">
+            <b-form-row align-h="around" align-v="center">
                 <b-col>
-                    <b-button pill block @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button>
-                    <b-button pill block @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
-                    <b-button pill block @click="obsolete" variant="outline-secondary" size="sm" v-b-tooltip.bottom="'新增作廢假資料'">
+                    <b-button block @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button>
+                </b-col>
+                <b-col>
+                    <b-button block @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
+                </b-col>
+                <b-col>
+                    <b-button block @click="obsolete" variant="outline-secondary" size="sm" v-b-tooltip.bottom="'新增作廢假資料'">
                         <span class="fa-stack" style="font-size: 0.5rem">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
                             <i class="fas fa-ban fa-stack-2x text-danger"></i>
