@@ -85,7 +85,7 @@ function adjustTableContent() {
     // make table sortable
     makeAllSortable();
     // case xhr event
-    $(".case.ajax").on("click", function(e) {
+    $(".case.ajax").off("click").on("click", function(e) {
         var clicked_element = $(e.target).closest("td");
         $(".focused-element").removeClass("focused-element");
         clicked_element.addClass("focused-element");
@@ -95,11 +95,6 @@ function adjustTableContent() {
     // user info dialog event
     console.assert(addUserInfoEvent, "Can't find addUserInfoEvent function ... do you include global.js?")
     addUserInfoEvent();
-    if (addNotification) {
-        addNotification({
-            body: `表格設定完成`
-        });
-    }
 }
 
 $(document).ready(startRefresh);

@@ -19,8 +19,8 @@ if (header_el) {
         clearTimeout(scroll_handle);
         scroll_handle = setTimeout(function() {
             if ($(window).scrollTop() > 120) {
-                if (header_el.hasClass("fade")) {
-                    header_el.removeClass("fade");
+                if (header_el.hasClass("hide")) {
+                    header_el.removeClass("hide");
                     // adjust column width
                     var fixed_ths = [
                         $("#fixed_th1"),
@@ -45,8 +45,8 @@ if (header_el) {
                     header_el.addClass("opacity");
                 }
             } else {
-                if (!header_el.hasClass("fade")) {
-                    header_el.addClass("fade");
+                if (!header_el.hasClass("hide")) {
+                    header_el.addClass("hide");
                     header_el.removeClass("opacity");
                 }
             }

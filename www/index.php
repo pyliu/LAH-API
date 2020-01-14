@@ -92,8 +92,8 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
       </div>
       <div id="table_container" class="table-responsive"></div>
       <!-- float table header -->
-      <div id="header_container" class="container-fluid fade header-fixed">
-        <table class='text-center col-lg-12' border="1">
+      <div id="header_container" class="container-fluid hide header-fixed">
+        <table class='text-center col-12' border="1">
           <thead>
             <tr id="header_tr" class="header">
               <th id="float_th1">收件字號</th>
