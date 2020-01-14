@@ -224,11 +224,9 @@ let xhrPrcQueryCase = e => {
 let xhrCallWatchDog = e => {
 	let body = new FormData();
 	body.append("type", "watchdog");
-	fetch("query_json_api.php", {
+	asyncFetch("query_json_api.php", {
 		method: "POST",
 		body: body
-	}).then(response => {
-		return response.json();
 	}).then(jsonObj => {
 		// normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
 		if (jsonObj.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
@@ -507,82 +505,6 @@ let xhrUpdateRegCaseCol = function(arguments) {
 			type: "danger"
 		});
 	});
-}
-
-let xhrGetSURCase = function(e) {
-	if (!validateCaseInput("#sur_delay_case_fix_year", "#sur_delay_case_fix_code", "#sur_delay_case_fix_num", "#sur_delay_case_fix_display")) {
-		return false;
-	}
-	let year = $("#sur_delay_case_fix_year").val().replace(/\D/g, "");
-	let code = $("#sur_delay_case_fix_code").val();
-	let number = $("#sur_delay_case_fix_num").val().replace(/\D/g, "");
-	// prepare post params
-	let id = trim(year + code + number);
-	let body = new FormData();
-	body.append("type", "sur_case");
-	body.append("id", id);
-	
-	toggle(e.target);
-
-	fetch("query_json_api.php", {
-		method: "POST",
-		body: body
-	}).then(response => {
-		return response.json();
-	}).then(jsonObj => {
-		showSURCaseDetail(jsonObj);
-		toggle(e.target);
-	}).catch(ex => {
-		console.error("xhrGetSURCase parsing failed", ex);
-		$("#sur_delay_case_fix_display").html("<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>");
-	});
-}
-
-let showSURCaseDetail = jsonObj => {
-	if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-		if (!jsonObj.data_count == 0) {
-			showAlert({
-				message: "查無測量案件資料",
-				type: "warning"
-			});
-			return;
-		}
-		let html = "收件字號：" + "<a title='案件辦理情形 on " + landhb_svr + "' href='#' onclick='javascript:window.open(\"http://\"\+landhb_svr\+\":9080/LandHB/Dispatcher?REQ=CMC0202&GRP=CAS&MM01="+ jsonObj.raw["MM01"] +"&MM02="+ jsonObj.raw["MM02"] +"&MM03="+ jsonObj.raw["MM03"] +"&RM90=\")'>" + jsonObj.收件字號 + "</a> </br>";
-		html += "收件時間：" + jsonObj.收件時間 + " <br/>";
-		html += "收件人員：" + jsonObj.收件人員 + " <br/>";
-		html += "　連件數：<input type='text' id='mm24_upd_text' value='" + jsonObj.raw["MM24"] + "' /> <button id='mm24_upd_btn' data-table='SCMSMS' data-case-id='" + jsonObj.收件字號 + "' data-origin-value='" + jsonObj.raw["MM24"] + "' data-column='MM24' data-input-id='mm24_upd_text' data-title=' " + jsonObj.raw["MM01"] + "-" + jsonObj.raw["MM02"] + "-" + jsonObj.raw["MM03"] + " 連件數'>更新</button><br/>";
-		html += "申請事由：" + jsonObj.raw["MM06"] + "：" + jsonObj.申請事由 + " <br/>";
-		html += "　段小段：" + jsonObj.raw["MM08"] + " <br/>";
-		html += "　　地號：" + (isEmpty(jsonObj.raw["MM09"]) ? "" : jsonObj.地號) + " <br/>";
-		html += "　　建號：" + (isEmpty(jsonObj.raw["MM10"]) ? "" : jsonObj.建號) + " <br/>";
-		html += "<span class='text-info'>辦理情形</span>：" + jsonObj.辦理情形 + " <br/>";
-		html += "結案狀態：" + jsonObj.結案狀態 + " <br/>";
-		html += "<span class='text-info'>延期原因</span>：" + jsonObj.延期原因 + " <br/>";
-		html += "<span class='text-info'>延期時間</span>：" + jsonObj.延期時間 + " <br/>";
-		if (jsonObj.結案已否 && jsonObj.raw["MM22"] == "C") {
-			html += '<h6 class="mt-2 mb-2"><span class="text-danger">※</span> ' + "發現 " + jsonObj.收件字號 + " 已「結案」但辦理情形為「延期複丈」!" + '</h6>';
-			html += "<button id='sur_delay_case_fix_button' class='text-danger' data-trigger='manual' data-toggle='popover' data-content='需勾選右邊其中一個選項才能進行修正' title='錯誤訊息' data-placement='top'>修正</button> ";
-			html += "<label for='sur_delay_case_fix_set_D'><input id='sur_delay_case_fix_set_D' type='checkbox' checked /> 辦理情形改為核定</label> ";
-			html += "<label for='sur_delay_case_fix_clear_delay_datetime'><input id='sur_delay_case_fix_clear_delay_datetime' type='checkbox' checked /> 清除延期時間</label> ";
-		}
-		showModal({
-			title: "測量案件查詢",
-			body: html,
-			size: "md",
-			callback: function() {
-				$("#sur_delay_case_fix_button").off("click").one("click", xhrFixSurDelayCase.bind(jsonObj.收件字號));
-				$("#mm24_upd_btn").off("click").one("click", e => {
-					// input validation
-					let number = $("#mm24_upd_text").val().replace(/\D/g, "");
-					$("#mm24_upd_text").val(number);
-					xhrUpdateCaseColumnData(e);
-				});
-				addUserInfoEvent();
-			}
-		});
-	} else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-		throw new Error("查詢失敗：" + jsonObj.message);
-	}
 }
 
 let xhrFixSurDelayCase = function(e) {

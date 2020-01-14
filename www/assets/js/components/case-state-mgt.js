@@ -58,12 +58,10 @@ if (Vue) {
 
                 let that = this;
 
-                fetch("query_json_api.php", {
+                asyncFetch("query_json_api.php", {
                     method: "POST",
                     //headers: { "Content-Type": "application/json" },
                     body: body
-                }).then(response => {
-                    return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({

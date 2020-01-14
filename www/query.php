@@ -128,52 +128,8 @@ fieldset fieldset legend {
 
           </fieldset>
         </div>
-        <div class="col-6">
-          <fieldset>
-            <legend>複丈案件查詢<small>(修正已結延期、修改連件數)</small></legend>
-
-            <div class="form-row">
-              <div class="input-group input-group-sm col">
-                <select id="sur_delay_case_fix_year" name="sur_delay_case_fix_year" class="form-control no-cache" aria-label="年" aria-describedby="inputGroup-sur_delay_case_fix_year" required>
-                  <option>107</option>
-                  <option selected>108</option>
-                  <option>109</option>
-                </select>
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-sur_delay_case_fix_year">年</span>
-                </div>
-              </div>
-              <div class="input-group input-group-sm col">
-                <select id="sur_delay_case_fix_code" name="sur_delay_case_fix_code" class="form-control" data-trigger="manual" data-toggle="popover" data-content='請選擇案件字' title='案件字' data-placement="top" aria-label="字" aria-describedby="inputGroup-sur_delay_case_fix_code" required>
-                  <option></option>
-                  <option value="HB12">HB12 中地測丈</option>
-                  <option value="HB13">HB13 中地測建</option>
-                  <option value="HB17">HB17 中地法土</option>
-                  <option value="HB18">HB18 中地法建</option>
-                </select>
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-sur_delay_case_fix_code">字</span>
-                </div>
-              </div>
-              <div class="input-group input-group-sm col">
-                <input type="number" step="100" min="100" max="999999" id="sur_delay_case_fix_num" name="sur_delay_case_fix_num" class="form-control" aria-label="號" aria-describedby="inputGroup-sur_delay_case_fix_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-sur_delay_case_fix_num">號</span>
-                </div>
-              </div>
-              <div class="filter-btn-group col">
-                <button id="sur_delay_case_fix_search_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="sur_delay_case_fix_quote_button" class="btn btn-sm btn-outline-success">備註</button>
-              </div>
-            </div>
-
-            <blockquote id="sur_delay_case_fix_quote" class="hide" data-title="複丈案件查詢">
-              <h5><span class="text-danger">※</span>注意：本功能會清除如下圖之欄位資料並將案件辦理情形改為【核定】，請確認後再執行。</h5>
-              <img src="assets/howto/107-HB18-3490_測丈已結案案件辦理情形出現(逾期)延期複丈問題調整【參考】.jpg" />
-              <h5><span class="text-danger">※</span> 問題原因說明</h5>
-              <div>原因是 CMB0301 延期複丈功能，針對於有連件案件在做處理時，會自動根據MM24案件數，將後面的案件自動做延期複丈的更新。導致後續已結案的案件會被改成延期複丈的狀態 MM22='C' 就是 100、200、300、400為四連件，所以100的案件 MM24='4'，200、300、400 的 MM24='0' 延期複丈的問題再將100號做延期複丈的時候，會將200、300、400也做延期複丈的更新，所以如果400已經結案，100做延期複丈，那400號就會變成 MM22='C' MM23='A' MM24='4' 的異常狀態。</div>
-            </blockquote>
-          </fieldset>
+        <div id="case-sur-mgt" class="col-6">
+          <case-sur-mgt></case-sur-mgt>
         </div>
       </div>
       <div class="row">
@@ -417,6 +373,11 @@ fieldset fieldset legend {
           </fieldset>
         </div>
       </div>
+      <div class="row">
+        <div id="case-sur-mgt" class="col-6">
+          <case-sur-mgt></case-sur-mgt>
+        </div>
+      </div>
     </div>
   </section><!-- /section -->
 
@@ -446,6 +407,9 @@ fieldset fieldset legend {
   
   <script src="assets/js/cache.js"></script>
   <script src="assets/js/mark.jquery.min.js"></script>
+  
+  <script src="assets/js/components/case-input-group-ui.js"></script>
+  <script src="assets/js/components/case-sur-mgt.js"></script>
 
   <script type="text/javascript">
     // place this variable in global to use this int for condition jufgement, e.g. 108
@@ -542,15 +506,6 @@ fieldset fieldset legend {
       });
       $("#log_zip_button").on("click", xhrZipLog);
 
-      // SUR Case Query & Delay Case Fix
-      $("#sur_delay_case_fix_code").on("change", xhrGetCaseLatestNum.bind({
-        code_id: "sur_delay_case_fix_code",
-        year_id: "sur_delay_case_fix_year",
-        number_id: "sur_delay_case_fix_num"
-      }));
-      $("#sur_delay_case_fix_search_button").on("click", xhrGetSURCase);
-      bindPressEnterEvent("#sur_delay_case_fix_num", xhrGetSURCase);
-
       // user info
       $(".user_tag").on("click", e => {
         let clicked_element = $(e.target);
@@ -568,6 +523,8 @@ fieldset fieldset legend {
       // search users
       $("#search_user_button").on("click", xhrSearchUsers);
       bindPressEnterEvent("#msg_who", xhrSearchUsers);
+
+      window.caseSurMgtVue = new Vue({ el: "#case-sur-mgt" });
     });
   </script>
 </body>
