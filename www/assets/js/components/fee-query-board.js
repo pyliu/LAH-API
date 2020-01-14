@@ -4,10 +4,8 @@ if (Vue) {
             <legend>規費資料</legend>
             <b-form-row class="mb-2">
                 <b-col>
-                    <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="inputGroup-fee_query_date">日期</span>
-                        </div>
+                    <b-input-group size="sm">
+                        <b-input-group-prepend is-text>日期</b-input-group-prepend>
                         <b-form-input
                             id="fee_query_date"
                             type="date"
@@ -16,14 +14,11 @@ if (Vue) {
                             :class="['no-cache']"
                             :formatter="toTWDate"
                         ></b-form-input>
-                        </b-form-input>
-                    </div>
+                    </b-input-group>
                 </b-col>
                 <b-col>
-                    <div class="input-group input-group-sm">
-                        <div class="input-group-prepend ml-1">
-                            <span class="input-group-text" id="inputGroup-fee_query_number">電腦給號</span>
-                        </div>
+                    <b-input-group size="sm">
+                        <b-input-group-prepend is-text>電腦給號</b-input-group-prepend>
                         <b-form-input
                             v-model="number"
                             id="fee_query_number"
@@ -35,10 +30,10 @@ if (Vue) {
                             min=1
                             trim
                             number
-                            :class="['form-control', 'h-100', 'no-cache']"
+                            :class="['no-cache']"
                         >
                         </b-form-input>
-                    </div>
+                    </b-input-group>
                 </b-col>
             </b-form-row>
             <b-form-row>
