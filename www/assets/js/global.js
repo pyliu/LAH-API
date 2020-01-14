@@ -266,7 +266,6 @@ let showAlert = opts => {
 
         // singleton inside :D
         initAlertUI();
-        
         window.alertApp.show(opts);
     }
 }
