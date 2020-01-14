@@ -31,7 +31,7 @@ if (Vue) {
                     :min="num_min"
                     :max="num_max"
                     :id="prefix+'_case_update_num'"
-                    :state="num > num_min && num < num_max"
+                    :state="num >= num_min && num <= num_max"
                 ></b-form-input>
                 <b-input-group-append is-text>號</b-input-group-append>
             </b-input-group>
