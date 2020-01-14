@@ -40,9 +40,9 @@ if (Vue) {
                     return false;
                 }
             
-                let year = data.year.replace(/\D/g, "");
+                let year = data.year;
                 let code = data.code;
-                let number = data.num.replace(/\D/g, "");
+                let number = data.num;
                 let that = this;
 
                 toggle(e.target);

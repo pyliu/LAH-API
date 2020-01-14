@@ -118,7 +118,7 @@ if (Vue) {
         },
         watch: {
             year: function(val) {
-                let evt = this.newCustomEvent('code-updated', val, $(this.$el).find(`#${this.prefix}_case_update_year`)[0]);
+                let evt = this.newCustomEvent('year-updated', val, $(this.$el).find(`#${this.prefix}_case_update_year`)[0]);
                 this.$emit("year-updated", evt);
             },
             code: function(val) {
@@ -126,7 +126,7 @@ if (Vue) {
                 this.$emit("code-updated", evt);
             },
             num: function(val) {
-                let evt = this.newCustomEvent('code-updated', val, $(this.$el).find(`#${this.prefix}_case_update_num`)[0]);
+                let evt = this.newCustomEvent('num-updated', val, $(this.$el).find(`#${this.prefix}_case_update_num`)[0]);
                 this.$emit("num-updated", evt);
             },
         },
