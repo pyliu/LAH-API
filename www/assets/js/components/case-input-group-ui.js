@@ -122,6 +122,7 @@ if (Vue) {
                 this.$emit("year-updated", evt);
             },
             code: function(val) {
+                this.num_step = val == "HB12" || val == "HB17" ? 100 : 10;
                 let evt = this.newCustomEvent('code-updated', val, $(this.$el).find(`#${this.prefix}_case_update_code`)[0]);
                 this.$emit("code-updated", evt);
             },
