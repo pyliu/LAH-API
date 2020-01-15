@@ -533,10 +533,11 @@ let initAlertUI = () => {
                 @after-leave="afterLeave"
             >
                 <div v-show="seen" class="alert alert-dismissible alert-fixed shadow" :class="type" role="alert" @mouseover="mouseOver" @mouseout="mouseOut">
-                    <div v-show="title != ''">
+                    <div v-show="title != '' && typeof title == 'string'" class="d-flex w-100 justify-content-between">
                         <h6 v-html="title"></h6>
-                        <hr>
+                        <span v-html="subtitle" style="font-size: .75rem"></span>
                     </div>
+                    <hr v-show="title != '' && typeof title == 'string'" class="mt-0 mb-1">
                     <p v-html="message" style="font-size: .9rem"></p>
                     <button type="button" class="close" @click="seen = false">
                         <span aria-hidden="true">&times;</span>
@@ -552,6 +553,7 @@ let initAlertUI = () => {
             el: '#bs_alert_template',
             data: {
                 title: "",
+                subtitle: "",
                 message: 'Hello Alert Vue!',
                 type: 'alert-warning',
                 seen: false,
@@ -559,10 +561,11 @@ let initAlertUI = () => {
                 progress_timer_handle: null,
                 progress_counter: 1,
                 autohide: true,
-                delay: 15000,
+                delay: 10000,
                 animated_in: "animated zoomInDown",
                 animated_out: "animated zoomOutUp",
-                animated_opts: ANIMATED_TRANSITIONS
+                animated_opts: ANIMATED_TRANSITIONS,
+                anim_delay: 400
             },
             methods: {
                 mouseOver: function(e) {
@@ -597,8 +600,8 @@ let initAlertUI = () => {
                 show: function(opts) {
                     if (this.seen) {
                         this.seen = false;
-                        // the slide up animation is 0.5s
-                        setTimeout(() => this.setData(opts), 500);
+                        // the slide up animation is 0.4s
+                        setTimeout(() => this.setData(opts), this.anim_delay);
                     } else {
                         this.setData(opts);
                     }
@@ -606,9 +609,10 @@ let initAlertUI = () => {
                 setData: function(opts) {
                     // normal usage, you want to attach event to the element in the alert window
                     if (typeof opts.callback == "function") {
-                        setTimeout(opts.callback, 500);
+                        setTimeout(opts.callback, this.anim_delay);
                     }
                     this.title = opts.title || "";
+                    this.subtitle = opts.subtitle || "";
                     this.autohide = opts.autohide || true;
                     this.message = opts.message;
                     this.type = opts.type;
