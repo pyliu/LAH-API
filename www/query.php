@@ -373,11 +373,6 @@ fieldset fieldset legend {
           </fieldset>
         </div>
       </div>
-      <div class="row">
-        <div id="case-sur-mgt" class="col-6">
-          <case-sur-mgt></case-sur-mgt>
-        </div>
-      </div>
     </div>
   </section><!-- /section -->
 
