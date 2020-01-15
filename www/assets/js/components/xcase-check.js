@@ -74,15 +74,12 @@ if (Vue) {
             "xcase-check-item": {
                 template: `<ul style="font-size: 0.9rem">
                     <li v-for="(item, index) in ids">
-                        <a href='javascript:void(0)' class='reg_case_id' @click="query">{{item}}</a>
+                        <a href='javascript:void(0)' class='reg_case_id' @click="window.utilApp.fetchRegCase">{{item}}</a>
                         <button class='fix_xcase_button btn btn-sm btn-outline-success' :data-id='item' @click.once="fix">修正</button>
                     </li>
                 </ul>`,
                 props: ["ids"],
                 methods: {
-                    query: function(e) {
-                        xhrRegQueryCaseDialog(e);
-                    },
                     fix: function(e) {
                         let id = $(e.target).data("id").replace(/[^a-zA-Z0-9]/g, "");
                         console.log("The problematic xcase id: "+id);

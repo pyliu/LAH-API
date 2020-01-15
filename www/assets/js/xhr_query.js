@@ -1,49 +1,4 @@
 //<![CDATA[
-
-let xhrGetCaseLatestNum = function(e) {
-	let code_select = $("#"+this.code_id);
-	let code_val = code_select.val();
-	if (isEmpty(code_val)) {
-		return;
-	}
-	
-	let year = $("#"+this.year_id).val().replace(/\D/g, "");
-	let code = trim(code_val);
-
-	let body = new FormData();
-	body.append("type", "max");
-	body.append("year", year);
-	body.append("code", code);
-	
-	let number = $("#"+this.number_id);
-
-	toggle(code_select);
-	toggle(number);
-
-	fetch("query_json_api.php", {
-		method: "POST",
-		body: body
-	}).then(response => {
-		return response.json();
-	}).then(jsonObj => {
-		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-			addNotification({
-				message: "目前 " + code_val + " 最新案件號為 " + jsonObj.max
-			});
-			number.val(jsonObj.max);
-		} else if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-			showAlert({message: jsonObj.message, type: "danger"});
-		} else {
-			showAlert({message: code_val, type: "danger"});
-		}
-		toggle(code_select);
-		toggle(number);
-	}).catch(ex => {
-		console.error("xhrGetCaseLatestNum parsing failed", ex);
-		showAlert({message: "查詢最大號碼失敗~【" + code_val + "】", type: "danger"});
-	});
-}
-
 let showRegCaseDetail = (jsonObj) => {
 	let html = "<p>" + jsonObj.tr_html + "</p>";
 	if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
@@ -133,91 +88,7 @@ let showPrcCaseDetail = (jsonObj) => {
 		body: html,
 		title: "地價案件詳情",
 		size: modal_size,
-		callback: () => { $(".prc_case_serial").off("click").on("click", xhrRegQueryCaseDialog); }
-	});
-}
-
-let xhrRegQueryCaseDialog = e => {
-	// ajax event binding
-	let clicked_element = $(e.target);
-	// remove additional characters for querying
-	let id = trim(clicked_element.text());
-
-	let body = new FormData();
-	body.append("type", "reg_case");
-	body.append("id", id);
-
-	fetch("query_json_api.php", {
-		method: "POST",
-		body: body
-	}).then(response => {
-		if (response.status != 200) {
-			throw new Error("XHR連線異常，回應非200");
-		}
-		return response.json();
-	}).then(jsonObj => {
-		showRegCaseDetail(jsonObj);
-	}).catch(ex => {
-		console.error("xhrRegQueryCaseDialog parsing failed", ex);
-	});
-}
-
-let xhrRegQueryCase = e => {
-	if (!validateCaseInput("#query_year", "#query_code", "#query_num", "#query_display")) {
-		return false;
-	}
-	let year = $("#query_year").val().replace(/\D/g, "");
-	let code = $("#query_code").val();
-	let number = $("#query_num").val().replace(/\D/g, "");
-	// prepare post params
-	let id = trim(year + code + number);
-	let body = new FormData();
-	body.append("type", "reg_case");
-	body.append("id", id);
-	
-	toggle(e.target);
-
-	fetch("query_json_api.php", {
-		method: "POST",
-		//headers: { "Content-Type": "application/json" },
-		body: body
-	}).then(response => {
-		return response.json();
-	}).then(jsonObj => {
-		showRegCaseDetail(jsonObj);
-		toggle(e.target);
-	}).catch(ex => {
-		console.error("xhrRegQueryCase parsing failed", ex);
-		showAlert({message: "無法取得 " + id + " 資訊!【" + ex + "】", type: "danger"});
-	});
-}
-
-let xhrPrcQueryCase = e => {
-	if (!validateCaseInput("#query_year", "#query_code", "#query_num", "#query_display")) {
-		return false;
-	}
-	let year = $("#query_year").val().replace(/\D/g, "");
-	let code = $("#query_code").val();
-	let number = $("#query_num").val().replace(/\D/g, "");
-	// prepare post params
-	let id = trim(year + code + number);
-	let body = new FormData();
-	body.append("type", "prc_case");
-	body.append("id", id);
-	
-	toggle(e.target);
-
-	fetch("query_json_api.php", {
-		method: "POST",
-		body: body
-	}).then(response => {
-		return response.json();
-	}).then(jsonObj => {
-		showPrcCaseDetail(jsonObj);
-		toggle(e.target);
-	}).catch(ex => {
-		console.error("xhrPrcQueryCase parsing failed", ex);
-		showAlert({message: "無法取得 " + id + " 資訊!【" + ex + "】", type: "danger"});
+		callback: () => { $(".prc_case_serial").off("click").on("click", window.utilApp.fetchRegCase); }
 	});
 }
 
@@ -306,7 +177,7 @@ let xhrGetCasesByID = e => {
 				html += "</p>";
 				$("#id_query_crsms_result").html(html);
 				// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
-				$(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
+				$(".reg_case_id").off("click").on("click", window.utilApp.fetchRegCase);
 				$(".reg_case_id").attr("title", "點我取得更多資訊！");
 			}
 			finish_count++;

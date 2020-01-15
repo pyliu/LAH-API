@@ -273,7 +273,7 @@ if (Vue) {
                     this.rm31 = this.raw["RM31"];
                     this.wip = isEmpty(this.rm31);
                     addUserInfoEvent(e);
-                    $(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
+                    $(".reg_case_id").off("click").on("click", window.utilApp.fetchRegCase);
                 }
             }
         }

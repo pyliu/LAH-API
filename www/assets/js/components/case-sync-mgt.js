@@ -117,7 +117,7 @@ if (Vue) {
                                     let column = $(element).data("column");
                                     $(element).on("click", that.syncCaseColumn.bind(that, id, column));
                                 });
-                                $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
+                                $("#sync_x_case_serial").off("click").on("click", window.utilApp.fetchRegCase);
                             },
                             size: "lg"
                         });
@@ -130,7 +130,7 @@ if (Vue) {
                                 <button id='inst_x_case_confirm_button'>新增本地端資料</button>
                             </div>`,
                             callback: () => {
-                                $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog);
+                                $("#sync_x_case_serial").off("click").on("click", window.utilApp.fetchRegCase);
                                 $("#inst_x_case_confirm_button").off("click").on("click", this.instRemoteCase.bind(this, id));
                             },
                             size: "md"
@@ -150,7 +150,7 @@ if (Vue) {
                             subtitle: `${year}-${code}-${number}`,
                             message: html,
                             type: "success",
-                            callback: () => $("#sync_x_case_serial").off("click").on("click", xhrRegQueryCaseDialog)
+                            callback: () => $("#sync_x_case_serial").off("click").on("click", window.utilApp.fetchRegCase)
                         });
                     }
                     toggle(e.target);

@@ -169,7 +169,7 @@ if (Vue) {
                                 })
                             );
                             $(".tmp_tbl_btn").off("click").on("click", that.showSQL);
-                            $(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog);
+                            $(".reg_case_id").off("click").on("click", window.utilApp.fetchRegCase);
                         }
                     });
                 }).catch(ex => {

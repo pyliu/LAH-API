@@ -91,42 +91,8 @@ fieldset fieldset legend {
     <div class="container-fluid">
       
     <div class="row">
-        <div class="col-6">
-          <fieldset>
-            <legend>登記案件查詢</legend>
-
-            <div class="form-row">
-              <div class="input-group input-group-sm col">
-                <select id="query_year" name="query_year" class="form-control no-cache" aria-label="年" aria-describedby="inputGroup-query_year" required>
-                  <option>105</option>
-                  <option>106</option>
-                  <option>107</option>
-                  <option selected>108</option>
-                  <option>109</option>
-                </select>
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-query_year">年</span>
-                </div>
-              </div>
-              <div class="input-group input-group-sm col">
-              <?php echo getCodeSelectHTML("query_code", 'class="form-control" data-trigger="manual" data-toggle="popover" data-content="請選擇案件字" title="案件字" data-placement="top" aria-label="字" aria-describedby="inputGroup-query_code" required'); ?>
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-query_code">字</span>
-                </div>
-              </div>
-              <div class="input-group input-group-sm col">
-                <input type="number" step="10" min="10" max="999999" id="query_num" name="query_num" class="form-control" aria-label="號" aria-describedby="inputGroup-query_num" required data-trigger="manual" data-toggle="popover" data-content='請輸入案件號(最多6碼)' title='案件號' data-placement="top" />
-                <div class="input-group-append">
-                  <span class="input-group-text" id="inputGroup-query_num">號</span>
-                </div>
-              </div>
-              <div class="filter-btn-group col">
-                <button id="query_button" class="btn btn-sm btn-outline-primary">登記</button>
-                <button id="query_prc_button" class="btn btn-sm btn-outline-secondary">地價</button>
-              </div>
-            </div>
-
-          </fieldset>
+        <div id="case-reg-search" class="col-6">
+          <case-reg-search></case-reg-search>
         </div>
         <div id="case-sur-mgt" class="col-6">
           <case-sur-mgt></case-sur-mgt>
@@ -405,24 +371,12 @@ fieldset fieldset legend {
   
   <script src="assets/js/components/case-input-group-ui.js"></script>
   <script src="assets/js/components/case-sur-mgt.js"></script>
+  <script src="assets/js/components/case-reg-search.js"></script>
 
   <script type="text/javascript">
     // place this variable in global to use this int for condition jufgement, e.g. 108
     let this_year = <?php echo $this_year; ?>;
     $(document).ready(e => {
-      // 選擇【字】的事件
-      $("#query_code").on("change", xhrGetCaseLatestNum.bind({
-        code_id: "query_code",
-        year_id: "query_year",
-        number_id: "query_num"
-      }));
-      // 登記查詢按鍵
-      $("#query_button").on("click", xhrRegQueryCase);
-      // 號
-      bindPressEnterEvent("#query_num", xhrRegQueryCase);
-      // 地價查詢按鍵
-      $("#query_prc_button").on("click", xhrPrcQueryCase);
-
       // query section data event
       $("#data_query_button").on("click", xhrGetSectionRALIDCount);
       bindPressEnterEvent("#data_query_text", xhrGetSectionRALIDCount);
@@ -520,6 +474,7 @@ fieldset fieldset legend {
       bindPressEnterEvent("#msg_who", xhrSearchUsers);
 
       window.caseSurMgtVue = new Vue({ el: "#case-sur-mgt" });
+      window.caseRegSearchVue = new Vue({ el: "#case-reg-search" });
     });
   </script>
 </body>

@@ -980,7 +980,7 @@ if (Vue) {
                     }
                 },
                 mounted: function() { 
-                    setTimeout(() => $(".reg_case_id").off("click").on("click", xhrRegQueryCaseDialog).removeClass("reg_case_id"), 400);
+                    setTimeout(() => $(".reg_case_id").off("click").on("click", window.utilApp.fetchRegCase).removeClass("reg_case_id"), 400);
                 }
             },
             "fee-detail-fix-ezcard": {

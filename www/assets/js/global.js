@@ -662,6 +662,30 @@ let initUtilApp = () => {
             transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)],
             callbackQueue: []
         },
+        created: function(e) {
+            this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
+                //console.log('Modal is about to be shown', bvEvent, modalId)
+            });
+            this.$root.$on('bv::modal::shown', (bvEvent, modalId) => {
+                //console.log('Modal is shown', bvEvent, modalId)
+                if (!this.openConfirm) {
+                    this.showModal(modalId);
+                }
+            });
+            this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
+                //console.log('Modal is about to hide', bvEvent, modalId)
+                // animation will break confirm Promise, so skip it
+                if (this.openConfirm) {
+                    this.openConfirm = false;
+                } else {
+                    bvEvent.preventDefault();
+                    this.hideModal(modalId);
+                }
+            });
+            this.$root.$on('bv::modal::hidden', (bvEvent, modalId) => {
+                //console.log('Modal is hidden', bvEvent, modalId)
+            });
+        },
         methods: {
             // make simple, short popup notice message
             makeToast: function(message, opts = {}) {
@@ -831,31 +855,32 @@ let initUtilApp = () => {
                 }).catch(err => {
                     console.error(err);
                 });
+            },
+            fetchRegCase: function(e) {
+                // ajax event binding
+                let clicked_element = $(e.target);
+                // remove additional characters for querying
+                let id = trim(clicked_element.text());
+
+                let body = new FormData();
+                body.append("type", "reg_case");
+                body.append("id", id);
+
+                asyncFetch("query_json_api.php", {
+                    method: "POST",
+                    body: body
+                }).then(jsonObj => {
+                    showRegCaseDetail(jsonObj);
+                }).catch(ex => {
+                    console.error("window.utilApp.fetchRegCase parsing failed", ex);
+                    showAlert({
+                        title: "擷取登記案件",
+                        subtitle: id,
+                        message: ex.toString(),
+                        type: "danger"
+                    });
+                });
             }
-        },
-        created: function(e) {
-            this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
-                //console.log('Modal is about to be shown', bvEvent, modalId)
-            });
-            this.$root.$on('bv::modal::shown', (bvEvent, modalId) => {
-                //console.log('Modal is shown', bvEvent, modalId)
-                if (!this.openConfirm) {
-                    this.showModal(modalId);
-                }
-            });
-            this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
-                //console.log('Modal is about to hide', bvEvent, modalId)
-                // animation will break confirm Promise, so skip it
-                if (this.openConfirm) {
-                    this.openConfirm = false;
-                } else {
-                    bvEvent.preventDefault();
-                    this.hideModal(modalId);
-                }
-            });
-            this.$root.$on('bv::modal::hidden', (bvEvent, modalId) => {
-                //console.log('Modal is hidden', bvEvent, modalId)
-            });
         }
     });
 }
