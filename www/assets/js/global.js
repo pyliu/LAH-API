@@ -360,7 +360,7 @@ let toggle = selector => {
     var el = $(selector);
     el.attr("disabled") ? el.attr("disabled", false) : el.attr("disabled", true);
     // also find cover container
-    let container = el.closest("fieldset");
+    let container = el.closest("fieldset, .modal-content");
     if (container.length == 0) {
         if (el.is("button")) {
             toggleInsideSpinner(el);

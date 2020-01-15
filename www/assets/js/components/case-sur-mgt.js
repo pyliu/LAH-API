@@ -84,16 +84,7 @@ if (Vue) {
                     showModal({
                         title: "測量案件查詢",
                         message: this.$createElement("case-sur-dialog", { props: { json: jsonObj } }),
-                        callback: function() {
-                            // $("#sur_delay_case_fix_button").off("click").one("click", xhrFixSurDelayCase.bind(jsonObj.收件字號));
-                            // $("#mm24_upd_btn").off("click").one("click", e => {
-                            //     // input validation
-                            //     let number = $("#mm24_upd_text").val().replace(/\D/g, "");
-                            //     $("#mm24_upd_text").val(number);
-                            //     xhrUpdateCaseColumnData(e);
-                            // });
-                            addUserInfoEvent();
-                        }
+                        callback: () => addUserInfoEvent()
                     });
                 } else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
                     throw new Error("查詢失敗：" + jsonObj.message);
@@ -132,14 +123,10 @@ if (Vue) {
                         <b-col>
                             <b-button
                                 id='mm24_upd_btn'
-                                data-table='SCMSMS'
-                                :data-case-id="json.收件字號.replace(/[^a-zA-Z0-9]/g, '')"
-                                :data-origin-value="json.raw['MM24']"
-                                data-column='MM24'
-                                data-input-id='mm24_upd_text'
-                                :data-title="json.raw['MM01'] + '-' + json.raw['MM02'] + '-' + json.raw['MM03'] + '連件數'"
                                 size="sm"
                                 variant="outline-primary"
+                                @click="update"
+                                :disabled="orig_count == count"
                             >更新</b-button>
                         </b-col>
                     </b-form-row>
@@ -192,25 +179,80 @@ if (Vue) {
                 props: ["json"],
                 data: () => {
                     return {
+                        id: "",
                         setD: true,
                         clearDatetime: true,
                         count: 0,
+                        orig_count: 0,
                         disabled_popover: true,
                         debug: false
                     }
                 },
                 methods: {
+                    update: function(e) {
+                        /**
+                         * add various data attrs in the button tag
+                         */
+                        let title = this.json.raw['MM01'] + '-' + this.json.raw['MM02'] + '-' + this.json.raw['MM03'] + '連件數';
+                        if (this.orig_count != this.count) {
+                            let that = this;
+                            showConfirm("確定要修改 " + title + " 為「" + this.count + "」？",function () {
+                                let body = new FormData();
+                                body.append("type", "upd_case_column");
+                                body.append("id", that.id);
+                                body.append("table", "SCMSMS");
+                                body.append("column", "MM24");
+                                body.append("value", that.count);
+
+                                toggle(e.target);
+
+                                asyncFetch("query_json_api.php", {
+                                    method: "POST",
+                                    body: body
+                                }).then(jsonObj => {
+                                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                        addNotification({
+                                            title: "更新連件數",
+                                            subtitle: that.id,
+                                            message: title + "更新為「" + that.count + "」更新成功",
+                                            type: "success"
+                                        });
+                                        that.orig_count = that.count;
+                                    } else {
+                                        addNotification({
+                                            title: "更新連件數",
+                                            subtitle: that.id,
+                                            message: jsonObj.message,
+                                            type: "danger"
+                                        });
+                                    }
+                                    toggle(e.target);
+                                }).catch(ex => {
+                                    console.error("case-sur-dialog::update parsing failed", ex);
+                                    showAlert({
+                                        message: ex.toString(),
+                                        subtitle: that.id,
+                                        title: "更新欄位失敗",
+                                        type: "danger"
+                                    });
+                                });
+                            });
+                        } else {
+                            addNotification("連件數未變更，不需更新。");
+                        }
+                    },
                     fix: function(e) {
                         if (!this.setD && !this.clearDatetime) {
                             this.disabled_popover = false;
                             return;
                         }
                         this.disabled_popover = true;
-                        let id = `${this.json.raw['MM01']}${this.json.raw['MM02']}${this.json.raw['MM03']}`;
+                        let id = this.id;
                         let upd_mm22 = this.setD;
                         let clr_delay = this.clearDatetime;
+                        let that = this;
                         showConfirm("確定要修正本案件?", function() {
-                            $(e.target).remove();
+                            toggle(e.target);
                             //fix_sur_delay_case
                             let body = new FormData();
                             body.append("type", "fix_sur_delay_case");
@@ -223,26 +265,32 @@ if (Vue) {
                             }).then(jsonObj => {
                                 if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                     addNotification({
+                                        title: "修正複丈案件",
+                                        subtitle: id,
                                         type: "success",
-                                        message: id + " 複丈案件修正成功!"
+                                        message: "修正成功!"
                                     });
+                                    // update the data will affect UI
+                                    that.json.raw['MM22'] = 'D';
                                 } else {
                                     let msg = "回傳狀態碼不正確!【" + jsonObj.message + "】";
                                     showAlert({
                                         title: "修正複丈案件失敗",
+                                        subtitle: id,
                                         message: msg,
                                         type: "danger"
                                     });
                                 }
                             }).catch(ex => {
                                 console.error("case-sur-dialog::fix parsing failed", ex);
-                                showAlert({title: "修正複丈案件失敗", message: "修正 " + id + " 失敗!【" + ex.toString() + "】", type: "danger"});
+                                showAlert({title: "修正複丈案件失敗", subtitle: id, message: "修正失敗!【" + ex.toString() + "】", type: "danger"});
                             });
                         });
                     }
                 },
-                mounted: function() {
-                    this.count = this.json.raw["MM24"];
+                created: function() {
+                    this.orig_count = this.count = this.json.raw["MM24"];
+                    this.id = `${this.json.raw['MM01']}${this.json.raw['MM02']}${this.json.raw['MM03']}`;
                 }
             }
         }
