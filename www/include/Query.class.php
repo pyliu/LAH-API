@@ -657,7 +657,6 @@ class Query {
 		}
 
 		global $log;
-		$diff_result = array();
 		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
 		$num = substr($id, 7, 6);
