@@ -90,7 +90,7 @@ fieldset fieldset legend {
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
       
-    <div class="row">
+      <div class="row">
         <div id="case-reg-search" class="col-6">
           <case-reg-search></case-reg-search>
         </div>

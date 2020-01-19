@@ -95,6 +95,14 @@
           <easycard-payment-check></easycard-payment-check>
         </div>
       </div>
+      <div class="row">
+        <div id="case-reg-search" class="col-6">
+          <case-reg-search></case-reg-search>
+        </div>
+        <div id="case-sur-mgt" class="col-6">
+          <case-sur-mgt></case-sur-mgt>
+        </div>
+      </div>
       <div id="test" class="row">
       </div>
     </div>
@@ -140,6 +148,8 @@
   <script src="assets/js/components/case-temp-mgt.js"></script>
   <script src="assets/js/components/case-sync-mgt.js"></script>
   <script src="assets/js/components/fee-query-board.js"></script>
+  <script src="assets/js/components/case-sur-mgt.js"></script>
+  <script src="assets/js/components/case-reg-search.js"></script>
 
   <script type="text/javascript">
     
@@ -151,6 +161,8 @@
       window.caseTempMgtVue = new Vue({el: "#case-temp-mgt"});
       window.caseSyncMgtVue = new Vue({el: "#case-sync-mgt"});
       window.feeQueryBoardVue = new Vue({el: "#fee-query-board"});
+      window.caseSurMgtVue = new Vue({ el: "#case-sur-mgt" });
+      window.caseRegSearchVue = new Vue({ el: "#case-reg-search" });
 
       let jsonObj = {
           "status": 1,
