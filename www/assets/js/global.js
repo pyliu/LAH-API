@@ -498,15 +498,15 @@ let initBlockquoteModal = () => {
 }
 
 let initWatchdog = () => {
-    if (xhrCallWatchDog) {
+    if (window.utilApp.callWatchdog) {
         // automatic check every 15 minutes
-        window.pyliuChkTimer = setInterval(function(e) {
+        window.utilApp.watchdog_timer = setInterval(function(e) {
             let now = new Date();
             let weekday = now.getDay();
             if (weekday != 0 && weekday != 6) {
                 let hour = now.getHours();
                 if (hour > 8 && hour < 17) {
-                    xhrCallWatchDog(e);
+                    window.utilApp.callWatchdog(e);
                 }
             }
         }, 900000);	// 1000 * 60 * 15
@@ -515,7 +515,7 @@ let initWatchdog = () => {
             window.location.reload(true);
         }, 28800000);	// 1000 * 60 * 60 * 8
     } else {
-        console.warn("Watchdog disabled. (xhrCallWatchDog not defined)");
+        console.warn("Watchdog disabled. (window.utilApp.callWatchdog not defined)");
     }
 }
 
@@ -660,7 +660,8 @@ let initUtilApp = () => {
             openConfirm: false,
             confirmAnswer: false,
             transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)],
-            callbackQueue: []
+            callbackQueue: [],
+            watchdog_timer: null
         },
         created: function(e) {
             this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
@@ -880,6 +881,25 @@ let initUtilApp = () => {
                         type: "danger"
                     });
                 });
+            },
+            callWatchdog: function(e) {
+                let that = this;
+                let body = new FormData();
+                body.append("type", "watchdog");
+                asyncFetch("query_json_api.php", {
+                    method: "POST",
+                    body: body
+                }).then(jsonObj => {
+                    // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
+                    if (jsonObj.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        console.error(jsonObj.message);
+                        // stop interval timer
+                        clearTimeout(that.watchdog_timer);
+                        console.info("停止全域WATCHDOG定時器。");
+                    }
+                }).catch(ex => {
+                    console.error("window.utilApp.callWatchdog parsing failed", ex);
+                });
             }
         }
     });
@@ -916,11 +936,11 @@ let wakeup = () => {
 }
 
 $(document).ready(e => {
+    initUtilApp();
     initBlockquoteModal();
     initTooltip();
     initDatepicker();
     initWatchdog();
-    initUtilApp();
     /**
      * detect page idle and add animation for fun
      */

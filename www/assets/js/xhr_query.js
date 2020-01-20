@@ -92,25 +92,6 @@ let showPrcCaseDetail = (jsonObj) => {
 	});
 }
 
-let xhrCallWatchDog = e => {
-	let body = new FormData();
-	body.append("type", "watchdog");
-	asyncFetch("query_json_api.php", {
-		method: "POST",
-		body: body
-	}).then(jsonObj => {
-		// normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
-		if (jsonObj.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
-			console.error(jsonObj.message);
-			// stop interval timer
-			clearTimeout(window.pyliuChkTimer);
-			console.info("停止全域WATCHDOG定時器。");
-		}
-	}).catch(ex => {
-		console.error("xhrCallWatchDog parsing failed", ex);
-	});
-}
-
 let xhrGetSectionRALIDCount = e => {
 	let el = $(e.target);
 	toggle(el);
