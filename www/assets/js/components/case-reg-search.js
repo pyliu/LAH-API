@@ -54,7 +54,6 @@ if (Vue) {
                     method: "POST",
                     body: body
                 }).then(jsonObj => {
-                    console.log(jsonObj);
                     showRegCaseDetail(jsonObj);
                     toggle(e.target);
                 }).catch(ex => {
