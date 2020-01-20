@@ -303,7 +303,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "mod_expac":
-		$log->info("XHR [mod_expac] 修正規費金額【".$_POST["year"].", ".$_POST["num"].", ".$_POST["code"].", ".$_POST["amount"]."】請求");
+		$log->info("XHR [mod_expac] 修正規費項目【".$_POST["year"].", ".$_POST["num"].", ".$_POST["code"].", ".$_POST["amount"]."】請求");
 		// make total number length is 7
 		$result_flag = $query->modifyExpacItem($_POST["year"], str_pad($_POST["num"], 7, '0', STR_PAD_LEFT), $_POST["code"], $_POST["amount"]);
 		if ($result_flag) {
@@ -312,7 +312,7 @@ switch ($_POST["type"]) {
 				"data_count" => "0",
 				"raw" => $result_flag
 			);
-			$log->error("XHR [mod_expac] 更新成功");
+			$log->info("XHR [mod_expac] 更新成功");
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [mod_expac] 更新失敗【".$_POST["year"].", ".$_POST["num"].", ".$_POST["code"].", ".$_POST["amount"]."】");

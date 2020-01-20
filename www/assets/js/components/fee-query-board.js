@@ -885,7 +885,7 @@ if (Vue) {
                                 </b-form-select>
                             </div>
                             <div class='filter-btn-group col'>
-                                <b-button @click="update($event, idx)" size="sm" variant="outline-primary" :data-orig="record['AC20']"><i class="fas fa-edit"></i> 修改</b-button>
+                                <b-button @click="update($event, idx)" size="sm" variant="outline-primary"><i class="fas fa-edit"></i> 修改</b-button>
                             </div>
                         </div>
                     </div>
@@ -928,55 +928,46 @@ if (Vue) {
                 methods: {
                     update: function(e, idx) {
                         let record = this.expac_list[idx];
-                        if (record["AC20"] == $(e.target).data("orig")) {
-                            addNotification({
-                                title: `${record["AC25"]}-${record["AC04"]} ${record["AC30"]}元 項目`,
-                                message: "選項沒變，不需更新",
-                                type: "warning"
+                        let body = new FormData();
+                        body.append("type", "mod_expac");
+                        body.append("year", record["AC25"]);
+                        body.append("num", record["AC04"]);
+                        body.append("code", record["AC20"]);
+                        body.append("amount", record["AC30"]);
+
+                        toggle(e.target);
+
+                        asyncFetch("query_json_api.php", {
+                            method: "POST",
+                            body: body
+                        }).then(jsonObj => {
+                            let the_one = this.expe_list.find(function(element) {
+                                return element.value == record["AC20"];
                             });
-                        } else {
-                            let body = new FormData();
-                            body.append("type", "mod_expac");
-                            body.append("year", record["AC25"]);
-                            body.append("num", record["AC04"]);
-                            body.append("code", record["AC20"]);
-                            body.append("amount", record["AC30"]);
-
-                            toggle(e.target);
-
-                            fetch("query_json_api.php", {
-                                method: "POST",
-                                body: body
-                            }).then(response => {
-                                if (response.status != 200) {
-                                    throw new Error("XHR連線異常，回應非200");
-                                }
-                                return response.json();
-                            }).then(jsonObj => {
-                                if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                    addNotification({
-                                        title: "修改收費項目",
-                                        subtitle: `${record["AC25"]}-${record["AC04"]}`,
-                                        message: `金額 ${record["AC30"]} 項目修正為「${this.expe[code]}」完成`,
-                                        type: "success"
-                                    });
-                                } else {
-                                    addNotification({
-                                        title: "修改收費項目",
-                                        subtitle: `${record["AC25"]}-${record["AC04"]}`,
-                                        message: `金額 ${record["AC30"]} 項目修正為「${this.expe[code]}」失敗`,
-                                        type: "danger"
-                                    });
-                                }
-                                toggle(e.target);
-                            }).catch(ex => {
-                                showAlert({
-                                    title: "fee-detail-expac-mgt::update",
-                                    message: ex.toString(),
+                            if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                addNotification({
+                                    title: "修改收費項目",
+                                    subtitle: `${record["AC25"]}-${record["AC04"]}`,
+                                    message: `金額 ${record["AC30"]} 項目修正為「${the_one.text}」完成`,
+                                    type: "success"
+                                });
+                                $(e.target).data("orig", record["AC20"]);
+                            } else {
+                                addNotification({
+                                    title: "修改收費項目",
+                                    subtitle: `${record["AC25"]}-${record["AC04"]}`,
+                                    message: `金額 ${record["AC30"]} 項目修正為「${the_one.text}」失敗`,
                                     type: "danger"
                                 });
+                            }
+                            toggle(e.target);
+                        }).catch(ex => {
+                            showAlert({
+                                title: "fee-detail-expac-mgt::update",
+                                message: ex.toString(),
+                                type: "danger"
                             });
-                        }
+                        });
                     }
                 },
                 mounted: function() { 
