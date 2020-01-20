@@ -499,17 +499,7 @@ let initBlockquoteModal = () => {
 
 let initWatchdog = () => {
     if (window.utilApp.callWatchdog) {
-        // automatic check every 15 minutes
-        window.utilApp.watchdog_timer = setInterval(function(e) {
-            let now = new Date();
-            let weekday = now.getDay();
-            if (weekday != 0 && weekday != 6) {
-                let hour = now.getHours();
-                if (hour > 8 && hour < 17) {
-                    window.utilApp.callWatchdog(e);
-                }
-            }
-        }, 900000);	// 1000 * 60 * 15
+        window.utilApp.callWatchdog();
         // reload page after 8 hours
         setTimeout(function(e) {
             window.location.reload(true);
@@ -891,7 +881,19 @@ let initUtilApp = () => {
                     body: body
                 }).then(jsonObj => {
                     // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
-                    if (jsonObj.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {                
+                        // automatic check every 15 minutes
+                        window.utilApp.watchdog_timer = setTimeout(function(e) {
+                            let now = new Date();
+                            let weekday = now.getDay();
+                            if (weekday != 0 && weekday != 6) {
+                                let hour = now.getHours();
+                                if (hour > 8 && hour < 17) {
+                                    that.callWatchdog(e);
+                                }
+                            }
+                        }, 900000);	// 1000 * 60 * 15
+                    } else {
                         console.error(jsonObj.message);
                         // stop interval timer
                         clearTimeout(that.watchdog_timer);

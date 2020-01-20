@@ -19,6 +19,7 @@ class WatchDog {
                 $log->warning($row['RM01'].'-'.$row['RM02'].'-'.$row['RM03']);
             }
             
+            $host_ip = $_SERVER["SERVER_ADDR"];
             $msg = new Message();
             $content = "系統目前找到下列跨所註記遺失案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/watch_dog.php 修正。";
             foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
@@ -31,6 +32,8 @@ class WatchDog {
         }
         $log->info('跨所註記遺失檢查結束。');
     }
+
+
 
     function __construct() { }
 
