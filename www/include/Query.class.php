@@ -401,6 +401,28 @@ class Query {
 		return $this->db->fetchAll();
     }
 
+	// template method for query all cases by date
+    public function queryOverdueCasesByDate($qday) {
+        // only allow int number for $qday
+        if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
+            return false;
+        }
+		$this->db->parse("
+			SELECT *
+			FROM SCRSMS
+			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+			WHERE RM07_1 = :bv_qday
+				AND RM02 NOT LIKE 'HB%1'
+				AND RM31 IS NULL
+				AND RM29_1 || RM29_2 < :bv_qdatetime
+			ORDER BY RM07_1, RM07_2 DESC
+		");
+		$this->db->bind(":bv_qday", $qday);
+        $this->db->bind(":bv_qdatetime", $qday.date("His"));
+		$this->db->execute();
+		return $this->db->fetchAll();
+    }
+
 	public function getRegCaseStatsMonthly($year_month) {
 		global $log;
         // only allow int number for $qday

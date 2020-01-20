@@ -890,6 +890,8 @@ let initUtilApp = () => {
                                 let hour = now.getHours();
                                 if (hour > 8 && hour < 17) {
                                     that.callWatchdog(e);
+                                } else {
+                                    console.warn("不在辦公時間內，看門狗將暫停啟用。");
                                 }
                             }
                         }, 900000);	// 1000 * 60 * 15

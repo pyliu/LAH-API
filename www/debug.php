@@ -8,7 +8,7 @@ require_once("./include/Logger.class.php");
 //$xkey = (random_int(1, 255) * date("H") * date("i", strtotime("1 min")) * date("s", strtotime("1 second"))) % 65535;
 //echo $xkey;
 
-        $tdoc_db = new MSDB(array(
+        /*$tdoc_db = new MSDB(array(
             "MS_DB_UID" => SYSTEM_CONFIG["MS_TDOC_DB_UID"],
             "MS_DB_PWD" => SYSTEM_CONFIG["MS_TDOC_DB_PWD"],
             "MS_DB_DATABASE" => SYSTEM_CONFIG["MS_TDOC_DB_DATABASE"],
@@ -18,11 +18,12 @@ require_once("./include/Logger.class.php");
         $users_results = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_OFF_JOB <> 'Y'");
         var_dump($users_results);
         var_dump($tdoc_db->getLastQuery());
+        */
 //var_dump(getTdocUserInfo("hb0541"));
 /*
 $ms_db = new MSDB();
 var_dump(print_r($ms_db->fetch("select top 1 sn from Message order by sn desc"), true));
 
-echo date("Y-m-d 23:59:59");
 */
+echo "1090120".date("His");
 ?>
