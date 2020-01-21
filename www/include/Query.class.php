@@ -401,7 +401,28 @@ class Query {
 		return $this->db->fetchAll();
     }
 
-	// template method for query all cases by date
+	// 找1080101後之案件
+	public function queryOverdueCases() {
+		$this->db->parse("
+			SELECT *
+			FROM SCRSMS
+			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+			WHERE
+				RM07_1 > '1080101'
+				AND RM02 NOT LIKE 'HB%1'	-- only search our own cases
+				AND RM31 IS NULL
+				AND RM29_1 || RM29_2 < :bv_now
+			ORDER BY RM07_1, RM07_2 DESC
+		");
+		$tw_date = new Datetime("now");
+		$tw_date->modify("-1911 year");
+		$now = ltrim($tw_date->format("YmdHis"), "0");	// ex: 1080325152111
+        $this->db->bind(":bv_now", $now);
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
+	// 查詢指定收件日期之案件
     public function queryOverdueCasesByDate($qday) {
         // only allow int number for $qday
         if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
@@ -411,8 +432,9 @@ class Query {
 			SELECT *
 			FROM SCRSMS
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
-			WHERE RM07_1 = :bv_qday
-				AND RM02 NOT LIKE 'HB%1'
+			WHERE
+				RM07_1 = :bv_qday AND 
+				RM02 NOT LIKE 'HB%1'	-- only search our own cases
 				AND RM31 IS NULL
 				AND RM29_1 || RM29_2 < :bv_qdatetime
 			ORDER BY RM07_1, RM07_2 DESC
@@ -421,7 +443,52 @@ class Query {
         $this->db->bind(":bv_qdatetime", $qday.date("His"));
 		$this->db->execute();
 		return $this->db->fetchAll();
-    }
+	}
+	
+	// 找全部案件
+	public function queryNearOverdueCases() {
+		$this->db->parse("
+			SELECT *
+			FROM SCRSMS
+			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+			WHERE
+				RM02 NOT LIKE 'HB%1'	-- only search our own cases
+				AND RM31 IS NULL
+				AND (RM29_1 || RM29_2 < :bv_4hours_later AND RM29_1 || RM29_2 > :bv_now)
+			ORDER BY RM07_1, RM07_2 DESC
+		");
+		$tw_date = new Datetime("now");
+		$tw_date->modify("-1911 year");
+		$today = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080325152111
+		$this->db->bind(":bv_4hours_later", $today.date("His", strtotime("+4 hours")));
+		$this->db->bind(":bv_now", $today.date("His"));
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
+	// 查詢指定收件日期之案件
+	public function queryNearOverdueCasesByDate($qday) {
+        // only allow int number for $qday
+        if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
+            return false;
+        }
+		$this->db->parse("
+			SELECT *
+			FROM SCRSMS
+			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+			WHERE
+				RM07_1 = :bv_qday AND 
+				RM02 NOT LIKE 'HB%1'
+				AND RM31 IS NULL
+				AND (RM29_1 || RM29_2 < :bv_4hours_later AND RM29_1 || RM29_2 > :bv_now)
+			ORDER BY RM07_1, RM07_2 DESC
+		");
+		$this->db->bind(":bv_qday", $qday);
+		$this->db->bind(":bv_4hours_later", $qday.date("His", strtotime("+4 hours")));
+		$this->db->bind(":bv_now", $qday.date("His"));
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
 
 	public function getRegCaseStatsMonthly($year_month) {
 		global $log;
