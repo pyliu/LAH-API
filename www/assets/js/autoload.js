@@ -76,12 +76,12 @@ function adjustTableContent() {
     }
     // enable bootstrap tooltip for operator field
     //console.log($('[data-toggle="tooltip"]'));
-    $('[data-toggle="tooltip"]').tooltip({
+    /*$('[data-toggle="tooltip"]').tooltip({
         delay: {
             show: 300,
             hide: 100
         }
-    });
+    });*/
     // make table sortable
     makeAllSortable();
     // case xhr event
