@@ -444,6 +444,7 @@ class Query {
 			WHERE
 				RM07_1 = :bv_qday AND 
 				RM02 NOT LIKE 'HB%1'	-- only search our own cases
+				AND RM03 LIKE '%0' 		-- without sub-case
 				AND RM31 IS NULL
 				AND RM29_1 || RM29_2 < :bv_qdatetime
 			ORDER BY RM07_1, RM07_2 DESC
