@@ -25,10 +25,8 @@ $ms_db = new MSDB();
 var_dump(print_r($ms_db->fetch("select top 1 sn from Message order by sn desc"), true));
 
 */
-echo "1090120".date("His");
-
 $query = new Query();
-$rows = $query->queryNearOverdueCases();
+$rows = $query->queryOverdueCasesIn15Days();
 echo "<p>".count($rows)."</p>";
 echo "<br />";
 echo str_replace("\n", "<br />", print_r($rows, true));
