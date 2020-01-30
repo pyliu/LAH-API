@@ -23,8 +23,8 @@
 <body>
 
   <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <i class="my-auto fas fa-user-secret fa-2x text-light"></i>&ensp;
-    <a class="navbar-brand" href="watch_dog.php">地政輔助系統 <span class="small">(α)</span></a>
+    <i class="my-auto fas fa-th-list fa-2x text-light"></i>&ensp;
+    <a class="navbar-brand" href="watch_dog.php">15天內逾期案件列表 - 地政輔助系統 <span class="small">(α)</span></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -49,9 +49,6 @@
   <script src="assets/js/jquery-3.4.1.min.js"></script>
   <script src="assets/js/popper.min.js"></script>
   <script src="assets/js/bootstrap.min.js"></script>
-  <!-- bs datepicker -->
-  <script src="assets/js/bootstrap-datepicker.min.js"></script>
-  <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
   <!-- Vue -->
   <script src="assets/js/vue.js"></script>
   <script src="assets/js/bootstrap-vue.min.js"></script>
