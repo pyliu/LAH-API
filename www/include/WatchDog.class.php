@@ -26,7 +26,7 @@ class WatchDog {
                 if ($adm_ip == '::1') {
                     continue;
                 }
-                $sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, "+14 minute");
+                $sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, 840);   // 840 => +14 mins
                 $log->info("訊息已送出(${sn})給 ${adm_ip}");
             }
         }
@@ -37,15 +37,11 @@ class WatchDog {
         global $log;
         $query = new Query();
         // check reg case missing RM99~RM101 data
-        $log->info('開始查詢目前逾期登記案件 ... ');
+        $log->info('開始查詢15天內逾期登記案件 ... ');
 
-        $tw_date = new Datetime("now");
-        $tw_date->modify("-1911 year");
-        $today = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080325
-
-        $rows = $query->queryOverdueCasesByDate($today);
+        $rows = $query->queryOverdueCasesIn15Days();
         if (!empty($rows)) {
-            $log->warning($today.' 目前找到'.count($rows).'件逾期登記案件。');
+            $log->warning('15天內找到'.count($rows).'件逾期登記案件。');
             $case_ids = [];
             foreach ($rows as $row) {
                 $case_ids[] = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
@@ -54,7 +50,7 @@ class WatchDog {
             
             $host_ip = getLocalhostIP();
             $msg = new Message();
-            $content = "地政輔助系統目前找到下列逾期登記案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://".$host_ip."/index.php 查看詳情。";
+            $content = "地政輔助系統目前".count($rows)."件逾期案件(15天內，僅顯示前5筆):\r\n\r\n".implode("\r\n", array_slice($case_ids, 0, 5))."\r\n\r\n請前往 http://".$host_ip."/overdue_reg_cases.php 查看詳細列表。";
             foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
                 /*if ($adm_ip == '::1') {
                     continue;
@@ -62,7 +58,7 @@ class WatchDog {
                 if ($adm_ip != '220.1.35.48') {
                     continue;
                 }
-                $sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, "+14 minute");
+                $sn = $msg->sysSend('逾期案件通知', $content, $adm_ip, 14399);  // 14399 => +3 hours 59 mins 59 secs
                 $log->info("訊息已送出(${sn})給 ${adm_ip}");
             }
         }
@@ -75,7 +71,7 @@ class WatchDog {
 
     public function do() {
         $this->checkCrossSiteData();
-        //$this->findDelayRegCases();
+        $this->findDelayRegCases();
         return true;
     }
     
