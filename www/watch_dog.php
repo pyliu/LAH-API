@@ -17,7 +17,6 @@
 <!-- Custom styles for this template -->
 <link href="assets/css/starter-template.css" rel="stylesheet">
 <link href="assets/css/bootstrap-vue.min.css" rel="stylesheet">
-<link href="assets/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
 <link href="assets/css/basic.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
 <style type="text/css">

@@ -16,7 +16,6 @@
 <!-- Custom styles for this template -->
 <link href="assets/css/starter-template.css" rel="stylesheet">
 <link href="assets/css/bootstrap-vue.min.css" rel="stylesheet">
-<link href="assets/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
 <link href="assets/css/basic.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
 </head>
@@ -33,7 +32,7 @@
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
       <div class="row">
-        <div id="overdue-reg-cases" class="col-6">
+        <div id="overdue-reg-cases" class="col">
           <overdue-reg-cases></overdue-reg-cases>
         </div>
       </div>
