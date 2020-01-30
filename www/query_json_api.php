@@ -20,6 +20,36 @@ function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 $query = new Query();
 
 switch ($_POST["type"]) {
+	case "overdue_reg_cases":
+		$log->info("XHR [overdue_reg_cases] 15天內逾期案件查詢請求");
+		$rows = $query->queryOverdueCasesIn15Days();
+		if (empty($rows)) {
+			$log->info("XHR [overdue_reg_cases] 15天內查無逾期資料");
+			echoErrorJSONString("15天內查無逾期資料");
+		} else {
+			$items = [];
+			foreach ($rows as $row) {
+				$regdata = new RegCaseData($row);
+				$items[] = array(
+					"收件字號" => $regdata->getReceiveSerial(),
+					"登記原因" => $regdata->getCaseReason(),
+					"辦理情形" => $regdata->getStatus(),
+					"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
+					"限辦期限" => $regdata->getDueDate(),
+					"初審人員" => $regdata->getFirstReviewer(),
+					"作業人員" => $regdata->getCurrentOperator()
+				);
+			}
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"items" => $items,
+				"data_count" => count($items),
+				"raw" => $rows
+			);
+			$log->info("XHR [overdue_reg_cases] 找到".count($items)."件15天內逾期案件");
+			echo json_encode($result, 0);
+		}
+		break;
 	case "watchdog":
 		$log->info("XHR [watchdog] 監控請求");
 		// use http://localhost the client will be "::1"

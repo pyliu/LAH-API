@@ -54,7 +54,7 @@ if (Vue) {
                     method: "POST",
                     body: body
                 }).then(jsonObj => {
-                    showRegCaseDetail(jsonObj);
+                    window.utilApp.showRegCase(jsonObj, true);
                     toggle(e.target);
                 }).catch(ex => {
                     console.error("case-reg-search::regQuery parsing failed", ex);

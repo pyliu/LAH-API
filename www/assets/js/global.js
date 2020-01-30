@@ -861,7 +861,7 @@ let initUtilApp = () => {
                     method: "POST",
                     body: body
                 }).then(jsonObj => {
-                    showRegCaseDetail(jsonObj);
+                    this.showRegCase(jsonObj);
                 }).catch(ex => {
                     console.error("window.utilApp.fetchRegCase parsing failed", ex);
                     showAlert({
@@ -870,6 +870,78 @@ let initUtilApp = () => {
                         message: ex.toString(),
                         type: "danger"
                     });
+                });
+            },
+            showRegCase: function(jsonObj, enable_userinfo = false) {
+                let html = "<p>" + jsonObj.tr_html + "</p>";
+                if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL || jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                    showAlert({title: "顯示登記案件詳情", message: jsonObj.message, type: "danger"});
+                    return;
+                } else {
+                    let area = "其他(" + jsonObj.資料管轄所 + "區)";
+                    let rm10 = jsonObj.raw.RM10 ? jsonObj.raw.RM10 : "XX";
+                    switch (rm10) {
+                        case "03":
+                            area = "中壢區";
+                            break;
+                        case "12":
+                            area = "觀音區";
+                            break;
+                        default:
+                            break;
+                    }
+
+                    html += "<div class='row'>";
+                    html += "<div class='col-4'>";
+
+                    html += (jsonObj.跨所 == "Y" ? "<span class='bg-info text-white rounded p-1'>跨所案件 (" + jsonObj.資料收件所 + " => " + jsonObj.資料管轄所 + ")</span><br />" : "");
+                    
+                    // http://220.1.35.34:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=108&word=HB04&code=005001&sdlyn=N&RM90=
+                    html += "收件字號：" + "<a title='案件辦理情形 on " + landhb_svr + "' href='#' onclick='javascript:window.open(\"http://\"\+landhb_svr\+\":9080/LandHB/CAS/CCD02/CCD0202.jsp?year="+ jsonObj.raw["RM01"] +"&word="+ jsonObj.raw["RM02"] +"&code="+ jsonObj.raw["RM03"] +"&sdlyn=N&RM90=\")'>" + jsonObj.收件字號 + "</a> <br />";
+                    
+                    // options for switching server
+                    //html += "<label for='cross_svr'><input type='radio' id='cross_svr' name='svr_opts' value='220.1.35.123' onclick='javascript:landhb_svr=\"220.1.35.123\"' /> 跨縣市主機</label> <br />";
+
+                    html += isEmpty(jsonObj.結案已否) ? "<div class='text-danger'><strong>尚未結案！</strong></div>" : "";
+
+                    html += "收件時間：" + jsonObj.收件時間 + "<br/>";
+                    html += "測量案件：" + jsonObj.測量案件 + "<br/>";
+                    html += "限辦期限：" + jsonObj.限辦期限 + "<br/>";
+                    html += "作業人員：<span id='the_incase_operator_span' class='user_tag' data-display-selector='#in_modal_display' data-id='" + jsonObj.作業人員ID + "' data-name='" + jsonObj.作業人員 + "'>" + jsonObj.作業人員 + "</span><br/>";
+                    html += "辦理情形：" + jsonObj.辦理情形 + "<br/>";
+                    html += "登記原因：" + jsonObj.登記原因 + "<br/>";
+                    html += "區域：" + area + "【" + jsonObj.raw.RM10 + "】<br/>";
+                    html += "段小段：" + jsonObj.段小段 + "【" + jsonObj.段代碼 + "】<br/>";
+                    html += "地號：" + jsonObj.地號 + "<br/>";
+                    html += "建號：" + jsonObj.建號 + "<br/>";
+                    html += "件數：" + jsonObj.件數 + "<br/>";
+                    html += "登記處理註記：" + jsonObj.登記處理註記 + "<br/>";
+                    html += "地價處理註記：" + jsonObj.地價處理註記 + "<br/>";
+                    html += "權利人統編：" + jsonObj.權利人統編 + "<br/>";
+                    html += "權利人姓名：" + jsonObj.權利人姓名 + "<br/>";
+                    html += "義務人統編：" + jsonObj.義務人統編 + "<br/>";
+                    html += "義務人姓名：" + jsonObj.義務人姓名 + "<br/>";
+                    html += "義務人人數：" + jsonObj.義務人人數 + "<br/>";
+                    html += "代理人統編：" + jsonObj.代理人統編 + "<br/>";
+                    html += "代理人姓名：" + jsonObj.代理人姓名 + "<br/>";
+                    html += "手機號碼：" + jsonObj.手機號碼;
+
+                    html += "</div>";
+                    html += "<div id='in_modal_display' class='col-8'></div>";
+                    html += "</div>";
+                }
+                
+                showModal({
+                    body: html,
+                    title: "登記案件詳情",
+                    size: "lg",
+                    callback: () => {
+                        if (enable_userinfo) {
+                            addUserInfoEvent();
+                            //load current operator user info
+                            $("#the_incase_operator_span").trigger("click");
+                        }
+                    }
                 });
             },
             callWatchdog: function(e) {

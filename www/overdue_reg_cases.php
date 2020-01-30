@@ -24,7 +24,7 @@
 
   <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
     <i class="my-auto fas fa-th-list fa-2x text-light"></i>&ensp;
-    <a class="navbar-brand" href="watch_dog.php">15天內逾期案件列表 - 地政輔助系統 <span class="small">(α)</span></a>
+    <a class="navbar-brand" href="javascript:location.reload()">15天內逾期案件列表 - 地政輔助系統 <span class="small">(α)</span></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -54,9 +54,6 @@
   <script src="assets/js/bootstrap-vue.min.js"></script>
   <!-- Custom -->
   <script src="assets/js/global.js"></script>
-  <script src="assets/js/xhr_query.js"></script>
-  <script src="assets/js/cache.js"></script>
-  <script src="assets/js/FileSaver.min.js"></script>
   <!-- Vue components -->
   <script src="assets/js/components/overdue-reg-cases.js"></script>
   <script type="text/javascript">

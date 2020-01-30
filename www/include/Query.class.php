@@ -413,7 +413,7 @@ class Query {
 				AND RM03 LIKE '%0' 			-- without sub-case
 				AND RM31 IS NULL			-- not closed case
 				AND RM29_1 || RM29_2 < :bv_now
-			ORDER BY RM07_1, RM07_2 DESC
+			ORDER BY RM07_1 DESC, RM07_2 DESC
 		");
 
 		$tw_date = new Datetime("now");
