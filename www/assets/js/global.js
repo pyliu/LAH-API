@@ -1011,12 +1011,7 @@ let wakeup = () => {
     clearLDAnimation(".navbar i.fas");
 }
 
-$(document).ready(e => {
-    initUtilApp();
-    initBlockquoteModal();
-    initTooltip();
-    initDatepicker();
-    initWatchdog();
+let initScreensaver = () => {
     /**
      * detect page idle and add animation for fun
      */
@@ -1038,6 +1033,15 @@ $(document).ready(e => {
         // clearLDAnimation("button, i.fas.text-light");
         wakeup();
     }
+}
+
+$(document).ready(e => {
+    initUtilApp();
+    initBlockquoteModal();
+    initTooltip();
+    initDatepicker();
+    initWatchdog();
+    initScreensaver();
     // hide footer after 10s
     setTimeout(() => addAnimatedCSS("#copyright", {
         name: "animated slideOutDown",
