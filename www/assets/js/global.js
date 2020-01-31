@@ -1042,11 +1042,14 @@ $(document).ready(e => {
     initDatepicker();
     initWatchdog();
     initScreensaver();
+    
     // hide footer after 10s
     setTimeout(() => addAnimatedCSS("#copyright", {
         name: "animated slideOutDown",
         callback: () => { $("#copyright").hide() }
     }), 10000);
+
+    // add pulse effect for the nav-item
     $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
 });
 //]]>
