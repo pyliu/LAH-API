@@ -41,29 +41,32 @@ class WatchDog {
 
         $rows = $query->queryOverdueCasesIn15Days();
         if (!empty($rows)) {
-            $log->warning('15天內找到'.count($rows).'件逾期登記案件。');
+            $log->info('15天內找到'.count($rows).'件逾期登記案件。');
             $users = GetDBUserMapping();
             $case_records = [];
             foreach ($rows as $row) {
-                $case_records[] = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']);
-                $log->warning($row['RM01'].'-'.$row['RM02'].'-'.$row['RM03']);
+                $this_msg = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']);
+                $case_records[$row['RM45']][] = $this_msg;
+                $case_records["ALL"][] = $this_msg;
+                $log->info($this_msg);
             }
             
-            $host_ip = getLocalhostIP();
-            $msg = new Message();
-            $content = "目前有 ".count($rows)." 件逾期案件(近15天，僅顯示前5筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 5))."\r\n...\r\n請前往 http://".$host_ip."/overdue_reg_cases.php 查看詳細列表。";
-            foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
-                /*if ($adm_ip == '::1') {
-                    continue;
-                }*/
-                if ($adm_ip != '220.1.35.48') {
-                    continue;
-                }
-                $sn = $msg->sysSend('逾期案件通知', $content, $adm_ip, 14399);  // 14399 => +3 hours 59 mins 59 secs
-                $log->info("訊息已送出(${sn})給 ${adm_ip}");
+            // send to the reviewer
+            foreach ($case_records as $ID => $records) {
+                $this->sendOverdueMessage($ID, $records);
             }
         }
         $log->info('查詢近15天逾期登記案件完成。');
+    }
+
+    private function sendOverdueMessage($to_id, $case_records) {
+        global $log;
+        $chief_id = "HB0541";
+        $host_ip = getLocalhostIP();
+        $msg = new Message();
+        $content = "目前有 ".count($case_records)." 件逾期案件(近15天，僅顯示前4筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請前往 http://${host_ip}/overdue_reg_cases.html?reviewerID=".($to_id == "ALL" ? "" : $to_id)." 查看詳細列表。";
+        $sn = $msg->sysSend('逾期案件通知', $content, $chief_id, 14399);  // 14399 => +3 hours 59 mins 59 secs
+        $log->info("訊息已送出(${sn})給 ${chief_id}");
     }
 
     function __construct() { }

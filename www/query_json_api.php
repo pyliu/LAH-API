@@ -22,6 +22,7 @@ $query = new Query();
 switch ($_POST["type"]) {
 	case "overdue_reg_cases":
 		$log->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
+		$log->info("XHR [overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");
 		$rows = $query->queryOverdueCasesIn15Days($_POST["reviewer_id"]);
 		if (empty($rows)) {
 			$log->info("XHR [overdue_reg_cases] 近15天查無逾期資料");
