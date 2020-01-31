@@ -8,7 +8,7 @@ class RegCaseData {
     private $row;
 
     private function getIDorName($id) {
-        return empty(RegCaseData::$operators[$id]) ? $id : RegCaseData::$operators[$id];
+        return RegCaseData::$operators[$id] ?? $id;
     }
 
     private function getDueTime($begin) {
