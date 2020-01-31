@@ -500,10 +500,18 @@ let initBlockquoteModal = () => {
 let initWatchdog = () => {
     if (window.utilApp.callWatchdog) {
         window.utilApp.callWatchdog();
-        // reload page after 8 hours
-        setTimeout(function(e) {
-            window.location.reload(true);
-        }, 1000 * 60 * 60 * 8);	// reload the page after 8 hrs
+        // check every hour
+        setInterval(() => {
+            let now = new Date();
+            let weekday = now.getDay();
+            if (weekday != 0 && weekday != 6) {
+                let hour = now.getHours();
+                // reload the page on 08:00
+                if (hour == 8) {
+                    window.location.reload(true);
+                }
+            }
+        }, 1000 * 60 * 60);
     } else {
         console.warn("Watchdog disabled. (window.utilApp.callWatchdog not defined)");
     }
@@ -960,7 +968,7 @@ let initUtilApp = () => {
                             let weekday = now.getDay();
                             if (weekday != 0 && weekday != 6) {
                                 let hour = now.getHours();
-                                if (hour > 8 && hour < 17) {
+                                if (hour >= 8 && hour <= 17) {
                                     that.callWatchdog(e);
                                 } else {
                                     console.warn("不在辦公時間內，看門狗將暫停啟用。");
