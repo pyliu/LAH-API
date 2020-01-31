@@ -51,7 +51,7 @@ class WatchDog {
             
             $host_ip = getLocalhostIP();
             $msg = new Message();
-            $content = "目前有 ".count($rows)." 件逾期案件(近15天，僅顯示前5筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 5))."\r\n...\r\n請前往 http://".$host_ip."/overdue_reg_cases.html 查看詳細列表。";
+            $content = "目前有 ".count($rows)." 件逾期案件(近15天，僅顯示前5筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 5))."\r\n...\r\n請前往 http://".$host_ip."/overdue_reg_cases.php 查看詳細列表。";
             foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
                 /*if ($adm_ip == '::1') {
                     continue;

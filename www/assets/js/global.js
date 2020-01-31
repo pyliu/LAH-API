@@ -503,7 +503,7 @@ let initWatchdog = () => {
         // reload page after 8 hours
         setTimeout(function(e) {
             window.location.reload(true);
-        }, 28800000);	// 1000 * 60 * 60 * 8
+        }, 1000 * 60 * 60 * 8);	// reload the page after 8 hrs
     } else {
         console.warn("Watchdog disabled. (window.utilApp.callWatchdog not defined)");
     }
@@ -966,12 +966,13 @@ let initUtilApp = () => {
                                     console.warn("不在辦公時間內，看門狗將暫停啟用。");
                                 }
                             }
-                        }, 900000);	// 1000 * 60 * 15
+                        }, 1000 * 60 * 15);	// call the watchdog every 15 mins
                     } else {
-                        console.error(jsonObj.message);
+                        console.warn(jsonObj.message);
                         // stop interval timer
                         clearTimeout(that.watchdog_timer);
                         console.info("停止全域WATCHDOG定時器。");
+                        console.info("window.utilApp.callWatchdog() to enable.");
                     }
                 }).catch(ex => {
                     console.error("window.utilApp.callWatchdog parsing failed", ex);

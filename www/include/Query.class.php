@@ -402,20 +402,38 @@ class Query {
     }
 
 	// 找近15天逾期的案件
-	public function queryOverdueCasesIn15Days() {
-		$this->db->parse("
-			SELECT *
-			FROM SCRSMS
-			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
-			WHERE
-				-- RM07_1 > :bv_start
-				RM02 NOT LIKE 'HB%1'		-- only search our own cases
-				AND RM03 LIKE '%0' 			-- without sub-case
-				AND RM31 IS NULL			-- not closed case
-				AND RM29_1 || RM29_2 < :bv_now
-				AND RM29_1 || RM29_2 > :bv_start
-			ORDER BY RM29_1 DESC, RM29_2 DESC
-		");
+	public function queryOverdueCasesIn15Days($first_reviewer = "") {
+		if (empty($first_reviewer)) {
+			$this->db->parse("
+				SELECT *
+				FROM SCRSMS
+				LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+				WHERE
+					-- RM07_1 > :bv_start
+					RM02 NOT LIKE 'HB%1'		-- only search our own cases
+					AND RM03 LIKE '%0' 			-- without sub-case
+					AND RM31 IS NULL			-- not closed case
+					AND RM29_1 || RM29_2 < :bv_now
+					AND RM29_1 || RM29_2 > :bv_start
+				ORDER BY RM29_1 DESC, RM29_2 DESC
+			");
+		} else {
+			$this->db->parse("
+				SELECT *
+				FROM SCRSMS
+				LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+				WHERE
+					-- RM07_1 > :bv_start
+					RM02 NOT LIKE 'HB%1'		-- only search our own cases
+					AND RM03 LIKE '%0' 			-- without sub-case
+					AND RM31 IS NULL			-- not closed case
+					AND RM29_1 || RM29_2 < :bv_now
+					AND RM29_1 || RM29_2 > :bv_start
+					AND RM45 = :bv_first_reviewer
+				ORDER BY RM29_1 DESC, RM29_2 DESC
+			");
+			$this->db->bind(":bv_first_reviewer", $first_reviewer);	// HBxxxx
+		}
 
 		$tw_date = new Datetime("now");
 		$tw_date->modify("-1911 year");

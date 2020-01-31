@@ -33,7 +33,7 @@
     <div class="container-fluid">
       <div class="row">
         <div id="overdue-reg-cases" class="col">
-          <overdue-reg-cases></overdue-reg-cases>
+          <overdue-reg-cases first-reviewer="<?php echo $_GET["first_reviewer"]; ?>"></overdue-reg-cases>
         </div>
       </div>
   </section><!-- /section -->

@@ -28,6 +28,7 @@ if (Vue) {
                 </template>
             </b-table>
         </div>`,
+        props: ['firstReviewer'],
         data: function () {
             return {
                 items: [],
@@ -52,6 +53,9 @@ if (Vue) {
                 this.busy = true;
                 let form_body = new FormData();
                 form_body.append("type", "overdue_reg_cases");
+                if (!isEmpty(this.firstReviewer)) {
+                    form_body.append("first_reviewer", this.firstReviewer);
+                }
                 asyncFetch("query_json_api.php", {
                     method: 'POST',
                     body: form_body
