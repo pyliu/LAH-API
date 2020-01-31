@@ -50,7 +50,7 @@ class WatchDog {
             
             $host_ip = getLocalhostIP();
             $msg = new Message();
-            $content = "地政輔助系統發現".count($rows)."件逾期案件(15天內，僅顯示前5筆):\r\n\r\n".implode("\r\n", array_slice($case_ids, 0, 5))."\r\n\r\n請前往 http://".$host_ip."/overdue_reg_cases.html 查看詳細列表。";
+            $content = "目前有 ".count($rows)." 件逾期案件(近15天，僅顯示前5筆):\r\n\r\n".implode("\r\n", array_slice($case_ids, 0, 5))."\r\n...\r\n請前往 http://".$host_ip."/overdue_reg_cases.html 查看詳細列表。";
             foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
                 /*if ($adm_ip == '::1') {
                     continue;
@@ -62,7 +62,7 @@ class WatchDog {
                 $log->info("訊息已送出(${sn})給 ${adm_ip}");
             }
         }
-        $log->info('查詢目前逾期登記案件完成。');
+        $log->info('查詢近15天逾期登記案件完成。');
     }
 
     function __construct() { }
