@@ -42,15 +42,16 @@ class WatchDog {
         $rows = $query->queryOverdueCasesIn15Days();
         if (!empty($rows)) {
             $log->warning('15天內找到'.count($rows).'件逾期登記案件。');
-            $case_ids = [];
+            $users = GetDBUserMapping();
+            $case_records = [];
             foreach ($rows as $row) {
-                $case_ids[] = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
+                $case_records[] = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']);
                 $log->warning($row['RM01'].'-'.$row['RM02'].'-'.$row['RM03']);
             }
             
             $host_ip = getLocalhostIP();
             $msg = new Message();
-            $content = "目前有 ".count($rows)." 件逾期案件(近15天，僅顯示前5筆):\r\n\r\n".implode("\r\n", array_slice($case_ids, 0, 5))."\r\n...\r\n請前往 http://".$host_ip."/overdue_reg_cases.html 查看詳細列表。";
+            $content = "目前有 ".count($rows)." 件逾期案件(近15天，僅顯示前5筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 5))."\r\n...\r\n請前往 http://".$host_ip."/overdue_reg_cases.html 查看詳細列表。";
             foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
                 /*if ($adm_ip == '::1') {
                     continue;
