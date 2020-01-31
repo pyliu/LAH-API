@@ -21,10 +21,10 @@ $query = new Query();
 
 switch ($_POST["type"]) {
 	case "overdue_reg_cases":
-		$log->info("XHR [overdue_reg_cases] 15天內逾期案件查詢請求");
+		$log->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
 		$rows = $query->queryOverdueCasesIn15Days();
 		if (empty($rows)) {
-			$log->info("XHR [overdue_reg_cases] 15天內查無逾期資料");
+			$log->info("XHR [overdue_reg_cases] 近15天查無逾期資料");
 			echoErrorJSONString("15天內查無逾期資料");
 		} else {
 			$items = [];
@@ -46,7 +46,7 @@ switch ($_POST["type"]) {
 				"data_count" => count($items),
 				"raw" => $rows
 			);
-			$log->info("XHR [overdue_reg_cases] 找到".count($items)."件15天內逾期案件");
+			$log->info("XHR [overdue_reg_cases] 近15天找到".count($items)."件逾期案件");
 			echo json_encode($result, 0);
 		}
 		break;

@@ -401,19 +401,20 @@ class Query {
 		return $this->db->fetchAll();
     }
 
-	// 找15天之內的案件
+	// 找近15天逾期的案件
 	public function queryOverdueCasesIn15Days() {
 		$this->db->parse("
 			SELECT *
 			FROM SCRSMS
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE
-				RM07_1 > :bv_start
-				AND RM02 NOT LIKE 'HB%1'	-- only search our own cases
+				-- RM07_1 > :bv_start
+				RM02 NOT LIKE 'HB%1'		-- only search our own cases
 				AND RM03 LIKE '%0' 			-- without sub-case
 				AND RM31 IS NULL			-- not closed case
 				AND RM29_1 || RM29_2 < :bv_now
-			ORDER BY RM07_1 DESC, RM07_2 DESC
+				AND RM29_1 || RM29_2 > :bv_start
+			ORDER BY RM29_1 DESC, RM29_2 DESC
 		");
 
 		$tw_date = new Datetime("now");
@@ -423,8 +424,11 @@ class Query {
 		$date_15days_before = new Datetime("now");
 		$date_15days_before->modify("-1911 year");
 		$date_15days_before->modify("-15 days");
-		$start = ltrim($date_15days_before->format("Ymd"), "0");	// ex: 1090107
+		$start = ltrim($date_15days_before->format("YmdHis"), "0");	// ex: 1090107081410
 		
+		global $log;
+		$log->info(__METHOD__.": Find overdue date between $start and $now cases.");
+
 		$this->db->bind(":bv_now", $now);
 		$this->db->bind(":bv_start", $start);
 		$this->db->execute();

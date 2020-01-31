@@ -6,8 +6,8 @@ if (Vue) {
                 hover
                 responsive
                 bordered
-                :sticky-header="height"
                 head-variant="light"
+                :sticky-header="height"
                 :items="items"
             ></b-table>
         </div>`,
