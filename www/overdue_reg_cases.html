@@ -33,7 +33,7 @@
     <div class="container-fluid">
       <div class="row">
         <div id="overdue-reg-cases" class="col">
-          <overdue-reg-cases first-reviewer="<?php echo $_GET["first_reviewer"]; ?>"></overdue-reg-cases>
+          <overdue-reg-cases :reviewer-id="reviewerID"></overdue-reg-cases>
         </div>
       </div>
   </section><!-- /section -->
@@ -58,7 +58,23 @@
   <script src="assets/js/components/overdue-reg-cases.js"></script>
   <script type="text/javascript">
     $(document).ready(e => {
-      window.overdueRegCasesVue = new Vue({el: "#overdue-reg-cases"});
+      window.overdueRegCasesVue = new Vue({
+        el: "#overdue-reg-cases",
+        data: {
+          reviewerID: ""
+        },
+        methods: {
+          getUrlParameter: name => {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+          }
+        },
+        created() {
+          this.reviewerID = this.getUrlParameter("reviewerID");
+        }
+      });
     });
   </script>
 </body>

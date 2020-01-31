@@ -402,8 +402,8 @@ class Query {
     }
 
 	// 找近15天逾期的案件
-	public function queryOverdueCasesIn15Days($first_reviewer = "") {
-		if (empty($first_reviewer)) {
+	public function queryOverdueCasesIn15Days($reviewer_id = "") {
+		if (empty($reviewer_id)) {
 			$this->db->parse("
 				SELECT *
 				FROM SCRSMS
@@ -429,10 +429,10 @@ class Query {
 					AND RM31 IS NULL			-- not closed case
 					AND RM29_1 || RM29_2 < :bv_now
 					AND RM29_1 || RM29_2 > :bv_start
-					AND RM45 = :bv_first_reviewer
+					AND RM45 = :bv_reviewer_id
 				ORDER BY RM29_1 DESC, RM29_2 DESC
 			");
-			$this->db->bind(":bv_first_reviewer", $first_reviewer);	// HBxxxx
+			$this->db->bind(":bv_reviewer_id", $reviewer_id);	// HBxxxx
 		}
 
 		$tw_date = new Datetime("now");

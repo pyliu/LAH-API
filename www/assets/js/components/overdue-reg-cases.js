@@ -28,7 +28,7 @@ if (Vue) {
                 </template>
             </b-table>
         </div>`,
-        props: ['firstReviewer'],
+        props: ['reviewerId'],
         data: function () {
             return {
                 items: [],
@@ -53,8 +53,8 @@ if (Vue) {
                 this.busy = true;
                 let form_body = new FormData();
                 form_body.append("type", "overdue_reg_cases");
-                if (!isEmpty(this.firstReviewer)) {
-                    form_body.append("first_reviewer", this.firstReviewer);
+                if (!isEmpty(this.reviewerId)) {
+                    form_body.append("reviewer_id", this.reviewerId);
                 }
                 asyncFetch("query_json_api.php", {
                     method: 'POST',
