@@ -61,7 +61,7 @@ if (Vue) {
                     break;
             }
             this.ap_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=${this.jsonObj.raw["RM01"]}&word=${this.jsonObj.raw["RM02"]}&code=${this.jsonObj.raw["RM03"]}&sdlyn=N&RM90=`;
-            this.is_close = isEmpty(this.jsonObj.結案已否);
+            this.is_close = !isEmpty(this.jsonObj.結案已否);
         },
         mounted: function(e) {
             if (this.enabled_userinfo) {
