@@ -91,7 +91,7 @@ class WatchDog {
         $log->info('跨所註記遺失檢查結束。');
     }
 
-    private isOverdueCheckingOn() {
+    private isOverdueCheckNeeded() {
         global $log;
         $log->info("檢查是否需要執行逾期案件檢查 ... ");
         return $this->isOn($this->overdueSchedule);
@@ -99,7 +99,7 @@ class WatchDog {
 
     private function findDelayRegCases() {
         global $log;
-        if (!$this->isOverdueCheckingOn()) {
+        if (!$this->isOverdueCheckNeeded()) {
             $log->warning(__METHOD__.": 非設定時間內，跳過執行。");
             return false;
         }
