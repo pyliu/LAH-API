@@ -15,9 +15,19 @@ class WatchDog {
         'Sat' => []
     ];
 
-    private function isOfficeHours() {
+    private $overdueSchedule = [
+        'Sun' => [],
+        'Mon' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
+        'Tue' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
+        'Wed' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
+        'Thu' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
+        'Fri' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
+        'Sat' => []
+    ];
+
+    private function isOn($schedule) {
         global $log;
-        
+
         // current or user supplied UNIX timestamp
         $timestamp = time();
 
@@ -28,11 +38,13 @@ class WatchDog {
         $currentTime = (new DateTime())->setTimestamp($timestamp);
 
         // loop through time ranges for current day
-        foreach ($this->officeSchedule[date('D', $timestamp)] as $startTime => $endTime) {
+        foreach ($schedule[date('D', $timestamp)] as $startTime => $endTime) {
 
             // create time objects from start/end times
             $startTime = DateTime::createFromFormat('h:i A', $startTime);
             $endTime   = DateTime::createFromFormat('h:i A', $endTime);
+
+            $log->info("目前時間判斷區間為 ".$startTime." ~ ". $endTime);
 
             // check if current time is within a range
             if (($startTime < $currentTime) && ($currentTime < $endTime)) {
@@ -41,7 +53,7 @@ class WatchDog {
             }
         }
 
-        $log->info("現在是".($status ? "上班" : "下班")."時間");
+        $log->info("現在是".($status ? "啟動" : "關閉")."狀態");
         // TODO
         return $status;
     }
@@ -75,6 +87,10 @@ class WatchDog {
 
     private function findDelayRegCases() {
         global $log;
+        if (!$this->isOn($this->overdueSchedule)) {
+            $log->warning(__METHOD__.": 非設定時間內，跳過執行。");
+            return false;
+        }
         $query = new Query();
         // check reg case missing RM99~RM101 data
         $log->info('開始查詢15天內逾期登記案件 ... ');
@@ -97,11 +113,15 @@ class WatchDog {
             }
         }
         $log->info('查詢近15天逾期登記案件完成。');
+        return true;
     }
 
     private function sendOverdueMessage($to_id, $case_records) {
         global $log;
         $chief_id = "HB0541";
+        if ($to_id == "ALL") {
+            $to_id = $chief_id;
+        }
         $host_ip = getLocalhostIP();
         $msg = new Message();
         $content = "目前有 ".count($case_records)." 件逾期案件(近15天，僅顯示前4筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請前往 http://${host_ip}/overdue_reg_cases.html?reviewerID=".($to_id == "ALL" ? "" : $to_id)." 查看詳細列表。";
@@ -114,7 +134,7 @@ class WatchDog {
     function __destruct() { }
 
     public function do() {
-        if ($this->isOfficeHours()) {
+        if ($this->isOn($this->officeSchedule)) {
             $this->checkCrossSiteData();
             $this->findDelayRegCases();
         }
