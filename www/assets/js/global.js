@@ -500,6 +500,7 @@ let initBlockquoteModal = () => {
 let initWatchdog = () => {
     if (window.utilApp.callWatchdog) {
         window.utilApp.callWatchdog();
+        /*
         // check every hour
         setInterval(() => {
             let now = new Date();
@@ -512,6 +513,7 @@ let initWatchdog = () => {
                 }
             }
         }, 1000 * 60 * 60);
+        */
     } else {
         console.warn("Watchdog disabled. (window.utilApp.callWatchdog not defined)");
     }
@@ -906,6 +908,8 @@ let initUtilApp = () => {
                     method: "POST",
                     body: body
                 }).then(jsonObj => {
+                    window.utilApp.watchdog_timer = setTimeout(that.callWatchdog, 1000 * 60 * 15);	// call the watchdog every 15 mins
+                    /*
                     // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {                
                         // automatic check every 15 minutes
@@ -928,6 +932,7 @@ let initUtilApp = () => {
                         console.info("停止全域WATCHDOG定時器。");
                         console.info("window.utilApp.callWatchdog() to enable.");
                     }
+                    */
                 }).catch(ex => {
                     console.error("window.utilApp.callWatchdog parsing failed", ex);
                 });
