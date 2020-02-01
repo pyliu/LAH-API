@@ -58,6 +58,12 @@ class WatchDog {
         return $status;
     }
 
+    private isOfficeHours() {
+        global $log;
+        $log->info("檢查是否處於上班時間 ... ");
+        return $this->isOn($this->officeSchedule);
+    }
+
     private function checkCrossSiteData() {
         $query = new Query();
         // check reg case missing RM99~RM101 data
@@ -85,9 +91,15 @@ class WatchDog {
         $log->info('跨所註記遺失檢查結束。');
     }
 
+    private isOverdueCheckingOn() {
+        global $log;
+        $log->info("檢查是否需要執行逾期案件檢查 ... ");
+        return $this->isOn($this->overdueSchedule);
+    }
+
     private function findDelayRegCases() {
         global $log;
-        if (!$this->isOn($this->overdueSchedule)) {
+        if (!$this->isOverdueCheckingOn()) {
             $log->warning(__METHOD__.": 非設定時間內，跳過執行。");
             return false;
         }
@@ -134,7 +146,7 @@ class WatchDog {
     function __destruct() { }
 
     public function do() {
-        if ($this->isOn($this->officeSchedule)) {
+        if ($this->isOfficeHours()) {
             $this->checkCrossSiteData();
             $this->findDelayRegCases();
         }
