@@ -32,7 +32,7 @@
     <div class="container-fluid">
       <div class="row">
         <div id="watchdog" class="col">
-          <watchdog></watchdog>
+          <watchdog ref="watchdog"></watchdog>
         </div>
       </div>
   </section><!-- /section -->
@@ -54,15 +54,17 @@
   <!-- Custom -->
   <script src="assets/js/global.js"></script>
   <!-- Vue components -->
+  <script src="assets/js/vue-countdown.min.js"></script>
   <script src="assets/js/components/watchdog.js"></script>
+<script></script>
   <script type="text/javascript">
     $(document).ready(e => {
-      window.watchdogVue = new Vue({
-        el: "#watchdog",
-        data: {},
-        methods: {},
-        created() {}
-      });
+        window.watchdogVue = new Vue({
+            el: "#watchdog",
+            data: {},
+            methods: {},
+            created() {}
+        });
     });
   </script>
 </body>
