@@ -35,6 +35,12 @@ if (Vue) {
             endCountdown: function () {
                 this.$refs.countdown.totalMilliseconds = 0;
             },
+            addScheduleHistory: function (message) {
+                if (this.schedule_history.length > 4) {
+                    this.schedule_history.pop();
+                }
+                this.schedule_history.unshift(message);
+            },
             callWatchdogAPI: function() {
                 // generate current date time string
                 let dt = new Date();
@@ -48,18 +54,18 @@ if (Vue) {
                 }).then(jsonObj => {
                     // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        this.schedule_history.push(`${now} 結果: OK`);
+                        this.addScheduleHistory(`${now} 結果: OK`);
                         // Backend will check if it needs to do or not
                         this.watchdog_timer = setTimeout(this.callWatchdogAPI, this.timer_milliseconds);	// call the watchdog every 15 mins
                         this.startCountdown();
                     } else {
                         // stop the timer if API tells it is not working
-                        this.schedule_history.push(`${now} 結果: ${jsonObj.message}`);
+                        this.addScheduleHistory(`${now} 結果: ${jsonObj.message}`);
                         console.warn(jsonObj.message);
                     }
                 }).catch(ex => {
                     this.endCountdown();
-                    this.schedule_history.push(`${now} 結果: ${ex.message}`);
+                    this.addScheduleHistory(`${now} 結果: ${ex.message}`);
                     showAlert({
                         title: 'watchdog::callWatchdogAPI parsing failed',
                         message: ex.message,
