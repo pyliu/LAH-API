@@ -372,6 +372,7 @@ fieldset fieldset legend {
   <script src="assets/js/cache.js"></script>
   <script src="assets/js/mark.jquery.min.js"></script>
   
+  <script src="assets/js/components/case-reg-detail.js"></script>
   <script src="assets/js/components/case-input-group-ui.js"></script>
   <script src="assets/js/components/case-sur-mgt.js"></script>
   <script src="assets/js/components/case-reg-search.js"></script>

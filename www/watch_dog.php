@@ -123,6 +123,7 @@
   <script src="assets/js/cache.js"></script>
   <script src="assets/js/FileSaver.min.js"></script>
   <!-- Vue components -->
+  <script src="assets/js/components/case-reg-detail.js"></script>
   <script src="assets/js/components/xcase-check.js"></script>
   <script src="assets/js/components/easycard-payment-check.js"></script>
   <script src="assets/js/components/announcement-mgt.js"></script>

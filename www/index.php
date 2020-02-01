@@ -144,6 +144,8 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   <script src="assets/js/fixed_header.js"></script>
   <script src="assets/js/autoload.js"></script>
 
+  <script src="assets/js/components/case-reg-detail.js"></script>
+  
   <script type="text/javascript">
     $(document).ready(e => {
       // filter button
