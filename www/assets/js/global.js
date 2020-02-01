@@ -900,7 +900,6 @@ let initUtilApp = () => {
                 }
             },
             callWatchdog: function(e) {
-                let that = this;
                 let body = new FormData();
                 body.append("type", "watchdog");
                 asyncFetch("query_json_api.php", {
@@ -910,7 +909,7 @@ let initUtilApp = () => {
                     // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {       
                         // Backend will check if it needs to go or not
-                        window.utilApp.watchdog_timer = setTimeout(that.callWatchdog, 1000 * 60 * 15);	// call the watchdog every 15 mins         
+                        window.utilApp.watchdog_timer = setTimeout(this.callWatchdog, 1000 * 60 * 15);	// call the watchdog every 15 mins         
                     } else {
                         // stop the timer if API tells it is not working
                         console.warn(jsonObj.message);
