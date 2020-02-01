@@ -5,8 +5,48 @@ require_once('include/Message.class.php');
 
 class WatchDog {
     
-    private function checkCrossSiteData() {
+    private $officeSchedule = [
+        'Sun' => [],
+        'Mon' => ['08:00 AM' => '05:00 PM'],
+        'Tue' => ['08:00 AM' => '05:00 PM'],
+        'Wed' => ['08:00 AM' => '05:00 PM'],
+        'Thu' => ['08:00 AM' => '05:00 PM'],
+        'Fri' => ['08:00 AM' => '05:00 PM'],
+        'Sat' => []
+    ];
+
+    private function isOfficeHours() {
         global $log;
+        
+        // current or user supplied UNIX timestamp
+        $timestamp = time();
+
+        // default status
+        $status = false;
+
+        // get current time object
+        $currentTime = (new DateTime())->setTimestamp($timestamp);
+
+        // loop through time ranges for current day
+        foreach ($this->officeSchedule[date('D', $timestamp)] as $startTime => $endTime) {
+
+            // create time objects from start/end times
+            $startTime = DateTime::createFromFormat('h:i A', $startTime);
+            $endTime   = DateTime::createFromFormat('h:i A', $endTime);
+
+            // check if current time is within a range
+            if (($startTime < $currentTime) && ($currentTime < $endTime)) {
+                $status = true;
+                break;
+            }
+        }
+
+        $log->info("現在是".($status ? "上班" : "下班")."時間");
+        // TODO
+        return $status;
+    }
+
+    private function checkCrossSiteData() {
         $query = new Query();
         // check reg case missing RM99~RM101 data
         $log->info('開始跨所註記遺失檢查 ... ');
@@ -74,8 +114,10 @@ class WatchDog {
     function __destruct() { }
 
     public function do() {
-        $this->checkCrossSiteData();
-        $this->findDelayRegCases();
+        if ($this->isOfficeHours()) {
+            $this->checkCrossSiteData();
+            $this->findDelayRegCases();
+        }
         return true;
     }
     
