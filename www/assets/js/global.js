@@ -497,28 +497,6 @@ let initBlockquoteModal = () => {
     });
 }
 
-let initWatchdog = () => {
-    if (window.utilApp.callWatchdog) {
-        window.utilApp.callWatchdog();
-        /*
-        // check every hour
-        setInterval(() => {
-            let now = new Date();
-            let weekday = now.getDay();
-            if (weekday != 0 && weekday != 6) {
-                let hour = now.getHours();
-                // reload the page on 08:00
-                if (hour == 8) {
-                    window.location.reload(true);
-                }
-            }
-        }, 1000 * 60 * 60);
-        */
-    } else {
-        console.warn("Watchdog disabled. (window.utilApp.callWatchdog not defined)");
-    }
-}
-
 let initAlertUI = () => {
     // add alert element to show the alert message
     if (!window.alertApp) {
@@ -660,8 +638,7 @@ let initUtilApp = () => {
             openConfirm: false,
             confirmAnswer: false,
             transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)],
-            callbackQueue: [],
-            watchdog_timer: null
+            callbackQueue: []
         },
         created: function(e) {
             this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
@@ -898,26 +875,6 @@ let initUtilApp = () => {
                         size: "lg"
                     });
                 }
-            },
-            callWatchdog: function(e) {
-                let body = new FormData();
-                body.append("type", "watchdog");
-                asyncFetch("query_json_api.php", {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
-                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {       
-                        // Backend will check if it needs to go or not
-                        window.utilApp.watchdog_timer = setTimeout(this.callWatchdog, 1000 * 60 * 15);	// call the watchdog every 15 mins         
-                    } else {
-                        // stop the timer if API tells it is not working
-                        console.warn(jsonObj.message);
-                        console.info("停止全域WATCHDOG定時器(可手動執行 window.utilApp.callWatchdog() 重試)。");
-                    }
-                }).catch(ex => {
-                    console.error("window.utilApp.callWatchdog parsing failed", ex);
-                });
             }
         }
     });
@@ -982,7 +939,6 @@ $(document).ready(e => {
     initBlockquoteModal();
     initTooltip();
     initDatepicker();
-    initWatchdog();
     initScreensaver();
     
     // hide footer after 10s
