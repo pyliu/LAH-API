@@ -882,19 +882,18 @@ let initUtilApp = () => {
                     });
                 });
             },
-            showRegCase: function(jsonObj, enable_userinfo = false) {
+            showRegCase: function(jsonObj, enabled_userinfo = false) {
                 if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL || jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
                     showAlert({title: "顯示登記案件詳情", message: jsonObj.message, type: "danger"});
                     return;
                 } else {
-                    let VNode = this.$createElement("case-reg-detail", {
-                        props: {
-                            jsonObj: jsonObj,
-                            enabled_userinfo: enable_userinfo
-                        }
-                    });
                     showModal({
-                        message: VNode,
+                        message: this.$createElement("case-reg-detail", {
+                            props: {
+                                jsonObj: jsonObj,
+                                enabled_userinfo: enabled_userinfo
+                            }
+                        }),
                         title: "登記案件詳情",
                         size: "lg"
                     });

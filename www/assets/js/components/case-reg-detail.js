@@ -64,7 +64,7 @@ if (Vue) {
             this.is_close = isEmpty(this.jsonObj.結案已否);
         },
         mounted: function(e) {
-            if (enable_userinfo) {
+            if (this.enabled_userinfo) {
                 addUserInfoEvent();
                 //load current operator user info
                 $("#the_incase_operator_span").trigger("click");
