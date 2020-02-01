@@ -908,31 +908,15 @@ let initUtilApp = () => {
                     method: "POST",
                     body: body
                 }).then(jsonObj => {
-                    window.utilApp.watchdog_timer = setTimeout(that.callWatchdog, 1000 * 60 * 15);	// call the watchdog every 15 mins
-                    /*
                     // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
-                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {                
-                        // automatic check every 15 minutes
-                        window.utilApp.watchdog_timer = setTimeout(function(e) {
-                            let now = new Date();
-                            let weekday = now.getDay();
-                            if (weekday != 0 && weekday != 6) {
-                                let hour = now.getHours();
-                                if (hour >= 8 && hour <= 17) {
-                                    that.callWatchdog(e);
-                                } else {
-                                    console.warn("不在辦公時間內，看門狗將暫停啟用。");
-                                }
-                            }
-                        }, 1000 * 60 * 15);	// call the watchdog every 15 mins
+                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {       
+                        // Backend will check if it needs to go or not
+                        window.utilApp.watchdog_timer = setTimeout(that.callWatchdog, 1000 * 60 * 15);	// call the watchdog every 15 mins         
                     } else {
+                        // stop the timer if API tells it is not working
                         console.warn(jsonObj.message);
-                        // stop interval timer
-                        clearTimeout(that.watchdog_timer);
-                        console.info("停止全域WATCHDOG定時器。");
-                        console.info("window.utilApp.callWatchdog() to enable.");
+                        console.info("停止全域WATCHDOG定時器(可手動執行 window.utilApp.callWatchdog() 重試)。");
                     }
-                    */
                 }).catch(ex => {
                     console.error("window.utilApp.callWatchdog parsing failed", ex);
                 });
