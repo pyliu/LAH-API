@@ -8,6 +8,7 @@ if (Vue) {
                 bordered
                 head-variant="dark"
                 caption-top
+                no-border-collapse
                 :caption="caption"
                 :sticky-header="height"
                 :items="items"
