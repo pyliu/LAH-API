@@ -7,78 +7,79 @@ if (Vue) {
                 <schedule-task></schedule-task>
             </b-col>
             <b-col>
-                <b-card bo-body header="紀錄儀表版">
+                <log-viewer></log-viewer>
+            </b-col>
+        </b-row>`,
+        components: {
+            "log-viewer": {
+                template: `<b-card bo-body header="紀錄儀表版">
                     <div class="d-flex w-100 justify-content-between">
                         <b-button variant="outline-primary" size="sm" @click="callLogAPI">刷新</b-button>
                         <small class="text-muted">更新時間: {{log_update_time}}</small>
                     </div>
                     <small>
                         <b-list-group flush>
-                            <b-list-group-item v-for="item in log_list">{{item}}</b-list-group-item>
+                            <b-list-group-item v-for="item in list">{{item}}</b-list-group-item>
                         </b-list-group>
                     </small>
-                </b-card>
-            </b-col>
-        </b-row>`,
-        data: function () {
-            return {
-                schedule_history: [],
-                watchdog_timer: null,
-                log_timer: null,
-                timer_milliseconds: 15 * 60 * 1000,  // 15 minutes
-                log_list: [],
-                log_update_time: "08:10:11",
-                display_count: 10
-            }
-        },
-        methods: {
-            addLogList: function (message) {
-                if (this.log_list.length == this.display_count) {
-                    this.log_list.pop();
-                } else if (this.log_list.length > this.display_count) {
-                    this.log_list = [];
-                }
-                this.log_list.unshift(message);
-            },
-            callLogAPI: function () {
-                clearTimeout(this.watchdog_timer);
-                let dt = new Date();
-                this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
-                let log_filename = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
-                let body = new FormData();
-                body.append("type", "load_log");
-                body.append("log_filename", log_filename);
-                asyncFetch("load_file_api.php", {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
-                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        let that = this;
-                        jsonObj.data.forEach(function(item, index, array){
-                            that.addLogList(item);
-                        });
-                        this.log_timer = setTimeout(this.callLogAPI, this.timer_milliseconds);
-                    } else {
-                        // stop the timer if API tells it is not working
-                        this.addLogList(`${this.log_update_time} 錯誤: ${jsonObj.message}`);
-                        console.warn(jsonObj.message);
+                </b-card>`,
+                data: function () {
+                    return {
+                        list: [],
+                        log_timer: null,
+                        milliseconds: 15 * 60 * 1000,
+                        count: 10,
+                        log_update_time: "10:48:00"
                     }
-                }).catch(ex => {
-                    this.addLogList(`${this.log_update_time} 錯誤: ${ex.message}`);
-                    showAlert({
-                        title: 'watchdog::callLogAPI parsing failed',
-                        message: ex.message,
-                        type: 'danger'
-                    });
-                    console.error("watchdog::callLogAPI parsing failed", ex);
-                });
-            }
-        },
-        mounted() {
-            this.callLogAPI();
-        },
-        components: {
+                },
+                methods: {
+                    callLogAPI: function () {
+                        clearTimeout(this.log_timer);
+                        let dt = new Date();
+                        this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
+                        let log_filename = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
+                        let body = new FormData();
+                        body.append("type", "load_log");
+                        body.append("log_filename", log_filename);
+                        asyncFetch("load_file_api.php", {
+                            method: "POST",
+                            body: body
+                        }).then(jsonObj => {
+                            // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
+                            if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                let that = this;
+                                jsonObj.data.forEach(function(item, index, array){
+                                    that.addLogList(item);
+                                });
+                                this.log_timer = setTimeout(this.callLogAPI, this.milliseconds);
+                            } else {
+                                // stop the timer if API tells it is not working
+                                this.addLogList(`${this.log_update_time} 錯誤: ${jsonObj.message}`);
+                                console.warn(jsonObj.message);
+                            }
+                        }).catch(ex => {
+                            this.addLogList(`${this.log_update_time} 錯誤: ${ex.message}`);
+                            showAlert({
+                                title: 'watchdog::callLogAPI parsing failed',
+                                message: ex.message,
+                                type: 'danger'
+                            });
+                            console.error("watchdog::callLogAPI parsing failed", ex);
+                        });
+                    },
+                    addLogList: function (message) {
+                        if (this.list.length == this.count) {
+                            this.list.pop();
+                        } else if (this.list.length > this.count) {
+                            this.list = [];
+                        }
+                        this.list.unshift(message);
+                    }
+                },
+                mounted() {
+                    this.callLogAPI();
+                }
+            },
             "schedule-task": {
                 template: `<b-card header="排程儀表版">
                     <b-row>
