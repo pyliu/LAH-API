@@ -12,7 +12,7 @@ if (Vue) {
         </b-form-row>`,
         components: {
             "log-viewer": {
-                template: `<b-card bo-body header="紀錄儀表版">
+                template: `<b-card bo-body :header="'紀錄儀表版 ' + query_data_count + ' / ' + query_total_count">
                     <div class="d-flex w-100 justify-content-between">
                         <b-input-group size="sm" style="width:125px">
                             <b-input-group-prepend is-text>顯示個數</b-input-group-prepend>
@@ -25,10 +25,13 @@ if (Vue) {
                         </b-input-group>
                         <small class="text-muted text-center">
                             <b-button variant="primary" size="sm" @click="callLogAPI">
-                                <countdown ref="countdown" :time="milliseconds" :auto-start="false">
-                                    <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }} 後自動刷新</template>
-                                </countdown>
-                                <b-badge variant="light">{{query_data_count}} / {{query_total_count}} <span class="sr-only">query log count</span></b-badge>
+                                刷新
+                                <b-badge variant="light">
+                                    <countdown ref="countdown" :time="milliseconds" :auto-start="false">
+                                        <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }}</template>
+                                    </countdown>
+                                    <span class="sr-only">countdown</span>
+                                </b-badge>
                             </b-button>
                         </small>
                     </div>
@@ -126,7 +129,7 @@ if (Vue) {
                         </b-input-group>
                         <small class="text-muted text-center">
                             <b-button variant="primary" size="sm" @click="callWatchdogAPI">
-                                手動執行
+                                執行
                                 <b-badge variant="light">
                                     <countdown ref="countdown" :time="milliseconds" :auto-start="false">
                                         <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }} </template>
