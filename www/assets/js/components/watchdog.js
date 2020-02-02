@@ -14,7 +14,7 @@ if (Vue) {
             "log-viewer": {
                 template: `<b-card bo-body header="紀錄儀表版">
                     <div class="d-flex w-100 justify-content-between">
-                        <b-input-group size="sm" style="width:170px">
+                        <b-input-group size="sm" style="width:180px">
                             <b-input-group-prepend is-text>顯示個數</b-input-group-prepend>
                             <b-form-input
                                 type="number"
@@ -22,6 +22,7 @@ if (Vue) {
                                 size="sm"
                                 min="1"
                             ></b-form-input>
+                            &ensp;
                             <b-button variant="outline-primary" size="sm" @click="callLogAPI">刷新</b-button>
                         </b-input-group>
                         <small class="text-muted">
@@ -109,7 +110,7 @@ if (Vue) {
             "schedule-task": {
                 template: `<b-card header="排程儀表版">
                     <div class="d-flex w-100 justify-content-between">
-                        <b-input-group size="sm" style="width:125px">
+                        <b-input-group size="sm" style="width:180px">
                             <b-input-group-prepend is-text>顯示個數</b-input-group-prepend>
                             <b-form-input
                                 type="number"
@@ -117,6 +118,8 @@ if (Vue) {
                                 size="sm"
                                 min="1"
                             ></b-form-input>
+                            &ensp;
+                            <b-button variant="outline-primary" size="sm" @click="callWatchdogAPI">執行</b-button>
                         </b-input-group>
                         <small class="text-muted">
                             <countdown ref="countdown" :time="milliseconds" :auto-start="false">
@@ -131,9 +134,9 @@ if (Vue) {
                     </small>
                 </b-card>`,
                 data: function() {
-                    return{
+                    return {
                         milliseconds: 15 * 60 * 1000,
-                        count: 10,
+                        count: 4,
                         history: [],
                         watchdog_timer: null
                     }
