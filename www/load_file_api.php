@@ -30,10 +30,14 @@ switch ($_POST["type"]) {
         $log->info("XHR [load_log] 查詢請求【".$_POST["log_filename"]."】");
         $path = "./logs/".$_POST["log_filename"];
         if (file_exists($path)) {
+            $all = explode("\n", file_get_contents($path));  // line by line
+            $data = $_POST["slice_offset"] ? array_slice($all, $_POST["slice_offset"]) : $all;
             $result = array(
                 "status" => STATUS_CODE::SUCCESS_NORMAL,
-                "data" => explode("\n", file_get_contents($path)),  // line by line
-                "query_string" => "log_filename=".$_POST["log_filename"]."&type=".$_POST["type"]
+                "data_count" => count($data),
+                "total_count" => count($all),
+                "data" => $data,
+                "query_string" => "log_filename=".$_POST["log_filename"]."&type=".$_POST["type"]."&slice_offset=".$_POST["slice_offset"]
             );
             $log->info("XHR [load_log] 讀取成功【".$path."】");
             echo json_encode($result, 0);

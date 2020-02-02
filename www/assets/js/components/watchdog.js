@@ -14,7 +14,7 @@ if (Vue) {
             "log-viewer": {
                 template: `<b-card bo-body header="紀錄儀表版">
                     <div class="d-flex w-100 justify-content-between">
-                        <b-input-group size="sm" style="width:180px">
+                        <b-input-group size="sm" style="width:125px">
                             <b-input-group-prepend is-text>顯示個數</b-input-group-prepend>
                             <b-form-input
                                 type="number"
@@ -22,13 +22,14 @@ if (Vue) {
                                 size="sm"
                                 min="1"
                             ></b-form-input>
-                            &ensp;
-                            <b-button variant="outline-primary" size="sm" @click="callLogAPI">刷新</b-button>
                         </b-input-group>
-                        <small class="text-muted">
-                            <countdown ref="countdown" :time="milliseconds" :auto-start="false">
-                                <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }} 後自動刷新</template>
-                            </countdown>
+                        <small class="text-muted text-center">
+                            <b-button variant="primary" size="sm" @click="callLogAPI">
+                                <countdown ref="countdown" :time="milliseconds" :auto-start="false">
+                                    <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }} 後自動刷新</template>
+                                </countdown>
+                                <b-badge variant="light">{{query_data_count}} / {{query_total_count}} <span class="sr-only">query log count</span></b-badge>
+                            </b-button>
                         </small>
                     </div>
                     <small>
@@ -43,7 +44,9 @@ if (Vue) {
                         log_timer: null,
                         milliseconds: 15 * 60 * 1000,
                         count: 10,
-                        log_update_time: "10:48:00"
+                        log_update_time: "10:48:00",
+                        query_data_count: 0,
+                        query_total_count: 0
                     }
                 },
                 methods: {
@@ -66,12 +69,14 @@ if (Vue) {
                         let body = new FormData();
                         body.append("type", "load_log");
                         body.append("log_filename", log_filename);
+                        body.append("slice_offset", -50);   // get last 50 records
                         asyncFetch("load_file_api.php", {
                             method: "POST",
                             body: body
                         }).then(jsonObj => {
                             // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                             if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                this.query_data_count = jsonObj.data_count;
                                 let that = this;
                                 jsonObj.data.forEach(function(item, index, array){
                                     that.addLogList(item);
@@ -110,7 +115,7 @@ if (Vue) {
             "schedule-task": {
                 template: `<b-card header="排程儀表版">
                     <div class="d-flex w-100 justify-content-between">
-                        <b-input-group size="sm" style="width:180px">
+                        <b-input-group size="sm" style="width:125px">
                             <b-input-group-prepend is-text>顯示個數</b-input-group-prepend>
                             <b-form-input
                                 type="number"
@@ -118,13 +123,16 @@ if (Vue) {
                                 size="sm"
                                 min="1"
                             ></b-form-input>
-                            &ensp;
-                            <b-button variant="outline-primary" size="sm" @click="callWatchdogAPI">執行</b-button>
                         </b-input-group>
-                        <small class="text-muted">
-                            <countdown ref="countdown" :time="milliseconds" :auto-start="false">
-                                <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }} 後自動執行</template>
-                            </countdown>
+                        <small class="text-muted text-center">
+                            <b-button variant="primary" size="sm" @click="callWatchdogAPI">
+                                手動執行
+                                <b-badge variant="light">
+                                    <countdown ref="countdown" :time="milliseconds" :auto-start="false">
+                                        <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }} </template>
+                                    </countdown>
+                                    <span class="sr-only">count down</span></b-badge>
+                            </b-button>
                         </small>
                     </div>
                     <small>
