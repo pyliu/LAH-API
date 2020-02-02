@@ -15,7 +15,7 @@ if (Vue) {
                 template: `<b-card bo-body :header="'紀錄儀表版 ' + query_data_count + ' / ' + query_total_count">
                     <div class="d-flex w-100 justify-content-between">
                         <b-input-group size="sm" style="width:125px">
-                            <b-input-group-prepend is-text>顯示個數</b-input-group-prepend>
+                            <b-input-group-prepend is-text>顯示筆數</b-input-group-prepend>
                             <b-form-input
                                 type="number"
                                 v-model="count"
@@ -119,7 +119,7 @@ if (Vue) {
                 template: `<b-card header="排程儀表版">
                     <div class="d-flex w-100 justify-content-between">
                         <b-input-group size="sm" style="width:125px">
-                            <b-input-group-prepend is-text>顯示個數</b-input-group-prepend>
+                            <b-input-group-prepend is-text>顯示筆數</b-input-group-prepend>
                             <b-form-input
                                 type="number"
                                 v-model="count"
