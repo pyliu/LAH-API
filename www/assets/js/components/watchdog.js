@@ -2,20 +2,33 @@ if (Vue) {
     // for using countdown
     Vue.component(VueCountdown.name, VueCountdown);
     Vue.component("watchdog", {
-        template: `<b-row>
+        template: `<b-form-row>
             <b-col>
                 <schedule-task></schedule-task>
             </b-col>
             <b-col>
                 <log-viewer></log-viewer>
             </b-col>
-        </b-row>`,
+        </b-form-row>`,
         components: {
             "log-viewer": {
                 template: `<b-card bo-body header="紀錄儀表版">
                     <div class="d-flex w-100 justify-content-between">
-                        <b-button variant="outline-primary" size="sm" @click="callLogAPI">刷新</b-button>
-                        <small class="text-muted">更新時間: {{log_update_time}}</small>
+                        <b-input-group size="sm" style="width:170px">
+                            <b-input-group-prepend is-text>顯示個數</b-input-group-prepend>
+                            <b-form-input
+                                type="number"
+                                v-model="count"
+                                size="sm"
+                                min="1"
+                            ></b-form-input>
+                            <b-button variant="outline-primary" size="sm" @click="callLogAPI">刷新</b-button>
+                        </b-input-group>
+                        <small class="text-muted">
+                            <countdown ref="countdown" :time="milliseconds" :auto-start="false">
+                                <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }} 後自動刷新</template>
+                            </countdown>
+                        </small>
                     </div>
                     <small>
                         <b-list-group flush>
@@ -33,7 +46,18 @@ if (Vue) {
                     }
                 },
                 methods: {
+                    resetCountdown: function () {
+                        this.$refs.countdown.totalMilliseconds = this.milliseconds;
+                        this.$refs.countdown.start();
+                    },
+                    startCountdown: function () {
+                        this.$refs.countdown.start();
+                    },
+                    endCountdown: function () {
+                        this.$refs.countdown.totalMilliseconds = 0;
+                    },
                     callLogAPI: function () {
+                        this.endCountdown();
                         clearTimeout(this.log_timer);
                         let dt = new Date();
                         this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
@@ -52,12 +76,14 @@ if (Vue) {
                                     that.addLogList(item);
                                 });
                                 this.log_timer = setTimeout(this.callLogAPI, this.milliseconds);
+                                this.startCountdown();
                             } else {
                                 // stop the timer if API tells it is not working
                                 this.addLogList(`${this.log_update_time} 錯誤: ${jsonObj.message}`);
                                 console.warn(jsonObj.message);
                             }
                         }).catch(ex => {
+                            this.endCountdown();
                             this.addLogList(`${this.log_update_time} 錯誤: ${ex.message}`);
                             showAlert({
                                 title: 'watchdog::callLogAPI parsing failed',
@@ -82,23 +108,22 @@ if (Vue) {
             },
             "schedule-task": {
                 template: `<b-card header="排程儀表版">
-                    <b-row>
-                        <b-col cols="8">
+                    <div class="d-flex w-100 justify-content-between">
+                        <b-input-group size="sm" style="width:125px">
+                            <b-input-group-prepend is-text>顯示個數</b-input-group-prepend>
+                            <b-form-input
+                                type="number"
+                                v-model="count"
+                                size="sm"
+                                min="1"
+                            ></b-form-input>
+                        </b-input-group>
+                        <small class="text-muted">
                             <countdown ref="countdown" :time="milliseconds" :auto-start="false">
                                 <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }} 後自動執行</template>
                             </countdown>
-                        </b-col>
-                        <b-col cols="4">
-                            <b-input-group size="sm">
-                                <b-input-group-prepend is-text>顯示個數</b-input-group-prepend>
-                                <b-form-input
-                                    type="number"
-                                    v-model="count"
-                                    size="sm"
-                                ></b-form-input>
-                            </b-input-group>
-                        </b-col>
-                    </b-row>
+                        </small>
+                    </div>
                     <small>
                         <b-list-group flush>
                             <b-list-group-item v-for="item in history">{{item}}</b-list-group-item>
