@@ -46,6 +46,7 @@ if (Vue) {
             return {
                 schedule_history: [],
                 watchdog_timer: null,
+                log_timer: null,
                 timer_milliseconds: 15 * 60 * 1000,  // 15 minutes
                 log_list: [],
                 log_update_time: "08:10:11",
@@ -80,6 +81,7 @@ if (Vue) {
                 this.log_list.unshift(message);
             },
             callLogAPI: function () {
+                clearTimeout(this.watchdog_timer);
                 let dt = new Date();
                 this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
                 let log_filename = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
@@ -96,6 +98,7 @@ if (Vue) {
                         jsonObj.data.forEach(function(item, index, array){
                             that.addLogList(item);
                         });
+                        this.log_timer = setTimeout(this.callLogAPI, this.timer_milliseconds);
                     } else {
                         // stop the timer if API tells it is not working
                         this.addLogList(`${this.log_update_time} 錯誤: ${jsonObj.message}`);
@@ -112,6 +115,9 @@ if (Vue) {
                 });
             },
             callWatchdogAPI: function() {
+                this.endCountdown();
+                clearTimeout(this.watchdog_timer);
+
                 // generate current date time string
                 let dt = new Date();
                 let now = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
