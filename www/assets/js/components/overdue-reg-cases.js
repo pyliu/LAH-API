@@ -1,18 +1,15 @@
 if (Vue) {
     Vue.component("overdue-reg-cases", {
         template: `<div>
-            <div class="d-flex w-100 justify-content-between">
-                <span>&ensp;</span>
-                <b-button variant="primary" size="sm" @click="load">
-                    刷新
-                    <b-badge variant="light">
-                        <countdown ref="countdown" :time="milliseconds" :auto-start="false">
-                            <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }}</template>
-                        </countdown>
-                        <span class="sr-only">countdown</span>
-                    </b-badge>
-                </b-button>
-            </div>
+            <b-button variant="primary" size="sm" @click="load" style="right: 2rem; position:absolute; top: 0.5rem;">
+                刷新
+                <b-badge variant="light">
+                    <countdown ref="countdown" :time="milliseconds" :auto-start="false">
+                        <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }}</template>
+                    </countdown>
+                    <span class="sr-only">countdown</span>
+                </b-badge>
+            </b-button>
             <b-table
                 striped
                 hover
@@ -112,7 +109,7 @@ if (Vue) {
         },
         mounted() {
             this.load();
-            this.height = $(document).height() - 170 + "px";
+            this.height = $(document).height() - 140 + "px";
         }
     });
 } else {
