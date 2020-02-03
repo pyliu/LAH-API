@@ -5,7 +5,7 @@ if (Vue) {
         template: `<div>
             <b-form-row class="mb-1" v-show="showScheduleTask">
                 <b-col>
-                    <schedule-task @failed="handleScheduleFailed"></schedule-task>
+                    <schedule-task @fail-not-valid-server="handleFailed"></schedule-task>
                 </b-col>
             </b-form-row>
             <b-form-row>
@@ -21,7 +21,7 @@ if (Vue) {
             }
         },
         methods: {
-            handleScheduleFailed: function() {
+            handleFailed: function() {
                 this.showScheduleTask = false;
             }
         },
@@ -202,23 +202,25 @@ if (Vue) {
                             body: body
                         }).then(jsonObj => {
                             // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
-                            if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                this.addHistory(`${now} 結果: OK`);
+                            if (jsonObj.status == XHR_STATUS_CODE.FAIL_NOT_VALID_SERVER) {
+                                // 此功能僅在伺服器上執行！
+                                this.$emit("fail-not-valid-server");
+                                addNotification({
+                                    title: "WATCHDOG停止通知",
+                                    message: `${jsonObj.message}`,
+                                    type: "warning"
+                                });
+                            } else {
+                                if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                    this.addHistory(`${now}：執行結果正常。`);
+                                } else {
+                                    this.addHistory(`${now}：${jsonObj.message}`);
+                                    console.warn(jsonObj.message);
+                                }
                                 // Backend will check if it needs to do or not
                                 this.watchdog_timer = setTimeout(this.callWatchdogAPI, this.milliseconds);	// call the watchdog every 15 mins
                                 this.resetCountdown();
                                 this.startCountdown();
-                            } else {
-                                let msg = `執行WATCHDOG回傳值不正確，WATCHDOG將停止執行。(${jsonObj.message})`;
-                                // stop the timer if API tells it is not working
-                                this.addHistory(msg);
-                                console.warn(msg);
-                                this.$emit("failed");
-                                addNotification({
-                                    title: "WATCHDOG執行通知",
-                                    message: msg,
-                                    type: "warning"
-                                });
                             }
                         }).catch(ex => {
                             this.endCountdown();

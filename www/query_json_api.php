@@ -54,8 +54,8 @@ switch ($_POST["type"]) {
 	case "watchdog":
 		$log->info("XHR [watchdog] 監控請求");
 		// use http://localhost the client will be "::1"
-		// if you want to enable the watchdog, open above link with chrome on server. (do not close it)
-		if ($client_ip == "::1") {
+		// if you want to enable the watchdog, open http://localhost/watchdog,html with chrome on server. (do not close it)
+		if ($client_ip == "::1") {	// $client_ip from init.php
 			$watchdog = new WatchDog();
 			$done = $watchdog->do();
 			if ($done) {
@@ -66,12 +66,12 @@ switch ($_POST["type"]) {
 					"raw" => $done
 				), 0);
 			} else {
-				$log->warning("XHR [watchdog] 檢查完成，但回傳值有問題【${done}】");
-				echoErrorJSONString("XHR [watchdog] 檢查完成，但回傳值有問題【${done}】");
+				$log->warning("XHR [watchdog] 非上班時段停止執行。");
+				echoErrorJSONString("XHR [watchdog] 非上班時段停止執行。");
 			}
 		} else {
-			$log->info("XHR [watchdog] 跳過執行，因為IP不為「::1」");
-			echoErrorJSONString("XHR [watchdog] 跳過執行，因為IP不為「::1」", STATUS_CODE::FAIL_NOT_VALID_SERVER);
+			$log->info("XHR [watchdog] 停止執行WATCHDOG，因為IP不為「::1」");
+			echoErrorJSONString("XHR [watchdog] 停止執行WATCHDOG，因為IP不為「::1」", STATUS_CODE::FAIL_NOT_VALID_SERVER);
 		}
 		break;
 	case "xcase-check":
