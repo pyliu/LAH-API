@@ -21,6 +21,7 @@ if (Vue) {
                                 v-model="count"
                                 size="sm"
                                 min="1"
+                                max="50"
                             ></b-form-input>
                         </b-input-group>
                         <small class="text-muted text-center">
@@ -45,8 +46,8 @@ if (Vue) {
                     return {
                         list: [],
                         log_timer: null,
-                        milliseconds: 15 * 60 * 1000,
-                        count: 10,
+                        milliseconds: 5 * 60 * 1000,
+                        count: 50,
                         log_update_time: "10:48:00",
                         query_data_count: 0,
                         query_total_count: 0
