@@ -109,7 +109,7 @@ if (Vue) {
         },
         mounted() {
             this.load();
-            this.height = $(document).height() - 140 + "px";
+            this.height = $(document).height() - 145 + "px";
         }
     });
 } else {

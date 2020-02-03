@@ -2,14 +2,29 @@ if (Vue) {
     // for using countdown
     Vue.component(VueCountdown.name, VueCountdown);
     Vue.component("watchdog", {
-        template: `<b-form-row>
-            <b-col>
-                <schedule-task></schedule-task>
-            </b-col>
-            <b-col>
-                <log-viewer></log-viewer>
-            </b-col>
-        </b-form-row>`,
+        template: `<div>
+            <b-form-row class="mb-1" v-show="showScheduleTask">
+                <b-col>
+                    <schedule-task @failed="handleScheduleFailed"></schedule-task>
+                </b-col>
+            </b-form-row>
+            <b-form-row>
+                <b-col>
+                    <log-viewer></log-viewer>
+                </b-col>
+            </b-form-row>
+
+        </div>`,
+        data: function() {
+            return {
+                showScheduleTask: true
+            }
+        },
+        methods: {
+            handleScheduleFailed: function() {
+                this.showScheduleTask = false;
+            }
+        },
         components: {
             "log-viewer": {
                 template: `<b-card bo-body :header="'紀錄儀表版 ' + query_data_count + ' / ' + query_total_count">
@@ -194,9 +209,16 @@ if (Vue) {
                                 this.resetCountdown();
                                 this.startCountdown();
                             } else {
+                                let msg = `執行WATCHDOG回傳值不正確，WATCHDOG將停止執行。(${jsonObj.message})`;
                                 // stop the timer if API tells it is not working
-                                this.addHistory(`${now} 結果: ${jsonObj.message}`);
-                                console.warn(jsonObj.message);
+                                this.addHistory(msg);
+                                console.warn(msg);
+                                this.$emit("failed");
+                                addNotification({
+                                    title: "WATCHDOG執行通知",
+                                    message: msg,
+                                    type: "warning"
+                                });
                             }
                         }).catch(ex => {
                             this.endCountdown();
