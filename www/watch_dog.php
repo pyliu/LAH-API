@@ -51,6 +51,9 @@
         <li class="nav-item mt-3">
           <a class="nav-link" href="/overdue_reg_cases.html">逾期案件</a>
         </li>
+        <li class="nav-item mt-3">
+          <a class="nav-link" href="/watchdog.html">檢視記錄檔</a>
+        </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle hamburger" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <img src="assets/img/menu.png" />
