@@ -115,11 +115,12 @@ class WatchDog {
                     continue;
                 }
                 $sn = $msg->send('逾期案件通知', $content, $adm_ip, 14399);
-                $log->info("訊息已送出(${sn})給 ${adm_ip} (管理者)");
+                $log->info("訊息已送出(${sn})給 ${adm_ip}。 (管理者)");
             }
         }
         $sn = $msg->sysSend('逾期案件通知', $content, $to_id, 14399);  // 14399 secs => +3 hours 59 mins 59 secs
-        $log->info("訊息已送出(${sn})給 ${to_id}。 「${content}」");
+        $users = GetDBUserMapping();
+        $log->info("訊息已送出(${sn})給 ${to_id}。 (".$users[$to_id].")");
     }
 
     function __construct() { }
