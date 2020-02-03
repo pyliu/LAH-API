@@ -58,13 +58,14 @@ class WatchDog {
         return $status;
     }
 
-    private isOfficeHours() {
+    private function isOfficeHours() {
         global $log;
         $log->info("檢查是否處於上班時間 ... ");
         return $this->isOn($this->officeSchedule);
     }
 
     private function checkCrossSiteData() {
+        global $log;
         $query = new Query();
         // check reg case missing RM99~RM101 data
         $log->info('開始跨所註記遺失檢查 ... ');
@@ -91,7 +92,7 @@ class WatchDog {
         $log->info('跨所註記遺失檢查結束。');
     }
 
-    private isOverdueCheckNeeded() {
+    private function isOverdueCheckNeeded() {
         global $log;
         $log->info("檢查是否需要執行逾期案件檢查 ... ");
         return $this->isOn($this->overdueSchedule);
