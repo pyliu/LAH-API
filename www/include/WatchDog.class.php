@@ -18,6 +18,7 @@ class WatchDog {
     private $overdueSchedule = [
         'Sun' => [],
         'Mon' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
+        //'Mon' => ['08:00 AM' => '09:00 PM'],  // testing
         'Tue' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
         'Wed' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
         'Thu' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
@@ -57,12 +58,12 @@ class WatchDog {
             
             $host_ip = getLocalhostIP();
             $msg = new Message();
-            $content = "系統目前找到下列跨所註記遺失案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/watch_dog.php 修正。";
+            $content = "系統目前找到下列跨所註記遺失案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/watch_dog.php 執行檢查功能並修正。";
             foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
                 if ($adm_ip == '::1') {
                     continue;
                 }
-                $sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, 840);   // 840 => +14 mins
+                $sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, 840);   // 840 secs => +14 mins
                 $log->info("訊息已送出(${sn})給 ${adm_ip}");
             }
         }
@@ -102,15 +103,23 @@ class WatchDog {
 
     private function sendOverdueMessage($to_id, $case_records) {
         global $log;
-        $chief_id = "HB0541";
-        if ($to_id == "ALL") {
-            $to_id = $chief_id;
-        }
+        $chief_id = "HB1214";
         $host_ip = getLocalhostIP();
         $msg = new Message();
         $content = "目前有 ".count($case_records)." 件逾期案件(近15天，僅顯示前4筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請前往 http://${host_ip}/overdue_reg_cases.html?reviewerID=".($to_id == "ALL" ? "" : $to_id)." 查看詳細列表。";
-        $sn = $msg->sysSend('逾期案件通知', $content, $chief_id, 14399);  // 14399 => +3 hours 59 mins 59 secs
-        $log->info("訊息已送出(${sn})給 ${chief_id}");
+        if ($to_id == "ALL") {
+            $to_id = $chief_id;
+            // send to admin for testing
+            foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
+                if ($adm_ip == '::1') {
+                    continue;
+                }
+                $sn = $msg->send('逾期案件通知', $content, $adm_ip, 14399);
+                $log->info("訊息已送出(${sn})給 ${adm_ip} (管理者)");
+            }
+        }
+        $sn = $msg->sysSend('逾期案件通知', $content, $to_id, 14399);  // 14399 secs => +3 hours 59 mins 59 secs
+        $log->info("訊息已送出(${sn})給 ${to_id}。 「${content}」");
     }
 
     function __construct() { }
@@ -146,7 +155,7 @@ class WatchDog {
             $st = DateTime::createFromFormat('h:i A', $startTime);
             $ed = DateTime::createFromFormat('h:i A', $endTime);
 
-            $log->info("目前時間判斷區間為 ".$startTime." ~ ".$endTime);
+            $log->info("開始確認 ".$startTime." ~ ".$endTime);
 
             // check if current time is within a range
             if (($st < $currentTime) && ($currentTime < $ed)) {
