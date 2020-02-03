@@ -68,7 +68,7 @@ if (Vue) {
                         clearTimeout(this.log_timer);
                         let dt = new Date();
                         this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
-                        let log_filename = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
+                        let log_filename = `log-${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
                         let body = new FormData();
                         body.append("type", "load_log");
                         body.append("log_filename", log_filename);
