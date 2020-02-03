@@ -1,6 +1,18 @@
 if (Vue) {
     Vue.component("overdue-reg-cases", {
         template: `<div>
+            <div class="d-flex w-100 justify-content-between">
+                <span>&ensp;</span>
+                <b-button variant="primary" size="sm" @click="load">
+                    刷新
+                    <b-badge variant="light">
+                        <countdown ref="countdown" :time="milliseconds" :auto-start="false">
+                            <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }}</template>
+                        </countdown>
+                        <span class="sr-only">countdown</span>
+                    </b-badge>
+                </b-button>
+            </div>
             <b-table
                 striped
                 hover
@@ -30,6 +42,9 @@ if (Vue) {
             </b-table>
         </div>`,
         props: ['reviewerId'],
+        components: {
+            "countdown": VueCountdown
+        },
         data: function () {
             return {
                 items: [],
@@ -46,11 +61,23 @@ if (Vue) {
                 height: true,
                 caption: "查詢中 ... ",
                 busy: true,
-                timer_handle: null
+                timer_handle: null,
+                milliseconds: 15 * 60 * 1000
             }
         },
         methods: {
+            resetCountdown: function () {
+                this.$refs.countdown.totalMilliseconds = this.milliseconds;
+            },
+            startCountdown: function () {
+                this.$refs.countdown.start();
+            },
+            endCountdown: function () {
+                this.$refs.countdown.totalMilliseconds = 0;
+            },
             load: function() {
+                clearTimeout(this.timer_handle);
+                this.endCountdown();
                 this.busy = true;
                 let form_body = new FormData();
                 form_body.append("type", "overdue_reg_cases");
@@ -62,26 +89,30 @@ if (Vue) {
                     body: form_body
                 }).then(jsonObj => {
                     console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "查詢登記逾期案件回傳狀態碼有問題【" + jsonObj.status + "】");
+                    
                     this.busy = false;
                     this.items = jsonObj.items;
                     this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
+                    
                     setTimeout(() => {
                         $("table tr td:nth-child(2)").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
                         addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
                     }, 1000);
+
+                    this.resetCountdown();
+                    this.startCountdown();
+
+                    // auto next reload
+                    this.timer_handle = setTimeout(this.load, this.milliseconds);
                 }).catch(ex => {
                     console.error("overdue-reg-cases::created parsing failed", ex);
                     showAlert({message: "overdue-reg-cases::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
                 });
             }
         },
-        created() {
-            this.load();
-            // reload the table every 15 mins
-            this.timer_handle = setInterval(this.load, 15 * 60 * 1000);
-        },
         mounted() {
-            this.height = $(document).height() - 145 + "px";
+            this.load();
+            this.height = $(document).height() - 170 + "px";
         }
     });
 } else {
