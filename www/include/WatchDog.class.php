@@ -25,43 +25,20 @@ class WatchDog {
         'Sat' => []
     ];
 
-    private function isOn($schedule) {
-        global $log;
-
-        // current or user supplied UNIX timestamp
-        $timestamp = time();
-
-        // default status
-        $status = false;
-
-        // get current time object
-        $currentTime = (new DateTime())->setTimestamp($timestamp);
-
-        // loop through time ranges for current day
-        foreach ($schedule[date('D', $timestamp)] as $startTime => $endTime) {
-
-            // create time objects from start/end times
-            $startTime = DateTime::createFromFormat('h:i A', $startTime);
-            $endTime   = DateTime::createFromFormat('h:i A', $endTime);
-
-            $log->info("目前時間判斷區間為 ".$startTime." ~ ". $endTime);
-
-            // check if current time is within a range
-            if (($startTime < $currentTime) && ($currentTime < $endTime)) {
-                $status = true;
-                break;
-            }
-        }
-
-        $log->info("現在是".($status ? "啟動" : "關閉")."狀態");
-        // TODO
-        return $status;
-    }
-
     private function isOfficeHours() {
         global $log;
         $log->info("檢查是否處於上班時間 ... ");
-        return $this->isOn($this->officeSchedule);
+        $result = $this->isOn($this->officeSchedule);
+        $log->info('現在是'.($result ? "上班" : "下班")."時段。");
+        return $result;
+    }
+
+    private function isOverdueCheckNeeded() {
+        global $log;
+        $log->info("檢查是否需要執行逾期案件檢查 ... ");
+        $result = $this->isOn($this->overdueSchedule);
+        $log->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
+        return $result;
     }
 
     private function checkCrossSiteData() {
@@ -90,12 +67,6 @@ class WatchDog {
             }
         }
         $log->info('跨所註記遺失檢查結束。');
-    }
-
-    private function isOverdueCheckNeeded() {
-        global $log;
-        $log->info("檢查是否需要執行逾期案件檢查 ... ");
-        return $this->isOn($this->overdueSchedule);
     }
 
     private function findDelayRegCases() {
@@ -150,9 +121,43 @@ class WatchDog {
         if ($this->isOfficeHours()) {
             $this->checkCrossSiteData();
             $this->findDelayRegCases();
+            return true;
         }
-        return true;
+        return false;
     }
     
+    public function isOn($schedule) {
+        global $log;
+
+        $now = new DateTime();
+        $log->info("現在時間是 ".$now->format('Y-m-d H:i:s')."，開始檢查是否為啟動區間。"); 
+
+
+        // current or user supplied UNIX timestamp
+        $timestamp = time();
+        // default status
+        $status = false;
+        // get current time object
+        $currentTime = (new DateTime())->setTimestamp($timestamp);
+        // loop through time ranges for current day
+        foreach ($schedule[date('D', $timestamp)] as $startTime => $endTime) {
+
+            // create time objects from start/end times
+            $st = DateTime::createFromFormat('h:i A', $startTime);
+            $ed = DateTime::createFromFormat('h:i A', $endTime);
+
+            $log->info("目前時間判斷區間為 ".$startTime." ~ ".$endTime);
+
+            // check if current time is within a range
+            if (($st < $currentTime) && ($currentTime < $ed)) {
+                $status = true;
+                break;
+            }
+        }
+
+        $log->info("現在應為".($status ? "啟動" : "關閉")."狀態");
+        // TODO
+        return $status;
+    }
 }
 ?>

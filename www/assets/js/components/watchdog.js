@@ -55,7 +55,6 @@ if (Vue) {
                 methods: {
                     resetCountdown: function () {
                         this.$refs.countdown.totalMilliseconds = this.milliseconds;
-                        this.$refs.countdown.start();
                     },
                     startCountdown: function () {
                         this.$refs.countdown.start();
@@ -80,11 +79,13 @@ if (Vue) {
                             // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                             if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                 this.query_data_count = jsonObj.data_count;
+                                this.query_total_count = jsonObj.total_count;
                                 let that = this;
                                 jsonObj.data.forEach(function(item, index, array){
                                     that.addLogList(item);
                                 });
                                 this.log_timer = setTimeout(this.callLogAPI, this.milliseconds);
+                                this.resetCountdown();
                                 this.startCountdown();
                             } else {
                                 // stop the timer if API tells it is not working
@@ -155,7 +156,6 @@ if (Vue) {
                 methods: {
                     resetCountdown: function () {
                         this.$refs.countdown.totalMilliseconds = this.milliseconds;
-                        this.$refs.countdown.start();
                     },
                     startCountdown: function () {
                         this.$refs.countdown.start();
@@ -190,6 +190,7 @@ if (Vue) {
                                 this.addHistory(`${now} 結果: OK`);
                                 // Backend will check if it needs to do or not
                                 this.watchdog_timer = setTimeout(this.callWatchdogAPI, this.milliseconds);	// call the watchdog every 15 mins
+                                this.resetCountdown();
                                 this.startCountdown();
                             } else {
                                 // stop the timer if API tells it is not working
