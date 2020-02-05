@@ -99,8 +99,19 @@ if (Vue) {
                     this.resetCountdown();
                     this.startCountdown();
 
-                    // auto next reload
-                    this.timer_handle = setTimeout(this.load, this.milliseconds);
+                    let now = new Date();
+                    if (now.getHours() >= 7 && now.getHours() < 17) {
+                        // auto next reload
+                        this.timer_handle = setTimeout(this.load, this.milliseconds);
+                    } else {
+                        console.warn("非上班時間，停止自動更新。");
+                        addNotification({
+                            title: "自動更新停止通知",
+                            message: "非上班時間，停止自動更新。",
+                            type: "warning"
+                        });
+                        this.endCountdown();
+                    }
                 }).catch(ex => {
                     console.error("overdue-reg-cases::created parsing failed", ex);
                     showAlert({message: "overdue-reg-cases::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});

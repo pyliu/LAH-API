@@ -4,7 +4,7 @@ if (Vue) {
             <p v-html="jsonObj.tr_html"></p>
             <b-form-row>
                 <b-col>
-                    <div v-if="!is_close" class='text-danger'><strong>尚未結案！</strong></div>
+                    <div v-if="is_ongoing" class='text-danger'><strong>尚未結案！</strong></div>
                     <div v-if="jsonObj.跨所 == 'Y'"><span class='bg-info text-white rounded p-1'>跨所案件 ({{jsonObj.資料收件所}} => {{jsonObj.資料管轄所}})</span></div>
                     收件字號：<a
                         :title="'案件辦理情形 on ' + ap_server"
@@ -27,7 +27,7 @@ if (Vue) {
                     權利人統編：{{jsonObj.權利人統編}} <br/>
                     權利人姓名：{{jsonObj.權利人姓名}} <br/>
                     義務人統編：{{jsonObj.義務人統編}} <br/>
-                    h義務人姓名：{{jsonObj.義務人姓名}} <br/>
+                    義務人姓名：{{jsonObj.義務人姓名}} <br/>
                     義務人人數：{{jsonObj.義務人人數}} <br/>
                     代理人統編：{{jsonObj.代理人統編}} <br/>
                     代理人姓名：{{jsonObj.代理人姓名}} <br/>
@@ -44,7 +44,7 @@ if (Vue) {
                 rm10: null,
                 ap_server: "220.1.35.123",
                 ap_url: "",
-                is_close: false
+                is_ongoing: false
             }
         },
         created: function(e) {
@@ -61,7 +61,7 @@ if (Vue) {
                     break;
             }
             this.ap_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=${this.jsonObj.raw["RM01"]}&word=${this.jsonObj.raw["RM02"]}&code=${this.jsonObj.raw["RM03"]}&sdlyn=N&RM90=`;
-            this.is_close = !isEmpty(this.jsonObj.結案已否);
+            this.is_ongoing = isEmpty(this.jsonObj.結案已否);
         },
         mounted: function(e) {
             if (this.enabled_userinfo) {
