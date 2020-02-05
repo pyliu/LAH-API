@@ -5,7 +5,7 @@ if (Vue) {
                 刷新
                 <b-badge variant="light">
                     <countdown ref="countdown" :time="milliseconds" :auto-start="false">
-                        <template slot-scope="props">{{ props.minutes }}:{{ props.seconds }}</template>
+                        <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }}</template>
                     </countdown>
                     <span class="sr-only">countdown</span>
                 </b-badge>
