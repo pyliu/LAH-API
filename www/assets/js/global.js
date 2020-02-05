@@ -834,7 +834,7 @@ let initUtilApp = () => {
                     console.error(err);
                 });
             },
-            fetchRegCase: function(e) {
+            fetchRegCase: function(e, enabled_userinfo = false) {
                 // ajax event binding
                 let clicked_element = $(e.target);
                 // remove additional characters for querying
@@ -848,7 +848,7 @@ let initUtilApp = () => {
                     method: "POST",
                     body: body
                 }).then(jsonObj => {
-                    this.showRegCase(jsonObj);
+                    this.showRegCase(jsonObj, enabled_userinfo);
                 }).catch(ex => {
                     console.error("window.utilApp.fetchRegCase parsing failed", ex);
                     showAlert({

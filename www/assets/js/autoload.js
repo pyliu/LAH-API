@@ -90,7 +90,7 @@ function adjustTableContent() {
         $(".focused-element").removeClass("focused-element");
         clicked_element.addClass("focused-element");
         scrollToElement(clicked_element);
-        window.utilApp.fetchRegCase(e);
+        window.utilApp.fetchRegCase(e, true);
     });
     // user info dialog event
     console.assert(addUserInfoEvent, "Can't find addUserInfoEvent function ... do you include global.js?")
