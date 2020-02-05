@@ -65,10 +65,16 @@
             methods: {},
             created() {}
         });
-        // refresh the page after 8hrs
+        // refresh the page at tomorrow 08:00
+        var now = new Date();
+        var today = now.getFullYear() + "-" +
+            ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
+            ("0" + now.getDate()).slice(-2);
+        let tomorrow_8am = new Date(today + " 08:00:00");
+        tomorrow_8am.setDate(new Date().getDate()+1);
         setTimeout(() => {
           window.location.reload();
-        }, 1 * 60 * 60 * 1000);
+        }, tomorrow_8am - now);
     });
   </script>
 </body>

@@ -106,7 +106,7 @@ class WatchDog {
         $chief_id = "HB1214";
         $host_ip = getLocalhostIP();
         $msg = new Message();
-        $content = "目前有 ".count($case_records)." 件逾期案件(近15天，僅顯示前4筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請用CHROME瀏覽器前往 http://${host_ip}/overdue_reg_cases.html?reviewerID=".($to_id == "ALL" ? "" : $to_id)." 查看詳細列表。";
+        $content = "目前有 ".count($case_records)." 件逾期案件(近15天，僅顯示前4筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請用CHROME瀏覽器前往 http://${host_ip}/overdue_reg_cases.html?reviewerID=".($to_id == "ALL" ? "" : $to_id)."\r\n查看詳細列表。";
         if ($to_id == "ALL") {
             $to_id = $chief_id;
             // send to admin for testing
