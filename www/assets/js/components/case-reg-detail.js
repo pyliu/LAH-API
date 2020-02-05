@@ -3,13 +3,13 @@ if (Vue) {
         template: `<div>
             <p v-html="jsonObj.tr_html"></p>
             <b-row>
-                <b-col cols="4">
+                <b-col>
                     <span v-show="jsonObj.跨所 == 'Y'" class='bg-info text-white rounded p-1'>跨所案件 ({{jsonObj.資料收件所}} => {{jsonObj.資料管轄所}})</span><br />
                     收件字號：<a
                         :title="'案件辦理情形 on ' + ap_server"
                         :href="ap_url"
                         target="_blank"
-                    >{{jsonObj.收件字號}}</a> <br />
+                    >{{jsonObj.收件字號}}</a> <b-button variant="outline-primary" size="sm" @click="window.open(ap_url)" title="案件辦理情形"><i class="fas fa-search">查看</i></b-button> <br />
                     <div v-show="is_close" class='text-danger'><strong>尚未結案！</strong></div>
                     收件時間：{{jsonObj.收件時間}} <br/>
                     測量案件：{{jsonObj.測量案件}} <br/>
@@ -33,7 +33,7 @@ if (Vue) {
                     代理人姓名：{{jsonObj.代理人姓名}} <br/>
                     手機號碼：{{jsonObj.手機號碼}}
                 </b-col>
-                <b-col id="in_modal_display" cols="8">
+                <b-col v-if="enabled_userinfo" id="in_modal_display" cols="8">
                 </b-col>
             </b-row>
         </div>`,
