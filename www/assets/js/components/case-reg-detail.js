@@ -33,7 +33,7 @@ if (Vue) {
                     代理人姓名：{{jsonObj.代理人姓名}} <br/>
                     手機號碼：{{jsonObj.手機號碼}}
                 </b-col>
-                <b-col v-if="enabled_userinfo" id="in_modal_display" cols="8">
+                <b-col v-if="enabled_userinfo" id="in_modal_display" cols="7">
                 </b-col>
             </b-form-row>
         </div>`,
