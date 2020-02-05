@@ -70,11 +70,13 @@
         var today = now.getFullYear() + "-" +
             ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
             ("0" + now.getDate()).slice(-2);
-        let tomorrow_8am = new Date(today + " 07:50:00");
-        tomorrow_8am.setDate(new Date().getDate()+1);
+        let tomorrow_7_50_am = new Date(`${today} 07:50:00`);
+        tomorrow_7_50_am.setDate(new Date().getDate()+1);
+        let milliseconds = tomorrow_7_50_am - now;
         setTimeout(() => {
           window.location.reload();
-        }, tomorrow_8am - now);
+        }, milliseconds);
+        console.log(`Refresh the page after ${Number.parseFloat(milliseconds / 1000 / 60 / 60).toFixed(2)} hrs. (${tomorrow_7_50_am})`);
     });
   </script>
 </body>
