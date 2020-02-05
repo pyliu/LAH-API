@@ -8,6 +8,7 @@ abstract class STATUS_CODE {
     const FAIL_WITH_LOCAL_NO_RECORD = -2;
     const FAIL_NOT_VALID_SERVER = -3;
     const FAIL_WITH_REMOTE_NO_RECORD = -4;
+    const FAIL_NO_AUTHORITY = -5;
 }
 
 define('ROOT_DIR', dirname(dirname(__FILE__)));
