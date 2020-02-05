@@ -70,7 +70,7 @@
         var today = now.getFullYear() + "-" +
             ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
             ("0" + now.getDate()).slice(-2);
-        let tomorrow_8am = new Date(today + " 08:00:00");
+        let tomorrow_8am = new Date(today + " 07:50:00");
         tomorrow_8am.setDate(new Date().getDate()+1);
         setTimeout(() => {
           window.location.reload();
