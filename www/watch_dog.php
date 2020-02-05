@@ -1,4 +1,7 @@
-<?php require_once("./include/init.php"); ?>
+<?php
+require_once("./include/init.php");
+require_once("./include/authentication.php");
+?>
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>

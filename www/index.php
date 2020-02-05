@@ -1,6 +1,7 @@
 <?php
 
 require_once("./include/init.php");
+require_once("./include/authentication.php");
 require_once("./include/RegCaseData.class.php");
 
 $qday = $_REQUEST["date"];
