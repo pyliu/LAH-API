@@ -27,7 +27,7 @@ class WatchDog {
     ];
 
     private $stats = null;
-    private $stats_path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."stats".DIRECTORY_SEPARATOR."watchdog.stats";
+    private $stats_path;
 
     private function isOfficeHours() {
         global $log;
@@ -139,13 +139,15 @@ class WatchDog {
     }
 
     private function setStats() {
-        if ($this->stats) {
+        if (is_array($this->stats)) {
             $content = serialize($this->stats);
             file_put_contents($this->stats_path, $content);
         }
     }
 
-    function __construct() { }
+    function __construct() {
+        $this->stats_path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."stats".DIRECTORY_SEPARATOR."watchdog.stats";
+    }
 
     function __destruct() { }
 
