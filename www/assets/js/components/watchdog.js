@@ -65,6 +65,7 @@ if (Vue) {
                                 max="50"
                             ></b-form-input>
                         </b-input-group>
+                        <a :href="'logs/' + log_filename" target="_blank">下載</a>
                         <small class="text-muted text-center">
                             <b-button variant="primary" size="sm" @click="callLogAPI">
                                 刷新
@@ -72,7 +73,7 @@ if (Vue) {
                                     <countdown ref="countdown" :time="milliseconds" :auto-start="false">
                                         <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }}</template>
                                     </countdown>
-                                    <span class="sr-only">countdown</span>
+                                    <span class="sr-only">倒數</span>
                                 </b-badge>
                             </b-button>
                         </small>
@@ -91,7 +92,8 @@ if (Vue) {
                         count: 50,
                         log_update_time: "10:48:00",
                         query_data_count: 0,
-                        query_total_count: 0
+                        query_total_count: 0,
+                        log_filename: ""
                     }
                 },
                 methods: {
@@ -109,10 +111,10 @@ if (Vue) {
                         clearTimeout(this.log_timer);
                         let dt = new Date();
                         this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
-                        let log_filename = `log-${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
+                        this.log_filename = `log-${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
                         let body = new FormData();
                         body.append("type", "load_log");
-                        body.append("log_filename", log_filename);
+                        body.append("log_filename", this.log_filename);
                         body.append("slice_offset", -50);   // get last 50 records
                         asyncFetch("load_file_api.php", {
                             method: "POST",
@@ -177,7 +179,7 @@ if (Vue) {
                                     <countdown ref="countdown" :time="milliseconds" :auto-start="false">
                                         <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }} </template>
                                     </countdown>
-                                    <span class="sr-only">count down</span></b-badge>
+                                    <span class="sr-only">倒數</span></b-badge>
                             </b-button>
                         </small>
                     </div>
