@@ -26,6 +26,9 @@ class WatchDog {
         'Sat' => []
     ];
 
+    private $stats = null;
+    private $stats_path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."stats".DIRECTORY_SEPARATOR."watchdog.stats";
+
     private function isOfficeHours() {
         global $log;
         $log->info("檢查是否處於上班時間 ... ");
@@ -121,6 +124,25 @@ class WatchDog {
         $sn = $msg->sysSend('逾期案件通知', $content, $to_id, 14399);  // 14399 secs => +3 hours 59 mins 59 secs
         $users = GetDBUserMapping();
         $log->info("訊息已送出(${sn})給 ${to_id}。 (".$users[$to_id].")");
+    }
+
+    private function getStats() {
+        if (!is_array($this->stats)) {
+            $content = file_get_contents($this->stats_path);
+            if (empty($content)) {
+                $this->stats = array();
+            } else {
+                $this->stats = unserialize($content);
+            }
+        }
+        return $this->stats;
+    }
+
+    private function setStats() {
+        if ($this->stats) {
+            $content = serialize($this->stats);
+            file_put_contents($this->stats_path, $content);
+        }
     }
 
     function __construct() { }
