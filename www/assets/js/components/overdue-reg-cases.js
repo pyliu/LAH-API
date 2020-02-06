@@ -18,6 +18,7 @@ if (Vue) {
                 head-variant="dark"
                 caption-top
                 no-border-collapse
+                :small="small"
                 :caption="caption"
                 :sticky-header="height"
                 :items="items"
@@ -34,12 +35,12 @@ if (Vue) {
                     {{data.index + 1}}
                 </template>
                 <template v-slot:cell(初審人員)="data">
-                    <b-button v-if="!inSearch" variant="outline-primary" size="sm" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的逾期案件'">{{data.value.split(" ")[0]}}</b-button>
+                    <b-button v-if="!inSearch" variant="outline-danger" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的逾期案件'">{{data.value.split(" ")[0]}}</b-button>
                     <span v-else>{{data.value.split(" ")[0]}}</span>
                 </template>
             </b-table>
         </div>`,
-        props: ['reviewerId', 'inSearch'],
+        props: ['reviewerId', 'inSearch', 'compact'],
         components: {
             "countdown": VueCountdown
         },
@@ -59,6 +60,7 @@ if (Vue) {
                 height: true,
                 caption: "查詢中 ... ",
                 busy: true,
+                small: false,
                 timer_handle: null,
                 milliseconds: 15 * 60 * 1000
             }
@@ -117,7 +119,7 @@ if (Vue) {
                             });
                             this.endCountdown();
                         }
-                        
+
                     }
                 }).catch(ex => {
                     console.error("overdue-reg-cases::created parsing failed", ex);
@@ -144,6 +146,7 @@ if (Vue) {
             if (this.inSearch === true) {
                 // in modal dialog
                 this.height = $(document).height() - 185 + "px";
+                this.small = true;
             } else {
                 this.height = $(document).height() - 145 + "px";
             }
