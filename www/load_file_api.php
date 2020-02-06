@@ -31,6 +31,9 @@ switch ($_POST["type"]) {
         $path = "./logs/".$_POST["log_filename"];
         if (file_exists($path)) {
             function removeLoadLog($item) {
+                if (empty($item)) {
+                    return false;
+                }
                 return !stristr($item, "load_log");
             }
             $all = array_filter(explode("\n", file_get_contents($path)), removeLoadLog);  // line by line
