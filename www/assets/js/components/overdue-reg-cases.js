@@ -35,7 +35,7 @@ if (Vue) {
                     {{data.index + 1}}
                 </template>
                 <template v-slot:cell(初審人員)="data">
-                    <b-button v-if="!inSearch" variant="outline-danger" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的逾期案件'">{{data.value.split(" ")[0]}}</b-button>
+                    <b-button v-if="!inSearch && !reviewerId" variant="outline-danger" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的逾期案件'">{{data.value.split(" ")[0]}}</b-button>
                     <span v-else>{{data.value.split(" ")[0]}}</span>
                 </template>
             </b-table>
