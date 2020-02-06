@@ -37,9 +37,8 @@ switch ($_POST["type"]) {
 					"辦理情形" => $regdata->getStatus(),
 					"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
 					"限辦期限" => $regdata->getDueDate(),
-					"初審人員" => $regdata->getFirstReviewer(),
-					"作業人員" => $regdata->getCurrentOperator(),
-					"ReviewerID" => $regdata->getFirstReviewerID()
+					"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
+					"作業人員" => $regdata->getCurrentOperator()
 				);
 			}
 			$result = array(

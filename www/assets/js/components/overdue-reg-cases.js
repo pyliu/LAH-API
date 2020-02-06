@@ -1,13 +1,13 @@
 if (Vue) {
     Vue.component("overdue-reg-cases", {
         template: `<div>
-            <b-button variant="primary" size="sm" @click="load" style="right: 2rem; position:absolute; top: 0.5rem;">
+            <b-button v-if="!inSearch" variant="primary" size="sm" @click="load" style="right: 2rem; position:absolute; top: 0.5rem;">
                 刷新
                 <b-badge variant="light">
                     <countdown ref="countdown" :time="milliseconds" :auto-start="false">
                         <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }}</template>
                     </countdown>
-                    <span class="sr-only">countdown</span>
+                    <span class="sr-only">倒數</span>
                 </b-badge>
             </b-button>
             <b-table
@@ -34,11 +34,12 @@ if (Vue) {
                     {{data.index + 1}}
                 </template>
                 <template v-slot:cell(初審人員)="data">
-                    <a class="text-info" :href="'overdue_reg_cases.html?reviewerID='+data.ReviewerID">{{data.value}}</a>
+                    <b-button v-if="!inSearch" variant="outline-primary" size="sm" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的逾期案件'">{{data.value.split(" ")[0]}}</b-button>
+                    <span v-else>{{data.value.split(" ")[0]}}</span>
                 </template>
             </b-table>
         </div>`,
-        props: ['reviewerId'],
+        props: ['reviewerId', 'inSearch'],
         components: {
             "countdown": VueCountdown
         },
@@ -74,7 +75,9 @@ if (Vue) {
             },
             load: function() {
                 clearTimeout(this.timer_handle);
-                this.endCountdown();
+                if (!this.inSearch) {
+                    this.endCountdown();
+                }
                 this.busy = true;
                 let form_body = new FormData();
                 form_body.append("type", "overdue_reg_cases");
@@ -90,37 +93,60 @@ if (Vue) {
                     this.busy = false;
                     this.items = jsonObj.items;
                     this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
-                    
+
                     setTimeout(() => {
-                        $("table tr td:nth-child(2)").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
+                        $("table tr td:nth-child(2)").off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
                         addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
                     }, 1000);
 
-                    this.resetCountdown();
-                    this.startCountdown();
+                    if (!this.inSearch) {
 
-                    let now = new Date();
-                    if (now.getHours() >= 7 && now.getHours() < 17) {
-                        // auto next reload
-                        this.timer_handle = setTimeout(this.load, this.milliseconds);
-                    } else {
-                        console.warn("非上班時間，停止自動更新。");
-                        addNotification({
-                            title: "自動更新停止通知",
-                            message: "非上班時間，停止自動更新。",
-                            type: "warning"
-                        });
-                        this.endCountdown();
+                        this.resetCountdown();
+                        this.startCountdown();
+
+                        let now = new Date();
+                        if (now.getHours() >= 7 && now.getHours() < 17) {
+                            // auto next reload
+                            this.timer_handle = setTimeout(this.load, this.milliseconds);
+                        } else {
+                            console.warn("非上班時間，停止自動更新。");
+                            addNotification({
+                                title: "自動更新停止通知",
+                                message: "非上班時間，停止自動更新。",
+                                type: "warning"
+                            });
+                            this.endCountdown();
+                        }
+                        
                     }
                 }).catch(ex => {
                     console.error("overdue-reg-cases::created parsing failed", ex);
                     showAlert({message: "overdue-reg-cases::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
                 });
+            },
+            searchByReviewer: function(reviewer_data) {
+                // e.g. "賴奕文 HB1159"
+                let id = trim(reviewer_data);
+                showModal({
+                    title: `查詢 ${reviewer_data} 逾期案件`,
+                    message: this.$createElement('overdue-reg-cases', {
+                        props: {
+                            reviewerId: id,
+                            inSearch: true
+                        }
+                    }),
+                    size: "xl"
+                });
             }
         },
         mounted() {
             this.load();
-            this.height = $(document).height() - 145 + "px";
+            if (this.inSearch === true) {
+                // in modal dialog
+                this.height = $(document).height() - 185 + "px";
+            } else {
+                this.height = $(document).height() - 145 + "px";
+            }
         }
     });
 } else {
