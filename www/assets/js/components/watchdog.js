@@ -114,7 +114,7 @@ if (Vue) {
                         let body = new FormData();
                         body.append("type", "load_log");
                         body.append("log_filename", this.log_filename);
-                        body.append("slice_offset", -50);   // get last 50 records
+                        body.append("slice_offset", this.count * -1);   // get lastest # records
                         asyncFetch("load_file_api.php", {
                             method: "POST",
                             body: body

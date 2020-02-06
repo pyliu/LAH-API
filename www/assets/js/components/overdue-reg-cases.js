@@ -34,7 +34,7 @@ if (Vue) {
                     {{data.index + 1}}
                 </template>
                 <template v-slot:cell(初審人員)="data">
-                    <b class="text-info">{{data.value}}</b>
+                    <a class="text-info" :href="'overdue_reg_cases.html?reviewerID='+data.ReviewerID">{{data.value}}</a>
                 </template>
             </b-table>
         </div>`,

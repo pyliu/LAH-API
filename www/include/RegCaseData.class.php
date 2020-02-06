@@ -268,6 +268,10 @@ class RegCaseData {
         return $this->getIDorName($this->row["RM45"]);
     }
 
+    public function getFirstReviewerID() {
+        return $this->row["RM45"];
+    }
+
     public function getFirstReviewerTooltipAttr() {
         return empty($this->row["RM45"]) || $this->row["RM45"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='xhrQueryUserInfo' data-id='".$this->row["RM45"]."' data-name='".$this->getIDorName($this->row["RM45"])."' data-display-selector='#in_modal_display' data-toggle='tooltip' title='初審人員：".$this->row["RM45"]."'";
     }
