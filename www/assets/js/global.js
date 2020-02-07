@@ -872,7 +872,7 @@ let initUtilApp = () => {
                             }
                         }),
                         title: "登記案件詳情",
-                        size: "lg"
+                        size: enabled_userinfo ? "xl" : "lg"
                     });
                 }
             }

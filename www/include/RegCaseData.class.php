@@ -83,7 +83,7 @@ class RegCaseData {
         } else if ($len == 13) {
             return substr($str, 0, 3) . "-" . substr($str, 3, 2) . "-" . substr($str, 5, 2) . " " . substr($str, 7, 2) . ":" . substr($str, 9, 2) . ":" . substr($str, 11, 2);
         }
-        return "N/A";
+        return "";
     }
 
     public function getJsonData($flag = 0) {
@@ -159,7 +159,40 @@ class RegCaseData {
             "資料收件所" => OFFICE[$row["RM101"]] ? OFFICE[$row["RM101"]] : $row["RM101"],
             "結案已否" => $row["RM31"],
             "tr_html" => $this->getTableHtml(),
-            "raw" => $row
+            "raw" => $row,
+            // 案件辦理情形資料
+            "收件人員" => $this->getReceptionist(),
+            "初審人員" => $this->getFirstReviewer(),
+            "初審時間" => RegCaseData::toDate($row["RM44_1"])." ".RegCaseData::toDate($row["RM44_2"]),
+            "複審人員" => $this->getSecondReviewer(),
+            "複審時間" => RegCaseData::toDate($row["RM46_1"])." ".RegCaseData::toDate($row["RM46_2"]),
+            "移轉課長" => $this->getIDorName($this->row["RM106"]),
+            "移轉課長時間" => RegCaseData::toDate($row["RM106_1"])." ".RegCaseData::toDate($row["RM106_2"]),
+            "移轉秘書" => $this->getIDorName($this->row["RM107"]),
+            "移轉秘書時間" => RegCaseData::toDate($row["RM107_1"])." ".RegCaseData::toDate($row["RM107_2"]),
+            "駁回日期" => RegCaseData::toDate($row["RM48_1"])." ".RegCaseData::toDate($row["RM48_2"]),
+            "公告日期" => RegCaseData::toDate($row["RM49"]),
+            "公告期滿日期" => RegCaseData::toDate($row["RM50"]),
+            "公告天數" => $row["RM49_DAY"],
+            "通知補正日期" => RegCaseData::toDate($row["RM51"]),
+            "補正期滿日期" => RegCaseData::toDate($row["RM52"]),
+            "補正期限" => $row["RM52_DAY"],
+            "補正日期" => RegCaseData::toDate($row["RM53_1"])." ".RegCaseData::toDate($row["RM53_2"]),
+            "請示人員" => $this->getIDorName($this->row["RM82"]),
+            "請示時間" => RegCaseData::toDate($row["RM80"])." ".RegCaseData::toDate($row["RM81"]),
+            "展期人員" => $this->getIDorName($this->row["RM88"]),
+            "展期日期" => RegCaseData::toDate($row["RM86"])." ".RegCaseData::toDate($row["RM87"]),
+            "展期天數" => $this->row["RM89"],
+            "登錄人員" => $this->getIDorName($this->row["RM55"]),
+            "登錄日期" => RegCaseData::toDate($row["RM54_1"])." ".RegCaseData::toDate($row["RM54_2"]),
+            "准登人員" => $this->getIDorName($this->row["RM63"]),
+            "准登日期" => RegCaseData::toDate($row["RM62_1"])." ".RegCaseData::toDate($row["RM62_2"]),
+            "校對人員" => $this->getIDorName($this->row["RM57"]),
+            "校對日期" => RegCaseData::toDate($row["RM56_1"])." ".RegCaseData::toDate($row["RM56_2"]),
+            "結案人員" => $this->getIDorName($this->row["RM59"]),
+            "結案日期" => RegCaseData::toDate($row["RM58_1"])." ".RegCaseData::toDate($row["RM58_2"]),
+            "預定結案日期" => RegCaseData::toDate($row["RM29_1"])." ".RegCaseData::toDate($row["RM29_2"]),
+            "結案與否" => empty($this->row["RM31"]) ? "否" : "是【".$this->row["RM31"]."】"
         );
         return json_encode($result, $flag);
     }
