@@ -7,21 +7,20 @@ if (Vue) {
                     <div role="tablist">
                         <b-card no-body class="mb-1">
                             <b-card-header header-tag="header" class="p-1" role="tab">
-                                <b-button block href="#" v-b-toggle.case-detail variant="light">收件資料</b-button>
+                                <b-button block v-b-toggle.case-detail variant="light">收件資料</b-button>
                             </b-card-header>
                             <b-collapse id="case-detail" visible accordion="reg-case" role="tabpanel">
                                 <b-card-body>
-                                    <div v-if="is_ongoing" class='text-danger'><strong>尚未結案！</strong></div>
                                     <div v-if="jsonObj.跨所 == 'Y'"><span class='bg-info text-white rounded p-1'>跨所案件 ({{jsonObj.資料收件所}} => {{jsonObj.資料管轄所}})</span></div>
-                                    收件字號：<a
-                                        :title="'收件資料 on ' + ap_server"
-                                        :href="case_data_url"
-                                        target="_blank"
-                                    >{{jsonObj.收件字號}}</a> <br />
+                                    收件字號：
+                                    <a :title="'收件資料 on ' + ap_server" :href="case_data_url" target="_blank">
+                                        {{jsonObj.收件字號}}
+                                    </a>
+                                    <b-button variant="outline-primary" size="sm" @click="window.open(case_data_url)" title="另開視窗查詢收件資料"><i class="fas fa-search"></i></b-button><br />
                                     收件時間：{{jsonObj.收件時間}} <br/>
                                     測量案件：{{jsonObj.測量案件}} <br/>
                                     限辦期限：<span v-html="jsonObj.限辦期限"></span> <br/>
-                                    作業人員：<span id='the_incase_operator_span' class='user_tag' data-display-selector='#in_modal_display' :data-id="jsonObj.作業人員ID" :data-name="jsonObj.作業人員">{{jsonObj.作業人員}}</span> <br/>
+                                    作業人員：<span id='the_incase_operator_span' class='user_tag' :data-display-selector="'#'+userinfo_display_id" :data-id="jsonObj.作業人員ID" :data-name="jsonObj.作業人員">{{jsonObj.作業人員}}</span> <br/>
                                     辦理情形：{{jsonObj.辦理情形}} <br/>
                                     登記原因：{{jsonObj.登記原因}} <br/>
                                     區域：{{area}}【{{jsonObj.raw.RM10}}】 <br/>
@@ -31,25 +30,13 @@ if (Vue) {
                                     件數：{{jsonObj.件數}} <br/>
                                     登記處理註記：{{jsonObj.登記處理註記}} <br/>
                                     地價處理註記：{{jsonObj.地價處理註記}} <br/>
-                                    <!--
-                                    權利人統編：{{jsonObj.權利人統編}} <br/>
-                                    權利人姓名：{{jsonObj.權利人姓名}} <br/>
-                                    義務人統編：{{jsonObj.義務人統編}} <br/>
-                                    義務人姓名：{{jsonObj.義務人姓名}} <br/>
-                                    義務人人數：{{jsonObj.義務人人數}} <br/>
-                                    代理人統編：{{jsonObj.代理人統編}} <br/>
-                                    代理人姓名：{{jsonObj.代理人姓名}} <br/>
-                                    -->
                                     手機號碼：{{jsonObj.手機號碼}}
-                                    <b-form-row>
-                                        <b-button block variant="outline-primary" size="sm" @click="window.open(case_data_url)" title="收件資料查詢"><i class="fas fa-search"></i> 另開視窗查詢</b-button>
-                                    </b-form-row>
                                 </b-card-body>
                             </b-collapse>
                         </b-card>
                         <b-card no-body class="mb-1">
                             <b-card-header header-tag="header" class="p-1" role="tab">
-                                <b-button block href="#" v-b-toggle.case-status variant="light">辦理情形</b-button>
+                                <b-button block v-b-toggle.case-status variant="light">辦理情形</b-button>
                             </b-card-header>
                             <b-collapse id="case-status" accordion="reg-case" role="tabpanel">
                                 <b-card-body>
@@ -78,7 +65,7 @@ if (Vue) {
                                         <b-col>辦理情形：{{jsonObj.辦理情形}}</b-col>
                                     </b-form-row>
                                     <b-form-row>
-                                        <b-col>收件人員：{{jsonObj.收件人員}}</b-col>
+                                        <b-col>收件人員：<span class='user_tag' :data-display-selector="'#'+userinfo_display_id" :data-id="jsonObj.收件人員ID" :data-name="jsonObj.收件人員">{{jsonObj.收件人員}}</span></b-col>
                                         <b-col>收件時間：{{jsonObj.收件時間}}</b-col>
                                     </b-form-row>
                                     <b-form-row>
@@ -149,7 +136,8 @@ if (Vue) {
                 ap_server: "220.1.35.123",
                 case_status_url: "",
                 case_data_url: "",
-                is_ongoing: false
+                is_ongoing: false,
+                userinfo_display_id: "in_modal_display" 
             }
         },
         created: function(e) {
@@ -174,6 +162,13 @@ if (Vue) {
                 addUserInfoEvent();
                 //load current operator user info
                 $("#the_incase_operator_span").trigger("click");
+                // hide the col if user info is not found
+                let that = this;
+                setTimeout(function() {
+                    if (isEmpty($("#"+that.userinfo_display_id).text())) {
+                        that.enabled_userinfo = false;
+                    }
+                }, 400);
             }
         }
     });
