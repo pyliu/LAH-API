@@ -40,13 +40,14 @@ if (Vue) {
                 </template>
             </b-table>
         </div>`,
-        props: ['reviewerId', 'inSearch', 'compact'],
+        props: ['reviewerId', 'inSearch', 'compact', 'itemsIn'],
         components: {
             "countdown": VueCountdown
         },
         data: function () {
             return {
                 items: [],
+                items_by_id: [],
                 fields: [
                     '序號',
                     {key: "收件字號", sortable: true},
@@ -81,50 +82,62 @@ if (Vue) {
                     this.endCountdown();
                 }
                 this.busy = true;
-                let form_body = new FormData();
-                form_body.append("type", "overdue_reg_cases");
-                if (!isEmpty(this.reviewerId)) {
-                    form_body.append("reviewer_id", this.reviewerId);
-                }
-                asyncFetch("query_json_api.php", {
-                    method: 'POST',
-                    body: form_body
-                }).then(jsonObj => {
-                    console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "查詢登記逾期案件回傳狀態碼有問題【" + jsonObj.status + "】");
-                    
+                if (this.itemsIn) {
                     this.busy = false;
-                    this.items = jsonObj.items;
-                    this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
-
+                    this.items = this.itemsIn;
+                    this.caption = `${this.itemsIn.length} 件`;
+                    this.items_by_id = this.items_by_id;
                     setTimeout(() => {
                         $("table tr td:nth-child(2)").off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
-                        addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
                     }, 1000);
-
-                    if (!this.inSearch) {
-
-                        this.resetCountdown();
-                        this.startCountdown();
-
-                        let now = new Date();
-                        if (now.getHours() >= 7 && now.getHours() < 17) {
-                            // auto next reload
-                            this.timer_handle = setTimeout(this.load, this.milliseconds);
-                        } else {
-                            console.warn("非上班時間，停止自動更新。");
-                            addNotification({
-                                title: "自動更新停止通知",
-                                message: "非上班時間，停止自動更新。",
-                                type: "warning"
-                            });
-                            this.endCountdown();
-                        }
-
+                    addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${this.itemsIn.length} 件案件` });
+                } else {
+                    let form_body = new FormData();
+                    form_body.append("type", "overdue_reg_cases");
+                    if (!isEmpty(this.reviewerId)) {
+                        form_body.append("reviewer_id", this.reviewerId);
                     }
-                }).catch(ex => {
-                    console.error("overdue-reg-cases::created parsing failed", ex);
-                    showAlert({message: "overdue-reg-cases::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
-                });
+                    asyncFetch("query_json_api.php", {
+                        method: 'POST',
+                        body: form_body
+                    }).then(jsonObj => {
+                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "查詢登記逾期案件回傳狀態碼有問題【" + jsonObj.status + "】");
+                        
+                        this.busy = false;
+                        this.items = jsonObj.items;
+                        this.items_by_id = jsonObj.items_by_id;
+                        this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
+
+                        setTimeout(() => {
+                            $("table tr td:nth-child(2)").off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
+                            addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
+                        }, 1000);
+
+                        if (!this.inSearch) {
+
+                            this.resetCountdown();
+                            this.startCountdown();
+
+                            let now = new Date();
+                            if (now.getHours() >= 7 && now.getHours() < 17) {
+                                // auto next reload
+                                this.timer_handle = setTimeout(this.load, this.milliseconds);
+                            } else {
+                                console.warn("非上班時間，停止自動更新。");
+                                addNotification({
+                                    title: "自動更新停止通知",
+                                    message: "非上班時間，停止自動更新。",
+                                    type: "warning"
+                                });
+                                this.endCountdown();
+                            }
+
+                        }
+                    }).catch(ex => {
+                        console.error("overdue-reg-cases::created parsing failed", ex);
+                        showAlert({message: "overdue-reg-cases::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+                    });
+                }
             },
             searchByReviewer: function(reviewer_data) {
                 // e.g. "賴奕文 HB1159"
@@ -134,7 +147,8 @@ if (Vue) {
                     message: this.$createElement('overdue-reg-cases', {
                         props: {
                             reviewerId: id,
-                            inSearch: true
+                            inSearch: true,
+                            itemsIn: this.items_by_id[id]
                         }
                     }),
                     size: "xl"

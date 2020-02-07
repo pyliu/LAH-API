@@ -29,9 +29,10 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("15天內查無逾期資料");
 		} else {
 			$items = [];
+			$items_by_id = [];
 			foreach ($rows as $row) {
 				$regdata = new RegCaseData($row);
-				$items[] = array(
+				$this_item = array(
 					"收件字號" => $regdata->getReceiveSerial(),
 					"登記原因" => $regdata->getCaseReason(),
 					"辦理情形" => $regdata->getStatus(),
@@ -40,10 +41,13 @@ switch ($_POST["type"]) {
 					"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
 					"作業人員" => $regdata->getCurrentOperator()
 				);
+				$items[] = $this_item;
+				$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
 			}
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"items" => $items,
+				"items_by_id" => $items_by_id,
 				"data_count" => count($items),
 				"raw" => $rows
 			);
