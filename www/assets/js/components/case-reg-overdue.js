@@ -39,6 +39,7 @@ if (Vue) {
                     <span v-else>{{data.value.split(" ")[0]}}</span>
                 </template>
             </b-table>
+            <canvas id="overdue-reg-cases-chart">圖形初始化失敗</canvas>
         </div>`,
         props: ['reviewerId', 'inSearch', 'compact', 'itemsIn'],
         components: {
@@ -46,8 +47,8 @@ if (Vue) {
         },
         data: function () {
             return {
-                items: [],
-                items_by_id: [],
+                items: {},
+                items_by_id: {},
                 fields: [
                     '序號',
                     {key: "收件字號", sortable: true},
@@ -63,7 +64,43 @@ if (Vue) {
                 busy: true,
                 small: false,
                 timer_handle: null,
-                milliseconds: 15 * 60 * 1000
+                milliseconds: 15 * 60 * 1000,
+                chartType: "pie",
+                chartInst: null,
+                chartData: {
+                    labels:[],
+                    legend: {
+                        display: true,
+                        labels: { boxWidth: 20 }
+                    },
+                    datasets:[{
+                        label: "數量分布統計",
+                        backgroundColor:[],
+                        data: [],
+                        borderColor:[],
+                        order: 1,
+                        opacity: 0.8,
+                        snapGaps: true
+                    }]
+                }
+            }
+        },
+        watch: {
+            chartType: function (val) {
+                switch (val) {
+                    case "line":
+                        this.buildChart('line');
+                        break;
+                    case "bar":
+                        this.buildChart('bar');
+                        break;
+                    case "doughnut":
+                        this.buildChart('doughnut');
+                        break;
+                    default:
+                        this.buildChart('pie');
+                        break;
+                }
             }
         },
         methods: {
@@ -132,6 +169,13 @@ if (Vue) {
                                 this.endCountdown();
                             }
 
+                            // prepare the chart data for rendering
+                            this.setChartData();
+                            // need to delay some time to init chart.js
+                            let that = this;
+                            setTimeout(function() {
+                                that.chartType = "bar";
+                            }, 50);
                         }
                     }).catch(ex => {
                         console.error("case-reg-overdue::created parsing failed", ex);
@@ -153,7 +197,28 @@ if (Vue) {
                     }),
                     size: "xl"
                 });
-            }
+            },
+            setChartData: function() {
+                let opacity = this.chartData.datasets[0].opacity;
+                this.chartData.datasets[0].backgroundColor = [];
+                this.chartData.datasets[0].data = [];
+                this.chartData.datasets[0].borderColor = `rgb(22, 22, 22)`;
+                for (let id in this.items_by_id) {
+                    this.chartData.labels.push(this.items_by_id[id][0]["初審人員"]);
+                    this.chartData.datasets[0].backgroundColor.push(`rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`);
+                    this.chartData.datasets[0].data.push(this.items_by_id[id].length);
+                }
+            },
+            buildChart: function (type = 'pie') {
+                // use chart.js directly
+                let ctx = $('#overdue-reg-cases-chart');
+                this.chartInst = new Chart(ctx, {
+                    type: type,
+                    data: this.chartData,
+                    options: {}
+                });
+            },
+            rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))
         },
         mounted() {
             this.load();

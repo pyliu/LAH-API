@@ -117,7 +117,9 @@ if (Vue) {
                                         <b-col>結案日期：{{jsonObj.結案日期}}</b-col>
                                     </b-form-row>
                                     <b-form-row>
-                                        <b-button block variant="outline-primary" size="sm" @click="window.open(case_status_url)" title="案件辦理情形"><i class="fas fa-search"></i> 另開視窗查詢</b-button>
+                                        <b-col class="text-center">
+                                            <b-button variant="outline-primary" size="sm" @click="window.open(case_status_url)" title="案件辦理情形"><i class="fas fa-search"></i> 另開視窗查詢</b-button>
+                                        </b-col>
                                     </b-form-row>
                                 </b-card-body>
                             </b-collapse>
