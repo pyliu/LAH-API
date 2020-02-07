@@ -117,7 +117,9 @@ if (Vue) {
                                     let column = $(element).data("column");
                                     $(element).on("click", that.syncCaseColumn.bind(that, id, column));
                                 });
-                                $("#sync_x_case_serial").off("click").on("click", window.utilApp.fetchRegCase);
+                                $("#sync_x_case_serial").off("click").on("click", function(e) {
+                                    window.utilApp.fetchRegCase(e, true)
+                                });
                             },
                             size: "lg"
                         });
@@ -150,7 +152,9 @@ if (Vue) {
                             subtitle: `${year}-${code}-${number}`,
                             message: html,
                             type: "success",
-                            callback: () => $("#sync_x_case_serial").off("click").on("click", window.utilApp.fetchRegCase)
+                            callback: () => $("#sync_x_case_serial").off("click").on("click", function(e) {
+                                window.utilApp.fetchRegCase(e, true);
+                            })
                         });
                     }
                     toggle(e.target);

@@ -169,7 +169,9 @@ if (Vue) {
                                 })
                             );
                             $(".tmp_tbl_btn").off("click").on("click", that.showSQL);
-                            $(".reg_case_id").off("click").on("click", window.utilApp.fetchRegCase);
+                            $(".reg_case_id").off("click").on("click", function(e) {
+                                window.utilApp.fetchRegCase(e, true);
+                            });
                         }
                     });
                 }).catch(ex => {
