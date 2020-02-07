@@ -171,6 +171,7 @@ if (Vue) {
                                 min="1"
                             ></b-form-input>
                         </b-input-group>
+                        <strong class="text-danger">排程執行中，請勿關閉本頁面。</strong>
                         <small class="text-muted text-center">
                             <b-button variant="primary" size="sm" @click="callWatchdogAPI">
                                 執行
