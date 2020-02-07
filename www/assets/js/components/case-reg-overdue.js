@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("overdue-reg-cases", {
+    Vue.component("case-reg-overdue", {
         template: `<div>
             <b-button v-if="!inSearch" variant="primary" size="sm" @click="load" style="right: 2rem; position:absolute; top: 0.5rem;">
                 刷新
@@ -134,8 +134,8 @@ if (Vue) {
 
                         }
                     }).catch(ex => {
-                        console.error("overdue-reg-cases::created parsing failed", ex);
-                        showAlert({message: "overdue-reg-cases::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+                        console.error("case-reg-overdue::created parsing failed", ex);
+                        showAlert({message: "case-reg-overdue::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
                     });
                 }
             },
@@ -144,7 +144,7 @@ if (Vue) {
                 let id = trim(reviewer_data);
                 showModal({
                     title: `查詢 ${reviewer_data} 逾期案件`,
-                    message: this.$createElement('overdue-reg-cases', {
+                    message: this.$createElement('case-reg-overdue', {
                         props: {
                             reviewerId: id,
                             inSearch: true,
@@ -167,5 +167,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... overdue-reg-cases component can not be loaded.");
+    console.error("vue.js not ready ... case-reg-overdue component can not be loaded.");
 }
