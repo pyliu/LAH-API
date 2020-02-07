@@ -139,6 +139,7 @@ class RegCaseData {
             "作業人員" => $this->getCurrentOperator(),
             "作業人員ID" => $this->getCurrentOperatorID(),
             "辦理情形" => $this->getStatus(),
+            "案件紅綠燈CSS" => $this->getStatusCss(),
             "權利人統編" => empty($row["RM18"]) ? "" : $row["RM18"],
             "權利人姓名" => empty($row["RM19"]) ? "" : $row["RM19"],
             "義務人統編" => empty($row["RM21"]) ? "" : $row["RM21"],

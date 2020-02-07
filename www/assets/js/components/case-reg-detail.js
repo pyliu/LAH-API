@@ -62,7 +62,7 @@ if (Vue) {
                                     </b-form-row>
                                     <b-form-row>
                                         <b-col>登記原因：{{jsonObj.登記原因}}</b-col>
-                                        <b-col>辦理情形：{{jsonObj.辦理情形}}</b-col>
+                                        <b-col>辦理情形：<span :class="jsonObj.案件紅綠燈CSS">{{jsonObj.辦理情形}}</span></b-col>
                                     </b-form-row>
                                     <b-form-row>
                                         <b-col>收件人員：<span class='user_tag' :data-display-selector="'#'+userinfo_display_id" :data-id="jsonObj.收件人員ID" :data-name="jsonObj.收件人員">{{jsonObj.收件人員}}</span></b-col>
