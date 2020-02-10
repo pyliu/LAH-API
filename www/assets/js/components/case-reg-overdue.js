@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("case-reg-overdue", {
         template: `<div>
             <div style="right: 2rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
-                <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="listMode = !listMode">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
+                <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
                 <b-button variant="primary" size="sm" @click="load">
                     刷新
                     <b-badge variant="light">
@@ -16,7 +16,7 @@ if (Vue) {
             <transition
                 :enter-active-class="animated_in"
                 :leave-active-class="animated_out"
-                mode="out-in"
+                @after-leave="afterTableLeave"
             >
                 <b-table
                     striped
@@ -49,19 +49,26 @@ if (Vue) {
                     </template>
                 </b-table>
             </transition>
-            <div class="mt-3" v-show="!listMode">
-                <div class="mx-auto w-75">
-                    <chart-component ref="statsChart"></chart-component>
+            
+            <transition
+                :enter-active-class="animated_in"
+                :leave-active-class="animated_out"
+                @after-leave="afterStatsLeave"
+            >
+                <div class="mt-3" v-show="statsMode">
+                    <div class="mx-auto w-75">
+                        <chart-component ref="statsChart"></chart-component>
+                    </div>
+                    <b-button-group style="margin-left: 12.5%" class="w-75 mt-2">
+                        <b-button size="sm" variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i> 長條圖</b-button>
+                        <b-button size="sm" variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i> 圓餅圖</b-button>
+                        <b-button size="sm" variant="success" @click="chartType = 'line'"><i class="fas fa-chart-line"></i> 線型圖</b-button>
+                        <b-button size="sm" variant="warning" @click="chartType = 'polarArea'"><i class="fas fa-chart-area"></i> 區域圖</b-button>
+                        <b-button size="sm" variant="info" @click="chartType = 'doughnut'"><i class="fab fa-edge"></i> 甜甜圈</b-button>
+                        <b-button size="sm" variant="dark" @click="chartType = 'radar'"><i class="fas fa-broadcast-tower"></i> 雷達圖</b-button>
+                    </b-button-group>
                 </div>
-                <b-button-group style="margin-left: 12.5%" class="w-75 mt-2">
-                    <b-button size="sm" variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i> 長條圖</b-button>
-                    <b-button size="sm" variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i> 圓餅圖</b-button>
-                    <b-button size="sm" variant="success" @click="chartType = 'line'"><i class="fas fa-chart-line"></i> 線型圖</b-button>
-                    <b-button size="sm" variant="warning" @click="chartType = 'polarArea'"><i class="fas fa-chart-area"></i> 區域圖</b-button>
-                    <b-button size="sm" variant="info" @click="chartType = 'doughnut'"><i class="fab fa-edge"></i> 甜甜圈</b-button>
-                    <b-button size="sm" variant="dark" @click="chartType = 'radar'"><i class="fas fa-broadcast-tower"></i> 雷達圖</b-button>
-                </b-button-group>
-            </div>
+            </transition>
         </div>`,
         props: ['reviewerId', 'inSearch', 'compact', 'itemsIn'],
         components: {
@@ -88,9 +95,10 @@ if (Vue) {
                 timer_handle: null,
                 milliseconds: 15 * 60 * 1000,
                 listMode: true,
+                statsMode: false,
                 chartType: "bar",
-                animated_in: "animated zoomInDown",
-                animated_out: "animated zoomOutUp",
+                animated_in: "animated fadeIn",
+                animated_out: "animated fadeOut",
                 animated_opts: ANIMATED_TRANSITIONS
             }
         },
@@ -100,6 +108,22 @@ if (Vue) {
             }
         },
         methods: {
+            switchMode: function() {
+                if (this.listMode) {
+                    // use afterTableLeave to control this.statsMode
+                    this.listMode = false;
+                }
+                if (this.statsMode) {
+                    // use afterStatsLeave to control this.listMode
+                    this.statsMode = false;
+                }
+            },
+            afterTableLeave: function () {
+                this.statsMode = true;
+            },
+            afterStatsLeave: function () {
+                this.listMode = true;
+            },
             setChartData: function() {
                 this.$refs.statsChart.items = [];
                 for (let id in this.items_by_id) {
@@ -202,18 +226,16 @@ if (Vue) {
                     }),
                     size: "xl"
                 });
-            },
-            randAnimation: function() {
-                if (this.animated_opts) {
-                    let count = this.animated_opts.length;
-                    let this_time = this.animated_opts[rand(count)];
-                    this.animated_in = `${this_time.in} once-anim-cfg`;
-                    this.animated_out = `${this_time.out} once-anim-cfg`;
-                }
             }
         },
         created() {
-            this.randAnimation();
+            // randomize the animation effect
+            if (this.animated_opts) {
+                let count = this.animated_opts.length;
+                let this_time = this.animated_opts[rand(count)];
+                this.animated_in = `${this_time.in} once-anim-cfg`;
+                this.animated_out = `${this_time.out} once-anim-cfg`;
+            }
         },
         mounted() {
             //console.log(this.$root, this.$parent, this);
