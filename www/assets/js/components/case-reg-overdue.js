@@ -1,9 +1,9 @@
 if (Vue) {
     Vue.component("case-reg-overdue", {
         template: `<div>
-            <div style="right: 2rem; position:absolute; top: 0.5rem;">
+            <div style="right: 2rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
                 <b-button variant="secondary" size="sm" @click="list_mode = !list_mode">{{list_mode ? "統計圖表" : "回列表模式"}}</b-button>
-                <b-button v-if="!inSearch" variant="primary" size="sm" @click="load">
+                <b-button variant="primary" size="sm" @click="load">
                     刷新
                     <b-badge variant="light">
                         <countdown ref="countdown" :time="milliseconds" :auto-start="false">
