@@ -45,18 +45,15 @@ if (Vue) {
             </b-table>
             <div class="mt-3" v-show="!list_mode">
                 <div class="mx-auto w-75">
-                    <canvas id="overdue-reg-cases-chart">圖形初始化失敗</canvas>
-                </div>
-                <b-button-group style="margin-left: 12.5%" class="w-75 mt-2">
-                    <b-button size="sm" variant="primary" @click="chartType = 'bar'">長條圖</b-button>
-                    <b-button size="sm" variant="secondary" @click="chartType = 'pie'">圓餅圖</b-button>
-                    <b-button size="sm" variant="info" @click="chartType = 'doughnut'">甜甜圈圖</b-button>
-                    <b-button size="sm" variant="warning" @click="chartType = 'radar'">雷達圖</b-button>
-                    <b-button size="sm" variant="success" @click="chartType = 'line'">線型圖</b-button>
-                </b-button-group>
-                <div class="mx-auto w-75">
                     <chart-component ref="myChart"></chart-component>
                 </div>
+                <b-button-group style="margin-left: 12.5%" class="w-75 mt-2">
+                    <b-button size="sm" variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i> 長條圖</b-button>
+                    <b-button size="sm" variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i> 圓餅圖</b-button>
+                    <b-button size="sm" variant="success" @click="chartType = 'line'"><i class="fas fa-chart-line"></i> 線型圖</b-button>
+                    <b-button size="sm" variant="warning" @click="chartType = 'radar'"><i class="fas fa-chart-area"></i> 雷達圖</b-button>
+                    <b-button size="sm" variant="info" @click="chartType = 'doughnut'"><i class="fab fa-edge"></i> 甜甜圈</b-button>
+                </b-button-group>
             </div>
         </div>`,
         props: ['reviewerId', 'inSearch', 'compact', 'itemsIn'],
@@ -84,21 +81,22 @@ if (Vue) {
                 timer_handle: null,
                 milliseconds: 15 * 60 * 1000,
                 list_mode: true,
-                chartType: "bar",
-                chartInst: null,
-                chartData: null,
-                chartItems: null
+                chartType: "bar"
             }
         },
         watch: {
             chartType: function (val) {
-                this.buildChart();
-            },
-            chartData: function(newObj) {
-                this.buildChart();
+                this.$refs.myChart.type = val;
             }
         },
         methods: {
+            setChartData: function() {
+                this.$refs.myChart.items = [];
+                for (let id in this.items_by_id) {
+                    let item = [this.items_by_id[id][0]["初審人員"], this.items_by_id[id].length];
+                    this.$refs.myChart.items.push(item);
+                }
+            },
             resetCountdown: function () {
                 this.$refs.countdown.totalMilliseconds = this.milliseconds;
             },
@@ -186,55 +184,7 @@ if (Vue) {
                     }),
                     size: "xl"
                 });
-            },
-            resetChartData: function() {
-                this.chartData = {
-                    labels:[],
-                    legend: {
-                        display: true,
-                        labels: { boxWidth: 20 }
-                    },
-                    datasets:[{
-                        label: "數量分布統計",
-                        backgroundColor:[],
-                        data: [],
-                        borderColor:[],
-                        order: 1,
-                        opacity: 0.8,
-                        snapGaps: true
-                    }]
-                };
-                this.chartItems = [];
-            },
-            setChartData: function() {
-                this.resetChartData();
-                let opacity = this.chartData.datasets[0].opacity;
-                this.chartData.datasets[0].borderColor = `rgb(22, 22, 22)`;
-                for (let id in this.items_by_id) {
-                    this.chartData.labels.push(this.items_by_id[id][0]["初審人員"]);
-                    this.chartData.datasets[0].backgroundColor.push(`rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`);
-                    this.chartData.datasets[0].data.push(this.items_by_id[id].length);
-
-                    let item = [this.items_by_id[id][0]["初審人員"], this.items_by_id[id].length];
-                    this.chartItems.push(item);
-                }
-                this.$refs.myChart.items = this.chartItems;
-            },
-            buildChart: function () {
-                if (this.chartInst) {
-                    // reset the chart
-                    this.chartInst.destroy();
-                    this.chartInst = null;
-                }
-                // use chart.js directly
-                let ctx = $('#overdue-reg-cases-chart');
-                this.chartInst = new Chart(ctx, {
-                    type: this.chartType,
-                    data: this.chartData,
-                    options: {}
-                });
-            },
-            rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))
+            }
         },
         mounted() {
             //console.log(this.$root, this.$parent, this);

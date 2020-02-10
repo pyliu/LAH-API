@@ -2,12 +2,12 @@ if (Vue) {
     // need to include Chart.min.js (chart.js) first.
     Vue.component("chart-component", {
         template: `<div>
-            <canvas :id="id"></canvas>
+            <canvas :id="id">圖形初始化失敗</canvas>
         </div>`,
         data: function () {
             return {
                 id: "__canvas__0",
-                type: "pie",
+                type: "bar",
                 inst: null,
                 chartData: null,
                 label: "統計圖表",
@@ -56,7 +56,7 @@ if (Vue) {
                         data: [],
                         borderColor:`rgb(22, 22, 22)`,
                         order: 1,
-                        opacity: 0.8,
+                        opacity: 0.6,
                         snapGaps: true
                     }]
                 };
