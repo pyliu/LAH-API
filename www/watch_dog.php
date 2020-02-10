@@ -139,8 +139,6 @@ require_once("./include/authentication.php");
   <script src="assets/js/components/fee-query-board.js"></script>
   <!-- Vue Chart Components -->
   <script src="assets/js/Chart.min.js"></script>
-  <script src="assets/js/vue-chartjs.min.js"></script>
-  <script src="assets/js/components/chart-bar.js"></script>
 
   <script type="text/javascript">
     $(document).ready(e => {
@@ -151,7 +149,6 @@ require_once("./include/authentication.php");
       window.caseTempMgtVue = new Vue({el: "#case-temp-mgt"});
       window.caseSyncMgtVue = new Vue({el: "#case-sync-mgt"});
       window.feeQueryBoardVue = new Vue({el: "#fee-query-board"});
-      
     });
   </script>
 </body>

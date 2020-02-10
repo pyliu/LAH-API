@@ -34,7 +34,7 @@
       <div class="row">
         <div id="overdue-reg-cases" class="col">
           <h1 v-if="!show" class="text-center text-danger">請使用 CHROME 瀏覽器開啟本頁面。</h1>
-          <case-reg-overdue v-else :reviewer-id="reviewerID"></case-reg-overdues>
+          <case-reg-overdue ref="overdue" v-else :reviewer-id="reviewerID"></case-reg-overdues>
         </div>
       </div>
   </section><!-- /section -->
@@ -60,8 +60,7 @@
   <script src="assets/js/components/case-reg-detail.js"></script>
   <script src="assets/js/components/case-reg-overdue.js"></script>
   <script src="assets/js/Chart.min.js"></script>
-  <script src="assets/js/vue-chartjs.min.js"></script>
-  <script src="assets/js/components/chart-bar.js"></script>
+  <script src="assets/js/components/chart-component.js"></script>
 
   <script type="text/javascript">
     $(document).ready(function(e) {

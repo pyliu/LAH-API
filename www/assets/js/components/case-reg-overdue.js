@@ -54,6 +54,9 @@ if (Vue) {
                     <b-button size="sm" variant="warning" @click="chartType = 'radar'">雷達圖</b-button>
                     <b-button size="sm" variant="success" @click="chartType = 'line'">線型圖</b-button>
                 </b-button-group>
+                <div class="mx-auto w-75">
+                    <chart-component ref="myChart"></chart-component>
+                </div>
             </div>
         </div>`,
         props: ['reviewerId', 'inSearch', 'compact', 'itemsIn'],
@@ -83,7 +86,8 @@ if (Vue) {
                 list_mode: true,
                 chartType: "bar",
                 chartInst: null,
-                chartData: null
+                chartData: null,
+                chartItems: null
             }
         },
         watch: {
@@ -200,6 +204,7 @@ if (Vue) {
                         snapGaps: true
                     }]
                 };
+                this.chartItems = [];
             },
             setChartData: function() {
                 this.resetChartData();
@@ -209,7 +214,11 @@ if (Vue) {
                     this.chartData.labels.push(this.items_by_id[id][0]["初審人員"]);
                     this.chartData.datasets[0].backgroundColor.push(`rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`);
                     this.chartData.datasets[0].data.push(this.items_by_id[id].length);
+
+                    let item = [this.items_by_id[id][0]["初審人員"], this.items_by_id[id].length];
+                    this.chartItems.push(item);
                 }
+                this.$refs.myChart.items = this.chartItems;
             },
             buildChart: function () {
                 if (this.chartInst) {
@@ -228,6 +237,7 @@ if (Vue) {
             rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))
         },
         mounted() {
+            //console.log(this.$root, this.$parent, this);
             this.load();
             if (this.inSearch === true) {
                 // in modal dialog
