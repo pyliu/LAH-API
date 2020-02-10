@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("case-reg-overdue", {
         template: `<div>
             <div style="right: 2rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
-                <b-button variant="secondary" size="sm" @click="list_mode = !list_mode">{{list_mode ? "統計圖表" : "回列表模式"}}</b-button>
+                <b-button variant="secondary" size="sm" @click="listMode = !listMode">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
                 <b-button variant="primary" size="sm" @click="load">
                     刷新
                     <b-badge variant="light">
@@ -13,37 +13,43 @@ if (Vue) {
                     </b-badge>
                 </b-button>
             </div>
-            <b-table
-                striped
-                hover
-                responsive
-                bordered
-                head-variant="dark"
-                caption-top
-                no-border-collapse
-                :small="small"
-                :caption="caption"
-                :sticky-header="height"
-                :items="items"
-                :fields="fields"
-                :busy="busy"
-                v-show="list_mode"
+            <transition
+                :enter-active-class="animated_in"
+                :leave-active-class="animated_out"
+                mode="out-in"
             >
-                <template v-slot:table-busy>
-                    <div class="text-center text-danger my-5">
-                        <b-spinner class="align-middle"></b-spinner>
-                        <strong>查詢中 ...</strong>
-                    </div>
-                </template>
-                <template v-slot:cell(序號)="data">
-                    {{data.index + 1}}
-                </template>
-                <template v-slot:cell(初審人員)="data">
-                    <b-button v-if="!inSearch && !reviewerId" variant="outline-danger" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的逾期案件'">{{data.value.split(" ")[0]}}</b-button>
-                    <span v-else>{{data.value.split(" ")[0]}}</span>
-                </template>
-            </b-table>
-            <div class="mt-3" v-show="!list_mode">
+                <b-table
+                    striped
+                    hover
+                    responsive
+                    bordered
+                    head-variant="dark"
+                    caption-top
+                    no-border-collapse
+                    :small="small"
+                    :caption="caption"
+                    :sticky-header="height"
+                    :items="items"
+                    :fields="fields"
+                    :busy="busy"
+                    v-show="listMode"
+                >
+                    <template v-slot:table-busy>
+                        <div class="text-center text-danger my-5">
+                            <b-spinner class="align-middle"></b-spinner>
+                            <strong>查詢中 ...</strong>
+                        </div>
+                    </template>
+                    <template v-slot:cell(序號)="data">
+                        {{data.index + 1}}
+                    </template>
+                    <template v-slot:cell(初審人員)="data">
+                        <b-button v-if="!inSearch && !reviewerId" variant="outline-danger" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的逾期案件'">{{data.value.split(" ")[0]}}</b-button>
+                        <span v-else>{{data.value.split(" ")[0]}}</span>
+                    </template>
+                </b-table>
+            </transition>
+            <div class="mt-3" v-show="!listMode">
                 <div class="mx-auto w-75">
                     <chart-component ref="statsChart"></chart-component>
                 </div>
@@ -51,8 +57,9 @@ if (Vue) {
                     <b-button size="sm" variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i> 長條圖</b-button>
                     <b-button size="sm" variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i> 圓餅圖</b-button>
                     <b-button size="sm" variant="success" @click="chartType = 'line'"><i class="fas fa-chart-line"></i> 線型圖</b-button>
-                    <b-button size="sm" variant="warning" @click="chartType = 'radar'"><i class="fas fa-chart-area"></i> 雷達圖</b-button>
+                    <b-button size="sm" variant="warning" @click="chartType = 'polarArea'"><i class="fas fa-chart-area"></i> 區域圖</b-button>
                     <b-button size="sm" variant="info" @click="chartType = 'doughnut'"><i class="fab fa-edge"></i> 甜甜圈</b-button>
+                    <b-button size="sm" variant="dark" @click="chartType = 'radar'"><i class="fas fa-broadcast-tower"></i> 雷達圖</b-button>
                 </b-button-group>
             </div>
         </div>`,
@@ -80,8 +87,11 @@ if (Vue) {
                 small: false,
                 timer_handle: null,
                 milliseconds: 15 * 60 * 1000,
-                list_mode: true,
-                chartType: "bar"
+                listMode: true,
+                chartType: "bar",
+                animated_in: "animated zoomInDown",
+                animated_out: "animated zoomOutUp",
+                animated_opts: ANIMATED_TRANSITIONS
             }
         },
         watch: {
@@ -184,7 +194,18 @@ if (Vue) {
                     }),
                     size: "xl"
                 });
+            },
+            randAnimation: function() {
+                if (this.animated_opts) {
+                    let count = this.animated_opts.length;
+                    let this_time = this.animated_opts[rand(count)];
+                    this.animated_in = `${this_time.in} once-anim-cfg`;
+                    this.animated_out = `${this_time.out} once-anim-cfg`;
+                }
             }
+        },
+        created() {
+            this.randAnimation();
         },
         mounted() {
             //console.log(this.$root, this.$parent, this);

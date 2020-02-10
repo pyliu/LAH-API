@@ -19,7 +19,9 @@ if (Vue) {
         },
         watch: {
             type: function (val) {
-                this.buildChart();
+                let opts = {};
+                // TODO: add more option for various type
+                this.buildChart(opts);
             },
             chartData: function(newObj) {
                 this.buildChart();
