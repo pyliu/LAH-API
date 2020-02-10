@@ -1,15 +1,18 @@
 if (Vue) {
     Vue.component("case-reg-overdue", {
         template: `<div>
-            <b-button v-if="!inSearch" variant="primary" size="sm" @click="load" style="right: 2rem; position:absolute; top: 0.5rem;">
-                刷新
-                <b-badge variant="light">
-                    <countdown ref="countdown" :time="milliseconds" :auto-start="false">
-                        <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }}</template>
-                    </countdown>
-                    <span class="sr-only">倒數</span>
-                </b-badge>
-            </b-button>
+            <div style="right: 2rem; position:absolute; top: 0.5rem;">
+                <b-button variant="secondary" size="sm" @click="list_mode = !list_mode">{{list_mode ? "統計圖表" : "回列表模式"}}</b-button>
+                <b-button v-if="!inSearch" variant="primary" size="sm" @click="load">
+                    刷新
+                    <b-badge variant="light">
+                        <countdown ref="countdown" :time="milliseconds" :auto-start="false">
+                            <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }}</template>
+                        </countdown>
+                        <span class="sr-only">倒數</span>
+                    </b-badge>
+                </b-button>
+            </div>
             <b-table
                 striped
                 hover
@@ -24,6 +27,7 @@ if (Vue) {
                 :items="items"
                 :fields="fields"
                 :busy="busy"
+                v-show="list_mode"
             >
                 <template v-slot:table-busy>
                     <div class="text-center text-danger my-5">
@@ -39,7 +43,18 @@ if (Vue) {
                     <span v-else>{{data.value.split(" ")[0]}}</span>
                 </template>
             </b-table>
-            <canvas id="overdue-reg-cases-chart">圖形初始化失敗</canvas>
+            <div class="mt-3" v-show="!list_mode">
+                <div class="mx-auto w-75">
+                    <canvas id="overdue-reg-cases-chart">圖形初始化失敗</canvas>
+                </div>
+                <b-button-group style="margin-left: 12.5%" class="w-75 mt-2">
+                    <b-button size="sm" variant="primary" @click="chartType = 'bar'">長條圖</b-button>
+                    <b-button size="sm" variant="secondary" @click="chartType = 'pie'">圓餅圖</b-button>
+                    <b-button size="sm" variant="info" @click="chartType = 'doughnut'">甜甜圈圖</b-button>
+                    <b-button size="sm" variant="warning" @click="chartType = 'radar'">雷達圖</b-button>
+                    <b-button size="sm" variant="success" @click="chartType = 'line'">線型圖</b-button>
+                </b-button-group>
+            </div>
         </div>`,
         props: ['reviewerId', 'inSearch', 'compact', 'itemsIn'],
         components: {
@@ -65,6 +80,7 @@ if (Vue) {
                 small: false,
                 timer_handle: null,
                 milliseconds: 15 * 60 * 1000,
+                list_mode: true,
                 chartType: "pie",
                 chartInst: null,
                 chartData: {
@@ -96,6 +112,9 @@ if (Vue) {
                         break;
                     case "doughnut":
                         this.buildChart('doughnut');
+                        break;
+                    case "radar":
+                        this.buildChart('radar');
                         break;
                     default:
                         this.buildChart('pie');
@@ -210,6 +229,9 @@ if (Vue) {
                 }
             },
             buildChart: function (type = 'pie') {
+                if (this.chartInst) {
+                    this.chartInst.destroy();
+                }
                 // use chart.js directly
                 let ctx = $('#overdue-reg-cases-chart');
                 this.chartInst = new Chart(ctx, {
