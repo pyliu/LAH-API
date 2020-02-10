@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("case-reg-overdue", {
         template: `<div>
             <div style="right: 2rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
-                <b-button variant="secondary" size="sm" @click="listMode = !listMode">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
+                <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="listMode = !listMode">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
                 <b-button variant="primary" size="sm" @click="load">
                     刷新
                     <b-badge variant="light">
@@ -106,6 +106,16 @@ if (Vue) {
                     let item = [this.items_by_id[id][0]["初審人員"], this.items_by_id[id].length];
                     this.$refs.statsChart.items.push(item);
                 }
+            },
+            empty: function (variable) {
+                if (variable === undefined || $.trim(variable) == "") {
+                    return true;
+                }
+                
+                if (typeof variable == "object" && variable.length == 0) {
+                    return true;
+                }
+                return false;
             },
             resetCountdown: function () {
                 this.$refs.countdown.totalMilliseconds = this.milliseconds;
