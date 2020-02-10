@@ -45,7 +45,7 @@ if (Vue) {
             </b-table>
             <div class="mt-3" v-show="!list_mode">
                 <div class="mx-auto w-75">
-                    <chart-component ref="myChart"></chart-component>
+                    <chart-component ref="statsChart"></chart-component>
                 </div>
                 <b-button-group style="margin-left: 12.5%" class="w-75 mt-2">
                     <b-button size="sm" variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i> 長條圖</b-button>
@@ -86,15 +86,15 @@ if (Vue) {
         },
         watch: {
             chartType: function (val) {
-                this.$refs.myChart.type = val;
+                this.$refs.statsChart.type = val;
             }
         },
         methods: {
             setChartData: function() {
-                this.$refs.myChart.items = [];
+                this.$refs.statsChart.items = [];
                 for (let id in this.items_by_id) {
                     let item = [this.items_by_id[id][0]["初審人員"], this.items_by_id[id].length];
-                    this.$refs.myChart.items.push(item);
+                    this.$refs.statsChart.items.push(item);
                 }
             },
             resetCountdown: function () {
@@ -195,6 +195,7 @@ if (Vue) {
                 this.small = true;
             } else {
                 this.height = $(document).height() - 145 + "px";
+                this.$refs.statsChart.label = "逾期案件統計表";
             }
         }
     });
