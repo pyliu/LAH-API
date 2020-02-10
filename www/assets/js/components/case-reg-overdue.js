@@ -116,6 +116,9 @@ if (Vue) {
             endCountdown: function () {
                 this.$refs.countdown.totalMilliseconds = 0;
             },
+            makeCaseIDClickable: function () {
+                $("table tr td:nth-child(2)").off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
+            },
             load: function() {
                 clearTimeout(this.timer_handle);
                 if (!this.inSearch) {
@@ -127,9 +130,7 @@ if (Vue) {
                     this.items = this.itemsIn;
                     this.caption = `${this.itemsIn.length} 件`;
                     this.items_by_id = this.items_by_id;
-                    setTimeout(() => {
-                        $("table tr td:nth-child(2)").off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
-                    }, 1000);
+                    setTimeout(this.makeCaseIDClickable, 1000);
                     addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${this.itemsIn.length} 件案件` });
                 } else {
                     let form_body = new FormData();
@@ -148,11 +149,8 @@ if (Vue) {
                         this.items_by_id = jsonObj.items_by_id;
                         this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
 
-                        setTimeout(() => {
-                            $("table tr td:nth-child(2)").off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
-                            addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
-                        }, 1000);
-
+                        setTimeout(this.makeCaseIDClickable, 1000);
+                        addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
                         if (!this.inSearch) {
 
                             this.resetCountdown();
