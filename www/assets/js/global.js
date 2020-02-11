@@ -553,10 +553,7 @@ let initAlertUI = () => {
     // add alert element to show the alert message
     if (!window.alertApp) {
         $("body").append($.parseHTML(`<div id="bs_alert_template">
-            <transition
-                name="bounce"
-                :enter-active-class="animated_in"
-                :leave-active-class="animated_out"
+            <my-transition
                 @enter="enter"
                 @leave="leave"
                 @after-enter="afterEnter"
@@ -576,11 +573,12 @@ let initAlertUI = () => {
                         <div class="progress-bar bg-light" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
                     </div>
                 </div>
-            </transition>
+            </my-transition>
         </div>`));
         // Try to use Vue.js
         window.alertApp = new Vue({
             el: '#bs_alert_template',
+            components: { "my-transition": VueTransition },
             data: {
                 title: "",
                 subtitle: "",
@@ -592,9 +590,6 @@ let initAlertUI = () => {
                 progress_counter: 1,
                 autohide: true,
                 delay: 10000,
-                animated_in: "animated zoomInDown",
-                animated_out: "animated zoomOutUp",
-                animated_opts: ANIMATED_TRANSITIONS,
                 anim_delay: 400
             },
             methods: {
