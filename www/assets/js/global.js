@@ -115,19 +115,23 @@ let VueTransition = {
     </transition>`,
     props: {
         random: Boolean,
-        appear: Boolean
+        appear: Boolean,
+        fix: Boolean
     },
     data: function() {
         return {
-            animated_in: "animated fadeIn",
-            animated_out: "animated fadeOut",
+            animated_in: "animated fadeIn once-anim-cfg",
+            animated_out: "animated fadeOut once-anim-cfg",
             animated_opts: ANIMATED_TRANSITIONS,
             duration: 400,   // or {enter: 400, leave: 800}
-            mode: "out-in"   // out-in, in-out
+            mode: "out-in",  // out-in, in-out
+            cfg_css: "once-anim-cfg"
         }
     },
     created() {
-        this.randAnimation();
+        if (!this.fix) {
+            this.randAnimation();
+        }
     },
     methods: {
         enter: function(e) { this.$emit("enter", e); },
@@ -144,8 +148,8 @@ let VueTransition = {
             if (this.animated_opts) {
                 let count = this.animated_opts.length;
                 let this_time = this.animated_opts[this.rand(count)];
-                this.animated_in = `${this_time.in} once-anim-cfg`;
-                this.animated_out = `${this_time.out} once-anim-cfg`;
+                this.animated_in = `${this_time.in} ${this.cfg_css}`;
+                this.animated_out = `${this_time.out} ${this.cfg_css}`;
             }
         }
     }
