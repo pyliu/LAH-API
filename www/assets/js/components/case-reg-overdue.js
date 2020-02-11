@@ -17,7 +17,7 @@ if (Vue) {
                     </b-badge>
                 </b-button>
             </div>
-            <my-transition @after-leave="afterTableLeave" appear>
+            <my-transition @after-leave="afterTableLeave">
                 <b-table
                     striped
                     hover
