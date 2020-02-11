@@ -5,7 +5,7 @@ if (Vue) {
             "countdown": VueCountdown
         },
         template: `<div>
-            <div style="right: 2rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
+            <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
                 <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
                 <b-button id="reload" variant="primary" size="sm" @click="load">
                     刷新
@@ -157,7 +157,7 @@ if (Vue) {
                     this.items = this.itemsIn;
                     this.caption = `${this.itemsIn.length} 件`;
                     this.items_by_id = this.items_by_id;
-                    setTimeout(this.makeCaseIDClickable, 1000);
+                    setTimeout(this.makeCaseIDClickable, 800);
                     addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${this.itemsIn.length} 件案件` });
                 } else {
                     let form_body = new FormData();
@@ -176,7 +176,7 @@ if (Vue) {
                         this.items_by_id = jsonObj.items_by_id;
                         this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
 
-                        setTimeout(this.makeCaseIDClickable, 1000);
+                        setTimeout(this.makeCaseIDClickable, 800);
                         addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
                         if (!this.inSearch) {
 
