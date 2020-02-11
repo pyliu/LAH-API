@@ -3,21 +3,13 @@ if (Vue) {
     Vue.component(VueCountdown.name, VueCountdown);
     Vue.component("watchdog", {
         template: `<div>
-            <transition
-                name="bounce"
-                :enter-active-class="animated_in"
-                :leave-active-class="animated_out"
-                @enter="enter"
-                @leave="leave"
-                @after-enter="afterEnter"
-                @after-leave="afterLeave"
-            >
+            <my-transition>
                 <b-form-row class="mb-1" v-show="showScheduleTask">
                     <b-col>
                         <schedule-task @fail-not-valid-server="handleFailed"></schedule-task>
                     </b-col>
                 </b-form-row>
-            </transition>
+            </my-transition>
             <b-form-row>
                 <b-col>
                     <log-viewer></log-viewer>
@@ -27,31 +19,14 @@ if (Vue) {
         </div>`,
         data: function() {
             return {
-                showScheduleTask: true,
-                animated_in: "animated zoomInDown",
-                animated_out: "animated zoomOutUp"
-            }
-        },
-        created() {
-            // random transition style
-            if (ANIMATED_TRANSITIONS) {
-                let count = ANIMATED_TRANSITIONS.length;
-                let this_time = ANIMATED_TRANSITIONS[this.rand(count)];
-                this.animated_in = `${this_time.in}`;
-                this.animated_out = `${this_time.out}`;
+                showScheduleTask: true
             }
         },
         methods: {
-            rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
-            handleFailed: function() {
-                this.showScheduleTask = false;
-            },
-            enter: function() { },
-            leave: function() { },
-            afterEnter: function() { },
-            afterLeave: function() { }
+            handleFailed: function() { this.showScheduleTask = false; }
         },
         components: {
+            "my-transition": VueTransition,
             "log-viewer": {
                 template: `<b-card bo-body :header="'紀錄儀表版 ' + query_data_count + ' / ' + query_total_count">
                     <div class="d-flex w-100 justify-content-between">
