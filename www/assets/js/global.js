@@ -114,9 +114,12 @@ let VueTransition = {
         <slot>轉場內容會顯示在這邊</slot>
     </transition>`,
     props: {
-        random: Boolean,
         appear: Boolean,
-        fix: Boolean
+        fade: Boolean,
+        slide: Boolean,
+        zoom: Boolean,
+        bounce: Boolean,
+        rotate: Boolean
     },
     data: function() {
         return {
@@ -129,7 +132,22 @@ let VueTransition = {
         }
     },
     created() {
-        if (!this.fix) {
+        if (this.rotate) {
+            this.animated_in = `animated rotateIn ${this.cfg_css}`;
+            this.animated_in = `animated rotateOut ${this.cfg_css}`;
+        } else if (this.bounce) {
+            this.animated_in = `animated bounceIn ${this.cfg_css}`;
+            this.animated_in = `animated bounceOut ${this.cfg_css}`;
+        } else if (this.zoom) {
+            this.animated_in = `animated zoomIn ${this.cfg_css}`;
+            this.animated_in = `animated zoomOut ${this.cfg_css}`;
+        } else if (this.slide) {
+            this.animated_in = `animated fadeIn ${this.cfg_css}`;
+            this.animated_in = `animated fadeOut ${this.cfg_css}`;
+        } else if (this.fade) {
+            this.animated_in = `animated slideInDown ${this.cfg_css}`;
+            this.animated_in = `animated slideOutUp ${this.cfg_css}`;
+        } else {
             this.randAnimation();
         }
     },
@@ -137,12 +155,7 @@ let VueTransition = {
         enter: function(e) { this.$emit("enter", e); },
         leave: function(e) { this.$emit("leave", e); },
         afterEnter: function(e) { this.$emit("after-enter", e); },
-        afterLeave: function(e) {
-            if (this.random) {
-                this.randAnimation();
-            }
-            this.$emit("after-leave", e);
-        },
+        afterLeave: function(e) { this.$emit("after-leave", e); },
         rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
         randAnimation: function() {
             if (this.animated_opts) {
