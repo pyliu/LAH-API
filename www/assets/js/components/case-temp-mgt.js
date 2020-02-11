@@ -169,7 +169,10 @@ if (Vue) {
                                 })
                             );
                             $(".tmp_tbl_btn").off("click").on("click", that.showSQL);
-                            $(".reg_case_id").off("click").on("click", function(e) {
+                            addAnimatedCSS(".reg_case_id", {
+                                name: "flash",
+                                duration: "once-anim-cfg"
+                            }).off("click").on("click", function(e) {
                                 window.utilApp.fetchRegCase(e, true);
                             });
                         }

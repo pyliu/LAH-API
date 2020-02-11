@@ -85,7 +85,10 @@ let xhrGetCasesByID = e => {
 				html += "</p>";
 				$("#id_query_crsms_result").html(html);
 				// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
-				$(".reg_case_id").off("click").on("click", window.utilApp.fetchRegCase);
+				addAnimatedCSS(".reg_case_id", {
+					name: "flash",
+					duration: "once-anim-cfg"
+				}).off("click").on("click", window.utilApp.fetchRegCase);
 				$(".reg_case_id").attr("title", "點我取得更多資訊！");
 			}
 			finish_count++;
