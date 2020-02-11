@@ -79,8 +79,8 @@ if (Vue) {
                     {key: "辦理情形", sortable: true},
                     {key: "初審人員", sortable: true},
                     {key: "作業人員", sortable: true},
-                    {key: "限辦期限", sortable: true},
-                    {key: "收件時間", sortable: true}
+                    {key: "收件時間", sortable: true},
+                    {key: "限辦期限", sortable: true}
                 ],
                 height: true,
                 caption: "查詢中 ... ",
@@ -165,6 +165,7 @@ if (Vue) {
                     if (!isEmpty(this.reviewerId)) {
                         form_body.append("reviewer_id", this.reviewerId);
                     }
+                    console.log(this.reviewerId);
                     asyncFetch("query_json_api.php", {
                         method: 'POST',
                         body: form_body

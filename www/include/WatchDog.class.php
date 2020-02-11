@@ -18,7 +18,6 @@ class WatchDog {
     private $overdueSchedule = [
         'Sun' => [],
         'Mon' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
-        //'Mon' => ['08:30 AM' => '09:00 PM'],  // testing
         'Tue' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
         'Wed' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
         'Thu' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
@@ -106,24 +105,34 @@ class WatchDog {
 
     private function sendOverdueMessage($to_id, $case_records) {
         global $log;
-        $chief_id = "HB1214";
+        $chief_id = "HB1214";   // 登記課長ID
         $host_ip = getLocalhostIP();
+        $users = GetDBUserMapping();
         $msg = new Message();
         $content = "目前有 ".count($case_records)." 件逾期案件(近15天，僅顯示前4筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請用CHROME瀏覽器前往 http://${host_ip}/overdue_reg_cases.html?reviewerID=".($to_id == "ALL" ? "" : $to_id)."\r\n查看詳細列表。";
         if ($to_id == "ALL") {
-            $to_id = $chief_id;
+            $title = "15天內逾期案件(全部)通知";
+            $sn = $msg->sysSend($title, $content, $chief_id, 14399);  // 14399 secs => +3 hours 59 mins 59 secs
+            $log->info("${title}訊息(${sn})已送出給 ${chief_id} 。 (".$users[$chief_id].")");
             // send to admin for testing
             foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
                 if ($adm_ip == '::1') {
                     continue;
                 }
-                $sn = $msg->send('逾期案件通知', $content, $adm_ip, 14399);
-                $log->info("訊息已送出(${sn})給 ${adm_ip}。 (管理者)");
+                $sn = $msg->send($title, $content, $adm_ip, 14399);
+                $log->info("${title}訊息(${sn})已送出給 ${adm_ip} 。 (管理者主機)");
             }
+        } else {
+            $this_user = $users[$to_id];
+            $title = "15天內逾期案件(${this_user})通知";
+
+            // 109-02-11 送給課長(測試)
+            //$sn = $msg->send($title, $content, "HB0537", 14399);
+            //$log->info("${title}訊息(${sn})已送出給 HB0537 (測試)。 (".$users["HB0537"].")");
+
+            $sn = $msg->sysSend($title, $content, $to_id, 14399);
+            $log->info("${title}訊息(${sn})已送出給 ${to_id} 。 (".$this_user.")");
         }
-        $sn = $msg->sysSend('逾期案件通知', $content, $to_id, 14399);  // 14399 secs => +3 hours 59 mins 59 secs
-        $users = GetDBUserMapping();
-        $log->info("訊息已送出(${sn})給 ${to_id}。 (".$users[$to_id].")");
     }
 
     private function getStats() {
