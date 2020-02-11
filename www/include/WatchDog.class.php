@@ -199,7 +199,7 @@ class WatchDog {
         }
 
         $log->info("現在應為".($status ? "啟動" : "關閉")."狀態");
-        // TODO
+        
         return $status;
     }
 }

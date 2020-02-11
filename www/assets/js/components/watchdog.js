@@ -146,7 +146,7 @@ if (Vue) {
                                 min="1"
                             ></b-form-input>
                         </b-input-group>
-                        <strong class="text-danger">排程執行中，請勿關閉本頁面。</strong>
+                        <strong id="schedule-wip-message" class="text-danger">排程執行中，請勿關閉本頁面。</strong>
                         <small class="text-muted text-center">
                             <b-button variant="primary" size="sm" @click="callWatchdogAPI">
                                 執行
@@ -169,7 +169,9 @@ if (Vue) {
                         milliseconds: 15 * 60 * 1000,
                         count: 4,
                         history: [],
-                        watchdog_timer: null
+                        watchdog_timer: null,
+                        anim_timer: null,
+                        anim_pattern: ["ld-bounceAlt", "ld-breath", "ld-rubber-v", "ld-beat", "ld-float", "ld-dim", "ld-damage"]
                     }
                 },
                 methods: {
@@ -235,10 +237,21 @@ if (Vue) {
                             });
                             console.error("schedule-task::callWatchdogAPI parsing failed", ex);
                         });
-                    }
+                    },
+                    changeWIPMessageAnim: function() {
+                        let len = this.anim_pattern.length;
+                        addLDAnimation("#schedule-wip-message", this.anim_pattern[this.rand(len)]);
+                    },
+                    rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))
                 },
                 mounted() {
                     this.callWatchdogAPI();
+                    this.changeWIPMessageAnim();
+                    this.anim_timer = setInterval(this.changeWIPMessageAnim, 15 * 60 * 1000);
+                },
+                beforeDestroy() {
+                    clearTimeout(this.watchdog_timer);
+                    clearTimeout(this.anim_timer);
                 }
             }
         }
