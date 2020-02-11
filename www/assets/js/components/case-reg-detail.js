@@ -15,8 +15,7 @@ if (Vue) {
                                     收件字號：
                                     <a :title="'收件資料 on ' + ap_server" :href="case_data_url" target="_blank">
                                         {{jsonObj.收件字號}}
-                                    </a>
-                                    <b-button variant="outline-primary" size="sm" @click="window.open(case_data_url)" title="另開視窗查詢收件資料"><i class="fas fa-search"></i></b-button><br />
+                                    </a> <br/>
                                     收件時間：{{jsonObj.收件時間}} <br/>
                                     測量案件：{{jsonObj.測量案件}} <br/>
                                     限辦期限：<span v-html="jsonObj.限辦期限"></span> <br/>
@@ -31,6 +30,11 @@ if (Vue) {
                                     登記處理註記：{{jsonObj.登記處理註記}} <br/>
                                     地價處理註記：{{jsonObj.地價處理註記}} <br/>
                                     手機號碼：{{jsonObj.手機號碼}}
+                                    <b-form-row>
+                                        <b-col class="text-center">
+                                            <b-button variant="outline-primary" size="sm" @click="window.open(case_data_url)" :title="'收件資料 on ' + ap_server"><i class="fas fa-search"></i> 另開視窗查詢</b-button>
+                                        </b-col>
+                                    </b-form-row>
                                 </b-card-body>
                             </b-collapse>
                         </b-card>
