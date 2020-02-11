@@ -375,7 +375,7 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 
 	let on_board_date = "";
 	if(!isEmpty(tdoc_raw["AP_ON_DATE"])) {
-		on_board_date = tdoc_raw["AP_ON_DATE"].date.split(" ")[0];
+		on_board_date = tdoc_raw["AP_ON_DATE"].date ? tdoc_raw["AP_ON_DATE"].date.split(" ")[0] :　tdoc_raw["AP_ON_DATE"];
 		let temp = Date.parse(on_board_date.replace('/-/g', "/"));
 		if (temp) {
 			let on = new Date(temp);
