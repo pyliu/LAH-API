@@ -274,8 +274,7 @@ if (Vue) {
                     this.wip = isEmpty(this.rm31);
                     addUserInfoEvent(e);
                     addAnimatedCSS(".reg_case_id", {
-                        name: "flash",
-                        duration: "once-anim-cfg"
+                        name: "flash"
                     }).off("click").on("click", function(e) {
                         window.utilApp.fetchRegCase(e, true);
                     });

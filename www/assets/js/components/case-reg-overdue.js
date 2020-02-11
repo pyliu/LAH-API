@@ -143,8 +143,7 @@ if (Vue) {
             },
             makeCaseIDClickable: function () {
                 addAnimatedCSS("table tr td:nth-child(2)", {
-                    name: "flash",
-                    duration: "once-anim-cfg"
+                    name: "flash"
                 }).off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
             },
             load: function() {

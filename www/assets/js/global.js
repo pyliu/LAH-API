@@ -393,7 +393,7 @@ let addAnimatedCSS = function(selector, opts) {
     if (node) {
         opts = Object.assign({
             name: ANIMATED_PATTERNS[rand(ANIMATED_PATTERNS.length)],
-            duration: ""    // a css class to control speed
+            duration: "once-anim-cfg"    // a css class to control speed
         }, opts);
         node.addClass(`animated ${opts.name} ${opts.duration}`);
         function handleAnimationEnd() {
