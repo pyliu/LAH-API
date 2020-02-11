@@ -972,8 +972,7 @@ if (Vue) {
                 },
                 mounted: function() { 
                     setTimeout(() => addAnimatedCSS(".reg_case_id", {
-                        name: "flash",
-                        duration: "once-anim-cfg"
+                        name: "flash"
                     }).off("click").on("click", window.utilApp.fetchRegCase).removeClass("reg_case_id"), 400);
                 }
             },
