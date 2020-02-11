@@ -188,7 +188,7 @@ if (Vue) {
                                 // auto next reload
                                 this.timer_handle = setTimeout(this.load, this.milliseconds);
                                 // add effect to catch attention
-                                addAnimatedCSS("#reload, caption");
+                                addAnimatedCSS("#reload, caption", {name: "flash"});
                             } else {
                                 console.warn("非上班時間，停止自動更新。");
                                 addNotification({
