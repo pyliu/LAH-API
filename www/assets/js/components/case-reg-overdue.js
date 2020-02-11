@@ -187,6 +187,8 @@ if (Vue) {
                             if (now.getHours() >= 7 && now.getHours() < 17) {
                                 // auto next reload
                                 this.timer_handle = setTimeout(this.load, this.milliseconds);
+                                // add effect to catch attention
+                                addAnimatedCSS("#reload");
                             } else {
                                 console.warn("非上班時間，停止自動更新。");
                                 addNotification({
