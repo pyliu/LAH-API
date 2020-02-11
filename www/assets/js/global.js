@@ -579,16 +579,15 @@ let initAlertUI = () => {
                 <div v-show="seen" class="alert alert-dismissible alert-fixed shadow" :class="type" role="alert" @mouseover="mouseOver" @mouseout="mouseOut">
                     <div v-show="title != '' && typeof title == 'string'" class="d-flex w-100 justify-content-between">
                         <h6 v-html="title"></h6>
-                        <span v-html="subtitle" style="font-size: .75rem"></span>
+                        <span v-if="subtitle != ''" v-html="subtitle" style="font-size: .75rem"></span>
+                        <span style="font-size: .75rem">{{remaining_secs}}s</span>
                     </div>
                     <hr v-show="title != '' && typeof title == 'string'" class="mt-0 mb-1">
                     <p v-html="message" style="font-size: .9rem"></p>
                     <button type="button" class="close" @click="seen = false">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <div class="progress mt-1" style="height:.2rem">
-                        <div class="progress-bar bg-light" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
-                    </div>
+                    <b-progress height="3px" :max="delay" :variant="bar_variant" :value="remaining_delay"></b-progress>
                 </div>
             </my-transition>
         </div>`));
@@ -607,7 +606,11 @@ let initAlertUI = () => {
                 progress_counter: 1,
                 autohide: true,
                 delay: 10000,
-                anim_delay: 400
+                anim_delay: 400,
+                remaining_delay: 10000,
+                remaining_secs: 10,
+                remaining_percent: 100,
+                bar_variant: "light"
             },
             methods: {
                 mouseOver: function(e) {
@@ -625,19 +628,28 @@ let initAlertUI = () => {
                 },
                 enableProgress: function() {
                     this.disableProgress();
-                    //console.log("enableProgress!");
                     let that = this;
+                    let total_remaining_secs = that.delay / 1000;
                     this.progress_timer_handle = setInterval(function() {
-                        let p = (100 - Math.round(((++that.progress_counter) / (that.delay / 200.0)) * 100));
-                        let wp = p < 0 ? "0%" : `${p}%`;
-                        $("#bs_alert_template .progress .progress-bar").css("width", wp);
+                        that.remaining_delay -= 200;
+                        let now_percent = ++that.progress_counter / (that.delay / 200.0);
+                        that.remaining_percent = (100 - Math.round(now_percent * 100));
+                        if (that.remaining_percent > 50) {
+                        } else if (that.remaining_percent > 25) {
+                            that.bar_variant = "warning";
+                        } else {
+                            that.bar_variant = "danger";
+                        }
+                        that.remaining_secs = total_remaining_secs - Math.floor(total_remaining_secs * now_percent);
                     }, 200);
                 },
                 disableProgress: function() {
-                    //console.log("disableProgress!");
                     clearTimeout(this.progress_timer_handle);
-                    $("#bs_alert_template .progress .progress-bar").css("width", "100%");
                     this.progress_counter = 1;
+                    this.remaining_delay = this.delay;
+                    this.remaining_secs = this.delay / 1000;
+                    this.remaining_percent = 100;
+                    this.bar_variant = "light";
                 },
                 show: function(opts) {
                     if (this.seen) {
