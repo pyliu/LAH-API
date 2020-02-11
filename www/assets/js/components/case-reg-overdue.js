@@ -33,6 +33,7 @@ if (Vue) {
                     :fields="fields"
                     :busy="busy"
                     v-show="listMode"
+                    class="text-center"
                 >
                     <template v-slot:table-busy>
                         <div class="text-center text-danger my-5">
