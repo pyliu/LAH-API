@@ -7,7 +7,7 @@ if (Vue) {
         template: `<div>
             <div style="right: 2rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
                 <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
-                <b-button variant="primary" size="sm" @click="load">
+                <b-button id="reload" variant="primary" size="sm" @click="load">
                     刷新
                     <b-badge variant="light">
                         <countdown ref="countdown" :time="milliseconds" :auto-start="false">
@@ -142,7 +142,10 @@ if (Vue) {
                 this.$refs.countdown.totalMilliseconds = 0;
             },
             makeCaseIDClickable: function () {
-                $("table tr td:nth-child(2)").off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
+                addAnimatedCSS("table tr td:nth-child(2)", {
+                    name: "flash",
+                    duration: "once-anim-cfg"
+                }).off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
             },
             load: function() {
                 clearTimeout(this.timer_handle);
