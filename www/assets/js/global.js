@@ -99,6 +99,58 @@ const ANIMATED_TRANSITIONS = [
     { in: "animated slideInRight", out: "animated slideOutLeft" }
 ];
 
+let VueTransition = {
+    template: `<transition
+        :enter-active-class="animated_in"
+        :leave-active-class="animated_out"
+        :duration="duration"
+        :mode="mode"
+        :appear="appear"
+        @enter="enter"
+        @leave="leave"
+        @after-enter="afterEnter"
+        @after-leave="afterLeave"
+    >
+        <slot>轉場內容會顯示在這邊</slot>
+    </transition>`,
+    props: {
+        random: Boolean,
+        appear: Boolean
+    },
+    data: function() {
+        return {
+            animated_in: "animated fadeIn",
+            animated_out: "animated fadeOut",
+            animated_opts: ANIMATED_TRANSITIONS,
+            duration: 400,   // or {enter: 400, leave: 800}
+            mode: "out-in"   // out-in, in-out
+        }
+    },
+    created() {
+        this.randAnimation();
+    },
+    methods: {
+        enter: function(e) { this.$emit("enter", e); },
+        leave: function(e) { this.$emit("leave", e); },
+        afterEnter: function(e) { this.$emit("after-enter", e); },
+        afterLeave: function(e) {
+            if (this.random) {
+                this.randAnimation();
+            }
+            this.$emit("after-leave", e);
+        },
+        rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
+        randAnimation: function() {
+            if (this.animated_opts) {
+                let count = this.animated_opts.length;
+                let this_time = this.animated_opts[this.rand(count)];
+                this.animated_in = `${this_time.in} once-anim-cfg`;
+                this.animated_out = `${this_time.out} once-anim-cfg`;
+            }
+        }
+    }
+}
+
 let asyncFetch = async function(url, opts) {
     opts = Object.assign({
         method: "POST",

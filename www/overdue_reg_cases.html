@@ -33,8 +33,10 @@
     <div class="container-fluid">
       <div class="row">
         <div id="overdue-reg-cases" class="col">
-          <h1 v-if="!show" class="text-center text-danger">請使用 CHROME 瀏覽器開啟本頁面。</h1>
-          <case-reg-overdue ref="overdue" v-else :reviewer-id="reviewerID"></case-reg-overdues>
+          <my-transition>
+            <h1 v-if="!show" class="text-center text-danger">請使用 CHROME 瀏覽器開啟本頁面。</h1>
+            <case-reg-overdue v-else ref="overdue" v-else :reviewer-id="reviewerID"></case-reg-overdues>
+          </my-transition>
         </div>
       </div>
   </section><!-- /section -->
@@ -66,6 +68,7 @@
     $(document).ready(function(e) {
       window.overdueRegCasesVue = new Vue({
         el: "#overdue-reg-cases",
+        components: {"my-transition": VueTransition},
         data: {
           reviewerID: "",
           show: false

@@ -1,5 +1,9 @@
 if (Vue) {
     Vue.component("case-reg-overdue", {
+        components: {
+            "my-transition": VueTransition,
+            "countdown": VueCountdown
+        },
         template: `<div>
             <div style="right: 2rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
                 <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
@@ -13,11 +17,7 @@ if (Vue) {
                     </b-badge>
                 </b-button>
             </div>
-            <transition
-                :enter-active-class="animated_in"
-                :leave-active-class="animated_out"
-                @after-leave="afterTableLeave"
-            >
+            <my-transition @after-leave="afterTableLeave" appear>
                 <b-table
                     striped
                     hover
@@ -49,13 +49,9 @@ if (Vue) {
                         <span v-else>{{data.value.split(" ")[0]}}</span>
                     </template>
                 </b-table>
-            </transition>
+            </my-transition>
             
-            <transition
-                :enter-active-class="animated_in"
-                :leave-active-class="animated_out"
-                @after-leave="afterStatsLeave"
-            >
+            <my-transition @after-leave="afterStatsLeave">
                 <div class="mt-3" v-show="statsMode">
                     <div class="mx-auto w-75">
                         <chart-component ref="statsChart"></chart-component>
@@ -69,12 +65,9 @@ if (Vue) {
                         <b-button size="sm" variant="dark" @click="chartType = 'radar'"><i class="fas fa-broadcast-tower"></i> 雷達圖</b-button>
                     </b-button-group>
                 </div>
-            </transition>
+            </my-transition>
         </div>`,
         props: ['reviewerId', 'inSearch', 'compact', 'itemsIn'],
-        components: {
-            "countdown": VueCountdown
-        },
         data: function () {
             return {
                 items: {},
@@ -97,10 +90,7 @@ if (Vue) {
                 milliseconds: 15 * 60 * 1000,
                 listMode: true,
                 statsMode: false,
-                chartType: "bar",
-                animated_in: "animated fadeIn",
-                animated_out: "animated fadeOut",
-                animated_opts: ANIMATED_TRANSITIONS
+                chartType: "bar"
             }
         },
         watch: {
@@ -229,17 +219,7 @@ if (Vue) {
                 });
             }
         },
-        created() {
-            // randomize the animation effect
-            if (this.animated_opts) {
-                let count = this.animated_opts.length;
-                let this_time = this.animated_opts[rand(count)];
-                this.animated_in = `${this_time.in} once-anim-cfg`;
-                this.animated_out = `${this_time.out} once-anim-cfg`;
-            }
-        },
         mounted() {
-            //console.log(this.$root, this.$parent, this);
             this.load();
             if (this.inSearch === true) {
                 // in modal dialog
