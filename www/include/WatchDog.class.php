@@ -91,7 +91,7 @@ class WatchDog {
                 $this_msg = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']);
                 $case_records[$row['RM45']][] = $this_msg;
                 $case_records["ALL"][] = $this_msg;
-                $log->info($this_msg);
+                $log->info("找到逾期案件：${this_msg}");
             }
             
             // send to the reviewer
