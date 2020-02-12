@@ -6,7 +6,7 @@ if (Vue) {
             <my-transition>
                 <b-form-row class="mb-1" v-show="showScheduleTask">
                     <b-col>
-                        <schedule-task @fail-not-valid-server="handleFailed"></schedule-task>
+                        <schedule-task @fail-not-valid-server="handleFailed" @succeed-valid-server="handleSucceeded"></schedule-task>
                     </b-col>
                 </b-form-row>
             </my-transition>
@@ -19,11 +19,12 @@ if (Vue) {
         </div>`,
         data: function() {
             return {
-                showScheduleTask: true
+                showScheduleTask: false
             }
         },
         methods: {
-            handleFailed: function() { this.showScheduleTask = false; }
+            handleFailed: function() { this.showScheduleTask = false; },
+            handleSucceeded: function() { this.showScheduleTask = true; },
         },
         components: {
             "my-transition": VueTransition,
@@ -169,8 +170,7 @@ if (Vue) {
                         milliseconds: 15 * 60 * 1000,
                         count: 4,
                         history: [],
-                        watchdog_timer: null,
-                        anim_timer: null,
+                        timer: null,
                         anim_pattern: ["ld-bounceAlt", "ld-breath", "ld-rubber-v", "ld-beat", "ld-float", "ld-dim", "ld-damage"]
                     }
                 },
@@ -210,8 +210,8 @@ if (Vue) {
                             if (jsonObj.status == XHR_STATUS_CODE.FAIL_NOT_VALID_SERVER) {
                                 // 此功能僅在伺服器上執行！
                                 this.$emit("fail-not-valid-server");
-                                addNotification({
-                                    title: "WATCHDOG停止通知",
+                                showAlert({
+                                    title: "伺服器排程停止通知",
                                     message: `${jsonObj.message}`,
                                     type: "warning"
                                 });
@@ -222,10 +222,10 @@ if (Vue) {
                                     this.addHistory(`${now}：${jsonObj.message}`);
                                     console.warn(jsonObj.message);
                                 }
-                                // Backend will check if it needs to do or not
-                                this.watchdog_timer = setTimeout(this.callWatchdogAPI, this.milliseconds);	// call the watchdog every 15 mins
                                 this.resetCountdown();
                                 this.startCountdown();
+                                this.queueTask();
+                                this.$emit("succeed-valid-server");
                             }
                         }).catch(ex => {
                             this.endCountdown();
@@ -242,16 +242,24 @@ if (Vue) {
                         let len = this.anim_pattern.length;
                         addLDAnimation("#schedule-wip-message", this.anim_pattern[this.rand(len)]);
                     },
-                    rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))
+                    rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
+                    queueTask: function() {
+                        clearTimeout(this.timer);
+                        let that = this;
+                        this.timer = setTimeout(() => {
+                            // Backend will check if it needs to do or not
+                            that.callWatchdogAPI();
+                            // update the message animation
+                            that.changeWIPMessageAnim();
+                        }, this.milliseconds);
+                    }
                 },
                 mounted() {
                     this.callWatchdogAPI();
                     this.changeWIPMessageAnim();
-                    this.anim_timer = setInterval(this.changeWIPMessageAnim, 15 * 60 * 1000);
                 },
                 beforeDestroy() {
-                    clearTimeout(this.watchdog_timer);
-                    clearTimeout(this.anim_timer);
+                    clearTimeout(this.timer);
                 }
             }
         }
