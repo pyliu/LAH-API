@@ -147,12 +147,10 @@ if (Vue) {
                 }).off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
             },
             load: function() {
-                clearTimeout(this.timer_handle);
-                if (!this.inSearch) {
-                    this.endCountdown();
-                }
                 this.busy = true;
+                clearTimeout(this.timer_handle);
                 if (this.itemsIn) {
+                    // in-search, by clicked the first reviewer button
                     this.busy = false;
                     this.items = this.itemsIn;
                     this.caption = `${this.itemsIn.length} 件`;
@@ -160,12 +158,14 @@ if (Vue) {
                     setTimeout(this.makeCaseIDClickable, 800);
                     addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${this.itemsIn.length} 件案件` });
                 } else {
+                    this.endCountdown();
+                    this.resetCountdown();
+                    this.startCountdown();
                     let form_body = new FormData();
                     form_body.append("type", "overdue_reg_cases");
                     if (!isEmpty(this.reviewerId)) {
                         form_body.append("reviewer_id", this.reviewerId);
                     }
-                    console.log(this.reviewerId);
                     asyncFetch("query_json_api.php", {
                         method: 'POST',
                         body: form_body
@@ -179,29 +179,24 @@ if (Vue) {
 
                         setTimeout(this.makeCaseIDClickable, 800);
                         addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
-                        if (!this.inSearch) {
-
-                            this.resetCountdown();
-                            this.startCountdown();
-
-                            let now = new Date();
-                            if (now.getHours() >= 7 && now.getHours() < 17) {
-                                // auto next reload
-                                this.timer_handle = setTimeout(this.load, this.milliseconds);
-                                // add effect to catch attention
-                                addAnimatedCSS("#reload, caption", {name: "flash"});
-                            } else {
-                                console.warn("非上班時間，停止自動更新。");
-                                addNotification({
-                                    title: "自動更新停止通知",
-                                    message: "非上班時間，停止自動更新。",
-                                    type: "warning"
-                                });
-                                this.endCountdown();
-                            }
-                            // prepare the chart data for rendering
-                            this.setChartData();
+                        
+                        let now = new Date();
+                        if (now.getHours() >= 7 && now.getHours() < 17) {
+                            // auto next reload
+                            this.timer_handle = setTimeout(this.load, this.milliseconds);
+                            // add effect to catch attention
+                            addAnimatedCSS("#reload, caption", {name: "flash"});
+                        } else {
+                            console.warn("非上班時間，停止自動更新。");
+                            addNotification({
+                                title: "自動更新停止通知",
+                                message: "非上班時間，停止自動更新。",
+                                type: "warning"
+                            });
+                            this.endCountdown();
                         }
+                        // prepare the chart data for rendering
+                        this.setChartData();
                     }).catch(ex => {
                         console.error("case-reg-overdue::created parsing failed", ex);
                         showAlert({message: "case-reg-overdue::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
