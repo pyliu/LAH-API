@@ -26,7 +26,7 @@ switch ($_POST["type"]) {
 		$rows = $query->queryOverdueCasesIn15Days($_POST["reviewer_id"]);
 		if (empty($rows)) {
 			$log->info("XHR [overdue_reg_cases] 近15天查無逾期資料");
-			echoErrorJSONString("15天內查無逾期資料");
+			echoErrorJSONString("15天內查無逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
 		} else {
 			$items = [];
 			$items_by_id = [];
@@ -61,7 +61,7 @@ switch ($_POST["type"]) {
 		$rows = $query->queryAlmostOverdueCases($_POST["reviewer_id"]);
 		if (empty($rows)) {
 			$log->info("XHR [almost_overdue_reg_cases] 近4小時內查無快逾期資料");
-			echoErrorJSONString("近4小時內查無快逾期資料");
+			echoErrorJSONString("近4小時內查無快逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
 		} else {
 			$items = [];
 			$items_by_id = [];

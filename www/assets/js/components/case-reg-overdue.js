@@ -6,7 +6,9 @@ if (Vue) {
         },
         template: `<div>
             <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
-                <b-form-checkbox inline v-model="overdueMode" size="sm" switch><span :class="overdueMode ? 'bg-danger text-white p-1' : 'bg-warning text-black p-1'">{{overdueMode ? "逾期模式" : "快逾期模式(4小時內)"}}</span></b-form-checkbox>
+                <b-form-checkbox inline v-model="overdueMode" size="sm" switch>
+                    <span :class="overdueMode ? 'bg-danger text-white p-1' : 'bg-warning text-black p-1'">{{overdueMode ? "逾期模式" : "快逾期模式(4小時內)"}}</span>
+                </b-form-checkbox>
                 <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
                 <b-button id="reload" variant="primary" size="sm" @click="load">
                     刷新
@@ -185,7 +187,7 @@ if (Vue) {
                         method: 'POST',
                         body: form_body
                     }).then(jsonObj => {
-                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢登記案件(${this.title})回傳狀態碼有問題【${jsonObj.status}】`);
+                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL || jsonObj.status == XHR_STATUS_CODE.SUCCESS_WITH_NO_RECORD, `查詢登記案件(${this.title})回傳狀態碼有問題【${jsonObj.status}】`);
                         
                         this.busy = false;
 

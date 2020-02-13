@@ -1,8 +1,9 @@
 <?php
 
 abstract class STATUS_CODE {
-	const SUCCESS_NORMAL = 1;
+    const SUCCESS_WITH_NO_RECORD = 3;
     const SUCCESS_WITH_MULTIPLE_RECORDS = 2;
+	const SUCCESS_NORMAL = 1;
 	const DEFAULT_FAIL = 0;
 	const UNSUPPORT_FAIL = -1;
     const FAIL_WITH_LOCAL_NO_RECORD = -2;

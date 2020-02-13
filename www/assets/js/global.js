@@ -7,13 +7,15 @@ const CONFIG = {
 const landhb_svr = "220.1.35.123";
 // the status code must be the same as server side response
 const XHR_STATUS_CODE = {
-    SUCCESS_NORMAL: 1,
+    SUCCESS_WITH_NO_RECORD: 3,
     SUCCESS_WITH_MULTIPLE_RECORDS: 2,
+    SUCCESS_NORMAL: 1,
     DEFAULT_FAIL: 0,
     UNSUPPORT_FAIL: -1,
     FAIL_WITH_LOCAL_NO_RECORD: -2,
     FAIL_NOT_VALID_SERVER: -3,
-    FAIL_WITH_REMOTE_NO_RECORD: -4
+    FAIL_WITH_REMOTE_NO_RECORD: -4,
+    FAIL_NO_AUTHORITY: -5
 }
 const LOADING_PATTERNS = [
     "ld-heartbeat", "ld-beat", "ld-blink", "ld-bounce", "ld-bounceAlt", "ld-breath", "ld-wrench", "ld-surprise",
