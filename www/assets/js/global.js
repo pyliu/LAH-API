@@ -101,6 +101,21 @@ const ANIMATED_TRANSITIONS = [
 /**
  * Vue Relative Component
  */
+const store = (() => {
+    if (typeof Vuex == "object") {
+        return new Vuex.Store({
+            state: {
+                cache : {}
+            },
+            mutations: {
+                cache(state, objPayload) {
+                    state.cache = Object.assign(objPayload, state.cache);
+                }
+            }
+        });
+    }
+    return {};
+})();
 let VueTransition = {
     template: `<transition
         :enter-active-class="animated_in"
@@ -718,6 +733,7 @@ let initUtilApp = () => {
             transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)],
             callbackQueue: []
         },
+        store,  // use global Vuex store
         created: function(e) {
             this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
                 //console.log('Modal is about to be shown', bvEvent, modalId)
