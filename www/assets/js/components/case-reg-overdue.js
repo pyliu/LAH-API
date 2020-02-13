@@ -5,7 +5,8 @@ if (Vue) {
             "countdown": VueCountdown
         },
         template: `<div>
-            <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
+            <div style="right: 2.5rem; position:absolute; top: -1.2rem;" v-if="!inSearch">
+                <b-form-checkbox v-model="overdueMode" size="sm" switch>逾期模式</b-form-checkbox>
                 <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
                 <b-button id="reload" variant="primary" size="sm" @click="load">
                     刷新
@@ -88,7 +89,9 @@ if (Vue) {
                 milliseconds: 15 * 60 * 1000,
                 listMode: true,
                 statsMode: false,
-                chartType: "bar"
+                overdueMode: true,
+                chartType: "bar",
+                title: "逾期"
             }
         },
         computed: {
@@ -104,6 +107,10 @@ if (Vue) {
         watch: {
             chartType: function (val) {
                 this.$refs.statsChart.type = val;
+            },
+            overdueMode: function(isChecked) {
+                this.title = isChecked ? "逾期" : "快逾期";
+                this.load();
             }
         },
         methods: {
@@ -129,6 +136,7 @@ if (Vue) {
                     let item = [this.overdue_list_by_id[id][0]["初審人員"], this.overdue_list_by_id[id].length];
                     this.$refs.statsChart.items.push(item);
                 }
+                this.$refs.statsChart.label = `${this.overdueMode ? "" : "接近"}逾期案件統計表`;
             },
             empty: function (variable) {
                 if (variable === undefined || $.trim(variable) == "") {
@@ -163,13 +171,13 @@ if (Vue) {
                     this.busy = false;
                     this.caption = `${case_count} 件`;
                     setTimeout(this.makeCaseIDClickable, 800);
-                    addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${case_count} 件案件` });
+                    addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
                 } else {
                     this.endCountdown();
                     this.resetCountdown();
                     this.startCountdown();
                     let form_body = new FormData();
-                    form_body.append("type", "overdue_reg_cases");
+                    form_body.append("type", this.overdueMode ? "overdue_reg_cases" : "almost_overdue_reg_cases");
                     if (!isEmpty(this.reviewerId)) {
                         form_body.append("reviewer_id", this.reviewerId);
                     }
@@ -177,7 +185,7 @@ if (Vue) {
                         method: 'POST',
                         body: form_body
                     }).then(jsonObj => {
-                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "查詢登記逾期案件回傳狀態碼有問題【" + jsonObj.status + "】");
+                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢登記案件(${this.title})回傳狀態碼有問題【${jsonObj.status}】`);
                         
                         this.busy = false;
 
@@ -188,7 +196,7 @@ if (Vue) {
                         this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
 
                         setTimeout(this.makeCaseIDClickable, 800);
-                        addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
+                        addNotification({ title: `查詢登記(${this.title})案件`, message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
                         
                         let now = new Date();
                         if (now.getHours() >= 7 && now.getHours() < 17) {
@@ -214,9 +222,9 @@ if (Vue) {
                 }
             },
             searchByReviewer: function(reviewer_data) {
-                // reviewer_data, e.g. 曾奕融 HB1184
+                // reviewer_data, e.g. "曾奕融 HB1184"
                 showModal({
-                    title: `查詢 ${reviewer_data} 逾期案件`,
+                    title: `查詢 ${reviewer_data} 登記(${this.title})案件`,
                     message: this.$createElement('case-reg-overdue', {
                         props: {
                             reviewerId: reviewer_data.split(" ")[1],
@@ -236,7 +244,6 @@ if (Vue) {
                 this.small = true;
             } else {
                 this.height = $(document).height() - 145 + "px";
-                this.$refs.statsChart.label = "逾期案件統計表";
             }
         }
     });

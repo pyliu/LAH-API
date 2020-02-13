@@ -55,6 +55,41 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
+	case "almost_overdue_reg_cases":
+		$log->info("XHR [almost_overdue_reg_cases] 快逾期案件查詢請求");
+		$log->info("XHR [almost_overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");
+		$rows = $query->queryAlmostOverdueCases($_POST["reviewer_id"]);
+		if (empty($rows)) {
+			$log->info("XHR [almost_overdue_reg_cases] 近4小時內查無快逾期資料");
+			echoErrorJSONString("近4小時內查無快逾期資料");
+		} else {
+			$items = [];
+			$items_by_id = [];
+			foreach ($rows as $row) {
+				$regdata = new RegCaseData($row);
+				$this_item = array(
+					"收件字號" => $regdata->getReceiveSerial(),
+					"登記原因" => $regdata->getCaseReason(),
+					"辦理情形" => $regdata->getStatus(),
+					"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
+					"限辦期限" => $regdata->getDueDate(),
+					"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
+					"作業人員" => $regdata->getCurrentOperator()
+				);
+				$items[] = $this_item;
+				$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
+			}
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"items" => $items,
+				"items_by_id" => $items_by_id,
+				"data_count" => count($items),
+				"raw" => $rows
+			);
+			$log->info("XHR [almost_overdue_reg_cases] 近4小時內找到".count($items)."件快逾期案件");
+			echo json_encode($result, 0);
+		}
+		break;
 	case "watchdog":
 		$log->info("XHR [watchdog] 監控請求");
 		// use http://localhost the client will be "::1"
@@ -516,7 +551,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "sync_xcase_column":
-	$log->info("XHR [sync_xcase_column] 同步遠端案件之特定欄位【".$_POST["id"].", ".$_POST["column"]."】請求");
+		$log->info("XHR [sync_xcase_column] 同步遠端案件之特定欄位【".$_POST["id"].", ".$_POST["column"]."】請求");
 		$result_flag = $query->syncXCaseColumn($_POST["id"], $_POST["column"]);
 		if ($result_flag) {
 			$result = array(

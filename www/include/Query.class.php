@@ -453,6 +453,51 @@ class Query {
 		return $this->db->fetchAll();
 	}
 
+	// 找快逾期的案件
+	public function queryAlmostOverdueCases($reviewer_id = "") {
+		$query_str = "
+			SELECT *
+			FROM SCRSMS
+			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+			WHERE
+				RM02 NOT LIKE 'HB%1'		-- only search our own cases
+				AND RM03 LIKE '%0' 			-- without sub-case
+				AND RM31 IS NULL			-- not closed case
+				AND RM29_1 || RM29_2 < :bv_now_plus_4hrs
+				AND RM29_1 || RM29_2 > :bv_now
+		";
+		if (empty($reviewer_id)) {
+			$this->db->parse("
+				${query_str}
+				ORDER BY RM29_1 DESC, RM29_2 DESC
+			");
+		} else {
+			$this->db->parse("
+				${query_str}
+					AND RM45 = :bv_reviewer_id
+				ORDER BY RM29_1 DESC, RM29_2 DESC
+			");
+			$this->db->bind(":bv_reviewer_id", $reviewer_id);	// HBxxxx
+		}
+
+		$tw_date = new Datetime("now");
+		$tw_date->modify("-1911 year");
+		$now = ltrim($tw_date->format("YmdHis"), "0");	// ex: 1080325152111
+
+		$date_4hrs_later = new Datetime("now");
+		$date_4hrs_later->modify("-1911 year");
+		$date_4hrs_later->modify("+4 hours");
+		$now_plus_4hrs = ltrim($date_4hrs_later->format("YmdHis"), "0");	// ex: 1090107081410
+		
+		global $log;
+		$log->info(__METHOD__.": Find overdue date between $now and $now_plus_4hrs cases.");
+
+		$this->db->bind(":bv_now", $now);
+		$this->db->bind(":bv_now_plus_4hrs", $now_plus_4hrs);
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
 	// 查詢指定收件日期之案件
     public function queryOverdueCasesByDate($qday) {
         // only allow int number for $qday
