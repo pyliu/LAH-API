@@ -54,7 +54,6 @@ const LOADING_PREDEFINED = [
     "fab fa-angellist ld-metronome fa-2x"
 ]
 const LOADING_SHAPES_COLOR = ["text-primary", "text-secondary", "text-danger", "text-info", "text-warning", "text-default", ""];
-
 const ANIMATED_PATTERNS = ["bounce", "flash", "pulse", "rubberBand", "shake", "headShake", "swing", "tada", "wobble", "jello", "hinge"];
 const ANIMATED_TRANSITIONS = [
     // rotate
