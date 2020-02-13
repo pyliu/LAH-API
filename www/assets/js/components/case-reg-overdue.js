@@ -94,11 +94,11 @@ if (Vue) {
         computed: {
             overdue_list() {
                 let store = this.store || this.$store;
-                return store.state.overdue_list;
+                return store.getters.list;
             },
             overdue_list_by_id() {
                 let store = this.store || this.$store;
-                return store.state.overdue_list_by_id;
+                return store.getters.list_by_id;
             }
         },
         watch: {

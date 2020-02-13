@@ -73,6 +73,10 @@
           overdue_list : {},
           overdue_list_by_id: {}
         },
+        getters: {
+          list: state => state.overdue_list,
+          list_by_id: state => state.overdue_list_by_id
+        },
         mutations: {
           overdue_list(state, jsonPayload) {
             state.overdue_list = jsonPayload || {};
