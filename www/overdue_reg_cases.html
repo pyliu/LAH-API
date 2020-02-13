@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="For tracking taoyuan land registration cases">
 <meta name="author" content="LIU, PANG-YU">
-<title>15天內逾期案件列表-桃園市中壢地政事務所</title>
+<title>逾期案件查詢-桃園市中壢地政事務所</title>
 
 <!-- Bootstrap core CSS -->
 <link rel="stylesheet" href="assets/css/bootstrap.min.css">
@@ -24,7 +24,7 @@
 
   <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
     <i class="my-auto fas fa-th-list fa-2x text-light"></i>&ensp;
-    <a class="navbar-brand" href="javascript:location.reload()">15天內逾期案件列表 - 地政輔助系統 <span class="small">(α)</span></a>
+    <a class="navbar-brand" href="javascript:location.reload()">逾期案件查詢 - 地政輔助系統 <span class="small">(α)</span></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -70,19 +70,19 @@
       // single source of truth
       const store = new Vuex.Store({
         state: {
-          overdue_list : {},
-          overdue_list_by_id: {}
+          list : {},
+          list_by_id: {}
         },
         getters: {
-          list: state => state.overdue_list,
-          list_by_id: state => state.overdue_list_by_id
+          list: state => state.list,
+          list_by_id: state => state.list_by_id
         },
         mutations: {
-          overdue_list(state, jsonPayload) {
-            state.overdue_list = jsonPayload || {};
+          list(state, jsonPayload) {
+            state.list = jsonPayload || {};
           },
-          overdue_list_by_id(state, jsonPayload) {
-            state.overdue_list_by_id = jsonPayload || {};
+          list_by_id(state, jsonPayload) {
+            state.list_by_id = jsonPayload || {};
           }
         }
       });

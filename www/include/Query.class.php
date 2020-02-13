@@ -480,6 +480,8 @@ class Query {
 			$this->db->bind(":bv_reviewer_id", $reviewer_id);	// HBxxxx
 		}
 
+		global $log;
+
 		$tw_date = new Datetime("now");
 		$tw_date->modify("-1911 year");
 		$now = ltrim($tw_date->format("YmdHis"), "0");	// ex: 1080325152111
@@ -487,9 +489,12 @@ class Query {
 		$date_4hrs_later = new Datetime("now");
 		$date_4hrs_later->modify("-1911 year");
 		$date_4hrs_later->modify("+4 hours");
+		if ($date_4hrs_later->format("H") > 17) {
+			$log->info(__METHOD__.": ".$date_4hrs_later->format("YmdHis")." is over 17:00:00, so add 16 hrs ... ");
+			$date_4hrs_later->modify("+16 hours");
+		}
 		$now_plus_4hrs = ltrim($date_4hrs_later->format("YmdHis"), "0");	// ex: 1090107081410
 		
-		global $log;
 		$log->info(__METHOD__.": Find overdue date between $now and $now_plus_4hrs cases.");
 
 		$this->db->bind(":bv_now", $now);

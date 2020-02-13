@@ -5,8 +5,8 @@ if (Vue) {
             "countdown": VueCountdown
         },
         template: `<div>
-            <div style="right: 2.5rem; position:absolute; top: -1.2rem;" v-if="!inSearch">
-                <b-form-checkbox v-model="overdueMode" size="sm" switch>逾期模式</b-form-checkbox>
+            <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
+                <b-form-checkbox inline v-model="overdueMode" size="sm" switch><span :class="overdueMode ? 'bg-danger text-white p-1' : 'bg-warning text-black p-1'">{{overdueMode ? "逾期模式" : "快逾期模式(4小時內)"}}</span></b-form-checkbox>
                 <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
                 <b-button id="reload" variant="primary" size="sm" @click="load">
                     刷新
@@ -30,7 +30,7 @@ if (Vue) {
                     :small="small"
                     :caption="caption"
                     :sticky-header="height"
-                    :items="inSearch ? overdue_list_by_id[reviewerId] : overdue_list"
+                    :items="inSearch ? case_list_by_id[reviewerId] : case_list"
                     :fields="fields"
                     :busy="busy"
                     v-show="listMode"
@@ -46,7 +46,7 @@ if (Vue) {
                         {{data.index + 1}}
                     </template>
                     <template v-slot:cell(初審人員)="data">
-                        <b-button v-if="!inSearch && !reviewerId" variant="outline-danger" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的逾期案件'">{{data.value.split(" ")[0]}}</b-button>
+                        <b-button v-if="!inSearch && !reviewerId" :variant="overdueMode ? 'outline-danger' : 'warning'" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的逾期案件'">{{data.value.split(" ")[0]}}</b-button>
                         <span v-else>{{data.value.split(" ")[0]}}</span>
                     </template>
                 </b-table>
@@ -95,11 +95,11 @@ if (Vue) {
             }
         },
         computed: {
-            overdue_list() {
+            case_list() {
                 let store = this.store || this.$store;
                 return store.getters.list;
             },
-            overdue_list_by_id() {
+            case_list_by_id() {
                 let store = this.store || this.$store;
                 return store.getters.list_by_id;
             }
@@ -132,8 +132,8 @@ if (Vue) {
             },
             setChartData: function() {
                 this.$refs.statsChart.items = [];
-                for (let id in this.overdue_list_by_id) {
-                    let item = [this.overdue_list_by_id[id][0]["初審人員"], this.overdue_list_by_id[id].length];
+                for (let id in this.case_list_by_id) {
+                    let item = [this.case_list_by_id[id][0]["初審人員"], this.case_list_by_id[id].length];
                     this.$refs.statsChart.items.push(item);
                 }
                 this.$refs.statsChart.label = `${this.overdueMode ? "" : "接近"}逾期案件統計表`;
@@ -167,7 +167,7 @@ if (Vue) {
                 clearTimeout(this.timer_handle);
                 if (this.inSearch) {
                     // in-search, by clicked the first reviewer button
-                    let case_count = this.overdue_list_by_id[this.reviewerId].length || 0;
+                    let case_count = this.case_list_by_id[this.reviewerId].length || 0;
                     this.busy = false;
                     this.caption = `${case_count} 件`;
                     setTimeout(this.makeCaseIDClickable, 800);
@@ -190,8 +190,8 @@ if (Vue) {
                         this.busy = false;
 
                         // set data to store
-                        this.$store.commit("overdue_list", jsonObj.items);
-                        this.$store.commit("overdue_list_by_id", jsonObj.items_by_id);
+                        this.$store.commit("list", jsonObj.items);
+                        this.$store.commit("list_by_id", jsonObj.items_by_id);
 
                         this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
 
