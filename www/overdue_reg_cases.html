@@ -54,6 +54,7 @@
   <script src="assets/js/bootstrap.min.js"></script>
   <!-- Vue -->
   <script src="assets/js/vue.js"></script>
+  <script src="assets/js/vuex.js"></script>
   <script src="assets/js/bootstrap-vue.min.js"></script>
   <!-- Custom -->
   <script src="assets/js/global.js"></script>
@@ -66,8 +67,24 @@
 
   <script type="text/javascript">
     $(document).ready(function(e) {
+      // single source of truth
+      const store = new Vuex.Store({
+        state: {
+          overdue_list : {},
+          overdue_list_by_id: {}
+        },
+        mutations: {
+          overdue_list(state, jsonPayload) {
+            state.overdue_list = jsonPayload || {};
+          },
+          overdue_list_by_id(state, jsonPayload) {
+            state.overdue_list_by_id = jsonPayload || {};
+          }
+        }
+      });
       window.overdueRegCasesVue = new Vue({
         el: "#overdue-reg-cases",
+        store,
         components: {"my-transition": VueTransition},
         data: {
           reviewerID: "",
@@ -88,6 +105,7 @@
           this.show = true;
         }
       });
+      // could check store by window.overdueRegCasesVue.$refs.overdue.$store
       // disable body scrollbar
       $("body").css("overflow", "hidden");
     });

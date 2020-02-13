@@ -29,7 +29,7 @@ if (Vue) {
                     :small="small"
                     :caption="caption"
                     :sticky-header="height"
-                    :items="items"
+                    :items="inSearch ? overdue_list_by_id[reviewerId] : overdue_list"
                     :fields="fields"
                     :busy="busy"
                     v-show="listMode"
@@ -67,11 +67,9 @@ if (Vue) {
                 </div>
             </my-transition>
         </div>`,
-        props: ['reviewerId', 'inSearch', 'compact', 'itemsIn'],
+        props: ['reviewerId', 'inSearch', 'compact', 'store'],
         data: function () {
             return {
-                items: {},
-                items_by_id: {},
                 fields: [
                     '序號',
                     {key: "收件字號", sortable: true},
@@ -91,6 +89,16 @@ if (Vue) {
                 listMode: true,
                 statsMode: false,
                 chartType: "bar"
+            }
+        },
+        computed: {
+            overdue_list() {
+                let store = this.$store || this.store;
+                return store.state.overdue_list;
+            },
+            overdue_list_by_id() {
+                let store = this.$store || this.store;
+                return store.state.overdue_list_by_id;
             }
         },
         watch: {
@@ -117,8 +125,8 @@ if (Vue) {
             },
             setChartData: function() {
                 this.$refs.statsChart.items = [];
-                for (let id in this.items_by_id) {
-                    let item = [this.items_by_id[id][0]["初審人員"], this.items_by_id[id].length];
+                for (let id in this.overdue_list_by_id) {
+                    let item = [this.overdue_list_by_id[id][0]["初審人員"], this.overdue_list_by_id[id].length];
                     this.$refs.statsChart.items.push(item);
                 }
             },
@@ -149,14 +157,13 @@ if (Vue) {
             load: function() {
                 this.busy = true;
                 clearTimeout(this.timer_handle);
-                if (this.itemsIn) {
+                if (this.inSearch) {
                     // in-search, by clicked the first reviewer button
+                    let case_count = this.overdue_list_by_id[this.reviewerId].length || 0;
                     this.busy = false;
-                    this.items = this.itemsIn;
-                    this.caption = `${this.itemsIn.length} 件`;
-                    this.items_by_id = this.items_by_id;
+                    this.caption = `${case_count} 件`;
                     setTimeout(this.makeCaseIDClickable, 800);
-                    addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${this.itemsIn.length} 件案件` });
+                    addNotification({ title: "查詢登記逾期案件", message: `查詢到 ${case_count} 件案件` });
                 } else {
                     this.endCountdown();
                     this.resetCountdown();
@@ -173,8 +180,11 @@ if (Vue) {
                         console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "查詢登記逾期案件回傳狀態碼有問題【" + jsonObj.status + "】");
                         
                         this.busy = false;
-                        this.items = jsonObj.items;
-                        this.items_by_id = jsonObj.items_by_id;
+
+                        // set data to store
+                        this.$store.commit("overdue_list", jsonObj.items);
+                        this.$store.commit("overdue_list_by_id", jsonObj.items_by_id);
+
                         this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
 
                         setTimeout(this.makeCaseIDClickable, 800);
@@ -204,15 +214,14 @@ if (Vue) {
                 }
             },
             searchByReviewer: function(reviewer_data) {
-                // e.g. "賴奕文 HB1159"
-                let id = trim(reviewer_data);
+                // reviewer_data, e.g. 曾奕融 HB1184
                 showModal({
                     title: `查詢 ${reviewer_data} 逾期案件`,
                     message: this.$createElement('case-reg-overdue', {
                         props: {
-                            reviewerId: id,
+                            reviewerId: reviewer_data.split(" ")[1],
                             inSearch: true,
-                            itemsIn: this.items_by_id[id]
+                            store: this.$store
                         }
                     }),
                     size: "xl"

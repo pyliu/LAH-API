@@ -98,6 +98,9 @@ const ANIMATED_TRANSITIONS = [
     { in: "animated slideInRight", out: "animated slideOutLeft" }
 ];
 
+/**
+ * Vue Relative Component
+ */
 let VueTransition = {
     template: `<transition
         :enter-active-class="animated_in"
