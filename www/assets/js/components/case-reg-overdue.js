@@ -171,22 +171,20 @@ if (Vue) {
                     name: "flash"
                 }).off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
             },
-            load: function() {
+            toggleBusy: function() {
                 // busy ...
                 if (this.statsMode) toggleCoverSpinner();
-                this.busy = true;
-
+                this.busy = !this.busy;
+            },
+            load: function() {
+                this.toggleBusy();
                 clearTimeout(this.timer_handle);
                 this.title = this.is_overdue_mode ? "逾期" : "即將逾期";
                 if (this.inSearch) {
                     // in-search, by clicked the first reviewer button
                     let case_count = this.case_list_by_id[this.reviewerId].length || 0;
                     this.caption = `${case_count} 件`;
-                    
-                    // release busy ... 
-                    this.busy = false;
-                    if (this.statsMode) toggleCoverSpinner();
-                    
+                    this.toggleBusy();
                     setTimeout(this.makeCaseIDClickable, 800);
                     addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
                 } else {
@@ -228,12 +226,10 @@ if (Vue) {
                             });
                             this.endCountdown();
                         }
-                        
+
                         // prepare the chart data for rendering
                         this.setChartData();
-                        // release busy ... 
-                        this.busy = false;
-                        if (this.statsMode) toggleCoverSpinner();
+                        this.toggleBusy();
                     }).catch(ex => {
                         console.error("case-reg-overdue::created parsing failed", ex);
                         showAlert({message: "case-reg-overdue::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
