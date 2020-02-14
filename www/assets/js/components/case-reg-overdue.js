@@ -6,8 +6,8 @@ if (Vue) {
         },
         template: `<div>
             <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
-                <b-form-checkbox inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;">
-                    <span :class="['border', is_overdue_mode ? 'border-danger' : 'border-warning', 'btn', 'btn-sm', 'align-middle']">{{is_overdue_mode ? "逾期模式" : "即將逾期模式(4小時內)"}}</span>
+                <b-form-checkbox inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;" class="align-bottom">
+                    <span :class="['border', is_overdue_mode ? 'border-danger' : 'border-warning', 'btn', 'btn-sm']" v-b-popover="modeText">{{modeText}}</span>
                 </b-form-checkbox>
                 <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
                 <b-button id="reload" variant="primary" size="sm" @click="load">
@@ -92,6 +92,7 @@ if (Vue) {
                 listMode: true,
                 statsMode: false,
                 overdueMode: true,
+                modeText: "mode text",
                 chartType: "bar",
                 title: "逾期"
             }
@@ -260,6 +261,7 @@ if (Vue) {
             } else {
                 this.height = $(document).height() - 145 + "px";
             }
+            this.modeText = this.is_overdue_mode ? "逾期模式" : "即將逾期模式(4小時內)";
         }
     });
 } else {
