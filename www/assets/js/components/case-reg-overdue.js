@@ -6,8 +6,8 @@ if (Vue) {
         },
         template: `<div>
             <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
-                <b-form-checkbox inline v-model="overdueMode" size="sm" switch>
-                    <span :class="overdueMode ? 'bg-danger text-white p-1' : 'bg-warning text-black p-1'">{{overdueMode ? "逾期模式" : "即將逾期模式(4小時內)"}}</span>
+                <b-form-checkbox inline v-model="overdueMode" switch style="margin-right: 0rem;">
+                    <span :class="[overdueMode ? 'bg-danger text-white' : 'bg-warning text-black', 'btn', 'btn-sm']">{{overdueMode ? "逾期模式" : "即將逾期模式(4小時內)"}}</span>
                 </b-form-checkbox>
                 <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
                 <b-button id="reload" variant="primary" size="sm" @click="load">
@@ -198,7 +198,7 @@ if (Vue) {
                         this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
 
                         setTimeout(this.makeCaseIDClickable, 800);
-                        addNotification({ title: `查詢登記(${this.title})案件`, message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
+                        addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
                         
                         let now = new Date();
                         if (now.getHours() >= 7 && now.getHours() < 17) {
@@ -226,7 +226,7 @@ if (Vue) {
             searchByReviewer: function(reviewer_data) {
                 // reviewer_data, e.g. "曾奕融 HB1184"
                 showModal({
-                    title: `查詢 ${reviewer_data} 登記(${this.title})案件`,
+                    title: `查詢 ${reviewer_data} 登記案件(${this.title})`,
                     message: this.$createElement('case-reg-overdue', {
                         props: {
                             reviewerId: reviewer_data.split(" ")[1],
