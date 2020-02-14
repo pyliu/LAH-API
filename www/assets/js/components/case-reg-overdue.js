@@ -9,8 +9,13 @@ if (Vue) {
                 <b-form-checkbox v-b-tooltip.hover.top="modeTooltip" inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;" :class="['align-baseline', 'btn', 'btn-sm', is_overdue_mode ? '' : 'border-warning', 'p-1']">
                     <span>{{modeText}}</span>
                 </b-form-checkbox>
-                <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
+                <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">
+                    <i v-if="listMode" class="far fa-chart-bar"></i>
+                    <i v-else class="fas fa-table"></i>
+                    {{listMode ? "統計圖表" : "表格模式"}}
+                </b-button>
                 <b-button id="reload" variant="primary" size="sm" @click="load">
+                    <i class="fas fa-sync"></i>
                     刷新
                     <b-badge variant="light">
                         <countdown ref="countdown" :time="milliseconds" :auto-start="false">
