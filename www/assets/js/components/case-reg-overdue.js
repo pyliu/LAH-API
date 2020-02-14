@@ -172,6 +172,7 @@ if (Vue) {
                 }).off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
             },
             load: function() {
+                if (this.statsMode) toggleCoverSpinner();
                 this.busy = true;
                 clearTimeout(this.timer_handle);
                 this.title = this.is_overdue_mode ? "逾期" : "即將逾期";
@@ -182,6 +183,7 @@ if (Vue) {
                     this.caption = `${case_count} 件`;
                     setTimeout(this.makeCaseIDClickable, 800);
                     addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
+                    if (this.statsMode) toggleCoverSpinner();
                 } else {
                     this.endCountdown();
                     this.resetCountdown();
@@ -225,6 +227,7 @@ if (Vue) {
                         }
                         // prepare the chart data for rendering
                         this.setChartData();
+                        if (this.statsMode) toggleCoverSpinner();
                     }).catch(ex => {
                         console.error("case-reg-overdue::created parsing failed", ex);
                         showAlert({message: "case-reg-overdue::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});

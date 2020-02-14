@@ -458,7 +458,7 @@ let toggle = selector => {
     }
 }
 
-let toggleCoverSpinner = (selector, style = "ld-over") => {
+let toggleCoverSpinner = (selector = "body", style = "ld-over") => {
     // cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
     let container = $(selector);
     if (container.length > 0) {
@@ -473,7 +473,8 @@ let toggleCoverSpinner = (selector, style = "ld-over") => {
             // randomize loading.io css for fun
             let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
             cover_el.addClass(LOADING_PREDEFINED[rand(LOADING_PREDEFINED.length)])		// predefined pattern
-                    .addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)]);	// color
+                    .addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])	// color
+                    .addClass("fa-5x");
             container.append(cover_el);
         }
     }
