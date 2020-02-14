@@ -6,8 +6,8 @@ if (Vue) {
         },
         template: `<div>
             <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
-                <b-form-checkbox inline v-model="overdueMode" switch style="margin-right: 0rem;">
-                    <span :class="[overdueMode ? 'bg-danger text-white' : 'bg-warning text-black', 'btn', 'btn-sm']">{{overdueMode ? "逾期模式" : "即將逾期模式(4小時內)"}}</span>
+                <b-form-checkbox inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;">
+                    <span :class="[is_overdue_mode ? 'border border-danger' : 'border border-warning', 'btn', 'btn-sm']">{{is_overdue_mode ? "逾期模式" : "即將逾期模式(4小時內)"}}</span>
                 </b-form-checkbox>
                 <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
                 <b-button id="reload" variant="primary" size="sm" @click="load">
@@ -48,7 +48,7 @@ if (Vue) {
                         {{data.index + 1}}
                     </template>
                     <template v-slot:cell(初審人員)="data">
-                        <b-button v-if="!inSearch && !reviewerId" :variant="overdueMode ? 'outline-danger' : 'warning'" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的'+(overdueMode ? '逾期' : '即將逾期')+'案件'">{{data.value.split(" ")[0]}}</b-button>
+                        <b-button v-if="!inSearch && !reviewerId" :variant="is_overdue_mode ? 'outline-danger' : 'warning'" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的'+(is_overdue_mode ? '逾期' : '即將逾期')+'案件'">{{data.value.split(" ")[0]}}</b-button>
                         <span v-else>{{data.value.split(" ")[0]}}</span>
                     </template>
                 </b-table>
@@ -104,6 +104,10 @@ if (Vue) {
             case_list_by_id() {
                 let store = this.store || this.$store;
                 return store.getters.list_by_id;
+            },
+            is_overdue_mode() {
+                let store = this.store || this.$store;
+                return store.getters.is_overdue_mode;
             }
         },
         watch: {
@@ -111,8 +115,11 @@ if (Vue) {
                 this.$refs.statsChart.type = val;
             },
             overdueMode: function(isChecked) {
-                this.title = isChecked ? "逾期" : "即將逾期";
                 this.load();
+                this.title = isChecked ? "逾期" : "即將逾期";
+                // also update store's flag
+                let store = this.store || this.$store;
+                store.commit("is_overdue_mode", isChecked);
             }
         },
         methods: {
@@ -138,7 +145,7 @@ if (Vue) {
                     let item = [this.case_list_by_id[id][0]["初審人員"], this.case_list_by_id[id].length];
                     this.$refs.statsChart.items.push(item);
                 }
-                this.$refs.statsChart.label = `${this.overdueMode ? "" : "即將"}逾期案件統計表`;
+                this.$refs.statsChart.label = `${this.is_overdue_mode ? "" : "即將"}逾期案件統計表`;
             },
             empty: function (variable) {
                 if (variable === undefined || $.trim(variable) == "") {
@@ -167,6 +174,7 @@ if (Vue) {
             load: function() {
                 this.busy = true;
                 clearTimeout(this.timer_handle);
+                this.title = this.is_overdue_mode ? "逾期" : "即將逾期";
                 if (this.inSearch) {
                     // in-search, by clicked the first reviewer button
                     let case_count = this.case_list_by_id[this.reviewerId].length || 0;
@@ -179,7 +187,7 @@ if (Vue) {
                     this.resetCountdown();
                     this.startCountdown();
                     let form_body = new FormData();
-                    form_body.append("type", this.overdueMode ? "overdue_reg_cases" : "almost_overdue_reg_cases");
+                    form_body.append("type", this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases");
                     if (!isEmpty(this.reviewerId)) {
                         form_body.append("reviewer_id", this.reviewerId);
                     }

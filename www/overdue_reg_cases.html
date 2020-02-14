@@ -71,11 +71,13 @@
       const store = new Vuex.Store({
         state: {
           list : {},
-          list_by_id: {}
+          list_by_id: {},
+          is_overdue_mode: true
         },
         getters: {
           list: state => state.list,
-          list_by_id: state => state.list_by_id
+          list_by_id: state => state.list_by_id,
+          is_overdue_mode: state => state.is_overdue_mode
         },
         mutations: {
           list(state, jsonPayload) {
@@ -83,6 +85,9 @@
           },
           list_by_id(state, jsonPayload) {
             state.list_by_id = jsonPayload || {};
+          },
+          is_overdue_mode(state, flagPayload) {
+            state.is_overdue_mode = flagPayload;
           }
         }
       });
