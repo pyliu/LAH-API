@@ -19,9 +19,7 @@ if (Vue) {
         },
         watch: {
             type: function (val) {
-                let opts = {};
-                // TODO: add more option for various type
-                this.buildChart(opts);
+                this.buildChart();
             },
             chartData: function(newObj) {
                 this.buildChart();
@@ -78,12 +76,45 @@ if (Vue) {
                     this.inst.destroy();
                     this.inst = null;
                 }
+                // keep only one dataset inside
+                if (this.chartData.datasets.length > 1) {
+                    this.chartData.datasets = this.chartData.datasets.slice(0, 1);
+                }
+                this.chartData.datasets[0].label = this.label;
+                switch(this.type) {
+                    case "pie":
+                    case "polarArea":
+                    case "doughnut":
+                        // put legend to the right for some chart type
+                        opts.legend = {
+                            display: true,
+                            position: 'right'
+                        };
+                        break;
+                    default:
+                }
                 // use chart.js directly
                 let ctx = $(`#${this.id}`);
                 this.inst = new Chart(ctx, {
                     type: this.type,
                     data: this.chartData,
-                    options: opts
+                    options: Object.assign({
+                        tooltips: {
+                            callbacks: {
+                                label: function (tooltipItem, data) {
+                                    // add percent ratio to the label
+                                    let dataset = data.datasets[tooltipItem.datasetIndex];
+                                    let sum = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
+                                        return previousValue + currentValue;
+                                    });
+                                    let currentValue = dataset.data[tooltipItem.index];
+                                    let percent = Math.round(((currentValue / sum) * 100));
+                                    return ` ${data.labels[tooltipItem.index]} : ${currentValue} [${percent}%]`;
+                                }
+                            }
+                        },
+                        title: { display: false, text: "自訂標題", position: "bottom" }
+                    }, opts)
                 });
             },
             rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))

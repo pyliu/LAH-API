@@ -7,7 +7,7 @@ if (Vue) {
         template: `<div>
             <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
                 <b-form-checkbox inline v-model="overdueMode" size="sm" switch>
-                    <span :class="overdueMode ? 'bg-danger text-white p-1' : 'bg-warning text-black p-1'">{{overdueMode ? "逾期模式" : "快逾期模式(4小時內)"}}</span>
+                    <span :class="overdueMode ? 'bg-danger text-white p-1' : 'bg-warning text-black p-1'">{{overdueMode ? "逾期模式" : "即將逾期模式(4小時內)"}}</span>
                 </b-form-checkbox>
                 <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">{{listMode ? "統計圖表" : "回列表模式"}}</b-button>
                 <b-button id="reload" variant="primary" size="sm" @click="load">
@@ -48,14 +48,14 @@ if (Vue) {
                         {{data.index + 1}}
                     </template>
                     <template v-slot:cell(初審人員)="data">
-                        <b-button v-if="!inSearch && !reviewerId" :variant="overdueMode ? 'outline-danger' : 'warning'" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的逾期案件'">{{data.value.split(" ")[0]}}</b-button>
+                        <b-button v-if="!inSearch && !reviewerId" :variant="overdueMode ? 'outline-danger' : 'warning'" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的'+(overdueMode ? '逾期' : '即將逾期')+'案件'">{{data.value.split(" ")[0]}}</b-button>
                         <span v-else>{{data.value.split(" ")[0]}}</span>
                     </template>
                 </b-table>
             </my-transition>
             
             <my-transition @after-leave="afterStatsLeave">
-                <div class="mt-3" v-show="statsMode">
+                <div class="mt-5" v-show="statsMode">
                     <div class="mx-auto w-75">
                         <chart-component ref="statsChart"></chart-component>
                     </div>
@@ -111,7 +111,7 @@ if (Vue) {
                 this.$refs.statsChart.type = val;
             },
             overdueMode: function(isChecked) {
-                this.title = isChecked ? "逾期" : "快逾期";
+                this.title = isChecked ? "逾期" : "即將逾期";
                 this.load();
             }
         },
@@ -138,7 +138,7 @@ if (Vue) {
                     let item = [this.case_list_by_id[id][0]["初審人員"], this.case_list_by_id[id].length];
                     this.$refs.statsChart.items.push(item);
                 }
-                this.$refs.statsChart.label = `${this.overdueMode ? "" : "接近"}逾期案件統計表`;
+                this.$refs.statsChart.label = `${this.overdueMode ? "" : "即將"}逾期案件統計表`;
             },
             empty: function (variable) {
                 if (variable === undefined || $.trim(variable) == "") {
