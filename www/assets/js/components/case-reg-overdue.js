@@ -172,18 +172,23 @@ if (Vue) {
                 }).off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
             },
             load: function() {
+                // busy ...
                 if (this.statsMode) toggleCoverSpinner();
                 this.busy = true;
+
                 clearTimeout(this.timer_handle);
                 this.title = this.is_overdue_mode ? "逾期" : "即將逾期";
                 if (this.inSearch) {
                     // in-search, by clicked the first reviewer button
                     let case_count = this.case_list_by_id[this.reviewerId].length || 0;
-                    this.busy = false;
                     this.caption = `${case_count} 件`;
+                    
+                    // release busy ... 
+                    this.busy = false;
+                    if (this.statsMode) toggleCoverSpinner();
+                    
                     setTimeout(this.makeCaseIDClickable, 800);
                     addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
-                    if (this.statsMode) toggleCoverSpinner();
                 } else {
                     this.endCountdown();
                     this.resetCountdown();
@@ -198,8 +203,6 @@ if (Vue) {
                         body: form_body
                     }).then(jsonObj => {
                         console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL || jsonObj.status == XHR_STATUS_CODE.SUCCESS_WITH_NO_RECORD, `查詢登記案件(${this.title})回傳狀態碼有問題【${jsonObj.status}】`);
-                        
-                        this.busy = false;
 
                         // set data to store
                         this.$store.commit("list", jsonObj.items);
@@ -225,8 +228,11 @@ if (Vue) {
                             });
                             this.endCountdown();
                         }
+                        
                         // prepare the chart data for rendering
                         this.setChartData();
+                        // release busy ... 
+                        this.busy = false;
                         if (this.statsMode) toggleCoverSpinner();
                     }).catch(ex => {
                         console.error("case-reg-overdue::created parsing failed", ex);
