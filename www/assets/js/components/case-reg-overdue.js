@@ -27,6 +27,7 @@ if (Vue) {
             </div>
             <my-transition @after-leave="afterTableLeave">
                 <b-table
+                    ref="case_list_tbl"
                     striped
                     hover
                     responsive
@@ -37,7 +38,7 @@ if (Vue) {
                     :small="small"
                     :caption="caption"
                     :sticky-header="height"
-                    :items="inSearch ? case_list_by_id[reviewerId] : case_list"
+                    :items="inSearch ? case_store.getters.list_by_id[reviewerId] : case_store.getters.list"
                     :fields="fields"
                     :busy="busy"
                     v-show="listMode"
@@ -104,17 +105,23 @@ if (Vue) {
             }
         },
         computed: {
+            total_case() {
+                return this.case_store.getters.list_count;
+            },
+            total_people() {
+                return this.case_store.getters.list_by_id_count;
+            },
             case_list() {
-                let store = this.store || this.$store;
-                return store.getters.list;
+                return this.case_store.getters.list;
             },
             case_list_by_id() {
-                let store = this.store || this.$store;
-                return store.getters.list_by_id;
+                return this.case_store.getters.list_by_id;
             },
             is_overdue_mode() {
-                let store = this.store || this.$store;
-                return store.getters.is_overdue_mode;
+                return this.case_store.getters.is_overdue_mode;
+            },
+            case_store() {
+                return this.store || this.$store;
             }
         },
         watch: {
@@ -122,13 +129,13 @@ if (Vue) {
                 this.$refs.statsChart.type = val;
             },
             overdueMode: function(isChecked) {
-                this.load();
+                // also update store's flag
+                this.case_store.commit("is_overdue_mode", isChecked);
                 this.title = isChecked ? "逾期" : "即將逾期";
                 this.modeText = isChecked ? "逾期模式" : "即將逾期"
                 this.modeTooltip = isChecked ? "逾期案件查詢模式" : "即將逾期模式(4小時內)";
-                // also update store's flag
-                let store = this.store || this.$store;
-                store.commit("is_overdue_mode", isChecked);
+                // calling api must be the last one to do
+                this.load();
             }
         },
         methods: {
@@ -150,11 +157,13 @@ if (Vue) {
             },
             setChartData: function() {
                 this.$refs.statsChart.items = [];
+                let total = 0;
                 for (let id in this.case_list_by_id) {
                     let item = [this.case_list_by_id[id][0]["初審人員"], this.case_list_by_id[id].length];
                     this.$refs.statsChart.items.push(item);
+                    total += this.case_list_by_id[id].length;
                 }
-                this.$refs.statsChart.label = `${this.is_overdue_mode ? "" : "即將"}逾期案件統計表`;
+                this.$refs.statsChart.label = `${this.is_overdue_mode ? "" : "即將"}逾期案件統計表 (${this.total_people}人，共${this.total_case}件)`;
             },
             empty: function (variable) {
                 if (variable === undefined || $.trim(variable) == "") {
@@ -200,6 +209,7 @@ if (Vue) {
                     this.endCountdown();
                     this.resetCountdown();
                     this.startCountdown();
+
                     let form_body = new FormData();
                     form_body.append("type", this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases");
                     if (!isEmpty(this.reviewerId)) {
@@ -212,8 +222,9 @@ if (Vue) {
                         console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL || jsonObj.status == XHR_STATUS_CODE.SUCCESS_WITH_NO_RECORD, `查詢登記案件(${this.title})回傳狀態碼有問題【${jsonObj.status}】`);
 
                         // set data to store
-                        this.$store.commit("list", jsonObj.items);
-                        this.$store.commit("list_by_id", jsonObj.items_by_id);
+                        // NOTE: the payload must be valid or it will not update UI correctly
+                        this.case_store.commit("list", jsonObj.items);
+                        this.case_store.commit("list_by_id", jsonObj.items_by_id);
 
                         this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
 
@@ -268,7 +279,6 @@ if (Vue) {
             }
         },
         mounted() {
-            this.load();
             if (this.inSearch === true) {
                 // in modal dialog
                 this.height = $(document).height() - 185 + "px";
@@ -276,6 +286,7 @@ if (Vue) {
             } else {
                 this.height = $(document).height() - 145 + "px";
             }
+            this.load();
         }
     });
 } else {

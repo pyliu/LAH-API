@@ -5,33 +5,14 @@ require_once('include/Message.class.php');
 
 class WatchDog {
     
-    private $officeSchedule = [
-        'Sun' => [],
-        'Mon' => ['08:00 AM' => '05:00 PM'],
-        'Tue' => ['08:00 AM' => '05:00 PM'],
-        'Wed' => ['08:00 AM' => '05:00 PM'],
-        'Thu' => ['08:00 AM' => '05:00 PM'],
-        'Fri' => ['08:00 AM' => '05:00 PM'],
-        'Sat' => []
-    ];
-
-    private $overdueSchedule = [
-        'Sun' => [],
-        'Mon' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
-        'Tue' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
-        'Wed' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
-        'Thu' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
-        'Fri' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
-        'Sat' => []
-    ];
-
     private $stats = null;
     private $stats_path;
+    private $schedule = null;
 
     private function isOfficeHours() {
         global $log;
         $log->info("檢查是否處於上班時間 ... ");
-        $result = $this->isOn($this->officeSchedule);
+        $result = $this->isOn($this->schedule["office"]);
         $log->info('現在是'.($result ? "上班" : "下班")."時段。");
         return $result;
     }
@@ -39,7 +20,7 @@ class WatchDog {
     private function isOverdueCheckNeeded() {
         global $log;
         $log->info("檢查是否需要執行逾期案件檢查 ... ");
-        $result = $this->isOn($this->overdueSchedule);
+        $result = $this->isOn($this->schedule["overdue"]);
         $log->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
@@ -156,6 +137,7 @@ class WatchDog {
 
     function __construct() {
         $this->stats_path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."stats".DIRECTORY_SEPARATOR."watchdog.stats";
+        $this->schedule = include('include/Config.Watchdog.Schedule.php');
     }
 
     function __destruct() { }

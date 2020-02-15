@@ -26,7 +26,14 @@ switch ($_POST["type"]) {
 		$rows = $query->queryOverdueCasesIn15Days($_POST["reviewer_id"]);
 		if (empty($rows)) {
 			$log->info("XHR [overdue_reg_cases] 近15天查無逾期資料");
-			echoErrorJSONString("15天內查無逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_WITH_NO_RECORD,
+				"items" => array(),
+				"items_by_id" => array(),
+				"data_count" => 0,
+				"message" => "15天內查無逾期資料"
+			);
+			echo json_encode($result, 0);
 		} else {
 			$items = [];
 			$items_by_id = [];
@@ -56,12 +63,19 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "almost_overdue_reg_cases":
-		$log->info("XHR [almost_overdue_reg_cases] 快逾期案件查詢請求");
+		$log->info("XHR [almost_overdue_reg_cases] 即將逾期案件查詢請求");
 		$log->info("XHR [almost_overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");
 		$rows = $query->queryAlmostOverdueCases($_POST["reviewer_id"]);
 		if (empty($rows)) {
-			$log->info("XHR [almost_overdue_reg_cases] 近4小時內查無快逾期資料");
-			echoErrorJSONString("近4小時內查無快逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+			$log->info("XHR [almost_overdue_reg_cases] 近4小時內查無即將逾期資料");
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_WITH_NO_RECORD,
+				"items" => array(),
+				"items_by_id" => array(),
+				"data_count" => 0,
+				"message" => "近4小時內查無即將逾期資料"
+			);
+			echo json_encode($result, 0);
 		} else {
 			$items = [];
 			$items_by_id = [];
@@ -86,7 +100,7 @@ switch ($_POST["type"]) {
 				"data_count" => count($items),
 				"raw" => $rows
 			);
-			$log->info("XHR [almost_overdue_reg_cases] 近4小時內找到".count($items)."件快逾期案件");
+			$log->info("XHR [almost_overdue_reg_cases] 近4小時內找到".count($items)."件即將逾期案件");
 			echo json_encode($result, 0);
 		}
 		break;
