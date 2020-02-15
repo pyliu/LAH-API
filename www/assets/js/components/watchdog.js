@@ -6,13 +6,13 @@ if (Vue) {
             <my-transition>
                 <b-form-row class="mb-1" v-show="showScheduleTask">
                     <b-col>
-                        <schedule-task @fail-not-valid-server="handleFailed" @succeed-valid-server="handleSucceeded"></schedule-task>
+                        <schedule-task ref="task" @fail-not-valid-server="handleFailed" @succeed-valid-server="handleSucceeded"></schedule-task>
                     </b-col>
                 </b-form-row>
             </my-transition>
             <b-form-row>
                 <b-col>
-                    <log-viewer></log-viewer>
+                    <log-viewer ref="log"></log-viewer>
                 </b-col>
             </b-form-row>
 
@@ -43,9 +43,10 @@ if (Vue) {
                         <a :href="'logs/' + log_filename" target="_blank">下載</a>
                         <small class="text-muted text-center">
                             <b-button variant="primary" size="sm" @click="callLogAPI">
+                                <i class="fas fa-sync"></i>
                                 刷新
                                 <b-badge variant="light">
-                                    <countdown ref="countdown" :time="milliseconds" :auto-start="false">
+                                    <countdown ref="countdown" :time="milliseconds" :auto-start="false" @end="callLogAPI">
                                         <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }}</template>
                                     </countdown>
                                     <span class="sr-only">倒數</span>
@@ -62,7 +63,6 @@ if (Vue) {
                 data: function () {
                     return {
                         list: [],
-                        log_timer: null,
                         milliseconds: 5 * 60 * 1000,
                         count: 50,
                         log_update_time: "10:48:00",
@@ -75,15 +75,16 @@ if (Vue) {
                     resetCountdown: function () {
                         this.$refs.countdown.totalMilliseconds = this.milliseconds;
                     },
+                    abortCountdown: function () {
+                        this.$refs.countdown.abort();
+                    },
                     startCountdown: function () {
                         this.$refs.countdown.start();
                     },
                     endCountdown: function () {
-                        this.$refs.countdown.totalMilliseconds = 0;
+                        this.$refs.countdown.end();
                     },
-                    callLogAPI: function () {
-                        this.endCountdown();
-                        clearTimeout(this.log_timer);
+                    callLogAPI: function (e) {
                         let dt = new Date();
                         this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
                         this.log_filename = `log-${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
@@ -103,7 +104,6 @@ if (Vue) {
                                 jsonObj.data.forEach(function(item, index, array){
                                     that.addLogList(item);
                                 });
-                                this.log_timer = setTimeout(this.callLogAPI, this.milliseconds);
                                 this.resetCountdown();
                                 this.startCountdown();
                             } else {
@@ -112,7 +112,7 @@ if (Vue) {
                                 console.warn(jsonObj.message);
                             }
                         }).catch(ex => {
-                            this.endCountdown();
+                            this.abortCountdown();
                             this.addLogList(`${this.log_update_time} 錯誤: ${ex.message}`);
                             showAlert({
                                 title: 'watchdog::callLogAPI parsing failed',
@@ -152,7 +152,7 @@ if (Vue) {
                             <b-button variant="primary" size="sm" @click="callWatchdogAPI">
                                 執行
                                 <b-badge variant="light">
-                                    <countdown ref="countdown" :time="milliseconds" :auto-start="false">
+                                    <countdown ref="countdown" :time="milliseconds" :auto-start="false" @end="handleCountdownEnd">
                                         <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }} </template>
                                     </countdown>
                                     <span class="sr-only">倒數</span></b-badge>
@@ -178,11 +178,20 @@ if (Vue) {
                     resetCountdown: function () {
                         this.$refs.countdown.totalMilliseconds = this.milliseconds;
                     },
+                    abortCountdown: function () {
+                        this.$refs.countdown.abort();
+                    },
                     startCountdown: function () {
                         this.$refs.countdown.start();
                     },
                     endCountdown: function () {
-                        this.$refs.countdown.totalMilliseconds = 0;
+                        this.$refs.countdown.end();
+                    },
+                    handleCountdownEnd: function(e) {
+                        // call api endpoint
+                        this.callWatchdogAPI();
+                        // update the message animation
+                        this.changeWIPMessageAnim();
                     },
                     addHistory: function (message) {
                         if (this.history.length == this.count) {
@@ -193,9 +202,6 @@ if (Vue) {
                         this.history.unshift(message);
                     },
                     callWatchdogAPI: function() {
-                        this.endCountdown();
-                        clearTimeout(this.watchdog_timer);
-        
                         // generate current date time string
                         let dt = new Date();
                         let now = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
@@ -224,11 +230,10 @@ if (Vue) {
                                 }
                                 this.resetCountdown();
                                 this.startCountdown();
-                                this.queueTask();
                                 this.$emit("succeed-valid-server");
                             }
                         }).catch(ex => {
-                            this.endCountdown();
+                            this.abortCountdown();
                             this.addHistory(`${now} 結果: ${ex.message}`);
                             showAlert({
                                 title: 'schedule-task::callWatchdogAPI parsing failed',
@@ -242,24 +247,11 @@ if (Vue) {
                         let len = this.anim_pattern.length;
                         addLDAnimation("#schedule-wip-message", this.anim_pattern[this.rand(len)]);
                     },
-                    rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
-                    queueTask: function() {
-                        clearTimeout(this.timer);
-                        let that = this;
-                        this.timer = setTimeout(() => {
-                            // Backend will check if it needs to do or not
-                            that.callWatchdogAPI();
-                            // update the message animation
-                            that.changeWIPMessageAnim();
-                        }, this.milliseconds);
-                    }
+                    rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))
                 },
                 mounted() {
                     this.callWatchdogAPI();
                     this.changeWIPMessageAnim();
-                },
-                beforeDestroy() {
-                    clearTimeout(this.timer);
                 }
             }
         }
