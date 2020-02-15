@@ -91,7 +91,7 @@ if (Vue) {
                 ],
                 height: true,
                 caption: "查詢中 ... ",
-                busy: true,
+                busy: false,
                 small: false,
                 timer_handle: null,
                 milliseconds: 15 * 60 * 1000,
@@ -136,6 +136,15 @@ if (Vue) {
                 this.modeTooltip = isChecked ? "逾期案件查詢模式" : "即將逾期模式(4小時內)";
                 // calling api must be the last one to do
                 this.load();
+            },
+            busy: function(flag) {
+                if (flag) {
+                    addLDAnimation("#reload .fas.fa-sync", "ld-cycle");
+                    if (this.statsMode) window.utilApp.busyState({size: "lg"});
+                } else {
+                    clearLDAnimation("#reload .fas.fa-sync");
+                    if (this.statsMode) window.utilApp.busyState({forceOff: true});
+                }
             }
         },
         methods: {
@@ -189,9 +198,8 @@ if (Vue) {
                     name: "flash"
                 }).off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
             },
-            load: function() {
+            load: function(e) {
                 // busy ...
-                if (this.statsMode) window.utilApp.busyState({size: "lg"});
                 this.busy = true;
 
                 clearTimeout(this.timer_handle);
@@ -203,7 +211,6 @@ if (Vue) {
                     setTimeout(this.makeCaseIDClickable, 800);
                     addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
                     // release busy ...
-                    if (this.statsMode) window.utilApp.busyState({forceOff: true});
                     this.busy = false;
                 } else {
                     this.endCountdown();
@@ -255,7 +262,6 @@ if (Vue) {
                         this.setChartData();
 
                         // release busy ...
-                        if (this.statsMode) window.utilApp.busyState({forceOff: true});
                         this.busy = false;
                     }).catch(ex => {
                         console.error("case-reg-overdue::created parsing failed", ex);
