@@ -109,7 +109,7 @@ class WatchDog {
         $host_ip = getLocalhostIP();
         $users = GetDBUserMapping();
         $msg = new Message();
-        $content = "目前有 ".count($case_records)." 件逾期案件(近15天，僅顯示前4筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請用CHROME瀏覽器前往 http://${host_ip}/overdue_reg_cases.html?reviewerID=".($to_id == "ALL" ? "" : $to_id)."\r\n查看詳細列表。";
+        $content = "目前有 ".count($case_records)." 件逾期案件(近15天，僅顯示前4筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請用 CHROME/EDGE 瀏覽器前往 http://${host_ip}/overdue_reg_cases.html?reviewerID=".($to_id == "ALL" ? "" : $to_id)."\r\n查看詳細列表。";
         if ($to_id == "ALL") {
             $title = "15天內逾期案件(全部)通知";
             $sn = $msg->sysSend($title, $content, $chief_id, 14399);  // 14399 secs => +3 hours 59 mins 59 secs
