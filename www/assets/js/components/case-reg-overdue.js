@@ -18,7 +18,7 @@ if (Vue) {
                     <i class="fas fa-sync"></i>
                     刷新
                     <b-badge variant="light">
-                        <countdown ref="countdown" :time="milliseconds" :auto-start="false">
+                        <countdown ref="countdown" :time="milliseconds" @end="handleCountdownEnd" @start="handleCountdownStart" :auto-start="false">
                             <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }}</template>
                         </countdown>
                         <span class="sr-only">倒數</span>
@@ -121,6 +121,7 @@ if (Vue) {
                 return this.case_store.getters.is_overdue_mode;
             },
             case_store() {
+                // in-search mode component will use this.store, root one will use this.$store
                 return this.store || this.$store;
             }
         },
@@ -148,6 +149,16 @@ if (Vue) {
             }
         },
         methods: {
+            empty: function (variable) {
+                if (variable === undefined || $.trim(variable) == "") {
+                    return true;
+                }
+                
+                if (typeof variable == "object" && variable.length == 0) {
+                    return true;
+                }
+                return false;
+            },
             switchMode: function() {
                 if (this.listMode) {
                     // use afterTableLeave to control this.statsMode
@@ -174,16 +185,6 @@ if (Vue) {
                 }
                 this.$refs.statsChart.label = `${this.is_overdue_mode ? "" : "即將"}逾期案件統計表 (${this.total_people}人，共${this.total_case}件)`;
             },
-            empty: function (variable) {
-                if (variable === undefined || $.trim(variable) == "") {
-                    return true;
-                }
-                
-                if (typeof variable == "object" && variable.length == 0) {
-                    return true;
-                }
-                return false;
-            },
             resetCountdown: function () {
                 this.$refs.countdown.totalMilliseconds = this.milliseconds;
             },
@@ -191,13 +192,29 @@ if (Vue) {
                 this.$refs.countdown.start();
             },
             endCountdown: function () {
-                this.$refs.countdown.totalMilliseconds = 0;
+                this.$refs.countdown.end();
             },
             makeCaseIDClickable: function () {
                 addAnimatedCSS("table tr td:nth-child(2)", {
                     name: "flash"
                 }).off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
             },
+            searchByReviewer: function(reviewer_data) {
+                // reviewer_data, e.g. "曾奕融 HB1184"
+                showModal({
+                    title: `查詢 ${reviewer_data} 登記案件(${this.title})`,
+                    message: this.$createElement('case-reg-overdue', {
+                        props: {
+                            reviewerId: reviewer_data.split(" ")[1],
+                            inSearch: true,
+                            store: this.$store
+                        }
+                    }),
+                    size: "xl"
+                });
+            },
+            handleCountdownStart: function (e) {},
+            handleCountdownEnd: function(e) { this.load(e); },
             load: function(e) {
                 // busy ...
                 this.busy = true;
@@ -213,10 +230,6 @@ if (Vue) {
                     // release busy ...
                     this.busy = false;
                 } else {
-                    this.endCountdown();
-                    this.resetCountdown();
-                    this.startCountdown();
-
                     let form_body = new FormData();
                     form_body.append("type", this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases");
                     if (!isEmpty(this.reviewerId)) {
@@ -244,8 +257,9 @@ if (Vue) {
                         
                         let now = new Date();
                         if (now.getHours() >= 7 && now.getHours() < 17) {
-                            // auto next reload
-                            this.timer_handle = setTimeout(this.load, this.milliseconds);
+                            // auto start countdown to prepare next reload
+                            this.resetCountdown();
+                            this.startCountdown();
                             // add effect to catch attention
                             addAnimatedCSS("#reload, caption", {name: "flash"});
                         } else {
@@ -255,7 +269,6 @@ if (Vue) {
                                 message: "非上班時間，停止自動更新。",
                                 type: "warning"
                             });
-                            this.endCountdown();
                         }
 
                         // prepare the chart data for rendering
@@ -268,20 +281,6 @@ if (Vue) {
                         showAlert({message: "case-reg-overdue::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
                     });
                 }
-            },
-            searchByReviewer: function(reviewer_data) {
-                // reviewer_data, e.g. "曾奕融 HB1184"
-                showModal({
-                    title: `查詢 ${reviewer_data} 登記案件(${this.title})`,
-                    message: this.$createElement('case-reg-overdue', {
-                        props: {
-                            reviewerId: reviewer_data.split(" ")[1],
-                            inSearch: true,
-                            store: this.$store
-                        }
-                    }),
-                    size: "xl"
-                });
             }
         },
         mounted() {
