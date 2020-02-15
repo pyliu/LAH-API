@@ -112,7 +112,11 @@ class WatchDog {
             //$log->info("${title}訊息(${sn})已送出給 HB0537 (測試)。 (".$users["HB0537"].")");
 
             $sn = $msg->sysSend($title, $content, $to_id, 14399);
-            $log->info("${title}訊息(${sn})已送出給 ${to_id} 。 (".$this_user.")");
+            if ($sn == -1) {
+                $log->warning("${title}訊息無法送出給 ${to_id} 。 (".$this_user.", $sn)");
+            } else {
+                $log->info("${title}訊息(${sn})已送出給 ${to_id} 。 (".$this_user.")");
+            }
         }
     }
 
