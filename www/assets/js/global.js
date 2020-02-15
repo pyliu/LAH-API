@@ -454,29 +454,7 @@ let toggle = selector => {
             toggleInsideSpinner(el);
         }
     } else {
-        toggleCoverSpinner(container);
-    }
-}
-
-let toggleCoverSpinner = (selector = "body", style = "ld-over") => {
-    // cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
-    let container = $(selector);
-    if (container.length > 0) {
-        if (container.hasClass(style)) {
-            container.removeClass(style);
-            container.find(".auto-add-spinner").remove();
-            container.removeClass("running");
-        } else {
-            container.addClass(style);
-            container.addClass("running");
-
-            // randomize loading.io css for fun
-            let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
-            cover_el.addClass(LOADING_PREDEFINED[rand(LOADING_PREDEFINED.length)])		// predefined pattern
-                    .addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])	// color
-                    .addClass("fa-5x");
-            container.append(cover_el);
-        }
+        window.utilApp.busyState({selector: container});
     }
 }
 
@@ -971,6 +949,59 @@ let initUtilApp = () => {
                         title: "登記案件詳情",
                         size: enabled_userinfo ? "xl" : "lg"
                     });
+                }
+            },
+            busyState: (opts = {}) => {
+                opts = Object.assign({
+                    selector: "body",
+                    style: "ld-over",   // ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
+                    forceOff: false,
+                    forceOn: false
+                }, opts);
+                let container = $(opts.selector);
+                if (container.length > 0) {
+                    let removeSpinner = function() {
+                        container.removeClass(opts.style);
+                        container.find(".auto-add-spinner").remove();
+                        container.removeClass("running");
+                    }
+                    let addSpinner = function() {
+                        container.addClass(opts.style);
+                        container.addClass("running");
+            
+                        // randomize loading.io css for fun
+                        let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
+                        cover_el.addClass(LOADING_PREDEFINED[rand(LOADING_PREDEFINED.length)])		// predefined pattern
+                                .addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)]);	// color
+                        switch(opts.size) {
+                            case "md":
+                                cover_el.addClass("fa-3x");
+                                break;
+                            case "lg":
+                                cover_el.addClass("fa-5x");
+                                break;
+                            case "xl":
+                                cover_el.addClass("fa-10x");
+                                break;
+                            default:
+                                break;
+                        }
+                        container.append(cover_el);
+                    }
+                    if (opts.forceOff) {
+                        removeSpinner();
+                        return;
+                    }
+                    if (opts.forceOn) {
+                        removeSpinner();
+                        addSpinner();
+                        return;
+                    }
+                    if (container.hasClass(opts.style)) {
+                        removeSpinner();
+                    } else {
+                        addSpinner();
+                    }
                 }
             }
         }

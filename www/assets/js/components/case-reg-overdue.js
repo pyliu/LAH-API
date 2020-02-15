@@ -182,7 +182,7 @@ if (Vue) {
             },
             load: function() {
                 // busy ...
-                if (this.statsMode) toggleCoverSpinner();
+                if (this.statsMode) window.utilApp.busyState({size: "lg"});
                 this.busy = true;
 
                 clearTimeout(this.timer_handle);
@@ -194,7 +194,7 @@ if (Vue) {
                     setTimeout(this.makeCaseIDClickable, 800);
                     addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
                     // release busy ...
-                    if (this.statsMode) toggleCoverSpinner();
+                    if (this.statsMode) window.utilApp.busyState({forceOff: true});
                     this.busy = false;
                 } else {
                     this.endCountdown();
@@ -218,7 +218,11 @@ if (Vue) {
                         this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
 
                         setTimeout(this.makeCaseIDClickable, 800);
-                        addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${jsonObj.data_count} 件案件`, type: "success" });
+                        addNotification({
+                            title: `查詢登記案件(${this.title})`,
+                            message: `查詢到 ${jsonObj.data_count} 件案件`,
+                            type: this.is_overdue_mode ? "danger" : "warning"
+                        });
                         
                         let now = new Date();
                         if (now.getHours() >= 7 && now.getHours() < 17) {
@@ -240,7 +244,7 @@ if (Vue) {
                         this.setChartData();
 
                         // release busy ...
-                        if (this.statsMode) toggleCoverSpinner();
+                        if (this.statsMode) window.utilApp.busyState({forceOff: true});
                         this.busy = false;
                     }).catch(ex => {
                         console.error("case-reg-overdue::created parsing failed", ex);
