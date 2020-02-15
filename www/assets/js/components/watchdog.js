@@ -68,7 +68,17 @@ if (Vue) {
                         log_update_time: "10:48:00",
                         query_data_count: 0,
                         query_total_count: 0,
-                        log_filename: ""
+                        log_filename: "",
+                        busy: false
+                    }
+                },
+                watch: {
+                    busy: function(flag) {
+                        if (flag) {
+                            addLDAnimation(".fas.fa-sync", "ld-cycle");
+                        } else {
+                            clearLDAnimation(".fas.fa-sync");
+                        }
                     }
                 },
                 methods: {
@@ -85,6 +95,7 @@ if (Vue) {
                         this.$refs.countdown.end();
                     },
                     callLogAPI: function (e) {
+                        this.busy = true;
                         let dt = new Date();
                         this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
                         this.log_filename = `log-${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
@@ -111,6 +122,7 @@ if (Vue) {
                                 this.addLogList(`${this.log_update_time} 錯誤: ${jsonObj.message}`);
                                 console.warn(jsonObj.message);
                             }
+                            this.busy = false;
                         }).catch(ex => {
                             this.abortCountdown();
                             this.addLogList(`${this.log_update_time} 錯誤: ${ex.message}`);
@@ -150,6 +162,7 @@ if (Vue) {
                         <strong id="schedule-wip-message" class="text-danger">排程執行中，請勿關閉本頁面。</strong>
                         <small class="text-muted text-center">
                             <b-button variant="primary" size="sm" @click="callWatchdogAPI">
+                                <i class="fas fa-calendar-check"></i>
                                 執行
                                 <b-badge variant="light">
                                     <countdown ref="countdown" :time="milliseconds" :auto-start="false" @end="handleCountdownEnd">
@@ -171,7 +184,17 @@ if (Vue) {
                         count: 4,
                         history: [],
                         timer: null,
-                        anim_pattern: ["ld-bounceAlt", "ld-breath", "ld-rubber-v", "ld-beat", "ld-float", "ld-dim", "ld-damage"]
+                        anim_pattern: ["ld-bounceAlt", "ld-breath", "ld-rubber-v", "ld-beat", "ld-float", "ld-dim", "ld-damage"],
+                        busy: false
+                    }
+                },
+                watch: {
+                    busy: function(flag) {
+                        if (flag) {
+                            addLDAnimation(".fas.fa-calendar-check", "ld-heartbeat");
+                        } else {
+                            clearLDAnimation(".fas.fa-calendar-check");
+                        }
                     }
                 },
                 methods: {
@@ -202,6 +225,7 @@ if (Vue) {
                         this.history.unshift(message);
                     },
                     callWatchdogAPI: function() {
+                        this.busy = true;
                         // generate current date time string
                         let dt = new Date();
                         let now = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
@@ -232,6 +256,7 @@ if (Vue) {
                                 this.startCountdown();
                                 this.$emit("succeed-valid-server");
                             }
+                            this.busy = false;
                         }).catch(ex => {
                             this.abortCountdown();
                             this.addHistory(`${now} 結果: ${ex.message}`);
