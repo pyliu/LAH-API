@@ -10,9 +10,9 @@ if (Vue) {
                     <span>{{modeText}}</span>
                 </b-form-checkbox>
                 <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">
-                    <i v-if="listMode" class="far fa-chart-bar"></i>
+                    <i v-if="listMode" class="far fa-chart-area"></i>
                     <i v-else class="fas fa-table"></i>
-                    {{listMode ? "統計圖表" : "表格模式"}}
+                    {{listMode ? "統計圖表" : "表格顯示"}}
                 </b-button>
                 <b-button id="reload" variant="primary" size="sm" @click="load">
                     <i class="fas fa-sync"></i>

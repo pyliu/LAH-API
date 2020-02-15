@@ -160,10 +160,10 @@ let VueTransition = {
         } else if (this.zoom) {
             this.animated_in = `animated zoomIn ${this.cfg_css}`;
             this.animated_in = `animated zoomOut ${this.cfg_css}`;
-        } else if (this.slide) {
+        } else if (this.fade) {
             this.animated_in = `animated fadeIn ${this.cfg_css}`;
             this.animated_in = `animated fadeOut ${this.cfg_css}`;
-        } else if (this.fade) {
+        } else if (this.slide) {
             this.animated_in = `animated slideInDown ${this.cfg_css}`;
             this.animated_in = `animated slideOutUp ${this.cfg_css}`;
         } else {
