@@ -455,7 +455,7 @@ let toggle = selector => {
             toggleInsideSpinner(el);
         }
     } else {
-        window.utilApp.busyState({selector: container});
+        window.utilApp.busy({selector: container});
     }
 }
 
@@ -961,7 +961,7 @@ let initUtilApp = () => {
                     });
                 }
             },
-            busyState: (opts = {}) => {
+            busy: (opts = {}) => {
                 opts = Object.assign({
                     selector: "body",
                     style: "ld-over",   // ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
@@ -1013,7 +1013,9 @@ let initUtilApp = () => {
                         addSpinner();
                     }
                 }
-            }
+            },
+            busyOn: function(el = "body", size = "") { this.busy({selector: el, forceOn: true, size: size}) },
+            busyOff: function(el = "body") { this.busy({selector: el, forceOff: true}) }
         }
     });
 }

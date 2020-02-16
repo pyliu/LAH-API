@@ -141,10 +141,10 @@ if (Vue) {
             busy: function(flag) {
                 if (flag) {
                     addLDAnimation("#reload .fas.fa-sync", "ld-cycle");
-                    if (this.statsMode) window.utilApp.busyState({size: "lg"});
+                    if (this.statsMode) window.utilApp.busyOn("body", "lg");
                 } else {
                     clearLDAnimation("#reload .fas.fa-sync");
-                    if (this.statsMode) window.utilApp.busyState({forceOff: true});
+                    if (this.statsMode) window.utilApp.busyOff("body");
                 }
             }
         },

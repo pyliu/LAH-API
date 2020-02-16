@@ -62,7 +62,8 @@ if (Vue) {
                 num_min: 10,
                 num_max: 999999,
                 code_data: [],
-                years: []
+                years: [],
+                busy: false
             }
         },
         methods: {
@@ -128,6 +129,15 @@ if (Vue) {
                 let evt = this.newCustomEvent('num-updated', val, $(this.$el).find(`#${this.prefix}_case_update_num`)[0]);
                 this.$emit("num-updated", evt);
             },
+            busy: function(flag) {
+                switch(flag) {
+                    case true:
+                        window.utilApp.busyOn(this.$el);
+                        break;
+                    default:
+                        window.utilApp.busyOff(this.$el);
+                }
+            }
         },
         created: function() {
             // set year select options
