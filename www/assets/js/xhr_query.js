@@ -146,7 +146,7 @@ let xhrLoadSQL = e => {
 	let body = new FormData();
 	body.append("type", "load_select_sql");
 	body.append("file_name", val);
-	asyncFetch("load_file_api.php", {
+	asyncFetch(CONFIG.FILE_API_EP, {
 		method: 'POST',
 			body: body
 	}).then(jsonObj => {

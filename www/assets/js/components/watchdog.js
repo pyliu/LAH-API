@@ -103,7 +103,7 @@ if (Vue) {
                         body.append("type", "load_log");
                         body.append("log_filename", this.log_filename);
                         body.append("slice_offset", this.count * -1);   // get lastest # records
-                        asyncFetch("load_file_api.php", {
+                        asyncFetch(CONFIG.FILE_API_EP, {
                             method: "POST",
                             body: body
                         }).then(jsonObj => {
