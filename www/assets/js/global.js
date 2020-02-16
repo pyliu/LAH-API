@@ -192,13 +192,10 @@ let VueTransition = {
 }
 
 let asyncFetch = async function(url, opts) {
-    opts = Object.assign({
-        method: "POST",
-        body: new FormData(),
-        blob: false
-    }, opts);
-    let response = await fetch(url, opts);
-    return opts.blob ? await response.blob() : await response.json();
+    if (!window.utilApp) {
+        initUtilApp();
+    }
+    return window.utilApp.fetch(url, opts);
 }
 
 let trim = text => {
@@ -912,6 +909,15 @@ let initUtilApp = () => {
                 }).catch(err => {
                     console.error(err);
                 });
+            },
+            fetch: async function(url, opts) {
+                opts = Object.assign({
+                    method: "POST",
+                    body: new FormData(),
+                    blob: false
+                }, opts);
+                let response = await fetch(url, opts);
+                return opts.blob ? await response.blob() : await response.json();
             },
             fetchRegCase: function(e, enabled_userinfo = false) {
                 // ajax event binding
