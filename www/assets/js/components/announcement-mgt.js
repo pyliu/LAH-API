@@ -34,14 +34,9 @@ if (Vue) {
                     toggle(e.target);
                     let form_body = new FormData();
                     form_body.append("type", "clear_announcement_flag");
-                    fetch(CONFIG.JSON_API_EP, {
+                    asyncFetch(CONFIG.JSON_API_EP, {
                         method: 'POST',
                         body: form_body
-                    }).then(response => {
-                        if (response.status != 200) {
-                            throw new Error("XHR連線異常，回應非200");
-                        }
-                        return response.json();
                     }).then(jsonObj => {
                         // let component knows it needs to clear the flag
                         this.reset_flag = true;
@@ -144,14 +139,9 @@ if (Vue) {
                 created: function(e) {
                     let form_body = new FormData();
                     form_body.append("type", "announcement_data");
-                    fetch(CONFIG.JSON_API_EP, {
+                    asyncFetch(CONFIG.JSON_API_EP, {
                         method: 'POST',
                         body: form_body
-                    }).then(response => {
-                        if (response.status != 200) {
-                            throw new Error("XHR連線異常，回應非200");
-                        }
-                        return response.json();
                     }).then(jsonObj => {
                         this.data = jsonObj.raw;
                     });
@@ -225,14 +215,9 @@ if (Vue) {
                                     form_body.append("day", day);
                                     form_body.append("flag", flag);
                                     
-                                    fetch(CONFIG.JSON_API_EP, {
+                                    asyncFetch(CONFIG.JSON_API_EP, {
                                         method: 'POST',
                                         body: form_body
-                                    }).then(response => {
-                                        if (response.status != 200) {
-                                            throw new Error("XHR連線異常，回應非200");
-                                        }
-                                        return response.json();
                                     }).then(jsonObj => {
                                         console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
                                         addNotification({

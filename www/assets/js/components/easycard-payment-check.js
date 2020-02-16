@@ -65,14 +65,9 @@ if (Vue) {
 
                 const h = this.$createElement;
 
-                fetch(CONFIG.JSON_API_EP, {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({
@@ -129,14 +124,9 @@ if (Vue) {
                             body.append("qday", qday);
                             body.append("pc_num", pc_number);
         
-                            fetch(CONFIG.JSON_API_EP, {
+                            asyncFetch(CONFIG.JSON_API_EP, {
                                 method: "POST",
                                 body: body
-                            }).then(response => {
-                                if (response.status != 200) {
-                                    throw new Error("XHR連線異常，回應非200");
-                                }
-                                return response.json();
                             }).then(jsonObj => {
                                 if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                     el.closest("li").html("修正 日期: " + qday + ", 電腦給號: " + pc_number + " <strong class='text-success'>成功</strong>!");

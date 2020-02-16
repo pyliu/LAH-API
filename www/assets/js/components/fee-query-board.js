@@ -115,14 +115,9 @@ if (Vue) {
                 body.append("num", this.number);
                 body.append("list_mode", true);
                 
-                fetch(CONFIG.JSON_API_EP, {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.data_count == 0) {
                         addNotification({
@@ -174,14 +169,9 @@ if (Vue) {
 
                 toggle(e.target);
 
-                fetch(CONFIG.JSON_API_EP, {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
                 }).then(jsonObj => {
                     toggle(e.target);
 
@@ -578,14 +568,9 @@ if (Vue) {
 
                             toggle(e.target);
 
-                            fetch(CONFIG.JSON_API_EP, {
+                            asyncFetch(CONFIG.JSON_API_EP, {
                                 method: "POST",
                                 body: body
-                            }).then(response => {
-                                if (response.status != 200) {
-                                    throw new Error("XHR連線異常，回應非200");
-                                }
-                                return response.json();
                             }).then(jsonObj => {
                                 closeModal(() => {
                                     addNotification({
@@ -661,14 +646,9 @@ if (Vue) {
         
                 toggle(e.target);
         
-                fetch(CONFIG.JSON_API_EP, {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
                 }).then(jsonObj => {
                     addNotification({
                         title: "修改規費付款方式",
@@ -720,14 +700,9 @@ if (Vue) {
         
                 toggle(e.target);
         
-                fetch(CONFIG.JSON_API_EP, {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
                 }).then(jsonObj => {
                     addNotification({
                         title: "修改列印註記",
@@ -802,14 +777,9 @@ if (Vue) {
                 body.append("qday", this.date);
                 body.append("num", this.pc_number);
                 body.append("list_mode", false);
-                fetch(CONFIG.JSON_API_EP, {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         this.expaa_data = jsonObj.raw;
@@ -825,14 +795,9 @@ if (Vue) {
                 body.append("type", "expac");
                 body.append("year", this.expac_year);
                 body.append("num", this.pc_number);
-                fetch(CONFIG.JSON_API_EP, {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
-                }).then(response => {
-                    if (response.status != 200) {
-                        throw new Error("XHR連線異常，回應非200");
-                    }
-                    return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({
@@ -1001,14 +966,9 @@ if (Vue) {
                             body.append("qday", qday);
                             body.append("pc_num", pc_number);
         
-                            fetch(CONFIG.JSON_API_EP, {
+                            asyncFetch(CONFIG.JSON_API_EP, {
                                 method: "POST",
                                 body: body
-                            }).then(response => {
-                                if (response.status != 200) {
-                                    throw new Error("XHR連線異常，回應非200");
-                                }
-                                return response.json();
                             }).then(jsonObj => {
                                 if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                     addNotification({

@@ -146,14 +146,9 @@ let xhrLoadSQL = e => {
 	let body = new FormData();
 	body.append("type", "load_select_sql");
 	body.append("file_name", val);
-	fetch("load_file_api.php", {
+	asyncFetch("load_file_api.php", {
 		method: 'POST',
 			body: body
-	}).then(response => {
-		if (response.status != 200) {
-			throw new Error("XHR連線異常，回應非200");
-		}
-		return response.json();
 	}).then(jsonObj => {
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
 			$("#sql_csv_text").val(jsonObj.data);
@@ -183,7 +178,7 @@ let xhrExportSQLReport = (e, form_body) => {
 	let text = $("#preload_sql_select option:selected").text();
 	form_body.append("sql", $("#sql_csv_text").val());
 	toggle(e.target);
-	fetch("export_file_api.php", {
+	asyncFetch("export_file_api.php", {
 		method: 'POST',
 		body: form_body
 	}).then(response => {
@@ -212,7 +207,7 @@ let xhrExportLog = e => {
 	form_body.append("type", "file_log");
 	form_body.append("date", date);
 	toggle(e.target);
-	fetch("export_file_api.php", {
+	asyncFetch("export_file_api.php", {
 		method: 'POST',
 		body: form_body
 	}).then(response => {
@@ -239,7 +234,7 @@ let xhrZipLog = e => {
 	let form_body = new FormData();
 	form_body.append("type", "zip_log");
 	toggle(e.target);
-	fetch(CONFIG.JSON_API_EP, {
+	asyncFetch(CONFIG.JSON_API_EP, {
 		method: 'POST',
 		body: form_body
 	}).then(response => {
@@ -271,7 +266,7 @@ let xhrUpdateRegCaseCol = function(arguments) {
 	body.append("rm03", arguments.rm03);
 	body.append("col", arguments.col);
 	body.append("val", arguments.val);
-	fetch(CONFIG.JSON_API_EP, {
+	asyncFetch(CONFIG.JSON_API_EP, {
 		method: "POST",
 		body: body
 	}).then(response => {
@@ -307,7 +302,7 @@ let xhrSearchUsers = e => {
 		return;
 	}
 	
-	fetch(CONFIG.JSON_API_EP, {
+	asyncFetch(CONFIG.JSON_API_EP, {
 		method: 'POST',
 		body: form_body
 	}).then(response => {
@@ -567,7 +562,7 @@ let xhrTest = () => {
 	form_body.append("type", "reg_stats");
 	form_body.append("year_month", "10812");
 
-	fetch(CONFIG.JSON_API_EP, {
+	asyncFetch(CONFIG.JSON_API_EP, {
 		method: 'POST',
 		body: form_body
 	}).then(response => {
