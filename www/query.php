@@ -362,10 +362,6 @@ fieldset fieldset legend {
   <!-- bs datepicker -->
   <script src="assets/js/bootstrap-datepicker.min.js"></script>
   <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
-  <!-- Promise library -->
-  <!-- <script src="assets/js/polyfill.min.js"></script> -->
-  <!-- fetch library -->
-  <!-- <script src="assets/js/fetch.min.js"></script> -->
 
   <script src="assets/js/vue.js"></script>
   <script src="assets/js/bootstrap-vue.min.js"></script>
