@@ -1,10 +1,14 @@
 //<![CDATA[
 const CONFIG = {
     DISABLE_MSDB_QUERY: false,
-    TEST_MODE: false
+    TEST_MODE: false,
+    AP_SVR: "220.1.35.123",
+    JSON_API_EP: "query_json_api.php",
+    FILE_API_EP: "load_file_api.php",
+    MOCK_API_EP: "TODO"
 }
-// 跨縣市主機
-const landhb_svr = "220.1.35.123";
+// for backwards compatibility
+const landhb_svr = CONFIG.AP_SVR;
 // the status code must be the same as server side response
 const XHR_STATUS_CODE = {
     SUCCESS_WITH_NO_RECORD: 3,
@@ -919,7 +923,7 @@ let initUtilApp = () => {
                 body.append("type", "reg_case");
                 body.append("id", id);
 
-                asyncFetch("query_json_api.php", {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
                 }).then(jsonObj => {

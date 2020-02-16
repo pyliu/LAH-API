@@ -24,7 +24,7 @@ let xhrGetSectionRALIDCount = e => {
 	toggle(el);
 	let text = $("#data_query_text").val();
 	let xhr = $.ajax({
-		url: "query_json_api.php",
+		url: CONFIG.JSON_API_EP,
 		data: "type=ralid&text="+text,
 		method: "POST",
 		dataType: "json",
@@ -69,7 +69,7 @@ let xhrGetCasesByID = e => {
 	toggleInsideSpinner("#id_query_cmsms_result");
 
 	let xhr_crsms = $.ajax({
-		url: "query_json_api.php",
+		url: CONFIG.JSON_API_EP,
 		data: "type=crsms&id="+text,
 		method: "POST",
 		dataType: "json",
@@ -103,7 +103,7 @@ let xhrGetCasesByID = e => {
 		}
 	});
 	let xhr_cmsms = $.ajax({
-		url: "query_json_api.php",
+		url: CONFIG.JSON_API_EP,
 		data: "type=cmsms&id="+text,
 		method: "POST",
 		dataType: "json",
@@ -239,7 +239,7 @@ let xhrZipLog = e => {
 	let form_body = new FormData();
 	form_body.append("type", "zip_log");
 	toggle(e.target);
-	fetch("query_json_api.php", {
+	fetch(CONFIG.JSON_API_EP, {
 		method: 'POST',
 		body: form_body
 	}).then(response => {
@@ -271,7 +271,7 @@ let xhrUpdateRegCaseCol = function(arguments) {
 	body.append("rm03", arguments.rm03);
 	body.append("col", arguments.col);
 	body.append("val", arguments.val);
-	fetch("query_json_api.php", {
+	fetch(CONFIG.JSON_API_EP, {
 		method: "POST",
 		body: body
 	}).then(response => {
@@ -307,7 +307,7 @@ let xhrSearchUsers = e => {
 		return;
 	}
 	
-	fetch("query_json_api.php", {
+	fetch(CONFIG.JSON_API_EP, {
 		method: 'POST',
 		body: form_body
 	}).then(response => {
@@ -484,7 +484,7 @@ let xhrQueryUserInfo = e => {
 	form_body.append("name", name);
 	form_body.append("id", id);
 
-	asyncFetch("query_json_api.php", {
+	asyncFetch(CONFIG.JSON_API_EP, {
 		method: 'POST',
 		body: form_body
 	}).then(jsonObj => {
@@ -547,7 +547,7 @@ let xhrSendMessage = e => {
 	form_body.append("who", who);
 
 
-	asyncFetch("query_json_api.php", {
+	asyncFetch(CONFIG.JSON_API_EP, {
 		body: form_body
 	}).then(jsonObj => {
 		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + jsonObj.message + "】");
@@ -567,7 +567,7 @@ let xhrTest = () => {
 	form_body.append("type", "reg_stats");
 	form_body.append("year_month", "10812");
 
-	fetch("query_json_api.php", {
+	fetch(CONFIG.JSON_API_EP, {
 		method: 'POST',
 		body: form_body
 	}).then(response => {

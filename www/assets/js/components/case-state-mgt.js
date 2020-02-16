@@ -58,7 +58,7 @@ if (Vue) {
 
                 let that = this;
 
-                asyncFetch("query_json_api.php", {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     //headers: { "Content-Type": "application/json" },
                     body: body

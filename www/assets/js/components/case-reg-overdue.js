@@ -235,7 +235,7 @@ if (Vue) {
                     if (!isEmpty(this.reviewerId)) {
                         form_body.append("reviewer_id", this.reviewerId);
                     }
-                    asyncFetch("query_json_api.php", {
+                    asyncFetch(CONFIG.JSON_API_EP, {
                         method: 'POST',
                         body: form_body
                     }).then(jsonObj => {

@@ -50,7 +50,7 @@ if (Vue) {
                 
                 toggle(e.target);
             
-                asyncFetch("query_json_api.php", {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
                 }).then(jsonObj => {
@@ -87,7 +87,7 @@ if (Vue) {
                 
                 toggle(e.target);
             
-                asyncFetch("query_json_api.php", {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
                 }).then(jsonObj => {

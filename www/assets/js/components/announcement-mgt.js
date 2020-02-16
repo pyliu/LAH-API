@@ -34,7 +34,7 @@ if (Vue) {
                     toggle(e.target);
                     let form_body = new FormData();
                     form_body.append("type", "clear_announcement_flag");
-                    fetch("query_json_api.php", {
+                    fetch(CONFIG.JSON_API_EP, {
                         method: 'POST',
                         body: form_body
                     }).then(response => {
@@ -144,7 +144,7 @@ if (Vue) {
                 created: function(e) {
                     let form_body = new FormData();
                     form_body.append("type", "announcement_data");
-                    fetch("query_json_api.php", {
+                    fetch(CONFIG.JSON_API_EP, {
                         method: 'POST',
                         body: form_body
                     }).then(response => {
@@ -225,7 +225,7 @@ if (Vue) {
                                     form_body.append("day", day);
                                     form_body.append("flag", flag);
                                     
-                                    fetch("query_json_api.php", {
+                                    fetch(CONFIG.JSON_API_EP, {
                                         method: 'POST',
                                         body: form_body
                                     }).then(response => {

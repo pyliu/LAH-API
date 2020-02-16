@@ -41,7 +41,7 @@ if (Vue) {
                 let body = new FormData();
                 body.append("type", "xcase-check");
 
-                fetch("query_json_api.php", {
+                fetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
                 }).then(response => {
@@ -91,7 +91,7 @@ if (Vue) {
                         let li = $(e.target).closest("li");
                         $(e.target).remove();
         
-                        fetch("query_json_api.php", {
+                        fetch(CONFIG.JSON_API_EP, {
                             method: "POST",
                             body: body
                         }).then(response => {

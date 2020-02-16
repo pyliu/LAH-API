@@ -115,7 +115,7 @@ if (Vue) {
                 body.append("num", this.number);
                 body.append("list_mode", true);
                 
-                fetch("query_json_api.php", {
+                fetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
                 }).then(response => {
@@ -174,7 +174,7 @@ if (Vue) {
 
                 toggle(e.target);
 
-                fetch("query_json_api.php", {
+                fetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
                 }).then(response => {
@@ -578,7 +578,7 @@ if (Vue) {
 
                             toggle(e.target);
 
-                            fetch("query_json_api.php", {
+                            fetch(CONFIG.JSON_API_EP, {
                                 method: "POST",
                                 body: body
                             }).then(response => {
@@ -661,7 +661,7 @@ if (Vue) {
         
                 toggle(e.target);
         
-                fetch("query_json_api.php", {
+                fetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
                 }).then(response => {
@@ -720,7 +720,7 @@ if (Vue) {
         
                 toggle(e.target);
         
-                fetch("query_json_api.php", {
+                fetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
                 }).then(response => {
@@ -802,7 +802,7 @@ if (Vue) {
                 body.append("qday", this.date);
                 body.append("num", this.pc_number);
                 body.append("list_mode", false);
-                fetch("query_json_api.php", {
+                fetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
                 }).then(response => {
@@ -825,7 +825,7 @@ if (Vue) {
                 body.append("type", "expac");
                 body.append("year", this.expac_year);
                 body.append("num", this.pc_number);
-                fetch("query_json_api.php", {
+                fetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
                 }).then(response => {
@@ -937,7 +937,7 @@ if (Vue) {
 
                         toggle(e.target);
 
-                        asyncFetch("query_json_api.php", {
+                        asyncFetch(CONFIG.JSON_API_EP, {
                             method: "POST",
                             body: body
                         }).then(jsonObj => {
@@ -1001,7 +1001,7 @@ if (Vue) {
                             body.append("qday", qday);
                             body.append("pc_num", pc_number);
         
-                            fetch("query_json_api.php", {
+                            fetch(CONFIG.JSON_API_EP, {
                                 method: "POST",
                                 body: body
                             }).then(response => {

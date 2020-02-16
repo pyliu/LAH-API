@@ -65,7 +65,7 @@ if (Vue) {
 
                 const h = this.$createElement;
 
-                fetch("query_json_api.php", {
+                fetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
                 }).then(response => {
@@ -129,7 +129,7 @@ if (Vue) {
                             body.append("qday", qday);
                             body.append("pc_num", pc_number);
         
-                            fetch("query_json_api.php", {
+                            fetch(CONFIG.JSON_API_EP, {
                                 method: "POST",
                                 body: body
                             }).then(response => {

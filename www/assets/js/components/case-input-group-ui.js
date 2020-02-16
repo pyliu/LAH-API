@@ -86,11 +86,9 @@ if (Vue) {
                 body.append("year", year);
                 body.append("code", code);
                 let that = this;
-                fetch("query_json_api.php", {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     method: "POST",
                     body: body
-                }).then(response => {
-                    return response.json();
                 }).then(jsonObj => {
                     if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         addNotification({

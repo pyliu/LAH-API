@@ -89,7 +89,7 @@ if (Vue) {
                 body.append("type", "diff_xcase");
                 body.append("id", id);
             
-                asyncFetch("query_json_api.php", {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     body: body
                 }).then(jsonObj => {
                     let html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + year + "-" + code + "-" + number + "</a><div>";
@@ -187,7 +187,7 @@ if (Vue) {
                     let td = $(`#sync_column_${column}`).parent();
                     $(`#sync_column_${column}`).remove();
 
-                    asyncFetch("query_json_api.php", {
+                    asyncFetch(CONFIG.JSON_API_EP, {
                         body: body
                     }).then(jsonObj => {
                         if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
@@ -208,7 +208,7 @@ if (Vue) {
                     body.append("type", "sync_xcase");
                     body.append("id", id);
                     $("#sync_x_case_confirm_button").remove();
-                    asyncFetch("query_json_api.php", {
+                    asyncFetch(CONFIG.JSON_API_EP, {
                         body: body
                     }).then(jsonObj => {
                         if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
@@ -242,7 +242,7 @@ if (Vue) {
                     body.append("type", "inst_xcase");
                     body.append("id", id);
                     $("#inst_x_case_confirm_button").remove();
-                    asyncFetch("query_json_api.php", {
+                    asyncFetch(CONFIG.JSON_API_EP, {
                         body: body
                     }).then(jsonObj => {
                         if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {

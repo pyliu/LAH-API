@@ -52,7 +52,7 @@ if (Vue) {
                 form_body.append("year", year);
                 form_body.append("code", code);
                 form_body.append("number", number);
-                asyncFetch("query_json_api.php", {
+                asyncFetch(CONFIG.JSON_API_EP, {
                     body: form_body
                 }).then(jsonObj => {
 
@@ -211,7 +211,7 @@ if (Vue) {
                     form_body.append("code", data.code);
                     form_body.append("number", data.number);
                     form_body.append("table", data.table);
-                    fetch("query_json_api.php", {
+                    fetch(CONFIG.JSON_API_EP, {
                         method: 'POST',
                         body: form_body
                     }).then(response => {
