@@ -7,7 +7,7 @@ if (Vue) {
                     <div role="tablist">
                         <b-card no-body class="mb-1">
                             <b-card-header header-tag="header" class="p-1" role="tab">
-                                <b-button block v-b-toggle.case-detail variant="light">收件資料</b-button>
+                                <b-button block v-b-toggle.case-detail variant="primary">收件資料</b-button>
                             </b-card-header>
                             <b-collapse id="case-detail" visible accordion="reg-case" role="tabpanel">
                                 <b-card-body>
@@ -40,7 +40,7 @@ if (Vue) {
                         </b-card>
                         <b-card no-body class="mb-1">
                             <b-card-header header-tag="header" class="p-1" role="tab">
-                                <b-button block v-b-toggle.case-status variant="light">辦理情形</b-button>
+                                <b-button block v-b-toggle.case-status variant="secondary">辦理情形</b-button>
                             </b-card-header>
                             <b-collapse id="case-status" accordion="reg-case" role="tabpanel">
                                 <b-card-body>
@@ -55,19 +55,19 @@ if (Vue) {
                                                 </b-col>
                                             </b-form-row>
                                         </b-list-group-item>
-                                        <b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.代理人統編)">
                                             <b-form-row>
                                                 <b-col>代理人統編：{{jsonObj.代理人統編}}</b-col>
                                                 <b-col>代理人姓名：{{jsonObj.代理人姓名}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
-                                        <b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.權利人統編)">
                                             <b-form-row>
                                                 <b-col>權利人統編：{{jsonObj.權利人統編}}</b-col>
                                                 <b-col>權利人姓名：{{jsonObj.權利人姓名}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
-                                        <b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.義務人統編)">
                                             <b-form-row>
                                                 <b-col>義務人統編：{{jsonObj.義務人統編}}</b-col>
                                                 <b-col>義務人姓名：{{jsonObj.義務人姓名}}</b-col>
@@ -85,13 +85,13 @@ if (Vue) {
                                                 <b-col>收件時間：{{jsonObj.收件時間}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
-                                        <b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.初審人員)">
                                             <b-form-row>
                                                 <b-col>初審人員：{{jsonObj.初審人員}}</b-col>
                                                 <b-col>初審時間：{{jsonObj.初審時間}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
-                                        <b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.複審人員)">
                                             <b-form-row>
                                                 <b-col>複審人員：{{jsonObj.複審人員}}</b-col>
                                                 <b-col>複審時間：{{jsonObj.複審時間}}</b-col>
