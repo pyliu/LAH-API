@@ -5,9 +5,6 @@ var now = new Date();
 var today = (now.getFullYear() - 1911) + "-" +
     ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
     ("0" + now.getDate()).slice(-2);
-if (!landhb_svr) {
-    landhb_svr = "220.1.35.123";
-}
 // IE ... disable cache globally
 $.ajaxSetup({ cache: false });
 	

@@ -11,25 +11,29 @@ if (Vue) {
                             </b-card-header>
                             <b-collapse id="case-detail" visible accordion="reg-case" role="tabpanel">
                                 <b-card-body>
-                                    <div v-if="jsonObj.跨所 == 'Y'"><span class='bg-info text-white rounded p-1'>跨所案件 ({{jsonObj.資料收件所}} => {{jsonObj.資料管轄所}})</span></div>
-                                    收件字號：
-                                    <a :title="'收件資料 on ' + ap_server" :href="case_data_url" target="_blank">
-                                        {{jsonObj.收件字號}}
-                                    </a> <br/>
-                                    收件時間：{{jsonObj.收件時間}} <br/>
-                                    測量案件：{{jsonObj.測量案件}} <br/>
-                                    限辦期限：<span v-html="jsonObj.限辦期限"></span> <br/>
-                                    作業人員：<span id='the_incase_operator_span' class='user_tag' :data-display-selector="'#'+userinfo_display_id" :data-id="jsonObj.作業人員ID" :data-name="jsonObj.作業人員">{{jsonObj.作業人員}}</span> <br/>
-                                    辦理情形：{{jsonObj.辦理情形}} <br/>
-                                    登記原因：{{jsonObj.登記原因}} <br/>
-                                    區域：{{area}}【{{jsonObj.raw.RM10}}】 <br/>
-                                    段小段：{{jsonObj.段小段}}【{{jsonObj.段代碼}}】 <br/>
-                                    地號：{{jsonObj.地號}} <br/>
-                                    建號：{{jsonObj.建號}} <br/>
-                                    件數：{{jsonObj.件數}} <br/>
-                                    登記處理註記：{{jsonObj.登記處理註記}} <br/>
-                                    地價處理註記：{{jsonObj.地價處理註記}} <br/>
-                                    手機號碼：{{jsonObj.手機號碼}}
+                                    <b-form-row>
+                                        <b-col>
+                                            <div v-if="jsonObj.跨所 == 'Y'"><span class='bg-info text-white rounded p-1'>跨所案件 ({{jsonObj.資料收件所}} => {{jsonObj.資料管轄所}})</span></div>
+                                            收件字號：
+                                            <a :title="'收件資料 on ' + ap_server" :href="case_data_url" target="_blank">
+                                                {{jsonObj.收件字號}}
+                                            </a> <br/>
+                                            收件時間：{{jsonObj.收件時間}} <br/>
+                                            測量案件：{{jsonObj.測量案件}} <br/>
+                                            限辦期限：<span v-html="jsonObj.限辦期限"></span> <br/>
+                                            作業人員：<span id='the_incase_operator_span' class='user_tag' :data-display-selector="'#'+userinfo_display_id" :data-id="jsonObj.作業人員ID" :data-name="jsonObj.作業人員">{{jsonObj.作業人員}}</span> <br/>
+                                            辦理情形：{{jsonObj.辦理情形}} <br/>
+                                            登記原因：{{jsonObj.登記原因}} <br/>
+                                            區域：{{area}}【{{jsonObj.raw.RM10}}】 <br/>
+                                            段小段：{{jsonObj.段小段}}【{{jsonObj.段代碼}}】 <br/>
+                                            地號：{{jsonObj.地號}} <br/>
+                                            建號：{{jsonObj.建號}} <br/>
+                                            件數：{{jsonObj.件數}} <br/>
+                                            登記處理註記：{{jsonObj.登記處理註記}} <br/>
+                                            地價處理註記：{{jsonObj.地價處理註記}} <br/>
+                                            手機號碼：{{jsonObj.手機號碼}}
+                                        </b-col>
+                                    </b-form-row>
                                     <b-form-row>
                                         <b-col class="text-center">
                                             <b-button variant="outline-primary" size="sm" @click="open($event, case_data_url)" :title="'收件資料 on ' + ap_server"><i class="fas fa-search"></i> 另開視窗查詢</b-button>

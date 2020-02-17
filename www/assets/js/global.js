@@ -7,8 +7,6 @@ const CONFIG = {
     FILE_API_EP: "load_file_api.php",
     MOCK_API_EP: "TODO"
 }
-// for backwards compatibility
-const landhb_svr = CONFIG.AP_SVR;
 // the status code must be the same as server side response
 const XHR_STATUS_CODE = {
     SUCCESS_WITH_NO_RECORD: 3,
