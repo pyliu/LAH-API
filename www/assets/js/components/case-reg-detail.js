@@ -44,83 +44,121 @@ if (Vue) {
                             </b-card-header>
                             <b-collapse id="case-status" accordion="reg-case" role="tabpanel">
                                 <b-card-body>
-                                    <b-form-row>
-                                        <b-col :title="jsonObj.預定結案日期">預定結案：<span v-html="jsonObj.限辦期限"></span></b-col>
-                                        <b-col :title="jsonObj.結案與否">
-                                            結案與否：
-                                            <span v-if="is_ongoing" class='text-danger'><strong>尚未結案！</strong></span>
-                                            <span v-else class='text-success'><strong>已結案</strong></span>
-                                        </b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>代理人統編：{{jsonObj.代理人統編}}</b-col>
-                                        <b-col>代理人姓名：{{jsonObj.代理人姓名}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>權利人統編：{{jsonObj.權利人統編}}</b-col>
-                                        <b-col>權利人姓名：{{jsonObj.權利人姓名}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>義務人統編：{{jsonObj.義務人統編}}</b-col>
-                                        <b-col>義務人姓名：{{jsonObj.義務人姓名}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>登記原因：{{jsonObj.登記原因}}</b-col>
-                                        <b-col>辦理情形：<span :class="jsonObj.案件紅綠燈CSS">{{jsonObj.辦理情形}}</span></b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>收件人員：<span class='user_tag' :data-display-selector="'#'+userinfo_display_id" :data-id="jsonObj.收件人員ID" :data-name="jsonObj.收件人員">{{jsonObj.收件人員}}</span></b-col>
-                                        <b-col>收件時間：{{jsonObj.收件時間}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>初審人員：{{jsonObj.初審人員}}</b-col>
-                                        <b-col>初審時間：{{jsonObj.初審時間}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>複審人員：{{jsonObj.複審人員}}</b-col>
-                                        <b-col>複審時間：{{jsonObj.複審時間}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>駁回日期：{{jsonObj.駁回日期}}</b-col>
-                                        <b-col></b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>公告日期：{{jsonObj.公告日期}}</b-col>
-                                        <b-col>公告到期：{{jsonObj.公告期滿日期}} 天數：{{jsonObj.公告天數}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>通知補正：{{jsonObj.通知補正日期}}</b-col>
-                                        <b-col>補正期滿：{{jsonObj.補正期滿日期}} 天數：{{jsonObj.補正期限}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>補正日期：{{jsonObj.補正日期}}</b-col>
-                                        <b-col></b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>請示人員：{{jsonObj.請示人員}}</b-col>
-                                        <b-col>請示時間：{{jsonObj.請示時間}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>展期人員：{{jsonObj.展期人員}}</b-col>
-                                        <b-col>展期日期：{{jsonObj.展期日期}} 天數：{{jsonObj.展期天數}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>准登人員：{{jsonObj.准登人員}}</b-col>
-                                        <b-col>准登日期：{{jsonObj.准登日期}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>登錄人員：{{jsonObj.登錄人員}}</b-col>
-                                        <b-col>登錄日期：{{jsonObj.登錄日期}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>校對人員：{{jsonObj.校對人員}}</b-col>
-                                        <b-col>校對日期：{{jsonObj.校對日期}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
-                                        <b-col>結案人員：{{jsonObj.結案人員}}</b-col>
-                                        <b-col>結案日期：{{jsonObj.結案日期}}</b-col>
-                                    </b-form-row>
-                                    <b-form-row>
+                                    <b-list-group flush compact>
+                                        <b-list-group-item>
+                                            <b-form-row>
+                                                <b-col :title="jsonObj.預定結案日期">預定結案：<span v-html="jsonObj.限辦期限"></span></b-col>
+                                                <b-col :title="jsonObj.結案與否">
+                                                    結案與否：
+                                                    <span v-if="is_ongoing" class='text-danger'><strong>尚未結案！</strong></span>
+                                                    <span v-else class='text-success'><strong>已結案</strong></span>
+                                                </b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item>
+                                            <b-form-row>
+                                                <b-col>代理人統編：{{jsonObj.代理人統編}}</b-col>
+                                                <b-col>代理人姓名：{{jsonObj.代理人姓名}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item>
+                                            <b-form-row>
+                                                <b-col>權利人統編：{{jsonObj.權利人統編}}</b-col>
+                                                <b-col>權利人姓名：{{jsonObj.權利人姓名}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item>
+                                            <b-form-row>
+                                                <b-col>義務人統編：{{jsonObj.義務人統編}}</b-col>
+                                                <b-col>義務人姓名：{{jsonObj.義務人姓名}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item>
+                                            <b-form-row>
+                                                <b-col>登記原因：{{jsonObj.登記原因}}</b-col>
+                                                <b-col>辦理情形：<span :class="jsonObj.案件紅綠燈CSS">{{jsonObj.辦理情形}}</span></b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item>
+                                            <b-form-row>
+                                                <b-col>收件人員：<span class='user_tag' :data-display-selector="'#'+userinfo_display_id" :data-id="jsonObj.收件人員ID" :data-name="jsonObj.收件人員">{{jsonObj.收件人員}}</span></b-col>
+                                                <b-col>收件時間：{{jsonObj.收件時間}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item>
+                                            <b-form-row>
+                                                <b-col>初審人員：{{jsonObj.初審人員}}</b-col>
+                                                <b-col>初審時間：{{jsonObj.初審時間}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item>
+                                            <b-form-row>
+                                                <b-col>複審人員：{{jsonObj.複審人員}}</b-col>
+                                                <b-col>複審時間：{{jsonObj.複審時間}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.駁回日期)">
+                                            <b-form-row>
+                                                <b-col>駁回日期：{{jsonObj.駁回日期}}</b-col>
+                                                <b-col></b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.公告日期)">
+                                            <b-form-row>
+                                                <b-col>公告日期：{{jsonObj.公告日期}}</b-col>
+                                                <b-col>公告到期：{{jsonObj.公告期滿日期}} 天數：{{jsonObj.公告天數}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.通知補正日期)">
+                                            <b-form-row>
+                                                <b-col>通知補正：{{jsonObj.通知補正日期}}</b-col>
+                                                <b-col>補正期滿：{{jsonObj.補正期滿日期}} 天數：{{jsonObj.補正期限}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.補正日期)">
+                                            <b-form-row>
+                                                <b-col>補正日期：{{jsonObj.補正日期}}</b-col>
+                                                <b-col></b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.請示人員)">
+                                            <b-form-row>
+                                                <b-col>請示人員：{{jsonObj.請示人員}}</b-col>
+                                                <b-col>請示時間：{{jsonObj.請示時間}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.展期人員)">
+                                            <b-form-row>
+                                                <b-col>展期人員：{{jsonObj.展期人員}}</b-col>
+                                                <b-col>展期日期：{{jsonObj.展期日期}} 天數：{{jsonObj.展期天數}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.准登人員)">
+                                            <b-form-row>
+                                                <b-col>准登人員：{{jsonObj.准登人員}}</b-col>
+                                                <b-col>准登日期：{{jsonObj.准登日期}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.登錄人員)">
+                                            <b-form-row>
+                                                <b-col>登錄人員：{{jsonObj.登錄人員}}</b-col>
+                                                <b-col>登錄日期：{{jsonObj.登錄日期}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.校對人員)">
+                                            <b-form-row>
+                                                <b-col>校對人員：{{jsonObj.校對人員}}</b-col>
+                                                <b-col>校對日期：{{jsonObj.校對日期}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.結案人員)">
+                                            <b-form-row>
+                                                <b-col>結案人員：{{jsonObj.結案人員}}</b-col>
+                                                <b-col>結案日期：{{jsonObj.結案日期}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                    </b-list-group>
+                                    <b-form-row class="mt-2">
                                         <b-col class="text-center">
                                             <b-button variant="outline-primary" size="sm" @click="open($event, case_status_url)" title="案件辦理情形"><i class="fas fa-search"></i> 另開視窗查詢</b-button>
                                         </b-col>
@@ -154,6 +192,16 @@ if (Vue) {
                     message: `<iframe src="${url}" class="w-100" height="${h}" frameborder="0"></iframe>`,
                     size: "xl"
                 });
+            },
+            empty: variable => {
+                if (variable === undefined || $.trim(variable) == "") {
+                    return true;
+                }
+                
+                if (typeof variable == "object" && variable.length == 0) {
+                    return true;
+                }
+                return false;
             }
         },
         created: function(e) {
