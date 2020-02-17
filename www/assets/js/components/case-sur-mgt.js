@@ -104,7 +104,7 @@ if (Vue) {
         components: {
             "case-sur-dialog": {
                 template: `<div>
-                    收件字號：<a title="案件辦理情形 on ${CONFIG.AP_SVR}" :href="'http://${CONFIG.AP_SVR}:9080/LandHB/Dispatcher?REQ=CMC0202&GRP=CAS&MM01=' + json.raw['MM01'] + '&MM02=' + json.raw['MM02'] + '&MM03=' + json.raw['MM03'] + '&RM90='" target="_blank">{{json.收件字號}}</a> </br>
+                    收件字號：<a title="案件辦理情形 on ${CONFIG.AP_SVR}" href="javascript:void(0)" @click="open($event, 'http://${CONFIG.AP_SVR}:9080/LandHB/Dispatcher?REQ=CMC0202&GRP=CAS&MM01=' + json.raw['MM01'] + '&MM02=' + json.raw['MM02'] + '&MM03=' + json.raw['MM03'] + '&RM90=')">{{json.收件字號}}</a> </br>
                     收件時間：{{json.收件時間}} <br/>
                     收件人員：<span v-html="json.收件人員"></span> <br/>
                     <b-form-row class="w-100">
@@ -286,6 +286,24 @@ if (Vue) {
                                 showAlert({title: "修正複丈案件失敗", subtitle: id, message: "修正失敗!【" + ex.toString() + "】", type: "danger"});
                             });
                         });
+                    },
+                    open: function(e, url) {
+                        let h = window.innerHeight - 160;
+                        showModal({
+                            title: e.target.title || `外部連結 - ${CONFIG.AP_SVR}`,
+                            message: `<iframe src="${url}" class="w-100" height="${h}" frameborder="0"></iframe>`,
+                            size: "xl"
+                        });
+                    },
+                    empty: variable => {
+                        if (variable === undefined || $.trim(variable) == "") {
+                            return true;
+                        }
+                        
+                        if (typeof variable == "object" && variable.length == 0) {
+                            return true;
+                        }
+                        return false;
                     }
                 },
                 created: function() {
