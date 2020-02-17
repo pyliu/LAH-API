@@ -123,7 +123,13 @@ if (Vue) {
             case_store() {
                 // in-search mode component will use this.store, root one will use this.$store
                 return this.store || this.$store;
-            }
+            }/*,
+            ...mapGetters([
+                'list',
+                'list_count',
+                'list_by_id',
+                'list_by_id_count'
+            ])*/
         },
         watch: {
             chartType: function (val) {

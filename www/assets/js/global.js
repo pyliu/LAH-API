@@ -122,6 +122,7 @@ const store = (() => {
     }
     return {};
 })();
+
 let VueTransition = {
     template: `<transition
         :enter-active-class="animated_in"
