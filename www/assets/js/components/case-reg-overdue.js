@@ -286,10 +286,10 @@ if (Vue) {
         mounted() {
             if (this.inSearch === true) {
                 // in modal dialog
-                this.height = $(document).height() - 185 + "px";
+                this.height = window.innerHeight - 185 + "px";
                 this.small = true;
             } else {
-                this.height = $(document).height() - 145 + "px";
+                this.height = window.innerHeight - 145 + "px";
             }
             this.load();
         }

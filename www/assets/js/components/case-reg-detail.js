@@ -190,7 +190,7 @@ if (Vue) {
         },
         methods: {
             open: function(e, url) {
-                let h = $(document).height() - 160;
+                let h = window.innerHeight - 160;
                 showModal({
                     title: e.target.title || `外部連結 - ${CONFIG.AP_SVR}`,
                     message: `<iframe src="${url}" class="w-100" height="${h}" frameborder="0"></iframe>`,
