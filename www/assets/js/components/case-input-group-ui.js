@@ -81,7 +81,7 @@ if (Vue) {
                     addNotification({message: "案件年或案件字為空白，無法取得案件目前最大號碼。"});
                     return;
                 }
-
+                this.busy = true;
                 let body = new FormData();
                 body.append("type", "max");
                 body.append("year", year);
@@ -101,6 +101,7 @@ if (Vue) {
                     } else {
                         showAlert({message: jsonObj.message, type: "danger"});
                     }
+                    this.busy = false;
                 }).catch(ex => {
                     console.error("case-input-group-ui::getMaxNumber parsing failed", ex);
                     showAlert({message: "查詢最大號碼失敗~【" + code + "】", type: "danger"});
