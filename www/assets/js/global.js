@@ -125,6 +125,11 @@ const store = (() => {
     return {};
 })();
 
+// add to all Vue instances
+// https://vuejs.org/v2/cookbook/adding-instance-properties.html
+Vue.prototype.$http = axios;
+Vue.prototype.$gstore = store;
+
 let VueTransition = {
     template: `<transition
         :enter-active-class="animated_in"
