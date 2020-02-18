@@ -305,11 +305,6 @@ let xhrSearchUsers = e => {
 	asyncFetch(CONFIG.JSON_API_EP, {
 		method: 'POST',
 		body: form_body
-	}).then(response => {
-		if (response.status != 200) {
-			throw new Error("XHR連線異常，回應非200");
-		}
-		return response.json();
 	}).then(jsonObj => {
 		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
 			showUserInfoByRAW(jsonObj.raw[jsonObj.data_count - 1]);
