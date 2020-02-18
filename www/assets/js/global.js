@@ -1106,9 +1106,6 @@ $(document).ready(e => {
 
     // add pulse effect for the nav-item
     $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
-    
-    // put store to window as well
-    window.$store = store;
 });
 //]]>
     
