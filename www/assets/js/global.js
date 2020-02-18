@@ -909,6 +909,15 @@ let initUtilApp = () => {
                     console.error(err);
                 });
             },
+            open: function(url, e) {
+                let h = window.innerHeight - 160;
+                this.modal(`<iframe src="${url}" class="w-100" height="${h}" frameborder="0"></iframe>`, {
+                    title: e.target.title || `外部連結`,
+                    size: "xl",
+                    html: true,
+                    noCloseOnBackdrop: false
+                });
+            },
             fetch: async function(url, opts) {
                 opts = Object.assign({
                     method: "POST",

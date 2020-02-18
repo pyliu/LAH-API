@@ -36,7 +36,7 @@ if (Vue) {
                                     </b-form-row>
                                     <b-form-row>
                                         <b-col class="text-center">
-                                            <b-button variant="outline-primary" size="sm" @click="open($event, case_data_url)" :title="'收件資料 on ' + ap_server"><i class="fas fa-search"></i> 另開視窗查詢</b-button>
+                                            <b-button variant="outline-primary" size="sm" @click="window.utilApp.open(case_data_url, $event)" :title="'收件資料 on ' + ap_server"><i class="fas fa-search"></i> 另開視窗查詢</b-button>
                                         </b-col>
                                     </b-form-row>
                                 </b-card-body>
@@ -164,7 +164,7 @@ if (Vue) {
                                     </b-list-group>
                                     <b-form-row class="mt-2">
                                         <b-col class="text-center">
-                                            <b-button variant="outline-primary" size="sm" @click="open($event, case_status_url)" title="案件辦理情形"><i class="fas fa-search"></i> 另開視窗查詢</b-button>
+                                            <b-button variant="outline-primary" size="sm" @click="window.utilApp.open(case_status_url, $event)" title="案件辦理情形"><i class="fas fa-search"></i> 另開視窗查詢</b-button>
                                         </b-col>
                                     </b-form-row>
                                 </b-card-body>
@@ -189,14 +189,6 @@ if (Vue) {
             }
         },
         methods: {
-            open: function(e, url) {
-                let h = window.innerHeight - 160;
-                showModal({
-                    title: e.target.title || `外部連結 - ${CONFIG.AP_SVR}`,
-                    message: `<iframe src="${url}" class="w-100" height="${h}" frameborder="0"></iframe>`,
-                    size: "xl"
-                });
-            },
             empty: variable => {
                 if (variable === undefined || $.trim(variable) == "") {
                     return true;
