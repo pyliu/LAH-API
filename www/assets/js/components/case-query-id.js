@@ -12,12 +12,12 @@ if (Vue) {
                     <b-input-group-append is-text>年</b-input-group-append>
                 </b-input-group>
                 <b-col><b-button pill block @click="check" size="sm" variant="outline-primary"><i class="fas fa-cogs"></i> 檢測</b-button></b-col>
-                <b-col><b-button pill block @click="showNote" size="sm" variant="outline-success" class="col"><i class="far fa-comment"></i> 備註</b-button></b-col>
+                <b-col><b-button pill block @click="showModal(noteObj)" size="sm" variant="outline-success" class="col"><i class="far fa-comment"></i> 備註</b-button></b-col>
             </b-form-row>
         </fieldset>`,
-        methods: {
-            showNote: function(e) {
-                showModal({
+        data: {
+            return {
+                noteObj: {
                     title: "跨所註記遺失檢測 小幫手提示",
                     body: `<div class="d-block">
                         -- 【法院來函查統編】MOICAS_CRSMS 土地登記案件查詢-權利人+義務人+代理人+複代 <br/>
@@ -36,9 +36,10 @@ if (Vue) {
                         &emsp;&emsp;OR t.MM17_2 = 'H221350201';
                     </div>`,
                     size: "lg"
-                });
+                }
             }
-        }
+        },
+        methods: { }
     });
 } else {
     console.error("vue.js not ready ... case-query-id component can not be loaded.");
