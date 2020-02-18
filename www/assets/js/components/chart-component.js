@@ -44,8 +44,7 @@ if (Vue) {
                 this.chartData = {
                     labels:[],
                     legend: {
-                        display: true,
-                        labels: { boxWidth: 20 }
+                        display: true
                     },
                     datasets:[{
                         label: this.label,
@@ -113,7 +112,15 @@ if (Vue) {
                                 }
                             }
                         },
-                        title: { display: false, text: "自訂標題", position: "bottom" }
+                        title: { display: false, text: "自訂標題", position: "bottom" },
+                        scales: {
+                            yAxes: [{
+                                display: true,
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
                     }, opts)
                 });
             },
