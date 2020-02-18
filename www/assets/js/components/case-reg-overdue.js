@@ -89,7 +89,7 @@ if (Vue) {
                     {key: "收件時間", sortable: true},
                     {key: "限辦期限", sortable: true}
                 ],
-                height: true,
+                height: 0,  // the height inside the modal
                 caption: "查詢中 ... ",
                 busy: false,
                 small: false,
