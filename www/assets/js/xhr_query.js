@@ -68,67 +68,63 @@ let xhrGetCasesByID = e => {
 	toggleInsideSpinner("#id_query_crsms_result");
 	toggleInsideSpinner("#id_query_cmsms_result");
 
-	let xhr_crsms = $.ajax({
-		url: CONFIG.JSON_API_EP,
-		data: "type=crsms&id="+text,
-		method: "POST",
-		dataType: "json",
-		success: jsonObj => {
-			let count = jsonObj.data_count;
-			if (count == 0) {
-				$("#id_query_crsms_result").html("本所登記案件資料庫查無統編「"+text+"」收件資料。");
-			} else {
-				let html = "<p>登記案件：";
-				for (let i=0; i<count; i++) {
-					html += "<div class='reg_case_id'>" + jsonObj.raw[i]["RM01"] + "-" + jsonObj.raw[i]["RM02"]  + "-" + jsonObj.raw[i]["RM03"] + "</div>";
-				}
-				html += "</p>";
-				$("#id_query_crsms_result").html(html);
-				// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
-				addAnimatedCSS(".reg_case_id", {
-					name: "flash"
-				}).off("click").on("click", window.utilApp.fetchRegCase);
-				$(".reg_case_id").attr("title", "點我取得更多資訊！");
+	axios.post(
+		CONFIG.JSON_API_EP,
+		{ type: 'crsms', id: text }
+	).then(response => {
+		// on success
+		let jsonObj = response.data;
+		let count = jsonObj.data_count;
+		if (count == 0) {
+			$("#id_query_crsms_result").html("本所登記案件資料庫查無統編「"+text+"」收件資料。");
+		} else {
+			let html = "<p>登記案件：";
+			for (let i=0; i<count; i++) {
+				html += "<div class='reg_case_id'>" + jsonObj.raw[i]["RM01"] + "-" + jsonObj.raw[i]["RM02"]  + "-" + jsonObj.raw[i]["RM03"] + "</div>";
 			}
-			finish_count++;
-			if (finish_count >= 2) {
-				toggle(".id_query_grp");
-			}
-		},
-		error: obj => {
-			finish_count++;
-			if (finish_count >= 2) {
-				toggle(".id_query_grp");
-			}
+			html += "</p>";
+			$("#id_query_crsms_result").html(html);
+			// make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
+			addAnimatedCSS(".reg_case_id", {
+				name: "flash"
+			}).off("click").on("click", window.utilApp.fetchRegCase);
+			$(".reg_case_id").attr("title", "點我取得更多資訊！");
+		}
+		finish_count++;
+	}).catch(error => {
+		// on error
+		finish_count++;
+	}).finally(() => {
+		// finally
+		if (finish_count >= 2) {
+			toggle(".id_query_grp");
 		}
 	});
-	let xhr_cmsms = $.ajax({
-		url: CONFIG.JSON_API_EP,
-		data: "type=cmsms&id="+text,
-		method: "POST",
-		dataType: "json",
-		success: jsonObj => {
-			let count = jsonObj.data_count;
-			if (count == 0) {
-				$("#id_query_cmsms_result").html("本所測量案件資料庫查無統編「"+text+"」收件資料。");
-			} else {
-				let html = "<p>測量案件：";
-				for (let i=0; i<count; i++) {
-					html += "<div>" + jsonObj.raw[i]["MM01"] + "-" + jsonObj.raw[i]["MM02"]  + "-" + jsonObj.raw[i]["MM03"] + "</div>";
-				}
-				html += "</p>";
-				$("#id_query_cmsms_result").html(html);
+
+	axios.post(
+		CONFIG.JSON_API_EP,
+		{ type: 'cmsms', id: text }
+	).then(response => {
+		let jsonObj = response.data;
+		let count = jsonObj.data_count;
+		if (count == 0) {
+			$("#id_query_cmsms_result").html("本所測量案件資料庫查無統編「"+text+"」收件資料。");
+		} else {
+			let html = "<p>測量案件：";
+			for (let i=0; i<count; i++) {
+				html += "<div>" + jsonObj.raw[i]["MM01"] + "-" + jsonObj.raw[i]["MM02"]  + "-" + jsonObj.raw[i]["MM03"] + "</div>";
 			}
-			finish_count++;
-			if (finish_count >= 2) {
-				toggle(".id_query_grp");
-			}
-		},
-		error: obj => {
-			finish_count++;
-			if (finish_count >= 2) {
-				toggle(".id_query_grp");
-			}
+			html += "</p>";
+			$("#id_query_cmsms_result").html(html);
+		}
+		finish_count++;
+	}).catch(error => {
+		// on error
+		finish_count++;
+	}).finally(() => {
+		// finally
+		if (finish_count >= 2) {
+			toggle(".id_query_grp");
 		}
 	});
 }

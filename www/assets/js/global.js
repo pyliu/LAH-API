@@ -101,7 +101,11 @@ const ANIMATED_TRANSITIONS = [
     { in: "animated slideInLeft", out: "animated slideOutRight" },
     { in: "animated slideInRight", out: "animated slideOutLeft" }
 ];
-
+/**
+ * set axios defaults
+ */
+// PHP default uses QueryString as the parsing source but axios use json object instead
+axios.defaults.transformRequest = [data => Qs.stringify(data)];
 /**
  * Vue Relative Component
  */
