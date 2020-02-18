@@ -237,11 +237,6 @@ let xhrZipLog = e => {
 	asyncFetch(CONFIG.JSON_API_EP, {
 		method: 'POST',
 		body: form_body
-	}).then(response => {
-		if (response.status != 200) {
-			throw new Error("XHR連線異常，回應非200");
-		}
-		return response.json();
 	}).then(jsonObj => {
 		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + jsonObj.message + "】");
 		addNotification({
@@ -560,11 +555,6 @@ let xhrTest = () => {
 	asyncFetch(CONFIG.JSON_API_EP, {
 		method: 'POST',
 		body: form_body
-	}).then(response => {
-		if (response.status != 200) {
-			throw new Error("XHR連線異常，回應非200");
-		}
-		return response.json();
 	}).then(jsonObj => {
 		console.log(jsonObj);
 	}).catch(ex => {
