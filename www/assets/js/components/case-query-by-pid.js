@@ -81,9 +81,9 @@ if (Vue) {
             "cmsms-case": VueCMSMS
         },
         template: `<fieldset>
-            <legend>法院來函查統編</legend>
+            <legend>查詢人民申請案件</legend>
             <b-input-group size="sm">
-                <b-input-group-prepend is-text>統編</b-input-group-prepend>
+                <b-input-group-prepend is-text>身分證號</b-input-group-prepend>
                 <b-form-input
                     id="pid"
                     v-model="pid"
