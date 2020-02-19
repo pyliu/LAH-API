@@ -113,11 +113,15 @@ const store = (() => {
     if (typeof Vuex == "object") {
         return new Vuex.Store({
             state: {
-                cache : {}
+                cache : {},
+                isAdmin: false
             },
             mutations: {
                 cache(state, objPayload) {
                     state.cache = Object.assign(objPayload, state.cache);
+                },
+                isAdmin(state, flagPayload) {
+                    state.isAdmin = flagPayload === true;
                 }
             }
         });

@@ -207,43 +207,8 @@ fieldset fieldset legend {
         </div>
       </div>
       <div class="row">
-        <div class="col-6">
-          <!-- ld-over the loading covering container-->
-          <fieldset>
-            <legend>法院來函查統編</legend>
-
-            <div class="form-row">
-              <div class="input-group input-group-sm col">
-                <div class="input-group-prepend">
-                  <span class="input-group-text" id="inputGroup-id_query_text">統編</span>
-                </div>
-                <input type="text" id="id_query_text" name="id_query_text" class="form-control id_query_grp" placeholder="A123456789" />
-              </div>
-              <div class="filter-btn-group col">
-                <button id="id_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="id_quote_button" class="btn btn-sm btn-outline-success">備註</button>
-              </div>
-            </div>
-            
-            <blockquote id="id_sql" class="hide" data-title="法院來函查統編">
-              -- 【法院來函查統編】MOICAS_CRSMS 土地登記案件查詢-權利人+義務人+代理人+複代 <br/>
-              SELECT t.* <br/>
-                FROM MOICAS.CRSMS t <br/>
-              WHERE t.RM18 = 'H221350201' <br/>
-                  OR t.RM21 = 'H221350201' <br/>
-                  OR t.RM24 = 'H221350201' <br/>
-                  OR t.RM25 = 'H221350201'; <br/>
-              <br/>
-              -- 【法院來函查統編】MOICAS_CMSMS 測量案件資料查詢-申請人+代理人+複代 <br/>
-              SELECT t.* <br/>
-                FROM MOICAS.CMSMS t <br/>
-              WHERE t.MM13 = 'H221350201' <br/>
-                  OR t.MM17_1 = 'H221350201' <br/>
-                  OR t.MM17_2 = 'H221350201';
-            </blockquote>
-            <div id="id_query_crsms_result"></div>
-            <div id="id_query_cmsms_result"></div>
-          </fieldset>
+        <div id="case-query-by-pid" class="col-6">
+          <case-query-by-pid></case-query-by-pid>
         </div>
         <div class="col-6">
           <fieldset>
@@ -377,6 +342,7 @@ fieldset fieldset legend {
   <script src="assets/js/components/case-input-group-ui.js"></script>
   <script src="assets/js/components/case-sur-mgt.js"></script>
   <script src="assets/js/components/case-reg-search.js"></script>
+  <script src="assets/js/components/case-query-by-pid.js"></script>
 
   <script type="text/javascript">
     // place this variable in global to use this int for condition jufgement, e.g. 108
@@ -385,10 +351,6 @@ fieldset fieldset legend {
       // query section data event
       $("#data_query_button").on("click", xhrGetSectionRALIDCount);
       bindPressEnterEvent("#data_query_text", xhrGetSectionRALIDCount);
-
-      // query case by id event
-      $("#id_query_button").on("click", xhrGetCasesByID);
-      bindPressEnterEvent("#id_query_text", xhrGetCasesByID);
 
       /**
        * For User Mapping
@@ -480,6 +442,7 @@ fieldset fieldset legend {
 
       window.caseSurMgtVue = new Vue({ el: "#case-sur-mgt" });
       window.caseRegSearchVue = new Vue({ el: "#case-reg-search" });
+      window.caseCaseQueryByIDVue = new Vue({ el: "#case-query-by-pid" });
     });
   </script>
 </body>
