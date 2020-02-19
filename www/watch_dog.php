@@ -122,6 +122,7 @@ require_once("./include/authentication.php");
   <!-- Vue -->
   <script src="assets/js/vue.js"></script>
   <script src="assets/js/bootstrap-vue.min.js"></script>
+  <script src="assets/js/bootstrap-vue-icons.min.js"></script>
   <!-- Custom -->
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/global.js"></script>
