@@ -1,11 +1,46 @@
 if (Vue) {
     let VueCRSMS = {
-        template: `<div v-html="message"></div>`,
+        template: `<div>
+            <b-table
+                ref="reg_case_tbl"
+                striped
+                hover
+                responsive
+                borderless
+                no-border-collapse
+                small
+                sticky-header
+                head-variant="dark"
+                caption-top
+                :caption="'登記案件找到 ' + json.raw.length + '件'"
+                :items="json.raw"
+                :fields="fields"
+                class="text-center"
+                v-if="json && json.data_count > 0"
+            >
+                <template v-slot:cell(序號)="data">
+                    {{data.index + 1}}
+                </template>
+                <template v-slot:cell(RM01)="data">
+                    <span class="reg_case_id">{{data.item["RM01"] + "-" + data.item["RM02"] + "-" +  data.item["RM03"]}}</span>
+                </template>
+                <template v-slot:cell(RM09)="data">
+                    {{data.item["RM09"] + ":" + data.item["RM09_CHT"]}}</span>
+                </template>
+            </b-table>
+            <span v-else v-html="message"></span>
+        </div>`,
         props: ["pid"],
         data: function() {
             return {
                 json: null,
-                message: `<i class="text-primary fas fa-sync ld ld-spin"></i> 登記案件資料查詢中 ...`
+                fields: [
+                    '序號',
+                    {key: "RM01", label: "收件字號", sortable: true},
+                    {key: "RM07_1", label: "收件日期", sortable: true},
+                    {key: "RM09", label: "登記代碼", sortable: true}
+                ],
+                message: '<i class="text-primary fas fa-sync ld ld-spin"></i> 登記案件資料查詢中 ...'
             }
         },
         created() {
@@ -15,23 +50,16 @@ if (Vue) {
             ).then(response => {
                 // on success
                 this.json = response.data;
-                let count = this.json.data_count;
-                if (count == 0) {
-                    this.message = "本所登記案件資料庫查無統編「"+this.pid+"」收件資料。";
-                } else {
-                    this.message = `<p>登記案件( <b class="text-info">${count}件</b> )：`;
-                    for (let i=0; i<count; i++) {
-                        this.message += "<div class='reg_case_id'>" + this.json.raw[i]["RM01"] + "-" + this.json.raw[i]["RM02"]  + "-" + this.json.raw[i]["RM03"] + "</div>";
-                    }
-                    this.message += "</p>";
-                    setTimeout(() => {
-                        // make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
-                        addAnimatedCSS(".reg_case_id", {
-                            name: "flash"
-                        }).off("click").on("click", window.utilApp.fetchRegCase);
-                        $(".reg_case_id").attr("title", "點我取得更多資訊！");
-                    }, 250);
+                if (this.json.data_count == 0) {
+                    this.message = `<i class="text-info fas fa-exclamation-circle ld ld-heartbeat"></i> 查無登記案件資料`;
                 }
+                setTimeout(() => {
+                    // make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
+                    addAnimatedCSS(".reg_case_id", {
+                        name: "flash"
+                    }).off("click").on("click", window.utilApp.fetchRegCase);
+                    $(".reg_case_id").attr("title", "點我取得更多資訊！");
+                }, 250);
             }).catch(error => {
                 // on error
                 console.error(error.toJson());
@@ -42,11 +70,46 @@ if (Vue) {
         mounted() { }
     };
     let VueCMSMS = {
-        template: `<div v-html="message"></div>`,
+        template: `<div>
+            <b-table
+                ref="sur_case_tbl"
+                striped
+                hover
+                responsive
+                borderless
+                no-border-collapse
+                small
+                sticky-header
+                head-variant="dark"
+                caption-top
+                :caption="'測量案件找到 ' + json.raw.length + '件'"
+                :items="json.raw"
+                :fields="fields"
+                class="text-center"
+                v-if="json && json.data_count > 0"
+            >
+                <template v-slot:cell(序號)="data">
+                    {{data.index + 1}}
+                </template>
+                <template v-slot:cell(MM01)="data">
+                    <span>{{data.item["MM01"] + "-" + data.item["MM02"] + "-" +  data.item["MM03"]}}</span>
+                </template>
+                <template v-slot:cell(MM06)="data">
+                    {{data.item["MM06"] + ":" + data.item["MM06_CHT"]}}</span>
+                </template>
+            </b-table>
+            <span v-else v-html="message"></span>
+        </div>`,
         props: ["pid"],
         data: function() {
             return {
                 json: null,
+                fields: [
+                    '序號',
+                    {key: "MM01", label: "收件字號", sortable: true},
+                    {key: "MM04_1", label: "收件日期", sortable: true},
+                    {key: "MM06", label: "申請事由", sortable: true}
+                ],
                 message: `<i class="fas fa-sync ld ld-spin"></i> 測量案件資料查詢中 ...`
             }
         },
@@ -57,15 +120,8 @@ if (Vue) {
             ).then(response => {
                 // on success
                 this.json = response.data;
-                let count = this.json.data_count;
-                if (count == 0) {
-                    this.message = "本所測量案件資料庫查無統編「"+this.pid+"」收件資料。";
-                } else {
-                    this.message = `<p>測量案件( <b class="text-info">${count}件</b> )：`;
-                    for (let i=0; i<count; i++) {
-                        this.message += "<div>" + this.json.raw[i]["MM01"] + "-" + this.json.raw[i]["MM02"]  + "-" + this.json.raw[i]["MM03"] + "</div>";
-                    }
-                    this.message += "</p>";
+                if (this.json.data_count == 0) {
+                    this.message = `<i class="text-secondary fas fa-exclamation-circle ld ld-heartbeat"></i> 查無測量案件資料`;
                 }
             }).catch(error => {
                 // on error

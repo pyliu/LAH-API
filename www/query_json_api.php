@@ -207,7 +207,7 @@ switch ($_POST["type"]) {
 		break;
 	case "crsms":
 		$log->info("XHR [crsms] 查詢登記案件資料【".$_POST["id"]."】請求");
-		$query_result = $query->getCRSMSCasesByID($_POST["id"]);
+		$query_result = $query->getCRSMSCasesByPID($_POST["id"]);
 		if (empty($query_result)) {
 			$log->info("XHR [crsms] 查無資料");
 			echoErrorJSONString();
@@ -224,7 +224,7 @@ switch ($_POST["type"]) {
 		break;
 	case "cmsms":
 		$log->info("XHR [cmsms] 查詢測量案件資料【".$_POST["id"]."】請求");
-		$query_result = $query->getCMSMSCasesByID($_POST["id"]);
+		$query_result = $query->getCMSMSCasesByPID($_POST["id"]);
 		if (empty($query_result)) {
 			$log->info("XHR [cmsms] 查無資料");
 			echoErrorJSONString();

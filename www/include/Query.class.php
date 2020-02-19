@@ -130,14 +130,15 @@ class Query {
 		return empty($row) ? "0" : ltrim(array_key_exists($code, SUR_WORD) ? $row["MM03"] : $row["RM03"], "0");
 	}
 
-	public function getCRSMSCasesByID($id) {
+	public function getCRSMSCasesByPID($id) {
 		$id = strtoupper($id);
         if (!$this->checkPID($id)) {
             return false;
 		}
 		$this->db->parse("
-			SELECT t.*
+			SELECT t.*, w.KCNT AS \"RM09_CHT\"
 			FROM MOICAS.CRSMS t
+			LEFT JOIN MOIADM.RKEYN w ON t.RM09 = w.KCDE_2 AND w.KCDE_1 = '06'   -- 登記原因
 			WHERE t.RM18 = :bv_id
 			OR t.RM21 = :bv_id
 			OR t.RM24 = :bv_id
@@ -148,14 +149,15 @@ class Query {
 		return $this->db->fetchAll();
 	}
 
-	public function getCMSMSCasesByID($id) {
+	public function getCMSMSCasesByPID($id) {
 		$id = strtoupper($id);
 		if (!$this->checkPID($id)) {
             return false;
 		}
 		$this->db->parse("
-			SELECT t.*
+			SELECT t.*, w.KCNT AS \"MM06_CHT\"
 			FROM MOICAS.CMSMS t
+			LEFT JOIN MOIADM.RKEYN w ON t.MM06 = w.KCDE_2 AND w.KCDE_1 = 'M3'   -- 登記原因
 			WHERE t.MM13 = :bv_id
 			OR t.MM17_1 = :bv_id
 			OR t.MM17_2 = :bv_id
