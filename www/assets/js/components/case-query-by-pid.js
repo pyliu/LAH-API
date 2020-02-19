@@ -84,7 +84,12 @@ if (Vue) {
             <legend>法院來函查統編</legend>
             <b-input-group size="sm">
                 <b-input-group-prepend is-text>統編</b-input-group-prepend>
-                <b-form-input id="pid" v-model="pid" placeholder="A123456789"></b-form-input>
+                <b-form-input
+                    id="pid"
+                    v-model="pid"
+                    placeholder="A123456789"
+                    :state="valid"
+                ></b-form-input>
                 &ensp;
                 <b-button size="sm" @click="search" variant="outline-primary"><i class="fas fa-search"></i> 搜尋</b-button>
                 &ensp;
@@ -118,20 +123,53 @@ if (Vue) {
                 }
             }
         },
+        computed: {
+            valid: function() {
+                if (this.pid == '') return null;
+                return this.checkID();
+            }
+        },
         methods: {
             search: function(e) {
-                let h = this.$createElement;
-                let vNodes = h(
-                    'div',
-                    [
-                        h("crsms-case", { props: { pid: this.pid } }),
-                        h("cmsms-case", { props: { pid: this.pid } })
-                    ]
-                );
-                showModal({
-                    title: `查詢案件 BY 統編 「${this.pid}」`,
-                    message: vNodes
-                });
+                if (this.valid) {
+                    let h = this.$createElement;
+                    let vNodes = h(
+                        'div',
+                        [
+                            h("crsms-case", { props: { pid: this.pid } }),
+                            h("cmsms-case", { props: { pid: this.pid } })
+                        ]
+                    );
+                    showModal({
+                        title: `查詢案件 BY 統編 「${this.pid}」`,
+                        message: vNodes
+                    });
+                } else {
+                    addNotification({
+                        message: `${this.pid} 統編格式錯誤`,
+                        type: "warning"
+                    });
+                }
+            },
+            checkID: function() {
+                let id = this.pid;
+                tab = "ABCDEFGHJKLMNPQRSTUVXYWZIO"                     
+                A1 = new Array (1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3 );
+                A2 = new Array (0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5 );
+                Mx = new Array (9,8,7,6,5,4,3,2,1,1);
+
+                if ( id.length != 10 ) return false;
+                i = tab.indexOf( id.charAt(0) );
+                if ( i == -1 ) return false;
+                sum = A1[i] + A2[i]*9;
+
+                for ( i=1; i<10; i++ ) {
+                    v = parseInt( id.charAt(i) );
+                    if ( isNaN(v) ) return false;
+                    sum = sum + v * Mx[i];
+                }
+                if ( sum % 10 != 0 ) return false;
+                return true;
             }
         },
         mounted() {
