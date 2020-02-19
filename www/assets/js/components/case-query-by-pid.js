@@ -19,7 +19,7 @@ if (Vue) {
                 if (count == 0) {
                     this.message = "本所登記案件資料庫查無統編「"+this.pid+"」收件資料。";
                 } else {
-                    this.message = "<p>登記案件：";
+                    this.message = `<p>登記案件( <b class="text-info">${count}件</b> )：`;
                     for (let i=0; i<count; i++) {
                         this.message += "<div class='reg_case_id'>" + this.json.raw[i]["RM01"] + "-" + this.json.raw[i]["RM02"]  + "-" + this.json.raw[i]["RM03"] + "</div>";
                     }
@@ -61,9 +61,9 @@ if (Vue) {
                 if (count == 0) {
                     this.message = "本所測量案件資料庫查無統編「"+this.pid+"」收件資料。";
                 } else {
-                    this.message = "<p>測量案件：";
+                    this.message = `<p>測量案件( <b class="text-info">${count}件</b> )：`;
                     for (let i=0; i<count; i++) {
-                        this.message += "<div>" + this.json.raw[i]["RM01"] + "-" + this.json.raw[i]["RM02"]  + "-" + this.json.raw[i]["RM03"] + "</div>";
+                        this.message += "<div>" + this.json.raw[i]["MM01"] + "-" + this.json.raw[i]["MM02"]  + "-" + this.json.raw[i]["MM03"] + "</div>";
                     }
                     this.message += "</p>";
                 }
