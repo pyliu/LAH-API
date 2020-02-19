@@ -63,6 +63,7 @@ if (Vue) {
             }).catch(error => {
                 // on error
                 console.error(error.toJson());
+                this.message = `<i class="text-danger fas fa-exclamation-circle ld ld-heartbeat"></i> 查詢登記案件發生錯誤！【${error}】`;
             }).finally(() => {
                 // finally
             });
@@ -126,6 +127,7 @@ if (Vue) {
             }).catch(error => {
                 // on error
                 console.error(error.toJson());
+                this.message = `<i class="text-danger fas fa-exclamation-circle ld ld-heartbeat"></i> 查詢測量案件發生錯誤！【${error}】`;
             }).finally(() => {
                 // finally
             });

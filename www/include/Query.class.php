@@ -143,6 +143,7 @@ class Query {
 			OR t.RM21 = :bv_id
 			OR t.RM24 = :bv_id
 			OR t.RM25 = :bv_id
+			ORDER BY RM07_1 DESC
         ");
 		$this->db->bind(":bv_id", $id);
 		$this->db->execute();
@@ -161,6 +162,7 @@ class Query {
 			WHERE t.MM13 = :bv_id
 			OR t.MM17_1 = :bv_id
 			OR t.MM17_2 = :bv_id
+			ORDER BY MM04_1 DESC
         ");
 		$this->db->bind(":bv_id", $id);
 		$this->db->execute();
