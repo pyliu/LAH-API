@@ -89,6 +89,7 @@ if (Vue) {
                     v-model="pid"
                     placeholder="A123456789"
                     :state="valid"
+                    @keyup.enter="search"
                 ></b-form-input>
                 &ensp;
                 <b-button size="sm" @click="search" variant="outline-primary"><i class="fas fa-search"></i> 搜尋</b-button>
