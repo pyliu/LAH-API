@@ -152,6 +152,8 @@ let VueTransition = {
         appear: Boolean,
         fade: Boolean,
         slide: Boolean,
+        slideDown: Boolean,
+        slideUp: Boolean,
         zoom: Boolean,
         bounce: Boolean,
         rotate: Boolean
@@ -169,19 +171,22 @@ let VueTransition = {
     created() {
         if (this.rotate) {
             this.animated_in = `animated rotateIn ${this.cfg_css}`;
-            this.animated_in = `animated rotateOut ${this.cfg_css}`;
+            this.animated_out = `animated rotateOut ${this.cfg_css}`;
         } else if (this.bounce) {
             this.animated_in = `animated bounceIn ${this.cfg_css}`;
-            this.animated_in = `animated bounceOut ${this.cfg_css}`;
+            this.animated_out = `animated bounceOut ${this.cfg_css}`;
         } else if (this.zoom) {
             this.animated_in = `animated zoomIn ${this.cfg_css}`;
-            this.animated_in = `animated zoomOut ${this.cfg_css}`;
+            this.animated_out = `animated zoomOut ${this.cfg_css}`;
         } else if (this.fade) {
             this.animated_in = `animated fadeIn ${this.cfg_css}`;
-            this.animated_in = `animated fadeOut ${this.cfg_css}`;
-        } else if (this.slide) {
+            this.animated_out = `animated fadeOut ${this.cfg_css}`;
+        } else if (this.slideDown || this.slide) {
             this.animated_in = `animated slideInDown ${this.cfg_css}`;
-            this.animated_in = `animated slideOutUp ${this.cfg_css}`;
+            this.animated_out = `animated slideOutUp ${this.cfg_css}`;
+        } else if (this.slideUp) {
+            this.animated_in = `animated slideInUp ${this.cfg_css}`;
+            this.animated_out = `animated slideOutDown ${this.cfg_css}`;
         } else {
             this.randAnimation();
         }
@@ -1101,13 +1106,6 @@ $(document).ready(e => {
     initTooltip();
     initDatepicker();
     initScreensaver();
-    
-    // hide footer after 10s
-    setTimeout(() => addAnimatedCSS("#copyright", {
-        name: "animated slideOutDown",
-        callback: () => { $("#copyright").hide() }
-    }), 10000);
-
     // add pulse effect for the nav-item
     $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
 });
