@@ -83,13 +83,14 @@ if (Vue) {
         template: `<fieldset>
             <legend>查詢人民申請案件</legend>
             <b-input-group size="sm">
-                <b-input-group-prepend is-text>身分證號</b-input-group-prepend>
+                <b-input-group-prepend is-text><b-icon icon="person-fill"></b-icon></b-input-group-prepend>
                 <b-form-input
                     id="pid"
                     v-model="pid"
                     placeholder="A123456789"
                     :state="valid"
                     @keyup.enter="search"
+                    title="身分證號"
                 ></b-form-input>
                 &ensp;
                 <b-button size="sm" @click="search" variant="outline-primary"><i class="fas fa-search"></i> 搜尋</b-button>
