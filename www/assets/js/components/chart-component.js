@@ -90,7 +90,17 @@ if (Vue) {
                             position: 'right'
                         };
                         break;
+                    case "radar":
+                        break;
                     default:
+                        opts.scales = {
+                            yAxes: [{
+                                display: true,
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        };
                 }
                 // use chart.js directly
                 let ctx = $(`#${this.id}`);
@@ -112,15 +122,7 @@ if (Vue) {
                                 }
                             }
                         },
-                        title: { display: false, text: "自訂標題", position: "bottom" },
-                        scales: {
-                            yAxes: [{
-                                display: true,
-                                ticks: {
-                                    beginAtZero: true
-                                }
-                            }]
-                        }
+                        title: { display: false, text: "自訂標題", position: "bottom" }
                     }, opts)
                 });
             },
