@@ -1108,6 +1108,8 @@ $(document).ready(e => {
     initScreensaver();
     // add pulse effect for the nav-item
     $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
+    // init vueApp
+    window.vueApp = new Vue({el: "#main_content_section"});
 });
 //]]>
     

@@ -52,47 +52,6 @@ fieldset fieldset legend {
 
 <body>
 
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <i class="my-auto fas fa-file-alt fa-2x text-light"></i>&ensp;
-    <a class="navbar-brand" href="query.php">地政輔助系統 <span class="small">(α)</span></a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item mt-3">
-          <a class="nav-link" href="/index.php">登記案件追蹤</a>
-        </li>
-		    <li class="nav-item mt-3 active">
-          <a class="nav-link" href="/query.php">查詢＆報表</a>
-        </li>
-        <li class="nav-item mt-3">
-          <a class="nav-link" href="/watch_dog.php">監控＆修正</a>
-        </li>
-        <li class="nav-item mt-3">
-          <a class="nav-link" href="/overdue_reg_cases.html">逾期案件</a>
-        </li>
-        <li class="nav-item mt-3">
-          <a class="nav-link" href="/watchdog.html">檢視記錄檔</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle hamburger" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="assets/img/menu.png" /></a>
-          <div class="dropdown-menu" aria-labelledby="dropdown01">
-            <a class="dropdown-item" href="http://220.1.35.87/" target="_blank">內部知識網</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="http://www.zhongli-land.tycg.gov.tw/" target="_blank">地所首頁</a>
-            <a class="dropdown-item" href="http://webitr.tycg.gov.tw:8080/WebITR/" target="_blank">差勤系統</a>
-            <a class="dropdown-item" href="/heir.html" target="_blank">繼承案件輕鬆審<span class="text-mute small">(β)</span></a>
-            <a class="dropdown-item" href="http://tycgcloud.tycg.gov.tw/" target="_blank">公務雲</a>
-            <a class="dropdown-item" href="http://220.1.35.24/Web/ap06.asp" target="_blank">分機查詢</a>
-            <a class="dropdown-item" href="http://220.1.35.42:9080/SMS98/" target="_blank">案件辦理情形通知系統（簡訊＆EMAIL）</a>
-            <a class="dropdown-item" href="/shortcuts.html" target="_blank">各類WEB版應用黃頁</a>
-          </div>
-        </li>
-      </ul>
-    </div>
-  </nav>
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
       
@@ -338,6 +297,7 @@ fieldset fieldset legend {
   <script src="assets/js/components/case-sur-mgt.js"></script>
   <script src="assets/js/components/case-reg-search.js"></script>
   <script src="assets/js/components/case-query-by-pid.js"></script>
+  <script src="assets/js/components/lah-header.js"></script>
   <script src="assets/js/components/lah-footer.js"></script>
 
   <script type="text/javascript">
@@ -435,10 +395,6 @@ fieldset fieldset legend {
       // search users
       $("#search_user_button").on("click", xhrSearchUsers);
       bindPressEnterEvent("#msg_who", xhrSearchUsers);
-
-      window.caseSurMgtVue = new Vue({ el: "#case-sur-mgt" });
-      window.caseRegSearchVue = new Vue({ el: "#case-reg-search" });
-      window.caseCaseQueryByIDVue = new Vue({ el: "#case-query-by-pid" });
     });
   </script>
 </body>

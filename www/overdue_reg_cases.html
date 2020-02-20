@@ -22,18 +22,11 @@
 
 <body>
 
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <i class="my-auto fas fa-th-list fa-2x text-light"></i>&ensp;
-    <a class="navbar-brand" href="javascript:location.reload()">逾期案件查詢 - 地政輔助系統 <span class="small">(α)</span></a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-  </nav>
-  <section id="main_content_section" class="mb-5">
+  <section id="overdue-reg-cases" class="mb-5">
     <div class="container-fluid">
       <div class="row">
-        <div id="overdue-reg-cases" class="col">
-          <case-reg-overdue ref="overdue" :reviewer-id="reviewerID"></case-reg-overdues>
+        <div class="col">
+          <case-reg-overdue ref="overdue" :reviewer-id="reviewerID"></case-reg-overdue>
           <my-transition slide>
             <h2 v-if="!show" class="text-center text-danger">請使用 CHROME/EDGE 瀏覽器開啟本頁面。</h2>
           </my-transition>
@@ -60,6 +53,7 @@
   <script src="assets/js/components/case-reg-overdue.js"></script>
   <script src="assets/js/Chart.min.js"></script>
   <script src="assets/js/components/chart-component.js"></script>
+  <script src="assets/js/components/lah-header.js"></script>
   <script src="assets/js/components/lah-footer.js"></script>
 
   <script type="text/javascript">
@@ -94,7 +88,8 @@
           }
         }
       });
-      window.overdueRegCasesVue = new Vue({
+      // override the default vueApp from global.js
+      window.vueApp = new Vue({
         el: "#overdue-reg-cases",
         store,
         components: {"my-transition": VueTransition},
@@ -115,9 +110,11 @@
         },
         mounted() {
           this.show = true;
+          // disable body scrollbar
+          $("body").css("overflow", "hidden");
         }
       });
-      // could check store by window.overdueRegCasesVue.$refs.overdue.$store
+      // could check store by window.vueApp.$refs.overdue.$store
       // disable body scrollbar
       $("body").css("overflow", "hidden");
     });
