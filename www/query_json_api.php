@@ -20,6 +20,27 @@ function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 $query = new Query();
 
 switch ($_POST["type"]) {
+	case "authentication":
+		// $client_ip is from init.php
+		if (in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
+			$msg = $client_ip." 通過管理者認證。";
+			$log->info($msg);
+			echo json_encode(array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"is_admin" => true,
+				"data_count" => "0",
+				"message" => $msg
+			), 0);
+		} else {
+			$log->warning($client_ip." 嘗試存取限制的管理系統。");
+			echo json_encode(array(
+				"status" => STATUS_CODE::FAIL_NO_AUTHORITY,
+				"is_admin" => false,
+				"data_count" => "0",
+				"message" => "<(￣ ﹌ ￣)> you bad boy ... ".$client_ip
+			), 0);
+		}
+		break;
 	case "overdue_reg_cases":
 		$log->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
 		$log->info("XHR [overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");

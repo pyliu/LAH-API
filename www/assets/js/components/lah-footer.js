@@ -25,7 +25,7 @@ if (Vue) {
         }
     });
     $(document).ready(() => {
-        $("body").append($.parseHTML(`<div id="lah-footer"><lah-footer></lah-footer></div>`));
-        new Vue({ el: "#lah-footer" });
+        $("body").append($.parseHTML(`<div id="lah-footer"><lah-footer ref="footer"></lah-footer></div>`));
+        window.vueLahFooter = new Vue({ el: "#lah-footer" });
     });
 }

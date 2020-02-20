@@ -21,7 +21,8 @@ if (Vue) {
         data: function() {
             return {
                 show: true,
-                is_admin: true,
+                icon: "fa-question",
+                is_admin: false,
                 links: [{
                     text: "案件追蹤",
                     url: "index.php",
@@ -46,14 +47,13 @@ if (Vue) {
                     text: "記錄檔",
                     url: "watchdog.html",
                     icon: "fa-dog",
-                    need_admin: false
+                    need_admin: true
                 }, {
                     text: "測試頁",
                     url: "test.html",
                     icon: "fa-charging-station",
                     need_admin: true
-                }],
-                icon: "fa-question"
+                }]
             }
         },
         methods: {
@@ -63,6 +63,19 @@ if (Vue) {
         },
         created() {
             // TODO: add query to get authority token
+            let that = this;
+            this.$http.post(CONFIG.JSON_API_EP, {
+                type: 'authentication'
+            }).then(res => {
+                that.is_admin = res.data.is_admin || false;
+            }).catch(err => {
+                console.error(err.toJSON());
+                showAlert({
+                    title: '認證失敗',
+                    message: err.message,
+                    type: 'danger'
+                });
+            });
         },
         mounted() {
             let that = this;
@@ -74,7 +87,7 @@ if (Vue) {
         }
     });
     $(document).ready(() => {
-        $("body").prepend($.parseHTML(`<div id="lah-header"><lah-header></lah-header></div>`));
-        new Vue({ el: "#lah-header" });
+        $("body").prepend($.parseHTML(`<div id="lah-header"><lah-header ref="header"></lah-header></div>`));
+        window.vueLahHeader = new Vue({ el: "#lah-header" });
     });
 }
