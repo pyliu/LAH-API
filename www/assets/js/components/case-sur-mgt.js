@@ -252,8 +252,8 @@ if (Vue) {
                             that.$http.post(CONFIG.JSON_API_EP, {
                                 type: "fix_sur_delay_case",
                                 id: id,
-                                "UPD_MM22": upd_mm22,
-                                "CLR_DELAY": clr_delay
+                                UPD_MM22: upd_mm22,
+                                CLR_DELAY: clr_delay
                             }).then(res => {
                                 if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                     addNotification({
