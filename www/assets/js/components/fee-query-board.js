@@ -935,7 +935,8 @@ if (Vue) {
                         });
                     }
                 },
-                mounted: function() { 
+                mounted: function() {},
+                updated() {
                     Vue.nextTick(() => 
                         addAnimatedCSS(".reg_case_id", {
                             name: "flash"
