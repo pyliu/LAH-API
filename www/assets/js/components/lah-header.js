@@ -69,7 +69,7 @@ if (Vue) {
             }).then(res => {
                 that.is_admin = res.data.is_admin || false;
             }).catch(err => {
-                console.error(err.toJSON());
+                console.error(err);
                 showAlert({
                     title: '認證失敗',
                     message: err.message,

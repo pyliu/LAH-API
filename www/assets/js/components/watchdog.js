@@ -240,10 +240,9 @@ if (Vue) {
                             if (jsonObj.status == XHR_STATUS_CODE.FAIL_NOT_VALID_SERVER) {
                                 // 此功能僅在伺服器上執行！
                                 this.$emit("fail-not-valid-server");
-                                showAlert({
+                                addNotification({
                                     title: "伺服器排程停止通知",
-                                    message: `${jsonObj.message}`,
-                                    type: "warning"
+                                    message: `${jsonObj.message}`
                                 });
                             } else {
                                 if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {

@@ -721,8 +721,10 @@ let initAlertUI = () => {
     }
 }
 
-let initUtilApp = () => {
+let initVueApp = () => {
     if (window.utilApp) { return; }
+    // init vueApp for every page's #main_content_section section tag
+    window.vueApp = new Vue({el: "#main_content_section"});
     // bootstrap-vue will add $bvToast and $bvModal to every vue instance, I will leverage it to show toast and modal window
     window.utilApp = new Vue({
         data: {
@@ -1101,15 +1103,13 @@ let initScreensaver = () => {
 }
 
 $(document).ready(e => {
-    initUtilApp();
-    initBlockquoteModal();
+    initVueApp();
     initTooltip();
     initDatepicker();
     initScreensaver();
+    initBlockquoteModal();
     // add pulse effect for the nav-item
     $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
-    // init vueApp
-    window.vueApp = new Vue({el: "#main_content_section"});
 });
 //]]>
     

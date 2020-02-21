@@ -75,6 +75,7 @@ require_once("./include/authentication.php");
   <script src="assets/js/bootstrap-vue.min.js"></script>
   <script src="assets/js/bootstrap-vue-icons.min.js"></script>
   <!-- Custom -->
+  <script src="assets/js/qs.js"></script>
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/global.js"></script>
   <script src="assets/js/xhr_query.js"></script>
