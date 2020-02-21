@@ -145,13 +145,10 @@ if (Vue) {
                     }
                 },
                 created: function(e) {
-                    let form_body = new FormData();
-                    form_body.append("type", "announcement_data");
-                    asyncFetch(CONFIG.JSON_API_EP, {
-                        method: 'POST',
-                        body: form_body
-                    }).then(jsonObj => {
-                        this.data = jsonObj.raw;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: 'announcement_data'
+                    }).then(res => {
+                        this.data = res.data.raw;
                     });
                 },
                 mounted: function(e) {
@@ -216,18 +213,15 @@ if (Vue) {
                                     return;
                                 }
                                 console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
+                                let that = this;
                                 showConfirm("確定要更新公告資料？", () => {
-                                    let form_body = new FormData();
-                                    form_body.append("type", "update_announcement_data");
-                                    form_body.append("code", reason_code);
-                                    form_body.append("day", day);
-                                    form_body.append("flag", flag);
-                                    
-                                    asyncFetch(CONFIG.JSON_API_EP, {
-                                        method: 'POST',
-                                        body: form_body
-                                    }).then(jsonObj => {
-                                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + jsonObj.status + "】");
+                                    that.$http.post(CONFIG.JSON_API_EP, {
+                                        type: 'update_announcement_data',
+                                        code: reason_code,
+                                        day: day,
+                                        flag: flag
+                                    }).then(res => {
+                                        console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + res.data.status + "】");
                                         addNotification({
                                             title: reason_cnt,
                                             message: `公告已更新【天數：${this.data[2]} => ${day}, 准登：${this.data[3]} => ${flag}】`,
@@ -242,9 +236,14 @@ if (Vue) {
                                             flag: flag
                                         });
                                         closeModal();
-                                    }).catch(ex => {
-                                        console.error("announcement-mgt-dialog::update parsing failed", ex);
-                                        showAlert({message: "announcement-mgt-dialog::update XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+                                    }).catch(err => {
+                                        console.error("announcement-mgt-dialog::update parsing failed", err);
+                                        showAlert({
+                                            title: "XHR連線查詢有問題",
+                                            subtitle: "announcement-mgt-dialog::update",
+                                            message: err.message,
+                                            type: "danger"
+                                        });
                                     });
                                     
                                 });
