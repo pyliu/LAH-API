@@ -21,8 +21,12 @@ if (Vue) {
                 year: "108",
                 code: "HB04",
                 num: "000010",
-                dialog: null
+                dialog: null,
+                busy: false
             }
+        },
+        watch: {
+            busy: function(flag) { flag ? utilApp.busyOn(this.$el) : utilApp.busyOff(this.$el); }
         },
         methods: {
             handleUpdate: function(e, data) {
@@ -40,44 +44,35 @@ if (Vue) {
                         type: "warning"});
                     return false;
                 }
+
                 let year = this.year;
                 let code = this.code;
                 let number = this.num;
-                // prepend "0"
-                var offset = 6 - number.length;
-                for (var i = 0; i < offset; i++) {
-                    number = "0" + number;
-                }
+                
                 // prepare post params
                 let id = trim(year + code + number);
-                let body = new FormData();
-                body.append("type", "reg_case");
-                body.append("id", id);
                 
-                toggle(e.target);
+                this.busy = true;
 
-                let that = this;
-
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    //headers: { "Content-Type": "application/json" },
-                    body: body
-                }).then(jsonObj => {
-                    if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "reg_case",
+                    id: id
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({
                             title: "案件查詢",
                             subtitle: id,
-                            message: jsonObj.message,
+                            message: res.data.message,
                             type: "warning"
                         });
-                    } else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                        throw new Error("查詢失敗：" + jsonObj.message);
+                    } else if (res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                        throw new Error("查詢失敗：" + res.data.message);
                     } else {
                         // create sub-component dynamically
                         let v = this.$createElement("case-state-mgt-dialog", {
                             props: {
-                                raw: jsonObj.raw,
-                                tr: jsonObj.tr_html
+                                raw: res.data.raw,
+                                tr: res.data.tr_html
                             }
                         })
                         showModal({
@@ -86,10 +81,15 @@ if (Vue) {
                             size: "md"
                         });
                     }
-                    toggle(e.target);
-                }).catch(ex => {
-                    console.error("case-state-mgt::query parsing failed", ex);
-                    showAlert({message: "無法取得 " + id + " 資訊!【" + ex.toString() + "】", type: "danger"});
+                    this.busy = false;
+                }).catch(err => {
+                    console.error("case-state-mgt::query parsing failed", err);
+                    showAlert({
+                        title: "查詢案件",
+                        subtitle: id,
+                        message: err.message,
+                        type: "danger"
+                    });
                 });
             },
             popup: () => {
