@@ -34,11 +34,29 @@ class Query {
 		return true;
 	}
 
-	private function checkCaseID($id) {
-		if (empty($id) || !preg_match("/^[0-9A-Za-z]{13}$/i", $id)) {
-            return false;
+	private function checkCaseID(&$id) {
+		global $log;
+		if (!empty($id)) {
+			$year = substr($id, 0, 3);
+			$code = substr($id, 3, 4);
+			$number = str_pad(substr($id, 7, 6), 6, "0", STR_PAD_LEFT);
+			if (
+				preg_match("/^[0-9A-Za-z]{3}$/i", $year) &&
+				preg_match("/^[0-9A-Za-z]{4}$/i", $code) &&
+				preg_match("/^[0-9A-Za-z]{6}$/i", $number)
+			) {
+				$log->info(__METHOD__.": $id passed the id verification.");
+				$nid = $year.$code.$number;
+				if ($id != $nid) {
+					// recomposition the $id
+					$id = $nid;
+					$log->info(__METHOD__.": update the case id to '$nid'.");
+				}
+				return true;
+			}
 		}
-		return true;
+		$log->warning(__METHOD__.": $id failed the id verification.");
+		return false;
 	}
 
     function __construct() {
@@ -96,7 +114,7 @@ class Query {
 		$code = substr($id, 3, 4);
 		$this->db->bind(":bv_rm01_year", substr($id, 0, 3));
         $this->db->bind(":bv_rm02_code", $code);
-		$this->db->bind(":bv_rm03_number", str_pad(substr($id, 7, 6), 6, "0"));
+		$this->db->bind(":bv_rm03_number", substr($id, 7, 6));
 		$this->db->bind(":bv_county_code", $code[0]);
 		$this->db->bind(":bv_hold_code", $code[0].$code[1]);
 		$this->db->bind(":bv_receive_code", $code[0].$code[2]);
@@ -605,7 +623,7 @@ class Query {
 
     public function getRegCaseDetail($id) {
         if (!$this->checkCaseID($id)) {
-            return "";
+            return array();
 		}
 		
 		$this->db->parse(
@@ -623,7 +641,7 @@ class Query {
 		
         $this->db->bind(":bv_rm01_year", substr($id, 0, 3));
         $this->db->bind(":bv_rm02_code", substr($id, 3, 4));
-        $this->db->bind(":bv_rm03_number", str_pad(substr($id, 7, 6), 6, "0"));
+        $this->db->bind(":bv_rm03_number", substr($id, 7, 6));
 
 		$this->db->execute();
 		// true -> raw data with converting to utf-8
@@ -653,7 +671,7 @@ class Query {
         
         $this->db->bind(":bv_year", substr($id, 0, 3));
         $this->db->bind(":bv_code", substr($id, 3, 4));
-        $this->db->bind(":bv_number", str_pad(substr($id, 7, 6), 6, "0"));
+        $this->db->bind(":bv_number", substr($id, 7, 6));
 
 		$this->db->execute();
 		// true -> raw data with converting to utf-8
@@ -667,7 +685,7 @@ class Query {
 
 		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
-		$number = str_pad(substr($id, 7, 6), 6, "0");
+		$number = substr($id, 7, 6);
 		
 		if ($upd_mm22 == "true") {
 			$this->db->parse("
@@ -750,7 +768,7 @@ class Query {
 		
         $this->db->bind(":bv_ss03_year", substr($id, 0, 3));
         $this->db->bind(":bv_ss04_1_code", substr($id, 3, 4));
-        $this->db->bind(":bv_ss04_2_number", str_pad(substr($id, 7, 6), 6, "0"));
+        $this->db->bind(":bv_ss04_2_number", substr($id, 7, 6));
 
 		$this->db->execute();
 		return $this->db->fetchAll();
@@ -764,7 +782,7 @@ class Query {
 		$diff_result = array();
 		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
-		$num = str_pad(substr($id, 7, 6), 6, "0");
+		$num = substr($id, 7, 6);
 		$db_user = "L1H".$code[1]."0H03";
 
 		global $log;
@@ -834,7 +852,7 @@ class Query {
 		global $log;
 		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
-		$num = str_pad(substr($id, 7, 6), 6, "0");
+		$num = substr($id, 7, 6);
 		$db_user = "L1H".$code[1]."0H03";
 
 		// connection switch to L1HWEB
@@ -905,7 +923,7 @@ class Query {
 			global $log;
 			$year = substr($id, 0, 3);
 			$code = substr($id, 3, 4);
-			$number = str_pad(substr($id, 7, 6), 6, "0");
+			$number = substr($id, 7, 6);
 
 			$set_str = "";
 			foreach ($diff as $col_name => $arr_vals) {
@@ -1076,7 +1094,7 @@ class Query {
 
 		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
-		$num = str_pad(substr($id, 7, 6), 6, "0");
+		$num = substr($id, 7, 6);
 
 		$sql = "UPDATE ${table} SET ${column} = :bv_val WHERE ${year_col} = :bv_year AND ${code_col} = :bv_code AND ${num_col} = :bv_number";
 		
