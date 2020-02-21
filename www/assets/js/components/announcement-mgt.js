@@ -18,7 +18,13 @@ if (Vue) {
         </fieldset>`,
         data: () => {
             return {
-                reset_flag: false
+                reset_flag: false,
+                busy: false
+            }
+        },
+        watch: {
+            busy: function(flag) {
+                flag ? utilApp.busyOn(this.$el) : utilApp.busyOff(this.$el);
             }
         },
         methods: {
@@ -31,21 +37,23 @@ if (Vue) {
             clear: function(e) {
                 let that = this;
                 showConfirm("請確認清除所有登記原因的准登旗標？", () => {
-                    toggle(e.target);
-                    let form_body = new FormData();
-                    form_body.append("type", "clear_announcement_flag");
-                    asyncFetch(CONFIG.JSON_API_EP, {
-                        method: 'POST',
-                        body: form_body
-                    }).then(jsonObj => {
+                    that.busy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: "clear_announcement_flag"
+                    }).then(res => {
                         // let component knows it needs to clear the flag
                         this.reset_flag = true;
-                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + jsonObj.status + "】");
+                        console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + res.data.status + "】");
                         addNotification({ title: "清除全部先行准登旗標", message: "已清除完成", type: "success" });
-                        toggle(e.target);
-                    }).catch(ex => {
-                        console.error("announcement-mgt::clear parsing failed", ex);
-                        showAlert({message: "announcement-mgt::clear XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+                        that.busy = false;
+                    }).catch(err => {
+                        console.error("announcement-mgt::clear parsing failed", err);
+                        showAlert({
+                            title: "XHR連線查詢有問題",
+                            subtitle: "announcement-mgt::clear",
+                            message: err.message,
+                            type: "danger"
+                        });
                     });
                 });
             },
