@@ -93,7 +93,6 @@ if (Vue) {
                 caption: "查詢中 ... ",
                 busy: false,
                 small: false,
-                timer_handle: null,
                 milliseconds: 15 * 60 * 1000,
                 listMode: true,
                 statsMode: false,
@@ -195,9 +194,10 @@ if (Vue) {
                 this.$refs.countdown.end();
             },
             makeCaseIDClickable: function () {
-                addAnimatedCSS("table tr td:nth-child(2)", {
-                    name: "flash"
-                }).off("click").on("click", window.utilApp.fetchRegCase).addClass("reg_case_id");
+                addAnimatedCSS("table tr td:nth-child(2)", { name: "flash" })
+                .off("click")
+                .on("click", window.utilApp.fetchRegCase)
+                .addClass("reg_case_id");
             },
             searchByReviewer: function(reviewer_data) {
                 // reviewer_data, e.g. "曾奕融 HB1184"
@@ -218,8 +218,6 @@ if (Vue) {
             load: function(e) {
                 // busy ...
                 this.busy = true;
-
-                clearTimeout(this.timer_handle);
                 this.title = this.is_overdue_mode ? "逾期" : "即將逾期";
                 if (this.inSearch) {
                     // in-search, by clicked the first reviewer button
