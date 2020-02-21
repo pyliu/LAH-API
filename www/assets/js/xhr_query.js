@@ -100,9 +100,9 @@ let xhrExportSQLReport = (e, form_body) => {
 	let text = $("#preload_sql_select option:selected").text();
 	form_body.append("sql", $("#sql_csv_text").val());
 	toggle(e.target);
-	asyncFetch("export_file_api.php", {
+	fetch("export_file_api.php", {
 		method: 'POST',
-		body: form_body
+		body: form_body,
 	}).then(response => {
 		return response.blob();
 	}).then(blob => {
@@ -129,7 +129,7 @@ let xhrExportLog = e => {
 	form_body.append("type", "file_log");
 	form_body.append("date", date);
 	toggle(e.target);
-	asyncFetch("export_file_api.php", {
+	fetch("export_file_api.php", {
 		method: 'POST',
 		body: form_body
 	}).then(response => {
