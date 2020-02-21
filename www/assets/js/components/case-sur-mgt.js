@@ -249,16 +249,13 @@ if (Vue) {
                         showConfirm("確定要修正本案件?", function() {
                             that.busy = true;
                             //fix_sur_delay_case
-                            let body = new FormData();
-                            body.append("type", "fix_sur_delay_case");
-                            body.append("id", id);
-                            body.append("UPD_MM22", upd_mm22);
-                            body.append("CLR_DELAY", clr_delay);
-                            asyncFetch(CONFIG.JSON_API_EP, {
-                                method: "POST",
-                                body: body
-                            }).then(jsonObj => {
-                                if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            that.$http.post(CONFIG.JSON_API_EP, {
+                                type: "fix_sur_delay_case",
+                                id: id,
+                                "UPD_MM22": upd_mm22,
+                                "CLR_DELAY": clr_delay
+                            }).then(res => {
+                                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                     addNotification({
                                         title: "修正複丈案件",
                                         subtitle: id,
@@ -268,7 +265,7 @@ if (Vue) {
                                     // update the data will affect UI
                                     that.json.raw['MM22'] = 'D';
                                 } else {
-                                    let msg = "回傳狀態碼不正確!【" + jsonObj.message + "】";
+                                    let msg = "回傳狀態碼不正確!【" + res.data.message + "】";
                                     showAlert({
                                         title: "修正複丈案件失敗",
                                         subtitle: id,
