@@ -228,15 +228,12 @@ if (Vue) {
                     this.busy = false;
                     Vue.nexTick ? Vue.nexTick(this.makeCaseIDClickable) : setTimeout(this.makeCaseIDClickable, 800);
                 } else {
-                    let form_body = new FormData();
-                    form_body.append("type", this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases");
-                    if (!isEmpty(this.reviewerId)) {
-                        form_body.append("reviewer_id", this.reviewerId);
+                    let params = {
+                        type: this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases",
+                        reviewer_id: this.reviewerId
                     }
-                    asyncFetch(CONFIG.JSON_API_EP, {
-                        method: 'POST',
-                        body: form_body
-                    }).then(jsonObj => {
+                    this.$http.post(CONFIG.JSON_API_EP, params).then(res => {
+                        let jsonObj = res.data;
                         console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL || jsonObj.status == XHR_STATUS_CODE.SUCCESS_WITH_NO_RECORD, `查詢登記案件(${this.title})回傳狀態碼有問題【${jsonObj.status}】`);
 
                         // set data to store
@@ -246,13 +243,6 @@ if (Vue) {
 
                         this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
 
-                        Vue.nextTick(this.makeCaseIDClickable);
-                        addNotification({
-                            title: `查詢登記案件(${this.title})`,
-                            message: `查詢到 ${jsonObj.data_count} 件案件`,
-                            type: this.is_overdue_mode ? "danger" : "warning"
-                        });
-                        
                         let now = new Date();
                         if (now.getHours() >= 7 && now.getHours() < 17) {
                             // auto start countdown to prepare next reload
@@ -271,9 +261,16 @@ if (Vue) {
 
                         // prepare the chart data for rendering
                         this.setChartData();
-
+                        // make .reg_case_id clickable
+                        Vue.nextTick(this.makeCaseIDClickable);
                         // release busy ...
                         this.busy = false;
+                        // send notification
+                        addNotification({
+                            title: `查詢登記案件(${this.title})`,
+                            message: `查詢到 ${jsonObj.data_count} 件案件`,
+                            type: this.is_overdue_mode ? "danger" : "warning"
+                        });
                     }).catch(ex => {
                         console.error("case-reg-overdue::created parsing failed", ex);
                         showAlert({message: "case-reg-overdue::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
