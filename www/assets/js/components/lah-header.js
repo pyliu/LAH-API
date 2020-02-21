@@ -10,11 +10,13 @@ if (Vue) {
                 </button>
             
                 <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-                    <ul class="navbar-nav mr-auto">
-                        <li v-for="link in links" :class="['nav-item', 'my-auto', active(link.url)]" v-show="link.need_admin ? is_admin : true">
-                            <a class="nav-link" :href="link.url">{{link.text}}</a>
-                        </li>
-                    </ul>
+                    <lah-transition appear>
+                        <ul class="navbar-nav mr-auto">
+                            <li v-for="link in links" :class="['nav-item', 'my-auto', active(link.url)]" v-show="link.need_admin ? is_admin : true">
+                                <a class="nav-link" :href="link.url">{{link.text}}</a>
+                            </li>
+                        </ul>
+                    </lah-transition>
                 </div>
             </nav>
         </lah-transition>`,

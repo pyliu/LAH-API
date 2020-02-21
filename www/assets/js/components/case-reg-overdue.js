@@ -225,10 +225,10 @@ if (Vue) {
                     // in-search, by clicked the first reviewer button
                     let case_count = this.case_list_by_id[this.reviewerId].length || 0;
                     this.caption = `${case_count} 件`;
-                    Vue.nexTick(this.makeCaseIDClickable);
                     addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
                     // release busy ...
                     this.busy = false;
+                    Vue.nexTick ? Vue.nexTick(this.makeCaseIDClickable) : setTimeout(this.makeCaseIDClickable, 800);
                 } else {
                     let form_body = new FormData();
                     form_body.append("type", this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases");
