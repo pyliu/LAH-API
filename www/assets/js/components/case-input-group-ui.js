@@ -78,33 +78,32 @@ if (Vue) {
                 let year = this.year;
                 let code = this.code;
                 if (isEmpty(code) || isEmpty(year)) {
-                    addNotification({message: "案件年或案件字為空白，無法取得案件目前最大號碼。"});
+                    addNotification({message: "案件年或案件字為空白，無法取得案件目前最大號碼。", type: "warning"});
                     return;
                 }
                 this.busy = true;
-                let body = new FormData();
-                body.append("type", "max");
-                body.append("year", year);
-                body.append("code", code);
                 let that = this;
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        addNotification({
-                            body: year + "年 " + code + " 最新案件號為 " + jsonObj.max
-                        });
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    "type": "max",
+                    "year": year,
+                    "code": code
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         // update UI
-                        that.num = jsonObj.max;
+                        that.num = res.data.max;
                         that.uiUpdate(e);
                     } else {
-                        showAlert({message: jsonObj.message, type: "danger"});
+                        addNotification({message: res.data.message, type: "warning"});
                     }
                     this.busy = false;
-                }).catch(ex => {
-                    console.error("case-input-group-ui::getMaxNumber parsing failed", ex);
-                    showAlert({message: "查詢最大號碼失敗~【" + code + "】", type: "danger"});
+                }).catch(err => {
+                    console.error("case-input-group-ui::getMaxNumber parsing failed", err);
+                    showAlert({
+                        title: "查詢最大號碼失敗",
+                        subtitle: code,
+                        message: err.message,
+                        type: "danger"
+                    });
                 });
             },
             newCustomEvent: (name, val, target) => {
