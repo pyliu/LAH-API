@@ -936,9 +936,14 @@ if (Vue) {
                     }
                 },
                 mounted: function() { 
-                    setTimeout(() => addAnimatedCSS(".reg_case_id", {
-                        name: "flash"
-                    }).off("click").on("click", window.utilApp.fetchRegCase).removeClass("reg_case_id"), 400);
+                    Vue.nextTick(() => 
+                        addAnimatedCSS(".reg_case_id", {
+                            name: "flash"
+                        })
+                        .off("click")
+                        .on("click", window.utilApp.fetchRegCase)
+                        .removeClass("reg_case_id")
+                    );
                 }
             },
             "fee-detail-fix-ezcard": {

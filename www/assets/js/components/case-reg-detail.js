@@ -224,11 +224,11 @@ if (Vue) {
                 $("#the_incase_operator_span").trigger("click");
                 // hide the col if user info is not found
                 let that = this;
-                setTimeout(function() {
+                Vue.nextTick(function() {
                     if (isEmpty($("#"+that.userinfo_display_id).text())) {
                         that.enabled_userinfo = false;
                     }
-                }, 400);
+                });
             }
         }
     });

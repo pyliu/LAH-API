@@ -53,13 +53,13 @@ if (Vue) {
                 if (this.json.data_count == 0) {
                     this.message = `<i class="text-info fas fa-exclamation-circle ld ld-heartbeat"></i> 查無登記案件資料`;
                 }
-                setTimeout(() => {
+                Vue.nextTick(() => {
                     // make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
                     addAnimatedCSS(".reg_case_id", {
                         name: "flash"
                     }).off("click").on("click", window.utilApp.fetchRegCase);
                     $(".reg_case_id").attr("title", "點我取得更多資訊！");
-                }, 250);
+                });
             }).catch(error => {
                 // on error
                 console.error(error.toJson());
@@ -234,7 +234,8 @@ if (Vue) {
         },
         mounted() {
             let that = this;
-            setTimeout(() => that.pid = $("#pid").val(), 100);
+            // wait cached data write back
+            setTimeout(() => that.pid = $("#pid").val(), 150);
         }
     });
 } else {

@@ -176,9 +176,9 @@ if (Vue) {
             let that = this;
             let mounted_el = $(this.$el);
             setTimeout(() => {
-                this.year = mounted_el.find(`#${this.prefix}_case_update_year`).val();
-                this.code = mounted_el.find(`#${this.prefix}_case_update_code`).val();
-                this.num = mounted_el.find(`#${this.prefix}_case_update_num`).val();
+                that.year = mounted_el.find(`#${this.prefix}_case_update_year`).val();
+                that.code = mounted_el.find(`#${this.prefix}_case_update_code`).val();
+                that.num = mounted_el.find(`#${this.prefix}_case_update_num`).val();
                 that.uiUpdate(e);
             }, 150);    // cache.js delay 100ms to wait Vue instance ready, so here delays 150ms
         }

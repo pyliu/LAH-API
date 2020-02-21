@@ -225,7 +225,7 @@ if (Vue) {
                     // in-search, by clicked the first reviewer button
                     let case_count = this.case_list_by_id[this.reviewerId].length || 0;
                     this.caption = `${case_count} 件`;
-                    setTimeout(this.makeCaseIDClickable, 800);
+                    Vue.nexTick(this.makeCaseIDClickable);
                     addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
                     // release busy ...
                     this.busy = false;
@@ -248,7 +248,7 @@ if (Vue) {
 
                         this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
 
-                        setTimeout(this.makeCaseIDClickable, 800);
+                        Vue.nextTick(this.makeCaseIDClickable);
                         addNotification({
                             title: `查詢登記案件(${this.title})`,
                             message: `查詢到 ${jsonObj.data_count} 件案件`,
