@@ -20,8 +20,12 @@ if (Vue) {
             return {
                 year: "108",
                 code: "HB12",
-                num: "000100"
+                num: "000100",
+                busy: false
             }
+        },
+        watch: {
+            busy: function(flag) { flag ? utilApp.busyOn(this.$el) : utilApp.busyOff(this.$el); }
         },
         methods: {
             handleUpdate: function(e, data) {
@@ -39,27 +43,18 @@ if (Vue) {
                         type: "warning"});
                     return false;
                 }
+                
                 let year = this.year;
                 let code = this.code;
                 let number = this.num;
-                // prepend "0"
-                var offset = 6 - number.length;
-                for (var i = 0; i < offset; i++) {
-                    number = "0" + number;
-                }
-                // prepare post params
-                let id = trim(year + code + number);
-                let body = new FormData();
-                body.append("type", "sur_case");
-                body.append("id", id);
                 
-                toggle(e.target);
+                this.busy = true;
             
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL && jsonObj.data_count == 0) {
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "sur_case",
+                    id: trim(`${year}${code}${number}`)
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL && res.data.data_count == 0) {
                         addNotification({
                             title: "測量案件查詢",
                             subtitle: `${year}-${code}-${number}`,
@@ -67,14 +62,15 @@ if (Vue) {
                             type: "warning"
                         });
                     } else {
-                        this.dialog(jsonObj);
+                        this.dialog(res.data);
                     }
-                    toggle(e.target);
-                }).catch(ex => {
-                    console.error("case-sur-mgt::query parsing failed", ex);
+                    this.busy = false;
+                }).catch(err => {
+                    console.error("case-sur-mgt::query parsing failed", err);
                     showAlert({
                         title: "查詢測量案件",
-                        message: "<strong class='text-danger'>無法取得 " + id + " 資訊!【" + ex + "】</strong>",
+                        subtitle: `${year}-${code}-${number}`,
+                        message: err.message,
                         type: "danger"
                     });
                 });
@@ -185,8 +181,12 @@ if (Vue) {
                         count: 0,
                         orig_count: 0,
                         disabled_popover: true,
-                        debug: false
+                        debug: false,
+                        busy: false
                     }
+                },
+                watch: {
+                    busy: function(flag) { flag ? utilApp.busyOn(this.$el) : utilApp.busyOff(this.$el); }
                 },
                 methods: {
                     update: function(e) {
@@ -197,20 +197,15 @@ if (Vue) {
                         if (this.orig_count != this.count) {
                             let that = this;
                             showConfirm("確定要修改 " + title + " 為「" + this.count + "」？",function () {
-                                let body = new FormData();
-                                body.append("type", "upd_case_column");
-                                body.append("id", that.id);
-                                body.append("table", "SCMSMS");
-                                body.append("column", "MM24");
-                                body.append("value", that.count);
-
-                                toggle(e.target);
-
-                                asyncFetch(CONFIG.JSON_API_EP, {
-                                    method: "POST",
-                                    body: body
-                                }).then(jsonObj => {
-                                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                that.busy = true;
+                                that.$http.post(CONFIG.JSON_API_EP, {
+                                    type: "upd_case_column",
+                                    id: that.id,
+                                    table: "SCMSMS",
+                                    column: "MM24",
+                                    value: that.count
+                                }).then(res => {
+                                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                         addNotification({
                                             title: "更新連件數",
                                             subtitle: that.id,
@@ -226,11 +221,11 @@ if (Vue) {
                                             type: "danger"
                                         });
                                     }
-                                    toggle(e.target);
-                                }).catch(ex => {
-                                    console.error("case-sur-dialog::update parsing failed", ex);
+                                    that.busy = false;
+                                }).catch(err => {
+                                    console.error("case-sur-dialog::update parsing failed", err);
                                     showAlert({
-                                        message: ex.toString(),
+                                        message: err.message,
                                         subtitle: that.id,
                                         title: "更新欄位失敗",
                                         type: "danger"
@@ -252,7 +247,7 @@ if (Vue) {
                         let clr_delay = this.clearDatetime;
                         let that = this;
                         showConfirm("確定要修正本案件?", function() {
-                            toggle(e.target);
+                            that.busy = true;
                             //fix_sur_delay_case
                             let body = new FormData();
                             body.append("type", "fix_sur_delay_case");
@@ -281,9 +276,10 @@ if (Vue) {
                                         type: "danger"
                                     });
                                 }
-                            }).catch(ex => {
-                                console.error("case-sur-dialog::fix parsing failed", ex);
-                                showAlert({title: "修正複丈案件失敗", subtitle: id, message: "修正失敗!【" + ex.toString() + "】", type: "danger"});
+                                that.busy = false;
+                            }).catch(err => {
+                                console.error("case-sur-dialog::fix parsing failed", err);
+                                showAlert({title: "修正複丈案件失敗", subtitle: id, message: err.message, type: "danger"});
                             });
                         });
                     }
