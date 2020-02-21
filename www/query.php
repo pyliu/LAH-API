@@ -284,7 +284,6 @@ fieldset fieldset legend {
   <script src="assets/js/vue.js"></script>
   <script src="assets/js/bootstrap-vue.min.js"></script>
   <script src="assets/js/bootstrap-vue-icons.min.js"></script>
-  <script src="assets/js/qs.js"></script>
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/global.js"></script>
   <script src="assets/js/xhr_query.js"></script>

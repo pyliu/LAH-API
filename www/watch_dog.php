@@ -22,13 +22,6 @@ require_once("./include/authentication.php");
 <link href="assets/css/bootstrap-vue.min.css" rel="stylesheet">
 <link href="assets/css/basic.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
-<style type="text/css">
-#dropdown01 img {
-  width: 32px;
-  height: auto;
-  vertical-align: middle;
-}
-</style>
 </head>
 
 <body>
@@ -75,7 +68,6 @@ require_once("./include/authentication.php");
   <script src="assets/js/bootstrap-vue.min.js"></script>
   <script src="assets/js/bootstrap-vue-icons.min.js"></script>
   <!-- Custom -->
-  <script src="assets/js/qs.js"></script>
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/global.js"></script>
   <script src="assets/js/xhr_query.js"></script>
