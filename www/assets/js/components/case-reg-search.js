@@ -20,8 +20,12 @@ if (Vue) {
             return {
                 year: "108",
                 code: "HB12",
-                num: "000100"
+                num: "000100",
+                busy: false
             }
+        },
+        watch: {
+            busy: function(flag) { flag ? utilApp.busyOn(this.$el) : utilApp.busyOff(this.$el); }
         },
         methods: {
             handleUpdate: function(e, data) {
@@ -41,27 +45,25 @@ if (Vue) {
                 }
                 let year = this.year;
                 let code = this.code;
-                let number = this.num.toString().padStart(6, "0");
+                let number = this.num;
+                
                 // prepare post params
                 let id = trim(year + code + number);
-                let body = new FormData();
-                body.append("type", "reg_case");
-                body.append("id", id);
                 
-                toggle(e.target);
+                this.busy = true;
             
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    window.utilApp.showRegCase(jsonObj, true);
-                    toggle(e.target);
-                }).catch(ex => {
-                    console.error("case-reg-search::regQuery parsing failed", ex);
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "reg_case",
+                    id: id
+                }).then(res => {
+                    window.utilApp.showRegCase(res.data, true);
+                    this.busy = false;
+                }).catch(err => {
+                    console.error("case-reg-search::regQuery parsing failed", err);
                     showAlert({
                         title: "查詢登記案件",
                         subtitle: id,
-                        message: "無法取得資訊!【" + ex + "】",
+                        message: err.message,
                         type: "danger"
                     });
                 });
@@ -78,27 +80,24 @@ if (Vue) {
                 }
                 let year = this.year;
                 let code = this.code;
-                let number = this.num.toString().padStart(6, "0");
+                let number = this.num;
                 // prepare post params
                 let id = trim(year + code + number);
-                let body = new FormData();
-                body.append("type", "prc_case");
-                body.append("id", id);
                 
-                toggle(e.target);
+                this.busy = true;
             
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    showPrcCaseDetail(jsonObj);
-                    toggle(e.target);
-                }).catch(ex => {
-                    console.error("case-reg-search::prcQuery parsing failed", ex);
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "prc_case",
+                    id: id
+                }).then(res => {
+                    showPrcCaseDetail(res.data);
+                    this.busy = false;
+                }).catch(err => {
+                    console.error("case-reg-search::prcQuery parsing failed", err);
                     showAlert({
                         title: "查詢地價案件",
                         subtitle: id,
-                        message: "無法取得資訊!【" + ex + "】",
+                        message: err.message,
                         type: "danger"
                     });
                 });
