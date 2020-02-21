@@ -172,7 +172,7 @@ if (Vue) {
                         </b-card>
                     </div>
                 </b-col>
-                <b-col v-if="enabled_userinfo" id="in_modal_display" cols="6">
+                <b-col v-show="enabled_userinfo" id="in_modal_display" cols="6">
                 </b-col>
             </b-form-row>
         </div>`,
