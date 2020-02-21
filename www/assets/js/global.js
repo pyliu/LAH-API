@@ -951,21 +951,18 @@ let initVueApp = () => {
                 // remove additional characters for querying
                 let id = trim(clicked_element.text());
 
-                let body = new FormData();
-                body.append("type", "reg_case");
-                body.append("id", id);
-
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    this.showRegCase(jsonObj, enabled_userinfo);
-                }).catch(ex => {
-                    console.error("window.utilApp.fetchRegCase parsing failed", ex);
+                let that = this;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "reg_case",
+                    id: id
+                }).then(res => {
+                    that.showRegCase(res.data, enabled_userinfo);
+                }).catch(err => {
+                    console.error("window.utilApp.fetchRegCase parsing failed", err);
                     showAlert({
                         title: "擷取登記案件",
                         subtitle: id,
-                        message: ex.toString(),
+                        message: err.message,
                         type: "danger"
                     });
                 });
