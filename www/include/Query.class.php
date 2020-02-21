@@ -96,7 +96,7 @@ class Query {
 		$code = substr($id, 3, 4);
 		$this->db->bind(":bv_rm01_year", substr($id, 0, 3));
         $this->db->bind(":bv_rm02_code", $code);
-		$this->db->bind(":bv_rm03_number", substr($id, 7, 6));
+		$this->db->bind(":bv_rm03_number", str_pad(substr($id, 7, 6), 6, "0"));
 		$this->db->bind(":bv_county_code", $code[0]);
 		$this->db->bind(":bv_hold_code", $code[0].$code[1]);
 		$this->db->bind(":bv_receive_code", $code[0].$code[2]);
@@ -620,10 +620,10 @@ class Query {
 				LEFT JOIN MOICAS.CABRP q ON r.RM24 = q.AB01) s
 			LEFT JOIN MOIADM.RKEYN u ON (u.KCDE_1 = '48' AND s.RM11 = u.KCDE_2)"
         );
-        
+		
         $this->db->bind(":bv_rm01_year", substr($id, 0, 3));
         $this->db->bind(":bv_rm02_code", substr($id, 3, 4));
-        $this->db->bind(":bv_rm03_number", substr($id, 7, 6));
+        $this->db->bind(":bv_rm03_number", str_pad(substr($id, 7, 6), 6, "0"));
 
 		$this->db->execute();
 		// true -> raw data with converting to utf-8
@@ -653,7 +653,7 @@ class Query {
         
         $this->db->bind(":bv_year", substr($id, 0, 3));
         $this->db->bind(":bv_code", substr($id, 3, 4));
-        $this->db->bind(":bv_number", substr($id, 7, 6));
+        $this->db->bind(":bv_number", str_pad(substr($id, 7, 6), 6, "0"));
 
 		$this->db->execute();
 		// true -> raw data with converting to utf-8
@@ -667,7 +667,7 @@ class Query {
 
 		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
-		$number = substr($id, 7, 6);
+		$number = str_pad(substr($id, 7, 6), 6, "0");
 		
 		if ($upd_mm22 == "true") {
 			$this->db->parse("
@@ -750,7 +750,7 @@ class Query {
 		
         $this->db->bind(":bv_ss03_year", substr($id, 0, 3));
         $this->db->bind(":bv_ss04_1_code", substr($id, 3, 4));
-        $this->db->bind(":bv_ss04_2_number", substr($id, 7, 6));
+        $this->db->bind(":bv_ss04_2_number", str_pad(substr($id, 7, 6), 6, "0"));
 
 		$this->db->execute();
 		return $this->db->fetchAll();
@@ -764,7 +764,7 @@ class Query {
 		$diff_result = array();
 		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
-		$num = substr($id, 7, 6);
+		$num = str_pad(substr($id, 7, 6), 6, "0");
 		$db_user = "L1H".$code[1]."0H03";
 
 		global $log;
@@ -834,7 +834,7 @@ class Query {
 		global $log;
 		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
-		$num = substr($id, 7, 6);
+		$num = str_pad(substr($id, 7, 6), 6, "0");
 		$db_user = "L1H".$code[1]."0H03";
 
 		// connection switch to L1HWEB
@@ -905,7 +905,7 @@ class Query {
 			global $log;
 			$year = substr($id, 0, 3);
 			$code = substr($id, 3, 4);
-			$number = substr($id, 7, 6);
+			$number = str_pad(substr($id, 7, 6), 6, "0");
 
 			$set_str = "";
 			foreach ($diff as $col_name => $arr_vals) {
@@ -1076,7 +1076,7 @@ class Query {
 
 		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
-		$num = substr($id, 7, 6);
+		$num = str_pad(substr($id, 7, 6), 6, "0");
 
 		$sql = "UPDATE ${table} SET ${column} = :bv_val WHERE ${year_col} = :bv_year AND ${code_col} = :bv_code AND ${num_col} = :bv_number";
 		
