@@ -210,7 +210,7 @@ let VueTransition = {
 
 let asyncFetch = async function(url, opts) {
     if (!window.utilApp) {
-        initUtilApp();
+        initVueApp();
     }
     return window.utilApp.fetch(url, opts);
 }
@@ -723,8 +723,6 @@ let initAlertUI = () => {
 
 let initVueApp = () => {
     if (window.utilApp) { return; }
-    // init vueApp for every page's #main_content_section section tag
-    window.vueApp = new Vue({el: "#main_content_section"});
     // bootstrap-vue will add $bvToast and $bvModal to every vue instance, I will leverage it to show toast and modal window
     window.utilApp = new Vue({
         data: {
@@ -1046,6 +1044,8 @@ let initVueApp = () => {
             busyOff: function(el = "body") { this.busy({selector: el, forceOff: true}) }
         }
     });
+    // init vueApp for every page's #main_content_section section tag
+    window.vueApp = new Vue({el: "#main_content_section"});
 }
 
 let sleep = () => {
