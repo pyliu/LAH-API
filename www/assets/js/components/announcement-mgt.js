@@ -24,7 +24,7 @@ if (Vue) {
         },
         watch: {
             busy: function(flag) {
-                flag ? utilApp.busyOn(this.$el) : utilApp.busyOff(this.$el);
+                flag ? vueApp.busyOn(this.$el) : vueApp.busyOff(this.$el);
             }
         },
         methods: {

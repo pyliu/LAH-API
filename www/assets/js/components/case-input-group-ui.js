@@ -132,10 +132,10 @@ if (Vue) {
             busy: function(flag) {
                 switch(flag) {
                     case true:
-                        window.utilApp.busyOn(this.$el);
+                        window.vueApp.busyOn(this.$el);
                         break;
                     default:
-                        window.utilApp.busyOff(this.$el);
+                        window.vueApp.busyOff(this.$el);
                 }
             }
         },

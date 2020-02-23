@@ -25,7 +25,7 @@ if (Vue) {
             }
         },
         watch: {
-            busy: function(flag) { flag ? utilApp.busyOn(this.$el) : utilApp.busyOff(this.$el); }
+            busy: function(flag) { flag ? vueApp.busyOn(this.$el) : vueApp.busyOff(this.$el); }
         },
         methods: {
             handleUpdate: function(e, data) {
@@ -100,7 +100,7 @@ if (Vue) {
         components: {
             "case-sur-dialog": {
                 template: `<div>
-                    收件字號：<a title="案件辦理情形 on ${CONFIG.AP_SVR}" href="javascript:void(0)" @click="window.utilApp.open('http://${CONFIG.AP_SVR}:9080/LandHB/Dispatcher?REQ=CMC0202&GRP=CAS&MM01=' + json.raw['MM01'] + '&MM02=' + json.raw['MM02'] + '&MM03=' + json.raw['MM03'] + '&RM90=', $event)">{{json.收件字號}}</a> </br>
+                    收件字號：<a title="案件辦理情形 on ${CONFIG.AP_SVR}" href="javascript:void(0)" @click="window.vueApp.open('http://${CONFIG.AP_SVR}:9080/LandHB/Dispatcher?REQ=CMC0202&GRP=CAS&MM01=' + json.raw['MM01'] + '&MM02=' + json.raw['MM02'] + '&MM03=' + json.raw['MM03'] + '&RM90=', $event)">{{json.收件字號}}</a> </br>
                     收件時間：{{json.收件時間}} <br/>
                     收件人員：<span v-html="json.收件人員"></span> <br/>
                     <b-form-row class="w-100">
@@ -186,7 +186,7 @@ if (Vue) {
                     }
                 },
                 watch: {
-                    busy: function(flag) { flag ? utilApp.busyOn(this.$el) : utilApp.busyOff(this.$el); }
+                    busy: function(flag) { flag ? vueApp.busyOn(this.$el) : vueApp.busyOff(this.$el); }
                 },
                 methods: {
                     update: function(e) {

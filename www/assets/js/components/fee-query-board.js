@@ -942,7 +942,7 @@ if (Vue) {
                             name: "flash"
                         })
                         .off("click")
-                        .on("click", window.utilApp.fetchRegCase)
+                        .on("click", window.vueApp.fetchRegCase)
                         .removeClass("reg_case_id")
                     );
                 }

@@ -15,7 +15,7 @@ let showPrcCaseDetail = (jsonObj) => {
 		body: html,
 		title: "地價案件詳情",
 		size: modal_size,
-		callback: () => { $(".prc_case_serial").off("click").on("click", window.utilApp.fetchRegCase); }
+		callback: () => { $(".prc_case_serial").off("click").on("click", window.vueApp.fetchRegCase); }
 	});
 }
 

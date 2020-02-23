@@ -25,7 +25,7 @@ if (Vue) {
             }
         },
         watch: {
-            busy: function(flag) { flag ? utilApp.busyOn(this.$el) : utilApp.busyOff(this.$el); }
+            busy: function(flag) { flag ? vueApp.busyOn(this.$el) : vueApp.busyOff(this.$el); }
         },
         methods: {
             handleUpdate: function(e, data) {
@@ -56,7 +56,7 @@ if (Vue) {
                     type: "reg_case",
                     id: id
                 }).then(res => {
-                    window.utilApp.showRegCase(res.data, true);
+                    window.vueApp.showRegCase(res.data, true);
                     this.busy = false;
                 }).catch(err => {
                     console.error("case-reg-search::regQuery parsing failed", err);

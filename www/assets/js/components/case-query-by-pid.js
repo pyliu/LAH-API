@@ -57,7 +57,7 @@ if (Vue) {
                     // make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
                     addAnimatedCSS(".reg_case_id", {
                         name: "flash"
-                    }).off("click").on("click", window.utilApp.fetchRegCase);
+                    }).off("click").on("click", window.vueApp.fetchRegCase);
                     $(".reg_case_id").attr("title", "點我取得更多資訊！");
                 });
             }).catch(error => {

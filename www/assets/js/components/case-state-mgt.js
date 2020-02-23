@@ -26,7 +26,7 @@ if (Vue) {
             }
         },
         watch: {
-            busy: function(flag) { flag ? utilApp.busyOn(this.$el) : utilApp.busyOff(this.$el); }
+            busy: function(flag) { flag ? vueApp.busyOn(this.$el) : vueApp.busyOff(this.$el); }
         },
         methods: {
             handleUpdate: function(e, data) {
@@ -182,7 +182,7 @@ if (Vue) {
                             return;
                         }
                         let that = this;
-                        window.utilApp.confirm(`您確定要更新辦理情形為「${that.rm30}」?`, {
+                        window.vueApp.confirm(`您確定要更新辦理情形為「${that.rm30}」?`, {
                             title: '請確認更新案件辦理情形',
                             callback: () => {
                                 xhrUpdateRegCaseCol({
@@ -251,7 +251,7 @@ if (Vue) {
                             return;
                         }
                         let that = this;
-                        window.utilApp.confirm(`您確定要更新登記處理註記為「${that.rm39}」?`, {
+                        window.vueApp.confirm(`您確定要更新登記處理註記為「${that.rm39}」?`, {
                             title: '請確認更新登記處理註記',
                             callback: () => {
                                 xhrUpdateRegCaseCol({
@@ -276,7 +276,7 @@ if (Vue) {
                     addAnimatedCSS(".reg_case_id", {
                         name: "flash"
                     }).off("click").on("click", function(e) {
-                        window.utilApp.fetchRegCase(e, true);
+                        window.vueApp.fetchRegCase(e, true);
                     });
                 }
             }

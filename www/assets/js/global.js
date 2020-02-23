@@ -213,10 +213,10 @@ let VueTransition = {
 }
 
 let asyncFetch = async function(url, opts) {
-    if (!window.utilApp) {
+    if (!window.vueApp) {
         initVueApp();
     }
-    return window.utilApp.fetch(url, opts);
+    return window.vueApp.fetch(url, opts);
 }
 
 let trim = text => {
@@ -330,9 +330,9 @@ let addNotification = (msg, opts) => {
     if (typeof msg == "object") {
         let message = msg.body || msg.message;
         msg.variant = msg.type || "default";
-        window.utilApp.makeToast(message, msg);
+        window.vueApp.makeToast(message, msg);
     } else if (typeof msg == "string") {
-        window.utilApp.makeToast(msg, opts);
+        window.vueApp.makeToast(msg, opts);
     } else {
         showAlert({message: "addNotification 傳入參數有誤(請查看console)", type: "danger"});
         console.error(msg, opts);
@@ -395,7 +395,7 @@ let showModal = opts => {
         size = "md";
     }
 
-    window.utilApp.modal(body, {
+    window.vueApp.modal(body, {
         title: title,
         size: size,
         html: true,
@@ -405,13 +405,13 @@ let showModal = opts => {
 }
 
 let showConfirm = (message, callback) => {
-    window.utilApp.confirm(message, {
+    window.vueApp.confirm(message, {
         callback: callback
     });
 }
 
 let closeModal = callback => {
-    window.utilApp.hideModal();
+    window.vueApp.hideModal();
     if (typeof callback == "function") {
         setTimeout(callback, 500);
     }
@@ -476,7 +476,7 @@ let toggle = selector => {
             toggleInsideSpinner(el);
         }
     } else {
-        window.utilApp.busy({selector: container});
+        window.vueApp.busy({selector: container});
     }
 }
 
@@ -726,9 +726,11 @@ let initAlertUI = () => {
 }
 
 let initVueApp = () => {
-    if (window.utilApp) { return; }
+    if (window.vueApp) { return; }
     // bootstrap-vue will add $bvToast and $bvModal to every vue instance, I will leverage it to show toast and modal window
-    window.utilApp = new Vue({
+    // init vueApp for every page's #main_content_section section tag
+    window.vueApp = new Vue({
+        el: "#main_content_section",
         data: {
             toastCounter: 0,
             openConfirm: false,
@@ -962,7 +964,7 @@ let initVueApp = () => {
                 }).then(res => {
                     that.showRegCase(res.data, enabled_userinfo);
                 }).catch(err => {
-                    console.error("window.utilApp.fetchRegCase parsing failed", err);
+                    console.error("window.vueApp.fetchRegCase parsing failed", err);
                     showAlert({
                         title: "擷取登記案件",
                         subtitle: id,
@@ -1043,11 +1045,7 @@ let initVueApp = () => {
             },
             busyOn: function(el = "body", size = "") { this.busy({selector: el, forceOn: true, size: size}) },
             busyOff: function(el = "body") { this.busy({selector: el, forceOff: true}) }
-        }
-    });
-    // init vueApp for every page's #main_content_section section tag
-    window.vueApp = new Vue({
-        el: "#main_content_section",
+        },
         created() {
             // check authority
             this.$http.post(CONFIG.JSON_API_EP, {

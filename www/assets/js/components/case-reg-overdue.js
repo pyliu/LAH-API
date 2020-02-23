@@ -140,10 +140,10 @@ if (Vue) {
             busy: function(flag) {
                 if (flag) {
                     addLDAnimation("#reload .fas.fa-sync", "ld-cycle");
-                    if (this.statsMode) window.utilApp.busyOn("body", "lg");
+                    if (this.statsMode) window.vueApp.busyOn("body", "lg");
                 } else {
                     clearLDAnimation("#reload .fas.fa-sync");
-                    if (this.statsMode) window.utilApp.busyOff("body");
+                    if (this.statsMode) window.vueApp.busyOff("body");
                 }
             }
         },
@@ -196,7 +196,7 @@ if (Vue) {
             makeCaseIDClickable: function () {
                 addAnimatedCSS("table tr td:nth-child(2)", { name: "flash" })
                 .off("click")
-                .on("click", window.utilApp.fetchRegCase)
+                .on("click", window.vueApp.fetchRegCase)
                 .addClass("reg_case_id");
             },
             searchByReviewer: function(reviewer_data) {
