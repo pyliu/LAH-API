@@ -12,7 +12,7 @@ if (Vue) {
                 <div class="collapse navbar-collapse" id="navbarsExampleDefault">
                     <lah-transition appear>
                         <ul class="navbar-nav mr-auto">
-                            <li v-for="link in links" :class="['nav-item', 'my-auto', active(link.url)]" v-show="link.need_admin ? is_admin : true">
+                            <li v-for="link in links" :class="['nav-item', 'my-auto', active(link.url)]" v-show="link.need_admin ? $gstore.getters.isAdmin : true">
                                 <a class="nav-link" :href="link.url">{{link.text}}</a>
                             </li>
                         </ul>
@@ -24,7 +24,6 @@ if (Vue) {
             return {
                 show: true,
                 icon: "fa-question",
-                is_admin: false,
                 links: [{
                     text: "案件追蹤",
                     url: "index.php",
@@ -62,22 +61,6 @@ if (Vue) {
             active: function(url) {
                 return location.href.indexOf(url) > 0 ? 'active' : '';
             }
-        },
-        created() {
-            // TODO: add query to get authority token
-            let that = this;
-            this.$http.post(CONFIG.JSON_API_EP, {
-                type: 'authentication'
-            }).then(res => {
-                that.is_admin = res.data.is_admin || false;
-            }).catch(err => {
-                console.error(err);
-                showAlert({
-                    title: '認證失敗',
-                    message: err.message,
-                    type: 'danger'
-                });
-            });
         },
         mounted() {
             let that = this;

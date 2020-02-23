@@ -116,9 +116,13 @@ const store = (() => {
                 cache : {},
                 isAdmin: false
             },
+            getters: {
+                cache: state => state.cache,
+                isAdmin: state => state.isAdmin
+            },
             mutations: {
                 cache(state, objPayload) {
-                    state.cache = Object.assign(objPayload, state.cache);
+                    state.cache = Object.assign(state.cache, objPayload);
                 },
                 isAdmin(state, flagPayload) {
                     state.isAdmin = flagPayload === true;
@@ -1042,7 +1046,25 @@ let initVueApp = () => {
         }
     });
     // init vueApp for every page's #main_content_section section tag
-    window.vueApp = new Vue({el: "#main_content_section"});
+    window.vueApp = new Vue({
+        el: "#main_content_section",
+        created() {
+            // check authority
+            this.$http.post(CONFIG.JSON_API_EP, {
+                type: 'authentication'
+            }).then(res => {
+                this.$gstore.commit("isAdmin", res.data.is_admin || false);
+                console.log("isAdmin: ", this.$gstore.getters.isAdmin);
+            }).catch(err => {
+                console.error(err.toJSON());
+                showAlert({
+                    title: '認證失敗',
+                    message: err.message,
+                    type: 'danger'
+                });
+            });
+        }
+    });
 }
 
 let sleep = () => {
