@@ -248,36 +248,6 @@ let addUserInfoEvent = () => {
     $(".user_tag").on("click", xhrQueryUserInfo);
 }
 
-let checkCaseUIData = (data) => {
-    let year = data.year;
-    let code = data.code;
-    let num = data.num;
-    if (isEmpty(year)) {
-        showAlert({
-            message: "請重新選擇「年」欄位!",
-            type: "danger"
-        });
-        return false;
-    }
-    if (isEmpty(code)) {
-        showAlert({
-            message: "請重新選擇「字」欄位!",
-            type: "danger"
-        });
-        return false;
-    }
-    let number = num.replace(/\D/g, "");
-    let offset = 6 - number.length;
-    if (isEmpty(number) || isNaN(number) || offset < 0) {
-        showAlert({
-            message: `「號」格式有問題，請查明修正【目前：${num}】`,
-            type: "danger"
-        });
-        return false;
-    }
-    return true;
-}
-
 let showPopper = (selector, content, timeout) => {
     if (!isEmpty(content)) {
         $(selector).attr("data-content", content);
@@ -943,6 +913,35 @@ let initVueApp = () => {
                         size: enabled_userinfo ? "xl" : "lg"
                     });
                 }
+            },
+            checkCaseUIData: function(data) {
+                let year = data.year;
+                let code = data.code;
+                let num = data.num;
+                if (isEmpty(year)) {
+                    showAlert({
+                        message: "請重新選擇「年」欄位!",
+                        type: "danger"
+                    });
+                    return false;
+                }
+                if (isEmpty(code)) {
+                    showAlert({
+                        message: "請重新選擇「字」欄位!",
+                        type: "danger"
+                    });
+                    return false;
+                }
+                let number = num.replace(/\D/g, "");
+                let offset = 6 - number.length;
+                if (isEmpty(number) || isNaN(number) || offset < 0) {
+                    showAlert({
+                        message: `「號」格式有問題，請查明修正【目前：${num}】`,
+                        type: "danger"
+                    });
+                    return false;
+                }
+                return true;
             },
             busy: (opts = {}) => {
                 opts = Object.assign({

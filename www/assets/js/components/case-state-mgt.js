@@ -36,7 +36,7 @@ if (Vue) {
             },
             query: function(e) {
                 let data = {year: this.year, code: this.code, num: this.num};
-                if (!checkCaseUIData(data)) {
+                if (!window.vueApp.checkCaseUIData(data)) {
                     addNotification({
                         title: "案件查詢",
                         subtitle: `${data.year}-${data.code}-${data.num}`,

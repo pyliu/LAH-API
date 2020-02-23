@@ -35,7 +35,7 @@ if (Vue) {
             },
             regQuery: function(e) {
                 let data = {year: this.year, code: this.code, num: this.num};
-                if (!checkCaseUIData(data)) {
+                if (!window.vueApp.checkCaseUIData(data)) {
                     addNotification({
                         title: "登記案件查詢",
                         subtitle: `${data.year}-${data.code}-${data.num}`,
@@ -70,7 +70,7 @@ if (Vue) {
             },
             prcQuery: function(e) {
                 let data = {year: this.year, code: this.code, num: this.num};
-                if (!checkCaseUIData(data)) {
+                if (!window.vueApp.checkCaseUIData(data)) {
                     addNotification({
                         title: "地價案件查詢",
                         subtitle: `${data.year}-${data.code}-${data.num}`,

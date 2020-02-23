@@ -31,7 +31,7 @@ if (Vue) {
             },
             query: function(e) {
                 let data = {year: this.year, code: this.code, num: this.num};
-                if (!checkCaseUIData(data)) {
+                if (!window.vueApp.checkCaseUIData(data)) {
                     addNotification({
                         title: "清除暫存檔",
                         message: `輸入資料格式有誤，無法查詢 ${data.year}-${data.code}-${data.num}`,
