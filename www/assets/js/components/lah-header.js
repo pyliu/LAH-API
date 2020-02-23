@@ -69,6 +69,8 @@ if (Vue) {
                     that.icon = link.icon;
                 }
             });
+            // add pulse effect for the nav-item
+            $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
         }
     });
     $(document).ready(() => {
