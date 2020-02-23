@@ -3,6 +3,8 @@ const CONFIG = {
     DISABLE_MSDB_QUERY: false,
     TEST_MODE: false,
     AP_SVR: "220.1.35.123",
+    SCREENSAVER: true,
+    SCREENSAVER_TIMER: 15 * 60 * 1000,
     JSON_API_EP: "query_json_api.php",
     FILE_API_EP: "load_file_api.php",
     MOCK_API_EP: "TODO"
@@ -1044,89 +1046,80 @@ let initVueApp = () => {
                 }
             },
             busyOn: function(el = "body", size = "") { this.busy({selector: el, forceOn: true, size: size}) },
-            busyOff: function(el = "body") { this.busy({selector: el, forceOff: true}) }
+            busyOff: function(el = "body") { this.busy({selector: el, forceOff: true}) },
+            screensaver: () => {
+                if (CONFIG.SCREENSAVER) {
+                    window.onload = resetTimer;
+                    window.onmousemove = resetTimer;
+                    window.onmousedown = resetTimer;  // catches touchscreen presses as well      
+                    window.ontouchstart = resetTimer; // catches touchscreen swipes as well 
+                    window.onclick = resetTimer;      // catches touchpad clicks as well
+                    window.onkeypress = resetTimer;   
+                    window.addEventListener('scroll', resetTimer, true); // improved; see comments
+                    let idle_timer;
+                    function wakeup() {
+                        let container = $("body");
+                        if (container.hasClass("ld-over-full-inverse")) {
+                            container.removeClass("ld-over-full-inverse");
+                            container.find("#screensaver").remove();
+                            container.removeClass("running");
+                        }
+                        clearLDAnimation(".navbar i.fas");
+                    }
+                    function resetTimer() {
+                        clearTimeout(idle_timer);
+                        idle_timer = setTimeout(() => {
+                            wakeup();
+                            let container = $("body");
+                            // cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
+                            let style = "ld-over-full-inverse";
+                            container.addClass(style);
+                            container.addClass("running");
+                            let cover_el = $(jQuery.parseHTML('<div id="screensaver" class="ld auto-add-spinner"></div>'));
+                            let patterns = [
+                                "fas fa-bolt ld-bounce", "fas fa-bed ld-swim", "fas fa-biking ld-move-ltr",
+                                "fas fa-biohazard ld-metronome", "fas fa-snowboarding ld-rush-ltr", "fas fa-anchor ld-swing",
+                                "fas fa-fingerprint ld-damage", "fab fa-angellist ld-metronome"
+                            ];
+                            cover_el.addClass(patterns[rand(patterns.length)])
+                                    .addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])
+                                    .addClass("fa-10x");
+                            container.append(cover_el);
+                            addLDAnimation(".navbar i.fas", "ld-bounce");
+                        }, CONFIG.SCREENSAVER_TIMER);  // 5mins
+                        wakeup();
+                    }
+                }
+            },
+            authenticate: function() {
+                // check authority
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'authentication'
+                }).then(res => {
+                    this.$gstore.commit("isAdmin", res.data.is_admin || false);
+                    console.log("isAdmin: ", this.$gstore.getters.isAdmin);
+                }).catch(err => {
+                    console.error(err.toJSON());
+                    showAlert({
+                        title: '認證失敗',
+                        message: err.message,
+                        type: 'danger'
+                    });
+                });
+            }
         },
         created() {
-            // check authority
-            this.$http.post(CONFIG.JSON_API_EP, {
-                type: 'authentication'
-            }).then(res => {
-                this.$gstore.commit("isAdmin", res.data.is_admin || false);
-                console.log("isAdmin: ", this.$gstore.getters.isAdmin);
-            }).catch(err => {
-                console.error(err.toJSON());
-                showAlert({
-                    title: '認證失敗',
-                    message: err.message,
-                    type: 'danger'
-                });
-            });
+            this.authenticate();
+            this.screensaver();
         }
     });
-}
-
-let sleep = () => {
-    wakeup();
-    let container = $("body");
-    // cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
-    let style = "ld-over-full-inverse";
-    container.addClass(style);
-    container.addClass("running");
-    let cover_el = $(jQuery.parseHTML('<div id="screensaver" class="ld auto-add-spinner"></div>'));
-    let patterns = [
-        "fas fa-bolt ld-bounce", "fas fa-bed ld-swim", "fas fa-biking ld-move-ltr",
-        "fas fa-biohazard ld-metronome", "fas fa-snowboarding ld-rush-ltr", "fas fa-anchor ld-swing",
-        "fas fa-fingerprint ld-damage", "fab fa-angellist ld-metronome"
-    ];
-    cover_el.addClass(patterns[rand(patterns.length)])
-            .addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])
-            .addClass("fa-10x");
-    container.append(cover_el);
-    addLDAnimation(".navbar i.fas", "ld-bounce");
-}
-
-let wakeup = () => {
-    let container = $("body");
-    if (container.hasClass("ld-over-full-inverse")) {
-        container.removeClass("ld-over-full-inverse");
-        container.find("#screensaver").remove();
-        container.removeClass("running");
-    }
-    clearLDAnimation(".navbar i.fas");
-}
-
-let initScreensaver = () => {
-    /**
-     * detect page idle and add animation for fun
-     */
-    window.onload = resetTimer;
-    window.onmousemove = resetTimer;
-    window.onmousedown = resetTimer;  // catches touchscreen presses as well      
-    window.ontouchstart = resetTimer; // catches touchscreen swipes as well 
-    window.onclick = resetTimer;      // catches touchpad clicks as well
-    window.onkeypress = resetTimer;   
-    window.addEventListener('scroll', resetTimer, true); // improved; see comments
-    let idle_timer;
-    function resetTimer() {
-        clearTimeout(idle_timer);
-        idle_timer = setTimeout(() => {
-            sleep();
-            //addLDAnimation("button, i.fas.text-light");
-            // addLDAnimation("i.fas.text-light", "ld-bounce");
-        }, 300000);  // 5mins
-        // clearLDAnimation("button, i.fas.text-light");
-        wakeup();
-    }
 }
 
 $(document).ready(e => {
     initVueApp();
     initTooltip();
     initDatepicker();
-    initScreensaver();
     initBlockquoteModal();
-    // add pulse effect for the nav-item
-    $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
 });
 //]]>
     
