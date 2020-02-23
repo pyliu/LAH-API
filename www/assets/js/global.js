@@ -919,7 +919,8 @@ let initVueApp = () => {
                     addNotification({
                         title: '案件輸入欄位檢測',
                         message: "案件【年】欄位為空白，請重新選擇！",
-                        type: "warning"
+                        type: "warning",
+                        toaster: "b-toaster-top-center"
                     });
                     return false;
                 }
@@ -927,7 +928,8 @@ let initVueApp = () => {
                     addNotification({
                         title: '案件輸入欄位檢測',
                         message: "案件【字】欄位為空白，請重新選擇！",
-                        type: "warning"
+                        type: "warning",
+                        toaster: "b-toaster-top-center"
                     });
                     return false;
                 }
@@ -935,7 +937,8 @@ let initVueApp = () => {
                     addNotification({
                         title: '案件輸入欄位檢測',
                         message: "案件【號】欄位格式錯誤，請重新輸入！",
-                        type: "warning"
+                        type: "warning",
+                        toaster: "b-toaster-top-center"
                     });
                     return false;
                 }
