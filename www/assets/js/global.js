@@ -915,29 +915,27 @@ let initVueApp = () => {
                 }
             },
             checkCaseUIData: function(data) {
-                let year = data.year;
-                let code = data.code;
-                let num = data.num;
-                if (isEmpty(year)) {
-                    showAlert({
-                        message: "請重新選擇「年」欄位!",
-                        type: "danger"
+                if (isEmpty(data.year)) {
+                    addNotification({
+                        title: '案件輸入欄位檢測',
+                        message: "案件【年】欄位為空白，請重新選擇！",
+                        type: "warning"
                     });
                     return false;
                 }
-                if (isEmpty(code)) {
-                    showAlert({
-                        message: "請重新選擇「字」欄位!",
-                        type: "danger"
+                if (isEmpty(data.code)) {
+                    addNotification({
+                        title: '案件輸入欄位檢測',
+                        message: "案件【字】欄位為空白，請重新選擇！",
+                        type: "warning"
                     });
                     return false;
                 }
-                let number = num.replace(/\D/g, "");
-                let offset = 6 - number.length;
-                if (isEmpty(number) || isNaN(number) || offset < 0) {
-                    showAlert({
-                        message: `「號」格式有問題，請查明修正【目前：${num}】`,
-                        type: "danger"
+                if (isEmpty(data.num) || isNaN(data.num)) {
+                    addNotification({
+                        title: '案件輸入欄位檢測',
+                        message: "案件【號】欄位格式錯誤，請重新輸入！",
+                        type: "warning"
                     });
                     return false;
                 }
