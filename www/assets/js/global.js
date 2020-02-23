@@ -245,7 +245,7 @@ let toTWDate = d => {
 
 let addUserInfoEvent = () => {
     $(".user_tag").off("click");
-    $(".user_tag").on("click", xhrQueryUserInfo);
+    $(".user_tag").on("click", window.vueAp.fetchUserInfo);
 }
 
 let showPopper = (selector, content, timeout) => {
@@ -943,45 +943,38 @@ let initVueApp = () => {
                     return;
                 }
                 
-                let form_body = new FormData();
-                form_body.append("type", "user_info");
-                form_body.append("name", name);
-                form_body.append("id", id);
-            
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "user_info",
                     name: name,
                     id: id
                 }).then(res => {
-                    let jsonObj = res.data;
-                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        let latest = jsonObj.data_count - 1;
-                        showUserInfoByRAW(jsonObj.raw[latest], el_selector);
-                        // cache to local storage
-                        if (localStorage) {
-                            let json_str = JSON.stringify(jsonObj);
-                            if (!isEmpty(id)) { localStorage[id] = json_str; }
-                            if (!isEmpty(name)) { localStorage[name] = json_str; }
-                        }
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        let latest = res.data.data_count - 1;
+                        this.showUserInfoFromRAW(res.data.raw[latest], el_selector);
+                        // cache to global store
+                        let json_str = JSON.stringify(res.data);
+                        let payload = {};
+                        if (!isEmpty(id)) { payload[id] = json_str; }
+                        if (!isEmpty(name)) { payload[name] = json_str; }
+                        this.$store.commit('cache', payload);
                     } else {
-                        addNotification({ message: `找不到 ${name} ${id} 資料`, type: "warning" });
+                        addNotification({ message: `找不到 '${name} ${id}' 資料` });
                     }
-                }).catch(ex => {
-                    console.error("xhrQueryUserInfo parsing failed", ex);
-                    showAlert({ title: "查詢使用者資訊", message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger" });
+                }).catch(err => {
+                    console.error("window.vueApp.fetchUserInfo parsing failed", err.toJSON());
+                    showAlert({ title: "查詢使用者資訊", message: err.message, type: "danger" });
                 });
             },
             cachedUserInfo: function (id, name, selector) {
                 // reduce user query traffic
-                if (localStorage) {
-                    let json_str = localStorage[id] || localStorage[name];
-                    if (!isEmpty(json_str)) {
-                        console.log(`cache hit ${id}:${name}, user info from localStorage.`);
-                        let jsonObj = JSON.parse(json_str);
-                        let latest = jsonObj.data_count - 1;
-                        this.showUserInfoFromRAW(jsonObj.raw[latest], selector);
-                        return true;
-                    }
+                let cache = this.$store.getters.cache;
+                let json_str = cache[id] || cache[name];
+                if (!isEmpty(json_str)) {
+                    console.log(`cache hit ${id}:${name} in store.`);
+                    let jsonObj = JSON.parse(json_str);
+                    let latest = jsonObj.data_count - 1;
+                    this.showUserInfoFromRAW(jsonObj.raw[latest], selector);
+                    return true;
                 }
                 return false;
             },
@@ -1071,9 +1064,11 @@ let initVueApp = () => {
                     $(selector).html(vue_html);
                     new Vue({
                         el: "#user_info_app",
-                        components: [ "b-card", "b-link", "b-badge" ]
+                        components: [ "b-card", "b-link", "b-badge" ],
+                        mounted() {
+                            addAnimatedCSS(selector, { name: "pulse", duration: "once-anim-cfg" });
+                        }
                     });
-                    addAnimatedCSS(selector, { name: "pulse", duration: "once-anim-cfg" });
                 } else {
                     showModal({
                         title: "使用者資訊",

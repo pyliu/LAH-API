@@ -385,7 +385,7 @@ fieldset fieldset legend {
         }
         let user_data = clicked_element.text().split(":");
         $("#msg_who").val($.trim(user_data[1]).replace(/[\?A-Za-z0-9\+]/g, ""));
-        xhrQueryUserInfo(e);
+        window.vueAp.fetchUserInfo(e);
       });
 
       // message

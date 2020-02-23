@@ -355,62 +355,6 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 	}
 }
 
-let xhrQueryUserInfo = e => {
-	if (CONFIG.DISABLE_MSDB_QUERY) {
-		console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping xhrQueryUSerInfo.");
-		return;
-	}
-
-	let clicked_element = $(e.target);
-	if (!clicked_element.hasClass("user_tag")) {
-		clicked_element = $(clicked_element.closest(".user_tag"));
-	}
-
-	let name = $.trim(clicked_element.data("name"));
-	if (name) {
-		name = name.replace(/[\?A-Za-z0-9\+]/g, "");
-	}
-	let id = trim(clicked_element.data("id"));
-	// use data-el HTML attribute to specify the display container, empty will use the modal popup window instead.
-	let el_selector = clicked_element.data("display-selector");
-
-	if (isEmpty(name) && isEmpty(id)) {
-		console.warn("Require query params are all empty, skip xhr querying. (add attr to the element => data-id=" + id + ", data-name=" + name + ")");
-		return;
-	}
-
-	// reduce user query traffic
-	if (showUserInfoFromCache(id, name, el_selector)) {
-		return;
-	}
-	
-	let form_body = new FormData();
-	form_body.append("type", "user_info");
-	form_body.append("name", name);
-	form_body.append("id", id);
-
-	asyncFetch(CONFIG.JSON_API_EP, {
-		method: 'POST',
-		body: form_body
-	}).then(jsonObj => {
-		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-			let latest = jsonObj.data_count - 1;
-			showUserInfoByRAW(jsonObj.raw[latest], el_selector);
-			// cache to local storage
-			if (localStorage) {
-				let json_str = JSON.stringify(jsonObj);
-				if (!isEmpty(id)) { localStorage[id] = json_str; }
-				if (!isEmpty(name)) { localStorage[name] = json_str; }
-			}
-		} else {
-			addNotification({ message: `找不到 ${name} ${id} 資料`, type: "warning" });
-		}
-	}).catch(ex => {
-		console.error("xhrQueryUserInfo parsing failed", ex);
-		showAlert({ title: "查詢使用者資訊", message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger" });
-	});
-}
-
 let xhrSendMessage = e => {
 	if (CONFIG.DISABLE_MSDB_QUERY) {
 		console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping xhrSendMessage.");
