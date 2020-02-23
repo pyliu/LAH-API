@@ -555,16 +555,6 @@ let initDatepicker = () => {
     }
 }
 
-let initTooltip = () => {
-    // tooltip enablement
-    $('[data-toggle="tooltip"]').tooltip({
-        delay: {
-            show: 300,
-            hide: 100
-        }
-    });
-}
-
 let initBlockquoteModal = () => {
     // add responsive and thumbnail style to blockquote img
     $("blockquote img").addClass("img-responsive img-thumbnail");
@@ -1117,7 +1107,6 @@ let initVueApp = () => {
 
 $(document).ready(e => {
     initVueApp();
-    initTooltip();
     initDatepicker();
     initBlockquoteModal();
 });
