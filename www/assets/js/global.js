@@ -914,6 +914,180 @@ let initVueApp = () => {
                     });
                 }
             },
+            fetchUserInfo: function(e) {
+                if (CONFIG.DISABLE_MSDB_QUERY) {
+                    console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping vueApp.fetchUserInfo.");
+                    return;
+                }
+            
+                let clicked_element = $(e.target);
+                if (!clicked_element.hasClass("user_tag")) {
+                    clicked_element = $(clicked_element.closest(".user_tag"));
+                }
+                // retrieve name/id from the data-* attributes
+                let name = $.trim(clicked_element.data("name"));
+                if (name) {
+                    name = name.replace(/[\?A-Za-z0-9\+]/g, "");
+                }
+                let id = trim(clicked_element.data("id"));
+                if (isEmpty(name) && isEmpty(id)) {
+                    console.warn("Require query params are all empty, skip dynamic user info querying. (add attr to the element => data-id=" + id + ", data-name=" + name + ")");
+                    return;
+                }
+            
+                // use data-el HTML attribute to specify the display container, empty will use the modal popup window instead.
+                let el_selector = clicked_element.data("display-selector");
+            
+                // reduce user query traffic
+                if (this.cachedUserInfo(id, name, el_selector)) {
+                    return;
+                }
+                
+                let form_body = new FormData();
+                form_body.append("type", "user_info");
+                form_body.append("name", name);
+                form_body.append("id", id);
+            
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "user_info",
+                    name: name,
+                    id: id
+                }).then(res => {
+                    let jsonObj = res.data;
+                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        let latest = jsonObj.data_count - 1;
+                        showUserInfoByRAW(jsonObj.raw[latest], el_selector);
+                        // cache to local storage
+                        if (localStorage) {
+                            let json_str = JSON.stringify(jsonObj);
+                            if (!isEmpty(id)) { localStorage[id] = json_str; }
+                            if (!isEmpty(name)) { localStorage[name] = json_str; }
+                        }
+                    } else {
+                        addNotification({ message: `找不到 ${name} ${id} 資料`, type: "warning" });
+                    }
+                }).catch(ex => {
+                    console.error("xhrQueryUserInfo parsing failed", ex);
+                    showAlert({ title: "查詢使用者資訊", message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger" });
+                });
+            },
+            cachedUserInfo: function (id, name, selector) {
+                // reduce user query traffic
+                if (localStorage) {
+                    let json_str = localStorage[id] || localStorage[name];
+                    if (!isEmpty(json_str)) {
+                        console.log(`cache hit ${id}:${name}, user info from localStorage.`);
+                        let jsonObj = JSON.parse(json_str);
+                        let latest = jsonObj.data_count - 1;
+                        this.showUserInfoFromRAW(jsonObj.raw[latest], selector);
+                        return true;
+                    }
+                }
+                return false;
+            },
+            showUserInfoFromRAW: function(tdoc_raw, selector = undefined) {
+                let year = 31536000000;
+                let now = new Date();
+                let age = "";
+                let birth = tdoc_raw["AP_BIRTH"];
+                let birth_regex = /^\d{3}\/\d{2}\/\d{2}$/;
+                if (birth.match(birth_regex)) {
+                    birth = (parseInt(birth.substring(0, 3)) + 1911) + birth.substring(3);
+                    let temp = Date.parse(birth);
+                    if (temp) {
+                        let born = new Date(temp);
+                        let badge_age = ((now - born) / year).toFixed(1);
+                        if (badge_age < 30) {
+                            age += " <b-badge variant='success' pill>";
+                        } else if (badge_age < 40) {
+                            age += " <b-badge variant='primary' pill>";
+                        } else if (badge_age < 50) {
+                            age += " <b-badge variant='warning' pill>";
+                        } else if (badge_age < 60) {
+                            age += " <b-badge variant='danger' pill>";
+                        } else {
+                            age += " <b-badge variant='dark' pill>";
+                        }
+                        age += badge_age + "歲</b-badge>"
+                    }
+                }
+
+                let on_board_date = "";
+                if(!isEmpty(tdoc_raw["AP_ON_DATE"])) {
+                    on_board_date = tdoc_raw["AP_ON_DATE"].date ? tdoc_raw["AP_ON_DATE"].date.split(" ")[0] :　tdoc_raw["AP_ON_DATE"];
+                    let temp = Date.parse(on_board_date.replace('/-/g', "/"));
+                    if (temp) {
+                        let on = new Date(temp);
+                        if (tdoc_raw["AP_OFF_JOB"] == "Y") {
+                            let off_board_date = tdoc_raw["AP_OFF_DATE"];
+                            off_board_date = (parseInt(off_board_date.substring(0, 3)) + 1911) + off_board_date.substring(3);
+                            temp = Date.parse(off_board_date.replace('/-/g', "/"));
+                            if (temp) {
+                                // replace now Date to off board date
+                                now = new Date(temp);
+                            }
+                        }
+                        let work_age = ((now - on) / year).toFixed(1);
+                        if (work_age < 5) {
+                            on_board_date += " <b-badge variant='success'>";
+                        } else if (work_age < 10) {
+                            on_board_date += " <b-badge variant='primary'>";
+                        } else if (work_age < 20) {
+                            on_board_date += " <b-badge variant='warning'>";
+                        } else {
+                            on_board_date += " <b-badge variant='danger'>";
+                        }
+                        on_board_date +=  work_age + "年</b-badge>";
+                    }
+                }
+                let vue_card_text = tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + tdoc_raw["AP_OFF_DATE"] + "】</p>";
+                vue_card_text += "ID：" + tdoc_raw["DocUserID"] + "<br />"
+                    + "電腦：" + tdoc_raw["AP_PCIP"] + "<br />"
+                    + "生日：" + tdoc_raw["AP_BIRTH"] + age + "<br />"
+                    + "單位：" + tdoc_raw["AP_UNIT_NAME"] + "<br />"
+                    + "工作：" + tdoc_raw["AP_WORK"] + "<br />"
+                    + "學歷：" + tdoc_raw["AP_HI_SCHOOL"] + "<br />"
+                    + "考試：" + tdoc_raw["AP_TEST"] + "<br />"
+                    + "手機：" + tdoc_raw["AP_SEL"] + "<br />"
+                    + "到職：" + on_board_date + "<br />"
+                    ;
+                let vue_html = `
+                    <div id="user_info_app">
+                        <b-card class="overflow-hidden bg-light" style="max-width: 540px; font-size: 0.9rem;" title="${tdoc_raw["AP_USER_NAME"]}" sub-title="${tdoc_raw["AP_JOB"]}">
+                            <b-link href="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}" target="_blank">
+                                <b-card-img
+                                    src="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}"
+                                    alt="${tdoc_raw["AP_USER_NAME"]}"
+                                    class="img-thumbnail float-right ml-2"
+                                    style="max-width: 220px"
+                                ></b-card-img>
+                            </b-link>
+                            <b-card-text>${vue_card_text}</b-card-text>
+                        </b-card>
+                    </div>
+                `;
+
+                if ($(selector).length > 0) {
+                    $(selector).html(vue_html);
+                    new Vue({
+                        el: "#user_info_app",
+                        components: [ "b-card", "b-link", "b-badge" ]
+                    });
+                    addAnimatedCSS(selector, { name: "pulse", duration: "once-anim-cfg" });
+                } else {
+                    showModal({
+                        title: "使用者資訊",
+                        body: vue_html,
+                        size: "md",
+                        callback: () => {
+                            new Vue({
+                                el: "#user_info_app",
+                                components: [ "b-card", "b-link", "b-badge" ]
+                            });
+                        }
+                    });
+                }
+            },
             checkCaseUIData: function(data) {
                 if (isEmpty(data.year)) {
                     addNotification({
