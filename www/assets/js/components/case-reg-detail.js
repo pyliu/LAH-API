@@ -1,5 +1,6 @@
 if (Vue) {
     Vue.component("case-reg-detail", {
+        components: { "lah-transition": VueTransition || {template: `<i class="text-danger fas fa-ban"></i>`}},
         template: `<div>
             <p v-html="jsonObj.tr_html"></p>
             <b-form-row>
@@ -172,11 +173,13 @@ if (Vue) {
                         </b-card>
                     </div>
                 </b-col>
-                <b-col v-show="enabled_userinfo" id="in_modal_display" cols="6">
-                </b-col>
+                <lah-transition appear>
+                    <b-col v-show="enabled_userinfo" id="in_modal_display" cols="6">
+                    </b-col>
+                </lah-transition>
             </b-form-row>
         </div>`,
-        props: ["jsonObj", "enabled_userinfo"],
+        props: ["jsonObj"],
         data: () => {
             return {
                 area: "",
@@ -185,7 +188,8 @@ if (Vue) {
                 case_status_url: "",
                 case_data_url: "",
                 is_ongoing: false,
-                userinfo_display_id: "in_modal_display" 
+                userinfo_display_id: "in_modal_display",
+                enabled_userinfo: false
             }
         },
         methods: {
@@ -216,19 +220,20 @@ if (Vue) {
             this.case_status_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=${this.jsonObj.raw["RM01"]}&word=${this.jsonObj.raw["RM02"]}&code=${this.jsonObj.raw["RM03"]}&sdlyn=N&RM90=`;
             this.case_data_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD01/CCD0103.jsp?rm01=${this.jsonObj.raw["RM01"]}&rm02=${this.jsonObj.raw["RM02"]}&rm03=${this.jsonObj.raw["RM03"]}`
             this.is_ongoing = isEmpty(this.jsonObj.結案已否);
+            this.enabled_userinfo = this.$store.getters.isAdmin;
         },
         mounted: function(e) {
             if (this.enabled_userinfo) {
                 addUserInfoEvent();
                 //load current operator user info
                 $("#the_incase_operator_span").trigger("click");
-                // hide the col if user info is not found
+                // hide the col if user info is not found, wait for xhr loading is finished
                 let that = this;
-                Vue.nextTick(function() {
+                setTimeout(function() {
                     if (isEmpty($("#"+that.userinfo_display_id).text())) {
                         that.enabled_userinfo = false;
                     }
-                });
+                }, 1000);
             }
         }
     });
