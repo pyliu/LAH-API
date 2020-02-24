@@ -35,7 +35,7 @@ if (Vue) {
                                 min="1"
                             ></b-form-input>
                         </b-input-group>
-                        <a :href="'logs/' + log_filename" target="_blank">下載</a>
+                        <a href="javascript:void(0)" @click="download"><i class="fas fa-download"></i> 下載</a>
                         <small class="text-muted text-center">
                             <b-button variant="primary" size="sm" @click="callLogAPI">
                                 <i class="fas fa-sync"></i>
@@ -134,6 +134,36 @@ if (Vue) {
                             this.log_list = [];
                         }
                         this.log_list.unshift(message);
+                    },
+                    download: function(e) {
+                        let dt = new Date();
+                        let date = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}`;
+                        let form_body = new FormData();
+                        form_body.append("type", "file_log");
+                        form_body.append("date", date);
+                        asyncFetch("export_file_api.php", {
+                            method: 'POST',
+                            body: form_body,
+                            blob: true
+                        }).then(blob => {
+                            let d = new Date();
+                            let url = window.URL.createObjectURL(blob);
+                            let a = document.createElement('a');
+                            a.href = url;
+                            a.download = `log-${date}.log`;
+                            document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+                            a.click();    
+                            a.remove();  //afterwards we remove the element again
+                            // release object in memory
+                            window.URL.revokeObjectURL(url);
+                        }).catch(ex => {
+                            console.error("xhrExportLog parsing failed", ex);
+                            showAlert({
+                                title: "下載記錄檔",
+                                message: "XHR連線查詢有問題!!【" + ex + "】",
+                                type: "danger"
+                            });
+                        });
                     }
                 },
                 mounted() {

@@ -442,7 +442,7 @@ const store = (() => {
 Vue.prototype.$http = axios;
 Vue.prototype.$gstore = store;
 
-let VueBan = { template: `<i class="text-danger fas fa-ban"></i>` }
+let VueBan = { template: `<i class="text-danger fas fa-ban fa-2x"></i>` }
 let VueTransition = {
     template: `<transition
         :enter-active-class="animated_in"
