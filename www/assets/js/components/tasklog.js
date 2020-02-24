@@ -95,7 +95,7 @@ if (Vue) {
                         let dt = new Date();
                         this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
                         this.log_filename = `log-${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
-                        this.$http.post(CONFIG.FILE_API_EP, {
+                        this.$http.post(CONFIG.LOAD_FILE_API_EP, {
                             type: "load_log",
                             log_filename: this.log_filename,
                             slice_offset: this.count * -1   // get lastest # records
@@ -137,32 +137,12 @@ if (Vue) {
                     },
                     download: function(e) {
                         let dt = new Date();
+                        // e.g. 2020-02-24
                         let date = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}`;
-                        let form_body = new FormData();
-                        form_body.append("type", "file_log");
-                        form_body.append("date", date);
-                        asyncFetch("export_file_api.php", {
-                            method: 'POST',
-                            body: form_body,
-                            blob: true
-                        }).then(blob => {
-                            let d = new Date();
-                            let url = window.URL.createObjectURL(blob);
-                            let a = document.createElement('a');
-                            a.href = url;
-                            a.download = `log-${date}.log`;
-                            document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-                            a.click();    
-                            a.remove();  //afterwards we remove the element again
-                            // release object in memory
-                            window.URL.revokeObjectURL(url);
-                        }).catch(ex => {
-                            console.error("xhrExportLog parsing failed", ex);
-                            showAlert({
-                                title: "下載記錄檔",
-                                message: "XHR連線查詢有問題!!【" + ex + "】",
-                                type: "danger"
-                            });
+                        window.vueApp.download(CONFIG.EXPORT_FILE_API_EP, {
+                            type: "file_log",
+                            date: date,
+                            filename: this.log_filename
                         });
                     }
                 },

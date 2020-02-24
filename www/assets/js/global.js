@@ -12,7 +12,8 @@ const CONFIG = {
     SCREENSAVER: true,
     SCREENSAVER_TIMER: 15 * 60 * 1000,
     JSON_API_EP: "query_json_api.php",
-    FILE_API_EP: "load_file_api.php",
+    LOAD_FILE_API_EP: "load_file_api.php",
+    EXPORT_FILE_API_EP: "export_file_api.php",
     MOCK_API_EP: "TODO"
 }
 // the status code must be the same as server side response
@@ -873,14 +874,17 @@ let initVueApp = () => {
                     noCloseOnBackdrop: false
                 });
             },
-            download: function(url, filename = 'download.log') {
-                this.$http.get(url, {
+            download: function(url, data) {
+                let params = Object.assign({
+                    filename: "you_need_to_specify_filename.xxx"
+                }, data || {});
+                this.$http.post(url, params, {
                     responseType: 'blob'    // important
                 }).then((response) => {
                     const url = window.URL.createObjectURL(new Blob([response.data]));
                     const link = document.createElement('a');
                     link.href = url;
-                    link.setAttribute('download', filename);
+                    link.setAttribute('download', params.filename);
                     document.body.appendChild(link);
                     link.click();
                     //afterwards we remove the element again
