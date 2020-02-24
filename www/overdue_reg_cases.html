@@ -88,10 +88,10 @@
           }
         }
       });
-      // override the default vueApp from global.js
-      window.vueApp = new Vue({
+      
+      window.overdueApp = new Vue({
         el: "#overdue-reg-cases",
-        store,
+        store,  // could check store by window.overdueApp.$refs.overdue.$store
         components: {"my-transition": VueTransition},
         data: {
           reviewerID: "",
@@ -114,9 +114,6 @@
           $("body").css("overflow", "hidden");
         }
       });
-      // could check store by window.vueApp.$refs.overdue.$store
-      // disable body scrollbar
-      $("body").css("overflow", "hidden");
     });
   </script>
 </body>
