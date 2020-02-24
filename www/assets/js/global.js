@@ -415,12 +415,12 @@ const store = (() => {
             state: {
                 cache : {},
                 isAdmin: false,
-                userMapping: null
+                userNames: null
             },
             getters: {
                 cache: state => state.cache,
                 isAdmin: state => state.isAdmin,
-                userMapping: state => state.userMapping
+                userNames: state => state.userNames
             },
             mutations: {
                 cache(state, objPayload) {
@@ -429,8 +429,8 @@ const store = (() => {
                 isAdmin(state, flagPayload) {
                     state.isAdmin = flagPayload === true;
                 },
-                userMapping(state, mappingPayload) {
-                    state.userMapping = mappingPayload || {};
+                userNames(state, mappingPayload) {
+                    state.userNames = mappingPayload || {};
                 }
             }
         });
@@ -1258,14 +1258,14 @@ let initVueApp = () => {
                     });
                 });
             },
-            loadUserMapping: function() {
+            loadUserNames: function() {
                 // check authority
                 console.assert(this.$store, "Vuex store is not ready, did you include vuex.js in the page??");
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: 'user_mapping'
                 }).then(res => {
-                    this.$store.commit("userMapping", res.data.data || {});
-                    //console.log("userMapping: ", res.data.data_count);
+                    this.$store.commit("userNames", res.data.data || {});
+                    //console.log("userNames: ", res.data.data_count);
                 }).catch(err => {
                     console.error(err);
                     showAlert({
@@ -1279,7 +1279,7 @@ let initVueApp = () => {
         mounted() {
             this.authenticate();
             this.screensaver();
-            this.loadUserMapping();
+            this.loadUserNames();
         }
     });
 }
