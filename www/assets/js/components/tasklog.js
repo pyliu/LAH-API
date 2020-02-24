@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("watchdog", {
+    Vue.component("tasklog", {
         template: `<div>
             <lah-transition>
                 <schedule-task

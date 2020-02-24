@@ -36,7 +36,7 @@ if (Vue) {
                     need_admin: true
                 }, {
                     text: "監控修正",
-                    url: "watch_dog.php",
+                    url: "watchdog.php",
                     icon: "fa-user-secret",
                     need_admin: true
                 }, {

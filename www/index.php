@@ -53,13 +53,13 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
           <a class="nav-link" href="/query.php">查詢＆報表</a>
         </li>
         <li class="nav-item mt-3">
-          <a class="nav-link" href="/watch_dog.php">監控＆修正</a>
+          <a class="nav-link" href="/watchdog.php">監控＆修正</a>
         </li>
         <li class="nav-item mt-3">
           <a class="nav-link" href="/overdue_reg_cases.html">逾期案件</a>
         </li>
         <li class="nav-item mt-3">
-          <a class="nav-link" href="/watchdog.html">檢視記錄檔</a>
+          <a class="nav-link" href="/tasklog.html">記錄檔&排程</a>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle hamburger" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="assets/img/menu.png" width="32" /></a>
