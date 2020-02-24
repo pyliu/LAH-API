@@ -873,6 +873,22 @@ let initVueApp = () => {
                     noCloseOnBackdrop: false
                 });
             },
+            download: function(url, filename = 'download.log') {
+                this.$http.get(url, {
+                    responseType: 'blob'    // important
+                }).then((response) => {
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', filename);
+                    document.body.appendChild(link);
+                    link.click();
+                    //afterwards we remove the element again
+                    link.remove();
+                    // release object in memory
+                    window.URL.revokeObjectURL(url);
+                });                  
+            },
             fetch: async function(url, opts) {
                 opts = Object.assign({
                     method: "POST",
