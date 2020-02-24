@@ -3,7 +3,7 @@ if (Vue) {
     Vue.component(VueCountdown.name, VueCountdown);
     Vue.component("watchdog", {
         template: `<div>
-            <my-transition>
+            <my-transition appear>
                 <b-form-row class="mb-1" v-show="showScheduleTask">
                     <b-col>
                         <schedule-task ref="task" @fail-not-valid-server="handleFailed" @succeed-valid-server="handleSucceeded"></schedule-task>
@@ -99,28 +99,25 @@ if (Vue) {
                         let dt = new Date();
                         this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
                         this.log_filename = `log-${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
-                        let body = new FormData();
-                        body.append("type", "load_log");
-                        body.append("log_filename", this.log_filename);
-                        body.append("slice_offset", this.count * -1);   // get lastest # records
-                        asyncFetch(CONFIG.FILE_API_EP, {
-                            method: "POST",
-                            body: body
-                        }).then(jsonObj => {
+                        this.$http.post(CONFIG.FILE_API_EP, {
+                            type: "load_log",
+                            log_filename: this.log_filename,
+                            slice_offset: this.count * -1   // get lastest # records
+                        }).then(res => {
                             // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
-                            if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                this.query_data_count = jsonObj.data_count;
-                                this.query_total_count = jsonObj.total_count;
+                            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                this.query_data_count = res.data.data_count;
+                                this.query_total_count = res.data.total_count;
                                 let that = this;
-                                jsonObj.data.forEach(function(item, index, array){
+                                res.data.data.forEach(function(item, index, array){
                                     that.addLogList(item);
                                 });
                                 this.resetCountdown();
                                 this.startCountdown();
                             } else {
                                 // stop the timer if API tells it is not working
-                                this.addLogList(`${this.log_update_time} 錯誤: ${jsonObj.message}`);
-                                console.warn(jsonObj.message);
+                                this.addLogList(`${this.log_update_time} 錯誤: ${res.data.message}`);
+                                console.warn(res.data.message);
                             }
                             this.busy = false;
                         }).catch(ex => {

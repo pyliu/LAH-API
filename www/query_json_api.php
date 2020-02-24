@@ -23,7 +23,7 @@ switch ($_POST["type"]) {
 	case "user_mapping":
 		$operators = GetDBUserMapping();
 		$count = count($operators);
-		$log->info("XHR [user_mapping] 取得使用者對應表。");
+		$log->info("XHR [user_mapping] 取得使用者對應表($count)。");
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
 			"data_count" => $count,

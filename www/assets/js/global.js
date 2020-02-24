@@ -1228,7 +1228,7 @@ let initVueApp = () => {
                     type: 'authentication'
                 }).then(res => {
                     this.$store.commit("isAdmin", res.data.is_admin || false);
-                    console.log("isAdmin: ", this.$store.getters.isAdmin);
+                    //console.log("isAdmin: ", this.$store.getters.isAdmin);
                 }).catch(err => {
                     console.error(err);
                     showAlert({
@@ -1245,7 +1245,7 @@ let initVueApp = () => {
                     type: 'user_mapping'
                 }).then(res => {
                     this.$store.commit("userMapping", res.data.data || {});
-                    console.log("userMapping: ", res.data.data_count);
+                    //console.log("userMapping: ", res.data.data_count);
                 }).catch(err => {
                     console.error(err);
                     showAlert({
