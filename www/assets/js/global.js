@@ -437,6 +437,7 @@ const store = (() => {
 Vue.prototype.$http = axios;
 Vue.prototype.$gstore = store;
 
+let VueBan = { template: `<i class="text-danger fas fa-ban"></i>` }
 let VueTransition = {
     template: `<transition
         :enter-active-class="animated_in"
@@ -907,11 +908,11 @@ let initVueApp = () => {
                         message: this.$createElement("case-reg-detail", {
                             props: {
                                 jsonObj: jsonObj,
-                                enabled_userinfo: enabled_userinfo
+                                enabled_userinfo: this.$store.getters.isAdmin
                             }
                         }),
                         title: "登記案件詳情",
-                        size: enabled_userinfo ? "xl" : "lg"
+                        size: this.$store.getters.isAdmin ? "xl" : "lg"
                     });
                 }
             },
