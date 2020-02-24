@@ -46,7 +46,7 @@ if (Vue) {
                     need_admin: false
                 }, {
                     text: "記錄檔",
-                    url: "watchdog.html",
+                    url: "tasklog.html",
                     icon: "fa-dog",
                     need_admin: true
                 }, {

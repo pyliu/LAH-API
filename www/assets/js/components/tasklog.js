@@ -1,21 +1,16 @@
 if (Vue) {
-    // for using countdown
-    Vue.component(VueCountdown.name, VueCountdown);
     Vue.component("watchdog", {
         template: `<div>
-            <my-transition appear>
-                <b-form-row class="mb-1" v-show="showScheduleTask">
-                    <b-col>
-                        <schedule-task ref="task" @fail-not-valid-server="handleFailed" @succeed-valid-server="handleSucceeded"></schedule-task>
-                    </b-col>
-                </b-form-row>
-            </my-transition>
-            <b-form-row>
-                <b-col>
-                    <log-viewer ref="log"></log-viewer>
-                </b-col>
-            </b-form-row>
-
+            <lah-transition>
+                <schedule-task
+                    v-show="showScheduleTask"
+                    class="mb-1"
+                    ref="task"
+                    @fail-not-valid-server="handleFailed"
+                    @succeed-valid-server="handleSucceeded"
+                ></schedule-task>
+            </lah-transition>
+            <log-viewer ref="log"></log-viewer>
         </div>`,
         data: function() {
             return {
@@ -27,7 +22,7 @@ if (Vue) {
             handleSucceeded: function() { this.showScheduleTask = true; },
         },
         components: {
-            "my-transition": VueTransition,
+            "lah-transition": VueTransition,
             "log-viewer": {
                 template: `<b-card bo-body :header="'紀錄儀表版 ' + query_data_count + ' / ' + query_total_count">
                     <div class="d-flex w-100 justify-content-between">
@@ -54,15 +49,14 @@ if (Vue) {
                             </b-button>
                         </small>
                     </div>
-                    <small>
-                        <b-list-group flush>
-                            <b-list-group-item v-for="item in list">{{item}}</b-list-group-item>
-                        </b-list-group>
-                    </small>
+                    <b-list-group flush class="small">
+                        <b-list-group-item v-for="item in log_list">{{item}}</b-list-group-item>
+                    </b-list-group>
                 </b-card>`,
+                components: { "countdown": VueCountdown },
                 data: function () {
                     return {
-                        list: [],
+                        log_list: [],
                         milliseconds: 5 * 60 * 1000,
                         count: 50,
                         log_update_time: "10:48:00",
@@ -75,8 +69,10 @@ if (Vue) {
                 watch: {
                     busy: function(flag) {
                         if (flag) {
+                            vueApp.busyOn(this.$el);
                             addLDAnimation(".fas.fa-sync", "ld-cycle");
                         } else {
+                            vueApp.busyOff(this.$el);
                             clearLDAnimation(".fas.fa-sync");
                         }
                     }
@@ -132,12 +128,12 @@ if (Vue) {
                         });
                     },
                     addLogList: function (message) {
-                        if (this.list.length == this.count) {
-                            this.list.pop();
-                        } else if (this.list.length > this.count) {
-                            this.list = [];
+                        if (this.log_list.length == this.count) {
+                            this.log_list.pop();
+                        } else if (this.log_list.length > this.count) {
+                            this.log_list = [];
                         }
-                        this.list.unshift(message);
+                        this.log_list.unshift(message);
                     }
                 },
                 mounted() {
@@ -175,6 +171,7 @@ if (Vue) {
                         </b-list-group>
                     </small>
                 </b-card>`,
+                components: { "countdown": VueCountdown },
                 data: function() {
                     return {
                         milliseconds: 15 * 60 * 1000,
