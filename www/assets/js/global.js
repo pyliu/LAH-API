@@ -1,4 +1,10 @@
 //<![CDATA[
+/**
+ * set axios defaults
+ */
+// PHP default uses QueryString as the parsing source but axios use json object instead
+axios.defaults.transformRequest = [data => $.param(data)];
+
 const CONFIG = {
     DISABLE_MSDB_QUERY: false,
     TEST_MODE: false,
@@ -103,116 +109,6 @@ const ANIMATED_TRANSITIONS = [
     { in: "animated slideInLeft", out: "animated slideOutRight" },
     { in: "animated slideInRight", out: "animated slideOutLeft" }
 ];
-/**
- * set axios defaults
- */
-// PHP default uses QueryString as the parsing source but axios use json object instead
-axios.defaults.transformRequest = [data => $.param(data)];
-/**
- * Vue Relative Component
- */
-const store = (() => {
-    if (typeof Vuex == "object") {
-        return new Vuex.Store({
-            state: {
-                cache : {},
-                isAdmin: false
-            },
-            getters: {
-                cache: state => state.cache,
-                isAdmin: state => state.isAdmin
-            },
-            mutations: {
-                cache(state, objPayload) {
-                    state.cache = Object.assign(state.cache, objPayload);
-                },
-                isAdmin(state, flagPayload) {
-                    state.isAdmin = flagPayload === true;
-                }
-            }
-        });
-    }
-    return {};
-})();
-
-// add to all Vue instances
-// https://vuejs.org/v2/cookbook/adding-instance-properties.html
-Vue.prototype.$http = axios;
-Vue.prototype.$gstore = store;
-
-let VueTransition = {
-    template: `<transition
-        :enter-active-class="animated_in"
-        :leave-active-class="animated_out"
-        :duration="duration"
-        :mode="mode"
-        :appear="appear"
-        @enter="enter"
-        @leave="leave"
-        @after-enter="afterEnter"
-        @after-leave="afterLeave"
-    >
-        <slot>轉場內容會顯示在這邊</slot>
-    </transition>`,
-    props: {
-        appear: Boolean,
-        fade: Boolean,
-        slide: Boolean,
-        slideDown: Boolean,
-        slideUp: Boolean,
-        zoom: Boolean,
-        bounce: Boolean,
-        rotate: Boolean
-    },
-    data: function() {
-        return {
-            animated_in: "animated fadeIn once-anim-cfg",
-            animated_out: "animated fadeOut once-anim-cfg",
-            animated_opts: ANIMATED_TRANSITIONS,
-            duration: 400,   // or {enter: 400, leave: 800}
-            mode: "out-in",  // out-in, in-out
-            cfg_css: "once-anim-cfg"
-        }
-    },
-    created() {
-        if (this.rotate) {
-            this.animated_in = `animated rotateIn ${this.cfg_css}`;
-            this.animated_out = `animated rotateOut ${this.cfg_css}`;
-        } else if (this.bounce) {
-            this.animated_in = `animated bounceIn ${this.cfg_css}`;
-            this.animated_out = `animated bounceOut ${this.cfg_css}`;
-        } else if (this.zoom) {
-            this.animated_in = `animated zoomIn ${this.cfg_css}`;
-            this.animated_out = `animated zoomOut ${this.cfg_css}`;
-        } else if (this.fade) {
-            this.animated_in = `animated fadeIn ${this.cfg_css}`;
-            this.animated_out = `animated fadeOut ${this.cfg_css}`;
-        } else if (this.slideDown || this.slide) {
-            this.animated_in = `animated slideInDown ${this.cfg_css}`;
-            this.animated_out = `animated slideOutUp ${this.cfg_css}`;
-        } else if (this.slideUp) {
-            this.animated_in = `animated slideInUp ${this.cfg_css}`;
-            this.animated_out = `animated slideOutDown ${this.cfg_css}`;
-        } else {
-            this.randAnimation();
-        }
-    },
-    methods: {
-        enter: function(e) { this.$emit("enter", e); },
-        leave: function(e) { this.$emit("leave", e); },
-        afterEnter: function(e) { this.$emit("after-enter", e); },
-        afterLeave: function(e) { this.$emit("after-leave", e); },
-        rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
-        randAnimation: function() {
-            if (this.animated_opts) {
-                let count = this.animated_opts.length;
-                let this_time = this.animated_opts[this.rand(count)];
-                this.animated_in = `${this_time.in} ${this.cfg_css}`;
-                this.animated_out = `${this_time.out} ${this.cfg_css}`;
-            }
-        }
-    }
-}
 
 let asyncFetch = async function(url, opts) {
     if (!window.vueApp) {
@@ -245,7 +141,7 @@ let toTWDate = d => {
 
 let addUserInfoEvent = () => {
     $(".user_tag").off("click");
-    $(".user_tag").on("click", window.vueAp.fetchUserInfo);
+    $(".user_tag").on("click", window.vueApp.fetchUserInfo);
 }
 
 let showPopper = (selector, content, timeout) => {
@@ -509,6 +405,111 @@ let initBlockquoteModal = () => {
         }
     });
 }
+/**
+ * Vue Relative Component
+ */
+const store = (() => {
+    if (typeof Vuex == "object") {
+        return new Vuex.Store({
+            state: {
+                cache : {},
+                isAdmin: false
+            },
+            getters: {
+                cache: state => state.cache,
+                isAdmin: state => state.isAdmin
+            },
+            mutations: {
+                cache(state, objPayload) {
+                    state.cache = Object.assign(state.cache, objPayload);
+                },
+                isAdmin(state, flagPayload) {
+                    state.isAdmin = flagPayload === true;
+                }
+            }
+        });
+    }
+    return {};
+})();
+
+// add to all Vue instances
+// https://vuejs.org/v2/cookbook/adding-instance-properties.html
+Vue.prototype.$http = axios;
+Vue.prototype.$gstore = store;
+
+let VueTransition = {
+    template: `<transition
+        :enter-active-class="animated_in"
+        :leave-active-class="animated_out"
+        :duration="duration"
+        :mode="mode"
+        :appear="appear"
+        @enter="enter"
+        @leave="leave"
+        @after-enter="afterEnter"
+        @after-leave="afterLeave"
+    >
+        <slot>轉場內容會顯示在這邊</slot>
+    </transition>`,
+    props: {
+        appear: Boolean,
+        fade: Boolean,
+        slide: Boolean,
+        slideDown: Boolean,
+        slideUp: Boolean,
+        zoom: Boolean,
+        bounce: Boolean,
+        rotate: Boolean
+    },
+    data: function() {
+        return {
+            animated_in: "animated fadeIn once-anim-cfg",
+            animated_out: "animated fadeOut once-anim-cfg",
+            animated_opts: ANIMATED_TRANSITIONS,
+            duration: 400,   // or {enter: 400, leave: 800}
+            mode: "out-in",  // out-in, in-out
+            cfg_css: "once-anim-cfg"
+        }
+    },
+    created() {
+        if (this.rotate) {
+            this.animated_in = `animated rotateIn ${this.cfg_css}`;
+            this.animated_out = `animated rotateOut ${this.cfg_css}`;
+        } else if (this.bounce) {
+            this.animated_in = `animated bounceIn ${this.cfg_css}`;
+            this.animated_out = `animated bounceOut ${this.cfg_css}`;
+        } else if (this.zoom) {
+            this.animated_in = `animated zoomIn ${this.cfg_css}`;
+            this.animated_out = `animated zoomOut ${this.cfg_css}`;
+        } else if (this.fade) {
+            this.animated_in = `animated fadeIn ${this.cfg_css}`;
+            this.animated_out = `animated fadeOut ${this.cfg_css}`;
+        } else if (this.slideDown || this.slide) {
+            this.animated_in = `animated slideInDown ${this.cfg_css}`;
+            this.animated_out = `animated slideOutUp ${this.cfg_css}`;
+        } else if (this.slideUp) {
+            this.animated_in = `animated slideInUp ${this.cfg_css}`;
+            this.animated_out = `animated slideOutDown ${this.cfg_css}`;
+        } else {
+            this.randAnimation();
+        }
+    },
+    methods: {
+        enter: function(e) { this.$emit("enter", e); },
+        leave: function(e) { this.$emit("leave", e); },
+        afterEnter: function(e) { this.$emit("after-enter", e); },
+        afterLeave: function(e) { this.$emit("after-leave", e); },
+        rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
+        randAnimation: function() {
+            if (this.animated_opts) {
+                let count = this.animated_opts.length;
+                let this_time = this.animated_opts[this.rand(count)];
+                this.animated_in = `${this_time.in} ${this.cfg_css}`;
+                this.animated_out = `${this_time.out} ${this.cfg_css}`;
+            }
+        }
+    }
+}
 
 let initAlertUI = () => {
     // add alert element to show the alert message
@@ -655,6 +656,7 @@ let initVueApp = () => {
     // init vueApp for every page's #main_content_section section tag
     window.vueApp = new Vue({
         el: "#main_content_section",
+        store,  // use global Vuex store
         data: {
             toastCounter: 0,
             openConfirm: false,
@@ -662,7 +664,6 @@ let initVueApp = () => {
             transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)],
             callbackQueue: []
         },
-        store,  // use global Vuex store
         created: function(e) {
             this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
                 //console.log('Modal is about to be shown', bvEvent, modalId)
@@ -1062,23 +1063,25 @@ let initVueApp = () => {
 
                 if ($(selector).length > 0) {
                     $(selector).html(vue_html);
-                    new Vue({
-                        el: "#user_info_app",
-                        components: [ "b-card", "b-link", "b-badge" ],
-                        mounted() {
-                            addAnimatedCSS(selector, { name: "pulse", duration: "once-anim-cfg" });
-                        }
-                    });
+                    Vue.nextTick(() =>
+                        new Vue({
+                            el: "#user_info_app",
+                            components: [ "b-card", "b-link", "b-badge" ],
+                            mounted() {
+                                addAnimatedCSS(selector, { name: "pulse", duration: "once-anim-cfg" });
+                            }
+                        })
+                    );
                 } else {
                     showModal({
                         title: "使用者資訊",
                         body: vue_html,
                         size: "md",
                         callback: () => {
-                            new Vue({
+                            Vue.nextTick(() => new Vue({
                                 el: "#user_info_app",
                                 components: [ "b-card", "b-link", "b-badge" ]
-                            });
+                            }));
                         }
                     });
                 }
@@ -1214,13 +1217,14 @@ let initVueApp = () => {
             },
             authenticate: function() {
                 // check authority
+                console.assert(this.$store, "Vuex store is not ready, did you include vuex.js in the page??");
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: 'authentication'
                 }).then(res => {
-                    this.$gstore.commit("isAdmin", res.data.is_admin || false);
-                    console.log("isAdmin: ", this.$gstore.getters.isAdmin);
+                    this.$store.commit("isAdmin", res.data.is_admin || false);
+                    console.log("isAdmin: ", this.$store.getters.isAdmin);
                 }).catch(err => {
-                    console.error(err.toJSON());
+                    console.error(err);
                     showAlert({
                         title: '認證失敗',
                         message: err.message,
@@ -1229,7 +1233,7 @@ let initVueApp = () => {
                 });
             }
         },
-        created() {
+        mounted() {
             this.authenticate();
             this.screensaver();
         }

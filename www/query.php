@@ -282,6 +282,7 @@ fieldset fieldset legend {
   <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
 
   <script src="assets/js/vue.js"></script>
+  <script src="assets/js/vuex.js"></script>
   <script src="assets/js/bootstrap-vue.min.js"></script>
   <script src="assets/js/bootstrap-vue-icons.min.js"></script>
   <script src="assets/js/axios.min.js"></script>

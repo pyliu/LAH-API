@@ -65,6 +65,7 @@ require_once("./include/authentication.php");
   <script src="assets/js/bootstrap.min.js"></script>
   <!-- Vue -->
   <script src="assets/js/vue.js"></script>
+  <script src="assets/js/vuex.js"></script>
   <script src="assets/js/bootstrap-vue.min.js"></script>
   <script src="assets/js/bootstrap-vue-icons.min.js"></script>
   <!-- Custom -->
