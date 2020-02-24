@@ -413,11 +413,13 @@ const store = (() => {
         return new Vuex.Store({
             state: {
                 cache : {},
-                isAdmin: false
+                isAdmin: false,
+                userMapping: null
             },
             getters: {
                 cache: state => state.cache,
-                isAdmin: state => state.isAdmin
+                isAdmin: state => state.isAdmin,
+                userMapping: state => state.userMapping
             },
             mutations: {
                 cache(state, objPayload) {
@@ -425,6 +427,9 @@ const store = (() => {
                 },
                 isAdmin(state, flagPayload) {
                     state.isAdmin = flagPayload === true;
+                },
+                userMapping(state, mappingPayload) {
+                    state.userMapping = mappingPayload || {};
                 }
             }
         });
@@ -1232,11 +1237,29 @@ let initVueApp = () => {
                         type: 'danger'
                     });
                 });
+            },
+            loadUserMapping: function() {
+                // check authority
+                console.assert(this.$store, "Vuex store is not ready, did you include vuex.js in the page??");
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'user_mapping'
+                }).then(res => {
+                    this.$store.commit("userMapping", res.data.data || {});
+                    console.log("userMapping: ", res.data.data_count);
+                }).catch(err => {
+                    console.error(err);
+                    showAlert({
+                        title: '取得使用者對應表',
+                        message: err.message,
+                        type: 'danger'
+                    });
+                });
             }
         },
         mounted() {
             this.authenticate();
             this.screensaver();
+            this.loadUserMapping();
         }
     });
 }

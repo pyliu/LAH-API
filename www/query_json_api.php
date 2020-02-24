@@ -20,11 +20,22 @@ function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 $query = new Query();
 
 switch ($_POST["type"]) {
+	case "user_mapping":
+		$operators = GetDBUserMapping();
+		$count = count($operators);
+		$log->info("XHR [user_mapping] 取得使用者對應表。");
+		echo json_encode(array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"data_count" => $count,
+			"data" => $operators,
+			"message" => "取得 $count 筆使用者資料。"
+		), 0);
+		break;
 	case "authentication":
 		// $client_ip is from init.php
 		if (in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
 			$msg = $client_ip." 通過管理者認證。";
-			$log->info($msg);
+			$log->info("XHR [authentication] ".$msg);
 			echo json_encode(array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"is_admin" => true,
@@ -32,7 +43,7 @@ switch ($_POST["type"]) {
 				"message" => $msg
 			), 0);
 		} else {
-			$log->warning($client_ip." 嘗試存取限制的管理系統。");
+			$log->warning("XHR [authentication] ".$client_ip." 嘗試存取限制的管理系統。");
 			echo json_encode(array(
 				"status" => STATUS_CODE::FAIL_NO_AUTHORITY,
 				"is_admin" => false,
