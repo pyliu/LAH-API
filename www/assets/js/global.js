@@ -420,7 +420,11 @@ const store = (() => {
             getters: {
                 cache: state => state.cache,
                 isAdmin: state => state.isAdmin,
-                userNames: state => state.userNames
+                userNames: state => state.userNames,
+                userIDs: state => {
+                    let reverseMapping = o => Object.keys(o).reduce((r, k) => Object.assign(r, { [o[k]]: (r[o[k]] || []).concat(k) }), {});
+                    return reverseMapping(state.userNames);
+                }
             },
             mutations: {
                 cache(state, objPayload) {
