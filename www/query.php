@@ -25,29 +25,6 @@ ksort($operators);
 <link href="assets/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
 <link href="assets/css/basic.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
-<style type="text/css">
-#contact a:link, a:visited, a:hover {
-	color: gray;
-}
-
-#dropdown01 img {
-  width: 32px;
-  height: auto;
-  vertical-align: middle;
-}
-
-fieldset fieldset {
-  border: 2px solid #04c;
-  border-bottom: 0;
-  border-left: 0;
-  border-right: 0;
-  border-radius: 0;
-}
-
-fieldset fieldset legend {
-  font-size: 18px;
-}
-</style>
 </head>
 
 <body>
