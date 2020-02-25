@@ -71,6 +71,7 @@ require_once("./include/authentication.php");
   <!-- Custom -->
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/global.js"></script>
+  <script src="assets/js/components/lah-vue.js"></script>
   <script src="assets/js/xhr_query.js"></script>
   <script src="assets/js/cache.js"></script>
   <script src="assets/js/FileSaver.min.js"></script>
@@ -84,8 +85,6 @@ require_once("./include/authentication.php");
   <script src="assets/js/components/case-temp-mgt.js"></script>
   <script src="assets/js/components/case-sync-mgt.js"></script>
   <script src="assets/js/components/fee-query-board.js"></script>
-  <script src="assets/js/components/lah-header.js"></script>
-  <script src="assets/js/components/lah-footer.js"></script>
   <!-- Vue Chart Components -->
   <script src="assets/js/Chart.min.js"></script>
 </body>

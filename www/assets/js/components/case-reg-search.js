@@ -20,12 +20,8 @@ if (Vue) {
             return {
                 year: "108",
                 code: "HB12",
-                num: "000100",
-                busy: false
+                num: "000100"
             }
-        },
-        watch: {
-            busy: function(flag) { flag ? vueApp.busyOn(this.$el) : vueApp.busyOff(this.$el); }
         },
         methods: {
             handleUpdate: function(e, data) {
@@ -50,14 +46,14 @@ if (Vue) {
                 // prepare post params
                 let id = trim(year + code + number);
                 
-                this.busy = true;
+                this.isBusy = true;
             
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "reg_case",
                     id: id
                 }).then(res => {
                     window.vueApp.showRegCase(res.data, true);
-                    this.busy = false;
+                    this.isBusy = false;
                 }).catch(err => {
                     console.error("case-reg-search::regQuery parsing failed", err);
                     showAlert({
@@ -84,14 +80,14 @@ if (Vue) {
                 // prepare post params
                 let id = trim(year + code + number);
                 
-                this.busy = true;
+                this.isBusy = true;
             
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "prc_case",
                     id: id
                 }).then(res => {
                     showPrcCaseDetail(res.data);
-                    this.busy = false;
+                    this.isBusy = false;
                 }).catch(err => {
                     console.error("case-reg-search::prcQuery parsing failed", err);
                     showAlert({

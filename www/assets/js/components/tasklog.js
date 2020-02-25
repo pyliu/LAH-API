@@ -62,19 +62,7 @@ if (Vue) {
                         log_update_time: "10:48:00",
                         query_data_count: 0,
                         query_total_count: 0,
-                        log_filename: "",
-                        busy: false
-                    }
-                },
-                watch: {
-                    busy: function(flag) {
-                        if (flag) {
-                            vueApp.busyOn(this.$el);
-                            addLDAnimation(".fas.fa-sync", "ld-cycle");
-                        } else {
-                            vueApp.busyOff(this.$el);
-                            clearLDAnimation(".fas.fa-sync");
-                        }
+                        log_filename: ""
                     }
                 },
                 methods: {
@@ -91,7 +79,7 @@ if (Vue) {
                         this.$refs.countdown.end();
                     },
                     callLogAPI: function (e) {
-                        this.busy = true;
+                        this.isBusy = true;
                         let dt = new Date();
                         this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
                         this.log_filename = `log-${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
@@ -115,7 +103,7 @@ if (Vue) {
                                 this.addLogList(`${this.log_update_time} 錯誤: ${res.data.message}`);
                                 console.warn(res.data.message);
                             }
-                            this.busy = false;
+                            this.isBusy = false;
                         }).catch(ex => {
                             this.abortCountdown();
                             this.addLogList(`${this.log_update_time} 錯誤: ${ex.message}`);
@@ -229,7 +217,7 @@ if (Vue) {
                         this.history.unshift(message);
                     },
                     callWatchdogAPI: function() {
-                        this.busy = true;
+                        this.isBusy = true;
                         // generate current date time string
                         let dt = new Date();
                         let now = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
@@ -259,7 +247,7 @@ if (Vue) {
                                 this.startCountdown();
                                 this.$emit("succeed-valid-server");
                             }
-                            this.busy = false;
+                            this.isBusy = false;
                         }).catch(ex => {
                             this.abortCountdown();
                             this.addHistory(`${now} 結果: ${ex.message}`);

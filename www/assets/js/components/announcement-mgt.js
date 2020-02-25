@@ -18,13 +18,7 @@ if (Vue) {
         </fieldset>`,
         data: () => {
             return {
-                reset_flag: false,
-                busy: false
-            }
-        },
-        watch: {
-            busy: function(flag) {
-                flag ? vueApp.busyOn(this.$el) : vueApp.busyOff(this.$el);
+                reset_flag: false
             }
         },
         methods: {
@@ -37,7 +31,7 @@ if (Vue) {
             clear: function(e) {
                 let that = this;
                 showConfirm("請確認清除所有登記原因的准登旗標？", () => {
-                    that.busy = true;
+                    that.isBusy = true;
                     this.$http.post(CONFIG.JSON_API_EP, {
                         type: "clear_announcement_flag"
                     }).then(res => {
@@ -45,7 +39,7 @@ if (Vue) {
                         this.reset_flag = true;
                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + res.data.status + "】");
                         addNotification({ title: "清除全部先行准登旗標", message: "已清除完成", type: "success" });
-                        that.busy = false;
+                        that.isBusy = false;
                     }).catch(err => {
                         console.error("announcement-mgt::clear parsing failed", err);
                         showAlert({

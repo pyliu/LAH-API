@@ -20,12 +20,8 @@ if (Vue) {
             return {
                 year: "108",
                 code: "HB12",
-                num: "000100",
-                busy: false
+                num: "000100"
             }
-        },
-        watch: {
-            busy: function(flag) { flag ? vueApp.busyOn(this.$el) : vueApp.busyOff(this.$el); }
         },
         methods: {
             handleUpdate: function(e, data) {
@@ -48,7 +44,7 @@ if (Vue) {
                 let code = this.code;
                 let number = this.num;
                 
-                this.busy = true;
+                this.isBusy = true;
             
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "sur_case",
@@ -64,7 +60,7 @@ if (Vue) {
                     } else {
                         this.dialog(res.data);
                     }
-                    this.busy = false;
+                    this.isBusy = false;
                 }).catch(err => {
                     console.error("case-sur-mgt::query parsing failed", err);
                     showAlert({
@@ -181,12 +177,8 @@ if (Vue) {
                         count: 0,
                         orig_count: 0,
                         disabled_popover: true,
-                        debug: false,
-                        busy: false
+                        debug: false
                     }
-                },
-                watch: {
-                    busy: function(flag) { flag ? vueApp.busyOn(this.$el) : vueApp.busyOff(this.$el); }
                 },
                 methods: {
                     update: function(e) {
@@ -197,7 +189,7 @@ if (Vue) {
                         if (this.orig_count != this.count) {
                             let that = this;
                             showConfirm("確定要修改 " + title + " 為「" + this.count + "」？",function () {
-                                that.busy = true;
+                                that.isBusy = true;
                                 that.$http.post(CONFIG.JSON_API_EP, {
                                     type: "upd_case_column",
                                     id: that.id,
@@ -221,7 +213,7 @@ if (Vue) {
                                             type: "danger"
                                         });
                                     }
-                                    that.busy = false;
+                                    that.isBusy = false;
                                 }).catch(err => {
                                     console.error("case-sur-dialog::update parsing failed", err);
                                     showAlert({
@@ -247,7 +239,7 @@ if (Vue) {
                         let clr_delay = this.clearDatetime;
                         let that = this;
                         showConfirm("確定要修正本案件?", function() {
-                            that.busy = true;
+                            that.isBusy = true;
                             //fix_sur_delay_case
                             that.$http.post(CONFIG.JSON_API_EP, {
                                 type: "fix_sur_delay_case",
@@ -273,7 +265,7 @@ if (Vue) {
                                         type: "danger"
                                     });
                                 }
-                                that.busy = false;
+                                that.isBusy = false;
                             }).catch(err => {
                                 console.error("case-sur-dialog::fix parsing failed", err);
                                 showAlert({title: "修正複丈案件失敗", subtitle: id, message: err.message, type: "danger"});

@@ -1,10 +1,4 @@
 //<![CDATA[
-/**
- * set axios defaults
- */
-// PHP default uses QueryString as the parsing source but axios use json object instead
-axios.defaults.transformRequest = [data => $.param(data)];
-
 const CONFIG = {
     DISABLE_MSDB_QUERY: false,
     TEST_MODE: false,
@@ -406,121 +400,6 @@ let initBlockquoteModal = () => {
         }
     });
 }
-/**
- * Vue Relative Component
- */
-const store = (() => {
-    if (typeof Vuex == "object") {
-        return new Vuex.Store({
-            state: {
-                cache : {},
-                isAdmin: false,
-                userNames: null
-            },
-            getters: {
-                cache: state => state.cache,
-                isAdmin: state => state.isAdmin,
-                userNames: state => state.userNames,
-                userIDs: state => {
-                    let reverseMapping = o => Object.keys(o).reduce((r, k) => Object.assign(r, { [o[k]]: (r[o[k]] || []).concat(k) }), {});
-                    return reverseMapping(state.userNames);
-                }
-            },
-            mutations: {
-                cache(state, objPayload) {
-                    state.cache = Object.assign(state.cache, objPayload);
-                },
-                isAdmin(state, flagPayload) {
-                    state.isAdmin = flagPayload === true;
-                },
-                userNames(state, mappingPayload) {
-                    state.userNames = mappingPayload || {};
-                }
-            }
-        });
-    }
-    return {};
-})();
-
-// add to all Vue instances
-// https://vuejs.org/v2/cookbook/adding-instance-properties.html
-Vue.prototype.$http = axios;
-Vue.prototype.$gstore = store;
-
-let VueBan = { template: `<i class="text-danger fas fa-ban fa-2x"></i>` }
-let VueTransition = {
-    template: `<transition
-        :enter-active-class="animated_in"
-        :leave-active-class="animated_out"
-        :duration="duration"
-        :mode="mode"
-        :appear="appear"
-        @enter="enter"
-        @leave="leave"
-        @after-enter="afterEnter"
-        @after-leave="afterLeave"
-    >
-        <slot>轉場內容會顯示在這邊</slot>
-    </transition>`,
-    props: {
-        appear: Boolean,
-        fade: Boolean,
-        slide: Boolean,
-        slideDown: Boolean,
-        slideUp: Boolean,
-        zoom: Boolean,
-        bounce: Boolean,
-        rotate: Boolean
-    },
-    data: function() {
-        return {
-            animated_in: "animated fadeIn once-anim-cfg",
-            animated_out: "animated fadeOut once-anim-cfg",
-            animated_opts: ANIMATED_TRANSITIONS,
-            duration: 400,   // or {enter: 400, leave: 800}
-            mode: "out-in",  // out-in, in-out
-            cfg_css: "once-anim-cfg"
-        }
-    },
-    created() {
-        if (this.rotate) {
-            this.animated_in = `animated rotateIn ${this.cfg_css}`;
-            this.animated_out = `animated rotateOut ${this.cfg_css}`;
-        } else if (this.bounce) {
-            this.animated_in = `animated bounceIn ${this.cfg_css}`;
-            this.animated_out = `animated bounceOut ${this.cfg_css}`;
-        } else if (this.zoom) {
-            this.animated_in = `animated zoomIn ${this.cfg_css}`;
-            this.animated_out = `animated zoomOut ${this.cfg_css}`;
-        } else if (this.fade) {
-            this.animated_in = `animated fadeIn ${this.cfg_css}`;
-            this.animated_out = `animated fadeOut ${this.cfg_css}`;
-        } else if (this.slideDown || this.slide) {
-            this.animated_in = `animated slideInDown ${this.cfg_css}`;
-            this.animated_out = `animated slideOutUp ${this.cfg_css}`;
-        } else if (this.slideUp) {
-            this.animated_in = `animated slideInUp ${this.cfg_css}`;
-            this.animated_out = `animated slideOutDown ${this.cfg_css}`;
-        } else {
-            this.randAnimation();
-        }
-    },
-    methods: {
-        enter: function(e) { this.$emit("enter", e); },
-        leave: function(e) { this.$emit("leave", e); },
-        afterEnter: function(e) { this.$emit("after-enter", e); },
-        afterLeave: function(e) { this.$emit("after-leave", e); },
-        rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
-        randAnimation: function() {
-            if (this.animated_opts) {
-                let count = this.animated_opts.length;
-                let this_time = this.animated_opts[this.rand(count)];
-                this.animated_in = `${this_time.in} ${this.cfg_css}`;
-                this.animated_out = `${this_time.out} ${this.cfg_css}`;
-            }
-        }
-    }
-}
 
 let initAlertUI = () => {
     // add alert element to show the alert message
@@ -667,7 +546,6 @@ let initVueApp = () => {
     // init vueApp for every page's #main_content_section section tag
     window.vueApp = new Vue({
         el: "#main_content_section",
-        store,  // use global Vuex store
         data: {
             toastCounter: 0,
             openConfirm: false,
@@ -764,7 +642,7 @@ let initVueApp = () => {
                 // use vNode for HTML content
                 const msgVNode = h('div', { domProps: { innerHTML: message } });
                 this.$bvToast.toast([msgVNode], merged);
-
+    
                 if (typeof merged.callback === 'function') {
                     let that = this;
                     setTimeout(() => merged.callback.apply(that, arguments), 100);
@@ -911,7 +789,7 @@ let initVueApp = () => {
                 let clicked_element = $(e.target);
                 // remove additional characters for querying
                 let id = trim(clicked_element.text());
-
+    
                 let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "reg_case",
@@ -937,11 +815,11 @@ let initVueApp = () => {
                         message: this.$createElement("case-reg-detail", {
                             props: {
                                 jsonObj: jsonObj,
-                                enabled_userinfo: this.$store.getters.isAdmin
+                                enabled_userinfo: this.$gstore.getters.isAdmin
                             }
                         }),
                         title: "登記案件詳情",
-                        size: this.$store.getters.isAdmin ? "xl" : "lg"
+                        size: this.$gstore.getters.isAdmin ? "xl" : "lg"
                     });
                 }
             },
@@ -987,7 +865,7 @@ let initVueApp = () => {
                         let payload = {};
                         if (!isEmpty(id)) { payload[id] = json_str; }
                         if (!isEmpty(name)) { payload[name] = json_str; }
-                        this.$store.commit('cache', payload);
+                        this.$gstore.commit('cache', payload);
                     } else {
                         addNotification({ message: `找不到 '${name} ${id}' 資料` });
                     }
@@ -998,7 +876,7 @@ let initVueApp = () => {
             },
             cachedUserInfo: function (id, name, selector) {
                 // reduce user query traffic
-                let cache = this.$store.getters.cache;
+                let cache = this.$gstore.getters.cache;
                 let json_str = cache[id] || cache[name];
                 if (!isEmpty(json_str)) {
                     console.log(`cache hit ${id}:${name} in store.`);
@@ -1035,7 +913,7 @@ let initVueApp = () => {
                         age += badge_age + "歲</b-badge>"
                     }
                 }
-
+    
                 let on_board_date = "";
                 if(!isEmpty(tdoc_raw["AP_ON_DATE"])) {
                     on_board_date = tdoc_raw["AP_ON_DATE"].date ? tdoc_raw["AP_ON_DATE"].date.split(" ")[0] :　tdoc_raw["AP_ON_DATE"];
@@ -1090,7 +968,7 @@ let initVueApp = () => {
                         </b-card>
                     </div>
                 `;
-
+    
                 if ($(selector).length > 0) {
                     $(selector).html(vue_html);
                     Vue.nextTick(() =>
@@ -1146,61 +1024,6 @@ let initVueApp = () => {
                 }
                 return true;
             },
-            busy: (opts = {}) => {
-                opts = Object.assign({
-                    selector: "body",
-                    style: "ld-over",   // ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
-                    forceOff: false,
-                    forceOn: false
-                }, opts);
-                let container = $(opts.selector);
-                if (container.length > 0) {
-                    let removeSpinner = function() {
-                        container.removeClass(opts.style);
-                        container.find(".auto-add-spinner").remove();
-                        container.removeClass("running");
-                    }
-                    let addSpinner = function() {
-                        container.addClass(opts.style);
-                        container.addClass("running");
-            
-                        // randomize loading.io css for fun
-                        let cover_el = $(jQuery.parseHTML('<div class="ld auto-add-spinner"></div>'));
-                        cover_el.addClass(LOADING_PREDEFINED[rand(LOADING_PREDEFINED.length)])		// predefined pattern
-                                .addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)]);	// color
-                        switch(opts.size) {
-                            case "md":
-                                cover_el.addClass("fa-3x");
-                                break;
-                            case "lg":
-                                cover_el.addClass("fa-5x");
-                                break;
-                            case "xl":
-                                cover_el.addClass("fa-10x");
-                                break;
-                            default:
-                                break;
-                        }
-                        container.append(cover_el);
-                    }
-                    if (opts.forceOff) {
-                        removeSpinner();
-                        return;
-                    }
-                    if (opts.forceOn) {
-                        removeSpinner();
-                        addSpinner();
-                        return;
-                    }
-                    if (container.hasClass(opts.style)) {
-                        removeSpinner();
-                    } else {
-                        addSpinner();
-                    }
-                }
-            },
-            busyOn: function(el = "body", size = "") { this.busy({selector: el, forceOn: true, size: size}) },
-            busyOff: function(el = "body") { this.busy({selector: el, forceOff: true}) },
             screensaver: () => {
                 if (CONFIG.SCREENSAVER) {
                     window.onload = resetTimer;
@@ -1247,12 +1070,12 @@ let initVueApp = () => {
             },
             authenticate: function() {
                 // check authority
-                console.assert(this.$store, "Vuex store is not ready, did you include vuex.js in the page??");
+                console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: 'authentication'
                 }).then(res => {
-                    this.$store.commit("isAdmin", res.data.is_admin || false);
-                    //console.log("isAdmin: ", this.$store.getters.isAdmin);
+                    this.$gstore.commit("isAdmin", res.data.is_admin || false);
+                    //console.log("isAdmin: ", this.$gstore.getters.isAdmin);
                 }).catch(err => {
                     console.error(err);
                     showAlert({
@@ -1264,11 +1087,11 @@ let initVueApp = () => {
             },
             loadUserNames: function() {
                 // check authority
-                console.assert(this.$store, "Vuex store is not ready, did you include vuex.js in the page??");
+                console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: 'user_mapping'
                 }).then(res => {
-                    this.$store.commit("userNames", res.data.data || {});
+                    this.$gstore.commit("userNames", res.data.data || {});
                     //console.log("userNames: ", res.data.data_count);
                 }).catch(err => {
                     console.error(err);

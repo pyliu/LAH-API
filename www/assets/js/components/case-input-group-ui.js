@@ -62,8 +62,7 @@ if (Vue) {
                 num_min: 10,
                 num_max: 999999,
                 code_data: [],
-                years: [],
-                busy: false
+                years: []
             }
         },
         methods: {
@@ -81,7 +80,7 @@ if (Vue) {
                     addNotification({message: "案件年或案件字為空白，無法取得案件目前最大號碼。", type: "warning"});
                     return;
                 }
-                this.busy = true;
+                this.isBusy = true;
                 let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     "type": "max",
@@ -95,7 +94,7 @@ if (Vue) {
                     } else {
                         addNotification({message: res.data.message, type: "warning"});
                     }
-                    this.busy = false;
+                    this.isBusy = false;
                 }).catch(err => {
                     console.error("case-input-group-ui::getMaxNumber parsing failed", err);
                     showAlert({
@@ -128,15 +127,6 @@ if (Vue) {
             num: function(val) {
                 let evt = this.newCustomEvent('num-updated', val, $(this.$el).find(`#${this.prefix}_case_update_num`)[0]);
                 this.$emit("num-updated", evt);
-            },
-            busy: function(flag) {
-                switch(flag) {
-                    case true:
-                        window.vueApp.busyOn(this.$el);
-                        break;
-                    default:
-                        window.vueApp.busyOff(this.$el);
-                }
             }
         },
         created: function() {

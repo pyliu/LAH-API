@@ -21,12 +21,8 @@ if (Vue) {
                 year: "108",
                 code: "HB04",
                 num: "000010",
-                dialog: null,
-                busy: false
+                dialog: null
             }
-        },
-        watch: {
-            busy: function(flag) { flag ? vueApp.busyOn(this.$el) : vueApp.busyOff(this.$el); }
         },
         methods: {
             handleUpdate: function(e, data) {
@@ -52,7 +48,7 @@ if (Vue) {
                 // prepare post params
                 let id = trim(year + code + number);
                 
-                this.busy = true;
+                this.isBusy = true;
 
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "reg_case",
@@ -81,7 +77,7 @@ if (Vue) {
                             size: "md"
                         });
                     }
-                    this.busy = false;
+                    this.isBusy = false;
                 }).catch(err => {
                     console.error("case-state-mgt::query parsing failed", err);
                     showAlert({

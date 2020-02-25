@@ -40,7 +40,7 @@ if (Vue) {
                     :sticky-header="height"
                     :items="inSearch ? case_store.getters.list_by_id[reviewerId] : case_store.getters.list"
                     :fields="fields"
-                    :busy="busy"
+                    :busy="isBusy"
                     v-show="listMode"
                     class="text-center"
                 >
@@ -91,7 +91,6 @@ if (Vue) {
                 ],
                 height: 0,  // the height inside the modal
                 caption: "查詢中 ... ",
-                busy: false,
                 small: false,
                 milliseconds: 15 * 60 * 1000,
                 listMode: true,
@@ -137,13 +136,13 @@ if (Vue) {
                 // calling api must be the last one to do
                 this.load();
             },
-            busy: function(flag) {
+            isBusy: function(flag) {
                 if (flag) {
                     addLDAnimation("#reload .fas.fa-sync", "ld-cycle");
-                    if (this.statsMode) window.vueApp.busyOn("body", "lg");
+                    if (this.statsMode) this.busyOn("body", "lg");
                 } else {
                     clearLDAnimation("#reload .fas.fa-sync");
-                    if (this.statsMode) window.vueApp.busyOff("body");
+                    if (this.statsMode) this.busyOff("body");
                 }
             }
         },
@@ -217,7 +216,7 @@ if (Vue) {
             handleCountdownEnd: function(e) { this.load(e); },
             load: function(e) {
                 // busy ...
-                this.busy = true;
+                this.isBusy = true;
                 this.title = this.is_overdue_mode ? "逾期" : "即將逾期";
                 if (this.inSearch) {
                     // in-search, by clicked the first reviewer button
@@ -225,7 +224,7 @@ if (Vue) {
                     this.caption = `${case_count} 件`;
                     addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
                     // release busy ...
-                    this.busy = false;
+                    this.isBusy = false;
                     Vue.nexTick ? Vue.nexTick(this.makeCaseIDClickable) : setTimeout(this.makeCaseIDClickable, 800);
                 } else {
                     let params = {
@@ -264,7 +263,7 @@ if (Vue) {
                         // make .reg_case_id clickable
                         Vue.nextTick(this.makeCaseIDClickable);
                         // release busy ...
-                        this.busy = false;
+                        this.isBusy = false;
                         // send notification
                         addNotification({
                             title: `查詢登記案件(${this.title})`,

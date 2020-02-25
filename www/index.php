@@ -138,6 +138,7 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   <script src="assets/js/bootstrap-vue-icons.min.js"></script>
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/global.js"></script>
+  <script src="assets/js/components/lah-vue.js"></script>
   <script src="assets/js/xhr_query.js"></script>
 
   <script src="assets/js/table_sort.js"></script>
@@ -145,8 +146,6 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   <script src="assets/js/autoload.js"></script>
 
   <script src="assets/js/components/case-reg-detail.js"></script>
-  <script src="assets/js/components/lah-header.js"></script>
-  <script src="assets/js/components/lah-footer.js"></script>
   
   <script type="text/javascript">
     $(document).ready(e => {
