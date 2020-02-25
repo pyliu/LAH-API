@@ -169,7 +169,7 @@ if (Vue) {
                 that.code = mounted_el.find(`#${this.prefix}_case_update_code`).val();
                 that.num = mounted_el.find(`#${this.prefix}_case_update_num`).val();
                 that.uiUpdate(e);
-            }, 150);    // cache.js delay 100ms to wait Vue instance ready, so here delays 150ms
+            }, 200);    // cache.js delay some time to wait Vue instance ready, so here delays 200ms
         }
     });
 } else {
