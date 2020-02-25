@@ -14,7 +14,7 @@ Vue.prototype.$gstore = (() => {
         return new Vuex.Store({
             state: {
                 cache : {},
-                isAdmin: true,
+                isAdmin: false,
                 userNames: null
             },
             getters: {
@@ -118,7 +118,25 @@ Vue.mixin({
                 }
             }
         },
-        "lah-ban": { template: `<i class="text-danger fas fa-ban fa-2x"></i>` }
+        "lah-ban": {
+            template: `<i class="text-danger fas fa-ban ld ld-breath" :class="[size]"></i>`,
+            props: ["size"],
+            data: function() { return { size: "" } },
+            created() {
+                switch(this.size) {
+                    case "xs": this.size = "fa-xs"; break;
+                    case "sm": this.size = "fa-sm"; break;
+                    case "lg": this.size = "fa-lg"; break;
+                    default:
+                        if (this.size[this.size.length - 1] === "x") {
+                            this.size = `fa-${this.size}`;
+                        } else {
+                            this.size = ""
+                        }
+                        break;
+                }
+            }
+        }
     },
     data: function() {
         return {
