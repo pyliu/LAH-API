@@ -24,11 +24,13 @@
   
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
-      
-      <div id="test" class="row">
+      <div style="font-size: 4rem;">
+        <b-icon icon="bell-fill" class="border rounded"></b-icon>
+        <b-icon icon="bell-fill" class="border border-info rounded" variant="info"></b-icon>
+        <b-icon icon="bell-fill" class="rounded-circle bg-danger p-1" variant="light"></b-icon>
+        <b-icon icon="unlock-fill" class="rounded bg-primary p-1" variant="light"></b-icon>
         <b-icon icon="camera" font-scale="7.5"></b-icon>
       </div>
-
     </div>
   </section><!-- /section -->
 
@@ -50,17 +52,11 @@
   <script type="text/javascript">
     
     $(document).ready(e => {
-      window.testVue = new Vue({
-        el: "#test",
-        data: {
-          reason_stats: null
-        },
-        mounted() {
-          this.$http.get("assets/js/mocks/case_count_by_reason.json")
-          .then(response => {
-            this.reason_stats = response.data;
-          });
-        }
+      let reason_stats = null;
+      Vue.$set(vueApp, "reason_stats", reason_stats);
+      axios.get("assets/js/mocks/case_count_by_reason.json")
+      .then(response => {
+        vueApp.$data.reason_stats = response.data;
       });
     });
   </script>
