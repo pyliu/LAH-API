@@ -1095,7 +1095,7 @@ let initVueApp = () => {
                 }).catch(err => {
                     console.error(err);
                     showAlert({
-                        title: '取得使用者對應表',
+                        title: '使用者對應表',
                         message: err.message,
                         type: 'danger'
                     });
