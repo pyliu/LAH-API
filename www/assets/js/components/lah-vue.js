@@ -270,7 +270,6 @@ Vue.component("lah-header", {
         }
     },
     mounted() {
-        let that = this;
         this.links.forEach(this.setHeader);
         // add pulse effect for the nav-item
         $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
