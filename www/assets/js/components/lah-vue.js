@@ -138,15 +138,11 @@ Vue.mixin({
             }
         }
     },
-    data: function() {
-        return {
-            isBusy: false
-        }
-    },
+    data: function() { return {
+        isBusy: false
+    }},
     watch: {
-        isBusy: function(flag) {
-            flag ? this.busyOn(this.$el) : this.busyOff(this.$el);
-        }
+        isBusy: function(flag) { flag ? this.busyOn(this.$el) : this.busyOff(this.$el); }
     },
     methods: {
         busy: (opts = {}) => {
@@ -211,7 +207,7 @@ Vue.component("lah-header", {
     template: `<lah-transition slide-down appear>
         <nav v-if="show" class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
             <i class="my-auto fas fa-2x text-light" :class="icon"></i>&ensp;
-            <a class="navbar-brand my-auto" :href="location.href">地政輔助系統 <span class="small">(β)</span></a>
+            <a class="navbar-brand my-auto" :href="location.href">{{leading}} <span class="small">(β)</span></a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
