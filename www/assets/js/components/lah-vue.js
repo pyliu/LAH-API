@@ -209,55 +209,69 @@ Vue.component("lah-header", {
             </div>
         </nav>
     </lah-transition>`,
-    data: function() {
-        return {
-            show: true,
-            icon: "fa-question",
-            links: [{
-                text: "案件追蹤",
-                url: "index.php",
-                icon: "fa-list-alt",
-                need_admin: true
-            }, {
-                text: "資料查詢",
-                url: "query.php",
-                icon: "fa-file-alt",
-                need_admin: true
-            }, {
-                text: "監控修正",
-                url: "watchdog.php",
-                icon: "fa-user-secret",
-                need_admin: true
-            }, {
-                text: "逾期案件",
-                url: "overdue_reg_cases.html",
-                icon: "fa-th-list",
-                need_admin: false
-            }, {
-                text: "記錄檔",
-                url: "tasklog.html",
-                icon: "fa-dog",
-                need_admin: true
-            }, {
-                text: "測試頁",
-                url: "test.html",
-                icon: "fa-charging-station",
-                need_admin: true
-            }]
-        }
-    },
+    data: () => { return {
+        show: true,
+        icon: "fa-question",
+        leading: "",
+        links: [{
+            text: "儀錶板",
+            url: ["index.html", "/"],
+            icon: "fa-th-list",
+            need_admin: true
+        }, {
+            text: "案件追蹤",
+            url: "index.php",
+            icon: "fa-list-alt",
+            need_admin: true
+        }, {
+            text: "資料查詢",
+            url: "query.php",
+            icon: "fa-file-alt",
+            need_admin: true
+        }, {
+            text: "監控修正",
+            url: "watchdog.php",
+            icon: "fa-user-secret",
+            need_admin: true
+        }, {
+            text: "逾期案件",
+            url: "overdue_reg_cases.html",
+            icon: "fa-th-list",
+            need_admin: false
+        }, {
+            text: "記錄檔",
+            url: "tasklog.html",
+            icon: "fa-dog",
+            need_admin: true
+        }, {
+            text: "測試頁",
+            url: "test.html",
+            icon: "fa-charging-station",
+            need_admin: true
+        }]
+    }},
     methods: {
         active: function(url) {
             return location.href.indexOf(url) > 0 ? 'active' : '';
+        },
+        setHeader: function(link) {
+            let that = this;
+            if (Array.isArray(link.url)) {
+                link.url.forEach((this_url, idx) => {
+                    if (location.href.indexOf(this_url) > 0) {
+                        that.icon = link.icon;
+                        that.leading = link.text;
+                    }
+                });
+            } else if (location.href.indexOf(link.url) > 0) {
+                that.icon = link.icon;
+                that.leading = link.text;
+            }
         }
     },
     mounted() {
         let that = this;
-        this.links.forEach(function(link, index) {
-            if (location.href.indexOf(link.url) > 0) {
-                that.icon = link.icon;
-            }
-        });
+        this.links.forEach(this.setHeader);
         // add pulse effect for the nav-item
         $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
     }
@@ -289,6 +303,7 @@ Vue.component("lah-footer", {
 });
 
 $(document).ready(() => {
+    // dynamic add header/footer
     $("body").prepend($.parseHTML(`<div id="lah-header"><lah-header ref="header"></lah-header></div>`));
     window.vueLahHeader = new Vue({ el: "#lah-header" });
     $("body").append($.parseHTML(`<div id="lah-footer"><lah-footer ref="footer"></lah-footer></div>`));
