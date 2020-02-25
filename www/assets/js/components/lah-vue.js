@@ -14,7 +14,7 @@ Vue.prototype.$gstore = (() => {
         return new Vuex.Store({
             state: {
                 cache : {},
-                isAdmin: false,
+                isAdmin: true,
                 userNames: null
             },
             getters: {
@@ -202,7 +202,7 @@ Vue.component("lah-header", {
                 <lah-transition appear>
                     <ul class="navbar-nav mr-auto">
                         <li v-for="link in links" :class="['nav-item', 'my-auto', active(link.url)]" v-show="link.need_admin ? $gstore.getters.isAdmin : true">
-                            <a class="nav-link" :href="link.url">{{link.text}}</a>
+                            <a class="nav-link" :href="Array.isArray(link.url) ? link.url[0] : link.url">{{link.text}}</a>
                         </li>
                     </ul>
                 </lah-transition>
@@ -216,7 +216,7 @@ Vue.component("lah-header", {
         links: [{
             text: "儀錶板",
             url: ["index.html", "/"],
-            icon: "fa-th-list",
+            icon: "fa-columns",
             need_admin: true
         }, {
             text: "案件追蹤",
