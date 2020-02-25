@@ -231,7 +231,7 @@ Vue.component("lah-header", {
         links: [{
             text: "儀錶板",
             url: ["index.html", "/"],
-            icon: "fa-columns",
+            icon: "fa-th",
             need_admin: true
         }, {
             text: "案件追蹤",
