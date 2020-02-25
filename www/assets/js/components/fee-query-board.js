@@ -185,7 +185,7 @@ if (Vue) {
                     showModal({
                         title: "規費作廢假資料",
                         message: VNode,
-                        size: "lg",
+                        size: "md",
                         callback: () => addUserInfoEvent()
                     });
                 }).catch(ex => {
@@ -421,56 +421,70 @@ if (Vue) {
                 template: `<div class="small">
                     下一筆假資料：<br />
                     ※ 電腦給號：{{next_pc_number}} <br />
-                    ※ 日期：{{today}}
-                    <hr>
-                    <div id="obsolete_container" class="form-row">
-                        <div class="input-group input-group-sm col-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="inputGroup-operator">作業人員</span>
-                            </div>
-                            <b-form-input
-                                v-model="operator"
-                                id="dummy_operator"
-                                placeholder="HBXXXX"
-                                :state="isOperatorValid"
-                                size="sm"
-                                trim
-                            >
-                            </b-form-input>
-                        </div>
-                        <div class="input-group input-group-sm col-4">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="inputGroup-fee-number">收據號碼</span>
-                            </div>
-                            <b-form-input
-                                v-model="AB_number"
-                                id="dummy_fee_number"
-                                placeholder="ABXXXXXXXX"
-                                :state="isNumberValid"
-                                size="sm"
-                                trim
-                            >
-                            </b-form-input>
-                        </div>
-                        <div class="input-group input-group-sm col-4">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="inputGroup-obsolete-reason">作廢原因</span>
-                            </div>
-                            <b-form-input
-                                v-model="reason"
-                                id="dummy_obsolete_reason"
-                                placeholder="卡紙"
-                                :state="isReasonValid"
-                                size="sm"
-                                trim
-                            >
-                            </b-form-input>
-                        </div>
-                        <div class="btn-group-sm col-1" role="group">
-                            <b-button @click="add" variant="outline-primary" :disabled="isDisabled" size="sm" pill>新增</b-button>
-                        </div>
-                    </div>
-                    <hr>
+                    <hr/>
+                    <b-form-row class="mb-1">
+                        <b-col cols="5">
+                            <b-input-group size="sm" title="民國年月日">
+                                <b-input-group-prepend is-text>結帳日期</b-input-group-prepend>
+                                <b-form-input
+                                    id="dummy_obsolete_date"
+                                    v-model="today"
+                                    placeholder="1090225"
+                                    size="sm"
+                                    trim
+                                    :state="isDateValid"
+                                >
+                                </b-form-input>
+                            </b-input-group>
+                        </b-col>
+                        <b-col>
+                            <b-input-group size="sm">
+                                <b-input-group-prepend is-text>作廢原因</b-input-group-prepend>
+                                <b-form-input
+                                    v-model="reason"
+                                    id="dummy_obsolete_reason"
+                                    placeholder="卡紙"
+                                    :state="isReasonValid"
+                                    size="sm"
+                                    trim
+                                >
+                                </b-form-input>
+                            </b-input-group>
+                        </b-col>
+                    </b-form-row>
+                    <b-form-row>
+                        <b-col cols="5">
+                            <b-input-group size="sm" title="作業人員">
+                                <b-input-group-prepend is-text>{{operator_name || '作業人員'}}</b-input-group-prepend>
+                                <b-form-input
+                                    v-model="operator"
+                                    id="dummy_operator"
+                                    placeholder="HBXXXX"
+                                    size="sm"
+                                    trim
+                                    :state="isOperatorValid"
+                                >
+                                </b-form-input>
+                            </b-input-group>
+                        </b-col>
+                        <b-col>
+                            <b-input-group size="sm" title="AB開頭編號共10碼">
+                                <b-input-group-prepend is-text>收據號碼</b-input-group-prepend>
+                                <b-form-input
+                                    v-model="AB_number"
+                                    id="dummy_fee_number"
+                                    placeholder="ABXXXXXXXX"
+                                    :state="isNumberValid"
+                                    size="sm"
+                                    trim
+                                >
+                                </b-form-input>
+                                &ensp;
+                                <b-button @click="add" variant="outline-primary" :disabled="isDisabled" size="sm">新增</b-button>
+                            </b-input-group>
+                        </b-col>
+                    </b-form-row>
+                    <hr/>
                     <p>目前系統中({{year}}年度)的假資料有 {{count}} 筆：</p>
                     <table class="table text-center">
                         <tr>
@@ -485,7 +499,7 @@ if (Vue) {
                             <td>{{item["AA04"]}}</td>
                             <td>{{item["AA05"]}}</td>
                             <td>{{item["AA104"]}}</td>
-                            <td><span :data-id="item['AA39']" class="user_tag">{{item['AA39']}}</span></td>
+                            <td><span :data-id="item['AA39']" :data-name="$gstore.getters.userNames[item['AA39']]" class="user_tag" :title="item['AA39']">{{$gstore.getters.userNames[item["AA39"]] || item["AA39"]}}</span></td>
                         </tr>
                     </table>
                 </div>`,
@@ -496,13 +510,23 @@ if (Vue) {
                         next_pc_number: 9109001,  // 9 + year (3 digits) + serial (3 digits)
                         today: "",
                         operator: "",   // 作業人員
+                        operator_name: "",
                         AB_number: "",  // 收據編號
                         reason: ""      // 作廢原因
+                    }
+                },
+                watch: {
+                    operator: function(val) {
+                        this.operator_name = this.$gstore.getters.userNames[val] || '';
                     }
                 },
                 computed: {
                     count: function() {
                         return this.raw_data.length;
+                    },
+                    isDateValid: function() {
+                        let regex = /[0-9]{7}/i;
+                        return regex.test(this.today) && this.today.length == 7;
                     },
                     isOperatorValid: function() {
                         let regex = /^HB/i;
@@ -516,7 +540,7 @@ if (Vue) {
                         return regex.test(this.AB_number) && this.AB_number.length == 10;
                     },
                     isDisabled: function() {
-                        return !this.isOperatorValid || !this.isNumberValid || !this.isReasonValid;
+                        return !this.isOperatorValid || !this.isNumberValid || !this.isReasonValid || !this.isDateValid;
                     }
                 },
                 methods: {
@@ -555,36 +579,42 @@ if (Vue) {
                             });
                             return false;
                         }
+                        if (!this.isDateValid) {
+                            addAnimatedCSS("#dummy_obsolete_date", { name: "tada", callback: () => $("#dummy_obsolete_date").focus() });
+                            addNotification({
+                                title: "日期",
+                                message: "請填入正確日期格式(民國)！",
+                                pos: "tc",
+                                type: "warning"
+                            });
+                            return false;
+                        }
                         
                         let that = this;
-                        showConfirm("確定要新增一個新的假資料？", () => {
-                            let body = new FormData();
-                            body.append("type", "add_dummy_ob_fees");
-                            body.append("today", that.today);
-                            body.append("pc_number", that.next_pc_number);
-                            body.append("operator", operator);
-                            body.append("fee_number", fee_number);
-                            body.append("reason", reason);
-
+                        showConfirm("確定要新增一個新的假資料以供作廢之用？", () => {
                             toggle(e.target);
 
-                            asyncFetch(CONFIG.JSON_API_EP, {
-                                method: "POST",
-                                body: body
-                            }).then(jsonObj => {
+                            this.$http.post(CONFIG.JSON_API_EP, {
+                                type: "add_dummy_ob_fees",
+                                today: that.today,
+                                pc_number: that.next_pc_number,
+                                operator: operator,
+                                fee_number: fee_number,
+                                reason: reason
+                            }).then(res => {
                                 closeModal(() => {
                                     addNotification({
                                         title: "新增假規費資料",
-                                        body: jsonObj.message,
+                                        body: res.data.message,
                                         type: "success",
                                         pos: "tc"
                                     });
                                 });
-                            }).catch(ex => {
-                                console.error("fee-obsolete-mgt::add parsing failed", ex);
+                            }).catch(err => {
+                                console.error("fee-obsolete-mgt::add parsing failed", err);
                                 showAlert({
                                     title: "fee-obsolete-mgt::add",
-                                    message: ex.message,
+                                    message: err.message,
                                     type: "danger"
                                 });
                             });
