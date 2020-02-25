@@ -405,7 +405,7 @@ let initAlertUI = () => {
     // add alert element to show the alert message
     if (!window.alertApp) {
         $("body").append($.parseHTML(`<div id="bs_alert_template">
-            <my-transition
+            <lah-transition
                 @enter="enter"
                 @leave="leave"
                 @after-enter="afterEnter"
@@ -424,12 +424,11 @@ let initAlertUI = () => {
                     </button>
                     <b-progress height="3px" :max="delay" :variant="bar_variant" :value="remaining_delay"></b-progress>
                 </div>
-            </my-transition>
+            </lah-transition>
         </div>`));
         // Try to use Vue.js
         window.alertApp = new Vue({
             el: '#bs_alert_template',
-            components: { "my-transition": VueTransition },
             data: {
                 title: "",
                 subtitle: "",
