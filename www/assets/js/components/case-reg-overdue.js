@@ -1,9 +1,6 @@
 if (Vue) {
     Vue.component("case-reg-overdue", {
-        components: {
-            "my-transition": VueTransition,
-            "countdown": VueCountdown
-        },
+        components: { "countdown": VueCountdown },
         template: `<div>
             <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
                 <b-form-checkbox v-b-tooltip.hover.top="modeTooltip" inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;" :class="['align-baseline', 'btn', 'btn-sm', is_overdue_mode ? '' : 'border-warning', 'p-1']">
@@ -25,7 +22,7 @@ if (Vue) {
                     </b-badge>
                 </b-button>
             </div>
-            <my-transition @after-leave="afterTableLeave">
+            <lah-transition @after-leave="afterTableLeave">
                 <b-table
                     ref="case_list_tbl"
                     striped
@@ -58,9 +55,9 @@ if (Vue) {
                         <span v-else>{{data.value.split(" ")[0]}}</span>
                     </template>
                 </b-table>
-            </my-transition>
+            </lah-transition>
             
-            <my-transition @after-leave="afterStatsLeave">
+            <lah-transition @after-leave="afterStatsLeave">
                 <div class="mt-5" v-show="statsMode">
                     <div class="mx-auto w-75">
                         <chart-component ref="statsChart"></chart-component>
@@ -74,7 +71,7 @@ if (Vue) {
                         <b-button size="sm" variant="dark" @click="chartType = 'radar'"><i class="fas fa-broadcast-tower"></i> 雷達圖</b-button>
                     </b-button-group>
                 </div>
-            </my-transition>
+            </lah-transition>
         </div>`,
         props: ['reviewerId', 'inSearch', 'compact', 'store'],
         data: function () {

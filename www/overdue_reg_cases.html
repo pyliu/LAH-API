@@ -27,9 +27,9 @@
       <div class="row">
         <div class="col">
           <case-reg-overdue ref="overdue" :reviewer-id="reviewerID"></case-reg-overdue>
-          <my-transition fade>
+          <lah-transition fade>
             <h2 v-if="!show" class="text-center text-danger">請使用 CHROME/EDGE 瀏覽器開啟本頁面。</h2>
-          </my-transition>
+          </lah-transition>
         </div>
       </div>
   </section><!-- /section -->
@@ -91,7 +91,6 @@
       window.overdueApp = new Vue({
         el: "#overdue-reg-cases",
         store,  // could check store by window.overdueApp.$refs.overdue.$store
-        components: {"my-transition": VueTransition},
         data: {
           reviewerID: "",
           show: false
