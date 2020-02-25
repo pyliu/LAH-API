@@ -1,6 +1,7 @@
 /**
  * Land-Affairs-Helper(lah) Vue custom components
  */
+Vue.config.devtools = true;
 /**
  * set axios defaults
  */

@@ -30,6 +30,7 @@
         <b-icon icon="bell-fill" class="rounded-circle bg-danger p-1" variant="light"></b-icon>
         <b-icon icon="unlock-fill" class="rounded bg-primary p-1" variant="light"></b-icon>
         <b-icon icon="camera" font-scale="7.5"></b-icon>
+        <lah-ban size="10x"></lah-ban>
       </div>
     </div>
   </section><!-- /section -->
@@ -53,10 +54,11 @@
     
     $(document).ready(e => {
       let reason_stats = null;
-      Vue.$set(vueApp, "reason_stats", reason_stats);
+      Vue.set(vueApp.data, "reason_stats", reason_stats);
       axios.get("assets/js/mocks/case_count_by_reason.json")
       .then(response => {
-        vueApp.$data.reason_stats = response.data;
+        vueApp.data.reason_stats = response.data;
+        console.log(vueApp.$data.reason_stats);
       });
     });
   </script>
