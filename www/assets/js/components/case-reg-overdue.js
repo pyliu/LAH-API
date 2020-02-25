@@ -43,7 +43,6 @@ if (Vue) {
                 >
                     <template v-slot:table-busy>
                         <div class="text-center text-danger my-5">
-                            <b-spinner class="align-middle"></b-spinner>
                             <strong>查詢中 ...</strong>
                         </div>
                     </template>
