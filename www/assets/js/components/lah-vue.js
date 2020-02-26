@@ -23,11 +23,7 @@ Vue.prototype.$gstore = (() => {
                 initialized: state => state.initialized,
                 cache: state => state.cache,
                 isAdmin: state => state.isAdmin,
-                userNames: state => state.userNames,
-                userIDs: state => {
-                    let reverseMapping = o => Object.keys(o).reduce((r, k) => Object.assign(r, { [o[k]]: (r[o[k]] || []).concat(k) }), {});
-                    return reverseMapping(state.userNames);
-                }
+                userNames: state => state.userNames
             },
             mutations: {
                 initialized(state, flagPayload) {
@@ -150,7 +146,15 @@ Vue.mixin({
     watch: {
         isBusy: function(flag) { flag ? this.busyOn(this.$el) : this.busyOff(this.$el) }
     },
+    computed: {
+        cache() { return this.$gstore.getters.cache; },
+        isAdmin() { return this.$gstore.getters.isAdmin; },
+        userNames() { return this.$gstore.getters.userNames; },
+        userIDs() { return this.reverseMapping(this.userNames || {}); },
+        initialized() { return this.$gstore.getters.initialized; }
+    },
     methods: {
+        reverseMapping: o => Object.keys(o).reduce((r, k) => Object.assign(r, { [o[k]]: (r[o[k]] || []).concat(k) }), {}),
         toggleBusy: (opts = {}) => {
             opts = Object.assign({
                 selector: "body",
@@ -829,8 +833,7 @@ $(document).ready(() => {
             },
             cachedUserInfo: function (id, name, selector) {
                 // reduce user query traffic
-                let cache = this.$gstore.getters.cache;
-                let json_str = cache[id] || cache[name];
+                let json_str = this.cache[id] || this.cache[name];
                 if (!isEmpty(json_str)) {
                     console.log(`cache hit ${id}:${name} in store.`);
                     let jsonObj = JSON.parse(json_str);
