@@ -148,7 +148,7 @@ Vue.mixin({
         isBusy: false
     }},
     watch: {
-        isBusy: function(flag) { flag ? this.busyOn(this.$el) : this.busyOff(this.$el); }
+        isBusy: function(flag) { flag ? this.busyOn(this.$el) : this.busyOff(this.$el) }
     },
     methods: {
         toggleBusy: (opts = {}) => {
@@ -205,105 +205,7 @@ Vue.mixin({
             }
         },
         busyOn: function(el = "body", size = "") { this.toggleBusy({selector: el, forceOn: true, size: size}) },
-        busyOff: function(el = "body") { this.toggleBusy({selector: el, forceOff: true}) },
-        screensaver: () => {
-            if (CONFIG.SCREENSAVER) {
-                window.onload = resetTimer;
-                window.onmousemove = resetTimer;
-                window.onmousedown = resetTimer;  // catches touchscreen presses as well      
-                window.ontouchstart = resetTimer; // catches touchscreen swipes as well 
-                window.onclick = resetTimer;      // catches touchpad clicks as well
-                window.onkeypress = resetTimer;   
-                window.addEventListener('scroll', resetTimer, true); // improved; see comments
-                let idle_timer;
-                function wakeup() {
-                    let container = $("body");
-                    if (container.hasClass("ld-over-full-inverse")) {
-                        container.removeClass("ld-over-full-inverse");
-                        container.find("#screensaver").remove();
-                        container.removeClass("running");
-                    }
-                    clearLDAnimation(".navbar i.fas");
-                }
-                function resetTimer() {
-                    clearTimeout(idle_timer);
-                    idle_timer = setTimeout(() => {
-                        wakeup();
-                        let container = $("body");
-                        // cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
-                        let style = "ld-over-full-inverse";
-                        container.addClass(style);
-                        container.addClass("running");
-                        let cover_el = $(jQuery.parseHTML('<div id="screensaver" class="ld auto-add-spinner"></div>'));
-                        let patterns = [
-                            "fas fa-bolt ld-bounce", "fas fa-bed ld-swim", "fas fa-biking ld-move-ltr",
-                            "fas fa-biohazard ld-metronome", "fas fa-snowboarding ld-rush-ltr", "fas fa-anchor ld-swing",
-                            "fas fa-fingerprint ld-damage", "fab fa-angellist ld-metronome"
-                        ];
-                        cover_el.addClass(patterns[rand(patterns.length)])
-                                .addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])
-                                .addClass("fa-10x");
-                        container.append(cover_el);
-                        addLDAnimation(".navbar i.fas", "ld-bounce");
-                    }, CONFIG.SCREENSAVER_TIMER);  // 5mins
-                    wakeup();
-                }
-            }
-        },
-        authenticate: function() {
-            // check authority
-            console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
-            this.$http.post(CONFIG.JSON_API_EP, {
-                type: 'authentication'
-            }).then(res => {
-                this.$gstore.commit("isAdmin", res.data.is_admin || false);
-                //console.log("isAdmin: ", this.$gstore.getters.isAdmin);
-            }).catch(err => {
-                console.error(err);
-                showAlert({
-                    title: '認證失敗',
-                    message: err.message,
-                    type: 'danger'
-                });
-            });
-        },
-        loadUserNames: function() {
-            let json_str = localStorage.getItem("userNames");
-            let json_ts = +localStorage.getItem("userNames_timestamp");
-            console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
-            let current_ts = +new Date();
-            if (typeof json_str == "string" && current_ts - json_ts < 86400000) {
-                // within a day use the cached data
-                this.$gstore.commit("userNames", JSON.parse(json_str) || {});
-            } else {
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: 'user_mapping'
-                }).then(res => {
-                    let json = res.data.data;
-                    this.$gstore.commit("userNames", json || {});
-                    if (localStorage) {
-                        localStorage.setItem("userNames", JSON.stringify(json));
-                        localStorage.setItem("userNames_timestamp", +new Date()); // == new Date().getTime()
-                    }
-                    //console.log("userNames: ", res.data.data_count);
-                }).catch(err => {
-                    console.error(err);
-                    showAlert({
-                        title: '使用者對應表',
-                        message: err.message,
-                        type: 'danger'
-                    });
-                });
-            }
-        }
-    },
-    created() {
-        if (!this.$gstore.getters.initialized) {
-            this.$gstore.commit("initialized", true);
-            this.screensaver();
-            this.authenticate();
-            this.loadUserNames();
-        }
+        busyOff: function(el = "body") { this.toggleBusy({selector: el, forceOff: true}) }
     }
 });
 
@@ -545,12 +447,110 @@ Vue.component("lah-header", {
                 that.icon = link.icon;
                 that.leading = link.text;
             }
+        },
+        screensaver: () => {
+            if (CONFIG.SCREENSAVER) {
+                window.onload = resetTimer;
+                window.onmousemove = resetTimer;
+                window.onmousedown = resetTimer;  // catches touchscreen presses as well      
+                window.ontouchstart = resetTimer; // catches touchscreen swipes as well 
+                window.onclick = resetTimer;      // catches touchpad clicks as well
+                window.onkeypress = resetTimer;   
+                window.addEventListener('scroll', resetTimer, true); // improved; see comments
+                let idle_timer;
+                function wakeup() {
+                    let container = $("body");
+                    if (container.hasClass("ld-over-full-inverse")) {
+                        container.removeClass("ld-over-full-inverse");
+                        container.find("#screensaver").remove();
+                        container.removeClass("running");
+                    }
+                    clearLDAnimation(".navbar i.fas");
+                }
+                function resetTimer() {
+                    clearTimeout(idle_timer);
+                    idle_timer = setTimeout(() => {
+                        wakeup();
+                        let container = $("body");
+                        // cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
+                        let style = "ld-over-full-inverse";
+                        container.addClass(style);
+                        container.addClass("running");
+                        let cover_el = $(jQuery.parseHTML('<div id="screensaver" class="ld auto-add-spinner"></div>'));
+                        let patterns = [
+                            "fas fa-bolt ld-bounce", "fas fa-bed ld-swim", "fas fa-biking ld-move-ltr",
+                            "fas fa-biohazard ld-metronome", "fas fa-snowboarding ld-rush-ltr", "fas fa-anchor ld-swing",
+                            "fas fa-fingerprint ld-damage", "fab fa-angellist ld-metronome"
+                        ];
+                        cover_el.addClass(patterns[rand(patterns.length)])
+                                .addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])
+                                .addClass("fa-10x");
+                        container.append(cover_el);
+                        addLDAnimation(".navbar i.fas", "ld-bounce");
+                    }, CONFIG.SCREENSAVER_TIMER);  // 5mins
+                    wakeup();
+                }
+            }
+        },
+        authenticate: function() {
+            // check authority
+            console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
+            this.$http.post(CONFIG.JSON_API_EP, {
+                type: 'authentication'
+            }).then(res => {
+                this.$gstore.commit("isAdmin", res.data.is_admin || false);
+                //console.log("isAdmin: ", this.$gstore.getters.isAdmin);
+            }).catch(err => {
+                console.error(err);
+                showAlert({
+                    title: '認證失敗',
+                    message: err.message,
+                    type: 'danger'
+                });
+            });
+        },
+        loadUserNames: function() {
+            let json_str = localStorage.getItem("userNames");
+            let json_ts = +localStorage.getItem("userNames_timestamp");
+            console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
+            let current_ts = +new Date();
+            if (typeof json_str == "string" && current_ts - json_ts < 86400000) {
+                // within a day use the cached data
+                this.$gstore.commit("userNames", JSON.parse(json_str) || {});
+            } else {
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'user_mapping'
+                }).then(res => {
+                    let json = res.data.data;
+                    this.$gstore.commit("userNames", json || {});
+                    if (localStorage) {
+                        localStorage.setItem("userNames", JSON.stringify(json));
+                        localStorage.setItem("userNames_timestamp", +new Date()); // == new Date().getTime()
+                    }
+                    //console.log("userNames: ", res.data.data_count);
+                }).catch(err => {
+                    console.error(err);
+                    showAlert({
+                        title: '使用者對應表',
+                        message: err.message,
+                        type: 'danger'
+                    });
+                });
+            }
         }
     },
     mounted() {
         this.links.forEach(this.setHeader);
         // add pulse effect for the nav-item
         $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
+    },
+    created() {
+        if (!this.$gstore.getters.initialized) {
+            this.$gstore.commit("initialized", true);
+            this.screensaver();
+            this.authenticate();
+            this.loadUserNames();
+        }
     }
 });
 
@@ -580,9 +580,493 @@ Vue.component("lah-footer", {
 });
 
 $(document).ready(() => {
-    // dynamic add header/footer
-    $("body").prepend($.parseHTML(`<div id="lah-header"><lah-header ref="header"></lah-header></div>`));
-    window.vueLahHeader = new Vue({ el: "#lah-header" });
-    $("body").append($.parseHTML(`<div id="lah-footer"><lah-footer ref="footer"></lah-footer></div>`));
-    window.vueLahFooter = new Vue({ el: "#lah-footer" });
+    // dynamic add header/footer/alert
+    $("#main_content_section").prepend($.parseHTML(`<div id="global-dynamic-components">
+        <lah-header ref="header"></lah-header>
+        <lah-footer ref="footer"></lah-footer>
+        <lah-alert ref="alert"></lah-alert>
+    </div>`));
+    // main app for whole page, use window.vueApp to get it
+    window.vueApp = new Vue({
+        el: "#main_content_section",
+        data: {
+            toastCounter: 0,
+            openConfirm: false,
+            confirmAnswer: false,
+            transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)],
+            callbackQueue: []
+        },
+        created: function(e) {
+            this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
+                //console.log('Modal is about to be shown', bvEvent, modalId)
+            });
+            this.$root.$on('bv::modal::shown', (bvEvent, modalId) => {
+                //console.log('Modal is shown', bvEvent, modalId)
+                if (!this.openConfirm) {
+                    this.showModal(modalId);
+                }
+            });
+            this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
+                //console.log('Modal is about to hide', bvEvent, modalId)
+                // animation will break confirm Promise, so skip it
+                if (this.openConfirm) {
+                    this.openConfirm = false;
+                } else {
+                    bvEvent.preventDefault();
+                    this.hideModal(modalId);
+                }
+            });
+            this.$root.$on('bv::modal::hidden', (bvEvent, modalId) => {
+                //console.log('Modal is hidden', bvEvent, modalId)
+            });
+        },
+        methods: {
+            // make simple, short popup notice message
+            makeToast: function(message, opts = {}) {
+                // for sub-title
+                var currentdate = new Date();
+                var datetime = ("0" + currentdate.getHours()).slice(-2) + ":" +
+                    ("0" + currentdate.getMinutes()).slice(-2) + ":" +
+                    ("0" + currentdate.getSeconds()).slice(-2);
+                // position adapter
+                switch(opts.pos) {
+                    case "tr":
+                        opts.toaster = "b-toaster-top-right";
+                        break;
+                    case "tl":
+                        opts.toaster = "b-toaster-top-left";
+                        break;
+                    case "br":
+                        opts.toaster = "b-toaster-bottom-right";
+                        break;
+                    case "bl":
+                        opts.toaster = "b-toaster-bottom-left";
+                        break;
+                    case "tc":
+                        opts.toaster = "b-toaster-top-center";
+                        break;
+                    case "tf":
+                        opts.toaster = "b-toaster-top-full";
+                        break;
+                    case "bc":
+                        opts.toaster = "b-toaster-bottom-center";
+                        break;
+                    case "bf":
+                        opts.toaster = "b-toaster-bottom-full";
+                        break;
+                    default:
+                        opts.toaster = "b-toaster-bottom-right";
+                }
+                // merge default setting
+                let merged = Object.assign({
+                    title: "通知",
+                    subtitle: datetime,
+                    href: "",
+                    noAutoHide: false,
+                    autoHideDelay: 5000,
+                    solid: true,
+                    toaster: "b-toaster-bottom-right",
+                    appendToast: true,
+                    variant: "default"
+                }, opts);
+                // Use a shorter name for this.$createElement
+                const h = this.$createElement
+                // Create the title
+                let vNodesTitle = h(
+                    'div',
+                    { class: ['d-flex', 'flex-grow-1', 'align-items-baseline', 'mr-2'] },
+                    [
+                    h('strong', { class: 'mr-2' }, merged.title),
+                    h('small', { class: 'ml-auto text-italics' }, merged.subtitle)
+                    ]
+                );
+                // Pass the VNodes as an array for title
+                merged.title = [vNodesTitle];
+                // use vNode for HTML content
+                const msgVNode = h('div', { domProps: { innerHTML: message } });
+                this.$bvToast.toast([msgVNode], merged);
+    
+                if (typeof merged.callback === 'function') {
+                    let that = this;
+                    setTimeout(() => merged.callback.apply(that, arguments), 100);
+                }
+                this.toastCounter++;
+            },
+            showModal: function(id, duration) {
+                let modal_content = $(`#${id} .modal-content`);
+                modal_content.removeClass("hide");
+                addAnimatedCSS(modal_content, {
+                    name: this.transition.in,
+                    duration: duration || "once-anim-cfg",
+                    callback: this.callbackQueue.pop()
+                });
+            },
+            hideModal: function(id) {
+                let that = this;
+                if (id == "" || id == undefined || id == null) {
+                    $('div.modal.show').each(function(idx, el) {
+                        that.removeModal(el.id);
+                    });
+                } else {
+                    that.removeModal(id);
+                }
+            },
+            removeModal: function(id, duration) {
+                if (!this.openConfirm) {
+                    let modal_content = $(`#${id} .modal-content`);
+                    addAnimatedCSS(modal_content, {
+                        name: this.transition.out,
+                        duration: duration || "once-anim-cfg",
+                        callback: () => {
+                            $(`#${id}___BV_modal_outer_`).remove();
+                            $(".popover").remove();
+                        }
+                    });
+                }
+            },
+            modal: function(message, opts) {
+                let merged = Object.assign({
+                    title: '訊息',
+                    size: 'md',
+                    buttonSize: 'sm',
+                    okVariant: 'outline-secondary',
+                    okTitle: '關閉',
+                    hideHeaderClose: false,
+                    centered: true,
+                    scrollable: true,
+                    hideFooter: true,
+                    noCloseOnBackdrop: true,
+                    contentClass: "shadow hide", // add hide class to .modal-content then use Animated.css for animation show up
+                    html: false
+                }, opts);
+                // use d-none to hide footer
+                merged.footerClass = merged.hideFooter ? "d-none" : "p-2";
+                if (merged.html) {
+                    merged.titleHtml = merged.title;
+                    merged.title = undefined;
+                    if (typeof message == "object") {
+                        // assume the message is VNode
+                        this.$bvModal.msgBoxOk([message], merged);
+                    } else {
+                        const h = this.$createElement;
+                        const msgVNode = h('div', { domProps: { innerHTML: message } });
+                        this.$bvModal.msgBoxOk([msgVNode], merged);
+                    }
+                    // to initialize Vue component purpose
+                    if (merged.callback && typeof merged.callback == "function") {
+                        this.callbackQueue.push(merged.callback);
+                    }
+                } else {
+                    this.$bvModal.msgBoxOk(message, merged);
+                }
+            },
+            confirm: function(message, opts) {
+                this.confirmAnswer = false;
+                this.openConfirm = true;
+                let merged = Object.assign({
+                    title: '請確認',
+                    size: 'sm',
+                    buttonSize: 'sm',
+                    okVariant: 'outline-success',
+                    okTitle: '確定',
+                    cancelVariant: 'secondary',
+                    cancelTitle: '取消',
+                    footerClass: 'p-2',
+                    hideHeaderClose: false,
+                    noCloseOnBackdrop: false,
+                    centered: true,
+                    contentClass: "shadow"
+                }, opts);
+                // use HTML content
+                const h = this.$createElement;
+                const msgVNode = h('div', { domProps: { innerHTML: message } });
+                this.$bvModal.msgBoxConfirm([msgVNode], merged)
+                .then(value => {
+                    this.confirmAnswer = value;
+                    if (this.confirmAnswer && merged.callback && typeof merged.callback == "function") {
+                        merged.callback.apply(this, arguments);
+                    }
+                }).catch(err => {
+                    console.error(err);
+                });
+            },
+            open: function(url, e) {
+                let h = window.innerHeight - 160;
+                this.modal(`<iframe src="${url}" class="w-100" height="${h}" frameborder="0"></iframe>`, {
+                    title: e.target.title || `外部連結`,
+                    size: "xl",
+                    html: true,
+                    noCloseOnBackdrop: false
+                });
+            },
+            download: function(url, data) {
+                let params = Object.assign({
+                    filename: "you_need_to_specify_filename.xxx"
+                }, data || {});
+                this.$http.post(url, params, {
+                    responseType: 'blob'    // important
+                }).then((response) => {
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', params.filename);
+                    document.body.appendChild(link);
+                    link.click();
+                    //afterwards we remove the element again
+                    link.remove();
+                    // release object in memory
+                    window.URL.revokeObjectURL(url);
+                });                  
+            },
+            fetch: async function(url, opts) {
+                opts = Object.assign({
+                    method: "POST",
+                    body: new FormData(),
+                    blob: false
+                }, opts);
+                let response = await fetch(url, opts);
+                return opts.blob ? await response.blob() : await response.json();
+            },
+            fetchRegCase: function(e, enabled_userinfo = false) {
+                // ajax event binding
+                let clicked_element = $(e.target);
+                // remove additional characters for querying
+                let id = trim(clicked_element.text());
+    
+                let that = this;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "reg_case",
+                    id: id
+                }).then(res => {
+                    that.showRegCase(res.data, enabled_userinfo);
+                }).catch(err => {
+                    console.error("window.vueApp.fetchRegCase parsing failed", err);
+                    showAlert({
+                        title: "擷取登記案件",
+                        subtitle: id,
+                        message: err.message,
+                        type: "danger"
+                    });
+                });
+            },
+            showRegCase: function(jsonObj, enabled_userinfo = false) {
+                if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL || jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                    showAlert({title: "顯示登記案件詳情", message: jsonObj.message, type: "danger"});
+                    return;
+                } else {
+                    showModal({
+                        message: this.$createElement("case-reg-detail", {
+                            props: {
+                                jsonObj: jsonObj,
+                                enabled_userinfo: this.$gstore.getters.isAdmin
+                            }
+                        }),
+                        title: "登記案件詳情",
+                        size: this.$gstore.getters.isAdmin ? "xl" : "lg"
+                    });
+                }
+            },
+            fetchUserInfo: function(e) {
+                if (CONFIG.DISABLE_MSDB_QUERY) {
+                    console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping vueApp.fetchUserInfo.");
+                    return;
+                }
+            
+                let clicked_element = $(e.target);
+                if (!clicked_element.hasClass("user_tag")) {
+                    clicked_element = $(clicked_element.closest(".user_tag"));
+                }
+                // retrieve name/id from the data-* attributes
+                let name = $.trim(clicked_element.data("name"));
+                if (name) {
+                    name = name.replace(/[\?A-Za-z0-9\+]/g, "");
+                }
+                let id = trim(clicked_element.data("id"));
+                if (isEmpty(name) && isEmpty(id)) {
+                    console.warn("Require query params are all empty, skip dynamic user info querying. (add attr to the element => data-id=" + id + ", data-name=" + name + ")");
+                    return;
+                }
+            
+                // use data-el HTML attribute to specify the display container, empty will use the modal popup window instead.
+                let el_selector = clicked_element.data("display-selector");
+            
+                // reduce user query traffic
+                if (this.cachedUserInfo(id, name, el_selector)) {
+                    return;
+                }
+                
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "user_info",
+                    name: name,
+                    id: id
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        let latest = res.data.data_count - 1;
+                        this.showUserInfoFromRAW(res.data.raw[latest], el_selector);
+                        // cache to global store
+                        let json_str = JSON.stringify(res.data);
+                        let payload = {};
+                        if (!isEmpty(id)) { payload[id] = json_str; }
+                        if (!isEmpty(name)) { payload[name] = json_str; }
+                        this.$gstore.commit('cache', payload);
+                    } else {
+                        addNotification({ message: `找不到 '${name} ${id}' 資料` });
+                    }
+                }).catch(err => {
+                    console.error("window.vueApp.fetchUserInfo parsing failed", err.toJSON());
+                    showAlert({ title: "查詢使用者資訊", message: err.message, type: "danger" });
+                });
+            },
+            cachedUserInfo: function (id, name, selector) {
+                // reduce user query traffic
+                let cache = this.$gstore.getters.cache;
+                let json_str = cache[id] || cache[name];
+                if (!isEmpty(json_str)) {
+                    console.log(`cache hit ${id}:${name} in store.`);
+                    let jsonObj = JSON.parse(json_str);
+                    let latest = jsonObj.data_count - 1;
+                    this.showUserInfoFromRAW(jsonObj.raw[latest], selector);
+                    return true;
+                }
+                return false;
+            },
+            showUserInfoFromRAW: function(tdoc_raw, selector = undefined) {
+                let year = 31536000000;
+                let now = new Date();
+                let age = "";
+                let birth = tdoc_raw["AP_BIRTH"];
+                let birth_regex = /^\d{3}\/\d{2}\/\d{2}$/;
+                if (birth.match(birth_regex)) {
+                    birth = (parseInt(birth.substring(0, 3)) + 1911) + birth.substring(3);
+                    let temp = Date.parse(birth);
+                    if (temp) {
+                        let born = new Date(temp);
+                        let badge_age = ((now - born) / year).toFixed(1);
+                        if (badge_age < 30) {
+                            age += " <b-badge variant='success' pill>";
+                        } else if (badge_age < 40) {
+                            age += " <b-badge variant='primary' pill>";
+                        } else if (badge_age < 50) {
+                            age += " <b-badge variant='warning' pill>";
+                        } else if (badge_age < 60) {
+                            age += " <b-badge variant='danger' pill>";
+                        } else {
+                            age += " <b-badge variant='dark' pill>";
+                        }
+                        age += badge_age + "歲</b-badge>"
+                    }
+                }
+    
+                let on_board_date = "";
+                if(!isEmpty(tdoc_raw["AP_ON_DATE"])) {
+                    on_board_date = tdoc_raw["AP_ON_DATE"].date ? tdoc_raw["AP_ON_DATE"].date.split(" ")[0] :　tdoc_raw["AP_ON_DATE"];
+                    let temp = Date.parse(on_board_date.replace('/-/g', "/"));
+                    if (temp) {
+                        let on = new Date(temp);
+                        if (tdoc_raw["AP_OFF_JOB"] == "Y") {
+                            let off_board_date = tdoc_raw["AP_OFF_DATE"];
+                            off_board_date = (parseInt(off_board_date.substring(0, 3)) + 1911) + off_board_date.substring(3);
+                            temp = Date.parse(off_board_date.replace('/-/g', "/"));
+                            if (temp) {
+                                // replace now Date to off board date
+                                now = new Date(temp);
+                            }
+                        }
+                        let work_age = ((now - on) / year).toFixed(1);
+                        if (work_age < 5) {
+                            on_board_date += " <b-badge variant='success'>";
+                        } else if (work_age < 10) {
+                            on_board_date += " <b-badge variant='primary'>";
+                        } else if (work_age < 20) {
+                            on_board_date += " <b-badge variant='warning'>";
+                        } else {
+                            on_board_date += " <b-badge variant='danger'>";
+                        }
+                        on_board_date +=  work_age + "年</b-badge>";
+                    }
+                }
+                let vue_card_text = tdoc_raw["AP_OFF_JOB"] == "N" ? "" : "<p class='text-danger'>已離職【" + tdoc_raw["AP_OFF_DATE"] + "】</p>";
+                vue_card_text += "ID：" + tdoc_raw["DocUserID"] + "<br />"
+                    + "電腦：" + tdoc_raw["AP_PCIP"] + "<br />"
+                    + "生日：" + tdoc_raw["AP_BIRTH"] + age + "<br />"
+                    + "單位：" + tdoc_raw["AP_UNIT_NAME"] + "<br />"
+                    + "工作：" + tdoc_raw["AP_WORK"] + "<br />"
+                    + "學歷：" + tdoc_raw["AP_HI_SCHOOL"] + "<br />"
+                    + "考試：" + tdoc_raw["AP_TEST"] + "<br />"
+                    + "手機：" + tdoc_raw["AP_SEL"] + "<br />"
+                    + "到職：" + on_board_date + "<br />"
+                    ;
+                let vue_html = `
+                    <div id="user_info_app">
+                        <b-card class="overflow-hidden bg-light" style="max-width: 540px; font-size: 0.9rem;" title="${tdoc_raw["AP_USER_NAME"]}" sub-title="${tdoc_raw["AP_JOB"]}">
+                            <b-link href="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}" target="_blank">
+                                <b-card-img
+                                    src="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}"
+                                    alt="${tdoc_raw["AP_USER_NAME"]}"
+                                    class="img-thumbnail float-right ml-2"
+                                    style="max-width: 220px"
+                                ></b-card-img>
+                            </b-link>
+                            <b-card-text>${vue_card_text}</b-card-text>
+                        </b-card>
+                    </div>
+                `;
+    
+                if ($(selector).length > 0) {
+                    $(selector).html(vue_html);
+                    Vue.nextTick(() =>
+                        new Vue({
+                            el: "#user_info_app",
+                            components: [ "b-card", "b-link", "b-badge" ],
+                            mounted() {
+                                addAnimatedCSS(selector, { name: "pulse", duration: "once-anim-cfg" });
+                            }
+                        })
+                    );
+                } else {
+                    showModal({
+                        title: "使用者資訊",
+                        body: vue_html,
+                        size: "md",
+                        callback: () => {
+                            Vue.nextTick(() => new Vue({
+                                el: "#user_info_app",
+                                components: [ "b-card", "b-link", "b-badge" ]
+                            }));
+                        }
+                    });
+                }
+            },
+            checkCaseUIData: function(data) {
+                if (isEmpty(data.year)) {
+                    addNotification({
+                        title: '案件輸入欄位檢測',
+                        message: "案件【年】欄位為空白，請重新選擇！",
+                        type: "warning",
+                        toaster: "b-toaster-top-center"
+                    });
+                    return false;
+                }
+                if (isEmpty(data.code)) {
+                    addNotification({
+                        title: '案件輸入欄位檢測',
+                        message: "案件【字】欄位為空白，請重新選擇！",
+                        type: "warning",
+                        toaster: "b-toaster-top-center"
+                    });
+                    return false;
+                }
+                if (isEmpty(data.num) || isNaN(data.num)) {
+                    addNotification({
+                        title: '案件輸入欄位檢測',
+                        message: "案件【號】欄位格式錯誤，請重新輸入！",
+                        type: "warning",
+                        toaster: "b-toaster-top-center"
+                    });
+                    return false;
+                }
+                return true;
+            }
+        }
+    });
 });
