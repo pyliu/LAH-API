@@ -728,8 +728,8 @@ let initVueApp = () => {
                     cancelVariant: 'secondary',
                     cancelTitle: '取消',
                     footerClass: 'p-2',
-                    hideHeaderClose: true,
-                    noCloseOnBackdrop: true,
+                    hideHeaderClose: false,
+                    noCloseOnBackdrop: false,
                     centered: true,
                     contentClass: "shadow"
                 }, opts);
@@ -745,6 +745,8 @@ let initVueApp = () => {
                 }).catch(err => {
                     console.error(err);
                 });
+                // wierd bug ... the buttons will be disabled ... so add the code to enable them
+                Vue.nextTick( () => $(".modal footer button").attr("disabled", false).removeClass("disabled") );
             },
             open: function(url, e) {
                 let h = window.innerHeight - 160;
