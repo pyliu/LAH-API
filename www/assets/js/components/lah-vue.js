@@ -16,9 +16,11 @@ Vue.prototype.$gstore = (() => {
             state: {
                 cache : {},
                 isAdmin: false,
-                userNames: null
+                userNames: null,
+                initialized: false
             },
             getters: {
+                initialized: state => state.initialized,
                 cache: state => state.cache,
                 isAdmin: state => state.isAdmin,
                 userNames: state => state.userNames,
@@ -28,6 +30,9 @@ Vue.prototype.$gstore = (() => {
                 }
             },
             mutations: {
+                initialized(state, flagPayload) {
+                    state.initialized = flagPayload === true;
+                },
                 cache(state, objPayload) {
                     state.cache = Object.assign(state.cache, objPayload);
                 },
@@ -200,7 +205,105 @@ Vue.mixin({
             }
         },
         busyOn: function(el = "body", size = "") { this.toggleBusy({selector: el, forceOn: true, size: size}) },
-        busyOff: function(el = "body") { this.toggleBusy({selector: el, forceOff: true}) }
+        busyOff: function(el = "body") { this.toggleBusy({selector: el, forceOff: true}) },
+        screensaver: () => {
+            if (CONFIG.SCREENSAVER) {
+                window.onload = resetTimer;
+                window.onmousemove = resetTimer;
+                window.onmousedown = resetTimer;  // catches touchscreen presses as well      
+                window.ontouchstart = resetTimer; // catches touchscreen swipes as well 
+                window.onclick = resetTimer;      // catches touchpad clicks as well
+                window.onkeypress = resetTimer;   
+                window.addEventListener('scroll', resetTimer, true); // improved; see comments
+                let idle_timer;
+                function wakeup() {
+                    let container = $("body");
+                    if (container.hasClass("ld-over-full-inverse")) {
+                        container.removeClass("ld-over-full-inverse");
+                        container.find("#screensaver").remove();
+                        container.removeClass("running");
+                    }
+                    clearLDAnimation(".navbar i.fas");
+                }
+                function resetTimer() {
+                    clearTimeout(idle_timer);
+                    idle_timer = setTimeout(() => {
+                        wakeup();
+                        let container = $("body");
+                        // cover style opts: ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
+                        let style = "ld-over-full-inverse";
+                        container.addClass(style);
+                        container.addClass("running");
+                        let cover_el = $(jQuery.parseHTML('<div id="screensaver" class="ld auto-add-spinner"></div>'));
+                        let patterns = [
+                            "fas fa-bolt ld-bounce", "fas fa-bed ld-swim", "fas fa-biking ld-move-ltr",
+                            "fas fa-biohazard ld-metronome", "fas fa-snowboarding ld-rush-ltr", "fas fa-anchor ld-swing",
+                            "fas fa-fingerprint ld-damage", "fab fa-angellist ld-metronome"
+                        ];
+                        cover_el.addClass(patterns[rand(patterns.length)])
+                                .addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)])
+                                .addClass("fa-10x");
+                        container.append(cover_el);
+                        addLDAnimation(".navbar i.fas", "ld-bounce");
+                    }, CONFIG.SCREENSAVER_TIMER);  // 5mins
+                    wakeup();
+                }
+            }
+        },
+        authenticate: function() {
+            // check authority
+            console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
+            this.$http.post(CONFIG.JSON_API_EP, {
+                type: 'authentication'
+            }).then(res => {
+                this.$gstore.commit("isAdmin", res.data.is_admin || false);
+                //console.log("isAdmin: ", this.$gstore.getters.isAdmin);
+            }).catch(err => {
+                console.error(err);
+                showAlert({
+                    title: '認證失敗',
+                    message: err.message,
+                    type: 'danger'
+                });
+            });
+        },
+        loadUserNames: function() {
+            let json_str = localStorage.getItem("userNames");
+            let json_ts = +localStorage.getItem("userNames_timestamp");
+            console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
+            let current_ts = +new Date();
+            if (typeof json_str == "string" && current_ts - json_ts < 86400000) {
+                // within a day use the cached data
+                this.$gstore.commit("userNames", JSON.parse(json_str) || {});
+            } else {
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'user_mapping'
+                }).then(res => {
+                    let json = res.data.data;
+                    this.$gstore.commit("userNames", json || {});
+                    if (localStorage) {
+                        localStorage.setItem("userNames", JSON.stringify(json));
+                        localStorage.setItem("userNames_timestamp", +new Date()); // == new Date().getTime()
+                    }
+                    //console.log("userNames: ", res.data.data_count);
+                }).catch(err => {
+                    console.error(err);
+                    showAlert({
+                        title: '使用者對應表',
+                        message: err.message,
+                        type: 'danger'
+                    });
+                });
+            }
+        }
+    },
+    created() {
+        if (!this.$gstore.getters.initialized) {
+            this.$gstore.commit("initialized", true);
+            this.screensaver();
+            this.authenticate();
+            this.loadUserNames();
+        }
     }
 });
 
