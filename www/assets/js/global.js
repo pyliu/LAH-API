@@ -301,7 +301,7 @@ let toggle = selector => {
             toggleInsideSpinner(el);
         }
     } else {
-        window.vueApp.busy({selector: container});
+        window.vueApp.toggleBusy({selector: container});
     }
 }
 
@@ -1087,19 +1087,22 @@ let initVueApp = () => {
                 });
             },
             loadUserNames: function() {
+                let json_str = localStorage.getItem("userNames");
+                let json_ts = +localStorage.getItem("userNames_timestamp");
                 console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
                 let current_ts = +new Date();
-                if (localStorage["userNames_ts"] && current_ts - localStorage["userNames_ts"] < 86400000) {
+                if (typeof json_str == "string" && current_ts - json_ts < 86400000) {
                     // within a day use the cached data
-                    this.$gstore.commit("userNames", JSON.parse(localStorage["userNames"]) || {});
+                    this.$gstore.commit("userNames", JSON.parse(json_str) || {});
                 } else {
                     this.$http.post(CONFIG.JSON_API_EP, {
                         type: 'user_mapping'
                     }).then(res => {
-                        this.$gstore.commit("userNames", res.data.data || {});
+                        let json = res.data.data;
+                        this.$gstore.commit("userNames", json || {});
                         if (localStorage) {
-                            localStorage["userNames"] = JSON.stringify(res.data);
-                            localStorage["userNames_ts"] = +new Date(); // == new Date().getTime()
+                            localStorage.setItem("userNames", JSON.stringify(json));
+                            localStorage.setItem("userNames_timestamp", +new Date()); // == new Date().getTime()
                         }
                         //console.log("userNames: ", res.data.data_count);
                     }).catch(err => {
