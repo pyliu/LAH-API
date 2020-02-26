@@ -165,6 +165,15 @@ let addNotification = (msg, opts) => {
 }
 
 let showAlert = opts => {
+    let message = opts.body || opts.message;
+    let merged = Object.assign({
+        title: "警示",
+        variant: opts.type || "default",
+        autoHideDelay: opts.delay || 10 * 1000,
+        pos: "tf"
+    }, opts);
+    window.vueApp.makeToast(message, merged);
+    return;
     if (typeof opts == "string") {
         opts = {message: opts}
     }

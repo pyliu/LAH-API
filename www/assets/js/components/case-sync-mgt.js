@@ -66,7 +66,7 @@ if (Vue) {
             },
             check: function(e) {
                 if (!this.validate()) {
-                    addNotification({message: `輸入資料格式有誤，無法查詢 ${this.year}-${this.code}-${this.num}`, type: "warning"});
+                    showAlert({message: `輸入資料格式有誤，無法查詢 ${this.year}-${this.code}-${this.num}`, type: "warning"});
                     return false;
                 }
                 
