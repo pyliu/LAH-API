@@ -1,6 +1,6 @@
 if (Vue) {
     let VueCRSMS = {
-        template: `<div>
+        template: `<lah-transition slide-down>
             <b-table
                 ref="reg_case_tbl"
                 striped
@@ -16,7 +16,7 @@ if (Vue) {
                 :items="json.raw"
                 :fields="fields"
                 class="text-center"
-                v-if="json && json.data_count > 0"
+                v-if="isTableReady"
             >
                 <template v-slot:cell(序號)="data">
                     {{data.index + 1}}
@@ -28,8 +28,8 @@ if (Vue) {
                     {{data.item["RM09"] + ":" + data.item["RM09_CHT"]}}</span>
                 </template>
             </b-table>
-            <span v-else v-html="message"></span>
-        </div>`,
+            <div v-else v-html="message"></div>
+        </lah-transition>`,
         props: ["pid"],
         data: function() {
             return {
@@ -40,7 +40,12 @@ if (Vue) {
                     {key: "RM07_1", label: "收件日期", sortable: true},
                     {key: "RM09", label: "登記代碼", sortable: true}
                 ],
-                message: '<i class="text-primary fas fa-sync ld ld-spin"></i> 登記案件資料查詢中 ...'
+                message: '<i class="text-primary ld ld-spin ld-spinner"></i> 登記案件資料查詢中 ...'
+            }
+        },
+        computed: {
+            isTableReady: function() {
+                return this.json && this.json.data_count > 0;
             }
         },
         created() {
@@ -51,7 +56,7 @@ if (Vue) {
                 // on success
                 this.json = response.data;
                 if (this.json.data_count == 0) {
-                    this.message = `<i class="text-info fas fa-exclamation-circle ld ld-heartbeat"></i> 查無登記案件資料`;
+                    this.message = `<i class="text-info fas fa-exclamation-circle"></i> 查無登記案件資料`;
                 }
                 Vue.nextTick(() => {
                     // make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
@@ -63,15 +68,14 @@ if (Vue) {
             }).catch(error => {
                 // on error
                 console.error(error.toJson());
-                this.message = `<i class="text-danger fas fa-exclamation-circle ld ld-heartbeat"></i> 查詢登記案件發生錯誤！【${error}】`;
+                this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢登記案件發生錯誤！【${error}】`;
             }).finally(() => {
                 // finally
             });
-        },
-        mounted() { }
+        }
     };
     let VueCMSMS = {
-        template: `<div>
+        template: `<lah-transition slide-up>
             <b-table
                 ref="sur_case_tbl"
                 striped
@@ -86,6 +90,7 @@ if (Vue) {
                 :caption="'測量案件找到 ' + json.raw.length + '件'"
                 :items="json.raw"
                 :fields="fields"
+                :busy="isBusy"
                 class="text-center"
                 v-if="json && json.data_count > 0"
             >
@@ -99,8 +104,8 @@ if (Vue) {
                     {{data.item["MM06"] + ":" + data.item["MM06_CHT"]}}</span>
                 </template>
             </b-table>
-            <span v-else v-html="message"></span>
-        </div>`,
+            <div v-else v-html="message"></div>
+        </lah-transition>`,
         props: ["pid"],
         data: function() {
             return {
@@ -122,12 +127,12 @@ if (Vue) {
                 // on success
                 this.json = response.data;
                 if (this.json.data_count == 0) {
-                    this.message = `<i class="text-secondary fas fa-exclamation-circle ld ld-heartbeat"></i> 查無測量案件資料`;
+                    this.message = `<i class="text-secondary fas fa-exclamation-circle"></i> 查無測量案件資料`;
                 }
             }).catch(error => {
                 // on error
                 console.error(error.toJson());
-                this.message = `<i class="text-danger fas fa-exclamation-circle ld ld-heartbeat"></i> 查詢測量案件發生錯誤！【${error}】`;
+                this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢測量案件發生錯誤！【${error}】`;
             }).finally(() => {
                 // finally
             });
@@ -206,7 +211,7 @@ if (Vue) {
                     });
                 } else {
                     addNotification({
-                        message: `${this.pid} 統編格式錯誤`,
+                        message: `「${this.pid}」 統編格式錯誤`,
                         type: "warning"
                     });
                 }
@@ -235,7 +240,7 @@ if (Vue) {
         mounted() {
             let that = this;
             // wait cached data write back
-            setTimeout(() => that.pid = $("#pid").val(), 150);
+            setTimeout(() => that.pid = $("#pid").val(), 200);
         }
     });
 } else {
