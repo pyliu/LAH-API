@@ -251,16 +251,16 @@ Vue.component("lah-alert", {
     }},
     methods: {
         mouseOver: function(e) {
-            if (window.alertApp.hide_timer_handle !== null) { clearTimeout(window.alertApp.hide_timer_handle); }
-            window.alertApp.disableProgress();
+            if (this.hide_timer_handle !== null) { clearTimeout(this.hide_timer_handle); }
+            this.disableProgress();
         },
         mouseOut: function(e) {
-            if (window.alertApp.autohide) {
-                window.alertApp.hide_timer_handle = setTimeout(() => {
-                    window.alertApp.seen = false;
-                    window.alertApp.hide_timer_handle = null;
-                }, window.alertApp.delay);
-                window.alertApp.enableProgress();
+            if (this.autohide) {
+                this.hide_timer_handle = setTimeout(() => {
+                    this.seen = false;
+                    this.hide_timer_handle = null;
+                }, this.delay);
+                this.enableProgress();
             }
         },
         enableProgress: function() {
