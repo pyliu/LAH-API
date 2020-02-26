@@ -22,7 +22,6 @@ if (Vue) {
             handleSucceeded: function() { this.showScheduleTask = true; },
         },
         components: {
-            "lah-transition": VueTransition,
             "log-viewer": {
                 template: `<b-card bo-body :header="'紀錄儀表版 ' + query_data_count + ' / ' + query_total_count">
                     <div class="d-flex w-100 justify-content-between">
