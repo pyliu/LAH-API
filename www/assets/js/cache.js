@@ -3,7 +3,6 @@ if (jQuery && localStorage) {
     let isJSON = function(str) {
         if (typeof str == "string") {
             try {
-                let obj = JSON.parse(str);
                 if (str.indexOf('{') > -1) {
                     return true;
                 } else {

@@ -1087,21 +1087,30 @@ let initVueApp = () => {
                 });
             },
             loadUserNames: function() {
-                // check authority
                 console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: 'user_mapping'
-                }).then(res => {
-                    this.$gstore.commit("userNames", res.data.data || {});
-                    //console.log("userNames: ", res.data.data_count);
-                }).catch(err => {
-                    console.error(err);
-                    showAlert({
-                        title: '使用者對應表',
-                        message: err.message,
-                        type: 'danger'
+                let current_ts = +new Date();
+                if (localStorage["userNames_ts"] && current_ts - localStorage["userNames_ts"] < 86400000) {
+                    // within a day use the cached data
+                    this.$gstore.commit("userNames", JSON.parse(localStorage["userNames"]) || {});
+                } else {
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: 'user_mapping'
+                    }).then(res => {
+                        this.$gstore.commit("userNames", res.data.data || {});
+                        if (localStorage) {
+                            localStorage["userNames"] = JSON.stringify(res.data);
+                            localStorage["userNames_ts"] = +new Date(); // == new Date().getTime()
+                        }
+                        //console.log("userNames: ", res.data.data_count);
+                    }).catch(err => {
+                        console.error(err);
+                        showAlert({
+                            title: '使用者對應表',
+                            message: err.message,
+                            type: 'danger'
+                        });
                     });
-                });
+                }
             }
         },
         mounted() {
