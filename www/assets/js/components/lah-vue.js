@@ -146,7 +146,7 @@ Vue.mixin({
         isBusy: function(flag) { flag ? this.busyOn(this.$el) : this.busyOff(this.$el); }
     },
     methods: {
-        busy: (opts = {}) => {
+        toggleBusy: (opts = {}) => {
             opts = Object.assign({
                 selector: "body",
                 style: "ld-over",   // ld-over, ld-over-inverse, ld-over-full, ld-over-full-inverse
@@ -199,8 +199,8 @@ Vue.mixin({
                 }
             }
         },
-        busyOn: function(el = "body", size = "") { this.busy({selector: el, forceOn: true, size: size}) },
-        busyOff: function(el = "body") { this.busy({selector: el, forceOff: true}) }
+        busyOn: function(el = "body", size = "") { this.toggleBusy({selector: el, forceOn: true, size: size}) },
+        busyOff: function(el = "body") { this.toggleBusy({selector: el, forceOff: true}) }
     }
 });
 
