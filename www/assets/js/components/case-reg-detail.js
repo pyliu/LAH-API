@@ -1,6 +1,5 @@
 if (Vue) {
     Vue.component("case-reg-detail", {
-        components: { "lah-transition": VueTransition || {template: `<i class="text-danger fas fa-ban"></i>`}},
         template: `<div>
             <p v-html="jsonObj.tr_html"></p>
             <b-form-row>
