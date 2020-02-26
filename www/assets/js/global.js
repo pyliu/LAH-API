@@ -745,8 +745,6 @@ let initVueApp = () => {
                 }).catch(err => {
                     console.error(err);
                 });
-                // wierd bug ... the buttons will be disabled ... so add the code to enable them
-                Vue.nextTick( () => $(".modal footer button").attr("disabled", false).removeClass("disabled") );
             },
             open: function(url, e) {
                 let h = window.innerHeight - 160;
