@@ -36,6 +36,7 @@ if (Vue) {
                         </b-input-group>
                         <a href="javascript:void(0)" @click="download"><i class="fas fa-download"></i> 下載</a>
                         <small class="text-muted text-center">
+                            <b-button @click="zip" size="sm" title="壓縮伺服器端紀錄檔案(不包含今天)">壓縮</b-button>
                             <b-button variant="primary" size="sm" @click="callLogAPI">
                                 <i class="fas fa-sync"></i>
                                 刷新
@@ -130,6 +131,27 @@ if (Vue) {
                             type: "file_log",
                             date: date,
                             filename: this.log_filename
+                        });
+                    },
+                    zip: function(e) {
+                        this.isBusy = true;
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: 'zip_log'
+                        }).then(res => {
+                            console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
+                            addNotification({
+                                title: "壓縮LOG檔",
+                                message: `<i class="text-success fas fa-circle"></i> 任務完成！`,
+                                type: "success"
+                            });
+                            this.isBusy = false;
+                        }).catch(err => {
+                            console.error("log-viewer::zip parsing failed", ex);
+                            showAlert({
+                                title: "壓縮LOG檔",
+                                message: err.message,
+                                type: "danger"
+                            });
                         });
                     }
                 },
