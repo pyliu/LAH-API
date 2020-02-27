@@ -152,12 +152,6 @@ ksort($operators);
         </div>
       </div>
       <div class="row">
-        <div class="col-6">
-        </div>
-        <div class="col-6">
-        </div>
-      </div>
-      <div class="row">
         <div class="col">
           <fieldset>
             <legend>報表匯出</legend>
@@ -219,10 +213,8 @@ ksort($operators);
             </blockquote>
           </fieldset>
         </div>
-        <!--
-        <div class="col">
-        </div>
-        -->
+        <!-- <div class="col">
+        </div> -->
       </div>
     </div>
   </section><!-- /section -->
@@ -337,6 +329,8 @@ ksort($operators);
       // search users
       $("#search_user_button").on("click", xhrSearchUsers);
       bindPressEnterEvent("#msg_who", xhrSearchUsers);
+
+      initBlockquoteModal();
     });
   </script>
 </body>

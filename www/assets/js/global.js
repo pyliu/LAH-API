@@ -340,11 +340,5 @@ let initBlockquoteModal = () => {
         }
     });
 }
-
-$(document).ready(e => {
-    setTimeout(() => {
-        initBlockquoteModal();
-    }, 3000);
-});
 //]]>
     
