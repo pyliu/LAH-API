@@ -38,6 +38,40 @@ Vue.prototype.$gstore = (() => {
                 userNames(state, mappingPayload) {
                     state.userNames = mappingPayload || {};
                 }
+            },
+            actions: {
+                async loadUserNames({ commit }) {
+                    try {
+                        let json_str = localStorage.getItem("userNames");
+                        let json_ts = +localStorage.getItem("userNames_timestamp");
+                        let current_ts = +new Date();
+                        if (typeof json_str == "string" && current_ts - json_ts < 86400000) {
+                            // within a day use the cached data
+                            commit("userNames", JSON.parse(json_str) || {});
+                        } else {
+                            await axios.post(CONFIG.JSON_API_EP, {
+                                type: 'user_mapping'
+                            }).then(res => {
+                                let json = res.data.data;
+                                commit("userNames", json || {});
+                                if (localStorage) {
+                                    localStorage.setItem("userNames", JSON.stringify(json));
+                                    localStorage.setItem("userNames_timestamp", +new Date()); // == new Date().getTime()
+                                }
+                                //console.log("userNames: ", res.data.data_count);
+                            }).catch(err => {
+                                console.error(err);
+                                showAlert({
+                                    title: '使用者對應表',
+                                    message: err.message,
+                                    type: 'danger'
+                                });
+                            });
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
             }
         });
     }
@@ -149,7 +183,12 @@ Vue.mixin({
     computed: {
         cache() { return this.$gstore.getters.cache; },
         isAdmin() { return this.$gstore.getters.isAdmin; },
-        userNames() { return this.$gstore.getters.userNames; },
+        userNames() {
+            if (!this.$gstore.getters.userNames) {
+                this.$gstore.dispatch("loadUserNames");
+            }
+            return this.$gstore.getters.userNames;
+        },
         userIDs() { return this.reverseMapping(this.userNames || {}); },
         initialized() { return this.$gstore.getters.initialized; }
     },
@@ -539,7 +578,6 @@ $(document).ready(() => {
                 this.$gstore.commit("initialized", true);
                 this.screensaver();
                 this.authenticate();
-                this.loadUserNames();
             }
         },
         methods: {
@@ -1047,34 +1085,6 @@ $(document).ready(() => {
                         type: 'danger'
                     });
                 });
-            },
-            loadUserNames: function() {
-                let json_str = localStorage.getItem("userNames");
-                let json_ts = +localStorage.getItem("userNames_timestamp");
-                let current_ts = +new Date();
-                if (typeof json_str == "string" && current_ts - json_ts < 86400000) {
-                    // within a day use the cached data
-                    this.$gstore.commit("userNames", JSON.parse(json_str) || {});
-                } else {
-                    this.$http.post(CONFIG.JSON_API_EP, {
-                        type: 'user_mapping'
-                    }).then(res => {
-                        let json = res.data.data;
-                        this.$gstore.commit("userNames", json || {});
-                        if (localStorage) {
-                            localStorage.setItem("userNames", JSON.stringify(json));
-                            localStorage.setItem("userNames_timestamp", +new Date()); // == new Date().getTime()
-                        }
-                        //console.log("userNames: ", res.data.data_count);
-                    }).catch(err => {
-                        console.error(err);
-                        showAlert({
-                            title: '使用者對應表',
-                            message: err.message,
-                            type: 'danger'
-                        });
-                    });
-                }
             }
         }
     });
