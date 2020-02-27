@@ -564,33 +564,6 @@ $(document).ready(() => {
             transition: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)],
             callbackQueue: []
         },
-        created: function(e) {
-            this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
-                //console.log('Modal is about to be shown', bvEvent, modalId)
-            });
-            this.$root.$on('bv::modal::shown', (bvEvent, modalId) => {
-                //console.log('Modal is shown', bvEvent, modalId)
-                if (!this.openConfirm) {
-                    this.showModal(modalId);
-                }
-            });
-            this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
-                //console.log('Modal is about to hide', bvEvent, modalId)
-                // animation will break confirm Promise, so skip it
-                if (this.openConfirm) {
-                    this.openConfirm = false;
-                } else {
-                    bvEvent.preventDefault();
-                    this.hideModal(modalId);
-                }
-            });
-            this.$root.$on('bv::modal::hidden', (bvEvent, modalId) => {
-                //console.log('Modal is hidden', bvEvent, modalId)
-            });
-            
-            console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
-            this.screensaver();
-        },
         methods: {
             // make simple, short popup notice message
             makeToast: function(message, opts = {}) {
@@ -1097,6 +1070,33 @@ $(document).ready(() => {
                     });
                 });
             }
+        },
+        created: function(e) {
+            this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
+                //console.log('Modal is about to be shown', bvEvent, modalId)
+            });
+            this.$root.$on('bv::modal::shown', (bvEvent, modalId) => {
+                //console.log('Modal is shown', bvEvent, modalId)
+                if (!this.openConfirm) {
+                    this.showModal(modalId);
+                }
+            });
+            this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
+                //console.log('Modal is about to hide', bvEvent, modalId)
+                // animation will break confirm Promise, so skip it
+                if (this.openConfirm) {
+                    this.openConfirm = false;
+                } else {
+                    bvEvent.preventDefault();
+                    this.hideModal(modalId);
+                }
+            });
+            this.$root.$on('bv::modal::hidden', (bvEvent, modalId) => {
+                //console.log('Modal is hidden', bvEvent, modalId)
+            });
+            
+            console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
+            this.screensaver();
         }
     });
 });
