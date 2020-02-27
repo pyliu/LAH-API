@@ -122,53 +122,6 @@ let xhrExportSQLReport = (e, form_body) => {
 	});
 };
 
-let xhrExportLog = e => {
-	let date = $("#log_date_text").val();
-	let form_body = new FormData();
-	form_body.append("type", "file_log");
-	form_body.append("date", date);
-	toggle(e.target);
-	asyncFetch("export_file_api.php", {
-		method: 'POST',
-		body: form_body,
-		blob: true
-	}).then(blob => {
-		let d = new Date();
-		let url = window.URL.createObjectURL(blob);
-		let a = document.createElement('a');
-		a.href = url;
-		a.download = date + ".log";
-		document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-		a.click();    
-		a.remove();  //afterwards we remove the element again
-		// release object in memory
-		window.URL.revokeObjectURL(url);
-		toggle(e.target);
-	}).catch(ex => {
-		console.error("xhrExportLog parsing failed", ex);
-		alert("XHR連線查詢有問題!!【" + ex + "】");
-	});
-};
-
-let xhrZipLog = e => {
-	let form_body = new FormData();
-	form_body.append("type", "zip_log");
-	toggle(e.target);
-	asyncFetch(CONFIG.JSON_API_EP, {
-		method: 'POST',
-		body: form_body
-	}).then(jsonObj => {
-		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + jsonObj.message + "】");
-		addNotification({
-			message: "<strong class='text-success'>壓縮完成</strong>"
-		});
-		toggle(e.target);
-	}).catch(ex => {
-		console.error("xhrZipLog parsing failed", ex);
-		alert("XHR連線查詢有問題!!【" + ex + "】");
-	});
-}
-
 let xhrUpdateRegCaseCol = function(arguments) {
 	if ($(arguments.el).length > 0) {
 		// remove the button

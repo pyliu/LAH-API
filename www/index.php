@@ -36,56 +36,13 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
 </head>
 
 <body id="html_body">
-
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <i class="my-auto fas fa-list-alt fa-2x text-light"></i>&ensp;
-    <a class="navbar-brand" href="index.php">地政輔助系統 <span class="small">(α)</span></a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item mt-3 active">
-          <a class="nav-link" href="/index.php">登記案件追蹤</a>
-        </li>
-		    <li class="nav-item mt-3">
-          <a class="nav-link" href="/query.php">查詢＆報表</a>
-        </li>
-        <li class="nav-item mt-3">
-          <a class="nav-link" href="/watchdog.php">監控＆修正</a>
-        </li>
-        <li class="nav-item mt-3">
-          <a class="nav-link" href="/overdue_reg_cases.html">逾期案件</a>
-        </li>
-        <li class="nav-item mt-3">
-          <a class="nav-link" href="/tasklog.html">記錄檔&排程</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle hamburger" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="assets/img/menu.png" width="32" /></a>
-          <div class="dropdown-menu" aria-labelledby="dropdown01">
-            <a class="dropdown-item" href="http://220.1.35.87/" target="_blank">內部知識網</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="http://www.zhongli-land.tycg.gov.tw/" target="_blank">地所首頁</a>
-            <a class="dropdown-item" href="http://webitr.tycg.gov.tw:8080/WebITR/" target="_blank">差勤系統</a>
-            <a class="dropdown-item" href="/heir.html" target="_blank">繼承案件輕鬆審<span class="text-mute small">(β)</span></a>
-            <a class="dropdown-item" href="http://tycgcloud.tycg.gov.tw/" target="_blank">公務雲</a>
-            <a class="dropdown-item" href="http://220.1.35.24/Web/ap06.asp" target="_blank">分機查詢</a>
-            <a class="dropdown-item" href="http://220.1.35.42:9080/SMS98/" target="_blank">案件辦理情形通知系統（簡訊＆EMAIL）</a>
-            <a class="dropdown-item" href="/shortcuts.html" target="_blank">各類WEB版應用黃頁</a>
-          </div>
-        </li>
-      </ul>
-      <form id="search_form" class="form-inline my-2 my-lg-0" onsubmit="return false">
-        <label class="text-white" for="date_input">日期：</label>
-        <input id="date_input" class="date_picker form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" value="<?php echo RegCaseData::toDate($qday); ?>" readonly />
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜尋</button>
-      </form>
-    </div>
-  </nav>
   <section id="main_content_section" class="mb-5">
+    <form id="search_form" class="form-inline mr-2 my-2" style="right: 0px; top: 0px;position: absolute; z-index: 9999;" onsubmit="return false">
+      <label class="text-white" for="date_input">日期：</label>
+      <input id="date_input" class="date_picker form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" value="<?php echo RegCaseData::toDate($qday); ?>" readonly />
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜尋</button>
+    </form>
     <div class="container-fluid">
-
       <div id="info_box" class="alert alert-info">
         <div class="filter-btn-group">
           <button id='gray_btn' class='btn btn-sm btn-default'>全部</button>
@@ -149,6 +106,26 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
   
   <script type="text/javascript">
     $(document).ready(e => {
+      if ($(".date_picker").datepicker) {
+        $(".date_picker").datepicker({
+            daysOfWeekDisabled: "",
+            language: "zh-TW",
+            daysOfWeekHighlighted: "1,2,3,4,5",
+            //todayBtn: true,
+            todayHighlight: true,
+            autoclose: true,
+            format: {
+                /*
+                * Say our UI should display a week ahead,
+                * but textbox should store the actual date.
+                * This is useful if we need UI to select local dates,
+                * but store in UTC
+                */
+                toDisplay: (date, format, language) => toTWDate(new Date(date)),
+                toValue: (date, format, language) => new Date()
+            }
+        });
+      }
       // filter button
       $("#red_btn").on("click", e => {
           let state = $("#table_container").data("active");
@@ -233,6 +210,7 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
       $("#date_input").on("changeDate", e => {
         window.location = "index.php?date=" + $("#date_input").val();
       });
+
     });
   </script>
 </body>

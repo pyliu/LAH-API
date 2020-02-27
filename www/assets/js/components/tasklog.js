@@ -32,10 +32,12 @@ if (Vue) {
                                 v-model="count"
                                 size="sm"
                                 min="1"
+                                class="h-100"
                             ></b-form-input>
                         </b-input-group>
                         <a href="javascript:void(0)" @click="download"><i class="fas fa-download"></i> 下載</a>
                         <small class="text-muted text-center">
+                            <b-form-datepicker size="sm" class="float-right"></b-form-datepicker>
                             <b-button @click="zip" size="sm" title="壓縮伺服器端紀錄檔案(不包含今天)">壓縮</b-button>
                             <b-button variant="primary" size="sm" @click="callLogAPI">
                                 <i class="fas fa-sync"></i>

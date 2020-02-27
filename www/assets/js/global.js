@@ -318,34 +318,6 @@ let bindPressEnterEvent = (selector, callback_func) => {
     });
 }
 
-let initDatepicker = () => {
-    // for any field that needs date picking purpose (add .date_picker to its class)
-    /**
-     * <script src="assets/js/bootstrap-datepicker.min.js"></script>
-         * <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
-     */
-    if ($(".date_picker").datepicker) {
-        $(".date_picker").datepicker({
-            daysOfWeekDisabled: "",
-            language: "zh-TW",
-            daysOfWeekHighlighted: "1,2,3,4,5",
-            //todayBtn: true,
-            todayHighlight: true,
-            autoclose: true,
-            format: {
-                /*
-                * Say our UI should display a week ahead,
-                * but textbox should store the actual date.
-                * This is useful if we need UI to select local dates,
-                * but store in UTC
-                */
-                toDisplay: (date, format, language) => toTWDate(new Date(date)),
-                toValue: (date, format, language) => new Date()
-            }
-        });
-    }
-}
-
 let initBlockquoteModal = () => {
     // add responsive and thumbnail style to blockquote img
     $("blockquote img").addClass("img-responsive img-thumbnail");
@@ -370,8 +342,9 @@ let initBlockquoteModal = () => {
 }
 
 $(document).ready(e => {
-    initDatepicker();
-    initBlockquoteModal();
+    setTimeout(() => {
+        initBlockquoteModal();
+    }, 3000);
 });
 //]]>
     

@@ -43,36 +43,6 @@ ksort($operators);
       <div class="row">
         <div id="case-query-by-pid" class="col-6">
           <case-query-by-pid></case-query-by-pid>
-        </div>
-        <div class="col-6">
-          <fieldset>
-            <legend>記錄檔</legend>
-
-            <div class="form-row">
-              <div class="input-group input-group-sm col">
-                <div class="input-group-prepend">
-                  <span class="input-group-text" id="inputGroup-log_date_text">日期</span>
-                </div>
-                <input type="text" id="log_date_text" name="log_date_text" class="form-control no-cache" value="<?php echo $today_ad; ?>" />
-              </div>
-              <div class="filter-btn-group col">
-                <button id="log_button" class="btn btn-sm btn-outline-primary">下載</button>
-                <button id="log_zip_button" class="btn btn-sm btn-outline-secondary">壓縮</button>
-                <button id="log_quote_button" class="btn btn-sm btn-outline-success">備註</button>
-              </div>
-            </div>
-
-            <blockquote id="log_blockquote" class="hide" data-title="記錄檔">
-              <ol>
-                <li>根據日期取得本伺服器之紀錄檔案。</li>
-                <li>按壓縮按鈕可手動壓縮主機端LOG原始檔。</li>
-              </ol>
-            </blockquote>
-          </fieldset>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-6">
           <fieldset>
             <legend>轄區各段土地標示部筆數＆面積查詢</legend>
             <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
@@ -105,8 +75,6 @@ ksort($operators);
             </blockquote>
             <div id="data_query_result"></div>
           </fieldset>
-        </div>
-        <div class="col-6">
           <fieldset>
             <legend>地政局索取地籍資料</legend>
             <div class="form-row">
@@ -143,9 +111,54 @@ ksort($operators);
             </blockquote>
           </fieldset>
         </div>
+        <div class="col-6">
+          <fieldset>
+            <legend>使用者＆信差訊息</legend>
+            <div class="float-clear">
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-msg_who">關鍵字</span>
+                </div>
+                <input type="text" id="msg_who" name="msg_who" class="form-control" placeholder="HB0541" value="HB054" title="ID、姓名、IP" />
+              </div>
+              <div class="filter-btn-group col">
+                <button id="search_user_button" class="btn btn-sm btn-outline-primary">搜尋</button>
+                <button id="msg_button" class="btn btn-sm btn-outline-secondary">傳送訊息</button>
+                <span id="filter_info" class="text-muted small"><?php echo count($operators); ?>筆</span>
+              </div>
+            </div>
+            <div class="form-row mt-1">
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-msg_title">訊息標題</span>
+                </div>
+                <input type="text" id="msg_title" name="msg_title" class="form-control" placeholder="訊息的標題" />
+              </div>
+            </div>
+            <div class="form-row mt-1">
+              <textarea class="form-control" id="msg_content" rows="5" placeholder="訊息內容(最多500字)"></textarea>
+            </div>
+            <div id="user_list">
+            <?php
+              foreach ($operators as $id => $name) {
+                // prevent rare word issue
+                $name = preg_replace("/[a-zA-Z?0-9+]+/", "", $name);
+                echo "<div class='float-left m-2 user_tag hide' style='font-size: .875rem;' data-id='".$id."' data-name='".($name ?? "XXXXXX")."'>".$id.": ".($name ?? "XXXXXX")."</div>";
+              }
+            ?>
+            </div>
+          </fieldset>
+        </div>
       </div>
       <div class="row">
         <div class="col-6">
+        </div>
+        <div class="col-6">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
           <fieldset>
             <legend>報表匯出</legend>
             <div class="form-row">
@@ -206,45 +219,10 @@ ksort($operators);
             </blockquote>
           </fieldset>
         </div>
-        <div class="col-6">
-          <fieldset>
-            <legend>使用者＆信差訊息</legend>
-            <div class="float-clear">
-            <div class="form-row">
-              <div class="input-group input-group-sm col">
-                <div class="input-group-prepend">
-                  <span class="input-group-text" id="inputGroup-msg_who">關鍵字</span>
-                </div>
-                <input type="text" id="msg_who" name="msg_who" class="form-control" placeholder="HB0541" value="HB054" title="ID、姓名、IP" />
-              </div>
-              <div class="filter-btn-group col">
-                <button id="search_user_button" class="btn btn-sm btn-outline-primary">搜尋</button>
-                <button id="msg_button" class="btn btn-sm btn-outline-secondary">傳送訊息</button>
-                <span id="filter_info" class="text-muted small"><?php echo count($operators); ?>筆</span>
-              </div>
-            </div>
-            <div class="form-row mt-1">
-              <div class="input-group input-group-sm col">
-                <div class="input-group-prepend">
-                  <span class="input-group-text" id="inputGroup-msg_title">訊息標題</span>
-                </div>
-                <input type="text" id="msg_title" name="msg_title" class="form-control" placeholder="訊息的標題" />
-              </div>
-            </div>
-            <div class="form-row mt-1">
-              <textarea class="form-control" id="msg_content" rows="5" placeholder="訊息內容(最多500字)"></textarea>
-            </div>
-            <div id="user_list">
-            <?php
-              foreach ($operators as $id => $name) {
-                // prevent rare word issue
-                $name = preg_replace("/[a-zA-Z?0-9+]+/", "", $name);
-                echo "<div class='float-left m-2 user_tag hide' style='font-size: .875rem;' data-id='".$id."' data-name='".($name ?? "XXXXXX")."'>".$id.": ".($name ?? "XXXXXX")."</div>";
-              }
-            ?>
-            </div>
-          </fieldset>
+        <!--
+        <div class="col">
         </div>
+        -->
       </div>
     </div>
   </section><!-- /section -->
@@ -341,18 +319,6 @@ ksort($operators);
         selected.startsWith("txt_") ? xhrExportSQLTxt(e) : xhrExportSQLCsv(e);
       });
       $("#preload_sql_select").on("change", xhrLoadSQL);
-
-      // log export
-      $("#log_button").on("click", xhrExportLog);
-      $("#log_date_text").datepicker({
-        language: "zh-TW",
-        daysOfWeekHighlighted: "1,2,3,4,5",
-        clearBtn: true,
-        todayHighlight: true,
-        autoclose: true,
-        format: "yyyy-mm-dd"
-      });
-      $("#log_zip_button").on("click", xhrZipLog);
 
       // user info
       $(".user_tag").on("click", e => {
