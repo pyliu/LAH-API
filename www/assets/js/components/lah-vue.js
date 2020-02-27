@@ -487,11 +487,19 @@ Vue.component("lah-footer", {
 
 $(document).ready(() => {
     // dynamic add header/footer/alert
-    $("#main_content_section").prepend($.parseHTML(`<div id="global-dynamic-components">
+    let dynamic_comps = $.parseHTML(`<div id="global-dynamic-components">
         <lah-header ref="header"></lah-header>
         <lah-footer ref="footer"></lah-footer>
         <lah-alert ref="alert"></lah-alert>
-    </div>`));
+    </div>`);
+    let target = $("#main_content_section");
+    if (target.length == 0) {
+        $("body").prepend(dynamic_comps);
+        window.dynaApp = new Vue({ el: "#global-dynamic-components" });
+    } else {
+        target.prepend(dynamic_comps);
+    }
+    
     // main app for whole page, use window.vueApp to get it
     window.vueApp = new Vue({
         el: "#main_content_section",
