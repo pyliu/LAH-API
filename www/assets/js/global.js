@@ -169,7 +169,8 @@ let showAlert = opts => {
         opts = {message: opts}
     }
     if (!isEmpty(opts.message)) {
-        window.vueApp.$refs.alert.show(opts);
+        let alert = window.vueApp.$refs.alert || window.dynaApp.$refs.alert;
+        alert.show(opts);
     }
 }
 
