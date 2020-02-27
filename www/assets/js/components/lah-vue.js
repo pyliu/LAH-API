@@ -48,11 +48,11 @@ Vue.prototype.$gstore = (() => {
                                 type: 'user_mapping'
                             }).then(res => {
                                 let json = res.data.data;
-                                commit("userNames", json || {});
                                 if (localStorage) {
                                     localStorage.setItem("userNames", JSON.stringify(json));
                                     localStorage.setItem("userNames_timestamp", +new Date()); // == new Date().getTime()
                                 }
+                                commit("userNames", json || {});
                                 //console.log("userNames: ", res.data.data_count);
                             }).catch(err => {
                                 console.error(err);
@@ -61,6 +61,7 @@ Vue.prototype.$gstore = (() => {
                                     message: err.message,
                                     type: 'danger'
                                 });
+                                commit("userNames", {});
                             });
                         }
                     } catch (e) {
@@ -79,6 +80,7 @@ Vue.prototype.$gstore = (() => {
                             message: err.message,
                             type: 'danger'
                         });
+                        commit("isAdmin", false);
                     });
                 }
             }
