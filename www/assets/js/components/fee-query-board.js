@@ -499,7 +499,7 @@ if (Vue) {
                             <td>{{item["AA04"]}}</td>
                             <td>{{item["AA05"]}}</td>
                             <td>{{item["AA104"]}}</td>
-                            <td><span :data-id="item['AA39']" :data-name="$gstore.getters.userNames[item['AA39']]" class="user_tag" :title="item['AA39']">{{$gstore.getters.userNames[item["AA39"]] || item["AA39"]}}</span></td>
+                            <td><span :data-id="item['AA39']" :data-name="userNames[item['AA39']]" class="user_tag" :title="item['AA39']">{{userNames[item["AA39"]] || item["AA39"]}}</span></td>
                         </tr>
                     </table>
                 </div>`,
@@ -517,7 +517,7 @@ if (Vue) {
                 },
                 watch: {
                     operator: function(val) {
-                        this.operator_name = this.$gstore.getters.userNames[val] || '';
+                        this.operator_name = this.userNames[val] || '';
                     }
                 },
                 computed: {

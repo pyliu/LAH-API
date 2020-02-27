@@ -385,7 +385,7 @@ Vue.component("lah-header", {
             <div class="collapse navbar-collapse" id="navbarsExampleDefault">
                 <lah-transition appear>
                     <ul class="navbar-nav mr-auto">
-                        <li v-for="link in links" :class="['nav-item', 'my-auto', active(link.url)]" v-show="link.need_admin ? $gstore.getters.isAdmin : true">
+                        <li v-for="link in links" :class="['nav-item', 'my-auto', active(link.url)]" v-show="link.need_admin ? isAdmin : true">
                             <a class="nav-link" :href="Array.isArray(link.url) ? link.url[0] : link.url">{{link.text}}</a>
                         </li>
                     </ul>
@@ -535,7 +535,7 @@ $(document).ready(() => {
             });
             
             console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
-            if (!this.$gstore.getters.initialized) {
+            if (!this.initialized) {
                 this.$gstore.commit("initialized", true);
                 this.screensaver();
                 this.authenticate();
@@ -780,11 +780,11 @@ $(document).ready(() => {
                         message: this.$createElement("case-reg-detail", {
                             props: {
                                 jsonObj: jsonObj,
-                                enabled_userinfo: this.$gstore.getters.isAdmin
+                                enabled_userinfo: this.isAdmin
                             }
                         }),
                         title: "登記案件詳情",
-                        size: this.$gstore.getters.isAdmin ? "xl" : "lg"
+                        size: this.isAdmin ? "xl" : "lg"
                     });
                 }
             },
@@ -1038,7 +1038,7 @@ $(document).ready(() => {
                     type: 'authentication'
                 }).then(res => {
                     this.$gstore.commit("isAdmin", res.data.is_admin || false);
-                    //console.log("isAdmin: ", this.$gstore.getters.isAdmin);
+                    //console.log("isAdmin: ", this.isAdmin);
                 }).catch(err => {
                     console.error(err);
                     showAlert({
