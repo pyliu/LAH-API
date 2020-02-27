@@ -15,20 +15,15 @@ Vue.prototype.$gstore = (() => {
         return new Vuex.Store({
             state: {
                 cache : {},
-                isAdmin: false,
-                userNames: null,
-                initialized: false
+                isAdmin: undefined,
+                userNames: undefined
             },
             getters: {
-                initialized: state => state.initialized,
                 cache: state => state.cache,
                 isAdmin: state => state.isAdmin,
                 userNames: state => state.userNames
             },
             mutations: {
-                initialized(state, flagPayload) {
-                    state.initialized = flagPayload === true;
-                },
                 cache(state, objPayload) {
                     state.cache = Object.assign(state.cache, objPayload);
                 },
@@ -71,6 +66,20 @@ Vue.prototype.$gstore = (() => {
                     } catch (e) {
                         console.error(e);
                     }
+                },
+                async authenticate({ commit }) {
+                    await axios.post(CONFIG.JSON_API_EP, {
+                        type: 'authentication'
+                    }).then(res => {
+                        commit("isAdmin", res.data.is_admin || false);
+                    }).catch(err => {
+                        console.error(err);
+                        showAlert({
+                            title: '認證失敗',
+                            message: err.message,
+                            type: 'danger'
+                        });
+                    });
                 }
             }
         });
@@ -182,15 +191,19 @@ Vue.mixin({
     },
     computed: {
         cache() { return this.$gstore.getters.cache; },
-        isAdmin() { return this.$gstore.getters.isAdmin; },
+        isAdmin() {
+            if (this.$gstore.getters.isAdmin === undefined) {
+                this.$gstore.dispatch("authenticate");
+            }
+            return this.$gstore.getters.isAdmin;
+        },
         userNames() {
-            if (!this.$gstore.getters.userNames) {
+            if (this.$gstore.getters.userNames === undefined) {
                 this.$gstore.dispatch("loadUserNames");
             }
             return this.$gstore.getters.userNames;
         },
-        userIDs() { return this.reverseMapping(this.userNames || {}); },
-        initialized() { return this.$gstore.getters.initialized; }
+        userIDs() { return this.reverseMapping(this.userNames || {}); }
     },
     methods: {
         reverseMapping: o => Object.keys(o).reduce((r, k) => Object.assign(r, { [o[k]]: (r[o[k]] || []).concat(k) }), {}),
@@ -574,11 +587,7 @@ $(document).ready(() => {
             });
             
             console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
-            if (!this.initialized) {
-                this.$gstore.commit("initialized", true);
-                this.screensaver();
-                this.authenticate();
-            }
+            this.screensaver();
         },
         methods: {
             // make simple, short popup notice message
