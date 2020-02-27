@@ -200,7 +200,7 @@ if (Vue) {
                                      * RM93 - 撤回 K
                                      * RM91_4 - 歸檔 Z
                                      */
-                                    let rm30_1 = "XXXXXXXX";
+                                    let rm30_1 = "";
                                     switch (this.rm30) {
                                         case "A":
                                             rm30_1 = this.raw["RM45"];
@@ -229,13 +229,16 @@ if (Vue) {
                                         case "Z":
                                             rm30_1 = this.raw["RM91_4"];
                                             break;
+                                        default:
+                                            rm30_1 = "XXXXXXXX";
+                                            break;
                                     }
                                     xhrUpdateRegCaseCol({
                                         rm01: this.raw["RM01"],
                                         rm02: this.raw["RM02"],
                                         rm03: this.raw["RM03"],
                                         col: "RM30_1",
-                                        val: rm30_1
+                                        val: isEmpty(rm30_1) ? "XXXXXXXX" : rm30_1
                                     });
                                 }
                             }
