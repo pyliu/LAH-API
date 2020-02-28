@@ -452,7 +452,7 @@ Vue.component("lah-header", {
         icon: "fa-question",
         leading: "",
         links: [{
-            text: "儀錶板",
+            text: "管理儀錶板",
             url: ["index.html", "/"],
             icon: "fa-th-large",
             need_admin: true
