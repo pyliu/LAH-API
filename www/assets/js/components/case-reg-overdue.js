@@ -63,7 +63,7 @@ if (Vue) {
             <lah-transition @after-leave="afterStatsLeave">
                 <div class="mt-5" v-show="statsMode">
                     <div class="mx-auto w-75">
-                        <chart-component ref="statsChart" @click="handleCharClick"></chart-component>
+                        <chart-component ref="statsChart" @click="handleChartClick"></chart-component>
                     </div>
                     <b-button-group style="margin-left: 12.5%" class="w-75 mt-2">
                         <b-button size="sm" variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i> 長條圖</b-button>
@@ -212,8 +212,9 @@ if (Vue) {
             },
             handleCountdownStart: function (e) {},
             handleCountdownEnd: function(e) { this.load(e); },
-            handleCharClick: function (e, payload) {
+            handleChartClick: function (e, payload) {
                 // TODO: show the modal of user's case table
+                console.log(payload);
             },
             load: function(e) {
                 // busy ...
