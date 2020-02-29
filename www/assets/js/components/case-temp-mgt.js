@@ -203,19 +203,17 @@ if (Vue) {
                     return;
                 }
                 let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + data.year + "-" + data.code + "-" + data.number + (data.clean_all ? " 全部暫存檔?" : " " + data.table + " 表格的暫存檔?");
+                let that = this;
                 showConfirm(msg, () => {
                     $(data.target).remove();
-                    let form_body = new FormData();
-                    form_body.append("type", "clear_temp_data");
-                    form_body.append("year", data.year);
-                    form_body.append("code", data.code);
-                    form_body.append("number", data.number);
-                    form_body.append("table", data.table);
-                    asyncFetch(CONFIG.JSON_API_EP, {
-                        method: 'POST',
-                        body: form_body
-                    }).then(jsonObj => {
-                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + jsonObj.status + "】");
+                    that.$http.post(CONFIG.JSON_API_EP, {
+                        type: 'clear_temp_data',
+                        year: data.year,
+                        code: data.code,
+                        number: data.number,
+                        table: data.table
+                    }).then(res => {
+                        console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + res.data.status + "】");
                         addNotification({
                             title: "清除暫存檔",
                             message: "已清除完成。<p>" + data.year + "-" + data.code + "-" + data.number + (data.table ? " 表格：" + data.table : "") + "</p>",
@@ -227,7 +225,8 @@ if (Vue) {
                     }).catch(ex => {
                         console.error("case-temp-mgt::fix parsing failed", ex);
                         showAlert({
-                            message: "case-temp-mgt::fix XHR連線查詢有問題!!【" + ex + "】",
+                            title: "清除暫存檔",
+                            message: ex.message,
                             type: "danger"
                         });
                     });
