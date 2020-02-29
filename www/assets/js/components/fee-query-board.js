@@ -994,33 +994,31 @@ if (Vue) {
                         let qday = this.date;
                         let pc_number = this.pc_number;
                         let message = `確定要修正 日期: ${qday}, 電腦給號: ${pc_number}, 金額: ${amount} 悠遊卡付款資料為正常？`;
+                        let that = this;
                         showConfirm(message, () => {
-                            toggle(e.target);
+                            that.isBusy = true;
         
-                            let body = new FormData();
-                            body.append("type", "fix_easycard");
-                            body.append("qday", qday);
-                            body.append("pc_num", pc_number);
-        
-                            asyncFetch(CONFIG.JSON_API_EP, {
-                                method: "POST",
-                                body: body
-                            }).then(jsonObj => {
-                                if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            that.$http.post(CONFIG.JSON_API_EP, {
+                                type: "fix_easycard",
+                                qday: qday,
+                                pc_num: pc_number
+                            }).then(res => {
+                                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                     addNotification({
                                         title: "悠遊卡自動加值扣款失敗修正",
                                         message: `日期: ${qday}, 電腦給號: ${pc_number}, 金額: ${amount} 悠遊卡付款資料修正成功!`,
                                         type: "success"
                                     });
                                     $(e.target).remove();
+                                    that.isBusy = false;
                                 } else {
-                                    throw new Error("回傳狀態碼不正確!【" + jsonObj.message + "】");
+                                    throw new Error("回傳狀態碼不正確!【" + res.data.message + "】");
                                 }
                             }).catch(ex => {
                                 console.error("fee-detail-fix-ezcard::fixEzcardPayment parsing failed", ex);
                                 showAlert({
                                     title: "fee-detail-fix-ezcard::fixEzcardPayment",
-                                    message: ex.toString(),
+                                    message: ex.message,
                                     type: "danger"
                                 });
                             });
