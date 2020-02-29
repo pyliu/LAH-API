@@ -235,17 +235,15 @@ if (Vue) {
                 });
             },
             instRemoteCase: function(id) {
+                let that = this;
                 showConfirm("確定要拉回局端資料新增於本所資料庫(CRSMS)？", function() {
                     console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
-                    // this binded as case id
-                    let body = new FormData();
-                    body.append("type", "inst_xcase");
-                    body.append("id", id);
                     $("#inst_x_case_confirm_button").remove();
-                    asyncFetch(CONFIG.JSON_API_EP, {
-                        body: body
-                    }).then(jsonObj => {
-                        if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                    that.$http.post(CONFIG.JSON_API_EP, {
+                        type: "inst_xcase",
+                        id: id
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             addNotification({
                                 title: "新增遠端案件資料",
                                 subtitle: id,
@@ -256,7 +254,7 @@ if (Vue) {
                             addNotification({
                                 title: "新增遠端案件資料",
                                 subtitle: id,
-                                message: jsonObj.message,
+                                message: res.data.message,
                                 type: "danger"
                             });
                         }
@@ -264,7 +262,8 @@ if (Vue) {
                     }).catch(ex => {
                         console.error("case-sync-mgt::instRemoteCase parsing failed", ex);
                         showAlert({
-                            message: ex.toString(),
+                            title: "新增遠端案件資料",
+                            message: ex.message,
                             type: "danger"
                         });
                     });
