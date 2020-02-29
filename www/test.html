@@ -24,14 +24,58 @@
   
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
-      <div style="font-size: 4rem;">
-        <b-icon icon="bell-fill" class="border rounded"></b-icon>
-        <b-icon icon="bell-fill" class="border border-info rounded" variant="info"></b-icon>
-        <b-icon icon="bell-fill" class="rounded-circle bg-danger p-1" variant="light"></b-icon>
-        <b-icon icon="unlock-fill" class="rounded bg-primary p-1" variant="light"></b-icon>
-        <b-icon icon="camera" font-scale="7.5"></b-icon>
-        <lah-ban size="10x"></lah-ban>
-      </div>
+      <b-card-group columns class="mb-1">
+        <b-card v-for="item in 5"
+          header="featured"
+          header-tag="header"
+          footer="Card Footer"
+          footer-tag="footer"
+          title="Title"
+        >
+          <b-card-text>Header and footers using props.</b-card-text>
+          <b-button href="#" variant="primary">Go somewhere</b-button>
+        </b-card>
+    
+        <b-card title="Title" header-tag="header" footer-tag="footer"  v-for="item in 5">
+          <template v-slot:header>
+            <h6 class="mb-0">Header Slot</h6>
+          </template>
+          <b-card-text>Header and footers using slots.</b-card-text>
+          <b-button href="#" variant="primary">Go somewhere</b-button>
+          <template v-slot:footer>
+            <em>Footer Slot</em>
+          </template>
+        </b-card>
+        <b-card
+          title="Card Title"
+          img-alt="Image"
+          img-top
+          tag="article"
+          style="max-width: 20rem;"
+          class="mb-2"
+          img-src="assets/img/zhongli_logo.png"
+          overlay
+          img-alt="Card Image"
+          text-variant="light"
+          bg-variant="dark"
+          title="Image Overlay"
+          sub-title="Subtitle"
+        >
+          <template v-slot:header><h6>This is a title</h6></template>
+        </b-card>
+      </b-card-group>
+      <b-card-group deck>
+        <b-card v-for="n in 5"
+          header="featured"
+          header-tag="header"
+          footer="Card Footer"
+          footer-tag="footer"
+          title="Title"
+        >
+          <b-card-text>Header and footers using props.</b-card-text>
+          <b-button href="#" variant="primary">Go somewhere</b-button>
+        </b-card>
+      </b-card-group>
     </div>
   </section><!-- /section -->
 
@@ -53,12 +97,10 @@
   <script type="text/javascript">
     
     $(document).ready(e => {
-      let reason_stats = null;
-      Vue.set(vueApp.data, "reason_stats", reason_stats);
       axios.get("assets/js/mocks/case_count_by_reason.json")
       .then(response => {
-        vueApp.data.reason_stats = response.data;
-        console.log(vueApp.$data.reason_stats);
+        Vue.set(window.vueApp.data, "reason_stats", response.data);
+        console.log(vueApp.data.reason_stats);
       });
     });
   </script>
