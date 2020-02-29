@@ -177,27 +177,25 @@ if (Vue) {
                 });
             },
             syncCaseColumn: function(id, column) {
+                let that = this;
                 showConfirm(`確定要同步${column}？`, function() {
                     console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
-                    let body = new FormData();
-                    body.append("type", "sync_xcase_column");
-                    body.append("id", id);
-                    body.append("column", column);
-
                     let td = $(`#sync_column_${column}`).parent();
                     $(`#sync_column_${column}`).remove();
 
-                    asyncFetch(CONFIG.JSON_API_EP, {
-                        body: body
-                    }).then(jsonObj => {
-                        if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                    that.$http.post(CONFIG.JSON_API_EP, {
+                        type: "sync_xcase_column",
+                        id: id,
+                        column: column
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             td.html("<span class='text-success'>" + column + " 同步成功！</span>");
                         } else {
-                            td.html("<span class='text-danger'>" + jsonObj.message + "</span>");
+                            td.html("<span class='text-danger'>" + res.data.message + "</span>");
                         }
                     }).catch(ex => {
                         console.error("case-sync-mgt::syncCaseColumn parsing failed", ex);
-                        td.html("<span class='text-danger'>" + ex + "</span>");
+                        td.html("<span class='text-danger'>" + ex.message + "</span>");
                     });
                 });
             },
