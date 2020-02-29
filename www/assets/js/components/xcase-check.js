@@ -35,36 +35,30 @@ if (Vue) {
             },
             check: function(e) {
                 const h = this.$createElement;
-
-                toggle(e.target);
-	
-                let body = new FormData();
-                body.append("type", "xcase-check");
-
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        let vnode = h("xcase-check-item", { props: { ids: jsonObj.case_ids } });
+                this.isBusy = true;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "xcase-check"
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        let vnode = h("xcase-check-item", { props: { ids: res.data.case_ids } });
                         showModal({
                             title: "<i class='fas fa-circle text-danger'></i>&ensp;<strong class='text-info'>請查看並修正下列案件</strong>",
                             body: vnode,
                             size: "md"
                         });
-                    } else if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
+                    } else if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({
-                            title: "檢測系統跨所註記遺失問題",
+                            title: "檢測系統跨所註記遺失",
                             message: "<i class='fas fa-circle text-success'></i>&ensp;目前無跨所註記遺失問題",
                             type: "success"
                         });
                     } else {
-                        showAlert({ title: "檢測系統跨所註記遺失問題", message: jsonObj.message, type: "danger" });
+                        showAlert({ title: "檢測系統跨所註記遺失", message: res.data.message, type: "danger" });
                     }
-                    toggle(e.target);
-                }).catch(ex => {
-                    console.error("xcase-check::check parsing failed", ex);
-                    showAlert({message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+                    this.isBusy = false;
+                }).catch(err => {
+                    console.error("xcase-check::check parsing failed", err);
+                    showAlert({title: "檢測系統跨所註記遺失", message: err.message, type: "danger"});
                 });
             }
         },
@@ -81,27 +75,23 @@ if (Vue) {
                     fix: function(e) {
                         let id = $(e.target).data("id").replace(/[^a-zA-Z0-9]/g, "");
                         console.log("The problematic xcase id: "+id);
-        
-                        let body = new FormData();
-                        body.append("type", "fix_xcase");
-                        body.append("id", id);
-        
                         let li = $(e.target).closest("li");
+                        this.isBusy = true;
                         $(e.target).remove();
-        
-                        asyncFetch(CONFIG.JSON_API_EP, {
-                            method: "POST",
-                            body: body
-                        }).then(jsonObj => {
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: "fix_xcase",
+                            id: id
+                        }).then(res => {
                             let msg = `<strong class='text-success'>${id} 跨所註記修正完成!</strong>`;
-                            if (jsonObj.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                msg = `<span class='text-danger'>${id} 跨所註記修正失敗! (${jsonObj.status})</span>`;
+                            if (res.data.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                msg = `<span class='text-danger'>${id} 跨所註記修正失敗! (${res.data.status})</span>`;
                             }
                             addNotification({ message: msg, variant: "success" });
                             li.html(msg);
-                        }).catch(ex => {
-                            console.error("xcase-check-item::fix parsing failed", ex);
-                            showAlert({message: ex.toString(), type: "danger"});
+                            this.isBusy = false;
+                        }).catch(err => {
+                            console.error("xcase-check-item::fix parsing failed", err);
+                            showAlert({title: "跨所註記修正", message: ex.message, type: "danger"});
                         });
                     }
                 }
