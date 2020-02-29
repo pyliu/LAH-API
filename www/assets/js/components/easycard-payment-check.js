@@ -118,25 +118,22 @@ if (Vue) {
                         let el = $(e.target);
                         let qday = item["AA01"], pc_number = item["AA04"], amount = item["AA28"];
                         let message = "確定要修正 日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料?";
+                        let that = this;
                         showConfirm(message, () => {
-                            let body = new FormData();
-                            body.append("type", "fix_easycard");
-                            body.append("qday", qday);
-                            body.append("pc_num", pc_number);
-        
-                            asyncFetch(CONFIG.JSON_API_EP, {
-                                method: "POST",
-                                body: body
-                            }).then(jsonObj => {
-                                if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            that.$http.post(CONFIG.JSON_API_EP, {
+                                type: "fix_easycard",
+                                qday: qday,
+                                pc_num: pc_number
+                            }).then(res => {
+                                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                     el.closest("li").html("修正 日期: " + qday + ", 電腦給號: " + pc_number + " <strong class='text-success'>成功</strong>!");
                                 } else {
-                                    throw new Error("回傳狀態碼不正確!【" + jsonObj.message + "】");
+                                    throw new Error("回傳狀態碼不正確!【" + res.data.message + "】");
                                 }
                                 el.remove();
                             }).catch(ex => {
                                 console.error("easycard-payment-check-item::fix parsing failed", ex);
-                                showAlert({message: `easycard-payment-check-item::fix parsing failed. ${ex.toString()}`, type: "danger"});
+                                showAlert({message: `easycard-payment-check-item::fix parsing failed. ${ex.message}`, type: "danger"});
                             });
                         });
                     },
