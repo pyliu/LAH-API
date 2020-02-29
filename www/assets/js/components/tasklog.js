@@ -89,7 +89,7 @@ if (Vue) {
                             log_filename: this.log_filename,
                             slice_offset: this.count * -1   // get lastest # records
                         }).then(res => {
-                            // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
+                            // normal success res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                 this.query_data_count = res.data.data_count;
                                 this.query_total_count = res.data.total_count;
@@ -244,41 +244,38 @@ if (Vue) {
                         let dt = new Date();
                         let now = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
                         
-                        let body = new FormData();
-                        body.append("type", "watchdog");
-                        asyncFetch(CONFIG.JSON_API_EP, {
-                            method: "POST",
-                            body: body
-                        }).then(jsonObj => {
-                            // normal success jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL
-                            if (jsonObj.status == XHR_STATUS_CODE.FAIL_NOT_VALID_SERVER) {
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: "watchdog"
+                        }).then(res => {
+                            // normal success res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
+                            if (res.data.status == XHR_STATUS_CODE.FAIL_NOT_VALID_SERVER) {
                                 // 此功能僅在伺服器上執行！
                                 this.$emit("fail-not-valid-server");
                                 addNotification({
                                     title: "伺服器排程停止通知",
-                                    message: `${jsonObj.message}`
+                                    message: `${res.data.message}`
                                 });
                             } else {
-                                if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                     this.addHistory(`${now}：執行結果正常。`);
                                 } else {
-                                    this.addHistory(`${now}：${jsonObj.message}`);
-                                    console.warn(jsonObj.message);
+                                    this.addHistory(`${now}：${res.data.message}`);
+                                    console.warn(res.data.message);
                                 }
                                 this.resetCountdown();
                                 this.startCountdown();
                                 this.$emit("succeed-valid-server");
                             }
                             this.isBusy = false;
-                        }).catch(ex => {
+                        }).catch(err => {
                             this.abortCountdown();
-                            this.addHistory(`${now} 結果: ${ex.message}`);
+                            this.addHistory(`${now} 結果: ${err.message}`);
                             showAlert({
                                 title: 'schedule-task::callWatchdogAPI parsing failed',
-                                message: ex.message,
+                                message: err.message,
                                 type: 'danger'
                             });
-                            console.error("schedule-task::callWatchdogAPI parsing failed", ex);
+                            console.error("schedule-task::callWatchdogAPI parsing failed", err);
                         });
                     },
                     changeWIPMessageAnim: function() {
