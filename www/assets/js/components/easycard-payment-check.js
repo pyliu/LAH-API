@@ -57,35 +57,30 @@ if (Vue) {
                     return;
                 }
 
-                toggle(e.target);
-
-                let body = new FormData();
-                body.append("type", "easycard");
-                body.append("qday", this.date);
-
+                this.isBusy = true;
                 const h = this.$createElement;
 
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "easycard",
+                    qday: this.date
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({
                             title: "檢測悠遊卡自動加值失敗",
-                            message: `<i class='fas fa-circle text-success'></i>&ensp;${jsonObj.message}`,
+                            message: `<i class='fas fa-circle text-success'></i>&ensp;${res.data.message}`,
                             type: "success"
                         });
                     } else {
                         showModal({
                             title: "<i class='fas fa-circle text-warning'></i>&ensp;<strong class='text-danger'>找到下列資料</strong>",
-                            body: h("easycard-payment-check-item", { props: { data: jsonObj.raw } }),
+                            body: h("easycard-payment-check-item", { props: { data: res.data.raw } }),
                             size: "md"
                         });
                     }
-                    toggle(e.target);
+                    this.isBusy = false;
                 }).catch(ex => {
                     console.error("easycard-payment-check::query parsing failed", ex);
-                    showAlert({title: "easycard-payment-check::query", message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+                    showAlert({title: "檢測悠遊卡自動加值失敗", message: ex.message, type: "danger"});
                 });
             },
             popup: () => {
