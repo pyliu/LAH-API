@@ -16,7 +16,8 @@ Vue.prototype.$gstore = (() => {
             state: {
                 cache : {},
                 isAdmin: undefined,
-                userNames: undefined
+                userNames: undefined,
+                dayMilliseconds: 24 * 60 * 60 * 1000
             },
             getters: {
                 cache: state => state.cache,
@@ -35,12 +36,12 @@ Vue.prototype.$gstore = (() => {
                 }
             },
             actions: {
-                async loadUserNames({ commit }) {
+                async loadUserNames({ commit, state }) {
                     try {
                         let json_str = localStorage.getItem("userNames");
                         let json_ts = +localStorage.getItem("userNames_timestamp");
                         let current_ts = +new Date();
-                        if (typeof json_str == "string" && current_ts - json_ts < 86400000) {
+                        if (typeof json_str == "string" && current_ts - json_ts < state.dayMilliseconds) {
                             // within a day use the cached data
                             commit("userNames", JSON.parse(json_str) || {});
                         } else {
@@ -68,7 +69,7 @@ Vue.prototype.$gstore = (() => {
                         console.error(e);
                     }
                 },
-                async authenticate({ commit }) {
+                async authenticate({ commit, state }) {
                     await axios.post(CONFIG.JSON_API_EP, {
                         type: 'authentication'
                     }).then(res => {
