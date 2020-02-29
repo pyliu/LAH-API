@@ -722,27 +722,25 @@ if (Vue) {
                 }
             },
             doUpdate: function(e) {
-                let body = new FormData();
-                body.append("type", "expaa_AA09_update");
-                body.append("date", this.date);
-                body.append("number", this.pc_number);
-                body.append("update_value", this.value);
-        
-                toggle(e.target);
-        
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
+                this.isBusy = true;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "expaa_AA09_update",
+                    date: this.date,
+                    number: this.pc_number,
+                    update_value: this.value
+                }).then(res => {
                     addNotification({
                         title: "修改列印註記",
                         subtitle: `${this.date} ${this.pc_number}`,
-                        message: jsonObj.message,
-                        type: jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
+                        message: res.data.message,
+                        type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
                     });
-                    toggle(e.target);
+                    this.isBusy = false;
                     closeModal();
-                });
+                }).catch(err) {
+                    console.error(err);
+                    showAlert({title: "修改列印註記", message: err.message, type: "danger"});
+                };
             }
         }
     });
