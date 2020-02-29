@@ -4,16 +4,14 @@ if (Vue) {
         template: `<div>
             <canvas :id="id">圖形初始化失敗</canvas>
         </div>`,
-        data: function () {
-            return {
-                id: "__canvas__0",
-                type: "bar",
-                inst: null,
-                chartData: null,
-                label: "統計圖表",
-                items: []
-            }
-        },
+        data: function () { return {
+            id: "__canvas__0",
+            type: "bar",
+            inst: null,
+            chartData: null,
+            label: "統計圖表",
+            items: []
+        } },
         created: function() {
             this.id = this.uuid();
         },
@@ -126,10 +124,8 @@ if (Vue) {
                     }, opts)
                 });
             },
+            toBase64Image: function() { return this.inst.toBase64Image() },
             rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))
-        },
-        mounted() {
-            //this.buildChart();
         }
     });
 } else {
