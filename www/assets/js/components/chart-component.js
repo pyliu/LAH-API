@@ -120,7 +120,17 @@ if (Vue) {
                                 }
                             }
                         },
-                        title: { display: false, text: "自訂標題", position: "bottom" }
+                        title: { display: false, text: "自訂標題", position: "bottom" },
+                        onClick: function(e) {
+                            let payload = {};
+                            payload["point"] = myChart.getElementAtEvent(evt)[0];
+                            if (payload["point"]) {
+                                payload["label"] = myChart.data.labels[firstPoint._index];
+                                payload["value"] = myChart.data.datasets[firstPoint._datasetIndex].data[firstPoint._index];
+                            }
+                            // parent use a handle function to catch the event, e.g. catchClick(e, payload) { ... }
+                            this.$emit("click", e, payload);
+                        }
                     }, opts)
                 });
             },
