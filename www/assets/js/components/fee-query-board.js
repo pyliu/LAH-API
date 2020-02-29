@@ -164,30 +164,23 @@ if (Vue) {
             },
             obsolete: function(e) {
                 // query first then do the creation
-                let body = new FormData();
-                body.append("type", "get_dummy_ob_fees");
-
-                toggle(e.target);
-
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    toggle(e.target);
-
+                this.isBusy = true;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "get_dummy_ob_fees"
+                }).then(res => {
                     // use the fee-obsolete-mgt sub-component to do the addition
                     let VNode = this.$createElement("fee-obsolete-mgt", {
                         props: {
-                            raw_data: jsonObj.raw
+                            raw_data: res.data.raw
                         }
                     });
-                    
                     showModal({
                         title: "規費作廢假資料",
                         message: VNode,
                         size: "md",
                         callback: () => addUserInfoEvent()
                     });
+                    this.isBusy = false;
                 }).catch(ex => {
                     console.error("fee-query-board::obsolete parsing failed", ex);
                     showAlert({
