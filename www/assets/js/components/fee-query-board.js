@@ -802,21 +802,18 @@ if (Vue) {
         },
         methods: {
             fetchEXPAA: function() {
-                let body = new FormData();
-                body.append("type", "expaa");
-                body.append("qday", this.date);
-                body.append("num", this.pc_number);
-                body.append("list_mode", false);
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        this.expaa_data = jsonObj.raw;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "expaa",
+                    qday: this.date,
+                    num: this.pc_number,
+                    list_mode: false
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        this.expaa_data = res.data.raw;
                     }
                 }).catch(ex => {
                     console.error("fee-detail-mgt::fetchEXPAA parsing failed", ex);
-                    showAlert({title: "fee-detail-mgt::fetchEXPAA", message: ex.toString(), type: "danger"});
+                    showAlert({title: "fee-detail-mgt::fetchEXPAA", message: ex.message, type: "danger"});
                 });
             },
             fetchEXPAC: function() {
