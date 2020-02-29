@@ -109,17 +109,14 @@ if (Vue) {
                 }
             },
             fetchList: function(e) {
-                let body = new FormData();
-                body.append("type", "expaa");
-                body.append("qday", this.date);
-                body.append("num", this.number);
-                body.append("list_mode", true);
-                
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    if (jsonObj.data_count == 0) {
+                this.isBusy = true;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "expaa",
+                    qday: this.date,
+                    num: this.number,
+                    list_mode: true
+                }).then(res => {
+                    if (res.data.data_count == 0) {
                         addNotification({
                             title: "查詢規費統計",
                             message: `${this.date} 查無資料`,
@@ -130,7 +127,7 @@ if (Vue) {
                     let that = this;
                     let VNode = this.$createElement("expaa-category-dashboard", {
                         props: {
-                            raw_data: jsonObj.raw
+                            raw_data: res.data.raw
                         },
                         on: {
                             "number_clicked": function(number) {
@@ -142,9 +139,10 @@ if (Vue) {
                         message: VNode,
                         title: `${this.date} 規費統計`
                     });
+                    this.isBusy = false;
                 }).catch(ex => {
                     console.error("fee-query-board::fetchList parsing failed", ex);
-                    showAlert({title: "fee-query-board::fetchList", message: ex.toString(), type: "danger"});
+                    showAlert({title: "fee-query-board::fetchList", message: ex.message, type: "danger"});
                 });
             },
             popup: function(e) {
