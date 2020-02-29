@@ -923,23 +923,18 @@ if (Vue) {
                 methods: {
                     update: function(e, idx) {
                         let record = this.expac_list[idx];
-                        let body = new FormData();
-                        body.append("type", "mod_expac");
-                        body.append("year", record["AC25"]);
-                        body.append("num", record["AC04"]);
-                        body.append("code", record["AC20"]);
-                        body.append("amount", record["AC30"]);
-
-                        toggle(e.target);
-
-                        asyncFetch(CONFIG.JSON_API_EP, {
-                            method: "POST",
-                            body: body
-                        }).then(jsonObj => {
+                        this.isBusy = true;
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: "mod_expac",
+                            year: record["AC25"],
+                            num: record["AC04"],
+                            code: record["AC20"],
+                            amount: record["AC30"]
+                        }).then(res => {
                             let the_one = this.expe_list.find(function(element) {
                                 return element.value == record["AC20"];
                             });
-                            if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                 addNotification({
                                     title: "修改收費項目",
                                     subtitle: `${record["AC25"]}-${record["AC04"]}`,
@@ -955,11 +950,11 @@ if (Vue) {
                                     type: "danger"
                                 });
                             }
-                            toggle(e.target);
+                            this.isBusy = false;
                         }).catch(ex => {
                             showAlert({
                                 title: "fee-detail-expac-mgt::update",
-                                message: ex.toString(),
+                                message: ex.message,
                                 type: "danger"
                             });
                         });
