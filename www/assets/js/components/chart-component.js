@@ -125,6 +125,16 @@ if (Vue) {
                 });
             },
             toBase64Image: function() { return this.inst.toBase64Image() },
+            downloadBase64PNG: function(filename = "download.png") {
+                let base64str = this.toBase64Image();
+                const link = document.createElement('a');
+                link.href = `data:image/png;base64,${base64str}`;
+                link.setAttribute("download", filename);
+                document.body.appendChild(link);
+                link.click();
+                //afterwards we remove the element again
+                link.remove();            
+            },
             rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))
         }
     });

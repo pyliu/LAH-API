@@ -764,15 +764,6 @@ $(document).ready(() => {
                     window.URL.revokeObjectURL(url);
                 });                  
             },
-            base64PNGDownload: function(base64str, filename = "download.png") {
-                const link = document.createElement('a');
-                link.href = `data:image/png;base64,${base64str}`;
-                link.setAttribute("download", filename);
-                document.body.appendChild(link);
-                link.click();
-                //afterwards we remove the element again
-                link.remove();            
-            },
             fetch: async function(url, opts) {
                 opts = Object.assign({
                     method: "POST",
