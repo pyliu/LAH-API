@@ -10,6 +10,7 @@ axios.defaults.transformRequest = [data => $.param(data)];
 // add to all Vue instances
 // https://vuejs.org/v2/cookbook/adding-instance-properties.html
 Vue.prototype.$http = axios;
+console.assert(typeof Vuex == "object", "Vuex is not loaded, did you include vuex.js in the page??");
 Vue.prototype.$gstore = (() => {
     if (typeof Vuex == "object") {
         return new Vuex.Store({
@@ -763,6 +764,15 @@ $(document).ready(() => {
                     window.URL.revokeObjectURL(url);
                 });                  
             },
+            base64PNGDownload: function(base64str, filename = "download.png") {
+                const link = document.createElement('a');
+                link.href = `data:image/png;base64,${base64str}`;
+                link.setAttribute("download", filename);
+                document.body.appendChild(link);
+                link.click();
+                //afterwards we remove the element again
+                link.remove();            
+            },
             fetch: async function(url, opts) {
                 opts = Object.assign({
                     method: "POST",
@@ -1054,22 +1064,6 @@ $(document).ready(() => {
                     window.onkeypress = resetTimer;   
                     window.addEventListener('scroll', resetTimer, true); // improved; see comments
                 }
-            },
-            authenticate: function() {
-                // check authority
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: 'authentication'
-                }).then(res => {
-                    this.$gstore.commit("isAdmin", res.data.is_admin || false);
-                    //console.log("isAdmin: ", this.isAdmin);
-                }).catch(err => {
-                    console.error(err);
-                    showAlert({
-                        title: '認證失敗',
-                        message: err.message,
-                        type: 'danger'
-                    });
-                });
             }
         },
         created: function(e) {
@@ -1095,8 +1089,6 @@ $(document).ready(() => {
             this.$root.$on('bv::modal::hidden', (bvEvent, modalId) => {
                 //console.log('Modal is hidden', bvEvent, modalId)
             });
-            
-            console.assert(this.$gstore, "Vuex store is not ready, did you include vuex.js in the page??");
             this.screensaver();
         }
     });
