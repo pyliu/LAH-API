@@ -45,23 +45,21 @@ if (Vue) {
                 let number = data.num;
                 let that = this;
 
-                toggle(e.target);
+                this.isBusy = true;
             
-                let form_body = new FormData();
-                form_body.append("type", "query_temp_data");
-                form_body.append("year", year);
-                form_body.append("code", code);
-                form_body.append("number", number);
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    body: form_body
-                }).then(jsonObj => {
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "query_temp_data",
+                    year: year,
+                    code: code,
+                    number: number
+                }).then(res => {
 
-                    toggle(e.target);
+                    this.isBusy = false;
 
-                    console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢暫存資料回傳狀態碼有問題【${jsonObj.status}】`);
+                    console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢暫存資料回傳狀態碼有問題【${res.data.status}】`);
                     
-                    // jsonObj.raw structure: 0 - Table, 1 - all raw data, 2 - SQL
-                    let filtered = jsonObj.raw.filter(function(item, index, array) {
+                    // res.data.raw structure: 0 - Table, 1 - all raw data, 2 - SQL
+                    let filtered = res.data.raw.filter(function(item, index, array) {
                         return item[1].length > 0;
                     });
 
@@ -178,7 +176,7 @@ if (Vue) {
                     });
                 }).catch(ex => {
                     console.error("case-temp-mgt::query parsing failed", ex);
-                    showAlert({ message: "case-temp-mgt::query XHR連線查詢有問題!!【" + ex + "】", type: "danger" });
+                    showAlert({ title: "清除暫存檔", message: ex.message, type: "danger" });
                 });
             },
             showSQL: function(e) {
