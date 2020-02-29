@@ -75,7 +75,7 @@ if (Vue) {
                 let number = this.num;
                 
                 // toggle button disable attr
-                toggle(e.target);
+                this.isBusy = true;
             
                 let offset = 6 - number.length;
                 if (offset > 0) {
@@ -85,25 +85,22 @@ if (Vue) {
 
                 // prepare post params
                 let id = trim(year + code + number);
-                let body = new FormData();
-                body.append("type", "diff_xcase");
-                body.append("id", id);
-            
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    body: body
-                }).then(jsonObj => {
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "diff_xcase",
+                    id: id
+                }).then(res => {
                     let html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + year + "-" + code + "-" + number + "</a><div>";
-                    if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         html += "<i class='fas fa-circle text-warning'></i>&ensp;請參考下列資訊： <button id='sync_x_case_confirm_button' class='btn btn-sm btn-success' title='同步全部欄位'>同步</button>";
                         html += "<table class='table table-hover text-center mt-1'>";
                         html += "<tr><th>欄位名稱</th><th>欄位代碼</th><th>局端</th><th>本所</th><th>單欄同步</th></tr>";
-                        for (let key in jsonObj.raw) {
+                        for (let key in res.data.raw) {
                             html += "<tr>";
-                            html += "<td>" + jsonObj.raw[key]["TEXT"] + "</td>";
-                            html += "<td>" + jsonObj.raw[key]["COLUMN"] + "</td>";
-                            html += "<td class='text-danger'>" + jsonObj.raw[key]["REMOTE"] + "</td>";
-                            html += "<td class='text-info'>" + jsonObj.raw[key]["LOCAL"] + "</td>";
-                            html += "<td><button id='sync_column_" + jsonObj.raw[key]["COLUMN"] + "' data-column='" + jsonObj.raw[key]["COLUMN"] + "' class='btn btn-sm btn-outline-dark sync_column_button'>同步" + jsonObj.raw[key]["COLUMN"] + "</button></td>";
+                            html += "<td>" + res.data.raw[key]["TEXT"] + "</td>";
+                            html += "<td>" + res.data.raw[key]["COLUMN"] + "</td>";
+                            html += "<td class='text-danger'>" + res.data.raw[key]["REMOTE"] + "</td>";
+                            html += "<td class='text-info'>" + res.data.raw[key]["LOCAL"] + "</td>";
+                            html += "<td><button id='sync_column_" + res.data.raw[key]["COLUMN"] + "' data-column='" + res.data.raw[key]["COLUMN"] + "' class='btn btn-sm btn-outline-dark sync_column_button'>同步" + res.data.raw[key]["COLUMN"] + "</button></td>";
                             html += "</tr>";
                         };
                         html += "</table>";
@@ -123,12 +120,12 @@ if (Vue) {
                             },
                             size: "lg"
                         });
-                    } else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_LOCAL_NO_RECORD) {
+                    } else if (res.data.status == XHR_STATUS_CODE.FAIL_WITH_LOCAL_NO_RECORD) {
                         showModal({
                             title: "本地端無資料",
                             body: `<div>
                                 <i class='fas fa-circle text-warning'></i>&ensp;
-                                ${jsonObj.message}
+                                ${res.data.message}
                                 <button id='inst_x_case_confirm_button'>新增本地端資料</button>
                             </div>`,
                             callback: () => {
@@ -137,8 +134,8 @@ if (Vue) {
                             },
                             size: "md"
                         });
-                    } else if (jsonObj.status == XHR_STATUS_CODE.FAIL_WITH_REMOTE_NO_RECORD) {
-                        html += "<div><i class='fas fa-circle text-secondary'></i>&ensp;" + jsonObj.message + "</div>";
+                    } else if (res.data.status == XHR_STATUS_CODE.FAIL_WITH_REMOTE_NO_RECORD) {
+                        html += "<div><i class='fas fa-circle text-secondary'></i>&ensp;" + res.data.message + "</div>";
                         addNotification({
                             title: "查詢遠端案件資料",
                             subtitle: `${year}-${code}-${number}`,
@@ -146,7 +143,7 @@ if (Vue) {
                             type: "warning"
                         });
                     } else {
-                        html += "<div><i class='fas fa-circle text-success'></i>&ensp;" + jsonObj.message + "</div>";
+                        html += "<div><i class='fas fa-circle text-success'></i>&ensp;" + res.data.message + "</div>";
                         addNotification({
                             title: "查詢遠端案件資料",
                             subtitle: `${year}-${code}-${number}`,
@@ -157,7 +154,7 @@ if (Vue) {
                             })
                         });
                     }
-                    toggle(e.target);
+                    this.isBusy = false;
                 }).catch(ex => {
                     // remove the fieldset since the function is not working ... 
                     let fieldset = $("#case-sync-mgt-fieldset");
@@ -171,7 +168,7 @@ if (Vue) {
                     });
                     console.error("case-sync-mgt::check parsing failed", ex);
                     showAlert({
-                        message: ex.toString(),
+                        message: ex.message,
                         type: "danger"
                     });
                 });
