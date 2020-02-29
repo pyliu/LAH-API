@@ -6,6 +6,10 @@ if (Vue) {
                 <b-form-checkbox v-b-tooltip.hover.top="modeTooltip" inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;" :class="['align-baseline', 'btn', 'btn-sm', is_overdue_mode ? '' : 'border-warning', 'p-1']">
                     <span>{{modeText}}</span>
                 </b-form-checkbox>
+                <b-button v-show="statsMode" size="sm" @click="downloadPNG">
+                    <b-icon icon="download" font-scale="1"></b-icon>
+                    下載圖檔
+                </b-button>
                 <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">
                     <b-icon v-if="listMode" icon="bar-chart-fill" font-scale="1"></b-icon>
                     <b-icon v-else icon="table" font-scale="1"></b-icon>
@@ -73,31 +77,29 @@ if (Vue) {
             </lah-transition>
         </div>`,
         props: ['reviewerId', 'inSearch', 'compact', 'store'],
-        data: function () {
-            return {
-                fields: [
-                    '序號',
-                    {key: "收件字號", sortable: true},
-                    {key: "登記原因", sortable: true},
-                    {key: "辦理情形", sortable: true},
-                    {key: "初審人員", sortable: true},
-                    {key: "作業人員", sortable: true},
-                    {key: "收件時間", sortable: true},
-                    {key: "限辦期限", sortable: true}
-                ],
-                height: 0,  // the height inside the modal
-                caption: "查詢中 ... ",
-                small: false,
-                milliseconds: 15 * 60 * 1000,
-                listMode: true,
-                statsMode: false,
-                overdueMode: true,
-                modeText: "逾期模式",
-                modeTooltip: "逾期案件查詢模式",
-                chartType: "bar",
-                title: "逾期"
-            }
-        },
+        data: function () { return {
+            fields: [
+                '序號',
+                {key: "收件字號", sortable: true},
+                {key: "登記原因", sortable: true},
+                {key: "辦理情形", sortable: true},
+                {key: "初審人員", sortable: true},
+                {key: "作業人員", sortable: true},
+                {key: "收件時間", sortable: true},
+                {key: "限辦期限", sortable: true}
+            ],
+            height: 0,  // the height inside the modal
+            caption: "查詢中 ... ",
+            small: false,
+            milliseconds: 15 * 60 * 1000,
+            listMode: true,
+            statsMode: false,
+            overdueMode: true,
+            modeText: "逾期模式",
+            modeTooltip: "逾期案件查詢模式",
+            chartType: "bar",
+            title: "逾期"
+        } },
         computed: {
             total_case() {
                 return this.case_store.getters.list_count;
@@ -271,6 +273,9 @@ if (Vue) {
                         showAlert({message: "case-reg-overdue::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
                     });
                 }
+            },
+            downloadPNG: function() {
+                this.$refs.statsChart.downloadBase64PNG(`${this.chartType}.png`);
             }
         },
         mounted() {
