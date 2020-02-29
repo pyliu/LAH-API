@@ -821,26 +821,23 @@ if (Vue) {
             },
             fetchEXPAC: function() {
                 // EXPAC data fetch
-                let body = new FormData();
-                body.append("type", "expac");
-                body.append("year", this.expac_year);
-                body.append("num", this.pc_number);
-                asyncFetch(CONFIG.JSON_API_EP, {
-                    method: "POST",
-                    body: body
-                }).then(jsonObj => {
-                    if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "expac",
+                    year: this.expac_year,
+                    num: this.pc_number
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({
                             title: "查詢收費項目資料集",
                             message: `找不到規費收費項目資料！【年度： ${this.expac_year}, 電腦給號： ${this.pc_number}】`,
                             type: "warning"
                         });
                     } else {
-                        this.expac_data = jsonObj.raw;
+                        this.expac_data = res.data.raw;
                     }
                 }).catch(ex => {
                     console.error("fee-detail-mgt::fetchEXPAC parsing failed", ex);
-                    showAlert({title: "fee-detail-mgt::fetchEXPAC", message: ex.toString(), type: "danger"});
+                    showAlert({title: "fee-detail-mgt::fetchEXPAC", message: ex.message, type: "danger"});
                 });
             }
         },
