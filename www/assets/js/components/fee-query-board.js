@@ -4,7 +4,7 @@ if (Vue) {
             <legend class="bg-light text-dark"><b-icon icon="credit-card"></b-icon> 規費資料查詢</legend>
             <b-form-row class="mb-1">
                 <b-input-group size="sm">
-                    <b-input-group-prepend is-text>日期</b-input-group-prepend>
+                    <b-input-group-prepend is-text>&emsp;日期&emsp;</b-input-group-prepend>
                     <b-form-datepicker
                         value-as-date
                         v-model="date_obj"
@@ -12,8 +12,8 @@ if (Vue) {
                         size="sm"
                         :date-disabled-fn="dateDisabled"
                         :max="new Date()"
-                    ></b-form-datepicker>&ensp;
-                    <b-button @click="queryByDate" variant="outline-primary" size="sm" title="依據日期"><i class="fas fa-search"></i> 查詢</b-button>
+                    ></b-form-datepicker>
+                    <b-button class="ml-1" @click="queryByDate" variant="outline-primary" size="sm" title="依據日期"><i class="fas fa-search"></i> 查詢</b-button>
                 </b-input-group>
             </b-form-row>
             <b-form-row class="mb-1">
@@ -31,13 +31,13 @@ if (Vue) {
                         trim
                         number
                     >
-                    </b-form-input>&ensp;
-                    <b-button @click="queryByNumber" variant="outline-primary" size="sm" title="依據電腦給號"><i class="fas fa-search"></i> 查詢</b-button>
+                    </b-form-input>
+                    <b-button class="ml-1" @click="queryByNumber" variant="outline-primary" size="sm" title="依據電腦給號"><i class="fas fa-search"></i> 查詢</b-button>
                 </b-input-group>
             </b-form-row>
             <b-form-row align-h="around" align-v="center">
-                <b-col>
-                    <b-button block @click="obsolete" variant="outline-secondary" size="sm" title="新增作廢假資料">
+                <b-col class="p-0 pr-1">
+                    <b-button block @click="obsolete" variant="outline-secondary" size="sm" title="新增作廢假資料" class="h-100">
                         <span class="fa-stack" style="font-size: 0.5rem">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
                             <i class="fas fa-ban fa-stack-2x text-danger"></i>
@@ -45,8 +45,8 @@ if (Vue) {
                         開啟新增作廢單據功能視窗
                     </b-button>
                 </b-col>
-                <b-col>
-                    <b-button block @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
+                <b-col class="p-0">
+                    <b-button block @click="popup" variant="outline-success" size="sm" class="h-100"><i class="far fa-comment"></i> 備註</b-button>
                 </b-col>
             </b-form-row>
         </fieldset>`,
