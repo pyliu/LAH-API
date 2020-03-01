@@ -122,35 +122,6 @@ let xhrExportSQLReport = (e, form_body) => {
 	});
 };
 
-let xhrUpdateRegCaseCol = function(arguments) {
-	if ($(arguments.el).length > 0) {
-		// remove the button
-		$(arguments.el).remove();
-	}
-	let body = new FormData();
-	body.append("type", "reg_upd_col");
-	body.append("rm01", arguments.rm01);
-	body.append("rm02", arguments.rm02);
-	body.append("rm03", arguments.rm03);
-	body.append("col", arguments.col);
-	body.append("val", arguments.val);
-	asyncFetch(CONFIG.JSON_API_EP, {
-		method: "POST",
-		body: body
-	}).then(response => {
-		return response.json();
-	}).then(jsonObj => {
-		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `更新案件「${arguments.col}」欄位回傳狀態碼有問題【${jsonObj.status}】`);
-		addNotification({message: `「${arguments.col}」更新完成`, variant: "success"});
-	}).catch(ex => {
-		console.error("xhrUpdateRegCaseCol parsing failed", ex);
-		showAlert({
-			message: `<strong class='text-danger'>更新欄位「${arguments.col}」失敗</strong><p>${arguments.rm01}, ${arguments.rm02}, ${arguments.rm03}, ${arguments.val}</p>`,
-			type: "danger"
-		});
-	});
-}
-
 let xhrSearchUsers = e => {
 	if (CONFIG.DISABLE_MSDB_QUERY) {
 		console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping xhrSearchUsers.");
@@ -162,30 +133,31 @@ let xhrSearchUsers = e => {
 		return;
 	}
 	
-	let form_body = new FormData();
-	form_body.append("type", "search_user");
-	form_body.append("keyword", keyword);
-
 	if (showUserInfoFromCache(keyword, keyword)) {
 		return;
 	}
 	
-	asyncFetch(CONFIG.JSON_API_EP, {
-		method: 'POST',
-		body: form_body
-	}).then(jsonObj => {
-		if (jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-			showUserInfoByRAW(jsonObj.raw[jsonObj.data_count - 1]);
+	axios.post(CONFIG.JSON_API_EP, {
+		type: 'search_user',
+		keyword: keyword
+	}).then(res => {
+		if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+			showUserInfoByRAW(res.data.raw[res.data.data_count - 1]);
 		} else {
-			showAlert({
-				message: jsonObj.message,
+			addNotification({
+				title: "搜尋使用者",
+				message: res.data.message,
 				type: "warning"
 			});
-			console.warn(jsonObj.message);
+			console.warn(res.data.message);
 		}
 	}).catch(ex => {
 		console.error("xhrSearchUsers parsing failed", ex);
-		alert("XHR連線查詢有問題!!【" + ex + "】");
+		showAlert({
+			title: "搜尋使用者",
+			message: ex.message,
+			type: "danger"
+		});
 	});
 }
 
@@ -342,25 +314,21 @@ let xhrSendMessage = e => {
 	let clicked_element = $(e.target);
 	toggle(clicked_element);
 
-	let form_body = new FormData();
-	form_body.append("type", "send_message");
-	form_body.append("title", title);
-	form_body.append("content", content);
-	form_body.append("who", who);
-
-
-	asyncFetch(CONFIG.JSON_API_EP, {
-		body: form_body
-	}).then(jsonObj => {
-		console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + jsonObj.message + "】");
+	axios.post(CONFIG.JSON_API_EP, {
+		type: "send_message",
+		title: title,
+		content: content,
+		who: who
+	}).then(res => {
+		console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
 		addNotification({
 			title: "傳送訊息",
-			message: jsonObj.message
+			message: res.data.message
 		});
 		toggle(clicked_element);
 	}).catch(ex => {
 		console.error("xhrSendMessage parsing failed", ex);
-		showAlert({ title: "傳送訊息", message: `XHR連線查詢有問題!!【${ex}】`, type: "danger" });
+		showAlert({ title: "傳送訊息", message: ex.message, type: "danger" });
 	});
 }
 
@@ -369,14 +337,14 @@ let xhrTest = () => {
 	form_body.append("type", "reg_stats");
 	form_body.append("year_month", "10812");
 
-	asyncFetch(CONFIG.JSON_API_EP, {
-		method: 'POST',
-		body: form_body
-	}).then(jsonObj => {
-		console.log(jsonObj);
+	axios.post(CONFIG.JSON_API_EP, {
+		method: 'reg_stats',
+		year_month: "10812"
+	}).then(res => {
+		console.log(res.data);
 	}).catch(ex => {
 		console.error("xhrTest parsing failed", ex);
-		showAlert({ title: "測試XHR連線", message: "XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+		showAlert({ title: "測試XHR連線", message: ex.message, type: "danger"});
 	});
 }
 //]]>

@@ -172,6 +172,34 @@ if (Vue) {
                     }
                 },
                 methods: {
+                    updateRegCaseCol: function(arguments) {
+                        if ($(arguments.el).length > 0) {
+                            // remove the button
+                            $(arguments.el).remove();
+                        }
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: "reg_upd_col",
+                            rm01: arguments.rm01,
+                            rm02: arguments.rm02,
+                            rm03: arguments.rm03,
+                            col: arguments.col,
+                            val: arguments.val
+                        }).then(res => {
+                            console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `更新案件「${arguments.col}」欄位回傳狀態碼有問題【${res.data.status}】`);
+                            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                addNotification({title: "更新案件欄位", message: `「${arguments.col}」更新完成`, variant: "success"});
+                            } else {
+                                addNotification({title: "更新案件欄位", message: `「${arguments.col}」更新失敗【${res.data.status}】`, variant: "warning"});
+                            }
+                        }).catch(ex => {
+                            console.error("case-state-mgt::updateRegCaseCol parsing failed", ex);
+                            showAlert({
+                                title: "更新案件欄位",
+                                message: `<strong class='text-danger'>更新欄位「${arguments.col}」失敗</strong><p>${arguments.rm01}, ${arguments.rm02}, ${arguments.rm03}, ${arguments.val}</p>【${ex.message}】`,
+                                type: "danger"
+                            });
+                        });
+                    },
                     updateRM30: function(e) {
                         if (this.rm30 == this.rm30_orig) {
                             addNotification({title: "更新案件辦理情形",  message: "案件辦理情形沒變動", type: "warning"});
@@ -181,7 +209,7 @@ if (Vue) {
                         window.vueApp.confirm(`您確定要更新辦理情形為「${that.rm30}」?`, {
                             title: '請確認更新案件辦理情形',
                             callback: () => {
-                                xhrUpdateRegCaseCol({
+                                that.updateRegCaseCol({
                                     rm01: this.raw["RM01"],
                                     rm02: this.raw["RM02"],
                                     rm03: this.raw["RM03"],
@@ -233,7 +261,7 @@ if (Vue) {
                                             rm30_1 = "XXXXXXXX";
                                             break;
                                     }
-                                    xhrUpdateRegCaseCol({
+                                    that.updateRegCaseCol({
                                         rm01: this.raw["RM01"],
                                         rm02: this.raw["RM02"],
                                         rm03: this.raw["RM03"],
@@ -253,7 +281,7 @@ if (Vue) {
                         window.vueApp.confirm(`您確定要更新登記處理註記為「${that.rm39}」?`, {
                             title: '請確認更新登記處理註記',
                             callback: () => {
-                                xhrUpdateRegCaseCol({
+                                that.updateRegCaseCol({
                                     rm01: that.raw["RM01"],
                                     rm02: that.raw["RM02"],
                                     rm03: that.raw["RM03"],
