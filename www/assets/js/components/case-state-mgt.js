@@ -41,12 +41,8 @@ if (Vue) {
                     return false;
                 }
 
-                let year = this.year;
-                let code = this.code;
-                let number = this.num;
-                
                 // prepare post params
-                let id = trim(year + code + number);
+                let id = trim(`${this.year}${this.code}${this.num}`);
                 
                 this.isBusy = true;
 
