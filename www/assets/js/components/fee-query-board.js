@@ -20,6 +20,7 @@ if (Vue) {
                 <b-input-group size="sm">
                     <b-input-group-prepend is-text>電腦給號</b-input-group-prepend>
                     <b-form-input
+                        ref="number"
                         v-model="number"
                         type="number"
                         placeholder="0005789"
@@ -29,7 +30,6 @@ if (Vue) {
                         min=1
                         trim
                         number
-                        :class="['no-cache']"
                     >
                     </b-form-input>&ensp;
                     <b-button @click="queryByNumber" variant="outline-primary" size="sm" title="依據電腦給號"><i class="fas fa-search"></i> 查詢</b-button>
@@ -37,16 +37,16 @@ if (Vue) {
             </b-form-row>
             <b-form-row align-h="around" align-v="center">
                 <b-col>
-                    <b-button pill block @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
-                </b-col>
-                <b-col>
-                    <b-button pill block @click="obsolete" variant="outline-secondary" size="sm" title="新增作廢假資料">
+                    <b-button block @click="obsolete" variant="outline-secondary" size="sm" title="新增作廢假資料">
                         <span class="fa-stack" style="font-size: 0.5rem">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
                             <i class="fas fa-ban fa-stack-2x text-danger"></i>
                         </span>
-                        作廢
+                        開啟新增作廢單據功能視窗
                     </b-button>
+                </b-col>
+                <b-col>
+                    <b-button block @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
                 </b-col>
             </b-form-row>
         </fieldset>`,
@@ -183,6 +183,11 @@ if (Vue) {
             this.query_date = (this.date_obj.getFullYear() - 1911) + ("0" + (this.date_obj.getMonth()+1)).slice(-2) + ("0" + this.date_obj.getDate()).slice(-2);
             if (this.number > 9999999) this.number = 9999999;
             else if (this.number < 1) this.number = '';
+        },
+        mounted() {
+            let that = this;
+            // restore cached data back
+            setTimeout(() => that.number = that.$refs.number.$el.value, 200);
         },
         components: {
             "expaa-category-dashboard": {
