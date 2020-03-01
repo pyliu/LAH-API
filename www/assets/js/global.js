@@ -130,10 +130,6 @@ let isEmpty = variable => {
     return false;
 }
 
-let toTWDate = d => {
-    return (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
-}
-
 let addUserInfoEvent = () => {
     $(".user_tag").off("click");
     $(".user_tag").on("click", window.vueApp.fetchUserInfo);

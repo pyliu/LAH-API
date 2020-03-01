@@ -121,7 +121,10 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
                 * This is useful if we need UI to select local dates,
                 * but store in UTC
                 */
-                toDisplay: (date, format, language) => toTWDate(new Date(date)),
+                toDisplay: (date, format, language) => {
+                  let d = new Date(date);
+                  return (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+                },
                 toValue: (date, format, language) => new Date()
             }
         });
