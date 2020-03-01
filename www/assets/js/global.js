@@ -1,7 +1,7 @@
 //<![CDATA[
 const CONFIG = {
     DISABLE_MSDB_QUERY: false,
-    TEST_MODE: false,
+    DEBUG_MODE: true,
     AP_SVR: "220.1.35.123",
     SCREENSAVER: true,
     SCREENSAVER_TIMER: 15 * 60 * 1000,

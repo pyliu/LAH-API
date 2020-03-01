@@ -7,6 +7,26 @@ Vue.config.devtools = true;
  */
 // PHP default uses QueryString as the parsing source but axios use json object instead
 axios.defaults.transformRequest = [data => $.param(data)];
+if (CONFIG.DEBUG_MODE) {
+    // declare a request interceptor
+    axios.interceptors.request.use(config => {
+        // perform a task before the request is sent
+        console.log(config);
+        return config;
+    }, error => {
+        // handle the error
+        return Promise.reject(error);
+    });
+    // declare a response interceptor
+    axios.interceptors.response.use((response) => {
+        // do something with the response data
+        console.log(response);
+        return response;
+    }, error => {
+        // handle the response error
+        return Promise.reject(error);
+    });
+}
 // add to all Vue instances
 // https://vuejs.org/v2/cookbook/adding-instance-properties.html
 Vue.prototype.$http = axios;
