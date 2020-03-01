@@ -35,7 +35,7 @@ Vue.prototype.$gstore = (() => {
     if (typeof Vuex == "object") {
         return new Vuex.Store({
             state: {
-                cache : {},
+                cache : new Map(),
                 isAdmin: undefined,
                 userNames: undefined,
                 dayMilliseconds: 24 * 60 * 60 * 1000
@@ -47,7 +47,9 @@ Vue.prototype.$gstore = (() => {
             },
             mutations: {
                 cache(state, objPayload) {
-                    state.cache = Object.assign(state.cache, objPayload);
+                    for (var key in objPayload) {
+                        state.cache.set(key, objPayload[key]);
+                    }
                 },
                 isAdmin(state, flagPayload) {
                     state.isAdmin = flagPayload === true;
@@ -885,7 +887,7 @@ $(document).ready(() => {
             },
             cachedUserInfo: function (id, name, selector) {
                 // reduce user query traffic
-                let json_str = this.cache[id] || this.cache[name];
+                let json_str = this.cache.get(id) || this.cache.get(name);
                 if (!isEmpty(json_str)) {
                     console.log(`cache hit ${id}:${name} in store.`);
                     let jsonObj = JSON.parse(json_str);
