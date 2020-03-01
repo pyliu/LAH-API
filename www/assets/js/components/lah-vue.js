@@ -48,7 +48,9 @@ Vue.prototype.$gstore = (() => {
             mutations: {
                 cache(state, objPayload) {
                     for (var key in objPayload) {
-                        state.cache.set(key, objPayload[key]);
+                        if (objPayload[key] !== undefined && objPayload[key] !== '' && objPayload[key] !== null) {
+                            state.cache.set(key, objPayload[key]);
+                        }
                     }
                 },
                 isAdmin(state, flagPayload) {
