@@ -25,7 +25,18 @@
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
       <b-card-group columns class="mb-1">
-        <b-card v-for="item in 5"
+        <b-card>
+          <template v-slot:header>
+            <b-nav card-header tabs>
+              <b-nav-item active>Active</b-nav-item>
+              <b-nav-item>Inactive</b-nav-item>
+              <b-nav-item disabled>Disabled</b-nav-item>
+            </b-nav>
+          </template>
+          <fee-query-board></fee-query-board>
+        </b-card>
+        <!--
+        <b-card
           header="featured"
           header-tag="header"
           footer="Card Footer"
@@ -63,6 +74,7 @@
         >
           <template v-slot:header><h6>This is a title</h6></template>
         </b-card>
+        -->
       </b-card-group>
       <b-card-group deck>
         <b-card v-for="n in 5"
@@ -91,6 +103,7 @@
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/global.js"></script>
   <script src="assets/js/components/lah-vue.js"></script>
+  <script src="assets/js/components/fee-query-board.js"></script>
 
 
   <script type="text/javascript">

@@ -1,45 +1,41 @@
 if (Vue) {
     Vue.component("fee-query-board", {
         template: `<fieldset>
-            <legend>規費資料</legend>
-            <b-form-row class="mb-2">
-                <b-col>
-                    <b-input-group size="sm">
-                        <b-input-group-prepend is-text>日期</b-input-group-prepend>
-                        <b-form-input
-                            id="fee_query_date"
-                            type="date"
-                            v-model="bc_date"
-                            size="sm"
-                            :class="['no-cache']"
-                            :formatter="toTWDate"
-                        ></b-form-input>
-                    </b-input-group>
-                </b-col>
-                <b-col>
-                    <b-input-group size="sm">
-                        <b-input-group-prepend is-text>電腦給號</b-input-group-prepend>
-                        <b-form-input
-                            v-model="number"
-                            id="fee_query_number"
-                            type="number"
-                            placeholder="7碼數字"
-                            :state="isNumberValid"
-                            size="sm"
-                            max=9999999
-                            min=1
-                            trim
-                            number
-                            :class="['no-cache']"
-                        >
-                        </b-form-input>
-                    </b-input-group>
-                </b-col>
+            <legend class="bg-light text-dark"><b-icon icon="credit-card"></b-icon> 規費資料查詢</legend>
+            <b-form-row class="mb-1">
+                <b-input-group size="sm">
+                    <b-input-group-prepend is-text>日期</b-input-group-prepend>
+                    <b-form-datepicker
+                        value-as-date
+                        v-model="date_obj"
+                        placeholder="請選擇日期"
+                        size="sm"
+                        :date-disabled-fn="dateDisabled"
+                        :max="new Date()"
+                    ></b-form-datepicker>&ensp;
+                    <b-button @click="queryByDate" variant="outline-primary" size="sm" title="依據日期"><i class="fas fa-search"></i> 查詢</b-button>
+                </b-input-group>
+            </b-form-row>
+            <b-form-row class="mb-1">
+                <b-input-group size="sm">
+                    <b-input-group-prepend is-text>電腦給號</b-input-group-prepend>
+                    <b-form-input
+                        v-model="number"
+                        type="number"
+                        placeholder="0005789"
+                        :state="isNumberValid"
+                        size="sm"
+                        max=9999999
+                        min=1
+                        trim
+                        number
+                        :class="['no-cache']"
+                    >
+                    </b-form-input>&ensp;
+                    <b-button @click="queryByNumber" variant="outline-primary" size="sm" title="依據電腦給號"><i class="fas fa-search"></i> 查詢</b-button>
+                </b-input-group>
             </b-form-row>
             <b-form-row align-h="around" align-v="center">
-                <b-col>
-                    <b-button pill block @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button>
-                </b-col>
                 <b-col>
                     <b-button pill block @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
                 </b-col>
@@ -54,26 +50,15 @@ if (Vue) {
                 </b-col>
             </b-form-row>
         </fieldset>`,
-        data: () => {
-            return {
-                date: "",
-                bc_date: "2020-01-09",
-                number: ""
-            }
-        },
-        computed: {
-            isNumberValid: function() {
-                if (this.number == '' || this.number == undefined) {
-                    return null;
-                }
-                let intVal = parseInt(this.number);
-                if (intVal < 9999999 && intVal > 0) {
-                    return true;
-                }
-                return false;
-            }
-        },
+        data: () => { return {
+            date_obj: null,    // v-model as a date object
+            query_date: "",
+            number: ""
+        } },
         watch: {
+            date_obj: function(nVal, oVal) {
+                this.query_date = `${nVal.getFullYear() - 1911}${("0" + (nVal.getMonth()+1)).slice(-2)}${("0" + nVal.getDate()).slice(-2)}`;
+            },
             number: function(nVal, oVal) {
                 let intVal = parseInt(this.number);
                 if (intVal > 9999999)
@@ -82,44 +67,34 @@ if (Vue) {
                     this.number = '';
             }
         },
+        computed: {
+            isNumberValid: function() {
+                let intVal = parseInt(this.number);
+                if (intVal < 9999999 && intVal > 0) {
+                    return true;
+                }
+                return false;
+            }
+        },
         methods: {
-            toTWDate: function(val) {
-                let d = new Date(val);
-                this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
-                // also clear the number for query by date purpose
-                this.number = '';
-                return val;
+            dateDisabled(ymd, date) {
+                const weekday = date.getDay();
+                // Disable weekends (Sunday = `0`, Saturday = `6`)
+                // Return `true` if the date should be disabled
+                return weekday === 0// || weekday === 6;
             },
-            query: function(e) {
-                if (this.bc_date == "NaNaNaN" || this.bc_date == "" || this.bc_date == undefined) {
-                    let d = new Date();
-                    this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
-                }
-                if (isEmpty(this.number)) {
-                    this.fetchList(e);
-                } else {
-                    let VNode = this.$createElement("fee-detail-mgt", {
-                        props: { date: this.date, pc_number: this.number.toString().padStart(7, "0")}
-                    });
-                    showModal({
-                        message: VNode,
-                        title: "規費資料詳情",
-                        size: "lg"
-                    });
-                }
-            },
-            fetchList: function(e) {
+            queryByDate: function(e) {
                 this.isBusy = true;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "expaa",
-                    qday: this.date,
+                    qday: this.query_date,
                     num: this.number,
                     list_mode: true
                 }).then(res => {
                     if (res.data.data_count == 0) {
                         addNotification({
                             title: "查詢規費統計",
-                            message: `${this.date} 查無資料`,
+                            message: `${this.query_date} 查無資料`,
                             type: "warning"
                         });
                         return;
@@ -137,13 +112,27 @@ if (Vue) {
                     });
                     showModal({
                         message: VNode,
-                        title: `${this.date} 規費統計`
+                        title: `${this.query_date} 規費統計`
                     });
                     this.isBusy = false;
-                }).catch(ex => {
-                    console.error("fee-query-board::fetchList parsing failed", ex);
-                    showAlert({title: "fee-query-board::fetchList", message: ex.message, type: "danger"});
+                }).catch(err => {
+                    console.error("fee-query-board::queryByDate parsing failed", err);
+                    showAlert({title: "搜尋規費", message: err.message, type: "danger"});
                 });
+            },
+            queryByNumber: function(e) {
+                if (this.number > 0) {
+                    let VNode = this.$createElement("fee-detail-mgt", {
+                        props: { date: this.query_date, pc_number: this.number.toString().padStart(7, "0")}
+                    });
+                    showModal({
+                        message: VNode,
+                        title: "規費資料詳情",
+                        size: "lg"
+                    });
+                } else {
+                    addNotification({ title: "查詢規費收據", subtitle: "依據電腦給號", message: "請輸入正確的電腦給號碼！", type: "warning"});
+                }
             },
             popup: function(e) {
                 showModal({
@@ -190,13 +179,11 @@ if (Vue) {
             }
         },
         created: function() {
-            let d = new Date();
-            this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
-            this.bc_date = d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+            this.date_obj = new Date();
+            this.query_date = (this.date_obj.getFullYear() - 1911) + ("0" + (this.date_obj.getMonth()+1)).slice(-2) + ("0" + this.date_obj.getDate()).slice(-2);
             if (this.number > 9999999) this.number = 9999999;
             else if (this.number < 1) this.number = '';
         },
-        mounted: function() { },
         components: {
             "expaa-category-dashboard": {
                 template: `<b-container id="expaa-list-container" fluid :class="['small', 'text-center']">
