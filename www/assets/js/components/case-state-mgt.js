@@ -109,23 +109,7 @@ if (Vue) {
                                 <span class="input-group-text" id="inputGroup-reg_case_RM30_select">案件辦理情形</span>
                             </div>
                             <select v-model="rm30" id='reg_case_RM30_select' class="form-control" aria-label="案件辦理情形" aria-describedby="inputGroup-reg_case_RM30_select" required>
-                                <option value="A">A: 初審</option>
-                                <option value="B">B: 複審</option>
-                                <option value="H">H: 公告</option>
-                                <option value="I">I: 補正</option>
-                                <option value="R">R: 登錄</option>
-                                <option value="C">C: 校對</option>
-                                <option value="U">U: 異動完成</option>
-                                <option value="F">F: 結案</option>
-                                <option value="X">X: 補正初核</option>
-                                <option value="Y">Y: 駁回初核</option>
-                                <option value="J">J: 撤回初核</option>
-                                <option value="K">K: 撤回</option>
-                                <option value="Z">Z: 歸檔</option>
-                                <option value="N">N: 駁回</option>
-                                <option value="L">L: 公告初核</option>
-                                <option value="E">E: 請示</option>
-                                <option value="D">D: 展期</option>
+                                <option v-for="(item, key) in rm30_mapping" :value="key">{{key}}: {{item}}</option>
                             </select>
                         </div>
                         <div v-if="wip" class="input-group input-group-sm col-3 small">
@@ -143,14 +127,7 @@ if (Vue) {
                             </div>
                             <select v-model="rm39" id='reg_case_RM39_select' class="form-control" aria-label="登記處理註記" aria-describedby="inputGroup-reg_case_RM39_select" required>
                                 <option value=""></option>
-                                <option value="B">B: 登錄開始</option>
-                                <option value="R">R: 登錄完成</option>
-                                <option value="C">C: 校對開始</option>
-                                <option value="D">D: 校對完成</option>
-                                <option value="S">S: 異動開始</option>
-                                <option value="F">F: 異動完成</option>
-                                <option value="G">G: 異動有誤</option>
-                                <option value="P">P: 競合暫停</option>
+                                <option v-for="(item, key) in rm39_mapping" :value="key">{{key}}: {{item}}</option>
                             </select>
                         </div>
                         <div v-if="wip" class="filter-btn-group col-auto">
@@ -168,7 +145,36 @@ if (Vue) {
                         rm39_orig: "",
                         rm31: "",
                         sync_rm30_1: true,
-                        wip: false
+                        wip: false,
+                        rm30_mapping: {
+                            A: "初審",
+                            B: "複審",
+                            H: "公告",
+                            I: "補正",
+                            R: "登錄",
+                            C: "校對",
+                            U: "異動完成",
+                            F: "結案",
+                            X: "補正初核",
+                            Y: "駁回初核",
+                            J: "撤回初核",
+                            K: "撤回",
+                            Z: "歸檔",
+                            N: "駁回",
+                            L: "公告初核",
+                            E: "請示",
+                            D: "展期"
+                        },
+                        rm39_mapping: {
+                            B: "登錄開始",
+                            R: "登錄完成",
+                            C: "校對開始",
+                            D: "校對完成",
+                            S: "異動開始",
+                            F: "異動完成",
+                            G: "異動有誤",
+                            P: "競合暫停"
+                        }
                     }
                 },
                 methods: {
