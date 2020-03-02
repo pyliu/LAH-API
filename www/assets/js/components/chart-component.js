@@ -102,6 +102,7 @@ if (Vue) {
                 }
                 // use chart.js directly
                 let ctx = $(`#${this.id}`);
+                let that = this;
                 this.inst = new Chart(ctx, {
                     type: this.type,
                     data: this.chartData,
@@ -123,13 +124,13 @@ if (Vue) {
                         title: { display: false, text: "自訂標題", position: "bottom" },
                         onClick: function(e) {
                             let payload = {};
-                            payload["point"] = this.inst.getElementAtEvent(evt)[0];
+                            payload["point"] = that.inst.getElementAtEvent(e)[0];
                             if (payload["point"]) {
-                                payload["label"] = myChart.data.labels[firstPoint._index];
-                                payload["value"] = myChart.data.datasets[firstPoint._datasetIndex].data[firstPoint._index];
+                                payload["label"] = that.inst.data.labels[payload["point"]._index];
+                                payload["value"] = that.inst.data.datasets[payload["point"]._datasetIndex].data[payload["point"]._index];
                             }
                             // parent uses a handle function to catch the event, e.g. catchClick(e, payload) { ... }
-                            this.$emit("click", e, payload);
+                            that.$emit("click", e, payload);
                         }
                     }, opts)
                 });

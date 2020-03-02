@@ -213,8 +213,9 @@ if (Vue) {
             handleCountdownStart: function (e) {},
             handleCountdownEnd: function(e) { this.load(e); },
             handleChartClick: function (e, payload) {
-                // TODO: show the modal of user's case table
-                console.log(payload);
+                // show the modal of user's case table
+                // payload, e.g. {point: i, label: "黃欣怡 HB1206", value: 5}
+                this.searchByReviewer(payload.label);
             },
             load: function(e) {
                 // busy ...
