@@ -137,9 +137,8 @@ if (Vue) {
             },
             toBase64Image: function() { return this.inst.toBase64Image() },
             downloadBase64PNG: function(filename = "download.png") {
-                let base64str = this.toBase64Image();
                 const link = document.createElement('a');
-                link.href = `${base64str}`;
+                link.href = this.toBase64Image();
                 link.setAttribute("download", filename);
                 document.body.appendChild(link);
                 link.click();
