@@ -10,7 +10,7 @@ abstract class CONNECTION_TYPE {
 }
 
 class OraDB {
-    private $L1HWEB_DB;
+    private $L3HWEB_DB;
     private $TWEB_DB;
     private $MAIN_DB;
     private $user;
@@ -25,7 +25,7 @@ class OraDB {
         $conn_str = $this->MAIN_DB;
         $this->CONN_TYPE = CONNECTION_TYPE::MAIN;
         if ($type == CONNECTION_TYPE::L1HWEB) {
-            $conn_str = $this->L1HWEB_DB;
+            $conn_str = $this->L3HWEB_DB;
             $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB;
         } else if ($type == CONNECTION_TYPE::TWEB) {
             $conn_str = $this->TWEB_DB;
@@ -123,7 +123,7 @@ class OraDB {
 
     function __construct() {
         
-        $this->L1HWEB_DB = SYSTEM_CONFIG["ORA_DB_L1HWEB"];
+        $this->L3HWEB_DB = SYSTEM_CONFIG["ORA_DB_L3HWEB"];
         $this->TWEB_DB = SYSTEM_CONFIG["ORA_DB_TWEB"];
         $this->MAIN_DB = SYSTEM_CONFIG["ORA_DB_MAIN"];
         $this->user = SYSTEM_CONFIG["ORA_DB_USER"];

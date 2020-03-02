@@ -6,7 +6,7 @@ const SYSTEM_CONFIG = array(
         "::1"
     ),
     // bureau
-    "ORA_DB_L1HWEB" => "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=xxx.xxx.xxx.xxx)(PORT=xxxx)))(CONNECT_DATA=(SERVICE_NAME=XXXXX)))",
+    "ORA_DB_L3HWEB" => "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=xxx.xxx.xxx.xxx)(PORT=xxxx)))(CONNECT_DATA=(SERVICE_NAME=XXXXX)))",
     // test svr
     "ORA_DB_TWEB" => "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=xxx.xxx.xxx.xxx)(PORT=xxxx)))(CONNECT_DATA=(SERVICE_NAME=XXXXX)))",
     // main db
