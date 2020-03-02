@@ -88,9 +88,9 @@ if (Vue) {
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "expaa",
                     qday: this.query_date,
-                    num: this.number,
                     list_mode: true
                 }).then(res => {
+                    this.isBusy = false;
                     if (res.data.data_count == 0) {
                         addNotification({
                             title: "查詢規費統計",
@@ -114,7 +114,6 @@ if (Vue) {
                         message: VNode,
                         title: `${this.query_date} 規費統計`
                     });
-                    this.isBusy = false;
                 }).catch(err => {
                     console.error("fee-query-board::queryByDate parsing failed", err);
                     showAlert({title: "搜尋規費", message: err.message, type: "danger"});
