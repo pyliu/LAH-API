@@ -14,6 +14,6 @@ A helper web app for land affairs in Taoyuan
 5. 將 instantclient 剛解壓縮後的位址（e.g. C:\instantclient_11_2）加入系統的 PATH 變數
 6. 將 www 目錄下檔案全部拷貝到 C:\AppServ\www 目錄底下
 7. 重新啟動電腦
-8. 開啟CHROME，網址列輸入 http://localhost/index.php 即可使用網站
+8. 開啟CHROME，網址列輸入 http://localhost/index.html 即可使用網站
 
 * NO IE Support
