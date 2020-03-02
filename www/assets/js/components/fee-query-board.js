@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("fee-query-board", {
         template: `<fieldset>
-            <legend class="bg-light text-dark"><b-icon icon="credit-card"></b-icon> 規費資料查詢</legend>
+            <legend class="bg-light text-dark"><b-icon icon="wallet"></b-icon> 規費資料查詢</legend>
             <b-form-row class="mb-1">
                 <b-input-group size="sm">
                     <b-input-group-prepend is-text>&emsp;日期&emsp;</b-input-group-prepend>
