@@ -13,7 +13,6 @@ function startRefresh() {
     if (target) {
         // prevent extra tooltip element occupied
         $(".tooltip").remove();
-        toggleInsideSpinner("#current_time", "sm");
         target.load("allcases.php", "date=" + $("#date_input").val(), function() {
             adjustQueryTime();
             adjustTableContent();

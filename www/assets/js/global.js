@@ -262,39 +262,33 @@ let toggle = selector => {
     // also find cover container
     let container = el.closest("fieldset, .modal-content");
     if (container.length == 0) {
-        if (el.is("button")) {
-            toggleInsideSpinner(el);
+        // not under fieldset/modal popup
+        if (el.length > 0) {
+            // add bootstrap spinner
+            let spans = el.find(".spinner-border,.sr-only");
+            if (spans.length > 0) {
+                spans.remove();
+            } else {
+                spans = jQuery.parseHTML('<span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>');
+                el.prepend(spans);
+            }
+            /*
+            // loading.io spinner, https://loading.io element
+            // ex: <button class="ld-ext-left"><span class="ld ld-ring ld-cycle small"></span> 查詢</button>
+            // position opts: ld-ext-top, ld-ext-bottom, ld-ext-left, ld-ext-right
+            if (el.hasClass("ld-ext-left")) {
+                el.removeClass("ld-ext-left");
+                el.find(".auto-add-spinner").remove();
+                el.removeClass("running");
+            } else {
+                el.addClass("ld-ext-left");
+                el.prepend(jQuery.parseHTML('<span class="ld ld-ring ld-cycle small auto-add-spinner"></span>'));
+                el.addClass("running");
+            }
+            */
         }
     } else {
         window.vueApp.toggleBusy({selector: container});
-    }
-}
-
-let toggleInsideSpinner = (selector, size = "sm") => {
-    let el = $(selector);
-    if (el.length > 0) {
-        // add bootstrap spinner
-        let spans = el.find(".spinner-border,.sr-only");
-        if (spans.length > 0) {
-            spans.remove();
-        } else {
-            spans = jQuery.parseHTML('<span class="spinner-border spinner-border-' + size + '" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>&ensp;');
-            el.prepend(spans);
-        }
-        /*
-        // loading.io spinner, https://loading.io element
-        // ex: <button class="ld-ext-left"><span class="ld ld-ring ld-cycle small"></span> 查詢</button>
-        // position opts: ld-ext-top, ld-ext-bottom, ld-ext-left, ld-ext-right
-        if (el.hasClass("ld-ext-left")) {
-            el.removeClass("ld-ext-left");
-            el.find(".auto-add-spinner").remove();
-            el.removeClass("running");
-        } else {
-            el.addClass("ld-ext-left");
-            el.prepend(jQuery.parseHTML('<span class="ld ld-ring ld-cycle small auto-add-spinner"></span>'));
-            el.addClass("running");
-        }
-        */
     }
 }
 
