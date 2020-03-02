@@ -30,6 +30,7 @@ if (Vue) {
                         min=1
                         trim
                         number
+                        @keyup.enter="queryByNumber"
                     >
                     </b-form-input>
                     <b-button class="ml-1" @click="queryByNumber" variant="outline-primary" size="sm" title="依據電腦給號"><i class="fas fa-search"></i> 查詢</b-button>

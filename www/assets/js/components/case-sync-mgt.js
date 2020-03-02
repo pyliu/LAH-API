@@ -234,10 +234,12 @@ if (Vue) {
                 showConfirm("確定要拉回局端資料新增於本所資料庫(CRSMS)？", function() {
                     console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
                     $("#inst_x_case_confirm_button").remove();
+                    that.isBusy = true;
                     that.$http.post(CONFIG.JSON_API_EP, {
                         type: "inst_xcase",
                         id: id
                     }).then(res => {
+                        that.isBusy = false;
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             addNotification({
                                 title: "新增遠端案件資料",
