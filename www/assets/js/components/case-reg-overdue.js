@@ -197,6 +197,10 @@ if (Vue) {
                 .addClass("reg_case_id");
             },
             searchByReviewer: function(reviewer_data) {
+                if (reviewer_data == undefined) {
+                    console.warning(`reviewer_data is undefined. skip searchByReviewer function call.`);
+                    return;
+                }
                 // reviewer_data, e.g. "曾奕融 HB1184"
                 showModal({
                     title: `查詢 ${reviewer_data} 登記案件(${this.title})`,
@@ -291,8 +295,8 @@ if (Vue) {
             } else {
                 this.height = window.innerHeight - 145 + "px";
             }
-            this.load();
-        }
+        },
+        created() { this.load(); }
     });
 } else {
     console.error("vue.js not ready ... case-reg-overdue component can not be loaded.");
