@@ -206,12 +206,12 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
     
       // form event
       $("#search_form").on("submit", e => {
-        window.location = "index.php?date=" + $("#date_input").val();
+        window.location = "tracking.php?date=" + $("#date_input").val();
       });
       
       // datepicker auto attached via .date_picker class
       $("#date_input").on("changeDate", e => {
-        window.location = "index.php?date=" + $("#date_input").val();
+        window.location = "tracking.php?date=" + $("#date_input").val();
       });
 
     });

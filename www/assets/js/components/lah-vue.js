@@ -484,7 +484,7 @@ Vue.component("lah-header", {
             need_admin: true
         }, {
             text: "案件追蹤",
-            url: "index.php",
+            url: "tracking.php",
             icon: "fa-list-alt",
             need_admin: true
         }, {
