@@ -46,6 +46,8 @@ echo str_replace("\n", "<br />", print_r($rows, true));
 // echo $dog->isOn($overdueSchedule);
 
 $db = new SQLiteDB(ROOT_DIR."/assets/db/LAH.db");
+$now = $db->select("select COUNT from stats WHERE ID = 'overdue_msg_count'", true);
+var_dump($now);
 var_dump($db->select("SELECT * FROM stats"));
 $db->close();
 
