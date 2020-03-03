@@ -5,9 +5,9 @@ const CONFIG = {
     AP_SVR: "220.1.35.123",
     SCREENSAVER: true,
     SCREENSAVER_TIMER: 15 * 60 * 1000,
-    JSON_API_EP: "query_json_api.php",
-    LOAD_FILE_API_EP: "load_file_api.php",
-    EXPORT_FILE_API_EP: "export_file_api.php",
+    JSON_API_EP: "api/query_json_api.php",
+    LOAD_FILE_API_EP: "api/load_file_api.php",
+    EXPORT_FILE_API_EP: "api/export_file_api.php",
     MOCK_API_EP: "TODO"
 }
 // the status code must be the same as server side response

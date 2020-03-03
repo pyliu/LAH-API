@@ -1,5 +1,6 @@
 <?php
-require_once("./include/init.php");
+$ROOT = dirname(dirname(__FILE__));
+require_once($ROOT."/include/init.php");
 
 function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 	echo json_encode(array(
@@ -12,7 +13,7 @@ function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 switch ($_POST["type"]) {
     case "load_select_sql":
         $log->info("XHR [load_select_sql] 查詢請求【".$_POST["file_name"]."】");
-        $path = "./assets/files/".$_POST["file_name"];
+        $path = "$ROOT/assets/files/".$_POST["file_name"];
         if (file_exists($path)) {
             $result = array(
                 "status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -28,7 +29,7 @@ switch ($_POST["type"]) {
         break;
     case "load_log":
         $log->info("XHR [load_log] 查詢請求【".$_POST["log_filename"]."】");
-        $path = "./logs/".$_POST["log_filename"];
+        $path = "$ROOT/logs/".$_POST["log_filename"];
         if (file_exists($path)) {
             function removeLoadLog($item) {
                 if (empty($item)) {

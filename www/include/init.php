@@ -12,7 +12,7 @@ require_once("Logger.class.php");
 $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $_SERVER["REMOTE_ADDR"] ?? getLocalhostIP();
 
 $today_ad = date('Y-m-d');  // ex: 2019-09-16
-$log = new Logger('logs/log-' . $today_ad . '.log');
+$log = new Logger(dirname(dirname(__FILE__)).'/logs/log-' . $today_ad . '.log');
 
 if (php_sapi_name() != "cli") {
     // compress all log every monday

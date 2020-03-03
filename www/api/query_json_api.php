@@ -1,13 +1,14 @@
 <?php
-require_once("./include/init.php");
-require_once("./include/RegCaseData.class.php");
-require_once("./include/SurCaseData.class.php");
-require_once("./include/PrcAllCasesData.class.php");
-require_once("./include/Query.class.php");
-require_once("./include/Message.class.php");
-require_once("./include/WatchDog.class.php");
-require_once("./include/JSONAPICommandFactory.class.php");
-require_once("./include/UserInfo.class.php");
+$ROOT = dirname(dirname(__FILE__));
+require_once($ROOT."/include/init.php");
+require_once($ROOT."/include/RegCaseData.class.php");
+require_once($ROOT."/include/SurCaseData.class.php");
+require_once($ROOT."/include/PrcAllCasesData.class.php");
+require_once($ROOT."/include/Query.class.php");
+require_once($ROOT."/include/Message.class.php");
+require_once($ROOT."/include/WatchDog.class.php");
+require_once($ROOT."/include/JSONAPICommandFactory.class.php");
+require_once($ROOT."/include/UserInfo.class.php");
 
 function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 	echo json_encode(array(
