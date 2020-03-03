@@ -8,6 +8,13 @@ class WatchDog {
     private $stats = null;
     private $stats_path;
     private $schedule = null;
+    private $overdue_cfg = array(
+        "REG_CHIEF_ID" => "HB1214",
+        "SUBSCRIBER" => array(
+            "220.1.35.48",  // pyliu
+            "220.1.35.106"  // INF Chief
+        )
+    );
 
     private function isOfficeHours() {
         global $log;
@@ -86,7 +93,7 @@ class WatchDog {
 
     private function sendOverdueMessage($to_id, $case_records) {
         global $log;
-        $chief_id = "HB1214";   // 登記課長ID
+        $chief_id = $this->overdue_cfg["REG_CHIEF_ID"];
         $host_ip = getLocalhostIP();
         $users = GetDBUserMapping();
         $msg = new Message();
@@ -95,22 +102,14 @@ class WatchDog {
             $title = "15天內逾期案件(全部)通知";
             $sn = $msg->sysSend($title, $content, $chief_id, 14399);  // 14399 secs => +3 hours 59 mins 59 secs
             $log->info("${title}訊息(${sn})已送出給 ${chief_id} 。 (".$users[$chief_id].")");
-            // send to admin for testing
-            foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
-                if ($adm_ip == '::1') {
-                    continue;
-                }
-                $sn = $msg->send($title, $content, $adm_ip, 14399);
-                $log->info("${title}訊息(${sn})已送出給 ${adm_ip} 。 (管理者主機)");
+            // send all cases notice to subscribers
+            foreach ($this->overdue_cfg["SUBSCRIBER"] as $subscriber_ip) {
+                $sn = $msg->send($title, $content, $subscriber_ip, 14399);
+                $log->info("${title}訊息(${sn})已送出給 ${subscriber_ip} 。 (訂閱者)");
             }
         } else {
             $this_user = $users[$to_id];
             $title = "15天內逾期案件(${this_user})通知";
-
-            // 109-02-11 送給課長(測試)
-            //$sn = $msg->send($title, $content, "HB0537", 14399);
-            //$log->info("${title}訊息(${sn})已送出給 HB0537 (測試)。 (".$users["HB0537"].")");
-
             $sn = $msg->sysSend($title, $content, $to_id, 14399);
             if ($sn == -1) {
                 $log->warning("${title}訊息無法送出給 ${to_id} 。 (".$this_user.", $sn)");
