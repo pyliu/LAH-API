@@ -3,7 +3,7 @@ require_once("./include/init.php");
 require_once("./include/Query.class.php");
 require_once("./include/Message.class.php");
 require_once("./include/Logger.class.php");
-require_once("./include/Watchdog.class.php");
+require_once("./include/SQLiteDB.class.php");
 //echo date("H") . date("i", strtotime("1 min")) . date("s", strtotime("1 second"))."<br/>";
 
 //$xkey = (random_int(1, 255) * date("H") * date("i", strtotime("1 min")) * date("s", strtotime("1 second"))) % 65535;
@@ -33,15 +33,19 @@ echo "<p>".count($rows)."</p>";
 echo "<br />";
 echo str_replace("\n", "<br />", print_r($rows, true));
 */
-$overdueSchedule = [
-    'Sun' => [],
-    'Mon' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
-    'Tue' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
-    'Wed' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
-    'Thu' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
-    'Fri' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
-    'Sat' => []
-];
-$dog = new Watchdog();
-echo $dog->isOn($overdueSchedule);
+// $overdueSchedule = [
+//     'Sun' => [],
+//     'Mon' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
+//     'Tue' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
+//     'Wed' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
+//     'Thu' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
+//     'Fri' => ['08:00 AM' => '08:15 AM', '13:00 PM' => '13:15 PM'],
+//     'Sat' => []
+// ];
+// $dog = new Watchdog();
+// echo $dog->isOn($overdueSchedule);
+
+$db = new SQLiteDB(ROOT_DIR."/assets/db/LAH.db");
+$db->close();
+
 ?>
