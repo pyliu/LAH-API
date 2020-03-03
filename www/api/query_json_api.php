@@ -1,14 +1,13 @@
 <?php
-$ROOT = dirname(dirname(__FILE__));
-require_once($ROOT."/include/init.php");
-require_once($ROOT."/include/RegCaseData.class.php");
-require_once($ROOT."/include/SurCaseData.class.php");
-require_once($ROOT."/include/PrcAllCasesData.class.php");
-require_once($ROOT."/include/Query.class.php");
-require_once($ROOT."/include/Message.class.php");
-require_once($ROOT."/include/WatchDog.class.php");
-require_once($ROOT."/include/JSONAPICommandFactory.class.php");
-require_once($ROOT."/include/UserInfo.class.php");
+require_once(dirname(dirname(__FILE__))."/include/init.php");
+require_once(ROOT_DIR."/include/RegCaseData.class.php");
+require_once(ROOT_DIR."/include/SurCaseData.class.php");
+require_once(ROOT_DIR."/include/PrcAllCasesData.class.php");
+require_once(ROOT_DIR."/include/Query.class.php");
+require_once(ROOT_DIR."/include/Message.class.php");
+require_once(ROOT_DIR."/include/WatchDog.class.php");
+require_once(ROOT_DIR."/include/JSONAPICommandFactory.class.php");
+require_once(ROOT_DIR."/include/UserInfo.class.php");
 
 function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 	echo json_encode(array(
@@ -451,7 +450,7 @@ switch ($_POST["type"]) {
 				if (is_null($value)) {
 					continue;
 				}
-				$col_mapping = include("./include/Config.ColsNameMapping.EXPAA.php");
+				$col_mapping = include(ROOT_DIR."/include/Config.ColsNameMapping.EXPAA.php");
 				if (empty($col_mapping[$key])) {
 					$mapping[$key] = $value;
 				} else {

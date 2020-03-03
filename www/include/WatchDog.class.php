@@ -1,8 +1,7 @@
 <?php
-$ROOT = dirname(dirname(__FILE__));
-require_once($ROOT.'/include/init.php');
-require_once($ROOT.'/include/Query.class.php');
-require_once($ROOT.'/include/Message.class.php');
+require_once(dirname(dirname(__FILE__)).'/include/init.php');
+require_once(ROOT_DIR.'/include/Query.class.php');
+require_once(ROOT_DIR.'/include/Message.class.php');
 
 class WatchDog {
     
@@ -142,7 +141,7 @@ class WatchDog {
 
     function __construct() {
         $this->stats_path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."stats".DIRECTORY_SEPARATOR."watchdog.stats";
-        $this->schedule = include($ROOT.'/include/Config.Watchdog.Schedule.php');
+        $this->schedule = include(ROOT_DIR.'/include/Config.Watchdog.Schedule.php');
     }
 
     function __destruct() { }
