@@ -2,6 +2,7 @@
 require_once(dirname(dirname(__FILE__)).'/include/init.php');
 require_once(ROOT_DIR.'/include/Query.class.php');
 require_once(ROOT_DIR.'/include/Message.class.php');
+require_once(ROOT_DIR.'/include/Stats.class.php');
 
 class WatchDog {
     
@@ -102,10 +103,12 @@ class WatchDog {
             $title = "15天內逾期案件(全部)通知";
             $sn = $msg->sysSend($title, $content, $chief_id, 14399);  // 14399 secs => +3 hours 59 mins 59 secs
             $log->info("${title}訊息(${sn})已送出給 ${chief_id} 。 (".$users[$chief_id].")");
+            $this->stats->addOverdueMsgCount();
             // send all cases notice to subscribers
             foreach ($this->overdue_cfg["SUBSCRIBER"] as $subscriber_ip) {
                 $sn = $msg->send($title, $content, $subscriber_ip, 14399);
                 $log->info("${title}訊息(${sn})已送出給 ${subscriber_ip} 。 (訂閱者)");
+                $this->stats->addOverdueMsgCount();
             }
         } else {
             $this_user = $users[$to_id];
@@ -115,32 +118,15 @@ class WatchDog {
                 $log->warning("${title}訊息無法送出給 ${to_id} 。 (".$this_user.", $sn)");
             } else {
                 $log->info("${title}訊息(${sn})已送出給 ${to_id} 。 (".$this_user.")");
+                $this->stats->addOverdueMsgCount();
             }
-        }
-    }
-
-    private function getStats() {
-        if (!is_array($this->stats)) {
-            $content = file_get_contents($this->stats_path);
-            if (empty($content)) {
-                $this->stats = array();
-            } else {
-                $this->stats = unserialize($content);
-            }
-        }
-        return $this->stats;
-    }
-
-    private function setStats() {
-        if (is_array($this->stats)) {
-            $content = serialize($this->stats);
-            file_put_contents($this->stats_path, $content);
         }
     }
 
     function __construct() {
         $this->stats_path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."stats".DIRECTORY_SEPARATOR."watchdog.stats";
         $this->schedule = include(ROOT_DIR.'/include/Config.Watchdog.Schedule.php');
+        $this->stats = new Stats();
     }
 
     function __destruct() { }
