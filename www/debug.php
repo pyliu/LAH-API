@@ -46,6 +46,7 @@ echo str_replace("\n", "<br />", print_r($rows, true));
 // echo $dog->isOn($overdueSchedule);
 
 $db = new SQLiteDB(ROOT_DIR."/assets/db/LAH.db");
+var_dump($db->select("SELECT * FROM stats"));
 $db->close();
 
 ?>
