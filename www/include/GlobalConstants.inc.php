@@ -13,7 +13,7 @@ abstract class STATUS_CODE {
 }
 
 define('ROOT_DIR', dirname(dirname(__FILE__)));
-define('DEF_SQLITE_DB', ROOT_DIR."\\assets\\db\\LAH.db");
+define('DEF_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."LAH.db");
 
 define('CASE_STATUS',[
     "A" => "初審",
