@@ -13,9 +13,9 @@ class Stats {
 
     public function addOverdueMsgCount() {
         global $log;
-        $arr = $this->db->select("SELECT COUNT from stats WHERE ID = 'overdue_msg_count'", true);
-        $current = $arr["COUNT"];
-        $this->db->update("UPDATE stats set COUNT = '".++$current."' WHERE  ID = 'overdue_msg_count'");
+        $arr = $this->db->select("SELECT TOTAL from stats WHERE ID = 'overdue_msg_count'", true);
+        $current = $arr["TOTAL"];
+        $this->db->update("UPDATE stats set TOTAL = '".++$current."' WHERE  ID = 'overdue_msg_count'");
         $log->info(__METHOD__.": 計數器+1，目前值為 $current");
     }
 }
