@@ -37,8 +37,10 @@ class Stats {
         $stm->bindValue(':count', count($data["RECORDS"]));
         $stm->bindParam(':note', $data["NOTE"]);
         $ret = $stm->execute();
-        global $log;
-        $log->info(__METHOD__.": 新增逾期統計詳情".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+        if (!$ret) {
+            global $log;
+            $log->error(__METHOD__.": 新增逾期統計詳情失敗【".$stm->getSQL()."】");
+        }
     }
 
     public function addXcasesStats($data) {
