@@ -231,13 +231,13 @@ if (Vue) {
                                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + res.data.status + "】");
                                         addNotification({
                                             title: reason_cnt,
-                                            message: `公告已更新【天數：${this.data[2]} => ${day}, 准登：${this.data[3]} => ${flag}】`,
+                                            message: `公告已更新【天數：${that.data[2]} => ${day}, 准登：${that.data[3]} => ${flag}】`,
                                             type: "success"
                                         });
-                                        this.data[2] = day;
-                                        this.data[3] = flag;
+                                        that.data[2] = day;
+                                        that.data[3] = flag;
                                         // notify parent the data is changed
-                                        this.$emit("announcement-update", {
+                                        that.$emit("announcement-update", {
                                             reason_code: reason_code,
                                             day: day,
                                             flag: flag
