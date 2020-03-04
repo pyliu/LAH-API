@@ -19,10 +19,8 @@ class SQLiteDB extends SQLite3 {
     public function select($sql, $only_one = false) {
         global $log;
         $log->info(__METHOD__.": ".$sql." 只取一筆: $only_one");
+        if ($only_one) return $this->querySingle($sql);
         $this->last_ret = $this->query($sql);
-        if ($only_one) {
-            return $this->last_ret->fetchArray(SQLITE3_ASSOC);
-        }
         $ret = array();
         while ($row = $this->last_ret->fetchArray(SQLITE3_ASSOC)) {
             $ret[] = $row;

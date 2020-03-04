@@ -46,8 +46,7 @@ echo str_replace("\n", "<br />", print_r($rows, true));
 // echo $dog->isOn($overdueSchedule);
 
 $db = new SQLiteDB();
-echo "test";
-$now = $db->select("select TOTAL from stats WHERE ID = 'overdue_msg_count'", true);
+$now = $db->querySingle("select TOTAL from stats WHERE ID = 'overdue_msg_count'", true);
 var_dump($now);
 var_dump($db->select("SELECT * FROM stats"));
 $db->close();
