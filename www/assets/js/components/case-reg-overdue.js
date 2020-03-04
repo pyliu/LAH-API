@@ -228,7 +228,7 @@ if (Vue) {
                 // payload, e.g. {point: i, label: "黃欣怡 HB1206", value: 5}
                 this.searchByReviewer(payload.label);
             },
-            load: function(e) {
+            load: function(switch_mode = false) {
                 // busy ...
                 this.isBusy = true;
                 this.title = this.is_overdue_mode ? "逾期" : "即將逾期";
@@ -284,6 +284,7 @@ if (Vue) {
                             message: `查詢到 ${jsonObj.data_count} 件案件`,
                             type: this.is_overdue_mode ? "danger" : "warning"
                         });
+                        if (switch_mode) this.switchMode();
                     }).catch(ex => {
                         console.error("case-reg-overdue::load parsing failed", ex);
                         showAlert({message: "case-reg-overdue::load XHR連線查詢有問題!!【" + ex.message + "】", type: "danger"});
@@ -316,7 +317,7 @@ if (Vue) {
         },
         created() {
             this.getOverdueMessageStats();
-            this.load();
+            this.load(true);
         }
     });
 } else {
