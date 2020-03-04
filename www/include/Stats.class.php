@@ -16,7 +16,7 @@ class Stats {
         $arr = $this->db->select("SELECT TOTAL from stats WHERE ID = 'overdue_msg_count'", true);
         $current = $arr["TOTAL"] + $count;
         $this->db->update("UPDATE stats set TOTAL = '".$current."' WHERE  ID = 'overdue_msg_count'");
-        $log->info(__METHOD__.": 計數器+${count}，目前值為 ${current}");
+        $log->info(__METHOD__.": overdue_msg_count 計數器+${count}，目前值為 ${current}");
     }
 
     public function addOverdueStatsDetail($data) {
@@ -37,6 +37,11 @@ class Stats {
         $sql = "INSERT INTO xcase_stats (datetime,found,note) VALUES ('".$data["date"]."', ".$data["found"].",'".$data["note"]."')";
         $ret = $this->db->insert($sql);
         $log->info(__METHOD__.": 新增跨所註記遺失案件統計".($ret ? "成功" : "失敗【${sql}】")."。");
+        // 更新 total counter
+        $arr = $this->db->select("SELECT TOTAL from stats WHERE ID = 'xcase_found_count'", true);
+        $current = $arr["TOTAL"] + $data["found"];
+        $this->db->update("UPDATE stats set TOTAL = '".$current."' WHERE  ID = 'xcase_found_count'");
+        $log->info(__METHOD__.":xcase_found_count 計數器+".$data["found"]."，目前值為 ${current}");
 
     }
 }
