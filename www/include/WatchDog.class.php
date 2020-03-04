@@ -7,7 +7,26 @@ require_once(ROOT_DIR.'/include/Stats.class.php');
 class WatchDog {
     
     private $stats = null;
-    private $schedule = null;
+    private $schedule = array(
+        "office" => [
+            'Sun' => [],
+            'Mon' => ['08:00 AM' => '05:00 PM'],
+            'Tue' => ['08:00 AM' => '05:00 PM'],
+            'Wed' => ['08:00 AM' => '05:00 PM'],
+            'Thu' => ['08:00 AM' => '05:00 PM'],
+            'Fri' => ['08:00 AM' => '05:00 PM'],
+            'Sat' => []
+        ],
+        "overdue" => [
+            'Sun' => [],
+            'Mon' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
+            'Tue' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
+            'Wed' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
+            'Thu' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
+            'Fri' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
+            'Sat' => []
+        ]
+    );
     private $overdue_cfg = array(
         "REG_CHIEF_ID" => "HB1214",
         "SUBSCRIBER" => array(
@@ -100,6 +119,7 @@ class WatchDog {
                 ));
                 $stats++;
             }
+            
             $this->stats->addOverdueMsgCount($stats);
         }
         $log->info('查詢近15天逾期登記案件完成。');
@@ -139,7 +159,6 @@ class WatchDog {
     }
 
     function __construct() {
-        $this->schedule = include(ROOT_DIR.'/include/Config.Watchdog.Schedule.php');
         $this->stats = new Stats();
     }
 
