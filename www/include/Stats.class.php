@@ -23,6 +23,7 @@ class Stats {
         // $data => ["ID" => HB0000, "RECORDS" => array, "DATETIME" => 2020-03-04 08:50:23, "NOTE" => XXX]
         // overdue_stats_detail
         global $log;
+        $data["NOTE"] = $this->db->escapeString($data["NOTE"]);
         $sql = "INSERT INTO overdue_stats_detail (datetime,id,count,note) VALUES ('".$data["DATETIME"]."', '".$data["ID"]."',".count($data["RECORDS"]).",'".$data["NOTE"]."')";
         $ret = $this->db->insert($sql);
         $log->info(__METHOD__.": 新增逾期統計詳情".($ret ? "成功" : "失敗【${sql}】")."。");
