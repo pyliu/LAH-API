@@ -8,6 +8,7 @@ require_once(ROOT_DIR."/include/Message.class.php");
 require_once(ROOT_DIR."/include/WatchDog.class.php");
 require_once(ROOT_DIR."/include/JSONAPICommandFactory.class.php");
 require_once(ROOT_DIR."/include/UserInfo.class.php");
+require_once(ROOT_DIR."/include/Stats.class.php");
 
 function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 	echo json_encode(array(
@@ -20,6 +21,16 @@ function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 $query = new Query();
 
 switch ($_POST["type"]) {
+	case "stats_overdue_msg_total":
+		$stats = new Stats();
+		$total = $stats->getTotal('overdue_msg_count');
+		echo json_encode(array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"data_count" => 1,
+			"total" => $total,
+			"message" => "已傳送 $total 人次訊息。"
+		), 0);
+		break;
 	case "user_mapping":
 		$operators = GetDBUserMapping();
 		$count = count($operators);

@@ -4,22 +4,22 @@ require_once('init.php');
 class Stats {
     private $db;
 
-    private function getTotal($id) {
-        return $this->db->querySingle("SELECT TOTAL from stats WHERE ID = '$id'");
-    }
-
-    private function updateTotal($id, $total) {
-        $stm = $this->db->prepare("UPDATE stats set TOTAL = :total WHERE  ID = :id");
-        $stm->bindValue(':total', intval($total));
-        $stm->bindParam(':id', $id);
-        return $stm->execute() === FALSE ? false : true;
-    }
-
     function __construct() {
         $this->db = new SQLite3(DEF_SQLITE_DB);
     }
 
     function __destruct() { }
+
+    public function getTotal($id) {
+        return $this->db->querySingle("SELECT TOTAL from stats WHERE ID = '$id'");
+    }
+
+    public function updateTotal($id, $total) {
+        $stm = $this->db->prepare("UPDATE stats set TOTAL = :total WHERE  ID = :id");
+        $stm->bindValue(':total', intval($total));
+        $stm->bindParam(':id', $id);
+        return $stm->execute() === FALSE ? false : true;
+    }
 
     public function addOverdueMsgCount($count = 1) {
         global $log;

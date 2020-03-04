@@ -6,6 +6,12 @@ if (Vue) {
                 <b-form-checkbox v-b-tooltip.hover.top="modeTooltip" inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;" :class="['align-baseline', 'btn', 'btn-sm', is_overdue_mode ? '' : 'border-warning', 'p-1']">
                     <span>{{modeText}}</span>
                 </b-form-checkbox>
+                <b-button variant="outline-info" size="sm" disabled>
+                    已傳送訊息
+                    <b-badge variant="warning">
+                    {{message_count}}
+                    </b-badge>
+                </b-button>
                 <b-button v-show="statsMode" size="sm" @click="downloadPNG">
                     <b-icon icon="download" font-scale="1"></b-icon>
                     下載圖檔
@@ -98,7 +104,8 @@ if (Vue) {
             modeText: "逾期模式",
             modeTooltip: "逾期案件查詢模式",
             chartType: "bar",
-            title: "逾期"
+            title: "逾期",
+            message_count: 0
         } },
         computed: {
             total_case() {
@@ -278,10 +285,21 @@ if (Vue) {
                             type: this.is_overdue_mode ? "danger" : "warning"
                         });
                     }).catch(ex => {
-                        console.error("case-reg-overdue::created parsing failed", ex);
-                        showAlert({message: "case-reg-overdue::created XHR連線查詢有問題!!【" + ex + "】", type: "danger"});
+                        console.error("case-reg-overdue::load parsing failed", ex);
+                        showAlert({message: "case-reg-overdue::load XHR連線查詢有問題!!【" + ex.message + "】", type: "danger"});
                     });
                 }
+            },
+            getOverdueMessageStats: function(e) {
+                this.$http.post(CONFIG.JSON_API_EP,{
+                    type: "stats_overdue_msg_total"
+                }).then(res => {
+                    console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢逾期案件統計回傳狀態碼有問題【${res.data.status}】`);
+                    this.message_count = res.data.total;
+                }).catch(ex => {
+                    console.error("case-reg-overdue::getOverdueMessageStats parsing failed", ex);
+                    showAlert({message: "case-reg-overdue::getOverdueMessageStats XHR連線查詢有問題!!【" + ex.message + "】", type: "danger"});
+                });
             },
             downloadPNG: function() {
                 this.$refs.statsChart.downloadBase64PNG(`${this.chartType}.png`);
@@ -296,7 +314,10 @@ if (Vue) {
                 this.height = window.innerHeight - 145 + "px";
             }
         },
-        created() { this.load(); }
+        created() {
+            this.getOverdueMessageStats();
+            this.load();
+        }
     });
 } else {
     console.error("vue.js not ready ... case-reg-overdue component can not be loaded.");
