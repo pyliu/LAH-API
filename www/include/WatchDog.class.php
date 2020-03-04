@@ -84,9 +84,12 @@ class WatchDog {
             }
             
             // send to the reviewer
+            $stats = 0;
             foreach ($case_records as $ID => $records) {
                 $this->sendOverdueMessage($ID, $records);
+                $stats++;
             }
+            $this->stats->addOverdueMsgCount($stats);
         }
         $log->info('查詢近15天逾期登記案件完成。');
         return true;
@@ -98,17 +101,19 @@ class WatchDog {
         $host_ip = getLocalhostIP();
         $users = GetDBUserMapping();
         $msg = new Message();
-        $content = "目前有 ".count($case_records)." 件逾期案件(近15天，僅顯示前4筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請用 CHROME/EDGE 瀏覽器前往 http://${host_ip}/overdue_reg_cases.html?reviewerID=".($to_id == "ALL" ? "" : $to_id)."\r\n查看詳細列表。";
+        $url = "http://${host_ip}/overdue_reg_cases.html";
+        if ($to_id != "ALL") {
+            $url .= "?reviewerID=${to_id}";
+        }
+        $content = "目前有 ".count($case_records)." 件逾期案件(近15天，僅顯示前4筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請用 CHROME/EDGE 瀏覽器前往 ${url}\r\n查看詳細列表。";
         if ($to_id == "ALL") {
             $title = "15天內逾期案件(全部)通知";
             $sn = $msg->sysSend($title, $content, $chief_id, 14399);  // 14399 secs => +3 hours 59 mins 59 secs
             $log->info("${title}訊息(${sn})已送出給 ${chief_id} 。 (".$users[$chief_id].")");
-            $this->stats->addOverdueMsgCount();
             // send all cases notice to subscribers
             foreach ($this->overdue_cfg["SUBSCRIBER"] as $subscriber_ip) {
                 $sn = $msg->send($title, $content, $subscriber_ip, 14399);
                 $log->info("${title}訊息(${sn})已送出給 ${subscriber_ip} 。 (訂閱者)");
-                $this->stats->addOverdueMsgCount();
             }
         } else {
             $this_user = $users[$to_id];
@@ -118,7 +123,6 @@ class WatchDog {
                 $log->warning("${title}訊息無法送出給 ${to_id} 。 (".$this_user.", $sn)");
             } else {
                 $log->info("${title}訊息(${sn})已送出給 ${to_id} 。 (".$this_user.")");
-                $this->stats->addOverdueMsgCount();
             }
         }
     }

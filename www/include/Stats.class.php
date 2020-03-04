@@ -11,12 +11,12 @@ class Stats {
 
     function __destruct() { }
 
-    public function addOverdueMsgCount() {
+    public function addOverdueMsgCount($count = 1) {
         global $log;
         $arr = $this->db->select("SELECT TOTAL from stats WHERE ID = 'overdue_msg_count'", true);
-        $current = $arr["TOTAL"];
-        $this->db->update("UPDATE stats set TOTAL = '".++$current."' WHERE  ID = 'overdue_msg_count'");
-        $log->info(__METHOD__.": 計數器+1，目前值為 $current");
+        $current = $arr["TOTAL"] + $count;
+        $this->db->update("UPDATE stats set TOTAL = '".$current."' WHERE  ID = 'overdue_msg_count'");
+        $log->info(__METHOD__.": 計數器+${count}，目前值為 ${current}");
     }
 }
 ?>
