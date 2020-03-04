@@ -7,7 +7,6 @@ require_once(ROOT_DIR.'/include/Stats.class.php');
 class WatchDog {
     
     private $stats = null;
-    private $stats_path;
     private $schedule = null;
     private $overdue_cfg = array(
         "REG_CHIEF_ID" => "HB1214",
@@ -64,7 +63,7 @@ class WatchDog {
     private function findDelayRegCases() {
         global $log;
         if (!$this->isOverdueCheckNeeded()) {
-            $log->warning(__METHOD__.": 非設定時間內，跳過執行。");
+            $log->warning(__METHOD__.": 非設定時間內，跳過逾期案件檢測。");
             return false;
         }
         $query = new Query();
@@ -85,8 +84,16 @@ class WatchDog {
             
             // send to the reviewer
             $stats = 0;
+            $date = date('Y-m-d H:i:s');
+            $users = GetDBUserMapping();
             foreach ($case_records as $ID => $records) {
                 $this->sendOverdueMessage($ID, $records);
+                $this->stats->addOverdueStatsDetail(array(
+                    "ID" => $ID,
+                    "RECORDS" => $records,
+                    "DATETIME" => $date,
+                    "NOTE" => $users[$ID]
+                ));
                 $stats++;
             }
             $this->stats->addOverdueMsgCount($stats);
@@ -128,7 +135,6 @@ class WatchDog {
     }
 
     function __construct() {
-        $this->stats_path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."stats".DIRECTORY_SEPARATOR."watchdog.stats";
         $this->schedule = include(ROOT_DIR.'/include/Config.Watchdog.Schedule.php');
         $this->stats = new Stats();
     }
