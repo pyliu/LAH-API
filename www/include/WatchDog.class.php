@@ -155,12 +155,6 @@ class WatchDog {
     }
     
     public function isOn($schedule) {
-        global $log;
-
-        $now = new DateTime();
-        $log->info("現在時間是 ".$now->format('Y-m-d H:i:s')."，開始檢查是否為啟動區間。"); 
-
-
         // current or user supplied UNIX timestamp
         $timestamp = time();
         // default status
@@ -169,12 +163,9 @@ class WatchDog {
         $currentTime = (new DateTime())->setTimestamp($timestamp);
         // loop through time ranges for current day
         foreach ($schedule[date('D', $timestamp)] as $startTime => $endTime) {
-
             // create time objects from start/end times
             $st = DateTime::createFromFormat('h:i A', $startTime);
             $ed = DateTime::createFromFormat('h:i A', $endTime);
-
-            $log->info("開始確認 ".$startTime." ~ ".$endTime);
 
             // check if current time is within a range
             if (($st < $currentTime) && ($currentTime < $ed)) {
@@ -182,9 +173,6 @@ class WatchDog {
                 break;
             }
         }
-
-        $log->info("現在應為".($status ? "啟動" : "關閉")."狀態");
-        
         return $status;
     }
 }
