@@ -12,7 +12,7 @@ if (Vue) {
                     <b-button block pill @click="check" variant="outline-primary" size="sm"><i class="fas fa-sync"></i> 比對</b-button>
                 </b-col>
                 <b-col>
-                    <b-button block pill @click="popup" variant="outline-success" size="sm"><i class="far fa-comment"></i> 備註</b-button>
+                    <b-button block pill @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i> 功能說明</b-button>
                 </b-col>
             </b-form-row>
         </fieldset>`,

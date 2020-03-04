@@ -47,7 +47,7 @@ if (Vue) {
                     </b-button>
                 </b-col>
                 <b-col class="p-0">
-                    <b-button block @click="popup" variant="outline-success" size="sm" class="h-100"><i class="far fa-comment"></i> 備註</b-button>
+                    <b-button block @click="popup" variant="outline-success" size="sm" class="h-100"><i class="fas fa-question"></i> 功能說明</b-button>
                 </b-col>
             </b-form-row>
         </fieldset>`,

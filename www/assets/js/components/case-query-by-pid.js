@@ -158,7 +158,7 @@ if (Vue) {
                 &ensp;
                 <b-button size="sm" @click="search" variant="outline-primary"><i class="fas fa-search"></i> 搜尋</b-button>
                 &ensp;
-                <b-button size="sm" @click="showModal(noteObj)" variant="outline-success"><i class="far fa-comment"></i> 備註</b-button>
+                <b-button size="sm" @click="showModal(noteObj)" variant="outline-success"><i class="fas fa-question"></i> 功能說明</b-button>
             </b-input-group>
             <div id="id_query_crsms_result"></div>
             <div id="id_query_cmsms_result"></div>
