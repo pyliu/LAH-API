@@ -85,7 +85,6 @@ class WatchDog {
             // send to the reviewer
             $stats = 0;
             $date = date('Y-m-d H:i:s');
-            $users = GetDBUserMapping();
             foreach ($case_records as $ID => $records) {
                 $this->sendOverdueMessage($ID, $records);
                 $this->stats->addOverdueStatsDetail(array(
