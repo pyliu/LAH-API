@@ -28,5 +28,16 @@ class Stats {
         $ret = $this->db->insert($sql);
         $log->info(__METHOD__.": 新增逾期統計詳情".($ret ? "成功" : "失敗【${sql}】")."。");
     }
+
+    public function addXcasesStats($data) {
+        // $data => ["date" => "2020-03-04 10:10:10","found" => 2, "note" => XXXXXXXXX]
+        // xcase_stats
+        global $log;
+        $data["note"] = $this->db->escapeString($data["note"]);
+        $sql = "INSERT INTO xcase_stats (datetime,found,note) VALUES ('".$data["date"]."', ".$data["found"].",'".$data["note"]."')";
+        $ret = $this->db->insert($sql);
+        $log->info(__METHOD__.": 新增跨所註記遺失案件統計".($ret ? "成功" : "失敗【${sql}】")."。");
+
+    }
 }
 ?>

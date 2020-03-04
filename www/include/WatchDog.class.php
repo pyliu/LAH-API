@@ -56,6 +56,11 @@ class WatchDog {
                 $sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, 840);   // 840 secs => +14 mins
                 $log->info("訊息已送出(${sn})給 ${adm_ip}");
             }
+            $this->stats->addXcasesStats(array(
+                "date" => date("Y-m-d H:i:s"),
+                "found" => count($rows),
+                "note" => $content
+            ));
         }
         $log->info('跨所註記遺失檢查結束。');
     }
