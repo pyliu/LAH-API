@@ -43,7 +43,8 @@ Vue.prototype.$gstore = (() => {
             getters: {
                 cache: state => state.cache,
                 isAdmin: state => state.isAdmin,
-                userNames: state => state.userNames
+                userNames: state => state.userNames,
+                dayMilliseconds: state => state.dayMilliseconds
             },
             mutations: {
                 cache(state, objPayload) {
@@ -231,7 +232,8 @@ Vue.mixin({
             }
             return this.$gstore.getters.userNames;
         },
-        userIDs() { return this.reverseMapping(this.userNames || {}); }
+        userIDs() { return this.reverseMapping(this.userNames || {}); },
+        dayMilliseconds() { return this.$gstore.getters.dayMilliseconds; }
     },
     methods: {
         reverseMapping: o => Object.keys(o).reduce((r, k) => Object.assign(r, { [o[k]]: (r[o[k]] || []).concat(k) }), {}),

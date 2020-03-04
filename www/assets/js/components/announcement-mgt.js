@@ -139,11 +139,24 @@ if (Vue) {
                     }
                 },
                 created: function(e) {
-                    this.$http.post(CONFIG.JSON_API_EP, {
-                        type: 'announcement_data'
-                    }).then(res => {
-                        this.data = res.data.raw;
-                    });
+                    let json_str = localStorage.getItem("announcement_data");
+                    let json_ts = +localStorage.getItem("announcement_data_timestamp");
+                    let current_ts = +new Date();
+                    // dayMilliseconds from $gstore
+                    if (typeof json_str == "string" && current_ts - json_ts < this.dayMilliseconds) {
+                        // within a day use the cached data
+                        this.data = JSON.parse(json_str) || {};
+                    } else {
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: 'announcement_data'
+                        }).then(res => {
+                            this.data = res.data.raw;
+                            localStorage.setItem("announcement_data", JSON.stringify(this.data));
+                            localStorage.setItem("announcement_data_timestamp", +new Date()); // == new Date().getTime()
+                        }).catch(err => {
+                            console.error(err);
+                        });
+                    }
                 },
                 mounted: function(e) {
                     // get cached data and set selected option
