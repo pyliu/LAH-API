@@ -320,7 +320,7 @@ ksort($operators);
         }
         let user_data = clicked_element.text().split(":");
         $("#msg_who").val($.trim(user_data[1]).replace(/[\?A-Za-z0-9\+]/g, ""));
-        window.vueAp.fetchUserInfo(e);
+        window.vueApp.fetchUserInfo(e);
       });
 
       // message
