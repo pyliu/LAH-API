@@ -1135,7 +1135,9 @@ $(document).ready(() => {
                 let current_ts = +new Date();
                 if (st) {
                     if (current_ts - st > 24 * 60 * 60 * 1000 * 7) {
-                        this.$lf.clear();
+                        this.$lf.clear().then(() => {
+                            console.warn("localforage clean the cached data because of a week passed.");
+                        });
                     }
                 } else {
                     this.$lf.setItem("cache_st_timestamp", +new Date());
