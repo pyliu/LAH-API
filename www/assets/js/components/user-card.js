@@ -37,11 +37,6 @@ if (Vue) {
             now: new Date(),
             year: 31536000000
         } },
-        watch: {
-            user_rows: function(val) {
-                console.log(val, this.showCard);
-            }
-        },
         computed: {
             showCard: function() {
                 return !this.disabled && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 0;
@@ -53,6 +48,24 @@ if (Vue) {
             },
             photoUrl: function (user_data) {
                 return `get_pho_img.php?name=${user_data['AP_USER_NAME']}`;
+            },
+            toADString: function(tw_date) {
+                let ad_date = tw_date.replace('/-/g', "/");
+                // detect if it is TW date
+                if (ad_date.match(/^\d{3}\/\d{2}\/\d{2}$/)) {
+                    // to AD date
+                    ad_date = (parseInt(ad_date.substring(0, 3)) + 1911) + ad_date.substring(3);
+                }
+                return ad_date;
+            },
+            toTWString: function(ad_date) {
+                tw_date = ad_date.replace('/-/g', "/");
+                // detect if it is AD date
+                if (tw_date.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+                    // to TW date
+                    tw_date = (parseInt(tw_date.substring(0, 4)) - 1911) + tw_date.substring(4);
+                }
+                return tw_date;
             },
             birthAgeVariant: function(user_data) {
                 let badge_age = this.birthAge(user_data["AP_BIRTH"]);
@@ -69,8 +82,8 @@ if (Vue) {
             },
             birthAge: function(user_data) {
                 let birth = user_data["AP_BIRTH"];
-                if (birth && birth.match(/^\d{3}\/\d{2}\/\d{2}$/)) {
-                    birth = (parseInt(birth.substring(0, 3)) + 1911) + birth.substring(3);
+                if (birth) {
+                    birth = this.toADString(birth);
                     let temp = Date.parse(birth);
                     if (temp) {
                         let born = new Date(temp);
@@ -85,15 +98,15 @@ if (Vue) {
                 let AP_OFF_DATE = user_data["AP_OFF_DATE"];
 
                 if(AP_ON_DATE != undefined && AP_ON_DATE != null) {
-                    let on_board_date = AP_ON_DATE.date ? AP_ON_DATE.date.split(" ")[0] :　AP_ON_DATE;
-                    let temp = Date.parse(on_board_date.replace('/-/g', "/"));
+                    AP_ON_DATE = AP_ON_DATE.date ? AP_ON_DATE.date.split(" ")[0] :　AP_ON_DATE;
+                    AP_ON_DATE = this.toADString(AP_ON_DATE);
+                    let temp = Date.parse(AP_ON_DATE);
                     if (temp) {
                         let on = new Date(temp);
                         let now = this.now;
                         if (AP_OFF_JOB == "Y") {
-                            let off_board_date = AP_OFF_DATE;
-                            off_board_date = (parseInt(off_board_date.substring(0, 3)) + 1911) + off_board_date.substring(3);
-                            temp = Date.parse(off_board_date.replace('/-/g', "/"));
+                            AP_OFF_DATE = this.toADString(AP_OFF_DATE);
+                            temp = Date.parse(off_boAP_OFF_DATEard_date);
                             if (temp) {
                                 // replace now Date to off board date
                                 now = new Date(temp);
