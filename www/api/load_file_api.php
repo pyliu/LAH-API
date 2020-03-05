@@ -27,7 +27,7 @@ switch ($_POST["type"]) {
         }
         break;
     case "load_log":
-        $log->info("XHR [load_log] 查詢請求【".$_POST["log_filename"]."】");
+        //$log->info("XHR [load_log] 查詢請求【".$_POST["log_filename"]."】");
         $path = ROOT_DIR."/logs/".$_POST["log_filename"];
         if (file_exists($path)) {
             function removeLoadLog($item) {
@@ -45,7 +45,7 @@ switch ($_POST["type"]) {
                 "data" => $data,
                 "query_string" => "log_filename=".$_POST["log_filename"]."&type=".$_POST["type"]."&slice_offset=".$_POST["slice_offset"]
             );
-            $log->info("XHR [load_log] 讀取成功【".$path."】");
+            //$log->info("XHR [load_log] 讀取成功【".$path."】");
             echo json_encode($result, 0);
         } else {
             $log->error("XHR [load_log] 找不到檔案【".$path."】");
