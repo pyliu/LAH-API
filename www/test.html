@@ -21,13 +21,11 @@
 </head>
 
 <body>
-  <div id="test"></div>
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
       <user-card id="HB0541"></user-card>
-      <b-card-group columns class="mb-1">
+      <b-card-group columns class="mb-1"><!--
         <b-card no-body class="border-0" v-for="n in 2">
-          <!--
           <template v-slot:header>
             <b-nav card-header tabs>
               <b-nav-item active>Active</b-nav-item>
@@ -35,11 +33,10 @@
               <b-nav-item disabled>Disabled</b-nav-item>
             </b-nav>
           </template>
-          -->
           <fee-query-board></fee-query-board>
           <announcement-mgt></announcement-mgt>
         </b-card>
-        <!--
+        
         <b-card
           header="featured"
           header-tag="header"
@@ -119,46 +116,6 @@
   <script type="text/javascript">
     
     $(document).ready(e => {
-
-      new Vue({
-        el: "#test",
-        template: `<select>
-          <option v-for="(item, key) in rm30_mapping" :value="key">{{key}}:{{item}}</option>
-          <option v-for="(item, key) in rm39_mapping" :value="key">{{key}}:{{item}}</option>
-        </select>`,
-        data: {
-          rm30_mapping: {
-              A: "初審",
-              B: "複審",
-              H: "公告",
-              I: "補正",
-              R: "登錄",
-              C: "校對",
-              U: "異動完成",
-              F: "結案",
-              X: "補正初核",
-              Y: "駁回初核",
-              J: "撤回初核",
-              K: "撤回",
-              Z: "歸檔",
-              N: "駁回",
-              L: "公告初核",
-              E: "請示",
-              D: "展期"
-          },
-          rm39_mapping: {
-              B: "登錄開始",
-              R: "登錄完成",
-              C: "校對開始",
-              D: "校對完成",
-              S: "異動開始",
-              F: "異動完成",
-              G: "異動有誤",
-              P: "競合暫停"
-          }
-        }
-      });
-
       let json1, json2;
       axios.all([
         axios.get('assets/js/mocks/case_count_by_reason.json'),
