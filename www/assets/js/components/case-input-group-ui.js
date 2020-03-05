@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("case-input-group-ui", {
         template: `<b-form-row>
             <b-input-group size="sm" class="col-3">
-                <b-form-select v-model="year" :options="years" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_year'">
+                <b-form-select ref="year" v-model="year" :options="years" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_year'">
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇年份 --</b-form-select-option>
                     </template>
@@ -10,7 +10,7 @@ if (Vue) {
                 <b-input-group-append is-text>年</b-input-group-append>
             </b-input-group>
             <b-input-group size="sm" class="col">
-                <b-form-select v-model="code" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_code'">
+                <b-form-select ref="code" v-model="code" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_code'">
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇案件字 --</b-form-select-option>
                     </template>
@@ -22,6 +22,7 @@ if (Vue) {
             </b-input-group>
             <b-input-group size="sm" class="col-4">
                 <b-form-input
+                    ref="num"
                     v-model="num"
                     v-b-tooltip.hover="'最多6個數字'"
                     @input="uiUpdate"
@@ -163,13 +164,13 @@ if (Vue) {
             }
             // setup delay timer to allow cached data update to the input/select element
             let that = this;
-            let mounted_el = $(this.$el);
+            //console.log(this.$refs.number);
             setTimeout(() => {
-                that.year = mounted_el.find(`#${this.prefix}_case_update_year`).val();
-                that.code = mounted_el.find(`#${this.prefix}_case_update_code`).val();
-                that.num = mounted_el.find(`#${this.prefix}_case_update_num`).val();
+                that.year = that.$refs.year.$el.value;
+                that.code = that.$refs.code.$el.value;
+                that.num = that.$refs.num.$el.value;
                 that.uiUpdate(e);
-            }, 200);    // cache.js delay some time to wait Vue instance ready, so here delays 200ms
+            }, 300);    // cached data write back
         }
     });
 } else {

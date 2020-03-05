@@ -205,7 +205,7 @@ if (Vue) {
             },
             searchByReviewer: function(reviewer_data) {
                 if (reviewer_data == undefined) {
-                    console.warning(`reviewer_data is undefined. skip searchByReviewer function call.`);
+                    console.warn(`reviewer_data is undefined. skip searchByReviewer function call.`);
                     return;
                 }
                 // reviewer_data, e.g. "曾奕融 HB1184"

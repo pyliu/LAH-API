@@ -994,7 +994,7 @@ $(document).ready(() => {
                             el: "#user_info_app",
                             components: [ "b-card", "b-link", "b-badge" ],
                             mounted() {
-                                addAnimatedCSS(selector, { name: "pulse", duration: "once-anim-cfg" });
+                                addAnimatedCSS(selector, { name: "headShake", duration: "once-anim-cfg" });
                             }
                         })
                     );
