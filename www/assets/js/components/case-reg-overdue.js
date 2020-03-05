@@ -6,11 +6,12 @@ if (Vue) {
                 <b-form-checkbox v-b-tooltip.hover.top="modeTooltip" inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;" :class="['align-baseline', 'btn', 'btn-sm', is_overdue_mode ? '' : 'border-warning', 'p-1']">
                     <span>{{modeText}}</span>
                 </b-form-checkbox>
-                <b-button variant="outline-info" size="sm" disabled title="已傳送的通知計數(人次，1090305起)">
+                <b-button variant="outline-info" size="sm" disabled title="已傳送的通知計數(1090305起)">
                     已通知
-                    <b-badge variant="warning">
+                    <b-badge variant="info">
                     {{message_count}}
                     </b-badge>
+                    人次
                 </b-button>
                 <b-button v-show="statsMode" size="sm" @click="downloadPNG">
                     <b-icon icon="download" font-scale="1"></b-icon>

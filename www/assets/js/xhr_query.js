@@ -100,7 +100,7 @@ let xhrExportSQLReport = (e, form_body) => {
 	let text = $("#preload_sql_select option:selected").text();
 	form_body.append("sql", $("#sql_csv_text").val());
 	toggle(e.target);
-	asyncFetch("export_file_api.php", {
+	asyncFetch(CONFIG.EXPORT_FILE_API_EP, {
 		method: 'POST',
 		body: form_body,
 		blob: true
