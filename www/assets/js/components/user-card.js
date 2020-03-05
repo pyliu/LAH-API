@@ -49,7 +49,7 @@ if (Vue) {
             photoUrl: function (user_data) {
                 return `get_pho_img.php?name=${user_data['AP_USER_NAME']}`;
             },
-            toADString: function(tw_date) {
+            toADDate: function(tw_date) {
                 let ad_date = tw_date.replace('/-/g', "/");
                 // detect if it is TW date
                 if (ad_date.match(/^\d{3}\/\d{2}\/\d{2}$/)) {
@@ -58,7 +58,7 @@ if (Vue) {
                 }
                 return ad_date;
             },
-            toTWString: function(ad_date) {
+            toTWDate: function(ad_date) {
                 tw_date = ad_date.replace('/-/g', "/");
                 // detect if it is AD date
                 if (tw_date.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
@@ -83,7 +83,7 @@ if (Vue) {
             birthAge: function(user_data) {
                 let birth = user_data["AP_BIRTH"];
                 if (birth) {
-                    birth = this.toADString(birth);
+                    birth = this.toADDate(birth);
                     let temp = Date.parse(birth);
                     if (temp) {
                         let born = new Date(temp);
@@ -99,13 +99,13 @@ if (Vue) {
 
                 if(AP_ON_DATE != undefined && AP_ON_DATE != null) {
                     AP_ON_DATE = AP_ON_DATE.date ? AP_ON_DATE.date.split(" ")[0] :　AP_ON_DATE;
-                    AP_ON_DATE = this.toADString(AP_ON_DATE);
+                    AP_ON_DATE = this.toADDate(AP_ON_DATE);
                     let temp = Date.parse(AP_ON_DATE);
                     if (temp) {
                         let on = new Date(temp);
                         let now = this.now;
                         if (AP_OFF_JOB == "Y") {
-                            AP_OFF_DATE = this.toADString(AP_OFF_DATE);
+                            AP_OFF_DATE = this.toADDate(AP_OFF_DATE);
                             temp = Date.parse(off_boAP_OFF_DATEard_date);
                             if (temp) {
                                 // replace now Date to off board date
