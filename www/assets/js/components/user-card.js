@@ -20,7 +20,7 @@ if (Vue) {
                     <p v-if="isLeft(user_data)" class='text-danger'>已離職【{{user_data["AP_OFF_DATE"]}}】</p>
                     <div>ID：{{user_data["DocUserID"]}}</div>
                     <div>電腦：{{user_data["AP_PCIP"]}}</div>
-                    <div>生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge(user_data['AP_BIRTH']) !== false" :variant="birthAgeVariant(user_data['AP_BIRTH'])" pill>{{birthAge(user_data["AP_BIRTH"])}}歲</b-badge></div>
+                    <div>生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge(user_data) !== false" :variant="birthAgeVariant(user_data)" pill>{{birthAge(user_data)}}歲</b-badge></div>
                     <div>單位：{{user_data["AP_UNIT_NAME"]}}</div>
                     <div>工作：{{user_data["AP_WORK"]}}</div>
                     <div>學歷：{{user_data["AP_HI_SCHOOL"]}}</div>
@@ -33,7 +33,9 @@ if (Vue) {
         props: ['id', 'name', 'ip'],
         data: function() { return {
             disabled: CONFIG.DISABLE_MSDB_QUERY,
-            user_rows: null
+            user_rows: null,
+            now: new Date(),
+            year: 31536000000
         } },
         watch: {
             user_rows: function(val) {
@@ -52,8 +54,8 @@ if (Vue) {
             photoUrl: function (user_data) {
                 return `get_pho_img.php?name=${user_data['AP_USER_NAME']}`;
             },
-            birthAgeVariant: function(AP_BIRTH) {
-                let badge_age = this.birthAge(AP_BIRTH);
+            birthAgeVariant: function(user_data) {
+                let badge_age = this.birthAge(user_data["AP_BIRTH"]);
                 if (badge_age < 30) {
                     return "success";
                 } else if (badge_age < 40) {
@@ -65,15 +67,14 @@ if (Vue) {
                 }
                 return "dark";
             },
-            birthAge: function(AP_BIRTH) {
-                let birth = AP_BIRTH;
-                let birth_regex = /^\d{3}\/\d{2}\/\d{2}$/;
-                if (birth.match(birth_regex)) {
+            birthAge: function(user_data) {
+                let birth = user_data["AP_BIRTH"];
+                if (birth && birth.match(/^\d{3}\/\d{2}\/\d{2}$/)) {
                     birth = (parseInt(birth.substring(0, 3)) + 1911) + birth.substring(3);
                     let temp = Date.parse(birth);
                     if (temp) {
                         let born = new Date(temp);
-                        return ((now - born) / year).toFixed(1);
+                        return ((this.now - born) / this.year).toFixed(1);
                     }
                 }
                 return false;
@@ -86,9 +87,9 @@ if (Vue) {
                 if(AP_ON_DATE != undefined && AP_ON_DATE != null) {
                     let on_board_date = AP_ON_DATE.date ? AP_ON_DATE.date.split(" ")[0] :　AP_ON_DATE;
                     let temp = Date.parse(on_board_date.replace('/-/g', "/"));
-                    if (temp && temp.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+                    if (temp) {
                         let on = new Date(temp);
-                        let now = new Date();
+                        let now = this.now;
                         if (AP_OFF_JOB == "Y") {
                             let off_board_date = AP_OFF_DATE;
                             off_board_date = (parseInt(off_board_date.substring(0, 3)) + 1911) + off_board_date.substring(3);
@@ -98,7 +99,7 @@ if (Vue) {
                                 now = new Date(temp);
                             }
                         }
-                        return ((now - on) / year).toFixed(1);
+                        return ((now - on) / this.year).toFixed(1);
                     }
                 }
                 return false;
