@@ -30,6 +30,7 @@ if (CONFIG.DEBUG_MODE) {
 // add to all Vue instances
 // https://vuejs.org/v2/cookbook/adding-instance-properties.html
 Vue.prototype.$http = axios;
+Vue.prototype.$lf = localforage || {};
 console.assert(typeof Vuex == "object", "Vuex is not loaded, did you include vuex.js in the page??");
 Vue.prototype.$gstore = (() => {
     if (typeof Vuex == "object") {
@@ -64,20 +65,23 @@ Vue.prototype.$gstore = (() => {
             actions: {
                 async loadUserNames({ commit, state }) {
                     try {
-                        let json_str = localStorage.getItem("userNames");
-                        let json_ts = +localStorage.getItem("userNames_timestamp");
+                        let json, json_ts;
+                        if (localforage) {
+                            json = await localStorage.getItem("userNames");
+                            json_ts = await +localStorage.getItem("userNames_timestamp");
+                        }
                         let current_ts = +new Date();
-                        if (typeof json_str == "string" && current_ts - json_ts < state.dayMilliseconds) {
+                        if (typeof json == "string" && current_ts - json_ts < state.dayMilliseconds) {
                             // within a day use the cached data
-                            commit("userNames", JSON.parse(json_str) || {});
+                            commit("userNames", json || {});
                         } else {
                             await axios.post(CONFIG.JSON_API_EP, {
                                 type: 'user_mapping'
-                            }).then(res => {
+                            }).then(async res => {
                                 let json = res.data.data;
-                                if (localStorage) {
-                                    localStorage.setItem("userNames", JSON.stringify(json));
-                                    localStorage.setItem("userNames_timestamp", +new Date()); // == new Date().getTime()
+                                if (localforage) {
+                                    await localforage.setItem("userNames", json);
+                                    await localforage.setItem("userNames_timestamp", +new Date()); // == new Date().getTime()
                                 }
                                 commit("userNames", json || {});
                                 //console.log("userNames: ", res.data.data_count);
