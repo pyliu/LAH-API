@@ -169,7 +169,7 @@ if (Vue) {
                     console.error("userinfo-card::created parsing failed", err);
                     showAlert({
                         title: "使用者資訊",
-                        subtitle: `${name}, ${id}, ${ip}`,
+                        subtitle: `${this.name}, ${this.id}, ${this.ip}`,
                         message: err.message,
                         type: "danger"
                     });
