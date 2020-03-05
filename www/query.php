@@ -238,7 +238,6 @@ ksort($operators);
   <script src="assets/js/components/lah-vue.js"></script>
   <script src="assets/js/xhr_query.js"></script>
   
-  <script src="assets/js/cache.js"></script>
   <script src="assets/js/mark.jquery.min.js"></script>
   
   <script src="assets/js/components/case-reg-detail.js"></script>

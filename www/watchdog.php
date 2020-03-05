@@ -74,7 +74,6 @@ require_once("./include/authentication.php");
   <script src="assets/js/global.js"></script>
   <script src="assets/js/components/lah-vue.js"></script>
   <script src="assets/js/xhr_query.js"></script>
-  <script src="assets/js/cache.js"></script>
   <script src="assets/js/FileSaver.min.js"></script>
   <!-- Vue components -->
   <script src="assets/js/components/case-reg-detail.js"></script>
