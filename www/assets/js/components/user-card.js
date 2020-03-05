@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("userinfo-card", {
+    Vue.component("user-card", {
         template: `<div v-if="showCard">
             <b-card-group columns>
                 <b-card
