@@ -863,21 +863,19 @@ $(document).ready(() => {
                     return;
                 }
             
-                // use data-el HTML attribute to specify the display container, empty will use the modal popup window instead.
+                // use data-display-selector HTML attribute to specify the display container, empty will use the modal popup window instead.
                 let el_selector = clicked_element.data("display-selector");
-                let card = this.$createElement("user-card", { props: { id: id, name: name, ip: ip } });
                 if ($(el_selector).length > 0) {
-                    $(el_selector).html("").append(card.$el);
-                    addAnimatedCSS(card.$el, { name: "headShake", duration: "once-anim-cfg" });
-                    /*
-                    let vue_el = $.parseHTML(`<div><user-card id="${id} name="${name} ip="${ip}"></user-card></div>`)
+                    // $(el_selector).html("").append(card.$el);
+                    // addAnimatedCSS(card.$el, { name: "headShake", duration: "once-anim-cfg" });
+                    let vue_el = $.parseHTML(`<div><user-card id="${id} name="${name} ip="${ip}"></user-card></div>`);
                     $(el_selector).html("").append(vue_el);
                     new Vue({
-                        el: vue_el,
-                        mounted() { addAnimatedCSS(vue_el, { name: "headShake", duration: "once-anim-cfg" }); }
+                        el: vue_el[0],
+                        mounted() { addAnimatedCSS(this.$el, { name: "headShake", duration: "once-anim-cfg" }); }
                     });
-                    */
                 } else {
+                    let card = this.$createElement("user-card", { props: { id: id, name: name, ip: ip } });
                     showModal({
                         title: "使用者資訊",
                         body: card,
