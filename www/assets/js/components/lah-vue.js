@@ -857,8 +857,9 @@ $(document).ready(() => {
                     name = name.replace(/[\?A-Za-z0-9\+]/g, "");
                 }
                 let id = trim(clicked_element.data("id"));
-                if (isEmpty(name) && isEmpty(id)) {
-                    console.warn("Require query params are all empty, skip dynamic user info querying. (add attr to the element => data-id=" + id + ", data-name=" + name + ")");
+                let ip = clicked_element.data("ip");
+                if (isEmpty(name) && isEmpty(id) && isEmpty(ip)) {
+                    console.warn("Require query params are all empty, skip dynamic user info querying. (add attr to the element => data-id=" + id + ", data-name=" + name + ", data-ip=" + ip);
                     return;
                 }
             
@@ -866,14 +867,15 @@ $(document).ready(() => {
                 let el_selector = clicked_element.data("display-selector");
             
                 // reduce user query traffic
-                if (this.cachedUserInfo(id, name, el_selector)) {
+                if (this.cachedUserInfo(id, name, ip, el_selector)) {
                     return;
                 }
                 
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "user_info",
                     name: name,
-                    id: id
+                    id: id,
+                    ip: ip
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         let latest = res.data.data_count - 1;
@@ -883,20 +885,21 @@ $(document).ready(() => {
                         let payload = {};
                         if (!isEmpty(id)) { payload[id] = json_str; }
                         if (!isEmpty(name)) { payload[name] = json_str; }
+                        if (!isEmpty(ip)) { payload[ip] = json_str; }
                         this.$gstore.commit('cache', payload);
                     } else {
-                        addNotification({ message: `找不到 '${name} ${id}' 資料` });
+                        addNotification({ message: `找不到 '${name || id || ip}' 資料` });
                     }
                 }).catch(err => {
                     console.error("window.vueApp.fetchUserInfo parsing failed", err.toJSON());
                     showAlert({ title: "查詢使用者資訊", message: err.message, type: "danger" });
                 });
             },
-            cachedUserInfo: function (id, name, selector) {
+            cachedUserInfo: function (id, name, ip, selector) {
                 // reduce user query traffic
-                let json_str = this.cache.get(id) || this.cache.get(name);
+                let json_str = this.cache.get(id) || this.cache.get(name) || this.cache.get(ip);
                 if (!isEmpty(json_str)) {
-                    console.log(`cache hit ${id}:${name} in store.`);
+                    console.log(`cache hit ${id}:${name}:${ip} in store.`);
                     let jsonObj = JSON.parse(json_str);
                     let latest = jsonObj.data_count - 1;
                     this.showUserInfoFromRAW(jsonObj.raw[latest], selector);
