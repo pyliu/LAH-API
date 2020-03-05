@@ -866,6 +866,31 @@ $(document).ready(() => {
                 // use data-el HTML attribute to specify the display container, empty will use the modal popup window instead.
                 let el_selector = clicked_element.data("display-selector");
             
+                if ($(el_selector).length > 0) {
+                    $(el_selector).html(`<div id="user_info_app"><user-card id="${id} id="${name} id="${ip}"></user-card></div>`);
+                    Vue.nextTick(() =>
+                        new Vue({
+                            el: "#user_info_app",
+                            components: [ "b-card", "b-link", "b-badge" ],
+                            mounted() {
+                                addAnimatedCSS(el_selector, { name: "headShake", duration: "once-anim-cfg" });
+                            }
+                        })
+                    );
+                } else {
+                    showModal({
+                        title: "使用者資訊",
+                        body: this.$createElement("user-card", {
+                            props: {
+                                id: id,
+                                name: name,
+                                ip: ip
+                            }
+                        }),
+                        size: "md"
+                    });
+                }
+                /*
                 // reduce user query traffic
                 if (this.cachedUserInfo(id, name, ip, el_selector)) {
                     return;
@@ -894,6 +919,7 @@ $(document).ready(() => {
                     console.error("window.vueApp.fetchUserInfo parsing failed", err.toJSON());
                     showAlert({ title: "查詢使用者資訊", message: err.message, type: "danger" });
                 });
+                */
             },
             cachedUserInfo: function (id, name, ip, selector) {
                 // reduce user query traffic
