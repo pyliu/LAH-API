@@ -84,7 +84,6 @@ Vue.prototype.$gstore = (() => {
                                     await localforage.setItem("userNames_timestamp", +new Date()); // == new Date().getTime()
                                 }
                                 commit("userNames", json || {});
-                                //console.log("userNames: ", res.data.data_count);
                             }).catch(err => {
                                 console.error(err);
                                 showAlert({
@@ -234,7 +233,7 @@ Vue.mixin({
             if (this.$gstore.getters.userNames === undefined) {
                 this.$gstore.dispatch("loadUserNames");
             }
-            return this.$gstore.getters.userNames;
+            return this.$gstore.getters.userNames || {};
         },
         userIDs() { return this.reverseMapping(this.userNames || {}); },
         dayMilliseconds() { return this.$gstore.getters.dayMilliseconds; }
