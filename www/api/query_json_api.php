@@ -771,23 +771,26 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "user_info":
-		$log->info("XHR [user_info] 查詢使用者資料【".$_POST["id"].", ".$_POST["name"]."】請求");
+		$log->info("XHR [user_info] 查詢使用者資料【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"]."】請求");
 		$user_info = new UserInfo();
 		$results = $user_info->searchByID($_POST["id"]);
 		if (empty($results)) {
 			$results = $user_info->searchByName($_POST["name"]);
 		}
 		if (empty($results)) {
+			$results = $user_info->searchByIP($_POST["ip"]);
+		}
+		if (empty($results)) {
 			echoErrorJSONString("查無 ".$_POST["name"]." 資料。");
-			$log->info("XHR [user_info] 查無 ".$_POST["name"]." 資料。");
+			$log->info("XHR [user_info] 查無 ".$_POST["name"] ?? $_POST["id"] ?? $_POST["ip"]." 資料。");
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => count($results),
 				"raw" => $results,
-				"query_string" => "id=".$_POST["id"]."&name=".$_POST["name"]
+				"query_string" => "id=".$_POST["id"]."&name=".$_POST["name"]."&ip=".$_POST["ip"]
 			);
-			$log->info("XHR [user_info] 查詢 ".$_POST["name"]." 成功。");
+			$log->info("XHR [user_info] 查詢 ".$_POST["name"] ?? $_POST["id"] ?? $_POST["ip"]." 成功。");
 			echo json_encode($result, 0);
 		}
 		break;
