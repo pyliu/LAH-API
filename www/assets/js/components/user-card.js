@@ -135,6 +135,12 @@ if (Vue) {
                 if (!isEmpty(this.name)) { payload[this.name] = json_str; }
                 if (!isEmpty(this.ip)) { payload[this.ip] = json_str; }
                 this.$gstore.commit('cache', payload);
+            },
+            restoreUserRows: function() {
+                let json_str = this.cache[this.id] || this.cache[this.name] || this.cache[this.ip];
+                if (isEmpty(json_str)) return false;
+                this.user_rows = JSON.parse(json_str) || null;
+                return this.user_rows;
             }
         },
         created() {
@@ -153,27 +159,29 @@ if (Vue) {
                 });
                 return;
                 */
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: "user_info",
-                    name: $.trim(this.name),
-                    id: $.trim(this.id),
-                    ip: $.trim(this.ip)
-                }).then(res => {
-                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        this.user_rows = res.data.raw;
-                        this.cacheUserRows();
-                    } else {
-                        addNotification({ message: `找不到 '${name} 或 ${id} 或 ${ip}' 資料` });
-                    }
-                }).catch(err => {
-                    console.error("userinfo-card::created parsing failed", err);
-                    showAlert({
-                        title: "使用者資訊",
-                        subtitle: `${this.name}, ${this.id}, ${this.ip}`,
-                        message: err.message,
-                        type: "danger"
+                if (!this.restoreUserRows()) {
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: "user_info",
+                        name: $.trim(this.name),
+                        id: $.trim(this.id),
+                        ip: $.trim(this.ip)
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            this.user_rows = res.data.raw;
+                            this.cacheUserRows();
+                        } else {
+                            addNotification({ message: `找不到 '${this.name || this.id || this.ip}' 資料` });
+                        }
+                    }).catch(err => {
+                        console.error("userinfo-card::created parsing failed", err);
+                        showAlert({
+                            title: "使用者資訊",
+                            subtitle: `${this.name || this.id || this.ip}`,
+                            message: err.message,
+                            type: "danger"
+                        });
                     });
-                });
+                }
             }
         },
         mounted() {}
