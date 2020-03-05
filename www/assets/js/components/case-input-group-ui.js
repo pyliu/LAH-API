@@ -164,7 +164,6 @@ if (Vue) {
             }
             // setup delay timer to allow cached data update to the input/select element
             let that = this;
-            //console.log(this.$refs.number);
             setTimeout(() => {
                 that.year = that.$refs.year.$el.value;
                 that.code = that.$refs.code.$el.value;
