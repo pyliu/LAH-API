@@ -1086,7 +1086,7 @@ $(document).ready(() => {
                     window.addEventListener('scroll', resetTimer, true); // improved; see comments
                 }
             },
-            cache: function() {
+            initCache: async function() {
                 let cached_el_selector = "input[type='text'], input[type='number'], select, textarea";
                 this.$lf.iterate(function(value, key, iterationNumber) {
                     // Resulting key/value pair -- this callback
@@ -1102,7 +1102,6 @@ $(document).ready(() => {
                     // This code runs if there were any errors
                     console.error(err);
                 });
-
                 // for cache purpose
                 let that = this;
                 let cacheIt = function(el) {
@@ -1132,6 +1131,16 @@ $(document).ready(() => {
                         cacheIt(e.target);
                     }
                 });
+                // clear cached data after a week
+                let st = await this.$lf.getItem("cache_st_timestamp");
+                let current_ts = +new Date();
+                if (st) {
+                    if (current_ts - st > 24 * 60 * 60 * 1000 * 7) {
+                        this.$lf.clear();
+                    }
+                } else {
+                    this.$lf.setItem("cache_st_timestamp", +new Date());
+                }
             }
         },
         created: function(e) {
@@ -1159,6 +1168,6 @@ $(document).ready(() => {
             });
             this.screensaver();
         },
-        mounted() { this.cache(); }
+        mounted() { this.initCache(); }
     });
 });
