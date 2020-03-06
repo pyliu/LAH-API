@@ -602,13 +602,13 @@ Vue.component("lah-user-card", {
             <b-card-text>
                 <p v-if="isLeft(user_data)" class='text-danger'>已離職【{{user_data["AP_OFF_DATE"]}}】</p>
                 <div>ID：{{user_data["DocUserID"]}}</div>
-                <div>電腦：{{user_data["AP_PCIP"]}}</div>
-                <div>生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge(user_data) !== false" :variant="birthAgeVariant(user_data)" pill>{{birthAge(user_data)}}歲</b-badge></div>
+                <div v-if="isAdmin">電腦：{{user_data["AP_PCIP"]}}</div>
+                <div v-if="isAdmin">生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge(user_data) !== false" :variant="birthAgeVariant(user_data)" pill>{{birthAge(user_data)}}歲</b-badge></div>
                 <div>單位：{{user_data["AP_UNIT_NAME"]}}</div>
                 <div>工作：{{user_data["AP_WORK"]}}</div>
-                <div>學歷：{{user_data["AP_HI_SCHOOL"]}}</div>
-                <div>考試：{{user_data["AP_TEST"]}}</div>
-                <div>手機：{{user_data["AP_SEL"]}}</div>
+                <div v-if="isAdmin">學歷：{{user_data["AP_HI_SCHOOL"]}}</div>
+                <div v-if="isAdmin">考試：{{user_data["AP_TEST"]}}</div>
+                <div v-if="isAdmin">手機：{{user_data["AP_SEL"]}}</div>
                 <div>到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge(user_data) !== false" :variant="workAgeVariant(user_data)" pill>{{workAge(user_data)}}年</b-badge></div>
             </b-card-text>
         </b-card>

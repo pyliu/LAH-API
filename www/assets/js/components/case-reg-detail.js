@@ -188,7 +188,7 @@ if (Vue) {
                 case_data_url: "",
                 is_ongoing: false,
                 userinfo_display_id: "in_modal_display",
-                enabled_userinfo: false
+                enabled_userinfo: true
             }
         },
         methods: {
@@ -219,7 +219,6 @@ if (Vue) {
             this.case_status_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=${this.jsonObj.raw["RM01"]}&word=${this.jsonObj.raw["RM02"]}&code=${this.jsonObj.raw["RM03"]}&sdlyn=N&RM90=`;
             this.case_data_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD01/CCD0103.jsp?rm01=${this.jsonObj.raw["RM01"]}&rm02=${this.jsonObj.raw["RM02"]}&rm03=${this.jsonObj.raw["RM03"]}`
             this.is_ongoing = this.empty(this.jsonObj.結案已否);
-            this.enabled_userinfo = this.isAdmin;
         },
         mounted: function(e) {
             if (this.enabled_userinfo) {
