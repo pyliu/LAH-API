@@ -263,19 +263,18 @@ if (Vue) {
                             });
                         }
 
+                        // release busy ...
+                        this.isBusy = false;
                         // prepare the chart data for rendering
                         this.setChartData();
                         // make .reg_case_id clickable
                         Vue.nextTick(this.makeCaseIDClickable);
-                        // release busy ...
-                        this.isBusy = false;
                         // send notification
                         addNotification({
                             title: `查詢登記案件(${this.title})`,
                             message: `查詢到 ${jsonObj.data_count} 件案件`,
                             type: this.is_overdue_mode ? "danger" : "warning"
                         });
-                        if (this.empty(this.reviewerId)) this.switchMode();
                     }).catch(ex => {
                         console.error("case-reg-overdue::load parsing failed", ex);
                         showAlert({message: "case-reg-overdue::load XHR連線查詢有問題!!【" + ex.message + "】", type: "danger"});

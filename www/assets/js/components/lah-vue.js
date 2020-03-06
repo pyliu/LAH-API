@@ -296,11 +296,13 @@ Vue.mixin({
         busyOn: function(el = "body", size = "") { this.toggleBusy({selector: el, forceOn: true, size: size}) },
         busyOff: function(el = "body") { this.toggleBusy({selector: el, forceOff: true}) },
         empty: function (variable) {
-            if (variable === undefined || $.trim(variable) == "") {
+            if (typeof variable == "object" && variable.length == 0) {
                 return true;
             }
-            
-            if (typeof variable == "object" && variable.length == 0) {
+            if (typeof variable == "array" && variable.length == 0) {
+                return true;
+            }
+            if (variable === undefined || variable === null || $.trim(variable) == "") {
                 return true;
             }
             return false;
