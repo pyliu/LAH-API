@@ -21,7 +21,7 @@ if (Vue) {
                                             收件時間：{{jsonObj.收件時間}} <br/>
                                             測量案件：{{jsonObj.測量案件}} <br/>
                                             限辦期限：<span v-html="jsonObj.限辦期限"></span> <br/>
-                                            作業人員：<span id='the_incase_operator_span' class='user_tag' :data-container="'#'+user_card_container" :data-id="jsonObj.作業人員ID" :data-name="jsonObj.作業人員">{{jsonObj.作業人員}}</span> <br/>
+                                            作業人員：<span id='the_incase_operator_span' class='user_tag' :data-container="'#'+user_card_container" :data-id="jsonObj.作業人員ID" :data-name="jsonObj.作業人員" data-title="作業人員">{{jsonObj.作業人員}}</span> <br/>
                                             辦理情形：{{jsonObj.辦理情形}} <br/>
                                             登記原因：{{jsonObj.登記原因}} <br/>
                                             區域：{{area}}【{{jsonObj.raw.RM10}}】 <br/>
@@ -173,7 +173,8 @@ if (Vue) {
                     </div>
                 </b-col>
                 <lah-transition appear>
-                    <div v-show="enabled_card" style="max-width: 220px; position: relative;">
+                    <div v-show="enabled_card" style="max-width: 220px; position: relative;" class="mr-1">
+                        {{card_title}}
                         <lah-close-btn @click="closeCard"></lah-close-btn>
                         <div id="user_card_container"></div>
                     </div>
@@ -191,6 +192,7 @@ if (Vue) {
                 is_ongoing: false,
                 user_card_container: "user_card_container",
                 enabled_card: true,
+                card_title: "作業人員",
                 timer: null
             }
         },

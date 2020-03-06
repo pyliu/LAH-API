@@ -586,7 +586,7 @@ Vue.component("lah-user-card", {
         <b-card
             v-for="user_data in user_rows"
             class="overflow-hidden bg-light"
-            style="max-width: 540px; font-size: 0.9rem;"
+            style="max-width: 480px; font-size: 0.9rem;"
             :title="user_data['AP_USER_NAME']"
             :sub-title="user_data['AP_JOB']"
         >
