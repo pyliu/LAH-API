@@ -173,7 +173,11 @@ if (Vue) {
                     </div>
                 </b-col>
                 <lah-transition appear>
-                    <b-col v-show="enabled_userinfo" id="user_card_container" cols="6">
+                    <b-col v-show="enabled_card" cols="6">
+                        <button @click="closeCard" class="close" type="button" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <div id="user_card_container"></div>
                     </b-col>
                 </lah-transition>
             </b-form-row>
@@ -188,8 +192,14 @@ if (Vue) {
                 case_data_url: "",
                 is_ongoing: false,
                 user_card_container: "user_card_container",
-                enabled_userinfo: true,
+                enabled_card: true,
                 timer: null
+            }
+        },
+        methods: {
+            closeCard() {
+                $("#"+this.user_card_container).html("");
+                this.enabled_card = false;
             }
         },
         created() {
@@ -210,14 +220,14 @@ if (Vue) {
             this.is_ongoing = this.empty(this.jsonObj.結案已否);
         },
         mounted() {
-            if (this.enabled_userinfo) {
+            if (this.enabled_card) {
                 addUserInfoEvent();
                 //load current operator user info
                 $("#the_incase_operator_span").trigger("click");
                 // hide the col if user info is not found, wait for xhr loading is finished
                 let that = this;
                 this.timer = setInterval(() => {
-                    that.enabled_userinfo = !that.empty($("#"+that.user_card_container).text());
+                    that.enabled_card = !that.empty($("#"+that.user_card_container).text());
                 }, 800);
             }
         },
