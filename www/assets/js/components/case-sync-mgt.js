@@ -33,7 +33,7 @@ if (Vue) {
                 let year = this.year;
                 let code = this.code;
                 let num = this.num;
-                if (isEmpty(year)) {
+                if (this.empty(year)) {
                     addNotification({
                         title: "查詢遠端案件資料",
                         subtitle: `${year}-${code}-${num}`,
@@ -42,7 +42,7 @@ if (Vue) {
                     });
                     return false;
                 }
-                if (isEmpty(code)) {
+                if (this.empty(code)) {
                     addNotification({
                         title: "查詢遠端案件資料",
                         subtitle: `${year}-${code}-${num}`,
@@ -53,7 +53,7 @@ if (Vue) {
                 }
                 let number = num.replace(/\D/g, "");
                 let offset = 6 - number.length;
-                if (isEmpty(number) || isNaN(number) || offset < 0) {
+                if (this.empty(number) || isNaN(number) || offset < 0) {
                     addNotification({
                         title: "查詢遠端案件資料",
                         subtitle: `${year}-${code}-${number}`,

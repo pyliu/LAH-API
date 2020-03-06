@@ -268,7 +268,7 @@ if (Vue) {
                                         rm02: this.raw["RM02"],
                                         rm03: this.raw["RM03"],
                                         col: "RM30_1",
-                                        val: isEmpty(rm30_1) ? "XXXXXXXX" : rm30_1
+                                        val: that.empty(rm30_1) ? "XXXXXXXX" : rm30_1
                                     });
                                 }
                             }
@@ -300,7 +300,7 @@ if (Vue) {
                     this.rm30_orig = this.raw["RM30"] || "";
                     this.rm39_orig = this.raw["RM39"] || "";
                     this.rm31 = this.raw["RM31"];
-                    this.wip = isEmpty(this.rm31);
+                    this.wip = this.empty(this.rm31);
                     addUserInfoEvent(e);
                     addAnimatedCSS(".reg_case_id", {
                         name: "flash"

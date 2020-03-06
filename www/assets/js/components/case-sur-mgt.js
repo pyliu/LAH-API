@@ -124,8 +124,8 @@ if (Vue) {
                     </b-form-row>
                     申請事由：{{json.raw["MM06"]}}：{{json.申請事由}} <br/>
                     　段小段：{{json.raw["MM08"]}} <br/>
-                    　　地號：{{isEmpty(json.raw["MM09"]) ? "" : this.json.地號}} <br/>
-                    　　建號：{{isEmpty(json.raw["MM10"]) ? "" : this.json.建號}} <br/>
+                    　　地號：{{empty(json.raw["MM09"]) ? "" : this.json.地號}} <br/>
+                    　　建號：{{empty(json.raw["MM10"]) ? "" : this.json.建號}} <br/>
                     <span class='text-info'>辦理情形</span>：{{json.辦理情形}} <br/>
                     結案狀態：{{json.結案狀態}} <br/>
                     <span class='text-info'>延期原因</span>：{{json.延期原因}} <br/>

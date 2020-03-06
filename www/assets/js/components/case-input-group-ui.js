@@ -77,7 +77,7 @@ if (Vue) {
             getMaxNumber: function(e) {
                 let year = this.year;
                 let code = this.code;
-                if (isEmpty(code) || isEmpty(year)) {
+                if (this.empty(code) || this.empty(year)) {
                     addNotification({message: "案件年或案件字為空白，無法取得案件目前最大號碼。", type: "warning"});
                     return;
                 }

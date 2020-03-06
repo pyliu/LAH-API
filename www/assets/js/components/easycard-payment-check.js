@@ -52,7 +52,7 @@ if (Vue) {
             query: function(e) {
                 // basic checking for tw date input
                 let regex = /^\d{7}$/;
-                if (!isEmpty(this.date) && this.date.match(regex) == null) {
+                if (!this.empty(this.date) && this.date.match(regex) == null) {
                     showPopper("#easycard_query_day");
                     return;
                 }
@@ -103,8 +103,8 @@ if (Vue) {
             "easycard-payment-check-item": {
                 template: `<ul style="font-size: 0.9rem">
                     <li v-for="(item, index) in data" class='easycard_item'>
-                        日期: {{item["AA01"]}}, 電腦給號: {{item["AA04"]}}, 實收金額: {{item["AA28"]}}<b-badge v-if="!isEmpty(item['AA104'])" variant="danger">, 作廢原因: {{item["AA104"]}}</b-badge>, 目前狀態: {{status(item["AA106"])}}
-                        <button v-if="isEmpty(item['AA104'])" @click="fix($event, item)" class="btn btn-sm btn-outline-success">修正</button>
+                        日期: {{item["AA01"]}}, 電腦給號: {{item["AA04"]}}, 實收金額: {{item["AA28"]}}<b-badge v-if="!empty(item['AA104'])" variant="danger">, 作廢原因: {{item["AA104"]}}</b-badge>, 目前狀態: {{status(item["AA106"])}}
+                        <button v-if="empty(item['AA104'])" @click="fix($event, item)" class="btn btn-sm btn-outline-success">修正</button>
                     </li>
                 </ul>`,
                 props: ["data"],

@@ -54,6 +54,7 @@ if (Vue) {
                     number: number
                 }).then(res => {
 
+                    let that = this;
                     this.isBusy = false;
 
                     console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢暫存資料回傳狀態碼有問題【${res.data.status}】`);
@@ -88,7 +89,7 @@ if (Vue) {
                                 let values = [];
                                 for (let key in this_row) {
                                     fields.push(key);
-                                    values.push(isEmpty(this_row[key]) ? "null" : `'${this_row[key]}'`);
+                                    values.push(that.empty(this_row[key]) ? "null" : `'${this_row[key]}'`);
                                 }
                                 INS_SQL += `insert into ${item[0]} (${fields.join(",")})`;
                                 INS_SQL += ` values (${values.join(",")});\n`;
