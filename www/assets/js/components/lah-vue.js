@@ -213,10 +213,6 @@ Vue.mixin({
                         break;
                 }
             }
-        },
-        "lah-close-btn": {
-            template: `<button class="close" type="button" aria-label="Close"><span aria-hidden="true" @click="click">&times;</span></button>`,
-            methods: { click(e) { this.$emit("click", e); } }
         }
     },
     data: function() { return {

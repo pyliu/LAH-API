@@ -175,7 +175,7 @@ if (Vue) {
                 <lah-transition appear>
                     <div v-show="enabled_card" style="max-width: 220px; position: relative;" class="mr-1">
                         {{card_title}}
-                        <lah-close-btn @click="closeCard"></lah-close-btn>
+                        <b-button-close @click="closeCard"></b-button-close>
                         <div id="user_card_container"></div>
                     </div>
                 </lah-transition>
