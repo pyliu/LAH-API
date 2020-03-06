@@ -196,7 +196,7 @@ Vue.mixin({
             }
         },
         "lah-ban": {
-            template: `<i class="text-danger fas fa-ban ld ld-breath" :class="[size]"></i>`,
+            template: `<i class="text-danger fas fa-ban ld ld-breath" :class="[size]"><slot>其他內容</slot></i>`,
             props: ["size"],
             data: function() { return { size: "" } },
             created() {
@@ -213,6 +213,10 @@ Vue.mixin({
                         break;
                 }
             }
+        },
+        "lah-close-btn": {
+            template: `<button class="close" type="button" aria-label="Close"><span aria-hidden="true" @click="click">&times;</span></button>`,
+            methods: { click(e) { this.$emit("click", e); } }
         }
     },
     data: function() { return {
@@ -590,12 +594,12 @@ Vue.component("lah-user-card", {
                 <b-card-img
                     :src="photoUrl(user_data)"
                     :alt="user_data['AP_USER_NAME']"
-                    class="img-thumbnail float-right ml-2"
+                    class="img-thumbnail float-right mx-auto ml-2"
                     style="max-width: 220px"
                 ></b-card-img>
             </b-link>
             <b-card-text>
-                <p v-if="isLeft(user_data)" class='text-danger'>已離職【{{user_data["AP_OFF_DATE"]}}】</p>
+                <lah-ban v-if="isLeft(user_data)" class='text-danger mx-auto'> 已離職【{{user_data["AP_OFF_DATE"]}}】</lah-ban>
                 <div>ID：{{user_data["DocUserID"]}}</div>
                 <div v-if="isAdmin">電腦：{{user_data["AP_PCIP"]}}</div>
                 <div v-if="isAdmin">生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge(user_data) !== false" :variant="birthAgeVariant(user_data)" pill>{{birthAge(user_data)}}歲</b-badge></div>
@@ -684,7 +688,7 @@ Vue.component("lah-user-card", {
                     let now = this.now;
                     if (AP_OFF_JOB == "Y") {
                         AP_OFF_DATE = this.toADDate(AP_OFF_DATE);
-                        temp = Date.parse(off_boAP_OFF_DATEard_date);
+                        temp = Date.parse(AP_OFF_DATE);
                         if (temp) {
                             // replace now Date to off board date
                             now = new Date(temp);
@@ -1055,7 +1059,7 @@ $(document).ready(() => {
                 if (this.empty(name) && this.empty(id) && this.empty(ip)) {
                     // fallback to find itself data-*
                     clicked_element = $(e.target);
-                    name = $.trim(clicked_element.data("name")) || '';
+                    name = $.trim(clicked_element.data("name")) || $.trim(clicked_element.text()) || '';
                     id = trim(clicked_element.data("id")) || '';
                     ip = $.trim(clicked_element.data("ip")) || '';
                 }
@@ -1082,8 +1086,7 @@ $(document).ready(() => {
                     let card = this.$createElement("lah-user-card", { props: { id: id, name: name, ip: ip } });
                     showModal({
                         title: "使用者資訊",
-                        body: card,
-                        size: "md"
+                        body: card
                     });
                 }
             },
