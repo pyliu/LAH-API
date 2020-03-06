@@ -753,7 +753,12 @@ Vue.component("lah-user-card", {
                         this.user_rows = res.data.raw;
                         this.cacheUserRows();
                     } else {
-                        addNotification({ message: `找不到 '${this.name || this.id || this.ip}' 資料` });
+                        addNotification({
+                            title: "使用者資訊",
+                            subtitle: `${this.id}-${this.name}-${this.ip}`,
+                            message: `找不到 '${this.name || this.id || this.ip}' 資料`,
+                            type: "warning"
+                        });
                     }
                 }).catch(err => {
                     console.error("userinfo-card::created parsing failed", err);
@@ -1046,25 +1051,29 @@ $(document).ready(() => {
                     console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping vueApp.fetchUserInfo.");
                     return;
                 }
-            
-                let clicked_element = $(e.target);
-                if (!clicked_element.hasClass("user_tag")) {
-                    clicked_element = $(clicked_element.closest(".user_tag"));
+                
+                // find the most closest 
+                let clicked_element = $($(e.target).closest(".user_tag"));
+                let name = $.trim(clicked_element.data("name")) || '';
+                let id = trim(clicked_element.data("id")) || '';
+                let ip = $.trim(clicked_element.data("ip")) || '';
+                if (this.empty(name) && this.empty(id) && this.empty(ip)) {
+                    // fallback to find itself data-*
+                    clicked_element = $(e.target);
+                    name = $.trim(clicked_element.data("name")) || '';
+                    id = trim(clicked_element.data("id")) || '';
+                    ip = $.trim(clicked_element.data("ip")) || '';
                 }
-                // retrieve name/id from the data-* attributes
-                let name = $.trim(clicked_element.data("name"));
-                let id = trim(clicked_element.data("id"));
-                let ip = clicked_element.data("ip");
                 if (name) {
-                    name = name.replace(/[\?A-Za-z0-9\+]/g, "");
+                    name = name.replace(/[\?A-Za-z0-9\+]/g, '');
                 }
                 if (this.empty(name) && this.empty(id) && this.empty(ip)) {
-                    console.warn("Require query params are all empty, skip dynamic user info querying. (add attr to the element => data-id=" + id + ", data-name=" + name + ", data-ip=" + ip);
-                    return;
+                    console.warn(id, name, ip, "所有參數都為空值，無法查詢使用者資訊！");
+                    return false;
                 }
-            
-                // use data-display-selector HTML attribute to specify the display container, empty will use the modal popup window instead.
-                let el_selector = clicked_element.data("display-selector");
+
+                // use data-display-selector(data-el) HTML attribute to specify the display container, empty will use the modal popup window instead.
+                let el_selector = clicked_element.data("display-selector") || clicked_element.data("el");
                 if ($(el_selector).length > 0) {
                     // $(el_selector).html("").append(card.$el);
                     // addAnimatedCSS(card.$el, { name: "headShake", duration: "once-anim-cfg" });

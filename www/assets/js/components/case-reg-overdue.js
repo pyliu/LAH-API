@@ -64,6 +64,9 @@ if (Vue) {
                         <b-button v-if="!inSearch && !reviewerId" :variant="is_overdue_mode ? 'outline-danger' : 'warning'" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的'+(is_overdue_mode ? '逾期' : '即將逾期')+'案件'">{{data.value.split(" ")[0]}}</b-button>
                         <span v-else>{{data.value.split(" ")[0]}}</span>
                     </template>
+                    <template v-slot:cell(作業人員)="data">
+                        <b-button :data-name="data.value" variant="outline-secondary" :size="small ? 'sm' : 'md'" @click="vueApp.fetchUserInfo" :title="'查詢 '+data.value+' 的使用者訊息'">{{data.value}}</b-button>
+                    </template>
                 </b-table>
             </lah-transition>
             
