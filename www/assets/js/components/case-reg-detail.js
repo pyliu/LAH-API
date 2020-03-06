@@ -21,7 +21,7 @@ if (Vue) {
                                             收件時間：{{jsonObj.收件時間}} <br/>
                                             測量案件：{{jsonObj.測量案件}} <br/>
                                             限辦期限：<span v-html="jsonObj.限辦期限"></span> <br/>
-                                            作業人員：<span id='the_incase_operator_span' class='user_tag' :data-display-selector="'#'+userinfo_display_id" :data-id="jsonObj.作業人員ID" :data-name="jsonObj.作業人員">{{jsonObj.作業人員}}</span> <br/>
+                                            作業人員：<span id='the_incase_operator_span' class='user_tag' :data-container="'#'+user_card_container" :data-id="jsonObj.作業人員ID" :data-name="jsonObj.作業人員">{{jsonObj.作業人員}}</span> <br/>
                                             辦理情形：{{jsonObj.辦理情形}} <br/>
                                             登記原因：{{jsonObj.登記原因}} <br/>
                                             區域：{{area}}【{{jsonObj.raw.RM10}}】 <br/>
@@ -85,7 +85,7 @@ if (Vue) {
                                         </b-list-group-item>
                                         <b-list-group-item>
                                             <b-form-row>
-                                                <b-col>收件人員：<span class='user_tag' :data-display-selector="'#'+userinfo_display_id" :data-id="jsonObj.收件人員ID" :data-name="jsonObj.收件人員">{{jsonObj.收件人員}}</span></b-col>
+                                                <b-col>收件人員：<span class='user_tag' :data-container="'#'+user_card_container" :data-id="jsonObj.收件人員ID" :data-name="jsonObj.收件人員">{{jsonObj.收件人員}}</span></b-col>
                                                 <b-col>收件時間：{{jsonObj.收件時間}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
@@ -173,7 +173,7 @@ if (Vue) {
                     </div>
                 </b-col>
                 <lah-transition appear>
-                    <b-col v-show="enabled_userinfo" id="in_modal_display" cols="6">
+                    <b-col v-show="enabled_userinfo" id="user_card_container" cols="6">
                     </b-col>
                 </lah-transition>
             </b-form-row>
@@ -187,23 +187,12 @@ if (Vue) {
                 case_status_url: "",
                 case_data_url: "",
                 is_ongoing: false,
-                userinfo_display_id: "in_modal_display",
-                enabled_userinfo: true
+                user_card_container: "user_card_container",
+                enabled_userinfo: true,
+                timer: null
             }
         },
-        methods: {
-            empty: variable => {
-                if (variable === undefined || $.trim(variable) == "") {
-                    return true;
-                }
-                
-                if (typeof variable == "object" && variable.length == 0) {
-                    return true;
-                }
-                return false;
-            }
-        },
-        created: function(e) {
+        created() {
             this.rm10 = this.jsonObj.raw.RM10 ? this.jsonObj.raw.RM10 : "XX";
             switch (this.rm10) {
                 case "03":
@@ -220,19 +209,20 @@ if (Vue) {
             this.case_data_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD01/CCD0103.jsp?rm01=${this.jsonObj.raw["RM01"]}&rm02=${this.jsonObj.raw["RM02"]}&rm03=${this.jsonObj.raw["RM03"]}`
             this.is_ongoing = this.empty(this.jsonObj.結案已否);
         },
-        mounted: function(e) {
+        mounted() {
             if (this.enabled_userinfo) {
                 addUserInfoEvent();
                 //load current operator user info
                 $("#the_incase_operator_span").trigger("click");
                 // hide the col if user info is not found, wait for xhr loading is finished
                 let that = this;
-                setTimeout(function() {
-                    if (that.empty($("#"+that.userinfo_display_id).text())) {
-                        that.enabled_userinfo = false;
-                    }
-                }, 1000);
+                this.timer = setInterval(() => {
+                    that.enabled_userinfo = !that.empty($("#"+that.user_card_container).text());
+                }, 800);
             }
+        },
+        beforeDestroy() {
+            clearTimeout(this.timer);
         }
     });
 } else {

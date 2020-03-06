@@ -715,10 +715,11 @@ Vue.component("lah-user-card", {
             this.$gstore.commit('cache', payload);
         },
         restoreUserRows: function() {
-            let json_str = this.cache[this.id] || this.cache[this.name] || this.cache[this.ip];
+            let json_str = this.cache.get(this.id) || this.cache.get(this.name) || this.cache.get(this.ip);
+            console.log(json_str);
             if (this.empty(json_str)) return false;
             this.user_rows = JSON.parse(json_str) || null;
-            return this.user_rows;
+            return true;
         }
     },
     created() {
@@ -1067,8 +1068,8 @@ $(document).ready(() => {
                     return false;
                 }
 
-                // use data-display-selector(data-el) HTML attribute to specify the display container, empty will use the modal popup window instead.
-                let el_selector = clicked_element.data("display-selector") || clicked_element.data("el");
+                // use data-container(data-el) HTML attribute to specify the display container, empty will use the modal popup window instead.
+                let el_selector = clicked_element.data("container") || clicked_element.data("el");
                 if ($(el_selector).length > 0) {
                     // $(el_selector).html("").append(card.$el);
                     // addAnimatedCSS(card.$el, { name: "headShake", duration: "once-anim-cfg" });
