@@ -85,19 +85,19 @@ if (Vue) {
                                         </b-list-group-item>
                                         <b-list-group-item>
                                             <b-form-row>
-                                                <b-col>收件人員：<span class='user_tag' :data-container="'#'+user_card_container" :data-id="jsonObj.收件人員ID" :data-name="jsonObj.收件人員">{{jsonObj.收件人員}}</span></b-col>
+                                                <b-col>收件人員：<span class='user_tag'  :data-id="jsonObj.收件人員ID" :data-name="jsonObj.收件人員">{{jsonObj.收件人員}}</span></b-col>
                                                 <b-col>收件時間：{{jsonObj.收件時間}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
                                         <b-list-group-item v-if="!empty(jsonObj.初審人員)">
                                             <b-form-row>
-                                                <b-col>初審人員：<span class='user_tag' :data-container="'#'+user_card_container">{{jsonObj.初審人員}}</span></b-col>
+                                                <b-col>初審人員：<span class='user_tag' >{{jsonObj.初審人員}}</span></b-col>
                                                 <b-col>初審時間：{{jsonObj.初審時間}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
                                         <b-list-group-item v-if="!empty(jsonObj.複審人員)">
                                             <b-form-row>
-                                                <b-col>複審人員：<span class='user_tag' :data-container="'#'+user_card_container">{{jsonObj.複審人員}}</span></b-col>
+                                                <b-col>複審人員：<span class='user_tag' >{{jsonObj.複審人員}}</span></b-col>
                                                 <b-col>複審時間：{{jsonObj.複審時間}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
@@ -127,37 +127,37 @@ if (Vue) {
                                         </b-list-group-item>
                                         <b-list-group-item v-if="!empty(jsonObj.請示人員)">
                                             <b-form-row>
-                                                <b-col>請示人員：<span class='user_tag' :data-container="'#'+user_card_container">{{jsonObj.請示人員}}</span></b-col>
+                                                <b-col>請示人員：<span class='user_tag' >{{jsonObj.請示人員}}</span></b-col>
                                                 <b-col>請示時間：{{jsonObj.請示時間}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
                                         <b-list-group-item v-if="!empty(jsonObj.展期人員)">
                                             <b-form-row>
-                                                <b-col>展期人員：<span class='user_tag' :data-container="'#'+user_card_container">{{jsonObj.展期人員}}</span></b-col>
+                                                <b-col>展期人員：<span class='user_tag' >{{jsonObj.展期人員}}</span></b-col>
                                                 <b-col>展期日期：{{jsonObj.展期日期}} 天數：{{jsonObj.展期天數}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
                                         <b-list-group-item v-if="!empty(jsonObj.准登人員)">
                                             <b-form-row>
-                                                <b-col>准登人員：<span class='user_tag' :data-container="'#'+user_card_container">{{jsonObj.准登人員}}</span></b-col>
+                                                <b-col>准登人員：<span class='user_tag' >{{jsonObj.准登人員}}</span></b-col>
                                                 <b-col>准登日期：{{jsonObj.准登日期}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
                                         <b-list-group-item v-if="!empty(jsonObj.登錄人員)">
                                             <b-form-row>
-                                                <b-col>登錄人員：<span class='user_tag' :data-container="'#'+user_card_container">{{jsonObj.登錄人員}}</span></b-col>
+                                                <b-col>登錄人員：<span class='user_tag' >{{jsonObj.登錄人員}}</span></b-col>
                                                 <b-col>登錄日期：{{jsonObj.登錄日期}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
                                         <b-list-group-item v-if="!empty(jsonObj.校對人員)">
                                             <b-form-row>
-                                                <b-col>校對人員：<span class='user_tag' :data-container="'#'+user_card_container">{{jsonObj.校對人員}}</span></b-col>
+                                                <b-col>校對人員：<span class='user_tag' >{{jsonObj.校對人員}}</span></b-col>
                                                 <b-col>校對日期：{{jsonObj.校對日期}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
                                         <b-list-group-item v-if="!empty(jsonObj.結案人員)">
                                             <b-form-row>
-                                                <b-col>結案人員：<span class='user_tag' :data-container="'#'+user_card_container">{{jsonObj.結案人員}}</span></b-col>
+                                                <b-col>結案人員：<span class='user_tag' >{{jsonObj.結案人員}}</span></b-col>
                                                 <b-col>結案日期：{{jsonObj.結案日期}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
