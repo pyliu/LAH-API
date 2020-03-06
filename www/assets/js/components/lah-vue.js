@@ -716,7 +716,6 @@ Vue.component("lah-user-card", {
         },
         restoreUserRows: function() {
             let json_str = this.cache.get(this.id) || this.cache.get(this.name) || this.cache.get(this.ip);
-            console.log(json_str);
             if (this.empty(json_str)) return false;
             this.user_rows = JSON.parse(json_str) || null;
             return true;
