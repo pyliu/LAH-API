@@ -707,18 +707,17 @@ Vue.component("lah-user-card", {
             return 'danger';
         },
         cacheUserRows: function() {
-            let json_str = JSON.stringify(this.user_rows);
             let payload = {};
-            if (!this.empty(this.id)) { payload[this.id] = json_str; }
-            if (!this.empty(this.name)) { payload[this.name] = json_str; }
-            if (!this.empty(this.ip)) { payload[this.ip] = json_str; }
+            if (!this.empty(this.id)) { payload[this.id] = this.user_rows; }
+            if (!this.empty(this.name)) { payload[this.name] = this.user_rows; }
+            if (!this.empty(this.ip)) { payload[this.ip] = this.user_rows; }
             this.$gstore.commit('cache', payload);
         },
         restoreUserRows: function() {
-            let json_str = this.cache.get(this.id) || this.cache.get(this.name) || this.cache.get(this.ip);
-            if (this.empty(json_str)) return false;
-            this.user_rows = JSON.parse(json_str) || null;
-            return true;
+            let user_rows = this.cache.get(this.id) || this.cache.get(this.name) || this.cache.get(this.ip);
+            if (this.empty(user_rows)) return false;
+            this.user_rows = user_rows || null;
+            return this.user_rows !== null;
         }
     },
     created() {
