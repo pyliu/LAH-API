@@ -174,7 +174,7 @@ if (Vue) {
                 </b-col>
                 <lah-transition appear>
                     <div v-show="enabled_card" style="max-width: 220px; position: relative;" class="mr-1">
-                        {{card_title}}
+                        <span class="align-middle"><i class="far fa-user"></i> 作業人員</span>
                         <b-button-close @click="closeCard"></b-button-close>
                         <div id="user_card_container"></div>
                     </div>
@@ -192,7 +192,6 @@ if (Vue) {
                 is_ongoing: false,
                 user_card_container: "user_card_container",
                 enabled_card: true,
-                card_title: "作業人員",
                 timer: null
             }
         },
