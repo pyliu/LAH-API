@@ -67,8 +67,8 @@ Vue.prototype.$gstore = (() => {
                     try {
                         let json, json_ts;
                         if (localforage) {
-                            json = await localStorage.getItem("userNames");
-                            json_ts = await +localStorage.getItem("userNames_timestamp");
+                            json = await localforage.getItem("userNames");
+                            json_ts = await +localforage.getItem("userNames_timestamp");
                         }
                         let current_ts = +new Date();
                         if (typeof json == "string" && current_ts - json_ts < state.dayMilliseconds) {
