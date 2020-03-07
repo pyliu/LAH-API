@@ -301,6 +301,37 @@ Vue.mixin({
             if (typeof variable == "array" && variable.length == 0) return true;
             if ($.trim(variable) == "") return true;
             return false;
+        },
+        setLocalCache: async (key, val, timeout = 0) => {
+            if (!localforage) return false;
+            try {
+                await localforage.setItem(key, val);
+                await localforage.setItem(`${key}_set_ts`, +new Date()); // == new Date().getTime()
+                await localforage.setItem(`${key}_set_ts_timeout`, timeout);    // milliseconds
+            } catch (err) {
+                console.error(err);
+                return false;
+            }
+            return true;
+        },
+        getLocalCache: async (key) => {
+            if (!localforage) return false;
+            try {
+                let val = await localforage.getItem(key);
+                let ts = await +localforage.getItem(`${key}_set_ts`);
+                let timeout = await +localforage.getItem(`${key}_set_ts_timeout`);
+                let now = +new Date();
+                if (timeout != 0 && now - ts > timeout) {
+                    await localforage.removeItem(key);
+                    console.log(`${key} is removed. (timeout: ${timeout}), now - ts == ${now - ts}`);
+                    return false;
+                } else {
+                    return val;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+            return false;
         }
     }
 });
