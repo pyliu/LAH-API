@@ -296,7 +296,7 @@ Vue.mixin({
         busyOn: function(el = "body", size = "") { this.toggleBusy({selector: el, forceOn: true, size: size}) },
         busyOff: function(el = "body") { this.toggleBusy({selector: el, forceOff: true}) },
         empty: function (variable) {
-            if (variable === null || variable === undefined) return true;
+            if (variable === null || variable === undefined || variable === false) return true;
             if (typeof variable == "object" && variable.length == 0) return true;
             if (typeof variable == "array" && variable.length == 0) return true;
             if ($.trim(variable) == "") return true;
@@ -739,14 +739,28 @@ Vue.component("lah-user-card", {
         },
         cacheUserRows: function() {
             let payload = {};
-            if (!this.empty(this.id)) { payload[this.id] = this.user_rows; }
-            if (!this.empty(this.name)) { payload[this.name] = this.user_rows; }
-            if (!this.empty(this.ip)) { payload[this.ip] = this.user_rows; }
+            if (!this.empty(this.id)) { payload[this.id] = this.user_rows; this.setLocalCache(this.id, this.user_rows, this.dayMilliseconds); }
+            if (!this.empty(this.name)) { payload[this.name] = this.user_rows; this.setLocalCache(this.name, this.user_rows, this.dayMilliseconds); }
+            if (!this.empty(this.ip)) { payload[this.ip] = this.user_rows; this.setLocalCache(this.ip, this.user_rows, this.dayMilliseconds); }
             this.$gstore.commit('cache', payload);
         },
         restoreUserRows: function() {
+            // find in $gstore(in-memory)
             let user_rows = this.cache.get(this.id) || this.cache.get(this.name) || this.cache.get(this.ip);
-            if (this.empty(user_rows)) return false;
+            if (this.empty(user_rows)) {
+                // find in localforage
+                user_rows = this.getLocalCache(this.id) || this.getLocalCache(this.name) || this.getLocalCache(this.ip);
+                if (this.empty(user_rows)) {
+                    return false;
+                } else {
+                    // also put back to $gstore
+                    let payload = {};
+                    if (!this.empty(this.id)) { payload[this.id] = this.user_rows; }
+                    if (!this.empty(this.name)) { payload[this.name] = this.user_rows; }
+                    if (!this.empty(this.ip)) { payload[this.ip] = this.user_rows; }
+                    this.$gstore.commit('cache', payload);
+                }
+            }
             this.user_rows = user_rows || null;
             return this.user_rows !== null;
         }
