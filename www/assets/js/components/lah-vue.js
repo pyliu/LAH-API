@@ -317,7 +317,7 @@ Vue.mixin({
         getLocalCache: async (key) => {
             if (!localforage) return false;
             try {
-                let val = await localforage.getItem(key);
+                const val = await localforage.getItem(key);
                 let ts = await +localforage.getItem(`${key}_set_ts`);
                 let timeout = await +localforage.getItem(`${key}_set_ts_timeout`);
                 let now = +new Date();
@@ -750,14 +750,15 @@ Vue.component("lah-user-card", {
             if (this.empty(user_rows)) {
                 // find in localforage
                 user_rows = this.getLocalCache(this.id) || this.getLocalCache(this.name) || this.getLocalCache(this.ip);
+                console.log(user_rows, "from localforage");
                 if (this.empty(user_rows)) {
                     return false;
                 } else {
                     // also put back to $gstore
                     let payload = {};
-                    if (!this.empty(this.id)) { payload[this.id] = this.user_rows; }
-                    if (!this.empty(this.name)) { payload[this.name] = this.user_rows; }
-                    if (!this.empty(this.ip)) { payload[this.ip] = this.user_rows; }
+                    if (!this.empty(this.id)) { payload[this.id] = user_rows; }
+                    if (!this.empty(this.name)) { payload[this.name] = user_rows; }
+                    if (!this.empty(this.ip)) { payload[this.ip] = user_rows; }
                     this.$gstore.commit('cache', payload);
                 }
             }
@@ -768,19 +769,20 @@ Vue.component("lah-user-card", {
     created() {
         if (!this.disabled) {
             // mocks for testing
-            /*
-            let that = this;
-            axios.get('assets/js/mocks/user_info.json')
-            .then(function(response) {
-                that.user_rows = response.data.raw;
-                that.cacheUserRows()
-            }).catch(err => {
-                console.error(err)
-            }).finally(function() {
+            if (!this.restoreUserRows()) {
+                let that = this;
+                axios.get('assets/js/mocks/user_info.json')
+                .then(function(response) {
+                    that.user_rows = response.data.raw;
+                    that.cacheUserRows()
+                }).catch(err => {
+                    console.error(err)
+                }).finally(function() {
 
-            });
+                });
+            }
             return;
-            */
+            
             if (!this.restoreUserRows()) {
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "user_info",
