@@ -71,7 +71,7 @@ Vue.prototype.$gstore = (() => {
                             json_ts = await +localforage.getItem("userNames_timestamp");
                         }
                         let current_ts = +new Date();
-                        if (typeof json == "string" && current_ts - json_ts < state.dayMilliseconds) {
+                        if (typeof json == "object" && current_ts - json_ts < state.dayMilliseconds) {
                             // within a day use the cached data
                             commit("userNames", json || {});
                         } else {
