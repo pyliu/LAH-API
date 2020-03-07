@@ -68,7 +68,7 @@ Vue.prototype.$gstore = (() => {
                         let json, json_ts;
                         if (localforage) {
                             json = await localforage.getItem("userNames");
-                            json_ts = await +localforage.getItem("userNames_timestamp");
+                            json_ts = await localforage.getItem("userNames_timestamp");
                         }
                         let current_ts = +new Date();
                         if (typeof json == "object" && current_ts - json_ts < state.dayMilliseconds) {
@@ -99,19 +99,32 @@ Vue.prototype.$gstore = (() => {
                     }
                 },
                 async authenticate({ commit, state }) {
-                    await axios.post(CONFIG.JSON_API_EP, {
-                        type: 'authentication'
-                    }).then(res => {
-                        commit("isAdmin", res.data.is_admin || false);
-                    }).catch(err => {
+                    try {
+                        const set_ts = await localforage.getItem(`isAdmin_set_ts`);
+                        const now_ts = +new Date();
+                        // over 15 mins, re-authenticate ... otherwise skip the request
+                        if (state.isAdmin === undefined || !Number.isInteger(set_ts) || now_ts - set_ts > 900000) {
+                            await axios.post(CONFIG.JSON_API_EP, {
+                                type: 'authentication'
+                            }).then(res => {
+                                commit("isAdmin", res.data.is_admin || false);
+                                await localforage.setItem(`isAdmin_set_ts`, +new Date()); // == new Date().getTime()
+                                await localforage.setItem(`isAdmin`, res.data.is_admin || false);
+                            }).catch(err => {
+                                console.error(err);
+                                showAlert({
+                                    title: '認證失敗',
+                                    message: err.message,
+                                    type: 'danger'
+                                });
+                                commit("isAdmin", false);
+                            });
+                        } else {
+                            commit("isAdmin", await localforage.getItem(`isAdmin`));
+                        }
+                    } catch (err) {
                         console.error(err);
-                        showAlert({
-                            title: '認證失敗',
-                            message: err.message,
-                            type: 'danger'
-                        });
-                        commit("isAdmin", false);
-                    });
+                    }
                 }
             }
         });
@@ -302,7 +315,7 @@ Vue.mixin({
             if ($.trim(variable) == "") return true;
             return false;
         },
-        setLocalCache: async (key, val, timeout = 0) => {
+        setLocalCache: async function(key, val, timeout = 0) {
             if (!localforage) return false;
             try {
                 await localforage.setItem(key, val);
@@ -314,13 +327,14 @@ Vue.mixin({
             }
             return true;
         },
-        getLocalCache: async (key) => {
+        getLocalCache: async function(key) {
             if (!localforage) return false;
             try {
                 const val = await localforage.getItem(key);
-                let ts = await +localforage.getItem(`${key}_set_ts`);
-                let timeout = await +localforage.getItem(`${key}_set_ts_timeout`);
+                let ts = await localforage.getItem(`${key}_set_ts`);
+                let timeout = await localforage.getItem(`${key}_set_ts_timeout`) || 0;
                 let now = +new Date();
+                console.log(`get ${key} val. (timeout: ${timeout}), now - ts == ${now - ts}`, val);
                 if (timeout != 0 && now - ts > timeout) {
                     await localforage.removeItem(key);
                     console.log(`${key} is removed. (timeout: ${timeout}), now - ts == ${now - ts}`);
@@ -739,49 +753,56 @@ Vue.component("lah-user-card", {
         },
         cacheUserRows: function() {
             let payload = {};
+            // basically cache for one day in localforage
             if (!this.empty(this.id)) { payload[this.id] = this.user_rows; this.setLocalCache(this.id, this.user_rows, this.dayMilliseconds); }
             if (!this.empty(this.name)) { payload[this.name] = this.user_rows; this.setLocalCache(this.name, this.user_rows, this.dayMilliseconds); }
             if (!this.empty(this.ip)) { payload[this.ip] = this.user_rows; this.setLocalCache(this.ip, this.user_rows, this.dayMilliseconds); }
             this.$gstore.commit('cache', payload);
         },
-        restoreUserRows: function() {
-            // find in $gstore(in-memory)
-            let user_rows = this.cache.get(this.id) || this.cache.get(this.name) || this.cache.get(this.ip);
-            if (this.empty(user_rows)) {
-                // find in localforage
-                user_rows = this.getLocalCache(this.id) || this.getLocalCache(this.name) || this.getLocalCache(this.ip);
-                console.log(user_rows, "from localforage");
+        restoreUserRows: async function() {
+            try {
+                // find in $gstore(in-memory)
+                let user_rows = this.cache.get(this.id) || this.cache.get(this.name) || this.cache.get(this.ip);
                 if (this.empty(user_rows)) {
-                    return false;
-                } else {
-                    // also put back to $gstore
-                    let payload = {};
-                    if (!this.empty(this.id)) { payload[this.id] = user_rows; }
-                    if (!this.empty(this.name)) { payload[this.name] = user_rows; }
-                    if (!this.empty(this.ip)) { payload[this.ip] = user_rows; }
-                    this.$gstore.commit('cache', payload);
+                    // find in localforage
+                    user_rows = await this.getLocalCache(this.id) || await this.getLocalCache(this.name) || await this.getLocalCache(this.ip);
+                    console.log("restore cache from localforage ... ", user_rows[0]);
+                    if (this.empty(user_rows)) {
+                        console.log("no cache in localforage ... ", this.id || this.name || this.ip);
+                        return false;
+                    } else {
+                        // also put back to $gstore
+                        let payload = {};
+                        if (!this.empty(this.id)) { payload[this.id] = user_rows; }
+                        if (!this.empty(this.name)) { payload[this.name] = user_rows; }
+                        if (!this.empty(this.ip)) { payload[this.ip] = user_rows; }
+                        console.log("push localforage cache to $gstore ... ", this.id || this.name || this.ip);
+                        this.$gstore.commit('cache', payload);
+                    }
                 }
+                this.user_rows = user_rows || null;
+            } catch (err) {
+                console.error(err);
             }
-            this.user_rows = user_rows || null;
             return this.user_rows !== null;
         }
     },
     created() {
         if (!this.disabled) {
             // mocks for testing
-            if (!this.restoreUserRows()) {
-                let that = this;
-                axios.get('assets/js/mocks/user_info.json')
-                .then(function(response) {
-                    that.user_rows = response.data.raw;
-                    that.cacheUserRows()
-                }).catch(err => {
-                    console.error(err)
-                }).finally(function() {
+            // if (!this.restoreUserRows()) {
+            //     let that = this;
+            //     axios.get('assets/js/mocks/user_info.json')
+            //     .then(function(response) {
+            //         that.user_rows = response.data.raw;
+            //         that.cacheUserRows()
+            //     }).catch(err => {
+            //         console.error(err)
+            //     }).finally(function() {
 
-                });
-            }
-            return;
+            //     });
+            // }
+            // return;
             
             if (!this.restoreUserRows()) {
                 this.$http.post(CONFIG.JSON_API_EP, {
