@@ -316,14 +316,14 @@ Vue.mixin({
             if ($.trim(variable) == "") return true;
             return false;
         },
-        setLocalCache: async function(key, val, timeout = 0) {
-            if (!localforage) return false;
+        setLocalCache: async function(key, val, expire_timeout = 0) {
+            if (!localforage || this.empty(key) || this.empty(val)) return false;
             try {
                 let item = {
                     key: key,
                     value: val,
-                    timestamp: +new Date(), // == new Date().getTime()
-                    expire_ms: timeout      // milliseconds
+                    timestamp: +new Date(),     // == new Date().getTime()
+                    expire_ms: expire_timeout   // milliseconds
                 };
                 await localforage.setItem(key, item);
             } catch (err) {
@@ -333,20 +333,20 @@ Vue.mixin({
             return true;
         },
         getLocalCache: async function(key) {
-            if (!localforage) return false;
+            if (!localforage || this.empty(key)) return false;
             try {
                 const item = await localforage.getItem(key);
-                let val = item.value;
+                if (this.empty(item)) return false;
                 let ts = item.timestamp;
-                let timeout = item.expire_ms || 0;
+                let expire_time = item.expire_ms || 0;
                 let now = +new Date();
-                console.log(`get ${key} value. (timeout: ${timeout}), now - ts == ${now - ts}`, val);
-                if (timeout != 0 && now - ts > timeout) {
+                console.log(`get ${key} value. (expire_time: ${expire_time}), now - ts == ${now - ts}`, item.value);
+                if (expire_time != 0 && now - ts > expire_time) {
                     await localforage.removeItem(key);
-                    console.log(`${key} is removed. (timeout: ${timeout}), now - ts == ${now - ts}`);
+                    console.log(`${key} is removed. (expire_time: ${expire_time}), now - ts == ${now - ts}`);
                     return false;
                 } else {
-                    return val;
+                    return item.value;
                 }
             } catch (err) {
                 console.error(err);
@@ -772,9 +772,7 @@ Vue.component("lah-user-card", {
                 if (this.empty(user_rows)) {
                     // find in localforage
                     user_rows = await this.getLocalCache(this.id) || await this.getLocalCache(this.name) || await this.getLocalCache(this.ip);
-                    console.log("restore cache from localforage ... ", user_rows[0]);
                     if (this.empty(user_rows)) {
-                        console.log("no cache in localforage ... ", this.id || this.name || this.ip);
                         return false;
                     } else {
                         // also put back to $gstore
@@ -782,7 +780,6 @@ Vue.component("lah-user-card", {
                         if (!this.empty(this.id)) { payload[this.id] = user_rows; }
                         if (!this.empty(this.name)) { payload[this.name] = user_rows; }
                         if (!this.empty(this.ip)) { payload[this.ip] = user_rows; }
-                        console.log("push localforage cache to $gstore ... ", this.id || this.name || this.ip);
                         this.$gstore.commit('cache', payload);
                     }
                 }
@@ -793,10 +790,12 @@ Vue.component("lah-user-card", {
             return this.user_rows !== null;
         }
     },
-    created() {
+    async created() {
         if (!this.disabled) {
+            const succeed_cached = await this.restoreUserRows();
             // mocks for testing
-            // if (!this.restoreUserRows()) {
+            // if (!succeed_cached) {
+            //     console.log("getting mock data");
             //     let that = this;
             //     axios.get('assets/js/mocks/user_info.json')
             //     .then(function(response) {
@@ -809,8 +808,7 @@ Vue.component("lah-user-card", {
             //     });
             // }
             // return;
-            
-            if (!this.restoreUserRows()) {
+            if (!succeed_cached) {
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "user_info",
                     name: $.trim(this.name),
