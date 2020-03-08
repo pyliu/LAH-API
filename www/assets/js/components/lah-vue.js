@@ -108,7 +108,6 @@ Vue.prototype.$gstore = (() => {
                                 type: 'authentication'
                             }).then(res => {
                                 commit("isAdmin", res.data.is_admin || false);
-                                await localforage.setItem(`isAdmin_set_ts`, +new Date()); // == new Date().getTime()
                                 await localforage.setItem(`isAdmin`, res.data.is_admin || false);
                             }).catch(err => {
                                 console.error(err);
@@ -118,6 +117,8 @@ Vue.prototype.$gstore = (() => {
                                     type: 'danger'
                                 });
                                 commit("isAdmin", false);
+                            }).finally(() => {
+                                await localforage.setItem(`isAdmin_set_ts`, +new Date()); // == new Date().getTime()
                             });
                         } else {
                             commit("isAdmin", await localforage.getItem(`isAdmin`));
