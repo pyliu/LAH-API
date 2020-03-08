@@ -340,10 +340,10 @@ Vue.mixin({
                 let ts = item.timestamp;
                 let expire_time = item.expire_ms || 0;
                 let now = +new Date();
-                console.log(`get ${key} value. (expire_time: ${expire_time}), now - ts == ${now - ts}`, item.value);
+                //console.log(`get ${key} value. (expire_time: ${expire_time}), now - ts == ${now - ts}`, item.value);
                 if (expire_time != 0 && now - ts > expire_time) {
                     await localforage.removeItem(key);
-                    console.log(`${key} is removed. (expire_time: ${expire_time}), now - ts == ${now - ts}`);
+                    //console.log(`${key} is removed. (expire_time: ${expire_time}), now - ts == ${now - ts}`);
                     return false;
                 } else {
                     return item.value;
@@ -517,10 +517,14 @@ Vue.component("lah-alert", {
 });
 
 Vue.component("lah-header", {
-    template: `<lah-transition slide-down appear>
+    template: `<lah-transition slide-down>
         <nav v-if="show" class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-            <i class="my-auto fas fa-2x text-light" :class="icon"></i>&ensp;
-            <a class="navbar-brand my-auto" :href="location.href">{{leading}} <span class="small">(β)</span></a>
+            <i class="fas fa-2x text-light mr-1" :class="icon"></i>
+            <a class="navbar-brand my-auto" :href="location.href">{{leading}} <span style="font-size: .75rem">(β)</span></a>
+            <i v-if="showUserIcon" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
+            <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft">
+                <lah-user-card :ip="ip" @not-found="userCardNotFound"></lah-user-card>
+            </b-popover>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -575,8 +579,13 @@ Vue.component("lah-header", {
             url: "test.html",
             icon: "fa-charging-station",
             need_admin: true
-        }]
+        }],
+        ip: null
     }},
+    computed: {
+        enableUserCardPopover() { return this.ip === null },
+        showUserIcon() { return this.enableUserCardPopover }
+    },
     methods: {
         active: function(url) {
             return location.href.indexOf(url) > 0 ? 'active' : '';
@@ -594,6 +603,28 @@ Vue.component("lah-header", {
                 that.icon = link.icon;
                 that.leading = link.text;
             }
+        },
+        userCardNotFound: function(input) {
+            this.ip = null;
+            console.warn(`找不到 ${input} 的使用者資訊，無法顯示目前使用者的卡片。`);
+        }
+    },
+    async created() {
+        try {
+            const myip = await this.getLocalCache('myip');
+            if (this.empty(myip)) {
+                await this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'ip'
+                }).then(res => {
+                    myip = res.data.ip || null;
+                    this.setLocalCache('myip', myip, 86400000); // expired after a day
+                }).catch(err => {
+                    console.error(err);
+                });
+            }
+            this.ip = myip;
+        } catch (err) {
+            console.error(err);
         }
     },
     mounted() {
@@ -825,6 +856,7 @@ Vue.component("lah-user-card", {
                             message: `找不到 '${this.name || this.id || this.ip}' 資料`,
                             type: "warning"
                         });
+                        this.$emit('not-found', this.name || this.id || this.ip);
                     }
                 }).catch(err => {
                     console.error("userinfo-card::created parsing failed", err);

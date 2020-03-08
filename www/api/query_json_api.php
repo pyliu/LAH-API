@@ -63,6 +63,14 @@ switch ($_POST["type"]) {
 			), 0);
 		}
 		break;
+	case "ip":
+		$log->info("XHR [ip] The client IP is $client_ip");
+		echo json_encode(array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"ip" => $client_ip,
+			"data_count" => "1",
+			"message" => "client ip is ".$client_ip
+		), 0);
 	case "overdue_reg_cases":
 		$log->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
 		$log->info("XHR [overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");
