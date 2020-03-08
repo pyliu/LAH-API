@@ -523,7 +523,7 @@ Vue.component("lah-header", {
             <a class="navbar-brand my-auto" :href="location.href">{{leading}} <span style="font-size: .75rem">(β)</span></a>
             <i v-if="showUserIcon" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
             <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft">
-                <lah-user-card :ip="ip" @not-found="userCardNotFound"></lah-user-card>
+                <lah-user-card :ip="ip" @not-found="userNotFound"></lah-user-card>
             </b-popover>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -604,7 +604,7 @@ Vue.component("lah-header", {
                 that.leading = link.text;
             }
         },
-        userCardNotFound: function(input) {
+        userNotFound: function(input) {
             this.ip = null;
             console.warn(`找不到 ${input} 的使用者資訊，無法顯示目前使用者的卡片。`);
         }
@@ -856,7 +856,7 @@ Vue.component("lah-user-card", {
                             message: `找不到 '${this.name || this.id || this.ip}' 資料`,
                             type: "warning"
                         });
-                        this.$emit('not-found', this.name || this.id || this.ip);
+                        this.$emit('notFound', this.name || this.id || this.ip);
                     }
                 }).catch(err => {
                     console.error("userinfo-card::created parsing failed", err);
