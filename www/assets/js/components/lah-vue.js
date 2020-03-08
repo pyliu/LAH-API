@@ -108,7 +108,7 @@ Vue.prototype.$gstore = (() => {
                                 type: 'authentication'
                             }).then(res => {
                                 commit("isAdmin", res.data.is_admin || false);
-                                await localforage.setItem(`isAdmin`, res.data.is_admin || false);
+                                localforage.setItem(`isAdmin`, res.data.is_admin || false);
                             }).catch(err => {
                                 console.error(err);
                                 showAlert({
@@ -118,7 +118,7 @@ Vue.prototype.$gstore = (() => {
                                 });
                                 commit("isAdmin", false);
                             }).finally(() => {
-                                await localforage.setItem(`isAdmin_set_ts`, +new Date()); // == new Date().getTime()
+                                localforage.setItem(`isAdmin_set_ts`, +new Date()); // == new Date().getTime()
                             });
                         } else {
                             commit("isAdmin", await localforage.getItem(`isAdmin`));
@@ -319,9 +319,13 @@ Vue.mixin({
         setLocalCache: async function(key, val, timeout = 0) {
             if (!localforage) return false;
             try {
-                await localforage.setItem(key, val);
-                await localforage.setItem(`${key}_set_ts`, +new Date()); // == new Date().getTime()
-                await localforage.setItem(`${key}_set_ts_timeout`, timeout);    // milliseconds
+                let item = {
+                    key: key,
+                    value: val,
+                    timestamp: +new Date(), // == new Date().getTime()
+                    expire_ms: timeout      // milliseconds
+                };
+                await localforage.setItem(key, item);
             } catch (err) {
                 console.error(err);
                 return false;
@@ -331,11 +335,12 @@ Vue.mixin({
         getLocalCache: async function(key) {
             if (!localforage) return false;
             try {
-                const val = await localforage.getItem(key);
-                let ts = await localforage.getItem(`${key}_set_ts`);
-                let timeout = await localforage.getItem(`${key}_set_ts_timeout`) || 0;
+                const item = await localforage.getItem(key);
+                let val = item.value;
+                let ts = item.timestamp;
+                let timeout = item.expire_ms || 0;
                 let now = +new Date();
-                console.log(`get ${key} val. (timeout: ${timeout}), now - ts == ${now - ts}`, val);
+                console.log(`get ${key} value. (timeout: ${timeout}), now - ts == ${now - ts}`, val);
                 if (timeout != 0 && now - ts > timeout) {
                     await localforage.removeItem(key);
                     console.log(`${key} is removed. (timeout: ${timeout}), now - ts == ${now - ts}`);
