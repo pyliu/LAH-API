@@ -1,6 +1,11 @@
 /**
  * Land-Affairs-Helper(lah) Vue custom components
  */
+console.assert(typeof jQuery == "function", "jQuery is not loaded, did you include jquery.min.js in the page??");
+console.assert(typeof CONFIG == "object", "CONFIG is not loaded, did you include global.js in the page??");
+console.assert(typeof axios == "function", "axios is not loaded, did you include axios.min.js in the page??");
+console.assert(typeof localforage == "object", "localforage is not loaded, did you include localforage.min.js in the page??");
+console.assert(typeof Vuex == "object", "Vuex is not loaded, did you include vuex.js in the page??");
 Vue.config.devtools = true;
 /**
  * set axios defaults
@@ -31,7 +36,6 @@ if (CONFIG.DEBUG_MODE) {
 // https://vuejs.org/v2/cookbook/adding-instance-properties.html
 Vue.prototype.$http = axios;
 Vue.prototype.$lf = localforage || {};
-console.assert(typeof Vuex == "object", "Vuex is not loaded, did you include vuex.js in the page??");
 Vue.prototype.$gstore = (() => {
     if (typeof Vuex == "object") {
         return new Vuex.Store({
