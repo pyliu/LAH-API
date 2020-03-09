@@ -22,7 +22,7 @@ if (Vue) {
                     <b-icon v-else icon="table" font-scale="1"></b-icon>
                     {{listMode ? "統計圖表" : "表格顯示"}}
                 </b-button>
-                <b-button id="reload" variant="primary" size="sm" @click="load">
+                <b-button id="reload" variant="primary" size="sm" @click="reload">
                     <i class="fas fa-sync"></i>
                     刷新
                     <b-badge variant="light">
@@ -185,6 +185,9 @@ if (Vue) {
             resetCountdown: function () {
                 this.$refs.countdown.totalMilliseconds = this.milliseconds;
             },
+            setCountdown: function (milliseconds) {
+                this.$refs.countdown.totalMilliseconds = milliseconds || this.milliseconds;
+            },
             startCountdown: function () {
                 this.$refs.countdown.start();
             },
@@ -222,7 +225,16 @@ if (Vue) {
                 // payload, e.g. {point: i, label: "黃欣怡 HB1206", value: 5}
                 this.searchByReviewer(payload.label);
             },
-            load: function(e) {
+            reload: async function () {
+                const key = this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases";
+                try {
+                    const succeed = await this.removeLocalCache(key);
+                    if (succeed) this.load();
+                } catch (err) {
+                    console.error(err);
+                }
+            },
+            load: async function(e) {
                 // busy ...
                 this.isBusy = true;
                 this.title = this.is_overdue_mode ? "逾期" : "即將逾期";
@@ -235,52 +247,70 @@ if (Vue) {
                     this.isBusy = false;
                     Vue.nexTick ? Vue.nexTick(this.makeCaseIDClickable) : setTimeout(this.makeCaseIDClickable, 800);
                 } else {
-                    let params = {
-                        type: this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases",
-                        reviewer_id: this.reviewerId
-                    }
-                    this.$http.post(CONFIG.JSON_API_EP, params).then(res => {
-                        let jsonObj = res.data;
-                        console.assert(jsonObj.status == XHR_STATUS_CODE.SUCCESS_NORMAL || jsonObj.status == XHR_STATUS_CODE.SUCCESS_WITH_NO_RECORD, `查詢登記案件(${this.title})回傳狀態碼有問題【${jsonObj.status}】`);
-
-                        // set data to store
-                        // NOTE: the payload must be valid or it will not update UI correctly
-                        this.case_store.commit("list", jsonObj.items);
-                        this.case_store.commit("list_by_id", jsonObj.items_by_id);
-
-                        this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
-
-                        let now = new Date();
-                        if (now.getHours() >= 7 && now.getHours() < 17) {
-                            // auto start countdown to prepare next reload
-                            this.resetCountdown();
-                            this.startCountdown();
-                            // add effect to catch attention
-                            addAnimatedCSS("#reload, caption", {name: "flash"});
-                        } else {
-                            console.warn("非上班時間，停止自動更新。");
-                            addNotification({
-                                title: "自動更新停止通知",
-                                message: "非上班時間，停止自動更新。",
-                                type: "warning"
+                    try {
+                        const key = this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases";
+                        const jsonObj = await this.getLocalCache(key);
+                        if (jsonObj === false) {
+                            this.$http.post(CONFIG.JSON_API_EP, {
+                                type: key,
+                                reviewer_id: this.reviewerId
+                            }).then(res => {
+                                this.setLocalCache(key, res.data, this.milliseconds - 5000);   // expired after 14 mins 55 secs
+                                console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL || res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_NO_RECORD, `查詢登記案件(${this.title})回傳狀態碼有問題【${res.data.status}】`);
+                                if (res.data.status != XHR_STATUS_CODE.SUCCESS_NORMAL && res.data.status != XHR_STATUS_CODE.SUCCESS_WITH_NO_RECORD) {
+                                    this.removeLocalCache(key);
+                                }
+                                this.loaded(res.data);
+                            }).catch(ex => {
+                                console.error("case-reg-overdue::load parsing failed", ex);
+                                showAlert({message: "case-reg-overdue::load XHR連線查詢有問題!!【" + ex.message + "】", type: "danger"});
                             });
+                        } else {
+                            // cache hit!
+                            this.loaded(jsonObj);
+                            const remaining_cache_time = await this.getLocalCacheExpireRemainingTime(key);
+                            this.setCountdown(remaining_cache_time);
+                            console.warn(`快取資料將在 ${(remaining_cache_time / 1000).toFixed(1)} 秒後到期。`);
                         }
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
+            },
+            loaded: function (jsonObj) {
+                // set data to store
+                // NOTE: the payload must be valid or it will not update UI correctly
+                this.case_store.commit("list", jsonObj.items);
+                this.case_store.commit("list_by_id", jsonObj.items_by_id);
 
-                        // release busy ...
-                        this.isBusy = false;
-                        // prepare the chart data for rendering
-                        this.setChartData();
-                        // make .reg_case_id clickable
-                        Vue.nextTick(this.makeCaseIDClickable);
-                        // send notification
-                        addNotification({
-                            title: `查詢登記案件(${this.title})`,
-                            message: `查詢到 ${jsonObj.data_count} 件案件`,
-                            type: this.is_overdue_mode ? "danger" : "warning"
-                        });
-                    }).catch(ex => {
-                        console.error("case-reg-overdue::load parsing failed", ex);
-                        showAlert({message: "case-reg-overdue::load XHR連線查詢有問題!!【" + ex.message + "】", type: "danger"});
+                this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
+
+                // release busy ...
+                this.isBusy = false;
+                // prepare the chart data for rendering
+                this.setChartData();
+                // make .reg_case_id clickable
+                Vue.nextTick(this.makeCaseIDClickable);
+                // send notification
+                addNotification({
+                    title: `查詢登記案件(${this.title})`,
+                    message: `查詢到 ${jsonObj.data_count} 件案件`,
+                    type: this.is_overdue_mode ? "danger" : "warning"
+                });
+                
+                let now = new Date();
+                if (now.getHours() >= 7 && now.getHours() < 17) {
+                    // auto start countdown to prepare next reload
+                    this.resetCountdown();
+                    this.startCountdown();
+                    // add effect to catch attention
+                    addAnimatedCSS("#reload, caption", {name: "flash"});
+                } else {
+                    console.warn("非上班時間，停止自動更新。");
+                    addNotification({
+                        title: "自動更新停止通知",
+                        message: "非上班時間，停止自動更新。",
+                        type: "warning"
                     });
                 }
             },

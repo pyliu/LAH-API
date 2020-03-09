@@ -350,6 +350,34 @@ Vue.mixin({
                 console.error(err);
             }
             return false;
+        },
+        getLocalCacheExpireRemainingTime: async function(key) {
+            if (!localforage || this.empty(key)) return false;
+            try {
+                const item = await localforage.getItem(key);
+                if (this.empty(item)) return false;
+                let ts = item.timestamp;
+                let expire_time = item.expire_ms || 0;
+                let now = +new Date();
+                //console.log(`get ${key} value. (expire_time: ${expire_time}), now - ts == ${now - ts}`, item.value);
+                if (expire_time == 0) {
+                    return false;
+                } else {
+                    return expire_time - (now - ts);    // milliseconds
+                }
+            } catch (err) {
+                console.error(err);
+            }
+            return false;
+        },
+        removeLocalCache: function(key) {
+            if (!localforage || this.empty(key)) return false;
+            try {
+                localforage.removeItem(key);
+            } catch (err) {
+                console.error(err);
+            }
+            return true;
         }
     }
 });
