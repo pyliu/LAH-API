@@ -1060,6 +1060,10 @@ class Query {
 				$log->warning(__METHOD__."：無法刪除 MOICAT.RINDX 跳過！");
 				continue;
 			}
+			if ($tmp_tbl_name == "MOIPRT.PHIND") {
+				$log->warning(__METHOD__."：無法刪除 MOIPRT.PHIND 跳過！");
+				continue;
+			}
 			$log->info(__METHOD__."：刪除 $tmp_tbl_name 資料 ... ");
 			$this->db->parse("
 				DELETE FROM ".$tmp_tbl_name." WHERE ".$key."03 = :bv_year AND ".$key."04_1 = :bv_code AND ".$key."04_2 = :bv_number

@@ -74,7 +74,7 @@ return array(
     "MOIPRT.PB014" => "TB",
     "MOIPRT.PB015" => "TB",
     "MOIPRT.PB016" => "TB",
-    "MOIPRT.PHIND" => "II",
+    "MOIPRT.PHIND" => "II", // 案件索引, PHIND must be kept usually (unless you want to delete whole case)
     "MOIPRT.PNLPO" => "NA",
     "MOIPRT.POA11" => "OA"
 );

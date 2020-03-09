@@ -97,7 +97,7 @@ if (Vue) {
                             html += "<small>"
                                  + `　<button id='backup_temp_btn_${i}' data-clean-btn-id='clean_temp_btn_${i}' data-filename='${filename_prefix}-${item[0]}' class='backup_tbl_temp_data btn btn-sm btn-outline-primary'>備份</button>`
                                  + `<span class='hide ins_sql' id="sql_${i}">${INS_SQL}</span> `
-                                 + ` <button id='clean_temp_btn_${i}' data-tbl='${item[0]}' data-backup-btn-id='backup_temp_btn_${i}' class='clean_tbl_temp_data btn btn-sm btn-outline-danger' ${item[0] == "MOICAT.RINDX" ? "disabled": ""}>清除</button>`
+                                 + ` <button id='clean_temp_btn_${i}' data-tbl='${item[0]}' data-backup-btn-id='backup_temp_btn_${i}' class='clean_tbl_temp_data btn btn-sm btn-outline-danger' ${item[0] == "MOICAT.RINDX" || item[0] == "MOIPRT.PHIND" ? "disabled": ""} title="${item[0] == "MOICAT.RINDX" || item[0] == "MOIPRT.PHIND" ? "重要案件索引，無法刪除！" : ""}">清除</button>`
                                  + "</small>";
                         }
                         html += `<br />&emsp;<small>－&emsp;${item[2]}</small> <br />`;
