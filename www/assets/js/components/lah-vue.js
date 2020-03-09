@@ -520,10 +520,10 @@ Vue.component("lah-header", {
             <i class="fas fa-2x text-light mr-1" :class="icon"></i>
             <a class="navbar-brand my-auto" :href="location.href">{{leading}} <span style="font-size: .75rem">(β)</span></a>
             <i v-if="showUserIcon" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
-            <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="auto">
+            <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="auto" delay="250">
                 <lah-user-card :ip="ip" @not-found="userNotFound"></lah-user-card>
             </b-popover>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler mr-5" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
         
@@ -662,7 +662,7 @@ Vue.component("lah-user-card", {
         <b-card
             v-for="user_data in user_rows"
             class="overflow-hidden bg-light"
-            style="max-width: 480px; font-size: 0.9rem;"
+            style="max-width: 480px;"
             :title="user_data['AP_USER_NAME']"
             :sub-title="user_data['AP_JOB']"
         >
@@ -674,7 +674,7 @@ Vue.component("lah-user-card", {
                     style="max-width: 220px"
                 ></b-card-img>
             </b-link>
-            <b-card-text>
+            <b-card-text class="small">
                 <lah-ban v-if="isLeft(user_data)" class='text-danger mx-auto'> 已離職【{{user_data["AP_OFF_DATE"]}}】</lah-ban>
                 <div>ID：{{user_data["DocUserID"]}}</div>
                 <div v-if="isAdmin">電腦：{{user_data["AP_PCIP"]}}</div>

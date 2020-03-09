@@ -788,6 +788,11 @@ switch ($_POST["type"]) {
 		}
 		if (empty($results)) {
 			$results = $user_info->searchByIP($_POST["ip"]);
+			$len = count($results);
+			if ($len > 1) {
+				$last = $results[$len - 1];
+				$results = array($last);
+			}
 		}
 		if (empty($results)) {
 			echoErrorJSONString("查無 ".$_POST["name"]." 資料。");

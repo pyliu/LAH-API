@@ -4,6 +4,8 @@ require_once("./include/Query.class.php");
 require_once("./include/Message.class.php");
 require_once("./include/Logger.class.php");
 require_once("./include/Stats.class.php");
+require_once("./include/UserInfo.class.php");
+
 //echo date("H") . date("i", strtotime("1 min")) . date("s", strtotime("1 second"))."<br/>";
 
 //$xkey = (random_int(1, 255) * date("H") * date("i", strtotime("1 min")) * date("s", strtotime("1 second"))) % 65535;
@@ -45,12 +47,15 @@ echo str_replace("\n", "<br />", print_r($rows, true));
 // $dog = new Watchdog();
 // echo $dog->isOn($overdueSchedule);
 
-$db = new SQLite3(DEF_SQLITE_DB);
-$now = $db->querySingle("select TOTAL from stats WHERE ID = 'overdue_msg_count'", true);
-var_dump($now["TOTAL"]);
-var_dump($db->query("SELECT * FROM stats"));
-$db->close();
+// $db = new SQLite3(DEF_SQLITE_DB);
+// $now = $db->querySingle("select TOTAL from stats WHERE ID = 'overdue_msg_count'", true);
+// var_dump($now["TOTAL"]);
+// var_dump($db->query("SELECT * FROM stats"));
+// $db->close();
 
-$db = new Stats();
-$db->addOverdueMsgCount(123);
+// $db = new Stats();
+// $db->addOverdueMsgCount(123);
+
+$userinfo = new UserInfo();
+var_dump($userinfo->searchByIP("220.1.35.48"));
 ?>

@@ -37,7 +37,7 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
 
 <body id="html_body">
   <section id="main_content_section" class="mb-5">
-    <form id="search_form" class="form-inline mr-2 my-2" style="right: 0px; top: 0px;position: absolute; z-index: 9999;" onsubmit="return false">
+    <form id="search_form" class="form-inline mr-5 my-2" style="right: 0px; top: 0px;position: absolute; z-index: 9999;" onsubmit="return false">
       <label class="text-white" for="date_input">日期：</label>
       <input id="date_input" class="date_picker form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" value="<?php echo RegCaseData::toDate($qday); ?>" readonly />
       <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜尋</button>
