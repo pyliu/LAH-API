@@ -7,25 +7,10 @@ if (Vue) {
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-easycard_query_day">日期</span>
                     </div>
-                    <!--
-                    <b-form-input
-                        @keyup.enter="query"
-                        id="easycard_query_day"
-                        :class="['form-control', 'no-cache', 'bg-light', 'h-100', 'pl-2', 'border']"
-                        placeholder="1081231"
-                        data-trigger="manual"
-                        data-toggle="popover"
-                        data-content="e.g. 1081217"
-                        data-placement="bottom"
-                        v-model="date"
-                        plaintext
-                    >
-                    </b-form-input>
-                    -->
                     <b-form-input
                         id="easycard_query_day"
                         type="date"
-                        v-model="bc_date"
+                        v-model="ad_date"
                         size="sm"
                         :class="['no-cache']"
                         :formatter="convertTWDate"
@@ -40,7 +25,7 @@ if (Vue) {
         data: () => {
             return {
                 date: "",
-                bc_date: "2020-01-08"
+                ad_date: "2020-01-08"
             }
         },
         methods: {
@@ -66,13 +51,13 @@ if (Vue) {
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                         addNotification({
-                            title: "檢測悠遊卡自動加值失敗",
-                            message: `<i class='fas fa-circle text-success'></i>&ensp;${res.data.message}`,
+                            title: "檢測悠遊卡自動加值付款失敗",
+                            message: `<i class='fas fa-circle text-success mr-1'></i>${res.data.message}`,
                             type: "success"
                         });
                     } else {
                         showModal({
-                            title: "<i class='fas fa-circle text-warning'></i>&ensp;<strong class='text-danger'>找到下列資料</strong>",
+                            title: "<i class='fas fa-circle text-warning mr-1'></i><strong class='text-danger'>找到下列資料</strong>",
                             body: h("easycard-payment-check-item", { props: { data: res.data.raw } }),
                             size: "md"
                         });
@@ -80,7 +65,7 @@ if (Vue) {
                     this.isBusy = false;
                 }).catch(ex => {
                     console.error("easycard-payment-check::query parsing failed", ex);
-                    showAlert({title: "檢測悠遊卡自動加值失敗", message: ex.message, type: "danger"});
+                    showAlert({title: "檢測悠遊卡自動加值付款失敗", message: ex.message, type: "danger"});
                 });
             },
             popup: () => {
@@ -168,7 +153,7 @@ if (Vue) {
         created: function() {
             let d = new Date();
             this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
-            this.bc_date = d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+            this.ad_date = d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
         },
         mounted: function() { }
     });
