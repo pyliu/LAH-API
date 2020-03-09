@@ -71,6 +71,7 @@ switch ($_POST["type"]) {
 			"data_count" => "1",
 			"message" => "client ip is ".$client_ip
 		), 0);
+		break;
 	case "overdue_reg_cases":
 		$log->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
 		$log->info("XHR [overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");

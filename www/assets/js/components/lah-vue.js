@@ -100,10 +100,11 @@ Vue.prototype.$gstore = (() => {
                 },
                 async authenticate({ commit, state }) {
                     try {
+                        const isAdmin = await localforage.getItem(`isAdmin`);
                         const set_ts = await localforage.getItem(`isAdmin_set_ts`);
                         const now_ts = +new Date();
                         // over 15 mins, re-authenticate ... otherwise skip the request
-                        if (state.isAdmin === undefined || !Number.isInteger(set_ts) || now_ts - set_ts > 900000) {
+                        if (isAdmin === null || !Number.isInteger(set_ts) || now_ts - set_ts > 900000) {
                             await axios.post(CONFIG.JSON_API_EP, {
                                 type: 'authentication'
                             }).then(res => {
@@ -121,7 +122,7 @@ Vue.prototype.$gstore = (() => {
                                 localforage.setItem(`isAdmin_set_ts`, +new Date()); // == new Date().getTime()
                             });
                         } else {
-                            commit("isAdmin", await localforage.getItem(`isAdmin`));
+                            commit("isAdmin", isAdmin);
                         }
                     } catch (err) {
                         console.error(err);
@@ -212,17 +213,14 @@ Vue.mixin({
         "lah-ban": {
             template: `<i class="text-danger fas fa-ban ld ld-breath" :class="[size]"><slot>其他內容</slot></i>`,
             props: ["size"],
-            data: function() { return { size: "" } },
             created() {
                 switch(this.size) {
                     case "xs": this.size = "fa-xs"; break;
                     case "sm": this.size = "fa-sm"; break;
                     case "lg": this.size = "fa-lg"; break;
                     default:
-                        if (this.size[this.size.length - 1] === "x") {
+                        if (this.size && this.size[this.size.length - 1] === "x") {
                             this.size = `fa-${this.size}`;
-                        } else {
-                            this.size = ""
                         }
                         break;
                 }
@@ -522,7 +520,7 @@ Vue.component("lah-header", {
             <i class="fas fa-2x text-light mr-1" :class="icon"></i>
             <a class="navbar-brand my-auto" :href="location.href">{{leading}} <span style="font-size: .75rem">(β)</span></a>
             <i v-if="showUserIcon" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
-            <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft">
+            <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="auto">
                 <lah-user-card :ip="ip" @not-found="userNotFound"></lah-user-card>
             </b-popover>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
@@ -583,7 +581,7 @@ Vue.component("lah-header", {
         ip: null
     }},
     computed: {
-        enableUserCardPopover() { return this.ip === null },
+        enableUserCardPopover() { return this.ip !== null },
         showUserIcon() { return this.enableUserCardPopover }
     },
     methods: {
@@ -611,7 +609,7 @@ Vue.component("lah-header", {
     },
     async created() {
         try {
-            const myip = await this.getLocalCache('myip');
+            let myip = await this.getLocalCache('myip');
             if (this.empty(myip)) {
                 await this.$http.post(CONFIG.JSON_API_EP, {
                     type: 'ip'
