@@ -11,8 +11,14 @@ if (Vue) {
                             </b-card-header>
                             <b-collapse id="case-detail" visible accordion="reg-case" role="tabpanel">
                                 <b-card-body>
-                                    <b-form-row>
-                                        <b-col>
+                                    <b-form-row class="mb-1">
+                                        <b-col>    
+                                            <lah-transition appear>
+                                                <div v-show="show_op_card" class="mr-1 float-right" style="width:400px">
+                                                    <span><i class="far fa-user"></i> 作業人員</span>
+                                                    <lah-user-card @not-found="handleNotFound" :id="jsonObj.作業人員ID"></lah-user-card>
+                                                </div>
+                                            </lah-transition>
                                             <div v-if="jsonObj.跨所 == 'Y'"><span class='bg-info text-white rounded p-1'>跨所案件 ({{jsonObj.資料收件所}} => {{jsonObj.資料管轄所}})</span></div>
                                             收件字號：
                                             <a :title="'收件資料 on ' + ap_server" href="javascript:void(0)" @click="window.vueApp.open(case_data_url, $event)">
@@ -21,7 +27,7 @@ if (Vue) {
                                             收件時間：{{jsonObj.收件時間}} <br/>
                                             測量案件：{{jsonObj.測量案件}} <br/>
                                             限辦期限：<span v-html="jsonObj.限辦期限"></span> <br/>
-                                            作業人員：<span id='the_incase_operator_span' class='user_tag' :data-container="'#'+user_card_container" :data-id="jsonObj.作業人員ID" :data-name="jsonObj.作業人員" data-title="作業人員">{{jsonObj.作業人員}}</span> <br/>
+                                            作業人員：<span class='user_tag'>{{jsonObj.作業人員}}</span> <br/>
                                             辦理情形：{{jsonObj.辦理情形}} <br/>
                                             登記原因：{{jsonObj.登記原因}} <br/>
                                             區域：{{area}}【{{jsonObj.raw.RM10}}】 <br/>
@@ -172,13 +178,6 @@ if (Vue) {
                         </b-card>
                     </div>
                 </b-col>
-                <lah-transition appear>
-                    <div v-show="enabled_card" style="max-width: 220px; position: relative;" class="mr-1">
-                        <span><i class="far fa-user"></i> 作業人員</span>
-                        <b-button-close @click="closeCard"></b-button-close>
-                        <div id="user_card_container"></div>
-                    </div>
-                </lah-transition>
             </b-form-row>
         </div>`,
         props: ["jsonObj"],
@@ -190,16 +189,12 @@ if (Vue) {
                 case_status_url: "",
                 case_data_url: "",
                 is_ongoing: false,
-                user_card_container: "user_card_container",
                 enabled_card: true,
-                timer: null
+                show_op_card: true
             }
         },
         methods: {
-            closeCard() {
-                $("#"+this.user_card_container).html("");
-                this.enabled_card = false;
-            }
+            handleNotFound: function(input) { this.show_op_card = false }
         },
         created() {
             this.rm10 = this.jsonObj.raw.RM10 ? this.jsonObj.raw.RM10 : "XX";
@@ -221,17 +216,7 @@ if (Vue) {
         mounted() {
             if (this.enabled_card) {
                 addUserInfoEvent();
-                //load current operator user info
-                $("#the_incase_operator_span").trigger("click");
-                // hide the col if user info is not found, wait for xhr loading is finished
-                let that = this;
-                this.timer = setInterval(() => {
-                    that.enabled_card = !that.empty($("#"+that.user_card_container).text());
-                }, 800);
             }
-        },
-        beforeDestroy() {
-            clearTimeout(this.timer);
         }
     });
 } else {

@@ -520,7 +520,7 @@ Vue.component("lah-header", {
             <i class="fas fa-2x text-light mr-1" :class="icon"></i>
             <a class="navbar-brand my-auto" :href="location.href">{{leading}} <span style="font-size: .75rem">(β)</span></a>
             <i v-if="showUserIcon" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
-            <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="auto" delay="250">
+            <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
                 <lah-user-card :ip="ip" @not-found="userNotFound"></lah-user-card>
             </b-popover>
             <button class="navbar-toggler mr-5" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
@@ -658,36 +658,39 @@ Vue.component("lah-footer", {
 });
 
 Vue.component("lah-user-card", {
-    template: `<b-card-group deck v-show="showCard">
-        <b-card
-            v-for="user_data in user_rows"
-            class="overflow-hidden bg-light"
-            style="max-width: 480px;"
-            :title="user_data['AP_USER_NAME']"
-            :sub-title="user_data['AP_JOB']"
-        >
-            <b-link :href="photoUrl(user_data)" target="_blank">
-                <b-card-img
-                    :src="photoUrl(user_data)"
-                    :alt="user_data['AP_USER_NAME']"
-                    class="img-thumbnail float-right mx-auto ml-2"
-                    style="max-width: 220px"
-                ></b-card-img>
-            </b-link>
-            <b-card-text class="small">
-                <lah-ban v-if="isLeft(user_data)" class='text-danger mx-auto'> 已離職【{{user_data["AP_OFF_DATE"]}}】</lah-ban>
-                <div>ID：{{user_data["DocUserID"]}}</div>
-                <div v-if="isAdmin">電腦：{{user_data["AP_PCIP"]}}</div>
-                <div v-if="isAdmin">生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge(user_data) !== false" :variant="birthAgeVariant(user_data)" pill>{{birthAge(user_data)}}歲</b-badge></div>
-                <div>單位：{{user_data["AP_UNIT_NAME"]}}</div>
-                <div>工作：{{user_data["AP_WORK"]}}</div>
-                <div v-if="isAdmin">學歷：{{user_data["AP_HI_SCHOOL"]}}</div>
-                <div v-if="isAdmin">考試：{{user_data["AP_TEST"]}}</div>
-                <div v-if="isAdmin">手機：{{user_data["AP_SEL"]}}</div>
-                <div>到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge(user_data) !== false" :variant="workAgeVariant(user_data)" pill>{{workAge(user_data)}}年</b-badge></div>
-            </b-card-text>
-        </b-card>
-    </b-card-group>`,
+    template: `<div>
+        <b-card-group deck v-if="showCard">
+            <b-card
+                v-for="user_data in user_rows"
+                class="overflow-hidden bg-light"
+                style="max-width: 480px;"
+                :title="user_data['AP_USER_NAME']"
+                :sub-title="user_data['AP_JOB']"
+            >
+                <b-link :href="photoUrl(user_data)" target="_blank">
+                    <b-card-img
+                        :src="photoUrl(user_data)"
+                        :alt="user_data['AP_USER_NAME']"
+                        class="img-thumbnail float-right mx-auto ml-2"
+                        style="max-width: 220px"
+                    ></b-card-img>
+                </b-link>
+                <b-card-text class="small">
+                    <lah-ban v-if="isLeft(user_data)" class='text-danger mx-auto'> 已離職【{{user_data["AP_OFF_DATE"]}}】</lah-ban>
+                    <div>ID：{{user_data["DocUserID"]}}</div>
+                    <div v-if="isAdmin">電腦：{{user_data["AP_PCIP"]}}</div>
+                    <div v-if="isAdmin">生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge(user_data) !== false" :variant="birthAgeVariant(user_data)" pill>{{birthAge(user_data)}}歲</b-badge></div>
+                    <div>單位：{{user_data["AP_UNIT_NAME"]}}</div>
+                    <div>工作：{{user_data["AP_WORK"]}}</div>
+                    <div v-if="isAdmin">學歷：{{user_data["AP_HI_SCHOOL"]}}</div>
+                    <div v-if="isAdmin">考試：{{user_data["AP_TEST"]}}</div>
+                    <div v-if="isAdmin">手機：{{user_data["AP_SEL"]}}</div>
+                    <div>到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge(user_data) !== false" :variant="workAgeVariant(user_data)" pill>{{workAge(user_data)}}年</b-badge></div>
+                </b-card-text>
+            </b-card>
+        </b-card-group>
+        <h6 v-else><i class="fas fa-exclamation-circle text-danger fa-lg"></i> 找不到使用者 「{{name || id || ip}}」</h6>
+    </div>`,
     props: ['id', 'name', 'ip'],
     data: function() { return {
         disabled: CONFIG.DISABLE_MSDB_QUERY,
@@ -848,12 +851,7 @@ Vue.component("lah-user-card", {
                         this.user_rows = res.data.raw;
                         this.cacheUserRows();
                     } else {
-                        addNotification({
-                            title: "使用者資訊",
-                            subtitle: `${this.id}-${this.name}-${this.ip}`,
-                            message: `找不到 '${this.name || this.id || this.ip}' 資料`,
-                            type: "warning"
-                        });
+                        console.warn(`找不到 '${this.name || this.id || this.ip}' 資料`);
                         this.$emit('notFound', this.name || this.id || this.ip);
                     }
                 }).catch(err => {
@@ -867,8 +865,7 @@ Vue.component("lah-user-card", {
                 });
             }
         }
-    },
-    mounted() {}
+    }
 });
 
 $(document).ready(() => {
@@ -1138,7 +1135,7 @@ $(document).ready(() => {
                             }
                         }),
                         title: "登記案件詳情",
-                        size: this.isAdmin ? "xl" : "lg"
+                        size: "lg"
                     });
                 }
             },
