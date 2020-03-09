@@ -721,7 +721,7 @@ Vue.component("lah-user-card", {
                 </b-card-text>
             </b-card>
         </b-card-group>
-        <h6 v-else><i class="fas fa-exclamation-circle text-danger fa-lg"></i> 找不到使用者 「{{name || id || ip}}」</h6>
+        <h6 v-else><i class="fas fa-exclamation-circle text-danger fa-lg ld ld-breath"></i> 找不到使用者 「{{name || id || ip}}」</h6>
     </div>`,
     props: ['id', 'name', 'ip'],
     data: function() { return {
