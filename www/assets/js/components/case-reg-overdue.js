@@ -269,7 +269,8 @@ if (Vue) {
                             // cache hit!
                             this.loaded(jsonObj);
                             const remaining_cache_time = await this.getLocalCacheExpireRemainingTime(key);
-                            this.setCountdown(remaining_cache_time);
+                            this.setCountdown(remaining_cache_time + 5000);
+                            this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date(+new Date() - this.milliseconds + remaining_cache_time - 5000)}`;
                             console.warn(`快取資料將在 ${(remaining_cache_time / 1000).toFixed(1)} 秒後到期。`);
                         }
                     } catch (err) {
