@@ -333,10 +333,10 @@ if (Vue) {
         mounted() {
             if (this.inSearch === true) {
                 // in modal dialog
-                this.height = window.innerHeight - 185 + "px";
+                this.height = window.innerHeight - 170 + "px";
                 this.small = true;
             } else {
-                this.height = window.innerHeight - 145 + "px";
+                this.height = window.innerHeight - 130 + "px";
             }
         },
         created() {
