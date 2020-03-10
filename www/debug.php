@@ -56,6 +56,7 @@ echo str_replace("\n", "<br />", print_r($rows, true));
 // $db = new Stats();
 // $db->addOverdueMsgCount(123);
 
-$userinfo = new UserInfo();
-var_dump($userinfo->searchByIP("220.1.35.48"));
+$msg = new Message();
+var_dump($msg->getMessageByUser("220.1.35.48"));
+var_dump(sqlsrv_errors());
 ?>

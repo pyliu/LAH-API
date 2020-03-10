@@ -229,6 +229,9 @@ Vue.mixin({
                         break;
                 }
             }
+        },
+        "lah-exclamation": {
+            template: `<h6><i class="fas fa-exclamation-circle fa-lg text-danger ld ld-breath"></i> <slot>內容會顯示在這邊</slot></h6>`
         }
     },
     data: function() { return {
@@ -721,7 +724,7 @@ Vue.component("lah-user-card", {
                 </b-card-text>
             </b-card>
         </b-card-group>
-        <h6 v-else><i class="fas fa-exclamation-circle text-danger fa-lg ld ld-breath"></i> 找不到使用者 「{{name || id || ip}}」</h6>
+        <lah-exclamation v-else>找不到使用者「{{name || id || ip}}」！</lah-exclamation>
     </div>`,
     props: ['id', 'name', 'ip'],
     data: function() { return {
@@ -733,7 +736,8 @@ Vue.component("lah-user-card", {
     computed: {
         showCard: function() {
             return !this.disabled && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 0;
-        }
+        },
+        not_found: function() { return `找不到使用者 「${this.name || this.id || this.ip}」`; }
     },
     methods: {
         isLeft: function(user_data) {

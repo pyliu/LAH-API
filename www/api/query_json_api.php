@@ -808,6 +808,27 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
+	case "user_message":
+		$log->info("XHR [user_message] 查詢使用者信差訊息【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"].", ".$_POST["count"]."】請求");
+		$param = $_POST["id"] ?? $_POST["name"] ?? $_POST["ip"];
+		$param = empty($param) ? $client_ip : $param;
+		$message = new Message();
+		$results = $message->getMessageByUser($param, $_POST["count"] ?? 5);
+		if (empty($results)) {
+			echoErrorJSONString("查無 ${param} 信差訊息。");
+			$log->info("XHR [user_message] 查無 ${param} 信差訊息。");
+		} else {
+			$json = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($results),
+				"raw" => $results,
+				"query_string" => "id=".$_POST["id"]."&name=".$_POST["name"]."&ip=".$_POST["ip"]."&count=".$_POST["count"],
+				"message" => "XHR [user_message] 查詢 ${param} 信差訊息成功。(".count($results).")"
+			);
+			$log->info($json["message"]);
+			echo json_encode($json, 0);
+		}
+		break;
 	case "send_message":
 		$log->info("XHR [send_message] 送出訊息【".$_POST["title"].", ".$_POST["content"].", ".$_POST["who"]."】請求");
 		$msg = new Message();
