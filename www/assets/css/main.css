@@ -2,6 +2,7 @@ body {
 	font-family: "微軟正黑體", "Microsoft JhenHei", sans-serif;
 	overflow-y: auto !important;
 	min-width: 1024px !important;
+	padding-top: 65px;
 }
 
 .hamburger {

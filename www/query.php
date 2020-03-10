@@ -21,9 +21,7 @@ ksort($operators);
 <link href="assets/css/animate.css" rel="stylesheet">
 <link href="assets/css/awesome-font.css" rel="stylesheet">
 <!-- Custom styles for this template -->
-<link href="assets/css/starter-template.css" rel="stylesheet">
 <link href="assets/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
-<link href="assets/css/basic.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
 </head>
 
