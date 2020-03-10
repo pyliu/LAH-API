@@ -603,6 +603,11 @@ Vue.component("lah-header", {
             icon: "fa-th-list",
             need_admin: false
         }, {
+            text: "信差訊息",
+            url: "message.html",
+            icon: "fa-comments",
+            need_admin: false
+        }, {
             text: "記錄檔",
             url: "tasklog.html",
             icon: "fa-dog",

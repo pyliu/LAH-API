@@ -6,7 +6,7 @@ if (Vue) {
                 <b-form-checkbox v-b-tooltip.hover.top="modeTooltip" inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;" :class="['align-baseline', 'btn', 'btn-sm', is_overdue_mode ? '' : 'border-warning', 'p-1']">
                     <span>{{modeText}}</span>
                 </b-form-checkbox>
-                <b-button variant="outline-info" size="sm" disabled title="已傳送的通知計數(1090305起)">
+                <b-button variant="outline-info" size="sm" title="已傳送的通知計數(1090305起)" @click="showMessage">
                     已通知
                     <b-badge variant="info">
                     {{message_count}}
@@ -328,6 +328,14 @@ if (Vue) {
             },
             downloadPNG: function() {
                 this.$refs.statsChart.downloadBase64PNG(`${this.chartType}.png`);
+            },
+            showMessage: function () {
+                let vm = this.$createElement('lah-user-message', { props: { count: 3 }});
+                showModal({
+                    title: "信差訊息(本人，最近3筆)",
+                    message: vm,
+                    size: "lg"
+                });
             }
         },
         mounted() {

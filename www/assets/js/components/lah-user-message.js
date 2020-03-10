@@ -3,11 +3,14 @@ if (Vue) {
         template: `<div>
             <b-card-group v-if="ready" :columns="columns" :deck="!columns">
                 <b-card
-                    v-for="message in raws"
+                    v-for="(message, index) in raws"
                     class="overflow-hidden bg-light small"
-                    :title="message['xname']"
-                    :sub-title="message['sendtime']['date'].substring(0, 19)"
                 >
+                    <b-card-title title-tag="h5">
+                        <i v-if="index == 0" class="fas fa-star font-bold text-warning"></i>
+                        <span v-else> {{index+1}}.</span> {{message['xname']}}
+                    </b-card-title>
+                    <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
                     <b-card-text v-html="format(message['xcontent'])"></b-card-text>
                 </b-card>
             </b-card-group>

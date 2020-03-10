@@ -231,7 +231,7 @@ class Message {
                 "MS_DB_SVR" => SYSTEM_CONFIG["MS_DB_SVR"],
                 "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_DB_CHARSET"]
             ));
-            $sql = "SELECT TOP ${top} * FROM Message WHERE receiver = '${id}' ORDER BY createdate DESC";
+            $sql = "SELECT TOP ${top} * FROM Message WHERE receiver = '${id}' ORDER BY sendtime DESC";
             return $tdoc_db->fetchAll($sql);
         }
         $log->warning(__METHOD__.": 找不到使用者資料！【${name_or_id_or_ip}】");
