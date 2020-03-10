@@ -4,21 +4,24 @@ if (Vue) {
             <b-card-group v-if="ready" :columns="columns" :deck="!columns">
                 <b-card
                     v-for="(message, index) in raws"
-                    class="overflow-hidden bg-light small"
+                    class="overflow-hidden bg-light"
+                    :border-variant="border(index)"
                 >
                     <b-card-title title-tag="h5">
-                        <i v-if="index == 0" class="fas fa-star font-bold text-warning"></i>
+                        <i v-if="index == 0" class="fas fa-eye"></i>
+                        <i v-else-if="index == 1" class="far fa-eye"></i>
                         <span v-else> {{index+1}}.</span> {{message['xname']}}
                     </b-card-title>
                     <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
-                    <b-card-text v-html="format(message['xcontent'])"></b-card-text>
+                    <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
                 </b-card>
             </b-card-group>
             <lah-exclamation v-else>{{not_found}}</lah-exclamation>
         </div>`,
         props: ['id', 'name', 'ip', 'count'],
         data: () => { return {
-            raws: undefined
+            raws: undefined,
+            pattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig
         } },
         computed: {
             ready: function() { return !this.empty(this.raws) },
@@ -26,7 +29,12 @@ if (Vue) {
             columns: function() { return this.count > 3 }
         },
         methods: {
-            format: function(content) { return content.replace(/\r\n/g,"<br />"); }
+            format: function(content) {
+                return content
+                    .replace(this.pattern, "<a href='$1' target='_blank' title='點擊前往'>$1</a>")
+                    .replace(/\r\n/g,"<br />");
+            },
+            border: function(index) { return index == 0 ? 'danger' : index == 1 ? 'primary' : '' }
         },
         async created() {
             try {
