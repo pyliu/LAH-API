@@ -557,6 +557,7 @@ Vue.component("lah-header", {
             <i v-if="showUserIcon" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
             <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
                 <lah-user-card :ip="ip" @not-found="userNotFound"></lah-user-card>
+                <lah-user-message :ip="ip" count="1"></lah-user-message>
             </b-popover>
             <button class="navbar-toggler mr-5" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
