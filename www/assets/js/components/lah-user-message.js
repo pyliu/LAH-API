@@ -39,30 +39,36 @@ if (Vue) {
         async created() {
             try {
                 this.count = this.count || 3;
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: "user_message",
-                    id: this.id,
-                    name: this.name,
-                    ip: this.ip,
-                    count: this.count
-                }).then(res => {
-                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        this.raws = res.data.raw
-                    } else {
-                        addNotification({
+                const raws = await this.getLocalCache("my-messeages");
+                if (raws !== false) {
+                    this.raws = raws;
+                } else {
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: "user_message",
+                        id: this.id,
+                        name: this.name,
+                        ip: this.ip,
+                        count: this.count
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            this.raws = res.data.raw
+                            this.setLocalCache("my-messeages", this.raws, 60000);   // 1 min
+                        } else {
+                            addNotification({
+                                title: "查詢信差訊息",
+                                message: res.data.message,
+                                type: "warning"
+                            });
+                        }
+                    }).catch(err => {
+                        console.error(err);
+                        showAlert({
                             title: "查詢信差訊息",
-                            message: res.data.message,
-                            type: "warning"
+                            message: err.message,
+                            type: "danger"
                         });
-                    }
-                }).catch(err => {
-                    console.error(err);
-                    showAlert({
-                        title: "查詢信差訊息",
-                        message: err.message,
-                        type: "danger"
                     });
-                });
+                }
             } catch(err) {
                 console.error(err);
             }
