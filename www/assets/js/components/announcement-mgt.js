@@ -74,7 +74,6 @@ if (Vue) {
                         size="sm"
                         id="announcement_list"
                         :class="['h-100']"
-                        @change="change"
                     >
                         <template v-slot:first>
                             <option value="" disabled>-- 請選擇一個項目 --</option>
@@ -109,7 +108,7 @@ if (Vue) {
                 },
                 methods: {
                     change: function(e) {
-                        if (isEmpty(this.val)) {
+                        if (this.empty(this.val)) {
                             return;
                         }
                         let vnode = this.$createElement("announcement-mgt-dialog", {
@@ -138,29 +137,31 @@ if (Vue) {
                         this.$emit("update-announcement-done", data);
                     }
                 },
-                created: function(e) {
-                    let json_str = localStorage.getItem("announcement_data");
-                    let json_ts = +localStorage.getItem("announcement_data_timestamp");
-                    let current_ts = +new Date();
-                    // dayMilliseconds from $gstore
-                    if (typeof json_str == "string" && current_ts - json_ts < this.dayMilliseconds) {
-                        // within a day use the cached data
-                        this.data = JSON.parse(json_str) || {};
-                    } else {
-                        this.$http.post(CONFIG.JSON_API_EP, {
-                            type: 'announcement_data'
-                        }).then(res => {
-                            this.data = res.data.raw;
-                            localStorage.setItem("announcement_data", JSON.stringify(this.data));
-                            localStorage.setItem("announcement_data_timestamp", +new Date()); // == new Date().getTime()
-                        }).catch(err => {
-                            console.error(err);
-                        });
+                async created() {
+                    try {
+                        const json = await this.getLocalCache('announcement_data');
+                        if (json !== false) {
+                            // within a day use the cached data
+                            this.data = json || {};
+                            if (this.empty(this.data)) this.removeLocalCache(announcement_data);
+                        } else {
+                            this.$http.post(CONFIG.JSON_API_EP, {
+                                type: 'announcement_data'
+                            }).then(async res => {
+                                this.data = res.data.raw;
+                                // dayMilliseconds from $gstore
+                                this.setLocalCache('announcement_data', this.data, this.dayMilliseconds);
+                            }).catch(err => {
+                                console.error(err);
+                            });
+                        }
+                    } catch (err) {
+                        console.error(err);
                     }
                 },
-                mounted: function(e) {
+                mounted: async function(e) {
                     // get cached data and set selected option
-                    this.val = localStorage.getItem("announcement_list");
+                    this.val = await this.$lf.getItem("announcement_list");
                 },
                 components: {
                     "announcement-mgt-dialog": {
