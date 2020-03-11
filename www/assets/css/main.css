@@ -320,6 +320,7 @@ blockquote {
 	font-weight: bold;
 }
 
+/* add v-fade to the element class to enable it */
 .v-fade {
 	display: inherit !important; /* override v-show display: none */
 	transition: 0.4s;

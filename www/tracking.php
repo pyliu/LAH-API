@@ -28,11 +28,62 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
 <link href="assets/css/animate.css" rel="stylesheet">
 <link href="assets/css/awesome-font.css" rel="stylesheet">
 <!-- Custom styles for this template -->
-<link href="assets/css/starter-template.css" rel="stylesheet">
 <link href="assets/css/bootstrap-vue.min.css" rel="stylesheet">
 <link href="assets/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
-<link href="assets/css/basic.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
+<style>
+table th {
+  text-align: center;
+  cursor: pointer;
+  text-decoration: underline;
+  background-color: black;
+  color: white;
+  font-weight: bold;
+}
+
+.hamburger {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.filter-btn-group {
+  float: right !important;
+}
+
+.tooltip > .tooltip-inner {
+  border: 1px solid white;
+  padding: 5px;
+  font-size: 16px;
+}
+
+.header-fixed {
+  position: fixed;
+  left: 0;
+  top: 78px;
+}
+
+.opacity {
+  opacity: 0.65;
+}
+
+canvas {
+  background: #FFF;
+  display: block;
+  margin: 0 auto;
+}
+
+#case_results a:link, #case_results a:visited {
+  color: rgba(0, 0, 255, 0.842);
+}
+
+#case_results .bg-success a:link, #case_results .bg-danger a:link, #case_results .bg-success a:visited, #case_results .bg-danger a:visited {
+  color: white;
+}
+
+#info_box {
+  margin-top: 5px;
+}
+</style>
 </head>
 
 <body id="html_body">
@@ -44,7 +95,7 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
     </form>
     <div class="container-fluid">
       <div id="info_box" class="alert alert-info">
-        <div class="filter-btn-group">
+        <div class="filter-btn-group float-right">
           <button id='gray_btn' class='btn btn-sm btn-default'>全部</button>
           <button id='info_btn' class='btn btn-sm btn-info'>正常</button>
           <button id='red_btn' class='btn btn-sm btn-danger'>逾期</button>
