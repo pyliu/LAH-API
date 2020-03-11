@@ -313,3 +313,9 @@ blockquote {
 .small-font {
 	font-size: .85rem;
 }
+
+.modal th {
+	background-color: black;
+	color: white;
+	font-weight: bold;
+}
