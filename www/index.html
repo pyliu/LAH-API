@@ -22,7 +22,29 @@
   
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
-      
+      <b-card-group deck class="mb-1">
+        <b-card>
+          <b-card-title title-tag="h5">規費統計</b-card-title>
+          <b-card-text><lah-fee-board></lah-fee-board></b-card-text>
+        </b-card>
+        <b-card no-body>
+          2
+        </b-card>
+        <b-card no-body>
+          3
+        </b-card>
+      </b-card-group>
+      <b-card-group deck class="mb-1">
+        <b-card no-body>
+          4
+        </b-card>
+        <b-card no-body>
+          5
+        </b-card>
+        <b-card no-body>
+          6
+        </b-card>
+      </b-card-group>
     </div>
   </section><!-- /section -->
 
@@ -40,6 +62,9 @@
   <script src="assets/js/localforage.min.js"></script>
   <script src="assets/js/global.js"></script>
   <script src="assets/js/components/lah-vue.js"></script>
+  <script src="assets/js/components/dashboard/lah-fee-board.js"></script>
+  <!-- Vue Chart Components -->
+  <script src="assets/js/Chart.min.js"></script>
 
   <script type="text/javascript">
     $(document).ready(e => {
