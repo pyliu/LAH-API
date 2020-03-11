@@ -34,6 +34,9 @@ if (CONFIG.DEBUG_MODE) {
 }
 // add to all Vue instances
 // https://vuejs.org/v2/cookbook/adding-instance-properties.html
+Vue.prototype.$log = console.log.bind(console);
+Vue.prototype.$error = console.error.bind(console);
+Vue.prototype.$warn = console.warn.bind(console);
 Vue.prototype.$http = axios;
 Vue.prototype.$lf = localforage || {};
 Vue.prototype.$gstore = (() => {
@@ -924,7 +927,7 @@ Vue.component("lah-user-card", {
 
 Vue.component('lah-user-message', {
     template: `<div>
-        <h6 v-show="!empty(inTitle)"><i class="fas fa-angle-double-right"></i> {{inTitle}}</h6>
+        <h6 v-show="!empty(title)"><i class="fas fa-angle-double-right"></i> {{title}} <b-form-spinbutton v-if="enable_spinbutton" v-model="count" min="1" size="sm" inline></b-form-spinbutton></h6>
         <b-card-group v-if="ready" :columns="columns" :deck="!columns">
             <b-card
                 v-for="(message, index) in raws"
@@ -942,16 +945,19 @@ Vue.component('lah-user-message', {
         </b-card-group>
         <lah-exclamation v-else>{{not_found}}</lah-exclamation>
     </div>`,
-    props: ['id', 'name', 'ip', 'count', 'title'],
+    props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton'],
     data: () => { return {
         raws: undefined,
-        pattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig,
-        inTitle: undefined
+        pattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig
     } },
+    watch: {
+        count: function(nVal, oVal) { this.load() }
+    },
     computed: {
         ready: function() { return !this.empty(this.raws) },
         not_found: function() { return `「${this.name || this.id || this.ip}」找不到信差訊息！` },
-        columns: function() { return this.count > 3 }
+        columns: function() { return this.count > 3 },
+        enable_spinbutton: function() { return !this.empty(this.spinbutton) }
     },
     methods: {
         format: function(content) {
@@ -959,48 +965,51 @@ Vue.component('lah-user-message', {
                 .replace(this.pattern, "<a href='$1' target='_blank' title='點擊前往'>$1</a>")
                 .replace(/\r\n/g,"<br />");
         },
-        border: function(index) { return index == 0 ? 'danger' : index == 1 ? 'primary' : '' }
-    },
-    async created() {
-        try {
-            this.count = this.count || 3;
-            const raws = await this.getLocalCache("my-messeages");
-            if (raws !== false && raws.length == this.count) {
-                this.raws = raws;
-            } else if (raws !== false && raws.length >= this.count) {
-                this.raws = raws.slice(0, this.count);
-            } else {
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: "user_message",
-                    id: this.id,
-                    name: this.name,
-                    ip: this.ip,
-                    count: this.count
-                }).then(res => {
-                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        this.raws = res.data.raw
-                        this.setLocalCache("my-messeages", this.raws, 60000);   // 1 min
-                    } else {
-                        addNotification({
+        border: function(index) { return index == 0 ? 'danger' : index == 1 ? 'primary' : '' },
+        load: async function() {
+            try {
+                const raws = await this.getLocalCache("my-messeages");
+                if (raws !== false && raws.length == this.count) {
+                    this.raws = raws;
+                } else if (raws !== false && raws.length >= this.count) {
+                    this.raws = raws.slice(0, this.count);
+                } else {
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: "user_message",
+                        id: this.id,
+                        name: this.name,
+                        ip: this.ip,
+                        count: this.count
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            this.raws = res.data.raw
+                            this.setLocalCache("my-messeages", this.raws, 60000);   // 1 min
+                        } else {
+                            addNotification({
+                                title: "查詢信差訊息",
+                                message: res.data.message,
+                                type: "warning"
+                            });
+                        }
+                    }).catch(err => {
+                        console.error(err);
+                        showAlert({
                             title: "查詢信差訊息",
-                            message: res.data.message,
-                            type: "warning"
+                            message: err.message,
+                            type: "danger"
                         });
-                    }
-                }).catch(err => {
-                    console.error(err);
-                    showAlert({
-                        title: "查詢信差訊息",
-                        message: err.message,
-                        type: "danger"
                     });
-                });
+                }
+            } catch(err) {
+                console.error(err);
             }
-        } catch(err) {
-            console.error(err);
         }
     },
-    mounted() { this.inTitle = this.title }
+    created() {
+        this.count = this.count || 1;
+        this.load();
+    },
+    mounted() { }
 });
 
 $(document).ready(() => {
