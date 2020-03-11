@@ -951,7 +951,7 @@ Vue.component('lah-user-message', {
         try {
             this.count = this.count || 3;
             const raws = await this.getLocalCache("my-messeages");
-            if (raws !== false) {
+            if (raws !== false && raws.length == this.count) {
                 this.raws = raws;
             } else {
                 this.$http.post(CONFIG.JSON_API_EP, {
