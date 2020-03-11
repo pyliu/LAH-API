@@ -43,13 +43,15 @@ Vue.prototype.$gstore = (() => {
                 cache : new Map(),
                 isAdmin: undefined,
                 userNames: undefined,
-                dayMilliseconds: 24 * 60 * 60 * 1000
+                dayMilliseconds: 24 * 60 * 60 * 1000,
+                dynaParams: {}
             },
             getters: {
                 cache: state => state.cache,
                 isAdmin: state => state.isAdmin,
                 userNames: state => state.userNames,
-                dayMilliseconds: state => state.dayMilliseconds
+                dayMilliseconds: state => state.dayMilliseconds,
+                dynaParams: state => state.dynaParams
             },
             mutations: {
                 cache(state, objPayload) {
@@ -64,7 +66,10 @@ Vue.prototype.$gstore = (() => {
                 },
                 userNames(state, mappingPayload) {
                     state.userNames = mappingPayload || {};
-                }
+                },
+                dynaParams(state, objPayload) {
+                    state.dynaParams = Object.assign({}, state.dynaParams, objPayload);
+                },
             },
             actions: {
                 async loadUserNames({ commit, state }) {
@@ -255,9 +260,15 @@ Vue.mixin({
             return this.$gstore.getters.userNames || {};
         },
         userIDs() { return this.reverseMapping(this.userNames || {}); },
-        dayMilliseconds() { return this.$gstore.getters.dayMilliseconds; }
+        dayMilliseconds() { return this.$gstore.getters.dayMilliseconds; },
+        settings() { return this.$gstore.getters.dynaParams; }
     },
     methods: {
+        setSetting: function(key, value) {
+            let payload = {};
+            payload[key] = value;
+            this.$gstore.commit('dynaParams', payload);
+        },
         reverseMapping: o => Object.keys(o).reduce((r, k) => Object.assign(r, { [o[k]]: (r[o[k]] || []).concat(k) }), {}),
         toggleBusy: (opts = {}) => {
             opts = Object.assign({
@@ -932,7 +943,7 @@ Vue.component('lah-user-message', {
     props: ['id', 'name', 'ip', 'count'],
     data: () => { return {
         raws: undefined,
-        pattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig
+        pattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig,
     } },
     computed: {
         ready: function() { return !this.empty(this.raws) },
