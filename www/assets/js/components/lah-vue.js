@@ -272,6 +272,7 @@ Vue.mixin({
             payload[key] = value;
             this.$gstore.commit('dynaParams', payload);
         },
+        getSetting: function(key) { return this.settings[key] },
         reverseMapping: o => Object.keys(o).reduce((r, k) => Object.assign(r, { [o[k]]: (r[o[k]] || []).concat(k) }), {}),
         toggleBusy: (opts = {}) => {
             opts = Object.assign({
