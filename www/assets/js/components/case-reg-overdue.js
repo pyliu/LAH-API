@@ -330,11 +330,11 @@ if (Vue) {
                 this.$refs.statsChart.downloadBase64PNG(`${this.chartType}.png`);
             },
             showMessage: function () {
-                let vm = this.$createElement('lah-user-message', { props: { count: 3 }});
+                let vm = this.$createElement('lah-user-message', { props: { count: 5, tabs: true, tabsPills: false, tabsEnd: false }});
                 showModal({
-                    title: "信差訊息(本人，最近3筆)",
+                    title: "我收到的信差訊息",
                     message: vm,
-                    size: "lg"
+                    size: "sm"
                 });
             }
         },

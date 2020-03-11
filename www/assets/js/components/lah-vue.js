@@ -572,7 +572,7 @@ Vue.component("lah-header", {
             <i v-if="showUserIcon" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
             <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
                 <lah-user-card :ip="ip" @not-found="userNotFound" class="mb-1" title="我的名片"></lah-user-card>
-                <lah-user-message :ip="ip" count="1" title="最新信差訊息"></lah-user-message>
+                <lah-user-message :ip="ip" count="5" title="最新信差訊息" tabs="true" tabsPills="true" tabsEnd="true"></lah-user-message>
             </b-popover>
             <button class="navbar-toggler mr-5" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -716,7 +716,35 @@ Vue.component("lah-footer", {
 Vue.component("lah-user-card", {
     template: `<div>
         <h6 v-show="!empty(title)"><i class="fas fa-user-circle"></i> {{title}}</h6>
-        <b-card-group deck v-if="showCard">
+        <b-card no-body v-if="useTab">
+            <b-tabs card>
+                <b-tab v-for="(user_data, idx) in user_rows" :title="user_data['AP_USER_NAME']" :active="idx == 0">
+                    <b-card-title>{{user_data['AP_USER_NAME']}}</b-card-title>
+                    <b-card-sub-title>{{user_data['AP_JOB']}}</b-card-sub-title>
+                    <b-link :href="photoUrl(user_data)" target="_blank">
+                        <b-card-img
+                            :src="photoUrl(user_data)"
+                            :alt="user_data['AP_USER_NAME']"
+                            class="img-thumbnail float-right mx-auto ml-2"
+                            style="max-width: 220px"
+                        ></b-card-img>
+                    </b-link>
+                    <b-card-text class="small">
+                        <lah-ban v-if="isLeft(user_data)" class='text-danger mx-auto'> 已離職【{{user_data["AP_OFF_DATE"]}}】</lah-ban>
+                        <div>ID：{{user_data["DocUserID"]}}</div>
+                        <div v-if="isAdmin">電腦：{{user_data["AP_PCIP"]}}</div>
+                        <div v-if="isAdmin">生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge(user_data) !== false" :variant="birthAgeVariant(user_data)" pill>{{birthAge(user_data)}}歲</b-badge></div>
+                        <div>單位：{{user_data["AP_UNIT_NAME"]}}</div>
+                        <div>工作：{{user_data["AP_WORK"]}}</div>
+                        <div v-if="isAdmin">學歷：{{user_data["AP_HI_SCHOOL"]}}</div>
+                        <div v-if="isAdmin">考試：{{user_data["AP_TEST"]}}</div>
+                        <div v-if="isAdmin">手機：{{user_data["AP_SEL"]}}</div>
+                        <div>到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge(user_data) !== false" :variant="workAgeVariant(user_data)" pill>{{workAge(user_data)}}年</b-badge></div>
+                    </b-card-text>
+                </b-tab>
+            </b-tabs>
+        </b-card>
+        <b-card-group deck v-else-if="useCard">
             <b-card
                 v-for="user_data in user_rows"
                 class="overflow-hidden bg-light"
@@ -746,7 +774,7 @@ Vue.component("lah-user-card", {
                 </b-card-text>
             </b-card>
         </b-card-group>
-        <lah-exclamation v-else>找不到使用者「{{name || id || ip}}」！</lah-exclamation>
+        <lah-exclamation v-else class="my-2">找不到使用者「{{name || id || ip}}」！</lah-exclamation>
     </div>`,
     props: ['id', 'name', 'ip', 'title'],
     data: function() { return {
@@ -756,9 +784,8 @@ Vue.component("lah-user-card", {
         year: 31536000000
     } },
     computed: {
-        showCard: function() {
-            return !this.disabled && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 0;
-        },
+        useTab: function() { return !this.disabled && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 1; },
+        useCard: function() { return !this.disabled && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 0; },
         not_found: function() { return `找不到使用者 「${this.name || this.id || this.ip}」`; }
     },
     methods: {
@@ -930,7 +957,18 @@ Vue.component('lah-user-message', {
     template: `<div>
         <h6 v-show="!empty(title)"><i class="fas fa-angle-double-right"></i> {{title}} <b-form-spinbutton v-if="enable_spinbutton" v-model="count" min="1" size="sm" inline></b-form-spinbutton></h6>
         <b-card-group v-if="ready" :columns="columns" :deck="!columns">
-            <b-card
+            <b-card no-body v-if="useTabs">
+                <b-tabs card :end="tabsEnd" :pills="tabsPills">
+                    <b-tab v-for="(message, index) in raws" :title="index+1">
+                        <b-card-title title-tag="h6">
+                            {{message['xname']}}
+                        </b-card-title>
+                        <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
+                        <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
+                    </b-tab>
+                </b-tabs>
+            </b-card>
+            <b-card v-else
                 v-for="(message, index) in raws"
                 class="overflow-hidden bg-light"
                 :border-variant="border(index)"
@@ -946,7 +984,7 @@ Vue.component('lah-user-message', {
         </b-card-group>
         <lah-exclamation v-else>{{not_found}}</lah-exclamation>
     </div>`,
-    props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton'],
+    props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton', 'tabs', 'tabsEnd', 'tabsPills'],
     data: () => { return {
         raws: undefined,
         pattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig
@@ -957,8 +995,9 @@ Vue.component('lah-user-message', {
     computed: {
         ready: function() { return !this.empty(this.raws) },
         not_found: function() { return `「${this.name || this.id || this.ip}」找不到信差訊息！` },
-        columns: function() { return this.count > 3 },
-        enable_spinbutton: function() { return !this.empty(this.spinbutton) }
+        columns: function() { return !this.useTabs && this.count > 3 },
+        enable_spinbutton: function() { return !this.empty(this.spinbutton) },
+        useTabs: function() { return !this.empty(this.tabs) }
     },
     methods: {
         format: function(content) {
