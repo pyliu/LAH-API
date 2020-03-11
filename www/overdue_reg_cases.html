@@ -103,7 +103,7 @@
           }
         },
         created() {
-          this.reviewerID = this.getUrlParameter("reviewerID");
+          this.reviewerID = this.getUrlParameter("ID") || this.getUrlParameter("reviewerID");
         },
         mounted() {
           this.show = true;
