@@ -130,6 +130,20 @@ if (Vue) {
                             <button @click="updateRM39" class="btn btn-sm btn-outline-primary">更新</button>
                         </div>
                     </div>
+                    <div class="form-row mt-1">
+                        <div class="input-group input-group-sm col">	
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroup-reg_case_RM42_select">地價處理註記</span>
+                            </div>
+                            <select v-model="rm42" id='reg_case_RM42_select' class="form-control" aria-label="地價處理註記" aria-describedby="inputGroup-reg_case_RM42_select" required>
+                                <option value=""></option>
+                                <option v-for="(item, key) in rm42_mapping" :value="key">{{key}}: {{item}}</option>
+                            </select>
+                        </div>
+                        <div v-if="wip" class="filter-btn-group col-auto">
+                            <button @click="updateRM42" class="btn btn-sm btn-outline-primary">更新</button>
+                        </div>
+                    </div>
                     <p class="mt-1" v-html="tr"></p>
                 </div>`,
                 props: ["raw", "tr"],    // jsonObj.raw, jsonObj.tr_html
@@ -139,6 +153,8 @@ if (Vue) {
                         rm30_orig: "",
                         rm39: "",
                         rm39_orig: "",
+                        rm42: "",
+                        rm42_orig: "",
                         rm31: "",
                         sync_rm30_1: true,
                         wip: false,
@@ -170,6 +186,17 @@ if (Vue) {
                             F: "異動完成",
                             G: "異動有誤",
                             P: "競合暫停"
+                        },
+                        rm42_mapping: {
+                            '0': "登記移案",
+                            B: "登錄中",
+                            R: "登錄完成",
+                            C: "校對中",
+                            D: "校對完成",
+                            E: "登錄有誤",
+                            S: "異動開始",
+                            F: "異動完成",
+                            G: "異動有誤"
                         }
                     }
                 },
@@ -292,13 +319,34 @@ if (Vue) {
                                 });
                             }
                         });
+                    },
+                    updateRM42: function(e) {
+                        if (this.rm42 == this.rm42_orig) {
+                            addNotification({title: "更新地價處理註記", message: "地價處理註記沒變動", type: "warning"});
+                            return;
+                        }
+                        let that = this;
+                        window.vueApp.confirm(`您確定要更新地價處理註記為「${that.rm42}」?`, {
+                            title: '請確認更新地價處理註記',
+                            callback: () => {
+                                that.updateRegCaseCol({
+                                    rm01: that.raw["RM01"],
+                                    rm02: that.raw["RM02"],
+                                    rm03: that.raw["RM03"],
+                                    col: "RM42",
+                                    val: that.rm42
+                                });
+                            }
+                        });
                     }
                 },
                 mounted: function(e) {
                     this.rm30 = this.raw["RM30"] || "";
                     this.rm39 = this.raw["RM39"] || "";
+                    this.rm42 = this.raw["RM42"] || "";
                     this.rm30_orig = this.raw["RM30"] || "";
                     this.rm39_orig = this.raw["RM39"] || "";
+                    this.rm42_orig = this.raw["RM42"] || "";
                     this.rm31 = this.raw["RM31"];
                     this.wip = this.empty(this.rm31);
                     addUserInfoEvent(e);
