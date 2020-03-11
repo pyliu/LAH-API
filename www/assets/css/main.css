@@ -319,3 +319,14 @@ blockquote {
 	color: white;
 	font-weight: bold;
 }
+
+.v-fade {
+	display: inherit !important; /* override v-show display: none */
+	transition: 0.4s;
+}
+
+.v-fade[style*="display: none;"] {
+	opacity: 0;
+	pointer-events: none; /* disable user interaction */
+	user-select: none; /* disable user selection */
+}
