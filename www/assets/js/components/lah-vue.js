@@ -717,7 +717,7 @@ Vue.component("lah-user-card", {
     template: `<div>
         <h6 v-show="!empty(title)"><i class="fas fa-user-circle"></i> {{title}}</h6>
         <b-card no-body v-if="useTab">
-            <b-tabs card align="center">
+            <b-tabs card align="center" small>
                 <b-tab v-for="(user_data, idx) in user_rows" :title="user_data['AP_USER_NAME']" :active="idx == 0">
                     <b-card-title>{{user_data['AP_USER_NAME']}}</b-card-title>
                     <b-card-sub-title>{{user_data['AP_JOB']}}</b-card-sub-title>
@@ -958,7 +958,7 @@ Vue.component('lah-user-message', {
         <h6 v-show="!empty(title)"><i class="fas fa-angle-double-right"></i> {{title}} <b-form-spinbutton v-if="enable_spinbutton" v-model="count" min="1" size="sm" inline></b-form-spinbutton></h6>
         <b-card-group v-if="ready" :columns="columns" :deck="!columns">
             <b-card no-body v-if="useTabs">
-                <b-tabs card :end="tabsEnd" :pills="tabsPills" align="center">
+                <b-tabs card :end="tabsEnd" :pills="tabsPills" align="center" small>
                     <b-tab v-for="(message, index) in raws" :title="index+1">
                         <b-card-title title-tag="h6">
                             {{message['xname']}}
