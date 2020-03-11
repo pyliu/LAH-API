@@ -1,7 +1,7 @@
 <?php
-require_once("./include/init.php");
-require_once("./include/Query.class.php");
-require_once("./include/RegCaseData.class.php");
+require_once("../include/init.php");
+require_once("../include/Query.class.php");
+require_once("../include/RegCaseData.class.php");
 
 $qday = $_REQUEST["date"];
 $qday = preg_replace("/\D+/", "", $qday);

@@ -13,7 +13,7 @@ function startRefresh() {
     if (target) {
         // prevent extra tooltip element occupied
         $(".tooltip").remove();
-        target.load("allcases.php", "date=" + $("#date_input").val(), function() {
+        target.load("api/allcases.php", "date=" + $("#date_input").val(), function() {
             adjustQueryTime();
             adjustTableContent();
             // only today that needs to update regularly
