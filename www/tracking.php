@@ -151,7 +151,6 @@ canvas {
   <script src="assets/js/xhr_query.js"></script>
 
   <script src="assets/js/table_sort.js"></script>
-  <script src="assets/js/fixed_header.js"></script>
   <script src="assets/js/autoload.js"></script>
 
   <script src="assets/js/components/case-reg-detail.js"></script>
