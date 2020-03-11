@@ -134,7 +134,7 @@ class WatchDog {
         $msg = new Message();
         $url = "http://${host_ip}/overdue_reg_cases.html";
         if ($to_id != "ALL") {
-            $url .= "?reviewerID=${to_id}";
+            $url .= "?ID=${to_id}";
         }
         $content = "目前有 ".count($case_records)." 件逾期案件(近15天，僅顯示前4筆):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請用 CHROME/EDGE 瀏覽器前往 ${url}\r\n查看詳細列表。";
         if ($to_id == "ALL") {
