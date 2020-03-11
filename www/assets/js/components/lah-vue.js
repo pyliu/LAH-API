@@ -967,6 +967,8 @@ Vue.component('lah-user-message', {
             const raws = await this.getLocalCache("my-messeages");
             if (raws !== false && raws.length == this.count) {
                 this.raws = raws;
+            } else if (raws !== false && raws.length >= this.count) {
+                this.raws = raws.slice(0, this.count);
             } else {
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "user_message",
