@@ -567,8 +567,8 @@ Vue.component("lah-header", {
             <a class="navbar-brand my-auto" :href="location.href">{{leading}} <span style="font-size: .75rem">(β)</span></a>
             <i v-if="showUserIcon" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
             <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
-                <lah-user-card :ip="ip" @not-found="userNotFound"></lah-user-card>
-                <lah-user-message :ip="ip" count="1"></lah-user-message>
+                <lah-user-card :ip="ip" @not-found="userNotFound" class="mb-1" title="我的名片"></lah-user-card>
+                <lah-user-message :ip="ip" count="1" title="最新信差訊息"></lah-user-message>
             </b-popover>
             <button class="navbar-toggler mr-5" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -711,6 +711,7 @@ Vue.component("lah-footer", {
 
 Vue.component("lah-user-card", {
     template: `<div>
+        <h6 v-show="!empty(title)"><i class="fas fa-user-circle"></i> {{title}}</h6>
         <b-card-group deck v-if="showCard">
             <b-card
                 v-for="user_data in user_rows"
@@ -743,7 +744,7 @@ Vue.component("lah-user-card", {
         </b-card-group>
         <lah-exclamation v-else>找不到使用者「{{name || id || ip}}」！</lah-exclamation>
     </div>`,
-    props: ['id', 'name', 'ip'],
+    props: ['id', 'name', 'ip', 'title'],
     data: function() { return {
         disabled: CONFIG.DISABLE_MSDB_QUERY,
         user_rows: null,
@@ -923,6 +924,7 @@ Vue.component("lah-user-card", {
 
 Vue.component('lah-user-message', {
     template: `<div>
+        <h6 v-show="!empty(inTitle)"><i class="fas fa-angle-double-right"></i> {{inTitle}}</h6>
         <b-card-group v-if="ready" :columns="columns" :deck="!columns">
             <b-card
                 v-for="(message, index) in raws"
@@ -940,10 +942,11 @@ Vue.component('lah-user-message', {
         </b-card-group>
         <lah-exclamation v-else>{{not_found}}</lah-exclamation>
     </div>`,
-    props: ['id', 'name', 'ip', 'count'],
+    props: ['id', 'name', 'ip', 'count', 'title'],
     data: () => { return {
         raws: undefined,
         pattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig,
+        inTitle: undefined
     } },
     computed: {
         ready: function() { return !this.empty(this.raws) },
@@ -995,7 +998,7 @@ Vue.component('lah-user-message', {
             console.error(err);
         }
     },
-    mounted() {}
+    mounted() { this.inTitle = this.title }
 });
 
 $(document).ready(() => {
