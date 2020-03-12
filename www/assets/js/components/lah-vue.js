@@ -250,9 +250,13 @@ Vue.mixin({
     },
     computed: {
         cache() { return this.$gstore.getters.cache; },
-        isAdmin() {
+        async isAdmin() {
             if (this.$gstore.getters.isAdmin === undefined) {
-                this.$gstore.dispatch("authenticate");
+                try {
+                    await this.$gstore.dispatch("authenticate");
+                } catch (err) {
+                    console.error(err);
+                }
             }
             return this.$gstore.getters.isAdmin;
         },
@@ -581,7 +585,7 @@ Vue.component("lah-header", {
             <div class="collapse navbar-collapse" id="navbarsExampleDefault">
                 <lah-transition appear>
                     <ul class="navbar-nav mr-auto">
-                        <li v-for="link in links" :class="['nav-item', 'my-auto', active(link.url)]" v-show="link.need_admin ? isAdmin : true">
+                        <li v-for="link in links" :class="['nav-item', 'my-auto', active(link)]" v-show="link.need_admin ? isAdmin : true">
                             <a class="nav-link" :href="Array.isArray(link.url) ? link.url[0] : link.url">{{link.text}}</a>
                         </li>
                     </ul>
@@ -641,8 +645,15 @@ Vue.component("lah-header", {
         showUserIcon() { return this.enableUserCardPopover }
     },
     methods: {
-        active: function(url) {
-            return location.href.indexOf(url) > 0 ? 'active' : '';
+        active: async function(link) {
+            let url = Array.isArray(link.url) ? link.url[0] : link.url;
+            let ret = location.href.indexOf(url) > 0 ? 'active' : '';
+            // check page authority here
+            if (ret == 'active' && link.need_admin && !this.isAdmin) {
+                console.error("限制存取頁面！");
+                $("body").html(`<h1 class="text-center text-danger">限制存取網頁，請勿使用！</h1>`);
+            }
+            return ret;
         },
         setHeader: function(link) {
             let that = this;
