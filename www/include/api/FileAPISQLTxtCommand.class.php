@@ -1,6 +1,6 @@
 <?php
 require_once("FileAPICommand.class.php");
-require_once("Query.class.php");
+require_once("../Query.class.php");
 
 class FileAPISQLTxtCommand extends FileAPICommand {
     private $sql;

@@ -1,5 +1,5 @@
 <?php
-require_once("init.php");
+require_once("../init.php");
 require_once("FileAPINotSupportCommand.class.php");
 require_once("FileAPISQLCsvCommand.class.php");
 require_once("FileAPISQLTxtCommand.class.php");
