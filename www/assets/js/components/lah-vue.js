@@ -628,7 +628,7 @@ Vue.component("lah-header", {
             icon: "fa-comments",
             need_admin: false
         }, {
-            text: "記錄檔",
+            text: "記錄瀏覽",
             url: "tasklog.html",
             icon: "fa-dog",
             need_admin: true
