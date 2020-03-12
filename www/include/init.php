@@ -4,7 +4,7 @@ session_start();
 // some query take long time ...
 set_time_limit(0);
 
-require_once("Config.inc.php");
+require_once("config/Config.inc.php");
 require_once("GlobalConstants.inc.php");
 require_once("GlobalFunctions.inc.php");
 require_once("Logger.class.php");

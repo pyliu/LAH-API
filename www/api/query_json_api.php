@@ -470,7 +470,7 @@ switch ($_POST["type"]) {
 				if (is_null($value)) {
 					continue;
 				}
-				$col_mapping = include(ROOT_DIR."/include/Config.ColsNameMapping.EXPAA.php");
+				$col_mapping = include(ROOT_DIR."/include/config/Config.ColsNameMapping.EXPAA.php");
 				if (empty($col_mapping[$key])) {
 					$mapping[$key] = $value;
 				} else {

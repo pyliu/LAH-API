@@ -1,5 +1,5 @@
 <?php
-require_once("Config.inc.php");
+require_once("config/Config.inc.php");
 
 function GetDBUserMapping($refresh = false) {
     $tmp_path = sys_get_temp_dir();

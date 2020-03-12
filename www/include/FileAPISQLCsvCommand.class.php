@@ -7,26 +7,26 @@ class FileAPISQLCsvCommand extends FileAPICommand {
     function __construct($sql) {
         $this->sql = $sql;
         // parent class has $colsNameMapping var for translating column header
-        $this->colsNameMapping = include("Config.ColsNameMapping.CRSMS.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.CMSMS.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.CMSDS.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.CABRP.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.EXPAA.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.EXPAB.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.EXPAC.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.EXPBA.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.EXPBB.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.EXPCA.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.EXPCB.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.EXPCC.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.EXPD.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.EXPE.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.EXPF.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.EXPG.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.RKEYN.php"); 
-        $this->colsNameMapping += include("Config.ColsNameMapping.RLNID.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.PSCRN.php");
-        $this->colsNameMapping += include("Config.ColsNameMapping.OTHERS.php");
+        $this->colsNameMapping = include("config/Config.ColsNameMapping.CRSMS.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.CMSMS.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.CMSDS.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.CABRP.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.EXPAA.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.EXPAB.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.EXPAC.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.EXPBA.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.EXPBB.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.EXPCA.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.EXPCB.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.EXPCC.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.EXPD.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.EXPE.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.EXPF.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.EXPG.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.RKEYN.php"); 
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.RLNID.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.PSCRN.php");
+        $this->colsNameMapping += include("config/Config.ColsNameMapping.OTHERS.php");
     }
 
     function __destruct() {}

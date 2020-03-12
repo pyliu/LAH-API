@@ -828,7 +828,7 @@ class Query {
 			return -3;
 		}
 
-		$colsNameMapping = include("Config.ColsNameMapping.CRSMS.php");
+		$colsNameMapping = include("config/Config.ColsNameMapping.CRSMS.php");
 		// compare each column base on remote data
 		foreach ($remote_row as $key => $value) {
 			if ($value != $local_row[$key]) { // use == to get every column for testing
@@ -1014,7 +1014,7 @@ class Query {
 		global $log;
 
 		// an array to express temp tables and key field names that need to be checked.
-		$temp_tables = include("Config.TempTables.php");
+		$temp_tables = include("config/Config.TempTables.php");
 		//foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
 		foreach ($temp_tables as $tmp_tbl_name => $key) {
 			/*
@@ -1049,7 +1049,7 @@ class Query {
 		}
 
 		// an array to express temp tables and key field names that need to be checked.
-		$temp_tables = include("Config.TempTables.php");
+		$temp_tables = include("config/Config.TempTables.php");
 		//foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
 		foreach ($temp_tables as $tmp_tbl_name => $key) {
 			if (!empty($table) && $tmp_tbl_name != $table) {
