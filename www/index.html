@@ -28,11 +28,11 @@
           <b-card-title title-tag="h5">規費統計</b-card-title>
           <b-card-text><lah-fee-board></lah-fee-board></b-card-text>
         </b-card>
-        <b-card no-body>
+        <b-card>
           <lah-user-message count="5" title="最新信差訊息" tabs="true" tabsPills="true" tabsEnd="true"></lah-user-message>
         </b-card>
         <b-card no-body>
-          3
+          <lah-user-card :ip="ip" title="我的名片"></lah-user-card>
         </b-card>
       </b-card-group>
       <b-card-group deck class="mb-1">
