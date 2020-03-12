@@ -1,5 +1,5 @@
 <?php
-require_once("GlobalConstants.inc.php");
+require_once("../GlobalConstants.inc.php");
 
 abstract class FileAPICommand {
     
