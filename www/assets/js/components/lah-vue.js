@@ -645,7 +645,7 @@ Vue.component("lah-header", {
         showUserIcon() { return this.enableUserCardPopover }
     },
     methods: {
-        active: async function(link) {
+        active: function(link) {
             let url = Array.isArray(link.url) ? link.url[0] : link.url;
             let ret = location.href.indexOf(url) > 0 ? 'active' : '';
             // check page authority here
@@ -677,6 +677,7 @@ Vue.component("lah-header", {
     async created() {
         try {
             let myip = await this.getLocalCache('myip');
+            let admin = await this.isAdmin;
             if (this.empty(myip)) {
                 await this.$http.post(CONFIG.JSON_API_EP, {
                     type: 'ip'
