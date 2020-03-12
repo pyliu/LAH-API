@@ -77,34 +77,6 @@ function GetDBUserMapping($refresh = false) {
     return unserialize($content);
 }
 
-function getCodeSelectHTML($element_id, $other_attrs = "") {
-    return '<select id="'.$element_id.'" name="'.$element_id.'" '.$other_attrs.'>
-    <optgroup label="本所">
-      <option>HB04 壢登</option>
-      <option>HB05 壢永</option>
-      <option>HB06 壢速</option>
-    </optgroup>
-    <optgroup label="本所收件(跨所)">
-      <option>HAB1 壢桃登跨</option>
-      <option>HCB1 壢溪登跨</option>
-      <option>HDB1 壢楊登跨</option>
-      <option>HEB1 壢蘆登跨</option>
-      <option>HFB1 壢德登跨</option>
-      <option>HGB1 壢平登跨</option>
-      <option>HHB1 壢山登跨</option>
-    </optgroup>
-    <optgroup label="他所收件(跨所)">
-      <option>HBA1 桃壢登跨</option>
-      <option>HBC1 溪壢登跨</option>
-      <option>HBD1 楊壢登跨</option>
-      <option>HBE1 蘆壢登跨</option>
-      <option>HBF1 德壢登跨</option>
-      <option>HBG1 平壢登跨</option>
-      <option>HBH1 山壢登跨</option>
-    </optgroup>
-  </select>';
-}
-
 function zipLogs() {
     global $log;
     // Enter the name of directory
