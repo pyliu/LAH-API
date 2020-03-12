@@ -1,6 +1,6 @@
 <?php
 require_once("FileAPICommand.class.php");
-require_once("../Query.class.php");
+require_once(dirname(dirname(__FILE__)).ROOT_DIR.DIRECTORY_SEPARATOR."Query.class.php");
 
 class FileAPISQLCsvCommand extends FileAPICommand {
     private $sql;
