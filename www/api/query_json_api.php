@@ -6,7 +6,7 @@ require_once(ROOT_DIR."/include/PrcAllCasesData.class.php");
 require_once(ROOT_DIR."/include/Query.class.php");
 require_once(ROOT_DIR."/include/Message.class.php");
 require_once(ROOT_DIR."/include/WatchDog.class.php");
-require_once(ROOT_DIR."/include/JSONAPICommandFactory.class.php");
+require_once(ROOT_DIR."/include/api/JSONAPICommandFactory.class.php");
 require_once(ROOT_DIR."/include/UserInfo.class.php");
 require_once(ROOT_DIR."/include/Stats.class.php");
 
