@@ -1017,6 +1017,7 @@ Vue.component('lah-user-message', {
     </div>`,
     props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton', 'tabs', 'tabsEnd', 'tabsPills'],
     data: () => { return {
+        disabled: CONFIG.DISABLE_MSDB_QUERY,
         raws: undefined,
         pattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig
     } },
@@ -1038,41 +1039,43 @@ Vue.component('lah-user-message', {
         },
         border: function(index) { return index == 0 ? 'danger' : index == 1 ? 'primary' : '' },
         load: async function() {
-            try {
-                const raws = await this.getLocalCache("my-messeages");
-                if (raws !== false && raws.length == this.count) {
-                    this.raws = raws;
-                } else if (raws !== false && raws.length >= this.count) {
-                    this.raws = raws.slice(0, this.count);
-                } else {
-                    this.$http.post(CONFIG.JSON_API_EP, {
-                        type: "user_message",
-                        id: this.id,
-                        name: this.name,
-                        ip: this.ip,
-                        count: this.count
-                    }).then(res => {
-                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                            this.raws = res.data.raw
-                            this.setLocalCache("my-messeages", this.raws, 60000);   // 1 min
-                        } else {
-                            addNotification({
+            if (!this.disabled) {
+                try {
+                    const raws = await this.getLocalCache("my-messeages");
+                    if (raws !== false && raws.length == this.count) {
+                        this.raws = raws;
+                    } else if (raws !== false && raws.length >= this.count) {
+                        this.raws = raws.slice(0, this.count);
+                    } else {
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: "user_message",
+                            id: this.id,
+                            name: this.name,
+                            ip: this.ip,
+                            count: this.count
+                        }).then(res => {
+                            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                this.raws = res.data.raw
+                                this.setLocalCache("my-messeages", this.raws, 60000);   // 1 min
+                            } else {
+                                addNotification({
+                                    title: "查詢信差訊息",
+                                    message: res.data.message,
+                                    type: "warning"
+                                });
+                            }
+                        }).catch(err => {
+                            console.error(err);
+                            showAlert({
                                 title: "查詢信差訊息",
-                                message: res.data.message,
-                                type: "warning"
+                                message: err.message,
+                                type: "danger"
                             });
-                        }
-                    }).catch(err => {
-                        console.error(err);
-                        showAlert({
-                            title: "查詢信差訊息",
-                            message: err.message,
-                            type: "danger"
                         });
-                    });
+                    }
+                } catch(err) {
+                    console.error(err);
                 }
-            } catch(err) {
-                console.error(err);
             }
         }
     },
