@@ -733,12 +733,13 @@ Vue.component("lah-user-card", {
                 <b-tab v-for="(user_data, idx) in user_rows" :title="user_data['AP_USER_NAME']" :active="idx == 0">
                     <b-card-title>{{user_data['AP_USER_NAME']}}</b-card-title>
                     <b-card-sub-title>{{user_data['AP_JOB']}}</b-card-sub-title>
-                    <b-link :href="photoUrl(user_data)" target="_blank">
+                    <b-link @click="openPhoto(user_data)">
                         <b-card-img
                             :src="photoUrl(user_data)"
                             :alt="user_data['AP_USER_NAME']"
                             class="img-thumbnail float-right mx-auto ml-2"
                             style="max-width: 220px"
+                            @click="openPhoto(user_data)"
                         ></b-card-img>
                     </b-link>
                     <b-card-text class="small">
@@ -764,7 +765,7 @@ Vue.component("lah-user-card", {
                 :title="user_data['AP_USER_NAME']"
                 :sub-title="user_data['AP_JOB']"
             >
-                <b-link :href="photoUrl(user_data)" target="_blank">
+                <b-link @click="openPhoto(user_data)">
                     <b-card-img
                         :src="photoUrl(user_data)"
                         :alt="user_data['AP_USER_NAME']"
@@ -806,6 +807,21 @@ Vue.component("lah-user-card", {
         },
         photoUrl: function (user_data) {
             return `get_pho_img.php?name=${user_data['AP_USER_NAME']}`;
+        },
+        openPhoto: function(user_data) {
+            // get_pho_img.php?name=${user_data['AP_USER_NAME']}
+            //<b-img thumbnail fluid src="https://picsum.photos/250/250/?image=54" alt="Image 1"></b-img>
+            showModal({
+                title: `${user_data['AP_USER_NAME']}照片`,
+                message: this.$createElement("div", {
+                    domProps: {
+                        className: "text-center"
+                    }
+                }, [this.$createElement("b-img", {
+                    props: {fluid: true, src: `get_pho_img.php?name=${user_data['AP_USER_NAME']}`, alt: user_data['AP_USER_NAME'], thumbnail: true}
+                })]),
+                size: "lg"
+            });
         },
         toADDate: function(tw_date) {
             let ad_date = tw_date.replace('/-/g', "/");
