@@ -22,21 +22,20 @@
   
   <section id="main_content_section" class="mb-5">
     <div class="container-fluid">
-      <i class="fas fa-wrench text-primary fa-2x ld ld-shake"> 開發中 ... </i>
-      <b-card-group deck class="mb-1">
-        <b-card>
-          <b-card-title title-tag="h5">規費統計</b-card-title>
-          <b-card-text><lah-fee-board></lah-fee-board></b-card-text>
+      <b-card-group columns class="mb-1">
+        <b-card no-body class="p-2">
+          <lah-user-card title="我的名片"></lah-user-card>
         </b-card>
-        <b-card>
+        <b-card no-body class="p-2">
           <lah-user-message count="5" title="最新信差訊息" tabs="true" tabsPills="true" tabsEnd="true"></lah-user-message>
         </b-card>
-        <b-card>
-          <lah-user-card title="我的名片"></lah-user-card>
+        <b-card no-body class="p-2">
+          <b-card-title title-tag="h6">規費統計</b-card-title>
+          <b-card-text><lah-fee-board></lah-fee-board></b-card-text>
         </b-card>
       </b-card-group>
       <b-card-group deck class="mb-1">
-        <b-card no-body>
+        <b-card no-body class="p-2">
           4
         </b-card>
         <b-card no-body>
@@ -64,6 +63,7 @@
   <script src="assets/js/global.js"></script>
   <script src="assets/js/components/lah-vue.js"></script>
   <script src="assets/js/components/dashboard/lah-fee-board.js"></script>
+  <script src="assets/js/components/fee-query-board.js"></script>
   <!-- Vue Chart Components -->
   <script src="assets/js/Chart.min.js"></script>
 

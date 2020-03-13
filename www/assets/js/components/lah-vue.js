@@ -572,7 +572,7 @@ Vue.component("lah-header", {
     template: `<lah-transition slide-down>
         <nav v-if="show" class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
             <i class="fas fa-2x text-light mr-1" :class="icon"></i>
-            <a class="navbar-brand my-auto" :href="location.href">{{leading}} <span style="font-size: .75rem">(β)</span></a>
+            <a class="navbar-brand my-auto" :href="location.href" v-html="leading"><span style="font-size: .75rem">(β)</span></a>
             <i v-if="showUserIcon" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
             <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
                 <lah-user-card :ip="ip" @not-found="userNotFound" class="mb-1" title="我的名片"></lah-user-card>
@@ -586,7 +586,7 @@ Vue.component("lah-header", {
                 <lah-transition appear>
                     <ul class="navbar-nav mr-auto">
                         <li v-for="link in links" :class="['nav-item', 'my-auto', active(link)]" v-show="link.need_admin ? isAdmin : true">
-                            <a class="nav-link" :href="Array.isArray(link.url) ? link.url[0] : link.url">{{link.text}}</a>
+                            <a class="nav-link" :href="Array.isArray(link.url) ? link.url[0] : link.url" v-html="link.text"></a>
                         </li>
                     </ul>
                 </lah-transition>
@@ -598,7 +598,7 @@ Vue.component("lah-header", {
         icon: "fa-question",
         leading: "",
         links: [{
-            text: "管理儀錶板",
+            text: `管理儀錶板 <i class="fas fa-wrench text-muted" style="font-size: .75rem" title="開發中"></i>`,
             url: ["index.html", "/"],
             icon: "fa-th-large",
             need_admin: true
@@ -798,7 +798,7 @@ Vue.component("lah-user-card", {
     computed: {
         useTab: function() { return !this.disabled && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 1; },
         useCard: function() { return !this.disabled && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 0; },
-        not_found: function() { return `找不到使用者 「${this.name || this.id || this.ip}」`; }
+        notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip}」`; }
     },
     methods: {
         isLeft: function(user_data) {
@@ -938,6 +938,7 @@ Vue.component("lah-user-card", {
             // }
             // return;
             if (!succeed_cached) {
+                if (!(this.name || this.id || this.ip)) this.ip = await this.getLocalCache('myip');
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "user_info",
                     name: $.trim(this.name),
@@ -994,7 +995,7 @@ Vue.component('lah-user-message', {
                 <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
             </b-card>
         </b-card-group>
-        <lah-exclamation v-else>{{not_found}}</lah-exclamation>
+        <lah-exclamation v-else>{{notFound}}</lah-exclamation>
     </div>`,
     props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton', 'tabs', 'tabsEnd', 'tabsPills'],
     data: () => { return {
@@ -1006,7 +1007,7 @@ Vue.component('lah-user-message', {
     },
     computed: {
         ready: function() { return !this.empty(this.raws) },
-        not_found: function() { return `「${this.name || this.id || this.ip}」找不到信差訊息！` },
+        notFound: function() { return `「${this.name || this.id || this.ip}」找不到信差訊息！` },
         columns: function() { return !this.useTabs && this.count > 3 },
         enable_spinbutton: function() { return !this.empty(this.spinbutton) },
         useTabs: function() { return !this.empty(this.tabs) }
