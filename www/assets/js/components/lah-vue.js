@@ -742,18 +742,7 @@ Vue.component("lah-user-card", {
                             @click="openPhoto(user_data)"
                         ></b-card-img>
                     </b-link>
-                    <b-card-text class="small">
-                        <lah-ban v-if="isLeft(user_data)" class='text-danger mx-auto'> 已離職【{{user_data["AP_OFF_DATE"]}}】</lah-ban>
-                        <div>ID：{{user_data["DocUserID"]}}</div>
-                        <div v-if="isAdmin">電腦：{{user_data["AP_PCIP"]}}</div>
-                        <div v-if="isAdmin">生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge(user_data) !== false" :variant="birthAgeVariant(user_data)" pill>{{birthAge(user_data)}}歲</b-badge></div>
-                        <div>單位：{{user_data["AP_UNIT_NAME"]}}</div>
-                        <div>工作：{{user_data["AP_WORK"]}}</div>
-                        <div v-if="isAdmin">學歷：{{user_data["AP_HI_SCHOOL"]}}</div>
-                        <div v-if="isAdmin">考試：{{user_data["AP_TEST"]}}</div>
-                        <div v-if="isAdmin">手機：{{user_data["AP_SEL"]}}</div>
-                        <div>到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge(user_data) !== false" :variant="workAgeVariant(user_data)" pill>{{workAge(user_data)}}年</b-badge></div>
-                    </b-card-text>
+                    <lah-user-description :user_data="user_data"></lah-user-description>
                 </b-tab>
             </b-tabs>
         </b-card>
@@ -773,28 +762,122 @@ Vue.component("lah-user-card", {
                         style="max-width: 220px"
                     ></b-card-img>
                 </b-link>
-                <b-card-text class="small">
-                    <lah-ban v-if="isLeft(user_data)" class='text-danger mx-auto'> 已離職【{{user_data["AP_OFF_DATE"]}}】</lah-ban>
-                    <div>ID：{{user_data["DocUserID"]}}</div>
-                    <div v-if="isAdmin">電腦：{{user_data["AP_PCIP"]}}</div>
-                    <div v-if="isAdmin">生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge(user_data) !== false" :variant="birthAgeVariant(user_data)" pill>{{birthAge(user_data)}}歲</b-badge></div>
-                    <div>單位：{{user_data["AP_UNIT_NAME"]}}</div>
-                    <div>工作：{{user_data["AP_WORK"]}}</div>
-                    <div v-if="isAdmin">學歷：{{user_data["AP_HI_SCHOOL"]}}</div>
-                    <div v-if="isAdmin">考試：{{user_data["AP_TEST"]}}</div>
-                    <div v-if="isAdmin">手機：{{user_data["AP_SEL"]}}</div>
-                    <div>到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge(user_data) !== false" :variant="workAgeVariant(user_data)" pill>{{workAge(user_data)}}年</b-badge></div>
-                </b-card-text>
+                <lah-user-description :user_data="user_data"></lah-user-description>
             </b-card>
         </b-card-group>
         <lah-exclamation v-else class="my-2">找不到使用者「{{name || id || ip}}」！</lah-exclamation>
     </div>`,
+    components: {
+        "lah-user-description": {
+            template: `<b-card-text class="small">
+                <lah-ban v-if="isLeft" class='text-danger mx-auto'> 已離職【{{user_data["AP_OFF_DATE"]}}】</lah-ban>
+                <div>ID：{{user_data["DocUserID"]}}</div>
+                <div v-if="isAdmin">電腦：{{user_data["AP_PCIP"]}}</div>
+                <div v-if="isAdmin">生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge() !== false" :variant="birthAgeVariant()" pill>{{birthAge()}}歲</b-badge></div>
+                <div>單位：{{user_data["AP_UNIT_NAME"]}}</div>
+                <div>工作：{{user_data["AP_WORK"]}}</div>
+                <div v-if="isAdmin">學歷：{{user_data["AP_HI_SCHOOL"]}}</div>
+                <div v-if="isAdmin">考試：{{user_data["AP_TEST"]}}</div>
+                <div v-if="isAdmin">手機：{{user_data["AP_SEL"]}}</div>
+                <div>到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge() !== false" :variant="workAgeVariant()" pill>{{workAge()}}年</b-badge></div>
+            </b-card-text>`,
+            props: ['user_data'],
+            data: function() { return {
+                now: new Date(),
+                year: 31536000000
+            } },
+            computed: {
+                isLeft: function () {
+                    return this.user_data['AP_OFF_JOB'] == 'Y';
+                }
+            },
+            methods: {
+                birthAgeVariant: function() {
+                    let badge_age = this.birthAge();
+                    if (badge_age < 30) {
+                        return "success";
+                    } else if (badge_age < 40) {
+                        return "primary";
+                    } else if (badge_age < 50) {
+                        return "warning";
+                    } else if (badge_age < 60) {
+                        return "danger";
+                    }
+                    return "dark";
+                },
+                birthAge: function() {
+                    let birth = this.user_data["AP_BIRTH"];
+                    if (birth) {
+                        birth = this.toADDate(birth);
+                        let temp = Date.parse(birth);
+                        if (temp) {
+                            let born = new Date(temp);
+                            return ((this.now - born) / this.year).toFixed(1);
+                        }
+                    }
+                    return false;
+                },
+                workAge: function() {
+                    let AP_ON_DATE = this.user_data["AP_ON_DATE"];
+                    let AP_OFF_JOB = this.user_data["AP_OFF_JOB"];
+                    let AP_OFF_DATE = this.user_data["AP_OFF_DATE"];
+        
+                    if(AP_ON_DATE != undefined && AP_ON_DATE != null) {
+                        AP_ON_DATE = AP_ON_DATE.date ? AP_ON_DATE.date.split(" ")[0] :　AP_ON_DATE;
+                        AP_ON_DATE = this.toADDate(AP_ON_DATE);
+                        let temp = Date.parse(AP_ON_DATE);
+                        if (temp) {
+                            let on = new Date(temp);
+                            let now = this.now;
+                            if (AP_OFF_JOB == "Y") {
+                                AP_OFF_DATE = this.toADDate(AP_OFF_DATE);
+                                temp = Date.parse(AP_OFF_DATE);
+                                if (temp) {
+                                    // replace now Date to off board date
+                                    now = new Date(temp);
+                                }
+                            }
+                            return ((now - on) / this.year).toFixed(1);
+                        }
+                    }
+                    return false;
+                },
+                workAgeVariant: function() {
+                    let work_age = this.workAge();
+                    if (work_age < 5) {
+                        return 'success';
+                    } else if (work_age < 10) {
+                        return 'primary';
+                    } else if (work_age < 20) {
+                        return 'warning';
+                    }
+                    return 'danger';
+                },
+                toTWDate: function(ad_date) {
+                    tw_date = ad_date.replace('/-/g', "/");
+                    // detect if it is AD date
+                    if (tw_date.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+                        // to TW date
+                        tw_date = (parseInt(tw_date.substring(0, 4)) - 1911) + tw_date.substring(4);
+                    }
+                    return tw_date;
+                },
+                toADDate: function(tw_date) {
+                    let ad_date = tw_date.replace('/-/g', "/");
+                    // detect if it is TW date
+                    if (ad_date.match(/^\d{3}\/\d{2}\/\d{2}$/)) {
+                        // to AD date
+                        ad_date = (parseInt(ad_date.substring(0, 3)) + 1911) + ad_date.substring(3);
+                    }
+                    return ad_date;
+                }
+            }
+        }
+    },
     props: ['id', 'name', 'ip', 'title'],
     data: function() { return {
         disabled: CONFIG.DISABLE_MSDB_QUERY,
-        user_rows: null,
-        now: new Date(),
-        year: 31536000000
+        user_rows: null
     } },
     computed: {
         useTab: function() { return !this.disabled && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 1; },
@@ -802,9 +885,6 @@ Vue.component("lah-user-card", {
         notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip}」`; }
     },
     methods: {
-        isLeft: function(user_data) {
-            return user_data['AP_OFF_JOB'] == 'Y';
-        },
         photoUrl: function (user_data) {
             return `get_pho_img.php?name=${user_data['AP_USER_NAME']}`;
         },
@@ -822,85 +902,6 @@ Vue.component("lah-user-card", {
                 })]),
                 size: "lg"
             });
-        },
-        toADDate: function(tw_date) {
-            let ad_date = tw_date.replace('/-/g', "/");
-            // detect if it is TW date
-            if (ad_date.match(/^\d{3}\/\d{2}\/\d{2}$/)) {
-                // to AD date
-                ad_date = (parseInt(ad_date.substring(0, 3)) + 1911) + ad_date.substring(3);
-            }
-            return ad_date;
-        },
-        toTWDate: function(ad_date) {
-            tw_date = ad_date.replace('/-/g', "/");
-            // detect if it is AD date
-            if (tw_date.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
-                // to TW date
-                tw_date = (parseInt(tw_date.substring(0, 4)) - 1911) + tw_date.substring(4);
-            }
-            return tw_date;
-        },
-        birthAgeVariant: function(user_data) {
-            let badge_age = this.birthAge(user_data["AP_BIRTH"]);
-            if (badge_age < 30) {
-                return "success";
-            } else if (badge_age < 40) {
-                return "primary";
-            } else if (badge_age < 50) {
-                return "warning";
-            } else if (badge_age < 60) {
-                return "danger";
-            }
-            return "dark";
-        },
-        birthAge: function(user_data) {
-            let birth = user_data["AP_BIRTH"];
-            if (birth) {
-                birth = this.toADDate(birth);
-                let temp = Date.parse(birth);
-                if (temp) {
-                    let born = new Date(temp);
-                    return ((this.now - born) / this.year).toFixed(1);
-                }
-            }
-            return false;
-        },
-        workAge: function(user_data) {
-            let AP_ON_DATE = user_data["AP_ON_DATE"];
-            let AP_OFF_JOB = user_data["AP_OFF_JOB"];
-            let AP_OFF_DATE = user_data["AP_OFF_DATE"];
-
-            if(AP_ON_DATE != undefined && AP_ON_DATE != null) {
-                AP_ON_DATE = AP_ON_DATE.date ? AP_ON_DATE.date.split(" ")[0] :　AP_ON_DATE;
-                AP_ON_DATE = this.toADDate(AP_ON_DATE);
-                let temp = Date.parse(AP_ON_DATE);
-                if (temp) {
-                    let on = new Date(temp);
-                    let now = this.now;
-                    if (AP_OFF_JOB == "Y") {
-                        AP_OFF_DATE = this.toADDate(AP_OFF_DATE);
-                        temp = Date.parse(AP_OFF_DATE);
-                        if (temp) {
-                            // replace now Date to off board date
-                            now = new Date(temp);
-                        }
-                    }
-                    return ((now - on) / this.year).toFixed(1);
-                }
-            }
-            return false;
-        },
-        workAgeVariant: function(user_data) {
-            let work_age = this.workAge(user_data);
-            if (work_age < 5) {
-                return 'success';
-            } else if (work_age < 10) {
-                return 'primary';
-            } else if (work_age < 20) {
-                return 'warning';
-            }
-            return 'danger';
         },
         cacheUserRows: function() {
             let payload = {};
