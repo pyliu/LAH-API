@@ -773,13 +773,13 @@ Vue.component("lah-user-card", {
                 <lah-ban v-if="isLeft" class='text-danger mx-auto'> 已離職【{{user_data["AP_OFF_DATE"]}}】</lah-ban>
                 <div>ID：{{user_data["DocUserID"]}}</div>
                 <div v-if="isAdmin">電腦：{{user_data["AP_PCIP"]}}</div>
-                <div v-if="isAdmin">生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge() !== false" :variant="birthAgeVariant()" pill>{{birthAge()}}歲</b-badge></div>
+                <div v-if="isAdmin">生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge !== false" :variant="birthAgeVariant" pill>{{birthAge}}歲</b-badge></div>
                 <div>單位：{{user_data["AP_UNIT_NAME"]}}</div>
                 <div>工作：{{user_data["AP_WORK"]}}</div>
                 <div v-if="isAdmin">學歷：{{user_data["AP_HI_SCHOOL"]}}</div>
                 <div v-if="isAdmin">考試：{{user_data["AP_TEST"]}}</div>
                 <div v-if="isAdmin">手機：{{user_data["AP_SEL"]}}</div>
-                <div>到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge() !== false" :variant="workAgeVariant()" pill>{{workAge()}}年</b-badge></div>
+                <div>到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge !== false" :variant="workAgeVariant" pill>{{workAge}}年</b-badge></div>
             </b-card-text>`,
             props: ['user_data'],
             data: function() { return {
@@ -789,11 +789,9 @@ Vue.component("lah-user-card", {
             computed: {
                 isLeft: function () {
                     return this.user_data['AP_OFF_JOB'] == 'Y';
-                }
-            },
-            methods: {
+                },
                 birthAgeVariant: function() {
-                    let badge_age = this.birthAge();
+                    let badge_age = this.birthAge;
                     if (badge_age < 30) {
                         return "success";
                     } else if (badge_age < 40) {
@@ -843,7 +841,7 @@ Vue.component("lah-user-card", {
                     return false;
                 },
                 workAgeVariant: function() {
-                    let work_age = this.workAge();
+                    let work_age = this.workAge;
                     if (work_age < 5) {
                         return 'success';
                     } else if (work_age < 10) {
@@ -852,7 +850,9 @@ Vue.component("lah-user-card", {
                         return 'warning';
                     }
                     return 'danger';
-                },
+                }
+            },
+            methods: {
                 toTWDate: function(ad_date) {
                     tw_date = ad_date.replace('/-/g', "/");
                     // detect if it is AD date
@@ -900,7 +900,8 @@ Vue.component("lah-user-card", {
                 }, [this.$createElement("b-img", {
                     props: {fluid: true, src: `get_pho_img.php?name=${user_data['AP_USER_NAME']}`, alt: user_data['AP_USER_NAME'], thumbnail: true}
                 })]),
-                size: "lg"
+                size: "lg",
+                backdrop_close: true
             });
         },
         cacheUserRows: function() {
