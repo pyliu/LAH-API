@@ -47,13 +47,13 @@ if (Vue) {
                 let id = trim(year + code + number);
                 
                 this.isBusy = true;
-            
+                let that = this;
+
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "reg_case",
                     id: id
                 }).then(res => {
                     window.vueApp.showRegCase(res.data, true);
-                    this.isBusy = false;
                 }).catch(err => {
                     console.error("case-reg-search::regQuery parsing failed", err);
                     showAlert({
@@ -62,6 +62,8 @@ if (Vue) {
                         message: err.message,
                         type: "danger"
                     });
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             },
             prcQuery: function(e) {
@@ -81,6 +83,7 @@ if (Vue) {
                 let id = trim(year + code + number);
                 
                 this.isBusy = true;
+                let that = this;
             
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "prc_case",
@@ -96,6 +99,8 @@ if (Vue) {
                         message: err.message,
                         type: "danger"
                     });
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             }
         },

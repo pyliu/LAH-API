@@ -86,12 +86,12 @@ if (Vue) {
             },
             queryByDate: function(e) {
                 this.isBusy = true;
+                let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "expaa",
                     qday: this.query_date,
                     list_mode: true
                 }).then(res => {
-                    this.isBusy = false;
                     if (res.data.data_count == 0) {
                         addNotification({
                             title: "查詢規費統計",
@@ -100,7 +100,6 @@ if (Vue) {
                         });
                         return;
                     }
-                    let that = this;
                     let VNode = this.$createElement("expaa-category-dashboard", {
                         props: {
                             raw_data: res.data.raw
@@ -118,6 +117,8 @@ if (Vue) {
                 }).catch(err => {
                     console.error("fee-query-board::queryByDate parsing failed", err);
                     showAlert({title: "搜尋規費", message: err.message, type: "danger"});
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             },
             queryByNumber: function(e) {
@@ -152,6 +153,7 @@ if (Vue) {
             obsolete: function(e) {
                 // query first then do the creation
                 this.isBusy = true;
+                let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "get_dummy_ob_fees"
                 }).then(res => {
@@ -167,7 +169,6 @@ if (Vue) {
                         size: "md",
                         callback: () => addUserInfoEvent()
                     });
-                    this.isBusy = false;
                 }).catch(ex => {
                     console.error("fee-query-board::obsolete parsing failed", ex);
                     showAlert({
@@ -175,6 +176,8 @@ if (Vue) {
                         message: ex.message,
                         type: "danger"
                     });
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             }
         },
@@ -653,6 +656,7 @@ if (Vue) {
             },
             doUpdate: function(e) {
                 this.isBusy = true;
+                let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "expaa_AA100_update",
                     date: this.date,
@@ -665,11 +669,12 @@ if (Vue) {
                         message: res.data.message,
                         type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
                     });
-                    this.isBusy = false;
                     closeModal();
                 }).catch(err => {
                     console.error(err);
                     showAlert({title: "修改規費付款方式", message: err.message, type: "danger"});
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             }
         }
@@ -705,6 +710,7 @@ if (Vue) {
             },
             doUpdate: function(e) {
                 this.isBusy = true;
+                let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "expaa_AA09_update",
                     date: this.date,
@@ -717,11 +723,12 @@ if (Vue) {
                         message: res.data.message,
                         type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
                     });
-                    this.isBusy = false;
                     closeModal();
                 }).catch(err => {
                     console.error(err);
                     showAlert({title: "修改列印註記", message: err.message, type: "danger"});
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             }
         }
@@ -898,6 +905,7 @@ if (Vue) {
                     update: function(e, idx) {
                         let record = this.expac_list[idx];
                         this.isBusy = true;
+                        let that = this;
                         this.$http.post(CONFIG.JSON_API_EP, {
                             type: "mod_expac",
                             year: record["AC25"],
@@ -924,13 +932,14 @@ if (Vue) {
                                     type: "danger"
                                 });
                             }
-                            this.isBusy = false;
                         }).catch(ex => {
                             showAlert({
                                 title: "fee-detail-expac-mgt::update",
                                 message: ex.message,
                                 type: "danger"
                             });
+                        }).finally(() => {
+                            that.isBusy = false;
                         });
                     }
                 },
@@ -979,7 +988,6 @@ if (Vue) {
                                         type: "success"
                                     });
                                     $(e.target).remove();
-                                    that.isBusy = false;
                                 } else {
                                     throw new Error("回傳狀態碼不正確!【" + res.data.message + "】");
                                 }
@@ -990,6 +998,8 @@ if (Vue) {
                                     message: ex.message,
                                     type: "danger"
                                 });
+                            }).finally(() => {
+                                that.isBusy = false;
                             });
                         });
                     }

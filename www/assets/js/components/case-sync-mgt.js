@@ -76,6 +76,7 @@ if (Vue) {
                 
                 // toggle button disable attr
                 this.isBusy = true;
+                let that = this;
             
                 let offset = 6 - number.length;
                 if (offset > 0) {
@@ -154,7 +155,6 @@ if (Vue) {
                             })
                         });
                     }
-                    this.isBusy = false;
                 }).catch(ex => {
                     // remove the fieldset since the function is not working ... 
                     let fieldset = $("#case-sync-mgt-fieldset");
@@ -171,6 +171,8 @@ if (Vue) {
                         message: ex.message,
                         type: "danger"
                     });
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             },
             syncCaseColumn: function(id, column) {
@@ -179,7 +181,7 @@ if (Vue) {
                     console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
                     let td = $(`#sync_column_${column}`).parent();
                     $(`#sync_column_${column}`).remove();
-
+                    that.isBusy = true;
                     that.$http.post(CONFIG.JSON_API_EP, {
                         type: "sync_xcase_column",
                         id: id,
@@ -193,6 +195,8 @@ if (Vue) {
                     }).catch(ex => {
                         console.error("case-sync-mgt::syncCaseColumn parsing failed", ex);
                         td.html("<span class='text-danger'>" + ex.message + "</span>");
+                    }).finally(() => {
+                        that.isBusy = false;
                     });
                 });
             },
@@ -201,6 +205,7 @@ if (Vue) {
                 showConfirm(`同步局端資料至本所資料庫【${id}】？`, function() {
                     console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
                     $("#sync_x_case_confirm_button").remove();
+                    that.isBusy = true;
                     that.$http.post(CONFIG.JSON_API_EP, {
                         type: "sync_xcase",
                         id: id
@@ -226,6 +231,8 @@ if (Vue) {
                             message: ex.message,
                             type: "danger"
                         });
+                    }).finally(() => {
+                        that.isBusy = false;
                     });
                 });
             },
@@ -239,7 +246,6 @@ if (Vue) {
                         type: "inst_xcase",
                         id: id
                     }).then(res => {
-                        that.isBusy = false;
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             addNotification({
                                 title: "新增遠端案件資料",
@@ -263,6 +269,8 @@ if (Vue) {
                             message: ex.message,
                             type: "danger"
                         });
+                    }).finally(() => {
+                        that.isBusy = false;
                     });
                 });
             },

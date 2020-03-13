@@ -45,6 +45,7 @@ if (Vue) {
                 let id = trim(`${this.year}${this.code}${this.num}`);
                 
                 this.isBusy = true;
+                let that = this;
 
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "reg_case",
@@ -73,7 +74,6 @@ if (Vue) {
                             size: "md"
                         });
                     }
-                    this.isBusy = false;
                 }).catch(err => {
                     console.error("case-state-mgt::query parsing failed", err);
                     showAlert({
@@ -82,6 +82,8 @@ if (Vue) {
                         message: err.message,
                         type: "danger"
                     });
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             },
             popup: () => {
@@ -227,7 +229,7 @@ if (Vue) {
                                 message: `<strong class='text-danger'>更新欄位「${arguments.col}」失敗</strong><p>${arguments.rm01}, ${arguments.rm02}, ${arguments.rm03}, ${arguments.val}</p>【${ex.message}】`,
                                 type: "danger"
                             });
-                        });
+                        }).finally(() => {});
                     },
                     updateRM30: function(e) {
                         if (this.rm30 == this.rm30_orig) {

@@ -43,9 +43,9 @@ if (Vue) {
                 let year = data.year;
                 let code = data.code;
                 let number = data.num;
-                let that = this;
 
                 this.isBusy = true;
+                let that = this;
             
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "query_temp_data",
@@ -53,10 +53,6 @@ if (Vue) {
                     code: code,
                     number: number
                 }).then(res => {
-
-                    let that = this;
-                    this.isBusy = false;
-
                     console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢暫存資料回傳狀態碼有問題【${res.data.status}】`);
                     
                     // res.data.raw structure: 0 - Table, 1 - all raw data, 2 - SQL
@@ -178,6 +174,8 @@ if (Vue) {
                 }).catch(ex => {
                     console.error("case-temp-mgt::query parsing failed", ex);
                     showAlert({ title: "清除暫存檔", message: ex.message, type: "danger" });
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             },
             showSQL: function(e) {
@@ -205,6 +203,7 @@ if (Vue) {
                 let that = this;
                 showConfirm(msg, () => {
                     $(data.target).remove();
+                    that.isBusy = true;
                     that.$http.post(CONFIG.JSON_API_EP, {
                         type: 'clear_temp_data',
                         year: data.year,
@@ -228,6 +227,8 @@ if (Vue) {
                             message: ex.message,
                             type: "danger"
                         });
+                    }).finally(() => {
+                        that.isBusy = false;
                     });
                 });
             },

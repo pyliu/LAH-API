@@ -36,6 +36,7 @@ if (Vue) {
             check: function(e) {
                 const h = this.$createElement;
                 this.isBusy = true;
+                let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "xcase-check"
                 }).then(res => {
@@ -55,10 +56,11 @@ if (Vue) {
                     } else {
                         showAlert({ title: "檢測系統跨所註記遺失", message: res.data.message, type: "danger" });
                     }
-                    this.isBusy = false;
                 }).catch(err => {
                     console.error("xcase-check::check parsing failed", err);
                     showAlert({title: "檢測系統跨所註記遺失", message: err.message, type: "danger"});
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             }
         },
@@ -77,6 +79,7 @@ if (Vue) {
                         console.log("The problematic xcase id: "+id);
                         let li = $(e.target).closest("li");
                         this.isBusy = true;
+                        let that = this;
                         $(e.target).remove();
                         this.$http.post(CONFIG.JSON_API_EP, {
                             type: "fix_xcase",
@@ -88,10 +91,11 @@ if (Vue) {
                             }
                             addNotification({ message: msg, variant: "success" });
                             li.html(msg);
-                            this.isBusy = false;
                         }).catch(err => {
                             console.error("xcase-check-item::fix parsing failed", err);
                             showAlert({title: "跨所註記修正", message: ex.message, type: "danger"});
+                        }).finally(() => {
+                            that.isBusy = false;
                         });
                     }
                 }

@@ -69,9 +69,7 @@ if (Vue) {
                 // on error
                 console.error(error.toJson());
                 this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢登記案件發生錯誤！【${error}】`;
-            }).finally(() => {
-                // finally
-            });
+            }).finally(() => {});
         }
     };
     let VueCMSMS = {
@@ -133,9 +131,7 @@ if (Vue) {
                 // on error
                 console.error(error.toJson());
                 this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢測量案件發生錯誤！【${error}】`;
-            }).finally(() => {
-                // finally
-            });
+            }).finally(() => {});
         }
     }
     Vue.component("case-query-by-pid", {

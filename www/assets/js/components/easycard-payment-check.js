@@ -43,6 +43,7 @@ if (Vue) {
                 }
 
                 this.isBusy = true;
+                let that = this;
                 const h = this.$createElement;
 
                 this.$http.post(CONFIG.JSON_API_EP, {
@@ -62,10 +63,11 @@ if (Vue) {
                             size: "md"
                         });
                     }
-                    this.isBusy = false;
                 }).catch(ex => {
                     console.error("easycard-payment-check::query parsing failed", ex);
                     showAlert({title: "檢測悠遊卡自動加值付款失敗", message: ex.message, type: "danger"});
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             },
             popup: () => {
@@ -100,6 +102,7 @@ if (Vue) {
                         let message = "確定要修正 日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料?";
                         let that = this;
                         showConfirm(message, () => {
+                            that.isBusy = true;
                             that.$http.post(CONFIG.JSON_API_EP, {
                                 type: "fix_easycard",
                                 qday: qday,
@@ -114,6 +117,8 @@ if (Vue) {
                             }).catch(ex => {
                                 console.error("easycard-payment-check-item::fix parsing failed", ex);
                                 showAlert({message: `easycard-payment-check-item::fix parsing failed. ${ex.message}`, type: "danger"});
+                            }).finally(() => {
+                                that.isBusy = false;
                             });
                         });
                     },

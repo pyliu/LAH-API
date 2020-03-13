@@ -39,7 +39,6 @@ if (Vue) {
                         this.reset_flag = true;
                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + res.data.status + "】");
                         addNotification({ title: "清除全部先行准登旗標", message: "已清除完成", type: "success" });
-                        that.isBusy = false;
                     }).catch(err => {
                         console.error("announcement-mgt::clear parsing failed", err);
                         showAlert({
@@ -48,6 +47,8 @@ if (Vue) {
                             message: err.message,
                             type: "danger"
                         });
+                    }).finally(() => {
+                        that.isBusy = false;
                     });
                 });
             },
@@ -223,6 +224,7 @@ if (Vue) {
                                 console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
                                 let that = this;
                                 showConfirm("確定要更新公告資料？", () => {
+                                    that.isBusy = true;
                                     that.$http.post(CONFIG.JSON_API_EP, {
                                         type: 'update_announcement_data',
                                         code: reason_code,
@@ -252,6 +254,8 @@ if (Vue) {
                                             message: err.message,
                                             type: "danger"
                                         });
+                                    }).finally(() => {
+                                        that.isBusy = false;
                                     });
                                     
                                 });

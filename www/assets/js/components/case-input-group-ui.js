@@ -95,7 +95,6 @@ if (Vue) {
                     } else {
                         addNotification({message: res.data.message, type: "warning"});
                     }
-                    this.isBusy = false;
                 }).catch(err => {
                     console.error("case-input-group-ui::getMaxNumber parsing failed", err);
                     showAlert({
@@ -104,6 +103,8 @@ if (Vue) {
                         message: err.message,
                         type: "danger"
                     });
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             },
             newCustomEvent: (name, val, target) => {

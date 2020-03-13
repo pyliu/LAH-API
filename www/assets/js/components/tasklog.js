@@ -81,6 +81,7 @@ if (Vue) {
                     },
                     callLogAPI: function (e) {
                         this.isBusy = true;
+                        let that = this;
                         let dt = new Date();
                         this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
                         this.log_filename = `log-${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
@@ -104,7 +105,6 @@ if (Vue) {
                                 this.addLogList(`${this.log_update_time} 錯誤: ${res.data.message}`);
                                 console.warn(res.data.message);
                             }
-                            this.isBusy = false;
                         }).catch(ex => {
                             this.abortCountdown();
                             this.addLogList(`${this.log_update_time} 錯誤: ${ex.message}`);
@@ -114,6 +114,8 @@ if (Vue) {
                                 type: 'danger'
                             });
                             console.error("watchdog::callLogAPI parsing failed", ex);
+                        }).finally(() => {
+                            that.isBusy = false;
                         });
                     },
                     addLogList: function (message) {
@@ -136,6 +138,7 @@ if (Vue) {
                     },
                     zip: function(e) {
                         this.isBusy = true;
+                        let that = this;
                         this.$http.post(CONFIG.JSON_API_EP, {
                             type: 'zip_log'
                         }).then(res => {
@@ -145,7 +148,6 @@ if (Vue) {
                                 message: `<i class="text-success fas fa-circle"></i> 任務完成！`,
                                 type: "success"
                             });
-                            this.isBusy = false;
                         }).catch(err => {
                             console.error("log-viewer::zip parsing failed", ex);
                             showAlert({
@@ -153,6 +155,8 @@ if (Vue) {
                                 message: err.message,
                                 type: "danger"
                             });
+                        }).finally(() => {
+                            that.isBusy = false;
                         });
                     }
                 },
@@ -240,6 +244,7 @@ if (Vue) {
                     },
                     callWatchdogAPI: function() {
                         this.isBusy = true;
+                        let that = this;
                         // generate current date time string
                         let dt = new Date();
                         let now = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
@@ -266,7 +271,6 @@ if (Vue) {
                                 this.startCountdown();
                                 this.$emit("succeed-valid-server");
                             }
-                            this.isBusy = false;
                         }).catch(err => {
                             this.abortCountdown();
                             this.addHistory(`${now} 結果: ${err.message}`);
@@ -276,6 +280,8 @@ if (Vue) {
                                 type: 'danger'
                             });
                             console.error("schedule-task::callWatchdogAPI parsing failed", err);
+                        }).finally(() => {
+                            that.isBusy = false;
                         });
                     },
                     changeWIPMessageAnim: function() {

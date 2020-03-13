@@ -45,6 +45,7 @@ if (Vue) {
                 let number = this.num;
                 
                 this.isBusy = true;
+                let that = this;
             
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "sur_case",
@@ -60,7 +61,6 @@ if (Vue) {
                     } else {
                         this.dialog(res.data);
                     }
-                    this.isBusy = false;
                 }).catch(err => {
                     console.error("case-sur-mgt::query parsing failed", err);
                     showAlert({
@@ -69,6 +69,8 @@ if (Vue) {
                         message: err.message,
                         type: "danger"
                     });
+                }).finally(() => {
+                    that.isBusy = false;
                 });
             },
             dialog: function(jsonObj) {
@@ -213,7 +215,6 @@ if (Vue) {
                                             type: "danger"
                                         });
                                     }
-                                    that.isBusy = false;
                                 }).catch(err => {
                                     console.error("case-sur-dialog::update parsing failed", err);
                                     showAlert({
@@ -222,6 +223,8 @@ if (Vue) {
                                         title: "更新欄位失敗",
                                         type: "danger"
                                     });
+                                }).finally(() => {
+                                    that.isBusy = false;
                                 });
                             });
                         } else {
@@ -265,10 +268,11 @@ if (Vue) {
                                         type: "danger"
                                     });
                                 }
-                                that.isBusy = false;
                             }).catch(err => {
                                 console.error("case-sur-dialog::fix parsing failed", err);
                                 showAlert({title: "修正複丈案件失敗", subtitle: id, message: err.message, type: "danger"});
+                            }).finally(() => {
+                                that.isBusy = false;
                             });
                         });
                     }
