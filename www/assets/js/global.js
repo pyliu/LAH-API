@@ -116,7 +116,7 @@ let trim = text => {
     if (isEmpty(text)) {
         return "";
     }
-    return text.replace(/[^a-zA-Z0-9]/g, "");
+    return text.toString().replace(/[^a-zA-Z0-9]/g, "");
 }
 
 let isEmpty = variable => {
