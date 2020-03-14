@@ -48,7 +48,7 @@ Vue.prototype.$gstore = (() => {
                 userNames: undefined,
                 dayMilliseconds: 24 * 60 * 60 * 1000,
                 dynaParams: {},
-                error: "The last error message"
+                errors: []
             },
             getters: {
                 cache: state => state.cache,
@@ -56,7 +56,8 @@ Vue.prototype.$gstore = (() => {
                 userNames: state => state.userNames,
                 dayMilliseconds: state => state.dayMilliseconds,
                 dynaParams: state => state.dynaParams,
-                error: state => state.error
+                errors: state => state.errors,
+                errorLen: state => state.errors.length
             },
             mutations: {
                 cache(state, objPayload) {
@@ -76,8 +77,11 @@ Vue.prototype.$gstore = (() => {
                     state.dynaParams = Object.assign({}, state.dynaParams, objPayload);
                 },
                 error(state, msgPayload) {
-                    state.error = msgPayload;
+                    state.errors.push(msgPayload);
                 },
+                errorPop(state, dontCarePayload) {
+                    state.error.pop();
+                }
             },
             actions: {
                 async loadUserNames({ commit, state }) {
@@ -255,13 +259,21 @@ Vue.mixin({
         isBusy: function(flag) { flag ? this.busyOn(this.$el) : this.busyOff(this.$el) },
         error: function(nMsg, oMsg) {
             if (!this.empty(nMsg)) {
-                this.$gstore.commit("error", nMsg);
+                // just in case the message array occupies too much memory
+                if (this.gerrorLen > 30) {
+                    this.$gstore.commit("errorPop");
+                }
+                this.$gstore.commit("error", {
+                    message: nMsg,
+                    time: this.currentDatetime
+                });
                 showAlert({
                     title: "錯誤訊息",
-                    subtitle: this.now,
+                    subtitle: this.currentDatetime,
                     message: nMsg,
                     type: "danger"
                 });
+                //this.$log(nMsg, oMsg);
             }
         }
     },
@@ -286,8 +298,11 @@ Vue.mixin({
         userIDs() { return this.reverseMapping(this.userNames || {}); },
         dayMilliseconds() { return this.$gstore.getters.dayMilliseconds; },
         settings() { return this.$gstore.getters.dynaParams; },
-        gerror() { return this.$gstore.getters.error; },
-        now() {
+        gerrors() { return this.$gstore.getters.errors; },
+        gerror() { return this.$gstore.getters.errors[this.$gstore.getters.errors.length - 1]; },
+        gerrorLen() { return this.$gstore.getters.errorLen; },
+        currentDatetime() {
+            // e.g. 2020-03-14 11:35 23
             let now = new Date();
             return now.getFullYear() + "-" +
                 ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
