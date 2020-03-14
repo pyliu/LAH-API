@@ -506,19 +506,18 @@ Vue.component("lah-alert", {
         },
         enableProgress: function() {
             this.disableProgress();
-            let that = this;
-            let total_remaining_secs = that.delay / 1000;
-            this.progress_timer_handle = setInterval(function() {
-                that.remaining_delay -= 200;
-                let now_percent = ++that.progress_counter / (that.delay / 200.0);
-                that.remaining_percent = (100 - Math.round(now_percent * 100));
-                if (that.remaining_percent > 50) {
-                } else if (that.remaining_percent > 25) {
-                    that.bar_variant = "warning";
+            let total_remaining_secs = this.delay / 1000;
+            this.progress_timer_handle = setInterval(() => {
+                this.remaining_delay -= 200;
+                let now_percent = ++this.progress_counter / (this.delay / 200.0);
+                this.remaining_percent = (100 - Math.round(now_percent * 100));
+                if (this.remaining_percent > 50) {
+                } else if (this.remaining_percent > 25) {
+                    this.bar_variant = "warning";
                 } else {
-                    that.bar_variant = "danger";
+                    this.bar_variant = "danger";
                 }
-                that.remaining_secs = total_remaining_secs - Math.floor(total_remaining_secs * now_percent);
+                this.remaining_secs = total_remaining_secs - Math.floor(total_remaining_secs * now_percent);
             }, 200);
         },
         disableProgress: function() {
@@ -592,11 +591,10 @@ Vue.component("lah-alert", {
         afterEnter: function() {
             // close alert after 15 secs (default)
             if (this.autohide) {
-                let that = this;
                 if (this.hide_timer_handle !== null) { clearTimeout(this.hide_timer_handle); }
                 this.hide_timer_handle = setTimeout(() => {
-                    that.seen = false;
-                    that.hide_timer_handle = null;
+                    this.seen = false;
+                    this.hide_timer_handle = null;
                 }, this.delay);
                 this.enableProgress();
             }
@@ -702,13 +700,13 @@ Vue.component("lah-header", {
             if (Array.isArray(link.url)) {
                 link.url.forEach((this_url, idx) => {
                     if (location.href.indexOf(this_url) > 0) {
-                        that.icon = link.icon;
-                        that.leading = link.text;
+                        this.icon = link.icon;
+                        this.leading = link.text;
                     }
                 });
             } else if (location.href.indexOf(link.url) > 0) {
-                that.icon = link.icon;
-                that.leading = link.text;
+                this.icon = link.icon;
+                this.leading = link.text;
             }
         },
         userNotFound: function(input) {
@@ -762,8 +760,7 @@ Vue.component("lah-footer", {
         }
     },
     mounted() {
-        let that = this;
-        setTimeout(() => that.show = false, this.leave_time);
+        setTimeout(() => this.show = false, this.leave_time);
     }
 });
 
@@ -985,14 +982,13 @@ Vue.component("lah-user-card", {
             // mocks for testing
             // if (!succeed_cached) {
             //     console.log("getting mock data");
-            //     let that = this;
             //     axios.get('assets/js/mocks/user_info.json')
-            //     .then(function(response) {
-            //         that.user_rows = response.data.raw;
-            //         that.cacheUserRows()
+            //     .then(response => {
+            //         this.user_rows = response.data.raw;
+            //         this.cacheUserRows()
             //     }).catch(err => {
             //         console.error(err)
-            //     }).finally(function() {
+            //     }).finally(() => {
 
             //     });
             // }
@@ -1235,13 +1231,12 @@ $(document).ready(() => {
                 });
             },
             hideModal: function(id) {
-                let that = this;
                 if (id == "" || id == undefined || id == null) {
-                    $('div.modal.show').each(function(idx, el) {
-                        that.removeModal(el.id);
+                    $('div.modal.show').each((idx, el) => {
+                        this.removeModal(el.id);
                     });
                 } else {
-                    that.removeModal(id);
+                    this.removeModal(id);
                 }
             },
             removeModal: function(id, duration) {
@@ -1366,12 +1361,11 @@ $(document).ready(() => {
                 // remove additional characters for querying
                 let id = trim(clicked_element.text());
     
-                let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "reg_case",
                     id: id
                 }).then(res => {
-                    that.showRegCase(res.data, enabled_userinfo);
+                    this.showRegCase(res.data, enabled_userinfo);
                 }).catch(err => {
                     console.error("window.vueApp.fetchRegCase parsing failed", err);
                     showAlert({
@@ -1535,20 +1529,19 @@ $(document).ready(() => {
                     console.error(err);
                 });
                 // for cache purpose
-                let that = this;
-                let cacheIt = function(el) {
+                let cacheIt = (el) => {
                     let this_text_input = $(el);
                     let val = this_text_input.val();
                     let ele_id = this_text_input.attr("id");
                     if (val === undefined || $.trim(val) == "") {
-                        that.$lf.removeItem(ele_id).then(function() {
+                        this.$lf.removeItem(ele_id).then(function() {
                             // Run this code once the key has been removed.
                         }).catch(function(err) {
                             // This code runs if there were any errors
                             console.error(err);
                         });
                     } else if (ele_id != undefined) {
-                        that.$lf.setItem(ele_id, val);
+                        this.$lf.setItem(ele_id, val);
                     }
                 }
                 window.pyliuCacheTimer = setInterval(function(e) {
