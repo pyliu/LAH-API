@@ -273,7 +273,6 @@ Vue.mixin({
                     message: nMsg.message || nMsg,
                     type: "danger"
                 });
-                //this.$log(nMsg, oMsg);
             }
         }
     },
