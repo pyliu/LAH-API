@@ -264,13 +264,13 @@ Vue.mixin({
                     this.$gstore.commit("errorPop");
                 }
                 this.$gstore.commit("error", {
-                    message: nMsg,
+                    message: nMsg.message || nMsg,
                     time: this.currentDatetime
                 });
                 showAlert({
                     title: "錯誤訊息",
                     subtitle: this.currentDatetime,
-                    message: nMsg,
+                    message: nMsg.message || nMsg,
                     type: "danger"
                 });
                 //this.$log(nMsg, oMsg);
