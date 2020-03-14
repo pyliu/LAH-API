@@ -86,7 +86,6 @@ if (Vue) {
             },
             queryByDate: function(e) {
                 this.isBusy = true;
-                let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "expaa",
                     qday: this.query_date,
@@ -105,8 +104,8 @@ if (Vue) {
                             raw_data: res.data.raw
                         },
                         on: {
-                            "number_clicked": function(number) {
-                               that.number = number;
+                            "number_clicked": number => {
+                               this.number = number;
                             }
                         }
                     });
@@ -115,10 +114,10 @@ if (Vue) {
                         title: `${this.query_date} 規費統計`
                     });
                 }).catch(err => {
-                    console.error("fee-query-board::queryByDate parsing failed", err);
-                    showAlert({title: "搜尋規費", message: err.message, type: "danger"});
+                    this.$error("fee-query-board::queryByDate", err);
+                    this.error = err;
                 }).finally(() => {
-                    that.isBusy = false;
+                    this.isBusy = false;
                 });
             },
             queryByNumber: function(e) {
@@ -153,7 +152,6 @@ if (Vue) {
             obsolete: function(e) {
                 // query first then do the creation
                 this.isBusy = true;
-                let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "get_dummy_ob_fees"
                 }).then(res => {
@@ -169,15 +167,11 @@ if (Vue) {
                         size: "md",
                         callback: () => addUserInfoEvent()
                     });
-                }).catch(ex => {
-                    console.error("fee-query-board::obsolete parsing failed", ex);
-                    showAlert({
-                        title: "fee-query-board::obsolete",
-                        message: ex.message,
-                        type: "danger"
-                    });
+                }).catch(err => {
+                    this.$error("fee-query-board::obsolete", err);
+                    this.error = err;
                 }).finally(() => {
-                    that.isBusy = false;
+                    this.isBusy = false;
                 });
             }
         },
@@ -577,14 +571,12 @@ if (Vue) {
                             return false;
                         }
                         
-                        let that = this;
                         showConfirm("確定要新增一個新的假資料以供作廢之用？", () => {
-                            toggle(e.target);
-
+                            this.isBusy = true;
                             this.$http.post(CONFIG.JSON_API_EP, {
                                 type: "add_dummy_ob_fees",
-                                today: that.today,
-                                pc_number: that.next_pc_number,
+                                today: this.today,
+                                pc_number: this.next_pc_number,
                                 operator: operator,
                                 fee_number: fee_number,
                                 reason: reason
@@ -598,12 +590,10 @@ if (Vue) {
                                     });
                                 });
                             }).catch(err => {
-                                console.error("fee-obsolete-mgt::add parsing failed", err);
-                                showAlert({
-                                    title: "fee-obsolete-mgt::add",
-                                    message: err.message,
-                                    type: "danger"
-                                });
+                                this.$error("fee-obsolete-mgt::add", err);
+                                this.error = err;
+                            }).finally(() => {
+                                this.isBusy = false;
                             });
                         });
                     }
@@ -656,7 +646,6 @@ if (Vue) {
             },
             doUpdate: function(e) {
                 this.isBusy = true;
-                let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "expaa_AA100_update",
                     date: this.date,
@@ -671,10 +660,10 @@ if (Vue) {
                     });
                     closeModal();
                 }).catch(err => {
-                    console.error(err);
-                    showAlert({title: "修改規費付款方式", message: err.message, type: "danger"});
+                    this.$error("fee-detail-payment-mgt::doUpdate", err);
+                    this.error = err;
                 }).finally(() => {
-                    that.isBusy = false;
+                    this.isBusy = false;
                 });
             }
         }
@@ -710,25 +699,24 @@ if (Vue) {
             },
             doUpdate: function(e) {
                 this.isBusy = true;
-                let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "expaa_AA09_update",
                     date: this.date,
                     number: this.pc_number,
                     update_value: this.value
                 }).then(res => {
-                    addNotification({
-                        title: "修改列印註記",
-                        subtitle: `${this.date} ${this.pc_number}`,
-                        message: res.data.message,
-                        type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
-                    });
-                    closeModal();
+                    closeModal(() => addNotification({
+                            title: "修改列印註記",
+                            subtitle: `${this.date} ${this.pc_number}`,
+                            message: res.data.message,
+                            type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
+                        })
+                    );
                 }).catch(err => {
-                    console.error(err);
-                    showAlert({title: "修改列印註記", message: err.message, type: "danger"});
+                    this.$error("fee-detail-print-mgt::doUpdate", err);
+                    this.error = err;
                 }).finally(() => {
-                    that.isBusy = false;
+                    this.isBusy = false;
                 });
             }
         }
@@ -798,9 +786,9 @@ if (Vue) {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         this.expaa_data = res.data.raw;
                     }
-                }).catch(ex => {
-                    console.error("fee-detail-mgt::fetchEXPAA parsing failed", ex);
-                    showAlert({title: "fee-detail-mgt::fetchEXPAA", message: ex.message, type: "danger"});
+                }).catch(err => {
+                    this.$error("fee-detail-mgt::fetchEXPAA", err);
+                    this.error = err;
                 });
             },
             fetchEXPAC: function() {
@@ -819,9 +807,9 @@ if (Vue) {
                     } else {
                         this.expac_data = res.data.raw;
                     }
-                }).catch(ex => {
-                    console.error("fee-detail-mgt::fetchEXPAC parsing failed", ex);
-                    showAlert({title: "fee-detail-mgt::fetchEXPAC", message: ex.message, type: "danger"});
+                }).catch(err => {
+                    this.$error("fee-detail-mgt::fetchEXPAC", err);
+                    this.error = err;
                 });
             }
         },
@@ -905,7 +893,6 @@ if (Vue) {
                     update: function(e, idx) {
                         let record = this.expac_list[idx];
                         this.isBusy = true;
-                        let that = this;
                         this.$http.post(CONFIG.JSON_API_EP, {
                             type: "mod_expac",
                             year: record["AC25"],
@@ -932,14 +919,11 @@ if (Vue) {
                                     type: "danger"
                                 });
                             }
-                        }).catch(ex => {
-                            showAlert({
-                                title: "fee-detail-expac-mgt::update",
-                                message: ex.message,
-                                type: "danger"
-                            });
+                        }).catch(err => {
+                            this.$error("fee-detail-expac-mgt::update", err);
+                            this.error = err;
                         }).finally(() => {
-                            that.isBusy = false;
+                            this.isBusy = false;
                         });
                     }
                 },
@@ -972,11 +956,10 @@ if (Vue) {
                         let qday = this.date;
                         let pc_number = this.pc_number;
                         let message = `確定要修正 日期: ${qday}, 電腦給號: ${pc_number}, 金額: ${amount} 悠遊卡付款資料為正常？`;
-                        let that = this;
                         showConfirm(message, () => {
-                            that.isBusy = true;
+                            this.isBusy = true;
         
-                            that.$http.post(CONFIG.JSON_API_EP, {
+                            this.$http.post(CONFIG.JSON_API_EP, {
                                 type: "fix_easycard",
                                 qday: qday,
                                 pc_num: pc_number
@@ -991,15 +974,11 @@ if (Vue) {
                                 } else {
                                     throw new Error("回傳狀態碼不正確!【" + res.data.message + "】");
                                 }
-                            }).catch(ex => {
-                                console.error("fee-detail-fix-ezcard::fixEzcardPayment parsing failed", ex);
-                                showAlert({
-                                    title: "fee-detail-fix-ezcard::fixEzcardPayment",
-                                    message: ex.message,
-                                    type: "danger"
-                                });
+                            }).catch(err => {
+                                this.$error("fee-detail-fix-ezcard::fixEzcardPayment", err);
+                                this.error = err;
                             }).finally(() => {
-                                that.isBusy = false;
+                                this.isBusy = false;
                             });
                         });
                     }
