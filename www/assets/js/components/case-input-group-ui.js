@@ -82,7 +82,6 @@ if (Vue) {
                     return;
                 }
                 this.isBusy = true;
-                let that = this;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     "type": "max",
                     "year": year,
@@ -90,8 +89,8 @@ if (Vue) {
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         // update UI
-                        that.num = res.data.max;
-                        that.uiUpdate(e);
+                        this.num = res.data.max;
+                        this.uiUpdate(e);
                     } else {
                         addNotification({message: res.data.message, type: "warning"});
                     }
@@ -104,7 +103,7 @@ if (Vue) {
                         type: "danger"
                     });
                 }).finally(() => {
-                    that.isBusy = false;
+                    this.isBusy = false;
                 });
             },
             newCustomEvent: (name, val, target) => {
@@ -164,12 +163,11 @@ if (Vue) {
                     break;
             }
             // setup delay timer to allow cached data update to the input/select element
-            let that = this;
             setTimeout(() => {
-                that.year = that.$refs.year.$el.value;
-                that.code = that.$refs.code.$el.value;
-                that.num = that.$refs.num.$el.value;
-                that.uiUpdate(e);
+                this.year = this.$refs.year.$el.value;
+                this.code = this.$refs.code.$el.value;
+                this.num = this.$refs.num.$el.value;
+                this.uiUpdate(e);
             }, 300);    // cached data write back
         }
     });
