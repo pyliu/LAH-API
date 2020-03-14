@@ -253,7 +253,7 @@ Vue.mixin({
     },
     data: function() { return {
         isBusy: false,
-        error: ""
+        error: {}
     }},
     watch: {
         isBusy: function(flag) { flag ? this.busyOn(this.$el) : this.busyOff(this.$el) },
@@ -297,9 +297,9 @@ Vue.mixin({
         userIDs() { return this.reverseMapping(this.userNames || {}); },
         dayMilliseconds() { return this.$gstore.getters.dayMilliseconds; },
         settings() { return this.$gstore.getters.dynaParams; },
-        gerrors() { return this.$gstore.getters.errors; },
         gerror() { return this.$gstore.getters.errors[this.$gstore.getters.errors.length - 1]; },
         gerrorLen() { return this.$gstore.getters.errorLen; },
+        gerrors() { return this.$gstore.getters.errors; },
         currentDatetime() {
             // e.g. 2020-03-14 11:35 23
             let now = new Date();

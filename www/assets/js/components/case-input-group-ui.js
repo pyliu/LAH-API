@@ -95,13 +95,8 @@ if (Vue) {
                         addNotification({message: res.data.message, type: "warning"});
                     }
                 }).catch(err => {
+                    this.error = err;
                     console.error("case-input-group-ui::getMaxNumber parsing failed", err);
-                    showAlert({
-                        title: "查詢最大號碼失敗",
-                        subtitle: code,
-                        message: err.message,
-                        type: "danger"
-                    });
                 }).finally(() => {
                     this.isBusy = false;
                 });
