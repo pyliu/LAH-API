@@ -146,6 +146,7 @@ if (Vue) {
                                 // dayMilliseconds from $gstore
                                 this.setLocalCache('announcement_data', this.data, this.dayMilliseconds);
                             }).catch(err => {
+                                this.error = err;
                                 console.error(err);
                             });
                         }
@@ -239,7 +240,8 @@ if (Vue) {
                                         });
                                         closeModal();
                                     }).catch(err => {
-                                        this.error = err.message;
+                                        this.error = err;
+                                        console.error(err);
                                     }).finally(() => {
                                         this.isBusy = false;
                                     });
