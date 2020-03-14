@@ -81,7 +81,6 @@ if (Vue) {
                     },
                     callLogAPI: function (e) {
                         this.isBusy = true;
-                        let that = this;
                         let dt = new Date();
                         this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
                         this.log_filename = `log-${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
@@ -94,9 +93,8 @@ if (Vue) {
                             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                 this.query_data_count = res.data.data_count;
                                 this.query_total_count = res.data.total_count;
-                                let that = this;
-                                res.data.data.forEach(function(item, index, array){
-                                    that.addLogList(item);
+                                res.data.data.forEach((item, index, array) => {
+                                    this.addLogList(item);
                                 });
                                 this.resetCountdown();
                                 this.startCountdown();
@@ -108,14 +106,10 @@ if (Vue) {
                         }).catch(ex => {
                             this.abortCountdown();
                             this.addLogList(`${this.log_update_time} 錯誤: ${ex.message}`);
-                            showAlert({
-                                title: 'watchdog::callLogAPI parsing failed',
-                                message: ex.message,
-                                type: 'danger'
-                            });
-                            console.error("watchdog::callLogAPI parsing failed", ex);
+                            this.$error("watchdog::callLogAPI", ex);
+                            this.error = ex;
                         }).finally(() => {
-                            that.isBusy = false;
+                            this.isBusy = false;
                         });
                     },
                     addLogList: function (message) {
@@ -138,25 +132,20 @@ if (Vue) {
                     },
                     zip: function(e) {
                         this.isBusy = true;
-                        let that = this;
                         this.$http.post(CONFIG.JSON_API_EP, {
                             type: 'zip_log'
                         }).then(res => {
-                            console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
+                            this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
                             addNotification({
                                 title: "壓縮LOG檔",
                                 message: `<i class="text-success fas fa-circle"></i> 任務完成！`,
                                 type: "success"
                             });
                         }).catch(err => {
-                            console.error("log-viewer::zip parsing failed", ex);
-                            showAlert({
-                                title: "壓縮LOG檔",
-                                message: err.message,
-                                type: "danger"
-                            });
+                            this.$error("log-viewer::zip", err);
+                            this.error = err;
                         }).finally(() => {
-                            that.isBusy = false;
+                            this.isBusy = false;
                         });
                     }
                 },
@@ -244,7 +233,6 @@ if (Vue) {
                     },
                     callWatchdogAPI: function() {
                         this.isBusy = true;
-                        let that = this;
                         // generate current date time string
                         let dt = new Date();
                         let now = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
@@ -274,14 +262,10 @@ if (Vue) {
                         }).catch(err => {
                             this.abortCountdown();
                             this.addHistory(`${now} 結果: ${err.message}`);
-                            showAlert({
-                                title: 'schedule-task::callWatchdogAPI parsing failed',
-                                message: err.message,
-                                type: 'danger'
-                            });
-                            console.error("schedule-task::callWatchdogAPI parsing failed", err);
+                            this.$error("schedule-task::callWatchdogAPI", err);
+                            this.error = err;
                         }).finally(() => {
-                            that.isBusy = false;
+                            this.isBusy = false;
                         });
                     },
                     changeWIPMessageAnim: function() {
