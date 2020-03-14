@@ -45,18 +45,16 @@ if (Vue) {
                 let number = data.num;
 
                 this.isBusy = true;
-                let that = this;
-            
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "query_temp_data",
                     year: year,
                     code: code,
                     number: number
                 }).then(res => {
-                    console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢暫存資料回傳狀態碼有問題【${res.data.status}】`);
+                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢暫存資料回傳狀態碼有問題【${res.data.status}】`);
                     
                     // res.data.raw structure: 0 - Table, 1 - all raw data, 2 - SQL
-                    let filtered = res.data.raw.filter(function(item, index, array) {
+                    let filtered = res.data.raw.filter((item, index, array) => {
                         return item[1].length > 0;
                     });
 
@@ -70,7 +68,7 @@ if (Vue) {
                     }
 
                     let html = "";
-                    filtered.forEach(function(item, i, array) {
+                    filtered.forEach((item, i, array) => {
                         html += `<button type="button" class="btn btn-sm btn-primary active tmp_tbl_btn" data-sql-id="sql_${i}" data-tbl="${item[0]}">
                                     ${item[0]} <span class="badge badge-light">${item[1].length} <span class="sr-only">暫存檔數量</span></span>
                                 </button>`;
@@ -85,7 +83,7 @@ if (Vue) {
                                 let values = [];
                                 for (let key in this_row) {
                                     fields.push(key);
-                                    values.push(that.empty(this_row[key]) ? "null" : `'${this_row[key]}'`);
+                                    values.push(this.empty(this_row[key]) ? "null" : `'${this_row[key]}'`);
                                 }
                                 INS_SQL += `insert into ${item[0]} (${fields.join(",")})`;
                                 INS_SQL += ` values (${values.join(",")});\n`;
@@ -111,7 +109,7 @@ if (Vue) {
                         callback: () => {
                             showPopper("#temp_backup_button", "請「備份後」再選擇清除", 5000);
                             
-                            $("#temp_clean_button").off("click").on("click", e => that.fix({
+                            $("#temp_clean_button").off("click").on("click", e => this.fix({
                                 year: year,
                                 code: code,
                                 number: number,
@@ -154,7 +152,7 @@ if (Vue) {
                                 saveAs(blob, filename);
                             });
                             // attach clean event to the buttons
-                            $(".clean_tbl_temp_data").off("click").on("click", e => that.fix({
+                            $(".clean_tbl_temp_data").off("click").on("click", e => this.fix({
                                     year: year,
                                     code: code,
                                     number: number,
@@ -163,19 +161,19 @@ if (Vue) {
                                     clean_all: false
                                 })
                             );
-                            $(".tmp_tbl_btn").off("click").on("click", that.showSQL);
+                            $(".tmp_tbl_btn").off("click").on("click", this.showSQL);
                             addAnimatedCSS(".reg_case_id", {
                                 name: "flash"
-                            }).off("click").on("click", function(e) {
+                            }).off("click").on("click", e => {
                                 window.vueApp.fetchRegCase(e, true);
                             });
                         }
                     });
-                }).catch(ex => {
-                    console.error("case-temp-mgt::query parsing failed", ex);
-                    showAlert({ title: "清除暫存檔", message: ex.message, type: "danger" });
+                }).catch(err => {
+                    this.$error("case-temp-mgt::query", err);
+                    this.error = err;
                 }).finally(() => {
-                    that.isBusy = false;
+                    this.isBusy = false;
                 });
             },
             showSQL: function(e) {
@@ -200,18 +198,17 @@ if (Vue) {
                     return;
                 }
                 let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + data.year + "-" + data.code + "-" + data.number + (data.clean_all ? " 全部暫存檔?" : " " + data.table + " 表格的暫存檔?");
-                let that = this;
                 showConfirm(msg, () => {
                     $(data.target).remove();
-                    that.isBusy = true;
-                    that.$http.post(CONFIG.JSON_API_EP, {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
                         type: 'clear_temp_data',
                         year: data.year,
                         code: data.code,
                         number: data.number,
                         table: data.table
                     }).then(res => {
-                        console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + res.data.status + "】");
+                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + res.data.status + "】");
                         addNotification({
                             title: "清除暫存檔",
                             message: "已清除完成。<p>" + data.year + "-" + data.code + "-" + data.number + (data.table ? " 表格：" + data.table : "") + "</p>",
@@ -228,7 +225,7 @@ if (Vue) {
                             type: "danger"
                         });
                     }).finally(() => {
-                        that.isBusy = false;
+                        this.isBusy = false;
                     });
                 });
             },
