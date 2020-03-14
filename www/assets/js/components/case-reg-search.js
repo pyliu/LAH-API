@@ -39,31 +39,18 @@ if (Vue) {
                         type: "warning"});
                     return false;
                 }
-                let year = this.year;
-                let code = this.code;
-                let number = this.num;
-                
-                // prepare post params
-                let id = trim(year + code + number);
-                
-                this.isBusy = true;
-                let that = this;
 
+                this.isBusy = true;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "reg_case",
-                    id: id
+                    id: trim(`${this.year}${this.code}${this.num}`)
                 }).then(res => {
                     window.vueApp.showRegCase(res.data, true);
                 }).catch(err => {
-                    console.error("case-reg-search::regQuery parsing failed", err);
-                    showAlert({
-                        title: "查詢登記案件",
-                        subtitle: id,
-                        message: err.message,
-                        type: "danger"
-                    });
+                    this.$error("case-reg-search::regQuery parsing failed", err);
+                    this.error = err;
                 }).finally(() => {
-                    that.isBusy = false;
+                    this.isBusy = false;
                 });
             },
             prcQuery: function(e) {
@@ -76,31 +63,18 @@ if (Vue) {
                         type: "warning"});
                     return false;
                 }
-                let year = this.year;
-                let code = this.code;
-                let number = this.num;
-                // prepare post params
-                let id = trim(year + code + number);
-                
                 this.isBusy = true;
-                let that = this;
-            
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "prc_case",
-                    id: id
+                    id: trim(`${this.year}${this.code}${this.num}`)
                 }).then(res => {
                     showPrcCaseDetail(res.data);
                     this.isBusy = false;
                 }).catch(err => {
-                    console.error("case-reg-search::prcQuery parsing failed", err);
-                    showAlert({
-                        title: "查詢地價案件",
-                        subtitle: id,
-                        message: err.message,
-                        type: "danger"
-                    });
+                    this.$error("case-reg-search::prcQuery", err);
+                    this.error = err;
                 }).finally(() => {
-                    that.isBusy = false;
+                    this.isBusy = false;
                 });
             }
         },
