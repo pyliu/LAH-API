@@ -37,6 +37,7 @@ if (CONFIG.DEBUG_MODE) {
 Vue.prototype.$log = console.log.bind(console);
 Vue.prototype.$error = console.error.bind(console);
 Vue.prototype.$warn = console.warn.bind(console);
+Vue.prototype.$assert = console.assert.bind(console);
 Vue.prototype.$http = axios;
 Vue.prototype.$lf = localforage || {};
 Vue.prototype.$gstore = (() => {
