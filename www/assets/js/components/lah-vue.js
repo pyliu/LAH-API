@@ -725,7 +725,7 @@ Vue.component("lah-header", {
                     myip = res.data.ip || null;
                     this.setLocalCache('myip', myip, 86400000); // expired after a day
                 }).catch(err => {
-                    console.error(err);
+                    this.$error("lah-header::created", err);
                 });
             }
             this.ip = myip;
@@ -987,7 +987,7 @@ Vue.component("lah-user-card", {
             //         this.user_rows = response.data.raw;
             //         this.cacheUserRows()
             //     }).catch(err => {
-            //         console.error(err)
+            //         this.$error(err)
             //     }).finally(() => {
 
             //     });
@@ -1009,13 +1009,8 @@ Vue.component("lah-user-card", {
                         this.$emit('notFound', this.name || this.id || this.ip);
                     }
                 }).catch(err => {
-                    console.error("userinfo-card::created parsing failed", err);
-                    showAlert({
-                        title: "使用者資訊",
-                        subtitle: `${this.name || this.id || this.ip}`,
-                        message: err.message,
-                        type: "danger"
-                    });
+                    this.$error("lah-user-card::created", err);
+                    this.error = err;
                 });
             }
         }
@@ -1103,16 +1098,12 @@ Vue.component('lah-user-message', {
                                 });
                             }
                         }).catch(err => {
-                            console.error(err);
-                            showAlert({
-                                title: "查詢信差訊息",
-                                message: err.message,
-                                type: "danger"
-                            });
+                            this.$error("lah-user-message::load", err);
+                            this.error = err;
                         });
                     }
                 } catch(err) {
-                    console.error(err);
+                    this.$error(err);
                 }
             }
         }
@@ -1315,7 +1306,7 @@ $(document).ready(() => {
                         merged.callback.apply(this, arguments);
                     }
                 }).catch(err => {
-                    console.error(err);
+                    this.$error(err);
                 });
             },
             open: function(url, e) {
@@ -1367,13 +1358,8 @@ $(document).ready(() => {
                 }).then(res => {
                     this.showRegCase(res.data, enabled_userinfo);
                 }).catch(err => {
-                    console.error("window.vueApp.fetchRegCase parsing failed", err);
-                    showAlert({
-                        title: "擷取登記案件",
-                        subtitle: id,
-                        message: err.message,
-                        type: "danger"
-                    });
+                    this.$error("window.vueApp.fetchRegCase", err);
+                    this.error = err;
                 });
             },
             showRegCase: function(jsonObj, enabled_userinfo = false) {
@@ -1522,11 +1508,11 @@ $(document).ready(() => {
                     if (el.length > 0 && el.is(cached_el_selector)) {
                         el.val(value);
                     }
-                }).then(function() {
+                }).then(() => {
                     //console.log('Iteration has completed');
-                }).catch(function(err) {
+                }).catch(err => {
                     // This code runs if there were any errors
-                    console.error(err);
+                    this.$error(err);
                 });
                 // for cache purpose
                 let cacheIt = (el) => {
@@ -1536,9 +1522,9 @@ $(document).ready(() => {
                     if (val === undefined || $.trim(val) == "") {
                         this.$lf.removeItem(ele_id).then(function() {
                             // Run this code once the key has been removed.
-                        }).catch(function(err) {
+                        }).catch(err => {
                             // This code runs if there were any errors
-                            console.error(err);
+                            this.$error(err);
                         });
                     } else if (ele_id != undefined) {
                         this.$lf.setItem(ele_id, val);
