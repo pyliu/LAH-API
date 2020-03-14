@@ -262,8 +262,8 @@ if (Vue) {
                                 }
                                 this.loaded(res.data);
                             }).catch(ex => {
-                                console.error("case-reg-overdue::load parsing failed", ex);
-                                this.caption = ex.message;
+                                this.error = this.caption = ex.message;
+                                console.error(this.gerror);
                             }).finally(() => {
                                 this.isBusy = false;
                             });

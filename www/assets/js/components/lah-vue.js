@@ -255,12 +255,13 @@ Vue.mixin({
         isBusy: function(flag) { flag ? this.busyOn(this.$el) : this.busyOff(this.$el) },
         error: function(nMsg, oMsg) {
             if (!this.empty(nMsg)) {
+                this.$gstore.commit("error", nMsg);
                 showAlert({
                     title: "錯誤訊息",
+                    subtitle: this.now,
                     message: nMsg,
                     type: "danger"
                 });
-                this.$gstore.commit("error", nMsg);
             }
         }
     },
@@ -285,7 +286,16 @@ Vue.mixin({
         userIDs() { return this.reverseMapping(this.userNames || {}); },
         dayMilliseconds() { return this.$gstore.getters.dayMilliseconds; },
         settings() { return this.$gstore.getters.dynaParams; },
-        gerror() { return this.$gstore.getters.error; }
+        gerror() { return this.$gstore.getters.error; },
+        now() {
+            let now = new Date();
+            return now.getFullYear() + "-" +
+                ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
+                ("0" + now.getDate()).slice(-2) + " " +
+                ("0" + now.getHours()).slice(-2) + ":" +
+                ("0" + now.getMinutes()).slice(-2) + ":" +
+                ("0" + now.getSeconds()).slice(-2);
+        }
     },
     methods: {
         setSetting: function(key, value) {
