@@ -263,7 +263,9 @@ if (Vue) {
                                 this.loaded(res.data);
                             }).catch(ex => {
                                 console.error("case-reg-overdue::load parsing failed", ex);
-                                showAlert({message: "case-reg-overdue::load XHR連線查詢有問題!!【" + ex.message + "】", type: "danger"});
+                                this.caption = ex.message;
+                            }).finally(() => {
+                                this.isBusy = false;
                             });
                         } else {
                             // cache hit!
