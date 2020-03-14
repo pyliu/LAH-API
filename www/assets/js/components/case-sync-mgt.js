@@ -173,7 +173,7 @@ if (Vue) {
             },
             syncCaseColumn: function(id, column) {
                 showConfirm(`確定要同步${column}？`, () => {
-                    console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
+                    this.$assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
                     let td = $(`#sync_column_${column}`).parent();
                     $(`#sync_column_${column}`).remove();
                     this.isBusy = true;
@@ -198,7 +198,7 @@ if (Vue) {
             },
             syncWholeCase: function(id) {
                 showConfirm(`同步局端資料至本所資料庫【${id}】？`, () => {
-                    console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
+                    this.$assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
                     $("#sync_x_case_confirm_button").remove();
                     this.isBusy = true;
                     this.$http.post(CONFIG.JSON_API_EP, {
@@ -229,7 +229,7 @@ if (Vue) {
             },
             instRemoteCase: function(id) {
                 showConfirm("確定要拉回局端資料新增於本所資料庫(CRSMS)？", () => {
-                    console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
+                    this.$assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
                     $("#inst_x_case_confirm_button").remove();
                     this.isBusy = true;
                     this.$http.post(CONFIG.JSON_API_EP, {
