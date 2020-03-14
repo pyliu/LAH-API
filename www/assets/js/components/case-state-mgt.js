@@ -45,8 +45,6 @@ if (Vue) {
                 let id = trim(`${this.year}${this.code}${this.num}`);
                 
                 this.isBusy = true;
-                let that = this;
-
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "reg_case",
                     id: id
@@ -75,15 +73,10 @@ if (Vue) {
                         });
                     }
                 }).catch(err => {
-                    console.error("case-state-mgt::query parsing failed", err);
-                    showAlert({
-                        title: "查詢案件",
-                        subtitle: id,
-                        message: err.message,
-                        type: "danger"
-                    });
+                    this.$error("case-state-mgt::query", err);
+                    this.error = err;
                 }).finally(() => {
-                    that.isBusy = false;
+                    this.isBusy = false;
                 });
             },
             popup: () => {
@@ -208,6 +201,7 @@ if (Vue) {
                             // remove the button
                             $(arguments.el).remove();
                         }
+                        this.isBusy = true;
                         this.$http.post(CONFIG.JSON_API_EP, {
                             type: "reg_upd_col",
                             rm01: arguments.rm01,
@@ -223,13 +217,11 @@ if (Vue) {
                                 addNotification({title: "更新案件欄位", message: `「${arguments.col}」更新失敗【${res.data.status}】`, variant: "warning"});
                             }
                         }).catch(ex => {
-                            console.error("case-state-mgt::updateRegCaseCol parsing failed", ex);
-                            showAlert({
-                                title: "更新案件欄位",
-                                message: `<strong class='text-danger'>更新欄位「${arguments.col}」失敗</strong><p>${arguments.rm01}, ${arguments.rm02}, ${arguments.rm03}, ${arguments.val}</p>【${ex.message}】`,
-                                type: "danger"
-                            });
-                        }).finally(() => {});
+                            this.$error("case-state-mgt::updateRegCaseCol", ex);
+                            this.error = ex;
+                        }).finally(() => {
+                            this.isBusy = false;
+                        });
                     },
                     updateRM30: function(e) {
                         if (this.rm30 == this.rm30_orig) {
