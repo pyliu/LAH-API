@@ -45,8 +45,6 @@ if (Vue) {
                 let number = this.num;
                 
                 this.isBusy = true;
-                let that = this;
-            
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "sur_case",
                     id: trim(`${year}${code}${number}`)
@@ -62,15 +60,10 @@ if (Vue) {
                         this.dialog(res.data);
                     }
                 }).catch(err => {
-                    console.error("case-sur-mgt::query parsing failed", err);
-                    showAlert({
-                        title: "查詢測量案件",
-                        subtitle: `${year}-${code}-${number}`,
-                        message: err.message,
-                        type: "danger"
-                    });
+                    this.$error("case-sur-mgt::query", err);
+                    this.error = err;
                 }).finally(() => {
-                    that.isBusy = false;
+                    this.isBusy = false;
                 });
             },
             dialog: function(jsonObj) {
@@ -189,42 +182,36 @@ if (Vue) {
                          */
                         let title = this.json.raw['MM01'] + '-' + this.json.raw['MM02'] + '-' + this.json.raw['MM03'] + '連件數';
                         if (this.orig_count != this.count) {
-                            let that = this;
-                            showConfirm("確定要修改 " + title + " 為「" + this.count + "」？",function () {
-                                that.isBusy = true;
-                                that.$http.post(CONFIG.JSON_API_EP, {
+                            showConfirm("確定要修改 " + title + " 為「" + this.count + "」？",() => {
+                                this.isBusy = true;
+                                this.$http.post(CONFIG.JSON_API_EP, {
                                     type: "upd_case_column",
-                                    id: that.id,
+                                    id: this.id,
                                     table: "SCMSMS",
                                     column: "MM24",
-                                    value: that.count
+                                    value: this.count
                                 }).then(res => {
                                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                         addNotification({
                                             title: "更新連件數",
-                                            subtitle: that.id,
-                                            message: title + "更新為「" + that.count + "」更新成功",
+                                            subtitle: this.id,
+                                            message: title + "更新為「" + this.count + "」更新成功",
                                             type: "success"
                                         });
-                                        that.orig_count = that.count;
+                                        this.orig_count = this.count;
                                     } else {
                                         addNotification({
                                             title: "更新連件數",
-                                            subtitle: that.id,
+                                            subtitle: this.id,
                                             message: jsonObj.message,
                                             type: "danger"
                                         });
                                     }
                                 }).catch(err => {
-                                    console.error("case-sur-dialog::update parsing failed", err);
-                                    showAlert({
-                                        message: err.message,
-                                        subtitle: that.id,
-                                        title: "更新欄位失敗",
-                                        type: "danger"
-                                    });
+                                    this.$error("case-sur-dialog::update", err);
+                                    this.error = err;
                                 }).finally(() => {
-                                    that.isBusy = false;
+                                    this.isBusy = false;
                                 });
                             });
                         } else {
@@ -240,11 +227,10 @@ if (Vue) {
                         let id = this.id;
                         let upd_mm22 = this.setD;
                         let clr_delay = this.clearDatetime;
-                        let that = this;
-                        showConfirm("確定要修正本案件?", function() {
-                            that.isBusy = true;
+                        showConfirm("確定要修正本案件?", () => {
+                            this.isBusy = true;
                             //fix_sur_delay_case
-                            that.$http.post(CONFIG.JSON_API_EP, {
+                            this.$http.post(CONFIG.JSON_API_EP, {
                                 type: "fix_sur_delay_case",
                                 id: id,
                                 UPD_MM22: upd_mm22,
@@ -258,7 +244,7 @@ if (Vue) {
                                         message: "修正成功!"
                                     });
                                     // update the data will affect UI
-                                    that.json.raw['MM22'] = 'D';
+                                    this.json.raw['MM22'] = 'D';
                                 } else {
                                     let msg = "回傳狀態碼不正確!【" + res.data.message + "】";
                                     showAlert({
@@ -269,10 +255,10 @@ if (Vue) {
                                     });
                                 }
                             }).catch(err => {
-                                console.error("case-sur-dialog::fix parsing failed", err);
-                                showAlert({title: "修正複丈案件失敗", subtitle: id, message: err.message, type: "danger"});
+                                this.$error("case-sur-dialog::fix", err);
+                                this.error = err;
                             }).finally(() => {
-                                that.isBusy = false;
+                                this.isBusy = false;
                             });
                         });
                     }
