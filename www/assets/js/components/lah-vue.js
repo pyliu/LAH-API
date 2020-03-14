@@ -47,14 +47,16 @@ Vue.prototype.$gstore = (() => {
                 isAdmin: undefined,
                 userNames: undefined,
                 dayMilliseconds: 24 * 60 * 60 * 1000,
-                dynaParams: {}
+                dynaParams: {},
+                error: "The last error message"
             },
             getters: {
                 cache: state => state.cache,
                 isAdmin: state => state.isAdmin,
                 userNames: state => state.userNames,
                 dayMilliseconds: state => state.dayMilliseconds,
-                dynaParams: state => state.dynaParams
+                dynaParams: state => state.dynaParams,
+                error: state => state.error
             },
             mutations: {
                 cache(state, objPayload) {
@@ -72,6 +74,9 @@ Vue.prototype.$gstore = (() => {
                 },
                 dynaParams(state, objPayload) {
                     state.dynaParams = Object.assign({}, state.dynaParams, objPayload);
+                },
+                error(state, msgPayload) {
+                    state.error = msgPayload;
                 },
             },
             actions: {
@@ -243,10 +248,21 @@ Vue.mixin({
         }
     },
     data: function() { return {
-        isBusy: false
+        isBusy: false,
+        error: ""
     }},
     watch: {
-        isBusy: function(flag) { flag ? this.busyOn(this.$el) : this.busyOff(this.$el) }
+        isBusy: function(flag) { flag ? this.busyOn(this.$el) : this.busyOff(this.$el) },
+        error: function(nMsg, oMsg) {
+            if (!this.empty(nMsg)) {
+                showAlert({
+                    title: "錯誤訊息",
+                    message: nMsg,
+                    type: "danger"
+                });
+                this.$gstore.commit("error", nMsg);
+            }
+        }
     },
     computed: {
         cache() { return this.$gstore.getters.cache; },
@@ -268,7 +284,8 @@ Vue.mixin({
         },
         userIDs() { return this.reverseMapping(this.userNames || {}); },
         dayMilliseconds() { return this.$gstore.getters.dayMilliseconds; },
-        settings() { return this.$gstore.getters.dynaParams; }
+        settings() { return this.$gstore.getters.dynaParams; },
+        gerror() { return this.$gstore.getters.error; }
     },
     methods: {
         setSetting: function(key, value) {
