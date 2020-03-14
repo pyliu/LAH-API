@@ -76,7 +76,6 @@ if (Vue) {
                 
                 // toggle button disable attr
                 this.isBusy = true;
-                let that = this;
             
                 let offset = 6 - number.length;
                 if (offset > 0) {
@@ -166,23 +165,19 @@ if (Vue) {
                             container.append(jQuery.parseHTML('<i class="ld ld-breath fas fa-ban text-danger fa-3x"></i>')).addClass("my-auto text-center");
                         }
                     });
-                    console.error("case-sync-mgt::check parsing failed", ex);
-                    showAlert({
-                        message: ex.message,
-                        type: "danger"
-                    });
+                    this.$error("case-sync-mgt::check", ex);
+                    this.error = ex;
                 }).finally(() => {
-                    that.isBusy = false;
+                    this.isBusy = false;
                 });
             },
             syncCaseColumn: function(id, column) {
-                let that = this;
-                showConfirm(`確定要同步${column}？`, function() {
+                showConfirm(`確定要同步${column}？`, () => {
                     console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
                     let td = $(`#sync_column_${column}`).parent();
                     $(`#sync_column_${column}`).remove();
-                    that.isBusy = true;
-                    that.$http.post(CONFIG.JSON_API_EP, {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
                         type: "sync_xcase_column",
                         id: id,
                         column: column
@@ -193,20 +188,20 @@ if (Vue) {
                             td.html("<span class='text-danger'>" + res.data.message + "</span>");
                         }
                     }).catch(ex => {
-                        console.error("case-sync-mgt::syncCaseColumn parsing failed", ex);
+                        this.$error("case-sync-mgt::syncCaseColumn", ex);
+                        this.error = ex;
                         td.html("<span class='text-danger'>" + ex.message + "</span>");
                     }).finally(() => {
-                        that.isBusy = false;
+                        this.isBusy = false;
                     });
                 });
             },
             syncWholeCase: function(id) {
-                let that = this;
-                showConfirm(`同步局端資料至本所資料庫【${id}】？`, function() {
+                showConfirm(`同步局端資料至本所資料庫【${id}】？`, () => {
                     console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
                     $("#sync_x_case_confirm_button").remove();
-                    that.isBusy = true;
-                    that.$http.post(CONFIG.JSON_API_EP, {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
                         type: "sync_xcase",
                         id: id
                     }).then(res => {
@@ -224,25 +219,20 @@ if (Vue) {
                             });
                         }
                         closeModal();
-                    }).catch(ex => {
-                        console.error("case-sync-mgt::syncWholeCase parsing failed", ex);
-                        showAlert({
-                            title: "同步局端資料至本所資料庫",
-                            message: ex.message,
-                            type: "danger"
-                        });
+                    }).catch(err => {
+                        this.$error("case-sync-mgt::syncWholeCase", err);
+                        this.error = err;
                     }).finally(() => {
-                        that.isBusy = false;
+                        this.isBusy = false;
                     });
                 });
             },
             instRemoteCase: function(id) {
-                let that = this;
-                showConfirm("確定要拉回局端資料新增於本所資料庫(CRSMS)？", function() {
+                showConfirm("確定要拉回局端資料新增於本所資料庫(CRSMS)？", () => {
                     console.assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
                     $("#inst_x_case_confirm_button").remove();
-                    that.isBusy = true;
-                    that.$http.post(CONFIG.JSON_API_EP, {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
                         type: "inst_xcase",
                         id: id
                     }).then(res => {
@@ -262,15 +252,11 @@ if (Vue) {
                             });
                         }
                         closeModal();
-                    }).catch(ex => {
-                        console.error("case-sync-mgt::instRemoteCase parsing failed", ex);
-                        showAlert({
-                            title: "新增遠端案件資料",
-                            message: ex.message,
-                            type: "danger"
-                        });
+                    }).catch(err => {
+                        this.$error("case-sur-mgt::instRemoteCase", err);
+                        this.error = err;
                     }).finally(() => {
-                        that.isBusy = false;
+                        this.isBusy = false;
                     });
                 });
             },
