@@ -96,7 +96,7 @@ if (Vue) {
                     }
                 }).catch(err => {
                     this.error = err;
-                    console.error("case-input-group-ui::getMaxNumber parsing failed", err);
+                    this.$error("case-input-group-ui::getMaxNumber", err);
                 }).finally(() => {
                     this.isBusy = false;
                 });
