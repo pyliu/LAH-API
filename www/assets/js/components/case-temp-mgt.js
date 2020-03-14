@@ -217,13 +217,9 @@ if (Vue) {
                         if (data.clean_all) {
                             closeModal();
                         }
-                    }).catch(ex => {
-                        console.error("case-temp-mgt::fix parsing failed", ex);
-                        showAlert({
-                            title: "清除暫存檔",
-                            message: ex.message,
-                            type: "danger"
-                        });
+                    }).catch(err => {
+                        this.$error("case-temp-mgt::fix", err);
+                        this.error = err;
                     }).finally(() => {
                         this.isBusy = false;
                     });
