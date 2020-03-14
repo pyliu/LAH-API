@@ -263,7 +263,7 @@ if (Vue) {
                                 this.loaded(res.data);
                             }).catch(ex => {
                                 this.error = this.caption = ex.message;
-                                console.error(this.gerror);
+                                console.error(ex);
                             }).finally(() => {
                                 this.isBusy = false;
                             });

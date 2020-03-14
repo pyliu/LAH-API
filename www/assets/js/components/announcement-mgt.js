@@ -29,9 +29,8 @@ if (Vue) {
                 this.reset_flag = false;
             },
             clear: function(e) {
-                let that = this;
                 showConfirm("請確認清除所有登記原因的准登旗標？", () => {
-                    that.isBusy = true;
+                    this.isBusy = true;
                     this.$http.post(CONFIG.JSON_API_EP, {
                         type: "clear_announcement_flag"
                     }).then(res => {
@@ -40,15 +39,9 @@ if (Vue) {
                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + res.data.status + "】");
                         addNotification({ title: "清除全部先行准登旗標", message: "已清除完成", type: "success" });
                     }).catch(err => {
-                        console.error("announcement-mgt::clear parsing failed", err);
-                        showAlert({
-                            title: "XHR連線查詢有問題",
-                            subtitle: "announcement-mgt::clear",
-                            message: err.message,
-                            type: "danger"
-                        });
+                        this.error = err.message;
                     }).finally(() => {
-                        that.isBusy = false;
+                        this.isBusy = false;
                     });
                 });
             },
@@ -222,10 +215,9 @@ if (Vue) {
                                     return;
                                 }
                                 console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
-                                let that = this;
                                 showConfirm("確定要更新公告資料？", () => {
-                                    that.isBusy = true;
-                                    that.$http.post(CONFIG.JSON_API_EP, {
+                                    this.isBusy = true;
+                                    this.$http.post(CONFIG.JSON_API_EP, {
                                         type: 'update_announcement_data',
                                         code: reason_code,
                                         day: day,
@@ -234,28 +226,22 @@ if (Vue) {
                                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + res.data.status + "】");
                                         addNotification({
                                             title: reason_cnt,
-                                            message: `公告已更新【天數：${that.data[2]} => ${day}, 准登：${that.data[3]} => ${flag}】`,
+                                            message: `公告已更新【天數：${this.data[2]} => ${day}, 准登：${this.data[3]} => ${flag}】`,
                                             type: "success"
                                         });
-                                        that.data[2] = day;
-                                        that.data[3] = flag;
+                                        this.data[2] = day;
+                                        this.data[3] = flag;
                                         // notify parent the data is changed
-                                        that.$emit("announcement-update", {
+                                        this.$emit("announcement-update", {
                                             reason_code: reason_code,
                                             day: day,
                                             flag: flag
                                         });
                                         closeModal();
                                     }).catch(err => {
-                                        console.error("announcement-mgt-dialog::update parsing failed", err);
-                                        showAlert({
-                                            title: "XHR連線查詢有問題",
-                                            subtitle: "announcement-mgt-dialog::update",
-                                            message: err.message,
-                                            type: "danger"
-                                        });
+                                        this.error = err.message;
                                     }).finally(() => {
-                                        that.isBusy = false;
+                                        this.isBusy = false;
                                     });
                                     
                                 });
