@@ -190,7 +190,6 @@ if (Vue) {
             }
         },
         created: function () {
-            let that = this;
             this.isBusy = true;
             this.date_obj = new Date();
             this.query_date = (this.date_obj.getFullYear() - 1911) + ("0" + (this.date_obj.getMonth()+1)).slice(-2) + ("0" + this.date_obj.getDate()).slice(-2);
@@ -217,9 +216,10 @@ if (Vue) {
                 });
                 this.buildChart();
             }).catch(err => {
-                that.$error("lah-fee-board::created parsing failed", err);
-            }).finally(function() {
-                that.isBusy = false;
+                this.$error("lah-fee-board::created", err);
+                this.error = err;
+            }).finally(() => {
+                this.isBusy = false;
             });
         },
         mounted: function() {}
