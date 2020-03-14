@@ -66,8 +66,8 @@ if (Vue) {
                     $(".reg_case_id").attr("title", "點我取得更多資訊！");
                 }, 800);
             }).catch(error => {
-                // on error
-                console.error(error.toJson());
+                this.error = error;
+                this.$error("case-query-by-pid(CRSMS)::created", error);
                 this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢登記案件發生錯誤！【${error}】`;
             }).finally(() => {});
         }
@@ -128,8 +128,8 @@ if (Vue) {
                     this.message = `<i class="text-secondary fas fa-exclamation-circle"></i> 查無測量案件資料`;
                 }
             }).catch(error => {
-                // on error
-                console.error(error.toJson());
+                this.error = error;
+                this.$error("case-query-by-pid(CMSMS)::created", error);
                 this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢測量案件發生錯誤！【${error}】`;
             }).finally(() => {});
         }

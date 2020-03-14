@@ -263,7 +263,7 @@ if (Vue) {
                                 this.loaded(res.data);
                             }).catch(ex => {
                                 this.error = this.caption = ex.message;
-                                console.error(ex);
+                                this.$error("case-reg-overdue::load", ex);
                             }).finally(() => {
                                 this.isBusy = false;
                             });
@@ -276,7 +276,7 @@ if (Vue) {
                             console.warn(`快取資料將在 ${(remaining_cache_time / 1000).toFixed(1)} 秒後到期。`);
                         }
                     } catch (err) {
-                        console.error(err);
+                        this.$error(err);
                     }
                 }
             },
