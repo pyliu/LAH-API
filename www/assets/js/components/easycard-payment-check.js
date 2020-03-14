@@ -43,7 +43,6 @@ if (Vue) {
                 }
 
                 this.isBusy = true;
-                let that = this;
                 const h = this.$createElement;
 
                 this.$http.post(CONFIG.JSON_API_EP, {
@@ -63,11 +62,11 @@ if (Vue) {
                             size: "md"
                         });
                     }
-                }).catch(ex => {
-                    console.error("easycard-payment-check::query parsing failed", ex);
-                    showAlert({title: "檢測悠遊卡自動加值付款失敗", message: ex.message, type: "danger"});
+                }).catch(err => {
+                    this.$error("easycard-payment-check::query", err);
+                    this.error = err;
                 }).finally(() => {
-                    that.isBusy = false;
+                    this.isBusy = false;
                 });
             },
             popup: () => {
@@ -100,10 +99,9 @@ if (Vue) {
                         let el = $(e.target);
                         let qday = item["AA01"], pc_number = item["AA04"], amount = item["AA28"];
                         let message = "確定要修正 日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料?";
-                        let that = this;
                         showConfirm(message, () => {
-                            that.isBusy = true;
-                            that.$http.post(CONFIG.JSON_API_EP, {
+                            this.isBusy = true;
+                            this.$http.post(CONFIG.JSON_API_EP, {
                                 type: "fix_easycard",
                                 qday: qday,
                                 pc_num: pc_number
@@ -114,11 +112,11 @@ if (Vue) {
                                     throw new Error("回傳狀態碼不正確!【" + res.data.message + "】");
                                 }
                                 el.remove();
-                            }).catch(ex => {
-                                console.error("easycard-payment-check-item::fix parsing failed", ex);
-                                showAlert({message: `easycard-payment-check-item::fix parsing failed. ${ex.message}`, type: "danger"});
+                            }).catch(err => {
+                                this.$error("easycard-payment-check-item::fix", err);
+                                this.error = err;
                             }).finally(() => {
-                                that.isBusy = false;
+                                this.isBusy = false;
                             });
                         });
                     },
