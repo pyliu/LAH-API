@@ -47,7 +47,6 @@ if (Vue) {
                 }).then(res => {
                     window.vueApp.showRegCase(res.data, true);
                 }).catch(err => {
-                    this.$error("case-reg-search::regQuery parsing failed", err);
                     this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
@@ -71,7 +70,6 @@ if (Vue) {
                     showPrcCaseDetail(res.data);
                     this.isBusy = false;
                 }).catch(err => {
-                    this.$error("case-reg-search::prcQuery", err);
                     this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
