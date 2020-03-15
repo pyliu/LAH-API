@@ -46,7 +46,7 @@ if (Vue) {
                     :small="small"
                     :caption="caption"
                     :sticky-header="height"
-                    :items="inSearch ? $gstore.getters.overdue_reg_cases.list_by_id[reviewerId] : $gstore.getters.overdue_reg_cases.list"
+                    :items="inSearch ? $store.getters.overdue_reg_cases.list_by_id[reviewerId] : $store.getters.overdue_reg_cases.list"
                     :fields="fields"
                     :busy="isBusy"
                     v-show="listMode"
@@ -143,19 +143,19 @@ if (Vue) {
         } },
         computed: {
             total_case() {
-                return this.$gstore.getters.overdue_reg_cases.list_count;
+                return this.$store.getters.overdue_reg_cases.list_count;
             },
             total_people() {
-                return this.$gstore.getters.overdue_reg_cases.list_by_id_count;
+                return this.$store.getters.overdue_reg_cases.list_by_id_count;
             },
             case_list() {
-                return this.$gstore.getters.overdue_reg_cases.list;
+                return this.$store.getters.overdue_reg_cases.list;
             },
             case_list_by_id() {
-                return this.$gstore.getters.overdue_reg_cases.list_by_id;
+                return this.$store.getters.overdue_reg_cases.list_by_id;
             },
             is_overdue_mode() {
-                return this.$gstore.getters.overdue_reg_cases.is_overdue_mode;
+                return this.$store.getters.overdue_reg_cases.is_overdue_mode;
             }
         },
         watch: {
@@ -164,7 +164,7 @@ if (Vue) {
             },
             overdueMode: function(isChecked) {
                 // also update store's flag
-                this.$gstore.commit("overdue_reg_cases/is_overdue_mode", isChecked);
+                this.$store.commit("overdue_reg_cases/is_overdue_mode", isChecked);
                 this.title = isChecked ? "逾期" : "即將逾期";
                 this.modeText = isChecked ? "逾期模式" : "即將逾期"
                 this.modeTooltip = isChecked ? "逾期案件查詢模式" : "即將逾期模式(4小時內)";
@@ -308,8 +308,8 @@ if (Vue) {
             loaded: function (jsonObj) {
                 // set data to store
                 // NOTE: the payload must be valid or it will not update UI correctly
-                this.$gstore.commit("overdue_reg_cases/list", jsonObj.items);
-                this.$gstore.commit("overdue_reg_cases/list_by_id", jsonObj.items_by_id);
+                this.$store.commit("overdue_reg_cases/list", jsonObj.items);
+                this.$store.commit("overdue_reg_cases/list_by_id", jsonObj.items_by_id);
 
                 this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
 
@@ -376,8 +376,8 @@ if (Vue) {
         },
         created() {
             if (!this.inSearch) {
-                // only overdue used store, register it to $gstore module
-                this.$gstore.registerModule('overdue_reg_cases', this.storeModule);
+                // only overdue used store, register it to $store module
+                this.$store.registerModule('overdue_reg_cases', this.storeModule);
                 this.getOverdueMessageStats();
             }
             this.load();

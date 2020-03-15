@@ -40,7 +40,7 @@ Vue.prototype.$warn = console.warn.bind(console);
 Vue.prototype.$assert = console.assert.bind(console);
 Vue.prototype.$http = axios;
 Vue.prototype.$lf = localforage || {};
-Vue.prototype.$gstore = (() => {
+Vue.prototype.$store = (() => {
     if (typeof Vuex == "object") {
         return new Vuex.Store({
             state: {
@@ -262,9 +262,9 @@ Vue.mixin({
             if (!this.empty(nMsg)) {
                 // just in case the message array occupies too much memory
                 if (this.gerrorLen > 30) {
-                    this.$gstore.commit("errorPop");
+                    this.$store.commit("errorPop");
                 }
-                this.$gstore.commit("error", {
+                this.$store.commit("error", {
                     message: nMsg.message || nMsg,
                     time: this.currentDatetime
                 });
@@ -278,29 +278,29 @@ Vue.mixin({
         }
     },
     computed: {
-        cache() { return this.$gstore.getters.cache; },
+        cache() { return this.$store.getters.cache; },
         async isAdmin() {
-            if (this.$gstore.getters.isAdmin === undefined) {
+            if (this.$store.getters.isAdmin === undefined) {
                 try {
-                    await this.$gstore.dispatch("authenticate");
+                    await this.$store.dispatch("authenticate");
                 } catch (err) {
                     console.error(err);
                 }
             }
-            return this.$gstore.getters.isAdmin;
+            return this.$store.getters.isAdmin;
         },
         userNames() {
-            if (this.$gstore.getters.userNames === undefined) {
-                this.$gstore.dispatch("loadUserNames");
+            if (this.$store.getters.userNames === undefined) {
+                this.$store.dispatch("loadUserNames");
             }
-            return this.$gstore.getters.userNames || {};
+            return this.$store.getters.userNames || {};
         },
         userIDs() { return this.reverseMapping(this.userNames || {}); },
-        dayMilliseconds() { return this.$gstore.getters.dayMilliseconds; },
-        settings() { return this.$gstore.getters.dynaParams; },
-        gerror() { return this.$gstore.getters.errors[this.$gstore.getters.errors.length - 1]; },
-        gerrorLen() { return this.$gstore.getters.errorLen; },
-        gerrors() { return this.$gstore.getters.errors; },
+        dayMilliseconds() { return this.$store.getters.dayMilliseconds; },
+        settings() { return this.$store.getters.dynaParams; },
+        gerror() { return this.$store.getters.errors[this.$store.getters.errors.length - 1]; },
+        gerrorLen() { return this.$store.getters.errorLen; },
+        gerrors() { return this.$store.getters.errors; },
         currentDatetime() {
             // e.g. 2020-03-14 11:35 23
             let now = new Date();
@@ -316,7 +316,7 @@ Vue.mixin({
         setSetting: function(key, value) {
             let payload = {};
             payload[key] = value;
-            this.$gstore.commit('dynaParams', payload);
+            this.$store.commit('dynaParams', payload);
         },
         getSetting: function(key) { return this.settings[key] },
         reverseMapping: o => Object.keys(o).reduce((r, k) => Object.assign(r, { [o[k]]: (r[o[k]] || []).concat(k) }), {}),
@@ -949,11 +949,11 @@ Vue.component("lah-user-card", {
             if (!this.empty(this.id)) { payload[this.id] = this.user_rows; this.setLocalCache(this.id, this.user_rows, this.dayMilliseconds); }
             if (!this.empty(this.name)) { payload[this.name] = this.user_rows; this.setLocalCache(this.name, this.user_rows, this.dayMilliseconds); }
             if (!this.empty(this.ip)) { payload[this.ip] = this.user_rows; this.setLocalCache(this.ip, this.user_rows, this.dayMilliseconds); }
-            this.$gstore.commit('cache', payload);
+            this.$store.commit('cache', payload);
         },
         restoreUserRows: async function() {
             try {
-                // find in $gstore(in-memory)
+                // find in $store(in-memory)
                 let user_rows = this.cache.get(this.id) || this.cache.get(this.name) || this.cache.get(this.ip);
                 if (this.empty(user_rows)) {
                     // find in localforage
@@ -961,12 +961,12 @@ Vue.component("lah-user-card", {
                     if (this.empty(user_rows)) {
                         return false;
                     } else {
-                        // also put back to $gstore
+                        // also put back to $store
                         let payload = {};
                         if (!this.empty(this.id)) { payload[this.id] = user_rows; }
                         if (!this.empty(this.name)) { payload[this.name] = user_rows; }
                         if (!this.empty(this.ip)) { payload[this.ip] = user_rows; }
-                        this.$gstore.commit('cache', payload);
+                        this.$store.commit('cache', payload);
                     }
                 }
                 this.user_rows = user_rows || null;

@@ -144,7 +144,7 @@ if (Vue) {
                                 type: 'announcement_data'
                             }).then(async res => {
                                 this.data = res.data.raw;
-                                // dayMilliseconds from $gstore
+                                // dayMilliseconds from $store
                                 this.setLocalCache('announcement_data', this.data, this.dayMilliseconds);
                             }).catch(err => {
                                 this.error = err;
