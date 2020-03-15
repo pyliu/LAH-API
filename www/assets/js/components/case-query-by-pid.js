@@ -67,8 +67,7 @@ if (Vue) {
                 }, 800);
             }).catch(error => {
                 this.error = error;
-                this.$error("case-query-by-pid(CRSMS)::created", error);
-                this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢登記案件發生錯誤！【${error}】`;
+                this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢登記案件發生錯誤！【${error.message}】`;
             }).finally(() => {});
         }
     };
@@ -129,8 +128,7 @@ if (Vue) {
                 }
             }).catch(error => {
                 this.error = error;
-                this.$error("case-query-by-pid(CMSMS)::created", error);
-                this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢測量案件發生錯誤！【${error}】`;
+                this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢測量案件發生錯誤！【${error.message}】`;
             }).finally(() => {});
         }
     }
