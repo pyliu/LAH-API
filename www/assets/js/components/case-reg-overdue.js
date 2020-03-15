@@ -281,9 +281,9 @@ if (Vue) {
                                     this.removeLocalCache(key);
                                 }
                                 this.loaded(res.data);
-                            }).catch(ex => {
-                                this.error = this.caption = ex.message;
-                                this.$error("case-reg-overdue::load", ex);
+                            }).catch(err => {
+                                this.caption = err.message;
+                                this.error = err;
                             }).finally(() => {
                                 this.isBusy = false;
                             });
@@ -296,7 +296,7 @@ if (Vue) {
                             console.warn(`快取資料將在 ${(remaining_cache_time / 1000).toFixed(1)} 秒後到期。`);
                         }
                     } catch (err) {
-                        this.$error(err);
+                        this.error = err;
                     }
                 }
             },
