@@ -376,6 +376,7 @@ if (Vue) {
         },
         created() {
             if (this.inSearch) {
+                // only overdue used store, register it to $gstore module
                 this.$gstore.registerModule('overdue_reg_cases', this.storeModule);
                 this.getOverdueMessageStats();
             }
