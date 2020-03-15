@@ -231,7 +231,7 @@ if (Vue) {
                     this.$warn(`reviewer_data is undefined. skip searchByReviewer function call.`);
                     return;
                 }
-                // reviewer_data, e.g. "曾奕融 HB1184"
+                // reviewer_data, e.g. "ＯＯＯ HB1184"
                 showModal({
                     title: `查詢 ${reviewer_data} 登記案件(${this.title})`,
                     message: this.$createElement('case-reg-overdue', {
