@@ -267,11 +267,11 @@ Vue.mixin({
                 }
                 this.$store.commit("error", {
                     message: nMsg.message || nMsg,
-                    time: this.currentDatetime
+                    time: this.nowDatetime
                 });
                 showAlert({
                     title: "錯誤訊息",
-                    subtitle: this.currentDatetime,
+                    subtitle: this.nowDatetime,
                     message: nMsg.message || nMsg,
                     type: "danger"
                 });
@@ -302,7 +302,7 @@ Vue.mixin({
         gerror() { return this.$store.getters.errors[this.$store.getters.errors.length - 1]; },
         gerrorLen() { return this.$store.getters.errorLen; },
         gerrors() { return this.$store.getters.errors; },
-        currentDatetime() {
+        nowDatetime() {
             // e.g. 2020-03-14 11:35 23
             let now = new Date();
             return now.getFullYear() + "-" +
