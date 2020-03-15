@@ -56,7 +56,6 @@ if (Vue) {
                         showAlert({ title: "檢測系統跨所註記遺失", message: res.data.message, type: "danger" });
                     }
                 }).catch(err => {
-                    this.$error("xcase-check::check", err);
                     this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
@@ -90,7 +89,6 @@ if (Vue) {
                             addNotification({ message: msg, variant: "success" });
                             li.html(msg);
                         }).catch(err => {
-                            this.$error("xcase-check-item::fix", err);
                             this.error = err;
                         }).finally(() => {
                             this.isBusy = false;
