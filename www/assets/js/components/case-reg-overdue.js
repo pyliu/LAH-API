@@ -377,6 +377,9 @@ if (Vue) {
             }
             this.reviewerID = this.getUrlParameter("ID") || this.getUrlParameter("reviewerID");
             this.load();
+        },
+        beforeDestroy() {
+            this.$store.unregisterModule('overdue_reg_cases');
         }
     });
 } else {
