@@ -1144,11 +1144,6 @@ $(document).ready(() => {
         methods: {
             // make simple, short popup notice message
             makeToast: function(message, opts = {}) {
-                // for sub-title
-                var currentdate = new Date();
-                var datetime = ("0" + currentdate.getHours()).slice(-2) + ":" +
-                    ("0" + currentdate.getMinutes()).slice(-2) + ":" +
-                    ("0" + currentdate.getSeconds()).slice(-2);
                 // position adapter
                 switch(opts.pos) {
                     case "tr":
@@ -1181,7 +1176,7 @@ $(document).ready(() => {
                 // merge default setting
                 let merged = Object.assign({
                     title: "通知",
-                    subtitle: datetime,
+                    subtitle: this.nowDatetime.split(" ")[1],
                     href: "",
                     noAutoHide: false,
                     autoHideDelay: 5000,
