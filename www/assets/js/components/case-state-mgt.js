@@ -73,7 +73,6 @@ if (Vue) {
                         });
                     }
                 }).catch(err => {
-                    this.$error("case-state-mgt::query", err);
                     this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
@@ -216,9 +215,8 @@ if (Vue) {
                             } else {
                                 addNotification({title: "更新案件欄位", message: `「${arguments.col}」更新失敗【${res.data.status}】`, variant: "warning"});
                             }
-                        }).catch(ex => {
-                            this.$error("case-state-mgt::updateRegCaseCol", ex);
-                            this.error = ex;
+                        }).catch(err => {
+                            this.error = err;
                         }).finally(() => {
                             this.isBusy = false;
                         });
