@@ -50,7 +50,9 @@ Vue.prototype.$store = (() => {
                 userNames: undefined,
                 dayMilliseconds: 24 * 60 * 60 * 1000,
                 dynaParams: {},
-                errors: []
+                errors: [],
+                myip: undefined,
+                myid: undefined
             },
             getters: {
                 cache: state => state.cache,
@@ -59,7 +61,9 @@ Vue.prototype.$store = (() => {
                 dayMilliseconds: state => state.dayMilliseconds,
                 dynaParams: state => state.dynaParams,
                 errors: state => state.errors,
-                errorLen: state => state.errors.length
+                errorLen: state => state.errors.length,
+                myip: state => state.myip,
+                myid: state => state.myid
             },
             mutations: {
                 cache(state, objPayload) {
@@ -83,6 +87,21 @@ Vue.prototype.$store = (() => {
                 },
                 errorPop(state, dontCarePayload) {
                     state.error.pop();
+                },
+                myip(state, ipPayload) {
+                    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipPayload)) {
+                        state.myip = ipPayload;
+                    } else {
+                        showAlert({
+                            title: "發生錯誤",
+                            subtitle: "Vuex, commit 'myip'",
+                            message: `${ipPayload} 格式不正確！`,
+                            type: "warning"
+                        });
+                    }
+                },
+                myip(state, idPayload) {
+                    state.myid = idPayload;
                 }
             },
             actions: {
@@ -313,7 +332,9 @@ Vue.mixin({
                 ("0" + now.getHours()).slice(-2) + ":" +
                 ("0" + now.getMinutes()).slice(-2) + ":" +
                 ("0" + now.getSeconds()).slice(-2);
-        }
+        },
+        myip() { return this.$store.getters.myip; },
+        myid() { return this.$store.getters.myid; }
     },
     methods: {
         setSetting: function(key, value) {
@@ -618,8 +639,8 @@ Vue.component("lah-header", {
             <a class="navbar-brand my-auto" :href="location.href" v-html="leading"><span style="font-size: .75rem">(β)</span></a>
             <i v-if="showUserIcon" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
             <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
-                <lah-user-card :ip="ip" @not-found="userNotFound" class="mb-1" title="我的名片"></lah-user-card>
-                <lah-user-message :ip="ip" count="5" title="最新信差訊息" tabs="true" tabsPills="true" tabsEnd="true"></lah-user-message>
+                <lah-user-card :ip="myip" @not-found="userNotFound" class="mb-1" title="我的名片"></lah-user-card>
+                <lah-user-message :ip="myip" count="5" title="最新信差訊息" tabs="true" tabsPills="true" tabsEnd="true"></lah-user-message>
             </b-popover>
             <button class="navbar-toggler mr-5" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -680,8 +701,7 @@ Vue.component("lah-header", {
             url: "test.html",
             icon: "fa-charging-station",
             need_admin: true
-        }],
-        ip: null
+        }]
     }},
     computed: {
         enableUserCardPopover() { return this.ip !== null },
@@ -699,7 +719,6 @@ Vue.component("lah-header", {
             return ret;
         },
         setHeader: function(link) {
-            let that = this;
             if (Array.isArray(link.url)) {
                 link.url.forEach((this_url, idx) => {
                     if (location.href.indexOf(this_url) > 0) {
@@ -713,7 +732,7 @@ Vue.component("lah-header", {
             }
         },
         userNotFound: function(input) {
-            this.ip = null;
+            this.$store.commit('myip', null);
             console.warn(`找不到 ${input} 的使用者資訊，無法顯示目前使用者的卡片。`);
         }
     },
@@ -731,7 +750,7 @@ Vue.component("lah-header", {
                     this.error = err;
                 });
             }
-            this.ip = myip;
+            this.$store.commit('myip', myip);
         } catch (err) {
             console.error(err);
         }
@@ -755,13 +774,11 @@ Vue.component("lah-footer", {
             </a>
         </p>
     </lah-transition>`,
-    data: function() {
-        return {
-            show: true,
-            leave_time: 10000,
-            classes: ['text-muted', 'fixed-bottom', 'my-2', 'mx-3', 'bg-white', 'border', 'rounded', 'text-center', 'p-2', 'small']
-        }
-    },
+    data: function() { return {
+        show: true,
+        leave_time: 10000,
+        classes: ['text-muted', 'fixed-bottom', 'my-2', 'mx-3', 'bg-white', 'border', 'rounded', 'text-center', 'p-2', 'small']
+    } },
     mounted() {
         setTimeout(() => this.show = false, this.leave_time);
     }
@@ -953,6 +970,9 @@ Vue.component("lah-user-card", {
             if (!this.empty(this.name)) { payload[this.name] = this.user_rows; this.setLocalCache(this.name, this.user_rows, this.dayMilliseconds); }
             if (!this.empty(this.ip)) { payload[this.ip] = this.user_rows; this.setLocalCache(this.ip, this.user_rows, this.dayMilliseconds); }
             this.$store.commit('cache', payload);
+            if (this.user_rows['AP_PCIP'] == this.myip) {
+                this.$store.commit('myid', this.user_rows['DocUserID']);
+            }
         },
         restoreUserRows: async function() {
             try {
@@ -973,6 +993,9 @@ Vue.component("lah-user-card", {
                     }
                 }
                 this.user_rows = user_rows || null;
+                if (this.user_rows && this.user_rows['AP_PCIP'] == this.myip) {
+                    this.$store.commit('myid', this.user_rows['DocUserID']);
+                }
             } catch (err) {
                 console.error(err);
             }
@@ -997,7 +1020,7 @@ Vue.component("lah-user-card", {
             // }
             // return;
             if (!succeed_cached) {
-                if (!(this.name || this.id || this.ip)) this.ip = await this.getLocalCache('myip');
+                if (!(this.name || this.id || this.ip)) this.ip = this.myip || await this.getLocalCache('myip');
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "user_info",
                     name: $.trim(this.name),
