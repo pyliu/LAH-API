@@ -371,7 +371,7 @@ if (Vue) {
         },
         created() {
             if (!this.is_in_modal_mode) {
-                // only overdue used store, register it to $store module
+                // register specific data store for using in both mode (page/modal)
                 this.$store.registerModule('overdue_reg_cases', this.storeModule);
                 this.getOverdueMessageStats();
             }
