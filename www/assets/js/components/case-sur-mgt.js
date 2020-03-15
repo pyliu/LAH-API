@@ -60,7 +60,6 @@ if (Vue) {
                         this.dialog(res.data);
                     }
                 }).catch(err => {
-                    this.$error("case-sur-mgt::query", err);
                     this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
@@ -208,7 +207,6 @@ if (Vue) {
                                         });
                                     }
                                 }).catch(err => {
-                                    this.$error("case-sur-dialog::update", err);
                                     this.error = err;
                                 }).finally(() => {
                                     this.isBusy = false;
@@ -255,7 +253,6 @@ if (Vue) {
                                     });
                                 }
                             }).catch(err => {
-                                this.$error("case-sur-dialog::fix", err);
                                 this.error = err;
                             }).finally(() => {
                                 this.isBusy = false;
