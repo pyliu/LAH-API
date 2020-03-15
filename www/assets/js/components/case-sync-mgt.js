@@ -154,7 +154,7 @@ if (Vue) {
                             })
                         });
                     }
-                }).catch(ex => {
+                }).catch(err => {
                     // remove the fieldset since the function is not working ... 
                     let fieldset = $("#case-sync-mgt-fieldset");
                     let container = fieldset.closest("div.col-6");
@@ -165,8 +165,7 @@ if (Vue) {
                             container.append(jQuery.parseHTML('<i class="ld ld-breath fas fa-ban text-danger fa-3x"></i>')).addClass("my-auto text-center");
                         }
                     });
-                    this.$error("case-sync-mgt::check", ex);
-                    this.error = ex;
+                    this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
                 });
@@ -187,10 +186,9 @@ if (Vue) {
                         } else {
                             td.html("<span class='text-danger'>" + res.data.message + "</span>");
                         }
-                    }).catch(ex => {
-                        this.$error("case-sync-mgt::syncCaseColumn", ex);
-                        this.error = ex;
-                        td.html("<span class='text-danger'>" + ex.message + "</span>");
+                    }).catch(err => {
+                        this.error = err;
+                        td.html("<span class='text-danger'>" + err.message + "</span>");
                     }).finally(() => {
                         this.isBusy = false;
                     });
@@ -220,7 +218,6 @@ if (Vue) {
                         }
                         closeModal();
                     }).catch(err => {
-                        this.$error("case-sync-mgt::syncWholeCase", err);
                         this.error = err;
                     }).finally(() => {
                         this.isBusy = false;
@@ -253,7 +250,6 @@ if (Vue) {
                         }
                         closeModal();
                     }).catch(err => {
-                        this.$error("case-sur-mgt::instRemoteCase", err);
                         this.error = err;
                     }).finally(() => {
                         this.isBusy = false;
