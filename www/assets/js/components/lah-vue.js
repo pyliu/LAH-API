@@ -275,6 +275,8 @@ Vue.mixin({
                     message: nMsg.message || nMsg,
                     type: "danger"
                 });
+                // console output
+                this.$error(nMsg);
             }
         }
     },

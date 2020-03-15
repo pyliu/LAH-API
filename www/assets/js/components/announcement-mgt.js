@@ -39,8 +39,7 @@ if (Vue) {
                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + res.data.status + "】");
                         addNotification({ title: "清除全部先行准登旗標", message: "已清除完成", type: "success" });
                     }).catch(err => {
-                        this.error = err.message;
-                        this.$error("announcement-mgt::clear", err);
+                        this.error = err;
                     }).finally(() => {
                         this.isBusy = false;
                     });
@@ -148,7 +147,6 @@ if (Vue) {
                                 this.setLocalCache('announcement_data', this.data, this.dayMilliseconds);
                             }).catch(err => {
                                 this.error = err;
-                                this.$error("announcement-mgt-item::created", err);
                             });
                         }
                     } catch (err) {
@@ -242,7 +240,6 @@ if (Vue) {
                                         closeModal();
                                     }).catch(err => {
                                         this.error = err;
-                                        this.$error(err);
                                     }).finally(() => {
                                         this.isBusy = false;
                                     });
