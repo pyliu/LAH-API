@@ -216,7 +216,6 @@ if (Vue) {
                 });
                 this.buildChart();
             }).catch(err => {
-                this.$error("lah-fee-board::created", err);
                 this.error = err;
             }).finally(() => {
                 this.isBusy = false;
