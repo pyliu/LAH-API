@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("case-reg-overdue", {
         components: { "countdown": VueCountdown },
         template: `<div>
-            <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="!inSearch">
+            <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="is_in_modal_mode">
                 <b-form-checkbox v-b-tooltip.hover.top="modeTooltip" inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;" :class="['align-baseline', 'btn', 'btn-sm', is_overdue_mode ? '' : 'border-warning', 'p-1']">
                     <span>{{modeText}}</span>
                 </b-form-checkbox>
@@ -17,7 +17,7 @@ if (Vue) {
                     <b-icon icon="download" font-scale="1"></b-icon>
                     下載圖檔
                 </b-button>
-                <b-button v-show="empty(reviewerId)" variant="secondary" size="sm" @click="switchMode()">
+                <b-button v-show="all_cases_mode" variant="secondary" size="sm" @click="switchMode()">
                     <b-icon v-if="listMode" icon="bar-chart-fill" font-scale="1"></b-icon>
                     <b-icon v-else icon="table" font-scale="1"></b-icon>
                     {{listMode ? "統計圖表" : "表格顯示"}}
@@ -46,7 +46,7 @@ if (Vue) {
                     :small="small"
                     :caption="caption"
                     :sticky-header="height"
-                    :items="inSearch ? $store.getters.overdue_reg_cases.list_by_id[reviewerId] : $store.getters.overdue_reg_cases.list"
+                    :items="table_items"
                     :fields="fields"
                     :busy="isBusy"
                     v-show="listMode"
@@ -61,7 +61,7 @@ if (Vue) {
                         {{data.index + 1}}
                     </template>
                     <template v-slot:cell(初審人員)="data">
-                        <b-button v-if="!inSearch && !reviewerId" :variant="is_overdue_mode ? 'outline-danger' : 'warning'" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的'+(is_overdue_mode ? '逾期' : '即將逾期')+'案件'">{{data.value.split(" ")[0]}}</b-button>
+                        <b-button v-if="all_cases_mode" :variant="is_overdue_mode ? 'outline-danger' : 'warning'" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的'+(is_overdue_mode ? '逾期' : '即將逾期')+'案件'">{{data.value.split(" ")[0]}}</b-button>
                         <span v-else>{{data.value.split(" ")[0]}}</span>
                     </template>
                     <template v-slot:cell(作業人員)="data">
@@ -86,7 +86,7 @@ if (Vue) {
                 </div>
             </lah-transition>
         </div>`,
-        props: ['reviewerId', 'inSearch', 'compact'],
+        props: ['inSearchID'],
         data: function () { return {
             fields: [
                 '序號',
@@ -98,6 +98,7 @@ if (Vue) {
                 {key: "收件時間", sortable: true},
                 {key: "限辦期限", sortable: true}
             ],
+            reviewerID: "",
             height: 0,  // the height inside the modal
             caption: "查詢中 ... ",
             small: false,
@@ -142,21 +143,14 @@ if (Vue) {
             }
         } },
         computed: {
-            total_case() {
-                return this.$store.getters.overdue_reg_cases.list_count;
-            },
-            total_people() {
-                return this.$store.getters.overdue_reg_cases.list_by_id_count;
-            },
-            case_list() {
-                return this.$store.getters.overdue_reg_cases.list;
-            },
-            case_list_by_id() {
-                return this.$store.getters.overdue_reg_cases.list_by_id;
-            },
-            is_overdue_mode() {
-                return this.$store.getters.overdue_reg_cases.is_overdue_mode;
-            }
+            total_case() { return this.$store.getters['overdue_reg_cases/list_count']; },
+            total_people() { return this.$store.getters['overdue_reg_cases/list_by_id_count']; },
+            case_list() { return this.$store.getters['overdue_reg_cases/list']; },
+            case_list_by_id() { return this.$store.getters['overdue_reg_cases/list_by_id']; },
+            is_overdue_mode() { return this.$store.getters['overdue_reg_cases/is_overdue_mode']; },
+            is_in_modal_mode() { return !this.empty(this.inSearchID); },
+            all_cases_mode() { return this.empty(this.reviewerID) && !this.is_in_modal_mode; },
+            table_items() { return this.is_in_modal_mode ? this.case_list_by_id[this.inSearchID] : this.case_list; }
         },
         watch: {
             chartType: function (val) {
@@ -182,6 +176,12 @@ if (Vue) {
             }
         },
         methods: {
+            getUrlParameter: name => {
+                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                var results = regex.exec(location.search);
+                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+            },
             switchMode: function() {
                 if (this.listMode) {
                     // use afterTableLeave to control this.statsMode
@@ -227,19 +227,14 @@ if (Vue) {
                 .addClass("reg_case_id");
             },
             searchByReviewer: function(reviewer_data) {
-                if (reviewer_data == undefined) {
-                    this.$warn(`reviewer_data is undefined. skip searchByReviewer function call.`);
+                if (this.empty(reviewer_data)) {
+                    this.$warn(`reviewer_data is empty. skip searchByReviewer function call.`);
                     return;
                 }
                 // reviewer_data, e.g. "ＯＯＯ HB1184"
                 showModal({
                     title: `查詢 ${reviewer_data} 登記案件(${this.title})`,
-                    message: this.$createElement('case-reg-overdue', {
-                        props: {
-                            reviewerId: reviewer_data.split(" ")[1],
-                            inSearch: true
-                        }
-                    }),
+                    message: this.$createElement('case-reg-overdue', { props: { inSearchID: reviewer_data.split(" ")[1] } }),
                     size: "xl"
                 });
             },
@@ -263,9 +258,9 @@ if (Vue) {
                 // busy ...
                 this.isBusy = true;
                 this.title = this.is_overdue_mode ? "逾期" : "即將逾期";
-                if (this.inSearch) {
+                if (this.is_in_modal_mode) {
                     // in-search, by clicked the first reviewer button
-                    let case_count = this.case_list_by_id[this.reviewerId].length || 0;
+                    let case_count = this.case_list_by_id[this.inSearchID].length || 0;
                     this.caption = `${case_count} 件`;
                     addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
                     // release busy ...
@@ -278,7 +273,7 @@ if (Vue) {
                         if (jsonObj === false) {
                             this.$http.post(CONFIG.JSON_API_EP, {
                                 type: key,
-                                reviewer_id: this.reviewerId
+                                reviewer_id: this.reviewerID
                             }).then(res => {
                                 this.setLocalCache(key, res.data, this.milliseconds - 5000);   // expired after 14 mins 55 secs
                                 console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL || res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_NO_RECORD, `查詢登記案件(${this.title})回傳狀態碼有問題【${res.data.status}】`);
@@ -366,7 +361,7 @@ if (Vue) {
             }
         },
         mounted() {
-            if (this.inSearch === true) {
+            if (this.is_in_modal_mode) {
                 // in modal dialog
                 this.height = window.innerHeight - 170 + "px";
                 this.small = true;
@@ -375,11 +370,12 @@ if (Vue) {
             }
         },
         created() {
-            if (!this.inSearch) {
+            if (!this.is_in_modal_mode) {
                 // only overdue used store, register it to $store module
                 this.$store.registerModule('overdue_reg_cases', this.storeModule);
                 this.getOverdueMessageStats();
             }
+            this.reviewerID = this.getUrlParameter("ID") || this.getUrlParameter("reviewerID");
             this.load();
         }
     });
