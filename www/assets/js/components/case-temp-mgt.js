@@ -170,7 +170,6 @@ if (Vue) {
                         }
                     });
                 }).catch(err => {
-                    this.$error("case-temp-mgt::query", err);
                     this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
@@ -218,7 +217,6 @@ if (Vue) {
                             closeModal();
                         }
                     }).catch(err => {
-                        this.$error("case-temp-mgt::fix", err);
                         this.error = err;
                     }).finally(() => {
                         this.isBusy = false;
