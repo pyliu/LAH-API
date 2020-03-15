@@ -40,6 +40,7 @@ Vue.prototype.$warn = console.warn.bind(console);
 Vue.prototype.$assert = console.assert.bind(console);
 Vue.prototype.$http = axios;
 Vue.prototype.$lf = localforage || {};
+// single source of truth
 Vue.prototype.$store = (() => {
     if (typeof Vuex == "object") {
         return new Vuex.Store({
