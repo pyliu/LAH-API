@@ -46,7 +46,7 @@ if (Vue) {
                     :small="small"
                     :caption="caption"
                     :sticky-header="height"
-                    :items="inSearch ? case_store.getters.list_by_id[reviewerId] : case_store.getters.list"
+                    :items="inSearch ? $gstore.getters.overdue_reg_cases.list_by_id[reviewerId] : $gstore.getters.overdue_reg_cases.list"
                     :fields="fields"
                     :busy="isBusy"
                     v-show="listMode"
@@ -86,7 +86,7 @@ if (Vue) {
                 </div>
             </lah-transition>
         </div>`,
-        props: ['reviewerId', 'inSearch', 'compact', 'store'],
+        props: ['reviewerId', 'inSearch', 'compact'],
         data: function () { return {
             fields: [
                 '序號',
@@ -109,27 +109,53 @@ if (Vue) {
             modeTooltip: "逾期案件查詢模式",
             chartType: "bar",
             title: "逾期",
-            message_count: 0
+            message_count: 0,
+            storeModule: {
+                namespaced: true,
+                state: function() { return {
+                    list : {},
+                    list_count: 0,
+                    list_by_id: {},
+                    list_by_id_count: 0,
+                    is_overdue_mode: true
+                } },
+                getters: {
+                    list: state => state.list,
+                    list_count: state => state.list_count,
+                    list_by_id: state => state.list_by_id,
+                    list_by_id_count: state => state.list_by_id_count,
+                    is_overdue_mode: state => state.is_overdue_mode
+                },
+                mutations: {
+                    list(state, jsonPayload) {
+                        state.list = jsonPayload || {};
+                        state.list_count = Object.keys(state.list).length;
+                    },
+                    list_by_id(state, jsonPayload) {
+                        state.list_by_id = jsonPayload || {};
+                        state.list_by_id_count = Object.keys(state.list_by_id).length;
+                    },
+                    is_overdue_mode(state, flagPayload) {
+                        state.is_overdue_mode = flagPayload;
+                    }
+                }
+            }
         } },
         computed: {
             total_case() {
-                return this.case_store.getters.list_count;
+                return this.$gstore.getters.overdue_reg_cases.list_count;
             },
             total_people() {
-                return this.case_store.getters.list_by_id_count;
+                return this.$gstore.getters.overdue_reg_cases.list_by_id_count;
             },
             case_list() {
-                return this.case_store.getters.list;
+                return this.$gstore.getters.overdue_reg_cases.list;
             },
             case_list_by_id() {
-                return this.case_store.getters.list_by_id;
+                return this.$gstore.getters.overdue_reg_cases.list_by_id;
             },
             is_overdue_mode() {
-                return this.case_store.getters.is_overdue_mode;
-            },
-            case_store() {
-                // in-search mode component will use this.store, root one will use this.$store
-                return this.store || this.$store;
+                return this.$gstore.getters.overdue_reg_cases.is_overdue_mode;
             }
         },
         watch: {
@@ -138,7 +164,7 @@ if (Vue) {
             },
             overdueMode: function(isChecked) {
                 // also update store's flag
-                this.case_store.commit("is_overdue_mode", isChecked);
+                this.$gstore.commit("overdue_reg_cases/is_overdue_mode", isChecked);
                 this.title = isChecked ? "逾期" : "即將逾期";
                 this.modeText = isChecked ? "逾期模式" : "即將逾期"
                 this.modeTooltip = isChecked ? "逾期案件查詢模式" : "即將逾期模式(4小時內)";
@@ -202,7 +228,7 @@ if (Vue) {
             },
             searchByReviewer: function(reviewer_data) {
                 if (reviewer_data == undefined) {
-                    console.warn(`reviewer_data is undefined. skip searchByReviewer function call.`);
+                    this.$warn(`reviewer_data is undefined. skip searchByReviewer function call.`);
                     return;
                 }
                 // reviewer_data, e.g. "曾奕融 HB1184"
@@ -211,8 +237,7 @@ if (Vue) {
                     message: this.$createElement('case-reg-overdue', {
                         props: {
                             reviewerId: reviewer_data.split(" ")[1],
-                            inSearch: true,
-                            store: this.$store
+                            inSearch: true
                         }
                     }),
                     size: "xl"
@@ -283,8 +308,8 @@ if (Vue) {
             loaded: function (jsonObj) {
                 // set data to store
                 // NOTE: the payload must be valid or it will not update UI correctly
-                this.case_store.commit("list", jsonObj.items);
-                this.case_store.commit("list_by_id", jsonObj.items_by_id);
+                this.$gstore.commit("overdue_reg_cases/list", jsonObj.items);
+                this.$gstore.commit("overdue_reg_cases/list_by_id", jsonObj.items_by_id);
 
                 this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date()}`;
 
@@ -350,7 +375,10 @@ if (Vue) {
             }
         },
         created() {
-            this.getOverdueMessageStats();
+            if (this.inSearch) {
+                this.$gstore.registerModule('overdue_reg_cases', this.storeModule);
+                this.getOverdueMessageStats();
+            }
             this.load();
         }
     });
