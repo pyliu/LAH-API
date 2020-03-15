@@ -728,7 +728,7 @@ Vue.component("lah-header", {
                     myip = res.data.ip || null;
                     this.setLocalCache('myip', myip, 86400000); // expired after a day
                 }).catch(err => {
-                    this.$error("lah-header::created", err);
+                    this.error = err;
                 });
             }
             this.ip = myip;
@@ -988,9 +988,9 @@ Vue.component("lah-user-card", {
             //     axios.get('assets/js/mocks/user_info.json')
             //     .then(response => {
             //         this.user_rows = response.data.raw;
-            //         this.cacheUserRows()
+            //         this.cacheUserRows();
             //     }).catch(err => {
-            //         this.$error(err)
+            //         this.error = err;
             //     }).finally(() => {
 
             //     });
@@ -1012,7 +1012,6 @@ Vue.component("lah-user-card", {
                         this.$emit('notFound', this.name || this.id || this.ip);
                     }
                 }).catch(err => {
-                    this.$error("lah-user-card::created", err);
                     this.error = err;
                 });
             }
@@ -1101,12 +1100,11 @@ Vue.component('lah-user-message', {
                                 });
                             }
                         }).catch(err => {
-                            this.$error("lah-user-message::load", err);
                             this.error = err;
                         });
                     }
                 } catch(err) {
-                    this.$error(err);
+                    this.error = err;
                 }
             }
         }
@@ -1304,7 +1302,7 @@ $(document).ready(() => {
                         merged.callback.apply(this, arguments);
                     }
                 }).catch(err => {
-                    this.$error(err);
+                    this.error = err;
                 });
             },
             open: function(url, e) {
@@ -1356,7 +1354,6 @@ $(document).ready(() => {
                 }).then(res => {
                     this.showRegCase(res.data, enabled_userinfo);
                 }).catch(err => {
-                    this.$error("window.vueApp.fetchRegCase", err);
                     this.error = err;
                 });
             },
@@ -1510,7 +1507,7 @@ $(document).ready(() => {
                     //console.log('Iteration has completed');
                 }).catch(err => {
                     // This code runs if there were any errors
-                    this.$error(err);
+                    this.error = err;
                 });
                 // for cache purpose
                 let cacheIt = (el) => {
@@ -1522,7 +1519,7 @@ $(document).ready(() => {
                             // Run this code once the key has been removed.
                         }).catch(err => {
                             // This code runs if there were any errors
-                            this.$error(err);
+                            this.error = err;
                         });
                     } else if (ele_id != undefined) {
                         this.$lf.setItem(ele_id, val);
