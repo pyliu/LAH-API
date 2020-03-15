@@ -103,11 +103,10 @@ if (Vue) {
                                 this.addLogList(`${this.log_update_time} 錯誤: ${res.data.message}`);
                                 console.warn(res.data.message);
                             }
-                        }).catch(ex => {
+                        }).catch(err => {
                             this.abortCountdown();
-                            this.addLogList(`${this.log_update_time} 錯誤: ${ex.message}`);
-                            this.$error("watchdog::callLogAPI", ex);
-                            this.error = ex;
+                            this.addLogList(`${this.log_update_time} 錯誤: ${err.message}`);
+                            this.error = err;
                         }).finally(() => {
                             this.isBusy = false;
                         });
@@ -142,7 +141,6 @@ if (Vue) {
                                 type: "success"
                             });
                         }).catch(err => {
-                            this.$error("log-viewer::zip", err);
                             this.error = err;
                         }).finally(() => {
                             this.isBusy = false;
@@ -262,7 +260,6 @@ if (Vue) {
                         }).catch(err => {
                             this.abortCountdown();
                             this.addHistory(`${now} 結果: ${err.message}`);
-                            this.$error("schedule-task::callWatchdogAPI", err);
                             this.error = err;
                         }).finally(() => {
                             this.isBusy = false;

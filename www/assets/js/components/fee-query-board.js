@@ -114,7 +114,6 @@ if (Vue) {
                         title: `${this.query_date} 規費統計`
                     });
                 }).catch(err => {
-                    this.$error("fee-query-board::queryByDate", err);
                     this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
@@ -168,7 +167,6 @@ if (Vue) {
                         callback: () => addUserInfoEvent()
                     });
                 }).catch(err => {
-                    this.$error("fee-query-board::obsolete", err);
                     this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
@@ -590,7 +588,6 @@ if (Vue) {
                                     });
                                 });
                             }).catch(err => {
-                                this.$error("fee-obsolete-mgt::add", err);
                                 this.error = err;
                             }).finally(() => {
                                 this.isBusy = false;
@@ -660,7 +657,6 @@ if (Vue) {
                     });
                     closeModal();
                 }).catch(err => {
-                    this.$error("fee-detail-payment-mgt::doUpdate", err);
                     this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
@@ -713,7 +709,6 @@ if (Vue) {
                         })
                     );
                 }).catch(err => {
-                    this.$error("fee-detail-print-mgt::doUpdate", err);
                     this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
@@ -787,7 +782,6 @@ if (Vue) {
                         this.expaa_data = res.data.raw;
                     }
                 }).catch(err => {
-                    this.$error("fee-detail-mgt::fetchEXPAA", err);
                     this.error = err;
                 });
             },
@@ -808,7 +802,6 @@ if (Vue) {
                         this.expac_data = res.data.raw;
                     }
                 }).catch(err => {
-                    this.$error("fee-detail-mgt::fetchEXPAC", err);
                     this.error = err;
                 });
             }
@@ -920,7 +913,6 @@ if (Vue) {
                                 });
                             }
                         }).catch(err => {
-                            this.$error("fee-detail-expac-mgt::update", err);
                             this.error = err;
                         }).finally(() => {
                             this.isBusy = false;
@@ -975,7 +967,6 @@ if (Vue) {
                                     throw new Error("回傳狀態碼不正確!【" + res.data.message + "】");
                                 }
                             }).catch(err => {
-                                this.$error("fee-detail-fix-ezcard::fixEzcardPayment", err);
                                 this.error = err;
                             }).finally(() => {
                                 this.isBusy = false;

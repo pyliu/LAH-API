@@ -63,7 +63,6 @@ if (Vue) {
                         });
                     }
                 }).catch(err => {
-                    this.$error("easycard-payment-check::query", err);
                     this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
@@ -113,7 +112,6 @@ if (Vue) {
                                 }
                                 el.remove();
                             }).catch(err => {
-                                this.$error("easycard-payment-check-item::fix", err);
                                 this.error = err;
                             }).finally(() => {
                                 this.isBusy = false;
