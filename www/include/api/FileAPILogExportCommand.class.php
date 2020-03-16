@@ -13,7 +13,7 @@ class FileAPILogExportCommand extends FileAPICommand {
     function __destruct() {}
 
     public function execute() {
-        $logs_folder = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs";
+        $logs_folder = ROOT_DIR.DIRECTORY_SEPARATOR."logs";
         $path = $logs_folder.DIRECTORY_SEPARATOR."log-".$this->date.".log";
         $data = null;
         if (file_exists($path)) {

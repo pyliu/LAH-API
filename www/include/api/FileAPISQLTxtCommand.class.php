@@ -1,6 +1,6 @@
 <?php
 require_once("FileAPICommand.class.php");
-require_once(dirname(dirname(__FILE__)).ROOT_DIR.DIRECTORY_SEPARATOR."Query.class.php");
+require_once(ROOT_DIR.DIRECTORY_SEPARATOR."include/Query.class.php");
 
 class FileAPISQLTxtCommand extends FileAPICommand {
     private $sql;
