@@ -637,7 +637,7 @@ Vue.component("lah-header", {
         <nav v-if="show" class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
             <i class="fas fa-2x text-light mr-1" :class="icon"></i>
             <a class="navbar-brand my-auto" :href="location.href" v-html="leading"><span style="font-size: .75rem">(β)</span></a>
-            <i v-if="showUserIcon" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
+            <i v-if="enableUserCardPopover" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
             <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
                 <lah-user-card :ip="myip" @not-found="userNotFound" class="mb-1" title="我的名片"></lah-user-card>
                 <lah-user-message :ip="myip" count="5" title="最新信差訊息" tabs="true" tabsPills="true" tabsEnd="true"></lah-user-message>
@@ -704,8 +704,7 @@ Vue.component("lah-header", {
         }]
     }},
     computed: {
-        enableUserCardPopover() { return this.ip !== null },
-        showUserIcon() { return this.enableUserCardPopover }
+        enableUserCardPopover() { return !this.empty(this.myip) }
     },
     methods: {
         active: function(link) {
