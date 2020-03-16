@@ -52,7 +52,8 @@ Vue.prototype.$store = (() => {
                 dynaParams: {},
                 errors: [],
                 myip: undefined,
-                myid: undefined
+                myid: undefined,
+                disableMSDBQuery: CONFIG.DISABLE_MSDB_QUERY
             },
             getters: {
                 cache: state => state.cache,
@@ -63,7 +64,8 @@ Vue.prototype.$store = (() => {
                 errors: state => state.errors,
                 errorLen: state => state.errors.length,
                 myip: state => state.myip,
-                myid: state => state.myid
+                myid: state => state.myid,
+                disableMSDBQuery: state => state.disableMSDBQuery
             },
             mutations: {
                 cache(state, objPayload) {
@@ -102,6 +104,9 @@ Vue.prototype.$store = (() => {
                 },
                 myid(state, idPayload) {
                     state.myid = idPayload;
+                },
+                disableMSDBQuery(state, flagPayload) {
+                    state.disableMSDBQuery = flagPayload === true;
                 }
             },
             actions: {
@@ -339,7 +344,8 @@ Vue.mixin({
                 ("0" + now.getSeconds()).slice(-2);
         },
         myip() { return this.$store.getters.myip; },
-        myid() { return this.$store.getters.myid; }
+        myid() { return this.$store.getters.myid; },
+        disableMSDBQuery() { return this.$store.getters.disableMSDBQuery; },
     },
     methods: {
         setSetting: function(key, value) {
@@ -939,12 +945,11 @@ Vue.component("lah-user-card", {
     },
     props: ['id', 'name', 'ip', 'title'],
     data: function() { return {
-        disabled: CONFIG.DISABLE_MSDB_QUERY,
         user_rows: null
     } },
     computed: {
-        useTab: function() { return !this.disabled && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 1; },
-        useCard: function() { return !this.disabled && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 0; },
+        useTab: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 1; },
+        useCard: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 0; },
         notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; }
     },
     methods: {
@@ -1007,7 +1012,7 @@ Vue.component("lah-user-card", {
         }
     },
     async created() {
-        if (!this.disabled) {
+        if (!this.disableMSDBQuery) {
             const succeed_cached = await this.restoreUserRows();
             // mocks for testing
             // if (!succeed_cached) {
@@ -1079,7 +1084,6 @@ Vue.component('lah-user-message', {
     </div>`,
     props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton', 'tabs', 'tabsEnd', 'tabsPills'],
     data: () => { return {
-        disabled: CONFIG.DISABLE_MSDB_QUERY,
         raws: undefined,
         urlPattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig,
         idPattern: /^HB\d{4}$/i
@@ -1107,7 +1111,7 @@ Vue.component('lah-user-message', {
         },
         border: function(index) { return index == 0 ? 'danger' : index == 1 ? 'primary' : '' },
         load: async function(force = false) {
-            if (!this.disabled) {
+            if (!this.disableMSDBQuery) {
                 try {
                     const raws = force ? await this.removeLocalCache("my-messeages") : await this.getLocalCache("my-messeages");
                     if (raws !== false && raws.length == this.count) {
