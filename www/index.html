@@ -28,10 +28,10 @@
         </b-card>
         <b-card no-body class="p-2">
           <b-input-group size="sm" class="mb-1">
-            <b-input-group-prepend is-text>使用者代碼</b-input-group-prepend>
+            <b-input-group-prepend is-text>{{userNames[settings['user_id'] ? settings['user_id'].toUpperCase() : null] || '使用者代碼'}}</b-input-group-prepend>
             <b-form-input
               v-model="settings['user_id']"
-              placeholder="ＨＢＯＯＯＯ"
+              placeholder="HBXXXX"
               class="no-cache"
               :state="(/^HB/i).test(settings['user_id']) && settings['user_id'].length == 6"
             ></b-form-input>
