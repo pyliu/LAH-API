@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("case-reg-overdue", {
         components: { "countdown": VueCountdown },
         template: `<div>
-            <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="is_in_modal_mode">
+            <div style="right: 2.5rem; position:absolute; top: 0.5rem;" v-if="!is_in_modal_mode">
                 <b-form-checkbox v-b-tooltip.hover.top="modeTooltip" inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;" :class="['align-baseline', 'btn', 'btn-sm', is_overdue_mode ? '' : 'border-warning', 'p-1']">
                     <span>{{modeText}}</span>
                 </b-form-checkbox>

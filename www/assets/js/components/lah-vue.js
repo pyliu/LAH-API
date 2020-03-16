@@ -100,7 +100,7 @@ Vue.prototype.$store = (() => {
                         });
                     }
                 },
-                myip(state, idPayload) {
+                myid(state, idPayload) {
                     state.myid = idPayload;
                 }
             },
