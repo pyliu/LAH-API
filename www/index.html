@@ -33,7 +33,7 @@
               v-model="settings['user_id']"
               placeholder="HBXXXX"
               class="no-cache"
-              :state="(/^HB/i).test(settings['user_id']) && settings['user_id'].length == 6"
+              :state="(/^HB\d{4}$/i).test(settings['user_id'])"
             ></b-form-input>
           </b-input-group>
           <lah-user-message :id="settings['user_id']" count="5" title="最新信差訊息" tabs="true" tabsPills="true" tabsEnd="true"></lah-user-message>

@@ -1077,12 +1077,12 @@ Vue.component('lah-user-message', {
         disabled: CONFIG.DISABLE_MSDB_QUERY,
         raws: undefined,
         urlPattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig,
-        idPattern: /^HB/i
+        idPattern: /^HB\d{4}$/i
     } },
     watch: {
         count: function(nVal, oVal) { this.load() },
         id: function(nVal, oVal) {
-            if (this.idPattern.test(nVal) && nVal.length == 6) {
+            if (this.idPattern.test(nVal)) {
                 this.load(true)
             }
         }
