@@ -29,7 +29,12 @@
         <b-card no-body class="p-2">
           <b-input-group size="sm" class="mb-1">
             <b-input-group-prepend is-text>使用者代碼</b-input-group-prepend>
-            <b-form-input v-model="settings['user_id']" placeholder="ＨＢＯＯＯＯ" class="no-cache"></b-form-input>
+            <b-form-input
+              v-model="settings['user_id']"
+              placeholder="ＨＢＯＯＯＯ"
+              class="no-cache"
+              :state="(/^HB/i).test(settings['user_id']) && settings['user_id'].length == 6"
+            ></b-form-input>
           </b-input-group>
           <lah-user-message :id="settings['user_id']" count="5" title="最新信差訊息" tabs="true" tabsPills="true" tabsEnd="true"></lah-user-message>
         </b-card>
