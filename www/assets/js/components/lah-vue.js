@@ -252,24 +252,29 @@ Vue.mixin({
                 }
             }
         },
-        "lah-ban": {
-            template: `<i class="text-danger fas fa-ban ld ld-breath" :class="[size]"><slot>其他內容</slot></i>`,
-            props: ["size"],
-            created() {
-                switch(this.size) {
-                    case "xs": this.size = "fa-xs"; break;
-                    case "sm": this.size = "fa-sm"; break;
-                    case "lg": this.size = "fa-lg"; break;
-                    default:
-                        if (this.size && this.size[this.size.length - 1] === "x") {
-                            this.size = `fa-${this.size}`;
-                        }
-                        break;
+        "lah-fa-icon": {
+            template: `<span><i :class="className"></i> <slot>其他內容</slot></span>`,
+            props: ["size", 'prefix', 'icon', 'variant', 'action'],
+            computed: {
+                className() {
+                    let prefix = this.prefix || 'fas';
+                    let icon = this.icon || 'ban';
+                    let variant = this.variant || 'danger';
+                    let ld_movement = this.action || '';
+                    let size = '';
+                    switch(this.size) {
+                        case "xs": size = "fa-xs"; break;
+                        case "sm": size = "fa-sm"; break;
+                        case "lg": size = "fa-lg"; break;
+                        default:
+                            if (this.size && this.size[this.size.length - 1] === "x") {
+                                size = `fa-${this.size}`;
+                            }
+                            break;
+                    }
+                    return `text-${variant} ${prefix} fa-${icon} ${size} ld ld-${ld_movement}`
                 }
             }
-        },
-        "lah-exclamation": {
-            template: `<h6><i class="fas fa-exclamation-circle fa-lg text-danger ld ld-breath"></i> <slot>內容會顯示在這邊</slot></h6>`
         }
     },
     data: function() { return {
@@ -823,12 +828,12 @@ Vue.component("lah-user-card", {
                 <lah-user-description :user_data="user_data"></lah-user-description>
             </b-card>
         </b-card-group>
-        <lah-exclamation v-else class="my-2">找不到使用者「{{name || id || ip}}」！</lah-exclamation>
+        <lah-fa-icon icon="exclamation-circle" size="lg" v-else class="my-2">找不到使用者「{{name || id || ip}}」！</lah-fa-icon>
     </div>`,
     components: {
         "lah-user-description": {
             template: `<b-card-text class="small">
-                <lah-ban v-if="isLeft" class='text-danger mx-auto'> 已離職【{{user_data["AP_OFF_DATE"]}}】</lah-ban>
+                <lah-fa-icon icon="ban" variant="danger" action="breath" v-if="isLeft" class='mx-auto'> 已離職【{{user_data["AP_OFF_DATE"]}}】</lah-fa-icon>
                 <div>ID：{{user_data["DocUserID"]}}</div>
                 <div v-if="isAdmin">電腦：{{user_data["AP_PCIP"]}}</div>
                 <div v-if="isAdmin">生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge !== false" :variant="birthAgeVariant" pill>{{birthAge}}歲</b-badge></div>
@@ -1070,7 +1075,7 @@ Vue.component('lah-user-message', {
                 <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
             </b-card>
         </b-card-group>
-        <lah-exclamation v-else>{{notFound}}</lah-exclamation>
+        <lah-fa-icon icon="exclamation-circle" size="lg" v-else>{{notFound}}</lah-fa-icon>
     </div>`,
     props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton', 'tabs', 'tabsEnd', 'tabsPills'],
     data: () => { return {
