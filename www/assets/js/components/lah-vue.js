@@ -1076,10 +1076,16 @@ Vue.component('lah-user-message', {
     data: () => { return {
         disabled: CONFIG.DISABLE_MSDB_QUERY,
         raws: undefined,
-        pattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig
+        urlPattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig,
+        idPattern: /^HB/i
     } },
     watch: {
-        count: function(nVal, oVal) { this.load() }
+        count: function(nVal, oVal) { this.load() },
+        id: function(nVal, oVal) {
+            if (this.idPattern.test(nVal) && nVal.length == 6) {
+                this.load(true)
+            }
+        }
     },
     computed: {
         ready: function() { return !this.empty(this.raws) },
@@ -1091,14 +1097,14 @@ Vue.component('lah-user-message', {
     methods: {
         format: function(content) {
             return content
-                .replace(this.pattern, "<a href='$1' target='_blank' title='點擊前往'>$1</a>")
+                .replace(this.urlPattern, "<a href='$1' target='_blank' title='點擊前往'>$1</a>")
                 .replace(/\r\n/g,"<br />");
         },
         border: function(index) { return index == 0 ? 'danger' : index == 1 ? 'primary' : '' },
-        load: async function() {
+        load: async function(force = false) {
             if (!this.disabled) {
                 try {
-                    const raws = await this.getLocalCache("my-messeages");
+                    const raws = force ? await this.removeLocalCache("my-messeages") : await this.getLocalCache("my-messeages");
                     if (raws !== false && raws.length == this.count) {
                         this.raws = raws;
                     } else if (raws !== false && raws.length >= this.count) {

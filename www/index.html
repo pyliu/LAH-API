@@ -27,7 +27,11 @@
           <lah-user-card title="我的名片"></lah-user-card>
         </b-card>
         <b-card no-body class="p-2">
-          <lah-user-message count="5" title="最新信差訊息" tabs="true" tabsPills="true" tabsEnd="true"></lah-user-message>
+          <b-input-group size="sm" class="mb-1">
+            <b-input-group-prepend is-text>使用者代碼</b-input-group-prepend>
+            <b-form-input v-model="settings['user_id']" placeholder="ＨＢＯＯＯＯ" class="no-cache"></b-form-input>
+          </b-input-group>
+          <lah-user-message :id="settings['user_id']" count="5" title="最新信差訊息" tabs="true" tabsPills="true" tabsEnd="true"></lah-user-message>
         </b-card>
         <b-card no-body class="p-2">
           <b-card-title title-tag="h6">今日規費</b-card-title>
@@ -68,7 +72,7 @@
   <script src="assets/js/Chart.min.js"></script>
 
   <script type="text/javascript">
-    $(document).ready(e => { });
+    $(document).ready(e => { vueApp.setSetting('user_id', undefined) });
   </script>
 </body>
 </html>
