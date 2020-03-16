@@ -940,7 +940,7 @@ Vue.component("lah-user-card", {
     computed: {
         useTab: function() { return !this.disabled && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 1; },
         useCard: function() { return !this.disabled && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 0; },
-        notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip}」`; }
+        notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; }
     },
     methods: {
         photoUrl: function (user_data) {
@@ -1083,7 +1083,7 @@ Vue.component('lah-user-message', {
     },
     computed: {
         ready: function() { return !this.empty(this.raws) },
-        notFound: function() { return `「${this.name || this.id || this.ip}」找不到信差訊息！` },
+        notFound: function() { return `「${this.name || this.id || this.ip || this.myip}」找不到信差訊息！` },
         columns: function() { return !this.useTabs && this.count > 3 },
         enable_spinbutton: function() { return !this.empty(this.spinbutton) },
         useTabs: function() { return !this.empty(this.tabs) }
@@ -1108,7 +1108,7 @@ Vue.component('lah-user-message', {
                             type: "user_message",
                             id: this.id,
                             name: this.name,
-                            ip: this.ip,
+                            ip: this.ip || this.myip,
                             count: this.count
                         }).then(res => {
                             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
