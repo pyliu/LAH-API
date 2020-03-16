@@ -89,7 +89,7 @@ Vue.prototype.$store = (() => {
                     state.error.pop();
                 },
                 myip(state, ipPayload) {
-                    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipPayload)) {
+                    if (/^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){4}$/.test(ipPayload) || ipPayload == '::1') {
                         state.myip = ipPayload;
                     } else {
                         showAlert({
