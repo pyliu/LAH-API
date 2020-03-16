@@ -253,7 +253,7 @@ Vue.mixin({
             }
         },
         "lah-fa-icon": {
-            template: `<span><i :class="className"></i> <slot>其他內容</slot></span>`,
+            template: `<span><i :class="className"></i> <slot></slot></span>`,
             props: ["size", 'prefix', 'icon', 'variant', 'action'],
             computed: {
                 className() {
@@ -667,7 +667,7 @@ Vue.component("lah-header", {
         icon: "fa-question",
         leading: "",
         links: [{
-            text: `管理儀錶板 <i class="fas fa-wrench text-muted" style="font-size: .75rem" title="開發中"></i>`,
+            text: `管理儀錶板 <i class="fas fa-wrench text-muted" style="font-size: .5rem" title="開發中"></i>`,
             url: ["index.html", "/"],
             icon: "fa-th-large",
             need_admin: true
