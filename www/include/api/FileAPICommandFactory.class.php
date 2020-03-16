@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(dirname(__FILE__)).ROOT_DIR.DIRECTORY_SEPARATOR."init.php");
+require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."init.php");
 require_once("FileAPINotSupportCommand.class.php");
 require_once("FileAPISQLCsvCommand.class.php");
 require_once("FileAPISQLTxtCommand.class.php");

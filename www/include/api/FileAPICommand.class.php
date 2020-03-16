@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(dirname(__FILE__)).ROOT_DIR.DIRECTORY_SEPARATOR."GlobalConstants.inc.php");
+require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."GlobalConstants.inc.php");
 
 abstract class FileAPICommand {
     
