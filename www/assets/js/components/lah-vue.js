@@ -646,7 +646,7 @@ Vue.component("lah-alert", {
 Vue.component("lah-header", {
     template: `<lah-transition slide-down>
         <nav v-if="show" class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-            <i class="fas fa-2x text-light mr-1" :class="icon"></i>
+            <lah-fa-icon size="2x" variant="light" class="mr-1" :icon="icon"></lah-fa-icon>
             <a class="navbar-brand my-auto" :href="location.href" v-html="leading"><span style="font-size: .75rem">(β)</span></a>
             <lah-fa-icon v-if="enableUserCardPopover" prefix="far" icon="user-circle" variant="light" id="header-user-icon" size="2x" style="position: fixed; right: 0;" class="mr-2"></lah-fa-icon>
             <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
@@ -675,42 +675,42 @@ Vue.component("lah-header", {
         links: [{
             text: `管理儀錶板 <i class="fas fa-wrench text-muted" style="font-size: .5rem" title="開發中"></i>`,
             url: ["index.html", "/"],
-            icon: "fa-th-large",
+            icon: "th-large",
             need_admin: true
         }, {
             text: "案件追蹤",
             url: "tracking.php",
-            icon: "fa-list-alt",
+            icon: "list-alt",
             need_admin: true
         }, {
             text: "資料查詢",
             url: "query.php",
-            icon: "fa-file-alt",
+            icon: "file-alt",
             need_admin: true
         }, {
             text: "監控修正",
             url: "watchdog.php",
-            icon: "fa-user-secret",
+            icon: "user-secret",
             need_admin: true
         }, {
             text: "逾期案件",
             url: "overdue_reg_cases.html",
-            icon: "fa-th-list",
+            icon: "th-list",
             need_admin: false
         }, {
             text: "信差訊息",
             url: "message.html",
-            icon: "fa-comments",
+            icon: "comments",
             need_admin: false
         }, {
             text: "記錄瀏覽",
             url: "tasklog.html",
-            icon: "fa-dog",
+            icon: "dog",
             need_admin: true
         }, {
             text: "測試頁",
             url: "test.html",
-            icon: "fa-charging-station",
+            icon: "charging-station",
             need_admin: true
         }]
     }},
