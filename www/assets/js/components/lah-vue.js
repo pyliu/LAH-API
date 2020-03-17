@@ -1082,7 +1082,7 @@ Vue.component('lah-user-message', {
         </b-card-group>
         <lah-fa-icon icon="exclamation-circle" size="lg" v-else>{{notFound}}</lah-fa-icon>
     </div>`,
-    props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton', 'tabs', 'tabsEnd', 'tabsPills'],
+    props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton', 'tabs', 'tabsEnd', 'tabsPills', 'noCache'],
     data: () => { return {
         raws: undefined,
         urlPattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig,
@@ -1113,7 +1113,11 @@ Vue.component('lah-user-message', {
         load: async function(force = false) {
             if (!this.disableMSDBQuery) {
                 try {
+
+                    if (!this.empty(this.noCache)) await this.removeLocalCache("my-messeages");
                     const raws = force ? await this.removeLocalCache("my-messeages") : await this.getLocalCache("my-messeages");
+                    this.$log(this.noCache);
+                    this.$log(raws);
                     if (raws !== false && raws.length == this.count) {
                         this.raws = raws;
                     } else if (raws !== false && raws.length >= this.count) {
