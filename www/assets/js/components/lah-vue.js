@@ -651,7 +651,7 @@ Vue.component("lah-header", {
             <i v-if="enableUserCardPopover" id="header-user-icon" class="far fa-2x text-light mr-2 fa-user-circle" style="position: fixed; right: 0;"></i>
             <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
                 <lah-user-card :ip="myip" @not-found="userNotFound" class="mb-1" title="我的名片"></lah-user-card>
-                <lah-user-message :ip="myip" count="5" title="最新信差訊息" tabs="true" tabsPills="true" tabsEnd="true"></lah-user-message>
+                <lah-user-message :ip="myip" count="5" title="最新信差訊息" tabs="true" tabsEnd="true"></lah-user-message>
             </b-popover>
             <button class="navbar-toggler mr-5" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -1056,7 +1056,7 @@ Vue.component('lah-user-message', {
         <h6 v-show="!empty(title)"><i class="fas fa-angle-double-right"></i> {{title}} <b-form-spinbutton v-if="enable_spinbutton" v-model="count" min="1" size="sm" inline></b-form-spinbutton></h6>
         <b-card-group v-if="ready" :columns="columns" :deck="!columns">
             <b-card no-body v-if="useTabs">
-                <b-tabs card :end="tabsEnd" :pills="tabsPills" align="center" small>
+                <b-tabs card :end="endTabs" :pills="endTabs" align="center" small>
                     <b-tab v-for="(message, index) in raws" :title="index+1">
                         <b-card-title title-tag="h6">
                             {{message['xname']}}
@@ -1082,7 +1082,7 @@ Vue.component('lah-user-message', {
         </b-card-group>
         <lah-fa-icon icon="exclamation-circle" size="lg" v-else>{{notFound}}</lah-fa-icon>
     </div>`,
-    props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton', 'tabs', 'tabsEnd', 'tabsPills', 'noCache'],
+    props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton', 'tabs', 'tabsEnd', 'noCache'],
     data: () => { return {
         raws: undefined,
         urlPattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig,
@@ -1102,6 +1102,7 @@ Vue.component('lah-user-message', {
         columns: function() { return !this.useTabs && this.count > 3 },
         enable_spinbutton: function() { return !this.empty(this.spinbutton) },
         useTabs: function() { return !this.empty(this.tabs) },
+        endTabs: function() { return !this.empty(this.tabsEnd)},
         cache_key: function() { return `${this.id||this.name||this.ip||this.myip}-messeages` }
     },
     methods: {
