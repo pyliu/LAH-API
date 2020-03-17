@@ -645,32 +645,41 @@ Vue.component("lah-alert", {
 
 Vue.component("lah-header", {
     template: `<lah-transition slide-down>
-        <b-nav v-if="show" class="navbar navbar-expand-md bg-dark fixed-top">
+        <b-navbar v-if="show" toggleable="lg" type="dark" variant="dark" class="mb-3" fixed>
             <lah-fa-icon size="2x" variant="light" class="mr-1" :icon="icon"></lah-fa-icon>
-            <a class="navbar-brand my-auto" :href="location.href" v-html="leading"><span style="font-size: .75rem">(β)</span></a>
-            <lah-fa-icon v-if="enableUserCardPopover" prefix="far" icon="user-circle" variant="light" id="header-user-icon" size="2x" style="position: fixed; right: 0;" class="mr-2"></lah-fa-icon>
-            <b-popover v-if="enableUserCardPopover" target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
-                <lah-user-card :ip="myip" @not-found="userNotFound" class="mb-1" title="我的名片"></lah-user-card>
-                <lah-user-message :ip="myip" count="5" title="最新信差訊息" tabs="true" tabsEnd="true"></lah-user-message>
-            </b-popover>
-
-            <b-nav-item 
-                v-for="link in links"
-                :class="[active(link), 'text-light', 'mr-2']"
-                v-show="link.need_admin ? isAdmin : true"
-                :href="Array.isArray(link.url) ? link.url[0] : link.url"
-                v-html="link.text"
-            ></b-nav-item>
-        </b-nav>
+            <b-navbar-brand :href="location.href" v-html="leading"></b-navbar-brand>
+            <b-navbar-toggle target="nav-collapse" class="mr-5"></b-navbar-toggle>
+            <b-collapse id="nav-collapse" is-nav>
+                <lah-transition appear>
+                    <b-navbar-nav>
+                        <b-nav-item 
+                            v-for="link in links"
+                            :class="[active(link)]"
+                            v-show="link.need_admin ? isAdmin : true"
+                            :href="Array.isArray(link.url) ? link.url[0] : link.url"
+                        >
+                            <b-nav-text v-html="link.text"></b-nav-text>
+                        </b-nav-item>
+                    </b-navbar-nav>
+                </lah-transition>
+                <b-nav-text style="position: fixed; right: 0;">
+                    <lah-fa-icon prefix="far" icon="user-circle" variant="light" id="header-user-icon" size="2x" class="mr-3"></lah-fa-icon>
+                    <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
+                        <lah-user-card :ip="myip" @not-found="userNotFound" class="mb-1" title="我的名片"></lah-user-card>
+                        <lah-user-message :ip="myip" count="5" title="最新信差訊息" tabs="true" tabsEnd="true"></lah-user-message>
+                    </b-popover>
+                </b-nav-text>
+            </b-collapse>
+        </b-navbar>
     </lah-transition>`,
     data: () => { return {
         show: true,
         icon: "fa-question",
         leading: "",
         links: [{
-            text: `管理儀錶板 <i class="fas fa-wrench text-muted" style="font-size: .5rem" title="開發中"></i>`,
+            text: `管理儀錶板`,
             url: ["index.html", "/"],
-            icon: "th-large",
+            icon: "cubes",
             need_admin: true
         }, {
             text: "案件追蹤",
@@ -690,7 +699,7 @@ Vue.component("lah-header", {
         }, {
             text: "逾期案件",
             url: "overdue_reg_cases.html",
-            icon: "th-list",
+            icon: "calendar-alt",
             need_admin: false
         }, {
             text: "信差訊息",
@@ -715,10 +724,10 @@ Vue.component("lah-header", {
     methods: {
         active: function(link) {
             let url = Array.isArray(link.url) ? link.url[0] : link.url;
-            let ret = location.href.indexOf(url) > 0 ? 'active' : '';
+            let ret = location.href.indexOf(url) > 0 ? "hide" : "";
             // check page authority here
-            if (ret == 'active' && link.need_admin && !this.isAdmin) {
-                console.error("限制存取頁面！");
+            if (ret === "hide" && link.need_admin && !this.isAdmin) {
+                this.error = "限制存取頁面！";
                 $("body").html(`<h1 class="text-center text-danger">限制存取網頁，請勿使用！</h1>`);
             }
             return ret;
