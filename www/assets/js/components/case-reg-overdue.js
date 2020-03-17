@@ -268,11 +268,11 @@ if (Vue) {
                     Vue.nexTick ? Vue.nexTick(this.makeCaseIDClickable) : setTimeout(this.makeCaseIDClickable, 800);
                 } else {
                     try {
-                        const key = this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases";
+                        const key = this.reviewerID + '-' + (this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases");
                         const jsonObj = await this.getLocalCache(key);
                         if (jsonObj === false) {
                             this.$http.post(CONFIG.JSON_API_EP, {
-                                type: key,
+                                type: this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases",
                                 reviewer_id: this.reviewerID
                             }).then(res => {
                                 this.setLocalCache(key, res.data, this.milliseconds - 5000);   // expired after 14 mins 55 secs
