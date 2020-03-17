@@ -645,7 +645,7 @@ Vue.component("lah-alert", {
 
 Vue.component("lah-header", {
     template: `<lah-transition slide-down>
-        <nav v-if="show" class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <b-nav v-if="show" class="navbar navbar-expand-md bg-dark fixed-top">
             <lah-fa-icon size="2x" variant="light" class="mr-1" :icon="icon"></lah-fa-icon>
             <a class="navbar-brand my-auto" :href="location.href" v-html="leading"><span style="font-size: .75rem">(β)</span></a>
             <lah-fa-icon v-if="enableUserCardPopover" prefix="far" icon="user-circle" variant="light" id="header-user-icon" size="2x" style="position: fixed; right: 0;" class="mr-2"></lah-fa-icon>
@@ -653,20 +653,15 @@ Vue.component("lah-header", {
                 <lah-user-card :ip="myip" @not-found="userNotFound" class="mb-1" title="我的名片"></lah-user-card>
                 <lah-user-message :ip="myip" count="5" title="最新信差訊息" tabs="true" tabsEnd="true"></lah-user-message>
             </b-popover>
-            <button class="navbar-toggler mr-5" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        
-            <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-                <lah-transition appear>
-                    <ul class="navbar-nav mr-auto">
-                        <li v-for="link in links" :class="['nav-item', 'my-auto', active(link)]" v-show="link.need_admin ? isAdmin : true">
-                            <a class="nav-link" :href="Array.isArray(link.url) ? link.url[0] : link.url" v-html="link.text"></a>
-                        </li>
-                    </ul>
-                </lah-transition>
-            </div>
-        </nav>
+
+            <b-nav-item 
+                v-for="link in links"
+                :class="[active(link), 'text-light', 'mr-2']"
+                v-show="link.need_admin ? isAdmin : true"
+                :href="Array.isArray(link.url) ? link.url[0] : link.url"
+                v-html="link.text"
+            ></b-nav-item>
+        </b-nav>
     </lah-transition>`,
     data: () => { return {
         show: true,
