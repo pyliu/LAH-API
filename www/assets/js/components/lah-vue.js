@@ -1092,7 +1092,7 @@ Vue.component('lah-user-message', {
         count: function(nVal, oVal) { this.load() },
         id: function(nVal, oVal) {
             if (this.idPattern.test(nVal)) {
-                this.load(true)
+                this.load();
             }
         }
     },
@@ -1101,7 +1101,8 @@ Vue.component('lah-user-message', {
         notFound: function() { return `「${this.name || this.id || this.ip || this.myip}」找不到信差訊息！` },
         columns: function() { return !this.useTabs && this.count > 3 },
         enable_spinbutton: function() { return !this.empty(this.spinbutton) },
-        useTabs: function() { return !this.empty(this.tabs) }
+        useTabs: function() { return !this.empty(this.tabs) },
+        cache_key: function() { return `${this.id||this.name||this.ip||this.myip}-messeages` }
     },
     methods: {
         format: function(content) {
@@ -1113,11 +1114,8 @@ Vue.component('lah-user-message', {
         load: async function(force = false) {
             if (!this.disableMSDBQuery) {
                 try {
-
-                    if (!this.empty(this.noCache)) await this.removeLocalCache("my-messeages");
-                    const raws = force ? await this.removeLocalCache("my-messeages") : await this.getLocalCache("my-messeages");
-                    this.$log(this.noCache);
-                    this.$log(raws);
+                    if (!this.empty(this.noCache) || force) await this.removeLocalCache(this.cache_key);
+                    const raws = await this.getLocalCache(this.cache_key);
                     if (raws !== false && raws.length == this.count) {
                         this.raws = raws;
                     } else if (raws !== false && raws.length >= this.count) {
@@ -1132,7 +1130,7 @@ Vue.component('lah-user-message', {
                         }).then(res => {
                             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                 this.raws = res.data.raw
-                                this.setLocalCache("my-messeages", this.raws, 60000);   // 1 min
+                                this.setLocalCache(this.cache_key, this.raws, 60000);   // 1 min
                             } else {
                                 addNotification({
                                     title: "查詢信差訊息",
