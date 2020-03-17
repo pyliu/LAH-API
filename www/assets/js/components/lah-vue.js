@@ -648,7 +648,7 @@ Vue.component("lah-header", {
         <b-navbar v-if="show" toggleable="lg" type="dark" variant="dark" class="mb-3" fixed>
             <lah-fa-icon size="2x" variant="light" class="mr-1" :icon="icon"></lah-fa-icon>
             <b-navbar-brand :href="location.href" v-html="leading"></b-navbar-brand>
-            <b-navbar-toggle target="nav-collapse" class="mr-5"></b-navbar-toggle>
+            <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
             <b-collapse id="nav-collapse" is-nav>
                 <lah-transition appear>
                     <b-navbar-nav>
