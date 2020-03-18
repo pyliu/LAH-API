@@ -759,7 +759,7 @@ Vue.component("lah-header", {
                 await this.$store.dispatch('authenticate');
             }
             if (!this.active || (this.active.need_admin && !this.isAdmin)) {
-                $('body').html("<h5 class='text-center text-danger font-weight-bold m-5'>限制存取區域</h5>");
+                $('body').html("<h3 class='text-center m-5 font-weight-bold'><a href='javascript:history.back()' class='text-danger'>限制存取區域，請返回上一頁！</a></h3>");
             }
             $("#main_content_section").removeClass("hide");
         }
