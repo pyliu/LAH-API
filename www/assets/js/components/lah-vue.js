@@ -327,7 +327,7 @@ Vue.mixin({
         gerrorLen() { return this.$store.getters.errorLen; },
         gerrors() { return this.$store.getters.errors; },
         nowDatetime() {
-            // e.g. 2020-03-14 11:35 23
+            // e.g. 2020-03-14 11:35:23
             let now = new Date();
             return now.getFullYear() + "-" +
                 ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
