@@ -646,7 +646,7 @@ Vue.component("lah-alert", {
 Vue.component("lah-header", {
     template: `<lah-transition slide-down>
         <b-navbar v-if="show" toggleable="lg" type="dark" variant="dark" class="mb-3" fixed>
-            <lah-fa-icon size="2x" variant="light" class="mr-1" :icon="icon"></lah-fa-icon>
+            <lah-fa-icon size="2x" variant="light" class="mr-2" :icon="icon"></lah-fa-icon>
             <b-navbar-brand :href="location.href" v-html="leading"></b-navbar-brand>
             <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
             <b-collapse id="nav-collapse" is-nav>
@@ -654,21 +654,20 @@ Vue.component("lah-header", {
                     <b-navbar-nav>
                         <b-nav-item 
                             v-for="link in links"
-                            :class="[active(link)]"
                             v-show="link.need_admin ? isAdmin : true"
                             :href="Array.isArray(link.url) ? link.url[0] : link.url"
                         >
-                            <b-nav-text v-html="link.text"></b-nav-text>
+                            <b-nav-text v-html="link.text" :class="[active(link)]"></b-nav-text>
                         </b-nav-item>
                     </b-navbar-nav>
                 </lah-transition>
-                <b-nav-text style="position: fixed; right: 0;">
-                    <lah-fa-icon prefix="far" icon="user-circle" variant="light" id="header-user-icon" size="2x" class="mr-3"></lah-fa-icon>
+                <b-navbar-nav class="ml-auto">
+                    <lah-fa-icon prefix="far" icon="user-circle" variant="light" id="header-user-icon" size="2x"></lah-fa-icon>
                     <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
                         <lah-user-card :ip="myip" @not-found="userNotFound" class="mb-1" title="我的名片"></lah-user-card>
                         <lah-user-message :ip="myip" count="5" title="最新信差訊息" tabs="true" tabsEnd="true"></lah-user-message>
                     </b-popover>
-                </b-nav-text>
+                </b-navbar-nav>
             </b-collapse>
         </b-navbar>
     </lah-transition>`,
@@ -724,9 +723,9 @@ Vue.component("lah-header", {
     methods: {
         active: function(link) {
             let url = Array.isArray(link.url) ? link.url[0] : link.url;
-            let ret = location.href.indexOf(url) > 0 ? "hide" : "";
+            let ret = location.href.indexOf(url) > 0 ? "font-weight-bold text-white" : "";
             // check page authority here
-            if (ret === "hide" && link.need_admin && !this.isAdmin) {
+            if (!this.empty(ret) && link.need_admin && !this.isAdmin) {
                 this.error = "限制存取頁面！";
                 $("body").html(`<h1 class="text-center text-danger">限制存取網頁，請勿使用！</h1>`);
             }

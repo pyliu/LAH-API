@@ -363,10 +363,10 @@ if (Vue) {
         mounted() {
             if (this.is_in_modal_mode) {
                 // in modal dialog
-                this.height = window.innerHeight - 170 + "px";
+                this.height = window.innerHeight - 190 + "px";
                 this.small = true;
             } else {
-                this.height = window.innerHeight - 130 + "px";
+                this.height = window.innerHeight - 155 + "px";
             }
         },
         created() {
