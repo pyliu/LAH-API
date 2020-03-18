@@ -150,7 +150,8 @@ if (Vue) {
             is_overdue_mode() { return this.$store.getters['overdue_reg_cases/is_overdue_mode']; },
             is_in_modal_mode() { return !this.empty(this.inSearchID); },
             all_cases_mode() { return this.empty(this.reviewerID) && !this.is_in_modal_mode; },
-            table_items() { return this.is_in_modal_mode ? this.case_list_by_id[this.inSearchID] : this.case_list; }
+            table_items() { return this.is_in_modal_mode ? this.case_list_by_id[this.inSearchID] : this.case_list; },
+            cache_key() { return this.reviewerID + '-' + (this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases"); }
         },
         watch: {
             chartType: function (val) {
@@ -246,9 +247,8 @@ if (Vue) {
                 this.searchByReviewer(payload.label);
             },
             reload: async function () {
-                const key = this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases";
                 try {
-                    const succeed = await this.removeLocalCache(key);
+                    const succeed = await this.removeLocalCache(this.cache_key);
                     if (succeed) this.load();
                 } catch (err) {
                     console.error(err);
@@ -268,17 +268,16 @@ if (Vue) {
                     Vue.nexTick ? Vue.nexTick(this.makeCaseIDClickable) : setTimeout(this.makeCaseIDClickable, 800);
                 } else {
                     try {
-                        const key = this.reviewerID + '-' + (this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases");
-                        const jsonObj = await this.getLocalCache(key);
+                        const jsonObj = await this.getLocalCache(this.cache_key);
                         if (jsonObj === false) {
                             this.$http.post(CONFIG.JSON_API_EP, {
                                 type: this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases",
                                 reviewer_id: this.reviewerID
                             }).then(res => {
-                                this.setLocalCache(key, res.data, this.milliseconds - 5000);   // expired after 14 mins 55 secs
+                                this.setLocalCache(this.cache_key, res.data, this.milliseconds - 5000);   // expired after 14 mins 55 secs
                                 console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL || res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_NO_RECORD, `查詢登記案件(${this.title})回傳狀態碼有問題【${res.data.status}】`);
                                 if (res.data.status != XHR_STATUS_CODE.SUCCESS_NORMAL && res.data.status != XHR_STATUS_CODE.SUCCESS_WITH_NO_RECORD) {
-                                    this.removeLocalCache(key);
+                                    this.removeLocalCache(this.cache_key);
                                 }
                                 this.loaded(res.data);
                             }).catch(err => {
@@ -290,7 +289,7 @@ if (Vue) {
                         } else {
                             // cache hit!
                             this.loaded(jsonObj);
-                            const remaining_cache_time = await this.getLocalCacheExpireRemainingTime(key);
+                            const remaining_cache_time = await this.getLocalCacheExpireRemainingTime(this.cache_key);
                             this.setCountdown(remaining_cache_time + 5000);
                             this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date(+new Date() - this.milliseconds + remaining_cache_time - 5000)}`;
                             console.warn(`快取資料將在 ${(remaining_cache_time / 1000).toFixed(1)} 秒後到期。`);

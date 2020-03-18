@@ -687,7 +687,7 @@ Vue.component("lah-header", {
             need_admin: true
         }, {
             text: "監控修正",
-            url: "watchdog.php",
+            url: "watchdog.html",
             icon: "user-secret",
             need_admin: true
         }, {
