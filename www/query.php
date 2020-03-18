@@ -28,7 +28,7 @@ ksort($operators);
 <body>
 
   <section id="main_content_section" class="mb-5">
-    <div class="container-fluid">
+    <div class="container-fluid" v-cloak>
       
       <div class="row">
         <div id="case-reg-search" class="col-6">

@@ -135,3 +135,7 @@ blockquote {
 	pointer-events: none; /* disable user interaction */
 	user-select: none; /* disable user selection */
 }
+
+[v-cloak] {
+	display: none;
+}

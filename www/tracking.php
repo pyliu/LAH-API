@@ -41,11 +41,6 @@ table th {
   font-weight: bold;
 }
 
-.hamburger {
-  font-size: 24px;
-  font-weight: bold;
-}
-
 .filter-btn-group {
   float: right !important;
 }
