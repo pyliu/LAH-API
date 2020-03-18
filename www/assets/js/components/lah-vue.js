@@ -151,7 +151,7 @@ Vue.prototype.$store = (() => {
                         const set_ts = await localforage.getItem(`isAdmin_set_ts`);
                         const now_ts = +new Date();
                         // over 15 mins, re-authenticate ... otherwise skip the request
-                        if (isAdmin === null || !Number.isInteger(set_ts) || now_ts - set_ts > 900000) {
+                        if (isAdmin === undefined || !Number.isInteger(set_ts) || now_ts - set_ts > 900000) {
                             await axios.post(CONFIG.JSON_API_EP, {
                                 type: 'authentication'
                             }).then(res => {
@@ -263,7 +263,7 @@ Vue.mixin({
             computed: {
                 className() {
                     let prefix = this.prefix || 'fas';
-                    let icon = this.icon || 'ban';
+                    let icon = this.icon || 'exclamation-circle';
                     let variant = this.variant || 'danger';
                     let ld_movement = this.action || '';
                     let size = '';
@@ -311,10 +311,10 @@ Vue.mixin({
     },
     computed: {
         cache() { return this.$store.getters.cache; },
-        async isAdmin() {
+        isAdmin() {
             if (this.$store.getters.isAdmin === undefined) {
                 try {
-                    await this.$store.dispatch("authenticate");
+                    this.$store.dispatch("authenticate");
                 } catch (err) {
                     console.error(err);
                 }
@@ -645,7 +645,7 @@ Vue.component("lah-alert", {
 
 Vue.component("lah-header", {
     template: `<lah-transition slide-down>
-        <b-navbar v-if="show" toggleable="lg" type="dark" variant="dark" class="mb-3" fixed>
+        <b-navbar v-if="show" toggleable="md" type="dark" variant="dark" class="mb-3" fixed>
             <lah-fa-icon size="2x" variant="light" class="mr-2" :icon="icon"></lah-fa-icon>
             <b-navbar-brand :href="location.href" v-html="leading"></b-navbar-brand>
             <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
@@ -654,7 +654,7 @@ Vue.component("lah-header", {
                     <b-navbar-nav>
                         <b-nav-item 
                             v-for="link in links"
-                            v-show="link.need_admin ? isAdmin : true"
+                            v-if="adminCheck(link)"
                             :href="Array.isArray(link.url) ? link.url[0] : link.url"
                         >
                             <b-nav-text v-html="link.text" :class="[active(link)]"></b-nav-text>
@@ -730,6 +730,9 @@ Vue.component("lah-header", {
                 $("body").html(`<h1 class="text-center text-danger">限制存取網頁，請勿使用！</h1>`);
             }
             return ret;
+        },
+        adminCheck: function(link) {
+            return link.need_admin ? this.isAdmin : true;
         },
         setHeader: function(link) {
             if (Array.isArray(link.url)) {
@@ -1056,8 +1059,8 @@ Vue.component("lah-user-card", {
 
 Vue.component('lah-user-message', {
     template: `<div>
-        <h6 v-show="!empty(title)"><i class="fas fa-angle-double-right"></i> {{title}} <b-form-spinbutton v-if="enable_spinbutton" v-model="count" min="1" size="sm" inline></b-form-spinbutton></h6>
-        <b-card-group v-if="ready" :columns="columns" :deck="!columns">
+        <h6 v-show="!empty(title)"><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> {{title}} <b-form-spinbutton v-if="enable_spinbutton" v-model="count" min="1" size="sm" inline></b-form-spinbutton></h6>
+        <b-card-group ref="group" v-if="ready" :columns="columns" :deck="!columns">
             <b-card no-body v-if="useTabs">
                 <b-tabs card :end="endTabs" :pills="endTabs" align="center" small>
                     <b-tab v-for="(message, index) in raws" :title="index+1">
