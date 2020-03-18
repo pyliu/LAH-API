@@ -761,6 +761,7 @@ Vue.component("lah-header", {
             if (!this.active || (this.active.need_admin && !this.isAdmin)) {
                 $('body').html("<h5 class='text-center text-danger font-weight-bold m-5'>限制存取區域</h5>");
             }
+            $("#main_content_section").removeClass("hide");
         }
     },
     async created() {
