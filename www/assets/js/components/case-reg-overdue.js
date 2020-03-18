@@ -45,7 +45,6 @@ if (Vue) {
                     no-border-collapse
                     :small="small"
                     :caption="caption"
-                    :sticky-header="height"
                     :items="table_items"
                     :fields="fields"
                     :busy="isBusy"
