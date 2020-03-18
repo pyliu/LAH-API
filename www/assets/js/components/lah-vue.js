@@ -151,7 +151,7 @@ Vue.prototype.$store = (() => {
                         const set_ts = await localforage.getItem(`isAdmin_set_ts`);
                         const now_ts = +new Date();
                         // over 15 mins, re-authenticate ... otherwise skip the request
-                        if (isAdmin === undefined || !Number.isInteger(set_ts) || now_ts - set_ts > 900000) {
+                        if (isAdmin === null || !Number.isInteger(set_ts) || now_ts - set_ts > 900000) {
                             await axios.post(CONFIG.JSON_API_EP, {
                                 type: 'authentication'
                             }).then(res => {
@@ -312,13 +312,6 @@ Vue.mixin({
     computed: {
         cache() { return this.$store.getters.cache; },
         isAdmin() {
-            if (this.$store.getters.isAdmin === undefined) {
-                try {
-                    this.$store.dispatch("authenticate");
-                } catch (err) {
-                    console.error(err);
-                }
-            }
             return this.$store.getters.isAdmin;
         },
         userNames() {
@@ -654,10 +647,10 @@ Vue.component("lah-header", {
                     <b-navbar-nav>
                         <b-nav-item 
                             v-for="link in links"
-                            v-if="adminCheck(link)"
+                            v-show="link.need_admin ? isAdmin || false : true"
                             :href="Array.isArray(link.url) ? link.url[0] : link.url"
                         >
-                            <b-nav-text v-html="link.text" :class="[active(link)]"></b-nav-text>
+                            <b-nav-text v-html="link.text" :class="activeCss(link)"></b-nav-text>
                         </b-nav-item>
                     </b-navbar-nav>
                 </lah-transition>
@@ -673,8 +666,10 @@ Vue.component("lah-header", {
     </lah-transition>`,
     data: () => { return {
         show: true,
-        icon: "fa-question",
+        icon: "question",
         leading: "",
+        active_link: undefined,
+        basename: new URL(location.href).pathname.substring(1),
         links: [{
             text: `管理儀錶板`,
             url: ["index.html", "/"],
@@ -721,18 +716,26 @@ Vue.component("lah-header", {
         enableUserCardPopover() { return !this.empty(this.myip) }
     },
     methods: {
-        active: function(link) {
-            let url = Array.isArray(link.url) ? link.url[0] : link.url;
-            let ret = location.href.indexOf(url) > 0 ? "font-weight-bold text-white" : "";
-            // check page authority here
-            if (!this.empty(ret) && link.need_admin && !this.isAdmin) {
-                this.error = "限制存取頁面！";
-                $("body").html(`<h1 class="text-center text-danger">限制存取網頁，請勿使用！</h1>`);
+        activeCss: function(link) {
+            let ret = "";
+            if (Array.isArray(link.url)) {
+                for (let i = 0; i < link.url.length; i++) {
+                    ret = this.css(link.url[i]);
+                    if (!this.empty(ret)) break;
+                }
+            } else {
+                ret = this.css(link.url);
             }
+            // store detected active link
+            if (!this.empty(ret)) { this.active_link = link }
+            
             return ret;
         },
-        adminCheck: function(link) {
-            return link.need_admin ? this.isAdmin : true;
+        css: function(url) {
+            if (this.basename == url) {
+                return "font-weight-bold text-white";
+            }
+            return "";
         },
         setHeader: function(link) {
             if (Array.isArray(link.url)) {
@@ -750,12 +753,19 @@ Vue.component("lah-header", {
         userNotFound: function(input) {
             this.$store.commit('myip', null);
             console.warn(`找不到 ${input} 的使用者資訊，無法顯示目前使用者的卡片。`);
+        },
+        checkAuthority: async function() {
+            if (this.isAdmin === undefined) {
+                await this.$store.dispatch('authenticate');
+            }
+            if (!this.active_link || (this.active_link.need_admin && !this.isAdmin)) {
+                $('body').html("<h5 class='text-center text-danger font-weight-bold m-5'>限制存取區域</h5>");
+            }
         }
     },
     async created() {
         try {
             let myip = await this.getLocalCache('myip');
-            let admin = await this.isAdmin;
             if (this.empty(myip)) {
                 await this.$http.post(CONFIG.JSON_API_EP, {
                     type: 'ip'
@@ -775,6 +785,7 @@ Vue.component("lah-header", {
         this.links.forEach(this.setHeader);
         // add pulse effect for the nav-item
         $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
+        this.checkAuthority();
     }
 });
 
