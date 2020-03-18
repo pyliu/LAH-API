@@ -667,9 +667,9 @@ Vue.component("lah-header", {
     data: () => { return {
         show: true,
         icon: "question",
-        leading: "",
-        active_link: undefined,
-        basename: new URL(location.href).pathname.substring(1),
+        leading: "Unknown",
+        active: undefined,
+        url: new URL(location.href).pathname.substring(1),
         links: [{
             text: `管理儀錶板`,
             url: ["index.html", "/"],
@@ -727,12 +727,12 @@ Vue.component("lah-header", {
                 ret = this.css(link.url);
             }
             // store detected active link
-            if (!this.empty(ret)) { this.active_link = link }
+            if (!this.empty(ret)) { this.active = link }
             
             return ret;
         },
         css: function(url) {
-            if (this.basename == url) {
+            if (this.url == url) {
                 return "font-weight-bold text-white";
             }
             return "";
@@ -740,12 +740,12 @@ Vue.component("lah-header", {
         setLeading: function(link) {
             if (Array.isArray(link.url)) {
                 link.url.forEach((this_url, idx) => {
-                    if (this.basename == this_url) {
+                    if (this.url == this_url) {
                         this.icon = link.icon;
                         this.leading = link.text;
                     }
                 });
-            } else if (this.basename == link.url) {
+            } else if (this.url == link.url) {
                 this.icon = link.icon;
                 this.leading = link.text;
             }
@@ -758,7 +758,7 @@ Vue.component("lah-header", {
             if (this.isAdmin === undefined) {
                 await this.$store.dispatch('authenticate');
             }
-            if (!this.active_link || (this.active_link.need_admin && !this.isAdmin)) {
+            if (!this.active || (this.active.need_admin && !this.isAdmin)) {
                 $('body').html("<h5 class='text-center text-danger font-weight-bold m-5'>限制存取區域</h5>");
             }
         }
