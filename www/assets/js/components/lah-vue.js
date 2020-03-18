@@ -737,15 +737,15 @@ Vue.component("lah-header", {
             }
             return "";
         },
-        setHeader: function(link) {
+        setLeading: function(link) {
             if (Array.isArray(link.url)) {
                 link.url.forEach((this_url, idx) => {
-                    if (location.href.indexOf(this_url) > 0) {
+                    if (this.basename == this_url) {
                         this.icon = link.icon;
                         this.leading = link.text;
                     }
                 });
-            } else if (location.href.indexOf(link.url) > 0) {
+            } else if (this.basename == link.url) {
                 this.icon = link.icon;
                 this.leading = link.text;
             }
@@ -782,7 +782,7 @@ Vue.component("lah-header", {
         }
     },
     mounted() {
-        this.links.forEach(this.setHeader);
+        this.links.forEach(this.setLeading);
         // add pulse effect for the nav-item
         $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
         this.checkAuthority();
