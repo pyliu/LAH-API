@@ -638,7 +638,7 @@ Vue.component("lah-alert", {
 
 Vue.component("lah-header", {
     template: `<lah-transition slide-down>
-        <b-navbar v-if="show" toggleable="md" type="dark" variant="dark" class="mb-3" fixed>
+        <b-navbar v-if="show" toggleable="md" type="dark" variant="dark" class="mb-3" fixed="top">
             <lah-fa-icon size="2x" variant="light" class="mr-2" :icon="icon"></lah-fa-icon>
             <b-navbar-brand :href="location.href" v-html="leading"></b-navbar-brand>
             <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
