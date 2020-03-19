@@ -82,7 +82,7 @@ canvas {
 </head>
 
 <body id="html_body">
-  <section id="main_content_section" class="mb-5">
+  <section id="main_content_section">
     <form id="search_form" class="form-inline mr-5 my-3" style="right: 15px; top: 0px;position: absolute; z-index: 9999;" onsubmit="return false">
       <label class="text-white" for="date_input">日期：</label>
       <input id="date_input" class="date_picker form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" value="<?php echo RegCaseData::toDate($qday); ?>" readonly />

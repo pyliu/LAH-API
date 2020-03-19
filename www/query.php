@@ -27,7 +27,7 @@ ksort($operators);
 
 <body>
 
-  <section id="main_content_section" class="mb-5 hide">
+  <section id="main_content_section" class="hide">
     <div class="container-fluid" v-cloak>
       
       <div class="row">
