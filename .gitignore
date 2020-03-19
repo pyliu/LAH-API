@@ -4,5 +4,4 @@ Config.inc.php
 node_modules
 logs
 *.log
-stats
-stats/*
+*.cache

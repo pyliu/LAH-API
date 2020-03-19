@@ -8,6 +8,7 @@ require_once(ROOT_DIR."/include/Message.class.php");
 require_once(ROOT_DIR."/include/WatchDog.class.php");
 require_once(ROOT_DIR."/include/UserInfo.class.php");
 require_once(ROOT_DIR."/include/Stats.class.php");
+require_once(ROOT_DIR."/include/Cache.class.php");
 
 require_once(ROOT_DIR."/include/api/JSONAPICommandFactory.class.php");
 
@@ -21,10 +22,14 @@ function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 
 $query = new Query();
 
+$cache = new Cache();
+$mock = false;
+
 switch ($_POST["type"]) {
 	case "stats_overdue_msg_total":
 		$stats = new Stats();
-		$total = $stats->getTotal('overdue_msg_count');
+		$total = $mock ? $cache->get('overdue_msg_count') : $stats->getTotal('overdue_msg_count');
+		if(!$mock) $cache->set('overdue_msg_count', $total);
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
 			"data_count" => 1,
@@ -33,7 +38,8 @@ switch ($_POST["type"]) {
 		), 0);
 		break;
 	case "user_mapping":
-		$operators = GetDBUserMapping();
+		$operators = $mock ? $cache->get('user_mapping') : GetDBUserMapping();
+		if(!$mock) $cache->set('user_mapping', $operators);
 		$count = count($operators);
 		$log->info("XHR [user_mapping] 取得使用者對應表($count)。");
 		echo json_encode(array(
@@ -76,7 +82,8 @@ switch ($_POST["type"]) {
 	case "overdue_reg_cases":
 		$log->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
 		$log->info("XHR [overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");
-		$rows = $query->queryOverdueCasesIn15Days($_POST["reviewer_id"]);
+		$rows = $mock ? $cache->get('overdue_reg_cases') : $query->queryOverdueCasesIn15Days($_POST["reviewer_id"]);
+		if(!$mock) $cache->set('overdue_msg_count', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [overdue_reg_cases] 近15天查無逾期資料");
 			$result = array(
@@ -118,7 +125,8 @@ switch ($_POST["type"]) {
 	case "almost_overdue_reg_cases":
 		$log->info("XHR [almost_overdue_reg_cases] 即將逾期案件查詢請求");
 		$log->info("XHR [almost_overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");
-		$rows = $query->queryAlmostOverdueCases($_POST["reviewer_id"]);
+		$rows = $mock ? $cache->get('almost_overdue_reg_cases') : $query->queryAlmostOverdueCases($_POST["reviewer_id"]);
+		if (!$mock) $cache->set('almost_overdue_reg_cases', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [almost_overdue_reg_cases] 近4小時內查無即將逾期資料");
 			$result = array(
@@ -182,7 +190,8 @@ switch ($_POST["type"]) {
 		break;
 	case "xcase-check":
 		$log->info("XHR [xcase-check] 查詢跨所註記遺失請求");
-		$query_result = $query->getProblematicCrossCases();
+		$query_result = $mock ? $cache->get('xcase-check') : $query->getProblematicCrossCases();
+		if (!$mock) $cache->set('xcase-check', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [xcase-check] 查無資料");
 			echoErrorJSONString();
@@ -216,7 +225,8 @@ switch ($_POST["type"]) {
 		break;
 	case "fix_xcase":
 		$log->info("XHR [fix_xcase] 修正跨所註記遺失【".$_POST["id"]."】請求");
-		$result_flag = $query->fixProblematicCrossCases($_POST["id"]);
+		$result_flag = $mock ? $cache->get('fix_xcase') : $query->fixProblematicCrossCases($_POST["id"]);
+		if (!$mock) $cache->set('fix_xcase', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -233,7 +243,8 @@ switch ($_POST["type"]) {
 		$log->info("XHR [max] 查詢案件最大號【".$_POST["year"].", ".$_POST["code"]."】請求");
 		$year = $_POST["year"];
 		$code = $_POST["code"];
-		$max_num = $query->getMaxNumByYearWord($year, $code);
+		$max_num = $mock ? $cache->get('max') : $query->getMaxNumByYearWord($year, $code);
+		if (!$mock) $cache->set('max', $max_num);
 		$log->info("XHR [max] 查詢成功【查詢 ${year}-${code} 回傳值為 ${max_num}");
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -243,7 +254,8 @@ switch ($_POST["type"]) {
 		break;
 	case "ralid":
 		$log->info("XHR [ralid] 查詢土地標示部資料【".$_POST["text"]."】請求");
-		$query_result = $query->getSectionRALIDCount($_POST["text"]);
+		$query_result = $mock ? $cache->get('ralid') : $query->getSectionRALIDCount($_POST["text"]);
+		if (!$mock) $cache->set('ralid', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [ralid] 查無資料");
 			echoErrorJSONString();
@@ -260,7 +272,8 @@ switch ($_POST["type"]) {
 		break;
 	case "crsms":
 		$log->info("XHR [crsms] 查詢登記案件資料【".$_POST["id"]."】請求");
-		$query_result = $query->getCRSMSCasesByPID($_POST["id"]);
+		$query_result = $mock ? $cache->get('crsms') : $query->getCRSMSCasesByPID($_POST["id"]);
+		if (!$mock) $cache->set('crsms', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [crsms] 查無資料");
 			echoErrorJSONString();
@@ -277,7 +290,8 @@ switch ($_POST["type"]) {
 		break;
 	case "cmsms":
 		$log->info("XHR [cmsms] 查詢測量案件資料【".$_POST["id"]."】請求");
-		$query_result = $query->getCMSMSCasesByPID($_POST["id"]);
+		$query_result = $mock ? $cache->get('cmsms') : $query->getCMSMSCasesByPID($_POST["id"]);
+		if (!$mock) $cache->set('cmsms', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [cmsms] 查無資料");
 			echoErrorJSONString();
