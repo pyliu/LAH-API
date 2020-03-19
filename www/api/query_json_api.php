@@ -52,7 +52,7 @@ switch ($_POST["type"]) {
 		break;
 	case "authentication":
 		// $client_ip is from init.php
-		if (in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
+		if ($mock || in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
 			$msg = $client_ip." 通過管理者認證。";
 			$log->info("XHR [authentication] ".$msg);
 			echo json_encode(array(
