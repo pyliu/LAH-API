@@ -128,8 +128,7 @@ class OraDB {
         $this->MAIN_DB = SYSTEM_CONFIG["ORA_DB_MAIN"];
         $this->user = SYSTEM_CONFIG["ORA_DB_USER"];
         $this->pass = SYSTEM_CONFIG["ORA_DB_PASS"];
-
-        $this->connect(CONNECTION_TYPE::MAIN);
+        if (!SYSTEM_CONFIG["MOCK_MODE"]) $this->connect(CONNECTION_TYPE::MAIN);
     }
 
     function __destruct() {
