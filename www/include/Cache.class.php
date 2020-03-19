@@ -9,11 +9,17 @@ class Cache {
     function __destruct() { }
     
     public function set($key, $val) {
-        return file_put_contents(CACHE_ROOT_DIR.DIRECTORY_SEPARATOR.$key.".cache", serialize($val));
+        if (!SYSTEM_CONFIG["MOCK_MODE"]) {
+            return file_put_contents(CACHE_ROOT_DIR.DIRECTORY_SEPARATOR.$key.".cache", serialize($val));
+        }
+        return false;
     }
 
     public function get($key) {
-        return unserialize(file_get_contents(CACHE_ROOT_DIR.DIRECTORY_SEPARATOR.$key.".cache"));
+        if (SYSTEM_CONFIG["MOCK_MODE"]) {
+            return unserialize(file_get_contents(CACHE_ROOT_DIR.DIRECTORY_SEPARATOR.$key.".cache"));
+        }
+        return false;
     }
 }
 ?>
