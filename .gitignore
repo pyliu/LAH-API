@@ -2,6 +2,5 @@ sync.ffs_db
 Config.inc.php
 .vscode
 node_modules
-logs
 *.log
 *.cache
