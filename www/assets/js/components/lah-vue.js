@@ -1090,9 +1090,10 @@ Vue.component('lah-user-message', {
                 :border-variant="border(index)"
             >
                 <b-card-title title-tag="h5">
-                    <i v-if="index == 0" class="fas fa-eye"></i>
-                    <i v-else-if="index == 1" class="far fa-eye"></i>
-                    <span v-else> {{index+1}}.</span> {{message['xname']}}
+                    <lah-fa-icon v-if="index == 0" icon="eye"></lah-fa-icon>
+                    <lah-fa-icon v-else-if="index == 1" icon="eye" variant="primary" prefix="far"></lah-fa-icon>
+                    <strong v-else> {{index+1}}.</strong>
+                    {{message['xname']}}
                 </b-card-title>
                 <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
                 <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
