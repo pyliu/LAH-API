@@ -16,10 +16,7 @@ class Cache {
     }
 
     public function get($key) {
-        if (SYSTEM_CONFIG["MOCK_MODE"]) {
-            return unserialize(file_get_contents(CACHE_ROOT_DIR.DIRECTORY_SEPARATOR.$key.".cache"));
-        }
-        return false;
+        return unserialize(file_get_contents(CACHE_ROOT_DIR.DIRECTORY_SEPARATOR.$key.".cache"));
     }
 }
 ?>
