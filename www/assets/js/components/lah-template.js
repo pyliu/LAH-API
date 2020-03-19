@@ -4,6 +4,7 @@ if (Vue) {
         data: () => { return {
             
         } },
+        computed: {},
         methods: {},
         created() {},
         mounted() {}
