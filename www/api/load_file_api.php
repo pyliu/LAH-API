@@ -18,10 +18,12 @@ switch ($_POST["type"]) {
     case "load_select_sql":
         $log->info("XHR [load_select_sql] 查詢請求【".$_POST["file_name"]."】");
         $path = ROOT_DIR."/assets/files/".$_POST["file_name"];
+        $content = $mock ? $cache->get('load_select_sql') : file_get_contents($path);
+        $cache->set('load_select_sql', $content);
         if (file_exists($path)) {
             $result = array(
                 "status" => STATUS_CODE::SUCCESS_NORMAL,
-                "data" => file_get_contents($path),
+                "data" => $content,
                 "query_string" => "file_name=".$_POST["file_name"]."&type=".$_POST["type"]
             );
             $log->info("XHR [load_select_sql] 讀取成功【".$path."】");

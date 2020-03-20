@@ -1182,7 +1182,7 @@ $(document).ready(() => {
         <lah-footer ref="footer"></lah-footer>
         <lah-alert ref="alert"></lah-alert>
     </div>`);
-    let target = $("#main_content_section");
+    let target = $("body section:first-child");
     if (target.length == 0) {
         $("body").prepend(dynamic_comps);
         window.dynaApp = new Vue({ el: "#global-dynamic-components" });
@@ -1192,7 +1192,7 @@ $(document).ready(() => {
     
     // main app for whole page, use window.vueApp to get it
     window.vueApp = new Vue({
-        el: "#main_content_section",
+        el: target[0],
         data: {
             toastCounter: 0,
             openConfirm: false,
