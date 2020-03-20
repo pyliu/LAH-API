@@ -1,6 +1,6 @@
 if (Vue) {
     Vue.component('lah-reg-table', {
-        template: `<lah-transition slide-down>
+        template: `<lah-transition appear slide-down>
             <b-table
                 ref="reg_case_tbl"
                 striped
@@ -12,11 +12,15 @@ if (Vue) {
                 sticky-header
                 head-variant="dark"
                 caption-top
-                :caption="'登記案件找到 ' + json.raw.length + '件'"
-                :items="rawData"
+                :caption="caption"
+                :items="data"
                 :fields="fields"
                 class="text-center"
+                :busy="!data"
             >
+                <template v-slot:table-busy>
+                    <b-spinner class="align-middle" variant="info" small label="讀取中..."></b-spinner>
+                </template>
                 <template v-slot:cell(序號)="data">
                     {{data.index + 1}}
                 </template>
@@ -28,7 +32,7 @@ if (Vue) {
                 </template>
             </b-table>
         </lah-transition>`,
-        props: ['rawData'],
+        props: ['data'],
         data: () => { return {
             sm_fields: [
                 '序號',
@@ -53,6 +57,13 @@ if (Vue) {
                     default:
                         return this.sm_fields;
                 }
+            },
+            count() { return this.data ? this.data.length : 0 },
+            caption() { return this.data ? '登記案件找到 ' + this.count + '件' : '讀取中' }
+        },
+        watch: {
+            data: function(nVal, oVal) {
+                //this.$log(nVal, oVal);
             }
         },
         methods: {},
