@@ -13,26 +13,26 @@ if (Vue) {
                 head-variant="dark"
                 caption-top
                 :caption="caption"
-                :items="data"
+                :items="rawdata"
                 :fields="fields"
                 class="text-center"
-                :busy="!data"
+                :busy="!rawdata"
             >
                 <template v-slot:table-busy>
-                    <b-spinner class="align-middle" variant="info" small label="讀取中..."></b-spinner>
+                    <b-spinner class="align-middle" variant="danger" small label="讀取中..."></b-spinner>
                 </template>
                 <template v-slot:cell(序號)="data">
                     {{data.index + 1}}
                 </template>
                 <template v-slot:cell(RM01)="data">
-                    <span class="reg_case_id">{{data.item["RM01"] + "-" + data.item["RM02"] + "-" +  data.item["RM03"]}}</span>
+                    <a href="javascript:void(0)" @click="fetch(data.item)">{{data.item["RM01"] + "-" + data.item["RM02"] + "-" +  data.item["RM03"]}}</a>
                 </template>
                 <template v-slot:cell(RM09)="data">
                     {{data.item["RM09"] + ":" + data.item["RM09_CHT"]}}</span>
                 </template>
             </b-table>
         </lah-transition>`,
-        props: ['data'],
+        props: ['rawdata'],
         data: () => { return {
             sm_fields: [
                 '序號',
@@ -58,15 +58,36 @@ if (Vue) {
                         return this.sm_fields;
                 }
             },
-            count() { return this.data ? this.data.length : 0 },
-            caption() { return this.data ? '登記案件找到 ' + this.count + '件' : '讀取中' }
+            count() { return this.rawdata ? this.rawdata.length : 0 },
+            caption() { return this.rawdata ? '登記案件找到 ' + this.count + '件' : '讀取中' }
         },
         watch: {
-            data: function(nVal, oVal) {
+            rawdata: function(nVal, oVal) {
                 //this.$log(nVal, oVal);
             }
         },
-        methods: {},
+        methods: {
+            fetch(data) {
+                let id = `${data["RM01"]}${data["RM02"]}${data["RM03"]}`;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "reg_case",
+                    id: id
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                        showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
+                        return;
+                    } else {
+                        showModal({
+                            message: this.$createElement("case-reg-detail", { props: { jsonObj: res.data } }),
+                            title: "登記案件詳情",
+                            size: "lg"
+                        });
+                    }
+                }).catch(err => {
+                    this.error = err;
+                });
+            }
+        },
         created() {},
         mounted() {}
     });

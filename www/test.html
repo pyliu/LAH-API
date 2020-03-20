@@ -21,62 +21,8 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-      <lah-user-message></lah-user-message>
-      <b-button-close></b-button-close>
+      <lah-reg-table :rawdata="settings['rawdata']"></lah-reg-table>
       <lah-user-card id="HB0541"></lah-user-card>
-      <b-card-group columns class="mb-1"><!--
-        <b-card no-body class="border-0" v-for="n in 2">
-          <template v-slot:header>
-            <b-nav card-header tabs>
-              <b-nav-item active>Active</b-nav-item>
-              <b-nav-item>Inactive</b-nav-item>
-              <b-nav-item disabled>Disabled</b-nav-item>
-            </b-nav>
-          </template>
-          <fee-query-board></fee-query-board>
-          <announcement-mgt></announcement-mgt>
-        </b-card>
-        
-        <b-card
-          header="featured"
-          header-tag="header"
-          footer="Card Footer"
-          footer-tag="footer"
-          title="Title"
-        >
-          <b-card-text>Header and footers using props.</b-card-text>
-          <b-button href="#" variant="primary">Go somewhere</b-button>
-        </b-card>
-    
-        <b-card title="Title" header-tag="header" footer-tag="footer"  v-for="item in 5">
-          <template v-slot:header>
-            <h6 class="mb-0">Header Slot</h6>
-          </template>
-          <b-card-text>Header and footers using slots.</b-card-text>
-          <b-button href="#" variant="primary">Go somewhere</b-button>
-          <template v-slot:footer>
-            <em>Footer Slot</em>
-          </template>
-        </b-card>
-        <b-card
-          title="Card Title"
-          img-alt="Image"
-          img-top
-          tag="article"
-          style="max-width: 20rem;"
-          class="mb-2"
-          img-src="assets/img/zhongli_logo.png"
-          overlay
-          img-alt="Card Image"
-          text-variant="light"
-          bg-variant="dark"
-          title="Image Overlay"
-          sub-title="Subtitle"
-        >
-          <template v-slot:header><h6>This is a title</h6></template>
-        </b-card>
-        -->
-      </b-card-group>
       <b-card-group deck>
         <b-card v-for="n in 5"
           header="featured"
@@ -109,12 +55,26 @@
   <script src="assets/js/components/xcase-check.js"></script>
   <script src="assets/js/components/easycard-payment-check.js"></script>
   <script src="assets/js/components/announcement-mgt.js"></script>
+  <script src="assets/js/components/lah-reg-table.js"></script>
   <script src="assets/js/Chart.min.js"></script>
+  <script src="assets/js/components/case-reg-detail.js"></script>
 
 
   <script type="text/javascript">
     
     $(document).ready(e => {
+      vueApp.setSetting('rawdata', undefined);
+
+      axios.post(
+          CONFIG.JSON_API_EP,
+          { type: 'crsms', id: 'A123456789' }
+      ).then(response => {
+          // on success
+          vueApp.setSetting('rawdata', response.data.raw);
+      }).catch(error => {
+          console.log(error);
+      }).finally(() => {});
+
       let json1, json2;
       axios.all([
         axios.get('assets/js/mocks/case_count_by_reason.json'),
