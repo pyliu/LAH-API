@@ -11,29 +11,33 @@ if (Vue) {
                 small
                 head-variant="dark"
                 caption-top
+                class="text-center"
                 :sticky-header="sticky"
                 :caption="caption"
                 :items="rawdata"
                 :fields="fields"
-                class="text-center"
                 :style="style"
                 :busy="!rawdata"
             >
                 <template v-slot:table-busy>
                     <b-spinner class="align-middle" variant="danger" type="grow" small label="讀取中..."></b-spinner>
                 </template>
-                <template v-slot:cell(序號)="data">
-                    {{data.index + 1}}
+
+                <template v-slot:cell(序號)="row">
+                    {{row.index + 1}}
                 </template>
-                <template v-slot:cell(RM01)="data">
-                    <a href="javascript:void(0)" @click="fetch(data.item)">{{data.item["RM01"] + "-" + data.item["RM02"] + "-" +  data.item["RM03"]}}</a>
+
+                <template v-slot:cell(RM01)="row">
+                    <lah-fa-icon :icon="icon" :variant="iconVariant" v-if='icon'></lah-fa-icon>
+                    <a href="javascript:void(0)" @click="fetch(row.item)">{{row.item["RM01"] + "-" + row.item["RM02"] + "-" +  row.item["RM03"]}}</a>
                 </template>
-                <template v-slot:cell(RM09)="data">
-                    {{data.item["RM09"] + ":" + data.item["RM09_CHT"]}}</span>
+
+                <template v-slot:cell(RM09)="row">
+                    {{row.item["RM09"] + ":" + row.item["RM09_CHT"]}}</span>
                 </template>
             </b-table>
         </lah-transition>`,
-        props: ['rawdata', 'maxHeight'],
+        props: ['rawdata', 'maxHeight', 'icon', 'iconVariant'],
         data: () => { return {
             sm_fields: [
                 '序號',
