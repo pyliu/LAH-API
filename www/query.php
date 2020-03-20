@@ -27,7 +27,7 @@ ksort($operators);
 
 <body>
 
-  <section id="main_content_section" class="hide">
+  <section class="hide">
     <div class="container-fluid" v-cloak>
       
       <div class="row">
@@ -243,6 +243,7 @@ ksort($operators);
   <script src="assets/js/components/case-sur-mgt.js"></script>
   <script src="assets/js/components/case-reg-search.js"></script>
   <script src="assets/js/components/case-query-by-pid.js"></script>
+  <script src="assets/js/components/lah-reg-table.js"></script>
 
   <script type="text/javascript">
     // place this variable in global to use this int for condition jufgement, e.g. 108

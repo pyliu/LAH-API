@@ -761,7 +761,7 @@ Vue.component("lah-header", {
             if (!this.active || (this.active.need_admin && !this.isAdmin)) {
                 $('body').html("<h3 class='text-center m-5 font-weight-bold'><a href='javascript:history.back()' class='text-danger'>限制存取區域，請返回上一頁！</a></h3>");
             }
-            $("#main_content_section").removeClass("hide");
+            $("body section:first-child").removeClass("hide");
         }
     },
     async created() {
@@ -1077,6 +1077,8 @@ Vue.component('lah-user-message', {
                 <b-tabs card :end="endTabs" :pills="endTabs" align="center" small>
                     <b-tab v-for="(message, index) in raws" :title="index+1">
                         <b-card-title title-tag="h6">
+                            <lah-fa-icon v-if="message['done'] == 1" icon="eye" variant="muted" title="已看過"></lah-fa-icon>
+                            <lah-fa-icon v-else icon="eye-slash" title="還沒看過！"></lah-fa-icon>
                             {{message['xname']}}
                         </b-card-title>
                         <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
@@ -1092,7 +1094,10 @@ Vue.component('lah-user-message', {
                 <b-card-title title-tag="h5">
                     <lah-fa-icon v-if="index == 0" icon="eye"></lah-fa-icon>
                     <lah-fa-icon v-else-if="index == 1" icon="eye" variant="primary" prefix="far"></lah-fa-icon>
-                    <strong v-else> {{index+1}}.</strong>
+                    <strong v-else>
+                        <lah-fa-icon v-if="message['done'] != 1" icon="eye-slash" title="還沒看過！"></lah-fa-icon>
+                        {{index+1}}.
+                    </strong>
                     {{message['xname']}}
                 </b-card-title>
                 <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
@@ -1182,7 +1187,7 @@ $(document).ready(() => {
         <lah-footer ref="footer"></lah-footer>
         <lah-alert ref="alert"></lah-alert>
     </div>`);
-    let target = $("#main_content_section");
+    let target = $("body section:first-child");
     if (target.length == 0) {
         $("body").prepend(dynamic_comps);
         window.dynaApp = new Vue({ el: "#global-dynamic-components" });
@@ -1192,7 +1197,7 @@ $(document).ready(() => {
     
     // main app for whole page, use window.vueApp to get it
     window.vueApp = new Vue({
-        el: "#main_content_section",
+        el: target[0],  // jQuery always return array of elements
         data: {
             toastCounter: 0,
             openConfirm: false,
