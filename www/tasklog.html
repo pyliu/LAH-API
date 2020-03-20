@@ -19,7 +19,7 @@
 </head>
 
 <body>
-  <section id="tasklog" class="hide">
+  <section id="main_content_section" class="hide">
     <div class="container-fluid" v-cloak>
       <tasklog ref="tasklog"></tasklog>
     </div>
@@ -46,7 +46,6 @@
   
   <script type="text/javascript">
     $(document).ready(e => {
-        window.tasklogVue = new Vue({ el: "#tasklog" });
         // refresh the page at tomorrow 08:00
         var now = new Date();
         var today = now.getFullYear() + "-" +
