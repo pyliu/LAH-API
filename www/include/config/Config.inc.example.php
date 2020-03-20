@@ -5,6 +5,7 @@ const SYSTEM_CONFIG = array(
         "xxx.xxx.xxx.xxx",
         "::1"
     ),
+    "USER_PHOTO_FOLDER" => '\\\\xxx.xxx.xxx.xxx\\Pho\\',
     "MOCK_MODE" => false,
     // bureau
     "ORA_DB_L3HWEB" => "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=xxx.xxx.xxx.xxx)(PORT=xxxx)))(CONNECT_DATA=(SERVICE_NAME=XXXXX)))",

@@ -1,9 +1,13 @@
 <?php
-$full_path = '\\\\220.1.35.24\\Pho\\'.$_REQUEST["name"].'.jpg';
+require_once("./include/init.php");
+$full_path = SYSTEM_CONFIG["USER_PHOTO_FOLDER"].$_REQUEST["name"].'.jpg';
 if (!file_exists($full_path)) {
-    $full_path = '\\\\220.1.35.24\\Pho\\'.$_REQUEST["name"].'-1.jpg';
+    $full_path = SYSTEM_CONFIG["USER_PHOTO_FOLDER"].$_REQUEST["name"].'-1.jpg';
     if (!file_exists($full_path)) {
-        $full_path = 'assets\\img\\not_found.jpg';
+        $full_path = SYSTEM_CONFIG["USER_PHOTO_FOLDER"].$_REQUEST["id"].'.jpg';
+        if (!file_exists($full_path)) {
+            $full_path = 'assets\\img\\not_found.jpg';
+        }
     }
 }
 $finfo = finfo_open(FILEINFO_MIME_TYPE);
