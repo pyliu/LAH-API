@@ -2,7 +2,7 @@
 require_once("config/Config.inc.php");
 
 function GetDBUserMapping($refresh = false) {
-    if (SYSTEM_CONFIG["MOCK_MODE"] === true) return array();
+    if (SYSTEM_CONFIG["MOCK_MODE"] === true) return array("HB0541" => "Vic Liu");
 
     $tmp_path = sys_get_temp_dir();
     $file = $tmp_path . "\\tyland_user.map";
