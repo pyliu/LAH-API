@@ -1,5 +1,10 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
+require_once(ROOT_DIR."/include/Cache.class.php");
+
+$cache = new Cache();
+$mock = SYSTEM_CONFIG["MOCK_MODE"];
+if ($mock) $log->warning("現在處於模擬模式(mock mode)，".__FILE__." API僅會回應之前已被快取之最新的資料！");
 
 function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 	echo json_encode(array(

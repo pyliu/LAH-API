@@ -2,6 +2,7 @@
 require_once("../include/init.php");
 require_once("../include/Query.class.php");
 require_once("../include/RegCaseData.class.php");
+require_once(ROOT_DIR."/include/Cache.class.php");
 
 $qday = $_REQUEST["date"];
 $qday = preg_replace("/\D+/", "", $qday);
@@ -10,7 +11,10 @@ if (empty($qday) || !preg_match("/^[0-9]{7}$/i", $qday)) {
 }
 
 $query = new Query();
-$all = $query->queryAllCasesByDate($qday);
+$cache = new Cache();
+if (SYSTEM_CONFIG["MOCK_MODE"]) $log->warning("現在處於模擬模式(mock mode)，allcases API僅會回應之前已被快取之最新的資料！");
+$all = SYSTEM_CONFIG["MOCK_MODE"] === true ? $cache->get('allcases') : $query->queryAllCasesByDate($qday);
+$cache->set('allcases', $all);
 
 // Fetch the results of the query
 $str = "<table id='case_results' class='table-hover text-center col-lg-12' border='1'>\n";

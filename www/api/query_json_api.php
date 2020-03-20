@@ -30,7 +30,7 @@ switch ($_POST["type"]) {
 	case "stats_overdue_msg_total":
 		$stats = new Stats();
 		$total = $mock ? $cache->get('overdue_msg_count') : $stats->getTotal('overdue_msg_count');
-		if(!$mock) $cache->set('overdue_msg_count', $total);
+		$cache->set('overdue_msg_count', $total);
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
 			"data_count" => 1,
@@ -40,7 +40,7 @@ switch ($_POST["type"]) {
 		break;
 	case "user_mapping":
 		$operators = $mock ? $cache->get('user_mapping') : GetDBUserMapping();
-		if(!$mock) $cache->set('user_mapping', $operators);
+		$cache->set('user_mapping', $operators);
 		$count = count($operators);
 		$log->info("XHR [user_mapping] 取得使用者對應表($count)。");
 		echo json_encode(array(
