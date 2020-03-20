@@ -52,7 +52,7 @@ switch ($_POST["type"]) {
 		break;
 	case "authentication":
 		// $client_ip is from init.php
-		if (in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
+		if ($mock || in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
 			$msg = $client_ip." 通過管理者認證。";
 			$log->info("XHR [authentication] ".$msg);
 			echo json_encode(array(
@@ -84,7 +84,7 @@ switch ($_POST["type"]) {
 		$log->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
 		$log->info("XHR [overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");
 		$rows = $mock ? $cache->get('overdue_reg_cases') : $query->queryOverdueCasesIn15Days($_POST["reviewer_id"]);
-		if(!$mock) $cache->set('overdue_msg_count', $rows);
+		$cache->set('overdue_msg_count', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [overdue_reg_cases] 近15天查無逾期資料");
 			$result = array(
