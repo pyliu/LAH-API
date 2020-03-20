@@ -1,10 +1,5 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
-require_once(ROOT_DIR."/include/Cache.class.php");
-
-$cache = new Cache();
-$mock = SYSTEM_CONFIG["MOCK_MODE"];
-if ($mock) $log->warning("現在處於模擬模式(mock mode)，".__FILE__." API僅會回應之前已被快取之最新的資料！");
 
 function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 	echo json_encode(array(
@@ -18,8 +13,7 @@ switch ($_POST["type"]) {
     case "load_select_sql":
         $log->info("XHR [load_select_sql] 查詢請求【".$_POST["file_name"]."】");
         $path = ROOT_DIR."/assets/files/".$_POST["file_name"];
-        $content = $mock ? $cache->get('load_select_sql') : file_get_contents($path);
-        $cache->set('load_select_sql', $content);
+        $content = file_get_contents($path);
         if (file_exists($path)) {
             $result = array(
                 "status" => STATUS_CODE::SUCCESS_NORMAL,

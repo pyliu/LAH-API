@@ -5,6 +5,10 @@ body {
 	padding-top: 80px;
 }
 
+body section:first-child {
+	margin-bottom: 50px;
+}
+
 .focused-element {
 	background-color: rgb(233, 218, 13);
 }
