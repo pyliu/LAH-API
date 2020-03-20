@@ -2,6 +2,8 @@
 require_once("config/Config.inc.php");
 
 function GetDBUserMapping($refresh = false) {
+    if (SYSTEM_CONFIG["MOCK_MODE"] === true) return array();
+
     $tmp_path = sys_get_temp_dir();
     $file = $tmp_path . "\\tyland_user.map";
     $time = @filemtime($file);
