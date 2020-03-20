@@ -23,7 +23,8 @@ if (Vue) {
             }
         },
         async created() {
-            this.json = await this.getLocalCache("case-query-by-pid-crsms");
+            let cache_key = "case-query-by-pid-crsms-"+this.pid;
+            this.json = await this.getLocalCache(cache_key);
             if (this.empty(this.json)) {
                 this.$http.post(
                     CONFIG.JSON_API_EP,
@@ -31,7 +32,7 @@ if (Vue) {
                 ).then(response => {
                     // on success
                     this.json = response.data;
-                    this.setLocalCache("case-query-by-pid-crsms", this.json, 900000);   // 15mins
+                    this.setLocalCache(cache_key, this.json, 900000);   // 15mins
                     if (this.json.data_count == 0) {
                         this.message = `<i class="text-info fas fa-exclamation-circle"></i> 查無登記案件資料`;
                     }
