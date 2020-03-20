@@ -17,6 +17,9 @@ class MSDB {
     }
     
     function __construct($conn_info = array()) {
+
+        if (SYSTEM_CONFIG["MOCK_MODE"] == true) return;
+        
         if (empty($conn_info)) {
             if (SYSTEM_CONFIG["MS_DB_SVR"] == "xxx.xxx.xxx.xxx") {
                 die(__FILE__.": MSDB SVR not configured. Current: xxx.xxx.xxx.xxx");
