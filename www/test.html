@@ -21,7 +21,7 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-      <lah-reg-table :rawdata="settings['rawdata']"></lah-reg-table>
+      <lah-reg-table :rawdata="settings['rawdata']" max-height="200"></lah-reg-table>
       <lah-user-card id="HB0541"></lah-user-card>
       <b-card-group deck>
         <b-card v-for="n in 5"
@@ -67,7 +67,7 @@
 
       axios.post(
           CONFIG.JSON_API_EP,
-          { type: 'crsms', id: 'A123456789' }
+          { type: 'crsms', id: 'H122611667' }
       ).then(response => {
           // on success
           vueApp.setSetting('rawdata', response.data.raw);

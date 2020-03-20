@@ -9,13 +9,14 @@ if (Vue) {
                 borderless
                 no-border-collapse
                 small
-                sticky-header
                 head-variant="dark"
                 caption-top
+                :sticky-header="sticky"
                 :caption="caption"
                 :items="rawdata"
                 :fields="fields"
                 class="text-center"
+                :style="style"
                 :busy="!rawdata"
             >
                 <template v-slot:table-busy>
@@ -32,7 +33,7 @@ if (Vue) {
                 </template>
             </b-table>
         </lah-transition>`,
-        props: ['rawdata'],
+        props: ['rawdata', 'maxHeight'],
         data: () => { return {
             sm_fields: [
                 '序號',
@@ -59,7 +60,12 @@ if (Vue) {
                 }
             },
             count() { return this.rawdata ? this.rawdata.length : 0 },
-            caption() { return this.rawdata ? '登記案件找到 ' + this.count + '件' : '讀取中' }
+            caption() { return this.rawdata ? '登記案件找到 ' + this.count + '件' : '讀取中' },
+            sticky() { return this.maxHeight ? true : false },
+            style() {
+                const parsed = parseInt(this.maxHeight);
+                return isNaN(parsed) ? '' : `max-height: ${parsed}px`;
+            }
         },
         watch: {
             rawdata: function(nVal, oVal) {

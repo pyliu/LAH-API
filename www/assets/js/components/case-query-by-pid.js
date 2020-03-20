@@ -1,7 +1,7 @@
 if (Vue) {
     let VueCRSMS = {
         template: `<lah-transition slide-down>
-            <lah-reg-table :rawdata="json.raw" v-if="isTableReady"></lah-reg-table>
+            <lah-reg-table :rawdata="json.raw" :max-height="200" v-if="isTableReady"></lah-reg-table>
             <div v-else v-html="message"></div>
         </lah-transition>`,
         props: ["pid"],
