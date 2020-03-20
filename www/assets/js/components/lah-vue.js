@@ -1192,7 +1192,7 @@ $(document).ready(() => {
     
     // main app for whole page, use window.vueApp to get it
     window.vueApp = new Vue({
-        el: target[0],
+        el: target[0],  // jQuery always return array of elements
         data: {
             toastCounter: 0,
             openConfirm: false,
