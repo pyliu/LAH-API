@@ -19,7 +19,7 @@ if (Vue) {
                 :busy="!rawdata"
             >
                 <template v-slot:table-busy>
-                    <b-spinner class="align-middle" variant="danger" small label="讀取中..."></b-spinner>
+                    <b-spinner class="align-middle" variant="danger" type="grow" small label="讀取中..."></b-spinner>
                 </template>
                 <template v-slot:cell(序號)="data">
                     {{data.index + 1}}

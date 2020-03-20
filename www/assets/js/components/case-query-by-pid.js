@@ -1,33 +1,7 @@
 if (Vue) {
     let VueCRSMS = {
         template: `<lah-transition slide-down>
-            <b-table
-                ref="reg_case_tbl"
-                striped
-                hover
-                responsive
-                borderless
-                no-border-collapse
-                small
-                sticky-header
-                head-variant="dark"
-                caption-top
-                :caption="'登記案件找到 ' + json.raw.length + '件'"
-                :items="json.raw"
-                :fields="fields"
-                class="text-center"
-                v-if="isTableReady"
-            >
-                <template v-slot:cell(序號)="data">
-                    {{data.index + 1}}
-                </template>
-                <template v-slot:cell(RM01)="data">
-                    <span class="reg_case_id">{{data.item["RM01"] + "-" + data.item["RM02"] + "-" +  data.item["RM03"]}}</span>
-                </template>
-                <template v-slot:cell(RM09)="data">
-                    {{data.item["RM09"] + ":" + data.item["RM09_CHT"]}}</span>
-                </template>
-            </b-table>
+            <lah-reg-table :rawdata="json.raw" v-if="isTableReady"></lah-reg-table>
             <div v-else v-html="message"></div>
         </lah-transition>`,
         props: ["pid"],
@@ -48,27 +22,24 @@ if (Vue) {
                 return this.json && this.json.data_count > 0;
             }
         },
-        created() {
-            this.$http.post(
-                CONFIG.JSON_API_EP,
-                { type: 'crsms', id: this.pid }
-            ).then(response => {
-                // on success
-                this.json = response.data;
-                if (this.json.data_count == 0) {
-                    this.message = `<i class="text-info fas fa-exclamation-circle"></i> 查無登記案件資料`;
-                }
-                setTimeout(() => {
-                    // make click case id tr can bring up the detail dialog 【use reg_case_id css class as identifier to bind event】
-                    addAnimatedCSS(".reg_case_id", {
-                        name: "flash"
-                    }).off("click").on("click", window.vueApp.fetchRegCase);
-                    $(".reg_case_id").attr("title", "點我取得更多資訊！");
-                }, 800);
-            }).catch(error => {
-                this.error = error;
-                this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢登記案件發生錯誤！【${error.message}】`;
-            }).finally(() => {});
+        async created() {
+            this.json = await this.getLocalCache("case-query-by-pid-crsms");
+            if (this.empty(this.json)) {
+                this.$http.post(
+                    CONFIG.JSON_API_EP,
+                    { type: 'crsms', id: this.pid }
+                ).then(response => {
+                    // on success
+                    this.json = response.data;
+                    this.setLocalCache("case-query-by-pid-crsms", this.json, 900000);   // 15mins
+                    if (this.json.data_count == 0) {
+                        this.message = `<i class="text-info fas fa-exclamation-circle"></i> 查無登記案件資料`;
+                    }
+                }).catch(error => {
+                    this.error = error;
+                    this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢登記案件發生錯誤！【${error.message}】`;
+                }).finally(() => {});
+            }
         }
     };
     let VueCMSMS = {
