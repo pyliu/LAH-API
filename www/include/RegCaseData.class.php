@@ -128,11 +128,11 @@ class RegCaseData {
 
     public function getBakedData() {
         $row = &$this->row;
-        return array(
-            "收件字號" => $row["RM01"]."-".$row["RM02"]."-".$row["RM03"],
+        $ret = array("收件字號" => $row["RM01"]."-".$row["RM02"]."-".$row["RM03"],
+            "收件日期" => RegCaseData::toDate($row["RM07_1"]),
             "收件時間" => RegCaseData::toDate($row["RM07_1"])." ".RegCaseData::toDate($row["RM07_2"]),
             "測量案件" => $row["RM04"]."-".$row["RM05"]."-".$row["RM06"],
-			"登記原因" => $row["KCNT"],
+            "登記原因" => $row["KCNT"],
             "限辦期限" => "<span class='".$this->getStatusCss()."'>".$this->getDueDate()."</span>",
             "作業人員" => $this->getCurrentOperator(),
             "作業人員ID" => $this->getCurrentOperatorID(),
@@ -145,9 +145,9 @@ class RegCaseData {
             "義務人人數" => empty($row["RM23"]) ? "" : $row["RM23"],
             "手機號碼" => empty($row["RM102"]) ? "" : $row["RM102"],
             "代理人統編" => empty($row["RM24"]) ? "" : $row["RM24"],
-			"代理人姓名" => empty($row["AB02"]) ? "" : $row["AB02"],
-			"段代碼" =>  empty($row["RM11"]) ? "" : $row["RM11"],
-			"段小段" =>  empty($row["RM11_CNT"]) ? "" : $row["RM11_CNT"],
+            "代理人姓名" => empty($row["AB02"]) ? "" : $row["AB02"],
+            "段代碼" =>  empty($row["RM11"]) ? "" : $row["RM11"],
+            "段小段" =>  empty($row["RM11_CNT"]) ? "" : $row["RM11_CNT"],
             "地號" =>  empty($row["RM12"]) ? "" : substr($row["RM12"], 0, 4)."-".substr($row["RM12"], 4),
             "建號" =>  empty($row["RM15"]) ? "" : substr($row["RM15"], 0, 5)."-".substr($row["RM15"], 5),
             "件數" =>  empty($row["RM32"]) ? "" : $row["RM32"],
@@ -158,7 +158,6 @@ class RegCaseData {
             "資料收件所" => OFFICE[$row["RM101"]] ? OFFICE[$row["RM101"]] : $row["RM101"],
             "結案已否" => $row["RM31"],
             "tr_html" => $this->getTableHtml(),
-            "raw" => $row,
             // 案件辦理情形資料
             "收件人員" => $this->getReceptionist(),
             "初審人員" => $this->getFirstReviewer(),
@@ -193,6 +192,7 @@ class RegCaseData {
             "預定結案日期" => RegCaseData::toDate($row["RM29_1"])." ".RegCaseData::toDate($row["RM29_2"]),
             "結案與否" => empty($this->row["RM31"]) ? "否" : "是【".$this->row["RM31"]."】"
         );
+        return $ret + $row; // merge raw data ($row["RM01"] ... etc) and keep original key index
     }
 
     public function isDanger() {

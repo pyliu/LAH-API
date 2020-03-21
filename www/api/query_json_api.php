@@ -286,9 +286,8 @@ switch ($_POST["type"]) {
 			}
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => count($query_result),
-				"query_string" => $_POST["id"],
-				"raw" => $query_result,
+				"data_count" => count($baked),
+				"query_string" => "id=".$_POST["id"],
 				"baked" => $baked
 			);
 			$log->info("XHR [crsms] 查詢成功");
@@ -367,7 +366,13 @@ switch ($_POST["type"]) {
 		} else {
 			$data = new RegCaseData($row);
 			$log->info("XHR [reg_case] 查詢成功");
-			echo json_encode($data->getBakedData(), 0);
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => 1,
+				"query_string" => "id=".$_POST["id"],
+				"baked" => $data->getBakedData()
+			);
+			echo json_encode($result, 0);
 		}
 		break;
 	case "reg_stats":

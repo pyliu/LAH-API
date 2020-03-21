@@ -14,10 +14,10 @@ if (Vue) {
                 class="text-center"
                 :sticky-header="sticky"
                 :caption="caption"
-                :items="rawdata"
+                :items="bakeddata"
                 :fields="fields"
                 :style="style"
-                :busy="!rawdata"
+                :busy="!bakeddata"
             >
                 <template v-slot:table-busy>
                     <b-spinner class="align-middle" variant="danger" type="grow" small label="讀取中..."></b-spinner>
@@ -29,7 +29,7 @@ if (Vue) {
 
                 <template v-slot:cell(RM01)="row">
                     <lah-fa-icon :icon="icon" :variant="iconVariant" v-if='icon'></lah-fa-icon>
-                    <a href="javascript:void(0)" @click="fetch(row.item)">{{row.item["RM01"] + "-" + row.item["RM02"] + "-" +  row.item["RM03"]}}</a>
+                    <a href="javascript:void(0)" @click="fetch(row.item)">{{row.item["收件字號"]}}</a>
                 </template>
 
                 <template v-slot:cell(RM09)="row">
@@ -37,40 +37,37 @@ if (Vue) {
                 </template>
             </b-table>
         </lah-transition>`,
-        props: ['rawdata', 'maxHeight', 'icon', 'iconVariant'],
+        props: ['bakeddata', 'maxHeight', 'icon', 'iconVariant'],
         data: () => { return {
-            sm_fields: [
-                '序號',
-                {key: "RM01", label: "收件字號", sortable: true},
-                {key: "RM07_1", label: "收件日期", sortable: true},
-                {key: "RM09", label: "登記代碼", sortable: true}
-            ],
-            md_fields: [
-                '序號',
-                {key: "RM01", label: "收件字號", sortable: true},
-                {key: "RM07_1", label: "收件日期", sortable: true},
-                {key: "RM09", label: "登記代碼", sortable: true}
-                /**收件字號	收件日期	限辦	辦理情形	收件人員	作業人員	初審人員	複審人員	准登人員	登記人員	校對人員	結案人員 */
-            ],
-            lg_fields: {},
-            xl_fields: {},
             size: "sm"
         } },
         computed: {
             fields: function() {
                 switch(this.size) {
                     case "md":
-                        return this.md_fields;
+                        return [
+                            '序號',
+                            {key: "RM01", label: "收件字號", sortable: true},
+                            {key: "RM07_1", label: "收件日期", sortable: true},
+                            {key: "RM09", label: "登記代碼", sortable: true}
+                            /**收件字號	收件日期	限辦	辦理情形	收件人員	作業人員	初審人員	複審人員	准登人員	登記人員	校對人員	結案人員 */
+                        ];
                     case "lg":
-                        return this.lg_fields;
+                        return ['序號'];
                     case "xl":
-                        return this.xl_fields;
+                        return ['序號'];
                     default:
-                        return this.sm_fields;
+                        return [
+                            '序號',
+                            {key: "RM01", label: "收件字號", sortable: true},
+                            {key: "RM07_1", label: "收件日期", sortable: true},
+                            {key: "RM09", label: "登記代碼", sortable: true}
+                        ];
                 }
             },
-            count() { return this.rawdata ? this.rawdata.length : 0 },
-            caption() { return this.rawdata ? '登記案件找到 ' + this.count + '件' : '讀取中' },
+            source() { return this.bakeddata },
+            count() { return this.source ? this.source.length : 0 },
+            caption() { return this.source ? '登記案件找到 ' + this.count + '件' : '讀取中' },
             sticky() { return this.maxHeight ? true : false },
             style() {
                 const parsed = parseInt(this.maxHeight);
@@ -78,7 +75,7 @@ if (Vue) {
             }
         },
         watch: {
-            rawdata: function(nVal, oVal) {
+            bakeddata: function(nVal, oVal) {
                 //this.$log(nVal, oVal);
             }
         },
@@ -94,7 +91,7 @@ if (Vue) {
                         return;
                     } else {
                         showModal({
-                            message: this.$createElement("case-reg-detail", { props: { jsonObj: res.data } }),
+                            message: this.$createElement("case-reg-detail", { props: { jsonObj: res.data.baked } }),
                             title: "登記案件詳情",
                             size: "lg"
                         });

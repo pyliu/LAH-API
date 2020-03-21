@@ -62,8 +62,8 @@ if (Vue) {
                         // create sub-component dynamically
                         let v = this.$createElement("case-state-mgt-dialog", {
                             props: {
-                                raw: res.data.raw,
-                                tr: res.data.tr_html
+                                raw: res.data.baked,
+                                tr: res.data.baked.tr_html
                             }
                         })
                         showModal({

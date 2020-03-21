@@ -1423,7 +1423,7 @@ $(document).ready(() => {
                         showModal({
                             message: this.$createElement("case-reg-detail", {
                                 props: {
-                                    jsonObj: res.data
+                                    jsonObj: res.data.baked
                                 }
                             }),
                             title: "登記案件詳情",

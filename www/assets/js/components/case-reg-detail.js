@@ -30,7 +30,7 @@ if (Vue) {
                                             作業人員：<span class='user_tag'>{{jsonObj.作業人員}}</span> <br/>
                                             辦理情形：{{jsonObj.辦理情形}} <br/>
                                             登記原因：{{jsonObj.登記原因}} <br/>
-                                            區域：{{area}}【{{jsonObj.raw.RM10}}】 <br/>
+                                            區域：{{area}}【{{jsonObj.RM10}}】 <br/>
                                             段小段：{{jsonObj.段小段}}【{{jsonObj.段代碼}}】 <br/>
                                             地號：{{jsonObj.地號}} <br/>
                                             建號：{{jsonObj.建號}} <br/>
@@ -196,7 +196,7 @@ if (Vue) {
             handleNotFound: function(input) { this.show_op_card = false }
         },
         created() {
-            this.rm10 = this.jsonObj.raw.RM10 ? this.jsonObj.raw.RM10 : "XX";
+            this.rm10 = this.jsonObj.RM10 ? this.jsonObj.RM10 : "XX";
             switch (this.rm10) {
                 case "03":
                     this.area = "中壢區";
@@ -208,8 +208,8 @@ if (Vue) {
                     this.area = "其他(" + this.jsonObj.資料管轄所 + "區)";
                     break;
             }
-            this.case_status_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=${this.jsonObj.raw["RM01"]}&word=${this.jsonObj.raw["RM02"]}&code=${this.jsonObj.raw["RM03"]}&sdlyn=N&RM90=`;
-            this.case_data_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD01/CCD0103.jsp?rm01=${this.jsonObj.raw["RM01"]}&rm02=${this.jsonObj.raw["RM02"]}&rm03=${this.jsonObj.raw["RM03"]}`
+            this.case_status_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=${this.jsonObj["RM01"]}&word=${this.jsonObj["RM02"]}&code=${this.jsonObj["RM03"]}&sdlyn=N&RM90=`;
+            this.case_data_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD01/CCD0103.jsp?rm01=${this.jsonObj["RM01"]}&rm02=${this.jsonObj["RM02"]}&rm03=${this.jsonObj["RM03"]}`
             this.is_ongoing = this.empty(this.jsonObj.結案已否);
         },
         mounted() {
