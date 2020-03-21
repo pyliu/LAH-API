@@ -1097,7 +1097,7 @@ if (Vue) {
                     <b-button @click="popup" variant="outline-success" size="sm"><lah-fa-icon icon="question"> 說明</lah-fa-icon></b-button>
                 </div>
             </div>
-            <lah-fa-icon v-else icon="exclamation-circle" variant="warning"> 找不到暫存檔！</lah-fa-icon>
+            <lah-fa-icon v-else icon="exclamation-circle" variant="success"> 無暫存檔。</lah-fa-icon>
         </div>`,
         props: ["bakedData"],
         data: function() { return {
