@@ -4,7 +4,11 @@ if (Vue) {
             <p v-html="jsonObj.tr_html"></p>
             <b-card no-body>
                 <b-tabs card :end="tabsAtEnd" :pills="tabsAtEnd">
-                    <b-tab title="收件資料">
+                    <b-tab>
+                        <template v-slot:title>
+                            <strong>收件資料</strong>
+                            <b-button variant="muted" size="sm" @click="window.vueApp.open(case_data_url, $event)" :title="'收件資料 on ' + ap_server"><lah-fa-icon icon="external-link-alt" variant="primary"></lah-fa-icon></b-button>
+                        </template>
                         <b-card-body>
                             <b-form-row class="mb-1">
                                 <b-col>    
@@ -35,14 +39,13 @@ if (Vue) {
                                     手機號碼：{{jsonObj.手機號碼}}
                                 </b-col>
                             </b-form-row>
-                            <b-form-row>
-                                <b-col class="text-center">
-                                    <b-button variant="outline-primary" size="sm" @click="window.vueApp.open(case_data_url, $event)" :title="'收件資料 on ' + ap_server"><i class="fas fa-search"></i> 另開視窗查詢</b-button>
-                                </b-col>
-                            </b-form-row>
                         </b-card-body>
                     </b-tab>
-                    <b-tab title="辦理情形">
+                    <b-tab>
+                        <template v-slot:title>
+                            <strong>辦理情形</strong>
+                            <b-button variant="muted" size="sm" @click="window.vueApp.open(case_status_url, $event)" title="案件辦理情形"><lah-fa-icon icon="external-link-alt" variant="secondary"></lah-fa-icon></b-button>
+                        </template>
                         <b-card-body>
                             <b-list-group flush compact>
                                 <b-list-group-item>
@@ -170,11 +173,6 @@ if (Vue) {
                                     </b-form-row>
                                 </b-list-group-item>
                             </b-list-group>
-                            <b-form-row class="mt-2">
-                                <b-col class="text-center">
-                                    <b-button variant="outline-primary" size="sm" @click="window.vueApp.open(case_status_url, $event)" title="案件辦理情形"><i class="fas fa-search"></i> 另開視窗查詢</b-button>
-                                </b-col>
-                            </b-form-row>
                         </b-card-body>
                     </b-tab>
                     <b-tab v-if="isAdmin" title="狀態管理" lazy><lah-reg-case-state-mgt :raw="jsonObj"></lah-reg-case-state-mgt></b-tab>
@@ -269,62 +267,59 @@ if (Vue) {
                     <button @click="updateRM42" class="btn btn-sm btn-outline-primary">更新</button>
                 </div>
             </div>
-            <p class="mt-1" v-html="tr"></p>
         </div>`,
-        props: ["raw", "tr"],    // jsonObj.raw, jsonObj.tr_html
-        data: () => {
-            return {
-                rm30: "",
-                rm30_orig: "",
-                rm39: "",
-                rm39_orig: "",
-                rm42: "",
-                rm42_orig: "",
-                rm31: "",
-                sync_rm30_1: true,
-                wip: false,
-                rm30_mapping: {
-                    A: "初審",
-                    B: "複審",
-                    H: "公告",
-                    I: "補正",
-                    R: "登錄",
-                    C: "校對",
-                    U: "異動完成",
-                    F: "結案",
-                    X: "補正初核",
-                    Y: "駁回初核",
-                    J: "撤回初核",
-                    K: "撤回",
-                    Z: "歸檔",
-                    N: "駁回",
-                    L: "公告初核",
-                    E: "請示",
-                    D: "展期"
-                },
-                rm39_mapping: {
-                    B: "登錄開始",
-                    R: "登錄完成",
-                    C: "校對開始",
-                    D: "校對完成",
-                    S: "異動開始",
-                    F: "異動完成",
-                    G: "異動有誤",
-                    P: "競合暫停"
-                },
-                rm42_mapping: {
-                    '0': "登記移案",
-                    B: "登錄中",
-                    R: "登錄完成",
-                    C: "校對中",
-                    D: "校對完成",
-                    E: "登錄有誤",
-                    S: "異動開始",
-                    F: "異動完成",
-                    G: "異動有誤"
-                }
+        props: ["raw"],
+        data: () => { return {
+            rm30: "",
+            rm30_orig: "",
+            rm39: "",
+            rm39_orig: "",
+            rm42: "",
+            rm42_orig: "",
+            rm31: "",
+            sync_rm30_1: true,
+            wip: false,
+            rm30_mapping: {
+                A: "初審",
+                B: "複審",
+                H: "公告",
+                I: "補正",
+                R: "登錄",
+                C: "校對",
+                U: "異動完成",
+                F: "結案",
+                X: "補正初核",
+                Y: "駁回初核",
+                J: "撤回初核",
+                K: "撤回",
+                Z: "歸檔",
+                N: "駁回",
+                L: "公告初核",
+                E: "請示",
+                D: "展期"
+            },
+            rm39_mapping: {
+                B: "登錄開始",
+                R: "登錄完成",
+                C: "校對開始",
+                D: "校對完成",
+                S: "異動開始",
+                F: "異動完成",
+                G: "異動有誤",
+                P: "競合暫停"
+            },
+            rm42_mapping: {
+                '0': "登記移案",
+                B: "登錄中",
+                R: "登錄完成",
+                C: "校對中",
+                D: "校對完成",
+                E: "登錄有誤",
+                S: "異動開始",
+                F: "異動完成",
+                G: "異動有誤"
             }
-        },
+        } },
         methods: {
             updateRegCaseCol: function(arguments) {
                 if ($(arguments.el).length > 0) {
@@ -463,7 +458,7 @@ if (Vue) {
                 });
             }
         },
-        mounted: function(e) {
+        created() {
             this.rm30 = this.raw["RM30"] || "";
             this.rm39 = this.raw["RM39"] || "";
             this.rm42 = this.raw["RM42"] || "";
@@ -472,14 +467,8 @@ if (Vue) {
             this.rm42_orig = this.raw["RM42"] || "";
             this.rm31 = this.raw["RM31"];
             this.wip = this.empty(this.rm31);
-            addUserInfoEvent(e);
-            addAnimatedCSS(".reg_case_id", {
-                name: "flash"
-            }).off("click").on("click", function(e) {
-                window.vueApp.fetchRegCase(e);
-            });
         }
     });
 } else {
-    console.error("vue.js not ready ... case-reg-detail component can not be loaded.");
+    console.error("vue.js not ready ... case-reg-detail/lah-reg-case-state-mgt components can not be loaded.");
 }
