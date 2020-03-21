@@ -1063,6 +1063,7 @@ Vue.component("lah-user-card", {
                     }
                 }).catch(err => {
                     this.error = err;
+                    this.$emit('error', this.name || this.id || this.ip);
                 });
             }
         }
