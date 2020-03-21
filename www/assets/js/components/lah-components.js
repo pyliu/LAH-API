@@ -1064,10 +1064,198 @@ if (Vue) {
     });
 
     Vue.component('lah-reg-case-temp-mgt', {
-        template: `<div>{{bakedData["收件字號"]}}</div>`,
+        template: `<div>
+            <div v-if="found">
+                <div v-for="(item, idx) in filtered">
+                    <button class="btn btn-sm btn-primary active tmp_tbl_btn" :data-sql-id="'sql_' + idx" :data-tbl="item[0]">
+                        {{item[0]}} <span class="badge badge-light">{{item[1].length}} <span class="sr-only">暫存檔數量</span></span>
+                    </button>
+                    <small>
+                        <button
+                            :id="'backup_temp_btn_' + idx"
+                            :data-clean-btn-id="'clean_temp_btn_' + idx"
+                            :data-filename="prefix + '-' + item[0]"
+                            class="backup_tbl_temp_data btn btn-sm btn-outline-primary"
+                        >備份</button>
+                        <span class="hide ins_sql" :id="'sql_' + idx">{{genInstSQL(item)}}</span>
+                        <button
+                            :id="'clean_temp_btn_' + idx"
+                            :data-tbl="item[0]"
+                            :data-backup-btn-id="'backup_temp_btn_' + idx"
+                            :disabled="item[0] == 'MOICAT.RINDX' || item[0] == 'MOIPRT.PHIND'"
+                            :title="title(item)"
+                            class="clean_tbl_temp_data btn btn-sm btn-outline-danger"
+                        >清除</button>
+                    </small>
+                    <br />&emsp;<small>－&emsp;{{item[2]}}</small>
+                </div>
+                <button id='temp_backup_button' data-clean-btn-id='temp_clean_button' class='mt-2 btn btn-sm btn-outline-primary' data-trigger='manual' data-toggle='popover' data-placement='bottom'>全部備份</button>
+                <button id='temp_clean_button' data-backup-btn-id='temp_backup_button' class='mt-2 btn btn-sm btn-outline-danger' id='temp_clr_button'>全部清除</button>
+            </div>
+            <lah-fa-icon v-else icon="exclamation-circle" variant="warning"> 找不到暫存檔！</lah-fa-icon>
+        </div>`,
         props: ["bakedData"],
-        created() { this.$log(this.bakedData) }
+        data: function() { return {
+            filtered: null
+        }},
+        computed: {
+            found() { return !this.empty(this.filtered) },
+            prefix() { return `${this.bakedData["RM01"]}-${this.bakedData["RM02"]}-${this.bakedData["RM03"]}` }
+        },
+        methods: {
+            title: function (item) {
+                return item[0] == "MOICAT.RINDX" || item[0] == "MOIPRT.PHIND" ? "重要案件索引，無法刪除！" : "";
+            },
+            attachEvent: function () {
+                let year = this.bakedData["RM01"];
+                let code = this.bakedData["RM02"];
+                let number = this.bakedData["RM03"];
+
+                showPopper("#temp_backup_button", "請「備份後」再選擇清除", 5000);
+                $("#temp_clean_button").off("click").on("click", e => this.fix({
+                    year: year,
+                    code: code,
+                    number: number,
+                    table: "",
+                    target: e.target,
+                    clean_all: true
+                }));
+
+                $("#temp_backup_button").off("click").on("click", (e) => {
+                    toggle(e.target);
+                    let filename = year + "-" + code + "-" + number + "-TEMP-DATA";
+                    let clean_btn_id = $(e.target).data("clean-btn-id");
+                    // attach clicked flag to the clean button
+                    $(`#${clean_btn_id}`).data("backup_flag", true);
+                    // any kind of extension (.txt,.cpp,.cs,.bat)
+                    filename += ".sql";
+                    let all_content = "";
+                    $(".ins_sql").each((index, hidden_span) => {
+                        all_content += $(hidden_span).text();
+                    });
+                    let blob = new Blob([all_content], {
+                        type: "text/plain;charset=utf-8"
+                    });
+                    saveAs(blob, filename);
+                    $(e.target).remove();
+                });
+                // attach backup event to the buttons
+                $(".backup_tbl_temp_data").off("click").on("click", e => {
+                    let filename = $(e.target).data("filename");
+                    let clean_btn_id = $(e.target).data("clean-btn-id");
+                    // attach clicked flag to the clean button
+                    $(`#${clean_btn_id}`).data("backup_flag", true);
+                    // any kind of extension (.txt,.cpp,.cs,.bat)
+                    filename += ".sql";
+                    let hidden_data = $(e.target).next("span"); // find DIRECT next span of the clicked button
+                    let content = hidden_data.text();
+                    let blob = new Blob([content], {
+                        type: "text/plain;charset=utf-8"
+                    });
+                    saveAs(blob, filename);
+                });
+                // attach clean event to the buttons
+                $(".clean_tbl_temp_data").off("click").on("click", e => this.fix({
+                        year: year,
+                        code: code,
+                        number: number,
+                        table: $(e.target).data("tbl"),
+                        target: e.target,
+                        clean_all: false
+                    })
+                );
+                $(".tmp_tbl_btn").off("click").on("click", this.showSQL);
+                addAnimatedCSS(".reg_case_id", { name: "flash" }).off("click").on("click", window.vueApp.fetchRegCase);
+            },
+            showSQL: function(e) {
+                let btn = $(e.target);
+                let sql_span = $(`#${btn.data("sql-id")}`);
+                showModal({
+                    title: `INSERT SQL of ${btn.data("tbl")}`,
+                    message: sql_span.html().replace(/\n/g, "<br /><br />"),
+                    size: "xl"
+                });
+            },
+            genInstSQL: function (item) {
+                let INS_SQL = "";
+                for (let y = 0; y < item[1].length; y++) {
+                    let this_row = item[1][y];
+                    let fields = [];
+                    let values = [];
+                    for (let key in this_row) {
+                        fields.push(key);
+                        values.push(this.empty(this_row[key]) ? "null" : `'${this_row[key]}'`);
+                    }
+                    INS_SQL += `insert into ${item[0]} (${fields.join(",")})`;
+                    INS_SQL += ` values (${values.join(",")});\n`;
+                }
+                return INS_SQL;
+            },
+            fix: function(data) {
+                let backup_flag = $(data.target).data("backup_flag");
+                if (backup_flag !== true) {
+                    addNotification({
+                        title: "清除暫存檔",
+                        subtitle: `${data.year}-${data.code}-${data.number}`,
+                        message: "清除前請先備份!",
+                        type: "warning"
+                    });
+                    addAnimatedCSS(`#${$(data.target).data("backup-btn-id")}`, { name: "tada" });
+                    return;
+                }
+                let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + data.year + "-" + data.code + "-" + data.number + (data.clean_all ? " 全部暫存檔?" : " " + data.table + " 表格的暫存檔?");
+                showConfirm(msg, () => {
+                    $(data.target).remove();
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: 'clear_temp_data',
+                        year: data.year,
+                        code: data.code,
+                        number: data.number,
+                        table: data.table
+                    }).then(res => {
+                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + res.data.status + "】");
+                        addNotification({
+                            title: "清除暫存檔",
+                            message: "已清除完成。<p>" + data.year + "-" + data.code + "-" + data.number + (data.table ? " 表格：" + data.table : "") + "</p>",
+                            type: "success"
+                        });
+                        if (data.clean_all) {
+                            closeModal();
+                        }
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                });
+            }
+        },
+        mounted() {
+            this.isBusy = true;
+            this.$http.post(CONFIG.JSON_API_EP, {
+                type: "query_temp_data",
+                year: this.bakedData["RM01"],
+                code: this.bakedData["RM02"],
+                number: this.bakedData["RM03"]
+            }).then(res => {
+                this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢暫存資料回傳狀態碼有問題【${res.data.status}】`);
+                
+                // res.data.raw structure: 0 - Table, 1 - all raw data, 2 - SQL
+                this.filtered = res.data.raw.filter((item, index, array) => {
+                    return item[1].length > 0;
+                });
+
+                if (this.found) {
+                    this.attachEvent();
+                }
+            }).catch(err => {
+                this.error = err;
+            }).finally(() => {
+                this.isBusy = false;
+            });
+        }
     });
 } else {
-    console.error("vue.js not ready ... lah-xxxxxxxx component can not be loaded.");
+    console.error("vue.js not ready ... lah-xxxxxxxx components can not be loaded.");
 }
