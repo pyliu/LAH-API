@@ -195,13 +195,6 @@ class RegCaseData {
         );
     }
 
-    public function getJsonHtmlData($flag = 0) {
-        // database charset is big5, so we need to convert it to utf-8 for frontend
-        //$row = $this->convertCharset();
-        $result = $this->getBakedData();
-        return json_encode($result, $flag);
-    }
-
     public function isDanger() {
         return empty(REG_WORD[$this->row["RM02"]]);
     }

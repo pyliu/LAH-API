@@ -361,7 +361,7 @@ switch ($_POST["type"]) {
 		} else {
 			$data = new RegCaseData($row);
 			$log->info("XHR [reg_case] 查詢成功");
-			echo $data->getJsonHtmlData();
+			echo json_encode($data->getBakedData(), 0);
 		}
 		break;
 	case "reg_stats":
