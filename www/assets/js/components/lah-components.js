@@ -1067,116 +1067,164 @@ if (Vue) {
         template: `<div>
             <div v-if="found">
                 <div v-for="(item, idx) in filtered">
-                    <button class="btn btn-sm btn-primary active tmp_tbl_btn" :data-sql-id="'sql_' + idx" :data-tbl="item[0]">
-                        {{item[0]}} <span class="badge badge-light">{{item[1].length}} <span class="sr-only">暫存檔數量</span></span>
-                    </button>
+                    <h6 v-if="idx == 0" class="font-weight-bold text-center">請檢查下列暫存檔資訊，必要時請刪除</h6>
+                    <b-button @click="showSQL(item)" size="sm" variant="warning">
+                        {{item[0]}}表格 <span class="badge badge-light">{{item[1].length}} <span class="sr-only">暫存檔數量</span></span>
+                    </b-button>
                     <small>
-                        <button
+                        <b-button
                             :id="'backup_temp_btn_' + idx"
-                            :data-clean-btn-id="'clean_temp_btn_' + idx"
-                            :data-filename="prefix + '-' + item[0]"
-                            class="backup_tbl_temp_data btn btn-sm btn-outline-primary"
-                        >備份</button>
-                        <span class="hide ins_sql" :id="'sql_' + idx">{{genInstSQL(item)}}</span>
-                        <button
-                            :id="'clean_temp_btn_' + idx"
-                            :data-tbl="item[0]"
-                            :data-backup-btn-id="'backup_temp_btn_' + idx"
+                            size="sm"
+                            variant="outline-primary"
+                            @click="backup(item, idx)"
+                        >備份</b-button>
+                        <b-button
                             :disabled="item[0] == 'MOICAT.RINDX' || item[0] == 'MOIPRT.PHIND'"
                             :title="title(item)"
-                            class="clean_tbl_temp_data btn btn-sm btn-outline-danger"
-                        >清除</button>
+                            size="sm"
+                            variant="outline-danger"
+                            @click="clean(item, idx, $event)"
+                        >清除</b-button>
                     </small>
                     <br />&emsp;<small>－&emsp;{{item[2]}}</small>
                 </div>
-                <button id='temp_backup_button' data-clean-btn-id='temp_clean_button' class='mt-2 btn btn-sm btn-outline-primary' data-trigger='manual' data-toggle='popover' data-placement='bottom'>全部備份</button>
-                <button id='temp_clean_button' data-backup-btn-id='temp_backup_button' class='mt-2 btn btn-sm btn-outline-danger' id='temp_clr_button'>全部清除</button>
+                <hr />
+                <div class="text-center">
+                    <b-button id="backup_temp_btn_all" @click="backupAll" variant="outline-primary" size="sm">全部備份</b-button>
+                    <b-button @click="cleanAll" variant="danger" size="sm">全部清除</b-button>
+                    <b-button @click="popup" variant="outline-success" size="sm"><lah-fa-icon icon="question"> 說明</lah-fa-icon></b-button>
+                </div>
             </div>
             <lah-fa-icon v-else icon="exclamation-circle" variant="warning"> 找不到暫存檔！</lah-fa-icon>
         </div>`,
         props: ["bakedData"],
         data: function() { return {
-            filtered: null
+            filtered: null,
+            cleanAllBackupFlag: false,
+            backupFlags: []
         }},
         computed: {
             found() { return !this.empty(this.filtered) },
-            prefix() { return `${this.bakedData["RM01"]}-${this.bakedData["RM02"]}-${this.bakedData["RM03"]}` }
+            prefix() { return `${this.bakedData["RM01"]}-${this.bakedData["RM02"]}-${this.bakedData["RM03"]}` },
+            year() { return this.bakedData["RM01"] },
+            code() { return this.bakedData["RM02"] },
+            number() { return this.bakedData["RM03"] }
         },
         methods: {
             title: function (item) {
                 return item[0] == "MOICAT.RINDX" || item[0] == "MOIPRT.PHIND" ? "重要案件索引，無法刪除！" : "";
             },
-            attachEvent: function () {
-                let year = this.bakedData["RM01"];
-                let code = this.bakedData["RM02"];
-                let number = this.bakedData["RM03"];
-
-                showPopper("#temp_backup_button", "請「備份後」再選擇清除", 5000);
-                $("#temp_clean_button").off("click").on("click", e => this.fix({
-                    year: year,
-                    code: code,
-                    number: number,
-                    table: "",
-                    target: e.target,
-                    clean_all: true
-                }));
-
-                $("#temp_backup_button").off("click").on("click", (e) => {
-                    toggle(e.target);
-                    let filename = year + "-" + code + "-" + number + "-TEMP-DATA";
-                    let clean_btn_id = $(e.target).data("clean-btn-id");
-                    // attach clicked flag to the clean button
-                    $(`#${clean_btn_id}`).data("backup_flag", true);
-                    // any kind of extension (.txt,.cpp,.cs,.bat)
-                    filename += ".sql";
-                    let all_content = "";
-                    $(".ins_sql").each((index, hidden_span) => {
-                        all_content += $(hidden_span).text();
-                    });
-                    let blob = new Blob([all_content], {
-                        type: "text/plain;charset=utf-8"
-                    });
-                    saveAs(blob, filename);
-                    $(e.target).remove();
-                });
-                // attach backup event to the buttons
-                $(".backup_tbl_temp_data").off("click").on("click", e => {
-                    let filename = $(e.target).data("filename");
-                    let clean_btn_id = $(e.target).data("clean-btn-id");
-                    // attach clicked flag to the clean button
-                    $(`#${clean_btn_id}`).data("backup_flag", true);
-                    // any kind of extension (.txt,.cpp,.cs,.bat)
-                    filename += ".sql";
-                    let hidden_data = $(e.target).next("span"); // find DIRECT next span of the clicked button
-                    let content = hidden_data.text();
-                    let blob = new Blob([content], {
-                        type: "text/plain;charset=utf-8"
-                    });
-                    saveAs(blob, filename);
-                });
-                // attach clean event to the buttons
-                $(".clean_tbl_temp_data").off("click").on("click", e => this.fix({
-                        year: year,
-                        code: code,
-                        number: number,
-                        table: $(e.target).data("tbl"),
-                        target: e.target,
-                        clean_all: false
-                    })
-                );
-                $(".tmp_tbl_btn").off("click").on("click", this.showSQL);
-                addAnimatedCSS(".reg_case_id", { name: "flash" }).off("click").on("click", window.vueApp.fetchRegCase);
+            download: function(content, filename) {
+                const url = window.URL.createObjectURL(new Blob([content]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', filename);
+                document.body.appendChild(link);
+                link.click();
+                //afterwards we remove the element again
+                link.remove();
+                // release object in memory
+                window.URL.revokeObjectURL(url);
             },
-            showSQL: function(e) {
-                let btn = $(e.target);
-                let sql_span = $(`#${btn.data("sql-id")}`);
+            backupAll: function(e) {
+                this.isBusy = true;
+                let filename = this.year + "-" + this.code + "-" + this.number + "-TEMP-DATA.sql";
+                let all_content = "";
+                this.filtered.forEach((item, idx) => {
+                    all_content += this.getInsSQL(item);
+                });
+                this.download(all_content, filename);
+                this.cleanAllBackupFlag = true;
+                this.isBusy = false;
+            },
+            cleanAll: function(e) {
+                if (this.cleanAllBackupFlag !== true) {
+                    showAlert({
+                        title: "清除全部暫存檔",
+                        subtitle: `${this.year}-${this.code}-${this.number}`,
+                        message: "請先備份！",
+                        type: "warning"
+                    });
+                    addAnimatedCSS("#backup_temp_btn_all", { name: "tada" });
+                    return;
+                }
+                let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + this.year + "-" + this.code + "-" + this.number + " 全部暫存檔?";
+                showConfirm(msg, () => {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: 'clear_temp_data',
+                        year: this.year,
+                        code: this.code,
+                        number: this.number,
+                        table: ''
+                    }).then(res => {
+                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + res.data.status + "】");
+                        addNotification({
+                            title: "清除暫存檔",
+                            message: "已清除完成。<p>" + this.year + "-" + this.code + "-" + this.number + "</p>",
+                            type: "success"
+                        });
+                        $(e.target).remove();
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                });
+            },
+            backup: function(item, idx) {
+                this.isBusy = true;
+                let filename = `${this.prefix}-${item[0]}-TEMP-DATA.sql`;
+                this.download(this.getInsSQL(item), filename);
+                $(e.target).remove();
+                this.backupFlags[idx] = true;
+                this.isBusy = false;
+            },
+            clean: function(item, idx, e) {
+                let table = item[0];
+                if (this.backupFlags[idx] !== true) {
+                    showAlert({
+                        title: `清除 ${table} 暫存檔`,
+                        subtitle: `${this.year}-${this.code}-${this.number}`,
+                        message: `請先備份 ${table} ！`,
+                        type: "warning"
+                    });
+                    addAnimatedCSS(`#backup_temp_btn_${idx}`, { name: "tada" });
+                    return;
+                }
+                let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + this.year + "-" + this.code + "-" + this.number + " " + table + " 暫存檔?";
+                showConfirm(msg, () => {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: 'clear_temp_data',
+                        year: this.year,
+                        code: this.code,
+                        number: this.number,
+                        table: table
+                    }).then(res => {
+                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + res.data.status + "】");
+                        addNotification({
+                            title: `清除 ${table} 暫存檔`,
+                            subtitle: this.year + "-" + this.code + "-" + this.number,
+                            message: "已清除完成。",
+                            type: "success"
+                        });
+                        $(e.target).remove();
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                });
+            },
+            showSQL: function(item) {
                 showModal({
-                    title: `INSERT SQL of ${btn.data("tbl")}`,
-                    message: sql_span.html().replace(/\n/g, "<br /><br />"),
+                    title: `INSERT SQL of ${item[0]}`,
+                    message: this.getInsSQL(item).replace(/\n/g, "<br /><br />"),
                     size: "xl"
                 });
             },
-            genInstSQL: function (item) {
+            getInsSQL: function (item) {
                 let INS_SQL = "";
                 for (let y = 0; y < item[1].length; y++) {
                     let this_row = item[1][y];
@@ -1191,43 +1239,89 @@ if (Vue) {
                 }
                 return INS_SQL;
             },
-            fix: function(data) {
-                let backup_flag = $(data.target).data("backup_flag");
-                if (backup_flag !== true) {
-                    addNotification({
-                        title: "清除暫存檔",
-                        subtitle: `${data.year}-${data.code}-${data.number}`,
-                        message: "清除前請先備份!",
-                        type: "warning"
-                    });
-                    addAnimatedCSS(`#${$(data.target).data("backup-btn-id")}`, { name: "tada" });
-                    return;
-                }
-                let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + data.year + "-" + data.code + "-" + data.number + (data.clean_all ? " 全部暫存檔?" : " " + data.table + " 表格的暫存檔?");
-                showConfirm(msg, () => {
-                    $(data.target).remove();
-                    this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
-                        type: 'clear_temp_data',
-                        year: data.year,
-                        code: data.code,
-                        number: data.number,
-                        table: data.table
-                    }).then(res => {
-                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + res.data.status + "】");
-                        addNotification({
-                            title: "清除暫存檔",
-                            message: "已清除完成。<p>" + data.year + "-" + data.code + "-" + data.number + (data.table ? " 表格：" + data.table : "") + "</p>",
-                            type: "success"
-                        });
-                        if (data.clean_all) {
-                            closeModal();
-                        }
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        this.isBusy = false;
-                    });
+            popup: () => {
+                showModal({
+                    title: "案件暫存檔清除 小幫手提示",
+                    body: `<h6 class="text-info">檢查下列的表格</h6>
+                    <ul>
+                      <!-- // 登記 -->
+                      <li>"MOICAT.RALID" => "A"   // 土地標示部</li>
+                      <li>"MOICAT.RBLOW" => "B"   // 土地所有權部</li>
+                      <li>"MOICAT.RCLOR" => "C"   // 他項權利部</li>
+                      <li>"MOICAT.RDBID" => "D"   // 建物標示部</li>
+                      <li>"MOICAT.REBOW" => "E"   // 建物所有權部</li>
+                      <li>"MOICAT.RLNID" => "L"   // 人檔</li>
+                      <li>"MOICAT.RRLSQ" => "R"   // 權利標的</li>
+                      <li>"MOICAT.RGALL" => "G"   // 其他登記事項</li>
+                      <li>"MOICAT.RMNGR" => "M"   // 管理者</li>
+                      <li>"MOICAT.RTOGH" => "T"   // 他項權利檔</li>
+                      <li>"MOICAT.RHD10" => "H"   // 基地坐落／地上建物</li>
+                      <li class="text-danger">"MOICAT.RINDX" => "II"  // 案件異動索引【不會清除】</li>
+                      <li>"MOICAT.RINXD" => "ID"</li>
+                      <li>"MOICAT.RINXR" => "IR"</li>
+                      <li>"MOICAT.RINXR_EN" => "IRE"</li>
+                      <li>"MOICAT.RJD14" => "J"</li>
+                      <li>"MOICAT.ROD31" => "O"</li>
+                      <li>"MOICAT.RPARK" => "P"</li>
+                      <li>"MOICAT.RPRCE" => "PB"</li>
+                      <li>"MOICAT.RSCNR" => "SR"</li>
+                      <li>"MOICAT.RSCNR_EN" => "SRE"</li>
+                      <li>"MOICAT.RVBLOW" => "VB"</li>
+                      <li>"MOICAT.RVCLOR" => "VC"</li>
+                      <li>"MOICAT.RVGALL" => "VG"</li>
+                      <li>"MOICAT.RVMNGR" => "VM"</li>
+                      <li>"MOICAT.RVPON" => "VP"  // 重測/重劃暫存</li>
+                      <li>"MOICAT.RVRLSQ" => "VR"</li>
+                      <li>"MOICAT.RXIDD04" => "ID"</li>
+                      <li>"MOICAT.RXLND" => "XL"</li>
+                      <li>"MOICAT.RXPRI" => "XP"</li>
+                      <li>"MOICAT.RXSEQ" => "XS"</li>
+                      <li>"MOICAT.B2104" => "BR"</li>
+                      <li>"MOICAT.B2118" => "BR"</li>
+                      <li>"MOICAT.BGALL" => "G"</li>
+                      <li>"MOICAT.BHD10" => "H"</li>
+                      <li>"MOICAT.BJD14" => "J"</li>
+                      <li>"MOICAT.BMNGR" => "M"</li>
+                      <li>"MOICAT.BOD31" => "O"</li>
+                      <li>"MOICAT.BPARK" => "P"</li>
+                      <li>"MOICAT.BRA26" => "C"</li>
+                      <li>"MOICAT.BRLSQ" => "R"</li>
+                      <li>"MOICAT.BXPRI" => "XP"</li>
+                      <li>"MOICAT.DGALL" => "G"</li>
+                      <!-- // 地價 -->
+                      <li>"MOIPRT.PPRCE" => "MA"</li>
+                      <li>"MOIPRT.PGALL" => "GG"</li>
+                      <li>"MOIPRT.PBLOW" => "LA"</li>
+                      <li>"MOIPRT.PALID" => "KA"</li>
+                      <li>"MOIPRT.PNLPO" => "NA"</li>
+                      <li>"MOIPRT.PBLNV" => "BA"</li>
+                      <li>"MOIPRT.PCLPR" => "CA"</li>
+                      <li>"MOIPRT.PFOLP" => "FA"</li>
+                      <li>"MOIPRT.PGOBP" => "GA"</li>
+                      <li>"MOIPRT.PAPRC" => "AA"</li>
+                      <li>"MOIPRT.PEOPR" => "EA"</li>
+                      <li>"MOIPRT.POA11" => "OA"</li>
+                      <li>"MOIPRT.PGOBPN" => "GA"</li>
+                      <!--<li>"MOIPRC.PKCLS" => "KK"</li>-->
+                      <li>"MOIPRT.PPRCE" => "MA"</li>
+                      <li>"MOIPRT.P76SCRN" => "SS"</li>
+                      <li>"MOIPRT.P21T01" => "TA"</li>
+                      <li>"MOIPRT.P76ALID" => "AS"</li>
+                      <li>"MOIPRT.P76BLOW" => "BS"</li>
+                      <li>"MOIPRT.P76CRED" => "BS"</li>
+                      <li>"MOIPRT.P76INDX" => "II"</li>
+                      <li>"MOIPRT.P76PRCE" => "UP"</li>
+                      <li>"MOIPRT.P76SCRN" => "SS"</li>
+                      <li>"MOIPRT.PAE0301" => "MA"</li>
+                      <li>"MOIPRT.PB010" => "TP"</li>
+                      <li>"MOIPRT.PB014" => "TB"</li>
+                      <li>"MOIPRT.PB015" => "TB"</li>
+                      <li>"MOIPRT.PB016" => "TB"</li>
+                      <li class="text-danger">"MOIPRT.PHIND" => "II"  // 案件異動索引【不會清除】</li>
+                      <li>"MOIPRT.PNLPO" => "NA"</li>
+                      <li>"MOIPRT.POA11" => "OA"</li>
+                    </ul>`,
+                    size: "lg"
                 });
             }
         },
@@ -1235,9 +1329,9 @@ if (Vue) {
             this.isBusy = true;
             this.$http.post(CONFIG.JSON_API_EP, {
                 type: "query_temp_data",
-                year: this.bakedData["RM01"],
-                code: this.bakedData["RM02"],
-                number: this.bakedData["RM03"]
+                year: this.year,
+                code: this.code,
+                number: this.number
             }).then(res => {
                 this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢暫存資料回傳狀態碼有問題【${res.data.status}】`);
                 
@@ -1245,10 +1339,17 @@ if (Vue) {
                 this.filtered = res.data.raw.filter((item, index, array) => {
                     return item[1].length > 0;
                 });
-
-                if (this.found) {
-                    this.attachEvent();
-                }
+                
+                this.filtered = [
+                    ["test", [
+                        { key1: "1", key2: "2", aaa: "3"}
+                    ], "SQL BLABLA"],
+                    ["test2222", [
+                        { key1: "1", key2: "2", aaa: "3"}
+                    ], "SQL qqqqq"]
+                ];
+                // initialize backup flag array for backup detection
+                this.backupFlags = Array(this.filtered.length).fill(false);
             }).catch(err => {
                 this.error = err;
             }).finally(() => {

@@ -301,7 +301,7 @@ if (Vue) {
                       <li>"MOIPRT.PB014" => "TB"</li>
                       <li>"MOIPRT.PB015" => "TB"</li>
                       <li>"MOIPRT.PB016" => "TB"</li>
-                      <li>"MOIPRT.PHIND" => "II"</li>
+                      <li class="text-danger">"MOIPRT.PHIND" => "II"  // 案件異動索引【不會清除】</li>
                       <li>"MOIPRT.PNLPO" => "NA"</li>
                       <li>"MOIPRT.POA11" => "OA"</li>
                     </ul>`,
