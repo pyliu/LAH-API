@@ -1429,8 +1429,7 @@ $(document).ready(() => {
                     showModal({
                         message: this.$createElement("case-reg-detail", {
                             props: {
-                                jsonObj: jsonObj,
-                                enabled_userinfo: this.isAdmin
+                                jsonObj: jsonObj
                             }
                         }),
                         title: "登記案件詳情",

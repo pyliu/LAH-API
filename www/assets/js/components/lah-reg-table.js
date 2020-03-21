@@ -45,7 +45,13 @@ if (Vue) {
                 {key: "RM07_1", label: "收件日期", sortable: true},
                 {key: "RM09", label: "登記代碼", sortable: true}
             ],
-            md_fields: {},
+            md_fields: [
+                '序號',
+                {key: "RM01", label: "收件字號", sortable: true},
+                {key: "RM07_1", label: "收件日期", sortable: true},
+                {key: "RM09", label: "登記代碼", sortable: true}
+                /**收件字號	收件日期	限辦	辦理情形	收件人員	作業人員	初審人員	複審人員	准登人員	登記人員	校對人員	結案人員 */
+            ],
             lg_fields: {},
             xl_fields: {},
             size: "sm"

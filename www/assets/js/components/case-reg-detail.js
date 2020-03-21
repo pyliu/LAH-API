@@ -189,7 +189,6 @@ if (Vue) {
                 case_status_url: "",
                 case_data_url: "",
                 is_ongoing: false,
-                enabled_card: true,
                 show_op_card: true
             }
         },
@@ -214,9 +213,7 @@ if (Vue) {
             this.is_ongoing = this.empty(this.jsonObj.結案已否);
         },
         mounted() {
-            if (this.enabled_card) {
-                addUserInfoEvent();
-            }
+            addUserInfoEvent();
         }
     });
 } else {
