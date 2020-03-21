@@ -126,11 +126,9 @@ class RegCaseData {
         return $str;
     }
 
-    public function getJsonHtmlData($flag = 0) {
-        // database charset is big5, so we need to convert it to utf-8 for frontend
-        //$row = $this->convertCharset();
+    public function getBakedData() {
         $row = &$this->row;
-        $result = array(
+        return array(
             "收件字號" => $row["RM01"]."-".$row["RM02"]."-".$row["RM03"],
             "收件時間" => RegCaseData::toDate($row["RM07_1"])." ".RegCaseData::toDate($row["RM07_2"]),
             "測量案件" => $row["RM04"]."-".$row["RM05"]."-".$row["RM06"],
@@ -195,6 +193,12 @@ class RegCaseData {
             "預定結案日期" => RegCaseData::toDate($row["RM29_1"])." ".RegCaseData::toDate($row["RM29_2"]),
             "結案與否" => empty($this->row["RM31"]) ? "否" : "是【".$this->row["RM31"]."】"
         );
+    }
+
+    public function getJsonHtmlData($flag = 0) {
+        // database charset is big5, so we need to convert it to utf-8 for frontend
+        //$row = $this->convertCharset();
+        $result = $this->getBakedData();
         return json_encode($result, $flag);
     }
 
