@@ -1416,26 +1416,23 @@ $(document).ready(() => {
                     type: "reg_case",
                     id: id
                 }).then(res => {
-                    this.showRegCase(res.data);
+                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                        showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
+                        return;
+                    } else {
+                        showModal({
+                            message: this.$createElement("case-reg-detail", {
+                                props: {
+                                    jsonObj: res.data
+                                }
+                            }),
+                            title: "登記案件詳情",
+                            size: "lg"
+                        });
+                    }
                 }).catch(err => {
                     this.error = err;
                 });
-            },
-            showRegCase: function(jsonObj) {
-                if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL || jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                    showAlert({title: "顯示登記案件詳情", message: jsonObj.message, type: "danger"});
-                    return;
-                } else {
-                    showModal({
-                        message: this.$createElement("case-reg-detail", {
-                            props: {
-                                jsonObj: jsonObj
-                            }
-                        }),
-                        title: "登記案件詳情",
-                        size: "lg"
-                    });
-                }
             },
             fetchUserInfo: function(e) {
                 if (CONFIG.DISABLE_MSDB_QUERY) {

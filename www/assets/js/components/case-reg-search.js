@@ -45,7 +45,20 @@ if (Vue) {
                     type: "reg_case",
                     id: trim(`${this.year}${this.code}${this.num}`)
                 }).then(res => {
-                    window.vueApp.showRegCase(res.data, true);
+                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                        showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
+                        return;
+                    } else {
+                        showModal({
+                            message: this.$createElement("case-reg-detail", {
+                                props: {
+                                    jsonObj: res.data
+                                }
+                            }),
+                            title: "登記案件詳情",
+                            size: "lg"
+                        });
+                    }
                 }).catch(err => {
                     this.error = err;
                 }).finally(() => {
