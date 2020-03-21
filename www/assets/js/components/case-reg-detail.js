@@ -7,7 +7,7 @@ if (Vue) {
                     <b-tab>
                         <template v-slot:title>
                             <strong>收件資料</strong>
-                            <b-button variant="muted" size="sm" @click.stop="window.vueApp.open(case_data_url, $event)" :title="'收件資料 on ' + ap_server"><lah-fa-icon icon="external-link-alt" variant="primary"></lah-fa-icon></b-button>
+                            <b-link variant="muted" @click.stop="window.vueApp.open(case_data_url, $event)" :title="'收件資料 on ' + ap_server"><lah-fa-icon icon="external-link-alt" variant="primary"></lah-fa-icon></b-link>
                         </template>
                         <b-card-body>
                             <b-form-row class="mb-1">
@@ -44,7 +44,7 @@ if (Vue) {
                     <b-tab>
                         <template v-slot:title>
                             <strong>辦理情形</strong>
-                            <b-button variant="muted" size="sm" @click.stop="window.vueApp.open(case_status_url, $event)" title="案件辦理情形"><lah-fa-icon icon="external-link-alt" variant="secondary"></lah-fa-icon></b-button>
+                            <b-link variant="muted" @click.stop="window.vueApp.open(case_status_url, $event)" title="案件辦理情形"><lah-fa-icon icon="external-link-alt" variant="primary"></lah-fa-icon></b-link>
                         </template>
                         <b-card-body>
                             <b-list-group flush compact>
@@ -175,8 +175,18 @@ if (Vue) {
                             </b-list-group>
                         </b-card-body>
                     </b-tab>
-                    <b-tab v-if="isAdmin" title="狀態管理" lazy><lah-reg-case-state-mgt :baked-data="jsonObj"></lah-reg-case-state-mgt></b-tab>
-                    <b-tab v-if="isAdmin" title="暫存檔管理" lazy><lah-reg-case-temp-mgt :baked-data="jsonObj"></lah-reg-case-temp-mgt></b-tab>
+                    <b-tab v-if="isAdmin" lazy>
+                        <template v-slot:title>
+                            <lah-fa-icon icon="database"> <strong>狀態管理</strong></lah-fa-icon>
+                        </template>
+                        <lah-reg-case-state-mgt :baked-data="jsonObj"></lah-reg-case-state-mgt>
+                    </b-tab>
+                    <b-tab v-if="isAdmin" lazy>
+                        <template v-slot:title>
+                            <lah-fa-icon icon="buffer" prefix="fab"> <strong>暫存檔管理</strong></lah-fa-icon>
+                        </template>
+                        <lah-reg-case-temp-mgt :baked-data="jsonObj"></lah-reg-case-temp-mgt>
+                    </b-tab>
                 </b-tabs>
             </b-card>
         </div>`,
