@@ -21,7 +21,7 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-      <lah-reg-table :rawdata="settings['rawdata']" max-height="200" icon="chevron-circle-right"></lah-reg-table>
+      <lah-reg-table :baked-data="settings['rawdata']" max-height="200" icon="chevron-circle-right"></lah-reg-table>
       <lah-user-card id="HB0541"></lah-user-card>
       <b-card-group deck>
         <b-card v-for="n in 5"
@@ -50,12 +50,12 @@
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/localforage.min.js"></script>
   <script src="assets/js/global.js"></script>
-  <script src="assets/js/components/lah-vue.js"></script>
+  <script src="assets/js/components/lah-global.js"></script>
+  <script src="assets/js/components/lah-components.js"></script>
   <script src="assets/js/components/fee-query-board.js"></script>
   <script src="assets/js/components/xcase-check.js"></script>
   <script src="assets/js/components/easycard-payment-check.js"></script>
   <script src="assets/js/components/announcement-mgt.js"></script>
-  <script src="assets/js/components/lah-reg-table.js"></script>
   <script src="assets/js/Chart.min.js"></script>
   <script src="assets/js/components/case-reg-detail.js"></script>
 
@@ -70,7 +70,7 @@
           { type: 'crsms', id: 'H122611667' }
       ).then(response => {
           // on success
-          vueApp.setSetting('rawdata', response.data.raw);
+          vueApp.setSetting('rawdata', response.data.baked);
       }).catch(error => {
           console.log(error);
       }).finally(() => {});

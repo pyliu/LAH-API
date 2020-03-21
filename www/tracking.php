@@ -142,7 +142,8 @@ canvas {
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/localforage.min.js"></script>
   <script src="assets/js/global.js"></script>
-  <script src="assets/js/components/lah-vue.js"></script>
+  <script src="assets/js/components/lah-global.js"></script>
+  <script src="assets/js/components/lah-components.js"></script>
   <script src="assets/js/xhr_query.js"></script>
 
   <script src="assets/js/table_sort.js"></script>
