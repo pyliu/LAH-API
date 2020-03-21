@@ -21,7 +21,7 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-      <lah-reg-table :baked-data="settings['rawdata']" max-height="200" icon="chevron-circle-right"></lah-reg-table>
+      <lah-reg-table :baked-data="settings['bakedData']" max-height="200" icon="chevron-circle-right"></lah-reg-table>
       <lah-user-card id="HB0541"></lah-user-card>
       <b-card-group deck>
         <b-card v-for="n in 5"
@@ -63,14 +63,14 @@
   <script type="text/javascript">
     
     $(document).ready(e => {
-      vueApp.setSetting('rawdata', undefined);
+      vueApp.setSetting('bakedData', undefined);
 
       axios.post(
           CONFIG.JSON_API_EP,
           { type: 'crsms', id: 'H122611667' }
       ).then(response => {
           // on success
-          vueApp.setSetting('rawdata', response.data.baked);
+          vueApp.setSetting('bakedData', response.data.baked);
       }).catch(error => {
           console.log(error);
       }).finally(() => {});
