@@ -165,7 +165,7 @@ if (Vue) {
                             addAnimatedCSS(".reg_case_id", {
                                 name: "flash"
                             }).off("click").on("click", e => {
-                                window.vueApp.fetchRegCase(e, true);
+                                window.vueApp.fetchRegCase(e);
                             });
                         }
                     });

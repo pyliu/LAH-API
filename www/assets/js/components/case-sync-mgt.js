@@ -115,7 +115,7 @@ if (Vue) {
                                     $(element).on("click", that.syncCaseColumn.bind(that, id, column));
                                 });
                                 $("#sync_x_case_serial").off("click").on("click", function(e) {
-                                    window.vueApp.fetchRegCase(e, true)
+                                    window.vueApp.fetchRegCase(e)
                                 });
                             },
                             size: "lg"
@@ -150,7 +150,7 @@ if (Vue) {
                             message: html,
                             type: "success",
                             callback: () => $("#sync_x_case_serial").off("click").on("click", function(e) {
-                                window.vueApp.fetchRegCase(e, true);
+                                window.vueApp.fetchRegCase(e);
                             })
                         });
                     }

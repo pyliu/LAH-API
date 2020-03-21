@@ -1406,7 +1406,7 @@ $(document).ready(() => {
                 let response = await fetch(url, opts);
                 return opts.blob ? await response.blob() : await response.json();
             },
-            fetchRegCase: function(e, enabled_userinfo = false) {
+            fetchRegCase: function(e) {
                 // ajax event binding
                 let clicked_element = $(e.target);
                 // remove additional characters for querying
@@ -1416,12 +1416,12 @@ $(document).ready(() => {
                     type: "reg_case",
                     id: id
                 }).then(res => {
-                    this.showRegCase(res.data, enabled_userinfo);
+                    this.showRegCase(res.data);
                 }).catch(err => {
                     this.error = err;
                 });
             },
-            showRegCase: function(jsonObj, enabled_userinfo = false) {
+            showRegCase: function(jsonObj) {
                 if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL || jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
                     showAlert({title: "顯示登記案件詳情", message: jsonObj.message, type: "danger"});
                     return;

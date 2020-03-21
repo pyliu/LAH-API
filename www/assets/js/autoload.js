@@ -84,7 +84,7 @@ function adjustTableContent() {
         $(".focused-element").removeClass("focused-element");
         clicked_element.addClass("focused-element");
         scrollToElement(clicked_element);
-        window.vueApp.fetchRegCase(e, true);
+        window.vueApp.fetchRegCase(e);
     });
     // user info dialog event
     console.assert(addUserInfoEvent, "Can't find addUserInfoEvent function ... do you include global.js?")
