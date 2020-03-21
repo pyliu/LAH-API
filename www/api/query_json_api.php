@@ -279,11 +279,17 @@ switch ($_POST["type"]) {
 			$log->info("XHR [crsms] 查無資料");
 			echoErrorJSONString();
 		} else {
+			$baked = array();
+			foreach ($query_result as $key => $row) {
+				$data = new RegCaseData($row);
+				$baked[] = $data->getBakedData();
+			}
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => count($query_result),
 				"query_string" => $_POST["id"],
-				"raw" => $query_result
+				"raw" => $query_result,
+				"baked" => $baked
 			);
 			$log->info("XHR [crsms] 查詢成功");
 			echo json_encode($result, 0);
