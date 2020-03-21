@@ -1342,14 +1342,6 @@ if (Vue) {
                     return item[1].length > 0;
                 });
                 
-                this.filtered = [
-                    ["test", [
-                        { key1: "1", key2: "2", aaa: "3"}
-                    ], "SQL BLABLA"],
-                    ["test2222", [
-                        { key1: "1", key2: "2", aaa: "3"}
-                    ], "SQL qqqqq"]
-                ];
                 // initialize backup flag array for backup detection
                 this.backupFlags = Array(this.filtered.length).fill(false);
             }).catch(err => {
