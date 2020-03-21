@@ -1,5 +1,7 @@
 if (Vue) {
-    
+    /**
+     * Land-Affairs-Helper(lah) Vue components
+     */
     Vue.component("lah-alert", {
         template: `<div id="bs_alert_template">
             <lah-transition

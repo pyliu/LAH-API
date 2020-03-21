@@ -1,5 +1,5 @@
 /**
- * Land-Affairs-Helper(lah) Vue custom components
+ * Land-Affairs-Helper(lah) Vue global setup
  */
 console.assert(typeof jQuery == "function", "jQuery is not loaded, did you include jquery.min.js in the page??");
 console.assert(typeof CONFIG == "object", "CONFIG is not loaded, did you include global.js in the page??");
