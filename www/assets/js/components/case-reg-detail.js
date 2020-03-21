@@ -95,6 +95,18 @@ if (Vue) {
                                                 <b-col>收件時間：{{jsonObj.收件時間}}</b-col>
                                             </b-form-row>
                                         </b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.移轉課長)">
+                                            <b-form-row>
+                                                <b-col>移轉課長：<span class='user_tag' >{{jsonObj.移轉課長}}</span></b-col>
+                                                <b-col>移轉課長時間：{{jsonObj.移轉課長時間}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
+                                        <b-list-group-item v-if="!empty(jsonObj.移轉秘書)">
+                                            <b-form-row>
+                                                <b-col>移轉秘書：<span class='user_tag' >{{jsonObj.移轉秘書}}</span></b-col>
+                                                <b-col>移轉秘書時間：{{jsonObj.移轉秘書時間}}</b-col>
+                                            </b-form-row>
+                                        </b-list-group-item>
                                         <b-list-group-item v-if="!empty(jsonObj.初審人員)">
                                             <b-form-row>
                                                 <b-col>初審人員：<span class='user_tag' >{{jsonObj.初審人員}}</span></b-col>
