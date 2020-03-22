@@ -735,18 +735,20 @@ if (Vue) {
 
                 <template v-slot:cell(RM01)="row">
                     <lah-fa-icon :icon="icon" :variant="iconVariant" v-if='icon'></lah-fa-icon>
-                    <a href="javascript:void(0)" @click="fetch(row.item)">{{row.item["收件字號"]}}</a>
+                    <a href="javascript:void(0)" @click="fetch(row.item)">{{bakedContent(row)}}</a>
                 </template>
 
                 <template v-slot:cell(RM09)="row">
                     {{row.item["RM09"] + ":" + row.item["RM09_CHT"]}}</span>
                 </template>
+
+                <template v-slot:cell(RM30)="row">
+                    {{bakedContent(row)}}
+                </template>
             </b-table>
         </lah-transition>`,
-        props: ['bakedData', 'maxHeight', 'icon', 'iconVariant'],
-        data: () => { return {
-            size: "sm"
-        } },
+        props: ['bakedData', 'maxHeight', 'icon', 'iconVariant', 'size'],
+        data: () => { return { } },
         computed: {
             fields: function() {
                 switch(this.size) {
@@ -756,7 +758,9 @@ if (Vue) {
                             '序號',
                             {key: "RM01", label: "收件字號", sortable: true},
                             {key: "RM07_1", label: "收件日期", sortable: true},
-                            {key: "RM09", label: "登記代碼", sortable: true}
+                            {key: "RM09", label: "登記原因", sortable: true},
+                            {key: "RM30", label: "辦理情形", sortable: true},
+                            {key: "RM29_1", label: "限辦期限", sortable: true},
                         ];
                     case "lg":
                         return ['序號'];
@@ -799,9 +803,12 @@ if (Vue) {
                 }).catch(err => {
                     this.error = err;
                 });
+            },
+            bakedContent: function(row) {
+                return row.item[row.field.label];
             }
         },
-        created() {},
+        created() { this.size = this.size || 'md' },
         mounted() {}
     });
 
