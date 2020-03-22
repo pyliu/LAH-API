@@ -895,7 +895,7 @@ if (Vue) {
                     <b-button @click="updateRM42" size="sm" variant="outline-primary"><lah-fa-icon icon="edit"> 更新</lah-fa-icon></b-button>
                 </div>
             </div>
-            <p v-if="showProgress" class="mt-2"><lah-reg-table size="md" :bakedData="[bakedData]" size="lg" class="text-center small"></lah-reg-table></p>
+            <p v-if="showProgress" class="mt-2"><lah-reg-table size="sm" :bakedData="[bakedData]" class="text-center small"></lah-reg-table></p>
         </div>`,
         props: ["bakedData", 'progress'],
         data: () => { return {
