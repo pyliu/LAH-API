@@ -1108,7 +1108,7 @@ if (Vue) {
         }},
         computed: {
             found() { return !this.empty(this.filtered) },
-            prefix() { return `${this.bakedData["RM01"]}-${this.bakedData["RM02"]}-${this.bakedData["RM03"]}` },
+            prefix() { return `${this.year}-${this.code}-${this.number}` },
             year() { return this.bakedData ? this.bakedData["RM01"] : this.id.substring(0, 3) },
             code() { return this.bakedData ? this.bakedData["RM02"] : this.id.substring(3, 7) },
             number() { return this.bakedData ? this.bakedData["RM03"] : this.id.substring(7) }
