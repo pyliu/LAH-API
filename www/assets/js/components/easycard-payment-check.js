@@ -84,6 +84,11 @@ if (Vue) {
                 });
             }
         },
+        created: function() {
+            let d = new Date();
+            this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+            this.ad_date = d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+        },
         components: {
             "easycard-payment-check-item": {
                 template: `<ul style="font-size: 0.9rem">
@@ -150,13 +155,7 @@ if (Vue) {
                     }
                 }
             }
-        },
-        created: function() {
-            let d = new Date();
-            this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
-            this.ad_date = d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
-        },
-        mounted: function() { }
+        }
     });
 } else {
     console.error("vue.js not ready ... easycard-payment-check component can not be loaded.");

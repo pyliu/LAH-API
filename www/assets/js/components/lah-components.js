@@ -751,15 +751,16 @@ if (Vue) {
             fields: function() {
                 switch(this.size) {
                     case "md":
+                        // 序號	收件字號 登記原因 辦理情形 初審人員 作業人員 收件時間 限辦期限
                         return [
                             '序號',
                             {key: "RM01", label: "收件字號", sortable: true},
                             {key: "RM07_1", label: "收件日期", sortable: true},
                             {key: "RM09", label: "登記代碼", sortable: true}
-                            /**收件字號	收件日期	限辦	辦理情形	收件人員	作業人員	初審人員	複審人員	准登人員	登記人員	校對人員	結案人員 */
                         ];
                     case "lg":
                         return ['序號'];
+                            /**收件字號	收件日期	限辦	辦理情形	收件人員	作業人員	初審人員	複審人員	准登人員	登記人員	校對人員	結案人員 */
                     case "xl":
                         return ['序號'];
                     default:
@@ -1099,7 +1100,7 @@ if (Vue) {
             </div>
             <lah-fa-icon v-else icon="exclamation-circle" variant="success"> 無暫存檔。</lah-fa-icon>
         </div>`,
-        props: ["bakedData"],
+        props: ["bakedData", 'id'],
         data: function() { return {
             filtered: null,
             cleanAllBackupFlag: false,
