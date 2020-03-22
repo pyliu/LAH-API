@@ -810,15 +810,15 @@ if (Vue) {
             <div class="form-row mt-1">
                 <b-input-group size="sm" class="col">
                     <b-input-group-prepend is-text>案件辦理情形</b-input-group-prepend>
-                    <b-form-select v-model="rm30" :options="rm30_mapping">
+                    <b-form-select v-model="rm30" :options="rm30_map" class="h-100">
                         <template v-slot:first>
                             <b-form-select-option :value="null" disabled>-- 請選擇狀態 --</b-form-select-option>
                         </template>
                     </b-form-select>
                 </b-input-group>
-                <b-input-group v-if="wip" size="sm" class="col-3 small">
+                <b-input-group v-if="wip" size="sm" class="col-3">
                     <b-form-checkbox v-model="sync_rm30_1" name="reg_case_RM30_1_checkbox" switch class="my-auto">
-                        同步作業人員
+                        <small>同步作業人員</small>
                     </b-form-checkbox>
                 </b-input-group>
                 <div v-if="wip" class="filter-btn-group col-auto">
@@ -828,7 +828,7 @@ if (Vue) {
             <div class="form-row mt-1">
                 <b-input-group size="sm" class="col">
                     <b-input-group-prepend is-text>登記處理註記</b-input-group-prepend>
-                    <b-form-select v-model="rm39" :options="rm39_mapping">
+                    <b-form-select v-model="rm39" :options="rm39_map">
                         <template v-slot:first>
                             <b-form-select-option value="">-- 更新為無狀態 --</b-form-select-option>
                         </template>
@@ -841,7 +841,7 @@ if (Vue) {
             <div class="form-row mt-1">
                 <b-input-group size="sm" class="col">
                     <b-input-group-prepend is-text>地價處理註記</b-input-group-prepend>
-                    <b-form-select v-model="rm42" :options="rm42_mapping">
+                    <b-form-select v-model="rm42" :options="rm42_map">
                         <template v-slot:first>
                             <b-form-select-option value="">-- 更新為無狀態 --</b-form-select-option>
                         </template>
@@ -864,46 +864,46 @@ if (Vue) {
             rm31: "",
             sync_rm30_1: true,
             wip: false,
-            rm30_mapping: {
-                A: "A: 初審",
-                B: "B: 複審",
-                H: "C: 公告",
-                I: "I: 補正",
-                R: "R: 登錄",
-                C: "C: 校對",
-                U: "U: 異動完成",
-                F: "F: 結案",
-                X: "X: 補正初核",
-                Y: "Y: 駁回初核",
-                J: "J: 撤回初核",
-                K: "K: 撤回",
-                Z: "Z: 歸檔",
-                N: "N: 駁回",
-                L: "L: 公告初核",
-                E: "E: 請示",
-                D: "D: 展期"
-            },
-            rm39_mapping: {
-                B: "B: 登錄開始",
-                R: "R: 登錄完成",
-                C: "C: 校對開始",
-                D: "D: 校對完成",
-                S: "S: 異動開始",
-                F: "F: 異動完成",
-                G: "G: 異動有誤",
-                P: "P: 競合暫停"
-            },
-            rm42_mapping: {
-                '0': "0: 登記移案",
-                B: "B: 登錄中",
-                R: "R: 登錄完成",
-                C: "C: 校對中",
-                D: "D: 校對完成",
-                E: "E: 登錄有誤",
-                S: "S: 異動開始",
-                F: "F: 異動完成",
-                G: "G: 異動有誤"
-            }
+            rm30_map: [
+                { value: 'A', text: 'A: 初審' },
+                { value: 'B', text: 'B: 複審' },
+                { value: 'C', text: 'C: 公告' },
+                { value: 'I', text: 'I: 補正' },
+                { value: 'R', text: 'R: 登錄' },
+                { value: 'C', text: 'C: 校對' },
+                { value: 'U', text: 'U: 異動完成' },
+                { value: 'F', text: 'F: 結案' },
+                { value: 'X', text: 'X: 補正初核' },
+                { value: 'Y', text: 'Y: 駁回初核' },
+                { value: 'J', text: 'J: 撤回初核' },
+                { value: 'K', text: 'K: 撤回' },
+                { value: 'Z', text: 'Z: 歸檔' },
+                { value: 'N', text: 'N: 駁回' },
+                { value: 'L', text: 'L: 公告初核' },
+                { value: 'E', text: 'E: 請示' },
+                { value: 'D', text: 'D: 展期' },
+            ],
+            rm39_map: [
+                { value: 'B', text: 'B: 登錄開始' },
+                { value: 'R', text: 'R: 登錄完成' },
+                { value: 'C', text: 'C: 校對開始' },
+                { value: 'D', text: 'D: 校對完成' },
+                { value: 'S', text: 'S: 異動開始' },
+                { value: 'F', text: 'F: 異動完成' },
+                { value: 'G', text: 'G: 異動有誤' },
+                { value: 'P', text: 'P: 競合暫停' },
+            ],
+            rm42_map: [
+                { value: '0', text: '0: 登記移案' },
+                { value: 'B', text: 'B: 登錄中' },
+                { value: 'R', text: 'R: 登錄完成' },
+                { value: 'C', text: 'C: 校對中' },
+                { value: 'D', text: 'D: 校對完成' },
+                { value: 'E', text: 'E: 登錄有誤' },
+                { value: 'S', text: 'S: 異動開始' },
+                { value: 'F', text: 'F: 異動完成' },
+                { value: 'G', text: 'G: 異動有誤' }
+            ]
         } },
         computed: {
             showProgress() { return !this.empty(this.progress) },
