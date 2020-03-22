@@ -734,16 +734,23 @@ if (Vue) {
                 </template>
 
                 <template v-slot:cell(RM01)="row">
-                    <lah-fa-icon :icon="icon" :variant="iconVariant" v-if='icon'></lah-fa-icon>
+                    <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
                     <a href="javascript:void(0)" @click="fetch(row.item)">{{bakedContent(row)}}</a>
                 </template>
-
-                <template v-slot:cell(RM09)="row">
-                    {{row.item["RM09"] + ":" + row.item["RM09_CHT"]}}</span>
+                <template v-slot:cell(收件字號)="row">
+                    <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
+                    <a href="javascript:void(0)" @click="fetch(row.item)">{{row.item['收件字號']}}</a>
                 </template>
 
-                <template v-slot:cell(RM30)="row">
-                    {{bakedContent(row)}}
+                <template v-slot:cell(登記原因)="row">
+                    {{reason(row)}}
+                </template>
+                <template v-slot:cell(RM09)="row">
+                    {{reason(row)}}
+                </template>
+
+                <template v-slot:cell(RM29_1)="{ item }">
+                    {{duedate(item)}}
                 </template>
             </b-table>
         </lah-transition>`,
@@ -756,11 +763,13 @@ if (Vue) {
                         // 序號	收件字號 登記原因 辦理情形 初審人員 作業人員 收件時間 限辦期限
                         return [
                             '序號',
-                            {key: "RM01", label: "收件字號", sortable: true},
-                            {key: "RM07_1", label: "收件日期", sortable: true},
-                            {key: "RM09", label: "登記原因", sortable: true},
-                            {key: "RM30", label: "辦理情形", sortable: true},
-                            {key: "RM29_1", label: "限辦期限", sortable: true},
+                            {key: "收件字號", sortable: true},
+                            {key: "登記原因", sortable: true},
+                            {key: "辦理情形", sortable: true},
+                            {key: "初審人員", sortable: true},
+                            {key: "作業人員", sortable: true},
+                            {key: "收件時間", sortable: true},
+                            {key: "RM29_1", label: "限辦期限", sortable: true}
                         ];
                     case "lg":
                         return ['序號'];
@@ -782,7 +791,8 @@ if (Vue) {
             style() {
                 const parsed = parseInt(this.maxHeight);
                 return isNaN(parsed) ? '' : `max-height: ${parsed}px`;
-            }
+            },
+            showIcon() { return !this.empty(this.icon) }
         },
         methods: {
             fetch(data) {
@@ -806,9 +816,15 @@ if (Vue) {
             },
             bakedContent: function(row) {
                 return row.item[row.field.label];
+            },
+            reason: function(row) {
+                return this.empty(row.item["登記原因"]) ? row.item["RM09"] + ":" + row.item["RM09_CHT"] : row.item["登記原因"];
+            },
+            duedate: function(item) {
+                return item['RM29_1'] + ' ' + item['RM29_2'];
             }
         },
-        created() { this.size = this.size || 'md' },
+        created() { this.size = this.size || '' },
         mounted() {}
     });
 
@@ -837,7 +853,7 @@ if (Vue) {
                     <b-input-group-prepend is-text>登記處理註記</b-input-group-prepend>
                     <b-form-select v-model="rm39" :options="rm39_map">
                         <template v-slot:first>
-                            <b-form-select-option value="">-- 更新為無狀態 --</b-form-select-option>
+                            <b-form-select-option value="">-- 無狀態 --</b-form-select-option>
                         </template>
                     </b-form-select>
                 </b-input-group>
@@ -850,7 +866,7 @@ if (Vue) {
                     <b-input-group-prepend is-text>地價處理註記</b-input-group-prepend>
                     <b-form-select v-model="rm42" :options="rm42_map">
                         <template v-slot:first>
-                            <b-form-select-option value="">-- 更新為無狀態 --</b-form-select-option>
+                            <b-form-select-option value="">-- 無狀態 --</b-form-select-option>
                         </template>
                     </b-form-select>
                 </b-input-group>
