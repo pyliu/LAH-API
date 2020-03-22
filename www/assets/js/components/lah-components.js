@@ -717,11 +717,10 @@ if (Vue) {
                 small
                 head-variant="dark"
                 caption-top
-                class="text-center"
                 :sticky-header="sticky"
                 :caption="caption"
                 :items="bakedData"
-                :fields="fields"
+                :fields="tblFields"
                 :style="style"
                 :busy="!bakedData"
             >
@@ -750,10 +749,11 @@ if (Vue) {
                 </template>
             </b-table>
         </lah-transition>`,
-        props: ['bakedData', 'maxHeight', 'icon', 'iconVariant', 'size'],
+        props: ['bakedData', 'maxHeight', 'icon', 'iconVariant', 'size', 'fields'],
         data: () => { return { } },
         computed: {
-            fields: function() {
+            tblFields: function() {
+                if (!this.empty(this.fields)) return this.fields;
                 switch(this.size) {
                     case "md":
                         return [
@@ -845,7 +845,7 @@ if (Vue) {
                 return this.empty(row.item["登記原因"]) ? row.item["RM09"] + ":" + row.item["RM09_CHT"] : row.item["登記原因"];
             }
         },
-        created() { this.size = this.size || 'lg' },
+        created() { this.size = this.size || '' },
         mounted() {}
     });
 
@@ -895,7 +895,7 @@ if (Vue) {
                     <b-button @click="updateRM42" size="sm" variant="outline-primary"><lah-fa-icon icon="edit"> 更新</lah-fa-icon></b-button>
                 </div>
             </div>
-            <p v-if="showProgress" v-html="bakedData.tr_html" class="mt-2"></p>
+            <p v-if="showProgress" class="mt-2"><lah-reg-table size="md" :bakedData="[bakedData]" size="lg" class="text-center small"></lah-reg-table></p>
         </div>`,
         props: ["bakedData", 'progress'],
         data: () => { return {
@@ -947,6 +947,15 @@ if (Vue) {
                 { value: 'S', text: 'S: 異動開始' },
                 { value: 'F', text: 'F: 異動完成' },
                 { value: 'G', text: 'G: 異動有誤' }
+            ],
+            fields: [
+                {key: "收件字號", sortable: true},
+                {key: "登記原因", sortable: true},
+                {key: "辦理情形", sortable: true},
+                {key: "作業人員", sortable: true},
+                {key: "登記處理註記", label: "登記註記", sortable: true},
+                {key: "地價處理註記", label: "地價註記", sortable: true},
+                {key: "預定結案日期", label:"期限", sortable: true}
             ]
         } },
         computed: {
