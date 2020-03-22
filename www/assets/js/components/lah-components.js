@@ -808,48 +808,47 @@ if (Vue) {
     Vue.component('lah-reg-case-state-mgt', {
         template: `<div>
             <div class="form-row mt-1">
-                <div class="input-group input-group-sm col">	
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-reg_case_RM30_select">案件辦理情形</span>
-                    </div>
-                    <select v-model="rm30" id='reg_case_RM30_select' class="form-control" aria-label="案件辦理情形" aria-describedby="inputGroup-reg_case_RM30_select" required>
-                        <option v-for="(item, key) in rm30_mapping" :value="key">{{key}}: {{item}}</option>
-                    </select>
-                </div>
-                <div v-if="wip" class="input-group input-group-sm col-3 small">
-                    <input v-model="sync_rm30_1" type="checkbox" id="reg_case_RM30_1_checkbox" class="my-auto mr-2" aria-label="同步作業人員" aria-describedby="inputGroup-reg_case_RM30_1_checkbox" required />
-                    <label for="reg_case_RM30_1_checkbox" class="my-auto">同步作業人員</label>
-                </div>
+                <b-input-group size="sm" class="col">
+                    <b-input-group-prepend is-text>案件辦理情形</b-input-group-prepend>
+                    <b-form-select v-model="rm30" :options="rm30_mapping">
+                        <template v-slot:first>
+                            <b-form-select-option :value="null" disabled>-- 請選擇狀態 --</b-form-select-option>
+                        </template>
+                    </b-form-select>
+                </b-input-group>
+                <b-input-group v-if="wip" size="sm" class="col-3 small">
+                    <b-form-checkbox v-model="sync_rm30_1" name="reg_case_RM30_1_checkbox" switch class="my-auto">
+                        同步作業人員
+                    </b-form-checkbox>
+                </b-input-group>
                 <div v-if="wip" class="filter-btn-group col-auto">
-                    <button @click="updateRM30" class="btn btn-sm btn-outline-primary">更新</button>
+                    <b-button @click="updateRM30" size="sm" variant="outline-primary"><lah-fa-icon icon="edit"> 更新</lah-fa-icon></b-button>
                 </div>
             </div>
             <div class="form-row mt-1">
-                <div class="input-group input-group-sm col">	
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-reg_case_RM39_select">登記處理註記</span>
-                    </div>
-                    <select v-model="rm39" id='reg_case_RM39_select' class="form-control" aria-label="登記處理註記" aria-describedby="inputGroup-reg_case_RM39_select" required>
-                        <option value=""></option>
-                        <option v-for="(item, key) in rm39_mapping" :value="key">{{key}}: {{item}}</option>
-                    </select>
-                </div>
+                <b-input-group size="sm" class="col">
+                    <b-input-group-prepend is-text>登記處理註記</b-input-group-prepend>
+                    <b-form-select v-model="rm39" :options="rm39_mapping">
+                        <template v-slot:first>
+                            <b-form-select-option value="">-- 更新為無狀態 --</b-form-select-option>
+                        </template>
+                    </b-form-select>
+                </b-input-group>
                 <div v-if="wip" class="filter-btn-group col-auto">
-                    <button @click="updateRM39" class="btn btn-sm btn-outline-primary">更新</button>
+                    <b-button @click="updateRM39" size="sm" variant="outline-primary"><lah-fa-icon icon="edit"> 更新</lah-fa-icon></b-button>
                 </div>
             </div>
             <div class="form-row mt-1">
-                <div class="input-group input-group-sm col">	
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-reg_case_RM42_select">地價處理註記</span>
-                    </div>
-                    <select v-model="rm42" id='reg_case_RM42_select' class="form-control" aria-label="地價處理註記" aria-describedby="inputGroup-reg_case_RM42_select" required>
-                        <option value=""></option>
-                        <option v-for="(item, key) in rm42_mapping" :value="key">{{key}}: {{item}}</option>
-                    </select>
-                </div>
+                <b-input-group size="sm" class="col">
+                    <b-input-group-prepend is-text>地價處理註記</b-input-group-prepend>
+                    <b-form-select v-model="rm42" :options="rm42_mapping">
+                        <template v-slot:first>
+                            <b-form-select-option value="">-- 更新為無狀態 --</b-form-select-option>
+                        </template>
+                    </b-form-select>
+                </b-input-group>
                 <div v-if="wip" class="filter-btn-group col-auto">
-                    <button @click="updateRM42" class="btn btn-sm btn-outline-primary">更新</button>
+                    <b-button @click="updateRM42" size="sm" variant="outline-primary"><lah-fa-icon icon="edit"> 更新</lah-fa-icon></b-button>
                 </div>
             </div>
             <p v-if="showProgress" v-html="bakedData.tr_html" class="mt-2"></p>
@@ -866,44 +865,44 @@ if (Vue) {
             sync_rm30_1: true,
             wip: false,
             rm30_mapping: {
-                A: "初審",
-                B: "複審",
-                H: "公告",
-                I: "補正",
-                R: "登錄",
-                C: "校對",
-                U: "異動完成",
-                F: "結案",
-                X: "補正初核",
-                Y: "駁回初核",
-                J: "撤回初核",
-                K: "撤回",
-                Z: "歸檔",
-                N: "駁回",
-                L: "公告初核",
-                E: "請示",
-                D: "展期"
+                A: "A: 初審",
+                B: "B: 複審",
+                H: "C: 公告",
+                I: "I: 補正",
+                R: "R: 登錄",
+                C: "C: 校對",
+                U: "U: 異動完成",
+                F: "F: 結案",
+                X: "X: 補正初核",
+                Y: "Y: 駁回初核",
+                J: "J: 撤回初核",
+                K: "K: 撤回",
+                Z: "Z: 歸檔",
+                N: "N: 駁回",
+                L: "L: 公告初核",
+                E: "E: 請示",
+                D: "D: 展期"
             },
             rm39_mapping: {
-                B: "登錄開始",
-                R: "登錄完成",
-                C: "校對開始",
-                D: "校對完成",
-                S: "異動開始",
-                F: "異動完成",
-                G: "異動有誤",
-                P: "競合暫停"
+                B: "B: 登錄開始",
+                R: "R: 登錄完成",
+                C: "C: 校對開始",
+                D: "D: 校對完成",
+                S: "S: 異動開始",
+                F: "F: 異動完成",
+                G: "G: 異動有誤",
+                P: "P: 競合暫停"
             },
             rm42_mapping: {
-                '0': "登記移案",
-                B: "登錄中",
-                R: "登錄完成",
-                C: "校對中",
-                D: "校對完成",
-                E: "登錄有誤",
-                S: "異動開始",
-                F: "異動完成",
-                G: "異動有誤"
+                '0': "0: 登記移案",
+                B: "B: 登錄中",
+                R: "R: 登錄完成",
+                C: "C: 校對中",
+                D: "D: 校對完成",
+                E: "E: 登錄有誤",
+                S: "S: 異動開始",
+                F: "F: 異動完成",
+                G: "G: 異動有誤"
             }
         } },
         computed: {
