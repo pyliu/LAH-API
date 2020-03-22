@@ -401,8 +401,14 @@ Vue.mixin({
                 }
             }
         },
-        busyOn: function(el = "body", size = "") { this.toggleBusy({selector: el, forceOn: true, size: size}) },
-        busyOff: function(el = "body") { this.toggleBusy({selector: el, forceOff: true}) },
+        busyOn: function(el = "body", size = "") {
+            this.toggleBusy({selector: el, forceOn: true, size: size});
+            this.$emit("busyOn", this);
+        },
+        busyOff: function(el = "body") {
+            this.toggleBusy({selector: el, forceOff: true});
+            this.$emit("busyOff", this);
+        },
         empty: function (variable) {
             if (variable === null || variable === undefined || variable === false) return true;
             if (typeof variable == "object" && variable.length == 0) return true;
