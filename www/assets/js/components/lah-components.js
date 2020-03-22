@@ -748,10 +748,6 @@ if (Vue) {
                 <template v-slot:cell(RM09)="row">
                     {{reason(row)}}
                 </template>
-
-                <template v-slot:cell(RM29_1)="{ item }">
-                    {{duedate(item)}}
-                </template>
             </b-table>
         </lah-transition>`,
         props: ['bakedData', 'maxHeight', 'icon', 'iconVariant', 'size'],
@@ -760,7 +756,6 @@ if (Vue) {
             fields: function() {
                 switch(this.size) {
                     case "md":
-                        // 序號	收件字號 登記原因 辦理情形 初審人員 作業人員 收件時間 限辦期限
                         return [
                             '序號',
                             {key: "收件字號", sortable: true},
@@ -769,13 +764,42 @@ if (Vue) {
                             {key: "初審人員", sortable: true},
                             {key: "作業人員", sortable: true},
                             {key: "收件時間", sortable: true},
-                            {key: "RM29_1", label: "限辦期限", sortable: true}
+                            {key: "預定結案日期", label:"限辦期限", sortable: true}
                         ];
                     case "lg":
-                        return ['序號'];
-                            /**收件字號	收件日期	限辦	辦理情形	收件人員	作業人員	初審人員	複審人員	准登人員	登記人員	校對人員	結案人員 */
+                        return [
+                            '序號',
+                            {key: "收件字號", sortable: true},
+                            {key: "收件日期", sortable: true},
+                            {key: "登記原因", sortable: true},
+                            {key: "辦理情形", sortable: true},
+                            {key: "收件人員", sortable: true},
+                            {key: "作業人員", sortable: true},
+                            {key: "初審人員", sortable: true},
+                            {key: "複審人員", sortable: true},
+                            {key: "准登人員", sortable: true},
+                            {key: "登記人員", sortable: true},
+                            {key: "校對人員", sortable: true},
+                            {key: "結案人員", sortable: true}
+                        ];
                     case "xl":
-                        return ['序號'];
+                        return [
+                            '序號',
+                            {key: "收件字號", sortable: true},
+                            {key: "收件日期", sortable: true},
+                            {key: "預定結案日期", label:"限辦期限", sortable: true},
+                            {key: "登記原因", sortable: true},
+                            {key: "辦理情形", sortable: true},
+                            {key: "收件人員", sortable: true},
+                            {key: "作業人員", sortable: true},
+                            {key: "初審人員", sortable: true},
+                            {key: "複審人員", sortable: true},
+                            {key: "准登人員", sortable: true},
+                            {key: "登記人員", sortable: true},
+                            {key: "校對人員", sortable: true},
+                            {key: "結案人員", sortable: true},
+                            {key: "結案已否", sortable: true}
+                        ];
                     default:
                         return [
                             '序號',
@@ -819,12 +843,9 @@ if (Vue) {
             },
             reason: function(row) {
                 return this.empty(row.item["登記原因"]) ? row.item["RM09"] + ":" + row.item["RM09_CHT"] : row.item["登記原因"];
-            },
-            duedate: function(item) {
-                return item['RM29_1'] + ' ' + item['RM29_2'];
             }
         },
-        created() { this.size = this.size || '' },
+        created() { this.size = this.size || 'lg' },
         mounted() {}
     });
 
