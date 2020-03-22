@@ -128,7 +128,9 @@ class RegCaseData {
 
     public function getBakedData() {
         $row = &$this->row;
-        $ret = array("收件字號" => $row["RM01"]."-".$row["RM02"]."-".$row["RM03"],
+        $ret = array(
+            "收件字號" => $this->getReceiveSerial(),
+            //"收件字號" => $row["RM01"]."-".$row["RM02"]."-".$row["RM03"],
             "收件日期" => RegCaseData::toDate($row["RM07_1"]),
             "收件時間" => RegCaseData::toDate($row["RM07_1"])." ".RegCaseData::toDate($row["RM07_2"]),
             "測量案件" => $row["RM04"]."-".$row["RM05"]."-".$row["RM06"],
@@ -156,8 +158,8 @@ class RegCaseData {
             "跨所" => $row["RM99"],
             "資料管轄所" => OFFICE[$row["RM100"]] ? OFFICE[$row["RM100"]] : $row["RM100"],
             "資料收件所" => OFFICE[$row["RM101"]] ? OFFICE[$row["RM101"]] : $row["RM101"],
-            "結案已否" => $row["RM31"],
-            "tr_html" => $this->getTableHtml(),
+            "結案已否YN" => $row["RM31"],
+            //"tr_html" => $this->getTableHtml(),
             // 案件辦理情形資料
             "收件人員" => $this->getReceptionist(),
             "初審人員" => $this->getFirstReviewer(),

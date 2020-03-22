@@ -758,12 +758,12 @@ if (Vue) {
                 </template>
             </b-table>
         </lah-transition>`,
-        props: ['bakedData', 'maxHeight', 'icon', 'iconVariant', 'size', 'fields', 'mute', 'noCaption'],
+        props: ['bakedData', 'maxHeight', 'icon', 'iconVariant', 'type', 'fields', 'mute', 'noCaption'],
         data: () => { return { } },
         computed: {
             tblFields: function() {
                 if (!this.empty(this.fields)) return this.fields;
-                switch(this.size) {
+                switch(this.type) {
                     case "md":
                         return [
                             {key: "收件字號", sortable: this.sort},
@@ -807,6 +807,18 @@ if (Vue) {
                             {key: "結案人員", label: "結案", sortable: this.sort},
                             {key: "結案已否", sortable: this.sort}
                         ];
+                    case "flow":
+                        return [
+                            {key: "辦理情形", sortable: this.sort},
+                            {key: "收件人員", label: "收件", sortable: this.sort},
+                            {key: "作業人員", label: "作業", sortable: this.sort},
+                            {key: "初審人員", label: "初審", sortable: this.sort},
+                            {key: "複審人員", label: "複審", sortable: this.sort},
+                            {key: "准登人員", label: "准登", sortable: this.sort},
+                            {key: "登記人員", label: "登簿", sortable: this.sort},
+                            {key: "校對人員", label: "校對", sortable: this.sort},
+                            {key: "結案人員", label: "結案", sortable: this.sort}
+                        ];
                     default:
                         return [
                             {key: "RM01", label: "收件字號", sortable: this.sort},
@@ -842,7 +854,7 @@ if (Vue) {
                     } else {
                         showModal({
                             message: this.$createElement("case-reg-detail", { props: { jsonObj: res.data.baked } }),
-                            title: "登記案件詳情",
+                            title: `登記案件詳情 ${data["RM01"]}-${data["RM02"]}-${data["RM03"]}`,
                             size: "lg"
                         });
                     }
@@ -857,7 +869,7 @@ if (Vue) {
                 return row.item["RM09"] + " : " + (this.empty(row.item["登記原因"]) ? row.item["RM09_CHT"] : row.item["登記原因"]);
             }
         },
-        created() { this.size = this.size || '' },
+        created() { this.type = this.type || '' },
         mounted() {}
     });
 
@@ -907,7 +919,7 @@ if (Vue) {
                     <b-button @click="updateRM42" size="sm" variant="outline-primary"><lah-fa-icon icon="edit"> 更新</lah-fa-icon></b-button>
                 </div>
             </div>
-            <p v-if="showProgress" class="mt-2"><lah-reg-table size="sm" :bakedData="[bakedData]" :no-caption="true" class="small"></lah-reg-table></p>
+            <p v-if="showProgress" class="mt-2"><lah-reg-table type="sm" :bakedData="[bakedData]" :no-caption="true" class="small"></lah-reg-table></p>
         </div>`,
         props: ["bakedData", 'progress'],
         data: () => { return {

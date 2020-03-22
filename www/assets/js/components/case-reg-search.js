@@ -55,7 +55,7 @@ if (Vue) {
                                     jsonObj: res.data.baked
                                 }
                             }),
-                            title: "登記案件詳情",
+                            title: `登記案件詳情 ${data.year}-${data.code}-${data.num}`,
                             size: "lg"
                         });
                     }

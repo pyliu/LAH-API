@@ -730,7 +730,7 @@ $(document).ready(() => {
                                     jsonObj: res.data.baked
                                 }
                             }),
-                            title: "登記案件詳情",
+                            title: `登記案件詳情 ${id}`,
                             size: "lg"
                         });
                     }
