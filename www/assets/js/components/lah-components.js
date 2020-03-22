@@ -709,20 +709,27 @@ if (Vue) {
         template: `<lah-transition appear slide-down>
             <b-table
                 ref="reg_case_tbl"
-                striped
-                hover
-                responsive
-                borderless
-                no-border-collapse
-                small
-                head-variant="dark"
-                caption-top
+                :striped="true"
+                :hover="true"
+                :bordered="true"
+                :borderless="false"
+                :outlined="false"
+                :small="true"
+                :dark="false"
+                :fixed="false"
+                :foot-clone="false"
+                :no-border-collapse="true"
+                :head-variant="'dark'"
+                :table-variant="false"
+
                 :sticky-header="sticky"
                 :caption="caption"
+                caption-top
                 :items="bakedData"
                 :fields="tblFields"
                 :style="style"
                 :busy="!bakedData"
+                class="text-center"
             >
                 <template v-slot:table-busy>
                     <b-spinner class="align-middle" variant="danger" type="grow" small label="讀取中..."></b-spinner>
@@ -734,11 +741,13 @@ if (Vue) {
 
                 <template v-slot:cell(RM01)="row">
                     <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
-                    <a href="javascript:void(0)" @click="fetch(row.item)">{{bakedContent(row)}}</a>
+                    <span v-if="mute">{{bakedContent(row)}}</span>
+                    <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{bakedContent(row)}}</a>
                 </template>
                 <template v-slot:cell(收件字號)="row">
                     <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
-                    <a href="javascript:void(0)" @click="fetch(row.item)">{{row.item['收件字號']}}</a>
+                    <span v-if="mute">{{bakedContent(row)}}</span>
+                    <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{row.item['收件字號']}}</a>
                 </template>
 
                 <template v-slot:cell(登記原因)="row">
@@ -749,7 +758,7 @@ if (Vue) {
                 </template>
             </b-table>
         </lah-transition>`,
-        props: ['bakedData', 'maxHeight', 'icon', 'iconVariant', 'size', 'fields'],
+        props: ['bakedData', 'maxHeight', 'icon', 'iconVariant', 'size', 'fields', 'mute', 'noCaption'],
         data: () => { return { } },
         computed: {
             tblFields: function() {
@@ -757,66 +766,69 @@ if (Vue) {
                 switch(this.size) {
                     case "md":
                         return [
-                            '序號',
-                            {key: "收件字號", sortable: true},
-                            {key: "登記原因", sortable: true},
-                            {key: "辦理情形", sortable: true},
-                            {key: "初審人員", sortable: true},
-                            {key: "作業人員", sortable: true},
-                            {key: "收件時間", sortable: true},
-                            {key: "預定結案日期", label:"限辦期限", sortable: true}
+                            {key: "收件字號", sortable: this.sort},
+                            {key: "登記原因", sortable: this.sort},
+                            {key: "辦理情形", sortable: this.sort},
+                            {key: "初審人員", sortable: this.sort},
+                            {key: "作業人員", sortable: this.sort},
+                            {key: "收件時間", sortable: this.sort},
+                            {key: "預定結案日期", label:"限辦期限", sortable: this.sort}
                         ];
                     case "lg":
                         return [
-                            '序號',
-                            {key: "收件字號", sortable: true},
-                            {key: "收件日期", sortable: true},
-                            {key: "登記原因", sortable: true},
-                            {key: "辦理情形", sortable: true},
-                            {key: "收件人員", sortable: true},
-                            {key: "作業人員", sortable: true},
-                            {key: "初審人員", sortable: true},
-                            {key: "複審人員", sortable: true},
-                            {key: "准登人員", sortable: true},
-                            {key: "登記人員", sortable: true},
-                            {key: "校對人員", sortable: true},
-                            {key: "結案人員", sortable: true}
+                            {key: "收件字號", sortable: this.sort},
+                            {key: "收件日期", sortable: this.sort},
+                            {key: "登記原因", sortable: this.sort},
+                            {key: "辦理情形", sortable: this.sort},
+                            {key: "收件人員", label: "收件", sortable: this.sort},
+                            {key: "作業人員", label: "作業", sortable: this.sort},
+                            {key: "初審人員", label: "初審", sortable: this.sort},
+                            {key: "複審人員", label: "複審", sortable: this.sort},
+                            {key: "准登人員", label: "准登", sortable: this.sort},
+                            {key: "登記人員", label: "登簿", sortable: this.sort},
+                            {key: "校對人員", label: "校對", sortable: this.sort},
+                            {key: "結案人員", label: "結案", sortable: this.sort}
                         ];
                     case "xl":
                         return [
                             '序號',
-                            {key: "收件字號", sortable: true},
-                            {key: "收件日期", sortable: true},
-                            {key: "預定結案日期", label:"限辦期限", sortable: true},
-                            {key: "登記原因", sortable: true},
-                            {key: "辦理情形", sortable: true},
-                            {key: "收件人員", sortable: true},
-                            {key: "作業人員", sortable: true},
-                            {key: "初審人員", sortable: true},
-                            {key: "複審人員", sortable: true},
-                            {key: "准登人員", sortable: true},
-                            {key: "登記人員", sortable: true},
-                            {key: "校對人員", sortable: true},
-                            {key: "結案人員", sortable: true},
-                            {key: "結案已否", sortable: true}
+                            {key: "收件字號", sortable: this.sort},
+                            {key: "收件日期", sortable: this.sort},
+                            {key: "預定結案日期", label:"限辦期限", sortable: this.sort},
+                            {key: "登記原因", sortable: this.sort},
+                            {key: "辦理情形", sortable: this.sort},
+                            {key: "收件人員", label: "收件", sortable: this.sort},
+                            {key: "作業人員", label: "作業", sortable: this.sort},
+                            {key: "初審人員", label: "初審", sortable: this.sort},
+                            {key: "複審人員", label: "複審", sortable: this.sort},
+                            {key: "准登人員", label: "准登", sortable: this.sort},
+                            {key: "登記人員", label: "登簿", sortable: this.sort},
+                            {key: "校對人員", label: "校對", sortable: this.sort},
+                            {key: "結案人員", label: "結案", sortable: this.sort},
+                            {key: "結案已否", sortable: this.sort}
                         ];
                     default:
                         return [
-                            '序號',
-                            {key: "RM01", label: "收件字號", sortable: true},
-                            {key: "RM07_1", label: "收件日期", sortable: true},
-                            {key: "RM09", label: "登記代碼", sortable: true}
+                            {key: "RM01", label: "收件字號", sortable: this.sort},
+                            {key: "RM07_1", label: "收件日期", sortable: this.sort},
+                            {key: "RM09", label: "登記原因", sortable: this.sort},
+                            {key: "辦理情形", sortable: this.sort},
                         ];
                 }
             },
             count() { return this.bakedData ? this.bakedData.length : 0 },
-            caption() { return this.bakedData ? '登記案件找到 ' + this.count + '件' : '讀取中' },
-            sticky() { return this.maxHeight ? true : false },
+            caption() {
+                if (this.mute || this.noCaption) return false;
+                return this.bakedData ? '登記案件找到 ' + this.count + '件' : '讀取中';
+                
+            },
+            sticky() { return this.maxHeight ? this.count > 0 ? true : false : false },
             style() {
                 const parsed = parseInt(this.maxHeight);
                 return isNaN(parsed) ? '' : `max-height: ${parsed}px`;
             },
-            showIcon() { return !this.empty(this.icon) }
+            showIcon() { return !this.empty(this.icon) },
+            sort() { return this.empty(this.mute) }
         },
         methods: {
             fetch(data) {
@@ -842,7 +854,7 @@ if (Vue) {
                 return row.item[row.field.label];
             },
             reason: function(row) {
-                return this.empty(row.item["登記原因"]) ? row.item["RM09"] + ":" + row.item["RM09_CHT"] : row.item["登記原因"];
+                return row.item["RM09"] + " : " + (this.empty(row.item["登記原因"]) ? row.item["RM09_CHT"] : row.item["登記原因"]);
             }
         },
         created() { this.size = this.size || '' },
@@ -895,7 +907,7 @@ if (Vue) {
                     <b-button @click="updateRM42" size="sm" variant="outline-primary"><lah-fa-icon icon="edit"> 更新</lah-fa-icon></b-button>
                 </div>
             </div>
-            <p v-if="showProgress" class="mt-2"><lah-reg-table size="sm" :bakedData="[bakedData]" class="text-center small"></lah-reg-table></p>
+            <p v-if="showProgress" class="mt-2"><lah-reg-table size="sm" :bakedData="[bakedData]" :no-caption="true" class="small"></lah-reg-table></p>
         </div>`,
         props: ["bakedData", 'progress'],
         data: () => { return {
