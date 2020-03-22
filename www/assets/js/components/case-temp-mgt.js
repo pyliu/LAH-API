@@ -44,6 +44,12 @@ if (Vue) {
                 let code = data.code;
                 let number = data.num;
 
+                showModal({
+                    title: "查詢登記案件暫存檔",
+                    subtitle: `${year}${code}${number}`,
+                    message: this.$createElement('lah-reg-case-temp-mgt', { props: { id: `${year}${code}${number}` } })
+                });
+                /*
                 this.isBusy = true;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "query_temp_data",
@@ -174,6 +180,7 @@ if (Vue) {
                 }).finally(() => {
                     this.isBusy = false;
                 });
+                */
             },
             showSQL: function(e) {
                 let btn = $(e.target);

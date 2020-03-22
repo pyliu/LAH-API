@@ -1100,7 +1100,7 @@ if (Vue) {
             </div>
             <lah-fa-icon v-else icon="exclamation-circle" variant="success"> 無暫存檔。</lah-fa-icon>
         </div>`,
-        props: ["bakedData", 'id'],
+        props: ["bakedData", 'id'], // the id format should be '109HB04001234'
         data: function() { return {
             filtered: null,
             cleanAllBackupFlag: false,
@@ -1109,9 +1109,9 @@ if (Vue) {
         computed: {
             found() { return !this.empty(this.filtered) },
             prefix() { return `${this.bakedData["RM01"]}-${this.bakedData["RM02"]}-${this.bakedData["RM03"]}` },
-            year() { return this.bakedData["RM01"] },
-            code() { return this.bakedData["RM02"] },
-            number() { return this.bakedData["RM03"] }
+            year() { return this.bakedData ? this.bakedData["RM01"] : this.id.substring(0, 3) },
+            code() { return this.bakedData ? this.bakedData["RM02"] : this.id.substring(3, 7) },
+            number() { return this.bakedData ? this.bakedData["RM03"] : this.id.substring(7) }
         },
         methods: {
             title: function (item) {
@@ -1327,6 +1327,9 @@ if (Vue) {
                     size: "lg"
                 });
             }
+        },
+        created() {
+            if (this.empty(this.id)) this.id = '';
         },
         mounted() {
             this.isBusy = true;
