@@ -1051,7 +1051,7 @@ if (Vue) {
                             {key: "登記人員", label: "登簿", sortable: this.sort},
                             {key: "校對人員", label: "校對", sortable: this.sort},
                             {key: "結案人員", label: "結案", sortable: this.sort},
-                            {key: "結案與否", sortable: this.sort}
+                            {key: "結案狀態", sortable: this.sort}
                         ];
                     case "flow":
                         return [
@@ -1411,7 +1411,7 @@ if (Vue) {
                             @click="backup(item, idx)"
                         >備份</b-button>
                         <b-button
-                            :disabled="item[0] == 'MOICAT.RINDX' || item[0] == 'MOIPRT.PHIND'"
+                            v-if="item[0] != 'MOICAT.RINDX' && item[0] != 'MOIPRT.PHIND'"
                             :title="title(item)"
                             size="sm"
                             variant="outline-danger"
@@ -1427,7 +1427,7 @@ if (Vue) {
                     <b-button @click="popup" variant="outline-success" size="sm"><lah-fa-icon icon="question"> 說明</lah-fa-icon></b-button>
                 </div>
             </div>
-            <lah-fa-icon v-else icon="exclamation-circle" variant="success" size="xs"> 無暫存檔。</lah-fa-icon>
+            <lah-fa-icon v-else icon="exclamation-circle" variant="success" size="lg"> 無暫存檔。</lah-fa-icon>
         </div>`,
         props: ["bakedData", 'id'], // the id format should be '109HB04001234'
         data: function() { return {

@@ -134,7 +134,7 @@ class RegCaseData {
             "收件日期" => RegCaseData::toDate($row["RM07_1"]),
             "收件時間" => RegCaseData::toDate($row["RM07_1"])." ".RegCaseData::toDate($row["RM07_2"]),
             "測量案件" => $row["RM04"]."-".$row["RM05"]."-".$row["RM06"],
-            "登記原因" => $row["KCNT"] ?? $row["RM09_CHT"],
+            "登記原因" => $this->getCaseReason(),
             "限辦期限" => $this->getDueDate(),
             "作業人員" => $this->getCurrentOperator(),
             "辦理情形" => $this->getStatus(),
@@ -158,6 +158,8 @@ class RegCaseData {
             "資料管轄所" => OFFICE[$row["RM100"]] ? OFFICE[$row["RM100"]] : $row["RM100"],
             "資料收件所" => OFFICE[$row["RM101"]] ? OFFICE[$row["RM101"]] : $row["RM101"],
             "結案代碼" => $row["RM31"],
+            "結案狀態" => $this->getCaseCloseStatus(),
+            "電子郵件" => $row["RM95"],
             // 案件辦理情形資料
             "收件人員" => $this->getReceptionist(),
             "初審人員" => $this->getFirstReviewer(),
@@ -190,7 +192,7 @@ class RegCaseData {
             "結案人員" => $this->getIDorName($this->row["RM59"]),
             "結案日期" => RegCaseData::toDate($row["RM58_1"])." ".RegCaseData::toDate($row["RM58_2"]),
             "預定結案日期" => RegCaseData::toDate($row["RM29_1"])." ".RegCaseData::toDate($row["RM29_2"]),
-            "結案與否" => empty($this->row["RM31"]) ? "否" : "是【".$this->row["RM31"]."】"
+            "結案與否" => empty($this->row["RM31"]) ? "N" : "Y【".$this->getCaseCloseStatus()."】"
         );
         return $ret + $row; // merge raw data ($row["RM01"] ... etc) and keep original key index
     }
@@ -239,7 +241,7 @@ class RegCaseData {
     }
 
     public function getCaseReason() {
-        return $this->row["KCNT"];
+        return $this->row["KCNT"] ?? $this->row["RM09_CHT"] ?? $this->row["RM09"];
     }
 
     public function getStatus() {
@@ -272,6 +274,23 @@ class RegCaseData {
         // reach the due (within 4hrs)
         if ($now - $begin > $due_in_secs - 4 * 60 * 60) {
             return "bg-warning";
+        }
+    }
+
+    public function getCaseCloseStatus() {
+        switch ($this->row['RM31']) {
+            case "A":
+                return "結案";
+            case "B":
+                return "撤回";
+            case "C":
+                return "併案";
+            case "D":
+                return "駁回";
+            case "E":
+                return "請示";
+            default:
+                return "尚未結案";
         }
     }
 

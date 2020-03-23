@@ -47,28 +47,33 @@
 
 
   <script type="text/javascript">
-    $(document).ready(e => {
+    $(document).ready(async e => {
         vueApp.setSetting('reg_cases_by_day', undefined);
         vueApp.setSetting('reg_cases_by_day_max_height', window.innerHeight - 130);
         let d = new Date();
         let today = `${d.getFullYear() - 1911}${("0" + (d.getMonth()+1)).slice(-2)}${("0" + d.getDate()).slice(-2)}`;
-        axios.post(CONFIG.JSON_API_EP, {
-            type: "reg_cases_by_day",
-            qday: today
-        }).then(res => {
-            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                vueApp.setSetting('reg_cases_by_day', res.data.baked);
-                vueApp.setLocalCache('reg_cases_by_day', res.data.baked, 60000);   // 1 min
-            } else {
-                addNotification({
-                    title: "查詢今日案件",
-                    message: res.data.message,
-                    type: "warning"
-                });
-            }
-        }).catch(err => {
-            this.error = err;
-        });
+        let cached = await vueApp.getLocalCache('reg_cases_by_day');
+        if (cached !== false) {
+            vueApp.setSetting('reg_cases_by_day', cached);
+        } else {
+            axios.post(CONFIG.JSON_API_EP, {
+                type: "reg_cases_by_day",
+                qday: today
+            }).then(res => {
+                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                    vueApp.setSetting('reg_cases_by_day', res.data.baked);
+                    vueApp.setLocalCache('reg_cases_by_day', res.data.baked, 300 * 1000);   // cached for 1 min
+                } else {
+                    addNotification({
+                        title: "查詢今日案件",
+                        message: res.data.message,
+                        type: "warning"
+                    });
+                }
+            }).catch(err => {
+                this.error = err;
+            });
+        }
     });
   </script>
 </body>
