@@ -785,7 +785,7 @@ if (Vue) {
                                 <b-list-group-item>
                                     <b-form-row>
                                         <b-col>登記原因：{{jsonObj.登記原因}}</b-col>
-                                        <b-col>辦理情形：<span :class="jsonObj.TRAFFIC_LIGHT_CSS">{{jsonObj.辦理情形}}</span></b-col>
+                                        <b-col>辦理情形：<span :class="jsonObj.紅綠燈背景CSS">{{jsonObj.辦理情形}}</span></b-col>
                                     </b-form-row>
                                 </b-list-group-item>
                                 <b-list-group-item>
@@ -972,7 +972,7 @@ if (Vue) {
                     {{row.index + 1}}
                 </template>
                 <template v-slot:cell(燈號)="row">
-                    <lah-fa-icon icon="circle" :variant="traffic(row.item)"></lah-fa-icon>
+                    <lah-fa-icon icon="circle" :variant="row.item['燈號']"></lah-fa-icon>
                 </template>
 
                 <template v-slot:cell(RM01)="row">
@@ -1137,11 +1137,7 @@ if (Vue) {
                 return row.item["RM09"] + " : " + (this.empty(row.item["登記原因"]) ? row.item["RM09_CHT"] : row.item["登記原因"]);
             },
             trClass(item, type) {
-                if(item && type == 'row') return this.color ? (item["TRAFFIC_LIGHT_CSS"] || '') : '';
-            },
-            traffic(item) {
-                // css e.g. "bg-success text-white"
-                return this.empty(item['TRAFFIC_LIGHT_CSS']) ? 'warning' : item['TRAFFIC_LIGHT_CSS'].split(' ')[0].split('-')[1];
+                if(item && type == 'row') return this.color ? (item["紅綠燈背景CSS"] || '') : '';
             }
         },
         created() { this.type = this.type || '' },

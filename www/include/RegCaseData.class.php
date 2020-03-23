@@ -129,8 +129,9 @@ class RegCaseData {
     public function getBakedData() {
         $row = &$this->row;
         $ret = array(
-            "CAES_SERIAL" => $row["RM01"]."-".$row["RM02"]."-".$row["RM03"],
-            "TRAFFIC_LIGHT_CSS" => $this->getStatusCss(),
+            "ID" => $row["RM01"].$row["RM02"].$row["RM03"],
+            "紅綠燈背景CSS" => $this->getStatusCss(),
+            "燈號" => $this->getState(),
             "收件字號" => $this->getReceiveSerial(),
             "收件日期" => RegCaseData::toDate($row["RM07_1"]),
             "收件時間" => RegCaseData::toDate($row["RM07_1"])." ".RegCaseData::toDate($row["RM07_2"]),
@@ -246,6 +247,37 @@ class RegCaseData {
 
     public function getStatus() {
         return CASE_STATUS[$this->row["RM30"]];
+    }
+
+    public function getState() {
+        // RM30 - 案件辦理情形
+        if ($this->row["RM30"] == "F" || $this->row["RM30"] == "Z"  || !empty($this->row["RM31"])) {
+            return "success";
+        }
+        
+        // RM07_1 - 收件日
+        $Y = substr($this->row["RM07_1"], 0, 3) + 1911;
+        $M = substr($this->row["RM07_1"], 3, 2);
+        $D = substr($this->row["RM07_1"], 5, 2);
+        // RM07_2 - 收件時間
+        $H = substr($this->row["RM07_2"], 0, 2);
+        $i = substr($this->row["RM07_2"], 2, 2);
+        $s = substr($this->row["RM07_2"], 4, 2);
+        
+        $now         = mktime();
+        $begin       = mktime($H, $i, $s, $M, $D, $Y);
+        $due_in_secs = $this->getDueTime($begin);
+        
+        // overdue
+        if ($now - $begin > $due_in_secs) {
+            return "danger";
+        }
+        // reach the due (within 4hrs)
+        if ($now - $begin > $due_in_secs - 4 * 60 * 60) {
+            return "warning";
+        }
+
+        return "light";
     }
 
     public function getStatusCss() {
