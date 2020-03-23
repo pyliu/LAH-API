@@ -4,3 +4,4 @@ Config.inc.php
 node_modules
 *.log
 *.cache
+*.zip
