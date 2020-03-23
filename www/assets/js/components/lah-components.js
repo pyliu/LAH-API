@@ -951,6 +951,7 @@ if (Vue) {
                 :style="style"
                 :busy="!bakedData"
                 class="text-center"
+                :tbody-tr-class="trClass"
             >
                 <template v-slot:table-busy>
                     <b-spinner class="align-middle" variant="danger" type="grow" small label="讀取中..."></b-spinner>
@@ -1004,7 +1005,7 @@ if (Vue) {
                 </template>
             </b-table>
         </lah-transition>`,
-        props: ['bakedData', 'maxHeight', 'icon', 'iconVariant', 'type', 'fields', 'mute', 'noCaption'],
+        props: ['bakedData', 'maxHeight', 'icon', 'iconVariant', 'type', 'fields', 'mute', 'noCaption', 'color'],
         data: () => { return { } },
         computed: {
             tblFields: function() {
@@ -1120,7 +1121,8 @@ if (Vue) {
             },
             reason: function(row) {
                 return row.item["RM09"] + " : " + (this.empty(row.item["登記原因"]) ? row.item["RM09_CHT"] : row.item["登記原因"]);
-            }
+            },
+            trClass(item, type) { return this.color ? item["TRAFFIC_LIGHT_CSS"] || '' : ''; }
         },
         created() { this.type = this.type || '' },
         mounted() {}
