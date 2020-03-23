@@ -375,6 +375,33 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
+	case "reg_cases_by_day":
+		if (empty($_POST["qday"])) {
+			$_POST["qday"] = $today;
+		}
+		$log->info("XHR [reg_cases_by_day] 查詢登記案件 BY DAY【".$_POST["qday"]."】請求");
+		$rows = $mock ? $cache->get('reg_cases_by_day') : $query->queryAllCasesByDate($_POST["qday"]);
+		$cache->set('reg_cases_by_day', $rows);
+		if (empty($rows)) {
+			$log->info("XHR [reg_cases_by_day] 查無資料");
+			echoErrorJSONString();
+		} else {
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$baked[] = $data->getBakedData();
+			}
+			$count = count($baked);
+			$log->info("XHR [reg_cases_by_day] 查詢成功 ($count)");
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => $count,
+				"query_string" => "qday=".$_POST["qday"],
+				"baked" => $baked
+			);
+			echo json_encode($result, 0);
+		}
+		break;
 	case "reg_stats":
 		if (empty($_POST["year_month"])) {
 			$log->error("XHR [reg_stats] 查詢年月為空值");

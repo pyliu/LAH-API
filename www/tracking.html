@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="For tracking taoyuan land registration cases">
+<meta name="description" content="For zhongli land office use only">
 <meta name="author" content="LIU, PANG-YU">
 <title>桃園市中壢地政事務所</title>
 
@@ -21,20 +21,11 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-      <lah-reg-table :baked-data="settings['bakedData']" max-height="200" icon="chevron-circle-right"></lah-reg-table>
-      <lah-user-card id="HB0541"></lah-user-card>
-      <b-card-group deck>
-        <b-card v-for="n in 5"
-          header="featured"
-          header-tag="header"
-          footer="Card Footer"
-          footer-tag="footer"
-          title="Title"
-        >
-          <b-card-text>Header and footers using props.</b-card-text>
-          <b-button href="#" variant="primary">Go somewhere</b-button>
-        </b-card>
-      </b-card-group>
+        <lah-reg-table
+            :baked-data="settings['reg_cases_by_day']"
+            :max-height="settings['reg_cases_by_day_max_height']"
+            type="xl"
+        ></lah-reg-table>
     </div>
   </section><!-- /section -->
   <!-- Bootstrap core JavaScript -->
@@ -42,46 +33,42 @@
   <script src="assets/js/jquery.min.js"></script>
   <script src="assets/js/popper.min.js"></script>
   <script src="assets/js/bootstrap.min.js"></script>
-
+  <!-- Vue -->
   <script src="assets/js/vue.js"></script>
   <script src="assets/js/vuex.js"></script>
   <script src="assets/js/bootstrap-vue.min.js"></script>
   <script src="assets/js/bootstrap-vue-icons.min.js"></script>
+  <!-- Add-On -->
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/localforage.min.js"></script>
   <script src="assets/js/global.js"></script>
   <script src="assets/js/components/lah-global.js"></script>
   <script src="assets/js/components/lah-components.js"></script>
-  <script src="assets/js/components/fee-query-board.js"></script>
-  <script src="assets/js/components/xcase-check.js"></script>
-  <script src="assets/js/components/easycard-payment-check.js"></script>
-  <script src="assets/js/components/announcement-mgt.js"></script>
-  <script src="assets/js/Chart.min.js"></script>
-  <script src="assets/js/FileSaver.min.js"></script>
 
 
   <script type="text/javascript">
-    
     $(document).ready(e => {
-      vueApp.setSetting('bakedData', undefined);
-
-      axios.post(
-          CONFIG.JSON_API_EP,
-          { type: 'crsms', id: 'H122611667' }
-      ).then(response => {
-          // on success
-          vueApp.setSetting('bakedData', response.data.baked);
-      }).catch(error => {
-          console.log(error);
-      }).finally(() => {});
-
-      let json1, json2;
-      axios.all([
-        axios.get('assets/js/mocks/case_count_by_reason.json'),
-        axios.get('assets/js/mocks/announcement_data.json')
-      ]).then(axios.spread((json1, json2) => {
-        
-      }));
+        vueApp.setSetting('reg_cases_by_day', undefined);
+        vueApp.setSetting('reg_cases_by_day_max_height', window.innerHeight - 130);
+        let d = new Date();
+        let today = `${d.getFullYear() - 1911}${("0" + (d.getMonth()+1)).slice(-2)}${("0" + d.getDate()).slice(-2)}`;
+        axios.post(CONFIG.JSON_API_EP, {
+            type: "reg_cases_by_day",
+            qday: today
+        }).then(res => {
+            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                vueApp.setSetting('reg_cases_by_day', res.data.baked);
+                vueApp.setLocalCache('reg_cases_by_day', res.data.baked, 60000);   // 1 min
+            } else {
+                addNotification({
+                    title: "查詢今日案件",
+                    message: res.data.message,
+                    type: "warning"
+                });
+            }
+        }).catch(err => {
+            this.error = err;
+        });
     });
   </script>
 </body>

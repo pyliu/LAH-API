@@ -50,7 +50,7 @@ if (Vue) {
                         return;
                     } else {
                         showModal({
-                            message: this.$createElement("case-reg-detail", {
+                            message: this.$createElement("lah-reg-case-detail", {
                                 props: {
                                     jsonObj: res.data.baked
                                 }

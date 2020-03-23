@@ -148,8 +148,6 @@ canvas {
 
   <script src="assets/js/table_sort.js"></script>
   <script src="assets/js/autoload.js"></script>
-
-  <script src="assets/js/components/case-reg-detail.js"></script>
   
   <script type="text/javascript">
     $(document).ready(e => {
