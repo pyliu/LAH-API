@@ -610,7 +610,7 @@ if (Vue) {
 
     // It needs to be used in popover, so register it to global scope
     Vue.component("fee-detail-payment-mgt", {
-        template: `<div class='form-row form-inline small-font'>
+        template: `<div class='form-row form-inline small'>
             <div class='input-group input-group-sm col-8'>
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="inputGroup-exapp_method_select">付款方式</span>
@@ -667,7 +667,7 @@ if (Vue) {
 
     // It needs to be used in popover, so register it to global scope
     Vue.component("fee-detail-print-mgt", {
-        template: `<div class='form-row form-inline small-font'>
+        template: `<div class='form-row form-inline small'>
             <div class='input-group input-group-sm col-8'>
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="inputGroup-exapp_print_select">列印狀態</span>
@@ -719,7 +719,7 @@ if (Vue) {
 
     // It needs to be used in expaa-list-mgt & fee-query-board, so register it to global scope
     Vue.component("fee-detail-mgt", {
-        template: `<b-container fluid :class="['small-font']">
+        template: `<b-container fluid :class="['small']">
             <b-row>
                 <b-col id="fee_detail_plate" cols="6">
                     <fieldset>
