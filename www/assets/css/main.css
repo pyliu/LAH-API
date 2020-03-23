@@ -118,21 +118,43 @@ blockquote {
 	animation-iteration-count: infinite;
 }
 
-.small-font {
+.s-95 {
+	font-size: .95rem;
+}
+
+.s-90 {
+	font-size: .90rem;
+}
+
+.s-85 {
 	font-size: .85rem;
 }
 
-.modal th {
-	background-color: black;
-	color: white;
-	font-weight: bold;
+.s-80 {
+	font-size: .80rem;
 }
 
-.b-table a:link, #case_results a:visited {
+.s-75 {
+	font-size: .75rem;
+}
+
+.s-70 {
+	font-size: .70rem;
+}
+
+.s-65 {
+	font-size: .65rem;
+}
+
+.s-60 {
+	font-size: .60rem;
+}
+
+.b-table a:link, .b-table a:visited {
 	color: rgba(56, 56, 241, 0.842);
   }
   
-.b-table .bg-success a:link, #case_results .bg-danger a:link, #case_results .bg-success a:visited, #case_results .bg-danger a:visited {
+.b-table .bg-success a:link, .b-table .bg-danger a:link, .b-table .bg-success a:visited, .b-table .bg-danger a:visited {
 	color: white;
 }
 
