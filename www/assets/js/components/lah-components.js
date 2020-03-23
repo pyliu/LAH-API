@@ -201,7 +201,7 @@ if (Vue) {
                 icon: "cubes",
                 need_admin: true
             }, {
-                text: "案件追蹤",
+                text: "今日案件",
                 url: "tracking.html",
                 icon: "list-alt",
                 need_admin: true
