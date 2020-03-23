@@ -19,13 +19,9 @@
 </head>
 
 <body>
-  <section class="hide">
+  <section>
     <div class="container-fluid" v-cloak>
-        <lah-reg-table
-            :baked-data="settings['reg_cases_by_day']"
-            :max-height="settings['reg_cases_by_day_max_height']"
-            type="xl"
-        ></lah-reg-table>
+        <div id="tracking"></div>
     </div>
   </section><!-- /section -->
   <!-- Bootstrap core JavaScript -->
@@ -42,38 +38,71 @@
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/localforage.min.js"></script>
   <script src="assets/js/global.js"></script>
+  <script src="assets/js/vue-countdown.min.js"></script>
   <script src="assets/js/components/lah-global.js"></script>
   <script src="assets/js/components/lah-components.js"></script>
 
 
   <script type="text/javascript">
-    $(document).ready(async e => {
-        vueApp.setSetting('reg_cases_by_day', undefined);
-        vueApp.setSetting('reg_cases_by_day_max_height', window.innerHeight - 130);
-        let d = new Date();
-        let today = `${d.getFullYear() - 1911}${("0" + (d.getMonth()+1)).slice(-2)}${("0" + d.getDate()).slice(-2)}`;
-        let cached = await vueApp.getLocalCache('reg_cases_by_day');
-        if (cached !== false) {
-            vueApp.setSetting('reg_cases_by_day', cached);
-        } else {
-            axios.post(CONFIG.JSON_API_EP, {
-                type: "reg_cases_by_day",
-                qday: today
-            }).then(res => {
-                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                    vueApp.setSetting('reg_cases_by_day', res.data.baked);
-                    vueApp.setLocalCache('reg_cases_by_day', res.data.baked, 300 * 1000);   // cached for 1 min
+    $(document).ready(e => {
+        new Vue({
+            el: "#tracking",
+            template: `<div>
+                <div style="right: 2.5rem; position:absolute; top: 0.5rem;">
+                    <b-button id="reload" variant="primary" size="sm" @click="reload">
+                        <i class="fas fa-sync"></i>
+                        刷新
+                        <b-badge variant="light">
+                            <countdown ref="countdown" :time="milliseconds" @end="handleCountdownEnd" @start="handleCountdownStart" :auto-start="false">
+                                <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }}</template>
+                            </countdown>
+                            <span class="sr-only">倒數</span>
+                        </b-badge>
+                    </b-button>
+                </div>
+                <lah-reg-table
+                    :baked-data="reg_cases_by_day"
+                    :max-height="reg_cases_by_day_max_height"
+                    type="xl"
+                ></lah-reg-table>
+            </div>`,
+            data: {
+                reg_cases_by_day: undefined,
+                reg_cases_by_day_max_height: window.innerHeight - 130,
+                milliseconds: 60 * 5 * 1000
+            },
+            methods: {
+                reload() {},
+                handleCountdownEnd() { },
+                handleCountdownStart() {}
+            },
+            async created() {
+                let d = new Date();
+                let today = `${d.getFullYear() - 1911}${("0" + (d.getMonth()+1)).slice(-2)}${("0" + d.getDate()).slice(-2)}`;
+                let cached = await this.getLocalCache('reg_cases_by_day');
+                if (cached !== false) {
+                    this.reg_cases_by_day = cached;
                 } else {
-                    addNotification({
-                        title: "查詢今日案件",
-                        message: res.data.message,
-                        type: "warning"
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: "reg_cases_by_day",
+                        qday: today
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            this.reg_cases_by_day = res.data.baked;
+                            this.setLocalCache('reg_cases_by_day', res.data.baked, 300 * 1000);   // cached for 1 min
+                        } else {
+                            addNotification({
+                                title: "查詢今日案件",
+                                message: res.data.message,
+                                type: "warning"
+                            });
+                        }
+                    }).catch(err => {
+                        this.error = err;
                     });
                 }
-            }).catch(err => {
-                this.error = err;
-            });
-        }
+            }
+        });
     });
   </script>
 </body>
