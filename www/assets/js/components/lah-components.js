@@ -1039,7 +1039,7 @@ if (Vue) {
                         return [
                             '序號',
                             {key: "收件字號", sortable: this.sort},
-                            {key: "收件日期", sortable: this.sort},
+                            {key: "收件時間", sortable: this.sort},
                             {key: "預定結案日期", label:"限辦期限", sortable: this.sort},
                             {key: "登記原因", sortable: this.sort},
                             {key: "辦理情形", sortable: this.sort},
@@ -1051,7 +1051,7 @@ if (Vue) {
                             {key: "登記人員", label: "登簿", sortable: this.sort},
                             {key: "校對人員", label: "校對", sortable: this.sort},
                             {key: "結案人員", label: "結案", sortable: this.sort},
-                            {key: "結案狀態", sortable: this.sort}
+                            {key: "結案狀態", label: "狀態", sortable: this.sort}
                         ];
                     case "flow":
                         return [
