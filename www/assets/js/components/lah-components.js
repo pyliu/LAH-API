@@ -201,13 +201,8 @@ if (Vue) {
                 icon: "cubes",
                 need_admin: true
             }, {
-                text: "案件追蹤beta",
-                url: "tracking.html",
-                icon: "list",
-                need_admin: true
-            }, {
                 text: "案件追蹤",
-                url: "tracking.php",
+                url: "tracking.html",
                 icon: "list-alt",
                 need_admin: true
             }, {
