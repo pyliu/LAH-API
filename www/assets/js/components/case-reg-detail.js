@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("case-reg-detail", {
         template: `<div>
-            <lah-reg-table :bakedData="[jsonObj]" type="flow" :mute="true" class="small"></lah-reg-table>
+            <lah-reg-table :bakedData="[jsonObj]" type="flow" :mute="true"></lah-reg-table>
             <b-card no-body>
                 <b-tabs card :end="tabsAtEnd" :pills="tabsAtEnd">
                     <b-tab>

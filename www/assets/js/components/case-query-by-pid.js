@@ -1,19 +1,21 @@
 if (Vue) {
     let VueCRSMS = {
         template: `<lah-transition slide-down>
-            <lah-reg-table :baked-data="json.baked" icon-variant="success" icon="chevron-circle-right" :max-height="200" v-if="isTableReady"></lah-reg-table>
+            <lah-reg-table
+                v-if="isTableReady"
+                :baked-data="json.baked"
+                icon-variant="success"
+                icon="chevron-circle-right" 
+                :max-height="300" 
+                class="small"
+            >
+            </lah-reg-table>
             <div v-else v-html="message"></div>
         </lah-transition>`,
         props: ["pid"],
         data: function() {
             return {
                 json: null,
-                fields: [
-                    '序號',
-                    {key: "RM01", label: "收件字號", sortable: true},
-                    {key: "RM07_1", label: "收件日期", sortable: true},
-                    {key: "RM09", label: "登記代碼", sortable: true}
-                ],
                 message: '<i class="text-primary ld ld-spin ld-spinner"></i> 登記案件資料查詢中 ...'
             }
         },

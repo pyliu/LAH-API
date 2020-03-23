@@ -758,28 +758,28 @@ if (Vue) {
                 </template>
 
                 <template v-slot:cell(初審人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['初審人員'])">{{item["初審人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['初審人員'], item['RM45'])">{{item["初審人員"]}}</a>
                 </template>
                 <template v-slot:cell(複審人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['複審人員'])">{{item["複審人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['複審人員'], item['RM47'])">{{item["複審人員"]}}</a>
                 </template>
                 <template v-slot:cell(收件人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['收件人員'])">{{item["收件人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['收件人員'], item['RM96'])">{{item["收件人員"]}}</a>
                 </template>
                 <template v-slot:cell(作業人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['作業人員'])">{{item["作業人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['作業人員'], item['RM30_1'])">{{item["作業人員"]}}</a>
                 </template>
                 <template v-slot:cell(准登人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['准登人員'])">{{item["准登人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['准登人員'], item['RM63'])">{{item["准登人員"]}}</a>
                 </template>
                 <template v-slot:cell(登記人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['登記人員'])">{{item["登記人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['登記人員'], item['RM55'])">{{item["登記人員"]}}</a>
                 </template>
                 <template v-slot:cell(校對人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['校對人員'])">{{item["校對人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['校對人員'], item['RM57'])">{{item["校對人員"]}}</a>
                 </template>
                 <template v-slot:cell(結案人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['結案人員'])">{{item["結案人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['結案人員'], item['RM59'])">{{item["結案人員"]}}</a>
                 </template>
             </b-table>
         </lah-transition>`,
@@ -887,11 +887,11 @@ if (Vue) {
                     this.error = err;
                 });
             },
-            userinfo(name) {
+            userinfo(name, id = '') {
                 if (name == 'XXXXXXXX') return;
                 showModal({
-                    title: `${name} 使用者資訊`,
-                    message: this.$createElement('lah-user-card', { props: { name: name }})
+                    title: `${name} 使用者資訊${this.empty(id) ? '' : ` (${id})`}`,
+                    message: this.$createElement('lah-user-card', { props: { id: id, name: name }})
                 });
             },
             bakedContent: function(row) {
@@ -1206,7 +1206,7 @@ if (Vue) {
                     <b-button @click="popup" variant="outline-success" size="sm"><lah-fa-icon icon="question"> 說明</lah-fa-icon></b-button>
                 </div>
             </div>
-            <lah-fa-icon v-else icon="exclamation-circle" variant="success"> 無暫存檔。</lah-fa-icon>
+            <lah-fa-icon v-else icon="exclamation-circle" variant="success" size="xs"> 無暫存檔。</lah-fa-icon>
         </div>`,
         props: ["bakedData", 'id'], // the id format should be '109HB04001234'
         data: function() { return {
