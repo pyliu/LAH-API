@@ -71,7 +71,10 @@
             data: {
                 reg_cases_by_day: undefined,
                 reg_cases_by_day_max_height: window.innerHeight - 130,
-                milliseconds: 60 * 5 * 1000 // cached for 5 mins
+                milliseconds: 60 * 5 * 1000, // cached for 5 mins
+                overdue: false,
+                almost: false,
+                
             },
             methods: {
                 async reload(force = false) {
