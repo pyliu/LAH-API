@@ -50,6 +50,10 @@
             el: "#tracking",
             template: `<div>
                 <div style="right: 2.5rem; position:absolute; top: 90px;">
+                    <b-button size="sm" variant="light" @click="$('.b-table tr').removeClass('hide')">全部</b-button>
+                    <b-button size="sm" variant="success" @click="$('.b-table tr').addClass('hide'); $('.b-table tr.filter-success').removeClass('hide');">結案</b-button>
+                    <b-button size="sm" variant="warning" @click="$('.b-table tr').addClass('hide'); $('.b-table tr.filter-warning').removeClass('hide');">接近逾期</b-button>
+                    <b-button size="sm" variant="danger" @click="$('.b-table tr').addClass('hide'); $('.b-table tr.filter-danger').removeClass('hide');">逾期</b-button>
                     <b-button id="reload" variant="primary" size="sm" @click="reload">
                         <lah-fa-icon icon="sync-alt"> 刷新</lah-fa-icon>
                         <b-badge variant="light">

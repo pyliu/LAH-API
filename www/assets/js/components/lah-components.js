@@ -1137,7 +1137,7 @@ if (Vue) {
                 return row.item["RM09"] + " : " + (this.empty(row.item["登記原因"]) ? row.item["RM09_CHT"] : row.item["登記原因"]);
             },
             trClass(item, type) {
-                if(item && type == 'row') return this.color ? (item["紅綠燈背景CSS"] || '') : '';
+                if(item && type == 'row') return this.color ? item["紅綠燈背景CSS"] : `filter-${item["燈號"]}`;
             }
         },
         created() { this.type = this.type || '' },
