@@ -150,6 +150,10 @@ blockquote {
 	font-size: .60rem;
 }
 
+.b-table > tbody > tr > td, .b-table > thead > tr > th {
+	vertical-align: middle;
+}
+
 .b-table a:link, .b-table a:visited {
 	color: rgba(56, 56, 241, 0.842);
   }
