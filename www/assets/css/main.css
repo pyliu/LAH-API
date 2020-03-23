@@ -128,6 +128,14 @@ blockquote {
 	font-weight: bold;
 }
 
+.b-table a:link, #case_results a:visited {
+	color: rgba(56, 56, 241, 0.842);
+  }
+  
+.b-table .bg-success a:link, #case_results .bg-danger a:link, #case_results .bg-success a:visited, #case_results .bg-danger a:visited {
+	color: white;
+}
+
 /* add v-fade to the element class to enable it */
 .v-fade {
 	display: inherit !important; /* override v-show display: none */

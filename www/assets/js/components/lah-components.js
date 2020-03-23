@@ -286,7 +286,7 @@ if (Vue) {
             },
             userFound: function(name) {
                 this.avatar = `get_pho_img.php?name=${name}`;
-                this.$log(name, this.avatar);
+                this.setLocalCache('avatar_src_url', this.avatar, 7 * 86400000);
             },
             checkAuthority: async function() {
                 if (this.isAdmin === undefined) {
@@ -312,6 +312,8 @@ if (Vue) {
                     });
                 }
                 this.$store.commit('myip', myip);
+                // restore avatar photo url
+                this.avatar = await this.getLocalCache('avatar_src_url');
             } catch (err) {
                 console.error(err);
             }
@@ -1130,7 +1132,9 @@ if (Vue) {
             reason: function(row) {
                 return row.item["RM09"] + " : " + (this.empty(row.item["登記原因"]) ? row.item["RM09_CHT"] : row.item["登記原因"]);
             },
-            trClass(item, type) { return this.color ? item["TRAFFIC_LIGHT_CSS"] || '' : ''; }
+            trClass(item, type) {
+                if(item && type == 'row') return this.color ? (item["TRAFFIC_LIGHT_CSS"] || '') : '';
+            }
         },
         created() { this.type = this.type || '' },
         mounted() {}
