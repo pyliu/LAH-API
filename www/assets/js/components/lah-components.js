@@ -955,13 +955,14 @@ if (Vue) {
 
                 :sticky-header="sticky"
                 :caption="caption"
-                caption-top
                 :items="bakedData"
                 :fields="tblFields"
                 :style="style"
                 :busy="!bakedData"
-                class="text-center"
                 :tbody-tr-class="trClass"
+
+                class="text-center"
+                caption-top
             >
                 <template v-slot:table-busy>
                     <b-spinner class="align-middle" variant="danger" type="grow" small label="讀取中..."></b-spinner>
@@ -970,6 +971,9 @@ if (Vue) {
                 <template v-slot:cell(序號)="row">
                     {{row.index + 1}}
                 </template>
+                <template v-slot:cell(燈號)="row">
+                    <lah-fa-icon icon="circle" :variant="traffic(row.item)"></lah-fa-icon>
+                </template>
 
                 <template v-slot:cell(RM01)="row">
                     <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
@@ -977,7 +981,7 @@ if (Vue) {
                     <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{bakedContent(row)}}</a>
                 </template>
                 <template v-slot:cell(收件字號)="row">
-                    <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
+                    <lah-fa-icon icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
                     <span v-if="mute">{{bakedContent(row)}}</span>
                     <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{row.item['收件字號']}}</a>
                 </template>
@@ -1015,7 +1019,7 @@ if (Vue) {
                 </template>
             </b-table>
         </lah-transition>`,
-        props: ['bakedData', 'maxHeight', 'icon', 'iconVariant', 'type', 'fields', 'mute', 'noCaption', 'color'],
+        props: ['bakedData', 'maxHeight', 'type', 'fields', 'mute', 'noCaption', 'color', 'icon', 'iconVariant'],
         data: () => { return { } },
         computed: {
             tblFields: function() {
@@ -1048,7 +1052,7 @@ if (Vue) {
                         ];
                     case "xl":
                         return [
-                            '序號',
+                            '燈號',
                             {key: "收件字號", sortable: this.sort},
                             {key: "收件時間", sortable: this.sort},
                             {key: "預定結案日期", label:"限辦期限", sortable: this.sort},
@@ -1126,14 +1130,18 @@ if (Vue) {
                     message: this.$createElement('lah-user-card', { props: { id: id, name: name }})
                 });
             },
-            bakedContent: function(row) {
+            bakedContent(row) {
                 return row.item[row.field.label];
             },
-            reason: function(row) {
+            reason(row) {
                 return row.item["RM09"] + " : " + (this.empty(row.item["登記原因"]) ? row.item["RM09_CHT"] : row.item["登記原因"]);
             },
             trClass(item, type) {
                 if(item && type == 'row') return this.color ? (item["TRAFFIC_LIGHT_CSS"] || '') : '';
+            },
+            traffic(item) {
+                // css e.g. "bg-success text-white"
+                return this.empty(item['TRAFFIC_LIGHT_CSS']) ? 'warning' : item['TRAFFIC_LIGHT_CSS'].split(' ')[0].split('-')[1];
             }
         },
         created() { this.type = this.type || '' },

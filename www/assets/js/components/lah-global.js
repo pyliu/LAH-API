@@ -264,7 +264,7 @@ Vue.mixin({
                 className() {
                     let prefix = this.prefix || 'fas';
                     let icon = this.icon || 'exclamation-circle';
-                    let variant = this.variant || 'transparent';
+                    let variant = this.variant || '';
                     let ld_movement = this.action || '';
                     let size = '';
                     switch(this.size) {

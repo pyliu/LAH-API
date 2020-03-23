@@ -129,8 +129,9 @@ class RegCaseData {
     public function getBakedData() {
         $row = &$this->row;
         $ret = array(
-            "收件字號" => $this->getReceiveSerial(),
             "CAES_SERIAL" => $row["RM01"]."-".$row["RM02"]."-".$row["RM03"],
+            "TRAFFIC_LIGHT_CSS" => $this->getStatusCss(),
+            "收件字號" => $this->getReceiveSerial(),
             "收件日期" => RegCaseData::toDate($row["RM07_1"]),
             "收件時間" => RegCaseData::toDate($row["RM07_1"])." ".RegCaseData::toDate($row["RM07_2"]),
             "測量案件" => $row["RM04"]."-".$row["RM05"]."-".$row["RM06"],
@@ -138,7 +139,6 @@ class RegCaseData {
             "限辦期限" => $this->getDueDate(),
             "作業人員" => $this->getCurrentOperator(),
             "辦理情形" => $this->getStatus(),
-            "TRAFFIC_LIGHT_CSS" => $this->getStatusCss(),
             "權利人統編" => empty($row["RM18"]) ? "" : $row["RM18"],
             "權利人姓名" => empty($row["RM19"]) ? "" : $row["RM19"],
             "義務人統編" => empty($row["RM21"]) ? "" : $row["RM21"],
