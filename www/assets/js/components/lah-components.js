@@ -179,9 +179,9 @@ if (Vue) {
                         </b-navbar-nav>
                     </lah-transition>
                     <b-navbar-nav class="ml-auto">
-                        <lah-fa-icon prefix="far" icon="user-circle" variant="light" id="header-user-icon" size="2x"></lah-fa-icon>
-                        <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="250">
-                            <lah-user-card :ip="myip" @not-found="userNotFound" class="mb-1" title="我的名片"></lah-user-card>
+                        <b-avatar variant="light" id="header-user-icon" size="2.25rem" :src="avatar"></b-avatar>
+                        <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
+                            <lah-user-card :ip="myip" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
                             <lah-user-message :ip="myip" count="5" title="最新信差訊息" tabs="true" tabsEnd="true"></lah-user-message>
                         </b-popover>
                     </b-navbar-nav>
@@ -194,6 +194,7 @@ if (Vue) {
             leading: "Unknown",
             active: undefined,
             url: new URL(location.href).pathname.substring(1),
+            avatar: undefined,
             links: [{
                 text: `管理儀錶板`,
                 url: ["index.html", "/"],
@@ -282,6 +283,10 @@ if (Vue) {
             userNotFound: function(input) {
                 this.$store.commit('myip', null);
                 console.warn(`找不到 ${input} 的使用者資訊，無法顯示目前使用者的卡片。`);
+            },
+            userFound: function(name) {
+                this.avatar = `get_pho_img.php?name=${name}`;
+                this.$log(name, this.avatar);
             },
             checkAuthority: async function() {
                 if (this.isAdmin === undefined) {
@@ -496,7 +501,8 @@ if (Vue) {
         computed: {
             useTab: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 1; },
             useCard: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 0; },
-            notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; }
+            notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; },
+            foundName: function() { return this.user_rows[0]["AP_USER_NAME"] }
         },
         methods: {
             photoUrl: function (user_data) {
@@ -551,6 +557,7 @@ if (Vue) {
                     if (this.user_rows && this.user_rows['AP_PCIP'] == this.myip) {
                         this.$store.commit('myid', this.user_rows['DocUserID']);
                     }
+                    this.$emit('found', this.foundName);
                 } catch (err) {
                     console.error(err);
                 }
@@ -571,6 +578,7 @@ if (Vue) {
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             this.user_rows = res.data.raw;
                             this.cacheUserRows();
+                            this.$emit('found', this.foundName);
                         } else {
                             console.warn(`找不到 '${this.name || this.id || this.ip}' 資料`);
                             this.$emit('notFound', this.name || this.id || this.ip);
