@@ -382,7 +382,7 @@ class Query {
 				SQ.RM21   AS \"義務人統一編號\",
 				SQ.RM22   AS \"義務人姓名\",
 				SQ.RM30   AS \"辦理情形\",
-				SQ.RM31   AS \"結案已否\"
+				SQ.RM31   AS \"結案代碼\"
 			FROM (
 				SELECT *
 				FROM MOICAS.CRSMS c

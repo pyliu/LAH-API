@@ -830,7 +830,7 @@ if (Vue) {
                             {key: "登記人員", label: "登簿", sortable: this.sort},
                             {key: "校對人員", label: "校對", sortable: this.sort},
                             {key: "結案人員", label: "結案", sortable: this.sort},
-                            {key: "結案已否", sortable: this.sort}
+                            {key: "結案與否", sortable: this.sort}
                         ];
                     case "flow":
                         return [

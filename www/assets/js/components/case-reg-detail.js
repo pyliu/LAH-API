@@ -15,7 +15,7 @@ if (Vue) {
                                     <lah-transition appear>
                                         <div v-show="show_op_card" class="mr-1 float-right" style="width:400px">
                                             <lah-fa-icon icon="user" variant="dark" prefix="far"> 作業人員</lah-fa-icon>
-                                            <lah-user-card @not-found="handleNotFound" :id="jsonObj.作業人員ID"></lah-user-card>
+                                            <lah-user-card @not-found="handleNotFound" :id="jsonObj.RM30_1"></lah-user-card>
                                         </div>
                                     </lah-transition>
                                     <div v-if="jsonObj.跨所 == 'Y'"><span class='bg-info text-white rounded p-1'>跨所案件 ({{jsonObj.資料收件所}} => {{jsonObj.資料管轄所}})</span></div>
