@@ -619,7 +619,7 @@ if (Vue) {
                     <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
                 </b-card>
             </b-card-group>
-            <lah-fa-icon icon="exclamation-circle" size="lg" v-else>{{notFound}}</lah-fa-icon>
+            <lah-fa-icon variant="danger" icon="exclamation-circle" size="lg" v-else>{{notFound}}</lah-fa-icon>
         </div>`,
         props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton', 'tabs', 'tabsEnd', 'noCache'],
         data: () => { return {

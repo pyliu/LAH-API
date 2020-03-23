@@ -290,7 +290,7 @@ class RegCaseData {
             case "E":
                 return "請示";
             default:
-                return "尚未結案";
+                return "未結案";
         }
     }
 

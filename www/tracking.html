@@ -81,6 +81,7 @@
                         this.reg_cases_by_day = cached;
                         let remaining_ms = await this.getLocalCacheExpireRemainingTime('reg_cases_by_day');
                         this.setCountdown(remaining_ms);
+                        this.startCountdown();
                     } else {
                         this.isBusy = true;
                         this.endCountdown();
@@ -103,9 +104,9 @@
                             this.error = err;
                         }).finally(() => {
                             this.isBusy = false;
+                            this.startCountdown();
                         });
                     }
-                    this.startCountdown();
                 },
                 handleCountdownEnd() { this.reload(true) },
                 handleCountdownStart() {},    
