@@ -1,34 +1,32 @@
 if (Vue) {
     Vue.component('lah-heir-share-ratio', {
         template: `<b-container fluid style="max-width:640px">
-        <div class="my-3">
+        <div>
           <h5>
             <lah-fa-icon icon="chevron-circle-right" variant="danger"> 被繼承人持分</lah-fa-icon>
           </h5>
 
-          <div>
-            <b-input-group class="mb-1">
-              <b-input-group-prepend is-text><span class="text-danger font-weight-bold">＊</span>持分</b-input-group-prepend>
-              <b-form-input
-                inline
-                type="number"
-                min="1"
-                step="1"
-                pattern="\d+"
-                v-model="heir_denominator"
-                @change="filterNonNumber"
-              ></b-form-input>
-              <span class="pt-1 mx-1"> 分之 1</span>
-            </b-input-group>
-          </div>
+          <b-input-group class="mt-3">
+            <b-input-group-prepend is-text><span class="text-danger font-weight-bold">＊</span>持分</b-input-group-prepend>
+            <b-form-input
+              inline
+              type="number"
+              min="1"
+              step="1"
+              pattern="\d+"
+              v-model="heir_denominator"
+              @change="filterNonNumber"
+            ></b-form-input>
+            <span class="pt-1 mx-1"> 分之 1</span>
+          </b-input-group>
         </div>
     
-        <h5>
+        <h5 class="my-3">
           <lah-fa-icon icon="chevron-circle-right" variant="info"> {{now_step.title}}</lah-fa-icon>
           <b-button :disabled="now_step == wizard.s0" @click="reset" :variant="now_step == wizard.s0 ? 'outline-primary' : 'success'" title="重新開始" class="float-right" size="sm"><lah-fa-icon icon="sync-alt"></lah-fa-icon></b-button>
         </h5>
 
-        <section class="mt-3 s-95">
+        <section class="s-95">
           <lah-transition>
 
             <!-- step 0 選擇繼承事實發生時間點 -->
