@@ -222,10 +222,7 @@ ksort($operators);
   <script src="assets/js/jquery.min.js"></script>
   <script src="assets/js/popper.min.js"></script>
   <script src="assets/js/bootstrap.min.js"></script>
-  <!-- bs datepicker -->
-  <script src="assets/js/bootstrap-datepicker.min.js"></script>
-  <script src="assets/js/bootstrap-datepicker.zh-TW.min.js"></script>
-
+  
   <script src="assets/js/vue.js"></script>
   <script src="assets/js/vuex.js"></script>
   <script src="assets/js/bootstrap-vue.min.js"></script>
