@@ -193,7 +193,6 @@ if (Vue) {
             icon: "question",
             leading: "Unknown",
             active: undefined,
-            url: new URL(location.href).pathname.substring(1),
             avatar: undefined,
             links: [{
                 text: `管理儀錶板`,
@@ -243,7 +242,14 @@ if (Vue) {
             }]
         }},
         computed: {
-            enableUserCardPopover() { return !this.empty(this.myip) }
+            enableUserCardPopover() { return !this.empty(this.myip) },
+            url() {
+                let page_url = new URL(location.href).pathname.substring(1);
+                if (this.empty(page_url)) {
+                    return 'index.html';
+                }
+                return page_url;
+            }
         },
         methods: {
             activeCss: function(link) {
