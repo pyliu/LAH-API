@@ -396,7 +396,7 @@ if (Vue) {
                     <div v-if="isAdmin">學歷：{{user_data["AP_HI_SCHOOL"]}}</div>
                     <div v-if="isAdmin">考試：{{user_data["AP_TEST"]}}</div>
                     <div v-if="isAdmin">手機：{{user_data["AP_SEL"]}}</div>
-                    <div>到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge !== false" :variant="workAgeVariant" pill>{{workAge}}年</b-badge></div>
+                    <div v-if="isAdmin">到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge !== false" :variant="workAgeVariant" pill>{{workAge}}年</b-badge></div>
                 </b-card-text>`,
                 props: ['user_data'],
                 data: function() { return {
