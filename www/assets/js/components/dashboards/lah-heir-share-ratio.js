@@ -2,9 +2,9 @@ if (Vue) {
     Vue.component('lah-heir-share-ratio', {
         template: `<b-container fluid style="max-width:640px">
         <div class="my-3">
-          <h5 v-if="now_step" class="text-justify">
+          <h5>
             <lah-fa-icon icon="chevron-circle-right" variant="danger"> 被繼承人持分</lah-fa-icon>
-            <b-button @click="reset" variant="outline-primary"><lah-fa-icon icon="sync-alt"> 重新開始</lah-fa-icon></b-button>
+            <b-button :disabled="now_step == wizard.s0" @click="reset" :variant="now_step == wizard.s0 ? 'outline-primary' : 'success'" title="重新開始" class="float-right" size="sm"><lah-fa-icon icon="sync-alt"></lah-fa-icon></b-button>
           </h5>
 
           <div>
@@ -24,7 +24,7 @@ if (Vue) {
           </div>
         </div>
     
-        <h5 v-if="now_step">
+        <h5>
           <lah-fa-icon icon="chevron-circle-right" variant="info"> {{now_step.title}}</lah-fa-icon>
         </h5>
 
