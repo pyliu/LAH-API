@@ -298,7 +298,6 @@ if (Vue) {
                     grandparents: 0
                 }
             },
-            toastCount: 0,
             heir_denominator: 1,
             now_step: null,
             color_codes: [
@@ -345,29 +344,6 @@ if (Vue) {
             }
         } },
         methods: {
-            makeToast: function (content, opts) {
-                if (content) {
-                    this.toastCount++;
-                    this.$bvToast.toast(
-                        content,
-                        Object.assign({
-                                title: "通知",
-                                autoHideDelay: 5000,
-                                appendToast: false,
-                                noAutoHide: false,
-                                noHoverPause: false,
-                                noCloseButton: true,
-                                solid: false,
-                                variant: "default",
-                                toaster: "b-toaster-bottom-right",
-                                headerClass: "my-toast-header",
-                                bodyClass: "my-toast-body"
-                            },
-                            opts
-                        )
-                    );
-                }
-            },
             reset: function (e) {
                 this.wizard.s0.seen = true;
                 this.wizard.s0.value = "";
@@ -396,7 +372,7 @@ if (Vue) {
                 this.wizard.s2.grandparents = 0;
             },
             filterNonNumber: function (e) {
-                if (this.empty(e.trget)) return;
+                if (this.empty(e.target)) return;
                 let val = e.target.value.replace(/[^0-9]/g, "").replace(/^0+/, ""); // removing non-digit chars, leading zero
                 e.target.value = Math.abs(val || 0);
             },
