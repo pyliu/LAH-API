@@ -1538,14 +1538,18 @@ if (Vue) {
                 </template>
 
                 <template v-slot:cell(RM01)="row">
-                    <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
-                    <span v-if="mute">{{bakedContent(row)}}</span>
-                    <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{bakedContent(row)}}</a>
+                    <div class="text-left">
+                        <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
+                        <span v-if="mute">{{bakedContent(row)}}</span>
+                        <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{bakedContent(row)}}</a>
+                    </div>
                 </template>
                 <template v-slot:cell(收件字號)="row">
-                    <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
-                    <span v-if="mute">{{bakedContent(row)}}</span>
-                    <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{row.item['收件字號']}}</a>
+                    <div class="text-left">
+                        <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
+                        <span v-if="mute">{{bakedContent(row)}}</span>
+                        <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{row.item['收件字號']}}</a>
+                    </div>
                 </template>
 
                 <template v-slot:cell(登記原因)="row">
@@ -1616,7 +1620,7 @@ if (Vue) {
                         ];
                     case "xl":
                         return [
-                            '燈號',
+                            {key: "燈號", sortable: this.sort},
                             {key: "收件字號", sortable: this.sort},
                             {key: "收件時間", sortable: this.sort},
                             {key: "預定結案日期", label:"限辦期限", sortable: this.sort},
