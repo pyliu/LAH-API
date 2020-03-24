@@ -226,6 +226,11 @@ if (Vue) {
                 icon: "comments",
                 need_admin: false
             }, {
+                text: "繼承應繼分",
+                url: "heir_share.html",
+                icon: "chart-pie",
+                need_admin: false
+            }, {
                 text: "記錄瀏覽",
                 url: "tasklog.html",
                 icon: "dog",
@@ -1489,12 +1494,12 @@ if (Vue) {
             });
         }
     });
-    
+
     Vue.component('lah-reg-table', {
         template: `<lah-transition appear slide-down>
             <b-table
                 ref="reg_case_tbl"
-                responsive="sm"
+                :responsive="'sm'"
                 :striped="true"
                 :hover="true"
                 :bordered="true"
@@ -1538,7 +1543,7 @@ if (Vue) {
                     <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{bakedContent(row)}}</a>
                 </template>
                 <template v-slot:cell(收件字號)="row">
-                    <lah-fa-icon icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
+                    <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
                     <span v-if="mute">{{bakedContent(row)}}</span>
                     <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{row.item['收件字號']}}</a>
                 </template>
