@@ -4,7 +4,6 @@ if (Vue) {
         <div class="my-3">
           <h5>
             <lah-fa-icon icon="chevron-circle-right" variant="danger"> 被繼承人持分</lah-fa-icon>
-            <b-button :disabled="now_step == wizard.s0" @click="reset" :variant="now_step == wizard.s0 ? 'outline-primary' : 'success'" title="重新開始" class="float-right" size="sm"><lah-fa-icon icon="sync-alt"></lah-fa-icon></b-button>
           </h5>
 
           <div>
@@ -26,6 +25,7 @@ if (Vue) {
     
         <h5>
           <lah-fa-icon icon="chevron-circle-right" variant="info"> {{now_step.title}}</lah-fa-icon>
+          <b-button :disabled="now_step == wizard.s0" @click="reset" :variant="now_step == wizard.s0 ? 'outline-primary' : 'success'" title="重新開始" class="float-right" size="sm"><lah-fa-icon icon="sync-alt"></lah-fa-icon></b-button>
         </h5>
 
         <section class="mt-3 s-95">
