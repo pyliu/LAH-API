@@ -258,8 +258,8 @@ Vue.mixin({
             }
         },
         "lah-fa-icon": {
-            template: `<span><i :class="className"></i> <slot></slot></span>`,
-            props: ["size", 'prefix', 'icon', 'variant', 'action'],
+            template: `<span><i :id="id" :class="className"></i> <slot></slot></span>`,
+            props: ["size", 'prefix', 'icon', 'variant', 'action', 'id'],
             computed: {
                 className() {
                     let prefix = this.prefix || 'fas';

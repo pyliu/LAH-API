@@ -23,7 +23,18 @@ if (Vue) {
     
         <h5 class="my-3">
           <lah-fa-icon icon="chevron-circle-right" variant="info"> {{now_step.title}}</lah-fa-icon>
-          <b-button :disabled="now_step == wizard.s0" @click="reset" :variant="now_step == wizard.s0 ? 'outline-primary' : 'success'" title="重新開始" class="float-right" size="sm"><lah-fa-icon icon="sync-alt"></lah-fa-icon></b-button>
+          <b-button
+            :disabled="now_step == wizard.s0"
+            :variant="now_step == wizard.s0 ? 'outline-primary' : 'success'"
+            title="重新開始"
+            class="float-right shadow-sm"
+            size="sm"
+            @click="reset"
+            @mouseenter="addLDAnimation('#spin-icon', 'ld-cycle-alt')"
+            @mouseleave="clearLDAnimation('#spin-icon')"
+          >
+            <lah-fa-icon :id="'spin-icon'" icon="undo"></lah-fa-icon>
+          </b-button>
         </h5>
 
         <section class="s-95">
@@ -349,6 +360,7 @@ if (Vue) {
                 this.now_step = this.wizard.s0;
                 this.resetS1(e);
                 this.resetS2(e);
+                clearLDAnimation('#spin-icon');
             },
             resetS1: function (e) {
                 this.wizard.s1.seen = false;
