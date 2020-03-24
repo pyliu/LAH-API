@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component('lah-heir-share-ratio', {
         template: `<b-container fluid style="max-width:640px">
-        <div class="my-2">
+        <div class="my-3">
           <h5 v-if="now_step" class="text-justify">
             <lah-fa-icon icon="chevron-circle-right" variant="danger"> 被繼承人持分</lah-fa-icon>
             <b-button @click="reset" variant="outline-primary"><lah-fa-icon icon="sync-alt"> 重新開始</lah-fa-icon></b-button>
@@ -28,228 +28,233 @@ if (Vue) {
           <lah-fa-icon icon="chevron-circle-right" variant="info"> {{now_step.title}}</lah-fa-icon>
         </h5>
 
-        <section class="s-95">
-          <!-- step 0 選擇繼承事實發生時間點 -->
-          <fieldset class="border p-2" v-show="wizard.s0.seen">
-            <legend class="w-auto">{{wizard.s0.legend}}</legend>
-            <div class="row text-center">
-              <label
-                class="col"
-                v-b-popover.hover.bottom="{ customClass: 'my-popover', content: '民國34年10月24日以前' }"
-              >
-                <input type="radio" v-model.number="wizard.s0.value" value="-1" @change="s0ValueSelected" /> 光復前
-              </label>
-              <label
-                class="col"
-                v-b-popover.hover.bottom="{ customClass: 'my-popover', content: '民國34年10月25日以後' }"
-              >
-                <input type="radio" v-model.number="wizard.s0.value" value="0" @change="s0ValueSelected" /> 光復後
-              </label>
-            </div>
-          </fieldset>
-      
-          <!-- step 1 光復前 -->
-          <fieldset class="border p-2" v-show="wizard.s1.seen">
-            <legend class="w-auto">{{wizard.s1.legend}}</legend>
-            <div class="row text-center">
-              <label class="col-6">
-                <input type="radio" v-model="wizard.s1.value" value="public" @change="s1ValueSelected" /> 家產
-              </label>
-              <label class="col-6">
-                <input type="radio" v-model="wizard.s1.value" value="private" @change="s1ValueSelected" /> 私產
-              </label>
-            </div>
+        <section class="mt-3 s-95">
+          <lah-transition>
 
-            <lah-transition fade>
-
-            <div key="seen_s1_public" class="border-top border-dark pt-2" v-if="seen_s1_public">
-              <ol class="d-block">
-                <li>
-                  法定推定財產繼承人係
-                  <strong class="text-primary">男子</strong>直系卑親屬，以親等近者為優先。親等相同之
-                  <strong class="text-primary">男子</strong>有數人時，共同均分繼承。
-                </li>
-                <li>無法定之推定戶主繼承人時，指定及選定之財產繼承人繼承。</li>
-              </ol>
-              
-              <div class="ml-4">
-                人數：
-                <b-form-spinbutton v-model="wizard.s1.public.count" min="0" size="sm" inline></b-form-spinbutton>
-                <h5 class="d-inline">
-                  <b-badge v-show="seen_s1_pub_msg" variant="warning">
-                    每人之應繼份為
-                    <b-badge variant="light">{{Math.abs(wizard.s1.public.count * heir_denominator)}} 分之 1</b-badge>
-                  </b-badge>
-                </h5>
+            <!-- step 0 選擇繼承事實發生時間點 -->
+            <fieldset key=s0 class="border p-2" v-if="wizard.s0.seen">
+              <legend class="w-auto">{{wizard.s0.legend}}</legend>
+              <div class="row text-center">
+                <label
+                  class="col"
+                  v-b-popover.hover.bottom="{ customClass: 'my-popover', content: '民國34年10月24日以前' }"
+                >
+                  <input type="radio" v-model.number="wizard.s0.value" value="-1" @change="s0ValueSelected" /> 光復前
+                </label>
+                <label
+                  class="col"
+                  v-b-popover.hover.bottom="{ customClass: 'my-popover', content: '民國34年10月25日以後' }"
+                >
+                  <input type="radio" v-model.number="wizard.s0.value" value="0" @change="s0ValueSelected" /> 光復後
+                </label>
               </div>
-            </div>
+            </fieldset>
+        
+            <!-- step 1 光復前 -->
+            <fieldset key="s1" class="border p-2" v-if="wizard.s1.seen">
+              <legend class="w-auto">{{wizard.s1.legend}}</legend>
+              <div class="row text-center">
+                <label class="col-6">
+                  <input type="radio" v-model="wizard.s1.value" value="public" @change="s1ValueSelected" /> 家產
+                </label>
+                <label class="col-6">
+                  <input type="radio" v-model="wizard.s1.value" value="private" @change="s1ValueSelected" /> 私產
+                </label>
+              </div>
 
-            <div key="seen_s1_private" class="border-top border-dark pt-2" v-if="seen_s1_private">
-              <h6 class="d-inline">* 僅有法定繼承人，順序如下：</h6>
-              <b-link href="#" @click="resetS1PrivateCounter">重設</b-link>
-              
-              <ol class="d-block">
-                <li>
-                  人數：<b-form-spinbutton v-model="wizard.s1.private.child" min="0" size="sm" inline :disabled="!seen_s1_private_1"></b-form-spinbutton>
-                  <label
-                    v-show="!seen_s1_private_1_msg"
-                    v-b-popover.hover.top="{ customClass: 'my-popover', content:'以親等近者為優先。親等相同之男子有數人時，共同均分之'}"
-                  >直系卑親屬</label>
+              <lah-transition fade>
+
+              <div key="seen_s1_public" class="border-top border-dark pt-2" v-if="seen_s1_public">
+                <ol class="d-block">
+                  <li>
+                    法定推定財產繼承人係
+                    <strong class="text-primary">男子</strong>直系卑親屬，以親等近者為優先。親等相同之
+                    <strong class="text-primary">男子</strong>有數人時，共同均分繼承。
+                  </li>
+                  <li>無法定之推定戶主繼承人時，指定及選定之財產繼承人繼承。</li>
+                </ol>
+                
+                <div class="ml-4">
+                  人數：
+                  <b-form-spinbutton v-model="wizard.s1.public.count" min="0" size="sm" inline></b-form-spinbutton>
                   <h5 class="d-inline">
-                    <b-badge v-show="seen_s1_private_1_msg" variant="warning">
-                      直系卑親屬每人之應繼份為
-                      <b-badge
-                        variant="light"
-                      >{{Math.abs(wizard.s1.private.child * heir_denominator)}} 分之 1</b-badge>
+                    <b-badge v-show="seen_s1_pub_msg" variant="warning">
+                      每人之應繼份為
+                      <b-badge variant="light">{{Math.abs(wizard.s1.public.count * heir_denominator)}} 分之 1</b-badge>
                     </b-badge>
                   </h5>
-                </li>
-                <li>
-                  人數：<b-form-spinbutton v-model="wizard.s1.private.spouse" size="sm" max="1" min="0" inline :disabled="!seen_s1_private_2"></b-form-spinbutton>
-                  <label v-show="!seen_s1_private_2_msg">配偶</label>
-                  <h5 class="d-inline">
-                    <b-badge v-show="seen_s1_private_2_msg" variant="warning">
-                      配偶應繼份為
-                      <b-badge
-                        variant="light"
-                      >{{Math.abs(wizard.s1.private.spouse * heir_denominator)}} 分之 1</b-badge>
-                    </b-badge>
-                  </h5>
-                </li>
-                <li>
-                  人數：<b-form-spinbutton v-model="wizard.s1.private.parent" min="0" size="sm" inline :disabled="!seen_s1_private_3"></b-form-spinbutton>
-                  <label
-                    v-show="!seen_s1_private_3_msg"
-                    v-b-popover.hover.bottom="{ customClass: 'my-popover', content: '親等不同以親等近者為先，同一親等有2人以上，共同均分之'}"
-                  >直系尊親屬</label>
-                  <h5 class="d-inline">
-                    <b-badge v-show="seen_s1_private_3_msg" variant="warning">
-                      直系尊親屬每人之應繼份為
-                      <b-badge
-                        variant="light"
-                      >{{Math.abs(wizard.s1.private.parent * heir_denominator)}} 分之 1</b-badge>
-                    </b-badge>
-                  </h5>
-                </li>
-                <li>
-                  人數：<b-form-spinbutton v-model="wizard.s1.private.household" size="sm" max="1" min="0" inline :disabled="!seen_s1_private_4"></b-form-spinbutton>
-                  <label v-show="!seen_s1_private_4_msg">戶主</label>
-                  <h5 class="d-inline">
-                    <b-badge v-show="seen_s1_private_4_msg" variant="warning">
-                      戶主應繼份為
-                      <b-badge
-                        variant="light"
-                      >{{Math.abs(wizard.s1.private.household * heir_denominator)}} 分之 1</b-badge>
-                    </b-badge>
-                  </h5>
-                </li>
-              </ol>
-              
-            </div>
+                </div>
+              </div>
 
-            </lah-transition>
+              <div key="seen_s1_private" class="border-top border-dark pt-2" v-if="seen_s1_private">
+                <h6 class="d-inline">* 僅有法定繼承人，順序如下：</h6>
+                <b-link href="#" @click="resetS1PrivateCounter">重設</b-link>
+                
+                <ol class="d-block">
+                  <li>
+                    人數：<b-form-spinbutton v-model="wizard.s1.private.child" min="0" size="sm" inline :disabled="!seen_s1_private_1"></b-form-spinbutton>
+                    <label
+                      v-show="!seen_s1_private_1_msg"
+                      v-b-popover.hover.top="{ customClass: 'my-popover', content:'以親等近者為優先。親等相同之男子有數人時，共同均分之'}"
+                    >直系卑親屬</label>
+                    <h5 class="d-inline">
+                      <b-badge v-show="seen_s1_private_1_msg" variant="warning">
+                        直系卑親屬每人之應繼份為
+                        <b-badge
+                          variant="light"
+                        >{{Math.abs(wizard.s1.private.child * heir_denominator)}} 分之 1</b-badge>
+                      </b-badge>
+                    </h5>
+                  </li>
+                  <li>
+                    人數：<b-form-spinbutton v-model="wizard.s1.private.spouse" size="sm" max="1" min="0" inline :disabled="!seen_s1_private_2"></b-form-spinbutton>
+                    <label v-show="!seen_s1_private_2_msg">配偶</label>
+                    <h5 class="d-inline">
+                      <b-badge v-show="seen_s1_private_2_msg" variant="warning">
+                        配偶應繼份為
+                        <b-badge
+                          variant="light"
+                        >{{Math.abs(wizard.s1.private.spouse * heir_denominator)}} 分之 1</b-badge>
+                      </b-badge>
+                    </h5>
+                  </li>
+                  <li>
+                    人數：<b-form-spinbutton v-model="wizard.s1.private.parent" min="0" size="sm" inline :disabled="!seen_s1_private_3"></b-form-spinbutton>
+                    <label
+                      v-show="!seen_s1_private_3_msg"
+                      v-b-popover.hover.bottom="{ customClass: 'my-popover', content: '親等不同以親等近者為先，同一親等有2人以上，共同均分之'}"
+                    >直系尊親屬</label>
+                    <h5 class="d-inline">
+                      <b-badge v-show="seen_s1_private_3_msg" variant="warning">
+                        直系尊親屬每人之應繼份為
+                        <b-badge
+                          variant="light"
+                        >{{Math.abs(wizard.s1.private.parent * heir_denominator)}} 分之 1</b-badge>
+                      </b-badge>
+                    </h5>
+                  </li>
+                  <li>
+                    人數：<b-form-spinbutton v-model="wizard.s1.private.household" size="sm" max="1" min="0" inline :disabled="!seen_s1_private_4"></b-form-spinbutton>
+                    <label v-show="!seen_s1_private_4_msg">戶主</label>
+                    <h5 class="d-inline">
+                      <b-badge v-show="seen_s1_private_4_msg" variant="warning">
+                        戶主應繼份為
+                        <b-badge
+                          variant="light"
+                        >{{Math.abs(wizard.s1.private.household * heir_denominator)}} 分之 1</b-badge>
+                      </b-badge>
+                    </h5>
+                  </li>
+                </ol>
+                
+              </div>
 
-          </fieldset>
-      
-          <!-- step 2 光復後 -->
-          <fieldset class="border p-2" v-show="wizard.s2.seen">
-            <legend class="w-auto">{{wizard.s2.legend}}</legend>
-            <div class="row text-center">
-              <label class="col-6">
-                <input type="radio" v-model="wizard.s2.value" value="7464" @change="s2ValueSelected" /> 74年6月4日以前
-              </label>
-              <label class="col-6">
-                <input type="radio" v-model="wizard.s2.value" value="7465" @change="s2ValueSelected" /> 74年6月5日以後
-              </label>
-            </div>
+              </lah-transition>
 
-            <lah-transition fade>
+            </fieldset>
+        
+            <!-- step 2 光復後 -->
+            <fieldset key="s2" class="border p-2" v-if="wizard.s2.seen">
+              <legend class="w-auto">{{wizard.s2.legend}}</legend>
+              <div class="row text-center">
+                <label class="col-6">
+                  <input type="radio" v-model="wizard.s2.value" value="7464" @change="s2ValueSelected" /> 74年6月4日以前
+                </label>
+                <label class="col-6">
+                  <input type="radio" v-model="wizard.s2.value" value="7465" @change="s2ValueSelected" /> 74年6月5日以後
+                </label>
+              </div>
 
-            <div class="border-top border-dark pt-2" v-if="seen_s2_counters">
-              <ol class="d-block">
-                <li>
-                  <b-link href="#" @click="resetS2Counter" class="float-right">重設</b-link>
-                  <b-form-checkbox
-                    v-model="wizard.s2.spouse"
-                    value="1"
-                    unchecked-value="0"
-                    size="sm"
-                    inline
-                    switch
-                  >
-                    <span>有配偶？</span>
-                  </b-form-checkbox>
-                  <span v-show="seen_s2_spouse_msg" class="h5">
-                    <b-badge variant="warning">
-                      應繼份為
-                      <b-badge variant="light">{{val_s2_spouse_ratio}}</b-badge>
-                    </b-badge>
-                  </span>
-                </li>
-                <li>
-                  <div>
-                    <label>
-                      直系卑親屬
-                      <lah-transition><span v-show="seen_s2_raising_children">(含養子女)</span></lah-transition>
-                    </label>人數：
-                    <b-form-spinbutton v-model="wizard.s2.children" min="0" size="sm" inline :disabled="!seen_s2_children"></b-form-spinbutton>
-                    <span v-show="seen_s2_children_msg" class="h5">
+              <lah-transition fade>
+
+              <div class="border-top border-dark pt-2" v-if="seen_s2_counters">
+                <ol class="d-block">
+                  <li>
+                    <b-link href="#" @click="resetS2Counter" class="float-right">重設</b-link>
+                    <b-form-checkbox
+                      v-model="wizard.s2.spouse"
+                      value="1"
+                      unchecked-value="0"
+                      size="sm"
+                      inline
+                      switch
+                    >
+                      <span>有配偶？</span>
+                    </b-form-checkbox>
+                    <span v-show="seen_s2_spouse_msg" class="h5">
                       <b-badge variant="warning">
-                        每人應繼份為
-                        <b-badge variant="light">{{val_s2_children_ratio}}</b-badge>
+                        應繼份為
+                        <b-badge variant="light">{{val_s2_spouse_ratio}}</b-badge>
                       </b-badge>
                     </span>
-                  </div>
-                  <lah-transition fade>
-                    <div v-show="!seen_s2_raising_children">
-                      <label>養子女</label>人數：
-                      <b-form-spinbutton v-model="wizard.s2.raising_children" min="0" size="sm" inline :disabled="!seen_s2_children"></b-form-spinbutton>
-                      <span v-show="seen_s2_raising_children_msg" class="h5">
+                  </li>
+                  <li>
+                    <div>
+                      <label>
+                        直系卑親屬
+                        <lah-transition><span v-show="seen_s2_raising_children">(含養子女)</span></lah-transition>
+                      </label>人數：
+                      <b-form-spinbutton v-model="wizard.s2.children" min="0" size="sm" inline :disabled="!seen_s2_children"></b-form-spinbutton>
+                      <span v-show="seen_s2_children_msg" class="h5">
                         <b-badge variant="warning">
                           每人應繼份為
-                          <b-badge variant="light">{{val_s2_raising_children_ratio}}</b-badge>
+                          <b-badge variant="light">{{val_s2_children_ratio}}</b-badge>
                         </b-badge>
                       </span>
                     </div>
-                  </lah-transition>
-                </li>
-                <li>
-                  <label>父母</label>人數：
-                  <b-form-spinbutton v-model="wizard.s2.parents" min="0" size="sm" inline :disabled="!seen_s2_parents"></b-form-spinbutton>
-                  <span v-show="seen_s2_parents_msg" class="h5">
-                    <b-badge variant="warning">
-                      每人應繼份為
-                      <b-badge variant="light">{{val_s2_parents_ratio}}</b-badge>
-                    </b-badge>
-                  </span>
-                </li>
-                <li>
-                  <label>兄弟姊妹</label>人數：
-                  <b-form-spinbutton v-model="wizard.s2.brothers" min="0" size="sm" inline :disabled="!seen_s2_brothers"></b-form-spinbutton>
-                  <span v-show="seen_s2_brothers_msg" class="h5">
-                    <b-badge variant="warning">
-                      每人應繼份為
-                      <b-badge variant="light">{{val_s2_brothers_ratio}}</b-badge>
-                    </b-badge>
-                  </span>
-                </li>
-                <li>
-                  <label>祖父母</label>人數：
-                  <b-form-spinbutton v-model="wizard.s2.grandparents" min="0" size="sm" inline :disabled="!seen_s2_grandparents"></b-form-spinbutton>
-                  <span v-show="seen_s2_grandparents_msg" class="h5">
-                    <b-badge variant="warning">
-                      每人應繼份為
-                      <b-badge variant="light">{{val_s2_grandparents_ratio}}</b-badge>
-                    </b-badge>
-                  </span>
-                </li>
-              </ol>
-            </div>
+                    <lah-transition fade>
+                      <div v-show="!seen_s2_raising_children">
+                        <label>養子女</label>人數：
+                        <b-form-spinbutton v-model="wizard.s2.raising_children" min="0" size="sm" inline :disabled="!seen_s2_children"></b-form-spinbutton>
+                        <span v-show="seen_s2_raising_children_msg" class="h5">
+                          <b-badge variant="warning">
+                            每人應繼份為
+                            <b-badge variant="light">{{val_s2_raising_children_ratio}}</b-badge>
+                          </b-badge>
+                        </span>
+                      </div>
+                    </lah-transition>
+                  </li>
+                  <li>
+                    <label>父母</label>人數：
+                    <b-form-spinbutton v-model="wizard.s2.parents" min="0" size="sm" inline :disabled="!seen_s2_parents"></b-form-spinbutton>
+                    <span v-show="seen_s2_parents_msg" class="h5">
+                      <b-badge variant="warning">
+                        每人應繼份為
+                        <b-badge variant="light">{{val_s2_parents_ratio}}</b-badge>
+                      </b-badge>
+                    </span>
+                  </li>
+                  <li>
+                    <label>兄弟姊妹</label>人數：
+                    <b-form-spinbutton v-model="wizard.s2.brothers" min="0" size="sm" inline :disabled="!seen_s2_brothers"></b-form-spinbutton>
+                    <span v-show="seen_s2_brothers_msg" class="h5">
+                      <b-badge variant="warning">
+                        每人應繼份為
+                        <b-badge variant="light">{{val_s2_brothers_ratio}}</b-badge>
+                      </b-badge>
+                    </span>
+                  </li>
+                  <li>
+                    <label>祖父母</label>人數：
+                    <b-form-spinbutton v-model="wizard.s2.grandparents" min="0" size="sm" inline :disabled="!seen_s2_grandparents"></b-form-spinbutton>
+                    <span v-show="seen_s2_grandparents_msg" class="h5">
+                      <b-badge variant="warning">
+                        每人應繼份為
+                        <b-badge variant="light">{{val_s2_grandparents_ratio}}</b-badge>
+                      </b-badge>
+                    </span>
+                  </li>
+                </ol>
+              </div>
 
-            </lah-transition>
+              </lah-transition>
 
-          </fieldset>
+            </fieldset>
+
+          </lah-transition>
         </section>
+
         <div class="my-2">
           <chart-component v-show="seen_chart" ref="pie"></chart-component>
           <heir-pie-chart :styles="vueChartStyle" :chartdata="vueChartData" :options="vueChartOptions" />
