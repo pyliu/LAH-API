@@ -49,7 +49,7 @@ if (Vue) {
                     :fields="fields"
                     :busy="isBusy"
                     v-show="listMode"
-                    class="text-center"
+                    class="text-center s-90"
                 >
                     <template v-slot:table-busy>
                         <div class="text-center text-danger my-5">
@@ -100,7 +100,7 @@ if (Vue) {
             reviewerID: "",
             height: 0,  // the height inside the modal
             caption: "查詢中 ... ",
-            small: false,
+            small: true,
             milliseconds: 15 * 60 * 1000,
             listMode: true,
             statsMode: false,

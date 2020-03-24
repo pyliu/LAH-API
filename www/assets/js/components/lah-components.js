@@ -931,219 +931,6 @@ if (Vue) {
         }
     });
 
-    Vue.component('lah-reg-table', {
-        template: `<lah-transition appear slide-down>
-            <b-table
-                ref="reg_case_tbl"
-                responsive="sm"
-                :striped="true"
-                :hover="true"
-                :bordered="true"
-                :borderless="false"
-                :outlined="false"
-                :small="true"
-                :dark="false"
-                :fixed="false"
-                :foot-clone="false"
-                :no-border-collapse="true"
-                :head-variant="'dark'"
-                :table-variant="false"
-
-                :sticky-header="sticky"
-                :caption="caption"
-                :items="bakedData"
-                :fields="tblFields"
-                :style="style"
-                :busy="!bakedData"
-                :tbody-tr-class="trClass"
-                :tbody-transition-props="transProps"
-                primary-key="收件字號"
-
-                class="text-center"
-                caption-top
-            >
-                <template v-slot:table-busy>
-                    <b-spinner class="align-middle" variant="danger" type="grow" small label="讀取中..."></b-spinner>
-                </template>
-
-                <template v-slot:cell(序號)="row">
-                    {{row.index + 1}}
-                </template>
-                <template v-slot:cell(燈號)="row">
-                    <lah-fa-icon icon="circle" :variant="row.item['燈號']"></lah-fa-icon>
-                </template>
-
-                <template v-slot:cell(RM01)="row">
-                    <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
-                    <span v-if="mute">{{bakedContent(row)}}</span>
-                    <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{bakedContent(row)}}</a>
-                </template>
-                <template v-slot:cell(收件字號)="row">
-                    <lah-fa-icon icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
-                    <span v-if="mute">{{bakedContent(row)}}</span>
-                    <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{row.item['收件字號']}}</a>
-                </template>
-
-                <template v-slot:cell(登記原因)="row">
-                    {{reason(row)}}
-                </template>
-                <template v-slot:cell(RM09)="row">
-                    {{reason(row)}}
-                </template>
-
-                <template v-slot:cell(初審人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['初審人員'], item['RM45'])">{{item["初審人員"]}}</a>
-                </template>
-                <template v-slot:cell(複審人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['複審人員'], item['RM47'])">{{item["複審人員"]}}</a>
-                </template>
-                <template v-slot:cell(收件人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['收件人員'], item['RM96'])">{{item["收件人員"]}}</a>
-                </template>
-                <template v-slot:cell(作業人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['作業人員'], item['RM30_1'])">{{item["作業人員"]}}</a>
-                </template>
-                <template v-slot:cell(准登人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['准登人員'], item['RM63'])">{{item["准登人員"]}}</a>
-                </template>
-                <template v-slot:cell(登記人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['登記人員'], item['RM55'])">{{item["登記人員"]}}</a>
-                </template>
-                <template v-slot:cell(校對人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['校對人員'], item['RM57'])">{{item["校對人員"]}}</a>
-                </template>
-                <template v-slot:cell(結案人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['結案人員'], item['RM59'])">{{item["結案人員"]}}</a>
-                </template>
-            </b-table>
-        </lah-transition>`,
-        props: ['bakedData', 'maxHeight', 'type', 'fields', 'mute', 'noCaption', 'color', 'icon', 'iconVariant'],
-        data: () => { return {
-            transProps: { name: 'rollIn' }
-        } },
-        computed: {
-            tblFields: function() {
-                if (!this.empty(this.fields)) return this.fields;
-                switch(this.type) {
-                    case "md":
-                        return [
-                            {key: "收件字號", sortable: this.sort},
-                            {key: "登記原因", sortable: this.sort},
-                            {key: "辦理情形", sortable: this.sort},
-                            {key: "初審人員", sortable: this.sort},
-                            {key: "作業人員", sortable: this.sort},
-                            {key: "收件時間", sortable: this.sort},
-                            {key: "預定結案日期", label:"限辦期限", sortable: this.sort}
-                        ];
-                    case "lg":
-                        return [
-                            {key: "收件字號", sortable: this.sort},
-                            {key: "收件日期", sortable: this.sort},
-                            {key: "登記原因", sortable: this.sort},
-                            {key: "辦理情形", sortable: this.sort},
-                            {key: "收件人員", label: "收件", sortable: this.sort},
-                            {key: "作業人員", label: "作業", sortable: this.sort},
-                            {key: "初審人員", label: "初審", sortable: this.sort},
-                            {key: "複審人員", label: "複審", sortable: this.sort},
-                            {key: "准登人員", label: "准登", sortable: this.sort},
-                            {key: "登記人員", label: "登簿", sortable: this.sort},
-                            {key: "校對人員", label: "校對", sortable: this.sort},
-                            {key: "結案人員", label: "結案", sortable: this.sort}
-                        ];
-                    case "xl":
-                        return [
-                            '燈號',
-                            {key: "收件字號", sortable: this.sort},
-                            {key: "收件時間", sortable: this.sort},
-                            {key: "預定結案日期", label:"限辦期限", sortable: this.sort},
-                            {key: "登記原因", sortable: this.sort},
-                            {key: "辦理情形", sortable: this.sort},
-                            {key: "收件人員", label: "收件", sortable: this.sort},
-                            {key: "作業人員", label: "作業", sortable: this.sort},
-                            {key: "初審人員", label: "初審", sortable: this.sort},
-                            {key: "複審人員", label: "複審", sortable: this.sort},
-                            {key: "准登人員", label: "准登", sortable: this.sort},
-                            {key: "登記人員", label: "登簿", sortable: this.sort},
-                            {key: "校對人員", label: "校對", sortable: this.sort},
-                            {key: "結案人員", label: "結案", sortable: this.sort},
-                            {key: "結案狀態", label: "狀態", sortable: this.sort}
-                        ];
-                    case "flow":
-                        return [
-                            {key: "辦理情形", sortable: this.sort},
-                            {key: "收件人員", label: "收件", sortable: this.sort},
-                            {key: "作業人員", label: "作業", sortable: this.sort},
-                            {key: "初審人員", label: "初審", sortable: this.sort},
-                            {key: "複審人員", label: "複審", sortable: this.sort},
-                            {key: "准登人員", label: "准登", sortable: this.sort},
-                            {key: "登記人員", label: "登簿", sortable: this.sort},
-                            {key: "校對人員", label: "校對", sortable: this.sort},
-                            {key: "結案人員", label: "結案", sortable: this.sort}
-                        ];
-                    default:
-                        return [
-                            {key: "RM01", label: "收件字號", sortable: this.sort},
-                            {key: "RM07_1", label: "收件日期", sortable: this.sort},
-                            {key: "RM09", label: "登記原因", sortable: this.sort},
-                            {key: "辦理情形", sortable: this.sort},
-                        ];
-                }
-            },
-            count() { return this.bakedData ? this.bakedData.length : 0 },
-            caption() {
-                if (this.mute || this.noCaption) return false;
-                return this.bakedData ? '登記案件找到 ' + this.count + '件' : '讀取中';
-                
-            },
-            sticky() { return this.maxHeight ? this.count > 0 ? true : false : false },
-            style() {
-                const parsed = parseInt(this.maxHeight);
-                return isNaN(parsed) ? '' : `max-height: ${parsed}px`;
-            },
-            showIcon() { return !this.empty(this.icon) },
-            sort() { return this.empty(this.mute) }
-        },
-        methods: {
-            fetch(data) {
-                let id = `${data["RM01"]}${data["RM02"]}${data["RM03"]}`;
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: "reg_case",
-                    id: id
-                }).then(res => {
-                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                        showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
-                    } else {
-                        showModal({
-                            message: this.$createElement("lah-reg-case-detail", { props: { jsonObj: res.data.baked } }),
-                            title: `登記案件詳情 ${data["RM01"]}-${data["RM02"]}-${data["RM03"]}`,
-                            size: "lg"
-                        });
-                    }
-                }).catch(err => {
-                    this.error = err;
-                });
-            },
-            userinfo(name, id = '') {
-                if (name == 'XXXXXXXX') return;
-                showModal({
-                    title: `${name} 使用者資訊${this.empty(id) ? '' : ` (${id})`}`,
-                    message: this.$createElement('lah-user-card', { props: { id: id, name: name }})
-                });
-            },
-            bakedContent(row) {
-                return row.item[row.field.label];
-            },
-            reason(row) {
-                return row.item["RM09"] + " : " + (this.empty(row.item["登記原因"]) ? row.item["RM09_CHT"] : row.item["登記原因"]);
-            },
-            trClass(item, type) {
-                if(item && type == 'row') return this.color ? item["紅綠燈背景CSS"] : `filter-${item["燈號"]}`;
-            }
-        },
-        created() { this.type = this.type || '' },
-        mounted() {}
-    });
-
     Vue.component('lah-reg-case-state-mgt', {
         template: `<div>
             <div class="form-row mt-1">
@@ -1702,6 +1489,220 @@ if (Vue) {
             });
         }
     });
+    
+    Vue.component('lah-reg-table', {
+        template: `<lah-transition appear slide-down>
+            <b-table
+                ref="reg_case_tbl"
+                responsive="sm"
+                :striped="true"
+                :hover="true"
+                :bordered="true"
+                :borderless="false"
+                :outlined="false"
+                :small="true"
+                :dark="false"
+                :fixed="false"
+                :foot-clone="false"
+                :no-border-collapse="true"
+                :head-variant="'dark'"
+                :table-variant="false"
+
+                :sticky-header="sticky"
+                :caption="caption"
+                :items="bakedData"
+                :fields="tblFields"
+                :style="style"
+                :busy="!bakedData"
+                :tbody-tr-class="trClass"
+                :tbody-transition-props="transProps"
+                primary-key="收件字號"
+
+                class="text-center"
+                caption-top
+            >
+                <template v-slot:table-busy>
+                    <b-spinner class="align-middle" variant="danger" type="grow" small label="讀取中..."></b-spinner>
+                </template>
+
+                <template v-slot:cell(序號)="row">
+                    {{row.index + 1}}
+                </template>
+                <template v-slot:cell(燈號)="row">
+                    <lah-fa-icon icon="circle" :variant="row.item['燈號']"></lah-fa-icon>
+                </template>
+
+                <template v-slot:cell(RM01)="row">
+                    <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
+                    <span v-if="mute">{{bakedContent(row)}}</span>
+                    <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{bakedContent(row)}}</a>
+                </template>
+                <template v-slot:cell(收件字號)="row">
+                    <lah-fa-icon icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
+                    <span v-if="mute">{{bakedContent(row)}}</span>
+                    <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{row.item['收件字號']}}</a>
+                </template>
+
+                <template v-slot:cell(登記原因)="row">
+                    {{reason(row)}}
+                </template>
+                <template v-slot:cell(RM09)="row">
+                    {{reason(row)}}
+                </template>
+
+                <template v-slot:cell(初審人員)="{ item }">
+                    <a href="javascript:void(0)" @click="userinfo(item['初審人員'], item['RM45'])">{{item["初審人員"]}}</a>
+                </template>
+                <template v-slot:cell(複審人員)="{ item }">
+                    <a href="javascript:void(0)" @click="userinfo(item['複審人員'], item['RM47'])">{{item["複審人員"]}}</a>
+                </template>
+                <template v-slot:cell(收件人員)="{ item }">
+                    <a href="javascript:void(0)" @click="userinfo(item['收件人員'], item['RM96'])">{{item["收件人員"]}}</a>
+                </template>
+                <template v-slot:cell(作業人員)="{ item }">
+                    <a href="javascript:void(0)" @click="userinfo(item['作業人員'], item['RM30_1'])">{{item["作業人員"]}}</a>
+                </template>
+                <template v-slot:cell(准登人員)="{ item }">
+                    <a href="javascript:void(0)" @click="userinfo(item['准登人員'], item['RM63'])">{{item["准登人員"]}}</a>
+                </template>
+                <template v-slot:cell(登記人員)="{ item }">
+                    <a href="javascript:void(0)" @click="userinfo(item['登記人員'], item['RM55'])">{{item["登記人員"]}}</a>
+                </template>
+                <template v-slot:cell(校對人員)="{ item }">
+                    <a href="javascript:void(0)" @click="userinfo(item['校對人員'], item['RM57'])">{{item["校對人員"]}}</a>
+                </template>
+                <template v-slot:cell(結案人員)="{ item }">
+                    <a href="javascript:void(0)" @click="userinfo(item['結案人員'], item['RM59'])">{{item["結案人員"]}}</a>
+                </template>
+            </b-table>
+        </lah-transition>`,
+        props: ['bakedData', 'maxHeight', 'type', 'fields', 'mute', 'noCaption', 'color', 'icon', 'iconVariant'],
+        data: () => { return {
+            transProps: { name: 'rollIn' }
+        } },
+        computed: {
+            tblFields: function() {
+                if (!this.empty(this.fields)) return this.fields;
+                switch(this.type) {
+                    case "md":
+                        return [
+                            {key: "收件字號", sortable: this.sort},
+                            {key: "登記原因", sortable: this.sort},
+                            {key: "辦理情形", sortable: this.sort},
+                            {key: "初審人員", sortable: this.sort},
+                            {key: "作業人員", sortable: this.sort},
+                            {key: "收件時間", sortable: this.sort},
+                            {key: "預定結案日期", label:"限辦期限", sortable: this.sort}
+                        ];
+                    case "lg":
+                        return [
+                            {key: "收件字號", sortable: this.sort},
+                            {key: "收件日期", sortable: this.sort},
+                            {key: "登記原因", sortable: this.sort},
+                            {key: "辦理情形", sortable: this.sort},
+                            {key: "收件人員", label: "收件", sortable: this.sort},
+                            {key: "作業人員", label: "作業", sortable: this.sort},
+                            {key: "初審人員", label: "初審", sortable: this.sort},
+                            {key: "複審人員", label: "複審", sortable: this.sort},
+                            {key: "准登人員", label: "准登", sortable: this.sort},
+                            {key: "登記人員", label: "登簿", sortable: this.sort},
+                            {key: "校對人員", label: "校對", sortable: this.sort},
+                            {key: "結案人員", label: "結案", sortable: this.sort}
+                        ];
+                    case "xl":
+                        return [
+                            '燈號',
+                            {key: "收件字號", sortable: this.sort},
+                            {key: "收件時間", sortable: this.sort},
+                            {key: "預定結案日期", label:"限辦期限", sortable: this.sort},
+                            {key: "登記原因", sortable: this.sort},
+                            {key: "辦理情形", sortable: this.sort},
+                            {key: "收件人員", label: "收件", sortable: this.sort},
+                            {key: "作業人員", label: "作業", sortable: this.sort},
+                            {key: "初審人員", label: "初審", sortable: this.sort},
+                            {key: "複審人員", label: "複審", sortable: this.sort},
+                            {key: "准登人員", label: "准登", sortable: this.sort},
+                            {key: "登記人員", label: "登簿", sortable: this.sort},
+                            {key: "校對人員", label: "校對", sortable: this.sort},
+                            {key: "結案人員", label: "結案", sortable: this.sort},
+                            {key: "結案狀態", label: "狀態", sortable: this.sort}
+                        ];
+                    case "flow":
+                        return [
+                            {key: "辦理情形", sortable: this.sort},
+                            {key: "收件人員", label: "收件", sortable: this.sort},
+                            {key: "作業人員", label: "作業", sortable: this.sort},
+                            {key: "初審人員", label: "初審", sortable: this.sort},
+                            {key: "複審人員", label: "複審", sortable: this.sort},
+                            {key: "准登人員", label: "准登", sortable: this.sort},
+                            {key: "登記人員", label: "登簿", sortable: this.sort},
+                            {key: "校對人員", label: "校對", sortable: this.sort},
+                            {key: "結案人員", label: "結案", sortable: this.sort}
+                        ];
+                    default:
+                        return [
+                            {key: "RM01", label: "收件字號", sortable: this.sort},
+                            {key: "RM07_1", label: "收件日期", sortable: this.sort},
+                            {key: "RM09", label: "登記原因", sortable: this.sort},
+                            {key: "辦理情形", sortable: this.sort},
+                        ];
+                }
+            },
+            count() { return this.bakedData ? this.bakedData.length : 0 },
+            caption() {
+                if (this.mute || this.noCaption) return false;
+                return this.bakedData ? '登記案件找到 ' + this.count + '件' : '讀取中';
+                
+            },
+            sticky() { return this.maxHeight ? this.count > 0 ? true : false : false },
+            style() {
+                const parsed = parseInt(this.maxHeight);
+                return isNaN(parsed) ? '' : `max-height: ${parsed}px`;
+            },
+            showIcon() { return !this.empty(this.icon) },
+            sort() { return this.empty(this.mute) }
+        },
+        methods: {
+            fetch(data) {
+                let id = `${data["RM01"]}${data["RM02"]}${data["RM03"]}`;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "reg_case",
+                    id: id
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                        showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
+                    } else {
+                        showModal({
+                            message: this.$createElement("lah-reg-case-detail", { props: { jsonObj: res.data.baked } }),
+                            title: `登記案件詳情 ${data["RM01"]}-${data["RM02"]}-${data["RM03"]}`,
+                            size: "lg"
+                        });
+                    }
+                }).catch(err => {
+                    this.error = err;
+                });
+            },
+            userinfo(name, id = '') {
+                if (name == 'XXXXXXXX') return;
+                showModal({
+                    title: `${name} 使用者資訊${this.empty(id) ? '' : ` (${id})`}`,
+                    message: this.$createElement('lah-user-card', { props: { id: id, name: name }})
+                });
+            },
+            bakedContent(row) {
+                return row.item[row.field.label];
+            },
+            reason(row) {
+                return row.item["RM09"] + " : " + (this.empty(row.item["登記原因"]) ? row.item["RM09_CHT"] : row.item["登記原因"]);
+            },
+            trClass(item, type) {
+                if(item && type == 'row') return this.color ? item["紅綠燈背景CSS"] : `filter-${item["燈號"]}`;
+            }
+        },
+        created() { this.type = this.type || '' },
+        mounted() {}
+    });
+
 } else {
     console.error("vue.js not ready ... lah-xxxxxxxx components can not be loaded.");
 }
