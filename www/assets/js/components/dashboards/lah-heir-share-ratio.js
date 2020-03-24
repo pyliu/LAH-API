@@ -1,7 +1,7 @@
 if (Vue) {
   Vue.component('lah-heir-share-ratio', {
-    template: `<b-form-row>
-        <b-col>
+    template: `<b-card-group deck>
+        <b-card>
           <div>
             <h5>
               <lah-fa-icon icon="chevron-circle-right" variant="danger"> 被繼承人持分</lah-fa-icon>
@@ -263,15 +263,19 @@ if (Vue) {
 
             </lah-transition>
           </section>
-        </b-col>
-      <lah-transition>
-        <b-col v-show="seen_chart" col="4">
-          <b-card title="分配圖">
-            <chart-component ref="pie"></chart-component>
-          </b-card>
-        </b-col>
-      </lah-transition>
-    </b-form-row>`,
+        </b-card>
+        <b-card v-show="pieChart" title="分配圖">
+          <lah-transition>
+            <chart-component v-show="seen_chart" ref="pie"></chart-component>
+          </lah-transition>
+        </b-card>
+    </b-card-group>`,
+    props: {
+      pieChart: {
+        type: Boolean,
+        default: false
+      }
+    },
     data: () => {
       return {
         wizard: {
@@ -439,7 +443,7 @@ if (Vue) {
         this.vueChartData.datasets[0].data = [];
         this.vueChartData.datasets[0].backgroundColor = [];
         this.vueChartData.datasets[0].borderColor = [];
-        this.$refs.pie.buildChart();
+        if (this.pieChart) this.$refs.pie.buildChart();
       },
       addChartData: function (name, servings, count = 1) {
         for (let i = 0; i < count; i++) {
@@ -449,7 +453,7 @@ if (Vue) {
           this.vueChartData.datasets[0].backgroundColor.push(`rgba(${color}, 0.8)`);
           this.vueChartData.datasets[0].borderColor.push(`rgba(${color}, 1)`);
         }
-        this.$refs.pie.buildChart();
+        if (this.pieChart) this.$refs.pie.buildChart();
       }
     },
     watch: {
@@ -657,8 +661,10 @@ if (Vue) {
       this.now_step = this.wizard.s0;
     },
     mounted() {
-      this.$refs.pie.chartData = this.vueChartData;
-      this.$refs.pie.type = 'pie';
+      if (this.pieChart) {
+        this.$refs.pie.chartData = this.vueChartData;
+        this.$refs.pie.type = 'pie';
+      }
     }
   });
 }
