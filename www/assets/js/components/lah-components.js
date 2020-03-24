@@ -201,11 +201,6 @@ if (Vue) {
                 icon: "cubes",
                 need_admin: true
             }, {
-                text: "今日案件",
-                url: "tracking.html",
-                icon: "list-alt",
-                need_admin: true
-            }, {
                 text: "資料查詢",
                 url: "query.php",
                 icon: "file-alt",
@@ -215,6 +210,11 @@ if (Vue) {
                 url: "watchdog.html",
                 icon: "user-secret",
                 need_admin: true
+            }, {
+                text: "今日案件",
+                url: "tracking.html",
+                icon: "list-alt",
+                need_admin: false
             }, {
                 text: "逾期案件",
                 url: "overdue_reg_cases.html",
@@ -935,6 +935,7 @@ if (Vue) {
         template: `<lah-transition appear slide-down>
             <b-table
                 ref="reg_case_tbl"
+                responsive="sm"
                 :striped="true"
                 :hover="true"
                 :bordered="true"
@@ -955,6 +956,8 @@ if (Vue) {
                 :style="style"
                 :busy="!bakedData"
                 :tbody-tr-class="trClass"
+                :tbody-transition-props="transProps"
+                primary-key="收件字號"
 
                 class="text-center"
                 caption-top
@@ -1015,7 +1018,9 @@ if (Vue) {
             </b-table>
         </lah-transition>`,
         props: ['bakedData', 'maxHeight', 'type', 'fields', 'mute', 'noCaption', 'color', 'icon', 'iconVariant'],
-        data: () => { return { } },
+        data: () => { return {
+            transProps: { name: 'rollIn' }
+        } },
         computed: {
             tblFields: function() {
                 if (!this.empty(this.fields)) return this.fields;
