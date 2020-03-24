@@ -213,7 +213,7 @@ if (Vue) {
             }, {
                 text: "今日案件",
                 url: "tracking.html",
-                icon: "list-alt",
+                icon: "briefcase",
                 need_admin: false
             }, {
                 text: "逾期案件",
