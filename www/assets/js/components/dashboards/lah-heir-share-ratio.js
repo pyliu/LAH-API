@@ -2,9 +2,14 @@ if (Vue) {
     Vue.component('lah-heir-share-ratio', {
         template: `<b-container fluid style="max-width:640px">
         <div class="my-2">
+          <h5 v-if="now_step" class="text-justify">
+            <lah-fa-icon icon="chevron-circle-right" variant="danger"> 被繼承人持分</lah-fa-icon>
+            <b-button @click="reset" variant="outline-primary"><lah-fa-icon icon="sync-alt"> 重新開始</lah-fa-icon></b-button>
+          </h5>
+
           <div>
             <b-input-group class="mb-1">
-              <b-input-group-prepend is-text><span class="text-danger font-weight-bold">＊</span>被繼承人持分</b-input-group-prepend>
+              <b-input-group-prepend is-text><span class="text-danger font-weight-bold">＊</span>持分</b-input-group-prepend>
               <b-form-input
                 inline
                 type="number"
@@ -15,7 +20,6 @@ if (Vue) {
                 @change="filterNonNumber"
               ></b-form-input>
               <span class="pt-1 mx-1"> 分之 1</span>
-              <b-button @click="reset" variant="outline-primary"><lah-fa-icon icon="sync-alt"> 重新開始</lah-fa-icon></b-button>
             </b-input-group>
           </div>
         </div>
@@ -447,6 +451,7 @@ if (Vue) {
                 this.wizard.s2.grandparents = 0;
             },
             filterNonNumber: function (e) {
+                if (this.empty(e.trget)) return;
                 let val = e.target.value.replace(/[^0-9]/g, "").replace(/^0+/, ""); // removing non-digit chars, leading zero
                 e.target.value = Math.abs(val || 0);
             },
