@@ -1,6 +1,6 @@
 if (Vue) {
     Vue.component('lah-heir-share-ratio', {
-        template: `<b-container fluid style="max-width:640px">
+      template: `<b-container fluid style="max-width:640px">
         <div>
           <h5>
             <lah-fa-icon icon="chevron-circle-right" variant="danger"> 被繼承人持分</lah-fa-icon>
@@ -15,7 +15,6 @@ if (Vue) {
               step="1"
               pattern="\d+"
               v-model="heir_denominator"
-              @change="filterNonNumber"
             ></b-form-input>
             <span class="pt-1 mx-1"> 分之 1</span>
           </b-input-group>
@@ -264,12 +263,13 @@ if (Vue) {
           </lah-transition>
         </section>
 
-        <div class="my-2">
-          <chart-component v-show="seen_chart" ref="pie"></chart-component>
-          <heir-pie-chart :styles="vueChartStyle" :chartdata="vueChartData" :options="vueChartOptions" />
+        <div class="my-3">
+          <lah-transition slide>
+            <chart-component v-show="seen_chart" ref="pie"></chart-component>
+          </lah-transition>
         </div>
       </b-container>`,
-        data: () => { return {
+      data: () => { return {
             wizard: {
                 s0: {
                     title: "步驟1，選擇事實發生區間",
@@ -351,331 +351,321 @@ if (Vue) {
             vueChartStyle: {
                 height: "180px"
             }
-        } },
-        methods: {
-            reset: function (e) {
-                this.wizard.s0.seen = true;
-                this.wizard.s0.value = "";
-                this.heir_denominator = 1;
-                this.now_step = this.wizard.s0;
-                this.resetS1(e);
-                this.resetS2(e);
-                clearLDAnimation('#spin-icon');
-            },
-            resetS1: function (e) {
-                this.wizard.s1.seen = false;
-                this.wizard.s1.value = "";
-                this.wizard.s1.public.count = 0;
-                this.wizard.s1.private.child = 0;
-                this.wizard.s1.private.spouse = 0;
-                this.wizard.s1.private.parent = 0;
-                this.wizard.s1.private.household = 0;
-            },
-            resetS2: function (e) {
-                this.wizard.s2.seen = false;
-                this.wizard.s2.value = "";
-                this.wizard.s2.children = 0;
-                this.wizard.s2.raising_children = 0;
-                this.wizard.s2.spouse = 0;
-                this.wizard.s2.parents = 0;
-                this.wizard.s2.brothers = 0;
-                this.wizard.s2.grandparents = 0;
-            },
-            filterNonNumber: function (e) {
-                if (this.empty(e.target)) return;
-                let val = e.target.value.replace(/[^0-9]/g, "").replace(/^0+/, ""); // removing non-digit chars, leading zero
-                e.target.value = Math.abs(val || 0);
-            },
-            resetS1PublicCounter: function (e) {
-                this.wizard.s1.public.count = 0;
-            },
-            resetS1PrivateCounter: function (e) {
-                this.wizard.s1.private.child = 0;
-                this.wizard.s1.private.spouse = 0;
-                this.wizard.s1.private.parent = 0;
-                this.wizard.s1.private.household = 0;
-            },
-            resetS2Counter: function (e) {
-                this.wizard.s2.children = 0;
-                this.wizard.s2.raising_children = 0;
-                this.wizard.s2.spouse = 0;
-                this.wizard.s2.parents = 0;
-                this.wizard.s2.brothers = 0;
-                this.wizard.s2.grandparents = 0;
-            },
-            resetChartData: function () {
-                this.vueChartData.labels = [];
-                this.vueChartData.datasets[0].data = [];
-                this.vueChartData.datasets[0].backgroundColor = [];
-                this.vueChartData.datasets[0].borderColor = [];
-            },
-            addChartData: function (name, servings, count = 1) {
-                for (let i = 0; i < count; i++) {
-                    this.vueChartData.labels.push(name);
-                    this.vueChartData.datasets[0].data.push(parseInt(servings));
-                    let color = this.color_codes[this.color_codes_next++ % this.color_codes.length];
-                    this.vueChartData.datasets[0].backgroundColor.push(`rgba(${color}, 0.8)`);
-                    this.vueChartData.datasets[0].borderColor.push(`rgba(${color}, 1)`);
-                }
-                // hide legend if count over 16
-                this.vueChartOptions.legend.display = this.vueChartData.labels.length <= 16;
-            },
-            recalS2Servings: function () {
-                this.resetChartData();
-                if (this.wizard.s2.children > 0 || this.wizard.s2.raising_children > 0) {
-                    this.addChartData("配偶", 2, this.wizard.s2.spouse);
-                    this.addChartData("直系卑親屬", 2, this.wizard.s2.children);
-                    this.addChartData("養子女", 1, this.wizard.s2.raising_children);
-                } else if (this.wizard.s2.parents > 0) {
-                    this.addChartData("配偶", this.wizard.s2.parents, this.wizard.s2.spouse);
-                    this.addChartData("父母", 1, this.wizard.s2.parents);
-                } else if (this.wizard.s2.brothers > 0) {
-                    this.addChartData("配偶", this.wizard.s2.brothers, this.wizard.s2.spouse);
-                    this.addChartData("兄弟姊妹", 1, this.wizard.s2.brothers);
-                } else if (this.wizard.s2.grandparents > 0) {
-                    this.addChartData("配偶", this.wizard.s2.grandparents * 4, this.wizard.s2.spouse);
-                    this.addChartData("祖父母", 2, this.wizard.s2.grandparents);
-                } else if (this.wizard.s2.spouse > 0) {
-                    this.addChartData("配偶", 1);
-                }
-            },
-            s0ValueSelected: function (e) {
-                switch (this.wizard.s0.value) {
-                    case -1:
-                        // 光復前
-                        this.now_step = this.wizard.s1;
-                        break;
-                    case 0:
-                        // 光復後
-                        this.now_step = this.wizard.s2;
-                        break;
-                    default:
-                        console.error(`Not supported: ${this.wizard.s0.value}.`);
-                        return;
-                }
-                // hide all steps first
-                for (let step in this.wizard) {
-                    this.wizard[step].seen = false;
-                }
-                this.now_step.seen = true;
-            },
-            s1ValueSelected: function (e) {
-                this.resetS1PublicCounter(e);
-                this.resetS1PrivateCounter(e);
-            },
-            s2ValueSelected: function (e) {
-                this.resetS2Counter(e);
-            },
-            disableDrag: function (e) {
-                e.preventDefault();
-                e.dataTransfer.effectAllowed = 'none';
-                e.dataTransfer.dropEffect = 'none';
-            }
-        },
-        watch: {
-            "wizard.s1.public.count": function () {
-                this.resetChartData();
-                this.addChartData("繼承人", 1, this.wizard.s1.public.count);
-            },
-            "wizard.s1.private.child": function () {
-                this.resetChartData();
-                this.addChartData("直系卑親屬(男)", 1, this.wizard.s1.private.child);
-            },
-            "wizard.s1.private.spouse": function () {
-                if (this.wizard.s1.private.spouse > 1) {
-                    this.wizard.s1.private.spouse = 1;
-                }
-                this.resetChartData();
-                this.addChartData("配偶", 1, this.wizard.s1.private.spouse);
-            },
-            "wizard.s1.private.parent": function () {
-                this.resetChartData();
-                this.addChartData("直系尊親屬", 1, this.wizard.s1.private.parent);
-            },
-            "wizard.s1.private.household": function () {
-                if (this.wizard.s1.private.household > 1) {
-                    this.wizard.s1.private.household = 1;
-                }
-                this.resetChartData();
-                this.addChartData("戶主", 1, this.wizard.s1.private.household);
-            },
-            "wizard.s2.spouse": function () {
-                this.recalS2Servings();
-            },
-            "wizard.s2.children": function () {
-                this.recalS2Servings();
-            },
-            "wizard.s2.raising_children": function () {
-                this.recalS2Servings();
-            },
-            "wizard.s2.parents": function () {
-                this.recalS2Servings();
-            },
-            "wizard.s2.brothers": function () {
-                this.recalS2Servings();
-            },
-            "wizard.s2.grandparents": function () {
-                this.recalS2Servings();
-            }
-        },
-        computed: {
-            val_s2_children_spouse_total_deno: function () {
-                return (
-                    parseInt(this.wizard.s2.children * 2) +
-                    parseInt(this.wizard.s2.raising_children) +
-                    parseInt(this.wizard.s2.spouse * 2)
-                ) * this.heir_denominator;
-            },
-            val_s2_spouse_ratio: function () {
-                if (this.wizard.s2.children > 0 || this.wizard.s2.raising_children > 0) {
-                    let deno = this.val_s2_children_spouse_total_deno;
-                    return this.wizard.s2.raising_children > 0 ? `${deno} 分之 2` : `${deno / 2} 分之 1`;
-                } else if (this.wizard.s2.parents > 0 || this.wizard.s2.brothers > 0) {
-                    return `${this.heir_denominator * 2} 分之 1`;
-                } else if (this.wizard.s2.grandparents > 0) {
-                    return `${this.heir_denominator * 3} 分之 2`;
-                }
-                return `${this.heir_denominator} 分之 1`;
-            },
-            val_s2_children_ratio: function () {
-                let deno = this.val_s2_children_spouse_total_deno;
-                return this.wizard.s2.raising_children > 0 ? `${deno} 分之 2` : `${deno / 2} 分之 1`;
-            },
-            val_s2_raising_children_ratio: function () {
-                return `${this.val_s2_children_spouse_total_deno} 分之 1`;
-            },
-            val_s2_parents_ratio: function () {
-                if (this.wizard.s2.spouse == 0) {
-                    return `${this.wizard.s2.parents * this.heir_denominator} 分之 1`;
-                } else {
-                    return `${this.wizard.s2.parents * 2 * this.heir_denominator} 分之 1`;
-                }
-            },
-            val_s2_brothers_ratio: function () {
-                if (this.wizard.s2.spouse == 0) {
-                    return `${this.wizard.s2.brothers * this.heir_denominator} 分之 1`;
-                } else {
-                    return `${this.wizard.s2.brothers * 2 * this.heir_denominator} 分之 1`;
-                }
-            },
-            val_s2_grandparents_ratio: function () {
-                if (this.wizard.s2.spouse == 0) {
-                    return `${this.wizard.s2.grandparents * this.heir_denominator} 分之 1`;
-                } else {
-                    return `${this.wizard.s2.grandparents * 3 * this.heir_denominator} 分之 1`;
-                }
-            },
-            seen_s1_public: function () {
-                return this.wizard.s1.value == "public";
-            },
-            seen_s1_pub_msg: function () {
-                return this.wizard.s1.public.count > 0;
-            },
-            seen_s1_private: function () {
-                return this.wizard.s1.value == "private";
-            },
-            seen_s1_private_1: function () {
-                return (
-                    this.wizard.s1.private.spouse == 0 &&
-                    this.wizard.s1.private.parent == 0 &&
-                    this.wizard.s1.private.household == 0
-                );
-            },
-            seen_s1_private_1_msg: function () {
-                return this.wizard.s1.private.child > 0;
-            },
-            seen_s1_private_2: function () {
-                return (
-                    this.wizard.s1.private.child == 0 &&
-                    this.wizard.s1.private.parent == 0 &&
-                    this.wizard.s1.private.household == 0
-                );
-            },
-            seen_s1_private_2_msg: function () {
-                return this.wizard.s1.private.spouse > 0;
-            },
-            seen_s1_private_3: function () {
-                return (
-                    this.wizard.s1.private.spouse == 0 &&
-                    this.wizard.s1.private.child == 0 &&
-                    this.wizard.s1.private.household == 0
-                );
-            },
-            seen_s1_private_3_msg: function () {
-                return this.wizard.s1.private.parent > 0;
-            },
-            seen_s1_private_4: function () {
-                return (
-                    this.wizard.s1.private.spouse == 0 &&
-                    this.wizard.s1.private.parent == 0 &&
-                    this.wizard.s1.private.child == 0
-                );
-            },
-            seen_s1_private_4_msg: function () {
-                return this.wizard.s1.private.household > 0;
-            },
-            seen_s2_counters: function () {
-                return this.wizard.s2.value;
-            },
-            seen_s2_spouse_msg: function () {
-                return this.wizard.s2.spouse > 0;
-            },
-            seen_s2_children: function () {
-                return (
-                    this.wizard.s2.parents == 0 &&
-                    this.wizard.s2.brothers == 0 &&
-                    this.wizard.s2.grandparents == 0
-                );
-            },
-            seen_s2_children_msg: function () {
-                return this.wizard.s2.children > 0;
-            },
-            seen_s2_raising_children: function () {
-                return this.wizard.s2.value == "7465";
-            },
-            seen_s2_raising_children_msg: function () {
-                return this.wizard.s2.raising_children > 0;
-            },
-            seen_s2_parents: function () {
-                return (
-                    this.wizard.s2.children == 0 &&
-                    this.wizard.s2.raising_children == 0 &&
-                    this.wizard.s2.brothers == 0 &&
-                    this.wizard.s2.grandparents == 0
-                );
-            },
-            seen_s2_parents_msg: function () {
-                return this.wizard.s2.parents > 0;
-            },
-            seen_s2_brothers: function () {
-                return (
-                    this.wizard.s2.parents == 0 &&
-                    this.wizard.s2.raising_children == 0 &&
-                    this.wizard.s2.children == 0 &&
-                    this.wizard.s2.grandparents == 0
-                );
-            },
-            seen_s2_brothers_msg: function () {
-                return this.wizard.s2.brothers > 0;
-            },
-            seen_s2_grandparents: function () {
-                return (
-                    this.wizard.s2.parents == 0 &&
-                    this.wizard.s2.raising_children == 0 &&
-                    this.wizard.s2.brothers == 0 &&
-                    this.wizard.s2.children == 0
-                );
-            },
-            seen_s2_grandparents_msg: function () {
-                return this.wizard.s2.grandparents > 0;
-            },
-            seen_chart: function () {
-                return this.vueChartData.labels.length > 0;
-            }
-        },
-        created() {
-          this.now_step = this.wizard.s0;
-          //this.$refs.pie.type = 'pie';
-        }
+      } },
+      methods: {
+          reset: function (e) {
+              this.wizard.s0.seen = true;
+              this.wizard.s0.value = "";
+              this.heir_denominator = 1;
+              this.now_step = this.wizard.s0;
+              this.resetS1(e);
+              this.resetS2(e);
+              clearLDAnimation('#spin-icon');
+          },
+          resetS1: function (e) {
+              this.wizard.s1.seen = false;
+              this.wizard.s1.value = "";
+              this.wizard.s1.public.count = 0;
+              this.wizard.s1.private.child = 0;
+              this.wizard.s1.private.spouse = 0;
+              this.wizard.s1.private.parent = 0;
+              this.wizard.s1.private.household = 0;
+          },
+          resetS2: function (e) {
+              this.wizard.s2.seen = false;
+              this.wizard.s2.value = "";
+              this.wizard.s2.children = 0;
+              this.wizard.s2.raising_children = 0;
+              this.wizard.s2.spouse = 0;
+              this.wizard.s2.parents = 0;
+              this.wizard.s2.brothers = 0;
+              this.wizard.s2.grandparents = 0;
+          },
+          resetS1PublicCounter: function (e) {
+              this.wizard.s1.public.count = 0;
+          },
+          resetS1PrivateCounter: function (e) {
+              this.wizard.s1.private.child = 0;
+              this.wizard.s1.private.spouse = 0;
+              this.wizard.s1.private.parent = 0;
+              this.wizard.s1.private.household = 0;
+          },
+          resetS2Counter: function (e) {
+              this.wizard.s2.children = 0;
+              this.wizard.s2.raising_children = 0;
+              this.wizard.s2.spouse = 0;
+              this.wizard.s2.parents = 0;
+              this.wizard.s2.brothers = 0;
+              this.wizard.s2.grandparents = 0;
+          },
+          recalS2Servings: function () {
+              this.resetChartData();
+              if (this.wizard.s2.children > 0 || this.wizard.s2.raising_children > 0) {
+                  this.addChartData("配偶", 2, this.wizard.s2.spouse);
+                  this.addChartData("直系卑親屬", 2, this.wizard.s2.children);
+                  this.addChartData("養子女", 1, this.wizard.s2.raising_children);
+              } else if (this.wizard.s2.parents > 0) {
+                  this.addChartData("配偶", this.wizard.s2.parents, this.wizard.s2.spouse);
+                  this.addChartData("父母", 1, this.wizard.s2.parents);
+              } else if (this.wizard.s2.brothers > 0) {
+                  this.addChartData("配偶", this.wizard.s2.brothers, this.wizard.s2.spouse);
+                  this.addChartData("兄弟姊妹", 1, this.wizard.s2.brothers);
+              } else if (this.wizard.s2.grandparents > 0) {
+                  this.addChartData("配偶", this.wizard.s2.grandparents * 4, this.wizard.s2.spouse);
+                  this.addChartData("祖父母", 2, this.wizard.s2.grandparents);
+              } else if (this.wizard.s2.spouse > 0) {
+                  this.addChartData("配偶", 1);
+              }
+          },
+          s0ValueSelected: function (e) {
+              switch (this.wizard.s0.value) {
+                  case -1:
+                      // 光復前
+                      this.now_step = this.wizard.s1;
+                      break;
+                  case 0:
+                      // 光復後
+                      this.now_step = this.wizard.s2;
+                      break;
+                  default:
+                      console.error(`Not supported: ${this.wizard.s0.value}.`);
+                      return;
+              }
+              // hide all steps first
+              for (let step in this.wizard) {
+                  this.wizard[step].seen = false;
+              }
+              this.now_step.seen = true;
+          },
+          s1ValueSelected: function (e) {
+              this.resetS1PublicCounter(e);
+              this.resetS1PrivateCounter(e);
+          },
+          s2ValueSelected: function (e) {
+              this.resetS2Counter(e);
+          },
+          resetChartData: function () {
+              this.vueChartData.labels = [];
+              this.vueChartData.datasets[0].data = [];
+              this.vueChartData.datasets[0].backgroundColor = [];
+              this.vueChartData.datasets[0].borderColor = [];
+          },
+          addChartData: function (name, servings, count = 1) {
+              for (let i = 0; i < count; i++) {
+                  this.vueChartData.labels.push(name);
+                  this.vueChartData.datasets[0].data.push(parseInt(servings));
+                  let color = this.color_codes[this.color_codes_next++ % this.color_codes.length];
+                  this.vueChartData.datasets[0].backgroundColor.push(`rgba(${color}, 0.8)`);
+                  this.vueChartData.datasets[0].borderColor.push(`rgba(${color}, 1)`);
+              }
+              // hide legend if count over 16
+              this.vueChartOptions.legend.display = this.vueChartData.labels.length <= 16;
+          }
+      },
+      watch: {
+          "wizard.s1.public.count": function () {
+              this.resetChartData();
+              this.addChartData("繼承人", 1, this.wizard.s1.public.count);
+          },
+          "wizard.s1.private.child": function () {
+              this.resetChartData();
+              this.addChartData("直系卑親屬(男)", 1, this.wizard.s1.private.child);
+          },
+          "wizard.s1.private.spouse": function () {
+              if (this.wizard.s1.private.spouse > 1) {
+                  this.wizard.s1.private.spouse = 1;
+              }
+              this.resetChartData();
+              this.addChartData("配偶", 1, this.wizard.s1.private.spouse);
+          },
+          "wizard.s1.private.parent": function () {
+              this.resetChartData();
+              this.addChartData("直系尊親屬", 1, this.wizard.s1.private.parent);
+          },
+          "wizard.s1.private.household": function () {
+              if (this.wizard.s1.private.household > 1) {
+                  this.wizard.s1.private.household = 1;
+              }
+              this.resetChartData();
+              this.addChartData("戶主", 1, this.wizard.s1.private.household);
+          },
+          "wizard.s2.spouse": function () {
+              this.recalS2Servings();
+          },
+          "wizard.s2.children": function () {
+              this.recalS2Servings();
+          },
+          "wizard.s2.raising_children": function () {
+              this.recalS2Servings();
+          },
+          "wizard.s2.parents": function () {
+              this.recalS2Servings();
+          },
+          "wizard.s2.brothers": function () {
+              this.recalS2Servings();
+          },
+          "wizard.s2.grandparents": function () {
+              this.recalS2Servings();
+          }
+      },
+      computed: {
+          val_s2_children_spouse_total_deno: function () {
+              return (
+                  parseInt(this.wizard.s2.children * 2) +
+                  parseInt(this.wizard.s2.raising_children) +
+                  parseInt(this.wizard.s2.spouse * 2)
+              ) * this.heir_denominator;
+          },
+          val_s2_spouse_ratio: function () {
+              if (this.wizard.s2.children > 0 || this.wizard.s2.raising_children > 0) {
+                  let deno = this.val_s2_children_spouse_total_deno;
+                  return this.wizard.s2.raising_children > 0 ? `${deno} 分之 2` : `${deno / 2} 分之 1`;
+              } else if (this.wizard.s2.parents > 0 || this.wizard.s2.brothers > 0) {
+                  return `${this.heir_denominator * 2} 分之 1`;
+              } else if (this.wizard.s2.grandparents > 0) {
+                  return `${this.heir_denominator * 3} 分之 2`;
+              }
+              return `${this.heir_denominator} 分之 1`;
+          },
+          val_s2_children_ratio: function () {
+              let deno = this.val_s2_children_spouse_total_deno;
+              return this.wizard.s2.raising_children > 0 ? `${deno} 分之 2` : `${deno / 2} 分之 1`;
+          },
+          val_s2_raising_children_ratio: function () {
+              return `${this.val_s2_children_spouse_total_deno} 分之 1`;
+          },
+          val_s2_parents_ratio: function () {
+              if (this.wizard.s2.spouse == 0) {
+                  return `${this.wizard.s2.parents * this.heir_denominator} 分之 1`;
+              } else {
+                  return `${this.wizard.s2.parents * 2 * this.heir_denominator} 分之 1`;
+              }
+          },
+          val_s2_brothers_ratio: function () {
+              if (this.wizard.s2.spouse == 0) {
+                  return `${this.wizard.s2.brothers * this.heir_denominator} 分之 1`;
+              } else {
+                  return `${this.wizard.s2.brothers * 2 * this.heir_denominator} 分之 1`;
+              }
+          },
+          val_s2_grandparents_ratio: function () {
+              if (this.wizard.s2.spouse == 0) {
+                  return `${this.wizard.s2.grandparents * this.heir_denominator} 分之 1`;
+              } else {
+                  return `${this.wizard.s2.grandparents * 3 * this.heir_denominator} 分之 1`;
+              }
+          },
+          seen_s1_public: function () {
+              return this.wizard.s1.value == "public";
+          },
+          seen_s1_pub_msg: function () {
+              return this.wizard.s1.public.count > 0;
+          },
+          seen_s1_private: function () {
+              return this.wizard.s1.value == "private";
+          },
+          seen_s1_private_1: function () {
+              return (
+                  this.wizard.s1.private.spouse == 0 &&
+                  this.wizard.s1.private.parent == 0 &&
+                  this.wizard.s1.private.household == 0
+              );
+          },
+          seen_s1_private_1_msg: function () {
+              return this.wizard.s1.private.child > 0;
+          },
+          seen_s1_private_2: function () {
+              return (
+                  this.wizard.s1.private.child == 0 &&
+                  this.wizard.s1.private.parent == 0 &&
+                  this.wizard.s1.private.household == 0
+              );
+          },
+          seen_s1_private_2_msg: function () {
+              return this.wizard.s1.private.spouse > 0;
+          },
+          seen_s1_private_3: function () {
+              return (
+                  this.wizard.s1.private.spouse == 0 &&
+                  this.wizard.s1.private.child == 0 &&
+                  this.wizard.s1.private.household == 0
+              );
+          },
+          seen_s1_private_3_msg: function () {
+              return this.wizard.s1.private.parent > 0;
+          },
+          seen_s1_private_4: function () {
+              return (
+                  this.wizard.s1.private.spouse == 0 &&
+                  this.wizard.s1.private.parent == 0 &&
+                  this.wizard.s1.private.child == 0
+              );
+          },
+          seen_s1_private_4_msg: function () {
+              return this.wizard.s1.private.household > 0;
+          },
+          seen_s2_counters: function () {
+              return this.wizard.s2.value;
+          },
+          seen_s2_spouse_msg: function () {
+              return this.wizard.s2.spouse > 0;
+          },
+          seen_s2_children: function () {
+              return (
+                  this.wizard.s2.parents == 0 &&
+                  this.wizard.s2.brothers == 0 &&
+                  this.wizard.s2.grandparents == 0
+              );
+          },
+          seen_s2_children_msg: function () {
+              return this.wizard.s2.children > 0;
+          },
+          seen_s2_raising_children: function () {
+              return this.wizard.s2.value == "7465";
+          },
+          seen_s2_raising_children_msg: function () {
+              return this.wizard.s2.raising_children > 0;
+          },
+          seen_s2_parents: function () {
+              return (
+                  this.wizard.s2.children == 0 &&
+                  this.wizard.s2.raising_children == 0 &&
+                  this.wizard.s2.brothers == 0 &&
+                  this.wizard.s2.grandparents == 0
+              );
+          },
+          seen_s2_parents_msg: function () {
+              return this.wizard.s2.parents > 0;
+          },
+          seen_s2_brothers: function () {
+              return (
+                  this.wizard.s2.parents == 0 &&
+                  this.wizard.s2.raising_children == 0 &&
+                  this.wizard.s2.children == 0 &&
+                  this.wizard.s2.grandparents == 0
+              );
+          },
+          seen_s2_brothers_msg: function () {
+              return this.wizard.s2.brothers > 0;
+          },
+          seen_s2_grandparents: function () {
+              return (
+                  this.wizard.s2.parents == 0 &&
+                  this.wizard.s2.raising_children == 0 &&
+                  this.wizard.s2.brothers == 0 &&
+                  this.wizard.s2.children == 0
+              );
+          },
+          seen_s2_grandparents_msg: function () {
+              return this.wizard.s2.grandparents > 0;
+          },
+          seen_chart: function () {
+              return this.vueChartData.labels.length > 0;
+          }
+      },
+      created() {
+        this.now_step = this.wizard.s0;
+        //this.$refs.pie.type = 'pie';
+      }
     });
 }
