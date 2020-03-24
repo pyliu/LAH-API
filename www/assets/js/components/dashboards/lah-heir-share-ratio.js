@@ -74,13 +74,7 @@ if (Vue) {
               
               <div class="ml-4">
                 人數：
-                <input
-                  type="number"
-                  min="0"
-                  class="num-counter"
-                  v-model="wizard.s1.public.count"
-                  @change="filterNonNumber"
-                />
+                <b-form-spinbutton v-model="wizard.s1.public.count" min="0" size="sm" inline></b-form-spinbutton>
                 <h5 class="d-inline">
                   <b-badge v-show="seen_s1_pub_msg" variant="warning">
                     每人之應繼份為
@@ -94,17 +88,9 @@ if (Vue) {
               <h6 class="d-inline">* 僅有法定繼承人，順序如下：</h6>
               <b-link href="#" @click="resetS1PrivateCounter">重設</b-link>
               
-              <!--<ol class="d-block">-->
-              <transition-group name="list" tag="ol>"
-                <li key="seen_s1_private_1" v-if="seen_s1_private_1">
-                  人數：
-                  <input
-                    type="number"
-                    min="0"
-                    class="num-counter"
-                    v-model="wizard.s1.private.child"
-                    @change="filterNonNumber"
-                  />
+              <ol class="d-block">
+                <li>
+                  人數：<b-form-spinbutton v-model="wizard.s1.private.child" min="0" size="sm" inline :disabled="!seen_s1_private_1"></b-form-spinbutton>
                   <label
                     v-show="!seen_s1_private_1_msg"
                     v-b-popover.hover.top="{ customClass: 'my-popover', content:'以親等近者為優先。親等相同之男子有數人時，共同均分之'}"
@@ -118,16 +104,8 @@ if (Vue) {
                     </b-badge>
                   </h5>
                 </li>
-                <li key="seen_s1_private_2" v-if="seen_s1_private_2">
-                  人數：
-                  <input
-                    type="number"
-                    min="0"
-                    max="1"
-                    class="num-counter"
-                    v-model="wizard.s1.private.spouse"
-                    @change="filterNonNumber"
-                  />
+                <li>
+                  人數：<b-form-spinbutton v-model="wizard.s1.private.spouse" size="sm" max="1" min="0" inline :disabled="!seen_s1_private_2"></b-form-spinbutton>
                   <label v-show="!seen_s1_private_2_msg">配偶</label>
                   <h5 class="d-inline">
                     <b-badge v-show="seen_s1_private_2_msg" variant="warning">
@@ -138,15 +116,8 @@ if (Vue) {
                     </b-badge>
                   </h5>
                 </li>
-                <li key="seen_s1_private_3" v-if="seen_s1_private_3">
-                  人數：
-                  <input
-                    type="number"
-                    min="0"
-                    class="num-counter"
-                    v-model="wizard.s1.private.parent"
-                    @change="filterNonNumber"
-                  />
+                <li>
+                  人數：<b-form-spinbutton v-model="wizard.s1.private.parent" min="0" size="sm" inline :disabled="!seen_s1_private_3"></b-form-spinbutton>
                   <label
                     v-show="!seen_s1_private_3_msg"
                     v-b-popover.hover.bottom="{ customClass: 'my-popover', content: '親等不同以親等近者為先，同一親等有2人以上，共同均分之'}"
@@ -160,16 +131,8 @@ if (Vue) {
                     </b-badge>
                   </h5>
                 </li>
-                <li key="seen_s1_private_4" v-if="seen_s1_private_4">
-                  人數：
-                  <input
-                    type="number"
-                    min="0"
-                    max="1"
-                    class="num-counter"
-                    v-model="wizard.s1.private.household"
-                    @change="filterNonNumber"
-                  />
+                <li>
+                  人數：<b-form-spinbutton v-model="wizard.s1.private.household" size="sm" max="1" min="0" inline :disabled="!seen_s1_private_4"></b-form-spinbutton>
                   <label v-show="!seen_s1_private_4_msg">戶主</label>
                   <h5 class="d-inline">
                     <b-badge v-show="seen_s1_private_4_msg" variant="warning">
@@ -180,8 +143,7 @@ if (Vue) {
                     </b-badge>
                   </h5>
                 </li>
-              </transition-group>
-              <!--</ol>-->
+              </ol>
               
             </div>
 
@@ -200,7 +162,10 @@ if (Vue) {
                 <input type="radio" v-model="wizard.s2.value" value="7465" @change="s2ValueSelected" /> 74年6月5日以後
               </label>
             </div>
-            <div class="border-top border-dark pt-2" v-show="seen_s2_counters">
+
+            <lah-transition fade>
+
+            <div class="border-top border-dark pt-2" v-if="seen_s2_counters">
               <ol class="d-block">
                 <li>
                   <b-link href="#" @click="resetS2Counter" class="float-right">重設</b-link>
@@ -221,19 +186,13 @@ if (Vue) {
                     </b-badge>
                   </span>
                 </li>
-                <li v-show="seen_s2_children">
+                <li>
                   <div>
                     <label>
                       直系卑親屬
-                      <span v-show="seen_s2_raising_children">(含養子女)</span>
+                      <lah-transition><span v-show="seen_s2_raising_children">(含養子女)</span></lah-transition>
                     </label>人數：
-                    <input
-                      type="number"
-                      min="0"
-                      class="num-counter"
-                      v-model="wizard.s2.children"
-                      @change="filterNonNumber"
-                    />
+                    <b-form-spinbutton v-model="wizard.s2.children" min="0" size="sm" inline :disabled="!seen_s2_children"></b-form-spinbutton>
                     <span v-show="seen_s2_children_msg" class="h5">
                       <b-badge variant="warning">
                         每人應繼份為
@@ -241,32 +200,22 @@ if (Vue) {
                       </b-badge>
                     </span>
                   </div>
-                  <div v-show="!seen_s2_raising_children">
-                    <label>養子女</label>人數：
-                    <input
-                      type="number"
-                      min="0"
-                      class="num-counter"
-                      v-model="wizard.s2.raising_children"
-                      @change="filterNonNumber"
-                    />
-                    <span v-show="seen_s2_raising_children_msg" class="h5">
-                      <b-badge variant="warning">
-                        每人應繼份為
-                        <b-badge variant="light">{{val_s2_raising_children_ratio}}</b-badge>
-                      </b-badge>
-                    </span>
-                  </div>
+                  <lah-transition fade>
+                    <div v-show="!seen_s2_raising_children">
+                      <label>養子女</label>人數：
+                      <b-form-spinbutton v-model="wizard.s2.raising_children" min="0" size="sm" inline :disabled="!seen_s2_children"></b-form-spinbutton>
+                      <span v-show="seen_s2_raising_children_msg" class="h5">
+                        <b-badge variant="warning">
+                          每人應繼份為
+                          <b-badge variant="light">{{val_s2_raising_children_ratio}}</b-badge>
+                        </b-badge>
+                      </span>
+                    </div>
+                  </lah-transition>
                 </li>
-                <li v-show="seen_s2_parents">
+                <li>
                   <label>父母</label>人數：
-                  <input
-                    type="number"
-                    min="0"
-                    class="num-counter"
-                    v-model="wizard.s2.parents"
-                    @change="filterNonNumber"
-                  />
+                  <b-form-spinbutton v-model="wizard.s2.parents" min="0" size="sm" inline :disabled="!seen_s2_parents"></b-form-spinbutton>
                   <span v-show="seen_s2_parents_msg" class="h5">
                     <b-badge variant="warning">
                       每人應繼份為
@@ -274,15 +223,9 @@ if (Vue) {
                     </b-badge>
                   </span>
                 </li>
-                <li v-show="seen_s2_brothers">
+                <li>
                   <label>兄弟姊妹</label>人數：
-                  <input
-                    type="number"
-                    min="0"
-                    class="num-counter"
-                    v-model="wizard.s2.brothers"
-                    @change="filterNonNumber"
-                  />
+                  <b-form-spinbutton v-model="wizard.s2.brothers" min="0" size="sm" inline :disabled="!seen_s2_brothers"></b-form-spinbutton>
                   <span v-show="seen_s2_brothers_msg" class="h5">
                     <b-badge variant="warning">
                       每人應繼份為
@@ -290,15 +233,9 @@ if (Vue) {
                     </b-badge>
                   </span>
                 </li>
-                <li v-show="seen_s2_grandparents">
+                <li>
                   <label>祖父母</label>人數：
-                  <input
-                    type="number"
-                    min="0"
-                    class="num-counter"
-                    v-model="wizard.s2.grandparents"
-                    @change="filterNonNumber"
-                  />
+                  <b-form-spinbutton v-model="wizard.s2.grandparents" min="0" size="sm" inline :disabled="!seen_s2_grandparents"></b-form-spinbutton>
                   <span v-show="seen_s2_grandparents_msg" class="h5">
                     <b-badge variant="warning">
                       每人應繼份為
@@ -308,6 +245,9 @@ if (Vue) {
                 </li>
               </ol>
             </div>
+
+            </lah-transition>
+
           </fieldset>
         </section>
         <div class="my-2">
