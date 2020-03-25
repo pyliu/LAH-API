@@ -264,13 +264,10 @@ if (Vue) {
             </lah-transition>
           </section>
         </b-card>
-        <b-card v-show="pieChart" class="align-middle text-center">
-          <b-card-title class="text-left"><lah-fa-icon :icon="seen_chart ? 'chart-pie' : 'exclamation-circle'">{{seen_chart ? '分配圖' : '請操作左方區塊'}}</lah-fa-icon></b-card-title>
+        <b-card v-show="pieChart">
+          <b-card-title><lah-fa-icon :prefix="seen_chart ? 'fas' : 'far'" :icon="seen_chart ? 'chart-pie' : 'hand-point-left'">{{seen_chart ? '分配圖' : '請操作左方區塊'}}</lah-fa-icon></b-card-title>
           <lah-transition>
             <chart-component v-show="seen_chart" ref="pie"></chart-component>
-          </lah-transition>
-          <lah-transition>
-            <lah-fa-icon icon="hand-point-left" size="8x" prefix="far" class="d-inline-block" v-if="seen_hand"></lah-fa-icon>
           </lah-transition>
         </b-card>
     </b-card-group>`,
