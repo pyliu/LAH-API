@@ -264,9 +264,13 @@ if (Vue) {
             </lah-transition>
           </section>
         </b-card>
-        <b-card v-show="pieChart" title="分配圖">
+        <b-card v-show="pieChart" class="align-middle text-center">
+          <b-card-title class="text-left"><lah-fa-icon :icon="seen_chart ? 'chart-pie' : 'exclamation-circle'">{{seen_chart ? '分配圖' : '請操作左方區塊'}}</lah-fa-icon></b-card-title>
           <lah-transition>
             <chart-component v-show="seen_chart" ref="pie"></chart-component>
+          </lah-transition>
+          <lah-transition>
+            <lah-fa-icon icon="hand-point-left" size="8x" prefix="far" class="d-inline-block" v-if="seen_hand"></lah-fa-icon>
           </lah-transition>
         </b-card>
     </b-card-group>`,
@@ -343,7 +347,8 @@ if (Vue) {
             data: [],
             borderWidth: 1
           }]
-        }
+        },
+        parent_width: 0
       }
     },
     methods: {
@@ -454,6 +459,15 @@ if (Vue) {
           this.vueChartData.datasets[0].borderColor.push(`rgba(${color}, 1)`);
         }
         if (this.pieChart) this.$refs.pie.buildChart();
+      },
+      parentWidth: function () { return this.$parent.$el.offsetWidth; },
+      checkParentWidth: function() {
+        let pw = this.$parent.$el.offsetWidth;
+        if (pw == 0) {
+          setTimeout(() => this.checkParentWidth(), 100);
+        } else {
+          this.parent_width = pw;
+        }
       }
     },
     watch: {
@@ -655,7 +669,8 @@ if (Vue) {
       },
       seen_chart: function () {
         return this.vueChartData.labels.length > 0;
-      }
+      },
+      seen_hand: function () { return !this.seen_chart }
     },
     created() {
       this.now_step = this.wizard.s0;
@@ -665,6 +680,7 @@ if (Vue) {
         this.$refs.pie.chartData = this.vueChartData;
         this.$refs.pie.type = 'pie';
       }
+      this.checkParentWidth();
     }
   });
 }
