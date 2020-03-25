@@ -445,7 +445,7 @@ if (Vue) {
         this.vueChartData.datasets[0].data = [];
         this.vueChartData.datasets[0].backgroundColor = [];
         this.vueChartData.datasets[0].borderColor = [];
-        if (this.pieChart) this.$refs.pie.buildChart();
+        if (this.pieChart) this.$refs.pie.buildChart({legend_pos: 'bottom'});
       },
       addChartData: function (name, servings, count = 1) {
         for (let i = 0; i < count; i++) {
@@ -455,7 +455,7 @@ if (Vue) {
           this.vueChartData.datasets[0].backgroundColor.push(`rgba(${color}, 0.8)`);
           this.vueChartData.datasets[0].borderColor.push(`rgba(${color}, 1)`);
         }
-        if (this.pieChart) this.$refs.pie.buildChart();
+        if (this.pieChart) this.$refs.pie.buildChart({legend_pos: 'bottom'});
       },
       parentWidth: function () { return this.$parent.$el.offsetWidth; },
       checkParentWidth: function() {

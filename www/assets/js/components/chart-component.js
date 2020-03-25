@@ -67,7 +67,7 @@ if (Vue) {
                 });
                 return true;
             },
-            buildChart: function (opts = {}) {
+            buildChart: function (opts = {}, ) {
                 if (this.inst) {
                     // reset the chart
                     this.inst.destroy();
@@ -85,7 +85,7 @@ if (Vue) {
                         // put legend to the right for some chart type
                         opts.legend = {
                             display: true,
-                            position: 'right'
+                            position: opts.legend_pos || 'right'
                         };
                         break;
                     case "radar":
