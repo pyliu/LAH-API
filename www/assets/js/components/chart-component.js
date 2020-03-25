@@ -112,7 +112,6 @@ if (Vue) {
                                 label: function (tooltipItem, data) {
                                     // add percent ratio to the label
                                     let dataset = data.datasets[tooltipItem.datasetIndex];
-                                    if (this.empty(dataset.data)) return;
                                     let sum = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
                                         return previousValue + currentValue;
                                     });
