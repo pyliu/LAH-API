@@ -1520,10 +1520,10 @@ if (Vue) {
 
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
-        template: `<b-card :border-variant="ready ? '' : 'danger'">
-            <lah-fa-icon v-if="ready" icon="tools" action="clock" size="2x" variant="danger"> 開發中</lah-fa-icon>
+        template: `<div class="p-2">
+            <lah-fa-icon v-if="ready" icon="tools" action="float" size="2x" variant="danger"> 開發中</lah-fa-icon>
             <lah-fa-icon v-else icon="tools" action="clock" size="2x" variant="primary"> 開發中</lah-fa-icon>
-        </b-card>`,
+        </div>`,
         computed: {
             border() { return this.ready ? '' : 'danger' }
         },
