@@ -134,7 +134,10 @@
                     this.$refs.countdown.end();
                 },
             },
-            created() { this.reload() }
+            created() {
+                this.busyIconSize="lg";
+                this.reload();
+            }
         });
     });
   </script>

@@ -1538,14 +1538,14 @@ if (Vue) {
                 </template>
 
                 <template v-slot:cell(RM01)="row">
-                    <div class="text-left" v-b-popover.hover.focus.d400="row.item['結案狀態']">
+                    <div class="text-left" v-b-popover.hover.focus.d400="{content: row.item['結案狀態'], variant: row.item['燈號']}">
                         <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
                         <span v-if="mute">{{bakedContent(row)}}</span>
                         <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{bakedContent(row)}}</a>
                     </div>
                 </template>
                 <template v-slot:cell(收件字號)="row">
-                    <div class="text-left" v-b-popover.hover.focus.d400="row.item['結案狀態']">
+                    <div class="text-left" v-b-popover.hover.focus.d400="{content: row.item['結案狀態'], variant: row.item['燈號']}">
                         <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
                         <span v-if="mute">{{bakedContent(row)}}</span>
                         <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{row.item['收件字號']}}</a>
@@ -1561,9 +1561,13 @@ if (Vue) {
                 </template>
 
                 <template v-slot:cell(限辦時間)="row">
-                    <lah-fa-icon icon="circle" :variant="row.item['燈號']" :title="row.item['預定結案日期']" class="text-nowrap"> {{row.value}}</lah-fa-icon>
+                    <lah-fa-icon icon="circle" :variant="row.item['燈號']" v-b-popover.hover.focus.d400="{content: row.item['預定結案日期'], variant: row.item['燈號']}" class="text-nowrap"> {{row.value}}</lah-fa-icon>
                 </template>
 
+                <template v-slot:cell(RM07_1)="row">
+                    <span v-b-popover.hover.focus.d400="row.item['收件時間']">{{row.item["RM07_1"]}}</span>
+                </template>
+                
                 <template v-slot:cell(登記原因)="row">
                     {{reason(row)}}
                 </template>
