@@ -232,6 +232,8 @@ ksort($operators);
   <script src="assets/js/global.js"></script>
   <script src="assets/js/components/lah-global.js"></script>
   <script src="assets/js/components/lah-components.js"></script>
+  <script src="assets/js/Chart.min.js"></script>
+  <script src="assets/js/components/chart-component.js"></script>
   <script src="assets/js/xhr_query.js"></script>
   
   <script src="assets/js/mark.jquery.min.js"></script>

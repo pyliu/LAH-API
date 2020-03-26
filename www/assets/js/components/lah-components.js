@@ -887,6 +887,12 @@ if (Vue) {
                             </b-list-group>
                         </b-card-body>
                     </b-tab>
+                    <b-tab lazy>
+                        <template v-slot:title>
+                            <lah-fa-icon icon="chart-line"> <strong>案件時間線</strong></lah-fa-icon>
+                        </template>
+                        <lah-reg-case-timeline :baked-data="jsonObj"></lah-reg-case-temp-mgt>
+                    </b-tab>
                     <b-tab v-if="isAdmin" lazy>
                         <template v-slot:title>
                             <lah-fa-icon icon="database"> <strong>狀態管理</strong></lah-fa-icon>
@@ -1514,7 +1520,7 @@ if (Vue) {
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
         template: `<div>
-            {{year}}-{{code}}-{{number}}
+            <lah-fa-icon icon="tools" action="clock" size="2x" variant="danger"> 開發中</lah-fa-icon>
         </div>`,
         created() {
             if (this.bakedData === undefined) {
