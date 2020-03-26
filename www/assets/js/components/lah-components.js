@@ -1545,7 +1545,7 @@ if (Vue) {
                     </div>
                 </template>
                 <template v-slot:cell(收件字號)="row">
-                    <div class="text-left">
+                    <div class="text-left" v-b-popover="row.item['結案狀態']">
                         <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
                         <span v-if="mute">{{bakedContent(row)}}</span>
                         <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{row.item['收件字號']}}</a>
@@ -1647,8 +1647,8 @@ if (Vue) {
                             {key: "准登人員", label: "准登", sortable: this.sort},
                             {key: "登記人員", label: "登簿", sortable: this.sort},
                             {key: "校對人員", label: "校對", sortable: this.sort},
-                            {key: "結案人員", label: "結案", sortable: this.sort},
-                            {key: "結案狀態", label: "狀態", sortable: this.sort}
+                            {key: "結案人員", label: "結案", sortable: this.sort}
+                            //{key: "結案狀態", label: "狀態", sortable: this.sort}
                         ];
                     case "flow":
                         return [
