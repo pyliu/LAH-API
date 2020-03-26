@@ -1237,7 +1237,7 @@ if (Vue) {
                             :id="'backup_temp_btn_' + idx"
                             size="sm"
                             variant="outline-primary"
-                            @click="backup(item, idx)"
+                            @click="backup(item, idx, $event)"
                         >備份</b-button>
                         <b-button
                             v-if="item[0] != 'MOICAT.RINDX' && item[0] != 'MOIPRT.PHIND'"
@@ -1329,12 +1329,12 @@ if (Vue) {
                     });
                 });
             },
-            backup: function(item, idx) {
+            backup: function(item, idx, e) {
                 this.isBusy = true;
                 let filename = `${this.prefix}-${item[0]}-TEMP-DATA.sql`;
                 this.download(this.getInsSQL(item), filename);
-                $(e.target).remove();
                 this.backupFlags[idx] = true;
+                $(e.target).attr("disabled", this.backupFlags[idx]);
                 this.isBusy = false;
             },
             clean: function(item, idx, e) {
@@ -1514,23 +1514,26 @@ if (Vue) {
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
         template: `<div>
+            {{year}}-{{code}}-{{number}}
         </div>`,
         created() {
-            this.isBusy = true;
-            this.$http.post(CONFIG.JSON_API_EP, {
-                type: "reg_case",
-                id: `${this.year}${this.code}${this.number}`
-            }).then(res => {
-                if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                    showAlert({title: "登記案件時間線", message: res.data.message, type: "warning"});
-                } else {
-                    this.bakedData = res.data.baked;
-                }
-            }).catch(err => {
-                this.error = err;
-            }).finally(() => {
-                this.isBusy = false;
-            });
+            if (this.bakedData === undefined) {
+                this.isBusy = true;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "reg_case",
+                    id: `${this.year}${this.code}${this.number}`
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                        showAlert({title: "登記案件時間線", message: res.data.message, type: "warning"});
+                    } else {
+                        this.bakedData = res.data.baked;
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            }
         }
     });
 
