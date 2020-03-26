@@ -138,6 +138,7 @@ class RegCaseData {
             "測量案件" => $row["RM04"]."-".$row["RM05"]."-".$row["RM06"],
             "登記原因" => $this->getCaseReason(),
             "限辦期限" => $this->getDueDate(),
+            "限辦時間" => $this->getDueHrs(),
             "作業人員" => $this->getCurrentOperator(),
             "辦理情形" => $this->getStatus(),
             "權利人統編" => empty($row["RM18"]) ? "" : $row["RM18"],

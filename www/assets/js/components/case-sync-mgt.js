@@ -92,7 +92,7 @@ if (Vue) {
                     let html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + year + "-" + code + "-" + number + "</a><div>";
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         html += "<i class='fas fa-circle text-warning'></i>&ensp;請參考下列資訊： <button id='sync_x_case_confirm_button' class='btn btn-sm btn-success' title='同步全部欄位'>同步</button>";
-                        html += "<table class='table table-hover text-center mt-1'>";
+                        html += "<table class='table table-hover b-table table-striped table-bordered table-sm text-center mt-1'>";
                         html += "<tr><th>欄位名稱</th><th>欄位代碼</th><th>局端</th><th>本所</th><th>單欄同步</th></tr>";
                         for (let key in res.data.raw) {
                             html += "<tr>";
