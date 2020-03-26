@@ -1475,6 +1475,7 @@ if (Vue) {
         },
         created() {
             if (this.empty(this.id)) this.id = '';
+            this.busyIconSize = "1x";
         },
         mounted() {
             this.isBusy = true;

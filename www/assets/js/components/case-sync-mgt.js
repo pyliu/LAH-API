@@ -93,7 +93,7 @@ if (Vue) {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         html += "<i class='fas fa-circle text-warning'></i>&ensp;請參考下列資訊： <button id='sync_x_case_confirm_button' class='btn btn-sm btn-success' title='同步全部欄位'>同步</button>";
                         html += "<table class='table table-hover b-table table-striped table-bordered table-sm text-center mt-1'>";
-                        html += "<tr><th>欄位名稱</th><th>欄位代碼</th><th>局端</th><th>本所</th><th>單欄同步</th></tr>";
+                        html += "<tr class='bg-dark text-white forn-weight-bold'><th>欄位名稱</th><th>欄位代碼</th><th>局端</th><th>本所</th><th>單欄同步</th></tr>";
                         for (let key in res.data.raw) {
                             html += "<tr>";
                             html += "<td>" + res.data.raw[key]["TEXT"] + "</td>";

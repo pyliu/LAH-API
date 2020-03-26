@@ -284,6 +284,7 @@ Vue.mixin({
     },
     data: function() { return {
         isBusy: false,
+        busyIconSize: undefined,
         error: {}
     }},
     watch: {
@@ -371,6 +372,12 @@ Vue.mixin({
                     cover_el.addClass(LOADING_PREDEFINED[rand(LOADING_PREDEFINED.length)])		// predefined pattern
                             .addClass(LOADING_SHAPES_COLOR[rand(LOADING_SHAPES_COLOR.length)]);	// color
                     switch(opts.size) {
+                        case "xs":
+                            cover_el.addClass("fa-xs");
+                            break;
+                        case "sm":
+                            cover_el.addClass("fa-sm");
+                            break;
                         case "md":
                             cover_el.addClass("fa-3x");
                             break;
@@ -381,6 +388,7 @@ Vue.mixin({
                             cover_el.addClass("fa-10x");
                             break;
                         default:
+                            cover_el.addClass(`fa-${opts.size == undefined ? '2x' : opts.size}`);
                             break;
                     }
                     container.append(cover_el);
@@ -401,8 +409,8 @@ Vue.mixin({
                 }
             }
         },
-        busyOn: function(el = "body", size = "") {
-            this.toggleBusy({selector: el, forceOn: true, size: size});
+        busyOn: function(el = "body") {
+            this.toggleBusy({selector: el, forceOn: true, size: this.busyIconSize});
             this.$emit("busyOn", this);
         },
         busyOff: function(el = "body") {
