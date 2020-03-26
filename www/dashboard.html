@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="Land Affairs Helper">
+<meta name="author" content="LIU, PANG-YU">
+<title>桃園市中壢地政事務所</title>
+
+<!-- Bootstrap core CSS -->
+<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+<link rel="stylesheet" href="assets/css/loading.css">
+<link rel="stylesheet" href="assets/css/loading-btn.css">
+<link href="assets/css/animate.css" rel="stylesheet">
+<link href="assets/css/awesome-font.css" rel="stylesheet">
+<!-- Custom styles for this template -->
+<link href="assets/css/bootstrap-vue.min.css" rel="stylesheet">
+<link href="assets/css/main.css" rel="stylesheet">
+</head>
+
+<body>
+  
+  <section class="hide">
+    <div class="container-fluid" v-cloak>
+      <b-card-group columns class="mb-1">
+        <b-card no-body class="p-2">
+          <lah-user-card title="我的名片"></lah-user-card>
+        </b-card>
+        <b-card no-body class="p-2">
+          <lah-user-message :id="settings['user_id']" count="5" title="信差訊息" tabs="true"></lah-user-message>
+          <b-input-group size="sm" class="mb-1">
+            <b-input-group-prepend is-text>{{userNames[settings['user_id'] ? settings['user_id'].toUpperCase() : null] || '使用者代碼'}}</b-input-group-prepend>
+            <b-form-input
+              v-model="settings['user_id']"
+              placeholder="HBXXXX"
+              class="no-cache"
+              :state="(/^HB\d{4}$/i).test(settings['user_id'])"
+            ></b-form-input>
+          </b-input-group>
+        </b-card>
+        <b-card no-body class="p-2">
+          <b-card-title title-tag="h6"><lah-fa-icon icon="wallet" variant="dark"> 今日規費</lah-fa-icon></b-card-title>
+          <b-card-text><lah-fee-board></lah-fee-board></b-card-text>
+        </b-card>
+      </b-card-group>
+      <b-card-group deck class="mb-1">
+        <b-card no-body class="p-2 s-90">
+          <lah-heir-share-ratio></lah-heir-share-ratio>
+        </b-card>
+        <b-card class="text-center">
+          <lah-fa-icon icon="tools" action="clock" size="2x" variant="danger"> 開發中</lah-fa-icon>
+        </b-card>
+      </b-card-group>
+    </div>
+  </section><!-- /section -->
+
+  <!-- Bootstrap core JavaScript -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="assets/js/jquery.min.js"></script>
+  <script src="assets/js/popper.min.js"></script>
+  <script src="assets/js/bootstrap.min.js"></script>
+
+  <script src="assets/js/vue.js"></script>
+  <script src="assets/js/vuex.js"></script>
+  <script src="assets/js/bootstrap-vue.min.js"></script>
+  <script src="assets/js/bootstrap-vue-icons.min.js"></script>
+  <script src="assets/js/axios.min.js"></script>
+  <script src="assets/js/localforage.min.js"></script>
+  <script src="assets/js/global.js"></script>
+  <script src="assets/js/components/lah-global.js"></script>
+  <script src="assets/js/components/lah-components.js"></script>
+
+  <script src="assets/js/components/dashboards/lah-fee-board.js"></script>
+  <script src="assets/js/components/dashboards/lah-heir-share-ratio.js"></script>
+  <script src="assets/js/components/fee-query-board.js"></script>
+  <!-- Vue Chart Components -->
+  <script src="assets/js/Chart.min.js"></script>
+  <script src="assets/js/components/chart-component.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(e => { vueApp.setSetting('user_id', undefined) });
+  </script>
+</body>
+</html>

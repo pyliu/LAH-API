@@ -195,10 +195,10 @@ if (Vue) {
             active: undefined,
             avatar: undefined,
             links: [{
-                text: `管理儀錶板`,
+                text: "今日案件",
                 url: ["index.html", "/"],
-                icon: "cubes",
-                need_admin: true
+                icon: "briefcase",
+                need_admin: false
             }, {
                 text: "資料查詢",
                 url: "query.php",
@@ -209,11 +209,6 @@ if (Vue) {
                 url: "watchdog.html",
                 icon: "user-secret",
                 need_admin: true
-            }, {
-                text: "今日案件",
-                url: "tracking.html",
-                icon: "briefcase",
-                need_admin: false
             }, {
                 text: "逾期案件",
                 url: "overdue_reg_cases.html",
@@ -233,6 +228,11 @@ if (Vue) {
                 text: "記錄瀏覽",
                 url: "tasklog.html",
                 icon: "dog",
+                need_admin: true
+            }, {
+                text: `管理儀錶板`,
+                url: "dashboard.html",
+                icon: "cubes",
                 need_admin: true
             }, {
                 text: "測試頁",
