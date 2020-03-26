@@ -1211,7 +1211,20 @@ if (Vue) {
         }
     });
 
+    let regCaseMixin = {
+        props: {
+            bakedData: { type: Object, default: undefined},
+            id: { type: String, default: "" } // the id format should be '109HB04001234'
+        },
+        computed: {
+            year() { return this.bakedData ? this.bakedData["RM01"] : this.id.substring(0, 3) },
+            code() { return this.bakedData ? this.bakedData["RM02"] : this.id.substring(3, 7) },
+            number() { return this.bakedData ? this.bakedData["RM03"] : this.id.substring(7) }
+        }
+    };
+
     Vue.component('lah-reg-case-temp-mgt', {
+        mixins: [regCaseMixin],
         template: `<div>
             <div v-if="found">
                 <div v-for="(item, idx) in filtered">
@@ -1245,7 +1258,6 @@ if (Vue) {
             </div>
             <lah-fa-icon v-else icon="exclamation-circle" variant="success" size="lg"> 無暫存檔。</lah-fa-icon>
         </div>`,
-        props: ["bakedData", 'id'], // the id format should be '109HB04001234'
         data: function() { return {
             filtered: null,
             cleanAllBackupFlag: false,
@@ -1253,10 +1265,7 @@ if (Vue) {
         }},
         computed: {
             found() { return !this.empty(this.filtered) },
-            prefix() { return `${this.year}-${this.code}-${this.number}` },
-            year() { return this.bakedData ? this.bakedData["RM01"] : this.id.substring(0, 3) },
-            code() { return this.bakedData ? this.bakedData["RM02"] : this.id.substring(3, 7) },
-            number() { return this.bakedData ? this.bakedData["RM03"] : this.id.substring(7) }
+            prefix() { return `${this.year}-${this.code}-${this.number}` }
         },
         methods: {
             title: function (item) {
@@ -1500,6 +1509,12 @@ if (Vue) {
                 this.isBusy = false;
             });
         }
+    });
+
+    Vue.component('lah-reg-case-timeline', {
+        template: `<div>
+        </div>`,
+        props: ["bakedData", 'id'],
     });
 
     Vue.component('lah-reg-table', {
