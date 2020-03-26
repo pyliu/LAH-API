@@ -1538,14 +1538,14 @@ if (Vue) {
                 </template>
 
                 <template v-slot:cell(RM01)="row">
-                    <div class="text-left">
+                    <div class="text-left" v-b-popover.hover.focus.d400="row.item['結案狀態']">
                         <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
                         <span v-if="mute">{{bakedContent(row)}}</span>
                         <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{bakedContent(row)}}</a>
                     </div>
                 </template>
                 <template v-slot:cell(收件字號)="row">
-                    <div class="text-left" v-b-popover="row.item['結案狀態']">
+                    <div class="text-left" v-b-popover.hover.focus.d400="row.item['結案狀態']">
                         <lah-fa-icon :icon="icon" :variant="iconVariant" v-if="showIcon"></lah-fa-icon>
                         <span v-if="mute">{{bakedContent(row)}}</span>
                         <a v-else href="javascript:void(0)" @click="fetch(row.item)">{{row.item['收件字號']}}</a>
