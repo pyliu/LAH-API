@@ -1225,7 +1225,8 @@ if (Vue) {
         computed: {
             year() { return this.bakedData ? this.bakedData["RM01"] : this.id.substring(0, 3) },
             code() { return this.bakedData ? this.bakedData["RM02"] : this.id.substring(3, 7) },
-            number() { return this.bakedData ? this.bakedData["RM03"] : this.id.substring(7) }
+            number() { return this.bakedData ? this.bakedData["RM03"] : this.id.substring(7) },
+            ready() { return !this.empty(this.bakedData) }
         }
     };
 
@@ -1519,10 +1520,14 @@ if (Vue) {
 
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
-        template: `<div>
-            <lah-fa-icon icon="tools" action="clock" size="2x" variant="danger"> 開發中</lah-fa-icon>
-        </div>`,
-        created() {
+        template: `<b-card :border-variant="ready ? '' : 'danger'">
+            <lah-fa-icon v-if="ready" icon="tools" action="clock" size="2x" variant="danger"> 開發中</lah-fa-icon>
+            <lah-fa-icon v-else icon="tools" action="clock" size="2x" variant="primary"> 開發中</lah-fa-icon>
+        </b-card>`,
+        computed: {
+            border() { return this.ready ? '' : 'danger' }
+        },
+        mounted() {
             if (this.bakedData === undefined) {
                 this.isBusy = true;
                 this.$http.post(CONFIG.JSON_API_EP, {

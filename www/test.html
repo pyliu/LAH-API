@@ -21,10 +21,9 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-      <lah-reg-case-timeline :baked-data="settings['bakedData']"></lah-reg-case-timeline>
+      <lah-reg-case-timeline></lah-reg-case-timeline>
       <lah-heir-share-ratio pie-chart></lah-heir-share-ratio>
       <lah-reg-table :baked-data="[settings['bakedData']]" max-height="200" icon="chevron-circle-right"></lah-reg-table>
-      <lah-user-card id="HB0541"></lah-user-card>
       <b-card-group deck>
         <b-card v-for="n in 5"
           header="featured"
@@ -33,7 +32,7 @@
           footer-tag="footer"
           title="Title"
         >
-          <b-card-text>Header and footers using props.</b-card-text>
+          <b-card-text><lah-user-card id="HB0541"></lah-user-card></b-card-text>
           <b-button href="#" variant="primary">Go somewhere</b-button>
         </b-card>
       </b-card-group>
