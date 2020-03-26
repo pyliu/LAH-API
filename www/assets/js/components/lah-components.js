@@ -1512,9 +1512,26 @@ if (Vue) {
     });
 
     Vue.component('lah-reg-case-timeline', {
+        mixins: [regCaseMixin],
         template: `<div>
         </div>`,
-        props: ["bakedData", 'id'],
+        created() {
+            this.isBusy = true;
+            this.$http.post(CONFIG.JSON_API_EP, {
+                type: "reg_case",
+                id: `${this.year}${this.code}${this.number}`
+            }).then(res => {
+                if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                    showAlert({title: "登記案件時間線", message: res.data.message, type: "warning"});
+                } else {
+                    this.bakedData = res.data.baked;
+                }
+            }).catch(err => {
+                this.error = err;
+            }).finally(() => {
+                this.isBusy = false;
+            });
+        }
     });
 
     Vue.component('lah-reg-table', {
