@@ -63,6 +63,36 @@ class RegCaseData {
         return $convert;
     }
 
+    private function getTimestamp($date, $time) {
+        /*
+        // RM27 - 案件辦理期限 (8 hrs a day)
+        $days = round($this->row["RM27"] / 8, 0, PHP_ROUND_HALF_DOWN);
+        $hours = $this->row["RM27"] % 8;
+        $due_in_secs = $hours * 60 * 60 + $days * 24 * 60 * 60;
+        // 遇到weekend需加上兩天時間
+        if ($days > 0) {
+            for ($i = 1; $i <= $days; $i++) {
+                $due_date = date("N", $begin + $i * 24 * 60 * 60);
+                if ($due_date > 5) {
+                    $due_in_secs += 2 * 24 * 60 * 60;
+                    break;
+                }
+            }
+        }
+        return $due_in_secs;
+        */
+        if (empty($date) || empty($time)) return false;
+        // $date, e.g. 1090327
+        // $time, e.g. 153033
+        $Y = substr($date, 0, 3) + 1911;
+        $M = substr($date, 3, 2);
+        $D = substr($date, 5, 2);
+        $H = substr($time, 0, 2);
+        $i = substr($time, 2, 2);
+        $s = substr($time, 4, 2);
+        return mktime($H, $i, $s, $M, $D, $Y);
+    }
+
     function __construct($db_record) {
         $this->row = $db_record;
         if (is_null(RegCaseData::$operators)) {
@@ -169,6 +199,7 @@ class RegCaseData {
             "初審耗時" => $this->getFirstReviewerPassedTime(),
             "複審人員" => $this->getSecondReviewer(),
             "複審時間" => RegCaseData::toDate($row["RM46_1"])." ".RegCaseData::toDate($row["RM46_2"]),
+            "複審耗時" => $this->getSecondReviewerPassedTime(),
             "移轉課長" => $this->getIDorName($this->row["RM106"]),
             "移轉課長時間" => RegCaseData::toDate($row["RM106_1"])." ".RegCaseData::toDate($row["RM106_2"]),
             "移轉秘書" => $this->getIDorName($this->row["RM107"]),
@@ -190,6 +221,7 @@ class RegCaseData {
             "登錄日期" => RegCaseData::toDate($row["RM54_1"])." ".RegCaseData::toDate($row["RM54_2"]),
             "准登人員" => $this->getIDorName($this->row["RM63"]),
             "准登日期" => RegCaseData::toDate($row["RM62_1"])." ".RegCaseData::toDate($row["RM62_2"]),
+            "准登耗時" => $this->getPreRegisterPassedTime(),
             "校對人員" => $this->getIDorName($this->row["RM57"]),
             "校對日期" => RegCaseData::toDate($row["RM56_1"])." ".RegCaseData::toDate($row["RM56_2"]),
             "結案人員" => $this->getIDorName($this->row["RM59"]),
@@ -218,6 +250,10 @@ class RegCaseData {
 
     public function getReceiveTime() {
         return RegCaseData::toDate($this->row["RM07_2"]);
+    }
+
+    public function getReceiveTimestamp() {
+        return $this->getTimestamp($this->row["RM07_1"], $this->row["RM07_2"]);
     }
 
     public function getDueHrs() {
@@ -356,46 +392,14 @@ class RegCaseData {
         return $this->row["RM45"];
     }
 
+    public function getFirstReviewerTimestamp() {
+        return $this->getTimestamp($this->row["RM44_1"], $this->row["RM44_2"]);
+    }
+
     public function getFirstReviewerPassedTime() {
-        if (empty($this->row['RM44_1']) || empty($this->row['RM44_2'])) return 0;
-
-        /*
-        // RM27 - 案件辦理期限 (8 hrs a day)
-        $days = round($this->row["RM27"] / 8, 0, PHP_ROUND_HALF_DOWN);
-        $hours = $this->row["RM27"] % 8;
-        $due_in_secs = $hours * 60 * 60 + $days * 24 * 60 * 60;
-        // 遇到weekend需加上兩天時間
-        if ($days > 0) {
-            for ($i = 1; $i <= $days; $i++) {
-                $due_date = date("N", $begin + $i * 24 * 60 * 60);
-                if ($due_date > 5) {
-                    $due_in_secs += 2 * 24 * 60 * 60;
-                    break;
-                }
-            }
-        }
-        return $due_in_secs;
-        */
-        // RM07_1 - 收件日期
-        $Y = substr($this->row["RM07_1"], 0, 3) + 1911;
-        $M = substr($this->row["RM07_1"], 3, 2);
-        $D = substr($this->row["RM07_1"], 5, 2);
-        // RM07_2 - 收件時間
-        $H = substr($this->row["RM07_2"], 0, 2);
-        $i = substr($this->row["RM07_2"], 2, 2);
-        $s = substr($this->row["RM07_2"], 4, 2);
-        $received_in_secs = mktime($H, $i, $s, $M, $D, $Y);
-
-        // RM44_1 - 初審日期
-        $Y = substr($this->row["RM44_1"], 0, 3) + 1911;
-        $M = substr($this->row["RM44_1"], 3, 2);
-        $D = substr($this->row["RM44_1"], 5, 2);
-        // RM44_2 - 初審時間
-        $H = substr($this->row["RM44_2"], 0, 2);
-        $i = substr($this->row["RM44_2"], 2, 2);
-        $s = substr($this->row["RM44_2"], 4, 2);
-        $first_reviewed_in_secs = mktime($H, $i, $s, $M, $D, $Y);
-
+        $received_in_secs = $this->getReceiveTimestamp();
+        $first_reviewed_in_secs = $this->getFirstReviewerTimestamp();
+        if ($first_reviewed_in_secs === false) return 0;
         return $first_reviewed_in_secs - $received_in_secs;
     }
 
@@ -411,12 +415,37 @@ class RegCaseData {
         return empty($this->row["RM47"]) || $this->row["RM47"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM47"]."' data-name='".$this->getIDorName($this->row["RM47"])."' data-toggle='tooltip' title='複審人員：".$this->row["RM47"]."'";
     }
 
+    public function getSecondReviewerTimestamp() {
+        return $this->getTimestamp($this->row["RM46_1"], $this->row["RM46_2"]);
+    }
+
+    public function getSecondReviewerPassedTime() {
+        $received_in_secs = $this->getReceiveTimestamp();
+        $first_reviewed_in_secs = $this->getFirstReviewerTimestamp();
+        $second_reviewed_in_secs = $this->getSecondReviewerTimestamp();
+        if ($second_reviewed_in_secs === false) return 0;
+        return $second_reviewed_in_secs - $received_in_secs - $first_reviewed_in_secs;
+    }
+
     public function getPreRegister() {
         return $this->getIDorName($this->row["RM63"]);
     }
 
     public function getPreRegisterTooltipAttr() {
         return empty($this->row["RM63"]) || $this->row["RM63"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM63"]."' data-name='".$this->getIDorName($this->row["RM63"])."' data-toggle='tooltip' title='准登人員：".$this->row["RM63"]."'";
+    }
+
+    public function getPreRegisterTimestamp() {
+        return $this->getTimestamp($this->row["RM62_1"], $this->row["RM62_2"]);
+    }
+
+    public function getPreRegisterPassedTime() {
+        $received_in_secs = $this->getReceiveTimestamp();
+        $first_reviewed_in_secs = $this->getFirstReviewerTimestamp();
+        $second_reviewed_in_secs = $this->getSecondReviewerTimestamp();
+        $pre_register_in_secs = $this->getPreRegisterTimestamp();
+        if ($second_reviewed_in_secs === false) return 0;
+        return $second_reviewed_in_secs - $received_in_secs - $second_reviewed_in_secs - $first_reviewed_in_secs;
     }
 
     public function getRegister() {

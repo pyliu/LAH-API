@@ -1627,10 +1627,10 @@ if (Vue) {
                 </template>
 
                 <template v-slot:cell(初審人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['初審人員'], item['RM45'])" v-b-popover.hover.d400="calculateOffsetHrs(item['初審耗時'])">{{item["初審人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['初審人員'], item['RM45'])" v-b-popover.top.hover.focus="passedTime(item['初審耗時'])">{{item["初審人員"]}}</a>
                 </template>
                 <template v-slot:cell(複審人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['複審人員'], item['RM47'])">{{item["複審人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['複審人員'], item['RM47'])" v-b-popover.top.hover.focus="passedTime(item['複審耗時'])">{{item["複審人員"]}}</a>
                 </template>
                 <template v-slot:cell(收件人員)="{ item }">
                     <a href="javascript:void(0)" @click="userinfo(item['收件人員'], item['RM96'])">{{item["收件人員"]}}</a>
@@ -1639,7 +1639,7 @@ if (Vue) {
                     <a href="javascript:void(0)" @click="userinfo(item['作業人員'], item['RM30_1'])">{{item["作業人員"]}}</a>
                 </template>
                 <template v-slot:cell(准登人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['准登人員'], item['RM63'])">{{item["准登人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['准登人員'], item['RM63'])" v-b-popover.top.hover.focus="passedTime(item['准登耗時'])">{{item["准登人員"]}}</a>
                 </template>
                 <template v-slot:cell(登記人員)="{ item }">
                     <a href="javascript:void(0)" @click="userinfo(item['登記人員'], item['RM55'])">{{item["登記人員"]}}</a>
@@ -1776,12 +1776,14 @@ if (Vue) {
             trClass(item, type) {
                 if(item && type == 'row') return this.color ? item["紅綠燈背景CSS"] : `filter-${item["燈號"]}`;
             },
-            calculateOffsetHrs(time_duration_secs) {
+            passedTime(time_duration_secs) {
+                if (isNaN(time_duration_secs)) return false;
+                if (time_duration_secs < 60) return "耗時 " + time_duration_secs + " 秒";
                 return "耗時 " + Number.parseFloat(time_duration_secs / 60).toFixed(2) + " 分鐘";
             }
         },
         created() { this.type = this.type || '' },
-        mounted() {}
+        mounted() { }
     });
 
 } else {
