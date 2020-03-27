@@ -1226,7 +1226,13 @@ if (Vue) {
             year() { return this.bakedData ? this.bakedData["RM01"] : this.id.substring(0, 3) },
             code() { return this.bakedData ? this.bakedData["RM02"] : this.id.substring(3, 7) },
             number() { return this.bakedData ? this.bakedData["RM03"] : this.id.substring(7) },
-            ready() { return !this.empty(this.bakedData) }
+            ready() { return !this.empty(this.bakedData) },
+            storeBakedData() { return this.storeParams['RegBakedData'] }
+        },
+        watch: {
+            bakedData: function(nObj, oObj) {
+                this.addToStoreParams('RegBakedData', nObj);
+            }
         }
     };
 
@@ -1490,7 +1496,6 @@ if (Vue) {
             }
         },
         created() {
-            if (this.empty(this.id)) this.id = '';
             this.busyIconSize = "1x";
         },
         mounted() {
