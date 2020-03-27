@@ -323,7 +323,7 @@ Vue.mixin({
         },
         userIDs() { return this.reverseMapping(this.userNames || {}); },
         dayMilliseconds() { return this.$store.getters.dayMilliseconds; },
-        settings() { return this.$store.getters.dynaParams; },
+        storeParams() { return this.$store.getters.dynaParams; },
         gerror() { return this.$store.getters.errors[this.$store.getters.errors.length - 1]; },
         gerrorLen() { return this.$store.getters.errorLen; },
         gerrors() { return this.$store.getters.errors; },
@@ -342,12 +342,11 @@ Vue.mixin({
         disableMSDBQuery() { return this.$store.getters.disableMSDBQuery; },
     },
     methods: {
-        setSetting: function(key, value) {
+        addToStoreParams: function(key, value) {
             let payload = {};
             payload[key] = value;
             this.$store.commit('dynaParams', payload);
         },
-        getSetting: function(key) { return this.settings[key] },
         reverseMapping: o => Object.keys(o).reduce((r, k) => Object.assign(r, { [o[k]]: (r[o[k]] || []).concat(k) }), {}),
         toggleBusy: (opts = {}) => {
             opts = Object.assign({

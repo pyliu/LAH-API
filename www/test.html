@@ -21,9 +21,9 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-      <lah-reg-case-timeline></lah-reg-case-timeline>
+      <lah-reg-case-timeline id="109HAB1003630"></lah-reg-case-timeline>
       <lah-heir-share-ratio pie-chart></lah-heir-share-ratio>
-      <lah-reg-table :baked-data="[settings['bakedData']]" max-height="200" icon="chevron-circle-right"></lah-reg-table>
+      <lah-reg-table :baked-data="[storeParams['bakedData']]" max-height="200" icon="chevron-circle-right"></lah-reg-table>
       <b-card-group deck>
         <b-card v-for="n in 5"
           header="featured"
@@ -68,21 +68,21 @@
     $(document).ready(e => {
       axios.post(
           CONFIG.JSON_API_EP,
-          { type: 'reg_case', id: 'H122611667' }
+          { type: 'reg_case', id: '109HAB1003630' }
       ).then(response => {
           // on success
-          vueApp.setSetting('bakedData', response.data.baked);
+          vueApp.addToStoreParams('bakedData', response.data.baked);
       }).catch(error => {
           console.log(error);
       }).finally(() => {});
 
-      let json1, json2;
-      axios.all([
-        axios.get('assets/js/mocks/case_count_by_reason.json'),
-        axios.get('assets/js/mocks/announcement_data.json')
-      ]).then(axios.spread((json1, json2) => {
+      // let json1, json2;
+      // axios.all([
+      //   axios.get('assets/js/mocks/case_count_by_reason.json'),
+      //   axios.get('assets/js/mocks/announcement_data.json')
+      // ]).then(axios.spread((json1, json2) => {
         
-      }));
+      // }));
     });
   </script>
 </body>
