@@ -166,6 +166,7 @@ class RegCaseData {
             "收件人員" => $this->getReceptionist(),
             "初審人員" => $this->getFirstReviewer(),
             "初審時間" => RegCaseData::toDate($row["RM44_1"])." ".RegCaseData::toDate($row["RM44_2"]),
+            "初審耗時" => $this->getFirstReviewerPassedTime(),
             "複審人員" => $this->getSecondReviewer(),
             "複審時間" => RegCaseData::toDate($row["RM46_1"])." ".RegCaseData::toDate($row["RM46_2"]),
             "移轉課長" => $this->getIDorName($this->row["RM106"]),
@@ -353,6 +354,49 @@ class RegCaseData {
 
     public function getFirstReviewerID() {
         return $this->row["RM45"];
+    }
+
+    public function getFirstReviewerPassedTime() {
+        if (empty($this->row['RM44_1']) || empty($this->row['RM44_2'])) return 0;
+
+        /*
+        // RM27 - 案件辦理期限 (8 hrs a day)
+        $days = round($this->row["RM27"] / 8, 0, PHP_ROUND_HALF_DOWN);
+        $hours = $this->row["RM27"] % 8;
+        $due_in_secs = $hours * 60 * 60 + $days * 24 * 60 * 60;
+        // 遇到weekend需加上兩天時間
+        if ($days > 0) {
+            for ($i = 1; $i <= $days; $i++) {
+                $due_date = date("N", $begin + $i * 24 * 60 * 60);
+                if ($due_date > 5) {
+                    $due_in_secs += 2 * 24 * 60 * 60;
+                    break;
+                }
+            }
+        }
+        return $due_in_secs;
+        */
+        // RM07_1 - 收件日期
+        $Y = substr($this->row["RM07_1"], 0, 3) + 1911;
+        $M = substr($this->row["RM07_1"], 3, 2);
+        $D = substr($this->row["RM07_1"], 5, 2);
+        // RM07_2 - 收件時間
+        $H = substr($this->row["RM07_2"], 0, 2);
+        $i = substr($this->row["RM07_2"], 2, 2);
+        $s = substr($this->row["RM07_2"], 4, 2);
+        $received_in_secs = mktime($H, $i, $s, $M, $D, $Y);
+
+        // RM44_1 - 初審日期
+        $Y = substr($this->row["RM44_1"], 0, 3) + 1911;
+        $M = substr($this->row["RM44_1"], 3, 2);
+        $D = substr($this->row["RM44_1"], 5, 2);
+        // RM44_2 - 初審時間
+        $H = substr($this->row["RM44_2"], 0, 2);
+        $i = substr($this->row["RM44_2"], 2, 2);
+        $s = substr($this->row["RM44_2"], 4, 2);
+        $first_reviewed_in_secs = mktime($H, $i, $s, $M, $D, $Y);
+
+        return $first_reviewed_in_secs - $received_in_secs;
     }
 
     public function getFirstReviewerTooltipAttr() {
