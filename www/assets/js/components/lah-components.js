@@ -1624,22 +1624,51 @@ if (Vue) {
 
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
-        template: `<div class="p-2">
-            <canvas id="" v-if="ready"></canvas>
-            <lah-fa-icon v-else icon="tools" action="clock" size="2x" variant="primary"> 開發中</lah-fa-icon>
-        </div>`,
+        template: `<div><canvas></canvas></div>`,
+        data: () => { return {
+            chartData: {
+                labels:['初審耗時', '複審耗時', '准登耗時'],
+                legend: {
+                    display: true,
+                    labels: { boxWidth: 20 }
+                },
+                datasets:[{
+                    label: "案件時間線",
+                    backgroundColor:[],
+                    data: [],
+                    borderColor:[],
+                    fill: true,
+                    type: "line",
+                    order: 1,
+                    opacity: 0.6,
+                    snapGaps: true
+                }]
+            },
+            chartInst: undefined
+        } },
         computed: {
             border() { return this.ready ? '' : 'danger' }
         },
         watch: {
             bakedData: function(nData, oData) {
-                let arr = [
-                    ['初審耗時', nData['初審耗時']],
-                    ['複審耗時', nData['複審耗時']],
-                    ['准登耗時', nData['准登耗時']]
+                this.chartData.datasets[0].backgroundColor = [`rgb(92, 184, 92, 0.6)`, `rgb(2, 117, 216, 0.6)`, `rgb(240, 173, 78, 0.6)`];
+                this.chartData.labels = ['初審耗時', '複審耗時', '准登耗時'];
+                this.chartData.datasets[0].data = [
+                    nData['初審耗時'],
+                    nData['複審耗時'],
+                    nData['准登耗時']
                 ];
-                this.$refs.line.items = arr;
-                this.$log(this.$refs.line);
+                if (this.chartInst) {
+                    // reset the chart
+                    this.chartInst.destroy();
+                    this.chartInst = null;
+                }
+                // use chart.js directly
+                let ctx = this.$el.childNodes[0];
+                this.chartInst = new Chart(ctx, {
+                    type: 'line',
+                    data: this.chartData
+                });
             }
         },
         mounted() {

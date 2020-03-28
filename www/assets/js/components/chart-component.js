@@ -1,9 +1,7 @@
 if (Vue) {
     // need to include Chart.min.js (chart.js) first.
     Vue.component("chart-component", {
-        template: `<div>
-            <canvas :id="id">圖形初始化失敗</canvas>
-        </div>`,
+        template: `<div><canvas>圖形初始化失敗</canvas></div>`,
         data: function () { return {
             id: "__canvas__0",
             type: "bar",
@@ -12,9 +10,6 @@ if (Vue) {
             label: "統計圖表",
             items: []
         } },
-        created: function() {
-            this.id = this.uuid();
-        },
         watch: {
             type: function (val) {
                 this.buildChart();
@@ -27,17 +22,6 @@ if (Vue) {
             }
         },
         methods: {
-            uuid: function() {
-                var d = Date.now();
-                if (typeof performance !== 'undefined' && typeof performance.now === 'function'){
-                    d += performance.now(); //use high-precision timer if available
-                }
-                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                    var r = (d + Math.random() * 16) % 16 | 0;
-                    d = Math.floor(d / 16);
-                    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-                });
-            },
             resetData: function() {
                 this.chartData = {
                     labels:[],
@@ -101,7 +85,7 @@ if (Vue) {
                         };
                 }
                 // use chart.js directly
-                let ctx = $(`#${this.id}`);
+                let ctx = this.$el.childNodes[0];
                 let that = this;
                 this.inst = new Chart(ctx, {
                     type: this.type,

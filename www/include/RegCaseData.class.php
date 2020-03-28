@@ -423,8 +423,8 @@ class RegCaseData {
         $second_reviewed_in_secs = $this->getSecondReviewerTimestamp();
         if ($second_reviewed_in_secs === false) return 0;
         $received_in_secs = $this->getReceiveTimestamp();
-        $first_reviewed_in_secs = $this->getFirstReviewerTimestamp();
-        return $second_reviewed_in_secs - $received_in_secs - $first_reviewed_in_secs;
+        $first_reviewed_consumed_in_secs = $this->getFirstReviewerPassedTime();
+        return $second_reviewed_in_secs - $received_in_secs - $first_reviewed_consumed_in_secs;
     }
 
     public function getPreRegister() {
@@ -443,9 +443,9 @@ class RegCaseData {
         $pre_register_in_secs = $this->getPreRegisterTimestamp();
         if ($second_reviewed_in_secs === false) return 0;
         $received_in_secs = $this->getReceiveTimestamp();
-        $first_reviewed_in_secs = $this->getFirstReviewerTimestamp();
-        $second_reviewed_in_secs = $this->getSecondReviewerTimestamp();
-        return $second_reviewed_in_secs - $received_in_secs - $second_reviewed_in_secs - $first_reviewed_in_secs;
+        $first_reviewed_consumed_in_secs = $this->getFirstReviewerPassedTime();
+        $second_reviewed_consumed_in_secs = $this->getSecondReviewerPassedTime();
+        return $pre_register_in_secs - $received_in_secs - $first_reviewed_consumed_in_secs - $second_reviewed_consumed_in_secs;
     }
 
     public function getRegister() {
