@@ -2,6 +2,105 @@ if (Vue) {
     /**
      * Land-Affairs-Helper(lah) Vue components
      */
+    Vue.component("lah-transition", {
+        template: `<transition
+            :enter-active-class="animated_in"
+            :leave-active-class="animated_out"
+            :duration="duration"
+            :mode="mode"
+            :appear="appear"
+            @enter="enter"
+            @leave="leave"
+            @after-enter="afterEnter"
+            @after-leave="afterLeave"
+        >
+            <slot>轉場內容會顯示在這邊</slot>
+        </transition>`,
+        props: {
+            appear: Boolean,
+            fade: Boolean,
+            slide: Boolean,
+            slideDown: Boolean,
+            slideUp: Boolean,
+            zoom: Boolean,
+            bounce: Boolean,
+            rotate: Boolean
+        },
+        data: function() {
+            return {
+                animated_in: "animated fadeIn once-anim-cfg",
+                animated_out: "animated fadeOut once-anim-cfg",
+                animated_opts: ANIMATED_TRANSITIONS,
+                duration: 400,   // or {enter: 400, leave: 800}
+                mode: "out-in",  // out-in, in-out
+                cfg_css: "once-anim-cfg"
+            }
+        },
+        created() {
+            if (this.rotate) {
+                this.animated_in = `animated rotateIn ${this.cfg_css}`;
+                this.animated_out = `animated rotateOut ${this.cfg_css}`;
+            } else if (this.bounce) {
+                this.animated_in = `animated bounceIn ${this.cfg_css}`;
+                this.animated_out = `animated bounceOut ${this.cfg_css}`;
+            } else if (this.zoom) {
+                this.animated_in = `animated zoomIn ${this.cfg_css}`;
+                this.animated_out = `animated zoomOut ${this.cfg_css}`;
+            } else if (this.fade) {
+                this.animated_in = `animated fadeIn ${this.cfg_css}`;
+                this.animated_out = `animated fadeOut ${this.cfg_css}`;
+            } else if (this.slideDown || this.slide) {
+                this.animated_in = `animated slideInDown ${this.cfg_css}`;
+                this.animated_out = `animated slideOutUp ${this.cfg_css}`;
+            } else if (this.slideUp) {
+                this.animated_in = `animated slideInUp ${this.cfg_css}`;
+                this.animated_out = `animated slideOutDown ${this.cfg_css}`;
+            } else {
+                this.randAnimation();
+            }
+        },
+        methods: {
+            enter: function(e) { this.$emit("enter", e); },
+            leave: function(e) { this.$emit("leave", e); },
+            afterEnter: function(e) { this.$emit("after-enter", e); },
+            afterLeave: function(e) { this.$emit("after-leave", e); },
+            rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
+            randAnimation: function() {
+                if (this.animated_opts) {
+                    let count = this.animated_opts.length;
+                    let this_time = this.animated_opts[this.rand(count)];
+                    this.animated_in = `${this_time.in} ${this.cfg_css}`;
+                    this.animated_out = `${this_time.out} ${this.cfg_css}`;
+                }
+            }
+        }
+    });
+
+    Vue.component("lah-fa-icon", {
+        template: `<span><i :id="id" :class="className"></i> <slot></slot></span>`,
+        props: ["size", 'prefix', 'icon', 'variant', 'action', 'id'],
+        computed: {
+            className() {
+                let prefix = this.prefix || 'fas';
+                let icon = this.icon || 'exclamation-circle';
+                let variant = this.variant || '';
+                let ld_movement = this.action || '';
+                let size = '';
+                switch(this.size) {
+                    case "xs": size = "fa-xs"; break;
+                    case "sm": size = "fa-sm"; break;
+                    case "lg": size = "fa-lg"; break;
+                    default:
+                        if (this.size && this.size[this.size.length - 1] === "x") {
+                            size = `fa-${this.size}`;
+                        }
+                        break;
+                }
+                return `text-${variant} ${prefix} fa-${icon} ${size} ld ld-${ld_movement}`
+            }
+        }
+    });
+
     Vue.component("lah-alert", {
         template: `<div id="bs_alert_template">
             <lah-transition
@@ -1526,11 +1625,22 @@ if (Vue) {
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
         template: `<div class="p-2">
-            <lah-fa-icon v-if="ready" icon="tools" action="float" size="2x" variant="danger"> 開發中</lah-fa-icon>
+            <canvas id="" v-if="ready"></canvas>
             <lah-fa-icon v-else icon="tools" action="clock" size="2x" variant="primary"> 開發中</lah-fa-icon>
         </div>`,
         computed: {
             border() { return this.ready ? '' : 'danger' }
+        },
+        watch: {
+            bakedData: function(nData, oData) {
+                let arr = [
+                    ['初審耗時', nData['初審耗時']],
+                    ['複審耗時', nData['複審耗時']],
+                    ['准登耗時', nData['准登耗時']]
+                ];
+                this.$refs.line.items = arr;
+                this.$log(this.$refs.line);
+            }
         },
         mounted() {
             if (this.bakedData === undefined) {
