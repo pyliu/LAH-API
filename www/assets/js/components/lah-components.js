@@ -1624,7 +1624,7 @@ if (Vue) {
 
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
-        template: `<div><canvas></canvas></div>`,
+        template: `<div><canvas class="w-100"></canvas></div>`,
         data: () => { return {
             chartData: {
                 labels:['初審耗時', '複審耗時', '准登耗時'],

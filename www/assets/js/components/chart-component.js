@@ -1,7 +1,7 @@
 if (Vue) {
     // need to include Chart.min.js (chart.js) first.
     Vue.component("chart-component", {
-        template: `<div><canvas>圖形初始化失敗</canvas></div>`,
+        template: `<div><canvas class="w-100">圖形初始化失敗</canvas></div>`,
         data: function () { return {
             id: "__canvas__0",
             type: "bar",
@@ -42,12 +42,11 @@ if (Vue) {
             setData: function(items) {
                 this.resetData();
                 let opacity = this.chartData.datasets[0].opacity;
-                let that = this;
-                items.forEach(function(item) {
-                    that.chartData.labels.push(item[0]);            // first element is label
-                    that.chartData.datasets[0].data.push(item[1]);  // second element is data count
+                items.forEach(item => {
+                    this.chartData.labels.push(item[0]);            // first element is label
+                    this.chartData.datasets[0].data.push(item[1]);  // second element is data count
                     // randoom color for this item
-                    that.chartData.datasets[0].backgroundColor.push(`rgb(${that.rand(255)}, ${that.rand(255)}, ${that.rand(255)}, ${opacity})`);
+                    this.chartData.datasets[0].backgroundColor.push(`rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`);
                 });
                 return true;
             },
