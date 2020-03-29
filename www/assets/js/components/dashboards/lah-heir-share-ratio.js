@@ -267,7 +267,7 @@ if (Vue) {
         <b-card v-show="pieChart">
           <b-card-title><lah-fa-icon :prefix="seen_chart ? 'fas' : 'far'" :icon="seen_chart ? 'chart-pie' : 'hand-point-left'">{{seen_chart ? '分配圖' : '請操作左方區塊'}}</lah-fa-icon></b-card-title>
           <lah-transition>
-            <chart-component v-show="seen_chart" ref="pie"></chart-component>
+            <lah-chart v-show="seen_chart" ref="pie"></lah-chart>
           </lah-transition>
         </b-card>
     </b-card-group>`,
