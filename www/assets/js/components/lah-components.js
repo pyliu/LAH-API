@@ -1295,7 +1295,7 @@ if (Vue) {
                         <template v-slot:title>
                             <lah-fa-icon icon="chart-line"> <strong>案件時間線</strong></lah-fa-icon>
                         </template>
-                        <lah-reg-case-timeline :baked-data="bakedData"></lah-reg-case-temp-mgt>
+                        <lah-reg-case-timeline ref="timeline" :baked-data="bakedData"></lah-reg-case-temp-mgt>
                     </b-tab>
                     <b-tab v-if="isAdmin" lazy>
                         <template v-slot:title>
@@ -1667,13 +1667,17 @@ if (Vue) {
             border() { return this.ready ? '' : 'danger' }
         },
         watch: {
-            bakedData: function(nData, oData) {
+            bakedData: function(nData, oData) { this.buildChart() }
+        },
+        methods: {
+            randColor: function() { return `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, 0.6)` },
+            buildChart: function() {
                 this.chartData.datasets[0].backgroundColor = [this.randColor(), this.randColor(), this.randColor()];
                 this.chartData.labels = ['初審耗時', '複審耗時', '准登耗時'];
                 this.chartData.datasets[0].data = [
-                    nData['初審耗時'],
-                    nData['複審耗時'],
-                    nData['准登耗時']
+                    this.bakedData['初審耗時'],
+                    this.bakedData['複審耗時'],
+                    this.bakedData['准登耗時']
                 ];
                 if (this.chartInst) {
                     // reset the chart
@@ -1688,8 +1692,11 @@ if (Vue) {
                 });
             }
         },
-        methods: {
-            randColor: function() { return `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, 0.6)` }
+        created() {
+            // debug ... 
+            //this.addToStoreParams('timeline', this);
+            // tricky to let Chart.js work in the modal window
+            setTimeout(this.buildChart, 0);
         }
     });
 
