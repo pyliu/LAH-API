@@ -72,8 +72,7 @@ if (Vue) {
             <lah-transition @after-leave="afterStatsLeave">
                 <div class="mt-5" v-show="statsMode">
                     <div class="mx-auto w-75">
-                        <chart-component ref="statsChart" @click="handleChartClick"></chart-component>
-                        <!-- <lah-chart :type="chartType" label="" :items="items"></lah-chart> -->
+                        <lah-chart ref="statsChart" :type="chartType" :label="chart_legend" :items="chartItems" @click="handleChartClick"></lah-chart>
                     </div>
                     <b-button-group style="margin-left: 12.5%" class="w-75 mt-2">
                         <b-button size="sm" variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i> 長條圖</b-button>
@@ -109,6 +108,7 @@ if (Vue) {
             modeText: "逾期模式",
             modeTooltip: "逾期案件查詢模式",
             chartType: "bar",
+            chartItems: [],
             title: "逾期",
             message_count: 0,
             storeModule: {
@@ -151,12 +151,10 @@ if (Vue) {
             is_in_modal_mode() { return !this.empty(this.inSearchID); },
             all_cases_mode() { return this.empty(this.reviewerID) && !this.is_in_modal_mode; },
             table_items() { return this.is_in_modal_mode ? this.case_list_by_id[this.inSearchID] : this.case_list; },
-            cache_key() { return this.reviewerID + '-' + (this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases"); }
+            cache_key() { return this.reviewerID + '-' + (this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases"); },
+            chart_legend() { return `${this.is_overdue_mode ? "" : "即將"}逾期案件統計表 (${this.total_people}人，共${this.total_case}件)` }
         },
         watch: {
-            chartType: function (val) {
-                this.$refs.statsChart.type = val;
-            },
             overdueMode: function(isChecked) {
                 // also update store's flag
                 this.$store.commit("overdue_reg_cases/is_overdue_mode", isChecked);
@@ -200,14 +198,13 @@ if (Vue) {
                 this.listMode = true;
             },
             setChartData: function() {
-                this.$refs.statsChart.items = [];
+                this.chartItems = [];
                 let total = 0;
                 for (let id in this.case_list_by_id) {
                     let item = [this.case_list_by_id[id][0]["初審人員"], this.case_list_by_id[id].length];
-                    this.$refs.statsChart.items.push(item);
+                    this.chartItems.push(item);
                     total += this.case_list_by_id[id].length;
                 }
-                this.$refs.statsChart.label = `${this.is_overdue_mode ? "" : "即將"}逾期案件統計表 (${this.total_people}人，共${this.total_case}件)`;
             },
             resetCountdown: function () {
                 this.$refs.countdown.totalMilliseconds = this.milliseconds;

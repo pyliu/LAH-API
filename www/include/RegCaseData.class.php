@@ -160,6 +160,11 @@ class RegCaseData {
         $row = &$this->row;
         $ret = array(
             "ID" => $row["RM01"].$row["RM02"].$row["RM03"],
+            "ELAPSED_TIME" => array(
+                "初審" => $this->getFirstReviewerPassedTime(),
+                "複審" => $this->getSecondReviewerPassedTime(),
+                "准登" => $this->getPreRegisterPassedTime()
+            ),
             "紅綠燈背景CSS" => $this->getStatusCss(),
             "燈號" => $this->getState(),
             "收件字號" => $this->getReceiveSerial(),
@@ -196,10 +201,8 @@ class RegCaseData {
             "收件人員" => $this->getReceptionist(),
             "初審人員" => $this->getFirstReviewer(),
             "初審時間" => RegCaseData::toDate($row["RM44_1"])." ".RegCaseData::toDate($row["RM44_2"]),
-            "初審耗時" => $this->getFirstReviewerPassedTime(),
             "複審人員" => $this->getSecondReviewer(),
             "複審時間" => RegCaseData::toDate($row["RM46_1"])." ".RegCaseData::toDate($row["RM46_2"]),
-            "複審耗時" => $this->getSecondReviewerPassedTime(),
             "移轉課長" => $this->getIDorName($this->row["RM106"]),
             "移轉課長時間" => RegCaseData::toDate($row["RM106_1"])." ".RegCaseData::toDate($row["RM106_2"]),
             "移轉秘書" => $this->getIDorName($this->row["RM107"]),
@@ -221,7 +224,6 @@ class RegCaseData {
             "登錄日期" => RegCaseData::toDate($row["RM54_1"])." ".RegCaseData::toDate($row["RM54_2"]),
             "准登人員" => $this->getIDorName($this->row["RM63"]),
             "准登日期" => RegCaseData::toDate($row["RM62_1"])." ".RegCaseData::toDate($row["RM62_2"]),
-            "准登耗時" => $this->getPreRegisterPassedTime(),
             "校對人員" => $this->getIDorName($this->row["RM57"]),
             "校對日期" => RegCaseData::toDate($row["RM56_1"])." ".RegCaseData::toDate($row["RM56_2"]),
             "結案人員" => $this->getIDorName($this->row["RM59"]),

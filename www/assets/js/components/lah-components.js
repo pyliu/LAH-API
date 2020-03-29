@@ -1654,9 +1654,9 @@ if (Vue) {
         methods: {
             prepareItems: function() {
                 let items = [];
-                items.push(['初審耗時',  this.bakedData['初審耗時']]);
-                items.push(['複審耗時',  this.bakedData['複審耗時']]);
-                items.push(['准登耗時',  this.bakedData['准登耗時']]);
+                Object.keys(this.bakedData.ELAPSED_TIME).forEach(key => {
+                    items.push([key, this.bakedData.ELAPSED_TIME[key]]);
+                });
                 this.items = items;
             }
         },
