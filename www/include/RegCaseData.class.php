@@ -164,7 +164,7 @@ class RegCaseData {
                 "初審" => $this->getFirstReviewerPassedTime(),
                 "複審" => $this->getSecondReviewerPassedTime(),
                 "准登" => $this->getPreRegisterPassedTime(),
-                "登錄" => $this->getRegisterPassedTime(),
+                "登簿" => $this->getRegisterPassedTime(),
                 "校對" => $this->getCheckerPassedTime(),
                 "結案" => $this->getCloserPassedTime()
             ),
