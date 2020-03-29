@@ -1641,9 +1641,8 @@ if (Vue) {
 
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
-        template: `<div>
-            <lah-chart :type="chartType" label="案件時間線" :items="items" :tooltip="tooltip"></lah-chart>
-            <b-button-group size="sm" style="margin-left: 12.5%" class="w-75 mt-2">
+        template: `<div class="clearfix">
+            <b-button-group size="sm" class="mb-2 mr-3 float-right">
                 <b-button variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                 <b-button variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
                 <b-button variant="success" @click="chartType = 'line'"><i class="fas fa-chart-line"></i></b-button>
@@ -1651,6 +1650,7 @@ if (Vue) {
                 <b-button variant="info" @click="chartType = 'doughnut'"><i class="fab fa-edge"></i></b-button>
                 <b-button variant="dark" @click="chartType = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
             </b-button-group>
+            <lah-chart :type="chartType" label="案件時間線" :items="items" :tooltip="tooltip"></lah-chart>
         </div>`,
         data: function() { return {
             items: [],
