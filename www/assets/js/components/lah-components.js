@@ -1641,63 +1641,26 @@ if (Vue) {
 
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
-        template: `<div><canvas class="w-100"></canvas></div>`,
+        template: `<div><lah-chart type="line" label="案件時間線" :items="items"></lah-chart></div>`,
         data: function() { return {
-            chartData: {
-                labels:['初審耗時', '複審耗時', '准登耗時'],
-                legend: {
-                    display: true,
-                    labels: { boxWidth: 20 }
-                },
-                datasets:[{
-                    label: "案件時間線",
-                    backgroundColor:[this.randColor(), this.randColor(), this.randColor()],
-                    data: [1, 2, 3],
-                    borderColor:[],
-                    fill: true,
-                    type: "line",
-                    order: 1,
-                    opacity: 0.6,
-                    snapGaps: true
-                }]
-            },
-            chartInst: undefined
+            items: []
         } },
         computed: {
             border() { return this.ready ? '' : 'danger' }
         },
         watch: {
-            bakedData: function(nData, oData) { this.buildChart() }
+            bakedData: function(nData, oData) { this.prepareItems() }
         },
         methods: {
-            randColor: function() { return `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, 0.6)` },
-            buildChart: function() {
-                this.chartData.datasets[0].backgroundColor = [this.randColor(), this.randColor(), this.randColor()];
-                this.chartData.labels = ['初審耗時', '複審耗時', '准登耗時'];
-                this.chartData.datasets[0].data = [
-                    this.bakedData['初審耗時'],
-                    this.bakedData['複審耗時'],
-                    this.bakedData['准登耗時']
-                ];
-                if (this.chartInst) {
-                    // reset the chart
-                    this.chartInst.destroy();
-                    this.chartInst = null;
-                }
-                // use chart.js directly
-                let ctx = this.$el.childNodes[0];
-                this.chartInst = new Chart(ctx, {
-                    type: 'line',
-                    data: this.chartData
-                });
+            prepareItems: function() {
+                let items = [];
+                items.push(['初審耗時',  this.bakedData['初審耗時']]);
+                items.push(['複審耗時',  this.bakedData['複審耗時']]);
+                items.push(['准登耗時',  this.bakedData['准登耗時']]);
+                this.items = items;
             }
         },
-        created() {
-            // debug ... 
-            //this.addToStoreParams('timeline', this);
-            // tricky to let Chart.js work in the modal window
-            setTimeout(this.buildChart, 0);
-        }
+        created() { this.prepareItems() }
     });
 
     Vue.component('lah-reg-table', {
@@ -1931,6 +1894,136 @@ if (Vue) {
         },
         created() { this.type = this.type || '' },
         mounted() { }
+    });
+
+    // need to include Chart.min.js (chart.js) first.
+    Vue.component("lah-chart", {
+        template: `<div><canvas class="w-100">圖形初始化失敗</canvas></div>`,
+        props: {
+            type: { type: String, default: 'bar'},
+            label: { type: String, default: '統計圖表'},
+            items: { type: Array, default: [] }
+        },
+        data: function () { return {
+            inst: null,
+            chartData: null
+        } },
+        watch: {
+            type: function (val) { setTimeout(this.buildChart, 0) },
+            chartData: function(newObj) { setTimeout(this.buildChart, 0)  },
+            items: function(newItems) { this.setData(newItems) }
+        },
+        methods: {
+            resetData: function() {
+                this.chartData = {
+                    labels:[],
+                    legend: {
+                        display: true
+                    },
+                    datasets:[{
+                        label: this.label,
+                        backgroundColor:[],
+                        data: [],
+                        borderColor:`rgb(22, 22, 22)`,
+                        order: 1,
+                        opacity: 0.6,
+                        snapGaps: true
+                    }]
+                };
+            },
+            setData: function(items) {
+                this.resetData();
+                let opacity = this.chartData.datasets[0].opacity;
+                items.forEach(item => {
+                    this.chartData.labels.push(item[0]);            // first element is label
+                    this.chartData.datasets[0].data.push(item[1]);  // second element is data count
+                    // randoom color for this item
+                    this.chartData.datasets[0].backgroundColor.push(`rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`);
+                });
+            },
+            buildChart: function (opts = {}, ) {
+                if (this.inst) {
+                    // reset the chart
+                    this.inst.destroy();
+                    this.inst = null;
+                }
+                // keep only one dataset inside
+                if (this.chartData.datasets.length > 1) {
+                    this.chartData.datasets = this.chartData.datasets.slice(0, 1);
+                }
+                this.chartData.datasets[0].label = this.label;
+                switch(this.type) {
+                    case "pie":
+                    case "polarArea":
+                    case "doughnut":
+                        // put legend to the right for some chart type
+                        opts.legend = {
+                            display: true,
+                            position: opts.legend_pos || 'right'
+                        };
+                        break;
+                    case "radar":
+                        break;
+                    default:
+                        opts.scales = {
+                            yAxes: [{
+                                display: true,
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        };
+                }
+                // use chart.js directly
+                let ctx = this.$el.childNodes[0];
+                let that = this;
+                this.inst = new Chart(ctx, {
+                    type: this.type,
+                    data: this.chartData,
+                    options: Object.assign({
+                        tooltips: {
+                            callbacks: {
+                                label: function (tooltipItem, data) {
+                                    // add percent ratio to the label
+                                    let dataset = data.datasets[tooltipItem.datasetIndex];
+                                    let sum = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
+                                        return previousValue + currentValue;
+                                    });
+                                    let currentValue = dataset.data[tooltipItem.index];
+                                    let percent = Math.round(((currentValue / sum) * 100));
+                                    return ` ${data.labels[tooltipItem.index]} : ${currentValue} [${percent}%]`;
+                                }
+                            }
+                        },
+                        title: { display: false, text: "自訂標題", position: "bottom" },
+                        onClick: function(e) {
+                            let payload = {};
+                            payload["point"] = that.inst.getElementAtEvent(e)[0];
+                            if (payload["point"]) {
+                                payload["label"] = that.inst.data.labels[payload["point"]._index];
+                                payload["value"] = that.inst.data.datasets[payload["point"]._datasetIndex].data[payload["point"]._index];
+                            }
+                            // parent uses a handle function to catch the event, e.g. catchClick(e, payload) { ... }
+                            that.$emit("click", e, payload);
+                        }
+                    }, opts)
+                });
+            },
+            toBase64Image: function() { return this.inst.toBase64Image() },
+            downloadBase64PNG: function(filename = "download.png") {
+                const link = document.createElement('a');
+                link.href = this.toBase64Image();
+                link.setAttribute("download", filename);
+                document.body.appendChild(link);
+                link.click();
+                //afterwards we remove the element again
+                link.remove();
+            }
+        },
+        created() {
+            this.setData(this.items);
+            setTimeout(this.buildChart, 0);
+        }
     });
 
 } else {

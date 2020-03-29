@@ -73,6 +73,7 @@ if (Vue) {
                 <div class="mt-5" v-show="statsMode">
                     <div class="mx-auto w-75">
                         <chart-component ref="statsChart" @click="handleChartClick"></chart-component>
+                        <!-- <lah-chart :type="chartType" label="" :items="items"></lah-chart> -->
                     </div>
                     <b-button-group style="margin-left: 12.5%" class="w-75 mt-2">
                         <b-button size="sm" variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i> 長條圖</b-button>
