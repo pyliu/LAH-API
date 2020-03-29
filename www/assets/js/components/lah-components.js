@@ -810,7 +810,46 @@ if (Vue) {
         mounted() { }
     });
 
+    let regCaseMixin = {
+        props: {
+            bakedData: { type: Object, default: undefined},
+            id: { type: String, default: "" } // the id format should be '109HB04001234'
+        },
+        computed: {
+            year() { return this.bakedData ? this.bakedData["RM01"] : this.id.substring(0, 3) },
+            code() { return this.bakedData ? this.bakedData["RM02"] : this.id.substring(3, 7) },
+            number() { return this.bakedData ? this.bakedData["RM03"] : this.id.substring(7) },
+            ready() { return !this.empty(this.bakedData) },
+            storeBakedData() { return this.storeParams['RegBakedData'] }
+        },
+        watch: {
+            bakedData: function(nObj, oObj) {
+                this.addToStoreParams('RegBakedData', nObj);
+            }
+        },
+        async created() {
+            if (this.bakedData === undefined) {
+                this.isBusy = true;
+                await this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "reg_case",
+                    id: `${this.year}${this.code}${this.number}`
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                        showAlert({title: "擷取登記案件失敗", message: res.data.message, type: "warning"});
+                    } else {
+                        this.bakedData = res.data.baked;
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            }
+        }
+    };
+
     Vue.component('lah-reg-case-state-mgt', {
+        mixins: [regCaseMixin],
         template: `<div>
             <div class="form-row mt-1">
                 <b-input-group size="sm" class="col">
@@ -858,7 +897,7 @@ if (Vue) {
             </div>
             <p v-if="showProgress" class="mt-2"><lah-reg-table type="sm" :bakedData="[bakedData]" :no-caption="true" class="small"></lah-reg-table></p>
         </div>`,
-        props: ["bakedData", 'progress'],
+        props: ['progress'],
         data: () => { return {
             rm30: "",
             rm30_orig: "",
@@ -1079,44 +1118,6 @@ if (Vue) {
         }
     });
 
-    let regCaseMixin = {
-        props: {
-            bakedData: { type: Object, default: undefined},
-            id: { type: String, default: "" } // the id format should be '109HB04001234'
-        },
-        computed: {
-            year() { return this.bakedData ? this.bakedData["RM01"] : this.id.substring(0, 3) },
-            code() { return this.bakedData ? this.bakedData["RM02"] : this.id.substring(3, 7) },
-            number() { return this.bakedData ? this.bakedData["RM03"] : this.id.substring(7) },
-            ready() { return !this.empty(this.bakedData) },
-            storeBakedData() { return this.storeParams['RegBakedData'] }
-        },
-        watch: {
-            bakedData: function(nObj, oObj) {
-                this.addToStoreParams('RegBakedData', nObj);
-            }
-        },
-        created() {
-            if (this.bakedData === undefined) {
-                this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: "reg_case",
-                    id: `${this.year}${this.code}${this.number}`
-                }).then(res => {
-                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                        showAlert({title: "擷取登記案件失敗", message: res.data.message, type: "warning"});
-                    } else {
-                        this.bakedData = res.data.baked;
-                    }
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
-                    this.isBusy = false;
-                });
-            }
-        }
-    };
-
     Vue.component("lah-reg-case-detail", {
         mixins: [regCaseMixin],
         template: `<div>
@@ -1294,7 +1295,7 @@ if (Vue) {
                             </b-list-group>
                         </b-card-body>
                     </b-tab>
-                    <b-tab>
+                    <b-tab lazy>
                         <template v-slot:title>
                             <lah-fa-icon icon="chart-line"> <strong>案件時間線</strong></lah-fa-icon>
                         </template>
