@@ -854,7 +854,7 @@ if (Vue) {
             <div class="form-row mt-1">
                 <b-input-group size="sm" class="col">
                     <b-input-group-prepend is-text>案件辦理情形</b-input-group-prepend>
-                    <b-form-select v-model="rm30" :options="rm30_map" class="h-100">
+                    <b-form-select v-model="bakedData['RM30']" :options="rm30_map" class="h-100">
                         <template v-slot:first>
                             <b-form-select-option :value="null" disabled>-- 請選擇狀態 --</b-form-select-option>
                         </template>
@@ -872,7 +872,7 @@ if (Vue) {
             <div class="form-row mt-1">
                 <b-input-group size="sm" class="col">
                     <b-input-group-prepend is-text>登記處理註記</b-input-group-prepend>
-                    <b-form-select v-model="rm39" :options="rm39_map">
+                    <b-form-select v-model="bakedData['RM39']" :options="rm39_map">
                         <template v-slot:first>
                             <b-form-select-option value="">-- 無狀態 --</b-form-select-option>
                         </template>
@@ -885,7 +885,7 @@ if (Vue) {
             <div class="form-row mt-1">
                 <b-input-group size="sm" class="col">
                     <b-input-group-prepend is-text>地價處理註記</b-input-group-prepend>
-                    <b-form-select v-model="rm42" :options="rm42_map">
+                    <b-form-select v-model="bakedData['RM42']" :options="rm42_map">
                         <template v-slot:first>
                             <b-form-select-option value="">-- 無狀態 --</b-form-select-option>
                         </template>
@@ -899,15 +899,10 @@ if (Vue) {
         </div>`,
         props: ['progress'],
         data: () => { return {
-            rm30: "",
             rm30_orig: "",
-            rm39: "",
             rm39_orig: "",
-            rm42: "",
             rm42_orig: "",
-            rm31: "",
             sync_rm30_1: true,
-            wip: false,
             rm30_map: [
                 { value: 'A', text: 'A: 初審' },
                 { value: 'B', text: 'B: 複審' },
@@ -960,7 +955,11 @@ if (Vue) {
         } },
         computed: {
             showProgress() { return !this.empty(this.progress) },
-            attachEvent() { return this.showProgress }
+            attachEvent() { return this.showProgress },
+            wip() { return this.empty(this.bakedData["RM31"]) },
+            rm30() { return this.bakedData["RM30"] || "" },
+            rm39() { return this.bakedData["RM39"] || "" },
+            rm42() { return this.bakedData["RM42"] || "" }
         },
         methods: {
             updateRegCaseCol: function(arguments) {
@@ -994,17 +993,19 @@ if (Vue) {
                     addNotification({title: "更新案件辦理情形",  message: "案件辦理情形沒變動", type: "warning"});
                     return;
                 }
-                let that = this;
-                window.vueApp.confirm(`您確定要更新辦理情形為「${that.rm30}」?`, {
+                window.vueApp.confirm(`您確定要更新辦理情形為「${this.rm30}」?`, {
                     title: '請確認更新案件辦理情形',
                     callback: () => {
-                        that.updateRegCaseCol({
-                            rm01: this.bakedData["RM01"],
-                            rm02: this.bakedData["RM02"],
-                            rm03: this.bakedData["RM03"],
+                        this.updateRegCaseCol({
+                            rm01: this.year,
+                            rm02: this.code,
+                            rm03: this.number,
                             col: "RM30",
                             val: this.rm30
                         });
+                        
+                        this.rm30_orig = this.bakedData["RM30"] || "";
+
                         if (this.sync_rm30_1) {
                             /**
                              * RM45 - 初審 A
@@ -1050,12 +1051,12 @@ if (Vue) {
                                     rm30_1 = "XXXXXXXX";
                                     break;
                             }
-                            that.updateRegCaseCol({
-                                rm01: this.bakedData["RM01"],
-                                rm02: this.bakedData["RM02"],
-                                rm03: this.bakedData["RM03"],
+                            this.updateRegCaseCol({
+                                rm01: this.year,
+                                rm02: this.code,
+                                rm03: this.number,
                                 col: "RM30_1",
-                                val: that.empty(rm30_1) ? "XXXXXXXX" : rm30_1
+                                val: this.empty(rm30_1) ? "XXXXXXXX" : rm30_1
                             });
                         }
                     }
@@ -1066,17 +1067,17 @@ if (Vue) {
                     addNotification({title: "更新登記處理註記", message: "登記處理註記沒變動", type: "warning"});
                     return;
                 }
-                let that = this;
-                window.vueApp.confirm(`您確定要更新登記處理註記為「${that.rm39}」?`, {
+                window.vueApp.confirm(`您確定要更新登記處理註記為「${this.rm39}」?`, {
                     title: '請確認更新登記處理註記',
                     callback: () => {
-                        that.updateRegCaseCol({
-                            rm01: that.bakedData["RM01"],
-                            rm02: that.bakedData["RM02"],
-                            rm03: that.bakedData["RM03"],
+                        this.updateRegCaseCol({
+                            rm01: this.year,
+                            rm02: this.code,
+                            rm03: this.number,
                             col: "RM39",
-                            val: that.rm39
+                            val: this.rm39
                         });
+                        this.rm39_orig = this.bakedData["RM39"] || "";
                     }
                 });
             },
@@ -1085,30 +1086,25 @@ if (Vue) {
                     addNotification({title: "更新地價處理註記", message: "地價處理註記沒變動", type: "warning"});
                     return;
                 }
-                let that = this;
-                window.vueApp.confirm(`您確定要更新地價處理註記為「${that.rm42}」?`, {
+                window.vueApp.confirm(`您確定要更新地價處理註記為「${this.rm42}」?`, {
                     title: '請確認更新地價處理註記',
                     callback: () => {
-                        that.updateRegCaseCol({
-                            rm01: that.bakedData["RM01"],
-                            rm02: that.bakedData["RM02"],
-                            rm03: that.bakedData["RM03"],
+                        this.updateRegCaseCol({
+                            rm01: this.year,
+                            rm02: this.code,
+                            rm03: this.number,
                             col: "RM42",
-                            val: that.rm42
+                            val: this.rm42
                         });
+                        this.rm42_orig = this.bakedData["RM42"] || "";
                     }
                 });
             }
         },
         created() {
-            this.rm30 = this.bakedData["RM30"] || "";
-            this.rm39 = this.bakedData["RM39"] || "";
-            this.rm42 = this.bakedData["RM42"] || "";
             this.rm30_orig = this.bakedData["RM30"] || "";
             this.rm39_orig = this.bakedData["RM39"] || "";
             this.rm42_orig = this.bakedData["RM42"] || "";
-            this.rm31 = this.bakedData["RM31"];
-            this.wip = this.empty(this.rm31);
         },
         mounted() {
             if (this.attachEvent) {
