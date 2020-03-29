@@ -647,7 +647,7 @@ $(document).ready(() => {
                         showModal({
                             message: this.$createElement("lah-reg-case-detail", {
                                 props: {
-                                    jsonObj: res.data.baked
+                                    bakedData: res.data.baked
                                 }
                             }),
                             title: `登記案件詳情 ${id}`,
