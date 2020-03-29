@@ -163,7 +163,10 @@ class RegCaseData {
             "ELAPSED_TIME" => array(
                 "初審" => $this->getFirstReviewerPassedTime(),
                 "複審" => $this->getSecondReviewerPassedTime(),
-                "准登" => $this->getPreRegisterPassedTime()
+                "准登" => $this->getPreRegisterPassedTime(),
+                "登錄" => $this->getRegisterPassedTime(),
+                "校對" => $this->getCheckerPassedTime(),
+                "結案" => $this->getCloserPassedTime()
             ),
             "紅綠燈背景CSS" => $this->getStatusCss(),
             "燈號" => $this->getState(),
@@ -443,7 +446,7 @@ class RegCaseData {
 
     public function getPreRegisterPassedTime() {
         $pre_register_in_secs = $this->getPreRegisterTimestamp();
-        if ($second_reviewed_in_secs === false) return 0;
+        if ($pre_register_in_secs === false) return 0;
         $received_in_secs = $this->getReceiveTimestamp();
         $first_reviewed_consumed_in_secs = $this->getFirstReviewerPassedTime();
         $second_reviewed_consumed_in_secs = $this->getSecondReviewerPassedTime();
@@ -458,12 +461,41 @@ class RegCaseData {
         return empty($this->row["RM55"]) || $this->row["RM55"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM55"]."' data-name='".$this->getIDorName($this->row["RM55"])."' data-toggle='tooltip' title='登記人員：".$this->row["RM55"]."'";
     }
 
+    public function getRegisterTimestamp() {
+        return $this->getTimestamp($this->row["RM54_1"], $this->row["RM54_2"]);
+    }
+
+    public function getRegisterPassedTime() {
+        $register_in_secs = $this->getRegisterTimestamp();
+        if ($register_in_secs === false) return 0;
+        $received_in_secs = $this->getReceiveTimestamp();
+        $first_reviewed_consumed_in_secs = $this->getFirstReviewerPassedTime();
+        $second_reviewed_consumed_in_secs = $this->getSecondReviewerPassedTime();
+        $pre_register_consumed_in_secs = $this->getPreRegisterPassedTime();
+        return $register_in_secs - $received_in_secs - $first_reviewed_consumed_in_secs - $second_reviewed_consumed_in_secs - $pre_register_consumed_in_secs;
+    }
+
     public function getChecker() {
         return $this->getIDorName($this->row["RM57"]);
     }
 
     public function getCheckerTooltipAttr() {
         return empty($this->row["RM57"]) || $this->row["RM57"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM57"]."' data-name='".$this->getIDorName($this->row["RM57"])."' data-toggle='tooltip' title='校對人員：".$this->row["RM57"]."'";
+    }
+
+    public function getCheckerTimestamp() {
+        return $this->getTimestamp($this->row["RM56_1"], $this->row["RM56_2"]);
+    }
+
+    public function getCheckerPassedTime() {
+        $checker_in_secs = $this->getCheckerTimestamp();
+        if ($checker_in_secs === false) return 0;
+        $received_in_secs = $this->getReceiveTimestamp();
+        $first_reviewed_consumed_in_secs = $this->getFirstReviewerPassedTime();
+        $second_reviewed_consumed_in_secs = $this->getSecondReviewerPassedTime();
+        $pre_register_consumed_in_secs = $this->getPreRegisterPassedTime();
+        $register_consumed_in_secs = $this->getRegisterPassedTime();
+        return $checker_in_secs - $received_in_secs - $first_reviewed_consumed_in_secs - $second_reviewed_consumed_in_secs - $pre_register_consumed_in_secs - $register_consumed_in_secs;
     }
 
     public function getCloser() {
@@ -473,5 +505,22 @@ class RegCaseData {
     public function getCloserTooltipAttr() {
         return empty($this->row["RM59"]) || $this->row["RM59"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM59"]."' data-name='".$this->getIDorName($this->row["RM59"])."' data-toggle='tooltip' title='結案人員：".$this->row["RM59"]."'";
     }
+
+    public function getCloserTimestamp() {
+        return $this->getTimestamp($this->row["RM58_1"], $this->row["RM58_2"]);
+    }
+
+    public function getCloserPassedTime() {
+        $closer_in_secs = $this->getCloserTimestamp();
+        if ($closer_in_secs === false) return 0;
+        $received_in_secs = $this->getReceiveTimestamp();
+        $first_reviewed_consumed_in_secs = $this->getFirstReviewerPassedTime();
+        $second_reviewed_consumed_in_secs = $this->getSecondReviewerPassedTime();
+        $pre_register_consumed_in_secs = $this->getPreRegisterPassedTime();
+        $register_consumed_in_secs = $this->getRegisterPassedTime();
+        $checker_consumed_in_secs = $this->getCheckerPassedTime();
+        return $closer_in_secs - $received_in_secs - $first_reviewed_consumed_in_secs - $second_reviewed_consumed_in_secs - $pre_register_consumed_in_secs - $register_consumed_in_secs - $checker_consumed_in_secs;
+    }
+
 }
 ?>
