@@ -1641,9 +1641,20 @@ if (Vue) {
 
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
-        template: `<div><lah-chart type="line" label="案件時間線" :items="items"></lah-chart></div>`,
+        template: `<div>
+            <lah-chart :type="chartType" label="案件時間線" :items="items"></lah-chart>
+            <b-button-group size="sm" style="margin-left: 12.5%" class="w-75 mt-2">
+                <b-button variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i> 長條圖</b-button>
+                <b-button variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i> 圓餅圖</b-button>
+                <b-button variant="success" @click="chartType = 'line'"><i class="fas fa-chart-line"></i> 線型圖</b-button>
+                <b-button variant="warning" @click="chartType = 'polarArea'"><i class="fas fa-chart-area"></i> 區域圖</b-button>
+                <b-button variant="info" @click="chartType = 'doughnut'"><i class="fab fa-edge"></i> 甜甜圈</b-button>
+                <b-button variant="dark" @click="chartType = 'radar'"><i class="fas fa-broadcast-tower"></i> 雷達圖</b-button>
+            </b-button-group>
+        </div>`,
         data: function() { return {
-            items: []
+            items: [],
+            chartType: 'line'
         } },
         computed: {
             border() { return this.ready ? '' : 'danger' }
@@ -1655,7 +1666,8 @@ if (Vue) {
             prepareItems: function() {
                 let items = [];
                 Object.keys(this.bakedData.ELAPSED_TIME).forEach(key => {
-                    items.push([key, this.bakedData.ELAPSED_TIME[key]]);
+                    let mins = parseFloat(this.bakedData.ELAPSED_TIME[key] / 60).toFixed(2);
+                    items.push([key, mins]);
                 });
                 this.items = items;
             }
@@ -1737,10 +1749,10 @@ if (Vue) {
                 </template>
 
                 <template v-slot:cell(初審人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['初審人員'], item['RM45'])" v-b-popover.top.hover.focus="passedTime(item['初審耗時'])">{{item["初審人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['初審人員'], item['RM45'])" v-b-popover.top.hover.focus="passedTime(item.ELAPSED_TIME['初審'])">{{item["初審人員"]}}</a>
                 </template>
                 <template v-slot:cell(複審人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['複審人員'], item['RM47'])" v-b-popover.top.hover.focus="passedTime(item['複審耗時'])">{{item["複審人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['複審人員'], item['RM47'])" v-b-popover.top.hover.focus="passedTime(item.ELAPSED_TIME['複審'])">{{item["複審人員"]}}</a>
                 </template>
                 <template v-slot:cell(收件人員)="{ item }">
                     <a href="javascript:void(0)" @click="userinfo(item['收件人員'], item['RM96'])">{{item["收件人員"]}}</a>
@@ -1749,16 +1761,16 @@ if (Vue) {
                     <a href="javascript:void(0)" @click="userinfo(item['作業人員'], item['RM30_1'])">{{item["作業人員"]}}</a>
                 </template>
                 <template v-slot:cell(准登人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['准登人員'], item['RM63'])" v-b-popover.top.hover.focus="passedTime(item['准登耗時'])">{{item["准登人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['准登人員'], item['RM63'])" v-b-popover.top.hover.focus="passedTime(item.ELAPSED_TIME['准登'])">{{item["准登人員"]}}</a>
                 </template>
                 <template v-slot:cell(登記人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['登記人員'], item['RM55'])">{{item["登記人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['登記人員'], item['RM55'])" v-b-popover.top.hover.focus="passedTime(item.ELAPSED_TIME['登錄'])">{{item["登記人員"]}}</a>
                 </template>
                 <template v-slot:cell(校對人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['校對人員'], item['RM57'])">{{item["校對人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['校對人員'], item['RM57'])" v-b-popover.top.hover.focus="passedTime(item.ELAPSED_TIME['校對'])">{{item["校對人員"]}}</a>
                 </template>
                 <template v-slot:cell(結案人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['結案人員'], item['RM59'])">{{item["結案人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['結案人員'], item['RM59'])" v-b-popover.top.hover.focus="passedTime(item.ELAPSED_TIME['結案'])">{{item["結案人員"]}}</a>
                 </template>
             </b-table>
         </lah-transition>`,
@@ -1892,8 +1904,7 @@ if (Vue) {
                 return "耗時 " + Number.parseFloat(time_duration_secs / 60).toFixed(2) + " 分鐘";
             }
         },
-        created() { this.type = this.type || '' },
-        mounted() { }
+        created() { this.type = this.type || '' }
     });
 
     // need to include Chart.min.js (chart.js) first.
@@ -1941,7 +1952,7 @@ if (Vue) {
                     this.chartData.datasets[0].backgroundColor.push(`rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`);
                 });
             },
-            buildChart: function (opts = {}, ) {
+            buildChart: function (opts = {}) {
                 if (this.inst) {
                     // reset the chart
                     this.inst.destroy();
@@ -1991,6 +2002,7 @@ if (Vue) {
                                     });
                                     let currentValue = dataset.data[tooltipItem.index];
                                     let percent = Math.round(((currentValue / sum) * 100));
+                                    if (isNaN(percent)) return ` ${data.labels[tooltipItem.index]} : ${currentValue}`;
                                     return ` ${data.labels[tooltipItem.index]} : ${currentValue} [${percent}%]`;
                                 }
                             }
