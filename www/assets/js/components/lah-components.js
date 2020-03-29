@@ -1642,7 +1642,7 @@ if (Vue) {
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
         template: `<div>
-            <lah-chart :type="chartType" label="案件時間線" :items="items"></lah-chart>
+            <lah-chart :type="chartType" label="案件時間線" :items="items" :tooltip="tooltip"></lah-chart>
             <b-button-group size="sm" style="margin-left: 12.5%" class="w-75 mt-2">
                 <b-button variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i> 長條圖</b-button>
                 <b-button variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i> 圓餅圖</b-button>
@@ -1670,6 +1670,15 @@ if (Vue) {
                     items.push([key, mins]);
                 });
                 this.items = items;
+            },
+            tooltip: function (tooltipItem, data) {
+                // add percent ratio to the label
+                let dataset = data.datasets[tooltipItem.datasetIndex];
+                let sum = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
+                    return previousValue + currentValue;
+                });
+                let currentValue = dataset.data[tooltipItem.index];
+                return ` ${data.labels[tooltipItem.index]} : ${currentValue} 分鐘`;
             }
         },
         created() { this.prepareItems() }
@@ -1911,9 +1920,20 @@ if (Vue) {
     Vue.component("lah-chart", {
         template: `<div><canvas class="w-100">圖形初始化失敗</canvas></div>`,
         props: {
-            type: { type: String, default: 'bar'},
-            label: { type: String, default: '統計圖表'},
-            items: { type: Array, default: [] }
+            type: { type: String, default: 'bar' },
+            label: { type: String, default: '統計圖表' },
+            items: { type: Array, default: [] },
+            tooltip: { type: Function, default: function (tooltipItem, data) {
+                // add percent ratio to the label
+                let dataset = data.datasets[tooltipItem.datasetIndex];
+                let sum = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
+                    return previousValue + currentValue;
+                });
+                let currentValue = dataset.data[tooltipItem.index];
+                let percent = Math.round(((currentValue / sum) * 100));
+                if (isNaN(percent)) return ` ${data.labels[tooltipItem.index]} : ${currentValue}`;
+                return ` ${data.labels[tooltipItem.index]} : ${currentValue} [${percent}%]`;
+            } }
         },
         data: function () { return {
             inst: null,
@@ -1994,17 +2014,7 @@ if (Vue) {
                     options: Object.assign({
                         tooltips: {
                             callbacks: {
-                                label: function (tooltipItem, data) {
-                                    // add percent ratio to the label
-                                    let dataset = data.datasets[tooltipItem.datasetIndex];
-                                    let sum = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
-                                        return previousValue + currentValue;
-                                    });
-                                    let currentValue = dataset.data[tooltipItem.index];
-                                    let percent = Math.round(((currentValue / sum) * 100));
-                                    if (isNaN(percent)) return ` ${data.labels[tooltipItem.index]} : ${currentValue}`;
-                                    return ` ${data.labels[tooltipItem.index]} : ${currentValue} [${percent}%]`;
-                                }
+                                label: this.tooltip
                             }
                         },
                         title: { display: false, text: "自訂標題", position: "bottom" },
