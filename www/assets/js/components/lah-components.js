@@ -1644,12 +1644,12 @@ if (Vue) {
         template: `<div>
             <lah-chart :type="chartType" label="案件時間線" :items="items" :tooltip="tooltip"></lah-chart>
             <b-button-group size="sm" style="margin-left: 12.5%" class="w-75 mt-2">
-                <b-button variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i> 長條圖</b-button>
-                <b-button variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i> 圓餅圖</b-button>
-                <b-button variant="success" @click="chartType = 'line'"><i class="fas fa-chart-line"></i> 線型圖</b-button>
-                <b-button variant="warning" @click="chartType = 'polarArea'"><i class="fas fa-chart-area"></i> 區域圖</b-button>
-                <b-button variant="info" @click="chartType = 'doughnut'"><i class="fab fa-edge"></i> 甜甜圈</b-button>
-                <b-button variant="dark" @click="chartType = 'radar'"><i class="fas fa-broadcast-tower"></i> 雷達圖</b-button>
+                <b-button variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
+                <b-button variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
+                <b-button variant="success" @click="chartType = 'line'"><i class="fas fa-chart-line"></i></b-button>
+                <b-button variant="warning" @click="chartType = 'polarArea'"><i class="fas fa-chart-area"></i></b-button>
+                <b-button variant="info" @click="chartType = 'doughnut'"><i class="fab fa-edge"></i></b-button>
+                <b-button variant="dark" @click="chartType = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
             </b-button-group>
         </div>`,
         data: function() { return {
