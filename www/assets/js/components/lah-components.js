@@ -1635,7 +1635,7 @@ if (Vue) {
                 datasets:[{
                     label: "案件時間線",
                     backgroundColor:[],
-                    data: [],
+                    data: [1, 2, 3],
                     borderColor:[],
                     fill: true,
                     type: "line",

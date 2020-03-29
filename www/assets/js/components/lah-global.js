@@ -399,7 +399,8 @@ Vue.mixin({
                 d = Math.floor(d / 16);
                 return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
             });
-        }
+        },
+        rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))
     }
 });
 

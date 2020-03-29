@@ -127,8 +127,7 @@ if (Vue) {
                 link.click();
                 //afterwards we remove the element again
                 link.remove();
-            },
-            rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))
+            }
         }
     });
 } else {
