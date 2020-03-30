@@ -1641,14 +1641,17 @@ if (Vue) {
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
         template: `<div class="clearfix">
-            <b-button-group size="sm" class="mb-2 mr-3 float-right">
-                <b-button variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
-                <b-button variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
-                <b-button variant="success" @click="chartType = 'line'"><i class="fas fa-chart-line"></i></b-button>
-                <b-button variant="warning" @click="chartType = 'polarArea'"><i class="fas fa-chart-area"></i></b-button>
-                <b-button variant="info" @click="chartType = 'doughnut'"><i class="fab fa-edge"></i></b-button>
-                <b-button variant="dark" @click="chartType = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
-            </b-button-group>
+            <div class="text-justify">
+                <span>{{bakedData.收件字號}}</span>
+                <b-button-group size="sm" class="float-right">
+                    <b-button variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
+                    <b-button variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
+                    <b-button variant="success" @click="chartType = 'line'"><i class="fas fa-chart-line"></i></b-button>
+                    <b-button variant="warning" @click="chartType = 'polarArea'"><i class="fas fa-chart-area"></i></b-button>
+                    <b-button variant="info" @click="chartType = 'doughnut'"><i class="fab fa-edge"></i></b-button>
+                    <b-button variant="dark" @click="chartType = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
+                </b-button-group>
+            </div>
             <lah-chart :type="chartType" label="案件時間線" :items="items" :tooltip="tooltip"></lah-chart>
         </div>`,
         data: function() { return {
@@ -1757,10 +1760,10 @@ if (Vue) {
                 </template>
 
                 <template v-slot:cell(初審人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['初審人員'], item['RM45'])" v-b-popover.top.hover.focus="passedTime(item.ELAPSED_TIME['初審'])">{{item["初審人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['初審人員'], item['RM45'])" v-b-popover.top.hover.focus="passedTime(item, item.ELAPSED_TIME['初審'])">{{item["初審人員"]}}</a>
                 </template>
                 <template v-slot:cell(複審人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['複審人員'], item['RM47'])" v-b-popover.top.hover.focus="passedTime(item.ELAPSED_TIME['複審'])">{{item["複審人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['複審人員'], item['RM47'])" v-b-popover.top.hover.focus="passedTime(item, item.ELAPSED_TIME['複審'])">{{item["複審人員"]}}</a>
                 </template>
                 <template v-slot:cell(收件人員)="{ item }">
                     <a href="javascript:void(0)" @click="userinfo(item['收件人員'], item['RM96'])">{{item["收件人員"]}}</a>
@@ -1769,16 +1772,16 @@ if (Vue) {
                     <a href="javascript:void(0)" @click="userinfo(item['作業人員'], item['RM30_1'])">{{item["作業人員"]}}</a>
                 </template>
                 <template v-slot:cell(准登人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['准登人員'], item['RM63'])" v-b-popover.top.hover.focus="passedTime(item.ELAPSED_TIME['准登'])">{{item["准登人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['准登人員'], item['RM63'])" v-b-popover.top.hover.focus="passedTime(item, item.ELAPSED_TIME['准登'])">{{item["准登人員"]}}</a>
                 </template>
                 <template v-slot:cell(登記人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['登記人員'], item['RM55'])" v-b-popover.top.hover.focus="passedTime(item.ELAPSED_TIME['登錄'])">{{item["登記人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['登記人員'], item['RM55'])" v-b-popover.top.hover.focus="passedTime(item, item.ELAPSED_TIME['登簿'])">{{item["登記人員"]}}</a>
                 </template>
                 <template v-slot:cell(校對人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['校對人員'], item['RM57'])" v-b-popover.top.hover.focus="passedTime(item.ELAPSED_TIME['校對'])">{{item["校對人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['校對人員'], item['RM57'])" v-b-popover.top.hover.focus="passedTime(item, item.ELAPSED_TIME['校對'])">{{item["校對人員"]}}</a>
                 </template>
                 <template v-slot:cell(結案人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['結案人員'], item['RM59'])" v-b-popover.top.hover.focus="passedTime(item.ELAPSED_TIME['結案'])">{{item["結案人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['結案人員'], item['RM59'])" v-b-popover.top.hover.focus="passedTime(item, item.ELAPSED_TIME['結案'])">{{item["結案人員"]}}</a>
                 </template>
             </b-table>
         </lah-transition>`,
@@ -1906,10 +1909,16 @@ if (Vue) {
             trClass(item, type) {
                 if(item && type == 'row') return this.color ? item["紅綠燈背景CSS"] : `filter-${item["燈號"]}`;
             },
-            passedTime(time_duration_secs) {
+            passedTime(item, time_duration_secs) {
                 if (isNaN(time_duration_secs)) return false;
+                if (this.empty(time_duration_secs) || time_duration_secs == '0') {
+                    if(this.empty(item['結案代碼'])) {
+                        return '作業中';
+                    }
+                }
                 if (time_duration_secs < 60) return "耗時 " + time_duration_secs + " 秒";
-                return "耗時 " + Number.parseFloat(time_duration_secs / 60).toFixed(2) + " 分鐘";
+                if (time_duration_secs < 3600) return "耗時 " + Number.parseFloat(time_duration_secs / 60).toFixed(2) + " 分鐘";
+                return "耗時 " + Number.parseFloat(time_duration_secs / 60 / 60).toFixed(2) + " 小時";
             }
         },
         created() { this.type = this.type || '' }
