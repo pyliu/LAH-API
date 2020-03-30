@@ -1760,10 +1760,10 @@ if (Vue) {
                 </template>
 
                 <template v-slot:cell(初審人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['初審人員'], item['RM45'])" v-b-popover.top.hover.focus="passedTime(item, item.ELAPSED_TIME['初審'])">{{item["初審人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['初審人員'], item['RM45'])" v-b-popover.top.hover.focus.html="passedTime(item, item.ELAPSED_TIME['初審'])">{{item["初審人員"]}}</a>
                 </template>
                 <template v-slot:cell(複審人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['複審人員'], item['RM47'])" v-b-popover.top.hover.focus="passedTime(item, item.ELAPSED_TIME['複審'])">{{item["複審人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['複審人員'], item['RM47'])" v-b-popover.top.hover.focus.html="passedTime(item, item.ELAPSED_TIME['複審'])">{{item["複審人員"]}}</a>
                 </template>
                 <template v-slot:cell(收件人員)="{ item }">
                     <a href="javascript:void(0)" @click="userinfo(item['收件人員'], item['RM96'])">{{item["收件人員"]}}</a>
@@ -1772,16 +1772,16 @@ if (Vue) {
                     <a href="javascript:void(0)" @click="userinfo(item['作業人員'], item['RM30_1'])">{{item["作業人員"]}}</a>
                 </template>
                 <template v-slot:cell(准登人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['准登人員'], item['RM63'])" v-b-popover.top.hover.focus="passedTime(item, item.ELAPSED_TIME['准登'])">{{item["准登人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['准登人員'], item['RM63'])" v-b-popover.top.hover.focus.html="passedTime(item, item.ELAPSED_TIME['准登'])">{{item["准登人員"]}}</a>
                 </template>
                 <template v-slot:cell(登記人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['登記人員'], item['RM55'])" v-b-popover.top.hover.focus="passedTime(item, item.ELAPSED_TIME['登簿'])">{{item["登記人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['登記人員'], item['RM55'])" v-b-popover.top.hover.focus.html="passedTime(item, item.ELAPSED_TIME['登簿'])">{{item["登記人員"]}}</a>
                 </template>
                 <template v-slot:cell(校對人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['校對人員'], item['RM57'])" v-b-popover.top.hover.focus="passedTime(item, item.ELAPSED_TIME['校對'])">{{item["校對人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['校對人員'], item['RM57'])" v-b-popover.top.hover.focus.html="passedTime(item, item.ELAPSED_TIME['校對'])">{{item["校對人員"]}}</a>
                 </template>
                 <template v-slot:cell(結案人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['結案人員'], item['RM59'])" v-b-popover.top.hover.focus="passedTime(item, item.ELAPSED_TIME['結案'])">{{item["結案人員"]}}</a>
+                    <a href="javascript:void(0)" @click="userinfo(item['結案人員'], item['RM59'])" v-b-popover.top.hover.focus.html="passedTime(item, item.ELAPSED_TIME['結案'])">{{item["結案人員"]}}</a>
                 </template>
             </b-table>
         </lah-transition>`,
@@ -1913,7 +1913,7 @@ if (Vue) {
                 if (isNaN(time_duration_secs)) return false;
                 if (this.empty(time_duration_secs) || time_duration_secs == '0') {
                     if(this.empty(item['結案代碼'])) {
-                        return '作業中';
+                        return '<i class="fa fa-tools ld ld-tick"></i> 作業中';
                     }
                 }
                 if (time_duration_secs < 60) return "耗時 " + time_duration_secs + " 秒";
