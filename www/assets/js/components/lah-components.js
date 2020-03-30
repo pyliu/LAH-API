@@ -1293,19 +1293,19 @@ if (Vue) {
                     </b-tab>
                     <b-tab lazy>
                         <template v-slot:title>
-                            <lah-fa-icon icon="chart-line"> <strong>案件時間線</strong></lah-fa-icon>
+                            <lah-fa-icon icon="chart-line" class="text-success"> <strong>案件時間線</strong></lah-fa-icon>
                         </template>
                         <lah-reg-case-timeline ref="timeline" :baked-data="bakedData"></lah-reg-case-temp-mgt>
                     </b-tab>
                     <b-tab v-if="isAdmin" lazy>
                         <template v-slot:title>
-                            <lah-fa-icon icon="database" class="text-dark"> <strong>狀態管理</strong></lah-fa-icon>
+                            <lah-fa-icon icon="database" class="text-secondary"> <strong>狀態管理</strong></lah-fa-icon>
                         </template>
                         <lah-reg-case-state-mgt :baked-data="bakedData"></lah-reg-case-state-mgt>
                     </b-tab>
                     <b-tab v-if="isAdmin" lazy>
                         <template v-slot:title>
-                            <lah-fa-icon icon="buffer" prefix="fab" class="text-dark"> <strong>暫存檔管理</strong></lah-fa-icon>
+                            <lah-fa-icon icon="buffer" prefix="fab" class="text-secondary"> <strong>暫存檔管理</strong></lah-fa-icon>
                         </template>
                         <lah-reg-case-temp-mgt :baked-data="bakedData"></lah-reg-case-temp-mgt>
                     </b-tab>
