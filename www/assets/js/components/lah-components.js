@@ -1320,12 +1320,12 @@ if (Vue) {
                 ap_server: "220.1.35.123",
                 case_status_url: "",
                 case_data_url: "",
-                is_ongoing: false,
                 show_op_card: true
             }
         },
         computed: {
-            tabsAtEnd() { return !this.empty(this.tabsEnd) }
+            tabsAtEnd() { return !this.empty(this.tabsEnd) },
+            is_ongoing() { return this.empty(this.bakedData.結案代碼) }
         },
         methods: {
             handleNotFound: function(input) { this.show_op_card = false }
@@ -1344,8 +1344,7 @@ if (Vue) {
                     break;
             }
             this.case_status_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=${this.year}&word=${this.code}&code=${this.number}&sdlyn=N&RM90=`;
-            this.case_data_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD01/CCD0103.jsp?rm01=${this.year}&rm02=${this.code}&rm03=${this.number}`
-            this.is_ongoing = this.empty(this.bakedData.結案已否);
+            this.case_data_url = `http://${this.ap_server}:9080/LandHB/CAS/CCD01/CCD0103.jsp?rm01=${this.year}&rm02=${this.code}&rm03=${this.number}`;
         },
         mounted() {
             addUserInfoEvent();
