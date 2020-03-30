@@ -1910,11 +1910,9 @@ if (Vue) {
                 if(item && type == 'row') return this.color ? item["紅綠燈背景CSS"] : `filter-${item["燈號"]}`;
             },
             passedTime(item, time_duration_secs) {
-                if (isNaN(time_duration_secs)) return false;
-                if (this.empty(time_duration_secs) || time_duration_secs == '0') {
-                    if(this.empty(item['結案代碼'])) {
-                        return '<i class="fa fa-tools ld ld-tick"></i> 作業中';
-                    }
+                if (isNaN(time_duration_secs) || this.empty(time_duration_secs)) return false;
+                if (time_duration_secs == '0' && this.empty(item['結案代碼'])) {
+                    return '<i class="fa fa-tools ld ld-clock"></i> 作業中';
                 }
                 if (time_duration_secs < 60) return "耗時 " + time_duration_secs + " 秒";
                 if (time_duration_secs < 3600) return "耗時 " + Number.parseFloat(time_duration_secs / 60).toFixed(2) + " 分鐘";
