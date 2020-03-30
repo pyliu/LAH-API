@@ -1774,8 +1774,8 @@ if (Vue) {
                 <template v-slot:cell(准登人員)="{ item }">
                     <a href="javascript:void(0)" @click="userinfo(item['准登人員'], item['RM63'])" v-b-popover.top.hover.focus.html="passedTime(item, item.ELAPSED_TIME['准登'])">{{item["准登人員"]}}</a>
                 </template>
-                <template v-slot:cell(登記人員)="{ item }">
-                    <a href="javascript:void(0)" @click="userinfo(item['登記人員'], item['RM55'])" v-b-popover.top.hover.focus.html="passedTime(item, item.ELAPSED_TIME['登簿'])">{{item["登記人員"]}}</a>
+                <template v-slot:cell(登錄人員)="{ item }">
+                    <a href="javascript:void(0)" @click="userinfo(item['登錄人員'], item['RM55'])" v-b-popover.top.hover.focus.html="passedTime(item, item.ELAPSED_TIME['登簿'])">{{item["登錄人員"]}}</a>
                 </template>
                 <template v-slot:cell(校對人員)="{ item }">
                     <a href="javascript:void(0)" @click="userinfo(item['校對人員'], item['RM57'])" v-b-popover.top.hover.focus.html="passedTime(item, item.ELAPSED_TIME['校對'])">{{item["校對人員"]}}</a>
@@ -1815,7 +1815,7 @@ if (Vue) {
                             {key: "初審人員", label: "初審", sortable: this.sort},
                             {key: "複審人員", label: "複審", sortable: this.sort},
                             {key: "准登人員", label: "准登", sortable: this.sort},
-                            {key: "登記人員", label: "登簿", sortable: this.sort},
+                            {key: "登錄人員", label: "登簿", sortable: this.sort},
                             {key: "校對人員", label: "校對", sortable: this.sort},
                             {key: "結案人員", label: "結案", sortable: this.sort}
                         ];
@@ -1833,7 +1833,7 @@ if (Vue) {
                             {key: "初審人員", label: "初審", sortable: this.sort},
                             {key: "複審人員", label: "複審", sortable: this.sort},
                             {key: "准登人員", label: "准登", sortable: this.sort},
-                            {key: "登記人員", label: "登簿", sortable: this.sort},
+                            {key: "登錄人員", label: "登簿", sortable: this.sort},
                             {key: "校對人員", label: "校對", sortable: this.sort},
                             {key: "結案人員", label: "結案", sortable: this.sort}
                             //{key: "結案狀態", label: "狀態", sortable: this.sort}
@@ -1846,7 +1846,7 @@ if (Vue) {
                             {key: "初審人員", label: "初審", sortable: this.sort},
                             {key: "複審人員", label: "複審", sortable: this.sort},
                             {key: "准登人員", label: "准登", sortable: this.sort},
-                            {key: "登記人員", label: "登簿", sortable: this.sort},
+                            {key: "登錄人員", label: "登簿", sortable: this.sort},
                             {key: "校對人員", label: "校對", sortable: this.sort},
                             {key: "結案人員", label: "結案", sortable: this.sort}
                         ];
