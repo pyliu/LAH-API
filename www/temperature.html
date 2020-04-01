@@ -163,8 +163,8 @@
             },
             thermoColor(degree) {
                 let fd = parseFloat(degree);
-                if (isNaN(fd) || fd < 35) return 'dark';
-                if (fd < 35.5) return 'light';
+                if (isNaN(fd) || fd < 35) return 'light';
+                if (fd < 35.5) return 'dark';
                 if (fd < 36) return 'info';
                 if (fd < 36.5) return 'primary';
                 if (fd < 37.0) return 'success';
