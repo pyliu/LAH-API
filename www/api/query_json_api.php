@@ -936,8 +936,9 @@ switch ($_POST["type"]) {
 	case "set_temperature":
 		$log->info("XHR [set_temperature] 設定體溫【".$_POST["id"].", ".$_POST["temperature"]."】請求");
 		$temperature = new Temperature();
-		$result = $mock ? $cache->get('set_temperature') : $temperature->set($_POST["id"], $_POST["temperature"]);
-		$cache->set('set_temperature', $result);
+		$result = $temperature->set($_POST["id"], $_POST["temperature"]);
+		// $result = $mock ? $cache->get('set_temperature') : $temperature->set($_POST["id"], $_POST["temperature"]);
+		// $cache->set('set_temperature', $result);
 		if ($result) {
 			$json_array = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -956,8 +957,9 @@ switch ($_POST["type"]) {
 	case "temperatures":
 		$log->info("XHR [temperatures] 取得體溫列表【".$_POST["id"]."】請求");
 		$temperature = new Temperature();
-		$results = $mock ? $temperature->get('temperatures') : $temperature->get($_POST["id"]);
-		$cache->set('temperatures', $results);
+		$results = $temperature->get($_POST["id"]);
+		// $results = $mock ? $temperature->get('temperatures') : $temperature->get($_POST["id"]);
+		// $cache->set('temperatures', $results);
 		$log->info("XHR [temperatures] 取得 ".count($results)." 筆體溫資料");
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
