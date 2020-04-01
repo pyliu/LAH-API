@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="For zhongli land office use only">
+<meta name="author" content="LIU, PANG-YU">
+<title>桃園市中壢地政事務所</title>
+
+<!-- Bootstrap core CSS -->
+<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+<link rel="stylesheet" href="assets/css/loading.css">
+<link rel="stylesheet" href="assets/css/loading-btn.css">
+<link href="assets/css/animate.css" rel="stylesheet">
+<link href="assets/css/awesome-font.css" rel="stylesheet">
+<!-- Custom styles for this template -->
+<link href="assets/css/bootstrap-vue.min.css" rel="stylesheet">
+<link href="assets/css/main.css" rel="stylesheet">
+</head>
+
+<body>
+  <section class="hide">
+    <div class="container-fluid" v-cloak>
+        <lah-temperature></lah-temperature>
+    </div>
+  </section><!-- /section -->
+  <!-- Bootstrap core JavaScript -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="assets/js/jquery.min.js"></script>
+  <script src="assets/js/popper.min.js"></script>
+  <script src="assets/js/bootstrap.min.js"></script>
+  <!-- Vue -->
+  <script src="assets/js/vue.js"></script>
+  <script src="assets/js/vuex.js"></script>
+  <script src="assets/js/bootstrap-vue.min.js"></script>
+  <script src="assets/js/bootstrap-vue-icons.min.js"></script>
+  <!-- Add-On -->
+  <script src="assets/js/axios.min.js"></script>
+  <script src="assets/js/localforage.min.js"></script>
+  <script src="assets/js/global.js"></script>
+  <script src="assets/js/components/lah-global.js"></script>
+  <script src="assets/js/components/lah-components.js"></script>
+  <script src="assets/js/Chart.min.js"></script>
+
+  <script type="text/javascript">
+    Vue.component("lah-temperature", {
+        template: `<b-card>
+            <template v-slot:header>
+                <h6 class="mb-0">員工體溫紀錄 {{today}}</h6>
+            </template>
+            <b-card-text>
+                <b-input-group size="sm" class="mb-1">
+                    <b-input-group-prepend is-text>{{userNames[id ? id.toUpperCase() : null] || '使用者代碼'}}</b-input-group-prepend>
+                    <b-form-input
+                        v-model="id"
+                        placeholder="HBXXXX"
+                        class="no-cache"
+                        :state="(/^HB\d{4}$/i).test(id)"
+                    ></b-form-input>
+                </b-input-group>
+            </b-card-text>
+        </b-card>`,
+        data: () => { return {
+            today: undefined,
+            id: undefined
+        } },
+        created() {
+            var now = new Date();
+            this.year = now.getFullYear() - 1911;
+            this.today = this.year +
+                ("0" + (now.getMonth() + 1)).slice(-2) +
+                ("0" + now.getDate()).slice(-2);
+        }
+    });
+  </script>
+
+</body>
+</html>

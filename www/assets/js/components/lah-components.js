@@ -323,6 +323,11 @@ if (Vue) {
                 url: "heir_share.html",
                 icon: "chart-pie",
                 need_admin: false
+            },{
+                text: "防疫體溫紀錄",
+                url: "temperature.html",
+                icon: "temperature-high",
+                need_admin: false
             }, {
                 text: "記錄瀏覽",
                 url: "tasklog.html",
