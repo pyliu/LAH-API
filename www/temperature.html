@@ -46,13 +46,13 @@
     Vue.component("lah-temperature", {
         template: `<b-card>
             <template v-slot:header>
-                <h6 class="mb-0">員工體溫紀錄 {{today}}</h6>
+                <h5 class="mb-0">員工體溫紀錄 {{today}}</h5>
             </template>
             <b-card-text>
                 <b-form-row>
                     <b-col>
                         <b-input-group class="h-100">
-                            <b-input-group-prepend is-text><lah-fa-icon icon="user" prefix="far" size="2x"> {{label}}</la-fa-icon></b-input-group-prepend>
+                            <b-input-group-prepend is-text><lah-fa-icon icon="user" prefix="far"> {{label}}</la-fa-icon></b-input-group-prepend>
                             <b-form-input
                                 ref="id"
                                 v-model="id"
@@ -64,7 +64,7 @@
                     </b-col>
                     <b-col cols="auto">
                         <b-input-group class="mb-1">
-                            <b-input-group-prepend is-text><lah-fa-icon :icon="thermoIcon(temperature)" :variant="thermoColor(temperature)" size="2x"> 體溫</la-fa-icon></b-input-group-prepend>
+                            <b-input-group-prepend is-text><lah-fa-icon :icon="thermoIcon(temperature)" :variant="thermoColor(temperature)"> 體溫</la-fa-icon></b-input-group-prepend>
                             <b-form-spinbutton
                                 v-model="temperature"
                                 min="34"
