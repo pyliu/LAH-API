@@ -10,11 +10,11 @@ class Temperature {
 
     function __destruct() { }
 
-    public function get($id) {
+    public function get($id, $limit = 30) {
         if (empty($id)) {
-            $stm = $this->db->prepare('SELECT * FROM temperature');
+            $stm = $this->db->prepare('SELECT * FROM temperature ORDER BY datetime DESC');
         } else {
-            $stm = $this->db->prepare('SELECT * FROM temperature WHERE id = :id');
+            $stm = $this->db->prepare('SELECT * FROM temperature WHERE id = :id ORDER BY datetime DESC');
             $stm->bindParam(':id', $id);
         }
         $ret = $stm->execute();
@@ -22,8 +22,10 @@ class Temperature {
         global $log;
         $log->info(__METHOD__.": 取得溫度紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
         $array = array();
-        while ($row = $ret->fetchArray()) {
+        $count = 0;
+        while (($row = $ret->fetchArray()) && $count < $limit) {
             $array[] = $row;
+            $count++;
         }
 
         return $array;

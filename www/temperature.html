@@ -51,34 +51,35 @@
             <b-card-text>
                 <b-form-row>
                     <b-col>
-                        <b-input-group>
-                            <b-input-group-prepend is-text>{{label}}</b-input-group-prepend>
+                        <b-input-group class="h-100">
+                            <b-input-group-prepend is-text><lah-fa-icon icon="user" prefix="far"></la-fa-icon> {{label}}</b-input-group-prepend>
                             <b-form-input
                                 v-model="id"
                                 placeholder="HBXXXX"
-                                class="no-cache"
+                                class="no-cache h-100"
                                 :state="validate"
                             ></b-form-input>
                         </b-input-group>
                     </b-col>
-                    <b-col>
+                    <b-col cols="auto">
                         <b-input-group class="mb-1">
-                            <b-input-group-prepend is-text>　現在體溫</b-input-group-prepend>
+                            <b-input-group-prepend is-text><lah-fa-icon icon="temperature-low"></la-fa-icon> 體溫</b-input-group-prepend>
                             <b-form-spinbutton
                                 v-model="temperature"
                                 min="34"
                                 max="45"
                                 step="0.1"
+                                vertical
                             ></b-form-spinbutton>
                         </b-input-group>
                     </b-col>
                     <b-col cols="auto">
-                        <b-button variant="outline-primary" @click="register" :disabled="!validate">登錄</b-button>
+                        <b-button variant="outline-primary" @click="register" :disabled="!validate" class="h-100">登錄</b-button>
                     </b-col>
                 </b-form-row>
             </b-card-text>
             <template v-slot:footer>
-                <h6 class="mb-0">體溫歷史紀錄 {{ID}}</h6>
+                <h6 class="mb-0">體溫歷史紀錄 {{ID}}:{{name}}</h6>
                 <b-list-group flush class="small mt-2">
                     <b-list-group-item v-for="item in list">{{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - {{item['value']}} &#8451;</b-list-group-item>
                 </b-list-group>
@@ -92,7 +93,8 @@
         } },
         computed: {
             ID: function () { return this.id ? this.id.toUpperCase() : null },
-            label: function() { return this.userNames[this.ID] || '使用者代碼' },
+            name: function() { return this.userNames[this.ID] || '' },
+            label: function () { return this.empty(this.name) ? '使用者代碼' : this.name },
             validate: function () { return (/^HB\d{4}$/i).test(this.ID) }
         },
         watch: {
@@ -104,7 +106,7 @@
         },
         methods: {
             register() {
-                this.$confirm(`姓名：${this.label} 體溫：${this.temperature} &#8451;`, {
+                this.$confirm(`姓名：${this.name} 體溫：${this.temperature} &#8451;`, {
                     title: '請確認登錄資訊',
                     callback: () => {
                         this.isBusy = true;
@@ -116,7 +118,7 @@
                             this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "設定體溫資料回傳狀態碼有問題【" + res.data.status + "】");
                             addNotification({
                                 title: "新增體溫紀錄",
-                                message: "已設定完成。<p>" + this.ID + "-" + this.label + "-" + this.temperature + "</p>",
+                                message: "已設定完成。<p>" + this.ID + "-" + this.name + "-" + this.temperature + "</p>",
                                 type: "success"
                             });
                         }).catch(err => {
