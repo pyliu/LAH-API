@@ -49,27 +49,110 @@
                 <h6 class="mb-0">員工體溫紀錄 {{today}}</h6>
             </template>
             <b-card-text>
-                <b-input-group size="sm" class="mb-1">
-                    <b-input-group-prepend is-text>{{userNames[id ? id.toUpperCase() : null] || '使用者代碼'}}</b-input-group-prepend>
-                    <b-form-input
-                        v-model="id"
-                        placeholder="HBXXXX"
-                        class="no-cache"
-                        :state="(/^HB\d{4}$/i).test(id)"
-                    ></b-form-input>
-                </b-input-group>
+                <b-form-row>
+                    <b-col>
+                        <b-input-group>
+                            <b-input-group-prepend is-text>{{label}}</b-input-group-prepend>
+                            <b-form-input
+                                v-model="id"
+                                placeholder="HBXXXX"
+                                class="no-cache"
+                                :state="validate"
+                            ></b-form-input>
+                        </b-input-group>
+                    </b-col>
+                    <b-col>
+                        <b-input-group class="mb-1">
+                            <b-input-group-prepend is-text>　現在體溫</b-input-group-prepend>
+                            <b-form-spinbutton
+                                v-model="temperature"
+                                min="34"
+                                max="45"
+                                step="0.1"
+                            ></b-form-spinbutton>
+                        </b-input-group>
+                    </b-col>
+                    <b-col cols="auto">
+                        <b-button variant="outline-primary" @click="register" :disabled="!validate">登錄</b-button>
+                    </b-col>
+                </b-form-row>
             </b-card-text>
+            <template v-slot:footer>
+                <h6 class="mb-0">體溫歷史紀錄 {{ID}}</h6>
+                <b-list-group flush class="small mt-2">
+                    <b-list-group-item v-for="item in list">{{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - {{item['value']}} &#8451;</b-list-group-item>
+                </b-list-group>
+            </template>
         </b-card>`,
         data: () => { return {
             today: undefined,
-            id: undefined
+            id: undefined,
+            temperature: 36.0,
+            list: undefined
         } },
+        computed: {
+            ID: function () { return this.id ? this.id.toUpperCase() : null },
+            label: function() { return this.userNames[this.ID] || '使用者代碼' },
+            validate: function () { return (/^HB\d{4}$/i).test(this.ID) }
+        },
+        watch: {
+            validate(nVal, oVal) {
+                if (nVal === true) {
+                    this.history();
+                }
+            }
+        },
+        methods: {
+            register() {
+                this.$confirm(`姓名：${this.label} 體溫：${this.temperature} &#8451;`, {
+                    title: '請確認登錄資訊',
+                    callback: () => {
+                        this.isBusy = true;
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: 'set_temperature',
+                            id: this.ID,
+                            temperature: this.temperature
+                        }).then(res => {
+                            this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "設定體溫資料回傳狀態碼有問題【" + res.data.status + "】");
+                            addNotification({
+                                title: "新增體溫紀錄",
+                                message: "已設定完成。<p>" + this.ID + "-" + this.label + "-" + this.temperature + "</p>",
+                                type: "success"
+                            });
+                        }).catch(err => {
+                            this.error = err;
+                        }).finally(() => {
+                            this.isBusy = false;
+                        });
+                    }
+                });
+            },
+            history() {
+                this.isBusy = true;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'temperatures',
+                    id: this.ID
+                }).then(res => {
+                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "取得體溫資料回傳狀態碼有問題【" + res.data.status + "】");
+                    addNotification({
+                        title: "取得體溫歷史紀錄",
+                        message: `取得 ${res.data.data_count} 筆歷史資料。`,
+                        type: "success"
+                    });
+                    this.list = res.data.raw;
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            }
+        },
         created() {
             var now = new Date();
-            this.year = now.getFullYear() - 1911;
-            this.today = this.year +
+            this.today = now.getFullYear() - 1911 +
                 ("0" + (now.getMonth() + 1)).slice(-2) +
                 ("0" + now.getDate()).slice(-2);
+            this.history();
         }
     });
   </script>

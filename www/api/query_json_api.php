@@ -9,6 +9,7 @@ require_once(ROOT_DIR."/include/WatchDog.class.php");
 require_once(ROOT_DIR."/include/UserInfo.class.php");
 require_once(ROOT_DIR."/include/Stats.class.php");
 require_once(ROOT_DIR."/include/Cache.class.php");
+require_once(ROOT_DIR."/include/Temperature.class.php");
 
 require_once(ROOT_DIR."/include/api/JSONAPICommandFactory.class.php");
 
@@ -931,6 +932,39 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("新增 ".$_POST["title"]." 訊息失敗【${id}】。");
 			$log->info("XHR [send_message] 新增「".$_POST["title"]."」訊息失敗【${id}】。");
 		}
+		break;
+	case "set_temperature":
+		$log->info("XHR [set_temperature] 設定體溫【".$_POST["id"].", ".$_POST["temperature"]."】請求");
+		$temperature = new Temperature();
+		$result = $mock ? $cache->get('set_temperature') : $temperature->set($_POST["id"], $_POST["temperature"]);
+		$cache->set('set_temperature', $result);
+		if ($result) {
+			$json_array = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => 1,
+				"result" => $result,
+				"query_string" => "id=".$_POST["id"]."&temperature=".$_POST["temperature"],
+				"message" => "新增體溫紀錄成功(".$_POST["id"].", ".$_POST["temperature"].")"
+			);
+			$log->info("XHR [set_temperature] ".$json_array["message"]);
+			echo json_encode($json_array, 0);
+		} else {
+			echoErrorJSONString("新增 ".$_POST["id"]." 體溫紀錄失敗。");
+			$log->info("XHR [set_temperature] 新增 ".$_POST["id"]." 體溫紀錄失敗。");
+		}
+		break;
+	case "temperatures":
+		$log->info("XHR [temperatures] 取得體溫列表【".$_POST["id"]."】請求");
+		$temperature = new Temperature();
+		$results = $mock ? $temperature->get('temperatures') : $temperature->get($_POST["id"]);
+		$cache->set('temperatures', $results);
+		$log->info("XHR [temperatures] 取得 ".count($results)." 筆體溫資料");
+		echo json_encode(array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"data_count" => count($results),
+			"raw" => $results,
+			"message" => "取得 ".count($results)." 筆資料。"
+		), 0);
 		break;
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");

@@ -859,6 +859,10 @@ $(document).ready(() => {
                 //console.log('Modal is hidden', bvEvent, modalId)
             });
             this.screensaver();
+            // shortcut to every Vue instance
+            Vue.prototype.$confirm = this.confirm;
+            Vue.prototype.$modal = this.modal;
+            Vue.prototype.$toast = this.makeToast;
         },
         mounted() { this.initCache(); }
     });
