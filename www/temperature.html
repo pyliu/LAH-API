@@ -21,7 +21,7 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-        <lah-temperature></lah-temperature>
+        <lah-temperature ref="temperature"></lah-temperature>
     </div>
   </section><!-- /section -->
   <!-- Bootstrap core JavaScript -->
@@ -52,18 +52,19 @@
                 <b-form-row>
                     <b-col>
                         <b-input-group class="h-100">
-                            <b-input-group-prepend is-text><lah-fa-icon icon="user" prefix="far"></la-fa-icon> {{label}}</b-input-group-prepend>
+                            <b-input-group-prepend is-text><lah-fa-icon icon="user" prefix="far" size="2x"> {{label}}</la-fa-icon></b-input-group-prepend>
                             <b-form-input
+                                ref="id"
                                 v-model="id"
                                 placeholder="HBXXXX"
-                                class="no-cache h-100"
+                                class="h-100"
                                 :state="validate"
                             ></b-form-input>
                         </b-input-group>
                     </b-col>
                     <b-col cols="auto">
                         <b-input-group class="mb-1">
-                            <b-input-group-prepend is-text><lah-fa-icon icon="temperature-low"></la-fa-icon> 體溫</b-input-group-prepend>
+                            <b-input-group-prepend is-text><lah-fa-icon :icon="thermoIcon(temperature)" :variant="thermoColor(temperature)" size="2x"> 體溫</la-fa-icon></b-input-group-prepend>
                             <b-form-spinbutton
                                 v-model="temperature"
                                 min="34"
@@ -81,7 +82,10 @@
             <template v-slot:footer>
                 <h6 class="mb-0">體溫歷史紀錄 {{ID}}:{{name}}</h6>
                 <b-list-group flush class="small mt-2">
-                    <b-list-group-item v-for="item in list">{{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - {{item['value']}} &#8451;</b-list-group-item>
+                    <b-list-group-item v-for="item in list">
+                        {{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - 
+                        <lah-fa-icon :icon="thermoIcon(item['value'])" :variant="thermoColor(item['value'])"> {{item['value']}} &#8451;</lah-fa-icon>
+                    </b-list-group-item>
                 </b-list-group>
             </template>
         </b-card>`,
@@ -147,6 +151,24 @@
                 }).finally(() => {
                     this.isBusy = false;
                 });
+            },
+            thermoIcon(degree) {
+                let fd = parseFloat(degree);
+                if (isNaN(fd)) return 'temperature-low';
+                if (fd < 36.0) return 'thermometer-empty';
+                if (fd < 36.5) return 'thermometer-quarter';
+                if (fd < 37.0) return 'thermometer-half';
+                if (fd < 37.5) return 'thermometer-three-quarters';
+                return 'thermometer-full';
+            },
+            thermoColor(degree) {
+                let fd = parseFloat(degree);
+                if (isNaN(fd)) return 'dark';
+                if (fd < 36) return 'info';
+                if (fd < 36.5) return 'primary';
+                if (fd < 37.0) return 'success';
+                if (fd < 37.5) return 'warning';
+                return 'danger';
             }
         },
         created() {
@@ -154,7 +176,10 @@
             this.today = now.getFullYear() - 1911 +
                 ("0" + (now.getMonth() + 1)).slice(-2) +
                 ("0" + now.getDate()).slice(-2);
-            this.history();
+            setTimeout(() => {
+                this.id = this.$refs.id.$el.value;
+                if (this.empty(this.id)) this.history();
+            }, 400);
         }
     });
   </script>
