@@ -338,7 +338,7 @@ if (Vue) {
                     type: "stats_overdue_msg_total"
                 }).then(res => {
                     console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢逾期案件統計回傳狀態碼有問題【${res.data.status}】`);
-                    this.message_count = res.data.total;
+                    this.message_count = parseInt(res.data.total);
                 }).catch(ex => {
                     console.error("case-reg-overdue::getOverdueMessageStats parsing failed", ex);
                     showAlert({message: "case-reg-overdue::getOverdueMessageStats XHR連線查詢有問題!!【" + ex.message + "】", type: "danger"});
