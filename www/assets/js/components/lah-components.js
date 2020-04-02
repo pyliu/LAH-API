@@ -2107,14 +2107,16 @@ if (Vue) {
                     <b-button variant="outline-primary" @click="register" :disabled="!validate">登錄</b-button>
                 </b-col>
             </b-form-row>
-            <h6 class="my-2">今日紀錄</h6>
-            <b-list-group class="small">
-                <b-list-group-item v-for="item in list" :primary-key="item['datetime']" v-if="todayItem(item)" >
-                    <a href="javascript:void(0)" @click="doDeletion(item)"><lah-fa-icon class="times-circle" icon="times-circle" prefix="far" variant="danger"></lah-fa-icon></a>
-                    {{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - 
-                    <lah-fa-icon :icon="thermoIcon(item['value'])" :variant="thermoColor(item['value'])"> {{item['value']}} &#8451;</lah-fa-icon>
-                </b-list-group-item>
-            </b-list-group>
+            <div v-if="seen">
+                <h6 class="my-2">今日紀錄</h6>
+                <b-list-group class="small">
+                    <b-list-group-item v-for="item in list" :primary-key="item['datetime']" v-if="todayItem(item)" >
+                        <a href="javascript:void(0)" @click="doDeletion(item)"><lah-fa-icon class="times-circle" icon="times-circle" prefix="far" variant="danger"></lah-fa-icon></a>
+                        {{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - 
+                        <lah-fa-icon :icon="thermoIcon(item['value'])" :variant="thermoColor(item['value'])"> {{item['value']}} &#8451;</lah-fa-icon>
+                    </b-list-group-item>
+                </b-list-group>
+            </div>
             <template v-if="seen" v-slot:footer>
                 <div v-if="seen" class="my-2">
                     <b-button-group size="sm" class="float-right">
