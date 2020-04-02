@@ -2066,7 +2066,7 @@ if (Vue) {
                         <b-form-input
                             ref="id"
                             v-model="id"
-                            placeholder="HBXXXX"
+                            placeholder="HB1184"
                             :state="validate"
                         ></b-form-input>
                     </b-input-group>
@@ -2118,7 +2118,7 @@ if (Vue) {
             name() { return this.userNames[this.ID] || '' },
             label() { return this.empty(this.name) ? '使用者代碼' : this.name },
             validate() { return (/^HB\d{4}$/i).test(this.ID) },
-            seen() { return this.chart_items !== undefined && this.validate && this.chart_items.length != 0 }
+            seen() { return this.chart_items !== undefined && this.chart_items.length != 0 && this.validate }
         },
         watch: {
             validate(nVal, oVal) {
@@ -2236,7 +2236,6 @@ if (Vue) {
                 ("0" + now.getDate()).slice(-2);
             setTimeout(() => {
                 this.id = this.$refs.id.$el.value;
-                if (this.empty(this.id)) this.history();
             }, 400);
         }
     });
