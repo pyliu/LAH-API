@@ -30,8 +30,9 @@ if ($mock) $log->warning("現在處於模擬模式(mock mode)，API僅會回應�
 switch ($_POST["type"]) {
 	case "stats_overdue_msg_total":
 		$stats = new Stats();
-		$total = $mock ? $cache->get('overdue_msg_count') : $stats->getTotal('overdue_msg_count');
-		$cache->set('overdue_msg_count', $total);
+		$total = $stats->getTotal('overdue_msg_count');
+		// $total = $mock ? $cache->get('overdue_msg_count') : $stats->getTotal('overdue_msg_count');
+		// $cache->set('overdue_msg_count', $total);
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
 			"data_count" => 1,
