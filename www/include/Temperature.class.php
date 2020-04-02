@@ -31,15 +31,56 @@ class Temperature {
         return $array;
     }
 
+    public function getAMPMTemperatures($id, $AMPM) {
+        global $log;
+
+        if (empty($id)) {
+            $stm = $this->db->prepare('SELECT * FROM temperature WHERE datetime BETWEEN :st AND :ed ORDER BY datetime DESC');
+        } else {
+            $stm = $this->db->prepare('SELECT * FROM temperature WHERE id = :id AND datetime BETWEEN :st AND :ed ORDER BY datetime DESC');
+            $stm->bindParam(':id', $id);
+        }
+
+        $today = date("Y-m-d");
+        if ($AMPM == 'AM') {
+            $stm->bindValue(':st', "$today 00:00:00");
+            $stm->bindValue(':ed', "$today 11:59:59");
+        } else {
+            $stm->bindValue(':st', "$today 12:00:00");
+            $stm->bindValue(':ed', "$today 23:59:59");
+        }
+
+        $ret = $stm->execute();
+
+        $log->info(__METHOD__.": 取得 ${id} ${AMPM} 溫度紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+
+        $array = array();
+        while ($row = $ret->fetchArray()) {
+            $array[] = $row;
+        }
+
+        return $array;
+    }
+
     public function add($id, $temperature_value, $note = '') {
+        global $log;
+
+        $AMPM = date('A');
+        $records = $this->getAMPMTemperatures($id, $AMPM);
+        if (count($records) != 0) {
+            $log->warning(__METHOD__.": ${id} ${AMPM} 已有體溫紀錄。");
+            return false;
+        }
+
         $stm = $this->db->prepare("INSERT INTO temperature (datetime,id,value,note) VALUES (:date,:id,:value,:note)");
         $stm->bindParam(':date', date("Y-m-d H:i:s"));
         $stm->bindParam(':id', $id);
         $stm->bindParam(':value', $temperature_value);
         $stm->bindParam(':note', $note);
         $ret = $stm->execute();
-        global $log;
+
         $log->info(__METHOD__.": 新增體溫紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+
         return $ret;
     }
 

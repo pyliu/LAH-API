@@ -2143,7 +2143,7 @@ if (Vue) {
             id: undefined,
             temperature: 36.0,
             chart_items: undefined,
-            chart_type: 'bar',
+            chart_type: 'line',
             list: undefined
         } },
         computed: {
@@ -2194,12 +2194,21 @@ if (Vue) {
                         temperature: this.temperature
                     }).then(res => {
                         this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "設定體溫資料回傳狀態碼有問題【" + res.data.status + "】");
-                        addNotification({
-                            title: "新增體溫紀錄",
-                            message: "已設定完成。<p>" + this.ID + "-" + this.name + "-" + this.temperature + "</p>",
-                            type: "success"
-                        });
-                        this.history();
+                        if (res.data.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            addNotification({
+                                title: "新增體溫紀錄",
+                                message: res.data.message,
+                                type: "warning",
+                                pos: 'tc'
+                            });
+                        } else {
+                            addNotification({
+                                title: "新增體溫紀錄",
+                                message: "已設定完成。<p>" + this.ID + "-" + this.name + "-" + this.temperature + "</p>",
+                                type: "success"
+                            });
+                            this.history();
+                        }
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
@@ -2221,18 +2230,7 @@ if (Vue) {
                         type: "success"
                     });
                     this.list = res.data.raw;
-                    this.chart_items = [];
-                    let count = 0;
-                    this.list.forEach((item) => {
-                        if (count < 10) {
-                            this.chart_items.push([
-                                item['datetime'],
-                                item['value']
-                            ]);
-                            count++;
-                        }
-                    });
-                    this.chart_items = this.chart_items.reverse();
+                    this.prepareChartData();
                     Vue.nextTick(() => $(".times-circle i.far").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "tada"}); }) );
                 }).catch(err => {
                     this.error = err;
@@ -2268,6 +2266,23 @@ if (Vue) {
                 if (fd < 37.0) return `rgb(92, 184, 92, ${opacity})`;
                 if (fd < 37.5) return `rgb(240, 173, 78, ${opacity})`;
                 return `rgb(217, 83, 79, ${opacity})`;
+            },
+            prepareChartData() {
+                let chart_items = [];
+                let count = 0;
+                this.list.forEach((item) => {
+                    if (count < 10) {
+                        let date = item['datetime'].substring(5, 10);   // remove year
+                        let hour = item['datetime'].substring(11, 13);
+                        let AMPM = parseInt(hour) < 12 ? 'AM' : 'PM';
+                        chart_items.push([
+                            `${date} ${AMPM}`,
+                            item['value']
+                        ]);
+                        count++;
+                    }
+                });
+                this.chart_items = chart_items.reverse();
             }
         },
         created() {

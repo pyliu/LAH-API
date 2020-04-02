@@ -972,8 +972,8 @@ switch ($_POST["type"]) {
 			$log->info("XHR [add_temperature] ".$json_array["message"]);
 			echo json_encode($json_array, 0);
 		} else {
-			echoErrorJSONString("新增 ".$_POST["id"]." 體溫紀錄失敗。");
-			$log->info("XHR [add_temperature] 新增 ".$_POST["id"]." 體溫紀錄失敗。");
+			echoErrorJSONString("已有 ".$_POST["id"]." 體溫紀錄，如需更新請刪除舊資料。");
+			$log->warning("XHR [add_temperature] 新增 ".$_POST["id"]." 體溫紀錄失敗。");
 		}
 		break;
 	case "temperatures":
