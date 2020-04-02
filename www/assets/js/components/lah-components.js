@@ -1939,7 +1939,17 @@ if (Vue) {
                 let percent = Math.round(((currentValue / sum) * 100));
                 if (isNaN(percent)) return ` ${data.labels[tooltipItem.index]} : ${currentValue}`;
                 return ` ${data.labels[tooltipItem.index]} : ${currentValue} [${percent}%]`;
-            } }
+            } },
+            bgColor: { type: Function, default: function(value, opacity) {
+                return `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`;
+            } },
+            yAxes: { type: Boolean, default: true },
+            xAxes: { type: Boolean, default: true },
+            yLabel: { type: String, default: '' },
+            xLabel: { type: String, default: '' },
+            beginAtZero: { type: Boolean, default: true },
+            title: { type: String, default: '' },
+            titlePos: { type: String, default: 'top' }
         },
         data: function () { return {
             inst: null,
@@ -1975,7 +1985,7 @@ if (Vue) {
                     this.chartData.labels.push(item[0]);            // first element is label
                     this.chartData.datasets[0].data.push(item[1]);  // second element is data count
                     // randoom color for this item
-                    this.chartData.datasets[0].backgroundColor.push(`rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`);
+                    this.chartData.datasets[0].backgroundColor.push(this.bgColor(item[1], opacity));
                 });
             },
             buildChart: function (opts = {}) {
@@ -2004,10 +2014,21 @@ if (Vue) {
                     default:
                         opts.scales = {
                             yAxes: [{
-                                display: true,
+                                display: this.yAxes,
+                                scaleLabel: {
+                                    display: !this.empty(this.yLabel),
+                                    labelString: this.yLabel
+                                },
                                 ticks: {
-                                    beginAtZero: true
+                                    beginAtZero: this.beginAtZero
                                 }
+                            }],
+                            xAxes: [{
+                                display: this.xAxes,
+                                scaleLabel: {
+                                    display: !this.empty(this.xLabel),
+                                    labelString: this.xLabel
+                                },
                             }]
                         };
                 }
@@ -2023,7 +2044,7 @@ if (Vue) {
                                 label: this.tooltip
                             }
                         },
-                        title: { display: false, text: "自訂標題", position: "bottom" },
+                        title: { display: !this.empty(this.title), text: this.title, position: this.titlePos },
                         onClick: function(e) {
                             let payload = {};
                             payload["point"] = that.inst.getElementAtEvent(e)[0];
@@ -2086,22 +2107,32 @@ if (Vue) {
                     <b-button variant="outline-primary" @click="register" :disabled="!validate">登錄</b-button>
                 </b-col>
             </b-form-row>
-            <div v-if="seen" class="my-2">
-                <b-button-group size="sm" class="float-right">
-                    <b-button variant="primary" @click="chart_type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
-                    <b-button variant="success" @click="chart_type = 'line'"><i class="fas fa-chart-line"></i></b-button>
-                </b-button-group>
-                <lah-chart :type="chart_type" label="歷史紀錄" :items="chart_items" class="clearfix"></lah-chart>
-            </div>
+            <h6 class="my-2">今日紀錄</h6>
+            <b-list-group class="small">
+                <b-list-group-item v-for="item in list" :primary-key="item['datetime']" v-if="todayItem(item)" >
+                    <a href="javascript:void(0)" @click="doDeletion(item)"><lah-fa-icon class="times-circle" icon="times-circle" prefix="far" variant="danger"></lah-fa-icon></a>
+                    {{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - 
+                    <lah-fa-icon :icon="thermoIcon(item['value'])" :variant="thermoColor(item['value'])"> {{item['value']}} &#8451;</lah-fa-icon>
+                </b-list-group-item>
+            </b-list-group>
             <template v-if="seen" v-slot:footer>
-                <h6>今日紀錄</h6>
-                <b-list-group class="small">
-                    <b-list-group-item v-for="item in list" :primary-key="item['datetime']" v-if="todayItem(item)" >
-                        <a href="javascript:void(0)" @click="doDeletion(item)"><lah-fa-icon class="times-circle" icon="times-circle" prefix="far" variant="danger"></lah-fa-icon></a>
-                        {{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - 
-                        <lah-fa-icon :icon="thermoIcon(item['value'])" :variant="thermoColor(item['value'])"> {{item['value']}} &#8451;</lah-fa-icon>
-                    </b-list-group-item>
-                </b-list-group>
+                <div v-if="seen" class="my-2">
+                    <b-button-group size="sm" class="float-right">
+                        <b-button variant="primary" @click="chart_type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
+                        <b-button variant="success" @click="chart_type = 'line'"><i class="fas fa-chart-line"></i></b-button>
+                    </b-button-group>
+                    <lah-chart
+                        :items="chart_items"
+                        :type="chart_type"
+                        :begin-at-zero="false"
+                        :bg-color="chartBgColor"
+                        y-label="溫度"
+                        x-label="日期時間"
+                        label="歷史紀錄" 
+                        class="clearfix"
+                    >
+                    </lah-chart>
+                </div>
             </template>
         </b-card>`,
         data: () => { return {
@@ -2199,6 +2230,7 @@ if (Vue) {
                             count++;
                         }
                     });
+                    this.chart_items = this.chart_items.reverse();
                     Vue.nextTick(() => $(".times-circle i.far").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "tada"}); }) );
                 }).catch(err => {
                     this.error = err;
@@ -2224,6 +2256,16 @@ if (Vue) {
                 if (fd < 37.0) return 'success';
                 if (fd < 37.5) return 'warning';
                 return 'danger';
+            },
+            chartBgColor(degree, opacity) {
+                let fd = parseFloat(degree);
+                if (isNaN(fd) || fd < 35) return `rgb(91, 93, 94, ${opacity})`;
+                if (fd < 35.5) return `rgb(41, 43, 44, ${opacity})`;
+                if (fd < 36) return `rgb(91, 192, 222, ${opacity})`;
+                if (fd < 36.5) return `rgb(2, 117, 216, ${opacity})`;
+                if (fd < 37.0) return `rgb(92, 184, 92, ${opacity})`;
+                if (fd < 37.5) return `rgb(240, 173, 78, ${opacity})`;
+                return `rgb(217, 83, 79, ${opacity})`;
             }
         },
         created() {
