@@ -2061,13 +2061,12 @@ if (Vue) {
             </template>
             <b-form-row>
                 <b-col>
-                    <b-input-group class="h-100">
+                    <b-input-group>
                         <b-input-group-prepend is-text><lah-fa-icon icon="user" prefix="far"> {{label}}</la-fa-icon></b-input-group-prepend>
                         <b-form-input
                             ref="id"
                             v-model="id"
                             placeholder="HBXXXX"
-                            class="h-100"
                             :state="validate"
                         ></b-form-input>
                     </b-input-group>
@@ -2080,12 +2079,11 @@ if (Vue) {
                             min="34"
                             max="45"
                             step="0.1"
-                            vertical
                         ></b-form-spinbutton>
                     </b-input-group>
                 </b-col>
                 <b-col cols="auto">
-                    <b-button variant="outline-primary" @click="register" :disabled="!validate" class="h-100">登錄</b-button>
+                    <b-button variant="outline-primary" @click="register" :disabled="!validate">登錄</b-button>
                 </b-col>
             </b-form-row>
             <div v-if="seen" class="my-2">
