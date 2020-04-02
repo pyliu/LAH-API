@@ -2088,15 +2088,15 @@ if (Vue) {
                     <b-button variant="outline-primary" @click="register" :disabled="!validate" class="h-100">登錄</b-button>
                 </b-col>
             </b-form-row>
-            <div v-if="seen_chart" class="my-2">
+            <div v-if="seen" class="my-2">
                 <b-button-group size="sm" class="float-right">
                     <b-button variant="primary" @click="chart_type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                     <b-button variant="success" @click="chart_type = 'line'"><i class="fas fa-chart-line"></i></b-button>
                 </b-button-group>
                 <lah-chart :type="chart_type" label="歷史紀錄" :items="chart_items" class="clearfix"></lah-chart>
             </div>
-            <template v-if="seen_chart" v-slot:footer>
-                <h6 class="my-2">今日紀錄</h6>
+            <template v-if="seen" v-slot:footer>
+                <h6>今日紀錄</h6>
                 <b-list-group class="small">
                     <b-list-group-item v-for="item in list" :primary-key="item['datetime']" v-if="todayItem(item)" >
                         <a href="javascript:void(0)" @click="doDeletion(item)"><lah-fa-icon class="times-circle" icon="times-circle" prefix="far" variant="danger"></lah-fa-icon></a>
@@ -2120,7 +2120,7 @@ if (Vue) {
             name() { return this.userNames[this.ID] || '' },
             label() { return this.empty(this.name) ? '使用者代碼' : this.name },
             validate() { return (/^HB\d{4}$/i).test(this.ID) },
-            seen_chart() { return this.chart_items !== undefined && this.validate }
+            seen() { return this.chart_items !== undefined && this.validate && this.chart_items.length != 0 }
         },
         watch: {
             validate(nVal, oVal) {
