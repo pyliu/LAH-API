@@ -2111,7 +2111,7 @@ if (Vue) {
                 <h6 class="my-2">今日紀錄</h6>
                 <b-list-group class="small">
                     <b-list-group-item v-for="item in list" :primary-key="item['datetime']" v-if="todayItem(item)" >
-                        <a href="javascript:void(0)" @click="doDeletion(item)"><lah-fa-icon class="times-circle" icon="times-circle" prefix="far" variant="danger"></lah-fa-icon></a>
+                        <a href="javascript:void(0)" @click="doDeletion(item)"><lah-fa-icon class="times-circle float-right" icon="times-circle" prefix="far" variant="danger"></lah-fa-icon></a>
                         {{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - 
                         <lah-fa-icon :icon="thermoIcon(item['value'])" :variant="thermoColor(item['value'])"> {{item['value']}} &#8451;</lah-fa-icon>
                     </b-list-group-item>
@@ -2259,10 +2259,10 @@ if (Vue) {
             },
             chartBgColor(degree, opacity) {
                 let fd = parseFloat(degree);
-                if (isNaN(fd) || fd < 35) return `rgb(91, 93, 94, ${opacity})`;
-                if (fd < 35.5) return `rgb(41, 43, 44, ${opacity})`;
-                if (fd < 36) return `rgb(91, 192, 222, ${opacity})`;
-                if (fd < 36.5) return `rgb(2, 117, 216, ${opacity})`;
+                //if (isNaN(fd) || fd < 35) return `rgb(91, 93, 94, ${opacity})`;
+                // if (fd < 35.5) return `rgb(41, 43, 44, ${opacity})`;
+                // if (fd < 36) return `rgb(91, 192, 222, ${opacity})`;
+                // if (fd < 36.5) return `rgb(2, 117, 216, ${opacity})`;
                 if (fd < 37.0) return `rgb(92, 184, 92, ${opacity})`;
                 if (fd < 37.5) return `rgb(240, 173, 78, ${opacity})`;
                 return `rgb(217, 83, 79, ${opacity})`;
