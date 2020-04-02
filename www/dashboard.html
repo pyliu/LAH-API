@@ -23,6 +23,9 @@
   <section class="hide">
     <div class="container-fluid" v-cloak>
       <b-card-group columns class="mb-1">
+        <b-card >
+          <lah-temperature></lah-temperature>
+        </b-card>
         <b-card no-body class="p-2">
           <lah-user-card title="我的名片"></lah-user-card>
         </b-card>
@@ -42,14 +45,14 @@
           <b-card-title title-tag="h6"><lah-fa-icon icon="wallet" variant="dark"> 今日規費</lah-fa-icon></b-card-title>
           <b-card-text><lah-fee-board></lah-fee-board></b-card-text>
         </b-card>
-      </b-card-group>
-      <b-card-group deck class="mb-1">
         <b-card no-body class="p-2 s-90">
           <lah-heir-share-ratio></lah-heir-share-ratio>
         </b-card>
         <b-card class="text-center">
           <lah-reg-case-timeline id="109HAB1003630"></lah-reg-case-timeline>
         </b-card>
+      </b-card-group>
+      <b-card-group deck class="mb-1">
       </b-card-group>
     </div>
   </section><!-- /section -->

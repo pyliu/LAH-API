@@ -40,6 +40,7 @@ Vue.prototype.$warn = console.warn.bind(console);
 Vue.prototype.$assert = console.assert.bind(console);
 Vue.prototype.$http = axios;
 Vue.prototype.$lf = localforage || {};
+Vue.prototype.$animated = addAnimatedCSS;
 // single source of truth
 Vue.prototype.$store = (() => {
     if (typeof Vuex == "object") {
@@ -563,6 +564,11 @@ $(document).ready(() => {
                     this.$bvModal.msgBoxOk(message, merged);
                 }
             },
+            confirmAdapter: function(message, callback) {
+                this.confirm(message, {
+                    callback: callback
+                });
+            },
             confirm: function(message, opts) {
                 this.confirmAnswer = false;
                 this.openConfirm = true;
@@ -860,7 +866,7 @@ $(document).ready(() => {
             });
             this.screensaver();
             // shortcut to every Vue instance
-            Vue.prototype.$confirm = this.confirm;
+            Vue.prototype.$confirm = this.confirmAdapter;
             Vue.prototype.$modal = this.modal;
             Vue.prototype.$toast = this.makeToast;
         },

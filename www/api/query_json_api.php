@@ -933,12 +933,33 @@ switch ($_POST["type"]) {
 			$log->info("XHR [send_message] 新增「".$_POST["title"]."」訊息失敗【${id}】。");
 		}
 		break;
-	case "set_temperature":
-		$log->info("XHR [set_temperature] 設定體溫【".$_POST["id"].", ".$_POST["temperature"]."】請求");
+	case "remove_temperature":
+			$log->info("XHR [remove_temperature] 刪除體溫【".$_POST["id"].", ".$_POST["datetime"]."】請求");
+			$temperature = new Temperature();
+			$result = $temperature->remove($_POST["id"], $_POST["datetime"]);
+			// $result = $mock ? $cache->get('set_temperature') : $temperature->set($_POST["id"], $_POST["temperature"]);
+			// $cache->set('set_temperature', $result);
+			if ($result) {
+				$json_array = array(
+					"status" => STATUS_CODE::SUCCESS_NORMAL,
+					"data_count" => 0,
+					"result" => $result,
+					"query_string" => "id=".$_POST["id"]."&datetime=".$_POST["datetime"],
+					"message" => "刪除體溫紀錄成功(".$_POST["id"].", ".$_POST["datetime"].")"
+				);
+				$log->info("XHR [remove_temperature] ".$json_array["message"]);
+				echo json_encode($json_array, 0);
+			} else {
+				echoErrorJSONString("刪除 ".$_POST["id"].", ".$_POST["datetime"]." 體溫紀錄失敗。");
+				$log->info("XHR [remove_temperature] 刪除 ".$_POST["id"]." 體溫紀錄失敗。");
+			}
+			break;	
+	case "add_temperature":
+		$log->info("XHR [add_temperature] 設定體溫【".$_POST["id"].", ".$_POST["temperature"]."】請求");
 		$temperature = new Temperature();
-		$result = $temperature->set($_POST["id"], $_POST["temperature"]);
-		// $result = $mock ? $cache->get('set_temperature') : $temperature->set($_POST["id"], $_POST["temperature"]);
-		// $cache->set('set_temperature', $result);
+		$result = $temperature->add($_POST["id"], $_POST["temperature"]);
+		// $result = $mock ? $cache->get('add_temperature') : $temperature->add($_POST["id"], $_POST["temperature"]);
+		// $cache->set('add_temperature', $result);
 		if ($result) {
 			$json_array = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -947,11 +968,11 @@ switch ($_POST["type"]) {
 				"query_string" => "id=".$_POST["id"]."&temperature=".$_POST["temperature"],
 				"message" => "新增體溫紀錄成功(".$_POST["id"].", ".$_POST["temperature"].")"
 			);
-			$log->info("XHR [set_temperature] ".$json_array["message"]);
+			$log->info("XHR [add_temperature] ".$json_array["message"]);
 			echo json_encode($json_array, 0);
 		} else {
 			echoErrorJSONString("新增 ".$_POST["id"]." 體溫紀錄失敗。");
-			$log->info("XHR [set_temperature] 新增 ".$_POST["id"]." 體溫紀錄失敗。");
+			$log->info("XHR [add_temperature] 新增 ".$_POST["id"]." 體溫紀錄失敗。");
 		}
 		break;
 	case "temperatures":

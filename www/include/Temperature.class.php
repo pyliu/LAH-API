@@ -31,7 +31,7 @@ class Temperature {
         return $array;
     }
 
-    public function set($id, $temperature_value, $note = '') {
+    public function add($id, $temperature_value, $note = '') {
         $stm = $this->db->prepare("INSERT INTO temperature (datetime,id,value,note) VALUES (:date,:id,:value,:note)");
         $stm->bindParam(':date', date("Y-m-d H:i:s"));
         $stm->bindParam(':id', $id);
@@ -40,6 +40,16 @@ class Temperature {
         $ret = $stm->execute();
         global $log;
         $log->info(__METHOD__.": 新增體溫紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+        return $ret;
+    }
+
+    public function remove($id, $datetime) {
+        $stm = $this->db->prepare("DELETE FROM temperature WHERE datetime = :date AND id = :id");
+        $stm->bindParam(':date', $datetime);
+        $stm->bindParam(':id', $id);
+        $ret = $stm->execute();
+        global $log;
+        $log->info(__METHOD__.": 刪除體溫紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
         return $ret;
     }
 }

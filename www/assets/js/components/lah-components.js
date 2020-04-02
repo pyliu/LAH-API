@@ -338,11 +338,6 @@ if (Vue) {
                 url: "dashboard.html",
                 icon: "cubes",
                 need_admin: true
-            }, {
-                text: "測試頁",
-                url: "test.html",
-                icon: "charging-station",
-                need_admin: true
             }]
         }},
         computed: {
@@ -2059,6 +2054,194 @@ if (Vue) {
         }
     });
 
+    Vue.component("lah-temperature", {
+        template: `<b-card>
+            <template v-slot:header>
+                <h6 class="mb-0">體溫紀錄 {{today}}</h6>
+            </template>
+            <b-form-row>
+                <b-col>
+                    <b-input-group class="h-100">
+                        <b-input-group-prepend is-text><lah-fa-icon icon="user" prefix="far"> {{label}}</la-fa-icon></b-input-group-prepend>
+                        <b-form-input
+                            ref="id"
+                            v-model="id"
+                            placeholder="HBXXXX"
+                            class="h-100"
+                            :state="validate"
+                        ></b-form-input>
+                    </b-input-group>
+                </b-col>
+                <b-col cols="auto">
+                    <b-input-group class="mb-1">
+                        <b-input-group-prepend is-text><lah-fa-icon :icon="thermoIcon(temperature)" :variant="thermoColor(temperature)"> 體溫</la-fa-icon></b-input-group-prepend>
+                        <b-form-spinbutton
+                            v-model="temperature"
+                            min="34"
+                            max="45"
+                            step="0.1"
+                            vertical
+                        ></b-form-spinbutton>
+                    </b-input-group>
+                </b-col>
+                <b-col cols="auto">
+                    <b-button variant="outline-primary" @click="register" :disabled="!validate" class="h-100">登錄</b-button>
+                </b-col>
+            </b-form-row>
+            <div v-if="seen_chart" class="my-2">
+                <b-button-group size="sm" class="float-right">
+                    <b-button variant="primary" @click="chart_type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
+                    <b-button variant="success" @click="chart_type = 'line'"><i class="fas fa-chart-line"></i></b-button>
+                </b-button-group>
+                <lah-chart :type="chart_type" label="歷史紀錄" :items="chart_items" class="clearfix"></lah-chart>
+            </div>
+            <template v-if="seen_chart" v-slot:footer>
+                <h6 class="my-2">今日紀錄</h6>
+                <b-list-group class="small">
+                    <b-list-group-item v-for="item in list" :primary-key="item['datetime']" v-if="todayItem(item)" >
+                        <a href="javascript:void(0)" @click="doDeletion(item)"><lah-fa-icon class="times-circle" icon="times-circle" prefix="far" variant="danger"></lah-fa-icon></a>
+                        {{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - 
+                        <lah-fa-icon :icon="thermoIcon(item['value'])" :variant="thermoColor(item['value'])"> {{item['value']}} &#8451;</lah-fa-icon>
+                    </b-list-group-item>
+                </b-list-group>
+            </template>
+        </b-card>`,
+        data: () => { return {
+            today: undefined,
+            ad_today: undefined,
+            id: undefined,
+            temperature: 36.0,
+            chart_items: undefined,
+            chart_type: 'bar',
+            list: undefined
+        } },
+        computed: {
+            ID() { return this.id ? this.id.toUpperCase() : null },
+            name() { return this.userNames[this.ID] || '' },
+            label() { return this.empty(this.name) ? '使用者代碼' : this.name },
+            validate() { return (/^HB\d{4}$/i).test(this.ID) },
+            seen_chart() { return this.chart_items !== undefined && this.validate }
+        },
+        watch: {
+            validate(nVal, oVal) {
+                if (nVal === true) {
+                    this.history();
+                }
+            }
+        },
+        methods: {
+            todayItem(item) { return item['datetime'].split(' ')[0].replace(/\-/gi, '') == this.ad_today },
+            doDeletion(item) {
+                this.$confirm(`刪除 ${this.userNames[item['id']]} ${item['value']} &#8451;紀錄？`, () => {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: 'remove_temperature',
+                        id: item['id'],
+                        datetime: item['datetime']
+                    }).then(res => {
+                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "刪除體溫資料回傳狀態碼有問題【" + res.data.status + "】");
+                        addNotification({
+                            title: "刪除體溫紀錄",
+                            subtitle: `${item['id']}:${this.userNames[item['id'].toUpperCase()]}-${item['value']}`,
+                            message: "刪除成功。",
+                            type: "success"
+                        });
+                        this.history();
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                });
+            },
+            register() {
+                this.$confirm(`姓名：${this.name} 體溫：${this.temperature} &#8451;`, () => {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: 'add_temperature',
+                        id: this.ID,
+                        temperature: this.temperature
+                    }).then(res => {
+                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "設定體溫資料回傳狀態碼有問題【" + res.data.status + "】");
+                        addNotification({
+                            title: "新增體溫紀錄",
+                            message: "已設定完成。<p>" + this.ID + "-" + this.name + "-" + this.temperature + "</p>",
+                            type: "success"
+                        });
+                        this.history();
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                });
+            },
+            history(all = false) {
+                this.isBusy = true;
+                if (all) this.chart_items = undefined;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'temperatures',
+                    id: all ? '' : this.ID
+                }).then(res => {
+                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "取得體溫資料回傳狀態碼有問題【" + res.data.status + "】");
+                    addNotification({
+                        title: "取得體溫歷史紀錄",
+                        message: `取得 ${res.data.data_count} 筆歷史資料。`,
+                        type: "success"
+                    });
+                    this.list = res.data.raw;
+                    this.chart_items = [];
+                    let count = 0;
+                    this.list.forEach((item) => {
+                        if (count < 10) {
+                            this.chart_items.push([
+                                item['datetime'],
+                                item['value']
+                            ]);
+                            count++;
+                        }
+                    });
+                    Vue.nextTick(() => $(".times-circle i.far").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "tada"}); }) );
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            },
+            thermoIcon(degree) {
+                let fd = parseFloat(degree);
+                if (isNaN(fd)) return 'temperature-low';
+                if (fd < 36.0) return 'thermometer-empty';
+                if (fd < 36.5) return 'thermometer-quarter';
+                if (fd < 37.0) return 'thermometer-half';
+                if (fd < 37.5) return 'thermometer-three-quarters';
+                return 'thermometer-full';
+            },
+            thermoColor(degree) {
+                let fd = parseFloat(degree);
+                if (isNaN(fd) || fd < 35) return 'secondary';
+                if (fd < 35.5) return 'dark';
+                if (fd < 36) return 'info';
+                if (fd < 36.5) return 'primary';
+                if (fd < 37.0) return 'success';
+                if (fd < 37.5) return 'warning';
+                return 'danger';
+            }
+        },
+        created() {
+            var now = new Date();
+            this.today = now.getFullYear() - 1911 +
+                ("0" + (now.getMonth() + 1)).slice(-2) +
+                ("0" + now.getDate()).slice(-2);
+            this.ad_today = now.getFullYear() +
+                ("0" + (now.getMonth() + 1)).slice(-2) +
+                ("0" + now.getDate()).slice(-2);
+            setTimeout(() => {
+                this.id = this.$refs.id.$el.value;
+                if (this.empty(this.id)) this.history();
+            }, 400);
+        }
+    });
 } else {
     console.error("vue.js not ready ... lah-xxxxxxxx components can not be loaded.");
 }

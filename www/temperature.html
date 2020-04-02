@@ -16,12 +16,17 @@
 <!-- Custom styles for this template -->
 <link href="assets/css/bootstrap-vue.min.css" rel="stylesheet">
 <link href="assets/css/main.css" rel="stylesheet">
+<style>
+    .scaleUp {
+        font-size: 1.5rem;
+    }
+</style>
 </head>
 
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-        <lah-temperature ref="temperature"></lah-temperature>
+        <lah-temperature style="max-width:640px" class="mx-auto"></lah-temperature>
     </div>
   </section><!-- /section -->
   <!-- Bootstrap core JavaScript -->
@@ -41,149 +46,5 @@
   <script src="assets/js/components/lah-global.js"></script>
   <script src="assets/js/components/lah-components.js"></script>
   <script src="assets/js/Chart.min.js"></script>
-
-  <script type="text/javascript">
-    Vue.component("lah-temperature", {
-        template: `<b-card>
-            <template v-slot:header>
-                <h5 class="mb-0">員工體溫紀錄 {{today}}</h5>
-            </template>
-            <b-card-text>
-                <b-form-row>
-                    <b-col>
-                        <b-input-group class="h-100">
-                            <b-input-group-prepend is-text><lah-fa-icon icon="user" prefix="far"> {{label}}</la-fa-icon></b-input-group-prepend>
-                            <b-form-input
-                                ref="id"
-                                v-model="id"
-                                placeholder="HBXXXX"
-                                class="h-100"
-                                :state="validate"
-                            ></b-form-input>
-                        </b-input-group>
-                    </b-col>
-                    <b-col cols="auto">
-                        <b-input-group class="mb-1">
-                            <b-input-group-prepend is-text><lah-fa-icon :icon="thermoIcon(temperature)" :variant="thermoColor(temperature)"> 體溫</la-fa-icon></b-input-group-prepend>
-                            <b-form-spinbutton
-                                v-model="temperature"
-                                min="34"
-                                max="45"
-                                step="0.1"
-                                vertical
-                            ></b-form-spinbutton>
-                        </b-input-group>
-                    </b-col>
-                    <b-col cols="auto">
-                        <b-button variant="outline-primary" @click="register" :disabled="!validate" class="h-100">登錄</b-button>
-                    </b-col>
-                </b-form-row>
-            </b-card-text>
-            <template v-slot:footer>
-                <h6 class="mb-0">體溫歷史紀錄 {{ID}}:{{name}}</h6>
-                <b-list-group flush class="small mt-2">
-                    <b-list-group-item v-for="item in list">
-                        {{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - 
-                        <lah-fa-icon :icon="thermoIcon(item['value'])" :variant="thermoColor(item['value'])"> {{item['value']}} &#8451;</lah-fa-icon>
-                    </b-list-group-item>
-                </b-list-group>
-            </template>
-        </b-card>`,
-        data: () => { return {
-            today: undefined,
-            id: undefined,
-            temperature: 36.0,
-            list: undefined
-        } },
-        computed: {
-            ID: function () { return this.id ? this.id.toUpperCase() : null },
-            name: function() { return this.userNames[this.ID] || '' },
-            label: function () { return this.empty(this.name) ? '使用者代碼' : this.name },
-            validate: function () { return (/^HB\d{4}$/i).test(this.ID) }
-        },
-        watch: {
-            validate(nVal, oVal) {
-                if (nVal === true) {
-                    this.history();
-                }
-            }
-        },
-        methods: {
-            register() {
-                this.$confirm(`姓名：${this.name} 體溫：${this.temperature} &#8451;`, {
-                    title: '請確認登錄資訊',
-                    callback: () => {
-                        this.isBusy = true;
-                        this.$http.post(CONFIG.JSON_API_EP, {
-                            type: 'set_temperature',
-                            id: this.ID,
-                            temperature: this.temperature
-                        }).then(res => {
-                            this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "設定體溫資料回傳狀態碼有問題【" + res.data.status + "】");
-                            addNotification({
-                                title: "新增體溫紀錄",
-                                message: "已設定完成。<p>" + this.ID + "-" + this.name + "-" + this.temperature + "</p>",
-                                type: "success"
-                            });
-                        }).catch(err => {
-                            this.error = err;
-                        }).finally(() => {
-                            this.isBusy = false;
-                        });
-                    }
-                });
-            },
-            history() {
-                this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: 'temperatures',
-                    id: this.ID
-                }).then(res => {
-                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "取得體溫資料回傳狀態碼有問題【" + res.data.status + "】");
-                    addNotification({
-                        title: "取得體溫歷史紀錄",
-                        message: `取得 ${res.data.data_count} 筆歷史資料。`,
-                        type: "success"
-                    });
-                    this.list = res.data.raw;
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
-                    this.isBusy = false;
-                });
-            },
-            thermoIcon(degree) {
-                let fd = parseFloat(degree);
-                if (isNaN(fd)) return 'temperature-low';
-                if (fd < 36.0) return 'thermometer-empty';
-                if (fd < 36.5) return 'thermometer-quarter';
-                if (fd < 37.0) return 'thermometer-half';
-                if (fd < 37.5) return 'thermometer-three-quarters';
-                return 'thermometer-full';
-            },
-            thermoColor(degree) {
-                let fd = parseFloat(degree);
-                if (isNaN(fd) || fd < 35) return 'light';
-                if (fd < 35.5) return 'dark';
-                if (fd < 36) return 'info';
-                if (fd < 36.5) return 'primary';
-                if (fd < 37.0) return 'success';
-                if (fd < 37.5) return 'warning';
-                return 'danger';
-            }
-        },
-        created() {
-            var now = new Date();
-            this.today = now.getFullYear() - 1911 +
-                ("0" + (now.getMonth() + 1)).slice(-2) +
-                ("0" + now.getDate()).slice(-2);
-            setTimeout(() => {
-                this.id = this.$refs.id.$el.value;
-                if (this.empty(this.id)) this.history();
-            }, 400);
-        }
-    });
-  </script>
-
 </body>
 </html>
