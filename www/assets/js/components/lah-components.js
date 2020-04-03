@@ -2059,8 +2059,10 @@ if (Vue) {
                             payload["point"] = that.inst.getElementAtEvent(e)[0];
                             if (payload["point"]) {
                                 // point e.g. {element: i, datasetIndex: 0, index: 14}
-                                payload["label"] = that.inst.data.labels[payload["point"].index];
-                                payload["value"] = that.inst.data.datasets[payload["point"].datasetIndex].data[payload["point"]._index];
+                                let idx = payload["point"].index;
+                                let dataset_idx = payload["point"].datasetIndex;    // in my case it should be always be 0
+                                payload["label"] = that.inst.data.labels[idx];
+                                payload["value"] = that.inst.data.datasets[dataset_idx].data[idx];
                             }
                             // parent uses a handle function to catch the event, e.g. catchClick(e, payload) { ... }
                             that.$emit("click", e, payload);

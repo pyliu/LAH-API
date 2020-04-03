@@ -26,7 +26,10 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-        <lah-temperature style="max-width:640px" class="mx-auto"></lah-temperature>
+      <lah-transition fade>
+        <h6 v-if="false" class="text-center text-danger">請使用 CHROME/EDGE 瀏覽器開啟本頁面。</h6>
+      </lah-transition>
+      <lah-temperature style="max-width:640px" class="mx-auto"></lah-temperature>
     </div>
   </section><!-- /section -->
   <!-- Bootstrap core JavaScript -->
