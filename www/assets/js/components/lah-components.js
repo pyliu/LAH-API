@@ -2069,7 +2069,7 @@ if (Vue) {
                         }
                     }, opts)
                 });
-                this.$log(this.inst);
+                //this.$log(this.inst);
             },
             toBase64Image: function() { return this.inst.toBase64Image() },
             downloadBase64PNG: function(filename = "download.png") {
@@ -2087,7 +2087,32 @@ if (Vue) {
         }
     });
 
+    let temperatureMixin = {
+        methods: {
+            thermoIcon(degree) {
+                let fd = parseFloat(degree);
+                if (isNaN(fd)) return 'temperature-low';
+                if (fd < 36.0) return 'thermometer-empty';
+                if (fd < 36.5) return 'thermometer-quarter';
+                if (fd < 37.0) return 'thermometer-half';
+                if (fd < 37.5) return 'thermometer-three-quarters';
+                return 'thermometer-full';
+            },
+            thermoColor(degree) {
+                let fd = parseFloat(degree);
+                if (isNaN(fd) || fd < 35) return 'secondary';
+                if (fd < 35.5) return 'dark';
+                if (fd < 36) return 'info';
+                if (fd < 36.5) return 'primary';
+                if (fd < 37.0) return 'success';
+                if (fd < 37.5) return 'warning';
+                return 'danger';
+            }
+        }
+    };
+
     Vue.component("lah-temperature", {
+        mixins: [temperatureMixin],
         template: `<b-card>
             <template v-slot:header>
                 <h6 class="d-flex justify-content-between mb-0">
@@ -2128,8 +2153,8 @@ if (Vue) {
             <div v-if="seen">
                 <h6 class="my-2">今日紀錄</h6>
                 <b-list-group class="small">
-                    <b-list-group-item v-for="item in list" :primary-key="item['datetime']" v-if="todayItem(item)" >
-                        <a href="javascript:void(0)" @click="doDeletion(item)" v-if="deletion(item)"><lah-fa-icon class="times-circle float-right" icon="times-circle" prefix="far" variant="danger"></lah-fa-icon></a>
+                    <b-list-group-item v-for="item in list" :primary-key="item['datetime']" v-if="onlyToday(item)" >
+                        <a href="javascript:void(0)" @click="doDeletion(item)" v-if="allowDeletion(item)"><lah-fa-icon class="times-circle float-right" icon="times-circle" prefix="far" variant="danger"></lah-fa-icon></a>
                         {{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - 
                         <lah-fa-icon :icon="thermoIcon(item['value'])" :variant="thermoColor(item['value'])"> {{item['value']}} &#8451;</lah-fa-icon>
                     </b-list-group-item>
@@ -2181,11 +2206,11 @@ if (Vue) {
             }
         },
         methods: {
-            todayItem(item) { return item['datetime'].split(' ')[0].replace(/\-/gi, '') == this.ad_today },
-            deletion(item) {
+            onlyToday(item) { return item['datetime'].split(' ')[0].replace(/\-/gi, '') == this.ad_today },
+            allowDeletion(item) {
+                // control deletion by AM/PM
                 let now = parseInt(this.nowDatetime.split(' ')[1].replace(/\:/gi, ''));
                 let AMPM = (now - 120000) > 0 ? 'PM' : 'AM';
-
                 let time = parseInt(item['datetime'].split(' ')[1].replace(/\:/gi, ''));
                 if (AMPM == 'AM') {
                     return time - 120000 < 0;
@@ -2254,11 +2279,6 @@ if (Vue) {
                     id: all ? '' : this.ID
                 }).then(res => {
                     this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "取得體溫資料回傳狀態碼有問題【" + res.data.status + "】");
-                    addNotification({
-                        title: "取得體溫歷史紀錄",
-                        message: `取得 ${res.data.data_count} 筆歷史資料。`,
-                        type: "success"
-                    });
                     this.list = res.data.raw;
                     this.prepareChartData();
                     Vue.nextTick(() => $(".times-circle i.far").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "tada"}); }) );
@@ -2267,25 +2287,6 @@ if (Vue) {
                 }).finally(() => {
                     this.isBusy = false;
                 });
-            },
-            thermoIcon(degree) {
-                let fd = parseFloat(degree);
-                if (isNaN(fd)) return 'temperature-low';
-                if (fd < 36.0) return 'thermometer-empty';
-                if (fd < 36.5) return 'thermometer-quarter';
-                if (fd < 37.0) return 'thermometer-half';
-                if (fd < 37.5) return 'thermometer-three-quarters';
-                return 'thermometer-full';
-            },
-            thermoColor(degree) {
-                let fd = parseFloat(degree);
-                if (isNaN(fd) || fd < 35) return 'secondary';
-                if (fd < 35.5) return 'dark';
-                if (fd < 36) return 'info';
-                if (fd < 36.5) return 'primary';
-                if (fd < 37.0) return 'success';
-                if (fd < 37.5) return 'warning';
-                return 'danger';
             },
             chartBgColor(degree, opacity) {
                 let fd = parseFloat(degree);
@@ -2319,7 +2320,14 @@ if (Vue) {
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: 'on_board_users'
                 }).then(res => {
-                    this.$log(res.data);
+                    let vn = this.$createElement('lah-temperature-list', {
+                        props: { userList: res.data.raw }
+                    });
+                    showModal({
+                        title: `全所體溫一覽表 ${this.today}`,
+                        message: vn,
+                        size: "xl"
+                    });
                 }).catch(err => {
                     this.error = err;
                 }).finally(() => {
@@ -2338,6 +2346,160 @@ if (Vue) {
             setTimeout(() => {
                 this.id = this.$refs.id.$el.value;
             }, 400);
+        }
+    });
+
+    Vue.component('lah-temperature-list', {
+        template: `<div>
+            <div v-for="item in filtered" class="clearfix my-2">
+                <h6>{{item['UNIT']}}</h6>
+                <div>
+                    <lah-user-temperature
+                        v-for="user in item['LIST']"
+                        :raw-user-data="user"
+                        class="float-left ml-1 mb-1"
+                    ></lah-user-temperature>
+                </div>
+            </div>
+        </div>`,
+        props: {
+            userList: { type: Object, default: null }
+        },
+        data: () => { return {
+            filtered: null
+        } },
+        computed: {
+            today() { return this.nowDatetime.split(' ')[0] }
+        },
+        methods: {
+            filter() {
+                let hr = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "人事室");
+                let accounting = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "會計室");
+                let director = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "主任室");
+                let secretary = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "秘書室");
+                let adm = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "行政課");
+                let reg = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "登記課");
+                let val = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "地價課");
+                let sur = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "測量課");
+                let inf = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "資訊課");
+                this.filtered = [
+                    { UNIT: '主任室', LIST: director },
+                    { UNIT: '秘書室', LIST: secretary },
+                    { UNIT: '人事室', LIST: hr },
+                    { UNIT: '會計室', LIST: accounting },
+                    { UNIT: '行政課', LIST: adm },
+                    { UNIT: '登記課', LIST: reg },
+                    { UNIT: '地價課', LIST: val },
+                    { UNIT: '測量課', LIST: sur },
+                    { UNIT: '資訊課', LIST: inf }
+                ];
+            },
+            prepareTodayTemperatures() {
+                this.isBusy = true;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'temperatures_by_date',
+                    date: this.today
+                }).then(res => {
+                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得 ${this.today} 體溫資料回傳狀態碼有問題【${res.data.status}】`);
+                    this.addToStoreParams('todayTemperatures', res.data.raw);
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            }
+        },
+        created() {
+            this.prepareTodayTemperatures();
+        },
+        mounted() {
+            this.filter();
+        }
+    });
+
+    Vue.component('lah-user-temperature', {
+        mixins: [temperatureMixin],
+        template: `<b-card no-body class="p-1 small" :border-variant="border">
+            <div><b-link @click="vueApp.fetchUserInfo" :data-id="id" :data-name="name">{{id}} : {{name}}</b-link></div>
+            <div>
+                <lah-fa-icon :icon="thermoIcon(temperature['AM'])" :variant="thermoColor(temperature['AM'])">{{temperature['AM']}} &#8451; AM</lah-fa-icon>
+            </div>
+            <div>
+                <lah-fa-icon :icon="thermoIcon(temperature['PM'])" :variant="thermoColor(temperature['PM'])">{{temperature['PM']}} &#8451; PM</lah-fa-icon>
+            </div>
+        </b-card>`,
+        props: ['rawUserData', 'inId'],
+        data: () => { return {
+            temperature: { AM: 0, PM: 0 }
+        } },
+        computed: {
+            id() { return this.rawUserData ? this.rawUserData['DocUserID'] : this.inId },
+            name() { return this.rawUserData ? this.rawUserData['AP_USER_NAME'] : ''},
+            today() { return this.nowDatetime.split(' ')[0] },
+            now_ampm() { return (parseInt(this.nowDatetime.split(' ')[1].replace(/\:/gi, '')) - 120000) >= 0 ? 'PM' : 'AM' },
+            not_ready() { return this.temperature.AM == 0 || this.temperature.PM == 0 },
+            ready_half() { return this.temperature.AM != 0 || this.temperature.PM != 0 },
+            ready() { return this.temperature.AM != 0 && this.temperature.PM != 0 },
+            border() { return this.ready ? 'success' : this.ready_half ? 'warning' : '' },
+            temperatures() { return this.storeParams['todayTemperatures'] },
+            store_ready() { return this.temperatures == undefined }
+        },
+        methods: {
+            setMyTemperature() {
+                let mine = this.temperatures.filter(this_record => this_record["id"] == this.id);
+                if (mine.length > 0) {
+                    mine.forEach(item => {       
+                        let time = parseInt(item['datetime'].split(' ')[1].replace(/\:/gi, ''));
+                        if (time - 120000 >= 0) {
+                            // PM
+                            this.temperature.PM = item['value'];
+                        } else {
+                            // AM
+                            this.temperature.AM = item['value'];
+                        }
+                    });
+                }
+            },
+            getMyTemperatures() {
+                this.isBusy = true;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'temperatures_by_id_date',
+                    id: this.id,
+                    date: this.today
+                }).then(res => {
+                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得 ${this.id}:${this.name} 體溫資料回傳狀態碼有問題【${res.data.status}】`);
+                    /**
+                        datetime: "2020-04-03 16:19:45"
+                        id: "HB0541"
+                        value: 37.2
+                        note: ""
+                    */
+                    // control deletion by AM/PM
+                    if (res.data.data_count > 0) {
+                        res.data.raw.forEach(item => {       
+                            let time = parseInt(item['datetime'].split(' ')[1].replace(/\:/gi, ''));
+                            if (time - 120000 >= 0) {
+                                // PM
+                                this.temperature.PM = item['value'];
+                            } else {
+                                // AM
+                                this.temperature.AM = item['value'];
+                            }
+                        });   
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            }
+        },
+        mounted() {
+            if (this.inId) {
+                this.getMyTemperatures();
+            } else {
+                setTimeout(this.setMyTemperature, 400);
+            }
         }
     });
 } else {

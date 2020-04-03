@@ -785,13 +785,17 @@ $(document).ready(() => {
             },
             initCache: async function() {
                 let cached_el_selector = "input[type='text'], input[type='number'], select, textarea";
-                this.$lf.iterate(function(value, key, iterationNumber) {
+                this.$lf.iterate((value, key, iterationNumber) => {
                     // Resulting key/value pair -- this callback
                     // will be executed for every item in the
                     // database.
-                    let el = $("#"+key);
-                    if (el.length > 0 && el.is(cached_el_selector)) {
-                        el.val(value);
+                    try {
+                        let el = $("#"+key);
+                        if (el.length > 0 && el.is(cached_el_selector)) {
+                            el.val(value);
+                        }
+                    } catch(err) {
+                        this.$lf.removeItem(key);
                     }
                 }).then(() => {
                     //console.log('Iteration has completed');

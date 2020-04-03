@@ -31,6 +31,37 @@ class Temperature {
         return $array;
     }
 
+    public function getByDate($date) {
+        $stm = $this->db->prepare('SELECT * FROM temperature WHERE datetime LIKE :date ORDER BY datetime DESC');
+        $stm->bindValue(':date', $date."%");
+        $ret = $stm->execute();
+
+        global $log;
+        $log->info(__METHOD__.": 取得 ${date} 溫度紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+        $array = array();
+        while ($row = $ret->fetchArray()) {
+            $array[] = $row;
+        }
+
+        return $array;
+    }
+
+    public function getByIdAndDate($id, $date) {
+        $stm = $this->db->prepare('SELECT * FROM temperature WHERE id = :id AND datetime LIKE :date ORDER BY datetime DESC');
+        $stm->bindParam(':id', $id);
+        $stm->bindValue(':date', $date."%");
+        $ret = $stm->execute();
+
+        global $log;
+        $log->info(__METHOD__.": 取得 ${$id} ${date} 溫度紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+        $array = array();
+        while ($row = $ret->fetchArray()) {
+            $array[] = $row;
+        }
+
+        return $array;
+    }
+
     public function getAMPMTemperatures($id, $AMPM) {
         global $log;
 

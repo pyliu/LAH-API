@@ -995,6 +995,34 @@ switch ($_POST["type"]) {
 			$log->warning("XHR [add_temperature] 新增 ".$_POST["id"]." 體溫紀錄失敗。");
 		}
 		break;
+	case "temperatures_by_id_date":
+		$log->info("XHR [temperatures_by_id_date] 取得體溫列表【".$_POST["id"].", ".$_POST['date']."】請求");
+		$temperature = new Temperature();
+		$results = $temperature->getByIdAndDate($_POST["id"], $_POST['date']);
+		// $results = $mock ? $temperature->get('temperatures') : $temperature->get($_POST["id"]);
+		// $cache->set('temperatures', $results);
+		$log->info("XHR [temperatures_by_id_date] 取得 ".$_POST["id"]." ".count($results)." 筆體溫資料【".$_POST['date']."】");
+		echo json_encode(array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"data_count" => count($results),
+			"raw" => $results,
+			"message" => "取得 ".$_POST["id"]." ".count($results)." 筆資料。【".$_POST['date']."】"
+		), 0);
+		break;
+	case "temperatures_by_date":
+		$log->info("XHR [temperatures_by_date] 取得體溫列表【".$_POST['date']."】請求");
+		$temperature = new Temperature();
+		$results = $temperature->getByDate($_POST['date']);
+		// $results = $mock ? $temperature->get('temperatures') : $temperature->get($_POST["id"]);
+		// $cache->set('temperatures', $results);
+		$log->info("XHR [temperatures_by_date] 取得 ".$_POST['date']." ".count($results)." 筆體溫資料");
+		echo json_encode(array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"data_count" => count($results),
+			"raw" => $results,
+			"message" => "取得 ".$_POST['date']." ".count($results)." 筆體溫資料"
+		), 0);
+		break;
 	case "temperatures":
 		$log->info("XHR [temperatures] 取得體溫列表【".$_POST["id"]."】請求");
 		$temperature = new Temperature();
