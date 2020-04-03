@@ -827,10 +827,10 @@ if (Vue) {
                 this.addToStoreParams('RegBakedData', nObj);
             }
         },
-        async created() {
+        created() {
             if (this.bakedData === undefined) {
                 this.isBusy = true;
-                await this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.JSON_API_EP, {
                     type: "reg_case",
                     id: `${this.year}${this.code}${this.number}`
                 }).then(res => {
@@ -1660,14 +1660,14 @@ if (Vue) {
         } },
         computed: {
             border() { return this.ready ? '' : 'danger' },
-            title() { return this.bakedData ? this.bakedData.收件字號 : '' }
+            title() { return this.ready ? this.bakedData.收件字號 : '' }
         },
         watch: {
             bakedData: function(nData, oData) { this.prepareItems() }
         },
         methods: {
             prepareItems: function() {
-                if (this.bakedData) {
+                if (this.ready) {
                     let items = [];
                     Object.keys(this.bakedData.ELAPSED_TIME).forEach(key => {
                         let mins = parseFloat(this.bakedData.ELAPSED_TIME[key] / 60).toFixed(2);
@@ -1675,8 +1675,8 @@ if (Vue) {
                     });
                     this.items = items;
                 } else {
-                    this.$warn("backedData is not ready ... retry after 400ms later");
-                    setTimeout(this.prepareItems, 400);
+                    this.$warn("lah-reg-case-timeline: backedData is not ready ... retry after 200ms later");
+                    setTimeout(this.prepareItems, 200);
                 }
             },
             tooltip: function (tooltipItem, data) {
@@ -1990,6 +1990,7 @@ if (Vue) {
                     // randoom color for this item
                     this.chartData.datasets[0].backgroundColor.push(this.bgColor(item[1], opacity));
                 });
+                setTimeout(this.buildChart, 0);
             },
             buildChart: function (opts = {}) {
                 if (this.inst) {
@@ -2042,6 +2043,8 @@ if (Vue) {
                     type: this.type,
                     data: this.chartData,
                     options: Object.assign({
+                        responsive: true,
+                        showTooltips: true,
                         tooltips: {
                             callbacks: {
                                 label: this.tooltip
@@ -2072,9 +2075,8 @@ if (Vue) {
                 link.remove();
             }
         },
-        created() {
+        mounted() {
             this.setData(this.items);
-            setTimeout(this.buildChart, 0);
         }
     });
 
