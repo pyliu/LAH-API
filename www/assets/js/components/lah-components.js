@@ -1931,6 +1931,7 @@ if (Vue) {
         props: {
             type: { type: String, default: 'bar' },
             label: { type: String, default: '統計圖表' },
+            opacity: { type: Number, default: 0.6 },
             items: { type: Array, default: [] },
             tooltip: { type: Function, default: function (tooltipItem, data) {
                 // add percent ratio to the label
@@ -1946,6 +1947,7 @@ if (Vue) {
             bgColor: { type: Function, default: function(value, opacity) {
                 return `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`;
             } },
+            borderColor: { type: String, default: `rgb(22, 22, 22)` },
             yAxes: { type: Boolean, default: true },
             xAxes: { type: Boolean, default: true },
             yLabel: { type: String, default: '' },
@@ -1974,10 +1976,11 @@ if (Vue) {
                         label: this.label,
                         backgroundColor:[],
                         data: [],
-                        borderColor:`rgb(22, 22, 22)`,
+                        borderColor: this.borderColor,
                         order: 1,
-                        opacity: 0.6,
-                        snapGaps: true
+                        opacity: this.opacity,
+                        snapGaps: true,
+                        borderWidth: 1
                     }]
                 };
             },
@@ -2055,8 +2058,9 @@ if (Vue) {
                             let payload = {};
                             payload["point"] = that.inst.getElementAtEvent(e)[0];
                             if (payload["point"]) {
-                                payload["label"] = that.inst.data.labels[payload["point"]._index];
-                                payload["value"] = that.inst.data.datasets[payload["point"]._datasetIndex].data[payload["point"]._index];
+                                // point e.g. {element: i, datasetIndex: 0, index: 14}
+                                payload["label"] = that.inst.data.labels[payload["point"].index];
+                                payload["value"] = that.inst.data.datasets[payload["point"].datasetIndex].data[payload["point"]._index];
                             }
                             // parent uses a handle function to catch the event, e.g. catchClick(e, payload) { ... }
                             that.$emit("click", e, payload);
@@ -2133,8 +2137,6 @@ if (Vue) {
                         :type="chart_type"
                         :begin-at-zero="false"
                         :bg-color="chartBgColor"
-                        y-label="溫度"
-                        x-label="日期時間"
                         label="歷史紀錄" 
                         class="clearfix"
                     >
@@ -2148,7 +2150,7 @@ if (Vue) {
             id: undefined,
             temperature: 36.0,
             chart_items: undefined,
-            chart_type: 'line',
+            chart_type: 'bar',
             list: undefined
         } },
         computed: {
