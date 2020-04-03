@@ -1642,7 +1642,7 @@ if (Vue) {
         mixins: [regCaseMixin],
         template: `<div class="clearfix">
             <div class="text-justify">
-                <span>{{bakedData.收件字號}}</span>
+                <span>{{title}}</span>
                 <b-button-group size="sm" class="float-right">
                     <b-button variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                     <b-button variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
@@ -1659,19 +1659,25 @@ if (Vue) {
             chartType: 'line'
         } },
         computed: {
-            border() { return this.ready ? '' : 'danger' }
+            border() { return this.ready ? '' : 'danger' },
+            title() { return this.bakedData ? this.bakedData.收件字號 : '' }
         },
         watch: {
             bakedData: function(nData, oData) { this.prepareItems() }
         },
         methods: {
             prepareItems: function() {
-                let items = [];
-                Object.keys(this.bakedData.ELAPSED_TIME).forEach(key => {
-                    let mins = parseFloat(this.bakedData.ELAPSED_TIME[key] / 60).toFixed(2);
-                    items.push([key, mins]);
-                });
-                this.items = items;
+                if (this.bakedData) {
+                    let items = [];
+                    Object.keys(this.bakedData.ELAPSED_TIME).forEach(key => {
+                        let mins = parseFloat(this.bakedData.ELAPSED_TIME[key] / 60).toFixed(2);
+                        items.push([key, mins]);
+                    });
+                    this.items = items;
+                } else {
+                    this.$warn("backedData is not ready ... retry after 400ms later");
+                    setTimeout(this.prepareItems, 400);
+                }
             },
             tooltip: function (tooltipItem, data) {
                 let dataset = data.datasets[tooltipItem.datasetIndex];
