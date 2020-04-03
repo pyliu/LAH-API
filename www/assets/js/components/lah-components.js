@@ -2419,7 +2419,7 @@ if (Vue) {
 
     Vue.component('lah-user-temperature', {
         mixins: [temperatureMixin],
-        template: `<b-card no-body class="p-1 small" :border-variant="border">
+        template: `<b-card no-body class="p-1 small" :border-variant="border" :bg-variant="bg" :text-variant="text" v-b-hover="hover">
             <div><b-link @click="vueApp.fetchUserInfo" :data-id="id" :data-name="name">{{id}} : {{name}}</b-link></div>
             <div>
                 <lah-fa-icon :icon="thermoIcon(temperature['AM'])" :variant="thermoColor(temperature['AM'])">{{temperature['AM']}} &#8451; AM</lah-fa-icon>
@@ -2430,7 +2430,9 @@ if (Vue) {
         </b-card>`,
         props: ['rawUserData', 'inId'],
         data: () => { return {
-            temperature: { AM: 0, PM: 0 }
+            temperature: { AM: 0, PM: 0 },
+            bg: '',
+            text: ''
         } },
         computed: {
             id() { return this.rawUserData ? this.rawUserData['DocUserID'] : this.inId },
@@ -2445,6 +2447,15 @@ if (Vue) {
             store_ready() { return this.temperatures == undefined }
         },
         methods: {
+            hover(flag) {
+                if (flag) {
+                    this.bg = 'warning';
+                    this.text= '';
+                } else {
+                    this.bg = '';
+                    this.text= '';
+                }
+            },
             setMyTemperature() {
                 let mine = this.temperatures.filter(this_record => this_record["id"] == this.id);
                 if (mine.length > 0) {
