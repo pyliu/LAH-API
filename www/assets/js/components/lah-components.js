@@ -2107,16 +2107,19 @@ if (Vue) {
                 <b-col cols="auto">
                     <b-input-group class="mb-1">
                         <b-input-group-prepend is-text><lah-fa-icon :icon="thermoIcon(temperature)" :variant="thermoColor(temperature)"> 體溫</la-fa-icon></b-input-group-prepend>
-                        <b-form-spinbutton
+                        <b-form-input
+                            type="number"
                             v-model="temperature"
                             min="34"
-                            max="45"
+                            max="43"
                             step="0.1"
-                        ></b-form-spinbutton>
+                            :state="validateTemperature"
+                        >
+                        </b-form-input>
                     </b-input-group>
                 </b-col>
                 <b-col cols="auto">
-                    <b-button variant="outline-primary" @click="register" :disabled="!validate">登錄</b-button>
+                    <b-button variant="outline-primary" @click="register" :disabled="!validate || !validateTemperature">登錄</b-button>
                 </b-col>
             </b-form-row>
             <div v-if="seen">
@@ -2161,6 +2164,10 @@ if (Vue) {
             name() { return this.userNames[this.ID] || '' },
             label() { return this.empty(this.name) ? '使用者代碼' : this.name },
             validate() { return (/^HB\d{4}$/i).test(this.ID) },
+            validateTemperature() {
+                let fn = parseFloat(this.temperature);
+                return !isNaN(fn) && fn > 34 && fn < 43;
+            },
             seen() { return this.chart_items !== undefined && this.chart_items.length != 0 && this.validate }
         },
         watch: {
