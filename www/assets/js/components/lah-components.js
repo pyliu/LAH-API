@@ -1674,16 +1674,13 @@ if (Vue) {
                 this.items = items;
             },
             tooltip: function (tooltipItem, data) {
-                // add percent ratio to the label
                 let dataset = data.datasets[tooltipItem.datasetIndex];
-                let sum = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
-                    return previousValue + currentValue;
-                });
                 let currentValue = dataset.data[tooltipItem.index];
+                //this.$log(` ${data.labels[tooltipItem.index]} : ${currentValue} 分鐘`);
                 return ` ${data.labels[tooltipItem.index]} : ${currentValue} 分鐘`;
             }
         },
-        created() { this.prepareItems() }
+        mounted() { this.prepareItems() }
     });
 
     Vue.component('lah-reg-table', {
