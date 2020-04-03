@@ -934,6 +934,25 @@ switch ($_POST["type"]) {
 			$log->info("XHR [send_message] 新增「".$_POST["title"]."」訊息失敗【${id}】。");
 		}
 		break;
+	case "on_board_users":
+		$log->info("XHR [on_board_users] 取得所有在職使用者資料請求");
+		$user_info = new UserInfo();
+		$results = $mock ? $cache->get('on_board_users') : $user_info->getOnBoardUsers();
+		$cache->set('on_board_users', $results);
+		if (empty($results)) {
+			echoErrorJSONString("查無在職使用者資料。");
+			$log->info("XHR [on_board_users] 查無在職使用者資料。");
+		} else {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($results),
+				"raw" => $results,
+				"query_string" => ""
+			);
+			$log->info("XHR [on_board_users] 查詢在職使用者資料成功。");
+			echo json_encode($result, 0);
+		}
+		break;
 	case "remove_temperature":
 			$log->info("XHR [remove_temperature] 刪除體溫【".$_POST["id"].", ".$_POST["datetime"]."】請求");
 			$temperature = new Temperature();

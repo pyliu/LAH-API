@@ -20,6 +20,13 @@ class UserInfo {
         $this->jungli_in_db = null;
     }
 
+    public function getOnBoardUsers() {
+        global $log;
+        $log->info(__METHOD__.": 取得所內所有在職的使用者。");
+        return $this->jungli_in_db->fetchAll("SELECT * FROM AP_USER WHERE AP_OFF_JOB = 'N' ORDER BY AP_UNIT_NAME, DocUserID");
+    }
+
+
     public function searchByID($id) {
         global $log;
         $results = false;

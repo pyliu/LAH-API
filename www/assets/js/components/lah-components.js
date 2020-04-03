@@ -2090,7 +2090,10 @@ if (Vue) {
     Vue.component("lah-temperature", {
         template: `<b-card>
             <template v-slot:header>
-                <h6 class="mb-0">體溫紀錄 {{today}}</h6>
+                <h6 class="d-flex justify-content-between mb-0">
+                    <span class="my-auto">體溫紀錄 {{today}}</span>
+                    <b-button @click="overview" variant="primary" size="sm">全所登錄一覽</b-button>
+                </h6>
             </template>
             <b-form-row>
                 <b-col>
@@ -2126,7 +2129,7 @@ if (Vue) {
                 <h6 class="my-2">今日紀錄</h6>
                 <b-list-group class="small">
                     <b-list-group-item v-for="item in list" :primary-key="item['datetime']" v-if="todayItem(item)" >
-                        <a href="javascript:void(0)" @click="doDeletion(item)"><lah-fa-icon class="times-circle float-right" icon="times-circle" prefix="far" variant="danger"></lah-fa-icon></a>
+                        <a href="javascript:void(0)" @click="doDeletion(item)" v-if="deletion(item)"><lah-fa-icon class="times-circle float-right" icon="times-circle" prefix="far" variant="danger"></lah-fa-icon></a>
                         {{item['datetime']}} - {{item['id']}}:{{userNames[item['id']]}} - 
                         <lah-fa-icon :icon="thermoIcon(item['value'])" :variant="thermoColor(item['value'])"> {{item['value']}} &#8451;</lah-fa-icon>
                     </b-list-group-item>
@@ -2154,9 +2157,9 @@ if (Vue) {
             today: undefined,
             ad_today: undefined,
             id: undefined,
-            temperature: 36.0,
+            temperature: 38,
             chart_items: undefined,
-            chart_type: 'bar',
+            chart_type: 'line',
             list: undefined
         } },
         computed: {
@@ -2179,6 +2182,16 @@ if (Vue) {
         },
         methods: {
             todayItem(item) { return item['datetime'].split(' ')[0].replace(/\-/gi, '') == this.ad_today },
+            deletion(item) {
+                let now = parseInt(this.nowDatetime.split(' ')[1].replace(/\:/gi, ''));
+                let AMPM = (now - 120000) > 0 ? 'PM' : 'AM';
+
+                let time = parseInt(item['datetime'].split(' ')[1].replace(/\:/gi, ''));
+                if (AMPM == 'AM') {
+                    return time - 120000 < 0;
+                }
+                return time - 120000 >= 0;
+            },
             doDeletion(item) {
                 this.$confirm(`刪除 ${this.userNames[item['id']]} ${item['value']} &#8451;紀錄？`, () => {
                     this.isBusy = true;
@@ -2300,6 +2313,18 @@ if (Vue) {
                     }
                 });
                 this.chart_items = chart_items.reverse();
+            },
+            overview() {
+                this.isBusy = true;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'on_board_users'
+                }).then(res => {
+                    this.$log(res.data);
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
             }
         },
         created() {
