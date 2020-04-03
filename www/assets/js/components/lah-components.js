@@ -2069,6 +2069,7 @@ if (Vue) {
                         }
                     }, opts)
                 });
+                this.$log(this.inst);
             },
             toBase64Image: function() { return this.inst.toBase64Image() },
             downloadBase64PNG: function(filename = "download.png") {
