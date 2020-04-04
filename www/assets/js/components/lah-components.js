@@ -1956,7 +1956,8 @@ if (Vue) {
         },
         data: function () { return {
             inst: null,
-            chartData: null
+            chartData: null,
+            init_fix: false
         } },
         watch: {
             type: function (val) { setTimeout(this.buildChart, 0) },
@@ -1964,6 +1965,9 @@ if (Vue) {
             items: function(newItems) { this.setData(newItems) }
         },
         methods: {
+            update: function() {
+                if (this.inst) this.inst.update();
+            },
             resetData: function() {
                 this.chartData = {
                     labels:[],
@@ -2059,7 +2063,11 @@ if (Vue) {
                         }
                     }, opts)
                 });
-                //this.$log(this.inst);
+                // sometimes the char doesn't show up properly ... so add this fix to update it
+                if (!this.init_fix) {
+                    setTimeout(this.update, 400);
+                    this.init_fix = true;
+                }
             },
             toBase64Image: function() { return this.inst.toBase64Image() },
             downloadBase64PNG: function(filename = "download.png") {
@@ -2119,6 +2127,7 @@ if (Vue) {
                             v-model="id"
                             placeholder="HB1184"
                             :state="validate"
+                            class="no-cache"
                         ></b-form-input>
                     </b-input-group>
                 </b-col>
@@ -2326,16 +2335,14 @@ if (Vue) {
             }
         },
         created() {
-            var now = new Date();
-            this.today = now.getFullYear() - 1911 +
-                ("0" + (now.getMonth() + 1)).slice(-2) +
-                ("0" + now.getDate()).slice(-2);
-            this.ad_today = now.getFullYear() +
-                ("0" + (now.getMonth() + 1)).slice(-2) +
-                ("0" + now.getDate()).slice(-2);
-            setTimeout(() => {
-                this.id = this.$refs.id.$el.value;
-            }, 400);
+            let now = new Date();
+            let mon = ("0" + (now.getMonth() + 1)).slice(-2);
+            let day = ("0" + now.getDate()).slice(-2);
+            this.today = now.getFullYear() - 1911 + mon + day;
+            this.ad_today = now.getFullYear()  + mon + day;
+        },
+        mounted() {
+            this.id = this.getUrlParameter('id');
         }
     });
 

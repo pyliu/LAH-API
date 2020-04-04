@@ -3,6 +3,8 @@ require_once(dirname(dirname(__FILE__)).'/include/init.php');
 require_once(ROOT_DIR.'/include/Query.class.php');
 require_once(ROOT_DIR.'/include/Message.class.php');
 require_once(ROOT_DIR.'/include/Stats.class.php');
+require_once(ROOT_DIR.'/include/Temperature.class.php');
+require_once(ROOT_DIR.'/include/UserInfo.class.php');
 
 class WatchDog {
     
@@ -24,6 +26,15 @@ class WatchDog {
             'Wed' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
             'Thu' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
             'Fri' => ['08:30 AM' => '08:45 AM', '01:30 PM' => '01:45 PM'],
+            'Sat' => []
+        ],
+        "temperature" => [
+            'Sun' => [],
+            'Mon' => ['07:00 AM' => '09:00 AM', '00:00 PM' => '02:00 PM'],
+            'Tue' => ['07:00 AM' => '09:00 AM', '00:00 PM' => '02:00 PM'],
+            'Wed' => ['07:00 AM' => '09:00 AM', '00:00 PM' => '02:00 PM'],
+            'Thu' => ['07:00 AM' => '09:00 AM', '00:00 PM' => '02:00 PM'],
+            'Fri' => ['07:00 AM' => '09:00 AM', '00:00 PM' => '02:00 PM'],
             'Sat' => []
         ]
     );
@@ -47,6 +58,14 @@ class WatchDog {
         global $log;
         $log->info("檢查是否需要執行逾期案件檢查 ... ");
         $result = $this->isOn($this->schedule["overdue"]);
+        $log->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
+        return $result;
+    }
+
+    private function isTemperatureNotifyNeeded() {
+        global $log;
+        $log->info("檢查是否需要體溫通知 ... ");
+        $result = $this->isOn($this->schedule["temperature"]);
         $log->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
@@ -158,6 +177,46 @@ class WatchDog {
         }
     }
 
+    public function notifyTemperatureRegistration() {
+        global $log;
+        if (!$this->isTemperatureNotifyNeeded()) {
+            $log->warning(__METHOD__.": 非設定時間內，跳過體溫通知排程。");
+            return false;
+        }
+        // get all on-board users
+        $userinfo = new UserInfo();
+        $onboard_users = $userinfo->getOnBoardUsers();
+        //check if they checked their temperature
+        $temperature = new Temperature();
+        $AMPM = date('A');
+        foreach ($onboard_users as $idx => $user) {
+            $user_id = $user['DocUserID'];
+            $record = $temperature->getAMPMTemperatures($user_id, $AMPM);
+            // only no record should be notified
+            if (empty($record)) {
+                $this->sendTemperatureMessage($user);
+            }
+        }
+    }
+
+    private function sendTemperatureMessage($user) {
+        global $log;
+        $to_id = $user['DocUserID'];
+        $to_name = $user['AP_USER_NAME'];
+        $AMPM = date('A');
+        $host_ip = getLocalhostIP();
+        $msg = new Message();
+        $url = "http://${host_ip}/temperature.html?id=${to_id}";
+        $content = "$to_name 您好\r\n\r\n系統偵測您於今日 $AMPM 尚未登記體溫！\r\n\r\n請用 CHROME/EDGE 瀏覽器前往 ${url} 進行登記。";
+        $title = "體溫登記通知";
+        $sn = $msg->sysSend($title, $content, $to_id, 840); // 14 mins == 840 secs
+        if ($sn == -1) {
+            $log->warning("${title} 訊息無法送出給 ${to_id}。($to_name, $sn)");
+        } else {
+            $log->info("${title} 訊息(${sn})已送出給 ${to_id}。($to_name)");
+        }
+    }
+
     function __construct() {
         $this->stats = new Stats();
     }
@@ -168,6 +227,7 @@ class WatchDog {
         if ($this->isOfficeHours()) {
             $this->checkCrossSiteData();
             $this->findDelayRegCases();
+            $this->notifyTemperatureRegistration();
             return true;
         }
         return false;

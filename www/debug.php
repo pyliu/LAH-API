@@ -6,6 +6,7 @@ require_once("./include/Logger.class.php");
 require_once("./include/Stats.class.php");
 require_once("./include/UserInfo.class.php");
 require_once("./include/api/FileAPICommandFactory.class.php");
+require_once("./include/Watchdog.class.php");
 
 //echo date("H") . date("i", strtotime("1 min")) . date("s", strtotime("1 second"))."<br/>";
 
@@ -57,7 +58,9 @@ echo str_replace("\n", "<br />", print_r($rows, true));
 // $db = new Stats();
 // $db->addOverdueMsgCount(123);
 
-$fact = new FileAPICommandFactory();
+// $fact = new FileAPICommandFactory();
 //var_dump($msg->getMessageByUser("220.1.35.48"));
 //var_dump(sqlsrv_errors());
+$dog = new Watchdog();
+$dog->notifyTemperatureRegistration();
 ?>
