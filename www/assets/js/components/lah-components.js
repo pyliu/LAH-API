@@ -1950,6 +1950,7 @@ if (Vue) {
             borderColor: { type: String, default: `rgb(22, 22, 22)` },
             yAxes: { type: Boolean, default: true },
             xAxes: { type: Boolean, default: true },
+            legend: { type: Boolean, default: true },
             beginAtZero: { type: Boolean, default: true },
             title: { type: String, default: '' },
             titlePos: { type: String, default: 'top' }
@@ -2014,7 +2015,7 @@ if (Vue) {
                     case "doughnut":
                         // put legend to the right for some chart type
                         opts.legend = {
-                            display: true,
+                            display: this.legend,
                             position: opts.legend_pos || 'right'
                         };
                         break;
@@ -2022,15 +2023,13 @@ if (Vue) {
                         break;
                     default:
                         opts.scales = {
-                            yAxes: [{
+                            yAxes: {
                                 display: this.yAxes,
-                                ticks: {
-                                    beginAtZero: this.beginAtZero
-                                }
-                            }],
-                            xAxes: [{
+                                beginAtZero: this.beginAtZero
+                            },
+                            xAxes: {
                                 display: this.xAxes
-                            }]
+                            }
                         };
                 }
                 // use chart.js directly
