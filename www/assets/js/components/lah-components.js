@@ -453,6 +453,30 @@ if (Vue) {
         }
     });
 
+    Vue.component("lah-user-id-input", {
+        template: `<b-input-group :size="size">
+        <b-input-group-prepend is-text><lah-fa-icon icon="user" prefix="far"> {{label}}</la-fa-icon></b-input-group-prepend>
+            <b-form-input
+                ref="lah_user_id"
+                v-model="id"
+                placeholder="HB1184"
+                class="no-cache"
+                :state="validate"
+                @input="$emit('input', id)"
+            ></b-form-input>
+        </b-input-group>`,
+        props: ['value', 'size'],
+        data: () => { return {
+            id: undefined
+        } },
+        computed: {
+            ID() { return this.id ? this.id.toUpperCase() : null },
+            name() { return this.userNames[this.ID] || '' },
+            label() { return this.empty(this.name) ? '使用者代碼' : this.name },
+            validate() { return (/^HB\d{4}$/i).test(this.ID) }
+        }
+    });
+
     Vue.component("lah-user-card", {
         template: `<div>
             <h6 v-show="!empty(title)"><i class="fas fa-user-circle"></i> {{title}}</h6>
@@ -2119,16 +2143,7 @@ if (Vue) {
             </template>
             <b-form-row>
                 <b-col>
-                    <b-input-group>
-                        <b-input-group-prepend is-text><lah-fa-icon icon="user" prefix="far"> {{label}}</la-fa-icon></b-input-group-prepend>
-                        <b-form-input
-                            ref="id"
-                            v-model="id"
-                            placeholder="HB1184"
-                            :state="validate"
-                            class="no-cache"
-                        ></b-form-input>
-                    </b-input-group>
+                    <lah-user-id-input v-model="id"></lah-user-id-input>
                 </b-col>
                 <b-col cols="auto">
                     <b-input-group class="mb-1">
