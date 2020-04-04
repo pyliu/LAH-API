@@ -2426,8 +2426,8 @@ if (Vue) {
             class="text-left mr-1 mb-1"
         >
             <div><b-avatar variant="light" size="1.2rem" :src="avatar_src"></b-avatar> {{name}}</div>
-            <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block">{{temperature['AM']}} &#8451; AM</lah-fa-icon>
-            <lah-fa-icon :icon="pm_icon" :variant="pm_color" class="d-block">{{temperature['PM']}} &#8451; PM</lah-fa-icon>
+            <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block"> {{temperature['AM']}} &#8451; AM</lah-fa-icon>
+            <lah-fa-icon :icon="pm_icon" :variant="pm_color" class="d-block"> {{temperature['PM']}} &#8451; PM</lah-fa-icon>
         </b-button>`,
         props: ['rawUserData', 'inId'],
         data: () => { return {
