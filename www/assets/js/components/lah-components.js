@@ -2165,6 +2165,7 @@ if (Vue) {
                         <b-button variant="success" @click="chart_type = 'line'"><i class="fas fa-chart-line"></i></b-button>
                     </b-button-group>
                     <lah-chart
+                        ref="chart"
                         :items="chart_items"
                         :type="chart_type"
                         :begin-at-zero="false"
