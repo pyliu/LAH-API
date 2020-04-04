@@ -2419,20 +2419,27 @@ if (Vue) {
 
     Vue.component('lah-user-temperature', {
         mixins: [temperatureMixin],
-        template: `<b-card no-body class="p-1 small" :border-variant="border" :bg-variant="bg" :text-variant="text" v-b-hover="hover">
-            <div><b-link @click="vueApp.fetchUserInfo" :data-id="id" :data-name="name">{{id}} : {{name}}</b-link></div>
+        template: `<b-button
+            @click="vueApp.fetchUserInfo"
+            size="sm"
+            :data-id="id"
+            :data-name="name"
+            v-b-tooltip.hover="id"
+            class="text-left mr-1 mb-1"
+            :variant="style"
+        >
+            <b-avatar variant="light" size="1.2rem" :src="avatar_src"></b-avatar>
+            {{name}}
             <div>
                 <lah-fa-icon :icon="thermoIcon(temperature['AM'])" :variant="thermoColor(temperature['AM'])">{{temperature['AM']}} &#8451; AM</lah-fa-icon>
             </div>
             <div>
                 <lah-fa-icon :icon="thermoIcon(temperature['PM'])" :variant="thermoColor(temperature['PM'])">{{temperature['PM']}} &#8451; PM</lah-fa-icon>
             </div>
-        </b-card>`,
+        </b-button>`,
         props: ['rawUserData', 'inId'],
         data: () => { return {
-            temperature: { AM: 0, PM: 0 },
-            bg: '',
-            text: ''
+            temperature: { AM: 0, PM: 0 }
         } },
         computed: {
             id() { return this.rawUserData ? this.rawUserData['DocUserID'] : this.inId },
@@ -2442,20 +2449,12 @@ if (Vue) {
             not_ready() { return this.temperature.AM == 0 || this.temperature.PM == 0 },
             ready_half() { return this.temperature.AM != 0 || this.temperature.PM != 0 },
             ready() { return this.temperature.AM != 0 && this.temperature.PM != 0 },
-            border() { return this.ready ? 'success' : this.ready_half ? 'warning' : '' },
+            style() { return this.ready ? 'outline-success' : this.ready_half ? 'outline-warning' : 'outline-secondary' },
             temperatures() { return this.storeParams['todayTemperatures'] },
-            store_ready() { return this.temperatures == undefined }
+            store_ready() { return this.temperatures == undefined },
+            avatar_src() { return `get_pho_img.php?name=${this.name}` }
         },
         methods: {
-            hover(flag) {
-                if (flag) {
-                    this.bg = 'warning';
-                    this.text= '';
-                } else {
-                    this.bg = '';
-                    this.text= '';
-                }
-            },
             setMyTemperature() {
                 let mine = this.temperatures.filter(this_record => this_record["id"] == this.id);
                 if (mine.length > 0) {
