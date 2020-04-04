@@ -2349,7 +2349,7 @@ if (Vue) {
     Vue.component('lah-temperature-list', {
         template: `<div>
             <div v-for="item in filtered" class="clearfix my-2">
-                <h6>{{item['UNIT']}}</h6>
+                <h5><lah-fa-icon icon="address-book" prefix="far"> {{item['UNIT']}}</lah-fa-icon></h5>
                 <div>
                     <lah-user-temperature
                         v-for="user in item['LIST']"
