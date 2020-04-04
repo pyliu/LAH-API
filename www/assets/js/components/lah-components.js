@@ -1950,8 +1950,6 @@ if (Vue) {
             borderColor: { type: String, default: `rgb(22, 22, 22)` },
             yAxes: { type: Boolean, default: true },
             xAxes: { type: Boolean, default: true },
-            yLabel: { type: String, default: '' },
-            xLabel: { type: String, default: '' },
             beginAtZero: { type: Boolean, default: true },
             title: { type: String, default: '' },
             titlePos: { type: String, default: 'top' }
@@ -2022,20 +2020,12 @@ if (Vue) {
                         opts.scales = {
                             yAxes: [{
                                 display: this.yAxes,
-                                scaleLabel: {
-                                    display: !this.empty(this.yLabel),
-                                    labelString: this.yLabel
-                                },
                                 ticks: {
                                     beginAtZero: this.beginAtZero
                                 }
                             }],
                             xAxes: [{
-                                display: this.xAxes,
-                                scaleLabel: {
-                                    display: !this.empty(this.xLabel),
-                                    labelString: this.xLabel
-                                },
+                                display: this.xAxes
                             }]
                         };
                 }
@@ -2421,21 +2411,16 @@ if (Vue) {
         mixins: [temperatureMixin],
         template: `<b-button
             @click="vueApp.fetchUserInfo"
-            size="sm"
             :data-id="id"
             :data-name="name"
+            :variant="style"
+            size="sm"
             v-b-tooltip.hover="id"
             class="text-left mr-1 mb-1"
-            :variant="style"
         >
-            <b-avatar variant="light" size="1.2rem" :src="avatar_src"></b-avatar>
-            {{name}}
-            <div>
-                <lah-fa-icon :icon="thermoIcon(temperature['AM'])" :variant="thermoColor(temperature['AM'])">{{temperature['AM']}} &#8451; AM</lah-fa-icon>
-            </div>
-            <div>
-                <lah-fa-icon :icon="thermoIcon(temperature['PM'])" :variant="thermoColor(temperature['PM'])">{{temperature['PM']}} &#8451; PM</lah-fa-icon>
-            </div>
+            <div><b-avatar variant="light" size="1.2rem" :src="avatar_src"></b-avatar> {{name}}</div>
+            <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block">{{temperature['AM']}} &#8451; AM</lah-fa-icon>
+            <lah-fa-icon :icon="pm_icon" :variant="pm_color" class="d-block">{{temperature['PM']}} &#8451; PM</lah-fa-icon>
         </b-button>`,
         props: ['rawUserData', 'inId'],
         data: () => { return {
@@ -2449,10 +2434,14 @@ if (Vue) {
             not_ready() { return this.temperature.AM == 0 || this.temperature.PM == 0 },
             ready_half() { return this.temperature.AM != 0 || this.temperature.PM != 0 },
             ready() { return this.temperature.AM != 0 && this.temperature.PM != 0 },
-            style() { return this.ready ? 'outline-success' : this.ready_half ? 'outline-warning' : 'outline-secondary' },
+            style() { return this.ready ? 'outline-success' : this.ready_half ? 'outline-primary' : 'outline-secondary' },
             temperatures() { return this.storeParams['todayTemperatures'] },
             store_ready() { return this.temperatures == undefined },
-            avatar_src() { return `get_pho_img.php?name=${this.name}` }
+            avatar_src() { return `get_pho_img.php?name=${this.name}` },
+            am_icon() { return this.thermoIcon(this.temperature['AM']) },
+            am_color() { return this.thermoColor(this.temperature['AM']) },
+            pm_icon() { return this.thermoIcon(this.temperature['PM']) },
+            pm_color() { return this.thermoColor(this.temperature['PM']) }
         },
         methods: {
             setMyTemperature() {
