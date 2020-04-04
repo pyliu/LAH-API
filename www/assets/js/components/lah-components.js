@@ -2441,7 +2441,7 @@ if (Vue) {
             not_ready() { return this.temperature.AM == 0 || this.temperature.PM == 0 },
             ready_half() { return this.temperature.AM != 0 || this.temperature.PM != 0 },
             ready() { return this.temperature.AM != 0 && this.temperature.PM != 0 },
-            style() { return this.ready ? 'outline-success' : this.ready_half ? 'outline-primary' : 'outline-secondary' },
+            style() { return this.ready ? 'success' : this.ready_half ? 'outline-primary' : 'outline-secondary' },
             temperatures() { return this.storeParams['todayTemperatures'] },
             store_ready() { return this.temperatures == undefined },
             avatar_src() { return `get_pho_img.php?name=${this.name}` },
