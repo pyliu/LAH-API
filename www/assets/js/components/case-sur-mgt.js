@@ -60,7 +60,15 @@ if (Vue) {
                                 type: "warning"
                             });
                         } else {
-                            this.dialog(res.data);
+                            if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
+                                showModal({
+                                    title: "測量案件查詢",
+                                    message: this.$createElement("case-sur-dialog", { props: { json: res.data } }),
+                                    callback: () => addUserInfoEvent()
+                                });
+                            } else if (res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                                throw new Error("查詢失敗：" + res.data.message);
+                            }
                         }
                     }).catch(err => {
                         this.error = err;
@@ -73,17 +81,6 @@ if (Vue) {
                         message: `測量案件ID有問題，請檢查後再重試！ (${this.id})`,
                         variant: 'warning'
                     });
-                }
-            },
-            dialog: function(jsonObj) {
-                if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-                    showModal({
-                        title: "測量案件查詢",
-                        message: this.$createElement("case-sur-dialog", { props: { json: jsonObj } }),
-                        callback: () => addUserInfoEvent()
-                    });
-                } else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                    throw new Error("查詢失敗：" + jsonObj.message);
                 }
             },
             popup: () => {
