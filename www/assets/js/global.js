@@ -107,7 +107,8 @@ const ANIMATED_TRANSITIONS = [
 
 let asyncFetch = async function(url, opts) {
     if (!window.vueApp) {
-        initVueApp();
+        console.error('vueApp is not ready!');
+        return false;
     }
     return window.vueApp.fetch(url, opts);
 }
