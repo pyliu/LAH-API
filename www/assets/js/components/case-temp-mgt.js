@@ -4,7 +4,7 @@ if (Vue) {
             <legend>暫存檔查詢</legend>
             <b-form-row class="mb-2">
                 <b-col>
-                    <case-input-group-ui @update="handleUpdate" @enter="query" type="reg" prefix="case_temp"></case-input-group-ui>
+                    <case-input-group-ui v-model="id" @enter="query" type="reg" prefix="case_temp"></case-input-group-ui>
                 </b-col>
             </b-form-row>
             <b-form-row>
@@ -18,217 +18,50 @@ if (Vue) {
         </fieldset>`,
         data: () => {
             return {
-                year: "109",
-                code: "HB04",
-                num: "000010"
+                year: undefined,
+                code: undefined,
+                num: undefined,
+                id: undefined
+            }
+        },
+        computed: {
+            validate() {
+                this.year = this.id.substring(0, 3);
+                this.code = this.id.substring(3, 7);
+                this.num = this.id.substring(7);
+                let regex = /^[0-9]{3}$/i;
+                if (!regex.test(this.year)) {
+                    this.$warn("year format is not valid.", this.year, this.id);
+                    return false;
+                }
+                regex = /^H[A-Z0-9]{3}$/i;
+                if (!regex.test(this.code)) {
+                    this.$warn("code format is not valid.", this.code, this.id);
+                    return false;
+                }
+                let number = parseInt(this.num);
+                if (this.empty(number) || isNaN(number)) {
+                    this.$warn("number is empty or NaN!", this.num, this.id);
+                    return false;
+                }
+                return true;
             }
         },
         methods: {
-            handleUpdate: function(e, data) {
-                this.year = data.year;
-                this.code = data.code;
-                this.num = data.num;
-            },
             query: function(e) {
-                let data = {year: this.year, code: this.code, num: this.num};
-                if (!window.vueApp.checkCaseUIData(data)) {
-                    addNotification({
-                        title: "清除暫存檔",
-                        message: `輸入資料格式有誤，無法查詢 ${data.year}-${data.code}-${data.num}`,
-                        type: "warning"
-                    });
-                    return false;
-                }
-            
-                let year = data.year;
-                let code = data.code;
-                let number = data.num;
-
-                showModal({
-                    title: "查詢登記案件暫存檔",
-                    subtitle: `${year}${code}${number}`,
-                    message: this.$createElement('lah-reg-case-temp-mgt', { props: { id: `${year}${code}${number}` } })
-                });
-                /*
-                this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: "query_temp_data",
-                    year: year,
-                    code: code,
-                    number: number
-                }).then(res => {
-                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢暫存資料回傳狀態碼有問題【${res.data.status}】`);
-                    
-                    // res.data.raw structure: 0 - Table, 1 - all raw data, 2 - SQL
-                    let filtered = res.data.raw.filter((item, index, array) => {
-                        return item[1].length > 0;
-                    });
-
-                    if (filtered.length == 0) {
-                        addNotification({
-                            title: "清除暫存檔",
-                            message: "案件 " + year + "-" + code + "-" + number + " 查無暫存資料",
-                            type: "warning"
-                        });
-                        return;
-                    }
-
-                    let html = "";
-                    filtered.forEach((item, i, array) => {
-                        html += `<button type="button" class="btn btn-sm btn-primary active tmp_tbl_btn" data-sql-id="sql_${i}" data-tbl="${item[0]}">
-                                    ${item[0]} <span class="badge badge-light">${item[1].length} <span class="sr-only">暫存檔數量</span></span>
-                                </button>`;
-                        // use saveAs to download backup SQL file
-                        if (saveAs) {
-                            let filename_prefix = `${year}-${code}-${number}`;
-                            // Prepare INS SQL text for BACKUP
-                            let INS_SQL = "";
-                            for (let y = 0; y < item[1].length; y++) {
-                                let this_row = item[1][y];
-                                let fields = [];
-                                let values = [];
-                                for (let key in this_row) {
-                                    fields.push(key);
-                                    values.push(this.empty(this_row[key]) ? "null" : `'${this_row[key]}'`);
-                                }
-                                INS_SQL += `insert into ${item[0]} (${fields.join(",")})`;
-                                INS_SQL += ` values (${values.join(",")});\n`;
-                            }
-                            html += "<small>"
-                                 + `　<button id='backup_temp_btn_${i}' data-clean-btn-id='clean_temp_btn_${i}' data-filename='${filename_prefix}-${item[0]}' class='backup_tbl_temp_data btn btn-sm btn-outline-primary'>備份</button>`
-                                 + `<span class='hide ins_sql' id="sql_${i}">${INS_SQL}</span> `
-                                 + ` <button id='clean_temp_btn_${i}' data-tbl='${item[0]}' data-backup-btn-id='backup_temp_btn_${i}' class='clean_tbl_temp_data btn btn-sm btn-outline-danger' ${item[0] == "MOICAT.RINDX" || item[0] == "MOIPRT.PHIND" ? "disabled": ""} title="${item[0] == "MOICAT.RINDX" || item[0] == "MOIPRT.PHIND" ? "重要案件索引，無法刪除！" : ""}">清除</button>`
-                                 + "</small>";
-                        }
-                        html += `<br />&emsp;<small>－&emsp;${item[2]}</small> <br />`;
-                    });
-                    
-                    html += `
-                        <button id='temp_backup_button' data-clean-btn-id='temp_clean_button' class='mt-2 btn btn-sm btn-outline-primary' data-trigger='manual' data-toggle='popover' data-placement='bottom'>全部備份</button>
-                        <button id='temp_clean_button' data-backup-btn-id='temp_backup_button' class='mt-2 btn btn-sm btn-outline-danger' id='temp_clr_button'>全部清除</button>
-                    `;
-                    
+                if (this.validate) {
                     showModal({
-                        body: html,
-                        title: `<span class="reg_case_id">${year}-${code}-${number}</span> 案件暫存檔統計`,
-                        size: "lg",
-                        callback: () => {
-                            showPopper("#temp_backup_button", "請「備份後」再選擇清除", 5000);
-                            
-                            $("#temp_clean_button").off("click").on("click", e => this.fix({
-                                year: year,
-                                code: code,
-                                number: number,
-                                table: "",
-                                target: e.target,
-                                clean_all: true
-                            }));
-            
-                            $("#temp_backup_button").off("click").on("click", (e) => {
-                                toggle(e.target);
-                                let filename = year + "-" + code + "-" + number + "-TEMP-DATA";
-                                let clean_btn_id = $(e.target).data("clean-btn-id");
-                                // attach clicked flag to the clean button
-                                $(`#${clean_btn_id}`).data("backup_flag", true);
-                                // any kind of extension (.txt,.cpp,.cs,.bat)
-                                filename += ".sql";
-                                let all_content = "";
-                                $(".ins_sql").each((index, hidden_span) => {
-                                    all_content += $(hidden_span).text();
-                                });
-                                let blob = new Blob([all_content], {
-                                    type: "text/plain;charset=utf-8"
-                                });
-                                saveAs(blob, filename);
-                                $(e.target).remove();
-                            });
-                            // attach backup event to the buttons
-                            $(".backup_tbl_temp_data").off("click").on("click", e => {
-                                let filename = $(e.target).data("filename");
-                                let clean_btn_id = $(e.target).data("clean-btn-id");
-                                // attach clicked flag to the clean button
-                                $(`#${clean_btn_id}`).data("backup_flag", true);
-                                // any kind of extension (.txt,.cpp,.cs,.bat)
-                                filename += ".sql";
-                                let hidden_data = $(e.target).next("span"); // find DIRECT next span of the clicked button
-                                let content = hidden_data.text();
-                                let blob = new Blob([content], {
-                                    type: "text/plain;charset=utf-8"
-                                });
-                                saveAs(blob, filename);
-                            });
-                            // attach clean event to the buttons
-                            $(".clean_tbl_temp_data").off("click").on("click", e => this.fix({
-                                    year: year,
-                                    code: code,
-                                    number: number,
-                                    table: $(e.target).data("tbl"),
-                                    target: e.target,
-                                    clean_all: false
-                                })
-                            );
-                            $(".tmp_tbl_btn").off("click").on("click", this.showSQL);
-                            addAnimatedCSS(".reg_case_id", {
-                                name: "flash"
-                            }).off("click").on("click", e => {
-                                window.vueApp.fetchRegCase(e);
-                            });
-                        }
+                        title: "查詢登記案件暫存檔",
+                        subtitle: `${this.year}-${this.code}-${this.number}`,
+                        message: this.$createElement('lah-reg-case-temp-mgt', { props: { id: this.id } })
                     });
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
-                    this.isBusy = false;
-                });
-                */
-            },
-            showSQL: function(e) {
-                let btn = $(e.target);
-                let sql_span = $(`#${btn.data("sql-id")}`);
-                showModal({
-                    title: `INSERT SQL of ${btn.data("tbl")}`,
-                    message: sql_span.html().replace(/\n/g, "<br /><br />"),
-                    size: "xl"
-                });
-            },
-            fix: function(data) {
-                let backup_flag = $(data.target).data("backup_flag");
-                if (backup_flag !== true) {
-                    addNotification({
-                        title: "清除暫存檔",
-                        subtitle: `${data.year}-${data.code}-${data.number}`,
-                        message: "清除前請先備份!",
-                        type: "warning"
+                } else {
+                    this.$alert({
+                        title: '查詢案件暫存檔',
+                        message: `案件ID有問題，請檢查後再重試！ (${this.year}-${this.code}-${this.num})`,
+                        variant: 'warning'
                     });
-                    addAnimatedCSS(`#${$(data.target).data("backup-btn-id")}`, { name: "tada" });
-                    return;
                 }
-                let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + data.year + "-" + data.code + "-" + data.number + (data.clean_all ? " 全部暫存檔?" : " " + data.table + " 表格的暫存檔?");
-                showConfirm(msg, () => {
-                    $(data.target).remove();
-                    this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
-                        type: 'clear_temp_data',
-                        year: data.year,
-                        code: data.code,
-                        number: data.number,
-                        table: data.table
-                    }).then(res => {
-                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + res.data.status + "】");
-                        addNotification({
-                            title: "清除暫存檔",
-                            message: "已清除完成。<p>" + data.year + "-" + data.code + "-" + data.number + (data.table ? " 表格：" + data.table : "") + "</p>",
-                            type: "success"
-                        });
-                        if (data.clean_all) {
-                            closeModal();
-                        }
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        this.isBusy = false;
-                    });
-                });
             },
             popup: () => {
                 showModal({
