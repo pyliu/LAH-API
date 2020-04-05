@@ -323,7 +323,7 @@ if (Vue) {
                 url: "heir_share.html",
                 icon: "chart-pie",
                 need_admin: false
-            },{
+            }, {
                 text: "防疫體溫紀錄",
                 url: "temperature.html",
                 icon: "temperature-high",
@@ -334,7 +334,7 @@ if (Vue) {
                 icon: "dog",
                 need_admin: true
             }, {
-                text: `管理儀錶板`,
+                text: `儀錶板`,
                 url: "dashboard.html",
                 icon: "cubes",
                 need_admin: true
