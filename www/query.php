@@ -241,6 +241,15 @@ ksort($operators);
   <script src="assets/js/components/case-query-by-pid.js"></script>
 
   <script type="text/javascript">
+    let bindPressEnterEvent = (selector, callback_func) => {
+        $(selector).on("keypress", function(e) {
+            var keynum = (e.keyCode ? e.keyCode : e.which);
+            if (keynum == '13') {
+                callback_func.call(e.target, e);
+            }
+        });
+    }
+
     // place this variable in global to use this int for condition jufgement, e.g. 108
     let this_year = <?php echo $this_year; ?>;
     $(document).ready(e => {
@@ -324,7 +333,26 @@ ksort($operators);
       $("#search_user_button").on("click", xhrSearchUsers);
       bindPressEnterEvent("#msg_who", xhrSearchUsers);
 
-      initBlockquoteModal();
+          // add responsive and thumbnail style to blockquote img
+          $("blockquote img").addClass("img-responsive img-thumbnail");
+          // control blockquote block for *_quote_button
+          $("button[id*='_quote_button']").on("click", function(e) {
+              let el = $(e.target);
+              let quote = el.next("blockquote"); // find DIRECT next element by selector
+              // fallback to get the one under fieldset 
+              if (quote.length == 0) {
+                  let fs = $(el.closest("fieldset"));
+                  quote = fs.find("blockquote");
+              }
+              if (quote.length > 0) {
+                  //quote.hasClass("hide") ? quote.removeClass("hide") : quote.addClass("hide");
+                  showModal({
+                      title: quote.data("title") + " 小幫手提示",
+                      body: quote.html(),
+                      size: "lg"
+                  });
+              }
+          });
     });
   </script>
 </body>
