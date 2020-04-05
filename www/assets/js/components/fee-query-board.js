@@ -393,7 +393,7 @@ if (Vue) {
                             legend: { display: true, labels: { fontColor: "black" } }
                         }
                     });
-
+                    setTimeout(() => { this.chartInst.update() }, 400);
                 }
             },
             "fee-obsolete-mgt": {
