@@ -2151,8 +2151,8 @@ if (Vue) {
                         <b-form-input
                             type="number"
                             v-model="temperature"
-                            min="34"
-                            max="43"
+                            min="35"
+                            max="40"
                             step="0.1"
                             :state="validateTemperature"
                         >
@@ -2196,7 +2196,7 @@ if (Vue) {
             today: undefined,
             ad_today: undefined,
             id: undefined,
-            temperature: 38,
+            temperature: 37.5,
             chart_items: undefined,
             chart_type: 'line',
             list: undefined
