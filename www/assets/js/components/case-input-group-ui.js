@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("case-input-group-ui", {
         template: `<b-form-row>
             <b-input-group size="sm" class="col-3">
-                <b-form-select ref="year" v-model="year" :options="years" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_year'">
+                <b-form-select ref="year" v-model="year" :options="years" @change="emitInput" @change="getMaxNumber" :id="prefix+'_case_update_year'">
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇年份 --</b-form-select-option>
                     </template>
@@ -10,7 +10,7 @@ if (Vue) {
                 <b-input-group-append is-text>年</b-input-group-append>
             </b-input-group>
             <b-input-group size="sm" class="col">
-                <b-form-select ref="code" v-model="code" @change="uiUpdate" @change="getMaxNumber" :id="prefix+'_case_update_code'">
+                <b-form-select ref="code" v-model="code" @change="emitInput" @change="getMaxNumber" :id="prefix+'_case_update_code'">
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇案件字 --</b-form-select-option>
                     </template>
@@ -25,7 +25,7 @@ if (Vue) {
                     ref="num"
                     v-model="num"
                     v-b-tooltip.hover="'最多6個數字'"
-                    @input="uiUpdate"
+                    @input="emitInput"
                     @keyup.enter="$emit('enter', $event)"
                     type="number"
                     :step="num_step"
@@ -67,12 +67,7 @@ if (Vue) {
             }
         },
         methods: {
-            uiUpdate: function(e) {
-                this.$emit("update", e, {
-                    year: this.year,
-                    code: this.code,
-                    num: this.num
-                });
+            emitInput: function(e) {
                 this.$emit('input', `${this.year}${this.code}${this.num}`);
             },
             getMaxNumber: function(e) {
@@ -91,7 +86,7 @@ if (Vue) {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         // update UI
                         this.num = res.data.max;
-                        this.uiUpdate(e);
+                        this.emitInput(e);
                     } else {
                         addNotification({message: res.data.message, type: "warning"});
                     }
@@ -162,8 +157,8 @@ if (Vue) {
                 this.year = this.$refs.year.$el.value;
                 this.code = this.$refs.code.$el.value;
                 this.num = this.$refs.num.$el.value;
-                this.uiUpdate(e);
-            }, 300);    // cached data write back
+                this.emitInput();
+            }, 400);    // cached data write back
         }
     });
 } else {
