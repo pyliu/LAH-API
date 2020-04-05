@@ -191,7 +191,7 @@ if (Vue) {
                          */
                         let title = this.json.raw['MM01'] + '-' + this.json.raw['MM02'] + '-' + this.json.raw['MM03'] + '連件數';
                         if (this.orig_count != this.count) {
-                            showConfirm("確定要修改 " + title + " 為「" + this.count + "」？",() => {
+                            showConfirm("確定要修改 " + title + " 為「" + this.count + "」？", () => {
                                 this.isBusy = true;
                                 this.$http.post(CONFIG.JSON_API_EP, {
                                     type: "upd_case_column",
@@ -212,7 +212,7 @@ if (Vue) {
                                         addNotification({
                                             title: "更新連件數",
                                             subtitle: this.id,
-                                            message: jsonObj.message,
+                                            message: res.data.message,
                                             type: "danger"
                                         });
                                     }
