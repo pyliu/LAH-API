@@ -2155,6 +2155,7 @@ if (Vue) {
                             max="40"
                             step="0.1"
                             :state="validateTemperature"
+                            class="no-cache"
                         >
                         </b-form-input>
                     </b-input-group>
