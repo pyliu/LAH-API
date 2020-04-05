@@ -453,6 +453,165 @@ if (Vue) {
         }
     });
 
+    // need to include Chart.min.js (chart.js) first.
+    Vue.component("lah-chart", {
+        template: `<div><canvas class="w-100">圖形初始化失敗</canvas></div>`,
+        props: {
+            type: { type: String, default: 'bar' },
+            label: { type: String, default: '統計圖表' },
+            opacity: { type: Number, default: 0.6 },
+            items: { type: Array, default: [] },
+            tooltip: { type: Function, default: function (tooltipItem, data) {
+                // add percent ratio to the label
+                let dataset = data.datasets[tooltipItem.datasetIndex];
+                let sum = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
+                    return previousValue + currentValue;
+                });
+                let currentValue = dataset.data[tooltipItem.index];
+                let percent = Math.round(((currentValue / sum) * 100));
+                if (isNaN(percent)) return ` ${data.labels[tooltipItem.index]} : ${currentValue}`;
+                return ` ${data.labels[tooltipItem.index]} : ${currentValue} [${percent}%]`;
+            } },
+            bgColor: { type: Function, default: function(value, opacity) {
+                return `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`;
+            } },
+            borderColor: { type: String, default: `rgb(22, 22, 22)` },
+            yAxes: { type: Boolean, default: true },
+            xAxes: { type: Boolean, default: true },
+            legend: { type: Boolean, default: true },
+            beginAtZero: { type: Boolean, default: true },
+            title: { type: String, default: '' },
+            titlePos: { type: String, default: 'top' }
+        },
+        data: function () { return {
+            inst: null,
+            chartData: null,
+            init_fix: false
+        } },
+        watch: {
+            type: function (val) { setTimeout(this.buildChart, 0) },
+            chartData: function(newObj) { setTimeout(this.buildChart, 0)  },
+            items: function(newItems) { this.setData(newItems) }
+        },
+        methods: {
+            update: function() {
+                if (this.inst) this.inst.update();
+            },
+            resetData: function() {
+                this.chartData = {
+                    labels:[],
+                    legend: {
+                        display: true
+                    },
+                    datasets:[{
+                        label: this.label,
+                        backgroundColor:[],
+                        data: [],
+                        borderColor: this.borderColor,
+                        order: 1,
+                        opacity: this.opacity,
+                        snapGaps: true,
+                        borderWidth: 1
+                    }]
+                };
+            },
+            setData: function(items) {
+                this.resetData();
+                let opacity = this.chartData.datasets[0].opacity;
+                items.forEach(item => {
+                    this.chartData.labels.push(item[0]);            // first element is label
+                    this.chartData.datasets[0].data.push(item[1]);  // second element is data count
+                    // randoom color for this item
+                    this.chartData.datasets[0].backgroundColor.push(this.bgColor(item[1], opacity));
+                });
+                setTimeout(this.buildChart, 0);
+            },
+            buildChart: function (opts = {}) {
+                if (this.inst) {
+                    // reset the chart
+                    this.inst.destroy();
+                    this.inst = null;
+                }
+                // keep only one dataset inside
+                if (this.chartData.datasets.length > 1) {
+                    this.chartData.datasets = this.chartData.datasets.slice(0, 1);
+                }
+                this.chartData.datasets[0].label = this.label;
+                switch(this.type) {
+                    case "pie":
+                    case "polarArea":
+                    case "doughnut":
+                        // put legend to the right for some chart type
+                        opts.legend = {
+                            display: this.legend,
+                            position: opts.legend_pos || 'right'
+                        };
+                        break;
+                    case "radar":
+                        break;
+                    default:
+                        opts.scales = {
+                            yAxes: {
+                                display: this.yAxes,
+                                beginAtZero: this.beginAtZero
+                            },
+                            xAxes: {
+                                display: this.xAxes
+                            }
+                        };
+                }
+                // use chart.js directly
+                let ctx = this.$el.childNodes[0];
+                let that = this;
+                this.inst = new Chart(ctx, {
+                    type: this.type,
+                    data: this.chartData,
+                    options: Object.assign({
+                        responsive: true,
+                        showTooltips: true,
+                        tooltips: {
+                            callbacks: {
+                                label: this.tooltip
+                            }
+                        },
+                        title: { display: !this.empty(this.title), text: this.title, position: this.titlePos },
+                        onClick: function(e) {
+                            let payload = {};
+                            payload["point"] = that.inst.getElementAtEvent(e)[0];
+                            if (payload["point"]) {
+                                // point e.g. {element: i, datasetIndex: 0, index: 14}
+                                let idx = payload["point"].index;
+                                let dataset_idx = payload["point"].datasetIndex;    // in my case it should be always be 0
+                                payload["label"] = that.inst.data.labels[idx];
+                                payload["value"] = that.inst.data.datasets[dataset_idx].data[idx];
+                            }
+                            // parent uses a handle function to catch the event, e.g. catchClick(e, payload) { ... }
+                            that.$emit("click", e, payload);
+                        }
+                    }, opts)
+                });
+                // sometimes the char doesn't show up properly ... so add this fix to update it
+                if (!this.init_fix) {
+                    setTimeout(this.update, 400);
+                    this.init_fix = true;
+                }
+            },
+            toBase64Image: function() { return this.inst.toBase64Image() },
+            downloadBase64PNG: function(filename = "download.png") {
+                const link = document.createElement('a');
+                link.href = this.toBase64Image();
+                link.setAttribute("download", filename);
+                document.body.appendChild(link);
+                link.click();
+                //afterwards we remove the element again
+                link.remove();
+            }
+        },
+        mounted() {
+            this.setData(this.items);
+        }
+    });
+
     Vue.component("lah-user-id-input", {
         template: `<b-input-group :size="size">
         <b-input-group-prepend is-text><lah-fa-icon icon="user" prefix="far"> {{label}}</la-fa-icon></b-input-group-prepend>
@@ -1947,165 +2106,6 @@ if (Vue) {
             }
         },
         created() { this.type = this.type || '' }
-    });
-
-    // need to include Chart.min.js (chart.js) first.
-    Vue.component("lah-chart", {
-        template: `<div><canvas class="w-100">圖形初始化失敗</canvas></div>`,
-        props: {
-            type: { type: String, default: 'bar' },
-            label: { type: String, default: '統計圖表' },
-            opacity: { type: Number, default: 0.6 },
-            items: { type: Array, default: [] },
-            tooltip: { type: Function, default: function (tooltipItem, data) {
-                // add percent ratio to the label
-                let dataset = data.datasets[tooltipItem.datasetIndex];
-                let sum = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
-                    return previousValue + currentValue;
-                });
-                let currentValue = dataset.data[tooltipItem.index];
-                let percent = Math.round(((currentValue / sum) * 100));
-                if (isNaN(percent)) return ` ${data.labels[tooltipItem.index]} : ${currentValue}`;
-                return ` ${data.labels[tooltipItem.index]} : ${currentValue} [${percent}%]`;
-            } },
-            bgColor: { type: Function, default: function(value, opacity) {
-                return `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`;
-            } },
-            borderColor: { type: String, default: `rgb(22, 22, 22)` },
-            yAxes: { type: Boolean, default: true },
-            xAxes: { type: Boolean, default: true },
-            legend: { type: Boolean, default: true },
-            beginAtZero: { type: Boolean, default: true },
-            title: { type: String, default: '' },
-            titlePos: { type: String, default: 'top' }
-        },
-        data: function () { return {
-            inst: null,
-            chartData: null,
-            init_fix: false
-        } },
-        watch: {
-            type: function (val) { setTimeout(this.buildChart, 0) },
-            chartData: function(newObj) { setTimeout(this.buildChart, 0)  },
-            items: function(newItems) { this.setData(newItems) }
-        },
-        methods: {
-            update: function() {
-                if (this.inst) this.inst.update();
-            },
-            resetData: function() {
-                this.chartData = {
-                    labels:[],
-                    legend: {
-                        display: true
-                    },
-                    datasets:[{
-                        label: this.label,
-                        backgroundColor:[],
-                        data: [],
-                        borderColor: this.borderColor,
-                        order: 1,
-                        opacity: this.opacity,
-                        snapGaps: true,
-                        borderWidth: 1
-                    }]
-                };
-            },
-            setData: function(items) {
-                this.resetData();
-                let opacity = this.chartData.datasets[0].opacity;
-                items.forEach(item => {
-                    this.chartData.labels.push(item[0]);            // first element is label
-                    this.chartData.datasets[0].data.push(item[1]);  // second element is data count
-                    // randoom color for this item
-                    this.chartData.datasets[0].backgroundColor.push(this.bgColor(item[1], opacity));
-                });
-                setTimeout(this.buildChart, 0);
-            },
-            buildChart: function (opts = {}) {
-                if (this.inst) {
-                    // reset the chart
-                    this.inst.destroy();
-                    this.inst = null;
-                }
-                // keep only one dataset inside
-                if (this.chartData.datasets.length > 1) {
-                    this.chartData.datasets = this.chartData.datasets.slice(0, 1);
-                }
-                this.chartData.datasets[0].label = this.label;
-                switch(this.type) {
-                    case "pie":
-                    case "polarArea":
-                    case "doughnut":
-                        // put legend to the right for some chart type
-                        opts.legend = {
-                            display: this.legend,
-                            position: opts.legend_pos || 'right'
-                        };
-                        break;
-                    case "radar":
-                        break;
-                    default:
-                        opts.scales = {
-                            yAxes: {
-                                display: this.yAxes,
-                                beginAtZero: this.beginAtZero
-                            },
-                            xAxes: {
-                                display: this.xAxes
-                            }
-                        };
-                }
-                // use chart.js directly
-                let ctx = this.$el.childNodes[0];
-                let that = this;
-                this.inst = new Chart(ctx, {
-                    type: this.type,
-                    data: this.chartData,
-                    options: Object.assign({
-                        responsive: true,
-                        showTooltips: true,
-                        tooltips: {
-                            callbacks: {
-                                label: this.tooltip
-                            }
-                        },
-                        title: { display: !this.empty(this.title), text: this.title, position: this.titlePos },
-                        onClick: function(e) {
-                            let payload = {};
-                            payload["point"] = that.inst.getElementAtEvent(e)[0];
-                            if (payload["point"]) {
-                                // point e.g. {element: i, datasetIndex: 0, index: 14}
-                                let idx = payload["point"].index;
-                                let dataset_idx = payload["point"].datasetIndex;    // in my case it should be always be 0
-                                payload["label"] = that.inst.data.labels[idx];
-                                payload["value"] = that.inst.data.datasets[dataset_idx].data[idx];
-                            }
-                            // parent uses a handle function to catch the event, e.g. catchClick(e, payload) { ... }
-                            that.$emit("click", e, payload);
-                        }
-                    }, opts)
-                });
-                // sometimes the char doesn't show up properly ... so add this fix to update it
-                if (!this.init_fix) {
-                    setTimeout(this.update, 400);
-                    this.init_fix = true;
-                }
-            },
-            toBase64Image: function() { return this.inst.toBase64Image() },
-            downloadBase64PNG: function(filename = "download.png") {
-                const link = document.createElement('a');
-                link.href = this.toBase64Image();
-                link.setAttribute("download", filename);
-                document.body.appendChild(link);
-                link.click();
-                //afterwards we remove the element again
-                link.remove();
-            }
-        },
-        mounted() {
-            this.setData(this.items);
-        }
     });
 
     let temperatureMixin = {
