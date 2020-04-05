@@ -37,7 +37,7 @@ if (Vue) {
                 <b-input-group-append is-text>號</b-input-group-append>
             </b-input-group>
         </b-form-row>`,
-        props: ["type", "prefix"],
+        props: ["type", "prefix", 'value'],
         data: function(e) {
             return {
                 local_reg_case_code: {
@@ -73,6 +73,7 @@ if (Vue) {
                     code: this.code,
                     num: this.num
                 });
+                this.$emit('input', `${this.year}${this.code}${this.num}`);
             },
             getMaxNumber: function(e) {
                 let year = this.year;

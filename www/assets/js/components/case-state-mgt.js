@@ -4,7 +4,7 @@ if (Vue) {
             <legend>案件狀態</legend>
             <b-form-row class="mb-2">
                 <b-col>
-                    <case-input-group-ui @update="handleUpdate" @enter="query" type="reg" prefix="case_state"></case-input-group-ui>
+                    <case-input-group-ui v-model="id" @update="handleUpdate" @enter="query" type="reg" prefix="case_state"></case-input-group-ui>
                 </b-col>
             </b-form-row>
             <b-form-row>
@@ -21,7 +21,8 @@ if (Vue) {
                 year: "108",
                 code: "HB04",
                 num: "000010",
-                dialog: null
+                dialog: null,
+                id: undefined
             }
         },
         methods: {
