@@ -4,7 +4,7 @@ if (Vue) {
             <legend>登記案件查詢</legend>
             <b-form-row class="mb-2">
                 <b-col>
-                    <case-input-group-ui @update="handleUpdate" @enter="regQuery" type="reg" prefix="case_reg"></case-input-group-ui>
+                    <case-input-group-ui v-model="id" @enter="regQuery" type="reg" prefix="case_reg"></case-input-group-ui>
                 </b-col>
             </b-form-row>
             <b-form-row>
@@ -18,75 +18,88 @@ if (Vue) {
         </fieldset>`,
         data: () => {
             return {
-                year: "108",
-                code: "HB12",
-                num: "000100"
+                id: undefined
+            }
+        },
+        computed: {
+            validate() {
+                let year = this.id.substring(0, 3);
+                let code = this.id.substring(3, 7);
+                let num = this.id.substring(7);
+                let regex = /^[0-9]{3}$/i;
+                if (!regex.test(year)) {
+                    this.$warn(this.id, "year format is not valid.");
+                    return false;
+                }
+                regex = /^H[A-Z0-9]{3}$/i;
+                if (!regex.test(code)) {
+                    this.$warn(this.id, "code format is not valid.");
+                    return false;
+                }
+                let number = parseInt(num);
+                if (this.empty(number) || isNaN(number)) {
+                    this.$warn(this.id, "number is empty or NaN!");
+                    return false;
+                }
+                return true;
             }
         },
         methods: {
-            handleUpdate: function(e, data) {
-                this.year = data.year;
-                this.code = data.code;
-                this.num = data.num;
-            },
             regQuery: function(e) {
-                let data = {year: this.year, code: this.code, num: this.num};
-                if (!window.vueApp.checkCaseUIData(data)) {
-                    addNotification({
-                        title: "登記案件查詢",
-                        subtitle: `${data.year}-${data.code}-${data.num}`,
-                        message: `輸入資料格式有誤，無法查詢。`,
-                        type: "warning"});
-                    return false;
+                if (this.validate) {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: "reg_case",
+                        id: this.id
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                            showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
+                            return;
+                        } else {
+                            showModal({
+                                message: this.$createElement("lah-reg-case-detail", {
+                                    props: {
+                                        bakedData: res.data.baked
+                                    }
+                                }),
+                                title: `登記案件詳情 ${this.id}`,
+                                size: "lg"
+                            });
+                        }
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                } else {
+                    this.$alert({
+                        title: '登記案件搜尋',
+                        message: `案件ID有問題，請檢查後再重試！ (${this.id})`,
+                        variant: 'warning'
+                    });
                 }
-
-                this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: "reg_case",
-                    id: trim(`${this.year}${this.code}${this.num}`)
-                }).then(res => {
-                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                        showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
-                        return;
-                    } else {
-                        showModal({
-                            message: this.$createElement("lah-reg-case-detail", {
-                                props: {
-                                    bakedData: res.data.baked
-                                }
-                            }),
-                            title: `登記案件詳情 ${data.year}-${data.code}-${data.num}`,
-                            size: "lg"
-                        });
-                    }
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
-                    this.isBusy = false;
-                });
             },
             prcQuery: function(e) {
-                let data = {year: this.year, code: this.code, num: this.num};
-                if (!window.vueApp.checkCaseUIData(data)) {
-                    addNotification({
-                        title: "地價案件查詢",
-                        subtitle: `${data.year}-${data.code}-${data.num}`,
-                        message: `輸入資料格式有誤，無法查詢。`,
-                        type: "warning"});
-                    return false;
+                if (this.validate) {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: "prc_case",
+                        id: this.id
+                    }).then(res => {
+                        showPrcCaseDetail(res.data);
+                        this.isBusy = false;
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                } else {
+                    this.$alert({
+                        title: '地價案件狀態查詢',
+                        message: `案件ID有問題，請檢查後再重試！ (${this.id})`,
+                        variant: 'warning'
+                    });
                 }
-                this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: "prc_case",
-                    id: trim(`${this.year}${this.code}${this.num}`)
-                }).then(res => {
-                    showPrcCaseDetail(res.data);
-                    this.isBusy = false;
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
-                    this.isBusy = false;
-                });
             }
         },
         components: {}

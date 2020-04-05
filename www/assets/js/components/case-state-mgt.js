@@ -27,16 +27,19 @@ if (Vue) {
                 let year = this.id.substring(0, 3);
                 let code = this.id.substring(3, 7);
                 let num = this.id.substring(7);
-                if (this.empty(year)) {
-                    this.$warn(this.id, "year is empty!");
+                let regex = /^[0-9]{3}$/i;
+                if (!regex.test(year)) {
+                    this.$warn(this.id, "year format is not valid.");
                     return false;
                 }
-                if (this.empty(code)) {
-                    this.$warn(this.id, "code is empty!");
+                regex = /^H[A-Z0-9]{3}$/i;
+                if (!regex.test(code)) {
+                    this.$warn(this.id, "code format is not valid.");
                     return false;
                 }
-                if (this.empty(num) || isNaN(num)) {
-                    this.$warn(this.id, "code is empty or NaN!");
+                let number = parseInt(num);
+                if (this.empty(number) || isNaN(number)) {
+                    this.$warn(this.id, "number is empty or NaN!");
                     return false;
                 }
                 return true;

@@ -4,7 +4,7 @@ if (Vue) {
             <legend>複丈案件查詢(修正已結延期、修改連件數)</legend>
             <b-form-row class="mb-2">
                 <b-col>
-                    <case-input-group-ui @update="handleUpdate" @enter="query" type="sur" prefix="case_sur"></case-input-group-ui>
+                    <case-input-group-ui v-model="id" @enter="query" type="sur" prefix="case_sur"></case-input-group-ui>
                 </b-col>
             </b-form-row>
             <b-form-row>
@@ -18,52 +18,62 @@ if (Vue) {
         </fieldset>`,
         data: () => {
             return {
-                year: "108",
-                code: "HB12",
-                num: "000100"
+                id: undefined
+            }
+        },
+        computed: {
+            validate() {
+                let year = this.id.substring(0, 3);
+                let code = this.id.substring(3, 7);
+                let num = this.id.substring(7);
+                let regex = /^[0-9]{3}$/i;
+                if (!regex.test(year)) {
+                    this.$warn(this.id, "year format is not valid.");
+                    return false;
+                }
+                regex = /^H[A-Z0-9]{3}$/i;
+                if (!regex.test(code)) {
+                    this.$warn(this.id, "code format is not valid.");
+                    return false;
+                }
+                let number = parseInt(num);
+                if (this.empty(number) || isNaN(number)) {
+                    this.$warn(this.id, "number is empty or NaN!");
+                    return false;
+                }
+                return true;
             }
         },
         methods: {
-            handleUpdate: function(e, data) {
-                this.year = data.year;
-                this.code = data.code;
-                this.num = data.num;
-            },
             query: function(e) {
-                let data = {year: this.year, code: this.code, num: this.num};
-                if (!window.vueApp.checkCaseUIData(data)) {
-                    addNotification({
-                        title: "案件查詢",
-                        subtitle: `${data.year}-${data.code}-${data.num}`,
-                        message: `輸入資料格式有誤，無法查詢。`,
-                        type: "warning"});
-                    return false;
+                if (this.validate) {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: "sur_case",
+                        id: this.id
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL && res.data.data_count == 0) {
+                            addNotification({
+                                title: "測量案件查詢",
+                                subtitle: `${this.id}`,
+                                message: "查無資料",
+                                type: "warning"
+                            });
+                        } else {
+                            this.dialog(res.data);
+                        }
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                } else {
+                    this.$alert({
+                        title: '測量案件狀態查詢',
+                        message: `測量案件ID有問題，請檢查後再重試！ (${this.id})`,
+                        variant: 'warning'
+                    });
                 }
-                
-                let year = this.year;
-                let code = this.code;
-                let number = this.num;
-                
-                this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: "sur_case",
-                    id: trim(`${year}${code}${number}`)
-                }).then(res => {
-                    if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL && res.data.data_count == 0) {
-                        addNotification({
-                            title: "測量案件查詢",
-                            subtitle: `${year}-${code}-${number}`,
-                            message: "查無資料",
-                            type: "warning"
-                        });
-                    } else {
-                        this.dialog(res.data);
-                    }
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
-                    this.isBusy = false;
-                });
             },
             dialog: function(jsonObj) {
                 if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
