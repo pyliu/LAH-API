@@ -1,24 +1,4 @@
 //<![CDATA[
-let showPrcCaseDetail = (jsonObj) => {
-	if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-		showAlert({
-			message: "查無地價案件資料",
-			type: "warning"
-		});
-		return;
-	} else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-		throw new Error("查詢失敗：" + jsonObj.message);
-	}
-	let html = "<p>" + jsonObj.html + "</p>";
-	let modal_size = "lg";
-	showModal({
-		body: html,
-		title: "地價案件詳情",
-		size: modal_size,
-		callback: () => { $(".prc_case_serial").off("click").on("click", window.vueApp.fetchRegCase); }
-	});
-}
-
 let xhrGetSectionRALIDCount = e => {
 	let el = $(e.target);
 	toggle(el);
