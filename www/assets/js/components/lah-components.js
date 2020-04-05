@@ -334,7 +334,7 @@ if (Vue) {
                 icon: "dog",
                 need_admin: true
             }, {
-                text: `儀錶板`,
+                text: `管理看板`,
                 url: "dashboard.html",
                 icon: "cubes",
                 need_admin: true
