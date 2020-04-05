@@ -849,6 +849,15 @@ $(document).ready(() => {
                 } else {
                     this.$lf.setItem("cache_st_timestamp", +new Date());
                 }
+            },
+            alert: function(opts) {
+                if (typeof opts == "string") {
+                    opts = { message: opts }
+                }
+                if (!this.empty(opts.message)) {
+                    let alert = this.$refs.alert || window.dynaApp.$refs.alert;
+                    alert.show(opts);
+                }
             }
         },
         created: function(e) {
@@ -879,6 +888,7 @@ $(document).ready(() => {
             Vue.prototype.$confirm = this.confirmAdapter;
             Vue.prototype.$modal = this.modal;
             Vue.prototype.$toast = this.makeToast;
+            Vue.prototype.$alert = this.alert;
         },
         mounted() { this.initCache(); }
     });

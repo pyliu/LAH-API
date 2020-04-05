@@ -193,7 +193,7 @@ if (Vue) {
                 if (typeof opts.callback == "function") {
                     setTimeout(opts.callback, this.anim_delay);
                 }
-                switch (opts.type) {
+                switch (opts.type || opts.variant) {
                     case "danger":
                     case "red":
                         opts.type = "alert-danger";
