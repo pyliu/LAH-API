@@ -155,7 +155,7 @@ class WatchDog {
         if ($to_id != "ALL") {
             $url .= "?ID=${to_id}";
         }
-        $content = "目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請用 CHROME/EDGE 瀏覽器前往 ${url}\r\n查看詳細列表。";
+        $content = "目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請用 CHROME 瀏覽器前往 ${url}\r\n查看詳細列表。";
         if ($to_id == "ALL") {
             $title = "15天內逾期案件(全部)通知";
             $sn = $msg->sysSend($title, $content, $chief_id, 14399);  // 14399 secs => +3 hours 59 mins 59 secs
@@ -207,7 +207,7 @@ class WatchDog {
         $host_ip = getLocalhostIP();
         $msg = new Message();
         $url = "http://${host_ip}/temperature.html?id=${to_id}";
-        $content = "$to_name 您好\r\n\r\n系統偵測您於今日 $AMPM 尚未登記體溫！\r\n\r\n請用 CHROME/EDGE 瀏覽器前往 ${url} 進行登記。";
+        $content = "$to_name 您好\r\n\r\n系統偵測您於今日 $AMPM 尚未登記體溫！\r\n\r\n請用 CHROME 瀏覽器前往 ${url} 進行登記。";
         $title = "體溫登記通知";
         $sn = $msg->sysSend($title, $content, $to_id, 840); // 14 mins == 840 secs
         if ($sn == -1) {

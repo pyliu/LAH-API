@@ -1,12 +1,12 @@
 <?php
 const SYSTEM_CONFIG = array(
     "CHIEF_IPS" => array(
-        "xxx.xxx.xxx.xxx"
+        "資訊課長" => "xxx.xxx.xxx.xxx"
     ),
     // Only allow adm IP to access
     "ADM_IPS" => array(
-        "xxx.xxx.xxx.xxx",
-        "::1"
+        "誰" => "xxx.xxx.xxx.xxx",
+        "伺服器" => "::1"
     ),
     "USER_PHOTO_FOLDER" => '\\\\xxx.xxx.xxx.xxx\\Pho\\',
     "MOCK_MODE" => false,
