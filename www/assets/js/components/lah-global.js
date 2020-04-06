@@ -154,6 +154,7 @@ Vue.prototype.$store = (() => {
                 async authenticate({ commit, state }) {
                     try {
                         const isAdmin = await localforage.getItem(`isAdmin`);
+                        const isChief = await localforage.getItem(`isChief`);
                         const set_ts = await localforage.getItem(`authentication_set_ts`);
                         const now_ts = +new Date();
                         // over 15 mins, re-authenticate ... otherwise skip the request
@@ -179,6 +180,7 @@ Vue.prototype.$store = (() => {
                             });
                         } else {
                             commit("isAdmin", isAdmin);
+                            commit("isChief", isChief);
                         }
                     } catch (err) {
                         console.error(err);

@@ -2449,14 +2449,15 @@ if (Vue) {
             v-b-tooltip.hover="id"
             class="text-left mr-1 mb-1"
         >
-            <!--<div><b-avatar variant="light" size="1.2rem" :src="avatar_src"></b-avatar> {{name}}</div>-->
-            <div :data-id="id" :data-name="name">{{name}}</div>
+            <div><b-avatar variant="light" :size="avatar_size" :src="avatar_src" :data-id="id" :data-name="name"></b-avatar> {{name}}</div>
+            <!--<div :data-id="id" :data-name="name">{{name}}</div>-->
             <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block" :data-id="id" :data-name="name"> {{temperature['AM']}} &#8451; AM</lah-fa-icon>
             <lah-fa-icon :icon="pm_icon" :variant="pm_color" class="d-block" :data-id="id" :data-name="name"> {{temperature['PM']}} &#8451; PM</lah-fa-icon>
         </b-button>`,
         props: ['rawUserData', 'inId'],
         data: () => { return {
-            temperature: { AM: 0, PM: 0 }
+            temperature: { AM: 0, PM: 0 },
+            avatar_size: '1.2rem'
         } },
         watch: {
             my_temperature(val) { this.empty(val) ? void(0) : this.setMyTemperature() }
@@ -2480,7 +2481,7 @@ if (Vue) {
             temperatures() { return this.storeParams['todayTemperatures'] },
             my_temperature() { return this.temperatures ? this.temperatures.filter(this_record => $.trim(this_record["id"]) == $.trim(this.id)) : [] },
             store_ready() { return this.temperatures == undefined },
-            avatar_src() { return `get_pho_img.php?name=${this.name}` },
+            avatar_src() { return `get_pho_img.php?name=${this.name}_avatar` },
             am_icon() { return this.thermoIcon(this.temperature['AM']) },
             am_color() { return this.thermoColor(this.temperature['AM']) },
             pm_icon() { return this.thermoIcon(this.temperature['PM']) },
