@@ -54,14 +54,14 @@ switch ($_POST["type"]) {
 		break;
 	case "authentication":
 		// $client_ip is from init.php
-		$is_admin = $mock || in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"]);
-		$is_chief = $mock || in_array($client_ip, SYSTEM_CONFIG["CHIEF_IPS"]);
+		$is_admin = $mock || in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"], true);
+		$is_chief = $mock || in_array($client_ip, SYSTEM_CONFIG["CHIEF_IPS"], true);
 		$msg = $client_ip." 已完成認證(admin: $is_admin, chief: $is_chief)。";
 		$log->info("XHR [authentication] ".$msg);
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
-			"is_admin" => $mock || in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"]),
-			"is_chief" => $mock || in_array($client_ip, SYSTEM_CONFIG["CHIEF_IPS"]),
+			"is_admin" => $is_admin,
+			"is_chief" => $is_chief,
 			"data_count" => "2",
 			"message" => $msg
 		), 0);
