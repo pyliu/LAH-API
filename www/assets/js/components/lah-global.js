@@ -48,6 +48,7 @@ Vue.prototype.$store = (() => {
             state: {
                 cache : new Map(),
                 isAdmin: undefined,
+                isChief: undefined,
                 userNames: undefined,
                 dayMilliseconds: 24 * 60 * 60 * 1000,
                 dynaParams: {},
@@ -59,6 +60,7 @@ Vue.prototype.$store = (() => {
             getters: {
                 cache: state => state.cache,
                 isAdmin: state => state.isAdmin,
+                isChief: state => state.isChief,
                 userNames: state => state.userNames,
                 dayMilliseconds: state => state.dayMilliseconds,
                 dynaParams: state => state.dynaParams,
@@ -78,6 +80,9 @@ Vue.prototype.$store = (() => {
                 },
                 isAdmin(state, flagPayload) {
                     state.isAdmin = flagPayload === true;
+                },
+                isChief(state, flagPayload) {
+                    state.isChief = flagPayload === true;
                 },
                 userNames(state, mappingPayload) {
                     state.userNames = mappingPayload || {};
@@ -149,7 +154,7 @@ Vue.prototype.$store = (() => {
                 async authenticate({ commit, state }) {
                     try {
                         const isAdmin = await localforage.getItem(`isAdmin`);
-                        const set_ts = await localforage.getItem(`isAdmin_set_ts`);
+                        const set_ts = await localforage.getItem(`authentication_set_ts`);
                         const now_ts = +new Date();
                         // over 15 mins, re-authenticate ... otherwise skip the request
                         if (isAdmin === null || !Number.isInteger(set_ts) || now_ts - set_ts > 900000) {
@@ -158,6 +163,8 @@ Vue.prototype.$store = (() => {
                             }).then(res => {
                                 commit("isAdmin", res.data.is_admin || false);
                                 localforage.setItem(`isAdmin`, res.data.is_admin || false);
+                                commit("isChief", res.data.is_chief || false);
+                                localforage.setItem(`isChief`, res.data.is_chief || false);
                             }).catch(err => {
                                 console.error(err);
                                 showAlert({
@@ -166,8 +173,9 @@ Vue.prototype.$store = (() => {
                                     type: 'danger'
                                 });
                                 commit("isAdmin", false);
+                                commit("isChief", false);
                             }).finally(() => {
-                                localforage.setItem(`isAdmin_set_ts`, +new Date()); // == new Date().getTime()
+                                localforage.setItem(`authentication_set_ts`, +new Date()); // == new Date().getTime()
                             });
                         } else {
                             commit("isAdmin", isAdmin);
@@ -216,6 +224,9 @@ Vue.mixin({
         cache() { return this.$store.getters.cache; },
         isAdmin() {
             return this.$store.getters.isAdmin;
+        },
+        isChief() {
+            return this.$store.getters.isChief;
         },
         userNames() {
             if (this.$store.getters.userNames === undefined) {

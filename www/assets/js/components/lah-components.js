@@ -2143,7 +2143,7 @@ if (Vue) {
             <template v-slot:header>
                 <h6 class="d-flex justify-content-between mb-0">
                     <span class="my-auto">體溫紀錄 {{today}}</span>
-                    <b-button @click="overview" variant="primary" size="sm">全所登錄一覽</b-button>
+                    <b-button v-if="isChief" @click="overview" variant="primary" size="sm">全所登錄一覽</b-button>
                 </h6>
             </template>
             <b-form-row>
@@ -2201,7 +2201,7 @@ if (Vue) {
             today: undefined,
             ad_today: undefined,
             id: undefined,
-            temperature: 37.5,
+            temperature: '',
             chart_items: undefined,
             chart_type: 'line',
             list: undefined
@@ -2471,9 +2471,9 @@ if (Vue) {
             ready() { return this.temperature.AM != 0 && this.temperature.PM != 0 },
             style() {
                 if (this.ready) {
-                    if (this.temperature.AM >= 37.5 || this.temperature.PM >= 37.5) return 'danger';
-                    if (this.temperature.AM >= 37 || this.temperature.PM >= 37) return 'warning';
-                    return 'success';
+                    if (this.temperature.AM >= 37.5 || this.temperature.PM >= 37.5) return 'outline-danger';
+                    if (this.temperature.AM >= 37 || this.temperature.PM >= 37) return 'outline-warning';
+                    return 'outline-success';
                 }
                 return this.ready_half ? 'outline-primary' : 'outline-secondary';
             },

@@ -1,5 +1,8 @@
 <?php
 const SYSTEM_CONFIG = array(
+    "CHIEF_IPS" => array(
+        "xxx.xxx.xxx.xxx"
+    ),
     // Only allow adm IP to access
     "ADM_IPS" => array(
         "xxx.xxx.xxx.xxx",

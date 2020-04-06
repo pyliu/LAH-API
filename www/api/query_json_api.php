@@ -54,24 +54,17 @@ switch ($_POST["type"]) {
 		break;
 	case "authentication":
 		// $client_ip is from init.php
-		if ($mock || in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"])) {
-			$msg = $client_ip." 通過管理者認證。";
-			$log->info("XHR [authentication] ".$msg);
-			echo json_encode(array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"is_admin" => true,
-				"data_count" => "0",
-				"message" => $msg
-			), 0);
-		} else {
-			$log->warning("XHR [authentication] ".$client_ip." 嘗試存取限制的管理系統。");
-			echo json_encode(array(
-				"status" => STATUS_CODE::FAIL_NO_AUTHORITY,
-				"is_admin" => false,
-				"data_count" => "0",
-				"message" => "<(￣ ﹌ ￣)> you bad boy ... ".$client_ip
-			), 0);
-		}
+		$is_admin = $mock || in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"]);
+		$is_chief = $mock || in_array($client_ip, SYSTEM_CONFIG["CHIEF_IPS"]);
+		$msg = $client_ip." 已完成認證(admin: $is_admin, chief: $is_chief)。";
+		$log->info("XHR [authentication] ".$msg);
+		echo json_encode(array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"is_admin" => $mock || in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"]),
+			"is_chief" => $mock || in_array($client_ip, SYSTEM_CONFIG["CHIEF_IPS"]),
+			"data_count" => "2",
+			"message" => $msg
+		), 0);
 		break;
 	case "ip":
 		$log->info("XHR [ip] The client IP is $client_ip");
