@@ -618,21 +618,26 @@ if (Vue) {
             <b-form-input
                 ref="lah_user_id"
                 v-model="id"
-                placeholder="HB1184"
+                placeholder="HBXXXX"
                 class="no-cache"
-                :state="validate"
                 @input="$emit('input', id)"
             ></b-form-input>
         </b-input-group>`,
-        props: ['value', 'size'],
+        props: ['value', 'size', 'validator'],
         data: () => { return {
             id: undefined
         } },
+        watch: {
+            value(val) { this.id = val }
+        },
         computed: {
             ID() { return this.id ? this.id.toUpperCase() : null },
             name() { return this.userNames[this.ID] || '' },
             label() { return this.empty(this.name) ? '使用者代碼' : this.name },
-            validate() { return (/^HB\d{4}$/i).test(this.ID) }
+            validate() { return this.validator /*(/^HB\d{4}$/i).test(this.ID)*/ }
+        },
+        mounted() {
+            this.id = this.value;
         }
     });
 
@@ -2154,14 +2159,13 @@ if (Vue) {
                             min="35"
                             max="40"
                             step="0.1"
-                            :state="validateTemperature"
                             class="no-cache"
                         >
                         </b-form-input>
                     </b-input-group>
                 </b-col>
                 <b-col cols="auto">
-                    <b-button variant="outline-primary" @click="register" :disabled="!validate || !validateTemperature">登錄</b-button>
+                    <b-button variant="outline-primary" @click="register" :disabled="disabled">登錄</b-button>
                 </b-col>
             </b-form-row>
             <div v-if="seen">
@@ -2175,7 +2179,7 @@ if (Vue) {
                 </b-list-group>
             </div>
             <template v-if="seen" v-slot:footer>
-                <div v-if="seen" class="my-2">
+                <div class="my-2">
                     <b-button-group size="sm" class="float-right">
                         <b-button variant="primary" @click="chart_type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                         <b-button variant="success" @click="chart_type = 'line'"><i class="fas fa-chart-line"></i></b-button>
@@ -2206,16 +2210,19 @@ if (Vue) {
             ID() { return this.id ? this.id.toUpperCase() : null },
             name() { return this.userNames[this.ID] || '' },
             label() { return this.empty(this.name) ? '使用者代碼' : this.name },
-            validate() { return (/^HB\d{4}$/i).test(this.ID) },
+            validate() { return !this.empty(this.ID) /* (/^HB\d{4}$/i).test(this.ID) */ },
             validateTemperature() {
                 let fn = parseFloat(this.temperature);
                 return !isNaN(fn) && fn > 34 && fn < 43;
             },
-            seen() { return this.chart_items !== undefined && this.chart_items.length != 0 && this.validate }
+            disabled() { return !this.validate || !this.validateTemperature },
+            seen() { return this.chart_items !== undefined && this.chart_items.length != 0 }
         },
         watch: {
-            validate(nVal, oVal) {
-                if (nVal === true) {
+            name(val) {
+                if (this.empty(val)) {
+                    this.chart_items = undefined;
+                } else { 
                     this.history();
                 }
             }
@@ -2356,9 +2363,10 @@ if (Vue) {
             let day = ("0" + now.getDate()).slice(-2);
             this.today = now.getFullYear() - 1911 + mon + day;
             this.ad_today = now.getFullYear()  + mon + day;
+            this.id = this.getUrlParameter('id');
         },
         mounted() {
-            this.id = this.getUrlParameter('id');
+            setTimeout(() => this.id = this.getUrlParameter('id'), 400)
         }
     });
 
@@ -2441,24 +2449,36 @@ if (Vue) {
             v-b-tooltip.hover="id"
             class="text-left mr-1 mb-1"
         >
-            <div><b-avatar variant="light" size="1.2rem" :src="avatar_src"></b-avatar> {{name}}</div>
-            <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block"> {{temperature['AM']}} &#8451; AM</lah-fa-icon>
-            <lah-fa-icon :icon="pm_icon" :variant="pm_color" class="d-block"> {{temperature['PM']}} &#8451; PM</lah-fa-icon>
+            <!--<div><b-avatar variant="light" size="1.2rem" :src="avatar_src"></b-avatar> {{name}}</div>-->
+            <div :data-id="id" :data-name="name">{{name}}</div>
+            <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block" :data-id="id" :data-name="name"> {{temperature['AM']}} &#8451; AM</lah-fa-icon>
+            <lah-fa-icon :icon="pm_icon" :variant="pm_color" class="d-block" :data-id="id" :data-name="name"> {{temperature['PM']}} &#8451; PM</lah-fa-icon>
         </b-button>`,
         props: ['rawUserData', 'inId'],
         data: () => { return {
             temperature: { AM: 0, PM: 0 }
         } },
+        watch: {
+            my_temperature(val) { this.empty(val) ? void(0) : this.setMyTemperature() }
+        },
         computed: {
-            id() { return this.rawUserData ? this.rawUserData['DocUserID'] : this.inId },
+            id() { return this.rawUserData ? $.trim(this.rawUserData['DocUserID']) : this.inId },
             name() { return this.rawUserData ? this.rawUserData['AP_USER_NAME'] : ''},
             today() { return this.nowDatetime.split(' ')[0] },
             now_ampm() { return (parseInt(this.nowDatetime.split(' ')[1].replace(/\:/gi, '')) - 120000) >= 0 ? 'PM' : 'AM' },
             not_ready() { return this.temperature.AM == 0 || this.temperature.PM == 0 },
             ready_half() { return this.temperature.AM != 0 || this.temperature.PM != 0 },
             ready() { return this.temperature.AM != 0 && this.temperature.PM != 0 },
-            style() { return this.ready ? 'success' : this.ready_half ? 'outline-primary' : 'outline-secondary' },
+            style() {
+                if (this.ready) {
+                    if (this.temperature.AM >= 37.5 || this.temperature.PM >= 37.5) return 'danger';
+                    if (this.temperature.AM >= 37 || this.temperature.PM >= 37) return 'warning';
+                    return 'success';
+                }
+                return this.ready_half ? 'outline-primary' : 'outline-secondary';
+            },
             temperatures() { return this.storeParams['todayTemperatures'] },
+            my_temperature() { return this.temperatures ? this.temperatures.filter(this_record => $.trim(this_record["id"]) == $.trim(this.id)) : [] },
             store_ready() { return this.temperatures == undefined },
             avatar_src() { return `get_pho_img.php?name=${this.name}` },
             am_icon() { return this.thermoIcon(this.temperature['AM']) },
@@ -2468,19 +2488,16 @@ if (Vue) {
         },
         methods: {
             setMyTemperature() {
-                let mine = this.temperatures.filter(this_record => this_record["id"] == this.id);
-                if (mine.length > 0) {
-                    mine.forEach(item => {       
-                        let time = parseInt(item['datetime'].split(' ')[1].replace(/\:/gi, ''));
-                        if (time - 120000 >= 0) {
-                            // PM
-                            this.temperature.PM = item['value'];
-                        } else {
-                            // AM
-                            this.temperature.AM = item['value'];
-                        }
-                    });
-                }
+                this.my_temperature.forEach(item => {       
+                    let time = parseInt(item['datetime'].split(' ')[1].replace(/\:/gi, ''));
+                    if (time - 120000 >= 0) {
+                        // PM
+                        this.temperature.PM = item['value'];
+                    } else {
+                        // AM
+                        this.temperature.AM = item['value'];
+                    }
+                });
             },
             getMyTemperatures() {
                 this.isBusy = true;
@@ -2520,7 +2537,7 @@ if (Vue) {
             if (this.inId) {
                 this.getMyTemperatures();
             } else {
-                setTimeout(this.setMyTemperature, 400);
+                setTimeout(() => this.id = this.getUrlParameter('id'), 400);
             }
         }
     });

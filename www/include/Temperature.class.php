@@ -11,6 +11,7 @@ class Temperature {
     function __destruct() { }
 
     public function get($id, $limit = 30) {
+        $id = trim($id);
         if (empty($id)) {
             $stm = $this->db->prepare('SELECT * FROM temperature ORDER BY datetime DESC');
         } else {
@@ -47,6 +48,7 @@ class Temperature {
     }
 
     public function getByIdAndDate($id, $date) {
+        $id = trim($id);
         $stm = $this->db->prepare('SELECT * FROM temperature WHERE id = :id AND datetime LIKE :date ORDER BY datetime DESC');
         $stm->bindParam(':id', $id);
         $stm->bindValue(':date', $date."%");
@@ -64,12 +66,12 @@ class Temperature {
 
     public function getAMPMTemperatures($id, $AMPM) {
         global $log;
-
+        $id = trim($id);
         if (empty($id)) {
             $stm = $this->db->prepare('SELECT * FROM temperature WHERE datetime BETWEEN :st AND :ed ORDER BY datetime DESC');
         } else {
             $stm = $this->db->prepare('SELECT * FROM temperature WHERE id = :id AND datetime BETWEEN :st AND :ed ORDER BY datetime DESC');
-            $stm->bindParam(':id', $id);
+            $stm->bindValue(':id', $id);
         }
 
         $today = date("Y-m-d");
@@ -95,7 +97,7 @@ class Temperature {
 
     public function add($id, $temperature_value, $note = '') {
         global $log;
-
+        $id = trim($id);
         $AMPM = date('A');
         $records = $this->getAMPMTemperatures($id, $AMPM);
         if (count($records) != 0) {
@@ -116,6 +118,7 @@ class Temperature {
     }
 
     public function remove($id, $datetime) {
+        $id = trim($id);
         $stm = $this->db->prepare("DELETE FROM temperature WHERE datetime = :date AND id = :id");
         $stm->bindParam(':date', $datetime);
         $stm->bindParam(':id', $id);

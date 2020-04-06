@@ -30,11 +30,11 @@ class WatchDog {
         ],
         "temperature" => [
             'Sun' => [],
-            'Mon' => ['07:00 AM' => '09:00 AM', '00:00 PM' => '02:00 PM'],
-            'Tue' => ['07:00 AM' => '09:00 AM', '00:00 PM' => '02:00 PM'],
-            'Wed' => ['07:00 AM' => '09:00 AM', '00:00 PM' => '02:00 PM'],
-            'Thu' => ['07:00 AM' => '09:00 AM', '00:00 PM' => '02:00 PM'],
-            'Fri' => ['07:00 AM' => '09:00 AM', '00:00 PM' => '02:00 PM'],
+            'Mon' => ['08:15 AM' => '08:30 AM', '09:15 AM' => '09:30 AM', '01:15 PM' => '01:30 PM', '02:15 PM' => '02:30 PM'],
+            'Tue' => ['08:15 AM' => '08:30 AM', '09:15 AM' => '09:30 AM', '01:15 PM' => '01:30 PM', '02:15 PM' => '02:30 PM'],
+            'Wed' => ['08:15 AM' => '08:30 AM', '09:15 AM' => '09:30 AM', '01:15 PM' => '01:30 PM', '02:15 PM' => '02:30 PM'],
+            'Thu' => ['08:15 AM' => '08:30 AM', '09:15 AM' => '09:30 AM', '01:15 PM' => '01:30 PM', '02:15 PM' => '02:30 PM'],
+            'Fri' => ['08:15 AM' => '08:30 AM', '09:15 AM' => '09:30 AM', '01:15 PM' => '01:30 PM', '02:15 PM' => '02:30 PM'],
             'Sat' => []
         ]
     );
@@ -201,7 +201,7 @@ class WatchDog {
 
     private function sendTemperatureMessage($user) {
         global $log;
-        $to_id = $user['DocUserID'];
+        $to_id = trim($user['DocUserID']);
         $to_name = $user['AP_USER_NAME'];
         $AMPM = date('A');
         $host_ip = getLocalhostIP();
