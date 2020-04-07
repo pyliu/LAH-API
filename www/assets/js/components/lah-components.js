@@ -2372,6 +2372,12 @@ if (Vue) {
 
     Vue.component('lah-temperature-list', {
         template: `<div>
+            <b-button-group size="sm" class="float-right">
+                <b-button variant="light" @click="selectBtn('all')" class="border"><i class="fas fa-list"></i> 全部</b-button>
+                <b-button variant="success" @click="selectBtn('.all-done')"><i class="fas fa-check"></i> 已完成</b-button>
+                <b-button variant="primary" @click="selectBtn('.half-done')"><i class="fas fa-temperature-low"></i> 登錄中</b-button>
+                <b-button variant="secondary" @click="selectBtn('.not-done')"><i class="fas fa-exclamation-circle"></i> 未登錄</b-button>
+            </b-button-group>
             <div v-for="item in filtered" class="clearfix my-2">
                 <h5><lah-fa-icon icon="address-book" prefix="far"> {{item['UNIT']}}</lah-fa-icon></h5>
                 <div>
@@ -2428,6 +2434,18 @@ if (Vue) {
                 }).finally(() => {
                     this.isBusy = false;
                 });
+            },
+            selectBtn(selector) {
+                $(`button.temperature`).hide();
+                switch(selector) {
+                    case ".all-done":
+                    case ".half-done":
+                    case ".not-done":
+                        $(selector).show();
+                        break;
+                    default:
+                        $(`button.temperature`).show();
+                }
             }
         },
         created() {
@@ -2447,7 +2465,7 @@ if (Vue) {
             :variant="style"
             size="sm"
             v-b-tooltip.hover="id"
-            class="text-left mr-1 mb-1"
+            :class="[selector, 'text-left', 'mr-1', 'mb-1', 'temperature']"
         >
             <div><b-avatar variant="light" :size="avatar_size" :src="avatar_src" :data-id="id" :data-name="name"></b-avatar> {{name}}</div>
             <!--<div :data-id="id" :data-name="name">{{name}}</div>-->
@@ -2485,7 +2503,12 @@ if (Vue) {
             am_icon() { return this.thermoIcon(this.temperature['AM']) },
             am_color() { return this.thermoColor(this.temperature['AM']) },
             pm_icon() { return this.thermoIcon(this.temperature['PM']) },
-            pm_color() { return this.thermoColor(this.temperature['PM']) }
+            pm_color() { return this.thermoColor(this.temperature['PM']) },
+            selector() {
+                if (this.ready) return 'all-done';
+                if (this.ready_half) return 'half-done';
+                return 'not-done';
+            }
         },
         methods: {
             setMyTemperature() {
