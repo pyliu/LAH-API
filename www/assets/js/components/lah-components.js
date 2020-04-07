@@ -628,7 +628,8 @@ if (Vue) {
             id: undefined
         } },
         watch: {
-            value(val) { this.id = val }
+            value(val) { this.id = val },
+            id(val) { this.id = this.empty(val) ? '' : val.toString().replace(/[^a-zA-Z0-9]/g, "") }
         },
         computed: {
             ID() { return this.id ? this.id.toUpperCase() : null },
@@ -2210,7 +2211,7 @@ if (Vue) {
             ID() { return this.id ? this.id.toUpperCase() : null },
             name() { return this.userNames[this.ID] || '' },
             label() { return this.empty(this.name) ? '使用者代碼' : this.name },
-            validate() { return !this.empty(this.ID) /* (/^HB\d{4}$/i).test(this.ID) */ },
+            validate() { return !this.empty(this.ID) && this.ID.length < 7 /* (/^HB\d{4}$/i).test(this.ID) */ },
             validateTemperature() {
                 let fn = parseFloat(this.temperature);
                 return !isNaN(fn) && fn > 34 && fn < 43;
