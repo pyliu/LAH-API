@@ -6,7 +6,10 @@ if (!file_exists($full_path)) {
     if (!file_exists($full_path)) {
         $full_path = SYSTEM_CONFIG["USER_PHOTO_FOLDER"].$_REQUEST["id"].'.jpg';
         if (!file_exists($full_path)) {
-            $full_path = 'assets\\img\\not_found.jpg';
+            $full_path = SYSTEM_CONFIG["USER_PHOTO_FOLDER"].trim($_REQUEST["name"], '_avatar').'.jpg';
+            if (!file_exists($full_path)) {
+                $full_path = 'assets\\img\\not_found.jpg';
+            }
         }
     }
 }
