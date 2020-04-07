@@ -623,7 +623,7 @@ if (Vue) {
                 @input="$emit('input', id)"
             ></b-form-input>
         </b-input-group>`,
-        props: ['value', 'size', 'validator'],
+        props: ['value', 'size', 'validator', 'usermap'],
         data: () => { return {
             id: undefined
         } },
@@ -634,7 +634,7 @@ if (Vue) {
         computed: {
             ID() { return this.id ? this.id.toUpperCase() : null },
             name() { return this.userNames[this.ID] || '' },
-            label() { return this.empty(this.name) ? '使用者代碼' : this.name },
+            label() { return this.empty(this.name) || this.usermap === false ? '使用者代碼' : this.name },
             validate() { return this.validator /*(/^HB\d{4}$/i).test(this.ID)*/ }
         },
         mounted() {
@@ -2149,7 +2149,7 @@ if (Vue) {
             </template>
             <b-form-row>
                 <b-col>
-                    <lah-user-id-input v-model="id"></lah-user-id-input>
+                    <lah-user-id-input v-model="id" :usermap="false"></lah-user-id-input>
                 </b-col>
                 <b-col cols="auto">
                     <b-input-group class="mb-1">
@@ -2391,7 +2391,8 @@ if (Vue) {
             </div>
         </div>`,
         props: {
-            userList: { type: Object, default: null }
+            userList: { type: Object, default: null },
+            date: { type: String, default: this.today }
         },
         data: () => { return {
             filtered: null
@@ -2426,7 +2427,7 @@ if (Vue) {
                 this.isBusy = true;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: 'temperatures_by_date',
-                    date: this.today
+                    date: this.date
                 }).then(res => {
                     this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得 ${this.today} 體溫資料回傳狀態碼有問題【${res.data.status}】`);
                     this.addToStoreParams('todayTemperatures', res.data.raw);
