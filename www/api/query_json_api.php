@@ -42,6 +42,10 @@ switch ($_POST["type"]) {
 		break;
 	case "user_mapping":
 		$operators = $mock ? $cache->get('user_mapping') : GetDBUserMapping();
+
+		// quick fix for HB1126
+		$operators['HB1126'] = '薛美月';
+
 		$cache->set('user_mapping', $operators);
 		$count = count($operators);
 		$log->info("XHR [user_mapping] 取得使用者對應表($count)。");
