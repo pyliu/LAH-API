@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("xcase-check", {
         template: `<fieldset>
-            <legend class="bg-light text-dark"><b-icon icon="alert-circle"></b-icon> 跨所註記檢測</legend>
+            <legend class="bg-light text-dark"><b-icon icon="exclamation-circle"></b-icon> 跨所註記檢測</legend>
             <b-form-row>
                 <b-col><b-button pill block @click="check" size="sm" variant="outline-primary"><i class="fas fa-cogs"></i> 檢測</b-button></b-col>
                 <b-col><b-button pill block @click="showNote" size="sm" variant="outline-success" class="col"><i class="fas fa-question"></i> 功能說明</b-col>
