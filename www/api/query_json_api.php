@@ -42,10 +42,6 @@ switch ($_POST["type"]) {
 		break;
 	case "user_mapping":
 		$operators = $mock ? $cache->get('user_mapping') : GetDBUserMapping();
-
-		// quick fix for HB1126
-		$operators['HB1126'] = '薛美月';
-
 		$cache->set('user_mapping', $operators);
 		$count = count($operators);
 		$log->info("XHR [user_mapping] 取得使用者對應表($count)。");
@@ -55,6 +51,25 @@ switch ($_POST["type"]) {
 			"data" => $operators,
 			"message" => "取得 $count 筆使用者資料。"
 		), 0);
+		break;
+	case "on_board_users":
+		$log->info("XHR [on_board_users] 取得所有在職使用者資料請求");
+		$user_info = new UserInfo();
+		$results = $mock ? $cache->get('on_board_users') : $user_info->getOnBoardUsers();
+		$cache->set('on_board_users', $results);
+		if (empty($results)) {
+			echoErrorJSONString("查無在職使用者資料。");
+			$log->info("XHR [on_board_users] 查無在職使用者資料。");
+		} else {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($results),
+				"raw" => $results,
+				"query_string" => ""
+			);
+			$log->info("XHR [on_board_users] 查詢在職使用者資料成功。");
+			echo json_encode($result, 0);
+		}
 		break;
 	case "authentication":
 		// $client_ip is from init.php
@@ -929,25 +944,6 @@ switch ($_POST["type"]) {
 		} else {
 			echoErrorJSONString("新增 ".$_POST["title"]." 訊息失敗【${id}】。");
 			$log->info("XHR [send_message] 新增「".$_POST["title"]."」訊息失敗【${id}】。");
-		}
-		break;
-	case "on_board_users":
-		$log->info("XHR [on_board_users] 取得所有在職使用者資料請求");
-		$user_info = new UserInfo();
-		$results = $mock ? $cache->get('on_board_users') : $user_info->getOnBoardUsers();
-		$cache->set('on_board_users', $results);
-		if (empty($results)) {
-			echoErrorJSONString("查無在職使用者資料。");
-			$log->info("XHR [on_board_users] 查無在職使用者資料。");
-		} else {
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => count($results),
-				"raw" => $results,
-				"query_string" => ""
-			);
-			$log->info("XHR [on_board_users] 查詢在職使用者資料成功。");
-			echo json_encode($result, 0);
 		}
 		break;
 	case "remove_temperature":

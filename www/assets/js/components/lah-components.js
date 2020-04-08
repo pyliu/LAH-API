@@ -615,7 +615,7 @@ if (Vue) {
     Vue.component("lah-user-id-input", {
         template: `<b-input-group :size="size">
         <b-input-group-prepend is-text>
-            <div v-if="validate" class="my-auto"><b-avatar variant="light" size="1.2rem" :src="avatar_src" :data-id="ID" :data-name="name"></b-avatar> {{label}}</div>
+            <div v-if="validate" class="my-auto"><b-avatar variant="light" size="1.2rem" :src="avatar_src" :data-id="ID" :data-name="name"></b-avatar> {{name}}</div>
             <lah-fa-icon v-else icon="user" prefix="far"> 使用者代碼</la-fa-icon>
         </b-input-group-prepend>
             <b-form-input
@@ -627,22 +627,54 @@ if (Vue) {
                 :state="validate"
             ></b-form-input>
         </b-input-group>`,
-        props: ['value', 'size', 'validator', 'usermap', 'onlyOnBoard'],
+        props: ['value', 'size', 'validator', 'onlyOnBoard'],
         data: () => { return {
-            id: undefined
+            id: undefined,
+            onboard_users: undefined
         } },
         watch: {
             value(val) { this.id = val },
             id(val) { this.id = this.empty(val) ? '' : val.toString().replace(/[^a-zA-Z0-9]/g, "") }
         },
         computed: {
+            userNameMap() { return this.only_onboard ? this.onboard_user_names : this.userNames },
             ID() { return this.id ? this.id.toUpperCase() : null },
-            name() { return this.userNames[this.ID] || '' },
-            label() { return this.empty(this.name) || this.usermap === false ? '使用者代碼' : this.name },
+            name() { return this.userNameMap[this.ID] || '' },
             validate() { return this.validator ? this.validator : this.def_validator },
-            def_validator() { return /*(/^HB\d{4}$/i).test(this.ID) || */(this.ID != null && this.ID.length <= 6 && this.ID.length >= 3) },
+            def_validator() { return /*(/^HB\d{4}$/i).test(this.ID) || */!this.empty(this.name) },
             avatar_src() { return `get_pho_img.php?name=${this.name}_avatar` },
-            only_on_board() { return this.onlyOnBoard === true }
+            only_onboard() { return this.onlyOnBoard === true },
+            onboard_user_names() {
+                let names = {};
+                if (this.onboard_users !== undefined) {
+                    this.onboard_users.forEach(user => {
+                        names[$.trim(user['DocUserID'])] = $.trim(user['AP_USER_NAME']);
+                    });
+                }
+                return names;
+            }
+        },
+        async created() {
+            if (this.only_onboard) {
+                let cached = await this.getLocalCache('onboard_users');
+                if (cached === false) {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: 'on_board_users'
+                    }).then(res => {
+                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得在職使用者資料回傳值有誤【${res.data.status}】`)
+                        this.onboard_users = res.data.raw;
+                        this.$log(`取得 ${this.onboard_users.length} 筆在職使用者資料。`);
+                        this.setLocalCache('onboard_users', this.onboard_users, 24 * 60 * 60 * 1000);   // 1 day
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                } else {
+                    this.onboard_users = cached;
+                }
+            }
         },
         mounted() {
             this.id = this.value;
@@ -2156,7 +2188,7 @@ if (Vue) {
             </template>
             <b-form-row>
                 <b-col>
-                    <lah-user-id-input v-model="id"></lah-user-id-input>
+                    <lah-user-id-input v-model="id" :only-on-board="true" ref="userid"></lah-user-id-input>
                 </b-col>
                 <b-col cols="auto">
                     <b-input-group class="mb-1">
