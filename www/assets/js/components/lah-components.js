@@ -2507,7 +2507,7 @@ if (Vue) {
             v-b-tooltip.hover="id"
             :class="[selector, 'text-left', 'mr-1', 'mb-1', 'temperature']"
         >
-            <div><b-avatar variant="light" :size="avatar_size" :src="avatar_src" :data-id="id" :data-name="name"></b-avatar> {{name}}</div>
+            <div><b-avatar button variant="light" :size="avatar_size" :src="avatar_src" :data-id="id" :data-name="name"></b-avatar> {{name}}</div>
             <!--<div :data-id="id" :data-name="name">{{name}}</div>-->
             <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block" :data-id="id" :data-name="name"> {{temperature['AM']}} &#8451; AM</lah-fa-icon>
             <lah-fa-icon :icon="pm_icon" :variant="pm_color" class="d-block" :data-id="id" :data-name="name"> {{temperature['PM']}} &#8451; PM</lah-fa-icon>
