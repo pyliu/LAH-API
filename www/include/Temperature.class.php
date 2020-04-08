@@ -85,8 +85,6 @@ class Temperature {
 
         $ret = $stm->execute();
 
-        $log->info(__METHOD__.": 取得 ${id} ${AMPM} 溫度紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
-
         $array = array();
         while ($row = $ret->fetchArray()) {
             $array[] = $row;
