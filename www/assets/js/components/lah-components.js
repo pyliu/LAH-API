@@ -614,16 +614,20 @@ if (Vue) {
 
     Vue.component("lah-user-id-input", {
         template: `<b-input-group :size="size">
-        <b-input-group-prepend is-text><lah-fa-icon icon="user" prefix="far"> {{label}}</la-fa-icon></b-input-group-prepend>
+        <b-input-group-prepend is-text>
+            <div v-if="validate" class="my-auto"><b-avatar variant="light" size="1.2rem" :src="avatar_src" :data-id="ID" :data-name="name"></b-avatar> {{label}}</div>
+            <lah-fa-icon v-else icon="user" prefix="far"> 使用者代碼</la-fa-icon>
+        </b-input-group-prepend>
             <b-form-input
                 ref="lah_user_id"
                 v-model="id"
                 placeholder="HBXXXX"
                 class="no-cache"
                 @input="$emit('input', id)"
+                :state="validate"
             ></b-form-input>
         </b-input-group>`,
-        props: ['value', 'size', 'validator', 'usermap'],
+        props: ['value', 'size', 'validator', 'usermap', 'onlyOnBoard'],
         data: () => { return {
             id: undefined
         } },
@@ -635,7 +639,10 @@ if (Vue) {
             ID() { return this.id ? this.id.toUpperCase() : null },
             name() { return this.userNames[this.ID] || '' },
             label() { return this.empty(this.name) || this.usermap === false ? '使用者代碼' : this.name },
-            validate() { return this.validator /*(/^HB\d{4}$/i).test(this.ID)*/ }
+            validate() { return this.validator ? this.validator : this.def_validator },
+            def_validator() { return /*(/^HB\d{4}$/i).test(this.ID) || */(this.ID != null && this.ID.length <= 6 && this.ID.length >= 3) },
+            avatar_src() { return `get_pho_img.php?name=${this.name}_avatar` },
+            only_on_board() { return this.onlyOnBoard === true }
         },
         mounted() {
             this.id = this.value;
@@ -2149,7 +2156,7 @@ if (Vue) {
             </template>
             <b-form-row>
                 <b-col>
-                    <lah-user-id-input v-model="id" :usermap="false"></lah-user-id-input>
+                    <lah-user-id-input v-model="id"></lah-user-id-input>
                 </b-col>
                 <b-col cols="auto">
                     <b-input-group class="mb-1">
@@ -2427,7 +2434,7 @@ if (Vue) {
                 this.isBusy = true;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: 'temperatures_by_date',
-                    date: this.date
+                    date: this.today
                 }).then(res => {
                     this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得 ${this.today} 體溫資料回傳狀態碼有問題【${res.data.status}】`);
                     this.addToStoreParams('todayTemperatures', res.data.raw);
