@@ -2196,8 +2196,8 @@ if (Vue) {
                         <b-form-input
                             type="number"
                             v-model="temperature"
-                            min="35"
-                            max="40"
+                            min="34"
+                            max="41"
                             step="0.1"
                             class="no-cache"
                         >
@@ -2252,7 +2252,7 @@ if (Vue) {
             validate() { return !this.empty(this.ID) && this.ID.length < 7 /* (/^HB\d{4}$/i).test(this.ID) */ },
             validateTemperature() {
                 let fn = parseFloat(this.temperature);
-                return !isNaN(fn) && fn > 34 && fn < 43;
+                return !isNaN(fn) && fn >= 34 && fn <= 41;
             },
             disabled() { return !this.validate || !this.validateTemperature },
             seen() { return this.chart_items !== undefined && this.chart_items.length != 0 }
