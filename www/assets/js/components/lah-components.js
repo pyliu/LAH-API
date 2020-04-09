@@ -278,7 +278,7 @@ if (Vue) {
                         </b-navbar-nav>
                     </lah-transition>
                     <b-navbar-nav class="ml-auto">
-                        <b-avatar variant="light" id="header-user-icon" size="2.25rem" :src="avatar"></b-avatar>
+                        <b-avatar variant="light" id="header-user-icon" size="2.25rem" :src="avatar_src"></b-avatar>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
                             <lah-user-card :ip="myip" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
                             <lah-user-message :ip="myip" count="5" title="最新信差訊息" tabs="true" tabsEnd="true"></lah-user-message>
@@ -292,7 +292,7 @@ if (Vue) {
             icon: "question",
             leading: "Unknown",
             active: undefined,
-            avatar: undefined,
+            avatar_src: 'get_user_img.php?name=not_found',
             links: [{
                 text: "今日案件",
                 url: ["index.html", "/"],
@@ -390,8 +390,8 @@ if (Vue) {
                 console.warn(`找不到 ${input} 的使用者資訊，無法顯示目前使用者的卡片。`);
             },
             userFound: function(name) {
-                this.avatar = `get_user_img.php?name=${name}`;
-                this.setLocalCache('avatar_src_url', this.avatar, 7 * 86400000);
+                this.avatar_src = `get_user_img.php?name=${name}_avatar`;
+                this.setLocalCache('avatar_src_url', this.avatar_src, 7 * 86400000);
             },
             checkAuthority: async function() {
                 if (this.isAdmin === undefined) {
@@ -417,8 +417,7 @@ if (Vue) {
                     });
                 }
                 this.$store.commit('myip', myip);
-                // restore avatar photo url
-                this.avatar = await this.getLocalCache('avatar_src_url');
+                this.avatar_src = await this.getLocalCache('avatar_src_url');
             } catch (err) {
                 console.error(err);
             }
