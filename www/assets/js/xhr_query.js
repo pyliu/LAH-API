@@ -225,9 +225,9 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 	let vue_html = `
 		<div id="user_info_app">
 			<b-card class="overflow-hidden bg-light" style="max-width: 540px; font-size: 0.9rem;" title="${tdoc_raw["AP_USER_NAME"]}" sub-title="${tdoc_raw["AP_JOB"]}">
-				<b-link href="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}" target="_blank">
+				<b-link href="get_user_img.php?name=${tdoc_raw["AP_USER_NAME"]}" target="_blank">
 					<b-card-img
-						src="get_pho_img.php?name=${tdoc_raw["AP_USER_NAME"]}"
+						src="get_user_img.php?name=${tdoc_raw["AP_USER_NAME"]}"
 						alt="${tdoc_raw["AP_USER_NAME"]}"
 						class="img-thumbnail float-right ml-2"
 						style="max-width: 220px"

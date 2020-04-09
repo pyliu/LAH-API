@@ -390,7 +390,7 @@ if (Vue) {
                 console.warn(`找不到 ${input} 的使用者資訊，無法顯示目前使用者的卡片。`);
             },
             userFound: function(name) {
-                this.avatar = `get_pho_img.php?name=${name}`;
+                this.avatar = `get_user_img.php?name=${name}`;
                 this.setLocalCache('avatar_src_url', this.avatar, 7 * 86400000);
             },
             checkAuthority: async function() {
@@ -642,7 +642,7 @@ if (Vue) {
             name() { return this.userNameMap[this.ID] || '' },
             validate() { return this.validator ? this.validator : this.def_validator },
             def_validator() { return /*(/^HB\d{4}$/i).test(this.ID) || */!this.empty(this.name) },
-            avatar_src() { return `get_pho_img.php?name=${this.name}_avatar` },
+            avatar_src() { return `get_user_img.php?name=${this.name}_avatar` },
             only_onboard() { return this.onlyOnBoard === true },
             onboard_user_names() {
                 let names = {};
@@ -841,10 +841,10 @@ if (Vue) {
         },
         methods: {
             photoUrl: function (user_data) {
-                return `get_pho_img.php?name=${user_data['AP_USER_NAME']}`;
+                return `get_user_img.php?name=${user_data['AP_USER_NAME']}`;
             },
             openPhoto: function(user_data) {
-                // get_pho_img.php?name=${user_data['AP_USER_NAME']}
+                // get_user_img.php?name=${user_data['AP_USER_NAME']}
                 //<b-img thumbnail fluid src="https://picsum.photos/250/250/?image=54" alt="Image 1"></b-img>
                 showModal({
                     title: `${user_data['AP_USER_NAME']}照片`,
@@ -853,7 +853,7 @@ if (Vue) {
                             className: "text-center"
                         }
                     }, [this.$createElement("b-img", {
-                        props: {fluid: true, src: `get_pho_img.php?name=${user_data['AP_USER_NAME']}`, alt: user_data['AP_USER_NAME'], thumbnail: true}
+                        props: {fluid: true, src: `get_user_img.php?name=${user_data['AP_USER_NAME']}`, alt: user_data['AP_USER_NAME'], thumbnail: true}
                     })]),
                     size: "lg",
                     backdrop_close: true
@@ -2539,7 +2539,7 @@ if (Vue) {
             temperatures() { return this.storeParams['todayTemperatures'] },
             my_temperature() { return this.temperatures ? this.temperatures.filter(this_record => $.trim(this_record["id"]) == $.trim(this.id)) : [] },
             store_ready() { return this.temperatures == undefined },
-            avatar_src() { return `get_pho_img.php?name=${this.name}_avatar` },
+            avatar_src() { return `get_user_img.php?name=${this.name}_avatar` },
             am_icon() { return this.thermoIcon(this.temperature['AM']) },
             am_color() { return this.thermoColor(this.temperature['AM']) },
             pm_icon() { return this.thermoIcon(this.temperature['PM']) },

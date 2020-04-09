@@ -8,7 +8,7 @@ const SYSTEM_CONFIG = array(
         "誰" => "xxx.xxx.xxx.xxx",
         "伺服器" => "::1"
     ),
-    "USER_PHOTO_FOLDER" => '\\\\xxx.xxx.xxx.xxx\\Pho\\',
+    "USER_PHOTO_FOLDER" => '\\\\xxx.xxx.xxx.xxx\\Pho\\',    // used for getting default fallback user image
     "MOCK_MODE" => false,
     // bureau
     "ORA_DB_L3HWEB" => "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=xxx.xxx.xxx.xxx)(PORT=xxxx)))(CONNECT_DATA=(SERVICE_NAME=XXXXX)))",
