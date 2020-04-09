@@ -2261,8 +2261,8 @@ if (Vue) {
             name(val) {
                 if (this.empty(val)) {
                     this.chart_items = undefined;
-                } else { 
-                    this.history();
+                } else {
+                    if (this.validate) this.history();
                 }
             }
         },
