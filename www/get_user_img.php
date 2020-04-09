@@ -3,7 +3,6 @@ require_once("./include/init.php");
 $default_path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."img".DIRECTORY_SEPARATOR."users".DIRECTORY_SEPARATOR;
 $fallback_path = SYSTEM_CONFIG["USER_PHOTO_FOLDER"];
 $key = $_REQUEST["name"] ?? $_REQUEST["id"] ?? "not_found";
-
 $full_path = $default_path.$key.'.jpg';
 if (!file_exists($full_path)) {
     $full_path = $default_path.$key.'-1.jpg';
