@@ -46,7 +46,19 @@ Vue.prototype.$store = (() => {
     if (typeof Vuex == "object") {
         return new Vuex.Store({
             state: {
+                AUTHORITY: {
+                    ADMIN: 1,
+                    CHIEF: 2,
+                    INF_SECTION: 4,
+                    SUR_SECTION: 8,
+                    VAL_SECTION: 16,
+                    ADM_SECTION: 32,
+                    REG_SECTION: 64,
+                    ACCOUNT_SECTION: 128,
+                    HR_SECTION: 256
+                },
                 cache : new Map(),
+                authority: 0,   // use bitwise compare
                 isAdmin: undefined,
                 isChief: undefined,
                 userNames: undefined,
