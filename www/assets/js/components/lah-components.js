@@ -2501,7 +2501,7 @@ if (Vue) {
             :data-id="id"
             :data-name="name"
             :variant="style"
-            :class="[selector, 'text-left', 'mr-1', 'mb-1', 'temperature', 'lah-user-card']"
+            :class="[selector, 'text-left', 'mr-1', 'mb-1', 'temperature', 'lah-user-card', 'position-relative']"
             size="sm"
             @click="click"
             v-b-hover="hover"
@@ -2560,11 +2560,11 @@ if (Vue) {
             },
             hover(flag, e) {
                 if (flag) {
-                    $(e.target).find(".b-avatar").addClass('position-absolute');
+                    $(e.target).find(".b-avatar").addClass('avatar_scale_center');
                     //$(e.target).find("div:first-child").addClass('pl-3');
                     this.avatar_size = '3.8rem';
                 } else {
-                    $(e.target).find(".b-avatar").removeClass('position-absolute');
+                    $(e.target).find(".b-avatar").removeClass('avatar_scale_center');
                     //$(e.target).find("div:first-child").removeClass('pl-3');
                     this.avatar_size = '1.2rem';
                 }

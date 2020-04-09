@@ -156,7 +156,7 @@ blockquote {
 
 .b-table a:link, .b-table a:visited {
 	color: rgba(56, 56, 241, 0.842);
-  }
+}
   
 .b-table .bg-success a:link, .b-table .bg-danger a:link, .b-table .bg-success a:visited, .b-table .bg-danger a:visited {
 	color: white;
@@ -185,4 +185,14 @@ blockquote {
 .list-enter, .list-leave-to {
 	opacity: 0;
 	transform: translateX(30px);
+}
+
+/* container need to be 'position: relative' */
+.avatar_scale_center {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	/* the avatar scales to 3.8rem*/
+	margin-left: -1.9rem;
+	margin-top: -1.9rem;
 }
