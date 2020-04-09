@@ -374,7 +374,7 @@ class RegCaseData {
     }
 
     public function getReceptionistTooltipAttr() {
-        return empty($this->row["RM96"]) || $this->row["RM96"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM96"]."' data-name='".$this->getIDorName($this->row["RM96"])."' data-toggle='tooltip' title='收件人員：".$this->row["RM96"]."'";
+        return empty($this->row["RM96"]) || $this->row["RM96"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueApp.\$user' data-id='".$this->row["RM96"]."' data-name='".$this->getIDorName($this->row["RM96"])."' data-toggle='tooltip' title='收件人員：".$this->row["RM96"]."'";
     }
 
     public function getCurrentOperator() {
@@ -386,7 +386,7 @@ class RegCaseData {
     }
 
     public function getCurrentOperatorTooltipAttr() {
-        return empty($this->row["RM30_1"]) || $this->row["RM30_1"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM30_1"]."' data-name='".$this->getIDorName($this->row["RM30_1"])."' data-toggle='tooltip' title='作業人員：".$this->row["RM30_1"]."'";
+        return empty($this->row["RM30_1"]) || $this->row["RM30_1"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueApp.\$user' data-id='".$this->row["RM30_1"]."' data-name='".$this->getIDorName($this->row["RM30_1"])."' data-toggle='tooltip' title='作業人員：".$this->row["RM30_1"]."'";
     }
 
     public function getFirstReviewer() {
@@ -409,7 +409,7 @@ class RegCaseData {
     }
 
     public function getFirstReviewerTooltipAttr() {
-        return empty($this->row["RM45"]) || $this->row["RM45"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM45"]."' data-name='".$this->getIDorName($this->row["RM45"])."' data-toggle='tooltip' title='初審人員：".$this->row["RM45"]."'";
+        return empty($this->row["RM45"]) || $this->row["RM45"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueApp.\$user' data-id='".$this->row["RM45"]."' data-name='".$this->getIDorName($this->row["RM45"])."' data-toggle='tooltip' title='初審人員：".$this->row["RM45"]."'";
     }
 
     public function getSecondReviewer() {
@@ -417,7 +417,7 @@ class RegCaseData {
     }
 
     public function getSecondReviewerTooltipAttr() {
-        return empty($this->row["RM47"]) || $this->row["RM47"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM47"]."' data-name='".$this->getIDorName($this->row["RM47"])."' data-toggle='tooltip' title='複審人員：".$this->row["RM47"]."'";
+        return empty($this->row["RM47"]) || $this->row["RM47"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueApp.\$user' data-id='".$this->row["RM47"]."' data-name='".$this->getIDorName($this->row["RM47"])."' data-toggle='tooltip' title='複審人員：".$this->row["RM47"]."'";
     }
 
     public function getSecondReviewerTimestamp() {
@@ -437,7 +437,7 @@ class RegCaseData {
     }
 
     public function getPreRegisterTooltipAttr() {
-        return empty($this->row["RM63"]) || $this->row["RM63"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM63"]."' data-name='".$this->getIDorName($this->row["RM63"])."' data-toggle='tooltip' title='准登人員：".$this->row["RM63"]."'";
+        return empty($this->row["RM63"]) || $this->row["RM63"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueApp.\$user' data-id='".$this->row["RM63"]."' data-name='".$this->getIDorName($this->row["RM63"])."' data-toggle='tooltip' title='准登人員：".$this->row["RM63"]."'";
     }
 
     public function getPreRegisterTimestamp() {
@@ -458,7 +458,7 @@ class RegCaseData {
     }
 
     public function getRegisterTooltipAttr() {
-        return empty($this->row["RM55"]) || $this->row["RM55"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM55"]."' data-name='".$this->getIDorName($this->row["RM55"])."' data-toggle='tooltip' title='登記人員：".$this->row["RM55"]."'";
+        return empty($this->row["RM55"]) || $this->row["RM55"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueApp.\$user' data-id='".$this->row["RM55"]."' data-name='".$this->getIDorName($this->row["RM55"])."' data-toggle='tooltip' title='登記人員：".$this->row["RM55"]."'";
     }
 
     public function getRegisterTimestamp() {
@@ -480,7 +480,7 @@ class RegCaseData {
     }
 
     public function getCheckerTooltipAttr() {
-        return empty($this->row["RM57"]) || $this->row["RM57"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM57"]."' data-name='".$this->getIDorName($this->row["RM57"])."' data-toggle='tooltip' title='校對人員：".$this->row["RM57"]."'";
+        return empty($this->row["RM57"]) || $this->row["RM57"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueApp.\$user' data-id='".$this->row["RM57"]."' data-name='".$this->getIDorName($this->row["RM57"])."' data-toggle='tooltip' title='校對人員：".$this->row["RM57"]."'";
     }
 
     public function getCheckerTimestamp() {
@@ -503,7 +503,7 @@ class RegCaseData {
     }
 
     public function getCloserTooltipAttr() {
-        return empty($this->row["RM59"]) || $this->row["RM59"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueAp.fetchUserInfo' data-id='".$this->row["RM59"]."' data-name='".$this->getIDorName($this->row["RM59"])."' data-toggle='tooltip' title='結案人員：".$this->row["RM59"]."'";
+        return empty($this->row["RM59"]) || $this->row["RM59"] == "XXXXXXXX" ? "" : "class='user_tag' @click.stop='window.vueApp.\$user' data-id='".$this->row["RM59"]."' data-name='".$this->getIDorName($this->row["RM59"])."' data-toggle='tooltip' title='結案人員：".$this->row["RM59"]."'";
     }
 
     public function getCloserTimestamp() {

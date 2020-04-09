@@ -133,7 +133,7 @@ let isEmpty = variable => {
 
 let addUserInfoEvent = () => {
     $(".user_tag").off("click");
-    $(".user_tag").on("click", window.vueApp.fetchUserInfo);
+    $(".user_tag").on("click", vueApp.$user);
 }
 
 let showPopper = (selector, content, timeout) => {
