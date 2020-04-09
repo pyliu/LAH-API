@@ -2498,23 +2498,29 @@ if (Vue) {
     Vue.component('lah-user-temperature', {
         mixins: [temperatureMixin],
         template: `<b-button
-            @click="vueApp.fetchUserInfo"
+            @click="click"
             :data-id="id"
             :data-name="name"
             :variant="style"
             size="sm"
-            v-b-tooltip.hover="id"
             :class="[selector, 'text-left', 'mr-1', 'mb-1', 'temperature', 'lah-user-card']"
+            v-b-hover="hover"
+            :id="btnid"
         >
             <div><b-avatar button variant="light" :size="avatar_size" :src="avatar_src"></b-avatar> {{name}}</div>
-            <!--<div>{{name}}</div>-->
             <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block"> {{temperature['AM']}} &#8451; AM</lah-fa-icon>
             <lah-fa-icon :icon="pm_icon" :variant="pm_color" class="d-block"> {{temperature['PM']}} &#8451; PM</lah-fa-icon>
+            <b-popover :target="btnid" triggers="hover focus" placement="top" delay="250">
+                {{id}} : {{name}}
+                <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block"> {{temperature['AM']}} &#8451; AM</lah-fa-icon>
+                <lah-fa-icon :icon="pm_icon" :variant="pm_color" class="d-block"> {{temperature['PM']}} &#8451; PM</lah-fa-icon>
+            </b-popover>
         </b-button>`,
         props: ['rawUserData', 'inId'],
         data: () => { return {
             temperature: { AM: 0, PM: 0 },
-            avatar_size: '1.2rem'
+            avatar_size: '1.2rem',
+            btnid: '',
         } },
         watch: {
             my_temperature(val) { this.empty(val) ? void(0) : this.setMyTemperature() }
@@ -2550,6 +2556,20 @@ if (Vue) {
             }
         },
         methods: {
+            click(e) {
+                this.$user(e);
+            },
+            hover(flag, e) {
+                if (flag) {
+                    $(e.target).find(".b-avatar").addClass('position-absolute');
+                    //$(e.target).find("div:first-child").addClass('pl-3');
+                    this.avatar_size = '3.8rem';
+                } else {
+                    $(e.target).find(".b-avatar").removeClass('position-absolute');
+                    //$(e.target).find("div:first-child").removeClass('pl-3');
+                    this.avatar_size = '1.2rem';
+                }
+            },
             setMyTemperature() {
                 this.my_temperature.forEach(item => {       
                     let time = parseInt(item['datetime'].split(' ')[1].replace(/\:/gi, ''));
@@ -2602,6 +2622,7 @@ if (Vue) {
             } else {
                 setTimeout(() => this.id = this.getUrlParameter('id'), 400);
             }
+            this.btnid = this.uuid();
         }
     });
 } else {

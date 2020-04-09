@@ -52,7 +52,7 @@ Vue.prototype.$open = function(url, e) {
 };
 Vue.prototype.$user = function(e) {
     if (CONFIG.DISABLE_MSDB_QUERY) {
-        console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping $user.");
+        console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping $user call.");
         return;
     }
     
@@ -61,6 +61,7 @@ Vue.prototype.$user = function(e) {
     let name = $.trim(clicked_element.data("name")) || '';
     let id = trim(clicked_element.data("id")) || '';
     let ip = $.trim(clicked_element.data("ip")) || '';
+
     if (this.empty(name) && this.empty(id) && this.empty(ip)) {
         // fallback to find itself data-*
         clicked_element = $(e.target);
