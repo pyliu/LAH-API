@@ -47,6 +47,7 @@ Vue.prototype.$store = (() => {
         return new Vuex.Store({
             state: {
                 AUTHORITY: {
+                    SUPER: 512, // developer
                     ADMIN: 1,
                     CHIEF: 2,
                     INF_SECTION: 4,
@@ -57,8 +58,8 @@ Vue.prototype.$store = (() => {
                     ACCOUNT_SECTION: 128,
                     HR_SECTION: 256
                 },
-                cache : new Map(),
                 authority: 0,   // use bitwise compare
+                cache : new Map(),
                 isAdmin: undefined,
                 isChief: undefined,
                 userNames: undefined,
@@ -701,8 +702,8 @@ $(document).ready(() => {
                     return;
                 }
                 
-                // find the most closest 
-                let clicked_element = $($(e.target).closest(".user_tag"));
+                // find the most closest element to get the data-* attrs
+                let clicked_element = $($(e.target).closest(".user_tag,.lah-user-card"));
                 let name = $.trim(clicked_element.data("name")) || '';
                 let id = trim(clicked_element.data("id")) || '';
                 let ip = $.trim(clicked_element.data("ip")) || '';

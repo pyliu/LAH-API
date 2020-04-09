@@ -65,7 +65,6 @@ class Temperature {
     }
 
     public function getAMPMTemperatures($id, $AMPM) {
-        global $log;
         $id = trim($id);
         if (empty($id)) {
             $stm = $this->db->prepare('SELECT * FROM temperature WHERE datetime BETWEEN :st AND :ed ORDER BY datetime DESC');

@@ -2505,12 +2505,12 @@ if (Vue) {
             :variant="style"
             size="sm"
             v-b-tooltip.hover="id"
-            :class="[selector, 'text-left', 'mr-1', 'mb-1', 'temperature']"
+            :class="[selector, 'text-left', 'mr-1', 'mb-1', 'temperature', 'lah-user-card']"
         >
-            <div><b-avatar button variant="light" :size="avatar_size" :src="avatar_src" :data-id="id" :data-name="name"></b-avatar> {{name}}</div>
-            <!--<div :data-id="id" :data-name="name">{{name}}</div>-->
-            <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block" :data-id="id" :data-name="name"> {{temperature['AM']}} &#8451; AM</lah-fa-icon>
-            <lah-fa-icon :icon="pm_icon" :variant="pm_color" class="d-block" :data-id="id" :data-name="name"> {{temperature['PM']}} &#8451; PM</lah-fa-icon>
+            <div><b-avatar button variant="light" :size="avatar_size" :src="avatar_src"></b-avatar> {{name}}</div>
+            <!--<div>{{name}}</div>-->
+            <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block"> {{temperature['AM']}} &#8451; AM</lah-fa-icon>
+            <lah-fa-icon :icon="pm_icon" :variant="pm_color" class="d-block"> {{temperature['PM']}} &#8451; PM</lah-fa-icon>
         </b-button>`,
         props: ['rawUserData', 'inId'],
         data: () => { return {
