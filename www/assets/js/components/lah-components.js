@@ -2498,14 +2498,14 @@ if (Vue) {
     Vue.component('lah-user-temperature', {
         mixins: [temperatureMixin],
         template: `<b-button
-            @click="click"
+            :id="btnid"
             :data-id="id"
             :data-name="name"
             :variant="style"
-            size="sm"
             :class="[selector, 'text-left', 'mr-1', 'mb-1', 'temperature', 'lah-user-card']"
+            size="sm"
+            @click="click"
             v-b-hover="hover"
-            :id="btnid"
         >
             <div><b-avatar button variant="light" :size="avatar_size" :src="avatar_src"></b-avatar> {{name}}</div>
             <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block"> {{temperature['AM']}} &#8451; AM</lah-fa-icon>
