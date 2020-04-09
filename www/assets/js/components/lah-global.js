@@ -49,7 +49,6 @@ Vue.prototype.$open = function(url, e) {
         html: true,
         noCloseOnBackdrop: false
     });
-    this.$log(url, h);
 };
 // single source of truth
 Vue.prototype.$store = (() => {
@@ -639,15 +638,6 @@ $(document).ready(() => {
                     }
                 }).catch(err => {
                     this.error = err;
-                });
-            },
-            open: function(url, e) {
-                let h = window.innerHeight - 160;
-                this.modal(`<iframe src="${url}" class="w-100" height="${h}" frameborder="0"></iframe>`, {
-                    title: e.target.title || `外部連結`,
-                    size: "xl",
-                    html: true,
-                    noCloseOnBackdrop: false
                 });
             },
             download: function(url, data) {
