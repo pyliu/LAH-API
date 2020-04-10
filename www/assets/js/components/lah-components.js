@@ -277,11 +277,10 @@ if (Vue) {
                             </b-nav-item>
                         </b-navbar-nav>
                     </lah-transition>
-                    <b-navbar-nav class="ml-auto">
+                    <b-navbar-nav @click="clearCache" class="ml-auto mr-1">
                         <b-avatar variant="light" id="header-user-icon" size="2.25rem" :src="avatar_src"></b-avatar>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
                             <lah-user-card :ip="myip" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
-                            <lah-user-message :ip="myip" count="5" title="最新信差訊息" tabs="true" tabsEnd="true"></lah-user-message>
                         </b-popover>
                     </b-navbar-nav>
                 </b-collapse>
@@ -401,6 +400,17 @@ if (Vue) {
                     $('body').html("<h3 class='text-center m-5 font-weight-bold'><a href='javascript:history.back()' class='text-danger'>限制存取區域，請返回上一頁！</a></h3>");
                 }
                 $("body section:first-child").removeClass("hide");
+            },
+            clearCache: function() {
+                this.$confirm(`清除全部快取紀錄？`, () => {
+                    this.$lf.clear().then(() => {
+                        addNotification({
+                            title: "清除快取",
+                            message: "已清除快取紀錄，請重新整理頁面。",
+                            type: "success"
+                        });
+                    });
+                });
             }
         },
         async created() {
