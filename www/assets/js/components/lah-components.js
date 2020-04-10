@@ -277,10 +277,10 @@ if (Vue) {
                             </b-nav-item>
                         </b-navbar-nav>
                     </lah-transition>
-                    <b-navbar-nav @click="clearCache" class="ml-auto mr-1" style="cursor: pointer;">
-                        <b-avatar variant="light" id="header-user-icon" size="2.25rem" :src="avatar_src"></b-avatar>
+                    <b-navbar-nav @click="clearCache" class="ml-auto mr-2" style="cursor: pointer;">
+                        <b-avatar variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
-                            <lah-user-card :ip="myip" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
+                            <lah-user-card :ip="myip" :avatar="true" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
                         </b-popover>
                     </b-navbar-nav>
                 </b-collapse>
@@ -896,7 +896,7 @@ if (Vue) {
                 }
             }
         },
-        props: ['id', 'name', 'ip', 'title'],
+        props: ['id', 'name', 'ip', 'title', 'avatar'],
         data: function() { return {
             user_rows: null
         } },
@@ -908,6 +908,9 @@ if (Vue) {
         },
         methods: {
             photoUrl: function (user_data) {
+                if (this.avatar) {
+                    return `get_user_img.php?name=${user_data['AP_USER_NAME']}_avatar`;
+                }
                 return `get_user_img.php?name=${user_data['AP_USER_NAME']}`;
             },
             openPhoto: function(user_data) {
