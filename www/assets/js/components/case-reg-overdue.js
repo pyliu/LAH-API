@@ -64,7 +64,7 @@ if (Vue) {
                         <span v-else>{{data.value.split(" ")[0]}}</span>
                     </template>
                     <template v-slot:cell(作業人員)="data">
-                        <b-button :data-name="data.value" variant="outline-secondary" :size="small ? 'sm' : 'md'" @click="$user" :title="'查詢 '+data.value+' 的使用者訊息'">{{data.value}}</b-button>
+                        <b-button :data-name="data.value" variant="outline-secondary" :size="small ? 'sm' : 'md'" @click="showUser" :title="'查詢 '+data.value+' 的使用者訊息'">{{data.value}}</b-button>
                     </template>
                 </b-table>
             </lah-transition>
@@ -348,7 +348,8 @@ if (Vue) {
                     message: vm,
                     size: "sm"
                 });
-            }
+            },
+            showUser: function(e) { this.$user(e) }
         },
         mounted() {
             if (this.is_in_modal_mode) {

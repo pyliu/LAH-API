@@ -277,7 +277,7 @@ if (Vue) {
                             </b-nav-item>
                         </b-navbar-nav>
                     </lah-transition>
-                    <b-navbar-nav @click="clearCache" class="ml-auto mr-1">
+                    <b-navbar-nav @click="clearCache" class="ml-auto mr-1" style="cursor: pointer;">
                         <b-avatar variant="light" id="header-user-icon" size="2.25rem" :src="avatar_src"></b-avatar>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
                             <lah-user-card :ip="myip" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
