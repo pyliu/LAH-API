@@ -469,48 +469,55 @@ if (Vue) {
                 <b-button @click="clear" size="sm" variant="danger">清除 <b-badge variant="light" pill>{{count}}</b-badge></b-button>
             </div>
             <b-list-group class="small">
-                <b-list-group-item v-for="item in all" :primary-key="item.key">
-                    <b-button-close @click="del(item.key)" class="valign-top"></b-button-close>
-                    <div class="truncate">{{item.key}} : {{item.val}}</div>
-                </b-list-group-item>
+                <transition-group name="list">
+                    <b-list-group-item v-for="(item, idx) in all" :key="item.key" v-b-popover.hover.d400="JSON.stringify(item.val)">
+                        <b-button-close @click="del(item.key, idx)" style="font-size: 1rem; color: red;"></b-button-close>
+                        <div class="truncate font-weight-bold">{{item.key}}</div>
+                    </b-list-group-item>
+                </transition-group>
             </b-list-group>
         </b-card>`,
         data: () => { return {
             all: undefined
         } },
         computed: {
-            count() { return this.keys ? this.keys.length : 0 }
+            count() { return this.all ? this.all.length : 0 }
         },
         methods: {
             async get(key) {
                 let valObj = await this.$lf.getItem(key);
                 return typeof valObj == 'object' ? valObj.value : valObj;
             },
-            del(key) {
+            del(key, idx) {
                 this.$confirm(`清除 ${key} 快取紀錄？`, () => {
-                    this.$lf.removeItem(key).then(this.reload);
-                });
-            },
-            reload() {
-                this.keys = {};
-                this.all = [];
-                this.$lf.keys().then(keys => {
-                    keys.forEach(async key => {
-                        const val = await this.$lf.getItem(key);
-                        this.all.push({key: key, val: val});
+                    this.$lf.removeItem(key).then(() => {
+                        for ( let i = 0; i < this.all.length; i++) {
+                            if ( this.all[i].key == key) {
+                                this.all.splice(i, 1);
+                                return true;
+                            }
+                        }
                     });
-                }).finally(() => {
-                    //this.$log(this.all);
                 });
             },
             clear() {
                 this.$confirm(`清除所有快取紀錄？`, () => {
-                    this.$lf.clear().then(this.reload);
+                    this.$lf.clear().then(() => {
+                        this.all = [];
+                    });
                 });
             }
         },
         created() {
-            this.reload();
+            this.all = [];
+            this.$lf.keys().then(keys => {
+                keys.forEach(async key => {
+                    const val = await this.$lf.getItem(key);
+                    this.all.push({key: key, val: val});
+                });
+            }).finally(() => {
+                //this.$log(this.all);
+            });
         }
     });
     // need to include Chart.min.js (chart.js) first.
