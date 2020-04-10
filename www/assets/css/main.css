@@ -196,3 +196,10 @@ blockquote {
 	margin-left: -1.9rem;
 	margin-top: -1.9rem;
 }
+
+.truncate {
+	max-width: 350px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

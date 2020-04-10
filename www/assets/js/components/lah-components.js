@@ -452,6 +452,57 @@ if (Vue) {
         }
     });
 
+    Vue.component("lah-cache-mgt", {
+        template: `<b-card>
+            <div class="d-flex w-100 justify-content-between mb-2">
+                <h6 class="my-auto">清除快取資料</h6>
+                <b-button @click="clear" size="sm" variant="danger">清除 <b-badge variant="light" pill>{{count}}</b-badge></b-button>
+            </div>
+            <b-list-group class="small">
+                <b-list-group-item v-for="item in all" :primary-key="item.key">
+                    <b-button-close @click="del(item.key)" class="valign-top"></b-button-close>
+                    <div class="truncate">{{item.key}} : {{item.val}}</div>
+                </b-list-group-item>
+            </b-list-group>
+        </b-card>`,
+        data: () => { return {
+            all: undefined
+        } },
+        computed: {
+            count() { return this.keys ? this.keys.length : 0 }
+        },
+        methods: {
+            async get(key) {
+                let valObj = await this.$lf.getItem(key);
+                return typeof valObj == 'object' ? valObj.value : valObj;
+            },
+            del(key) {
+                this.$confirm(`清除 ${key} 快取紀錄？`, () => {
+                    this.$lf.removeItem(key).then(this.reload);
+                });
+            },
+            reload() {
+                this.keys = {};
+                this.all = [];
+                this.$lf.keys().then(keys => {
+                    keys.forEach(async key => {
+                        const val = await this.$lf.getItem(key);
+                        this.all.push({key: key, val: val});
+                    });
+                }).finally(() => {
+                    //this.$log(this.all);
+                });
+            },
+            clear() {
+                this.$confirm(`清除所有快取紀錄？`, () => {
+                    this.$lf.clear().then(this.reload);
+                });
+            }
+        },
+        created() {
+            this.reload();
+        }
+    });
     // need to include Chart.min.js (chart.js) first.
     Vue.component("lah-chart", {
         template: `<div><canvas class="w-100">圖形初始化失敗</canvas></div>`,
