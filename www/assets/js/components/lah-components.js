@@ -402,7 +402,7 @@ if (Vue) {
                 $("body section:first-child").removeClass("hide");
             },
             clearCache: function() {
-                this.$confirm(`清除全部快取紀錄？`, () => {
+                this.$confirm(`清除全部暫存資料？`, () => {
                     this.$lf.clear().then(() => {
                         addNotification({
                             title: "清除快取",
@@ -1725,7 +1725,7 @@ if (Vue) {
             cleanAll: function(e) {
                 if (this.cleanAllBackupFlag !== true) {
                     showAlert({
-                        title: "清除全部暫存檔",
+                        title: "清除全部暫存資料",
                         subtitle: `${this.year}-${this.code}-${this.number}`,
                         message: "請先備份！",
                         type: "warning"
