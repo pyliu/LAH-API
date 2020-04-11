@@ -111,8 +111,13 @@ if (Vue) {
             "crsms-case": VueCRSMS,
             "cmsms-case": VueCMSMS
         },
-        template: `<fieldset>
-            <legend>查詢人民申請案件</legend>
+        template: `<b-card>
+            <template v-slot:header>
+                <div class="d-flex w-100 justify-content-between mb-0">
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="search"> 查詢人民申請案件</lah-fa-icon></h6>
+                    <b-button @click="showModal(noteObj)" size="sm" variant="success"><i class="fas fa-question"></i> 功能說明</b-button>
+                </div>
+            </template>
             <b-input-group size="sm">
                 <b-input-group-prepend is-text><b-icon icon="person-fill"></b-icon></b-input-group-prepend>
                 <b-form-input
@@ -125,12 +130,10 @@ if (Vue) {
                 ></b-form-input>
                 &ensp;
                 <b-button size="sm" @click="search" variant="outline-primary"><i class="fas fa-search"></i> 搜尋</b-button>
-                &ensp;
-                <b-button size="sm" @click="showModal(noteObj)" variant="outline-success"><i class="fas fa-question"></i> 功能說明</b-button>
             </b-input-group>
             <div id="id_query_crsms_result"></div>
             <div id="id_query_cmsms_result"></div>
-        </fieldset>`,
+        </b-card>`,
         data: function() {
             return {
                 pid: '',
