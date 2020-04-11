@@ -261,7 +261,7 @@ if (Vue) {
 
     Vue.component("lah-header", {
         template: `<lah-transition slide-down>
-            <b-navbar v-if="show" toggleable="md" type="dark" variant="dark" class="mb-3" fixed="top">
+            <b-navbar v-if="show" toggleable="md" type="dark" :variant="variant" class="mb-3" fixed="top">
                 <lah-fa-icon size="2x" variant="light" class="mr-2" :icon="icon"></lah-fa-icon>
                 <b-navbar-brand :href="location.href" v-html="leading"></b-navbar-brand>
                 <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
@@ -347,6 +347,20 @@ if (Vue) {
                     return 'index.html';
                 }
                 return page_url;
+            },
+            variant() {
+                let day_of_week = new Date().getDay();
+                switch(day_of_week) {
+                    case 1:
+                    case 2:
+                        return 'dark';
+                    case 3:
+                    case 4:
+                        return 'secondary';
+                    case 5:
+                    default:
+                        return 'success';
+                }
             }
         },
         methods: {

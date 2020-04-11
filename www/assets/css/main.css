@@ -24,23 +24,16 @@ fieldset {
 	-moz-border-radius: 8px;
 	-webkit-border-radius: 8px;
 
-	/*
-	background:-webkit-liner-gradient(top,#EEEEEE,#FFFFFF);
-	background:linear-gradient(top,#EFEFEF,#FFFFFF);
-
-	box-shadow:3px 3px 10px #666;
-	-moz-box-shadow:3px 3px 10px #666;
-	-webkit-box-shadow:3px 3px 10px #666;
-	*/
+	font-size: .9rem;;
 	position:relative;
 }
 
 legend {
 	width: auto;
 	padding:5px 10px;
-	font-size: 1.25rem;
-	background-color:#343a40;
-	color:#FFF;
+	font-size: 1.1rem;
+	background-color:#FFF;
+	color:#000;
 	font-weight: bold;
 
 	border-radius:15px;
@@ -50,10 +43,6 @@ legend {
 	box-shadow:2px 2px 4px #666;
 	-moz-box-shadow:2px 2px 4px #666;
 	-webkit-box-shadow:2px 2px 4px #666;
-  /*
-	position:absolute;
-	left:10px;top:-11px;
-  */
 }
 
 .hide {
