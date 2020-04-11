@@ -997,7 +997,6 @@ if (Vue) {
                     });
                 }
             }
-            this.$log(this.avatar);
         }
     });
 
@@ -2578,7 +2577,7 @@ if (Vue) {
             :variant="style"
             :class="[selector, 'text-left', 'mr-1', 'mb-1', 'temperature', 'lah-user-card', 'position-relative']"
             size="sm"
-            @click="click"
+            @click="usercard"
             v-b-hover="hover"
         >
             <div><b-avatar button variant="light" :size="avatar_size" :src="avatar_src"></b-avatar> {{name}}</div>
@@ -2630,9 +2629,6 @@ if (Vue) {
             }
         },
         methods: {
-            click(e) {
-                this.$user(e);
-            },
             hover(flag, e) {
                 if (flag) {
                     $(e.target).find(".b-avatar").addClass('avatar_scale_center');

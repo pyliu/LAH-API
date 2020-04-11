@@ -50,49 +50,6 @@ Vue.prototype.$open = function(url, e) {
         noCloseOnBackdrop: false
     });
 };
-Vue.prototype.$user = function(e) {
-    if (CONFIG.DISABLE_MSDB_QUERY) {
-        console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping $user call.");
-        return;
-    }
-    
-    // find the most closest element to get the data-* attrs
-    let clicked_element = $($(e.target).closest(".user_tag,.lah-user-card"));
-    let name = $.trim(clicked_element.data("name")) || '';
-    let id = trim(clicked_element.data("id")) || '';
-    let ip = $.trim(clicked_element.data("ip")) || '';
-
-    if (this.empty(name) && this.empty(id) && this.empty(ip)) {
-        // fallback to find itself data-*
-        clicked_element = $(e.target);
-        name = $.trim(clicked_element.data("name")) || $.trim(clicked_element.text()) || '';
-        id = trim(clicked_element.data("id")) || '';
-        ip = $.trim(clicked_element.data("ip")) || '';
-    }
-    if (name) {
-        name = name.replace(/[\?A-Za-z0-9\+]/g, '');
-    }
-    if (this.empty(name) && this.empty(id) && this.empty(ip)) {
-        console.warn(id, name, ip, "所有參數都為空值，無法查詢使用者資訊！");
-        return false;
-    }
-
-    // use data-container(data-el) HTML attribute to specify the display container, empty will use the modal popup window instead.
-    let el_selector = clicked_element.data("container") || clicked_element.data("el");
-    if ($(el_selector).length > 0) {
-        // $(el_selector).html("").append(card.$el);
-        // addAnimatedCSS(card.$el, { name: "headShake", duration: "once-anim-cfg" });
-        let vue_el = $.parseHTML(`<div><lah-user-card id="${id}" name="${name}" ip="${ip}"></lah-user-card></div>`);
-        $(el_selector).html("").append(vue_el);
-        new Vue({
-            el: vue_el[0],
-            mounted() { addAnimatedCSS(this.$el, { name: "headShake", duration: "once-anim-cfg" }); }
-        });
-    } else {
-        let card = this.$createElement("lah-user-card", { props: { id: id, name: name, ip: ip } });
-        this.$modal(card, { title: "使用者資訊" });
-    }
-};
 // single source of truth
 Vue.prototype.$store = (() => {
     if (typeof Vuex == "object") {
@@ -485,7 +442,50 @@ Vue.mixin({
                 return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
             });
         },
-        rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))
+        rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
+        usercard: function(e) {
+            if (CONFIG.DISABLE_MSDB_QUERY) {
+                console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping $user call.");
+                return;
+            }
+            
+            // find the most closest element to get the data-* attrs
+            let clicked_element = $($(e.target).closest(".user_tag,.lah-user-card"));
+            let name = $.trim(clicked_element.data("name")) || '';
+            let id = trim(clicked_element.data("id")) || '';
+            let ip = $.trim(clicked_element.data("ip")) || '';
+        
+            if (this.empty(name) && this.empty(id) && this.empty(ip)) {
+                // fallback to find itself data-*
+                clicked_element = $(e.target);
+                name = $.trim(clicked_element.data("name")) || $.trim(clicked_element.text()) || '';
+                id = trim(clicked_element.data("id")) || '';
+                ip = $.trim(clicked_element.data("ip")) || '';
+            }
+            if (name) {
+                name = name.replace(/[\?A-Za-z0-9\+]/g, '');
+            }
+            if (this.empty(name) && this.empty(id) && this.empty(ip)) {
+                console.warn(id, name, ip, "所有參數都為空值，無法查詢使用者資訊！");
+                return false;
+            }
+        
+            // use data-container(data-el) HTML attribute to specify the display container, empty will use the modal popup window instead.
+            let el_selector = clicked_element.data("container") || clicked_element.data("el");
+            if ($(el_selector).length > 0) {
+                // $(el_selector).html("").append(card.$el);
+                // addAnimatedCSS(card.$el, { name: "headShake", duration: "once-anim-cfg" });
+                let vue_el = $.parseHTML(`<div><lah-user-card id="${id}" name="${name}" ip="${ip}"></lah-user-card></div>`);
+                $(el_selector).html("").append(vue_el);
+                new Vue({
+                    el: vue_el[0],
+                    mounted() { addAnimatedCSS(this.$el, { name: "headShake", duration: "once-anim-cfg" }); }
+                });
+            } else {
+                let card = this.$createElement("lah-user-card", { props: { id: id, name: name, ip: ip } });
+                this.$modal(card, { title: "使用者資訊" });
+            }
+        }
     }
 });
 
