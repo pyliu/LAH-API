@@ -747,7 +747,6 @@ if (Vue) {
                     }).then(res => {
                         this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得在職使用者資料回傳值有誤【${res.data.status}】`)
                         this.onboard_users = res.data.raw;
-                        this.$log(`取得 ${this.onboard_users.length} 筆在職使用者資料。`);
                         this.setLocalCache('onboard_users', this.onboard_users, 24 * 60 * 60 * 1000);   // 1 day
                     }).catch(err => {
                         this.error = err;
