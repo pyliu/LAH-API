@@ -484,7 +484,7 @@ if (Vue) {
                     <b-button @click="clear" size="sm" variant="danger">清除 <b-badge variant="light" pill>{{count}}</b-badge></b-button>
                 </div>
             </template>
-            <b-list-group class="small" flush>
+            <b-list-group class="small" style="max-height: 300px; overflow: auto;">
                 <transition-group name="list">
                     <b-list-group-item button v-for="(item, idx) in all" :key="item.key" v-b-popover.focus="JSON.stringify(item.val)">
                         <b-button-close @click="del(item.key, idx)" style="font-size: 1rem; color: red;"></b-button-close>
