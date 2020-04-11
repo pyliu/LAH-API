@@ -463,14 +463,16 @@ if (Vue) {
     });
 
     Vue.component("lah-cache-mgt", {
-        template: `<b-card>
-            <div class="d-flex w-100 justify-content-between mb-2">
-                <h6 class="my-auto">清除快取資料</h6>
-                <b-button @click="clear" size="sm" variant="danger">清除 <b-badge variant="light" pill>{{count}}</b-badge></b-button>
-            </div>
-            <b-list-group class="small">
+        template: `<b-card no-body>
+            <template v-slot:header>
+                <div class="d-flex w-100 justify-content-between mb-0">
+                    <h6 class="my-auto">清除快取資料</h6>
+                    <b-button @click="clear" size="sm" variant="danger">清除 <b-badge variant="light" pill>{{count}}</b-badge></b-button>
+                </div>
+            </template>
+            <b-list-group class="small" flush>
                 <transition-group name="list">
-                    <b-list-group-item v-for="(item, idx) in all" :key="item.key" v-b-popover.hover.d400="JSON.stringify(item.val)">
+                    <b-list-group-item button v-for="(item, idx) in all" :key="item.key" v-b-popover.focus="JSON.stringify(item.val)">
                         <b-button-close @click="del(item.key, idx)" style="font-size: 1rem; color: red;"></b-button-close>
                         <div class="truncate font-weight-bold">{{item.key}}</div>
                     </b-list-group-item>
@@ -761,7 +763,7 @@ if (Vue) {
                                 :src="photoUrl(user_data)"
                                 :alt="user_data['AP_USER_NAME']"
                                 class="img-thumbnail float-right mx-auto ml-2"
-                                style="max-width: 220px"
+                                :style="imgStyle"
                             ></b-card-img>
                         </b-link>
                         <lah-user-description :user_data="user_data"></lah-user-description>
@@ -781,7 +783,7 @@ if (Vue) {
                             :src="photoUrl(user_data)"
                             :alt="user_data['AP_USER_NAME']"
                             class="img-thumbnail float-right mx-auto ml-2"
-                            style="max-width: 220px"
+                            :style="imgStyle"
                         ></b-card-img>
                     </b-link>
                     <lah-user-description :user_data="user_data"></lah-user-description>
@@ -904,7 +906,8 @@ if (Vue) {
             useTab: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 1; },
             useCard: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 0; },
             notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; },
-            foundName: function() { return this.user_rows[0]["AP_USER_NAME"] }
+            foundName: function() { return this.user_rows[0]["AP_USER_NAME"] },
+            imgStyle: function() { return this.avatar ? 'max-width: 5rem' : 'max-width: 220px' }
         },
         methods: {
             photoUrl: function (user_data) {
@@ -994,6 +997,7 @@ if (Vue) {
                     });
                 }
             }
+            this.$log(this.avatar);
         }
     });
 
