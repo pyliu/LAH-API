@@ -121,7 +121,7 @@ if (Vue) {
             <b-input-group size="sm">
                 <b-input-group-prepend is-text><b-icon icon="person-fill"></b-icon></b-input-group-prepend>
                 <b-form-input
-                    id="pid"
+                    ref="pid"
                     v-model="pid"
                     placeholder="A123456789"
                     :state="valid"
@@ -209,9 +209,8 @@ if (Vue) {
             }
         },
         mounted() {
-            let that = this;
             // wait cached data write back
-            setTimeout(() => that.pid = $("#pid").val(), 200);
+            setTimeout(() => this.pid = this.$refs.pid.$el.value, 400);
         }
     });
 } else {
