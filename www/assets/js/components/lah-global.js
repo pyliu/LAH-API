@@ -41,15 +41,6 @@ Vue.prototype.$assert = console.assert.bind(console);
 Vue.prototype.$http = axios;
 Vue.prototype.$lf = localforage || {};
 Vue.prototype.$animated = addAnimatedCSS;
-Vue.prototype.$open = function(url, e) {
-    let h = window.innerHeight - 160;
-    this.$modal(`<iframe src="${url}" class="w-100" height="${h}" frameborder="0"></iframe>`, {
-        title: e.target.title || `外部連結`,
-        size: "xl",
-        html: true,
-        noCloseOnBackdrop: false
-    });
-};
 // single source of truth
 Vue.prototype.$store = (() => {
     if (typeof Vuex == "object") {
@@ -443,6 +434,15 @@ Vue.mixin({
             });
         },
         rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
+        open: function(url, e) {
+            let h = window.innerHeight - 160;
+            this.$modal(`<iframe src="${url}" class="w-100" height="${h}" frameborder="0"></iframe>`, {
+                title: e.target.title || `外部連結`,
+                size: "xl",
+                html: true,
+                noCloseOnBackdrop: false
+            });
+        },
         usercard: function(e) {
             if (CONFIG.DISABLE_MSDB_QUERY) {
                 console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping $user call.");
