@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("case-reg-overdue", {
         components: { "countdown": VueCountdown },
         template: `<div>
-            <div style="right: 0; position:absolute; top: 0.5rem;" v-if="!is_in_modal_mode">
+            <div style="right: 1rem; position:absolute; top: 0.5rem;" v-if="!is_in_modal_mode">
                 <b-form-checkbox v-b-tooltip.hover.top="modeTooltip" inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;" :class="['align-baseline', 'btn', 'btn-sm', is_overdue_mode ? '' : 'border-warning', 'p-1']">
                     <span>{{modeText}}</span>
                 </b-form-checkbox>
@@ -213,7 +213,7 @@ if (Vue) {
                 this.$refs.countdown.end();
             },
             makeCaseIDClickable: function () {
-                addAnimatedCSS("table tr td:nth-child(2)", { name: "flash" })
+                this.animated("table tr td:nth-child(2)", { name: "flash" })
                 .off("click")
                 .on("click", window.vueApp.fetchRegCase)
                 .addClass("reg_case_id");
@@ -317,7 +317,7 @@ if (Vue) {
                     this.resetCountdown();
                     this.startCountdown();
                     // add effect to catch attention
-                    addAnimatedCSS("#reload, caption", {name: "flash"});
+                    this.animated("#reload, caption", {name: "flash"});
                 } else {
                     console.warn("非上班時間，停止自動更新。");
                     addNotification({

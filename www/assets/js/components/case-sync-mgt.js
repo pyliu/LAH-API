@@ -123,7 +123,7 @@ if (Vue) {
                         // remove the fieldset since the function is not working ... 
                         let fieldset = $("#case-sync-mgt-fieldset");
                         let container = fieldset.closest("div.col-6");
-                        addAnimatedCSS(fieldset, {
+                        this.animated(fieldset, {
                             name: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)].out,
                             callback: () => {
                                 fieldset.remove();

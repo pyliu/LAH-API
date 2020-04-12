@@ -529,7 +529,7 @@ if (Vue) {
                         let reason = this.reason.replace(/[\'\"]/g, "");
 
                         if (!this.isOperatorValid) {
-                            addAnimatedCSS("#dummy_operator", { name: "tada", callback: () => $("#dummy_operator").focus() });
+                            this.animated("#dummy_operator", { name: "tada", callback: () => $("#dummy_operator").focus() });
                             addNotification({
                                 title: "作廢資料",
                                 message: "請填入作業人員代碼！",
@@ -539,7 +539,7 @@ if (Vue) {
                             return false;
                         }
                         if (!this.isNumberValid) {
-                            addAnimatedCSS("#dummy_fee_number", { name: "tada", callback: () => $("#dummy_fee_number").focus() });
+                            this.animated("#dummy_fee_number", { name: "tada", callback: () => $("#dummy_fee_number").focus() });
                             addNotification({
                                 title: "作廢資料",
                                 message: "請填入收據編號！",
@@ -549,7 +549,7 @@ if (Vue) {
                             return false;
                         }
                         if (!this.isReasonValid) {
-                            addAnimatedCSS("#dummy_obsolete_reason", { name: "tada", callback: () => $("#dummy_obsolete_reason").focus() });
+                            this.animated("#dummy_obsolete_reason", { name: "tada", callback: () => $("#dummy_obsolete_reason").focus() });
                             addNotification({
                                 title: "作廢資料",
                                 message: "請填入作廢原因！",
@@ -559,7 +559,7 @@ if (Vue) {
                             return false;
                         }
                         if (!this.isDateValid) {
-                            addAnimatedCSS("#dummy_obsolete_date", { name: "tada", callback: () => $("#dummy_obsolete_date").focus() });
+                            this.animated("#dummy_obsolete_date", { name: "tada", callback: () => $("#dummy_obsolete_date").focus() });
                             addNotification({
                                 title: "日期",
                                 message: "請填入正確日期格式(民國)！",
@@ -922,7 +922,7 @@ if (Vue) {
                 mounted: function() {},
                 updated() {
                     Vue.nextTick(() => 
-                        addAnimatedCSS(".reg_case_id", {
+                        this.animated(".reg_case_id", {
                             name: "flash"
                         })
                         .off("click")

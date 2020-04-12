@@ -453,7 +453,7 @@ if (Vue) {
         mounted() {
             this.links.forEach(this.setLeading);
             // add pulse effect for the nav-item
-            $(".nav-item").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "pulse"}); });
+            $(".nav-item").on("mouseenter", function(e) { this.animated(this, {name: "pulse"}); });
             this.checkAuthority();
         }
     });
@@ -1427,7 +1427,7 @@ if (Vue) {
         mounted() {
             if (this.attachEvent) {
                 addUserInfoEvent();
-                addAnimatedCSS(".reg_case_id", { name: "flash" }).off("click").on("click", window.vueApp.fetchRegCase);
+                this.animated(".reg_case_id", { name: "flash" }).off("click").on("click", window.vueApp.fetchRegCase);
             }
         }
     });
@@ -1747,7 +1747,7 @@ if (Vue) {
                         message: "請先備份！",
                         type: "warning"
                     });
-                    addAnimatedCSS("#backup_temp_btn_all", { name: "tada" });
+                    this.animated("#backup_temp_btn_all", { name: "tada" });
                     return;
                 }
                 let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + this.year + "-" + this.code + "-" + this.number + " 全部暫存檔?";
@@ -1791,7 +1791,7 @@ if (Vue) {
                         message: `請先備份 ${table} ！`,
                         type: "warning"
                     });
-                    addAnimatedCSS(`#backup_temp_btn_${idx}`, { name: "tada" });
+                    this.animated(`#backup_temp_btn_${idx}`, { name: "tada" });
                     return;
                 }
                 let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + this.year + "-" + this.code + "-" + this.number + " " + table + " 暫存檔?";
@@ -2431,7 +2431,7 @@ if (Vue) {
                     this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "取得體溫資料回傳狀態碼有問題【" + res.data.status + "】");
                     this.list = res.data.raw;
                     this.prepareChartData();
-                    Vue.nextTick(() => $(".times-circle i.far").on("mouseenter", function(e) { addAnimatedCSS(this, {name: "tada"}); }) );
+                    Vue.nextTick(() => $(".times-circle i.far").on("mouseenter", e => { this.animated(e.target, {name: "tada"}); }) );
                 }).catch(err => {
                     this.error = err;
                 }).finally(() => {

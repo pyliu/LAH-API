@@ -472,13 +472,11 @@ Vue.mixin({
             // use data-container(data-el) HTML attribute to specify the display container, empty will use the modal popup window instead.
             let el_selector = clicked_element.data("container") || clicked_element.data("el");
             if ($(el_selector).length > 0) {
-                // $(el_selector).html("").append(card.$el);
-                // addAnimatedCSS(card.$el, { name: "headShake", duration: "once-anim-cfg" });
                 let vue_el = $.parseHTML(`<div><lah-user-card id="${id}" name="${name}" ip="${ip}"></lah-user-card></div>`);
                 $(el_selector).html("").append(vue_el);
                 new Vue({
                     el: vue_el[0],
-                    mounted() { addAnimatedCSS(this.$el, { name: "headShake", duration: "once-anim-cfg" }); }
+                    mounted() { this.animated(this.$el, { name: "headShake", duration: "once-anim-cfg" }); }
                 });
             } else {
                 let card = this.$createElement("lah-user-card", { props: { id: id, name: name, ip: ip } });
@@ -602,7 +600,7 @@ $(document).ready(() => {
             showModal: function(id, duration) {
                 let modal_content = $(`#${id} .modal-content`);
                 modal_content.removeClass("hide");
-                addAnimatedCSS(modal_content, {
+                this.animated(modal_content, {
                     name: this.transition.in,
                     duration: duration || "once-anim-cfg",
                     callback: this.callbackQueue.pop()
@@ -620,7 +618,7 @@ $(document).ready(() => {
             removeModal: function(id, duration) {
                 if (!this.openConfirm) {
                     let modal_content = $(`#${id} .modal-content`);
-                    addAnimatedCSS(modal_content, {
+                    this.animated(modal_content, {
                         name: this.transition.out,
                         duration: duration || "once-anim-cfg",
                         callback: () => {
