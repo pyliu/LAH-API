@@ -40,7 +40,6 @@ Vue.prototype.$warn = console.warn.bind(console);
 Vue.prototype.$assert = console.assert.bind(console);
 Vue.prototype.$http = axios;
 Vue.prototype.$lf = localforage || {};
-Vue.prototype.$animated = addAnimatedCSS;
 // single source of truth
 Vue.prototype.$store = (() => {
     if (typeof Vuex == "object") {
@@ -485,6 +484,25 @@ Vue.mixin({
                 let card = this.$createElement("lah-user-card", { props: { id: id, name: name, ip: ip } });
                 this.$modal(card, { title: "使用者資訊" });
             }
+        },
+        animated: function(selector, opts) {
+            const node = $(selector);
+            if (node) {
+                opts = Object.assign({
+                    name: ANIMATED_PATTERNS[rand(ANIMATED_PATTERNS.length)],
+                    duration: "once-anim-cfg"    // a css class to control speed
+                }, opts);
+                node.addClass(`animated ${opts.name} ${opts.duration}`);
+                function handleAnimationEnd() {
+                    node.removeClass(`animated ${opts.name} ${opts.duration}`);
+                    node.off('animationend');
+                    // clear ld animation also
+                    clearLDAnimation(selector);
+                    if (typeof opts.callback === 'function') opts.callback.apply(this, arguments);
+                }
+                node.on('animationend', handleAnimationEnd);
+            }
+            return node;
         }
     }
 });
