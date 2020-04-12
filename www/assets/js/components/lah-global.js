@@ -353,13 +353,6 @@ Vue.mixin({
             this.toggleBusy({selector: el, forceOff: true});
             this.$emit("busyOff", this);
         },
-        empty: function (variable) {
-            if (variable === null || variable === undefined || variable === false) return true;
-            if (typeof variable == "object" && variable.length == 0) return true;
-            if (typeof variable == "array" && variable.length == 0) return true;
-            if ($.trim(variable) == "") return true;
-            return false;
-        },
         setLocalCache: async function(key, val, expire_timeout = 0) {
             if (!localforage || this.empty(key) || this.empty(val)) return false;
             try {
@@ -416,12 +409,6 @@ Vue.mixin({
             }
             return false;
         },
-        getUrlParameter: name => {
-            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            var results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        },
         removeLocalCache: function(key) {
             if (!localforage || this.empty(key)) return false;
             try {
@@ -430,6 +417,19 @@ Vue.mixin({
                 console.error(err);
             }
             return true;
+        },
+        getUrlParameter: name => {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        },
+        empty: function (variable) {
+            if (variable === null || variable === undefined || variable === false) return true;
+            if (typeof variable == "object" && variable.length == 0) return true;
+            if (typeof variable == "array" && variable.length == 0) return true;
+            if ($.trim(variable) == "") return true;
+            return false;
         },
         uuid: function() {
             var d = Date.now();
