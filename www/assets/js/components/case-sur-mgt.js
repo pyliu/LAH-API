@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("case-sur-mgt", {
         template: `<fieldset>
-            <legend>複丈案件查詢(修正已結延期、修改連件數)</legend>
+            <legend>複丈案件查詢</legend>
             <b-form-row class="mb-2">
                 <b-col>
                     <case-input-group-ui v-model="id" @enter="query" type="sur" prefix="case_sur"></case-input-group-ui>

@@ -261,7 +261,7 @@ if (Vue) {
 
     Vue.component("lah-header", {
         template: `<lah-transition slide-down>
-            <b-navbar v-if="show" toggleable="md" type="dark" :variant="variant" class="mb-3" fixed="top">
+            <b-navbar v-if="show" toggleable="md" type="dark" variant="dark" class="mb-3" fixed="top" :style="bgStyle">
                 <lah-fa-icon size="2x" variant="light" class="mr-2" :icon="icon"></lah-fa-icon>
                 <b-navbar-brand :href="location.href" v-html="leading"></b-navbar-brand>
                 <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
@@ -348,18 +348,22 @@ if (Vue) {
                 }
                 return page_url;
             },
-            variant() {
+            bgStyle() {
                 let day_of_week = new Date().getDay();
+                let hours = new Date().getHours();
                 switch(day_of_week) {
                     case 1:
                     case 2:
-                        return 'dark';
+                        return 'background-color: #343a40 !important;'; // dark
                     case 3:
+                        return 'background-color: #3b88e0 !important;'; // blue
                     case 4:
-                        return 'secondary';
+                        if (hours <= 12) {
+                            return 'background-color: #3b88e0 !important;'; // blue
+                        }
                     case 5:
                     default:
-                        return 'success';
+                        return 'background-color: #28a745 !important;'; // green
                 }
             }
         },
