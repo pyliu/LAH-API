@@ -501,6 +501,28 @@ Vue.mixin({
                 node.on('animationend', handleAnimationEnd);
             }
             return node;
+        },
+        alert: function(opts) {
+            if (typeof opts == "string") {
+                opts = { message: opts }
+            }
+            if (!this.empty(opts.message)) {
+                let alert = window.vueApp.$refs.alert || window.dynaApp.$refs.alert;
+                alert.show(opts);
+            }
+        },
+        notify: function(msg, opts) {
+            // previous only use one object param
+            if (typeof msg == "object") {
+                let message = msg.body || msg.message;
+                msg.variant = msg.type || "default";
+                this.$toast(message, msg);
+            } else if (typeof msg == "string") {
+                this.$toast(msg, opts);
+            } else {
+                this.alert({message: "addNotification 傳入參數有誤(請查看console)", type: "danger"});
+                this.$error(msg, opts);
+            }
         }
     }
 });
@@ -859,15 +881,6 @@ $(document).ready(() => {
                 } else {
                     this.$lf.setItem("cache_st_timestamp", +new Date());
                 }
-            },
-            alert: function(opts) {
-                if (typeof opts == "string") {
-                    opts = { message: opts }
-                }
-                if (!this.empty(opts.message)) {
-                    let alert = this.$refs.alert || window.dynaApp.$refs.alert;
-                    alert.show(opts);
-                }
             }
         },
         created: function(e) {
@@ -898,7 +911,6 @@ $(document).ready(() => {
             Vue.prototype.$confirm = this.confirmAdapter;
             Vue.prototype.$modal = this.modal;
             Vue.prototype.$toast = this.makeToast;
-            Vue.prototype.$alert = this.alert;
         },
         mounted() { this.initCache(); }
     });

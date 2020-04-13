@@ -56,7 +56,7 @@ if (Vue) {
                         message: this.$createElement('lah-reg-case-temp-mgt', { props: { id: this.id } })
                     });
                 } else {
-                    this.$alert({
+                    this.alert({
                         title: '查詢案件暫存檔',
                         message: `案件ID有問題，請檢查後再重試！ (${this.year}-${this.code}-${this.num})`,
                         variant: 'warning'

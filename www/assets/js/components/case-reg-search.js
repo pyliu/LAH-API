@@ -72,7 +72,7 @@ if (Vue) {
                         this.isBusy = false;
                     });
                 } else {
-                    this.$alert({
+                    this.alert({
                         title: '登記案件搜尋',
                         message: `案件ID有問題，請檢查後再重試！ (${this.id})`,
                         variant: 'warning'
@@ -94,7 +94,7 @@ if (Vue) {
                         this.isBusy = false;
                     });
                 } else {
-                    this.$alert({
+                    this.alert({
                         title: '地價案件狀態查詢',
                         message: `案件ID有問題，請檢查後再重試！ (${this.id})`,
                         variant: 'warning'

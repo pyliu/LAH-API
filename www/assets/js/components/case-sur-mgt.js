@@ -76,7 +76,7 @@ if (Vue) {
                         this.isBusy = false;
                     });
                 } else {
-                    this.$alert({
+                    this.alert({
                         title: '測量案件狀態查詢',
                         message: `測量案件ID有問題，請檢查後再重試！ (${this.id})`,
                         variant: 'warning'

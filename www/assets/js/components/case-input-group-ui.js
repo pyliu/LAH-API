@@ -40,21 +40,27 @@ if (Vue) {
         props: ["type", "prefix", 'value'],
         data: function(e) {
             return {
-                local_reg_case_code: {
-                    label: "本所",
-                    options: ["HB04 壢登", "HB05 壢永", "HB06 壢速"]
-                },
-                remote_local_reg_case_code: {
-                    label: "本所收件(跨所)",
-                    options: ["HAB1 壢桃登跨", "HCB1 壢溪登跨", "HDB1 壢楊登跨", "HEB1 壢蘆登跨", "HFB1 壢德登跨", "HGB1 壢平登跨", "HHB1 壢山登跨"]
-                },
-                remote_remote_reg_case_code: {
-                    label: "他所收件(跨所)",
-                    options: ["HBA1 桃壢登跨", "HBC1 溪壢登跨", "HBD1 楊壢登跨", "HBE1 蘆壢登跨", "HBF1 德壢登跨", "HBG1 平壢登跨", "HBH1 山壢登跨"]
-                },
-                local_sur_case_code: {
-                    label: "測量案件",
-                    options: ["HB12 中地測丈", "HB13 中地測建", "HB17 中地法土", "HB18 中地法建"]
+                codes: {
+                    reg: {
+                        local: {
+                            label: "本所",
+                            options: ["HB04 壢登", "HB05 壢永", "HB06 壢速"]
+                        },
+                        remote_local: {
+                            label: "本所收件(跨所)",
+                            options: ["HAB1 壢桃登跨", "HCB1 壢溪登跨", "HDB1 壢楊登跨", "HEB1 壢蘆登跨", "HFB1 壢德登跨", "HGB1 壢平登跨", "HHB1 壢山登跨"]
+                        },
+                        remote_remote: {
+                            label: "他所收件(跨所)",
+                            options: ["HBA1 桃壢登跨", "HBC1 溪壢登跨", "HBD1 楊壢登跨", "HBE1 蘆壢登跨", "HBF1 德壢登跨", "HBG1 平壢登跨", "HBH1 山壢登跨"]
+                        }
+                    },
+                    sur: {
+                        local: {
+                            label: "測量案件",
+                            options: ["HB12 中地測丈", "HB13 中地測建", "HB17 中地法土", "HB18 中地法建"]
+                        }
+                    }
                 },
                 year: "",
                 code: "",
@@ -128,28 +134,38 @@ if (Vue) {
             for (let i = 0; i <= len; i++) {
                 this.years.push({value: 105 + i, text: 105 + i});
             }
+
+            this.$http.post(CONFIG.JSON_API_EP, {
+                type: 'reg_code'
+            }).then(res => {
+                this.$log(res.data);
+            }).catch(err => {
+
+            }).finally(() => {
+
+            });
         },
         mounted: function(e) {
             switch(this.type) {
                 case "reg":
-                    this.code_data.push(this.local_reg_case_code);
-                    this.code_data.push(this.remote_local_reg_case_code);
-                    this.code_data.push(this.remote_remote_reg_case_code);
+                    this.code_data.push(this.codes.reg.local);
+                    this.code_data.push(this.codes.reg.remote_local);
+                    this.code_data.push(this.codes.reg.remote_remote);
                     this.num_step = this.num_min = 10;
                     break;
                 case "sur":
-                    this.code_data.push(this.local_sur_case_code);
+                    this.code_data.push(this.codes.sur.local);
                     this.num_step = this.num_min = 100;
                     this.num = "000100";
                     break;
                 case "sync":
-                    this.code_data.push(this.remote_local_reg_case_code);
+                    this.code_data.push(this.codes.reg.remote_local);
                     break;
                 default:
-                    this.code_data.push(this.local_reg_case_code);
-                    this.code_data.push(this.remote_local_reg_case_code);
-                    this.code_data.push(this.remote_remote_reg_case_code);
-                    this.code_data.push(this.local_sur_case_code);
+                    this.code_data.push(this.codes.reg.local);
+                    this.code_data.push(this.codes.reg.remote_local);
+                    this.code_data.push(this.codes.reg.remote_remote);
+                    this.code_data.push(this.codes.sur.local);
                     break;
             }
             // setup delay timer to allow cached data update to the input/select element
