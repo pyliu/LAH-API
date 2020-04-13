@@ -800,7 +800,6 @@ if (Vue) {
                             <b-form-input
                                 v-model="msg_title"
                                 type="text"
-                                size="sm"
                                 placeholder="Hi there!"
                                 :state="!empty(msg_title)"
                             ></b-form-input>
@@ -815,10 +814,15 @@ if (Vue) {
                             <b-form-textarea
                                 placeholder="Dear xxxx, ..."
                                 rows="3"
-                                max-rows="8"
+                                max-rows="5"
                                 v-model="msg_content"
+                                :state="!empty(msg_content)"
+                                style="overflow: hidden"
                             ></b-form-textarea>
                         </b-form-group>
+                        <div class="text-center">
+                            <b-button variant="outline-primary" @click="sendMessage" :disabled="!okToSendMessage"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
+                        </div>
                     </b-tab>
                 </b-tabs>
             </b-card>
@@ -941,7 +945,9 @@ if (Vue) {
             found: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined },
             notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; },
             foundName: function() { return this.user_rows[0]["AP_USER_NAME"] },
-            useAvatar: function() { return !this.empty(this.avatar) }
+            useAvatar: function() { return !this.empty(this.avatar) },
+            okToSendMessage: function() { return !this.empty(this.msg_title) && !this.empty(this.msg_content) && this.ID !== null },
+            ID: function() { return this.user_rows ? this.user_rows[0]['DocUserID'] : null }
         },
         methods: {
             photoUrl: function (user_data) {
@@ -1004,6 +1010,43 @@ if (Vue) {
                     console.error(err);
                 }
                 return this.user_rows !== null;
+            },
+            sendMessage: function(e) {
+                if (CONFIG.DISABLE_MSDB_QUERY) {
+                    this.$warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping lah-user-card::sendMessage.");
+                    return;
+                }
+                let title = this.msg_title;
+                let content = this.msg_content.replace(/\n/g, "\r\n");	// Messenger client is Windows app, so I need to replace \n to \r\n
+                let who = this.ID || this.foundName;
+
+                if (content.length > 1000) {
+                    this.alert({
+                        message: "<span>內容不能超過1000個字元。</span><p>" + content + "</p>",
+                        type: "warning"
+                    });
+                    return;
+                }
+
+                this.$confirm(`"確認要送 「${title}」 給 「${who}」？\n\n${content}`, () => {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: "send_message",
+                        title: title,
+                        content: content,
+                        who: who
+                    }).then(res => {
+                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
+                        this.notify({
+                            title: "傳送訊息",
+                            message: res.data.message
+                        });
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy= false;
+                    });
+                });
             }
         },
         async created() {

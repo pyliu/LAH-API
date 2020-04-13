@@ -39,7 +39,39 @@ ksort($operators);
       <div class="row">
         <div id="case-query-by-pid" class="col-6">
           <case-query-by-pid></case-query-by-pid>
+        </div>
+        <div class="col-6">
           <fieldset>
+            <legend>使用者</legend>
+            <div class="float-clear">
+            <div class="form-row">
+              <div class="input-group input-group-sm col">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroup-msg_who">關鍵字</span>
+                </div>
+                <input type="text" id="msg_who" name="msg_who" class="form-control" placeholder="HB0541" value="HB054" title="ID、姓名、IP" />
+              </div>
+              <div class="filter-btn-group col">
+                <button id="search_user_button" class="btn btn-sm btn-outline-primary">搜尋</button>
+                <span id="filter_info" class="text-muted small"><?php echo count($operators); ?>筆</span>
+              </div>
+            </div>
+            <div id="user_list">
+            <?php
+              foreach ($operators as $id => $name) {
+                // prevent rare word issue
+                $name = preg_replace("/[a-zA-Z?0-9+]+/", "", $name);
+                echo "<div class='float-left m-2 user_tag hide' style='font-size: .875rem;' data-id='".$id."' data-name='".($name ?? "XXXXXX")."'>".$id.": ".($name ?? "XXXXXX")."</div>";
+              }
+            ?>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          
+        <fieldset>
             <legend>轄區各段土地標示部筆數＆面積查詢</legend>
             <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
             <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
@@ -71,7 +103,9 @@ ksort($operators);
             </blockquote>
             <div id="data_query_result"></div>
           </fieldset>
-          <fieldset>
+        </div>
+        <div class="col-6">
+        <fieldset>
             <legend>地政局索取地籍資料</legend>
             <div class="form-row">
               <div class="filter-btn-group col">
@@ -105,45 +139,6 @@ ksort($operators);
                 
               <span class="text-danger">※</span> 登記子系統/列印/清冊報表/土地建物地籍整理清冊【土地、建物各產一次存PDF，請至地政系統WEB版產出】 <br/>
             </blockquote>
-          </fieldset>
-        </div>
-        <div class="col-6">
-          <fieldset>
-            <legend>使用者＆信差訊息</legend>
-            <div class="float-clear">
-            <div class="form-row">
-              <div class="input-group input-group-sm col">
-                <div class="input-group-prepend">
-                  <span class="input-group-text" id="inputGroup-msg_who">關鍵字</span>
-                </div>
-                <input type="text" id="msg_who" name="msg_who" class="form-control" placeholder="HB0541" value="HB054" title="ID、姓名、IP" />
-              </div>
-              <div class="filter-btn-group col">
-                <button id="search_user_button" class="btn btn-sm btn-outline-primary">搜尋</button>
-                <button id="msg_button" class="btn btn-sm btn-outline-secondary">傳送訊息</button>
-                <span id="filter_info" class="text-muted small"><?php echo count($operators); ?>筆</span>
-              </div>
-            </div>
-            <div class="form-row mt-1">
-              <div class="input-group input-group-sm col">
-                <div class="input-group-prepend">
-                  <span class="input-group-text" id="inputGroup-msg_title">訊息標題</span>
-                </div>
-                <input type="text" id="msg_title" name="msg_title" class="form-control" placeholder="訊息的標題" />
-              </div>
-            </div>
-            <div class="form-row mt-1">
-              <textarea class="form-control" id="msg_content" rows="5" placeholder="訊息內容(最多500字)"></textarea>
-            </div>
-            <div id="user_list">
-            <?php
-              foreach ($operators as $id => $name) {
-                // prevent rare word issue
-                $name = preg_replace("/[a-zA-Z?0-9+]+/", "", $name);
-                echo "<div class='float-left m-2 user_tag hide' style='font-size: .875rem;' data-id='".$id."' data-name='".($name ?? "XXXXXX")."'>".$id.": ".($name ?? "XXXXXX")."</div>";
-              }
-            ?>
-            </div>
           </fieldset>
         </div>
       </div>
@@ -325,9 +320,6 @@ ksort($operators);
         $("#msg_who").val($.trim(user_data[1]).replace(/[\?A-Za-z0-9\+]/g, ""));
         vueApp.usercard(e);
       });
-
-      // message
-      $("#msg_button").on("click", xhrSendMessage);
 
       // search users
       $("#search_user_button").on("click", xhrSearchUsers);
