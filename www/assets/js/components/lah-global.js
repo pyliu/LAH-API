@@ -523,6 +523,29 @@ Vue.mixin({
                 this.alert({message: "addNotification 傳入參數有誤(請查看console)", type: "danger"});
                 this.$error(msg, opts);
             }
+        },
+        msgbox: function(opts) {
+            let body = opts.body || opts.message;
+            let title = opts.title;
+            let size = opts.size;	// sm, md, lg, xl
+            let callback = opts.callback;
+            if (isEmpty(title)) {
+                title = "... 請輸入指定標題 ...";
+            }
+            if (isEmpty(body)) {
+                body = "... 請輸入指定內文 ...";
+            }
+            if (isEmpty(size)) {
+                size = "md";
+            }
+
+            this.$modal(body, {
+                title: title,
+                size: size,
+                html: true,
+                callback: callback,
+                noCloseOnBackdrop: !opts.backdrop_close
+            });
         }
     }
 });
