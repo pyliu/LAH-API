@@ -365,79 +365,6 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("更新失敗【".$_POST["qday"].", ".$_POST["pc_num"]."】");
 		}
 		break;
-	case "reg_case":
-		if (empty($_POST["id"])) {
-			$log->error("XHR [reg_case] 查詢ID為空值");
-			echoErrorJSONString();
-			break;
-		}
-		$log->info("XHR [reg_case] 查詢登記案件【".$_POST["id"]."】請求");
-		$row = $mock ? $cache->get('reg_case') : $query->getRegCaseDetail($_POST["id"]);
-		$cache->set('reg_case', $row);
-		if (empty($row)) {
-			$log->info("XHR [reg_case] 查無資料");
-			echoErrorJSONString();
-		} else {
-			$data = new RegCaseData($row);
-			$log->info("XHR [reg_case] 查詢成功");
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => 1,
-				"query_string" => "id=".$_POST["id"],
-				"baked" => $data->getBakedData()
-			);
-			echo json_encode($result, 0);
-		}
-		break;
-	case "reg_cases_by_day":
-		if (empty($_POST["qday"])) {
-			$_POST["qday"] = $today;
-		}
-		$log->info("XHR [reg_cases_by_day] 查詢登記案件 BY DAY【".$_POST["qday"]."】請求");
-		$rows = $mock ? $cache->get('reg_cases_by_day') : $query->queryAllCasesByDate($_POST["qday"]);
-		$cache->set('reg_cases_by_day', $rows);
-		if (empty($rows)) {
-			$log->info("XHR [reg_cases_by_day] 查無資料");
-			echoErrorJSONString();
-		} else {
-			$baked = array();
-			foreach ($rows as $row) {
-				$data = new RegCaseData($row);
-				$baked[] = $data->getBakedData();
-			}
-			$count = count($baked);
-			$log->info("XHR [reg_cases_by_day] 查詢成功 ($count)");
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => $count,
-				"query_string" => "qday=".$_POST["qday"],
-				"baked" => $baked
-			);
-			echo json_encode($result, 0);
-		}
-		break;
-	case "reg_stats":
-		if (empty($_POST["year_month"])) {
-			$log->error("XHR [reg_stats] 查詢年月為空值");
-			echoErrorJSONString();
-			break;
-		}
-		$log->info("XHR [reg_stats] 查詢登記案件統計【".$_POST["year_month"]."】請求");
-		$rows = $mock ? $cache->get('reg_stats') : $query->getRegCaseStatsMonthly($_POST["year_month"]);
-		$cache->set('reg_stats', $rows);
-		if (empty($rows)) {
-			$log->info("XHR [reg_stats] 查無資料");
-			echoErrorJSONString();
-		} else {
-			$log->info("XHR [reg_stats] 查詢成功");
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => count($rows),
-				"raw" => $rows	// each record key is reason, count
-			);
-			echo json_encode($result, 0);
-		}
-		break;
 	case "sur_case":
 		if (empty($_POST["id"])) {
 			$log->error("XHR [sur_case] 查詢ID為空值");
@@ -798,24 +725,6 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("清除暫存資料失敗");
 		}
 		break;
-	case "reg_upd_col":
-		$log->info("XHR [reg_upd_col] 更新案件欄位【".$_POST["rm01"].", ".$_POST["rm02"].", ".$_POST["rm03"].", ".$_POST["col"].", ".$_POST["val"]."】請求");
-		$result_flag = $mock ? $cache->get('reg_upd_col') : $query->updateCaseColumnData($_POST["rm01"].$_POST["rm02"].$_POST["rm03"], "MOICAS.CRSMS", $_POST["col"], $_POST["val"]);
-		$cache->set('reg_upd_col', $result_flag);
-		if ($result_flag) {
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => "0",
-				"raw" => $result_flag,
-				"query_string" => "RM01=".$_POST["rm01"]."&RM02=".$_POST["rm02"]."&RM03=".$_POST["rm03"]."&COL=".$_POST["col"]."&VAL=".$_POST["val"]
-			);
-			$log->info("XHR [reg_upd_col] 更新案件欄位成功");
-			echo json_encode($result, 0);
-		} else {
-			$log->error("XHR [reg_upd_col] 更新案件欄位失敗");
-			echoErrorJSONString("更新案件欄位失敗");
-		}
-		break;
 	case "upd_case_column":
 			$log->info("XHR [upd_case_column] 更新案件特定欄位【".$_POST["id"].", ".$_POST["table"].", ".$_POST["column"].", ".$_POST["value"]."】請求");
 			$result_flag = $mock ? $cache->get('upd_case_column') : $query->updateCaseColumnData($_POST["id"], $_POST["table"], $_POST["column"], $_POST["value"]);
@@ -1020,8 +929,6 @@ switch ($_POST["type"]) {
 		$log->info("XHR [temperatures] 取得體溫列表【".$_POST["id"]."】請求");
 		$temperature = new Temperature();
 		$results = $temperature->get($_POST["id"]);
-		// $results = $mock ? $temperature->get('temperatures') : $temperature->get($_POST["id"]);
-		// $cache->set('temperatures', $results);
 		$log->info("XHR [temperatures] 取得 ".count($results)." 筆體溫資料");
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -1029,6 +936,107 @@ switch ($_POST["type"]) {
 			"raw" => $results,
 			"message" => "取得 ".count($results)." 筆資料。"
 		), 0);
+		break;
+	case "reg_code":
+		$log->info("XHR [reg_code] 取得登記案件字列表請求");
+		$log->info("XHR [reg_code] 取得 ".count(REG_CODE)." 群資料");
+		echo json_encode(array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"data_count" => count(REG_CODE),
+			"raw" => REG_CODE,
+			"message" => "取得 ".count(REG_CODE)." 群資料。"
+		), 0);
+		break;
+	case "reg_case":
+		if (empty($_POST["id"])) {
+			$log->error("XHR [reg_case] 查詢ID為空值");
+			echoErrorJSONString();
+			break;
+		}
+		$log->info("XHR [reg_case] 查詢登記案件【".$_POST["id"]."】請求");
+		$row = $mock ? $cache->get('reg_case') : $query->getRegCaseDetail($_POST["id"]);
+		$cache->set('reg_case', $row);
+		if (empty($row)) {
+			$log->info("XHR [reg_case] 查無資料");
+			echoErrorJSONString();
+		} else {
+			$data = new RegCaseData($row);
+			$log->info("XHR [reg_case] 查詢成功");
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => 1,
+				"query_string" => "id=".$_POST["id"],
+				"baked" => $data->getBakedData()
+			);
+			echo json_encode($result, 0);
+		}
+		break;
+	case "reg_cases_by_day":
+		if (empty($_POST["qday"])) {
+			$_POST["qday"] = $today;
+		}
+		$log->info("XHR [reg_cases_by_day] 查詢登記案件 BY DAY【".$_POST["qday"]."】請求");
+		$rows = $mock ? $cache->get('reg_cases_by_day') : $query->queryAllCasesByDate($_POST["qday"]);
+		$cache->set('reg_cases_by_day', $rows);
+		if (empty($rows)) {
+			$log->info("XHR [reg_cases_by_day] 查無資料");
+			echoErrorJSONString();
+		} else {
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$baked[] = $data->getBakedData();
+			}
+			$count = count($baked);
+			$log->info("XHR [reg_cases_by_day] 查詢成功 ($count)");
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => $count,
+				"query_string" => "qday=".$_POST["qday"],
+				"baked" => $baked
+			);
+			echo json_encode($result, 0);
+		}
+		break;
+	case "reg_stats":
+		if (empty($_POST["year_month"])) {
+			$log->error("XHR [reg_stats] 查詢年月為空值");
+			echoErrorJSONString();
+			break;
+		}
+		$log->info("XHR [reg_stats] 查詢登記案件統計【".$_POST["year_month"]."】請求");
+		$rows = $mock ? $cache->get('reg_stats') : $query->getRegCaseStatsMonthly($_POST["year_month"]);
+		$cache->set('reg_stats', $rows);
+		if (empty($rows)) {
+			$log->info("XHR [reg_stats] 查無資料");
+			echoErrorJSONString();
+		} else {
+			$log->info("XHR [reg_stats] 查詢成功");
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($rows),
+				"raw" => $rows	// each record key is reason, count
+			);
+			echo json_encode($result, 0);
+		}
+		break;
+	case "reg_upd_col":
+		$log->info("XHR [reg_upd_col] 更新案件欄位【".$_POST["rm01"].", ".$_POST["rm02"].", ".$_POST["rm03"].", ".$_POST["col"].", ".$_POST["val"]."】請求");
+		$result_flag = $mock ? $cache->get('reg_upd_col') : $query->updateCaseColumnData($_POST["rm01"].$_POST["rm02"].$_POST["rm03"], "MOICAS.CRSMS", $_POST["col"], $_POST["val"]);
+		$cache->set('reg_upd_col', $result_flag);
+		if ($result_flag) {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => "0",
+				"raw" => $result_flag,
+				"query_string" => "RM01=".$_POST["rm01"]."&RM02=".$_POST["rm02"]."&RM03=".$_POST["rm03"]."&COL=".$_POST["col"]."&VAL=".$_POST["val"]
+			);
+			$log->info("XHR [reg_upd_col] 更新案件欄位成功");
+			echo json_encode($result, 0);
+		} else {
+			$log->error("XHR [reg_upd_col] 更新案件欄位失敗");
+			echoErrorJSONString("更新案件欄位失敗");
+		}
 		break;
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
