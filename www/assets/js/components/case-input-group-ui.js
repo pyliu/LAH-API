@@ -42,21 +42,29 @@ if (Vue) {
             return {
                 codes: {
                     reg: {
-                        local: {
+                        HB: {
                             label: "本所",
                             options: ["HB04 壢登", "HB05 壢永", "HB06 壢速"]
                         },
-                        remote_local: {
+                        HXB1: {
                             label: "本所收件(跨所)",
                             options: ["HAB1 壢桃登跨", "HCB1 壢溪登跨", "HDB1 壢楊登跨", "HEB1 壢蘆登跨", "HFB1 壢德登跨", "HGB1 壢平登跨", "HHB1 壢山登跨"]
                         },
-                        remote_remote: {
+                        HBX1: {
                             label: "他所收件(跨所)",
                             options: ["HBA1 桃壢登跨", "HBC1 溪壢登跨", "HBD1 楊壢登跨", "HBE1 蘆壢登跨", "HBF1 德壢登跨", "HBG1 平壢登跨", "HBH1 山壢登跨"]
+                        },
+                        H2XX: {
+                            label: "本所收件(跨縣市)",
+                            options: []
+                        },
+                        XXHB: {
+                            label: "他所收件(跨縣市)",
+                            options: []
                         }
                     },
                     sur: {
-                        local: {
+                        HB: {
                             label: "測量案件",
                             options: ["HB12 中地測丈", "HB13 中地測建", "HB17 中地法土", "HB18 中地法建"]
                         }
@@ -109,6 +117,20 @@ if (Vue) {
                 });
                 Object.defineProperty(evt, 'target', {writable: false, value: target});
                 return evt;
+            },
+            restoreCodesByJSON: function(json) {
+                for (let city in json.raw['跨縣市本所收件']) {
+                    for (let code in json.raw['跨縣市本所收件'][city]) {
+                        let clean_name = json.raw['跨縣市本所收件'][city][code].replace('跨縣市（', '').replace('）', '');
+                        this.codes.reg.H2XX.options.push(`${code} ${clean_name} (${city})`);
+                    }
+                }
+                for (let city in json.raw['跨縣市他所收件']) {
+                    for (let code in json.raw['跨縣市他所收件'][city]) {
+                        let clean_name = json.raw['跨縣市他所收件'][city][code].replace('跨縣市（', '').replace('）', '');
+                        this.codes.reg.XXHB.options.push(`${code} ${clean_name} (${city})`);
+                    }
+                }
             }
         },
         watch: {
@@ -126,7 +148,7 @@ if (Vue) {
                 this.$emit("num-updated", evt);
             }
         },
-        created: function() {
+        created: async function() {
             // set year select options
             var d = new Date();
             this.year = (d.getFullYear() - 1911);
@@ -135,37 +157,49 @@ if (Vue) {
                 this.years.push({value: 105 + i, text: 105 + i});
             }
 
+            let json = await this.getLocalCache('reg_code');
+            if (json !== false) {
+                this.restoreCodesByJSON(json);
+                return;
+            }
+
+            this.isBusy = true;
             this.$http.post(CONFIG.JSON_API_EP, {
                 type: 'reg_code'
             }).then(res => {
-                this.$log(res.data);
+                this.restoreCodesByJSON(res.data);
+                this.setLocalCache('reg_code', res.data, 24 * 60 * 60 * 1000);  // cache for a day
             }).catch(err => {
-
+                this.error = err;
             }).finally(() => {
-
+                this.isBusy = false;
             });
         },
         mounted: function(e) {
             switch(this.type) {
                 case "reg":
-                    this.code_data.push(this.codes.reg.local);
-                    this.code_data.push(this.codes.reg.remote_local);
-                    this.code_data.push(this.codes.reg.remote_remote);
+                    this.code_data.push(this.codes.reg.HB);
+                    this.code_data.push(this.codes.reg.HXB1);
+                    this.code_data.push(this.codes.reg.HBX1);
+                    this.code_data.push(this.codes.reg.H2XX);
+                    this.code_data.push(this.codes.reg.XXHB);
                     this.num_step = this.num_min = 10;
                     break;
                 case "sur":
-                    this.code_data.push(this.codes.sur.local);
+                    this.code_data.push(this.codes.sur.HB);
                     this.num_step = this.num_min = 100;
                     this.num = "000100";
                     break;
                 case "sync":
-                    this.code_data.push(this.codes.reg.remote_local);
+                    this.code_data.push(this.codes.reg.HXB1);
                     break;
                 default:
-                    this.code_data.push(this.codes.reg.local);
-                    this.code_data.push(this.codes.reg.remote_local);
-                    this.code_data.push(this.codes.reg.remote_remote);
-                    this.code_data.push(this.codes.sur.local);
+                    this.code_data.push(this.codes.reg.HB);
+                    this.code_data.push(this.codes.reg.HXB1);
+                    this.code_data.push(this.codes.reg.HBX1);
+                    this.code_data.push(this.codes.sur.HB);
+                    this.code_data.push(this.codes.reg.H2XX);
+                    this.code_data.push(this.codes.reg.XXHB);
                     break;
             }
             // setup delay timer to allow cached data update to the input/select element
