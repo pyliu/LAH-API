@@ -133,7 +133,7 @@ if (Vue) {
                 }
             },
             codeBg(label) {
-                let bg_css = 'bg-light';
+                let bg_css = 'bg-dark text-white';
                 switch (label) {
                     case '他所收件(跨縣市)':
                         bg_css = 'bg-warning';
