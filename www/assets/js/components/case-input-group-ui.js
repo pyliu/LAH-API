@@ -188,7 +188,7 @@ if (Vue) {
                 type: 'reg_code'
             }).then(res => {
                 this.restoreCodesByJSON(res.data);
-                this.setLocalCache('reg_code', res.data, 24 * 60 * 60 * 1000);  // cache for a day
+                this.setLocalCache('reg_code', res.data, 7 * 24 * 60 * 60 * 1000);  // cache for a week
             }).catch(err => {
                 this.error = err;
             }).finally(() => {
