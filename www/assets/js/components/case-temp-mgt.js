@@ -34,7 +34,7 @@ if (Vue) {
                     this.$warn("year format is not valid.", this.year, this.id);
                     return false;
                 }
-                regex = /^H[A-Z0-9]{3}$/i;
+                regex = /^[A-Z0-9]{4}$/i;
                 if (!regex.test(this.code)) {
                     this.$warn("code format is not valid.", this.code, this.id);
                     return false;
@@ -63,8 +63,8 @@ if (Vue) {
                     });
                 }
             },
-            popup: () => {
-                showModal({
+            popup: function() {
+                this.msgbox({
                     title: "案件暫存檔清除 小幫手提示",
                     body: `<h6 class="text-info">檢查下列的表格</h6>
                     <ul>

@@ -32,7 +32,7 @@ if (Vue) {
                     this.$warn(this.id, "year format is not valid.");
                     return false;
                 }
-                regex = /^H[A-Z0-9]{3}$/i;
+                regex = /^[A-Z0-9]{4}$/i;
                 if (!regex.test(code)) {
                     this.$warn(this.id, "code format is not valid.");
                     return false;
