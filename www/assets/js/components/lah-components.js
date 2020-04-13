@@ -325,7 +325,7 @@ if (Vue) {
             }, {
                 text: "防疫體溫紀錄",
                 url: "temperature.html",
-                icon: "temperature-high",
+                icon: "head-side-mask",
                 need_admin: false
             }, {
                 text: "記錄瀏覽",
@@ -2475,7 +2475,7 @@ if (Vue) {
                         props: { userList: res.data.raw }
                     });
                     showModal({
-                        title: `全所體溫一覽表 ${this.today}`,
+                        title: `<i class="fa fa-temperature-low fa-lg"></i> 全所體溫一覽表 ${this.today}`,
                         message: vn,
                         size: "xl"
                     });
