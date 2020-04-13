@@ -14,7 +14,7 @@ if (Vue) {
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇案件字 --</b-form-select-option>
                     </template>
-                    <optgroup v-for="obj in code_data" :label="obj.label">
+                    <optgroup v-for="obj in code_data" :label="obj.label" :class="codeBg(obj.label)">
                         <option v-for="item in obj.options" :value="item.replace(/[^A-Za-z0-9]/g, '')">{{item}}</option>
                     </optgroup>
                 </b-form-select>
@@ -131,6 +131,20 @@ if (Vue) {
                         this.codes.reg.XXHB.options.push(`${code} ${clean_name} (${city})`);
                     }
                 }
+            },
+            codeBg(label) {
+                let bg_css = 'bg-light';
+                switch (label) {
+                    case '他所收件(跨縣市)':
+                        bg_css = 'bg-warning';
+                        break;
+                    case '本所收件(跨縣市)':
+                        bg_css = 'bg-success text-white';
+                        break;
+                    default:
+                        break;
+                }
+                return bg_css;
             }
         },
         watch: {
