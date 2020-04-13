@@ -453,7 +453,8 @@ if (Vue) {
         mounted() {
             this.links.forEach(this.setLeading);
             // add pulse effect for the nav-item
-            $(".nav-item").on("mouseenter", function(e) { this.animated(this, {name: "pulse"}); });
+            let that = this;
+            $(".nav-item").on("mouseenter", function(e) { that.animated(this, {name: "pulse"}); });
             this.checkAuthority();
         }
     });
