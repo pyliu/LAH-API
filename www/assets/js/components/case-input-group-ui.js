@@ -149,12 +149,18 @@ if (Vue) {
             }
         },
         created: async function() {
-            // set year select options
-            var d = new Date();
-            this.year = (d.getFullYear() - 1911);
-            let len = this.year - 105;
-            for (let i = 0; i <= len; i++) {
-                this.years.push({value: 105 + i, text: 105 + i});
+            let years = await this.getLocalCache('case_input_years');
+            if (years !== false) {
+                this.years = years;
+            } else {
+                // set year select options
+                var d = new Date();
+                this.year = (d.getFullYear() - 1911);
+                let len = this.year - 105;
+                for (let i = 0; i <= len; i++) {
+                    this.years.push({value: 105 + i, text: 105 + i});
+                }
+                this.setLocalCache('case_input_years', this.years, 24 * 60 * 60 * 1000);  // cache for a day
             }
 
             let json = await this.getLocalCache('reg_code');
