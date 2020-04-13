@@ -1,18 +1,17 @@
 if (Vue) {
     Vue.component("case-sync-mgt", {
         template: `<fieldset id="case-sync-mgt-fieldset">
-            <legend>同步案件</legend>
+            <legend>
+                <i class="fas fa-sync-alt"></i>
+                同步案件
+                <b-button class="border-0" @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
+            </legend>
             <b-form-row class="mb-2">
                 <b-col>
                     <case-input-group-ui v-model="id" @enter="check" type="sync" prefix="case_sync"></case-input-group-ui>
                 </b-col>
-            </b-form-row>
-            <b-form-row>
-                <b-col>
-                    <b-button block pill @click="check" variant="outline-primary" size="sm"><i class="fas fa-sync"></i> 比對</b-button>
-                </b-col>
-                <b-col>
-                    <b-button block pill @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i> 功能說明</b-button>
+                <b-col cols="1">
+                    <b-button @click="check" variant="outline-primary" size="sm"><i class="fas fa-sync"></i></b-button>
                 </b-col>
             </b-form-row>
         </fieldset>`,
