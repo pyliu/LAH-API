@@ -1,18 +1,17 @@
 if (Vue) {
     Vue.component("case-temp-mgt", {
         template: `<fieldset>
-            <legend>暫存檔查詢</legend>
+            <legend>
+                <i class="fas fa-layer-group"></i>
+                暫存檔查詢
+                <b-button @click="popup" variant="outline-success" size="sm" class="border-0"><i class="fas fa-question"></i></b-button>
+            </legend>
             <b-form-row class="mb-2">
                 <b-col>
                     <case-input-group-ui v-model="id" @enter="query" type="reg" prefix="case_temp"></case-input-group-ui>
                 </b-col>
-            </b-form-row>
-            <b-form-row>
-                <b-col>
-                    <b-button block pill @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 查詢</b-button>
-                </b-col>
-                <b-col>
-                    <b-button block pill @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i> 功能說明</b-button>
+                <b-col cols="1">
+                    <b-button @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i></b-button>
                 </b-col>
             </b-form-row>
         </fieldset>`,
