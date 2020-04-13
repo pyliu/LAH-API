@@ -1,7 +1,11 @@
 if (Vue) {
     Vue.component("fee-query-board", {
         template: `<fieldset>
-            <legend class="bg-light text-dark"><b-icon icon="wallet"></b-icon> 規費資料查詢</legend>
+            <legend class="bg-light text-dark">
+                <b-icon icon="wallet"></b-icon>
+                規費資料查詢
+                <b-button @click="popup" variant="outline-success" size="sm" class="border-0"><i class="fas fa-question"></i></b-button>
+            </legend>
             <b-form-row class="mb-1">
                 <b-input-group size="sm">
                     <b-input-group-prepend is-text>&emsp;日期&emsp;</b-input-group-prepend>
@@ -33,22 +37,15 @@ if (Vue) {
                         @keyup.enter="queryByNumber"
                     >
                     </b-form-input>
-                    <b-button class="ml-1" @click="queryByNumber" variant="outline-primary" size="sm" title="依據電腦給號"><i class="fas fa-search"></i> 查詢</b-button>
-                </b-input-group>
-            </b-form-row>
-            <b-form-row align-h="around" align-v="center">
-                <b-col class="p-0 pr-1">
-                    <b-button block @click="obsolete" variant="outline-secondary" size="sm" title="新增作廢假資料" class="h-100">
+                    <b-button class="mx-1" @click="queryByNumber" variant="outline-primary" size="sm" title="依據電腦給號"><i class="fas fa-search"></i> 查詢</b-button>
+                    <b-button @click="obsolete" variant="outline-secondary" size="sm" title="新增作廢假資料" class="h-100" title="開啟新增作廢單據功能視窗">
                         <span class="fa-stack" style="font-size: 0.5rem">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
                             <i class="fas fa-ban fa-stack-2x text-danger"></i>
                         </span>
-                        開啟新增作廢單據功能視窗
+                        作廢
                     </b-button>
-                </b-col>
-                <b-col class="p-0">
-                    <b-button block @click="popup" variant="outline-success" size="sm" class="h-100"><i class="fas fa-question"></i> 功能說明</b-button>
-                </b-col>
+                </b-input-group>
             </b-form-row>
         </fieldset>`,
         data: () => { return {
