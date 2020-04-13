@@ -260,58 +260,6 @@ let showUserInfoByRAW = (tdoc_raw, selector = undefined) => {
 	}
 }
 
-let xhrSendMessage = e => {
-	if (CONFIG.DISABLE_MSDB_QUERY) {
-		console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping xhrSendMessage.");
-		return;
-	}
-	let title = $("#msg_title").val();
-	let content = $("#msg_content").val().replace(/\n/g, "\r\n");	// Messenger client is Windows app, so I need to replace \n to \r\n
-	let who = $("#msg_who").val();
-
-	if (!confirm("確認要送 「" + title + "」 給 「" + who + "」？\n\n" + content)) {
-		return false;
-	}
-
-	if(isEmpty(title) || isEmpty(content) || isEmpty(who)) {
-		console.warn("Require query params are empty, skip xhr querying. (" + title + ", " + content + ")");
-		showAlert({
-			message: "<span class='text-danger'>標題或是內容為空白。</span>",
-			type: "warning"
-		});
-		return;
-	}
-
-	if (content.length > 1000) {
-		console.warn("Content should not exceed 1000 chars, skip xhr querying. (" + content.length + ")");
-		showAlert({
-			message: "<span class='text-danger'>內容不能超過1000個字元。</span><p>" + content + "</p>",
-			type: "warning"
-		});
-		return;
-	}
-
-	let clicked_element = $(e.target);
-	toggle(clicked_element);
-
-	axios.post(CONFIG.JSON_API_EP, {
-		type: "send_message",
-		title: title,
-		content: content,
-		who: who
-	}).then(res => {
-		console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
-		addNotification({
-			title: "傳送訊息",
-			message: res.data.message
-		});
-		toggle(clicked_element);
-	}).catch(ex => {
-		console.error("xhrSendMessage parsing failed", ex);
-		showAlert({ title: "傳送訊息", message: ex.message, type: "danger" });
-	});
-}
-
 let xhrTest = () => {
 	let form_body = new FormData();
 	form_body.append("type", "reg_stats");
