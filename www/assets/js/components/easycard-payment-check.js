@@ -1,7 +1,11 @@
 if (Vue) {
     Vue.component("easycard-payment-check", {
         template: `<fieldset>
-            <legend class="bg-light text-dark"><b-icon icon="credit-card"></b-icon> 悠遊卡檢測</legend>
+            <legend class="bg-light text-dark">
+                <b-icon icon="credit-card"></b-icon>
+                悠遊卡檢測
+                <b-button class="border-0" @click="popup" size="sm" variant="outline-success"><i class="fas fa-question"></i></b-button>
+            </legend>
             <div class="form-row d-none">
                 <div class="input-group input-group-sm col small">
                     <div class="input-group-prepend">
@@ -19,7 +23,6 @@ if (Vue) {
             </div>
             <b-form-row>
                 <b-col><b-button pill block @click="query" size="sm" variant="outline-primary"><i class="fas fa-cogs"></i> 檢測</b-button></b-col>
-                <b-col><b-button pill block @click="popup" size="sm" variant="outline-success"><i class="fas fa-question"></i> 功能說明</b-button></b-col>
             </b-form-row>
         </fieldset>`,
         data: () => {

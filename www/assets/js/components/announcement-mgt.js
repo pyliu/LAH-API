@@ -1,18 +1,17 @@
 if (Vue) {
     Vue.component("announcement-mgt", {
         template: `<fieldset>
-            <legend>公告維護</legend>
-            <b-form-row class="mb-2">
+            <legend>
+                <i class="fas fa-bullhorn"></i>
+                公告維護
+                <b-button class="border-0" @click="popup" variant="outline-success" size="sm" title="備註"><i class="fas fa-question"></i></b-button>
+            </legend>
+            <b-form-row class="pr-2">
                 <b-col>
                     <announcement-mgt-item :reset-flag="reset_flag" @update-announcement-done="updated" @reset-flags-done="done"></announcement-mgt-item>
                 </b-col>
-            </b-form-row>
-            <b-form-row>
-                <b-col>
-                    <b-button block pill @click="clear" variant="outline-secondary" size="sm" title="'清除准登旗標'"><i class="fas fa-broom"></i> 清除</b-button>
-                </b-col>
-                <b-col>
-                    <b-button block pill @click="popup" variant="outline-success" size="sm" title="備註"><i class="fas fa-question"></i> 功能說明</b-button>
+                <b-col cols="1">
+                    <b-button @click="clear" variant="outline-secondary" size="sm" title="'清除准登旗標'"><i class="fas fa-broom"></i></b-button>
                 </b-col>
             </b-form-row>
         </fieldset>`,
