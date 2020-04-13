@@ -771,43 +771,58 @@ if (Vue) {
     Vue.component("lah-user-card", {
         template: `<div>
             <h6 v-show="!empty(title)"><i class="fas fa-user-circle"></i> {{title}}</h6>
-            <b-card no-body v-if="useTab">
-                <b-tabs card align="center" small>
-                    <b-tab v-for="(user_data, idx) in user_rows" :title="user_data['AP_USER_NAME']" :active="idx == 0">
-                        <b-card-title>{{user_data['AP_USER_NAME']}}</b-card-title>
+            <b-card no-body v-if="found" style="max-width: 480px">
+                <b-tabs card>
+                    <b-tab v-for="(user_data, idx) in user_rows" :title="user_data['DocUserID']" :active="idx == 0">
+                        <b-card-title>
+                            <b-avatar button size="3rem" :src="photoUrl(user_data)" variant="light" @click="openPhoto(user_data)" v-if="useAvatar"></b-avatar>
+                            {{user_data['AP_USER_NAME']}}
+                        </b-card-title>
                         <b-card-sub-title>{{user_data['AP_JOB']}}</b-card-sub-title>
-                        <b-link @click="openPhoto(user_data)">
+                        <b-link @click="openPhoto(user_data)" v-if="!useAvatar">
                             <b-card-img
                                 :src="photoUrl(user_data)"
                                 :alt="user_data['AP_USER_NAME']"
                                 class="img-thumbnail float-right mx-auto ml-2"
-                                :style="imgStyle"
+                                style="max-width: 220px"
                             ></b-card-img>
                         </b-link>
                         <lah-user-description :user_data="user_data"></lah-user-description>
                     </b-tab>
+                    <b-tab title="傳送訊息">
+                        <b-form-group
+                            label-cols-sm="auto"
+                            label-cols-lg="auto"
+                            description="請輸入訊息標題 ... "
+                            label="標題"
+                            label-align="right"
+                        >
+                            <b-form-input
+                                v-model="msg_title"
+                                type="text"
+                                size="sm"
+                                placeholder="Hi there!"
+                                :state="!empty(msg_title)"
+                            ></b-form-input>
+                        </b-form-group>
+                        <b-form-group
+                            label-cols-sm="auto"
+                            label-cols-lg="auto"
+                            description="請輸入訊息內容 ... "
+                            label="內文"
+                            label-align="right"
+                        >
+                            <b-form-textarea
+                                placeholder="Dear xxxx, ..."
+                                rows="3"
+                                max-rows="8"
+                                v-model="msg_content"
+                            ></b-form-textarea>
+                        </b-form-group>
+                    </b-tab>
                 </b-tabs>
             </b-card>
-            <b-card-group deck v-else-if="useCard">
-                <b-card
-                    v-for="user_data in user_rows"
-                    class="overflow-hidden bg-light"
-                    style="max-width: 480px;"
-                    :title="user_data['AP_USER_NAME']"
-                    :sub-title="user_data['AP_JOB']"
-                >
-                    <b-link @click="openPhoto(user_data)">
-                        <b-card-img
-                            :src="photoUrl(user_data)"
-                            :alt="user_data['AP_USER_NAME']"
-                            class="img-thumbnail float-right mx-auto ml-2"
-                            :style="imgStyle"
-                        ></b-card-img>
-                    </b-link>
-                    <lah-user-description :user_data="user_data"></lah-user-description>
-                </b-card>
-            </b-card-group>
-            <lah-fa-icon icon="exclamation-circle" size="lg" variant="danger" v-else class="my-2">找不到使用者「{{name || id || ip}}」！</lah-fa-icon>
+            <lah-fa-icon icon="exclamation-circle" size="lg" variant="danger" class="my-2" v-else>找不到使用者「{{name || id || ip}}」！</lah-fa-icon>
         </div>`,
         components: {
             "lah-user-description": {
@@ -918,18 +933,19 @@ if (Vue) {
         },
         props: ['id', 'name', 'ip', 'title', 'avatar'],
         data: function() { return {
-            user_rows: null
+            user_rows: null,
+            msg_title: '',
+            msg_content: ''
         } },
         computed: {
-            useTab: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 1; },
-            useCard: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined && this.user_rows.length > 0; },
+            found: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined },
             notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; },
             foundName: function() { return this.user_rows[0]["AP_USER_NAME"] },
-            imgStyle: function() { return this.avatar ? 'max-width: 5rem' : 'max-width: 220px' }
+            useAvatar: function() { return !this.empty(this.avatar) }
         },
         methods: {
             photoUrl: function (user_data) {
-                if (this.avatar) {
+                if (this.useAvatar) {
                     return `get_user_img.php?name=${user_data['AP_USER_NAME']}_avatar`;
                 }
                 return `get_user_img.php?name=${user_data['AP_USER_NAME']}`;
