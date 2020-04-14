@@ -1046,7 +1046,7 @@ if (Vue) {
                             message: res.data.message
                         });
                         this.msg_content = '';
-                        this.msg_title = '';
+                        this.msg_title = '' ;
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
