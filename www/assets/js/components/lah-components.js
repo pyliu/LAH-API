@@ -949,8 +949,8 @@ if (Vue) {
             ID: function() { return this.user_rows ? this.user_rows[0]['DocUserID'] : null },
             sendMessageOK: function() { return this.msgTitleOK && this.msgContentOK && this.ID !== null },
             msgContentOK: function() { return !this.empty(this.msg_content) && this.msg_content.length <= 500 },
-            msgTitleOK: function() { return !this.empty(this.msg_title) && this.msg_title.length <= 50 },
-            msgTitleCount: function() { return this.empty(this.msg_title) ? '最多50字中文 ... ' : `${this.msg_title.length} / 50` },
+            msgTitleOK: function() { return !this.empty(this.msg_title) && this.msg_title.length <= 20 },
+            msgTitleCount: function() { return this.empty(this.msg_title) ? '言簡意賅最多20字中文 ... ' : `${this.msg_title.length} / 20` },
             msgContentCount: function() { return this.empty(this.msg_content) ? '最多500字中文 ... ' : `${this.msg_content.length} / 500` }
         },
         methods: {
