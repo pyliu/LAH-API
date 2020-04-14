@@ -793,7 +793,7 @@ if (Vue) {
                         <b-form-group
                             label-cols-sm="auto"
                             label-cols-lg="auto"
-                            description="請輸入訊息標題 ... "
+                            :description="msgTitleCount"
                             label="標題"
                             label-align="right"
                         >
@@ -801,13 +801,13 @@ if (Vue) {
                                 v-model="msg_title"
                                 type="text"
                                 placeholder="Hi there!"
-                                :state="!empty(msg_title)"
+                                :state="msgTitleOK"
                             ></b-form-input>
                         </b-form-group>
                         <b-form-group
                             label-cols-sm="auto"
                             label-cols-lg="auto"
-                            description="請輸入訊息內容 ... "
+                            :description="msgContentCount"
                             label="內文"
                             label-align="right"
                         >
@@ -816,12 +816,12 @@ if (Vue) {
                                 rows="3"
                                 max-rows="5"
                                 v-model="msg_content"
-                                :state="!empty(msg_content)"
+                                :state="msgContentOK"
                                 style="overflow: hidden"
                             ></b-form-textarea>
                         </b-form-group>
                         <div class="text-center">
-                            <b-button variant="outline-primary" @click="sendMessage" :disabled="!okToSendMessage"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
+                            <b-button variant="outline-primary" @click="sendMessage" :disabled="!sendMessageOK"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
                         </div>
                     </b-tab>
                 </b-tabs>
@@ -946,8 +946,12 @@ if (Vue) {
             notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; },
             foundName: function() { return this.user_rows[0]["AP_USER_NAME"] },
             useAvatar: function() { return !this.empty(this.avatar) },
-            okToSendMessage: function() { return !this.empty(this.msg_title) && !this.empty(this.msg_content) && this.ID !== null },
-            ID: function() { return this.user_rows ? this.user_rows[0]['DocUserID'] : null }
+            ID: function() { return this.user_rows ? this.user_rows[0]['DocUserID'] : null },
+            sendMessageOK: function() { return this.msgTitleOK && this.msgContentOK && this.ID !== null },
+            msgContentOK: function() { return !this.empty(this.msg_content) && this.msg_content.length <= 500 },
+            msgTitleOK: function() { return !this.empty(this.msg_title) && this.msg_title.length <= 50 },
+            msgTitleCount: function() { return this.empty(this.msg_title) ? '最多50字中文 ... ' : `${this.msg_title.length} / 50` },
+            msgContentCount: function() { return this.empty(this.msg_content) ? '最多500字中文 ... ' : `${this.msg_content.length} / 500` }
         },
         methods: {
             photoUrl: function (user_data) {
