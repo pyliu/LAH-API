@@ -1009,6 +1009,7 @@ if (Vue) {
 
     Vue.component('lah-user-message-form', {
         template: `<div>
+            <h6 v-if="showTitle" v-html="title"></h6>
             <b-form-group
                 label-cols-sm="auto"
                 label-cols-lg="auto"
@@ -1044,15 +1045,17 @@ if (Vue) {
             </div>
         </div>`,
         props: {
-            ID: { type: String, default: null },
-            NAME: { type: String, default: null }
+            ID: { type: String, default: '' },
+            NAME: { type: String, default: '' },
+            title: { type: String, default: '' }
         },
         data: () => { return {
             msg_title: '',
             msg_content: ''
         } },
         computed: {
-            sendMessageOK: function() { return this.msgTitleOK && this.msgContentOK && this.ID !== null },
+            showTitle: function() { return !this.empty(this.title) },
+            sendMessageOK: function() { return this.msgTitleOK && this.msgContentOK && !this.empty(this.ID) },
             msgContentOK: function() { return !this.empty(this.msg_content) && this.msg_content.length <= 500 },
             msgTitleOK: function() { return !this.empty(this.msg_title) && this.msg_title.length <= 20 },
             msgTitleCount: function() { return this.empty(this.msg_title) ? '言簡意賅最多20字中文 ... ' : `${this.msg_title.length} / 20` },
