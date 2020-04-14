@@ -1110,7 +1110,7 @@ if (Vue) {
         }
     });
 
-    Vue.component('lah-user-message', {
+    Vue.component('lah-user-message-history', {
         template: `<div>
             <h6 v-show="!empty(title)"><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> {{title}} <b-form-spinbutton v-if="enable_spinbutton" v-model="count" min="1" size="sm" inline></b-form-spinbutton></h6>
             <b-card-group ref="group" v-if="ready" :columns="columns" :deck="!columns">

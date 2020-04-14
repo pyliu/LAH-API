@@ -342,7 +342,7 @@ if (Vue) {
                 this.$refs.statsChart.downloadBase64PNG(`${this.chartType}.png`);
             },
             showMessage: function () {
-                let vm = this.$createElement('lah-user-message', { props: { count: 5, tabs: true, tabsPills: false, tabsEnd: false }});
+                let vm = this.$createElement('lah-user-message-history', { props: { count: 5, tabs: true, tabsPills: false, tabsEnd: false }});
                 showModal({
                     title: "我收到的信差訊息",
                     message: vm,
