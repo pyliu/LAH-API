@@ -101,6 +101,12 @@ blockquote {
 	animation-iteration-count: 1;
 }
 
+.once-anim-cfg-2x {
+	animation-duration: 0.8s;
+	/* animation-delay: 2s; */
+	animation-iteration-count: 1;
+}
+
 .inf-anim-cfg {
 	animation-duration: 0.4s;
 	/* animation-delay: 2s; */
