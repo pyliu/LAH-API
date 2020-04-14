@@ -790,39 +790,7 @@ if (Vue) {
                         <lah-user-description :user_data="user_data"></lah-user-description>
                     </b-tab>
                     <b-tab title="傳送訊息">
-                        <b-form-group
-                            label-cols-sm="auto"
-                            label-cols-lg="auto"
-                            :description="msgTitleCount"
-                            label="標題"
-                            label-align="right"
-                        >
-                            <b-form-input
-                                v-model="msg_title"
-                                type="text"
-                                placeholder="Hi there!"
-                                :state="msgTitleOK"
-                            ></b-form-input>
-                        </b-form-group>
-                        <b-form-group
-                            label-cols-sm="auto"
-                            label-cols-lg="auto"
-                            :description="msgContentCount"
-                            label="內文"
-                            label-align="right"
-                        >
-                            <b-form-textarea
-                                placeholder="Dear xxxx, ..."
-                                rows="3"
-                                max-rows="5"
-                                v-model="msg_content"
-                                :state="msgContentOK"
-                                style="overflow: hidden"
-                            ></b-form-textarea>
-                        </b-form-group>
-                        <div class="text-center">
-                            <b-button ref="msgbtn" variant="outline-primary" @click="sendMessage" :disabled="!sendMessageOK"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
-                        </div>
+                        <lah-user-message-form :ID="ID" :NAME="foundName"></lah-user-message-form>
                     </b-tab>
                 </b-tabs>
             </b-card>
@@ -946,12 +914,7 @@ if (Vue) {
             notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; },
             foundName: function() { return this.user_rows[0]["AP_USER_NAME"] },
             useAvatar: function() { return !this.empty(this.avatar) },
-            ID: function() { return this.user_rows ? this.user_rows[0]['DocUserID'] : null },
-            sendMessageOK: function() { return this.msgTitleOK && this.msgContentOK && this.ID !== null },
-            msgContentOK: function() { return !this.empty(this.msg_content) && this.msg_content.length <= 500 },
-            msgTitleOK: function() { return !this.empty(this.msg_title) && this.msg_title.length <= 20 },
-            msgTitleCount: function() { return this.empty(this.msg_title) ? '言簡意賅最多20字中文 ... ' : `${this.msg_title.length} / 20` },
-            msgContentCount: function() { return this.empty(this.msg_content) ? '最多500字中文 ... ' : `${this.msg_content.length} / 500` }
+            ID: function() { return this.user_rows ? this.user_rows[0]['DocUserID'] : null }
         },
         methods: {
             photoUrl: function (user_data) {
@@ -1014,15 +977,96 @@ if (Vue) {
                     console.error(err);
                 }
                 return this.user_rows !== null;
-            },
-            sendMessage: function(e) {
+            }
+        },
+        async created() {
+            if (!this.disableMSDBQuery) {
+                const succeed_cached = await this.restoreUserRows();
+                if (!succeed_cached) {
+                    if (!(this.name || this.id || this.ip)) this.ip = this.myip || await this.getLocalCache('myip');
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: "user_info",
+                        name: $.trim(this.name),
+                        id: $.trim(this.id),
+                        ip: $.trim(this.ip)
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            this.user_rows = res.data.raw;
+                            this.cacheUserRows();
+                            this.$emit('found', this.foundName);
+                        } else {
+                            console.warn(`找不到 '${this.name || this.id || this.ip}' 資料`);
+                            this.$emit('notFound', this.name || this.id || this.ip);
+                        }
+                    }).catch(err => {
+                        this.error = err;
+                        this.$emit('error', this.name || this.id || this.ip);
+                    });
+                }
+            }
+        }
+    });
+
+    Vue.component('lah-user-message-form', {
+        template: `<div>
+            <b-form-group
+                label-cols-sm="auto"
+                label-cols-lg="auto"
+                :description="msgTitleCount"
+                label="標題"
+                label-align="right"
+            >
+                <b-form-input
+                    v-model="msg_title"
+                    type="text"
+                    placeholder="Hi there!"
+                    :state="msgTitleOK"
+                ></b-form-input>
+            </b-form-group>
+            <b-form-group
+                label-cols-sm="auto"
+                label-cols-lg="auto"
+                :description="msgContentCount"
+                label="內文"
+                label-align="right"
+            >
+                <b-form-textarea
+                    placeholder="Dear xxxx, ..."
+                    rows="3"
+                    max-rows="5"
+                    v-model="msg_content"
+                    :state="msgContentOK"
+                    style="overflow: hidden"
+                ></b-form-textarea>
+            </b-form-group>
+            <div class="text-center">
+                <b-button ref="msgbtn" variant="outline-primary" @click="send" :disabled="!sendMessageOK"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
+            </div>
+        </div>`,
+        props: {
+            ID: { type: String, default: null },
+            NAME: { type: String, default: null }
+        },
+        data: () => { return {
+            msg_title: '',
+            msg_content: ''
+        } },
+        computed: {
+            sendMessageOK: function() { return this.msgTitleOK && this.msgContentOK && this.ID !== null },
+            msgContentOK: function() { return !this.empty(this.msg_content) && this.msg_content.length <= 500 },
+            msgTitleOK: function() { return !this.empty(this.msg_title) && this.msg_title.length <= 20 },
+            msgTitleCount: function() { return this.empty(this.msg_title) ? '言簡意賅最多20字中文 ... ' : `${this.msg_title.length} / 20` },
+            msgContentCount: function() { return this.empty(this.msg_content) ? '最多500字中文 ... ' : `${this.msg_content.length} / 500` }
+        },
+        methods: {
+            send: function(e) {
                 if (CONFIG.DISABLE_MSDB_QUERY) {
-                    this.$warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping lah-user-card::sendMessage.");
+                    this.$warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping lah-user-message-form::send.");
                     return;
                 }
                 let title = this.msg_title;
                 let content = this.msg_content.replace(/\n/g, "\r\n");	// Messenger client is Windows app, so I need to replace \n to \r\n
-                let who = this.ID || this.foundName;
+                let who = this.ID || this.NAME;
 
                 if (content.length > 1000) {
                     this.alert({
@@ -1062,32 +1106,6 @@ if (Vue) {
                         }
                     });
                 });
-            }
-        },
-        async created() {
-            if (!this.disableMSDBQuery) {
-                const succeed_cached = await this.restoreUserRows();
-                if (!succeed_cached) {
-                    if (!(this.name || this.id || this.ip)) this.ip = this.myip || await this.getLocalCache('myip');
-                    this.$http.post(CONFIG.JSON_API_EP, {
-                        type: "user_info",
-                        name: $.trim(this.name),
-                        id: $.trim(this.id),
-                        ip: $.trim(this.ip)
-                    }).then(res => {
-                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                            this.user_rows = res.data.raw;
-                            this.cacheUserRows();
-                            this.$emit('found', this.foundName);
-                        } else {
-                            console.warn(`找不到 '${this.name || this.id || this.ip}' 資料`);
-                            this.$emit('notFound', this.name || this.id || this.ip);
-                        }
-                    }).catch(err => {
-                        this.error = err;
-                        this.$emit('error', this.name || this.id || this.ip);
-                    });
-                }
             }
         }
     });
