@@ -490,7 +490,7 @@ if (Vue) {
                 </div>
             </template>
             <b-list-group class="small" style="max-height: 300px; overflow: auto;">
-                <transition-group name="list">
+                <transition-group name="list" style="z-index: 1 !important;">
                     <b-list-group-item button v-for="(item, idx) in all" :key="item.key" v-b-popover.focus="JSON.stringify(item.val)">
                         <b-button-close @click="del(item.key, idx)" style="font-size: 1rem; color: red;"></b-button-close>
                         <div class="truncate font-weight-bold">{{item.key}}</div>
@@ -1032,7 +1032,7 @@ if (Vue) {
                     return;
                 }
 
-                this.$confirm(`"確認要送 「${title}」 給 「${who}」？<p>${content}</p>`, () => {
+                this.$confirm(`"確認要送 「${title}」 給 「${who}」？<p class="mt-2">${content}</p>`, () => {
                     this.isBusy = true;
                     this.$http.post(CONFIG.JSON_API_EP, {
                         type: "send_message",
