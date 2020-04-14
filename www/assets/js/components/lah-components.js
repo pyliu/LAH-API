@@ -821,7 +821,7 @@ if (Vue) {
                             ></b-form-textarea>
                         </b-form-group>
                         <div class="text-center">
-                            <b-button variant="outline-primary" @click="sendMessage" :disabled="!sendMessageOK"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
+                            <b-button ref="msgbtn" variant="outline-primary" @click="sendMessage" :disabled="!sendMessageOK"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
                         </div>
                     </b-tab>
                 </b-tabs>
@@ -1033,25 +1033,29 @@ if (Vue) {
                 }
 
                 this.$confirm(`"確認要送 「${title}」 給 「${who}」？<p class="mt-2">${content}</p>`, () => {
-                    this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
-                        type: "send_message",
-                        title: title,
-                        content: content,
-                        who: who
-                    }).then(res => {
-                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
-                        this.notify({
-                            title: "傳送訊息",
-                            message: res.data.message
+                    this.animated(this.$refs.msgbtn, { name: 'lightSpeedOut', callback: () => {
+                        this.isBusy = true;
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: "send_message",
+                            title: title,
+                            content: content,
+                            who: who
+                        }).then(res => {
+                            this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
+                            this.animated(this.$refs.msgbtn, { name: 'lightSpeedIn', callback: () => {
+                                this.msg_content = '';
+                                this.msg_title = '' ;
+                                this.notify({
+                                    title: "傳送訊息",
+                                    message: res.data.message
+                                });
+                            } });
+                        }).catch(err => {
+                            this.error = err;
+                        }).finally(() => {
+                            this.isBusy= false;
                         });
-                        this.msg_content = '';
-                        this.msg_title = '' ;
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        this.isBusy= false;
-                    });
+                    } });
                 });
             }
         },

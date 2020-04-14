@@ -492,11 +492,11 @@ Vue.mixin({
                 }, opts);
                 node.addClass(`animated ${opts.name} ${opts.duration}`);
                 function handleAnimationEnd() {
+                    if (typeof opts.callback === 'function') opts.callback.apply(this, arguments);
                     node.removeClass(`animated ${opts.name} ${opts.duration}`);
                     node.off('animationend');
                     // clear ld animation also
                     clearLDAnimation(selector);
-                    if (typeof opts.callback === 'function') opts.callback.apply(this, arguments);
                 }
                 node.on('animationend', handleAnimationEnd);
             }
