@@ -69,9 +69,9 @@ ksort($operators);
         </div>
       </div>
       <div class="row">
-        <div class="col-6">
+        <div class="col">
           
-        <fieldset>
+          <fieldset>
             <legend>轄區各段土地標示部筆數＆面積查詢</legend>
             <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
             <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
@@ -103,47 +103,8 @@ ksort($operators);
             </blockquote>
             <div id="data_query_result"></div>
           </fieldset>
-        </div>
-        <div class="col-6">
-        <fieldset>
-            <legend>地政局索取地籍資料</legend>
-            <div class="form-row">
-              <div class="filter-btn-group col">
-                <button id="export_txt_quote_button" class="btn btn-sm btn-outline-success">打開說明</button>
-              </div>
-            </div>
-            <blockquote id="export_txt_blockquote" class="hide" data-title="地政局索取地籍資料">
-              <span class="text-danger">※</span> 系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
-              　- <small class="mt-2 mb-2"> 除下面標示為黃色部分須至地政系統產出並下載，其餘皆可於「報表匯出」區塊產出。</small> <br/>
-              　AI001-10 <br/>
-              　　AI00301 - 土地標示部 <br/>
-              　　AI00401 - 土地所有權部 <br/>
-              　　AI00601 - 管理者資料【土地、建物各做一次】 <br/>
-              　　AI00701 - 建物標示部 <br/>
-              　　AI00801 - 基地坐落 <br/>
-              　　AI00901 - 建物分層及附屬 <br/>
-              　　AI01001 - 主建物與共同使用部分 <br/>
-              　AI011-20 <br/>
-              　　AI01101 - 建物所有權部 <br/>
-              　　<span class="text-warning">AI01901 - 土地各部別</span> <br/>
-              　AI021-40 <br/>
-              　　<span class="text-warning">AI02101 - 土地他項權利部</span> <br/>
-              　　<span class="text-warning">AI02201 - 建物他項權利部</span> <br/>
-              　　AI02901 - 各部別之其他登記事項【土地、建物各做一次】 <br/><br/>
 
-              <span class="text-danger">※</span> 測量子系統/測量資料管理/資料輸出入 【請至地政系統WEB版產出】<br/>
-              　地籍圖轉出(數值地籍) <br/>
-              　　* 輸出DXF圖檔【含控制點】及 NEC重測輸出檔 <br/>
-              　地籍圖轉出(圖解數化) <br/>
-              　　* 同上兩種類皆輸出，並將【分幅管理者先接合】下選項皆勾選 <br/><br/>
-                
-              <span class="text-danger">※</span> 登記子系統/列印/清冊報表/土地建物地籍整理清冊【土地、建物各產一次存PDF，請至地政系統WEB版產出】 <br/>
-            </blockquote>
-          </fieldset>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
+          
           <fieldset>
             <legend>報表匯出</legend>
             <div class="form-row">
@@ -203,9 +164,49 @@ ksort($operators);
               <img src="assets/img/csv_export_method.jpg" class="w-auto" />
             </blockquote>
           </fieldset>
+
+          <fieldset>
+            <legend>地政局索取地籍資料</legend>
+            <div class="form-row">
+              <div class="filter-btn-group col">
+                <button id="export_txt_quote_button" class="btn btn-sm btn-outline-success">打開說明</button>
+              </div>
+            </div>
+            <blockquote id="export_txt_blockquote" class="hide" data-title="地政局索取地籍資料">
+              <span class="text-danger">※</span> 系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
+              　- <small class="mt-2 mb-2"> 除下面標示為黃色部分須至地政系統產出並下載，其餘皆可於「報表匯出」區塊產出。</small> <br/>
+              　AI001-10 <br/>
+              　　AI00301 - 土地標示部 <br/>
+              　　AI00401 - 土地所有權部 <br/>
+              　　AI00601 - 管理者資料【土地、建物各做一次】 <br/>
+              　　AI00701 - 建物標示部 <br/>
+              　　AI00801 - 基地坐落 <br/>
+              　　AI00901 - 建物分層及附屬 <br/>
+              　　AI01001 - 主建物與共同使用部分 <br/>
+              　AI011-20 <br/>
+              　　AI01101 - 建物所有權部 <br/>
+              　　<span class="text-warning">AI01901 - 土地各部別</span> <br/>
+              　AI021-40 <br/>
+              　　<span class="text-warning">AI02101 - 土地他項權利部</span> <br/>
+              　　<span class="text-warning">AI02201 - 建物他項權利部</span> <br/>
+              　　AI02901 - 各部別之其他登記事項【土地、建物各做一次】 <br/><br/>
+
+              <span class="text-danger">※</span> 測量子系統/測量資料管理/資料輸出入 【請至地政系統WEB版產出】<br/>
+              　地籍圖轉出(數值地籍) <br/>
+              　　* 輸出DXF圖檔【含控制點】及 NEC重測輸出檔 <br/>
+              　地籍圖轉出(圖解數化) <br/>
+              　　* 同上兩種類皆輸出，並將【分幅管理者先接合】下選項皆勾選 <br/><br/>
+                
+              <span class="text-danger">※</span> 登記子系統/列印/清冊報表/土地建物地籍整理清冊【土地、建物各產一次存PDF，請至地政系統WEB版產出】 <br/>
+            </blockquote>
+          </fieldset>
+
         </div>
-        <!-- <div class="col">
-        </div> -->
+
+        <div class="col">
+          <lah-user-message-form title="訊息傳遞"></lah-user-message-form>
+        </div>
+        
       </div>
     </div>
   </section><!-- /section -->
