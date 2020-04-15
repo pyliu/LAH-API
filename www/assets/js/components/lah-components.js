@@ -774,6 +774,9 @@ if (Vue) {
             <b-card no-body v-if="found" style="max-width: 480px">
                 <b-tabs card>
                     <b-tab v-for="(user_data, idx) in user_rows" :title="user_data['DocUserID']" :active="idx == 0">
+                        <template v-slot:title>
+                            <lah-fa-icon icon="id-card"> {{user_data['DocUserID']}}</lah-fa-icon>
+                        </template>
                         <b-card-title>
                             <b-avatar button size="3rem" :src="photoUrl(user_data)" variant="light" @click="openPhoto(user_data)" v-if="useAvatar"></b-avatar>
                             {{user_data['AP_USER_NAME']}}
@@ -789,8 +792,11 @@ if (Vue) {
                         </b-link>
                         <lah-user-description :user_data="user_data"></lah-user-description>
                     </b-tab>
-                    <b-tab title="傳送訊息">
-                        <lah-user-message-form :ID="ID" :NAME="foundName"></lah-user-message-form>
+                    <b-tab>
+                        <template v-slot:title>
+                            <lah-fa-icon icon="comment-dots" prefix="far"> 傳送信差</lah-fa-icon>
+                        </template>
+                        <lah-user-message-form :ID="ID" :NAME="foundName" no-body></lah-user-message-form>
                     </b-tab>
                 </b-tabs>
             </b-card>
@@ -1008,8 +1014,9 @@ if (Vue) {
     });
 
     Vue.component('lah-user-message-form', {
-        template: `<div>
-            <h6 v-if="showTitle" v-html="title"></h6>
+        template: `<b-card :no-body="noBody" :class="border">
+            <h5 v-if="showTitle"><lah-fa-icon icon="comment-dots" prefix="far"> {{title}}</lah-fa-icon></h5>
+            <lah-user-id-input v-if="showIdInput" v-model="id"></lah-user-id-input>
             <b-form-group
                 label-cols-sm="auto"
                 label-cols-lg="auto"
@@ -1041,21 +1048,25 @@ if (Vue) {
                 ></b-form-textarea>
             </b-form-group>
             <div class="text-center">
-                <b-button ref="msgbtn" variant="outline-primary" @click="send" :disabled="!sendMessageOK"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
+                <b-button ref="msgbtn" variant="outline-primary" @click="send" :disabled="!sendMessageOK" size="sm"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
             </div>
-        </div>`,
+        </b-card>`,
         props: {
             ID: { type: String, default: '' },
             NAME: { type: String, default: '' },
-            title: { type: String, default: '' }
+            title: { type: String, default: '' },
+            noBody: { type: Boolean, default: false },
         },
         data: () => { return {
             msg_title: '',
-            msg_content: ''
+            msg_content: '',
+            id: ''
         } },
         computed: {
+            border: function() { return this.noBody ? 'border-0' : '' },
             showTitle: function() { return !this.empty(this.title) },
-            sendMessageOK: function() { return this.msgTitleOK && this.msgContentOK && !this.empty(this.ID) },
+            showIdInput: function() { return this.empty(this.ID) && this.empty(this.NAME)},
+            sendMessageOK: function() { return this.msgTitleOK && this.msgContentOK && (!this.empty(this.ID) || !this.empty(this.id))  },
             msgContentOK: function() { return !this.empty(this.msg_content) && this.msg_content.length <= 500 },
             msgTitleOK: function() { return !this.empty(this.msg_title) && this.msg_title.length <= 20 },
             msgTitleCount: function() { return this.empty(this.msg_title) ? '言簡意賅最多20字中文 ... ' : `${this.msg_title.length} / 20` },
@@ -1069,7 +1080,7 @@ if (Vue) {
                 }
                 let title = this.msg_title;
                 let content = this.msg_content.replace(/\n/g, "\r\n");	// Messenger client is Windows app, so I need to replace \n to \r\n
-                let who = this.ID || this.NAME;
+                let who = this.ID || this.NAME || this.id;
 
                 if (content.length > 1000) {
                     this.alert({
