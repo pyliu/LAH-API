@@ -2819,6 +2819,174 @@ if (Vue) {
             this.btnid = this.uuid();
         }
     });
+
+    Vue.component('lah-report', {
+        template: `<fieldset>
+            <legend>
+                <lah-fa-icon icon="file-excel" prefix="far"></lah-fa-icon>
+                報表資料匯出
+                <b-btn @click="popup" variant="outline-success" class="border-0 my-auto" size="sm"><lah-fa-icon icon="question"></lah-fa-icon></b-btn>
+                {{selected}}
+            </legend>
+            <b-input-group>
+                <b-input-group-prepend is-text>預載查詢選項</b-input-group-prepend>
+                <b-form-select v-model="selected" :options="options" @change="change"></b-form-select>
+                <b-btn class="ml-1" @click="output" variant="outline-primary" v-b-tooltip="'匯出'" :disabled="!validate"><lah-fa-icon icon="file-export"></lah-fa-icon></b-btn>
+            </b-input-group>
+            <b-form-textarea
+                ref="sql"
+                placeholder="SELECT SQL text ..."
+                rows="3"
+                max-rows="8"
+                v-model="sql"
+                class="mt-1 overflow-auto"
+                :state="validate"
+            ></b-form-textarea>
+        </fieldset>`,
+        data: function() { return {
+            selected: '',
+            selected_label: '',
+            sql: '',
+            options: [
+                { label: '==== 地籍資料 ====', options: [
+                    { text: 'AI00301 - 土地標示部資料', value: 'txt_AI00301.sql' },
+                    { text: 'AI00401 - 土地所有權部資料', value: 'txt_AI00401.sql' },
+                    { text: 'AI00601 - 土地管理者資料', value: 'txt_AI00601_B.sql' },
+                    { text: 'AI00601 - 建物管理者資料', value: 'txt_AI00601_E.sql' },
+                    { text: 'AI00701 - 建物標示部資料', value: 'txt_AI00701.sql' },
+                    { text: 'AI00801 - 基地坐落資料', value: 'txt_AI00801.sql' },
+                    { text: 'AI00901 - 建物分層及附屬資料', value: 'txt_AI00901.sql' },
+                    { text: 'AI01001 - 主建物與共同使用部分資料', value: 'txt_AI01001.sql' },
+                    { text: 'AI01101 - 建物所有權部資料', value: 'txt_AI01101.sql' },
+                    { text: 'AI02901 - 土地各部別之其他登記事項列印', value: 'txt_AI02901_B.sql' },
+                    { text: 'AI02901 - 建物各部別之其他登記事項列印', value: 'txt_AI02901_E.sql' }
+                ] },
+                { label: '==== 所內登記案件統計 ====', options: [
+                    { text: '每月案件統計', value: '01_reg_case_monthly.sql' },
+                    { text: '每月案件 by 登記原因', value: '11_reg_reason_query_monthly.sql' },
+                    { text: '每月遠途先審案件', value: '02_reg_remote_case_monthly.sql' },
+                    { text: '每月跨所案件【本所代收】', value: '03_reg_other_office_case_monthly.sql' },
+                    { text: '每月跨所案件【非本所收件】', value: '04_reg_other_office_case_2_monthly.sql' },
+                    { text: '每月跨所子號案件【本所代收】', value: '09_reg_other_office_case_3_monthly.sql' },
+                    { text: '每月跨所各登記原因案件統計 by 收件所', value: '10_reg_reason_stats_monthly.sql' },
+                    { text: '每月權利人＆義務人為外國人案件', value: '07_reg_foreign_case_monthly.sql' },
+                    { text: '每月外國人地權登記統計', value: '07_regf_foreign_case_monthly.sql' },
+                    { text: '每月土地建物登記統計檔', value: '17_rega_case_stats_monthly.sql' },
+                    { text: '外站人員謄本核發量', value: '08_reg_workstation_case.sql' }
+                ] },
+                { label: '==== 所內其他統計 ====', options: [
+                    { text: '已結卻延期之複丈案件', value: '16_sur_close_delay_case.sql' },
+                    { text: '因雨延期測量案件數', value: '14_sur_rain_delay_case.sql' },
+                    { text: '段小段面積統計', value: '05_adm_area_size.sql' },
+                    { text: '段小段土地標示部筆數', value: '06_adm_area_blow_count.sql' },
+                    { text: '未完成地價收件資料', value: '12_prc_not_F_case.sql' },
+                    { text: '法院謄本申請LOG檔查詢 BY 段、地建號', value: '13_log_court_cert.sql' },
+                    { text: '某段之土地所有權人清冊資料', value: '15_reg_land_stats.sql' },
+                    { text: '全國跨縣市收件資料', value: '18_cross_county_crsms.sql' }
+                ] }
+            ]
+        } },
+        computed: {
+            validate() { return !this.empty(this.sql) }
+        },
+        methods: {
+            change(val) {
+                let opt = $("select.custom-select optgroup option[value='" + val + "']")[0];
+                this.$assert(opt, "找不到選取的 option。", $("select.custom-select optgroup option[value='" + val + "']"));
+                this.selected_label = opt.label;
+                this.$http.post(CONFIG.LOAD_FILE_API_EP, {
+                    type: "load_select_sql",
+                    file_name: this.selected
+                }).then(res => {
+                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `讀取異常，回傳狀態值為 ${res.data.status}，${res.data.message}`);
+                    this.sql = res.data.data;
+                    // let cache work
+                    Vue.nextTick(() => $(this.$refs.sql.$el).trigger("blur"));
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+
+                });
+            },
+            output(e) {
+                if(this.selected.startsWith("txt_")) {
+                    this.download('file_sql_txt');
+                } else {
+                    this.download('file_sql_csv');
+                }
+            },
+            download(type) {
+                if (this.validate) {
+                    this.$confirm(this.sql, () => {
+                        this.$http.post(CONFIG.EXPORT_FILE_API_EP, {
+                            type: type,
+                            sql: this.sql,
+                            responseType: 'blob'
+                        }).then(res => {
+                            let url = window.URL.createObjectURL(new Blob([res.data]));
+                            let a = document.createElement('a');
+                            a.href = url;
+                            a.download = this.selected_label + (type == "file_sql_txt" ? ".txt" : ".csv");
+                            document.body.appendChild(a);
+                            a.click();    
+                            a.remove();
+                            // release object in memory
+                            window.URL.revokeObjectURL(url);
+                        }).catch(err => {
+                            this.error = err;
+                        }).finally(() => {});
+                    });
+                } else {
+                    this.notify({
+                        title: "匯出SQL檔案報表",
+                        message: "SQL內容不能為空的。",
+                        type: "warning"
+                    });
+                }
+            },
+            popup(e) {
+                this.msgbox({
+                    title: '報表檔案會出功能提示',
+                    message: `
+                        <p>輸入SELECT SQL指令匯出查詢結果。</p>
+                        <img src="assets/img/csv_export_method.jpg" class="w-auto img-responsive img-thumbnail" />
+                        <br/>
+                        <br/>
+                        <h5>地政局索取地籍資料備註</h5>
+                        <span class="text-danger mt-2">※</span> 系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
+                        　- <small class="mt-2 mb-2"> 除下面標示為黃色部分須至地政系統產出並下載，其餘皆可於「報表匯出」區塊產出。</small> <br/>
+                        　AI001-10 <br/>
+                        　　AI00301 - 土地標示部 <br/>
+                        　　AI00401 - 土地所有權部 <br/>
+                        　　AI00601 - 管理者資料【土地、建物各做一次】 <br/>
+                        　　AI00701 - 建物標示部 <br/>
+                        　　AI00801 - 基地坐落 <br/>
+                        　　AI00901 - 建物分層及附屬 <br/>
+                        　　AI01001 - 主建物與共同使用部分 <br/>
+                        　AI011-20 <br/>
+                        　　AI01101 - 建物所有權部 <br/>
+                        　　<span class="text-warning">AI01901 - 土地各部別</span> <br/>
+                        　AI021-40 <br/>
+                        　　<span class="text-warning">AI02101 - 土地他項權利部</span> <br/>
+                        　　<span class="text-warning">AI02201 - 建物他項權利部</span> <br/>
+                        　　AI02901 - 各部別之其他登記事項【土地、建物各做一次】 <br/><br/>
+
+                        <span class="text-danger">※</span> 測量子系統/測量資料管理/資料輸出入 【請至地政系統WEB版產出】<br/>
+                        　地籍圖轉出(數值地籍) <br/>
+                        　　* 輸出DXF圖檔【含控制點】及 NEC重測輸出檔 <br/>
+                        　地籍圖轉出(圖解數化) <br/>
+                        　　* 同上兩種類皆輸出，並將【分幅管理者先接合】下選項皆勾選 <br/><br/>
+                            
+                        <span class="text-danger">※</span> 登記子系統/列印/清冊報表/土地建物地籍整理清冊【土地、建物各產一次存PDF，請至地政系統WEB版產出】 <br/>
+                    `,
+                    size: 'lg'
+                });
+            }
+        },
+        mounted() {
+            setTimeout(() => this.sql = this.$refs.sql.$el.value, 400);
+        }
+    });
 } else {
     console.error("vue.js not ready ... lah-xxxxxxxx components can not be loaded.");
 }
