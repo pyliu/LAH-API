@@ -652,13 +652,17 @@ $(document).ready(() => {
                 });
             },
             hideModal: function(id) {
-                if (id == "" || id == undefined || id == null) {
+                let count = parseInt($("body.modal-open").data("modal-open-count")) || 0;
+                if (this.empty(id)) {
                     $('div.modal.show').each((idx, el) => {
                         this.removeModal(el.id);
+                        $("body.modal-open").data("modal-open-count", --count);
                     });
                 } else {
                     this.removeModal(id);
+                    $("body.modal-open").data("modal-open-count", --count);
                 }
+                $("body.modal-open").removeAttr("style");
             },
             removeModal: function(id, duration) {
                 if (!this.openConfirm) {
@@ -922,7 +926,8 @@ $(document).ready(() => {
                 if (this.openConfirm) {
                     this.openConfirm = false;
                 } else {
-                    //bvEvent.preventDefault();
+                    // add this the bv::modal::hidden will not trigger ... Orz
+                    bvEvent.preventDefault();
                     this.hideModal(modalId);
                 }
             });
