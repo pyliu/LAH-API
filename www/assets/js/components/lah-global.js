@@ -922,7 +922,7 @@ $(document).ready(() => {
                 if (this.openConfirm) {
                     this.openConfirm = false;
                 } else {
-                    bvEvent.preventDefault();
+                    //bvEvent.preventDefault();
                     this.hideModal(modalId);
                 }
             });

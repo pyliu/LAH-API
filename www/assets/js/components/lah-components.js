@@ -490,7 +490,7 @@ if (Vue) {
                 </div>
             </template>
             <b-list-group class="small" style="max-height: 300px; overflow: auto;">
-                <transition-group name="list" style="z-index: 1 !important;">
+                <transition-group name="list" style="z-index: 0 !important;">
                     <b-list-group-item button v-for="(item, idx) in all" :key="item.key" v-b-popover.focus="JSON.stringify(item.val)">
                         <b-button-close @click="del(item.key, idx)" style="font-size: 1rem; color: red;"></b-button-close>
                         <div class="truncate font-weight-bold">{{item.key}}</div>
