@@ -6,14 +6,10 @@ if (Vue) {
                 同步案件
                 <b-button class="border-0" @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
             </legend>
-            <b-form-row class="mb-2">
-                <b-col>
-                    <case-input-group-ui v-model="id" @enter="check" type="sync" prefix="case_sync"></case-input-group-ui>
-                </b-col>
-                <b-col cols="1">
-                    <b-button @click="check" variant="outline-primary" size="sm"><i class="fas fa-sync"></i></b-button>
-                </b-col>
-            </b-form-row>
+            <div class="d-flex">
+                <case-input-group-ui v-model="id" @enter="check" type="sync" prefix="case_sync"></case-input-group-ui>
+                <b-button @click="check" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋案件'"><i class="fas fa-sync"></i></b-button>
+            </div>
         </fieldset>`,
         data: () => {
             return {

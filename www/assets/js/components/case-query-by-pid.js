@@ -128,11 +128,8 @@ if (Vue) {
                     @keyup.enter="search"
                     title="身分證號"
                 ></b-form-input>
-                &ensp;
-                <b-button size="sm" @click="search" variant="outline-primary"><i class="fas fa-search"></i> 搜尋</b-button>
+                <b-button class="ml-1" size="sm" @click="search" variant="outline-primary"><i class="fas fa-search"></i> 搜尋</b-button>
             </b-input-group>
-            <div id="id_query_crsms_result"></div>
-            <div id="id_query_cmsms_result"></div>
         </b-card>`,
         data: function() {
             return {

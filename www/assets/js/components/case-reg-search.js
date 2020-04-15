@@ -5,17 +5,11 @@ if (Vue) {
                 <i class="fas fa-search"></i>
                 登記案件查詢
             </legend>
-            <b-form-row class="mb-2">
-                <b-col>
-                    <case-input-group-ui v-model="id" @enter="regQuery" type="reg" prefix="case_reg"></case-input-group-ui>
-                </b-col>
-            </b-form-row>
-            <b-form-row>
-                <b-col class="text-center">
-                    <b-button @click="regQuery" variant="outline-primary" size="sm"><i class="fas fa-search"></i> 登記</b-button>
-                    <b-button @click="prcQuery" variant="outline-secondary" size="sm"><i class="far fa-comment"></i> 地價</b-button>
-                </b-col>
-            </b-form-row>
+            <div class="d-flex">
+                <case-input-group-ui v-model="id" @enter="regQuery" type="reg" prefix="case_reg"></case-input-group-ui>
+                <b-button @click="regQuery" variant="outline-primary" size="sm" v-b-tooltip="'查登記案件'" class="mx-1"><i class="fas fa-briefcase"></i></b-button>
+                <b-button @click="prcQuery" variant="outline-secondary" size="sm" v-b-tooltip="'查地價案件'"><i class="fas fa-hand-holding-usd"></i></b-button>
+            </div>
         </fieldset>`,
         data: () => {
             return {

@@ -223,7 +223,7 @@ Vue.mixin({
                     message: nMsg.message || nMsg,
                     time: this.nowDatetime
                 });
-                showAlert({
+                this.alert({
                     title: "錯誤訊息",
                     subtitle: this.nowDatetime,
                     message: nMsg.message || nMsg,

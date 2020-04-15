@@ -6,14 +6,10 @@ if (Vue) {
                 複丈案件查詢
                 <b-button class="border-0" @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
             </legend>
-            <b-form-row class="mb-2">
-                <b-col>
-                    <case-input-group-ui v-model="id" @enter="query" type="sur" prefix="case_sur"></case-input-group-ui>
-                </b-col>
-                <b-col cols="1">
-                    <b-button @click="query" variant="outline-primary" size="sm"><i class="fas fa-search"></i></b-button>
-                </b-col>
-            </b-form-row>
+            <div class="d-flex">
+                <case-input-group-ui v-model="id" @enter="query" type="sur" prefix="case_sur"></case-input-group-ui>
+                <b-button @click="query" variant="outline-primary" size="sm" class="ml-1"><i class="fas fa-search"></i></b-button>
+            </div>
         </fieldset>`,
         data: () => {
             return {

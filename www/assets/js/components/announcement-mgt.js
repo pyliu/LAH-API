@@ -6,14 +6,10 @@ if (Vue) {
                 公告維護
                 <b-button class="border-0" @click="popup" variant="outline-success" size="sm" title="備註"><i class="fas fa-question"></i></b-button>
             </legend>
-            <b-form-row class="pr-2">
-                <b-col>
-                    <announcement-mgt-item :reset-flag="reset_flag" @update-announcement-done="updated" @reset-flags-done="done"></announcement-mgt-item>
-                </b-col>
-                <b-col cols="1">
-                    <b-button @click="clear" variant="outline-secondary" size="sm" title="'清除准登旗標'"><i class="fas fa-broom"></i></b-button>
-                </b-col>
-            </b-form-row>
+            <div class="d-flex">
+                <announcement-mgt-item :reset-flag="reset_flag" @update-announcement-done="updated" @reset-flags-done="done"></announcement-mgt-item>
+                <b-button @click="clear" variant="outline-danger" size="sm" v-b-tooltip="'清除准登旗標'" class="ml-1"><i class="fas fa-flag"></i></b-button>
+            </div>
         </fieldset>`,
         data: () => {
             return {
@@ -76,7 +72,7 @@ if (Vue) {
                         </option>
                     </b-form-select>
                     &ensp;
-                    <b-button @click="change" variant="outline-primary" size="sm" v-b-popover.hover.focus.bottom="'開啟編輯視窗'"><i class="fas fa-external-link-alt"></i> 編輯</b-button>
+                    <b-button @click="change" variant="outline-primary" size="sm" v-b-tooltip="'開啟編輯視窗'"><i class="fas fa-external-link-alt"></i></b-button>
                 </div>`,
                 props: ["resetFlag"],
                 data: () => {
