@@ -109,7 +109,7 @@ ksort($operators);
         </div>
 
         <div class="col">
-          <lah-user-message-form title="訊息傳遞"></lah-user-message-form>
+          <lah-user-message-form title="訊息快遞"></lah-user-message-form>
         </div>
         
       </div>
