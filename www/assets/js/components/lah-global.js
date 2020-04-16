@@ -657,8 +657,9 @@ $(document).ready(() => {
                     $("body.modal-open").attr("style", removed_pad_right);
                     $("body.modal-open").removeAttr("data-padding-right");
                 }
-                // below is useless Orz
-                this.$root.$emit('bv::modal::hidden', true);
+                // https://bootstrap-vue.js.org/docs/components/modal/#emitting-events-on-root
+                // however ... below is useless Orz
+                this.$root.$emit('bv::modal::hidden', id);
             },
             removeModal: function(id, duration) {
                 if (!this.openConfirm) {
