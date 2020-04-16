@@ -354,12 +354,18 @@ if (Vue) {
                     case 2:
                         return 'background-color: #343a40 !important;'; // dark
                     case 3:
-                        return 'background-color: #3b88e0 !important;'; // blue
                     case 4:
-                        if (hours <= 12) {
-                            return 'background-color: #3b88e0 !important;'; // blue
-                        }
+                        return 'background-color: #3b88e0 !important;'; // blue
                     case 5:
+                        // for fun
+                        if (hours < 17 && hours > 12) {
+                            this.notify({
+                                title: 'TGIF',
+                                message: '<i class="far fa-laugh-wink fa-2x ld ld-swing"></i> 快放假了~離下班只剩 ' + (17 - hours) + ' 小時，再撐一下下！',
+                                type: 'success',
+                                delay: 15000
+                            });
+                        }
                     default:
                         return 'background-color: #28a745 !important;'; // green
                 }
@@ -445,7 +451,7 @@ if (Vue) {
                 this.$store.commit('myip', myip);
                 this.avatar_src = await this.getLocalCache('avatar_src_url');
             } catch (err) {
-                console.error(err);
+                this.error = err;
             }
         },
         mounted() {
