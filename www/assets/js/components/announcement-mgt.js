@@ -30,7 +30,7 @@ if (Vue) {
                         // let component knows it needs to clear the flag
                         this.reset_flag = true;
                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + res.data.status + "】");
-                        addNotification({ title: "清除全部先行准登旗標", message: "已清除完成", type: "success" });
+                        this.notify({ title: "清除全部先行准登旗標", message: "已清除完成", type: "success" });
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
@@ -196,7 +196,7 @@ if (Vue) {
                                 let day = this.day;
                                 let flag = this.flag;
                                 if (this.data[2] == day && this.data[3] == flag) {
-                                    addNotification({
+                                    this.notify({
                                         title: "更新公告資料",
                                         message: "無變更，不需更新！",
                                         type: "warning"
@@ -213,7 +213,7 @@ if (Vue) {
                                         flag: flag
                                     }).then(res => {
                                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + res.data.status + "】");
-                                        addNotification({
+                                        this.notify({
                                             title: reason_cnt,
                                             message: `公告已更新【天數：${this.data[2]} => ${day}, 准登：${this.data[3]} => ${flag}】`,
                                             type: "success"

@@ -51,7 +51,7 @@ if (Vue) {
                     qday: this.date
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-                        addNotification({
+                        this.notify({
                             title: "檢測悠遊卡自動加值付款失敗",
                             message: `<i class='fas fa-circle text-success mr-1'></i>${res.data.message}`,
                             type: "success"

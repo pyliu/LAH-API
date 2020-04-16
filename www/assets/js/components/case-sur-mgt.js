@@ -46,7 +46,7 @@ if (Vue) {
                         id: this.id
                     }).then(res => {
                         if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL && res.data.data_count == 0) {
-                            addNotification({
+                            this.notify({
                                 title: "測量案件查詢",
                                 subtitle: `${this.id}`,
                                 message: "查無資料",
@@ -191,7 +191,7 @@ if (Vue) {
                                     value: this.count
                                 }).then(res => {
                                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                        addNotification({
+                                        this.notify({
                                             title: "更新連件數",
                                             subtitle: this.id,
                                             message: title + "更新為「" + this.count + "」更新成功",
@@ -199,7 +199,7 @@ if (Vue) {
                                         });
                                         this.orig_count = this.count;
                                     } else {
-                                        addNotification({
+                                        this.notify({
                                             title: "更新連件數",
                                             subtitle: this.id,
                                             message: res.data.message,
@@ -213,7 +213,7 @@ if (Vue) {
                                 });
                             });
                         } else {
-                            addNotification("連件數未變更，不需更新。");
+                            this.notify("連件數未變更，不需更新。");
                         }
                     },
                     fix: function(e) {
@@ -235,7 +235,7 @@ if (Vue) {
                                 CLR_DELAY: clr_delay
                             }).then(res => {
                                 if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                    addNotification({
+                                    this.notify({
                                         title: "修正複丈案件",
                                         subtitle: id,
                                         type: "success",
@@ -245,7 +245,7 @@ if (Vue) {
                                     this.json.raw['MM22'] = 'D';
                                 } else {
                                     let msg = "回傳狀態碼不正確!【" + res.data.message + "】";
-                                    showAlert({
+                                    this.alert({
                                         title: "修正複丈案件失敗",
                                         subtitle: id,
                                         message: msg,

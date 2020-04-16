@@ -200,7 +200,7 @@ if (Vue) {
                 list_mode: true
             }).then(res => {
                 if (res.data.data_count == 0) {
-                    addNotification({
+                    this.notify({
                         title: "查詢規費統計",
                         message: `${this.query_date} 查無資料`,
                         type: "warning"

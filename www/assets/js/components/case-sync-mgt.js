@@ -94,7 +94,7 @@ if (Vue) {
                             });
                         } else if (res.data.status == XHR_STATUS_CODE.FAIL_WITH_REMOTE_NO_RECORD) {
                             html += "<div><i class='fas fa-circle text-secondary'></i>&ensp;" + res.data.message + "</div>";
-                            addNotification({
+                            this.notify({
                                 title: "查詢遠端案件資料",
                                 subtitle: `${this.year}-${this.code}-${this.num}`,
                                 message: html,
@@ -102,7 +102,7 @@ if (Vue) {
                             });
                         } else {
                             html += "<div><i class='fas fa-circle text-success'></i>&ensp;" + res.data.message + "</div>";
-                            addNotification({
+                            this.notify({
                                 title: "查詢遠端案件資料",
                                 subtitle: `${this.year}-${this.code}-${this.num}`,
                                 message: html,
@@ -169,14 +169,14 @@ if (Vue) {
                         id: id
                     }).then(res => {
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                            addNotification({
+                            this.notify({
                                 title: "同步局端資料至本所資料庫",
                                 subtitle: id,
                                 message: "同步成功！",
                                 type: "success"
                             });
                         } else {
-                            showAlert({
+                            this.alert({
                                 message: res.data.message,
                                 type: "danger"
                             });
@@ -199,14 +199,14 @@ if (Vue) {
                         id: id
                     }).then(res => {
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                            addNotification({
+                            this.notify({
                                 title: "新增遠端案件資料",
                                 subtitle: id,
                                 message: "新增成功",
                                 type: "success"
                             });
                         } else {
-                            addNotification({
+                            this.notify({
                                 title: "新增遠端案件資料",
                                 subtitle: id,
                                 message: res.data.message,

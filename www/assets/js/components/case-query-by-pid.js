@@ -176,7 +176,7 @@ if (Vue) {
                         message: vNodes
                     });
                 } else {
-                    addNotification({
+                    this.notify({
                         message: `「${this.pid}」 統編格式錯誤`,
                         type: "warning"
                     });

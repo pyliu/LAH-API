@@ -89,7 +89,7 @@ if (Vue) {
                     list_mode: true
                 }).then(res => {
                     if (res.data.data_count == 0) {
-                        addNotification({
+                        this.notify({
                             title: "查詢規費統計",
                             message: `${this.query_date} 查無資料`,
                             type: "warning"
@@ -127,7 +127,7 @@ if (Vue) {
                         size: "lg"
                     });
                 } else {
-                    addNotification({ title: "查詢規費收據", subtitle: "依據電腦給號", message: "請輸入正確的電腦給號碼！", type: "warning"});
+                    this.notify({ title: "查詢規費收據", subtitle: "依據電腦給號", message: "請輸入正確的電腦給號碼！", type: "warning"});
                 }
             },
             popup: function(e) {
@@ -523,7 +523,7 @@ if (Vue) {
 
                         if (!this.isOperatorValid) {
                             this.animated("#dummy_operator", { name: "tada", callback: () => $("#dummy_operator").focus() });
-                            addNotification({
+                            this.notify({
                                 title: "作廢資料",
                                 message: "請填入作業人員代碼！",
                                 pos: "tc",
@@ -533,7 +533,7 @@ if (Vue) {
                         }
                         if (!this.isNumberValid) {
                             this.animated("#dummy_fee_number", { name: "tada", callback: () => $("#dummy_fee_number").focus() });
-                            addNotification({
+                            this.notify({
                                 title: "作廢資料",
                                 message: "請填入收據編號！",
                                 pos: "tc",
@@ -543,7 +543,7 @@ if (Vue) {
                         }
                         if (!this.isReasonValid) {
                             this.animated("#dummy_obsolete_reason", { name: "tada", callback: () => $("#dummy_obsolete_reason").focus() });
-                            addNotification({
+                            this.notify({
                                 title: "作廢資料",
                                 message: "請填入作廢原因！",
                                 pos: "tc",
@@ -553,7 +553,7 @@ if (Vue) {
                         }
                         if (!this.isDateValid) {
                             this.animated("#dummy_obsolete_date", { name: "tada", callback: () => $("#dummy_obsolete_date").focus() });
-                            addNotification({
+                            this.notify({
                                 title: "日期",
                                 message: "請填入正確日期格式(民國)！",
                                 pos: "tc",
@@ -573,7 +573,7 @@ if (Vue) {
                                 reason: reason
                             }).then(res => {
                                 closeModal(() => {
-                                    addNotification({
+                                    this.notify({
                                         title: "新增假規費資料",
                                         body: res.data.message,
                                         type: "success",
@@ -642,7 +642,7 @@ if (Vue) {
                     number: this.pc_number,
                     update_value: this.value
                 }).then(res => {
-                    addNotification({
+                    this.notify({
                         title: "修改規費付款方式",
                         subtitle: `${this.date} ${this.pc_number}`,
                         message: res.data.message,
@@ -694,7 +694,7 @@ if (Vue) {
                     number: this.pc_number,
                     update_value: this.value
                 }).then(res => {
-                    closeModal(() => addNotification({
+                    closeModal(() => this.notify({
                             title: "修改列印註記",
                             subtitle: `${this.date} ${this.pc_number}`,
                             message: res.data.message,
@@ -784,7 +784,7 @@ if (Vue) {
                     num: this.pc_number
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-                        addNotification({
+                        this.notify({
                             title: "查詢收費項目資料集",
                             message: `找不到規費收費項目資料！【年度： ${this.expac_year}, 電腦給號： ${this.pc_number}】`,
                             type: "warning"
@@ -886,7 +886,7 @@ if (Vue) {
                                 return element.value == record["AC20"];
                             });
                             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                addNotification({
+                                this.notify({
                                     title: "修改收費項目",
                                     subtitle: `${record["AC25"]}-${record["AC04"]}`,
                                     message: `金額 ${record["AC30"]} 項目修正為「${the_one.text}」完成`,
@@ -894,7 +894,7 @@ if (Vue) {
                                 });
                                 $(e.target).data("orig", record["AC20"]);
                             } else {
-                                addNotification({
+                                this.notify({
                                     title: "修改收費項目",
                                     subtitle: `${record["AC25"]}-${record["AC04"]}`,
                                     message: `金額 ${record["AC30"]} 項目修正為「${the_one.text}」失敗`,
@@ -946,7 +946,7 @@ if (Vue) {
                                 pc_num: pc_number
                             }).then(res => {
                                 if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                    addNotification({
+                                    this.notify({
                                         title: "悠遊卡自動加值扣款失敗修正",
                                         message: `日期: ${qday}, 電腦給號: ${pc_number}, 金額: ${amount} 悠遊卡付款資料修正成功!`,
                                         type: "success"

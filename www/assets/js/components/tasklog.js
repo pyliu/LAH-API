@@ -135,7 +135,7 @@ if (Vue) {
                             type: 'zip_log'
                         }).then(res => {
                             this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
-                            addNotification({
+                            this.notify({
                                 title: "壓縮LOG檔",
                                 message: `<i class="text-success fas fa-circle"></i> 任務完成！`,
                                 type: "success"
@@ -242,7 +242,7 @@ if (Vue) {
                             if (res.data.status == XHR_STATUS_CODE.FAIL_NOT_VALID_SERVER) {
                                 // 此功能僅在伺服器上執行！
                                 this.$emit("fail-not-valid-server");
-                                addNotification({
+                                this.notify({
                                     title: "伺服器排程停止通知",
                                     message: `${res.data.message}`
                                 });

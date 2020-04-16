@@ -112,7 +112,7 @@ Vue.prototype.$store = (() => {
                     if (/^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){4}$/.test(ipPayload) || ipPayload == '::1') {
                         state.myip = ipPayload;
                     } else {
-                        showAlert({
+                        console.error({
                             title: "發生錯誤",
                             subtitle: "Vuex, commit 'myip'",
                             message: `${ipPayload} 格式不正確！`,
@@ -151,11 +151,6 @@ Vue.prototype.$store = (() => {
                                 commit("userNames", json || {});
                             }).catch(err => {
                                 console.error(err);
-                                showAlert({
-                                    title: '使用者對應表',
-                                    message: err.message,
-                                    type: 'danger'
-                                });
                                 commit("userNames", {});
                             });
                         }
@@ -180,11 +175,6 @@ Vue.prototype.$store = (() => {
                                 localforage.setItem(`isChief`, res.data.is_chief || false);
                             }).catch(err => {
                                 console.error(err);
-                                showAlert({
-                                    title: '認證失敗',
-                                    message: err.message,
-                                    type: 'danger'
-                                });
                                 commit("isAdmin", false);
                                 commit("isChief", false);
                             }).finally(() => {
@@ -520,7 +510,7 @@ Vue.mixin({
             } else if (typeof msg == "string") {
                 this.$toast(msg, opts);
             } else {
-                this.alert({message: "addNotification 傳入參數有誤(請查看console)", type: "danger"});
+                this.alert({message: "notify 傳入參數有誤(請查看console)", type: "danger"});
                 this.$error(msg, opts);
             }
         },
@@ -793,7 +783,7 @@ $(document).ready(() => {
                     id: id
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                        showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
+                        this.alert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
                         return;
                     } else {
                         this.msgbox({

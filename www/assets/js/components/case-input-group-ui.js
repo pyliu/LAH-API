@@ -86,7 +86,7 @@ if (Vue) {
                 let year = this.year;
                 let code = this.code;
                 if (this.empty(code) || this.empty(year)) {
-                    addNotification({message: "案件年或案件字為空白，無法取得案件目前最大號碼。", type: "warning"});
+                    this.notify({message: "案件年或案件字為空白，無法取得案件目前最大號碼。", type: "warning"});
                     return;
                 }
                 this.isBusy = true;
@@ -100,7 +100,7 @@ if (Vue) {
                         this.num = res.data.max;
                         this.emitInput(e);
                     } else {
-                        addNotification({message: res.data.message, type: "warning"});
+                        this.notify({message: res.data.message, type: "warning"});
                     }
                 }).catch(err => {
                     this.error = err;

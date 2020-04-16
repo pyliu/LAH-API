@@ -253,7 +253,7 @@ if (Vue) {
                     // in-search, by clicked the first reviewer button
                     let case_count = this.case_list_by_id[this.inSearchID].length || 0;
                     this.caption = `${case_count} 件`;
-                    addNotification({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
+                    this.notify({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
                     // release busy ...
                     this.isBusy = false;
                     Vue.nexTick ? Vue.nexTick(this.makeCaseIDClickable) : setTimeout(this.makeCaseIDClickable, 800);
@@ -305,7 +305,7 @@ if (Vue) {
                 // make .reg_case_id clickable
                 Vue.nextTick(this.makeCaseIDClickable);
                 // send notification
-                addNotification({
+                this.notify({
                     title: `查詢登記案件(${this.title})`,
                     message: `查詢到 ${jsonObj.data_count} 件案件`,
                     type: this.is_overdue_mode ? "danger" : "warning"
@@ -320,7 +320,7 @@ if (Vue) {
                     this.animated("#reload, caption", {name: "flash"});
                 } else {
                     console.warn("非上班時間，停止自動更新。");
-                    addNotification({
+                    this.notify({
                         title: "自動更新停止通知",
                         message: "非上班時間，停止自動更新。",
                         type: "warning"
@@ -335,7 +335,7 @@ if (Vue) {
                     this.message_count = parseInt(res.data.total);
                 }).catch(ex => {
                     console.error("case-reg-overdue::getOverdueMessageStats parsing failed", ex);
-                    showAlert({message: "case-reg-overdue::getOverdueMessageStats XHR連線查詢有問題!!【" + ex.message + "】", type: "danger"});
+                    this.alert({message: "case-reg-overdue::getOverdueMessageStats XHR連線查詢有問題!!【" + ex.message + "】", type: "danger"});
                 });
             },
             downloadPNG: function() {

@@ -420,7 +420,7 @@ if (Vue) {
             clearCache: function() {
                 this.$confirm(`清除全部暫存資料？`, () => {
                     this.$lf.clear().then(() => {
-                        addNotification({
+                        this.notify({
                             title: "清除快取",
                             message: "已清除快取紀錄，請重新整理頁面。",
                             type: "success"
@@ -1210,7 +1210,7 @@ if (Vue) {
                                     this.raws = res.data.raw
                                     this.setLocalCache(this.cache_key, this.raws, 60000);   // 1 min
                                 } else {
-                                    addNotification({
+                                    this.notify({
                                         title: "查詢信差訊息",
                                         message: res.data.message,
                                         type: "warning"
@@ -1258,7 +1258,7 @@ if (Vue) {
                     id: `${this.year}${this.code}${this.number}`
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                        showAlert({title: "擷取登記案件失敗", message: res.data.message, type: "warning"});
+                        this.alert({title: "擷取登記案件失敗", message: res.data.message, type: "warning"});
                     } else {
                         this.bakedData = res.data.baked;
                     }
@@ -1401,9 +1401,9 @@ if (Vue) {
                 }).then(res => {
                     console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `更新案件「${arguments.col}」欄位回傳狀態碼有問題【${res.data.status}】`);
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        addNotification({title: "更新案件欄位", message: `「${arguments.col}」更新完成`, variant: "success"});
+                        this.notify({title: "更新案件欄位", message: `「${arguments.col}」更新完成`, variant: "success"});
                     } else {
-                        addNotification({title: "更新案件欄位", message: `「${arguments.col}」更新失敗【${res.data.status}】`, variant: "warning"});
+                        this.notify({title: "更新案件欄位", message: `「${arguments.col}」更新失敗【${res.data.status}】`, variant: "warning"});
                     }
                 }).catch(err => {
                     this.error = err;
@@ -1413,7 +1413,7 @@ if (Vue) {
             },
             updateRM30: function(e) {
                 if (this.rm30 == this.rm30_orig) {
-                    addNotification({title: "更新案件辦理情形",  message: "案件辦理情形沒變動", type: "warning"});
+                    this.notify({title: "更新案件辦理情形",  message: "案件辦理情形沒變動", type: "warning"});
                     return;
                 }
                 window.vueApp.confirm(`您確定要更新辦理情形為「${this.rm30}」?`, {
@@ -1487,7 +1487,7 @@ if (Vue) {
             },
             updateRM39: function(e) {
                 if (this.rm39 == this.rm39_orig) {
-                    addNotification({title: "更新登記處理註記", message: "登記處理註記沒變動", type: "warning"});
+                    this.notify({title: "更新登記處理註記", message: "登記處理註記沒變動", type: "warning"});
                     return;
                 }
                 window.vueApp.confirm(`您確定要更新登記處理註記為「${this.rm39}」?`, {
@@ -1506,7 +1506,7 @@ if (Vue) {
             },
             updateRM42: function(e) {
                 if (this.rm42 == this.rm42_orig) {
-                    addNotification({title: "更新地價處理註記", message: "地價處理註記沒變動", type: "warning"});
+                    this.notify({title: "更新地價處理註記", message: "地價處理註記沒變動", type: "warning"});
                     return;
                 }
                 window.vueApp.confirm(`您確定要更新地價處理註記為「${this.rm42}」?`, {
@@ -1844,7 +1844,7 @@ if (Vue) {
             },
             cleanAll: function(e) {
                 if (this.cleanAllBackupFlag !== true) {
-                    showAlert({
+                    this.alert({
                         title: "清除全部暫存資料",
                         subtitle: `${this.year}-${this.code}-${this.number}`,
                         message: "請先備份！",
@@ -1864,7 +1864,7 @@ if (Vue) {
                         table: ''
                     }).then(res => {
                         this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + res.data.status + "】");
-                        addNotification({
+                        this.notify({
                             title: "清除暫存檔",
                             message: "已清除完成。<p>" + this.year + "-" + this.code + "-" + this.number + "</p>",
                             type: "success"
@@ -1888,7 +1888,7 @@ if (Vue) {
             clean: function(item, idx, e) {
                 let table = item[0];
                 if (this.backupFlags[idx] !== true) {
-                    showAlert({
+                    this.alert({
                         title: `清除 ${table} 暫存檔`,
                         subtitle: `${this.year}-${this.code}-${this.number}`,
                         message: `請先備份 ${table} ！`,
@@ -1908,7 +1908,7 @@ if (Vue) {
                         table: table
                     }).then(res => {
                         this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除暫存資料回傳狀態碼有問題【" + res.data.status + "】");
-                        addNotification({
+                        this.notify({
                             title: `清除 ${table} 暫存檔`,
                             subtitle: this.year + "-" + this.code + "-" + this.number,
                             message: "已清除完成。",
@@ -2304,7 +2304,7 @@ if (Vue) {
                     id: id
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                        showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
+                        this.alert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
                     } else {
                         this.msgbox({
                             message: this.$createElement("lah-reg-case-detail", { props: { bakedData: res.data.baked } }),
@@ -2479,7 +2479,7 @@ if (Vue) {
                         datetime: item['datetime']
                     }).then(res => {
                         this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "刪除體溫資料回傳狀態碼有問題【" + res.data.status + "】");
-                        addNotification({
+                        this.notify({
                             title: "刪除體溫紀錄",
                             subtitle: `${item['id']}:${this.userNames[item['id'].toUpperCase()]}-${item['value']}`,
                             message: "刪除成功。",
@@ -2503,14 +2503,14 @@ if (Vue) {
                     }).then(res => {
                         this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "設定體溫資料回傳狀態碼有問題【" + res.data.status + "】");
                         if (res.data.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                            addNotification({
+                            this.notify({
                                 title: "新增體溫紀錄",
                                 message: res.data.message,
                                 type: "warning",
                                 pos: 'tc'
                             });
                         } else {
-                            addNotification({
+                            this.notify({
                                 title: "新增體溫紀錄",
                                 message: "已設定完成。<p>" + this.ID + "-" + this.name + "-" + this.temperature + "</p>",
                                 type: "success"

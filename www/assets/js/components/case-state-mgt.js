@@ -49,7 +49,7 @@ if (Vue) {
                         id: id
                     }).then(res => {
                         if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-                            addNotification({
+                            this.notify({
                                 title: "案件查詢",
                                 subtitle: id,
                                 message: res.data.message,

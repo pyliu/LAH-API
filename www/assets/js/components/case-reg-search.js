@@ -46,7 +46,7 @@ if (Vue) {
                         id: this.id
                     }).then(res => {
                         if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                            showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
+                            this.alert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
                             return;
                         } else {
                             this.msgbox({
@@ -96,7 +96,7 @@ if (Vue) {
             },
             showPrcCaseDetail(jsonObj) {
                 if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-                    showAlert({
+                    this.alert({
                         message: "查無地價案件資料",
                         type: "warning"
                     });

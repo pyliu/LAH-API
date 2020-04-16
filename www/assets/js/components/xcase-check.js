@@ -50,13 +50,13 @@ if (Vue) {
                             size: "md"
                         });
                     } else if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-                        addNotification({
+                        this.notify({
                             title: "檢測系統跨所註記遺失",
                             message: "<i class='fas fa-circle text-success'></i>&ensp;目前無跨所註記遺失問題",
                             type: "success"
                         });
                     } else {
-                        showAlert({ title: "檢測系統跨所註記遺失", message: res.data.message, type: "danger" });
+                        this.alert({ title: "檢測系統跨所註記遺失", message: res.data.message, type: "danger" });
                     }
                 }).catch(err => {
                     this.error = err;
@@ -89,7 +89,7 @@ if (Vue) {
                             if (res.data.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                 msg = `<span class='text-danger'>${id} 跨所註記修正失敗! (${res.data.status})</span>`;
                             }
-                            addNotification({ message: msg, variant: "success" });
+                            this.notify({ message: msg, variant: "success" });
                             li.html(msg);
                         }).catch(err => {
                             this.error = err;
