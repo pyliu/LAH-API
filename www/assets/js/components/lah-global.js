@@ -656,13 +656,17 @@ $(document).ready(() => {
                 if (this.empty(id)) {
                     $('div.modal.show').each((idx, el) => {
                         this.removeModal(el.id);
-                        $("body.modal-open").data("modal-open-count", --count);
+                        $("body.modal-open").attr("data-modal-open-count", --count);
                     });
                 } else {
                     this.removeModal(id);
-                    $("body.modal-open").data("modal-open-count", --count);
+                    $("body.modal-open").attr("data-modal-open-count", --count);
                 }
-                $("body.modal-open").removeAttr("style");
+                if ($("body.modal-open").attr("style")) {
+                    let removed_pad_right = $("body.modal-open").attr("style").replace('padding-right: 17px;', '');
+                    $("body.modal-open").attr("style", removed_pad_right);
+                    $("body.modal-open").removeAttr("data-padding-right");
+                }
             },
             removeModal: function(id, duration) {
                 if (!this.openConfirm) {
@@ -929,6 +933,8 @@ $(document).ready(() => {
                     // add this the bv::modal::hidden will not trigger ... Orz
                     bvEvent.preventDefault();
                     this.hideModal(modalId);
+                    // below is useless Orz
+                    //this.$root.$emit('bv::modal::hidden', bvEvent, modalId);
                 }
             });
             this.$root.$on('bv::modal::hidden', (bvEvent, modalId) => {
