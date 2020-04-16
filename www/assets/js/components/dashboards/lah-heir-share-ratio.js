@@ -277,77 +277,75 @@ if (Vue) {
         default: false
       }
     },
-    data: () => {
-      return {
-        wizard: {
-          s0: {
-            title: "步驟1，選擇事實發生區間",
-            legend: "被繼承人死亡時間",
-            seen: true,
-            value: ""
+    data: () => ({
+      wizard: {
+        s0: {
+          title: "步驟1，選擇事實發生區間",
+          legend: "被繼承人死亡時間",
+          seen: true,
+          value: ""
+        },
+        s1: {
+          // 光復前
+          title: "步驟2，光復前繼承財產分類",
+          legend: "被繼承財產種類",
+          seen: false,
+          value: "",
+          public: {
+            count: 0
           },
-          s1: {
-            // 光復前
-            title: "步驟2，光復前繼承財產分類",
-            legend: "被繼承財產種類",
-            seen: false,
-            value: "",
-            public: {
-              count: 0
-            },
-            private: {
-              child: 0,
-              spouse: 0,
-              parent: 0,
-              household: 0
-            }
-          },
-          s2: {
-            // 光復後
-            title: "步驟2，光復後時段區間",
-            legend: "時段區間",
-            seen: false,
-            value: "",
-            children: 0,
-            raising_children: 0,
+          private: {
+            child: 0,
             spouse: 0,
-            parents: 0,
-            brothers: 0,
-            grandparents: 0
+            parent: 0,
+            household: 0
           }
         },
-        heir_denominator: 1,
-        now_step: null,
-        color_codes: [
-          "2, 117, 216",
-          "92, 184, 92",
-          "91, 192, 222",
-          "240, 173, 78",
-          "217, 83, 79",
-          "41, 43, 44",
-          "73, 5, 245",
-          "201, 65, 149",
-          "148, 88, 200",
-          "251, 218, 137",
-          "193, 247, 215",
-          "252, 116, 4",
-          "242, 193, 135",
-          "60, 108, 4",
-          "150, 140, 107",
-          "206, 170, 155"
-        ],
-        color_codes_next: 0,
-        vueChartData: {
-          labels: [],
-          datasets: [{
-            label: '繼承分配表',
-            data: [],
-            borderWidth: 1
-          }]
-        },
-        parent_width: 0
-      }
-    },
+        s2: {
+          // 光復後
+          title: "步驟2，光復後時段區間",
+          legend: "時段區間",
+          seen: false,
+          value: "",
+          children: 0,
+          raising_children: 0,
+          spouse: 0,
+          parents: 0,
+          brothers: 0,
+          grandparents: 0
+        }
+      },
+      heir_denominator: 1,
+      now_step: null,
+      color_codes: [
+        "2, 117, 216",
+        "92, 184, 92",
+        "91, 192, 222",
+        "240, 173, 78",
+        "217, 83, 79",
+        "41, 43, 44",
+        "73, 5, 245",
+        "201, 65, 149",
+        "148, 88, 200",
+        "251, 218, 137",
+        "193, 247, 215",
+        "252, 116, 4",
+        "242, 193, 135",
+        "60, 108, 4",
+        "150, 140, 107",
+        "206, 170, 155"
+      ],
+      color_codes_next: 0,
+      vueChartData: {
+        labels: [],
+        datasets: [{
+          label: '繼承分配表',
+          data: [],
+          borderWidth: 1
+        }]
+      },
+      parent_width: 0
+    }),
     methods: {
       reset: function (e) {
         this.wizard.s0.seen = true;

@@ -8,14 +8,12 @@ if (Vue) {
             </legend>
             <div class="d-flex">
                 <case-input-group-ui v-model="id" @enter="query" type="sur" prefix="case_sur"></case-input-group-ui>
-                <b-button @click="query" variant="outline-primary" size="sm" class="ml-1"><i class="fas fa-search"></i></b-button>
+                <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'查詢測量案件'"><i class="fas fa-search"></i></b-button>
             </div>
         </fieldset>`,
-        data: () => {
-            return {
-                id: undefined
-            }
-        },
+        data: () => ({
+            id: undefined
+        }),
         computed: {
             validate() {
                 let year = this.id.substring(0, 3);

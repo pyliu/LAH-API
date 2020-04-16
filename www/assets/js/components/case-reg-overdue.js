@@ -86,7 +86,7 @@ if (Vue) {
             </lah-transition>
         </div>`,
         props: ['inSearchID'],
-        data: function () { return {
+        data: () => ({
             fields: [
                 '序號',
                 {key: "收件字號", sortable: true},
@@ -141,7 +141,7 @@ if (Vue) {
                     }
                 }
             }
-        } },
+        }),
         computed: {
             total_case() { return this.$store.getters['overdue_reg_cases/list_count']; },
             total_people() { return this.$store.getters['overdue_reg_cases/list_by_id_count']; },

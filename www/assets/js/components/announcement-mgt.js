@@ -11,11 +11,9 @@ if (Vue) {
                 <b-button @click="clear" variant="outline-danger" size="sm" v-b-tooltip="'清除准登旗標'" class="ml-1"><i class="fas fa-flag"></i></b-button>
             </div>
         </fieldset>`,
-        data: () => {
-            return {
-                reset_flag: false
-            }
-        },
+        data: () => ({
+            reset_flag: false
+        }),
         methods: {
             updated: function(updated_data) {
                 //console.log(updated_data);
@@ -75,12 +73,10 @@ if (Vue) {
                     <b-button @click="change" variant="outline-primary" size="sm" v-b-tooltip="'開啟編輯視窗'"><i class="fas fa-external-link-alt"></i></b-button>
                 </div>`,
                 props: ["resetFlag"],
-                data: () => {
-                    return {
-                        data: [],
-                        val: ""
-                    }
-                },
+                data: () => ({
+                    data: [],
+                    val: ""
+                }),
                 watch: {
                     resetFlag: function(nval, oval) {
                         if (nval) {
@@ -188,13 +184,11 @@ if (Vue) {
                             </div>
                         </div>`,
                         props: ["data"],
-                        data: function(e) {
-                            return {
-                                reason_code: this.data[0],
-                                day: this.data[2],
-                                flag: this.data[3]
-                            }
-                        },
+                        data: () => ({
+                            reason_code: this.data[0],
+                            day: this.data[2],
+                            flag: this.data[3]
+                        }),
                         methods: {
                             update: function(e) {
                                 let reason_code = this.data[0];

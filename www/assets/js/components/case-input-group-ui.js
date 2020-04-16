@@ -38,48 +38,46 @@ if (Vue) {
             </b-input-group>
         </div>`,
         props: ["type", "prefix", 'value'],
-        data: function(e) {
-            return {
-                codes: {
-                    reg: {
-                        HB: {
-                            label: "本所",
-                            options: ["HB04 壢登", "HB05 壢永", "HB06 壢速"]
-                        },
-                        HXB1: {
-                            label: "本所收件(跨所)",
-                            options: ["HAB1 壢桃登跨", "HCB1 壢溪登跨", "HDB1 壢楊登跨", "HEB1 壢蘆登跨", "HFB1 壢德登跨", "HGB1 壢平登跨", "HHB1 壢山登跨"]
-                        },
-                        HBX1: {
-                            label: "他所收件(跨所)",
-                            options: ["HBA1 桃壢登跨", "HBC1 溪壢登跨", "HBD1 楊壢登跨", "HBE1 蘆壢登跨", "HBF1 德壢登跨", "HBG1 平壢登跨", "HBH1 山壢登跨"]
-                        },
-                        H2XX: {
-                            label: "本所收件(跨縣市)",
-                            options: []
-                        },
-                        XXHB: {
-                            label: "他所收件(跨縣市)",
-                            options: []
-                        }
+        data: () => ({
+            codes: {
+                reg: {
+                    HB: {
+                        label: "本所",
+                        options: ["HB04 壢登", "HB05 壢永", "HB06 壢速"]
                     },
-                    sur: {
-                        HB: {
-                            label: "測量案件",
-                            options: ["HB12 中地測丈", "HB13 中地測建", "HB17 中地法土", "HB18 中地法建"]
-                        }
+                    HXB1: {
+                        label: "本所收件(跨所)",
+                        options: ["HAB1 壢桃登跨", "HCB1 壢溪登跨", "HDB1 壢楊登跨", "HEB1 壢蘆登跨", "HFB1 壢德登跨", "HGB1 壢平登跨", "HHB1 壢山登跨"]
+                    },
+                    HBX1: {
+                        label: "他所收件(跨所)",
+                        options: ["HBA1 桃壢登跨", "HBC1 溪壢登跨", "HBD1 楊壢登跨", "HBE1 蘆壢登跨", "HBF1 德壢登跨", "HBG1 平壢登跨", "HBH1 山壢登跨"]
+                    },
+                    H2XX: {
+                        label: "本所收件(跨縣市)",
+                        options: []
+                    },
+                    XXHB: {
+                        label: "他所收件(跨縣市)",
+                        options: []
                     }
                 },
-                year: "",
-                code: "",
-                num: "",
-                num_step: 10,
-                num_min: 10,
-                num_max: 999999,
-                code_data: [],
-                years: []
-            }
-        },
+                sur: {
+                    HB: {
+                        label: "測量案件",
+                        options: ["HB12 中地測丈", "HB13 中地測建", "HB17 中地法土", "HB18 中地法建"]
+                    }
+                }
+            },
+            year: "",
+            code: "",
+            num: "",
+            num_step: 10,
+            num_min: 10,
+            num_max: 999999,
+            code_data: [],
+            years: []
+        }),
         methods: {
             emitInput: function(e) {
                 this.$emit('input', `${this.year}${this.code}${this.num}`);

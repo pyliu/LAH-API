@@ -39,7 +39,7 @@ if (Vue) {
                 <b-col><canvas id="feeBarChart" class="w-100"></canvas></b-col>
             </b-row>
         </b-container>`,
-        data: () => { return {
+        data: () => ({
             date_obj: null,
             query_date: "1090311",
             raw_data: null,
@@ -77,7 +77,7 @@ if (Vue) {
                     snapGaps: true
                 }]
             }
-        } },
+        }),
         computed: {
             count_cash: function() { return this.cash.length; },
             count_ezcard: function() { return this.ezcard.length; },

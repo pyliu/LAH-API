@@ -26,16 +26,14 @@ if (Vue) {
             bounce: Boolean,
             rotate: Boolean
         },
-        data: function() {
-            return {
-                animated_in: "animated fadeIn once-anim-cfg",
-                animated_out: "animated fadeOut once-anim-cfg",
-                animated_opts: ANIMATED_TRANSITIONS,
-                duration: 400,   // or {enter: 400, leave: 800}
-                mode: "out-in",  // out-in, in-out
-                cfg_css: "once-anim-cfg"
-            }
-        },
+        data: () => ({
+            animated_in: "animated fadeIn once-anim-cfg",
+            animated_out: "animated fadeOut once-anim-cfg",
+            animated_opts: ANIMATED_TRANSITIONS,
+            duration: 400,   // or {enter: 400, leave: 800}
+            mode: "out-in",  // out-in, in-out
+            cfg_css: "once-anim-cfg"
+        }),
         created() {
             if (this.rotate) {
                 this.animated_in = `animated rotateIn ${this.cfg_css}`;
@@ -124,7 +122,7 @@ if (Vue) {
                 </div>
             </lah-transition>
         </div>`,
-        data: function() { return {
+        data: () => ({
             title: "",
             subtitle: "",
             message: 'Hello Alert Vue!',
@@ -140,7 +138,7 @@ if (Vue) {
             remaining_secs: 10,
             remaining_percent: 100,
             bar_variant: "light"
-        }},
+        }),
         methods: {
             mouseOver: function(e) {
                 if (this.hide_timer_handle !== null) { clearTimeout(this.hide_timer_handle); }
@@ -286,7 +284,7 @@ if (Vue) {
                 </b-collapse>
             </b-navbar>
         </lah-transition>`,
-        data: () => { return {
+        data: () => ({
             show: true,
             icon: "question",
             leading: "Unknown",
@@ -338,7 +336,7 @@ if (Vue) {
                 icon: "cubes",
                 need_admin: true
             }]
-        }},
+        }),
         computed: {
             enableUserCardPopover() { return !this.empty(this.myip) },
             url() {
@@ -471,11 +469,11 @@ if (Vue) {
                 </a>
             </p>
         </lah-transition>`,
-        data: function() { return {
+        data: () => ({
             show: true,
             leave_time: 10000,
             classes: ['text-muted', 'fixed-bottom', 'my-2', 'mx-3', 'bg-white', 'border', 'rounded', 'text-center', 'p-2', 'small']
-        } },
+        }),
         mounted() {
             setTimeout(() => this.show = false, this.leave_time);
         }
@@ -498,9 +496,9 @@ if (Vue) {
                 </transition-group>
             </b-list-group>
         </b-card>`,
-        data: () => { return {
+        data: () => ({
             all: undefined
-        } },
+        }),
         computed: {
             count() { return this.all ? this.all.length : 0 }
         },
@@ -571,11 +569,11 @@ if (Vue) {
             title: { type: String, default: '' },
             titlePos: { type: String, default: 'top' }
         },
-        data: function () { return {
+        data: () => ({
             inst: null,
             chartData: null,
             init_fix: false
-        } },
+        }),
         watch: {
             type: function (val) { setTimeout(this.buildChart, 0) },
             chartData: function(newObj) { setTimeout(this.buildChart, 0)  },
@@ -716,10 +714,10 @@ if (Vue) {
             ></b-form-input>
         </b-input-group>`,
         props: ['value', 'size', 'validator', 'onlyOnBoard'],
-        data: () => { return {
+        data: () => ({
             id: undefined,
             onboard_users: undefined
-        } },
+        }),
         watch: {
             value(val) { this.id = val },
             id(val) { this.id = this.empty(val) ? '' : val.toString().replace(/[^a-zA-Z0-9]/g, "") }
@@ -817,10 +815,10 @@ if (Vue) {
                     <div v-if="isAdmin">到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge !== false" :variant="workAgeVariant" pill>{{workAge}}年</b-badge></div>
                 </b-card-text>`,
                 props: ['user_data'],
-                data: function() { return {
+                data: () => ({
                     now: new Date(),
                     year: 31536000000
-                } },
+                }),
                 computed: {
                     isLeft: function () {
                         return this.user_data['AP_OFF_JOB'] == 'Y';
@@ -910,11 +908,11 @@ if (Vue) {
             }
         },
         props: ['id', 'name', 'ip', 'title', 'avatar'],
-        data: function() { return {
+        data: () => ({
             user_rows: null,
             msg_title: '',
             msg_content: ''
-        } },
+        }),
         computed: {
             found: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined },
             notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; },
@@ -1057,11 +1055,11 @@ if (Vue) {
             title: { type: String, default: '' },
             noBody: { type: Boolean, default: false },
         },
-        data: () => { return {
+        data: () => ({
             msg_title: '',
             msg_content: '',
             id: ''
-        } },
+        }),
         computed: {
             border: function() { return this.noBody ? 'border-0' : '' },
             showTitle: function() { return !this.empty(this.title) },
@@ -1162,11 +1160,11 @@ if (Vue) {
             <lah-fa-icon variant="danger" icon="exclamation-circle" size="lg" v-else>{{notFound}}</lah-fa-icon>
         </div>`,
         props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton', 'tabs', 'tabsEnd', 'noCache'],
-        data: () => { return {
+        data: () => ({
             raws: undefined,
             urlPattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig,
             idPattern: /^HB\d{4}$/i
-        } },
+        }),
         watch: {
             count: function(nVal, oVal) { this.load() },
             id: function(nVal, oVal) {
@@ -1323,7 +1321,7 @@ if (Vue) {
             <p v-if="showProgress" class="mt-2"><lah-reg-table type="sm" :bakedData="[bakedData]" :no-caption="true" class="small"></lah-reg-table></p>
         </div>`,
         props: ['progress'],
-        data: () => { return {
+        data: () => ({
             rm30_orig: "",
             rm39_orig: "",
             rm42_orig: "",
@@ -1377,7 +1375,7 @@ if (Vue) {
                 {key: "地價處理註記", label: "地價註記", sortable: true},
                 {key: "預定結案日期", label:"期限", sortable: true}
             ]
-        } },
+        }),
         computed: {
             showProgress() { return !this.empty(this.progress) },
             attachEvent() { return this.showProgress },
@@ -1738,14 +1736,12 @@ if (Vue) {
             </b-card>
         </div>`,
         props: ['tabsEnd'],
-        data: () => {
-            return {
-                area: "",
-                rm10: null,
-                ap_server: "220.1.35.123",
-                show_op_card: true
-            }
-        },
+        data: () => ({
+            area: "",
+            rm10: null,
+            ap_server: "220.1.35.123",
+            show_op_card: true
+        }),
         computed: {
             tabsAtEnd() { return !this.empty(this.tabsEnd) },
             is_ongoing() { return this.empty(this.bakedData.結案代碼) },
@@ -1810,11 +1806,11 @@ if (Vue) {
             </div>
             <lah-fa-icon v-else icon="exclamation-circle" variant="success" size="lg"> 無暫存檔。</lah-fa-icon>
         </div>`,
-        data: function() { return {
+        data: () => ({
             filtered: null,
             cleanAllBackupFlag: false,
             backupFlags: []
-        }},
+        }),
         computed: {
             found() { return !this.empty(this.filtered) },
             prefix() { return `${this.year}-${this.code}-${this.number}` }
@@ -2078,10 +2074,10 @@ if (Vue) {
             </div>
             <lah-chart :type="chartType" label="案件時間線" :items="items" :tooltip="tooltip"></lah-chart>
         </div>`,
-        data: function() { return {
+        data: () => ({
             items: [],
             chartType: 'line'
-        } },
+        }),
         computed: {
             border() { return this.ready ? '' : 'danger' },
             title() { return this.ready ? this.bakedData.收件字號 : '' }
@@ -2213,9 +2209,9 @@ if (Vue) {
             </b-table>
         </lah-transition>`,
         props: ['bakedData', 'maxHeight', 'type', 'fields', 'mute', 'noCaption', 'color', 'icon', 'iconVariant'],
-        data: () => { return {
+        data: () => ({
             transProps: { name: 'rollIn' }
-        } },
+        }),
         computed: {
             tblFields: function() {
                 if (!this.empty(this.fields)) return this.fields;
@@ -2433,7 +2429,7 @@ if (Vue) {
                 </div>
             </template>
         </b-card>`,
-        data: () => { return {
+        data: () => ({
             today: undefined,
             ad_today: undefined,
             id: undefined,
@@ -2441,7 +2437,7 @@ if (Vue) {
             chart_items: undefined,
             chart_type: 'line',
             list: undefined
-        } },
+        }),
         computed: {
             ID() { return this.id ? this.id.toUpperCase() : null },
             name() { return this.userNames[this.ID] || '' },
@@ -2628,9 +2624,9 @@ if (Vue) {
             userList: { type: Object, default: null },
             date: { type: String, default: this.today }
         },
-        data: () => { return {
+        data: () => ({
             filtered: null
-        } },
+        }),
         computed: {
             today() { return this.nowDatetime.split(' ')[0] }
         },
@@ -2714,11 +2710,11 @@ if (Vue) {
             </b-popover>
         </b-button>`,
         props: ['rawUserData', 'inId'],
-        data: () => { return {
+        data: () => ({
             temperature: { AM: 0, PM: 0 },
             avatar_size: '1.2rem',
             btnid: '',
-        } },
+        }),
         watch: {
             my_temperature(val) { this.empty(val) ? void(0) : this.setMyTemperature() }
         },
@@ -2843,7 +2839,7 @@ if (Vue) {
                 :state="validate"
             ></b-form-textarea>
         </fieldset>`,
-        data: function() { return {
+        data: () => ({
             selected: '',
             selected_label: '',
             sql: '',
@@ -2885,7 +2881,7 @@ if (Vue) {
                     { text: '全國跨縣市收件資料', value: '18_cross_county_crsms.sql' }
                 ] }
             ]
-        } },
+        }),
         computed: {
             validate() { return !this.empty(this.sql) }
         },

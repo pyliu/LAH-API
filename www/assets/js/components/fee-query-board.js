@@ -48,11 +48,11 @@ if (Vue) {
                 </b-input-group>
             </b-form-row>
         </fieldset>`,
-        data: () => { return {
+        data: () => ({
             date_obj: null,    // v-model as a date object
             query_date: "",
             number: ""
-        } },
+        }),
         watch: {
             date_obj: function(nVal, oVal) {
                 this.query_date = `${nVal.getFullYear() - 1911}${("0" + (nVal.getMonth()+1)).slice(-2)}${("0" + nVal.getDate()).slice(-2)}`;
@@ -223,44 +223,42 @@ if (Vue) {
                     </b-row>
                 </b-container>`,
                 props: ["raw_data"],
-                data: () => {
-                    return {
-                        cash: [],
-                        ezcard: [],
-                        mobile: [],
-                        credit: [],
-                        other: [],
-                        chartInst: null,
-                        chartData: {
-                            labels:[],
-                            legend: {
-                                display: true,
-                                labels: { boxWidth: 20 }
-                            },
-                            datasets:[{
-                                label: "數量統計",
-                                backgroundColor:[],
-                                data: [],
-                                borderColor:[],
-                                fill: true,
-                                type: "bar",
-                                order: 1,
-                                opacity: 0.8,
-                                snapGaps: true
-                            }, {
-                                label: "金額統計",
-                                backgroundColor:[],
-                                data: [],
-                                borderColor:[],
-                                fill: true,
-                                type: "line",
-                                order: 2,
-                                opacity: 0.7,
-                                snapGaps: true
-                            }]
-                        }
+                data: () => ({
+                    cash: [],
+                    ezcard: [],
+                    mobile: [],
+                    credit: [],
+                    other: [],
+                    chartInst: null,
+                    chartData: {
+                        labels:[],
+                        legend: {
+                            display: true,
+                            labels: { boxWidth: 20 }
+                        },
+                        datasets:[{
+                            label: "數量統計",
+                            backgroundColor:[],
+                            data: [],
+                            borderColor:[],
+                            fill: true,
+                            type: "bar",
+                            order: 1,
+                            opacity: 0.8,
+                            snapGaps: true
+                        }, {
+                            label: "金額統計",
+                            backgroundColor:[],
+                            data: [],
+                            borderColor:[],
+                            fill: true,
+                            type: "line",
+                            order: 2,
+                            opacity: 0.7,
+                            snapGaps: true
+                        }]
                     }
-                },
+                }),
                 computed: {
                     count_cash: function() { return this.cash.length; },
                     count_ezcard: function() { return this.ezcard.length; },
@@ -480,17 +478,15 @@ if (Vue) {
                     </table>
                 </div>`,
                 props: ["raw_data"],
-                data: function() {
-                    return {
-                        year: "109",
-                        next_pc_number: 9109001,  // 9 + year (3 digits) + serial (3 digits)
-                        today: "",
-                        operator: "",   // 作業人員
-                        operator_name: "",
-                        AB_number: "",  // 收據編號
-                        reason: ""      // 作廢原因
-                    }
-                },
+                data: () => ({
+                    year: "109",
+                    next_pc_number: 9109001,  // 9 + year (3 digits) + serial (3 digits)
+                    today: "",
+                    operator: "",   // 作業人員
+                    operator_name: "",
+                    AB_number: "",  // 收據編號
+                    reason: ""      // 作廢原因
+                }),
                 watch: {
                     operator: function(val) {
                         this.operator_name = this.userNames[val] || '';
@@ -746,22 +742,20 @@ if (Vue) {
             </b-row>
         </b-container>`,
         props: ["date", "pc_number"],
-        data: function() {
-            return {
-                expaa_data: [],
-                expac_data: [/*{  // mock data
-                    AC16: "108",
-                    AC17: "HB04",
-                    AC18: "000010",
-                    AC25: "108",
-                    AC04: "0000001",
-                    AC29: "100",
-                    AC30: "80",
-                    AC20: "07"
-                }*/],
-                expac_year: "109"
-            }
-        },
+        data: () => ({
+            expaa_data: [],
+            expac_data: [/*{  // mock data
+                AC16: "108",
+                AC17: "HB04",
+                AC18: "000010",
+                AC25: "108",
+                AC04: "0000001",
+                AC29: "100",
+                AC30: "80",
+                AC20: "07"
+            }*/],
+            expac_year: "109"
+        }),
         created: function() {
             this.expac_year = this.date.substring(0, 3) || "109";
             this.fetchEXPAA();
@@ -845,40 +839,38 @@ if (Vue) {
                     </div>
                 </div>`,
                 props: ["expac_list", "date", "pc_number"],
-                data: function() {
-                    return {
-                        expe_list: [ // from MOIEXP.EXPE
-                            { value: "01", text: "01：土地法65條登記費" },
-                            { value: "02", text: "02：土地法76條登記費" },
-                            { value: "03", text: "03：土地法67條書狀費" },
-                            { value: "04", text: "04：地籍謄本工本費" },
-                            { value: "06", text: "06：檔案閱覽抄錄複製費" },
-                            { value: "07", text: "07：閱覽費" },
-                            { value: "08", text: "08：門牌查詢費" },
-                            { value: "09", text: "09：複丈費及建物測量費" },
-                            { value: "10", text: "10：地目變更勘查費" },
-                            { value: "14", text: "14：電子謄本列印" },
-                            { value: "18", text: "18：塑膠樁土地界標" },
-                            { value: "19", text: "19：鋼釘土地界標(大)" },
-                            { value: "30", text: "30：104年度登記罰鍰" },
-                            { value: "31", text: "31：100年度登記罰鍰" },
-                            { value: "32", text: "32：101年度登記罰鍰" },
-                            { value: "33", text: "33：102年度登記罰鍰" },
-                            { value: "34", text: "34：103年度登記罰鍰" },
-                            { value: "35", text: "35：其他" },
-                            { value: "36", text: "36：鋼釘土地界標(小)" },
-                            { value: "37", text: "37：105年度登記罰鍰" },
-                            { value: "38", text: "38：106年度登記罰鍰" },
-                            { value: "39", text: "39：塑膠樁土地界標(大)" },
-                            { value: "40", text: "40：107年度登記罰鍰" },
-                            { value: "41", text: "41：108年度登記罰鍰" },
-                            { value: "42", text: "42：土地法第76條登記費（跨縣市）" },
-                            { value: "43", text: "43：書狀費（跨縣市）" },
-                            { value: "44", text: "44：罰鍰（跨縣市）" },
-                            { value: "45", text: "45：109年度登記罰鍰" }
-                        ]
-                    }
-                },
+                data: () => ({
+                    expe_list: [ // from MOIEXP.EXPE
+                        { value: "01", text: "01：土地法65條登記費" },
+                        { value: "02", text: "02：土地法76條登記費" },
+                        { value: "03", text: "03：土地法67條書狀費" },
+                        { value: "04", text: "04：地籍謄本工本費" },
+                        { value: "06", text: "06：檔案閱覽抄錄複製費" },
+                        { value: "07", text: "07：閱覽費" },
+                        { value: "08", text: "08：門牌查詢費" },
+                        { value: "09", text: "09：複丈費及建物測量費" },
+                        { value: "10", text: "10：地目變更勘查費" },
+                        { value: "14", text: "14：電子謄本列印" },
+                        { value: "18", text: "18：塑膠樁土地界標" },
+                        { value: "19", text: "19：鋼釘土地界標(大)" },
+                        { value: "30", text: "30：104年度登記罰鍰" },
+                        { value: "31", text: "31：100年度登記罰鍰" },
+                        { value: "32", text: "32：101年度登記罰鍰" },
+                        { value: "33", text: "33：102年度登記罰鍰" },
+                        { value: "34", text: "34：103年度登記罰鍰" },
+                        { value: "35", text: "35：其他" },
+                        { value: "36", text: "36：鋼釘土地界標(小)" },
+                        { value: "37", text: "37：105年度登記罰鍰" },
+                        { value: "38", text: "38：106年度登記罰鍰" },
+                        { value: "39", text: "39：塑膠樁土地界標(大)" },
+                        { value: "40", text: "40：107年度登記罰鍰" },
+                        { value: "41", text: "41：108年度登記罰鍰" },
+                        { value: "42", text: "42：土地法第76條登記費（跨縣市）" },
+                        { value: "43", text: "43：書狀費（跨縣市）" },
+                        { value: "44", text: "44：罰鍰（跨縣市）" },
+                        { value: "45", text: "45：109年度登記罰鍰" }
+                    ]
+                }),
                 methods: {
                     update: function(e, idx) {
                         let record = this.expac_list[idx];

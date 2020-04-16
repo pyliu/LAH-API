@@ -11,14 +11,12 @@ if (Vue) {
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋案件'"><i class="fas fa-search"></i></b-button>
             </div>
         </fieldset>`,
-        data: () => {
-            return {
-                year: undefined,
-                code: undefined,
-                num: undefined,
-                id: undefined
-            }
-        },
+        data: () => ({
+            year: undefined,
+            code: undefined,
+            num: undefined,
+            id: undefined
+        }),
         computed: {
             validate() {
                 this.year = this.id.substring(0, 3);

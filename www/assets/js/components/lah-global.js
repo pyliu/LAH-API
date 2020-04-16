@@ -206,11 +206,11 @@ Vue.prototype.$store = (() => {
 
 // inject to all Vue instances
 Vue.mixin({
-    data: function() { return {
+    data: () => ({
         isBusy: false,
         busyIconSize: undefined,
         error: {}
-    }},
+    }),
     watch: {
         isBusy: function(flag) { flag ? this.busyOn(this.$el) : this.busyOff(this.$el) },
         error: function(nMsg, oMsg) {

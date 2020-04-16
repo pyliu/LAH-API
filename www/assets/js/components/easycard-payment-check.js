@@ -25,12 +25,10 @@ if (Vue) {
                 <b-col><b-button pill block @click="query" size="sm" variant="outline-primary"><i class="fas fa-cogs"></i> 檢測</b-button></b-col>
             </b-form-row>
         </fieldset>`,
-        data: () => {
-            return {
-                date: "",
-                ad_date: "2020-01-08"
-            }
-        },
+        data: () => ({
+            date: "",
+            ad_date: "2020-01-08"
+        }),
         methods: {
             convertTWDate: function(val) {
                 let d = new Date(val);

@@ -11,11 +11,9 @@ if (Vue) {
                 <b-button @click="prcQuery" variant="outline-secondary" size="sm" v-b-tooltip="'查地價案件'"><i class="fas fa-hand-holding-usd"></i></b-button>
             </div>
         </fieldset>`,
-        data: () => {
-            return {
-                id: undefined
-            }
-        },
+        data: () => ({
+            id: undefined
+        }),
         computed: {
             validate() {
                 let year = this.id.substring(0, 3);

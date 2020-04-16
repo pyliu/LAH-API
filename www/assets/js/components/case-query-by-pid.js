@@ -13,12 +13,10 @@ if (Vue) {
             <div v-else v-html="message"></div>
         </lah-transition>`,
         props: ["pid"],
-        data: function() {
-            return {
-                json: null,
-                message: '<i class="text-primary ld ld-spin ld-spinner"></i> 登記案件資料查詢中 ...'
-            }
-        },
+        data: () => ({
+            json: null,
+            message: '<i class="text-primary ld ld-spin ld-spinner"></i> 登記案件資料查詢中 ...'
+        }),
         computed: {
             isTableReady: function() {
                 return this.json && this.json.data_count > 0;
