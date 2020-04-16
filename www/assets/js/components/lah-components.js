@@ -545,6 +545,7 @@ if (Vue) {
             });
         }
     });
+
     // need to include Chart.min.js (chart.js) first.
     Vue.component("lah-chart", {
         template: `<div><canvas class="w-100">圖形初始化失敗</canvas></div>`,
@@ -732,7 +733,7 @@ if (Vue) {
             userNameMap() { return this.only_onboard ? this.onboard_user_names : this.userNames },
             ID() { return this.id ? this.id.toUpperCase() : null },
             name() { return this.userNameMap[this.ID] || '' },
-            validate() { return this.validator ? this.validator : this.def_validator },
+            validate() { return this.empty(this.id) ? null : this.validator ? this.validator : this.def_validator },
             def_validator() { return /*(/^HB\d{4}$/i).test(this.ID) || */!this.empty(this.name) },
             avatar_src() { return `get_user_img.php?name=${this.name}_avatar` },
             only_onboard() { return this.onlyOnBoard === true },
@@ -1071,8 +1072,8 @@ if (Vue) {
             showTitle: function() { return !this.empty(this.title) },
             showIdInput: function() { return this.empty(this.ID) && this.empty(this.NAME)},
             sendMessageOK: function() { return this.msgTitleOK && this.msgContentOK && (!this.empty(this.ID) || !this.empty(this.id))  },
-            msgContentOK: function() { return !this.empty(this.msg_content) && this.msg_content.length <= 500 },
-            msgTitleOK: function() { return !this.empty(this.msg_title) && this.msg_title.length <= 20 },
+            msgContentOK: function() { return this.empty(this.msg_content) ? null : this.msg_content.length <= 500 },
+            msgTitleOK: function() { return this.empty(this.msg_title) ? null : this.msg_title.length <= 20 },
             msgTitleCount: function() { return this.empty(this.msg_title) ? '言簡意賅最多20字中文 ... ' : `${this.msg_title.length} / 20` },
             msgContentCount: function() { return this.empty(this.msg_content) ? '最多500字中文 ... ' : `${this.msg_content.length} / 500` }
         },
@@ -2889,7 +2890,7 @@ if (Vue) {
             ]
         }),
         computed: {
-            validate() { return !this.empty(this.sql) }
+            validate() { return this.empty(this.sql) ? null : /^select/gi.test(this.sql) }
         },
         methods: {
             change(val) {
@@ -2989,6 +2990,105 @@ if (Vue) {
             setTimeout(() => this.sql = this.$refs.sql.$el.value, 400);
         }
     });
+    
+    Vue.component("lah-area-search", {
+        template: `<fieldset>
+            <legend v-b-tooltip="'轄區各段土地標示部筆數＆面積查詢'">
+                <i class="far fa-map"></i>
+                轄區段別資料
+                <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
+            </legend>
+            <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
+            <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
+            <div class="d-flex">
+                <b-input-group size="sm">
+                    <b-input-group-prepend is-text>關鍵字/段代碼</b-input-group-prepend>
+                    <b-form-input
+                        placeholder="榮民段"
+                        ref="text"
+                        v-model="text"
+                        :state="validate"
+                        @keyup.enter="query"
+                    ></b-form-input>
+                </b-input-group>
+                <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋段小段'" :disabled="!validate"><i class="fas fa-search"></i></b-button>
+            </div>
+        </fieldset>`,
+        data: () => ({
+            text: ''
+        }),
+        computed: {
+            validate() { return this.empty(this.text) ? null : isNaN(parseInt(this.text)) ? true : /\d{4}/gi.test(this.text) }
+        },
+        methods: {
+            query() {
+                if (this.validate) {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: 'ralid',
+                        text: this.text
+                    }).then(res => {
+                        this.$log(res.data);
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                }/*
+                let xhr = $.ajax({
+                    url: CONFIG.JSON_API_EP,
+                    data: "type=ralid&text="+text,
+                    method: "POST",
+                    dataType: "json",
+                    success: jsonObj => {
+                        toggle(el);
+                        let count = jsonObj.data_count;
+                        let html = "";
+                        for (let i=0; i<count; i++) {
+                            if (isNaN(jsonObj.raw[i]["段代碼"])) {
+                                continue;
+                            }
+                            let this_count = parseInt(jsonObj.raw[i]["土地標示部筆數"]);
+                            this_count = this_count < 1000 ? 1000 : this_count;
+                            let blow = jsonObj.raw[i]["土地標示部筆數"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                            let size = 0, size_o = 0;
+                            if (jsonObj.raw[i]["面積"]) {
+                                size = jsonObj.raw[i]["面積"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                size_o = (jsonObj.raw[i]["面積"] * 3025 / 10000).toFixed(2);
+                                size_o = size_o.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                            }
+                            html += "【<span class='text-info'>" + jsonObj.raw[i]["段代碼"]  + "</span>】" + jsonObj.raw[i]["段名稱"] + "：土地標示部 <span class='text-primary'>" + blow + "</span> 筆【面積：" + size + " &#x33A1; | " + size_o + " 坪】 <br />";
+                        }
+                        $("#data_query_result").html(html);
+                    },
+                    error: obj => {
+                        toggle(el);
+                    }
+                });
+                */
+            },
+            popup() {
+              this.msgbox({
+                  title: '土地標示部筆數＆面積查詢',
+                  message: `-- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>
+                  SELECT t.AA48 as "段代碼", <br/>
+                  　　m.KCNT as "段名稱", <br/>
+                  　　SUM(t.AA10) as "面積", <br/>
+                  　　COUNT(t.AA10) as "筆數" <br/>
+                  FROM MOICAD.RALID t <br/>
+                  LEFT JOIN MOIADM.RKEYN m ON (m.KCDE_1 = '48' and m.KCDE_2 = t.AA48) <br/>
+                  --WHERE t.AA48 = '%【輸入數字】'<br/>
+                  --WHERE m.KCNT = '%【輸入文字】%'<br/>
+                  GROUP BY t.AA48, m.KCNT;`,
+                  size: 'lg'
+              });
+            }
+        },
+        mounted() {
+            setTimeout(() => this.text = this.$refs.text.$el.value, 400); 
+        }
+    });
+
 } else {
     console.error("vue.js not ready ... lah-xxxxxxxx components can not be loaded.");
 }
