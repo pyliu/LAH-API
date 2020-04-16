@@ -643,20 +643,21 @@ $(document).ready(() => {
                 });
             },
             hideModal: function(id) {
-                let count = parseInt($("body.modal-open").data("modal-open-count")) || 0;
+                let body = $("body.modal-open");
+                let count = parseInt(body.data("modal-open-count")) || 0;
                 if (this.empty(id)) {
                     $('div.modal.show').each((idx, el) => {
                         this.removeModal(el.id);
-                        $("body.modal-open").attr("data-modal-open-count", --count);
+                        body.data("modal-open-count", --count);
                     });
                 } else {
                     this.removeModal(id);
-                    $("body.modal-open").attr("data-modal-open-count", --count);
+                    body.data("modal-open-count", --count);
                 }
-                if ($("body.modal-open").attr("style")) {
-                    let removed_pad_right = $("body.modal-open").attr("style").replace('padding-right: 17px;', '');
-                    $("body.modal-open").attr("style", removed_pad_right);
-                    $("body.modal-open").removeAttr("data-padding-right");
+                if (body.attr("style")) {
+                    let removed_style = body.attr("style").replace(/((padding|margin)\-right:\s*\d*px;)/gi, '');
+                    body.attr("style", removed_style);
+                    body.removeAttr("data-padding-right");
                 }
                 // https://bootstrap-vue.js.org/docs/components/modal/#emitting-events-on-root
                 // however ... below is useless Orz
