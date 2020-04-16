@@ -1329,7 +1329,7 @@ if (Vue) {
             rm30_map: [
                 { value: 'A', text: 'A: 初審' },
                 { value: 'B', text: 'B: 複審' },
-                { value: 'C', text: 'C: 公告' },
+                { value: 'H', text: 'H: 公告' },
                 { value: 'I', text: 'I: 補正' },
                 { value: 'R', text: 'R: 登錄' },
                 { value: 'C', text: 'C: 校對' },
