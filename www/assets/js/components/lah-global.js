@@ -506,6 +506,7 @@ Vue.mixin({
             if (typeof msg == "object") {
                 let message = msg.body || msg.message;
                 msg.variant = msg.type || "default";
+                msg.autoHideDelay = msg.delay || 5000;
                 this.$toast(message, msg);
             } else if (typeof msg == "string") {
                 this.$toast(msg, opts);
