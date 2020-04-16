@@ -70,42 +70,8 @@ ksort($operators);
       </div>
       <div class="row">
         <div class="col">
-          
-          <fieldset>
-            <legend>轄區各段土地標示部筆數＆面積查詢</legend>
-            <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
-            <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
-            
-            <div class="form-row">
-              <div class="input-group input-group-sm col">
-                <div class="input-group-prepend">
-                  <span class="input-group-text" id="inputGroup-data_query_text">關鍵字/段代碼</span>
-                </div>
-                <input type="text" id="data_query_text" name="data_query_text" class="form-control" placeholder="榮民段" />
-              </div>
-              <div class="filter-btn-group col">
-                <button id="data_query_button" class="btn btn-sm btn-outline-primary">查詢</button>
-                <button id="data_quote_button" class="btn btn-sm btn-outline-success">備註</button>
-              </div>
-            </div>
-            
-            <blockquote id="data_blockquote" class="hide" data-title="土地標示部筆數＆面積查詢">
-              -- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>
-              SELECT t.AA48 as "段代碼", <br/>
-                  m.KCNT as "段名稱", <br/>
-                  SUM(t.AA10) as "面積", <br/>
-                  COUNT(t.AA10) as "筆數" <br/>
-              FROM MOICAD.RALID t <br/>
-              LEFT JOIN MOIADM.RKEYN m ON (m.KCDE_1 = '48' and m.KCDE_2 = t.AA48) <br/>
-              --WHERE t.AA48 = '%【輸入數字】'<br/>
-              --WHERE m.KCNT = '%【輸入文字】%'<br/>
-              GROUP BY t.AA48, m.KCNT;
-            </blockquote>
-            <div id="data_query_result"></div>
-          </fieldset>
-
+          <lah-area-search></lah-area-search>
           <lah-report></lah-report>
-
         </div>
 
         <div class="col">
@@ -154,10 +120,6 @@ ksort($operators);
     // place this variable in global to use this int for condition jufgement, e.g. 108
     let this_year = <?php echo $this_year; ?>;
     $(document).ready(e => {
-      // query section data event
-      $("#data_query_button").on("click", xhrGetSectionRALIDCount);
-      bindPressEnterEvent("#data_query_text", xhrGetSectionRALIDCount);
-
       /**
        * For User Mapping
        */

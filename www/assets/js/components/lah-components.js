@@ -2992,6 +2992,37 @@ if (Vue) {
     });
     
     Vue.component("lah-area-search", {
+        components: {
+            "lah-area-search-results": {
+                template: `<div>
+                    
+                    <b-list-group v-if="count > 0" flush class="small overflow-auto" style="max-height: 300px;">
+                        <b-list-group-item v-for="(item, idx) in json.raw" :key="item.段代碼">
+                            <!-- 段代碼: "0341", 段名稱: "廣興段", 面積: "1888802.41", 土地標示部筆數: "2311" -->
+                            <div class="d-flex justify-content-between">
+                                <span>段代碼：{{item.段代碼}}</span>
+                                <span>段名：{{item.段名稱}}</span>
+                                <span v-b-tooltip="areaM2(item.面積)">面積：{{area(item.面積)}}</span>
+                                <span>筆數：{{format(item.土地標示部筆數)}}筆</span>
+                            </div>
+                        </b-list-group-item>
+                    </b-list-group>
+                    <lah-fa-icon v-else icon="exclamation-triangle" variant="danger" size="lg"> {{input}} 查無資料</lah-fa-icon>
+                </div>`,
+                props: {
+                    json: { type: Object, default: {} },
+                    input: { type: String, default: '' }
+                },
+                computed: {
+                    count() { return this.json.data_count || 0 }
+                },
+                methods: {
+                    format(val) { return val.replace(/\B(?=(\d{3})+(?!\d))/g, ",") },
+                    area(val) { return this.format((val * 3025 / 10000).toFixed(2)) + '坪' },
+                    areaM2(val) { return this.format(val) + '平方米' }
+                }
+            }
+        },
         template: `<fieldset>
             <legend v-b-tooltip="'轄區各段土地標示部筆數＆面積查詢'">
                 <i class="far fa-map"></i>
@@ -2999,12 +3030,12 @@ if (Vue) {
                 <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
             </legend>
             <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
-            <a href="assets/files/土地基本資料庫電子資料流通申請表.doc">電子資料申請書</a> <br />
+            <a href="assets/files/%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%B5%81%E9%80%9A%E7%94%B3%E8%AB%8B%E8%A1%A8.doc">電子資料申請書</a> <br />
             <div class="d-flex">
                 <b-input-group size="sm">
                     <b-input-group-prepend is-text>關鍵字/段代碼</b-input-group-prepend>
                     <b-form-input
-                        placeholder="榮民段"
+                        placeholder="'榮民段' OR '0200'"
                         ref="text"
                         v-model="text"
                         :state="validate"
@@ -3028,44 +3059,16 @@ if (Vue) {
                         type: 'ralid',
                         text: this.text
                     }).then(res => {
-                        this.$log(res.data);
+                        this.msgbox({
+                            title: "段小段查詢結果",
+                            message: this.$createElement("lah-area-search-results", { props: { json: res.data }})
+                        });
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
                         this.isBusy = false;
                     });
-                }/*
-                let xhr = $.ajax({
-                    url: CONFIG.JSON_API_EP,
-                    data: "type=ralid&text="+text,
-                    method: "POST",
-                    dataType: "json",
-                    success: jsonObj => {
-                        toggle(el);
-                        let count = jsonObj.data_count;
-                        let html = "";
-                        for (let i=0; i<count; i++) {
-                            if (isNaN(jsonObj.raw[i]["段代碼"])) {
-                                continue;
-                            }
-                            let this_count = parseInt(jsonObj.raw[i]["土地標示部筆數"]);
-                            this_count = this_count < 1000 ? 1000 : this_count;
-                            let blow = jsonObj.raw[i]["土地標示部筆數"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                            let size = 0, size_o = 0;
-                            if (jsonObj.raw[i]["面積"]) {
-                                size = jsonObj.raw[i]["面積"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                                size_o = (jsonObj.raw[i]["面積"] * 3025 / 10000).toFixed(2);
-                                size_o = size_o.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                            }
-                            html += "【<span class='text-info'>" + jsonObj.raw[i]["段代碼"]  + "</span>】" + jsonObj.raw[i]["段名稱"] + "：土地標示部 <span class='text-primary'>" + blow + "</span> 筆【面積：" + size + " &#x33A1; | " + size_o + " 坪】 <br />";
-                        }
-                        $("#data_query_result").html(html);
-                    },
-                    error: obj => {
-                        toggle(el);
-                    }
-                });
-                */
+                }
             },
             popup() {
               this.msgbox({

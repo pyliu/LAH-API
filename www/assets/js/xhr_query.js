@@ -1,40 +1,4 @@
 //<![CDATA[
-let xhrGetSectionRALIDCount = e => {
-	let el = $(e.target);
-	toggle(el);
-	let text = $("#data_query_text").val();
-	let xhr = $.ajax({
-		url: CONFIG.JSON_API_EP,
-		data: "type=ralid&text="+text,
-		method: "POST",
-		dataType: "json",
-		success: jsonObj => {
-			toggle(el);
-			let count = jsonObj.data_count;
-			let html = "";
-			for (let i=0; i<count; i++) {
-				if (isNaN(jsonObj.raw[i]["段代碼"])) {
-					continue;
-				}
-				let this_count = parseInt(jsonObj.raw[i]["土地標示部筆數"]);
-				this_count = this_count < 1000 ? 1000 : this_count;
-				let blow = jsonObj.raw[i]["土地標示部筆數"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-				let size = 0, size_o = 0;
-				if (jsonObj.raw[i]["面積"]) {
-					size = jsonObj.raw[i]["面積"].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-					size_o = (jsonObj.raw[i]["面積"] * 3025 / 10000).toFixed(2);
-					size_o = size_o.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-				}
-				html += "【<span class='text-info'>" + jsonObj.raw[i]["段代碼"]  + "</span>】" + jsonObj.raw[i]["段名稱"] + "：土地標示部 <span class='text-primary'>" + blow + "</span> 筆【面積：" + size + " &#x33A1; | " + size_o + " 坪】 <br />";
-			}
-			$("#data_query_result").html(html);
-		},
-		error: obj => {
-			toggle(el);
-		}
-	});
-}
-
 let xhrSearchUsers = e => {
 	if (CONFIG.DISABLE_MSDB_QUERY) {
 		console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping xhrSearchUsers.");
