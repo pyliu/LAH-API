@@ -667,6 +667,8 @@ $(document).ready(() => {
                     $("body.modal-open").attr("style", removed_pad_right);
                     $("body.modal-open").removeAttr("data-padding-right");
                 }
+                // below is useless Orz
+                this.$root.$emit('bv::modal::hidden', true);
             },
             removeModal: function(id, duration) {
                 if (!this.openConfirm) {
@@ -933,8 +935,6 @@ $(document).ready(() => {
                     // add this the bv::modal::hidden will not trigger ... Orz
                     bvEvent.preventDefault();
                     this.hideModal(modalId);
-                    // below is useless Orz
-                    //this.$root.$emit('bv::modal::hidden', bvEvent, modalId);
                 }
             });
             this.$root.$on('bv::modal::hidden', (bvEvent, modalId) => {
