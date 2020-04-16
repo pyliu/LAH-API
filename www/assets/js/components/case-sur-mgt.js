@@ -54,7 +54,7 @@ if (Vue) {
                             });
                         } else {
                             if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-                                showModal({
+                                this.msgbox({
                                     title: "測量案件查詢",
                                     message: this.$createElement("case-sur-dialog", { props: { json: res.data } }),
                                     callback: () => addUserInfoEvent()

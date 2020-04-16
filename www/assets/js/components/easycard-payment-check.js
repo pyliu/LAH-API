@@ -57,7 +57,7 @@ if (Vue) {
                             type: "success"
                         });
                     } else {
-                        showModal({
+                        this.msgbox({
                             title: "<i class='fas fa-circle text-warning mr-1'></i><strong class='text-danger'>找到下列資料</strong>",
                             body: h("easycard-payment-check-item", { props: { data: res.data.raw } }),
                             size: "md"
@@ -69,8 +69,8 @@ if (Vue) {
                     this.isBusy = false;
                 });
             },
-            popup: () => {
-                showModal({
+            popup: function() {
+                this.msgbox({
                     title: "悠遊卡自動加值付款失敗回復 小幫手提示",
                     body: `
                         <ol>

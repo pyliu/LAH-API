@@ -63,7 +63,7 @@ if (Vue) {
                                 html += "</tr>";
                             };
                             html += "</table>";
-                            showModal({
+                            this.msgbox({
                                 title: "案件比對詳情",
                                 body: html,
                                 callback: () => {
@@ -79,7 +79,7 @@ if (Vue) {
                                 size: "lg"
                             });
                         } else if (res.data.status == XHR_STATUS_CODE.FAIL_WITH_LOCAL_NO_RECORD) {
-                            showModal({
+                            this.msgbox({
                                 title: "本地端無資料",
                                 body: `<div>
                                     <i class='fas fa-circle text-warning'></i>&ensp;
@@ -221,8 +221,8 @@ if (Vue) {
                     });
                 });
             },
-            popup: () => {
-                showModal({
+            popup: function() {
+                this.msgbox({
                     title: "案件暫存檔清除 小幫手提示",
                     body: `
                         <h6>將局端跨所資料同步回本所資料庫</h6>

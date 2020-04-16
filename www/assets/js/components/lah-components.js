@@ -930,7 +930,7 @@ if (Vue) {
             openPhoto: function(user_data) {
                 // get_user_img.php?name=${user_data['AP_USER_NAME']}
                 //<b-img thumbnail fluid src="https://picsum.photos/250/250/?image=54" alt="Image 1"></b-img>
-                showModal({
+                this.msgbox({
                     title: `${user_data['AP_USER_NAME']}照片`,
                     message: this.$createElement("div", {
                         domProps: {
@@ -1923,7 +1923,7 @@ if (Vue) {
                 });
             },
             showSQL: function(item) {
-                showModal({
+                this.msgbox({
                     title: `INSERT SQL of ${item[0]}`,
                     message: this.getInsSQL(item).replace(/\n/g, "<br /><br />"),
                     size: "xl"
@@ -1944,8 +1944,8 @@ if (Vue) {
                 }
                 return INS_SQL;
             },
-            popup: () => {
-                showModal({
+            popup: function() {
+                this.msgbox({
                     title: "案件暫存檔清除 小幫手提示",
                     body: `<h6 class="text-info">檢查下列的表格</h6>
                     <ul>
@@ -2306,7 +2306,7 @@ if (Vue) {
                     if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
                         showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
                     } else {
-                        showModal({
+                        this.msgbox({
                             message: this.$createElement("lah-reg-case-detail", { props: { bakedData: res.data.baked } }),
                             title: `登記案件詳情 ${data["RM01"]}-${data["RM02"]}-${data["RM03"]}`,
                             size: "lg"
@@ -2318,7 +2318,7 @@ if (Vue) {
             },
             userinfo(name, id = '') {
                 if (name == 'XXXXXXXX') return;
-                showModal({
+                this.msgbox({
                     title: `${name} 使用者資訊${this.empty(id) ? '' : ` (${id})`}`,
                     message: this.$createElement('lah-user-card', { props: { id: id, name: name }})
                 });
@@ -2576,7 +2576,7 @@ if (Vue) {
                     let vn = this.$createElement('lah-temperature-list', {
                         props: { userList: res.data.raw }
                     });
-                    showModal({
+                    this.msgbox({
                         title: `<i class="fa fa-temperature-low fa-lg"></i> 全所體溫一覽表 ${this.today}`,
                         message: vn,
                         size: "xl"

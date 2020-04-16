@@ -106,7 +106,7 @@ if (Vue) {
                             }
                         }
                     });
-                    showModal({
+                    this.msgbox({
                         message: VNode,
                         title: `${this.query_date} 規費統計`
                     });
@@ -121,7 +121,7 @@ if (Vue) {
                     let VNode = this.$createElement("fee-detail-mgt", {
                         props: { date: this.query_date, pc_number: this.number.toString().padStart(7, "0")}
                     });
-                    showModal({
+                    this.msgbox({
                         message: VNode,
                         title: "規費資料詳情",
                         size: "lg"
@@ -131,7 +131,7 @@ if (Vue) {
                 }
             },
             popup: function(e) {
-                showModal({
+                this.msgbox({
                     title: "規費資料 小幫手提示",
                     body: `AA09 - 列印註記【1：已印，0：未印】<br />
                     AA100 - 付款方式<br />
@@ -157,7 +157,7 @@ if (Vue) {
                             raw_data: res.data.raw
                         }
                     });
-                    showModal({
+                    this.msgbox({
                         title: "規費作廢假資料",
                         message: VNode,
                         size: "md",
@@ -279,7 +279,7 @@ if (Vue) {
                             return false;
                         }
                         let that = this;
-                        showModal({
+                        this.msgbox({
                             title: title,
                             message: this.$createElement("expaa-list-mgt", {
                                 props: { items: data || [] },
@@ -325,7 +325,7 @@ if (Vue) {
                                 let VNode = this.$createElement("fee-detail-mgt", {
                                     props: { date: date, pc_number: pc_number}
                                 });
-                                showModal({
+                                this.msgbox({
                                     message: VNode,
                                     title: "規費資料詳情",
                                     backdrop_close: true,

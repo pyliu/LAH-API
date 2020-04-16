@@ -224,7 +224,7 @@ if (Vue) {
                     return;
                 }
                 // reviewer_data, e.g. "ＯＯＯ HB1184"
-                showModal({
+                this.msgbox({
                     title: `查詢 ${reviewer_data} 登記案件(${this.title})`,
                     message: this.$createElement('case-reg-overdue', { props: { inSearchID: reviewer_data.split(" ")[1] } }),
                     size: "xl"
@@ -343,7 +343,7 @@ if (Vue) {
             },
             showMessage: function () {
                 let vm = this.$createElement('lah-user-message-history', { props: { count: 5, tabs: true, tabsPills: false, tabsEnd: false }});
-                showModal({
+                this.msgbox({
                     title: "我收到的信差訊息",
                     message: vm,
                     size: "sm"

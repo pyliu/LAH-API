@@ -694,7 +694,7 @@ $(document).ready(() => {
                     centered: true,
                     scrollable: true,
                     hideFooter: true,
-                    noCloseOnBackdrop: true,
+                    noCloseOnBackdrop: false,
                     contentClass: "shadow hide", // add hide class to .modal-content then use Animated.css for animation show up
                     html: false
                 }, opts);
@@ -796,7 +796,7 @@ $(document).ready(() => {
                         showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
                         return;
                     } else {
-                        showModal({
+                        this.msgbox({
                             message: this.$createElement("lah-reg-case-detail", {
                                 props: {
                                     bakedData: res.data.baked

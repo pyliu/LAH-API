@@ -65,7 +65,7 @@ if (Vue) {
                                     progress: true
                                 }
                             })
-                            showModal({
+                            this.msgbox({
                                 title: "調整登記案件欄位資料",
                                 body: v,
                                 size: "md"
@@ -84,8 +84,8 @@ if (Vue) {
                     });
                 }
             },
-            popup: () => {
-                showModal({
+            popup: function() {
+                this.msgbox({
                     title: "調整登記案件欄位資料 小幫手提示",
                     body: `<ul>
                         <li>使用情境1：先行准登後案件須回復至公告</li>

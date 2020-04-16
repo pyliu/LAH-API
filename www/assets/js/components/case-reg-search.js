@@ -49,7 +49,7 @@ if (Vue) {
                             showAlert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
                             return;
                         } else {
-                            showModal({
+                            this.msgbox({
                                 message: this.$createElement("lah-reg-case-detail", {
                                     props: {
                                         bakedData: res.data.baked
@@ -106,7 +106,7 @@ if (Vue) {
                 }
                 let html = "<p>" + jsonObj.html + "</p>";
                 let modal_size = "lg";
-                showModal({
+                this.msgbox({
                     body: html,
                     title: "地價案件詳情",
                     size: modal_size,

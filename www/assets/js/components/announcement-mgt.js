@@ -39,7 +39,7 @@ if (Vue) {
                 });
             },
             popup: function(e) {
-                showModal({
+                this.msgbox({
                     title: "公告期限維護 小幫手提示",
                     body: `
                         <h5><span class="text-danger">※</span>注意：中壢所規定超過30件案件才能執行此功能，並於完成時須馬上關掉以免其他案件誤登。</h5>
@@ -104,7 +104,7 @@ if (Vue) {
                                 "announcement-update": this.update
                             }
                         });
-                        showModal({
+                        this.msgbox({
                             title: "更新公告資料",
                             body: vnode,
                             size: "md"

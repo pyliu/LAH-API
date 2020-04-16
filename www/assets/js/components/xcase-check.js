@@ -12,7 +12,7 @@ if (Vue) {
         </fieldset>`,
         methods: {
             showNote: function(e) {
-                showModal({
+                this.msgbox({
                     title: "跨所註記遺失檢測 小幫手提示",
                     body: `<div class="d-block">
                         <h5><span class="text-danger">※</span>通常發生的情況是案件內的權利人/義務人/代理人姓名內有罕字造成。</h5>
@@ -44,7 +44,7 @@ if (Vue) {
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         let vnode = h("xcase-check-item", { props: { ids: res.data.case_ids } });
-                        showModal({
+                        this.msgbox({
                             title: "<i class='fas fa-circle text-danger'></i>&ensp;<strong class='text-info'>請查看並修正下列案件</strong>",
                             body: vnode,
                             size: "md"

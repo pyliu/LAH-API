@@ -113,7 +113,7 @@ if (Vue) {
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="search"> 查詢人民申請案件</lah-fa-icon></h6>
-                    <b-button @click="showModal(noteObj)" size="sm" variant="outline-success" class="border-0"><i class="fas fa-question"></i></b-button>
+                    <b-button @click="msgbox(noteObj)" size="sm" variant="outline-success" class="border-0"><i class="fas fa-question"></i></b-button>
                 </div>
             </template>
             <b-input-group size="sm">
@@ -171,7 +171,7 @@ if (Vue) {
                             h("cmsms-case", { props: { pid: this.pid } })
                         ]
                     );
-                    showModal({
+                    this.msgbox({
                         title: `查詢案件 BY 統編 「${this.pid}」`,
                         message: vNodes
                     });

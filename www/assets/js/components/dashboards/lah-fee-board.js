@@ -98,7 +98,7 @@ if (Vue) {
                     return false;
                 }
                 let that = this;
-                showModal({
+                this.msgbox({
                     title: title,
                     message: this.$createElement("expaa-list-mgt", {
                         props: { items: data || [] },
@@ -179,7 +179,7 @@ if (Vue) {
                         let VNode = this.$createElement("fee-detail-mgt", {
                             props: { date: date, pc_number: pc_number}
                         });
-                        showModal({
+                        this.msgbox({
                             message: VNode,
                             title: "規費資料詳情",
                             backdrop_close: true,
