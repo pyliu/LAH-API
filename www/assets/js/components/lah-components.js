@@ -2441,7 +2441,7 @@ if (Vue) {
         computed: {
             ID() { return this.id ? this.id.toUpperCase() : null },
             name() { return this.userNames[this.ID] || '' },
-            validate() { return (/^HB\d{4}$/i).test(this.ID) || this.ID == '604' || this.ID == 'RO77' },
+            validate() { return (/^HB\d{4}$/i).test(this.ID) },
             validateTemperature() {
                 let fn = parseFloat(this.temperature);
                 return !isNaN(fn) && fn >= 34 && fn <= 41;
