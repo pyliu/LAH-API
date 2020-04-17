@@ -80,8 +80,8 @@ blockquote {
 }
 
 .reg_case_id:hover, .user_tag:hover, .usercard:hover {
-	background-color:  rgb(233, 218, 13);
-	text-decoration: underline;
+	/*background-color:  rgb(233, 218, 13);*/
+	text-decoration: none;
 	font-weight: bold;
 	cursor: pointer;
 }

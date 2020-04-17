@@ -727,12 +727,13 @@ if (Vue) {
                 <b-input-group size="sm">
                     <b-input-group-prepend is-text>關鍵字</b-input-group-prepend>
                     <b-form-input
-                        placeholder="'HB05' OR '允' OR '220.1.35.x'"
+                        placeholder="'HB05' OR '憶如' OR '220.1.35.x'"
                         ref="input"
                         v-model="input"
                         @keyup="filter"
                         @keyup.enter="query"
                         v-b-tooltip="'HBXXXX 或 姓名 或 IP'"
+                        :state="validate"
                     ></b-form-input>
                 </b-input-group>
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
@@ -740,11 +741,13 @@ if (Vue) {
             <div class="clearfix">
                 <div
                     v-for="(name, id, idx) in userNames"
-                    class='float-left m-2 hide usercard'
+                    class='float-left m-2 usercard'
                     style='font-size: .875rem;'
                     :data-id="id"
                     :data-name="name"
                     @click.stop="usercard"
+                    v-if="usertag_flags[id]"
+                    :id="'usertag_'+id"
                 >
                     <b-avatar v-if="avatar" button size="1.5rem" :src="avatar_src(name)" variant="light"></b-avatar>
                     {{id}}: {{name||'XXXXXX'}}
@@ -752,17 +755,20 @@ if (Vue) {
             </div>
         </fieldset>`,
         props: {
-            avatar: { type: Boolean, default: false }
+            avatar: { type: Boolean, default: true }
         },
         data: () => ({
-            input: 'HB12',
-            keyup_timer: null
+            input: 'HB054',
+            keyup_timer: null,
+            ids: [],
+            usertag_flags: {}
         }),
         computed: {
-            validate() { return this.empty(this.input) ? null : ture }
+            validate() { return this.empty(this.input) ? null : this.input.length > 1 }
         },
         methods: {
-            avatar_src: function (name) { return `get_user_img.php?name=${name}_avatar` },
+            avatar_src(name) { return `get_user_img.php?name=${name}_avatar` },
+            reset_flags() { this.usertag_flags = {...this.ids.reduce((reduced, key) => ({ ...reduced, [key]: false }), {})}; },
             filter() {
                 if (this.input != this.$refs.input.$el.value && !this.empty(this.$refs.input.$el.value)) {
                     this.input = this.$refs.input.$el.value;
@@ -771,28 +777,31 @@ if (Vue) {
                     clearTimeout(this.keyup_timer);
                     this.keyup_timer = null;
                 }
-                this.keyup_timer = setTimeout(() => {
-                    // clean
-                    $(".usercard").unmark(this.input, { "className": "highlight" }).addClass("hide");
-                    if (this.empty(this.input)) {
-                        $(".usercard").removeClass("hide");
-                    } else {
-                        // Don't add 'g' because I only a line everytime.
-                        // If use 'g' flag regexp object will remember last found index, that will possibly case the subsequent test failure.
-                        this.input = this.input.replace("?", ""); // prevent out of memory
-                        let keyword = new RegExp(this.input, "i");
-                        $(".usercard").each((idx, div) => {
-                            if (keyword.test($(div).text())) {
-                                $(div).removeClass("hide");
-                                // $("#msg_who").val($.trim(user_data[1]));
-                                $(div).mark(this.input, {
+                this.keyup_timer = setTimeout(this.mark, 400);
+            },
+            mark() {
+                if (this.validate) {
+                    // set all flag to false
+                    this.reset_flags();
+                    // Don't add 'g' because I only a line everytime.
+                    // If use 'g' flag regexp object will remember last found index, that will possibly case the subsequent test failure.
+                    this.input = this.input.replace("?", ""); // prevent out of memory
+                    let keyword = new RegExp(this.input, "i");
+                    this.ids.forEach(id => {
+                        let text = `${id}: ${this.userNames[id]}`;
+                        this.usertag_flags[id] = keyword.test(text);
+
+
+                        if (this.usertag_flags[id]) {
+                            Vue.nextTick(() => {
+                                $('#usertag_'+id).mark(this.input, {
                                     "element": "strong",
                                     "className": "highlight"
                                 });
-                            }
-                        });
-                    }
-                }, 400);
+                            });
+                        }
+                    });
+                }
             },
             query() {
                 if (CONFIG.DISABLE_MSDB_QUERY) {
@@ -837,6 +846,12 @@ if (Vue) {
                     message: todo
                 });
             }
+        },
+        created() {
+            setTimeout(() => {
+                this.ids = Object.keys(this.userNames);
+                this.reset_flags();
+            }, 300);
         },
         mounted() {
             setTimeout(() => this.filter(), 400);
