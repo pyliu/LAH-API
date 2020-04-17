@@ -457,7 +457,7 @@ if (Vue) {
         template: `<lah-transition slide-up appear>
             <p v-if="show" :class="classes">
                 <span v-show="fri_afternoon">
-                    <i class="far fa-laugh-wink fa-lg ld ld-swing"></i> 快放假了~離下班只剩 {{left_hours}} 小時，再撐一下下！
+                    <i class="far fa-laugh-wink fa-lg ld ld-bounce"></i> 快放假了~離下班只剩 {{left_hours}} 小時，再撐一下下！
                 </span>
                 <span v-show="!fri_afternoon">
                     <a href="https://github.com/pyliu/Land-Affairs-Helper" target="_blank" title="View project on Github!">
@@ -727,6 +727,7 @@ if (Vue) {
                         v-model="input"
                         @keyup="filter"
                         @keyup.enter="query"
+                        v-b-tooltip="'HBXXXX 或 姓名 或 IP'"
                     ></b-form-input>
                 </b-input-group>
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
