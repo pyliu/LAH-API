@@ -746,6 +746,7 @@ if (Vue) {
                     :data-name="name"
                     @click.stop="usercard"
                 >
+                    <b-avatar button size="1.5rem" :src="avatar_src(name)" variant="light"></b-avatar>
                     {{id}}: {{name||'XXXXXX'}}
                 </div>
             </div>
@@ -758,6 +759,7 @@ if (Vue) {
             validate() { return this.empty(this.input) ? null : ture }
         },
         methods: {
+            avatar_src: function (name) { return `get_user_img.php?name=${name}_avatar` },
             filter() {
                 if (this.input != this.$refs.input.$el.value && !this.empty(this.$refs.input.$el.value)) {
                     this.input = this.$refs.input.$el.value;
@@ -930,7 +932,7 @@ if (Vue) {
                         </b-link>
                         <lah-user-description :user_data="user_data"></lah-user-description>
                     </b-tab>
-                    <b-tab v-if="foundCount == 1">
+                    <b-tab v-if="foundCount == 1 && !foundLeft">
                         <template v-slot:title>
                             <lah-fa-icon icon="comment-dots" prefix="far"> 傳送信差</lah-fa-icon>
                         </template>
@@ -1058,6 +1060,7 @@ if (Vue) {
             notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; },
             foundName: function() { return this.user_rows[0]["AP_USER_NAME"] },
             foundCount: function() { return this.user_rows.length },
+            foundLeft: function() { return this.user_rows[0]["AP_OFF_JOB"] == 'Y' },
             useAvatar: function() { return !this.empty(this.avatar) },
             ID: function() { return this.user_rows ? this.user_rows[0]['DocUserID'] : null }
         },
