@@ -72,24 +72,30 @@ class Query {
 			select m.KCDE_2 as \"段代碼\",
 				m.KCNT as \"段名稱\",
 				SUM(t.AA10) as \"面積\",
-				COUNT(t.AA10) as \"土地標示部筆數\"
+				COUNT(t.AA10) as \"土地標示部筆數\",
+				t.AA46 as \"區代碼\"
 			FROM MOIADM.RKEYN m
 			LEFT JOIN MOICAD.RALID t on m.KCDE_2 = t.AA48 -- 段小段面積計算 (RALID 登記－土地標示部)
 			WHERE m.KCDE_1 = '48'
 		";
+		
 		if (is_numeric($cond)) {
 			$prefix .= "AND m.KCDE_2 LIKE '_' || :bv_cond";
 		} else if (!empty($cond)) {
 			$prefix .= "AND m.KCNT LIKE '%' || :bv_cond || '%'";
 		}
+
 		$postfix = "
-			GROUP BY m.KCDE_2, m.KCNT
+			GROUP BY m.KCDE_2, m.KCNT, t.AA46
 		";
+
 		$this->db->parse($prefix.$postfix);
 		if (!empty($cond)) {
 			$this->db->bind(":bv_cond", iconv("utf-8", "big5", ltrim($cond, '0')));
 		}
+
 		$this->db->execute();
+		
 		return $this->db->fetchAll();
 	}
 	

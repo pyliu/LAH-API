@@ -705,6 +705,8 @@ if (Vue) {
         }
     });
 
+    Vue.component("lah-user-search", {});
+
     Vue.component("lah-user-id-input", {
         template: `<b-input-group :size="size">
         <b-input-group-prepend is-text>
@@ -3014,6 +3016,9 @@ if (Vue) {
                         class="text-center"
                         caption-top
                     >
+                        <template v-slot:cell(區代碼)="{ item }">
+                            <span v-b-tooltip.d400="item.區代碼">{{section(item.區代碼)}}</span>
+                        </template>
                         <template v-slot:cell(面積)="{ item }">
                             <span v-b-tooltip.d400="areaM2(item.面積)">{{area(item.面積)}}</span>
                         </template>
@@ -3029,10 +3034,11 @@ if (Vue) {
                 },
                 data: () => ({
                     fields: [
+                        {key: "區代碼", label: "區域", sortable: true},
                         {key: "段代碼", sortable: true},
                         {key: "段名稱", sortable: true},
                         {key: "面積", sortable: true},
-                        {key: "土地標示部筆數", sortable: true}
+                        {key: "土地標示部筆數", sortable: true},
                     ]
                 }),
                 computed: {
@@ -3041,7 +3047,8 @@ if (Vue) {
                 methods: {
                     format(val) { return val ? val.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '' },
                     area(val) { return val ? this.format((val * 3025 / 10000).toFixed(2)) + ' 坪' : '' },
-                    areaM2(val) { return val ? this.format(val) + ' 平方米' : '' }
+                    areaM2(val) { return val ? this.format(val) + ' 平方米' : '' },
+                    section(val) { return val ? (val == '03' ? '中壢區' : '觀音區') : '' }
                 }
             }
         },
