@@ -296,16 +296,6 @@ if (Vue) {
                 icon: "briefcase",
                 need_admin: false
             }, {
-                text: "資料查詢",
-                url: "query.html",
-                icon: "file-alt",
-                need_admin: true
-            }, {
-                text: "監控修正",
-                url: "watchdog.html",
-                icon: "user-secret",
-                need_admin: true
-            }, {
                 text: "逾期案件",
                 url: "overdue_reg_cases.html",
                 icon: "calendar-alt",
@@ -745,9 +735,9 @@ if (Vue) {
                     style='font-size: .875rem;'
                     :data-id="id"
                     :data-name="name"
+                    :id="'usertag_'+id"
                     @click.stop="usercard"
                     v-if="usertag_flags[id]"
-                    :id="'usertag_'+id"
                 >
                     <b-avatar v-if="avatar" button size="1.5rem" :src="avatar_src(name)" variant="light"></b-avatar>
                     {{id}}: {{name||'XXXXXX'}}
@@ -758,10 +748,11 @@ if (Vue) {
             avatar: { type: Boolean, default: true }
         },
         data: () => ({
-            input: 'HB054',
+            input: '',
             keyup_timer: null,
             ids: [],
-            usertag_flags: {}
+            usertag_flags: {},
+            delay: 500
         }),
         computed: {
             validate() { return this.empty(this.input) ? null : this.input.length > 1 }
@@ -770,38 +761,40 @@ if (Vue) {
             avatar_src(name) { return `get_user_img.php?name=${name}_avatar` },
             reset_flags() { this.usertag_flags = {...this.ids.reduce((reduced, key) => ({ ...reduced, [key]: false }), {})}; },
             filter() {
-                if (this.input != this.$refs.input.$el.value && !this.empty(this.$refs.input.$el.value)) {
-                    this.input = this.$refs.input.$el.value;
-                }
+                // if (this.input != this.$refs.input.$el.value && !this.empty(this.$refs.input.$el.value)) {
+                //     this.input = this.$refs.input.$el.value;
+                // }
                 if (this.keyup_timer) {
                     clearTimeout(this.keyup_timer);
                     this.keyup_timer = null;
                 }
-                this.keyup_timer = setTimeout(this.mark, 400);
+                this.keyup_timer = setTimeout(this.mark, this.delay);
             },
             mark() {
-                if (this.validate) {
-                    // set all flag to false
-                    this.reset_flags();
-                    // Don't add 'g' because I only a line everytime.
-                    // If use 'g' flag regexp object will remember last found index, that will possibly case the subsequent test failure.
-                    this.input = this.input.replace("?", ""); // prevent out of memory
-                    let keyword = new RegExp(this.input, "i");
-                    this.ids.forEach(id => {
-                        let text = `${id}: ${this.userNames[id]}`;
-                        this.usertag_flags[id] = keyword.test(text);
-
-
-                        if (this.usertag_flags[id]) {
-                            Vue.nextTick(() => {
-                                $('#usertag_'+id).mark(this.input, {
-                                    "element": "strong",
-                                    "className": "highlight"
-                                });
+                
+                    if (this.validate) {
+                        // set all flag to false
+                        this.reset_flags();
+                        // rendering may take some time so use Vue.nextTick ... 
+                        Vue.nextTick(() => {
+                            // Don't add 'g' because I only a line everytime.
+                            // If use 'g' flag regexp object will remember last found index, that will possibly case the subsequent test failure.
+                            this.input = this.input.replace("?", ""); // prevent out of memory
+                            let keyword = new RegExp(this.input, "i");
+                            this.ids.forEach(id => {
+                                let text = `${id}: ${this.userNames[id]}`;
+                                this.usertag_flags[id] = keyword.test(text);
+                                if (this.usertag_flags[id]) {
+                                    Vue.nextTick(() => {
+                                        $('#usertag_'+id).mark(this.input, {
+                                            "element": "strong",
+                                            "className": "highlight"
+                                        });
+                                    });
+                                }
                             });
-                        }
-                    });
-                }
+                        });
+                    }
             },
             query() {
                 if (CONFIG.DISABLE_MSDB_QUERY) {
@@ -851,10 +844,10 @@ if (Vue) {
             setTimeout(() => {
                 this.ids = Object.keys(this.userNames);
                 this.reset_flags();
-            }, 300);
+            }, this.delay);
         },
         mounted() {
-            setTimeout(() => this.filter(), 400);
+            setTimeout(() => this.filter(), this.delay);
         }
     });
 
