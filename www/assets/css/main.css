@@ -79,7 +79,7 @@ blockquote {
 	font-weight: bold;
 }
 
-.reg_case_id:hover, .user_tag:hover {
+.reg_case_id:hover, .user_tag:hover, .usercard:hover {
 	background-color:  rgb(233, 218, 13);
 	text-decoration: underline;
 	font-weight: bold;

@@ -439,7 +439,7 @@ Vue.mixin({
             }
             
             // find the most closest element to get the data-* attrs
-            let clicked_element = $($(e.target).closest(".user_tag,.lah-user-card"));
+            let clicked_element = $($(e.target).closest(".user_tag,.lah-user-card,.usercard"));
             let name = $.trim(clicked_element.data("name")) || '';
             let id = trim(clicked_element.data("id")) || '';
             let ip = $.trim(clicked_element.data("ip")) || '';

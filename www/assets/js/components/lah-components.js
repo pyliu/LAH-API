@@ -297,7 +297,7 @@ if (Vue) {
                 need_admin: false
             }, {
                 text: "資料查詢",
-                url: "query.php",
+                url: "query.html",
                 icon: "file-alt",
                 need_admin: true
             }, {
@@ -711,7 +711,91 @@ if (Vue) {
         }
     });
 
-    Vue.component("lah-user-search", {});
+    Vue.component("lah-user-search", {
+        template: `<fieldset>
+            <legend v-b-tooltip="'以關鍵字搜尋使用者'">
+                <i class="fas fa-users"></i>
+                使用者搜尋
+                <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
+            </legend>
+            <div class="d-flex">
+                <b-input-group size="sm">
+                    <b-input-group-prepend is-text>關鍵字</b-input-group-prepend>
+                    <b-form-input
+                        placeholder="'HB05' OR '允'"
+                        ref="input"
+                        v-model="input"
+                        @keyup="filter"
+                    ></b-form-input>
+                </b-input-group>
+                <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
+            </div>
+            <div class="clearfix">
+                <div
+                    v-for="(name, id, idx) in userNames"
+                    class='float-left m-2 lah-user-search hide usercard'
+                    style='font-size: .875rem;'
+                    :data-id="id"
+                    :data-name="name"
+                    @click.stop="usercard"
+                >
+                    {{id}}: {{name||'XXXXXX'}}
+                </div>
+            </div>
+        </fieldset>`,
+        data: () => ({
+            input: '',
+            keyup_timer: null
+        }),
+        computed: {
+            validate() { return this.empty(this.input) ? null : ture }
+        },
+        methods: {
+            filter() {
+                if (this.keyup_timer) {
+                    clearTimeout(this.keyup_timer);
+                    this.keyup_timer = null;
+                }
+                this.keyup_timer = setTimeout(() => {
+                    // clean
+                    $(".lah-user-search").unmark(this.input, { "className": "highlight" }).addClass("hide");
+                    if (this.empty(this.input)) {
+                        $(".lah-user-search").removeClass("hide");
+                    } else {
+                        // Don't add 'g' because I only a line everytime.
+                        // If use 'g' flag regexp object will remember last found index, that will possibly case the subsequent test failure.
+                        this.input = this.input.replace("?", ""); // prevent out of memory
+                        let keyword = new RegExp(this.input, "i");
+                        $(".lah-user-search").each((idx, div) => {
+                            if (keyword.test($(div).text())) {
+                                $(div).removeClass("hide");
+                                // $("#msg_who").val($.trim(user_data[1]));
+                                $(div).mark(this.input, {
+                                    "element": "strong",
+                                    "className": "highlight"
+                                });
+                            }
+                        });
+                    }
+                }, 400);
+            },
+            query() {},
+            wash(val) {
+                return val.replace(/[a-zA-Z?0-9+]+/gi, '');
+            },
+            popup() {
+                let todo = this.$createElement(
+                    'lah-fa-icon',
+                    { props: { icon: 'tools', variant: 'primary', size: 'lg' } },
+                    [ 'TODO...' ]
+                );
+                this.msgbox({
+                    title: '使用者搜尋說明',
+                    message: todo
+                });
+            }
+        }
+    });
 
     Vue.component("lah-user-id-input", {
         template: `<b-input-group :size="size">
