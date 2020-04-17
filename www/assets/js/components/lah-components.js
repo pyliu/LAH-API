@@ -726,6 +726,7 @@ if (Vue) {
                         ref="input"
                         v-model="input"
                         @keyup="filter"
+                        @keyup.enter="query"
                     ></b-form-input>
                 </b-input-group>
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
@@ -733,7 +734,7 @@ if (Vue) {
             <div class="clearfix">
                 <div
                     v-for="(name, id, idx) in userNames"
-                    class='float-left m-2 lah-user-search hide usercard'
+                    class='float-left m-2 hide usercard'
                     style='font-size: .875rem;'
                     :data-id="id"
                     :data-name="name"
@@ -752,21 +753,24 @@ if (Vue) {
         },
         methods: {
             filter() {
+                if (this.input != this.$refs.input.$el.value) {
+                    this.input = this.$refs.input.$el.value;
+                }
                 if (this.keyup_timer) {
                     clearTimeout(this.keyup_timer);
                     this.keyup_timer = null;
                 }
                 this.keyup_timer = setTimeout(() => {
                     // clean
-                    $(".lah-user-search").unmark(this.input, { "className": "highlight" }).addClass("hide");
+                    $(".usercard").unmark(this.input, { "className": "highlight" }).addClass("hide");
                     if (this.empty(this.input)) {
-                        $(".lah-user-search").removeClass("hide");
+                        $(".usercard").removeClass("hide");
                     } else {
                         // Don't add 'g' because I only a line everytime.
                         // If use 'g' flag regexp object will remember last found index, that will possibly case the subsequent test failure.
                         this.input = this.input.replace("?", ""); // prevent out of memory
                         let keyword = new RegExp(this.input, "i");
-                        $(".lah-user-search").each((idx, div) => {
+                        $(".usercard").each((idx, div) => {
                             if (keyword.test($(div).text())) {
                                 $(div).removeClass("hide");
                                 // $("#msg_who").val($.trim(user_data[1]));
@@ -779,9 +783,37 @@ if (Vue) {
                     }
                 }, 400);
             },
-            query() {},
-            wash(val) {
-                return val.replace(/[a-zA-Z?0-9+]+/gi, '');
+            query() {
+                if (CONFIG.DISABLE_MSDB_QUERY) {
+                    this.$warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping lah-user-search::query.");
+                    return;
+                }
+                let keyword = $.trim(this.input.replace(/\?/g, ""));
+                if (this.empty(keyword)) {
+                    this.$warn("Keyword field should not be empty.");
+                    return;
+                }
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'search_user',
+                    keyword: keyword
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        this.$log(res.data);
+                        let card = this.$createElement("lah-user-card", { props: { inUserRows: res.data.raw } });
+                        this.$modal(card, { title: "搜尋使用者資訊" });
+                    } else {
+                        this.notify({
+                            title: "搜尋使用者",
+                            message: res.data.message,
+                            type: "warning"
+                        });
+                        this.$warn(res.data.message);
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+
+                });
             },
             popup() {
                 let todo = this.$createElement(
@@ -794,6 +826,9 @@ if (Vue) {
                     message: todo
                 });
             }
+        },
+        mounted() {
+            setTimeout(() => this.filter(), 400);
         }
     });
 
@@ -889,7 +924,7 @@ if (Vue) {
                         </b-link>
                         <lah-user-description :user_data="user_data"></lah-user-description>
                     </b-tab>
-                    <b-tab>
+                    <b-tab v-if="foundCount == 1">
                         <template v-slot:title>
                             <lah-fa-icon icon="comment-dots" prefix="far"> 傳送信差</lah-fa-icon>
                         </template>
@@ -1006,7 +1041,7 @@ if (Vue) {
                 }
             }
         },
-        props: ['id', 'name', 'ip', 'title', 'avatar'],
+        props: ['id', 'name', 'ip', 'title', 'avatar', 'inUserRows'],
         data: () => ({
             user_rows: null,
             msg_title: '',
@@ -1016,6 +1051,7 @@ if (Vue) {
             found: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined },
             notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; },
             foundName: function() { return this.user_rows[0]["AP_USER_NAME"] },
+            foundCount: function() { return this.user_rows.length },
             useAvatar: function() { return !this.empty(this.avatar) },
             ID: function() { return this.user_rows ? this.user_rows[0]['DocUserID'] : null }
         },
@@ -1056,7 +1092,7 @@ if (Vue) {
             restoreUserRows: async function() {
                 try {
                     // find in $store(in-memory)
-                    let user_rows = this.cache.get(this.id) || this.cache.get(this.name) || this.cache.get(this.ip);
+                    let user_rows = this.cache.get(this.id) || this.cache.get(this.name) || this.cache.get(this.ip) || this.inUserRows;
                     if (this.empty(user_rows)) {
                         // find in localforage
                         user_rows = await this.getLocalCache(this.id) || await this.getLocalCache(this.name) || await this.getLocalCache(this.ip);
