@@ -326,6 +326,11 @@ if (Vue) {
                 icon: "head-side-mask",
                 need_admin: false
             }, {
+                text: "使用者查詢",
+                url: "user.html",
+                icon: "users",
+                need_admin: false
+            }, {
                 text: "記錄瀏覽",
                 url: "tasklog.html",
                 icon: "dog",
@@ -722,7 +727,7 @@ if (Vue) {
                 <b-input-group size="sm">
                     <b-input-group-prepend is-text>關鍵字</b-input-group-prepend>
                     <b-form-input
-                        placeholder="'HB05' OR '允'"
+                        placeholder="'HB05' OR '允' OR '220.1.35.x'"
                         ref="input"
                         v-model="input"
                         @keyup="filter"
