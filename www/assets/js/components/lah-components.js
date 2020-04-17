@@ -363,7 +363,8 @@ if (Vue) {
                                 title: 'TGIF',
                                 message: '<i class="far fa-laugh-wink fa-2x ld ld-swing"></i> 快放假了~離下班只剩 ' + (17 - hours) + ' 小時，再撐一下下！',
                                 type: 'success',
-                                delay: 15000
+                                delay: 15000,
+                                pos: 'bl'   // b-toaster-bottom-left
                             });
                         }
                     default:
