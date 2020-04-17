@@ -2850,7 +2850,7 @@ if (Vue) {
                 rows="3"
                 max-rows="8"
                 v-model="sql"
-                class="mt-1 overflow-auto"
+                class="mt-1 overflow-auto no-cache"
                 :state="validate"
             ></b-form-textarea>
         </fieldset>`,
@@ -2898,7 +2898,8 @@ if (Vue) {
             ]
         }),
         computed: {
-            validate() { return this.empty(this.sql) ? null : /^select/gi.test(this.sql) }
+            validate() { return this.empty(this.sql) ? null : /^select/gi.test(this.sql) },
+            cache_key() { return `lah-report_sql` }
         },
         methods: {
             change(val) {
@@ -2911,6 +2912,7 @@ if (Vue) {
                 }).then(res => {
                     this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `讀取異常，回傳狀態值為 ${res.data.status}，${res.data.message}`);
                     this.sql = res.data.data;
+                    this.setLocalCache(this.cache_key, this.sql, 0);    // no expiring
                     // let cache work
                     Vue.nextTick(() => $(this.$refs.sql.$el).trigger("blur"));
                 }).catch(err => {
@@ -2994,8 +2996,9 @@ if (Vue) {
                 });
             }
         },
-        mounted() {
-            setTimeout(() => this.sql = this.$refs.sql.$el.value, 400);
+        async mounted() {
+            this.sql = await this.getLocalCache(this.cache_key);
+            if (this.sql === false) this.sql = '';
         }
     });
     
@@ -3059,13 +3062,13 @@ if (Vue) {
             }
         },
         template: `<fieldset>
-            <legend v-b-tooltip="'轄區各段土地標示部筆數＆面積查詢'">
+            <legend v-b-tooltip="'各段土地標示部筆數＆面積'">
                 <i class="far fa-map"></i>
                 轄區段別資料
                 <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
             </legend>
             <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
-            <a href="assets/files/%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%B5%81%E9%80%9A%E7%94%B3%E8%AB%8B%E8%A1%A8.doc">電子資料申請書</a> <br />
+            <a href="assets/files/%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%B5%81%E9%80%9A%E7%94%B3%E8%AB%8B%E8%A1%A8.doc" target="_blank">電子資料申請書</a> <br />
             <div class="d-flex">
                 <b-input-group size="sm">
                     <b-input-group-prepend is-text>關鍵字/段代碼</b-input-group-prepend>
