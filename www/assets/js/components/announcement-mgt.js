@@ -177,7 +177,7 @@ if (Vue) {
                                     <select v-model="flag" class='no-cache form-control'><option>N</option><option>Y</option></select>
                                 </div>
                                 <div class="filter-btn-group col">
-                                    <button :id="'ann_upd_btn_'+o_reason_code" class="btn btn-sm btn-outline-primary" @click="update">更新</button>
+                                    <button :id="'ann_upd_btn_'+o_reason_code" class="btn btn-sm btn-outline-primary" @click="update" :disabled="!changed">更新</button>
                                 </div>
                             </div>
                         </div>`,
@@ -192,9 +192,12 @@ if (Vue) {
                             o_day: '',
                             o_flag: ''
                         }),
+                        computed: {
+                            changed() { return this.o_day != this.day || this.o_flag != this.flag }
+                        },
                         methods: {
                             update: function(e) {
-                                if (this.o_day == this.day && this.o_flag == this.flag) {
+                                if (!this.changed) {
                                     this.notify({
                                         title: "更新公告資料",
                                         message: "無變更，不需更新！",
