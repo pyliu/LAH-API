@@ -70,7 +70,7 @@ ksort($operators);
       </div>
       <div class="row">
         <div class="col">
-          <lah-area-search></lah-area-search>
+          <lah-section-search></lah-section-search>
           <lah-report></lah-report>
         </div>
 

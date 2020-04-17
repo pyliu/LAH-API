@@ -87,7 +87,7 @@ class Query {
 		";
 		$this->db->parse($prefix.$postfix);
 		if (!empty($cond)) {
-			$this->db->bind(":bv_cond", iconv("utf-8", "big5", $cond));
+			$this->db->bind(":bv_cond", iconv("utf-8", "big5", ltrim($cond, '0')));
 		}
 		$this->db->execute();
 		return $this->db->fetchAll();

@@ -2991,35 +2991,57 @@ if (Vue) {
         }
     });
     
-    Vue.component("lah-area-search", {
+    Vue.component("lah-section-search", {
         components: {
             "lah-area-search-results": {
                 template: `<div>
-                    
-                    <b-list-group v-if="count > 0" flush class="small overflow-auto" style="max-height: 300px;">
-                        <b-list-group-item v-for="(item, idx) in json.raw" :key="item.段代碼">
-                            <!-- 段代碼: "0341", 段名稱: "廣興段", 面積: "1888802.41", 土地標示部筆數: "2311" -->
-                            <div class="d-flex justify-content-between">
-                                <span>段代碼：{{item.段代碼}}</span>
-                                <span>段名：{{item.段名稱}}</span>
-                                <span v-b-tooltip="areaM2(item.面積)">面積：{{area(item.面積)}}</span>
-                                <span>筆數：{{format(item.土地標示部筆數)}}筆</span>
-                            </div>
-                        </b-list-group-item>
-                    </b-list-group>
+                    <b-table
+                        v-if="count > 0"
+                        ref="section_search_tbl"
+                        :responsive="'sm'"
+                        :striped="true"
+                        :hover="true"
+                        :bordered="true"
+                        :small="true"
+                        :no-border-collapse="true"
+                        :head-variant="'dark'"
+
+                        :items="json.raw"
+                        :fields="fields"
+                        :busy="!json"
+                        primary-key="段代碼"
+
+                        class="text-center"
+                        caption-top
+                    >
+                        <template v-slot:cell(面積)="{ item }">
+                            <span v-b-tooltip.d400="areaM2(item.面積)">{{area(item.面積)}}</span>
+                        </template>
+                        <template v-slot:cell(土地標示部筆數)="{ item }">
+                            {{format(item.土地標示部筆數)}} 筆
+                        </template>
+                    </b-table>
                     <lah-fa-icon v-else icon="exclamation-triangle" variant="danger" size="lg"> {{input}} 查無資料</lah-fa-icon>
                 </div>`,
                 props: {
                     json: { type: Object, default: {} },
                     input: { type: String, default: '' }
                 },
+                data: () => ({
+                    fields: [
+                        {key: "段代碼", sortable: true},
+                        {key: "段名稱", sortable: true},
+                        {key: "面積", sortable: true},
+                        {key: "土地標示部筆數", sortable: true}
+                    ]
+                }),
                 computed: {
                     count() { return this.json.data_count || 0 }
                 },
                 methods: {
-                    format(val) { return val.replace(/\B(?=(\d{3})+(?!\d))/g, ",") },
-                    area(val) { return this.format((val * 3025 / 10000).toFixed(2)) + '坪' },
-                    areaM2(val) { return this.format(val) + '平方米' }
+                    format(val) { return val ? val.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '' },
+                    area(val) { return val ? this.format((val * 3025 / 10000).toFixed(2)) + ' 坪' : '' },
+                    areaM2(val) { return val ? this.format(val) + ' 平方米' : '' }
                 }
             }
         },
@@ -3038,8 +3060,8 @@ if (Vue) {
                         placeholder="'榮民段' OR '0200'"
                         ref="text"
                         v-model="text"
-                        :state="validate"
                         @keyup.enter="query"
+                        :state="validate"
                     ></b-form-input>
                 </b-input-group>
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋段小段'" :disabled="!validate"><i class="fas fa-search"></i></b-button>
@@ -3049,26 +3071,30 @@ if (Vue) {
             text: ''
         }),
         computed: {
-            validate() { return this.empty(this.text) ? null : isNaN(parseInt(this.text)) ? true : /\d{4}/gi.test(this.text) }
+            validate() { return isNaN(parseInt(this.text)) ? true : this.text.length < 5 }
         },
         methods: {
             query() {
-                if (this.validate) {
-                    this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
-                        type: 'ralid',
-                        text: this.text
-                    }).then(res => {
-                        this.msgbox({
-                            title: "段小段查詢結果",
-                            message: this.$createElement("lah-area-search-results", { props: { json: res.data }})
-                        });
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        this.isBusy = false;
+                this.isBusy = true;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'ralid',
+                    text: this.text
+                }).then(res => {
+                    this.msgbox({
+                        title: "段小段查詢結果",
+                        message: this.$createElement("lah-area-search-results", {
+                            props: {
+                                json: res.data,
+                                input: this.text
+                            }
+                        }),
+                        size: "lg"
                     });
-                }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
             },
             popup() {
               this.msgbox({
