@@ -746,11 +746,14 @@ if (Vue) {
                     :data-name="name"
                     @click.stop="usercard"
                 >
-                    <b-avatar button size="1.5rem" :src="avatar_src(name)" variant="light"></b-avatar>
+                    <b-avatar v-if="avatar" button size="1.5rem" :src="avatar_src(name)" variant="light"></b-avatar>
                     {{id}}: {{name||'XXXXXX'}}
                 </div>
             </div>
         </fieldset>`,
+        props: {
+            avatar: { type: Boolean, default: false }
+        },
         data: () => ({
             input: 'HB12',
             keyup_timer: null
