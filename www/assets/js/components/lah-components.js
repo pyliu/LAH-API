@@ -751,7 +751,7 @@ if (Vue) {
             </div>
         </fieldset>`,
         data: () => ({
-            input: '',
+            input: 'HB12',
             keyup_timer: null
         }),
         computed: {
@@ -759,7 +759,7 @@ if (Vue) {
         },
         methods: {
             filter() {
-                if (this.input != this.$refs.input.$el.value) {
+                if (this.input != this.$refs.input.$el.value && !this.empty(this.$refs.input.$el.value)) {
                     this.input = this.$refs.input.$el.value;
                 }
                 if (this.keyup_timer) {
