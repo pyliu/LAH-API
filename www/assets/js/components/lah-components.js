@@ -3078,29 +3078,39 @@ if (Vue) {
             text: ''
         }),
         computed: {
-            validate() { return isNaN(parseInt(this.text)) ? true : this.text.length < 5 }
+            validate() { return isNaN(parseInt(this.text)) ? true : this.text.length < 5 },
+            cache_key() { return 'lah-section-search_'+this.text }
         },
         methods: {
-            query() {
-                this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
-                    type: 'ralid',
-                    text: this.text
-                }).then(res => {
-                    this.msgbox({
-                        title: "段小段查詢結果",
-                        message: this.$createElement("lah-area-search-results", {
-                            props: {
-                                json: res.data,
-                                input: this.text
-                            }
-                        }),
-                        size: "lg"
+            async query() {
+                let json = await this.getLocalCache(this.cache_key);
+                if (json) {
+                    this.result(json);
+                } else {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: 'ralid',
+                        text: this.text
+                    }).then(res => {
+                        this.result(res.data);
+                        this.setLocalCache(this.cache_key, res.data, 24 * 60 * 60 * 1000);
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
                     });
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
-                    this.isBusy = false;
+                }
+            },
+            result(json) {
+                this.msgbox({
+                    title: "段小段查詢結果",
+                    message: this.$createElement("lah-area-search-results", {
+                        props: {
+                            json: json,
+                            input: this.text
+                        }
+                    }),
+                    size: "lg"
                 });
             },
             popup() {
