@@ -348,7 +348,6 @@ if (Vue) {
             },
             bgStyle() {
                 let day_of_week = new Date().getDay();
-                let hours = new Date().getHours();
                 switch(day_of_week) {
                     case 1:
                     case 2:
@@ -357,16 +356,6 @@ if (Vue) {
                     case 4:
                         return 'background-color: #3b88e0 !important;'; // blue
                     case 5:
-                        // for fun
-                        if (hours < 17 && hours > 12) {
-                            this.notify({
-                                title: 'TGIF',
-                                message: '<i class="far fa-laugh-wink fa-2x ld ld-swing"></i> 快放假了~離下班只剩 ' + (17 - hours) + ' 小時，再撐一下下！',
-                                type: 'success',
-                                delay: 15000,
-                                pos: 'bl'   // b-toaster-bottom-left
-                            });
-                        }
                     default:
                         return 'background-color: #28a745 !important;'; // green
                 }
@@ -467,13 +456,18 @@ if (Vue) {
     Vue.component("lah-footer", {
         template: `<lah-transition slide-up appear>
             <p v-if="show" :class="classes">
-                <a href="https://github.com/pyliu/Land-Affairs-Helper" target="_blank" title="View project on Github!">
-                    <i class="fab fa-github fa-lg text-dark"></i>
-                </a>
-                <strong><i class="far fa-copyright"></i> <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
-                <a href="https://vuejs.org/" target="_blank" title="Learn Vue JS!">
-                    <i class="text-success fab fa-vuejs fa-lg"></i>
-                </a>
+                <span v-show="fri_afternoon">
+                    <i class="far fa-laugh-wink fa-lg ld ld-swing"></i> 快放假了~離下班只剩 {{left_hours}} 小時，再撐一下下！
+                </span>
+                <span v-show="!fri_afternoon">
+                    <a href="https://github.com/pyliu/Land-Affairs-Helper" target="_blank" title="View project on Github!">
+                        <i class="fab fa-github fa-lg text-dark"></i>
+                    </a>
+                    <strong><i class="far fa-copyright"></i> <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
+                    <a href="https://vuejs.org/" target="_blank" title="Learn Vue JS!">
+                        <i class="text-success fab fa-vuejs fa-lg"></i>
+                    </a>
+                </span>
             </p>
         </lah-transition>`,
         data: () => ({
@@ -481,6 +475,17 @@ if (Vue) {
             leave_time: 10000,
             classes: ['text-muted', 'fixed-bottom', 'my-2', 'mx-3', 'bg-white', 'border', 'rounded', 'text-center', 'p-2', 'small']
         }),
+        computed: {
+            fri_afternoon() {
+                let day_of_week = new Date().getDay();
+                let hours = new Date().getHours();
+                return day_of_week == 5 && hours < 17 && hours > 12;
+            },
+            left_hours() {
+                let hours = new Date().getHours();
+                return 17 - hours;
+            }
+        },
         mounted() {
             setTimeout(() => this.show = false, this.leave_time);
         }
