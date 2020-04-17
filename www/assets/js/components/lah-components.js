@@ -491,10 +491,12 @@ if (Vue) {
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto">清除快取資料</h6>
+                    <b-form-checkbox inline v-model="enable" switch>
+                    </b-form-checkbox>
                     <b-button @click="clear" size="sm" variant="danger">清除 <b-badge variant="light" pill>{{count}}</b-badge></b-button>
                 </div>
             </template>
-            <b-list-group class="small" style="max-height: 300px; overflow: auto;">
+            <b-list-group v-if="enable" class="small" style="max-height: 300px; overflow: auto;">
                 <transition-group name="list" style="z-index: 0 !important;">
                     <b-list-group-item button v-for="(item, idx) in all" :key="item.key" v-b-popover.focus="JSON.stringify(item.val)">
                         <b-button-close @click="del(item.key, idx)" style="font-size: 1rem; color: red;"></b-button-close>
@@ -504,8 +506,25 @@ if (Vue) {
             </b-list-group>
         </b-card>`,
         data: () => ({
-            all: undefined
+            all: [],
+            enable: false
         }),
+        watch: {
+            enable(val) {
+                this.all = [];
+                if (val) {
+                    this.isBusy = true;
+                    this.$lf.keys().then(keys => {
+                        keys.forEach(async key => {
+                            const val = await this.$lf.getItem(key);
+                            this.all.push({key: key, val: val});
+                        });
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                }
+            }
+        },
         computed: {
             count() { return this.all ? this.all.length : 0 }
         },
@@ -533,17 +552,6 @@ if (Vue) {
                     });
                 });
             }
-        },
-        created() {
-            this.all = [];
-            this.$lf.keys().then(keys => {
-                keys.forEach(async key => {
-                    const val = await this.$lf.getItem(key);
-                    this.all.push({key: key, val: val});
-                });
-            }).finally(() => {
-                //this.$log(this.all);
-            });
         }
     });
 
@@ -748,7 +756,7 @@ if (Vue) {
             avatar: { type: Boolean, default: true }
         },
         data: () => ({
-            input: '',
+            input: 'HB054',
             keyup_timer: null,
             ids: [],
             usertag_flags: {},
