@@ -18,18 +18,18 @@ if (Vue) {
             updated: function(updated_data) {
                 //console.log(updated_data);
             },
-            done: () => {
+            done: function() {
                 this.reset_flag = false;
             },
             clear: function(e) {
-                showConfirm("請確認清除所有登記原因的准登旗標？", () => {
+                this.$confirm("清除所有登記原因的准登旗標？", () => {
                     this.isBusy = true;
                     this.$http.post(CONFIG.JSON_API_EP, {
                         type: "clear_announcement_flag"
                     }).then(res => {
                         // let component knows it needs to clear the flag
                         this.reset_flag = true;
-                        console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + res.data.status + "】");
+                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + res.data.status + "】");
                         this.notify({ title: "清除全部先行准登旗標", message: "已清除完成", type: "success" });
                     }).catch(err => {
                         this.error = err;
@@ -65,22 +65,22 @@ if (Vue) {
                         <template v-slot:first>
                             <option value="" disabled>-- 請選擇一個項目 --</option>
                         </template>
-                        <option v-for="(item, index) in data" :value="item['RA01'] + ',' + item['KCNT'] + ',' + item['RA02'] + ',' + item['RA03']">
+                        <option v-for="(item, index) in announcement_data" :value="item['RA01'] + ',' + item['KCNT'] + ',' + item['RA02'] + ',' + item['RA03']">
                             {{item["RA01"]}} : {{item["KCNT"]}} 【{{item['RA02']}}, {{item['RA03']}}】
                         </option>
                     </b-form-select>
                     &ensp;
-                    <b-button @click="change" variant="outline-primary" size="sm" v-b-tooltip="'開啟編輯視窗'"><i class="fas fa-external-link-alt"></i></b-button>
+                    <b-button @click.stop="click" variant="outline-primary" size="sm" v-b-tooltip="'開啟編輯視窗'"><i class="fas fa-external-link-alt"></i></b-button>
                 </div>`,
                 props: ["resetFlag"],
                 data: () => ({
-                    data: [],
+                    announcement_data: [],
                     val: ""
                 }),
                 watch: {
                     resetFlag: function(nval, oval) {
                         if (nval) {
-                            this.data.forEach(element => {
+                            this.announcement_data.forEach(element => {
                                 if (element["RA03"] != 'N') {
                                     element["RA03"] = 'N';
                                     // set selected value
@@ -92,13 +92,11 @@ if (Vue) {
                     }
                 },
                 methods: {
-                    change: function(e) {
-                        if (this.empty(this.val)) {
-                            return;
-                        }
+                    click: function(e) {
+                        if (this.empty(this.val)) return;
                         let vnode = this.$createElement("announcement-mgt-dialog", {
                             props: {
-                                data: this.val.split(",")
+                                inData: this.val.split(",")
                             },
                             on: {
                                 "announcement-update": this.update
@@ -111,7 +109,7 @@ if (Vue) {
                         });
                     },
                     update: function(data) {
-                        this.data.forEach(element => {
+                        this.announcement_data.forEach(element => {
                             if (element["RA01"] == data.reason_code) {
                                 element["RA02"] = data.day;
                                 element["RA03"] = data.flag;
@@ -127,21 +125,21 @@ if (Vue) {
                         const json = await this.getLocalCache('announcement_data');
                         if (json !== false) {
                             // within a day use the cached data
-                            this.data = json || {};
-                            if (this.empty(this.data)) this.removeLocalCache(announcement_data);
+                            this.announcement_data = json || {};
+                            if (this.empty(this.announcement_data)) this.removeLocalCache(announcement_data);
                         } else {
                             this.$http.post(CONFIG.JSON_API_EP, {
                                 type: 'announcement_data'
                             }).then(async res => {
-                                this.data = res.data.raw;
+                                this.announcement_data = res.data.raw;
                                 // dayMilliseconds from $store
-                                this.setLocalCache('announcement_data', this.data, this.dayMilliseconds);
+                                this.setLocalCache('announcement_data', this.announcement_data, this.dayMilliseconds);
                             }).catch(err => {
                                 this.error = err;
                             });
                         }
                     } catch (err) {
-                        console.error(err);
+                        this.error = err;
                     }
                 },
                 mounted: async function(e) {
@@ -156,46 +154,47 @@ if (Vue) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="inputGroup-annoumcement_code">登記代碼</span>
                                     </div>
-                                    <input type="text" id="annoumcement_code" name="annoumcement_code" class="form-control" :value="data[0]" readonly />
+                                    <input type="text" id="annoumcement_code" name="annoumcement_code" class="form-control" :value="o_reason_code" readonly />
                                 </div>
                                 <div class="input-group input-group-sm col">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="inputGroup-annoumcement_reason">登記原因</span>
                                     </div>
-                                    <input type="text" id="annoumcement_reason" name="annoumcement_reason" class="form-control" :value="data[1]" readonly />
+                                    <input type="text" id="annoumcement_reason" name="annoumcement_reason" class="form-control" :value="o_reason_cnt" readonly />
                                 </div>
                             </div>
                             <div class="form-row mt-1">
                                 <div class="input-group input-group-sm col">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text" :id="'inputGroup-ann_day_'+data[0]">公告天數</span>
+                                        <span class="input-group-text" :id="'inputGroup-ann_day_'+o_reason_code">公告天數</span>
                                     </div>
                                     <select class='no-cache form-control' v-model="day"><option>15</option><option>30</option><option>45</option><option>60</option><option>75</option><option>90</option></select>
                                 </div>
                                 <div class="input-group input-group-sm col">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text" :id="'inputGroup-ann_reg_flag_'+data[0]">先行准登</span>
+                                        <span class="input-group-text" :id="'inputGroup-ann_reg_flag_'+o_reason_code">先行准登</span>
                                     </div>
                                     <select v-model="flag" class='no-cache form-control'><option>N</option><option>Y</option></select>
                                 </div>
                                 <div class="filter-btn-group col">
-                                    <button :id="'ann_upd_btn_'+data[0]" class="btn btn-sm btn-outline-primary" @click="update">更新</button>
+                                    <button :id="'ann_upd_btn_'+o_reason_code" class="btn btn-sm btn-outline-primary" @click="update">更新</button>
                                 </div>
                             </div>
                         </div>`,
-                        props: ["data"],
+                        props: ["inData"],
                         data: () => ({
-                            reason_code: this.data[0],
-                            day: this.data[2],
-                            flag: this.data[3]
+                            reason_code: '',
+                            reason_cnt: '',
+                            day: '',
+                            flag: '',
+                            o_reason_code: '',
+                            o_reason_cnt: '',
+                            o_day: '',
+                            o_flag: ''
                         }),
                         methods: {
                             update: function(e) {
-                                let reason_code = this.data[0];
-                                let reason_cnt = this.data[1];
-                                let day = this.day;
-                                let flag = this.flag;
-                                if (this.data[2] == day && this.data[3] == flag) {
+                                if (this.o_day == this.day && this.o_flag == this.flag) {
                                     this.notify({
                                         title: "更新公告資料",
                                         message: "無變更，不需更新！",
@@ -203,30 +202,29 @@ if (Vue) {
                                     });
                                     return;
                                 }
-                                console.assert(reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
-                                showConfirm("確定要更新公告資料？", () => {
+                                this.$assert(this.reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
+                                this.$confirm("確定要更新公告資料？", () => {
                                     this.isBusy = true;
                                     this.$http.post(CONFIG.JSON_API_EP, {
                                         type: 'update_announcement_data',
-                                        code: reason_code,
-                                        day: day,
-                                        flag: flag
+                                        code: this.reason_code,
+                                        day: this.day,
+                                        flag: this.flag
                                     }).then(res => {
-                                        console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + res.data.status + "】");
+                                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "更新公告期限回傳狀態碼有問題【" + res.data.status + "】");
                                         this.notify({
-                                            title: reason_cnt,
-                                            message: `公告已更新【天數：${this.data[2]} => ${day}, 准登：${this.data[3]} => ${flag}】`,
+                                            title: this.reason_cnt,
+                                            message: `公告已更新【天數：${this.o_day} => ${this.day}, 准登：${this.o_flag} => ${this.flag}】`,
                                             type: "success"
                                         });
-                                        this.data[2] = day;
-                                        this.data[3] = flag;
+                                        this.o_day = this.day;
+                                        this.o_flag = this.flag;
                                         // notify parent the data is changed
                                         this.$emit("announcement-update", {
-                                            reason_code: reason_code,
-                                            day: day,
-                                            flag: flag
+                                            reason_code: this.reason_code,
+                                            day: this.day,
+                                            flag: this.flag
                                         });
-                                        closeModal();
                                     }).catch(err => {
                                         this.error = err;
                                     }).finally(() => {
@@ -235,6 +233,16 @@ if (Vue) {
                                     
                                 });
                             }
+                        },
+                        created() {
+                            this.reason_code = this.inData[0];
+                            this.reason_cnt = this.inData[1];
+                            this.day = this.inData[2];
+                            this.flag = this.inData[3];
+                            this.o_reason_code = this.inData[0];
+                            this.o_reason_cnt = this.inData[1];
+                            this.o_day = this.inData[2];
+                            this.o_flag = this.inData[3];
                         }
                     }
                 }
