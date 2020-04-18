@@ -86,7 +86,7 @@ class WatchDog {
             
             $host_ip = getLocalhostIP();
             $msg = new Message();
-            $content = "系統目前找到下列跨所註記遺失案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/watchdog.html 執行檢查功能並修正。";
+            $content = "系統目前找到下列跨所註記遺失案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/dashboard.html 執行檢查功能並修正。";
             foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
                 if ($adm_ip == '::1') {
                     continue;

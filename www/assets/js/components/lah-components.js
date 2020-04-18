@@ -2295,7 +2295,7 @@ if (Vue) {
                 :items="bakedData"
                 :fields="tblFields"
                 :style="style"
-                :busy="!bakedData"
+                :busy="false"
                 :tbody-tr-class="trClass"
                 :tbody-transition-props="transProps"
                 primary-key="收件字號"
@@ -2448,7 +2448,7 @@ if (Vue) {
             count() { return this.bakedData ? this.bakedData.length : 0 },
             caption() {
                 if (this.mute || this.noCaption) return false;
-                return this.bakedData ? '登記案件找到 ' + this.count + '件' : '讀取中';
+                return this.busy ? '讀取中' : '登記案件找到 ' + this.count + '件';
                 
             },
             sticky() { return this.maxHeight ? this.count > 0 ? true : false : false },

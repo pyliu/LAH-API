@@ -51,7 +51,7 @@
             components: { "countdown": VueCountdown },
             el: "#tracking",
             template: `<div>
-                <div style="right: 2.5rem; position:absolute; top: 90px;">
+                <div style="right: 1rem; position:absolute; top: 90px;">
                     <b-button size="sm" variant="light" @click="$('.b-table tbody tr').removeClass('hide')" class="border px-3"><lah-fa-icon icon="list"></lah-fa-icon> 全部</b-button>
                     <b-button size="sm" variant="success" @click="$('.b-table tbody tr').addClass('hide'); $('.b-table tbody tr.filter-success').removeClass('hide');"><lah-fa-icon icon="suitcase"></lah-fa-icon> 已結案</b-button>
                     <b-button size="sm" variant="warning" @click="$('.b-table tbody tr').addClass('hide'); $('.b-table tbody tr.filter-warning').removeClass('hide');"><lah-fa-icon prefix="far" icon="clock"></lah-fa-icon> 快逾期</b-button>
@@ -80,9 +80,6 @@
                 reg_cases_by_day: undefined,
                 reg_cases_by_day_max_height: window.innerHeight - 130,
                 milliseconds: 60 * 5 * 1000, // cached for 5 mins
-                overdue: false,
-                almost: false,
-                
             },
             methods: {
                 async reload(force = false) {
