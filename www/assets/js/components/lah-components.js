@@ -490,9 +490,8 @@ if (Vue) {
         template: `<b-card no-body>
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
-                    <h6 class="my-auto">清除快取資料</h6>
-                    <b-form-checkbox inline v-model="enable" switch>
-                    </b-form-checkbox>
+                    <h6 class="my-auto"><lah-fa-icon icon="hand-sparkles"></lah-fa-icon> 清除快取資料</h6>
+                    <b-form-checkbox inline v-model="enable" switch class="my-auto">顯示細節</b-form-checkbox>
                     <b-button @click="clear" size="sm" variant="danger">清除 <b-badge variant="light" pill>{{count}}</b-badge></b-button>
                 </div>
             </template>
@@ -2987,7 +2986,7 @@ if (Vue) {
                 <b-btn @click="popup" variant="outline-success" class="border-0 my-auto" size="sm"><lah-fa-icon icon="question"></lah-fa-icon></b-btn>
                 {{selected}}
             </legend>
-            <b-input-group>
+            <b-input-group size="sm">
                 <b-input-group-prepend is-text>預載查詢選項</b-input-group-prepend>
                 <b-form-select v-model="selected" :options="options" @change="change"></b-form-select>
                 <b-btn class="ml-1" @click="output" variant="outline-primary" v-b-tooltip="'匯出'" :disabled="!validate"><lah-fa-icon icon="file-export"></lah-fa-icon></b-btn>
@@ -2998,6 +2997,7 @@ if (Vue) {
                 rows="3"
                 max-rows="8"
                 v-model="sql"
+                size="sm"
                 class="mt-1 overflow-auto no-cache"
                 :state="validate"
             ></b-form-textarea>
