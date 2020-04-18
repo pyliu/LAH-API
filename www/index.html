@@ -101,8 +101,7 @@
                         }).then(res => {
                             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                 this.reg_cases_by_day = res.data.baked;
-                                this.setLocalCache('reg_cases_by_day', res.data.baked, this.milliseconds);   
-                                this.resetCountdown();
+                                this.setLocalCache('reg_cases_by_day', res.data.baked, this.milliseconds);  
                             } else {
                                 this.notify({
                                     title: "查詢今日案件",
@@ -113,7 +112,8 @@
                         }).catch(err => {
                             this.error = err;
                         }).finally(() => {
-                            this.isBusy = false;
+                            this.isBusy = false; 
+                            this.resetCountdown();
                             this.startCountdown();
                         });
                     }
