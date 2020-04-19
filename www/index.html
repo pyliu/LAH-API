@@ -113,43 +113,44 @@
                     // Return `true` if the date should be disabled
                     return weekday === 0// || weekday === 6;
                 },
-                async reload(force = false) {
+                reload(force = false) {
                     if (this.isBusy) return;
-                    this.$log(this.cache_key);
                     this.reg_cases_by_day = undefined;
-                    this.isBusy = true;
-                    if (force) await this.removeLocalCache(this.cache_key);
-                    let cached = await this.getLocalCache(this.cache_key);
-                    if (cached !== false) {
-                        this.reg_cases_by_day = cached;
-                        let remaining_ms = await this.getLocalCacheExpireRemainingTime(this.cache_key);
-                        this.setCountdown(remaining_ms);
-                        this.startCountdown();
-                        this.isBusy = false;
-                    } else {
-                        this.endCountdown();
-                        this.$http.post(CONFIG.JSON_API_EP, {
-                            type: "reg_cases_by_day",
-                            qday: this.qday
-                        }).then(res => {
-                            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                this.reg_cases_by_day = res.data.baked;
-                                this.setLocalCache(this.cache_key, res.data.baked, this.milliseconds);  
-                            } else {
-                                this.notify({
-                                    title: "查詢今日案件",
-                                    message: res.data.message,
-                                    type: "warning"
-                                });
-                            }
-                        }).catch(err => {
-                            this.error = err;
-                        }).finally(() => {
-                            this.isBusy = false; 
-                            this.resetCountdown();
+                    Vue.nextTick(async () => {
+                        this.isBusy = true;
+                        if (force) await this.removeLocalCache(this.cache_key);
+                        let cached = await this.getLocalCache(this.cache_key);
+                        if (cached !== false) {
+                            this.reg_cases_by_day = cached;
+                            let remaining_ms = await this.getLocalCacheExpireRemainingTime(this.cache_key);
+                            this.setCountdown(remaining_ms);
                             this.startCountdown();
-                        });
-                    }
+                            this.isBusy = false;
+                        } else {
+                            this.endCountdown();
+                            this.$http.post(CONFIG.JSON_API_EP, {
+                                type: "reg_cases_by_day",
+                                qday: this.qday
+                            }).then(res => {
+                                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                    this.reg_cases_by_day = res.data.baked;
+                                    this.setLocalCache(this.cache_key, res.data.baked, this.milliseconds);  
+                                } else {
+                                    this.notify({
+                                        title: `查詢 ${this.qday} 案件`,
+                                        message: res.data.message,
+                                        type: "warning"
+                                    });
+                                }
+                            }).catch(err => {
+                                this.error = err;
+                            }).finally(() => {
+                                this.isBusy = false; 
+                                this.resetCountdown();
+                                this.startCountdown();
+                            });
+                        }
+                    });
                 },
                 handleCountdownEnd() { this.reload(true) },
                 handleCountdownStart() {},    
