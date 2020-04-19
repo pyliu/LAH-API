@@ -2294,7 +2294,7 @@ if (Vue) {
                 :items="bakedData"
                 :fields="tblFields"
                 :style="style"
-                :busy="false"
+                :busy="busy"
                 :tbody-tr-class="trClass"
                 :tbody-transition-props="transProps"
                 primary-key="收件字號"
@@ -2370,7 +2370,7 @@ if (Vue) {
                 </template>
             </b-table>
         </lah-transition>`,
-        props: ['bakedData', 'maxHeight', 'type', 'fields', 'mute', 'noCaption', 'color', 'icon', 'iconVariant'],
+        props: ['bakedData', 'maxHeight', 'type', 'fields', 'mute', 'noCaption', 'color', 'icon', 'iconVariant', 'busy'],
         data: () => ({
             transProps: { name: 'rollIn' }
         }),
