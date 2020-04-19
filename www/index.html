@@ -52,8 +52,8 @@
             el: "#tracking",
             template: `<div>
                 <div class="d-flex justify-content-between mb-2">
-                    <b-input-group size="sm" class="text-nowrap mr-1" style="max-width: 300px">
-                        <b-input-group-prepend is-text>指定日期</b-input-group-prepend>
+                    <b-input-group size="sm" class="text-nowrap mr-1" style="max-width: 320px">
+                        <b-input-group-prepend is-text>日期</b-input-group-prepend>
                         <b-form-datepicker
                             value-as-date
                             v-model="date_obj"
@@ -62,7 +62,7 @@
                             :date-disabled-fn="dateDisabled"
                             :max="new Date()"
                         ></b-form-datepicker>
-                        <b-button class="ml-1" @click.stop="reload(true)" variant="outline-primary" size="sm" title="依據日期"><i class="fas fa-search"></i> 查詢</b-button>
+                        <b-button class="ml-1" @click.stop="reload()" variant="outline-primary" size="sm" title="依據日期"><i class="fas fa-search"></i> 查詢</b-button>
                     </b-input-group>
                     <div class="text-nowrap">
                         <b-button size="sm" variant="light" @click="$('.b-table tbody tr').removeClass('hide')" class="border px-3"><lah-fa-icon icon="list"></lah-fa-icon> 全部</b-button>
@@ -84,6 +84,7 @@
                     :baked-data="reg_cases_by_day"
                     :max-height="reg_cases_by_day_max_height"
                     :color="false"
+                    :busy="isBusy"
                     icon="chevron-circle-right"
                     iconVariant="primary"
                     class="s-90"
@@ -95,14 +96,15 @@
                 reg_cases_by_day_max_height: window.innerHeight - 170,
                 milliseconds: 60 * 5 * 1000, // cached for 5 mins
                 date_obj: null,
-                query_date: undefined,
-                today: ''
+                date_str: undefined,
+                today_str: undefined
             },
             watch: {
-                date_obj(nVal) { this.query_date = `${nVal.getFullYear() - 1911}${("0" + (nVal.getMonth()+1)).slice(-2)}${("0" + nVal.getDate()).slice(-2)}` }
+                date_obj(nVal) { this.date_str = `${nVal.getFullYear() - 1911}${("0" + (nVal.getMonth()+1)).slice(-2)}${("0" + nVal.getDate()).slice(-2)}` }
             },
             computed: {
-                qday() { return this.query_date || this.today }
+                qday() { return this.date_str || this.today_str },
+                cache_key() { return `reg_cases_by_day_${this.qday}` }
             },
             methods: {
                 dateDisabled(ymd, date) {
@@ -113,15 +115,18 @@
                 },
                 async reload(force = false) {
                     if (this.isBusy) return;
-                    if (force) await this.removeLocalCache('reg_cases_by_day');
-                    let cached = await this.getLocalCache('reg_cases_by_day');
+                    this.$log(this.cache_key);
+                    this.reg_cases_by_day = undefined;
+                    this.isBusy = true;
+                    if (force) await this.removeLocalCache(this.cache_key);
+                    let cached = await this.getLocalCache(this.cache_key);
                     if (cached !== false) {
                         this.reg_cases_by_day = cached;
-                        let remaining_ms = await this.getLocalCacheExpireRemainingTime('reg_cases_by_day');
+                        let remaining_ms = await this.getLocalCacheExpireRemainingTime(this.cache_key);
                         this.setCountdown(remaining_ms);
                         this.startCountdown();
+                        this.isBusy = false;
                     } else {
-                        this.isBusy = true;
                         this.endCountdown();
                         this.$http.post(CONFIG.JSON_API_EP, {
                             type: "reg_cases_by_day",
@@ -129,7 +134,7 @@
                         }).then(res => {
                             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                 this.reg_cases_by_day = res.data.baked;
-                                this.setLocalCache('reg_cases_by_day', res.data.baked, this.milliseconds);  
+                                this.setLocalCache(this.cache_key, res.data.baked, this.milliseconds);  
                             } else {
                                 this.notify({
                                     title: "查詢今日案件",
@@ -163,7 +168,7 @@
             },
             created() {
                 let d = new Date();
-                this.today = `${d.getFullYear() - 1911}${("0" + (d.getMonth()+1)).slice(-2)}${("0" + d.getDate()).slice(-2)}`
+                this.today_str = `${d.getFullYear() - 1911}${("0" + (d.getMonth()+1)).slice(-2)}${("0" + d.getDate()).slice(-2)}`
                 //this.busyIconSize="lg";
                 this.reload();
             }
