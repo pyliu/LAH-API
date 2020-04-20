@@ -113,9 +113,26 @@
                     // Return `true` if the date should be disabled
                     return weekday === 0// || weekday === 6;
                 },
+                resetTimer(remaining) {
+                    this.isBusy = false; 
+                    let now = new Date();
+                    if (now.getHours() >= 7 && now.getHours() < 17) {
+                        // auto start countdown to prepare next reload
+                        this.setCountdown(remaining);
+                        this.startCountdown();
+                        // add effect to catch attention
+                        this.animated("#reload, caption", {name: "flash"});
+                    } else {
+                        this.$warn("非上班時間，停止自動更新。");
+                        this.notify({
+                            title: "自動更新停止通知",
+                            message: "非上班時間，停止自動更新。",
+                            type: "warning"
+                        });
+                    }
+                },
                 reload(force = false) {
                     if (this.isBusy) return;
-                    this.reg_cases_by_day = undefined;
                     Vue.nextTick(async () => {
                         this.isBusy = true;
                         if (force) await this.removeLocalCache(this.cache_key);
@@ -123,9 +140,7 @@
                         if (cached !== false) {
                             this.reg_cases_by_day = cached;
                             let remaining_ms = await this.getLocalCacheExpireRemainingTime(this.cache_key);
-                            this.setCountdown(remaining_ms);
-                            this.startCountdown();
-                            this.isBusy = false;
+                            this.resetTimer(remaining_ms);
                         } else {
                             this.endCountdown();
                             this.$http.post(CONFIG.JSON_API_EP, {
@@ -145,9 +160,7 @@
                             }).catch(err => {
                                 this.error = err;
                             }).finally(() => {
-                                this.isBusy = false; 
-                                this.resetCountdown();
-                                this.startCountdown();
+                                this.resetTimer(this.milliseconds);
                             });
                         }
                     });
