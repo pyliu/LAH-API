@@ -237,5 +237,30 @@ class Message {
         $log->warning(__METHOD__.": 找不到使用者資料！【${name_or_id_or_ip}】");
         return false;
     }
+
+    public function getUnreadMessageByUser($name_or_id_or_ip) {
+        global $log;
+        if (empty($name_or_id_or_ip)) {
+            $log->warning(__METHOD__.": 輸入參數為空白，無法查詢使用者！");
+            return false;
+        }
+        $user = $this->getUserInfo($name_or_id_or_ip);
+        if ($user !== false) {
+            $id = $user["DocUserID"];
+            // $name = $user["AP_USER_NAME"];
+            // $ip = $user["AP_PCIP"];
+            $tdoc_db = new MSDB(array(
+                "MS_DB_UID" => SYSTEM_CONFIG["MS_DB_UID"],
+                "MS_DB_PWD" => SYSTEM_CONFIG["MS_DB_PWD"],
+                "MS_DB_DATABASE" => SYSTEM_CONFIG["MS_DB_DATABASE"],
+                "MS_DB_SVR" => SYSTEM_CONFIG["MS_DB_SVR"],
+                "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_DB_CHARSET"]
+            ));
+            $sql = "SELECT * FROM Message WHERE receiver = '${id}' AND done <> '1' ORDER BY sendtime DESC";
+            return $tdoc_db->fetchAll($sql);
+        }
+        $log->warning(__METHOD__.": 找不到使用者資料！【${name_or_id_or_ip}】");
+        return false;
+    }
 }
 ?>

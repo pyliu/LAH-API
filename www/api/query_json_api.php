@@ -833,6 +833,28 @@ switch ($_POST["type"]) {
 			echo json_encode($json, 0);
 		}
 		break;
+	case "user_unread_message":
+		$log->info("XHR [user_unread_message] 查詢使用者未讀信差訊息【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"]."】請求");
+		$param = $_POST["id"] ?? $_POST["name"] ?? $_POST["ip"];
+		$param = empty($param) ? $client_ip : $param;
+		$message = new Message();
+		$results = $mock ? $cache->get('user_unread_message') : $message->getUnreadMessageByUser($param);
+		$cache->set('user_unread_message', $results);
+		if (empty($results)) {
+			echoErrorJSONString("查無 ${param} 未讀信差訊息。");
+			$log->info("XHR [user_unread_message] 查無 ${param} 未讀信差訊息。");
+		} else {
+			$json = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($results),
+				"raw" => $results,
+				"query_string" => "id=".$_POST["id"]."&name=".$_POST["name"]."&ip=".$_POST["ip"],
+				"message" => "XHR [user_unread_message] 查詢 ${param} 未讀信差訊息成功。(".count($results).")"
+			);
+			$log->info($json["message"]);
+			echo json_encode($json, 0);
+		}
+		break;
 	case "send_message":
 		$log->info("XHR [send_message] 送出訊息【".$_POST["title"].", ".$_POST["content"].", ".$_POST["who"]."】請求");
 		$msg = new Message();

@@ -275,8 +275,8 @@ if (Vue) {
                             </b-nav-item>
                         </b-navbar-nav>
                     </lah-transition>
-                    <b-navbar-nav @click="clearCache" class="ml-auto mr-2" style="cursor: pointer;">
-                        <b-avatar icon="people-fill" :badge="avatar_badge" badge-variant="primary" variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
+                    <b-navbar-nav @click="clearCache" class="ml-auto mr-2" style="cursor: pointer;" :title="avatar_badge+'則未讀訊息'">
+                        <b-avatar icon="people-fill" :badge="avatar_badge" variant="light" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
                             <lah-user-card :ip="myip" :avatar="true" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
                         </b-popover>
@@ -419,6 +419,19 @@ if (Vue) {
                         });
                     });
                 });
+            },
+            setUnreadMessageCount: function() {
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'user_unread_message',
+                    ip: this.myip
+                }).then(res => {
+                    this.avatar_badge = res.data.data_count || 0;
+                    this.$log(name, this.avatar_badge);
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+
+                });
             }
         },
         async created() {
@@ -436,6 +449,7 @@ if (Vue) {
                 }
                 this.$store.commit('myip', myip);
                 this.avatar_src = await this.getLocalCache('avatar_src_url');
+                this.setUnreadMessageCount();
             } catch (err) {
                 this.error = err;
             }
@@ -838,12 +852,12 @@ if (Vue) {
             },
             popup() {
                 let todo = this.$createElement(
-                    'lah-fa-icon',
+                    'p',
                     { props: { icon: 'search', variant: 'primary', size: 'lg' } },
                     [ ' 輸入 使用者代碼(如：HB0544) 或 名稱(如：奕) 或 電腦IP位址(如：220.1.35.48) 來查找。' ]
                 );
                 this.msgbox({
-                    title: '使用者搜尋說明',
+                    title: '<i class="fa fa-search fa-lg"></i> 使用者搜尋說明',
                     message: todo
                 });
             }
