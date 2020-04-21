@@ -839,8 +839,8 @@ if (Vue) {
             popup() {
                 let todo = this.$createElement(
                     'lah-fa-icon',
-                    { props: { icon: 'tools', variant: 'primary', size: 'lg' } },
-                    [ 'TODO...' ]
+                    { props: { icon: 'search', variant: 'primary', size: 'lg' } },
+                    [ ' 輸入 使用者代碼(如：HB0544) 或 名稱(如：奕) 或 電腦IP位址(如：220.1.35.48) 來查找。' ]
                 );
                 this.msgbox({
                     title: '使用者搜尋說明',
