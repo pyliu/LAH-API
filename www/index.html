@@ -104,6 +104,7 @@
             },
             computed: {
                 qday() { return this.date_str || this.today_str },
+                is_today() { return this.qday == this.today_str },
                 cache_key() { return `reg_cases_by_day_${this.qday}` }
             },
             methods: {
@@ -116,17 +117,17 @@
                 resetTimer(remaining) {
                     this.isBusy = false; 
                     let now = new Date();
-                    if (now.getHours() >= 7 && now.getHours() < 17) {
+                    if (this.is_today && now.getHours() >= 7 && now.getHours() < 17) {
                         // auto start countdown to prepare next reload
                         this.setCountdown(remaining);
                         this.startCountdown();
                         // add effect to catch attention
                         this.animated("#reload, caption", {name: "flash"});
                     } else {
-                        this.$warn("非上班時間，停止自動更新。");
+                        this.$warn("非今日上班時間，停止自動更新。");
                         this.notify({
                             title: "自動更新停止通知",
-                            message: "非上班時間，停止自動更新。",
+                            message: "非今日上班時間，停止自動更新。",
                             type: "warning"
                         });
                     }
