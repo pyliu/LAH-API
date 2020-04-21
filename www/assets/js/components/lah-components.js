@@ -276,7 +276,7 @@ if (Vue) {
                         </b-navbar-nav>
                     </lah-transition>
                     <b-navbar-nav @click="location.href='message.html'" class="ml-auto mr-2" style="cursor: pointer;" :title="avatar_badge+'則未讀訊息'">
-                        <b-avatar icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
+                        <b-avatar icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" badge-top id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
                             <lah-user-card :ip="myip" :avatar="true" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
                         </b-popover>
@@ -777,9 +777,14 @@ if (Vue) {
             delay: 500
         }),
         computed: {
-            validate() { return this.empty(this.input) ? null : this.input.length > 1 }
+            validate() { return this.empty(this.input) ? null : this.length(this.input) > 1 }
         },
         methods: {
+            length(s) {
+                var b = 0, i = 0, c;
+                for(;c=s.charCodeAt(i++);b+=c>>11?3:c>>7?2:1);
+                return b
+            },
             avatar_src(name) { return `get_user_img.php?name=${name}_avatar` },
             reset_flags() { this.usertag_flags = {...this.ids.reduce((reduced, key) => ({ ...reduced, [key]: false }), {})}; },
             filter() {
