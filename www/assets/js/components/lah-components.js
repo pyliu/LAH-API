@@ -275,8 +275,8 @@ if (Vue) {
                             </b-nav-item>
                         </b-navbar-nav>
                     </lah-transition>
-                    <b-navbar-nav @click="clearCache" class="ml-auto mr-2" style="cursor: pointer;" :title="avatar_badge+'則未讀訊息'">
-                        <b-avatar icon="people-fill" :badge="avatar_badge" variant="light" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
+                    <b-navbar-nav @click="location.href='message.html'" class="ml-auto mr-2" style="cursor: pointer;" :title="avatar_badge+'則未讀訊息'">
+                        <b-avatar icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
                             <lah-user-card :ip="myip" :avatar="true" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
                         </b-popover>
@@ -290,7 +290,7 @@ if (Vue) {
             leading: "Unknown",
             active: undefined,
             avatar_src: 'get_user_img.php?name=not_found',
-            avatar_badge: 0,
+            avatar_badge: false,
             links: [{
                 text: "今日案件",
                 url: ["index.html", "/"],
@@ -425,7 +425,7 @@ if (Vue) {
                     type: 'user_unread_message',
                     ip: this.myip
                 }).then(res => {
-                    this.avatar_badge = res.data.data_count || 0;
+                    this.avatar_badge = res.data.data_count || false;
                     this.$log(name, this.avatar_badge);
                 }).catch(err => {
                     this.error = err;
