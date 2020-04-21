@@ -276,7 +276,7 @@ if (Vue) {
                         </b-navbar-nav>
                     </lah-transition>
                     <b-navbar-nav @click="clearCache" class="ml-auto mr-2" style="cursor: pointer;">
-                        <b-avatar variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
+                        <b-avatar icon="people-fill" :badge="avatar_badge" badge-variant="primary" variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
                             <lah-user-card :ip="myip" :avatar="true" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
                         </b-popover>
@@ -290,6 +290,7 @@ if (Vue) {
             leading: "Unknown",
             active: undefined,
             avatar_src: 'get_user_img.php?name=not_found',
+            avatar_badge: 0,
             links: [{
                 text: "今日案件",
                 url: ["index.html", "/"],
@@ -1216,6 +1217,7 @@ if (Vue) {
             NAME: { type: String, default: '' },
             title: { type: String, default: '' },
             noBody: { type: Boolean, default: false },
+            noConfirm: { type: Boolean, default: true }
         },
         data: () => ({
             msg_title: '',
@@ -1249,36 +1251,43 @@ if (Vue) {
                     });
                     return;
                 }
-
-                this.$confirm(`"確認要送 「${title}」 給 「${who}」？<p class="mt-2">${content}</p>`, () => {
-                    this.animated(this.$refs.msgbtn, { name: 'lightSpeedOut',
-                        duration: 'once-anim-cfg-2x',
-                        callback: () => {
-                            $(this.$refs.msgbtn).hide();
-                            this.isBusy = true;
-                            this.$http.post(CONFIG.JSON_API_EP, {
-                                type: "send_message",
-                                title: title,
-                                content: content,
-                                who: who
-                            }).then(res => {
-                                this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
-                                $(this.$refs.msgbtn).show();
-                                this.animated(this.$refs.msgbtn, { name: 'slideInUp', callback: () => {
-                                    this.msg_content = '';
-                                    this.msg_title = '' ;
-                                    this.notify({
-                                        title: "傳送訊息",
-                                        message: res.data.message
-                                    });
-                                } });
-                            }).catch(err => {
-                                this.error = err;
-                            }).finally(() => {
-                                this.isBusy= false;
-                            });
-                        }
-                    });
+                if (this.noConfirm) {
+                    this.callback();
+                } else {
+                    this.$confirm(`"確認要送 「${title}」 給 「${who}」？<p class="mt-2">${content}</p>`, this.callback);
+                }
+            },
+            callback: function() {
+                let title = this.msg_title;
+                let content = this.msg_content.replace(/\n/g, "\r\n");	// Messenger client is Windows app, so I need to replace \n to \r\n
+                let who = this.ID || this.NAME || this.id;
+                this.animated(this.$refs.msgbtn, { name: 'lightSpeedOut',
+                    duration: 'once-anim-cfg-2x',
+                    callback: () => {
+                        $(this.$refs.msgbtn).hide();
+                        this.isBusy = true;
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: "send_message",
+                            title: title,
+                            content: content,
+                            who: who
+                        }).then(res => {
+                            this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
+                            $(this.$refs.msgbtn).show();
+                            this.animated(this.$refs.msgbtn, { name: 'slideInUp', callback: () => {
+                                this.msg_content = '';
+                                this.msg_title = '' ;
+                                this.notify({
+                                    title: "傳送訊息",
+                                    message: res.data.message
+                                });
+                            } });
+                        }).catch(err => {
+                            this.error = err;
+                        }).finally(() => {
+                            this.isBusy= false;
+                        });
+                    }
                 });
             }
         }
