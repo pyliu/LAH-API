@@ -861,7 +861,7 @@ if (Vue) {
     Vue.component("lah-user-id-input", {
         template: `<b-input-group :size="size">
         <b-input-group-prepend is-text>
-            <div v-if="validate" class="my-auto"><b-avatar variant="light" size="1.2rem" :src="avatar_src" :data-id="ID" :data-name="name"></b-avatar> {{name}}</div>
+            <div v-if="validate" class="my-auto"><b-avatar @click="usercard" button variant="success" size="1.2rem" :src="avatar_src" :data-id="ID" :data-name="name" class="usercard" :title="ID"></b-avatar> {{name}}</div>
             <lah-fa-icon v-else icon="user" prefix="far"> 使用者代碼</la-fa-icon>
         </b-input-group-prepend>
             <b-form-input
