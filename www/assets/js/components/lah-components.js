@@ -426,7 +426,6 @@ if (Vue) {
                     ip: this.myip
                 }).then(res => {
                     this.avatar_badge = res.data.data_count || false;
-                    this.$log(name, this.avatar_badge);
                 }).catch(err => {
                     this.error = err;
                 }).finally(() => {
@@ -750,7 +749,7 @@ if (Vue) {
                 </b-input-group>
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
             </div>
-            <div class="clearfix overflow-auto" style="max-height: 100px">
+            <div class="clearfix overflow-auto" :style="style">
                 <div
                     v-for="(name, id, idx) in userNames"
                     class='float-left m-2 usercard'
@@ -767,7 +766,8 @@ if (Vue) {
             </div>
         </fieldset>`,
         props: {
-            avatar: { type: Boolean, default: true }
+            avatar: { type: Boolean, default: true },
+            maxHeight: { type: String, default: '' }
         },
         data: () => ({
             input: 'HB054',
@@ -777,7 +777,8 @@ if (Vue) {
             delay: 500
         }),
         computed: {
-            validate() { return this.empty(this.input) ? null : this.length(this.input) > 1 }
+            validate() { return this.empty(this.input) ? null : this.length(this.input) > 1 },
+            style() { return this.empty($.trim(this.maxHeight)) ? '' : `max-height: ${this.maxHeight}px` }
         },
         methods: {
             length(s) {
