@@ -2989,7 +2989,7 @@ if (Vue) {
             <b-input-group size="sm">
                 <b-input-group-prepend is-text>預載查詢選項</b-input-group-prepend>
                 <b-form-select v-model="selected" :options="options" @change="change"></b-form-select>
-                <b-btn class="ml-1" @click="output" variant="outline-primary" v-b-tooltip="'匯出'" :disabled="!validate"><lah-fa-icon icon="file-export"></lah-fa-icon></b-btn>
+                <b-btn size="sm" class="ml-1" @click="output" variant="outline-primary" v-b-tooltip="'匯出'" :disabled="!validate"><lah-fa-icon icon="file-export"></lah-fa-icon></b-btn>
             </b-input-group>
             <b-form-textarea
                 ref="sql"
