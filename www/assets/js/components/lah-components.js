@@ -750,7 +750,7 @@ if (Vue) {
                 </b-input-group>
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
             </div>
-            <div class="clearfix">
+            <div class="clearfix overflow-auto" style="max-height: 100px">
                 <div
                     v-for="(name, id, idx) in userNames"
                     class='float-left m-2 usercard'
