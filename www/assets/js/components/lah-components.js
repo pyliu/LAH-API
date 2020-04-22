@@ -1332,6 +1332,8 @@ if (Vue) {
                     :border-variant="border(index)"
                 >
                     <b-card-title title-tag="h5">
+                        <lah-fa-icon v-if="index == 0" icon="angle-double-right" variant="danger"></lah-fa-icon>
+                        <lah-fa-icon v-else-if="index == 1" icon="angle-double-right" variant="primary"></lah-fa-icon>
                         <strong>
                             <lah-fa-icon v-if="message['done'] != 1" icon="eye-slash" title="還沒看過！"></lah-fa-icon>
                             {{index+1}}.
