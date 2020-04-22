@@ -745,7 +745,7 @@ if (Vue) {
                         v-model="input"
                         @keyup="filter"
                         @keyup.enter="query"
-                        v-b-tooltip="'HBXXXX 或 姓名 或 IP'"
+                        title="HBXXXX 或 姓名 或 IP"
                         :state="validate"
                     ></b-form-input>
                 </b-input-group>
