@@ -276,7 +276,7 @@ if (Vue) {
                         </b-navbar-nav>
                     </lah-transition>
                     <b-navbar-nav @click="location.href='message.html'" class="ml-auto mr-2" style="cursor: pointer;" :title="avatar_badge+'則未讀訊息'">
-                        <b-avatar icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" badge-top id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
+                        <b-avatar icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
                             <lah-user-card :ip="myip" :avatar="true" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
                         </b-popover>
@@ -1332,9 +1332,7 @@ if (Vue) {
                     :border-variant="border(index)"
                 >
                     <b-card-title title-tag="h5">
-                        <lah-fa-icon v-if="index == 0" icon="eye"></lah-fa-icon>
-                        <lah-fa-icon v-else-if="index == 1" icon="eye" variant="primary" prefix="far"></lah-fa-icon>
-                        <strong v-else>
+                        <strong>
                             <lah-fa-icon v-if="message['done'] != 1" icon="eye-slash" title="還沒看過！"></lah-fa-icon>
                             {{index+1}}.
                         </strong>
