@@ -3262,7 +3262,7 @@ if (Vue) {
             text: ''
         }),
         computed: {
-            validate() { return isNaN(parseInt(this.text)) ? true : this.text.length < 5 },
+            validate() { return isNaN(parseInt(this.text)) ? true : (this.text <= 400 && this.text >= 200) },
             cache_key() { return 'lah-section-search_'+this.text }
         },
         methods: {
