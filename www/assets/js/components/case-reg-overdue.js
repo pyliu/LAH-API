@@ -351,13 +351,13 @@ if (Vue) {
             }
         },
         mounted() {
-            if (this.is_in_modal_mode) {
-                // in modal dialog
-                this.height = window.innerHeight - 190 + "px";
-                this.small = true;
-            } else {
-                this.height = window.innerHeight - 155 + "px";
-            }
+            // if (this.is_in_modal_mode) {
+            //     // in modal dialog
+            //     this.height = window.innerHeight - 190 + "px";
+            //     this.small = true;
+            // } else {
+            //     this.height = window.innerHeight - 100 + "px";
+            // }
         },
         created() {
             if (!this.is_in_modal_mode) {

@@ -15,7 +15,7 @@
 <link rel="preload" href="assets/css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 </head>
 
-<body>
+<body class="overflow-hidden">
   <section>
     <div class="container-fluid" v-cloak>
         <div id="tracking"></div>
@@ -93,7 +93,7 @@
             </div>`,
             data: {
                 reg_cases_by_day: undefined,
-                reg_cases_by_day_max_height: window.innerHeight - 170,
+                reg_cases_by_day_max_height: window.innerHeight - 150,
                 milliseconds: 60 * 5 * 1000, // cached for 5 mins
                 date_obj: null,
                 date_str: undefined,
