@@ -120,7 +120,7 @@ class MSDB {
         }
 
         $sql = "UPDATE " . $table . " SET " . $set . " WHERE 1 = 1 " . $check;
-        $result = $this->dbo->query( $sql, false );
+        $this->dbo->query( $sql, false );
     }
     /**
 	 * Return the last ran query in its entirety

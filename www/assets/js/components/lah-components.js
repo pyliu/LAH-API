@@ -280,6 +280,7 @@ if (Vue) {
                         <b-avatar v-else icon="people-fill" variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
                             <lah-user-card :ip="myip" :avatar="true" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
+                            <lah-user-message-history :ip="myip" count=1 title="最新訊息"></lah-user-message-history>
                         </b-popover>
                     </b-navbar-nav>
                 </b-collapse>
@@ -1333,14 +1334,12 @@ if (Vue) {
                     class="overflow-hidden bg-light"
                     :border-variant="border(index)"
                 >
-                    <b-card-title title-tag="h5">
-                        <lah-fa-icon v-if="index == 0" icon="angle-double-right" variant="danger"></lah-fa-icon>
-                        <lah-fa-icon v-else-if="index == 1" icon="angle-double-right" variant="primary"></lah-fa-icon>
-                        <strong>
-                            <lah-fa-icon v-if="message['done'] != 1" icon="eye-slash" title="還沒看過！"></lah-fa-icon>
-                            {{index+1}}.
-                        </strong>
+                    <b-card-title title-tag="h6">
+                        <lah-fa-icon v-if="raws[index]['done'] != 1" icon="angle-double-right" variant="danger" action="wander"></lah-fa-icon>
+                        <strong>{{index+1}}. </strong>
                         {{message['xname']}}
+                        <b-btn v-if="raws[index]['done'] != 1" size="sm" variant="outline-primary" @click.stop="read(message['sn'], index)" title="設為已讀" class="border-0"> <lah-fa-icon icon="eye-slash"></lah-fa-icon> </b-btn>
+                        <b-btn v-else size="sm" variant="outline-secondary" @click.stop="unread(message['sn'], index)" title="設為未讀" class="border-0"> <lah-fa-icon :id="message['sn']" icon="eye"></lah-fa-icon> </b-btn>
                     </b-card-title>
                     <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
                     <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
@@ -1377,7 +1376,7 @@ if (Vue) {
                     .replace(this.urlPattern, "<a href='$1' target='_blank' title='點擊前往'>$1</a>")
                     .replace(/\r\n/g,"<br />");
             },
-            border: function(index) { return index == 0 ? 'danger' : index == 1 ? 'primary' : '' },
+            border: function(index) { return this.raws[index]['done'] == 0 ? 'danger' : 'secondary' },
             load: async function(force = false) {
                 if (!this.disableMSDBQuery) {
                     try {
@@ -1412,6 +1411,44 @@ if (Vue) {
                     } catch(err) {
                         this.error = err;
                     }
+                }
+            },
+            read(sn, idx) {
+                if (!this.disableMSDBQuery) {
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: "set_read_user_message",
+                        sn: sn
+                    }).then(res => {
+                        this.notify({
+                            title: "設定已讀取",
+                            message: res.data.message,
+                            type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? 'success' : 'warning'
+                        });
+                        this.raws[idx]['done'] = XHR_STATUS_CODE.SUCCESS_NORMAL ? 1 : 0;
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+
+                    });
+                }
+            },
+            unread(sn, idx) {
+                if (!this.disableMSDBQuery) {
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: "set_unread_user_message",
+                        sn: sn
+                    }).then(res => {
+                        this.notify({
+                            title: "設定未讀取",
+                            message: res.data.message,
+                            type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? 'success' : 'warning'
+                        });
+                        this.raws[idx]['done'] = XHR_STATUS_CODE.SUCCESS_NORMAL ? 0 : 1;
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+
+                    });
                 }
             }
         },

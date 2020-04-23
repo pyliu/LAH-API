@@ -38,11 +38,17 @@ class Message {
         unset($this->jungli_in_db);
         $this->jungli_in_db = null;
     }
+
+    public function lastError() {
+        return $this->jungli_in_db->getLastError();
+    }
     
     public function update($data, $where) {
         if (is_array($data) && is_array($where)) {
             $this->jungli_in_db->update("Message", $data, $where);
+            return true;
         }
+        return false;
     }
 
     public function send($title, $content, $to_who, $seconds_span = 28800) : int {
@@ -138,10 +144,6 @@ class Message {
         if (is_numeric($seconds_span)) {
             $user_info = $this->getUserInfo($to_who);
             if ($user_info != false) {
-            
-                global $client_ip;
-                $sender_info = $this->getUserInfo($client_ip);
-
                 $pctype = "SVR";
                 $sendcname = "地政系管輔助系統";
                 $presn = "0";   // map to MessageMain topic
@@ -261,6 +263,14 @@ class Message {
         }
         $log->warning(__METHOD__.": 找不到使用者資料！【${name_or_id_or_ip}】");
         return false;
+    }
+
+    public function setRead($sn) {
+        return $this->update(array( 'done' => 1 ), array( 'sn' => $sn ));
+    }
+
+    public function setUnread($sn) {
+        return $this->update(array( 'done' => 0 ), array( 'sn' => $sn ));
     }
 }
 ?>

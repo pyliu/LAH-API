@@ -855,6 +855,46 @@ switch ($_POST["type"]) {
 			echo json_encode($json, 0);
 		}
 		break;
+	case "set_read_user_message":
+		$log->info("XHR [set_read_user_message] 設定已讀使用者信差訊息【".$_POST["sn"]."】請求");
+		$message = new Message();
+		$result = $mock ? $cache->get('set_read_user_message') : $message->setRead($_POST["sn"]);
+		$cache->set('set_read_user_message', $result);
+		if ($result) {
+			$json = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => 1,
+				"raw" => $result,
+				"query_string" => "sn=".$_POST["sn"],
+				"message" => "設定 ".$_POST['sn']." 已讀成功。"
+			);
+			$log->info("XHR [set_read_user_message] ".$json["message"]);
+			echo json_encode($json, 0);
+		} else {
+			echoErrorJSONString(print_r($message->lastError(), true));
+			$log->error("XHR [set_read_user_message] "."設定 ".$_POST['sn']." 已讀信差訊息失敗。");
+		}
+		break;
+	case "set_unread_user_message":
+		$log->info("XHR [set_unread_user_message] 設定未讀使用者信差訊息【".$_POST["sn"]."】請求");
+		$message = new Message();
+		$result = $mock ? $cache->get('set_unread_user_message') : $message->setUnread($_POST["sn"]);
+		$cache->set('set_unread_user_message', $result);
+		if ($result) {
+			$json = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => 1,
+				"raw" => $result,
+				"query_string" => "sn=".$_POST["sn"],
+				"message" => "設定 ".$_POST['sn']." 未讀成功。"
+			);
+			$log->info("XHR [set_unread_user_message] ".$json["message"]);
+			echo json_encode($json, 0);
+		} else {
+			echoErrorJSONString(print_r($message->lastError(), true));
+			$log->error("XHR [set_unread_user_message] "."設定 ".$_POST['sn']." 未讀信差訊息失敗。");
+		}
+		break;
 	case "send_message":
 		$log->info("XHR [send_message] 送出訊息【".$_POST["title"].", ".$_POST["content"].", ".$_POST["who"]."】請求");
 		$msg = new Message();
