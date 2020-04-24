@@ -1304,7 +1304,7 @@ if (Vue) {
                             <b-card-title title-tag="h6">
                                 <lah-fa-icon v-if="message['done'] == 1" icon="eye" variant="muted" title="已看過"></lah-fa-icon>
                                 <lah-fa-icon v-else icon="eye-slash" title="還沒看過！"></lah-fa-icon>
-                                {{message['xname']}}
+                                <strong class="align-middle">{{message['xname']}}</strong>
                             </b-card-title>
                             <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
                             <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
