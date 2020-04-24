@@ -67,6 +67,7 @@ Vue.prototype.$store = (() => {
                 errors: [],
                 myip: undefined,
                 myid: undefined,
+                myinfo: undefined,
                 disableMSDBQuery: CONFIG.DISABLE_MSDB_QUERY
             },
             getters: {
@@ -80,6 +81,7 @@ Vue.prototype.$store = (() => {
                 errorLen: state => state.errors.length,
                 myip: state => state.myip,
                 myid: state => state.myid,
+                myinfo: state => state.myinfo,
                 disableMSDBQuery: state => state.disableMSDBQuery
             },
             mutations: {
@@ -122,6 +124,10 @@ Vue.prototype.$store = (() => {
                 },
                 myid(state, idPayload) {
                     state.myid = idPayload;
+                },
+                myinfo(state, infoPayload) {
+                    state.myinfo = infoPayload;
+                    state.myid = infoPayload['DocUserID'] || undefined;
                 },
                 disableMSDBQuery(state, flagPayload) {
                     state.disableMSDBQuery = flagPayload === true;
@@ -256,6 +262,8 @@ Vue.mixin({
         },
         myip() { return this.$store.getters.myip; },
         myid() { return this.$store.getters.myid; },
+        myinfo() { return this.$store.getters.myinfo; },
+        myname() { return this.myinfo ? this.myinfo['AP_USER_NAME'] : ''; },
         disableMSDBQuery() { return this.$store.getters.disableMSDBQuery; },
     },
     methods: {
@@ -908,21 +916,21 @@ $(document).ready(() => {
                     this.$lf.setItem("cache_st_timestamp", +new Date());
                 }
             },
-            initMyID: async function() {
-                if (!CONFIG.DISABLE_MSDB_QUERY) {
+            initMyInfo: async function() {
+                if (!this.disableMSDBQuery) {
                     try {
-                        let myid = await this.getLocalCache('myid');
-                        if (!myid) {
+                        let myinfo = await this.getLocalCache('myinfo');
+                        if (!myinfo) {
                             await this.$http.post(CONFIG.JSON_API_EP, {
                                 type: 'user_id'
                             }).then(res => {
-                                myid = res.data.id || null;
-                                this.setLocalCache('myid', myid, 86400000); // expired after a day
+                                myinfo = res.data.raw[0];
+                                this.setLocalCache('myinfo', myinfo, 86400000);   // cache query info result
                             }).catch(err => {
                                 this.error = err;
                             });
                         }
-                        this.$store.commit("myid", myid);
+                        this.$store.commit("myinfo", myinfo || undefined);
                     } catch (err) {
                         this.error = err;
                     }
@@ -961,7 +969,7 @@ $(document).ready(() => {
         },
         mounted() {
             this.initCache();
-            this.initMyID();
+            this.initMyInfo();
         }
     });
 });

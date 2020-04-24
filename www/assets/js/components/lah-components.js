@@ -279,8 +279,8 @@ if (Vue) {
                         <b-avatar v-if="showBadge" icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-avatar v-else icon="people-fill" variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
-                            <lah-user-card :ip="myip" :avatar="true" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
-                            <lah-user-message-history :ip="myip" count=1 title="最新訊息"></lah-user-message-history>
+                            <lah-user-card :in-user-rows="[myinfo]" :avatar="true" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
+                            <lah-user-message-history :id="myid" :ip="myip" count=1 title="最新訊息"></lah-user-message-history>
                         </b-popover>
                     </b-navbar-nav>
                 </b-collapse>
@@ -291,7 +291,6 @@ if (Vue) {
             icon: "question",
             leading: "Unknown",
             active: undefined,
-            avatar_src: 'get_user_img.php?name=not_found',
             avatar_badge: false,
             links: [{
                 text: "今日案件",
@@ -358,7 +357,8 @@ if (Vue) {
                     default:
                         return 'background-color: #28a745 !important;'; // green
                 }
-            }
+            },
+            avatar_src() { return this.empty(this.myname) ? 'get_user_img.php?name=' : `get_user_img.php?name=${this.myname}_avatar` }
         },
         methods: {
             activeCss: function(link) {
@@ -397,11 +397,10 @@ if (Vue) {
             },
             userNotFound: function(input) {
                 this.$store.commit('myip', null);
-                console.warn(`找不到 ${input} 的使用者資訊，無法顯示目前使用者的卡片。`);
+                this.$warn(`找不到 ${input} 的使用者資訊，無法顯示目前使用者的卡片。`);
             },
             userFound: function(name) {
-                this.avatar_src = `get_user_img.php?name=${name}_avatar`;
-                this.setLocalCache('avatar_src_url', this.avatar_src, 7 * 86400000);
+                
             },
             checkAuthority: async function() {
                 if (this.isAdmin === undefined) {
@@ -434,27 +433,28 @@ if (Vue) {
                 }).finally(() => {
 
                 });
+            },
+            setMyIP: function() {
+                this.getLocalCache('myip').then(myip => {
+                    if (this.empty(myip)) {
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: 'ip'
+                        }).then(res => {
+                            this.setLocalCache('myip', res.data.ip, 86400000);
+                            this.$store.commit('myip', res.data.ip);
+                        }).catch(err => {
+                            this.error = err;
+                        });
+                    } else {
+                        this.setLocalCache('myip', myip, 86400000); // expired after a day
+                        this.$store.commit('myip', myip);
+                    }
+                });
             }
         },
-        async created() {
-            try {
-                let myip = await this.getLocalCache('myip');
-                if (this.empty(myip)) {
-                    await this.$http.post(CONFIG.JSON_API_EP, {
-                        type: 'ip'
-                    }).then(res => {
-                        myip = res.data.ip || null;
-                        this.setLocalCache('myip', myip, 86400000); // expired after a day
-                    }).catch(err => {
-                        this.error = err;
-                    });
-                }
-                this.$store.commit('myip', myip);
-                this.avatar_src = await this.getLocalCache('avatar_src_url');
-                this.setUnreadMessageCount();
-            } catch (err) {
-                this.error = err;
-            }
+        created() {
+            this.setMyIP();
+            this.setUnreadMessageCount();
         },
         mounted() {
             this.links.forEach(this.setLeading);
