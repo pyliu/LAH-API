@@ -28,6 +28,7 @@ if (Vue) {
                         <b-input-group size="sm" style="width:155px">
                             <b-input-group-prepend is-text>顯示筆數</b-input-group-prepend>
                             <b-form-input
+                                ref="log"
                                 type="number"
                                 v-model="count"
                                 size="sm"
@@ -38,11 +39,11 @@ if (Vue) {
                         <a href="javascript:void(0)" @click="download"><i class="fas fa-download"></i> 下載</a>
                         <small class="text-muted text-center">
                             <b-button @click="zip" size="sm" title="壓縮伺服器端紀錄檔案(不包含今天)">壓縮</b-button>
-                            <b-button variant="primary" size="sm" @click="callLogAPI">
+                            <b-button variant="primary" size="sm" @click="loadLog">
                                 <i class="fas fa-sync"></i>
                                 刷新
                                 <b-badge variant="light">
-                                    <countdown ref="countdown" :time="milliseconds" :auto-start="false" @end="callLogAPI">
+                                    <countdown ref="countdown" :time="milliseconds" :auto-start="false" @end="loadLog">
                                         <template slot-scope="props">{{ props.minutes.toString().padStart(2, '0') }}:{{ props.seconds.toString().padStart(2, '0') }}</template>
                                     </countdown>
                                     <span class="sr-only">倒數</span>
@@ -79,7 +80,7 @@ if (Vue) {
                     endCountdown: function () {
                         this.$refs.countdown.end();
                     },
-                    callLogAPI: function (e) {
+                    loadLog: function (e) {
                         this.isBusy = true;
                         let dt = new Date();
                         this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
@@ -148,7 +149,11 @@ if (Vue) {
                     }
                 },
                 mounted() {
-                    this.callLogAPI();
+                    setTimeout(() => {
+                        this.count = this.$refs.log.$el.value || 50;
+                        this.loadLog();
+                    }, 400);
+                    
                 }
             },
             "schedule-task": {
