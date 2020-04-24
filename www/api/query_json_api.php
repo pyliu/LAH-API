@@ -812,28 +812,31 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "my_info":
-	case "user_id":
-		$log->info("XHR [user_id] 查詢使用者ID請求");
+		$log->info("XHR [my_info] 查詢 $client_ip 請求");
 		$user_info = new UserInfo();
-		$results = $mock ? $cache->get('user_id') : $user_info->searchByIP($client_ip);
+		$results = $mock ? $cache->get('my_info') : $user_info->searchByIP($client_ip);
 		$len = count($results);
 		if ($len > 1) {
 			$last = $results[$len - 1];
 			$results = array($last);
 		}
-		$cache->set('user_id', $results);
+		$cache->set('my_info', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ".$client_ip." 資料。");
-			$log->info("XHR [user_id] 查無 ".$client_ip." 資料。");
+			$log->info("XHR [my_info] 查無 ".$client_ip." 資料。");
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => count($results),
-				"id" => $results[0]["DocUserID"],
+				"info" => array(
+					"id" => $results[0]["DocUserID"],
+					"name" => $results[0]["AP_USER_NAME"],
+					"ip" => $results[0]["AP_PCIP"]
+				),
 				"raw" => $results,
 				"query_string" => ""
 			);
-			$log->info("XHR [user_id] 查詢 ".$client_ip." 成功。 (".$results[0]["DocUserID"].")");
+			$log->info("XHR [my_info] 查詢 ".$client_ip." 成功。 (".$results[0]["DocUserID"].", ".$results[0]["AP_USER_NAME"].")");
 			echo json_encode($result, 0);
 		}
 		break;
