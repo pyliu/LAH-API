@@ -433,27 +433,9 @@ if (Vue) {
                 }).finally(() => {
 
                 });
-            },
-            setMyIP: function() {
-                this.getLocalCache('myip').then(myip => {
-                    if (this.empty(myip)) {
-                        this.$http.post(CONFIG.JSON_API_EP, {
-                            type: 'ip'
-                        }).then(res => {
-                            this.setLocalCache('myip', res.data.ip, 86400000);
-                            this.$store.commit('myip', res.data.ip);
-                        }).catch(err => {
-                            this.error = err;
-                        });
-                    } else {
-                        this.setLocalCache('myip', myip, 86400000); // expired after a day
-                        this.$store.commit('myip', myip);
-                    }
-                });
             }
         },
         created() {
-            this.setMyIP();
             this.setUnreadMessageCount();
         },
         mounted() {

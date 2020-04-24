@@ -935,6 +935,20 @@ $(document).ready(() => {
                         this.error = err;
                     }
                 }
+                this.getLocalCache('myip').then(myip => {
+                    if (this.empty(myip)) {
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: 'ip'
+                        }).then(res => {
+                            this.setLocalCache('myip', res.data.ip, 86400000);
+                            this.$store.commit('myip', res.data.ip);
+                        }).catch(err => {
+                            this.error = err;
+                        });
+                    } else {
+                        this.$store.commit('myip', myip);
+                    }
+                });
             }
         },
         created: function(e) {
