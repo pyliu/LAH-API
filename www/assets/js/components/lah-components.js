@@ -2823,7 +2823,7 @@ if (Vue) {
             this.id = this.getUrlParameter('id');
         },
         mounted() {
-            setTimeout(() => this.id = this.getUrlParameter('id'), 400)
+            setTimeout(() => this.id = this.getUrlParameter('id') || this.myid, 400)
         }
     });
 
@@ -3039,6 +3039,7 @@ if (Vue) {
                 setTimeout(() => this.id = this.getUrlParameter('id'), 400);
             }
             this.btnid = this.uuid();
+            setTimeout(() => this.$log(this.myid), 400);
         }
     });
 

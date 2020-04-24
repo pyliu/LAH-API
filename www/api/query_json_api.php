@@ -811,6 +811,31 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
+	case "user_id":
+		$log->info("XHR [user_id] 查詢使用者ID請求");
+		$user_info = new UserInfo();
+		$results = $mock ? $cache->get('user_id') : $user_info->searchByIP($client_ip);
+		$len = count($results);
+		if ($len > 1) {
+			$last = $results[$len - 1];
+			$results = array($last);
+		}
+		$cache->set('user_id', $results);
+		if (empty($results)) {
+			echoErrorJSONString("查無 ".$client_ip." 資料。");
+			$log->info("XHR [user_id] 查無 ".$client_ip." 資料。");
+		} else {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($results),
+				"id" => $results[0]["DocUserID"],
+				"raw" => $results,
+				"query_string" => ""
+			);
+			$log->info("XHR [user_id] 查詢 ".$client_ip." 成功。 (".$results[0]["DocUserID"].")");
+			echo json_encode($result, 0);
+		}
+		break;
 	case "user_message":
 		$log->info("XHR [user_message] 查詢使用者信差訊息【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"].", ".$_POST["count"]."】請求");
 		$param = $_POST["id"] ?? $_POST["name"] ?? $_POST["ip"];

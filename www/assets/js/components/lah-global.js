@@ -803,7 +803,7 @@ $(document).ready(() => {
                     this.error = err;
                 });
             },
-            screensaver: () => {
+            screensaver: function() {
                 if (CONFIG.SCREENSAVER) {
                     let idle_timer;
                     function wakeup() {
@@ -907,6 +907,26 @@ $(document).ready(() => {
                 } else {
                     this.$lf.setItem("cache_st_timestamp", +new Date());
                 }
+            },
+            initMyID: async function() {
+                if (!CONFIG.DISABLE_MSDB_QUERY) {
+                    try {
+                        let myid = await this.getLocalCache('myid');
+                        if (!myid) {
+                            await this.$http.post(CONFIG.JSON_API_EP, {
+                                type: 'user_id'
+                            }).then(res => {
+                                myid = res.data.id || null;
+                                this.setLocalCache('myid', myid, 86400000); // expired after a day
+                            }).catch(err => {
+                                this.error = err;
+                            });
+                        }
+                        this.$store.commit("myid", myid);
+                    } catch (err) {
+                        this.error = err;
+                    }
+                }
             }
         },
         created: function(e) {
@@ -939,6 +959,9 @@ $(document).ready(() => {
             Vue.prototype.$modal = this.modal;
             Vue.prototype.$toast = this.makeToast;
         },
-        mounted() { this.initCache(); }
+        mounted() {
+            this.initCache();
+            this.initMyID();
+        }
     });
 });
