@@ -755,7 +755,7 @@ if (Vue) {
             maxHeight: { type: String, default: '' }
         },
         data: () => ({
-            input: 'HB054',
+            input: '',
             keyup_timer: null,
             ids: [],
             usertag_flags: {},
