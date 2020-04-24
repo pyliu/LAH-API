@@ -916,24 +916,23 @@ $(document).ready(() => {
                     this.$lf.setItem("cache_st_timestamp", +new Date());
                 }
             },
-            initMyInfo: async function() {
+            initMyInfo: function() {
                 if (!this.disableMSDBQuery) {
-                    try {
-                        let myinfo = await this.getLocalCache('myinfo');
-                        if (!myinfo) {
-                            await this.$http.post(CONFIG.JSON_API_EP, {
-                                type: 'user_id'
+                    this.getLocalCache('myinfo').then(myinfo => {
+                        if (myinfo) {
+                            this.$store.commit("myinfo", myinfo);
+                        } else {
+                            this.$http.post(CONFIG.JSON_API_EP, {
+                                type: 'my_info'
                             }).then(res => {
-                                myinfo = res.data.raw[0];
+                                let myinfo = res.data.raw[0];
                                 this.setLocalCache('myinfo', myinfo, 86400000);   // cache query info result
+                                this.$store.commit("myinfo", myinfo);
                             }).catch(err => {
                                 this.error = err;
                             });
                         }
-                        this.$store.commit("myinfo", myinfo || undefined);
-                    } catch (err) {
-                        this.error = err;
-                    }
+                    });
                 }
                 this.getLocalCache('myip').then(myip => {
                     if (this.empty(myip)) {

@@ -811,6 +811,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
+	case "my_info":
 	case "user_id":
 		$log->info("XHR [user_id] 查詢使用者ID請求");
 		$user_info = new UserInfo();
