@@ -25,7 +25,7 @@ if (Vue) {
             "log-viewer": {
                 template: `<b-card bo-body :header="'紀錄儀表版 ' + query_data_count + ' / ' + query_total_count">
                     <div class="d-flex w-100 justify-content-between">
-                        <b-input-group size="sm" style="width:135px">
+                        <b-input-group size="sm" style="width:155px">
                             <b-input-group-prepend is-text>顯示筆數</b-input-group-prepend>
                             <b-form-input
                                 type="number"
