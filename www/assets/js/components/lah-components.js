@@ -856,7 +856,10 @@ if (Vue) {
             }, this.delay);
         },
         mounted() {
-            setTimeout(() => this.filter(), this.delay);
+            setTimeout(() => {
+                this.input = this.myid;
+                this.filter();
+            }, this.delay);
         }
     });
 
@@ -1317,8 +1320,8 @@ if (Vue) {
                     :border-variant="border(index)"
                 >
                     <b-card-title title-tag="h6">
-                        <lah-fa-icon v-if="raws[index]['done'] != 1" icon="angle-double-right" variant="danger" action="wander"></lah-fa-icon>
                         <strong class="align-middle">
+                            <lah-fa-icon v-if="raws[index]['done'] != 1" icon="angle-double-right" variant="danger" action="wander"></lah-fa-icon>
                             {{index+1}}. 
                             {{message['xname']}}
                         </strong>
