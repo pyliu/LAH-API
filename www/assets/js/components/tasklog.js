@@ -242,10 +242,7 @@ if (Vue) {
                             if (res.data.status == XHR_STATUS_CODE.FAIL_NOT_VALID_SERVER) {
                                 // 此功能僅在伺服器上執行！
                                 this.$emit("fail-not-valid-server");
-                                this.notify({
-                                    title: "伺服器排程停止通知",
-                                    message: `${res.data.message}`
-                                });
+                                this.$warn(res.data.message);
                             } else {
                                 if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                     this.addHistory(`${now}：執行結果正常。`);
