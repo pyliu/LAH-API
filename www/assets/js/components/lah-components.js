@@ -279,8 +279,10 @@ if (Vue) {
                         <b-avatar v-if="showBadge" icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-avatar v-else icon="people-fill" variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
-                            <lah-user-card :in-user-rows="[myinfo]" :avatar="true" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
                             <lah-user-message-history :id="myid" :ip="myip" count=1 title="最新訊息"></lah-user-message-history>
+                            <!--
+                            <lah-user-card :in-user-rows="[myinfo]" :avatar="true" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
+                            -->
                         </b-popover>
                     </b-navbar-nav>
                 </b-collapse>
@@ -547,6 +549,11 @@ if (Vue) {
                 this.$confirm(`清除所有快取紀錄？`, () => {
                     this.$lf.clear().then(() => {
                         this.all = [];
+                        this.notify({
+                            title: '清除快取資料',
+                            message: '已完成，請重新整理頁面。',
+                            type: 'success'
+                        });
                     });
                 });
             }
