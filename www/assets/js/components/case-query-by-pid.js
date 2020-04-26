@@ -22,25 +22,27 @@ if (Vue) {
                 return this.json && this.json.data_count > 0;
             }
         },
-        async created() {
+        created() {
             let cache_key = "case-query-by-pid-crsms-"+this.pid;
-            this.json = await this.getLocalCache(cache_key);
-            if (this.empty(this.json)) {
-                this.$http.post(
-                    CONFIG.JSON_API_EP,
-                    { type: 'crsms', id: this.pid }
-                ).then(response => {
-                    // on success
-                    this.json = response.data;
-                    this.setLocalCache(cache_key, this.json, 900000);   // 15mins
-                    if (this.json.data_count == 0) {
-                        this.message = `<i class="text-info fas fa-exclamation-circle"></i> 查無登記案件資料`;
-                    }
-                }).catch(error => {
-                    this.error = error;
-                    this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢登記案件發生錯誤！【${error.message}】`;
-                }).finally(() => {});
-            }
+            this.getLocalCache(cache_key).then(json => {
+                this.json = json;
+                if (this.empty(this.json)) {
+                    this.$http.post(
+                        CONFIG.JSON_API_EP,
+                        { type: 'crsms', id: this.pid }
+                    ).then(response => {
+                        // on success
+                        this.json = response.data;
+                        this.setLocalCache(cache_key, this.json, 900000);   // 15mins
+                        if (this.json.data_count == 0) {
+                            this.message = `<i class="text-info fas fa-exclamation-circle"></i> 查無登記案件資料`;
+                        }
+                    }).catch(error => {
+                        this.error = error;
+                        this.message = `<i class="text-danger fas fa-exclamation-circle"></i> 查詢登記案件發生錯誤！【${error.message}】`;
+                    }).finally(() => {});
+                }
+            });
         }
     };
     let VueCMSMS = {

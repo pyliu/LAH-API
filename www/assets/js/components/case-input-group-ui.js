@@ -161,37 +161,39 @@ if (Vue) {
             }
         },
         created: async function() {
-            let years = await this.getLocalCache('case_input_years');
-            if (years !== false) {
-                this.years = years;
-            } else {
-                // set year select options
-                var d = new Date();
-                this.year = (d.getFullYear() - 1911);
-                let len = this.year - 105;
-                for (let i = 0; i <= len; i++) {
-                    this.years.push({value: 105 + i, text: 105 + i});
+            this.getLocalCache('case_input_years').then(years => {
+                if (years !== false) {
+                    this.years = years;
+                } else {
+                    // set year select options
+                    var d = new Date();
+                    this.year = (d.getFullYear() - 1911);
+                    let len = this.year - 105;
+                    for (let i = 0; i <= len; i++) {
+                        this.years.push({value: 105 + i, text: 105 + i});
+                    }
+                    this.setLocalCache('case_input_years', this.years, 24 * 60 * 60 * 1000);  // cache for a day
                 }
-                this.setLocalCache('case_input_years', this.years, 24 * 60 * 60 * 1000);  // cache for a day
-            }
-
-            let json = await this.getLocalCache('reg_code');
-            if (json !== false) {
-                this.restoreCodesByJSON(json);
-                return;
-            }
-
-            this.isBusy = true;
-            this.$http.post(CONFIG.JSON_API_EP, {
-                type: 'reg_code'
-            }).then(res => {
-                this.restoreCodesByJSON(res.data);
-                this.setLocalCache('reg_code', res.data, 7 * 24 * 60 * 60 * 1000);  // cache for a week
-            }).catch(err => {
-                this.error = err;
-            }).finally(() => {
-                this.isBusy = false;
             });
+
+            this.getLocalCache('reg_code').then(json => {
+                if (json !== false) {
+                    this.restoreCodesByJSON(json);
+                } else {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.JSON_API_EP, {
+                        type: 'reg_code'
+                    }).then(res => {
+                        this.restoreCodesByJSON(res.data);
+                        this.setLocalCache('reg_code', res.data, 7 * 24 * 60 * 60 * 1000);  // cache for a week
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                }
+            });
+
         },
         mounted: function(e) {
             switch(this.type) {

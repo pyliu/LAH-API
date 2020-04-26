@@ -137,33 +137,33 @@
                     Vue.nextTick(async () => {
                         this.isBusy = true;
                         if (force) await this.removeLocalCache(this.cache_key);
-                        let cached = await this.getLocalCache(this.cache_key);
-                        if (cached !== false) {
-                            this.reg_cases_by_day = cached;
-                            let remaining_ms = await this.getLocalCacheExpireRemainingTime(this.cache_key);
-                            this.resetTimer(remaining_ms);
-                        } else {
-                            this.endCountdown();
-                            this.$http.post(CONFIG.JSON_API_EP, {
-                                type: "reg_cases_by_day",
-                                qday: this.qday
-                            }).then(res => {
-                                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                    this.reg_cases_by_day = res.data.baked;
-                                    this.setLocalCache(this.cache_key, res.data.baked, this.milliseconds);  
-                                } else {
-                                    this.notify({
-                                        title: `查詢 ${this.qday} 案件`,
-                                        message: res.data.message,
-                                        type: "warning"
-                                    });
-                                }
-                            }).catch(err => {
-                                this.error = err;
-                            }).finally(() => {
-                                this.resetTimer(this.milliseconds);
-                            });
-                        }
+                        this.getLocalCache(this.cache_key).then(cached => {
+                            if (cached !== false) {
+                                this.reg_cases_by_day = cached;
+                                this.getLocalCacheExpireRemainingTime(this.cache_key).then(remaining_ms => this.resetTimer(remaining_ms));
+                            } else {
+                                this.endCountdown();
+                                this.$http.post(CONFIG.JSON_API_EP, {
+                                    type: "reg_cases_by_day",
+                                    qday: this.qday
+                                }).then(res => {
+                                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                        this.reg_cases_by_day = res.data.baked;
+                                        this.setLocalCache(this.cache_key, res.data.baked, this.milliseconds);  
+                                    } else {
+                                        this.notify({
+                                            title: `查詢 ${this.qday} 案件`,
+                                            message: res.data.message,
+                                            type: "warning"
+                                        });
+                                    }
+                                }).catch(err => {
+                                    this.error = err;
+                                }).finally(() => {
+                                    this.resetTimer(this.milliseconds);
+                                });
+                            }
+                        });
                     });
                 },
                 handleCountdownEnd() { this.reload(true) },

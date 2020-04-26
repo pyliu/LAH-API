@@ -912,25 +912,26 @@ if (Vue) {
                 return names;
             }
         },
-        async created() {
+        created() {
             if (this.only_onboard) {
-                let cached = await this.getLocalCache('onboard_users');
-                if (cached === false) {
-                    this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
-                        type: 'on_board_users'
-                    }).then(res => {
-                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得在職使用者資料回傳值有誤【${res.data.status}】`)
-                        this.onboard_users = res.data.raw;
-                        this.setLocalCache('onboard_users', this.onboard_users, 24 * 60 * 60 * 1000);   // 1 day
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        this.isBusy = false;
-                    });
-                } else {
-                    this.onboard_users = cached;
-                }
+                this.getLocalCache('onboard_users').then(cached => {
+                    if (cached === false) {
+                        this.isBusy = true;
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: 'on_board_users'
+                        }).then(res => {
+                            this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得在職使用者資料回傳值有誤【${res.data.status}】`)
+                            this.onboard_users = res.data.raw;
+                            this.setLocalCache('onboard_users', this.onboard_users, 24 * 60 * 60 * 1000);   // 1 day
+                        }).catch(err => {
+                            this.error = err;
+                        }).finally(() => {
+                            this.isBusy = false;
+                        });
+                    } else {
+                        this.onboard_users = cached;
+                    }
+                });
             }
         },
         mounted() {
@@ -1375,33 +1376,34 @@ if (Vue) {
                 if (!this.disableMSDBQuery) {
                     try {
                         if (!this.empty(this.noCache) || force) await this.removeLocalCache(this.cache_key);
-                        const raws = await this.getLocalCache(this.cache_key);
-                        if (raws !== false && raws.length == this.count) {
-                            this.raws = raws;
-                        } else if (raws !== false && raws.length >= this.count) {
-                            this.raws = raws.slice(0, this.count);
-                        } else {
-                            this.$http.post(CONFIG.JSON_API_EP, {
-                                type: "user_message",
-                                id: this.id,
-                                name: this.name,
-                                ip: this.ip || this.myip,
-                                count: this.count
-                            }).then(res => {
-                                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                    this.raws = res.data.raw
-                                    this.setLocalCache(this.cache_key, this.raws, 60000);   // 1 min
-                                } else {
-                                    this.notify({
-                                        title: "查詢信差訊息",
-                                        message: res.data.message,
-                                        type: "warning"
-                                    });
-                                }
-                            }).catch(err => {
-                                this.error = err;
-                            });
-                        }
+                        this.getLocalCache(this.cache_key).then(raws => {
+                            if (raws !== false && raws.length == this.count) {
+                                this.raws = raws;
+                            } else if (raws !== false && raws.length >= this.count) {
+                                this.raws = raws.slice(0, this.count);
+                            } else {
+                                this.$http.post(CONFIG.JSON_API_EP, {
+                                    type: "user_message",
+                                    id: this.id,
+                                    name: this.name,
+                                    ip: this.ip || this.myip,
+                                    count: this.count
+                                }).then(res => {
+                                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                        this.raws = res.data.raw
+                                        this.setLocalCache(this.cache_key, this.raws, 60000);   // 1 min
+                                    } else {
+                                        this.notify({
+                                            title: "查詢信差訊息",
+                                            message: res.data.message,
+                                            type: "warning"
+                                        });
+                                    }
+                                }).catch(err => {
+                                    this.error = err;
+                                });
+                            }
+                        });
                     } catch(err) {
                         this.error = err;
                     }
@@ -3203,9 +3205,11 @@ if (Vue) {
                 });
             }
         },
-        async mounted() {
-            this.sql = await this.getLocalCache(this.cache_key);
-            if (this.sql === false) this.sql = '';
+        mounted() {
+            this.getLocalCache(this.cache_key).then(sql => {
+                this.sql = sql;
+                if (this.sql === false) this.sql = '';
+            });
         }
     });
     
@@ -3298,24 +3302,25 @@ if (Vue) {
             cache_key() { return 'lah-section-search_'+this.text }
         },
         methods: {
-            async query() {
-                let json = await this.getLocalCache(this.cache_key);
-                if (json) {
-                    this.result(json);
-                } else {
-                    this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
-                        type: 'ralid',
-                        text: this.text
-                    }).then(res => {
-                        this.result(res.data);
-                        this.setLocalCache(this.cache_key, res.data, 24 * 60 * 60 * 1000);
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        this.isBusy = false;
-                    });
-                }
+            query() {
+                this.getLocalCache(this.cache_key).then(json => {
+                    if (json) {
+                        this.result(json);
+                    } else {
+                        this.isBusy = true;
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: 'ralid',
+                            text: this.text
+                        }).then(res => {
+                            this.result(res.data);
+                            this.setLocalCache(this.cache_key, res.data, 24 * 60 * 60 * 1000);
+                        }).catch(err => {
+                            this.error = err;
+                        }).finally(() => {
+                            this.isBusy = false;
+                        });
+                    }
+                });
             },
             result(json) {
                 this.msgbox({

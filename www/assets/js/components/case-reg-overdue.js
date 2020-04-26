@@ -245,7 +245,7 @@ if (Vue) {
                     console.error(err);
                 }
             },
-            load: async function(e) {
+            load: function(e) {
                 // busy ...
                 this.isBusy = true;
                 this.title = this.is_overdue_mode ? "逾期" : "即將逾期";
@@ -258,8 +258,7 @@ if (Vue) {
                     this.isBusy = false;
                     Vue.nexTick ? Vue.nexTick(this.makeCaseIDClickable) : setTimeout(this.makeCaseIDClickable, 800);
                 } else {
-                    try {
-                        const jsonObj = await this.getLocalCache(this.cache_key);
+                    this.getLocalCache(this.cache_key).then(jsonObj => {
                         if (jsonObj === false) {
                             this.$http.post(CONFIG.JSON_API_EP, {
                                 type: this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases",
@@ -280,14 +279,13 @@ if (Vue) {
                         } else {
                             // cache hit!
                             this.loaded(jsonObj);
-                            const remaining_cache_time = await this.getLocalCacheExpireRemainingTime(this.cache_key);
-                            this.setCountdown(remaining_cache_time + 5000);
-                            this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date(+new Date() - this.milliseconds + remaining_cache_time - 5000)}`;
-                            console.warn(`快取資料將在 ${(remaining_cache_time / 1000).toFixed(1)} 秒後到期。`);
+                            this.getLocalCacheExpireRemainingTime(this.cache_key).then(remaining_cache_time => {
+                                this.setCountdown(remaining_cache_time + 5000);
+                                this.caption = `${jsonObj.data_count} 件，更新時間: ${new Date(+new Date() - this.milliseconds + remaining_cache_time - 5000)}`;
+                                this.$warn(`快取資料將在 ${(remaining_cache_time / 1000).toFixed(1)} 秒後到期。`);
+                            });
                         }
-                    } catch (err) {
-                        this.error = err;
-                    }
+                    });
                 }
             },
             loaded: function (jsonObj) {

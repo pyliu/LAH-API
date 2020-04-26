@@ -120,9 +120,8 @@ if (Vue) {
                         this.$emit("update-announcement-done", data);
                     }
                 },
-                async created() {
-                    try {
-                        const json = await this.getLocalCache('announcement_data');
+                created() {
+                    this.getLocalCache('announcement_data').then(json => {
                         if (json !== false) {
                             // within a day use the cached data
                             this.announcement_data = json || {};
@@ -138,13 +137,11 @@ if (Vue) {
                                 this.error = err;
                             });
                         }
-                    } catch (err) {
-                        this.error = err;
-                    }
+                    });
                 },
-                mounted: async function(e) {
+                mounted: function(e) {
                     // get cached data and set selected option
-                    this.val = await this.$lf.getItem("announcement_list");
+                    this.$lf.getItem("announcement_list").then(val => this.val = val);
                 },
                 components: {
                     "announcement-mgt-dialog": {
