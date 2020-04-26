@@ -69,7 +69,7 @@ if (Vue) {
                     }
                 }
             },
-            year: "",
+            year: "109",
             code: "",
             num: "",
             num_step: 10,
