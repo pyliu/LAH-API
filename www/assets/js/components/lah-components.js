@@ -1224,8 +1224,40 @@ if (Vue) {
                     style="overflow: hidden"
                 ></b-form-textarea>
             </b-form-group>
-            <div class="text-center">
-                <b-button ref="msgbtn" variant="outline-primary" @click="send" :disabled="!sendMessageOK" size="sm"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
+            <div class="d-flex" :id="btn_grp_id">
+                <b-input-group style="margin:auto; width:auto;">
+                    <b-input-group-prepend>
+                        <b-form-timepicker
+                            v-model="send_time"
+                            size="sm"
+                            show-seconds
+                            now-button
+                            reset-button
+                            label-now-button="現在"
+                            label-close-button="關閉"
+                            label-reset-button="清空"
+                            button-only
+                            button-variant="success"
+                            v-b-tooltip="msgSendTime"
+                        ></b-form-timepicker>
+                    </b-input-group-prepend>
+                    <b-button ref="msgbtn" variant="outline-primary" @click="send" :disabled="!sendMessageOK" size="sm"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
+                    <b-input-group-append>
+                        <b-form-timepicker
+                            v-model="end_time"
+                            size="sm"
+                            show-seconds
+                            now-button
+                            reset-button
+                            label-now-button="現在"
+                            label-close-button="關閉"
+                            label-reset-button="清空"
+                            button-only
+                            button-variant="danger"
+                            v-b-tooltip="msgEndTime"
+                        ></b-form-timepicker>
+                    </b-input-group-append>
+                </b-input-group>
             </div>
         </b-card>`,
         props: {
@@ -1238,7 +1270,10 @@ if (Vue) {
         data: () => ({
             msg_title: '',
             msg_content: '',
-            id: ''
+            id: '',
+            send_time: '',
+            end_time: '23:59:59',
+            btn_grp_id: ''
         }),
         computed: {
             border: function() { return this.noBody ? 'border-0' : '' },
@@ -1248,7 +1283,9 @@ if (Vue) {
             msgContentOK: function() { return this.empty(this.msg_content) ? null : this.msg_content.length <= 500 },
             msgTitleOK: function() { return this.empty(this.msg_title) ? null : this.msg_title.length <= 20 },
             msgTitleCount: function() { return this.empty(this.msg_title) ? '言簡意賅最多20字中文 ... ' : `${this.msg_title.length} / 20` },
-            msgContentCount: function() { return this.empty(this.msg_content) ? '最多500字中文 ... ' : `${this.msg_content.length} / 500` }
+            msgContentCount: function() { return this.empty(this.msg_content) ? '最多500字中文 ... ' : `${this.msg_content.length} / 500` },
+            msgSendTime: function() { return this.empty(this.send_time) ? '立即傳送' : `預定今日 ${this.send_time} 送出訊息`},
+            msgEndTime: function() { return this.empty(this.end_time) ? '23:59:59為止' : `預定今日 ${this.end_time} 捨棄訊息` }
         },
         methods: {
             send: function(e) {
@@ -1277,7 +1314,7 @@ if (Vue) {
                 let title = this.msg_title;
                 let content = this.msg_content.replace(/\n/g, "\r\n");	// Messenger client is Windows app, so I need to replace \n to \r\n
                 let who = this.ID || this.NAME || this.id;
-                this.animated(this.$refs.msgbtn, { name: 'lightSpeedOut',
+                this.animated(`#${this.btn_grp_id}`, { name: 'lightSpeedOut',
                     duration: 'once-anim-cfg-2x',
                     callback: () => {
                         $(this.$refs.msgbtn).hide();
@@ -1305,7 +1342,12 @@ if (Vue) {
                         });
                     }
                 });
-            }
+            },
+            timeState: function(time) { return this.empty(time) ? null : /\d{2}:\d{2}:\d{2}/gi.test(time) }
+        },
+        created() {
+            this.send_time = this.nowDatetime.split(' ')[1];
+            this.btn_grp_id = this.uuid();
         }
     });
 
