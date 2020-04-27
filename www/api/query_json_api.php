@@ -230,7 +230,7 @@ switch ($_POST["type"]) {
 				if ($adm_ip == '::1') {
 					continue;
 				}
-				$sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, "+9 minute");
+				$sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, 'now', 540);	// send right now and drop message after 540 secs if noe read
 				$log->info("訊息已送出(${sn})給 ${adm_ip}");
 			}
 
@@ -925,9 +925,9 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "send_message":
-		$log->info("XHR [send_message] 送出訊息【".$_POST["title"].", ".$_POST["content"].", ".$_POST["who"]."】請求");
+		$log->info("XHR [send_message] 送出訊息【".$_POST["title"].", ".$_POST["content"].", ".$_POST["who"].", ".$_POST["send_time"].", ".$_POST["end_time"]."】請求");
 		$msg = new Message();
-		$id = $mock ? $cache->get('send_message') : $msg->send($_POST["title"], $_POST["content"], $_POST["who"]);
+		$id = $mock ? $cache->get('send_message') : $msg->sendByInterval($_POST["title"], $_POST["content"], $_POST["who"], date('Y-m-d ').$_POST["send_time"], date('Y-m-d ').$_POST["end_time"]);	// send message by send_time and drop it by end_time
 		$cache->set('send_message', $id);
 		if ($id > 0) {
 			$result = array(
@@ -935,12 +935,18 @@ switch ($_POST["type"]) {
 				"data_count" => 1,
 				"sn" => $id,
 				"query_string" => "title=".$_POST["title"]."&content=".$_POST["content"]."&who=".$_POST["who"],
-				"message" => "傳送成功 (sn: $id)"
+				"message" => "給「".$_POST["who"]."」訊息傳送成功 (sn: $id)"
 			);
 			$log->info("XHR [send_message] 給「".$_POST["who"]."」訊息「".$_POST["title"]."」已寫入內網資料庫【sn: $id 】");
 			echo json_encode($result, 0);
 		} else if ($id == -1) {
-			echoErrorJSONString("現職人員找不到 ".$_POST["who"]." 故無法傳送訊息。");
+			$msg = "現職人員找不到 ".$_POST["who"]." 故無法傳送訊息。";
+			echoErrorJSONString($msg);
+			$log->info("XHR [send_message] ${msg}");
+		} else if ($id == -2 || $id == -3) {
+			$msg = "時間區間有問題，故無法傳送訊息。【".$_POST["send_time"].", ".$_POST["end_time"]."】";
+			echoErrorJSONString($msg);
+			$log->info("XHR [send_message] ${msg}");
 		} else {
 			echoErrorJSONString("新增 ".$_POST["title"]." 訊息失敗【${id}】。");
 			$log->info("XHR [send_message] 新增「".$_POST["title"]."」訊息失敗【${id}】。");

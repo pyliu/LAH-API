@@ -162,7 +162,7 @@ class WatchDog {
             $log->info("${title}訊息(${sn})已送出給 ${chief_id} 。 (".$users[$chief_id].")");
             // send all cases notice to subscribers
             foreach ($this->overdue_cfg["SUBSCRIBER"] as $subscriber_ip) {
-                $sn = $msg->send($title, $content, $subscriber_ip, 14399);
+                $sn = $msg->send($title, $content, $subscriber_ip, 'now', 14399);
                 $log->info("${title}訊息(${sn})已送出給 ${subscriber_ip} 。 (訂閱者)");
             }
         } else {

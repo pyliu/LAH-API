@@ -50,14 +50,21 @@ class Message {
         }
         return false;
     }
-
-    public function send($title, $content, $to_who, $seconds_span = 28800) : int {
-        if (is_numeric($seconds_span)) {
+    // send message right away
+    public function send($title, $content, $to_who, $trigger_datetime = 'now', $drop_seconds_range = 28800, $system = false) : int {
+        if (is_numeric($drop_seconds_range)) {
             $user_info = $this->getUserInfo($to_who);
             if ($user_info != false) {
-            
-                global $client_ip;
-                $sender_info = $this->getUserInfo($client_ip);
+                $sendcname = "地政系管輔助系統";
+                $sender = "HBADMIN";
+                $sendIP = getLocalhostIP();
+                if (!$system) {
+                    global $client_ip;
+                    $sender_info = $this->getUserInfo($client_ip);
+                    $sendcname = $sender_info["AP_USER_NAME"];
+                    $sender = $sender_info["DocUserID"];
+                    $sendIP = $sender_info["AP_PCIP"];
+                }
                 /*
                     AP_OFF_JOB: 離職 (Y/N)
                     DocUserID: 使用者代碼 (HB0123)
@@ -73,33 +80,30 @@ class Message {
                     AP_ON_DATE: 到職日
                 */
                 $pctype = "SVR";
-                $sendcname = $sender_info["AP_USER_NAME"] ?? "地政系管輔助系統";
                 $presn = "0";   // map to MessageMain topic
                 $xkey = $this->getXKey();
-                $sender = $sender_info["DocUserID"] ?? "HBADMIN";
                 $receiver = $user_info["DocUserID"];
                 $xname = trim($title);  // nvarchar(50)
                 $xcontent = trim($content); // nvarchar(1000)
                 $sendtype = "1";
-                $sendIP = $sender_info["AP_PCIP"] ?? getLocalhostIP();
                 $recIP = $user_info["AP_PCIP"];
-                $sendtime = date("Y-m-d H:i:s").".000";
+                $sendtime = ($trigger_datetime == 'now' ? date("Y-m-d H:i:s") : $trigger_datetime).".000";
                 $xtime = "1";
                 $intertime = "15";
                 $timetype = "0";
                 $done = "0";
-                $createdate = $sendtime;
+                $createdate = date("Y-m-d H:i:s").".000";
                 $createunit = "5";
                 $creator = $sender;
-                $modifydate = $sendtime;
+                $modifydate = $createdate;
                 $modunit = "5";
                 $modifier = $sender;
 
                 $end_datetime = new Datetime("now");
-                if ($seconds_span > 0) {
-                    $end_datetime->add(new DateInterval('PT'.$seconds_span.'S'));
+                if ($drop_seconds_range > 0) {
+                    $end_datetime->add(new DateInterval('PT'.$drop_seconds_range.'S'));
                 } else {
-                    $end_datetime->sub(new DateInterval('PT'.abs($seconds_span).'S'));
+                    $end_datetime->sub(new DateInterval('PT'.abs($drop_seconds_range).'S'));
                 }
                 $enddate = $end_datetime->format("Y-m-d H:i:s");
                 
@@ -135,80 +139,35 @@ class Message {
                 );
                 return $this->jungli_in_db->insert("Message", $data);
             }
+            return -1;
         }
-        return -1;
+        global $log;
+        $log->error(__METHOD__.": \$drop_seconds_range 需為秒數 (${drop_seconds_range})");
+        return -2;
     }
 
-    public function sysSend($title, $content, $to_who, $seconds_span = 14400) : int {
-        // $seconds_span => default +4 hours
-        if (is_numeric($seconds_span)) {
-            $user_info = $this->getUserInfo($to_who);
-            if ($user_info != false) {
-                $pctype = "SVR";
-                $sendcname = "地政系管輔助系統";
-                $presn = "0";   // map to MessageMain topic
-                $xkey = $this->getXKey();
-                $sender = "HBADMIN";
-                $receiver = $user_info["DocUserID"];
-                $xname = trim($title);  // nvarchar(50)
-                $xcontent = trim($content); // nvarchar(1000)
-                $sendtype = "1";
-                $sendIP = getLocalhostIP();
-                $recIP = $user_info["AP_PCIP"];
-                $sendtime = date("Y-m-d H:i:s").".000";
-                $xtime = "1";
-                $intertime = "15";
-                $timetype = "0";
-                $done = "0";
-                $createdate = $sendtime;
-                $createunit = "5";
-                $creator = $sender;
-                $modifydate = $sendtime;
-                $modunit = "5";
-                $modifier = $sender;
-
-                $end_datetime = new Datetime("now");
-                if ($seconds_span > 0) {
-                    $end_datetime->add(new DateInterval('PT'.$seconds_span.'S'));
-                } else {
-                    $end_datetime->sub(new DateInterval('PT'.abs($seconds_span).'S'));
-                }
-                $enddate = $end_datetime->format("Y-m-d H:i:s");
-                
-                /*
-                $sdate = 
-                $shour = 
-                $smin = 
-                */
-                $data = array(
-                    'pctype' => $pctype,
-                    'sendcname' => $sendcname,
-                    'presn' => $presn,
-                    'xkey' => $xkey,
-                    'enddate' => $enddate,
-                    'sender' => $sender,
-                    'receiver' => $receiver,
-                    'xname' => $xname,
-                    'xcontent' => $xcontent,
-                    'sendtype' => $sendtype,
-                    'sendIP' => $sendIP,
-                    'recIP' => $recIP,
-                    'xtime' => $xtime,
-                    'intertime' => $intertime,
-                    'timetype' => $timetype,
-                    'sendtime' => $sendtime,
-                    'done' => $done,
-                    'createdate' => $createdate,
-                    'createunit' => $createunit,
-                    'creator' => $creator,
-                    'modifydate' => $modifydate,
-                    'modunit' => $modunit,
-                    'modifier' => $modifier
-                );
-                return $this->jungli_in_db->insert("Message", $data);
-            }
+    public function sysSend($title, $content, $to_who, $drop_seconds_range = 14400) : int {
+        // $drop_seconds_range => default +4 hours
+        return $this->send($title, $content, $to_who, 'now', $drop_seconds_range, true);
+    }
+    /**
+     * Send message with a st/ed date string
+     * $title: string
+     * $content: string
+     * $who: string
+     * $send_datetime: string, date("Y-m-d H:i:s") format
+     * $drop_datetime: string, date("Y-m-d H:i:s") format
+     */
+    public function sendByInterval($title, $content, $to_who, $send_datetime, $drop_datetime) : int {
+        $d1 = new DateTime($send_datetime);
+        $d2 = new DateTime($drop_datetime);
+        $diff = $d2->diff($d1);
+        if ($diff->invert == 1 && $diff->s > 0) {
+            return $this->send($title, $content, $to_who, $send_datetime, $diff->s, false);
         }
-        return -1;
+        global $log;
+        $log->error(__METHOD__.": 時間區間有問題 => 開始: ${send_datetime} 結束:${drop_datetime}");
+        return -3;
     }
 
     public function getMessageByUser($name_or_id_or_ip, $top = 5) {

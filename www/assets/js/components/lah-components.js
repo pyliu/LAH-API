@@ -1228,30 +1228,31 @@ if (Vue) {
                 <b-input-group style="margin:auto; width:auto;">
                     <b-input-group-prepend>
                         <b-form-timepicker
+                            :reset-value="send_time"
                             v-model="send_time"
                             size="sm"
                             show-seconds
                             now-button
-                            reset-button
                             label-now-button="現在"
-                            label-close-button="關閉"
-                            label-reset-button="清空"
+                            label-close-button="完成"
+                            label-reset-button="預設值"
                             button-only
-                            button-variant="primary"
+                            button-variant="success"
                             v-b-tooltip="msgSendTime"
                         ></b-form-timepicker>
                     </b-input-group-prepend>
                     <b-button ref="msgbtn" variant="outline-primary" @click="send" :disabled="!sendMessageOK" size="sm"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
                     <b-input-group-append>
                         <b-form-timepicker
+                            reset-value="23:59:59"
                             v-model="end_time"
                             size="sm"
                             show-seconds
                             now-button
                             reset-button
                             label-now-button="現在"
-                            label-close-button="關閉"
-                            label-reset-button="清空"
+                            label-close-button="完成"
+                            label-reset-button="預設值"
                             button-only
                             button-variant="secondary"
                             v-b-tooltip="msgEndTime"
@@ -1323,10 +1324,11 @@ if (Vue) {
                             type: "send_message",
                             title: title,
                             content: content,
-                            who: who
+                            who: who,
+                            send_time: this.send_time,
+                            end_time: this.end_time
                         }).then(res => {
                             this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
-                            $(this.$refs.msgbtn).show();
                             this.animated(`#${this.btn_grp_id}`, { name: 'slideInUp', callback: () => {
                                 this.msg_content = '';
                                 this.msg_title = '' ;
@@ -1339,6 +1341,7 @@ if (Vue) {
                             this.error = err;
                         }).finally(() => {
                             this.isBusy= false;
+                            $(`#${this.btn_grp_id}`).show();
                         });
                     }
                 });

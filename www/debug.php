@@ -61,6 +61,9 @@ echo str_replace("\n", "<br />", print_r($rows, true));
 // $fact = new FileAPICommandFactory();
 //var_dump($msg->getMessageByUser("220.1.35.48"));
 //var_dump(sqlsrv_errors());
-$dog = new Watchdog();
-$dog->notifyTemperatureRegistration();
+$d1=new DateTime("2012-07-08 11:14:15.638276");
+$d2=new DateTime("2012-07-08 11:14:05.889342");
+$diff=$d2->diff($d1);
+print_r( $diff->s ) ;
+print_r( $diff ) ;
 ?>
