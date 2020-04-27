@@ -430,6 +430,10 @@ if (Vue) {
                     ip: this.myip
                 }).then(res => {
                     this.avatar_badge = res.data.data_count || false;
+                    this.$root.$emit(CONFIG.LAH_ROOT_EVENT.MESSAGE_UNREAD, {
+                        count: res.data.data_count,
+                        ip: this.myip
+                    });
                 }).catch(err => {
                     this.error = err;
                 }).finally(() => {
@@ -1308,7 +1312,7 @@ if (Vue) {
     Vue.component('lah-user-message-history', {
         template: `<div>
             <h6 v-show="!empty(title)"><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> {{title}} <b-form-spinbutton v-if="enable_spinbutton" v-model="count" min="1" size="sm" inline></b-form-spinbutton></h6>
-            <b-card-group ref="group" v-if="ready" :columns="columns" :deck="!columns">
+            <b-card-group ref="group" v-if="ready" columns>
                 <b-card no-body v-if="useTabs">
                     <b-tabs card :end="endTabs" :pills="endTabs" align="center" small>
                         <b-tab v-for="(message, index) in raws" :title="index+1">
@@ -1322,39 +1326,36 @@ if (Vue) {
                         </b-tab>
                     </b-tabs>
                 </b-card>
-                <b-card v-else
-                    v-for="(message, index) in raws"
-                    class="overflow-hidden bg-light"
-                    :border-variant="border(index)"
-                >
-                    <b-card-title title-tag="h6">
-                        <strong class="align-middle">
-                            <lah-fa-icon v-if="raws[index]['done'] != 1" icon="angle-double-right" variant="danger" action="wander"></lah-fa-icon>
-                            {{index+1}}. 
-                            {{message['xname']}}
-                        </strong>
-                        <b-btn v-if="raws[index]['done'] != 1" size="sm" variant="outline-primary" @click.stop="read(message['sn'], index)" title="設為已讀" class="border-0"> <lah-fa-icon icon="eye-slash"></lah-fa-icon> </b-btn>
-                        <b-btn v-else size="sm" variant="outline-secondary" @click.stop="unread(message['sn'], index)" title="設為未讀" class="border-0"> <lah-fa-icon :id="message['sn']" icon="eye"></lah-fa-icon> </b-btn>
-                    </b-card-title>
-                    <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
-                    <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
-                </b-card>
+                <transition-group name="list" mode="out-in" v-else>
+                    <b-card
+                        v-for="(message, index) in raws"
+                        class="overflow-hidden bg-light"
+                        :border-variant="border(index)"
+                        :key="'card_'+index"
+                    >
+                        <b-card-title title-tag="h6">
+                            <strong class="align-middle">
+                                <lah-fa-icon v-if="raws[index]['done'] != 1" icon="angle-double-right" variant="danger" action="wander"></lah-fa-icon>
+                                {{index+1}}. 
+                                {{message['xname']}}
+                            </strong>
+                            <b-btn v-if="raws[index]['done'] != 1" size="sm" variant="outline-primary" @click.stop="read(message['sn'], index)" title="設為已讀" class="border-0"> <lah-fa-icon icon="eye-slash"></lah-fa-icon> </b-btn>
+                            <b-btn v-else size="sm" variant="outline-secondary" @click.stop="unread(message['sn'], index)" title="設為未讀" class="border-0"> <lah-fa-icon :id="message['sn']" icon="eye"></lah-fa-icon> </b-btn>
+                        </b-card-title>
+                        <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
+                        <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
+                    </b-card>
+                </transition-group>
             </b-card-group>
             <lah-fa-icon variant="danger" icon="exclamation-circle" size="lg" v-else>{{notFound}}</lah-fa-icon>
         </div>`,
         props: ['id', 'name', 'ip', 'count', 'title', 'spinbutton', 'tabs', 'tabsEnd', 'noCache'],
         data: () => ({
             raws: undefined,
-            urlPattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig,
-            idPattern: /^HB\d{4}$/i
+            urlPattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig
         }),
         watch: {
-            count: function(nVal, oVal) { this.load() },
-            id: function(nVal, oVal) {
-                if (this.idPattern.test(nVal)) {
-                    this.load();
-                }
-            }
+            count: function(nVal, oVal) { this.load() }
         },
         computed: {
             ready: function() { return !this.empty(this.raws) },
@@ -1363,7 +1364,8 @@ if (Vue) {
             enable_spinbutton: function() { return !this.empty(this.spinbutton) },
             useTabs: function() { return !this.empty(this.tabs) },
             endTabs: function() { return !this.empty(this.tabsEnd)},
-            cache_key: function() { return `${this.id||this.name||this.ip||this.myip}-messeages` }
+            cache_prefix: function() { return this.id||this.name||this.ip||this.myip },
+            cache_key: function() { return `${this.cache_prefix}-messeages` }
         },
         methods: {
             format: function(content) {
@@ -1449,10 +1451,13 @@ if (Vue) {
             }
         },
         created() {
-            this.count = this.count || 1;
-            this.load();
-        },
-        mounted() { }
+            let parsed = parseInt(this.count);
+            this.count = isNaN(parsed) ? 3 : parsed;
+            this.$root.$on(CONFIG.LAH_ROOT_EVENT.MESSAGE_UNREAD, payload => {
+                if (payload.count > 0) this.count = payload.count; // unread count
+            });
+            //this.load();
+        }
     });
 
     let regCaseMixin = {

@@ -8,7 +8,10 @@ const CONFIG = {
     JSON_API_EP: "api/query_json_api.php",
     LOAD_FILE_API_EP: "api/load_file_api.php",
     EXPORT_FILE_API_EP: "api/export_file_api.php",
-    MOCK_API_EP: "TODO"
+    MOCK_API_EP: "TODO",
+    LAH_ROOT_EVENT: {
+        MESSAGE_UNREAD: 'lah::message::unread'
+    }
 }
 // the status code must be the same as server side response
 const XHR_STATUS_CODE = {

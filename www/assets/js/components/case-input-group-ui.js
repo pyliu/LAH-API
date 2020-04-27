@@ -1,6 +1,6 @@
 if (Vue) {
     Vue.component("case-input-group-ui", {
-        template: `<div class="d-flex">
+        template: `<div class="d-flex" v-b-popover.hover.focus.bottom.d1000="'目前案件代碼：'+ID">
             <b-input-group size="sm">
                 <b-form-select ref="year" v-model="year" :options="years" @change="emitInput" @change="getMaxNumber" :id="prefix+'_case_update_year'">
                     <template v-slot:first>
@@ -78,6 +78,9 @@ if (Vue) {
             code_data: [],
             years: []
         }),
+        computed: {
+            ID() { return `${this.year}-${this.code}-${this.num}`}
+        },
         methods: {
             emitInput: function(e) {
                 this.$emit('input', `${this.year}${this.code}${this.num}`);
