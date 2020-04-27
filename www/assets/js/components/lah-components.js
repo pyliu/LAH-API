@@ -1237,7 +1237,7 @@ if (Vue) {
                             label-close-button="關閉"
                             label-reset-button="清空"
                             button-only
-                            button-variant="success"
+                            button-variant="light"
                             v-b-tooltip="msgSendTime"
                         ></b-form-timepicker>
                     </b-input-group-prepend>
@@ -1253,7 +1253,7 @@ if (Vue) {
                             label-close-button="關閉"
                             label-reset-button="清空"
                             button-only
-                            button-variant="danger"
+                            button-variant="secondary"
                             v-b-tooltip="msgEndTime"
                         ></b-form-timepicker>
                     </b-input-group-append>
