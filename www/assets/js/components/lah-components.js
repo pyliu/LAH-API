@@ -1237,7 +1237,7 @@ if (Vue) {
                             label-close-button="關閉"
                             label-reset-button="清空"
                             button-only
-                            button-variant="light"
+                            button-variant="primary"
                             v-b-tooltip="msgSendTime"
                         ></b-form-timepicker>
                     </b-input-group-prepend>
@@ -1317,7 +1317,7 @@ if (Vue) {
                 this.animated(`#${this.btn_grp_id}`, { name: 'lightSpeedOut',
                     duration: 'once-anim-cfg-2x',
                     callback: () => {
-                        $(this.$refs.msgbtn).hide();
+                        $(`#${this.btn_grp_id}`).hide();
                         this.isBusy = true;
                         this.$http.post(CONFIG.JSON_API_EP, {
                             type: "send_message",
@@ -1327,7 +1327,7 @@ if (Vue) {
                         }).then(res => {
                             this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
                             $(this.$refs.msgbtn).show();
-                            this.animated(this.$refs.msgbtn, { name: 'slideInUp', callback: () => {
+                            this.animated(`#${this.btn_grp_id}`, { name: 'slideInUp', callback: () => {
                                 this.msg_content = '';
                                 this.msg_title = '' ;
                                 this.notify({
