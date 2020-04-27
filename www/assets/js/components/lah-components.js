@@ -1312,7 +1312,7 @@ if (Vue) {
     Vue.component('lah-user-message-history', {
         template: `<div>
             <h6 v-show="!empty(title)"><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> {{title}} <b-form-spinbutton v-if="enable_spinbutton" v-model="count" min="1" size="sm" inline></b-form-spinbutton></h6>
-            <b-card-group ref="group" v-if="ready" columns>
+            <b-card-group ref="group" v-if="ready" :columns="columns" :deck="!columns">
                 <b-card no-body v-if="useTabs">
                     <b-tabs card :end="endTabs" :pills="endTabs" align="center" small>
                         <b-tab v-for="(message, index) in raws" :title="index+1">
@@ -1360,7 +1360,7 @@ if (Vue) {
         computed: {
             ready: function() { return !this.empty(this.raws) },
             notFound: function() { return `「${this.name || this.id || this.ip || this.myip}」找不到信差訊息！` },
-            columns: function() { return !this.useTabs && this.count > 3 },
+            columns: function() { return !this.useTabs && this.count > 3 && this.enable_spinbutton },
             enable_spinbutton: function() { return !this.empty(this.spinbutton) },
             useTabs: function() { return !this.empty(this.tabs) },
             endTabs: function() { return !this.empty(this.tabsEnd)},
