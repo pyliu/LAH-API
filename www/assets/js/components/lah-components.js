@@ -767,9 +767,9 @@ if (Vue) {
         },
         data: () => ({
             input: '',
-            keyup_timer: null,
             ids: [],
             usertag_flags: {},
+            keyup_timer: null,
             delay: 500
         }),
         computed: {
@@ -795,30 +795,29 @@ if (Vue) {
                 this.keyup_timer = setTimeout(this.mark, this.delay);
             },
             mark() {
-                
-                    if (this.validate) {
-                        // set all flag to false
-                        this.reset_flags();
-                        // rendering may take some time so use Vue.nextTick ... 
-                        Vue.nextTick(() => {
-                            // Don't add 'g' because I only a line everytime.
-                            // If use 'g' flag regexp object will remember last found index, that will possibly case the subsequent test failure.
-                            this.input = this.input.replace("?", ""); // prevent out of memory
-                            let keyword = new RegExp(this.input, "i");
-                            this.ids.forEach(id => {
-                                let text = `${id}: ${this.userNames[id]}`;
-                                this.usertag_flags[id] = keyword.test(text);
-                                if (this.usertag_flags[id]) {
-                                    Vue.nextTick(() => {
-                                        $('#usertag_'+id).mark(this.input, {
-                                            "element": "strong",
-                                            "className": "highlight"
-                                        });
+                if (this.validate) {
+                    // set all flag to false
+                    this.reset_flags();
+                    // rendering may take some time so use Vue.nextTick ... 
+                    Vue.nextTick(() => {
+                        // Don't add 'g' because I only a line everytime.
+                        // If use 'g' flag regexp object will remember last found index, that will possibly case the subsequent test failure.
+                        this.input = this.input.replace("?", ""); // prevent out of memory
+                        let keyword = new RegExp(this.input, "i");
+                        this.ids.forEach(id => {
+                            let text = `${id}: ${this.userNames[id]}`;
+                            this.usertag_flags[id] = keyword.test(text);
+                            if (this.usertag_flags[id]) {
+                                Vue.nextTick(() => {
+                                    $('#usertag_'+id).mark(this.input, {
+                                        "element": "strong",
+                                        "className": "highlight"
                                     });
-                                }
-                            });
+                                });
+                            }
                         });
-                    }
+                    });
+                }
             },
             query() {
                 if (CONFIG.DISABLE_MSDB_QUERY) {
