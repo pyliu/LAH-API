@@ -1360,7 +1360,7 @@ if (Vue) {
         computed: {
             ready: function() { return !this.empty(this.raws) },
             notFound: function() { return `「${this.name || this.id || this.ip || this.myip}」找不到信差訊息！` },
-            columns: function() { return !this.useTabs && this.count > 3 && this.enable_spinbutton },
+            columns: function() { return !this.useTabs && this.enable_spinbutton },
             enable_spinbutton: function() { return !this.empty(this.spinbutton) },
             useTabs: function() { return !this.empty(this.tabs) },
             endTabs: function() { return !this.empty(this.tabsEnd)},
@@ -1456,7 +1456,7 @@ if (Vue) {
             this.$root.$on(CONFIG.LAH_ROOT_EVENT.MESSAGE_UNREAD, payload => {
                 if (payload.count > 0) this.count = payload.count; // unread count
             });
-            //this.load();
+            this.load();
         }
     });
 

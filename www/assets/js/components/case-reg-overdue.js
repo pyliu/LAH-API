@@ -6,7 +6,7 @@ if (Vue) {
                 <b-form-checkbox v-b-tooltip.hover.top="modeTooltip" inline v-model="overdueMode" switch style="margin-right: 0rem; margin-top: .15rem;" :class="['align-baseline', 'btn', 'btn-sm', is_overdue_mode ? '' : 'border-warning', 'p-1']">
                     <span>{{modeText}}</span>
                 </b-form-checkbox>
-                <b-button variant="outline-success" size="sm" title="已傳送的通知計數(1090214起)">
+                <b-button variant="outline-success" size="sm" title="已傳送的通知計數(1090214起)" @click="message">
                     通知
                     <b-badge variant="success">
                     {{message_count}}
@@ -338,6 +338,15 @@ if (Vue) {
             },
             downloadPNG: function() {
                 this.$refs.statsChart.downloadBase64PNG(`${this.chartType}.png`);
+            },
+            message: function() {
+                this.msgbox({
+                    title: '我的信差訊息',
+                    message: this.$createElement(
+                        'lah-user-message-history',
+                        { props: { count: 9, tabs: true }}
+                    )
+                });
             }
         },
         mounted() {
