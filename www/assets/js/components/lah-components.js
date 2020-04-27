@@ -1376,6 +1376,7 @@ if (Vue) {
             border: function(index) { return this.raws[index]['done'] == 0 ? 'danger' : 'secondary' },
             load: async function(force = false) {
                 if (!this.disableMSDBQuery) {
+                    if (this.isBusy) return;
                     try {
                         if (!this.empty(this.noCache) || force) await this.removeLocalCache(this.cache_key);
                         this.getLocalCache(this.cache_key).then(raws => {
@@ -1384,6 +1385,7 @@ if (Vue) {
                             } else if (raws !== false && raws.length >= this.count) {
                                 this.raws = raws.slice(0, this.count);
                             } else {
+                                this.isBusy = true;
                                 this.$http.post(CONFIG.JSON_API_EP, {
                                     type: "user_message",
                                     id: this.id,
@@ -1403,7 +1405,7 @@ if (Vue) {
                                     }
                                 }).catch(err => {
                                     this.error = err;
-                                });
+                                }).finally(() => this.isBusy = false);
                             }
                         });
                     } catch(err) {
@@ -1454,7 +1456,9 @@ if (Vue) {
             let parsed = parseInt(this.count);
             this.count = isNaN(parsed) ? 3 : parsed;
             this.$root.$on(CONFIG.LAH_ROOT_EVENT.MESSAGE_UNREAD, payload => {
-                if (payload.count > 0) this.count = payload.count; // unread count
+                if (payload.count > 0) {
+                    this.notify({ message: `您有 ${payload.count} 則未讀訊息。`, type: "warning" })
+                }
             });
             this.load();
         }
