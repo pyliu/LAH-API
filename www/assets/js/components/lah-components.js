@@ -1388,8 +1388,10 @@ if (Vue) {
                                 {{index+1}}. 
                                 {{message['xname']}}
                             </strong>
-                            <b-btn v-if="raws[index]['done'] != 1" size="sm" variant="outline-primary" @click.stop="read(message['sn'], index)" title="設為已讀" class="border-0"> <lah-fa-icon icon="eye-slash"></lah-fa-icon> </b-btn>
-                            <b-btn v-else size="sm" variant="outline-secondary" @click.stop="unread(message['sn'], index)" title="設為未讀" class="border-0"> <lah-fa-icon :id="message['sn']" icon="eye"></lah-fa-icon> </b-btn>
+                            <span v-if="showCtlBtn(message['sendtime']['date'].substring(0, 19))">
+                                <b-btn v-if="raws[index]['done'] != 1" size="sm" variant="outline-primary" @click.stop="read(message['sn'], index)" title="設為已讀" class="border-0"> <lah-fa-icon icon="eye-slash"></lah-fa-icon> </b-btn>
+                                <b-btn v-else size="sm" variant="outline-secondary" @click.stop="unread(message['sn'], index)" title="設為未讀" class="border-0"> <lah-fa-icon :id="message['sn']" icon="eye"></lah-fa-icon> </b-btn>
+                            </span>
                         </b-card-title>
                         <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
                         <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
@@ -1499,6 +1501,11 @@ if (Vue) {
 
                     });
                 }
+            },
+            showCtlBtn(snd_time) {
+                const date1 = +new Date();
+                const date2 = +new Date(snd_time.replace(' ', 'T'));
+                return date1 - date2 > 0;
             }
         },
         created() {
