@@ -769,7 +769,7 @@ if (Vue) {
             ids: [],
             usertag_flags: {},
             keyup_timer: null,
-            delay: 1000
+            delay: 500
         }),
         watch: {
             input(nVal, oVal) {
