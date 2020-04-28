@@ -737,7 +737,6 @@ if (Vue) {
                         placeholder="'HB05' OR '憶如' OR '220.1.35.x'"
                         ref="input"
                         v-model="input"
-                        @keyup="filter"
                         @keyup.enter="query"
                         title="HBXXXX 或 姓名 或 IP"
                         :state="validate"
@@ -770,8 +769,13 @@ if (Vue) {
             ids: [],
             usertag_flags: {},
             keyup_timer: null,
-            delay: 500
+            delay: 1000
         }),
+        watch: {
+            input(nVal, oVal) {
+                this.filter();
+            }
+        },
         computed: {
             validate() { return this.empty(this.input) ? null : this.length(this.input) > 1 },
             style() { return this.empty($.trim(this.maxHeight)) ? '' : `max-height: ${this.maxHeight}px` }
@@ -785,9 +789,6 @@ if (Vue) {
             avatar_src(name) { return `get_user_img.php?name=${name}_avatar` },
             reset_flags() { this.usertag_flags = {...this.ids.reduce((reduced, key) => ({ ...reduced, [key]: false }), {})}; },
             filter() {
-                // if (this.input != this.$refs.input.$el.value && !this.empty(this.$refs.input.$el.value)) {
-                //     this.input = this.$refs.input.$el.value;
-                // }
                 if (this.keyup_timer) {
                     clearTimeout(this.keyup_timer);
                     this.keyup_timer = null;
@@ -868,7 +869,6 @@ if (Vue) {
         mounted() {
             setTimeout(() => {
                 this.input = this.myid;
-                this.filter();
             }, this.delay);
         }
     });
@@ -1237,7 +1237,7 @@ if (Vue) {
                             label-reset-button="預設值"
                             button-only
                             button-variant="success"
-                            v-b-tooltip="msgSendTime"
+                            v-b-tooltip.left="msgSendTime"
                         ></b-form-timepicker>
                     </b-input-group-prepend>
                     <b-button ref="msgbtn" variant="outline-primary" @click="send" :disabled="!sendMessageOK" size="sm"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
@@ -1254,7 +1254,7 @@ if (Vue) {
                             label-reset-button="預設值"
                             button-only
                             button-variant="secondary"
-                            v-b-tooltip="msgEndTime"
+                            v-b-tooltip.right="msgEndTime"
                         ></b-form-timepicker>
                     </b-input-group-append>
                 </b-input-group>
@@ -1284,8 +1284,8 @@ if (Vue) {
             msgTitleOK: function() { return this.empty(this.msg_title) ? null : this.msg_title.length <= 20 },
             msgTitleCount: function() { return this.empty(this.msg_title) ? '言簡意賅最多20字中文 ... ' : `${this.msg_title.length} / 20` },
             msgContentCount: function() { return this.empty(this.msg_content) ? '最多500字中文 ... ' : `${this.msg_content.length} / 500` },
-            msgSendTime: function() { return this.empty(this.send_time) ? '立即傳送' : `預定今日 ${this.send_time} 送出訊息`},
-            msgEndTime: function() { return this.empty(this.end_time) ? '23:59:59為止' : `預定今日 ${this.end_time} 捨棄訊息` }
+            msgSendTime: function() { return this.empty(this.send_time) ? '立即傳送' : `預定 ${this.send_time} 送出`},
+            msgEndTime: function() { return this.empty(this.end_time) ? '23:59:59為止' : `預定 ${this.end_time} 捨棄` }
         },
         methods: {
             send: function(e) {
