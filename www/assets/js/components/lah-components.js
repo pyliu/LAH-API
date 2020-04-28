@@ -354,13 +354,13 @@ if (Vue) {
                         return 'background-color: #343a40 !important;'; // dark
                     case 3:
                     case 4:
-                        return 'background-color: #3b88e0 !important;'; // blue
+                        return 'background-color: #6c757d !important;'; // gray
                     case 5:
                     default:
                         return 'background-color: #28a745 !important;'; // green
                 }
             },
-            avatar_src() { return this.empty(this.myname) ? 'get_user_img.php?name=' : `get_user_img.php?name=${this.myname}_avatar` }
+            avatar_src() { return this.empty(this.myname) ? 'get_user_img.php?name=not_found' : `get_user_img.php?name=${this.myname}_avatar` }
         },
         methods: {
             activeCss: function(link) {
