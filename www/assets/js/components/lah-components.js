@@ -435,7 +435,7 @@ if (Vue) {
                     ip: this.myip
                 }).then(res => {
                     this.avatar_badge = res.data.data_count || false;
-                    this.$root.$emit(CONFIG.LAH_ROOT_EVENT.MESSAGE_UNREAD, {
+                    this.$root.$emit(CONFIG.LAH_ROOT_EVENT ? CONFIG.LAH_ROOT_EVENT.MESSAGE_UNREAD : 'lah::message::unread', {
                         count: res.data.data_count,
                         ip: this.myip
                     });
@@ -2874,10 +2874,9 @@ if (Vue) {
             let day = ("0" + now.getDate()).slice(-2);
             this.today = now.getFullYear() - 1911 + mon + day;
             this.ad_today = now.getFullYear()  + mon + day;
-            this.id = this.getUrlParameter('id');
         },
         mounted() {
-            setTimeout(() => this.id = this.getUrlParameter('id') || this.myid, 400)
+            setTimeout(() => this.id = this.getUrlParameter('id') || this.myid, 800)
         }
     });
 
