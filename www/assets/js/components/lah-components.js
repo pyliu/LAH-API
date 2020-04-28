@@ -278,6 +278,7 @@ if (Vue) {
                     <b-navbar-nav @click="location.href='message.html'" class="ml-auto mr-2" style="cursor: pointer;" :title="avatar_badge+'則未讀訊息'">
                         <b-avatar v-if="showBadge" icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-avatar v-else icon="people-fill" variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
+                        <b-popover ref="friday" target="header-user-icon" placement="left" :show.sync="friday"> It's Friday!! </b-popover>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
                             <lah-user-message-history :id="myid" :ip="myip" count=1 title="最新訊息"></lah-user-message-history>
                             <!--
@@ -360,7 +361,11 @@ if (Vue) {
                         return 'background-color: #28a745 !important;'; // green
                 }
             },
-            avatar_src() { return this.empty(this.myname) ? 'get_user_img.php?name=not_found' : `get_user_img.php?name=${this.myname}_avatar` }
+            avatar_src() { return this.empty(this.myname) ? 'get_user_img.php?name=not_found' : `get_user_img.php?name=${this.myname}_avatar` },
+            friday() {
+                let day_of_week = new Date().getDay();
+                return day_of_week == 5;
+            }
         },
         methods: {
             activeCss: function(link) {
