@@ -919,9 +919,13 @@ $(document).ready(() => {
                             this.$http.post(CONFIG.JSON_API_EP, {
                                 type: 'my_info'
                             }).then(res => {
-                                let myinfo = res.data.raw[0];
-                                this.setLocalCache('myinfo', myinfo, 86400000);   // cache query info result
-                                this.$store.commit("myinfo", myinfo);
+                                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                    let myinfo = res.data.raw[0];
+                                    this.setLocalCache('myinfo', myinfo, 86400000);   // cache query info result
+                                    this.$store.commit("myinfo", myinfo);
+                                } else {
+                                    this.$warn(res.data.message);
+                                }
                             }).catch(err => {
                                 this.error = err;
                             });
