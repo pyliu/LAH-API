@@ -62,7 +62,6 @@ Vue.prototype.$store = (() => {
                 isAdmin: undefined,
                 isChief: undefined,
                 userNames: undefined,
-                dayMilliseconds: 24 * 60 * 60 * 1000,
                 dynaParams: {},
                 errors: [],
                 myip: undefined,
@@ -75,7 +74,6 @@ Vue.prototype.$store = (() => {
                 isAdmin: state => state.isAdmin,
                 isChief: state => state.isChief,
                 userNames: state => state.userNames,
-                dayMilliseconds: state => state.dayMilliseconds,
                 dynaParams: state => state.dynaParams,
                 errors: state => state.errors,
                 errorLen: state => state.errors.length,
@@ -205,7 +203,8 @@ Vue.mixin({
     data: () => ({
         isBusy: false,
         busyIconSize: undefined,
-        error: {}
+        error: {},
+        dayMilliseconds: 24 * 60 * 60 * 1000
     }),
     watch: {
         isBusy: function(flag) { flag ? this.busyOn(this.$el) : this.busyOff(this.$el) },
@@ -245,7 +244,6 @@ Vue.mixin({
             return this.$store.getters.userNames || {};
         },
         userIDs() { return this.reverseMapping(this.userNames || {}); },
-        dayMilliseconds() { return this.$store.getters.dayMilliseconds; },
         storeParams() { return this.$store.getters.dynaParams; },
         gerror() { return this.$store.getters.errors[this.$store.getters.errors.length - 1]; },
         gerrorLen() { return this.$store.getters.errorLen; },
