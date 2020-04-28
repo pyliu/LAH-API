@@ -230,24 +230,20 @@ Vue.mixin({
         }
     },
     computed: {
-        cache() { return this.$store.getters.cache; },
-        isAdmin() {
-            return this.$store.getters.isAdmin;
-        },
-        isChief() {
-            return this.$store.getters.isChief;
-        },
+        cache() { return this.$store.getters.cache },
+        isAdmin() { return this.$store.getters.isAdmin },
+        isChief() { return this.$store.getters.isChief },
         userNames() {
             if (this.$store.getters.userNames === undefined) {
                 this.$store.dispatch("loadUserNames");
             }
             return this.$store.getters.userNames || {};
         },
-        userIDs() { return this.reverseMapping(this.userNames || {}); },
-        storeParams() { return this.$store.getters.dynaParams; },
-        gerror() { return this.$store.getters.errors[this.$store.getters.errors.length - 1]; },
-        gerrorLen() { return this.$store.getters.errorLen; },
-        gerrors() { return this.$store.getters.errors; },
+        userIDs() { return this.reverseMapping(this.userNames || {}) },
+        storeParams() { return this.$store.getters.dynaParams },
+        gerror() { return this.$store.getters.errors[this.$store.getters.errors.length - 1] },
+        gerrorLen() { return this.$store.getters.errorLen },
+        gerrors() { return this.$store.getters.errors },
         nowDatetime() {
             // e.g. 2020-03-14 11:35:23
             let now = new Date();
@@ -258,11 +254,11 @@ Vue.mixin({
                 ("0" + now.getMinutes()).slice(-2) + ":" +
                 ("0" + now.getSeconds()).slice(-2);
         },
-        myip() { return this.$store.getters.myip; },
-        myid() { return this.$store.getters.myid; },
-        myinfo() { return this.$store.getters.myinfo; },
-        myname() { return this.myinfo ? this.myinfo['AP_USER_NAME'] : ''; },
-        disableMSDBQuery() { return this.$store.getters.disableMSDBQuery; },
+        myip() { return this.$store.getters.myip },
+        myid() { return this.$store.getters.myid },
+        myinfo() { return this.$store.getters.myinfo },
+        myname() { return this.myinfo ? this.myinfo['AP_USER_NAME'] : '' },
+        disableMSDBQuery() { return this.$store.getters.disableMSDBQuery },
     },
     methods: {
         addToStoreParams: function(key, value) {
