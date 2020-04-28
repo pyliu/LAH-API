@@ -75,6 +75,7 @@ if (Vue) {
                 props: ["resetFlag"],
                 data: () => ({
                     announcement_data: [],
+                    flag_on_announcements: [],
                     val: ""
                 }),
                 watch: {
@@ -88,6 +89,21 @@ if (Vue) {
                                 }
                             });
                             this.$emit("reset-flags-done");
+                        }
+                    },
+                    flag_on_announcements: function(nVal, oVal) {
+                        if (!this.empty(nVal)) {
+                            let html = '<h6><i class="fas fa-exclamation-triangle text-danger fa-lg"></i> 請注意下列已開啟准登之登記原因</h6>';
+                            nVal.forEach(item => {
+                                // RA01: "02" KCNT: "第一次登記" RA02: "15" RA03: "N"
+                                html += `<p>代碼：${item['RA01']} 原因：${item['KCNT']}</p>`
+                            });
+                            this.notify({
+                                title: '先行准登警示',
+                                message: html,
+                                type: 'danger',
+                                delay: 10000
+                            });
                         }
                     }
                 },
@@ -118,6 +134,30 @@ if (Vue) {
                             }
                         });
                         this.$emit("update-announcement-done", data);
+                        this.reload();
+                    },
+                    reload: function() {
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: 'announcement_data'
+                        }).then(res => {
+                            this.announcement_data = res.data.raw;
+                            // dayMilliseconds from mixin
+                            this.setLocalCache('announcement_data', this.announcement_data, this.dayMilliseconds);
+                            this.flags();
+                        }).catch(err => {
+                            this.error = err;
+                        });
+                    },
+                    flags: function() {
+                        this.flag_on_announcements = this.announcement_data.filter(item => {
+                            /*
+                                RA01: "02"
+                                KCNT: "第一次登記"
+                                RA02: "15"
+                                RA03: "N"
+                            */
+                            return item['RA03'] == 'Y';
+                        })
                     }
                 },
                 created() {
@@ -126,16 +166,9 @@ if (Vue) {
                             // within a day use the cached data
                             this.announcement_data = json || {};
                             if (this.empty(this.announcement_data)) this.removeLocalCache(announcement_data);
+                            this.flags();
                         } else {
-                            this.$http.post(CONFIG.JSON_API_EP, {
-                                type: 'announcement_data'
-                            }).then(async res => {
-                                this.announcement_data = res.data.raw;
-                                // dayMilliseconds from $store
-                                this.setLocalCache('announcement_data', this.announcement_data, this.dayMilliseconds);
-                            }).catch(err => {
-                                this.error = err;
-                            });
+                            this.reload();
                         }
                     });
                 },
