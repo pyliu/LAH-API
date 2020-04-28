@@ -924,6 +924,8 @@ switch ($_POST["type"]) {
 			$log->error("XHR [set_unread_user_message] "."設定 ".$_POST['sn']." 未讀信差訊息失敗。");
 		}
 		break;
+	case "del_user_message":
+		break;
 	case "send_message":
 		$log->info("XHR [send_message] 送出訊息【".$_POST["title"].", ".$_POST["content"].", ".$_POST["who"].", ".$_POST["send_time"].", ".$_POST["end_time"]."】請求");
 		$msg = new Message();

@@ -1392,6 +1392,7 @@ if (Vue) {
                                 <b-btn v-if="raws[index]['done'] != 1" size="sm" variant="outline-primary" @click.stop="read(message['sn'], index)" title="設為已讀" class="border-0"> <lah-fa-icon icon="eye-slash"></lah-fa-icon> </b-btn>
                                 <b-btn v-else size="sm" variant="outline-secondary" @click.stop="unread(message['sn'], index)" title="設為未讀" class="border-0"> <lah-fa-icon :id="message['sn']" icon="eye"></lah-fa-icon> </b-btn>
                             </span>
+                            <b-button-close v-if="showDeleteBtn(message)" @click="del(message['sn'])"></b-button-close>
                         </b-card-title>
                         <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
                         <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
@@ -1502,11 +1503,32 @@ if (Vue) {
                     });
                 }
             },
+            del(sn) {
+                if (!this.disableMSDBQuery) {
+                    this.$confirm('確定刪除本則訊息？', () => {
+                        this.$http.post(CONFIG.JSON_API_EP, {
+                            type: "del_user_message",
+                            sn: sn
+                        }).then(res => {
+                            this.notify({
+                                title: "刪除訊息",
+                                message: res.data.message,
+                                type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? 'success' : 'warning'
+                            });
+                        }).catch(err => {
+                            this.error = err;
+                        }).finally(() => {
+    
+                        });
+                    });
+                }
+            },
             showCtlBtn(snd_time) {
                 const date1 = +new Date();
                 const date2 = +new Date(snd_time.replace(' ', 'T'));
                 return date1 - date2 > 0;
-            }
+            },
+            showDeleteBtn(message) { return $.trim(message['sender']) == $.trim(this.myid) && message['done'] == 0 }
         },
         created() {
             let parsed = parseInt(this.count);

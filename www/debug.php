@@ -61,9 +61,17 @@ echo str_replace("\n", "<br />", print_r($rows, true));
 // $fact = new FileAPICommandFactory();
 //var_dump($msg->getMessageByUser("220.1.35.48"));
 //var_dump(sqlsrv_errors());
-$d1=new DateTime("2012-07-08 11:14:15.638276");
-$d2=new DateTime("2012-07-08 11:14:05.889342");
-$diff=$d2->diff($d1);
-print_r( $diff->s ) ;
-print_r( $diff ) ;
+
+// $d1=new DateTime("2012-07-08 11:14:15.638276");
+// $d2=new DateTime("2012-07-08 11:14:05.889342");
+// $diff=$d2->diff($d1);
+// print_r( $diff->s ) ;
+// print_r( $diff ) ;
+
+$db = new PDO("odbc:driver={microsoft access driver (*.mdb)};dbq=".realpath("\\220.1.35.69\personnel\ATT2000.MDB")) or die("Connect Error");
+var_dump($db);
+// $rs = $db->query('select * from web');
+// print "<pre>";
+// print_r($rs->fetchAll());
+// print "</pre>";
 ?>
