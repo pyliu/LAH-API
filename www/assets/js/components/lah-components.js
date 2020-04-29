@@ -784,7 +784,8 @@ if (Vue) {
             delay: 500
         }),
         watch: {
-            input(nVal, oVal) { this.filter() }
+            input(nVal, oVal) { this.filter() },
+            myid(val) { this.input = val }
         },
         computed: {
             validate() { return this.empty(this.input) ? null : this.length(this.input) > 1 },
@@ -797,15 +798,23 @@ if (Vue) {
                 return b
             },
             avatar_src(name) { return `get_user_img.php?name=${name}_avatar` },
-            reset_flags() { this.usertag_flags = {...this.ids.reduce((reduced, key) => ({ ...reduced, [key]: false }), {})}; },
+            async reset_flags() {
+                let flags = await this.getLocalCache('lah-user-search-flags');
+                if (flags === false) {
+                    this.usertag_flags = {...this.ids.reduce((reduced, key) => ({ ...reduced, [key]: false }), {})};
+                    this.setLocalCache('lah-user-search-flags', this.usertag_flags);
+                } else {
+                    this.usertag_flags = flags;
+                }
+            },
             filter() {
                 clearTimeout(this.keyup_timer);
                 this.keyup_timer = setTimeout(this.mark, this.delay);
             },
-            mark() {
+            async mark() {
                 if (this.validate) {
                     // set all flag to false
-                    this.reset_flags();
+                    await this.reset_flags();
                     // rendering may take some time so use Vue.nextTick ... 
                     Vue.nextTick(() => {
                         // Don't add 'g' because I only a line everytime.
@@ -867,15 +876,19 @@ if (Vue) {
             }
         },
         created() {
-            setTimeout(() => {
-                this.ids = Object.keys(this.userNames);
-                this.reset_flags();
-            }, this.delay);
-        },
-        mounted() {
-            setTimeout(() => {
-                this.input = this.myid;
-            }, this.delay);
+            this.getLocalCache('lah-user-search-ids').then(ids => {
+                if (ids === false) {
+                    setTimeout(() => {
+                        this.ids = Object.keys(this.userNames);
+                        this.reset_flags();
+                        this.setLocalCache('lah-user-search-ids', this.ids);
+                    }, this.delay);
+                } else {
+                    this.ids = ids;
+                    this.reset_flags();
+                }
+            })
+            
         }
     });
 
@@ -1563,6 +1576,7 @@ if (Vue) {
                         label-reset-button="預設值"
                         size="sm"
                         dropup
+                        @shown="shown"
                     ></b-format-timepicker>
                 </b-button-group>
                 <span class="text-muted ml-auto align-middle">預約時間：{{time}}</span>
@@ -1624,6 +1638,17 @@ if (Vue) {
                 }).finally(() => {
                     this.isBusy= false;
                 });
+            },
+            shown() {
+                let now = new Date();
+                let choosed_ms = +new Date(now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T" + this.time);
+                let now_ms = now.getTime() + 5 * 60 * 1000; // add 5 mins buffer
+                if (now_ms >= choosed_ms) {
+                    let an_hour_later = new Date(now_ms + 10 * 60 * 1000);
+                    this.time = ("0" + an_hour_later.getHours()).slice(-2) + ":" +
+                    ("0" + an_hour_later.getMinutes()).slice(-2) + ":" +
+                    ("0" + an_hour_later.getSeconds()).slice(-2);
+                }
             }
         }
     });
