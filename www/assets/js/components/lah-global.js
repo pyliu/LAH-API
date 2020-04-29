@@ -125,7 +125,7 @@ Vue.prototype.$store = (() => {
                 },
                 myinfo(state, infoPayload) {
                     state.myinfo = infoPayload;
-                    state.myid = infoPayload['DocUserID'] || undefined;
+                    state.myid = $.trim(infoPayload['DocUserID']) || undefined;
                 },
                 disableMSDBQuery(state, flagPayload) {
                     state.disableMSDBQuery = flagPayload === true;
