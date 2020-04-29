@@ -1565,6 +1565,7 @@ if (Vue) {
                         label-close-button="確定"
                         label-reset-button="預設值"
                         size="sm"
+                        dropup
                     ></b-format-timepicker>
                 </b-button-group>
                 <span class="text-muted ml-auto align-middle">預約時間：{{time}}</span>
@@ -1572,7 +1573,7 @@ if (Vue) {
                     <b-form-input
                         v-model="title"
                         type="text"
-                        placeholder="e.g. 17:00:00 打卡提醒 ... "
+                        placeholder="17:00:00 打卡提醒 ... "
                         :state="!empty(title)"
                         inline
                         @keyup.enter="send"
@@ -1585,14 +1586,7 @@ if (Vue) {
             time: '17:00:00'
         }),
         watch: {
-            time(nVal, oVal) {
-                let now = new Date();
-                let choosed = +new Date(now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T" + nVal); 
-                if (now.getTime() + 2 * 60 * 1000 >= choosed) {
-                    Vue.nextTick(() => this.time = oVal);
-                }
-                this.title = `${this.time} 提醒我`;
-            }
+            time(nVal, oVal) { this.title = `${this.time} 提醒我` }
         },
         computed: {
             show() { return !this.empty(this.myid) }
@@ -1605,6 +1599,12 @@ if (Vue) {
                 }
                 if (this.empty(this.title)) {
                     this.notify({ message: '請輸入訊息', type: "warning" })
+                    return;
+                }
+                let now = new Date();
+                let choosed = +new Date(now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T" + this.time);
+                if (now.getTime() >= choosed) {
+                    this.notify({ message: '請選擇現在之後的時間', type: "warning" })
                     return;
                 }
                 this.isBusy = true;
