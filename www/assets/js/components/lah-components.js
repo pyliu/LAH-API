@@ -799,10 +799,7 @@ if (Vue) {
             avatar_src(name) { return `get_user_img.php?name=${name}_avatar` },
             reset_flags() { this.usertag_flags = {...this.ids.reduce((reduced, key) => ({ ...reduced, [key]: false }), {})}; },
             filter() {
-                if (this.keyup_timer) {
-                    clearTimeout(this.keyup_timer);
-                    this.keyup_timer = null;
-                }
+                clearTimeout(this.keyup_timer);
                 this.keyup_timer = setTimeout(this.mark, this.delay);
             },
             mark() {
