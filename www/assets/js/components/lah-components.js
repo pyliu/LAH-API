@@ -278,12 +278,10 @@ if (Vue) {
                     <b-navbar-nav @click="location.href='message.html'" class="ml-auto mr-2" style="cursor: pointer;" :title="avatar_badge+'則未讀訊息'">
                         <b-avatar v-if="showBadge" icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-avatar v-else icon="people-fill" variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
-                        <b-popover ref="friday" target="header-user-icon" placement="left" :show.sync="friday"> It's Friday!! </b-popover>
-                        <b-popover target="header-user-icon" triggers="hover focus" placement="bottomleft" delay="350">
-                            <lah-user-message-history :id="myid" :ip="myip" count=1 title="最新訊息"></lah-user-message-history>
-                            <!--
-                            <lah-user-card :in-user-rows="[myinfo]" :avatar="true" @not-found="userNotFound" @found="userFound" class="mb-1" title="我的名片"></lah-user-card>
-                            -->
+                        <b-popover ref="friday" target="header-user-icon" placement="left" :show.sync="friday"> {{weekday}} </b-popover>
+                        <b-popover target="header-user-icon" triggers="hover focus" placement="bottom" delay="350">
+                            <lah-user-message-history ref="message" :ip="myip" count=5 title="最新訊息" class="mb-2" :tabs="true" :tabs-end="true"></lah-user-message-history>
+                            <lah-user-message-reservation></lah-user-message-reservation>
                         </b-popover>
                     </b-navbar-nav>
                 </b-collapse>
@@ -295,6 +293,7 @@ if (Vue) {
             leading: "Unknown",
             active: undefined,
             avatar_badge: false,
+            weekday: '',
             links: [{
                 text: "今日案件",
                 url: ["index.html", "/"],
@@ -351,13 +350,21 @@ if (Vue) {
                 let day_of_week = new Date().getDay();
                 switch(day_of_week) {
                     case 1:
-                    case 2:
+                        this.weekday = "星期一";
                         return 'background-color: #343a40 !important;'; // dark
+                    case 2:
+                        this.weekday = "星期二";
+                        return 'background-color: #565658 !important;';
                     case 3:
+                        this.weekday = "星期三";
+                        return 'background-color: #646366 !important;';
                     case 4:
-                        return 'background-color: #6c757d !important;'; // gray
+                        this.weekday = "星期四";
+                        return 'background-color: #707073 !important;';
                     case 5:
+                        this.weekday = "It's Friday!!";
                     default:
+                        this.weekday = "周末，該休息了!!";
                         return 'background-color: #28a745 !important;'; // green
                 }
             },
@@ -777,9 +784,7 @@ if (Vue) {
             delay: 500
         }),
         watch: {
-            input(nVal, oVal) {
-                this.filter();
-            }
+            input(nVal, oVal) { this.filter() }
         },
         computed: {
             validate() { return this.empty(this.input) ? null : this.length(this.input) > 1 },
@@ -840,7 +845,6 @@ if (Vue) {
                     keyword: keyword
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        this.$log(res.data);
                         let card = this.$createElement("lah-user-card", { props: { inUserRows: res.data.raw } });
                         this.$modal(card, { title: "搜尋使用者資訊" });
                     } else {
@@ -905,10 +909,10 @@ if (Vue) {
         computed: {
             userNameMap() { return this.only_onboard ? this.onboard_user_names : this.userNames },
             ID() { return this.id ? this.id.toUpperCase() : null },
-            name() { return this.userNameMap[this.ID] || '' },
+            name() { return this.userNameMap[this.ID] || null },
             validate() { return this.empty(this.id) ? null : this.validator ? this.validator : this.def_validator },
             def_validator() { return /*(/^HB\d{4}$/i).test(this.ID) || */!this.empty(this.name) },
-            avatar_src() { return `get_user_img.php?name=${this.name}_avatar` },
+            avatar_src() { return `get_user_img.php?name=${this.name || 'not_found'}_avatar` },
             only_onboard() { return this.onlyOnBoard === true },
             onboard_user_names() {
                 let names = {};
@@ -1392,7 +1396,7 @@ if (Vue) {
                                 <b-btn v-if="raws[index]['done'] != 1" size="sm" variant="outline-primary" @click.stop="read(message['sn'], index)" title="設為已讀" class="border-0"> <lah-fa-icon icon="eye-slash"></lah-fa-icon> </b-btn>
                                 <b-btn v-else size="sm" variant="outline-secondary" @click.stop="unread(message['sn'], index)" title="設為未讀" class="border-0"> <lah-fa-icon :id="message['sn']" icon="eye"></lah-fa-icon> </b-btn>
                             </span>
-                            <b-button-close v-if="showDeleteBtn(message)" @click="del(message['sn'], index)" title="刪除這個訊息"></b-button-close>
+                            <b-button-close v-if="showDeleteBtn(message)" @click="del(message['sn'])" title="刪除這個訊息"></b-button-close>
                         </b-card-title>
                         <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
                         <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
@@ -1503,7 +1507,7 @@ if (Vue) {
                     });
                 }
             },
-            del(sn, idx) {
+            del(sn) {
                 if (!this.disableMSDBQuery) {
                     this.$confirm('此動作無法復原，確定刪除本則訊息？', () => {
                         this.$http.post(CONFIG.JSON_API_EP, {
@@ -1515,10 +1519,8 @@ if (Vue) {
                                 message: res.data.message,
                                 type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? 'success' : 'warning'
                             });
-                            if (this.raws && res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                let removed = this.raws.splice(idx, 1);
-                                this.$log('message removed.', removed);
-                                this.count--;
+                            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                this.load(true);
                             }
                         }).catch(err => {
                             this.error = err;
@@ -1544,6 +1546,88 @@ if (Vue) {
                 }
             });
             this.load();
+        }
+    });
+
+    Vue.component('lah-user-message-reservation', {
+        template: `<div v-if="show">
+            <h6><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> 信差提醒</h6>
+            <b-form-group>
+                <b-button-group size="sm">
+                    <b-button size="sm" title="送出" variant="outline-primary" @click.stop="send"><lah-fa-icon icon="paper-plane" prefix="far"></lah-fa-icon></b-button>
+                    <b-form-timepicker
+                        hide-header
+                        reset-value="17:00:00"
+                        v-model="time"
+                        button-only
+                        no-close-button
+                        title="預約時間"
+                        label-close-button="確定"
+                        label-reset-button="預設值"
+                        size="sm"
+                    ></b-format-timepicker>
+                </b-button-group>
+                <span class="text-muted ml-auto align-middle">預約時間：{{time}}</span>
+                <b-input-group size="sm" prepend="訊息" class="mt-1">
+                    <b-form-input
+                        v-model="title"
+                        type="text"
+                        placeholder="e.g. 17:00:00 打卡提醒 ... "
+                        :state="!empty(title)"
+                        inline
+                        @keyup.enter="send"
+                    ></b-form-input>
+                </b-input-group>
+            </b-form-group>
+        </div>`,
+        data: () => ({
+            title: '',
+            time: '17:00:00'
+        }),
+        watch: {
+            time(nVal, oVal) {
+                let now = new Date();
+                let choosed = +new Date(now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T" + nVal); 
+                if (now.getTime() + 2 * 60 * 1000 >= choosed) {
+                    Vue.nextTick(() => this.time = oVal);
+                }
+                this.title = `${this.time} 提醒我`;
+            }
+        },
+        computed: {
+            show() { return !this.empty(this.myid) }
+        },
+        methods: {
+            send() {
+                if (CONFIG.DISABLE_MSDB_QUERY) {
+                    this.$warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping lah-user-message-reservation::send.");
+                    return;
+                }
+                if (this.empty(this.title)) {
+                    this.notify({ message: '請輸入訊息', type: "warning" })
+                    return;
+                }
+                this.isBusy = true;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: "send_message",
+                    title: this.title,
+                    content: this.title,
+                    who: this.myid,
+                    send_time: this.time,
+                    end_time: '23:59:59'
+                }).then(res => {
+                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
+                    this.title = '';
+                    this.notify({
+                        title: "傳送訊息",
+                        message: res.data.message
+                    });
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy= false;
+                });
+            }
         }
     });
 
@@ -2755,22 +2839,18 @@ if (Vue) {
         computed: {
             ID() { return this.id ? this.id.toUpperCase() : null },
             name() { return this.userNames[this.ID] || '' },
-            validate() { return (/^HB\d{4}$/i).test(this.ID) },
+            validateID() { return (/^HB\d{4}$/i).test(this.ID) },
             validateTemperature() {
                 let fn = parseFloat(this.temperature);
                 return !isNaN(fn) && fn >= 34 && fn <= 41;
             },
-            disabled() { return !this.validate || !this.validateTemperature },
+            disabled() { return !this.validateID || !this.validateTemperature },
             seen() { return this.chart_items !== undefined && this.chart_items.length != 0 }
         },
         watch: {
-            name(val) {
-                if (this.empty(val)) {
-                    this.chart_items = undefined;
-                } else {
-                    if (this.validate) this.history();
-                }
-            }
+            name(val) { if (this.empty(val)) this.chart_items = undefined },
+            id(val) { if (this.validateID) this.history() },
+            myid(val) { this.id = val }
         },
         methods: {
             onlyToday(item) { return item['datetime'].split(' ')[0].replace(/\-/gi, '') == this.ad_today },
@@ -2809,6 +2889,10 @@ if (Vue) {
             },
             register() {
                 this.$confirm(`姓名：${this.name} 體溫：${this.temperature} &#8451;`, () => {
+                    if (this.empty(this.name)) {
+                        this.notify({ message: '無法找到使用者，無法登錄。', type: "warning"});
+                        return;
+                    }
                     this.isBusy = true;
                     this.$http.post(CONFIG.JSON_API_EP, {
                         type: 'add_temperature',
@@ -2908,9 +2992,7 @@ if (Vue) {
             let day = ("0" + now.getDate()).slice(-2);
             this.today = now.getFullYear() - 1911 + mon + day;
             this.ad_today = now.getFullYear()  + mon + day;
-        },
-        mounted() {
-            setTimeout(() => this.id = this.getUrlParameter('id') || this.myid, 800)
+            this.id = this.getUrlParameter('id');
         }
     });
 
