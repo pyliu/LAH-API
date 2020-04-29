@@ -50,6 +50,11 @@ class Message {
         }
         return false;
     }
+
+    public function delete($sn) {
+        return $this->jungli_in_db->delete("Message", array("sn" => $sn));
+    }
+
     // send message right away
     public function send($title, $content, $to_who, $trigger_datetime = 'now', $drop_seconds_range = 28800, $system = false) : int {
         if (is_numeric($drop_seconds_range)) {

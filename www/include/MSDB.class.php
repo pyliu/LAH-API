@@ -122,6 +122,25 @@ class MSDB {
         $sql = "UPDATE " . $table . " SET " . $set . " WHERE 1 = 1 " . $check;
         $this->dbo->query( $sql, false );
     }
+
+    public function delete($table, $where) {
+        if (empty($where)) return false;
+        $check = '';
+        foreach( $where AS $field => $value ) {
+            $check .= ' AND ' . $table . '.' . $field;
+            if ( null === $value ) {
+                $check .= ' IS NULL';
+            }
+            elseif ( ctype_digit( str_replace( array( '.', '-' ), '', $value ) ) && substr_count( $value, '.' ) < 2 ) {
+                $check .= ' = ' . $value;
+            }
+            else {
+                $check .= " = '" . addslashes( $value ) . "'";
+            }
+        }
+        $sql = "DELETE FROM " . $table . " WHERE 1 = 1 " . $check;
+        return $this->dbo->query( $sql, false );
+    }
     /**
 	 * Return the last ran query in its entirety
 	 * @return string

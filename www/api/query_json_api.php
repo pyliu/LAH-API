@@ -925,6 +925,24 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "del_user_message":
+		$log->info("XHR [del_user_message] 刪除訊息【".$_POST["sn"]."】請求");
+		$msg = new Message();
+		$ret = $mock ? $cache->get('del_user_message') : $msg->delete($_POST["sn"]);
+		$cache->set('del_user_message', $ret);
+		if ($ret) {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => 1,
+				"sn" => $_POST["sn"],
+				"query_string" => "sn=".$_POST["sn"],
+				"message" => "刪除「".$_POST["sn"]."」訊息成功"
+			);
+			$log->info("XHR [del_user_message] 刪除「".$_POST["sn"]."」訊息成功。");
+			echo json_encode($result, 0);
+		} else {
+			echoErrorJSONString("刪除「".$_POST["sn"]."」訊息失敗");
+			$log->error("XHR [del_user_message] 刪除「".$_POST["sn"]."」訊息失敗。");
+		}
 		break;
 	case "send_message":
 		$log->info("XHR [send_message] 送出訊息【".$_POST["title"].", ".$_POST["content"].", ".$_POST["who"].", ".$_POST["send_time"].", ".$_POST["end_time"]."】請求");
