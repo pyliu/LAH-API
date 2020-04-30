@@ -249,6 +249,8 @@ Vue.mixin({
         myinfo() { return this.$store.getters.myinfo },
         myname() { return this.myinfo ? this.myinfo['AP_USER_NAME'] : '' },
         disableMSDBQuery() { return this.$store.getters.disableMSDBQuery },
+        nowDate() { return this.now().split(' ')[0] },
+        nowTime() { return this.now().split(' ')[1] }
     },
     methods: {
         addToStoreParams: function(key, value) {
@@ -603,7 +605,7 @@ $(document).ready(() => {
                 // merge default setting
                 let merged = Object.assign({
                     title: "通知",
-                    subtitle: this.now().split(" ")[1],
+                    subtitle: this.now().split(" ")[1], // everytime is different, so not use computed var here
                     href: "",
                     noAutoHide: false,
                     autoHideDelay: 5000,

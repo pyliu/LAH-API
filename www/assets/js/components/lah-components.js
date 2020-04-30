@@ -1367,7 +1367,7 @@ if (Vue) {
             timeState: function(time) { return this.empty(time) ? null : /\d{2}:\d{2}:\d{2}/gi.test(time) }
         },
         created() {
-            this.send_time = this.now()[1];
+            this.send_time = this.nowTime;
             this.btn_grp_id = this.uuid();
         }
     });
@@ -2878,7 +2878,7 @@ if (Vue) {
             onlyToday(item) { return item['datetime'].split(' ')[0].replace(/\-/gi, '') == this.ad_today },
             allowDeletion(item) {
                 // control deletion by AM/PM
-                let now = parseInt(this.now().split(' ')[1].replace(/\:/gi, ''));
+                let now = parseInt(this.nowTime.replace(/\:/gi, ''));
                 let AMPM = (now - 120000) > 0 ? 'PM' : 'AM';
                 let time = parseInt(item['datetime'].split(' ')[1].replace(/\:/gi, ''));
                 if (AMPM == 'AM') {
@@ -3045,7 +3045,7 @@ if (Vue) {
             filtered: null
         }),
         computed: {
-            today() { return this.now().split(' ')[0] }
+            today() { return this.nowDate }
         },
         methods: {
             filter() {
@@ -3138,8 +3138,8 @@ if (Vue) {
         computed: {
             id() { return this.rawUserData ? $.trim(this.rawUserData['DocUserID']) : this.inId },
             name() { return this.rawUserData ? this.rawUserData['AP_USER_NAME'] : ''},
-            today() { return this.now().split(' ')[0] },
-            now_ampm() { return (parseInt(this.now().split(' ')[1].replace(/\:/gi, '')) - 120000) >= 0 ? 'PM' : 'AM' },
+            today() { return this.nowDate },
+            now_ampm() { return (parseInt(this.nowTime.replace(/\:/gi, '')) - 120000) >= 0 ? 'PM' : 'AM' },
             not_ready() { return this.temperature.AM == 0 || this.temperature.PM == 0 },
             ready_half() { return this.temperature.AM != 0 || this.temperature.PM != 0 },
             ready() { return this.temperature.AM != 0 && this.temperature.PM != 0 },
