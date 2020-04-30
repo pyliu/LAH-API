@@ -32,7 +32,7 @@ class FileAPISQLCsvCommand extends FileAPICommand {
     function __destruct() {}
 
     private function outputCSV($data, $skip_header = false) {
-        header("Content-Type: text/csv");
+        header("Content-Type: text/csv; charset=big5");
         $out = fopen("php://output", 'w'); 
         if (is_array($data)) {
             $firstline_flag = false;

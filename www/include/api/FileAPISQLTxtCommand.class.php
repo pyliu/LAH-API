@@ -11,7 +11,7 @@ class FileAPISQLTxtCommand extends FileAPICommand {
     function __destruct() {}
 
     private function txt($data, $print_count = true) {
-        header("Content-Type: text/txt");
+        header("Content-Type: text/txt; charset=big5");
         $out = fopen("php://output", 'w'); 
         if (is_array($data)) {
             $count = 0;
