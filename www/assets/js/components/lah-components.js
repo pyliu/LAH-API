@@ -278,7 +278,9 @@ if (Vue) {
                     <b-navbar-nav @click="location.href='message.html'" class="ml-auto mr-2" style="cursor: pointer;" :title="avatar_badge+'則未讀訊息'">
                         <b-avatar v-if="showBadge" icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-avatar v-else icon="people-fill" variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
-                        <b-popover ref="friday" target="header-user-icon" placement="left" :show.sync="friday"> {{weekday}} <i class="far fa-heart"></i></b-popover>
+                        <b-popover ref="fun" target="header-user-icon" placement="left" :show.sync="fri_afternoon">
+                            <i class="far fa-laugh-wink fa-lg ld ld-swing"></i> 快放假了~離下班只剩 {{left_hours}} 小時
+                        </b-popover>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottom" delay="350">
                             <lah-user-message-history ref="message" :ip="myip" count=5 title="最新訊息" class="mb-2" :tabs="true" :tabs-end="true"></lah-user-message-history>
                             <lah-user-message-reservation></lah-user-message-reservation>
@@ -293,7 +295,6 @@ if (Vue) {
             leading: "Unknown",
             active: undefined,
             avatar_badge: false,
-            weekday: '',
             links: [{
                 text: "今日案件",
                 url: ["index.html", "/"],
@@ -350,28 +351,27 @@ if (Vue) {
                 let day_of_week = new Date().getDay();
                 switch(day_of_week) {
                     case 1:
-                        this.weekday = "星期一";
                         return 'background-color: #343a40 !important;'; // dark
                     case 2:
-                        this.weekday = "星期二";
                         return 'background-color: #565658 !important;';
                     case 3:
-                        this.weekday = "星期三";
                         return 'background-color: #646366 !important;';
                     case 4:
-                        this.weekday = "星期四";
                         return 'background-color: #707073 !important;';
                     case 5:
-                        this.weekday = "It's Friday!!";
                     default:
-                        this.weekday = "周末，該休息了!!";
                         return 'background-color: #28a745 !important;'; // green
                 }
             },
             avatar_src() { return this.empty(this.myname) ? 'get_user_img.php?name=not_found' : `get_user_img.php?name=${this.myname}_avatar` },
-            friday() {
+            fri_afternoon() {
                 let day_of_week = new Date().getDay();
-                return day_of_week == 5;
+                let hours = new Date().getHours();
+                return day_of_week == 5 && hours < 17 && hours > 12;
+            },
+            left_hours() {
+                let hours = new Date().getHours();
+                return 17 - hours;
             }
         },
         methods: {
@@ -468,10 +468,7 @@ if (Vue) {
     Vue.component("lah-footer", {
         template: `<lah-transition slide-up appear>
             <p v-if="show" :class="classes">
-                <span v-show="fri_afternoon">
-                    <i class="far fa-laugh-wink fa-lg ld ld-bounce"></i> 快放假了~離下班只剩 {{left_hours}} 小時，再撐一下下！
-                </span>
-                <span v-show="!fri_afternoon">
+                <span>
                     <a href="https://github.com/pyliu/Land-Affairs-Helper" target="_blank" title="View project on Github!">
                         <i class="fab fa-github fa-lg text-dark"></i>
                     </a>
@@ -487,17 +484,6 @@ if (Vue) {
             leave_time: 10000,
             classes: ['text-muted', 'fixed-bottom', 'my-2', 'mx-3', 'bg-white', 'border', 'rounded', 'text-center', 'p-2', 'small']
         }),
-        computed: {
-            fri_afternoon() {
-                let day_of_week = new Date().getDay();
-                let hours = new Date().getHours();
-                return day_of_week == 5 && hours < 17 && hours > 12;
-            },
-            left_hours() {
-                let hours = new Date().getHours();
-                return 17 - hours;
-            }
-        },
         mounted() {
             setTimeout(() => this.show = false, this.leave_time);
         }
@@ -965,7 +951,7 @@ if (Vue) {
         template: `<div>
             <h6 v-show="!empty(title)"><i class="fas fa-user-circle"></i> {{title}}</h6>
             <b-card no-body v-if="found" style="max-width: 480px">
-                <b-tabs card :end="useEndTabs" :pills="useEndTabs" :small="useEndTabs">
+                <b-tabs card :end="useEndTabs" :pills="useEndTabs" :small="useEndTabs" fill>
                     <b-tab v-for="(user_data, idx) in user_rows" :title="user_data['DocUserID']" :active="idx == 0">
                         <template v-slot:title>
                             <lah-fa-icon icon="id-card"> {{user_data['DocUserID']}}</lah-fa-icon>
@@ -3335,6 +3321,7 @@ if (Vue) {
             },
             download(type) {
                 if (this.validate) {
+                    this.isBusy = true;
                     this.$http.post(CONFIG.EXPORT_FILE_API_EP, {
                         type: type,
                         sql: this.sql,
@@ -3351,7 +3338,9 @@ if (Vue) {
                         window.URL.revokeObjectURL(url);
                     }).catch(err => {
                         this.error = err;
-                    }).finally(() => {});
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
                 } else {
                     this.notify({
                         title: "匯出SQL檔案報表",
