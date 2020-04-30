@@ -216,11 +216,11 @@ Vue.mixin({
                 }
                 this.$store.commit("error", {
                     message: nMsg.message || nMsg,
-                    time: this.nowDatetime
+                    time: this.now()
                 });
                 this.alert({
                     title: "錯誤訊息",
-                    subtitle: this.nowDatetime,
+                    subtitle: this.now(),
                     message: nMsg.message || nMsg,
                     type: "danger"
                 });
@@ -244,16 +244,6 @@ Vue.mixin({
         gerror() { return this.$store.getters.errors[this.$store.getters.errors.length - 1] },
         gerrorLen() { return this.$store.getters.errorLen },
         gerrors() { return this.$store.getters.errors },
-        nowDatetime() {
-            // e.g. 2020-03-14 11:35:23
-            let now = new Date();
-            return now.getFullYear() + "-" +
-                ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
-                ("0" + now.getDate()).slice(-2) + " " +
-                ("0" + now.getHours()).slice(-2) + ":" +
-                ("0" + now.getMinutes()).slice(-2) + ":" +
-                ("0" + now.getSeconds()).slice(-2);
-        },
         myip() { return this.$store.getters.myip },
         myid() { return this.$store.getters.myid },
         myinfo() { return this.$store.getters.myinfo },
@@ -425,6 +415,16 @@ Vue.mixin({
             });
         },
         rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
+        now: function() {
+            // e.g. 2020-03-14 11:35:23
+            let now = new Date();
+            return now.getFullYear() + "-" +
+                ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
+                ("0" + now.getDate()).slice(-2) + " " +
+                ("0" + now.getHours()).slice(-2) + ":" +
+                ("0" + now.getMinutes()).slice(-2) + ":" +
+                ("0" + now.getSeconds()).slice(-2);
+        },
         open: function(url, e) {
             let h = window.innerHeight - 160;
             this.$modal(`<iframe src="${url}" class="w-100" height="${h}" frameborder="0"></iframe>`, {
@@ -603,7 +603,7 @@ $(document).ready(() => {
                 // merge default setting
                 let merged = Object.assign({
                     title: "通知",
-                    subtitle: this.nowDatetime.split(" ")[1],
+                    subtitle: this.now().split(" ")[1],
                     href: "",
                     noAutoHide: false,
                     autoHideDelay: 5000,

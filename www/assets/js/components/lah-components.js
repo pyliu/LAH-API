@@ -278,7 +278,7 @@ if (Vue) {
                     <b-navbar-nav @click="location.href='message.html'" class="ml-auto mr-2" style="cursor: pointer;" :title="avatar_badge+'則未讀訊息'">
                         <b-avatar v-if="showBadge" icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-avatar v-else icon="people-fill" variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
-                        <b-popover ref="friday" target="header-user-icon" placement="left" :show.sync="friday"> {{weekday}} </b-popover>
+                        <b-popover ref="friday" target="header-user-icon" placement="left" :show.sync="friday"> {{weekday}} <i class="far fa-heart"></i></b-popover>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottom" delay="350">
                             <lah-user-message-history ref="message" :ip="myip" count=5 title="最新訊息" class="mb-2" :tabs="true" :tabs-end="true"></lah-user-message-history>
                             <lah-user-message-reservation></lah-user-message-reservation>
@@ -1367,7 +1367,7 @@ if (Vue) {
             timeState: function(time) { return this.empty(time) ? null : /\d{2}:\d{2}:\d{2}/gi.test(time) }
         },
         created() {
-            this.send_time = this.nowDatetime.split(' ')[1];
+            this.send_time = this.now()[1];
             this.btn_grp_id = this.uuid();
         }
     });
@@ -2878,7 +2878,7 @@ if (Vue) {
             onlyToday(item) { return item['datetime'].split(' ')[0].replace(/\-/gi, '') == this.ad_today },
             allowDeletion(item) {
                 // control deletion by AM/PM
-                let now = parseInt(this.nowDatetime.split(' ')[1].replace(/\:/gi, ''));
+                let now = parseInt(this.now().split(' ')[1].replace(/\:/gi, ''));
                 let AMPM = (now - 120000) > 0 ? 'PM' : 'AM';
                 let time = parseInt(item['datetime'].split(' ')[1].replace(/\:/gi, ''));
                 if (AMPM == 'AM') {
@@ -3045,7 +3045,7 @@ if (Vue) {
             filtered: null
         }),
         computed: {
-            today() { return this.nowDatetime.split(' ')[0] }
+            today() { return this.now().split(' ')[0] }
         },
         methods: {
             filter() {
@@ -3138,8 +3138,8 @@ if (Vue) {
         computed: {
             id() { return this.rawUserData ? $.trim(this.rawUserData['DocUserID']) : this.inId },
             name() { return this.rawUserData ? this.rawUserData['AP_USER_NAME'] : ''},
-            today() { return this.nowDatetime.split(' ')[0] },
-            now_ampm() { return (parseInt(this.nowDatetime.split(' ')[1].replace(/\:/gi, '')) - 120000) >= 0 ? 'PM' : 'AM' },
+            today() { return this.now().split(' ')[0] },
+            now_ampm() { return (parseInt(this.now().split(' ')[1].replace(/\:/gi, '')) - 120000) >= 0 ? 'PM' : 'AM' },
             not_ready() { return this.temperature.AM == 0 || this.temperature.PM == 0 },
             ready_half() { return this.temperature.AM != 0 || this.temperature.PM != 0 },
             ready() { return this.temperature.AM != 0 && this.temperature.PM != 0 },
