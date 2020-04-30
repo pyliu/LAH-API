@@ -965,7 +965,7 @@ if (Vue) {
         template: `<div>
             <h6 v-show="!empty(title)"><i class="fas fa-user-circle"></i> {{title}}</h6>
             <b-card no-body v-if="found" style="max-width: 480px">
-                <b-tabs card :end="useEndTabs" :pills="useEndTabs" small>
+                <b-tabs card :end="useEndTabs" :pills="useEndTabs" :small="useEndTabs">
                     <b-tab v-for="(user_data, idx) in user_rows" :title="user_data['DocUserID']" :active="idx == 0">
                         <template v-slot:title>
                             <lah-fa-icon icon="id-card"> {{user_data['DocUserID']}}</lah-fa-icon>
