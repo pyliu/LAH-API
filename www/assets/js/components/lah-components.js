@@ -965,7 +965,7 @@ if (Vue) {
         template: `<div>
             <h6 v-show="!empty(title)"><i class="fas fa-user-circle"></i> {{title}}</h6>
             <b-card no-body v-if="found" style="max-width: 480px">
-                <b-tabs card>
+                <b-tabs card :end="useEndTabs" :pills="useEndTabs" small>
                     <b-tab v-for="(user_data, idx) in user_rows" :title="user_data['DocUserID']" :active="idx == 0">
                         <template v-slot:title>
                             <lah-fa-icon icon="id-card"> {{user_data['DocUserID']}}</lah-fa-icon>
@@ -1115,7 +1115,8 @@ if (Vue) {
             foundCount: function() { return this.user_rows.length },
             foundLeft: function() { return this.user_rows[0]["AP_OFF_JOB"] == 'Y' },
             useAvatar: function() { return !this.empty(this.avatar) },
-            ID: function() { return this.user_rows ? this.user_rows[0]['DocUserID'] : null }
+            ID: function() { return this.user_rows ? this.user_rows[0]['DocUserID'] : null },
+            useEndTabs() { return this.inUserRows ? this.inUserRows.length > 1 : false }
         },
         methods: {
             photoUrl: function (user_data) {
@@ -3334,25 +3335,23 @@ if (Vue) {
             },
             download(type) {
                 if (this.validate) {
-                    this.$confirm(this.sql, () => {
-                        this.$http.post(CONFIG.EXPORT_FILE_API_EP, {
-                            type: type,
-                            sql: this.sql,
-                            responseType: 'blob'
-                        }).then(res => {
-                            let url = window.URL.createObjectURL(new Blob([res.data]));
-                            let a = document.createElement('a');
-                            a.href = url;
-                            a.download = this.selected_label + (type == "file_sql_txt" ? ".txt" : ".csv");
-                            document.body.appendChild(a);
-                            a.click();    
-                            a.remove();
-                            // release object in memory
-                            window.URL.revokeObjectURL(url);
-                        }).catch(err => {
-                            this.error = err;
-                        }).finally(() => {});
-                    });
+                    this.$http.post(CONFIG.EXPORT_FILE_API_EP, {
+                        type: type,
+                        sql: this.sql,
+                        responseType: 'blob'
+                    }).then(res => {
+                        let url = window.URL.createObjectURL(new Blob([res.data]));
+                        let a = document.createElement('a');
+                        a.href = url;
+                        a.download = this.selected_label + (type == "file_sql_txt" ? ".txt" : ".csv");
+                        document.body.appendChild(a);
+                        a.click();    
+                        a.remove();
+                        // release object in memory
+                        window.URL.revokeObjectURL(url);
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {});
                 } else {
                     this.notify({
                         title: "匯出SQL檔案報表",
