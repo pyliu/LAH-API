@@ -743,19 +743,21 @@ if (Vue) {
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
             </div>
             <div id="usertag_container" class="clearfix overflow-auto" :style="style">
-                <div
-                    v-for="(name, userid, idx) in userNames"
-                    class='float-left m-2 usercard'
-                    style='font-size: .8rem;'
-                    :data-id="userid"
-                    :data-name="name"
-                    :id="'usertag_'+userid"
-                    @click.stop="usercard"
-                    v-if="usertag_flags[userid]"
-                >
-                    <b-avatar v-if="avatar" button size="1.5rem" :src="avatar_src(name)" variant="light"></b-avatar>
-                    {{userid}}: {{name||'XXXXXX'}}
-                </div>
+                <transition-group name="list" mode="in-out">
+                    <div
+                        v-for="(name, userid, idx) in userNames"
+                        class='float-left m-2 usercard'
+                        style='font-size: .8rem;'
+                        :data-id="userid"
+                        :data-name="name"
+                        :key="'usertag_'+userid"
+                        @click.stop="usercard"
+                        v-if="usertag_flags[userid]"
+                    >
+                        <b-avatar v-if="avatar" button size="1.5rem" :src="avatar_src(name)" variant="light"></b-avatar>
+                        {{userid}}: {{name||'XXXXXX'}}
+                    </div>
+                </transition-group>
             </div>
         </fieldset>`,
         props: {
@@ -764,7 +766,7 @@ if (Vue) {
         },
         data: () => ({
             input: '',
-            last_on_ids: [],
+            last_hit_ids: [],
             ids: [],
             usertag_flags: {},
             keyup_timer: null,
@@ -791,7 +793,7 @@ if (Vue) {
                     flags = {...this.ids.reduce((reduced, key) => ({ ...reduced, [key]: false }), {})};
                     this.setLocalCache('lah-user-search-flags', flags);
                 }
-                this.usertag_flags = flags;
+                this.usertag_flags = Object.assign({}, flags);
             },
             filter() {
                 if (this.keyup_timer) {
@@ -802,11 +804,11 @@ if (Vue) {
             },
             mark() {
                 if (this.validate) {
-                    this.last_on_ids.forEach(id => {
+                    this.last_hit_ids.forEach(id => {
                         this.usertag_flags[id] = false;
                     });
                     // clear last on flags
-                    this.last_on_ids = [];
+                    this.last_hit_ids = [];
                     
                     this.input = this.input.replace("?", ""); // prevent out of memory
                     let keyword = new RegExp(this.input, "i");
@@ -814,8 +816,7 @@ if (Vue) {
                         let text = `${id}: ${this.userNames[id]}`;
                         this.usertag_flags[id] = keyword.test(text);
                         if (this.usertag_flags[id]) {
-                            this.last_on_ids.push(id);
-                            this.$log(`found ${text}`, this.usertag_flags[id]);
+                            this.last_hit_ids.push(id);
                         }
                     });
                     // rendering may take some time so use Vue.nextTick ... 
