@@ -691,7 +691,7 @@ class Query {
 
 		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
-		$number = substr($id, 7, 6);
+		$number = str_pad(substr($id, 7, 6), 6, "0", STR_PAD_LEFT);
 		
 		if ($upd_mm22 == "true") {
 			$this->db->parse("
@@ -929,7 +929,7 @@ class Query {
 			global $log;
 			$year = substr($id, 0, 3);
 			$code = substr($id, 3, 4);
-			$number = substr($id, 7, 6);
+			$number = str_pad(substr($id, 7, 6), 6, "0", STR_PAD_LEFT);
 
 			$set_str = "";
 			foreach ($diff as $col_name => $arr_vals) {
@@ -1017,6 +1017,9 @@ class Query {
 			return $result;
 		}
 
+		// prevent length not enough issue
+		$number = str_pad($number, 6, "0", STR_PAD_LEFT);
+
 		global $log;
 
 		// an array to express temp tables and key field names that need to be checked.
@@ -1054,6 +1057,9 @@ class Query {
 			return false;
 		}
 
+		// prevent length not enough issue
+		$number = str_pad($number, 6, "0", STR_PAD_LEFT);
+		
 		// an array to express temp tables and key field names that need to be checked.
 		$temp_tables = include("config/Config.TempTables.php");
 		//foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
