@@ -743,7 +743,7 @@ if (Vue) {
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
             </div>
             <div id="usertag_container" class="clearfix overflow-auto" :style="style">
-                <transition-group name="list" mode="in-out">
+                <transition-group name="list" mode="out-in">
                     <div
                         v-for="(name, userid, idx) in userNames"
                         class='float-left m-2 usercard'
