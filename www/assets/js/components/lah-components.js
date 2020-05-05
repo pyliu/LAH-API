@@ -742,19 +742,19 @@ if (Vue) {
                 </b-input-group>
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
             </div>
-            <div class="clearfix overflow-auto" :style="style">
+            <div id="usertag_container" class="clearfix overflow-auto" :style="style">
                 <div
-                    v-for="(name, id, idx) in userNames"
+                    v-for="(name, userid, idx) in userNames"
                     class='float-left m-2 usercard'
-                    style='font-size: .875rem;'
-                    :data-id="id"
+                    style='font-size: .8rem;'
+                    :data-id="userid"
                     :data-name="name"
-                    :id="'usertag_'+id"
+                    :id="'usertag_'+userid"
                     @click.stop="usercard"
-                    v-if="usertag_flags[id]"
+                    v-if="usertag_flags[userid]"
                 >
                     <b-avatar v-if="avatar" button size="1.5rem" :src="avatar_src(name)" variant="light"></b-avatar>
-                    {{id}}: {{name||'XXXXXX'}}
+                    {{userid}}: {{name||'XXXXXX'}}
                 </div>
             </div>
         </fieldset>`,
@@ -764,6 +764,7 @@ if (Vue) {
         },
         data: () => ({
             input: '',
+            last_on_ids: [],
             ids: [],
             usertag_flags: {},
             keyup_timer: null,
@@ -787,35 +788,45 @@ if (Vue) {
             async reset_flags() {
                 let flags = await this.getLocalCache('lah-user-search-flags');
                 if (flags === false) {
-                    this.usertag_flags = {...this.ids.reduce((reduced, key) => ({ ...reduced, [key]: false }), {})};
-                    this.setLocalCache('lah-user-search-flags', this.usertag_flags);
-                } else {
-                    this.usertag_flags = flags;
+                    flags = {...this.ids.reduce((reduced, key) => ({ ...reduced, [key]: false }), {})};
+                    this.setLocalCache('lah-user-search-flags', flags);
                 }
+                this.usertag_flags = flags;
             },
             filter() {
-                clearTimeout(this.keyup_timer);
+                if (this.keyup_timer) {
+                    clearTimeout(this.keyup_timer);
+                    this.keyup_timer = null;
+                }
                 this.keyup_timer = setTimeout(this.mark, this.delay);
             },
-            async mark() {
+            mark() {
                 if (this.validate) {
-                    // set all flag to false
-                    await this.reset_flags();
+                    this.last_on_ids.forEach(id => {
+                        this.usertag_flags[id] = false;
+                    });
+                    // clear last on flags
+                    this.last_on_ids = [];
+                    
+                    this.input = this.input.replace("?", ""); // prevent out of memory
+                    let keyword = new RegExp(this.input, "i");
+                    this.ids.forEach(id => {
+                        let text = `${id}: ${this.userNames[id]}`;
+                        this.usertag_flags[id] = keyword.test(text);
+                        if (this.usertag_flags[id]) {
+                            this.last_on_ids.push(id);
+                            this.$log(`found ${text}`, this.usertag_flags[id]);
+                        }
+                    });
                     // rendering may take some time so use Vue.nextTick ... 
                     Vue.nextTick(() => {
-                        // Don't add 'g' because I only a line everytime.
-                        // If use 'g' flag regexp object will remember last found index, that will possibly case the subsequent test failure.
-                        this.input = this.input.replace("?", ""); // prevent out of memory
-                        let keyword = new RegExp(this.input, "i");
-                        this.ids.forEach(id => {
-                            let text = `${id}: ${this.userNames[id]}`;
-                            this.usertag_flags[id] = keyword.test(text);
-                            if (this.usertag_flags[id]) {
-                                Vue.nextTick(() => {
-                                    $('#usertag_'+id).mark(this.input, {
-                                        "element": "strong",
-                                        "className": "highlight"
-                                    });
+                        $('#usertag_container').unmark({
+                            element: "strong",
+                            className: "highlight",
+                            done: () => {
+                                $('#usertag_container').mark(this.input, {
+                                    element: "strong",
+                                    className: "highlight"
                                 });
                             }
                         });
@@ -864,17 +875,14 @@ if (Vue) {
         created() {
             this.getLocalCache('lah-user-search-ids').then(ids => {
                 if (ids === false) {
-                    setTimeout(() => {
-                        this.ids = Object.keys(this.userNames);
-                        this.reset_flags();
-                        this.setLocalCache('lah-user-search-ids', this.ids);
-                    }, this.delay);
+                    this.ids = Object.keys(this.userNames);
+                    this.setLocalCache('lah-user-search-ids', this.ids);
                 } else {
                     this.ids = ids;
-                    this.reset_flags();
                 }
-            })
-            
+            }).finally(() => {
+                this.reset_flags();
+            });
         }
     });
 
