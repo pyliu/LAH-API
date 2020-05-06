@@ -13,7 +13,7 @@ SELECT SQ.RM01   AS "收件年",
        SQ.RM31   AS "結案代碼"
   FROM (SELECT *
           FROM MOICAS.CRSMS tt
-         WHERE tt.rm07_1 LIKE '10810%'
+         WHERE tt.rm07_1 LIKE '10904%'
            AND tt.rm02 LIKE 'H%B1' -- 本所處理跨所案件
            AND tt.RM03 NOT LIKE '%0' -- 子號案件
         ) SQ
