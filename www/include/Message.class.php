@@ -171,17 +171,17 @@ class Message {
 
         $diff = $d2->diff($d1);
         if ($diff->invert != 1) {
-            $log->error(__METHOD__.": 時間區間有問題 => 開始: ${send_datetime} 捨棄:${drop_datetime}");
+            $log->error(__METHOD__.": 時間區間有問題 => 開始: ${send_datetime} 忽略:${drop_datetime}");
             return -3;
         }
 
         $diff = $d2->diff($d0);
         if ($diff->invert == 1) {
             $seconds = (60 * $diff->h + $diff->i) * 60 + $diff->s;
-            $log->info(__METHOD__.": 設定時間區間 => 開始: ${send_datetime}, 捨棄: ${drop_datetime}, seconds: ".$seconds);
+            $log->info(__METHOD__.": 設定時間區間 => 開始: ${send_datetime}, 忽略: ${drop_datetime}, seconds: ".$seconds);
             return $this->send($title, $content, $to_who, $send_datetime, $seconds, false);
         }
-        $log->error(__METHOD__.": 捨棄時間已超過現在時間 => 捨棄: ${drop_datetime} 現在: ".date('Y-m-d H:i:s'));
+        $log->error(__METHOD__.": 忽略時間已超過現在時間 => 忽略: ${drop_datetime} 現在: ".date('Y-m-d H:i:s'));
         return -4;
     }
 

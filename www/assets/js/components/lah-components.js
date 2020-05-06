@@ -1287,7 +1287,7 @@ if (Vue) {
             msgTitleCount: function() { return this.empty(this.msg_title) ? '言簡意賅最多20字中文 ... ' : `${this.msg_title.length} / 20` },
             msgContentCount: function() { return this.empty(this.msg_content) ? '最多500字中文 ... ' : `${this.msg_content.length} / 500` },
             msgSendTime: function() { return this.empty(this.send_time) ? '立即傳送' : `預定 ${this.send_time} 送出`},
-            msgEndTime: function() { return this.empty(this.end_time) ? '23:59:59為止' : `預定 ${this.end_time} 捨棄` }
+            msgEndTime: function() { return this.empty(this.end_time) ? '23:59:59為止' : `預定 ${this.end_time} 忽略` }
         },
         methods: {
             send: function(e) {
@@ -1395,7 +1395,7 @@ if (Vue) {
                             <div class="float-right">
                                 <ul>
                                     <li>通知：{{message['sendtime']['date'].substring(0, 19)}}</li>
-                                    <li>捨棄：{{message['enddate']['date'].substring(0, 19)}}</li>
+                                    <li>忽略：{{message['enddate']['date'].substring(0, 19)}}</li>
                                 </ul>
                             </div>
                         </b-card-sub-title>
@@ -1594,7 +1594,7 @@ if (Vue) {
             sendtime(nVal, oVal) {
                 this.sendtime_ms = +new Date(this.ad_date + "T" + nVal);
                 this.message = `${nVal} 提醒我`;
-                this.title = `預計 ${this.droptime} 捨棄本則訊息`;
+                this.title = `預計 ${this.droptime} 忽略本則訊息`;
             }
         },
         computed: {

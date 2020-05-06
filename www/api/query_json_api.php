@@ -968,7 +968,7 @@ switch ($_POST["type"]) {
 			echoErrorJSONString($msg);
 			$log->warning("XHR [send_message] ${msg}");
 		} else if ($id == -4) {
-			$msg = "捨棄時間已超過現在時間，故無法傳送訊息。【end: ".$_POST["end_time"].", now: ".date('H:i:s')."】";
+			$msg = "忽略時間已超過現在時間，故無需傳送訊息。【end: ".$_POST["end_time"].", now: ".date('H:i:s')."】";
 			echoErrorJSONString($msg);
 			$log->warning("XHR [send_message] ${msg}");
 		} else {
