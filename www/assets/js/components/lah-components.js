@@ -3372,10 +3372,6 @@ if (Vue) {
                 this.msgbox({
                     title: '報表檔案會出功能提示',
                     message: `
-                        <p>輸入SELECT SQL指令匯出查詢結果。</p>
-                        <img src="assets/img/csv_export_method.jpg" class="w-auto img-responsive img-thumbnail" />
-                        <br/>
-                        <br/>
                         <h5>地政局索取地籍資料備註</h5>
                         <span class="text-danger mt-2">※</span> 系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
                         　- <small class="mt-2 mb-2"> 除下面標示為黃色部分須至地政系統產出並下載，其餘皆可於「報表匯出」區塊產出。</small> <br/>
