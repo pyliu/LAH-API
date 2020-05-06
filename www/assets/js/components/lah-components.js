@@ -738,6 +738,7 @@ if (Vue) {
                         @keyup.enter="query"
                         title="HBXXXX 或 姓名 或 IP"
                         :state="validate"
+                        class="no-cache"
                     ></b-form-input>
                 </b-input-group>
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
@@ -1578,6 +1579,7 @@ if (Vue) {
                         :state="!empty(message)"
                         inline
                         @keyup.enter="send"
+                        class="no-cache"
                     ></b-form-input>
                 </b-input-group>
             </b-form-group>
@@ -3247,7 +3249,7 @@ if (Vue) {
             </legend>
             <b-input-group size="sm">
                 <b-input-group-prepend is-text>預載查詢選項</b-input-group-prepend>
-                <b-form-select v-model="selected" :options="options" @change="change"></b-form-select>
+                <b-form-select ref="select" v-model="selected" :options="options" @change="change"></b-form-select>
                 <b-btn size="sm" class="ml-1" @click="output" variant="outline-primary" v-b-tooltip="'匯出'" :disabled="!validate"><lah-fa-icon icon="file-export"></lah-fa-icon></b-btn>
             </b-input-group>
             <b-form-textarea
@@ -3343,6 +3345,7 @@ if (Vue) {
                         sql: this.sql,
                         responseType: 'blob'
                     }).then(res => {
+                        this.$log(this.selected_label + (type == "file_sql_txt" ? ".txt" : ".csv"));
                         let url = window.URL.createObjectURL(new Blob([res.data]));
                         let a = document.createElement('a');
                         a.href = url;
@@ -3409,6 +3412,12 @@ if (Vue) {
                 this.sql = sql;
                 if (this.sql === false) this.sql = '';
             });
+            setTimeout(() => {
+                this.selected = this.$refs.select.$el.value;
+                let opt = $("select.custom-select optgroup option[value='" + this.selected + "']")[0];
+                this.$assert(opt, "找不到選取的 option。", $("select.custom-select optgroup option[value='" + this.selected + "']"));
+                this.selected_label = opt.label;
+            }, 400);
         }
     });
     
