@@ -1391,8 +1391,15 @@ if (Vue) {
                             </span>
                             <b-button-close v-if="showDeleteBtn(message)" @click="del(message['sn'])" title="刪除這個訊息"></b-button-close>
                         </b-card-title>
-                        <b-card-sub-title sub-title-tag="small"><div class="text-right">{{message['sendtime']['date'].substring(0, 19)}}</div></b-card-sub-title>
-                        <b-card-text v-html="format(message['xcontent'])" class="small"></b-card-text>
+                        <b-card-sub-title sub-title-tag="small">
+                            <div class="float-right">
+                                <ul>
+                                    <li>通知：{{message['sendtime']['date'].substring(0, 19)}}</li>
+                                    <li>捨棄：{{message['enddate']['date'].substring(0, 19)}}</li>
+                                </ul>
+                            </div>
+                        </b-card-sub-title>
+                        <b-card-text v-html="format(message['xcontent'])" class="small mt-2 clearfix"></b-card-text>
                     </b-card>
                 </transition-group>
             </b-card-group>
@@ -1545,13 +1552,13 @@ if (Vue) {
     Vue.component('lah-user-message-reservation', {
         template: `<div v-if="show">
             <h6><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> 信差提醒</h6>
-            <b-form-group>
+            <b-form-group :title="title">
                 <b-button-group size="sm">
                     <b-button size="sm" title="送出" variant="outline-primary" @click.stop="send"><lah-fa-icon icon="paper-plane" prefix="far"></lah-fa-icon></b-button>
                     <b-form-timepicker
                         hide-header
                         reset-value="17:00:00"
-                        v-model="time"
+                        v-model="sendtime"
                         button-only
                         no-close-button
                         title="預約時間"
@@ -1562,13 +1569,13 @@ if (Vue) {
                         @shown="shown"
                     ></b-format-timepicker>
                 </b-button-group>
-                <span class="text-muted ml-auto align-middle">預約時間：{{time}}</span>
+                <span class="text-muted ml-auto align-middle">預約時間：{{sendtime}}</span>
                 <b-input-group size="sm" prepend="訊息" class="mt-1">
                     <b-form-input
-                        v-model="title"
+                        v-model="message"
                         type="text"
                         placeholder="17:00:00 打卡提醒 ... "
-                        :state="!empty(title)"
+                        :state="!empty(message)"
                         inline
                         @keyup.enter="send"
                     ></b-form-input>
@@ -1577,13 +1584,28 @@ if (Vue) {
         </div>`,
         data: () => ({
             title: '',
-            time: '17:00:00'
+            message: '',
+            sendtime: '17:00:00',
+            sendtime_ms: +new Date(),
+            buffer_ms: 5 * 60 * 1000,
+            now: new Date()
         }),
         watch: {
-            time(nVal, oVal) { this.title = `${this.time} 提醒我` }
+            sendtime(nVal, oVal) {
+                this.sendtime_ms = +new Date(this.ad_date + "T" + nVal);
+                this.message = `${nVal} 提醒我`;
+                this.title = `預計 ${this.droptime} 捨棄本則訊息`;
+            }
         },
         computed: {
-            show() { return !this.empty(this.myid) }
+            show() { return !this.empty(this.myid) },
+            ad_date() { return this.now.getFullYear() + "-" + ("0" + (this.now.getMonth() + 1)).slice(-2) + "-" + ("0" + this.now.getDate()).slice(-2) },
+            droptime() {
+                let dropdate = new Date(this.sendtime_ms + this.buffer_ms);
+                return ("0" + dropdate.getHours()).slice(-2) + ":" +
+                    ("0" + dropdate.getMinutes()).slice(-2) + ":" +
+                    ("0" + dropdate.getSeconds()).slice(-2);
+            }
         },
         methods: {
             send() {
@@ -1595,20 +1617,18 @@ if (Vue) {
                     this.notify({ message: '請輸入訊息', type: "warning" })
                     return;
                 }
-                let now = new Date();
-                let choosed = +new Date(now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T" + this.time);
-                if (now.getTime() >= choosed) {
+                if (this.now.getTime() >= this.sendtime_ms) {
                     this.notify({ message: '請選擇現在之後的時間', type: "warning" })
                     return;
                 }
                 this.isBusy = true;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     type: "send_message",
-                    title: this.title,
-                    content: this.title,
+                    title: this.message,
+                    content: this.message,
                     who: this.myid,
-                    send_time: this.time,
-                    end_time: '23:59:59'
+                    send_time: this.sendtime,
+                    end_time: this.droptime
                 }).then(res => {
                     this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
                     this.title = '';
@@ -1623,12 +1643,12 @@ if (Vue) {
                 });
             },
             shown() {
-                let now = new Date();
-                let choosed_ms = +new Date(now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T" + this.time);
-                let now_ms = now.getTime() + 5 * 60 * 1000; // add 5 mins buffer
+                this.now = new Date();
+                let choosed_ms = +new Date(this.ad_date + "T" + this.sendtime);
+                let now_ms = this.now.getTime() + this.buffer_ms; // add 5 mins buffer
                 if (now_ms >= choosed_ms) {
                     let an_hour_later = new Date(now_ms + 10 * 60 * 1000);
-                    this.time = ("0" + an_hour_later.getHours()).slice(-2) + ":" +
+                    this.sendtime = ("0" + an_hour_later.getHours()).slice(-2) + ":" +
                     ("0" + an_hour_later.getMinutes()).slice(-2) + ":" +
                     ("0" + an_hour_later.getSeconds()).slice(-2);
                 }

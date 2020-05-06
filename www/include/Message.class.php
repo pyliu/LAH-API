@@ -164,15 +164,25 @@ class Message {
      * $drop_datetime: string, date("Y-m-d H:i:s") format
      */
     public function sendByInterval($title, $content, $to_who, $send_datetime, $drop_datetime) : int {
+        global $log;
+        $d0 = new DateTime('now');
         $d1 = new DateTime($send_datetime);
         $d2 = new DateTime($drop_datetime);
+
         $diff = $d2->diff($d1);
-        if ($diff->invert == 1 && $diff->s > 0) {
-            return $this->send($title, $content, $to_who, $send_datetime, $diff->s, false);
+        if ($diff->invert != 1) {
+            $log->error(__METHOD__.": 時間區間有問題 => 開始: ${send_datetime} 捨棄:${drop_datetime}");
+            return -3;
         }
-        global $log;
-        $log->error(__METHOD__.": 時間區間有問題 => 開始: ${send_datetime} 結束:${drop_datetime}");
-        return -3;
+
+        $diff = $d2->diff($d0);
+        if ($diff->invert == 1) {
+            $seconds = (60 * $diff->h + $diff->i) * 60 + $diff->s;
+            $log->info(__METHOD__.": 設定時間區間 => 開始: ${send_datetime}, 捨棄: ${drop_datetime}, seconds: ".$seconds);
+            return $this->send($title, $content, $to_who, $send_datetime, $seconds, false);
+        }
+        $log->error(__METHOD__.": 捨棄時間已超過現在時間 => 捨棄: ${drop_datetime} 現在: ".date('Y-m-d H:i:s'));
+        return -4;
     }
 
     public function getMessageByUser($name_or_id_or_ip, $top = 5) {

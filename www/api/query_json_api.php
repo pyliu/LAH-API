@@ -962,14 +962,18 @@ switch ($_POST["type"]) {
 		} else if ($id == -1) {
 			$msg = "現職人員找不到 ".$_POST["who"]." 故無法傳送訊息。";
 			echoErrorJSONString($msg);
-			$log->info("XHR [send_message] ${msg}");
+			$log->warning("XHR [send_message] ${msg}");
 		} else if ($id == -2 || $id == -3) {
 			$msg = "時間區間有問題，故無法傳送訊息。【".$_POST["send_time"].", ".$_POST["end_time"]."】";
 			echoErrorJSONString($msg);
-			$log->info("XHR [send_message] ${msg}");
+			$log->warning("XHR [send_message] ${msg}");
+		} else if ($id == -4) {
+			$msg = "捨棄時間已超過現在時間，故無法傳送訊息。【end: ".$_POST["end_time"].", now: ".date('H:i:s')."】";
+			echoErrorJSONString($msg);
+			$log->warning("XHR [send_message] ${msg}");
 		} else {
 			echoErrorJSONString("新增 ".$_POST["title"]." 訊息失敗【${id}】。");
-			$log->info("XHR [send_message] 新增「".$_POST["title"]."」訊息失敗【${id}】。");
+			$log->error("XHR [send_message] 新增「".$_POST["title"]."」訊息失敗【${id}】。");
 		}
 		break;
 	case "remove_temperature":
