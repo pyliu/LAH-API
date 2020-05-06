@@ -774,7 +774,14 @@ if (Vue) {
         }),
         watch: {
             input(nVal, oVal) { this.filter() },
-            myid(val) { this.input = val }
+            myid(val) { this.input = val },
+            userNames(val) {
+                this.ids = Object.keys(val);
+                // set all flags to false at first
+                this.ids.forEach(id => {
+                    Vue.set(this.usertag_flags, id, false);
+                });
+            }
         },
         computed: {
             validate() { return this.empty(this.input) ? null : this.length(this.input) > 1 },
@@ -787,14 +794,6 @@ if (Vue) {
                 return b
             },
             avatar_src(name) { return `get_user_img.php?name=${name}_avatar` },
-            async reset_flags() {
-                let flags = await this.getLocalCache('lah-user-search-flags');
-                if (flags === false) {
-                    flags = {...this.ids.reduce((reduced, key) => ({ ...reduced, [key]: false }), {})};
-                    this.setLocalCache('lah-user-search-flags', flags);
-                }
-                this.usertag_flags = Object.assign({}, flags);
-            },
             filter() {
                 if (this.keyup_timer) {
                     clearTimeout(this.keyup_timer);
@@ -872,18 +871,6 @@ if (Vue) {
                     size: "sm"
                 });
             }
-        },
-        created() {
-            this.getLocalCache('lah-user-search-ids').then(ids => {
-                if (ids === false) {
-                    this.ids = Object.keys(this.userNames);
-                    this.setLocalCache('lah-user-search-ids', this.ids);
-                } else {
-                    this.ids = ids;
-                }
-            }).finally(() => {
-                this.reset_flags();
-            });
         }
     });
 
