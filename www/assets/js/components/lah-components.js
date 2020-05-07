@@ -728,21 +728,20 @@ if (Vue) {
                 使用者搜尋
                 <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
             </legend>
-            <div class="d-flex">
-                <b-input-group size="sm">
-                    <b-input-group-prepend is-text>關鍵字</b-input-group-prepend>
-                    <b-form-input
-                        placeholder="'HB05' OR '憶如' OR '220.1.35.x'"
-                        ref="input"
-                        v-model="input"
-                        @keyup.enter="query"
-                        title="HBXXXX 或 姓名 或 IP"
-                        :state="validate"
-                        class="no-cache"
-                    ></b-form-input>
-                </b-input-group>
-                <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
-            </div>
+            <b-input-group size="sm" prepend="關鍵字">
+                <b-form-input
+                    placeholder="'HB05' OR '憶如' OR '220.1.35.x'"
+                    ref="input"
+                    v-model="input"
+                    @keyup.enter="query"
+                    title="HBXXXX 或 姓名 或 IP"
+                    :state="validate"
+                    class="no-cache"
+                ></b-form-input>
+                <template v-slot:append>
+                    <b-button @click="query" variant="outline-primary" size="sm" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
+                </template>
+            </b-input-group>
             <div id="usertag_container" class="clearfix overflow-auto" :style="style">
                 <transition-group name="list" mode="out-in">
                     <div
