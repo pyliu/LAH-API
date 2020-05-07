@@ -1,15 +1,14 @@
 if (Vue) {
     Vue.component("case-input-group-ui", {
         template: `<div class="d-flex" v-b-popover.hover.focus.bottom.d1000="'目前案件代碼：'+ID">
-            <b-input-group size="sm">
+            <b-input-group size="sm" append="年">
                 <b-form-select ref="year" v-model="year" :options="years" @change="emitInput" @change="getMaxNumber" :id="prefix+'_case_update_year'">
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇年份 --</b-form-select-option>
                     </template>
                 </b-form-select>
-                <b-input-group-append is-text>年</b-input-group-append>
             </b-input-group>
-            <b-input-group size="sm" class="mx-1">
+            <b-input-group size="sm" class="mx-1" append="字">
                 <b-form-select ref="code" v-model="code" @change="emitInput" @change="getMaxNumber" :id="prefix+'_case_update_code'">
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇案件字 --</b-form-select-option>
@@ -18,9 +17,8 @@ if (Vue) {
                         <option v-for="item in obj.options" :value="item.replace(/[^A-Za-z0-9]/g, '')">{{item}}</option>
                     </optgroup>
                 </b-form-select>
-                <b-input-group-append is-text>字</b-input-group-append>
             </b-input-group>
-            <b-input-group size="sm">
+            <b-input-group size="sm" append="號">
                 <b-form-input
                     ref="num"
                     v-model="num"
@@ -34,7 +32,6 @@ if (Vue) {
                     :id="prefix+'_case_update_num'"
                     :state="num >= num_min && num <= num_max"
                 ></b-form-input>
-                <b-input-group-append is-text>號</b-input-group-append>
             </b-input-group>
         </div>`,
         props: ["type", "prefix", 'value'],
