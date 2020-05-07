@@ -777,6 +777,7 @@ if (Vue) {
             myid(val) { this.input = val },
             userNames(val) {
                 this.ids = Object.keys(val);
+                this.ids.sort();
                 // set all flags to false at first
                 this.ids.forEach(id => {
                     Vue.set(this.usertag_flags, id, false);
