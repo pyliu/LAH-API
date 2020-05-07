@@ -3483,19 +3483,18 @@ if (Vue) {
             </legend>
             <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
             <a href="assets/files/%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%B5%81%E9%80%9A%E7%94%B3%E8%AB%8B%E8%A1%A8.doc" target="_blank">電子資料申請書</a> <br />
-            <div class="d-flex">
-                <b-input-group size="sm">
-                    <b-input-group-prepend is-text>關鍵字/段代碼</b-input-group-prepend>
-                    <b-form-input
-                        placeholder="'榮民段' OR '0200'"
-                        ref="text"
-                        v-model="text"
-                        @keyup.enter="query"
-                        :state="validate"
-                    ></b-form-input>
-                </b-input-group>
-                <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋段小段'" :disabled="!validate"><i class="fas fa-search"></i></b-button>
-            </div>
+            <b-input-group size="sm" prepend="關鍵字/段代碼">
+                <b-form-input
+                    placeholder="'榮民段' OR '0200'"
+                    ref="text"
+                    v-model="text"
+                    @keyup.enter="query"
+                    :state="validate"
+                ></b-form-input>
+                <template v-slot:append>
+                    <b-button @click="query" variant="outline-primary" size="sm" v-b-tooltip="'搜尋段小段'" :disabled="!validate"><i class="fas fa-search"></i></b-button>
+                </template>
+            </b-input-group>
         </fieldset>`,
         data: () => ({
             text: ''
