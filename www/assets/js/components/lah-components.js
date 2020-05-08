@@ -284,6 +284,7 @@ if (Vue) {
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottom" delay="350">
                             <lah-user-message-history ref="message" :ip="myip" count=5 title="最新訊息" class="mb-2" :tabs="true" :tabs-end="true"></lah-user-message-history>
                             <lah-user-message-reservation></lah-user-message-reservation>
+                            <b-button block @click.stop="clearCache" variant="outline-secondary" size="sm"><lah-fa-icon icon="broom"> 清除快取資料</lah-fa-icon></b-button>
                         </b-popover>
                     </b-navbar-nav>
                 </b-collapse>
@@ -451,7 +452,8 @@ if (Vue) {
                 }).finally(() => {
 
                 });
-            }
+            },
+            clearCache: function() { this.$lf.clear().then(() => { this.notify({title: '清除快取', message: '快取資料已清除，請重新整理頁面。', type: "success"}) }) }
         },
         created() {
             this.setUnreadMessageCount();
@@ -2817,6 +2819,7 @@ if (Vue) {
                             max="41"
                             step="0.1"
                             class="no-cache"
+                            @keyup.enter="register"
                         >
                         </b-form-input>
                     </b-input-group>
@@ -2915,38 +2918,40 @@ if (Vue) {
                 });
             },
             register() {
-                this.$confirm(`姓名：${this.name} 體溫：${this.temperature} &#8451;`, () => {
-                    if (this.empty(this.name)) {
-                        this.notify({ message: '無法找到使用者，無法登錄。', type: "warning"});
-                        return;
+                if (this.disabled) {
+                    this.$warn('輸入資料未齊全，跳過登錄。')
+                    return;
+                }
+                if (this.empty(this.name)) {
+                    this.notify({ message: `無法找到使用者 ${this.ID}，無法登錄。`, type: "warning"});
+                    return;
+                }
+                this.isBusy = true;
+                this.$http.post(CONFIG.JSON_API_EP, {
+                    type: 'add_temperature',
+                    id: this.ID,
+                    temperature: this.temperature
+                }).then(res => {
+                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "設定體溫資料回傳狀態碼有問題【" + res.data.status + "】");
+                    if (res.data.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        this.notify({
+                            title: "新增體溫紀錄",
+                            message: res.data.message,
+                            type: "warning",
+                            pos: 'tc'
+                        });
+                    } else {
+                        this.notify({
+                            title: "新增體溫紀錄",
+                            message: "已設定完成。<p>" + this.ID + "-" + this.name + "-" + this.temperature + "</p>",
+                            type: "success"
+                        });
+                        this.history();
                     }
-                    this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
-                        type: 'add_temperature',
-                        id: this.ID,
-                        temperature: this.temperature
-                    }).then(res => {
-                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "設定體溫資料回傳狀態碼有問題【" + res.data.status + "】");
-                        if (res.data.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                            this.notify({
-                                title: "新增體溫紀錄",
-                                message: res.data.message,
-                                type: "warning",
-                                pos: 'tc'
-                            });
-                        } else {
-                            this.notify({
-                                title: "新增體溫紀錄",
-                                message: "已設定完成。<p>" + this.ID + "-" + this.name + "-" + this.temperature + "</p>",
-                                type: "success"
-                            });
-                            this.history();
-                        }
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        this.isBusy = false;
-                    });
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
                 });
             },
             history(all = false) {
