@@ -278,7 +278,7 @@ if (Vue) {
                     <b-navbar-nav @click="location.href='message.html'" class="ml-auto mr-2" style="cursor: pointer;" :title="avatar_badge+'則未讀訊息'">
                         <b-avatar v-if="showBadge" icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-avatar v-else icon="people-fill" variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
-                        <b-popover ref="fun" target="header-user-icon" placement="left" :show.sync="fri_noon">
+                        <b-popover ref="fun" target="header-user-icon" placement="left" :show="fri_noon">
                             <i class="far fa-laugh-wink fa-lg ld ld-swing"></i> 快放假了~離下班只剩 {{left_hours}} 小時
                         </b-popover>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottom" delay="350">
