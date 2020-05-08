@@ -1127,5 +1127,16 @@ class Query {
 
 		return true;
 	}
+
+	// 取得權利人資料
+	public function getRLNIDByID($id) {
+		$this->db->parse("
+			select * from MOICAD.RLNID t
+			where lidn = :bv_id
+		");
+		$this->db->bind(":bv_id", $id);
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
 }
 ?>
