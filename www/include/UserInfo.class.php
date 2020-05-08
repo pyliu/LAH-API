@@ -55,7 +55,7 @@ class UserInfo {
         $name = trim($name);
         // query by name
         $log->info(__METHOD__.": Search By Name: $name");
-        $results = $this->jungli_in_db->fetchAll("SELECT * FROM AP_USER WHERE AP_USER_NAME LIKE '%${name}%' ORDER BY DocUserID, AP_ON_DATE");
+        $results = $this->jungli_in_db->fetchAll("SELECT * FROM AP_USER WHERE AP_USER_NAME LIKE '%${name}%' ORDER BY DocUserID, AP_USER_NAME,AP_ON_DATE");
 
         return $results;
     }
@@ -70,7 +70,7 @@ class UserInfo {
         }
 
         $log->info(__METHOD__.": Search By IP: $ip");
-        $results = $this->jungli_in_db->fetchAll("SELECT * FROM AP_USER WHERE AP_PCIP = '${ip}' ORDER BY AP_ON_DATE DESC");
+        $results = $this->jungli_in_db->fetchAll("SELECT * FROM AP_USER WHERE AP_PCIP = '${ip}' ORDER BY AP_ON_DATE");
     
         return $results;
     }
