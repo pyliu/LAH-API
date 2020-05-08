@@ -259,7 +259,7 @@ if (Vue) {
 
     Vue.component("lah-header", {
         template: `<lah-transition slide-down>
-            <b-navbar v-if="show" toggleable="md" type="dark" variant="dark" class="mb-3" fixed="top" :style="bgStyle">
+            <b-navbar toggleable="md" type="dark" variant="dark" class="mb-3" fixed="top" :style="bgStyle">
                 <lah-fa-icon size="2x" variant="light" class="mr-2" :icon="icon"></lah-fa-icon>
                 <b-navbar-brand :href="location.href" v-html="leading"></b-navbar-brand>
                 <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
@@ -278,7 +278,7 @@ if (Vue) {
                     <b-navbar-nav @click="location.href='message.html'" class="ml-auto mr-2" style="cursor: pointer;" :title="avatar_badge+'則未讀訊息'">
                         <b-avatar v-if="showBadge" icon="people-fill" variant="light" :badge="avatar_badge" badge-variant="primary" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
                         <b-avatar v-else icon="people-fill" variant="light" id="header-user-icon" size="2.8rem" :src="avatar_src"></b-avatar>
-                        <b-popover ref="fun" target="header-user-icon" placement="left" :show.sync="fri_afternoon">
+                        <b-popover ref="fun" target="header-user-icon" placement="left" :show.sync="fri_noon">
                             <i class="far fa-laugh-wink fa-lg ld ld-swing"></i> 快放假了~離下班只剩 {{left_hours}} 小時
                         </b-popover>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottom" delay="350">
@@ -291,7 +291,7 @@ if (Vue) {
             </b-navbar>
         </lah-transition>`,
         data: () => ({
-            show: true,
+            fri_noon: false,
             icon: "question",
             leading: "Unknown",
             active: undefined,
@@ -307,17 +307,12 @@ if (Vue) {
                 icon: "calendar-alt",
                 need_admin: false
             }, {
-                text: "信差訊息",
-                url: "message.html",
-                icon: "comments",
-                need_admin: false
-            }, {
                 text: "繼承應繼分",
                 url: "heir_share.html",
                 icon: "chart-pie",
                 need_admin: false
             }, {
-                text: "防疫體溫紀錄",
+                text: "體溫紀錄",
                 url: "temperature.html",
                 icon: "head-side-mask",
                 need_admin: false
@@ -325,6 +320,11 @@ if (Vue) {
                 text: "使用者查詢",
                 url: "user.html",
                 icon: "users",
+                need_admin: false
+            }, {
+                text: "信差訊息",
+                url: "message.html",
+                icon: "comments",
                 need_admin: false
             }, {
                 text: "記錄瀏覽",
@@ -365,11 +365,6 @@ if (Vue) {
                 }
             },
             avatar_src() { return this.empty(this.myname) ? 'get_user_img.php?name=not_found' : `get_user_img.php?name=${this.myname}_avatar` },
-            fri_afternoon() {
-                let day_of_week = new Date().getDay();
-                let hours = new Date().getHours();
-                return day_of_week == 5 && hours < 17 && hours > 12;
-            },
             left_hours() {
                 let hours = new Date().getHours();
                 return 17 - hours;
@@ -456,6 +451,9 @@ if (Vue) {
             clearCache: function() { this.$lf.clear().then(() => { this.notify({title: '清除快取', message: '快取資料已清除，請重新整理頁面。', type: "success"}) }) }
         },
         created() {
+            let day_of_week = new Date().getDay();
+            let hours = new Date().getHours();
+            this.fri_noon = day_of_week == 5 && hours < 17 && hours > 12;
             this.setUnreadMessageCount();
         },
         mounted() {
@@ -3415,9 +3413,11 @@ if (Vue) {
             });
             setTimeout(() => {
                 this.selected = this.$refs.select.$el.value;
-                let opt = $("select.custom-select optgroup option[value='" + this.selected + "']")[0];
-                this.$assert(opt, "找不到選取的 option。", $("select.custom-select optgroup option[value='" + this.selected + "']"));
-                this.selected_label = opt.label;
+                if ($("select.custom-select optgroup option[value='" + this.selected + "']").length > 0) {
+                    let opt = $("select.custom-select optgroup option[value='" + this.selected + "']")[0];
+                    this.$assert(opt, "找不到選取的 option。", $("select.custom-select optgroup option[value='" + this.selected + "']"));
+                    this.selected_label = opt.label;
+                }
             }, 400);
         }
     });
