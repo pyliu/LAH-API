@@ -1132,9 +1132,9 @@ class Query {
 	public function getRLNIDByID($id) {
 		$this->db->parse("
 			select * from MOICAD.RLNID t
-			where lidn = :bv_id
+			where lidn like :bv_id
 		");
-		$this->db->bind(":bv_id", $id);
+		$this->db->bind(":bv_id", '%'.$id.'%');
 		$this->db->execute();
 		return $this->db->fetchAll();
 	}

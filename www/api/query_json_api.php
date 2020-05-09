@@ -1159,6 +1159,26 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("更新案件欄位失敗");
 		}
 		break;
+	case "rlnid":
+		$param = $_POST["id"];
+		$log->info("XHR [rlnid] 取得權利人資訊【${param}】請求");
+		$results = $mock ? $cache->get('rlnid') : $query->getRLNIDByID($param);
+		$cache->set('rlnid', $results);
+		if (empty($results)) {
+			echoErrorJSONString("查無 ${param} 權利人資訊。");
+			$log->info("XHR [user_unread_message] 查無 ${param} 權利人資訊。");
+		} else {
+			$json = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($results),
+				"raw" => $results,
+				"query_string" => "id=".$_POST["id"],
+				"message" => "XHR [rlnid] 查詢 ${param} 權利人資訊成功。(".count($results).")"
+			);
+			$log->info($json["message"]);
+			echo json_encode($json, 0);
+		}
+		break;
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoErrorJSONString("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
