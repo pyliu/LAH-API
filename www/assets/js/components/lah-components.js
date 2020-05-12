@@ -332,9 +332,14 @@ if (Vue) {
                 icon: "dog",
                 need_admin: true
             }, {
-                text: `管理看板`,
+                text: `管理儀錶板`,
                 url: "dashboard.html",
                 icon: "cubes",
+                need_admin: true
+            }, {
+                text: `測試`,
+                url: "test.html",
+                icon: "tools",
                 need_admin: true
             }]
         }),
