@@ -2,13 +2,16 @@ if (Vue) {
   Vue.component('lah-heir-share-ratio', {
     template: `<b-card-group deck>
         <b-card>
+        <h5>
+          <lah-fa-icon icon="chevron-circle-right" variant="danger">被繼承人資訊</lah-fa-icon>
+        </h5>
           <div class="d-flex">
-            <b-input-group prepend="權利人" size="sm">
+            <b-input-group :prepend="name" size="sm">
               <b-form-input
                   ref="pid"
                   v-model="id"
                   placeholder="A123456789"
-                  :state="valid"
+                  :state="validID"
                   title="身分證號"
               ></b-form-input>
             </b-input-group>
@@ -290,11 +293,11 @@ if (Vue) {
     },
     data: () => ({
       id: '',
-      name: '',
+      name: '權利人',
       dead: false,
       wizard: {
         s0: {
-          title: "步驟1，選擇事實發生區間",
+          title: "步驟1，選擇發生區間",
           legend: "被繼承人死亡時間",
           seen: true,
           value: ""
@@ -505,6 +508,27 @@ if (Vue) {
       }
     },
     watch: {
+      id(val) {
+        if (this.validID) {
+          this.isBusy = true;
+          this.$http.post(CONFIG.JSON_API_EP, {
+            type: 'rlnid',
+            id: this.id
+          }).then(res => {
+            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+              // res.data.raw always returns array, so I pick the first record.
+              this.name = res.data.raw[0]['LNAM'];
+            } else {
+              this.$warn(res.data.message);
+              this.name = '權利人';
+            }
+          }).catch(err => {
+            this.error = err;
+          }).finally(() => {
+            this.isBusy = false;
+          });
+        }
+      },
       "wizard.s1.public.count": function () {
         this.resetChartData();
         this.addChartData("繼承人", 1, this.wizard.s1.public.count);
@@ -710,7 +734,7 @@ if (Vue) {
       seen_heir_inputs: function () {
         return this.dead
       },
-      valid: function() {
+      validID: function() {
         if (this.id == '') return null;
         return this.checkID(this.id);
       }
