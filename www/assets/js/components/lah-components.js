@@ -3238,7 +3238,6 @@ if (Vue) {
                 setTimeout(() => this.id = this.getUrlParameter('id'), 400);
             }
             this.btnid = this.uuid();
-            setTimeout(() => this.$log(this.myid), 400);
         }
     });
 
