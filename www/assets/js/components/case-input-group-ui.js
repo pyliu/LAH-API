@@ -40,7 +40,7 @@ if (Vue) {
                 reg: {
                     HB: {
                         label: "本所",
-                        options: ["HB04 壢登", "HB05 壢永", "HB06 壢速"]
+                        options: ["HB04 壢登", "HB05 壢永", "HB06 壢速", "HB31 地價更正"]
                     },
                     HXB1: {
                         label: "本所收件(跨所)",
