@@ -156,14 +156,13 @@ class Query {
 				ORDER BY RM01 DESC, RM03 DESC
 			");
 		}
+		
 		$this->db->bind(":bv_year", $year);
 		$this->db->bind(":bv_code", trim($code));
 		$this->db->execute();
 		$row = $this->db->fetch();
 
-
-
-		return empty($row) ? "0" : ltrim(array_key_exists($code, SUR_WORD) ? $row["MM03"] : $row["RM03"], "0");
+		return empty($row) ? "0" : ltrim($row[$num_key], "0");
 	}
 
 	public function getCRSMSCasesByPID($id) {
