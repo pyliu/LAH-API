@@ -2462,8 +2462,6 @@ if (Vue) {
         },
         created() {
             this.busyIconSize = "1x";
-        },
-        mounted() {
             this.isBusy = true;
             this.$http.post(CONFIG.JSON_API_EP, {
                 type: "query_temp_data",

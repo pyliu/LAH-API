@@ -183,6 +183,10 @@ define('SUR_WORD', [
     "HB18" => "中地法建"
 ]);
 
+define('PRC_WORD', [
+    "HB31" => "地價更正"
+]);
+
 define('REG_CODE', [
     "本所" => [
         "HB04" => "壢登",

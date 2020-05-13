@@ -91,10 +91,12 @@ if (Vue) {
             getMaxNumber: function(e) {
                 let year = this.year;
                 let code = this.code;
+                
                 if (this.empty(code) || this.empty(year)) {
                     this.notify({message: "案件年或案件字為空白，無法取得案件目前最大號碼。", type: "warning"});
                     return;
                 }
+
                 this.isBusy = true;
                 this.$http.post(CONFIG.JSON_API_EP, {
                     "type": "max",
@@ -137,7 +139,7 @@ if (Vue) {
                 }
             },
             codeBg(label) {
-                let bg_css = 'bg-dark text-white';
+                let bg_css = '';
                 switch (label) {
                     case '登記案件-本所收件(跨所)':
                         bg_css = 'bg-primary text-white';
@@ -146,10 +148,16 @@ if (Vue) {
                         bg_css = 'bg-info text-white';
                         break;
                     case '登記案件-本所收件(跨縣市)':
-                        bg_css = 'bg-secondary text-white';
+                        bg_css = 'bg-success text-white';
                         break;
                     case '登記案件-他所收件(跨縣市)':
                         bg_css = 'bg-warning';
+                        break;
+                    case '測量案件':
+                        bg_css = 'bg-dark text-white';
+                        break;
+                    case '地價案件':
+                        bg_css = 'bg-secondary text-white';
                         break;
                     default:
                         break;
@@ -232,7 +240,7 @@ if (Vue) {
                     this.code_data.push(this.codes.reg.HBX1);
                     this.code_data.push(this.codes.reg.H2XX);
                     this.code_data.push(this.codes.reg.XXHB);
-                    this.num_step = this.num_min = 10;
+                    this.num_step = this.num_min = 1;
                     break;
                 default:
                     this.code_data.push(this.codes.reg.HB);

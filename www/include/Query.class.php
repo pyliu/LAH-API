@@ -134,13 +134,22 @@ class Query {
 			return false;
 		}
 
+		$num_key = "RM03";
 		if (array_key_exists($code, SUR_WORD)) {
 			$this->db->parse("
 				SELECT * from MOICAS.CMSMS t
 				WHERE MM01 = :bv_year AND MM02 = :bv_code AND rownum = 1
 				ORDER BY MM01 DESC, MM03 DESC
 			");
-		} else {
+			$num_key = "MM03";
+		} else if (array_key_exists($code, PRC_WORD)) {
+			$this->db->parse("
+				SELECT * from MOIPRC.PSCRN t
+				WHERE SS03 = :bv_year AND SS04_1 = :bv_code AND rownum = 1
+				ORDER BY SS03 DESC, SS04_1 DESC
+			");
+			$num_key = "SS04_2";
+		} else  {
 			$this->db->parse("
 				SELECT * from MOICAS.CRSMS t
 				WHERE RM01 = :bv_year AND RM02 = :bv_code AND rownum = 1
@@ -151,6 +160,9 @@ class Query {
 		$this->db->bind(":bv_code", trim($code));
 		$this->db->execute();
 		$row = $this->db->fetch();
+
+
+
 		return empty($row) ? "0" : ltrim(array_key_exists($code, SUR_WORD) ? $row["MM03"] : $row["RM03"], "0");
 	}
 
