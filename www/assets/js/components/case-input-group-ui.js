@@ -139,11 +139,17 @@ if (Vue) {
             codeBg(label) {
                 let bg_css = 'bg-dark text-white';
                 switch (label) {
-                    case '登記案件-他所收件(跨縣市)':
-                        bg_css = 'bg-warning';
+                    case '登記案件-本所收件(跨所)':
+                        bg_css = 'bg-primary text-white';
+                        break;
+                    case '登記案件-他所收件(跨所)':
+                        bg_css = 'bg-info text-white';
                         break;
                     case '登記案件-本所收件(跨縣市)':
-                        bg_css = 'bg-success text-white';
+                        bg_css = 'bg-secondary text-white';
+                        break;
+                    case '登記案件-他所收件(跨縣市)':
+                        bg_css = 'bg-warning';
                         break;
                     default:
                         break;
