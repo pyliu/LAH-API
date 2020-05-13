@@ -39,23 +39,23 @@ if (Vue) {
             codes: {
                 reg: {
                     HB: {
-                        label: "本所",
-                        options: ["HB04 壢登", "HB05 壢永", "HB06 壢速", "HB31 地價更正"]
+                        label: "登記案件-本所",
+                        options: ["HB04 壢登", "HB05 壢永", "HB06 壢速"]
                     },
                     HXB1: {
-                        label: "本所收件(跨所)",
+                        label: "登記案件-本所收件(跨所)",
                         options: ["HAB1 壢桃登跨", "HCB1 壢溪登跨", "HDB1 壢楊登跨", "HEB1 壢蘆登跨", "HFB1 壢德登跨", "HGB1 壢平登跨", "HHB1 壢山登跨"]
                     },
                     HBX1: {
-                        label: "他所收件(跨所)",
+                        label: "登記案件-他所收件(跨所)",
                         options: ["HBA1 桃壢登跨", "HBC1 溪壢登跨", "HBD1 楊壢登跨", "HBE1 蘆壢登跨", "HBF1 德壢登跨", "HBG1 平壢登跨", "HBH1 山壢登跨"]
                     },
                     H2XX: {
-                        label: "本所收件(跨縣市)",
+                        label: "登記案件-本所收件(跨縣市)",
                         options: []
                     },
                     XXHB: {
-                        label: "他所收件(跨縣市)",
+                        label: "登記案件-他所收件(跨縣市)",
                         options: []
                     }
                 },
@@ -63,6 +63,12 @@ if (Vue) {
                     HB: {
                         label: "測量案件",
                         options: ["HB12 中地測丈", "HB13 中地測建", "HB17 中地法土", "HB18 中地法建"]
+                    }
+                },
+                prc: {
+                    HB: {
+                        label: "地價案件",
+                        options: ["HB31 地價更正"]
                     }
                 }
             },
@@ -133,10 +139,10 @@ if (Vue) {
             codeBg(label) {
                 let bg_css = 'bg-dark text-white';
                 switch (label) {
-                    case '他所收件(跨縣市)':
+                    case '登記案件-他所收件(跨縣市)':
                         bg_css = 'bg-warning';
                         break;
-                    case '本所收件(跨縣市)':
+                    case '登記案件-本所收件(跨縣市)':
                         bg_css = 'bg-success text-white';
                         break;
                     default:
@@ -213,10 +219,20 @@ if (Vue) {
                 case "sync":
                     this.code_data.push(this.codes.reg.HXB1);
                     break;
+                case "tmp":
+                    this.code_data.push(this.codes.reg.HB);
+                    this.code_data.push(this.codes.prc.HB);
+                    this.code_data.push(this.codes.reg.HXB1);
+                    this.code_data.push(this.codes.reg.HBX1);
+                    this.code_data.push(this.codes.reg.H2XX);
+                    this.code_data.push(this.codes.reg.XXHB);
+                    this.num_step = this.num_min = 10;
+                    break;
                 default:
                     this.code_data.push(this.codes.reg.HB);
                     this.code_data.push(this.codes.reg.HXB1);
                     this.code_data.push(this.codes.reg.HBX1);
+                    this.code_data.push(this.codes.prc.HB);
                     this.code_data.push(this.codes.sur.HB);
                     this.code_data.push(this.codes.reg.H2XX);
                     this.code_data.push(this.codes.reg.XXHB);
