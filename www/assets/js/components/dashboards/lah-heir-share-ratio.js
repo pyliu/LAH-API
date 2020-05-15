@@ -511,7 +511,7 @@ if (Vue) {
       id(val) {
         if (this.validID) {
           this.isBusy = true;
-          this.$http.post(CONFIG.JSON_API_EP, {
+          this.$http.post(CONFIG.QUERY_JSON_API_EP, {
             type: 'rlnid',
             id: this.id
           }).then(res => {

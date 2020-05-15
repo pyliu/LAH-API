@@ -128,4 +128,13 @@ function getLocalhostIP() {
     }
     return $host_ip;
 }
+/**
+ * 
+ */
+function echoJSONResponse($msg, $in_array = array(), $status = STATUS_CODE::DEFAULT_FAIL) {
+	echo json_encode(array_merge(array(
+		"status" => $status,
+        "message" => $msg
+	), $in_array), 0);
+}
 ?>

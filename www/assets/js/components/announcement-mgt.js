@@ -24,7 +24,7 @@ if (Vue) {
             clear: function(e) {
                 this.$confirm("清除所有登記原因的准登旗標？", () => {
                     this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
+                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                         type: "clear_announcement_flag"
                     }).then(res => {
                         // let component knows it needs to clear the flag
@@ -137,7 +137,7 @@ if (Vue) {
                         this.reload();
                     },
                     reload: function() {
-                        this.$http.post(CONFIG.JSON_API_EP, {
+                        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                             type: 'announcement_data'
                         }).then(res => {
                             this.announcement_data = res.data.raw;
@@ -238,7 +238,7 @@ if (Vue) {
                                 this.$assert(this.reason_code.length == 2, "登記原因代碼應為2碼，如'30'");
                                 this.$confirm("確定要更新公告資料？", () => {
                                     this.isBusy = true;
-                                    this.$http.post(CONFIG.JSON_API_EP, {
+                                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                                         type: 'update_announcement_data',
                                         code: this.reason_code,
                                         day: this.day,

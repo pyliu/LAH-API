@@ -39,7 +39,7 @@ if (Vue) {
             check: function(e) {
                 const h = this.$createElement;
                 this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: "xcase-check"
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
@@ -81,7 +81,7 @@ if (Vue) {
                         let li = $(e.target).closest("li");
                         this.isBusy = true;
                         $(e.target).remove();
-                        this.$http.post(CONFIG.JSON_API_EP, {
+                        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                             type: "fix_xcase",
                             id: id
                         }).then(res => {

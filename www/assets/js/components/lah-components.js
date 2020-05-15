@@ -443,7 +443,7 @@ if (Vue) {
                 });
             },
             setUnreadMessageCount: function() {
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: 'user_unread_message',
                     ip: this.myip
                 }).then(res => {
@@ -854,7 +854,7 @@ if (Vue) {
                     this.$warn("Keyword field should not be empty.");
                     return;
                 }
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: 'search_user',
                     keyword: keyword
                 }).then(res => {
@@ -932,7 +932,7 @@ if (Vue) {
                 this.getLocalCache('onboard_users').then(cached => {
                     if (cached === false) {
                         this.isBusy = true;
-                        this.$http.post(CONFIG.JSON_API_EP, {
+                        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                             type: 'on_board_users'
                         }).then(res => {
                             this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得在職使用者資料回傳值有誤【${res.data.status}】`)
@@ -1179,7 +1179,7 @@ if (Vue) {
                 const succeed_cached = await this.restoreUserRows();
                 if (!succeed_cached) {
                     if (!(this.name || this.id || this.ip)) this.ip = this.myip || await this.getLocalCache('myip');
-                    this.$http.post(CONFIG.JSON_API_EP, {
+                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                         type: "user_info",
                         name: $.trim(this.name),
                         id: $.trim(this.id),
@@ -1332,7 +1332,7 @@ if (Vue) {
                     callback: () => {
                         $(`#${this.btn_grp_id}`).hide();
                         this.isBusy = true;
-                        this.$http.post(CONFIG.JSON_API_EP, {
+                        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                             type: "send_message",
                             title: title,
                             content: content,
@@ -1453,7 +1453,7 @@ if (Vue) {
                                 this.raws = raws.slice(0, this.count);
                             } else {
                                 this.isBusy = true;
-                                this.$http.post(CONFIG.JSON_API_EP, {
+                                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                                     type: "user_message",
                                     id: this.id,
                                     name: this.name,
@@ -1482,7 +1482,7 @@ if (Vue) {
             },
             read(sn, idx) {
                 if (!this.disableMSDBQuery) {
-                    this.$http.post(CONFIG.JSON_API_EP, {
+                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                         type: "set_read_user_message",
                         sn: sn
                     }).then(res => {
@@ -1501,7 +1501,7 @@ if (Vue) {
             },
             unread(sn, idx) {
                 if (!this.disableMSDBQuery) {
-                    this.$http.post(CONFIG.JSON_API_EP, {
+                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                         type: "set_unread_user_message",
                         sn: sn
                     }).then(res => {
@@ -1521,7 +1521,7 @@ if (Vue) {
             del(sn) {
                 if (!this.disableMSDBQuery) {
                     this.$confirm('此動作無法復原，確定刪除本則訊息？', () => {
-                        this.$http.post(CONFIG.JSON_API_EP, {
+                        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                             type: "del_user_message",
                             sn: sn
                         }).then(res => {
@@ -1634,7 +1634,7 @@ if (Vue) {
                     return;
                 }
                 this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: "send_message",
                     title: this.message,
                     content: this.message,
@@ -1688,7 +1688,7 @@ if (Vue) {
         created() {
             if (this.bakedData === undefined) {
                 this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: "reg_case",
                     id: `${this.year}${this.code}${this.number}`
                 }).then(res => {
@@ -1826,7 +1826,7 @@ if (Vue) {
                     $(arguments.el).remove();
                 }
                 this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: "reg_upd_col",
                     rm01: arguments.rm01,
                     rm02: arguments.rm02,
@@ -2291,7 +2291,7 @@ if (Vue) {
                 let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + this.year + "-" + this.code + "-" + this.number + " 全部暫存檔?";
                 showConfirm(msg, () => {
                     this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
+                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                         type: 'clear_temp_data',
                         year: this.year,
                         code: this.code,
@@ -2335,7 +2335,7 @@ if (Vue) {
                 let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + this.year + "-" + this.code + "-" + this.number + " " + table + " 暫存檔?";
                 showConfirm(msg, () => {
                     this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
+                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                         type: 'clear_temp_data',
                         year: this.year,
                         code: this.code,
@@ -2468,7 +2468,7 @@ if (Vue) {
         created() {
             this.busyIconSize = "1x";
             this.isBusy = true;
-            this.$http.post(CONFIG.JSON_API_EP, {
+            this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                 type: "query_temp_data",
                 year: this.year,
                 code: this.code,
@@ -2732,7 +2732,7 @@ if (Vue) {
         methods: {
             fetch(data) {
                 let id = `${data["RM01"]}${data["RM02"]}${data["RM03"]}`;
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: "reg_case",
                     id: id
                 }).then(res => {
@@ -2903,7 +2903,7 @@ if (Vue) {
             doDeletion(item) {
                 this.$confirm(`刪除 ${this.userNames[item['id']]} ${item['value']} &#8451;紀錄？`, () => {
                     this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
+                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                         type: 'remove_temperature',
                         id: item['id'],
                         datetime: item['datetime']
@@ -2933,7 +2933,7 @@ if (Vue) {
                     return;
                 }
                 this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: 'add_temperature',
                     id: this.ID,
                     temperature: this.temperature
@@ -2963,7 +2963,7 @@ if (Vue) {
             history(all = false) {
                 this.isBusy = true;
                 if (all) this.chart_items = undefined;
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: 'temperatures',
                     id: all ? '' : this.ID
                 }).then(res => {
@@ -3006,7 +3006,7 @@ if (Vue) {
             },
             overview() {
                 this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: 'on_board_users'
                 }).then(res => {
                     let vn = this.$createElement('lah-temperature-list', {
@@ -3088,7 +3088,7 @@ if (Vue) {
             },
             prepareTodayTemperatures() {
                 this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: 'temperatures_by_date',
                     date: this.today
                 }).then(res => {
@@ -3207,7 +3207,7 @@ if (Vue) {
             },
             getMyTemperatures() {
                 this.isBusy = true;
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: 'temperatures_by_id_date',
                     id: this.id,
                     date: this.today
@@ -3523,7 +3523,7 @@ if (Vue) {
                         this.result(json);
                     } else {
                         this.isBusy = true;
-                        this.$http.post(CONFIG.JSON_API_EP, {
+                        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                             type: 'ralid',
                             text: this.text
                         }).then(res => {
@@ -3571,6 +3571,51 @@ if (Vue) {
         }
     });
 
+    /**
+     * Stats
+     */
+    Vue.component("lah-stats-item", {
+        template: `<div v-if="ok">
+            <b-list-group>
+                <b-list-group-item class="d-flex justify-content-between align-items-center">
+                    {{text}}-{{date}}
+                    <b-badge variant="primary" pill>{{count}}</b-badge>
+                </b-list-group-item>
+            </b-list-group>
+        </div>`,
+        props: {
+            category: { type: String, default: 'stats_refund' },
+        },
+        data: () => ({
+            text: 'TBD',
+            count: 0,
+            date: '10904',
+            ok: false
+        }),
+        computed: {},
+        methods: {
+            stats_refund() {
+                this.$http.post(CONFIG.STATS_JSON_API_EP, {
+                    type: 'stats_refund',
+                    date: this.date
+                }).then(res => {
+                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "stats_refund 回傳狀態碼錯誤【" + res.data.status + "】");
+                    this.ok = res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL;
+                    if (this.ok) {
+                        this.text = res.data.text;
+                        this.count = res.data.count;
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+
+                });
+            }
+        },
+        created() {
+            this.stats_refund();
+        }
+    });
 } else {
     console.error("vue.js not ready ... lah-xxxxxxxx components can not be loaded.");
 }

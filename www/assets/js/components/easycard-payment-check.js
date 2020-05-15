@@ -46,7 +46,7 @@ if (Vue) {
                 this.isBusy = true;
                 const h = this.$createElement;
 
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: "easycard",
                     qday: this.date
                 }).then(res => {
@@ -106,7 +106,7 @@ if (Vue) {
                         let message = "確定要修正 日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料?";
                         showConfirm(message, () => {
                             this.isBusy = true;
-                            this.$http.post(CONFIG.JSON_API_EP, {
+                            this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                                 type: "fix_easycard",
                                 qday: qday,
                                 pc_num: pc_number

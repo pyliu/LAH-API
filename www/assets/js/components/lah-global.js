@@ -144,7 +144,7 @@ Vue.prototype.$store = (() => {
                             // within a day use the cached data
                             commit("userNames", json || {});
                         } else {
-                            await axios.post(CONFIG.JSON_API_EP, {
+                            await axios.post(CONFIG.QUERY_JSON_API_EP, {
                                 type: 'user_mapping'
                             }).then(async res => {
                                 let json = res.data.data;
@@ -170,7 +170,7 @@ Vue.prototype.$store = (() => {
                         const now_ts = +new Date();
                         // over 15 mins, re-authenticate ... otherwise skip the request
                         if (isAdmin === null || !Number.isInteger(set_ts) || now_ts - set_ts > 900000) {
-                            await axios.post(CONFIG.JSON_API_EP, {
+                            await axios.post(CONFIG.QUERY_JSON_API_EP, {
                                 type: 'authentication'
                             }).then(res => {
                                 commit("isAdmin", res.data.is_admin || false);
@@ -785,7 +785,7 @@ $(document).ready(() => {
                 // remove additional characters for querying
                 let id = trim(clicked_element.text());
     
-                this.$http.post(CONFIG.JSON_API_EP, {
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                     type: "reg_case",
                     id: id
                 }).then(res => {
@@ -918,7 +918,7 @@ $(document).ready(() => {
                         if (myinfo) {
                             this.$store.commit("myinfo", myinfo);
                         } else {
-                            this.$http.post(CONFIG.JSON_API_EP, {
+                            this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                                 type: 'my_info'
                             }).then(res => {
                                 if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
@@ -936,7 +936,7 @@ $(document).ready(() => {
                 }
                 this.getLocalCache('myip').then(myip => {
                     if (this.empty(myip)) {
-                        this.$http.post(CONFIG.JSON_API_EP, {
+                        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                             type: 'ip'
                         }).then(res => {
                             this.setLocalCache('myip', res.data.ip, 86400000);

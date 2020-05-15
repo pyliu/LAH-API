@@ -260,7 +260,7 @@ if (Vue) {
                 } else {
                     this.getLocalCache(this.cache_key).then(jsonObj => {
                         if (jsonObj === false) {
-                            this.$http.post(CONFIG.JSON_API_EP, {
+                            this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                                 type: this.is_overdue_mode ? "overdue_reg_cases" : "almost_overdue_reg_cases",
                                 reviewer_id: this.reviewerID
                             }).then(res => {
@@ -326,7 +326,7 @@ if (Vue) {
                 }
             },
             getOverdueMessageStats: function(e) {
-                this.$http.post(CONFIG.JSON_API_EP,{
+                this.$http.post(CONFIG.QUERY_JSON_API_EP,{
                     type: "stats_overdue_msg_total"
                 }).then(res => {
                     console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢逾期案件統計回傳狀態碼有問題【${res.data.status}】`);

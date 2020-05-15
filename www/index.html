@@ -146,7 +146,7 @@
                                 this.getLocalCacheExpireRemainingTime(this.cache_key).then(remaining_ms => this.resetTimer(remaining_ms));
                             } else {
                                 this.endCountdown();
-                                this.$http.post(CONFIG.JSON_API_EP, {
+                                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                                     type: "reg_cases_by_day",
                                     qday: this.qday
                                 }).then(res => {

@@ -41,7 +41,7 @@ if (Vue) {
             query: function(e) {
                 if (this.validate) {
                     this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
+                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                         type: "sur_case",
                         id: this.id
                     }).then(res => {
@@ -183,7 +183,7 @@ if (Vue) {
                         if (this.orig_count != this.count) {
                             showConfirm("確定要修改 " + title + " 為「" + this.count + "」？", () => {
                                 this.isBusy = true;
-                                this.$http.post(CONFIG.JSON_API_EP, {
+                                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                                     type: "upd_case_column",
                                     id: this.id,
                                     table: "SCMSMS",
@@ -228,7 +228,7 @@ if (Vue) {
                         showConfirm("確定要修正本案件?", () => {
                             this.isBusy = true;
                             //fix_sur_delay_case
-                            this.$http.post(CONFIG.JSON_API_EP, {
+                            this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                                 type: "fix_sur_delay_case",
                                 id: id,
                                 UPD_MM22: upd_mm22,

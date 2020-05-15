@@ -41,7 +41,7 @@ if (Vue) {
             regQuery: function(e) {
                 if (this.validate) {
                     this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
+                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                         type: "reg_case",
                         id: this.id
                     }).then(res => {
@@ -75,7 +75,7 @@ if (Vue) {
             prcQuery: function(e) {
                 if (this.validate) {
                     this.isBusy = true;
-                    this.$http.post(CONFIG.JSON_API_EP, {
+                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
                         type: "prc_case",
                         id: this.id
                     }).then(res => {
