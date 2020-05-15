@@ -15,16 +15,16 @@ switch ($_POST["type"]) {
 		$result = $stats->getRefundCount($_POST['date']);
 		$result = $mock ? $cache->get('stats_refund') : $stats->getRefundCount($_POST['date']);
         $cache->set('stats_refund', $result);
-        echoJSONResponse("取得 ".count($result)." 筆資料。", array(
+        echoJSONResponse("取得 ".count($result)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
 			"data_count" => count($result),
             "raw" => $result,
             "text" => "溢繳規費數量",
             "count" => $result[0]['count']
-		), STATUS_CODE::SUCCESS_NORMAL);
+		));
 		break;
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
-		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", array(), STATUS_CODE::UNSUPPORT_FAIL);
+		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
 		break;
 }
 ?>

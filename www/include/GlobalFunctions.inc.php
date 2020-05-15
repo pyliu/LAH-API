@@ -131,7 +131,7 @@ function getLocalhostIP() {
 /**
  * 
  */
-function echoJSONResponse($msg, $in_array = array(), $status = STATUS_CODE::DEFAULT_FAIL) {
+function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array = array()) {
 	echo json_encode(array_merge(array(
 		"status" => $status,
         "message" => $msg
