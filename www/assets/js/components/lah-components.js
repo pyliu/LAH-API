@@ -337,6 +337,11 @@ if (Vue) {
                 icon: "cubes",
                 need_admin: true
             }, {
+                text: `統計報表`,
+                url: "stats.html",
+                icon: "file-contract",
+                need_admin: true
+            }, {
                 text: `測試`,
                 url: "test.html",
                 icon: "tools",

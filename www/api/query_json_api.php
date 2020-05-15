@@ -7,7 +7,7 @@ require_once(ROOT_DIR."/include/Query.class.php");
 require_once(ROOT_DIR."/include/Message.class.php");
 require_once(ROOT_DIR."/include/WatchDog.class.php");
 require_once(ROOT_DIR."/include/UserInfo.class.php");
-require_once(ROOT_DIR."/include/Stats.class.php");
+require_once(ROOT_DIR."/include/StatsSQLite3.class.php");
 require_once(ROOT_DIR."/include/Cache.class.php");
 require_once(ROOT_DIR."/include/Temperature.class.php");
 
@@ -29,7 +29,7 @@ if ($mock) $log->warning("現在處於模擬模式(mock mode)，API僅會回應�
 
 switch ($_POST["type"]) {
 	case "stats_overdue_msg_total":
-		$stats = new Stats();
+		$stats = new StatsSQLite3();
 		$total = $stats->getTotal('overdue_msg_count');
 		// $total = $mock ? $cache->get('overdue_msg_count') : $stats->getTotal('overdue_msg_count');
 		// $cache->set('overdue_msg_count', $total);

@@ -2,7 +2,7 @@
 require_once(dirname(dirname(__FILE__)).'/include/init.php');
 require_once(ROOT_DIR.'/include/Query.class.php');
 require_once(ROOT_DIR.'/include/Message.class.php');
-require_once(ROOT_DIR.'/include/Stats.class.php');
+require_once(ROOT_DIR.'/include/StatsSQLite3.class.php');
 require_once(ROOT_DIR.'/include/Temperature.class.php');
 require_once(ROOT_DIR.'/include/UserInfo.class.php');
 
@@ -218,7 +218,7 @@ class WatchDog {
     }
 
     function __construct() {
-        $this->stats = new Stats();
+        $this->stats = new StatsSQLite3();
     }
 
     function __destruct() { }

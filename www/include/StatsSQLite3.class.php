@@ -1,7 +1,7 @@
 <?php
 require_once('init.php');
 
-class Stats {
+class StatsSQLite3 {
     private $db;
 
     function __construct() {
