@@ -3634,8 +3634,12 @@ if (Vue) {
                 case "stats_court":
                     this.stats_court();
                     break;
-                default:
+                case "stats_refund":
                     this.stats_refund();
+                    break;
+                default:
+                    this.$warn("Not supported category.", this.category);
+                    this.alert({message: "lah-stats-item: Not supported category.【" + this.category + "】", type: "warning"});
             }
         }
     });
