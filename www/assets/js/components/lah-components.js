@@ -3610,10 +3610,33 @@ if (Vue) {
                 }).finally(() => {
 
                 });
-            }
+            },
+            stats_court() {
+                this.$http.post(CONFIG.STATS_JSON_API_EP, {
+                    type: 'stats_court',
+                    date: this.date
+                }).then(res => {
+                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "stats_refund 回傳狀態碼錯誤【" + res.data.status + "】");
+                    this.ok = res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL;
+                    if (this.ok) {
+                        this.text = res.data.text;
+                        this.count = res.data.count;
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+
+                });
+            },
         },
         created() {
-            this.stats_refund();
+            switch(this.category) {
+                case "stats_court":
+                    this.stats_court();
+                    break;
+                default:
+                    this.stats_refund();
+            }
         }
     });
 } else {
