@@ -3577,9 +3577,9 @@ if (Vue) {
     Vue.component("lah-stats-item", {
         template: `<div v-if="ok">
             <b-list-group>
-                <b-list-group-item class="d-flex justify-content-between align-items-center">
-                    {{text}}-{{date}}
-                    <b-badge variant="primary" pill>{{count}}</b-badge>
+                <b-list-group-item v-for="item in items" class="d-flex justify-content-between align-items-center">
+                    {{item.text}}-{{date}}
+                    <b-badge variant="primary" pill>{{item.count}}</b-badge>
                 </b-list-group-item>
             </b-list-group>
         </div>`,
@@ -3587,8 +3587,7 @@ if (Vue) {
             category: { type: String, default: 'stats_refund' },
         },
         data: () => ({
-            text: 'TBD',
-            count: 0,
+            items: [],
             date: '10904',
             ok: false
         }),
@@ -3602,8 +3601,10 @@ if (Vue) {
                     this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "stats_refund 回傳狀態碼錯誤【" + res.data.status + "】");
                     this.ok = res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL;
                     if (this.ok) {
-                        this.text = res.data.text;
-                        this.count = res.data.count;
+                        this.items.push({
+                            text:　res.data.text,
+                            count: res.data.count
+                        });
                     }
                 }).catch(err => {
                     this.error = err;
@@ -3619,8 +3620,10 @@ if (Vue) {
                     this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "stats_refund 回傳狀態碼錯誤【" + res.data.status + "】");
                     this.ok = res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL;
                     if (this.ok) {
-                        this.text = res.data.text;
-                        this.count = res.data.count;
+                        this.items.push({
+                            text:　res.data.text,
+                            count: res.data.count
+                        });
                     }
                 }).catch(err => {
                     this.error = err;
