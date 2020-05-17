@@ -3600,8 +3600,6 @@ if (Vue) {
                     type: type,
                     date: this.date
                 }).then(res => {
-                    this.$log(res.data);
-                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, type + " 回傳狀態碼錯誤【" + res.data.status + "】");
                     this.ok = res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL;
                     if (this.ok) {
                         this.$assert(res.data.data_count > 0, "response data count is not correct.", res.data.data_count);
@@ -3611,6 +3609,9 @@ if (Vue) {
                                 count: res.data.raw[i].count
                             });
                         }
+                    } else {
+                        this.notify({ message: res.data.message, type: "warning" });
+                        this.$warn(type + " 回傳狀態碼錯誤【" + res.data.status + "】");
                     }
                 }).catch(err => {
                     this.error = err;
