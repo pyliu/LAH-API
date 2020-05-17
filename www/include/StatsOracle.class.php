@@ -49,5 +49,21 @@ class StatsOracle {
 		$this->db->execute();
 		return $this->db->fetchAll();
     }
+
+    public function getSurRainCount($year_month) {
+		if (!$this->checkYearMonth($year_month)) {
+            return false;
+		}
+        $this->db->parse("
+            -- 測量因雨延期
+            select COUNT(*) AS \"count\" from SCMSMS t
+            left join SCMSDS q on MM01 = MD01 and MM02 = MD02 and MM03 = MD03
+            where t.MM04_1 LIKE :bv_cond || '%'
+            and MD12 = '1'
+		");
+		$this->db->bind(":bv_cond", $year_month);
+		$this->db->execute();
+		return $this->db->fetchAll();
+    }
 }
 ?>

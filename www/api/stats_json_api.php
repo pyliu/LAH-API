@@ -40,6 +40,21 @@ switch ($_POST["type"]) {
             ));
         }
         break;
+    case "stats_sur_rain":
+		$log->info("XHR [stats_sur_rain] 取得因雨延期測量案件數(".$_POST['date'].")請求。");
+		$result = $mock ? $cache->get('stats_sur_rain') : $stats->getSurRainCount($_POST['date']);
+        $cache->set('stats_sur_rain', $result);
+        if ($result === false) {
+            echoJSONResponse("取得因雨延期測量案件數資料失敗。 ".$_POST['date']);
+        } else {
+            echoJSONResponse("取得 ".count($result)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($result),
+                "raw" => $result,
+                "text" => "因雨延期測量案件",
+                "count" => $result[0]['count'] ?? 0
+            ));
+        }
+        break;
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

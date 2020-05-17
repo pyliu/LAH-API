@@ -3575,27 +3575,38 @@ if (Vue) {
      * Stats
      */
     Vue.component("lah-stats-item", {
-        template: `<div v-if="ok">
-            <b-list-group>
-                <b-list-group-item v-for="item in items" class="d-flex justify-content-between align-items-center">
+        template: `<b-list-group>
+            <transition-group name="list" style="z-index: 0 !important;">
+                <b-list-group-item v-if="ok" v-for="(item, idx) in items" :key="'stats_'+idx" class="d-flex justify-content-between align-items-center">
                     {{item.text}}-{{date}}
                     <b-badge variant="primary" pill>{{item.count}}</b-badge>
                 </b-list-group-item>
-            </b-list-group>
-        </div>`,
+            </transition-group>
+            <lah-transition appear>
+                <b-list-group-item v-if="!ok" class="d-flex justify-content-between align-items-center">
+                    <lah-fa-icon icon="exclamation-triangle" variant="danger"> 尚未備妥 {{category}}</lah-fa-icon>
+                </b-list-group-item>
+            </lah-transition>
+        </b-list-group>`,
         props: {
             category: { type: String, default: 'stats_refund' },
         },
         data: () => ({
             items: [],
             ok: false,
-            default_date: ''
+            default_date: '',
+            queue: []
         }),
         computed: {
             date() { return this.storeParams.stats_date || this.default_date }
         },
         methods: {
             get_stats(type) {
+                if (this.isBusy) {
+                    this.queue.push(this.get_stats.bind(this, type));
+                    return;
+                }
+                this.isBusy = true;
                 this.$http.post(CONFIG.STATS_JSON_API_EP, {
                     type: type,
                     date: this.date
@@ -3616,14 +3627,12 @@ if (Vue) {
                 }).catch(err => {
                     this.error = err;
                 }).finally(() => {
-
+                    this.isBusy = false;
+                    let callback = this.queue.pop();
+                    if (callback) {
+                        callback();
+                    }
                 });
-            },
-            stats_refund() {
-                this.get_stats('stats_refund');
-            },
-            stats_court() {
-                this.get_stats('stats_court');
             }
         },
         created() {
@@ -3633,10 +3642,18 @@ if (Vue) {
             //this.addToStoreParams('stats_date', '10904');
             switch(this.category) {
                 case "stats_court":
-                    this.stats_court();
+                    this.get_stats('stats_court');
                     break;
                 case "stats_refund":
-                    this.stats_refund();
+                    this.get_stats('stats_refund');
+                    break;
+                case "stats_sur_rain":
+                    this.get_stats('stats_sur_rain');
+                    break;
+                case "all":
+                    this.get_stats('stats_court');
+                    this.get_stats('stats_refund');
+                    this.get_stats('stats_sur_rain');
                     break;
                 default:
                     this.$warn("Not supported category.", this.category);
