@@ -66,10 +66,7 @@ switch ($_POST["type"]) {
                 "data_count" => count($result),
                 "raw" => $result,
                 "text" => "登記原因案件",
-                "count" => array_reduce($a, function($carry, $item) {
-                    $carry += $item['count'];
-                    return $carry;
-                }, 0)
+                "count" => array_reduce($result, function($carry, $item) { return $carry += $item['count']; }, 0)
             ));
         }
         break;
