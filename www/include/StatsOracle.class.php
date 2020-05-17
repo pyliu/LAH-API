@@ -26,7 +26,7 @@ class StatsOracle {
 		}
 		$this->db->parse("
             -- 主動申請退費
-            SELECT COUNT(*) AS \"count\" FROM MOIEXP.EXPBA t
+            SELECT '主動申請退費' AS \"text\", COUNT(*) AS \"count\" FROM MOIEXP.EXPBA t
             WHERE t.BA32 LIKE :bv_cond || '%' and t.BA42 = '01'  --溢繳規費
 		");
 		$this->db->bind(":bv_cond", $year_month);
@@ -40,7 +40,7 @@ class StatsOracle {
 		}
         $this->db->parse("
             -- 法院囑託案件，登記原因為查封(33)、塗銷查封(34)
-            SELECT COUNT(*) AS \"count\"
+            SELECT '法院囑託案件' AS \"text\", COUNT(*) AS \"count\"
             FROM MOICAS.CRSMS t
             WHERE t.RM07_1 LIKE :bv_cond || '%'
             AND t.RM09 in ('33', '34')
@@ -56,7 +56,7 @@ class StatsOracle {
 		}
         $this->db->parse("
             -- 測量因雨延期
-            select COUNT(*) AS \"count\" from SCMSMS t
+            select '因雨延期測量案件' AS \"text\", COUNT(*) AS \"count\" from SCMSMS t
             left join SCMSDS q on MM01 = MD01 and MM02 = MD02 and MM03 = MD03
             where t.MM04_1 LIKE :bv_cond || '%'
             and MD12 = '1'
