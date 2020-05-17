@@ -3588,51 +3588,48 @@ if (Vue) {
         },
         data: () => ({
             items: [],
-            date: '10904',
-            ok: false
+            ok: false,
+            default_date: ''
         }),
-        computed: {},
+        computed: {
+            date() { return this.storeParams.stats_date || this.default_date }
+        },
         methods: {
-            stats_refund() {
+            get_stats(type) {
                 this.$http.post(CONFIG.STATS_JSON_API_EP, {
-                    type: 'stats_refund',
+                    type: type,
                     date: this.date
                 }).then(res => {
-                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "stats_refund 回傳狀態碼錯誤【" + res.data.status + "】");
+                    this.$log(res.data);
+                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, type + " 回傳狀態碼錯誤【" + res.data.status + "】");
                     this.ok = res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL;
                     if (this.ok) {
-                        this.items.push({
-                            text:　res.data.text,
-                            count: res.data.count
-                        });
+                        this.$assert(res.data.data_count > 0, "response data count is not correct.", res.data.data_count);
+                        for(let i = 0; i < res.data.data_count; i++) {
+                            this.items.push({
+                                text:　res.data.raw[i].text,
+                                count: res.data.raw[i].count
+                            });
+                        }
                     }
                 }).catch(err => {
                     this.error = err;
                 }).finally(() => {
 
                 });
+            },
+            stats_refund() {
+                this.get_stats('stats_refund');
             },
             stats_court() {
-                this.$http.post(CONFIG.STATS_JSON_API_EP, {
-                    type: 'stats_court',
-                    date: this.date
-                }).then(res => {
-                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "stats_refund 回傳狀態碼錯誤【" + res.data.status + "】");
-                    this.ok = res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL;
-                    if (this.ok) {
-                        this.items.push({
-                            text:　res.data.text,
-                            count: res.data.count
-                        });
-                    }
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
-
-                });
-            },
+                this.get_stats('stats_court');
+            }
         },
         created() {
+            // set default to the last month, e.g. 10904
+            let now = new Date();
+            this.default_date = now.getFullYear()-1911 + ("0" + (now.getMonth())).slice(-2);
+            //this.addToStoreParams('stats_date', '10904');
             switch(this.category) {
                 case "stats_court":
                     this.stats_court();
