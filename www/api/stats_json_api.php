@@ -62,7 +62,6 @@ switch ($_POST["type"]) {
         if ($result === false) {
             echoJSONResponse("取得登記原因案件數資料失敗。 ".$_POST['date']);
         } else {
-
             echoJSONResponse("取得 ".count($result)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => count($result),
                 "raw" => $result,
