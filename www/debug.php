@@ -2,6 +2,7 @@
 require_once("./include/init.php");
 require_once("./include/Query.class.php");
 require_once("./include/Message.class.php");
+require_once("./include/StatsOracle.class.php");
 require_once("./include/Logger.class.php");
 require_once("./include/UserInfo.class.php");
 require_once("./include/api/FileAPICommandFactory.class.php");
@@ -72,7 +73,7 @@ $result = array(
     array("text" => "text2", "count" => 3),
     array("text" => "text3", "count" => 9)
 );
-echo array_reduce($result, function($carry, $item) { return $carry += $item['count']; }, 10)
+echo array_reduce($result, function($carry, $item) { return $carry += $item['count']; }, 10);
 
 // $db = new PDO("odbc:driver={microsoft access driver (*.mdb)};dbq=".realpath("\\220.1.35.69\personnel\ATT2000.MDB")) or die("Connect Error");
 // var_dump($db);
