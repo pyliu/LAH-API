@@ -31,7 +31,7 @@ class StatsOracle {
 		");
 		$this->db->bind(":bv_cond", $year_month);
 		$this->db->execute();
-		return $this->db->fetchAll();
+		return $this->db->fetchAll(true);
     }
 
     public function getCourtCaseCount($year_month) {
@@ -47,7 +47,7 @@ class StatsOracle {
 		");
 		$this->db->bind(":bv_cond", $year_month);
 		$this->db->execute();
-		return $this->db->fetchAll();
+		return $this->db->fetchAll(true);
     }
 
     public function getSurRainCount($year_month) {
@@ -63,7 +63,7 @@ class StatsOracle {
 		");
 		$this->db->bind(":bv_cond", $year_month);
 		$this->db->execute();
-		return $this->db->fetchAll();
+		return $this->db->fetchAll(true);
     }
 
     public function getRegReasonCount($year_month) {
@@ -99,7 +99,7 @@ class StatsOracle {
 		");
 		$this->db->bind(":bv_cond", $year_month);
 		$this->db->execute();
-		return $this->db->fetchAll();
+		return $this->db->fetchAll(true);
     }
 }
 ?>
