@@ -129,7 +129,7 @@ function getLocalhostIP() {
     return $host_ip;
 }
 /**
- * 
+ * print the json string
  */
 function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array = array()) {
 	echo json_encode(array_merge(array(
