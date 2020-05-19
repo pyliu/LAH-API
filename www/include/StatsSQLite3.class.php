@@ -10,6 +10,15 @@ class StatsSQLite3 {
 
     function __destruct() { }
 
+    public function instTotal($id, $name, $total = 0) {
+        $stm = $this->db->prepare("INSERT INTO stats ('ID', 'NAME', 'TOTAL') VALUES (:id, :name, :total)");
+        //$stm = $this->db->prepare("INSERT INTO stats set TOTAL = :total WHERE  ID = :id");
+        $stm->bindValue(':total', intval($total));
+        $stm->bindParam(':id', $id);
+        $stm->bindParam(':name', $name);
+        return $stm->execute() === FALSE ? false : true;
+    }
+
     public function getTotal($id) {
         return $this->db->querySingle("SELECT TOTAL from stats WHERE ID = '$id'");
     }
@@ -58,6 +67,25 @@ class StatsSQLite3 {
         $ret = $this->updateTotal('xcase_found_count', $total);
         $log->info(__METHOD__.":xcase_found_count 計數器+".$data["found"]."，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
 
+    }
+
+    public function addStatsRawData($id, $data) {
+        // $data => php array
+        // overdue_stats_detail
+        $stm = $this->db->prepare("INSERT INTO stats_raw_data (id,data) VALUES (:id, :data)");
+        $stm->bindParam(':data', serialize($data));
+        $stm->bindParam(':id', $id);
+        $ret = $stm->execute();
+        if (!$ret) {
+            global $log;
+            $log->error(__METHOD__.": 新增統計 RAW DATA 失敗【".$id.", ".$stm->getSQL()."】");
+        }
+        return $ret;
+    }
+
+    public function getStatsRawData($id) {
+        $data = $this->db->querySingle("SELECT data from stats_raw_data WHERE id = '$id'");
+        return empty($data) ? false : unserialize($data);
     }
 }
 ?>

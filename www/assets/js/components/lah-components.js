@@ -3572,21 +3572,59 @@ if (Vue) {
     });
 
     /**
-     * Stats
+     * Stats Relative Components
      */
+    Vue.component("lah-stats-range", {
+        template: `<div>
+            <label for="stat_range">選取月份: {{date}}</label>
+            <b-form-input id="stat_range" v-model="value" type="range" :min="1" :max="12"></b-form-input>
+        </div>`,
+        data: () => ({
+            year: '109',
+            month: '05',
+            value: 12,
+            watch_timer: null
+        }),
+        computed: {
+            date() { return `${this.year}${this.month}` }
+        },
+        watch: {
+            value(nVal, oVal) {
+                let after = (nVal - oVal) + parseInt(this.month);
+                if (after < 1) {
+                    after += 12;
+                    this.year = parseInt(this.year) - 1;
+                } else if (after > 12) {
+                    after -= 12;
+                    this.year = parseInt(this.year) + 1;
+                }
+                this.month = ("0" + after).slice(-2);
+                // delay the reload action 
+                clearTimeout(this.watch_timer);
+                this.watch_timer = setTimeout(() => {
+                    this.storeParams['stats_date'] = `${this.year}${this.month}`;
+                }, 800);
+            }
+        },
+        mounted() {
+            let now = new Date();
+            this.year = now.getFullYear()-1911;
+            this.month = ("0" + (now.getMonth()+1)).slice(-2);
+            this.addToStoreParams('stats_date', this.date)
+        }
+    });
+
     Vue.component("lah-stats-item", {
-        template: `<b-list-group>
+        template: `<b-list-group :title="header">
             <transition-group name="list" style="z-index: 0 !important;">
-                <b-list-group-item v-if="ok" v-for="(item, idx) in items" :key="'stats_'+idx" class="d-flex justify-content-between align-items-center">
-                    {{item.text}}-{{date}}
+                <b-list-group-item flush button v-if="ok" v-for="(item, idx) in items" :key="'stats_'+idx" class="d-flex justify-content-between align-items-center">
+                    {{item.text}}
                     <b-badge variant="primary" pill>{{item.count}}</b-badge>
                 </b-list-group-item>
             </transition-group>
-            <lah-transition appear>
-                <b-list-group-item v-if="!ok" class="d-flex justify-content-between align-items-center">
-                    <lah-fa-icon icon="exclamation-triangle" variant="danger"> 尚未備妥 {{category}}</lah-fa-icon>
-                </b-list-group-item>
-            </lah-transition>
+            <b-list-group-item v-if="!ok" class="d-flex justify-content-between align-items-center">
+                <lah-fa-icon icon="exclamation-triangle" variant="danger"> 執行查詢失敗 {{category}}</lah-fa-icon>
+            </b-list-group-item>
         </b-list-group>`,
         props: {
             category: { type: String, default: 'stats_refund' },
@@ -3598,7 +3636,26 @@ if (Vue) {
             queue: []
         }),
         computed: {
-            date() { return this.storeParams.stats_date || this.default_date }
+            date() { return this.storeParams['stats_date'] || this.default_date },
+            header() {
+                switch(this.category) {
+                    case "stats_court":
+                        return `法院囑託案件 (${this.date})`;
+                    case "stats_refund":
+                        return `主動申請退費數量 (${this.date})`;
+                    case "stats_sur_rain":
+                        return `因雨延期測量案件 (${this.date})`;
+                    case "stats_reg_reason":
+                        return `各項登記原因案件 (${this.date})`;
+                    case "all":
+                        return `所有支援的統計資料 (${this.date})`;
+                    default:
+                        return `不支援的類型-${this.category}`;
+                }
+            }
+        },
+        watch: {
+            date(nVal, oVal) { this.$log(nVal, oVal); this.reload(); }
         },
         methods: {
             get_stats(type) {
@@ -3633,32 +3690,38 @@ if (Vue) {
                         callback();
                     }
                 });
+            },
+            reload() {
+                this.items.length = 0;
+                switch(this.category) {
+                    case "stats_court":
+                        this.get_stats('stats_court');
+                        break;
+                    case "stats_refund":
+                        this.get_stats('stats_refund');
+                        break;
+                    case "stats_sur_rain":
+                        this.get_stats('stats_sur_rain');
+                        break;
+                    case "stats_reg_reason":
+                        this.get_stats('stats_reg_reason');
+                        break;
+                    case "all":
+                        this.get_stats('stats_court');
+                        this.get_stats('stats_refund');
+                        this.get_stats('stats_sur_rain');
+                        this.get_stats('stats_reg_reason');
+                        break;
+                    default:
+                        this.$warn("Not supported category.", this.category);
+                        this.alert({message: "lah-stats-item: Not supported category.【" + this.category + "】", type: "warning"});
+                }
             }
         },
-        created() {
+        mounted() {
             // set default to the last month, e.g. 10904
             let now = new Date();
             this.default_date = now.getFullYear()-1911 + ("0" + (now.getMonth())).slice(-2);
-            //this.addToStoreParams('stats_date', '10904');
-            switch(this.category) {
-                case "stats_court":
-                    this.get_stats('stats_court');
-                    break;
-                case "stats_refund":
-                    this.get_stats('stats_refund');
-                    break;
-                case "stats_sur_rain":
-                    this.get_stats('stats_sur_rain');
-                    break;
-                case "all":
-                    this.get_stats('stats_court');
-                    this.get_stats('stats_refund');
-                    this.get_stats('stats_sur_rain');
-                    break;
-                default:
-                    this.$warn("Not supported category.", this.category);
-                    this.alert({message: "lah-stats-item: Not supported category.【" + this.category + "】", type: "warning"});
-            }
         }
     });
 } else {

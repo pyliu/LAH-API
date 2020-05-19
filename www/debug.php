@@ -75,6 +75,9 @@ $result = array(
 );
 echo array_reduce($result, function($carry, $item) { return $carry += $item['count']; }, 10);
 
+echo "\n\n";
+
+echo (date("Y") - 1911)."".date("m");
 // $db = new PDO("odbc:driver={microsoft access driver (*.mdb)};dbq=".realpath("\\220.1.35.69\personnel\ATT2000.MDB")) or die("Connect Error");
 // var_dump($db);
 // $rs = $db->query('select * from web');
