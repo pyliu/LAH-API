@@ -3619,7 +3619,7 @@ if (Vue) {
                     <b-card no-body  border-variant="white" v-for="(item, idx) in items" :key="'stats_'+idx">
                         <b-list-group-item button class="d-flex justify-content-between align-items-center">
                             {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
-                            <b-badge variant="primary" pill>{{item.count}}</b-badge>
+                            <b-badge :variant="badge_var(item.category)" pill>{{item.count}}</b-badge>
                         </b-list-group-item>
                     </b-card>
                 </transition-group>
@@ -3676,6 +3676,21 @@ if (Vue) {
             date(nVal, oVal) { this.reload(); }
         },
         methods: {
+            badge_var(type) {
+                switch (type) {
+                    case "stats_court":
+                    case "stats_refund":
+                    case "stats_sur_rain":
+                    case "stats_reg_reason":
+                    case "stats_reg_reject":
+                    case "stats_reg_fix":
+                        return 'primary';
+                    case "stats_reg_all":
+                        return 'success';
+                    default:
+                        return '';
+                }
+            },
             get_stats(type) {
                 if (this.isBusy) {
                     this.queue.push(this.get_stats.bind(this, type));
@@ -3693,7 +3708,8 @@ if (Vue) {
                             this.items.push({
                                 id: res.data.raw[i].id || '',
                                 text:　res.data.raw[i].text,
-                                count: res.data.raw[i].count
+                                count: res.data.raw[i].count,
+                                category: type
                             });
                         }
                     } else {
@@ -3729,7 +3745,7 @@ if (Vue) {
                         this.get_stats('stats_reg_reject');
                         this.get_stats('stats_reg_fix');
                         //this.get_stats('stats_reg_reason');
-                        this.get_stats('stats_reg_all');
+                        setTimeout(() => this.get_stats('stats_reg_all'), 1000);
                         break;
                     default:
                         this.$warn("Not supported category.", this.category);
