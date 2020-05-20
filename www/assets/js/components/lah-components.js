@@ -340,7 +340,7 @@ if (Vue) {
                 text: `統計報表`,
                 url: "stats.html",
                 icon: "file-contract",
-                need_admin: true
+                need_admin: false
             }, {
                 text: `測試`,
                 url: "test.html",
