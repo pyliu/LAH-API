@@ -3645,6 +3645,10 @@ if (Vue) {
                         return `因雨延期測量案件 (${this.date})`;
                     case "stats_reg_reason":
                         return `各項登記原因案件 (${this.date})`;
+                    case "stats_reg_reject":
+                        return `駁回案件 (${this.date})`;
+                    case "stats_reg_fix":
+                        return `補正案件 (${this.date})`;
                     case "all":
                         return `所有支援的統計資料 (${this.date})`;
                     default:
@@ -3693,22 +3697,20 @@ if (Vue) {
                 this.items.length = 0;
                 switch(this.category) {
                     case "stats_court":
-                        this.get_stats('stats_court');
-                        break;
                     case "stats_refund":
-                        this.get_stats('stats_refund');
-                        break;
                     case "stats_sur_rain":
-                        this.get_stats('stats_sur_rain');
-                        break;
                     case "stats_reg_reason":
-                        this.get_stats('stats_reg_reason');
+                    case "stats_reg_reject":
+                    case "stats_reg_fix":
+                        this.get_stats(this.category);
                         break;
                     case "all":
                         this.get_stats('stats_court');
                         this.get_stats('stats_refund');
                         this.get_stats('stats_sur_rain');
                         this.get_stats('stats_reg_reason');
+                        this.get_stats('stats_reg_reject');
+                        this.get_stats('stats_reg_fix');
                         break;
                     default:
                         this.$warn("Not supported category.", this.category);

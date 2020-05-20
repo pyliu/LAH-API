@@ -66,6 +66,40 @@ class StatsOracle {
 		return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
 
+    public function getRegFixCount($year_month) {
+		if (!$this->checkYearMonth($year_month)) {
+            return false;
+		}
+        $this->db->parse("
+            -- 補正統計
+            SELECT DISTINCT COUNT(*) AS \"count\", '補正案件' AS \"text\"
+            FROM MOICAS.CRSMS
+            WHERE MOICAS.CRSMS.RM07_1 LIKE :bv_cond || '%'
+            AND MOICAS.CRSMS.RM51 Is Not Null
+            AND MOICAS.CRSMS.RM52 Is Not Null
+		");
+		$this->db->bind(":bv_cond", $year_month);
+		$this->db->execute();
+		return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+    }
+
+    public function getRegRejectCount($year_month) {
+		if (!$this->checkYearMonth($year_month)) {
+            return false;
+		}
+        $this->db->parse("
+            -- 駁回統計
+            SELECT DISTINCT COUNT(*) AS \"count\", '駁回案件' AS \"text\"
+            FROM MOICAS.CRSMS
+            WHERE MOICAS.CRSMS.RM07_1 LIKE :bv_cond || '%'
+            AND MOICAS.CRSMS.RM48_1 Is Not Null
+            AND MOICAS.CRSMS.RM48_2 Is Not Null
+		");
+		$this->db->bind(":bv_cond", $year_month);
+		$this->db->execute();
+		return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+    }
+
     public function getRegReasonCount($year_month) {
 		if (!$this->checkYearMonth($year_month)) {
             return false;

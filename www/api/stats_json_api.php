@@ -33,6 +33,12 @@ function queryStats($type, $date, $error_msg) {
                 case "stats_reg_reason":
                     $result = $stats->getRegReasonCount($date);
                     break;
+                case "stats_reg_fix":
+                    $result = $stats->getRegFixCount($date);
+                    break;
+                case "stats_reg_reject":
+                    $result = $stats->getRegRejectCount($date);
+                    break;
             }
         }
         $cache->set($type, $result);
@@ -55,6 +61,28 @@ function queryStats($type, $date, $error_msg) {
 }
 
 switch ($_POST["type"]) {
+    case "stats_reg_reject":
+        $log->info("XHR [stats_reg_reject] 取得駁回案件數量(".$_POST['date'].")請求。");
+        
+        $err = "取得駁回案件數量資料失敗。 ".$_POST['date'];
+        if (queryStats('stats_reg_reject', $_POST['date'], $err)) {
+            $log->info("XHR [stats_reg_reject] 取得駁回案件數量(".$_POST['date'].")成功。");
+        } else {
+            $log->info("XHR [stats_reg_reject] ${err}。");
+        }
+
+        break;
+    case "stats_reg_fix":
+        $log->info("XHR [stats_reg_fix] 取得補正案件數量(".$_POST['date'].")請求。");
+        
+        $err = "取得補正案件數量資料失敗。 ".$_POST['date'];
+        if (queryStats('stats_reg_fix', $_POST['date'], $err)) {
+            $log->info("XHR [stats_reg_fix] 取得補正案件數量(".$_POST['date'].")成功。");
+        } else {
+            $log->info("XHR [stats_reg_fix] ${err}。");
+        }
+
+        break;
     case "stats_refund":
         $log->info("XHR [stats_refund] 取得溢繳規費數量(".$_POST['date'].")請求。");
         
