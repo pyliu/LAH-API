@@ -3619,7 +3619,7 @@ if (Vue) {
                     <b-card no-body  border-variant="white" v-for="(item, idx) in items" :key="'stats_'+idx">
                         <b-list-group-item button class="d-flex justify-content-between align-items-center">
                             {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
-                            <b-badge :variant="badge_var(item.category)" pill>{{item.count}}</b-badge>
+                            <b-badge :variant="badge_var(item.count)" pill>{{item.count}}</b-badge>
                         </b-list-group-item>
                     </b-card>
                 </transition-group>
@@ -3676,20 +3676,21 @@ if (Vue) {
             date(nVal, oVal) { this.reload(); }
         },
         methods: {
-            badge_var(type) {
-                switch (type) {
-                    case "stats_court":
-                    case "stats_refund":
-                    case "stats_sur_rain":
-                    case "stats_reg_reason":
-                    case "stats_reg_reject":
-                    case "stats_reg_fix":
-                        return 'primary';
-                    case "stats_reg_all":
-                        return 'success';
-                    default:
-                        return '';
+            badge_var(count) {
+                if(count < 10) {
+                    return 'secondary';
+                } else if (count < 50) {
+                    return 'dark';
+                } else if (count < 100) {
+                    return 'info';
+                } else if (count < 200) {
+                    return 'primary';
+                } else if (count < 400) {
+                    return 'success';
+                } else if (count < 750) {
+                    return 'warning';
                 }
+                return 'danger';
             },
             get_stats(type) {
                 if (this.isBusy) {
