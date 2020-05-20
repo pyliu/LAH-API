@@ -3612,20 +3612,33 @@ if (Vue) {
         }
     });
 
-    Vue.component("lah-stats-item", {
-        template: `<b-list-group :title="header">
-            <transition-group name="list" style="z-index: 0 !important;">
-                <b-list-group-item flush button v-if="ok" v-for="(item, idx) in items" :key="'stats_'+idx" class="d-flex justify-content-between align-items-center">
-                    {{item.text}}
-                    <b-badge variant="primary" pill>{{item.count}}</b-badge>
+    Vue.component("lah-stats-dashboard", {
+        template: `<div>
+            <b-card-group v-if="all" columns>
+                <transition-group name="list">
+                    <b-card no-body  border-variant="white" v-for="(item, idx) in items" :key="'stats_'+idx">
+                        <b-list-group-item button class="d-flex justify-content-between align-items-center">
+                            {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
+                            <b-badge variant="primary" pill>{{item.count}}</b-badge>
+                        </b-list-group-item>
+                    </b-card>
+                </transition-group>
+                <lah-fa-icon v-if="!ok" icon="exclamation-triangle" variant="danger"> 查詢後端資料失敗</lah-fa-icon>
+            </b-card-group>
+            <b-list-group v-else :title="header">
+                <transition-group name="list">
+                    <b-list-group-item flush button v-if="ok" v-for="(item, idx) in items" :key="'stats_'+idx" class="d-flex justify-content-between align-items-center">
+                        {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
+                        <b-badge variant="primary" pill>{{item.count}}</b-badge>
+                    </b-list-group-item>
+                </transition-group>
+                <b-list-group-item v-if="!ok" class="d-flex justify-content-between align-items-center">
+                    <lah-fa-icon icon="exclamation-triangle" variant="danger"> 執行查詢失敗 {{category}}</lah-fa-icon>
                 </b-list-group-item>
-            </transition-group>
-            <b-list-group-item v-if="!ok" class="d-flex justify-content-between align-items-center">
-                <lah-fa-icon icon="exclamation-triangle" variant="danger"> 執行查詢失敗 {{category}}</lah-fa-icon>
-            </b-list-group-item>
-        </b-list-group>`,
+            </b-list-group>
+        </div>`,
         props: {
-            category: { type: String, default: 'stats_refund' },
+            category: { type: String, default: 'all' },
         },
         data: () => ({
             items: [],
@@ -3640,21 +3653,24 @@ if (Vue) {
                     case "stats_court":
                         return `法院囑託案件 (${this.date})`;
                     case "stats_refund":
-                        return `主動申請退費數量 (${this.date})`;
+                        return `主動申請退費案件 (${this.date})`;
                     case "stats_sur_rain":
                         return `因雨延期測量案件 (${this.date})`;
                     case "stats_reg_reason":
-                        return `各項登記原因案件 (${this.date})`;
+                        return `各項登記(特定)原因案件 (${this.date})`;
                     case "stats_reg_reject":
-                        return `駁回案件 (${this.date})`;
+                        return `登記駁回案件 (${this.date})`;
                     case "stats_reg_fix":
-                        return `補正案件 (${this.date})`;
+                        return `登記補正案件 (${this.date})`;
+                    case "stats_reg_all":
+                        return `各項登記原因案件 (${this.date})`;
                     case "all":
                         return `所有支援的統計資料 (${this.date})`;
                     default:
                         return `不支援的類型-${this.category}`;
                 }
-            }
+            },
+            all() { return this.category == 'all' }
         },
         watch: {
             date(nVal, oVal) { this.reload(); }
@@ -3675,12 +3691,13 @@ if (Vue) {
                         this.$assert(res.data.data_count > 0, "response data count is not correct.", res.data.data_count);
                         for(let i = 0; i < res.data.data_count; i++) {
                             this.items.push({
+                                id: res.data.raw[i].id || '',
                                 text:　res.data.raw[i].text,
                                 count: res.data.raw[i].count
                             });
                         }
                     } else {
-                        this.notify({ message: res.data.message, type: "warning" });
+                        this.notify({ message: res.data.message + " 回傳狀態碼錯誤【" + res.data.status + "】", type: "warning" });
                         this.$warn(type + " 回傳狀態碼錯誤【" + res.data.status + "】");
                     }
                 }).catch(err => {
@@ -3702,15 +3719,17 @@ if (Vue) {
                     case "stats_reg_reason":
                     case "stats_reg_reject":
                     case "stats_reg_fix":
+                    case "stats_reg_all":    
                         this.get_stats(this.category);
                         break;
                     case "all":
                         this.get_stats('stats_court');
                         this.get_stats('stats_refund');
                         this.get_stats('stats_sur_rain');
-                        this.get_stats('stats_reg_reason');
                         this.get_stats('stats_reg_reject');
                         this.get_stats('stats_reg_fix');
+                        //this.get_stats('stats_reg_reason');
+                        this.get_stats('stats_reg_all');
                         break;
                     default:
                         this.$warn("Not supported category.", this.category);

@@ -14,7 +14,7 @@ $mock = SYSTEM_CONFIG["MOCK_MODE"];
 if ($mock) $log->warning("現在處於模擬模式(mock mode)，STATS API僅會回應之前已被快取之最新的資料！");
 
 function queryStats($type, $date, $error_msg) {
-    global $stats_sqlite3, $mock, $cache, $stats, $this_month;
+    global $stats_sqlite3, $mock, $cache, $stats, $this_month, $log;
     $key = $type.'_'.$date;
     $result = $stats_sqlite3->getStatsRawData($key);
     if ($this_month == $date || empty($result)) {
@@ -32,12 +32,16 @@ function queryStats($type, $date, $error_msg) {
                     break;
                 case "stats_reg_reason":
                     $result = $stats->getRegReasonCount($date);
+                    //$result = $stats->getRegCaseCount($date);
                     break;
                 case "stats_reg_fix":
                     $result = $stats->getRegFixCount($date);
                     break;
                 case "stats_reg_reject":
                     $result = $stats->getRegRejectCount($date);
+                    break;
+                case "stats_reg_all":
+                    $result = $stats->getRegCaseCount($date);
                     break;
             }
         }
@@ -51,6 +55,7 @@ function queryStats($type, $date, $error_msg) {
             }
         }
     }
+    $log->info(__METHOD__.": ($type, $date) 取得 ".count($result)." 筆資料。");
     echoJSONResponse("取得 ".count($result)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
         "data_count" => count($result),
         "raw" => $result,
@@ -124,6 +129,17 @@ switch ($_POST["type"]) {
             $log->info("XHR [stats_reg_reason] 取得登記原因案件數量(".$_POST['date'].")成功。");
         } else {
             $log->info("XHR [stats_reg_reason] ${err}。");
+        }
+
+        break;
+    case "stats_reg_all":
+        $log->info("XHR [stats_reg_all] 取得全部登記案件數(".$_POST['date'].")請求。");
+
+        $err = "取得全部登記案件數資料失敗。 ".$_POST['date'];
+        if (queryStats('stats_reg_all', $_POST['date'], $err)) {
+            $log->info("XHR [stats_reg_all] 取得全部登記案件數量(".$_POST['date'].")成功。");
+        } else {
+            $log->info("XHR [stats_reg_all] ${err}。");
         }
 
         break;

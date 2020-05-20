@@ -8,6 +8,8 @@ require_once("./include/UserInfo.class.php");
 require_once("./include/api/FileAPICommandFactory.class.php");
 require_once("./include/Watchdog.class.php");
 
+require_once(ROOT_DIR."/include/StatsOracle.class.php");
+
 //echo date("H") . date("i", strtotime("1 min")) . date("s", strtotime("1 second"))."<br/>";
 
 //$xkey = (random_int(1, 255) * date("H") * date("i", strtotime("1 min")) * date("s", strtotime("1 second"))) % 65535;
@@ -78,6 +80,14 @@ echo array_reduce($result, function($carry, $item) { return $carry += $item['cou
 echo "\n\n";
 
 echo (date("Y") - 1911)."".date("m");
+
+// $stats = new StatsOracle();
+// $result = $stats->getRegCaseCount('10904');
+// echo (__METHOD__.": 取得 ".count($result)." 筆資料。\n<br />");
+//     echoJSONResponse("取得 ".count($result)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+//         "data_count" => count($result),
+//         "raw" => $result
+//     ));
 // $db = new PDO("odbc:driver={microsoft access driver (*.mdb)};dbq=".realpath("\\220.1.35.69\personnel\ATT2000.MDB")) or die("Connect Error");
 // var_dump($db);
 // $rs = $db->query('select * from web');

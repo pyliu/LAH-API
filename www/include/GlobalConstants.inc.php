@@ -10,6 +10,7 @@ abstract class STATUS_CODE {
     const FAIL_NOT_VALID_SERVER = -3;
     const FAIL_WITH_REMOTE_NO_RECORD = -4;
     const FAIL_NO_AUTHORITY = -5;
+    const FAIL_JSON_ENCODE = -6;
 }
 
 define('ROOT_DIR', dirname(dirname(__FILE__)));
