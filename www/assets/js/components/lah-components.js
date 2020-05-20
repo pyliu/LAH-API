@@ -3577,39 +3577,37 @@ if (Vue) {
     Vue.component("lah-stats-range", {
         template: `<div>
             <label for="stat_range">選取月份: {{date}}</label>
-            <b-form-input id="stat_range" v-model="value" type="range" :min="1" :max="12"></b-form-input>
+            <b-form-input id="stat_range" v-model="value" type="range" :min="1" :max="max"></b-form-input>
         </div>`,
         data: () => ({
-            year: '109',
-            month: '05',
-            value: 12,
+            year: 109,
+            month: 5,
+            base: 0,
+            value: 0,
+            max: 24,
             watch_timer: null
         }),
         computed: {
-            date() { return `${this.year}${this.month}` }
+            date() { return `${this.year}${("0" + this.month).slice(-2)}` }
         },
         watch: {
             value(nVal, oVal) {
-                let after = (nVal - oVal) + parseInt(this.month);
-                if (after < 1) {
-                    after += 12;
-                    this.year = parseInt(this.year) - 1;
-                } else if (after > 12) {
-                    after -= 12;
-                    this.year = parseInt(this.year) + 1;
-                }
-                this.month = ("0" + after).slice(-2);
+                let after = this.base - this.max + parseInt(nVal) - 1;
+                this.year = parseInt(after / 12);
+                this.month = after % 12 + 1;
                 // delay the reload action 
                 clearTimeout(this.watch_timer);
                 this.watch_timer = setTimeout(() => {
-                    this.storeParams['stats_date'] = `${this.year}${this.month}`;
+                    this.storeParams['stats_date'] = this.date;
                 }, 800);
             }
         },
         mounted() {
             let now = new Date();
-            this.year = now.getFullYear()-1911;
-            this.month = ("0" + (now.getMonth()+1)).slice(-2);
+            this.year = now.getFullYear() - 1911;
+            this.month = now.getMonth() + 1;
+            this.base = this.year * 12 + now.getMonth() + 1;
+            this.value = this.max;
             this.addToStoreParams('stats_date', this.date)
         }
     });
@@ -3655,7 +3653,7 @@ if (Vue) {
             }
         },
         watch: {
-            date(nVal, oVal) { this.$log(nVal, oVal); this.reload(); }
+            date(nVal, oVal) { this.reload(); }
         },
         methods: {
             get_stats(type) {
