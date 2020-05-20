@@ -332,12 +332,12 @@ if (Vue) {
                 icon: "dog",
                 need_admin: true
             }, {
-                text: `管理板`,
+                text: `管理看板`,
                 url: "dashboard.html",
                 icon: "cubes",
                 need_admin: true
             }, {
-                text: `統計板`,
+                text: `統計看板`,
                 url: "stats.html",
                 icon: "file-contract",
                 need_admin: false
