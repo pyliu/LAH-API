@@ -3616,7 +3616,7 @@ if (Vue) {
             <b-card-group v-if="all" columns>
                 <transition-group name="list">
                     <b-card no-body  border-variant="white" v-for="(item, idx) in items" :key="'stats_'+idx">
-                        <b-list-group-item button class="d-flex justify-content-between align-items-center">
+                        <b-list-group-item button class="d-flex justify-content-between align-items-center" @click.stop="query(item)">
                             {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
                             <b-badge :variant="badge_var(item.count)" pill>{{item.count}}</b-badge>
                         </b-list-group-item>
@@ -3626,7 +3626,7 @@ if (Vue) {
             </b-card-group>
             <b-list-group v-else :title="header">
                 <transition-group name="list">
-                    <b-list-group-item flush button v-if="ok" v-for="(item, idx) in items" :key="'stats_'+idx" class="d-flex justify-content-between align-items-center">
+                    <b-list-group-item flush button v-if="ok" v-for="(item, idx) in items" :key="'stats_'+idx" class="d-flex justify-content-between align-items-center" @click.stop="query(item)">
                         {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
                         <b-badge variant="primary" pill>{{item.count}}</b-badge>
                     </b-list-group-item>
@@ -3750,6 +3750,42 @@ if (Vue) {
                     default:
                         this.$warn("Not supported category.", this.category);
                         this.alert({message: "lah-stats-item: Not supported category.【" + this.category + "】", type: "warning"});
+                }
+            },
+            query(item) {
+                if (this.empty(item.id)) {
+                    this.$warn("無登記原因代碼，無法查詢案件。");
+                } else {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                        type: 'reg_reason_cases_by_month',
+                        reason_code: item.id,
+                        query_month: this.date
+                    }).then(res => {
+                        if (
+                            res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS ||
+                            res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
+                        ) {
+                            this.msgbox({
+                                title: item.text,
+                                message: this.$createElement('lah-reg-table', { props: {
+                                    bakedData: res.data.baked,
+                                    iconVariant: "success",
+                                    icon: "chevron-circle-right",
+                                    type: 'md'
+                                } }),
+                                size: 'xl'
+                            });
+                        } else {
+                            let err = `回傳的狀態碼有誤【${res.data.status}】`;
+                            this.$warn(err);
+                            this.notify({ message: err, type: "warning" });
+                        }
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
                 }
             }
         },

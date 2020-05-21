@@ -1139,8 +1139,8 @@ switch ($_POST["type"]) {
 			}
 			$count = count($baked);
 			$status = $count > 1 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
-			$log->info("XHR [reg_reason_cases_by_month] 查詢成功 ($count)");
-			echoJSONResponse("查到 $count 筆資料。", $status, array(
+			$log->info("XHR [reg_reason_cases_by_month] $reason_code 查到 $count 筆資料");
+			echoJSONResponse("$reason_code 查到 $count 筆資料。", $status, array(
 				"data_count" => $count,
 				"query_string" => "query_month=".$query_month."&reason_code=".$reason_code,
 				"baked" => $baked

@@ -440,13 +440,14 @@ class Query {
 		return $this->db->fetchAll();
     }
 
-	public function queryReasonCasesByMonth($reason_code, $qmonth) {
-		// only allow int number for $qmonth
-        if (!filter_var($qmonth, FILTER_SANITIZE_NUMBER_INT)) {
+	public function queryReasonCasesByMonth($reason_code, $query_month) {
+		// only allow int number for $query_month
+        if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
         }
-        $this->db->parse("SELECT * FROM SCRSMS LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2 WHERE RM07_1 LIKE :bv_qmonth || '%' ORDER BY RM07_1, RM07_2 DESC");
-        $this->db->bind(":bv_qmonth", $qmonth);
+        $this->db->parse("SELECT * FROM SCRSMS LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2 WHERE RM07_1 LIKE :bv_qmonth || '%' AND RM09 = :bv_rcode ORDER BY RM07_1, RM07_2 DESC");
+		$this->db->bind(":bv_qmonth", $query_month);
+		$this->db->bind(":bv_rcode", $reason_code);
 		$this->db->execute();
 		return $this->db->fetchAll();
 	}
