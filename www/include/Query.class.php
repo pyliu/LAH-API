@@ -440,6 +440,17 @@ class Query {
 		return $this->db->fetchAll();
     }
 
+	public function queryAllCasesByMonth($qmonth) {
+		// only allow int number for $qmonth
+        if (!filter_var($qmonth, FILTER_SANITIZE_NUMBER_INT)) {
+            return false;
+        }
+        $this->db->parse("SELECT * FROM SCRSMS LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2 WHERE RM07_1 LIKE :bv_qmonth || '%' ORDER BY RM07_1, RM07_2 DESC");
+        $this->db->bind(":bv_qmonth", $qmonth);
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
 	// 找近15天逾期的案件
 	public function queryOverdueCasesIn15Days($reviewer_id = "") {
 		if (empty($reviewer_id)) {

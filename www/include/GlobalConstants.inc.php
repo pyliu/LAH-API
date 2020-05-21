@@ -60,7 +60,6 @@ define('VAL_NOTE', [
     "G" => "異動有誤"
 ]);
 
-
 define('OFFICE', [
     "HA" => "桃園",
     "HB" => "中壢",
