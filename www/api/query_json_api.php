@@ -1119,17 +1119,18 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
-	case "reg_cases_by_month":
-		if (empty($_POST["qmonth"])) {
-			$_POST["qmonth"] = substr($today, 0, 5);
+	case "reg_reason_cases_by_month":
+		if (empty($_POST["query_month"])) {
+			$_POST["query_month"] = substr($today, 0, 5);
 		}
-		$query_param = $_POST['qmonth'];
-		$log->info("XHR [reg_cases_by_month] 查詢登記案件 BY DAY【${query_param}】請求");
-		$rows = $mock ? $cache->get('reg_cases_by_month') : $query->queryAllCasesByMonth($query_param);
-		$cache->set('reg_cases_by_month', $rows);
+		$reason_code = $_POST['reason_code'];
+		$query_month = $_POST['query_month'];
+		$log->info("XHR [reg_reason_cases_by_month] 查詢登記案件 BY MONTH【${reason_code}, ${query_month}】請求");
+		$rows = $mock ? $cache->get('reg_reason_cases_by_month') : $query->queryReasonCasesByMonth($reason_code, $query_month);
+		$cache->set('reg_reason_cases_by_month', $rows);
 		if (empty($rows)) {
-			$log->info("XHR [reg_cases_by_month] 查無資料");
-			echoJSONResponse("XHR [reg_cases_by_month] 查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+			$log->info("XHR [reg_reason_cases_by_month] 查無資料");
+			echoJSONResponse("XHR [reg_reason_cases_by_month] 查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
 		} else {
 			$baked = array();
 			foreach ($rows as $row) {
@@ -1138,10 +1139,10 @@ switch ($_POST["type"]) {
 			}
 			$count = count($baked);
 			$status = $count > 1 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
-			$log->info("XHR [reg_cases_by_month] 查詢成功 ($count)");
+			$log->info("XHR [reg_reason_cases_by_month] 查詢成功 ($count)");
 			echoJSONResponse("查到 $count 筆資料。", $status, array(
 				"data_count" => $count,
-				"query_string" => "qmonth=".$query_param,
+				"query_string" => "query_month=".$query_month."&reason_code=".$reason_code,
 				"baked" => $baked
 			));
 		}

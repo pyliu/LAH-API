@@ -440,7 +440,7 @@ class Query {
 		return $this->db->fetchAll();
     }
 
-	public function queryAllCasesByMonth($qmonth) {
+	public function queryReasonCasesByMonth($reason_code, $qmonth) {
 		// only allow int number for $qmonth
         if (!filter_var($qmonth, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
