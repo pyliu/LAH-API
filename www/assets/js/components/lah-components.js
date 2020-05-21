@@ -3574,9 +3574,18 @@ if (Vue) {
      * Stats Relative Components
      */
     Vue.component("lah-stats-range", {
-        template: `<div>
+        template: `<div class="mb-2">
             <label for="stat_range">選取月份: {{date}}</label>
             <b-form-input id="stat_range" v-model="value" type="range" :min="1" :max="max"></b-form-input>
+            <b-input-group size="sm" style="width:160px" prepend="筆數大於">
+                <b-form-input
+                    type="number"
+                    v-model="filter"
+                    size="sm"
+                    min="0"
+                    class="no-cache"
+                ></b-form-input>
+            </b-input-group>
         </div>`,
         data: () => ({
             year: 109,
@@ -3584,7 +3593,9 @@ if (Vue) {
             base: 0,
             value: 0,
             max: 24,
-            watch_timer: null
+            filter: 0,
+            value_timer: null,
+            filter_timer: null
         }),
         computed: {
             date() { return `${this.year}${("0" + this.month).slice(-2)}` }
@@ -3595,9 +3606,16 @@ if (Vue) {
                 this.year = parseInt(after / 12);
                 this.month = after % 12 + 1;
                 // delay the reload action 
-                clearTimeout(this.watch_timer);
-                this.watch_timer = setTimeout(() => {
+                clearTimeout(this.value_timer);
+                this.value_timer = setTimeout(() => {
                     this.storeParams['stats_date'] = this.date;
+                }, 800);
+            },
+            filter(nVal, oVal) {
+                // delay the reload action 
+                clearTimeout(this.filter_timer);
+                this.filter_timer = setTimeout(() => {
+                    this.storeParams['stats_filter'] = nVal;
                 }, 800);
             }
         },
@@ -3607,7 +3625,8 @@ if (Vue) {
             this.month = now.getMonth() + 1;
             this.base = this.year * 12 + now.getMonth() + 1;
             this.value = this.max;
-            this.addToStoreParams('stats_date', this.date)
+            this.addToStoreParams('stats_date', this.date);
+            this.addToStoreParams('stats_filter', this.filter);
         }
     });
 
@@ -3647,6 +3666,7 @@ if (Vue) {
         }),
         computed: {
             date() { return this.storeParams['stats_date'] || this.default_date },
+            filter() { return parseInt(this.storeParams['stats_filter']) || 0 },
             header() {
                 switch(this.category) {
                     case "stats_court":
@@ -3672,7 +3692,8 @@ if (Vue) {
             all() { return this.category == 'all' }
         },
         watch: {
-            date(nVal, oVal) { this.reload(); }
+            date(nVal, oVal) { this.reload() },
+            filter(nVal, oVal) { this.reload() }
         },
         methods: {
             badge_var(count) {
@@ -3705,12 +3726,14 @@ if (Vue) {
                     if (this.ok) {
                         this.$assert(res.data.data_count > 0, "response data count is not correct.", res.data.data_count);
                         for(let i = 0; i < res.data.data_count; i++) {
-                            this.items.push({
-                                id: res.data.raw[i].id || '',
-                                text:　res.data.raw[i].text,
-                                count: res.data.raw[i].count,
-                                category: type
-                            });
+                            if (res.data.raw[i].count > this.filter) {
+                                this.items.push({
+                                    id: res.data.raw[i].id || '',
+                                    text:　res.data.raw[i].text,
+                                    count: res.data.raw[i].count,
+                                    category: type
+                                });
+                            }
                         }
                     } else {
                         this.notify({ message: res.data.message + " 回傳狀態碼錯誤【" + res.data.status + "】", type: "warning" });
