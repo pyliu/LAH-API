@@ -3777,7 +3777,14 @@ if (Vue) {
             },
             query(item) {
                 if (this.empty(item.id)) {
-                    this.$warn("無登記原因代碼，無法查詢案件。");
+                    switch (item.category) {
+                        case "stats_court":
+                            this.queryCourtCase();
+                            break;
+                        default:
+                            this.$warn("無登記原因代碼，無法查詢案件。");
+                            this.notify({ message: '本項目未支援取得詳細列表功能', type: "warning" })
+                    }
                 } else {
                     this.isBusy = true;
                     this.$http.post(CONFIG.QUERY_JSON_API_EP, {
@@ -3810,6 +3817,37 @@ if (Vue) {
                         this.isBusy = false;
                     });
                 }
+            },
+            queryCourtCase() {
+                this.isBusy = true;
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                    type: 'reg_court_cases_by_month',
+                    query_month: this.date
+                }).then(res => {
+                    if (
+                        res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS ||
+                        res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
+                    ) {
+                        this.msgbox({
+                            title: item.text,
+                            message: this.$createElement('lah-reg-table', { props: {
+                                bakedData: res.data.baked,
+                                iconVariant: "success",
+                                icon: "chevron-circle-right",
+                                type: 'md'
+                            } }),
+                            size: 'xl'
+                        });
+                    } else {
+                        let err = `回傳的狀態碼有誤【${res.data.status}】`;
+                        this.$warn(err);
+                        this.notify({ message: err, type: "warning" });
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
             }
         },
         mounted() {

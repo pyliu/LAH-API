@@ -452,6 +452,16 @@ class Query {
 		return $this->db->fetchAll();
 	}
 
+	public function queryCourtCasesByMonth($query_month) {
+		// only allow int number for $query_month
+        if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
+            return false;
+		}
+		$cases_33 = $this->queryReasonCasesByMonth('33', $query_month);
+		$cases_34 = $this->queryReasonCasesByMonth('34', $query_month);
+		return $cases_33 + $cases_34;
+	}
+
 	// 找近15天逾期的案件
 	public function queryOverdueCasesIn15Days($reviewer_id = "") {
 		if (empty($reviewer_id)) {
