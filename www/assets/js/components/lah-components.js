@@ -3583,6 +3583,7 @@ if (Vue) {
                     v-model="filter"
                     size="sm"
                     min="0"
+                    max="1000"
                     class="no-cache"
                 ></b-form-input>
             </b-input-group>
@@ -3666,7 +3667,7 @@ if (Vue) {
         }),
         computed: {
             date() { return this.storeParams['stats_date'] || this.default_date },
-            filter() { return parseInt(this.storeParams['stats_filter']) || 0 },
+            filter() { return parseInt(this.storeParams['stats_filter'] || 0) },
             header() {
                 switch(this.category) {
                     case "stats_court":
@@ -3726,7 +3727,7 @@ if (Vue) {
                     if (this.ok) {
                         this.$assert(res.data.data_count > 0, "response data count is not correct.", res.data.data_count);
                         for(let i = 0; i < res.data.data_count; i++) {
-                            if (res.data.raw[i].count > this.filter) {
+                            if (res.data.raw[i].count >= this.filter) {
                                 this.items.push({
                                     id: res.data.raw[i].id || '',
                                     text:　res.data.raw[i].text,
@@ -3750,7 +3751,7 @@ if (Vue) {
                 });
             },
             reload() {
-                this.items.length = 0;
+                this.items = [];
                 switch(this.category) {
                     case "stats_court":
                     case "stats_refund":
@@ -3775,6 +3776,18 @@ if (Vue) {
                         this.alert({message: "lah-stats-item: Not supported category.【" + this.category + "】", type: "warning"});
                 }
             },
+            showCases(title, data) {
+                this.msgbox({
+                    title: title,
+                    message: this.$createElement('lah-reg-table', { props: {
+                        bakedData: data,
+                        iconVariant: "success",
+                        icon: "chevron-circle-right",
+                        type: 'md'
+                    } }),
+                    size: 'xl'
+                });
+            },
             query(item) {
                 if (this.empty(item.id)) {
                     switch (item.category) {
@@ -3796,16 +3809,7 @@ if (Vue) {
                             res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS ||
                             res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                         ) {
-                            this.msgbox({
-                                title: item.text,
-                                message: this.$createElement('lah-reg-table', { props: {
-                                    bakedData: res.data.baked,
-                                    iconVariant: "success",
-                                    icon: "chevron-circle-right",
-                                    type: 'md'
-                                } }),
-                                size: 'xl'
-                            });
+                            this.showCases(item.text, res.data.baked);
                         } else {
                             let err = `回傳的狀態碼有誤【${res.data.status}】`;
                             this.$warn(err);
@@ -3828,16 +3832,7 @@ if (Vue) {
                         res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS ||
                         res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                     ) {
-                        this.msgbox({
-                            title: '法院囑託案件',
-                            message: this.$createElement('lah-reg-table', { props: {
-                                bakedData: res.data.baked,
-                                iconVariant: "success",
-                                icon: "chevron-circle-right",
-                                type: 'md'
-                            } }),
-                            size: 'xl'
-                        });
+                        this.showCases('法院囑託案件', res.data.baked);
                     } else {
                         let err = `回傳的狀態碼有誤【${res.data.status}】`;
                         this.$warn(err);
