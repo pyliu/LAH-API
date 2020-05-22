@@ -3829,7 +3829,7 @@ if (Vue) {
                         res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                     ) {
                         this.msgbox({
-                            title: item.text,
+                            title: '法院囑託案件',
                             message: this.$createElement('lah-reg-table', { props: {
                                 bakedData: res.data.baked,
                                 iconVariant: "success",

@@ -459,7 +459,7 @@ class Query {
 		}
 		$cases_33 = $this->queryReasonCasesByMonth('33', $query_month);
 		$cases_34 = $this->queryReasonCasesByMonth('34', $query_month);
-		return $cases_33 + $cases_34;
+		return array_merge($cases_33, $cases_34);
 	}
 
 	// 找近15天逾期的案件
