@@ -3578,15 +3578,7 @@ if (Vue) {
             <legend>篩選條件</legend>
             <b-form-row class="mt-2">
                 <b-input-group size="sm" :prepend="date" class="col">
-                    <b-form-input id="stat_range" v-model="value" type="range" :min="1" :max="max"></b-form-input>
-                </b-input-group>
-                <b-input-group ref="reason" size="sm" prepend="登記原因" class="col-2">
-                    <b-form-input
-                        type="text"
-                        v-model="reason"
-                        size="sm"
-                        class="no-cache h-100"
-                    ></b-form-input>
+                    <b-form-input id="stat_range" v-model="value" type="range" :min="1" :max="max" class="h-100"></b-form-input>
                 </b-input-group>
                 <b-input-group size="sm" prepend="筆數大於" class="col-2">
                     <b-form-input
@@ -3598,6 +3590,15 @@ if (Vue) {
                         class="no-cache h-100"
                     ></b-form-input>
                 </b-input-group>
+                <b-input-group ref="reason" size="sm" prepend="登記原因" class="col-2">
+                    <b-form-input
+                        type="text"
+                        v-model="reason"
+                        size="sm"
+                        class="no-cache h-100"
+                    ></b-form-input>
+                    <b-button v-if="!enable_timer" size="sm" variant="outline-primary" class="ml-2" @click.stop="update">更新</b-button>
+                </b-input-group>
             </b-form-row>
         </fieldset>`,
         data: () => ({
@@ -3608,6 +3609,7 @@ if (Vue) {
             value: 0,
             filter: 0,
             reason: '',
+            enable_timer: true,
             value_timer: null,
             filter_timer: null,
             reason_timer: null,
@@ -3621,24 +3623,37 @@ if (Vue) {
                 let after = this.base - this.max + parseInt(nVal) - 1;
                 this.year = parseInt(after / 12);
                 this.month = after % 12 + 1;
-                // delay the reload action 
-                clearTimeout(this.value_timer);
-                this.value_timer = setTimeout(() => {
-                    this.storeParams['stats_date'] = this.date;
-                }, this.delay);
+                if (this.enable_timer) {
+                    // delay the reload action 
+                    clearTimeout(this.value_timer);
+                    this.value_timer = setTimeout(() => {
+                        this.storeParams['stats_date'] = this.date;
+                    }, this.delay);
+                }
             },
             filter(nVal, oVal) {
-                // delay the reload action 
-                clearTimeout(this.filter_timer);
-                this.filter_timer = setTimeout(() => {
-                    this.storeParams['stats_filter'] = nVal;
-                }, this.delay);
+                if (this.enable_timer) {
+                    // delay the reload action 
+                    clearTimeout(this.filter_timer);
+                    this.filter_timer = setTimeout(() => {
+                        this.storeParams['stats_filter'] = nVal;
+                    }, this.delay);
+                }
             },
             reason(nVal, oVal) {
-                clearTimeout(this.reason_timer);
-                this.reason_timer = setTimeout(() => {
-                    this.storeParams['stats_reason'] = nVal;
-                }, this.delay);
+                if (this.enable_timer) {
+                    clearTimeout(this.reason_timer);
+                    this.reason_timer = setTimeout(() => {
+                        this.storeParams['stats_reason'] = nVal;
+                    }, this.delay);
+                }
+            }
+        },
+        methods: {
+            update() {
+                this.storeParams['stats_date'] = this.date;
+                this.storeParams['stats_filter'] = this.filter;
+                this.storeParams['stats_reason'] = this.reason;
             }
         },
         mounted() {
