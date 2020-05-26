@@ -3788,51 +3788,18 @@ if (Vue) {
                     size: 'xl'
                 });
             },
-            query(item) {
-                if (this.empty(item.id)) {
-                    switch (item.category) {
-                        case "stats_court":
-                            this.queryCourtCase();
-                            break;
-                        default:
-                            this.$warn("無登記原因代碼，無法查詢案件。");
-                            this.notify({ message: '本項目未支援取得詳細列表功能', type: "warning" })
-                    }
-                } else {
-                    this.isBusy = true;
-                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
-                        type: 'reg_reason_cases_by_month',
-                        reason_code: item.id,
-                        query_month: this.date
-                    }).then(res => {
-                        if (
-                            res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS ||
-                            res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
-                        ) {
-                            this.showCases(item.text, res.data.baked);
-                        } else {
-                            let err = `回傳的狀態碼有誤【${res.data.status}】`;
-                            this.$warn(err);
-                            this.notify({ message: err, type: "warning" });
-                        }
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        this.isBusy = false;
-                    });
-                }
-            },
-            queryCourtCase() {
+            xhr(type, title, reason_code = undefined) {
                 this.isBusy = true;
                 this.$http.post(CONFIG.QUERY_JSON_API_EP, {
-                    type: 'reg_court_cases_by_month',
-                    query_month: this.date
+                    type: type,
+                    query_month: this.date,
+                    reason_code: reason_code
                 }).then(res => {
                     if (
                         res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS ||
                         res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                     ) {
-                        this.showCases('法院囑託案件', res.data.baked);
+                        this.showCases(title, res.data.baked);
                     } else {
                         let err = `回傳的狀態碼有誤【${res.data.status}】`;
                         this.$warn(err);
@@ -3843,6 +3810,26 @@ if (Vue) {
                 }).finally(() => {
                     this.isBusy = false;
                 });
+            },
+            query(item) {
+                if (this.empty(item.id)) {
+                    switch (item.category) {
+                        case "stats_court":
+                            this.xhr('reg_court_cases_by_month', '法院囑託案件');
+                            break;
+                        case "stats_reg_fix":
+                            this.xhr('reg_supplement_cases_by_month', '登記補正案件');
+                            break;
+                        case "stats_reg_reject":
+                            this.xhr('reg_reject_cases_by_month', '登記駁回案件');
+                            break;
+                        default:
+                            this.$warn("無登記原因代碼，無法查詢案件。");
+                            this.notify({ message: '本項目未支援取得詳細列表功能', type: "warning" })
+                    }
+                } else {
+                    this.xhr('reg_reason_cases_by_month', item.text, item.id);
+                }
             }
         },
         mounted() {

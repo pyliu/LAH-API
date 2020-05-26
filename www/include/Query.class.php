@@ -462,6 +462,23 @@ class Query {
 		return array_merge($cases_33, $cases_34);
 	}
 
+	public function querySupplementCasesByMonth($query_month) {
+		// only allow int number for $query_month
+        if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
+            return false;
+		}
+		$this->db->parse("
+			SELECT DISTINCT *
+				FROM MOICAS.CRSMS
+			WHERE MOICAS.CRSMS.RM07_1 LIKE :bv_qmonth || '%'
+				AND MOICAS.CRSMS.RM51 Is Not Null
+				AND MOICAS.CRSMS.RM52 Is Not Null
+		");
+		$this->db->bind(":bv_qmonth", $query_month);
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
 	// 找近15天逾期的案件
 	public function queryOverdueCasesIn15Days($reviewer_id = "") {
 		if (empty($reviewer_id)) {
