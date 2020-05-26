@@ -3574,29 +3574,44 @@ if (Vue) {
      * Stats Relative Components
      */
     Vue.component("lah-stats-range", {
-        template: `<div class="mb-2">
-            <label for="stat_range">選取月份: {{date}}</label>
-            <b-form-input id="stat_range" v-model="value" type="range" :min="1" :max="max"></b-form-input>
-            <b-input-group size="sm" style="width:160px" prepend="筆數大於">
-                <b-form-input
-                    type="number"
-                    v-model="filter"
-                    size="sm"
-                    min="0"
-                    max="1000"
-                    class="no-cache"
-                ></b-form-input>
-            </b-input-group>
-        </div>`,
+        template: `<fieldset class="mb-2">
+            <legend>篩選條件</legend>
+            <b-form-row class="mt-2">
+                <b-input-group size="sm" :prepend="date" class="col">
+                    <b-form-input id="stat_range" v-model="value" type="range" :min="1" :max="max"></b-form-input>
+                </b-input-group>
+                <b-input-group size="sm" prepend="筆數大於" class="col-2">
+                    <b-form-input
+                        type="number"
+                        v-model="filter"
+                        size="sm"
+                        min="0"
+                        max="1000"
+                        class="no-cache h-100"
+                    ></b-form-input>
+                </b-input-group>
+                <b-input-group size="sm" prepend="登記原因" class="col-2">
+                    <b-form-input
+                        type="text"
+                        v-model="reason"
+                        size="sm"
+                        class="no-cache h-100"
+                    ></b-form-input>
+                </b-input-group>
+            </b-form-row>
+        </fieldset>`,
         data: () => ({
             year: 109,
             month: 5,
             base: 0,
-            value: 0,
             max: 24,
+            value: 0,
             filter: 0,
+            reason: '',
             value_timer: null,
-            filter_timer: null
+            filter_timer: null,
+            reason_timer: null,
+            delay: 1000
         }),
         computed: {
             date() { return `${this.year}${("0" + this.month).slice(-2)}` }
@@ -3610,14 +3625,20 @@ if (Vue) {
                 clearTimeout(this.value_timer);
                 this.value_timer = setTimeout(() => {
                     this.storeParams['stats_date'] = this.date;
-                }, 800);
+                }, this.delay);
             },
             filter(nVal, oVal) {
                 // delay the reload action 
                 clearTimeout(this.filter_timer);
                 this.filter_timer = setTimeout(() => {
                     this.storeParams['stats_filter'] = nVal;
-                }, 800);
+                }, this.delay);
+            },
+            reason(nVal, oVal) {
+                clearTimeout(this.reason_timer);
+                this.reason_timer = setTimeout(() => {
+                    this.storeParams['stats_reason'] = nVal;
+                }, this.delay);
             }
         },
         mounted() {
@@ -3628,6 +3649,7 @@ if (Vue) {
             this.value = this.max;
             this.addToStoreParams('stats_date', this.date);
             this.addToStoreParams('stats_filter', this.filter);
+            this.addToStoreParams('stats_reason', this.reason);
         }
     });
 
@@ -3667,6 +3689,7 @@ if (Vue) {
         }),
         computed: {
             date() { return this.storeParams['stats_date'] || this.default_date },
+            reason() { return this.storeParams['stats_reason'] || '' },
             filter() { return parseInt(this.storeParams['stats_filter'] || 0) },
             header() {
                 switch(this.category) {
@@ -3694,7 +3717,8 @@ if (Vue) {
         },
         watch: {
             date(nVal, oVal) { this.reload() },
-            filter(nVal, oVal) { this.reload() }
+            filter(nVal, oVal) { this.reload() },
+            reason(nVal, oVal) { this.reload() }
         },
         methods: {
             badge_var(count) {
@@ -3728,12 +3752,25 @@ if (Vue) {
                         this.$assert(res.data.data_count > 0, "response data count is not correct.", res.data.data_count);
                         for(let i = 0; i < res.data.data_count; i++) {
                             if (res.data.raw[i].count >= this.filter) {
-                                this.items.push({
-                                    id: res.data.raw[i].id || '',
-                                    text:　res.data.raw[i].text,
-                                    count: res.data.raw[i].count,
-                                    category: type
-                                });
+                                if (this.empty(this.reason)) {
+                                    this.items.push({
+                                        id: res.data.raw[i].id || '',
+                                        text:　res.data.raw[i].text,
+                                        count: res.data.raw[i].count,
+                                        category: type
+                                    });
+                                } else {
+                                    let txt = this.reason.replace("?", ""); // prevent out of memory
+                                    let keyword = new RegExp(txt, "i");
+                                    if (keyword.test(res.data.raw[i].id) || keyword.test(res.data.raw[i].text)) {
+                                        this.items.push({
+                                            id: res.data.raw[i].id || '',
+                                            text:　res.data.raw[i].text,
+                                            count: res.data.raw[i].count,
+                                            category: type
+                                        });
+                                    }
+                                }
                             }
                         }
                     } else {
