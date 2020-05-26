@@ -3818,7 +3818,7 @@ if (Vue) {
                             this.xhr('reg_court_cases_by_month', '法院囑託案件');
                             break;
                         case "stats_reg_fix":
-                            this.xhr('reg_supplement_cases_by_month', '登記補正案件');
+                            this.xhr('reg_fix_cases_by_month', '登記補正案件');
                             break;
                         case "stats_reg_reject":
                             this.xhr('reg_reject_cases_by_month', '登記駁回案件');

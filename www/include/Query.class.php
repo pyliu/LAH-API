@@ -462,7 +462,7 @@ class Query {
 		return array_merge($cases_33, $cases_34);
 	}
 
-	public function querySupplementCasesByMonth($query_month) {
+	public function queryFixCasesByMonth($query_month) {
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
