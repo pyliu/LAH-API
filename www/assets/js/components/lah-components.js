@@ -3580,6 +3580,14 @@ if (Vue) {
                 <b-input-group size="sm" :prepend="date" class="col">
                     <b-form-input id="stat_range" v-model="value" type="range" :min="1" :max="max"></b-form-input>
                 </b-input-group>
+                <b-input-group ref="reason" size="sm" prepend="登記原因" class="col-2">
+                    <b-form-input
+                        type="text"
+                        v-model="reason"
+                        size="sm"
+                        class="no-cache h-100"
+                    ></b-form-input>
+                </b-input-group>
                 <b-input-group size="sm" prepend="筆數大於" class="col-2">
                     <b-form-input
                         type="number"
@@ -3587,14 +3595,6 @@ if (Vue) {
                         size="sm"
                         min="0"
                         max="1000"
-                        class="no-cache h-100"
-                    ></b-form-input>
-                </b-input-group>
-                <b-input-group size="sm" prepend="登記原因" class="col-2">
-                    <b-form-input
-                        type="text"
-                        v-model="reason"
-                        size="sm"
                         class="no-cache h-100"
                     ></b-form-input>
                 </b-input-group>
