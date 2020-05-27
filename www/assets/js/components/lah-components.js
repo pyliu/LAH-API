@@ -3855,6 +3855,8 @@ if (Vue) {
                         hover: true,
                         headVariant: 'dark',
                         bordered: true,
+                        captionTop: true,
+                        caption: `找到 ${data.length} 件`,
                         items: data
                     } }),
                     size: 'xl'
