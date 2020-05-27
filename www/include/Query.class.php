@@ -496,6 +496,31 @@ class Query {
 		return $this->db->fetchAll();
 	}
 
+	public function queryEXPBARefundCasesByMonth($query_month) {
+		// only allow int number for $query_month
+        if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
+            return false;
+		}
+		$this->db->parse("
+			-- 主動申請退費
+			select
+				BA32  AS  \"退費日期\",
+				BA33  AS  \"退費年\",
+				BA35  AS  \"收入退還書編號\",
+				BA36  AS  \"申請書文號\",
+				BA37  AS  \"退還書狀況\",
+				BA25  AS  \"結帳年\",
+				BA04  AS  \"收費電腦給號\",
+				BA38  AS  \"公庫付款日期\",
+				BA39  AS  \"承辦員代碼\",
+				BA40  AS  \"退費總金額\"
+			from MOIEXP.EXPBA t
+			where ba32 LIKE :bv_qmonth || '%' and BA42 = '01'  --溢繳規費
+		");
+		$this->db->bind(":bv_qmonth", $query_month);
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
 	// 找近15天逾期的案件
 	public function queryOverdueCasesIn15Days($reviewer_id = "") {
 		if (empty($reviewer_id)) {

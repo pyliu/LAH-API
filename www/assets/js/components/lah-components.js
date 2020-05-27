@@ -3665,8 +3665,8 @@ if (Vue) {
             let now = new Date();
             this.year = now.getFullYear() - 1911;
             this.month = now.getMonth();    // set last month as default
-            this.base = this.year * 12 + now.getMonth() + 1;
             this.value = this.max - 1;
+            this.base = this.year * 12 + now.getMonth() + 1;
             this.addToStoreParams('stats_date', this.date);
             this.addToStoreParams('stats_filter', this.filter);
             this.addToStoreParams('stats_keyword', this.keyword);
@@ -3833,7 +3833,7 @@ if (Vue) {
                         this.alert({message: "lah-stats-item: Not supported category.【" + this.category + "】", type: "warning"});
                 }
             },
-            showCases(title, data) {
+            showRegCases(title, data) {
                 this.msgbox({
                     title: title,
                     message: this.$createElement('lah-reg-table', { props: {
@@ -3844,6 +3844,9 @@ if (Vue) {
                     } }),
                     size: 'xl'
                 });
+            },
+            showRegularCases(title, data) {
+                this.$log(title, data);
             },
             xhr(type, title, reason_code = undefined) {
                 this.isBusy = true;
@@ -3856,7 +3859,11 @@ if (Vue) {
                         res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS ||
                         res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                     ) {
-                        this.showCases(title, res.data.baked);
+                        if (title == "主動退費案件") {
+                            this.showRegularCases(title, res.data.raw);
+                        } else {
+                            this.showRegCases(title, res.data.baked);
+                        }
                     } else {
                         let err = `回傳的狀態碼有誤【${res.data.status}】`;
                         this.$warn(err);
@@ -3879,6 +3886,9 @@ if (Vue) {
                             break;
                         case "stats_reg_reject":
                             this.xhr('reg_reject_cases_by_month', '登記駁回案件');
+                            break;
+                        case "stats_refund":
+                            this.xhr('expba_refund_cases_by_month', '主動退費案件');
                             break;
                         default:
                             this.$warn("無登記原因代碼，無法查詢案件。");
