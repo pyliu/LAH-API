@@ -3590,10 +3590,10 @@ if (Vue) {
                         class="no-cache h-100"
                     ></b-form-input>
                 </b-input-group>
-                <b-input-group ref="reason" size="sm" prepend="關鍵字" class="col-2">
+                <b-input-group size="sm" prepend="關鍵字" class="col-2">
                     <b-form-input
                         type="text"
-                        v-model="reason"
+                        v-model="keyword"
                         size="sm"
                         class="no-cache h-100"
                     ></b-form-input>
@@ -3609,12 +3609,12 @@ if (Vue) {
             month: 5,
             base: 0,
             max: 24,
-            value: 0,
+            value: 23,
             filter: 0,
-            reason: '',
+            keyword: '',
             value_timer: null,
             filter_timer: null,
-            reason_timer: null,
+            keyword_timer: null,
             delay: 1000
         }),
         computed: {
@@ -3634,6 +3634,9 @@ if (Vue) {
                 }
             },
             filter(nVal, oVal) {
+                if (nVal < 0 || nVal > 1000) {
+                    this.filter = 0;
+                } 
                 if (!this.button) {
                     // delay the reload action 
                     clearTimeout(this.filter_timer);
@@ -3642,11 +3645,11 @@ if (Vue) {
                     }, this.delay);
                 }
             },
-            reason(nVal, oVal) {
+            keyword(nVal, oVal) {
                 if (!this.button) {
-                    clearTimeout(this.reason_timer);
-                    this.reason_timer = setTimeout(() => {
-                        this.storeParams['stats_reason'] = nVal;
+                    clearTimeout(this.keyword_timer);
+                    this.keyword_timer = setTimeout(() => {
+                        this.storeParams['stats_keyword'] = nVal;
                     }, this.delay);
                 }
             }
@@ -3655,18 +3658,18 @@ if (Vue) {
             update() {
                 this.storeParams['stats_date'] = this.date;
                 this.storeParams['stats_filter'] = this.filter;
-                this.storeParams['stats_reason'] = this.reason;
+                this.storeParams['stats_keyword'] = this.keyword;
             }
         },
         mounted() {
             let now = new Date();
             this.year = now.getFullYear() - 1911;
-            this.month = now.getMonth() + 1;
+            this.month = now.getMonth();    // set last month as default
             this.base = this.year * 12 + now.getMonth() + 1;
-            this.value = this.max;
+            this.value = this.max - 1;
             this.addToStoreParams('stats_date', this.date);
             this.addToStoreParams('stats_filter', this.filter);
-            this.addToStoreParams('stats_reason', this.reason);
+            this.addToStoreParams('stats_keyword', this.keyword);
         }
     });
 
@@ -3706,7 +3709,7 @@ if (Vue) {
         }),
         computed: {
             date() { return this.storeParams['stats_date'] || this.default_date },
-            reason() { return this.storeParams['stats_reason'] || '' },
+            keyword() { return this.storeParams['stats_keyword'] || '' },
             filter() { return parseInt(this.storeParams['stats_filter'] || 0) },
             header() {
                 switch(this.category) {
@@ -3735,7 +3738,7 @@ if (Vue) {
         watch: {
             date(nVal, oVal) { this.reload() },
             filter(nVal, oVal) { this.reload() },
-            reason(nVal, oVal) { this.reload() }
+            keyword(nVal, oVal) { this.reload() }
         },
         methods: {
             badge_var(count) {
@@ -3769,7 +3772,7 @@ if (Vue) {
                         this.$assert(res.data.data_count > 0, "response data count is not correct.", res.data.data_count);
                         for(let i = 0; i < res.data.data_count; i++) {
                             if (res.data.raw[i].count >= this.filter) {
-                                if (this.empty(this.reason)) {
+                                if (this.empty(this.keyword)) {
                                     this.items.push({
                                         id: res.data.raw[i].id || '',
                                         text:　res.data.raw[i].text,
@@ -3777,7 +3780,7 @@ if (Vue) {
                                         category: type
                                     });
                                 } else {
-                                    let txt = this.reason.replace("?", ""); // prevent out of memory
+                                    let txt = this.keyword.replace("?", ""); // prevent out of memory
                                     let keyword = new RegExp(txt, "i");
                                     if (keyword.test(res.data.raw[i].id) || keyword.test(res.data.raw[i].text)) {
                                         this.items.push({
