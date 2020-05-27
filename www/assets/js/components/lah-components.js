@@ -3597,10 +3597,13 @@ if (Vue) {
                         size="sm"
                         class="no-cache h-100"
                     ></b-form-input>
-                    <b-button v-if="!enable_timer" size="sm" variant="outline-primary" class="ml-2" @click.stop="update">更新</b-button>
+                    <b-button v-if="button" size="sm" variant="outline-primary" class="ml-2" @click.stop="update">更新</b-button>
                 </b-input-group>
             </b-form-row>
         </fieldset>`,
+        props: {
+            button: { type: Boolean, default: false }
+        },
         data: () => ({
             year: 109,
             month: 5,
@@ -3609,7 +3612,6 @@ if (Vue) {
             value: 0,
             filter: 0,
             reason: '',
-            enable_timer: true,
             value_timer: null,
             filter_timer: null,
             reason_timer: null,
@@ -3623,7 +3625,7 @@ if (Vue) {
                 let after = this.base - this.max + parseInt(nVal) - 1;
                 this.year = parseInt(after / 12);
                 this.month = after % 12 + 1;
-                if (this.enable_timer) {
+                if (!this.button) {
                     // delay the reload action 
                     clearTimeout(this.value_timer);
                     this.value_timer = setTimeout(() => {
@@ -3632,7 +3634,7 @@ if (Vue) {
                 }
             },
             filter(nVal, oVal) {
-                if (this.enable_timer) {
+                if (!this.button) {
                     // delay the reload action 
                     clearTimeout(this.filter_timer);
                     this.filter_timer = setTimeout(() => {
@@ -3641,7 +3643,7 @@ if (Vue) {
                 }
             },
             reason(nVal, oVal) {
-                if (this.enable_timer) {
+                if (!this.button) {
                     clearTimeout(this.reason_timer);
                     this.reason_timer = setTimeout(() => {
                         this.storeParams['stats_reason'] = nVal;
