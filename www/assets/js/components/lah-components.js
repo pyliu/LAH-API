@@ -3590,7 +3590,7 @@ if (Vue) {
                         class="no-cache h-100"
                     ></b-form-input>
                 </b-input-group>
-                <b-input-group ref="reason" size="sm" prepend="登記原因" class="col-2">
+                <b-input-group ref="reason" size="sm" prepend="關鍵字" class="col-2">
                     <b-form-input
                         type="text"
                         v-model="reason"
