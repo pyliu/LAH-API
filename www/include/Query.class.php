@@ -507,10 +507,12 @@ class Query {
 			WHERE 
 				--t.RM02 = 'HB06' AND 
 				t.RM07_1 LIKE :bv_qmonth || '%' AND 
-				(u.LADR NOT LIKE '%桃園市%' AND u.LADR NOT LIKE '%桃園縣%') AND 
-				(v.AB03 NOT LIKE '%桃園市%' AND v.AB03 NOT LIKE '%桃園縣%')
+				(u.LADR NOT LIKE '%' || :bv_city || '%' AND u.LADR NOT LIKE '%' || :bv_county || '%') AND 
+                (v.AB03 NOT LIKE '%' || :bv_city || '%' AND v.AB03 NOT LIKE '%' || :bv_county || '%')
 		");
 		$this->db->bind(":bv_qmonth", $query_month);
+        $this->db->bind(":bv_city", '桃園市');
+        $this->db->bind(":bv_county", '桃園縣');
 		$this->db->execute();
 		return $this->db->fetchAll();
 	}
