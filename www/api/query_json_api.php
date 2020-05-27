@@ -1166,8 +1166,8 @@ switch ($_POST["type"]) {
 			}
 			$count = count($baked);
 			$status = $count > 1 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
-			$log->info("XHR [reg_court_cases_by_month] $reason_code 查到 $count 筆資料");
-			echoJSONResponse("$reason_code 查到 $count 筆資料。", $status, array(
+			$log->info("XHR [reg_court_cases_by_month] 登記法院囑託案件查到 $count 筆資料");
+			echoJSONResponse("登記法院囑託案件查到 $count 筆資料。", $status, array(
 				"data_count" => $count,
 				"query_string" => "query_month=".$query_month,
 				"baked" => $baked
@@ -1193,8 +1193,8 @@ switch ($_POST["type"]) {
 			}
 			$count = count($baked);
 			$status = $count > 1 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
-			$log->info("XHR [reg_fix_cases_by_month] $reason_code 查到 $count 筆資料");
-			echoJSONResponse("$reason_code 查到 $count 筆資料。", $status, array(
+			$log->info("XHR [reg_fix_cases_by_month] 補正案件查到 $count 筆資料");
+			echoJSONResponse("補正案件查到 $count 筆資料。", $status, array(
 				"data_count" => $count,
 				"query_string" => "query_month=".$query_month,
 				"baked" => $baked
@@ -1220,11 +1220,33 @@ switch ($_POST["type"]) {
 			}
 			$count = count($baked);
 			$status = $count > 1 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
-			$log->info("XHR [reg_reject_cases_by_month] $reason_code 查到 $count 筆資料");
-			echoJSONResponse("$reason_code 查到 $count 筆資料。", $status, array(
+			$log->info("XHR [reg_reject_cases_by_month] 駁回案件查到 $count 筆資料");
+			echoJSONResponse("駁回案件查到 $count 筆資料。", $status, array(
 				"data_count" => $count,
 				"query_string" => "query_month=".$query_month,
 				"baked" => $baked
+			));
+		}
+		break;
+	case "reg_remote_cases_by_month":
+		if (empty($_POST["query_month"])) {
+			$_POST["query_month"] = substr($today, 0, 5);
+		}
+		$query_month = $_POST['query_month'];
+		$log->info("XHR [reg_remote_cases_by_month] 查詢遠途先審案件 BY MONTH【${query_month}】請求");
+		$rows = $mock ? $cache->get('reg_remote_cases_by_month') : $query->queryRegRemoteCasesByMonth($query_month);
+		$cache->set('reg_remote_cases_by_month', $rows);
+		if (empty($rows)) {
+			$log->info("XHR [reg_remote_cases_by_month] 查無資料");
+			echoJSONResponse("XHR [reg_remote_cases_by_month] 查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+		} else {
+			$count = count($rows);
+			$status = $count > 1 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
+			$log->info("XHR [reg_remote_cases_by_month] 查到 $count 筆資料");
+			echoJSONResponse("查到 $count 筆資料。", $status, array(
+				"data_count" => $count,
+				"query_string" => "query_month=".$query_month,
+				"raw" => $rows
 			));
 		}
 		break;
@@ -1282,8 +1304,8 @@ switch ($_POST["type"]) {
 		} else {
 			$count = count($rows);
 			$status = $count > 1 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
-			$log->info("XHR [expba_refund_cases_by_month] $reason_code 查到 $count 筆資料");
-			echoJSONResponse("$reason_code 查到 $count 筆資料。", $status, array(
+			$log->info("XHR [expba_refund_cases_by_month] 退費案件查到 $count 筆資料");
+			echoJSONResponse("退費案件查到 $count 筆資料。", $status, array(
 				"data_count" => $count,
 				"query_string" => "query_month=".$query_month,
 				"raw" => $rows
@@ -1304,8 +1326,8 @@ switch ($_POST["type"]) {
 		} else {
 			$count = count($rows);
 			$status = $count > 1 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
-			$log->info("XHR [sur_rain_cases_by_month] $reason_code 查到 $count 筆資料");
-			echoJSONResponse("$reason_code 查到 $count 筆資料。", $status, array(
+			$log->info("XHR [sur_rain_cases_by_month] 測量因雨延期案件查到 $count 筆資料");
+			echoJSONResponse("測量因雨延期案件查到 $count 筆資料。", $status, array(
 				"data_count" => $count,
 				"query_string" => "query_month=".$query_month,
 				"raw" => $rows

@@ -479,6 +479,42 @@ class Query {
 		return $this->db->fetchAll();
 	}
 
+	public function queryRegRemoteCasesByMonth($query_month) {
+		// only allow int number for $query_month
+        if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
+            return false;
+		}
+		$this->db->parse("
+			SELECT
+				t.RM01 AS \"收件年\",
+				t.RM02 AS \"收件字\",
+				t.RM03 AS \"收件號\",
+				t.RM09 AS \"登記原因代碼\",
+				w.KCNT AS \"登記原因\",
+				t.RM07_1 AS \"收件日期\",
+				u.LIDN AS \"權利人統編\",
+				u.LNAM AS \"權利人名稱\",
+				u.LADR AS \"權利人地址\",
+				v.AB01 AS \"代理人統編\",
+				v.AB02 AS \"代理人名稱\",
+				v.AB03 AS \"代理人地址\",
+				t.RM13 AS \"筆數\",
+				t.RM16 AS \"棟數\"
+			FROM MOICAS.CRSMS t
+				LEFT JOIN MOICAD.RLNID u ON t.RM18 = u.LIDN  -- 權利人
+				LEFT JOIN MOICAS.CABRP v ON t.RM24 = v.AB01  -- 代理人
+				LEFT JOIN MOIADM.RKEYN w ON t.RM09 = w.KCDE_2 AND w.KCDE_1 = '06'   -- 登記原因
+			WHERE 
+				--t.RM02 = 'HB06' AND 
+				t.RM07_1 LIKE :bv_qmonth || '%' AND 
+				(u.LADR NOT LIKE '%桃園市%' AND u.LADR NOT LIKE '%桃園縣%') AND 
+				(v.AB03 NOT LIKE '%桃園市%' AND v.AB03 NOT LIKE '%桃園縣%')
+		");
+		$this->db->bind(":bv_qmonth", $query_month);
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
 	public function queryRejectCasesByMonth($query_month) {
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
@@ -551,7 +587,7 @@ class Query {
 				--t.MM17_2 AS \"複代理人統一編號\",
 				--t.MM18   AS \"案件點數\",
 				--t.MM19   AS \"辦理期限\",
-				--t.MM20   AS \"案件天數\",
+				t.MM20   AS \"案件天數\",
 				--t.MM21_1 AS \"逾期日期\",
 				--t.MM21_2 AS \"逾期時間\",
 				t.MM22   AS \"辦理情形\",

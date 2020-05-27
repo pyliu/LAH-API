@@ -43,6 +43,9 @@ function queryStats($type, $date, $error_msg) {
                 case "stats_reg_all":
                     $result = $stats->getRegCaseCount($date);
                     break;
+                case "stats_reg_remote":
+                    $result = $stats->getRegRemoteCount($date);
+                    break;
             }
         }
         $cache->set($type, $result);
@@ -140,6 +143,17 @@ switch ($_POST["type"]) {
             $log->info("XHR [stats_reg_all] 取得全部登記案件數量(".$_POST['date'].")成功。");
         } else {
             $log->info("XHR [stats_reg_all] ${err}。");
+        }
+
+        break;
+    case "stats_reg_remote":
+        $log->info("XHR [stats_reg_remote] 取得遠途先審案件數(".$_POST['date'].")請求。");
+
+        $err = "取得全部登記案件數資料失敗。 ".$_POST['date'];
+        if (queryStats('stats_reg_remote', $_POST['date'], $err)) {
+            $log->info("XHR [stats_reg_remote] 取得遠途先審案件數量(".$_POST['date'].")成功。");
+        } else {
+            $log->info("XHR [stats_reg_remote] ${err}。");
         }
 
         break;

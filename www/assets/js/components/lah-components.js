@@ -3816,10 +3816,12 @@ if (Vue) {
                     case "stats_reg_reason":
                     case "stats_reg_reject":
                     case "stats_reg_fix":
-                    case "stats_reg_all":    
+                    case "stats_reg_all":
+                    case "stats_reg_remote":
                         this.get_stats(this.category);
                         break;
                     case "all":
+                        this.get_stats('stats_reg_remote');
                         this.get_stats('stats_court');
                         this.get_stats('stats_refund');
                         this.get_stats('stats_sur_rain');
@@ -3869,7 +3871,7 @@ if (Vue) {
                         res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS ||
                         res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                     ) {
-                        if (title == "主動退費案件" || title == "測量因雨延期案件") {
+                        if (title == "主動退費案件" || title == "測量因雨延期案件" || title == "遠途先審案件") {
                             this.showRegularCases(title, res.data.raw);
                         } else {
                             this.showRegCases(title, res.data.baked);
@@ -3902,6 +3904,9 @@ if (Vue) {
                             break;
                         case "stats_sur_rain":
                             this.xhr('sur_rain_cases_by_month', '測量因雨延期案件');
+                            break;
+                        case "stats_reg_remote":
+                            this.xhr('reg_remote_cases_by_month', '遠途先審案件');
                             break;
                         default:
                             this.$warn("無登記原因代碼，無法查詢案件。");

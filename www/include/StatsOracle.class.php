@@ -121,21 +121,44 @@ class StatsOracle {
     }
 
     public function getRegCaseCount($year_month) {
-      if (!$this->checkYearMonth($year_month)) {
-          return false;
-      }
-      $this->db->parse("
-          SELECT t.RM09 AS \"id\", q.kcnt AS \"text\", COUNT(*) AS \"count\"
-          FROM MOICAS.CRSMS t
-          LEFT JOIN MOICAD.RKEYN q
+        if (!$this->checkYearMonth($year_month)) {
+            return false;
+        }
+        $this->db->parse("
+            SELECT t.RM09 AS \"id\", q.kcnt AS \"text\", COUNT(*) AS \"count\"
+            FROM MOICAS.CRSMS t
+            LEFT JOIN MOICAD.RKEYN q
             ON q.kcde_1 = '06'
-          AND t.rm09 = q.kcde_2
-          WHERE t.RM07_1 LIKE :bv_cond || '%'
-          GROUP BY t.RM09, q.kcnt
-      ");
-      $this->db->bind(":bv_cond", $year_month);
-      $this->db->execute();
-      return $this->db->fetchAll();   // true => fetch raw data instead of converting to UTF-8
-  }
+            AND t.rm09 = q.kcde_2
+            WHERE t.RM07_1 LIKE :bv_cond || '%'
+            GROUP BY t.RM09, q.kcnt
+        ");
+        $this->db->bind(":bv_cond", $year_month);
+        $this->db->execute();
+        return $this->db->fetchAll();   // true => fetch raw data instead of converting to UTF-8
+    }
+
+    
+    public function getRegRemoteCount($year_month) {
+        if (!$this->checkYearMonth($year_month)) {
+            return false;
+        }
+        $this->db->parse("
+            SELECT
+                '遠途先審案件' AS \"text\", COUNT(*) AS \"count\"
+            FROM MOICAS.CRSMS t
+                LEFT JOIN MOICAD.RLNID u ON t.RM18 = u.LIDN  -- 權利人
+                LEFT JOIN MOICAS.CABRP v ON t.RM24 = v.AB01  -- 代理人
+                LEFT JOIN MOIADM.RKEYN w ON t.RM09 = w.KCDE_2 AND w.KCDE_1 = '06'   -- 登記原因
+            WHERE 
+                --t.RM02 = 'HB06' AND 
+                t.RM07_1 LIKE :bv_cond || '%' AND 
+                (u.LADR NOT LIKE '%桃園市%' AND u.LADR NOT LIKE '%桃園縣%') AND 
+                (v.AB03 NOT LIKE '%桃園市%' AND v.AB03 NOT LIKE '%桃園縣%')
+        ");
+        $this->db->bind(":bv_cond", $year_month);
+        $this->db->execute();
+        return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+    }
 }
 ?>
