@@ -521,6 +521,68 @@ class Query {
 		$this->db->execute();
 		return $this->db->fetchAll();
 	}
+
+	public function querySurRainCasesByMonth($query_month) {
+		// only allow int number for $query_month
+        if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
+            return false;
+		}
+		$this->db->parse("
+			select
+				t.MM01   AS \"收件年\",
+				t.MM02   AS \"收件字\",
+				t.MM03   AS \"收件號\",
+				t.MM04_1 AS \"收件日期\",
+				--t.MM04_2 AS \"收件時間\",
+				t.MM05   AS \"收件類別\",
+				t.MM06   AS \"申請事由\",
+				--t.MM07   AS \"鄉鎮市區\",
+				--t.MM08   AS \"段小段\",
+				--t.MM09   AS \"地號\",
+				--t.MM09_1 AS \"地目\",
+				--t.MM10   AS \"建號\",
+				--t.MM11   AS \"筆 / 棟數\",
+				--t.MM12   AS \"面積\",
+				--t.MM13   AS \"申請人統一編號\",
+				--t.MM14   AS \"申請人姓名\",
+				--t.MM15   AS \"申請人電話\",
+				--t.MM16   AS \"申請人住址\",
+				--t.MM17_1 AS \"代理人統一編號\",
+				--t.MM17_2 AS \"複代理人統一編號\",
+				--t.MM18   AS \"案件點數\",
+				--t.MM19   AS \"辦理期限\",
+				--t.MM20   AS \"案件天數\",
+				--t.MM21_1 AS \"逾期日期\",
+				--t.MM21_2 AS \"逾期時間\",
+				t.MM22   AS \"辦理情形\",
+				t.MM23   AS \"結案已否\",
+				--t.MM24   AS \"件數\",
+				--t.MM13_1 AS \"共(人)\",
+				--t.MM15_1 AS \"申請人電話分機號碼\",
+				--t.MM25   AS \"管轄所代碼\",
+				--t.MM20_1 AS \"實際辦理天數\",
+				--t.MM16_1 AS \"電子信箱\",
+				--t.MM17_3 AS \"登記助理員統編\",
+				--t.MM15_2 AS \"手機號碼\",
+				--t.MM26   AS \"區域號碼\",
+				--t.MM27   AS \"分機號碼\",
+				t.MM31   AS \"收件人\"
+				--t.MM32   AS \"是否為跨所案件\",
+				--t.MM33   AS \"跨所-收件所所別\",
+				--t.MM34   AS \"跨所-收件所縣市別\"
+			from SCMSMS t
+			left join SCMSDS q
+				on t.MM01 = q.MD01
+				and t.MM02 = q.MD02
+				and t.MM03 = q.MD03
+			where t.MM04_1 LIKE :bv_qmonth || '%'
+				and q.MD12 = '1' -- 因雨延期代碼
+		");
+		$this->db->bind(":bv_qmonth", $query_month);
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
 	// 找近15天逾期的案件
 	public function queryOverdueCasesIn15Days($reviewer_id = "") {
 		if (empty($reviewer_id)) {

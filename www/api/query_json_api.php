@@ -1290,6 +1290,28 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
+	case "sur_rain_cases_by_month":
+		if (empty($_POST["query_month"])) {
+			$_POST["query_month"] = substr($today, 0, 5);
+		}
+		$query_month = $_POST['query_month'];
+		$log->info("XHR [sur_rain_cases_by_month] 查詢測量因雨延期案件 BY MONTH【${query_month}】請求");
+		$rows = $mock ? $cache->get('sur_rain_cases_by_month') : $query->querySurRainCasesByMonth($query_month);
+		$cache->set('sur_rain_cases_by_month', $rows);
+		if (empty($rows)) {
+			$log->info("XHR [sur_rain_cases_by_month] 查無資料");
+			echoJSONResponse("XHR [sur_rain_cases_by_month] 查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+		} else {
+			$count = count($rows);
+			$status = $count > 1 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
+			$log->info("XHR [sur_rain_cases_by_month] $reason_code 查到 $count 筆資料");
+			echoJSONResponse("$reason_code 查到 $count 筆資料。", $status, array(
+				"data_count" => $count,
+				"query_string" => "query_month=".$query_month,
+				"raw" => $rows
+			));
+		}
+		break;
 	case "rlnid":
 		$param = $_POST["id"];
 		$log->info("XHR [rlnid] 取得權利人資訊【${param}】請求");

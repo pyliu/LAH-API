@@ -3846,7 +3846,17 @@ if (Vue) {
                 });
             },
             showRegularCases(title, data) {
-                this.$log(title, data);
+                this.msgbox({
+                    title: title,
+                    message: this.$createElement('b-table', { props: {
+                        striped: true,
+                        hover: true,
+                        headVariant: 'dark',
+                        bordered: true,
+                        items: data
+                    } }),
+                    size: 'xl'
+                });
             },
             xhr(type, title, reason_code = undefined) {
                 this.isBusy = true;
@@ -3859,7 +3869,7 @@ if (Vue) {
                         res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS ||
                         res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                     ) {
-                        if (title == "主動退費案件") {
+                        if (title == "主動退費案件" || title == "測量因雨延期案件") {
                             this.showRegularCases(title, res.data.raw);
                         } else {
                             this.showRegCases(title, res.data.baked);
@@ -3889,6 +3899,9 @@ if (Vue) {
                             break;
                         case "stats_refund":
                             this.xhr('expba_refund_cases_by_month', '主動退費案件');
+                            break;
+                        case "stats_sur_rain":
+                            this.xhr('sur_rain_cases_by_month', '測量因雨延期案件');
                             break;
                         default:
                             this.$warn("無登記原因代碼，無法查詢案件。");
