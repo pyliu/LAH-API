@@ -511,8 +511,8 @@ class Query {
                 (v.AB03 NOT LIKE '%' || :bv_city || '%' AND v.AB03 NOT LIKE '%' || :bv_county || '%')
 		");
 		$this->db->bind(":bv_qmonth", $query_month);
-        $this->db->bind(":bv_city", '桃園市');
-        $this->db->bind(":bv_county", '桃園縣');
+		$this->db->bind(":bv_city", mb_convert_encoding('桃園市', "big5"));
+        $this->db->bind(":bv_county", mb_convert_encoding('桃園縣', "big5"));
 		$this->db->execute();
 		return $this->db->fetchAll();
 	}
