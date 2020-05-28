@@ -3727,6 +3727,10 @@ if (Vue) {
                         return `登記補正案件 (${this.date})`;
                     case "stats_reg_all":
                         return `各項登記原因案件 (${this.date})`;
+                    case "stats_reg_remote":
+                        return `遠途先審案件 (${this.date})`;
+                    case "stats_reg_subcase":
+                        return `本所處理跨所子號案件 (${this.date})`;
                     case "all":
                         return `所有支援的統計資料 (${this.date})`;
                     default:
@@ -3818,9 +3822,11 @@ if (Vue) {
                     case "stats_reg_fix":
                     case "stats_reg_all":
                     case "stats_reg_remote":
+                    case "stats_reg_subcase":
                         this.get_stats(this.category);
                         break;
                     case "all":
+                        this.get_stats('stats_reg_subcase');
                         this.get_stats('stats_reg_remote');
                         this.get_stats('stats_court');
                         this.get_stats('stats_refund');

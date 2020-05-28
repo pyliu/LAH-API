@@ -138,7 +138,6 @@ class StatsOracle {
         return $this->db->fetchAll();   // true => fetch raw data instead of converting to UTF-8
     }
 
-    
     public function getRegRemoteCount($year_month) {
         if (!$this->checkYearMonth($year_month)) {
             return false;
@@ -159,6 +158,22 @@ class StatsOracle {
         $this->db->bind(":bv_cond", $year_month);
         $this->db->bind(":bv_city", mb_convert_encoding('桃園市', "big5"));
         $this->db->bind(":bv_county", mb_convert_encoding('桃園縣', "big5"));
+        $this->db->execute();
+        return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+    }
+
+    public function getRegSubCaseCount($year_month) {
+        if (!$this->checkYearMonth($year_month)) {
+            return false;
+        }
+        $this->db->parse("
+            SELECT '本所處理跨所子號案件' AS \"text\", COUNT(*) AS \"count\"
+            FROM MOICAS.CRSMS tt
+            WHERE tt.rm07_1 LIKE :bv_cond || '%'
+                AND tt.rm02 LIKE 'H%B1' -- 本所處理跨所案件
+                AND tt.RM03 NOT LIKE '%0' -- 子號案件
+        ");
+        $this->db->bind(":bv_cond", $year_month);
         $this->db->execute();
         return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
