@@ -3879,7 +3879,7 @@ if (Vue) {
                         res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS ||
                         res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                     ) {
-                        if (title == "主動退費案件" || title == "測量因雨延期案件" || title == "遠途先審案件") {
+                        if (title == "主動退費案件" || title == "測量因雨延期案件" || title == "遠途先審案件" || title == "本所處理跨所子號案件") {
                             this.showRegularCases(title, res.data.raw);
                         } else {
                             this.showRegCases(title, res.data.baked);
@@ -3915,6 +3915,9 @@ if (Vue) {
                             break;
                         case "stats_reg_remote":
                             this.xhr('reg_remote_cases_by_month', '遠途先審案件');
+                            break;
+                        case "stats_reg_subcase":
+                            this.xhr('reg_subcases_by_month', '本所處理跨所子號案件');
                             break;
                         default:
                             this.$warn("無登記原因代碼，無法查詢案件。");
