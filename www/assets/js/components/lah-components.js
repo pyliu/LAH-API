@@ -3731,6 +3731,8 @@ if (Vue) {
                         return `遠途先審案件 (${this.date})`;
                     case "stats_reg_subcase":
                         return `本所處理跨所子號案件 (${this.date})`;
+                    case "stats_regf":
+                        return `外國人地權登記統計 (${this.date})`;
                     case "all":
                         return `所有支援的統計資料 (${this.date})`;
                     default:
@@ -3823,6 +3825,7 @@ if (Vue) {
                     case "stats_reg_all":
                     case "stats_reg_remote":
                     case "stats_reg_subcase":
+                    case "stats_regf":
                         this.get_stats(this.category);
                         break;
                     case "all":
@@ -3833,6 +3836,7 @@ if (Vue) {
                         this.get_stats('stats_sur_rain');
                         this.get_stats('stats_reg_reject');
                         this.get_stats('stats_reg_fix');
+                        this.get_stats('stats_regf');
                         //this.get_stats('stats_reg_reason');
                         setTimeout(() => this.get_stats('stats_reg_all'), 1000);
                         break;
@@ -3879,7 +3883,7 @@ if (Vue) {
                         res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_MULTIPLE_RECORDS ||
                         res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL
                     ) {
-                        if (title == "主動退費案件" || title == "測量因雨延期案件" || title == "遠途先審案件" || title == "本所處理跨所子號案件") {
+                        if (title == "主動退費案件" || title == "測量因雨延期案件" || title == "遠途先審案件" || title == "本所處理跨所子號案件" || title == "外國人地權登記統計") {
                             this.showRegularCases(title, res.data.raw);
                         } else {
                             this.showRegCases(title, res.data.baked);
@@ -3918,6 +3922,9 @@ if (Vue) {
                             break;
                         case "stats_reg_subcase":
                             this.xhr('reg_subcases_by_month', '本所處理跨所子號案件');
+                            break;
+                        case "stats_regf":
+                            this.xhr('regf_by_month', '外國人地權登記統計');
                             break;
                         default:
                             this.$warn("無登記原因代碼，無法查詢案件。");

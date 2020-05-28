@@ -177,5 +177,19 @@ class StatsOracle {
         $this->db->execute();
         return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
+
+    public function getRegfCount($year_month) {
+        if (!$this->checkYearMonth($year_month)) {
+            return false;
+        }
+        $this->db->parse("
+            SELECT '外國人地權登記統計' AS \"text\", COUNT(*) AS \"count\"
+            FROM MOICAD.REGF
+            WHERE MOICAD.REGF.RF40 LIKE :bv_cond || '%'
+        ");
+        $this->db->bind(":bv_cond", $year_month);
+        $this->db->execute();
+        return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+    }
 }
 ?>

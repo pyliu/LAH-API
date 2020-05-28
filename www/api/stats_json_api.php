@@ -49,6 +49,9 @@ function queryStats($type, $date, $error_msg) {
                 case "stats_reg_subcase":
                     $result = $stats->getRegSubCaseCount($date);
                     break;
+                case "stats_regf":
+                    $result = $stats->getRegfCount($date);
+                    break;
             }
         }
         $cache->set($type, $result);
@@ -168,6 +171,17 @@ switch ($_POST["type"]) {
             $log->info("XHR [stats_reg_subcase] 取得本所處理跨所子號案件數量(".$_POST['date'].")成功。");
         } else {
             $log->info("XHR [stats_reg_subcase] ${err}。");
+        }
+
+        break;
+    case "stats_regf":
+        $log->info("XHR [stats_regf] 取得外國人地權登記統計檔(".$_POST['date'].")請求。");
+
+        $err = "取得外國人地權登記統計檔資料失敗。 ".$_POST['date'];
+        if (queryStats('stats_regf', $_POST['date'], $err)) {
+            $log->info("XHR [stats_regf] 取得外國人地權登記統計檔(".$_POST['date'].")成功。");
+        } else {
+            $log->info("XHR [stats_regf] ${err}。");
         }
 
         break;

@@ -1294,6 +1294,28 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
+	case "regf_by_month":
+		if (empty($_POST["query_month"])) {
+			$_POST["query_month"] = substr($today, 0, 5);
+		}
+		$query_month = $_POST['query_month'];
+		$log->info("XHR [regf_by_month] 查詢外國人地權登記統計檔 BY MONTH【${query_month}】請求");
+		$rows = $mock ? $cache->get('regf_by_month') : $query->queryRegfCasesByMonth($query_month);
+		$cache->set('regf_by_month', $rows);
+		if (empty($rows)) {
+			$log->info("XHR [regf_by_month] 查無外國人地權登記統計檔資料");
+			echoJSONResponse("XHR [regf_by_month] 查無外國人地權登記統計檔資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+		} else {
+			$count = count($rows);
+			$status = $count > 1 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
+			$log->info("XHR [regf_by_month] 外國人地權登記統計檔查到 $count 筆資料");
+			echoJSONResponse("外國人地權登記統計檔查到 $count 筆資料。", $status, array(
+				"data_count" => $count,
+				"query_string" => "query_month=".$query_month,
+				"raw" => $rows
+			));
+		}
+		break;
 	case "reg_upd_col":
 		$log->info("XHR [reg_upd_col] 更新案件欄位【".$_POST["rm01"].", ".$_POST["rm02"].", ".$_POST["rm03"].", ".$_POST["col"].", ".$_POST["val"]."】請求");
 		$result_flag = $mock ? $cache->get('reg_upd_col') : $query->updateCaseColumnData($_POST["rm01"].$_POST["rm02"].$_POST["rm03"], "MOICAS.CRSMS", $_POST["col"], $_POST["val"]);
