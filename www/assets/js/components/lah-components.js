@@ -3771,7 +3771,7 @@ if (Vue) {
                     type: type,
                     date: this.date
                 }).then(res => {
-                    this.ok = res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL;
+                    this.ok = res.data.status > 0;
                     if (this.ok) {
                         this.$assert(res.data.data_count > 0, "response data count is not correct.", res.data.data_count);
                         for(let i = 0; i < res.data.data_count; i++) {
@@ -3798,8 +3798,8 @@ if (Vue) {
                             }
                         }
                     } else {
-                        this.notify({ message: res.data.message + " 回傳狀態碼錯誤【" + res.data.status + "】", type: "warning" });
-                        this.$warn(type + " 回傳狀態碼錯誤【" + res.data.status + "】");
+                        this.notify({ message: res.data.message + " " + this.responseMessage(res.data.status), type: "warning" });
+                        this.$warn(type + " " + this.responseMessage(res.data.status));
                     }
                 }).catch(err => {
                     this.error = err;
@@ -3885,7 +3885,7 @@ if (Vue) {
                             this.showRegCases(title, res.data.baked);
                         }
                     } else {
-                        let err = `回傳的狀態碼有誤【${res.data.status}】`;
+                        let err = this.responseMessage(res.data.status);
                         this.$warn(err);
                         this.notify({ message: err, type: "warning" });
                     }
