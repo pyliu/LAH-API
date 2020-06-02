@@ -3634,7 +3634,7 @@ if (Vue) {
                 }
             },
             filter(nVal, oVal) {
-                if (nVal < 0 || nVal > 1000) {
+                if (nVal < 0 || nVal > 1000 || isNaN(nVal)) {
                     this.filter = 0;
                 } 
                 if (!this.button) {
