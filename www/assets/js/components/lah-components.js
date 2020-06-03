@@ -3813,6 +3813,26 @@ if (Vue) {
                     }
                 });
             },
+            reload_stats_cache(type) {
+                this.isBusy = true;
+                this.$http.post(CONFIG.STATS_JSON_API_EP, {
+                    type: type,
+                    date: this.date,
+                    reload: true
+                }).then(res => {
+                    this.ok = res.data.status > 0;
+                    if (this.ok) {
+                        this.notify({ message: type + " (" + this.date + ") 已成功更新" + this.responseMessage(res.data.status), type: "success" });
+                    } else {
+                        this.notify({ message: res.data.message + " " + this.responseMessage(res.data.status), type: "warning" });
+                        this.$warn(type + " " + this.responseMessage(res.data.status));
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            },
             reload() {
                 this.items = [];
                 switch(this.category) {
@@ -3885,6 +3905,8 @@ if (Vue) {
                     ) {
                         if (title == "主動退費案件" || title == "測量因雨延期案件" || title == "遠途先審案件" || title == "本所處理跨所子號案件" || title == "外國人地權登記統計") {
                             this.showRegularCases(title, res.data.raw);
+                            // e.g. stats_regf may need to reload the stats count since it will have data after 1st day of month ... 
+                            this.sync_data_count(title, res.data.raw);
                         } else {
                             this.showRegCases(title, res.data.baked);
                         }
@@ -3932,6 +3954,17 @@ if (Vue) {
                     }
                 } else {
                     this.xhr('reg_reason_cases_by_month', item.text, item.id);
+                }
+            },
+            sync_data_count(title, qry_data) {
+                // NOTE: use title to check the count sync
+                let need_to_sync = this.items.filter((item, index, array) => {
+                    return qry_data.length != item.count && item.text == title;
+                });
+                if (need_to_sync) {
+                    need_to_sync.forEach(element => {
+                        this.reload_stats_cache(element.category);
+                    });
                 }
             }
         },

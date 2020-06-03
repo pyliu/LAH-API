@@ -83,6 +83,19 @@ class StatsSQLite3 {
         return $ret;
     }
 
+    public function removeStatsRawData($id) {
+        // $data => php array
+        // overdue_stats_detail
+        $stm = $this->db->prepare("DELETE FROM stats_raw_data WHERE id = :id");
+        $stm->bindParam(':id', $id);
+        $ret = $stm->execute();
+        if (!$ret) {
+            global $log;
+            $log->error(__METHOD__.": 移除統計 RAW DATA 失敗【".$id.", ".$stm->getSQL()."】");
+        }
+        return $ret;
+    }
+
     public function getStatsRawData($id) {
         $data = $this->db->querySingle("SELECT data from stats_raw_data WHERE id = '$id'");
         return empty($data) ? false : unserialize($data);

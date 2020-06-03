@@ -16,6 +16,12 @@ if ($mock) $log->warning("現在處於模擬模式(mock mode)，STATS API僅會�
 function queryStats($type, $date, $error_msg) {
     global $stats_sqlite3, $mock, $cache, $stats, $this_month, $log;
     $key = $type.'_'.$date;
+    
+    // remove old record first for rest operation
+    if ($_POST['reload'] == 'true') {
+        $stats_sqlite3->removeStatsRawData($key);
+    }
+    
     $result = $stats_sqlite3->getStatsRawData($key);
     if ($this_month == $date || empty($result)) {
         $result = $cache->get($type);
