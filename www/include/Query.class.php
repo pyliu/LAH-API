@@ -456,10 +456,19 @@ class Query {
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
-		}
-		$cases_33 = $this->queryReasonCasesByMonth('33', $query_month);
-		$cases_34 = $this->queryReasonCasesByMonth('34', $query_month);
-		return array_merge($cases_33, $cases_34);
+        }
+        $this->db->parse("
+			SELECT *
+			FROM SCRSMS
+			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+			WHERE
+				RM07_1 LIKE :bv_qmonth || '%' AND
+				RM09 in ('33', '34', '49', '54', '50', '55', '52', '57', '51', '56', 'FB', 'FC', 'AU')
+			ORDER BY RM07_1, RM07_2 DESC
+		");
+		$this->db->bind(":bv_qmonth", $query_month);
+		$this->db->execute();
+		return $this->db->fetchAll();
 	}
 
 	public function queryFixCasesByMonth($query_month) {

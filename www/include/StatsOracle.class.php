@@ -39,11 +39,13 @@ class StatsOracle {
             return false;
         }
         $this->db->parse("
-            -- 法院囑託案件，登記原因為查封(33)、塗銷查封(34)
+            -- 法院囑託案件
+            -- 登記原因為查封(33)、塗銷查封(34)、假扣押(49)、塗銷假扣押(54)、假處分(50)、塗銷假處分(55)
+            -- 禁止處分(52)、塗銷禁止處分(57)、破產登記(51)、塗銷破產登記(56)、暫時處分(FB)、塗銷暫時處分(FC)、未登記建物查封(AU)
             SELECT '法院囑託案件' AS \"text\", COUNT(*) AS \"count\"
             FROM MOICAS.CRSMS t
             WHERE t.RM07_1 LIKE :bv_cond || '%'
-            AND t.RM09 in ('33', '34')
+            AND t.RM09 in ('33', '34', '49', '54', '50', '55', '52', '57', '51', '56', 'FB', 'FC', 'AU')
 		    ");
         $this->db->bind(":bv_cond", $year_month);
         $this->db->execute();
