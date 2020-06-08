@@ -327,11 +327,6 @@ if (Vue) {
                 icon: "comments",
                 need_admin: false
             }, {
-                text: "記錄瀏覽",
-                url: "tasklog.html",
-                icon: "dog",
-                need_admin: true
-            }, {
                 text: `管理看板`,
                 url: "dashboard.html",
                 icon: "cubes",
@@ -341,6 +336,11 @@ if (Vue) {
                 url: "stats.html",
                 icon: "file-contract",
                 need_admin: false
+            }, {
+                text: "記錄瀏覽",
+                url: "tasklog.html",
+                icon: "dog",
+                need_admin: true
             }, {
                 text: `測試`,
                 url: "test.html",
