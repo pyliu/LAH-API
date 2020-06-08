@@ -3677,7 +3677,7 @@ if (Vue) {
         template: `<div>
             <b-card-group v-if="all" columns>
                 <transition-group name="list">
-                    <b-card no-body  border-variant="white" v-for="(item, idx) in items" :key="'stats_'+idx">
+                    <b-card no-body v-for="(item, idx) in items" :key="'stats_'+idx" :border-variant="border_var(item)">
                         <b-list-group-item button class="d-flex justify-content-between align-items-center" @click.stop="query(item)">
                             {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
                             <b-badge :variant="badge_var(item.count)" pill>{{item.count}}</b-badge>
@@ -3747,6 +3747,22 @@ if (Vue) {
             keyword(nVal, oVal) { this.reload() }
         },
         methods: {
+            border_var(item) {
+                switch(item.category) {
+                    case "stats_court":
+                    case "stats_refund":
+                    case "stats_sur_rain":
+                    case "stats_reg_reason":
+                    case "stats_reg_reject":
+                    case "stats_reg_fix":
+                    case "stats_reg_remote":
+                    case "stats_reg_subcase":
+                    case "stats_regf":
+                        return 'info';
+                    default:
+                        return 'white';
+                }
+            },
             badge_var(count) {
                 if(count < 10) {
                     return 'secondary';
