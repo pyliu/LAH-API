@@ -3678,7 +3678,7 @@ if (Vue) {
             <b-card-group v-if="all" columns>
                 <transition-group name="list">
                     <b-card no-body v-for="(item, idx) in items" :key="'stats_'+idx" :border-variant="border_var(item)">
-                        <b-list-group-item button class="d-flex justify-content-between align-items-center" @click.stop="query(item)">
+                        <b-list-group-item button class="d-flex justify-content-between align-items-center" @click.stop="query(item)" title="按我取得詳細資料">
                             {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
                             <b-badge :variant="badge_var(item.count)" pill>{{item.count}}</b-badge>
                         </b-list-group-item>
