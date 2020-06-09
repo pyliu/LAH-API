@@ -1652,6 +1652,7 @@ if (Vue) {
                     this.error = err;
                 }).finally(() => {
                     this.isBusy= false;
+                    this.message = '';
                 });
             },
             shown() {
