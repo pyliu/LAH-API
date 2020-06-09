@@ -471,23 +471,6 @@ class Query {
 		return $this->db->fetchAll();
 	}
 
-	public function queryFixCasesByMonth($query_month) {
-		// only allow int number for $query_month
-        if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
-            return false;
-		}
-		$this->db->parse("
-			SELECT DISTINCT *
-				FROM MOICAS.CRSMS
-			WHERE MOICAS.CRSMS.RM07_1 LIKE :bv_qmonth || '%'
-				AND MOICAS.CRSMS.RM51 Is Not Null
-				AND MOICAS.CRSMS.RM52 Is Not Null
-		");
-		$this->db->bind(":bv_qmonth", $query_month);
-		$this->db->execute();
-		return $this->db->fetchAll();
-	}
-
 	public function queryRegRemoteCasesByMonth($query_month) {
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
@@ -587,17 +570,36 @@ class Query {
 		return $this->db->fetchAll();
 	}
 
+	public function queryFixCasesByMonth($query_month) {
+		// only allow int number for $query_month
+        if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
+            return false;
+		}
+		$this->db->parse("
+			SELECT DISTINCT t.*, s.KCNT AS \"RM09_CHT\"
+			FROM MOICAS.CRSMS t
+			LEFT JOIN SRKEYN s ON s.KCDE_1 = '06' AND t.RM09 = s.KCDE_2
+			WHERE t.RM07_1 LIKE :bv_qmonth || '%'
+				AND t.RM51 Is Not Null
+				AND t.RM52 Is Not Null
+		");
+		$this->db->bind(":bv_qmonth", $query_month);
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
 	public function queryRejectCasesByMonth($query_month) {
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
 		}
 		$this->db->parse("
-			SELECT DISTINCT *
-				FROM MOICAS.CRSMS
-			WHERE MOICAS.CRSMS.RM07_1 LIKE :bv_qmonth || '%'
-				AND MOICAS.CRSMS.RM48_1 Is Not Null
-				AND MOICAS.CRSMS.RM48_2 Is Not Null
+			SELECT DISTINCT t.*, s.KCNT AS \"RM09_CHT\"
+			FROM MOICAS.CRSMS t
+			LEFT JOIN SRKEYN s ON s.KCDE_1 = '06' AND t.RM09 = s.KCDE_2
+			WHERE t.RM07_1 LIKE :bv_qmonth || '%'
+				AND t.RM48_1 Is Not Null
+				AND t.RM48_2 Is Not Null
 		");
 		$this->db->bind(":bv_qmonth", $query_month);
 		$this->db->execute();
