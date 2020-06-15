@@ -1876,7 +1876,7 @@ if (Vue) {
                             <span v-b-tooltip.d400="item.區代碼">{{section(item.區代碼)}}</span>
                         </template>
                         <template v-slot:cell(面積)="{ item }">
-                            <span v-b-tooltip.d400="areaM2(item.面積)">{{area(item.面積)}}</span>
+                            <span v-b-tooltip.d400="area(item.面積)">{{areaM2(item.面積)}}</span>
                         </template>
                         <template v-slot:cell(土地標示部筆數)="{ item }">
                             {{format(item.土地標示部筆數)}} 筆
@@ -3752,7 +3752,6 @@ if (Vue) {
                 switch(item.category) {
                     case "stats_court":
                     case "stats_refund":
-                    case "stats_sur_rain":
                     case "stats_reg_reason":
                     case "stats_reg_reject":
                     case "stats_reg_fix":
@@ -3760,6 +3759,8 @@ if (Vue) {
                     case "stats_reg_subcase":
                     case "stats_regf":
                         return 'info';
+                    case "stats_sur_rain":
+                        return 'warning';
                     default:
                         return 'white';
                 }
