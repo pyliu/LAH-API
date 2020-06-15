@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("case-input-group-ui", {
         template: `<div class="d-flex" v-b-popover.hover.focus.bottom.d1000="'目前案件代碼：'+ID">
-            <b-input-group size="sm" append="年">
+            <b-input-group size="sm" append="年" @click="getMaxNumber">
                 <b-form-select ref="year" v-model="year" :options="years" @change="emitInput" @change="getMaxNumber" :id="prefix+'_case_update_year'">
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇年份 --</b-form-select-option>
