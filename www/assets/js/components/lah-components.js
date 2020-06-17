@@ -3875,8 +3875,8 @@ if (Vue) {
                         this.get_stats('stats_reg_reject');
                         this.get_stats('stats_reg_fix');
                         this.get_stats('stats_regf');
-                        //this.get_stats('stats_reg_reason');
-                        setTimeout(() => this.get_stats('stats_reg_all'), 1000);
+                        setTimeout(() => this.get_stats('stats_reg_reason'), 1000);
+                        //setTimeout(() => this.get_stats('stats_reg_all'), 1000);
                         break;
                     default:
                         this.$warn("Not supported category.", this.category);
