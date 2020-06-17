@@ -3600,6 +3600,7 @@ if (Vue) {
                     ></b-form-input>
                     <b-button v-if="button" size="sm" variant="outline-primary" class="ml-2" @click.stop="update">更新</b-button>
                 </b-input-group>
+                <b-form-checkbox inline v-model="reg_reason" switch class="h-100 my-auto">所有登記原因</b-form-checkbox>
             </b-form-row>
         </fieldset>`,
         props: {
@@ -3613,9 +3614,11 @@ if (Vue) {
             value: 23,
             filter: 0,
             keyword: '',
+            reg_reason: false,
             value_timer: null,
             filter_timer: null,
             keyword_timer: null,
+            reg_reason_timer: null,
             delay: 1000
         }),
         computed: {
@@ -3653,6 +3656,14 @@ if (Vue) {
                         this.storeParams['stats_keyword'] = nVal;
                     }, this.delay);
                 }
+            },
+            reg_reason(nVal, oVal) {
+                if (!this.button) {
+                    clearTimeout(this.reg_reason_timer);
+                    this.reg_reason_timer = setTimeout(() => {
+                        this.storeParams['stats_reg_reason'] = nVal;
+                    }, this.delay);
+                }
             }
         },
         methods: {
@@ -3671,6 +3682,7 @@ if (Vue) {
             this.addToStoreParams('stats_date', this.date);
             this.addToStoreParams('stats_filter', this.filter);
             this.addToStoreParams('stats_keyword', this.keyword);
+            this.addToStoreParams('stats_reg_reason', this.reg_reason);
         }
     });
 
@@ -3712,6 +3724,7 @@ if (Vue) {
             date() { return this.storeParams['stats_date'] || this.default_date },
             keyword() { return this.storeParams['stats_keyword'] || '' },
             filter() { return parseInt(this.storeParams['stats_filter'] || 0) },
+            all_reg_reason() { return this.storeParams['stats_reg_reason'] || false },
             header() {
                 switch(this.category) {
                     case "stats_court":
@@ -3745,20 +3758,22 @@ if (Vue) {
         watch: {
             date(nVal, oVal) { this.reload() },
             filter(nVal, oVal) { this.reload() },
-            keyword(nVal, oVal) { this.reload() }
+            keyword(nVal, oVal) { this.reload() },
+            all_reg_reason(nVal, oVal) { this.reload() }
         },
         methods: {
             border_var(item) {
                 switch(item.category) {
                     case "stats_court":
                     case "stats_refund":
-                    case "stats_reg_reason":
                     case "stats_reg_reject":
                     case "stats_reg_fix":
                     case "stats_reg_remote":
                     case "stats_reg_subcase":
                     case "stats_regf":
                         return 'info';
+                    case "stats_reg_reason":
+                        return 'primary';
                     case "stats_sur_rain":
                         return 'warning';
                     default:
@@ -3796,6 +3811,12 @@ if (Vue) {
                         this.$assert(res.data.data_count > 0, "response data count is not correct.", res.data.data_count);
                         for(let i = 0; i < res.data.data_count; i++) {
                             if (res.data.raw[i].count >= this.filter) {
+                                // prevent duplication
+                                let existed = this.items.find((item, index, array) => {
+                                    return item.text == res.data.raw[i].text;
+                                });
+                                if (existed !== undefined) continue;
+
                                 if (this.empty(this.keyword)) {
                                     this.items.push({
                                         id: res.data.raw[i].id || '',
@@ -3852,6 +3873,7 @@ if (Vue) {
                 });
             },
             reload() {
+                this.$log(this.all_reg_reason);
                 this.items = [];
                 switch(this.category) {
                     case "stats_court":
@@ -3875,8 +3897,7 @@ if (Vue) {
                         this.get_stats('stats_reg_reject');
                         this.get_stats('stats_reg_fix');
                         this.get_stats('stats_regf');
-                        setTimeout(() => this.get_stats('stats_reg_reason'), 1000);
-                        //setTimeout(() => this.get_stats('stats_reg_all'), 1000);
+                        setTimeout(() => this.all_reg_reason ? this.get_stats('stats_reg_all') : this.get_stats('stats_reg_reason'), 1000);
                         break;
                     default:
                         this.$warn("Not supported category.", this.category);
