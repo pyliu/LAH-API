@@ -41,8 +41,8 @@ class WatchDog {
     private $overdue_cfg = array(
         "REG_CHIEF_ID" => "HB1214",
         "SUBSCRIBER" => array(
-            "220.1.35.48",  // pyliu
-            "220.1.35.106"  // INF Chief
+            "192.168.24.2",  // pyliu
+            "192.168.24.150"  // INF Chief
         )
     );
 
