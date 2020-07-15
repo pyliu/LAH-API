@@ -227,7 +227,7 @@ class WatchDog {
         if ($this->isOfficeHours()) {
             $this->checkCrossSiteData();
             $this->findDelayRegCases();
-            $this->notifyTemperatureRegistration();
+            //$this->notifyTemperatureRegistration();
             return true;
         }
         return false;

@@ -223,11 +223,11 @@ if (Vue) {
             },
             popup: function() {
                 this.msgbox({
-                    title: "案件暫存檔清除 小幫手提示",
+                    title: "案件同步 小幫手提示",
                     body: `
                         <h6>將局端跨所資料同步回本所資料庫</h6>
                         <div><span class="text-danger">※</span>新版跨縣市回寫機制會在每一分鐘時自動回寫，故局端資料有可能會比較慢更新。【2019-06-26】</div>
-                        <div><span class="text-danger">※</span>局端針對遠端連線同步異動資料庫有鎖IP，故<span class="text-danger">IP不在局端白名單內的主機將無法使用本功能</span>。【2019-10-01】</div>
+                        <div><span class="text-danger">※</span>局端針對遠端連線同步異動資料庫有鎖IP，故<span class="text-danger">IP不在局端白名單內或不再集中化內的伺服器主機將無法使用本功能</span>。【2020-07-15】</div>
                     `,
                     size: "lg"
                 });
