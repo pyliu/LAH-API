@@ -1269,7 +1269,7 @@ class Query {
 
 	public function clearAnnouncementFlag() {
 		$this->db->parse("
-			UPDATE MOICAS.CRACD SET RA03 = 'N' WHERE 1 = 1
+			UPDATE MOICAS.CRACD SET RA03 = 'N' WHERE RA03 <> 'N'
 		");
 		$this->db->execute();
 		return true;
