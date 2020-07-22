@@ -31,6 +31,8 @@ if (Vue) {
                         this.reset_flag = true;
                         this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "清除先行准登回傳狀態碼有問題【" + res.data.status + "】");
                         this.notify({ title: "清除全部先行准登旗標", message: "已清除完成", type: "success" });
+                        // clear cached data when flags are cleared
+                        this.removeLocalCache('announcement_data');
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
