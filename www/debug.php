@@ -10,6 +10,12 @@ require_once("./include/Watchdog.class.php");
 
 require_once(ROOT_DIR."/include/StatsOracle.class.php");
 
+echo $_SERVER["HTTP_X_FORWARDED_FOR"]."<br/>";
+echo $_SERVER["HTTP_CLIENT_IP"]."<br/>";
+echo $_SERVER["REMOTE_ADDR"]."<br/>";
+echo getLocalhostIP()."<br/>";
+echo "<br/>";
+echo getRealIPAddr();
 //echo date("H") . date("i", strtotime("1 min")) . date("s", strtotime("1 second"))."<br/>";
 
 //$xkey = (random_int(1, 255) * date("H") * date("i", strtotime("1 min")) * date("s", strtotime("1 second"))) % 65535;
@@ -70,16 +76,16 @@ echo str_replace("\n", "<br />", print_r($rows, true));
 // print_r( $diff->s ) ;
 // print_r( $diff ) ;
 
-$result = array(
-    array("text" => "text", "count" => 4),
-    array("text" => "text2", "count" => 3),
-    array("text" => "text3", "count" => 9)
-);
-echo array_reduce($result, function($carry, $item) { return $carry += $item['count']; }, 10);
+// $result = array(
+//     array("text" => "text", "count" => 4),
+//     array("text" => "text2", "count" => 3),
+//     array("text" => "text3", "count" => 9)
+// );
+// echo array_reduce($result, function($carry, $item) { return $carry += $item['count']; }, 10);
 
-echo "\n\n";
+// echo "\n\n";
 
-echo (date("Y") - 1911)."".date("m");
+// echo (date("Y") - 1911)."".date("m");
 
 // $stats = new StatsOracle();
 // $result = $stats->getRegCaseCount('10904');
