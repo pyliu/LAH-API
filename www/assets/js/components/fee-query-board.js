@@ -303,12 +303,12 @@ if (Vue) {
                     "expaa-list-mgt": {
                         template: `<div>
                             <b-button
+                                v-for="(item, idx) in items"
                                 @click="open(item['AA01'], item['AA04'])"
-                                :variant="item['AA09'] == 1 ? 'outline-primary' : item['AA08'] == 1 ? 'danger' : 'dark'"
+                                :variant="variant(item)"
                                 pill
                                 size="sm" 
                                 :class="['float-left', 'mr-2', 'mb-2']"
-                                v-for="(item, idx) in items"
                                 :id="'fee_btn_'+idx"
                             >
                                 {{item["AA04"]}}
@@ -332,6 +332,10 @@ if (Vue) {
                                     size: "lg"
                                 });
                                 this.$emit("number_clicked", pc_number);
+                            },
+                            variant: function(item) {
+                                if (item['AA08'] == 0) return 'secondary';
+                                return item['AA09'] == 1 ? 'outline-primary' : 'danger';
                             }
                         }
                     }
