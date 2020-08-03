@@ -3873,7 +3873,6 @@ if (Vue) {
                 });
             },
             reload() {
-                this.$log(this.all_reg_reason);
                 this.items = [];
                 switch(this.category) {
                     case "stats_court":
