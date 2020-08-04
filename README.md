@@ -19,4 +19,4 @@ A helper web app for land affairs in Taoyuan
 7. 重新啟動電腦
 8. 開啟CHROME，網址列輸入 http://localhost/index.html 即可使用網站
 
-* NO IE support, Please use Chrome based browsers.
+* NOT support IE, please use Chrome based browser instead.
