@@ -306,12 +306,12 @@ if (Vue) {
                 url: "overdue_reg_cases.html",
                 icon: "calendar-alt",
                 need_admin: false
-            }, {
+            }, /*{
                 text: "繼承應繼分",
                 url: "heir_share.html",
                 icon: "chart-pie",
                 need_admin: false
-            }, {
+            },*/ {
                 text: "體溫紀錄",
                 url: "temperature.html",
                 icon: "head-side-mask",
