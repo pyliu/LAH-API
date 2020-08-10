@@ -681,7 +681,7 @@ if (Vue) {
         -->
         <b-form-row>
             <b-col cols="8">
-                <b-input-group size="sm" prepend="作廢狀態">
+                <b-input-group size="sm" prepend="單據狀態">
                     <b-form-select ref="expaa_obselete" v-model="value" :options="opts"></b-form-select>
                 </b-input-group>
             </b-col>
@@ -704,7 +704,7 @@ if (Vue) {
                 if (this.noConfirm) {
                     this.doUpdate(e);
                 } else {
-                    showConfirm("確定要修改作廢狀態？", (e) => {
+                    showConfirm("確定要修改單據狀態？", (e) => {
                         this.doUpdate(e);
                     });
                 }
@@ -718,7 +718,7 @@ if (Vue) {
                     update_value: this.value
                 }).then(res => {
                     closeModal(() => this.notify({
-                            title: "修改作廢狀態",
+                            title: "修改單據狀態",
                             subtitle: `${this.date} ${this.pc_number}`,
                             message: res.data.message,
                             type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
@@ -802,6 +802,9 @@ if (Vue) {
                             </span>
                             <span v-else-if="key == '悠遊卡繳費扣款結果'">
                                 <fee-detail-fix-ezcard :raw="expaa_data" :date="date" :pc_number="pc_number"></fee-detail-fix-ezcard>
+                            </span>
+                            <span v-else-if="key == '單據狀況'">
+                            <fee-detail-obselete-mgt :value="item" :date="date" :pc_number="pc_number"></fee-detail-obselete-mgt>
                             </span>
                             <span v-else>{{key}}：{{item}}</span>
                         </div>
