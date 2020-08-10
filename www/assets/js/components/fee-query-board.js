@@ -665,21 +665,7 @@ if (Vue) {
 
     // It needs to be used in popover, so register it to global scope
     Vue.component("fee-detail-obselete-mgt", {
-        template: `
-        <!--
-        <div class='form-row form-inline small'>
-            <div class='input-group input-group-sm col-8'>
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="inputGroup-exapp_print_select">列印狀態</span>
-                </div>
-                <select id='exapp_print_select' class='form-control' v-model="value">
-                    <option value='0'>未印[0]</option>
-                    <option value='1'>已印[1]</option>
-                </select>
-            </div>
-        </div>
-        -->
-        <b-form-row>
+        template: `<b-form-row>
             <b-col cols="8">
                 <b-input-group size="sm" prepend="單據狀態">
                     <b-form-select ref="expaa_obselete" v-model="value" :options="opts"></b-form-select>
@@ -735,21 +721,26 @@ if (Vue) {
 
     // It needs to be used in popover, so register it to global scope
     Vue.component("fee-detail-print-mgt", {
-        template: `<div class='form-row form-inline small'>
-            <div class='input-group input-group-sm col-8'>
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="inputGroup-exapp_print_select">列印狀態</span>
-                </div>
-                <select id='exapp_print_select' class='form-control' v-model="value">
-                    <option value='0'>未印[0]</option>
-                    <option value='1'>已印[1]</option>
-                </select>
-            </div>
-            <div class='filter-btn-group col'>
+        template: `<b-form-row>
+            <b-col cols="8">
+                <b-input-group size="sm" prepend="列印狀態">
+                    <b-form-select ref="expaa_print" v-model="value" :options="opts"></b-form-select>
+                </b-input-group>
+            </b-col>
+            <b-col>
                 <b-button @click="update" size="sm" variant="outline-primary"><i class="fas fa-edit"></i> 修改</button>
-            </div>
-        </div>`,
+            </b-col>
+        </b-form-row>`,
         props: ["value", "date", "pc_number", "noConfirm"],
+        data: () => ({
+            opts: [{
+                value: 0,
+                text: "未印[0]"
+            }, {
+                value: 1,
+                text: "已印[1]"
+            }]
+        }),
         methods: {
             update: function(e) {
                 if (this.noConfirm) {
