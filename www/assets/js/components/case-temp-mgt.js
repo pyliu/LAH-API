@@ -46,7 +46,8 @@ if (Vue) {
                     this.msgbox({
                         title: "查詢登記案件暫存檔",
                         subtitle: `${this.year}-${this.code}-${this.number}`,
-                        message: this.$createElement('lah-reg-case-temp-mgt', { props: { id: this.id } })
+                        message: this.$createElement('lah-reg-case-temp-mgt', { props: { id: this.id } }),
+                        size: "lg"
                     });
                 } else {
                     this.alert({
