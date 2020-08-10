@@ -316,6 +316,7 @@ if (Vue) {
                                     <template v-slot:title>序號: {{item["AA05"]}} 金額: {{item['AA28']}}元</template>
                                     <fee-detail-print-mgt :value="item['AA09']" :date="item['AA01']" :pc_number="item['AA04']" :no-confirm=true></fee-detail-print-mgt>
                                     <fee-detail-payment-mgt :value="item['AA100']" :date="item['AA01']" :pc_number="item['AA04']" :no-confirm=true></fee-detail-payment-mgt>
+                                    <fee-detail-obselete-mgt :value="item['AA08']" :date="item['AA01']" :pc_number="item['AA04']" :no-confirm=true></fee-detail-obselete-mgt>
                                 </b-popover>
                             </b-button>
                         </div>`,
@@ -653,6 +654,76 @@ if (Vue) {
                         type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
                     });
                     closeModal();
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            }
+        }
+    });
+
+    // It needs to be used in popover, so register it to global scope
+    Vue.component("fee-detail-obselete-mgt", {
+        template: `
+        <!--
+        <div class='form-row form-inline small'>
+            <div class='input-group input-group-sm col-8'>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroup-exapp_print_select">列印狀態</span>
+                </div>
+                <select id='exapp_print_select' class='form-control' v-model="value">
+                    <option value='0'>未印[0]</option>
+                    <option value='1'>已印[1]</option>
+                </select>
+            </div>
+        </div>
+        -->
+        <b-form-row>
+            <b-col cols="8">
+                <b-input-group size="sm" prepend="作廢狀態">
+                    <b-form-select ref="expaa_obselete" v-model="value" :options="opts"></b-form-select>
+                </b-input-group>
+            </b-col>
+            <b-col>
+                <b-button @click="update" size="sm" variant="outline-primary"><i class="fas fa-edit"></i> 修改</button>
+            </b-col>
+        </b-form-row>`,
+        props: ["value", "date", "pc_number", "noConfirm"],
+        data: () => ({
+            opts: [{
+                value: 0,
+                text: "作廢[0]"
+            }, {
+                value: 1,
+                text: "正常[1]"
+            }]
+        }),
+        methods: {
+            update: function(e) {
+                if (this.noConfirm) {
+                    this.doUpdate(e);
+                } else {
+                    showConfirm("確定要修改作廢狀態？", (e) => {
+                        this.doUpdate(e);
+                    });
+                }
+            },
+            doUpdate: function(e) {
+                this.isBusy = true;
+                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                    type: "expaa_AA08_update",
+                    date: this.date,
+                    number: this.pc_number,
+                    update_value: this.value
+                }).then(res => {
+                    closeModal(() => this.notify({
+                            title: "修改作廢狀態",
+                            subtitle: `${this.date} ${this.pc_number}`,
+                            message: res.data.message,
+                            type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? "success" : "danger"
+                        })
+                    );
                 }).catch(err => {
                     this.error = err;
                 }).finally(() => {
