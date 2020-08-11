@@ -37,7 +37,7 @@ switch ($_POST["type"]) {
                 }
                 return !stristr($item, "load_log");
             }
-            $all = array_filter(explode("\n", file_get_contents($path)), removeLoadLog);  // line by line
+            $all = array_filter(explode("\n", file_get_contents($path)), "removeLoadLog");  // line by line
             $data = $_POST["slice_offset"] ? array_slice($all, $_POST["slice_offset"]) : $all;
             $result = array(
                 "status" => STATUS_CODE::SUCCESS_NORMAL,
