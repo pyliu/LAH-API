@@ -18,7 +18,7 @@ function queryStats($type, $date, $error_msg) {
     $key = $type.'_'.$date;
     
     // remove old record first for rest operation
-    if ($_POST['reload'] == 'true') {
+    if (array_key_exists('reload', $_POST) && $_POST['reload'] == 'true') {
         $stats_sqlite3->removeStatsRawData($key);
     }
     
