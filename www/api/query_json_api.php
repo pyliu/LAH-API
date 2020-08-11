@@ -864,8 +864,8 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "user_unread_message":
-		$log->info("XHR [user_unread_message] 查詢使用者未讀信差訊息【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"]."】請求");
 		$param = $_POST["id"] ?? $_POST["name"] ?? $_POST["ip"];
+		$log->info("XHR [user_unread_message] 查詢使用者未讀信差訊息【".$param."】請求");
 		$param = empty($param) ? $client_ip : $param;
 		$message = new Message();
 		$results = $mock ? $cache->get('user_unread_message') : $message->getUnreadMessageByUser($param);
