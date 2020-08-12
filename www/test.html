@@ -30,7 +30,8 @@
 <body>
     <section class="hide">
         <div class="container-fluid" v-cloak>
-            <div id="treant" class="chart mt-5"></div>
+            <div id="test_xlsx"></div>
+            <div id="treant" class="chart mt-2"></div>
         </div>
     </section>
 
@@ -57,6 +58,34 @@
     <script src="assets/js/treant/Treant.js"></script>
     <script>
         $(document).ready(() => {
+
+            setTimeout(() => window.testApp = new Vue({
+                el: "#test_xlsx",
+                template: `<div style="margin-top: 85px"><b-button @click="download">xlsx download</b-button></div>`,
+                methods: {
+                    download() {
+                        this.$http.post(CONFIG.EXPORT_FILE_API_EP, {
+                            type: 'file_xlsx_test',
+                            responseType: 'blob'
+                        }).then(res => {
+                            this.$log("test.xlsx");
+                            let url = window.URL.createObjectURL(new Blob([res.data]));
+                            let a = document.createElement('a');
+                            a.href = url;
+                            a.download = "test.xlsx";
+                            document.body.appendChild(a);
+                            a.click();    
+                            a.remove();
+                            // release object in memory
+                            window.URL.revokeObjectURL(url);
+                        }).catch(err => {
+                            console.log(err);
+                        }).finally(() => {
+                        });
+                    }
+                }
+            }), 500);
+
             var config = {
             container: "#treant",
             connectors: {
