@@ -60,7 +60,7 @@ class FileAPISQLCsvCommand extends FileAPICommand {
     public function execute() {
         $q = new Query();
         // get raw big5 data for file output
-        $data = $q->getSelectSQLData($this->sql, true);
+        $data = $q->getSelectSQLData($this->sql, false);
         $this->outputCSV($data);
     }
 }

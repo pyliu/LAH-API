@@ -21,8 +21,8 @@ abstract class FileAPICommand {
         }
     }
 
-    protected function mapColumns($input) {
-        return array_key_exists($input, $this->colsNameMapping) ? mb_convert_encoding($this->colsNameMapping[$input], "big5", "utf-8") : $input;
+    protected function mapColumns($input, $convert = true) {
+        return array_key_exists($input, $this->colsNameMapping) ? ($convert ? mb_convert_encoding($this->colsNameMapping[$input], "big5", "utf-8") : $this->colsNameMapping[$input]) : $input;
     }
 }
 ?>

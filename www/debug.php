@@ -96,17 +96,30 @@ echo str_replace("\n", "<br />", print_r($rows, true));
 // print_r($rs->fetchAll());
 // print "</pre>";
 
-require 'vendor/autoload.php';
+require_once('vendor/autoload.php');
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
-$spreadsheet = new Spreadsheet();
-$sheet = $spreadsheet->getActiveSheet();
-$sheet->setCellValue('A1', 'Hello World !');
+$spreadsheet = IOFactory::load('test.xlsx');
 
-$writer = new Xlsx($spreadsheet);
-$writer->save('hello world.xlsx');
+$worksheet = $spreadsheet->getActiveSheet();
+
+$worksheet->getCell('A1')->setValue('套用樣板測試');
+$worksheet->getCell('B1')->setValue('2');
+
+// $writer = new Xlsx($spreadsheet);
+// $writer->save('exports/hello world.xlsx');
+//header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+header('Content-Type: application/octet-stream');
+header('Content-Disposition: attachment;filename="hello world.xlsx"');
+header('Cache-Control: max-age=0');
+
+$writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+$writer->save('php://output');
+
+
 
 
 ?>
