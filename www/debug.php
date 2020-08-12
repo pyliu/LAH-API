@@ -10,12 +10,7 @@ require_once("./include/Watchdog.class.php");
 
 require_once(ROOT_DIR."/include/StatsOracle.class.php");
 
-echo $_SERVER["HTTP_X_FORWARDED_FOR"]."<br/>";
-echo $_SERVER["HTTP_CLIENT_IP"]."<br/>";
-echo $_SERVER["REMOTE_ADDR"]."<br/>";
-echo getLocalhostIP()."<br/>";
-echo "<br/>";
-echo getRealIPAddr();
+
 //echo date("H") . date("i", strtotime("1 min")) . date("s", strtotime("1 second"))."<br/>";
 
 //$xkey = (random_int(1, 255) * date("H") * date("i", strtotime("1 min")) * date("s", strtotime("1 second"))) % 65535;
@@ -101,8 +96,7 @@ echo str_replace("\n", "<br />", print_r($rows, true));
 // print_r($rs->fetchAll());
 // print "</pre>";
 
-require_once(ROOT_DIR.'include/lib/PhpSpreadsheet/SpreadSheet.php');
-require_once(ROOT_DIR.'include/lib/PhpSpreadsheet/SpreadSheet.php');
+require 'vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
