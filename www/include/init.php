@@ -12,19 +12,18 @@ require_once("Logger.class.php");
 $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $_SERVER["REMOTE_ADDR"] ?? getLocalhostIP();
 
 // to ensure exports dir exists
-$export_folder = ROOT_DIR.DIRECTORY_SEPARATOR.'exports';
-if (!file_exists($export_folder) && !is_dir($export_folder)) {
-    mkdir($export_folder);       
+if (!file_exists(EXPORTS_DIR) && !is_dir(EXPORTS_DIR)) {
+    mkdir(EXPORTS_DIR);       
 } 
 
 // to ensure logs dir exists
-$logs_folder = ROOT_DIR.DIRECTORY_SEPARATOR.'logs';
-if (!file_exists($logs_folder) && !is_dir($logs_folder)) {
-    mkdir($logs_folder);       
+$logs_folder = ROOT_DIR.'logs';
+if (!file_exists(LOGS_DIR) && !is_dir(LOGS_DIR)) {
+    mkdir(LOGS_DIR);       
 } 
 
 $today_ad = date('Y-m-d');  // ex: 2019-09-16
-$log = new Logger(ROOT_DIR.'/logs/log-' . $today_ad . '.log');
+$log = new Logger(LOGS_DIR.DIRECTORY_SEPARATOR.'log-' . $today_ad . '.log');
 
 if (php_sapi_name() != "cli") {
     // compress all log every monday
