@@ -6,9 +6,11 @@ node_modules
 *.log
 *.cache
 *.zip
+*.lock
 **/users/*.JPG
 **/users/*.jpg
 *.BAK
 **/howto/*.jpg
 **/howto/*.txt
+**/vendor/*
 

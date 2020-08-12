@@ -100,4 +100,19 @@ echo str_replace("\n", "<br />", print_r($rows, true));
 // print "<pre>";
 // print_r($rs->fetchAll());
 // print "</pre>";
+
+require_once(ROOT_DIR.'include/lib/PhpSpreadsheet/SpreadSheet.php');
+require_once(ROOT_DIR.'include/lib/PhpSpreadsheet/SpreadSheet.php');
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
+$spreadsheet = new Spreadsheet();
+$sheet = $spreadsheet->getActiveSheet();
+$sheet->setCellValue('A1', 'Hello World !');
+
+$writer = new Xlsx($spreadsheet);
+$writer->save('hello world.xlsx');
+
+
 ?>
