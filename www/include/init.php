@@ -4,6 +4,12 @@ session_start();
 // some query take long time ...
 set_time_limit(0);
 
+// to ensure logs dir exists
+$logs_folder = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'logs';
+if (!file_exists($logs_folder) && !is_dir($logs_folder)) {
+    mkdir($logs_folder);       
+} 
+
 require_once("config/Config.inc.php");
 require_once("GlobalConstants.inc.php");
 require_once("GlobalFunctions.inc.php");
