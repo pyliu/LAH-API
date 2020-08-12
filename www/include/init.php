@@ -11,6 +11,12 @@ require_once("Logger.class.php");
 
 $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $_SERVER["REMOTE_ADDR"] ?? getLocalhostIP();
 
+// to ensure exports dir exists
+$export_folder = ROOT_DIR.DIRECTORY_SEPARATOR.'exports';
+if (!file_exists($export_folder) && !is_dir($export_folder)) {
+    mkdir($export_folder);       
+} 
+
 // to ensure logs dir exists
 $logs_folder = ROOT_DIR.DIRECTORY_SEPARATOR.'logs';
 if (!file_exists($logs_folder) && !is_dir($logs_folder)) {
