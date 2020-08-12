@@ -13,4 +13,7 @@ node_modules
 **/howto/*.jpg
 **/howto/*.txt
 **/vendor/*
+**/logs/*
+**/exports/*
+
 
