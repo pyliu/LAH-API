@@ -4,18 +4,18 @@ session_start();
 // some query take long time ...
 set_time_limit(0);
 
-// to ensure logs dir exists
-$logs_folder = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'logs';
-if (!file_exists($logs_folder) && !is_dir($logs_folder)) {
-    mkdir($logs_folder);       
-} 
-
 require_once("config/Config.inc.php");
 require_once("GlobalConstants.inc.php");
 require_once("GlobalFunctions.inc.php");
 require_once("Logger.class.php");
 
 $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $_SERVER["REMOTE_ADDR"] ?? getLocalhostIP();
+
+// to ensure logs dir exists
+$logs_folder = ROOT_DIR.DIRECTORY_SEPARATOR.'logs';
+if (!file_exists($logs_folder) && !is_dir($logs_folder)) {
+    mkdir($logs_folder);       
+} 
 
 $today_ad = date('Y-m-d');  // ex: 2019-09-16
 $log = new Logger(ROOT_DIR.'/logs/log-' . $today_ad . '.log');
