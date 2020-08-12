@@ -66,7 +66,8 @@
                     download() {
                         this.$http.post(CONFIG.EXPORT_FILE_API_EP, {
                             type: 'file_xlsx_test',
-                            responseType: 'blob'
+                            responseType: 'blob',
+                            filename: 'testAA'
                         }).then(res => {
                             this.$log("test.xlsx");
                             let url = window.URL.createObjectURL(new Blob([res.data]));
