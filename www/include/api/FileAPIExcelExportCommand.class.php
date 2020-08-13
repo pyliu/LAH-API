@@ -32,6 +32,9 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         header('Content-Transfer-Encoding: binary');
         header('Content-Disposition: attachment;filename="'.$this->filename.'.xlsx"');
         header('Cache-Control: max-age=0');
+        // https://stackoverflow.com/questions/34381816/phpexcel-return-a-corrupted-file
+        // need to add this line to prevent corrupted file
+        ob_end_clean();
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $writer->save('php://output');

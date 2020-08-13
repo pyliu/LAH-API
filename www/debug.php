@@ -107,19 +107,17 @@ $spreadsheet = IOFactory::load('test.xlsx');
 $worksheet = $spreadsheet->getActiveSheet();
 
 $worksheet->getCell('A1')->setValue('套用樣板測試');
-$worksheet->getCell('B1')->setValue('2');
+$worksheet->getCell('B2')->setValue('B2');
+$worksheet->getCell('C3')->setValue('C3');
 
 // $writer = new Xlsx($spreadsheet);
 // $writer->save('exports/hello world.xlsx');
 //header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-header('Content-Type: application/octet-stream');
-header('Content-Disposition: attachment;filename="hello world.xlsx"');
+header('Content-Type: application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+header('Content-Disposition: attachment;filename="hello_world.xlsx"');
 header('Cache-Control: max-age=0');
+ob_end_clean();
 
 $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
 $writer->save('php://output');
-
-
-
-
 ?>
