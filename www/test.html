@@ -64,16 +64,17 @@
                 template: `<div style="margin-top: 85px"><b-button @click="download">xlsx download</b-button></div>`,
                 methods: {
                     download() {
+                        let filename = 'testAA';
                         this.$http.post(CONFIG.EXPORT_FILE_API_EP, {
                             type: 'file_xlsx_test',
                             responseType: 'blob',
-                            filename: 'testAA'
+                            filename: filename
                         }).then(res => {
-                            this.$log("test.xlsx");
+                            this.$log(`${filename}.xlsx`);
                             let url = window.URL.createObjectURL(new Blob([res.data]));
                             let a = document.createElement('a');
                             a.href = url;
-                            a.download = "test.xlsx";
+                            a.download = `${filename}.xlsx`;
                             document.body.appendChild(a);
                             a.click();    
                             a.remove();
