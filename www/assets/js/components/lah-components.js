@@ -297,6 +297,11 @@ if (Vue) {
             active: undefined,
             avatar_badge: false,
             links: [{
+                text: `管理看板`,
+                url: "dashboard.html",
+                icon: "cubes",
+                need_admin: true
+            }, {
                 text: "今日案件",
                 url: ["index.html", "/"],
                 icon: "briefcase",
@@ -311,26 +316,21 @@ if (Vue) {
                 url: "heir_share.html",
                 icon: "chart-pie",
                 need_admin: false
+            }, {
+                text: "使用者查詢",
+                url: "user.html",
+                icon: "users",
+                need_admin: false
             },*/ {
                 text: "體溫紀錄",
                 url: "temperature.html",
                 icon: "head-side-mask",
                 need_admin: false
             }, {
-                text: "使用者查詢",
-                url: "user.html",
-                icon: "users",
-                need_admin: false
-            }, {
                 text: "信差訊息",
                 url: "message.html",
                 icon: "comments",
                 need_admin: false
-            }, {
-                text: `管理看板`,
-                url: "dashboard.html",
-                icon: "cubes",
-                need_admin: true
             }, {
                 text: `統計看板`,
                 url: "stats.html",
