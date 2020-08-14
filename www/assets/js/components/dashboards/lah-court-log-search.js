@@ -1,7 +1,7 @@
 if (Vue) {
   Vue.component('lah-court-log-search', {
     template: `<b-card>
-      謄本記錄查詢
+      製作中 ... 
     </b-card>`,
     props: {
       sample: {
