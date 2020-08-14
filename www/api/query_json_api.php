@@ -878,7 +878,7 @@ switch ($_POST["type"]) {
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => count($results),
 				"raw" => $results,
-				"query_string" => "id=".$_POST["id"]."&name=".$_POST["name"]."&ip=".$_POST["ip"],
+				// "query_string" => "id=".$_POST["id"]."&name=".$_POST["name"]."&ip=".$_POST["ip"],
 				"message" => "XHR [user_unread_message] 查詢 ${param} 未讀信差訊息成功。(".count($results).")"
 			);
 			$log->info($json["message"]);
