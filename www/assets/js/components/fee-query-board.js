@@ -43,7 +43,7 @@ if (Vue) {
                             <i class="fas fa-file-alt fa-stack-1x"></i>
                             <i class="fas fa-ban fa-stack-2x text-danger"></i>
                         </span>
-                        作廢
+                        無電腦給號作廢
                     </b-button>
                 </b-input-group>
             </b-form-row>
