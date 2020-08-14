@@ -1,6 +1,7 @@
 if (Vue) {
   Vue.component('lah-court-log-search', {
     template: `<b-card>
+      <h6 class="text-danger">建置中 ... </h6>
       <b-form-select ref="section" v-model="section_code" :options="sections">
           <template v-slot:first>
               <b-form-select-option :value="null" disabled>-- 請選擇段別 --</b-form-select-option>
