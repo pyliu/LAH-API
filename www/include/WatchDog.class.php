@@ -134,7 +134,7 @@ class WatchDog {
                     "ID" => $ID,
                     "RECORDS" => $records,
                     "DATETIME" => $date,
-                    "NOTE" => $users[$ID]
+                    "NOTE" => array_key_exists($ID, $users) ? $users[$ID] : ''
                 ));
                 $stats++;
             }
