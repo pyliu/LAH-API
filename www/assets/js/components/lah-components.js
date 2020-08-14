@@ -334,12 +334,17 @@ if (Vue) {
             }, {
                 text: `統計看板`,
                 url: "stats.html",
-                icon: "file-contract",
+                icon: "laptop-house",
+                need_admin: false
+            },{
+                text: `謄本紀錄查詢`,
+                url: "court.html",
+                icon: "stamp",
                 need_admin: false
             }, {
                 text: "記錄瀏覽",
                 url: "tasklog.html",
-                icon: "dog",
+                icon: "paw",
                 need_admin: true
             }, {
                 text: `測試`,
