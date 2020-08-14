@@ -337,7 +337,7 @@ if (Vue) {
                 icon: "laptop-house",
                 need_admin: false
             },{
-                text: `謄本紀錄查詢`,
+                text: `謄本紀錄`,
                 url: "court.html",
                 icon: "stamp",
                 need_admin: false
