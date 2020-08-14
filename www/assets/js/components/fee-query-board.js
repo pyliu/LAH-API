@@ -38,7 +38,7 @@ if (Vue) {
                     >
                     </b-form-input>
                     <b-button class="mx-1" @click="queryByNumber" variant="outline-primary" size="sm" title="依據電腦給號"><i class="fas fa-search"></i> 查詢</b-button>
-                    <b-button @click="obsolete" variant="outline-secondary" size="sm" title="新增作廢假資料" class="h-100" title="開啟新增作廢單據功能視窗">
+                    <b-button @click="obsolete" variant="outline-secondary" size="sm" class="h-100" title="開啟新增作廢單據功能視窗(無電腦給號)">
                         <span class="fa-stack" style="font-size: 0.5rem">
                             <i class="fas fa-file-alt fa-stack-1x"></i>
                             <i class="fas fa-ban fa-stack-2x text-danger"></i>
