@@ -11,7 +11,10 @@ class FileAPISQLTxtCommand extends FileAPICommand {
     function __destruct() {}
 
     private function txt($data, $print_count = true) {
-        header("Content-Type: text/txt; charset=big5");
+        header("Content-Type: text/plain; charset=big5");
+        header("Content-Transfer-Encoding: binary");
+        ob_clean();
+        flush();
         $out = fopen("php://output", 'w'); 
         if (is_array($data)) {
             $count = 0;
@@ -22,6 +25,7 @@ class FileAPISQLTxtCommand extends FileAPICommand {
             }
             if ($print_count) {
                 fwrite($out, mb_convert_encoding("##### TAG #####共產製 ".$count." 筆資料", "big5", "utf-8"));
+                // fwrite($out, "##### TAG #####共產製 ".$count." 筆資料");
             }
         } else {
             fwrite($out, mb_convert_encoding("錯誤說明：傳入之參數非陣列格式無法匯出！\n", "big5", "utf-8"));
@@ -32,7 +36,7 @@ class FileAPISQLTxtCommand extends FileAPICommand {
 
     public function execute() {
         $q = new Query();
-        // get raw big5 data
+        // true - get raw big5 data; default is false.
         $data = $q->getSelectSQLData($this->sql, true);
         $this->txt($data);
     }

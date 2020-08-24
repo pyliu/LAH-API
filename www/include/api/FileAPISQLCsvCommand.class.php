@@ -33,6 +33,9 @@ class FileAPISQLCsvCommand extends FileAPICommand {
 
     private function outputCSV($data, $skip_header = false) {
         header("Content-Type: text/csv; charset=big5");
+        header("Content-Transfer-Encoding: binary");
+        ob_clean();
+        flush();
         $out = fopen("php://output", 'w'); 
         if (is_array($data)) {
             $firstline_flag = false;
@@ -59,8 +62,8 @@ class FileAPISQLCsvCommand extends FileAPICommand {
 
     public function execute() {
         $q = new Query();
-        // get raw big5 data for file output
-        $data = $q->getSelectSQLData($this->sql, false);
+        // true - get raw big5 data; default is false.
+        $data = $q->getSelectSQLData($this->sql, true);
         $this->outputCSV($data);
     }
 }
