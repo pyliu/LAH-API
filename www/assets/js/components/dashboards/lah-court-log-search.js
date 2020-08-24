@@ -25,7 +25,7 @@ if (Vue) {
       <b-form-row>
         <b-col>
           <div class="d-flex">
-            <b-input-group size="sm" prepend="地/建號" v-b-tooltip="'以-分隔子號'">
+            <b-input-group size="sm" prepend="地/建號" title="以-分隔子號">
               <b-form-input v-model="land_build_number"></b-form-input>
             </b-input-group>
             <b-button @click="addLandNumber" variant="outline-primary" size="sm" title="增加地號" class="mx-1"><i class="fas fa-mountain"></i></b-button>
