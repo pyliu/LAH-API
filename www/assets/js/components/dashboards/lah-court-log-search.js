@@ -1,25 +1,45 @@
 if (Vue) {
   Vue.component('lah-court-log-search', {
+    components: {
+      'lah-court-log-item': {
+        template: ``
+      }
+    },
     template: `<fieldset>
       <legend v-b-tooltip="'匯出謄本查詢紀錄'">
         <i class="fas fa-stamp"></i>
         謄本紀錄查詢
         <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
       </legend>
-      <h6 class="text-danger">建置中 ...</h6>
-      <b-input-group size="sm" prepend="段小段">
-        <b-form-select ref="section" v-model="section_code" :options="sections">
-            <template v-slot:first>
-                <b-form-select-option :value="null" disabled>-- 請選擇段別 --</b-form-select-option>
-            </template>
-        </b-form-select>
-      </b-input-group>
+      <b-form-row class="mb-2">
+        <b-col>
+          <b-input-group size="sm" prepend="段小段">
+            <b-form-select ref="section" v-model="section_code" :options="sections">
+                <template v-slot:first>
+                    <b-form-select-option :value="null" disabled>-- 請選擇段別 --</b-form-select-option>
+                </template>
+            </b-form-select>
+          </b-input-group>
+        </b-col>
+      </b-form-row>
+      <b-form-row>
+        <b-col>
+          <div class="d-flex">
+            <b-input-group size="sm" prepend="地/建號" v-b-tooltip="'以-分隔子號'">
+              <b-form-input v-model="land_build_number"></b-form-input>
+            </b-input-group>
+            <b-button @click="addLandNumber" variant="outline-primary" size="sm" title="增加地號" class="mx-1"><i class="fas fa-mountain"></i></b-button>
+            <b-button @click="addBuildNumber" variant="outline-primary" size="sm" title="增加建號"><i class="fas fa-home"></i></b-button>
+          </div>
+        </b-col>
+      </b-form-row>
     </fieldset>`,
     props: { },
     data: () => ({
       cache_key: 'lah-court-log-search-section-list',
       sections: [],
-      section_code: '0200'
+      section_code: '0200',
+      land_build_number: ''
     }),
     methods: {
       prepare(json) {
@@ -41,7 +61,9 @@ if (Vue) {
           message: `依序輸入下列條件來查找。 <ol><li>選擇段小段別</li> <li>輸入地、建號</li> <li>點選查詢</li> </ol>`,
           size: "sm"
         });
-      }
+      },
+      addLandNumber() {},
+      addBuildNumber() {}
     },
     watch: { },
     computed: {
