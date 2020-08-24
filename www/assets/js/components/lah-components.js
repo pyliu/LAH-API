@@ -336,10 +336,10 @@ if (Vue) {
                 url: "stats.html",
                 icon: "laptop-house",
                 need_admin: false
-            },{
-                text: `謄本紀錄`,
-                url: "court.html",
-                icon: "stamp",
+            }, {
+                text: `小幫手`,
+                url: "helper.html",
+                icon: "hands-helping",
                 need_admin: false
             }, {
                 text: "記錄瀏覽",
@@ -883,7 +883,7 @@ if (Vue) {
             popup() {
                 this.msgbox({
                     title: '<i class="fa fa-search fa-lg"></i> 使用者搜尋說明',
-                    message: `輸入下列條件來查找。 <ul><li>使用者代碼(如：HB0544)</li> <li>名稱(如：奕)</li> <li>電腦IP位址(如：220.1.35.48)</li> </ul>`,
+                    message: `輸入下列條件來查找。 <ul><li>使用者代碼(如：HB1184)</li> <li>名稱(如：奕)</li> <li>電腦IP位址(如：192.168.22.7)</li> </ul>`,
                     size: "sm"
                 });
             }

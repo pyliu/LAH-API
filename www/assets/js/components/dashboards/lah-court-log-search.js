@@ -1,13 +1,20 @@
 if (Vue) {
   Vue.component('lah-court-log-search', {
-    template: `<b-card>
-      <h6 class="text-danger">建置中 ... </h6>
-      <b-form-select ref="section" v-model="section_code" :options="sections">
-          <template v-slot:first>
-              <b-form-select-option :value="null" disabled>-- 請選擇段別 --</b-form-select-option>
-          </template>
-      </b-form-select>
-    </b-card>`,
+    template: `<fieldset>
+      <legend v-b-tooltip="'匯出謄本查詢紀錄'">
+        <i class="fas fa-stamp"></i>
+        謄本紀錄查詢
+        <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
+      </legend>
+      <h6 class="text-danger">建置中 ...</h6>
+      <b-input-group size="sm" prepend="段小段">
+        <b-form-select ref="section" v-model="section_code" :options="sections">
+            <template v-slot:first>
+                <b-form-select-option :value="null" disabled>-- 請選擇段別 --</b-form-select-option>
+            </template>
+        </b-form-select>
+      </b-input-group>
+    </fieldset>`,
     props: { },
     data: () => ({
       cache_key: 'lah-court-log-search-section-list',
@@ -27,10 +34,20 @@ if (Vue) {
         } else {
           this.notify({ message: '無法取得正確段代碼資料', type: 'warning'});
         }
+      },
+      popup() {
+        this.msgbox({
+          title: '<i class="fa fa-search fa-lg"></i> 謄本紀錄查詢',
+          message: `依序輸入下列條件來查找。 <ol><li>選擇段小段別</li> <li>輸入地、建號</li> <li>點選查詢</li> </ol>`,
+          size: "sm"
+        });
       }
     },
     watch: { },
-    computed: { },
+    computed: {
+      list_key() { return 'target-number-list' },
+      list() { return this.storeParams[this.list_key] }
+    },
     created() {
       this.getLocalCache(this.cache_key).then(json => {
         if (json) {
@@ -50,6 +67,10 @@ if (Vue) {
           });
         }
       });
+      // init global store param
+      this.addToStoreParams(this.list_key, []);
+      this.$log(this.list_key);
+      this.$log(this.list);
     },
     mounted() { }
   });
