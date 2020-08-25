@@ -285,6 +285,23 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
+	case "cert_log":
+		$log->info("XHR [cert_log] 查詢謄本紀錄資料【".$_POST["section_code"].", ".$_POST["numbers"]."】請求");
+		$query_result = $mock ? $cache->get('cert_log') : $query->getCertLog($_POST["section_code"], $_POST["numbers"]);
+		$cache->set('cert_log', $query_result);
+		if (empty($query_result)) {
+			$log->info("XHR [cert_log] 查無資料");
+			echoErrorJSONString();
+		} else {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($query_result),
+				"raw" => $query_result
+			);
+			$log->info("XHR [cert_log] 查到 ".$result["data_count"]." 筆資料");
+			echo json_encode($result, 0);
+		}
+		break;
 	case "crsms":
 		$log->info("XHR [crsms] 查詢登記案件資料【".$_POST["id"]."】請求");
 		$query_result = $mock ? $cache->get('crsms') : $query->getCRSMSCasesByPID($_POST["id"]);
