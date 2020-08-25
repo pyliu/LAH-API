@@ -35,8 +35,43 @@ if (Vue) {
         謄本紀錄查詢
         <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
       </legend>
+      <b-form-row class="position-relative mb-1" style="margin-top: -2rem">
+        <b-col class="text-right">
+          <b-button
+            @click="query"
+            variant="outline-primary"
+            size="sm"
+            title="搜尋"
+            :disabled="!query_btn_on"
+            @mouseenter="addLDAnimation('#lah-court-log-search-search-icon', 'ld-breath')"
+            @mouseleave="clearLDAnimation('#lah-court-log-search-search-icon')"
+          >
+            <lah-fa-icon :id="'lah-court-log-search-search-icon'" icon="search"></lah-fa-icon>
+          </b-button>
+          <b-button
+            @click="xlsx"
+            variant="outline-success"
+            size="sm" title="匯出檔案"
+            :disabled="!xlsx_btn_on"
+            @mouseenter="addLDAnimation('#lah-court-log-search-export-icon', 'ld-move-fade-ltr')"
+            @mouseleave="clearLDAnimation('#lah-court-log-search-export-icon')"
+          >
+            <lah-fa-icon :id="'lah-court-log-search-export-icon'" icon="file-export"></lah-fa-icon>
+          </b-button>
+          <b-button
+            @click="reset"
+            variant="outline-secondary"
+            size="sm"
+            title="重設"
+            @mouseenter="addLDAnimation('#lah-court-log-search-spin-icon', 'ld-cycle-alt')"
+            @mouseleave="clearLDAnimation('#lah-court-log-search-spin-icon')"
+          >
+            <lah-fa-icon :id="'lah-court-log-search-spin-icon'" icon="undo"></lah-fa-icon>
+          </b-button>
+        </b-col>
+      </b-form-row>
       <b-form-row class="mb-1">
-        <b-col class="d-flex">
+        <b-col>
           <b-input-group size="sm" prepend="段小段">
             <b-form-select ref="section" v-model="section_code" :options="sections" class="no-cache">
                 <template v-slot:first>
@@ -44,8 +79,6 @@ if (Vue) {
                 </template>
             </b-form-select>
           </b-input-group>
-          <b-button @click="query" variant="outline-primary" size="sm" title="搜尋" class="mx-1" :disabled="!query_btn_on"><i class="fas fa-search"></i></b-button>
-          <b-button @click="reset" variant="outline-secondary" size="sm" title="重設"><i class="fas fa-sync"></i></b-button>
         </b-col>
       </b-form-row>
       <b-form-row>
@@ -78,6 +111,7 @@ if (Vue) {
         this.land_build_number = null;
         this.storeParams[this.list_key] = [];
       },
+      xlsx() {},
       prepare(json) {
         if (json && json.data_count > 0) {
           json.raw.forEach(item => {
@@ -186,6 +220,7 @@ if (Vue) {
       query_btn_on() {
         return this.list.length > 0 && !this.empty(this.section_code);
       },
+      xlsx_btn_on() { return this.query_btn_on },
       validate_input() { return this.land_btn_on || this.build_btn_on; }
     },
     created() {
