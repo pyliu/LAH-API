@@ -51,10 +51,10 @@ if (Vue) {
         <b-col>
           <div class="d-flex">
             <b-input-group size="sm" prepend="地/建號" title="以-分隔子號">
-              <b-form-input v-model="land_build_number"></b-form-input>
+              <b-form-input :state="validate_input" v-model="land_build_number" class="h-100 no-cache" placeholder="123-1" @input="filter"></b-form-input>
             </b-input-group>
-            <b-button @click="addLandNumber" variant="outline-primary" size="sm" title="增加地號" class="mx-1"><i class="fas fa-mountain"></i></b-button>
-            <b-button @click="addBuildNumber" variant="outline-success" size="sm" title="增加建號"><i class="fas fa-home"></i></b-button>
+            <b-button @click="addLandNumber" variant="outline-primary" size="sm" title="增加地號" class="mx-1 text-nowrap" :disabled="!land_btn_on"><i class="fas fa-plus"> 土地</i></b-button>
+            <b-button @click="addBuildNumber" variant="outline-success" size="sm" title="增加建號" class="text-nowrap" :disabled="!build_btn_on"><i class="fas fa-plus"> 建物</i></b-button>
           </div>
         </b-col>
       </b-form-row>
@@ -104,12 +104,29 @@ if (Vue) {
       },
       addBuildNumber() {
         this.list.push({ type: 'build', value: this.land_build_number });
+      },
+      filter() {
+        this.land_build_number = this.land_build_number.replace(/(^\s*)|(\s*$)/g, '').replace(/\-0+$/g, '');
       }
     },
     watch: { },
     computed: {
       list_key() { return 'target-number-list' },
-      list() { return this.storeParams[this.list_key] }
+      list() { return this.storeParams[this.list_key] },
+      land_btn_on() {
+        let testee = this.land_build_number;
+        if (this.empty(testee) || parseInt(testee) == 0) return false;
+        if (parseInt(testee) == 0) return false;
+        if (testee.includes('-') && testee.match(/^\d{1,4}(\-\d{1,4})?$/g) === null) return false;
+        return testee.length < 5 || testee.match(/^\d{1,4}(\-\d{1,4})?$/g) !== null;
+      },
+      build_btn_on() {
+        let testee = this.land_build_number;
+        if (this.empty(testee) || parseInt(testee) == 0) return false;
+        if (testee.includes('-') && testee.match(/^\d{1,5}(\-\d{1,3})?$/g) === null) return false;
+        return testee.length < 6 || testee.match(/^\d{1,5}(\-\d{1,3})?$/g) !== null;
+      },
+      validate_input() { return this.land_btn_on || this.build_btn_on; }
     },
     created() {
       this.getLocalCache(this.cache_key).then(json => {
