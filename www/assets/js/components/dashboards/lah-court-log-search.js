@@ -44,7 +44,7 @@ if (Vue) {
                 </template>
             </b-form-select>
           </b-input-group>
-          <b-button @click="query" variant="outline-primary" size="sm" title="搜尋" class="ml-1"><i class="fas fa-search"></i></b-button>
+          <b-button @click="query" variant="outline-primary" size="sm" title="搜尋" class="ml-1" :disabled="!query_btn_on"><i class="fas fa-search"></i></b-button>
         </b-col>
       </b-form-row>
       <b-form-row>
@@ -125,6 +125,9 @@ if (Vue) {
         if (this.empty(testee) || parseInt(testee) == 0) return false;
         if (testee.includes('-') && testee.match(/^\d{1,5}(\-\d{1,3})?$/g) === null) return false;
         return testee.length < 6 || testee.match(/^\d{1,5}(\-\d{1,3})?$/g) !== null;
+      },
+      query_btn_on() {
+        return this.list.length > 0;
       },
       validate_input() { return this.land_btn_on || this.build_btn_on; }
     },
