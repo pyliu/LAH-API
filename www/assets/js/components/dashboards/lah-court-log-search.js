@@ -100,10 +100,16 @@ if (Vue) {
         });
       },
       addLandNumber() {
-        this.list.push({ type: 'land', value: this.land_build_number });
+        let exists = this.list.find((item, index, array) => {
+          return item.type == 'land' && item.value == this.land_build_number;
+        });
+        if (this.empty(exists)) this.list.push({ type: 'land', value: this.land_build_number });
       },
       addBuildNumber() {
-        this.list.push({ type: 'build', value: this.land_build_number });
+        let exists = this.list.find((item, index, array) => {
+          return item.type == 'build' && item.value == this.land_build_number;
+        });
+        if (this.empty(exists)) this.list.push({ type: 'build', value: this.land_build_number });
       },
       filter() {
         this.land_build_number = this.land_build_number.replace(/(^\s*)|(\s*$)/g, '').replace(/\-0+$/g, '');
