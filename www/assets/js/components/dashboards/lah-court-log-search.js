@@ -1,8 +1,22 @@
 if (Vue) {
   Vue.component('lah-court-log-search', {
     components: {
-      'lah-court-log-item': {
-        template: ``
+      'lah-court-log-search-items': {
+        template: `<div>
+          <b-form-row v-for="item in list">
+            <b-col>
+              <lah-fa-icon icon="mountain" v-if="item.type == 'land'" variant="primary"> 土地</lah-fa-icon>
+              <lah-fa-icon icon="home" v-else variant="success"> 建物</lah-fa-icon>
+              : {{item["value"]}}
+            </b-col>
+          </b-form-row>
+        </div>`,
+        data: () => ({}),
+        computed: {
+          list_key() { return this.$parent.list_key },
+          list() { return this.storeParams[this.list_key] }
+        },
+        created() { }
       }
     },
     template: `<fieldset>
@@ -11,8 +25,8 @@ if (Vue) {
         謄本紀錄查詢
         <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
       </legend>
-      <b-form-row class="mb-2">
-        <b-col>
+      <b-form-row class="mb-1">
+        <b-col class="d-flex">
           <b-input-group size="sm" prepend="段小段">
             <b-form-select ref="section" v-model="section_code" :options="sections">
                 <template v-slot:first>
@@ -20,6 +34,7 @@ if (Vue) {
                 </template>
             </b-form-select>
           </b-input-group>
+          <b-button @click="query" variant="outline-primary" size="sm" title="搜尋" class="ml-1"><i class="fas fa-search"></i></b-button>
         </b-col>
       </b-form-row>
       <b-form-row>
@@ -29,8 +44,13 @@ if (Vue) {
               <b-form-input v-model="land_build_number"></b-form-input>
             </b-input-group>
             <b-button @click="addLandNumber" variant="outline-primary" size="sm" title="增加地號" class="mx-1"><i class="fas fa-mountain"></i></b-button>
-            <b-button @click="addBuildNumber" variant="outline-primary" size="sm" title="增加建號"><i class="fas fa-home"></i></b-button>
+            <b-button @click="addBuildNumber" variant="outline-success" size="sm" title="增加建號"><i class="fas fa-home"></i></b-button>
           </div>
+        </b-col>
+      </b-form-row>
+      <b-form-row>
+        <b-col>
+          <lah-court-log-search-items></lah-court-log-search-items>
         </b-col>
       </b-form-row>
     </fieldset>`,
@@ -62,8 +82,19 @@ if (Vue) {
           size: "sm"
         });
       },
-      addLandNumber() {},
-      addBuildNumber() {}
+      query() {
+        this.msgbox({
+          title: '<i class="fa fa-search fa-lg"></i> 謄本紀錄查詢',
+            message: `建置中 ... `,
+            size: "sm"
+        });
+      },
+      addLandNumber() {
+        this.list.push({ type: 'land', value: this.land_build_number });
+      },
+      addBuildNumber() {
+        this.list.push({ type: 'build', value: this.land_build_number });
+      }
     },
     watch: { },
     computed: {
@@ -90,9 +121,10 @@ if (Vue) {
         }
       });
       // init global store param
+      // e.g. [{type: 'land', value: '123-1'}, {type: 'build', value: '00456-002'}]
       this.addToStoreParams(this.list_key, []);
-      this.$log(this.list_key);
-      this.$log(this.list);
+      // this.$log(this.list_key);
+      // this.$log(this.list);
     },
     mounted() { }
   });
