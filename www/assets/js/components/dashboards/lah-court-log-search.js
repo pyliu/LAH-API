@@ -5,9 +5,8 @@ if (Vue) {
         template: `<div>
           <b-form-row v-for="item in list">
             <b-col>
-              <lah-fa-icon icon="mountain" v-if="item.type == 'land'" variant="primary"> 土地</lah-fa-icon>
-              <lah-fa-icon icon="home" v-else variant="success"> 建物</lah-fa-icon>
-              : {{item.value}}
+              <lah-fa-icon icon="mountain" v-if="item.type == 'land'" variant="primary">土地：{{item.value}}</lah-fa-icon>
+              <lah-fa-icon icon="home" v-else variant="success">建物：{{item.value}}</lah-fa-icon>
               <b-button-close @click="remove(item)" title="刪除這個項目" class="text-danger"></b-button-close>
             </b-col>
           </b-form-row>
