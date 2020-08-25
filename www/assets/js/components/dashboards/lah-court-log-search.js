@@ -44,7 +44,8 @@ if (Vue) {
                 </template>
             </b-form-select>
           </b-input-group>
-          <b-button @click="query" variant="outline-primary" size="sm" title="搜尋" class="ml-1" :disabled="!query_btn_on"><i class="fas fa-search"></i></b-button>
+          <b-button @click="query" variant="outline-primary" size="sm" title="搜尋" class="mx-1" :disabled="!query_btn_on"><i class="fas fa-search"></i></b-button>
+          <b-button @click="reset" variant="outline-secondary" size="sm" title="重設"><i class="fas fa-sync"></i></b-button>
         </b-col>
       </b-form-row>
       <b-form-row>
@@ -72,6 +73,11 @@ if (Vue) {
       land_build_number: null
     }),
     methods: {
+      reset() {
+        this.section_code = null;
+        this.land_build_number = null;
+        this.storeParams[this.list_key] = [];
+      },
       prepare(json) {
         if (json && json.data_count > 0) {
           json.raw.forEach(item => {
