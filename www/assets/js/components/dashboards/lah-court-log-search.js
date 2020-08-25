@@ -38,7 +38,7 @@ if (Vue) {
       <b-form-row class="mb-1">
         <b-col class="d-flex">
           <b-input-group size="sm" prepend="段小段">
-            <b-form-select ref="section" v-model="section_code" :options="sections">
+            <b-form-select ref="section" v-model="section_code" :options="sections" class="no-cache">
                 <template v-slot:first>
                     <b-form-select-option :value="null" disabled>-- 請選擇段別 --</b-form-select-option>
                 </template>
@@ -68,8 +68,8 @@ if (Vue) {
     data: () => ({
       cache_key: 'lah-court-log-search-section-list',
       sections: [],
-      section_code: '0200',
-      land_build_number: ''
+      section_code: null,
+      land_build_number: null
     }),
     methods: {
       prepare(json) {
@@ -127,7 +127,7 @@ if (Vue) {
         return testee.length < 6 || testee.match(/^\d{1,5}(\-\d{1,3})?$/g) !== null;
       },
       query_btn_on() {
-        return this.list.length > 0;
+        return this.list.length > 0 && !this.empty(this.section_code);
       },
       validate_input() { return this.land_btn_on || this.build_btn_on; }
     },
