@@ -93,10 +93,55 @@ if (Vue) {
         });
       },
       query() {
-        this.msgbox({
-          title: '<i class="fa fa-search fa-lg"></i> 謄本紀錄查詢',
-            message: `建置中 ... `,
-            size: "sm"
+        // prepare formated number array for api
+        let numbers = [];
+        this.list.forEach((item, index, array) => {
+          let arr = item.value.split("-");
+          let parent = arr[0];
+          let child = arr[1] || '';
+          if (item.type == 'land') {
+            parent = parent.padStart(4, '0'); // 母號四碼
+            child = child.padStart(4, '0'); // 子號四碼
+          } else {
+            parent = parent.padStart(5, '0'); // 母號五碼
+            child = child.padStart(3, '0'); // 子號三碼
+          }
+          numbers.push(`${parent}${child}`);
+        });
+        
+        this.isBusy = true;
+        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+          type: 'cert_log',
+          section_code: this.section_code,
+          numbers: numbers
+        }).then(res => {
+          if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+              this.msgbox({
+                  title: '查詢謄本記錄檔',
+                  message: this.$createElement('b-table', { props: {
+                      striped: true,
+                      hover: true,
+                      headVariant: 'dark',
+                      bordered: true,
+                      captionTop: true,
+                      caption: `找到 ${res.data.data_count} 件`,
+                      items: res.data.raw
+                  } }),
+                  size: 'xl'
+              });
+          } else if (res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_NO_RECORD) {
+            this.$warn(`查詢謄本記錄檔: ${res.data.message}`);
+            this.notify({ title: '查詢謄本記錄檔', message: res.data.message, type: "success" });
+          } else {
+              let err = this.responseMessage(res.data.status);
+              let message = `${err} - ${res.data.status}`;
+              this.$warn(`查詢謄本記錄檔: ${message}`);
+              this.notify({ title: '查詢謄本記錄檔', message: message, type: "danger" });
+          }
+        }).catch(err => {
+            this.error = err;
+        }).finally(() => {
+            this.isBusy = false;
         });
       },
       addLandNumber() {

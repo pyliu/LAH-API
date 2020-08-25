@@ -286,12 +286,12 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "cert_log":
-		$log->info("XHR [cert_log] 查詢謄本紀錄資料【".$_POST["section_code"].", ".$_POST["numbers"]."】請求");
+		$log->info("XHR [cert_log] 查詢謄本紀錄資料【".$_POST["section_code"].", ".implode(',', $_POST["numbers"])."】請求");
 		$query_result = $mock ? $cache->get('cert_log') : $query->getCertLog($_POST["section_code"], $_POST["numbers"]);
 		$cache->set('cert_log', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [cert_log] 查無資料");
-			echoErrorJSONString();
+			echoErrorJSONString("查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
