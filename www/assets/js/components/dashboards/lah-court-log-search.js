@@ -7,7 +7,8 @@ if (Vue) {
             <b-col>
               <lah-fa-icon icon="mountain" v-if="item.type == 'land'" variant="primary"> 土地</lah-fa-icon>
               <lah-fa-icon icon="home" v-else variant="success"> 建物</lah-fa-icon>
-              : {{item["value"]}}
+              : {{item.value}}
+              <b-button-close @click="remove(item)" title="刪除這個項目" class="text-danger"></b-button-close>
             </b-col>
           </b-form-row>
         </div>`,
@@ -15,6 +16,15 @@ if (Vue) {
         computed: {
           list_key() { return this.$parent.list_key },
           list() { return this.storeParams[this.list_key] }
+        },
+        methods: {
+          remove(item) {
+            for(let i = 0; i < this.list.length; i++) {
+              if ( this.list[i].type == item.type && this.list[i].value == item.value ) {
+                this.list.splice(i, 1);
+              }
+            }
+          }
         },
         created() { }
       }
