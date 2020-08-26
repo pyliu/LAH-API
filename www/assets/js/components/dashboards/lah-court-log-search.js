@@ -133,7 +133,7 @@ if (Vue) {
         this.storeParams[this.list_key] = [];
       },
       xlsx() {
-        var w = window.open(CONFIG.API_EP.XLSX.CERT_LOG);
+        var w = window.open(CONFIG.API.XLSX.CERT_LOG);
         w.document.close();
       },
       prepare(json) {
