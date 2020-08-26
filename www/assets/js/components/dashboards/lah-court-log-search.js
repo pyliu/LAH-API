@@ -86,8 +86,8 @@ if (Vue) {
             <b-input-group size="sm" prepend="地/建號" title="以-分隔子號">
               <b-form-input :state="validate_input" v-model="land_build_number" class="h-100 no-cache" placeholder="123-1" @input="filter"></b-form-input>
             </b-input-group>
-            <b-button @click="addLandNumber" variant="outline-primary" size="sm" title="增加地號" class="mx-1 text-nowrap" :disabled="!land_btn_on"><i class="fas fa-plus"> 土地</i></b-button>
-            <b-button @click="addBuildNumber" variant="outline-success" size="sm" title="增加建號" class="text-nowrap" :disabled="!build_btn_on"><i class="fas fa-plus"> 建物</i></b-button>
+            <b-button @click="addLandNumber" variant="outline-primary" size="sm" title="增加地號" class="mx-1 text-nowrap" :disabled="!land_btn_on"><i class="fas fa-plus fa-sm"> 土地</i></b-button>
+            <b-button @click="addBuildNumber" variant="outline-success" size="sm" title="增加建號" class="text-nowrap" :disabled="!build_btn_on"><i class="fas fa-plus fa-sm"> 建物</i></b-button>
           </div>
         </b-col>
       </b-form-row>
@@ -110,7 +110,9 @@ if (Vue) {
         this.land_build_number = null;
         this.storeParams[this.list_key] = [];
       },
-      xlsx() {},
+      xlsx() {
+        this.$log('click');
+      },
       prepare(json) {
         if (json && json.data_count > 0) {
           json.raw.forEach(item => {
@@ -159,15 +161,10 @@ if (Vue) {
           if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
               this.msgbox({
                   title: '查詢謄本記錄檔',
-                  message: this.$createElement('b-table', { props: {
-                      striped: true,
-                      hover: true,
-                      headVariant: 'dark',
-                      bordered: true,
-                      captionTop: true,
-                      caption: `找到 ${res.data.data_count} 件`,
-                      items: res.data.raw
-                  } }),
+                  message: this.$createElement('div', [
+                    this.createExportBtn(),
+                    this.createTable(res.data)
+                  ]),
                   size: 'xl'
               });
           } else if (res.data.status == XHR_STATUS_CODE.SUCCESS_WITH_NO_RECORD) {
@@ -183,6 +180,35 @@ if (Vue) {
             this.error = err;
         }).finally(() => {
             this.isBusy = false;
+        });
+      },
+      createExportBtn() {
+        return this.$createElement('b-button', {
+            class: 'position-absolute',
+            style: 'right: 1rem; top: 1.5rem;',
+            props: { variant: 'outline-success', size: 'sm' },
+            on: {
+              click: this.xlsx,
+              mouseenter: () => addLDAnimation('#lah-court-log-search-export-icon-inside', 'ld-move-fade-ltr'),
+              mouseleave: () => clearLDAnimation('#lah-court-log-search-export-icon-inside')
+            }
+          }, [this.$createElement('lah-fa-icon', { props: { icon: 'file-export' }, attrs: { id: 'lah-court-log-search-export-icon-inside' }})]
+        );
+      },
+      createTable(json) {
+        return this.$createElement('b-table', {
+          props: {
+            striped: true,
+            hover: true,
+            headVariant: 'dark',
+            bordered: true,
+            captionTop: true,
+            caption: `找到 ${json.data_count} 件`,
+            items: json.raw
+          },
+          attrs: {
+            style: { marginTop: '-2rem' }
+          }
         });
       },
       addLandNumber() {
