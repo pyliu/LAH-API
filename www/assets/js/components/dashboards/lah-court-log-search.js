@@ -104,6 +104,29 @@ if (Vue) {
       section_code: null,
       land_build_number: null
     }),
+    computed: {
+      list_key() { return 'target-number-list' },
+      list() { return this.storeParams[this.list_key] },
+      land_btn_on() {
+        let testee = this.land_build_number;
+        if (this.empty(testee) || parseInt(testee) == 0) return false;
+        if (parseInt(testee) == 0) return false;
+        if (testee.includes('-') && testee.match(/^\d{1,4}(\-\d{1,4})?$/g) === null) return false;
+        return testee.length < 5 || testee.match(/^\d{1,4}(\-\d{1,4})?$/g) !== null;
+      },
+      build_btn_on() {
+        let testee = this.land_build_number;
+        if (this.empty(testee) || parseInt(testee) == 0) return false;
+        if (testee.includes('-') && testee.match(/^\d{1,5}(\-\d{1,3})?$/g) === null) return false;
+        return testee.length < 6 || testee.match(/^\d{1,5}(\-\d{1,3})?$/g) !== null;
+      },
+      query_btn_on() {
+        return this.list.length > 0 && !this.empty(this.section_code);
+      },
+      xlsx_btn_on() { return this.query_btn_on },
+      validate_input() { return this.land_btn_on || this.build_btn_on; }
+    },
+    watch: { },
     methods: {
       reset() {
         this.section_code = null;
@@ -226,29 +249,6 @@ if (Vue) {
       filter() {
         this.land_build_number = this.land_build_number.replace(/(^\s*)|(\s*$)/g, '').replace(/\-0+$/g, '');
       }
-    },
-    watch: { },
-    computed: {
-      list_key() { return 'target-number-list' },
-      list() { return this.storeParams[this.list_key] },
-      land_btn_on() {
-        let testee = this.land_build_number;
-        if (this.empty(testee) || parseInt(testee) == 0) return false;
-        if (parseInt(testee) == 0) return false;
-        if (testee.includes('-') && testee.match(/^\d{1,4}(\-\d{1,4})?$/g) === null) return false;
-        return testee.length < 5 || testee.match(/^\d{1,4}(\-\d{1,4})?$/g) !== null;
-      },
-      build_btn_on() {
-        let testee = this.land_build_number;
-        if (this.empty(testee) || parseInt(testee) == 0) return false;
-        if (testee.includes('-') && testee.match(/^\d{1,5}(\-\d{1,3})?$/g) === null) return false;
-        return testee.length < 6 || testee.match(/^\d{1,5}(\-\d{1,3})?$/g) !== null;
-      },
-      query_btn_on() {
-        return this.list.length > 0 && !this.empty(this.section_code);
-      },
-      xlsx_btn_on() { return this.query_btn_on },
-      validate_input() { return this.land_btn_on || this.build_btn_on; }
     },
     created() {
       this.getLocalCache(this.cache_key).then(json => {
