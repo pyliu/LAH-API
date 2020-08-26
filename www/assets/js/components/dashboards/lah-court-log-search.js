@@ -133,8 +133,26 @@ if (Vue) {
         this.storeParams[this.list_key] = [];
       },
       xlsx() {
-        var w = window.open(CONFIG.API.XLSX.CERT_LOG);
-        w.document.close();
+        this.isBusy = true;
+        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+          type: 'xlsx_params',
+          section_code: this.section_code,
+          numbers: this.format()
+        }).then(res => {
+          if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+            let w = window.open(CONFIG.API.XLSX.CERT_LOG);
+            w.document.close();
+          } else {
+            let err = this.responseMessage(res.data.status);
+            let message = `${err} - ${res.data.status}`;
+            this.$warn(`紀錄 XLSX 參數失敗: ${message}`);
+            this.notify({ title: '紀錄 XLSX 參數', message: message, type: "danger" });
+          }
+        }).catch(err => {
+            this.error = err;
+        }).finally(() => {
+            this.isBusy = false;
+        });
       },
       prepare(json) {
         if (json && json.data_count > 0) {

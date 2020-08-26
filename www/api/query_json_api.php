@@ -1403,7 +1403,7 @@ switch ($_POST["type"]) {
 		$cache->set('rlnid', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ${param} 權利人資訊。");
-			$log->info("XHR [user_unread_message] 查無 ${param} 權利人資訊。");
+			$log->info("XHR [rlnid] 查無 ${param} 權利人資訊。");
 		} else {
 			$json = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -1414,6 +1414,35 @@ switch ($_POST["type"]) {
 			);
 			$log->info($json["message"]);
 			echo json_encode($json, 0);
+		}
+		break;
+	case "xlsx_params":
+		$params = json_encode($_POST);
+		$log->info("XHR [xlsx_params] 設定xlsx查詢參數【${params}】請求");
+		function setSessions($params) {
+			if (empty($_POST) || session_status() === PHP_SESSION_DISABLED) return false;
+			foreach($_POST as $key => $value) {
+				if ($value !== NULL) {
+					$_SESSION[$key] = $value;
+				}
+			}
+			return true;
+		}
+		$flag = $mock ? $cache->get('xlsx_params') : setSessions($_POST);
+		$cache->set('xlsx_params', $flag);
+		if ($flag) {
+			$json = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($_POST),
+				"raw" => $_POST,
+				"message" => "XHR [xlsx_params] 設定 xlsx 查詢參數成功。(".count($_POST).")"
+			);
+			$log->info($json["message"]);
+			echo json_encode($json, 0);
+		} else {
+			echoErrorJSONString("設定 xlsx session 參數失敗。(${params})");
+			$log->info("XHR [xlsx_params] 設定 xlsx session 參數失敗。");
+			$log->info("XHR [xlsx_params] ${params}");
 		}
 		break;
 	default:
