@@ -9,6 +9,11 @@ const CONFIG = {
     STATS_JSON_API_EP: "api/stats_json_api.php",
     LOAD_FILE_API_EP: "api/load_file_api.php",
     EXPORT_FILE_API_EP: "api/export_file_api.php",
+    API_EP: {
+        XLSX: {
+            CERT_LOG: "xlsx/cert_log.php"
+        }
+    },
     MOCK_API_EP: "TODO",
     LAH_ROOT_EVENT: {
         MESSAGE_UNREAD: 'lah::message::unread'
