@@ -131,7 +131,7 @@ if (Vue) {
           size: "sm"
         });
       },
-      query() {
+      format() {
         // prepare formated number array for api
         let numbers = [];
         this.list.forEach((item, index, array) => {
@@ -147,12 +147,14 @@ if (Vue) {
           }
           numbers.push(`${parent}${child}`);
         });
-        
+        return numbers;
+      },
+      query() {
         this.isBusy = true;
         this.$http.post(CONFIG.QUERY_JSON_API_EP, {
           type: 'cert_log',
           section_code: this.section_code,
-          numbers: numbers
+          numbers: this.format()
         }).then(res => {
           if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
               this.msgbox({
