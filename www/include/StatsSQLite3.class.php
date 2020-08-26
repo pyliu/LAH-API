@@ -73,7 +73,7 @@ class StatsSQLite3 {
         // $data => php array
         // overdue_stats_detail
         $stm = $this->db->prepare("INSERT INTO stats_raw_data (id,data) VALUES (:id, :data)");
-        $stm->bindParam(':data', serialize($data));
+        $stm->bindVariable(':data', serialize($data));
         $stm->bindParam(':id', $id);
         $ret = $stm->execute();
         if (!$ret) {

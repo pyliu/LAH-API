@@ -22,7 +22,7 @@ ob_end_clean();
 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 header('Content-Disposition: attachment;filename="'.$today.'.xlsx"');
 header('Cache-Control: max-age=0');
-ob_end_clean();
+//ob_end_clean();
 
 $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
 $writer->save('php://output');
