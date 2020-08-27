@@ -37,28 +37,28 @@ if (Vue) {
       <b-form-row class="position-relative mb-1" style="margin-top: -2rem">
         <b-col class="text-right">
           <lah-button
-            icon="search"
-            title="搜尋"
-            @click="query"
-            variant="outline-primary"
-            :disabled="!query_btn_on"
-          ></lah-button>
-          <lah-button
             icon="undo"
             title="重設"
             @click="reset"
             variant="outline-secondary"
             action="cycle-alt"
           ></lah-button>
+          <lah-button
+            icon="search"
+            title="搜尋"
+            @click="query"
+            variant="outline-primary"
+            :disabled="!query_btn_on"
+          ></lah-button>
         </b-col>
       </b-form-row>
       <b-form-row class="mb-1">
         <b-col>
           <b-input-group size="sm" prepend="段小段">
-            <b-form-select ref="section" v-model="section_code" :options="sections" class="no-cache">
-                <template v-slot:first>
-                    <b-form-select-option :value="null" disabled>-- 請選擇段別 --</b-form-select-option>
-                </template>
+            <b-form-select ref="section" v-model="section_code" :options="sections" class="no-cache" :state="land_build_number_on">
+              <template v-slot:first>
+                  <b-form-select-option :value="null" disabled>-- 請選擇段別 --</b-form-select-option>
+              </template>
             </b-form-select>
           </b-input-group>
         </b-col>
@@ -67,10 +67,12 @@ if (Vue) {
         <b-col>
           <div class="d-flex">
             <b-input-group size="sm" prepend="地/建號" title="以-分隔子號">
-              <b-form-input ref="number" :state="validate_input" v-model="land_build_number" class="h-100 no-cache" placeholder="123-1" @input="filter"></b-form-input>
+              <b-form-input ref="number" :state="validate_input" v-model="land_build_number" class="h-100 no-cache" placeholder="123-1" @input="filter" :disabled="!land_build_number_on"></b-form-input>
+              <template v-slot:append>
+                <b-button @click="addLandNumber" variant="outline-primary" size="sm" title="增加地號" class="text-nowrap" :disabled="!land_btn_on"><i class="fas fa-plus fa-sm"> 土地</i></b-button>
+                <b-button @click="addBuildNumber" variant="outline-success" size="sm" title="增加建號" class="text-nowrap" :disabled="!build_btn_on"><i class="fas fa-plus fa-sm"> 建物</i></b-button>
+              </template>
             </b-input-group>
-            <b-button @click="addLandNumber" variant="outline-primary" size="sm" title="增加地號" class="mx-1 text-nowrap" :disabled="!land_btn_on"><i class="fas fa-plus fa-sm"> 土地</i></b-button>
-            <b-button @click="addBuildNumber" variant="outline-success" size="sm" title="增加建號" class="text-nowrap" :disabled="!build_btn_on"><i class="fas fa-plus fa-sm"> 建物</i></b-button>
           </div>
         </b-col>
       </b-form-row>
@@ -105,6 +107,7 @@ if (Vue) {
       query_btn_on() {
         return this.list.length > 0 && !this.empty(this.section_code);
       },
+      land_build_number_on() { return !this.empty(this.section_code) },
       xlsx_btn_on() { return this.query_btn_on },
       validate_input() { return this.land_btn_on || this.build_btn_on; }
     },
