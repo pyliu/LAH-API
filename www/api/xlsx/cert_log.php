@@ -53,6 +53,7 @@ $spreadsheet->getProperties()
 // also write a copy to export folder
 $writer = new Xlsx($spreadsheet);
 $writer->save(ROOT_DIR.'/exports/'.$filename);
+zipExports();
 
 ob_end_clean();
 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
