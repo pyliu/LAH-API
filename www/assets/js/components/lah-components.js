@@ -591,7 +591,7 @@ if (Vue) {
             variant: { type: String, default: 'outline-primary'},
             size: { type: String, default: 'sm'},
             icon: { type: String, default: 'exclamation-triangle'},
-            action: { type: String, default: 'heartbeat'},
+            action: { type: String, default: undefined},
             click: { type: Function, default: console.log }
         },
         data: () => ({
@@ -601,7 +601,10 @@ if (Vue) {
         computed: { },
         methods: {
             emitClick() { this.$emit('click', this.click) },
-            mouseenter() { addLDAnimation(`#${this.icon_id}`, `ld-${this.action}`) },
+            mouseenter() {
+                let movement = this.action ? `ld-${this.action}` : undefined;
+                addLDAnimation(`#${this.icon_id}`, movement);
+            },
             mouseleave() { clearLDAnimation(`#${this.icon_id}`) }
         },
         created() { this.icon_id = this.uuid() }
