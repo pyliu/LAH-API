@@ -590,7 +590,7 @@ if (Vue) {
         props: {
             variant: { type: String, default: 'outline-primary'},
             size: { type: String, default: 'sm'},
-            icon: { type: String, default: 'hand-point-up'},
+            icon: { type: String, default: 'exclamation-triangle'},
             action: { type: String, default: 'heartbeat'},
             click: { type: Function, default: console.log }
         },
