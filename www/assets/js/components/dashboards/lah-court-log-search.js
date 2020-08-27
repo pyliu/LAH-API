@@ -84,7 +84,7 @@ if (Vue) {
         <b-col>
           <div class="d-flex">
             <b-input-group size="sm" prepend="地/建號" title="以-分隔子號">
-              <b-form-input :state="validate_input" v-model="land_build_number" class="h-100 no-cache" placeholder="123-1" @input="filter"></b-form-input>
+              <b-form-input ref="number" :state="validate_input" v-model="land_build_number" class="h-100 no-cache" placeholder="123-1" @input="filter"></b-form-input>
             </b-input-group>
             <b-button @click="addLandNumber" variant="outline-primary" size="sm" title="增加地號" class="mx-1 text-nowrap" :disabled="!land_btn_on"><i class="fas fa-plus fa-sm"> 土地</i></b-button>
             <b-button @click="addBuildNumber" variant="outline-success" size="sm" title="增加建號" class="text-nowrap" :disabled="!build_btn_on"><i class="fas fa-plus fa-sm"> 建物</i></b-button>
@@ -258,12 +258,16 @@ if (Vue) {
           return item.type == 'land' && item.value == this.land_build_number;
         });
         if (this.empty(exists)) this.list.push({ type: 'land', value: this.land_build_number });
+        this.land_build_number = '';
+        this.$refs.number.focus();
       },
       addBuildNumber() {
         let exists = this.list.find((item, index, array) => {
           return item.type == 'build' && item.value == this.land_build_number;
         });
         if (this.empty(exists)) this.list.push({ type: 'build', value: this.land_build_number });
+        this.land_build_number = '';
+        this.$refs.number.focus();
       },
       filter() {
         this.land_build_number = this.land_build_number.replace(/(^\s*)|(\s*$)/g, '').replace(/\-0+$/g, '');
