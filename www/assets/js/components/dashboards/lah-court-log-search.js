@@ -54,7 +54,7 @@ if (Vue) {
       </b-form-row>
       <b-form-row class="mb-1">
         <b-col>
-          <b-input-group size="sm" prepend="段小段">
+          <b-input-group size="sm" prepend="段/小段">
             <b-form-select ref="section" v-model="section_code" :options="sections" class="no-cache" :state="land_build_number_on">
               <template v-slot:first>
                   <b-form-select-option :value="null" disabled>-- 請選擇段別 --</b-form-select-option>
