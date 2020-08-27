@@ -584,7 +584,7 @@ if (Vue) {
             @mouseenter="mouseenter"
             @mouseleave="mouseleave"
             @blur="mouseleave"
-            @click="emitClick"
+            @click="emitClick($event)"
         >
             <lah-fa-icon :id="icon_id" :icon="icon"> <slot></slot></lah-fa-icon>
       </b-button>`,
@@ -601,7 +601,7 @@ if (Vue) {
         watch: { },
         computed: { },
         methods: {
-            emitClick() { this.$emit('click', this.click) },
+            emitClick(evt) { this.$emit('click', this.click); evt.stopPropagation(); },
             mouseenter() {
                 let movement = this.action ? `ld-${this.action}` : undefined;
                 addLDAnimation(`#${this.icon_id}`, movement);
@@ -3732,8 +3732,10 @@ if (Vue) {
                     <b-card no-body v-for="(item, idx) in items" :key="'stats_'+idx" :border-variant="border_var(item)">
                         <b-list-group-item button class="d-flex justify-content-between align-items-center" @click.stop="query(item)" title="按我取得詳細資料">
                             {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
-                            
-                            <b-badge :variant="badge_var(item.count)" pill>{{item.count}}</b-badge>
+                            <div>
+                                <b-badge :variant="badge_var(item.count)" pill>{{item.count}}</b-badge>
+                                <lah-button icon="file-excel" variant="outline-success" action="move-fade-ltr" title="匯出EXCEL" @click="xlsx(item)"></lah-button>
+                            </div>
                         </b-list-group-item>
                     </b-card>
                 </transition-group>
@@ -3743,7 +3745,10 @@ if (Vue) {
                 <transition-group name="list">
                     <b-list-group-item flush button v-if="ok" v-for="(item, idx) in items" :key="'stats_'+idx" class="d-flex justify-content-between align-items-center" @click.stop="query(item)">
                         {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
-                        <b-badge variant="primary" pill>{{item.count}}</b-badge>
+                        <div>
+                            <b-badge variant="primary" pill>{{item.count}}</b-badge>
+                            <lah-button icon="file-excel" variant="outline-success" action="move-fade-ltr" @click="xlsx(item)"></lah-button>
+                        </div>
                     </b-list-group-item>
                 </transition-group>
                 <b-list-group-item v-if="!ok" class="d-flex justify-content-between align-items-center">
@@ -3880,7 +3885,7 @@ if (Vue) {
                         }
                     } else {
                         this.notify({ message: res.data.message + " " + this.responseMessage(res.data.status), type: "warning" });
-                        this.$warn(type + " " + this.responseMessage(res.data.status));
+                        this.$warn(type + " " + this.responseMessage(res.data.status) + " " + res.data.status);
                     }
                 }).catch(err => {
                     this.error = err;
@@ -4044,6 +4049,9 @@ if (Vue) {
                         this.reload_stats_cache(element.category);
                     });
                 }
+            },
+            xlsx(item) {
+                this.$log(item);
             }
         },
         mounted() {
