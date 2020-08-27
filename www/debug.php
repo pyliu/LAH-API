@@ -1,4 +1,5 @@
 ﻿<?php
+ini_set("display_errors", 0);
 require_once("./include/init.php");
 require_once("./include/Query.class.php");
 require_once("./include/Message.class.php");

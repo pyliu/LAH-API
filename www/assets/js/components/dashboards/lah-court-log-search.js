@@ -141,12 +141,13 @@ if (Vue) {
         }).then(res => {
           if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
             let w = window.open(CONFIG.API.XLSX.CERT_LOG);
-            w.document.close();
+            setTimeout(() => w.document.close(), 1000);
+            this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-check"> 成功</i>', type: "success" });
           } else {
             let err = this.responseMessage(res.data.status);
             let message = `${err} - ${res.data.status}`;
             this.$warn(`紀錄 XLSX 參數失敗: ${message}`);
-            this.notify({ title: '紀錄 XLSX 參數', message: message, type: "danger" });
+            this.alert({ title: '紀錄 XLSX 參數', message: message, type: "danger" });
           }
         }).catch(err => {
             this.error = err;
