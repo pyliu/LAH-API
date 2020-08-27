@@ -583,6 +583,7 @@ if (Vue) {
             :size="size"
             @mouseenter="mouseenter"
             @mouseleave="mouseleave"
+            @blur="mouseleave"
             @click="emitClick"
         >
             <lah-fa-icon :id="icon_id" :icon="icon"> <slot></slot></lah-fa-icon>

@@ -69,8 +69,8 @@ if (Vue) {
             <b-input-group size="sm" prepend="地/建號" title="以-分隔子號">
               <b-form-input ref="number" :state="validate_input" v-model="land_build_number" class="h-100 no-cache" placeholder="123-1" @input="filter" :disabled="!land_build_number_on"></b-form-input>
               <template v-slot:append>
-                <b-button @click="addLandNumber" variant="outline-primary" size="sm" title="增加地號" class="text-nowrap" :disabled="!land_btn_on"><i class="fas fa-plus fa-sm"> 土地</i></b-button>
-                <b-button @click="addBuildNumber" variant="outline-success" size="sm" title="增加建號" class="text-nowrap" :disabled="!build_btn_on"><i class="fas fa-plus fa-sm"> 建物</i></b-button>
+                <lah-button icon="plus" title="增加地號" class="text-nowrap" @click="addLandNumber" :disabled="!land_btn_on" action="pulse">土地</lah-button>
+                <lah-button icon="plus" variant="outline-success" title="增加建號" class="text-nowrap" @click="addBuildNumber" :disabled="!build_btn_on" action="pulse">建物</lah-button>
               </template>
             </b-input-group>
           </div>
