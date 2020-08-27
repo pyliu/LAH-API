@@ -577,6 +577,36 @@ if (Vue) {
         }
     });
 
+    Vue.component("lah-button", {
+        template: `<b-button
+            :variant="variant"
+            :size="size"
+            @mouseenter="mouseenter"
+            @mouseleave="mouseleave"
+            @click="emitClick"
+        >
+            <lah-fa-icon :id="icon_id" :icon="icon"> <slot></slot></lah-fa-icon>
+      </b-button>`,
+        props: {
+            variant: { type: String, default: 'outline-primary'},
+            size: { type: String, default: 'sm'},
+            icon: { type: String, default: 'hand-point-up'},
+            action: { type: String, default: 'heartbeat'},
+            click: { type: Function, default: console.log }
+        },
+        data: () => ({
+            icon_id: 'xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx'
+        }),
+        watch: { },
+        computed: { },
+        methods: {
+            emitClick() { this.$emit('click', this.click) },
+            mouseenter() { addLDAnimation(`#${this.icon_id}`, `ld-${this.action}`) },
+            mouseleave() { clearLDAnimation(`#${this.icon_id}`) }
+        },
+        created() { this.icon_id = this.uuid() }
+    });
+
     // need to include Chart.min.js (chart.js) first.
     Vue.component("lah-chart", {
         template: `<div><canvas class="w-100">圖形初始化失敗</canvas></div>`,

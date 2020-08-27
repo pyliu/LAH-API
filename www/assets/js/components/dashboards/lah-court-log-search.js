@@ -36,37 +36,20 @@ if (Vue) {
       </legend>
       <b-form-row class="position-relative mb-1" style="margin-top: -2rem">
         <b-col class="text-right">
-          <b-button
+          <lah-button
+            icon="search"
+            title="搜尋"
             @click="query"
             variant="outline-primary"
-            size="sm"
-            title="搜尋"
             :disabled="!query_btn_on"
-            @mouseenter="addLDAnimation('#lah-court-log-search-search-icon', 'ld-breath')"
-            @mouseleave="clearLDAnimation('#lah-court-log-search-search-icon')"
-          >
-            <lah-fa-icon :id="'lah-court-log-search-search-icon'" icon="search"></lah-fa-icon>
-          </b-button>
-          <b-button
-            @click="xlsx"
-            variant="outline-success"
-            size="sm" title="匯出檔案"
-            :disabled="!xlsx_btn_on"
-            @mouseenter="addLDAnimation('#lah-court-log-search-export-icon', 'ld-move-fade-ltr')"
-            @mouseleave="clearLDAnimation('#lah-court-log-search-export-icon')"
-          >
-            <lah-fa-icon :id="'lah-court-log-search-export-icon'" icon="file-export"></lah-fa-icon>
-          </b-button>
-          <b-button
+          ></lah-button>
+          <lah-button
+            icon="undo"
+            title="重設"
             @click="reset"
             variant="outline-secondary"
-            size="sm"
-            title="重設"
-            @mouseenter="addLDAnimation('#lah-court-log-search-spin-icon', 'ld-cycle-alt')"
-            @mouseleave="clearLDAnimation('#lah-court-log-search-spin-icon')"
-          >
-            <lah-fa-icon :id="'lah-court-log-search-spin-icon'" icon="undo"></lah-fa-icon>
-          </b-button>
+            action="cycle-alt"
+          ></lah-button>
         </b-col>
       </b-form-row>
       <b-form-row class="mb-1">
@@ -225,17 +208,14 @@ if (Vue) {
         });
       },
       createExportBtn() {
-        return this.$createElement('b-button', {
+        return this.$createElement('lah-button', {
             class: 'position-absolute',
             style: 'right: 1rem; top: 1.5rem;',
-            props: { variant: 'outline-success', size: 'sm' },
-            on: {
-              click: this.xlsx,
-              mouseenter: () => addLDAnimation('#lah-court-log-search-export-icon-inside', 'ld-move-fade-ltr'),
-              mouseleave: () => clearLDAnimation('#lah-court-log-search-export-icon-inside')
-            }
-          }, [this.$createElement('lah-fa-icon', { props: { icon: 'file-export' }, attrs: { id: 'lah-court-log-search-export-icon-inside' }})]
-        );
+            attrs: { title: '匯出EXCEL' },
+            props: { variant: 'outline-success', size: 'sm', action: 'move-fade-ltr', icon: 'file-excel' },
+            on: { click: this.xlsx }
+        });
+
       },
       createTable(json) {
         return this.$createElement('b-table', {
