@@ -1814,6 +1814,10 @@ if (Vue) {
                         sql: this.sql,
                         responseType: 'blob'
                     }).then(res => {
+                        if (type == "file_sql_txt") {
+                            this.tmpDownload();
+                            return;
+                        }
                         this.$log(this.selected_label + (type == "file_sql_txt" ? ".txt" : ".csv"));
                         let url = window.URL.createObjectURL(new Blob([res.data]));
                         let a = document.createElement('a');
@@ -1836,6 +1840,11 @@ if (Vue) {
                         type: "warning"
                     });
                 }
+            },
+            tmpDownload() {
+                let w = window.open('exports_tmp_txt.php?filename='+this.selected_label);
+                setTimeout(() => w.document.close(), 1000);
+                this.notify({ title: '匯出TXT檔案', message: '<i class="fas fa-check"> 成功</i>', type: "success" });
             },
             popup(e) {
                 this.msgbox({

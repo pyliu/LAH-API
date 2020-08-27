@@ -120,6 +120,7 @@ function zipExports() {
     $dir = opendir($pathdir); 
     $today = date("Y-m-d");
     while($file = readdir($dir)) {
+        if ($file == 'tmp.txt') continue;
         // skip today
         if (stristr($file, $today)) {
             $log->info("Skipping today's log for compression.【${file}】");
