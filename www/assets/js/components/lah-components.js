@@ -784,7 +784,7 @@ if (Vue) {
                     class="no-cache"
                 ></b-form-input>
                 <template v-slot:append>
-                    <b-button @click="query" variant="outline-primary" size="sm" v-b-tooltip="'搜尋使用者'"><i class="fas fa-search"></i></b-button>
+                    <lah-button @click="query" variant="outline-primary" size="sm" v-b-tooltip="'搜尋使用者'" icon="search"></lah-button>
                 </template>
             </b-input-group>
             <div id="usertag_container" class="clearfix overflow-auto" :style="style">
