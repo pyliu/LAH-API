@@ -1784,7 +1784,7 @@ if (Vue) {
                 let opt = $("select.custom-select optgroup option[value='" + val + "']")[0];
                 this.$assert(opt, "找不到選取的 option。", $("select.custom-select optgroup option[value='" + val + "']"));
                 this.selected_label = opt.label;
-                this.$http.post(CONFIG.LOAD_FILE_API_EP, {
+                this.$http.post(CONFIG.API.FILE.LOAD, {
                     type: "load_select_sql",
                     file_name: this.selected
                 }).then(res => {

@@ -85,7 +85,7 @@ if (Vue) {
                         let dt = new Date();
                         this.log_update_time = `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
                         this.log_filename = `log-${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}.log`
-                        this.$http.post(CONFIG.LOAD_FILE_API_EP, {
+                        this.$http.post(CONFIG.API.FILE.LOAD, {
                             type: "load_log",
                             log_filename: this.log_filename,
                             slice_offset: this.count * -1   // get lastest # records
