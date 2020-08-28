@@ -5,7 +5,6 @@ const CONFIG = {
     AP_SVR: "220.1.35.123",
     SCREENSAVER: true,
     SCREENSAVER_TIMER: 15 * 60 * 1000,
-    STATS_JSON_API_EP: "api/stats_json_api.php",
     LOAD_FILE_API_EP: "api/load_file_api.php",
     EXPORT_FILE_API_EP: "api/export_file_api.php",
     API: {

@@ -3856,7 +3856,7 @@ if (Vue) {
                     return;
                 }
                 this.isBusy = true;
-                this.$http.post(CONFIG.STATS_JSON_API_EP, {
+                this.$http.post(CONFIG.API.JSON.STATS, {
                     type: type,
                     date: this.date
                 }).then(res => {
@@ -3908,7 +3908,7 @@ if (Vue) {
             },
             reload_stats_cache(type) {
                 this.isBusy = true;
-                this.$http.post(CONFIG.STATS_JSON_API_EP, {
+                this.$http.post(CONFIG.API.JSON.STATS, {
                     type: type,
                     date: this.date,
                     reload: true
