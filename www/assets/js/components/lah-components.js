@@ -267,11 +267,15 @@ if (Vue) {
                     <lah-transition appear>
                         <b-navbar-nav>
                             <b-nav-item 
-                                v-for="link in links"
+                                v-for="(link, index) in links"
                                 v-show="link.need_admin ? isAdmin || false : true"
                                 :href="Array.isArray(link.url) ? link.url[0] : link.url"
+                                :id="'lah-header-nav-'+index"
                             >
                                 <b-nav-text v-html="link.text" :class="activeCss(link)"></b-nav-text>
+                                <b-popover v-if="subMenu(link)" :target="'lah-header-nav-'+index" triggers="hover focus" placement="bottom" delay="400">
+                                    <div v-for="clink in link.children"><a class="text-decoration-none" :href="Array.isArray(clink.url) ? clink.url[0] : clink.url"><lah-fa-icon :icon="clink.icon">{{clink.text}}</lah-fa-icon></a></div>
+                                </b-popover>
                             </b-nav-item>
                         </b-navbar-nav>
                     </lah-transition>
@@ -297,39 +301,36 @@ if (Vue) {
             active: undefined,
             avatar_badge: false,
             links: [{
-                text: `管理看板`,
+                text: `系管看板`,
                 url: "dashboard.html",
                 icon: "cubes",
-                need_admin: true
-            }, {
-                text: "今日案件",
-                url: ["index.html", "/"],
-                icon: "briefcase",
-                need_admin: false
+                need_admin: true,
+                children: [{
+                    text: "記錄瀏覽",
+                    url: "tasklog.html",
+                    icon: "paw",
+                    need_admin: true
+                }, {
+                    text: `測試`,
+                    url: "test.html",
+                    icon: "tools",
+                    need_admin: true
+                }]
             }, {
                 text: "逾期案件",
                 url: "overdue_reg_cases.html",
                 icon: "calendar-alt",
-                need_admin: false
-            }, /*{
-                text: "繼承應繼分",
-                url: "heir_share.html",
-                icon: "chart-pie",
-                need_admin: false
+                need_admin: false,
+                children: [{
+                    text: "今日案件",
+                    url: ["index.html", "/"],
+                    icon: "briefcase",
+                    need_admin: false
+                }]
             }, {
-                text: "使用者查詢",
-                url: "user.html",
-                icon: "users",
-                need_admin: false
-            },*/ {
                 text: "體溫紀錄",
                 url: "temperature.html",
                 icon: "head-side-mask",
-                need_admin: false
-            }, {
-                text: "信差訊息",
-                url: "message.html",
-                icon: "comments",
                 need_admin: false
             }, {
                 text: `統計看板`,
@@ -340,17 +341,23 @@ if (Vue) {
                 text: `小幫手`,
                 url: "helper.html",
                 icon: "hands-helping",
-                need_admin: false
-            }, {
-                text: "記錄瀏覽",
-                url: "tasklog.html",
-                icon: "paw",
-                need_admin: true
-            }, {
-                text: `測試`,
-                url: "test.html",
-                icon: "tools",
-                need_admin: true
+                need_admin: false,
+                children: [{
+                    text: "信差訊息",
+                    url: "message.html",
+                    icon: "comments",
+                    need_admin: false
+                }, {
+                    text: "繼承應繼分",
+                    url: "heir_share.html",
+                    icon: "chart-pie",
+                    need_admin: false
+                }, {
+                    text: "使用者查詢",
+                    url: "user.html",
+                    icon: "users",
+                    need_admin: false
+                }]
             }]
         }),
         computed: {
@@ -396,8 +403,14 @@ if (Vue) {
                 } else {
                     ret = this.css(link.url);
                 }
-                // store detected active link
-                if (!this.empty(ret)) { this.active = link }
+                if (this.empty(ret)) {
+                    if (Array.isArray(link.children)) {
+                        link.children.forEach(child => this.activeCss(child));
+                    }
+                } else {
+                    // store detected active link
+                    this.active = link
+                }
                 
                 return ret;
             },
@@ -418,8 +431,11 @@ if (Vue) {
                 } else if (this.url == link.url) {
                     this.icon = link.icon;
                     this.leading = link.text;
+                } else if (Array.isArray(link.children)) {
+                    link.children.forEach(child => this.setLeading(child));
                 }
             },
+            subMenu(link) { return !this.empty(link.children) },
             userNotFound: function(input) {
                 this.$store.commit('myip', null);
                 this.$warn(`找不到 ${input} 的使用者資訊，無法顯示目前使用者的卡片。`);
