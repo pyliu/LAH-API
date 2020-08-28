@@ -74,7 +74,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $query_result = $mock ? $this->cache->get('cert_log') : $this->query->getCertLog($_SESSION['section_code'], $_SESSION['numbers']);
         if (!$mock) $this->cache->set('cert_log', $query_result);
 
-        $spreadsheet = IOFactory::load(ROOT_DIR.'/api/xlsx/cert_log_tpl.xlsx');
+        $spreadsheet = IOFactory::load(ROOT_DIR.'/assets/xlsx/cert_log.tpl.xlsx');
         // $spreadsheet = new Spreadsheet();
         $worksheet = $spreadsheet->getActiveSheet();
 
