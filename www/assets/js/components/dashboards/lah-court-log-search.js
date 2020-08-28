@@ -127,7 +127,7 @@ if (Vue) {
           numbers: this.format()
         }).then(res => {
           if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-            let w = window.open(CONFIG.API.XLSX.LANDING);
+            let w = window.open(CONFIG.API.FILE.XLSX);
             setTimeout(() => w.document.close(), 1000);
             this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-check"> 完成</i>', type: "success" });
           } else {

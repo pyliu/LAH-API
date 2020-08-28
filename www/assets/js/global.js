@@ -11,8 +11,16 @@ const CONFIG = {
     EXPORT_FILE_API_EP: "api/export_file_api.php",
     API: {
         XLSX: {
-            CERT_LOG: "api/xlsx/cert_log.php",
             LANDING: "api/xlsx/landing.php"
+        },
+        JSON: {
+            QUERY: "api/query_json_api.php",
+            STATS: "api/stats_json_api.php"
+        },
+        FILE: {
+            LOAD: "api/load_file_api.php",
+            EXPORT: "api/export_file_api.php",
+            XLSX: "api/xlsx/landing.php"
         }
     },
     MOCK_API_EP: "TODO",
