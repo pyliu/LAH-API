@@ -17,9 +17,9 @@ const CONFIG = {
             LOAD: "api/load_file_api.php",
             EXPORT: "api/export_file_api.php",
             XLSX: "api/xlsx/landing.php"
-        }
+        },
+        MOCK:{}
     },
-    MOCK_API_EP: "TODO",
     LAH_ROOT_EVENT: {
         MESSAGE_UNREAD: 'lah::message::unread'
     }
