@@ -65,7 +65,7 @@
                 methods: {
                     download() {
                         let filename = 'testAA';
-                        this.$http.post(CONFIG.EXPORT_FILE_API_EP, {
+                        this.$http.post(CONFIG.API.FILE.EXPORT, {
                             type: 'file_xlsx_test',
                             responseType: 'blob',
                             filename: filename

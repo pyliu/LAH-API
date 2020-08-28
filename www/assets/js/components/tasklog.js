@@ -124,7 +124,7 @@ if (Vue) {
                         let dt = new Date();
                         // e.g. 2020-02-24
                         let date = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))}`;
-                        window.vueApp.download(CONFIG.EXPORT_FILE_API_EP, {
+                        window.vueApp.download(CONFIG.API.FILE.EXPORT, {
                             type: "file_log",
                             date: date,
                             filename: this.log_filename

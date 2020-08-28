@@ -1809,7 +1809,7 @@ if (Vue) {
             download(type) {
                 if (this.validate) {
                     this.isBusy = true;
-                    this.$http.post(CONFIG.EXPORT_FILE_API_EP, {
+                    this.$http.post(CONFIG.API.FILE.EXPORT, {
                         type: type,
                         sql: this.sql,
                         responseType: 'blob'
