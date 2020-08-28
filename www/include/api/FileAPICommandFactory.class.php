@@ -9,7 +9,7 @@ require_once("FileAPIExcelExportCommand.class.php");
 abstract class FileAPICommandFactory {
     public static function getCommand($type) {
         global $log;
-        switch ($_POST["type"]) {
+        switch ($type) {
             case "file_sql_csv":
                 $log->info("輸出CSV檔案");
                 $log->info($_POST["sql"]);
@@ -22,8 +22,8 @@ abstract class FileAPICommandFactory {
                 $log->info("輸出LOG檔案");
                 $log->info($_POST["date"]);
                 return new FileAPILogExportCommand($_POST["date"]);
-            case "file_xlsx_test":
-                $log->info("輸出XLSX測試檔案");
+            case "file_xlsx":
+                $log->info("輸出XLSX檔案");
                 return new FileAPIExcelExportCommand();
             default:
                 return new FileAPINotSupportCommand();

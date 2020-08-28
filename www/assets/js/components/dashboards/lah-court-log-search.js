@@ -122,13 +122,14 @@ if (Vue) {
         this.isBusy = true;
         this.$http.post(CONFIG.QUERY_JSON_API_EP, {
           type: 'xlsx_params',
+          xlsx_type: 'cert_log',
           section_code: this.section_code,
           numbers: this.format()
         }).then(res => {
           if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-            let w = window.open(CONFIG.API.XLSX.CERT_LOG);
+            let w = window.open(CONFIG.API.XLSX.LANDING);
             setTimeout(() => w.document.close(), 1000);
-            this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-check"> 成功</i>', type: "success" });
+            this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-check"> 完成</i>', type: "success" });
           } else {
             let err = this.responseMessage(res.data.status);
             let message = `${err} - ${res.data.status}`;

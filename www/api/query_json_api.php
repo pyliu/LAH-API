@@ -1428,8 +1428,9 @@ switch ($_POST["type"]) {
 			}
 			return true;
 		}
-		$flag = $mock ? $cache->get('xlsx_params') : setSessions($_POST);
-		$cache->set('xlsx_params', $flag);
+		$flag = setSessions($_POST);
+		// $flag = $mock ? $cache->get('xlsx_params') : setSessions($_POST);
+		// $cache->set('xlsx_params', $flag);
 		if ($flag) {
 			$json = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
