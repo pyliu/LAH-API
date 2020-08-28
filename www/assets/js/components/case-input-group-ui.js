@@ -98,7 +98,7 @@ if (Vue) {
                 }
 
                 this.isBusy = true;
-                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                this.$http.post(CONFIG.API.JSON.QUERY, {
                     "type": "max",
                     "year": year,
                     "code": code
@@ -201,7 +201,7 @@ if (Vue) {
                     this.restoreCodesByJSON(json);
                 } else {
                     this.isBusy = true;
-                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                    this.$http.post(CONFIG.API.JSON.QUERY, {
                         type: 'reg_code'
                     }).then(res => {
                         this.restoreCodesByJSON(res.data);

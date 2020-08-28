@@ -44,7 +44,7 @@ if (Vue) {
             check: function(e) {
                 if (this.validate) {
                     this.isBusy = true;
-                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                    this.$http.post(CONFIG.API.JSON.QUERY, {
                         type: "diff_xcase",
                         id: this.id
                     }).then(res => {
@@ -141,7 +141,7 @@ if (Vue) {
                     let td = $(`#sync_column_${column}`).parent();
                     $(`#sync_column_${column}`).remove();
                     this.isBusy = true;
-                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                    this.$http.post(CONFIG.API.JSON.QUERY, {
                         type: "sync_xcase_column",
                         id: id,
                         column: column
@@ -164,7 +164,7 @@ if (Vue) {
                     this.$assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
                     $("#sync_x_case_confirm_button").remove();
                     this.isBusy = true;
-                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                    this.$http.post(CONFIG.API.JSON.QUERY, {
                         type: "sync_xcase",
                         id: id
                     }).then(res => {
@@ -194,7 +194,7 @@ if (Vue) {
                     this.$assert(id != '' && id != undefined && id != null, "the remote case id should not be empty");
                     $("#inst_x_case_confirm_button").remove();
                     this.isBusy = true;
-                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                    this.$http.post(CONFIG.API.JSON.QUERY, {
                         type: "inst_xcase",
                         id: id
                     }).then(res => {

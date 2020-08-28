@@ -83,7 +83,7 @@ if (Vue) {
             },
             queryByDate: function(e) {
                 this.isBusy = true;
-                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                this.$http.post(CONFIG.API.JSON.QUERY, {
                     type: "expaa",
                     qday: this.query_date,
                     list_mode: true
@@ -148,7 +148,7 @@ if (Vue) {
             obsolete: function(e) {
                 // query first then do the creation
                 this.isBusy = true;
-                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                this.$http.post(CONFIG.API.JSON.QUERY, {
                     type: "get_dummy_ob_fees"
                 }).then(res => {
                     // use the fee-obsolete-mgt sub-component to do the addition
@@ -569,7 +569,7 @@ if (Vue) {
                         
                         showConfirm("確定要新增一個新的假資料以供作廢之用？", () => {
                             this.isBusy = true;
-                            this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                            this.$http.post(CONFIG.API.JSON.QUERY, {
                                 type: "add_dummy_ob_fees",
                                 today: this.today,
                                 pc_number: this.next_pc_number,
@@ -641,7 +641,7 @@ if (Vue) {
             },
             doUpdate: function(e) {
                 this.isBusy = true;
-                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                this.$http.post(CONFIG.API.JSON.QUERY, {
                     type: "expaa_AA100_update",
                     date: this.date,
                     number: this.pc_number,
@@ -697,7 +697,7 @@ if (Vue) {
             },
             doUpdate: function(e) {
                 this.isBusy = true;
-                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                this.$http.post(CONFIG.API.JSON.QUERY, {
                     type: "expaa_AA08_update",
                     date: this.date,
                     number: this.pc_number,
@@ -754,7 +754,7 @@ if (Vue) {
             },
             doUpdate: function(e) {
                 this.isBusy = true;
-                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                this.$http.post(CONFIG.API.JSON.QUERY, {
                     type: "expaa_AA09_update",
                     date: this.date,
                     number: this.pc_number,
@@ -832,7 +832,7 @@ if (Vue) {
         },
         methods: {
             fetchEXPAA: function() {
-                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                this.$http.post(CONFIG.API.JSON.QUERY, {
                     type: "expaa",
                     qday: this.date,
                     num: this.pc_number,
@@ -847,7 +847,7 @@ if (Vue) {
             },
             fetchEXPAC: function() {
                 // EXPAC data fetch
-                this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                this.$http.post(CONFIG.API.JSON.QUERY, {
                     type: "expac",
                     year: this.expac_year,
                     num: this.pc_number
@@ -944,7 +944,7 @@ if (Vue) {
                     update: function(e, idx) {
                         let record = this.expac_list[idx];
                         this.isBusy = true;
-                        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                        this.$http.post(CONFIG.API.JSON.QUERY, {
                             type: "mod_expac",
                             year: record["AC25"],
                             num: record["AC04"],
@@ -1009,7 +1009,7 @@ if (Vue) {
                         showConfirm(message, () => {
                             this.isBusy = true;
         
-                            this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                            this.$http.post(CONFIG.API.JSON.QUERY, {
                                 type: "fix_easycard",
                                 qday: qday,
                                 pc_num: pc_number

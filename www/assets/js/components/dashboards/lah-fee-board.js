@@ -194,7 +194,7 @@ if (Vue) {
             this.isBusy = true;
             this.date_obj = new Date();
             this.query_date = (this.date_obj.getFullYear() - 1911) + ("0" + (this.date_obj.getMonth()+1)).slice(-2) + ("0" + this.date_obj.getDate()).slice(-2);
-            this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+            this.$http.post(CONFIG.API.JSON.QUERY, {
                 type: "expaa",
                 qday: this.query_date,
                 list_mode: true

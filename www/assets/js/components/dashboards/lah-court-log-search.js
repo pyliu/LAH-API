@@ -120,7 +120,7 @@ if (Vue) {
       },
       xlsx() {
         this.isBusy = true;
-        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+        this.$http.post(CONFIG.API.JSON.QUERY, {
           type: 'xlsx_params',
           xlsx_type: 'cert_log',
           section_code: this.section_code,
@@ -182,7 +182,7 @@ if (Vue) {
       },
       query() {
         this.isBusy = true;
-        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+        this.$http.post(CONFIG.API.JSON.QUERY, {
           type: 'cert_log',
           section_code: this.section_code,
           numbers: this.format()
@@ -263,7 +263,7 @@ if (Vue) {
           this.prepare(json);
         } else {
           this.isBusy = true;
-          this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+          this.$http.post(CONFIG.API.JSON.QUERY, {
               type: 'ralid',
               text: ''
           }).then(res => {

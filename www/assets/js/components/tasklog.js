@@ -132,7 +132,7 @@ if (Vue) {
                     },
                     zip: function(e) {
                         this.isBusy = true;
-                        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                        this.$http.post(CONFIG.API.JSON.QUERY, {
                             type: 'zip_log'
                         }).then(res => {
                             this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
@@ -240,7 +240,7 @@ if (Vue) {
                         let dt = new Date();
                         let now = `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${(dt.getDate().toString().padStart(2, '0'))} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
                         
-                        this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                        this.$http.post(CONFIG.API.JSON.QUERY, {
                             type: "watchdog"
                         }).then(res => {
                             // normal success res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL

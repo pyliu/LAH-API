@@ -44,7 +44,7 @@ if (Vue) {
                     // prepare post params
                     let id = this.id;
                     this.isBusy = true;
-                    this.$http.post(CONFIG.QUERY_JSON_API_EP, {
+                    this.$http.post(CONFIG.API.JSON.QUERY, {
                         type: "reg_case",
                         id: id
                     }).then(res => {

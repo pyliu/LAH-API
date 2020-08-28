@@ -28,7 +28,7 @@ if (Vue) {
                 this.json = json;
                 if (this.empty(this.json)) {
                     this.$http.post(
-                        CONFIG.QUERY_JSON_API_EP,
+                        CONFIG.API.JSON.QUERY,
                         { type: 'crsms', id: this.pid }
                     ).then(response => {
                         // on success
@@ -92,7 +92,7 @@ if (Vue) {
         },
         created() {
             this.$http.post(
-                CONFIG.QUERY_JSON_API_EP,
+                CONFIG.API.JSON.QUERY,
                 { type: 'cmsms', id: this.pid }
             ).then(response => {
                 // on success
