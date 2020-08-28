@@ -47,14 +47,14 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         // readfile($expfile);
     }
 
-    private function write_export_tmp_file(&$spreadsheet, $filename) {
+    private function write_export_tmp_file(&$spreadsheet, $filename = 'tmp.xlsx') {
         // also write a copy to export folder
         $writer = new Xlsx($spreadsheet);
         $writer->save(ROOT_DIR.'/exports/'.$filename);
         zipExports();
     }
 
-    private function write_php_output(&$spreadsheet, $filename) {
+    private function write_php_output(&$spreadsheet, $filename = 'tmp.xlsx') {
         ob_end_clean();
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="'.$filename.'"');
