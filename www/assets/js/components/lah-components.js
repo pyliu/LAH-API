@@ -270,9 +270,8 @@ if (Vue) {
                                 v-for="(link, index) in links"
                                 v-show="link.need_admin ? isAdmin || false : true"
                                 :href="Array.isArray(link.url) ? link.url[0] : link.url"
-                                :id="'lah-header-nav-'+index"
                             >
-                                <b-nav-text v-html="link.text" :class="activeCss(link)"></b-nav-text>
+                                <b-nav-text v-html="link.text" :class="activeCss(link)" :id="'lah-header-nav-'+index"></b-nav-text>
                                 <b-popover v-if="subMenu(link)" :target="'lah-header-nav-'+index" triggers="hover focus" placement="bottom" delay="400">
                                     <div v-for="clink in link.children"><a class="text-decoration-none" :href="Array.isArray(clink.url) ? clink.url[0] : clink.url"><lah-fa-icon :icon="clink.icon">{{clink.text}}</lah-fa-icon></a></div>
                                 </b-popover>
@@ -404,6 +403,7 @@ if (Vue) {
                     ret = this.css(link.url);
                 }
                 if (this.empty(ret)) {
+                    // recursive checking
                     if (Array.isArray(link.children)) {
                         link.children.forEach(child => this.activeCss(child));
                     }
@@ -432,6 +432,7 @@ if (Vue) {
                     this.icon = link.icon;
                     this.leading = link.text;
                 } else if (Array.isArray(link.children)) {
+                    // recursive down to check children
                     link.children.forEach(child => this.setLeading(child));
                 }
             },
