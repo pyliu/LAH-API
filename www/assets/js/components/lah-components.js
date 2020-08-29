@@ -268,12 +268,14 @@ if (Vue) {
                         <b-navbar-nav>
                             <b-nav-item 
                                 v-for="(link, index) in links"
-                                v-show="link.need_admin ? isAdmin || false : true"
+                                v-if="link.need_admin ? isAdmin || false : true"
                                 :href="Array.isArray(link.url) ? link.url[0] : link.url"
+                                @mouseenter="animate($event)"
                             >
                                 <b-nav-text v-html="link.text" :class="activeCss(link)" :id="'lah-header-nav-'+index"></b-nav-text>
-                                <b-popover v-if="subMenu(link)" :target="'lah-header-nav-'+index" triggers="hover focus" placement="bottom" delay="400">
-                                    <div v-for="clink in link.children"><a class="text-decoration-none" :href="Array.isArray(clink.url) ? clink.url[0] : clink.url"><lah-fa-icon :icon="clink.icon">{{clink.text}}</lah-fa-icon></a></div>
+                                <b-popover v-if="subMenu(link)" :target="'lah-header-nav-'+index" triggers="hover" placement="bottom" delay="400" class="small">
+                                    <div v-for="(clink, cindex) in link.children" class="m-2" @mouseenter="animate($event)"><a class="text-decoration-none" :href="Array.isArray(clink.url) ? clink.url[0] : clink.url"><lah-fa-icon :icon="clink.icon">{{clink.text}}</lah-fa-icon></a></div>
+                                    <template v-slot:title><lah-fa-icon icon="angle-double-down">{{link.text}}</lah-fa-icon></template>
                                 </b-popover>
                             </b-nav-item>
                         </b-navbar-nav>
@@ -436,6 +438,10 @@ if (Vue) {
                     link.children.forEach(child => this.setLeading(child));
                 }
             },
+            animate(e) {
+                // add pulse effect for the links
+                this.animated(e.target, {name: "pulse"});
+            },
             subMenu(link) { return !this.empty(link.children) },
             userNotFound: function(input) {
                 this.$store.commit('myip', null);
@@ -490,9 +496,6 @@ if (Vue) {
         },
         mounted() {
             this.links.forEach(this.setLeading);
-            // add pulse effect for the nav-item
-            let that = this;
-            $(".nav-item").on("mouseenter", function(e) { that.animated(this, {name: "pulse"}); });
             this.checkAuthority();
         }
     });
