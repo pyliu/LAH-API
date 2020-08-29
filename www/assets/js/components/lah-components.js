@@ -4079,7 +4079,7 @@ if (Vue) {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         // second param usage => e.target.title to get the title
                         this.open(CONFIG.API.FILE.XLSX, {target:{title:'下載XLSX'}});
-                        setTimeout(closeModal, 1000);
+                        setTimeout(closeModal, 3000);
                         this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-check"> 後端作業完成</i>', type: "success" });
                     } else {
                         let err = this.responseMessage(res.data.status);
