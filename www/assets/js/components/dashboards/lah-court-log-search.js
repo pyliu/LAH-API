@@ -127,6 +127,7 @@ if (Vue) {
           numbers: this.format()
         }).then(res => {
           if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+            // second param usage is e.target.title to get the title
             this.open(CONFIG.API.FILE.XLSX, {target:{title:'下載XLSX'}});
             // let w = window.open(CONFIG.API.FILE.XLSX);
             // setTimeout(() => w.document.close(), 1000);

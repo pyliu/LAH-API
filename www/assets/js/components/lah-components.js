@@ -4065,7 +4065,51 @@ if (Vue) {
                             this.notify({ message: '本項目未支援取得詳細列表功能', type: "warning" })
                     }
                 } else {
+                    this.$log(item.category);
                     this.xhr('reg_reason_cases_by_month', item.text, item.id);
+                }
+            },
+            xlsx_export(item) {
+                this.isBusy = true;
+                this.$http.post(CONFIG.API.JSON.QUERY, {
+                    type: 'xlsx_params',
+                    xlsx_type: 'stats_export',
+                    xlsx_item: Object.assign({query_month: this.date}, item)
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        // second param usage => e.target.title to get the title
+                        this.open(CONFIG.API.FILE.XLSX, {target:{title:'下載XLSX'}});
+                        setTimeout(closeModal, 5000);
+                        this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-check"> 後端作業完成</i>', type: "success" });
+                    } else {
+                        let err = this.responseMessage(res.data.status);
+                        let message = `${err} - ${res.data.status}`;
+                        this.$warn(`紀錄 XLSX 參數失敗: ${message}`);
+                        this.alert({ title: '紀錄 XLSX 參數', message: message, type: "danger" });
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            },
+            xlsx(item) {
+                // item.id is reg reason code
+                switch (item.category) {
+                    case "stats_court":
+                    case "stats_reg_fix":
+                    case "stats_reg_reject":
+                    case "stats_refund":
+                    case "stats_sur_rain":
+                    case "stats_reg_remote":
+                    case "stats_reg_subcase":
+                    case "stats_regf":
+                    case "stats_reg_reason":
+                        this.xlsx_export(item);
+                        break;
+                    default:
+                        this.$warn("無分類代碼，無法匯出資料。", item);
+                        this.notify({ message: '本項目未支援匯出XLSX功能', type: "warning" })
                 }
             },
             sync_data_count(title, qry_data) {
@@ -4078,9 +4122,6 @@ if (Vue) {
                         this.reload_stats_cache(element.category);
                     });
                 }
-            },
-            xlsx(item) {
-                this.$log(item);
             }
         },
         mounted() {

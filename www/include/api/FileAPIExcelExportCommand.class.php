@@ -2,6 +2,7 @@
 require_once(dirname(dirname(__FILE__))."/init.php");
 require_once(ROOT_DIR."/include/Cache.class.php");
 require_once(ROOT_DIR."/include/Query.class.php");
+require_once(ROOT_DIR."/include/RegCaseData.class.php");
 require_once(ROOT_DIR.'/vendor/autoload.php');
 require_once("FileAPICommand.class.php");
 
@@ -12,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 class FileAPIExcelExportCommand extends FileAPICommand {
     private $query;
     private $cache;
+    private $mock_mode;
     private $type;
 
     private function test() {
@@ -69,10 +71,9 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         // from init.php
         global $log, $today;
 
-        $mock = SYSTEM_CONFIG["MOCK_MODE"];
-        if ($mock) $log->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！【cert_log】");
-        $query_result = $mock ? $this->cache->get('cert_log') : $this->query->getCertLog($_SESSION['section_code'], $_SESSION['numbers']);
-        if (!$mock) $this->cache->set('cert_log', $query_result);
+        if ($this->mock_mode) $log->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！【cert_log】");
+        $query_result = $this->mock_mode ? $this->cache->get('cert_log') : $this->query->getCertLog($_SESSION['section_code'], $_SESSION['numbers']);
+        if (!$this->mock_mode) $this->cache->set('cert_log', $query_result);
 
         $spreadsheet = IOFactory::load(ROOT_DIR.'/assets/xlsx/cert_log.tpl.xlsx');
         // $spreadsheet = new Spreadsheet();
@@ -110,10 +111,136 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $this->write_php_output($spreadsheet, $filename);
     }
 
+    private function stats_export_reg_reason(&$xlsx_item) {
+        // from init.php
+        global $log, $today;
+        if (empty($xlsx_item["query_month"])) {
+			$xlsx_item["query_month"] = substr($today, 0, 5);
+		}
+		$reason_code = $xlsx_item['id'];
+		$query_month = $xlsx_item['query_month'];
+		$log->info("匯出登記案件 BY MONTH【${reason_code}, ${query_month}】");
+		$rows = $this->mock_mode ? $this->cache->get('reg_reason_cases_by_month') : $this->query->queryReasonCasesByMonth($reason_code, $query_month);
+        if (!$this->mock_mode) $this->cache->set('reg_reason_cases_by_month', $rows);
+        
+        $log->info('查到 '.count($rows).' 筆資料');
+        //$log->info(print_r($rows, true));
+        $baked = [];
+        foreach ($rows as $row) {
+            $data = new RegCaseData($row);
+            $baked[] = $data->getBakedData();
+        }
+
+        //$_SESSION['xlsx_item'] => Array ( [query_month] => 10907 [id] => 67 [text] => 拍賣 [count] => 21 [category] => stats_reg_reason )
+        $spreadsheet = IOFactory::load(ROOT_DIR.'/assets/xlsx/stats_reg_reason.xl.tpl.xlsx');
+        $worksheet = $spreadsheet->getActiveSheet();
+
+        $row_num = 1;
+        foreach( $baked as $index => $row ) {
+            $row_num = $index + 3;  // template has the header and title row, so add 3
+            $worksheet->setCellValueExplicit(
+                'A'.$row_num,
+                $row['收件字號'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+            $worksheet->setCellValueExplicit(
+                'B'.$row_num,
+                $row['收件時間'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+            $worksheet->setCellValueExplicit(
+                'C'.$row_num,
+                $row['登記原因'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+            $worksheet->setCellValueExplicit(
+                'D'.$row_num,
+                $row['辦理情形'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+            $worksheet->setCellValueExplicit(
+                'E'.$row_num,
+                $row['收件人員'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+            $worksheet->setCellValueExplicit(
+                'F'.$row_num,
+                $row['作業人員'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+            $worksheet->setCellValueExplicit(
+                'G'.$row_num,
+                $row['初審人員'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+            $worksheet->setCellValueExplicit(
+                'H'.$row_num,
+                $row['複審人員'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+            $worksheet->setCellValueExplicit(
+                'I'.$row_num,
+                $row['准登人員'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+            $worksheet->setCellValueExplicit(
+                'J'.$row_num,
+                $row['登錄人員'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+            $worksheet->setCellValueExplicit(
+                'K'.$row_num,
+                $row['校對人員'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+            $worksheet->setCellValueExplicit(
+                'L'.$row_num,
+                $row['結案人員'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+            $worksheet->setCellValueExplicit(
+                'M'.$row_num,
+                $row['結案狀態'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+        }
+
+        $spreadsheet->getProperties()
+            ->setCreator("地政WEB版輔助系統")
+            ->setLastModifiedBy("地政WEB版輔助系統")
+            ->setTitle("地政系統WEB版每月登記案件匯出")
+            ->setSubject("地政系統WEB版每月登記案件匯出")
+            ->setDescription(
+                "document for Office 2007 XLSX, generated by PHPSpreadsheet classes."
+            )
+            ->setKeywords("office 2007 openxml php xlsx log cert")
+            ->setCategory("export");
+
+        $filename = $today.'_'.$query_month.'_'.$xlsx_item['text'].'_'.$xlsx_item['id'].'.xlsx';
+        $this->write_export_tmp_file($spreadsheet, $filename);
+        $this->write_php_output($spreadsheet, $filename);
+    }
+    
+    private function stats_export() {
+        // from init.php
+        global $log;
+        // $_SESSION['xlsx_item'] => Array ( [query_month] => 10907 [id] => 67 [text] => 拍賣 [count] => 21 [category] => stats_reg_reason )
+        $type = $_SESSION["xlsx_item"]["category"];
+        switch ($type) {
+            case "stats_reg_reason":
+                $this->stats_export_reg_reason($_SESSION["xlsx_item"]);
+                break;
+            default:
+                echo "<span style='color: red; font-weight: bold;'>※</span> 不支援的統計資料型態。【${type}】";
+                $log->warning(__METHOD__.":不支援的統計資料型態。【${type}】");
+        }
+    }
+
     function __construct() {
         $this->query = new Query();
         $this->cache = new Cache();
         $this->type = $_SESSION['xlsx_type'] ?? false;
+        $this->mock_mode = SYSTEM_CONFIG["MOCK_MODE"];
     }
 
     function __destruct() {}
@@ -124,6 +251,9 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         switch($this->type) {
             case 'cert_log':
                 $this->cert_log();
+                break;
+            case 'stats_export':
+                $this->stats_export();
                 break;
             default:
                 $log->error('xlsx_type is not set, can not output xlsx file! ['.print_r($_SESSION, true).']');
