@@ -273,7 +273,7 @@ if (Vue) {
                                 @mouseenter="animate($event)"
                             >
                                 <b-nav-text v-html="link.text" :class="activeCss(link)" :id="'lah-header-nav-'+index"></b-nav-text>
-                                <b-popover v-if="subMenu(link)" :target="'lah-header-nav-'+index" triggers="hover" placement="bottom" delay="400" class="small">
+                                <b-popover v-if="subMenu(link)" :target="'lah-header-nav-'+index" triggers="hover" placement="bottom" delay="400">
                                     <div v-for="(clink, cindex) in link.children" class="m-2" @mouseenter="animate($event)"><a class="text-decoration-none" :href="Array.isArray(clink.url) ? clink.url[0] : clink.url"><lah-fa-icon :icon="clink.icon">{{clink.text}}</lah-fa-icon></a></div>
                                     <template v-slot:title><lah-fa-icon icon="angle-double-down">{{link.text}}</lah-fa-icon></template>
                                 </b-popover>
@@ -440,7 +440,7 @@ if (Vue) {
             },
             animate(e) {
                 // add pulse effect for the links
-                this.animated(e.target, {name: "pulse"});
+                this.animated(e.target, this.fri_noon ? {} : {name: "pulse"});
             },
             subMenu(link) { return !this.empty(link.children) },
             userNotFound: function(input) {
