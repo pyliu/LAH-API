@@ -297,6 +297,22 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $this->write_reg_col_meta_output($rows, $xlsx_item, "每月登記駁回案件");
     }
 
+    private function stats_export_court(&$xlsx_item) {
+        global $log;
+
+        if (empty($xlsx_item["query_month"])) {
+			$xlsx_item["query_month"] = substr($today, 0, 5);
+        }
+        
+        $query_month = $xlsx_item["query_month"];
+		$log->info("匯出登記法院囑託案件 BY MONTH【${query_month}】");
+		$rows = $this->mock_mode ? $this->cache->get('reg_court_cases_by_month') : $this->query->queryCourtCasesByMonth($query_month);
+		if (!$this->mock_mode) $this->cache->set('reg_court_cases_by_month', $rows);
+
+        $xlsx_item['tpl'] = ROOT_DIR.'/assets/xlsx/stats_court.tpl.xlsx';
+        $this->write_reg_col_meta_output($rows, $xlsx_item, "每月登記法院囑託案件");
+    }
+
     private function stats_export_reg_subcase(&$xlsx_item) {
         // from init.php
         global $log, $today;
@@ -360,6 +376,48 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $this->write_meta_output($spreadsheet, $xlsx_item, "每月外國人地權登記統計檔");
     }
 
+    private function stats_export_sur_rain(&$xlsx_item) {
+        // from init.php
+        global $log, $today;
+        if (empty($xlsx_item["query_month"])) {
+			$xlsx_item["query_month"] = substr($today, 0, 5);
+        }
+        
+        $query_month = $xlsx_item["query_month"];
+		$log->info("匯出測量因雨延期案件 BY MONTH【${query_month}】");
+		$rows = $this->mock_mode ? $this->cache->get('sur_rain_cases_by_month') : $this->query->querySurRainCasesByMonth($query_month);
+		if (!$this->mock_mode) $this->cache->set('sur_rain_cases_by_month', $rows);
+        
+        $log->info('查到 '.count($rows).' 筆資料');
+        
+        $spreadsheet = IOFactory::load(ROOT_DIR.'/assets/xlsx/stats_sur_rain.tpl.xlsx');
+        $worksheet = $spreadsheet->getActiveSheet();
+
+        $this->write_col_data($worksheet, $rows);
+        $this->write_meta_output($spreadsheet, $xlsx_item, "每月測量因雨延期案件");
+    }
+
+    private function stats_export_refund(&$xlsx_item) {
+        // from init.php
+        global $log, $today;
+        if (empty($xlsx_item["query_month"])) {
+			$xlsx_item["query_month"] = substr($today, 0, 5);
+        }
+        
+        $query_month = $xlsx_item["query_month"];
+		$log->info("匯出退費案件 BY MONTH【${query_month}】");
+		$rows = $this->mock_mode ? $this->cache->get('expba_refund_cases_by_month') : $this->query->queryEXPBARefundCasesByMonth($query_month);
+		if (!$this->mock_mode) $this->cache->set('expba_refund_cases_by_month', $rows);
+        
+        $log->info('查到 '.count($rows).' 筆資料');
+        
+        $spreadsheet = IOFactory::load(ROOT_DIR.'/assets/xlsx/stats_refund.tpl.xlsx');
+        $worksheet = $spreadsheet->getActiveSheet();
+
+        $this->write_col_data($worksheet, $rows);
+        $this->write_meta_output($spreadsheet, $xlsx_item, "每月退費案件");
+    }
+
     private function stats_export_factory() {
         // from init.php
         global $log;
@@ -383,6 +441,15 @@ class FileAPIExcelExportCommand extends FileAPICommand {
                 break;
             case "stats_reg_reject":
                 $this->stats_export_reg_reject($_SESSION["xlsx_item"]);
+                break;
+            case "stats_sur_rain":
+                $this->stats_export_sur_rain($_SESSION["xlsx_item"]);
+                break;
+            case "stats_refund":
+                $this->stats_export_refund($_SESSION["xlsx_item"]);
+                break;
+            case "stats_court":
+                $this->stats_export_court($_SESSION["xlsx_item"]);
                 break;
             default:
                 echo "<span style='color: red; font-weight: bold;'>※</span> 不支援的統計資料型態。【${type}】";
