@@ -104,8 +104,17 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $this->write_php_output($spreadsheet, $filename);
     }
 
-    private function write_reg_col_meta_output(&$baked, &$xlsx_item, $title) {
-        global $today;
+    private function write_reg_col_meta_output(&$rows, &$xlsx_item, $title) {
+        // from init.php
+        global $log, $today;
+
+        $log->info('查到 '.count($rows).' 筆資料');
+        $baked = [];
+        foreach ($rows as $row) {
+            $data = new RegCaseData($row);
+            $baked[] = $data->getBakedData();
+        }
+
         $spreadsheet = IOFactory::load($xlsx_item['tpl']);
         $worksheet = $spreadsheet->getActiveSheet();
         $row_num = 1;
@@ -240,30 +249,25 @@ class FileAPIExcelExportCommand extends FileAPICommand {
 
     private function stats_export_reg_reason(&$xlsx_item) {
         // from init.php
-        global $log, $today;
+        global $log;
+        
         if (empty($xlsx_item["query_month"])) {
 			$xlsx_item["query_month"] = substr($today, 0, 5);
-		}
+        }
+        
 		$reason_code = $xlsx_item['id'];
 		$query_month = $xlsx_item['query_month'];
 		$log->info("匯出登記案件 BY MONTH【${reason_code}, ${query_month}】");
 		$rows = $this->mock_mode ? $this->cache->get('reg_reason_cases_by_month') : $this->query->queryReasonCasesByMonth($reason_code, $query_month);
         if (!$this->mock_mode) $this->cache->set('reg_reason_cases_by_month', $rows);
         
-        $log->info('查到 '.count($rows).' 筆資料');
-        //$log->info(print_r($rows, true));
-        $baked = [];
-        foreach ($rows as $row) {
-            $data = new RegCaseData($row);
-            $baked[] = $data->getBakedData();
-        }
         $xlsx_item['tpl'] = ROOT_DIR.'/assets/xlsx/stats_reg_reason.xl.tpl.xlsx';
-        $this->write_reg_col_meta_output($baked, $xlsx_item, "每月登記案件");
+        $this->write_reg_col_meta_output($rows, $xlsx_item, "每月登記案件");
     }
 
     private function stats_export_reg_fix(&$xlsx_item) {
-        // from init.php
-        global $log, $today;
+        global $log;
+
         if (empty($xlsx_item["query_month"])) {
 			$xlsx_item["query_month"] = substr($today, 0, 5);
         }
@@ -273,15 +277,24 @@ class FileAPIExcelExportCommand extends FileAPICommand {
 		$rows = $this->mock_mode ? $this->cache->get('reg_fix_cases_by_month') : $this->query->queryFixCasesByMonth($query_month);
 		if (!$this->mock_mode) $this->cache->set('reg_fix_cases_by_month', $rows);
         
-        $log->info('查到 '.count($rows).' 筆資料');
-        $baked = [];
-        foreach ($rows as $row) {
-            $data = new RegCaseData($row);
-            $baked[] = $data->getBakedData();
-        }
-
         $xlsx_item['tpl'] = ROOT_DIR.'/assets/xlsx/stats_reg_fix.tpl.xlsx';
-        $this->write_reg_col_meta_output($baked, $xlsx_item, "每月登記補正案件");
+        $this->write_reg_col_meta_output($rows, $xlsx_item, "每月登記補正案件");
+    }
+
+    private function stats_export_reg_reject(&$xlsx_item) {
+        global $log;
+
+        if (empty($xlsx_item["query_month"])) {
+			$xlsx_item["query_month"] = substr($today, 0, 5);
+        }
+        
+        $query_month = $xlsx_item["query_month"];
+		$log->info("匯出登記駁回案件 BY MONTH【${query_month}】");
+		$rows = $this->mock_mode ? $this->cache->get('reg_reject_cases_by_month') : $this->query->queryRejectCasesByMonth($query_month);
+		if (!$this->mock_mode) $this->cache->set('reg_reject_cases_by_month', $rows);
+
+        $xlsx_item['tpl'] = ROOT_DIR.'/assets/xlsx/stats_reg_reject.tpl.xlsx';
+        $this->write_reg_col_meta_output($rows, $xlsx_item, "每月登記駁回案件");
     }
 
     private function stats_export_reg_subcase(&$xlsx_item) {
@@ -367,6 +380,9 @@ class FileAPIExcelExportCommand extends FileAPICommand {
                 break;
             case "stats_reg_fix":
                 $this->stats_export_reg_fix($_SESSION["xlsx_item"]);
+                break;
+            case "stats_reg_reject":
+                $this->stats_export_reg_reject($_SESSION["xlsx_item"]);
                 break;
             default:
                 echo "<span style='color: red; font-weight: bold;'>※</span> 不支援的統計資料型態。【${type}】";
