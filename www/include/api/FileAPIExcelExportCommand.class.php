@@ -104,7 +104,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $this->write_php_output($spreadsheet, $filename);
     }
 
-    private function write_reg_col_meta_output(&$rows, &$xlsx_item, $title) {
+    private function write_reg_case_xlsx(&$rows, &$xlsx_item, $title) {
         // from init.php
         global $log, $today;
 
@@ -222,7 +222,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         if (!$this->mock_mode) $this->cache->set('reg_reason_cases_by_month', $rows);
         
         $xlsx_item['tpl'] = ROOT_DIR.'/assets/xlsx/stats_reg_reason.xl.tpl.xlsx';
-        $this->write_reg_col_meta_output($rows, $xlsx_item, "每月登記案件");
+        $this->write_reg_case_xlsx($rows, $xlsx_item, "每月登記案件");
     }
 
     private function stats_export_reg_fix(&$xlsx_item) {
@@ -238,7 +238,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
 		if (!$this->mock_mode) $this->cache->set('reg_fix_cases_by_month', $rows);
         
         $xlsx_item['tpl'] = ROOT_DIR.'/assets/xlsx/stats_reg_fix.tpl.xlsx';
-        $this->write_reg_col_meta_output($rows, $xlsx_item, "每月登記補正案件");
+        $this->write_reg_case_xlsx($rows, $xlsx_item, "每月登記補正案件");
     }
 
     private function stats_export_reg_reject(&$xlsx_item) {
@@ -254,7 +254,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
 		if (!$this->mock_mode) $this->cache->set('reg_reject_cases_by_month', $rows);
 
         $xlsx_item['tpl'] = ROOT_DIR.'/assets/xlsx/stats_reg_reject.tpl.xlsx';
-        $this->write_reg_col_meta_output($rows, $xlsx_item, "每月登記駁回案件");
+        $this->write_reg_case_xlsx($rows, $xlsx_item, "每月登記駁回案件");
     }
 
     private function stats_export_court(&$xlsx_item) {
@@ -270,7 +270,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
 		if (!$this->mock_mode) $this->cache->set('reg_court_cases_by_month', $rows);
 
         $xlsx_item['tpl'] = ROOT_DIR.'/assets/xlsx/stats_court.tpl.xlsx';
-        $this->write_reg_col_meta_output($rows, $xlsx_item, "每月登記法院囑託案件");
+        $this->write_reg_case_xlsx($rows, $xlsx_item, "每月登記法院囑託案件");
     }
 
     private function stats_export_reg_subcase(&$xlsx_item) {
