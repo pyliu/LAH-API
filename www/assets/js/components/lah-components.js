@@ -3762,7 +3762,7 @@ if (Vue) {
     });
 
     Vue.component("lah-stats-dashboard", {
-        template: `<div>
+        template: `<div>a
             <b-card-group v-if="all" columns>
                 <transition-group name="list">
                     <b-card no-body v-for="(item, idx) in items" :key="'stats_'+idx" :border-variant="border_var(item)">
