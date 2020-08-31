@@ -601,6 +601,7 @@ if (Vue) {
         template: `<b-button
             :variant="variant"
             :size="size"
+            :pill="pill"
             @mouseenter="mouseenter"
             @mouseleave="mouseleave"
             @blur="mouseleave"
@@ -613,7 +614,8 @@ if (Vue) {
             size: { type: String, default: 'sm'},
             icon: { type: String, default: 'exclamation-triangle'},
             action: { type: String, default: undefined},
-            click: { type: Function, default: console.log }
+            click: { type: Function, default: console.log },
+            pill: { type: Boolean, default: false }
         },
         data: () => ({
             icon_id: 'xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx'
@@ -3768,7 +3770,7 @@ if (Vue) {
                             {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
                             <div>
                                 <b-badge :variant="badge_var(item.count)" pill>{{item.count}}</b-badge>
-                                <lah-button icon="file-excel" variant="outline-success" action="move-fade-ltr" title="匯出EXCEL" @click="xlsx(item)"></lah-button>
+                                <lah-button pill icon="file-excel" variant="outline-success" action="move-fade-ltr" title="匯出EXCEL" @click="xlsx(item)"></lah-button>
                             </div>
                         </b-list-group-item>
                     </b-card>
@@ -3781,7 +3783,7 @@ if (Vue) {
                         {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
                         <div>
                             <b-badge variant="primary" pill>{{item.count}}</b-badge>
-                            <lah-button icon="file-excel" variant="outline-success" action="move-fade-ltr" @click="xlsx(item)"></lah-button>
+                            <lah-button pill icon="file-excel" variant="outline-success" action="move-fade-ltr" @click="xlsx(item)"></lah-button>
                         </div>
                     </b-list-group-item>
                 </transition-group>
