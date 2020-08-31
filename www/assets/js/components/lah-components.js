@@ -3767,11 +3767,11 @@ if (Vue) {
                 <transition-group name="list">
                     <b-card no-body v-for="(item, idx) in items" :key="'stats_'+idx" :border-variant="border_var(item)">
                         <b-list-group-item button class="d-flex justify-content-between align-items-center" @click.stop="query(item)" title="按我取得詳細資料">
-                            {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
                             <div>
-                                <b-badge :variant="badge_var(item.count)" pill>{{item.count}}</b-badge>
                                 <lah-button pill icon="file-excel" variant="outline-success" action="move-fade-ltr" title="匯出EXCEL" @click="xlsx(item)"></lah-button>
+                                {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
                             </div>
+                            <b-badge :variant="badge_var(item.count)" pill>{{item.count}}</b-badge>
                         </b-list-group-item>
                     </b-card>
                 </transition-group>
@@ -3780,11 +3780,11 @@ if (Vue) {
             <b-list-group v-else :title="header">
                 <transition-group name="list">
                     <b-list-group-item flush button v-if="ok" v-for="(item, idx) in items" :key="'stats_'+idx" class="d-flex justify-content-between align-items-center" @click.stop="query(item)">
-                        {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
                         <div>
-                            <b-badge variant="primary" pill>{{item.count}}</b-badge>
                             <lah-button pill icon="file-excel" variant="outline-success" action="move-fade-ltr" @click="xlsx(item)"></lah-button>
+                            {{empty(item.id) ? '' : item.id+'：'}}{{item.text}}
                         </div>
+                        <b-badge variant="primary" pill>{{item.count}}</b-badge>
                     </b-list-group-item>
                 </transition-group>
                 <b-list-group-item v-if="!ok" class="d-flex justify-content-between align-items-center">
