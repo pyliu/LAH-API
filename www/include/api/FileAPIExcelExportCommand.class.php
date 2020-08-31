@@ -53,7 +53,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         // also write a copy to export folder
         $writer = new Xlsx($spreadsheet);
         $writer->save(ROOT_DIR.'/exports/'.$filename);
-        zipExports();
+        //zipExports();
     }
 
     private function write_php_output(&$spreadsheet, $filename = 'tmp.xlsx') {
