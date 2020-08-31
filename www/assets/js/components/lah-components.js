@@ -274,8 +274,8 @@ if (Vue) {
                             >
                                 <b-nav-text v-html="link.text" :class="activeCss(link)" :id="'lah-header-nav-'+index"></b-nav-text>
                                 <b-popover v-if="subMenu(link)" :target="'lah-header-nav-'+index" triggers="hover" placement="bottom" delay="400">
-                                    <div v-for="(clink, cindex) in link.children" class="m-2" @mouseenter="animate($event)"><a class="text-decoration-none" :href="Array.isArray(clink.url) ? clink.url[0] : clink.url"><lah-fa-icon :icon="clink.icon">{{clink.text}}</lah-fa-icon></a></div>
-                                    <template v-slot:title><lah-fa-icon icon="angle-double-down">{{link.text}}</lah-fa-icon></template>
+                                    <div v-for="(clink, cindex) in link.children" class="m-2" @mouseenter="animate($event)"><a class="text-decoration-none text-primary" :href="Array.isArray(clink.url) ? clink.url[0] : clink.url"><lah-fa-icon :icon="clink.icon">{{clink.text}}</lah-fa-icon></a></div>
+                                    <template v-slot:title><lah-fa-icon icon="angle-double-down"><span class="font-weight-bold s-95 align-top text-muted">其他連結</span></lah-fa-icon></template>
                                 </b-popover>
                             </b-nav-item>
                         </b-navbar-nav>
