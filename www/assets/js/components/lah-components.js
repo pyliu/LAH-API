@@ -2630,7 +2630,8 @@ if (Vue) {
                     <b-button @click="popup" variant="outline-success" size="sm"><lah-fa-icon icon="question"> 說明</lah-fa-icon></b-button>
                 </div>
             </div>
-            <lah-fa-icon v-else icon="exclamation-circle" variant="success" size="lg"> 無暫存檔。</lah-fa-icon>
+            <lah-fa-icon v-if="not_found" icon="exclamation-circle" variant="success" size="lg"> 無暫存檔。</lah-fa-icon>
+            <lah-fa-icon v-if="loading" action="spin" icon="spinner" size="lg"> 讀取中</lah-fa-icon>
         </div>`,
         data: () => ({
             filtered: null,
@@ -2639,6 +2640,8 @@ if (Vue) {
         }),
         computed: {
             found() { return !this.empty(this.filtered) },
+            not_found() { return Array.isArray(this.filtered) && this.empty(this.filtered) },
+            loading() { return this.filtered === null },
             prefix() { return `${this.year}-${this.code}-${this.number}` }
         },
         methods: {
@@ -2865,8 +2868,10 @@ if (Vue) {
                 code: this.code,
                 number: this.number
             }).then(res => {
+
                 this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢暫存資料回傳狀態碼有問題【${res.data.status}】`);
-                
+
+                this.filtered = [];
                 // res.data.raw structure: 0 - Table, 1 - all raw data, 2 - SQL
                 this.filtered = res.data.raw.filter((item, index, array) => {
                     return item[1].length > 0;
