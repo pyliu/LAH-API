@@ -5,7 +5,7 @@ select A.MM00 || A.MM48 || A.MM49 || A.MM01 ||
     RPAD(NVL(C.LADR, ' '), 60, ' ') AS AI00601_B
   from SRMNGR A, SRBLOW B, SRLNID C
  where --(A.MM48 || A.MM49 between '036200000000' and '036399999999')
---a.MM48 in ('0362', '0363')
+--a.MM48 in ('0362', '0363') -- A20
 -- a.MM48 in ('0200', '0202', '0205', '0210') -- A21
 -- a.MM48 in ('0255') -- 草漯
 -- a.MM48 in ('0255', '0275', '0277', '0278', '0377') -- 草漯UNIT3
