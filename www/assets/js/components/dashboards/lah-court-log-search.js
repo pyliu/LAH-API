@@ -127,12 +127,10 @@ if (Vue) {
           numbers: this.format()
         }).then(res => {
           if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-            // second param usage is e.target.title to get the title
+            this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ', type: "warning", duration: 2000 });
+            // second param usage => e.target.title to get the title
             this.open(CONFIG.API.FILE.XLSX, {target:{title:'下載XLSX'}});
-            // let w = window.open(CONFIG.API.FILE.XLSX);
-            // setTimeout(() => w.document.close(), 1000);
-            setTimeout(closeModal, 1000);
-            this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-check"> 完成</i>', type: "success" });
+            setTimeout(() => closeModal(() => this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
           } else {
             let err = this.responseMessage(res.data.status);
             let message = `${err} - ${res.data.status}`;
