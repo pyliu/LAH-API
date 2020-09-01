@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("case-sur-mgt", {
+    Vue.component("lah-case-sur-mgt", {
         template: `<fieldset>
             <legend>
                 <i class="fas fa-map-marker-alt"></i>
@@ -268,5 +268,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... case-sur-mgt component can not be loaded.");
+    console.error("vue.js not ready ... lah-case-sur-mgt component can not be loaded.");
 }
