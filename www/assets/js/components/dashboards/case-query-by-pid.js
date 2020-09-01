@@ -106,7 +106,7 @@ if (Vue) {
             }).finally(() => {});
         }
     }
-    Vue.component("case-query-by-pid", {
+    Vue.component("lah-case-query-by-pid", {
         components: {
             "crsms-case": VueCRSMS,
             "cmsms-case": VueCMSMS
@@ -211,5 +211,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... case-query-by-pid component can not be loaded.");
+    console.error("vue.js not ready ... lah-case-query-by-pid component can not be loaded.");
 }
