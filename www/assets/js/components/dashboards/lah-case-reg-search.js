@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("case-reg-search", {
+    Vue.component("lah-case-reg-search", {
         template: `<fieldset>
             <legend>
                 <i class="fas fa-search"></i>
@@ -117,5 +117,5 @@ if (Vue) {
         components: {}
     });
 } else {
-    console.error("vue.js not ready ... case-reg-search component can not be loaded.");
+    console.error("vue.js not ready ... lah-case-reg-search component can not be loaded.");
 }
