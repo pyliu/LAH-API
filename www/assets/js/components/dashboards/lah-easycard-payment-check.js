@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("easycard-payment-check", {
+    Vue.component("lah-easycard-payment-check", {
         template: `<fieldset>
             <legend class="bg-light text-dark">
                 <b-icon icon="credit-card"></b-icon>
@@ -59,7 +59,7 @@ if (Vue) {
                     } else {
                         this.msgbox({
                             title: "<i class='fas fa-circle text-warning mr-1'></i><strong class='text-danger'>找到下列資料</strong>",
-                            body: h("easycard-payment-check-item", { props: { data: res.data.raw } }),
+                            body: h("lah-easycard-payment-check-item", { props: { data: res.data.raw } }),
                             size: "md"
                         });
                     }
@@ -91,7 +91,7 @@ if (Vue) {
             this.ad_date = d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
         },
         components: {
-            "easycard-payment-check-item": {
+            "lah-easycard-payment-check-item": {
                 template: `<ul style="font-size: 0.9rem">
                     <li v-for="(item, index) in data" class='easycard_item'>
                         日期: {{item["AA01"]}}, 電腦給號: {{item["AA04"]}}, 實收金額: {{item["AA28"]}}<b-badge v-if="!empty(item['AA104'])" variant="danger">, 作廢原因: {{item["AA104"]}}</b-badge>, 目前狀態: {{status(item["AA106"])}}
@@ -159,5 +159,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... easycard-payment-check component can not be loaded.");
+    console.error("vue.js not ready ... lah-easycard-payment-check component can not be loaded.");
 }
