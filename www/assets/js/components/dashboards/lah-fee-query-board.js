@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("fee-query-board", {
+    Vue.component("lah-fee-query-board", {
         template: `<fieldset>
             <legend class="bg-light text-dark">
                 <b-icon icon="wallet"></b-icon>
@@ -776,7 +776,7 @@ if (Vue) {
         }
     });
 
-    // It needs to be used in expaa-list-mgt & fee-query-board, so register it to global scope
+    // It needs to be used in expaa-list-mgt & lah-fee-query-board, so register it to global scope
     Vue.component("fee-detail-mgt", {
         template: `<b-container fluid :class="['small']">
             <b-row>
@@ -1036,5 +1036,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... fee-query-board component can not be loaded.");
+    console.error("vue.js not ready ... lah-fee-query-board component can not be loaded.");
 }
