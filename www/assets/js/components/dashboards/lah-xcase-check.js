@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("xcase-check", {
+    Vue.component("lah-xcase-check", {
         template: `<fieldset>
             <legend class="bg-light text-dark">
                 <b-icon icon="exclamation-circle"></b-icon>
@@ -43,7 +43,7 @@ if (Vue) {
                     type: "xcase-check"
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        let vnode = h("xcase-check-item", { props: { ids: res.data.case_ids } });
+                        let vnode = h("lah-xcase-check-item", { props: { ids: res.data.case_ids } });
                         this.msgbox({
                             title: "<i class='fas fa-circle text-danger'></i>&ensp;<strong class='text-info'>請查看並修正下列案件</strong>",
                             body: vnode,
@@ -66,7 +66,7 @@ if (Vue) {
             }
         },
         components: {
-            "xcase-check-item": {
+            "lah-xcase-check-item": {
                 template: `<ul style="font-size: 0.9rem">
                     <li v-for="(item, index) in ids">
                         <a href='javascript:void(0)' class='reg_case_id' @click="window.vueApp.fetchRegCase">{{item}}</a>
