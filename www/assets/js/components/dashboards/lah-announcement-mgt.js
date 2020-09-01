@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("announcement-mgt", {
+    Vue.component("lah-announcement-mgt", {
         template: `<fieldset>
             <legend>
                 <i class="fas fa-bullhorn"></i>
@@ -285,5 +285,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... announcement-mgt component can not be loaded.");
+    console.error("vue.js not ready ... lah-announcement-mgt component can not be loaded.");
 }
