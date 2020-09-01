@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("case-state-mgt", {
+    Vue.component("lah-case-state-mgt", {
         template: `<fieldset>
             <legend>
                 <i class="far fa-folder"></i>
@@ -59,7 +59,7 @@ if (Vue) {
                             throw new Error("查詢失敗：" + res.data.message);
                         } else {
                             // create sub-component dynamically
-                            let v = this.$createElement("lah-reg-case-state-mgt", {
+                            let v = this.$createElement("lah-reg-lah-case-state-mgt", {
                                 props: {
                                     bakedData: res.data.baked,
                                     progress: true
@@ -98,5 +98,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... case-state-mgt component can not be loaded.");
+    console.error("vue.js not ready ... lah-case-state-mgt component can not be loaded.");
 }

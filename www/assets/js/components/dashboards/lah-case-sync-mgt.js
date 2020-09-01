@@ -1,6 +1,6 @@
 if (Vue) {
-    Vue.component("case-sync-mgt", {
-        template: `<fieldset id="case-sync-mgt-fieldset">
+    Vue.component("lah-case-sync-mgt", {
+        template: `<fieldset id="lah-case-sync-mgt-fieldset">
             <legend>
                 <i class="fas fa-sync-alt"></i>
                 同步案件
@@ -114,7 +114,7 @@ if (Vue) {
                         }
                     }).catch(err => {
                         // remove the fieldset since the function is not working ... 
-                        let fieldset = $("#case-sync-mgt-fieldset");
+                        let fieldset = $("#lah-case-sync-mgt-fieldset");
                         let container = fieldset.closest("div.col-6");
                         this.animated(fieldset, {
                             name: ANIMATED_TRANSITIONS[rand(ANIMATED_TRANSITIONS.length)].out,
@@ -235,5 +235,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... case-sync-mgt component can not be loaded.");
+    console.error("vue.js not ready ... lah-case-sync-mgt component can not be loaded.");
 }
