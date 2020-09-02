@@ -1623,8 +1623,22 @@ if (Vue) {
 
     Vue.component('lah-user-message-reservation', {
         template: `<div v-if="show">
-            <h6><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> 信差提醒</h6>
-            <b-form-group :title="title">
+            <h6 v-if="heading"><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> 信差提醒</h6>
+            <b-form-group :title="title" label-size="lg">
+                <template v-slot:label v-if="!empty(label)">
+                    <lah-fa-icon icon="bell" prefix="far"> {{label}}</lah-fa-icon>
+                </template>
+                <b-input-group size="sm" prepend="訊息" class="mb-1">
+                    <b-form-input
+                        v-model="message"
+                        type="text"
+                        placeholder="17:00:00 打卡提醒 ... "
+                        :state="!empty(message)"
+                        inline
+                        @keyup.enter="send"
+                        class="no-cache"
+                    ></b-form-input>
+                </b-input-group>
                 <b-button-group size="sm">
                     <b-button size="sm" title="送出" variant="outline-primary" @click.stop="send"><lah-fa-icon icon="paper-plane" prefix="far"></lah-fa-icon></b-button>
                     <b-form-timepicker
@@ -1637,24 +1651,17 @@ if (Vue) {
                         label-close-button="確定"
                         label-reset-button="預設值"
                         size="sm"
-                        dropup
+                        dropdown
                         @shown="shown"
                     ></b-format-timepicker>
                 </b-button-group>
                 <span class="text-muted ml-auto align-middle">預約時間：{{sendtime}}</span>
-                <b-input-group size="sm" prepend="訊息" class="mt-1">
-                    <b-form-input
-                        v-model="message"
-                        type="text"
-                        placeholder="17:00:00 打卡提醒 ... "
-                        :state="!empty(message)"
-                        inline
-                        @keyup.enter="send"
-                        class="no-cache"
-                    ></b-form-input>
-                </b-input-group>
             </b-form-group>
         </div>`,
+        props: {
+            heading: { type: Boolean, default: true },
+            label: { type: String, default: '' }
+        },
         data: () => ({
             title: '',
             message: '',
