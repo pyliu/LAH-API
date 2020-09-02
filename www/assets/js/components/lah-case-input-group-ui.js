@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("case-input-group-ui", {
+    Vue.component("lah-case-input-group-ui", {
         template: `<div class="d-flex" v-b-popover.hover.focus.bottom.d1000="'目前案件代碼：'+ID">
             <b-input-group size="sm" append="年" @click="getMaxNumber">
                 <b-form-select ref="year" v-model="year" :options="years" @change="emitInput" @change="getMaxNumber" :id="prefix+'_case_update_year'">
@@ -262,5 +262,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... case-input-group-ui component can not be loaded.");
+    console.error("vue.js not ready ... lah-case-input-group-ui component can not be loaded.");
 }

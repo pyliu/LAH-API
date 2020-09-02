@@ -7,7 +7,7 @@ if (Vue) {
                 <b-button class="border-0" @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
             </legend>
             <div class="d-flex">
-                <case-input-group-ui v-model="id" @enter="query" type="sur" prefix="case_sur"></case-input-group-ui>
+                <lah-case-input-group-ui v-model="id" @enter="query" type="sur" prefix="case_sur"></lah-case-input-group-ui>
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'查詢測量案件'"><i class="fas fa-search"></i></b-button>
             </div>
         </fieldset>`,

@@ -6,7 +6,7 @@ if (Vue) {
                 登記案件查詢
             </legend>
             <div class="d-flex">
-                <case-input-group-ui v-model="id" @enter="regQuery" type="reg" prefix="case_reg"></case-input-group-ui>
+                <lah-case-input-group-ui v-model="id" @enter="regQuery" type="reg" prefix="case_reg"></lah-case-input-group-ui>
                 <b-button @click="regQuery" variant="outline-primary" size="sm" v-b-tooltip="'查登記案件'" class="mx-1"><i class="fas fa-briefcase"></i></b-button>
                 <b-button @click="prcQuery" variant="outline-secondary" size="sm" v-b-tooltip="'查地價案件'"><i class="fas fa-hand-holding-usd"></i></b-button>
             </div>
