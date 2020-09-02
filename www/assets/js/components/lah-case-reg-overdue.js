@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("case-reg-overdue", {
+    Vue.component("lah-case-reg-overdue", {
         components: { "countdown": VueCountdown },
         template: `<div>
             <div style="right: 1rem; position:absolute; top: 0.5rem;" v-if="!is_in_modal_mode">
@@ -226,7 +226,7 @@ if (Vue) {
                 // reviewer_data, e.g. "ＯＯＯ HB1184"
                 this.msgbox({
                     title: `查詢 ${reviewer_data} 登記案件(${this.title})`,
-                    message: this.$createElement('case-reg-overdue', { props: { inSearchID: reviewer_data.split(" ")[1] } }),
+                    message: this.$createElement('lah-case-reg-overdue', { props: { inSearchID: reviewer_data.split(" ")[1] } }),
                     size: "xl"
                 });
             },
@@ -332,8 +332,8 @@ if (Vue) {
                     console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `查詢逾期案件統計回傳狀態碼有問題【${res.data.status}】`);
                     this.message_count = parseInt(res.data.total);
                 }).catch(ex => {
-                    console.error("case-reg-overdue::getOverdueMessageStats parsing failed", ex);
-                    this.alert({message: "case-reg-overdue::getOverdueMessageStats XHR連線查詢有問題!!【" + ex.message + "】", type: "danger"});
+                    console.error("lah-case-reg-overdue::getOverdueMessageStats parsing failed", ex);
+                    this.alert({message: "lah-case-reg-overdue::getOverdueMessageStats XHR連線查詢有問題!!【" + ex.message + "】", type: "danger"});
                 });
             },
             downloadPNG: function() {
@@ -372,5 +372,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... case-reg-overdue component can not be loaded.");
+    console.error("vue.js not ready ... lah-case-reg-overdue component can not be loaded.");
 }
