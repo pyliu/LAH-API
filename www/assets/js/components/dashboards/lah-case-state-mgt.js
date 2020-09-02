@@ -59,7 +59,7 @@ if (Vue) {
                             throw new Error("查詢失敗：" + res.data.message);
                         } else {
                             // create sub-component dynamically
-                            let v = this.$createElement("lah-reg-lah-case-state-mgt", {
+                            let v = this.$createElement("lah-reg-case-state-mgt", {
                                 props: {
                                     bakedData: res.data.baked,
                                     progress: true
