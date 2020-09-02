@@ -1864,9 +1864,13 @@ if (Vue) {
                 }
             },
             tmpDownload() {
-                let w = window.open('exports_tmp_txt.php?filename='+this.selected_label);
-                setTimeout(() => w.document.close(), 1000);
-                this.notify({ title: '匯出TXT檔案', message: '<i class="fas fa-check"> 成功</i>', type: "success" });
+                this.notify({ title: '匯出TXT檔案', message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ', type: "warning", duration: 2000 });
+                // second param usage => e.target.title to get the title
+                this.open(CONFIG.API.FILE.TXT+'?filename='+this.selected_label, {target:{title:'下載TXT'}});
+                setTimeout(() => closeModal(() => this.notify({ title: '下載TXT檔案', message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
+                // let w = window.open();
+                // setTimeout(() => w.document.close(), 1000);
+                // this.notify({ title: '匯出TXT檔案', message: '<i class="fas fa-check"> 成功</i>', type: "success" });
             },
             popup(e) {
                 this.msgbox({
