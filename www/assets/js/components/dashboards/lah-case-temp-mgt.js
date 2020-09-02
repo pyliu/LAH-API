@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component("case-temp-mgt", {
+    Vue.component("lah-case-temp-mgt", {
         template: `<fieldset>
             <legend>
                 <i class="fas fa-layer-group"></i>
@@ -145,5 +145,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... case-temp-mgt component can not be loaded.");
+    console.error("vue.js not ready ... lah-case-temp-mgt component can not be loaded.");
 }
