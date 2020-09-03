@@ -10,7 +10,7 @@ class FileAPISQLTxtCommand extends FileAPICommand {
 
     function __destruct() {}
 
-    private function exportTxt($data, $print_count = true) {
+    private function txt($data, $print_count = true) {
         $out = fopen(ROOT_DIR.DIRECTORY_SEPARATOR."exports/tmp.txt", 'w'); 
         if (is_array($data)) {
             $count = 0;
@@ -30,7 +30,7 @@ class FileAPISQLTxtCommand extends FileAPICommand {
         fclose($out);
     }
 
-    private function txt($data, $print_count = true) {
+    private function exportTxt($data, $print_count = true) {
         header("Content-Type: text/plain; charset=big5");
         header("Content-Transfer-Encoding: binary");
         ob_clean();
@@ -58,7 +58,7 @@ class FileAPISQLTxtCommand extends FileAPICommand {
         $q = new Query();
         // true - get raw big5 data; default is false.
         $data = $q->getSelectSQLData($this->sql, true);
-        $this->exportTxt($data);
+        //$this->exportTxt($data);
         $this->txt($data);
     }
 }

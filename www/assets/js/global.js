@@ -17,7 +17,8 @@ const CONFIG = {
             LOAD: "api/load_file_api.php",
             EXPORT: "api/export_file_api.php",
             XLSX: "api/export_xlsx_api.php",
-            TXT: "api/export_tmp_txt.php"
+            TXT: "api/export_tmp_txt.php",
+            CSV: "api/export_tmp_csv.php",
         },
         MOCK:{}
     },
