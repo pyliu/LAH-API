@@ -1843,7 +1843,18 @@ if (Vue) {
                         sql: this.sql,
                         responseType: 'blob'
                     }).then(res => {
-                        (type == "file_sql_txt") ? this.txtDownload() : this.csvDownload();
+                        let notify_title = '匯出CSV檔案';
+                        let iframe_title = '下載CSV';
+                        let api = CONFIG.API.FILE.CSV+'?filename='+this.selected_label;
+                        if (type == "file_sql_txt") {
+                            notify_title = '匯出TXT檔案';
+                            iframe_title = '下載TXT';
+                            api = CONFIG.API.FILE.TXT+'?filename='+this.selected_label;
+                        }
+                        this.notify({ title: notify_title, message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ', type: "warning", duration: 2000 });
+                        // second param usage => e.target.title to get the title
+                        this.open(api, {target:{title:iframe_title}});
+                        setTimeout(() => closeModal(() => this.notify({ title: notify_title, message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
@@ -1856,18 +1867,6 @@ if (Vue) {
                         type: "warning"
                     });
                 }
-            },
-            txtDownload() {
-                this.notify({ title: '匯出TXT檔案', message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ', type: "warning", duration: 2000 });
-                // second param usage => e.target.title to get the title
-                this.open(CONFIG.API.FILE.TXT+'?filename='+this.selected_label, {target:{title:'下載TXT'}});
-                setTimeout(() => closeModal(() => this.notify({ title: '下載TXT檔案', message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
-            },
-            csvDownload() {
-                this.notify({ title: '匯出CSV檔案', message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ', type: "warning", duration: 2000 });
-                // second param usage => e.target.title to get the title
-                this.open(CONFIG.API.FILE.CSV+'?filename='+this.selected_label, {target:{title:'CSV'}});
-                setTimeout(() => closeModal(() => this.notify({ title: '下載TXT檔案', message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
             },
             popup(e) {
                 this.msgbox({
