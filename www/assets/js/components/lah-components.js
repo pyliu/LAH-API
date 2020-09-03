@@ -1870,7 +1870,7 @@ if (Vue) {
             },
             popup(e) {
                 this.msgbox({
-                    title: '報表檔案會出功能提示',
+                    title: '報表檔案匯出功能提示',
                     message: `
                         <h5>地政局索取地籍資料備註</h5>
                         <span class="text-danger mt-2">※</span> 系統管理子系統/資料轉入轉出 (共14個txt檔案，地/建號範圍從 00000000 ~ 99999999) <br/>
