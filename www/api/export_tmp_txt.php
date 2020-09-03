@@ -4,7 +4,7 @@ require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."include".DIRECTORY_
 $tmp_file = ROOT_DIR.DIRECTORY_SEPARATOR.'exports'.DIRECTORY_SEPARATOR.'tmp.txt';
 
 header("Content-Length: " . filesize($tmp_file));
-header('Content-Type: application/octet-stream');
+header('Content-Type: text/plain');
 header('Content-Disposition: attachment; filename='.($_GET['filename'] ?? 'tmp').'.txt');
 
 readfile($tmp_file);
