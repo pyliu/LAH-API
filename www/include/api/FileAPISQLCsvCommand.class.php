@@ -48,17 +48,36 @@ class FileAPISQLCsvCommand extends FileAPICommand {
             fwrite($out, print_r($data, true));
         }
         fclose($out);
-        
+    
         global $today;
 
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="'.$today.'"');
-        header('Content-Transfer-Encoding: binary');
-        // header("Content-Type: text/plain; charset=big5;");
-        // header("Content-Transfer-Encoding: binary");
+        // header('Content-Type: application/octet-stream');
+        // header('Content-Disposition: attachment; filename="'.$today.'"');
+        // header('Content-Transfer-Encoding: binary');
+        // ob_clean();
+        // flush();
+        // readfile(ROOT_DIR.DIRECTORY_SEPARATOR."exports".DIRECTORY_SEPARATOR."tmp.csv");
+
+
         ob_clean();
-        flush();
-        readfile(ROOT_DIR.DIRECTORY_SEPARATOR."exports".DIRECTORY_SEPARATOR."tmp.csv");
+        $filepath = ROOT_DIR.DIRECTORY_SEPARATOR."exports".DIRECTORY_SEPARATOR."tmp.csv";
+        if(!file_exists($filepath)){
+            exit;
+        }
+        $fp = fopen($filepath, "r");
+        $filesize = filesize($filepath);
+        header("Content-type:application/octet-stream");
+        header("Accept-Ranges:bytes");
+        header("Accept-Length:".$filesize);
+        header("Content-Disposition: attachment; filename=".$today.".csv");
+        $buffer=1024;
+        $buffer_count=0;
+        while(!feof($fp) && $filesize - $buffer_count > 0) {
+            $data = fread($fp,$buffer);
+            $buffer_count = $buffer;
+            echo $data;
+        }
+        fclose($fp);
     }
 
     private function outputCSV($data, $skip_header = false) {
