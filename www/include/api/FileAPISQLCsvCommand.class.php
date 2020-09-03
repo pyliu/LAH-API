@@ -34,7 +34,7 @@ class FileAPISQLCsvCommand extends FileAPICommand {
 
     function __destruct() {}
 
-    private function csv($data) {
+    private function writeCSVtmp($data) {
         $out = fopen(ROOT_DIR.DIRECTORY_SEPARATOR."exports".DIRECTORY_SEPARATOR."tmp.csv", 'w'); 
         if (is_array($data)) {
             $count = 0;
@@ -88,7 +88,7 @@ class FileAPISQLCsvCommand extends FileAPICommand {
         $q = new Query();
         // true - get raw big5 data; default is false.
         $data = $q->getSelectSQLData($this->sql, true);
-        $this->csv($data);
+        $this->writeCSVtmp($data);
         //$this->outputCSV($data);
     }
 }

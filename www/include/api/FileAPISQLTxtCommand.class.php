@@ -10,7 +10,7 @@ class FileAPISQLTxtCommand extends FileAPICommand {
 
     function __destruct() {}
 
-    private function txt($data, $print_count = true) {
+    private function writeTXTtmp($data, $print_count = true) {
         $out = fopen(ROOT_DIR.DIRECTORY_SEPARATOR."exports/tmp.txt", 'w'); 
         if (is_array($data)) {
             $count = 0;
@@ -59,7 +59,7 @@ class FileAPISQLTxtCommand extends FileAPICommand {
         // true - get raw big5 data; default is false.
         $data = $q->getSelectSQLData($this->sql, true);
         //$this->exportTxt($data);
-        $this->txt($data);
+        $this->writeTXTtmp($data);
     }
 }
 ?>
