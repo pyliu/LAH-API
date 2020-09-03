@@ -31,5 +31,7 @@ $finfo = finfo_open(FILEINFO_MIME_TYPE);
 $contentType = finfo_file($finfo, $full_path);
 finfo_close($finfo);
 header('Content-Type: ' . $contentType);
+ob_clean();
+flush();
 readfile($full_path);
 ?>

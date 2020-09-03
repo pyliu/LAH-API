@@ -27,9 +27,39 @@ class FileAPISQLCsvCommand extends FileAPICommand {
         $this->colsNameMapping += include(ROOT_DIR.DIRECTORY_SEPARATOR."include/config/Config.ColsNameMapping.RLNID.php");
         $this->colsNameMapping += include(ROOT_DIR.DIRECTORY_SEPARATOR."include/config/Config.ColsNameMapping.PSCRN.php");
         $this->colsNameMapping += include(ROOT_DIR.DIRECTORY_SEPARATOR."include/config/Config.ColsNameMapping.OTHERS.php");
+        // foreach ($this->colsNameMapping as $key => $value) {
+        //     $this->colsNameMapping[$key] = mb_convert_encoding($value, "big5", "utf-8");
+        // }
     }
 
     function __destruct() {}
+
+    private function csv($data) {
+        $out = fopen(ROOT_DIR.DIRECTORY_SEPARATOR."exports/tmp.csv", 'w'); 
+        if (is_array($data)) {
+            $count = 0;
+            foreach ($data as $row) {
+                $count++;
+                $flat_text = '"'.implode("\",\"", array_values($row)).'"';
+                fwrite($out, $flat_text."\n");
+            }
+        } else {
+            fwrite($out, mb_convert_encoding("錯誤說明：傳入之參數非陣列格式無法匯出！\n", "big5", "utf-8"));
+            fwrite($out, print_r($data, true));
+        }
+        fclose($out);
+        
+        global $today;
+
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="'.$today.'"');
+        header('Content-Transfer-Encoding: binary');
+        // header("Content-Type: text/plain; charset=big5;");
+        // header("Content-Transfer-Encoding: binary");
+        ob_clean();
+        flush();
+        readfile(ROOT_DIR.DIRECTORY_SEPARATOR."exports".DIRECTORY_SEPARATOR."tmp.csv");
+    }
 
     private function outputCSV($data, $skip_header = false) {
         header("Content-Type: text/csv; charset=big5");
@@ -51,7 +81,12 @@ class FileAPISQLCsvCommand extends FileAPICommand {
                     fputcsv($out, $firstline, ',', '"');
                     $firstline_flag = true;
                 }
-                fputcsv($out, array_values($row), ',', '"');
+                $vals = array_values($row);
+                // foreach ($vals as $key => $value) {
+                //     $vals[$key] = mb_convert_encoding($value, "big5", "utf-8");
+                // }
+
+                fputcsv($out, $vals, ',', '"');
             }
         } else {
             fputcsv($out, array_values(array(iconv("utf-8", "big5", "錯誤說明"))), ',', '"');
@@ -65,6 +100,7 @@ class FileAPISQLCsvCommand extends FileAPICommand {
         // true - get raw big5 data; default is false.
         $data = $q->getSelectSQLData($this->sql, true);
         $this->outputCSV($data);
+        // $this->csv($data);
     }
 }
 ?>
