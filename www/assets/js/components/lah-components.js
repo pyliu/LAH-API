@@ -1843,18 +1843,24 @@ if (Vue) {
                         sql: this.sql,
                         responseType: 'blob'
                     }).then(res => {
-                        let notify_title = '匯出CSV檔案';
-                        let iframe_title = '下載CSV';
-                        let api = CONFIG.API.FILE.CSV+'?filename='+this.selected_label;
-                        if (type == "file_sql_txt") {
-                            notify_title = '匯出TXT檔案';
-                            iframe_title = '下載TXT';
-                            api = CONFIG.API.FILE.TXT+'?filename='+this.selected_label;
+                        // BE should not response anything (wrote tmp.txt or tmp.csv)
+                        if (res.data.length > 0) {
+                            this.$error(typeof res.data, res.data.length);
+                            this.notify({ title: '下載報表檔案', message: res.data, type: 'danger' });
+                        } else {
+                            let notify_title = '匯出CSV檔案';
+                            let iframe_title = '下載CSV';
+                            let api = CONFIG.API.FILE.CSV+'?filename='+this.selected_label;
+                            if (type == "file_sql_txt") {
+                                notify_title = '匯出TXT檔案';
+                                iframe_title = '下載TXT';
+                                api = CONFIG.API.FILE.TXT+'?filename='+this.selected_label;
+                            }
+                            this.notify({ title: notify_title, message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ', type: "warning", duration: 2000 });
+                            // second param usage => e.target.title to get the title
+                            this.open(api, {target:{title:iframe_title}});
+                            setTimeout(() => closeModal(() => this.notify({ title: notify_title, message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
                         }
-                        this.notify({ title: notify_title, message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ', type: "warning", duration: 2000 });
-                        // second param usage => e.target.title to get the title
-                        this.open(api, {target:{title:iframe_title}});
-                        setTimeout(() => closeModal(() => this.notify({ title: notify_title, message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
