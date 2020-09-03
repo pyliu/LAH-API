@@ -27,9 +27,6 @@ class FileAPISQLCsvCommand extends FileAPICommand {
         $this->colsNameMapping += include(ROOT_DIR.DIRECTORY_SEPARATOR."include/config/Config.ColsNameMapping.RLNID.php");
         $this->colsNameMapping += include(ROOT_DIR.DIRECTORY_SEPARATOR."include/config/Config.ColsNameMapping.PSCRN.php");
         $this->colsNameMapping += include(ROOT_DIR.DIRECTORY_SEPARATOR."include/config/Config.ColsNameMapping.OTHERS.php");
-        // foreach ($this->colsNameMapping as $key => $value) {
-        //     $this->colsNameMapping[$key] = mb_convert_encoding($value, "big5", "utf-8");
-        // }
     }
 
     function __destruct() {}
@@ -39,9 +36,19 @@ class FileAPISQLCsvCommand extends FileAPICommand {
         if (is_array($data)) {
             $count = 0;
             foreach ($data as $row) {
+                // heading
+                if ($count == 0) {
+                    if (!is_array($row)) {
+                        fputcsv($out, array_values(array(iconv("utf-8", "big5", "錯誤說明"))), ',', '"');
+                        fputcsv($out, array_values(array(iconv("utf-8", "big5", "第一列的資料非陣列，無法轉換為CSV檔案"))), ',', '"');
+                        break;
+                    }
+                    $firstline = array_map(array($this, "mapColumns"), array_keys($row));
+                    fputcsv($out, $firstline, ',', '"');
+                }
+                // normal content
+                fputcsv($out, array_values($row), ',', '"');
                 $count++;
-                $flat_text = '"'.implode("\",\"", array_values($row)).'"';
-                fwrite($out, $flat_text."\n");
             }
         } else {
             fwrite($out, mb_convert_encoding("錯誤說明：傳入之參數非陣列格式無法匯出！\n", "big5", "utf-8"));
