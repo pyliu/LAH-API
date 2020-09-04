@@ -328,16 +328,16 @@ if (Vue) {
                 icon: "tv",
                 need_admin: true
             }, {
+                text: "今日案件",
+                url: ["index.html", "/"],
+                icon: "briefcase",
+                need_admin: false
+            }, {
                 text: "逾期案件",
                 url: "overdue_reg_cases.html",
                 icon: "calendar-alt",
                 need_admin: false,
-                children: [{
-                    text: "今日案件",
-                    url: ["index.html", "/"],
-                    icon: "briefcase",
-                    need_admin: false
-                }]
+                children: []
             }, {
                 text: "體溫紀錄",
                 url: "temperature.html",
