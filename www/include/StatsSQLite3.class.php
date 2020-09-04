@@ -129,8 +129,8 @@ class StatsSQLite3 {
         $stm->bindParam(':time', $ten_mins_ago);
         $ret = $stm->execute();
         if ($ret) {
-            $deleted_count = $this->db->changes();
-            if ($deleted_count > 0) $log->info("成功刪除 $deleted_count 筆紀錄(10分鐘前)。");
+            // $deleted_count = $this->db->changes();
+            // if ($deleted_count > 0) $log->info("成功刪除過期 $deleted_count 筆 ap_connection 統計紀錄。");
         } else {
             $log->error(__METHOD__.": 移除10分鐘前資料失敗【".$ten_mins_ago.", ".$this->db->lastErrorMsg()."】");
         }
