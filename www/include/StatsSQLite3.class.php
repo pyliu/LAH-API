@@ -11,7 +11,7 @@ class StatsSQLite3 {
         $this->db = new SQLite3($db);
     }
 
-    function __destruct() { }
+    function __destruct() { $this->db->close(); }
 
     public function instTotal($id, $name, $total = 0) {
         $stm = $this->db->prepare("INSERT INTO stats ('ID', 'NAME', 'TOTAL') VALUES (:id, :name, :total)");
@@ -128,8 +128,11 @@ class StatsSQLite3 {
         $stm = $this->db->prepare("DELETE FROM ap_connection WHERE log_time < :time");
         $stm->bindParam(':time', $ten_mins_ago);
         $ret = $stm->execute();
-        if (!$ret) {
-            $log->error(__METHOD__.": 移除10分鐘前資料失敗【".$ten_mins_ago.", ".$stm->getSQL()."】");
+        if ($ret) {
+            $deleted_count = $this->db->changes();
+            if ($deleted_count > 0) $log->info("成功刪除 $deleted_count 筆紀錄(10分鐘前)。");
+        } else {
+            $log->error(__METHOD__.": 移除10分鐘前資料失敗【".$ten_mins_ago.", ".$this->db->lastErrorMsg()."】");
         }
         return $ret;
     }
