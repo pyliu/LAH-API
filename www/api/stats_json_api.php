@@ -201,6 +201,19 @@ switch ($_POST["type"]) {
         }
         $stats_sqlite3->wipeAPConnection();
         break;
+    case "stats_ap_conn_latest":
+        $count = $_POST['count'] ?? 11;
+        $log->info("XHR [stats_ap_conn_latest] 取得最新AP連線紀錄(".$_POST['ip'].", ".$count.")請求。");
+        if ($arr = $stats_sqlite3->getLastestAPConnection($_POST['ip'], $count)) {
+            $log->info(print_r($arr, true));
+            echoJSONResponse("取得 ".count($arr)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($arr),
+                "raw" => $arr
+            ));
+        } else {
+            $log->error("XHR [stats_ap_conn_latest] 取得最新AP連線紀錄失敗。");
+        }
+        break;
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

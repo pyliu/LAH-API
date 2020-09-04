@@ -136,6 +136,23 @@ class StatsSQLite3 {
         }
         return $ret;
     }
+
+    public function getLastestAPConnection($ip, $count = 11) {
+        if($stmt = $this->db->prepare('SELECT * FROM ap_connection WHERE ip=:ip ORDER BY log_time DESC LIMIT :limit')) {
+            $stmt->bindParam(':ip', $ip);
+            $stmt->bindValue(':limit', $count, SQLITE3_INTEGER);
+            $result = $stmt->execute();
+            $return = [];
+            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                $return[] = $row;
+            }
+            return $return;
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得最新 $count 筆");
+        }
+        return false;
+    }
     
 }
 ?>

@@ -23,6 +23,7 @@
   <section class="hide">
     <div class="container-fluid" v-cloak>
       <b-card-group columns>
+        <b-card no-body border-variant="white"><lah-ap-connection-chart></lah-ap-connection-chart></b-card>
         <b-card no-body border-variant="white"><lah-user-message-reservation :heading="false" label="信差提醒"></lah-user-message-reservation></b-card>
         <b-card no-body border-variant="white"><lah-user-search ref="user_search" max-height="100"></lah-user-search></b-card>
         <b-card no-body border-variant="white"><lah-court-log-search></lah-court-log-search></b-card>
@@ -50,5 +51,6 @@
   <script src="assets/js/mark.jquery.min.js"></script>
 
   <script src="assets/js/components/dashboards/lah-court-log-search.js"></script>
+  <script src="assets/js/components/dashboards/lah-ap-connection-chart.js"></script>
 </body>
 </html>
