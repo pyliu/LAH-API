@@ -307,6 +307,11 @@ if (Vue) {
                 icon: "cubes",
                 need_admin: true,
                 children: [{
+                    text: "監控看板",
+                    url: "monitor.html",
+                    icon: "tv",
+                    need_admin: true
+                }, {
                     text: "記錄瀏覽",
                     url: "tasklog.html",
                     icon: "paw",
@@ -317,6 +322,11 @@ if (Vue) {
                     icon: "tools",
                     need_admin: true
                 }]
+            }, {
+                text: "監控看板",
+                url: "monitor.html",
+                icon: "tv",
+                need_admin: true
             }, {
                 text: "逾期案件",
                 url: "overdue_reg_cases.html",

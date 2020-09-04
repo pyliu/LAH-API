@@ -8,7 +8,7 @@
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache">
-<title>小幫手-桃園市中壢地政事務所</title>
+<title>監控看板-桃園市中壢地政事務所</title>
 <!-- Bootstrap core CSS -->
 <link rel="preload" href="assets/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="preload" href="assets/css/loading.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -22,11 +22,9 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-      <b-card-group columns>
-        <b-card no-body border-variant="white"><lah-user-message-reservation :heading="false" label="信差提醒"></lah-user-message-reservation></b-card>
-        <b-card no-body border-variant="white"><lah-user-search ref="user_search" max-height="100"></lah-user-search></b-card>
-        <b-card no-body border-variant="white"><lah-court-log-search></lah-court-log-search></b-card>
-      </b-card-group>
+        <b-card-group columns>
+            <b-card no-body border-variant="white"><lah-ap-connection-chart></lah-ap-connection-chart></b-card>
+        </b-card-group>
     </div>
   </section>
 
@@ -48,7 +46,7 @@
   <script src="assets/js/components/lah-components.js"></script>
   <script src="assets/js/Chart.min.js"></script>
   <script src="assets/js/mark.jquery.min.js"></script>
-
-  <script src="assets/js/components/dashboards/lah-court-log-search.js"></script>
+  <!-- Dashboads -->
+  <script src="assets/js/components/dashboards/lah-ap-connection-chart.js"></script>
 </body>
 </html>
