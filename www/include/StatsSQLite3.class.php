@@ -1,11 +1,14 @@
 <?php
 require_once('init.php');
 
+define('DEF_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."LAH.db");
+define('TEMPERATURE_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."Temperature.db");
+define('AP_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."Temperature.db");
 class StatsSQLite3 {
     private $db;
 
-    function __construct() {
-        $this->db = new SQLite3(DEF_SQLITE_DB);
+    function __construct($db = DEF_SQLITE_DB) {
+        $this->db = new SQLite3($db);
     }
 
     function __destruct() { }
@@ -18,7 +21,9 @@ class StatsSQLite3 {
         $stm->bindParam(':name', $name);
         return $stm->execute() === FALSE ? false : true;
     }
-
+    /**
+     * Stats
+     */
     public function getTotal($id) {
         return $this->db->querySingle("SELECT TOTAL from stats WHERE ID = '$id'");
     }
@@ -101,5 +106,33 @@ class StatsSQLite3 {
         $data = $this->db->querySingle("SELECT data from stats_raw_data WHERE id = '$id'");
         return empty($data) ? false : unserialize($data);
     }
+    /**
+     * AP connection
+     */
+    public function addAPConnection($log_time, $ip, $site, $count) {
+        // $post_data => ["log_time" => '20200904094300', "ip" => '220.1.35.123', "site" => 'HB', "count" => '10']
+        $stm = $this->db->prepare("INSERT INTO ap_connection (log_time,ip,site,count) VALUES (:log_time, :ip, :site, :count)");
+        $stm->bindParam(':log_time', $log_time);
+        $stm->bindParam(':ip', $ip);
+        $stm->bindParam(':site', $site);
+        $stm->bindValue(':count', $count);
+        return $stm->execute();
+    }
+
+    public function wipeAPConnection() {
+        global $log;
+        $ten_mins_ago = date("YmdHis", time() - 600);
+
+        // $log->info("十分鐘前時間：$ten_mins_ago");
+
+        $stm = $this->db->prepare("DELETE FROM ap_connection WHERE log_time < :time");
+        $stm->bindParam(':time', $ten_mins_ago);
+        $ret = $stm->execute();
+        if (!$ret) {
+            $log->error(__METHOD__.": 移除10分鐘前資料失敗【".$ten_mins_ago.", ".$stm->getSQL()."】");
+        }
+        return $ret;
+    }
+    
 }
 ?>
