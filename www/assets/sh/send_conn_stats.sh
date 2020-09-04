@@ -76,5 +76,5 @@ while true; do
 
     echo "done."
 
-    sleep 5
+    sleep 15
 done
