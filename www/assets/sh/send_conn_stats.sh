@@ -4,7 +4,7 @@ api="http://220.1.35.84/api/stats_json_api.php"
 
 post_data()
 {
-    local log_time=`date "+%Y%m%d%H%m%S"`
+    local log_time=`date "+%Y%m%d%H%M%S"`
     site=$1
     echo "type=stats_set_ap_conn&log_time=${log_time}&ip=${ip}&site=${site}&count=$2"
 }
@@ -25,7 +25,7 @@ count()
 
 post()
 {
-    local log_time=`date "+%Y%m%d%H%m%S"`
+    local log_time=`date "+%Y%m%d%H%M%S"`
     curl -X POST \
     -d "type=stats_set_ap_conn" \
     -d "log_time=$log_time" \
@@ -56,25 +56,32 @@ post()
 }
 
 while true; do
-    curr=`date "+%Y-%m-%d %H:%m:%S"`
-    echo -n "${curr}: Send send post data to ${api} ... "
-    DB=`netstat -an | grep EST | grep -E ":1521" | wc -l`
-    TOTAL=`netstat -an | grep EST | wc -l`
+    CURR=`date "+%Y-%m-%d %H:%M:%S"`
+    DOW=$(date +%u)
+    HOUR=(`date "+%H"`)
+    if [ $DOW -le 5 ] && [ $HOUR -ge 8 ] && [ $HOUR -le 17 ]; then
+        echo -n "${CURR}: Send send post data to ${api} ... "
+        DB=`netstat -an | grep EST | grep -E ":1521" | wc -l`
+        TOTAL=`netstat -an | grep EST | wc -l`
 
-    #clear
-    post "H0" $(count "220.1.33.") \
-    "HA" $(count "220.1.34.") \
-    "HB" $(count ":9080") \
-    "HC" $(count "220.1.36.") \
-    "HD" $(count "220.1.37.") \
-    "HE" $(count "220.1.38.") \
-    "HF" $(count "220.1.39.") \
-    "HG" $(count "220.1.40.") \
-    "HH" $(count "220.1.41.") \
-    "DB" $DB \
-    "TOTAL" $TOTAL
+        #clear
+        post "H0" $(count "220.1.33.") \
+        "HA" $(count "220.1.34.") \
+        "HB" $(count ":9080") \
+        "HC" $(count "220.1.36.") \
+        "HD" $(count "220.1.37.") \
+        "HE" $(count "220.1.38.") \
+        "HF" $(count "220.1.39.") \
+        "HG" $(count "220.1.40.") \
+        "HH" $(count "220.1.41.") \
+        "DB" $DB \
+        "TOTAL" $TOTAL
 
-    echo "done."
+        echo "done."
 
-    sleep 15
+        sleep 15
+    else
+        echo "${CURR}: NOT IN OFFICE HOUR ... "
+        sleep 3600
+    fi
 done
