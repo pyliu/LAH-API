@@ -52,6 +52,7 @@ if (Vue) {
                                     if (found) {
                                         found[1] = item.count;
                                     } else {
+                                        // chart item format is array => ['text', 'count']
                                         this.items.push([item.site, item.count]);
                                     }
                                 }
