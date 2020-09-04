@@ -60,7 +60,7 @@ class StatsSQLite3 {
     public function addXcasesStats($data) {
         // $data => ["date" => "2020-03-04 10:10:10","found" => 2, "note" => XXXXXXXXX]
         // xcase_stats
-        $stm = $this->db-prepare("INSERT INTO xcase_stats (datetime,found,note) VALUES (:date, :found, :note)");
+        $stm = $this->db->prepare("INSERT INTO xcase_stats (datetime,found,note) VALUES (:date, :found, :note)");
         $stm->bindParam(':date', $data["date"]);
         $stm->bindParam(':found', $data["found"]);
         $stm->bindParam(':note', $data["note"]);
