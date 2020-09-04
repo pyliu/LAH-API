@@ -191,7 +191,7 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_set_ap_conn":
-        $log->info("XHR [stats_set_ap_conn] 設定AP連線數統計(".$_POST['log_time'].", ".$_POST['ip'].", records: ".count($_POST['sites']).")請求。");
+        //$log->info("XHR [stats_set_ap_conn] 設定AP連線數統計(".$_POST['log_time'].", ".$_POST['ip'].", records: ".count($_POST['sites']).")請求。");
         for ($i = 0; $i < count($_POST['sites']); $i++) {
             if ($stats_sqlite3->addAPConnection($_POST['log_time'], $_POST['ip'], $_POST['sites'][$i], $_POST['counts'][$i])) {
                 //$log->info("XHR [stats_set_ap_conn] 設定 [".$_POST['sites'][$i].",".$_POST['counts'][$i]."] 統計完成。");
