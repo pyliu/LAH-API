@@ -40,12 +40,21 @@ if (Vue) {
                         if (res.data.data_count == 0) {
                             this.notify({title: 'AP連線數', message: '無資料，無法繪製圖形', type: 'warning'});
                         } else {
-                            this.items.length = 0;
+                            //this.items.length = 0;
                             res.data.raw.reverse().forEach(item => {
                                 // e.g. item => { count: 911, ip: "220.1.35.123", log_time: "20200904175957", site: "HB" }
                                 if (item.site == 'TOTAL') { this.total_count = item.count; }
                                 else if (item.site == 'DB') { this.db_count = item.count; }
-                                else { this.items.push([item.site, item.count]); }
+                                else {
+                                    let found = this.items.find((oitem, index, array) => {
+                                        return item.site == oitem[0];
+                                    });
+                                    if (found) {
+                                        found[1] = item.count;
+                                    } else {
+                                        this.items.push([item.site, item.count]);
+                                    }
+                                }
                             });
                         }
                     } else {
