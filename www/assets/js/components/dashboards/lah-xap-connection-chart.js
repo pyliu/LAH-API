@@ -68,11 +68,11 @@ if (Vue) {
                     }).finally(() => {
                         this.isBusy = false;
                         // reload every 15s
-                        setTimeout(this.reload, 15000);
+                        this.delay(this.reload, 15000);
                     });
                 } else {
                     // check after an hour
-                    setTimeout(this.reload, 3600000);
+                    this.delay(this.reload, 3600000);
                 }
             }
         },

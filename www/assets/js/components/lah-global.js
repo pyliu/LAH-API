@@ -572,7 +572,8 @@ Vue.mixin({
             let now = new Date();
             if (now.getDay() === 0 || now.getDay() === 6) return false;
             return now.getHours() >= 8 && now.getHours() <= 17;
-        }
+        },
+        delay(func, ms) { setTimeout(func, ms) }
     }
 });
 
