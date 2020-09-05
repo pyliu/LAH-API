@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component('lah-xap-connection-H0-history-chart', {
+    Vue.component('lah-xap-connection-HX-history-chart', {
         template: `<div>
             <div class="text-justify">
                 <span class="align-middle small">{{title}}</span>
@@ -15,22 +15,23 @@ if (Vue) {
             <lah-chart :label="label" :items="items" :type="type"></lah-chart>
         </div>`,
         props: {
-            ip: { type: String, default: '220.1.33.X' },
-            type: { type: String, default: 'bar' }
+            site: { type: String, default: 'H0' },
         },
         data: () => ({
-            items: []
+            items: [],
+            type: 'bar'
         }),
         computed: {
-            label() { return `H0` },
-            title() { return `跨所AP H0歷史連線數` }
+            label() { return `${this.site}` },
+            title() { return `跨所AP ${this.site}歷史連線數` }
         },
         methods: {
-            reload(force = false) {
+            reload(force) {
                 if (force || this.isOfficeHours()) {
                     this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
-                        type: "stats_ap_conn_H0_history"
+                        type: "stats_ap_conn_HX_history",
+                        site: this.site
                     }).then(res => {
                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得跨所 AP H0 歷史連線數回傳狀態碼有問題【${res.data.status}】`);
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
@@ -71,5 +72,5 @@ if (Vue) {
         }
     });
 } else {
-    console.error("vue.js not ready ... lah-xap-connection-H0-history-chart component can not be loaded.");
+    console.error("vue.js not ready ... lah-xap-connection-HX-history-chart component can not be loaded.");
 }

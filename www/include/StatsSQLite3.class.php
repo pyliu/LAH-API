@@ -153,9 +153,9 @@ class StatsSQLite3 {
         return false;
     }
 
-    public function getAPConnectionH0History() {
+    public function getAPConnectionHXHistory($site) {
         if($stmt = $this->db->prepare('SELECT * FROM ap_connection WHERE site = :site')) {
-            $stmt->bindValue(':site', 'H0', SQLITE3_TEXT);
+            $stmt->bindParam(':site', $site, SQLITE3_TEXT);
             $result = $stmt->execute();
             $return = [];
             while($row = $result->fetchArray(SQLITE3_ASSOC)) {
@@ -164,7 +164,7 @@ class StatsSQLite3 {
             return $return;
         } else {
             global $log;
-            $log->error(__METHOD__.": 取得H0歷史資料失敗！");
+            $log->error(__METHOD__.": 取得${site}歷史資料失敗！");
         }
         return false;
     }

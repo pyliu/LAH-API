@@ -213,15 +213,15 @@ switch ($_POST["type"]) {
             $log->error("XHR [stats_xap_conn_latest] 取得最新AP連線紀錄失敗。");
         }
         break;
-    case "stats_ap_conn_H0_history":
-        $log->info("XHR [stats_ap_conn_H0_history] 取得跨所AP H0 連線歷史紀錄請求。");
-        if ($arr = $stats_sqlite3->getAPConnectionH0History()) {
+    case "stats_ap_conn_HX_history":
+        $log->info("XHR [stats_ap_conn_HX_history] 取得跨所AP ".$_POST["site"]." 連線歷史紀錄請求。");
+        if ($arr = $stats_sqlite3->getAPConnectionHXHistory($_POST["site"])) {
             echoJSONResponse("取得 ".count($arr)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => count($arr),
                 "raw" => $arr
             ));
         } else {
-            $log->error("XHR [stats_ap_conn_H0_history] 取得跨所AP H0 連線歷史紀錄失敗。");
+            $log->error("XHR [stats_ap_conn_HX_history] 取得跨所AP ".$_POST["site"]." 連線歷史紀錄失敗。");
         }
         break;
 	default:
