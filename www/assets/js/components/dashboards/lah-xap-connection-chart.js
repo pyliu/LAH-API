@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component('lah-ap-connection-chart', {
+    Vue.component('lah-xap-connection-chart', {
         template: `<b-card>
             <div class="text-justify">
                 <span class="align-middle">{{title}}</span>
@@ -76,5 +76,5 @@ if (Vue) {
         mounted() {}
     });
 } else {
-    console.error("vue.js not ready ... lah-ap-connection-chart component can not be loaded.");
+    console.error("vue.js not ready ... lah-xap-connection-chart component can not be loaded.");
 }
