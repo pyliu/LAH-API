@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component('lah-xap-connection-chart', {
         template: `<b-card>
             <div class="text-justify">
-                <span class="align-middle">{{title}}</span>
+                <span class="align-middle small">{{title}}</span>
                 <b-button-group size="sm" class="float-right">
                     <b-button variant="primary" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                     <b-button variant="secondary" @click="type = 'pie'"><i class="fas fa-chart-pie"></i></b-button>

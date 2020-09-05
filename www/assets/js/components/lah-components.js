@@ -643,7 +643,7 @@ if (Vue) {
         created() { this.icon_id = this.uuid() }
     });
 
-    // need to include Chart.min.js (chart.js) first.
+    // need to include chart.min.js (chart.js) first.
     Vue.component("lah-chart", {
         template: `<div><canvas class="w-100">圖形初始化失敗</canvas></div>`,
         props: {
