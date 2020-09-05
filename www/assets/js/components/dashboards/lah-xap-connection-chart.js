@@ -28,8 +28,8 @@ if (Vue) {
             title() { return `${this.ip} 連線數` }
         },
         methods: {
-            reload() {
-                if (this.isOfficeHours()) {
+            reload(force = false) {
+                if (!force && this.isOfficeHours()) {
                     this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_ap_conn_latest",
@@ -76,7 +76,7 @@ if (Vue) {
             }
         },
         created() {
-            this.reload();
+            this.reload(true);
         },
         mounted() {}
     });
