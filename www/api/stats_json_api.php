@@ -201,17 +201,27 @@ switch ($_POST["type"]) {
         }
         $stats_sqlite3->wipeAPConnection();
         break;
-    case "stats_ap_conn_latest":
+    case "stats_xap_conn_latest":
         $count = $_POST['count'] ?? 11;
-        $log->info("XHR [stats_ap_conn_latest] 取得最新AP連線紀錄(".$_POST['ip'].", ".$count.")請求。");
-        if ($arr = $stats_sqlite3->getLastestAPConnection($_POST['ip'], $count)) {
-            $log->info(print_r($arr, true));
+        $log->info("XHR [stats_xap_conn_latest] 取得最新AP連線紀錄(".$count.")請求。");
+        if ($arr = $stats_sqlite3->getLastestAPConnection($count)) {
             echoJSONResponse("取得 ".count($arr)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => count($arr),
                 "raw" => $arr
             ));
         } else {
-            $log->error("XHR [stats_ap_conn_latest] 取得最新AP連線紀錄失敗。");
+            $log->error("XHR [stats_xap_conn_latest] 取得最新AP連線紀錄失敗。");
+        }
+        break;
+    case "stats_ap_conn_H0_history":
+        $log->info("XHR [stats_ap_conn_H0_history] 取得跨所AP H0 連線歷史紀錄請求。");
+        if ($arr = $stats_sqlite3->getAPConnectionH0History()) {
+            echoJSONResponse("取得 ".count($arr)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($arr),
+                "raw" => $arr
+            ));
+        } else {
+            $log->error("XHR [stats_ap_conn_H0_history] 取得跨所AP H0 連線歷史紀錄失敗。");
         }
         break;
 	default:

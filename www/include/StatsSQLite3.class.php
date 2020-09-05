@@ -137,9 +137,8 @@ class StatsSQLite3 {
         return $ret;
     }
 
-    public function getLastestAPConnection($ip, $count = 11) {
-        if($stmt = $this->db->prepare('SELECT * FROM ap_connection WHERE ip=:ip ORDER BY log_time DESC LIMIT :limit')) {
-            $stmt->bindParam(':ip', $ip);
+    public function getLastestAPConnection($count = 11) {
+        if($stmt = $this->db->prepare('SELECT * FROM ap_connection ORDER BY log_time DESC LIMIT :limit')) {
             $stmt->bindValue(':limit', $count, SQLITE3_INTEGER);
             $result = $stmt->execute();
             $return = [];
@@ -149,7 +148,23 @@ class StatsSQLite3 {
             return $return;
         } else {
             global $log;
-            $log->error(__METHOD__.": 取得最新 $count 筆");
+            $log->error(__METHOD__.": 取得最新 $count 筆失敗！");
+        }
+        return false;
+    }
+
+    public function getAPConnectionH0History() {
+        if($stmt = $this->db->prepare('SELECT * FROM ap_connection WHERE site = :site')) {
+            $stmt->bindValue(':site', 'H0', SQLITE3_TEXT);
+            $result = $stmt->execute();
+            $return = [];
+            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                $return[] = $row;
+            }
+            return $return;
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得H0歷史資料失敗！");
         }
         return false;
     }
