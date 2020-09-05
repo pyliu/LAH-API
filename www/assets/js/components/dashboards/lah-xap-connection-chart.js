@@ -1,8 +1,11 @@
 if (Vue) {
     Vue.component('lah-xap-connection-chart', {
-        template: `<b-card>
+        template: `<div>
             <div class="text-justify">
-                <span class="align-middle small">{{title}}</span>
+                <span class="align-middle small">
+                    資料庫: <b-badge variant="info" pill>{{db_count}}</b-badge>
+                    全部: <b-badge variant="info" pill>{{total_count}}</b-badge>
+                </span>
                 <b-button-group size="sm" class="float-right">
                     <b-button variant="primary" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                     <b-button variant="secondary" @click="type = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
@@ -13,7 +16,7 @@ if (Vue) {
                 </b-button-group>
             </div>
             <lah-chart :label="label" :items="items" :type="type"></lah-chart>
-        </b-card>`,
+        </div>`,
         props: {
             ip: { type: String, default: CONFIG.AP_SVR || '220.1.35.123' },
             type: { type: String, default: 'line' }
@@ -24,16 +27,14 @@ if (Vue) {
             total_count: 0
         }),
         computed: {
-            label() { return `DB: ${this.db_count}, TOTAL: ${this.total_count}` },
-            title() { return `${this.ip} 連線數` }
+            label() { return `${this.ip} 連線數` }
         },
         methods: {
             reload(force = false) {
                 if (force || this.isOfficeHours()) {
                     this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
-                        type: "stats_ap_conn_latest",
-                        ip: this.ip,
+                        type: "stats_xap_conn_latest",
                         count: 11
                     }).then(res => {
                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得AP連線數回傳狀態碼有問題【${res.data.status}】`);
