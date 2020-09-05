@@ -11,7 +11,7 @@ if (Vue) {
                     <b-button variant="dark" @click="type = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
                 </b-button-group>
                 <span class="small float-right mt-1">
-                    資料庫: <b-badge variant="info" pill>{{db_count}}</b-badge>
+                    資料庫: <b-badge :variant="db_variant" pill>{{db_count}}</b-badge>
                     全部: <b-badge variant="info" pill>{{total_count}}</b-badge>
                 </span>
             </div>
@@ -27,7 +27,13 @@ if (Vue) {
             total_count: 0
         }),
         computed: {
-            label() { return `${this.ip} 連線數` }
+            label() { return `${this.ip} 連線數` },
+            db_variant() {
+                if (this.db_count > 3000) return 'dark';
+                if (this.db_count > 1800) return 'danger';
+                if (this.db_count > 1000) return 'warning';
+                return 'success';
+            }
         },
         methods: {
             reload(force = false) {
