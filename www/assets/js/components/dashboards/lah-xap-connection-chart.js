@@ -2,11 +2,7 @@ if (Vue) {
     Vue.component('lah-xap-connection-chart', {
         template: `<div>
             <div class="text-justify">
-                <span class="align-middle small">
-                    資料庫: <b-badge variant="info" pill>{{db_count}}</b-badge>
-                    全部: <b-badge variant="info" pill>{{total_count}}</b-badge>
-                </span>
-                <b-button-group size="sm" class="float-right">
+                <b-button-group size="sm">
                     <b-button variant="primary" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                     <b-button variant="secondary" @click="type = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
                     <b-button variant="success" @click="type = 'line'"><i class="fas fa-chart-line"></i></b-button>
@@ -14,6 +10,10 @@ if (Vue) {
                     <b-button variant="info" @click="type = 'doughnut'"><i class="fab fa-edge"></i></b-button>
                     <b-button variant="dark" @click="type = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
                 </b-button-group>
+                <span class="small float-right mt-1">
+                    資料庫: <b-badge variant="info" pill>{{db_count}}</b-badge>
+                    全部: <b-badge variant="info" pill>{{total_count}}</b-badge>
+                </span>
             </div>
             <lah-chart :label="label" :items="items" :type="type"></lah-chart>
         </div>`,
