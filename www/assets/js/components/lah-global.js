@@ -567,6 +567,11 @@ Vue.mixin({
                 default:
                     return `不支援的狀態碼【${status_code}】`;
             }
+        },
+        isOfficeHours() {
+            let now = new Date();
+            if (now.getDay() === 0 || now.getDay() === 6) return false;
+            return now.getHours() >= 8 && now.getHours() <= 17;
         }
     }
 });
