@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component('lah-xap-connection-HX-history-chart', {
         template: `<div>
             <div class="text-justify">
-                <span class="align-middle small">{{title}}</span>
+                <span class="align-middle small">{{site}}</span>
                 <b-button-group size="sm" class="float-right">
                     <b-button variant="primary" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                     <b-button variant="secondary" @click="type = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
@@ -59,11 +59,11 @@ if (Vue) {
                     }).finally(() => {
                         this.isBusy = false;
                         // reload every 15s
-                        setTimeout(this.reload, 15000);
+                        this.delay(this.reload, 15000);
                     });
                 } else {
                     // check after an hour
-                    setTimeout(this.reload, 3600000);
+                    this.delay(this.reload, 3600000);
                 }
             }
         },
