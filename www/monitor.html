@@ -24,7 +24,9 @@
     <div class="container-fluid" v-cloak>
         <b-card-group columns>
             <b-card border-variant="secondary"><lah-xap-connection-chart></lah-xap-connection-chart></b-card>
-            <b-card border-variant="secondary" id="asdqwezxc"><lah-xap-connection-HX-history-chart></lah-xap-connection-HX-history-chart></b-card>
+            <b-card border-variant="secondary"><lah-HX-chart site="H0"></lah-HX-chart></b-card>
+            <b-card border-variant="secondary"><lah-HX-chart site="HA"></lah-HX-chart></b-card>
+            <b-card border-variant="secondary"><lah-HX-chart site="HB"></lah-HX-chart></b-card>
         </b-card-group>
     </div>
   </section>
@@ -50,12 +52,5 @@
   <!-- Dashboads -->
   <script src="assets/js/components/dashboards/lah-xap-connection-chart.js"></script>
   <script src="assets/js/components/dashboards/lah-xap-connection-HX-history-chart.js"></script>
-  <script>
-    $(document).ready(() => {
-      setTimeout(() => {
-        console.log(new Vue({el: '#asdqwezxc'}));
-      }, 3000)
-    });
-  </script>
 </body>
 </html>
