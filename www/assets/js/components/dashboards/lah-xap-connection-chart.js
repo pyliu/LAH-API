@@ -29,7 +29,7 @@ if (Vue) {
         },
         methods: {
             reload(force = false) {
-                if (!force && this.isOfficeHours()) {
+                if (force || this.isOfficeHours()) {
                     this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_ap_conn_latest",
