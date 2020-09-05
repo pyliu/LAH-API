@@ -41,7 +41,7 @@ if (Vue) {
                     this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_xap_conn_latest",
-                        count: 11
+                        count: 11   // why 11? => H0 HA-H DB TOTAL
                     }).then(res => {
                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得AP連線數回傳狀態碼有問題【${res.data.status}】`);
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
