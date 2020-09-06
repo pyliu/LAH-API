@@ -851,7 +851,7 @@ if (Vue) {
             ids: [],
             usertag_flags: {},
             keyup_timer: null,
-            delay: 800
+            delay_ms: 800
         }),
         watch: {
             input(nVal, oVal) { this.filter() },
@@ -881,7 +881,7 @@ if (Vue) {
                     clearTimeout(this.keyup_timer);
                     this.keyup_timer = null;
                 }
-                this.keyup_timer = this.delay(this.mark, this.delay);
+                this.keyup_timer = this.delay(this.mark, this.delay_ms);
             },
             mark() {
                 if (this.validate) {
