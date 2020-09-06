@@ -1,5 +1,5 @@
 if (Vue) {
-    Vue.component('lah-xap-connection-HX-history-chart', {
+    Vue.component('lah-xap-history-chart', {
         template: `<div>
             <div class="text-justify">
                 <span class="align-middle small">{{site}}</span>
@@ -71,6 +71,7 @@ if (Vue) {
             this.reload(true);
         }
     });
+        console.log(Vue.options.components);
 } else {
-    console.error("vue.js not ready ... lah-xap-connection-HX-history-chart component can not be loaded.");
+    console.error("vue.js not ready ... lah-xap-history-chart component can not be loaded.");
 }
