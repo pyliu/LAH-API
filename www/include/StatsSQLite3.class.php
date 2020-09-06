@@ -153,14 +153,22 @@ class StatsSQLite3 {
         return false;
     }
 
-    public function getAPConnectionHXHistory($site) {
-        if($stmt = $this->db->prepare('SELECT * FROM ap_connection WHERE site = :site')) {
+    public function getAPConnectionHXHistory($site, $count, $extend = true) {
+        if($stmt = $this->db->prepare('SELECT * FROM ap_connection WHERE site = :site ORDER BY log_time DESC LIMIT :limit')) {
             $stmt->bindParam(':site', $site, SQLITE3_TEXT);
+            $stmt->bindValue(':limit', $extend ? $count * 2 : $count, SQLITE3_INTEGER);
             $result = $stmt->execute();
             $return = [];
+
+            $skip_flag = true;
             while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                if ($extend) {
+                    $skip_flag = !$skip_flag;
+                    if ($skip_flag) continue;
+                }
                 $return[] = $row;
             }
+            
             return $return;
         } else {
             global $log;

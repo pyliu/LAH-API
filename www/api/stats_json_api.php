@@ -214,10 +214,12 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_ap_conn_HX_history":
-        $log->info("XHR [stats_ap_conn_HX_history] 取得跨所AP ".$_POST["site"]." 連線歷史紀錄請求。");
-        if ($arr = $stats_sqlite3->getAPConnectionHXHistory($_POST["site"])) {
-            echoJSONResponse("取得 ".count($arr)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => count($arr),
+        $log->info("XHR [stats_ap_conn_HX_history] 取得跨所AP ".$_POST["site"]." 連線歷史紀錄請求。(筆數".$_POST["count"].")");
+        if ($arr = $stats_sqlite3->getAPConnectionHXHistory($_POST["site"], $_POST["count"])) {
+            $count = count($arr);
+            $log->error("XHR [stats_ap_conn_HX_history] 取得 $count 筆資料。");
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => $count,
                 "raw" => $arr
             ));
         } else {

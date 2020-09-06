@@ -19,7 +19,7 @@ if (Vue) {
         </div>`,
         props: {
             ip: { type: String, default: CONFIG.AP_SVR || '220.1.35.123' },
-            type: { type: String, default: 'line' }
+            type: { type: String, default: 'bar' }
         },
         data: () => ({
             items: [],
