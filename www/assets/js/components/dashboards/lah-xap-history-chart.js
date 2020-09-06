@@ -88,6 +88,7 @@ if (Vue) {
             }
         },
         created() {
+            this.timer_ms = this.demo ? 5000 : 60000;
             this.set_site_tw(this.site);
             this.reload(true);
         }
