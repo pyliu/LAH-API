@@ -13,7 +13,8 @@ if (Vue) {
         </div>`,
         props: {
             site: { type: String, default: 'H0' },
-            mins: { type: Number, default: 10 }
+            mins: { type: Number, default: 10 },
+            demo: { type: Boolean, default: false}
         },
         data: () => ({
             items: [],
@@ -37,11 +38,11 @@ if (Vue) {
                 let mins = this.mins;
                 raw.forEach((item, raw_idx, raw) => {
                     let text = (raw_idx == mins) ? '現在' : `${mins - raw_idx}分前`;
-                    this.items.push([text, item.count]);
+                    this.items.push([text, this.demo ? this.rand() : item.count]);
                 });
             },
             reload(force) {
-                if (force || this.isOfficeHours()) {
+                if (force || this.isOfficeHours() || this.demo) {
                     this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_ap_conn_HX_history",
