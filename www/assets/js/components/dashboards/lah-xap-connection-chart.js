@@ -11,8 +11,8 @@ if (Vue) {
                     <b-button variant="dark" @click="type = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
                 </b-button-group>
                 <span class="small float-right mt-1">
-                    資料庫: <b-badge :variant="db_variant" pill>{{db_count}}</b-badge>
-                    全部: <b-badge variant="info" pill>{{total_count}}</b-badge>
+                    <lah-fa-icon icon="database" title="資料庫連線數">: <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="calculator" title="跨所AP上所有連線數">: <b-badge variant="info" pill>{{total_count}}</b-badge></lah-fa-icon>
                 </span>
             </div>
             <lah-chart :label="label" :items="items" :type="type"></lah-chart>
@@ -36,6 +36,20 @@ if (Vue) {
             }
         },
         methods: {
+            get_site_tw(site_code) {
+                switch(site_code) {
+                    case 'H0': return '地政局';
+                    case 'HA': return '桃園所';
+                    case 'HB': return '中壢所';
+                    case 'HC': return '大溪所';
+                    case 'HD': return '楊梅所';
+                    case 'HE': return '蘆竹所';
+                    case 'HF': return '八德所';
+                    case 'HG': return '平鎮所';
+                    case 'HH': return '龜山所';
+                    default: return '未知';
+                }
+            },
             reload(force = false) {
                 if (force || this.isOfficeHours()) {
                     this.isBusy = true;
@@ -55,13 +69,13 @@ if (Vue) {
                                     else if (item.site == 'DB') { this.db_count = item.count; }
                                     else {
                                         let found = this.items.find((oitem, index, array) => {
-                                            return item.site == oitem[0];
+                                            return this.get_site_tw(item.site) == oitem[0];
                                         });
                                         if (found) {
                                             found[1] = item.count;
                                         } else {
                                             // chart item format is array => ['text', 'count']
-                                            this.items.push([item.site, item.count]);
+                                            this.items.push([this.get_site_tw(item.site), item.count]);
                                         }
                                     }
                                 });

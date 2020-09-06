@@ -20,19 +20,35 @@ if (Vue) {
             items: [],
             type: 'line',
             timer_ms: 60000,
-            spin_timer: null
+            spin_timer: null,
+            site_tw: '地政局',
         }),
         watch: {
             mins(nVal, oVal) {
                 clearTimeout(this.spin_timer);
                 this.spin_timer = this.delay(this.reload.bind(this, true), 1000);
-            }
+            },
+            site(nVal, oVal) { this.set_site_tw(nVal) }
         },
         computed: {
-            label() { return `${this.site}` },
-            title() { return `跨所 AP ${this.site} 連線趨勢圖` }
+            label() { return `${this.site_tw}` },
+            title() { return `跨所 AP ${this.site_tw} 連線趨勢圖` }
         },
         methods: {
+            set_site_tw(site_code) {
+                switch(site_code) {
+                    case 'H0': this.site_tw = '地政局'; break;
+                    case 'HA': this.site_tw = '桃園所'; break;
+                    case 'HB': this.site_tw = '中壢所'; break;
+                    case 'HC': this.site_tw = '大溪所'; break;
+                    case 'HD': this.site_tw = '楊梅所'; break;
+                    case 'HE': this.site_tw = '蘆竹所'; break;
+                    case 'HF': this.site_tw = '八德所'; break;
+                    case 'HG': this.site_tw = '平鎮所'; break;
+                    case 'HH': this.site_tw = '龜山所'; break;
+                    default: this.site_tw = '未知';
+                }
+            },
             set_items(raw) {
                 this.items.length = 0;
                 let mins = this.mins;
@@ -49,15 +65,15 @@ if (Vue) {
                         site: this.site,
                         count: this.mins + 1
                     }).then(res => {
-                        console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得跨所 AP ${this.site} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`);
+                        console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得跨所 AP ${this.site_tw} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`);
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             if (res.data.data_count == 0) {
-                                this.notify({title: `跨所 AP ${this.site} 連線趨勢圖`, message: '無資料，無法繪製圖形', type: 'warning'});
+                                this.notify({title: `跨所 AP ${this.site_tw} 連線趨勢圖`, message: '無資料，無法繪製圖形', type: 'warning'});
                             } else {
                                 this.set_items(res.data.raw.reverse());
                             }
                         } else {
-                            this.alert({title: `取得跨所 AP ${this.site} 連線趨勢圖`, message: `取得跨所 AP ${this.site} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`, variant: "warning"});
+                            this.alert({title: `取得跨所 AP ${this.site_tw} 連線趨勢圖`, message: `取得跨所 AP ${this.site_tw} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`, variant: "warning"});
                         }
                     }).catch(err => {
                         this.error = err;
@@ -72,6 +88,7 @@ if (Vue) {
             }
         },
         created() {
+            this.set_site_tw(this.site);
             this.reload(true);
         }
     });
