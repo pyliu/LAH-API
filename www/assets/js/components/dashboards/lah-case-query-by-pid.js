@@ -207,7 +207,7 @@ if (Vue) {
         },
         mounted() {
             // wait cached data write back
-            setTimeout(() => this.pid = this.$refs.pid.$el.value, 400);
+            this.delay(() => this.pid = this.$refs.pid.$el.value, 400);
         }
     });
 } else {

@@ -253,7 +253,7 @@ if (Vue) {
                     break;
             }
             // setup delay timer to allow cached data update to the input/select element
-            setTimeout(() => {
+            this.delay(() => {
                 this.year = this.$refs.year.$el.value;
                 this.code = this.$refs.code.$el.value;
                 this.num = this.$refs.num.$el.value;

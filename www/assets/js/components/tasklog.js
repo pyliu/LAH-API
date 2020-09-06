@@ -149,7 +149,7 @@ if (Vue) {
                     }
                 },
                 mounted() {
-                    setTimeout(() => {
+                    this.delay(() => {
                         this.count = this.$refs.log.$el.value || 50;
                         this.loadLog();
                     }, 400);

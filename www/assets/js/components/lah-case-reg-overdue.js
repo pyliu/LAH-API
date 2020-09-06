@@ -256,7 +256,7 @@ if (Vue) {
                     this.notify({ title: `查詢登記案件(${this.title})`, message: `查詢到 ${case_count} 件案件` });
                     // release busy ...
                     this.isBusy = false;
-                    Vue.nexTick ? Vue.nexTick(this.makeCaseIDClickable) : setTimeout(this.makeCaseIDClickable, 800);
+                    Vue.nexTick ? Vue.nexTick(this.makeCaseIDClickable) : this.delay(this.makeCaseIDClickable, 800);
                 } else {
                     this.getLocalCache(this.cache_key).then(jsonObj => {
                         if (jsonObj === false) {

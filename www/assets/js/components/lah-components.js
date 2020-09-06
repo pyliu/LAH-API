@@ -146,7 +146,7 @@ if (Vue) {
             },
             mouseOut: function(e) {
                 if (this.autohide) {
-                    this.hide_timer_handle = setTimeout(() => {
+                    this.hide_timer_handle = this.delay(() => {
                         this.seen = false;
                         this.hide_timer_handle = null;
                     }, this.delay);
@@ -181,7 +181,7 @@ if (Vue) {
                 if (this.seen) {
                     this.seen = false;
                     // the slide up animation is 0.4s
-                    setTimeout(() => this.setData(opts), this.anim_delay);
+                    this.delay(() => this.setData(opts), this.anim_delay);
                 } else {
                     this.setData(opts);
                 }
@@ -189,7 +189,7 @@ if (Vue) {
             setData: function(opts) {
                 // normal usage, you want to attach event to the element in the alert window
                 if (typeof opts.callback == "function") {
-                    setTimeout(opts.callback, this.anim_delay);
+                    this.delay(opts.callback, this.anim_delay);
                 }
                 switch (opts.type || opts.variant) {
                     case "danger":
@@ -241,7 +241,7 @@ if (Vue) {
                 // close alert after 15 secs (default)
                 if (this.autohide) {
                     if (this.hide_timer_handle !== null) { clearTimeout(this.hide_timer_handle); }
-                    this.hide_timer_handle = setTimeout(() => {
+                    this.hide_timer_handle = this.delay(() => {
                         this.seen = false;
                         this.hide_timer_handle = null;
                     }, this.delay);
@@ -530,7 +530,7 @@ if (Vue) {
             classes: ['text-muted', 'fixed-bottom', 'my-2', 'mx-3', 'bg-white', 'border', 'rounded', 'text-center', 'p-2', 'small']
         }),
         mounted() {
-            setTimeout(() => this.show = false, this.leave_time);
+            this.delay(() => this.show = false, this.leave_time);
         }
     });
 
@@ -679,8 +679,8 @@ if (Vue) {
             init_fix: false
         }),
         watch: {
-            type: function (val) { setTimeout(this.buildChart, 0) },
-            chartData: function(newObj) { setTimeout(this.buildChart, 0)  },
+            type: function (val) { this.delay(this.buildChart, 0) },
+            chartData: function(newObj) { this.delay(this.buildChart, 0)  },
             items: function(newItems) { this.setData(newItems) }
         },
         methods: {
@@ -714,7 +714,7 @@ if (Vue) {
                     // randoom color for this item
                     this.chartData.datasets[0].backgroundColor.push(this.bgColor(item[1], opacity));
                 });
-                setTimeout(this.buildChart, 0);
+                this.delay(this.buildChart, 0);
             },
             buildChart: function (opts = {}) {
                 if (this.inst) {
@@ -782,7 +782,7 @@ if (Vue) {
                 });
                 // sometimes the char doesn't show up properly ... so add this fix to update it
                 if (!this.init_fix) {
-                    setTimeout(this.update, 400);
+                    this.delay(this.update, 400);
                     this.init_fix = true;
                 }
             },
@@ -881,7 +881,7 @@ if (Vue) {
                     clearTimeout(this.keyup_timer);
                     this.keyup_timer = null;
                 }
-                this.keyup_timer = setTimeout(this.mark, this.delay);
+                this.keyup_timer = this.delay(this.mark, this.delay);
             },
             mark() {
                 if (this.validate) {
@@ -1869,7 +1869,7 @@ if (Vue) {
                             this.notify({ title: notify_title, message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ', type: "warning", duration: 2000 });
                             // second param usage => e.target.title to get the title
                             this.open(api, {target:{title:iframe_title}});
-                            setTimeout(() => closeModal(() => this.notify({ title: notify_title, message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
+                            this.delay(() => closeModal(() => this.notify({ title: notify_title, message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
                         }
                     }).catch(err => {
                         this.error = err;
@@ -1924,7 +1924,7 @@ if (Vue) {
                 this.sql = sql;
                 if (this.sql === false) this.sql = '';
             });
-            setTimeout(() => {
+            this.delay(() => {
                 this.selected = this.$refs.select.$el.value;
                 if ($("select.custom-select optgroup option[value='" + this.selected + "']").length > 0) {
                     let opt = $("select.custom-select optgroup option[value='" + this.selected + "']")[0];
@@ -2073,7 +2073,7 @@ if (Vue) {
             }
         },
         mounted() {
-            setTimeout(() => this.text = this.$refs.text.$el.value, 400); 
+            this.delay(() => this.text = this.$refs.text.$el.value, 400); 
         }
     });
 
@@ -2943,7 +2943,7 @@ if (Vue) {
                     this.items = items;
                 } else {
                     this.$warn("lah-reg-case-timeline: backedData is not ready ... retry after 200ms later");
-                    setTimeout(this.prepareItems, 200);
+                    this.delay(this.prepareItems, 200);
                 }
             },
             tooltip: function (tooltipItem, data) {
@@ -3657,7 +3657,7 @@ if (Vue) {
             if (this.inId) {
                 this.getMyTemperatures();
             } else {
-                setTimeout(() => this.id = this.getUrlParameter('id'), 400);
+                this.delay(() => this.id = this.getUrlParameter('id'), 400);
             }
             this.btnid = this.uuid();
         }
@@ -3723,7 +3723,7 @@ if (Vue) {
                 if (!this.button) {
                     // delay the reload action 
                     clearTimeout(this.value_timer);
-                    this.value_timer = setTimeout(() => {
+                    this.value_timer = this.delay(() => {
                         this.storeParams['stats_date'] = this.date;
                     }, this.delay);
                 }
@@ -3735,7 +3735,7 @@ if (Vue) {
                 if (!this.button) {
                     // delay the reload action 
                     clearTimeout(this.filter_timer);
-                    this.filter_timer = setTimeout(() => {
+                    this.filter_timer = this.delay(() => {
                         this.storeParams['stats_filter'] = nVal;
                     }, this.delay);
                 }
@@ -3743,7 +3743,7 @@ if (Vue) {
             keyword(nVal, oVal) {
                 if (!this.button) {
                     clearTimeout(this.keyword_timer);
-                    this.keyword_timer = setTimeout(() => {
+                    this.keyword_timer = this.delay(() => {
                         this.storeParams['stats_keyword'] = nVal;
                     }, this.delay);
                 }
@@ -3751,7 +3751,7 @@ if (Vue) {
             reg_reason(nVal, oVal) {
                 if (!this.button) {
                     clearTimeout(this.reg_reason_timer);
-                    this.reg_reason_timer = setTimeout(() => {
+                    this.reg_reason_timer = this.delay(() => {
                         this.storeParams['stats_reg_reason'] = nVal;
                     }, this.delay);
                 }
@@ -3993,7 +3993,7 @@ if (Vue) {
                         this.get_stats('stats_reg_reject');
                         this.get_stats('stats_reg_fix');
                         this.get_stats('stats_regf');
-                        setTimeout(() => this.all_reg_reason ? this.get_stats('stats_reg_all') : this.get_stats('stats_reg_reason'), 1000);
+                        this.delay(() => this.all_reg_reason ? this.get_stats('stats_reg_all') : this.get_stats('stats_reg_reason'), 1000);
                         break;
                     default:
                         this.$warn("Not supported category.", this.category);
@@ -4103,7 +4103,7 @@ if (Vue) {
                         this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ', type: "warning", duration: 2000 });
                         // second param usage => e.target.title to get the title
                         this.open(CONFIG.API.FILE.XLSX, {target:{title:'下載XLSX'}});
-                        setTimeout(() => closeModal(() => this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
+                        this.delay(() => closeModal(() => this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
                     } else {
                         let err = this.responseMessage(res.data.status);
                         let message = `${err} - ${res.data.status}`;
