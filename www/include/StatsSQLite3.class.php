@@ -156,19 +156,20 @@ class StatsSQLite3 {
     public function getAPConnectionHXHistory($site, $count, $extend = true) {
         if($stmt = $this->db->prepare('SELECT * FROM ap_connection WHERE site = :site ORDER BY log_time DESC LIMIT :limit')) {
             $stmt->bindParam(':site', $site, SQLITE3_TEXT);
-            $stmt->bindValue(':limit', $extend ? $count * 2 : $count, SQLITE3_INTEGER);
+            $stmt->bindValue(':limit', $extend ? $count * 4 : $count, SQLITE3_INTEGER);
             $result = $stmt->execute();
             $return = [];
 
-            $skip_flag = true;
+            $skip_count = 0;
             while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                // basically BE every 15s a record, exrtend means to get 1min record
                 if ($extend) {
-                    $skip_flag = !$skip_flag;
-                    if ($skip_flag) continue;
+                    $skip_count++;
+                    if ($skip_count % 4 != 1) continue;
                 }
                 $return[] = $row;
             }
-            
+
             return $return;
         } else {
             global $log;

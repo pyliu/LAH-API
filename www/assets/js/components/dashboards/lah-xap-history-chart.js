@@ -16,7 +16,7 @@ if (Vue) {
         data: () => ({
             items: [],
             type: 'line',
-            count: 10,
+            count: 20,
             timer_ms: 30000
         }),
         computed: {
