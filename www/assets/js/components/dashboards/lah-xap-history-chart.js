@@ -17,13 +17,38 @@ if (Vue) {
             items: [],
             type: 'line',
             count: 20,
-            timer_ms: 30000
+            timer_ms: 60000
         }),
         computed: {
             label() { return `${this.site}` },
             title() { return `跨所 AP ${this.site} 連線趨勢圖` }
         },
         methods: {
+            raw_idx_to_text(raw_idx) {
+                switch(raw_idx) {
+                    case 0: return '19分前';
+                    case 1: return '18分前';
+                    case 2: return '17分前';
+                    case 3: return '16分前';
+                    case 4: return '15分前';
+                    case 5: return '14分前';
+                    case 6: return '13分前';
+                    case 7: return '12分前';
+                    case 8: return '11分前';
+                    case 9: return '10分前';
+                    case 10: return '9分前';
+                    case 11: return '8分前';
+                    case 12: return '7分前';
+                    case 13: return '6分前';
+                    case 14: return '5分前';
+                    case 15: return '4分前';
+                    case 16: return '3分前';
+                    case 17: return '2分前';
+                    case 18: return '1分前';
+                    case 19: return '現在';
+                    default: return 'N/A';
+                }
+            },
             reload(force) {
                 if (force || this.isOfficeHours()) {
                     this.isBusy = true;
@@ -40,13 +65,13 @@ if (Vue) {
                                 res.data.raw.reverse().forEach((item, raw_idx, raw) => {
                                     // e.g. item => { count: 34, ip: "220.1.35.123", log_time: "20200904175957", site: "H0" }
                                     let found = this.items.find((oitem, oidx, items) => {
-                                        return raw_idx == oitem[0];
+                                        return this.raw_idx_to_text(raw_idx) == oitem[0];
                                     });
                                     if (found) {
                                         found[1] = item.count;
                                     } else {
                                         // chart item format is array => ['text', 'count']
-                                        this.items.push([raw_idx, item.count]);
+                                        this.items.push([this.raw_idx_to_text(raw_idx), item.count]);
                                     }
                                 });
                             }
