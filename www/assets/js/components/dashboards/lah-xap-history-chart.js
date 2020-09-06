@@ -6,19 +6,27 @@ if (Vue) {
                 <b-button-group size="sm" class="float-right">
                     <b-button variant="primary" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                     <b-button variant="success" @click="type = 'line'"><i class="fas fa-chart-line"></i></b-button>
+                    <b-form-spinbutton v-model="mins" min="5" max="45" size="sm" inline></b-form-spinbutton>
                 </b-button-group>
             </div>
             <lah-chart ref="chart" :label="label" :items="items" :type="type"></lah-chart>
         </div>`,
         props: {
             site: { type: String, default: 'H0' },
-            count: { type: Number, default: 21 }
+            mins: { type: Number, default: 10 }
         },
         data: () => ({
             items: [],
             type: 'line',
-            timer_ms: 60000
+            timer_ms: 60000,
+            spin_timer: null
         }),
+        watch: {
+            mins(nVal, oVal) {
+                clearTimeout(this.spin_timer);
+                this.spin_timer = this.delay(this.reload.bind(this, true), 1000);
+            }
+        },
         computed: {
             label() { return `${this.site}` },
             title() { return `跨所 AP ${this.site} 連線趨勢圖` }
@@ -26,8 +34,9 @@ if (Vue) {
         methods: {
             set_items(raw) {
                 this.items.length = 0;
+                let mins = this.mins;
                 raw.forEach((item, raw_idx, raw) => {
-                    let text = (raw_idx == this.count - 1) ? '現在' : `${this.count - raw_idx - 1}分前`;
+                    let text = (raw_idx == mins) ? '現在' : `${mins - raw_idx}分前`;
                     this.items.push([text, item.count]);
                 });
             },
@@ -37,7 +46,7 @@ if (Vue) {
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_ap_conn_HX_history",
                         site: this.site,
-                        count: this.count
+                        count: this.mins + 1
                     }).then(res => {
                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得跨所 AP ${this.site} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`);
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
