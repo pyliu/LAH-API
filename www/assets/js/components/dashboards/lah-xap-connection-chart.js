@@ -1,6 +1,6 @@
 if (Vue) {
     Vue.component('lah-xap-connection-chart', {
-        template: `<div>
+        template: `<div :title="ip">
             <div class="text-justify mb-2">
                 <b-button-group size="sm">
                     <b-button variant="primary" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
@@ -27,7 +27,7 @@ if (Vue) {
             total_count: 0
         }),
         computed: {
-            label() { return `${this.ip} 連線數` },
+            label() { return `跨所AP連線數` },
             db_variant() {
                 if (this.db_count > 3000) return 'dark';
                 if (this.db_count > 1800) return 'danger';
