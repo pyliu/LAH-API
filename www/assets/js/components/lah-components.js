@@ -617,12 +617,13 @@ if (Vue) {
             @blur="mouseleave"
             @click="emitClick($event)"
         >
-            <lah-fa-icon :id="icon_id" :icon="icon"> <slot></slot></lah-fa-icon>
+            <lah-fa-icon :id="icon_id" :icon="icon" :prefix="fa_icon_prefix"> <slot></slot></lah-fa-icon>
       </b-button>`,
         props: {
             variant: { type: String, default: 'outline-primary'},
             size: { type: String, default: 'sm'},
             icon: { type: String, default: 'exclamation-triangle'},
+            alt: { type: Boolean, default: false},
             action: { type: String, default: undefined},
             click: { type: Function, default: console.log },
             pill: { type: Boolean, default: false }
@@ -631,7 +632,7 @@ if (Vue) {
             icon_id: 'xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx'
         }),
         watch: { },
-        computed: { },
+        computed: { fa_icon_prefix() { return this.alt ? 'far' : 'fas' } },
         methods: {
             emitClick(evt) { this.$emit('click', this.click); evt.stopPropagation(); },
             mouseenter() {

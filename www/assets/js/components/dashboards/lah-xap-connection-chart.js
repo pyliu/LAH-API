@@ -15,7 +15,7 @@ if (Vue) {
                         <b-button variant="warning" v-if="type != 'polarArea'" @click="type = 'polarArea'"><i class="fas fa-chart-area"></i></b-button>
                         <b-button variant="info" v-if="type != 'doughnut'" @click="type = 'doughnut'"><i class="fab fa-edge"></i></b-button>
                         <b-button variant="dark" v-if="type != 'radar'" @click="type = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
-                        <lah-button v-if="popupButton" icon="external-link-alt" variant="outline-primary" title="放大顯示" @click="popup"></lah-button>
+                        <lah-button v-if="popupButton" alt icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popup"></lah-button>
                     </b-button-group>
                 </div>
             </div>
