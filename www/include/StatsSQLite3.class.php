@@ -121,18 +121,18 @@ class StatsSQLite3 {
 
     public function wipeAPConnection() {
         global $log;
-        $one_hour_ago = date("YmdHis", time() - 3600);
+        $one_day_ago = date("YmdHis", time() - 24 * 3600);
 
         // $log->info("60分鐘前時間：$ten_mins_ago");
 
         $stm = $this->db->prepare("DELETE FROM ap_connection WHERE log_time < :time");
-        $stm->bindParam(':time', $one_hour_ago);
+        $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
         $ret = $stm->execute();
         if ($ret) {
             // $deleted_count = $this->db->changes();
             // if ($deleted_count > 0) $log->info("成功刪除過期 $deleted_count 筆 ap_connection 統計紀錄。");
         } else {
-            $log->error(__METHOD__.": 移除60分鐘前資料失敗【".$one_hour_ago.", ".$this->db->lastErrorMsg()."】");
+            $log->error(__METHOD__.": 移除一天前資料失敗【".$one_day_ago.", ".$this->db->lastErrorMsg()."】");
         }
         return $ret;
     }

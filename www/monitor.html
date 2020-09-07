@@ -23,24 +23,24 @@
   <section class="hide">
     <div class="container-fluid" v-cloak>
         <b-card-group columns>
-            <b-card border-variant="secondary"><lah-xap-connection-chart></lah-xap-connection-chart></b-card>
-            <b-card border-variant="secondary"><lah-xap-connection-chart type='line'></lah-xap-connection-chart></b-card>
-            <b-card border-variant="secondary"><lah-xap-connection-chart type='doughnut'></lah-xap-connection-chart></b-card>
+            <lah-xap-connection-chart></lah-xap-connection-chart>
+            <!-- <lah-xap-connection-chart type='line'></lah-xap-connection-chart></b-card>
+            <lah-xap-connection-chart type='doughnut'></lah-xap-connection-chart></b-card> -->
+          <lah-xap-history-chart site="H0"></lah-xap-history-chart>
+          <lah-xap-history-chart site="HA" type='bar'></lah-xap-history-chart>
         </b-card-group>
         <b-card-group columns class="my-2">
-          <b-card border-variant="secondary"><lah-xap-history-chart site="H0"></lah-xap-history-chart></b-card>
-          <b-card border-variant="secondary"><lah-xap-history-chart site="HA"></lah-xap-history-chart></b-card>
-          <b-card border-variant="secondary"><lah-xap-history-chart site="HB" mins="45"></lah-xap-history-chart></b-card>
+          <lah-xap-history-chart site="HB" mins="60"></lah-xap-history-chart>
+          <lah-xap-history-chart site="HC" type="bar"></lah-xap-history-chart>
+          <lah-xap-history-chart site="HD"></lah-xap-history-chart>
         </b-card-group>
         <b-card-group columns class="mb-2">
-          <b-card border-variant="secondary"><lah-xap-history-chart site="HC"></lah-xap-history-chart></b-card>
-          <b-card border-variant="secondary"><lah-xap-history-chart site="HD"></lah-xap-history-chart></b-card>
-          <b-card border-variant="secondary"><lah-xap-history-chart site="HE"></lah-xap-history-chart></b-card>
+          <lah-xap-history-chart site="HE" type="bar"></lah-xap-history-chart>
+          <lah-xap-history-chart site="HF"></lah-xap-history-chart>
+          <lah-xap-history-chart site="HG" type="bar"></lah-xap-history-chart>
         </b-card-group>
         <b-card-group columns class="mb-2">
-          <b-card border-variant="secondary"><lah-xap-history-chart site="HF"></lah-xap-history-chart></b-card>
-          <b-card border-variant="secondary"><lah-xap-history-chart site="HG"></lah-xap-history-chart></b-card>
-          <b-card border-variant="secondary"><lah-xap-history-chart site="HH"></lah-xap-history-chart></b-card>
+          <lah-xap-history-chart site="HH"></lah-xap-history-chart>
         </b-card-group>
     </div>
   </section>

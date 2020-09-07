@@ -1,26 +1,26 @@
 if (Vue) {
     Vue.component('lah-xap-history-chart', {
-        template: `<div>
+        template: `<b-card border-variant="secondary">
             <div class="text-justify">
                 <span class="align-middle small">{{title}}</span>
                 <b-button-group size="sm" class="float-right">
-                    <b-button variant="primary" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
-                    <b-button variant="success" @click="type = 'line'"><i class="fas fa-chart-line"></i></b-button>
-                    <b-form-spinbutton v-model="mins" min="5" max="45" size="sm" inline></b-form-spinbutton>
+                    <b-button variant="primary" v-if="type != 'bar'" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
+                    <b-button variant="success" v-if="type != 'line'" @click="type = 'line'"><i class="fas fa-chart-line"></i></b-button>
+                    <b-form-spinbutton v-model="mins" min="5" max="60" size="sm" inline></b-form-spinbutton>
                     <lah-button v-if="popupButton" icon="external-link-alt" variant="outline-primary" title="放大顯示" @click="popup"></lah-button>
                 </b-button-group>
             </div>
             <lah-chart ref="chart" :label="label" :items="items" :type="type"></lah-chart>
-        </div>`,
+        </b-card>`,
         props: {
             site: { type: String, default: 'H0' },
             mins: { type: Number, default: 10 },
+            type: { type: String, default: 'line' },
             demo: { type: Boolean, default: false},
             popupButton: { type: Boolean, default: true }
         },
         data: () => ({
             items: [],
-            type: 'line',
             timer_ms: 60000,
             spin_timer: null,
             site_tw: '地政局',
@@ -53,7 +53,7 @@ if (Vue) {
             },
             set_items(raw) {
                 this.items.length = 0;
-                let mins = this.mins;
+                let mins = (raw.length <= this.mins)? raw.length - 1 : this.mins;
                 raw.forEach((item, raw_idx, raw) => {
                     let text = (raw_idx == mins) ? '現在' : `${mins - raw_idx}分前`;
                     this.items.push([text, this.demo ? this.rand() : item.count]);

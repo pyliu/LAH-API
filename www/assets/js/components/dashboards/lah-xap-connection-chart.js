@@ -1,14 +1,15 @@
 if (Vue) {
     Vue.component('lah-xap-connection-chart', {
-        template: `<div :title="ip">
-            <div class="text-justify mb-2">
+        template: `<b-card border-variant="secondary">
+            <div class="text-justify mb-2" :title="ip">
                 <b-button-group size="sm">
-                    <b-button variant="primary" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
-                    <b-button variant="secondary" @click="type = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
-                    <b-button variant="success" @click="type = 'line'"><i class="fas fa-chart-line"></i></b-button>
-                    <b-button variant="warning" @click="type = 'polarArea'"><i class="fas fa-chart-area"></i></b-button>
-                    <b-button variant="info" @click="type = 'doughnut'"><i class="fab fa-edge"></i></b-button>
-                    <b-button variant="dark" @click="type = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
+                    <b-button variant="primary" v-if="type != 'bar'" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
+                    <b-button variant="secondary" v-if="type != 'pie'" @click="type = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
+                    <b-button variant="success" v-if="type != 'line'" @click="type = 'line'"><i class="fas fa-chart-line"></i></b-button>
+                    <b-button variant="warning" v-if="type != 'polarArea'" @click="type = 'polarArea'"><i class="fas fa-chart-area"></i></b-button>
+                    <b-button variant="info" v-if="type != 'doughnut'" @click="type = 'doughnut'"><i class="fab fa-edge"></i></b-button>
+                    <b-button variant="dark" v-if="type != 'radar'" @click="type = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
+                    <lah-button v-if="popupButton" icon="external-link-alt" variant="outline-primary" title="放大顯示" @click="popup"></lah-button>
                 </b-button-group>
                 <span class="small float-right mt-1">
                     <lah-fa-icon icon="database" title="資料庫連線數">: <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
@@ -16,10 +17,11 @@ if (Vue) {
                 </span>
             </div>
             <lah-chart :label="label" :items="items" :type="type"></lah-chart>
-        </div>`,
+        </b-card>`,
         props: {
             ip: { type: String, default: CONFIG.AP_SVR || '220.1.35.123' },
-            type: { type: String, default: 'bar' }
+            type: { type: String, default: 'bar' },
+            popupButton: { type: Boolean, default: true }
         },
         data: () => ({
             items: [],
@@ -62,21 +64,13 @@ if (Vue) {
                             if (res.data.data_count == 0) {
                                 this.notify({title: 'AP連線數', message: '無資料，無法繪製圖形', type: 'warning'});
                             } else {
-                                //this.items.length = 0;
+                                this.items.length = 0;
                                 res.data.raw.reverse().forEach(item => {
                                     // e.g. item => { count: 911, ip: "220.1.35.123", log_time: "20200904175957", site: "HB" }
                                     if (item.site == 'TOTAL') { this.total_count = item.count; }
                                     else if (item.site == 'DB') { this.db_count = item.count; }
                                     else {
-                                        let found = this.items.find((oitem, index, array) => {
-                                            return this.get_site_tw(item.site) == oitem[0];
-                                        });
-                                        if (found) {
-                                            found[1] = item.count;
-                                        } else {
-                                            // chart item format is array => ['text', 'count']
-                                            this.items.push([this.get_site_tw(item.site), item.count]);
-                                        }
+                                        this.items.push([this.get_site_tw(item.site), item.count]);
                                     }
                                 });
                             }
@@ -94,6 +88,13 @@ if (Vue) {
                     // check after an hour
                     this.delay(this.reload, 3600000);
                 }
+            },
+            popup() {
+                this.msgbox({
+                    title: `跨所AP各所連線數`,
+                    message: this.$createElement('lah-xap-connection-chart', { props: { type: 'line', popupButton: false } }),
+                    size: "xl"
+                });
             }
         },
         created() {
