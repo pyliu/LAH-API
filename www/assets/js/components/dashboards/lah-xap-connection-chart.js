@@ -1,21 +1,23 @@
 if (Vue) {
     Vue.component('lah-xap-connection-chart', {
         template: `<b-card border-variant="secondary">
-            <div class="text-justify mb-2" :title="ip">
-                <b-button-group size="sm">
-                    <b-button variant="primary" v-if="type != 'bar'" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
-                    <b-button variant="secondary" v-if="type != 'pie'" @click="type = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
-                    <b-button variant="success" v-if="type != 'line'" @click="type = 'line'"><i class="fas fa-chart-line"></i></b-button>
-                    <b-button variant="warning" v-if="type != 'polarArea'" @click="type = 'polarArea'"><i class="fas fa-chart-area"></i></b-button>
-                    <b-button variant="info" v-if="type != 'doughnut'" @click="type = 'doughnut'"><i class="fab fa-edge"></i></b-button>
-                    <b-button variant="dark" v-if="type != 'radar'" @click="type = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
-                    <lah-button v-if="popupButton" icon="external-link-alt" variant="outline-primary" title="放大顯示" @click="popup"></lah-button>
-                </b-button-group>
-                <span class="small float-right mt-1">
+            <div class="d-flex justify-content-between">
+                <span class="small mt-1 float-left">
                     <lah-fa-icon icon="database" title="資料庫連線數">: <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="calculator" title="跨所AP上所有連線數">: <b-badge variant="info" pill>{{total_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="clock" title="更新時間">: <b-badge variant="secondary" pill>{{last_update_time}}</b-badge></lah-fa-icon>
                 </span>
+                <div class="mb-2" :title="ip">
+                    <b-button-group size="sm">
+                        <b-button variant="primary" v-if="type != 'bar'" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
+                        <b-button variant="secondary" v-if="type != 'pie'" @click="type = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
+                        <b-button variant="success" v-if="type != 'line'" @click="type = 'line'"><i class="fas fa-chart-line"></i></b-button>
+                        <b-button variant="warning" v-if="type != 'polarArea'" @click="type = 'polarArea'"><i class="fas fa-chart-area"></i></b-button>
+                        <b-button variant="info" v-if="type != 'doughnut'" @click="type = 'doughnut'"><i class="fab fa-edge"></i></b-button>
+                        <b-button variant="dark" v-if="type != 'radar'" @click="type = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
+                        <lah-button v-if="popupButton" icon="external-link-alt" variant="outline-primary" title="放大顯示" @click="popup"></lah-button>
+                    </b-button-group>
+                </div>
             </div>
             <lah-chart :label="label" :items="items" :type="type"></lah-chart>
         </b-card>`,
