@@ -7,6 +7,7 @@ if (Vue) {
                     <b-button variant="primary" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                     <b-button variant="success" @click="type = 'line'"><i class="fas fa-chart-line"></i></b-button>
                     <b-form-spinbutton v-model="mins" min="5" max="45" size="sm" inline></b-form-spinbutton>
+                    <lah-button icon="external-link-alt" variant="outline-primary" title="放大顯示"></lah-button>
                 </b-button-group>
             </div>
             <lah-chart ref="chart" :label="label" :items="items" :type="type"></lah-chart>
@@ -32,7 +33,7 @@ if (Vue) {
         },
         computed: {
             label() { return `${this.site_tw}` },
-            title() { return `跨所 AP ${this.site_tw} 連線趨勢圖` }
+            title() { return `${this.site_tw}連線` }
         },
         methods: {
             set_site_tw(site_code) {
