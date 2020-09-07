@@ -7,7 +7,7 @@ if (Vue) {
                     <b-button variant="primary" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                     <b-button variant="success" @click="type = 'line'"><i class="fas fa-chart-line"></i></b-button>
                     <b-form-spinbutton v-model="mins" min="5" max="45" size="sm" inline></b-form-spinbutton>
-                    <lah-button icon="external-link-alt" variant="outline-primary" title="放大顯示"></lah-button>
+                    <lah-button v-if="popupButton" icon="external-link-alt" variant="outline-primary" title="放大顯示" @click="popup"></lah-button>
                 </b-button-group>
             </div>
             <lah-chart ref="chart" :label="label" :items="items" :type="type"></lah-chart>
@@ -15,7 +15,8 @@ if (Vue) {
         props: {
             site: { type: String, default: 'H0' },
             mins: { type: Number, default: 10 },
-            demo: { type: Boolean, default: false}
+            demo: { type: Boolean, default: false},
+            popupButton: { type: Boolean, default: true }
         },
         data: () => ({
             items: [],
@@ -86,6 +87,13 @@ if (Vue) {
                     // check after an hour
                     this.delay(this.reload, 3600000);
                 }
+            },
+            popup() {
+                this.msgbox({
+                    title: `跨所AP ${this.site_tw}連線`,
+                    message: this.$createElement('lah-xap-history-chart', { props: { site: this.site, mins: this.mins, demo: this.demo, popupButton: false } }),
+                    size: "xl"
+                });
             }
         },
         created() {
