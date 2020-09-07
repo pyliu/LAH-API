@@ -14,6 +14,7 @@ if (Vue) {
                 <span class="small float-right mt-1">
                     <lah-fa-icon icon="database" title="資料庫連線數">: <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="calculator" title="跨所AP上所有連線數">: <b-badge variant="info" pill>{{total_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="clock" title="更新時間">: <b-badge variant="secondary" pill>{{last_update_time}}</b-badge></lah-fa-icon>
                 </span>
             </div>
             <lah-chart :label="label" :items="items" :type="type"></lah-chart>
@@ -26,7 +27,8 @@ if (Vue) {
         data: () => ({
             items: [],
             db_count: 0,
-            total_count: 0
+            total_count: 0,
+            last_update_time: ''
         }),
         computed: {
             label() { return `跨所AP連線數` },
@@ -73,6 +75,7 @@ if (Vue) {
                                         this.items.push([this.get_site_tw(item.site), item.count]);
                                     }
                                 });
+                                this.last_update_time = this.now().split(' ')[1];
                             }
                         } else {
                             this.alert({title: `取得${this.ip}連線數`, message: `取得AP連線數回傳狀態碼有問題【${res.data.status}】`, variant: "warning"});

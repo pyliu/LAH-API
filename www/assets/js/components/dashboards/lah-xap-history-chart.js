@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component('lah-xap-history-chart', {
         template: `<b-card border-variant="secondary">
             <div class="text-justify">
-                <span class="align-middle small">{{title}}</span>
+                <span class="align-middle small">{{title}} <lah-fa-icon icon="clock" title="更新時間">: <b-badge variant="secondary" pill>{{last_update_time}}</b-badge></lah-fa-icon></span>
                 <b-button-group size="sm" class="float-right">
                     <b-button variant="primary" v-if="type != 'bar'" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                     <b-button variant="success" v-if="type != 'line'" @click="type = 'line'"><i class="fas fa-chart-line"></i></b-button>
@@ -14,7 +14,7 @@ if (Vue) {
         </b-card>`,
         props: {
             site: { type: String, default: 'H0' },
-            mins: { type: Number, default: 10 },
+            mins: { type: Number, default: 15 },
             type: { type: String, default: 'line' },
             demo: { type: Boolean, default: false},
             popupButton: { type: Boolean, default: true }
@@ -24,6 +24,7 @@ if (Vue) {
             timer_ms: 60000,
             spin_timer: null,
             site_tw: '地政局',
+            last_update_time: ''
         }),
         watch: {
             mins(nVal, oVal) {
@@ -58,6 +59,7 @@ if (Vue) {
                     let text = (raw_idx == mins) ? '現在' : `${mins - raw_idx}分前`;
                     this.items.push([text, this.demo ? this.rand() : item.count]);
                 });
+                this.last_update_time = this.now().split(' ')[1];
             },
             reload(force) {
                 if (force || this.isOfficeHours() || this.demo) {
