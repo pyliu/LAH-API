@@ -91,7 +91,7 @@ if (Vue) {
             popup() {
                 this.msgbox({
                     title: `跨所AP ${this.site_tw}連線`,
-                    message: this.$createElement('lah-xap-history-chart', { props: { site: this.site, mins: this.mins, demo: this.demo, popupButton: false } }),
+                    message: this.$createElement('lah-xap-history-chart', { props: { site: this.site, mins: 45, demo: this.demo, popupButton: false } }),
                     size: "xl"
                 });
             }
