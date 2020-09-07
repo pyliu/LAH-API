@@ -1,13 +1,14 @@
 if (Vue) {
     Vue.component('lah-xap-connection-chart', {
         template: `<b-card border-variant="secondary">
+            <lah-chart :label="label" :items="items" :type="type"></lah-chart>
             <div class="d-flex justify-content-between">
-                <span class="small mt-1 float-left">
+                <span class="small align-middle my-auto">
                     <lah-fa-icon icon="database" title="資料庫連線數"> <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="calculator" title="跨所AP上所有連線數"> <b-badge variant="info" pill>{{total_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="clock" title="更新時間"> <b-badge variant="secondary" pill>{{last_update_time}}</b-badge></lah-fa-icon>
                 </span>
-                <div class="mb-2" :title="ip">
+                <div :title="ip">
                     <b-button-group size="sm">
                         <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'"></lah-button>
                         <lah-button icon="chart-pie" variant="secondary" v-if="type != 'pie'" @click="type = 'pie'"></lah-button>
@@ -19,7 +20,6 @@ if (Vue) {
                     </b-button-group>
                 </div>
             </div>
-            <lah-chart :label="label" :items="items" :type="type"></lah-chart>
         </b-card>`,
         props: {
             ip: { type: String, default: CONFIG.AP_SVR || '220.1.35.123' },

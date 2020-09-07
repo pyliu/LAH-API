@@ -1,16 +1,16 @@
 if (Vue) {
     Vue.component('lah-xap-history-chart', {
         template: `<b-card border-variant="secondary">
-            <div class="text-justify">
-                <span class="align-middle small"><lah-fa-icon icon="clock" title="更新時間"> <b-badge variant="secondary" pill>{{last_update_time}}</b-badge></lah-fa-icon></span>
-                <b-button-group size="sm" class="float-right">
+            <lah-chart ref="chart" :label="label" :items="items" :type="type"></lah-chart>
+            <div class="d-flex justify-content-between">
+                <span class="align-middle small my-auto"><lah-fa-icon icon="clock" title="更新時間"> <b-badge variant="secondary" pill>{{last_update_time}}</b-badge></lah-fa-icon></span>
+                <b-button-group size="sm">
                     <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'"></lah-button>
                     <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'"></lah-button>
                     <b-form-spinbutton v-model="mins" min="5" max="60" size="sm" inline></b-form-spinbutton>
                     <lah-button v-if="popupButton" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popup" action="heartbeat"></lah-button>
                 </b-button-group>
             </div>
-            <lah-chart ref="chart" :label="label" :items="items" :type="type"></lah-chart>
         </b-card>`,
         props: {
             site: { type: String, default: 'H0' },
