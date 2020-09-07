@@ -623,7 +623,8 @@ if (Vue) {
             variant: { type: String, default: 'outline-primary'},
             size: { type: String, default: 'sm'},
             icon: { type: String, default: 'exclamation-triangle'},
-            alt: { type: Boolean, default: false},
+            regular: { type: Boolean, default: false},
+            brand: { type: Boolean, default: false },
             action: { type: String, default: undefined},
             click: { type: Function, default: console.log },
             pill: { type: Boolean, default: false }
@@ -632,7 +633,11 @@ if (Vue) {
             icon_id: 'xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx'
         }),
         watch: { },
-        computed: { fa_icon_prefix() { return this.alt ? 'far' : 'fas' } },
+        computed: {
+            fa_icon_prefix() {
+                return this.brand ? 'fab' : this.regular ? 'far' : 'fas';
+            }
+        },
         methods: {
             emitClick(evt) { this.$emit('click', this.click); evt.stopPropagation(); },
             mouseenter() {
