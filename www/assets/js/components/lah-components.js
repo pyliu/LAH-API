@@ -132,7 +132,7 @@ if (Vue) {
             progress_timer_handle: null,
             progress_counter: 1,
             autohide: true,
-            delay: 10000,
+            delay_ms: 10000,
             anim_delay: 400,
             remaining_delay: 10000,
             remaining_secs: 10,
@@ -149,7 +149,7 @@ if (Vue) {
                     this.hide_timer_handle = this.delay(() => {
                         this.seen = false;
                         this.hide_timer_handle = null;
-                    }, this.delay);
+                    }, this.delay_ms);
                     this.enableProgress();
                 }
             },
@@ -244,7 +244,7 @@ if (Vue) {
                     this.hide_timer_handle = this.delay(() => {
                         this.seen = false;
                         this.hide_timer_handle = null;
-                    }, this.delay);
+                    }, this.delay_ms);
                     this.enableProgress();
                 }
             },
