@@ -3,9 +3,9 @@ if (Vue) {
         template: `<b-card border-variant="secondary">
             <div class="d-flex justify-content-between">
                 <span class="small mt-1 float-left">
-                    <lah-fa-icon icon="database" title="資料庫連線數">: <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="calculator" title="跨所AP上所有連線數">: <b-badge variant="info" pill>{{total_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="clock" title="更新時間">: <b-badge variant="secondary" pill>{{last_update_time}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="database" title="資料庫連線數"> <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="calculator" title="跨所AP上所有連線數"> <b-badge variant="info" pill>{{total_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="clock" title="更新時間"> <b-badge variant="secondary" pill>{{last_update_time}}</b-badge></lah-fa-icon>
                 </span>
                 <div class="mb-2" :title="ip">
                     <b-button-group size="sm">

@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component('lah-xap-history-chart', {
         template: `<b-card border-variant="secondary">
             <div class="text-justify">
-                <span class="align-middle small"><lah-fa-icon icon="clock" title="更新時間">: <b-badge variant="secondary" pill>{{last_update_time}}</b-badge></lah-fa-icon></span>
+                <span class="align-middle small"><lah-fa-icon icon="clock" title="更新時間"> <b-badge variant="secondary" pill>{{last_update_time}}</b-badge></lah-fa-icon></span>
                 <b-button-group size="sm" class="float-right">
                     <b-button variant="primary" v-if="type != 'bar'" @click="type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
                     <b-button variant="success" v-if="type != 'line'" @click="type = 'line'"><i class="fas fa-chart-line"></i></b-button>
