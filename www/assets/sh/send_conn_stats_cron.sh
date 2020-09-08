@@ -2,7 +2,8 @@
 # add following to the jboss crontab
 # for i in 1 2 3 4 ; do /home/jboss/cron/send_conn_stats_cron.sh 2>&1 > /dev/null & [[ i -ne 4 ]] && sleep 15; done
 
-ip=`ifconfig | grep 'inet addr:' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{print $1}'`
+#ip=`ifconfig | grep 'inet addr:' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{print $1}'`
+ip="220.1.35.123"
 api="http://220.1.35.84/api/stats_json_api.php"
 
 post_data()
@@ -29,7 +30,7 @@ count()
 post()
 {
     local log_time=`date "+%Y%m%d%H%M%S"`
-    curl -X POST \
+    curl -s -X POST \
     -d "type=stats_set_ap_conn" \
     -d "log_time=$log_time" \
     -d "ip=$ip" \
