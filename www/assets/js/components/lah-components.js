@@ -118,7 +118,7 @@ if (Vue) {
                     <button type="button" class="close" @click="seen = false">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <b-progress height="3px" :max="delay" :variant="bar_variant" :value="remaining_delay"></b-progress>
+                    <b-progress height="3px" :max="delay_ms" :variant="bar_variant" :value="remaining_delay"></b-progress>
                 </div>
             </lah-transition>
         </div>`,
