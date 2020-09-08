@@ -3,7 +3,7 @@ if (Vue) {
         template: `<b-card border-variant="secondary">
             <lah-chart ref="chart" :label="label" :items="items" :type="type"></lah-chart>
             <div class="d-flex justify-content-between">
-                <span class="align-middle small my-auto"><lah-fa-icon icon="clock" title="更新時間"> <b-badge variant="secondary" pill>{{last_update_time}}</b-badge></lah-fa-icon></span>
+                <span class="align-middle small my-auto"><lah-fa-icon icon="clock" prefix="far" title="更新時間"> <b-badge variant="secondary">{{last_update_time}}</b-badge></lah-fa-icon></span>
                 <b-button-group size="sm">
                     <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
                     <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'" title="切換線型圖"></lah-button>
