@@ -20,10 +20,11 @@ post_single()
     curl -X POST --data "${data}" $api
 }
 
+netstat_est=`netstat -an | grep EST`
 
 count()
 {
-    local stats=`netstat -an | grep EST | grep "$1" | wc -l`
+    local stats=`echo $netstat_est | grep "$1" | wc -l`
     echo $stats	
 }
 
@@ -61,8 +62,9 @@ post()
 
 CURR=`date "+%Y-%m-%d %H:%M:%S"`
 echo -n "${CURR}: Send send post data to ${api} ... "
-DB=`netstat -an | grep EST | grep -E ":1521" | wc -l`
-TOTAL=`netstat -an | grep EST | wc -l`
+
+DB=`echo $netstat_est | grep -E ":1521" | wc -l`
+TOTAL=`echo $netstat_est | wc -l`
 
 #clear
 post "H0" $(count "220.1.33.") \
