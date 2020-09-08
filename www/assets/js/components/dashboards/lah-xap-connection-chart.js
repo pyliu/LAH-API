@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component('lah-xap-connection-chart', {
         template: `<b-card border-variant="secondary">
-            <lah-chart :label="label" :items="items" :type="type"></lah-chart>
+            <lah-chart :label="label" :items="items" :type="type" :bg-color="bg_color"></lah-chart>
             <div class="d-flex justify-content-between">
                 <span class="small align-middle my-auto">
                     <lah-fa-icon icon="database" title="資料庫連線數"> <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
@@ -30,7 +30,8 @@ if (Vue) {
             items: [],
             db_count: 0,
             total_count: 0,
-            last_update_time: ''
+            last_update_time: '',
+            bg_idx: 0
         }),
         computed: {
             label() { return `跨所AP連線數` },
@@ -42,6 +43,21 @@ if (Vue) {
             }
         },
         methods: {
+            bg_color(value, opacity) {
+                this.$log(value, opacity);
+                switch(this.bg_idx++ % 9) {
+                    case 0: return `rgb(247, 247, 247, ${opacity})`;
+                    case 1: return `rgb(255, 20, 147, ${opacity})`;
+                    case 2: return `rgb(92, 184, 92, ${opacity})`;
+                    case 3: return `rgb(2, 117, 216, ${opacity})`;
+                    case 4: return `rgb(57, 86, 73, ${opacity})`;
+                    case 5: return `rgb(240, 173, 78, ${opacity})`;
+                    case 6: return `rgb(217, 83, 79, ${opacity})`;
+                    case 7: return `rgb(78, 51, 87, ${opacity})`;
+                    case 8: return `rgb(108, 21, 240, ${opacity})`;
+                    default: `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`;
+                }
+            },
             get_site_tw(site_code) {
                 switch(site_code) {
                     case 'H0': return '地政局';

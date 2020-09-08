@@ -3728,7 +3728,7 @@ if (Vue) {
             filter_timer: null,
             keyword_timer: null,
             reg_reason_timer: null,
-            delay:ms 1000
+            delay_ms: 1000
         }),
         computed: {
             date() { return `${this.year}${("0" + this.month).slice(-2)}` }
