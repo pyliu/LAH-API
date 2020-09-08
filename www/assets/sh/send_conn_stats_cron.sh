@@ -1,6 +1,6 @@
 #!/bin/bash
 # add following to the jboss crontab
-# */1 8-17   *   *  1-5 for i in 1 2 3 4 ; do /home/jboss/send_conn_stats_cron.sh >> /home/jboss/send_conn_stats.log & sleep 15; done
+# for i in 1 2 3 4 ; do /home/jboss/cron/send_conn_stats_cron.sh 2>&1 > /dev/null & [[ i -ne 4 ]] && sleep 15; done
 
 ip=`ifconfig | grep 'inet addr:' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{print $1}'`
 api="http://220.1.35.84/api/stats_json_api.php"
