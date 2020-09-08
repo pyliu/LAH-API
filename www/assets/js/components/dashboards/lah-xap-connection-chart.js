@@ -23,7 +23,7 @@ if (Vue) {
         </b-card>`,
         props: {
             ip: { type: String, default: CONFIG.AP_SVR || '220.1.35.123' },
-            type: { type: String, default: 'bar' },
+            type: { type: String, default: 'doughnut' },
             popupButton: { type: Boolean, default: true }
         },
         data: () => ({
