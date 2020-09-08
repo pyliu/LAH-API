@@ -2929,12 +2929,12 @@ if (Vue) {
             <div class="text-justify">
                 <span>{{title}}</span>
                 <b-button-group size="sm" class="float-right">
-                    <b-button variant="primary" @click="chartType = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
-                    <b-button variant="secondary" @click="chartType = 'pie'"><i class="fas fa-chart-pie"></i></b-button>
-                    <b-button variant="success" @click="chartType = 'line'"><i class="fas fa-chart-line"></i></b-button>
-                    <b-button variant="warning" @click="chartType = 'polarArea'"><i class="fas fa-chart-area"></i></b-button>
-                    <b-button variant="info" @click="chartType = 'doughnut'"><i class="fab fa-edge"></i></b-button>
-                    <b-button variant="dark" @click="chartType = 'radar'"><i class="fas fa-broadcast-tower"></i></b-button>
+                    <lah-button variant="primary" @click="chartType = 'bar'" icon="chart-bar"></lah-button>
+                    <lah-button variant="secondary" @click="chartType = 'pie'" icon="chart-pie"></lah-button>
+                    <lah-button variant="success" @click="chartType = 'line'" icon="chart-line"></lah-button>
+                    <lah-button variant="warning" @click="chartType = 'polarArea'" icon="chart-area"></lah-button>
+                    <lah-button variant="info" @click="chartType = 'doughnut'" icon="edge" brand></lah-button>
+                    <lah-button variant="dark" @click="chartType = 'radar'" icon="broadcast-tower"></lah-button>
                 </b-button-group>
             </div>
             <lah-chart :type="chartType" label="案件時間線" :items="items" :tooltip="tooltip"></lah-chart>
