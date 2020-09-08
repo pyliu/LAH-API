@@ -76,9 +76,7 @@ if (Vue) {
                             } else {
                                 this.set_items(res.data.raw.reverse());
                                 // to workaround the line chart not rendering well issue
-                                if (this.type == 'line') {
-                                    this.delay(() => this.$refs.chart.update(), 0)
-                                }
+                                this.delay(() => this.$refs.chart.update(), 0);
                             }
                         } else {
                             this.alert({title: `取得跨所 AP ${this.site_tw} 連線趨勢圖`, message: `取得跨所 AP ${this.site_tw} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`, variant: "warning"});

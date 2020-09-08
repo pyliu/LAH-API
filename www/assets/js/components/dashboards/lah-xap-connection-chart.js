@@ -93,9 +93,7 @@ if (Vue) {
                                 });
                                 this.last_update_time = this.now().split(' ')[1];
                                 // to workaround the line chart not rendering well issue
-                                if (this.type == 'line') {
-                                    this.delay(() => this.$refs.chart.update(), 0)
-                                }
+                                this.delay(() => this.$refs.chart.update(), 0);
                             }
                         } else {
                             this.alert({title: `取得${this.ip}連線數`, message: `取得AP連線數回傳狀態碼有問題【${res.data.status}】`, variant: "warning"});
