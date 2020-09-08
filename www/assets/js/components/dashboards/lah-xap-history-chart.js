@@ -7,7 +7,7 @@ if (Vue) {
                 <b-button-group size="sm">
                     <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
                     <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'" title="切換線型圖"></lah-button>
-                    <b-form-spinbutton v-model="mins" min="5" max="60" size="sm" inline></b-form-spinbutton>
+                    <b-form-spinbutton v-if="!popupButton" v-model="mins" min="5" max="60" size="sm" inline></b-form-spinbutton>
                     <lah-button v-if="popupButton" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popup" action="heartbeat"></lah-button>
                 </b-button-group>
             </div>
