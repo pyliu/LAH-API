@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component('lah-xap-connection-chart', {
         template: `<b-card border-variant="secondary" class="shadow">
-            <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color"></lah-chart>
+            <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left"></lah-chart>
             <div class="d-flex justify-content-between">
                 <span class="small align-middle my-auto">
                     <lah-fa-icon icon="database" title="資料庫連線數"> <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
@@ -34,6 +34,7 @@ if (Vue) {
         }),
         computed: {
             label() { return `跨所AP連線數` },
+            title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
             db_variant() {
                 if (this.db_count > 3000) return 'dark';
                 if (this.db_count > 1800) return 'danger';
