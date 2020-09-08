@@ -1,6 +1,6 @@
 if (Vue) {
     Vue.component('lah-xap-history-chart', {
-        template: `<b-card border-variant="secondary">
+        template: `<b-card border-variant="secondary" class="shadow">
             <lah-chart ref="chart" :label="label" :items="items" :type="type"></lah-chart>
             <div class="d-flex justify-content-between">
                 <span class="align-middle small my-auto"><lah-fa-icon icon="clock" prefix="far" title="更新時間"> <b-badge variant="secondary">{{last_update_time}}</b-badge></lah-fa-icon></span>

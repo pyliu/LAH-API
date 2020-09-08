@@ -1,6 +1,6 @@
 if (Vue) {
     Vue.component('lah-xap-connection-chart', {
-        template: `<b-card border-variant="secondary">
+        template: `<b-card border-variant="secondary" class="shadow">
             <lah-chart :label="label" :items="items" :type="type" :bg-color="bg_color"></lah-chart>
             <div class="d-flex justify-content-between">
                 <span class="small align-middle my-auto">
