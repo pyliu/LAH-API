@@ -155,10 +155,10 @@ if (Vue) {
             },
             enableProgress: function() {
                 this.disableProgress();
-                let total_remaining_secs = this.delay / 1000;
+                let total_remaining_secs = this.delay_ms / 1000;
                 this.progress_timer_handle = setInterval(() => {
                     this.remaining_delay -= 200;
-                    let now_percent = ++this.progress_counter / (this.delay / 200.0);
+                    let now_percent = ++this.progress_counter / (this.delay_ms / 200.0);
                     this.remaining_percent = (100 - Math.round(now_percent * 100));
                     if (this.remaining_percent > 50) {
                     } else if (this.remaining_percent > 25) {
@@ -172,8 +172,8 @@ if (Vue) {
             disableProgress: function() {
                 clearTimeout(this.progress_timer_handle);
                 this.progress_counter = 1;
-                this.remaining_delay = this.delay;
-                this.remaining_secs = this.delay / 1000;
+                this.remaining_delay = this.delay_ms;
+                this.remaining_secs = this.delay_ms / 1000;
                 this.remaining_percent = 100;
                 this.bar_variant = "light";
             },
@@ -3728,7 +3728,7 @@ if (Vue) {
             filter_timer: null,
             keyword_timer: null,
             reg_reason_timer: null,
-            delay: 1000
+            delay:ms 1000
         }),
         computed: {
             date() { return `${this.year}${("0" + this.month).slice(-2)}` }
@@ -3743,7 +3743,7 @@ if (Vue) {
                     clearTimeout(this.value_timer);
                     this.value_timer = this.delay(() => {
                         this.storeParams['stats_date'] = this.date;
-                    }, this.delay);
+                    }, this.delay_ms);
                 }
             },
             filter(nVal, oVal) {
@@ -3755,7 +3755,7 @@ if (Vue) {
                     clearTimeout(this.filter_timer);
                     this.filter_timer = this.delay(() => {
                         this.storeParams['stats_filter'] = nVal;
-                    }, this.delay);
+                    }, this.delay_ms);
                 }
             },
             keyword(nVal, oVal) {
@@ -3763,7 +3763,7 @@ if (Vue) {
                     clearTimeout(this.keyword_timer);
                     this.keyword_timer = this.delay(() => {
                         this.storeParams['stats_keyword'] = nVal;
-                    }, this.delay);
+                    }, this.delay_ms);
                 }
             },
             reg_reason(nVal, oVal) {
@@ -3771,7 +3771,7 @@ if (Vue) {
                     clearTimeout(this.reg_reason_timer);
                     this.reg_reason_timer = this.delay(() => {
                         this.storeParams['stats_reg_reason'] = nVal;
-                    }, this.delay);
+                    }, this.delay_ms);
                 }
             }
         },
