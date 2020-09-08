@@ -10,12 +10,12 @@ if (Vue) {
                 </span>
                 <div :title="ip">
                     <b-button-group size="sm">
-                        <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'"></lah-button>
-                        <lah-button icon="chart-pie" variant="secondary" v-if="type != 'pie'" @click="type = 'pie'"></lah-button>
-                        <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'"></lah-button>
-                        <lah-button icon="chart-area" variant="warning" v-if="type != 'polarArea'" @click="type = 'polarArea'"></lah-button>
-                        <lah-button brand icon="edge" variant="info" v-if="type != 'doughnut'" @click="type = 'doughnut'"></lah-button>
-                        <lah-button icon="broadcast-tower" variant="dark" v-if="type != 'radar'" @click="type = 'radar'"></lah-button>
+                        <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
+                        <lah-button icon="chart-pie" variant="secondary" v-if="type != 'pie'" @click="type = 'pie'" title="切換圓餅圖"></lah-button>
+                        <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'" title="切換長線型圖"></lah-button>
+                        <lah-button icon="chart-area" variant="warning" v-if="type != 'polarArea'" @click="type = 'polarArea'" title="切換區域圖"></lah-button>
+                        <lah-button brand icon="edge" variant="info" v-if="type != 'doughnut'" @click="type = 'doughnut'" title="切換甜甜圈"></lah-button>
+                        <lah-button icon="broadcast-tower" variant="dark" v-if="type != 'radar'" @click="type = 'radar'" title="切換雷達圖"></lah-button>
                         <lah-button v-if="popupButton" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popup" action="heartbeat"></lah-button>
                     </b-button-group>
                 </div>
