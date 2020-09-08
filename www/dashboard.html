@@ -16,6 +16,11 @@
 <link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="preload" href="assets/css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<style>
+  fieldset {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+</style>
 </head>
 
 <body>
@@ -35,8 +40,8 @@
         <b-card no-body border-variant="white"><lah-fee-query-board></lah-fee-query-board></b-card>
         <b-card no-body border-variant="white"><lah-xcase-check></lah-xcase-check></b-card>
         <b-card no-body border-variant="white"><lah-easycard-payment-check></lah-easycard-payment-check></b-card>
-        <b-card no-body border-variant="white"><lah-case-query-by-pid></lah-case-query-by-pid></b-card>
-        <b-card no-body border-variant="white"><lah-cache-mgt></lah-cache-mgt></b-card>
+        <b-card no-body border-variant="white"><lah-case-query-by-pid class="shadow"></lah-case-query-by-pid></b-card>
+        <b-card no-body border-variant="white"><lah-cache-mgt class="shadow"></lah-cache-mgt></b-card>
       </b-card-group>
     </div>
   </section><!-- /section -->
