@@ -35,7 +35,7 @@ if (Vue) {
         },
         computed: {
             label() { return `${this.site_tw}` },
-            title() { return `${this.site_tw}連線` }
+            title() { return `${this.site_tw}連線` },
         },
         methods: {
             set_site_tw(site_code) {

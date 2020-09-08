@@ -30,8 +30,7 @@ if (Vue) {
             items: [],
             db_count: 0,
             total_count: 0,
-            last_update_time: '',
-            bg_idx: 0
+            last_update_time: ''
         }),
         computed: {
             label() { return `跨所AP連線數` },
@@ -43,18 +42,17 @@ if (Vue) {
             }
         },
         methods: {
-            bg_color(value, opacity) {
-                this.$log(value, opacity);
-                switch(this.bg_idx++ % 9) {
-                    case 0: return `rgb(247, 247, 247, ${opacity})`;
-                    case 1: return `rgb(255, 20, 147, ${opacity})`;
-                    case 2: return `rgb(92, 184, 92, ${opacity})`;
-                    case 3: return `rgb(2, 117, 216, ${opacity})`;
-                    case 4: return `rgb(57, 86, 73, ${opacity})`;
-                    case 5: return `rgb(240, 173, 78, ${opacity})`;
-                    case 6: return `rgb(217, 83, 79, ${opacity})`;
-                    case 7: return `rgb(78, 51, 87, ${opacity})`;
-                    case 8: return `rgb(108, 21, 240, ${opacity})`;
+            bg_color(label, opacity) {
+                switch(label) {
+                    case '地政局': return `rgb(247, 247, 247, ${opacity})`;    // H0
+                    case '桃園所': return `rgb(255, 20, 147, ${opacity})`;     // HA
+                    case '中壢所': return `rgb(92, 184, 92, ${opacity})`;      // HB
+                    case '大溪所': return `rgb(2, 117, 216, ${opacity})`;      // HC
+                    case '楊梅所': return `rgb(57, 86, 73, ${opacity})`;       // HD
+                    case '蘆竹所': return `rgb(240, 173, 78, ${opacity})`;     // HE
+                    case '八德所': return `rgb(217, 83, 79, ${opacity})`;      // HF
+                    case '平鎮所': return `rgb(78, 51, 87, ${opacity})`;       // HG
+                    case '龜山所': return `rgb(108, 21, 240, ${opacity})`;     // HH
                     default: `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`;
                 }
             },

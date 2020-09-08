@@ -730,7 +730,7 @@ if (Vue) {
                     this.chartData.labels.push(item[0]);            // first element is label
                     this.chartData.datasets[0].data.push(item[1]);  // second element is data count
                     // randoom color for this item
-                    this.chartData.datasets[0].backgroundColor.push(this.bgColor(item[1], opacity));
+                    this.chartData.datasets[0].backgroundColor.push(this.bgColor(item[0], opacity));
                 });
                 this.delay(this.buildChart, 0);
             },
