@@ -72,7 +72,7 @@ if (Vue) {
             },
             reload(force = false) {
                 if (force || this.isOfficeHours()) {
-                    this.isBusy = true;
+                    //this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_xap_conn_latest",
                         count: 11   // why 11? => H0 HA-H DB TOTAL
@@ -99,7 +99,7 @@ if (Vue) {
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
-                        this.isBusy = false;
+                        //this.isBusy = false;
                         // reload every 15s
                         this.delay(this.reload, 15000);
                     });

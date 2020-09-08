@@ -63,7 +63,7 @@ if (Vue) {
             },
             reload(force) {
                 if (force || this.isOfficeHours() || this.demo) {
-                    this.isBusy = true;
+                    //this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_ap_conn_HX_history",
                         site: this.site,
@@ -82,7 +82,7 @@ if (Vue) {
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
-                        this.isBusy = false;
+                        //this.isBusy = false;
                         this.delay(this.reload, this.timer_ms);
                     });
                 } else {
