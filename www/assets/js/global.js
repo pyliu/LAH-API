@@ -3,7 +3,7 @@ const CONFIG = {
     DISABLE_MSDB_QUERY: false,
     DEBUG_MODE: false,
     AP_SVR: "220.1.35.123",
-    SCREENSAVER: true,
+    SCREENSAVER: false,
     SCREENSAVER_TIMER: 15 * 60 * 1000,
     API: {
         XLSX: {
