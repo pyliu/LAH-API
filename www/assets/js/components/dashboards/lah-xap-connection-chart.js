@@ -8,7 +8,7 @@ if (Vue) {
                     <lah-fa-icon icon="database" title="資料庫連線數"> <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="link" title="跨所AP上所有連線數"> <b-badge variant="info" pill>{{total_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="clock" prefix="far" title="更新時間">
-                        <b-badge v-if="isOfficeHours()" variant="secondary">{{last_update_time}}</b-badge>
+                        <b-badge v-if="isOfficeHours() || demo" variant="secondary">{{last_update_time}}</b-badge>
                         <b-badge v-else variant="danger" title="非上班時間所以停止更新">已停止更新</b-badge>
                     </lah-fa-icon>
                 </span>
@@ -28,7 +28,7 @@ if (Vue) {
         props: {
             ip: { type: String, default: CONFIG.AP_SVR || '220.1.35.123' },
             type: { type: String, default: 'doughnut' },
-            demo: { type: Boolean, default: false},
+            demo: { type: Boolean, default: true},
             popupButton: { type: Boolean, default: true }
         },
         data: () => ({

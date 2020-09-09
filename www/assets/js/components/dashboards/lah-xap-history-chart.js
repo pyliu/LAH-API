@@ -22,7 +22,7 @@ if (Vue) {
             site: { type: String, default: 'H0' },
             mins: { type: Number, default: 15 },
             type: { type: String, default: 'line' },
-            demo: { type: Boolean, default: false},
+            demo: { type: Boolean, default: true},
             popupButton: { type: Boolean, default: true }
         },
         data: () => ({
