@@ -91,7 +91,7 @@ if (Vue) {
                             if (res.data.data_count == 0) {
                                 this.notify({title: 'AP連線數', message: '無資料，無法繪製圖形', type: 'warning'});
                             } else {
-                                let ap_total_count = 0;
+                                this.ap_count = 0;
                                 res.data.raw.reverse().forEach(item => {
                                     // e.g. item => { count: 911, ip: "220.1.35.123", log_time: "20200904175957", site: "HB" }
                                     if (item.site == 'TOTAL') { this.total_count = item.count; }
