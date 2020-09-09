@@ -5,7 +5,10 @@ if (Vue) {
             <div class="d-flex justify-content-between mt-1">
                 <span class="align-middle small my-auto">
                     <lah-fa-icon icon="network-wired" title="現在連線數"> <b-badge :variant="badge_variant">{{now_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="clock" prefix="far" title="更新時間"> <b-badge variant="secondary">{{last_update_time}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="clock" prefix="far" title="更新時間">
+                        <b-badge v-if="isOfficeHours()" variant="secondary">{{last_update_time}}</b-badge>
+                        <b-badge v-else variant="danger" title="非上班時間所以停止更新">已停止更新</b-badge>
+                    </lah-fa-icon>
                 </span>
                 <b-button-group size="sm">
                     <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
