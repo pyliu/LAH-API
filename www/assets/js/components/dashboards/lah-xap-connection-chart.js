@@ -31,19 +31,12 @@ if (Vue) {
             items: [],
             db_count: 0,
             total_count: 0,
+            ap_count: 0,
             last_update_time: ''
         }),
         computed: {
             label() { return `跨所AP連線數` },
             title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
-            ap_count() {
-                let ap_total_count = 0;
-                this.items.forEach(item => {
-                    if (item[0] == 'TOTAL' || item[0] == 'DB') return;
-                    ap_total_count += parseInt(item[1]);
-                });
-                return ap_total_count;
-            },
             ap_variant() {
                 if (this.ap_count > 500) return 'dark';
                 if (this.ap_count > 400) return 'danger';
@@ -98,6 +91,7 @@ if (Vue) {
                             if (res.data.data_count == 0) {
                                 this.notify({title: 'AP連線數', message: '無資料，無法繪製圖形', type: 'warning'});
                             } else {
+                                let ap_total_count = 0;
                                 res.data.raw.reverse().forEach(item => {
                                     // e.g. item => { count: 911, ip: "220.1.35.123", log_time: "20200904175957", site: "HB" }
                                     if (item.site == 'TOTAL') { this.total_count = item.count; }
@@ -108,6 +102,7 @@ if (Vue) {
                                         } else {
                                             this.items.push([this.get_site_tw(item.site), item.count]);
                                         }
+                                        this.ap_count += parseInt(item.count);
                                     }
                                 });
                                 this.last_update_time = this.now().split(' ')[1];
