@@ -744,6 +744,8 @@ if (Vue) {
                     this.chartData.datasets[0].data[found_idx] = value;
                     // redraw the chart
                     this.update();
+                } else {
+                    this.$warn(`lah-chart: Not found "${label}" in dataset, the ${value} will not be updated.`, this.chartData);
                 }
             },
             buildChart: function (opts = {}) {
