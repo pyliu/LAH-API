@@ -105,7 +105,7 @@ if (Vue) {
                                         if (this.items.length == 9) {
                                             this.$refs.chart.changeValue(this.get_site_tw(item.site), value);
                                         } else {
-                                            this.items.push([this.get_site_tw(item.site), value);
+                                            this.items.push([this.get_site_tw(item.site), value]);
                                         }
                                         this.ap_count += parseInt(value);
                                     }
