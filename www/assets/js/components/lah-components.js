@@ -737,7 +737,7 @@ if (Vue) {
                 });
                 this.delay(this.buildChart, 0);
             },
-            changeVaule(label, value) {
+            changeValue(label, value) {
                 let found_idx = undefined;
                 this.chartData.labels.find((olabel, idx, array) => {
                     if (olabel == label) found_idx = idx;

@@ -28,6 +28,7 @@ if (Vue) {
         props: {
             ip: { type: String, default: CONFIG.AP_SVR || '220.1.35.123' },
             type: { type: String, default: 'doughnut' },
+            demo: { type: Boolean, default: false},
             popupButton: { type: Boolean, default: true }
         },
         data: () => ({
@@ -83,7 +84,7 @@ if (Vue) {
                 }
             },
             reload(force = false) {
-                if (force || this.isOfficeHours()) {
+                if (force || this.isOfficeHours() || this.demo) {
                     //this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_xap_conn_latest",
@@ -97,15 +98,16 @@ if (Vue) {
                                 this.ap_count = 0;
                                 res.data.raw.reverse().forEach(item => {
                                     // e.g. item => { count: 911, ip: "220.1.35.123", log_time: "20200904175957", site: "HB" }
-                                    if (item.site == 'TOTAL') { this.total_count = item.count; }
-                                    else if (item.site == 'DB') { this.db_count = item.count; }
+                                    if (item.site == 'TOTAL') { this.total_count = this.demo ? this.rand(5000) : item.count; }
+                                    else if (item.site == 'DB') { this.db_count = this.demo ? this.rand(4000) : item.count; }
                                     else {
+                                        let value = this.demo ? this.rand(300) : item.count;
                                         if (this.items.length == 9) {
-                                            this.$refs.chart.changeVaule(this.get_site_tw(item.site), item.count);
+                                            this.$refs.chart.changeValue(this.get_site_tw(item.site), value);
                                         } else {
-                                            this.items.push([this.get_site_tw(item.site), item.count]);
+                                            this.items.push([this.get_site_tw(item.site), value);
                                         }
-                                        this.ap_count += parseInt(item.count);
+                                        this.ap_count += parseInt(value);
                                     }
                                 });
                                 this.last_update_time = this.now().split(' ')[1];
@@ -118,7 +120,7 @@ if (Vue) {
                     }).finally(() => {
                         //this.isBusy = false;
                         // reload every 15s
-                        this.delay(this.reload, 15000);
+                        this.delay(this.reload, this.demo ? 5000 : 15000);
                     });
                 } else {
                     // check after an hour

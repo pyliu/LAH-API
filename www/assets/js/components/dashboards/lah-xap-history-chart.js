@@ -79,7 +79,7 @@ if (Vue) {
                     let text = (raw_idx == 0) ? '現在' : `${raw_idx}分前`;
                     let val = this.demo ? this.rand(300) : item.count;
                     if (this.items.length == raw.length) {
-                        this.$refs.chart.changeVaule(text, val);
+                        this.$refs.chart.changeValue(text, val);
                     } else {
                         this.items.push([text, val]);
                     }
