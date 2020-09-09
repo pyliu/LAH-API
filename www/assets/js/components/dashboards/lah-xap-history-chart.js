@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component('lah-xap-history-chart', {
         template: `<b-card border-variant="secondary" class="shadow">
             <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color"></lah-chart>
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between mt-1">
                 <span class="align-middle small my-auto">
                     <lah-fa-icon icon="network-wired" title="現在連線數"> <b-badge :variant="badge_variant">{{now_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="clock" prefix="far" title="更新時間"> <b-badge variant="secondary">{{last_update_time}}</b-badge></lah-fa-icon>
@@ -10,7 +10,7 @@ if (Vue) {
                 <b-button-group size="sm">
                     <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
                     <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'" title="切換線型圖"></lah-button>
-                    <b-form-spinbutton v-if="!popupButton" v-model="mins" min="5" max="60" size="sm" inline></b-form-spinbutton>
+                    <b-form-spinbutton v-model="mins" min="5" max="60" size="sm" inline></b-form-spinbutton>
                     <lah-button v-if="popupButton" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popup" action="heartbeat"></lah-button>
                 </b-button-group>
             </div>
@@ -32,7 +32,10 @@ if (Vue) {
         watch: {
             mins(nVal, oVal) {
                 clearTimeout(this.spin_timer);
-                this.spin_timer = this.delay(this.reload.bind(this, true), 1000);
+                this.spin_timer = this.delay(() => {
+                    this.items.length = 0;
+                    this.reload.bind(true);
+                }, 1000);
             },
             site(nVal, oVal) { this.set_site_tw(nVal) }
         },
@@ -69,13 +72,13 @@ if (Vue) {
                 }
             },
             set_items(raw) {
-                let mins = (raw.length <= this.mins)? raw.length - 1 : this.mins;
                 raw.forEach((item, raw_idx, raw) => {
                     let text = (raw_idx == 0) ? '現在' : `${raw_idx}分前`;
+                    let val = this.demo ? this.rand() : item.count;
                     if (this.items.length == raw.length) {
-                        this.$refs.chart.changeVaule(text, this.demo ? this.rand() : item.count);
+                        this.$refs.chart.changeVaule(text, val);
                     } else {
-                        this.items.push([text, this.demo ? this.rand() : item.count]);
+                        this.items.push([text, val]);
                     }
                 });
                 this.last_update_time = this.now().split(' ')[1];

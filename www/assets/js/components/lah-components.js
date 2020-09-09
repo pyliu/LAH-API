@@ -694,7 +694,7 @@ if (Vue) {
         data: () => ({
             inst: null,
             chartData: null,
-            update_working: false
+            update_timer: null
         }),
         watch: {
             type: function (val) { this.delay(this.buildChart, 0) },
@@ -703,11 +703,9 @@ if (Vue) {
         },
         methods: {
             update: function() {
-                if (this.update_working) return;
-                this.update_working = true;
-                this.delay(() => {
+                clearTimeout(this.update_timer);
+                this.update_timer = this.delay(() => {
                     if (this.inst) this.inst.update();
-                    this.update_working = false;
                 }, 100);
             },
             resetData: function() {
