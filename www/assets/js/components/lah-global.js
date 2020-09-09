@@ -103,6 +103,7 @@ Vue.prototype.$store = (() => {
                     state.dynaParams = Object.assign({}, state.dynaParams, objPayload);
                 },
                 error(state, msgPayload) {
+                    if (!Array.isArray(state.errors)) state.errors = [];
                     state.errors.push(msgPayload);
                 },
                 errorPop(state, dontCarePayload) {
