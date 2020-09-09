@@ -680,7 +680,7 @@ if (Vue) {
                 if (isNaN(percent)) return ` ${data.labels[tooltipItem.index]} : ${currentValue}`;
                 return ` ${data.labels[tooltipItem.index]} : ${currentValue} [${percent}%]`;
             } },
-            bgColor: { type: Function, default: function(value, opacity) {
+            bgColor: { type: Function, default: function(dataset_item, opacity) {
                 return `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`;
             } },
             borderColor: { type: String, default: `rgb(22, 22, 22)` },
@@ -730,7 +730,7 @@ if (Vue) {
                     this.chartData.labels.push(item[0]);            // first element is label
                     this.chartData.datasets[0].data.push(item[1]);  // second element is data count
                     // randoom color for this item
-                    this.chartData.datasets[0].backgroundColor.push(this.bgColor(item[0], opacity));
+                    this.chartData.datasets[0].backgroundColor.push(this.bgColor(item, opacity));
                 });
                 this.delay(this.buildChart, 0);
             },
@@ -3409,7 +3409,8 @@ if (Vue) {
                     this.isBusy = false;
                 });
             },
-            chartBgColor(degree, opacity) {
+            chartBgColor(data, opacity) {
+                let degree = data[1];   // data[0] - text, data[1] - value
                 let fd = parseFloat(degree);
                 //if (isNaN(fd) || fd < 35) return `rgb(91, 93, 94, ${opacity})`;
                 // if (fd < 35.5) return `rgb(41, 43, 44, ${opacity})`;

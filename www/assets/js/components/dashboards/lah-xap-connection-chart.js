@@ -43,8 +43,8 @@ if (Vue) {
             }
         },
         methods: {
-            bg_color(label, opacity) {
-                switch(label) {
+            bg_color(dataset_item, opacity) {
+                switch(dataset_item[0]) {
                     case '地政局': return `rgb(207, 207, 207, ${opacity})`;    // H0
                     case '桃園所': return `rgb(255, 20, 147, ${opacity})`;     // HA
                     case '中壢所': return `rgb(92, 184, 92, ${opacity})`;      // HB
