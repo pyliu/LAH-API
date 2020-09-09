@@ -4,6 +4,7 @@ if (Vue) {
             <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left"></lah-chart>
             <div class="d-flex justify-content-between">
                 <span class="small align-middle my-auto">
+                    <lah-fa-icon icon="server" title="AP總連線數"> <b-badge :variant="ap_variant" pill>{{ap_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="database" title="資料庫連線數"> <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="calculator" title="跨所AP上所有連線數"> <b-badge variant="info" pill>{{total_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="clock" prefix="far" title="更新時間"> <b-badge variant="secondary">{{last_update_time}}</b-badge></lah-fa-icon>
@@ -35,6 +36,20 @@ if (Vue) {
         computed: {
             label() { return `跨所AP連線數` },
             title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
+            ap_count() {
+                let ap_total_count = 0;
+                this.items.forEach(item => {
+                    if (item[0] == 'TOTAL' || item[0] == 'DB') return;
+                    ap_total_count += parseInt(item[1]);
+                });
+                return ap_total_count;
+            },
+            ap_variant() {
+                if (this.ap_count > 500) return 'dark';
+                if (this.ap_count > 400) return 'danger';
+                if (this.ap_count > 300) return 'warning';
+                return 'success';
+            },
             db_variant() {
                 if (this.db_count > 3000) return 'dark';
                 if (this.db_count > 1800) return 'danger';
