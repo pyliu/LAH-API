@@ -6,7 +6,7 @@ if (Vue) {
                 <span class="small align-middle my-auto">
                     <lah-fa-icon icon="server" title="AP總連線數"> <b-badge :variant="ap_variant" pill>{{ap_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="database" title="資料庫連線數"> <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="calculator" title="跨所AP上所有連線數"> <b-badge variant="info" pill>{{total_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="link" title="跨所AP上所有連線數"> <b-badge variant="info" pill>{{total_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="clock" prefix="far" title="更新時間"> <b-badge variant="secondary">{{last_update_time}}</b-badge></lah-fa-icon>
                 </span>
                 <div :title="ip">
