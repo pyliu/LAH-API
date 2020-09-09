@@ -30,7 +30,8 @@ if (Vue) {
             timer_ms: 60000,
             spin_timer: null,
             site_tw: '地政局',
-            last_update_time: ''
+            last_update_time: '',
+            now_count: 0
         }),
         watch: {
             mins(nVal, oVal) {
@@ -45,7 +46,6 @@ if (Vue) {
         computed: {
             label() { return `${this.site_tw}` },
             title() { return `${this.site_tw}連線` },
-            now_count() { return this.items.length > 0 ? this.items[0][1] : 0 },
             badge_variant() {
                 if (this.now_count > 200) return `danger`;   // red
                 if (this.now_count > 100) return `warning`;  // yellow
@@ -79,12 +79,15 @@ if (Vue) {
                     let text = (raw_idx == 0) ? '現在' : `${raw_idx}分前`;
                     let val = this.demo ? this.rand(300) : item.count;
                     if (this.items.length == raw.length) {
+                        this.items[raw_idx][1] = val;
+                        // not reactively ... manual set chartData
                         this.$refs.chart.changeValue(text, val);
                     } else {
                         this.items.push([text, val]);
                     }
                 });
                 this.last_update_time = this.now().split(' ')[1];
+                this.now_count = this.items[0][1];
             },
             reload(force) {
                 if (force || this.isOfficeHours() || this.demo) {

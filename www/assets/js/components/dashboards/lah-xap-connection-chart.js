@@ -104,6 +104,8 @@ if (Vue) {
                                     else {
                                         let value = this.demo ? this.rand(300) : item.count;
                                         if (this.items.length == 9) {
+                                            this.items[raw_idx][1] = value;
+                                            // not reactively ... manual set chartData
                                             this.$refs.chart.changeValue(text, value);
                                         } else {
                                             this.items.push([text, value]);
