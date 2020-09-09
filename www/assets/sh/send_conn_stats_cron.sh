@@ -1,6 +1,6 @@
 #!/bin/bash
 # add following to the jboss crontab
-# for i in 1 2 3 4 ; do /home/jboss/cron/send_conn_stats_cron.sh 2>&1 > /dev/null & [[ i -ne 4 ]] && sleep 15; done
+# */1 7-21   *   *  1-5 for i in 1 2 3 4 ; do /home/jboss/cron/send_conn_stats_cron.sh 2>&1 > /dev/null & [[ i -ne 4 ]] && sleep 15; done
 
 post_data()
 {
@@ -23,11 +23,9 @@ ip="220.1.35.123"
 api="http://220.1.35.84/api/stats_json_api.php"
 CURR=`date "+%Y-%m-%d %H:%M:%S"`
 
-netstat -an | grep EST > netstat_est_cron.log
-
 count()
 {
-    local stats=`cat netstat_est_cron.log | grep "$1" | wc -l`
+    local stats=`netstat -an | grep EST | grep "$1" | wc -l`
     echo $stats	
 }
 
@@ -65,8 +63,8 @@ post()
 
 echo -n "${CURR}: Send send post data to ${api} ... "
 
-DB=`cat netstat_est_cron.log | grep -E ":1521" | wc -l`
-TOTAL=`cat netstat_est_cron.log | wc -l`
+DB=`netstat -an | grep EST | grep -E ":1521" | wc -l`
+TOTAL=`netstat -an | grep EST | wc -l`
 
 post "H0" $(count "220.1.33.") \
 "HA" $(count "220.1.34.") \
