@@ -708,7 +708,7 @@ if (Vue) {
                 this.delay(() => {
                     if (this.inst) this.inst.update();
                     this.update_working = false;
-                }, 50);
+                }, 100);
             },
             resetData: function() {
                 this.chartData = {
@@ -818,7 +818,7 @@ if (Vue) {
                     }, opts)
                 });
                 // sometimes the char doesn't show up properly ... so add this fix to update it
-                this.delay(this.update, 50);
+                this.update();
             },
             toBase64Image: function() { return this.inst.toBase64Image() },
             downloadBase64PNG: function(filename = "download.png") {
