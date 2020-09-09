@@ -69,11 +69,14 @@ if (Vue) {
                 }
             },
             set_items(raw) {
-                this.items.length = 0;
                 let mins = (raw.length <= this.mins)? raw.length - 1 : this.mins;
                 raw.forEach((item, raw_idx, raw) => {
                     let text = (raw_idx == 0) ? '現在' : `${raw_idx}分前`;
-                    this.items.push([text, this.demo ? this.rand() : item.count]);
+                    if (this.items.length == raw.length) {
+                        this.$refs.chart.changeVaule(text, this.demo ? this.rand() : item.count);
+                    } else {
+                        this.items.push([text, this.demo ? this.rand() : item.count]);
+                    }
                 });
                 this.last_update_time = this.now().split(' ')[1];
             },

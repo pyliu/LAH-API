@@ -734,6 +734,18 @@ if (Vue) {
                 });
                 this.delay(this.buildChart, 0);
             },
+            changeVaule(label, value) {
+                let found_idx = undefined;
+                this.chartData.labels.find((olabel, idx, array) => {
+                    if (olabel == label) found_idx = idx;
+                    return olabel == label;
+                })
+                if (found_idx !== undefined) {
+                    this.chartData.datasets[0].data[found_idx] = value;
+                    // redraw the chart
+                    this.update();
+                }
+            },
             buildChart: function (opts = {}) {
                 if (this.inst) {
                     // reset the chart
