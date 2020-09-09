@@ -96,16 +96,17 @@ if (Vue) {
                                 this.notify({title: 'AP連線數', message: '無資料，無法繪製圖形', type: 'warning'});
                             } else {
                                 this.ap_count = 0;
-                                res.data.raw.reverse().forEach(item => {
+                                res.data.raw.reverse().forEach((item, raw_idx, array) => {
+                                    let text = this.get_site_tw(item.site);
                                     // e.g. item => { count: 911, ip: "220.1.35.123", log_time: "20200904175957", site: "HB" }
                                     if (item.site == 'TOTAL') { this.total_count = this.demo ? this.rand(5000) : item.count; }
                                     else if (item.site == 'DB') { this.db_count = this.demo ? this.rand(4000) : item.count; }
                                     else {
                                         let value = this.demo ? this.rand(300) : item.count;
                                         if (this.items.length == 9) {
-                                            this.$refs.chart.changeValue(this.get_site_tw(item.site), value);
+                                            this.$refs.chart.changeValue(text, value);
                                         } else {
-                                            this.items.push([this.get_site_tw(item.site), value]);
+                                            this.items.push([text, value]);
                                         }
                                         this.ap_count += parseInt(value);
                                     }
