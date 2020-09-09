@@ -694,7 +694,7 @@ if (Vue) {
         data: () => ({
             inst: null,
             chartData: null,
-            init_fix: false
+            update_working: false
         }),
         watch: {
             type: function (val) { this.delay(this.buildChart, 0) },
@@ -703,7 +703,10 @@ if (Vue) {
         },
         methods: {
             update: function() {
+                if (this.update_working) return;
+                this.update_working = true;
                 if (this.inst) this.inst.update();
+                this.update_working = false;
             },
             resetData: function() {
                 this.chartData = {
@@ -813,10 +816,7 @@ if (Vue) {
                     }, opts)
                 });
                 // sometimes the char doesn't show up properly ... so add this fix to update it
-                if (!this.init_fix) {
-                    this.delay(this.update, 400);
-                    this.init_fix = true;
-                }
+                this.delay(this.update, 50);
             },
             toBase64Image: function() { return this.inst.toBase64Image() },
             downloadBase64PNG: function(filename = "download.png") {
