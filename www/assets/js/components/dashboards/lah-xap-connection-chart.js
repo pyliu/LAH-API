@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component('lah-xap-connection-chart', {
         template: `<b-card border-variant="secondary" class="shadow">
-            <lah-chart :label="label" :items="items" :type="type" :bg-color="bg_color"></lah-chart>
+            <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left"></lah-chart>
             <div class="d-flex justify-content-between">
                 <span class="small align-middle my-auto">
                     <lah-fa-icon icon="database" title="資料庫連線數"> <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
@@ -34,6 +34,7 @@ if (Vue) {
         }),
         computed: {
             label() { return `跨所AP連線數` },
+            title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
             db_variant() {
                 if (this.db_count > 3000) return 'dark';
                 if (this.db_count > 1800) return 'danger';
@@ -44,7 +45,7 @@ if (Vue) {
         methods: {
             bg_color(label, opacity) {
                 switch(label) {
-                    case '地政局': return `rgb(247, 247, 247, ${opacity})`;    // H0
+                    case '地政局': return `rgb(207, 207, 207, ${opacity})`;    // H0
                     case '桃園所': return `rgb(255, 20, 147, ${opacity})`;     // HA
                     case '中壢所': return `rgb(92, 184, 92, ${opacity})`;      // HB
                     case '大溪所': return `rgb(2, 117, 216, ${opacity})`;      // HC
@@ -92,6 +93,8 @@ if (Vue) {
                                     }
                                 });
                                 this.last_update_time = this.now().split(' ')[1];
+                                // to workaround the line chart not rendering well issue
+                                this.delay(() => this.$refs.chart.update(), 0);
                             }
                         } else {
                             this.alert({title: `取得${this.ip}連線數`, message: `取得AP連線數回傳狀態碼有問題【${res.data.status}】`, variant: "warning"});

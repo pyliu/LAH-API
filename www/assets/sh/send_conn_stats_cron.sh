@@ -2,10 +2,6 @@
 # add following to the jboss crontab
 # for i in 1 2 3 4 ; do /home/jboss/cron/send_conn_stats_cron.sh 2>&1 > /dev/null & [[ i -ne 4 ]] && sleep 15; done
 
-#ip=`ifconfig | grep 'inet addr:' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{print $1}'`
-ip="220.1.35.123"
-api="http://220.1.35.84/api/stats_json_api.php"
-
 post_data()
 {
     local log_time=`date "+%Y%m%d%H%M%S"`
@@ -20,10 +16,16 @@ post_single()
     curl -X POST --data "${data}" $api
 }
 
+# non-root user may not find ifconfig ...
+#ip=`ifconfig | grep 'inet addr:' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{print $1}'`
+ip="220.1.35.123"
+api="http://220.1.35.84/api/stats_json_api.php"
+netstat_est=`netstat -an | grep EST`
+CURR=`date "+%Y-%m-%d %H:%M:%S"`
 
 count()
 {
-    local stats=`netstat -an | grep EST | grep "$1" | wc -l`
+    local stats=`echo $netstat_est | grep "$1" | wc -l`
     echo $stats	
 }
 
@@ -59,12 +61,11 @@ post()
     $api
 }
 
-CURR=`date "+%Y-%m-%d %H:%M:%S"`
 echo -n "${CURR}: Send send post data to ${api} ... "
-DB=`netstat -an | grep EST | grep -E ":1521" | wc -l`
-TOTAL=`netstat -an | grep EST | wc -l`
 
-#clear
+DB=`echo $netstat_est | grep -E ":1521" | wc -l`
+TOTAL=`echo $netstat_est | wc -l`
+
 post "H0" $(count "220.1.33.") \
 "HA" $(count "220.1.34.") \
 "HB" $(count ":9080") \
