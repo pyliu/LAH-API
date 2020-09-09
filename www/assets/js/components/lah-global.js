@@ -571,7 +571,7 @@ Vue.mixin({
         isOfficeHours() {
             let now = new Date();
             if (now.getDay() === 0 || now.getDay() === 6) return false;
-            return now.getHours() >= 8 && now.getHours() <= 17;
+            return now.getHours() >= 7 && now.getHours() <= 21;
         },
         delay(func, ms) { return setTimeout(func, ms) }
     }
