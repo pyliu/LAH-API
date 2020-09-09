@@ -62,7 +62,7 @@ if (Vue) {
                 this.items.length = 0;
                 let mins = (raw.length <= this.mins)? raw.length - 1 : this.mins;
                 raw.forEach((item, raw_idx, raw) => {
-                    let text = (raw_idx == mins) ? '現在' : `${mins - raw_idx}分前`;
+                    let text = (raw_idx == 0) ? '現在' : `${raw_idx}分前`;
                     this.items.push([text, this.demo ? this.rand() : item.count]);
                 });
                 this.last_update_time = this.now().split(' ')[1];
@@ -80,7 +80,7 @@ if (Vue) {
                             if (res.data.data_count == 0) {
                                 this.notify({title: `跨所 AP ${this.site_tw} 連線趨勢圖`, message: '無資料，無法繪製圖形', type: 'warning'});
                             } else {
-                                this.set_items(res.data.raw.reverse());
+                                this.set_items(res.data.raw);
                             }
                         } else {
                             this.alert({title: `取得跨所 AP ${this.site_tw} 連線趨勢圖`, message: `取得跨所 AP ${this.site_tw} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`, variant: "warning"});
