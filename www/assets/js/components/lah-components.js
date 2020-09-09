@@ -705,8 +705,10 @@ if (Vue) {
             update: function() {
                 if (this.update_working) return;
                 this.update_working = true;
-                if (this.inst) this.inst.update();
-                this.update_working = false;
+                this.delay(() => {
+                    if (this.inst) this.inst.update();
+                    this.update_working = false;
+                }, 50);
             },
             resetData: function() {
                 this.chartData = {
