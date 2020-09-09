@@ -16,16 +16,18 @@ post_single()
     curl -X POST --data "${data}" $api
 }
 
+
 # non-root user may not find ifconfig ...
 #ip=`ifconfig | grep 'inet addr:' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{print $1}'`
 ip="220.1.35.123"
 api="http://220.1.35.84/api/stats_json_api.php"
-netstat_est=`netstat -an | grep EST`
 CURR=`date "+%Y-%m-%d %H:%M:%S"`
+
+netstat -an | grep EST > netstat_est_cron.log
 
 count()
 {
-    local stats=`echo $netstat_est | grep "$1" | wc -l`
+    local stats=`cat netstat_est_cron.log | grep "$1" | wc -l`
     echo $stats	
 }
 
@@ -63,8 +65,8 @@ post()
 
 echo -n "${CURR}: Send send post data to ${api} ... "
 
-DB=`echo $netstat_est | grep -E ":1521" | wc -l`
-TOTAL=`echo $netstat_est | wc -l`
+DB=`cat netstat_est_cron.log | grep -E ":1521" | wc -l`
+TOTAL=`cat netstat_est_cron.log | wc -l`
 
 post "H0" $(count "220.1.33.") \
 "HA" $(count "220.1.34.") \
@@ -79,3 +81,4 @@ post "H0" $(count "220.1.33.") \
 "TOTAL" $TOTAL
 
 echo "done."
+
