@@ -28,7 +28,7 @@ if (Vue) {
         props: {
             ip: { type: String, default: CONFIG.AP_SVR || '220.1.35.123' },
             type: { type: String, default: 'doughnut' },
-            demo: { type: Boolean, default: true},
+            demo: { type: Boolean, default: false},
             popupButton: { type: Boolean, default: true }
         },
         data: () => ({
