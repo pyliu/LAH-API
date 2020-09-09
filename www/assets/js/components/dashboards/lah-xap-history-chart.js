@@ -6,7 +6,7 @@ if (Vue) {
                 <span class="align-middle small my-auto">
                     <lah-fa-icon icon="network-wired" title="現在連線數"> <b-badge :variant="badge_variant">{{now_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="clock" prefix="far" title="更新時間">
-                        <b-badge v-if="isOfficeHours()" variant="secondary">{{last_update_time}}</b-badge>
+                        <b-badge v-if="isOfficeHours() || demo" variant="secondary">{{last_update_time}}</b-badge>
                         <b-badge v-else variant="danger" title="非上班時間所以停止更新">已停止更新</b-badge>
                     </lah-fa-icon>
                 </span>
@@ -77,7 +77,7 @@ if (Vue) {
             set_items(raw) {
                 raw.forEach((item, raw_idx, raw) => {
                     let text = (raw_idx == 0) ? '現在' : `${raw_idx}分前`;
-                    let val = this.demo ? this.rand() : item.count;
+                    let val = this.demo ? this.rand(300) : item.count;
                     if (this.items.length == raw.length) {
                         this.$refs.chart.changeVaule(text, val);
                     } else {
