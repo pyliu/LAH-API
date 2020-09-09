@@ -34,7 +34,7 @@ if (Vue) {
                 clearTimeout(this.spin_timer);
                 this.spin_timer = this.delay(() => {
                     this.items.length = 0;
-                    this.reload.bind(true);
+                    this.reload(true);
                 }, 1000);
             },
             site(nVal, oVal) { this.set_site_tw(nVal) }
