@@ -130,11 +130,16 @@ if (Vue) {
             },
             show_count(e, payload) {
                 if (this.empty(payload['label'])) return;
+                let variant = 'info', action = '';
+                if (payload['value'] > 200) { variant = 'danger'; action='shiver'; }
+                else if (payload['value'] > 100) { variant = 'warning'; action='beat'; }
+                else if (payload['value'] > 10) { variant = 'success'; action='jump'; }
+                else variant = 'muted';
                 this.notify({
                     title: `${this.site_tw}連線數`,
                     subtitle: `${payload['label']}`,
-                    message: `<i class="fas fa-network-wired"></i> ${payload['value']}`,
-                    type: 'muted'
+                    message: `<i class="fas fa-network-wired ld ld-${action}"></i> ${payload['value']}`,
+                    type: variant
                 });
             }
         },
