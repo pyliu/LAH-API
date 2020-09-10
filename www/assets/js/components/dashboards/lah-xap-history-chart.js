@@ -131,7 +131,7 @@ if (Vue) {
             show_count(e, payload) {
                 if (this.empty(payload['label'])) return;
                 let variant = 'info', action = '';
-                if (payload['value'] > 200) { variant = 'danger'; action='shiver'; }
+                if (payload['value'] > 200) { variant = 'danger'; action='coin-h'; }
                 else if (payload['value'] > 100) { variant = 'warning'; action='beat'; }
                 else if (payload['value'] > 10) { variant = 'success'; action='jump'; }
                 else variant = 'muted';
