@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component('lah-xap-connection-chart', {
         template: `<b-card border-variant="secondary" class="shadow">
-            <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left"></lah-chart>
+            <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left" @click="history"></lah-chart>
             <div class="d-flex justify-content-between mt-1">
                 <span class="small align-middle my-auto">
                     <lah-fa-icon icon="server" title="AP總連線數"> <b-badge :variant="ap_variant" pill>{{ap_count}}</b-badge></lah-fa-icon>
@@ -104,7 +104,8 @@ if (Vue) {
                                     else {
                                         let value = this.demo ? this.rand(300) : item.count;
                                         if (this.items.length == 9) {
-                                            this.items[raw_idx][1] = value;
+                                            // this.$log(raw_idx, this.items[raw_idx], Array.isArray(this.items[raw_idx]), item);
+                                            this.items[raw_idx - 1][1] = value;
                                             // not reactively ... manual set chartData
                                             this.$refs.chart.changeValue(text, value);
                                         } else {
@@ -129,6 +130,26 @@ if (Vue) {
                     // check after an hour
                     this.delay(this.reload, 3600000);
                 }
+            },
+            history(e, payload) {
+                let site = '';
+                switch(payload['label']) {
+                    case '地政局': site = 'H0'; break;
+                    case '桃園所': site = 'HA'; break;
+                    case '中壢所': site = 'HB'; break;
+                    case '大溪所': site = 'HC'; break;
+                    case '楊梅所': site = 'HD'; break;
+                    case '蘆竹所': site = 'HE'; break;
+                    case '八德所': site = 'HF'; break;
+                    case '平鎮所': site = 'HG'; break;
+                    case '龜山所': site = 'HH'; break;
+                    default: site = 'HB';
+                }
+                this.msgbox({
+                    title: `跨所AP${payload['label']}連線`,
+                    message: this.$createElement('lah-xap-history-chart', { props: { site: site, mins: 60, demo: this.demo, popupButton: false, type: 'bar' } }),
+                    size: "xl"
+                });
             },
             popup() {
                 this.msgbox({

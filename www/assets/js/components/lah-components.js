@@ -745,6 +745,8 @@ if (Vue) {
                 })
                 if (found_idx !== undefined) {
                     this.chartData.datasets[0].data[found_idx] = value;
+                    // also update background color as well
+                    this.chartData.datasets[0].backgroundColor[found_idx] = this.bgColor([label, value], 0.6);
                     // redraw the chart
                     this.update();
                 } else {
