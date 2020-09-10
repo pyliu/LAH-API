@@ -125,6 +125,9 @@ if (Vue) {
                         //this.isBusy = false;
                         // reload every 15s
                         this.delay(this.reload, this.demo ? 5000 : 15000);
+                        Vue.nextTick(() => {
+                            this.$refs.chart.update();
+                        });
                     });
                 } else {
                     // check after an hour

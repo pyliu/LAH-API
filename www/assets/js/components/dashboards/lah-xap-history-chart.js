@@ -112,6 +112,9 @@ if (Vue) {
                     }).finally(() => {
                         //this.isBusy = false;
                         this.delay(this.reload, this.timer_ms);
+                        Vue.nextTick(() => {
+                            this.$refs.chart.update();
+                        });
                     });
                 } else {
                     // check after an hour
