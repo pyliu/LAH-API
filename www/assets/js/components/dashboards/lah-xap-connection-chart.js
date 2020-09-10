@@ -142,6 +142,7 @@ if (Vue) {
                 }
             },
             history(e, payload) {
+                if (this.empty(payload['label'])) return;
                 /**
                  * payload example
                  * payload['point'] => index, value
