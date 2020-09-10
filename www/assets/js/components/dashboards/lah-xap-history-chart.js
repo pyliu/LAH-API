@@ -56,7 +56,7 @@ if (Vue) {
         methods: {
             bg_color(dataset_item, opacity) {
                 if (dataset_item[1] > 200) return `rgb(243, 0, 19, ${opacity})`;   // red
-                if (dataset_item[1] > 100) return `rgb(243, 247, 5, ${opacity})`; // yellow
+                if (dataset_item[1] > 100) return `rgb(238, 182, 1, ${opacity})`; // yellow
                 if (dataset_item[1] > 10) return `rgb(0, 200, 0, ${opacity})`;   // green
                 return `rgb(207, 207, 207, ${opacity})`;                           // muted
             },
