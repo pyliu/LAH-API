@@ -104,10 +104,17 @@ if (Vue) {
                                     else {
                                         let value = this.demo ? this.rand(300) : item.count;
                                         if (this.items.length == 9) {
-                                            // this.$log(raw_idx, this.items[raw_idx], Array.isArray(this.items[raw_idx]), item);
-                                            this.items[raw_idx - 1][1] = value;
-                                            // not reactively ... manual set chartData
-                                            this.$refs.chart.changeValue(text, value);
+                                            let found = this.items.find((oitem, idx, array) => {
+                                                return oitem[0] == text;
+                                            });
+                                            if (found) {
+                                                // the dataset item format is ['text', 123]
+                                                found[1] = value;
+                                                // not reactively ... manual set chartData
+                                                this.$refs.chart.changeValue(text, value);
+                                            } else {
+                                                this.$warn(`RAW IDX: ${raw_idx}`, 'RAW ITEM: ', item, `FOUND IDX: ${found_idx}`, 'FOUND ITEM: ',  this.items[found_idx], `NOW items: `, this.items);
+                                            }
                                         } else {
                                             this.items.push([text, value]);
                                         }
