@@ -64,7 +64,7 @@ if (Vue) {
                     case '楊梅所': return `rgb(0, 157, 122, ${opacity})`;      // HD
                     case '蘆竹所': return `rgb(33, 137, 227, ${opacity})`;     // HE
                     case '八德所': return `rgb(181, 92, 66, ${opacity})`;      // HF
-                    case '平鎮所': return `rgb(246, 153, 158, ${opacity})`;    // HG
+                    case '平鎮所': return `rgb(195, 42, 84, ${opacity})`;    // HG
                     case '龜山所': return `rgb(136, 72, 152, ${opacity})`;     // HH
                     default: `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`;
                 }
