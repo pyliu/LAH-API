@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component('lah-xap-history-chart', {
         template: `<b-card border-variant="secondary" class="shadow">
-            <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color"></lah-chart>
+            <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" @click="show_count"></lah-chart>
             <div class="d-flex justify-content-between mt-1">
                 <span class="align-middle small my-auto">
                     <lah-fa-icon icon="network-wired" title="現在連線數"> <b-badge :variant="badge_variant">{{now_count}}</b-badge></lah-fa-icon>
@@ -126,6 +126,15 @@ if (Vue) {
                     title: `跨所AP ${this.site_tw}連線`,
                     message: this.$createElement('lah-xap-history-chart', { props: { site: this.site, mins: 60, demo: this.demo, popupButton: false } }),
                     size: "xl"
+                });
+            },
+            show_count(e, payload) {
+                if (this.empty(payload['label'])) return;
+                this.notify({
+                    title: `${this.site_tw}連線數`,
+                    subtitle: `${payload['label']}`,
+                    message: `<i class="fas fa-network-wired"></i> ${payload['value']}`,
+                    type: 'muted'
                 });
             }
         },

@@ -142,6 +142,12 @@ if (Vue) {
                 }
             },
             history(e, payload) {
+                /**
+                 * payload example
+                 * payload['point'] => index, value
+                 * payload['label'] => '中壢所'
+                 * payload['value'] => 20
+                 */
                 let site = '';
                 switch(payload['label']) {
                     case '地政局': site = 'H0'; break;
