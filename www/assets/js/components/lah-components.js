@@ -748,7 +748,7 @@ if (Vue) {
                     // also update background color as well
                     this.chartData.datasets[0].backgroundColor[found_idx] = this.bgColor([label, value], 0.6);
                     // redraw the chart
-                    this.update();
+                    Vue.nextTick(this.update);
                 } else {
                     this.$warn(`lah-chart: Not found "${label}" in dataset, the ${value} will not be updated.`, this.chartData);
                 }
@@ -818,7 +818,7 @@ if (Vue) {
                     }, opts)
                 });
                 // sometimes the char doesn't show up properly ... so add this fix to update it
-                this.update();
+                Vue.nextTick(this.update);
             },
             toBase64Image: function() { return this.inst.toBase64Image() },
             downloadBase64PNG: function(filename = "download.png") {
