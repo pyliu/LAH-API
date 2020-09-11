@@ -44,7 +44,7 @@ if (Vue) {
                     this.notify({
                         title: '跨所AP連線數警示',
                         type: 'warning',
-                        message: `<i class="fas fa-exclamation-triangle"></i> 目前連線數達 ${val}，須注意!`
+                        message: `<i class="fas fa-exclamation-triangle"></i> 目前連線數達 <strong>${val}</strong>，須注意!`
                     })
                 }
             },
@@ -54,13 +54,13 @@ if (Vue) {
                         this.alert({
                             title: '跨所AP資料庫連線數超標警示',
                             type: 'danger',
-                            message: `<i class="fas fa-exclamation-circle"></i> 目前占用資料庫連線數已超過 3000 (${val})，請立即處理！` 
+                            message: `<i class="fas fa-exclamation-circle"></i> 目前占用資料庫連線數已超過 3000 (<strong>${val}</strong>)，請立即處理！` 
                         });
                     } else {
                         this.notify({
                             title: '跨所AP資料庫連線數過高通知',
                             type: 'warning',
-                            message: `<i class="fas fa-exclamation-circle"></i> 目前占用資料庫連線數已達 ${val}，須注意!` 
+                            message: `<i class="fas fa-exclamation-circle"></i> 目前占用資料庫連線數已達 <strong>${val}</strong>，須注意!` 
                         });
                     }
                 }
