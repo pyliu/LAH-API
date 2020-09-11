@@ -50,11 +50,19 @@ if (Vue) {
             },
             db_count(val) {
                 if (val > 2500) {
-                    this.notify({
-                        title: '跨所AP資料庫連線數過高警示',
-                        type: 'danger',
-                        message: `<i class="fas fa-exclamation-circle"></i> 目前占用資料庫連線數已達達 ${val}，須注意!`
-                    })
+                    if (val > 3000) {
+                        this.alert({
+                            title: '跨所AP資料庫連線數過高警示',
+                            type: 'danger',
+                            message: `<i class="fas fa-exclamation-circle"></i> 目前占用資料庫連線數已達 ${val}，請立即處理！` 
+                        });
+                    } else {
+                        this.notify({
+                            title: '跨所AP資料庫連線數過高通知',
+                            type: val > 3000 ? 'dark' : 'danger',
+                            message: `<i class="fas fa-exclamation-circle"></i> 目前占用資料庫連線數已達 ${val}，須注意!` 
+                        });
+                    }
                 }
             }
         },
