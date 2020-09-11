@@ -4,8 +4,8 @@ if (Vue) {
             <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left" @click="history"></lah-chart>
             <div class="d-flex justify-content-between mt-1">
                 <span class="small align-middle my-auto">
-                    <lah-fa-icon icon="server" title="AP總連線數"> <b-badge :variant="ap_variant" pill>{{ap_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="database" title="資料庫連線數"> <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="server" title="AP總連線數" :action="ap_icon_action"> <b-badge :variant="ap_variant" pill>{{ap_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="database" title="資料庫連線數" :action="db_icon_action"> <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="link" title="跨所AP上所有連線數"> <b-badge variant="info" pill>{{total_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="clock" prefix="far" title="更新時間">
                         <b-badge v-if="isOfficeHours() || demo" variant="secondary">{{last_update_time}}</b-badge>
@@ -47,14 +47,24 @@ if (Vue) {
                 if (this.ap_count > 300) return 'warning';
                 return 'success';
             },
+            ap_icon_action() { return this.icon_action_by_variant(this.ap_variant) },
             db_variant() {
                 if (this.db_count > 3000) return 'dark';
                 if (this.db_count > 1800) return 'danger';
                 if (this.db_count > 1000) return 'warning';
                 return 'success';
-            }
+            },
+            db_icon_action() { return this.icon_action_by_variant(this.db_variant) },
         },
         methods: {
+            icon_action_by_variant(variant) {
+                switch(variant) {
+                    case 'dark': return 'tremble';
+                    case 'danger': return 'shiver';
+                    case 'warning': return 'beat';
+                }
+                return 'breath';
+            },
             bg_color(dataset_item, opacity) {
                 switch(dataset_item[0]) {
                     case '地政局': return `rgb(207, 207, 207, ${opacity})`;    // H0

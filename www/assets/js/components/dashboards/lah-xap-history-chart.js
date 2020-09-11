@@ -4,7 +4,7 @@ if (Vue) {
             <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" @click="show_count"></lah-chart>
             <div class="d-flex justify-content-between mt-1">
                 <span class="align-middle small my-auto">
-                    <lah-fa-icon icon="network-wired" title="現在連線數"> <b-badge :variant="badge_variant">{{now_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="network-wired" title="現在連線數" :action="icon_action"> <b-badge :variant="badge_variant">{{now_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="clock" prefix="far" title="更新時間">
                         <b-badge v-if="isOfficeHours() || demo" variant="secondary">{{last_update_time}}</b-badge>
                         <b-badge v-else variant="danger" title="非上班時間所以停止更新">已停止更新</b-badge>
@@ -47,18 +47,26 @@ if (Vue) {
             label() { return `${this.site_tw}` },
             title() { return `${this.site_tw}連線` },
             badge_variant() {
-                if (this.now_count > 200) return `danger`;   // red
-                if (this.now_count > 100) return `warning`;  // yellow
-                if (this.now_count > 10) return `success`;   // green
-                return `muted`;                              // muted
+                [variant, action, rgb] = this.style_by_count(this.now_count);
+                return variant;
+            },
+            icon_action() {
+                [variant, action, rgb] = this.style_by_count(this.now_count);
+                return action;
             }
         },
         methods: {
+            style_by_count(value, opacity = 0.6) {
+                let variant, action, rgb;
+                if (value > 200) { variant = 'danger'; action='coin-h'; rgb = `rgb(243, 0, 19, ${opacity})`}        // red
+                else if (value > 100) { variant = 'warning'; action='beat'; rgb = `rgb(238, 182, 1, ${opacity})`;}  // yellow
+                else if (value > 10) { variant = 'success'; action='jump'; rgb = `rgb(0, 200, 0, ${opacity})`}      // green
+                else { variant = 'muted'; action= ''; rgb = `rgb(207, 207, 207, ${opacity})`; }                     // muted
+                return [variant, action, rgb]
+            },
             bg_color(dataset_item, opacity) {
-                if (dataset_item[1] > 200) return `rgb(243, 0, 19, ${opacity})`;   // red
-                if (dataset_item[1] > 100) return `rgb(238, 182, 1, ${opacity})`; // yellow
-                if (dataset_item[1] > 10) return `rgb(0, 200, 0, ${opacity})`;   // green
-                return `rgb(207, 207, 207, ${opacity})`;                           // muted
+                [variant, action, rgb] = this.style_by_count(dataset_item[1], opacity);
+                return rgb;
             },
             set_site_tw(site_code) {
                 switch(site_code) {
@@ -130,11 +138,7 @@ if (Vue) {
             },
             show_count(e, payload) {
                 if (this.empty(payload['label'])) return;
-                let variant = 'info', action = '';
-                if (payload['value'] > 200) { variant = 'danger'; action='coin-h'; }
-                else if (payload['value'] > 100) { variant = 'warning'; action='beat'; }
-                else if (payload['value'] > 10) { variant = 'success'; action='jump'; }
-                else variant = 'muted';
+                [variant, action, rgb] = this.style_by_count(payload['value']);
                 this.notify({
                     title: `${this.site_tw}連線數`,
                     subtitle: `${payload['label']}`,
