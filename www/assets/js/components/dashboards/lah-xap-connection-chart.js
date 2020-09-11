@@ -38,6 +38,26 @@ if (Vue) {
             ap_count: 0,
             last_update_time: ''
         }),
+        watch: {
+            ap_count(val) {
+                if (val > 400) {
+                    this.notify({
+                        title: '跨所AP連線數過高警示',
+                        type: 'danger',
+                        message: `<i class="fas fa-exclamation-triangle"></i> 目前連線數達 ${val}，須注意!`
+                    })
+                }
+            },
+            db_count(val) {
+                if (val > 2500) {
+                    this.notify({
+                        title: '跨所AP資料庫連線數過高警示',
+                        type: 'danger',
+                        message: `<i class="fas fa-exclamation-circle"></i> 目前占用資料庫連線數已達達 ${val}，須注意!`
+                    })
+                }
+            }
+        },
         computed: {
             label() { return `跨所AP連線數` },
             title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
