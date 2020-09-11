@@ -818,7 +818,7 @@ if (Vue) {
                     }, opts)
                 });
                 // sometimes the char doesn't show up properly ... so add this fix to update it
-                Vue.nextTick(this.update);
+                this.delay(this.update, 400);
             },
             toBase64Image: function() { return this.inst.toBase64Image() },
             downloadBase64PNG: function(filename = "download.png") {
