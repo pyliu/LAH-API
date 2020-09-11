@@ -105,7 +105,6 @@ if (Vue) {
                         site: this.site,
                         count: parseInt(this.mins) + 1
                     }).then(res => {
-                        console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得跨所 AP ${this.site_tw} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`);
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             if (res.data.data_count == 0) {
                                 this.notify({title: `跨所 AP ${this.site_tw} 連線趨勢圖`, message: '無資料，無法繪製圖形', type: 'warning'});
