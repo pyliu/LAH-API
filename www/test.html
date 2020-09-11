@@ -24,13 +24,19 @@
         .Treant img {
             max-width: 64px;
         }
+        .card {
+            max-width: 640px;
+        }
     </style>
 </head>
 
 <body>
     <section class="hide">
         <div class="container-fluid" v-cloak>
-            <div id="test_xlsx"></div>
+            <b-card-group columns style="margin-top: 450px">
+                <lah-xap-connection-chart demo></lah-xap-connection-chart>
+                <lah-xap-history-chart site="HA" type='bar' demo></lah-xap-history-chart>
+            </b-card-group>
             <b-button v-b-toggle.sidebar-1>Toggle Sidebar</b-button>
             <b-sidebar id="sidebar-1" title="Sidebar" bg-variant="dark" text-variant="light" backdrop no-close-on-backdrop shadow>
             <div class="px-3 py-2">
@@ -43,6 +49,7 @@
             </b-sidebar>
             <div id="treant" class="chart mt-2"></div>
             <div id="testHX"></div>
+            <div id="test_xlsx"></div>
         </div>
     </section>
 
@@ -64,6 +71,9 @@
     <script src="assets/js/components/lah-components.js"></script>
     <script src="assets/js/chart.min.js"></script>
     <script src="assets/js/mark.jquery.min.js"></script>
+
+    <script src="assets/js/components/dashboards/lah-xap-connection-chart.js"></script>
+    <script src="assets/js/components/dashboards/lah-xap-history-chart.js"></script>
 
     <script src="assets/js/treant/vendor/raphael.js"></script>
     <script src="assets/js/treant/Treant.js"></script>
