@@ -2166,7 +2166,7 @@ if (Vue) {
                         <small>同步作業人員</small>
                     </b-form-checkbox>
                 </b-input-group>
-                <div v-if="wip" class="filter-btn-group col-auto">
+                <div class="filter-btn-group col-auto">
                     <b-button @click="updateRM30" size="sm" variant="outline-primary"><lah-fa-icon icon="edit"> 更新</lah-fa-icon></b-button>
                 </div>
             </div>
@@ -2179,7 +2179,7 @@ if (Vue) {
                         </template>
                     </b-form-select>
                 </b-input-group>
-                <div v-if="wip" class="filter-btn-group col-auto">
+                <div class="filter-btn-group col-auto">
                     <b-button @click="updateRM39" size="sm" variant="outline-primary"><lah-fa-icon icon="edit"> 更新</lah-fa-icon></b-button>
                 </div>
             </div>
@@ -2192,7 +2192,7 @@ if (Vue) {
                         </template>
                     </b-form-select>
                 </b-input-group>
-                <div v-if="wip" class="filter-btn-group col-auto">
+                <div class="filter-btn-group col-auto">
                     <b-button @click="updateRM42" size="sm" variant="outline-primary"><lah-fa-icon icon="edit"> 更新</lah-fa-icon></b-button>
                 </div>
             </div>
