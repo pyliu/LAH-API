@@ -66,7 +66,7 @@ class Message {
                 if (!$system) {
                     global $client_ip;
                     $sender_info = $this->getUserInfo($client_ip);
-                    $sendcname = $sender_info["AP_USER_NAME"];
+                    $sendcname = $sender_info["AP_USER_NAME"] ?? '系統';
                     $sender = $sender_info["DocUserID"];
                     $sendIP = $sender_info["AP_PCIP"];
                 }
