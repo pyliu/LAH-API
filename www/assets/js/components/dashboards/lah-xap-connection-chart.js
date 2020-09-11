@@ -4,11 +4,11 @@ if (Vue) {
             <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left" @click="history"></lah-chart>
             <div class="d-flex justify-content-between mt-1">
                 <span class="small align-middle my-auto">
-                    <lah-fa-icon icon="server" title="AP總連線數" :action="ap_icon_action"> <b-badge :variant="ap_variant" pill>{{ap_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="database" title="資料庫連線數" :action="db_icon_action"> <b-badge :variant="db_variant" pill>{{db_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="link" title="跨所AP上所有連線數"> <b-badge variant="info" pill>{{total_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="clock" prefix="far" title="更新時間">
-                        <b-badge v-if="isOfficeHours() || demo" variant="secondary">{{last_update_time}}</b-badge>
+                    <lah-fa-icon icon="server" title="AP總連線數" :action="ap_icon_action" :variant="ap_variant"> <b-badge variant="muted" pill>{{ap_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="database" title="資料庫連線數" :action="db_icon_action" :variant="db_variant"> <b-badge variant="muted" pill>{{db_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="link" title="跨所AP上所有連線數" variant="info"> <b-badge variant="muted" pill>{{total_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="clock" prefix="far" title="更新時間" variant="secondary">
+                        <b-badge v-if="isOfficeHours() || demo" variant="muted">{{last_update_time}}</b-badge>
                         <b-badge v-else variant="danger" title="非上班時間所以停止更新">已停止更新</b-badge>
                     </lah-fa-icon>
                 </span>
