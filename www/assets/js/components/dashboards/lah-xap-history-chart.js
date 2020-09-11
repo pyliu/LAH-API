@@ -60,7 +60,7 @@ if (Vue) {
                 let variant, action, rgb;
                 if (value > 200) { variant = 'danger'; action='coin-h'; rgb = `rgb(243, 0, 19, ${opacity})`}        // red
                 else if (value > 100) { variant = 'warning'; action='beat'; rgb = `rgb(238, 182, 1, ${opacity})`;}  // yellow
-                else if (value > 10) { variant = 'success'; action='jump'; rgb = `rgb(0, 200, 0, ${opacity})`}      // green
+                else if (value > 5) { variant = 'success'; action='jump'; rgb = `rgb(0, 200, 0, ${opacity})`}      // green
                 else { variant = 'muted'; action= ''; rgb = `rgb(207, 207, 207, ${opacity})`; }                     // muted
                 return [variant, action, rgb]
             },
