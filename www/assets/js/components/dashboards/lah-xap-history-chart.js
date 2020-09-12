@@ -64,12 +64,12 @@ if (Vue) {
                 let variant, action, rgb, icon;
                 if (value > 200) { icon='network-wired'; variant = 'danger'; action='tremble'; rgb = `rgb(243, 0, 19, ${opacity})`}        // red
                 else if (value > 100) { icon='network-wired'; variant = 'warning'; action='beat'; rgb = `rgb(238, 182, 1, ${opacity})`;}  // yellow
-                else if (value > 5) { icon='project-diagram'; variant = 'success'; action='jump'; rgb = `rgb(0, 200, 0, ${opacity})`}      // green
+                else if (value > 5) { icon='network-wired'; variant = 'success'; action='jump'; rgb = `rgb(0, 200, 0, ${opacity})`}      // green
                 else { icon='ethernet'; variant = 'muted'; action= ''; rgb = `rgb(207, 207, 207, ${opacity})`; }                     // muted
                 return [variant, action, rgb, icon]
             },
             bg_color(dataset_item, opacity) {
-                [variant, action, rgb] = this.style_by_count(dataset_item[1], opacity);
+                [variant, action, rgb, icon] = this.style_by_count(dataset_item[1], opacity);
                 return rgb;
             },
             set_site_tw(site_code) {
