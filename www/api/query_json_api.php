@@ -32,7 +32,7 @@ switch ($_POST["type"]) {
 		$stats = new StatsSQLite3();
 		$total = $stats->getTotal('overdue_msg_count');
 		// $total = $mock ? $cache->get('overdue_msg_count') : $stats->getTotal('overdue_msg_count');
-		// $cache->set('overdue_msg_count', $total);
+		// if (!$mock) $cache->set('overdue_msg_count', $total);
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
 			"data_count" => 1,
@@ -42,7 +42,7 @@ switch ($_POST["type"]) {
 		break;
 	case "user_mapping":
 		$operators = $mock ? $cache->get('user_mapping') : GetDBUserMapping();
-		$cache->set('user_mapping', $operators);
+		if (!$mock) $cache->set('user_mapping', $operators);
 		$count = count($operators);
 		$log->info("XHR [user_mapping] 取得使用者對應表($count)。");
 		echo json_encode(array(
@@ -56,7 +56,7 @@ switch ($_POST["type"]) {
 		$log->info("XHR [on_board_users] 取得所有在職使用者資料請求");
 		$user_info = new UserInfo();
 		$results = $mock ? $cache->get('on_board_users') : $user_info->getOnBoardUsers();
-		$cache->set('on_board_users', $results);
+		if (!$mock) $cache->set('on_board_users', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無在職使用者資料。");
 			$log->info("XHR [on_board_users] 查無在職使用者資料。");
@@ -98,7 +98,7 @@ switch ($_POST["type"]) {
 		$log->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
 		$log->info("XHR [overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");
 		$rows = $mock ? $cache->get('overdue_reg_cases') : $query->queryOverdueCasesIn15Days($_POST["reviewer_id"]);
-		$cache->set('overdue_msg_count', $rows);
+		if (!$mock) $cache->set('overdue_msg_count', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [overdue_reg_cases] 近15天查無逾期資料");
 			$result = array(
@@ -141,7 +141,7 @@ switch ($_POST["type"]) {
 		$log->info("XHR [almost_overdue_reg_cases] 即將逾期案件查詢請求");
 		$log->info("XHR [almost_overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");
 		$rows = $mock ? $cache->get('almost_overdue_reg_cases') : $query->queryAlmostOverdueCases($_POST["reviewer_id"]);
-		$cache->set('almost_overdue_reg_cases', $rows);
+		if (!$mock) $cache->set('almost_overdue_reg_cases', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [almost_overdue_reg_cases] 近4小時內查無即將逾期資料");
 			$result = array(
@@ -206,7 +206,7 @@ switch ($_POST["type"]) {
 	case "xcase-check":
 		$log->info("XHR [xcase-check] 查詢跨所註記遺失請求");
 		$query_result = $mock ? $cache->get('xcase-check') : $query->getProblematicCrossCases();
-		$cache->set('xcase-check', $query_result);
+		if (!$mock) $cache->set('xcase-check', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [xcase-check] 查無資料");
 			echoErrorJSONString();
@@ -241,7 +241,7 @@ switch ($_POST["type"]) {
 	case "fix_xcase":
 		$log->info("XHR [fix_xcase] 修正跨所註記遺失【".$_POST["id"]."】請求");
 		$result_flag = $mock ? $cache->get('fix_xcase') : $query->fixProblematicCrossCases($_POST["id"]);
-		$cache->set('fix_xcase', $result_flag);
+		if (!$mock) $cache->set('fix_xcase', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -259,7 +259,7 @@ switch ($_POST["type"]) {
 		$year = $_POST["year"];
 		$code = $_POST["code"];
 		$max_num = $mock ? $cache->get('max') : $query->getMaxNumByYearWord($year, $code);
-		$cache->set('max', $max_num);
+		if (!$mock) $cache->set('max', $max_num);
 		$log->info("XHR [max] 查詢成功【查詢 ${year}-${code} 回傳值為 ${max_num}");
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -270,7 +270,7 @@ switch ($_POST["type"]) {
 	case "ralid":
 		$log->info("XHR [ralid] 查詢土地標示部資料【".$_POST["text"]."】請求");
 		$query_result = $mock ? $cache->get('ralid') : $query->getSectionRALIDCount($_POST["text"]);
-		$cache->set('ralid', $query_result);
+		if (!$mock) $cache->set('ralid', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [ralid] 查無資料");
 			echoErrorJSONString();
@@ -288,7 +288,7 @@ switch ($_POST["type"]) {
 	case "cert_log":
 		$log->info("XHR [cert_log] 查詢謄本紀錄資料【".$_POST["section_code"].", ".implode(',', $_POST["numbers"])."】請求");
 		$query_result = $mock ? $cache->get('cert_log') : $query->getCertLog($_POST["section_code"], $_POST["numbers"]);
-		$cache->set('cert_log', $query_result);
+		if (!$mock) $cache->set('cert_log', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [cert_log] 查無資料");
 			echoErrorJSONString("查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
@@ -305,7 +305,7 @@ switch ($_POST["type"]) {
 	case "crsms":
 		$log->info("XHR [crsms] 查詢登記案件資料【".$_POST["id"]."】請求");
 		$query_result = $mock ? $cache->get('crsms') : $query->getCRSMSCasesByPID($_POST["id"]);
-		$cache->set('crsms', $query_result);
+		if (!$mock) $cache->set('crsms', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [crsms] 查無資料");
 			echoErrorJSONString();
@@ -328,7 +328,7 @@ switch ($_POST["type"]) {
 	case "cmsms":
 		$log->info("XHR [cmsms] 查詢測量案件資料【".$_POST["id"]."】請求");
 		$query_result = $mock ? $cache->get('cmsms') : $query->getCMSMSCasesByPID($_POST["id"]);
-		$cache->set('cmsms', $query_result);
+		if (!$mock) $cache->set('cmsms', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [cmsms] 查無資料");
 			echoErrorJSONString();
@@ -346,7 +346,7 @@ switch ($_POST["type"]) {
 	case "easycard":
 		$log->info("XHR [easycard] 查詢悠遊卡資料【".$_POST["qday"]."】請求");
 		$query_result = $mock ? $cache->get('easycard') : $query->getEasycardPayment($_POST["qday"]);
-		$cache->set('easycard', $query_result);
+		if (!$mock) $cache->set('easycard', $query_result);
 		if (empty($query_result)) {
 			$msg = $_POST["qday"] ."查無悠遊卡交易異常資料！";
 			if (empty($_POST["qday"])) {
@@ -368,7 +368,7 @@ switch ($_POST["type"]) {
 	case "fix_easycard":
 		$log->info("XHR [fix_easycard] 修正悠遊卡交易【".$_POST["qday"].", ".$_POST["pc_num"]."】請求");
 		$result_flag = $mock ? $cache->get('fix_easycard') : $query->fixEasycardPayment($_POST["qday"], $_POST["pc_num"]);
-		$cache->set('fix_easycard', $result_flag);
+		if (!$mock) $cache->set('fix_easycard', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -390,7 +390,7 @@ switch ($_POST["type"]) {
 		}
 		$log->info("XHR [sur_case] 查詢測量案件【".$_POST["id"]."】請求");
 		$row = $mock ? $cache->get('sur_case') : $query->getSurCaseDetail($_POST["id"]);
-		$cache->set('sur_case', $row);
+		if (!$mock) $cache->set('sur_case', $row);
 		if (empty($row)) {
 			$log->info("XHR [sur_case] 查無資料");
 			echoErrorJSONString();
@@ -408,7 +408,7 @@ switch ($_POST["type"]) {
 		}
 		$log->info("XHR [fix_sur_delay_case] 修正測量延期案件【".$_POST["id"].", ".$_POST["UPD_MM22"].", ".$_POST["CLR_DELAY"]."】請求");
 		$result_flag = $mock ? $cache->get('fix_sur_delay_case') : $query->fixSurDelayCase($_POST["id"], $_POST["UPD_MM22"], $_POST["CLR_DELAY"]);
-		$cache->set('fix_sur_delay_case', $result_flag);
+		if (!$mock) $cache->set('fix_sur_delay_case', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -425,7 +425,7 @@ switch ($_POST["type"]) {
 	case "prc_case":
 		$log->info("XHR [prc_case] 查詢地價案件【".$_POST["id"]."】請求");
 		$rows = $mock ? $cache->get('prc_case') : $query->getPrcCaseAll($_POST["id"]);
-		$cache->set('prc_case', $rows);
+		if (!$mock) $cache->set('prc_case', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [prc_case] 查無資料");
 			echoErrorJSONString();
@@ -443,7 +443,7 @@ switch ($_POST["type"]) {
 		$log->info("XHR [expac] 查詢規費收費項目【".$_POST["year"].", ".$_POST["num"]."】請求");
 		// make total number length is 7
 		$rows = $mock ? $cache->get('expac') : $query->getExpacItems($_POST["year"], str_pad($_POST["num"], 7, '0', STR_PAD_LEFT));
-		$cache->set('expac', $rows);
+		if (!$mock) $cache->set('expac', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [expac] 查無資料");
 			echoErrorJSONString();
@@ -462,7 +462,7 @@ switch ($_POST["type"]) {
 		$log->info("XHR [mod_expac] 修正規費項目【".$_POST["year"].", ".$_POST["num"].", ".$_POST["code"].", ".$_POST["amount"]."】請求");
 		// make total number length is 7
 		$result_flag = $mock ? $cache->get('mod_expac') : $query->modifyExpacItem($_POST["year"], str_pad($_POST["num"], 7, '0', STR_PAD_LEFT), $_POST["code"], $_POST["amount"]);
-		$cache->set('mod_expac', $result_flag);
+		if (!$mock) $cache->set('mod_expac', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -480,7 +480,7 @@ switch ($_POST["type"]) {
 		$log->info("XHR [expaa] 查詢規費資料【".$_POST["qday"].", ".(array_key_exists('num', $_POST) ? $_POST["num"] : '')."】請求");
 		// make total number length is 7
 		$rows = $mock ? $cache->get('expaa') : $query->getExpaaData($_POST["qday"], empty($_POST["num"]) ? "" : str_pad($_POST["num"], 7, '0', STR_PAD_LEFT));
-		$cache->set('expaa', $rows);
+		if (!$mock) $cache->set('expaa', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [expaa] 查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
 			echoErrorJSONString("查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
@@ -543,7 +543,7 @@ switch ($_POST["type"]) {
 	case "get_dummy_ob_fees":
 		$log->info("XHR [get_dummy_ob_fees] 查詢作廢規費假資料 請求");
 		$rows = $mock ? $cache->get('get_dummy_ob_fees') : $query->getDummyObFees();
-		$cache->set('get_dummy_ob_fees', $rows);
+		if (!$mock) $cache->set('get_dummy_ob_fees', $rows);
 		$len = count($rows);
 		if ($len > 0) {
 			$result = array(
@@ -562,7 +562,7 @@ switch ($_POST["type"]) {
 	case "add_dummy_ob_fees":
 		$log->info("XHR [add_dummy_ob_fees] 新增作廢規費假資料 請求");
 		$result_flag = $mock ? $cache->get('add_dummy_ob_fees') : $query->addDummyObFees($_POST["today"], $_POST["pc_number"], $_POST["operator"], $_POST["fee_number"], $_POST["reason"]);
-		$cache->set('add_dummy_ob_fees', $result_flag);
+		if (!$mock) $cache->set('add_dummy_ob_fees', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -581,7 +581,7 @@ switch ($_POST["type"]) {
 	case "diff_xcase":
 		$log->info("XHR [diff_xcase] 查詢同步案件資料【".$_POST["id"]."】請求");
 		$rows = $mock ? $cache->get('diff_xcase') : $query->getXCaseDiff($_POST["id"]);
-		$cache->set('diff_xcase', $rows);
+		if (!$mock) $cache->set('diff_xcase', $rows);
 		if ($rows === -1) {
 			$log->warning("XHR [diff_xcase] 參數格式錯誤【".$_POST["id"]."】");
 			echoErrorJSONString("參數格式錯誤【".$_POST["id"]."】");
@@ -608,7 +608,7 @@ switch ($_POST["type"]) {
 	case "inst_xcase":
 		$log->info("XHR [inst_xcase] 插入遠端案件【".$_POST["id"]."】請求");
 		$result_flag = $mock ? $cache->get('inst_xcase') : $query->instXCase($_POST["id"]);
-		$cache->set('inst_xcase', $result_flag);
+		if (!$mock) $cache->set('inst_xcase', $result_flag);
 		if ($result_flag === true) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -631,7 +631,7 @@ switch ($_POST["type"]) {
 	case "sync_xcase":
 		$log->info("XHR [sync_xcase] 同步遠端案件【".$_POST["id"]."】請求");
 		$result_flag = $mock ? $cache->get('sync_xcase') : $query->syncXCase($_POST["id"]);
-		$cache->set('sync_xcase', $result_flag);
+		if (!$mock) $cache->set('sync_xcase', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -648,7 +648,7 @@ switch ($_POST["type"]) {
 	case "sync_xcase_column":
 		$log->info("XHR [sync_xcase_column] 同步遠端案件之特定欄位【".$_POST["id"].", ".$_POST["column"]."】請求");
 		$result_flag = $mock ? $cache->get('sync_xcase_column') : $query->syncXCaseColumn($_POST["id"], $_POST["column"]);
-		$cache->set('sync_xcase_column', $result_flag);
+		if (!$mock) $cache->set('sync_xcase_column', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -665,7 +665,7 @@ switch ($_POST["type"]) {
 	case "announcement_data":
 		$log->info("XHR [announcement_data] 查詢公告資料請求");
 		$rows = $mock ? $cache->get('announcement_data') : $query->getAnnouncementData();
-		$cache->set('announcement_data', $rows);
+		if (!$mock) $cache->set('announcement_data', $rows);
 		$result = array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
 			"data_count" => count($rows),
@@ -677,7 +677,7 @@ switch ($_POST["type"]) {
 	case "update_announcement_data":
 		$log->info("XHR [update_announcement_data] 更新公告資料【".$_POST["code"].",".$_POST["day"].",".$_POST["flag"]."】請求");
 		$result_flag = $mock ? $cache->get('update_announcement_data') : $query->updateAnnouncementData($_POST["code"], $_POST["day"], $_POST["flag"]);
-		$cache->set('update_announcement_data', $result_flag);
+		if (!$mock) $cache->set('update_announcement_data', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -694,7 +694,7 @@ switch ($_POST["type"]) {
 	case "clear_announcement_flag":
 		$log->info("XHR [clear_announcement_flag] 清除先行准登旗標請求");
 		$result_flag = $mock ? $cache->get('clear_announcement_flag') : $query->clearAnnouncementFlag();
-		$cache->set('clear_announcement_flag', $result_flag);
+		if (!$mock) $cache->set('clear_announcement_flag', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -711,7 +711,7 @@ switch ($_POST["type"]) {
 	case "query_temp_data":
 		$log->info("XHR [query_temp_data] 查詢暫存資料【".$_POST["year"].", ".$_POST["code"].", ".$_POST["number"]."】請求");
 		$rows = $mock ? $cache->get('query_temp_data') : $query->getCaseTemp($_POST["year"], $_POST["code"], str_pad($_POST["number"], 6, '0', STR_PAD_LEFT));
-		$cache->set('query_temp_data', $rows);
+		if (!$mock) $cache->set('query_temp_data', $rows);
 		if (!empty($rows)) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -728,7 +728,7 @@ switch ($_POST["type"]) {
 	case "clear_temp_data":
 		$log->info("XHR [clear_temp_data] 清除暫存【".$_POST["year"].", ".$_POST["code"].", ".$_POST["number"].", ".$_POST["table"]."】請求");
 		$result_flag = $mock ? $cache->get('clear_temp_data') : $query->clearCaseTemp($_POST["year"], $_POST["code"], str_pad($_POST["number"], 6, '0', STR_PAD_LEFT), $_POST["table"]);
-		$cache->set('clear_temp_data', $result_flag);
+		if (!$mock) $cache->set('clear_temp_data', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -744,22 +744,22 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "upd_case_column":
-			$log->info("XHR [upd_case_column] 更新案件特定欄位【".$_POST["id"].", ".$_POST["table"].", ".$_POST["column"].", ".$_POST["value"]."】請求");
-			$result_flag = $mock ? $cache->get('upd_case_column') : $query->updateCaseColumnData($_POST["id"], $_POST["table"], $_POST["column"], $_POST["value"]);
-			$cache->set('upd_case_column', $result_flag);
-			if ($result_flag) {
-				$result = array(
-					"status" => STATUS_CODE::SUCCESS_NORMAL,
-					"data_count" => "0",
-					"raw" => $result_flag,
-					"query_string" => "id=".$_POST["id"]."&table=".$_POST["table"]."&column=".$_POST["column"]."&value=".$_POST["value"]
-				);
-				$log->info("XHR [upd_case_column] 更新".$_POST["table"].".".$_POST["column"]."欄位為「".$_POST["value"]."」成功");
-				echo json_encode($result, 0);
-			} else {
-				$log->error("XHR [upd_case_column] 更新".$_POST["table"].".".$_POST["column"]."欄位為「".$_POST["value"]."」失敗");
-				echoErrorJSONString("更新".$_POST["table"].".".$_POST["column"]."欄位為「".$_POST["value"]."」失敗");
-			}
+		$log->info("XHR [upd_case_column] 更新案件特定欄位【".$_POST["id"].", ".$_POST["table"].", ".$_POST["column"].", ".$_POST["value"]."】請求");
+		$result_flag = $mock ? $cache->get('upd_case_column') : $query->updateCaseColumnData($_POST["id"], $_POST["table"], $_POST["column"], $_POST["value"]);
+		if (!$mock) $cache->set('upd_case_column', $result_flag);
+		if ($result_flag) {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => "0",
+				"raw" => $result_flag,
+				"query_string" => "id=".$_POST["id"]."&table=".$_POST["table"]."&column=".$_POST["column"]."&value=".$_POST["value"]
+			);
+			$log->info("XHR [upd_case_column] 更新".$_POST["table"].".".$_POST["column"]."欄位為「".$_POST["value"]."」成功");
+			echo json_encode($result, 0);
+		} else {
+			$log->error("XHR [upd_case_column] 更新".$_POST["table"].".".$_POST["column"]."欄位為「".$_POST["value"]."」失敗");
+			echoErrorJSONString("更新".$_POST["table"].".".$_POST["column"]."欄位為「".$_POST["value"]."」失敗");
+		}
 		break;
 	case "zip_log":
 		$log->info("XHR [zip_log] 壓縮LOG資料請求");
@@ -784,7 +784,7 @@ switch ($_POST["type"]) {
 				$results = $mock ? $cache->get('search_user') : $user_info->searchByName($_POST["keyword"]);
 			}
 		}
-		$cache->set('search_user', $results);
+		if (!$mock) $cache->set('search_user', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ".$_POST["keyword"]." 資料。");
 			$log->info("XHR [user_info] 查無 ".$_POST["keyword"]." 資料。");
@@ -814,7 +814,7 @@ switch ($_POST["type"]) {
 				$results = array($last);
 			}
 		}
-		$cache->set('user_info', $results);
+		if (!$mock) $cache->set('user_info', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ".$_POST["name"]." 資料。");
 			$log->info("XHR [user_info] 查無 ".$_POST["name"] ?? $_POST["id"] ?? $_POST["ip"]." 資料。");
@@ -838,7 +838,7 @@ switch ($_POST["type"]) {
 			$last = $results[$len - 1];
 			$results = array($last);
 		}
-		$cache->set('my_info', $results);
+		if (!$mock) $cache->set('my_info', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ".$client_ip." 資料。");
 			$log->info("XHR [my_info] 查無 ".$client_ip." 資料。");
@@ -864,7 +864,7 @@ switch ($_POST["type"]) {
 		$param = empty($param) ? $client_ip : $param;
 		$message = new Message();
 		$results = $mock ? $cache->get('user_message') : $message->getMessageByUser($param, $_POST["count"] ?? 5);
-		$cache->set('user_message', $results);
+		if (!$mock) $cache->set('user_message', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ${param} 信差訊息。");
 			$log->info("XHR [user_message] 查無 ${param} 信差訊息。");
@@ -886,7 +886,7 @@ switch ($_POST["type"]) {
 		$param = empty($param) ? $client_ip : $param;
 		$message = new Message();
 		$results = $mock ? $cache->get('user_unread_message') : $message->getUnreadMessageByUser($param);
-		$cache->set('user_unread_message', $results);
+		if (!$mock) $cache->set('user_unread_message', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ${param} 未讀信差訊息。");
 			$log->info("XHR [user_unread_message] 查無 ${param} 未讀信差訊息。");
@@ -906,7 +906,7 @@ switch ($_POST["type"]) {
 		$log->info("XHR [set_read_user_message] 設定已讀使用者信差訊息【".$_POST["sn"]."】請求");
 		$message = new Message();
 		$result = $mock ? $cache->get('set_read_user_message') : $message->setRead($_POST["sn"]);
-		$cache->set('set_read_user_message', $result);
+		if (!$mock) $cache->set('set_read_user_message', $result);
 		if ($result) {
 			$json = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -926,7 +926,7 @@ switch ($_POST["type"]) {
 		$log->info("XHR [set_unread_user_message] 設定未讀使用者信差訊息【".$_POST["sn"]."】請求");
 		$message = new Message();
 		$result = $mock ? $cache->get('set_unread_user_message') : $message->setUnread($_POST["sn"]);
-		$cache->set('set_unread_user_message', $result);
+		if (!$mock) $cache->set('set_unread_user_message', $result);
 		if ($result) {
 			$json = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -946,7 +946,7 @@ switch ($_POST["type"]) {
 		$log->info("XHR [del_user_message] 刪除訊息【".$_POST["sn"]."】請求");
 		$msg = new Message();
 		$ret = $mock ? $cache->get('del_user_message') : $msg->delete($_POST["sn"]);
-		$cache->set('del_user_message', $ret);
+		if (!$mock) $cache->set('del_user_message', $ret);
 		if ($ret) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -966,7 +966,7 @@ switch ($_POST["type"]) {
 		$log->info("XHR [send_message] 送出訊息【".$_POST["title"].", ".$_POST["content"].", ".$_POST["who"].", ".$_POST["send_time"].", ".$_POST["end_time"]."】請求");
 		$msg = new Message();
 		$id = $mock ? $cache->get('send_message') : $msg->sendByInterval($_POST["title"], $_POST["content"], $_POST["who"], date('Y-m-d ').$_POST["send_time"], date('Y-m-d ').$_POST["end_time"]);	// send message by send_time and drop it by end_time
-		$cache->set('send_message', $id);
+		if (!$mock) $cache->set('send_message', $id);
 		if ($id > 0) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -995,32 +995,32 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "remove_temperature":
-			$log->info("XHR [remove_temperature] 刪除體溫【".$_POST["id"].", ".$_POST["datetime"]."】請求");
-			$temperature = new Temperature();
-			$result = $temperature->remove($_POST["id"], $_POST["datetime"]);
-			// $result = $mock ? $cache->get('set_temperature') : $temperature->set($_POST["id"], $_POST["temperature"]);
-			// $cache->set('set_temperature', $result);
-			if ($result) {
-				$json_array = array(
-					"status" => STATUS_CODE::SUCCESS_NORMAL,
-					"data_count" => 0,
-					"result" => $result,
-					"query_string" => "id=".$_POST["id"]."&datetime=".$_POST["datetime"],
-					"message" => "刪除體溫紀錄成功(".$_POST["id"].", ".$_POST["datetime"].")"
-				);
-				$log->info("XHR [remove_temperature] ".$json_array["message"]);
-				echo json_encode($json_array, 0);
-			} else {
-				echoErrorJSONString("刪除 ".$_POST["id"].", ".$_POST["datetime"]." 體溫紀錄失敗。");
-				$log->info("XHR [remove_temperature] 刪除 ".$_POST["id"]." 體溫紀錄失敗。");
-			}
-			break;	
+		$log->info("XHR [remove_temperature] 刪除體溫【".$_POST["id"].", ".$_POST["datetime"]."】請求");
+		$temperature = new Temperature();
+		$result = $temperature->remove($_POST["id"], $_POST["datetime"]);
+		// $result = $mock ? $cache->get('set_temperature') : $temperature->set($_POST["id"], $_POST["temperature"]);
+		// if (!$mock) $cache->set('set_temperature', $result);
+		if ($result) {
+			$json_array = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => 0,
+				"result" => $result,
+				"query_string" => "id=".$_POST["id"]."&datetime=".$_POST["datetime"],
+				"message" => "刪除體溫紀錄成功(".$_POST["id"].", ".$_POST["datetime"].")"
+			);
+			$log->info("XHR [remove_temperature] ".$json_array["message"]);
+			echo json_encode($json_array, 0);
+		} else {
+			echoErrorJSONString("刪除 ".$_POST["id"].", ".$_POST["datetime"]." 體溫紀錄失敗。");
+			$log->info("XHR [remove_temperature] 刪除 ".$_POST["id"]." 體溫紀錄失敗。");
+		}
+		break;	
 	case "add_temperature":
 		$log->info("XHR [add_temperature] 設定體溫【".$_POST["id"].", ".$_POST["temperature"]."】請求");
 		$temperature = new Temperature();
 		$result = $temperature->add($_POST["id"], $_POST["temperature"]);
 		// $result = $mock ? $cache->get('add_temperature') : $temperature->add($_POST["id"], $_POST["temperature"]);
-		// $cache->set('add_temperature', $result);
+		// if (!$mock) $cache->set('add_temperature', $result);
 		if ($result) {
 			$json_array = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -1041,7 +1041,7 @@ switch ($_POST["type"]) {
 		$temperature = new Temperature();
 		$results = $temperature->getByIdAndDate($_POST["id"], $_POST['date']);
 		// $results = $mock ? $temperature->get('temperatures') : $temperature->get($_POST["id"]);
-		// $cache->set('temperatures', $results);
+		// if (!$mock) $cache->set('temperatures', $results);
 		$log->info("XHR [temperatures_by_id_date] 取得 ".$_POST["id"]." ".count($results)." 筆體溫資料【".$_POST['date']."】");
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -1055,7 +1055,7 @@ switch ($_POST["type"]) {
 		$temperature = new Temperature();
 		$results = $temperature->getByDate($_POST['date']);
 		// $results = $mock ? $temperature->get('temperatures') : $temperature->get($_POST["id"]);
-		// $cache->set('temperatures', $results);
+		// if (!$mock) $cache->set('temperatures', $results);
 		$log->info("XHR [temperatures_by_date] 取得 ".$_POST['date']." ".count($results)." 筆體溫資料");
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -1094,7 +1094,7 @@ switch ($_POST["type"]) {
 		}
 		$log->info("XHR [reg_case] 查詢登記案件【".$_POST["id"]."】請求");
 		$row = $mock ? $cache->get('reg_case') : $query->getRegCaseDetail($_POST["id"]);
-		$cache->set('reg_case', $row);
+		if (!$mock) $cache->set('reg_case', $row);
 		if (empty($row)) {
 			$log->info("XHR [reg_case] 查無資料");
 			echoErrorJSONString();
@@ -1116,7 +1116,7 @@ switch ($_POST["type"]) {
 		}
 		$log->info("XHR [reg_cases_by_day] 查詢登記案件 BY DAY【".$_POST["qday"]."】請求");
 		$rows = $mock ? $cache->get('reg_cases_by_day') : $query->queryAllCasesByDate($_POST["qday"]);
-		$cache->set('reg_cases_by_day', $rows);
+		if (!$mock) $cache->set('reg_cases_by_day', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [reg_cases_by_day] 查無資料");
 			echoErrorJSONString();
@@ -1145,7 +1145,7 @@ switch ($_POST["type"]) {
 		$query_month = $_POST['query_month'];
 		$log->info("XHR [reg_reason_cases_by_month] 查詢登記案件 BY MONTH【${reason_code}, ${query_month}】請求");
 		$rows = $mock ? $cache->get('reg_reason_cases_by_month') : $query->queryReasonCasesByMonth($reason_code, $query_month);
-		$cache->set('reg_reason_cases_by_month', $rows);
+		if (!$mock) $cache->set('reg_reason_cases_by_month', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [reg_reason_cases_by_month] 查無資料");
 			echoJSONResponse("XHR [reg_reason_cases_by_month] 查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
@@ -1172,7 +1172,7 @@ switch ($_POST["type"]) {
 		$query_month = $_POST['query_month'];
 		$log->info("XHR [reg_court_cases_by_month] 查詢登記法院囑託案件 BY MONTH【${reason_code}, ${query_month}】請求");
 		$rows = $mock ? $cache->get('reg_court_cases_by_month') : $query->queryCourtCasesByMonth($query_month);
-		$cache->set('reg_court_cases_by_month', $rows);
+		if (!$mock) $cache->set('reg_court_cases_by_month', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [reg_court_cases_by_month] 查無資料");
 			echoJSONResponse("XHR [reg_court_cases_by_month] 查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
@@ -1199,7 +1199,7 @@ switch ($_POST["type"]) {
 		$query_month = $_POST['query_month'];
 		$log->info("XHR [reg_fix_cases_by_month] 查詢登記補正案件 BY MONTH【${query_month}】請求");
 		$rows = $mock ? $cache->get('reg_fix_cases_by_month') : $query->queryFixCasesByMonth($query_month);
-		$cache->set('reg_fix_cases_by_month', $rows);
+		if (!$mock) $cache->set('reg_fix_cases_by_month', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [reg_fix_cases_by_month] 查無資料");
 			echoJSONResponse("XHR [reg_fix_cases_by_month] 查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
@@ -1226,7 +1226,7 @@ switch ($_POST["type"]) {
 		$query_month = $_POST['query_month'];
 		$log->info("XHR [reg_reject_cases_by_month] 查詢登記駁回案件 BY MONTH【${query_month}】請求");
 		$rows = $mock ? $cache->get('reg_reject_cases_by_month') : $query->queryRejectCasesByMonth($query_month);
-		$cache->set('reg_reject_cases_by_month', $rows);
+		if (!$mock) $cache->set('reg_reject_cases_by_month', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [reg_reject_cases_by_month] 查無資料");
 			echoJSONResponse("XHR [reg_reject_cases_by_month] 查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
@@ -1253,7 +1253,7 @@ switch ($_POST["type"]) {
 		$query_month = $_POST['query_month'];
 		$log->info("XHR [reg_remote_cases_by_month] 查詢遠途先審案件 BY MONTH【${query_month}】請求");
 		$rows = $mock ? $cache->get('reg_remote_cases_by_month') : $query->queryRegRemoteCasesByMonth($query_month);
-		$cache->set('reg_remote_cases_by_month', $rows);
+		if (!$mock) $cache->set('reg_remote_cases_by_month', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [reg_remote_cases_by_month] 查無遠途先審案件資料");
 			echoJSONResponse("XHR [reg_remote_cases_by_month] 查無遠途先審案件資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
@@ -1275,7 +1275,7 @@ switch ($_POST["type"]) {
 		$query_month = $_POST['query_month'];
 		$log->info("XHR [reg_subcases_by_month] 查詢本所處理跨所子號案件 BY MONTH【${query_month}】請求");
 		$rows = $mock ? $cache->get('reg_subcases_by_month') : $query->queryRegSubCasesByMonth($query_month);
-		$cache->set('reg_subcases_by_month', $rows);
+		if (!$mock) $cache->set('reg_subcases_by_month', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [reg_subcases_by_month] 查無本所處理跨所子號案件資料");
 			echoJSONResponse("XHR [reg_subcases_by_month] 查無本所處理跨所子號案件資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
@@ -1298,7 +1298,7 @@ switch ($_POST["type"]) {
 		}
 		$log->info("XHR [reg_stats] 查詢登記案件統計【".$_POST["year_month"]."】請求");
 		$rows = $mock ? $cache->get('reg_stats') : $query->getRegCaseStatsMonthly($_POST["year_month"]);
-		$cache->set('reg_stats', $rows);
+		if (!$mock) $cache->set('reg_stats', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [reg_stats] 查無資料");
 			echoErrorJSONString();
@@ -1319,7 +1319,7 @@ switch ($_POST["type"]) {
 		$query_month = $_POST['query_month'];
 		$log->info("XHR [regf_by_month] 查詢外國人地權登記統計檔 BY MONTH【${query_month}】請求");
 		$rows = $mock ? $cache->get('regf_by_month') : $query->queryRegfCasesByMonth($query_month);
-		$cache->set('regf_by_month', $rows);
+		if (!$mock) $cache->set('regf_by_month', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [regf_by_month] 查無外國人地權登記統計檔資料");
 			echoJSONResponse("XHR [regf_by_month] 查無外國人地權登記統計檔資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
@@ -1337,7 +1337,7 @@ switch ($_POST["type"]) {
 	case "reg_upd_col":
 		$log->info("XHR [reg_upd_col] 更新案件欄位【".$_POST["rm01"].", ".$_POST["rm02"].", ".$_POST["rm03"].", ".$_POST["col"].", ".$_POST["val"]."】請求");
 		$result_flag = $mock ? $cache->get('reg_upd_col') : $query->updateCaseColumnData($_POST["rm01"].$_POST["rm02"].$_POST["rm03"], "MOICAS.CRSMS", $_POST["col"], $_POST["val"]);
-		$cache->set('reg_upd_col', $result_flag);
+		if (!$mock) $cache->set('reg_upd_col', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -1359,7 +1359,7 @@ switch ($_POST["type"]) {
 		$query_month = $_POST['query_month'];
 		$log->info("XHR [expba_refund_cases_by_month] 查詢退費案件 BY MONTH【${query_month}】請求");
 		$rows = $mock ? $cache->get('expba_refund_cases_by_month') : $query->queryEXPBARefundCasesByMonth($query_month);
-		$cache->set('expba_refund_cases_by_month', $rows);
+		if (!$mock) $cache->set('expba_refund_cases_by_month', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [expba_refund_cases_by_month] 查無資料");
 			echoJSONResponse("XHR [expba_refund_cases_by_month] 查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
@@ -1381,7 +1381,7 @@ switch ($_POST["type"]) {
 		$query_month = $_POST['query_month'];
 		$log->info("XHR [sur_rain_cases_by_month] 查詢測量因雨延期案件 BY MONTH【${query_month}】請求");
 		$rows = $mock ? $cache->get('sur_rain_cases_by_month') : $query->querySurRainCasesByMonth($query_month);
-		$cache->set('sur_rain_cases_by_month', $rows);
+		if (!$mock) $cache->set('sur_rain_cases_by_month', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [sur_rain_cases_by_month] 查無資料");
 			echoJSONResponse("XHR [sur_rain_cases_by_month] 查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
@@ -1400,7 +1400,7 @@ switch ($_POST["type"]) {
 		$param = $_POST["id"];
 		$log->info("XHR [rlnid] 取得權利人資訊【${param}】請求");
 		$results = $mock ? $cache->get('rlnid') : $query->getRLNIDByID($param);
-		$cache->set('rlnid', $results);
+		if (!$mock) $cache->set('rlnid', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ${param} 權利人資訊。");
 			$log->info("XHR [rlnid] 查無 ${param} 權利人資訊。");
@@ -1430,7 +1430,7 @@ switch ($_POST["type"]) {
 		}
 		$flag = setSessions($_POST);
 		// $flag = $mock ? $cache->get('xlsx_params') : setSessions($_POST);
-		// $cache->set('xlsx_params', $flag);
+		// if (!$mock) $cache->set('xlsx_params', $flag);
 		if ($flag) {
 			$json = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
