@@ -64,7 +64,8 @@ if (Vue) {
                         });
                     }
                 }
-            }
+            },
+            demo(val) { this.reload() }
         },
         computed: {
             label() { return `跨所AP連線數` },

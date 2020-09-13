@@ -37,9 +37,9 @@
     <section class="hide">
         <div class="container-fluid" v-cloak>
             <b-card-group columns style="margin-top: 85px">
-                <lah-xap-connection-chart demo></lah-xap-connection-chart>
-                <lah-xap-history-chart site="HA" type='bar' demo></lah-xap-history-chart>
-                <lah-button></lah-button>
+                <lah-xap-connection-chart :demo="storeParams['demo']"></lah-xap-connection-chart>
+                <lah-xap-history-chart site="HA" type='bar' :demo="storeParams['demo']"></lah-xap-history-chart>
+                <lah-button @click="if (storeParams['demo'] === undefined) addToStoreParams('demo', true); storeParams['demo'] = !storeParams['demo'];">{{storeParams['demo']}}</lah-button>
             </b-card-group>
             <b-button v-b-toggle.sidebar-1>Toggle Sidebar</b-button>
             <b-sidebar id="sidebar-1" title="Sidebar" bg-variant="dark" text-variant="light" backdrop

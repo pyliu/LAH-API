@@ -41,7 +41,8 @@ if (Vue) {
                     this.reload(true);
                 }, 1000);
             },
-            site(nVal, oVal) { this.set_site_tw(nVal) }
+            site(nVal, oVal) { this.set_site_tw(nVal) },
+            demo(val) { this.reload() }
         },
         computed: {
             label() { return `${this.site_tw}` },
