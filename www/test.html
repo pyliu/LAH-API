@@ -36,12 +36,14 @@
 <body>
     <section class="hide">
         <div class="container-fluid" v-cloak>
-            <b-card-group columns style="margin-top: 85px">
+            <b-card-group deck style="margin-top: 85px">
                 <lah-xap-connection-chart :demo="storeParams['demo']"></lah-xap-connection-chart>
                 <lah-xap-history-chart site="HA" type='bar' :demo="storeParams['demo']"></lah-xap-history-chart>
-                <lah-button @click="if (storeParams['demo'] === undefined) addToStoreParams('demo', true); storeParams['demo'] = !storeParams['demo'];">{{storeParams['demo']}}</lah-button>
+                <b-card>
+                    <lah-button @click="if (!storeParams.hasOwnProperty('demo')) addToStoreParams('demo', false); storeParams['demo'] = !storeParams['demo'];">{{storeParams['demo']}}</lah-button>
+                    <lah-button v-b-toggle.sidebar-1>Toggle Sidebar</lah-button>
+                </b-card>
             </b-card-group>
-            <b-button v-b-toggle.sidebar-1>Toggle Sidebar</b-button>
             <b-sidebar id="sidebar-1" title="Sidebar" bg-variant="dark" text-variant="light" backdrop
                 no-close-on-backdrop shadow>
                 <div class="px-3 py-2">
@@ -85,7 +87,7 @@
             var config = {
                 container: "#treant",
                 connectors: {
-                    type: 'step'
+                    type: 'bCurve' // curve, bCurve, step, straight
                 },
                 node: {
                     HTMLclass: 'nodeExample1'
@@ -110,32 +112,45 @@
                     contact: "03-4917647#300",
                 },
                 stackChildren: true,
-                image: "assets/img/users/鍾玉美_avatar.jpg"
+                image: "assets/img/users/鍾玉美_avatar.jpg",
+                collapsable: true,
+                collapsed: false,
+                connectors: { type: 'step' }
             },
             inf_chief = {
                 parent: secretary,
                 text: {
                     name: "陳允成",
                     title: "資訊課長",
+                    contact: '#501'
                 },
                 stackChildren: true,
-                image: "assets/img/users/陳允成_avatar.jpg"
+                image: "assets/img/users/陳允成_avatar.jpg",
+                collapsable: true,
+                collapsed: true
             },
             HB0541 = {
                 parent: inf_chief,
                 text: {
                     name: "劉邦渝",
                     title: "管理師",
-                    contact: '03-4917647#503'
+                    desc: "Awesome!",
+                    "data-foo": " data Attribute for node",
+                    contact: { 
+                        val: "#503",
+                        href: "https://www.google.com/",
+                        target: "_blank"
+                    }
                 },
-                image: "assets/img/users/劉邦渝_avatar.jpg"
+                image: "assets/img/users/劉邦渝_avatar.jpg",
+                HTMLclass: 'bg-dark text-white'
             },
             HB0542 = {
                 parent: inf_chief,
                 text: {
                     name: "賴俋儒",
                     title: "管理師",
-                    contact: '03-4917647#502'
+                    contact: '#502'
                 },
                 image: "assets/img/users/賴俋儒_avatar.jpg"
             },
@@ -144,7 +159,7 @@
                 text: {
                     name: "葉宇敦",
                     title: "管理師",
-                    contact: '03-4917647#506'
+                    contact: '#506'
                 },
                 image: "assets/img/users/葉宇敦_avatar.jpg"
             },
@@ -216,12 +231,11 @@
                 },
                 stackChildren: true,
                 image: "assets/img/users/郭美蘭_avatar.jpg"
-            },
-            chart_config = [
+            };
+            setTimeout(() => new Treant([
                 config,
                 director, secretary, inf_chief, sur_chief, reg_chief, val_chief, adm_chief, HB0247, HB1184, HB1185, HB0541, HB0542, HB0543
-            ];
-            setTimeout(() => new Treant(chart_config), 250);
+            ]), 400);
         });
     </script>
 </body>
