@@ -26,6 +26,18 @@ class UserInfo {
         return $this->jungli_in_db->fetchAll("SELECT * FROM AP_USER WHERE AP_OFF_JOB = 'N' ORDER BY AP_UNIT_NAME, DocUserID");
     }
 
+    public function getOffBoardUsers() {
+        global $log;
+        $log->info(__METHOD__.": 取得所內所有離職的使用者。");
+        return $this->jungli_in_db->fetchAll("SELECT * FROM AP_USER WHERE AP_OFF_JOB = 'Y' ORDER BY AP_UNIT_NAME, DocUserID");
+    }
+
+    public function getAllUsers() {
+        global $log;
+        $log->info(__METHOD__.": 取得所內所有使用者(包含離職)。");
+        return $this->jungli_in_db->fetchAll("SELECT * FROM AP_USER WHERE ORDER BY AP_UNIT_NAME, DocUserID");
+    }
+
 
     public function searchByID($id) {
         global $log;
