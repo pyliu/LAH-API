@@ -803,12 +803,13 @@ switch ($_POST["type"]) {
 	case "user_info":
 		$log->info("XHR [user_info] 查詢使用者資料【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"]."】請求");
 		$user_info = new TdocUserInfo();
-		$results = $mock ? $cache->get('user_info') : $user_info->searchByID($_POST["id"]);
+		$sqlite_user = new SQLiteUser();
+		$results = $mock ? $cache->get('user_info') : $sqlite_user->getUser($_POST["id"]);
 		if (empty($results)) {
-			$results = $mock ? $cache->get('user_info') : $user_info->searchByName($_POST["name"]);
+			$results = $mock ? $cache->get('user_info') : $sqlite_user->getUserByName($_POST["name"]);
 		}
 		if (empty($results)) {
-			$results = $mock ? $cache->get('user_info') : $user_info->searchByIP($_POST["ip"]);
+			$results = $mock ? $cache->get('user_info') : $sqlite_user->getUserByIP($_POST["ip"]);
 			$len = count($results);
 			if ($len > 1) {
 				$last = $results[$len - 1];

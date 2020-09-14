@@ -23,6 +23,7 @@ class SQLiteUser {
         $stm->bindParam(':work', $row['AP_WORK']);
         $stm->bindParam(':exam', $row['AP_TEST']);
         $stm->bindParam(':education', $row['AP_HI_SCHOOL']);
+        $stm->bindParam(':birthday', $row['AP_BIRTH']);
 
         global $log;
         $tokens = preg_split("/\s+/", $row['AP_ON_DATE']);
@@ -42,8 +43,8 @@ class SQLiteUser {
 
     private function inst(&$row) {
         $stm = $this->db->prepare("
-            INSERT INTO user ('id', 'name', 'sex', 'addr', 'tel', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority')
-            VALUES (:id, :name, :sex, :addr, :tel, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', 0)
+            INSERT INTO user ('id', 'name', 'sex', 'addr', 'tel', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
+            VALUES (:id, :name, :sex, :addr, :tel, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', 0, :birthday)
         ");
         $this->bindUserParams($stm, $row);
         return $stm->execute() === FALSE ? false : true;
@@ -64,7 +65,8 @@ class SQLiteUser {
                 education = :education,
                 onboard_date = :onboard_date, 
                 offboard_date = :offboard_date,
-                ip = :ip
+                ip = :ip,
+                birthday = :birthday
             WHERE id = :id
         ");
         $this->bindUserParams($stm, $row);
@@ -139,6 +141,30 @@ class SQLiteUser {
         } else {
             global $log;
             $log->error(__METHOD__.": 取得使用者($id)資料失敗！");
+        }
+        return false;
+        
+    }
+
+    public function getUserByName($name) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE name = :name")) {
+            $stmt->bindParam(':name', $name);
+            return $this->prepareArray($stmt);
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得使用者($name)資料失敗！");
+        }
+        return false;
+        
+    }
+
+    public function getUserByIP($ip) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE ip = :ip")) {
+            $stmt->bindParam(':ip', $ip);
+            return $this->prepareArray($stmt);
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得使用者($ip)資料失敗！");
         }
         return false;
         

@@ -1064,19 +1064,19 @@ if (Vue) {
             <h6 v-show="!empty(title)"><i class="fas fa-user-circle"></i> {{title}}</h6>
             <b-card no-body v-if="found" style="max-width: 480px">
                 <b-tabs card :end="useEndTabs" :pills="useEndTabs" :small="useEndTabs" fill>
-                    <b-tab v-for="(user_data, idx) in user_rows" :title="user_data['DocUserID']" :active="idx == 0" class="clearfix">
+                    <b-tab v-for="(user_data, idx) in user_rows" :title="user_data['id']" :active="idx == 0" class="clearfix">
                         <template v-slot:title>
-                            <lah-fa-icon icon="id-card"> {{user_data['DocUserID']}}</lah-fa-icon>
+                            <lah-fa-icon icon="id-card"> {{user_data['id']}}</lah-fa-icon>
                         </template>
                         <b-card-title>
                             <b-avatar button size="3rem" :src="photoUrl(user_data)" variant="light" @click="openPhoto(user_data)" v-if="useAvatar"></b-avatar>
                             {{user_data['AP_USER_NAME']}}
                         </b-card-title>
-                        <b-card-sub-title>{{user_data['AP_JOB']}}</b-card-sub-title>
+                        <b-card-sub-title>{{user_data['title']}}</b-card-sub-title>
                         <b-link @click="openPhoto(user_data)" v-if="!useAvatar">
                             <b-card-img
                                 :src="photoUrl(user_data)"
-                                :alt="user_data['AP_USER_NAME']"
+                                :alt="user_data['name']"
                                 class="img-thumbnail float-right mx-auto ml-2"
                                 style="max-width: 220px"
                             ></b-card-img>
@@ -1096,16 +1096,16 @@ if (Vue) {
         components: {
             "lah-user-description": {
                 template: `<b-card-text class="small">
-                    <lah-fa-icon icon="ban" variant="danger" action="breath" v-if="isLeft" class='mx-auto'> 已離職【{{user_data["AP_OFF_DATE"]}}】</lah-fa-icon>
-                    <div>ID：{{user_data["DocUserID"]}}</div>
-                    <div v-if="isAdmin">電腦：{{user_data["AP_PCIP"]}}</div>
-                    <div v-if="isAdmin">生日：{{user_data["AP_BIRTH"]}} <b-badge v-show="birthAge !== false" :variant="birthAgeVariant" pill>{{birthAge}}歲</b-badge></div>
-                    <div>單位：{{user_data["AP_UNIT_NAME"]}}</div>
-                    <div>工作：{{user_data["AP_WORK"]}}</div>
-                    <div v-if="isAdmin">學歷：{{user_data["AP_HI_SCHOOL"]}}</div>
-                    <div v-if="isAdmin">考試：{{user_data["AP_TEST"]}}</div>
-                    <div v-if="isAdmin">手機：{{user_data["AP_SEL"]}}</div>
-                    <div v-if="isAdmin">到職：{{user_data["AP_ON_DATE"]}} <b-badge v-show="workAge !== false" :variant="workAgeVariant" pill>{{workAge}}年</b-badge></div>
+                    <lah-fa-icon icon="ban" variant="danger" action="breath" v-if="isLeft" class='mx-auto'> 已離職【{{user_data["offboard_date"]}}】</lah-fa-icon>
+                    <div>ID：{{user_data["id"]}}</div>
+                    <div v-if="isAdmin">電腦：{{user_data["ip"]}}</div>
+                    <div v-if="isAdmin">生日：{{user_data["birthday"]}} <b-badge v-show="birthAge !== false" :variant="birthAgeVariant" pill>{{birthAge}}歲</b-badge></div>
+                    <div>單位：{{user_data["unit"]}}</div>
+                    <div>工作：{{user_data["work"]}}</div>
+                    <div v-if="isAdmin">學歷：{{user_data["education"]}}</div>
+                    <div v-if="isAdmin">考試：{{user_data["exam"]}}</div>
+                    <div v-if="isAdmin">手機：{{user_data["cell"]}}</div>
+                    <div v-if="isAdmin">到職：{{user_data["onboard_date"]}} <b-badge v-show="workAge !== false" :variant="workAgeVariant" pill>{{workAge}}年</b-badge></div>
                 </b-card-text>`,
                 props: ['user_data'],
                 data: () => ({
@@ -1114,7 +1114,7 @@ if (Vue) {
                 }),
                 computed: {
                     isLeft: function () {
-                        return this.user_data['AP_OFF_JOB'] == 'Y';
+                        return !this.empty(this.user_data['offboard_date']);
                     },
                     birthAgeVariant: function() {
                         let badge_age = this.birthAge;
@@ -1130,7 +1130,7 @@ if (Vue) {
                         return "dark";
                     },
                     birthAge: function() {
-                        let birth = this.user_data["AP_BIRTH"];
+                        let birth = this.user_data["birthday"];
                         if (birth) {
                             birth = this.toADDate(birth);
                             let temp = Date.parse(birth);
@@ -1142,9 +1142,9 @@ if (Vue) {
                         return false;
                     },
                     workAge: function() {
-                        let AP_ON_DATE = this.user_data["AP_ON_DATE"];
-                        let AP_OFF_JOB = this.user_data["AP_OFF_JOB"];
-                        let AP_OFF_DATE = this.user_data["AP_OFF_DATE"];
+                        let AP_ON_DATE = this.user_data["onboard_date"];
+                        let AP_OFF_JOB = this.isLeft ? 'Y' : 'N';
+                        let AP_OFF_DATE = this.user_data["offboard_date"];
             
                         if(AP_ON_DATE != undefined && AP_ON_DATE != null) {
                             AP_ON_DATE = AP_ON_DATE.date ? AP_ON_DATE.date.split(" ")[0] :　AP_ON_DATE;
@@ -1209,31 +1209,31 @@ if (Vue) {
         computed: {
             found: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined },
             notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; },
-            foundName: function() { return this.user_rows[0]["AP_USER_NAME"] },
+            foundName: function() { return this.user_rows[0]["name"] },
             foundCount: function() { return this.user_rows.length },
-            foundLeft: function() { return this.user_rows[0]["AP_OFF_JOB"] == 'Y' },
+            foundLeft: function() { return this.user_rows[0]["offboard_date"] != '' },
             useAvatar: function() { return !this.empty(this.avatar) },
-            ID: function() { return this.user_rows ? this.user_rows[0]['DocUserID'] : null },
+            ID: function() { return this.user_rows ? this.user_rows[0]['id'] : null },
             useEndTabs() { return this.inUserRows ? this.inUserRows.length > 1 : false }
         },
         methods: {
             photoUrl: function (user_data) {
                 if (this.useAvatar) {
-                    return `get_user_img.php?name=${user_data['AP_USER_NAME']}_avatar`;
+                    return `get_user_img.php?name=${user_data['name']}_avatar`;
                 }
-                return `get_user_img.php?name=${user_data['AP_USER_NAME']}`;
+                return `get_user_img.php?name=${user_data['name']}`;
             },
             openPhoto: function(user_data) {
-                // get_user_img.php?name=${user_data['AP_USER_NAME']}
+                // get_user_img.php?name=${user_data['name']}
                 //<b-img thumbnail fluid src="https://picsum.photos/250/250/?image=54" alt="Image 1"></b-img>
                 this.msgbox({
-                    title: `${user_data['AP_USER_NAME']}照片`,
+                    title: `${user_data['name']}照片`,
                     message: this.$createElement("div", {
                         domProps: {
                             className: "text-center"
                         }
                     }, [this.$createElement("b-img", {
-                        props: {fluid: true, src: `get_user_img.php?name=${user_data['AP_USER_NAME']}`, alt: user_data['AP_USER_NAME'], thumbnail: true}
+                        props: {fluid: true, src: `get_user_img.php?name=${user_data['name']}`, alt: user_data['name'], thumbnail: true}
                     })]),
                     size: "lg",
                     backdrop_close: true
@@ -1246,8 +1246,8 @@ if (Vue) {
                 if (!this.empty(this.name)) { payload[this.name] = this.user_rows; this.setLocalCache(this.name, this.user_rows, this.dayMilliseconds); }
                 if (!this.empty(this.ip)) { payload[this.ip] = this.user_rows; this.setLocalCache(this.ip, this.user_rows, this.dayMilliseconds); }
                 this.$store.commit('cache', payload);
-                if (this.user_rows['AP_PCIP'] == this.myip) {
-                    this.$store.commit('myid', this.user_rows['DocUserID']);
+                if (this.user_rows['ip'] == this.myip) {
+                    this.$store.commit('myid', this.user_rows['id']);
                 }
             },
             restoreUserRows: async function() {
