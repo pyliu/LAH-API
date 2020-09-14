@@ -1,17 +1,18 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
-require_once(ROOT_DIR."/include/RegCaseData.class.php");
-require_once(ROOT_DIR."/include/SurCaseData.class.php");
-require_once(ROOT_DIR."/include/PrcAllCasesData.class.php");
-require_once(ROOT_DIR."/include/Query.class.php");
-require_once(ROOT_DIR."/include/Message.class.php");
-require_once(ROOT_DIR."/include/WatchDog.class.php");
-require_once(ROOT_DIR."/include/UserInfo.class.php");
-require_once(ROOT_DIR."/include/StatsSQLite3.class.php");
-require_once(ROOT_DIR."/include/Cache.class.php");
-require_once(ROOT_DIR."/include/Temperature.class.php");
+require_once(INC_DIR."/RegCaseData.class.php");
+require_once(INC_DIR."/SurCaseData.class.php");
+require_once(INC_DIR."/PrcAllCasesData.class.php");
+require_once(INC_DIR."/Query.class.php");
+require_once(INC_DIR."/Message.class.php");
+require_once(INC_DIR."/WatchDog.class.php");
+require_once(INC_DIR."/UserInfo.class.php");
+require_once(INC_DIR."/SQLiteUser.class.php");
+require_once(INC_DIR."/StatsSQLite3.class.php");
+require_once(INC_DIR."/Cache.class.php");
+require_once(INC_DIR."/Temperature.class.php");
 
-require_once(ROOT_DIR."/include/api/JSONAPICommandFactory.class.php");
+require_once(INC_DIR."/api/JSONAPICommandFactory.class.php");
 
 function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 	echo json_encode(array(
@@ -492,7 +493,7 @@ switch ($_POST["type"]) {
 				if (is_null($value)) {
 					continue;
 				}
-				$col_mapping = include(ROOT_DIR."/include/config/Config.ColsNameMapping.EXPAA.php");
+				$col_mapping = include(INC_DIR."/config/Config.ColsNameMapping.EXPAA.php");
 				if (empty($col_mapping[$key])) {
 					$mapping[$key] = $value;
 				} else {
