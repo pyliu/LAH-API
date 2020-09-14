@@ -1,5 +1,6 @@
 <?php
 require_once("MSDB.class.php");
+require_once("SQLiteUser.class.php");
 
 class Message {
     private $jungli_in_db;
@@ -9,6 +10,20 @@ class Message {
     }
 
     private function getUserInfo($name_or_id_or_ip) {
+        $sqlite_user = new SQLiteUser();
+        $name_or_id_or_ip = trim($name_or_id_or_ip);
+        $res = $sqlite_user->getUser($name_or_id_or_ip);
+        if (empty($res)) {
+            $res = $sqlite_user->getUserByName($name_or_id_or_ip);
+        }
+        if (empty($res)) {
+            $res = $sqlite_user->getUserByIP($name_or_id_or_ip);
+        }
+        if (empty($res) || count($res) != 1) {
+            return false;
+        }
+        return $res[0];
+        /*
         $tdoc_db = new MSDB(array(
             "MS_DB_UID" => SYSTEM_CONFIG["MS_TDOC_DB_UID"],
             "MS_DB_PWD" => SYSTEM_CONFIG["MS_TDOC_DB_PWD"],
@@ -28,6 +43,7 @@ class Message {
             return false;
         }
         return $res[0];
+        */
     }
 
     function __construct() {
@@ -66,9 +82,9 @@ class Message {
                 if (!$system) {
                     global $client_ip;
                     $sender_info = $this->getUserInfo($client_ip);
-                    $sendcname = $sender_info["AP_USER_NAME"] ?? '系統';
-                    $sender = $sender_info["DocUserID"];
-                    $sendIP = $sender_info["AP_PCIP"];
+                    $sendcname = $sender_info["name"] ?? '系統';
+                    $sender = $sender_info["id"];
+                    $sendIP = $sender_info["ip"];
                 }
                 /*
                     AP_OFF_JOB: 離職 (Y/N)
@@ -87,11 +103,11 @@ class Message {
                 $pctype = "SVR";
                 $presn = "0";   // map to MessageMain topic
                 $xkey = $this->getXKey();
-                $receiver = $user_info["DocUserID"];
+                $receiver = $user_info["id"];
                 $xname = trim($title);  // nvarchar(50)
                 $xcontent = trim($content); // nvarchar(1000)
                 $sendtype = "1";
-                $recIP = $user_info["AP_PCIP"];
+                $recIP = $user_info["ip"];
                 $sendtime = ($trigger_datetime == 'now' ? date("Y-m-d H:i:s") : $trigger_datetime).".000";
                 $xtime = "1";
                 $intertime = "15";
@@ -197,7 +213,7 @@ class Message {
         }
         $user = $this->getUserInfo($name_or_id_or_ip);
         if ($user !== false) {
-            $id = $user["DocUserID"];
+            $id = $user["id"];
             // $name = $user["AP_USER_NAME"];
             // $ip = $user["AP_PCIP"];
             $tdoc_db = new MSDB(array(
@@ -222,7 +238,7 @@ class Message {
         }
         $user = $this->getUserInfo($name_or_id_or_ip);
         if ($user !== false) {
-            $id = $user["DocUserID"];
+            $id = $user["id"];
             // $name = $user["AP_USER_NAME"];
             // $ip = $user["AP_PCIP"];
             $tdoc_db = new MSDB(array(
