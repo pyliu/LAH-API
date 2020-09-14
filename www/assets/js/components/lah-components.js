@@ -94,7 +94,7 @@ if (Vue) {
                         }
                         break;
                 }
-                return `text-${variant} ${prefix} fa-${icon} ${size} ld ld-${ld_movement}`
+                return `text-${variant} ${prefix} fa-${icon} ${size} ld ld-${ld_movement} align-middle`
             }
         }
     });

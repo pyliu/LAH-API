@@ -4,8 +4,8 @@ if (Vue) {
             <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left" @click="history"></lah-chart>
             <div class="d-flex justify-content-between mt-1">
                 <span class="small align-middle my-auto">
-                    <lah-fa-icon icon="server" title="AP總連線數" :action="ap_icon_action" :variant="ap_variant"> <b-badge variant="muted" pill>{{ap_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="database" title="資料庫連線數" :action="db_icon_action" :variant="db_variant"> <b-badge variant="muted" pill>{{db_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="server" title="AP總連線數" :action="ap_vars[1]" :variant="ap_vars[0]" :size="ap_vars[2]"> <b-badge variant="muted" pill>{{ap_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="database" title="資料庫連線數" :action="db_vars[1]" :variant="db_vars[0]" :size="db_vars[2]"> <b-badge variant="muted" pill>{{db_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="link" title="跨所AP上所有連線數" variant="info"> <b-badge variant="muted" pill>{{total_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="clock" prefix="far" title="更新時間" variant="secondary">
                         <b-badge v-if="isOfficeHours() || demo" variant="muted">{{last_update_time}}</b-badge>
@@ -15,7 +15,7 @@ if (Vue) {
                 <div :title="ip">
                     <b-button-group size="sm">
                         <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
-                        <lah-button icon="chart-pie" variant="secondary" v-if="type != 'pie'" @click="type = 'pie'" title="切換圓餅圖"></lah-button>
+                        <!--<lah-button icon="chart-pie" variant="secondary" v-if="type != 'pie'" @click="type = 'pie'" title="切換圓餅圖"></lah-button>-->
                         <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'" title="切換長線型圖"></lah-button>
                         <lah-button icon="chart-area" variant="warning" v-if="type != 'polarArea'" @click="type = 'polarArea'" title="切換區域圖"></lah-button>
                         <lah-button brand icon="edge" variant="info" v-if="type != 'doughnut'" @click="type = 'doughnut'" title="切換甜甜圈"></lah-button>
@@ -70,22 +70,23 @@ if (Vue) {
         computed: {
             label() { return `跨所AP連線數` },
             title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
-            ap_variant() {
-                if (this.ap_count > 500) return 'dark';
-                if (this.ap_count > 400) return 'danger';
-                if (this.ap_count > 300) return 'warning';
-                return 'success';
+            ap_vars() {
+                // return [color, action, size]
+                if (this.ap_count > 500) return ['dark', 'tremble', '3x'];
+                if (this.ap_count > 400) return ['danger', 'shiver', '2x'];
+                if (this.ap_count > 300) return ['warning', 'beat', 'lg'];
+                return ['success', 'breath', ''];
             },
-            ap_icon_action() { return this.icon_action_by_variant(this.ap_variant) },
-            db_variant() {
-                if (this.db_count > 3000) return 'dark';
-                if (this.db_count > 1800) return 'danger';
-                if (this.db_count > 1000) return 'warning';
-                return 'success';
-            },
-            db_icon_action() { return this.icon_action_by_variant(this.db_variant) },
+            db_vars() {
+                // return [color, action, size]
+                if (this.db_count > 3000) return ['dark', 'tremble', '3x'];
+                if (this.db_count > 1800) return ['danger', 'shiver', '2x'];
+                if (this.db_count > 1000) return ['warning', 'beat', 'lg'];
+                return ['success', 'breath', ''];
+            }
         },
         methods: {
+            /*
             icon_action_by_variant(variant) {
                 switch(variant) {
                     case 'dark': return 'tremble';
@@ -94,6 +95,7 @@ if (Vue) {
                 }
                 return 'breath';
             },
+            */
             bg_color(dataset_item, opacity) {
                 switch(dataset_item[0]) {
                     case '地政局': return `rgb(207, 207, 207, ${opacity})`;    // H0
