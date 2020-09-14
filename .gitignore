@@ -7,7 +7,7 @@ node_modules
 *.cache
 *.zip
 *.lock
-*.db
+*tmp
 **/users/*.JPG
 **/users/*.jpg
 *.BAK
@@ -16,3 +16,4 @@ node_modules
 **/vendor/*
 **/logs/*
 **/exports/*
+**/assets/db/*.db
