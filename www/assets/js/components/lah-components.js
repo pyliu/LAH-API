@@ -622,7 +622,7 @@ if (Vue) {
         props: {
             variant: { type: String, default: 'outline-primary'},
             size: { type: String, default: 'sm'},
-            icon: { type: String, default: 'exclamation-triangle'},
+            icon: { type: String, default: 'question'},
             regular: { type: Boolean, default: false},
             brand: { type: Boolean, default: false },
             action: { type: String, default: undefined},

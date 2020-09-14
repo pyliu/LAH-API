@@ -16,14 +16,17 @@
     <link rel="preload" href="assets/css/loading-btn.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="assets/css/animate.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="assets/css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="assets/js/treant/Treant.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/js/treant/examples/basic-example/basic-example.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/js/treant/examples/basic-example/basic-example.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
     <style>
         .Treant img {
             max-width: 64px;
         }
+
         .card {
             max-width: 640px;
         }
@@ -33,23 +36,25 @@
 <body>
     <section class="hide">
         <div class="container-fluid" v-cloak>
-            <b-card-group columns style="margin-top: 85px">
-                <lah-xap-connection-chart demo></lah-xap-connection-chart>
-                <lah-xap-history-chart site="HA" type='bar' demo></lah-xap-history-chart>
+            <b-card-group deck style="margin-top: 85px">
+                <lah-xap-connection-chart :demo="storeParams['demo']"></lah-xap-connection-chart>
+                <lah-xap-history-chart site="HA" type='bar' :demo="storeParams['demo']"></lah-xap-history-chart>
+                <b-card>
+                    <lah-button @click="if (!storeParams.hasOwnProperty('demo')) addToStoreParams('demo', false); storeParams['demo'] = !storeParams['demo'];">{{storeParams['demo']}}</lah-button>
+                    <lah-button v-b-toggle.sidebar-1>Toggle Sidebar</lah-button>
+                </b-card>
             </b-card-group>
-            <b-button v-b-toggle.sidebar-1>Toggle Sidebar</b-button>
-            <b-sidebar id="sidebar-1" title="Sidebar" bg-variant="dark" text-variant="light" backdrop no-close-on-backdrop shadow>
-            <div class="px-3 py-2">
-                <p>
-                Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis
-                in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-                </p>
-                <b-img src="get_user_img.php?name=%E8%B3%B4%E4%BF%8B%E5%84%92" fluid thumbnail></b-img>
-            </div>
+            <b-sidebar id="sidebar-1" title="Sidebar" bg-variant="dark" text-variant="light" backdrop
+                no-close-on-backdrop shadow>
+                <div class="px-3 py-2">
+                    <p>
+                        Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis
+                        in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+                    </p>
+                    <b-img src="get_user_img.php?name=%E8%B3%B4%E4%BF%8B%E5%84%92" fluid thumbnail></b-img>
+                </div>
             </b-sidebar>
-            <div id="treant" class="chart mt-2"></div>
-            <div id="testHX"></div>
-            <div id="test_xlsx"></div>
+            <div id="treant" class="chart mt-2 w-100"></div>
         </div>
     </section>
 
@@ -79,166 +84,159 @@
     <script src="assets/js/treant/Treant.js"></script>
     <script>
         $(document).ready(() => {
-
-            new Vue({
-                el: '#testHX',
-                template: `<div>
-                    test {{site}}
-                </div>`,
-                data: () => ({
-                    site: 'xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx'
-                })
-            });
-
-            setTimeout(() => window.testApp = new Vue({
-                el: "#test_xlsx",
-                template: `<div style="margin-top: 85px"><b-button @click="download">xlsx download</b-button></div>`,
-                methods: {
-                    download() {
-                        let filename = 'testAA';
-                        this.$http.post(CONFIG.API.FILE.EXPORT, {
-                            type: 'file_xlsx_test',
-                            responseType: 'blob',
-                            filename: filename
-                        }).then(res => {
-                            this.$log(`${filename}.xlsx`);
-                            let url = window.URL.createObjectURL(new Blob([res.data]));
-                            let a = document.createElement('a');
-                            a.href = url;
-                            a.download = `${filename}.xlsx`;
-                            document.body.appendChild(a);
-                            a.click();    
-                            a.remove();
-                            // release object in memory
-                            window.URL.revokeObjectURL(url);
-                        }).catch(err => {
-                            console.log(err);
-                        }).finally(() => {
-                        });
-                    }
-                }
-            }), 500);
-
             var config = {
-            container: "#treant",
-            connectors: {
-            type: 'step'
+                container: "#treant",
+                connectors: {
+                    type: 'bCurve' // curve, bCurve, step, straight
+                },
+                node: {
+                    HTMLclass: 'nodeExample1'
+                },
+                rootOrientation: 'NORTH',
+                nodeAlign: 'TOP',
+                animateOnInit: false
             },
-            node: {
-            HTMLclass: 'nodeExample1'
-            }
+            director = {
+                text: {
+                    name: "劉瑞德",
+                    title: "主任",
+                    contact: "03-4917647#100",
+                },
+                image: "assets/img/users/劉瑞德_avatar.jpg"
             },
-            ceo = {
-            text: {
-            name: "Mark Hill",
-            title: "Chief executive officer",
-            contact: "Tel: 01 213 123 134",
+            secretary = {
+                parent: director,
+                text: {
+                    name: "鍾玉美",
+                    title: "秘書",
+                    contact: "03-4917647#300",
+                },
+                stackChildren: true,
+                image: "assets/img/users/鍾玉美_avatar.jpg",
+                collapsable: true,
+                collapsed: false,
+                connectors: { type: 'step' }
             },
-            image: "assets/img/users/not_found.jpg"
+            inf_chief = {
+                parent: secretary,
+                text: {
+                    name: "陳允成",
+                    title: "資訊課長",
+                    contact: '#501'
+                },
+                stackChildren: true,
+                image: "assets/img/users/陳允成_avatar.jpg",
+                collapsable: true,
+                collapsed: false,
+                pseudo: false
             },
-
-            cto = {
-            parent: ceo,
-            text: {
-            name: "Joe Linux",
-            title: "Chief Technology Officer",
+            HB0541 = {
+                parent: inf_chief,
+                text: {
+                    name: "劉邦渝",
+                    title: "管理師",
+                    desc: "Awesome!",
+                    "data-foo": " data Attribute for node",
+                    contact: { 
+                        val: "#503",
+                        href: "https://www.google.com/",
+                        target: "_blank"
+                    }
+                },
+                image: "assets/img/users/劉邦渝_avatar.jpg",
+                HTMLclass: 'bg-dark text-white'
             },
-            stackChildren: true,
-            image: "assets/img/users/not_found.jpg"
+            HB0542 = {
+                parent: inf_chief,
+                text: {
+                    name: "賴俋儒",
+                    title: "管理師",
+                    contact: '#502'
+                },
+                image: "assets/img/users/賴俋儒_avatar.jpg"
             },
-            cbo = {
-            parent: ceo,
-            stackChildren: true,
-            text: {
-            name: "Linda May",
-            title: "Chief Business Officer",
+            HB0543 = {
+                parent: inf_chief,
+                text: {
+                    name: "葉宇敦",
+                    title: "管理師",
+                    contact: '#506'
+                },
+                image: "assets/img/users/葉宇敦_avatar.jpg"
             },
-            image: "assets/img/users/not_found.jpg"
+            reg_chief = {
+                parent: secretary,
+                text: {
+                    name: "麥志中",
+                    title: "登記課長",
+                },
+                stackChildren: true,
+                image: "assets/img/users/麥志中_avatar.jpg"
             },
-            cdo = {
-            parent: ceo,
-            text: {
-            name: "John Green",
-            title: "Chief accounting officer",
-            contact: "Tel: 01 213 123 134",
+            HB1184 = {
+                parent: reg_chief,
+                text: {
+                    name: "曾奕融",
+                    title: "課員",
+                    contact: {
+                        val: "1184.b@mail.tyland.gov.tw",
+                        href: "mailto:1184.b@mail.tyland.gov.tw"
+                    }
+                },
+                image: "assets/img/users/曾奕融_avatar.jpg"
             },
-            image: "assets/img/users/not_found.jpg"
+            HB1185 = {
+                parent: reg_chief,
+                text: {
+                    name: "王甄臻",
+                    title: "課員",
+                    contact: {
+                        val: "1185.b@mail.tyland.gov.tw",
+                        href: "mailto:1185.b@mail.tyland.gov.tw"
+                    }
+                },
+                image: "assets/img/users/王甄臻_avatar.jpg"
             },
-            cio = {
-            parent: cto,
-            text: {
-            name: "Ron Blomquist",
-            title: "Chief Information Security Officer"
+            adm_chief = {
+                parent: secretary,
+                text: {
+                    name: "劉家欣",
+                    title: "行政課長",
+                },
+                stackChildren: true,
+                image: "assets/img/users/劉家欣_avatar.jpg"
             },
-            image: "assets/img/users/not_found.jpg"
+            sur_chief = {
+                parent: secretary,
+                text: {
+                    name: "張明智",
+                    title: "測量課長",
+                },
+                stackChildren: true,
+                image: "assets/img/users/張明智_avatar.jpg"
             },
-            ciso = {
-            parent: cto,
-            text: {
-            name: "Michael Rubin",
-            title: "Chief Innovation Officer",
-            contact: {
-            val: "we@aregreat.com",
-            href: "mailto:we@aregreat.com"
-            }
+            HB0247 = {
+                parent: sur_chief,
+                text: {
+                    name: "葉思仙",
+                    title: "測量助理員",
+                    contact: '03-4917647#228'
+                },
+                image: "assets/img/users/葉思仙_avatar.jpg"
             },
-            image: "assets/img/users/not_found.jpg"
-            },
-            cio2 = {
-            parent: cdo,
-            text: {
-            name: "Erica Reel",
-            title: "Chief Customer Officer"
-            },
-            link: {
-            href: "http://www.google.com"
-            },
-            image: "assets/img/users/not_found.jpg"
-            },
-            ciso2 = {
-            parent: cbo,
-            text: {
-            name: "Alice Lopez",
-            title: "Chief Communications Officer"
-            },
-            image: "assets/img/users/not_found.jpg"
-            },
-            ciso3 = {
-            parent: cbo,
-            text: {
-            name: "Mary Johnson",
-            title: "Chief Brand Officer"
-            },
-            image: "assets/img/users/not_found.jpg"
-            },
-            ciso4 = {
-            parent: cbo,
-            text: {
-            name: "Kirk Douglas",
-            title: "Chief Business Development Officer"
-            },
-            image: "assets/img/users/not_found.jpg"
-            },
-
-            chart_config = [
-            config,
-            ceo,
-            cto,
-            cbo,
-            cdo,
-            cio,
-            ciso,
-            cio2,
-            ciso2,
-            ciso3,
-            ciso4
-            ];
-            // let echoFunc = (cfg) => () => {new Treant(cfg); console.log("called");};
-            // vueApp.$on('updated', function() {
-            //     new Treant(chart_config)
-            //     console.log("called")
-            // })
-            setTimeout(() => new Treant(chart_config), 500);
+            val_chief = {
+                parent: secretary,
+                text: {
+                    name: "郭美蘭",
+                    title: "地價課長",
+                },
+                stackChildren: true,
+                image: "assets/img/users/郭美蘭_avatar.jpg"
+            };
+            setTimeout(() => new Treant([
+                config,
+                director, secretary, inf_chief, sur_chief, reg_chief, val_chief, adm_chief, HB0247, HB1184, HB1185, HB0541, HB0542, HB0543
+            ]), 400);
         });
     </script>
 </body>
