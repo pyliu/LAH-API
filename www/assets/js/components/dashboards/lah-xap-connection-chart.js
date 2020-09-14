@@ -44,7 +44,7 @@ if (Vue) {
                     this.notify({
                         title: '跨所AP連線數警示',
                         type: 'warning',
-                        message: `<i class="fas fa-exclamation-triangle"></i> 目前連線數達 <b>${val}</b>，須注意!`
+                        message: `<i class="fas fa-exclamation-triangle fa-lg ld ld-beat"></i> 目前連線數達 <b>${val}</b>，須注意!`
                     })
                 }
             },
@@ -60,7 +60,7 @@ if (Vue) {
                         this.notify({
                             title: '跨所AP資料庫連線數過高通知',
                             type: 'warning',
-                            message: `<i class="fas fa-exclamation-circle"></i> 目前占用資料庫連線數已達 <b>${val}</b>，須注意!` 
+                            message: `<i class="fas fa-exclamation-circle fa-lg ld ld-beat"></i> 目前占用資料庫連線數已達 <b>${val}</b>，須注意!` 
                         });
                     }
                 }
@@ -115,7 +115,10 @@ if (Vue) {
                 }
             },
             reload(force = false) {
-                if (force || this.isOfficeHours() || this.demo) {
+                if (this.demo) {
+                    this.reload_demo_data();
+                    this.delay(this.reload, 5000);
+                } else if (force || this.isOfficeHours()) {
                     //this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_xap_conn_latest",
@@ -130,10 +133,10 @@ if (Vue) {
                                 res.data.raw.reverse().forEach((item, raw_idx, array) => {
                                     let text = this.get_site_tw(item.site);
                                     // e.g. item => { count: 911, ip: "220.1.35.123", log_time: "20200904175957", site: "HB" }
-                                    if (item.site == 'TOTAL') { this.total_count = this.demo ? this.rand(2000) : item.count; }
-                                    else if (item.site == 'DB') { this.db_count = this.demo ? this.rand(4000) : item.count; }
+                                    if (item.site == 'TOTAL') { this.total_count = item.count; }
+                                    else if (item.site == 'DB') { this.db_count =  item.count; }
                                     else {
-                                        let value = this.demo ? this.rand(100) : item.count;
+                                        let value = item.count;
                                         if (this.items.length == 9) {
                                             let found = this.items.find((oitem, idx, array) => {
                                                 return oitem[0] == text;
@@ -162,7 +165,7 @@ if (Vue) {
                     }).finally(() => {
                         //this.isBusy = false;
                         // reload every 15s
-                        this.delay(this.reload, this.demo ? 5000 : 15000);
+                        this.delay(this.reload, 15000);
                         Vue.nextTick(() => {
                             this.$refs.chart.update();
                         });
@@ -171,6 +174,19 @@ if (Vue) {
                     // check after an hour
                     this.delay(this.reload, 3600000);
                 }
+            },
+            reload_demo_data() {
+                this.ap_count = 0;
+                this.total_count = this.rand(2000);
+                this.db_count = this.rand(4000);
+                this.items.forEach((item, raw_idx, array) => {
+                    let text = item[0];
+                    let value = this.rand(100);
+                    item[1] = value;
+                    this.$refs.chart.changeValue(text, value);
+                    this.ap_count += parseInt(value);
+                });
+                this.last_update_time = this.now().split(' ')[1];
             },
             history(e, payload) {
                 if (this.empty(payload['label'])) return;
