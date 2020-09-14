@@ -55,8 +55,8 @@ switch ($_POST["type"]) {
 		break;
 	case "on_board_users":
 		$log->info("XHR [on_board_users] 取得所有在職使用者資料請求");
-		$user_info = new TdocUserInfo();
-		$results = $mock ? $cache->get('on_board_users') : $user_info->getOnBoardUsers();
+		$sqlite_user = new SQLiteUser();
+		$results = $mock ? $cache->get('on_board_users') : $sqlite_user->getOnboardUsers();
 		if (!$mock) $cache->set('on_board_users', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無在職使用者資料。");
@@ -802,7 +802,6 @@ switch ($_POST["type"]) {
 		break;
 	case "user_info":
 		$log->info("XHR [user_info] 查詢使用者資料【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"]."】請求");
-		$user_info = new TdocUserInfo();
 		$sqlite_user = new SQLiteUser();
 		$results = $mock ? $cache->get('user_info') : $sqlite_user->getUser($_POST["id"]);
 		if (empty($results)) {

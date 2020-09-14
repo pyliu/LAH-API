@@ -992,10 +992,10 @@ if (Vue) {
 
     Vue.component("lah-user-id-input", {
         template: `<b-input-group :size="size">
-        <b-input-group-prepend is-text>
-            <div v-if="validate" class="my-auto"><b-avatar @click="usercard" button variant="success" size="1.2rem" :src="avatar_src" :data-id="ID" :data-name="name" class="usercard" :title="ID"></b-avatar> {{name}}</div>
-            <lah-fa-icon v-else icon="user" prefix="far"> 使用者代碼</la-fa-icon>
-        </b-input-group-prepend>
+            <b-input-group-prepend is-text>
+                <div v-if="validate" class="my-auto"><b-avatar @click="usercard" button variant="success" size="1.2rem" :src="avatar_src" :data-id="ID" :data-name="name" class="usercard" :title="ID"></b-avatar> {{name}}</div>
+                <lah-fa-icon v-else icon="user" prefix="far"> 使用者代碼</la-fa-icon>
+            </b-input-group-prepend>
             <b-form-input
                 ref="lah_user_id"
                 v-model="id"
@@ -1026,7 +1026,7 @@ if (Vue) {
                 let names = {};
                 if (this.onboard_users !== undefined) {
                     this.onboard_users.forEach(user => {
-                        names[$.trim(user['DocUserID'])] = $.trim(user['AP_USER_NAME']);
+                        names[$.trim(user['id'])] = $.trim(user['name']);
                     });
                 }
                 return names;
@@ -3514,15 +3514,15 @@ if (Vue) {
         },
         methods: {
             filter() {
-                let hr = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "人事室");
-                let accounting = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "會計室");
-                let director = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "主任室");
-                let secretary = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "秘書室");
-                let adm = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "行政課");
-                let reg = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "登記課");
-                let val = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "地價課");
-                let sur = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "測量課");
-                let inf = this.userList.filter(this_record => this_record["AP_UNIT_NAME"] == "資訊課");
+                let hr = this.userList.filter(this_record => this_record["unit"] == "人事室");
+                let accounting = this.userList.filter(this_record => this_record["unit"] == "會計室");
+                let director = this.userList.filter(this_record => this_record["unit"] == "主任室");
+                let secretary = this.userList.filter(this_record => this_record["unit"] == "秘書室");
+                let adm = this.userList.filter(this_record => this_record["unit"] == "行政課");
+                let reg = this.userList.filter(this_record => this_record["unit"] == "登記課");
+                let val = this.userList.filter(this_record => this_record["unit"] == "地價課");
+                let sur = this.userList.filter(this_record => this_record["unit"] == "測量課");
+                let inf = this.userList.filter(this_record => this_record["unit"] == "資訊課");
                 this.filtered = [
                     { UNIT: '主任室', LIST: director },
                     { UNIT: '秘書室', LIST: secretary },
@@ -3601,8 +3601,8 @@ if (Vue) {
             my_temperature(val) { this.empty(val) ? void(0) : this.setMyTemperature() }
         },
         computed: {
-            id() { return this.rawUserData ? $.trim(this.rawUserData['DocUserID']) : this.inId },
-            name() { return this.rawUserData ? this.rawUserData['AP_USER_NAME'] : ''},
+            id() { return this.rawUserData ? $.trim(this.rawUserData['id']) : this.inId },
+            name() { return this.rawUserData ? this.rawUserData['name'] : ''},
             today() { return this.nowDate },
             now_ampm() { return (parseInt(this.nowTime.replace(/\:/gi, '')) - 120000) >= 0 ? 'PM' : 'AM' },
             not_ready() { return this.temperature.AM == 0 || this.temperature.PM == 0 },
