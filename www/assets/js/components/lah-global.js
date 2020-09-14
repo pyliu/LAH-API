@@ -956,7 +956,7 @@ $(document).ready(() => {
                             }).then(res => {
                                 if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                     let myinfo = res.data.raw[0];
-                                    this.setLocalCache('myinfo', myinfo, 86400000);   // cache query info result
+                                    this.setLocalCache('myinfo', myinfo, this.dayMilliseconds);   // cache query info result
                                     this.$store.commit("myinfo", myinfo);
                                 } else {
                                     this.$warn(res.data.message);
@@ -972,7 +972,7 @@ $(document).ready(() => {
                         this.$http.post(CONFIG.API.JSON.QUERY, {
                             type: 'ip'
                         }).then(res => {
-                            this.setLocalCache('myip', res.data.ip, 86400000);
+                            this.setLocalCache('myip', res.data.ip, this.dayMilliseconds);
                             this.$store.commit('myip', res.data.ip);
                         }).catch(err => {
                             this.error = err;

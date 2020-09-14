@@ -832,8 +832,8 @@ switch ($_POST["type"]) {
 		break;
 	case "my_info":
 		$log->info("XHR [my_info] 查詢 $client_ip 請求");
-		$user_info = new TdocUserInfo();
-		$results = $mock ? $cache->get('my_info') : $user_info->searchByIP($client_ip);
+		$sqlite_user = new SQLiteUser();
+		$results = $mock ? $cache->get('my_info') : $sqlite_user->getUserByIP($client_ip);
 		$len = count($results);
 		if ($len > 1) {
 			$last = $results[$len - 1];
@@ -848,14 +848,14 @@ switch ($_POST["type"]) {
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => count($results),
 				"info" => array(
-					"id" => $results[0]["DocUserID"],
-					"name" => $results[0]["AP_USER_NAME"],
-					"ip" => $results[0]["AP_PCIP"]
+					"id" => $results[0]["id"],
+					"name" => $results[0]["name"],
+					"ip" => $results[0]["ip"]
 				),
 				"raw" => $results,
 				"query_string" => ""
 			);
-			$log->info("XHR [my_info] 查詢 ".$client_ip." 成功。 (".$results[0]["DocUserID"].", ".$results[0]["AP_USER_NAME"].")");
+			$log->info("XHR [my_info] 查詢 ".$client_ip." 成功。 (".$results[0]["id"].", ".$results[0]["name"].")");
 			echo json_encode($result, 0);
 		}
 		break;
