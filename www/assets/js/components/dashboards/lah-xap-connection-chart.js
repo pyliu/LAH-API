@@ -4,8 +4,8 @@ if (Vue) {
             <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left" @click="history"></lah-chart>
             <div class="d-flex justify-content-between mt-1">
                 <span class="small align-middle my-auto">
-                    <lah-fa-icon icon="server" title="AP總連線數" :action="ap_vars[1]" :variant="ap_vars[0]" :size="ap_vars[2]"> <b-badge variant="muted" pill>{{ap_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="database" title="資料庫連線數" :action="db_vars[1]" :variant="db_vars[0]" :size="db_vars[2]"> <b-badge variant="muted" pill>{{db_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon :icon="ap_vars[3]" title="AP總連線數" :action="ap_vars[1]" :variant="ap_vars[0]" :size="ap_vars[2]"> <b-badge variant="muted" pill>{{ap_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon :icon="db_vars[3]" title="資料庫連線數" :action="db_vars[1]" :variant="db_vars[0]" :size="db_vars[2]"> <b-badge variant="muted" pill>{{db_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="link" title="跨所AP上所有連線數" variant="info"> <b-badge variant="muted" pill>{{total_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="clock" prefix="far" title="更新時間" variant="secondary">
                         <b-badge v-if="isOfficeHours() || demo" variant="muted">{{last_update_time}}</b-badge>
@@ -71,18 +71,18 @@ if (Vue) {
             label() { return `跨所AP連線數` },
             title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
             ap_vars() {
-                // return [color, action, size]
-                if (this.ap_count > 500) return ['dark', 'tremble', '2x'];
-                if (this.ap_count > 400) return ['danger', 'shiver', 'lg'];
-                if (this.ap_count > 300) return ['warning', 'beat', '1x'];
-                return ['success', 'breath', ''];
+                // return [color, action, size, icon]
+                if (this.ap_count > 500) return ['danger', 'tremble', '2x', 'bomb'];
+                if (this.ap_count > 400) return ['danger', 'shiver', 'lg', 'server'];
+                if (this.ap_count > 300) return ['warning', 'beat', '1x', 'server'];
+                return ['success', 'breath', 'sm', 'server'];
             },
             db_vars() {
-                // return [color, action, size]
-                if (this.db_count > 3000) return ['dark', 'tremble', '2x'];
-                if (this.db_count > 1800) return ['danger', 'shiver', 'lg'];
-                if (this.db_count > 1000) return ['warning', 'beat', '1x'];
-                return ['success', 'breath', ''];
+                // return [color, action, size, icon]
+                if (this.db_count > 3000) return ['danger', 'tremble', '2x', 'bomb'];
+                if (this.db_count > 1800) return ['danger', 'shiver', 'lg', 'database'];
+                if (this.db_count > 1000) return ['warning', 'beat', '1x', 'database'];
+                return ['success', 'breath', 'sm', 'database'];
             }
         },
         methods: {
@@ -140,10 +140,10 @@ if (Vue) {
                                 res.data.raw.reverse().forEach((item, raw_idx, array) => {
                                     let text = this.get_site_tw(item.site);
                                     // e.g. item => { count: 911, ip: "220.1.35.123", log_time: "20200904175957", site: "HB" }
-                                    if (item.site == 'TOTAL') { this.total_count = this.demo ? this.rand(5000) : item.count; }
+                                    if (item.site == 'TOTAL') { this.total_count = this.demo ? this.rand(2000) : item.count; }
                                     else if (item.site == 'DB') { this.db_count = this.demo ? this.rand(4000) : item.count; }
                                     else {
-                                        let value = this.demo ? this.rand(300) : item.count;
+                                        let value = this.demo ? this.rand(100) : item.count;
                                         if (this.items.length == 9) {
                                             let found = this.items.find((oitem, idx, array) => {
                                                 return oitem[0] == text;
