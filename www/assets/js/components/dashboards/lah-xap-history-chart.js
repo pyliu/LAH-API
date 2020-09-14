@@ -28,6 +28,7 @@ if (Vue) {
         data: () => ({
             items: [],
             timer_ms: 60000,
+            reload_timer: null,
             spin_timer: null,
             site_tw: '地政局',
             last_update_time: '',
@@ -103,10 +104,11 @@ if (Vue) {
                 this.now_count = this.items[0][1];
             },
             reload(force) {
+                clearTimeout(this.reload_timer);
                 this.timer_ms = this.demo ? 5000 : 60000;
                 if (this.demo && this.items.length > 0) {
                     this.reload_demo_data();
-                    this.delay(this.reload, this.timer_ms);
+                    this.reload_timer = this.delay(this.reload, this.timer_ms);
                 } else if (force || this.isOfficeHours()) {
                     //this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
@@ -127,14 +129,14 @@ if (Vue) {
                         this.error = err;
                     }).finally(() => {
                         //this.isBusy = false;
-                        this.delay(this.reload, this.timer_ms);
+                        this.reload_timer = this.delay(this.reload, this.timer_ms);
                         Vue.nextTick(() => {
                             this.$refs.chart.update();
                         });
                     });
                 } else {
                     // check after an hour
-                    this.delay(this.reload, 3600000);
+                    this.reload_timer = this.delay(this.reload, 3600000);
                 }
             },
             reload_demo_data() {
