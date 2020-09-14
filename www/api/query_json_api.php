@@ -774,21 +774,21 @@ switch ($_POST["type"]) {
 		break;
 	case "search_user":
 		$log->info("XHR [search_user] 查詢使用者資料【".$_POST["keyword"]."】請求");
-		$user_info = new TdocUserInfo();
+		$sqlite_user = new SQLiteUser();
 		$results = false;
 		if (filter_var($_POST["keyword"], FILTER_VALIDATE_IP)) {
-			$results = $mock ? $cache->get('search_user') : $user_info->searchByIP($_POST["keyword"]);
+			$results = $mock ? $cache->get('search_user') : $sqlite_user->getUserByIP($_POST["keyword"]);
 		}
 		if (empty($results)) {
-			$results = $mock ? $cache->get('search_user') : $user_info->searchByID($_POST["keyword"]);
+			$results = $mock ? $cache->get('search_user') : $sqlite_user->getUser($_POST["keyword"]);
 			if (empty($results)) {
-				$results = $mock ? $cache->get('search_user') : $user_info->searchByName($_POST["keyword"]);
+				$results = $mock ? $cache->get('search_user') : $sqlite_user->getUserByName($_POST["keyword"]);
 			}
 		}
 		if (!$mock) $cache->set('search_user', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ".$_POST["keyword"]." 資料。");
-			$log->info("XHR [user_info] 查無 ".$_POST["keyword"]." 資料。");
+			$log->info("XHR [search_user] 查無 ".$_POST["keyword"]." 資料。");
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -796,7 +796,7 @@ switch ($_POST["type"]) {
 				"raw" => $results,
 				"query_string" => "keyword=".$_POST["keyword"]
 			);
-			$log->info("XHR [user_info] 查詢 ".$_POST["keyword"]." 成功。");
+			$log->info("XHR [search_user] 查詢 ".$_POST["keyword"]." 成功。");
 			echo json_encode($result, 0);
 		}
 		break;

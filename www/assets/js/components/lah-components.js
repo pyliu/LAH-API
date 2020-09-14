@@ -1269,8 +1269,8 @@ if (Vue) {
                         }
                     }
                     this.user_rows = user_rows || null;
-                    if (this.user_rows && this.user_rows['AP_PCIP'] == this.myip) {
-                        this.$store.commit('myid', this.user_rows['DocUserID']);
+                    if (this.user_rows && this.user_rows['ip'] == this.myip) {
+                        this.$store.commit('myid', this.user_rows['id']);
                     }
                     this.$emit('found', this.foundName);
                 } catch (err) {
@@ -1280,29 +1280,27 @@ if (Vue) {
             }
         },
         async created() {
-            if (!this.disableMSDBQuery) {
-                const succeed_cached = await this.restoreUserRows();
-                if (!succeed_cached) {
-                    if (!(this.name || this.id || this.ip)) this.ip = this.myip || await this.getLocalCache('myip');
-                    this.$http.post(CONFIG.API.JSON.QUERY, {
-                        type: "user_info",
-                        name: $.trim(this.name),
-                        id: $.trim(this.id),
-                        ip: $.trim(this.ip)
-                    }).then(res => {
-                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                            this.user_rows = res.data.raw;
-                            this.cacheUserRows();
-                            this.$emit('found', this.foundName);
-                        } else {
-                            console.warn(`找不到 '${this.name || this.id || this.ip}' 資料`);
-                            this.$emit('notFound', this.name || this.id || this.ip);
-                        }
-                    }).catch(err => {
-                        this.error = err;
-                        this.$emit('error', this.name || this.id || this.ip);
-                    });
-                }
+            const succeed_cached = await this.restoreUserRows();
+            if (!succeed_cached) {
+                if (!(this.name || this.id || this.ip)) this.ip = this.myip || await this.getLocalCache('myip');
+                this.$http.post(CONFIG.API.JSON.QUERY, {
+                    type: "user_info",
+                    name: $.trim(this.name),
+                    id: $.trim(this.id),
+                    ip: $.trim(this.ip)
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        this.user_rows = res.data.raw;
+                        this.cacheUserRows();
+                        this.$emit('found', this.foundName);
+                    } else {
+                        console.warn(`找不到 '${this.name || this.id || this.ip}' 資料`);
+                        this.$emit('notFound', this.name || this.id || this.ip);
+                    }
+                }).catch(err => {
+                    this.error = err;
+                    this.$emit('error', this.name || this.id || this.ip);
+                });
             }
         }
     });
