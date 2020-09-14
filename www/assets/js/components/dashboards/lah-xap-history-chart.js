@@ -90,7 +90,7 @@ if (Vue) {
             set_items(raw) {
                 raw.forEach((item, raw_idx, raw) => {
                     let text = (raw_idx == 0) ? '現在' : `${raw_idx}分前`;
-                    let val = this.demo ? this.rand(300) : item.count;
+                    let val = item.count;
                     if (this.items.length == raw.length) {
                         this.items[raw_idx][1] = val;
                         // not reactively ... manual set chartData
@@ -103,7 +103,11 @@ if (Vue) {
                 this.now_count = this.items[0][1];
             },
             reload(force) {
-                if (force || this.isOfficeHours() || this.demo) {
+                this.timer_ms = this.demo ? 5000 : 60000;
+                if (this.demo && this.items.length > 0) {
+                    this.reload_demo_data();
+                    this.delay(this.reload, this.timer_ms);
+                } else if (force || this.isOfficeHours()) {
                     //this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_ap_conn_HX_history",
@@ -133,6 +137,16 @@ if (Vue) {
                     this.delay(this.reload, 3600000);
                 }
             },
+            reload_demo_data() {
+                this.items.forEach((item, raw_idx, raw) => {
+                    let val = this.rand(300);
+                    item[1] = val;
+                    // not reactively ... manual set chartData
+                    this.$refs.chart.changeValue(item[0], val);
+                });
+                this.last_update_time = this.now().split(' ')[1];
+                this.now_count = this.items[0][1];
+            },
             popup() {
                 this.msgbox({
                     title: `跨所AP ${this.site_tw}連線`,
@@ -152,7 +166,6 @@ if (Vue) {
             }
         },
         created() {
-            this.timer_ms = this.demo ? 5000 : 60000;
             this.set_site_tw(this.site);
             this.reload(true);
         }
