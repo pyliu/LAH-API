@@ -26,12 +26,13 @@ class SQLiteUser {
         $stm->bindParam(':offboard_date', $row['AP_OFF_DATE']);
         $stm->bindParam(':ip', $row['AP_PCIP']);
         $stm->bindParam(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');
+        $stm->bindValue(':authority', 0);
     }
 
     private function inst(&$row) {
         $stm = $this->db->prepare("
-            INSERT INTO user ('id', 'name', 'sex', 'addr', 'tel', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash')
-            VALUES (:id, :name, :sex, :addr, :tel, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, :pw_hash)
+            INSERT INTO user ('id', 'name', 'sex', 'addr', 'tel', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', authority)
+            VALUES (:id, :name, :sex, :addr, :tel, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, :pw_hash, :authority)
         ");
         $this->bindUserParam($stm, $row);
         return $stm->execute() === FALSE ? false : true;
@@ -53,7 +54,8 @@ class SQLiteUser {
                 onboard_date = :onboard_date, 
                 offboard_date = :offboard_date,
                 ip = :ip,
-                pw_hash = :pw_hash
+                pw_hash = :pw_hash,
+                authority = :authority
             WHERE id = :id
         ");
         $this->bindUserParam($stm, $row);

@@ -16,6 +16,7 @@ abstract class STATUS_CODE {
 define('ROOT_DIR', dirname(dirname(__FILE__)));
 define('EXPORTS_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'exports');
 define('LOGS_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'logs');
+define('INC_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."include");
 
 define('CASE_STATUS',[
     "A" => "初審",
