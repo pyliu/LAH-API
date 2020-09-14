@@ -54,7 +54,7 @@ if (Vue) {
                         this.alert({
                             title: '跨所AP資料庫連線數超標警示',
                             type: 'danger',
-                            message: `<i class="fas fa-exclamation-circle"></i> 目前占用資料庫連線數已超過 3000 (<b>${val}</b>)，請立即處理！` 
+                            message: `<i class="fas fa-bomb fa-lg text-dark ld ld-tremble"></i> 目前占用資料庫連線數已超過 3000 (<b>${val}</b>)，請立即處理！` 
                         });
                     } else {
                         this.notify({
@@ -86,16 +86,6 @@ if (Vue) {
             }
         },
         methods: {
-            /*
-            icon_action_by_variant(variant) {
-                switch(variant) {
-                    case 'dark': return 'tremble';
-                    case 'danger': return 'shiver';
-                    case 'warning': return 'beat';
-                }
-                return 'breath';
-            },
-            */
             bg_color(dataset_item, opacity) {
                 switch(dataset_item[0]) {
                     case '地政局': return `rgb(207, 207, 207, ${opacity})`;    // H0
