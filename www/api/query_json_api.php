@@ -6,7 +6,7 @@ require_once(INC_DIR."/PrcAllCasesData.class.php");
 require_once(INC_DIR."/Query.class.php");
 require_once(INC_DIR."/Message.class.php");
 require_once(INC_DIR."/WatchDog.class.php");
-require_once(INC_DIR."/UserInfo.class.php");
+require_once(INC_DIR."/TdocUserInfo.class.php");
 require_once(INC_DIR."/SQLiteUser.class.php");
 require_once(INC_DIR."/StatsSQLite3.class.php");
 require_once(INC_DIR."/Cache.class.php");
@@ -55,7 +55,7 @@ switch ($_POST["type"]) {
 		break;
 	case "on_board_users":
 		$log->info("XHR [on_board_users] 取得所有在職使用者資料請求");
-		$user_info = new UserInfo();
+		$user_info = new TdocUserInfo();
 		$results = $mock ? $cache->get('on_board_users') : $user_info->getOnBoardUsers();
 		if (!$mock) $cache->set('on_board_users', $results);
 		if (empty($results)) {
@@ -99,7 +99,7 @@ switch ($_POST["type"]) {
 		$log->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
 		$log->info("XHR [overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");
 		$rows = $mock ? $cache->get('overdue_reg_cases') : $query->queryOverdueCasesIn15Days($_POST["reviewer_id"]);
-		if (!$mock) $cache->set('overdue_msg_count', $rows);
+		if (!$mock) $cache->set('overdue_reg_cases', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [overdue_reg_cases] 近15天查無逾期資料");
 			$result = array(
@@ -774,7 +774,7 @@ switch ($_POST["type"]) {
 		break;
 	case "search_user":
 		$log->info("XHR [search_user] 查詢使用者資料【".$_POST["keyword"]."】請求");
-		$user_info = new UserInfo();
+		$user_info = new TdocUserInfo();
 		$results = false;
 		if (filter_var($_POST["keyword"], FILTER_VALIDATE_IP)) {
 			$results = $mock ? $cache->get('search_user') : $user_info->searchByIP($_POST["keyword"]);
@@ -802,7 +802,7 @@ switch ($_POST["type"]) {
 		break;
 	case "user_info":
 		$log->info("XHR [user_info] 查詢使用者資料【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"]."】請求");
-		$user_info = new UserInfo();
+		$user_info = new TdocUserInfo();
 		$results = $mock ? $cache->get('user_info') : $user_info->searchByID($_POST["id"]);
 		if (empty($results)) {
 			$results = $mock ? $cache->get('user_info') : $user_info->searchByName($_POST["name"]);
@@ -832,7 +832,7 @@ switch ($_POST["type"]) {
 		break;
 	case "my_info":
 		$log->info("XHR [my_info] 查詢 $client_ip 請求");
-		$user_info = new UserInfo();
+		$user_info = new TdocUserInfo();
 		$results = $mock ? $cache->get('my_info') : $user_info->searchByIP($client_ip);
 		$len = count($results);
 		if ($len > 1) {

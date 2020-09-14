@@ -2,7 +2,7 @@
 require_once("init.php");
 require_once("MSDB.class.php");
 
-class UserInfo {
+class TdocUserInfo {
     private $jungli_in_db;
 
     function __construct() {

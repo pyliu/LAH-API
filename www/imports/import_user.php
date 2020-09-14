@@ -1,9 +1,9 @@
 <?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."include".DIRECTORY_SEPARATOR."init.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."UserInfo.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."TdocUserInfo.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteUser.class.php");
 
-$userinfo = new UserInfo();
+$userinfo = new TdocUserInfo();
 $all = $userinfo->getAllUsers();
 if ($all === false) die("Return results is false.");
 

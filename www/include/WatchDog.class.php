@@ -4,7 +4,7 @@ require_once(ROOT_DIR.'/include/Query.class.php');
 require_once(ROOT_DIR.'/include/Message.class.php');
 require_once(ROOT_DIR.'/include/StatsSQLite3.class.php');
 require_once(ROOT_DIR.'/include/Temperature.class.php');
-require_once(ROOT_DIR.'/include/UserInfo.class.php');
+require_once(ROOT_DIR.'/include/TdocUserInfo.class.php');
 
 class WatchDog {
     
@@ -184,7 +184,7 @@ class WatchDog {
             return false;
         }
         // get all on-board users
-        $userinfo = new UserInfo();
+        $userinfo = new TdocUserInfo();
         $onboard_users = $userinfo->getOnBoardUsers();
         //check if they checked their temperature
         $temperature = new Temperature();
