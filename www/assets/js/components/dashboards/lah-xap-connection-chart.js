@@ -72,16 +72,16 @@ if (Vue) {
             title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
             ap_vars() {
                 // return [color, action, size]
-                if (this.ap_count > 500) return ['dark', 'tremble', '3x'];
-                if (this.ap_count > 400) return ['danger', 'shiver', '2x'];
-                if (this.ap_count > 300) return ['warning', 'beat', 'lg'];
+                if (this.ap_count > 500) return ['dark', 'tremble', '2x'];
+                if (this.ap_count > 400) return ['danger', 'shiver', 'lg'];
+                if (this.ap_count > 300) return ['warning', 'beat', '1x'];
                 return ['success', 'breath', ''];
             },
             db_vars() {
                 // return [color, action, size]
-                if (this.db_count > 3000) return ['dark', 'tremble', '3x'];
-                if (this.db_count > 1800) return ['danger', 'shiver', '2x'];
-                if (this.db_count > 1000) return ['warning', 'beat', 'lg'];
+                if (this.db_count > 3000) return ['dark', 'tremble', '2x'];
+                if (this.db_count > 1800) return ['danger', 'shiver', 'lg'];
+                if (this.db_count > 1000) return ['warning', 'beat', '1x'];
                 return ['success', 'breath', ''];
             }
         },
