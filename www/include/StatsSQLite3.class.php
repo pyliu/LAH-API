@@ -162,7 +162,7 @@ class StatsSQLite3 {
 
             $skip_count = 0;
             while($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                // basically BE every 15s a record, exrtend means to get 1min record
+                // basically BE every 15s insert a record, extend means to get 1-min duration record
                 if ($extend) {
                     $skip_count++;
                     if ($skip_count % 4 != 1) continue;

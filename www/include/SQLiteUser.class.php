@@ -6,11 +6,12 @@ class SQLiteUser {
     private $db;
 
     private function exists($id) {
-        $ret = $this->db->querySingle("SELECT id from user WHERE id = '$id'");
+        global $log;
+        $ret = $this->db->querySingle("SELECT id from user WHERE id = '".trim($id)."'");
         return !empty($ret);
     }
 
-    private function bindUserParam(&$stm, &$row) {
+    private function bindUserParams(&$stm, &$row) {
         $stm->bindParam(':id', $row['DocUserID']);
         $stm->bindParam(':name', $row['AP_USER_NAME']);
         $stm->bindValue(':sex', $row['AP_SEX'] == '男' ? 1 : 0);
@@ -22,19 +23,29 @@ class SQLiteUser {
         $stm->bindParam(':work', $row['AP_WORK']);
         $stm->bindParam(':exam', $row['AP_TEST']);
         $stm->bindParam(':education', $row['AP_HI_SCHOOL']);
-        $stm->bindParam(':onboard_date', $row['AP_ON_DATE']);
+
+        global $log;
+        $tokens = preg_split("/\s+/", $row['AP_ON_DATE']);
+        if (count($tokens) == 3) {
+            $rewrite = $tokens[2]."/".str_pad($tokens[0], 2, '0', STR_PAD_LEFT)."/".str_pad($tokens[1], 2, '0', STR_PAD_LEFT);
+            $stm->bindParam(':onboard_date', $rewrite);
+        } else {
+            $stm->bindParam(':onboard_date', $row['AP_ON_DATE']);
+            //$log->info($row['AP_ON_DATE']);
+        }
+        
         $stm->bindParam(':offboard_date', $row['AP_OFF_DATE']);
         $stm->bindParam(':ip', $row['AP_PCIP']);
-        $stm->bindParam(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');
-        $stm->bindValue(':authority', 0);
+        // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
+        // $stm->bindValue(':authority', 0);
     }
 
     private function inst(&$row) {
         $stm = $this->db->prepare("
-            INSERT INTO user ('id', 'name', 'sex', 'addr', 'tel', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', authority)
-            VALUES (:id, :name, :sex, :addr, :tel, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, :pw_hash, :authority)
+            INSERT INTO user ('id', 'name', 'sex', 'addr', 'tel', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority')
+            VALUES (:id, :name, :sex, :addr, :tel, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', 0)
         ");
-        $this->bindUserParam($stm, $row);
+        $this->bindUserParams($stm, $row);
         return $stm->execute() === FALSE ? false : true;
     }
 
@@ -53,13 +64,20 @@ class SQLiteUser {
                 education = :education,
                 onboard_date = :onboard_date, 
                 offboard_date = :offboard_date,
-                ip = :ip,
-                pw_hash = :pw_hash,
-                authority = :authority
+                ip = :ip
             WHERE id = :id
         ");
-        $this->bindUserParam($stm, $row);
+        $this->bindUserParams($stm, $row);
         return $stm->execute() === FALSE ? false : true;
+    }
+
+    private function prepareArray(&$stmt) {
+        $result = $stmt->execute();
+        $return = [];
+        while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            $return[] = $row;
+        }
+        return $return;
     }
 
     function __construct() {
@@ -71,7 +89,7 @@ class SQLiteUser {
     public function import(&$row) {
         if (empty($row['DocUserID'])) {
             global $log;
-            $log->warning(__METHOD__.": DocUserID is empty update user procedure can not be proceeded.");
+            $log->warning(__METHOD__.": DocUserID is empty. Import user procedure can not be proceeded.");
             $log->warning(__METHOD__.": ".print_r($row, true));
             return false;
         }
@@ -84,5 +102,46 @@ class SQLiteUser {
         }
     }
 
+    public function getOnboardUsers() {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE offboard_date is NULL or offboard_date = '' ORDER BY id")) {
+            return $this->prepareArray($stmt);
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得在職使用者資料失敗！");
+        }
+        return false;
+    }
+
+    public function getOffboardUsers() {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE offboard_date != '' ORDER BY id")) {
+            return $this->prepareArray($stmt);
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得離職使用者資料失敗！");
+        }
+        return false;
+    }
+
+    public function getAllUsers() {
+        if($stmt = $this->db->prepare("SELECT * FROM user ORDER BY id")) {
+            return $this->prepareArray($stmt);
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得全部使用者資料失敗！");
+        }
+        return false;
+    }
+
+    public function getUser($id) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE id = :id")) {
+            $stmt->bindParam(':id', $id);
+            return $this->prepareArray($stmt);
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得使用者($id)資料失敗！");
+        }
+        return false;
+        
+    }
 }
 ?>
