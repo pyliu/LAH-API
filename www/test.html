@@ -40,8 +40,8 @@
                 <lah-xap-connection-chart :demo="storeParams['demo']"></lah-xap-connection-chart>
                 <lah-xap-history-chart site="HA" type='bar' :demo="storeParams['demo']"></lah-xap-history-chart>
                 <b-card>
-                    <lah-button @click="if (!storeParams.hasOwnProperty('demo')) addToStoreParams('demo', false); storeParams['demo'] = !storeParams['demo'];">{{storeParams['demo']}}</lah-button>
-                    <lah-button v-b-toggle.sidebar-1>Toggle Sidebar</lah-button>
+                    <lah-button @click="if (!storeParams.hasOwnProperty('demo')) addToStoreParams('demo', false); storeParams['demo'] = !storeParams['demo'];" icon="laptop-code" :pressed="storeParams['demo']">DEMO</lah-button>
+                    <lah-button v-b-toggle.sidebar-1 icon="bars">Toggle</lah-button>
                 </b-card>
             </b-card-group>
             <b-sidebar id="sidebar-1" title="Sidebar" bg-variant="dark" text-variant="light" backdrop

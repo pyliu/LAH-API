@@ -612,6 +612,7 @@ if (Vue) {
             :variant="variant"
             :size="size"
             :pill="pill"
+            :pressed="pressed"
             @mouseenter="mouseenter"
             @mouseleave="mouseleave"
             @blur="mouseleave"
@@ -627,7 +628,8 @@ if (Vue) {
             brand: { type: Boolean, default: false },
             action: { type: String, default: undefined},
             click: { type: Function, default: console.log },
-            pill: { type: Boolean, default: false }
+            pill: { type: Boolean, default: false },
+            pressed: { type: Boolean, default: false }
         },
         data: () => ({
             icon_id: 'xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx'
