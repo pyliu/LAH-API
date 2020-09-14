@@ -36,7 +36,9 @@ if (Vue) {
             db_count: 0,
             total_count: 0,
             ap_count: 0,
-            last_update_time: ''
+            last_update_time: '',
+            reload_timer: null,
+            timer_ms: 15000
         }),
         watch: {
             ap_count(val) {
@@ -115,9 +117,11 @@ if (Vue) {
                 }
             },
             reload(force = false) {
-                if (this.demo) {
+                clearTimeout(this.reload_timer);
+                this.timer_ms = this.demo ? 5000 : 15000;
+                if (this.demo && this.items.length > 0) {
                     this.reload_demo_data();
-                    this.delay(this.reload, 5000);
+                    this.reload_timer = this.delay(this.reload, this.timer_ms);
                 } else if (force || this.isOfficeHours()) {
                     //this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
@@ -165,14 +169,14 @@ if (Vue) {
                     }).finally(() => {
                         //this.isBusy = false;
                         // reload every 15s
-                        this.delay(this.reload, 15000);
+                        this.reload_timer = this.delay(this.reload, this.timer_ms);
                         Vue.nextTick(() => {
                             this.$refs.chart.update();
                         });
                     });
                 } else {
                     // check after an hour
-                    this.delay(this.reload, 3600000);
+                    this.reload_timer = this.delay(this.reload, 3600000);
                 }
             },
             reload_demo_data() {
@@ -218,7 +222,7 @@ if (Vue) {
             popup() {
                 this.msgbox({
                     title: `跨所AP各所連線數`,
-                    message: this.$createElement('lah-xap-connection-chart', { props: { type: 'line', popupButton: false } }),
+                    message: this.$createElement('lah-xap-connection-chart', { props: { type: this.type, popupButton: false, demo: this.demo, ip: this.ip } }),
                     size: "xl"
                 });
             }
