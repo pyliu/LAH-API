@@ -30,8 +30,8 @@ if (Vue) {
             animated_in: "animated fadeIn once-anim-cfg",
             animated_out: "animated fadeOut once-anim-cfg",
             animated_opts: ANIMATED_TRANSITIONS,
-            duration: 400,   // or {enter: 400, leave: 800}
-            mode: "out-in",  // out-in, in-out
+            duration: 400, // or {enter: 400, leave: 800}
+            mode: "out-in", // out-in, in-out
             cfg_css: "once-anim-cfg"
         }),
         created() {
@@ -58,12 +58,20 @@ if (Vue) {
             }
         },
         methods: {
-            enter: function(e) { this.$emit("enter", e); },
-            leave: function(e) { this.$emit("leave", e); },
-            afterEnter: function(e) { this.$emit("after-enter", e); },
-            afterLeave: function(e) { this.$emit("after-leave", e); },
+            enter: function (e) {
+                this.$emit("enter", e);
+            },
+            leave: function (e) {
+                this.$emit("leave", e);
+            },
+            afterEnter: function (e) {
+                this.$emit("after-enter", e);
+            },
+            afterLeave: function (e) {
+                this.$emit("after-leave", e);
+            },
             rand: (range) => Math.floor(Math.random() * Math.floor(range || 100)),
-            randAnimation: function() {
+            randAnimation: function () {
                 if (this.animated_opts) {
                     let count = this.animated_opts.length;
                     let this_time = this.animated_opts[this.rand(count)];
@@ -84,10 +92,16 @@ if (Vue) {
                 let variant = this.variant || '';
                 let ld_movement = this.action || '';
                 let size = '';
-                switch(this.size) {
-                    case "xs": size = "fa-xs"; break;
-                    case "sm": size = "fa-sm"; break;
-                    case "lg": size = "fa-lg"; break;
+                switch (this.size) {
+                    case "xs":
+                        size = "fa-xs";
+                        break;
+                    case "sm":
+                        size = "fa-sm";
+                        break;
+                    case "lg":
+                        size = "fa-lg";
+                        break;
                     default:
                         if (this.size && this.size[this.size.length - 1] === "x") {
                             size = `fa-${this.size}`;
@@ -140,11 +154,13 @@ if (Vue) {
             bar_variant: "light"
         }),
         methods: {
-            mouseOver: function(e) {
-                if (this.hide_timer_handle !== null) { clearTimeout(this.hide_timer_handle); }
+            mouseOver: function (e) {
+                if (this.hide_timer_handle !== null) {
+                    clearTimeout(this.hide_timer_handle);
+                }
                 this.disableProgress();
             },
-            mouseOut: function(e) {
+            mouseOut: function (e) {
                 if (this.autohide) {
                     this.hide_timer_handle = this.delay(() => {
                         this.seen = false;
@@ -153,15 +169,14 @@ if (Vue) {
                     this.enableProgress();
                 }
             },
-            enableProgress: function() {
+            enableProgress: function () {
                 this.disableProgress();
                 let total_remaining_secs = this.delay_ms / 1000;
                 this.progress_timer_handle = setInterval(() => {
                     this.remaining_delay -= 200;
                     let now_percent = ++this.progress_counter / (this.delay_ms / 200.0);
                     this.remaining_percent = (100 - Math.round(now_percent * 100));
-                    if (this.remaining_percent > 50) {
-                    } else if (this.remaining_percent > 25) {
+                    if (this.remaining_percent > 50) {} else if (this.remaining_percent > 25) {
                         this.bar_variant = "warning";
                     } else {
                         this.bar_variant = "danger";
@@ -169,7 +184,7 @@ if (Vue) {
                     this.remaining_secs = total_remaining_secs - Math.floor(total_remaining_secs * now_percent);
                 }, 200);
             },
-            disableProgress: function() {
+            disableProgress: function () {
                 clearTimeout(this.progress_timer_handle);
                 this.progress_counter = 1;
                 this.remaining_delay = this.delay_ms;
@@ -177,7 +192,7 @@ if (Vue) {
                 this.remaining_percent = 100;
                 this.bar_variant = "light";
             },
-            show: function(opts) {
+            show: function (opts) {
                 if (this.seen) {
                     this.seen = false;
                     // the slide up animation is 0.4s
@@ -186,7 +201,7 @@ if (Vue) {
                     this.setData(opts);
                 }
             },
-            setData: function(opts) {
+            setData: function (opts) {
                 // normal usage, you want to attach event to the element in the alert window
                 if (typeof opts.callback == "function") {
                     this.delay(opts.callback, this.anim_delay);
@@ -227,7 +242,7 @@ if (Vue) {
                 this.type = opts.type;
                 this.seen = true;
             },
-            randAnimation: function() {
+            randAnimation: function () {
                 if (this.animated_opts) {
                     let count = this.animated_opts.length;
                     let this_time = this.animated_opts[rand(count)];
@@ -235,12 +250,15 @@ if (Vue) {
                     this.animated_out = `${this_time.out} once-anim-cfg`;
                 }
             },
-            enter: function() { },
-            leave: function() { /*this.randAnimation();*/ },
-            afterEnter: function() {
+            enter: function () {},
+            leave: function () {
+                /*this.randAnimation();*/ },
+            afterEnter: function () {
                 // close alert after 15 secs (default)
                 if (this.autohide) {
-                    if (this.hide_timer_handle !== null) { clearTimeout(this.hide_timer_handle); }
+                    if (this.hide_timer_handle !== null) {
+                        clearTimeout(this.hide_timer_handle);
+                    }
                     this.hide_timer_handle = this.delay(() => {
                         this.seen = false;
                         this.hide_timer_handle = null;
@@ -248,11 +266,11 @@ if (Vue) {
                     this.enableProgress();
                 }
             },
-            afterLeave: function() {
+            afterLeave: function () {
                 this.disableProgress();
             }
         },
-        created: function() {
+        created: function () {
             this.randAnimation();
         }
     });
@@ -372,8 +390,12 @@ if (Vue) {
             }]
         }),
         computed: {
-            showBadge() { return this.avatar_badge > 0 },
-            enableUserCardPopover() { return !this.empty(this.myip) },
+            showBadge() {
+                return this.avatar_badge > 0
+            },
+            enableUserCardPopover() {
+                return !this.empty(this.myip)
+            },
             url() {
                 let page_url = new URL(location.href).pathname.substring(1);
                 if (this.empty(page_url)) {
@@ -383,7 +405,7 @@ if (Vue) {
             },
             bgStyle() {
                 let day_of_week = new Date().getDay();
-                switch(day_of_week) {
+                switch (day_of_week) {
                     case 1:
                         return 'background-color: #343a40 !important;'; // dark
                     case 2:
@@ -397,14 +419,16 @@ if (Vue) {
                         return 'background-color: #28a745 !important;'; // green
                 }
             },
-            avatar_src() { return this.empty(this.myname) ? 'get_user_img.php?name=not_found' : `get_user_img.php?name=${this.myname}_avatar` },
+            avatar_src() {
+                return this.empty(this.myname) ? 'get_user_img.php?name=not_found' : `get_user_img.php?name=${this.myname}_avatar`
+            },
             left_hours() {
                 let hours = new Date().getHours();
                 return 17 - hours;
             }
         },
         methods: {
-            activeCss: function(link) {
+            activeCss: function (link) {
                 let ret = "";
                 if (Array.isArray(link.url)) {
                     for (let i = 0; i < link.url.length; i++) {
@@ -423,16 +447,16 @@ if (Vue) {
                     // store detected active link
                     this.active = link
                 }
-                
+
                 return ret;
             },
-            css: function(url) {
+            css: function (url) {
                 if (this.url == url) {
                     return "font-weight-bold text-white";
                 }
                 return "";
             },
-            setLeading: function(link) {
+            setLeading: function (link) {
                 if (Array.isArray(link.url)) {
                     link.url.forEach((this_url, idx) => {
                         if (this.url == this_url) {
@@ -450,17 +474,21 @@ if (Vue) {
             },
             animate(e) {
                 // add pulse effect for the links
-                this.animated(e.target, this.fri_noon ? {} : {name: "pulse"});
+                this.animated(e.target, this.fri_noon ? {} : {
+                    name: "pulse"
+                });
             },
-            subMenu(link) { return !this.empty(link.children) },
-            userNotFound: function(input) {
+            subMenu(link) {
+                return !this.empty(link.children)
+            },
+            userNotFound: function (input) {
                 this.$store.commit('myip', null);
                 this.$warn(`找不到 ${input} 的使用者資訊，無法顯示目前使用者的卡片。`);
             },
-            userFound: function(name) {
-                
+            userFound: function (name) {
+
             },
-            checkAuthority: async function() {
+            checkAuthority: async function () {
                 if (this.isAdmin === undefined) {
                     await this.$store.dispatch('authenticate');
                 }
@@ -469,7 +497,7 @@ if (Vue) {
                 }
                 $("body section:first-child").removeClass("hide");
             },
-            clearCache: function() {
+            clearCache: function () {
                 this.$confirm(`清除全部暫存資料？`, () => {
                     this.$lf.clear().then(() => {
                         this.notify({
@@ -480,7 +508,7 @@ if (Vue) {
                     });
                 });
             },
-            setUnreadMessageCount: function() {
+            setUnreadMessageCount: function () {
                 this.$http.post(CONFIG.API.JSON.QUERY, {
                     type: 'user_unread_message',
                     ip: this.myip
@@ -496,7 +524,15 @@ if (Vue) {
 
                 });
             },
-            clearCache: function() { this.$lf.clear().then(() => { this.notify({title: '清除快取', message: '快取資料已清除，請重新整理頁面。', type: "success"}) }) }
+            clearCache: function () {
+                this.$lf.clear().then(() => {
+                    this.notify({
+                        title: '清除快取',
+                        message: '快取資料已清除，請重新整理頁面。',
+                        type: "success"
+                    })
+                })
+            }
         },
         created() {
             let day_of_week = new Date().getDay();
@@ -564,7 +600,10 @@ if (Vue) {
                     this.$lf.keys().then(keys => {
                         keys.forEach(async key => {
                             const val = await this.$lf.getItem(key);
-                            this.all.push({key: key, val: val});
+                            this.all.push({
+                                key: key,
+                                val: val
+                            });
                         });
                     }).finally(() => {
                         this.isBusy = false;
@@ -573,7 +612,9 @@ if (Vue) {
             }
         },
         computed: {
-            count() { return this.all ? this.all.length : 0 }
+            count() {
+                return this.all ? this.all.length : 0
+            }
         },
         methods: {
             async get(key) {
@@ -583,8 +624,8 @@ if (Vue) {
             del(key, idx) {
                 this.$confirm(`清除 ${key} 快取紀錄？`, () => {
                     this.$lf.removeItem(key).then(() => {
-                        for ( let i = 0; i < this.all.length; i++) {
-                            if ( this.all[i].key == key) {
+                        for (let i = 0; i < this.all.length; i++) {
+                            if (this.all[i].key == key) {
                                 this.all.splice(i, 1);
                                 return true;
                             }
@@ -621,27 +662,57 @@ if (Vue) {
             <lah-fa-icon :id="icon_id" :icon="icon" :prefix="fa_icon_prefix"> <slot></slot></lah-fa-icon>
       </b-button>`,
         props: {
-            variant: { type: String, default: 'outline-primary'},
-            size: { type: String, default: 'sm'},
-            icon: { type: String, default: 'question'},
-            regular: { type: Boolean, default: false},
-            brand: { type: Boolean, default: false },
-            action: { type: String, default: undefined},
-            click: { type: Function, default: console.log },
-            pill: { type: Boolean, default: false },
-            pressed: { type: Boolean, default: false }
+            variant: {
+                type: String,
+                default: 'outline-primary'
+            },
+            size: {
+                type: String,
+                default: 'sm'
+            },
+            icon: {
+                type: String,
+                default: 'question'
+            },
+            regular: {
+                type: Boolean,
+                default: false
+            },
+            brand: {
+                type: Boolean,
+                default: false
+            },
+            action: {
+                type: String,
+                default: undefined
+            },
+            click: {
+                type: Function,
+                default: console.log
+            },
+            pill: {
+                type: Boolean,
+                default: false
+            },
+            pressed: {
+                type: Boolean,
+                default: false
+            }
         },
         data: () => ({
             icon_id: 'xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx'
         }),
-        watch: { },
+        watch: {},
         computed: {
             fa_icon_prefix() {
                 return this.brand ? 'fab' : this.regular ? 'far' : 'fas';
             }
         },
         methods: {
-            emitClick(evt) { this.$emit('click', this.click); evt.stopPropagation(); },
+            emitClick(evt) {
+                this.$emit('click', this.click);
+                evt.stopPropagation();
+            },
             mouseenter() {
                 /**
                  *  Land-Affairs-Helper"ld-heartbeat", "ld-beat", "ld-blink", "ld-bounce", "ld-bounceAlt", "ld-breath", "ld-wrench", "ld-surprise",
@@ -658,40 +729,83 @@ if (Vue) {
                 // movement is "undefined" will be random effect
                 addLDAnimation(`#${this.icon_id}`, movement);
             },
-            mouseleave() { clearLDAnimation(`#${this.icon_id}`) }
+            mouseleave() {
+                clearLDAnimation(`#${this.icon_id}`)
+            }
         },
-        created() { this.icon_id = this.uuid() }
+        created() {
+            this.icon_id = this.uuid()
+        }
     });
 
     // need to include chart.min.js (chart.js) first.
     Vue.component("lah-chart", {
         template: `<div><canvas class="w-100">圖形初始化失敗</canvas></div>`,
         props: {
-            type: { type: String, default: 'bar' },
-            label: { type: String, default: '統計圖表' },
-            opacity: { type: Number, default: 0.6 },
-            items: { type: Array, default: [] },
-            tooltip: { type: Function, default: function (tooltipItem, data) {
-                // add percent ratio to the label
-                let dataset = data.datasets[tooltipItem.datasetIndex];
-                let sum = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
-                    return previousValue + currentValue;
-                });
-                let currentValue = dataset.data[tooltipItem.index];
-                let percent = Math.round(((currentValue / sum) * 100));
-                if (isNaN(percent)) return ` ${data.labels[tooltipItem.index]} : ${currentValue}`;
-                return ` ${data.labels[tooltipItem.index]} : ${currentValue} [${percent}%]`;
-            } },
-            bgColor: { type: Function, default: function(dataset_item, opacity) {
-                return `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`;
-            } },
-            borderColor: { type: String, default: `rgb(22, 22, 22)` },
-            yAxes: { type: Boolean, default: true },
-            xAxes: { type: Boolean, default: true },
-            legend: { type: Boolean, default: true },
-            beginAtZero: { type: Boolean, default: true },
-            title: { type: String, default: '' },
-            titlePos: { type: String, default: 'top' }
+            type: {
+                type: String,
+                default: 'bar'
+            },
+            label: {
+                type: String,
+                default: '統計圖表'
+            },
+            opacity: {
+                type: Number,
+                default: 0.6
+            },
+            items: {
+                type: Array,
+                default: []
+            },
+            tooltip: {
+                type: Function,
+                default: function (tooltipItem, data) {
+                    // add percent ratio to the label
+                    let dataset = data.datasets[tooltipItem.datasetIndex];
+                    let sum = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
+                        return previousValue + currentValue;
+                    });
+                    let currentValue = dataset.data[tooltipItem.index];
+                    let percent = Math.round(((currentValue / sum) * 100));
+                    if (isNaN(percent)) return ` ${data.labels[tooltipItem.index]} : ${currentValue}`;
+                    return ` ${data.labels[tooltipItem.index]} : ${currentValue} [${percent}%]`;
+                }
+            },
+            bgColor: {
+                type: Function,
+                default: function (dataset_item, opacity) {
+                    return `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`;
+                }
+            },
+            borderColor: {
+                type: String,
+                default: `rgb(22, 22, 22)`
+            },
+            yAxes: {
+                type: Boolean,
+                default: true
+            },
+            xAxes: {
+                type: Boolean,
+                default: true
+            },
+            legend: {
+                type: Boolean,
+                default: true
+            },
+            beginAtZero: {
+                type: Boolean,
+                default: true
+            },
+            title: {
+                type: String,
+                default: ''
+            },
+            titlePos: {
+                type: String,
+                default: 'top'
+            }
         },
         data: () => ({
             inst: null,
@@ -699,26 +813,32 @@ if (Vue) {
             update_timer: null
         }),
         watch: {
-            type: function (val) { this.delay(this.buildChart, 0) },
-            chartData: function(newObj) { this.delay(this.buildChart, 0)  },
-            items: function(newItems) { this.setData(newItems) }
+            type: function (val) {
+                this.delay(this.buildChart, 0)
+            },
+            chartData: function (newObj) {
+                this.delay(this.buildChart, 0)
+            },
+            items: function (newItems) {
+                this.setData(newItems)
+            }
         },
         methods: {
-            update: function() {
+            update: function () {
                 clearTimeout(this.update_timer);
                 this.update_timer = this.delay(() => {
                     if (this.inst) this.inst.update();
                 }, 100);
             },
-            resetData: function() {
+            resetData: function () {
                 this.chartData = {
-                    labels:[],
+                    labels: [],
                     legend: {
                         display: true
                     },
-                    datasets:[{
+                    datasets: [{
                         label: this.label,
-                        backgroundColor:[],
+                        backgroundColor: [],
                         data: [],
                         borderColor: this.borderColor,
                         order: 1,
@@ -728,12 +848,12 @@ if (Vue) {
                     }]
                 };
             },
-            setData: function(items) {
+            setData: function (items) {
                 this.resetData();
                 let opacity = this.chartData.datasets[0].opacity;
                 items.forEach(item => {
-                    this.chartData.labels.push(item[0]);            // first element is label
-                    this.chartData.datasets[0].data.push(item[1]);  // second element is data count
+                    this.chartData.labels.push(item[0]); // first element is label
+                    this.chartData.datasets[0].data.push(item[1]); // second element is data count
                     // randoom color for this item
                     this.chartData.datasets[0].backgroundColor.push(this.bgColor(item, opacity));
                 });
@@ -766,7 +886,7 @@ if (Vue) {
                     this.chartData.datasets = this.chartData.datasets.slice(0, 1);
                 }
                 this.chartData.datasets[0].label = this.label;
-                switch(this.type) {
+                switch (this.type) {
                     case "pie":
                     case "polarArea":
                     case "doughnut":
@@ -803,14 +923,18 @@ if (Vue) {
                                 label: this.tooltip
                             }
                         },
-                        title: { display: !this.empty(this.title), text: this.title, position: this.titlePos },
-                        onClick: function(e) {
+                        title: {
+                            display: !this.empty(this.title),
+                            text: this.title,
+                            position: this.titlePos
+                        },
+                        onClick: function (e) {
                             let payload = {};
                             payload["point"] = that.inst.getElementAtEvent(e)[0];
                             if (payload["point"]) {
                                 // point e.g. {element: i, datasetIndex: 0, index: 14}
                                 let idx = payload["point"].index;
-                                let dataset_idx = payload["point"].datasetIndex;    // in my case it should be always be 0
+                                let dataset_idx = payload["point"].datasetIndex; // in my case it should be always be 0
                                 payload["label"] = that.inst.data.labels[idx];
                                 payload["value"] = that.inst.data.datasets[dataset_idx].data[idx];
                             }
@@ -822,8 +946,10 @@ if (Vue) {
                 // sometimes the char doesn't show up properly ... so add this fix to update it
                 this.delay(this.update, 400);
             },
-            toBase64Image: function() { return this.inst.toBase64Image() },
-            downloadBase64PNG: function(filename = "download.png") {
+            toBase64Image: function () {
+                return this.inst.toBase64Image()
+            },
+            downloadBase64PNG: function (filename = "download.png") {
                 const link = document.createElement('a');
                 link.href = this.toBase64Image();
                 link.setAttribute("download", filename);
@@ -878,8 +1004,14 @@ if (Vue) {
             </div>
         </fieldset>`,
         props: {
-            avatar: { type: Boolean, default: true },
-            maxHeight: { type: String, default: '' }
+            avatar: {
+                type: Boolean,
+                default: true
+            },
+            maxHeight: {
+                type: String,
+                default: ''
+            }
         },
         data: () => ({
             input: '',
@@ -890,8 +1022,12 @@ if (Vue) {
             delay_ms: 800
         }),
         watch: {
-            input(nVal, oVal) { this.filter() },
-            myid(val) { this.input = val },
+            input(nVal, oVal) {
+                this.filter()
+            },
+            myid(val) {
+                this.input = val
+            },
             userNames(val) {
                 this.ids = Object.keys(val);
                 this.ids.sort();
@@ -902,16 +1038,24 @@ if (Vue) {
             }
         },
         computed: {
-            validate() { return this.empty(this.input) ? null : this.length(this.input) > 1 },
-            style() { return this.empty($.trim(this.maxHeight)) ? '' : `max-height: ${this.maxHeight}px` }
+            validate() {
+                return this.empty(this.input) ? null : this.length(this.input) > 1
+            },
+            style() {
+                return this.empty($.trim(this.maxHeight)) ? '' : `max-height: ${this.maxHeight}px`
+            }
         },
         methods: {
             length(s) {
-                var b = 0, i = 0, c;
-                for(;c=s.charCodeAt(i++);b+=c>>11?3:c>>7?2:1);
+                var b = 0,
+                    i = 0,
+                    c;
+                for (; c = s.charCodeAt(i++); b += c >> 11 ? 3 : c >> 7 ? 2 : 1);
                 return b
             },
-            avatar_src(name) { return `get_user_img.php?name=${name}_avatar` },
+            avatar_src(name) {
+                return `get_user_img.php?name=${name}_avatar`
+            },
             filter() {
                 if (this.keyup_timer) {
                     clearTimeout(this.keyup_timer);
@@ -926,7 +1070,7 @@ if (Vue) {
                     });
                     // clear last on flags
                     this.last_hit_ids = [];
-                    
+
                     this.input = this.input.replace("?", ""); // prevent out of memory
                     let keyword = new RegExp(this.input, "i");
                     this.ids.forEach(id => {
@@ -962,8 +1106,14 @@ if (Vue) {
                     keyword: keyword
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        let card = this.$createElement("lah-user-card", { props: { inUserRows: res.data.raw } });
-                        this.$modal(card, { title: "搜尋使用者資訊" });
+                        let card = this.$createElement("lah-user-card", {
+                            props: {
+                                inUserRows: res.data.raw
+                            }
+                        });
+                        this.$modal(card, {
+                            title: "搜尋使用者資訊"
+                        });
                     } else {
                         this.notify({
                             title: "搜尋使用者",
@@ -986,7 +1136,9 @@ if (Vue) {
                 });
             }
         },
-        mounted() { this.input = this.myid }
+        mounted() {
+            this.input = this.myid
+        }
     });
 
     Vue.component("lah-user-id-input", {
@@ -1010,17 +1162,35 @@ if (Vue) {
             onboard_users: undefined
         }),
         watch: {
-            value(val) { this.id = val },
-            id(val) { this.id = this.empty(val) ? '' : val.toString().replace(/[^a-zA-Z0-9]/g, "") }
+            value(val) {
+                this.id = val
+            },
+            id(val) {
+                this.id = this.empty(val) ? '' : val.toString().replace(/[^a-zA-Z0-9]/g, "")
+            }
         },
         computed: {
-            userNameMap() { return this.only_onboard ? this.onboard_user_names : this.userNames },
-            ID() { return this.id ? this.id.toUpperCase() : null },
-            name() { return this.userNameMap[this.ID] || null },
-            validate() { return this.empty(this.id) ? null : this.validator ? this.validator : this.def_validator },
-            def_validator() { return /*(/^HB\d{4}$/i).test(this.ID) || */!this.empty(this.name) },
-            avatar_src() { return `get_user_img.php?name=${this.name || 'not_found'}_avatar` },
-            only_onboard() { return this.onlyOnBoard === true },
+            userNameMap() {
+                return this.only_onboard ? this.onboard_user_names : this.userNames
+            },
+            ID() {
+                return this.id ? this.id.toUpperCase() : null
+            },
+            name() {
+                return this.userNameMap[this.ID] || null
+            },
+            validate() {
+                return this.empty(this.id) ? null : this.validator ? this.validator : this.def_validator
+            },
+            def_validator() {
+                return /*(/^HB\d{4}$/i).test(this.ID) || */ !this.empty(this.name)
+            },
+            avatar_src() {
+                return `get_user_img.php?name=${this.name || 'not_found'}_avatar`
+            },
+            only_onboard() {
+                return this.onlyOnBoard === true
+            },
             onboard_user_names() {
                 let names = {};
                 if (this.onboard_users !== undefined) {
@@ -1041,7 +1211,7 @@ if (Vue) {
                         }).then(res => {
                             this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得在職使用者資料回傳值有誤【${res.data.status}】`)
                             this.onboard_users = res.data.raw;
-                            this.setLocalCache('onboard_users', this.onboard_users, 24 * 60 * 60 * 1000);   // 1 day
+                            this.setLocalCache('onboard_users', this.onboard_users, 24 * 60 * 60 * 1000); // 1 day
                         }).catch(err => {
                             this.error = err;
                         }).finally(() => {
@@ -1115,7 +1285,7 @@ if (Vue) {
                     isLeft: function () {
                         return !this.empty(this.user_data['offboard_date']);
                     },
-                    birthAgeVariant: function() {
+                    birthAgeVariant: function () {
                         let badge_age = this.birthAge;
                         if (badge_age < 30) {
                             return "success";
@@ -1128,7 +1298,7 @@ if (Vue) {
                         }
                         return "dark";
                     },
-                    birthAge: function() {
+                    birthAge: function () {
                         let birth = this.user_data["birthday"];
                         if (birth) {
                             birth = this.toADDate(birth);
@@ -1140,13 +1310,13 @@ if (Vue) {
                         }
                         return false;
                     },
-                    workAge: function() {
+                    workAge: function () {
                         let AP_ON_DATE = this.user_data["onboard_date"];
                         let AP_OFF_JOB = this.isLeft ? 'Y' : 'N';
                         let AP_OFF_DATE = this.user_data["offboard_date"];
-            
-                        if(AP_ON_DATE != undefined && AP_ON_DATE != null) {
-                            AP_ON_DATE = AP_ON_DATE.date ? AP_ON_DATE.date.split(" ")[0] :　AP_ON_DATE;
+
+                        if (AP_ON_DATE != undefined && AP_ON_DATE != null) {
+                            AP_ON_DATE = AP_ON_DATE.date ? AP_ON_DATE.date.split(" ")[0] : AP_ON_DATE;
                             AP_ON_DATE = this.toADDate(AP_ON_DATE);
                             let temp = Date.parse(AP_ON_DATE);
                             if (temp) {
@@ -1165,7 +1335,7 @@ if (Vue) {
                         }
                         return false;
                     },
-                    workAgeVariant: function() {
+                    workAgeVariant: function () {
                         let work_age = this.workAge;
                         if (work_age < 5) {
                             return 'success';
@@ -1178,7 +1348,7 @@ if (Vue) {
                     }
                 },
                 methods: {
-                    toTWDate: function(ad_date) {
+                    toTWDate: function (ad_date) {
                         tw_date = ad_date.replace('/-/g', "/");
                         // detect if it is AD date
                         if (tw_date.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
@@ -1187,7 +1357,7 @@ if (Vue) {
                         }
                         return tw_date;
                     },
-                    toADDate: function(tw_date) {
+                    toADDate: function (tw_date) {
                         let ad_date = tw_date.replace('/-/g', "/");
                         // detect if it is TW date
                         if (ad_date.match(/^\d{3}\/\d{2}\/\d{2}$/)) {
@@ -1206,14 +1376,30 @@ if (Vue) {
             msg_content: ''
         }),
         computed: {
-            found: function() { return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined },
-            notFound: function() { return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`; },
-            foundName: function() { return this.user_rows[0]["name"] },
-            foundCount: function() { return this.user_rows.length },
-            foundLeft: function() { return this.user_rows[0]["offboard_date"] != '' },
-            useAvatar: function() { return !this.empty(this.avatar) },
-            ID: function() { return this.user_rows ? this.user_rows[0]['id'] : null },
-            useEndTabs() { return this.inUserRows ? this.inUserRows.length > 1 : false }
+            found: function () {
+                return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined
+            },
+            notFound: function () {
+                return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`;
+            },
+            foundName: function () {
+                return this.user_rows[0]["name"]
+            },
+            foundCount: function () {
+                return this.user_rows.length
+            },
+            foundLeft: function () {
+                return this.user_rows[0]["offboard_date"] != ''
+            },
+            useAvatar: function () {
+                return !this.empty(this.avatar)
+            },
+            ID: function () {
+                return this.user_rows ? this.user_rows[0]['id'] : null
+            },
+            useEndTabs() {
+                return this.inUserRows ? this.inUserRows.length > 1 : false
+            }
         },
         methods: {
             photoUrl: function (user_data) {
@@ -1222,7 +1408,7 @@ if (Vue) {
                 }
                 return `get_user_img.php?name=${user_data['name']}`;
             },
-            openPhoto: function(user_data) {
+            openPhoto: function (user_data) {
                 // get_user_img.php?name=${user_data['name']}
                 //<b-img thumbnail fluid src="https://picsum.photos/250/250/?image=54" alt="Image 1"></b-img>
                 this.msgbox({
@@ -1232,24 +1418,38 @@ if (Vue) {
                             className: "text-center"
                         }
                     }, [this.$createElement("b-img", {
-                        props: {fluid: true, src: `get_user_img.php?name=${user_data['name']}`, alt: user_data['name'], thumbnail: true}
+                        props: {
+                            fluid: true,
+                            src: `get_user_img.php?name=${user_data['name']}`,
+                            alt: user_data['name'],
+                            thumbnail: true
+                        }
                     })]),
                     size: "lg",
                     backdrop_close: true
                 });
             },
-            cacheUserRows: function() {
+            cacheUserRows: function () {
                 let payload = {};
                 // basically cache for one day in localforage
-                if (!this.empty(this.id)) { payload[this.id] = this.user_rows; this.setLocalCache(this.id, this.user_rows, this.dayMilliseconds); }
-                if (!this.empty(this.name)) { payload[this.name] = this.user_rows; this.setLocalCache(this.name, this.user_rows, this.dayMilliseconds); }
-                if (!this.empty(this.ip)) { payload[this.ip] = this.user_rows; this.setLocalCache(this.ip, this.user_rows, this.dayMilliseconds); }
+                if (!this.empty(this.id)) {
+                    payload[this.id] = this.user_rows;
+                    this.setLocalCache(this.id, this.user_rows, this.dayMilliseconds);
+                }
+                if (!this.empty(this.name)) {
+                    payload[this.name] = this.user_rows;
+                    this.setLocalCache(this.name, this.user_rows, this.dayMilliseconds);
+                }
+                if (!this.empty(this.ip)) {
+                    payload[this.ip] = this.user_rows;
+                    this.setLocalCache(this.ip, this.user_rows, this.dayMilliseconds);
+                }
                 this.$store.commit('cache', payload);
                 if (this.user_rows['ip'] == this.myip) {
                     this.$store.commit('myid', this.user_rows['id']);
                 }
             },
-            restoreUserRows: async function() {
+            restoreUserRows: async function () {
                 try {
                     // find in $store(in-memory)
                     let user_rows = this.cache.get(this.id) || this.cache.get(this.name) || this.cache.get(this.ip) || this.inUserRows;
@@ -1261,9 +1461,15 @@ if (Vue) {
                         } else {
                             // also put back to $store
                             let payload = {};
-                            if (!this.empty(this.id)) { payload[this.id] = user_rows; }
-                            if (!this.empty(this.name)) { payload[this.name] = user_rows; }
-                            if (!this.empty(this.ip)) { payload[this.ip] = user_rows; }
+                            if (!this.empty(this.id)) {
+                                payload[this.id] = user_rows;
+                            }
+                            if (!this.empty(this.name)) {
+                                payload[this.name] = user_rows;
+                            }
+                            if (!this.empty(this.ip)) {
+                                payload[this.ip] = user_rows;
+                            }
                             this.$store.commit('cache', payload);
                         }
                     }
@@ -1376,11 +1582,26 @@ if (Vue) {
             </div>
         </b-card>`,
         props: {
-            ID: { type: String, default: '' },
-            NAME: { type: String, default: '' },
-            title: { type: String, default: '' },
-            noBody: { type: Boolean, default: false },
-            noConfirm: { type: Boolean, default: true }
+            ID: {
+                type: String,
+                default: ''
+            },
+            NAME: {
+                type: String,
+                default: ''
+            },
+            title: {
+                type: String,
+                default: ''
+            },
+            noBody: {
+                type: Boolean,
+                default: false
+            },
+            noConfirm: {
+                type: Boolean,
+                default: true
+            }
         },
         data: () => ({
             msg_title: '',
@@ -1391,25 +1612,45 @@ if (Vue) {
             btn_grp_id: ''
         }),
         computed: {
-            border: function() { return this.noBody ? 'border-0' : '' },
-            showTitle: function() { return !this.empty(this.title) },
-            showIdInput: function() { return this.empty(this.ID) && this.empty(this.NAME)},
-            sendMessageOK: function() { return this.msgTitleOK && this.msgContentOK && (!this.empty(this.ID) || !this.empty(this.id))  },
-            msgContentOK: function() { return this.empty(this.msg_content) ? null : this.msg_content.length <= 500 },
-            msgTitleOK: function() { return this.empty(this.msg_title) ? null : this.msg_title.length <= 20 },
-            msgTitleCount: function() { return this.empty(this.msg_title) ? '言簡意賅最多20字中文 ... ' : `${this.msg_title.length} / 20` },
-            msgContentCount: function() { return this.empty(this.msg_content) ? '最多500字中文 ... ' : `${this.msg_content.length} / 500` },
-            msgSendTime: function() { return this.empty(this.send_time) ? '立即傳送' : `預定 ${this.send_time} 送出`},
-            msgEndTime: function() { return this.empty(this.end_time) ? '23:59:59為止' : `預定 ${this.end_time} 忽略` }
+            border: function () {
+                return this.noBody ? 'border-0' : ''
+            },
+            showTitle: function () {
+                return !this.empty(this.title)
+            },
+            showIdInput: function () {
+                return this.empty(this.ID) && this.empty(this.NAME)
+            },
+            sendMessageOK: function () {
+                return this.msgTitleOK && this.msgContentOK && (!this.empty(this.ID) || !this.empty(this.id))
+            },
+            msgContentOK: function () {
+                return this.empty(this.msg_content) ? null : this.msg_content.length <= 500
+            },
+            msgTitleOK: function () {
+                return this.empty(this.msg_title) ? null : this.msg_title.length <= 20
+            },
+            msgTitleCount: function () {
+                return this.empty(this.msg_title) ? '言簡意賅最多20字中文 ... ' : `${this.msg_title.length} / 20`
+            },
+            msgContentCount: function () {
+                return this.empty(this.msg_content) ? '最多500字中文 ... ' : `${this.msg_content.length} / 500`
+            },
+            msgSendTime: function () {
+                return this.empty(this.send_time) ? '立即傳送' : `預定 ${this.send_time} 送出`
+            },
+            msgEndTime: function () {
+                return this.empty(this.end_time) ? '23:59:59為止' : `預定 ${this.end_time} 忽略`
+            }
         },
         methods: {
-            send: function(e) {
+            send: function (e) {
                 if (CONFIG.DISABLE_MSDB_QUERY) {
                     this.$warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping lah-user-message-form::send.");
                     return;
                 }
                 let title = this.msg_title;
-                let content = this.msg_content.replace(/\n/g, "\r\n");	// Messenger client is Windows app, so I need to replace \n to \r\n
+                let content = this.msg_content.replace(/\n/g, "\r\n"); // Messenger client is Windows app, so I need to replace \n to \r\n
                 let who = this.ID || this.NAME || this.id;
 
                 if (content.length > 1000) {
@@ -1425,11 +1666,12 @@ if (Vue) {
                     this.$confirm(`"確認要送 「${title}」 給 「${who}」？<p class="mt-2">${content}</p>`, this.callback);
                 }
             },
-            callback: function() {
+            callback: function () {
                 let title = this.msg_title;
-                let content = this.msg_content.replace(/\n/g, "\r\n");	// Messenger client is Windows app, so I need to replace \n to \r\n
+                let content = this.msg_content.replace(/\n/g, "\r\n"); // Messenger client is Windows app, so I need to replace \n to \r\n
                 let who = this.ID || this.NAME || this.id;
-                this.animated(`#${this.btn_grp_id}`, { name: 'lightSpeedOut',
+                this.animated(`#${this.btn_grp_id}`, {
+                    name: 'lightSpeedOut',
                     duration: 'once-anim-cfg-2x',
                     callback: () => {
                         $(`#${this.btn_grp_id}`).hide();
@@ -1443,24 +1685,29 @@ if (Vue) {
                             end_time: this.end_time
                         }).then(res => {
                             this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
-                            this.animated(`#${this.btn_grp_id}`, { name: 'slideInUp', callback: () => {
-                                this.msg_content = '';
-                                this.msg_title = '' ;
-                                this.notify({
-                                    title: "傳送訊息",
-                                    message: res.data.message
-                                });
-                            } });
+                            this.animated(`#${this.btn_grp_id}`, {
+                                name: 'slideInUp',
+                                callback: () => {
+                                    this.msg_content = '';
+                                    this.msg_title = '';
+                                    this.notify({
+                                        title: "傳送訊息",
+                                        message: res.data.message
+                                    });
+                                }
+                            });
                         }).catch(err => {
                             this.error = err;
                         }).finally(() => {
-                            this.isBusy= false;
+                            this.isBusy = false;
                             $(`#${this.btn_grp_id}`).show();
                         });
                     }
                 });
             },
-            timeState: function(time) { return this.empty(time) ? null : /\d{2}:\d{2}:\d{2}/gi.test(time) }
+            timeState: function (time) {
+                return this.empty(time) ? null : /\d{2}:\d{2}:\d{2}/gi.test(time)
+            }
         },
         created() {
             this.send_time = this.nowTime;
@@ -1524,26 +1771,46 @@ if (Vue) {
             urlPattern: /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/ig
         }),
         watch: {
-            count: function(nVal, oVal) { this.load() }
+            count: function (nVal, oVal) {
+                this.load()
+            }
         },
         computed: {
-            ready: function() { return !this.empty(this.raws) },
-            notFound: function() { return `「${this.name || this.id || this.ip || this.myip}」找不到信差訊息！` },
-            columns: function() { return !this.useTabs && this.enable_spinbutton },
-            enable_spinbutton: function() { return !this.empty(this.spinbutton) },
-            useTabs: function() { return !this.empty(this.tabs) },
-            endTabs: function() { return !this.empty(this.tabsEnd)},
-            cache_prefix: function() { return this.id||this.name||this.ip||this.myip },
-            cache_key: function() { return `${this.cache_prefix}-messeages` }
+            ready: function () {
+                return !this.empty(this.raws)
+            },
+            notFound: function () {
+                return `「${this.name || this.id || this.ip || this.myip}」找不到信差訊息！`
+            },
+            columns: function () {
+                return !this.useTabs && this.enable_spinbutton
+            },
+            enable_spinbutton: function () {
+                return !this.empty(this.spinbutton)
+            },
+            useTabs: function () {
+                return !this.empty(this.tabs)
+            },
+            endTabs: function () {
+                return !this.empty(this.tabsEnd)
+            },
+            cache_prefix: function () {
+                return this.id || this.name || this.ip || this.myip
+            },
+            cache_key: function () {
+                return `${this.cache_prefix}-messeages`
+            }
         },
         methods: {
-            format: function(content) {
+            format: function (content) {
                 return content
                     .replace(this.urlPattern, "<a href='$1' target='_blank' title='點擊前往'>$1</a>")
-                    .replace(/\r\n/g,"<br />");
+                    .replace(/\r\n/g, "<br />");
             },
-            border: function(index) { return this.raws[index]['done'] == 0 ? 'danger' : 'secondary' },
-            load: async function(force = false) {
+            border: function (index) {
+                return this.raws[index]['done'] == 0 ? 'danger' : 'secondary'
+            },
+            load: async function (force = false) {
                 if (!this.disableMSDBQuery) {
                     if (this.isBusy) return;
                     try {
@@ -1564,7 +1831,7 @@ if (Vue) {
                                 }).then(res => {
                                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                         this.raws = res.data.raw
-                                        this.setLocalCache(this.cache_key, this.raws, 60000);   // 1 min
+                                        this.setLocalCache(this.cache_key, this.raws, 60000); // 1 min
                                     } else {
                                         this.notify({
                                             title: "查詢信差訊息",
@@ -1577,7 +1844,7 @@ if (Vue) {
                                 }).finally(() => this.isBusy = false);
                             }
                         });
-                    } catch(err) {
+                    } catch (err) {
                         this.error = err;
                     }
                 }
@@ -1638,7 +1905,7 @@ if (Vue) {
                         }).catch(err => {
                             this.error = err;
                         }).finally(() => {
-    
+
                         });
                     });
                 }
@@ -1648,14 +1915,19 @@ if (Vue) {
                 const date2 = +new Date(snd_time.replace(' ', 'T'));
                 return date1 - date2 > 0;
             },
-            showDeleteBtn(message) { return $.trim(message['sender']) == $.trim(this.myid) && message['done'] == 0 }
+            showDeleteBtn(message) {
+                return $.trim(message['sender']) == $.trim(this.myid) && message['done'] == 0
+            }
         },
         created() {
             let parsed = parseInt(this.count);
             this.count = isNaN(parsed) ? 3 : parsed;
             this.$root.$on(CONFIG.LAH_ROOT_EVENT.MESSAGE_UNREAD, payload => {
                 if (payload.count > 0) {
-                    this.notify({ message: `您有 ${payload.count} 則未讀訊息。`, type: "warning" })
+                    this.notify({
+                        message: `您有 ${payload.count} 則未讀訊息。`,
+                        type: "warning"
+                    })
                 }
             });
             this.load();
@@ -1700,8 +1972,14 @@ if (Vue) {
             </b-form-group>
         </div>`,
         props: {
-            heading: { type: Boolean, default: true },
-            label: { type: String, default: '' }
+            heading: {
+                type: Boolean,
+                default: true
+            },
+            label: {
+                type: String,
+                default: ''
+            }
         },
         data: () => ({
             title: '',
@@ -1719,8 +1997,12 @@ if (Vue) {
             }
         },
         computed: {
-            show() { return !this.empty(this.myid) },
-            ad_date() { return this.now.getFullYear() + "-" + ("0" + (this.now.getMonth() + 1)).slice(-2) + "-" + ("0" + this.now.getDate()).slice(-2) },
+            show() {
+                return !this.empty(this.myid)
+            },
+            ad_date() {
+                return this.now.getFullYear() + "-" + ("0" + (this.now.getMonth() + 1)).slice(-2) + "-" + ("0" + this.now.getDate()).slice(-2)
+            },
             droptime() {
                 let dropdate = new Date(this.sendtime_ms + this.buffer_ms);
                 return ("0" + dropdate.getHours()).slice(-2) + ":" +
@@ -1735,11 +2017,17 @@ if (Vue) {
                     return;
                 }
                 if (this.empty(this.title)) {
-                    this.notify({ message: '請輸入訊息', type: "warning" })
+                    this.notify({
+                        message: '請輸入訊息',
+                        type: "warning"
+                    })
                     return;
                 }
                 if (this.now.getTime() >= this.sendtime_ms) {
-                    this.notify({ message: '請選擇現在之後的時間', type: "warning" })
+                    this.notify({
+                        message: '請選擇現在之後的時間',
+                        type: "warning"
+                    })
                     return;
                 }
                 this.isBusy = true;
@@ -1760,7 +2048,7 @@ if (Vue) {
                 }).catch(err => {
                     this.error = err;
                 }).finally(() => {
-                    this.isBusy= false;
+                    this.isBusy = false;
                     this.message = '';
                 });
             },
@@ -1771,8 +2059,8 @@ if (Vue) {
                 if (now_ms >= choosed_ms) {
                     let an_hour_later = new Date(now_ms + 10 * 60 * 1000);
                     this.sendtime = ("0" + an_hour_later.getHours()).slice(-2) + ":" +
-                    ("0" + an_hour_later.getMinutes()).slice(-2) + ":" +
-                    ("0" + an_hour_later.getSeconds()).slice(-2);
+                        ("0" + an_hour_later.getMinutes()).slice(-2) + ":" +
+                        ("0" + an_hour_later.getSeconds()).slice(-2);
                 }
             }
         }
@@ -1806,48 +2094,147 @@ if (Vue) {
             selected: '',
             selected_label: '',
             sql: '',
-            options: [
-                { label: '==== 地籍資料 ====', options: [
-                    { text: 'AI00301 - 土地標示部資料', value: 'txt_AI00301.sql' },
-                    { text: 'AI00401 - 土地所有權部資料', value: 'txt_AI00401.sql' },
-                    { text: 'AI00601 - 土地管理者資料', value: 'txt_AI00601_B.sql' },
-                    { text: 'AI00601 - 建物管理者資料', value: 'txt_AI00601_E.sql' },
-                    { text: 'AI00701 - 建物標示部資料', value: 'txt_AI00701.sql' },
-                    { text: 'AI00801 - 基地坐落資料', value: 'txt_AI00801.sql' },
-                    { text: 'AI00901 - 建物分層及附屬資料', value: 'txt_AI00901.sql' },
-                    { text: 'AI01001 - 主建物與共同使用部分資料', value: 'txt_AI01001.sql' },
-                    { text: 'AI01101 - 建物所有權部資料', value: 'txt_AI01101.sql' },
-                    { text: 'AI02901 - 土地各部別之其他登記事項列印', value: 'txt_AI02901_B.sql' },
-                    { text: 'AI02901 - 建物各部別之其他登記事項列印', value: 'txt_AI02901_E.sql' }
-                ] },
-                { label: '==== 所內登記案件統計 ====', options: [
-                    { text: '每月案件統計', value: '01_reg_case_monthly.sql' },
-                    { text: '每月案件 by 登記原因', value: '11_reg_reason_query_monthly.sql' },
-                    { text: '每月遠途先審案件', value: '02_reg_remote_case_monthly.sql' },
-                    { text: '每月跨所案件【本所代收】', value: '03_reg_other_office_case_monthly.sql' },
-                    { text: '每月跨所案件【非本所收件】', value: '04_reg_other_office_case_2_monthly.sql' },
-                    { text: '每月跨所子號案件【本所代收】', value: '09_reg_other_office_case_3_monthly.sql' },
-                    { text: '每月跨所各登記原因案件統計 by 收件所', value: '10_reg_reason_stats_monthly.sql' },
-                    { text: '每月權利人＆義務人為外國人案件', value: '07_reg_foreign_case_monthly.sql' },
-                    { text: '每月外國人地權登記統計', value: '07_regf_foreign_case_monthly.sql' },
-                    { text: '每月土地建物登記統計檔', value: '17_rega_case_stats_monthly.sql' },
-                    { text: '外站人員謄本核發量', value: '08_reg_workstation_case.sql' }
-                ] },
-                { label: '==== 所內其他統計 ====', options: [
-                    { text: '已結卻延期之複丈案件', value: '16_sur_close_delay_case.sql' },
-                    { text: '因雨延期測量案件數', value: '14_sur_rain_delay_case.sql' },
-                    { text: '段小段面積統計', value: '05_adm_area_size.sql' },
-                    { text: '段小段土地標示部筆數', value: '06_adm_area_blow_count.sql' },
-                    { text: '未完成地價收件資料', value: '12_prc_not_F_case.sql' },
-                    { text: '法院謄本申請LOG檔查詢 BY 段、地建號', value: '13_log_court_cert.sql' },
-                    { text: '某段之土地所有權人清冊資料', value: '15_reg_land_stats.sql' },
-                    { text: '全國跨縣市收件資料', value: '18_cross_county_crsms.sql' }
-                ] }
+            options: [{
+                    label: '==== 地籍資料 ====',
+                    options: [{
+                            text: 'AI00301 - 土地標示部資料',
+                            value: 'txt_AI00301.sql'
+                        },
+                        {
+                            text: 'AI00401 - 土地所有權部資料',
+                            value: 'txt_AI00401.sql'
+                        },
+                        {
+                            text: 'AI00601 - 土地管理者資料',
+                            value: 'txt_AI00601_B.sql'
+                        },
+                        {
+                            text: 'AI00601 - 建物管理者資料',
+                            value: 'txt_AI00601_E.sql'
+                        },
+                        {
+                            text: 'AI00701 - 建物標示部資料',
+                            value: 'txt_AI00701.sql'
+                        },
+                        {
+                            text: 'AI00801 - 基地坐落資料',
+                            value: 'txt_AI00801.sql'
+                        },
+                        {
+                            text: 'AI00901 - 建物分層及附屬資料',
+                            value: 'txt_AI00901.sql'
+                        },
+                        {
+                            text: 'AI01001 - 主建物與共同使用部分資料',
+                            value: 'txt_AI01001.sql'
+                        },
+                        {
+                            text: 'AI01101 - 建物所有權部資料',
+                            value: 'txt_AI01101.sql'
+                        },
+                        {
+                            text: 'AI02901 - 土地各部別之其他登記事項列印',
+                            value: 'txt_AI02901_B.sql'
+                        },
+                        {
+                            text: 'AI02901 - 建物各部別之其他登記事項列印',
+                            value: 'txt_AI02901_E.sql'
+                        }
+                    ]
+                },
+                {
+                    label: '==== 所內登記案件統計 ====',
+                    options: [{
+                            text: '每月案件統計',
+                            value: '01_reg_case_monthly.sql'
+                        },
+                        {
+                            text: '每月案件 by 登記原因',
+                            value: '11_reg_reason_query_monthly.sql'
+                        },
+                        {
+                            text: '每月遠途先審案件',
+                            value: '02_reg_remote_case_monthly.sql'
+                        },
+                        {
+                            text: '每月跨所案件【本所代收】',
+                            value: '03_reg_other_office_case_monthly.sql'
+                        },
+                        {
+                            text: '每月跨所案件【非本所收件】',
+                            value: '04_reg_other_office_case_2_monthly.sql'
+                        },
+                        {
+                            text: '每月跨所子號案件【本所代收】',
+                            value: '09_reg_other_office_case_3_monthly.sql'
+                        },
+                        {
+                            text: '每月跨所各登記原因案件統計 by 收件所',
+                            value: '10_reg_reason_stats_monthly.sql'
+                        },
+                        {
+                            text: '每月權利人＆義務人為外國人案件',
+                            value: '07_reg_foreign_case_monthly.sql'
+                        },
+                        {
+                            text: '每月外國人地權登記統計',
+                            value: '07_regf_foreign_case_monthly.sql'
+                        },
+                        {
+                            text: '每月土地建物登記統計檔',
+                            value: '17_rega_case_stats_monthly.sql'
+                        },
+                        {
+                            text: '外站人員謄本核發量',
+                            value: '08_reg_workstation_case.sql'
+                        }
+                    ]
+                },
+                {
+                    label: '==== 所內其他統計 ====',
+                    options: [{
+                            text: '已結卻延期之複丈案件',
+                            value: '16_sur_close_delay_case.sql'
+                        },
+                        {
+                            text: '因雨延期測量案件數',
+                            value: '14_sur_rain_delay_case.sql'
+                        },
+                        {
+                            text: '段小段面積統計',
+                            value: '05_adm_area_size.sql'
+                        },
+                        {
+                            text: '段小段土地標示部筆數',
+                            value: '06_adm_area_blow_count.sql'
+                        },
+                        {
+                            text: '未完成地價收件資料',
+                            value: '12_prc_not_F_case.sql'
+                        },
+                        {
+                            text: '法院謄本申請LOG檔查詢 BY 段、地建號',
+                            value: '13_log_court_cert.sql'
+                        },
+                        {
+                            text: '某段之土地所有權人清冊資料',
+                            value: '15_reg_land_stats.sql'
+                        },
+                        {
+                            text: '全國跨縣市收件資料',
+                            value: '18_cross_county_crsms.sql'
+                        }
+                    ]
+                }
             ]
         }),
         computed: {
-            validate() { return this.empty(this.sql) ? null : /^select/gi.test(this.sql) },
-            cache_key() { return `lah-report_sql` }
+            validate() {
+                return this.empty(this.sql) ? null : /^select/gi.test(this.sql)
+            },
+            cache_key() {
+                return `lah-report_sql`
+            }
         },
         methods: {
             change(val) {
@@ -1860,7 +2247,7 @@ if (Vue) {
                 }).then(res => {
                     this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `讀取異常，回傳狀態值為 ${res.data.status}，${res.data.message}`);
                     this.sql = res.data.data;
-                    this.setLocalCache(this.cache_key, this.sql, 0);    // no expiring
+                    this.setLocalCache(this.cache_key, this.sql, 0); // no expiring
                     // let cache work
                     Vue.nextTick(() => $(this.$refs.sql.$el).trigger("blur"));
                 }).catch(err => {
@@ -1870,7 +2257,7 @@ if (Vue) {
                 });
             },
             output(e) {
-                if(this.selected.startsWith("txt_")) {
+                if (this.selected.startsWith("txt_")) {
                     this.download('file_sql_txt');
                 } else {
                     this.download('file_sql_csv');
@@ -1887,20 +2274,37 @@ if (Vue) {
                         // BE should not response anything (wrote tmp.txt or tmp.csv)
                         if (res.data.length > 0) {
                             this.$error(typeof res.data, res.data.length);
-                            this.notify({ title: '下載報表檔案', message: res.data, type: 'danger' });
+                            this.notify({
+                                title: '下載報表檔案',
+                                message: res.data,
+                                type: 'danger'
+                            });
                         } else {
                             let notify_title = '匯出CSV檔案';
                             let iframe_title = '下載CSV';
-                            let api = CONFIG.API.FILE.CSV+'?filename='+this.selected_label;
+                            let api = CONFIG.API.FILE.CSV + '?filename=' + this.selected_label;
                             if (type == "file_sql_txt") {
                                 notify_title = '匯出TXT檔案';
                                 iframe_title = '下載TXT';
-                                api = CONFIG.API.FILE.TXT+'?filename='+this.selected_label;
+                                api = CONFIG.API.FILE.TXT + '?filename=' + this.selected_label;
                             }
-                            this.notify({ title: notify_title, message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ', type: "warning", duration: 2000 });
+                            this.notify({
+                                title: notify_title,
+                                message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ',
+                                type: "warning",
+                                duration: 2000
+                            });
                             // second param usage => e.target.title to get the title
-                            this.open(api, {target:{title:iframe_title}});
-                            this.delay(() => closeModal(() => this.notify({ title: notify_title, message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
+                            this.open(api, {
+                                target: {
+                                    title: iframe_title
+                                }
+                            });
+                            this.delay(() => closeModal(() => this.notify({
+                                title: notify_title,
+                                message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成',
+                                type: "success"
+                            })), 2000);
                         }
                     }).catch(err => {
                         this.error = err;
@@ -1965,7 +2369,7 @@ if (Vue) {
             }, 400);
         }
     });
-    
+
     Vue.component("lah-section-search", {
         components: {
             "lah-area-search-results": {
@@ -2002,26 +2406,57 @@ if (Vue) {
                     <lah-fa-icon v-else icon="exclamation-triangle" variant="danger" size="lg"> {{input}} 查無資料</lah-fa-icon>
                 </div>`,
                 props: {
-                    json: { type: Object, default: {} },
-                    input: { type: String, default: '' }
+                    json: {
+                        type: Object,
+                        default: {}
+                    },
+                    input: {
+                        type: String,
+                        default: ''
+                    }
                 },
                 data: () => ({
-                    fields: [
-                        {key: "區代碼", label: "區域", sortable: true},
-                        {key: "段代碼", sortable: true},
-                        {key: "段名稱", sortable: true},
-                        {key: "面積", sortable: true},
-                        {key: "土地標示部筆數", sortable: true},
+                    fields: [{
+                            key: "區代碼",
+                            label: "區域",
+                            sortable: true
+                        },
+                        {
+                            key: "段代碼",
+                            sortable: true
+                        },
+                        {
+                            key: "段名稱",
+                            sortable: true
+                        },
+                        {
+                            key: "面積",
+                            sortable: true
+                        },
+                        {
+                            key: "土地標示部筆數",
+                            sortable: true
+                        },
                     ]
                 }),
                 computed: {
-                    count() { return this.json.data_count || 0 }
+                    count() {
+                        return this.json.data_count || 0
+                    }
                 },
                 methods: {
-                    format(val) { return val ? val.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '' },
-                    area(val) { return val ? this.format((val * 3025 / 10000).toFixed(2)) + ' 坪' : '' },
-                    areaM2(val) { return val ? this.format(val) + ' 平方米' : '' },
-                    section(val) { return val ? (val == '03' ? '中壢區' : '觀音區') : '' }
+                    format(val) {
+                        return val ? val.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ''
+                    },
+                    area(val) {
+                        return val ? this.format((val * 3025 / 10000).toFixed(2)) + ' 坪' : ''
+                    },
+                    areaM2(val) {
+                        return val ? this.format(val) + ' 平方米' : ''
+                    },
+                    section(val) {
+                        return val ? (val == '03' ? '中壢區' : '觀音區') : ''
+                    }
                 }
             }
         },
@@ -2050,8 +2485,12 @@ if (Vue) {
             text: ''
         }),
         computed: {
-            validate() { return isNaN(parseInt(this.text)) ? true : (this.text <= 400 && this.text >= 200) },
-            cache_key() { return 'lah-section-search_'+this.text }
+            validate() {
+                return isNaN(parseInt(this.text)) ? true : (this.text <= 400 && this.text >= 200)
+            },
+            cache_key() {
+                return 'lah-section-search_' + this.text
+            }
         },
         methods: {
             query() {
@@ -2087,9 +2526,9 @@ if (Vue) {
                 });
             },
             popup() {
-              this.msgbox({
-                  title: '土地標示部筆數＆面積查詢',
-                  message: `-- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>
+                this.msgbox({
+                    title: '土地標示部筆數＆面積查詢',
+                    message: `-- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>
                   SELECT t.AA48 as "段代碼", <br/>
                   　　m.KCNT as "段名稱", <br/>
                   　　SUM(t.AA10) as "面積", <br/>
@@ -2099,29 +2538,45 @@ if (Vue) {
                   --WHERE t.AA48 = '%【輸入數字】'<br/>
                   --WHERE m.KCNT = '%【輸入文字】%'<br/>
                   GROUP BY t.AA48, m.KCNT;`,
-                  size: 'lg'
-              });
+                    size: 'lg'
+                });
             }
         },
         mounted() {
-            this.delay(() => this.text = this.$refs.text.$el.value, 400); 
+            this.delay(() => this.text = this.$refs.text.$el.value, 400);
         }
     });
 
     let regCaseMixin = {
         props: {
-            bakedData: { type: Object, default: undefined},
-            id: { type: String, default: "" } // the id format should be '109HB04001234'
+            bakedData: {
+                type: Object,
+                default: undefined
+            },
+            id: {
+                type: String,
+                default: ""
+            } // the id format should be '109HB04001234'
         },
         computed: {
-            year() { return this.bakedData ? this.bakedData["RM01"] : this.id.substring(0, 3) },
-            code() { return this.bakedData ? this.bakedData["RM02"] : this.id.substring(3, 7) },
-            number() { return this.bakedData ? this.bakedData["RM03"] : this.id.substring(7) },
-            ready() { return !this.empty(this.bakedData) },
-            storeBakedData() { return this.storeParams['RegBakedData'] }
+            year() {
+                return this.bakedData ? this.bakedData["RM01"] : this.id.substring(0, 3)
+            },
+            code() {
+                return this.bakedData ? this.bakedData["RM02"] : this.id.substring(3, 7)
+            },
+            number() {
+                return this.bakedData ? this.bakedData["RM03"] : this.id.substring(7)
+            },
+            ready() {
+                return !this.empty(this.bakedData)
+            },
+            storeBakedData() {
+                return this.storeParams['RegBakedData']
+            }
         },
         watch: {
-            bakedData: function(nObj, oObj) {
+            bakedData: function (nObj, oObj) {
                 this.addToStoreParams('RegBakedData', nObj);
             }
         },
@@ -2133,7 +2588,11 @@ if (Vue) {
                     id: `${this.year}${this.code}${this.number}`
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                        this.alert({title: "擷取登記案件失敗", message: res.data.message, type: "warning"});
+                        this.alert({
+                            title: "擷取登記案件失敗",
+                            message: res.data.message,
+                            type: "warning"
+                        });
                     } else {
                         this.bakedData = res.data.baked;
                     }
@@ -2201,66 +2660,200 @@ if (Vue) {
             rm39_orig: "",
             rm42_orig: "",
             sync_rm30_1: true,
-            rm30_map: [
-                { value: 'A', text: 'A: 初審' },
-                { value: 'B', text: 'B: 複審' },
-                { value: 'H', text: 'H: 公告' },
-                { value: 'I', text: 'I: 補正' },
-                { value: 'R', text: 'R: 登錄' },
-                { value: 'C', text: 'C: 校對' },
-                { value: 'U', text: 'U: 異動完成' },
-                { value: 'F', text: 'F: 結案' },
-                { value: 'X', text: 'X: 補正初核' },
-                { value: 'Y', text: 'Y: 駁回初核' },
-                { value: 'J', text: 'J: 撤回初核' },
-                { value: 'K', text: 'K: 撤回' },
-                { value: 'Z', text: 'Z: 歸檔' },
-                { value: 'N', text: 'N: 駁回' },
-                { value: 'L', text: 'L: 公告初核' },
-                { value: 'E', text: 'E: 請示' },
-                { value: 'D', text: 'D: 展期' },
+            rm30_map: [{
+                    value: 'A',
+                    text: 'A: 初審'
+                },
+                {
+                    value: 'B',
+                    text: 'B: 複審'
+                },
+                {
+                    value: 'H',
+                    text: 'H: 公告'
+                },
+                {
+                    value: 'I',
+                    text: 'I: 補正'
+                },
+                {
+                    value: 'R',
+                    text: 'R: 登錄'
+                },
+                {
+                    value: 'C',
+                    text: 'C: 校對'
+                },
+                {
+                    value: 'U',
+                    text: 'U: 異動完成'
+                },
+                {
+                    value: 'F',
+                    text: 'F: 結案'
+                },
+                {
+                    value: 'X',
+                    text: 'X: 補正初核'
+                },
+                {
+                    value: 'Y',
+                    text: 'Y: 駁回初核'
+                },
+                {
+                    value: 'J',
+                    text: 'J: 撤回初核'
+                },
+                {
+                    value: 'K',
+                    text: 'K: 撤回'
+                },
+                {
+                    value: 'Z',
+                    text: 'Z: 歸檔'
+                },
+                {
+                    value: 'N',
+                    text: 'N: 駁回'
+                },
+                {
+                    value: 'L',
+                    text: 'L: 公告初核'
+                },
+                {
+                    value: 'E',
+                    text: 'E: 請示'
+                },
+                {
+                    value: 'D',
+                    text: 'D: 展期'
+                },
             ],
-            rm39_map: [
-                { value: 'B', text: 'B: 登錄開始' },
-                { value: 'R', text: 'R: 登錄完成' },
-                { value: 'C', text: 'C: 校對開始' },
-                { value: 'D', text: 'D: 校對完成' },
-                { value: 'S', text: 'S: 異動開始' },
-                { value: 'F', text: 'F: 異動完成' },
-                { value: 'G', text: 'G: 異動有誤' },
-                { value: 'P', text: 'P: 競合暫停' },
+            rm39_map: [{
+                    value: 'B',
+                    text: 'B: 登錄開始'
+                },
+                {
+                    value: 'R',
+                    text: 'R: 登錄完成'
+                },
+                {
+                    value: 'C',
+                    text: 'C: 校對開始'
+                },
+                {
+                    value: 'D',
+                    text: 'D: 校對完成'
+                },
+                {
+                    value: 'S',
+                    text: 'S: 異動開始'
+                },
+                {
+                    value: 'F',
+                    text: 'F: 異動完成'
+                },
+                {
+                    value: 'G',
+                    text: 'G: 異動有誤'
+                },
+                {
+                    value: 'P',
+                    text: 'P: 競合暫停'
+                },
             ],
-            rm42_map: [
-                { value: '0', text: '0: 登記移案' },
-                { value: 'B', text: 'B: 登錄中' },
-                { value: 'R', text: 'R: 登錄完成' },
-                { value: 'C', text: 'C: 校對中' },
-                { value: 'D', text: 'D: 校對完成' },
-                { value: 'E', text: 'E: 登錄有誤' },
-                { value: 'S', text: 'S: 異動開始' },
-                { value: 'F', text: 'F: 異動完成' },
-                { value: 'G', text: 'G: 異動有誤' }
+            rm42_map: [{
+                    value: '0',
+                    text: '0: 登記移案'
+                },
+                {
+                    value: 'B',
+                    text: 'B: 登錄中'
+                },
+                {
+                    value: 'R',
+                    text: 'R: 登錄完成'
+                },
+                {
+                    value: 'C',
+                    text: 'C: 校對中'
+                },
+                {
+                    value: 'D',
+                    text: 'D: 校對完成'
+                },
+                {
+                    value: 'E',
+                    text: 'E: 登錄有誤'
+                },
+                {
+                    value: 'S',
+                    text: 'S: 異動開始'
+                },
+                {
+                    value: 'F',
+                    text: 'F: 異動完成'
+                },
+                {
+                    value: 'G',
+                    text: 'G: 異動有誤'
+                }
             ],
-            fields: [
-                {key: "收件字號", sortable: true},
-                {key: "登記原因", sortable: true},
-                {key: "辦理情形", sortable: true},
-                {key: "作業人員", sortable: true},
-                {key: "登記處理註記", label: "登記註記", sortable: true},
-                {key: "地價處理註記", label: "地價註記", sortable: true},
-                {key: "預定結案日期", label:"期限", sortable: true}
+            fields: [{
+                    key: "收件字號",
+                    sortable: true
+                },
+                {
+                    key: "登記原因",
+                    sortable: true
+                },
+                {
+                    key: "辦理情形",
+                    sortable: true
+                },
+                {
+                    key: "作業人員",
+                    sortable: true
+                },
+                {
+                    key: "登記處理註記",
+                    label: "登記註記",
+                    sortable: true
+                },
+                {
+                    key: "地價處理註記",
+                    label: "地價註記",
+                    sortable: true
+                },
+                {
+                    key: "預定結案日期",
+                    label: "期限",
+                    sortable: true
+                }
             ]
         }),
         computed: {
-            showProgress() { return !this.empty(this.progress) },
-            attachEvent() { return this.showProgress },
-            wip() { return this.empty(this.bakedData["RM31"]) },
-            rm30() { return this.bakedData["RM30"] || "" },
-            rm39() { return this.bakedData["RM39"] || "" },
-            rm42() { return this.bakedData["RM42"] || "" }
+            showProgress() {
+                return !this.empty(this.progress)
+            },
+            attachEvent() {
+                return this.showProgress
+            },
+            wip() {
+                return this.empty(this.bakedData["RM31"])
+            },
+            rm30() {
+                return this.bakedData["RM30"] || ""
+            },
+            rm39() {
+                return this.bakedData["RM39"] || ""
+            },
+            rm42() {
+                return this.bakedData["RM42"] || ""
+            }
         },
         methods: {
-            updateRegCaseCol: function(arguments) {
+            updateRegCaseCol: function (arguments) {
                 if ($(arguments.el).length > 0) {
                     // remove the button
                     $(arguments.el).remove();
@@ -2276,9 +2869,17 @@ if (Vue) {
                 }).then(res => {
                     console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `更新案件「${arguments.col}」欄位回傳狀態碼有問題【${res.data.status}】`);
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        this.notify({title: "更新案件欄位", message: `「${arguments.col}」更新完成`, variant: "success"});
+                        this.notify({
+                            title: "更新案件欄位",
+                            message: `「${arguments.col}」更新完成`,
+                            variant: "success"
+                        });
                     } else {
-                        this.notify({title: "更新案件欄位", message: `「${arguments.col}」更新失敗【${res.data.status}】`, variant: "warning"});
+                        this.notify({
+                            title: "更新案件欄位",
+                            message: `「${arguments.col}」更新失敗【${res.data.status}】`,
+                            variant: "warning"
+                        });
                     }
                 }).catch(err => {
                     this.error = err;
@@ -2286,9 +2887,13 @@ if (Vue) {
                     this.isBusy = false;
                 });
             },
-            updateRM30: function(e) {
+            updateRM30: function (e) {
                 if (this.rm30 == this.rm30_orig) {
-                    this.notify({title: "更新案件辦理情形",  message: "案件辦理情形沒變動", type: "warning"});
+                    this.notify({
+                        title: "更新案件辦理情形",
+                        message: "案件辦理情形沒變動",
+                        type: "warning"
+                    });
                     return;
                 }
                 window.vueApp.confirm(`您確定要更新辦理情形為「${this.rm30}」?`, {
@@ -2301,7 +2906,7 @@ if (Vue) {
                             col: "RM30",
                             val: this.rm30
                         });
-                        
+
                         this.rm30_orig = this.bakedData["RM30"] || "";
 
                         if (this.sync_rm30_1) {
@@ -2360,9 +2965,13 @@ if (Vue) {
                     }
                 });
             },
-            updateRM39: function(e) {
+            updateRM39: function (e) {
                 if (this.rm39 == this.rm39_orig) {
-                    this.notify({title: "更新登記處理註記", message: "登記處理註記沒變動", type: "warning"});
+                    this.notify({
+                        title: "更新登記處理註記",
+                        message: "登記處理註記沒變動",
+                        type: "warning"
+                    });
                     return;
                 }
                 window.vueApp.confirm(`您確定要更新登記處理註記為「${this.rm39}」?`, {
@@ -2379,9 +2988,13 @@ if (Vue) {
                     }
                 });
             },
-            updateRM42: function(e) {
+            updateRM42: function (e) {
                 if (this.rm42 == this.rm42_orig) {
-                    this.notify({title: "更新地價處理註記", message: "地價處理註記沒變動", type: "warning"});
+                    this.notify({
+                        title: "更新地價處理註記",
+                        message: "地價處理註記沒變動",
+                        type: "warning"
+                    });
                     return;
                 }
                 window.vueApp.confirm(`您確定要更新地價處理註記為「${this.rm42}」?`, {
@@ -2407,7 +3020,9 @@ if (Vue) {
         mounted() {
             if (this.attachEvent) {
                 addUserInfoEvent();
-                this.animated(".reg_case_id", { name: "flash" }).off("click").on("click", window.vueApp.fetchRegCase);
+                this.animated(".reg_case_id", {
+                    name: "flash"
+                }).off("click").on("click", window.vueApp.fetchRegCase);
             }
         }
     });
@@ -2618,14 +3233,24 @@ if (Vue) {
             show_op_card: true
         }),
         computed: {
-            tabsAtEnd() { return !this.empty(this.tabsEnd) },
-            is_ongoing() { return this.empty(this.bakedData.結案代碼) },
-            case_status_url() { return `http://${this.ap_server}:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=${this.year}&word=${this.code}&code=${this.number}&sdlyn=N&RM90=` },
-            case_data_url() { return `http://${this.ap_server}:9080/LandHB/CAS/CCD01/CCD0103.jsp?rm01=${this.year}&rm02=${this.code}&rm03=${this.number}` }
+            tabsAtEnd() {
+                return !this.empty(this.tabsEnd)
+            },
+            is_ongoing() {
+                return this.empty(this.bakedData.結案代碼)
+            },
+            case_status_url() {
+                return `http://${this.ap_server}:9080/LandHB/CAS/CCD02/CCD0202.jsp?year=${this.year}&word=${this.code}&code=${this.number}&sdlyn=N&RM90=`
+            },
+            case_data_url() {
+                return `http://${this.ap_server}:9080/LandHB/CAS/CCD01/CCD0103.jsp?rm01=${this.year}&rm02=${this.code}&rm03=${this.number}`
+            }
 
         },
         methods: {
-            handleNotFound: function(input) { this.show_op_card = false }
+            handleNotFound: function (input) {
+                this.show_op_card = false
+            }
         },
         mounted() {
             this.rm10 = this.bakedData.RM10 ? this.bakedData.RM10 : "XX";
@@ -2688,16 +3313,24 @@ if (Vue) {
             backupFlags: []
         }),
         computed: {
-            found() { return !this.empty(this.filtered) },
-            not_found() { return Array.isArray(this.filtered) && this.empty(this.filtered) },
-            loading() { return this.filtered === null },
-            prefix() { return `${this.year}-${this.code}-${this.number}` }
+            found() {
+                return !this.empty(this.filtered)
+            },
+            not_found() {
+                return Array.isArray(this.filtered) && this.empty(this.filtered)
+            },
+            loading() {
+                return this.filtered === null
+            },
+            prefix() {
+                return `${this.year}-${this.code}-${this.number}`
+            }
         },
         methods: {
             title: function (item) {
                 return item[0] == "MOICAT.RINDX" || item[0] == "MOIPRT.PHIND" ? "重要案件索引，無法刪除！" : "";
             },
-            download: function(content, filename) {
+            download: function (content, filename) {
                 const url = window.URL.createObjectURL(new Blob([content]));
                 const link = document.createElement('a');
                 link.href = url;
@@ -2709,7 +3342,7 @@ if (Vue) {
                 // release object in memory
                 window.URL.revokeObjectURL(url);
             },
-            backupAll: function(e) {
+            backupAll: function (e) {
                 this.isBusy = true;
                 let filename = this.year + "-" + this.code + "-" + this.number + "-TEMP-DATA.sql";
                 let all_content = "";
@@ -2720,7 +3353,7 @@ if (Vue) {
                 this.cleanAllBackupFlag = true;
                 this.isBusy = false;
             },
-            cleanAll: function(e) {
+            cleanAll: function (e) {
                 if (this.cleanAllBackupFlag !== true) {
                     this.alert({
                         title: "清除全部暫存資料",
@@ -2728,7 +3361,9 @@ if (Vue) {
                         message: "請先備份！",
                         type: "warning"
                     });
-                    this.animated("#backup_temp_btn_all", { name: "tada" });
+                    this.animated("#backup_temp_btn_all", {
+                        name: "tada"
+                    });
                     return;
                 }
                 let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + this.year + "-" + this.code + "-" + this.number + " 全部暫存檔?";
@@ -2755,7 +3390,7 @@ if (Vue) {
                     });
                 });
             },
-            backup: function(item, idx, e) {
+            backup: function (item, idx, e) {
                 this.isBusy = true;
                 let filename = `${this.prefix}-${item[0]}-TEMP-DATA.sql`;
                 this.download(this.getInsSQL(item), filename);
@@ -2763,7 +3398,7 @@ if (Vue) {
                 $(e.target).attr("disabled", this.backupFlags[idx]);
                 this.isBusy = false;
             },
-            clean: function(item, idx, e) {
+            clean: function (item, idx, e) {
                 let table = item[0];
                 if (this.backupFlags[idx] !== true) {
                     this.alert({
@@ -2772,7 +3407,9 @@ if (Vue) {
                         message: `請先備份 ${table} ！`,
                         type: "warning"
                     });
-                    this.animated(`#backup_temp_btn_${idx}`, { name: "tada" });
+                    this.animated(`#backup_temp_btn_${idx}`, {
+                        name: "tada"
+                    });
                     return;
                 }
                 let msg = "<h6><strong class='text-danger'>★警告★</strong>：無法復原請先備份!!</h6>清除案件 " + this.year + "-" + this.code + "-" + this.number + " " + table + " 暫存檔?";
@@ -2800,7 +3437,7 @@ if (Vue) {
                     });
                 });
             },
-            showSQL: function(item) {
+            showSQL: function (item) {
                 this.msgbox({
                     title: `INSERT SQL of ${item[0]}`,
                     message: this.getInsSQL(item).replace(/\n/g, "<br /><br />"),
@@ -2822,7 +3459,7 @@ if (Vue) {
                 }
                 return INS_SQL;
             },
-            popup: function() {
+            popup: function () {
                 this.msgbox({
                     title: "案件暫存檔清除 小幫手提示",
                     body: `<h6 class="text-info">檢查下列的表格</h6>
@@ -2925,7 +3562,7 @@ if (Vue) {
                 this.filtered = res.data.raw.filter((item, index, array) => {
                     return item[1].length > 0;
                 });
-                
+
                 // initialize backup flag array for backup detection
                 this.backupFlags = Array(this.filtered.length).fill(false);
             }).catch(err => {
@@ -2957,14 +3594,20 @@ if (Vue) {
             chartType: 'line'
         }),
         computed: {
-            border() { return this.ready ? '' : 'danger' },
-            title() { return this.ready ? this.bakedData.收件字號 : '' }
+            border() {
+                return this.ready ? '' : 'danger'
+            },
+            title() {
+                return this.ready ? this.bakedData.收件字號 : ''
+            }
         },
         watch: {
-            bakedData: function(nData, oData) { this.prepareItems() }
+            bakedData: function (nData, oData) {
+                this.prepareItems()
+            }
         },
         methods: {
-            prepareItems: function() {
+            prepareItems: function () {
                 if (this.ready) {
                     let items = [];
                     Object.keys(this.bakedData.ELAPSED_TIME).forEach(key => {
@@ -2984,7 +3627,9 @@ if (Vue) {
                 return ` ${data.labels[tooltipItem.index]} : ${currentValue} 分鐘`;
             }
         },
-        mounted() { this.prepareItems() }
+        mounted() {
+            this.prepareItems()
+        }
     });
 
     Vue.component('lah-reg-table', {
@@ -3088,91 +3733,263 @@ if (Vue) {
         </lah-transition>`,
         props: ['bakedData', 'maxHeight', 'type', 'fields', 'mute', 'noCaption', 'color', 'icon', 'iconVariant', 'busy'],
         data: () => ({
-            transProps: { name: 'rollIn' }
+            transProps: {
+                name: 'rollIn'
+            }
         }),
         computed: {
-            tblFields: function() {
+            tblFields: function () {
                 if (!this.empty(this.fields)) return this.fields;
-                switch(this.type) {
+                switch (this.type) {
                     case "md":
-                        return [
-                            {key: "收件字號", sortable: this.sort},
-                            {key: "登記原因", sortable: this.sort},
-                            {key: "辦理情形", sortable: this.sort},
-                            {key: "初審人員", sortable: this.sort},
-                            {key: "作業人員", sortable: this.sort},
-                            {key: "收件時間", sortable: this.sort},
-                            {key: "限辦時間", sortable: this.sort}
+                        return [{
+                                key: "收件字號",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "登記原因",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "辦理情形",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "初審人員",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "作業人員",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "收件時間",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "限辦時間",
+                                sortable: this.sort
+                            }
                             //{key: "預定結案日期", label:"限辦期限", sortable: this.sort}
                         ];
                     case "lg":
-                        return [
-                            {key: "收件字號", sortable: this.sort},
-                            {key: "收件日期", sortable: this.sort},
-                            {key: "登記原因", sortable: this.sort},
-                            {key: "辦理情形", sortable: this.sort},
-                            {key: "收件人員", label: "收件", sortable: this.sort},
-                            {key: "作業人員", label: "作業", sortable: this.sort},
-                            {key: "初審人員", label: "初審", sortable: this.sort},
-                            {key: "複審人員", label: "複審", sortable: this.sort},
-                            {key: "准登人員", label: "准登", sortable: this.sort},
-                            {key: "登錄人員", label: "登簿", sortable: this.sort},
-                            {key: "校對人員", label: "校對", sortable: this.sort},
-                            {key: "結案人員", label: "結案", sortable: this.sort}
+                        return [{
+                                key: "收件字號",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "收件日期",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "登記原因",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "辦理情形",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "收件人員",
+                                label: "收件",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "作業人員",
+                                label: "作業",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "初審人員",
+                                label: "初審",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "複審人員",
+                                label: "複審",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "准登人員",
+                                label: "准登",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "登錄人員",
+                                label: "登簿",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "校對人員",
+                                label: "校對",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "結案人員",
+                                label: "結案",
+                                sortable: this.sort
+                            }
                         ];
                     case "xl":
                         return [
                             //{key: "燈號", sortable: this.sort},
-                            {key: "序號", sortable: !this.sort},
-                            {key: "收件字號", sortable: this.sort},
-                            {key: "收件時間", sortable: this.sort},
-                            {key: "限辦時間", label: "限辦", sortable: this.sort},
-                            {key: "登記原因", sortable: this.sort},
-                            {key: "辦理情形", sortable: this.sort},
-                            {key: "收件人員", label: "收件", sortable: this.sort},
-                            {key: "作業人員", label: "作業", sortable: this.sort},
-                            {key: "初審人員", label: "初審", sortable: this.sort},
-                            {key: "複審人員", label: "複審", sortable: this.sort},
-                            {key: "准登人員", label: "准登", sortable: this.sort},
-                            {key: "登錄人員", label: "登簿", sortable: this.sort},
-                            {key: "校對人員", label: "校對", sortable: this.sort},
-                            {key: "結案人員", label: "結案", sortable: this.sort}
+                            {
+                                key: "序號",
+                                sortable: !this.sort
+                            },
+                            {
+                                key: "收件字號",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "收件時間",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "限辦時間",
+                                label: "限辦",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "登記原因",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "辦理情形",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "收件人員",
+                                label: "收件",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "作業人員",
+                                label: "作業",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "初審人員",
+                                label: "初審",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "複審人員",
+                                label: "複審",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "准登人員",
+                                label: "准登",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "登錄人員",
+                                label: "登簿",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "校對人員",
+                                label: "校對",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "結案人員",
+                                label: "結案",
+                                sortable: this.sort
+                            }
                             //{key: "結案狀態", label: "狀態", sortable: this.sort}
                         ];
                     case "flow":
-                        return [
-                            {key: "辦理情形", sortable: this.sort},
-                            {key: "收件人員", label: "收件", sortable: this.sort},
-                            {key: "作業人員", label: "作業", sortable: this.sort},
-                            {key: "初審人員", label: "初審", sortable: this.sort},
-                            {key: "複審人員", label: "複審", sortable: this.sort},
-                            {key: "准登人員", label: "准登", sortable: this.sort},
-                            {key: "登錄人員", label: "登簿", sortable: this.sort},
-                            {key: "校對人員", label: "校對", sortable: this.sort},
-                            {key: "結案人員", label: "結案", sortable: this.sort}
+                        return [{
+                                key: "辦理情形",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "收件人員",
+                                label: "收件",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "作業人員",
+                                label: "作業",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "初審人員",
+                                label: "初審",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "複審人員",
+                                label: "複審",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "准登人員",
+                                label: "准登",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "登錄人員",
+                                label: "登簿",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "校對人員",
+                                label: "校對",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "結案人員",
+                                label: "結案",
+                                sortable: this.sort
+                            }
                         ];
                     default:
-                        return [
-                            {key: "RM01", label: "收件字號", sortable: this.sort},
-                            {key: "RM07_1", label: "收件日期", sortable: this.sort},
-                            {key: "RM09", label: "登記原因", sortable: this.sort},
-                            {key: "辦理情形", sortable: this.sort},
+                        return [{
+                                key: "RM01",
+                                label: "收件字號",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "RM07_1",
+                                label: "收件日期",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "RM09",
+                                label: "登記原因",
+                                sortable: this.sort
+                            },
+                            {
+                                key: "辦理情形",
+                                sortable: this.sort
+                            },
                         ];
                 }
             },
-            count() { return this.bakedData ? this.bakedData.length : 0 },
+            count() {
+                return this.bakedData ? this.bakedData.length : 0
+            },
             caption() {
                 if (this.mute || this.noCaption) return false;
                 return this.busy ? '讀取中' : '登記案件找到 ' + this.count + '件';
-                
+
             },
-            sticky() { return this.maxHeight ? this.count > 0 ? true : false : false },
+            sticky() {
+                return this.maxHeight ? this.count > 0 ? true : false : false
+            },
             style() {
                 const parsed = parseInt(this.maxHeight);
                 return isNaN(parsed) ? '' : `max-height: ${parsed}px`;
             },
-            showIcon() { return !this.empty(this.icon) },
-            sort() { return this.empty(this.mute) }
+            showIcon() {
+                return !this.empty(this.icon)
+            },
+            sort() {
+                return this.empty(this.mute)
+            }
         },
         methods: {
             fetch(data) {
@@ -3182,10 +3999,18 @@ if (Vue) {
                     id: id
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                        this.alert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
+                        this.alert({
+                            title: "顯示登記案件詳情",
+                            message: res.data.message,
+                            type: "warning"
+                        });
                     } else {
                         this.msgbox({
-                            message: this.$createElement("lah-reg-case-detail", { props: { bakedData: res.data.baked } }),
+                            message: this.$createElement("lah-reg-case-detail", {
+                                props: {
+                                    bakedData: res.data.baked
+                                }
+                            }),
                             title: `登記案件詳情 ${data["RM01"]}-${data["RM02"]}-${data["RM03"]}`,
                             size: "lg"
                         });
@@ -3198,7 +4023,12 @@ if (Vue) {
                 if (name == 'XXXXXXXX') return;
                 this.msgbox({
                     title: `${name} 使用者資訊${this.empty(id) ? '' : ` (${id})`}`,
-                    message: this.$createElement('lah-user-card', { props: { id: id, name: name }})
+                    message: this.$createElement('lah-user-card', {
+                        props: {
+                            id: id,
+                            name: name
+                        }
+                    })
                 });
             },
             bakedContent(row) {
@@ -3208,7 +4038,7 @@ if (Vue) {
                 return row.item["RM09"] + " : " + (this.empty(row.item["登記原因"]) ? row.item["RM09_CHT"] : row.item["登記原因"]);
             },
             trClass(item, type) {
-                if(item && type == 'row') return this.color ? item["紅綠燈背景CSS"] : `filter-${item["燈號"]}`;
+                if (item && type == 'row') return this.color ? item["紅綠燈背景CSS"] : `filter-${item["燈號"]}`;
             },
             passedTime(item, time_duration_secs) {
                 if (isNaN(time_duration_secs) || this.empty(time_duration_secs)) return false;
@@ -3220,7 +4050,9 @@ if (Vue) {
                 return "耗時 " + Number.parseFloat(time_duration_secs / 60 / 60).toFixed(2) + " 小時";
             }
         },
-        created() { this.type = this.type || '' }
+        created() {
+            this.type = this.type || ''
+        }
     });
 
     let temperatureMixin = {
@@ -3318,23 +4150,41 @@ if (Vue) {
             list: undefined
         }),
         computed: {
-            ID() { return this.id ? this.id.toUpperCase() : null },
-            name() { return this.userNames[this.ID] || '' },
-            validateID() { return (/^HB\d{4}$/i).test(this.ID) },
+            ID() {
+                return this.id ? this.id.toUpperCase() : null
+            },
+            name() {
+                return this.userNames[this.ID] || ''
+            },
+            validateID() {
+                return (/^HB\d{4}$/i).test(this.ID)
+            },
             validateTemperature() {
                 let fn = parseFloat(this.temperature);
                 return !isNaN(fn) && fn >= 34 && fn <= 41;
             },
-            disabled() { return !this.validateID || !this.validateTemperature },
-            seen() { return this.chart_items !== undefined && this.chart_items.length != 0 }
+            disabled() {
+                return !this.validateID || !this.validateTemperature
+            },
+            seen() {
+                return this.chart_items !== undefined && this.chart_items.length != 0
+            }
         },
         watch: {
-            name(val) { if (this.empty(val)) this.chart_items = undefined },
-            id(val) { if (this.validateID) this.history() },
-            myid(val) { this.id = val }
+            name(val) {
+                if (this.empty(val)) this.chart_items = undefined
+            },
+            id(val) {
+                if (this.validateID) this.history()
+            },
+            myid(val) {
+                this.id = val
+            }
         },
         methods: {
-            onlyToday(item) { return item['datetime'].split(' ')[0].replace(/\-/gi, '') == this.ad_today },
+            onlyToday(item) {
+                return item['datetime'].split(' ')[0].replace(/\-/gi, '') == this.ad_today
+            },
             allowDeletion(item) {
                 // control deletion by AM/PM
                 let now = parseInt(this.nowTime.replace(/\:/gi, ''));
@@ -3374,7 +4224,10 @@ if (Vue) {
                     return;
                 }
                 if (this.empty(this.name)) {
-                    this.notify({ message: `無法找到使用者 ${this.ID}，無法登錄。`, type: "warning"});
+                    this.notify({
+                        message: `無法找到使用者 ${this.ID}，無法登錄。`,
+                        type: "warning"
+                    });
                     return;
                 }
                 this.isBusy = true;
@@ -3415,7 +4268,11 @@ if (Vue) {
                     this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "取得體溫資料回傳狀態碼有問題【" + res.data.status + "】");
                     this.list = res.data.raw;
                     this.prepareChartData();
-                    Vue.nextTick(() => $(".times-circle i.far").on("mouseenter", e => { this.animated(e.target, {name: "tada"}); }) );
+                    Vue.nextTick(() => $(".times-circle i.far").on("mouseenter", e => {
+                        this.animated(e.target, {
+                            name: "tada"
+                        });
+                    }));
                 }).catch(err => {
                     this.error = err;
                 }).finally(() => {
@@ -3423,7 +4280,7 @@ if (Vue) {
                 });
             },
             chartBgColor(data, opacity) {
-                let degree = data[1];   // data[0] - text, data[1] - value
+                let degree = data[1]; // data[0] - text, data[1] - value
                 let fd = parseFloat(degree);
                 //if (isNaN(fd) || fd < 35) return `rgb(91, 93, 94, ${opacity})`;
                 // if (fd < 35.5) return `rgb(41, 43, 44, ${opacity})`;
@@ -3438,7 +4295,7 @@ if (Vue) {
                 let count = 0;
                 this.list.forEach((item) => {
                     if (count < 10) {
-                        let date = item['datetime'].substring(5, 10);   // remove year
+                        let date = item['datetime'].substring(5, 10); // remove year
                         let hour = item['datetime'].substring(11, 13);
                         let AMPM = parseInt(hour) < 12 ? 'AM' : 'PM';
                         chart_items.push([
@@ -3456,7 +4313,9 @@ if (Vue) {
                     type: 'on_board_users'
                 }).then(res => {
                     let vn = this.$createElement('lah-temperature-list', {
-                        props: { userList: res.data.raw }
+                        props: {
+                            userList: res.data.raw
+                        }
                     });
                     this.msgbox({
                         title: `<i class="fa fa-temperature-low fa-lg"></i> 全所體溫一覽表 ${this.today}`,
@@ -3475,7 +4334,7 @@ if (Vue) {
             let mon = ("0" + (now.getMonth() + 1)).slice(-2);
             let day = ("0" + now.getDate()).slice(-2);
             this.today = now.getFullYear() - 1911 + mon + day;
-            this.ad_today = now.getFullYear()  + mon + day;
+            this.ad_today = now.getFullYear() + mon + day;
             this.id = this.getUrlParameter('id');
         }
     });
@@ -3500,14 +4359,22 @@ if (Vue) {
             </div>
         </div>`,
         props: {
-            userList: { type: Object, default: null },
-            date: { type: String, default: this.today }
+            userList: {
+                type: Object,
+                default: null
+            },
+            date: {
+                type: String,
+                default: this.today
+            }
         },
         data: () => ({
             filtered: null
         }),
         computed: {
-            today() { return this.nowDate }
+            today() {
+                return this.nowDate
+            }
         },
         methods: {
             filter() {
@@ -3520,16 +4387,42 @@ if (Vue) {
                 let val = this.userList.filter(this_record => this_record["unit"] == "地價課");
                 let sur = this.userList.filter(this_record => this_record["unit"] == "測量課");
                 let inf = this.userList.filter(this_record => this_record["unit"] == "資訊課");
-                this.filtered = [
-                    { UNIT: '主任室', LIST: director },
-                    { UNIT: '秘書室', LIST: secretary },
-                    { UNIT: '人事室', LIST: hr },
-                    { UNIT: '會計室', LIST: accounting },
-                    { UNIT: '行政課', LIST: adm },
-                    { UNIT: '登記課', LIST: reg },
-                    { UNIT: '地價課', LIST: val },
-                    { UNIT: '測量課', LIST: sur },
-                    { UNIT: '資訊課', LIST: inf }
+                this.filtered = [{
+                        UNIT: '主任室',
+                        LIST: director
+                    },
+                    {
+                        UNIT: '秘書室',
+                        LIST: secretary
+                    },
+                    {
+                        UNIT: '人事室',
+                        LIST: hr
+                    },
+                    {
+                        UNIT: '會計室',
+                        LIST: accounting
+                    },
+                    {
+                        UNIT: '行政課',
+                        LIST: adm
+                    },
+                    {
+                        UNIT: '登記課',
+                        LIST: reg
+                    },
+                    {
+                        UNIT: '地價課',
+                        LIST: val
+                    },
+                    {
+                        UNIT: '測量課',
+                        LIST: sur
+                    },
+                    {
+                        UNIT: '資訊課',
+                        LIST: inf
+                    }
                 ];
             },
             prepareTodayTemperatures() {
@@ -3548,7 +4441,7 @@ if (Vue) {
             },
             selectBtn(selector) {
                 $(`button.temperature`).hide();
-                switch(selector) {
+                switch (selector) {
                     case ".all-done":
                     case ".half-done":
                     case ".not-done":
@@ -3590,21 +4483,40 @@ if (Vue) {
         </b-button>`,
         props: ['rawUserData', 'inId'],
         data: () => ({
-            temperature: { AM: 0, PM: 0 },
+            temperature: {
+                AM: 0,
+                PM: 0
+            },
             avatar_size: '1.2rem',
             btnid: '',
         }),
         watch: {
-            my_temperature(val) { this.empty(val) ? void(0) : this.setMyTemperature() }
+            my_temperature(val) {
+                this.empty(val) ? void(0) : this.setMyTemperature()
+            }
         },
         computed: {
-            id() { return this.rawUserData ? $.trim(this.rawUserData['id']) : this.inId },
-            name() { return this.rawUserData ? this.rawUserData['name'] : ''},
-            today() { return this.nowDate },
-            now_ampm() { return (parseInt(this.nowTime.replace(/\:/gi, '')) - 120000) >= 0 ? 'PM' : 'AM' },
-            not_ready() { return this.temperature.AM == 0 || this.temperature.PM == 0 },
-            ready_half() { return this.temperature.AM != 0 || this.temperature.PM != 0 },
-            ready() { return this.temperature.AM != 0 && this.temperature.PM != 0 },
+            id() {
+                return this.rawUserData ? $.trim(this.rawUserData['id']) : this.inId
+            },
+            name() {
+                return this.rawUserData ? this.rawUserData['name'] : ''
+            },
+            today() {
+                return this.nowDate
+            },
+            now_ampm() {
+                return (parseInt(this.nowTime.replace(/\:/gi, '')) - 120000) >= 0 ? 'PM' : 'AM'
+            },
+            not_ready() {
+                return this.temperature.AM == 0 || this.temperature.PM == 0
+            },
+            ready_half() {
+                return this.temperature.AM != 0 || this.temperature.PM != 0
+            },
+            ready() {
+                return this.temperature.AM != 0 && this.temperature.PM != 0
+            },
             style() {
                 if (this.ready) {
                     if (this.temperature.AM >= 37.5 || this.temperature.PM >= 37.5) return 'outline-danger';
@@ -3613,14 +4525,30 @@ if (Vue) {
                 }
                 return this.ready_half ? 'outline-primary' : 'outline-secondary';
             },
-            temperatures() { return this.storeParams['todayTemperatures'] },
-            my_temperature() { return this.temperatures ? this.temperatures.filter(this_record => $.trim(this_record["id"]) == $.trim(this.id)) : [] },
-            store_ready() { return this.temperatures == undefined },
-            avatar_src() { return `get_user_img.php?name=${this.name}_avatar` },
-            am_icon() { return this.thermoIcon(this.temperature['AM']) },
-            am_color() { return this.thermoColor(this.temperature['AM']) },
-            pm_icon() { return this.thermoIcon(this.temperature['PM']) },
-            pm_color() { return this.thermoColor(this.temperature['PM']) },
+            temperatures() {
+                return this.storeParams['todayTemperatures']
+            },
+            my_temperature() {
+                return this.temperatures ? this.temperatures.filter(this_record => $.trim(this_record["id"]) == $.trim(this.id)) : []
+            },
+            store_ready() {
+                return this.temperatures == undefined
+            },
+            avatar_src() {
+                return `get_user_img.php?name=${this.name}_avatar`
+            },
+            am_icon() {
+                return this.thermoIcon(this.temperature['AM'])
+            },
+            am_color() {
+                return this.thermoColor(this.temperature['AM'])
+            },
+            pm_icon() {
+                return this.thermoIcon(this.temperature['PM'])
+            },
+            pm_color() {
+                return this.thermoColor(this.temperature['PM'])
+            },
             selector() {
                 if (this.ready) return 'all-done';
                 if (this.ready_half) return 'half-done';
@@ -3640,7 +4568,7 @@ if (Vue) {
                 }
             },
             setMyTemperature() {
-                this.my_temperature.forEach(item => {       
+                this.my_temperature.forEach(item => {
                     let time = parseInt(item['datetime'].split(' ')[1].replace(/\:/gi, ''));
                     if (time - 120000 >= 0) {
                         // PM
@@ -3667,7 +4595,7 @@ if (Vue) {
                     */
                     // control deletion by AM/PM
                     if (res.data.data_count > 0) {
-                        res.data.raw.forEach(item => {       
+                        res.data.raw.forEach(item => {
                             let time = parseInt(item['datetime'].split(' ')[1].replace(/\:/gi, ''));
                             if (time - 120000 >= 0) {
                                 // PM
@@ -3676,7 +4604,7 @@ if (Vue) {
                                 // AM
                                 this.temperature.AM = item['value'];
                             }
-                        });   
+                        });
                     }
                 }).catch(err => {
                     this.error = err;
@@ -3727,7 +4655,10 @@ if (Vue) {
             </b-form-row>
         </fieldset>`,
         props: {
-            button: { type: Boolean, default: false }
+            button: {
+                type: Boolean,
+                default: false
+            }
         },
         data: () => ({
             year: 109,
@@ -3745,7 +4676,9 @@ if (Vue) {
             delay_ms: 1000
         }),
         computed: {
-            date() { return `${this.year}${("0" + this.month).slice(-2)}` }
+            date() {
+                return `${this.year}${("0" + this.month).slice(-2)}`
+            }
         },
         watch: {
             value(nVal, oVal) {
@@ -3763,7 +4696,7 @@ if (Vue) {
             filter(nVal, oVal) {
                 if (nVal < 0 || nVal > 1000 || isNaN(nVal)) {
                     this.filter = 0;
-                } 
+                }
                 if (!this.button) {
                     // delay the reload action 
                     clearTimeout(this.filter_timer);
@@ -3799,7 +4732,7 @@ if (Vue) {
         mounted() {
             let now = new Date();
             this.year = now.getFullYear() - 1911;
-            this.month = now.getMonth();    // set last month as default
+            this.month = now.getMonth(); // set last month as default
             this.value = this.max - 1;
             this.base = this.year * 12 + now.getMonth() + 1;
             this.addToStoreParams('stats_date', this.date);
@@ -3841,7 +4774,10 @@ if (Vue) {
             </b-list-group>
         </div>`,
         props: {
-            category: { type: String, default: 'all' },
+            category: {
+                type: String,
+                default: 'all'
+            },
         },
         data: () => ({
             items: [],
@@ -3850,12 +4786,20 @@ if (Vue) {
             queue: []
         }),
         computed: {
-            date() { return this.storeParams['stats_date'] || this.default_date },
-            keyword() { return this.storeParams['stats_keyword'] || '' },
-            filter() { return parseInt(this.storeParams['stats_filter'] || 0) },
-            all_reg_reason() { return this.storeParams['stats_reg_reason'] || false },
+            date() {
+                return this.storeParams['stats_date'] || this.default_date
+            },
+            keyword() {
+                return this.storeParams['stats_keyword'] || ''
+            },
+            filter() {
+                return parseInt(this.storeParams['stats_filter'] || 0)
+            },
+            all_reg_reason() {
+                return this.storeParams['stats_reg_reason'] || false
+            },
             header() {
-                switch(this.category) {
+                switch (this.category) {
                     case "stats_court":
                         return `法院囑託案件 (${this.date})`;
                     case "stats_refund":
@@ -3882,17 +4826,27 @@ if (Vue) {
                         return `不支援的類型-${this.category}`;
                 }
             },
-            all() { return this.category == 'all' }
+            all() {
+                return this.category == 'all'
+            }
         },
         watch: {
-            date(nVal, oVal) { this.reload() },
-            filter(nVal, oVal) { this.reload() },
-            keyword(nVal, oVal) { this.reload() },
-            all_reg_reason(nVal, oVal) { this.reload() }
+            date(nVal, oVal) {
+                this.reload()
+            },
+            filter(nVal, oVal) {
+                this.reload()
+            },
+            keyword(nVal, oVal) {
+                this.reload()
+            },
+            all_reg_reason(nVal, oVal) {
+                this.reload()
+            }
         },
         methods: {
             border_var(item) {
-                switch(item.category) {
+                switch (item.category) {
                     case "stats_court":
                     case "stats_refund":
                     case "stats_reg_reject":
@@ -3910,7 +4864,7 @@ if (Vue) {
                 }
             },
             badge_var(count) {
-                if(count < 10) {
+                if (count < 10) {
                     return 'secondary';
                 } else if (count < 50) {
                     return 'dark';
@@ -3938,7 +4892,7 @@ if (Vue) {
                     this.ok = res.data.status > 0;
                     if (this.ok) {
                         this.$assert(res.data.data_count > 0, "response data count is not correct.", res.data.data_count);
-                        for(let i = 0; i < res.data.data_count; i++) {
+                        for (let i = 0; i < res.data.data_count; i++) {
                             if (res.data.raw[i].count >= this.filter) {
                                 // prevent duplication
                                 let existed = this.items.find((item, index, array) => {
@@ -3949,7 +4903,7 @@ if (Vue) {
                                 if (this.empty(this.keyword)) {
                                     this.items.push({
                                         id: res.data.raw[i].id || '',
-                                        text:　res.data.raw[i].text,
+                                        text: res.data.raw[i].text,
                                         count: res.data.raw[i].count,
                                         category: type
                                     });
@@ -3959,7 +4913,7 @@ if (Vue) {
                                     if (keyword.test(res.data.raw[i].id) || keyword.test(res.data.raw[i].text)) {
                                         this.items.push({
                                             id: res.data.raw[i].id || '',
-                                            text:　res.data.raw[i].text,
+                                            text: res.data.raw[i].text,
                                             count: res.data.raw[i].count,
                                             category: type
                                         });
@@ -3968,7 +4922,10 @@ if (Vue) {
                             }
                         }
                     } else {
-                        this.notify({ message: res.data.message + " " + this.responseMessage(res.data.status), type: "warning" });
+                        this.notify({
+                            message: res.data.message + " " + this.responseMessage(res.data.status),
+                            type: "warning"
+                        });
                         this.$warn(type + " " + this.responseMessage(res.data.status) + " " + res.data.status);
                     }
                 }).catch(err => {
@@ -3990,9 +4947,15 @@ if (Vue) {
                 }).then(res => {
                     this.ok = res.data.status > 0;
                     if (this.ok) {
-                        this.notify({ message: type + " (" + this.date + ") 已成功更新" + this.responseMessage(res.data.status), type: "success" });
+                        this.notify({
+                            message: type + " (" + this.date + ") 已成功更新" + this.responseMessage(res.data.status),
+                            type: "success"
+                        });
                     } else {
-                        this.notify({ message: res.data.message + " " + this.responseMessage(res.data.status), type: "warning" });
+                        this.notify({
+                            message: res.data.message + " " + this.responseMessage(res.data.status),
+                            type: "warning"
+                        });
                         this.$warn(type + " " + this.responseMessage(res.data.status));
                     }
                 }).catch(err => {
@@ -4003,7 +4966,7 @@ if (Vue) {
             },
             reload() {
                 this.items = [];
-                switch(this.category) {
+                switch (this.category) {
                     case "stats_court":
                     case "stats_refund":
                     case "stats_sur_rain":
@@ -4029,33 +4992,40 @@ if (Vue) {
                         break;
                     default:
                         this.$warn("Not supported category.", this.category);
-                        this.alert({message: "lah-stats-item: Not supported category.【" + this.category + "】", type: "warning"});
+                        this.alert({
+                            message: "lah-stats-item: Not supported category.【" + this.category + "】",
+                            type: "warning"
+                        });
                 }
             },
             showRegCases(title, data) {
                 this.msgbox({
                     title: title,
-                    message: this.$createElement('lah-reg-table', { props: {
-                        bakedData: data,
-                        iconVariant: "success",
-                        icon: "chevron-circle-right",
-                        type: 'md'
-                    } }),
+                    message: this.$createElement('lah-reg-table', {
+                        props: {
+                            bakedData: data,
+                            iconVariant: "success",
+                            icon: "chevron-circle-right",
+                            type: 'md'
+                        }
+                    }),
                     size: 'xl'
                 });
             },
             showRegularCases(title, data) {
                 this.msgbox({
                     title: title,
-                    message: this.$createElement('b-table', { props: {
-                        striped: true,
-                        hover: true,
-                        headVariant: 'dark',
-                        bordered: true,
-                        captionTop: true,
-                        caption: `找到 ${data.length} 件`,
-                        items: data
-                    } }),
+                    message: this.$createElement('b-table', {
+                        props: {
+                            striped: true,
+                            hover: true,
+                            headVariant: 'dark',
+                            bordered: true,
+                            captionTop: true,
+                            caption: `找到 ${data.length} 件`,
+                            items: data
+                        }
+                    }),
                     size: 'xl'
                 });
             },
@@ -4080,7 +5050,10 @@ if (Vue) {
                     } else {
                         let err = this.responseMessage(res.data.status);
                         this.$warn(err);
-                        this.notify({ message: err, type: "warning" });
+                        this.notify({
+                            message: err,
+                            type: "warning"
+                        });
                     }
                 }).catch(err => {
                     this.error = err;
@@ -4117,7 +5090,10 @@ if (Vue) {
                             break;
                         default:
                             this.$warn("無登記原因代碼，無法查詢案件。");
-                            this.notify({ message: '本項目未支援取得詳細列表功能', type: "warning" })
+                            this.notify({
+                                message: '本項目未支援取得詳細列表功能',
+                                type: "warning"
+                            })
                     }
                 } else {
                     this.$log(item.category);
@@ -4129,18 +5105,37 @@ if (Vue) {
                 this.$http.post(CONFIG.API.JSON.QUERY, {
                     type: 'xlsx_params',
                     xlsx_type: 'stats_export',
-                    xlsx_item: Object.assign({query_month: this.date}, item)
+                    xlsx_item: Object.assign({
+                        query_month: this.date
+                    }, item)
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ', type: "warning", duration: 2000 });
+                        this.notify({
+                            title: '匯出EXCEL檔案',
+                            message: '<i class="fas fa-cog ld ld-spin"></i> 後端處理中 ... ',
+                            type: "warning",
+                            duration: 2000
+                        });
                         // second param usage => e.target.title to get the title
-                        this.open(CONFIG.API.FILE.XLSX, {target:{title:'下載XLSX'}});
-                        this.delay(() => closeModal(() => this.notify({ title: '匯出EXCEL檔案', message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成', type: "success" })), 2000);
+                        this.open(CONFIG.API.FILE.XLSX, {
+                            target: {
+                                title: '下載XLSX'
+                            }
+                        });
+                        this.delay(() => closeModal(() => this.notify({
+                            title: '匯出EXCEL檔案',
+                            message: '<i class="fas fa-check ld ld-pulse"></i> 後端作業完成',
+                            type: "success"
+                        })), 2000);
                     } else {
                         let err = this.responseMessage(res.data.status);
                         let message = `${err} - ${res.data.status}`;
                         this.$warn(`紀錄 XLSX 參數失敗: ${message}`);
-                        this.alert({ title: '紀錄 XLSX 參數', message: message, type: "danger" });
+                        this.alert({
+                            title: '紀錄 XLSX 參數',
+                            message: message,
+                            type: "danger"
+                        });
                     }
                 }).catch(err => {
                     this.error = err;
@@ -4164,7 +5159,10 @@ if (Vue) {
                         break;
                     default:
                         this.$warn("無分類代碼，無法匯出資料。", item);
-                        this.notify({ message: '本項目未支援匯出XLSX功能', type: "warning" })
+                        this.notify({
+                            message: '本項目未支援匯出XLSX功能',
+                            type: "warning"
+                        })
                 }
             },
             sync_data_count(title, qry_data) {
@@ -4182,7 +5180,7 @@ if (Vue) {
         mounted() {
             // set default to the last month, e.g. 10904
             let now = new Date();
-            this.default_date = now.getFullYear()-1911 + ("0" + (now.getMonth())).slice(-2);
+            this.default_date = now.getFullYear() - 1911 + ("0" + (now.getMonth())).slice(-2);
         }
     });
 } else {
