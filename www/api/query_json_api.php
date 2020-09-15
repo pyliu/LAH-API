@@ -847,16 +847,11 @@ switch ($_POST["type"]) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => count($results),
-				"info" => array(
-					"id" => $results[0]["id"],
-					"name" => $results[0]["name"],
-					"ip" => $results[0]["ip"],
+				"info" => $results[0] + array(
 					"admin" => boolval($results[0]["authority"] & AUTHORITY::ADMIN),
 					"chief" => boolval($results[0]["authority"] & AUTHORITY::CHIEF),
 					"super" => boolval($results[0]["authority"] & AUTHORITY::SUPER)
-				),
-				"raw" => $results[0],
-				"query_string" => ""
+				)
 			);
 			$log->info("XHR [my_info] 查詢 ".$client_ip." 成功。 (".$results[0]["id"].", ".$results[0]["name"].")");
 			echo json_encode($result, 0);
