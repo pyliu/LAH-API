@@ -10,10 +10,6 @@ class SQLiteUser {
         return !empty($ret);
     }
 
-    private function getOrigAuthority($id) {
-        return  $this->db->querySingle("SELECT authority from user WHERE id = '".trim($id)."'");
-    }
-
     private function bindUserParams(&$stm, &$row, $update = false) {
         $stm->bindParam(':id', $row['DocUserID']);
         $stm->bindParam(':name', $row['AP_USER_NAME']);
@@ -41,7 +37,7 @@ class SQLiteUser {
 
         // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
         
-        $authority = $this->getOrigAuthority($row['DocUserID']) ?? AUTHORITY::NORMAL;
+        $authority = $this->getAuthority($row['DocUserID']);
         // add admin privilege
         if (in_array($row['AP_PCIP'], SYSTEM_CONFIG["ADM_IPS"])) {
             $authority = $authority | AUTHORITY::ADMIN;
@@ -115,6 +111,10 @@ class SQLiteUser {
             // insert
             return $this->inst($row);
         }
+    }
+
+    public function getAuthority($id) {
+        return  $this->db->querySingle("SELECT authority from user WHERE id = '".trim($id)."'") ?? AUTHORITY::NORMAL;
     }
 
     public function getOnboardUsers() {

@@ -2,6 +2,19 @@
 require_once("config/Config.inc.php");
 require_once('SQLiteUser.class.php');
 
+function getMyAuthority() {
+    if (isset($_SESSION['myinfo'])) {
+        return array(
+            "isAdmin" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::ADMIN),
+            "isChief" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::CHIEF),
+            "isSuper" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::SUPER),
+            "isRAE"   => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::RESEARCH_AND_EVALUATION),
+            "isGA"    => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::GENERAL_AFFAIRS),
+        );
+    }
+    return array();
+}
+
 function GetDBUserMapping($refresh = false) {
     if (SYSTEM_CONFIG["MOCK_MODE"] === true) {
         $content = @file_get_contents(dirname(dirname(__FILE__))."/assets/cache/user_mapping.cache");

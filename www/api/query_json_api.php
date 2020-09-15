@@ -844,14 +844,11 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("查無 ".$client_ip." 資料。");
 			$log->info("XHR [my_info] 查無 ".$client_ip." 資料。");
 		} else {
+			$_SESSION["myinfo"] = $results[0];
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => count($results),
-				"info" => $results[0] + array(
-					"admin" => boolval($results[0]["authority"] & AUTHORITY::ADMIN),
-					"chief" => boolval($results[0]["authority"] & AUTHORITY::CHIEF),
-					"super" => boolval($results[0]["authority"] & AUTHORITY::SUPER)
-				)
+				"info" => $results[0] + getMyAuthority()
 			);
 			$log->info("XHR [my_info] 查詢 ".$client_ip." 成功。 (".$results[0]["id"].", ".$results[0]["name"].")");
 			echo json_encode($result, 0);

@@ -116,9 +116,9 @@ Vue.prototype.$store = (() => {
                 myinfo(state, infoPayload) {
                     state.myinfo = infoPayload;
                     state.myid = $.trim(infoPayload['id']) || undefined;
-                    state.isAdmin = Boolean(infoPayload['admin']) || Boolean(infoPayload['super']);
-                    state.isChief = Boolean(infoPayload['chief']);
-                    state.isSuper = Boolean(infoPayload['super']);
+                    state.isAdmin = Boolean(infoPayload['isAdmin']) || Boolean(infoPayload['isSuper']);
+                    state.isChief = Boolean(infoPayload['isChief']);
+                    state.isSuper = Boolean(infoPayload['isSuper']);
                     console.log(`Authority check: admin: ${state.isAdmin}, chief: ${state.isChief}, super: ${state.isSuper}`);
                 },
                 disableMSDBQuery(state, flagPayload) {
