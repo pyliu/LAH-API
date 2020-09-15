@@ -1,27 +1,29 @@
 if (Vue) {
     Vue.component('lah-xap-history-chart', {
-        template: `<b-card border-variant="secondary" class="shadow">
-            <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" @click="show_count"></lah-chart>
-            <div class="d-flex justify-content-between mt-1">
-                <span class="align-middle small my-auto">
-                    <lah-fa-icon :icon="network_icon" title="現在連線數" :action="icon_action"> <b-badge :variant="badge_variant">{{now_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="clock" prefix="far" title="更新時間">
-                        <b-badge v-if="isOfficeHours() || demo" variant="secondary">{{last_update_time}}</b-badge>
-                        <b-badge v-else variant="danger" title="非上班時間所以停止更新">已停止更新</b-badge>
-                    </lah-fa-icon>
-                </span>
-                <b-button-group size="sm">
-                    <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
-                    <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'" title="切換線型圖"></lah-button>
-                    <b-form-spinbutton v-model="mins" min="5" max="60" size="sm" inline class="h-100"></b-form-spinbutton>
-                    <lah-button v-if="popupButton" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popup" action="heartbeat"></lah-button>
-                </b-button-group>
-            </div>
-            <div class="d-flex justify-content-between position-absolute w-100 mt-3" style="top:0;left:0;">
-                <lah-button icon="chevron-left" variant="outline-muted" size="sm" action="pulse" @click="nav_left"></lah-button>
-                <lah-button icon="chevron-right" variant="outline-muted" size="sm" action="pulse" @click="nav_right"></lah-button>
-            </div>
-        </b-card>`,
+        template: `<lah-transition appear>
+            <b-card border-variant="secondary" class="shadow">
+                <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" @click="show_count"></lah-chart>
+                <div class="d-flex justify-content-between mt-1">
+                    <span class="align-middle small my-auto">
+                        <lah-fa-icon :icon="network_icon" title="現在連線數" :action="icon_action"> <b-badge :variant="badge_variant">{{now_count}}</b-badge></lah-fa-icon>
+                        <lah-fa-icon icon="clock" prefix="far" title="更新時間">
+                            <b-badge v-if="isOfficeHours() || demo" variant="secondary">{{last_update_time}}</b-badge>
+                            <b-badge v-else variant="danger" title="非上班時間所以停止更新">已停止更新</b-badge>
+                        </lah-fa-icon>
+                    </span>
+                    <b-button-group size="sm">
+                        <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
+                        <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'" title="切換線型圖"></lah-button>
+                        <b-form-spinbutton v-model="mins" min="5" max="60" size="sm" inline class="h-100"></b-form-spinbutton>
+                        <lah-button v-if="popupButton" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popup" action="heartbeat"></lah-button>
+                    </b-button-group>
+                </div>
+                <div class="d-flex justify-content-between position-absolute w-100 mt-3" style="top:0;left:0;">
+                    <lah-button icon="chevron-left" variant="outline-muted" size="sm" action="pulse" @click="nav_left"></lah-button>
+                    <lah-button icon="chevron-right" variant="outline-muted" size="sm" action="pulse" @click="nav_right"></lah-button>
+                </div>
+            </b-card>
+        </lah-transition>`,
         props: {
             site: { type: String, default: 'H0' },
             mins: { type: Number, default: 15 },

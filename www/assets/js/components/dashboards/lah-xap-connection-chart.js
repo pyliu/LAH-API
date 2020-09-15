@@ -1,30 +1,32 @@
 if (Vue) {
     Vue.component('lah-xap-connection-chart', {
-        template: `<b-card border-variant="secondary" class="shadow">
-            <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left" @click="history"></lah-chart>
-            <div class="d-flex justify-content-between mt-1">
-                <span class="small align-middle my-auto">
-                    <lah-fa-icon :icon="ap_vars[3]" title="AP總連線數" :action="ap_vars[1]" :variant="ap_vars[0]" :size="ap_vars[2]"> <b-badge variant="muted" pill>{{ap_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon :icon="db_vars[3]" title="資料庫連線數" :action="db_vars[1]" :variant="db_vars[0]" :size="db_vars[2]"> <b-badge variant="muted" pill>{{db_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="link" title="跨所AP上所有連線數" variant="info"> <b-badge variant="muted" pill>{{total_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="clock" prefix="far" title="更新時間" variant="secondary">
-                        <b-badge v-if="isOfficeHours() || demo" variant="muted">{{last_update_time}}</b-badge>
-                        <b-badge v-else variant="danger" title="非上班時間所以停止更新">已停止更新</b-badge>
-                    </lah-fa-icon>
-                </span>
-                <div :title="ip">
-                    <b-button-group size="sm">
-                        <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
-                        <!--<lah-button icon="chart-pie" variant="secondary" v-if="type != 'pie'" @click="type = 'pie'" title="切換圓餅圖"></lah-button>-->
-                        <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'" title="切換長線型圖"></lah-button>
-                        <lah-button icon="chart-area" variant="warning" v-if="type != 'polarArea'" @click="type = 'polarArea'" title="切換區域圖"></lah-button>
-                        <lah-button brand icon="edge" variant="info" v-if="type != 'doughnut'" @click="type = 'doughnut'" title="切換甜甜圈"></lah-button>
-                        <lah-button icon="broadcast-tower" variant="dark" v-if="type != 'radar'" @click="type = 'radar'" title="切換雷達圖"></lah-button>
-                        <lah-button v-if="popupButton" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popup" action="heartbeat"></lah-button>
-                    </b-button-group>
+        template: `<lah-transition appear>
+            <b-card border-variant="secondary" class="shadow">
+                <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left" @click="history"></lah-chart>
+                <div class="d-flex justify-content-between mt-1">
+                    <span class="small align-middle my-auto">
+                        <lah-fa-icon :icon="ap_vars[3]" title="AP總連線數" :action="ap_vars[1]" :variant="ap_vars[0]" :size="ap_vars[2]"> <b-badge variant="muted" pill>{{ap_count}}</b-badge></lah-fa-icon>
+                        <lah-fa-icon :icon="db_vars[3]" title="資料庫連線數" :action="db_vars[1]" :variant="db_vars[0]" :size="db_vars[2]"> <b-badge variant="muted" pill>{{db_count}}</b-badge></lah-fa-icon>
+                        <lah-fa-icon icon="link" title="跨所AP上所有連線數" variant="info"> <b-badge variant="muted" pill>{{total_count}}</b-badge></lah-fa-icon>
+                        <lah-fa-icon icon="clock" prefix="far" title="更新時間" variant="secondary">
+                            <b-badge v-if="isOfficeHours() || demo" variant="muted">{{last_update_time}}</b-badge>
+                            <b-badge v-else variant="danger" title="非上班時間所以停止更新">已停止更新</b-badge>
+                        </lah-fa-icon>
+                    </span>
+                    <div :title="ip">
+                        <b-button-group size="sm">
+                            <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
+                            <!--<lah-button icon="chart-pie" variant="secondary" v-if="type != 'pie'" @click="type = 'pie'" title="切換圓餅圖"></lah-button>-->
+                            <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'" title="切換長線型圖"></lah-button>
+                            <lah-button icon="chart-area" variant="warning" v-if="type != 'polarArea'" @click="type = 'polarArea'" title="切換區域圖"></lah-button>
+                            <lah-button brand icon="edge" variant="info" v-if="type != 'doughnut'" @click="type = 'doughnut'" title="切換甜甜圈"></lah-button>
+                            <lah-button icon="broadcast-tower" variant="dark" v-if="type != 'radar'" @click="type = 'radar'" title="切換雷達圖"></lah-button>
+                            <lah-button v-if="popupButton" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popup" action="heartbeat"></lah-button>
+                        </b-button-group>
+                    </div>
                 </div>
-            </div>
-        </b-card>`,
+            </b-card>
+        </lah-transition>`,
         props: {
             ip: { type: String, default: CONFIG.AP_SVR || '220.1.35.123' },
             type: { type: String, default: 'doughnut' },
