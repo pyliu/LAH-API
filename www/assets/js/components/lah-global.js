@@ -46,16 +46,20 @@ Vue.prototype.$store = (() => {
         return new Vuex.Store({
             state: {
                 AUTHORITY: {
-                    SUPER: 512, // developer
-                    ADMIN: 1,
-                    CHIEF: 2,
-                    INF_SECTION: 4,
-                    SUR_SECTION: 8,
-                    VAL_SECTION: 16,
-                    ADM_SECTION: 32,
-                    REG_SECTION: 64,
-                    ACCOUNT_SECTION: 128,
-                    HR_SECTION: 256
+                    SUPER: 1,   // developer
+                    ADMIN: 2,   // 管理者
+                    CHIEF: 4,   // 主管
+                    INF_SECTION: 8,
+                    SUR_SECTION: 16,
+                    VAL_SECTION: 32,
+                    ADM_SECTION: 64,
+                    REG_SECTION: 128,
+                    ACCOUNT_OFFICE: 256,
+                    HR_OFFICE: 512,
+                    DIRECTOR_OFFICE: 1024,
+                    SECRETARY_OFFICE: 2048,
+                    RE_ROLE: 4096,  // 研考
+                    GA_ROLE: 8192   // 總務
                 },
                 authority: 0,   // use bitwise compare
                 cache : new Map(),

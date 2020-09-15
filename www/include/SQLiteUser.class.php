@@ -6,12 +6,30 @@ class SQLiteUser {
     private $db;
 
     private function exists($id) {
-        global $log;
         $ret = $this->db->querySingle("SELECT id from user WHERE id = '".trim($id)."'");
         return !empty($ret);
     }
 
-    private function bindUserParams(&$stm, &$row) {
+    private function getOrigAuthority($id) {
+        return  $this->db->querySingle("SELECT authority from user WHERE id = '".trim($id)."'");
+    }
+
+    private function getDefaultAuthority($unit) {
+        switch ($unit) {
+            case '資訊課': return AUTHORITY::INF_SECTION;
+            case '登記課': return AUTHORITY::REG_SECTION;
+            case '測量課': return AUTHORITY::SUR_SECTION;
+            case '地價課': return AUTHORITY::VAL_SECTION;
+            case '行政課': return AUTHORITY::ADM_SECTION;
+            case '會計室': return AUTHORITY::ACCOUNT_OFFICE;
+            case '人事室': return AUTHORITY::HR_OFFICE;
+            case '秘書室': return AUTHORITY::SECRETARY_OFFICE;
+            case '主任室': return AUTHORITY::DIRECTOR_OFFICE;
+            default: return 0;
+        }
+    }
+
+    private function bindUserParams(&$stm, &$row, $update = false) {
         $stm->bindParam(':id', $row['DocUserID']);
         $stm->bindParam(':name', $row['AP_USER_NAME']);
         $stm->bindValue(':sex', $row['AP_SEX'] == '男' ? 1 : 0);
@@ -25,7 +43,6 @@ class SQLiteUser {
         $stm->bindParam(':education', $row['AP_HI_SCHOOL']);
         $stm->bindParam(':birthday', $row['AP_BIRTH']);
 
-        global $log;
         $tokens = preg_split("/\s+/", $row['AP_ON_DATE']);
         if (count($tokens) == 3) {
             $rewrite = $tokens[2]."/".str_pad($tokens[0], 2, '0', STR_PAD_LEFT)."/".str_pad($tokens[1], 2, '0', STR_PAD_LEFT);
@@ -38,13 +55,22 @@ class SQLiteUser {
         $stm->bindParam(':offboard_date', $row['AP_OFF_DATE']);
         $stm->bindParam(':ip', $row['AP_PCIP']);
         // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
-        // $stm->bindValue(':authority', 0);
+        if ($update) {
+            global $log;
+            $orig_authority = $this->getOrigAuthority($row['DocUserID']);
+            $new_authority = intval($orig_authority) | intval($this->getDefaultAuthority($row['AP_UNIT_NAME']));
+            $log->info(__METHOD__.":".$row['DocUserID']." original authority is ".$orig_authority);
+            $log->info(__METHOD__.":".$row['DocUserID']." prepare updates to ".$new_authority);
+            $stm->bindValue(':authority', $new_authority);
+        } else {
+            $stm->bindValue(':authority', $this->getDefaultAuthority($row['AP_UNIT_NAME']));
+        }
     }
 
     private function inst(&$row) {
         $stm = $this->db->prepare("
             INSERT INTO user ('id', 'name', 'sex', 'addr', 'tel', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
-            VALUES (:id, :name, :sex, :addr, :tel, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', 0, :birthday)
+            VALUES (:id, :name, :sex, :addr, :tel, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
         ");
         $this->bindUserParams($stm, $row);
         return $stm->execute() === FALSE ? false : true;
@@ -66,10 +92,11 @@ class SQLiteUser {
                 onboard_date = :onboard_date, 
                 offboard_date = :offboard_date,
                 ip = :ip,
-                birthday = :birthday
+                birthday = :birthday,
+                authority = :authority
             WHERE id = :id
         ");
-        $this->bindUserParams($stm, $row);
+        $this->bindUserParams($stm, $row, true);
         return $stm->execute() === FALSE ? false : true;
     }
 
