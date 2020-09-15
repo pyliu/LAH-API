@@ -948,7 +948,7 @@ $(document).ready(() => {
                         }).then(res => {
                             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                 let myinfo = res.data.info;
-                                myinfo.raw = res.data.raw[0];
+                                myinfo.raw = res.data.raw;
                                 this.setLocalCache('myinfo', myinfo, this.dayMilliseconds);   // cache query info result
                                 this.$store.commit("myinfo", myinfo);
                             } else {

@@ -855,7 +855,7 @@ switch ($_POST["type"]) {
 					"chief" => boolval($results[0]["authority"] & AUTHORITY::CHIEF),
 					"super" => boolval($results[0]["authority"] & AUTHORITY::SUPER)
 				),
-				"raw" => $results,
+				"raw" => $results[0],
 				"query_string" => ""
 			);
 			$log->info("XHR [my_info] 查詢 ".$client_ip." 成功。 (".$results[0]["id"].", ".$results[0]["name"].")");
