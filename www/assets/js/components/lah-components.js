@@ -843,7 +843,7 @@ if (Vue) {
             <legend v-b-tooltip="'以關鍵字搜尋使用者'">
                 <i class="fas fa-users"></i>
                 使用者搜尋
-                <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
+                <lah-button class="border-0"  @click="popup" variant="outline-success" size="sm" icon="question"></lah-button>
             </legend>
             <b-input-group size="sm" prepend="關鍵字">
                 <b-form-input
@@ -952,10 +952,6 @@ if (Vue) {
                 }
             },
             query() {
-                if (CONFIG.DISABLE_MSDB_QUERY) {
-                    this.$warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping lah-user-search::query.");
-                    return;
-                }
                 let keyword = $.trim(this.input.replace(/\?/g, ""));
                 if (this.empty(keyword)) {
                     this.$warn("Keyword field should not be empty.");
@@ -989,7 +985,8 @@ if (Vue) {
                     size: "sm"
                 });
             }
-        }
+        },
+        mounted() { this.input = this.myid }
     });
 
     Vue.component("lah-user-id-input", {
