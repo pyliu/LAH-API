@@ -4,7 +4,7 @@ require_once(ROOT_DIR.'/include/Query.class.php');
 require_once(ROOT_DIR.'/include/Message.class.php');
 require_once(ROOT_DIR.'/include/StatsSQLite3.class.php');
 require_once(ROOT_DIR.'/include/Temperature.class.php');
-require_once(ROOT_DIR.'/include/TdocUserInfo.class.php');
+require_once(ROOT_DIR.'/include/SQLiteUser.class.php');
 
 class WatchDog {
     
@@ -184,13 +184,13 @@ class WatchDog {
             return false;
         }
         // get all on-board users
-        $userinfo = new TdocUserInfo();
-        $onboard_users = $userinfo->getOnBoardUsers();
+        $sqlite_user = new SQLiteUser();
+        $onboard_users = $sqlite_user->getOnboardUsers();
         //check if they checked their temperature
         $temperature = new Temperature();
         $AMPM = date('A');
         foreach ($onboard_users as $idx => $user) {
-            $user_id = $user['DocUserID'];
+            $user_id = $user['id'];
             $record = $temperature->getAMPMTemperatures($user_id, $AMPM);
             // only no record should be notified
             if (empty($record)) {
@@ -201,8 +201,8 @@ class WatchDog {
 
     private function sendTemperatureMessage($user) {
         global $log;
-        $to_id = trim($user['DocUserID']);
-        $to_name = $user['AP_USER_NAME'];
+        $to_id = trim($user['id']);
+        $to_name = $user['name'];
         $AMPM = date('A');
         $host_ip = getLocalhostIP();
         $msg = new Message();

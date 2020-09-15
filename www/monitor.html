@@ -22,7 +22,21 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-        <b-card-group columns :key="'b-card-grp-1'">
+      <b-card-group deck>
+        <lah-xap-connection-chart></lah-xap-connection-chart>
+        <lah-xap-history-chart site="HB" type='bar' mins="30"></lah-xap-history-chart>
+      </b-card-group>
+      <b-card-group columns class="mt-3">
+        <lah-xap-history-chart site="HA"></lah-xap-history-chart>
+        <lah-xap-history-chart site="HC" type="bar"></lah-xap-history-chart>
+        <lah-xap-history-chart site="HF"></lah-xap-history-chart>
+        <lah-xap-history-chart site="HE" type="bar"></lah-xap-history-chart>
+        <lah-xap-history-chart site="HD"></lah-xap-history-chart>
+        <lah-xap-history-chart site="HH"></lah-xap-history-chart>
+        <lah-xap-history-chart site="HG" type="bar"></lah-xap-history-chart>
+        <lah-xap-history-chart site="H0"></lah-xap-history-chart>
+      </b-card-group>
+        <!-- <b-card-group columns :key="'b-card-grp-1'">
           <lah-xap-connection-chart></lah-xap-connection-chart>
           <lah-xap-history-chart site="HA" type='bar'></lah-xap-history-chart>
           <lah-xap-history-chart site="HB" mins="30"></lah-xap-history-chart>
@@ -39,7 +53,7 @@
         </b-card-group>
         <b-card-group columns class="mb-2" :key="'b-card-grp-4'">
           <lah-xap-history-chart site="H0"></lah-xap-history-chart>
-        </b-card-group>
+        </b-card-group> -->
     </div>
   </section>
 

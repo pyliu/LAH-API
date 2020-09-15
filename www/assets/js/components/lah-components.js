@@ -1072,7 +1072,7 @@ if (Vue) {
                         </template>
                         <b-card-title>
                             <b-avatar button size="3rem" :src="photoUrl(user_data)" variant="light" @click="openPhoto(user_data)" v-if="useAvatar"></b-avatar>
-                            {{user_data['AP_USER_NAME']}}
+                            {{user_data['name']}}
                         </b-card-title>
                         <b-card-sub-title>{{user_data['title']}}</b-card-sub-title>
                         <b-link @click="openPhoto(user_data)" v-if="!useAvatar">

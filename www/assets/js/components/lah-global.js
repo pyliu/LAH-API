@@ -248,7 +248,7 @@ Vue.mixin({
         myip() { return this.$store.getters.myip },
         myid() { return this.$store.getters.myid },
         myinfo() { return this.$store.getters.myinfo },
-        myname() { return this.myinfo ? this.myinfo['AP_USER_NAME'] : '' },
+        myname() { return this.myinfo ? this.myinfo['name'] : '' },
         disableMSDBQuery() { return this.$store.getters.disableMSDBQuery },
         nowDate() { return this.now().split(' ')[0] },
         nowTime() { return this.now().split(' ')[1] }
