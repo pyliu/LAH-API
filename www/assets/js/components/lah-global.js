@@ -116,7 +116,7 @@ Vue.prototype.$store = (() => {
                 myinfo(state, infoPayload) {
                     state.myinfo = infoPayload;
                     state.myid = $.trim(infoPayload['id']) || undefined;
-                    state.isAdmin = Boolean(infoPayload['admin']);
+                    state.isAdmin = Boolean(infoPayload['admin']) || Boolean(infoPayload['super']);
                     state.isChief = Boolean(infoPayload['chief']);
                     state.isSuper = Boolean(infoPayload['super']);
                     console.log(`Authority check: admin: ${state.isAdmin}, chief: ${state.isChief}, super: ${state.isSuper}`);

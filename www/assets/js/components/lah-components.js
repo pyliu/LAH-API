@@ -1377,7 +1377,7 @@ if (Vue) {
         }),
         computed: {
             found: function () {
-                return !this.disableMSDBQuery && this.user_rows !== null && this.user_rows !== undefined
+                return this.user_rows !== null && this.user_rows !== undefined
             },
             notFound: function () {
                 return `找不到使用者 「${this.name || this.id || this.ip || this.myip}」`;
