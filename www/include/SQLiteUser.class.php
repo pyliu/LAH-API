@@ -56,11 +56,8 @@ class SQLiteUser {
         $stm->bindParam(':ip', $row['AP_PCIP']);
         // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
         if ($update) {
-            global $log;
             $orig_authority = $this->getOrigAuthority($row['DocUserID']);
             $new_authority = intval($orig_authority) | intval($this->getDefaultAuthority($row['AP_UNIT_NAME']));
-            $log->info(__METHOD__.":".$row['DocUserID']." original authority is ".$orig_authority);
-            $log->info(__METHOD__.":".$row['DocUserID']." prepare updates to ".$new_authority);
             $stm->bindValue(':authority', $new_authority);
         } else {
             $stm->bindValue(':authority', $this->getDefaultAuthority($row['AP_UNIT_NAME']));
