@@ -31,7 +31,6 @@ if (Vue) {
         },
         data: () => ({
             items: [],
-            timer_ms: 60000,
             reload_timer: null,
             spin_timer: null,
             site_tw: '地政局',
@@ -67,6 +66,7 @@ if (Vue) {
             demo(val) { this.reload() }
         },
         computed: {
+            timer_ms() { return this.demo ? 5000 : 60000 },
             label() { return `${this.site_tw}` },
             title() { return `${this.site_tw}連線` },
             network_icon() {
@@ -112,7 +112,6 @@ if (Vue) {
             },
             reload(force) {
                 clearTimeout(this.reload_timer);
-                this.timer_ms = this.demo ? 5000 : 60000;
                 if (this.demo && this.items.length > 0) {
                     this.reload_demo_data();
                     this.reload_timer = this.delay(this.reload, this.timer_ms);

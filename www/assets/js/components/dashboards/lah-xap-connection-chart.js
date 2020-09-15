@@ -37,8 +37,7 @@ if (Vue) {
             total_count: 0,
             ap_count: 0,
             last_update_time: '',
-            reload_timer: null,
-            timer_ms: 15000
+            reload_timer: null
         }),
         watch: {
             ap_count(val) {
@@ -70,6 +69,7 @@ if (Vue) {
             demo(val) { this.reload() }
         },
         computed: {
+            timer_ms() { return this.demo ? 5000 : 15000 },
             label() { return `跨所AP連線數` },
             title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
             ap_vars() {
@@ -118,7 +118,6 @@ if (Vue) {
             },
             reload(force = false) {
                 clearTimeout(this.reload_timer);
-                this.timer_ms = this.demo ? 5000 : 15000;
                 if (this.demo && this.items.length > 0) {
                     this.reload_demo_data();
                     this.reload_timer = this.delay(this.reload, this.timer_ms);
