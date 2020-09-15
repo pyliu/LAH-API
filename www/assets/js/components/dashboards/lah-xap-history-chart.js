@@ -13,9 +13,13 @@ if (Vue) {
                 <b-button-group size="sm">
                     <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
                     <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'" title="切換線型圖"></lah-button>
-                    <b-form-spinbutton v-model="mins" min="5" max="60" size="sm" inline></b-form-spinbutton>
+                    <b-form-spinbutton v-model="mins" min="5" max="60" size="sm" inline class="h-100"></b-form-spinbutton>
                     <lah-button v-if="popupButton" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popup" action="heartbeat"></lah-button>
                 </b-button-group>
+            </div>
+            <div class="d-flex justify-content-between position-absolute w-100 mt-3" style="top:0;left:0;">
+                <lah-button icon="chevron-left" variant="outline-muted" size="sm" action="pulse" @click="nav_left"></lah-button>
+                <lah-button icon="chevron-right" variant="outline-muted" size="sm" action="pulse" @click="nav_right"></lah-button>
             </div>
         </b-card>`,
         props: {
@@ -28,20 +32,38 @@ if (Vue) {
         data: () => ({
             items: [],
             timer_ms: 60000,
+            reload_timer: null,
             spin_timer: null,
             site_tw: '地政局',
+            site_code: 'H0',
             last_update_time: '',
             now_count: 0
         }),
         watch: {
-            mins(nVal, oVal) {
+            mins(dont_care) {
                 clearTimeout(this.spin_timer);
                 this.spin_timer = this.delay(() => {
                     this.items.length = 0;
                     this.reload(true);
                 }, 1000);
             },
-            site(nVal, oVal) { this.set_site_tw(nVal) },
+            site(val) { this.site_code = val },
+            site_code(val) {
+                switch(val) {
+                    case 'H0': this.site_tw = '地政局'; break;
+                    case 'HA': this.site_tw = '桃園所'; break;
+                    case 'HB': this.site_tw = '中壢所'; break;
+                    case 'HC': this.site_tw = '大溪所'; break;
+                    case 'HD': this.site_tw = '楊梅所'; break;
+                    case 'HE': this.site_tw = '蘆竹所'; break;
+                    case 'HF': this.site_tw = '八德所'; break;
+                    case 'HG': this.site_tw = '平鎮所'; break;
+                    case 'HH': this.site_tw = '龜山所'; break;
+                    default: this.site_tw = '未知';
+                }
+                this.items.length = 0;
+                this.reload(true);
+            },
             demo(val) { this.reload() }
         },
         computed: {
@@ -73,24 +95,10 @@ if (Vue) {
                 [variant, action, rgb, icon] = this.style_by_count(dataset_item[1], opacity);
                 return rgb;
             },
-            set_site_tw(site_code) {
-                switch(site_code) {
-                    case 'H0': this.site_tw = '地政局'; break;
-                    case 'HA': this.site_tw = '桃園所'; break;
-                    case 'HB': this.site_tw = '中壢所'; break;
-                    case 'HC': this.site_tw = '大溪所'; break;
-                    case 'HD': this.site_tw = '楊梅所'; break;
-                    case 'HE': this.site_tw = '蘆竹所'; break;
-                    case 'HF': this.site_tw = '八德所'; break;
-                    case 'HG': this.site_tw = '平鎮所'; break;
-                    case 'HH': this.site_tw = '龜山所'; break;
-                    default: this.site_tw = '未知';
-                }
-            },
             set_items(raw) {
                 raw.forEach((item, raw_idx, raw) => {
                     let text = (raw_idx == 0) ? '現在' : `${raw_idx}分前`;
-                    let val = this.demo ? this.rand(300) : item.count;
+                    let val = item.count;
                     if (this.items.length == raw.length) {
                         this.items[raw_idx][1] = val;
                         // not reactively ... manual set chartData
@@ -103,11 +111,16 @@ if (Vue) {
                 this.now_count = this.items[0][1];
             },
             reload(force) {
-                if (force || this.isOfficeHours() || this.demo) {
+                clearTimeout(this.reload_timer);
+                this.timer_ms = this.demo ? 5000 : 60000;
+                if (this.demo && this.items.length > 0) {
+                    this.reload_demo_data();
+                    this.reload_timer = this.delay(this.reload, this.timer_ms);
+                } else if (force || this.isOfficeHours()) {
                     //this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_ap_conn_HX_history",
-                        site: this.site,
+                        site: this.site_code,
                         count: parseInt(this.mins) + 1
                     }).then(res => {
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
@@ -123,20 +136,30 @@ if (Vue) {
                         this.error = err;
                     }).finally(() => {
                         //this.isBusy = false;
-                        this.delay(this.reload, this.timer_ms);
+                        this.reload_timer = this.delay(this.reload, this.timer_ms);
                         Vue.nextTick(() => {
                             this.$refs.chart.update();
                         });
                     });
                 } else {
                     // check after an hour
-                    this.delay(this.reload, 3600000);
+                    this.reload_timer = this.delay(this.reload, 3600000);
                 }
+            },
+            reload_demo_data() {
+                this.items.forEach((item, raw_idx, raw) => {
+                    let val = this.rand(300);
+                    item[1] = val;
+                    // not reactively ... manual set chartData
+                    this.$refs.chart.changeValue(item[0], val);
+                });
+                this.last_update_time = this.now().split(' ')[1];
+                this.now_count = this.items[0][1];
             },
             popup() {
                 this.msgbox({
                     title: `跨所AP ${this.site_tw}連線`,
-                    message: this.$createElement('lah-xap-history-chart', { props: { site: this.site, mins: 60, demo: this.demo, popupButton: false } }),
+                    message: this.$createElement('lah-xap-history-chart', { props: { site: this.site_code, mins: 60, demo: this.demo, popupButton: false } }),
                     size: "xl"
                 });
             },
@@ -149,11 +172,38 @@ if (Vue) {
                     message: `<i class="fas fa-network-wired ld ld-${action}"></i> ${payload['value']}`,
                     type: variant
                 });
+            },
+            nav_left() {
+                switch(this.site_code) {
+                    case 'H0': this.site_code = 'HH'; break;
+                    case 'HA': this.site_code = 'H0'; break;
+                    case 'HB': this.site_code = 'HA'; break;
+                    case 'HC': this.site_code = 'HB'; break;
+                    case 'HD': this.site_code = 'HC'; break;
+                    case 'HE': this.site_code = 'HD'; break;
+                    case 'HF': this.site_code = 'HE'; break;
+                    case 'HG': this.site_code = 'HF'; break;
+                    case 'HH': this.site_code = 'HG'; break;
+                    default: this.site_code = '未知';
+                }
+            },
+            nav_right() {
+                switch(this.site_code) {
+                    case 'H0': this.site_code = 'HA'; break;
+                    case 'HA': this.site_code = 'HB'; break;
+                    case 'HB': this.site_code = 'HC'; break;
+                    case 'HC': this.site_code = 'HD'; break;
+                    case 'HD': this.site_code = 'HE'; break;
+                    case 'HE': this.site_code = 'HF'; break;
+                    case 'HF': this.site_code = 'HG'; break;
+                    case 'HG': this.site_code = 'HH'; break;
+                    case 'HH': this.site_code = 'H0'; break;
+                    default: this.site_code = '未知';
+                }
             }
         },
         created() {
-            this.timer_ms = this.demo ? 5000 : 60000;
-            this.set_site_tw(this.site);
+            this.site_code = this.site;
             this.reload(true);
         }
     });

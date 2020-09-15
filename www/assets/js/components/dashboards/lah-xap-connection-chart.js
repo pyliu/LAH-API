@@ -4,8 +4,8 @@ if (Vue) {
             <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left" @click="history"></lah-chart>
             <div class="d-flex justify-content-between mt-1">
                 <span class="small align-middle my-auto">
-                    <lah-fa-icon icon="server" title="AP總連線數" :action="ap_icon_action" :variant="ap_variant"> <b-badge variant="muted" pill>{{ap_count}}</b-badge></lah-fa-icon>
-                    <lah-fa-icon icon="database" title="資料庫連線數" :action="db_icon_action" :variant="db_variant"> <b-badge variant="muted" pill>{{db_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon :icon="ap_vars[3]" title="AP總連線數" :action="ap_vars[1]" :variant="ap_vars[0]" :size="ap_vars[2]"> <b-badge variant="muted" pill>{{ap_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon :icon="db_vars[3]" title="資料庫連線數" :action="db_vars[1]" :variant="db_vars[0]" :size="db_vars[2]"> <b-badge variant="muted" pill>{{db_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="link" title="跨所AP上所有連線數" variant="info"> <b-badge variant="muted" pill>{{total_count}}</b-badge></lah-fa-icon>
                     <lah-fa-icon icon="clock" prefix="far" title="更新時間" variant="secondary">
                         <b-badge v-if="isOfficeHours() || demo" variant="muted">{{last_update_time}}</b-badge>
@@ -15,7 +15,7 @@ if (Vue) {
                 <div :title="ip">
                     <b-button-group size="sm">
                         <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
-                        <lah-button icon="chart-pie" variant="secondary" v-if="type != 'pie'" @click="type = 'pie'" title="切換圓餅圖"></lah-button>
+                        <!--<lah-button icon="chart-pie" variant="secondary" v-if="type != 'pie'" @click="type = 'pie'" title="切換圓餅圖"></lah-button>-->
                         <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'" title="切換長線型圖"></lah-button>
                         <lah-button icon="chart-area" variant="warning" v-if="type != 'polarArea'" @click="type = 'polarArea'" title="切換區域圖"></lah-button>
                         <lah-button brand icon="edge" variant="info" v-if="type != 'doughnut'" @click="type = 'doughnut'" title="切換甜甜圈"></lah-button>
@@ -36,7 +36,9 @@ if (Vue) {
             db_count: 0,
             total_count: 0,
             ap_count: 0,
-            last_update_time: ''
+            last_update_time: '',
+            reload_timer: null,
+            timer_ms: 15000
         }),
         watch: {
             ap_count(val) {
@@ -44,7 +46,7 @@ if (Vue) {
                     this.notify({
                         title: '跨所AP連線數警示',
                         type: 'warning',
-                        message: `<i class="fas fa-exclamation-triangle"></i> 目前連線數達 <b>${val}</b>，須注意!`
+                        message: `<i class="fas fa-exclamation-triangle fa-lg ld ld-beat"></i> 目前連線數達 <b>${val}</b>，須注意!`
                     })
                 }
             },
@@ -54,13 +56,13 @@ if (Vue) {
                         this.alert({
                             title: '跨所AP資料庫連線數超標警示',
                             type: 'danger',
-                            message: `<i class="fas fa-exclamation-circle"></i> 目前占用資料庫連線數已超過 3000 (<b>${val}</b>)，請立即處理！` 
+                            message: `<i class="fas fa-bomb fa-lg text-dark ld ld-tremble"></i> 目前占用資料庫連線數已超過 3000 (<b>${val}</b>)，請立即處理！` 
                         });
                     } else {
                         this.notify({
                             title: '跨所AP資料庫連線數過高通知',
                             type: 'warning',
-                            message: `<i class="fas fa-exclamation-circle"></i> 目前占用資料庫連線數已達 <b>${val}</b>，須注意!` 
+                            message: `<i class="fas fa-exclamation-circle fa-lg ld ld-beat"></i> 目前占用資料庫連線數已達 <b>${val}</b>，須注意!` 
                         });
                     }
                 }
@@ -70,30 +72,22 @@ if (Vue) {
         computed: {
             label() { return `跨所AP連線數` },
             title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
-            ap_variant() {
-                if (this.ap_count > 500) return 'dark';
-                if (this.ap_count > 400) return 'danger';
-                if (this.ap_count > 300) return 'warning';
-                return 'success';
+            ap_vars() {
+                // return [color, action, size, icon]
+                if (this.ap_count > 500) return ['danger', 'tremble', '2x', 'bomb'];
+                if (this.ap_count > 400) return ['danger', 'shiver', 'lg', 'server'];
+                if (this.ap_count > 300) return ['warning', 'beat', '1x', 'server'];
+                return ['success', 'breath', 'sm', 'server'];
             },
-            ap_icon_action() { return this.icon_action_by_variant(this.ap_variant) },
-            db_variant() {
-                if (this.db_count > 3000) return 'dark';
-                if (this.db_count > 1800) return 'danger';
-                if (this.db_count > 1000) return 'warning';
-                return 'success';
-            },
-            db_icon_action() { return this.icon_action_by_variant(this.db_variant) },
+            db_vars() {
+                // return [color, action, size, icon]
+                if (this.db_count > 3000) return ['danger', 'tremble', '2x', 'bomb'];
+                if (this.db_count > 1800) return ['danger', 'shiver', 'lg', 'database'];
+                if (this.db_count > 1000) return ['warning', 'beat', '1x', 'database'];
+                return ['success', 'breath', 'sm', 'database'];
+            }
         },
         methods: {
-            icon_action_by_variant(variant) {
-                switch(variant) {
-                    case 'dark': return 'tremble';
-                    case 'danger': return 'shiver';
-                    case 'warning': return 'beat';
-                }
-                return 'breath';
-            },
             bg_color(dataset_item, opacity) {
                 switch(dataset_item[0]) {
                     case '地政局': return `rgb(207, 207, 207, ${opacity})`;    // H0
@@ -123,7 +117,12 @@ if (Vue) {
                 }
             },
             reload(force = false) {
-                if (force || this.isOfficeHours() || this.demo) {
+                clearTimeout(this.reload_timer);
+                this.timer_ms = this.demo ? 5000 : 15000;
+                if (this.demo && this.items.length > 0) {
+                    this.reload_demo_data();
+                    this.reload_timer = this.delay(this.reload, this.timer_ms);
+                } else if (force || this.isOfficeHours()) {
                     //this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_xap_conn_latest",
@@ -138,10 +137,10 @@ if (Vue) {
                                 res.data.raw.reverse().forEach((item, raw_idx, array) => {
                                     let text = this.get_site_tw(item.site);
                                     // e.g. item => { count: 911, ip: "220.1.35.123", log_time: "20200904175957", site: "HB" }
-                                    if (item.site == 'TOTAL') { this.total_count = this.demo ? this.rand(5000) : item.count; }
-                                    else if (item.site == 'DB') { this.db_count = this.demo ? this.rand(4000) : item.count; }
+                                    if (item.site == 'TOTAL') { this.total_count = item.count; }
+                                    else if (item.site == 'DB') { this.db_count =  item.count; }
                                     else {
-                                        let value = this.demo ? this.rand(300) : item.count;
+                                        let value = item.count;
                                         if (this.items.length == 9) {
                                             let found = this.items.find((oitem, idx, array) => {
                                                 return oitem[0] == text;
@@ -170,15 +169,28 @@ if (Vue) {
                     }).finally(() => {
                         //this.isBusy = false;
                         // reload every 15s
-                        this.delay(this.reload, this.demo ? 5000 : 15000);
+                        this.reload_timer = this.delay(this.reload, this.timer_ms);
                         Vue.nextTick(() => {
                             this.$refs.chart.update();
                         });
                     });
                 } else {
                     // check after an hour
-                    this.delay(this.reload, 3600000);
+                    this.reload_timer = this.delay(this.reload, 3600000);
                 }
+            },
+            reload_demo_data() {
+                this.ap_count = 0;
+                this.total_count = this.rand(2000);
+                this.db_count = this.rand(4000);
+                this.items.forEach((item, raw_idx, array) => {
+                    let text = item[0];
+                    let value = this.rand(100);
+                    item[1] = value;
+                    this.$refs.chart.changeValue(text, value);
+                    this.ap_count += parseInt(value);
+                });
+                this.last_update_time = this.now().split(' ')[1];
             },
             history(e, payload) {
                 if (this.empty(payload['label'])) return;
@@ -210,7 +222,7 @@ if (Vue) {
             popup() {
                 this.msgbox({
                     title: `跨所AP各所連線數`,
-                    message: this.$createElement('lah-xap-connection-chart', { props: { type: 'line', popupButton: false } }),
+                    message: this.$createElement('lah-xap-connection-chart', { props: { type: this.type, popupButton: false, demo: this.demo, ip: this.ip } }),
                     size: "xl"
                 });
             }
