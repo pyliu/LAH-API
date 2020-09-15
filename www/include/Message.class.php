@@ -237,8 +237,6 @@ class Message {
         $user = $this->getUserInfo($name_or_id_or_ip);
         if ($user !== false) {
             $id = $user["id"];
-            // $name = $user["AP_USER_NAME"];
-            // $ip = $user["AP_PCIP"];
             $tdoc_db = new MSDB(array(
                 "MS_DB_UID" => SYSTEM_CONFIG["MS_DB_UID"],
                 "MS_DB_PWD" => SYSTEM_CONFIG["MS_DB_PWD"],
