@@ -25,11 +25,26 @@ if (Vue) {
             </b-card>
         </lah-transition>`,
         props: {
-            site: { type: String, default: 'H0' },
-            mins: { type: Number, default: 15 },
-            type: { type: String, default: 'line' },
-            demo: { type: Boolean, default: false},
-            popupButton: { type: Boolean, default: true }
+            site: {
+                type: String,
+                default: 'H0'
+            },
+            mins: {
+                type: Number,
+                default: 15
+            },
+            type: {
+                type: String,
+                default: 'line'
+            },
+            demo: {
+                type: Boolean,
+                default: false
+            },
+            popupButton: {
+                type: Boolean,
+                default: true
+            }
         },
         data: () => ({
             items: [],
@@ -48,31 +63,60 @@ if (Vue) {
                     this.reload(true);
                 }, 1000);
             },
-            site(val) { this.site_code = val },
+            site(val) {
+                this.site_code = val
+            },
             site_code(val) {
-                switch(val) {
-                    case 'H0': this.site_tw = '地政局'; break;
-                    case 'HA': this.site_tw = '桃園所'; break;
-                    case 'HB': this.site_tw = '中壢所'; break;
-                    case 'HC': this.site_tw = '大溪所'; break;
-                    case 'HD': this.site_tw = '楊梅所'; break;
-                    case 'HE': this.site_tw = '蘆竹所'; break;
-                    case 'HF': this.site_tw = '八德所'; break;
-                    case 'HG': this.site_tw = '平鎮所'; break;
-                    case 'HH': this.site_tw = '龜山所'; break;
-                    default: this.site_tw = '未知';
+                switch (val) {
+                    case 'H0':
+                        this.site_tw = '地政局';
+                        break;
+                    case 'HA':
+                        this.site_tw = '桃園所';
+                        break;
+                    case 'HB':
+                        this.site_tw = '中壢所';
+                        break;
+                    case 'HC':
+                        this.site_tw = '大溪所';
+                        break;
+                    case 'HD':
+                        this.site_tw = '楊梅所';
+                        break;
+                    case 'HE':
+                        this.site_tw = '蘆竹所';
+                        break;
+                    case 'HF':
+                        this.site_tw = '八德所';
+                        break;
+                    case 'HG':
+                        this.site_tw = '平鎮所';
+                        break;
+                    case 'HH':
+                        this.site_tw = '龜山所';
+                        break;
+                    default:
+                        this.site_tw = '未知';
                 }
                 this.items.length = 0;
                 this.reload(true);
             },
-            demo(val) { this.reload() }
+            demo(val) {
+                this.reload()
+            }
         },
         computed: {
-            timer_ms() { return this.demo ? 5000 : 60000 },
-            label() { return `${this.site_tw}` },
-            title() { return `${this.site_tw}連線` },
+            timer_ms() {
+                return this.demo ? 5000 : 60000
+            },
+            label() {
+                return `${this.site_tw}`
+            },
+            title() {
+                return `${this.site_tw}連線`
+            },
             network_icon() {
-                 [variant, action, rgb, icon] = this.style_by_count(this.now_count);
+                [variant, action, rgb, icon] = this.style_by_count(this.now_count);
                 return icon;
             },
             badge_variant() {
@@ -87,10 +131,30 @@ if (Vue) {
         methods: {
             style_by_count(value, opacity = 0.6) {
                 let variant, action, rgb, icon;
-                if (value > 200) { icon='network-wired'; variant = 'danger'; action='tremble'; rgb = `rgb(243, 0, 19, ${opacity})`}        // red
-                else if (value > 100) { icon='network-wired'; variant = 'warning'; action='beat'; rgb = `rgb(238, 182, 1, ${opacity})`;}  // yellow
-                else if (value > 5) { icon='network-wired'; variant = 'success'; action='jump'; rgb = `rgb(0, 200, 0, ${opacity})`}      // green
-                else { icon='ethernet'; variant = 'muted'; action= ''; rgb = `rgb(207, 207, 207, ${opacity})`; }                     // muted
+                if (value > 200) {
+                    icon = 'network-wired';
+                    variant = 'danger';
+                    action = 'tremble';
+                    rgb = `rgb(243, 0, 19, ${opacity})`
+                } // red
+                else if (value > 100) {
+                    icon = 'network-wired';
+                    variant = 'warning';
+                    action = 'beat';
+                    rgb = `rgb(238, 182, 1, ${opacity})`;
+                } // yellow
+                else if (value > 5) {
+                    icon = 'network-wired';
+                    variant = 'success';
+                    action = 'jump';
+                    rgb = `rgb(0, 200, 0, ${opacity})`
+                } // green
+                else {
+                    icon = 'ethernet';
+                    variant = 'muted';
+                    action = '';
+                    rgb = `rgb(207, 207, 207, ${opacity})`;
+                } // muted
                 return [variant, action, rgb, icon]
             },
             bg_color(dataset_item, opacity) {
@@ -126,12 +190,20 @@ if (Vue) {
                     }).then(res => {
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             if (res.data.data_count == 0) {
-                                this.notify({title: `跨所 AP ${this.site_tw} 連線趨勢圖`, message: '無資料，無法繪製圖形', type: 'warning'});
+                                this.notify({
+                                    title: `跨所 AP ${this.site_tw} 連線趨勢圖`,
+                                    message: '無資料，無法繪製圖形',
+                                    type: 'warning'
+                                });
                             } else {
                                 this.set_items(res.data.raw);
                             }
                         } else {
-                            this.alert({title: `取得跨所 AP ${this.site_tw} 連線趨勢圖`, message: `取得跨所 AP ${this.site_tw} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`, variant: "warning"});
+                            this.alert({
+                                title: `取得跨所 AP ${this.site_tw} 連線趨勢圖`,
+                                message: `取得跨所 AP ${this.site_tw} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`,
+                                variant: "warning"
+                            });
                         }
                     }).catch(err => {
                         this.error = err;
@@ -160,7 +232,14 @@ if (Vue) {
             popup() {
                 this.msgbox({
                     title: `跨所AP ${this.site_tw}連線`,
-                    message: this.$createElement('lah-xap-history-chart', { props: { site: this.site_code, mins: 60, demo: this.demo, popupButton: false } }),
+                    message: this.$createElement('lah-xap-history-chart', {
+                        props: {
+                            site: this.site_code,
+                            mins: 60,
+                            demo: this.demo,
+                            popupButton: false
+                        }
+                    }),
                     size: "xl"
                 });
             },
@@ -175,31 +254,69 @@ if (Vue) {
                 });
             },
             nav_left() {
-                switch(this.site_code) {
-                    case 'H0': this.site_code = 'HH'; break;
-                    case 'HA': this.site_code = 'H0'; break;
-                    case 'HB': this.site_code = 'HA'; break;
-                    case 'HC': this.site_code = 'HB'; break;
-                    case 'HD': this.site_code = 'HC'; break;
-                    case 'HE': this.site_code = 'HD'; break;
-                    case 'HF': this.site_code = 'HE'; break;
-                    case 'HG': this.site_code = 'HF'; break;
-                    case 'HH': this.site_code = 'HG'; break;
-                    default: this.site_code = '未知';
+                switch (this.site_code) {
+                    case 'H0':
+                        this.site_code = 'HH';
+                        break;
+                    case 'HA':
+                        this.site_code = 'H0';
+                        break;
+                    case 'HB':
+                        this.site_code = 'HA';
+                        break;
+                    case 'HC':
+                        this.site_code = 'HB';
+                        break;
+                    case 'HD':
+                        this.site_code = 'HC';
+                        break;
+                    case 'HE':
+                        this.site_code = 'HD';
+                        break;
+                    case 'HF':
+                        this.site_code = 'HE';
+                        break;
+                    case 'HG':
+                        this.site_code = 'HF';
+                        break;
+                    case 'HH':
+                        this.site_code = 'HG';
+                        break;
+                    default:
+                        this.site_code = '未知';
                 }
             },
             nav_right() {
-                switch(this.site_code) {
-                    case 'H0': this.site_code = 'HA'; break;
-                    case 'HA': this.site_code = 'HB'; break;
-                    case 'HB': this.site_code = 'HC'; break;
-                    case 'HC': this.site_code = 'HD'; break;
-                    case 'HD': this.site_code = 'HE'; break;
-                    case 'HE': this.site_code = 'HF'; break;
-                    case 'HF': this.site_code = 'HG'; break;
-                    case 'HG': this.site_code = 'HH'; break;
-                    case 'HH': this.site_code = 'H0'; break;
-                    default: this.site_code = '未知';
+                switch (this.site_code) {
+                    case 'H0':
+                        this.site_code = 'HA';
+                        break;
+                    case 'HA':
+                        this.site_code = 'HB';
+                        break;
+                    case 'HB':
+                        this.site_code = 'HC';
+                        break;
+                    case 'HC':
+                        this.site_code = 'HD';
+                        break;
+                    case 'HD':
+                        this.site_code = 'HE';
+                        break;
+                    case 'HE':
+                        this.site_code = 'HF';
+                        break;
+                    case 'HF':
+                        this.site_code = 'HG';
+                        break;
+                    case 'HG':
+                        this.site_code = 'HH';
+                        break;
+                    case 'HH':
+                        this.site_code = 'H0';
+                        break;
+                    default:
+                        this.site_code = '未知';
                 }
             }
         },

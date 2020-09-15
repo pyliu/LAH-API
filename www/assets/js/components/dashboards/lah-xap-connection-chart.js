@@ -28,10 +28,22 @@ if (Vue) {
             </b-card>
         </lah-transition>`,
         props: {
-            ip: { type: String, default: CONFIG.AP_SVR || '220.1.35.123' },
-            type: { type: String, default: 'doughnut' },
-            demo: { type: Boolean, default: false},
-            popupButton: { type: Boolean, default: true }
+            ip: {
+                type: String,
+                default: CONFIG.AP_SVR || '220.1.35.123'
+            },
+            type: {
+                type: String,
+                default: 'doughnut'
+            },
+            demo: {
+                type: Boolean,
+                default: false
+            },
+            popupButton: {
+                type: Boolean,
+                default: true
+            }
         },
         data: () => ({
             items: [],
@@ -57,23 +69,31 @@ if (Vue) {
                         this.alert({
                             title: '跨所AP資料庫連線數超標警示',
                             type: 'danger',
-                            message: `<i class="fas fa-bomb fa-lg text-dark ld ld-tremble"></i> 目前占用資料庫連線數已超過 3000 (<b>${val}</b>)，請立即處理！` 
+                            message: `<i class="fas fa-bomb fa-lg text-dark ld ld-tremble"></i> 目前占用資料庫連線數已超過 3000 (<b>${val}</b>)，請立即處理！`
                         });
                     } else {
                         this.notify({
                             title: '跨所AP資料庫連線數過高通知',
                             type: 'warning',
-                            message: `<i class="fas fa-exclamation-circle fa-lg ld ld-beat"></i> 目前占用資料庫連線數已達 <b>${val}</b>，須注意!` 
+                            message: `<i class="fas fa-exclamation-circle fa-lg ld ld-beat"></i> 目前占用資料庫連線數已達 <b>${val}</b>，須注意!`
                         });
                     }
                 }
             },
-            demo(val) { this.reload() }
+            demo(val) {
+                this.reload()
+            }
         },
         computed: {
-            timer_ms() { return this.demo ? 5000 : 15000 },
-            label() { return `跨所AP連線數` },
-            title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
+            timer_ms() {
+                return this.demo ? 5000 : 15000
+            },
+            label() {
+                return `跨所AP連線數`
+            },
+            title() {
+                return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label
+            },
             ap_vars() {
                 // return [color, action, size, icon]
                 if (this.ap_count > 500) return ['danger', 'tremble', '2x', 'bomb'];
@@ -91,31 +111,51 @@ if (Vue) {
         },
         methods: {
             bg_color(dataset_item, opacity) {
-                switch(dataset_item[0]) {
-                    case '地政局': return `rgb(207, 207, 207, ${opacity})`;    // H0
-                    case '桃園所': return `rgb(254, 185, 180, ${opacity})`;    // HA
-                    case '中壢所': return `rgb(125, 199, 80, ${opacity})`;     // HB
-                    case '大溪所': return `rgb(255, 251, 185, ${opacity})`;    // HC
-                    case '楊梅所': return `rgb(0, 157, 122, ${opacity})`;      // HD
-                    case '蘆竹所': return `rgb(33, 137, 227, ${opacity})`;     // HE
-                    case '八德所': return `rgb(181, 92, 66, ${opacity})`;      // HF
-                    case '平鎮所': return `rgb(195, 42, 84, ${opacity})`;    // HG
-                    case '龜山所': return `rgb(136, 72, 152, ${opacity})`;     // HH
-                    default: `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`;
+                switch (dataset_item[0]) {
+                    case '地政局':
+                        return `rgb(207, 207, 207, ${opacity})`; // H0
+                    case '桃園所':
+                        return `rgb(254, 185, 180, ${opacity})`; // HA
+                    case '中壢所':
+                        return `rgb(125, 199, 80, ${opacity})`; // HB
+                    case '大溪所':
+                        return `rgb(255, 251, 185, ${opacity})`; // HC
+                    case '楊梅所':
+                        return `rgb(0, 157, 122, ${opacity})`; // HD
+                    case '蘆竹所':
+                        return `rgb(33, 137, 227, ${opacity})`; // HE
+                    case '八德所':
+                        return `rgb(181, 92, 66, ${opacity})`; // HF
+                    case '平鎮所':
+                        return `rgb(195, 42, 84, ${opacity})`; // HG
+                    case '龜山所':
+                        return `rgb(136, 72, 152, ${opacity})`; // HH
+                    default:
+                        `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`;
                 }
             },
             get_site_tw(site_code) {
-                switch(site_code) {
-                    case 'H0': return '地政局';
-                    case 'HA': return '桃園所';
-                    case 'HB': return '中壢所';
-                    case 'HC': return '大溪所';
-                    case 'HD': return '楊梅所';
-                    case 'HE': return '蘆竹所';
-                    case 'HF': return '八德所';
-                    case 'HG': return '平鎮所';
-                    case 'HH': return '龜山所';
-                    default: return '未知';
+                switch (site_code) {
+                    case 'H0':
+                        return '地政局';
+                    case 'HA':
+                        return '桃園所';
+                    case 'HB':
+                        return '中壢所';
+                    case 'HC':
+                        return '大溪所';
+                    case 'HD':
+                        return '楊梅所';
+                    case 'HE':
+                        return '蘆竹所';
+                    case 'HF':
+                        return '八德所';
+                    case 'HG':
+                        return '平鎮所';
+                    case 'HH':
+                        return '龜山所';
+                    default:
+                        return '未知';
                 }
             },
             reload(force = false) {
@@ -127,20 +167,26 @@ if (Vue) {
                     //this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_xap_conn_latest",
-                        count: 11   // why 11? => H0 HA-H DB TOTAL
+                        count: 11 // why 11? => H0 HA-H DB TOTAL
                     }).then(res => {
                         console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得AP連線數回傳狀態碼有問題【${res.data.status}】`);
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             if (res.data.data_count == 0) {
-                                this.notify({title: 'AP連線數', message: '無資料，無法繪製圖形', type: 'warning'});
+                                this.notify({
+                                    title: 'AP連線數',
+                                    message: '無資料，無法繪製圖形',
+                                    type: 'warning'
+                                });
                             } else {
                                 this.ap_count = 0;
                                 res.data.raw.reverse().forEach((item, raw_idx, array) => {
                                     let text = this.get_site_tw(item.site);
                                     // e.g. item => { count: 911, ip: "220.1.35.123", log_time: "20200904175957", site: "HB" }
-                                    if (item.site == 'TOTAL') { this.total_count = item.count; }
-                                    else if (item.site == 'DB') { this.db_count =  item.count; }
-                                    else {
+                                    if (item.site == 'TOTAL') {
+                                        this.total_count = item.count;
+                                    } else if (item.site == 'DB') {
+                                        this.db_count = item.count;
+                                    } else {
                                         let value = item.count;
                                         if (this.items.length == 9) {
                                             let found = this.items.find((oitem, idx, array) => {
@@ -152,7 +198,7 @@ if (Vue) {
                                                 // not reactively ... manual set chartData
                                                 this.$refs.chart.changeValue(text, value);
                                             } else {
-                                                this.$warn(`RAW IDX: ${raw_idx}`, 'RAW ITEM: ', item, `FOUND IDX: ${found_idx}`, 'FOUND ITEM: ',  this.items[found_idx], `NOW items: `, this.items);
+                                                this.$warn(`RAW IDX: ${raw_idx}`, 'RAW ITEM: ', item, `FOUND IDX: ${found_idx}`, 'FOUND ITEM: ', this.items[found_idx], `NOW items: `, this.items);
                                             }
                                         } else {
                                             this.items.push([text, value]);
@@ -163,7 +209,11 @@ if (Vue) {
                                 this.last_update_time = this.now().split(' ')[1];
                             }
                         } else {
-                            this.alert({title: `取得${this.ip}連線數`, message: `取得AP連線數回傳狀態碼有問題【${res.data.status}】`, variant: "warning"});
+                            this.alert({
+                                title: `取得${this.ip}連線數`,
+                                message: `取得AP連線數回傳狀態碼有問題【${res.data.status}】`,
+                                variant: "warning"
+                            });
                         }
                     }).catch(err => {
                         this.error = err;
@@ -202,28 +252,62 @@ if (Vue) {
                  * payload['value'] => 20
                  */
                 let site = '';
-                switch(payload['label']) {
-                    case '地政局': site = 'H0'; break;
-                    case '桃園所': site = 'HA'; break;
-                    case '中壢所': site = 'HB'; break;
-                    case '大溪所': site = 'HC'; break;
-                    case '楊梅所': site = 'HD'; break;
-                    case '蘆竹所': site = 'HE'; break;
-                    case '八德所': site = 'HF'; break;
-                    case '平鎮所': site = 'HG'; break;
-                    case '龜山所': site = 'HH'; break;
-                    default: site = 'HB';
+                switch (payload['label']) {
+                    case '地政局':
+                        site = 'H0';
+                        break;
+                    case '桃園所':
+                        site = 'HA';
+                        break;
+                    case '中壢所':
+                        site = 'HB';
+                        break;
+                    case '大溪所':
+                        site = 'HC';
+                        break;
+                    case '楊梅所':
+                        site = 'HD';
+                        break;
+                    case '蘆竹所':
+                        site = 'HE';
+                        break;
+                    case '八德所':
+                        site = 'HF';
+                        break;
+                    case '平鎮所':
+                        site = 'HG';
+                        break;
+                    case '龜山所':
+                        site = 'HH';
+                        break;
+                    default:
+                        site = 'HB';
                 }
                 this.msgbox({
                     title: `跨所AP${payload['label']}連線`,
-                    message: this.$createElement('lah-xap-history-chart', { props: { site: site, mins: 60, demo: this.demo, popupButton: false, type: 'bar' } }),
+                    message: this.$createElement('lah-xap-history-chart', {
+                        props: {
+                            site: site,
+                            mins: 60,
+                            demo: this.demo,
+                            popupButton: false,
+                            type: 'bar'
+                        }
+                    }),
                     size: "xl"
                 });
             },
             popup() {
                 this.msgbox({
                     title: `跨所AP各所連線數`,
-                    message: this.$createElement('lah-xap-connection-chart', { props: { type: this.type, popupButton: false, demo: this.demo, ip: this.ip } }),
+                    message: this.$createElement('lah-xap-connection-chart', {
+                        props: {
+                            type: this.type,
+                            popupButton: false,
+                            demo: this.demo,
+                            ip: this.ip
+                        }
+                    }),
                     size: "xl"
                 });
             }
