@@ -14,20 +14,12 @@ abstract class STATUS_CODE {
 }
 
 abstract class AUTHORITY {
-    const SUPER = 1;   // developer
-    const ADMIN = 2;   // 管理者
-    const CHIEF = 4;   // 主管
-    const INF_SECTION = 8;
-    const SUR_SECTION = 16;
-    const VAL_SECTION = 32;
-    const ADM_SECTION = 64;
-    const REG_SECTION = 128;
-    const ACCOUNT_OFFICE = 256;
-    const HR_OFFICE = 512;
-    const DIRECTOR_OFFICE = 1024;
-    const SECRETARY_OFFICE = 2048;
-    const RE_ROLE = 4096;   // 研考
-    const GA_ROLE = 8192;   // 總務
+    const NORMAL = 0;
+    const SUPER = 1;                    // pyliu
+    const ADMIN = 2;                    // 管理者
+    const CHIEF = 4;                    // 主管
+    const RESEARCH_AND_EVALUATION = 8;  // 研考
+    const GENERAL_AFFAIRS = 16;         // 總務
 }
 
 define('ROOT_DIR', dirname(dirname(__FILE__)));

@@ -14,21 +14,6 @@ class SQLiteUser {
         return  $this->db->querySingle("SELECT authority from user WHERE id = '".trim($id)."'");
     }
 
-    private function getDefaultAuthority($unit) {
-        switch ($unit) {
-            case '資訊課': return AUTHORITY::INF_SECTION;
-            case '登記課': return AUTHORITY::REG_SECTION;
-            case '測量課': return AUTHORITY::SUR_SECTION;
-            case '地價課': return AUTHORITY::VAL_SECTION;
-            case '行政課': return AUTHORITY::ADM_SECTION;
-            case '會計室': return AUTHORITY::ACCOUNT_OFFICE;
-            case '人事室': return AUTHORITY::HR_OFFICE;
-            case '秘書室': return AUTHORITY::SECRETARY_OFFICE;
-            case '主任室': return AUTHORITY::DIRECTOR_OFFICE;
-            default: return 0;
-        }
-    }
-
     private function bindUserParams(&$stm, &$row, $update = false) {
         $stm->bindParam(':id', $row['DocUserID']);
         $stm->bindParam(':name', $row['AP_USER_NAME']);
@@ -49,19 +34,23 @@ class SQLiteUser {
             $stm->bindParam(':onboard_date', $rewrite);
         } else {
             $stm->bindParam(':onboard_date', $row['AP_ON_DATE']);
-            //$log->info($row['AP_ON_DATE']);
         }
         
         $stm->bindParam(':offboard_date', $row['AP_OFF_DATE']);
         $stm->bindParam(':ip', $row['AP_PCIP']);
+
         // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
-        if ($update) {
-            $orig_authority = $this->getOrigAuthority($row['DocUserID']);
-            $new_authority = intval($orig_authority) | intval($this->getDefaultAuthority($row['AP_UNIT_NAME']));
-            $stm->bindValue(':authority', $new_authority);
-        } else {
-            $stm->bindValue(':authority', $this->getDefaultAuthority($row['AP_UNIT_NAME']));
+        
+        $authority = $this->getOrigAuthority($row['DocUserID']) ?? AUTHORITY::NORMAL;
+        // add admin privilege
+        if (in_array($row['AP_PCIP'], SYSTEM_CONFIG["ADM_IPS"])) {
+            $authority = $authority | AUTHORITY::ADMIN;
         }
+        // add chief privilege
+        if (in_array($row['AP_PCIP'], SYSTEM_CONFIG["CHIEF_IPS"])) {
+            $authority = $authority | AUTHORITY::CHIEF;
+        }
+        $stm->bindParam(':authority', $authority);
     }
 
     private function inst(&$row) {
