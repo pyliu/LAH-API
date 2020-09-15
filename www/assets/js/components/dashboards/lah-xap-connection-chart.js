@@ -244,7 +244,7 @@ if (Vue) {
                 this.db_count = this.rand(4000);
                 this.items.forEach((item, raw_idx, array) => {
                     let text = item[0];
-                    let value = this.rand(100);
+                    let value = this.rand(75);
                     item[1] = value;
                     this.$refs.chart.changeValue(text, value);
                     this.ap_count += parseInt(value);
