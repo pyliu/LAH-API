@@ -1,5 +1,6 @@
 <?php
 require_once("config/Config.inc.php");
+require_once('SQLiteUser.class.php');
 
 function GetDBUserMapping($refresh = false) {
     if (SYSTEM_CONFIG["MOCK_MODE"] === true) {
@@ -46,29 +47,21 @@ function GetDBUserMapping($refresh = false) {
         }
         try {
             /**
-             * Also get user info from internal DB
+             * Also get user info from SQLite DB
              */
-            require_once("MSDB.class.php");
-            $tdoc_db = new MSDB(array(
-                "MS_DB_UID" => SYSTEM_CONFIG["MS_TDOC_DB_UID"],
-                "MS_DB_PWD" => SYSTEM_CONFIG["MS_TDOC_DB_PWD"],
-                "MS_DB_DATABASE" => SYSTEM_CONFIG["MS_TDOC_DB_DATABASE"],
-                "MS_DB_SVR" => SYSTEM_CONFIG["MS_TDOC_DB_SVR"],
-                "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
-            ));
-            $users_results = $tdoc_db->fetchAll("SELECT * FROM AP_USER");
-            foreach($users_results as $this_user) {
-                $user_id =trim($this_user["DocUserID"]);
+            $sqlite_user = new SQLiteUser();
+            $all_users = $sqlite_user->getAllUsers();
+            foreach($all_users as $this_user) {
+                $user_id =trim($this_user["id"]);
                 if (empty($user_id)) {
                     continue;
                 }
-                $result[$user_id] = preg_replace('/\d+/', "", trim($this_user["AP_USER_NAME"]));
+                $result[$user_id] = preg_replace('/\d+/', "", trim($this_user["name"]));
             }
         } catch (\Throwable $th) {
             //throw $th;
             global $log;
-            $log->error("取得內網使用者失敗。【".$th->getMessage()."】");
-
+            $log->error("取得SQLite內網使用者失敗。【".$th->getMessage()."】");
         } finally {
             // cache
             $content = serialize($result);
