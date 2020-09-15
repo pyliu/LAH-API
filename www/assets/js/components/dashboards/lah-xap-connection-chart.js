@@ -55,12 +55,20 @@ if (Vue) {
         }),
         watch: {
             ap_count(val) {
-                if (val > 400) {
-                    this.notify({
-                        title: '跨所AP連線數警示',
-                        type: 'warning',
-                        message: `<i class="fas fa-exclamation-triangle fa-lg ld ld-beat"></i> 目前連線數達 <b>${val}</b>，須注意!`
-                    })
+                if (val > 500) {
+                    if (val > 750) {
+                        this.alert({
+                            title: '跨所AP連線數超標警示',
+                            type: 'danger',
+                            message: `<i class="fas fa-bomb fa-lg text-dark ld ld-tremble"></i> 目前連線數已達 <b>${val}</b>，可能造成伺服器回應緩慢，應進行適當處理。`
+                        });
+                    } else {
+                        this.notify({
+                            title: '跨所AP連線數警示',
+                            type: 'warning',
+                            message: `<i class="fas fa-exclamation-triangle fa-lg ld ld-beat"></i> 目前連線數達 <b>${val}</b>，有點吃緊。`
+                        })
+                    }
                 }
             },
             db_count(val) {
@@ -96,9 +104,9 @@ if (Vue) {
             },
             ap_vars() {
                 // return [color, action, size, icon]
-                if (this.ap_count > 500) return ['danger', 'tremble', '2x', 'bomb'];
-                if (this.ap_count > 400) return ['danger', 'shiver', 'lg', 'server'];
-                if (this.ap_count > 300) return ['warning', 'beat', '1x', 'server'];
+                if (this.ap_count > 750) return ['danger', 'tremble', '2x', 'bomb'];
+                if (this.ap_count > 500) return ['danger', 'shiver', 'lg', 'server'];
+                if (this.ap_count > 250) return ['warning', 'beat', '1x', 'server'];
                 return ['success', 'breath', 'sm', 'server'];
             },
             db_vars() {
