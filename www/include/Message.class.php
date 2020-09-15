@@ -82,7 +82,7 @@ class Message {
                 if (!$system) {
                     global $client_ip;
                     $sender_info = $this->getUserInfo($client_ip);
-                    $sendcname = $sender_info["name"] ?? '系統';
+                    $sendcname = $sender_info["name"] ?? $sendcname;
                     $sender = $sender_info["id"];
                     $sendIP = $sender_info["ip"];
                 }
