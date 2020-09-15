@@ -45,26 +45,10 @@ Vue.prototype.$store = (() => {
     if (typeof Vuex == "object") {
         return new Vuex.Store({
             state: {
-                AUTHORITY: {
-                    SUPER: 1,   // developer
-                    ADMIN: 2,   // 管理者
-                    CHIEF: 4,   // 主管
-                    INF_SECTION: 8,
-                    SUR_SECTION: 16,
-                    VAL_SECTION: 32,
-                    ADM_SECTION: 64,
-                    REG_SECTION: 128,
-                    ACCOUNT_OFFICE: 256,
-                    HR_OFFICE: 512,
-                    DIRECTOR_OFFICE: 1024,
-                    SECRETARY_OFFICE: 2048,
-                    RE_ROLE: 4096,  // 研考
-                    GA_ROLE: 8192   // 總務
-                },
-                authority: 0,   // use bitwise compare
                 cache : new Map(),
                 isAdmin: undefined,
                 isChief: undefined,
+                isSuper: undefined,
                 userNames: undefined,
                 dynaParams: {},
                 errors: [],
@@ -77,6 +61,7 @@ Vue.prototype.$store = (() => {
                 cache: state => state.cache,
                 isAdmin: state => state.isAdmin,
                 isChief: state => state.isChief,
+                isSuper: state => state.isSuper,
                 userNames: state => state.userNames,
                 dynaParams: state => state.dynaParams,
                 errors: state => state.errors,
@@ -131,6 +116,10 @@ Vue.prototype.$store = (() => {
                 myinfo(state, infoPayload) {
                     state.myinfo = infoPayload;
                     state.myid = $.trim(infoPayload['id']) || undefined;
+                    state.isAdmin = Boolean(infoPayload['admin']);
+                    state.isChief = Boolean(infoPayload['chief']);
+                    state.isSuper = Boolean(infoPayload['super']);
+                    console.log(`Authority check: admin: ${state.isAdmin}, chief: ${state.isChief}, super: ${state.isSuper}`);
                 },
                 disableMSDBQuery(state, flagPayload) {
                     state.disableMSDBQuery = flagPayload === true;
@@ -950,27 +939,26 @@ $(document).ready(() => {
                 }
             },
             initMyInfo: function() {
-                if (!this.disableMSDBQuery) {
-                    this.getLocalCache('myinfo').then(myinfo => {
-                        if (myinfo) {
-                            this.$store.commit("myinfo", myinfo);
-                        } else {
-                            this.$http.post(CONFIG.API.JSON.QUERY, {
-                                type: 'my_info'
-                            }).then(res => {
-                                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                                    let myinfo = res.data.raw[0];
-                                    this.setLocalCache('myinfo', myinfo, this.dayMilliseconds);   // cache query info result
-                                    this.$store.commit("myinfo", myinfo);
-                                } else {
-                                    this.$warn(res.data.message);
-                                }
-                            }).catch(err => {
-                                this.error = err;
-                            });
-                        }
-                    });
-                }
+                this.getLocalCache('myinfo').then(myinfo => {
+                    if (myinfo) {
+                        this.$store.commit("myinfo", myinfo);
+                    } else {
+                        this.$http.post(CONFIG.API.JSON.QUERY, {
+                            type: 'my_info'
+                        }).then(res => {
+                            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                let myinfo = res.data.info;
+                                myinfo.raw = res.data.raw[0];
+                                this.setLocalCache('myinfo', myinfo, this.dayMilliseconds);   // cache query info result
+                                this.$store.commit("myinfo", myinfo);
+                            } else {
+                                this.$warn(res.data.message);
+                            }
+                        }).catch(err => {
+                            this.error = err;
+                        });
+                    }
+                });
                 this.getLocalCache('myip').then(myip => {
                     if (this.empty(myip)) {
                         this.$http.post(CONFIG.API.JSON.QUERY, {

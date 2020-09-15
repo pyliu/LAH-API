@@ -850,7 +850,10 @@ switch ($_POST["type"]) {
 				"info" => array(
 					"id" => $results[0]["id"],
 					"name" => $results[0]["name"],
-					"ip" => $results[0]["ip"]
+					"ip" => $results[0]["ip"],
+					"admin" => boolval($results[0]["authority"] & AUTHORITY::ADMIN),
+					"chief" => boolval($results[0]["authority"] & AUTHORITY::CHIEF),
+					"super" => boolval($results[0]["authority"] & AUTHORITY::SUPER)
 				),
 				"raw" => $results,
 				"query_string" => ""
