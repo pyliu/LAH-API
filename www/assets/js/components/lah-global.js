@@ -55,10 +55,12 @@ Vue.prototype.$store = (() => {
                 myip: undefined,
                 myid: undefined,
                 myinfo: undefined,
+                authority: undefined,
                 disableMSDBQuery: CONFIG.DISABLE_MSDB_QUERY
             },
             getters: {
                 cache: state => state.cache,
+                authority: state => state.authority,
                 isAdmin: state => state.isAdmin,
                 isChief: state => state.isChief,
                 isSuper: state => state.isSuper,
@@ -79,11 +81,11 @@ Vue.prototype.$store = (() => {
                         }
                     }
                 },
-                isAdmin(state, flagPayload) {
-                    state.isAdmin = flagPayload === true;
-                },
-                isChief(state, flagPayload) {
-                    state.isChief = flagPayload === true;
+                authority(state, authPayload) {
+                    state.authority = authPayload;
+                    state.isAdmin = authPayload.isAdmin;
+                    state.isChief = authPayload.isChief;
+                    state.isSuper = authPayload.isSuper;
                 },
                 userNames(state, mappingPayload) {
                     state.userNames = mappingPayload || {};
@@ -116,10 +118,6 @@ Vue.prototype.$store = (() => {
                 myinfo(state, infoPayload) {
                     state.myinfo = infoPayload;
                     state.myid = $.trim(infoPayload['id']) || undefined;
-                    state.isAdmin = Boolean(infoPayload['isAdmin']) || Boolean(infoPayload['isSuper']);
-                    state.isChief = Boolean(infoPayload['isChief']);
-                    state.isSuper = Boolean(infoPayload['isSuper']);
-                    console.log(`Authority check: admin: ${state.isAdmin}, chief: ${state.isChief}, super: ${state.isSuper}`);
                 },
                 disableMSDBQuery(state, flagPayload) {
                     state.disableMSDBQuery = flagPayload === true;
@@ -158,29 +156,24 @@ Vue.prototype.$store = (() => {
                 },
                 async authenticate({ commit, state }) {
                     try {
-                        const isAdmin = await localforage.getItem(`isAdmin`);
-                        const isChief = await localforage.getItem(`isChief`);
-                        const set_ts = await localforage.getItem(`authentication_set_ts`);
-                        const now_ts = +new Date();
-                        // over 15 mins, re-authenticate ... otherwise skip the request
-                        if (isAdmin === null || !Number.isInteger(set_ts) || now_ts - set_ts > 900000) {
+                        let authority = await localforage.getItem("authority");
+                        let authority_ts = await localforage.getItem("authority_timestamp");
+                        let current_ts = +new Date(); // == new Date().getTime()
+                        if (typeof authority == "object" && current_ts - authority_ts < state.dayMilliseconds) {
+                            commit("authority", authority || false);
+                        } else {
                             await axios.post(CONFIG.API.JSON.QUERY, {
                                 type: 'authentication'
                             }).then(res => {
-                                commit("isAdmin", res.data.is_admin || false);
-                                localforage.setItem(`isAdmin`, res.data.is_admin || false);
-                                commit("isChief", res.data.is_chief || false);
-                                localforage.setItem(`isChief`, res.data.is_chief || false);
+                                authority = res.data.authority;
+                                localforage.setItem(`authority`, authority || false);
+                                commit("authority", authority || false);
                             }).catch(err => {
                                 console.error(err);
-                                commit("isAdmin", false);
-                                commit("isChief", false);
+                                commit("authority", authority || false);
                             }).finally(() => {
-                                localforage.setItem(`authentication_set_ts`, +new Date()); // == new Date().getTime()
+                                localforage.setItem(`authentication_set_ts`, current_ts);
                             });
-                        } else {
-                            commit("isAdmin", isAdmin);
-                            commit("isChief", isChief);
                         }
                     } catch (err) {
                         console.error(err);
@@ -241,6 +234,7 @@ Vue.mixin({
         myip() { return this.$store.getters.myip },
         myid() { return this.$store.getters.myid },
         myinfo() { return this.$store.getters.myinfo },
+        authority() { return this.$store.getters.authority },
         myname() { return this.myinfo ? this.myinfo['name'] : '' },
         disableMSDBQuery() { return this.$store.getters.disableMSDBQuery },
         nowDate() { return this.now().split(' ')[0] },

@@ -72,20 +72,6 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
-	case "authentication":
-		// $client_ip is from init.php
-		$is_admin = $mock || in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"], true);
-		$is_chief = $mock || in_array($client_ip, SYSTEM_CONFIG["CHIEF_IPS"], true);
-		$msg = $client_ip." 已完成認證(admin: $is_admin, chief: $is_chief)。";
-		$log->info("XHR [authentication] ".$msg);
-		echo json_encode(array(
-			"status" => STATUS_CODE::SUCCESS_NORMAL,
-			"is_admin" => $is_admin,
-			"is_chief" => $is_chief,
-			"data_count" => "2",
-			"message" => $msg
-		), 0);
-		break;
 	case "ip":
 		$log->info("XHR [ip] The client IP is $client_ip");
 		echo json_encode(array(
@@ -831,7 +817,8 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "my_info":
-		$log->info("XHR [my_info] 查詢 $client_ip 請求");
+	case "authentication":
+		$log->info("XHR [my_info/authentication] 查詢 $client_ip 請求");
 		$sqlite_user = new SQLiteUser();
 		$results = $mock ? $cache->get('my_info') : $sqlite_user->getUserByIP($client_ip);
 		$len = count($results);
@@ -842,15 +829,17 @@ switch ($_POST["type"]) {
 		if (!$mock) $cache->set('my_info', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ".$client_ip." 資料。");
-			$log->info("XHR [my_info] 查無 ".$client_ip." 資料。");
+			$log->info("XHR [my_info/authentication] 查無 ".$client_ip." 資料。");
 		} else {
 			$_SESSION["myinfo"] = $results[0];
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => count($results),
-				"info" => $results[0] + getMyAuthority()
+				"info" => $results[0],
+				"authority" => getMyAuthority()
 			);
-			$log->info("XHR [my_info] 查詢 ".$client_ip." 成功。 (".$results[0]["id"].", ".$results[0]["name"].")");
+			$log->info("XHR [my_info/authentication] 查詢 ".$client_ip." 成功。 (".$results[0]["id"].", ".$results[0]["name"].")");
+			$log->info("XHR [authentication] 查詢 ".$client_ip." 成功。 (".print_r($result['authority'], true).")");
 			echo json_encode($result, 0);
 		}
 		break;
