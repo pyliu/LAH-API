@@ -166,7 +166,7 @@ Vue.prototype.$store = (() => {
                                 type: 'authentication'
                             }).then(res => {
                                 console.log(res.data.message);
-                                console.log(res.data.authority);
+                                //console.log(res.data.authority);
                                 authority = res.data.authority;
                                 localforage.setItem(`authority`, authority || false);
                                 commit("authority", authority || false);
