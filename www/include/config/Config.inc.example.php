@@ -1,5 +1,14 @@
 <?php
 const SYSTEM_CONFIG = array(
+    "GA_IPS" => array(
+        "總務" => "xxx.xxx.xxx.xxx"
+    ),
+    "RAE_IPS" => array(
+        "研考" => "xxx.xxx.xxx.xxx"
+    ),
+    "SUPER_IPS" => array(
+        "開發者" => "xxx.xxx.xxx.xxx"
+    ),
     "CHIEF_IPS" => array(
         "資訊課長" => "xxx.xxx.xxx.xxx"
     ),
