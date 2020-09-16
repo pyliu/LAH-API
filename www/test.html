@@ -9,7 +9,7 @@
     <meta http-equiv="pragma" content="no-cache">
     <meta http-equiv="expires" content="0">
     <meta http-equiv="cache-control" content="no-cache">
-    <title>應繼分系統表-桃園市中壢地政事務所</title>
+    <title>測試頁-桃園市中壢地政事務所</title>
     <!-- Bootstrap core CSS -->
     <link rel="preload" href="assets/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="assets/css/loading.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -234,6 +234,12 @@
                 config,
                 director, secretary, inf_chief, sur_chief, reg_chief, val_chief, adm_chief, HB0247, HB1184, HB1185, HB0541, HB0542, HB0543
             ]), 1000);
+            window.addEventListener("resize", function(e) {
+                new Treant([
+                    config,
+                    director, secretary, inf_chief, sur_chief, reg_chief, val_chief, adm_chief, HB0247, HB1184, HB1185, HB0541, HB0542, HB0543
+                ])
+            });
         });
     </script>
 </body>
