@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component('lah-xap-history-chart', {
         template: `<lah-transition appear>
-            <b-card border-variant="secondary" class="shadow">
+            <b-card border-variant="secondary" class="shadow" v-b-visible="visible">
                 <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" @click="show_count"></lah-chart>
                 <div class="d-flex justify-content-between mt-1">
                     <span class="align-middle small my-auto">
