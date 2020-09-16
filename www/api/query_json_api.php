@@ -833,13 +833,7 @@ switch ($_POST["type"]) {
 				"message" => "查無 ".$client_ip." 資料。",
 				"data_count" => 0,
 				"info" => false,
-				"authority" => array(
-					"isAdmin" => in_array($client_ip, SYSTEM_CONFIG['ADM_IPS']),
-					"isChief" => in_array($client_ip, SYSTEM_CONFIG['CHIEF_IPS']),
-					"isSuper" => false,
-					"isRAE"   => false,
-					"isGA"    => false
-				)
+				"authority" => getMyAuthority()
 			);
 			$log->info("XHR [my_info] ".$result['message']);
 			$log->info("XHR [authentication] $client_ip 授權【".print_r($result['authority'], true)."】");
