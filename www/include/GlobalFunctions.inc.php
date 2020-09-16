@@ -3,6 +3,7 @@ require_once("config/Config.inc.php");
 require_once('SQLiteUser.class.php');
 
 function getMyAuthority() {
+    global $client_ip;
     if (isset($_SESSION['myinfo'])) {
         if (boolval($_SESSION['myinfo']["authority"] & AUTHORITY::SUPER)) {
             return array(
@@ -13,16 +14,21 @@ function getMyAuthority() {
                 "isGA"    => true,
             );
         }
-        global $client_ip;
         return array(
             "isAdmin" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::ADMIN) || in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"]),
             "isChief" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::CHIEF) || in_array($client_ip, SYSTEM_CONFIG["CHIEF_IPS"]),
             "isSuper" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::SUPER),
             "isRAE"   => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::RESEARCH_AND_EVALUATION),
-            "isGA"    => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::GENERAL_AFFAIRS),
+            "isGA"    => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::GENERAL_AFFAIRS)
         );
     }
-    return array();
+    return array(
+        "isAdmin" => in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"]),
+        "isChief" => in_array($client_ip, SYSTEM_CONFIG["CHIEF_IPS"]),
+        "isSuper" => in_array($client_ip, SYSTEM_CONFIG["SUPER_IPS"]),
+        "isRAE"   => in_array($client_ip, SYSTEM_CONFIG["RAE_IPS"]),
+        "isGA"    => in_array($client_ip, SYSTEM_CONFIG["GA_IPS"])
+    );
 }
 
 function GetDBUserMapping($refresh = false) {
