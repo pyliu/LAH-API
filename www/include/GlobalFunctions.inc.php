@@ -4,6 +4,7 @@ require_once('SQLiteUser.class.php');
 
 function getMyAuthority() {
     global $client_ip;
+
     // check Config.inc.php setting first
     $res = array(
         "isAdmin" => in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"]),
@@ -12,6 +13,9 @@ function getMyAuthority() {
         "isRAE"   => in_array($client_ip, SYSTEM_CONFIG["RAE_IPS"]),
         "isGA"    => in_array($client_ip, SYSTEM_CONFIG["GA_IPS"])
     );
+    if ($res['isSuper']) array_walk($res, function(&$value) { $value = true; });
+
+    // check user authority from DB
     if (isset($_SESSION['myinfo'])) {
         if (boolval($_SESSION['myinfo']["authority"] & AUTHORITY::SUPER)) {
             array_walk($res, function(&$value) { $value = true; });
@@ -23,6 +27,7 @@ function getMyAuthority() {
             $res["isGA"] = $res["isGA"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::GENERAL_AFFAIRS);
         }
     }
+    
     return $res;
 }
 
