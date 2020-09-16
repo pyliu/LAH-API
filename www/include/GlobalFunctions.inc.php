@@ -13,9 +13,10 @@ function getMyAuthority() {
                 "isGA"    => true,
             );
         }
+        global $client_ip;
         return array(
-            "isAdmin" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::ADMIN),
-            "isChief" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::CHIEF),
+            "isAdmin" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::ADMIN) || in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"]),
+            "isChief" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::CHIEF) || in_array($client_ip, SYSTEM_CONFIG["CHIEF_IPS"]),
             "isSuper" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::SUPER),
             "isRAE"   => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::RESEARCH_AND_EVALUATION),
             "isGA"    => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::GENERAL_AFFAIRS),

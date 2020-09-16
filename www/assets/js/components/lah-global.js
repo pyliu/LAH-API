@@ -165,6 +165,7 @@ Vue.prototype.$store = (() => {
                             await axios.post(CONFIG.API.JSON.QUERY, {
                                 type: 'authentication'
                             }).then(res => {
+                                console.log(res.data.message);
                                 authority = res.data.authority;
                                 localforage.setItem(`authority`, authority || false);
                                 commit("authority", authority || false);

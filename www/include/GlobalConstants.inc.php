@@ -11,6 +11,7 @@ abstract class STATUS_CODE {
     const FAIL_WITH_REMOTE_NO_RECORD = -4;
     const FAIL_NO_AUTHORITY = -5;
     const FAIL_JSON_ENCODE = -6;
+    const FAIL_NOT_FOUND = -7;
 }
 
 abstract class AUTHORITY {
