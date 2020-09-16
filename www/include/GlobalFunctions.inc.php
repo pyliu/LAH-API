@@ -4,6 +4,15 @@ require_once('SQLiteUser.class.php');
 
 function getMyAuthority() {
     if (isset($_SESSION['myinfo'])) {
+        if (boolval($_SESSION['myinfo']["authority"] & AUTHORITY::SUPER)) {
+            return array(
+                "isAdmin" => true,
+                "isChief" => true,
+                "isSuper" => true,
+                "isRAE"   => true,
+                "isGA"    => true,
+            );
+        }
         return array(
             "isAdmin" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::ADMIN),
             "isChief" => boolval($_SESSION['myinfo']["authority"] & AUTHORITY::CHIEF),
