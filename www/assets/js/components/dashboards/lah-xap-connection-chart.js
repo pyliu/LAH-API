@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component('lah-xap-connection-chart', {
         template: `<lah-transition appear>
-            <b-card border-variant="secondary" class="shadow">
+            <b-card border-variant="secondary" class="shadow" v-b-visible="visible">
                 <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" :title="title" title-pos="left" @click="history"></lah-chart>
                 <div class="d-flex justify-content-between mt-1">
                     <span class="small align-middle my-auto">
@@ -250,6 +250,13 @@ if (Vue) {
                     this.ap_count += parseInt(value);
                 });
                 this.last_update_time = this.now().split(' ')[1];
+            },
+            visible(isVisible) {
+                if (isVisible) {
+                    this.reload_timer = this.reload(true);
+                } else {
+                    clearTimeout(this.reload_timer);
+                }
             },
             history(e, payload) {
                 if (this.empty(payload['label'])) return;

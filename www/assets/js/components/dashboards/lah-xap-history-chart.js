@@ -229,6 +229,13 @@ if (Vue) {
                 this.last_update_time = this.now().split(' ')[1];
                 this.now_count = this.items[0][1];
             },
+            visible(isVisible) {
+                if (isVisible) {
+                    this.reload_timer = this.reload(true);
+                } else {
+                    clearTimeout(this.reload_timer);
+                }
+            },
             popup() {
                 this.msgbox({
                     title: `跨所AP ${this.site_tw}連線`,
