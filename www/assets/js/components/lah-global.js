@@ -425,11 +425,6 @@ Vue.mixin({
             });
         },
         usercard: function(e) {
-            if (CONFIG.DISABLE_MSDB_QUERY) {
-                console.warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping $user call.");
-                return;
-            }
-            
             // find the most closest element to get the data-* attrs
             let clicked_element = $($(e.target).closest(".user_tag,.lah-user-card,.usercard"));
             let name = $.trim(clicked_element.data("name")) || '';

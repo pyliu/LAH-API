@@ -1645,7 +1645,7 @@ if (Vue) {
         },
         methods: {
             send: function (e) {
-                if (CONFIG.DISABLE_MSDB_QUERY) {
+                if (this.disableMSDBQuery) {
                     this.$warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping lah-user-message-form::send.");
                     return;
                 }
@@ -2012,7 +2012,7 @@ if (Vue) {
         },
         methods: {
             send() {
-                if (CONFIG.DISABLE_MSDB_QUERY) {
+                if (this.disableMSDBQuery) {
                     this.$warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping lah-user-message-reservation::send.");
                     return;
                 }
