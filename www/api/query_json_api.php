@@ -1423,8 +1423,6 @@ switch ($_POST["type"]) {
 			return true;
 		}
 		$flag = setSessions($_POST);
-		// $flag = $mock ? $cache->get('xlsx_params') : setSessions($_POST);
-		// if (!$mock) $cache->set('xlsx_params', $flag);
 		if ($flag) {
 			$json = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -1439,6 +1437,18 @@ switch ($_POST["type"]) {
 			$log->info("XHR [xlsx_params] 設定 xlsx session 參數失敗。");
 			$log->info("XHR [xlsx_params] ${params}");
 		}
+		break;
+	case "org_data":
+		$user_info = new SQLiteUser();
+		$tree_data = $user_info->getTopTreeData();
+		$json = array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"data_count" => 1,
+			"raw" => $tree_data,
+			"message" => "XHR [org_data] 查詢組織資料成功。"
+		);
+		$log->info($json["message"]);
+		echo json_encode($json, 0);
 		break;
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");

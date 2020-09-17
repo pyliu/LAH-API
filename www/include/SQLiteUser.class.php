@@ -147,6 +147,64 @@ class SQLiteUser {
         return false;
     }
 
+    public function getChiefs() {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (offboard_date is NULL OR offboard_date = '') AND authority & :chief_bit ORDER BY id")) {
+            $stmt->bindValue(':chief_bit', AUTHORITY::CHIEF, SQLITE3_INTEGER);
+            return $this->prepareArray($stmt);
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得主管資料失敗！");
+        }
+        return false;
+    }
+    public function getChief($unit) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (offboard_date is NULL OR offboard_date = '') AND authority & :chief_bit AND unit = :unit ORDER BY id")) {
+            $stmt->bindValue(':chief_bit', AUTHORITY::CHIEF, SQLITE3_INTEGER);
+            $stmt->bindParam(':unit', $unit, SQLITE3_TEXT);
+            return $this->prepareArray($stmt);
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得${unit}主管資料失敗！");
+        }
+        return false;
+    }
+
+    public function getStaffs($unit) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (offboard_date is NULL or offboard_date = '') AND unit = :unit ORDER BY id")) {
+            $stmt->bindParam(':unit', $unit, SQLITE3_TEXT);
+            return $this->prepareArray($stmt);
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得${unit}人員資料失敗！");
+        }
+        return false;
+    }
+
+    public function getTreeData($unit) {
+        $chief = $this->getChief($unit)[0];
+        $chief['staffs'] = array();
+        $staffs = $this->getStaffs($unit);
+        foreach ($staffs as $staff) {
+            if ($staff['id'] == $chief['id']) continue;
+            $chief['staffs'][] = $staff;
+        }
+        return $chief;
+    }
+
+    public function getTopTreeData() {
+        $director = $this->getTreeData('主任室');
+        $secretary = $this->getTreeData('秘書室');
+        $director['staffs'][] = &$secretary;
+        $secretary['staffs'][] = $this->getTreeData('登記課');
+        $secretary['staffs'][] = $this->getTreeData('測量課');
+        $secretary['staffs'][] = $this->getTreeData('地價課');
+        $secretary['staffs'][] = $this->getTreeData('行政課');
+        $secretary['staffs'][] = $this->getTreeData('資訊課');
+        $secretary['staffs'][] = $this->getTreeData('會計室');
+        $secretary['staffs'][] = $this->getTreeData('人事室');
+        return $director;
+    }
+
     public function getUser($id) {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE id = :id")) {
             $stmt->bindParam(':id', $id);

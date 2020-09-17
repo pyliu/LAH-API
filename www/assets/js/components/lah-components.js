@@ -367,6 +367,11 @@ if (Vue) {
                 icon: "laptop-house",
                 need_admin: false
             }, {
+                text: `組織圖`,
+                url: "org.html",
+                icon: "sitemap",
+                need_admin: false
+            }, {
                 text: `小幫手`,
                 url: "helper.html",
                 icon: "hands-helping",
