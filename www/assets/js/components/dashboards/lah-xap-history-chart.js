@@ -35,7 +35,7 @@ if (Vue) {
             },
             type: {
                 type: String,
-                default: 'line'
+                default: 'bar'
             },
             demo: {
                 type: Boolean,
