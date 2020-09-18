@@ -230,15 +230,20 @@
                 stackChildren: true,
                 image: "assets/img/users/郭美蘭_avatar.jpg"
             };
-            setTimeout(() => new Treant([
-                config,
-                director, secretary, inf_chief, sur_chief, reg_chief, val_chief, adm_chief, HB0247, HB1184, HB1185, HB0541, HB0542, HB0543
-            ]), 1000);
-            window.addEventListener("resize", function(e) {
-                new Treant([
+            let tr;
+            setTimeout(() => {
+                tr = new Treant([
                     config,
                     director, secretary, inf_chief, sur_chief, reg_chief, val_chief, adm_chief, HB0247, HB1184, HB1185, HB0541, HB0542, HB0543
-                ])
+                ]);
+                console.log(tr);
+            }, 1000);
+            window.addEventListener("resize", function(e) {
+                tr = new Treant([
+                    config,
+                    director, secretary, inf_chief, sur_chief, reg_chief, val_chief, adm_chief, HB0247, HB1184, HB1185, HB0541, HB0542, HB0543
+                ]);
+                console.log(tr);
             });
         });
     </script>
