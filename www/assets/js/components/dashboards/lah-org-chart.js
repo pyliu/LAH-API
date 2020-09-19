@@ -133,7 +133,7 @@ if (Vue) {
                         text: this.filter_by_title ? staff.title : staff.work,
                         pseudo: true,
                         stackChildren: true,
-                        connectors: { type: 'curve' },
+                        connectors: { type: 'curve', stackIndent: this.margin },
                         siblingSeparation: 0,
                         levelSeparation: 0,
                         subTeeSeparation: 0,
@@ -184,7 +184,7 @@ if (Vue) {
                     connectors: { type: collapsable ? 'bCurve' : 'step' },
                     collapsed: collapsable && !inf_chief,
                     stackChildren: this.depth_switch && children.length > 1,
-                    HTMLclass: `mynode ${this.myid == raw_obj.id ? 'bg-dark text-white font-weight-bold' : 'bg-muted'}`,
+                    HTMLclass: `mynode usercard ${this.myid == raw_obj.id ? 'bg-dark text-white font-weight-bold' : 'bg-muted'}`,
                     pseudo: false
                 };
                 // children will affect stackChildren ... 
