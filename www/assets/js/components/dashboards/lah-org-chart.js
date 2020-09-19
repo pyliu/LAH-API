@@ -2,10 +2,14 @@ if (Vue) {
     Vue.component("lah-org-chart", {
         template: `<b-card>
             <div class="d-flex justify-content-between">
-                <h5 class="align-middle my-auto font-weight-bolder">中壢所組織架構圖</h5>
-                <b-button-group size="sm">
-                    <lah-button action="move-fade-ttb" icon="arrow-down" variant="primary" v-if="orientation != 'NORTH'" @click="orientation = 'NORTH'" title="切換成上到下格式">切換方向</lah-button>
-                    <lah-button action="move-fade-ltr" icon="arrow-right" variant="success" v-if="orientation != 'WEST'" @click="orientation = 'WEST'" title="切換成左到右格式">切換方向</lah-button>
+                <h4 class="align-middle my-auto font-weight-bolder">組織架構圖</h4>
+                <b-button-group>
+                    <b-form-checkbox v-b-tooltip.hover.top="'切換顯示分類'" inline v-model="filter_switch" switch>
+                        <span>{{filter_by_text}}</span>
+                    </b-form-checkbox>
+                    <b-form-checkbox v-b-tooltip.hover.top="'切換圖形方向'" inline v-model="orientation_switch" switch>
+                        <span>{{orientation_text}}</span>
+                    </b-form-checkbox>
                 </b-button-group>
             </div>
             <div id="e6e03333-5899-4cad-b934-83189668a148" class="w-100 h-100"></div>
@@ -18,10 +22,16 @@ if (Vue) {
             depth: 0,
             margin: 15,
             filter_switch: false,
+            orientation_switch: false,
             orientation: 'NORTH'
         }),
         watch: {
-            orientation(val) { this.reload() }
+            orientation(val) { this.reload() },
+            filter_switch(val) { this.reload() },
+            orientation_switch(val) {
+                this.orientation = val ? 'WEST' : 'NORTH';
+                this.reload();
+            }
         },
         methods: {
             reload() {
@@ -116,11 +126,11 @@ if (Vue) {
             getPersudoNode(nodes, staff) {
                 // preapre persudo node by title
                 let found = nodes.find((item, idx, array) => {
-                    return item.text == staff.title;
+                    return item.text == (this.filter_by_title ? staff.title : staff.work);
                 });
                 if (!found) {
                     found = {
-                        text: staff.title,
+                        text: this.filter_by_title ? staff.title : staff.work,
                         pseudo: true,
                         stackChildren: true,
                         connectors: { type: 'curve' },
@@ -183,7 +193,10 @@ if (Vue) {
             }
         },
         computed: {
-            depth_switch() { return this.depth < 2 ? false : true }
+            depth_switch() { return this.depth < 2 ? false : true },
+            filter_by_title() { return this.filter_switch },
+            filter_by_text() { return this.filter_by_title ? '角色分類' : '職務分類' },
+            orientation_text() { return this.orientation_switch ? '左到右' : '上到下' }
         },
         created() {
             window.addEventListener("resize", e => {
