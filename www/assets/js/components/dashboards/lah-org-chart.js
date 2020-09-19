@@ -7,7 +7,8 @@ if (Vue) {
             resize_timer: null,
             config: null,
             depth: 0,
-            margin: 15
+            margin: 15,
+            filter_switch: false
         }),
         methods: {
             reload() {
@@ -55,7 +56,7 @@ if (Vue) {
                     chart: {
                         container: `#e6e03333-5899-4cad-b934-83189668a148`,
                         connectors: {
-                            type: 'bCurve' // curve, bCurve, step, straight
+                            type: 'step' // curve, bCurve, step, straight
                         },
                         node: {
                             HTMLclass: 'mynode',
@@ -81,22 +82,64 @@ if (Vue) {
                             onAfterClickCollapseSwitch: (node) => {}
                         }
                     },
-                    nodeStructure: this.nodeStructure(raw)
+                    nodeStructure: this.nodeChief(raw)
                 };
             },
-            nodeStructure(raw_obj) {
+            nodeStaff(staff) {
+                return {
+                    text: {
+                        name: { val: `${staff.id}:${staff.name}`, href: `javascript:vueApp.popUsercard('${staff.id}')` },
+                        title: staff.title,
+                        contact: `#${staff.ext} ${staff.work}`,
+                        desc: ``,
+                        "data-id": staff.id,
+                        "data-name": staff.name
+                    },
+                    image: `assets/img/users/${staff.name}_avatar.jpg`,
+                    HTMLclass: `mynode ${this.myid == staff.id ? 'bg-dark text-white font-weight-bold' : 'bg-muted'}`,
+                    pseudo: false
+                };
+            },
+            getPersudoNode(nodes, staff) {
+                // preapre persudo node by title
+                let found = nodes.find((item, idx, array) => {
+                    return item.text == staff.title;
+                });
+                if (!found) {
+                    found = {
+                        text: staff.title,
+                        pseudo: true,
+                        stackChildren: true,
+                        connectors: { type: 'bCurve' },
+                        children: []
+                    };
+                    // add new title persudo node
+                    nodes.push(found);
+                }
+                return found;
+            },
+            nodeChief(raw_obj) {
                 this.depth++;
                 if (!raw_obj.id) {
                     return false
                 };
                 let children = [];
                 if (!this.empty(raw_obj.staffs)) {
+                    let persudo_nodes = [];
                     raw_obj.staffs.forEach( staff => {
-                        let obj = this.nodeStructure(staff);
-                        if (obj !== false) {
-                            children.push(obj);
+                        // employees under section chief filtered on demand
+                        if (this.empty(staff.staffs)) {
+                            let found = this.getPersudoNode(persudo_nodes, staff);
+                            found.children.push(this.nodeStaff(staff));
+                            found.stackChildren = found.children.length > 1;
+                        } else {
+                            let obj = this.nodeChief(staff);
+                            if (obj) {
+                                children.push(obj);
+                            }
                         }
                     } );
+                    children = [...children, ...persudo_nodes];
                 }
                 this.depth--;
                 let collapsable = this.depth_switch && children.length > 0;
@@ -111,8 +154,9 @@ if (Vue) {
                         "data-name": raw_obj.name
                     },
                     image: `assets/img/users/${raw_obj.name}_avatar.jpg`,
-                    collapsable: false/*this.depth_switch && children.length > 0*/,
-                    collapsed: false/* collapsable&& !inf_chief*/,
+                    collapsable: this.depth_switch && children.length > 0,
+                    connectors: { type: collapsable ? 'bCurve' : 'step' },
+                    collapsed: collapsable && !inf_chief,
                     stackChildren: this.depth_switch && children.length > 1,
                     HTMLclass: `mynode ${this.myid == raw_obj.id ? 'bg-dark text-white font-weight-bold' : 'bg-muted'}`,
                     pseudo: false
