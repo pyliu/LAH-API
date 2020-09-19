@@ -22,7 +22,7 @@ if (Vue) {
             depth: 0,
             margin: 15,
             role_switch: true,
-            orientation_switch: false,
+            orientation_switch: true,
             orientation: 'NORTH'
         }),
         watch: {
