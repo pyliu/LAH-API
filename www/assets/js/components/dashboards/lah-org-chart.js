@@ -103,10 +103,12 @@ if (Vue) {
                 let inf_chief = (raw_obj.authority & 4 && raw_obj.unit == '資訊課');
                 let this_node =  {
                     text: {
-                        name: {val: `${raw_obj.id}:${raw_obj.name}`, href: `javascript:vueApp.popUsercard('${raw_obj.id}')`},
+                        name: { val: `${raw_obj.id}:${raw_obj.name}`, href: `javascript:vueApp.popUsercard('${raw_obj.id}')` },
                         title: raw_obj.title,
                         contact: `#${raw_obj.ext} ${raw_obj.work}`,
-                        desc: ``
+                        desc: ``,
+                        "data-id": raw_obj.id,
+                        "data-name": raw_obj.name
                     },
                     image: `assets/img/users/${raw_obj.name}_avatar.jpg`,
                     collapsable: false/*this.depth_switch && children.length > 0*/,
