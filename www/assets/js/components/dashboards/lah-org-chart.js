@@ -1,6 +1,15 @@
 if (Vue) {
     Vue.component("lah-org-chart", {
-        template: `<div id="e6e03333-5899-4cad-b934-83189668a148" class="w-100 h-100"></div>`,
+        template: `<b-card>
+            <div class="d-flex justify-content-between">
+                <h5 class="align-middle my-auto font-weight-bolder">中壢所組織架構圖</h5>
+                <b-button-group size="sm">
+                    <lah-button action="move-fade-ttb" icon="arrow-down" variant="primary" v-if="orientation != 'NORTH'" @click="orientation = 'NORTH'" title="切換成上到下格式">切換方向</lah-button>
+                    <lah-button action="move-fade-ltr" icon="arrow-right" variant="success" v-if="orientation != 'WEST'" @click="orientation = 'WEST'" title="切換成左到右格式">切換方向</lah-button>
+                </b-button-group>
+            </div>
+            <div id="e6e03333-5899-4cad-b934-83189668a148" class="w-100 h-100"></div>
+        </b-card>`,
         data: () => ({
             inst: null,
             reload_timer: null,
@@ -11,6 +20,9 @@ if (Vue) {
             filter_switch: false,
             orientation: 'NORTH'
         }),
+        watch: {
+            orientation(val) { this.reload() }
+        },
         methods: {
             reload() {
                 this.getLocalCache('lah-org-chart').then(cached => {
@@ -111,7 +123,10 @@ if (Vue) {
                         text: staff.title,
                         pseudo: true,
                         stackChildren: true,
-                        connectors: { type: 'bCurve' },
+                        connectors: { type: 'curve' },
+                        siblingSeparation: 0,
+                        levelSeparation: 0,
+                        subTeeSeparation: 0,
                         children: []
                     };
                     // add new title persudo node

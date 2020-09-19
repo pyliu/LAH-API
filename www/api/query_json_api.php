@@ -789,19 +789,18 @@ switch ($_POST["type"]) {
 	case "user_info":
 		$log->info("XHR [user_info] 查詢使用者資料【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"]."】請求");
 		$sqlite_user = new SQLiteUser();
-		$results = $mock ? $cache->get('user_info') : $sqlite_user->getUser($_POST["id"]);
+		$results = $sqlite_user->getUser($_POST["id"]);
 		if (empty($results)) {
-			$results = $mock ? $cache->get('user_info') : $sqlite_user->getUserByName($_POST["name"]);
+			$results = $sqlite_user->getUserByName($_POST["name"]);
 		}
 		if (empty($results)) {
-			$results = $mock ? $cache->get('user_info') : $sqlite_user->getUserByIP($_POST["ip"]);
+			$results = $sqlite_user->getUserByIP($_POST["ip"]);
 			$len = count($results);
 			if ($len > 1) {
 				$last = $results[$len - 1];
 				$results = array($last);
 			}
 		}
-		if (!$mock) $cache->set('user_info', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ".$_POST["name"]." 資料。");
 			$log->info("XHR [user_info] 查無 ".$_POST["name"] ?? $_POST["id"] ?? $_POST["ip"]." 資料。");
