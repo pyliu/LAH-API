@@ -55,7 +55,7 @@ if (Vue) {
                     chart: {
                         container: `#e6e03333-5899-4cad-b934-83189668a148`,
                         connectors: {
-                            type: 'step' // curve, bCurve, step, straight
+                            type: 'bCurve' // curve, bCurve, step, straight
                         },
                         node: {
                             HTMLclass: 'mynode',
@@ -67,20 +67,19 @@ if (Vue) {
                         // nodeAlign: 'TOP',
                         siblingSeparation: this.margin,
                         levelSeparation: this.margin,
-                        subTeeSeparation: this.margin/*,
+                        subTeeSeparation: this.margin,
                         callback: {
-                            onCreateNode: null,
-                            onCreateNodeCollapseSwitch: null,
-                            onAfterAddNode: null,
-                            onBeforeAddNode: null,
-                            onAfterPositionNode: null,
-                            onBeforePositionNode: null,
-                            onToggleCollapseFinished: null,
-                            onAfterClickCollapseSwitch: null,
-                            onBeforeClickCollapseSwitch: null,
-                            onTreeLoaded: null
+                            onCreateNode:  function(e) {},
+                            onCreateNodeCollapseSwitch:  function(e) {},
+                            onAfterAddNode:  function(e) {},
+                            onBeforeAddNode:  function(e) {},
+                            onAfterPositionNode:  function(e) {},
+                            onBeforePositionNode:  function(e) {},
+                            onToggleCollapseFinished:  function(e) {},
+                            onBeforeClickCollapseSwitch:  function(e) {},
+                            onTreeLoaded: function(e) {},
+                            onAfterClickCollapseSwitch: (node) => {}
                         }
-                        */
                     },
                     nodeStructure: this.nodeStructure(raw)
                 };
@@ -104,16 +103,16 @@ if (Vue) {
                 let inf_chief = (raw_obj.authority & 4 && raw_obj.unit == '資訊課');
                 let this_node =  {
                     text: {
-                        name: `${raw_obj.id}:${raw_obj.name}`,
+                        name: {val: `${raw_obj.id}:${raw_obj.name}`, href: `javascript:vueApp.popUsercard('${raw_obj.id}')`},
                         title: raw_obj.title,
-                        contact: `${raw_obj.ext}`,
-                        desc: raw_obj.work
+                        contact: `#${raw_obj.ext} ${raw_obj.work}`,
+                        desc: ``
                     },
                     image: `assets/img/users/${raw_obj.name}_avatar.jpg`,
-                    collapsable: collapsable,
-                    collapsed: collapsable/* && !inf_chief*/,
+                    collapsable: false/*this.depth_switch && children.length > 0*/,
+                    collapsed: false/* collapsable&& !inf_chief*/,
                     stackChildren: this.depth_switch && children.length > 1,
-                    HTMLclass: "mynode bg-muted",
+                    HTMLclass: `mynode ${this.myid == raw_obj.id ? 'bg-dark text-white font-weight-bold' : 'bg-muted'}`,
                     pseudo: false
                 };
                 // children will affect stackChildren ... 
@@ -127,7 +126,9 @@ if (Vue) {
         created() {
             window.addEventListener("resize", e => {
                 clearTimeout(this.resize_timer);
-                this.resize_timer = this.delay(this.reload, 500);
+                this.resize_timer = this.delay(() => {
+                    this.inst.tree.reload();
+                }, 500);
             });
         },
         mounted() { this.reload() }

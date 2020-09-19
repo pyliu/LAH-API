@@ -426,6 +426,10 @@ Vue.mixin({
                 noCloseOnBackdrop: false
             });
         },
+        popUsercard: function(id, name = '', ip = '') {
+            let card = this.$createElement("lah-user-card", { props: { id: id, name: name, ip: ip } });
+            this.$modal(card, { title: "使用者資訊" });
+        },
         usercard: function(e) {
             // find the most closest element to get the data-* attrs
             let clicked_element = $($(e.target).closest(".user_tag,.lah-user-card,.usercard"));
@@ -458,8 +462,7 @@ Vue.mixin({
                     mounted() { this.animated(this.$el, { name: "headShake", duration: "once-anim-cfg" }); }
                 });
             } else {
-                let card = this.$createElement("lah-user-card", { props: { id: id, name: name, ip: ip } });
-                this.$modal(card, { title: "使用者資訊" });
+                this.popUsercard(id, name, ip);
             }
         },
         animated: function(selector, opts) {

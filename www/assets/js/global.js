@@ -149,9 +149,9 @@ let isEmpty = variable => {
     return false;
 }
 
-let addUserInfoEvent = () => {
-    $(".user_tag").off("click");
-    $(".user_tag").on("click", vueApp.$user);
+let addUserInfoEvent = (classname = 'user_tag') => {
+    $(`.${classname}`).off("click");
+    $(`.${classname}`).on("click", vueApp.usercard);
 }
 
 let showPopper = (selector, content, timeout) => {
