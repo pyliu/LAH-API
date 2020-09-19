@@ -22,16 +22,12 @@ if (Vue) {
             depth: 0,
             margin: 15,
             role_switch: true,
-            orientation_switch: true,
-            orientation: 'NORTH'
+            orientation_switch: true
         }),
         watch: {
             orientation(val) { this.reload() },
             role_switch(val) { this.reload() },
-            orientation_switch(val) {
-                this.orientation = val ? 'WEST' : 'NORTH';
-                this.reload();
-            }
+            orientation_switch(val) { this.reload() }
         },
         methods: {
             reload() {
@@ -86,7 +82,7 @@ if (Vue) {
                             // collapsable: true,
                             // stackChildren: true
                         },
-                        rootOrientation: this.orientation || 'WEST',
+                        rootOrientation: this.orientation_switch ? 'WEST' : 'NORTH',
                         // animateOnInit: false,
                         // nodeAlign: 'TOP',
                         siblingSeparation: this.margin,
