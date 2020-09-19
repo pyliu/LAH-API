@@ -2,9 +2,9 @@ if (Vue) {
     Vue.component("lah-org-chart", {
         template: `<b-card>
             <div class="d-flex justify-content-between">
-                <h4 class="align-middle my-auto font-weight-bolder">組織架構圖</h4>
+                <h3 class="align-middle my-auto font-weight-bolder">組織架構圖</h3>
                 <b-button-group>
-                    <b-form-checkbox v-b-tooltip.hover.top="'切換顯示分類'" inline v-model="filter_switch" switch>
+                    <b-form-checkbox v-b-tooltip.hover.top="'切換顯示分類'" inline v-model="role_switch" switch>
                         <span>{{filter_by_text}}</span>
                     </b-form-checkbox>
                     <b-form-checkbox v-b-tooltip.hover.top="'切換圖形方向'" inline v-model="orientation_switch" switch>
@@ -21,13 +21,13 @@ if (Vue) {
             config: null,
             depth: 0,
             margin: 15,
-            filter_switch: false,
+            role_switch: true,
             orientation_switch: false,
             orientation: 'NORTH'
         }),
         watch: {
             orientation(val) { this.reload() },
-            filter_switch(val) { this.reload() },
+            role_switch(val) { this.reload() },
             orientation_switch(val) {
                 this.orientation = val ? 'WEST' : 'NORTH';
                 this.reload();
@@ -123,14 +123,14 @@ if (Vue) {
                     pseudo: false
                 };
             },
-            getPersudoNode(nodes, staff) {
+            nodePersudo(nodes, staff) {
                 // preapre persudo node by title
                 let found = nodes.find((item, idx, array) => {
-                    return item.text == (this.filter_by_title ? staff.title : staff.work);
+                    return item.text == (this.role_switch ? staff.title : staff.work);
                 });
                 if (!found) {
                     found = {
-                        text: this.filter_by_title ? staff.title : staff.work,
+                        text: this.role_switch ? staff.title : staff.work,
                         pseudo: true,
                         stackChildren: true,
                         connectors: { type: 'curve', stackIndent: this.margin },
@@ -155,7 +155,7 @@ if (Vue) {
                     raw_obj.staffs.forEach( staff => {
                         // employees under section chief filtered on demand
                         if (this.empty(staff.staffs)) {
-                            let found = this.getPersudoNode(persudo_nodes, staff);
+                            let found = this.nodePersudo(persudo_nodes, staff);
                             found.children.push(this.nodeStaff(staff));
                             found.stackChildren = found.children.length > 1;
                         } else {
@@ -194,8 +194,7 @@ if (Vue) {
         },
         computed: {
             depth_switch() { return this.depth < 2 ? false : true },
-            filter_by_title() { return this.filter_switch },
-            filter_by_text() { return this.filter_by_title ? '角色分類' : '職務分類' },
+            filter_by_text() { return this.role_switch ? '角色分類' : '職務分類' },
             orientation_text() { return this.orientation_switch ? '左到右' : '上到下' }
         },
         created() {
