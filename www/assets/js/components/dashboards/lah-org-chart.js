@@ -62,7 +62,7 @@ if (Vue) {
                             // collapsable: true,
                             // stackChildren: true
                         },
-                        rootOrientation: 'WEST',
+                        // rootOrientation: 'WEST',
                         // animateOnInit: false,
                         // nodeAlign: 'TOP',
                         siblingSeparation: this.margin,
@@ -101,7 +101,8 @@ if (Vue) {
                 }
                 this.depth--;
                 let collapsable = this.depth_switch && children.length > 0;
-                return {
+                let inf_chief = (raw_obj.authority & 4 && raw_obj.unit == '資訊課');
+                let this_node =  {
                     text: {
                         name: `${raw_obj.id}:${raw_obj.name}`,
                         title: raw_obj.title,
@@ -110,12 +111,14 @@ if (Vue) {
                     },
                     image: `assets/img/users/${raw_obj.name}_avatar.jpg`,
                     collapsable: collapsable,
-                    collapsed: collapsable && !(raw_obj.authority & 4 && raw_obj.unit == '資訊課'),
+                    collapsed: collapsable/* && !inf_chief*/,
                     stackChildren: this.depth_switch && children.length > 1,
                     HTMLclass: "mynode bg-muted",
-                    pseudo: false,
-                    children: [...children]
+                    pseudo: false
                 };
+                // children will affect stackChildren ... 
+                if (children.length > 0) this_node.children = [...children];
+                return this_node;
             }
         },
         computed: {
