@@ -8,7 +8,8 @@ if (Vue) {
             config: null,
             depth: 0,
             margin: 15,
-            filter_switch: false
+            filter_switch: false,
+            orientation: 'NORTH'
         }),
         methods: {
             reload() {
@@ -63,7 +64,7 @@ if (Vue) {
                             // collapsable: true,
                             // stackChildren: true
                         },
-                        // rootOrientation: 'WEST',
+                        rootOrientation: this.orientation || 'WEST',
                         // animateOnInit: false,
                         // nodeAlign: 'TOP',
                         siblingSeparation: this.margin,
