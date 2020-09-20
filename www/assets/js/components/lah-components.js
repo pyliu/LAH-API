@@ -284,20 +284,19 @@ if (Vue) {
                 <b-collapse id="nav-collapse" is-nav>
                     <lah-transition appear>
                         <b-navbar-nav>
-                            <span
+                            <b-nav-item
                                 v-for="(link, index) in links"
                                 v-if="link.need_admin ? isAdmin || false : true"
                                 @mouseenter="animate($event)"
+                                :href="Array.isArray(link.url) ? link.url[0] : link.url"
                             >
-                                <b-nav-item :href="Array.isArray(link.url) ? link.url[0] : link.url">
-                                    <b-nav-text v-html="link.text" :class="activeCss(link)"></b-nav-text>
-                                    <i :id="'lah-header-nav-'+index" v-if="hasSubMenu(link)" class="fa fa-caret-down" @click="event.preventDefault()"></i>
-                                    <b-popover v-if="hasSubMenu(link)" :target="'lah-header-nav-'+index" triggers="hover focus click" placement="bottom" delay="400" offset="-50">
-                                        <div v-for="(clink, cindex) in link.children" class="m-2" @mouseenter="animate($event)"><a class="text-decoration-none text-primary" :href="Array.isArray(clink.url) ? clink.url[0] : clink.url"><lah-fa-icon :icon="clink.icon">{{clink.text}}</lah-fa-icon></a></div>
-                                        <!--<template v-slot:title><lah-fa-icon icon="angle-double-down"><span class="font-weight-bold s-95 align-top text-muted">其他連結</span></lah-fa-icon></template>-->
-                                    </b-popover>
-                                </b-nav-item>
-                            </span>
+                                <lah-fa-icon :icon="link.icon" :class="activeCss(link)">{{link.text}}</lah-fa-icon>
+                                <lah-fa-icon icon="caret-down" :id="'lah-header-nav-'+index" v-if="hasSubMenu(link)" @click="event.preventDefault()"></lah-fa-icon>
+                                <b-popover v-if="hasSubMenu(link)" :target="'lah-header-nav-'+index" triggers="hover focus click" placement="bottom" delay="100" offset="-50">
+                                    <div v-for="(clink, cindex) in link.children" class="m-2" @mouseenter="animate($event)"><a class="text-decoration-none text-primary" :href="Array.isArray(clink.url) ? clink.url[0] : clink.url"><lah-fa-icon :icon="clink.icon">{{clink.text}}</lah-fa-icon></a></div>
+                                    <!--<template v-slot:title><lah-fa-icon icon="angle-double-down"><span class="font-weight-bold s-95 align-top text-muted">其他連結</span></lah-fa-icon></template>-->
+                                </b-popover>
+                            </b-nav-item>
                         </b-navbar-nav>
                     </lah-transition>
                     <b-navbar-nav @click="location.href='message.html'" class="ml-auto mr-2" style="cursor: pointer;" :title="avatar_badge+'則未讀訊息'">
