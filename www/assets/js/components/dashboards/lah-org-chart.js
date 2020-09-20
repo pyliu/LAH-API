@@ -1,8 +1,7 @@
 if (Vue) {
     Vue.component("lah-org-chart", {
-        template: `<b-card>
-            <div class="d-flex justify-content-between">
-                <h3 class="align-middle my-auto font-weight-bolder">組織架構圖</h3>
+        template: `<b-card border-variant="white">
+            <div class="position-fixed bg-white rounded" style="z-index: 9999">
                 <b-button-group>
                     <b-form-checkbox v-b-tooltip.hover.top="'切換顯示分類'" inline v-model="role_switch" switch>
                         <span>{{filter_by_text}}</span>
@@ -12,7 +11,7 @@ if (Vue) {
                     </b-form-checkbox>
                 </b-button-group>
             </div>
-            <div id="e6e03333-5899-4cad-b934-83189668a148" class="w-100 h-100"></div>
+            <div id="e6e03333-5899-4cad-b934-83189668a148" class="container-fluid"></div>
         </b-card>`,
         data: () => ({
             inst: null,
