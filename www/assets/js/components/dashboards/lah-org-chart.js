@@ -179,7 +179,7 @@ if (Vue) {
                     image: `assets/img/users/${raw_obj.name}_avatar.jpg`,
                     collapsable: this.depth_switch && children.length > 0,
                     connectors: { type: collapsable ? 'bCurve' : 'step' },
-                    collapsed: collapsable && !inf_chief,
+                    collapsed: collapsable/* && !inf_chief*/,
                     stackChildren: this.depth_switch && children.length > 1,
                     HTMLclass: `mynode usercard ${this.myid == raw_obj.id ? 'bg-dark text-white font-weight-bold' : 'bg-muted'}`,
                     pseudo: false
