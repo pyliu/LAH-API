@@ -99,7 +99,8 @@ if (Vue) {
                             onBeforeClickCollapseSwitch:  function(e) {},
                             onTreeLoaded: function(e) {},
                             onAfterClickCollapseSwitch: (node) => {}
-                        }
+                        },
+                        scrollbar: 'native'
                     },
                     nodeStructure: this.nodeChief(raw)
                 };
