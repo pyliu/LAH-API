@@ -84,13 +84,14 @@ if (Vue) {
 
     Vue.component("lah-fa-icon", {
         template: `<span><i :id="id" :class="className"></i> <slot></slot></span>`,
-        props: ["size", 'prefix', 'icon', 'variant', 'action', 'id'],
+        props: ["size", 'prefix', 'icon', 'variant', 'action', 'id', 'align'],
         computed: {
             className() {
                 let prefix = this.prefix || 'fas';
                 let icon = this.icon || 'exclamation-circle';
                 let variant = this.variant || '';
                 let ld_movement = this.action || '';
+                let align = this.align || 'middle'
                 let size = '';
                 switch (this.size) {
                     case "xs":
@@ -108,7 +109,7 @@ if (Vue) {
                         }
                         break;
                 }
-                return `text-${variant} ${prefix} fa-${icon} ${size} ld ld-${ld_movement} align-middle`
+                return `text-${variant} ${prefix} fa-${icon} ${size} ld ld-${ld_movement} align-${align}`
             }
         }
     });
