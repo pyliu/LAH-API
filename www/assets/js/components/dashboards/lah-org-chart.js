@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("lah-org-chart", {
         template: `<b-card border-variant="white">
-            <div class="position-fixed bg-white rounded" style="z-index: 9999">
+            <div class="position-fixed bg-white rounded" style="z-index: 1000">
                 <b-button-group>
                     <b-form-checkbox v-b-tooltip.hover.top="'切換顯示分類'" inline v-model="role_switch" switch>
                         <span>{{filter_by_text}}</span>
