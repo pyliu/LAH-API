@@ -11,7 +11,7 @@ if (Vue) {
                     </b-form-checkbox>
                 </b-button-group>
             </div>
-            <div id="e6e03333-5899-4cad-b934-83189668a148" class="container-fluid"></div>
+            <div id="e6e03333-5899-4cad-b934-83189668a148" class="container-fluid" style="height: 600px;"></div>
         </b-card>`,
         data: () => ({
             inst: null,
@@ -178,7 +178,6 @@ if (Vue) {
                     },
                     image: `assets/img/users/${raw_obj.name}_avatar.jpg`,
                     collapsable: this.depth_switch && children.length > 0,
-                    connectors: { type: collapsable ? 'bCurve' : 'step' },
                     collapsed: collapsable/* && !inf_chief*/,
                     stackChildren: this.depth_switch && children.length > 1,
                     HTMLclass: `mynode usercard ${this.myid == raw_obj.id ? 'bg-dark text-white font-weight-bold' : 'bg-muted'}`,
