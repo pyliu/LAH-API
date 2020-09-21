@@ -1274,6 +1274,7 @@ if (Vue) {
                     <lah-fa-icon icon="ban" variant="danger" action="breath" v-if="isLeft" class='mx-auto'> 已離職【{{user_data["offboard_date"]}}】</lah-fa-icon>
                     <div>ID：{{user_data["id"]}}</div>
                     <div v-if="isAdmin">電腦：{{user_data["ip"]}}</div>
+                    <div>分機：{{user_data["ext"]}}</div>
                     <div v-if="isAdmin">生日：{{user_data["birthday"]}} <b-badge v-show="birthAge !== false" :variant="birthAgeVariant" pill>{{birthAge}}歲</b-badge></div>
                     <div>單位：{{user_data["unit"]}}</div>
                     <div>工作：{{user_data["work"]}}</div>
