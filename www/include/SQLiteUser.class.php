@@ -16,7 +16,7 @@ class SQLiteUser {
         $stm->bindValue(':sex', $row['AP_SEX'] == '男' ? 1 : 0);
         $stm->bindParam(':addr', $row['AP_ADR']);
         $stm->bindParam(':tel', $row['AP_TEL'], SQLITE3_TEXT);
-        //$stm->bindValue(':ext', $row['AP_EXT'] ?? '', SQLITE3_TEXT);
+        $stm->bindValue(':ext', empty($row['AP_EXT']) ? '153' : $row['AP_EXT'], SQLITE3_TEXT); // 總機 153
         $stm->bindParam(':cell', $row['AP_SEL'], SQLITE3_TEXT);
         $stm->bindParam(':unit', $row['AP_UNIT_NAME']);
         $stm->bindParam(':title', $row['AP_JOB']);
@@ -52,8 +52,8 @@ class SQLiteUser {
 
     private function inst(&$row) {
         $stm = $this->db->prepare("
-            INSERT INTO user ('id', 'name', 'sex', 'addr', 'tel', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
-            VALUES (:id, :name, :sex, :addr, :tel, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
+            INSERT INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
+            VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
         ");
         $this->bindUserParams($stm, $row);
         return $stm->execute() === FALSE ? false : true;
@@ -66,6 +66,7 @@ class SQLiteUser {
                 sex = :sex,
                 addr = :addr,
                 tel = :tel,
+                ext = :ext,
                 cell = :cell,
                 unit = :unit,
                 title = :title,
