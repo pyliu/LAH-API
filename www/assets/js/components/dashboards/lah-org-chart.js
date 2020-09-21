@@ -119,23 +119,24 @@ if (Vue) {
                     pseudo: false
                 };
             },
-            nodePersudo(nodes, staff) {
-                // preapre persudo node by title
+            nodePseudo(nodes, staff) {
+                // preapre pseudo node by title
                 let found = nodes.find((item, idx, array) => {
-                    return item.text == (this.role_switch ? staff.title : staff.work);
+                    return item.role == (this.role_switch ? staff.title : staff.work);
                 });
                 if (!found) {
                     found = {
-                        text: this.role_switch ? staff.title : staff.work,
+                        // text: this.role_switch ? staff.title : staff.work,
                         pseudo: true,
                         stackChildren: true,
                         connectors: { type: 'curve', stackIndent: this.margin },
                         siblingSeparation: 0,
                         levelSeparation: 0,
                         subTeeSeparation: 0,
-                        children: []
+                        children: [],
+                        role: this.role_switch ? staff.title : staff.work
                     };
-                    // add new title persudo node
+                    // add new pseudo node
                     nodes.push(found);
                 }
                 return found;
@@ -147,11 +148,11 @@ if (Vue) {
                 };
                 let children = [];
                 if (!this.empty(raw_obj.staffs)) {
-                    let persudo_nodes = [];
+                    let pseudo_nodes = [];
                     raw_obj.staffs.forEach( staff => {
                         // employees under section chief filtered on demand
                         if (this.empty(staff.staffs)) {
-                            let found = this.nodePersudo(persudo_nodes, staff);
+                            let found = this.nodePseudo(pseudo_nodes, staff);
                             found.children.push(this.nodeStaff(staff));
                             found.stackChildren = found.children.length > 1;
                         } else {
@@ -161,7 +162,7 @@ if (Vue) {
                             }
                         }
                     } );
-                    children = [...children, ...persudo_nodes];
+                    children = [...children, ...pseudo_nodes];
                 }
                 this.depth--;
                 let collapsable = this.depth_switch && children.length > 0;
