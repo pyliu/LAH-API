@@ -179,7 +179,7 @@ if (Vue) {
         mounted() {
             let that = this;
             // restore cached data back
-            this.delay(() => that.number = that.$refs.number.$el.value, 200);
+            this.timeout(() => that.number = that.$refs.number.$el.value, 200);
         },
         components: {
             "expaa-category-dashboard": {
@@ -393,7 +393,7 @@ if (Vue) {
                             legend: { display: true, labels: { fontColor: "black" } }
                         }
                     });
-                    this.delay(() => { this.chartInst.update() }, 400);
+                    this.timeout(() => { this.chartInst.update() }, 400);
                 }
             },
             "fee-obsolete-mgt": {

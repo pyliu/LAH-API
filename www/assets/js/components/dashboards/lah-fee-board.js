@@ -150,7 +150,7 @@ if (Vue) {
                         legend: { display: true, labels: { fontColor: "black" } }
                     }
                 });
-                this.delay(() => { this.chartInst.update() }, 400);
+                this.timeout(() => { this.chartInst.update() }, 400);
             }
         },
         components: {

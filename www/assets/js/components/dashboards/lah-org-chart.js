@@ -59,7 +59,7 @@ if (Vue) {
             },
             build(raw) {
                 clearTimeout(this.reload_timer);
-                this.reload_timer = this.delay(() => {
+                this.reload_timer = this.timeout(() => {
                     this.isBusy = true;
                     this.prepareConfig(raw);
                     this.inst = new Treant(this.config, () => {
@@ -196,7 +196,7 @@ if (Vue) {
         created() {
             window.addEventListener("resize", e => {
                 clearTimeout(this.resize_timer);
-                this.resize_timer = this.delay(() => {
+                this.resize_timer = this.timeout(() => {
                     this.inst.tree.reload();
                 }, 500);
             });

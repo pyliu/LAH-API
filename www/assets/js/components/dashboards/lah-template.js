@@ -15,4 +15,6 @@ if (Vue) {
     created() { },
     mounted() { }
   });
+} else {
+  console.error("vue.js not ready ... lah-export-txt component can not be loaded.");
 }

@@ -58,7 +58,7 @@ if (Vue) {
         watch: {
             mins(dont_care) {
                 clearTimeout(this.spin_timer);
-                this.spin_timer = this.delay(() => {
+                this.spin_timer = this.timeout(() => {
                     this.items.length = 0;
                     this.reload(true);
                 }, 1000);
@@ -180,7 +180,7 @@ if (Vue) {
                 clearTimeout(this.reload_timer);
                 if (this.demo && this.items.length > 0) {
                     this.reload_demo_data();
-                    this.reload_timer = this.delay(this.reload, this.timer_ms);
+                    this.reload_timer = this.timeout(this.reload, this.timer_ms);
                 } else if (force || this.isOfficeHours()) {
                     //this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
@@ -209,14 +209,14 @@ if (Vue) {
                         this.error = err;
                     }).finally(() => {
                         //this.isBusy = false;
-                        this.reload_timer = this.delay(this.reload, this.timer_ms);
+                        this.reload_timer = this.timeout(this.reload, this.timer_ms);
                         Vue.nextTick(() => {
                             this.$refs.chart.update();
                         });
                     });
                 } else {
                     // check after an hour
-                    this.reload_timer = this.delay(this.reload, 3600000);
+                    this.reload_timer = this.timeout(this.reload, 3600000);
                 }
             },
             reload_demo_data() {

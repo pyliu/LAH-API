@@ -482,7 +482,7 @@ if (Vue) {
       checkParentWidth: function () {
         let pw = this.$parent.$el.offsetWidth;
         if (pw == 0) {
-          this.delay(() => this.checkParentWidth(), 100);
+          this.timeout(() => this.checkParentWidth(), 100);
         } else {
           this.parent_width = pw;
         }

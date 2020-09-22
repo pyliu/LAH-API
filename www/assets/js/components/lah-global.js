@@ -561,7 +561,8 @@ Vue.mixin({
             if (now.getDay() === 0 || now.getDay() === 6) return false;
             return now.getHours() > 6 && now.getHours() < 19;
         },
-        delay(func, ms) { return setTimeout(func, ms) }
+        delay(func, ms) { return this.timeout(func, ms) },
+        timeout(func, ms) { return setTimeout(func, ms) }
     }
 });
 
@@ -653,7 +654,7 @@ $(document).ready(() => {
     
                 if (typeof merged.callback === 'function') {
                     let that = this;
-                    this.delay(() => merged.callback.apply(that, arguments), 100);
+                    this.timeout(() => merged.callback.apply(that, arguments), 100);
                 }
                 this.toastCounter++;
             },
