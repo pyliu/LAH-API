@@ -67,7 +67,7 @@ class FileAPIDataExportCommand extends FileAPICommand {
             return false;
         }
         foreach ($this->sections as $k => $section) {
-            $this->sections[$k] = str_pad($section, 4, '0');
+            $this->sections[$k] = str_pad($section, 4, '0', STR_PAD_LEFT);
         }
         $replacement = "'".implode("','", $this->sections)."'";
         $sql = str_replace('##REPLACEMENT##', $replacement, $content);
