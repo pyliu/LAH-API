@@ -12,7 +12,8 @@ if (Vue) {
                 <h6 class="my-auto">快速選項</h6>
                 <b-button-group size="sm" class="align-middle">
                     <lah-button icon="train" variant="outline-secondary" @click="tags = ['0200', '0202', '0205', '0210']" class="mr-1">A21站</lah-button>
-                    <lah-button icon="warehouse" variant="outline-secondary" @click="tags = ['0213', '0222']">中原營區</lah-button>
+                    <lah-button icon="warehouse" variant="outline-secondary" @click="tags = ['0213', '0222']" class="mr-1">中原營區</lah-button>
+                    <lah-button icon="undo" action="cycle-alt" variant="outline-success" @click="clean">重設</lah-button>
                 </b-button-group>
             </div>
         </template>
@@ -31,20 +32,61 @@ if (Vue) {
                 :tag-validator="validator"
             ></b-form-tags>
         </b-input-group>
+        <div v-for="link in links" class="s-80 my-1"><a href="#" @click="download(link.code)">{{link.filename}}</a></div>
     </b-card>`,
     computed: {
         disabled() { return this.tags.length == 0 }
     },
     data: () => ({
-        tags: []
+        tags: [],
+        links: []
     }),
     methods: {
         validator(tag) {
             return (/^\d{3,4}$/ig).test(tag);
         },
+        clean() { this.tags = []; this.links = []; },
+        download(code) {
+            // second param usage => e.target.title to get the title
+            this.open(`api/export_txt_data.php?code=${code}`, {
+                target: {
+                    title: '下載產製資料'
+                }
+            });
+            this.timeout(() => closeModal(() => this.notify({
+                title: '下載產製資料',
+                message: '<i class="fas fa-check ld ld-pulse"></i> 下載完成',
+                type: "success"
+            })), 2000);
+        },
         go() {
-            this.$confirm(`請確認以輸入的段代碼產生地籍資料？`, () => {
-                
+            this.$confirm(`請確認以輸入的段代碼產生地籍資料？`, async () => {
+                await this.query('AI00301');
+                await this.query('AI00401');
+                await this.query('AI00601_B');
+                await this.query('AI00601_E');
+                await this.query('AI00701');
+                await this.query('AI00801');
+                await this.query('AI00901');
+                await this.query('AI01001');
+                await this.query('AI01101');
+                await this.query('AI02901_B');
+                await this.query('AI02901_E');
+            });
+        },
+        async query(code) {
+            this.isBusy = true;
+            await this.$http.post(CONFIG.API.FILE.EXPORT, {
+                type: 'file_data_export',
+                code: code,
+                section: this.tags
+            }).then(res => {
+                this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, this.responseMessage(res.data.status));
+                this.links.push({ code: code, filename: res.data.filename });
+            }).catch(err => {
+                this.error = err;
+            }).finally(() => {
+                this.isBusy = false;
             });
         },
         popup() {

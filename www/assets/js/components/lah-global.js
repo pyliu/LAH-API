@@ -552,6 +552,10 @@ Vue.mixin({
                     return `授權失敗【${XHR_STATUS_CODE.FAIL_NO_AUTHORITY}, FAIL_NO_AUTHORITY】`;
                 case -6:
                     return `JSON編碼失敗【${XHR_STATUS_CODE.FAIL_JSON_ENCODE}, FAIL_JSON_ENCODE】`;
+                case -7:
+                    return `找不到資料失敗【${XHR_STATUS_CODE.FAIL_NOT_FOUND}, FAIL_NOT_FOUND`;
+                case -8:
+                    return `讀取檔案失敗【${XHR_STATUS_CODE.FAIL_LOAD_ERROR}, FAIL_LOAD_ERROR`;
                 default:
                     return `不支援的狀態碼【${status_code}】`;
             }

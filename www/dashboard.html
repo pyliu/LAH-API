@@ -30,6 +30,7 @@
       <b-card-group columns>
         <b-card no-body border-variant="white"><lah-user-search ref="user_search" max-height="100"></lah-user-search></b-card>
         <b-card no-body border-variant="white"><lah-section-search></lah-section-search></b-card>
+        <lah-export-txt class="shadow"></lah-export-txt>
         <b-card no-body border-variant="white"><lah-report></lah-report></b-card>
         <b-card no-body border-variant="white"><lah-announcement-mgt></lah-announcement-mgt></b-card>
         <b-card no-body border-variant="white"><lah-case-state-mgt ref="case_state_mgt"></lah-case-state-mgt></b-card>
@@ -80,6 +81,7 @@
   <script src="assets/js/components/dashboards/lah-fee-query-board.js"></script>
   <script src="assets/js/components/dashboards/lah-case-sync-mgt.js"></script>
   <script src="assets/js/components/dashboards/lah-case-temp-mgt.js"></script>
+  <script src="assets/js/components/dashboards/lah-export-txt.js"></script>
 
   <script type="text/javascript">
     $(document).ready(e => { vueApp.addToStoreParams('user_id', undefined) });

@@ -38,7 +38,8 @@ const XHR_STATUS_CODE = {
     FAIL_WITH_REMOTE_NO_RECORD: -4,
     FAIL_NO_AUTHORITY: -5,
     FAIL_JSON_ENCODE: -6,
-    FAIL_NOT_FOUND: -7
+    FAIL_NOT_FOUND: -7,
+    FAIL_LOAD_ERROR: -8
 }
 const LOADING_PATTERNS = [
     "ld-heartbeat", "ld-beat", "ld-blink", "ld-bounce", "ld-bounceAlt", "ld-breath", "ld-wrench", "ld-surprise",
