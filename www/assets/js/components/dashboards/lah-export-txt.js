@@ -8,7 +8,7 @@ if (Vue) {
             </div>
         </template>
         <template v-slot:footer>
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between" v-if="!working">
                 <h6 class="my-auto">快速選項</h6>
                 <b-button-group size="sm" class="align-middle">
                     <lah-button icon="train" variant="outline-secondary" @click="tags = ['0200', '0202', '0205', '0210']" class="mr-1">A21站</lah-button>
@@ -17,7 +17,10 @@ if (Vue) {
                 </b-button-group>
             </div>
         </template>
-        <b-input-group size="sm" prepend="段代碼">
+        <b-progress v-if="show_progress" :max="max" show-progress animated class="my-1">
+            <b-progress-bar :value="iteration" :label="((iteration / max) * 100).toFixed(2)+'%'"></b-progress-bar>
+        </b-progress>
+        <b-input-group size="sm" prepend="段代碼" v-if="!working">
             <template v-slot:append>
                 <lah-button icon="cogs" variant="outline-primary" @click="go" title="執行" :disabled="disabled"></lah-button>
             </template>
@@ -32,20 +35,26 @@ if (Vue) {
                 :tag-validator="validator"
             ></b-form-tags>
         </b-input-group>
-        <div v-for="link in links" class="s-75 my-1 truncate"><a href="#" @click="download(link.code)" :title="link.filename">{{link.filename}}</a></div>
+        <ul>
+            <li v-for="link in links" class="s-75 truncate"><b-link href="#" @click="download(link.code)" :title="link.filename">{{link.filename}}</b-link></li>
+        </ul>
     </b-card>`,
     computed: {
-        disabled() { return this.tags.length == 0 }
+        disabled() { return this.tags.length == 0 || this.show_progress },
+        show_progress() { return this.iteration < 11 }
     },
     data: () => ({
         tags: [],
-        links: []
+        links: [],
+        max: 11,
+        iteration: 11,
+        working: false
     }),
     methods: {
         validator(tag) {
             return (/^\d{3,4}$/ig).test(tag);
         },
-        clean() { this.tags = [] },
+        clean() { this.tags = [] ; this.links = []; },
         download(code) {
             // second param usage => e.target.title to get the title
             this.open(`api/export_txt_data.php?code=${code}`, {
@@ -62,22 +71,24 @@ if (Vue) {
         go() {
             this.$confirm(`請確認以輸入的段代碼產生地籍資料？`, async () => {
                 this.links = [];
-                await this.query('AI00301');
-                await this.query('AI00401');
-                await this.query('AI00601_B');
-                await this.query('AI00601_E');
-                await this.query('AI00701');
-                await this.query('AI00801');
-                await this.query('AI00901');
-                await this.query('AI01001');
-                await this.query('AI01101');
-                await this.query('AI02901_B');
+                this.working = true;
+                this.iteration = 1;
+                await this.query('AI00301'); this.iteration++;
+                await this.query('AI00401'); this.iteration++;
+                await this.query('AI00601_B'); this.iteration++;
+                await this.query('AI00601_E'); this.iteration++;
+                await this.query('AI00701'); this.iteration++;
+                await this.query('AI00801'); this.iteration++;
+                await this.query('AI00901'); this.iteration++;
+                await this.query('AI01001'); this.iteration++;
+                await this.query('AI01101'); this.iteration++;
+                await this.query('AI02901_B'); this.iteration++;
                 await this.query('AI02901_E');
+                this.working = false;
             });
         },
         async query(code) {
-            this.isBusy = true;
-            await this.$http.post(CONFIG.API.FILE.EXPORT, {
+            this.$http.post(CONFIG.API.FILE.EXPORT, {
                 type: 'file_data_export',
                 code: code,
                 section: this.tags
