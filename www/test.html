@@ -23,13 +23,9 @@
     <link rel="preload" href="assets/js/treant/examples/basic-example/basic-example.css" as="style"
         onload="this.onload=null;this.rel='stylesheet'">
     <style>
-        .Treant > .node { padding: 3px; border: 1px solid #484848; border-radius: 3px; font-size: 12px;}
-        .Treant > .node img { max-width: 64px; margin-right: 3px; }
-        .Treant .collapse-switch { width: 100%; height: 100%; border: none; }
-        .Treant .node.collapsed { border: 2px solid #c5caf8 }
-        .Treant .node.collapsed .collapse-switch { background: none; }
-        .Treant img {
-            max-width: 64px;
+        .card {
+            -webkit-filter: drop-shadow(6px 6px 7px rgba(0, 0, 0, 0.7));
+            filter: drop-shadow(6px 6px 7px rgba(0, 0, 0, 0.7))
         }
     </style>
 </head>
@@ -45,6 +41,9 @@
                     <lah-button v-b-toggle.sidebar-1 icon="bars">Toggle</lah-button>
                     {{myinfo}} {{authority}}
                 </b-card>
+            </b-card-group>
+            <b-card-group columns class="mt-2">
+                <lah-export-txt></lah-export-txt>
             </b-card-group>
             <b-sidebar id="sidebar-1" title="Sidebar" bg-variant="dark" text-variant="light" backdrop
                 no-close-on-backdrop shadow>
@@ -82,176 +81,7 @@
     <script src="assets/js/components/dashboards/lah-xap-connection-chart.js"></script>
     <script src="assets/js/components/dashboards/lah-xap-history-chart.js"></script>
 
-    <script src="assets/js/treant/vendor/raphael.js"></script>
-    <script src="assets/js/treant/Treant.js"></script>
-    <script>
-        $(document).ready(() => {
-            var config = {
-                container: "#treant",
-                connectors: {
-                    type: 'bCurve' // curve, bCurve, step, straight
-                },
-                node: {
-                    HTMLclass: 'nodeExample1'
-                },
-                rootOrientation: 'NORTH',
-                nodeAlign: 'TOP',
-                animateOnInit: false
-            },
-            director = {
-                text: {
-                    name: "劉瑞德",
-                    title: "主任",
-                    contact: "03-4917647#100",
-                },
-                image: "assets/img/users/劉瑞德_avatar.jpg"
-            },
-            secretary = {
-                parent: director,
-                text: {
-                    name: "鍾玉美",
-                    title: "秘書",
-                    contact: "03-4917647#300",
-                },
-                stackChildren: true,
-                image: "assets/img/users/鍾玉美_avatar.jpg",
-                collapsable: true,
-                collapsed: false,
-                connectors: { type: 'step' }
-            },
-            inf_chief = {
-                parent: secretary,
-                text: {
-                    name: "陳允成",
-                    title: "資訊課長",
-                    contact: '#501'
-                },
-                stackChildren: true,
-                image: "assets/img/users/陳允成_avatar.jpg",
-                collapsable: true,
-                collapsed: false,
-                pseudo: false
-            },
-            HB0541 = {
-                parent: inf_chief,
-                text: {
-                    name: "劉邦渝",
-                    title: "管理師",
-                    desc: "Awesome!",
-                    "data-foo": " data Attribute for node",
-                    contact: { 
-                        val: "#503",
-                        href: "https://www.google.com/",
-                        target: "_blank"
-                    }
-                },
-                image: "assets/img/users/劉邦渝_avatar.jpg",
-                HTMLclass: 'bg-dark text-white'
-            },
-            HB0542 = {
-                parent: inf_chief,
-                text: {
-                    name: "賴俋儒",
-                    title: "管理師",
-                    contact: '#502'
-                },
-                image: "assets/img/users/賴俋儒_avatar.jpg"
-            },
-            HB0543 = {
-                parent: inf_chief,
-                text: {
-                    name: "葉宇敦",
-                    title: "管理師",
-                    contact: '#506'
-                },
-                image: "assets/img/users/葉宇敦_avatar.jpg"
-            },
-            reg_chief = {
-                parent: secretary,
-                text: {
-                    name: "麥志中",
-                    title: "登記課長",
-                },
-                stackChildren: true,
-                image: "assets/img/users/麥志中_avatar.jpg"
-            },
-            HB1184 = {
-                parent: reg_chief,
-                text: {
-                    name: "曾奕融",
-                    title: "課員",
-                    contact: {
-                        val: "1184.b@mail.tyland.gov.tw",
-                        href: "mailto:1184.b@mail.tyland.gov.tw"
-                    }
-                },
-                image: "assets/img/users/曾奕融_avatar.jpg"
-            },
-            HB1185 = {
-                parent: reg_chief,
-                text: {
-                    name: "王甄臻",
-                    title: "課員",
-                    contact: {
-                        val: "1185.b@mail.tyland.gov.tw",
-                        href: "mailto:1185.b@mail.tyland.gov.tw"
-                    }
-                },
-                image: "assets/img/users/王甄臻_avatar.jpg"
-            },
-            adm_chief = {
-                parent: secretary,
-                text: {
-                    name: "劉家欣",
-                    title: "行政課長",
-                },
-                stackChildren: true,
-                image: "assets/img/users/劉家欣_avatar.jpg"
-            },
-            sur_chief = {
-                parent: secretary,
-                text: {
-                    name: "張明智",
-                    title: "測量課長",
-                },
-                stackChildren: true,
-                image: "assets/img/users/張明智_avatar.jpg"
-            },
-            HB0247 = {
-                parent: sur_chief,
-                text: {
-                    name: "葉思仙",
-                    title: "測量助理員",
-                    contact: '03-4917647#228'
-                },
-                image: "assets/img/users/葉思仙_avatar.jpg"
-            },
-            val_chief = {
-                parent: secretary,
-                text: {
-                    name: "郭美蘭",
-                    title: "地價課長",
-                },
-                stackChildren: true,
-                image: "assets/img/users/郭美蘭_avatar.jpg"
-            };
-            let tr;
-            setTimeout(() => {
-                tr = new Treant([
-                    config,
-                    director, secretary, inf_chief, sur_chief, reg_chief, val_chief, adm_chief, HB0247, HB1184, HB1185, HB0541, HB0542, HB0543
-                ]);
-                console.log(tr);
-            }, 1000);
-            window.addEventListener("resize", function(e) {
-                tr = new Treant([
-                    config,
-                    director, secretary, inf_chief, sur_chief, reg_chief, val_chief, adm_chief, HB0247, HB1184, HB1185, HB0541, HB0542, HB0543
-                ]);
-                console.log(tr);
-            });
-        });
-    </script>
+    <script src="assets/js/components/dashboards/lah-export-txt.js"></script>
 </body>
 
 </html>
