@@ -2102,54 +2102,7 @@ if (Vue) {
             selected: '',
             selected_label: '',
             sql: '',
-            options: [{
-                    label: '==== 地籍資料 ====',
-                    options: [{
-                            text: 'AI00301 - 土地標示部資料',
-                            value: 'txt_AI00301.sql'
-                        },
-                        {
-                            text: 'AI00401 - 土地所有權部資料',
-                            value: 'txt_AI00401.sql'
-                        },
-                        {
-                            text: 'AI00601 - 土地管理者資料',
-                            value: 'txt_AI00601_B.sql'
-                        },
-                        {
-                            text: 'AI00601 - 建物管理者資料',
-                            value: 'txt_AI00601_E.sql'
-                        },
-                        {
-                            text: 'AI00701 - 建物標示部資料',
-                            value: 'txt_AI00701.sql'
-                        },
-                        {
-                            text: 'AI00801 - 基地坐落資料',
-                            value: 'txt_AI00801.sql'
-                        },
-                        {
-                            text: 'AI00901 - 建物分層及附屬資料',
-                            value: 'txt_AI00901.sql'
-                        },
-                        {
-                            text: 'AI01001 - 主建物與共同使用部分資料',
-                            value: 'txt_AI01001.sql'
-                        },
-                        {
-                            text: 'AI01101 - 建物所有權部資料',
-                            value: 'txt_AI01101.sql'
-                        },
-                        {
-                            text: 'AI02901 - 土地各部別之其他登記事項列印',
-                            value: 'txt_AI02901_B.sql'
-                        },
-                        {
-                            text: 'AI02901 - 建物各部別之其他登記事項列印',
-                            value: 'txt_AI02901_E.sql'
-                        }
-                    ]
-                },
+            options: [
                 {
                     label: '==== 所內登記案件統計 ====',
                     options: [{
@@ -2231,6 +2184,53 @@ if (Vue) {
                         {
                             text: '全國跨縣市收件資料',
                             value: '18_cross_county_crsms.sql'
+                        }
+                    ]
+                },{
+                    label: '==== 地籍資料 ====',
+                    options: [{
+                            text: 'AI00301 - 土地標示部資料',
+                            value: 'txt_AI00301.sql'
+                        },
+                        {
+                            text: 'AI00401 - 土地所有權部資料',
+                            value: 'txt_AI00401.sql'
+                        },
+                        {
+                            text: 'AI00601 - 土地管理者資料',
+                            value: 'txt_AI00601_B.sql'
+                        },
+                        {
+                            text: 'AI00601 - 建物管理者資料',
+                            value: 'txt_AI00601_E.sql'
+                        },
+                        {
+                            text: 'AI00701 - 建物標示部資料',
+                            value: 'txt_AI00701.sql'
+                        },
+                        {
+                            text: 'AI00801 - 基地坐落資料',
+                            value: 'txt_AI00801.sql'
+                        },
+                        {
+                            text: 'AI00901 - 建物分層及附屬資料',
+                            value: 'txt_AI00901.sql'
+                        },
+                        {
+                            text: 'AI01001 - 主建物與共同使用部分資料',
+                            value: 'txt_AI01001.sql'
+                        },
+                        {
+                            text: 'AI01101 - 建物所有權部資料',
+                            value: 'txt_AI01101.sql'
+                        },
+                        {
+                            text: 'AI02901 - 土地各部別之其他登記事項列印',
+                            value: 'txt_AI02901_B.sql'
+                        },
+                        {
+                            text: 'AI02901 - 建物各部別之其他登記事項列印',
+                            value: 'txt_AI02901_E.sql'
                         }
                     ]
                 }
