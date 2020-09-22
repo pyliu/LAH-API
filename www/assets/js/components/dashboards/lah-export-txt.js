@@ -88,7 +88,7 @@ if (Vue) {
             });
         },
         async query(code) {
-            this.$http.post(CONFIG.API.FILE.EXPORT, {
+            await this.$http.post(CONFIG.API.FILE.EXPORT, {
                 type: 'file_data_export',
                 code: code,
                 section: this.tags
