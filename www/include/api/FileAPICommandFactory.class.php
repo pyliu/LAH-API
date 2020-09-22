@@ -17,6 +17,7 @@ abstract class FileAPICommandFactory {
             case "file_sql_txt":
                 $log->info("輸出TXT檔案");
                 $log->info($_POST["sql"]);
+                $_SESSION['export_tmp_txt_filename'] = $_POST["filename"] ?? 'tmp';
                 return new FileAPISQLTxtCommand($_POST["sql"]);
             case "file_log":
                 $log->info("輸出LOG檔案");

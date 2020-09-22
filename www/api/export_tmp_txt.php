@@ -1,11 +1,12 @@
 <?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."include".DIRECTORY_SEPARATOR."init.php");
 
-$tmp_file = ROOT_DIR.DIRECTORY_SEPARATOR.'exports'.DIRECTORY_SEPARATOR.'tmp.txt';
+$exp_folder = ROOT_DIR.DIRECTORY_SEPARATOR.'exports'.DIRECTORY_SEPARATOR;
+$tmp_file = $exp_folder.'tmp.txt';
 
-if (isset($_SESSION['export_tmp_txt_filename'])) {
+if (isset($_SESSION['export_tmp_txt_filename']) && $_SESSION['export_tmp_txt_filename'] != 'tmp') {
     // copy tmp.txt to the target as well
-    $target = ROOT_DIR.DIRECTORY_SEPARATOR.'exports'.DIRECTORY_SEPARATOR.$_SESSION['export_tmp_txt_filename'].'.txt';
+    $target = $exp_folder.$_SESSION['export_tmp_txt_filename'].'.txt';
     $res = @copy($tmp_file, $target);
     if ($res) {
         $log->info('Copied tmp.txt to '.$target);
