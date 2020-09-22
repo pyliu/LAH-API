@@ -4,12 +4,7 @@ require_once(ROOT_DIR.DIRECTORY_SEPARATOR."include/Query.class.php");
 
 class FileAPISQLTxtCommand extends FileAPICommand {
     private $sql;
-    function __construct($sql) {
-        $this->sql = $sql;
-    }
-
-    function __destruct() {}
-
+    
     private function writeTXTtmp($data, $print_count = true) {
         $out = fopen(ROOT_DIR.DIRECTORY_SEPARATOR."exports/tmp.txt", 'w'); 
         if (is_array($data)) {
@@ -53,6 +48,12 @@ class FileAPISQLTxtCommand extends FileAPICommand {
         }
         fclose($out);
     }
+
+    function __construct($sql) {
+        $this->sql = $sql;
+    }
+
+    function __destruct() {}
 
     public function execute() {
         $q = new Query();
