@@ -32,7 +32,7 @@ if (Vue) {
                 :tag-validator="validator"
             ></b-form-tags>
         </b-input-group>
-        <div v-for="link in links" class="s-80 my-1"><a href="#" @click="download(link.code)">{{link.filename}}</a></div>
+        <div v-for="link in links" class="s-75 my-1 truncate"><a href="#" @click="download(link.code)" :title="link.filename">{{link.filename}}</a></div>
     </b-card>`,
     computed: {
         disabled() { return this.tags.length == 0 }
@@ -45,7 +45,7 @@ if (Vue) {
         validator(tag) {
             return (/^\d{3,4}$/ig).test(tag);
         },
-        clean() { this.tags = []; this.links = []; },
+        clean() { this.tags = [] },
         download(code) {
             // second param usage => e.target.title to get the title
             this.open(`api/export_txt_data.php?code=${code}`, {
@@ -61,6 +61,7 @@ if (Vue) {
         },
         go() {
             this.$confirm(`請確認以輸入的段代碼產生地籍資料？`, async () => {
+                this.links = [];
                 await this.query('AI00301');
                 await this.query('AI00401');
                 await this.query('AI00601_B');

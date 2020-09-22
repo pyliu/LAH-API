@@ -2,6 +2,7 @@
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'init.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR."api".DIRECTORY_SEPARATOR."FileAPICommand.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."Query.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."Cache.class.php");
 
 class FileAPIDataExportCommand extends FileAPICommand {
     private $code, $sections;
@@ -71,10 +72,15 @@ class FileAPIDataExportCommand extends FileAPICommand {
         }
         $replacement = "'".implode("','", $this->sections)."'";
         $sql = str_replace('##REPLACEMENT##', $replacement, $content);
+        
+        global $log;
+        $mock = SYSTEM_CONFIG["MOCK_MODE"];
+        if ($mock) $log->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！");
+        $cache = new Cache();
         $q = new Query();
-        // true - get raw big5 data; default is false.
-        $data = $q->getSelectSQLData($sql, true);
-        //$this->exportTxt($data);
+		$data = $mock ? $cache->get('FileAPIDataExportCommand') : $q->getSelectSQLData($sql, true); // true - get raw big5 data; default is false.
+        if (!$mock) $cache->set('FileAPIDataExportCommand', $data);
+        
         $this->export($data);
     }
 }
