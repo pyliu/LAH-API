@@ -11,7 +11,7 @@ if (Vue) {
                     </b-form-checkbox>
                 </b-button-group>
             </div>
-            <div id="e6e03333-5899-4cad-b934-83189668a148" class="container-fluid" style="height: 600px;"></div>
+            <div ref="canvas" id="e6e03333-5899-4cad-b934-83189668a148" class="container-fluid" style="height: 600px;"></div>
         </b-card>`,
         data: () => ({
             inst: null,
@@ -201,7 +201,10 @@ if (Vue) {
                 }, 500);
             });
         },
-        mounted() { this.reload() }
+        mounted() {
+            this.$refs.canvas.style.height = (window.innerHeight - 165 || 600) + 'px';
+            this.reload();
+        }
     });
 } else {
     console.error("vue.js not ready ... lah-org-chart component can not be loaded.");
