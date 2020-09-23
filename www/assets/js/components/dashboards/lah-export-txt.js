@@ -35,7 +35,7 @@ if (Vue) {
                 :tag-validator="validator"
             ></b-form-tags>
         </b-input-group>
-        <div v-for="link in links" class="s-75 truncate my-1"><b-link href="#" @click="download(link.code)" :title="link.filename">{{link.filename}}</b-link></div>
+        <div v-for="link in links" class="s-75 truncate my-1"><i class="fa fa-download"></i> <b-link href="#" @click="download(link)" :title="link.filename">{{link.filename}}</b-link></div>
     </b-card>`,
     computed: {
         disabled() { return this.tags.length == 0 },
@@ -53,16 +53,16 @@ if (Vue) {
             return (/^\d{3,4}$/ig).test(tag);
         },
         clean() { this.tags = [] ; this.links = []; },
-        download(code) {
+        download(link) {
             // second param usage => e.target.title to get the title
-            this.open(`${CONFIG.API.FILE.DATA}?code=${code}`, {
+            this.open(`${CONFIG.API.FILE.DATA}?code=${link.code}`, {
                 target: {
                     title: '下載產製資料'
                 }
             });
             this.timeout(() => closeModal(() => this.notify({
                 title: '下載產製資料',
-                message: '<i class="fas fa-check ld ld-pulse"></i> 下載完成',
+                message: `<i class="fas fa-check ld ld-pulse"></i> ${link.filename} 下載完成`,
                 type: "success"
             })), 2000);
         },
