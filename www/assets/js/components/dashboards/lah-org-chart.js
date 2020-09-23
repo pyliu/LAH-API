@@ -62,6 +62,7 @@ if (Vue) {
                 this.reload_timer = this.timeout(() => {
                     this.isBusy = true;
                     this.prepareConfig(raw);
+                    this.$refs.canvas.style.height = (window.innerHeight - 165 || 600) + 'px';
                     this.inst = new Treant(this.config, () => {
                         this.depth = 0;
                         this.isBusy = false;
@@ -206,7 +207,6 @@ if (Vue) {
             });
         },
         mounted() {
-            this.$refs.canvas.style.height = (window.innerHeight - 165 || 600) + 'px';
             this.reload();
         }
     });
