@@ -14,7 +14,7 @@ if (Vue) {
                     <lah-button icon="train" variant="outline-secondary" @click="tags = ['0200', '0202', '0205', '0210']" class="mr-1">A21站</lah-button>
                     <lah-button icon="warehouse" variant="outline-secondary" @click="tags = ['0213', '0222']" class="mr-1">中原營區</lah-button>
                     <lah-button icon="map-signs" variant="outline-secondary" @click="tags = ['0255', '0275', '0277', '0278', '0377']" class="mr-1">草漯</lah-button>
-                    <lah-button icon="undo" action="cycle-alt" variant="outline-success" @click="clean" title="重設"></lah-button>
+                    <lah-button icon="undo" action="cycle-alt" variant="outline-success" @click="clean" title="重設" :disabled="tags.length == 0"></lah-button>
                 </b-button-group>
             </div>
         </template>
