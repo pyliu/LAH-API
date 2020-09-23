@@ -18,7 +18,7 @@ if (Vue) {
                 </b-button-group>
             </div>
         </template>
-        <b-progress v-if="show_progress" :max="max" show-progress animated class="my-1">
+        <b-progress v-if="working" :max="max" show-progress animated class="my-1">
             <b-progress-bar :value="iteration" :label="((iteration / max) * 100).toFixed(2)+'%'"></b-progress-bar>
         </b-progress>
         <b-input-group size="sm" prepend="段代碼" v-if="!working">
@@ -40,7 +40,7 @@ if (Vue) {
     </b-card>`,
     computed: {
         disabled() { return this.tags.length == 0 },
-        show_progress() { return this.iteration < 11 }
+        show_progress() { return this.iteration < 12 }
     },
     data: () => ({
         tags: [],
