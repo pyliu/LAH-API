@@ -74,20 +74,21 @@ if (Vue) {
                             this.isBusy = false;
                         }, $);
                         // this.$log(this.inst);
-                    }, 500);
+                    }, 250);
                 } else {
                     this.$error(`Treant not defined. Did you include treant.js?`);
                 }
             }
         },
         created() {
+            this.busy = true;
             this.id = this.uuid();
             window.addEventListener("resize", e => {
                 clearTimeout(this.rebuild_timer);
-                this.rebuild_timer = this.timeout(this.build, 500);
+                this.rebuild_timer = this.timeout(this.build, 250);
             });
         },
-        mounted() { this.build() }
+        mounted() { this.rebuild_timer = this.timeout(this.build, 750) }
     });
 } else {
     console.error("vue.js not ready ... lah-tree component can not be loaded.");

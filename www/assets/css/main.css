@@ -207,3 +207,8 @@ blockquote {
 	width: 176px;
 	font-size: 12px;
 }
+
+.mynode img {
+	max-width: 64px;
+	margin-right: 2px;
+}
