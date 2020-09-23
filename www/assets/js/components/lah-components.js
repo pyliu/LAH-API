@@ -3044,7 +3044,7 @@ if (Vue) {
                     <b-tab>
                         <template v-slot:title>
                             <strong>收件資料</strong>
-                            <b-link variant="muted" @click.stop="open(case_data_url, $event)" :title="'收件資料 on ' + ap_server"><lah-fa-icon icon="external-link-alt" variant="primary"></lah-fa-icon></b-link>
+                            <b-link variant="muted" @click.stop="openNewWindow(case_data_url, $event)" :title="'收件資料 on ' + ap_server"><lah-fa-icon icon="external-link-alt" variant="primary"></lah-fa-icon></b-link>
                         </template>
                         <b-card-body>
                             <b-form-row class="mb-1">
@@ -3081,7 +3081,7 @@ if (Vue) {
                     <b-tab>
                         <template v-slot:title>
                             <strong>辦理情形</strong>
-                            <b-link variant="muted" @click.stop="open(case_status_url, $event)" :title="'案件辦理情形 on ' + ap_server"><lah-fa-icon icon="external-link-alt" variant="primary"></lah-fa-icon></b-link>
+                            <b-link variant="muted" @click.stop="openNewWindow(case_status_url, $event)" :title="'案件辦理情形 on ' + ap_server"><lah-fa-icon icon="external-link-alt" variant="primary"></lah-fa-icon></b-link>
                         </template>
                         <b-card-body>
                             <b-list-group flush compact>

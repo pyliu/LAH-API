@@ -419,13 +419,16 @@ Vue.mixin({
         },
         open: function(url, e) {
             let h = window.innerHeight - 160;
-            this.$log(url, e);
-            this.$modal(`<iframe allow-scripts sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-pointer-lock" src="${url}" class="w-100" height="${h}" frameborder="0"></iframe>`, {
+            this.$modal(`<iframe sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-pointer-lock" src="${url}" class="w-100" height="${h}" frameborder="0"></iframe>`, {
                 title: e.target.title || `外部連結`,
                 size: "xl",
                 html: true,
                 noCloseOnBackdrop: false
             });
+        },
+        openNewWindow: function(url, e) {
+            let win = window.open(url, '_blank');
+            win.focus();
         },
         popUsercard: function(id, name = '', ip = '') {
             let card = this.$createElement("lah-user-card", { props: { id: id, name: name, ip: ip } });
