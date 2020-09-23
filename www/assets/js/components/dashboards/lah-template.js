@@ -9,12 +9,12 @@ if (Vue) {
       }
     },
     data: () => ({ }),
-    methods: {},
-    watch: { },
     computed: { },
+    watch: { },
+    methods: {},
     created() { },
     mounted() { }
   });
 } else {
-  console.error("vue.js not ready ... lah-export-txt component can not be loaded.");
+  console.error("vue.js not ready ... lah-xxxxxxxxx component can not be loaded.");
 }
