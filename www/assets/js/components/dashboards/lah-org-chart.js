@@ -21,7 +21,8 @@ if (Vue) {
             depth: 0,
             margin: 15,
             role_switch: true,
-            orientation_switch: false
+            orientation_switch: false,
+            treeNode: null
         }),
         watch: {
             orientation(val) { this.reload() },
@@ -72,6 +73,7 @@ if (Vue) {
                 }, 1000);
             },
             prepareConfig(raw) {
+                this.treeNode = this.nodeChief(raw);
                 this.config = {
                     chart: {
                         container: `#e6e03333-5899-4cad-b934-83189668a148`,
@@ -107,7 +109,7 @@ if (Vue) {
                         },
                         scrollbar: 'native'
                     },
-                    nodeStructure: this.nodeChief(raw)
+                    nodeStructure: this.treeNode
                 };
             },
             nodeStaff(staff) {
