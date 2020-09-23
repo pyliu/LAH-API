@@ -1,8 +1,8 @@
 if (Vue) {
     Vue.component('lah-tree', {
-        template: `<b-card :id="id" style="min-height: 300px"></b-card>`,
+        template: `<b-card no-body border-variant="white" :id="id" style="min-height: 300px"></b-card>`,
         props: {
-            dataNode: {
+            root: {
                 type: Object,
                 default: {
                     text: {
@@ -44,7 +44,7 @@ if (Vue) {
                             // collapsable: true,
                             // stackChildren: true
                         },
-                        rootOrientation: this.orientation_switch ? 'NORTH' : 'WEST',
+                        rootOrientation: this.orientation,
                         // animateOnInit: false,
                         // nodeAlign: 'TOP',
                         siblingSeparation: this.nodeMargin,
@@ -56,7 +56,7 @@ if (Vue) {
             }
         },
         watch: {
-            dataNode() { this.build() },
+            root() { this.build() },
             nodeMargin() { this.build() },
             htmlClass() { this.build() },
             orientation() { this.build() }
@@ -67,10 +67,9 @@ if (Vue) {
                     clearTimeout(this.rebuild_timer);
                     this.rebuild_timer = this.timeout(() => {
                         this.isBusy = true;
-                        this.config.nodeStructure = this.dataNode;
                         //this.$refs.canvas.style.height = (window.innerHeight - 165 || 600) + 'px';
                         if (this.inst) this.inst.destroy();
-                        this.inst = new Treant(Object.assign(this.config, { nodeStructure: this.dataNode }), () => {
+                        this.inst = new Treant(Object.assign(this.config, { nodeStructure: this.root }), () => {
                             this.isBusy = false;
                         }, $);
                         // this.$log(this.inst);
@@ -78,6 +77,9 @@ if (Vue) {
                 } else {
                     this.$error(`Treant not defined. Did you include treant.js?`);
                 }
+            },
+            height(val) {
+                $(this.$el).css('height', val + 'px');
             }
         },
         created() {

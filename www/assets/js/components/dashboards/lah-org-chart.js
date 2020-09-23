@@ -11,21 +11,24 @@ if (Vue) {
                     </b-form-checkbox>
                 </b-button-group>
             </div>
-            <div ref="canvas" id="e6e03333-5899-4cad-b934-83189668a148" class="container-fluid" style="height: 600px;"></div>
+            <lah-tree ref="tree" :root="root" :orientation="orientation" :node-margin="margin"></lah-tree>
         </b-card>`,
         data: () => ({
-            inst: null,
             reload_timer: null,
-            resize_timer: null,
             config: null,
             depth: 0,
             margin: 15,
             role_switch: true,
             orientation_switch: false,
-            treeNode: null
+            root: null
         }),
+        computed: {
+            depth_switch() { return this.depth < 2 ? false : true },
+            filter_by_text() { return this.role_switch ? '角色分類' : '職務分類' },
+            orientation_text() { return this.orientation_switch ? '左到右' : '上到下' },
+            orientation() { return this.orientation_switch ? 'WEST' : 'NORTH' }
+        },
         watch: {
-            orientation(val) { this.reload() },
             role_switch(val) { this.reload() },
             orientation_switch(val) { this.reload() }
         },
@@ -40,7 +43,7 @@ if (Vue) {
                             console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得組織樹狀資料回傳狀態碼有問題【${res.data.status}】`);
                             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                 this.setLocalCache('lah-org-chart', res.data.raw);
-                                this.build(res.data.raw);
+                                this.root = this.nodeChief(res.data.raw);
                             } else {
                                 this.alert({
                                     title: `取得組織樹狀資料`,
@@ -54,63 +57,9 @@ if (Vue) {
                             this.isBusy = false;
                         });
                     } else {
-                        this.build(cached);
+                        this.root = this.nodeChief(cached);
                     }
                 });
-            },
-            build(raw) {
-                clearTimeout(this.reload_timer);
-                this.reload_timer = this.timeout(() => {
-                    this.isBusy = true;
-                    this.prepareConfig(raw);
-                    this.$refs.canvas.style.height = (window.innerHeight - 165 || 600) + 'px';
-                    if (this.inst) this.inst.destroy();
-                    this.inst = new Treant(this.config, () => {
-                        this.depth = 0;
-                        this.isBusy = false;
-                    }, $);
-                    // this.$log(this.inst);
-                }, 1000);
-            },
-            prepareConfig(raw) {
-                this.treeNode = this.nodeChief(raw);
-                this.config = {
-                    chart: {
-                        container: `#e6e03333-5899-4cad-b934-83189668a148`,
-                        connectors: {
-                            type: 'step', // curve, bCurve, step, straight
-                            style: {  
-                                "stroke-width": 2,  
-                                "stroke": "#000"
-                            }
-                        },
-                        node: {
-                            HTMLclass: 'mynode',
-                            // collapsable: true,
-                            // stackChildren: true
-                        },
-                        rootOrientation: this.orientation_switch ? 'WEST' : 'NORTH',
-                        // animateOnInit: false,
-                        // nodeAlign: 'TOP',
-                        siblingSeparation: this.margin,
-                        levelSeparation: this.margin,
-                        subTeeSeparation: this.margin,
-                        callback: {
-                            onCreateNode:  function(e) {},
-                            onCreateNodeCollapseSwitch:  function(e) {},
-                            onAfterAddNode:  function(e) {},
-                            onBeforeAddNode:  function(e) {},
-                            onAfterPositionNode:  function(e) {},
-                            onBeforePositionNode:  function(e) {},
-                            onToggleCollapseFinished:  function(e) {},
-                            onBeforeClickCollapseSwitch:  function(e) {},
-                            onTreeLoaded: function(e) {},
-                            onAfterClickCollapseSwitch: (node) => {}
-                        },
-                        scrollbar: 'native'
-                    },
-                    nodeStructure: this.treeNode
-                };
             },
             nodeStaff(staff) {
                 return {
@@ -196,22 +145,8 @@ if (Vue) {
                 return this_node;
             }
         },
-        computed: {
-            depth_switch() { return this.depth < 2 ? false : true },
-            filter_by_text() { return this.role_switch ? '角色分類' : '職務分類' },
-            orientation_text() { return this.orientation_switch ? '左到右' : '上到下' }
-        },
-        created() {
-            window.addEventListener("resize", e => {
-                clearTimeout(this.resize_timer);
-                this.resize_timer = this.timeout(() => {
-                    this.inst.tree.reload();
-                }, 500);
-            });
-        },
-        mounted() {
-            this.reload();
-        }
+        created() { this.reload() },
+        mounted() { this.$refs.tree.height(window.innerHeight - 165); }
     });
 } else {
     console.error("vue.js not ready ... lah-org-chart component can not be loaded.");
