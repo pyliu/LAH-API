@@ -63,6 +63,7 @@ if (Vue) {
                     this.isBusy = true;
                     this.prepareConfig(raw);
                     this.$refs.canvas.style.height = (window.innerHeight - 165 || 600) + 'px';
+                    if (this.inst) this.inst.destroy();
                     this.inst = new Treant(this.config, () => {
                         this.depth = 0;
                         this.isBusy = false;
