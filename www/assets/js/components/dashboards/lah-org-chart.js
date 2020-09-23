@@ -74,7 +74,11 @@ if (Vue) {
                     chart: {
                         container: `#e6e03333-5899-4cad-b934-83189668a148`,
                         connectors: {
-                            type: 'step' // curve, bCurve, step, straight
+                            type: 'step', // curve, bCurve, step, straight
+                            style: {  
+                                "stroke-width": 2,  
+                                "stroke": "#000"
+                            }
                         },
                         node: {
                             HTMLclass: 'mynode',
