@@ -61,6 +61,9 @@ if (Vue) {
                     }
                 });
             },
+            resizeCanvasHeight() {
+                this.$refs.tree.height(window.innerHeight - 165);
+            },
             nodeStaff(staff) {
                 return {
                     text: {
@@ -145,8 +148,11 @@ if (Vue) {
                 return this_node;
             }
         },
-        created() { this.reload() },
-        mounted() { this.$refs.tree.height(window.innerHeight - 165); }
+        created() {
+            window.addEventListener("resize", e => this.resizeCanvasHeight() );
+            this.reload();
+        },
+        mounted() { this.resizeCanvasHeight() }
     });
 } else {
     console.error("vue.js not ready ... lah-org-chart component can not be loaded.");
