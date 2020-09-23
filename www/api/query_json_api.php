@@ -835,7 +835,7 @@ switch ($_POST["type"]) {
 				"authority" => getMyAuthority()
 			);
 			$log->info("XHR [my_info] ".$result['message']);
-			$log->info("XHR [authentication] $client_ip 授權【".print_r($result['authority'], true)."】");
+			$log->info("XHR [authentication] 查無 $client_ip 授權");
 			echo json_encode($result, 0);
 		} else {
 			$_SESSION["myinfo"] = $results[0];
@@ -847,7 +847,7 @@ switch ($_POST["type"]) {
 				"authority" => getMyAuthority()
 			);
 			$log->info("XHR [my_info] ".$result['message']);
-			$log->info("XHR [authentication] 查詢 ".$client_ip." 成功。 (".print_r($result['authority'], true).")");
+			$log->info("XHR [authentication] 查詢 ".$client_ip." 成功。 (".str_replace("\n", ' ', print_r($result['authority'], true)).")");
 			echo json_encode($result, 0);
 		}
 		break;
