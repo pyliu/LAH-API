@@ -22,7 +22,7 @@ if (Vue) {
         </b-progress>
         <b-input-group size="sm" prepend="段代碼" v-if="!working">
             <template v-slot:append>
-                <lah-button icon="cogs" variant="outline-primary" @click="go" title="執行" :disabled="disabled"></lah-button>
+                <lah-button icon="cog" action="cycle" variant="outline-primary" @click="go" title="執行" :disabled="disabled"></lah-button>
             </template>
             <b-form-tags
                 input-id="tags-basic"
