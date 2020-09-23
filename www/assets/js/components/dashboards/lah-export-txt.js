@@ -3,7 +3,7 @@ if (Vue) {
     template: `<b-card>
         <template v-slot:header>
             <div class="d-flex w-100 justify-content-between mb-0">
-                <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="map" prefix="far"> 輸出地籍資料</lah-fa-icon></h6>
+                <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="road" size="lg"> 輸出地籍資料</lah-fa-icon></h6>
                 <lah-button icon="question" variant="outline-success" class="border-0" @click="popup"></lah-button>
             </div>
         </template>
