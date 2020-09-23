@@ -67,7 +67,6 @@ if (Vue) {
                     clearTimeout(this.rebuild_timer);
                     this.rebuild_timer = this.timeout(() => {
                         this.isBusy = true;
-                        //this.$refs.canvas.style.height = (window.innerHeight - 165 || 600) + 'px';
                         if (this.inst) this.inst.destroy();
                         this.inst = new Treant(Object.assign(this.config, { nodeStructure: this.root }), () => {
                             this.isBusy = false;
