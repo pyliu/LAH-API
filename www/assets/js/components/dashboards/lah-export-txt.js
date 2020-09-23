@@ -35,12 +35,10 @@ if (Vue) {
                 :tag-validator="validator"
             ></b-form-tags>
         </b-input-group>
-        <ul>
-            <li v-for="link in links" class="s-75 truncate"><b-link href="#" @click="download(link.code)" :title="link.filename">{{link.filename}}</b-link></li>
-        </ul>
+        <div v-for="link in links" class="s-75 truncate my-1"><b-link href="#" @click="download(link.code)" :title="link.filename">{{link.filename}}</b-link></div>
     </b-card>`,
     computed: {
-        disabled() { return this.tags.length == 0 || this.show_progress },
+        disabled() { return this.tags.length == 0 },
         show_progress() { return this.iteration < 11 }
     },
     data: () => ({
@@ -57,7 +55,7 @@ if (Vue) {
         clean() { this.tags = [] ; this.links = []; },
         download(code) {
             // second param usage => e.target.title to get the title
-            this.open(`api/export_txt_data.php?code=${code}`, {
+            this.open(`${CONFIG.API.FILE.DATA}?code=${code}`, {
                 target: {
                     title: '下載產製資料'
                 }
@@ -69,6 +67,10 @@ if (Vue) {
             })), 2000);
         },
         go() {
+            if (this.working) {
+                this.$warn("Data generating in progress ... please wait a monment.");
+                return;
+            }
             this.$confirm(`請確認以輸入的段代碼產生地籍資料？`, async () => {
                 this.links = [];
                 this.working = true;

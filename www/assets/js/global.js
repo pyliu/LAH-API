@@ -19,6 +19,7 @@ const CONFIG = {
             XLSX: "api/export_xlsx_api.php",
             TXT: "api/export_tmp_txt.php",
             CSV: "api/export_tmp_csv.php",
+            DATA: "api/export_txt_data.php"
         },
         MOCK:{}
     },
