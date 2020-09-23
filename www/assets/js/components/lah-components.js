@@ -359,11 +359,6 @@ if (Vue) {
                 need_admin: false,
                 children: []
             }, {
-                text: "體溫紀錄",
-                url: "temperature.html",
-                icon: "head-side-mask",
-                need_admin: false
-            }, {
                 text: `統計看板`,
                 url: "stats.html",
                 icon: "laptop-house",
@@ -379,6 +374,11 @@ if (Vue) {
                 icon: "hands-helping",
                 need_admin: false,
                 children: [{
+                    text: "體溫紀錄",
+                    url: "temperature.html",
+                    icon: "head-side-mask",
+                    need_admin: false
+                }, {
                     text: "信差訊息",
                     url: "message.html",
                     icon: "comments",
