@@ -33,6 +33,10 @@ class SQLiteUser {
             $stm->bindParam(':onboard_date', $row['AP_ON_DATE']);
         }
         
+        if (empty($row['AP_OFF_DATE']) && $row['AP_OFF_JOB'] == 'Y') {
+            $row['AP_OFF_DATE'] = '109/09/24';
+        }
+
         $stm->bindParam(':offboard_date', $row['AP_OFF_DATE']);
         if (empty($row['AP_PCIP'])) {
             $stm->bindValue(':ip', '192.168.xx.xx');
