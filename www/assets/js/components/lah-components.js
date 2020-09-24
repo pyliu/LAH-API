@@ -1238,7 +1238,7 @@ if (Vue) {
     Vue.component("lah-user-card", {
         template: `<div>
             <h6 v-show="!empty(title)"><i class="fas fa-user-circle"></i> {{title}}</h6>
-            <b-card no-body v-if="found" style="max-width: 480px">
+            <b-card no-body v-if="found">
                 <b-tabs card :end="useEndTabs" :pills="useEndTabs" :small="useEndTabs" fill>
                     <b-tab v-for="(user_data, idx) in user_rows" :title="user_data['id']" :active="idx == 0" class="clearfix">
                         <template v-slot:title>
