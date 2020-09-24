@@ -38,6 +38,14 @@ class DocUserInfo {
         return $this->doc_db->fetchAll("SELECT * FROM DOC_USER WHERE USER_ID LIKE 'HB%' ORDER BY USER_NAME, USER_ID");
     }
 
+    public function updateExt($id, $ext) {
+        $this->doc_db->update($table, array('SUB_TEL' => $ext), array('USER_ID' => $id));
+        return $this->hasError();
+    }
+
+    public function hasError() {
+        return $this->doc_db->hasError();
+    }
 
     public function searchByID($id) {
         global $log;

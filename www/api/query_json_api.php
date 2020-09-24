@@ -7,6 +7,7 @@ require_once(INC_DIR."/Query.class.php");
 require_once(INC_DIR."/Message.class.php");
 require_once(INC_DIR."/WatchDog.class.php");
 require_once(INC_DIR."/TdocUserInfo.class.php");
+require_once(INC_DIR."/DocUserInfo.class.php");
 require_once(INC_DIR."/SQLiteUser.class.php");
 require_once(INC_DIR."/StatsSQLite3.class.php");
 require_once(INC_DIR."/Cache.class.php");
@@ -822,9 +823,9 @@ switch ($_POST["type"]) {
 		break;
 	case "upd_ext_doc":
 		$log->info("XHR [upd_ext_doc] 更新舊資料庫分機號碼【".$_POST["id"].", ".$_POST["ext"]."】請求");
-		// TODO connect doc MSSQL DB to update
-		// $sqlite_user = new SQLiteUser();
-		// $result = $sqlite_user->updateExt($_POST["id"], $_POST["ext"]);
+		// connect MSSQL doc DB to update legacy data
+		$doc = new DocUserInfo();
+		$result = $doc->updateExt($_POST["id"], $_POST["ext"]);
 		if ($result) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
