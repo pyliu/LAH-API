@@ -20,7 +20,8 @@ if (Vue) {
             },
             nodeMargin: { type: Number, default: 15 },
             htmlClass: { type: String, default: 'mynode' },
-            orientation: { type: String, default: 'NORTH' }
+            orientation: { type: String, default: 'NORTH' },
+            height: { type: Number, default: 300 }
         },
         data: () => ({
             id: '',
@@ -59,7 +60,11 @@ if (Vue) {
             root() { this.build() },
             nodeMargin() { this.build() },
             htmlClass() { this.build() },
-            orientation() { this.build() }
+            orientation() { this.build() },
+            height(val) {
+                $(this.$el).css('height', val + 'px');
+                this.build();
+            }
         },
         methods: {
             build() {
@@ -76,9 +81,6 @@ if (Vue) {
                 } else {
                     this.$error(`Treant not defined. Did you include treant.js?`);
                 }
-            },
-            height(val) {
-                $(this.$el).css('height', val + 'px');
             }
         },
         created() {

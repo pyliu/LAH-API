@@ -11,7 +11,7 @@ if (Vue) {
                     </b-form-checkbox>
                 </b-button-group>
             </div>
-            <lah-tree ref="tree" :root="root" :orientation="orientation" :node-margin="margin"></lah-tree>
+            <lah-tree ref="tree" :root="root" :orientation="orientation" :node-margin="margin" :height="canvas_height"></lah-tree>
         </b-card>`,
         data: () => ({
             reload_timer: null,
@@ -20,7 +20,8 @@ if (Vue) {
             margin: 15,
             role_switch: true,
             orientation_switch: false,
-            root: null
+            root: null,
+            canvas_height: 300
         }),
         computed: {
             depth_switch() { return this.depth < 2 ? false : true },
@@ -60,9 +61,6 @@ if (Vue) {
                         this.root = this.nodeChief(cached);
                     }
                 });
-            },
-            resizeCanvasHeight() {
-                this.$refs.tree.height(window.innerHeight - 165);
             },
             nodeStaff(staff) {
                 return {
@@ -149,10 +147,10 @@ if (Vue) {
             }
         },
         created() {
-            window.addEventListener("resize", e => this.resizeCanvasHeight() );
+            window.addEventListener("resize", e => this.canvas_height = window.innerHeight - 165 );
             this.reload();
         },
-        mounted() { this.resizeCanvasHeight() }
+        mounted() { this.canvas_height = window.innerHeight - 165 }
     });
 } else {
     console.error("vue.js not ready ... lah-org-chart component can not be loaded.");
