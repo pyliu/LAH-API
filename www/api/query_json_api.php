@@ -791,9 +791,11 @@ switch ($_POST["type"]) {
 		$sqlite_user = new SQLiteUser();
 		$results = $sqlite_user->getUser($_POST["id"]);
 		if (empty($results)) {
+			$log->info("XHR [user_info] user id (".$_POST["id"].") not found ... try to use name (".$_POST["name"].") for searching.");
 			$results = $sqlite_user->getUserByName($_POST["name"]);
 		}
 		if (empty($results)) {
+			$log->info("XHR [user_info] user name (".$_POST["name"].") not found ... try to use ip (".$_POST["ip"].") for searching.");
 			$results = $sqlite_user->getUserByIP($_POST["ip"]);
 			$len = count($results);
 			if ($len > 1) {
@@ -802,8 +804,8 @@ switch ($_POST["type"]) {
 			}
 		}
 		if (empty($results)) {
-			echoErrorJSONString("查無 ".$_POST["name"]." 資料。");
 			$log->info("XHR [user_info] 查無 ".$_POST["name"] ?? $_POST["id"] ?? $_POST["ip"]." 資料。");
+			echoErrorJSONString("查無 ".$_POST["name"]." 資料。");
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -811,7 +813,7 @@ switch ($_POST["type"]) {
 				"raw" => $results,
 				"query_string" => "id=".$_POST["id"]."&name=".$_POST["name"]."&ip=".$_POST["ip"]
 			);
-			$log->info("XHR [user_info] 查詢 ".$_POST["name"] ?? $_POST["id"] ?? $_POST["ip"]." 成功。");
+			$log->info("XHR [user_info] 查詢 ".($_POST["name"] ?? $_POST["id"] ?? $_POST["ip"])." 成功。");
 			echo json_encode($result, 0);
 		}
 		break;

@@ -34,7 +34,11 @@ class SQLiteUser {
         }
         
         $stm->bindParam(':offboard_date', $row['AP_OFF_DATE']);
-        $stm->bindParam(':ip', $row['AP_PCIP']);
+        if (empty($row['AP_PCIP'])) {
+            $stm->bindValue(':ip', '192.168.xx.xx');
+        } else {
+            $stm->bindParam(':ip', $row['AP_PCIP']);
+        }
 
         // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
         

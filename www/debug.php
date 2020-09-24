@@ -8,11 +8,12 @@ require_once("./include/TdocUserInfo.class.php");
 require_once("./include/api/FileAPICommandFactory.class.php");
 require_once("./include/Watchdog.class.php");
 require_once("./include/StatsOracle.class.php");
+require_once("./include/SQLiteUser.class.php");
 
 echo date("Ymdhis", strtotime("-10 minutes"));
 echo "\n\ntest\n\n";
 
 $user_info = new SQLiteUser();
-$users = $user_info->getTopTreeData();
+$users = $user_info->getUser('HB0122');
 var_dump($users);
 ?>
