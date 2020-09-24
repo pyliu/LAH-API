@@ -250,5 +250,12 @@ class SQLiteUser {
         return false;
         
     }
+
+    public function updateExt($id, $ext) {
+        $stm = $this->db->prepare("UPDATE user SET ext = :ext WHERE id = :id");
+        $stm->bindParam(':ext', $ext);
+        $stm->bindParam(':id', $id);
+        return $stm->execute() === FALSE ? false : true;
+    }
 }
 ?>

@@ -307,8 +307,8 @@ if (Vue) {
                             <i class="far fa-laugh-wink fa-lg ld ld-swing"></i> 快放假了~離下班只剩 {{left_hours}} 小時
                         </b-popover>
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottom" delay="350">
-                            <lah-user-ext></lah-user-ext>
                             <lah-user-message-history ref="message" :ip="myip" count=5 title="最新訊息" class="mb-2" :tabs="true" :tabs-end="true"></lah-user-message-history>
+                            <lah-user-ext class="mb-2"></lah-user-ext>
                             <lah-user-message-reservation></lah-user-message-reservation>
                             <b-button block @click.stop="clearCache" variant="outline-secondary" size="sm"><lah-fa-icon icon="broom"> 清除快取資料</lah-fa-icon></b-button>
                         </b-popover>
@@ -2119,67 +2119,53 @@ if (Vue) {
     Vue.component('lah-user-ext', {
         template: `<div>
             <h6 v-if="heading"><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> 我的分機</h6>
-            <b-form-group label-size="lg">
-                <template v-slot:label v-if="!empty(label)">
-                    <lah-fa-icon icon="bell" prefix="far"> {{label}}</lah-fa-icon>
+            <b-input-group size="sm" prepend="分機號碼">
+                <template v-slot:append>
+                    <lah-button icon="edit" variant="outline-primary" @click="update" title="更新" :disabled="!validate"></lah-button>
                 </template>
-                <b-input-group size="sm" prepend="分機號碼">
-                    <template v-slot:append>
-                        <lah-button icon="edit" variant="outline-primary" @click="update" title="更新" :disabled="!validate"></lah-button>
-                    </template>
-                    <b-form-input
-                        v-model="myinfo['ext']"
-                        type="number"
-                        inline
-                        @keyup.enter="update"
-                        :state="validate"
-                    ></b-form-input>
-                </b-input-group>
-            </b-form-group>
+                <b-form-input
+                    v-model="myinfo['ext']"
+                    type="number"
+                    inline
+                    @keyup.enter="update"
+                    :state="validate"
+                    class="no-cache"
+                ></b-form-input>
+            </b-input-group>
         </div>`,
         props: {
             heading: {
                 type: Boolean,
                 default: true
-            },
-            label: {
-                type: String,
-                default: ''
             }
         },
         data: () => ({}),
         computed: {
-            validate() { return !this.empty(this.myinfo['ext']) && parseInt(this.myinfo['ext']) != NaN },
-        },
-        watch: {
-            myinfo(nVal, oVal) {}
+            validate() { return this.myinfo['ext'] > 99 && this.myinfo['ext'] < 700 },
         },
         methods: {
             update() {
                 if (this.validate) {
-
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.API.JSON.QUERY, {
+                        type: "upd_ext",
+                        id: this.myinfo['id'],
+                        ext: this.myinfo['ext']
+                    }).then(res => {
+                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
+                        this.notify({
+                            title: "更新分機號碼",
+                            message: res.data.message,
+                            type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? 'success' : 'danger'
+                        });
+                        // clear local cache after success updated
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) this.removeLocalCache('myinfo');
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
                 }
-                // this.isBusy = true;
-                // this.$http.post(CONFIG.API.JSON.QUERY, {
-                //     type: "send_message",
-                //     title: this.message,
-                //     content: this.message,
-                //     who: this.myid,
-                //     send_time: this.sendtime,
-                //     end_time: this.droptime
-                // }).then(res => {
-                //     this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
-                //     this.title = '';
-                //     this.notify({
-                //         title: "傳送訊息",
-                //         message: res.data.message
-                //     });
-                // }).catch(err => {
-                //     this.error = err;
-                // }).finally(() => {
-                //     this.isBusy = false;
-                //     this.message = '';
-                // });
             }
         }
     });

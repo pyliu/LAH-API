@@ -804,6 +804,39 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
+	case "upd_ext":
+		$log->info("XHR [upd_ext] 更新分機號碼【".$_POST["id"].", ".$_POST["ext"]."】請求");
+		$sqlite_user = new SQLiteUser();
+		$result = $sqlite_user->updateExt($_POST["id"], $_POST["ext"]);
+		if ($result) {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"message" => "更新分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 成功。"
+			);
+			$log->info("XHR [upd_ext] ".$result["message"]);
+			echo json_encode($result, 0);
+		} else {
+			echoErrorJSONString("更新分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
+			$log->info("XHR [upd_ext] 更新分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
+		}
+		break;
+	case "upd_ext_doc":
+		$log->info("XHR [upd_ext_doc] 更新舊資料庫分機號碼【".$_POST["id"].", ".$_POST["ext"]."】請求");
+		// TODO connect doc MSSQL DB to update
+		// $sqlite_user = new SQLiteUser();
+		// $result = $sqlite_user->updateExt($_POST["id"], $_POST["ext"]);
+		if ($result) {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"message" => "更新舊資料庫分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 成功。"
+			);
+			$log->info("XHR [upd_ext_doc] ".$result["message"]);
+			echo json_encode($result, 0);
+		} else {
+			echoErrorJSONString("更新舊資料庫分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
+			$log->info("XHR [upd_ext_doc] 更新舊資料庫分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
+		}
+		break;
 	case "user_info":
 		$log->info("XHR [user_info] 查詢使用者資料【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"]."】請求");
 		$sqlite_user = new SQLiteUser();
