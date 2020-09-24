@@ -1146,6 +1146,7 @@ if (Vue) {
             load_usernames() {
                 this.getLocalCache('user_names').then(raw => {
                     if (raw === false) {
+                        this.busy = true;
                         this.$http.post(CONFIG.API.JSON.QUERY, {
                             type: 'user_names'
                         }).then(res => {
@@ -1184,7 +1185,6 @@ if (Vue) {
         created() { this.load_usernames() },
         mounted() {
             this.input = this.myid
-            this.busy = true;
         }
     });
 
