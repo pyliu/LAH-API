@@ -1036,13 +1036,13 @@ if (Vue) {
             myid(val) {
                 this.input = val
             },
-            userNames(val) {
-                this.ids = Object.keys(val);
-                this.ids.sort();
-                // set all flags to false at first
-                this.ids.forEach(id => {
-                    Vue.set(this.usertag_flags, id, false);
+            usernames(val) {
+                this.ids = val.map((item, idx, array) => {
+                    // set all flags to false at first
+                    Vue.set(this.usertag_flags, item.id, false);
+                    return item.id;
                 });
+                this.ids.sort();
             }
         },
         computed: {
@@ -1142,34 +1142,49 @@ if (Vue) {
                     message: `輸入下列條件來查找。 <ul><li>使用者代碼(如：HB1184)</li> <li>名稱(如：奕)</li> <li>電腦IP位址(如：192.168.22.7)</li> </ul>`,
                     size: "sm"
                 });
+            },
+            load_usernames() {
+                this.getLocalCache('user_names').then(raw => {
+                    if (raw === false) {
+                        this.$http.post(CONFIG.API.JSON.QUERY, {
+                            type: 'user_names'
+                        }).then(res => {
+                            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                res.data.raw.forEach(userinfo => {
+                                    this.usernames.push({
+                                        id: userinfo['id'],
+                                        name: userinfo['name']
+                                    });
+                                });
+                                this.setLocalCache('user_names', res.data.raw);
+                            } else {
+                                this.notify({
+                                    title: "使用者名冊",
+                                    message: res.data.message,
+                                    type: "warning"
+                                });
+                                this.$warn(res.data.message);
+                            }
+                        }).catch(err => {
+                            this.error = err;
+                        }).finally(() => {
+                            this.busy = false;
+                        });
+                    } else {
+                        raw.forEach(userinfo => {
+                            this.usernames.push({
+                                id: userinfo['id'],
+                                name: userinfo['name']
+                            });
+                        });
+                    }
+                });
             }
         },
+        created() { this.load_usernames() },
         mounted() {
             this.input = this.myid
             this.busy = true;
-            this.$http.post(CONFIG.API.JSON.QUERY, {
-                type: 'user_names'
-            }).then(res => {
-                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                    res.data.raw.forEach(userinfo => {
-                        this.usernames.push({
-                            id: userinfo['id'],
-                            name: userinfo['name']
-                        });
-                    });
-                } else {
-                    this.notify({
-                        title: "使用者名冊",
-                        message: res.data.message,
-                        type: "warning"
-                    });
-                    this.$warn(res.data.message);
-                }
-            }).catch(err => {
-                this.error = err;
-            }).finally(() => {
-                this.busy = false;
-            });
         }
     });
 
