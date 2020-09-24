@@ -23,10 +23,11 @@
   <section class="hide">
     <div class="container-fluid" v-cloak>
       <b-card-group columns>
+        <lah-user-card :no-message="true" class="shadow"></lah-user-card>
         <lah-xap-connection-chart type='bar'></lah-xap-connection-chart>
-        <b-card no-body border-variant="white"><lah-user-message-reservation :heading="false" label="信差提醒"></lah-user-message-reservation></b-card>
-        <b-card no-body border-variant="white"><lah-user-search ref="user_search" max-height="100"></lah-user-search></b-card>
-        <b-card no-body border-variant="white"><lah-court-log-search></lah-court-log-search></b-card>
+        <b-card no-body border-variant="white"><lah-user-search ref="user_search" max-height="100" class="shadow"></lah-user-search></b-card>
+        <b-card no-body border-variant="white"><lah-user-message-reservation :heading="false" label="信差提醒" class="shadow"></lah-user-message-reservation></b-card>
+        <b-card no-body border-variant="white"><lah-court-log-search class="shadow"></lah-court-log-search></b-card>
       </b-card-group>
     </div>
   </section>

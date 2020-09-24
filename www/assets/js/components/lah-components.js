@@ -1259,7 +1259,7 @@ if (Vue) {
                         </b-link>
                         <lah-user-description :user_data="user_data"></lah-user-description>
                     </b-tab>
-                    <b-tab v-if="foundCount == 1 && !foundLeft">
+                    <b-tab v-if="foundCount == 1 && !foundLeft && message_ui">
                         <template v-slot:title>
                             <lah-fa-icon icon="comment-dots" prefix="far"> 傳送信差</lah-fa-icon>
                         </template>
@@ -1377,7 +1377,7 @@ if (Vue) {
                 }
             }
         },
-        props: ['id', 'name', 'ip', 'title', 'avatar', 'inUserRows'],
+        props: ['id', 'name', 'ip', 'title', 'avatar', 'inUserRows', 'noMessage'],
         data: () => ({
             user_rows: null,
             msg_title: '',
@@ -1407,7 +1407,8 @@ if (Vue) {
             },
             useEndTabs() {
                 return this.inUserRows ? this.inUserRows.length > 1 : false
-            }
+            },
+            message_ui() { return this.empty(this.noMessage) }
         },
         methods: {
             photoUrl: function (user_data) {
