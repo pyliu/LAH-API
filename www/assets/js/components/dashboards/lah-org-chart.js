@@ -31,7 +31,8 @@ if (Vue) {
         },
         watch: {
             role_switch(val) { this.reload() },
-            orientation_switch(val) { this.reload() }
+            orientation_switch(val) { this.reload() },
+            myinfo() { this.reload() }
         },
         methods: {
             reload() {
@@ -125,6 +126,8 @@ if (Vue) {
                 this.depth--;
                 let collapsable = this.depth_switch && children.length > 0;
                 let inf_chief = (raw_obj.authority & 4 && raw_obj.unit == '資訊課');
+                // expand own unit by global myinfo variable
+                let isMyUnit = this.myinfo ? raw_obj.unit == this.myinfo['unit'] : false;
                 let this_node =  {
                     text: {
                         name: { val: `${raw_obj.id}:${raw_obj.name}`, href: `javascript:vueApp.popUsercard('${raw_obj.id}')` },
@@ -136,7 +139,7 @@ if (Vue) {
                     },
                     image: `assets/img/users/${raw_obj.name}_avatar.jpg`,
                     collapsable: this.depth_switch && children.length > 0,
-                    collapsed: collapsable/* && !inf_chief*/,
+                    collapsed: collapsable && !isMyUnit,
                     stackChildren: this.depth_switch,
                     HTMLclass: `mynode usercard ${this.myid == raw_obj.id ? 'bg-dark text-white font-weight-bold' : 'bg-muted'}`,
                     pseudo: false
@@ -148,7 +151,6 @@ if (Vue) {
         },
         created() {
             window.addEventListener("resize", e => this.canvas_height = window.innerHeight - 165 );
-            this.reload();
         },
         mounted() { this.canvas_height = window.innerHeight - 165 }
     });
