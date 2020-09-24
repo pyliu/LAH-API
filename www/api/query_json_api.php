@@ -758,6 +758,24 @@ switch ($_POST["type"]) {
 		$log->info("XHR [zip_log] 壓縮LOG成功");
 		echo json_encode($result, 0);
 		break;
+	case "user_names":
+		$log->info("XHR [user_names] 查詢使用者名冊資料請求 (SQLite DB: dimension.db)");
+		$sqlite_user = new SQLiteUser();
+		$all_users = $sqlite_user->getAllUsers();
+		if (empty($all_users)) {
+			$msg = "查無使用者名冊資料。( dimension.db exists?? )";
+			echoErrorJSONString($msg);
+			$log->info("XHR [user_names] $msg");
+		} else {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($all_users),
+				"raw" => $all_users
+			);
+			$log->info("XHR [user_names] 查詢使用者名冊資料成功。");
+			echo json_encode($result, 0);
+		}
+		break;
 	case "search_user":
 		$log->info("XHR [search_user] 查詢使用者資料【".$_POST["keyword"]."】請求");
 		$sqlite_user = new SQLiteUser();

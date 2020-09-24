@@ -995,17 +995,17 @@ if (Vue) {
             <div id="usertag_container" class="clearfix overflow-auto" :style="style">
                 <transition-group name="list" mode="out-in">
                     <div
-                        v-for="(name, userid, idx) in userNames"
+                        v-for="(userinfo, idx) in usernames"
                         class='float-left m-2 usercard'
                         style='font-size: .8rem;'
-                        :data-id="userid"
-                        :data-name="name"
-                        :key="'usertag_'+userid"
+                        :data-id="userinfo.id"
+                        :data-name="userinfo.name"
+                        :key="'usertag_'+userinfo.id"
                         @click.stop="usercard"
-                        v-if="usertag_flags[userid]"
+                        v-if="usertag_flags[userinfo.id]"
                     >
-                        <b-avatar v-if="avatar" button size="1.5rem" :src="avatar_src(name)" variant="light"></b-avatar>
-                        {{userid}}: {{name||'XXXXXX'}}
+                        <b-avatar v-if="avatar" button size="1.5rem" :src="avatar_src(userinfo.name)" variant="light"></b-avatar>
+                        {{userinfo.id}}: {{userinfo.name||'XXXXXX'}}
                     </div>
                 </transition-group>
             </div>
@@ -1026,7 +1026,8 @@ if (Vue) {
             ids: [],
             usertag_flags: {},
             keyup_timer: null,
-            delay_ms: 800
+            delay_ms: 800,
+            usernames: []
         }),
         watch: {
             input(nVal, oVal) {
@@ -1145,6 +1146,30 @@ if (Vue) {
         },
         mounted() {
             this.input = this.myid
+            this.busy = true;
+            this.$http.post(CONFIG.API.JSON.QUERY, {
+                type: 'user_names'
+            }).then(res => {
+                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                    res.data.raw.forEach(userinfo => {
+                        this.usernames.push({
+                            id: userinfo['id'],
+                            name: userinfo['name']
+                        });
+                    });
+                } else {
+                    this.notify({
+                        title: "使用者名冊",
+                        message: res.data.message,
+                        type: "warning"
+                    });
+                    this.$warn(res.data.message);
+                }
+            }).catch(err => {
+                this.error = err;
+            }).finally(() => {
+                this.busy = false;
+            });
         }
     });
 
