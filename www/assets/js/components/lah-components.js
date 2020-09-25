@@ -1002,7 +1002,7 @@ if (Vue) {
                         :data-id="userinfo.id"
                         :data-name="userinfo.name"
                         :key="'usertag_'+userinfo.id"
-                        @click.stop="usercard"
+                        @click.stop="popUsercard(userinfo.id)"
                         v-if="usertag_flags[userinfo.id]"
                     >
                         <b-avatar v-if="avatar" button size="1.5rem" :src="avatar_src(userinfo.name)" variant="light"></b-avatar>
