@@ -1004,6 +1004,7 @@ if (Vue) {
                         :key="'usertag_'+userinfo.id"
                         @click.stop="popUsercard(userinfo.id)"
                         v-if="usertag_flags[userinfo.id]"
+                        v-b-popover="popover(userinfo)"
                     >
                         <b-avatar v-if="avatar" button size="1.5rem" :src="avatar_src(userinfo.name)" variant="light"></b-avatar>
                         {{userinfo.id}}: {{userinfo.name||'XXXXXX'}}
@@ -1053,6 +1054,23 @@ if (Vue) {
             }
         },
         methods: {
+            popover(userinfo) {
+                let left = this.empty(userinfo.offboard_date) ? '' : `<div><i class="fa fa-ban text-danger mx-auto"></i> 已離職【${userinfo.offboard_date}】</div>`;
+                let html = `<div class="small">
+                    ${left}
+                    <div>分機：${userinfo.ext}</div>
+                    <div>單位：${userinfo.unit}</div>
+                    <div>工作：${userinfo.work}</div>
+                </div>`;
+                return {
+                    content: html,
+                    variant: this.empty(userinfo.offboard_date) ? 'muted' : 'dark',
+                    trigger: 'hover',
+                    delay: 400,
+                    // customClass: 's-80',
+                    html: true
+                };
+            },
             length(s) {
                 var b = 0,
                     i = 0,
@@ -1151,10 +1169,7 @@ if (Vue) {
                         }).then(res => {
                             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                 res.data.raw.forEach(userinfo => {
-                                    this.usernames.push({
-                                        id: userinfo['id'],
-                                        name: userinfo['name']
-                                    });
+                                    this.usernames.push({...userinfo});
                                 });
                                 this.setLocalCache('user_names', res.data.raw);
                             } else {
@@ -1172,10 +1187,7 @@ if (Vue) {
                         });
                     } else {
                         raw.forEach(userinfo => {
-                            this.usernames.push({
-                                id: userinfo['id'],
-                                name: userinfo['name']
-                            });
+                            this.usernames.push({...userinfo});
                         });
                     }
                 });
