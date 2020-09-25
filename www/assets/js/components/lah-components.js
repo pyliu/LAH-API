@@ -2187,7 +2187,10 @@ if (Vue) {
                             type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? 'success' : 'danger'
                         });
                         // clear local cache after success updated
-                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) this.removeLocalCache('myinfo');
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            this.orig_ext = this.myinfo['ext'];
+                            this.removeLocalCache('myinfo');
+                        }
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
