@@ -1055,7 +1055,7 @@ if (Vue) {
         },
         methods: {
             popover(userinfo) {
-                let left = this.empty(userinfo.offboard_date) ? '' : `<div><i class="fa fa-ban text-danger mx-auto"></i> 已離職【${userinfo.offboard_date}】</div>`;
+                let left = this.empty(userinfo.offboard_date) ? '' : `<div>離職：${userinfo.offboard_date} <i class="fa fa-ban text-danger mx-auto"></i></div>`;
                 let admin = '';
                 if (this.isAdmin) {
                     admin = `
@@ -1067,29 +1067,17 @@ if (Vue) {
                     `;
                 }
                 let html = `<div class="small">
-                    ${left}
                     <div>分機：${userinfo.ext}</div>
                     <div>單位：${userinfo.unit}</div>
                     <div>工作：${userinfo.work}</div>
                     ${admin}
+                    ${left}
                 </div>`;
-                /**
-                 * <div v-if="isAdmin">電腦：{{user_data["ip"]}}</div>
-                    <div>分機：{{user_data["ext"]}}</div>
-                    <div v-if="isAdmin">生日：{{user_data["birthday"]}} <b-badge v-show="birthAge !== false" :variant="birthAgeVariant" pill>{{birthAge}}歲</b-badge></div>
-                    <div>單位：{{user_data["unit"]}}</div>
-                    <div>工作：{{user_data["work"]}}</div>
-                    <div v-if="isAdmin">學歷：{{user_data["education"]}}</div>
-                    <div v-if="isAdmin">考試：{{user_data["exam"]}}</div>
-                    <div v-if="isAdmin">手機：{{user_data["cell"]}}</div>
-                    <div v-if="isAdmin">到職：{{user_data["onboard_date"]}} <b-badge v-show="workAge !== false" :variant="workAgeVariant" pill>{{workAge}}年</b-badge></div>
-                    
-                 */
                 return {
                     content: html,
                     variant: this.empty(userinfo.offboard_date) ? 'muted' : 'dark',
                     trigger: 'hover',
-                    delay: 600,
+                    delay: 800,
                     // customClass: 's-80',
                     html: true
                 };
