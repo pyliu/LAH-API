@@ -1324,6 +1324,7 @@ if (Vue) {
                     <div v-if="isAdmin">考試：{{user_data["exam"]}}</div>
                     <div v-if="isAdmin">手機：{{user_data["cell"]}}</div>
                     <div v-if="isAdmin">到職：{{user_data["onboard_date"]}} <b-badge v-show="workAge !== false" :variant="workAgeVariant" pill>{{workAge}}年</b-badge></div>
+                    <lah-user-ext v-if="me" class="mt-2"></lah-user-ext>
                 </b-card-text>`,
                 props: ['user_data'],
                 data: () => ({
@@ -1394,7 +1395,8 @@ if (Vue) {
                             return 'warning';
                         }
                         return 'danger';
-                    }
+                    },
+                    me() { return this.user_data['id'] == this.myinfo['id'] }
                 },
                 methods: {
                     toTWDate: function (ad_date) {
@@ -2118,7 +2120,7 @@ if (Vue) {
 
     Vue.component('lah-user-ext', {
         template: `<div>
-            <h6 v-if="heading"><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> 我的分機</h6>
+            <h6 v-if="heading"><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon>更新我的分機</h6>
             <b-input-group size="sm" prepend="分機號碼">
                 <template v-slot:append>
                     <lah-button icon="edit" variant="outline-primary" @click="update" title="更新" :disabled="!validate"></lah-button>
