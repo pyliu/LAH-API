@@ -1289,7 +1289,7 @@ if (Vue) {
                             <b-card-img
                                 :src="photoUrl(user_data)"
                                 :alt="user_data['name']"
-                                class="img-thumbnail float-right mx-auto ml-2"
+                                class="img-thumbnail float-right mx-auto ml-2 shadow-xl"
                                 style="max-width: 220px"
                             ></b-card-img>
                         </b-link>
