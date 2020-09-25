@@ -135,7 +135,7 @@ if (Vue) {
             return {
                 pid: '',
                 noteObj: {
-                    title: "跨所註記遺失檢測 小幫手提示",
+                    title: "查詢人民申請案件 小幫手提示",
                     body: `<div class="d-block">
                         -- 【法院來函查統編】MOICAS_CRSMS 土地登記案件查詢-權利人+義務人+代理人+複代 <br/>
                         SELECT t.* <br/>
