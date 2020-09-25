@@ -3204,7 +3204,7 @@ if (Vue) {
                                     </lah-transition>
                                     <div v-if="bakedData.跨所 == 'Y'"><span class='bg-info text-white rounded p-1'>跨所案件 ({{bakedData.資料收件所}} => {{bakedData.資料管轄所}})</span></div>
                                     收件字號：
-                                    <a :title="'收件資料 on ' + ap_server" href="javascript:void(0)" @click="open(case_data_url, $event)">
+                                    <a :title="'收件資料 on ' + ap_server" href="javascript:void(0)" @click="openNewWindow(case_data_url, $event)">
                                         {{bakedData.收件字號}}
                                     </a> <br/>
                                     收件時間：{{bakedData.收件時間}} <br/>
