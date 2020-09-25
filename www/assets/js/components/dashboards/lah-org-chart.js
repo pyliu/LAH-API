@@ -74,7 +74,7 @@ if (Vue) {
                         "data-name": staff.name
                     },
                     image: `assets/img/users/${staff.name}_avatar.jpg`,
-                    HTMLclass: `mynode ${this.myid == staff.id ? 'bg-dark text-white font-weight-bold' : 'bg-muted'}`,
+                    HTMLclass: `mynode ${this.myid == staff.id ? 'bg-info text-white font-weight-bold' : 'bg-muted'}`,
                     pseudo: false
                 };
             },
