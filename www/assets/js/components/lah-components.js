@@ -83,7 +83,7 @@ if (Vue) {
     });
 
     Vue.component("lah-fa-icon", {
-        template: `<span class="align-middle"><i :id="id" :class="className"></i> <slot></slot></span>`,
+        template: `<span class="align-middle my-auto"><i :id="id" :class="className"></i> <slot></slot></span>`,
         props: ["size", 'prefix', 'icon', 'variant', 'action', 'id', 'align'],
         computed: {
             className() {
@@ -1010,7 +1010,7 @@ if (Vue) {
                         v-b-popover="popover(userinfo)"
                     >
                         <b-avatar v-if="avatar" button size="1.5rem" :src="avatar_src(userinfo.name)" variant="light"></b-avatar>
-                        {{userinfo.id}}: {{userinfo.name||'XXXXXX'}}
+                        {{dogtag(userinfo)}}
                     </div>
                 </transition-group>
             </div>
@@ -1058,7 +1058,7 @@ if (Vue) {
         },
         methods: {
             popover(userinfo) {
-                let left = this.empty(userinfo.offboard_date) ? '' : `<div>離職：${userinfo.offboard_date} <i class="fa fa-ban text-danger mx-auto"></i></div>`;
+                let left = this.left(userinfo) ? `<div>離職：${userinfo.offboard_date} <i class="fa fa-ban text-danger mx-auto"></i></div>` : '';
                 let admin = '';
                 if (this.isAdmin) {
                     admin = `
@@ -1086,6 +1086,7 @@ if (Vue) {
                     html: true
                 };
             },
+            left(userinfo) { return !this.empty(userinfo.offboard_date) },
             length(s) {
                 var b = 0,
                     i = 0,
@@ -1093,6 +1094,7 @@ if (Vue) {
                 for (; c = s.charCodeAt(i++); b += c >> 11 ? 3 : c >> 7 ? 2 : 1);
                 return b
             },
+            dogtag(userinfo) { return `${userinfo.id}: ${userinfo.name||'XXXXXX'}` },
             avatar_src(name) {
                 return `get_user_img.php?name=${name}_avatar`
             },
