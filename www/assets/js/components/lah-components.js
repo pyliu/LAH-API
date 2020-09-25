@@ -2189,7 +2189,9 @@ if (Vue) {
                         // clear local cache after success updated
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             this.orig_ext = this.myinfo['ext'];
+                            // remove frontend cache for refreshing as well
                             this.removeLocalCache('myinfo');
+                            this.removeLocalCache('lah-org-chart');
                         }
                     }).catch(err => {
                         this.error = err;
