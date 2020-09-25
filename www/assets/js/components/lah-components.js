@@ -972,11 +972,11 @@ if (Vue) {
         }
     });
 
-    Vue.component("lah-user-search", {
+    Vue.component("lah-user-board", {
         template: `<fieldset>
             <legend v-b-tooltip="'以關鍵字搜尋使用者'">
                 <i class="fas fa-users"></i>
-                使用者搜尋
+                使用者看板
                 <lah-button class="border-0"  @click="popup" variant="outline-success" size="sm" icon="question"></lah-button>
             </legend>
             <b-input-group size="sm" prepend="關鍵字">
@@ -990,7 +990,7 @@ if (Vue) {
                     class="no-cache"
                 ></b-form-input>
                 <template v-slot:append>
-                    <lah-button @click="query" variant="outline-primary" size="sm" v-b-tooltip="'搜尋使用者'" icon="search"></lah-button>
+                    <lah-button v-if="false" @click="query" variant="outline-primary" size="sm" v-b-tooltip="'搜尋使用者'" icon="search"></lah-button>
                 </template>
             </b-input-group>
             <div id="usertag_container" class="clearfix overflow-auto" :style="style">
