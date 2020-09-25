@@ -1070,6 +1070,7 @@ if (Vue) {
                     `;
                 }
                 let html = `<div class="small">
+                    <div>職稱：${userinfo.title}</div>
                     <div>分機：${userinfo.ext}</div>
                     <div>單位：${userinfo.unit}</div>
                     <div>工作：${userinfo.work}</div>
