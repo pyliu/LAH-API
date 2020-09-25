@@ -1089,7 +1089,7 @@ if (Vue) {
                     content: html,
                     variant: this.empty(userinfo.offboard_date) ? 'muted' : 'dark',
                     trigger: 'hover',
-                    delay: 400,
+                    delay: 600,
                     // customClass: 's-80',
                     html: true
                 };
