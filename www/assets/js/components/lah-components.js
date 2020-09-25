@@ -83,7 +83,7 @@ if (Vue) {
     });
 
     Vue.component("lah-fa-icon", {
-        template: `<span><i :id="id" :class="className"></i> <slot></slot></span>`,
+        template: `<span class="align-middle"><i :id="id" :class="className"></i> <slot></slot></span>`,
         props: ["size", 'prefix', 'icon', 'variant', 'action', 'id', 'align'],
         computed: {
             className() {
@@ -91,7 +91,6 @@ if (Vue) {
                 let icon = this.icon || 'exclamation-circle';
                 let variant = this.variant || '';
                 let ld_movement = this.action || '';
-                let align = this.align || 'middle'
                 let size = '';
                 switch (this.size) {
                     case "xs":
@@ -109,7 +108,7 @@ if (Vue) {
                         }
                         break;
                 }
-                return `text-${variant} ${prefix} fa-${icon} ${size} ld ld-${ld_movement} align-${align}`
+                return `text-${variant} ${prefix} fa-${icon} ${size} ld ld-${ld_movement}`
             }
         }
     });
@@ -974,10 +973,14 @@ if (Vue) {
 
     Vue.component("lah-user-board", {
         template: `<fieldset>
-            <legend v-b-tooltip="'以關鍵字搜尋使用者'">
-                <i class="fas fa-users"></i>
-                使用者看板
-                <lah-button class="border-0"  @click="popup" variant="outline-success" size="sm" icon="question"></lah-button>
+            <legend>
+                <lah-fa-icon icon="users">
+                    使用者看板
+                </lah-fa-icon>
+                <b-button-group size="sm" class="align-middle my-auto">
+                    <lah-button class="border-0"  @click="location.href='org.html'" variant="outline-primary" size="sm" icon="sitemap"></lah-button>
+                    <lah-button class="border-0"  @click="popup" variant="outline-success" size="sm" icon="question"></lah-button>
+                </b-button-group>
             </legend>
             <b-input-group size="sm" prepend="關鍵字">
                 <b-form-input
