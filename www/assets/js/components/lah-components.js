@@ -1345,7 +1345,7 @@ if (Vue) {
                     <div v-if="isAdmin">考試：{{user_data["exam"]}}</div>
                     <div v-if="isAdmin">手機：{{user_data["cell"]}}</div>
                     <div v-if="isAdmin">到職：{{user_data["onboard_date"]}} <b-badge v-show="workAge !== false" :variant="workAgeVariant" pill>{{workAge}}年</b-badge></div>
-                    <lah-user-ext v-if="me" class="mt-2"></lah-user-ext>
+                    <lah-user-ext v-if="me" class="mt-2 w-50"></lah-user-ext>
                 </b-card-text>`,
                 props: ['user_data'],
                 data: () => ({
@@ -2140,31 +2140,36 @@ if (Vue) {
     });
 
     Vue.component('lah-user-ext', {
-        template: `<div>
-            <h6 v-if="heading"><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon>更新我的分機</h6>
-            <b-input-group size="sm" prepend="分機號碼">
-                <template v-slot:append>
-                    <lah-button icon="edit" variant="outline-primary" @click="update" title="更新" :disabled="!validate"></lah-button>
-                </template>
+        template: `<b-card no-body class="border-0">
+            <h6 v-if="heading"><lah-fa-icon icon="angle-double-right" variant="dark"> 我的分機</lah-fa-icon></h6>
+            <b-input-group size="sm" prepend="分機">
                 <b-form-input
                     v-model="myinfo['ext']"
                     type="number"
-                    inline
                     @keyup.enter="update"
                     :state="validate"
                     class="no-cache"
                 ></b-form-input>
+                <template v-slot:append>
+                    <lah-button icon="edit" variant="outline-primary" @click="update" title="更新" :disabled="!validate" v-show="need_update"></lah-button>
+                </template>
             </b-input-group>
-        </div>`,
+        </b-card>`,
         props: {
             heading: {
                 type: Boolean,
                 default: true
             }
         },
-        data: () => ({}),
+        data: () => ({
+            orig_ext: 503
+        }),
+        watch: {
+            myinfo(val) { this.orig_ext = val['ext'] }
+        },
         computed: {
             validate() { return this.myinfo['ext'] > 99 && this.myinfo['ext'] < 700 },
+            need_update() { return this.orig_ext != this.myinfo['ext'] }
         },
         methods: {
             update() {
