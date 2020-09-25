@@ -1034,9 +1034,7 @@ if (Vue) {
             input(nVal, oVal) {
                 this.filter()
             },
-            myid(val) {
-                this.input = val
-            },
+            myid(val) { this.input = val.replace(/\d{1}$/g, "") },
             usernames(val) {
                 this.ids = val.map((item, idx, array) => {
                     // set all flags to false at first
@@ -1183,10 +1181,7 @@ if (Vue) {
                 });
             }
         },
-        created() { this.load_usernames() },
-        mounted() {
-            this.input = this.myid
-        }
+        created() { this.load_usernames() }
     });
 
     Vue.component("lah-user-id-input", {
