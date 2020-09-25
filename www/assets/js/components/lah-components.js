@@ -1056,12 +1056,35 @@ if (Vue) {
         methods: {
             popover(userinfo) {
                 let left = this.empty(userinfo.offboard_date) ? '' : `<div><i class="fa fa-ban text-danger mx-auto"></i> 已離職【${userinfo.offboard_date}】</div>`;
+                let admin = '';
+                if (this.isAdmin) {
+                    admin = `
+                        <div>生日：${userinfo.birthday}</div>
+                        <div>學歷：${userinfo.education}</div>
+                        <div>考試：${userinfo.exam}</div>
+                        <div>手機：${userinfo.cell}</div>
+                        <div>到職：${userinfo.onboard_date}</div>    
+                    `;
+                }
                 let html = `<div class="small">
                     ${left}
                     <div>分機：${userinfo.ext}</div>
                     <div>單位：${userinfo.unit}</div>
                     <div>工作：${userinfo.work}</div>
+                    ${admin}
                 </div>`;
+                /**
+                 * <div v-if="isAdmin">電腦：{{user_data["ip"]}}</div>
+                    <div>分機：{{user_data["ext"]}}</div>
+                    <div v-if="isAdmin">生日：{{user_data["birthday"]}} <b-badge v-show="birthAge !== false" :variant="birthAgeVariant" pill>{{birthAge}}歲</b-badge></div>
+                    <div>單位：{{user_data["unit"]}}</div>
+                    <div>工作：{{user_data["work"]}}</div>
+                    <div v-if="isAdmin">學歷：{{user_data["education"]}}</div>
+                    <div v-if="isAdmin">考試：{{user_data["exam"]}}</div>
+                    <div v-if="isAdmin">手機：{{user_data["cell"]}}</div>
+                    <div v-if="isAdmin">到職：{{user_data["onboard_date"]}} <b-badge v-show="workAge !== false" :variant="workAgeVariant" pill>{{workAge}}年</b-badge></div>
+                    
+                 */
                 return {
                     content: html,
                     variant: this.empty(userinfo.offboard_date) ? 'muted' : 'dark',
