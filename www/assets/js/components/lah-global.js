@@ -56,7 +56,8 @@ Vue.prototype.$store = (() => {
                 myid: undefined,
                 myinfo: undefined,
                 authority: undefined,
-                disableMSDBQuery: CONFIG.DISABLE_MSDB_QUERY
+                disableMSDBQuery: CONFIG.DISABLE_MSDB_QUERY,
+                disableOfficeHours: false
             },
             getters: {
                 cache: state => state.cache,
@@ -71,7 +72,8 @@ Vue.prototype.$store = (() => {
                 myip: state => state.myip,
                 myid: state => state.myid,
                 myinfo: state => state.myinfo,
-                disableMSDBQuery: state => state.disableMSDBQuery
+                disableMSDBQuery: state => state.disableMSDBQuery,
+                disableOfficeHours: state => state.disableOfficeHours
             },
             mutations: {
                 cache(state, objPayload) {
@@ -121,6 +123,9 @@ Vue.prototype.$store = (() => {
                 },
                 disableMSDBQuery(state, flagPayload) {
                     state.disableMSDBQuery = flagPayload === true;
+                },
+                disableOfficeHours(state, flagPayload) {
+                    state.disableOfficeHours = flagPayload === true;
                 }
             },
             actions: {
@@ -239,6 +244,7 @@ Vue.mixin({
         authority() { return this.$store.getters.authority },
         myname() { return this.myinfo ? this.myinfo['name'] : '' },
         disableMSDBQuery() { return this.$store.getters.disableMSDBQuery },
+        disableOfficeHours() { return this.$store.getters.disableOfficeHours },
         nowDate() { return this.now().split(' ')[0] },
         nowTime() { return this.now().split(' ')[1] }
     },
@@ -565,6 +571,7 @@ Vue.mixin({
             }
         },
         isOfficeHours() {
+            if (this.disableOfficeHours) return true;
             let now = new Date();
             if (now.getDay() === 0 || now.getDay() === 6) return false;
             return now.getHours() > 6 && now.getHours() < 19;
