@@ -5370,10 +5370,14 @@ if (Vue) {
             enable_office_hours_desc() { return this.enable_office_hours ? '啟用工作天檢查' : '停用工作天檢查' }
         },
         watch: {
-            disableMSDBQuery(flag) { this.enable_msdb_query = !flag },
-            disableOfficeHours(flag) { this.enable_office_hours = !flag },
-            enable_msdb_query(flag) { this.$store.commit("disableMSDBQuery", !flag) },
-            enable_office_hours(flag) { this.$store.commit("disableOfficeHours", !flag) }
+            enable_msdb_query(flag) {
+                this.setLocalCache('disableMSDBQuery', flag ? 'no' : 'yes');
+                this.$store.commit("disableMSDBQuery", !flag);
+            },
+            enable_office_hours(flag) {
+                this.setLocalCache('disableOfficeHours', flag ? 'no' : 'yes');
+                this.$store.commit("disableOfficeHours", !flag);
+            }
         },
         created() {
             this.enable_msdb_query = !this.disableMSDBQuery;

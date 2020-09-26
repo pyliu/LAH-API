@@ -981,6 +981,18 @@ $(document).ready(() => {
                         this.$store.commit('myip', myip);
                     }
                 });
+            },
+            initSystemSwitches: function() {
+                this.getLocalCache('disableMSDBQuery').then(cached => {
+                    if (cached !== false) {
+                        this.$store.commit("disableMSDBQuery", cached == 'yes' ? true : false);
+                    }
+                });
+                this.getLocalCache('disableOfficeHours').then(cached => {
+                    if (cached !== false) {
+                        this.$store.commit("disableOfficeHours", cached == 'yes' ? true : false);
+                    }
+                });
             }
         },
         created: function(e) {
@@ -1016,6 +1028,7 @@ $(document).ready(() => {
         mounted() {
             this.initCache();
             this.initMyInfo();
+            this.initSystemSwitches();
         }
     });
 });
