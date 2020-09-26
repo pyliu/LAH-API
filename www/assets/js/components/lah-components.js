@@ -5367,7 +5367,7 @@ if (Vue) {
         }),
         computed: {
             enable_msdb_query_desc() { return this.enable_msdb_query ? '啟用外部MSSQL連線功能' : '停用外部MSSQL連線功能' },
-            enable_office_hours_desc() { return this.enable_office_hours ? '啟用工作天檢查' : '停用工作天檢查' },
+            enable_office_hours_desc() { return this.enable_office_hours ? '啟用工作天檢查' : '停用工作天檢查' }
         },
         watch: {
             disableMSDBQuery(flag) { this.enable_msdb_query = !flag },
