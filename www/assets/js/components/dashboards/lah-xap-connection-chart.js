@@ -54,6 +54,7 @@ if (Vue) {
             reload_timer: null
         }),
         watch: {
+            disableOfficeHours(val) { if (val) this.reload() },
             ap_count(val) {
                 if (val > 500) {
                     if (val > 750) {

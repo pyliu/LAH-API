@@ -56,6 +56,7 @@ if (Vue) {
             now_count: 0
         }),
         watch: {
+            disableOfficeHours(val) { if (val) this.reload(true) },
             mins(dont_care) {
                 clearTimeout(this.spin_timer);
                 this.spin_timer = this.timeout(() => {

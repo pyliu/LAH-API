@@ -309,6 +309,7 @@ if (Vue) {
                             <lah-user-message-history ref="message" :ip="myip" count=5 title="最新訊息" class="mb-2" :tabs="true" :tabs-end="true"></lah-user-message-history>
                             <lah-user-ext class="mb-2"></lah-user-ext>
                             <lah-user-message-reservation></lah-user-message-reservation>
+                            <lah-vuex-switch v-if="isAdmin"></lah-vuex-switch>
                             <b-button block @click.stop="clearCache" variant="outline-secondary" size="sm"><lah-fa-icon icon="broom"> 清除快取資料</lah-fa-icon></b-button>
                         </b-popover>
                     </b-navbar-nav>
@@ -5346,6 +5347,39 @@ if (Vue) {
             this.default_date = now.getFullYear() - 1911 + ("0" + (now.getMonth())).slice(-2);
         }
     });
+    /**
+     * Vuex switches
+     */
+    Vue.component("lah-vuex-switch", {
+        template: `<b-card no-body class="border-0">
+            <h6 v-if="heading" class="mb-2"><lah-fa-icon icon="angle-double-right" variant="dark"> 系統設定</lah-fa-icon></h6>
+            <b-input-group size="sm">
+                <b-form-checkbox v-model="enable_msdb_query" switch>{{enable_msdb_query_desc}}</b-form-checkbox>
+                <b-form-checkbox v-model="enable_office_hours" switch>{{enable_office_hours_desc}}</b-form-checkbox>
+            </b-input-group>
+        </b-card>`,
+        props: {
+            heading: { type: Boolean, default: true }
+        },
+        data: () => ({
+            enable_msdb_query: true,
+            enable_office_hours: true
+        }),
+        computed: {
+            enable_msdb_query_desc() { return this.enable_msdb_query ? '啟用外部MSSQL連線功能' : '停用外部MSSQL連線功能' },
+            enable_office_hours_desc() { return this.enable_office_hours ? '啟用工作天檢查' : '停用工作天檢查' },
+        },
+        watch: {
+            disableMSDBQuery(flag) { this.enable_msdb_query = !flag },
+            disableOfficeHours(flag) { this.enable_office_hours = !flag },
+            enable_msdb_query(flag) { this.$store.commit("disableMSDBQuery", !flag) },
+            enable_office_hours(flag) { this.$store.commit("disableOfficeHours", !flag) }
+        },
+        created() {
+            this.enable_msdb_query = !this.disableMSDBQuery;
+            this.enable_office_hours = !this.disableOfficeHours;
+        }
+    });
 } else {
-    console.error("vue.js not ready ... lah-xxxxxxxx components can not be loaded.");
+    console.error("vue.js not ready ... lah-* relative components can not be loaded.");
 }
