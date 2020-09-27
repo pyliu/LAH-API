@@ -10,10 +10,7 @@ require_once("./include/Watchdog.class.php");
 require_once("./include/StatsOracle.class.php");
 require_once("./include/SQLiteUser.class.php");
 
-echo date("Ymdhis", strtotime("-10 minutes"));
-echo "\n\ntest\n\n";
+// echo date("Ymdhis", strtotime("-10 minutes"));
+echo serialize(array('127.0.0.1',"::1"));
 
-$user_info = new SQLiteUser();
-$users = $user_info->getUser('HB0122');
-var_dump($users);
 ?>
