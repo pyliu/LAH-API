@@ -11,7 +11,7 @@ class SQLiteUser {
         return !empty($ret);
     }
 
-    private function bindUserParams(&$stm, &$row, $update = false) {
+    private function bindUserParams(&$stm, &$row) {
         $stm->bindParam(':id', $row['DocUserID']);
         $stm->bindParam(':name', $row['AP_USER_NAME']);
         $stm->bindValue(':sex', $row['AP_SEX'] == '男' ? 1 : 0);
@@ -60,40 +60,15 @@ class SQLiteUser {
         $stm->bindParam(':authority', $authority);
     }
 
-    private function inst(&$row) {
+    private function replace(&$row) {
         $stm = $this->db->prepare("
-            INSERT INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
+            REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
             VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
         ");
         $this->bindUserParams($stm, $row);
         return $stm->execute() === FALSE ? false : true;
     }
-
-    private function update(&$row) {
-        $stm = $this->db->prepare("
-            UPDATE user SET
-                name = :name,
-                sex = :sex,
-                addr = :addr,
-                tel = :tel,
-                ext = :ext,
-                cell = :cell,
-                unit = :unit,
-                title = :title,
-                work = :work,
-                exam = :exam,
-                education = :education,
-                onboard_date = :onboard_date, 
-                offboard_date = :offboard_date,
-                ip = :ip,
-                birthday = :birthday,
-                authority = :authority
-            WHERE id = :id
-        ");
-        $this->bindUserParams($stm, $row, true);
-        return $stm->execute() === FALSE ? false : true;
-    }
-
+    
     private function prepareArray(&$stmt) {
         $result = $stmt->execute();
         $return = [];
@@ -116,13 +91,7 @@ class SQLiteUser {
             $log->warning(__METHOD__.": ".print_r($row, true));
             return false;
         }
-        if ($this->exists($row['DocUserID'])) {
-            // update
-            return $this->update($row);
-        } else {
-            // insert
-            return $this->inst($row);
-        }
+        return $this->replace($row);
     }
 
     public function getAuthority($id) {
