@@ -59,8 +59,7 @@ switch ($_POST["type"]) {
 	case "on_board_users":
 		$log->info("XHR [on_board_users] 取得所有在職使用者資料請求");
 		$sqlite_user = new SQLiteUser();
-		$results = $mock ? $cache->get('on_board_users') : $sqlite_user->getOnboardUsers();
-		if (!$mock) $cache->set('on_board_users', $results);
+		$results = $sqlite_user->getOnboardUsers();
 		if (empty($results)) {
 			echoErrorJSONString("查無在職使用者資料。");
 			$log->info("XHR [on_board_users] 查無在職使用者資料。");
@@ -785,15 +784,14 @@ switch ($_POST["type"]) {
 		$sqlite_user = new SQLiteUser();
 		$results = false;
 		if (filter_var($_POST["keyword"], FILTER_VALIDATE_IP)) {
-			$results = $mock ? $cache->get('search_user') : $sqlite_user->getUserByIP($_POST["keyword"]);
+			$results = $sqlite_user->getUserByIP($_POST["keyword"]);
 		}
 		if (empty($results)) {
-			$results = $mock ? $cache->get('search_user') : $sqlite_user->getUser($_POST["keyword"]);
+			$results = $sqlite_user->getUser($_POST["keyword"]);
 			if (empty($results)) {
-				$results = $mock ? $cache->get('search_user') : $sqlite_user->getUserByName($_POST["keyword"]);
+				$results = $sqlite_user->getUserByName($_POST["keyword"]);
 			}
 		}
-		if (!$mock) $cache->set('search_user', $results);
 		if (empty($results)) {
 			echoErrorJSONString("查無 ".$_POST["keyword"]." 資料。");
 			$log->info("XHR [search_user] 查無 ".$_POST["keyword"]." 資料。");
@@ -876,13 +874,12 @@ switch ($_POST["type"]) {
 	case "authentication":
 		$log->info("XHR [my_info/authentication] 查詢 $client_ip 請求");
 		$sqlite_user = new SQLiteUser();
-		$results = $mock ? $cache->get('my_info') : $sqlite_user->getUserByIP($client_ip);
+		$results = $sqlite_user->getUserByIP($client_ip);
 		$len = count($results);
 		if ($len > 1) {
 			$last = $results[$len - 1];
 			$results = array($last);
 		}
-		if (!$mock) $cache->set('my_info', $results);
 		if (empty($results)) {
 			$result = array(
 				"status" => STATUS_CODE::FAIL_NOT_FOUND,
