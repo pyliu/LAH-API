@@ -48,7 +48,7 @@ class System {
             "isSuper" => in_array($ip, $this->getRoleSuperIps()),
             "isRAE"   => in_array($ip, $this->getRoleRAEIps()),
             "isGA"    => in_array($ip, $this->getRoleGAIps())
-        )
+        );
     }
 
     public function get($key) {
