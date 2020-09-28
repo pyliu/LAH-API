@@ -13,7 +13,7 @@ require_once("./include/System.class.php");
 
 // echo date("Ymdhis", strtotime("-10 minutes"));
 echo serialize(array(
-    "localhost" => "::1"
+    
 ));
 
 $system = new System();

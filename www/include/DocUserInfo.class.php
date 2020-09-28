@@ -1,18 +1,14 @@
 <?php
 require_once("init.php");
 require_once("MSDB.class.php");
+require_once("System.class.php");
 
 class DocUserInfo {
     private $doc_db;
 
     function __construct() {
-        $this->doc_db = new MSDB(array(
-            "MS_DB_UID" => 'doc',
-            "MS_DB_PWD" => 'doc',
-            "MS_DB_DATABASE" => 'doc',
-            "MS_DB_SVR" => SYSTEM_CONFIG["MS_TDOC_DB_SVR"],
-            "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
-        ));
+        $system = new System();
+        $this->doc_db = new MSDB($system->getMSDocDatabaseConnection());
     }
 
     function __destruct() {

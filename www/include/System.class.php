@@ -21,6 +21,10 @@ class System {
         return unserialize($this->get('ROLE_ADM_IPS'));
     }
 
+    public function getMSDocDatabaseConnection() {
+        return unserialize($this->get('MS_DOC_DB_CONN'));
+    }
+
     public function get($key) {
         return $this->sqlite3->querySingle("SELECT value from config WHERE key = '$key'");
     }
