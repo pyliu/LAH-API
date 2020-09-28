@@ -12,6 +12,7 @@ require_once(INC_DIR."/SQLiteUser.class.php");
 require_once(INC_DIR."/StatsSQLite3.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/Temperature.class.php");
+require_once(INC_DIR."/System.class.php");
 
 require_once(INC_DIR."/api/JSONAPICommandFactory.class.php");
 
@@ -25,8 +26,9 @@ function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 
 $query = new Query();
 $cache = new Cache();
+$system = new System();
 
-$mock = SYSTEM_CONFIG["MOCK_MODE"];
+$mock = $system->isMockMode();
 if ($mock) $log->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！");
 
 switch ($_POST["type"]) {
