@@ -1,5 +1,4 @@
 <?php
-require_once("config/Config.inc.php");
 require_once('SQLiteUser.class.php');
 require_once('System.class.php');
 
