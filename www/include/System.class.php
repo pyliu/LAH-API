@@ -21,8 +21,34 @@ class System {
         return unserialize($this->get('ROLE_ADM_IPS'));
     }
 
+    public function getRoleChiefIps() {
+        return unserialize($this->get('ROLE_CHIEF_IPS'));
+    }
+
+    public function getRoleSuperIps() {
+        return unserialize($this->get('ROLE_SUPER_IPS'));
+    }
+
+    public function getRoleRAEIps() {
+        return unserialize($this->get('ROLE_RAE_IPS'));
+    }
+
+    public function getRoleGAIps() {
+        return unserialize($this->get('ROLE_GA_IPS'));
+    }
+
     public function getMSDocDatabaseConnection() {
         return unserialize($this->get('MS_DOC_DB_CONN'));
+    }
+
+    public function getAuthority($ip) {
+        return array(
+            "isAdmin" => in_array($ip, $this->getRoleAdminIps()),
+            "isChief" => in_array($ip, $this->getRoleChiefIps()),
+            "isSuper" => in_array($ip, $this->getRoleSuperIps()),
+            "isRAE"   => in_array($ip, $this->getRoleRAEIps()),
+            "isGA"    => in_array($ip, $this->getRoleGAIps())
+        )
     }
 
     public function get($key) {

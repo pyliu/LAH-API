@@ -1,18 +1,15 @@
 <?php
 require_once("config/Config.inc.php");
 require_once('SQLiteUser.class.php');
+require_once('System.class.php');
+
+$system = new System();
 
 function getMyAuthority() {
     global $client_ip;
 
     // check Config.inc.php setting first
-    $res = array(
-        "isAdmin" => in_array($client_ip, SYSTEM_CONFIG["ADM_IPS"]),
-        "isChief" => in_array($client_ip, SYSTEM_CONFIG["CHIEF_IPS"]),
-        "isSuper" => in_array($client_ip, SYSTEM_CONFIG["SUPER_IPS"]),
-        "isRAE"   => in_array($client_ip, SYSTEM_CONFIG["RAE_IPS"]),
-        "isGA"    => in_array($client_ip, SYSTEM_CONFIG["GA_IPS"])
-    );
+    $res = $system->getAuthority();
     if ($res['isSuper']) array_walk($res, function(&$value) { $value = true; });
 
     // check user authority from DB
@@ -32,7 +29,7 @@ function getMyAuthority() {
 }
 
 function GetDBUserMapping($refresh = false) {
-    if (SYSTEM_CONFIG["MOCK_MODE"] === true) {
+    if ($system->isMockMode() === true) {
         $content = @file_get_contents(dirname(dirname(__FILE__))."/assets/cache/user_mapping.cache");
         return unserialize($content);
     }
