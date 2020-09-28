@@ -28,6 +28,7 @@ function getMyAuthority() {
 }
 
 function GetDBUserMapping($refresh = false) {
+    $system = new System();
     if ($system->isMockMode() === true) {
         $content = @file_get_contents(dirname(dirname(__FILE__))."/assets/cache/user_mapping.cache");
         return unserialize($content);
