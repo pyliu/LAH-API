@@ -1,16 +1,18 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(ROOT_DIR."/include/Cache.class.php");
+require_once(ROOT_DIR."/include/System.class.php");
 require_once(ROOT_DIR."/include/StatsOracle.class.php");
 require_once(ROOT_DIR."/include/StatsSQLite3.class.php");
 
 $stats = new StatsOracle();
 $stats_sqlite3 = new StatsSQLite3();
 $cache = new Cache();
+$system = new System();
 
 $this_month = (date("Y") - 1911)."".date("m");
 
-$mock = SYSTEM_CONFIG["MOCK_MODE"];
+$mock = $system->isMockMode();
 if ($mock) $log->warning("現在處於模擬模式(mock mode)，STATS API僅會回應之前已被快取之最新的資料！");
 
 function queryStats($type, $date, $error_msg) {
