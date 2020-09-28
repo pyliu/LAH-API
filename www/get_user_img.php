@@ -1,7 +1,11 @@
 <?php
 require_once("./include/init.php");
+require_once("./include/System.class.php");
+
+$system = new System();
 $default_path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."img".DIRECTORY_SEPARATOR."users".DIRECTORY_SEPARATOR;
-$fallback_path = SYSTEM_CONFIG["USER_PHOTO_FOLDER"];
+$fallback_path = rtrim($system->getUserPhotoFolderPath());
+
 $key = $_REQUEST["name"] ?? $_REQUEST["id"] ?? "not_found";
 $full_path = $default_path.$key.'.jpg';
 if (!file_exists($full_path)) {
@@ -10,9 +14,9 @@ if (!file_exists($full_path)) {
         $full_path = $default_path.trim($_REQUEST["name"], '_avatar').'.jpg';
         if (!file_exists($full_path)) {
             // try to use fallback to get the image
-            $full_path = $fallback_path.$key.'.JPG';
+            $full_path = $fallback_path.DIRECTORY_SEPARATOR.$key.'.JPG';
             if (!file_exists($full_path)) {
-                $full_path = $fallback_path.$key.'.jpg';
+                $full_path = $fallback_path.DIRECTORY_SEPARATOR.$key.'.jpg';
             }
             if (file_exists($full_path)) {
                 $log->info("Trying to copy the $full_path to ./$default_path$key.jpg");

@@ -9,10 +9,13 @@ require_once("./include/api/FileAPICommandFactory.class.php");
 require_once("./include/Watchdog.class.php");
 require_once("./include/StatsOracle.class.php");
 require_once("./include/SQLiteUser.class.php");
+require_once("./include/System.class.php");
 
 // echo date("Ymdhis", strtotime("-10 minutes"));
 echo serialize(array(
     "localhost" => "::1"
 ));
 
+$system = new System();
+echo $system->getUserPhotoFolderPath();
 ?>

@@ -7,12 +7,16 @@ class System {
 
     function __construct() { $this->sqlite3 = new SQLite3(DIMENSION_SQLITE_DB); }
 
-    function __destruct() { }
+    function __destruct() { unset($this->sqlite3); }
 
     public function isMockMode() {
         return $this->get('MOCK_MODE') == 'true';
     }
     
+    public function getUserPhotoFolderPath() {
+        return rtrim($this->get('USER_PHOTO_FOLDER'), "\\");
+    }
+
     public function get($key) {
         return $this->sqlite3->querySingle("SELECT value from config WHERE key = '$key'");
     }
