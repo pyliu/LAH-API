@@ -1,5 +1,6 @@
 <?php
 require_once("config/Config.inc.php");
+require_once("System.class.php");
 // 地所DB的內碼為「American_America.US7ASCII」
 putenv('NLS_LANG=American_America.US7ASCII');
 
@@ -122,13 +123,13 @@ class OraDB {
     }
 
     function __construct() {
-        
-        $this->L3HWEB_DB = SYSTEM_CONFIG["ORA_DB_L3HWEB"];
-        $this->TWEB_DB = SYSTEM_CONFIG["ORA_DB_TWEB"];
-        $this->MAIN_DB = SYSTEM_CONFIG["ORA_DB_MAIN"];
-        $this->user = SYSTEM_CONFIG["ORA_DB_USER"];
-        $this->pass = SYSTEM_CONFIG["ORA_DB_PASS"];
-        if (!SYSTEM_CONFIG["MOCK_MODE"]) $this->connect(CONNECTION_TYPE::MAIN);
+        $system = new System();
+        $this->L3HWEB_DB = $system->get("ORA_DB_L3HWEB");
+        $this->TWEB_DB = $system->get("ORA_DB_TWEB");
+        $this->MAIN_DB = $system->get("ORA_DB_MAIN");
+        $this->user = $system->get("ORA_DB_USER");
+        $this->pass = $system->get("ORA_DB_PASS");
+        if (!$system->isMockMode()) $this->connect(CONNECTION_TYPE::MAIN);
     }
 
     function __destruct() {

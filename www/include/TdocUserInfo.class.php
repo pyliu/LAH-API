@@ -1,17 +1,19 @@
 <?php
 require_once("init.php");
 require_once("MSDB.class.php");
+require_once("System.class.php");
 
 class TdocUserInfo {
     private $jungli_in_db;
 
     function __construct() {
+        $system = new System();
         $this->jungli_in_db = new MSDB(array(
-            "MS_DB_UID" => SYSTEM_CONFIG["MS_TDOC_DB_UID"],
-            "MS_DB_PWD" => SYSTEM_CONFIG["MS_TDOC_DB_PWD"],
-            "MS_DB_DATABASE" => SYSTEM_CONFIG["MS_TDOC_DB_DATABASE"],
-            "MS_DB_SVR" => SYSTEM_CONFIG["MS_TDOC_DB_SVR"],
-            "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
+            "MS_DB_UID" => $system->get("MS_TDOC_DB_UID"),
+            "MS_DB_PWD" => $system->get("MS_TDOC_DB_PWD"),
+            "MS_DB_DATABASE" => $system->get("MS_TDOC_DB_DATABASE"),
+            "MS_DB_SVR" => $system->get("MS_TDOC_DB_SVR"),
+            "MS_DB_CHARSET" => $system->get("MS_TDOC_DB_CHARSET")
         ));
     }
 

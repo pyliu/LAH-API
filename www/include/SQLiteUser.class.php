@@ -1,5 +1,6 @@
 <?php
 require_once('init.php');
+require_once('System.class.php');
 define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."dimension.db");
 
 class SQLiteUser {
@@ -47,12 +48,13 @@ class SQLiteUser {
         // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
         
         $authority = $this->getAuthority($row['DocUserID']);
+        $system = new System();
         // add admin privilege
-        if (in_array($row['AP_PCIP'], SYSTEM_CONFIG["ADM_IPS"])) {
+        if (in_array($row['AP_PCIP'], $system->getRoleAdminIps())) {
             $authority = $authority | AUTHORITY::ADMIN;
         }
         // add chief privilege
-        if (in_array($row['AP_PCIP'], SYSTEM_CONFIG["CHIEF_IPS"])) {
+        if (in_array($row['AP_PCIP'], $system->getRoleChiefIps())) {
             $authority = $authority | AUTHORITY::CHIEF;
         }
         $stm->bindParam(':authority', $authority);

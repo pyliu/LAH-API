@@ -5,6 +5,7 @@ require_once(ROOT_DIR.'/include/Message.class.php');
 require_once(ROOT_DIR.'/include/StatsSQLite3.class.php');
 require_once(ROOT_DIR.'/include/Temperature.class.php');
 require_once(ROOT_DIR.'/include/SQLiteUser.class.php');
+require_once(ROOT_DIR.'/include/System.class.php');
 
 class WatchDog {
     
@@ -87,7 +88,9 @@ class WatchDog {
             $host_ip = getLocalhostIP();
             $msg = new Message();
             $content = "系統目前找到下列跨所註記遺失案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/dashboard.html 執行檢查功能並修正。";
-            foreach (SYSTEM_CONFIG['ADM_IPS'] as $adm_ip) {
+            $system = new System();
+            $adm_ips = $system->getRoleAdminIps();
+            foreach ($adm_ips as $adm_ip) {
                 if ($adm_ip == '::1') {
                     continue;
                 }
