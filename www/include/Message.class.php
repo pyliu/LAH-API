@@ -1,6 +1,7 @@
 <?php
 require_once("MSDB.class.php");
 require_once("SQLiteUser.class.php");
+require_once("System.class.php");
 
 class Message {
     private $jungli_in_db;
@@ -23,27 +24,6 @@ class Message {
             return false;
         }
         return $res[0];
-        /*
-        $tdoc_db = new MSDB(array(
-            "MS_DB_UID" => SYSTEM_CONFIG["MS_TDOC_DB_UID"],
-            "MS_DB_PWD" => SYSTEM_CONFIG["MS_TDOC_DB_PWD"],
-            "MS_DB_DATABASE" => SYSTEM_CONFIG["MS_TDOC_DB_DATABASE"],
-            "MS_DB_SVR" => SYSTEM_CONFIG["MS_TDOC_DB_SVR"],
-            "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_TDOC_DB_CHARSET"]
-        ));
-        $name_or_id_or_ip = trim($name_or_id_or_ip);
-        $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE DocUserID LIKE '%${name_or_id_or_ip}%' AND AP_OFF_JOB <> 'Y'");
-        if (empty($res)) {
-            $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_USER_NAME LIKE '%${name_or_id_or_ip}%' AND AP_OFF_JOB <> 'Y' ORDER BY AP_ON_DATE");
-        }
-        if (empty($res)) {
-            $res = $tdoc_db->fetchAll("SELECT * FROM AP_USER WHERE AP_PCIP = '${name_or_id_or_ip}' AND AP_OFF_JOB <> 'Y' ORDER BY DocUserID");
-        }
-        if (empty($res) || count($res) != 1) {
-            return false;
-        }
-        return $res[0];
-        */
     }
 
     function __construct() {
@@ -214,12 +194,15 @@ class Message {
         $user = $this->getUserInfo($name_or_id_or_ip);
         if ($user !== false) {
             $id = $user["id"];
+
+            $system = new System();
+
             $tdoc_db = new MSDB(array(
-                "MS_DB_UID" => SYSTEM_CONFIG["MS_DB_UID"],
-                "MS_DB_PWD" => SYSTEM_CONFIG["MS_DB_PWD"],
-                "MS_DB_DATABASE" => SYSTEM_CONFIG["MS_DB_DATABASE"],
-                "MS_DB_SVR" => SYSTEM_CONFIG["MS_DB_SVR"],
-                "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_DB_CHARSET"]
+                "MS_DB_UID" => $system->get("MS_DB_UID"),
+                "MS_DB_PWD" => $system->get("MS_DB_PWD"),
+                "MS_DB_DATABASE" => $system->get("MS_DB_DATABASE"),
+                "MS_DB_SVR" => $system->get("MS_DB_SVR"),
+                "MS_DB_CHARSET" => $system->get("MS_DB_CHARSET")
             ));
             $sql = "SELECT TOP ${top} * FROM Message WHERE receiver = '${id}' ORDER BY sendtime DESC";
             return $tdoc_db->fetchAll($sql);
@@ -237,12 +220,15 @@ class Message {
         $user = $this->getUserInfo($name_or_id_or_ip);
         if ($user !== false) {
             $id = $user["id"];
+
+            $system = new System();
+
             $tdoc_db = new MSDB(array(
-                "MS_DB_UID" => SYSTEM_CONFIG["MS_DB_UID"],
-                "MS_DB_PWD" => SYSTEM_CONFIG["MS_DB_PWD"],
-                "MS_DB_DATABASE" => SYSTEM_CONFIG["MS_DB_DATABASE"],
-                "MS_DB_SVR" => SYSTEM_CONFIG["MS_DB_SVR"],
-                "MS_DB_CHARSET" => SYSTEM_CONFIG["MS_DB_CHARSET"]
+                "MS_DB_UID" => $system->get("MS_DB_UID"),
+                "MS_DB_PWD" => $system->get("MS_DB_PWD"),
+                "MS_DB_DATABASE" => $system->get("MS_DB_DATABASE"),
+                "MS_DB_SVR" => $system->get("MS_DB_SVR"),
+                "MS_DB_CHARSET" => $system->get("MS_DB_CHARSET")
             ));
             $sql = "SELECT * FROM Message WHERE receiver = '${id}' AND done <> '1' ORDER BY sendtime DESC";
             return $tdoc_db->fetchAll($sql);

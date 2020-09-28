@@ -1,9 +1,11 @@
 <?php
 require_once("init.php");
 require_once("SQLSRV_DataBase.class.php");
+require_once("System.class.php");
 
 class MSDB {
     private $dbo;
+    private $system;
 
     private function prepareVal($value){
         if ( null === $value ) {
@@ -17,20 +19,20 @@ class MSDB {
     }
     
     function __construct($conn_info = array()) {
-
-        if (SYSTEM_CONFIG["MOCK_MODE"] === true) return;
+        $this->system = new System();
+        if ($this->system->isMockMode() === true) return;
         
         if (empty($conn_info)) {
-            if (SYSTEM_CONFIG["MS_DB_SVR"] == "xxx.xxx.xxx.xxx") {
-                die(__FILE__.": MSDB SVR not configured. Current: xxx.xxx.xxx.xxx");
+            if ($this->system->get("MS_DB_SVR") == "xxx.xxx.xxx.xxx") {
+                die(__FILE__.": MSDB SVR not configured. Current: ".$this->system->get("MS_DB_SVR"));
             }
             // default connect via config
             $this->dbo = new SQLSRV_DataBase(
-                SYSTEM_CONFIG["MS_DB_UID"],
-                SYSTEM_CONFIG["MS_DB_PWD"],
-                SYSTEM_CONFIG["MS_DB_DATABASE"],
-                SYSTEM_CONFIG["MS_DB_SVR"],
-                SYSTEM_CONFIG["MS_DB_CHARSET"]
+                $this->system->get("MS_DB_UID"),
+                $this->system->get("MS_DB_PWD"),
+                $this->system->get("MS_DB_DATABASE"),
+                $this->system->get("MS_DB_SVR"),
+                $this->system->get("MS_DB_CHARSET")
             );
         } else {
             $require_keys = array(
@@ -47,7 +49,7 @@ class MSDB {
                 }
             }
             if ($conn_info["MS_DB_SVR"] == "xxx.xxx.xxx.xxx") {
-                die(__FILE__.": MSDB SVR not configured. Current: xxx.xxx.xxx.xxx");
+                die(__FILE__.": MSDB SVR not configured. Current: ".$conn_info["MS_DB_SVR"]);
             }
             $this->dbo = new SQLSRV_DataBase(
                 $conn_info["MS_DB_UID"],

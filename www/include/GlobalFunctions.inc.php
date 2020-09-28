@@ -39,9 +39,9 @@ function GetDBUserMapping($refresh = false) {
     $time = @filemtime($file);
     
     if ($refresh === true || $time === false || mktime() - $time > 86400) {
-        $db = SYSTEM_CONFIG["ORA_DB_MAIN"];
+        $db = $system->get("ORA_DB_MAIN");
         
-        $conn = oci_connect(SYSTEM_CONFIG["ORA_DB_USER"], SYSTEM_CONFIG["ORA_DB_PASS"], $db, "US7ASCII");
+        $conn = oci_connect($system->get("ORA_DB_USER"), $system->get("ORA_DB_PASS"), $db, "US7ASCII");
         if (!$conn) {
             $e = oci_error();
             trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
