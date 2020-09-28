@@ -3,6 +3,7 @@ require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'init.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR."api".DIRECTORY_SEPARATOR."FileAPICommand.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."Query.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."Cache.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 
 class FileAPIDataExportCommand extends FileAPICommand {
     private $code, $sections;
@@ -74,7 +75,8 @@ class FileAPIDataExportCommand extends FileAPICommand {
         $sql = str_replace('##REPLACEMENT##', $replacement, $content);
         
         global $log;
-        $mock = SYSTEM_CONFIG["MOCK_MODE"];
+        $system = new System();
+        $mock = $system->isMockMode();
         if ($mock) $log->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！");
         $cache = new Cache();
         $q = new Query();

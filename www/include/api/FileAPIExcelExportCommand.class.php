@@ -2,6 +2,7 @@
 require_once(dirname(dirname(__FILE__))."/init.php");
 require_once(ROOT_DIR."/include/Cache.class.php");
 require_once(ROOT_DIR."/include/Query.class.php");
+require_once(ROOT_DIR."/include/System.class.php");
 require_once(ROOT_DIR."/include/RegCaseData.class.php");
 require_once(ROOT_DIR.'/vendor/autoload.php');
 require_once("FileAPICommand.class.php");
@@ -421,7 +422,8 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $this->query = new Query();
         $this->cache = new Cache();
         $this->type = $_SESSION['xlsx_type'] ?? false;
-        $this->mock_mode = SYSTEM_CONFIG["MOCK_MODE"];
+        $system = new System();
+        $this->mock_mode = $system->isMockMode();
     }
 
     function __destruct() {}
