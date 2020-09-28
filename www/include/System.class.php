@@ -17,6 +17,10 @@ class System {
         return rtrim($this->get('USER_PHOTO_FOLDER'), "\\");
     }
 
+    public function getRoleAdminIps() {
+        return unserialize($this->get('ROLE_ADM_IPS'));
+    }
+
     public function get($key) {
         return $this->sqlite3->querySingle("SELECT value from config WHERE key = '$key'");
     }
