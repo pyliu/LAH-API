@@ -11,6 +11,8 @@ require_once("./include/StatsOracle.class.php");
 require_once("./include/SQLiteUser.class.php");
 
 // echo date("Ymdhis", strtotime("-10 minutes"));
-echo serialize(array('127.0.0.1',"::1"));
+echo serialize(array(
+    "localhost" => "::1"
+));
 
 ?>
