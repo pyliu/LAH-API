@@ -3,13 +3,12 @@ require_once("config/Config.inc.php");
 require_once('SQLiteUser.class.php');
 require_once('System.class.php');
 
-$system = new System();
-
 function getMyAuthority() {
     global $client_ip;
 
-    // check Config.inc.php setting first
-    $res = $system->getAuthority();
+    // check authority by ip address
+    $system = new System();
+    $res = $system->getAuthority($client_ip);
     if ($res['isSuper']) array_walk($res, function(&$value) { $value = true; });
 
     // check user authority from DB
