@@ -13,6 +13,51 @@ class System {
         return $this->get('MOCK_MODE') == 'true';
     }
     
+    public function enableMockMode() {
+        $super_array = unserialize($this->get('ROLE_SUPER_IPS'));
+        if (!in_array('127.0.0.1', $super_array)) {
+            $super_array[] = '127.0.0.1';
+            $stm = $this->sqlite3->prepare("
+                REPLACE INTO config ('key', 'value')
+                VALUES (:key, :value)
+            ");
+            $stm->bindValue(':key', 'ROLE_SUPER_IPS');
+            $stm->bindValue(':value', serialize($super_array));
+            $stm->execute();
+        }
+
+        $stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ");
+        $stm->bindValue(':key', 'MOCK_MODE');
+        $stm->bindValue(':value', 'true');
+        return $stm->execute() === FALSE ? false : true;
+    }
+    
+    public function disableMockMode() {
+        $super_array = unserialize($this->get('ROLE_SUPER_IPS'));
+        if (in_array('127.0.0.1', $super_array)) {
+            $idx = array_search('127.0.0.1', $super_array, true);
+            $super_array = array_splice($super_array, $idx, 1);
+            $stm = $this->sqlite3->prepare("
+                REPLACE INTO config ('key', 'value')
+                VALUES (:key, :value)
+            ");
+            $stm->bindValue(':key', 'ROLE_SUPER_IPS');
+            $stm->bindValue(':value', serialize($super_array));
+            $stm->execute();
+        }
+
+        $stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ");
+        $stm->bindValue(':key', 'MOCK_MODE');
+        $stm->bindValue(':value', 'false');
+        return $stm->execute() === FALSE ? false : true;
+    }
+    
     public function getUserPhotoFolderPath() {
         return rtrim($this->get('USER_PHOTO_FOLDER'), "\\");
     }
