@@ -5356,6 +5356,7 @@ if (Vue) {
             <b-input-group size="sm">
                 <b-form-checkbox v-model="enable_msdb_query" switch>{{enable_msdb_query_desc}}</b-form-checkbox>
                 <b-form-checkbox v-model="enable_office_hours" switch>{{enable_office_hours_desc}}</b-form-checkbox>
+                <b-form-checkbox v-model="enable_mock_mode" switch>{{enable_mock_mode_desc}}</b-form-checkbox>
             </b-input-group>
         </b-card>`,
         props: {
@@ -5363,11 +5364,13 @@ if (Vue) {
         },
         data: () => ({
             enable_msdb_query: true,
-            enable_office_hours: true
+            enable_office_hours: true,
+            enable_mock_mode: false
         }),
         computed: {
             enable_msdb_query_desc() { return this.enable_msdb_query ? '啟用外部MSSQL連線功能' : '停用外部MSSQL連線功能' },
-            enable_office_hours_desc() { return this.enable_office_hours ? '啟用工作天檢查' : '停用工作天檢查' }
+            enable_office_hours_desc() { return this.enable_office_hours ? '啟用工作天檢查' : '停用工作天檢查' },
+            enable_mock_mode_desc() { return this.enable_mock_mode ? '啟用MOCK模式' : '停用MOCK模式' }
         },
         watch: {
             enable_msdb_query(flag) {
@@ -5377,6 +5380,18 @@ if (Vue) {
             enable_office_hours(flag) {
                 this.setLocalCache('disableOfficeHours', flag ? 'no' : 'yes');
                 this.$store.commit("disableOfficeHours", !flag);
+            },
+            enable_mock_mode(flag) {
+                this.isBusy = true;
+                this.$http.post(CONFIG.API.JSON.SWITCH, {
+                    type: flag ? 'switch_disable_mock' : 'switch_enable_mock'
+                }).then(res => {
+                    this.notify({ title: '切換MOCK模式', message: res.data.message })
+                }).catch(err => {
+                    this.$error(err);
+                }).finally(() => {
+                    this.isBusy = false;
+                });
             }
         },
         created() {

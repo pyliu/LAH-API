@@ -993,6 +993,11 @@ $(document).ready(() => {
                         this.$store.commit("disableOfficeHours", cached == 'yes' ? true : false);
                     }
                 });
+                this.getLocalCache('disableMockMode').then(cached => {
+                    if (cached !== false) {
+                        this.$store.commit("disableMockMode", cached == 'yes' ? true : false);
+                    }
+                });
             }
         },
         created: function(e) {
