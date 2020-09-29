@@ -16,7 +16,7 @@ if (Vue) {
                     <div :title="ip">
                         <b-button-group size="sm">
                             <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
-                            <!--<lah-button icon="chart-pie" variant="secondary" v-if="type != 'pie'" @click="type = 'pie'" title="切換圓餅圖"></lah-button>-->
+                            <lah-button icon="chart-pie" variant="secondary" v-if="type != 'pie'" @click="type = 'pie'" title="切換圓餅圖"></lah-button>
                             <lah-button icon="chart-line" variant="success" v-if="type != 'line'" @click="type = 'line'" title="切換長線型圖"></lah-button>
                             <lah-button icon="chart-area" variant="warning" v-if="type != 'polarArea'" @click="type = 'polarArea'" title="切換區域圖"></lah-button>
                             <lah-button brand icon="edge" variant="info" v-if="type != 'doughnut'" @click="type = 'doughnut'" title="切換甜甜圈"></lah-button>
@@ -51,7 +51,8 @@ if (Vue) {
             total_count: 0,
             ap_count: 0,
             last_update_time: '',
-            reload_timer: null
+            reload_timer: null,
+            carousel: ['bar', 'line', 'pie', 'polarArea', 'doughnut', 'radar']
         }),
         watch: {
             disableOfficeHours(val) { if (val) this.reload() },
@@ -251,6 +252,8 @@ if (Vue) {
                     this.ap_count += parseInt(value);
                 });
                 this.last_update_time = this.now().split(' ')[1];
+                let len = this.carousel.length;
+                this.type = this.carousel[this.ap_count % len];
             },
             visible(isVisible) {
                 if (isVisible) {
