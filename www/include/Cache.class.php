@@ -21,7 +21,7 @@ class Cache {
             VALUES (:key, :value, :expire)
         ");
         $stm->bindParam(':key', $key);
-        $stm->bindParam(':value', $val);
+        $stm->bindParam(':value', serialize($val));
         $stm->bindParam(':expire', $expire);
         return $stm->execute() === FALSE ? false : true;
     }
