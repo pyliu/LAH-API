@@ -10,12 +10,10 @@ require_once("./include/Watchdog.class.php");
 require_once("./include/StatsOracle.class.php");
 require_once("./include/SQLiteUser.class.php");
 require_once("./include/System.class.php");
+require_once("./include/Temperature.class.php");
 
 // echo date("Ymdhis", strtotime("-10 minutes"));
 echo serialize(array(
     
 ));
-
-$system = new System();
-echo $system->getUserPhotoFolderPath();
 ?>
