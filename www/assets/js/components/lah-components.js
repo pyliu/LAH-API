@@ -5384,7 +5384,7 @@ if (Vue) {
             enable_mock_mode(flag) {
                 this.isBusy = true;
                 this.$http.post(CONFIG.API.JSON.SWITCH, {
-                    type: flag ? 'switch_disable_mock' : 'switch_enable_mock'
+                    type: flag ? 'switch_enable_mock' : 'switch_disable_mock'
                 }).then(res => {
                     this.notify({ title: '切換MOCK模式', message: res.data.message })
                 }).catch(err => {
