@@ -229,6 +229,7 @@ if (Vue) {
                 });
                 this.last_update_time = this.now().split(' ')[1];
                 this.now_count = this.items[0][1];
+                this.type = this.now_count % 2 == 0 ? 'bar' : 'line';
             },
             visible(isVisible) {
                 if (isVisible) {
