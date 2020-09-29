@@ -8,7 +8,13 @@ class DocUserInfo {
 
     function __construct() {
         $system = new System();
-        $this->doc_db = new MSDB($system->getMSDocDatabaseConnection());
+        $this->doc_db = new MSDB(array(
+            'MS_DB_UID' => $system->get('MS_DOC_DB_UID'),
+            'MS_DB_PWD' => $system->get('MS_DOC_DB_PWD'),
+            'MS_DB_DATABASE' => $system->get('MS_DOC_DB_DATABASE'),
+            'MS_DB_SVR' => $system->get('MS_DOC_DB_SVR'),
+            'MS_DB_CHARSET' => $system->get('MS_DOC_DB_CHARSET')
+        ));
     }
 
     function __destruct() {

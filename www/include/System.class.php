@@ -37,10 +37,6 @@ class System {
         return unserialize($this->get('ROLE_GA_IPS'));
     }
 
-    public function getMSDocDatabaseConnection() {
-        return unserialize($this->get('MS_DOC_DB_CONN'));
-    }
-
     public function getAuthority($ip) {
         return array(
             "isAdmin" => in_array($ip, $this->getRoleAdminIps()),
