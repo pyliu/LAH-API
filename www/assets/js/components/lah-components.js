@@ -309,7 +309,6 @@ if (Vue) {
                             <lah-user-message-history ref="message" :ip="myip" count=5 title="最新訊息" class="mb-2" :tabs="true" :tabs-end="true"></lah-user-message-history>
                             <lah-user-ext class="mb-2"></lah-user-ext>
                             <lah-user-message-reservation></lah-user-message-reservation>
-                            <lah-vuex-switch v-if="isAdmin"></lah-vuex-switch>
                             <b-button block @click.stop="clearCache" variant="outline-secondary" size="sm"><lah-fa-icon icon="broom"> 清除快取資料</lah-fa-icon></b-button>
                         </b-popover>
                     </b-navbar-nav>
@@ -5354,13 +5353,16 @@ if (Vue) {
      * Vuex switches
      */
     Vue.component("lah-vuex-switch", {
-        template: `<b-card no-body class="border-0">
-            <h6 v-if="heading" class="mb-2"><lah-fa-icon icon="angle-double-right" variant="dark"> 系統設定</lah-fa-icon></h6>
-            <b-input-group size="sm">
-                <b-form-checkbox v-model="enable_msdb_query" switch>{{enable_msdb_query_desc}}</b-form-checkbox>
-                <b-form-checkbox v-model="enable_office_hours" switch>{{enable_office_hours_desc}}</b-form-checkbox>
-                <b-form-checkbox v-model="enable_mock_mode" switch>{{enable_mock_mode_desc}}</b-form-checkbox>
-            </b-input-group>
+        template: `<b-card>
+            <template v-slot:header>
+                <div class="d-flex w-100 justify-content-between mb-0">
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="cogs"> 系統設定</lah-fa-icon></h6>
+                    <lah-button icon="question" @click="popup" size="sm" variant="outline-success" class="border-0"></lah-button>
+                </div>
+            </template>
+            <b-form-checkbox v-model="enable_msdb_query" switch><span title="FE端設定一天後會自動恢復">{{enable_msdb_query_desc}}</span></b-form-checkbox>
+            <b-form-checkbox v-model="enable_office_hours" switch><span title="FE端設定一天後會自動恢復">{{enable_office_hours_desc}}</span></b-form-checkbox>
+            <b-form-checkbox v-model="enable_mock_mode" switch><span title="寫入資料庫(dimension.db)設定">{{enable_mock_mode_desc}}</span></b-form-checkbox>
         </b-card>`,
         props: {
             heading: { type: Boolean, default: true }
@@ -5394,6 +5396,22 @@ if (Vue) {
                     this.$error(err);
                 }).finally(() => {
                     this.isBusy = false;
+                });
+            }
+        },
+        methods: {
+            popup() {
+                this.msgbox({
+                    title: "系統設定 小幫手提示",
+                    body: `
+                        <h6 class="text-info">相關設定說明</h6>
+                        <ul>
+                            <li>${this.enable_msdb_query_desc} - FE端設定一天後會自動恢復</li>
+                            <li>${this.enable_office_hours_desc} - FE端設定一天後會自動恢復</li>
+                            <li>${this.enable_mock_mode_desc} - 寫入資料庫(dimension.db)設定</li>
+                        </ul>
+                    `,
+                    size: "lg"
                 });
             }
         },
