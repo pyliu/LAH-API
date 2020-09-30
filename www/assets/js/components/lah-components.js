@@ -5360,9 +5360,9 @@ if (Vue) {
                     <lah-button icon="question" @click="popup" size="sm" variant="outline-success" class="border-0"></lah-button>
                 </div>
             </template>
-            <b-form-checkbox v-model="enable_msdb_query" switch><span title="FE端設定一天後會自動恢復">{{enable_msdb_query_desc}}</span></b-form-checkbox>
-            <b-form-checkbox v-model="enable_office_hours" switch><span title="FE端設定一天後會自動恢復">{{enable_office_hours_desc}}</span></b-form-checkbox>
-            <b-form-checkbox v-model="enable_mock_mode" switch><span title="寫入資料庫(dimension.db)設定">{{enable_mock_mode_desc}}</span></b-form-checkbox>
+            <b-form-checkbox v-model="enable_msdb_query" switch><span title="瀏覽器端設定一天後會自動恢復">{{enable_msdb_query_desc}}</span></b-form-checkbox>
+            <b-form-checkbox v-model="enable_office_hours" switch><span title="瀏覽器端設定一天後會自動恢復">{{enable_office_hours_desc}}</span></b-form-checkbox>
+            <b-form-checkbox v-model="enable_mock_mode" switch><span title="伺服器只會傳回快取的資料">{{enable_mock_mode_desc}}</span></b-form-checkbox>
         </b-card>`,
         props: {
             heading: { type: Boolean, default: true }
@@ -5406,9 +5406,9 @@ if (Vue) {
                     body: `
                         <h6 class="text-info">相關設定說明</h6>
                         <ul>
-                            <li>${this.enable_msdb_query_desc} - FE端設定一天後會自動恢復</li>
-                            <li>${this.enable_office_hours_desc} - FE端設定一天後會自動恢復</li>
-                            <li>${this.enable_mock_mode_desc} - 寫入資料庫(dimension.db)設定</li>
+                            <li>${this.enable_msdb_query_desc} - 瀏覽器端設定一天後會自動恢復</li>
+                            <li>${this.enable_office_hours_desc} - 瀏覽器端設定一天後會自動恢復</li>
+                            <li>${this.enable_mock_mode_desc} - 伺服器只會傳回快取的資料。</li>
                         </ul>
                     `,
                     size: "lg"
