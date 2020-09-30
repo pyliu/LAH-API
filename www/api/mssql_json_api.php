@@ -1,5 +1,7 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
+require_once(INC_DIR."/TdocUserInfo.class.php");
+require_once(INC_DIR."/DocUserInfo.class.php");
 require_once(INC_DIR."/Message.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/System.class.php");
@@ -132,6 +134,21 @@ switch ($_POST["type"]) {
 			echoJSONResponse("新增 ".$_POST["title"]." 訊息失敗【${id}】。");
 		}
 		break;
+    case "upd_ext_doc":
+        $log->info("XHR [upd_ext_doc] 更新舊資料庫分機號碼【".$_POST["id"].", ".$_POST["ext"]."】請求");
+        // connect MSSQL doc DB to update legacy data
+        $doc = new DocUserInfo();
+        $result = $mock ? $cache->get('upd_ext_doc') : $doc->updateExt($_POST["id"], $_POST["ext"]);
+        if (!$mock) $cache->set('upd_ext_doc', $result);
+        if ($result) {
+            $msg = "更新舊資料庫分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 成功。";
+            $log->info("XHR [upd_ext_doc] ".$msg);
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            $log->info("XHR [upd_ext_doc] 更新舊資料庫分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
+            echoJSONResponse("更新舊資料庫分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
+        }
+        break;
     default:
         $log->error("不支援的查詢型態【".$_POST["type"]."】");
         echoErrorJSONString("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

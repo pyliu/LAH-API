@@ -731,23 +731,6 @@ switch ($_POST["type"]) {
 		$log->info("XHR [zip_log] 壓縮LOG成功");
 		echo json_encode($result, 0);
 		break;
-	case "upd_ext_doc":
-		$log->info("XHR [upd_ext_doc] 更新舊資料庫分機號碼【".$_POST["id"].", ".$_POST["ext"]."】請求");
-		// connect MSSQL doc DB to update legacy data
-		$doc = new DocUserInfo();
-		$result = $doc->updateExt($_POST["id"], $_POST["ext"]);
-		if ($result) {
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"message" => "更新舊資料庫分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 成功。"
-			);
-			$log->info("XHR [upd_ext_doc] ".$result["message"]);
-			echo json_encode($result, 0);
-		} else {
-			echoErrorJSONString("更新舊資料庫分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
-			$log->info("XHR [upd_ext_doc] 更新舊資料庫分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
-		}
-		break;
 	case "remove_temperature":
 		$log->info("XHR [remove_temperature] 刪除體溫【".$_POST["id"].", ".$_POST["datetime"]."】請求");
 		$temperature = new Temperature();

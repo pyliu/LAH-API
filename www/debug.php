@@ -13,6 +13,5 @@ require_once("./include/System.class.php");
 require_once("./include/Temperature.class.php");
 
 // echo date("Ymdhis", strtotime("-10 minutes"));
-echo serialize(array(
-));
+echo serialize(array( ));
 ?>
