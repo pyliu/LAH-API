@@ -1,6 +1,5 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
-require_once(INC_DIR."/TdocUserInfo.class.php");
 require_once(INC_DIR."/DocUserInfo.class.php");
 require_once(INC_DIR."/Message.class.php");
 require_once(INC_DIR."/Cache.class.php");
