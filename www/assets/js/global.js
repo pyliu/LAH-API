@@ -13,7 +13,8 @@ const CONFIG = {
             QUERY: "api/query_json_api.php",
             STATS: "api/stats_json_api.php",
             SWITCH: "api/switch_json_api.php",
-            USER: "api/user_json_api.php"
+            USER: "api/user_json_api.php",
+            MSSQL: "api/mssql_json_api.php"
         },
         FILE: {
             LOAD: "api/load_file_api.php",

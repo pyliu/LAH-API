@@ -517,7 +517,7 @@ if (Vue) {
             },
             setUnreadMessageCount: function () {
                 if (!this.disableMSDBQuery) {
-                    this.$http.post(CONFIG.API.JSON.QUERY, {
+                    this.$http.post(CONFIG.API.JSON.MSSQL, {
                         type: 'user_unread_message',
                         ip: this.myip
                     }).then(res => {
@@ -1755,7 +1755,7 @@ if (Vue) {
                     callback: () => {
                         $(`#${this.btn_grp_id}`).hide();
                         this.isBusy = true;
-                        this.$http.post(CONFIG.API.JSON.QUERY, {
+                        this.$http.post(CONFIG.API.JSON.MSSQL, {
                             type: "send_message",
                             title: title,
                             content: content,
@@ -1901,7 +1901,7 @@ if (Vue) {
                                 this.raws = raws.slice(0, this.count);
                             } else {
                                 this.isBusy = true;
-                                this.$http.post(CONFIG.API.JSON.QUERY, {
+                                this.$http.post(CONFIG.API.JSON.MSSQL, {
                                     type: "user_message",
                                     id: this.id,
                                     name: this.name,
@@ -1930,7 +1930,7 @@ if (Vue) {
             },
             read(sn, idx) {
                 if (!this.disableMSDBQuery) {
-                    this.$http.post(CONFIG.API.JSON.QUERY, {
+                    this.$http.post(CONFIG.API.JSON.MSSQL, {
                         type: "set_read_user_message",
                         sn: sn
                     }).then(res => {
@@ -1949,7 +1949,7 @@ if (Vue) {
             },
             unread(sn, idx) {
                 if (!this.disableMSDBQuery) {
-                    this.$http.post(CONFIG.API.JSON.QUERY, {
+                    this.$http.post(CONFIG.API.JSON.MSSQL, {
                         type: "set_unread_user_message",
                         sn: sn
                     }).then(res => {
@@ -1969,7 +1969,7 @@ if (Vue) {
             del(sn) {
                 if (!this.disableMSDBQuery) {
                     this.$confirm('此動作無法復原，確定刪除本則訊息？', () => {
-                        this.$http.post(CONFIG.API.JSON.QUERY, {
+                        this.$http.post(CONFIG.API.JSON.MSSQL, {
                             type: "del_user_message",
                             sn: sn
                         }).then(res => {
@@ -2110,7 +2110,7 @@ if (Vue) {
                     return;
                 }
                 this.isBusy = true;
-                this.$http.post(CONFIG.API.JSON.QUERY, {
+                this.$http.post(CONFIG.API.JSON.MSSQL, {
                     type: "send_message",
                     title: this.message,
                     content: this.message,
