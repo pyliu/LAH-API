@@ -172,7 +172,7 @@ Vue.prototype.$store = (() => {
                         if (typeof authority == "object" && current_ts - authority_ts < state.dayMilliseconds) {
                             commit("authority", authority || false);
                         } else {
-                            await axios.post(CONFIG.API.JSON.QUERY, {
+                            await axios.post(CONFIG.API.JSON.USER, {
                                 type: 'authentication'
                             }).then(res => {
                                 console.log(res.data.message);
@@ -958,7 +958,7 @@ $(document).ready(() => {
                     if (myinfo) {
                         this.$store.commit("myinfo", myinfo);
                     } else {
-                        this.$http.post(CONFIG.API.JSON.QUERY, {
+                        this.$http.post(CONFIG.API.JSON.USER, {
                             type: 'my_info'
                         }).then(res => {
                             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {

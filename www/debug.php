@@ -14,9 +14,5 @@ require_once("./include/Temperature.class.php");
 
 // echo date("Ymdhis", strtotime("-10 minutes"));
 echo serialize(array(
-    
 ));
-
-$system = new System();
-$system->enableMockMode();
 ?>
