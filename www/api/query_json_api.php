@@ -26,7 +26,6 @@ $cache = new Cache();
 $system = new System();
 
 $mock = $system->isMockMode();
-if ($mock) $log->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！");
 
 switch ($_POST["type"]) {
 	case "stats_overdue_msg_total":
