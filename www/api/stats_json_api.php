@@ -13,7 +13,6 @@ $system = new System();
 $this_month = (date("Y") - 1911)."".date("m");
 
 $mock = $system->isMockMode();
-if ($mock) $log->warning("現在處於模擬模式(mock mode)，STATS API僅會回應之前已被快取之最新的資料！");
 
 function queryStats($type, $date, $error_msg) {
     global $stats_sqlite3, $mock, $cache, $stats, $this_month, $log;
