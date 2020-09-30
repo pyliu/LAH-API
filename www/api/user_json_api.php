@@ -13,13 +13,11 @@ switch ($_POST["type"]) {
 	case "user_mapping":
 		$operators = getUserNames();
 		$count = count($operators);
-		$log->info("XHR [user_mapping] 取得使用者對應表($count)。");
-		echo json_encode(array(
-			"status" => STATUS_CODE::SUCCESS_NORMAL,
+        $log->info("XHR [user_mapping] 取得使用者對應表($count)。");
+        echoJSONResponse("取得 $count 筆使用者資料。", STATUS_CODE::SUCCESS_NORMAL, array(
 			"data_count" => $count,
-			"data" => $operators,
-			"message" => "取得 $count 筆使用者資料。"
-		), 0);
+			"data" => $operators
+		));
 		break;
     case "user_names":
         $log->info("XHR [user_names] 查詢使用者名冊資料請求 (SQLite DB: dimension.db)");
@@ -30,13 +28,11 @@ switch ($_POST["type"]) {
             echoJSONResponse($msg);
             $log->info("XHR [user_names] $msg");
         } else {
-            $result = array(
-                "status" => STATUS_CODE::SUCCESS_NORMAL,
+            $log->info("XHR [user_names] 查詢使用者名冊資料成功。");
+            echoJSONResponse('查詢使用者名冊資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => count($all_users),
                 "raw" => $all_users
-            );
-            $log->info("XHR [user_names] 查詢使用者名冊資料成功。");
-            echo json_encode($result, 0);
+            ));
         }
         break;
     case "search_user":
@@ -56,14 +52,12 @@ switch ($_POST["type"]) {
             echoJSONResponse("查無 ".$_POST["keyword"]." 資料。");
             $log->info("XHR [search_user] 查無 ".$_POST["keyword"]." 資料。");
         } else {
-            $result = array(
-                "status" => STATUS_CODE::SUCCESS_NORMAL,
+            $log->info("XHR [search_user] 查詢 ".$_POST["keyword"]." 成功。");
+            echoJSONResponse("查詢 ".$_POST["keyword"]." 成功", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => count($results),
                 "raw" => $results,
                 "query_string" => "keyword=".$_POST["keyword"]
-            );
-            $log->info("XHR [search_user] 查詢 ".$_POST["keyword"]." 成功。");
-            echo json_encode($result, 0);
+            ));
         }
         break;
     case "user_info":
@@ -87,27 +81,22 @@ switch ($_POST["type"]) {
             $log->info("XHR [user_info] 查無 ".$_POST["name"] ?? $_POST["id"] ?? $_POST["ip"]." 資料。");
             echoJSONResponse("查無 ".$_POST["name"]." 資料。");
         } else {
-            $result = array(
-                "status" => STATUS_CODE::SUCCESS_NORMAL,
+            $log->info("XHR [user_info] 查詢 ".($_POST["name"] ?? $_POST["id"] ?? $_POST["ip"])." 成功。");
+            echoJSONResponse("查詢 ".($_POST["name"] ?? $_POST["id"] ?? $_POST["ip"])." 成功", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => count($results),
                 "raw" => $results,
                 "query_string" => "id=".$_POST["id"]."&name=".$_POST["name"]."&ip=".$_POST["ip"]
-            );
-            $log->info("XHR [user_info] 查詢 ".($_POST["name"] ?? $_POST["id"] ?? $_POST["ip"])." 成功。");
-            echo json_encode($result, 0);
+            ));
         }
         break;
     case "org_data":
         $user_info = new SQLiteUser();
         $tree_data = $user_info->getTopTreeData();
-        $json = array(
-            "status" => STATUS_CODE::SUCCESS_NORMAL,
-            "data_count" => 1,
-            "raw" => $tree_data,
-            "message" => "XHR [org_data] 查詢組織資料成功。"
-        );
         $log->info($json["message"]);
-        echo json_encode($json, 0);
+        echoJSONResponse("XHR [org_data] 查詢組織資料成功。", STATUS_CODE::SUCCESS_NORMAL, array(
+            "data_count" => 1,
+            "raw" => $tree_data
+        ));
         break;
 	case "my_info":
 	case "authentication":
@@ -123,28 +112,23 @@ switch ($_POST["type"]) {
 			$results = array($last);
 		}
 		if (empty($results)) {
-			$result = array(
-				"status" => STATUS_CODE::FAIL_NOT_FOUND,
-				"message" => "查無 ".$client_ip." 資料。",
+            $msg = "查無 ".$client_ip." 資料。";
+			$log->info("XHR [my_info] ".$msg);
+			$log->info("XHR [authentication] 查無 $client_ip 授權");
+            echoJSONResponse("查無 ".$client_ip." 資料。", STATUS_CODE::FAIL_NOT_FOUND, array(
 				"data_count" => 0,
 				"info" => false,
 				"authority" => getMyAuthority()
-			);
-			$log->info("XHR [my_info] ".$result['message']);
-			$log->info("XHR [authentication] 查無 $client_ip 授權");
-			echo json_encode($result, 0);
+			));
 		} else {
 			$_SESSION["myinfo"] = $results[0];
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"message" => "查詢 ".$client_ip." 成功。 (".$results[0]["id"].":".$results[0]["name"].")",
+			$log->info("XHR [my_info] ".$result['message']);
+			$log->info("XHR [authentication] 查詢 ".$client_ip." 成功。 (".str_replace("\n", ' ', print_r($result['authority'], true)).")");
+            echoJSONResponse("查詢 ".$client_ip." 成功。 (".$results[0]["id"].":".$results[0]["name"].")", STATUS_CODE::SUCCESS_NORMAL, array(
 				"data_count" => count($results),
 				"info" => $results[0],
 				"authority" => getMyAuthority()
-			);
-			$log->info("XHR [my_info] ".$result['message']);
-			$log->info("XHR [authentication] 查詢 ".$client_ip." 成功。 (".str_replace("\n", ' ', print_r($result['authority'], true)).")");
-			echo json_encode($result, 0);
+			));
 		}
 		break;
     default:
