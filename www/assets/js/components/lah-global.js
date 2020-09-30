@@ -46,16 +46,19 @@ Vue.prototype.$store = (() => {
         return new Vuex.Store({
             state: {
                 cache : new Map(),
-                isAdmin: undefined,
-                isChief: undefined,
-                isSuper: undefined,
                 userNames: undefined,
                 dynaParams: {},
                 errors: [],
                 myip: undefined,
                 myid: undefined,
                 myinfo: undefined,
-                authority: undefined,
+                authority: {
+                    isAdmin: undefined,
+                    isSuper: undefined,
+                    isChief: undefined,
+                    isRAE: undefined,
+                    isGA: undefined
+                },
                 disableMSDBQuery: CONFIG.DISABLE_MSDB_QUERY,
                 disableOfficeHours: false,
                 disableMockMode: true
@@ -63,9 +66,6 @@ Vue.prototype.$store = (() => {
             getters: {
                 cache: state => state.cache,
                 authority: state => state.authority,
-                isAdmin: state => state.isAdmin,
-                isChief: state => state.isChief,
-                isSuper: state => state.isSuper,
                 userNames: state => state.userNames,
                 dynaParams: state => state.dynaParams,
                 errors: state => state.errors,
@@ -230,9 +230,13 @@ Vue.mixin({
     },
     computed: {
         cache() { return this.$store.getters.cache },
-        isAdmin() { return this.$store.getters.isAdmin },
-        isChief() { return this.$store.getters.isChief },
+        isAdmin() { return this.$store.getters.authority.isAdmin },
+        isChief() { return this.$store.getters.authority.isChief },
+        isSuper() { return this.$store.getters.authority.isSuper },
+        isRAE() { return this.$store.getters.authority.isRAE },
+        isGA() { return this.$store.getters.authority.isGA },
         userNames() {
+            // lazy loading
             if (this.$store.getters.userNames === undefined) {
                 this.$store.dispatch("loadUserNames");
             }
