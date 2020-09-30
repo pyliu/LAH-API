@@ -57,7 +57,8 @@ Vue.prototype.$store = (() => {
                 myinfo: undefined,
                 authority: undefined,
                 disableMSDBQuery: CONFIG.DISABLE_MSDB_QUERY,
-                disableOfficeHours: false
+                disableOfficeHours: false,
+                disableMockMode: true
             },
             getters: {
                 cache: state => state.cache,
@@ -73,7 +74,8 @@ Vue.prototype.$store = (() => {
                 myid: state => state.myid,
                 myinfo: state => state.myinfo,
                 disableMSDBQuery: state => state.disableMSDBQuery,
-                disableOfficeHours: state => state.disableOfficeHours
+                disableOfficeHours: state => state.disableOfficeHours,
+                disableMockMode: state => state.disableMockMode
             },
             mutations: {
                 cache(state, objPayload) {
@@ -126,6 +128,9 @@ Vue.prototype.$store = (() => {
                 },
                 disableOfficeHours(state, flagPayload) {
                     state.disableOfficeHours = flagPayload === true;
+                },
+                disableMockMode(state, flagPayload) {
+                    state.disableMockMode = flagPayload === true;
                 }
             },
             actions: {
@@ -245,6 +250,7 @@ Vue.mixin({
         myname() { return this.myinfo ? this.myinfo['name'] : '' },
         disableMSDBQuery() { return this.$store.getters.disableMSDBQuery },
         disableOfficeHours() { return this.$store.getters.disableOfficeHours },
+        disableMockMode() { return this.$store.getters.disableMockMode },
         nowDate() { return this.now().split(' ')[0] },
         nowTime() { return this.now().split(' ')[1] }
     },
@@ -993,10 +999,16 @@ $(document).ready(() => {
                         this.$store.commit("disableOfficeHours", cached == 'yes' ? true : false);
                     }
                 });
-                this.getLocalCache('disableMockMode').then(cached => {
-                    if (cached !== false) {
-                        this.$store.commit("disableMockMode", cached == 'yes' ? true : false);
-                    }
+                axios.post(CONFIG.API.JSON.SWITCH, {
+                    type: 'switch_mock_flag'
+                }).then(res => {
+                    //console.log(res.data.authority);
+                    let mock_on = res.data.mock_flag;
+                    this.$store.commit("disableMockMode", !mock_on);
+                }).catch(err => {
+                    this.$error = err;
+                }).finally(() => {
+                    
                 });
             }
         },

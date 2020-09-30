@@ -5418,6 +5418,7 @@ if (Vue) {
         created() {
             this.enable_msdb_query = !this.disableMSDBQuery;
             this.enable_office_hours = !this.disableOfficeHours;
+            this.enable_mock_mode = !this.disableMockMode;
         }
     });
 } else {
