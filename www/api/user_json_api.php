@@ -11,7 +11,7 @@ $mock = $system->isMockMode();
 
 switch ($_POST["type"]) {
 	case "user_mapping":
-		$operators = GetDBUserMapping();
+		$operators = getUserNames();
 		$count = count($operators);
 		$log->info("XHR [user_mapping] 取得使用者對應表($count)。");
 		echo json_encode(array(

@@ -162,7 +162,7 @@ class SurCaseData {
     }
 
     public function getJsonHtmlData($flag = 0) {
-        $operators = GetDBUserMapping();
+        $operators = getUserNames();
         $row = &$this->row;
         $result = array(
             "status" => 0,

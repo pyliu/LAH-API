@@ -465,7 +465,7 @@ switch ($_POST["type"]) {
 		} else if (count($rows) == 1 && $_POST["list_mode"] == "false") {
 			$mapping = array();
 			// AA39 is 承辦人員, AA89 is 修改人員代碼
-			$users = GetDBUserMapping();
+			$users = getUserNames();
 			foreach ($rows[0] as $key => $value) {
 				if (is_null($value)) {
 					continue;

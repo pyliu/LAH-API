@@ -96,7 +96,7 @@ class RegCaseData {
     function __construct($db_record) {
         $this->row = $db_record;
         if (is_null(RegCaseData::$operators)) {
-            RegCaseData::$operators = GetDBUserMapping();
+            RegCaseData::$operators = getUserNames();
         }
     }
 

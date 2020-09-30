@@ -61,7 +61,7 @@ function GetOraUser() {
     return $result;
 }
 
-function GetDBUserMapping($refresh = false) {
+function getUserNames($refresh = false) {
 
     $system = new System();
     $cache = new Cache();
