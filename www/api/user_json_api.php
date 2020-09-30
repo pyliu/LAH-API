@@ -98,6 +98,34 @@ switch ($_POST["type"]) {
             "raw" => $tree_data
         ));
         break;
+    case "on_board_users":
+        $log->info("XHR [on_board_users] 取得所有在職使用者資料請求");
+        $sqlite_user = new SQLiteUser();
+        $results = $sqlite_user->getOnboardUsers();
+        if (empty($results)) {
+            $log->info("XHR [on_board_users] 查無在職使用者資料。");
+            echoJSONResponse("查無在職使用者資料。");
+        } else {
+            $log->info("XHR [on_board_users] 查詢在職使用者資料成功。");
+            echoJSONResponse('查詢在職使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($results),
+                "raw" => $results
+            ));
+        }
+        break;
+    case "upd_ext":
+        $log->info("XHR [upd_ext] 更新分機號碼【".$_POST["id"].", ".$_POST["ext"]."】請求");
+        $sqlite_user = new SQLiteUser();
+        $result = $sqlite_user->updateExt($_POST["id"], $_POST["ext"]);
+        if ($result) {
+            $msg = "更新分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 成功。";
+            $log->info("XHR [upd_ext] ".$msg);
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            $log->info("XHR [upd_ext] 更新分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
+            echoJSONResponse("更新分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
+        }
+        break;
 	case "my_info":
 	case "authentication":
 		$log->info("XHR [my_info/authentication] 查詢 $client_ip 請求");

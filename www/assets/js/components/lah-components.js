@@ -1281,7 +1281,7 @@ if (Vue) {
                 this.getLocalCache('onboard_users').then(cached => {
                     if (cached === false) {
                         this.isBusy = true;
-                        this.$http.post(CONFIG.API.JSON.QUERY, {
+                        this.$http.post(CONFIG.API.JSON.USER, {
                             type: 'on_board_users'
                         }).then(res => {
                             this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得在職使用者資料回傳值有誤【${res.data.status}】`)
@@ -2181,7 +2181,7 @@ if (Vue) {
             update() {
                 if (this.validate) {
                     this.isBusy = true;
-                    this.$http.post(CONFIG.API.JSON.QUERY, {
+                    this.$http.post(CONFIG.API.JSON.USER, {
                         type: "upd_ext",
                         id: this.myinfo['id'],
                         ext: this.myinfo['ext']
@@ -4475,7 +4475,7 @@ if (Vue) {
             },
             overview() {
                 this.isBusy = true;
-                this.$http.post(CONFIG.API.JSON.QUERY, {
+                this.$http.post(CONFIG.API.JSON.USER, {
                     type: 'on_board_users'
                 }).then(res => {
                     let vn = this.$createElement('lah-temperature-list', {
