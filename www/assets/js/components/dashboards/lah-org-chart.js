@@ -39,7 +39,7 @@ if (Vue) {
                 this.getLocalCache('lah-org-chart').then(cached => {
                     if (cached === false) {
                         this.isBusy = true;
-                        this.$http.post(CONFIG.API.JSON.QUERY, {
+                        this.$http.post(CONFIG.API.JSON.USER, {
                             type: "org_data"
                         }).then(res => {
                             console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得組織樹狀資料回傳狀態碼有問題【${res.data.status}】`);

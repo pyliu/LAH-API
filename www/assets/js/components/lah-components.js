@@ -1146,7 +1146,7 @@ if (Vue) {
                     this.$warn("Keyword field should not be empty.");
                     return;
                 }
-                this.$http.post(CONFIG.API.JSON.QUERY, {
+                this.$http.post(CONFIG.API.JSON.USER, {
                     type: 'search_user',
                     keyword: keyword
                 }).then(res => {
@@ -1184,7 +1184,7 @@ if (Vue) {
                 this.getLocalCache('user_names').then(raw => {
                     if (raw === false) {
                         this.busy = true;
-                        this.$http.post(CONFIG.API.JSON.QUERY, {
+                        this.$http.post(CONFIG.API.JSON.USER, {
                             type: 'user_names'
                         }).then(res => {
                             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
@@ -1567,7 +1567,7 @@ if (Vue) {
             const succeed_cached = await this.restoreUserRows();
             if (!succeed_cached) {
                 if (!(this.name || this.id || this.ip)) this.ip = this.myip || await this.getLocalCache('myip');
-                this.$http.post(CONFIG.API.JSON.QUERY, {
+                this.$http.post(CONFIG.API.JSON.USER, {
                     type: "user_info",
                     name: $.trim(this.name),
                     id: $.trim(this.id),
