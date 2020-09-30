@@ -146,7 +146,7 @@ Vue.prototype.$store = (() => {
                             // within a day use the cached data
                             commit("userNames", json || {});
                         } else {
-                            await axios.post(CONFIG.API.JSON.QUERY, {
+                            await axios.post(CONFIG.API.JSON.USER, {
                                 type: 'user_mapping'
                             }).then(async res => {
                                 let json = res.data.data;

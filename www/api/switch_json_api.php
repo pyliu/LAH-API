@@ -1,9 +1,10 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
 
-if ($client_ip != '127.0.0.1') {
-    $log->error("$client_ip 不是 127.0.0.1 無法存取此API(".__FILE__.")");
-    echoJSONResponse("非本機 loopback IP 無法執行命令。", STATUS_CODE::DEFAULT_FAIL);
+$auth = getMyAuthority();
+if (!$auth['isAdmin'] && !$auth['isSuper']) {
+    $log->error("$client_ip 不是 Admin/Super 使用者無法存取此API(".__FILE__.")");
+    echoJSONResponse("非 Admin/Super 無法執行命令。", STATUS_CODE::DEFAULT_FAIL);
     exit;
 }
 

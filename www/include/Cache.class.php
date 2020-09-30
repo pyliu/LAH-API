@@ -7,6 +7,12 @@ class Cache {
     private $system;
     private $sqlite3;
 
+    private function getExpire($key) {
+        $val = $this->sqlite3->querySingle("SELECT expire from cache WHERE key = '$key'");
+        if (empty($val)) return 0;
+        return intval($val);
+    }
+
     function __construct() {
         $this->sqlite3 = new SQLite3(CACHE_SQLITE_DB);
         $this->system = new System();
@@ -14,7 +20,7 @@ class Cache {
 
     function __destruct() { }
     
-    public function set($key, $val, $expire = 864000) {
+    public function set($key, $val, $expire = 86400) {
         if ($this->system->isMockMode()) return false;
         $stm = $this->sqlite3->prepare("
             REPLACE INTO cache ('key', 'value', 'expire')
@@ -22,7 +28,7 @@ class Cache {
         ");
         $stm->bindParam(':key', $key);
         $stm->bindParam(':value', serialize($val));
-        $stm->bindParam(':expire', $expire);
+        $stm->bindParam(':expire', mktime() + $expire); // in seconds, 86400 => one day
         return $stm->execute() === FALSE ? false : true;
     }
 
@@ -32,11 +38,8 @@ class Cache {
         return unserialize($val);
     }
 
-    
-    public function getExpire($key) {
-        $val = $this->sqlite3->querySingle("SELECT expire from cache WHERE key = '$key'");
-        if (empty($val)) return false;
-        return intval($val);
+    public function isExpired($key) {
+        return mktime() > $this->getExpire($key);
     }
 }
 ?>

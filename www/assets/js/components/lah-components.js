@@ -5391,7 +5391,7 @@ if (Vue) {
                 this.$http.post(CONFIG.API.JSON.SWITCH, {
                     type: flag ? 'switch_enable_mock' : 'switch_disable_mock'
                 }).then(res => {
-                    this.notify({ title: '切換MOCK模式', message: res.data.message })
+                    this.$warn(res.data.message);
                 }).catch(err => {
                     this.$error(err);
                 }).finally(() => {

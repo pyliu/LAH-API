@@ -44,18 +44,6 @@ switch ($_POST["type"]) {
 			"message" => "已傳送 $total 人次訊息。"
 		), 0);
 		break;
-	case "user_mapping":
-		$operators = $mock ? $cache->get('user_mapping') : GetDBUserMapping();
-		if (!$mock) $cache->set('user_mapping', $operators);
-		$count = count($operators);
-		$log->info("XHR [user_mapping] 取得使用者對應表($count)。");
-		echo json_encode(array(
-			"status" => STATUS_CODE::SUCCESS_NORMAL,
-			"data_count" => $count,
-			"data" => $operators,
-			"message" => "取得 $count 筆使用者資料。"
-		), 0);
-		break;
 	case "on_board_users":
 		$log->info("XHR [on_board_users] 取得所有在職使用者資料請求");
 		$sqlite_user = new SQLiteUser();

@@ -1,6 +1,7 @@
 <?php
 require_once('SQLiteUser.class.php');
 require_once('System.class.php');
+require_once("Cache.class.php");
 
 function getMyAuthority() {
     global $client_ip;
@@ -26,50 +27,52 @@ function getMyAuthority() {
     return $res;
 }
 
-function GetDBUserMapping($refresh = false) {
+function GetOraUser() {
     $system = new System();
+    $db = $system->get("ORA_DB_MAIN");
+    $conn = oci_connect($system->get("ORA_DB_USER"), $system->get("ORA_DB_PASS"), $db, "US7ASCII");
+    if (!$conn) {
+        $e = oci_error();
+        trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+    }
+    // Prepare the statement
+    $stid = oci_parse($conn, "SELECT * FROM SSYSAUTH1");
+    if (!$stid) {
+        $e = oci_error($conn);
+        trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+    }
+    
+    // Perform the logic of the query
+    $r = oci_execute($stid);
+    if (!$r) {
+        $e = oci_error($stid);
+        trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+    }
+    $result = array();
+    while ($row = oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS)) {
+        $result[$row["USER_ID"]] = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", "BIG5");
+    }
+    if ($stid) {
+        oci_free_statement($stid);
+    }
+    if ($conn) {
+        oci_close($conn);
+    }
+    return $result;
+}
+
+function GetDBUserMapping($refresh = false) {
+
+    $system = new System();
+    $cache = new Cache();
+    $result = $cache->get('user_mapping');
+
     if ($system->isMockMode() === true) {
-        $content = @file_get_contents(dirname(dirname(__FILE__))."/assets/cache/user_mapping.cache");
-        return unserialize($content);
+        return $result;
     }
 
-    $tmp_path = sys_get_temp_dir();
-    $file = $tmp_path . "\\tyland_user.map";
-    $time = @filemtime($file);
-    
-    if ($refresh === true || $time === false || mktime() - $time > 86400) {
-        $db = $system->get("ORA_DB_MAIN");
-        
-        $conn = oci_connect($system->get("ORA_DB_USER"), $system->get("ORA_DB_PASS"), $db, "US7ASCII");
-        if (!$conn) {
-            $e = oci_error();
-            trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
-        }
-        // Prepare the statement
-        $stid = oci_parse($conn, "SELECT * FROM SSYSAUTH1");
-        if (!$stid) {
-            $e = oci_error($conn);
-            trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
-        }
-        
-        // Perform the logic of the query
-        $r = oci_execute($stid);
-        if (!$r) {
-            $e = oci_error($stid);
-            trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
-        }
-        
-        $result = array();
-        while ($row = oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS)) {
-            $result[$row["USER_ID"]] = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", "BIG5");
-        }
-        
-        if ($stid) {
-            oci_free_statement($stid);
-        }
-        if ($conn) {
-            oci_close($conn);
-        }
+    if ($refresh === true || $cache->isExpired('user_mapping')) {
+        $result = GetOraUser();
         try {
             /**
              * Also get user info from SQLite DB
@@ -89,15 +92,10 @@ function GetDBUserMapping($refresh = false) {
             $log->error("取得SQLite內網使用者失敗。【".$th->getMessage()."】");
         } finally {
             // cache
-            $content = serialize($result);
-            file_put_contents($file, $content);
+            $cache->set('user_mapping', $result, 86400);
         }
-        
-        return $result;
     }
-    
-    $content = @file_get_contents($file);
-    return unserialize($content);
+    return $result;
 }
 
 function zipLogs() {
