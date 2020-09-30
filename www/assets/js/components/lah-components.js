@@ -2211,7 +2211,7 @@ if (Vue) {
                 if (!this.disableMSDBQuery) {
                     this.isBusy = true;
                     // also update old db database
-                    this.$http.post(CONFIG.API.JSON.QUERY, {
+                    this.$http.post(CONFIG.API.JSON.MSSQL, {
                         type: "upd_ext_doc",
                         id: this.myinfo['id'],
                         ext: this.myinfo['ext']
