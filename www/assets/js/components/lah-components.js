@@ -517,20 +517,22 @@ if (Vue) {
                 });
             },
             setUnreadMessageCount: function () {
-                this.$http.post(CONFIG.API.JSON.QUERY, {
-                    type: 'user_unread_message',
-                    ip: this.myip
-                }).then(res => {
-                    this.avatar_badge = res.data.data_count || false;
-                    this.$root.$emit(CONFIG.LAH_ROOT_EVENT ? CONFIG.LAH_ROOT_EVENT.MESSAGE_UNREAD : 'lah::message::unread', {
-                        count: res.data.data_count,
+                if (!this.disableMSDBQuery) {
+                    this.$http.post(CONFIG.API.JSON.QUERY, {
+                        type: 'user_unread_message',
                         ip: this.myip
-                    });
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
+                    }).then(res => {
+                        this.avatar_badge = res.data.data_count || false;
+                        this.$root.$emit(CONFIG.LAH_ROOT_EVENT ? CONFIG.LAH_ROOT_EVENT.MESSAGE_UNREAD : 'lah::message::unread', {
+                            count: res.data.data_count,
+                            ip: this.myip
+                        });
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
 
-                });
+                    });
+                }
             },
             clearCache: function () {
                 this.$lf.clear().then(() => {
@@ -546,7 +548,8 @@ if (Vue) {
             let day_of_week = new Date().getDay();
             let hours = new Date().getHours();
             this.fri_noon = day_of_week == 5 && hours < 17 && hours > 12;
-            this.setUnreadMessageCount();
+            // delay 15s to get the unread message
+            this.timeout(() => this.setUnreadMessageCount(), 15000);
         },
         mounted() {
             this.links.forEach(this.setLeading);
