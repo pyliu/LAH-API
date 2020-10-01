@@ -5,7 +5,9 @@ define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SE
 class System {
     private $sqlite3;
 
-    private function addLoopIpToSuper() {
+    private function addLoopIPsAuthority() {
+        $ret = false;
+        
         $super_array = unserialize($this->get('ROLE_SUPER_IPS'));
         if (!in_array('127.0.0.1', $super_array)) {
             $super_array[] = '127.0.0.1';
@@ -15,9 +17,22 @@ class System {
             ");
             $stm->bindValue(':key', 'ROLE_SUPER_IPS');
             $stm->bindValue(':value', serialize($super_array));
-            return $stm->execute() === FALSE ? false : true;
+            $ret = $stm->execute() === FALSE ? false : true;
         }
-        return false;
+        
+        $adm_array = unserialize($this->get('ROLE_ADM_IPS'));
+        if (!in_array('::1', $adm_array)) {
+            $adm_array[] = '::1';
+            $stm = $this->sqlite3->prepare("
+                REPLACE INTO config ('key', 'value')
+                VALUES (:key, :value)
+            ");
+            $stm->bindValue(':key', 'ROLE_ADM_IPS');
+            $stm->bindValue(':value', serialize($adm_array));
+            $ret = $stm->execute() === FALSE ? false : true;
+        }
+
+        return $ret;
     }
 
     private function turnOnMock() {
@@ -40,36 +55,69 @@ class System {
         return $stm->execute() === FALSE ? false : true;
     }
 
-    private function addMockSuperUser() {
+    private function addSuperUser() {
         $stm = $this->sqlite3->prepare("
             REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
             VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
         ");
-        $stm->bindValue(':id', 'HBAMIN');
-        $stm->bindValue(':name', '系統管理員');
+        $stm->bindValue(':id', 'HBSUPER');
+        $stm->bindValue(':name', '開發人員');
         $stm->bindValue(':sex', 1);
         $stm->bindValue(':addr', '虛構的世界');
         $stm->bindValue(':tel', '034917647', SQLITE3_TEXT);
-        $stm->bindValue(':ext', '153', SQLITE3_TEXT); // 總機 153
+        $stm->bindValue(':ext', '503', SQLITE3_TEXT); // 總機 153
         $stm->bindValue(':cell', '0912345678', SQLITE3_TEXT);
-        $stm->bindValue(':unit', '庶務二課');
-        $stm->bindValue(':title', '雜役');
+        $stm->bindValue(':unit', '庶務一課');
+        $stm->bindValue(':title', '雜役工');
         $stm->bindValue(':work', '打怪');
         $stm->bindValue(':exam', '109年邦頭特考三級');
-        $stm->bindValue(':education', '國立台北科技大學資訊工程研究所');
+        $stm->bindValue(':education', '國立台北科技大學資訊工程所');
         $stm->bindValue(':birthday', '066/05/23');
         $stm->bindValue(':onboard_date', '107/10/31');
         $stm->bindValue(':offboard_date', '');
         $stm->bindValue(':ip', '127.0.0.1');
         // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
-        $authority = AUTHORITY::SUPER | AUTHORITY::ADMIN;
+        $authority = AUTHORITY::SUPER;
         $stm->bindParam(':authority', $authority);
         return $stm->execute() === FALSE ? false : true;
     }
 
-    private function removeMockSuperUser() {
+    private function addWatchdogUser() {
+        $stm = $this->sqlite3->prepare("
+            REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
+            VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
+        ");
+        $stm->bindValue(':id', 'HBWATCHDOG');
+        $stm->bindValue(':name', '看門狗');
+        $stm->bindValue(':sex', 0);
+        $stm->bindValue(':addr', '虛構的世界');
+        $stm->bindValue(':tel', '034917647', SQLITE3_TEXT);
+        $stm->bindValue(':ext', '153', SQLITE3_TEXT); // 總機 153
+        $stm->bindValue(':cell', '0912345678', SQLITE3_TEXT);
+        $stm->bindValue(':unit', '庶務二課');
+        $stm->bindValue(':title', '看門狗');
+        $stm->bindValue(':work', '定時工');
+        $stm->bindValue(':exam', '109年邦頭特考四級');
+        $stm->bindValue(':education', '國立台北科技大學資訊工程研究所');
+        $stm->bindValue(':birthday', '066/05/23');
+        $stm->bindValue(':onboard_date', '107/10/31');
+        $stm->bindValue(':offboard_date', '');
+        $stm->bindValue(':ip', '::1');
+        // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
+        $authority = AUTHORITY::ADMIN;
+        $stm->bindParam(':authority', $authority);
+        return $stm->execute() === FALSE ? false : true;
+    }
+
+    private function removeSuperUser() {
         $stm = $this->sqlite3->prepare("DELETE from user WHERE id = :id");
-        $stm->bindValue(':id', 'HBAMIN');
+        $stm->bindValue(':id', 'HBSUPER');
+        return $stm->execute() === FALSE ? false : true;
+    }
+
+    private function removeWatchdogUser() {
+        $stm = $this->sqlite3->prepare("DELETE from user WHERE id = :id");
+        $stm->bindValue(':id', 'HBWATCHDOG');
         return $stm->execute() === FALSE ? false : true;
     }
 
@@ -84,8 +132,9 @@ class System {
     }
     
     public function enableMockMode() {
-        $this->addLoopIpToSuper();
-        $this->addMockSuperUser();
+        $this->addLoopIPsAuthority();
+        $this->addSuperUser();
+        $this->addWatchdogUser();
         return $this->turnOnMock();
     }
     
