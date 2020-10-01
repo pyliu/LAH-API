@@ -78,6 +78,8 @@ class System {
     function __destruct() { unset($this->sqlite3); }
 
     public function isMockMode() {
+        global $client_ip;
+        if ($client_ip == '127.0.0.1') return true;
         return $this->get('MOCK_MODE') == 'true';
     }
     
