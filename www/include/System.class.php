@@ -35,23 +35,13 @@ class System {
         return $ret;
     }
 
-    private function turnOnMock() {
+    private function setMockMode($flag) {
         $stm = $this->sqlite3->prepare("
             REPLACE INTO config ('key', 'value')
             VALUES (:key, :value)
         ");
         $stm->bindValue(':key', 'MOCK_MODE');
-        $stm->bindValue(':value', 'true');
-        return $stm->execute() === FALSE ? false : true;
-    }
-
-    private function turnOffMock() {
-        $stm = $this->sqlite3->prepare("
-            REPLACE INTO config ('key', 'value')
-            VALUES (:key, :value)
-        ");
-        $stm->bindValue(':key', 'MOCK_MODE');
-        $stm->bindValue(':value', 'false');
+        $stm->bindValue(':value', $flag ? 'true' : 'false');
         return $stm->execute() === FALSE ? false : true;
     }
 
@@ -135,13 +125,27 @@ class System {
         $this->addLoopIPsAuthority();
         $this->addSuperUser();
         $this->addWatchdogUser();
-        return $this->turnOnMock();
+        return $this->setMockMode(true);
     }
     
     public function disableMockMode() {
-        return $this->turnOffMock();
+        return $this->setMockMode(false);
     }
     
+    public function isMSSQLEnable() {
+        return $this->get('DISABLE_MSSQL_CONN') !== 'true';
+    }
+
+    public function enableMSSQLConnection($flag) {
+        $stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ");
+        $stm->bindValue(':key', 'DISABLE_MSSQL_CONN');
+        $stm->bindValue(':value', $flag ? 'false' : 'true');
+        return $stm->execute() === FALSE ? false : true;
+    }
+
     public function getUserPhotoFolderPath() {
         return rtrim($this->get('USER_PHOTO_FOLDER'), "\\");
     }
