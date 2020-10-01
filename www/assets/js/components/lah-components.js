@@ -1423,7 +1423,7 @@ if (Vue) {
                         }
                         return 'danger';
                     },
-                    me() { return this.user_data['id'] == this.myinfo['id'] }
+                    me() { return this.myinfo ? this.user_data['id'] == this.myinfo['id'] : false }
                 },
                 methods: {
                     toTWDate: function (ad_date) {
