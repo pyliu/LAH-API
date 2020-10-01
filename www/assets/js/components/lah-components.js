@@ -2146,7 +2146,7 @@ if (Vue) {
     });
 
     Vue.component('lah-user-ext', {
-        template: `<b-card no-body class="border-0">
+        template: `<b-card no-body class="border-0" v-if="myinfo">
             <h6 v-if="heading" class="mb-2"><lah-fa-icon icon="angle-double-right" variant="dark"> 我的分機</lah-fa-icon></h6>
             <b-input-group size="sm" prepend="分機">
                 <b-form-input
@@ -2174,7 +2174,7 @@ if (Vue) {
             myinfo(val) { this.orig_ext = val['ext'] }
         },
         computed: {
-            validate() { return this.myinfo['ext'] > 99 && this.myinfo['ext'] < 700 },
+            validate() { return this.myinfo ? (this.myinfo['ext'] > 99 && this.myinfo['ext'] < 700) : false },
             need_update() { return this.orig_ext != this.myinfo['ext'] }
         },
         methods: {
