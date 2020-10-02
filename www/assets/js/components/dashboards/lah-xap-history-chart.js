@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component('lah-xap-history-chart', {
         template: `<lah-transition appear>
             <b-card border-variant="secondary" class="shadow" v-b-visible="visible">
-                <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" @click="show_count"></lah-chart>
+                <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" @click="show_count" :aspect-ratio="aspectRatio"></lah-chart>
                 <div class="d-flex justify-content-between mt-1">
                     <span class="align-middle small my-auto">
                         <lah-fa-icon :icon="network_icon" title="現在連線數" :action="icon_action"> <b-badge :variant="badge_variant">{{now_count}}</b-badge></lah-fa-icon>
@@ -44,6 +44,10 @@ if (Vue) {
             popupButton: {
                 type: Boolean,
                 default: true
+            },
+            aspectRatio: {
+                type: Number,
+                default: 2
             }
         },
         data: () => ({

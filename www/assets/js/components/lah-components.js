@@ -761,7 +761,9 @@ if (Vue) {
 
     // need to include chart.min.js (chart.js) first.
     Vue.component("lah-chart", {
-        template: `<div><canvas :style="style">圖形初始化失敗</canvas></div>`,
+        template: `<b-card no-body class="border-0">
+            <canvas :id="id">圖形初始化失敗</canvas>
+        </b-card>`,
         props: {
             type: {
                 type: String,
@@ -826,16 +828,18 @@ if (Vue) {
             titlePos: {
                 type: String,
                 default: 'top'
-            }
+            },
+            aspectRatio: { type: Number, default: 2}
         },
         data: () => ({
+            id: null,
             inst: null,
             chartData: null,
             update_timer: null,
             resize_timer: null
         }),
         computed: {
-            style() { return `max-height: ${window.innerHeight - 185}px; max-width: ${window.innerWidth - 20}px;` }
+            style() { return `max-height: ${window.innerHeight - 185}px; max-width: ${window.innerWidth * 0.75}px;` }
         },
         watch: {
             type: function (val) {
@@ -870,9 +874,7 @@ if (Vue) {
                         opacity: this.opacity,
                         snapGaps: true,
                         borderWidth: 1
-                    }],
-                    responsive: true, 
-                    maintainAspectRatio: true
+                    }]
                 };
             },
             setData: function (items) {
@@ -937,14 +939,17 @@ if (Vue) {
                         };
                 }
                 // use chart.js directly
-                let ctx = this.$el.childNodes[0];
+                // let ctx = this.$el.childNodes[0];
+                let ctx = $(`#${this.id}`);
                 let that = this;
                 this.inst = new Chart(ctx, {
                     type: this.type,
                     data: this.chartData,
                     options: Object.assign({
-                        responsive: true,
                         showTooltips: true,
+                        responsive: true, 
+                        maintainAspectRatio: true,
+                        aspectRatio: that.aspectRatio,
                         tooltips: {
                             callbacks: {
                                 label: this.tooltip
@@ -986,6 +991,7 @@ if (Vue) {
                 link.remove();
             }
         },
+        created() { this.id = this.uuid() },
         mounted() {
             this.setData(this.items);
             // this.style = `max-height: ${window.innerHeight - 185}px; max-width: ${window.innerWidth - 20}px;`;
