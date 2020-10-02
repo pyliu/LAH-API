@@ -258,7 +258,7 @@ Vue.mixin({
         disableMockMode() { return this.$store.getters.disableMockMode },
         nowDate() { return this.now().split(' ')[0] },
         nowTime() { return this.now().split(' ')[1] },
-        viewportRatio() { return (window.innerWidth * 1.25).toFixed(2) / (window.innerHeight).toFixed(2) }
+        viewportRatio() { return (window.innerWidth * 1.25).toFixed(2) / (window.innerHeight - 85).toFixed(2) }
     },
     methods: {
         addToStoreParams: function(key, value) {
