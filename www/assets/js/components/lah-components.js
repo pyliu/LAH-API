@@ -5379,13 +5379,40 @@ if (Vue) {
             show_mock_mode_switch() { return this.myip != '127.0.0.1' }
         },
         watch: {
+            disableMSDBQuery(flag) {
+                this.enable_msdb_query = !flag;
+            },
             enable_msdb_query(flag) {
-                this.setLocalCache('disableMSDBQuery', flag ? 'no' : 'yes');
-                this.$store.commit("disableMSDBQuery", !flag);
+                this.isBusy = true;
+                this.$http.post(CONFIG.API.JSON.SWITCH, {
+                    type: 'switch_set_mssql_mode',
+                    flag: flag
+                }).then(res => {
+                    this.$warn(res.data.message);
+                }).catch(err => {
+                    this.$error(err);
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            },
+            disableOfficeHours(flag) {
+                this.enable_office_hours = !flag;
             },
             enable_office_hours(flag) {
-                this.setLocalCache('disableOfficeHours', flag ? 'no' : 'yes');
-                this.$store.commit("disableOfficeHours", !flag);
+                this.isBusy = true;
+                this.$http.post(CONFIG.API.JSON.SWITCH, {
+                    type: 'switch_set_office_hours_mode',
+                    flag: flag
+                }).then(res => {
+                    this.$warn(res.data.message);
+                }).catch(err => {
+                    this.$error(err);
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            },
+            disableMockMode(flag) {
+                this.enable_mock_mode = !flag;
             },
             enable_mock_mode(flag) {
                 this.isBusy = true;
@@ -5407,19 +5434,14 @@ if (Vue) {
                     body: `
                         <h6 class="text-info">相關設定說明</h6>
                         <ul>
-                            <li>${this.enable_msdb_query_desc} - 瀏覽器端設定一天後會自動恢復</li>
-                            <li>${this.enable_office_hours_desc} - 瀏覽器端設定一天後會自動恢復</li>
-                            <li>${this.enable_mock_mode_desc} - 伺服器只會傳回快取的資料。</li>
+                            <li>${this.enable_msdb_query_desc} - 有關外部MSSQL查詢都會影響。</li>
+                            <li>${this.enable_office_hours_desc} - 是否受工作天檢查影響。</li>
+                            <li>${this.enable_mock_mode_desc} - 伺服器是否只會傳回快取的資料。</li>
                         </ul>
                     `,
                     size: "lg"
                 });
             }
-        },
-        created() {
-            this.enable_msdb_query = !this.disableMSDBQuery;
-            this.enable_office_hours = !this.disableOfficeHours;
-            this.enable_mock_mode = !this.disableMockMode;
         }
     });
 } else {

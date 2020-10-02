@@ -133,16 +133,30 @@ class System {
     }
     
     public function isMSSQLEnable() {
-        return $this->get('DISABLE_MSSQL_CONN') !== 'true';
+        return $this->get('ENABLE_MSSQL_CONN') !== 'false';
     }
 
-    public function enableMSSQLConnection($flag) {
+    public function setMSSQLConnection($flag) {
         $stm = $this->sqlite3->prepare("
             REPLACE INTO config ('key', 'value')
             VALUES (:key, :value)
         ");
-        $stm->bindValue(':key', 'DISABLE_MSSQL_CONN');
-        $stm->bindValue(':value', $flag ? 'false' : 'true');
+        $stm->bindValue(':key', 'ENABLE_MSSQL_CONN');
+        $stm->bindValue(':value', $flag ? 'true' : 'false');
+        return $stm->execute() === FALSE ? false : true;
+    }
+    
+    public function isOfficeHoursEnable() {
+        return $this->get('ENABLE_OFFICE_HOURS') !== 'false';
+    }
+
+    public function setOfficeHoursEnable($flag) {
+        $stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ");
+        $stm->bindValue(':key', 'ENABLE_OFFICE_HOURS');
+        $stm->bindValue(':value', $flag ? 'true' : 'false');
         return $stm->execute() === FALSE ? false : true;
     }
 

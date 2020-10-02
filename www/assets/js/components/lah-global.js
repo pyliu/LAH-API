@@ -993,16 +993,25 @@ $(document).ready(() => {
                 });
             },
             initSystemSwitches: function() {
-                this.getLocalCache('disableMSDBQuery').then(cached => {
-                    if (cached !== false) {
-                        this.$store.commit("disableMSDBQuery", cached == 'yes' ? true : false);
-                    }
+                axios.post(CONFIG.API.JSON.SWITCH, {
+                    type: 'switch_mssql_flag'
+                }).then(res => {
+                    let enable_mssql = res.data.mssql_flag;
+                    this.$store.commit("disableMSDBQuery", !enable_mssql);
+                }).catch(err => {
+                    this.$error = err;
                 });
-                this.getLocalCache('disableOfficeHours').then(cached => {
-                    if (cached !== false) {
-                        this.$store.commit("disableOfficeHours", cached == 'yes' ? true : false);
-                    }
+
+                
+                axios.post(CONFIG.API.JSON.SWITCH, {
+                    type: 'switch_office_hours_flag'
+                }).then(res => {
+                    let enable_office_hours = res.data.office_hours_flag;
+                    this.$store.commit("disableOfficeHours", !enable_office_hours);
+                }).catch(err => {
+                    this.$error = err;
                 });
+
                 axios.post(CONFIG.API.JSON.SWITCH, {
                     type: 'switch_mock_flag'
                 }).then(res => {
