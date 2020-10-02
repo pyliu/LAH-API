@@ -19,10 +19,10 @@
 <link rel="preload" href="assets/css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 </head>
 
-<body>
+<body style="overflow: hidden !important;">
   <section class="hide">
     <div class="container-fluid" v-cloak>
-        <lah-xap-connection-chart :aspect-ratio="2.6"></lah-xap-connection-chart>
+        <lah-xap-connection-chart :aspect-ratio="viewportRatio"></lah-xap-connection-chart>
     </div>
   </section>
 
