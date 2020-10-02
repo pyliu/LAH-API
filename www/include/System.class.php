@@ -40,7 +40,7 @@ class System {
             REPLACE INTO config ('key', 'value')
             VALUES (:key, :value)
         ");
-        $stm->bindValue(':key', 'MOCK_MODE');
+        $stm->bindValue(':key', 'ENABLE_MOCK_MODE');
         $stm->bindValue(':value', $flag ? 'true' : 'false');
         return $stm->execute() === FALSE ? false : true;
     }
@@ -118,7 +118,7 @@ class System {
     public function isMockMode() {
         global $client_ip;
         if ($client_ip == '127.0.0.1') return true;
-        return $this->get('MOCK_MODE') == 'true';
+        return $this->get('ENABLE_MOCK_MODE') == 'true';
     }
     
     public function enableMockMode() {
