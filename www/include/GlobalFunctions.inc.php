@@ -209,6 +209,7 @@ function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array =
         echo json_encode(array( "status" => STATUS_CODE::FAIL_JSON_ENCODE, "message" => "無法轉換陣列資料到JSON物件。" ));
     } else {
         echo $str;
+        exit;
     }
 }
 ?>

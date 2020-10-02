@@ -9,6 +9,11 @@ $cache = new Cache();
 $system = new System();
 
 $mock = $system->isMockMode();
+$mssql_on = $system->isMSSQLEnable();
+if (!$mssql_on) {
+	$log->warning("XHR [".$_POST["type"]."] MSSQL查詢模式已停用。");
+	echoJSONResponse("MSSQL查詢模式已停用");
+}
 
 switch ($_POST["type"]) {
 	case "user_message":
