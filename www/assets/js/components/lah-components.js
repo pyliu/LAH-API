@@ -5360,9 +5360,9 @@ if (Vue) {
                     <lah-button icon="question" @click="popup" size="sm" variant="outline-success" class="border-0"></lah-button>
                 </div>
             </template>
-            <b-form-checkbox v-model="enable_msdb_query" switch><span title="瀏覽器端設定一天後會自動恢復">{{enable_msdb_query_desc}}</span></b-form-checkbox>
-            <b-form-checkbox v-model="enable_office_hours" switch><span title="瀏覽器端設定一天後會自動恢復">{{enable_office_hours_desc}}</span></b-form-checkbox>
-            <b-form-checkbox v-if="show_mock_mode_switch" v-model="enable_mock_mode" switch><span title="伺服器只會傳回快取的資料">{{enable_mock_mode_desc}}</span></b-form-checkbox>
+            <b-form-checkbox v-model="enable_msdb_query" switch><span title="是否停用MSSQL資料庫連結">{{enable_msdb_query_desc}}</span></b-form-checkbox>
+            <b-form-checkbox v-model="enable_office_hours" switch><span title="是否啟用工作天時檢查">{{enable_office_hours_desc}}</span></b-form-checkbox>
+            <b-form-checkbox v-if="show_mock_mode_switch" v-model="enable_mock_mode" switch><span title="是否處於模擬模式">{{enable_mock_mode_desc}}</span></b-form-checkbox>
         </b-card>`,
         props: {
             heading: { type: Boolean, default: true }
@@ -5375,7 +5375,7 @@ if (Vue) {
         computed: {
             enable_msdb_query_desc() { return this.enable_msdb_query ? '啟用外部MSSQL連線功能' : '停用外部MSSQL連線功能' },
             enable_office_hours_desc() { return this.enable_office_hours ? '啟用工作天檢查' : '停用工作天檢查' },
-            enable_mock_mode_desc() { return this.enable_mock_mode ? '啟用MOCK模式' : '停用MOCK模式' },
+            enable_mock_mode_desc() { return this.enable_mock_mode ? '啟用模擬模式' : '停用模擬模式' },
             show_mock_mode_switch() { return this.myip != '127.0.0.1' }
         },
         watch: {
