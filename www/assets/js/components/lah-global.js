@@ -1003,7 +1003,6 @@ $(document).ready(() => {
                     this.$error = err;
                 });
 
-                
                 axios.post(CONFIG.API.JSON.SWITCH, {
                     type: 'switch_office_hours_flag'
                 }).then(res => {
@@ -1022,7 +1021,15 @@ $(document).ready(() => {
                 }).catch(err => {
                     this.$error = err;
                 }).finally(() => {
-                    
+                    if (!this.disableMockMode) {
+                        this.notify({
+                            title: '模擬模式提醒',
+                            message: '目前系統處於模擬模式下，所有資訊都會是從快取資料回復！',
+                            type: 'info',
+                            delay: 10000,
+                            pos: 'bl'
+                        });
+                    }
                 });
             }
         },
