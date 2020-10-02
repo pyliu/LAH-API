@@ -346,7 +346,18 @@ if (Vue) {
                 text: "監控看板",
                 url: "monitor.html",
                 icon: "tv",
-                need_admin: true
+                need_admin: true,
+                children: [{
+                    text: "跨所AP看板",
+                    url: "monitor_cross_ap.html",
+                    icon: "server",
+                    need_admin: true
+                }/*, {
+                    text: "監控看板",
+                    url: "monitor.html",
+                    icon: "tv",
+                    need_admin: true
+                }*/]
             }, {
                 text: "今日案件",
                 url: ["index.html", "/"],
@@ -750,7 +761,7 @@ if (Vue) {
 
     // need to include chart.min.js (chart.js) first.
     Vue.component("lah-chart", {
-        template: `<div><canvas class="w-100">圖形初始化失敗</canvas></div>`,
+        template: `<div><canvas :style="style">圖形初始化失敗</canvas></div>`,
         props: {
             type: {
                 type: String,
@@ -820,8 +831,12 @@ if (Vue) {
         data: () => ({
             inst: null,
             chartData: null,
-            update_timer: null
+            update_timer: null,
+            resize_timer: null
         }),
+        computed: {
+            style() { return `max-height: ${window.innerHeight - 185}px; max-width: ${window.innerWidth - 20}px;` }
+        },
         watch: {
             type: function (val) {
                 this.timeout(this.buildChart, 0)
@@ -855,7 +870,9 @@ if (Vue) {
                         opacity: this.opacity,
                         snapGaps: true,
                         borderWidth: 1
-                    }]
+                    }],
+                    responsive: true, 
+                    maintainAspectRatio: true
                 };
             },
             setData: function (items) {
@@ -971,6 +988,13 @@ if (Vue) {
         },
         mounted() {
             this.setData(this.items);
+            // this.style = `max-height: ${window.innerHeight - 185}px; max-width: ${window.innerWidth - 20}px;`;
+            // window.addEventListener("resize", e => {
+            //     clearTimeout(this.resize_timer);
+            //     this.resize_timer = this.timeout(() => {
+            //         this.style = `max-height: ${window.innerHeight - 185}px; max-width: ${window.innerWidth - 20}px;`;
+            //     }, 250);
+            // });
         }
     });
 
