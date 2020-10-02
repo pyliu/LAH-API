@@ -5430,9 +5430,8 @@ if (Vue) {
         methods: {
             popup() {
                 this.msgbox({
-                    title: "系統設定 小幫手提示",
+                    title: "系統設定 相關設定說明",
                     body: `
-                        <h6 class="text-info">相關設定說明</h6>
                         <ul>
                             <li>${this.enable_msdb_query_desc} - 有關外部MSSQL查詢都會影響。</li>
                             <li>${this.enable_office_hours_desc} - 是否受工作天檢查影響。</li>
