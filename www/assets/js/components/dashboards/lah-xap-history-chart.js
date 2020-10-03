@@ -336,8 +336,7 @@ if (Vue) {
         created() {
             this.site_code = this.site;
             this.reload(true);
-        },
-        mounted() { this.aspectRatio = this.viewportRatio }
+        }
     });
 } else {
     console.error("vue.js not ready ... lah-xap-history-chart component can not be loaded.");

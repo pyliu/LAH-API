@@ -23,13 +23,13 @@
   <section class="hide">
     <div class="container-fluid" v-cloak>
       <b-card-group deck>
-        <lah-xap-connection-chart></lah-xap-connection-chart>
-        <lah-xap-history-chart site="HB" type='bar' mins="30"></lah-xap-history-chart>
+        <lah-xap-connection-chart :aspect-ratio="viewportRatio"></lah-xap-connection-chart>
+        <lah-xap-history-chart site="HB" type='bar' mins="30" :aspect-ratio="viewportRatio"></lah-xap-history-chart>
       </b-card-group>
       <b-card-group deck class="mt-3">
-        <lah-xap-history-chart site="HA" type="bar"></lah-xap-history-chart>
-        <lah-xap-history-chart site="HE" type="bar"></lah-xap-history-chart>
-        <lah-xap-history-chart site="HG" type="bar"></lah-xap-history-chart>
+        <lah-xap-history-chart site="HA" type="bar" :aspect-ratio="viewportRatio"></lah-xap-history-chart>
+        <lah-xap-history-chart site="HE" type="bar"> :aspect-ratio="viewportRatio"</lah-xap-history-chart>
+        <lah-xap-history-chart site="HG" type="bar" :aspect-ratio="viewportRatio"></lah-xap-history-chart>
       </b-card-group>
       <!-- <b-card-group columns class="mt-3">
         <lah-xap-history-chart site="HA" type="bar"></lah-xap-history-chart>
