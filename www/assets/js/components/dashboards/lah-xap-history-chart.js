@@ -250,7 +250,8 @@ if (Vue) {
                             site: this.site_code,
                             mins: 60,
                             demo: this.demo,
-                            popupButton: false
+                            popupButton: false,
+                            aspectRatio: this.aspectRatio
                         }
                     }),
                     size: "xl"

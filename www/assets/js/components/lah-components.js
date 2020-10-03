@@ -584,7 +584,7 @@ if (Vue) {
         data: () => ({
             show: true,
             leave_time: 10000,
-            classes: ['text-muted', 'fixed-bottom', 'my-2', 'mx-3', 'bg-white', 'border', 'rounded', 'text-center', 'p-2', 'small']
+            classes: ['text-muted', 'fixed-bottom', 'my-2', 'mx-3', 'bg-white', 'border', 'rounded', 'text-center', 'p-2', 'small', 'shadow-xl']
         }),
         mounted() {
             this.timeout(() => this.show = false, this.leave_time);

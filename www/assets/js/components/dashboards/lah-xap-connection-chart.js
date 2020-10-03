@@ -325,7 +325,8 @@ if (Vue) {
                             type: this.type,
                             popupButton: false,
                             demo: this.demo,
-                            ip: this.ip
+                            ip: this.ip,
+                            aspectRatio: this.aspectRatio
                         }
                     }),
                     size: "xl"
