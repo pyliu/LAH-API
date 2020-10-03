@@ -335,7 +335,7 @@ if (Vue) {
         created() {
             this.reload(true);
         },
-        mounted() {}
+        mounted() { this.aspectRatio = this.viewportRatio }
     });
 } else {
     console.error("vue.js not ready ... lah-xap-connection-chart component can not be loaded.");
