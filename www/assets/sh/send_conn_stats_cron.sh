@@ -36,6 +36,7 @@ post()
     -d "type=stats_set_ap_conn" \
     -d "log_time=$log_time" \
     -d "ip=$ip" \
+    -d "api_key=4a0494ad2055969f758260e8055dcb99" \
     -d "sites[]=$1" \
     -d "counts[]=$2" \
     -d "sites[]=$3" \
