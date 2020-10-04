@@ -228,19 +228,22 @@ switch ($_POST["type"]) {
             $stats_sqlite3->wipeAPConnection();
         }
         break;
-    /*
-    case "stats_set_ap_conn":
-        //$log->info("XHR [stats_set_ap_conn] 設定AP連線數統計(".$_POST['log_time'].", ".$_POST['ip'].", records: ".count($_POST['sites']).")請求。");
-        for ($i = 0; $i < count($_POST['sites']); $i++) {
-            if ($stats_sqlite3->addAPConnection($_POST['log_time'], $_POST['ip'], $_POST['sites'][$i], $_POST['counts'][$i])) {
-                //$log->info("XHR [stats_set_ap_conn] 設定 [".$_POST['sites'][$i].",".$_POST['counts'][$i]."] 統計完成。");
-            } else {
-                $log->error("XHR [stats_set_ap_conn] 設定 [".$_POST['sites'][$i].",".$_POST['counts'][$i]."] 統計失敗。");
+    case "stats_set_conn_count":
+        if ($_POST['api_key'] != $system->get('API_KEY')) {
+            $log->error("XHR [stats_set_conn_count] Wrong API key to set AP connections. [expect: ".$system->get('API_KEY')." get ".$_POST["api_key"]."]");
+        } else {
+            $count = count($_POST['records']);
+            // record string is like 2,192.168.88.40
+            for ($i = 0; $i < $count; $i++) {
+                if ($stats_sqlite3->addAPConnHistory($_POST['log_time'], $_POST['ap_ip'], $_POST['records'])) {
+                    //$log->info("XHR [stats_set_ap_conn] 設定 [".$_POST['sites'][$i].",".$_POST['counts'][$i]."] 統計完成。");
+                } else {
+                    $log->error("XHR [stats_set_conn_count] 設定 [".$_POST['records'][$i]."] 歷史資料失敗。");
+                }
             }
+            // $stats_sqlite3->wipeAPConnection();
         }
-        $stats_sqlite3->wipeAPConnection();
         break;
-    */
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

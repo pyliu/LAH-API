@@ -107,8 +107,21 @@ class StatsSQLite3 {
         return empty($data) ? false : unserialize($data);
     }
     /**
-     * AP connection
+     * AP connection count
      */
+    public function addAPConnHistory($log_time, $ap_ip, $record) {
+        /** TODO
+        CREATE TABLE "ap_conn_history" (
+            "log_time"	TEXT NOT NULL,
+            "ap_ip"	TEXT NOT NULL,
+            "est_ip"	TEXT NOT NULL,
+            "count"	INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY("log_time","ap_ip","est_ip")
+        )
+        */
+        return true;
+    }
+
     public function addAPConnection($log_time, $ip, $site, $count) {
         // $post_data => ["log_time" => '20200904094300', "ip" => '220.1.35.123', "site" => 'HB', "count" => '10']
         $stm = $this->db->prepare("INSERT INTO ap_connection (log_time,ip,site,count) VALUES (:log_time, :ip, :site, :count)");
