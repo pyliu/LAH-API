@@ -115,6 +115,10 @@ class System {
 
     function __destruct() { unset($this->sqlite3); }
 
+    public function isKeyValid($key) {
+        return $key == $this->get('API_KEY');
+    }
+
     public function isMockMode() {
         global $client_ip;
         if ($client_ip == '127.0.0.1') return true;

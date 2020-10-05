@@ -217,21 +217,19 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_set_ap_conn":
-        if ($_POST['api_key'] != $system->get('API_KEY')) {
-            $log->error("XHR [stats_set_ap_conn] Wrong API key to set AP connections. [expect: ".$system->get('API_KEY')." get ".$_POST["api_key"]."]");
-        } else {
+        if ($system->isKeyValid($_POST['api_key'])) {
             for ($i = 0; $i < count($_POST['sites']); $i++) {
                 if (!$stats_sqlite3->addAPConnection($_POST['log_time'], $_POST['ip'], $_POST['sites'][$i], $_POST['counts'][$i])) {
                     $log->error("XHR [stats_set_ap_conn] 設定 [".$_POST['sites'][$i].",".$_POST['counts'][$i]."] 統計失敗。");
                 }
             }
             $stats_sqlite3->wipeAPConnection();
+        } else {
+            $log->error("XHR [stats_set_ap_conn] Wrong API key to set AP connections. [expect: ".$system->get('API_KEY')." get ".$_POST["api_key"]."]");
         }
         break;
     case "stats_set_conn_count":
-        if ($_POST['api_key'] != $system->get('API_KEY')) {
-            $log->error("XHR [stats_set_conn_count] Wrong API key to set AP connections. [expect: ".$system->get('API_KEY')." get ".$_POST["api_key"]."]");
-        } else {
+        if ($system->isKeyValid($_POST['api_key'])) {
             $count = count($_POST['records']);
             // record string is like 2,192.168.88.40
             for ($i = 0; $i < $count; $i++) {
@@ -242,6 +240,8 @@ switch ($_POST["type"]) {
                 }
             }
             // $stats_sqlite3->wipeAPConnection();
+        } else {
+            $log->error("XHR [stats_set_conn_count] Wrong API key to set AP connections. [expect: ".$system->get('API_KEY')." get ".$_POST["api_key"]."]");
         }
         break;
 	default:
