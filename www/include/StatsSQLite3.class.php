@@ -111,6 +111,27 @@ class StatsSQLite3 {
     /**
      * AP connection count
      */
+    public function getLatestAPConnHistory($ap_ip) {
+        global $log;
+        // inst into db
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.explode('.', $ap_ip)[3].'.db';
+        $ap_db = new SQLite3($db_path);
+        $latest_log_time = $ap_db->querySingle("SELECT DISTINCT log_time from ap_conn_history ORDER BY log_time DESC");
+        if($stmt = $ap_db->prepare('SELECT * FROM ap_conn_history WHERE log_time = :log_time ORDER BY est_ip')) {
+            $stmt->bindParam(':log_time', $latest_log_time);
+            $result = $stmt->execute();
+            $return = [];
+            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                $return[] = $row;
+            }
+            return $return;
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得最新紀錄(${latest_log_time})資料失敗！ (${db_path})");
+        }
+        return false;
+    }
+
     public function addAPConnHistory($log_time, $ap_ip, $records) {
         global $log;
         // clean data ... 
@@ -130,24 +151,26 @@ class StatsSQLite3 {
             }
         }
         // inst into db
-        explode('.', $ap_ip)[3];
-        $ap_db = new SQLite3(DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.explode('.', $ap_ip)[3].'.db');
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.explode('.', $ap_ip)[3].'.db';
+        $ap_db = new SQLite3($db_path);
+        $latest_batch = $ap_db->querySingle("SELECT DISTINCT batch from ap_conn_history ORDER BY batch DESC");
         $success = 0;
         foreach ($processed as $est_ip => $count) {
             $retry = 0;
-            $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count) VALUES (:log_time, :ap_ip, :est_ip, :count)");
+            $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch)");
             while ($stm === false) {
                 if ($retry > 3) return $success;
                 usleep(rand(100000, 500000));
-                $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count) VALUES (:log_time, :ap_ip, :est_ip, :count)");
+                $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch)");
                 $retry++;
             }
             $stm->bindParam(':log_time', $log_time);
             $stm->bindParam(':ap_ip', $ap_ip);
             $stm->bindParam(':est_ip', $est_ip);
             $stm->bindParam(':count', $count);
+            $stm->bindValue(':batch', $latest_batch + 1);
             if ($stm->execute() === FALSE) {
-                $log->warning(__METHOD__.": 更新資料庫失敗($log_time, $ap_ip, $est_ip, $count)");
+                $log->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $ap_ip, $est_ip, $count)");
             } else {
                 $success++;
             }
