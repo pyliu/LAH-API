@@ -112,20 +112,21 @@ class StatsSQLite3 {
     /**
      * AP connection count
      */
-    public function getLatestAPConnHistory($ap_ip) {
+    public function getLatestAPConnHistory($ap_ip, $all = 'true') {
         global $log;
         // inst into db
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.explode('.', $ap_ip)[3].'.db';
         $ap_db = new SQLite3($db_path);
         $latest_log_time = $ap_db->querySingle("SELECT DISTINCT log_time from ap_conn_history ORDER BY log_time DESC");
-        if($stmt = $ap_db->prepare('SELECT * FROM ap_conn_history WHERE log_time = :log_time ORDER BY est_ip')) {
+        if($stmt = $ap_db->prepare('SELECT * FROM ap_conn_history WHERE log_time = :log_time ORDER BY count DESC')) {
             $stmt->bindParam(':log_time', $latest_log_time);
             $result = $stmt->execute();
             $return = [];
             while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                if ($all == 'false' && IPResolver::isServerIP($row['est_ip'])) continue;
                 // turn est_ip to user
                 $name = IPResolver::resolve($row['est_ip']);
-                $row['name'] = $name;
+                $row['name'] = empty($name) ? $row['est_ip'] : $name;
                 $return[] = $row;
             }
             return $return;

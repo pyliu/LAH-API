@@ -241,7 +241,7 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_latest_ap_conn":
-        if ($arr = $stats_sqlite3->getLatestAPConnHistory($_POST["ap_ip"])) {
+        if ($arr = $stats_sqlite3->getLatestAPConnHistory($_POST["ap_ip"], $_POST["all"])) {
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => $count,
