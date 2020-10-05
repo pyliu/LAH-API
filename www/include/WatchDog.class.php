@@ -220,6 +220,25 @@ class WatchDog {
         }
     }
 
+    private function compressLog() {
+        if (php_sapi_name() != "cli") {
+            global $log;
+            // compress all log every monday
+            if (date("w") == "1" && !isset($_SESSION["LOG_COMPRESSION_DONE"])) {
+                $log->info("今天星期一，開始壓縮LOG檔！");
+                zipLogs();
+                $_SESSION["LOG_COMPRESSION_DONE"] = true;
+                $log->info("壓縮LOG檔結束！");
+            }
+        }
+    }
+
+    private function wipeStatsHistoryData() {
+        // clean old data
+        $this->stats->wipeAllAPConnHistory();
+        $this->stats->wipeAPConnection();
+    }
+
     function __construct() {
         $this->stats = new StatsSQLite3();
     }
@@ -230,6 +249,8 @@ class WatchDog {
         if ($this->isOfficeHours()) {
             $this->checkCrossSiteData();
             $this->findDelayRegCases();
+            $this->compressLog();
+            $this->wipeStatsHistoryData();
             //$this->notifyTemperatureRegistration();
             return true;
         }

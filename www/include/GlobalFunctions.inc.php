@@ -107,7 +107,7 @@ function zipLogs() {
     while($file = readdir($dir)) {
         // skip today
         if (stristr($file, $today)) {
-            $log->info("Skipping today's log for compression.【${file}】");
+            //$log->info("Skipping today's log for compression.【${file}】");
             continue;
         }
         $full_filename = $pathdir.DIRECTORY_SEPARATOR.$file;

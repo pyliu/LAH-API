@@ -1,9 +1,11 @@
 <?php
 require_once('init.php');
 
-define('DEF_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."LAH.db");
-define('TEMPERATURE_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."Temperature.db");
-define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."dimension.db");
+define('DB_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db");
+define('DEF_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."LAH.db");
+define('TEMPERATURE_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."Temperature.db");
+define('DIMENSION_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."dimension.db");
+
 class StatsSQLite3 {
     private $db;
 
@@ -128,29 +130,53 @@ class StatsSQLite3 {
             }
         }
         // inst into db
+        explode('.', $ap_ip)[3];
+        $ap_db = new SQLite3(DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.explode('.', $ap_ip)[3].'.db');
+        $success = 0;
         foreach ($processed as $est_ip => $count) {
-            $stm = $this->db->prepare("REPLACE INTO ap_conn_history (log_time,ap_ip,est_ip,count) VALUES (:log_time, :ap_ip, :est_ip, :count)");
+            $retry = 0;
+            $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count) VALUES (:log_time, :ap_ip, :est_ip, :count)");
+            while ($stm === false) {
+                if ($retry > 3) return $success;
+                usleep(rand(100000, 500000));
+                $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count) VALUES (:log_time, :ap_ip, :est_ip, :count)");
+                $retry++;
+            }
             $stm->bindParam(':log_time', $log_time);
             $stm->bindParam(':ap_ip', $ap_ip);
             $stm->bindParam(':est_ip', $est_ip);
-            $stm->bindValue(':count', $count);
-            if (!$stm->execute()) {
-                $log->warning("更新資料庫失敗($log_time, $ap_ip, $est_ip, $count)");
+            $stm->bindParam(':count', $count);
+            if ($stm->execute() === FALSE) {
+                $log->warning(__METHOD__.": 更新資料庫失敗($log_time, $ap_ip, $est_ip, $count)");
+            } else {
+                $success++;
             }
         }
-        return true;
+        return $success;
     }
 
-    public function wipeAPConnHistory() {
+    public function wipeAPConnHistory($ip_end) {
         global $log;
         $one_day_ago = date("YmdHis", time() - 24 * 3600);
-        $stm = $this->db->prepare("DELETE FROM ap_conn_history WHERE log_time < :time");
+        $ap_db = new SQLite3(DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.$ip_end.'.db');
+        $stm = $ap_db->prepare("DELETE FROM ap_conn_history WHERE log_time < :time");
         $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
         $ret = $stm->execute();
         if (!$ret) {
-            $log->error(__METHOD__.": 移除一天前資料失敗【".$one_day_ago.", ".$this->db->lastErrorMsg()."】");
+            $log->error(__METHOD__.": stats_ap_conn_AP".$ip_end.".db 移除一天前資料失敗【".$one_day_ago.", ".$this->db->lastErrorMsg()."】");
         }
         return $ret;
+    }
+
+    public function wipeAllAPConnHistory() {
+        $this->wipeAPConnHistory('31');
+        $this->wipeAPConnHistory('32');
+        $this->wipeAPConnHistory('33');
+        $this->wipeAPConnHistory('34');
+        $this->wipeAPConnHistory('35');
+        $this->wipeAPConnHistory('36');
+        $this->wipeAPConnHistory('70');
+        $this->wipeAPConnHistory('123');
     }
 
     public function addAPConnection($log_time, $ip, $site, $count) {

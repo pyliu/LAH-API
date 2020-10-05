@@ -24,16 +24,6 @@ if (!file_exists(LOGS_DIR) && !is_dir(LOGS_DIR)) {
 $today_ad = date('Y-m-d');  // ex: 2019-09-16
 $log = new Logger(LOGS_DIR.DIRECTORY_SEPARATOR.'log-' . $today_ad . '.log');
 
-if (php_sapi_name() != "cli") {
-    // compress all log every monday
-    if (date("w") == "1" && !isset($_SESSION["LOG_COMPRESSION_DONE"])) {
-        $log->info("今天星期一，開始壓縮LOG檔！");
-        zipLogs();
-        $_SESSION["LOG_COMPRESSION_DONE"] = true;
-        $log->info("壓縮LOG檔結束！");
-    }
-}
-
 $tw_date = new Datetime("now");
 $tw_date->modify("-1911 year");
 $this_year = ltrim($tw_date->format("Y"), "0");	// ex: 108
