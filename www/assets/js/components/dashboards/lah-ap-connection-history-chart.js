@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component('lah-ap-connection-history-chart', {
         template: `<lah-transition appear>
             <b-card border-variant="secondary" class="shadow" v-b-visible="visible">
-                <lah-chart ref="chart" :label="label" :items="items" :type="type" :title="title" title-pos="left" :aspect-ratio="aspectRatio"></lah-chart>
+                <lah-chart ref="chart" :label="label" :items="items" :type="type" :title="title" title-pos="left" :aspect-ratio="aspectRatio" :bg-color="bg_color"></lah-chart>
                 <div class="d-flex justify-content-between mt-1">
                     <span class="small align-middle my-auto">
                     <b-form-checkbox v-model="allSwitch" switch inline><span title="全部/使用者切換">{{all_switch_desc}}</span></b-form-checkbox>
@@ -194,7 +194,39 @@ if (Vue) {
                 });
             },
             nav_left() { this.ip = this.next_svr },
-            nav_right() { this.ip = this.prev_svr }
+            nav_right() { this.ip = this.prev_svr },
+            style_by_count(value, opacity = 0.6) {
+                let variant, action, rgb, icon;
+                if (value > 100) {
+                    icon = 'network-wired';
+                    variant = 'danger';
+                    action = 'tremble';
+                    rgb = `rgb(243, 0, 19, ${opacity})`
+                } // red
+                else if (value > 50) {
+                    icon = 'network-wired';
+                    variant = 'warning';
+                    action = 'beat';
+                    rgb = `rgb(238, 182, 1, ${opacity})`;
+                } // yellow
+                else if (value > 5) {
+                    icon = 'network-wired';
+                    variant = 'success';
+                    action = 'jump';
+                    rgb = `rgb(0, 200, 0, ${opacity})`
+                } // green
+                else {
+                    icon = 'ethernet';
+                    variant = 'muted';
+                    action = '';
+                    rgb = `rgb(207, 207, 207, ${opacity})`;
+                } // muted
+                return [variant, action, rgb, icon]
+            },
+            bg_color(dataset_item, opacity) {
+                [variant, action, rgb, icon] = this.style_by_count(dataset_item[1], opacity);
+                return rgb;
+            },
         },
         created() {
             this.reload(true);
