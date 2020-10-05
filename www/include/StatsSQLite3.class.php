@@ -109,17 +109,48 @@ class StatsSQLite3 {
     /**
      * AP connection count
      */
-    public function addAPConnHistory($log_time, $ap_ip, $record) {
-        /** TODO
-        CREATE TABLE "ap_conn_history" (
-            "log_time"	TEXT NOT NULL,
-            "ap_ip"	TEXT NOT NULL,
-            "est_ip"	TEXT NOT NULL,
-            "count"	INTEGER NOT NULL DEFAULT 0,
-            PRIMARY KEY("log_time","ap_ip","est_ip")
-        )
-        */
+    public function addAPConnHistory($log_time, $ap_ip, $records) {
+        global $log;
+        // clean data ... 
+        $processed = array();
+        foreach ($records as $record) {
+            $pair = explode(',',  $record);
+            $count = $pair[0];
+            $est_ip = $pair[1];
+            if (empty($est_ip) || empty($count)) {
+                $log->warning("IP或是記數為空值，將略過此筆紀錄。($est_ip, $count)");
+                continue;
+            }
+            if (array_key_exists($est_ip, $processed)) {
+                $processed[$est_ip] += $count;
+            } else {
+                $processed[$est_ip] = $count;
+            }
+        }
+        // inst into db
+        foreach ($processed as $est_ip => $count) {
+            $stm = $this->db->prepare("REPLACE INTO ap_conn_history (log_time,ap_ip,est_ip,count) VALUES (:log_time, :ap_ip, :est_ip, :count)");
+            $stm->bindParam(':log_time', $log_time);
+            $stm->bindParam(':ap_ip', $ap_ip);
+            $stm->bindParam(':est_ip', $est_ip);
+            $stm->bindValue(':count', $count);
+            if (!$stm->execute()) {
+                $log->warning("更新資料庫失敗($log_time, $ap_ip, $est_ip, $count)");
+            }
+        }
         return true;
+    }
+
+    public function wipeAPConnHistory() {
+        global $log;
+        $one_day_ago = date("YmdHis", time() - 24 * 3600);
+        $stm = $this->db->prepare("DELETE FROM ap_conn_history WHERE log_time < :time");
+        $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
+        $ret = $stm->execute();
+        if (!$ret) {
+            $log->error(__METHOD__.": 移除一天前資料失敗【".$one_day_ago.", ".$this->db->lastErrorMsg()."】");
+        }
+        return $ret;
     }
 
     public function addAPConnection($log_time, $ip, $site, $count) {
@@ -135,16 +166,10 @@ class StatsSQLite3 {
     public function wipeAPConnection() {
         global $log;
         $one_day_ago = date("YmdHis", time() - 24 * 3600);
-
-        // $log->info("60分鐘前時間：$ten_mins_ago");
-
         $stm = $this->db->prepare("DELETE FROM ap_connection WHERE log_time < :time");
         $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
         $ret = $stm->execute();
-        if ($ret) {
-            // $deleted_count = $this->db->changes();
-            // if ($deleted_count > 0) $log->info("成功刪除過期 $deleted_count 筆 ap_connection 統計紀錄。");
-        } else {
+        if (!$ret) {
             $log->error(__METHOD__.": 移除一天前資料失敗【".$one_day_ago.", ".$this->db->lastErrorMsg()."】");
         }
         return $ret;
