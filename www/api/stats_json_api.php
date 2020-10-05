@@ -193,27 +193,28 @@ switch ($_POST["type"]) {
         break;
     case "stats_xap_conn_latest":
         $count = $_POST['count'] ?? 11;
-        // $log->info("XHR [stats_xap_conn_latest] 取得最新AP連線紀錄(".$count.")請求。");
         if ($arr = $stats_sqlite3->getLastestAPConnection($count)) {
             echoJSONResponse("取得 ".count($arr)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => count($arr),
                 "raw" => $arr
             ));
         } else {
-            $log->error("XHR [stats_xap_conn_latest] 取得最新AP連線紀錄失敗。");
+            $error = "取得最新AP連線紀錄失敗。";
+            $log->error("XHR [stats_xap_conn_latest] $error");
+            echoJSONResponse($error);
         }
         break;
     case "stats_ap_conn_HX_history":
-        // $log->info("XHR [stats_ap_conn_HX_history] 取得跨所AP ".$_POST["site"]." 連線歷史紀錄請求。(筆數".$_POST["count"].")");
         if ($arr = $stats_sqlite3->getAPConnectionHXHistory($_POST["site"], $_POST["count"])) {
             $count = count($arr);
-            // $log->info("XHR [stats_ap_conn_HX_history] 取得 $count 筆資料。");
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => $count,
                 "raw" => $arr
             ));
         } else {
-            $log->error("XHR [stats_ap_conn_HX_history] 取得跨所AP ".$_POST["site"]." 連線歷史紀錄失敗。");
+            $error = "取得跨所AP ".$_POST["site"]." 連線歷史紀錄失敗。";
+            $log->error("XHR [stats_ap_conn_HX_history] $error");
+            echoJSONResponse($error);
         }
         break;
     case "stats_set_ap_conn":
@@ -237,6 +238,19 @@ switch ($_POST["type"]) {
             }
         } else {
             $log->error("XHR [stats_set_conn_count] Wrong API key to set AP connections. [expect: ".$system->get('API_KEY')." get ".$_POST["api_key"]."]");
+        }
+        break;
+    case "stats_latest_ap_conn":
+        if ($arr = $stats_sqlite3->getLatestAPConnHistory($_POST["ap_ip"])) {
+            $count = count($arr);
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => $count,
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得最新AP ".$_POST["ap_ip"]." 連線數紀錄失敗。";
+            $log->error("XHR [stats_latest_ap_conn] $error");
+            echoJSONResponse($error);
         }
         break;
 	default:
