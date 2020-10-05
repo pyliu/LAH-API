@@ -352,12 +352,12 @@ if (Vue) {
                     url: "monitor_cross_ap.html",
                     icon: "server",
                     need_admin: true
-                }/*, {
-                    text: "監控看板",
-                    url: "monitor.html",
-                    icon: "tv",
+                }, {
+                    text: "AP連線數看板",
+                    url: "monitor_ap_conn.html",
+                    icon: "user-friends",
                     need_admin: true
-                }*/]
+                }]
             }, {
                 text: "今日案件",
                 url: ["index.html", "/"],
