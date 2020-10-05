@@ -1,5 +1,6 @@
 <?php
 require_once('init.php');
+require_once('IPResolver.class.php');
 
 define('DB_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db");
 define('DEF_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."LAH.db");
@@ -122,6 +123,9 @@ class StatsSQLite3 {
             $result = $stmt->execute();
             $return = [];
             while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                // turn est_ip to user
+                $name = IPResolver::resolve($row['est_ip']);
+                $row['name'] = $name;
                 $return[] = $row;
             }
             return $return;
