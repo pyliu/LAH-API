@@ -10,8 +10,9 @@ define('DIMENSION_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."dimension.db");
 abstract class IPResolver {
     private static $server_map = array(
         '220.1.35.43' => 'G08儲存',
-        '220.1.35.2' => '資料庫',
         '220.1.35.3' => 'AD主機',
+        '220.1.35.12' => 'PS主機',
+        '220.1.35.42' => 'PS主機(權狀)',
         '220.1.35.123' => '本所跨域主機',
         '220.1.35.30' => '次AD主機',
         '220.1.35.31' => '登記(1)主機',
@@ -24,6 +25,7 @@ abstract class IPResolver {
         '220.1.33.5' => '局同步異動'
     );
     private static $remote_eps = array(
+        '220.1.35.2' => '資料庫',
         '220.1.37.246' => '楊梅跨域',
         '220.1.38.30' => '蘆竹跨域',
         '220.1.34.161' => '桃園跨域',
