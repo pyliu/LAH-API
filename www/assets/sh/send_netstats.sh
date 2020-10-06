@@ -6,7 +6,6 @@
 #ip=`ifconfig | grep 'inet addr:' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{print $1}'`
 ip="220.1.35.123"
 api="http://220.1.35.84/api/stats_json_api.php"
-CURR=`date "+%Y-%m-%d %H:%M:%S"`
 log_time=`date "+%Y%m%d%H%M%S"`
 POST_PARAMS=$(netstat -ntu | grep ESTAB | awk '{print $5}' | sed -e 's/^::ffff://'  | cut -d : -f 1 | sort | uniq -c | sort -nr | awk '{print " -d records[]="$1","$2}')
 curl -s -X POST \
