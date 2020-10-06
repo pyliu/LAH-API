@@ -106,11 +106,6 @@ if (Vue) {
             }
         },
         methods: {
-            addTopSiteParams(item) {
-                if (this.storeParams.hasOwnProperty('XAP_CONN_TOP_SITES')) {
-                    this.addToStoreParams('XAP_CONN_TOP_SITES', []);
-                }
-            },
             reload(force = false) {
                 clearTimeout(this.reload_timer);
                 if (this.demo && this.items.length > 0) {
@@ -134,6 +129,8 @@ if (Vue) {
                                 });
                             } else {
                                 this.items = [];
+                                // reset connection count top site
+                                this.storeParams['XAP_CONN_TOP_SITES'] = [];
                                 res.data.raw.forEach((item, raw_idx, array) => {
                                     /*
                                         item = {
@@ -150,7 +147,9 @@ if (Vue) {
                                     } else if (item.est_ip == '127.0.0.1') {
                                         // skip 127.0.0.1, SYSTEM ADMIN default ip
                                     } else {
-                                        this.addTopSiteParams(item);
+                                        if (this.xap_map.has(item.est_ip)) {
+                                            this.storeParams['XAP_CONN_TOP_SITES'].push(this.xap_map.get(item.est_ip));
+                                        }
                                         this.items.push([item.name, item.count]);
                                     }
                                 });
@@ -249,6 +248,7 @@ if (Vue) {
         },
         created() {
             this.reload(true);
+            this.addToStoreParams('XAP_CONN_TOP_SITES', []);
         }
     });
 } else {

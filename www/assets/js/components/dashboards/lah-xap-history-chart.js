@@ -25,6 +25,7 @@ if (Vue) {
             </b-card>
         </lah-transition>`,
         props: {
+            watchTopSiteIndex: { type: Number, default: -1 },
             site: {
                 type: String,
                 default: 'H0'
@@ -108,6 +109,11 @@ if (Vue) {
             },
             demo(val) {
                 this.reload()
+            },
+            top_site(arr) {
+                if (this.watchTopSiteIndex != -1 && Array.isArray(arr) && arr[this.watchTopSiteIndex]) {
+                    this.site = arr[this.watchTopSiteIndex];
+                }
             }
         },
         computed: {
@@ -131,7 +137,8 @@ if (Vue) {
             icon_action() {
                 [variant, action, rgb, icon] = this.style_by_count(this.now_count);
                 return action;
-            }
+            },
+            top_site() { return this.storeParams['XAP_CONN_TOP_SITES'] }
         },
         methods: {
             style_by_count(value, opacity = 0.6) {
