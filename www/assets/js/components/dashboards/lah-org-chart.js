@@ -11,7 +11,7 @@ if (Vue) {
                     </b-form-checkbox>
                 </b-button-group>
             </div>
-            <lah-tree ref="tree" :root="root" :orientation="orientation" :node-margin="margin" :height="canvas_height"></lah-tree>
+            <lah-tree ref="tree" :root="root" :orientation="orientation" :node-margin="margin"></lah-tree>
         </b-card>`,
         data: () => ({
             reload_timer: null,
