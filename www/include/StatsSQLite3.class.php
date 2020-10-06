@@ -145,8 +145,8 @@ class StatsSQLite3 {
             $pair = explode(',',  $record);
             $count = $pair[0];
             $est_ip = $pair[1];
-            if (empty($est_ip) || empty($count)) {
-                $log->warning("IP或是記數為空值，將略過此筆紀錄。($est_ip, $count)");
+            if (empty($est_ip)) {
+                $log->warning("IP為空值，將略過此筆紀錄。($est_ip, $count)");
                 continue;
             }
             if (array_key_exists($est_ip, $processed)) {
