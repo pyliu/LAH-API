@@ -338,5 +338,13 @@ let refreshTomorrow8AM = (min_sec = '00:00') => {
     }, milliseconds);
     console.log(`Refresh the page after ${Number.parseFloat(milliseconds / 1000 / 60 / 60).toFixed(2)} hrs. (${tomorrow_8_xx_am})`);
 }
+
+let resizeReload = () => {
+    let global_resize_timer = null;
+    $(window).resize(function() {
+        clearTimeout(global_resize_timer);
+        global_resize_timer = setTimeout(() => window.location.reload(), 250);
+    }); 
+}
 //]]>
     

@@ -46,6 +46,11 @@
   <script src="assets/js/mark.jquery.min.js"></script>
   <!-- Dashboads -->
   <script src="assets/js/components/dashboards/lah-ap-connection-history-chart.js"></script>
-  <script> $(document).ready(e => { refreshTomorrow8AM('00:00') }); </script>
+  <script>
+    $(document).ready(e => {
+      refreshTomorrow8AM('00:00');
+      resizeReload();
+    });
+  </script>
 </body>
 </html>
