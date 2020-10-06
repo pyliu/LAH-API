@@ -21,7 +21,7 @@ class SQLiteUser {
         $stm->bindParam(':cell', $row['AP_SEL'], SQLITE3_TEXT);
         $stm->bindParam(':unit', $row['AP_UNIT_NAME']);
         $stm->bindParam(':title', $row['AP_JOB']);
-        $stm->bindParam(':work', $row['AP_WORK']);
+        $stm->bindValue(':work', empty($row['unitname2']) ? $row['AP_WORK'] : $row['unitname2']);
         $stm->bindParam(':exam', $row['AP_TEST']);
         $stm->bindParam(':education', $row['AP_HI_SCHOOL']);
         $stm->bindParam(':birthday', $row['AP_BIRTH']);
