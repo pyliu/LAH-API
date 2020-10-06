@@ -23,14 +23,22 @@ abstract class IPResolver {
         '220.1.35.70' => '謄本主機',
         '220.1.33.5' => '局同步異動'
     );
-    private static $remote_aps = array(
+    private static $remote_eps = array(
         '220.1.37.246' => '楊梅跨域',
         '220.1.38.30' => '蘆竹跨域',
         '220.1.34.161' => '桃園跨域',
         '220.1.36.45' => '大溪跨域',
         '220.1.39.57' => '八德跨域',
         '220.1.40.33' => '平鎮跨域',
-        '220.1.41.20' => '龜山跨域'
+        '220.1.41.20' => '龜山跨域',
+        '220.2.33.85' => '自強櫃台',
+        '220.2.33.84' => '自強審查',
+        '220.2.33.89' => '普義櫃台1',
+        '220.2.33.90' => '普義審查',
+        '220.2.33.93' => '普義櫃台2',
+        '220.2.33.44' => '觀音櫃台',
+        '220.2.33.43' => '觀音審查',
+
     );
 
     function __construct() { }
@@ -42,8 +50,8 @@ abstract class IPResolver {
         if (filter_var($ip, FILTER_VALIDATE_IP)) {
             if (array_key_exists($ip, IPResolver::$server_map)) {
                 return IPResolver::$server_map[$ip];
-            } else if (array_key_exists($ip, IPResolver::$remote_aps)) {
-                return IPResolver::$remote_aps[$ip];
+            } else if (array_key_exists($ip, IPResolver::$remote_eps)) {
+                return IPResolver::$remote_eps[$ip];
             }
             // find user by ip address
             $sqlite_user = new SQLiteUser();
