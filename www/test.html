@@ -33,7 +33,6 @@
                 <b-card>
                     <lah-button @click="if (!storeParams.hasOwnProperty('demo')) addToStoreParams('demo', false); storeParams['demo'] = !storeParams['demo'];" icon="laptop-code" :pressed="storeParams['demo']">DEMO</lah-button>
                     <lah-button v-b-toggle.sidebar-1 icon="bars">Toggle</lah-button>
-                    {{myinfo}} {{authority}}
                 </b-card>
             </b-card-group>
             <b-card-group columns class="mt-2">
@@ -45,8 +44,7 @@
                 no-close-on-backdrop shadow>
                 <div class="px-3 py-2">
                     <p>
-                        Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis
-                        in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+                        {{myinfo}} {{authority}}
                     </p>
                     <b-img src="get_user_img.php?name=%E8%B3%B4%E4%BF%8B%E5%84%92" fluid thumbnail></b-img>
                     <b-img src="get_user_img.php?name=%E5%8A%89%E9%82%A6%E6%B8%9D" fluid thumbnail></b-img>
