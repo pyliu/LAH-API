@@ -343,7 +343,7 @@ let resizeReload = () => {
     let global_resize_timer = null;
     $(window).resize(function() {
         clearTimeout(global_resize_timer);
-        global_resize_timer = setTimeout(() => window.location.reload(), 250);
+        global_resize_timer = setTimeout(() => window.location.reload(), 1000);
     }); 
 }
 //]]>
