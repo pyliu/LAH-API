@@ -114,9 +114,9 @@ class StatsSQLite3 {
      */
     public function getLatestAPConnHistory($ap_ip, $all = 'true') {
         global $log;
-        // inst into db
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.explode('.', $ap_ip)[3].'.db';
         $ap_db = new SQLite3($db_path);
+        // get latest batch log_time
         $latest_log_time = $ap_db->querySingle("SELECT DISTINCT log_time from ap_conn_history ORDER BY log_time DESC");
         if($stmt = $ap_db->prepare('SELECT * FROM ap_conn_history WHERE log_time = :log_time ORDER BY count DESC')) {
             $stmt->bindParam(':log_time', $latest_log_time);
@@ -132,7 +132,7 @@ class StatsSQLite3 {
             return $return;
         } else {
             global $log;
-            $log->error(__METHOD__.": 取得最新紀錄(${latest_log_time})資料失敗！ (${db_path})");
+            $log->error(__METHOD__.": 取得 $ap_ip 最新紀錄資料失敗！ (${db_path})");
         }
         return false;
     }
