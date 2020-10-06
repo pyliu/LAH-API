@@ -324,19 +324,19 @@ let scrollToElement = element => {
     }, 1000);
 }
 
-let refreshTomorrow8AM = () => {
+let refreshTomorrow8AM = (min_sec = '00:00') => {
     // refresh the page at tomorrow 08:00
     var now = new Date();
     var today = now.getFullYear() + "-" +
         ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
         ("0" + now.getDate()).slice(-2);
-    let tomorrow_8_00_am = new Date(`${today} 08:00:00`);
-    tomorrow_8_00_am.setDate(new Date().getDate()+1);
-    let milliseconds = tomorrow_8_00_am - now;
+    let tomorrow_8_xx_am = new Date(`${today} 08:${min_sec}`);
+    tomorrow_8_xx_am.setDate(new Date().getDate()+1);
+    let milliseconds = tomorrow_8_xx_am - now;
     setTimeout(() => {
       window.location.reload();
     }, milliseconds);
-    console.log(`Refresh the page after ${Number.parseFloat(milliseconds / 1000 / 60 / 60).toFixed(2)} hrs. (${tomorrow_8_00_am})`);
+    console.log(`Refresh the page after ${Number.parseFloat(milliseconds / 1000 / 60 / 60).toFixed(2)} hrs. (${tomorrow_8_xx_am})`);
 }
 //]]>
     
