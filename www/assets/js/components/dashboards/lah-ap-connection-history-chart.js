@@ -132,6 +132,8 @@ if (Vue) {
                                     */
                                     if (item.name == '資料庫') {
                                         this.db_count = item.count;
+                                    } else if (item.est_ip == '127.0.0.1') {
+                                        // skip 127.0.0.1, SYSTEM ADMIN default ip
                                     } else {
                                         this.items.push([item.name, item.count]);
                                     }
