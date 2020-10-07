@@ -220,10 +220,10 @@ if (Vue) {
                 variant = 'secondary';
                 action = '';
                 if (this.type == 'bar') {
-                    if (value > 100) {
+                    if (value > 200) {
                         rgb = `rgb(243, 0, 19, ${opacity})`
                     } // red
-                    else if (value > 50) {
+                    else if (value > 100) {
                         rgb = `rgb(238, 182, 1, ${opacity})`;
                     } // yellow
                     else if (value > 5) {
