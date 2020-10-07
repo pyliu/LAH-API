@@ -12,7 +12,7 @@ Vue.config.devtools = true;
  */
 // PHP default uses QueryString as the parsing source but axios use json object instead
 axios.defaults.transformRequest = [data => $.param(data)];
-axios.defaults.timeout = 5000;   // ms
+axios.defaults.timeout = 6500;   // ms
 if (CONFIG.DEBUG_MODE) {
     // declare a request interceptor
     axios.interceptors.request.use(config => {
