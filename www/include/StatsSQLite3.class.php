@@ -229,22 +229,6 @@ class StatsSQLite3 {
         return $ret;
     }
 
-    public function getLastestAPConnection($count = 11) {
-        if($stmt = $this->db->prepare('SELECT * FROM ap_connection ORDER BY log_time DESC LIMIT :limit')) {
-            $stmt->bindValue(':limit', $count, SQLITE3_INTEGER);
-            $result = $stmt->execute();
-            $return = [];
-            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                $return[] = $row;
-            }
-            return $return;
-        } else {
-            global $log;
-            $log->error(__METHOD__.": 取得最新 $count 筆失敗！");
-        }
-        return false;
-    }
-
     public function getAPConnectionHXHistory($site, $count, $extend = true) {
         if($stmt = $this->db->prepare('SELECT * FROM ap_connection WHERE site = :site ORDER BY log_time DESC LIMIT :limit')) {
             $stmt->bindParam(':site', $site, SQLITE3_TEXT);

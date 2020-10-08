@@ -194,43 +194,80 @@ if (Vue) {
                     this.reload_demo_data();
                     this.reload_timer = this.timeout(this.reload, this.timer_ms);
                 } else if (force || this.isOfficeHours()) {
-                    //this.isBusy = true;
-                    this.$http.post(CONFIG.API.JSON.STATS, {
-                        type: "stats_ap_conn_HX_history",
-                        site: this.site_code,
-                        count: parseInt(this.mins) + 1
-                    }).then(res => {
-                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                            if (res.data.data_count == 0) {
-                                this.notify({
-                                    title: `跨所 AP ${this.site_tw} 連線趨勢圖`,
-                                    message: '無資料，無法繪製圖形',
-                                    type: 'warning'
-                                });
-                            } else {
-                                this.set_items(res.data.raw);
-                            }
-                        } else {
-                            this.alert({
-                                title: `取得跨所 AP ${this.site_tw} 連線趨勢圖`,
-                                message: `取得跨所 AP ${this.site_tw} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`,
-                                variant: "warning"
-                            });
-                        }
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        //this.isBusy = false;
-                        this.reload_timer = this.timeout(this.reload, this.timer_ms);
-                        Vue.nextTick(() => {
-                            this.$refs.chart.update();
-                        });
-                    });
+                    request_old();
                 } else {
                     // check after an hour
                     this.reload_timer = this.timeout(this.reload, 3600000);
                 }
             },
+            request_old() {
+                //this.isBusy = true;
+                this.$http.post(CONFIG.API.JSON.STATS, {
+                    type: "stats_ap_conn_HX_history",
+                    site: this.site_code,
+                    count: parseInt(this.mins) + 1
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        if (res.data.data_count == 0) {
+                            this.notify({
+                                title: `跨所 AP ${this.site_tw} 連線趨勢圖`,
+                                message: '無資料，無法繪製圖形',
+                                type: 'warning'
+                            });
+                        } else {
+                            this.set_items(res.data.raw);
+                        }
+                    } else {
+                        this.alert({
+                            title: `取得跨所 AP ${this.site_tw} 連線趨勢圖`,
+                            message: `取得跨所 AP ${this.site_tw} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`,
+                            variant: "warning"
+                        });
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    //this.isBusy = false;
+                    this.reload_timer = this.timeout(this.reload, this.timer_ms);
+                    Vue.nextTick(() => {
+                        this.$refs.chart.update();
+                    });
+                });
+            },
+            request() {
+                //this.isBusy = true;
+                this.$http.post(CONFIG.API.JSON.STATS, {
+                    type: "stats_ap_conn_HX_history",
+                    site: this.site_code,
+                    count: parseInt(this.mins) + 1
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        if (res.data.data_count == 0) {
+                            this.notify({
+                                title: `跨所 AP ${this.site_tw} 連線趨勢圖`,
+                                message: '無資料，無法繪製圖形',
+                                type: 'warning'
+                            });
+                        } else {
+                            this.set_items(res.data.raw);
+                        }
+                    } else {
+                        this.alert({
+                            title: `取得跨所 AP ${this.site_tw} 連線趨勢圖`,
+                            message: `取得跨所 AP ${this.site_tw} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`,
+                            variant: "warning"
+                        });
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    //this.isBusy = false;
+                    this.reload_timer = this.timeout(this.reload, this.timer_ms);
+                    Vue.nextTick(() => {
+                        this.$refs.chart.update();
+                    });
+                });
+            }
             reload_demo_data() {
                 this.items.forEach((item, raw_idx, raw) => {
                     let val = this.rand(300);
