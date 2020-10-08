@@ -191,19 +191,6 @@ switch ($_POST["type"]) {
             $log->info("XHR [stats_regf] ${err}。");
         }
         break;
-    case "stats_ap_conn_HX_history":
-        if ($arr = $stats_sqlite3->getAPConnectionHXHistory($_POST["site"], $_POST["count"])) {
-            $count = count($arr);
-            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => $count,
-                "raw" => $arr
-            ));
-        } else {
-            $error = "取得跨所AP ".$_POST["site"]." 連線歷史紀錄失敗。";
-            $log->error("XHR [stats_ap_conn_HX_history] $error");
-            echoJSONResponse($error);
-        }
-        break;
     case "stats_set_ap_conn":
         if ($system->isKeyValid($_POST['api_key'])) {
             for ($i = 0; $i < count($_POST['sites']); $i++) {
@@ -237,6 +224,19 @@ switch ($_POST["type"]) {
         } else {
             $error = "取得最新AP [".$_POST["ap_ip"]."] 連線數紀錄失敗。";
             $log->error("XHR [stats_latest_ap_conn] $error");
+            echoJSONResponse($error);
+        }
+        break;
+    case "stats_ap_conn_history":
+        if ($arr = $stats_sqlite3->getAPConnHistory($_POST["ap_ip"], $_POST["count"])) {
+            $count = count($arr);
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => $count,
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得跨所AP ".$_POST["ap_ip"]." 連線歷史紀錄失敗。";
+            $log->error("XHR [stats_ap_conn_history] $error");
             echoJSONResponse($error);
         }
         break;

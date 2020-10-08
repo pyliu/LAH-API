@@ -73,36 +73,11 @@ if (Vue) {
                 this.site_code = val
             },
             site_code(val) {
-                switch (val) {
-                    case 'H0':
-                        this.site_tw = '地政局';
-                        break;
-                    case 'HA':
-                        this.site_tw = '桃園所';
-                        break;
-                    case 'HB':
-                        this.site_tw = '中壢所';
-                        break;
-                    case 'HC':
-                        this.site_tw = '大溪所';
-                        break;
-                    case 'HD':
-                        this.site_tw = '楊梅所';
-                        break;
-                    case 'HE':
-                        this.site_tw = '蘆竹所';
-                        break;
-                    case 'HF':
-                        this.site_tw = '八德所';
-                        break;
-                    case 'HG':
-                        this.site_tw = '平鎮所';
-                        break;
-                    case 'HH':
-                        this.site_tw = '龜山所';
-                        break;
-                    default:
-                        this.site_tw = '未知';
+                this.site_tw = '未知';
+                for (var value of this.xapMap.values()) {
+                    if (value.code == val) {
+                        this.site_tw = value.name;
+                    }
                 }
                 this.items.length = 0;
                 this.reload(true);
@@ -138,7 +113,15 @@ if (Vue) {
                 [variant, action, rgb, icon] = this.style_by_count(this.now_count);
                 return action;
             },
-            top_site() { return this.storeParams['XAP_CONN_TOP_SITES'] }
+            top_site() { return this.storeParams['XAP_CONN_TOP_SITES'] },
+            ip() {
+                for (var value of this.xapMap.values()) {
+                    if (value.code == this.site) {
+                        return value.ip;
+                    }
+                }
+                return false;
+            }
         },
         methods: {
             style_by_count(value, opacity = 0.6) {
@@ -175,6 +158,16 @@ if (Vue) {
             },
             set_items(raw) {
                 raw.forEach((item, raw_idx, raw) => {
+                    /*
+                        item = {
+                            log_time: '20201005181631',
+                            ap_ip: '220.1.35.123',
+                            est_ip: '220.1.35.36',
+                            count: '2',
+                            batch: '490',
+                            name: '資訊主機'
+                        }
+                    */
                     let text = (raw_idx == 0) ? '現在' : `${raw_idx}分前`;
                     let val = item.count;
                     if (this.items.length == raw.length) {
@@ -194,23 +187,24 @@ if (Vue) {
                     this.reload_demo_data();
                     this.reload_timer = this.timeout(this.reload, this.timer_ms);
                 } else if (force || this.isOfficeHours()) {
-                    request_old();
+                    this.request();
                 } else {
                     // check after an hour
                     this.reload_timer = this.timeout(this.reload, 3600000);
                 }
             },
-            request_old() {
+            request() {
                 //this.isBusy = true;
                 this.$http.post(CONFIG.API.JSON.STATS, {
-                    type: "stats_ap_conn_HX_history",
-                    site: this.site_code,
+                    type: "stats_ap_conn_history",
+                    ap_ip: this.ip,
                     count: parseInt(this.mins) + 1
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         if (res.data.data_count == 0) {
                             this.notify({
                                 title: `跨所 AP ${this.site_tw} 連線趨勢圖`,
+                                subtitle: this.site_tw,
                                 message: '無資料，無法繪製圖形',
                                 type: 'warning'
                             });
@@ -219,8 +213,8 @@ if (Vue) {
                         }
                     } else {
                         this.alert({
-                            title: `取得跨所 AP ${this.site_tw} 連線趨勢圖`,
-                            message: `取得跨所 AP ${this.site_tw} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`,
+                            title: `跨所 AP ${this.site_tw} 連線趨勢圖`,
+                            message: `取得跨所 AP ${this.site_tw} ${this.ip} 連線資料失敗。【${res.data.status}】`,
                             variant: "warning"
                         });
                     }
@@ -234,40 +228,6 @@ if (Vue) {
                     });
                 });
             },
-            request() {
-                //this.isBusy = true;
-                this.$http.post(CONFIG.API.JSON.STATS, {
-                    type: "stats_ap_conn_HX_history",
-                    site: this.site_code,
-                    count: parseInt(this.mins) + 1
-                }).then(res => {
-                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        if (res.data.data_count == 0) {
-                            this.notify({
-                                title: `跨所 AP ${this.site_tw} 連線趨勢圖`,
-                                message: '無資料，無法繪製圖形',
-                                type: 'warning'
-                            });
-                        } else {
-                            this.set_items(res.data.raw);
-                        }
-                    } else {
-                        this.alert({
-                            title: `取得跨所 AP ${this.site_tw} 連線趨勢圖`,
-                            message: `取得跨所 AP ${this.site_tw} 連線趨勢圖回傳狀態碼有問題【${res.data.status}】`,
-                            variant: "warning"
-                        });
-                    }
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
-                    //this.isBusy = false;
-                    this.reload_timer = this.timeout(this.reload, this.timer_ms);
-                    Vue.nextTick(() => {
-                        this.$refs.chart.update();
-                    });
-                });
-            }
             reload_demo_data() {
                 this.items.forEach((item, raw_idx, raw) => {
                     let val = this.rand(300);

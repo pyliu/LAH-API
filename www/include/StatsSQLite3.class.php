@@ -137,6 +137,33 @@ class StatsSQLite3 {
         return false;
     }
 
+    public function getAPConnHistory($ap_ip, $count, $extend = true) {
+        global $log;
+        // XAP conn only store at AP123 db
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP123.db';
+        $ap_db = new SQLite3($db_path);
+        if($stmt = $ap_db->prepare('SELECT * FROM ap_conn_history WHERE est_ip = :ip ORDER BY log_time DESC LIMIT :limit')) {
+            $stmt->bindParam(':ip', $ap_ip);
+            $stmt->bindValue(':limit', $extend ? $count * 4 : $count, SQLITE3_INTEGER);
+            $result = $stmt->execute();
+            $return = [];
+            $skip_count = 0;
+            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                // basically BE every 15s insert a record, extend means to get 1-min duration record
+                if ($extend) {
+                    $skip_count++;
+                    if ($skip_count % 4 != 1) continue;
+                }
+                $return[] = $row;
+            }
+            return $return;
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得 $ap_ip 歷史紀錄資料失敗！ (${db_path})");
+        }
+        return false;
+    }
+
     public function addAPConnHistory($log_time, $ap_ip, $records) {
         global $log;
         // clean data ... 
@@ -228,31 +255,5 @@ class StatsSQLite3 {
         }
         return $ret;
     }
-
-    public function getAPConnectionHXHistory($site, $count, $extend = true) {
-        if($stmt = $this->db->prepare('SELECT * FROM ap_connection WHERE site = :site ORDER BY log_time DESC LIMIT :limit')) {
-            $stmt->bindParam(':site', $site, SQLITE3_TEXT);
-            $stmt->bindValue(':limit', $extend ? $count * 4 : $count, SQLITE3_INTEGER);
-            $result = $stmt->execute();
-            $return = [];
-
-            $skip_count = 0;
-            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                // basically BE every 15s insert a record, extend means to get 1-min duration record
-                if ($extend) {
-                    $skip_count++;
-                    if ($skip_count % 4 != 1) continue;
-                }
-                $return[] = $row;
-            }
-
-            return $return;
-        } else {
-            global $log;
-            $log->error(__METHOD__.": 取得${site}歷史資料失敗！");
-        }
-        return false;
-    }
-    
 }
 ?>
