@@ -2,11 +2,6 @@
 require_once('init.php');
 require_once('SQLiteUser.class.php');
 
-define('DB_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db");
-define('DEF_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."LAH.db");
-define('TEMPERATURE_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."Temperature.db");
-define('DIMENSION_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."dimension.db");
-
 abstract class IPResolver {
     private static $server_map = array(
         '220.1.35.43' => 'G08儲存',
