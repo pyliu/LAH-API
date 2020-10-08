@@ -28,12 +28,12 @@
     <section class="hide">
         <div class="container-fluid" v-cloak>
             <b-card-group columns style="margin-top: 85px">
-                <lah-xap-connection-chart :demo="storeParams['demo']"></lah-xap-connection-chart>
-                <lah-xap-history-chart site="HA" type='bar' :demo="storeParams['demo']"></lah-xap-history-chart>
                 <b-card>
                     <lah-button @click="if (!storeParams.hasOwnProperty('demo')) addToStoreParams('demo', false); storeParams['demo'] = !storeParams['demo'];" icon="laptop-code" :pressed="storeParams['demo']">DEMO</lah-button>
                     <lah-button v-b-toggle.sidebar-1 icon="bars">Toggle</lah-button>
                 </b-card>
+                <lah-xap-connection-chart :demo="storeParams['demo']"></lah-xap-connection-chart>
+                <lah-xap-history-chart site="HA" type='bar' :demo="storeParams['demo']"></lah-xap-history-chart>
                 <lah-export-txt></lah-export-txt>
                 <lah-tree class="shadow-xl"></lah-tree>
                 <lah-ap-connection-history-chart ip="220.1.35.123" :demo="storeParams['demo']"></lah-ap-connection-history-chart>
