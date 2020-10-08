@@ -60,7 +60,7 @@ class Query {
 	}
 
     function __construct() {
-        $this->db = new OraDB();
+        $this->db = new OraDB(CONNECTION_TYPE::MAIN);
     }
 
     function __destruct() {
@@ -1154,8 +1154,8 @@ class Query {
 		global $log;
 		$log->info(__METHOD__.": 找遠端 ${db_user}.CRSMS 的案件資料【${year}, ${code}, ${num}】");
 
-		// connection switch to L1HWEB
-		$this->db->connect(CONNECTION_TYPE::L1HWEB);
+		// connection switch to L3HWEB
+		$this->db->connect(CONNECTION_TYPE::L3HWEB);
 		$this->db->parse("
 			SELECT *
 			FROM $db_user.CRSMS t
@@ -1221,8 +1221,8 @@ class Query {
 		$num = substr($id, 7, 6);
 		$db_user = "L1H".$code[1]."0H03";
 
-		// connection switch to L1HWEB
-		$this->db->connect(CONNECTION_TYPE::L1HWEB);
+		// connection switch to L3HWEB
+		$this->db->connect(CONNECTION_TYPE::L3HWEB);
 		$this->db->parse("
 			SELECT *
 			FROM $db_user.CRSMS t

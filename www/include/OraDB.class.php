@@ -5,7 +5,7 @@ putenv('NLS_LANG=American_America.US7ASCII');
 
 abstract class CONNECTION_TYPE {
     const MAIN = 0;
-    const L1HWEB = 1;
+    const L3HWEB = 1;
     const TWEB = 2;
 }
 
@@ -24,9 +24,9 @@ class OraDB {
     public function connect($type = CONNECTION_TYPE::MAIN) {
         $conn_str = $this->MAIN_DB;
         $this->CONN_TYPE = CONNECTION_TYPE::MAIN;
-        if ($type == CONNECTION_TYPE::L1HWEB) {
+        if ($type == CONNECTION_TYPE::L3HWEB) {
             $conn_str = $this->L3HWEB_DB;
-            $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB;
+            $this->CONN_TYPE = CONNECTION_TYPE::L3HWEB;
         } else if ($type == CONNECTION_TYPE::TWEB) {
             $conn_str = $this->TWEB_DB;
             $this->CONN_TYPE = CONNECTION_TYPE::TWEB;
@@ -121,14 +121,14 @@ class OraDB {
         oci_bind_by_name($this->stid, $bind_var, $real_var);
     }
 
-    function __construct() {
+    function __construct($type = CONNECTION_TYPE::MAIN) {
         $system = new System();
         $this->L3HWEB_DB = $system->get("ORA_DB_L3HWEB");
         $this->TWEB_DB = $system->get("ORA_DB_TWEB");
         $this->MAIN_DB = $system->get("ORA_DB_MAIN");
         $this->user = $system->get("ORA_DB_USER");
         $this->pass = $system->get("ORA_DB_PASS");
-        if (!$system->isMockMode()) $this->connect(CONNECTION_TYPE::MAIN);
+        if (!$system->isMockMode()) $this->connect($type);
     }
 
     function __destruct() {

@@ -15,7 +15,7 @@ class StatsOracle {
     }
 
     function __construct() {
-        $this->db = new OraDB();
+        $this->db = new OraDB(CONNECTION_TYPE::MAIN);
     }
 
     function __destruct() { }
