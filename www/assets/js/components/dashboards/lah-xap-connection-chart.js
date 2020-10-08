@@ -175,71 +175,83 @@ if (Vue) {
                     this.reload_demo_data();
                     this.reload_timer = this.timeout(this.reload, this.timer_ms);
                 } else if (force || this.isOfficeHours()) {
-                    //this.isBusy = true;
-                    this.$http.post(CONFIG.API.JSON.STATS, {
-                        type: "stats_xap_conn_latest",
-                        count: 11 // why 11? => H0 HA-H DB TOTAL
-                    }).then(res => {
-                        console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得AP連線數回傳狀態碼有問題【${res.data.status}】`);
-                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                            if (res.data.data_count == 0) {
-                                this.notify({
-                                    title: 'AP連線數',
-                                    message: '無資料，無法繪製圖形',
-                                    type: 'warning'
-                                });
-                            } else {
-                                this.ap_count = 0;
-                                res.data.raw.reverse().forEach((item, raw_idx, array) => {
-                                    let text = this.get_site_tw(item.site);
-                                    // e.g. item => { count: 911, ip: "220.1.35.123", log_time: "20200904175957", site: "HB" }
-                                    if (item.site == 'TOTAL') {
-                                        this.total_count = item.count;
-                                    } else if (item.site == 'DB') {
-                                        this.db_count = item.count;
-                                    } else {
-                                        let value = item.count;
-                                        if (this.items.length == 9) {
-                                            let found = this.items.find((oitem, idx, array) => {
-                                                return oitem[0] == text;
-                                            });
-                                            if (found) {
-                                                // the dataset item format is ['text', 123]
-                                                found[1] = value;
-                                                // not reactively ... manual set chartData
-                                                this.$refs.chart.changeValue(text, value);
-                                            } else {
-                                                this.$warn(`RAW IDX: ${raw_idx}`, 'RAW ITEM: ', item, `FOUND IDX: ${found_idx}`, 'FOUND ITEM: ', this.items[found_idx], `NOW items: `, this.items);
-                                            }
-                                        } else {
-                                            this.items.push([text, value]);
-                                        }
-                                        this.ap_count += parseInt(value);
-                                    }
-                                });
-                                this.last_update_time = this.now().split(' ')[1];
-                            }
-                        } else {
-                            this.alert({
-                                title: `取得${this.ip}連線數`,
-                                message: `取得AP連線數回傳狀態碼有問題【${res.data.status}】`,
-                                variant: "warning"
-                            });
-                        }
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        //this.isBusy = false;
-                        // reload every 15s
-                        this.reload_timer = this.timeout(this.reload, this.timer_ms);
-                        Vue.nextTick(() => {
-                            this.$refs.chart.update();
-                        });
-                    });
+                    this.request();
                 } else {
                     // check after an hour
                     this.reload_timer = this.timeout(this.reload, 3600000);
                 }
+            },
+            request() {
+                //this.isBusy = true;
+                this.$http.post(CONFIG.API.JSON.STATS, {
+                    type: "stats_latest_ap_conn",
+                    ap_ip: this.ip,
+                    all: true
+                }).then(res => {
+                    console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得 ${this.ip} AP連線數回傳狀態碼有問題【${res.data.status}】`);
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        if (res.data.data_count == 0) {
+                            this.notify({
+                                title: '跨所AP連線數',
+                                message: '無資料，無法繪製圖形',
+                                type: 'warning'
+                            });
+                        } else {
+                            this.ap_count = 0;
+                            this.total_count = 0;
+                            res.data.raw.forEach((item, raw_idx, array) => {
+                                /*
+                                    item = {
+                                        log_time: '20201005181631',
+                                        ap_ip: '220.1.35.123',
+                                        est_ip: '220.1.35.36',
+                                        count: '2',
+                                        batch: '490',
+                                        name: '資訊主機'
+                                    }
+                                */
+                                this.total_count += item.count;
+                                if (item.name == '資料庫') {
+                                    this.db_count = item.count;
+                                } else if (this.xap_map.has(item.est_ip)) {
+                                    // only cares about H0 - HH
+                                    let value = item.count;
+                                    let text = this.xap_map.get(item.est_ip).name;
+                                    this.ap_count += parseInt(value);
+                                    if (this.items.length == 9) {
+                                        let found = this.items.find((oitem, idx, array) => {
+                                            return oitem[0] == text;
+                                        });
+                                        if (found) {
+                                            // the dataset item format is ['text', 123]
+                                            found[1] = value;
+                                            // not reactively ... manual set chartData
+                                            this.$refs.chart.changeValue(text, value);
+                                        }
+                                    } else {
+                                        this.items.push([text, value]);
+                                    }
+                                }
+                            });
+                            this.last_update_time = this.now().split(' ')[1];
+                        }
+                    } else {
+                        this.alert({
+                            title: `取得${this.ip}連線數`,
+                            message: `取得AP連線數回傳狀態碼有問題【${res.data.status}】`,
+                            variant: "warning"
+                        });
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    //this.isBusy = false;
+                    // reload every 15s
+                    this.reload_timer = this.timeout(this.reload, this.timer_ms);
+                    Vue.nextTick(() => {
+                        this.$refs.chart.update();
+                    });
+                });
             },
             reload_demo_data() {
                 this.ap_count = 0;

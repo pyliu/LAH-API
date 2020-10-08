@@ -59,17 +59,7 @@ if (Vue) {
             reload_timer: null,
             refresh_ip_timer: null,
             type_carousel: ['bar', 'line', 'pie', 'polarArea', 'doughnut', 'radar'],
-            svr_carousel: ['31', '32', '33', '34', '35', '36', '70', '123'],
-            xap_map: new Map([
-                ['220.1.35.123', 'HB'],
-                ['220.1.37.246', 'HD'],
-                ['220.1.38.30', 'HE'],
-                ['220.1.34.161', 'HA'],
-                ['220.1.36.45', 'HC'],
-                ['220.1.39.57', 'HF'],
-                ['220.1.40.33', 'HG'],
-                ['220.1.41.20', 'HH']
-            ])
+            svr_carousel: ['31', '32', '33', '34', '35', '36', '70', '123']
         }),
         watch: {
             disableOfficeHours(val) { if (val) this.reload() },
@@ -149,7 +139,7 @@ if (Vue) {
                                         // skip 127.0.0.1, SYSTEM ADMIN default ip
                                     } else {
                                         if (this.xap_map.has(item.est_ip)) {
-                                            this.storeParams['XAP_CONN_TOP_SITES'].push(this.xap_map.get(item.est_ip));
+                                            this.storeParams['XAP_CONN_TOP_SITES'].push(this.xap_map.get(item.est_ip).code);
                                         }
                                         this.items.push([item.name, item.count]);
                                     }

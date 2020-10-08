@@ -62,7 +62,18 @@ Vue.prototype.$store = (() => {
                 },
                 disableMSDBQuery: CONFIG.DISABLE_MSDB_QUERY,
                 disableOfficeHours: false,
-                disableMockMode: true
+                disableMockMode: true,
+                xapMap: new Map([
+                    ['220.1.33.71', {name: '地政局', code: 'H0', ip: '220.1.33.71'}],
+                    ['220.1.34.161', {name: '桃園所', code: 'HA', ip: '220.1.34.161'}],
+                    ['220.1.35.123', {name: '中壢所', code: 'HB', ip: '220.1.35.1232'}],
+                    ['220.1.36.45', {name: '大溪所', code: 'HC', ip: '220.1.36.45'}],
+                    ['220.1.37.246', {name: '楊梅所', code: 'HD', ip: '220.1.37.246'}],
+                    ['220.1.38.30', {name: '蘆竹所', code: 'HE', ip: '220.1.38.30'}],
+                    ['220.1.39.57', {name: '八德所', code: 'HF', ip: '220.1.39.57'}],
+                    ['220.1.40.33', {name: '平鎮所', code: 'HG', ip: '220.1.40.33'}],
+                    ['220.1.41.20', {name: '龜山所', code: 'HH', ip: '220.1.41.20'}]
+                ])
             },
             getters: {
                 cache: state => state.cache,
@@ -76,7 +87,8 @@ Vue.prototype.$store = (() => {
                 myinfo: state => state.myinfo,
                 disableMSDBQuery: state => state.disableMSDBQuery,
                 disableOfficeHours: state => state.disableOfficeHours,
-                disableMockMode: state => state.disableMockMode
+                disableMockMode: state => state.disableMockMode,
+                xapMap: state => state.xapMap
             },
             mutations: {
                 cache(state, objPayload) {
@@ -258,7 +270,8 @@ Vue.mixin({
         disableMockMode() { return this.$store.getters.disableMockMode },
         nowDate() { return this.now().split(' ')[0] },
         nowTime() { return this.now().split(' ')[1] },
-        viewportRatio() { return ((window.innerWidth) * 1.08).toFixed(2) / (window.innerHeight - 85 - 20).toFixed(2) }
+        viewportRatio() { return ((window.innerWidth) * 1.08).toFixed(2) / (window.innerHeight - 85 - 20).toFixed(2) },
+        xap_map() { return this.$store.getters.xapMap }
     },
     methods: {
         addToStoreParams: function(key, value) {

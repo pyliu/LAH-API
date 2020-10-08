@@ -191,19 +191,6 @@ switch ($_POST["type"]) {
             $log->info("XHR [stats_regf] ${err}。");
         }
         break;
-    case "stats_xap_conn_latest":
-        $count = $_POST['count'] ?? 11;
-        if ($arr = $stats_sqlite3->getLastestAPConnection($count)) {
-            echoJSONResponse("取得 ".count($arr)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => count($arr),
-                "raw" => $arr
-            ));
-        } else {
-            $error = "取得最新AP連線紀錄失敗。";
-            $log->error("XHR [stats_xap_conn_latest] $error");
-            echoJSONResponse($error);
-        }
-        break;
     case "stats_ap_conn_HX_history":
         if ($arr = $stats_sqlite3->getAPConnectionHXHistory($_POST["site"], $_POST["count"])) {
             $count = count($arr);
@@ -241,14 +228,14 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_latest_ap_conn":
-        if ($arr = $stats_sqlite3->getLatestAPConnHistory($_POST["ap_ip"], $_POST["all"])) {
+        if (!empty($_POST["ap_ip"]) && $arr = $stats_sqlite3->getLatestAPConnHistory($_POST["ap_ip"], $_POST["all"])) {
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => $count,
                 "raw" => $arr
             ));
         } else {
-            $error = "取得最新AP ".$_POST["ap_ip"]." 連線數紀錄失敗。";
+            $error = "取得最新AP [".$_POST["ap_ip"]."] 連線數紀錄失敗。";
             $log->error("XHR [stats_latest_ap_conn] $error");
             echoJSONResponse($error);
         }
