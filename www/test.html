@@ -34,11 +34,10 @@
                     <lah-button @click="if (!storeParams.hasOwnProperty('demo')) addToStoreParams('demo', false); storeParams['demo'] = !storeParams['demo'];" icon="laptop-code" :pressed="storeParams['demo']">DEMO</lah-button>
                     <lah-button v-b-toggle.sidebar-1 icon="bars">Toggle</lah-button>
                 </b-card>
-            </b-card-group>
-            <b-card-group columns class="mt-2">
                 <lah-export-txt></lah-export-txt>
                 <lah-tree class="shadow-xl"></lah-tree>
                 <lah-ap-connection-history-chart ip="220.1.35.123" :demo="storeParams['demo']"></lah-ap-connection-history-chart>
+                <lah-l3hweb-traffic-light></lah-l3hweb-traffic-light>
             </b-card-group>
             <b-sidebar id="sidebar-1" title="Sidebar" bg-variant="dark" text-variant="light" backdrop
                 no-close-on-backdrop shadow>
@@ -79,6 +78,7 @@
     <script src="assets/js/components/dashboards/lah-ap-connection-history-chart.js"></script>
 
     <script src="assets/js/components/dashboards/lah-export-txt.js"></script>
+    <script src="assets/js/components/dashboards/lah-l3hweb-traffic-light.js"></script>
     
     <script src="assets/js/treant/raphael.min.js"></script>
     <script src="assets/js/treant/treant.min.js"></script>

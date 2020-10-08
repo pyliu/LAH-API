@@ -538,6 +538,11 @@ switch ($_POST["type"]) {
 		$log->info("XHR [l3hweb_update_time] 查詢同步異動更新時間【".$_POST["site"]."】請求");
 		$rows = $mock ? $cache->get('l3hweb_update_time') : $query->getL3HWEBUpdateTime();
 		if (!$mock) $cache->set('l3hweb_update_time', $rows);
+		$count = count($rows);
+		echoJSONResponse('共查詢到'.$count.'筆資料', STATUS_CODE::SUCCESS_NORMAL, array(
+			'data_count' => $count,
+			'raw' => $rows
+		));
 		break;
 	case "diff_xcase":
 		$log->info("XHR [diff_xcase] 查詢同步案件資料【".$_POST["id"]."】請求");
