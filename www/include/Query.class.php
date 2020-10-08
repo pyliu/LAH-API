@@ -2,6 +2,7 @@
 require_once("init.php");
 require_once("OraDB.class.php");
 require_once("RegCaseData.class.php");
+require_once("L3HWEB.class.php");
 
 class Query {
 
@@ -1140,6 +1141,11 @@ class Query {
 		return $this->db->fetchAll();
 	}
 	
+	public function getL3HWEBUpdateTime() {
+		$db = new L3HWEB();
+		return $db->queryUpdateTime();
+	}
+
 	public function getXCaseDiff($id, $raw = false) {
         if (!$this->checkCaseID($id)) {
             return -1;

@@ -17,14 +17,22 @@ class L3HWEB {
      * 同步異動更新時間
      */
     public function queryUpdateTime($site = '') {
-        $this->db->parse("
+        $prefix = "
             SELECT
                 SUBSTR(sowner, 3, 2) AS SITE,
                 TO_CHAR(min(snaptime), 'yyyy-mm-dd hh24:mi:ss') as UPDATE_DATETIME
             FROM sys.snap_reftime$
+        ";
+        $where = "";
+        if (!empty($site) && 2 == strlen($site)) {
+            $site = strtoupper($site);
+            $where = " WHERE SUBSTR(sowner, 3, 2) = '$site' ";
+        }
+        $postfix = "
             GROUP BY sowner
             ORDER BY SITE, UPDATE_DATETIME
-        ");
+        ";
+        $this->db->parse($prefix.$where.$postfix);
 		$this->db->execute();
 		return $this->db->fetchAll();
     }
