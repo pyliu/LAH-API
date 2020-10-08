@@ -213,10 +213,10 @@ if (Vue) {
                                 this.total_count += item.count;
                                 if (item.name == '資料庫') {
                                     this.db_count = item.count;
-                                } else if (this.xap_map.has(item.est_ip)) {
+                                } else if (this.xapMap.has(item.est_ip)) {
                                     // only cares about H0 - HH
                                     let value = item.count;
-                                    let text = this.xap_map.get(item.est_ip).name;
+                                    let text = this.xapMap.get(item.est_ip).name;
                                     this.ap_count += parseInt(value);
                                     if (this.items.length == 9) {
                                         let found = this.items.find((oitem, idx, array) => {

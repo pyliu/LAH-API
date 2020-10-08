@@ -138,8 +138,8 @@ if (Vue) {
                                     } else if (item.est_ip == '127.0.0.1') {
                                         // skip 127.0.0.1, SYSTEM ADMIN default ip
                                     } else {
-                                        if (this.xap_map.has(item.est_ip)) {
-                                            this.storeParams['XAP_CONN_TOP_SITES'].push(this.xap_map.get(item.est_ip).code);
+                                        if (this.xapMap.has(item.est_ip)) {
+                                            this.storeParams['XAP_CONN_TOP_SITES'].push(this.xapMap.get(item.est_ip).code);
                                         }
                                         this.items.push([item.name, item.count]);
                                     }

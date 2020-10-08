@@ -271,7 +271,7 @@ Vue.mixin({
         nowDate() { return this.now().split(' ')[0] },
         nowTime() { return this.now().split(' ')[1] },
         viewportRatio() { return ((window.innerWidth) * 1.08).toFixed(2) / (window.innerHeight - 85 - 20).toFixed(2) },
-        xap_map() { return this.$store.getters.xapMap }
+        xapMap() { return this.$store.getters.xapMap }
     },
     methods: {
         addToStoreParams: function(key, value) {
