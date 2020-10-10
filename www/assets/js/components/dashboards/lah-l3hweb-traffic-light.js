@@ -16,7 +16,10 @@ if (Vue) {
         </div>
       </div>
       <div v-else :id="container_id">
-        <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="viewportRatio" :bg-color="chartItemColor"></lah-chart>
+        <div class="d-flex justify-content-between mx-auto" style="width: 85%">
+          <lah-fa-icon v-for="entry in list" icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
+        </div>
+        <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="viewportRatio+0.1" :bg-color="chartItemColor"></lah-chart>
       </div>
     </b-card>`,
     props: {
@@ -27,59 +30,38 @@ if (Vue) {
     },
     data: () => ({
       container_id: 'grids-container',
-      list: [{
-          SITE: 'HA',
-          UPDATE_DATETIME: '2020-10-10 20:47:00'
-        },
-        {
-          SITE: 'HB',
-          UPDATE_DATETIME: '2020-10-10 21:47:00'
-        },
-        {
-          SITE: 'HC',
-          UPDATE_DATETIME: '2020-10-10 22:47:00'
-        },
-        {
-          SITE: 'HD',
-          UPDATE_DATETIME: '2020-10-10 23:47:00'
-        },
-        {
-          SITE: 'HE',
-          UPDATE_DATETIME: '2020-10-11 00:47:00'
-        },
-        {
-          SITE: 'HF',
-          UPDATE_DATETIME: '2020-10-11 01:47:00'
-        },
-        {
-          SITE: 'HG',
-          UPDATE_DATETIME: '2020-10-11 02:47:00'
-        },
-        {
-          SITE: 'HH',
-          UPDATE_DATETIME: '2020-10-10 03:47:00'
-        }
+      list: [
+        { SITE: 'HA', UPDATE_DATETIME: '2020-10-10 20:47:00' },
+        { SITE: 'HB', UPDATE_DATETIME: '2020-10-10 20:47:00' },
+        { SITE: 'HC', UPDATE_DATETIME: '2020-10-10 20:47:00' },
+        { SITE: 'HD', UPDATE_DATETIME: '2020-10-10 20:47:00' },
+        { SITE: 'HE', UPDATE_DATETIME: '2020-10-10 21:27:00' },
+        { SITE: 'HF', UPDATE_DATETIME: '2020-10-10 21:40:00' },
+        { SITE: 'HG', UPDATE_DATETIME: '2020-10-10 21:17:00' },
+        { SITE: 'HH', UPDATE_DATETIME: '2020-10-10 21:37:00' }
       ],
       chartLabel: '未更新時間',
       charType: 'bar',
       chartItems: [
-        ['桃園所', 330 / 60],
-        ['中壢所', 260 / 60],
-        ['大溪所', 334 / 60],
-        ['楊梅所', 910 / 60],
-        ['蘆竹所', 111 / 60],
-        ['八德所', 150 / 60],
-        ['平鎮所', 699 / 60],
-        ['龜山所', 1801 / 60]
+        ['桃園所', 0],
+        ['中壢所', 0],
+        ['大溪所', 0],
+        ['楊梅所', 0],
+        ['蘆竹所', 0],
+        ['八德所', 0],
+        ['平鎮所', 0],
+        ['龜山所', 0]
       ]
     }),
     computed: {
       headerLight() {
+        let site_light = 'success';
         for (let i = 0; i < this.list.length; i++) {
-          let site_light = this.light(this.list[i]);
-          if (site_light == 'danger' || site_light == 'warning') return site_light;
+          let this_light = this.light(this.list[i]);
+          if (this_light == 'warning') site_light = 'warning';
+          if (this_light == 'danger') return 'danger';
         }
-        return 'success';
+        return site_light;
       }
     },
     watch: {},
@@ -108,13 +90,6 @@ if (Vue) {
             return '';
         }
       },
-      name(entry) {
-        for (var value of this.xapMap.values()) {
-          if (value.code == entry.SITE) {
-            return value.name;
-          }
-        }
-      },
       light(entry) {
         const now = +new Date(); // in ms
         const last_update = +new Date(entry.UPDATE_DATETIME.replace(' ', 'T'));
@@ -123,31 +98,36 @@ if (Vue) {
         else if (offset > 15 * 60 * 1000) return 'warning';
         return 'success';
       },
+      name(entry) {
+        for (var value of this.xapMap.values()) {
+          if (value.code == entry.SITE) {
+            return value.name;
+          }
+        }
+      },
       popup() {
         this.msgbox({
           title: '同步異動資料庫監控說明',
           message: `
-                <h6 class="my-2"><i class="fa fa-circle text-danger fa-lg"></i> 已超過半小時未更新</h6>
-                <h6 class="my-2"><i class="fa fa-circle text-warning fa-lg"></i> 已超過15分鐘未更新</h6>
-                <h6 class="my-2"><i class="fa fa-circle text-success fa-lg"></i> 15分鐘內更新</h6>
+              <h6 class="my-2"><i class="fa fa-circle text-danger fa-lg"></i> 已超過半小時未更新</h6>
+              <h6 class="my-2"><i class="fa fa-circle text-warning fa-lg"></i> 已超過15分鐘未更新</h6>
+              <h6 class="my-2"><i class="fa fa-circle text-success fa-lg"></i> 15分鐘內更新</h6>
             `,
           size: 'lg'
         });
       },
       reload() {},
       updChartData(data) {
+        const now = +new Date(); // in ms
         data.forEach((item, raw_idx, array) => {
           // item = { SITE: 'HB', UPDATE_DATETIME: '2020-10-10 19:58:01' }
           let name = this.name(item);
           if (this.empty(name)) {
             this.$warn(`${item.SITE} can not find the mapping name.`);
           } else {
-            const now = +new Date(); // in ms
-            const last_update = +new Date(item.UPDATE_DATETIME.replace(' ', 'T'));
-            let value = ((now - last_update) / 3600000).toFixed(1); // 60 * 60 * 1000 => 3600000 ms
-            let found = this.chartItems.find((oitem, idx, array) => {
-              return oitem[0] == name;
-            });
+            let last_update = +new Date(item.UPDATE_DATETIME.replace(' ', 'T'));
+            let value = ((now - last_update) / 60000).toFixed(1); // ms to min
+            let found = this.chartItems.find((oitem, idx, array) => { return oitem[0] == name; });
             if (found) {
               // the dataset item format is ['text', 123]
               found[1] = value;
