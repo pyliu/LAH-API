@@ -10,13 +10,13 @@ if (Vue) {
           </b-button-group>
         </div>
       </template>
-      <div v-if="!fullHeight" id="grids-container" class="grids">
+      <div v-if="!fullHeight" :id="container_id" class="grids">
         <div v-for="entry in list" class="grid">
           <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
         </div>
       </div>
-      <div v-else>
-        <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="2" :bg-color="chartItemColor"></lah-chart>
+      <div v-else :id="container_id">
+        <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="viewportRatio" :bg-color="chartItemColor"></lah-chart>
       </div>
     </b-card>`,
     props: {
@@ -26,6 +26,7 @@ if (Vue) {
       }
     },
     data: () => ({
+      container_id: 'grids-container',
       list: [{
           SITE: 'HA',
           UPDATE_DATETIME: '2020-10-10 20:47:00'
@@ -59,17 +60,17 @@ if (Vue) {
           UPDATE_DATETIME: '2020-10-10 03:47:00'
         }
       ],
-      chartLabel: '更新經過時間表',
+      chartLabel: '未更新時間',
       charType: 'bar',
       chartItems: [
-        ['桃園所', 130],
-        ['中壢所', 260],
-        ['大溪所', 334],
-        ['楊梅所', 467],
-        ['蘆竹所', 111],
-        ['八德所', 150],
-        ['平鎮所', 699],
-        ['龜山所', 901]
+        ['桃園所', 330 / 60],
+        ['中壢所', 260 / 60],
+        ['大溪所', 334 / 60],
+        ['楊梅所', 910 / 60],
+        ['蘆竹所', 111 / 60],
+        ['八德所', 150 / 60],
+        ['平鎮所', 699 / 60],
+        ['龜山所', 1801 / 60]
       ]
     }),
     computed: {
@@ -85,10 +86,10 @@ if (Vue) {
     methods: {
       chartItemColor(dataset_item, opacity) {
         let rgb, value = dataset_item[1];
-        if (value > 900) {
+        if (value > 30) {
           rgb = `rgb(243, 0, 19, ${opacity})`
         } // red
-        else if (value > 450) {
+        else if (value > 15) {
           rgb = `rgb(238, 182, 1, ${opacity})`;
         } // yellow
         else {
@@ -98,21 +99,24 @@ if (Vue) {
       },
       action(entry) {
         let light = this.light(entry);
-        switch(light) {
-          case 'danger': return 'tremble';
-          case 'warning': return 'beat';
-          default: return '';
+        switch (light) {
+          case 'danger':
+            return 'tremble';
+          case 'warning':
+            return 'beat';
+          default:
+            return '';
         }
       },
       name(entry) {
         for (var value of this.xapMap.values()) {
           if (value.code == entry.SITE) {
-              return value.name;
+            return value.name;
           }
         }
       },
       light(entry) {
-        const now = +new Date();  // in ms
+        const now = +new Date(); // in ms
         const last_update = +new Date(entry.UPDATE_DATETIME.replace(' ', 'T'));
         let offset = now - last_update;
         if (offset > 30 * 60 * 1000) return 'danger';
@@ -121,16 +125,42 @@ if (Vue) {
       },
       popup() {
         this.msgbox({
-            title: '同步異動資料庫監控說明',
-            message: `
+          title: '同步異動資料庫監控說明',
+          message: `
                 <h6 class="my-2"><i class="fa fa-circle text-danger fa-lg"></i> 已超過半小時未更新</h6>
                 <h6 class="my-2"><i class="fa fa-circle text-warning fa-lg"></i> 已超過15分鐘未更新</h6>
                 <h6 class="my-2"><i class="fa fa-circle text-success fa-lg"></i> 15分鐘內更新</h6>
             `,
-            size: 'lg'
+          size: 'lg'
         });
       },
-      reload() {}
+      reload() {},
+      updChartData(data) {
+        data.forEach((item, raw_idx, array) => {
+          // item = { SITE: 'HB', UPDATE_DATETIME: '2020-10-10 19:58:01' }
+          let name = this.name(item);
+          if (this.empty(name)) {
+            this.$warn(`${item.SITE} can not find the mapping name.`);
+          } else {
+            const now = +new Date(); // in ms
+            const last_update = +new Date(item.UPDATE_DATETIME.replace(' ', 'T'));
+            let value = ((now - last_update) / 3600000).toFixed(1); // 60 * 60 * 1000 => 3600000 ms
+            let found = this.chartItems.find((oitem, idx, array) => {
+              return oitem[0] == name;
+            });
+            if (found) {
+              // the dataset item format is ['text', 123]
+              found[1] = value;
+              // not reactively ... manual set chartData
+              if (this.$refs.chart) {
+                this.$refs.chart.changeValue(name, value);
+              }
+            } else {
+              this.$warn(`Can not find ${name} in chartItems.`);
+            }
+          }
+        });
+      }
     },
     created() {
       // this.isBusy = true;
@@ -154,7 +184,8 @@ if (Vue) {
       // });
     },
     mounted() {
-      if (this.fullHeight) $(`#grids-container`).css('height', `${window.innerHeight-195}px`);
+      if (this.fullHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
+      this.updChartData(this.list);
     }
   });
 } else {
