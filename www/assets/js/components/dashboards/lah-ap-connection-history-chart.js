@@ -66,10 +66,10 @@ if (Vue) {
             demo(val) { this.reload() },
             ip(val) {
                 clearTimeout(this.refresh_ip_timer);
-                this.refresh_ip_timer = this.timeout(() => this.reload(), 250);
+                this.refresh_ip_timer = this.timeout(() => this.reload(true), 250);
             },
-            allSwitch(val) { this.reload() },
-            type(val) { this.reload() }
+            allSwitch(val) { this.reload(true) },
+            type(val) { this.reload(true) }
         },
         computed: {
             timer_ms() { return this.demo ? 5000 : 15000 },
