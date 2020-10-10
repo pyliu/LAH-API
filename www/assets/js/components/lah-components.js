@@ -357,6 +357,11 @@ if (Vue) {
                     url: "monitor_ap_conn.html",
                     icon: "user-friends",
                     need_admin: true
+                }, {
+                    text: "同步異動監控",
+                    url: "monitor_l3hweb.html",
+                    icon: "desktop",
+                    need_admin: true
                 }]
             }, {
                 text: "今日案件",
