@@ -62,7 +62,8 @@ if (Vue) {
       }
     },
     watch: {
-      demo(flag) { this.reload() }
+      demo(flag) { this.reload() },
+      list(arr) { this.updChartData(arr) }
     },
     methods: {
       randDate() {
@@ -137,7 +138,6 @@ if (Vue) {
             { SITE: 'HG', UPDATE_DATETIME: this.randDate() },
             { SITE: 'HH', UPDATE_DATETIME: this.randDate() }
           ];
-          this.updChartData(this.list);
           this.timeout(() => this.reload(), 5000);
         } else {
           this.isBusy = true;
@@ -188,6 +188,16 @@ if (Vue) {
       }
     },
     created() {
+      this.list = [
+        { SITE: 'HA', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HB', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HC', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HD', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HE', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HF', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HG', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HH', UPDATE_DATETIME: this.randDate() }
+      ];
       this.reload();
     },
     mounted() {
