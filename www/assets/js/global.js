@@ -346,5 +346,5 @@ let resizeReload = () => {
         global_resize_timer = setTimeout(() => window.location.reload(), 1000);
     }); 
 }
+
 //]]>
-    

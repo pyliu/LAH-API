@@ -19,7 +19,8 @@ if (Vue) {
         <div class="d-flex justify-content-between mx-auto" style="width: 85%">
           <lah-fa-icon v-for="entry in list" icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
         </div>
-        <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="viewportRatio+0.1" :bg-color="chartItemColor"></lah-chart>
+        <hr/>
+        <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="viewportRatio+0.3" :bg-color="chartItemColor"></lah-chart>
       </div>
     </b-card>`,
     props: {
@@ -30,17 +31,8 @@ if (Vue) {
     },
     data: () => ({
       container_id: 'grids-container',
-      list: [
-        { SITE: 'HA', UPDATE_DATETIME: '2020-10-10 20:47:00' },
-        { SITE: 'HB', UPDATE_DATETIME: '2020-10-10 20:47:00' },
-        { SITE: 'HC', UPDATE_DATETIME: '2020-10-10 20:47:00' },
-        { SITE: 'HD', UPDATE_DATETIME: '2020-10-10 20:47:00' },
-        { SITE: 'HE', UPDATE_DATETIME: '2020-10-10 21:27:00' },
-        { SITE: 'HF', UPDATE_DATETIME: '2020-10-10 21:40:00' },
-        { SITE: 'HG', UPDATE_DATETIME: '2020-10-10 21:17:00' },
-        { SITE: 'HH', UPDATE_DATETIME: '2020-10-10 21:37:00' }
-      ],
-      chartLabel: '未更新時間',
+      list: [],
+      chartLabel: '未更新時間(分鐘)',
       charType: 'bar',
       chartItems: [
         ['桃園所', 0],
@@ -51,7 +43,8 @@ if (Vue) {
         ['八德所', 0],
         ['平鎮所', 0],
         ['龜山所', 0]
-      ]
+      ],
+      reload_timer: null
     }),
     computed: {
       headerLight() {
@@ -66,6 +59,15 @@ if (Vue) {
     },
     watch: {},
     methods: {
+      randDate() {
+        let rand_date = new Date(+new Date() - this.rand(45 * 60 * 1000));
+        return rand_date.getFullYear() + "-" +
+          ("0" + (rand_date.getMonth() + 1)).slice(-2) + "-" +
+          ("0" + rand_date.getDate()).slice(-2) + " " +
+          ("0" + rand_date.getHours()).slice(-2) + ":" +
+          ("0" + rand_date.getMinutes()).slice(-2) + ":" +
+          ("0" + rand_date.getSeconds()).slice(-2);
+      },
       chartItemColor(dataset_item, opacity) {
         let rgb, value = dataset_item[1];
         if (value > 30) {
@@ -116,7 +118,29 @@ if (Vue) {
           size: 'lg'
         });
       },
-      reload() {},
+      reload() {
+        clearTimeout(this.reload_timer);
+        this.isBusy = true;
+        this.$http.post(CONFIG.API.JSON.QUERY, {
+          type: "l3hweb_update_time"
+        }).then(res => {
+          if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+            // array of {SITE: 'HB', UPDATE_DATETIME: '2020-10-08 21:47:00'}
+            this.list = res.data.raw;
+          } else {
+            this.notify({
+              title: "同步異動主機狀態檢視",
+              message: `${res.data.message}`,
+              type: "warning"
+            });
+          }
+        }).catch(err => {
+          this.error = err;
+        }).finally(() => {
+          this.isBusy = false;
+          this.reload_timer = this.timeout(() => this.reload(), 60 * 1000);  // a minute
+        });
+      },
       updChartData(data) {
         const now = +new Date(); // in ms
         data.forEach((item, raw_idx, array) => {
@@ -126,7 +150,7 @@ if (Vue) {
             this.$warn(`${item.SITE} can not find the mapping name.`);
           } else {
             let last_update = +new Date(item.UPDATE_DATETIME.replace(' ', 'T'));
-            let value = ((now - last_update) / 60000).toFixed(1); // ms to min
+            let value = parseInt((now - last_update) / 60000); // ms to min
             let found = this.chartItems.find((oitem, idx, array) => { return oitem[0] == name; });
             if (found) {
               // the dataset item format is ['text', 123]
@@ -143,25 +167,17 @@ if (Vue) {
       }
     },
     created() {
-      // this.isBusy = true;
-      // this.$http.post(CONFIG.API.JSON.QUERY, {
-      //   type: "l3hweb_update_time"
-      // }).then(res => {
-      //   if (this.empty(res.data.data_count)) {
-      //     this.notify({
-      //       title: "同步異動主機狀態檢視",
-      //       message: `${this.nowDate} ${this.nowTime} 查無資料`,
-      //       type: "warning"
-      //     });
-      //   } else {
-      //     // array of {SITE: 'HB', UPDATE_DATETIME: '2020-10-08 21:47:00'}
-      //     this.list = res.data.raw;
-      //   }
-      // }).catch(err => {
-      //   this.error = err;
-      // }).finally(() => {
-      //   this.isBusy = false;
-      // });
+      this.list = [
+        { SITE: 'HA', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HB', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HC', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HD', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HE', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HF', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HG', UPDATE_DATETIME: this.randDate() },
+        { SITE: 'HH', UPDATE_DATETIME: this.randDate() }
+      ];
+      this.reload();
     },
     mounted() {
       if (this.fullHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
