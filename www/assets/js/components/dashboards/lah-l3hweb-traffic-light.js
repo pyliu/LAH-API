@@ -75,7 +75,13 @@ if (Vue) {
     },
     watch: {
       demo(flag) { this.reload() },
-      list(arr) { this.updChartData(arr) }
+      list(arr) { this.updChartData(arr) },
+      full(flag) {
+        if (flag) {
+          this.maximized = flag;
+          this.onlyLight = !flag;
+        }
+      }
     },
     methods: {
       randDate() {
