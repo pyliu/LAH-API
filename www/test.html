@@ -46,15 +46,16 @@
 <body>
     <section class="hide">
         <div class="container-fluid" v-cloak>
-            <b-card-group columns style="margin-top: 85px">
-                <b-card>
+            <b-card-group deck style="margin-top: 85px">
+                <b-card border-variant="secondary">
                     <lah-button @click="if (!storeParams.hasOwnProperty('demo')) addToStoreParams('demo', false); storeParams['demo'] = !storeParams['demo'];" icon="laptop-code" :pressed="storeParams['demo']">DEMO</lah-button>
-                    <lah-button v-b-toggle.sidebar-1 icon="bars">Toggle</lah-button>
+                    <lah-button v-b-toggle.sidebar-1 icon="bars">側邊攔</lah-button>
                 </b-card>
                 <lah-xap-connection-chart :demo="storeParams['demo']"></lah-xap-connection-chart>
                 <lah-xap-history-chart site="HA" type='bar' :demo="storeParams['demo']"></lah-xap-history-chart>
-                <lah-export-txt></lah-export-txt>
-                <lah-tree class="shadow-xl"></lah-tree>
+                <!-- <lah-tree class="shadow-xl"></lah-tree> -->
+            </b-card-group>
+            <b-card-group deck class="mt-3">
                 <lah-ap-connection-history-chart ip="220.1.35.123" :demo="storeParams['demo']"></lah-ap-connection-history-chart>
                 <lah-l3hweb-traffic-light :demo="storeParams['demo']"></lah-l3hweb-traffic-light>
                 <lah-l3hweb-traffic-light :demo="storeParams['demo']" :only-light="false"></lah-l3hweb-traffic-light>
@@ -70,7 +71,6 @@
                     <b-img src="get_user_img.php?name=%E6%9B%BE%E5%A5%95%E8%9E%8D" fluid thumbnail></b-img>
                 </div>
             </b-sidebar>
-            <div id="treant" class="chart mt-2 w-100"></div>
         </div>
     </section>
 
