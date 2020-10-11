@@ -27,6 +27,10 @@ if (Vue) {
       fullHeight: {
         type: Boolean,
         default: false
+      },
+      demo: {
+        type: Boolean,
+        default: false
       }
     },
     data: () => ({
@@ -57,7 +61,9 @@ if (Vue) {
         return site_light;
       }
     },
-    watch: {},
+    watch: {
+      demo(flag) { this.reload() }
+    },
     methods: {
       randDate() {
         let rand_date = new Date(+new Date() - this.rand(45 * 60 * 1000));
@@ -120,26 +126,41 @@ if (Vue) {
       },
       reload() {
         clearTimeout(this.reload_timer);
-        this.isBusy = true;
-        this.$http.post(CONFIG.API.JSON.QUERY, {
-          type: "l3hweb_update_time"
-        }).then(res => {
-          if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-            // array of {SITE: 'HB', UPDATE_DATETIME: '2020-10-08 21:47:00'}
-            this.list = res.data.raw;
-          } else {
-            this.notify({
-              title: "同步異動主機狀態檢視",
-              message: `${res.data.message}`,
-              type: "warning"
-            });
-          }
-        }).catch(err => {
-          this.error = err;
-        }).finally(() => {
-          this.isBusy = false;
-          this.reload_timer = this.timeout(() => this.reload(), 60 * 1000);  // a minute
-        });
+        if (this.demo) {
+          this.list = [
+            { SITE: 'HA', UPDATE_DATETIME: this.randDate() },
+            { SITE: 'HB', UPDATE_DATETIME: this.randDate() },
+            { SITE: 'HC', UPDATE_DATETIME: this.randDate() },
+            { SITE: 'HD', UPDATE_DATETIME: this.randDate() },
+            { SITE: 'HE', UPDATE_DATETIME: this.randDate() },
+            { SITE: 'HF', UPDATE_DATETIME: this.randDate() },
+            { SITE: 'HG', UPDATE_DATETIME: this.randDate() },
+            { SITE: 'HH', UPDATE_DATETIME: this.randDate() }
+          ];
+          this.updChartData(this.list);
+          this.timeout(() => this.reload(), 5000);
+        } else {
+          this.isBusy = true;
+          this.$http.post(CONFIG.API.JSON.QUERY, {
+            type: "l3hweb_update_time"
+          }).then(res => {
+            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+              // array of {SITE: 'HB', UPDATE_DATETIME: '2020-10-08 21:47:00'}
+              this.list = res.data.raw;
+            } else {
+              this.notify({
+                title: "同步異動主機狀態檢視",
+                message: `${res.data.message}`,
+                type: "warning"
+              });
+            }
+          }).catch(err => {
+            this.error = err;
+          }).finally(() => {
+            this.isBusy = false;
+            this.reload_timer = this.timeout(() => this.reload(), 60 * 1000);  // a minute
+          });
+        }
       },
       updChartData(data) {
         const now = +new Date(); // in ms
@@ -167,16 +188,6 @@ if (Vue) {
       }
     },
     created() {
-      this.list = [
-        { SITE: 'HA', UPDATE_DATETIME: this.randDate() },
-        { SITE: 'HB', UPDATE_DATETIME: this.randDate() },
-        { SITE: 'HC', UPDATE_DATETIME: this.randDate() },
-        { SITE: 'HD', UPDATE_DATETIME: this.randDate() },
-        { SITE: 'HE', UPDATE_DATETIME: this.randDate() },
-        { SITE: 'HF', UPDATE_DATETIME: this.randDate() },
-        { SITE: 'HG', UPDATE_DATETIME: this.randDate() },
-        { SITE: 'HH', UPDATE_DATETIME: this.randDate() }
-      ];
       this.reload();
     },
     mounted() {
