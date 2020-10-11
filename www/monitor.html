@@ -19,7 +19,7 @@
 <link rel="preload" href="assets/css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 </head>
 
-<body style="overflow: hidden !important;">
+<body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
       <b-card-group deck>
@@ -29,7 +29,8 @@
       <b-card-group deck class="mt-3">
         <lah-xap-history-chart site="HB" type='bar' watch-top-site-index="0"></lah-xap-history-chart>
         <lah-xap-history-chart site="HA" type="bar" watch-top-site-index="1"></lah-xap-history-chart>
-        <lah-xap-history-chart site="HE" type="bar" watch-top-site-index="2"></lah-xap-history-chart>
+        <!-- <lah-xap-history-chart site="HE" type="bar" watch-top-site-index="2"></lah-xap-history-chart> -->
+        <lah-l3hweb-traffic-light :only-light="false"></lah-l3hweb-traffic-light>
         <!-- <lah-xap-history-chart site="HG" type="bar"></lah-xap-history-chart> -->
       </b-card-group>
       <!-- <b-card-group columns class="mt-3">
@@ -67,6 +68,7 @@
   <script src="assets/js/components/dashboards/lah-xap-connection-chart.js"></script>
   <script src="assets/js/components/dashboards/lah-xap-history-chart.js"></script>
   <script src="assets/js/components/dashboards/lah-ap-connection-history-chart.js"></script>
+  <script src="assets/js/components/dashboards/lah-l3hweb-traffic-light.js"></script>
   <script> $(document).ready(e => {
     refreshTomorrow8AM('00:00');
     resizeReload();

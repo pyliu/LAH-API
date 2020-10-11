@@ -5,26 +5,29 @@ if (Vue) {
         <div class="d-flex w-100 justify-content-between mb-0">
           <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="traffic-light" size="lg" :variant="headerLight"> L3HWEB 資料庫更新監控 </lah-fa-icon></h6>
           <b-button-group>
-            <lah-button icon="sync" variant='outline-primary' class="border-0" @click="reload" action="cycle"></lah-button>
-            <lah-button icon="question" variant="outline-success" class="border-0" @click="popup"></lah-button>
+            <lah-button icon="sync" variant='outline-primary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
+            <lah-button icon="question" variant="outline-success" class="border-0" @click="popup" title="說明"></lah-button>
           </b-button-group>
         </div>
       </template>
-      <div v-if="!fullHeight" :id="container_id" class="grids">
+      <div v-if="onlyLight" :id="container_id" class="grids">
         <div v-for="entry in list" class="grid">
           <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
         </div>
       </div>
       <div v-else :id="container_id">
-        <div class="d-flex justify-content-between mx-auto" style="width: 85%">
+        <div v-if="showHeadLight" class="d-flex justify-content-between mx-auto" style="width: 85%">
           <lah-fa-icon v-for="entry in list" icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
         </div>
-        <hr/>
-        <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="viewportRatio+0.3" :bg-color="chartItemColor"></lah-chart>
+        <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="aspectRatio" :bg-color="chartItemColor"></lah-chart>
       </div>
     </b-card>`,
     props: {
-      fullHeight: {
+      onlyLight: {
+        type: Boolean,
+        default: true
+      },
+      autoHeight: {
         type: Boolean,
         default: false
       },
@@ -51,6 +54,8 @@ if (Vue) {
       reload_timer: null
     }),
     computed: {
+      aspectRatio() { return this.showHeadLight ? this.viewportRatio + 0.1 : this.viewportRatio - 0.2 },
+      showHeadLight() { return this.autoHeight },
       headerLight() {
         let site_light = 'success';
         for (let i = 0; i < this.list.length; i++) {
@@ -201,7 +206,7 @@ if (Vue) {
       this.reload();
     },
     mounted() {
-      if (this.fullHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
+      if (this.autoHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
       this.updChartData(this.list);
     }
   });
