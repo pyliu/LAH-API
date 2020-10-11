@@ -1,27 +1,29 @@
 if (Vue) {
   Vue.component('lah-l3hweb-traffic-light', {
-    template: `<b-card>
-      <template v-slot:header>
-        <div class="d-flex w-100 justify-content-between mb-0">
-          <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="traffic-light" size="lg" :variant="headerLight"> L3HWEB 資料庫更新監控 </lah-fa-icon></h6>
-          <b-button-group>
-            <lah-button icon="sync" variant='outline-primary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
-            <lah-button icon="question" variant="outline-success" class="border-0" @click="popup" title="說明"></lah-button>
-          </b-button-group>
+    template: `<lah-transition appear>
+      <b-card border-variant="secondary" class="shadow">
+        <template v-slot:header>
+          <div class="d-flex w-100 justify-content-between mb-0">
+            <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="traffic-light" size="lg" :variant="headerLight"> L3HWEB 資料庫更新監控 </lah-fa-icon></h6>
+            <b-button-group>
+              <lah-button icon="sync" variant='outline-primary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
+              <lah-button icon="question" variant="outline-success" class="border-0" @click="popup" title="說明"></lah-button>
+            </b-button-group>
+          </div>
+        </template>
+        <div v-if="onlyLight" :id="container_id" class="grids">
+          <div v-for="entry in list" class="grid">
+            <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
+          </div>
         </div>
-      </template>
-      <div v-if="onlyLight" :id="container_id" class="grids">
-        <div v-for="entry in list" class="grid">
-          <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
+        <div v-else :id="container_id">
+          <div v-if="showHeadLight" class="d-flex justify-content-between mx-auto" style="width: 85%">
+            <lah-fa-icon v-for="entry in list" icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
+          </div>
+          <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="aspectRatio" :bg-color="chartItemColor"></lah-chart>
         </div>
-      </div>
-      <div v-else :id="container_id">
-        <div v-if="showHeadLight" class="d-flex justify-content-between mx-auto" style="width: 85%">
-          <lah-fa-icon v-for="entry in list" icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
-        </div>
-        <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="aspectRatio" :bg-color="chartItemColor"></lah-chart>
-      </div>
-    </b-card>`,
+      </b-card>
+    </lah-transition>`,
     props: {
       onlyLight: {
         type: Boolean,
@@ -193,6 +195,7 @@ if (Vue) {
       }
     },
     created() {
+      // mock data
       this.list = [
         { SITE: 'HA', UPDATE_DATETIME: this.randDate() },
         { SITE: 'HB', UPDATE_DATETIME: this.randDate() },
@@ -207,7 +210,6 @@ if (Vue) {
     },
     mounted() {
       if (this.autoHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
-      this.updChartData(this.list);
     }
   });
 } else {
