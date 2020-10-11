@@ -49,7 +49,7 @@
             <b-card-group deck style="margin-top: 85px">
                 <b-card border-variant="secondary">
                     <lah-button @click="if (!storeParams.hasOwnProperty('demo')) addToStoreParams('demo', false); storeParams['demo'] = !storeParams['demo'];" icon="laptop-code" :pressed="storeParams['demo']">DEMO</lah-button>
-                    <lah-button v-b-toggle.sidebar-1 icon="bars">側邊攔</lah-button>
+                    <lah-button v-b-toggle.sidebar-1 icon="bars" action="move-fade-ltr">側邊攔</lah-button>
                 </b-card>
                 <lah-xap-connection-chart :demo="storeParams['demo']"></lah-xap-connection-chart>
                 <lah-xap-history-chart site="HA" type='bar' :demo="storeParams['demo']"></lah-xap-history-chart>
