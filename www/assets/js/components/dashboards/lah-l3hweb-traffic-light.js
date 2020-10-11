@@ -138,7 +138,7 @@ if (Vue) {
             { SITE: 'HG', UPDATE_DATETIME: this.randDate() },
             { SITE: 'HH', UPDATE_DATETIME: this.randDate() }
           ];
-          this.timeout(() => this.reload(), 5000);
+          this.reload_timer = this.timeout(() => this.reload(), 5000);
         } else {
           this.isBusy = true;
           this.$http.post(CONFIG.API.JSON.QUERY, {
