@@ -338,7 +338,7 @@ if (Vue) {
                             popupButton: false,
                             demo: this.demo,
                             ip: this.ip,
-                            aspectRatio: this.aspectRatio
+                            aspectRatio: this.viewportRatio
                         }
                     }),
                     size: "xl"

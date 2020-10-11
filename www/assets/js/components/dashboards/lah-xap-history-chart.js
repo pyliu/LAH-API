@@ -255,7 +255,7 @@ if (Vue) {
                             mins: 60,
                             demo: this.demo,
                             popupButton: false,
-                            aspectRatio: this.aspectRatio
+                            aspectRatio: this.viewportRatio
                         }
                     }),
                     size: "xl"

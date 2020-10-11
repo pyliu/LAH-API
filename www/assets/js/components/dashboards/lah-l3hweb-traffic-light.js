@@ -6,8 +6,9 @@ if (Vue) {
           <div class="d-flex w-100 justify-content-between mb-0">
             <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="traffic-light" size="lg" :variant="headerLight"> L3HWEB 資料庫更新監控 </lah-fa-icon></h6>
             <b-button-group>
-              <lah-button icon="sync" variant='outline-primary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
-              <lah-button icon="question" variant="outline-success" class="border-0" @click="popup" title="說明"></lah-button>
+              <lah-button icon="sync" variant='outline-secondary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
+              <lah-button v-if="!maximized" class="border-0" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popupMaximized" action="heartbeat"></lah-button>
+              <lah-button icon="question" variant="outline-success" class="border-0" @click="popupQuestion" title="說明"></lah-button>
             </b-button-group>
           </div>
         </template>
@@ -29,11 +30,15 @@ if (Vue) {
         type: Boolean,
         default: true
       },
-      autoHeight: {
+      full: {
         type: Boolean,
         default: false
       },
       demo: {
+        type: Boolean,
+        default: false
+      },
+      maximized: {
         type: Boolean,
         default: false
       }
@@ -57,7 +62,7 @@ if (Vue) {
     }),
     computed: {
       aspectRatio() { return this.showHeadLight ? this.viewportRatio + 0.1 : this.viewportRatio - 0.2 },
-      showHeadLight() { return this.autoHeight },
+      showHeadLight() { return this.full || this.maximized },
       headerLight() {
         let site_light = 'success';
         for (let i = 0; i < this.list.length; i++) {
@@ -121,7 +126,7 @@ if (Vue) {
           }
         }
       },
-      popup() {
+      popupQuestion() {
         this.msgbox({
           title: '同步異動資料庫監控說明',
           message: `
@@ -130,6 +135,21 @@ if (Vue) {
               <h6 class="my-2"><i class="fa fa-circle text-success fa-lg"></i> 15分鐘內更新</h6>
             `,
           size: 'lg'
+        });
+      },
+      popupMaximized() {
+        this.msgbox({
+            title: `L3HWEB同步異動監控`,
+            message: this.$createElement('lah-l3hweb-traffic-light', {
+                props: {
+                    onlyLight: false,
+                    full: false,
+                    demo: this.demo,
+                    aspectRatio: this.viewportRatio,
+                    maximized: true
+                }
+            }),
+            size: "xl"
         });
       },
       reload() {
