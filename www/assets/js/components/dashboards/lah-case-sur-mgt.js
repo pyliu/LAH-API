@@ -70,7 +70,7 @@ if (Vue) {
                     });
                 } else {
                     this.alert({
-                        title: '測量案件狀態查詢',
+                        title: '測量案件狀態',
                         message: `測量案件ID有問題，請檢查後再重試！ (${this.id})`,
                         variant: 'warning'
                     });

@@ -3,7 +3,7 @@ if (Vue) {
         template: `<fieldset>
             <legend>
                 <i class="far fa-folder"></i>
-                案件狀態
+                登記案件狀態
                 <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
             </legend>
             <div class="d-flex">
@@ -78,7 +78,7 @@ if (Vue) {
                     });
                 } else {
                     this.alert({
-                        title: '案件狀態查詢',
+                        title: '登記案件狀態',
                         message: `案件ID有問題，請檢查後再重試！ (${this.id})`,
                         variant: 'warning'
                     });

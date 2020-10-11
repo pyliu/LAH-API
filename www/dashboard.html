@@ -27,21 +27,30 @@
   
   <section class="hide">
     <b-container fluid v-cloak>
-      <b-card-group columns>
-        <!-- <b-card no-body border-variant="white"><lah-user-board ref="user_search" max-height="100"></lah-user-board></b-card> -->
-        <b-card no-body border-variant="white"><lah-section-search></lah-section-search></b-card>
-        <lah-export-txt class="shadow"></lah-export-txt>
+      <b-card-group deck>
+        <lah-l3hweb-traffic-light></lah-l3hweb-traffic-light>
         <b-card no-body border-variant="white"><lah-report></lah-report></b-card>
-        <b-card no-body border-variant="white"><lah-announcement-mgt></lah-announcement-mgt></b-card>
-        <b-card no-body border-variant="white"><lah-case-state-mgt ref="case_state_mgt"></lah-case-state-mgt></b-card>
-        <b-card no-body border-variant="white"><lah-case-sync-mgt></lah-case-sync-mgt></b-card>
-        <b-card no-body border-variant="white"><lah-case-temp-mgt></lah-case-temp-mgt></b-card>
-        <b-card no-body border-variant="white"><lah-case-reg-search></lah-case-reg-search></b-card>
-        <b-card no-body border-variant="white"><lah-case-sur-mgt></lah-case-sur-mgt></b-card>
         <b-card no-body border-variant="white"><lah-fee-query-board></lah-fee-query-board></b-card>
+      </b-card-group>
+      <b-card-group deck>
+        <b-card no-body border-variant="white"><lah-case-sync-mgt></lah-case-sync-mgt></b-card>
+        <b-card no-body border-variant="white"><lah-case-reg-search></lah-case-reg-search></b-card>
+        <b-card no-body border-variant="white"><lah-case-state-mgt ref="case_state_mgt"></lah-case-state-mgt></b-card>
+      </b-card-group>
+      <b-card-group deck>
+        <b-card no-body border-variant="white"><lah-case-temp-mgt></lah-case-temp-mgt></b-card>
+        <b-card no-body border-variant="white"><lah-case-query-by-pid class="shadow"></lah-case-query-by-pid></b-card>
+        <b-card no-body border-variant="white"><lah-announcement-mgt></lah-announcement-mgt></b-card>
+      </b-card-group>
+      <b-card-group deck>
+        <b-card no-body border-variant="white"><lah-case-sur-mgt></lah-case-sur-mgt></b-card>
         <b-card no-body border-variant="white"><lah-xcase-check></lah-xcase-check></b-card>
         <b-card no-body border-variant="white"><lah-easycard-payment-check></lah-easycard-payment-check></b-card>
-        <b-card no-body border-variant="white"><lah-case-query-by-pid class="shadow"></lah-case-query-by-pid></b-card>
+      </b-card-group>
+      <b-card-group deck>
+        <!-- <b-card no-body border-variant="white"><lah-user-board ref="user_search" max-height="100"></lah-user-board></b-card> -->
+        <!-- <b-card no-body border-variant="white"><lah-section-search></lah-section-search></b-card> -->
+        <lah-export-txt class="shadow"></lah-export-txt>
         <lah-vuex-switch class="shadow-xl"></lah-vuex-switch>
         <b-card no-body border-variant="white"><lah-cache-mgt class="shadow"></lah-cache-mgt></b-card>
       </b-card-group>
@@ -83,6 +92,7 @@
   <script src="assets/js/components/dashboards/lah-case-sync-mgt.js"></script>
   <script src="assets/js/components/dashboards/lah-case-temp-mgt.js"></script>
   <script src="assets/js/components/dashboards/lah-export-txt.js"></script>
+  <script src="assets/js/components/dashboards/lah-l3hweb-traffic-light.js"></script>
 
   <script type="text/javascript">
     $(document).ready(e => { vueApp.addToStoreParams('user_id', undefined) });

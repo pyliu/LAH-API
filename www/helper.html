@@ -24,6 +24,7 @@
     <div class="container-fluid" v-cloak>
       <b-card-group columns>
         <lah-user-card :no-message="true" class="shadow"></lah-user-card>
+        <b-card no-body border-variant="white"><lah-section-search></lah-section-search></b-card>
         <b-card no-body border-variant="white"><lah-user-board ref="user_search" class="shadow"></lah-user-board></b-card>
         <b-card no-body border-variant="white"><lah-user-message-reservation :heading="false" label="信差提醒" class="shadow"></lah-user-message-reservation></b-card>
         <b-card no-body border-variant="white"><lah-court-log-search class="shadow"></lah-court-log-search></b-card>

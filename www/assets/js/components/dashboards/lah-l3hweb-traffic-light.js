@@ -18,7 +18,7 @@ if (Vue) {
           </div>
         </div>
         <div v-else :id="container_id">
-          <div v-if="showHeadLight" class="d-flex justify-content-between mx-auto" style="width: 85%">
+          <div v-if="showHeadLight" class="d-flex justify-content-between mx-auto">
             <lah-fa-icon v-for="entry in list" icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
           </div>
           <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="aspectRatio" :bg-color="chartItemColor"></lah-chart>
@@ -61,7 +61,7 @@ if (Vue) {
       reload_timer: null
     }),
     computed: {
-      aspectRatio() { return this.showHeadLight ? this.viewportRatio + 0.1 : this.viewportRatio - 0.2 },
+      aspectRatio() { return this.showHeadLight ? this.viewportRatio + 0.2 : this.viewportRatio - 0.2 },
       showHeadLight() { return this.full || this.maximized },
       headerLight() {
         let site_light = 'success';
