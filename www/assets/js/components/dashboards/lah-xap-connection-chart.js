@@ -47,7 +47,17 @@ if (Vue) {
             aspectRatio: { type: Number, default: 2 }
         },
         data: () => ({
-            items: [],
+            items: [
+                ['桃園所', 0],
+                ['中壢所', 0],
+                ['大溪所', 0],
+                ['楊梅所', 0],
+                ['蘆竹所', 0],
+                ['八德所', 0],
+                ['平鎮所', 0],
+                ['龜山所', 0],
+                ['地政局', 0]
+            ],
             db_count: 0,
             total_count: 0,
             ap_count: 0,
@@ -218,18 +228,14 @@ if (Vue) {
                                     let value = item.count;
                                     let text = this.xapMap.get(item.est_ip).name;
                                     this.ap_count += parseInt(value);
-                                    if (this.items.length == 9) {
-                                        let found = this.items.find((oitem, idx, array) => {
-                                            return oitem[0] == text;
-                                        });
-                                        if (found) {
-                                            // the dataset item format is ['text', 123]
-                                            found[1] = value;
-                                            // not reactively ... manual set chartData
-                                            this.$refs.chart.changeValue(text, value);
-                                        }
-                                    } else {
-                                        this.items.push([text, value]);
+                                    let found = this.items.find((oitem, idx, array) => {
+                                        return oitem[0] == text;
+                                    });
+                                    if (found) {
+                                        // the dataset item format is ['text', 123]
+                                        found[1] = value;
+                                        // not reactively ... manual set chartData
+                                        this.$refs.chart.changeValue(text, value);
                                     }
                                 }
                             });
