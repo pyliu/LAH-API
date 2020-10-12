@@ -30,7 +30,7 @@
       <b-card-group deck>
         <b-card no-body border-variant="white"><lah-user-board ref="user_search" max-height="100"></lah-user-board></b-card>
         <b-card no-body border-variant="white"><lah-fee-query-board></lah-fee-query-board></b-card>
-        <b-card no-body border-variant="white"><lah-report></lah-report></b-card>
+        <b-card no-body border-variant="white"><lah-section-search></lah-section-search></b-card>
         <!-- <b-card no-body border-variant="white"><lah-cache-mgt class="shadow"></lah-cache-mgt></b-card> -->
       </b-card-group>
       <b-card-group deck>
@@ -46,12 +46,12 @@
       <b-card-group deck>
         <b-card no-body border-variant="white"><lah-xcase-check></lah-xcase-check></b-card>
         <b-card no-body border-variant="white"><lah-easycard-payment-check></lah-easycard-payment-check></b-card>
-        <b-card no-body border-variant="white"><lah-section-search></lah-section-search></b-card>
-      </b-card-group>
-      <b-card-group deck>
-        <lah-export-txt class="shadow"></lah-export-txt>
         <b-card no-body border-variant="white"><lah-case-query-by-pid class="shadow"></lah-case-query-by-pid></b-card>
-        <lah-vuex-switch class="shadow-xl"></lah-vuex-switch>
+      </b-card-group>
+      <b-card-group deck class="mt-2">
+        <lah-export-txt class="shadow"></lah-export-txt>
+        <b-card no-body border-variant="white"><lah-report></lah-report></b-card>
+        <lah-vuex-switch class="shadow"></lah-vuex-switch>
       </b-card-group>
     </b-container>
   </section><!-- /section -->
