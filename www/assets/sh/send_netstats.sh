@@ -17,6 +17,7 @@ if [ "$ip" == "220.1.35.123" ]; then
      DEF_RECORDS+=" -d records[]=0,220.1.39.57"
      DEF_RECORDS+=" -d records[]=0,220.1.40.33"
      DEF_RECORDS+=" -d records[]=0,220.1.41.20"
+     DEF_RECORDS+=" -d records[]=0,220.1.33.71"
 fi
 
 POST_PARAMS=$(netstat -ntu | grep ESTAB | awk '{print $5}' | sed -e 's/^::ffff://'  | cut -d : -f 1 | sort | uniq -c | sort -nr | awk '{print " -d records[]="$1","$2}')

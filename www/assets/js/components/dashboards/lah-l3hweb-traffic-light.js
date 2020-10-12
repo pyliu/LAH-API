@@ -78,8 +78,8 @@ if (Vue) {
       list(arr) { this.updChartData(arr) },
       full(flag) {
         if (flag) {
-          this.maximized = flag;
-          this.onlyLight = !flag;
+          this.maximized = true;
+          this.onlyLight = false;
         }
       }
     },
