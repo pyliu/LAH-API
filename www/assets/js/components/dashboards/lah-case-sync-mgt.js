@@ -2,9 +2,9 @@ if (Vue) {
     Vue.component("lah-case-sync-mgt", {
         template: `<fieldset id="lah-case-sync-mgt-fieldset">
             <legend>
-                <i class="fas fa-sync-alt"></i>
-                同步案件
-                <b-button class="border-0" @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
+                <lah-fa-icon icon="sync-alt">同步案件</lah-fa-icon>
+                <lah-button action="move-fade-btt" regular icon="window-maximize" class="border-0" @click="syncStatus" variant="outline-primary" size="sm" title="檢視同步異動狀態"></lah-button>
+                <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm"></lah-button>
             </legend>
             <div class="d-flex">
                 <lah-case-input-group-ui v-model="id" @enter="check" type="sync" prefix="case_sync"></lah-case-input-group-ui>
@@ -231,7 +231,15 @@ if (Vue) {
                     `,
                     size: "lg"
                 });
-            }
+            },
+            syncStatus() {
+                this.msgbox({
+                    title: "L3HWEB同步異動狀態",
+                    message: this.$createElement('lah-l3hweb-traffic-light', {
+                        props: { full: true, maximized: true, onlyLight: false }
+                    }),
+                    size: "xl"
+                });}
         }
     });
 } else {
