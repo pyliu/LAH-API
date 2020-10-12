@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component("lah-case-sync-mgt", {
         template: `<fieldset id="lah-case-sync-mgt-fieldset">
             <legend>
-                <lah-fa-icon icon="sync-alt">同步案件</lah-fa-icon>
+                <lah-fa-icon icon="sync-alt">同步登記案件</lah-fa-icon>
                 <lah-button action="heartbeat" regular icon="window-maximize" class="border-0" @click="syncStatus" variant="outline-primary" size="sm" title="檢視同步異動狀態"></lah-button>
                 <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm"></lah-button>
             </legend>
