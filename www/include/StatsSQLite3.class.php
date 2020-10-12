@@ -122,6 +122,7 @@ class StatsSQLite3 {
             $stmt->bindParam(':log_time', $latest_log_time);
             $result = $stmt->execute();
             $return = [];
+            if ($result === false) return $return;
             while($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 if ($all == 'false' && IPResolver::isServerIP($row['est_ip'])) continue;
                 // turn est_ip to user
@@ -147,6 +148,7 @@ class StatsSQLite3 {
             $stmt->bindValue(':limit', $extend ? $count * 4 : $count, SQLITE3_INTEGER);
             $result = $stmt->execute();
             $return = [];
+            if ($result === false) return $return;
             $skip_count = 0;
             while($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 // basically BE every 15s insert a record, extend means to get 1-min duration record
