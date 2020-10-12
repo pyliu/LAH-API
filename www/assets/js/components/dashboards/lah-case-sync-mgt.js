@@ -3,7 +3,7 @@ if (Vue) {
         template: `<fieldset id="lah-case-sync-mgt-fieldset">
             <legend>
                 <lah-fa-icon icon="sync-alt">同步案件</lah-fa-icon>
-                <lah-button action="move-fade-btt" regular icon="window-maximize" class="border-0" @click="syncStatus" variant="outline-primary" size="sm" title="檢視同步異動狀態"></lah-button>
+                <lah-button action="heartbeat" regular icon="window-maximize" class="border-0" @click="syncStatus" variant="outline-primary" size="sm" title="檢視同步異動狀態"></lah-button>
                 <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm"></lah-button>
             </legend>
             <div class="d-flex">
