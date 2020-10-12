@@ -4,7 +4,7 @@ if (Vue) {
       <b-card border-variant="secondary" class="shadow">
         <template v-slot:header>
           <div class="d-flex w-100 justify-content-between mb-0">
-            <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="traffic-light" size="lg" :variant="headerLight"> L3HWEB 資料庫更新監控 </lah-fa-icon></h6>
+            <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="traffic-light" size="lg" :variant="headerLight"> L3HWEB 同步異動監控 </lah-fa-icon></h6>
             <b-button-group>
               <lah-button icon="sync" variant='outline-secondary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
               <lah-button v-if="!maximized" class="border-0" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popupMaximized" action="heartbeat"></lah-button>
