@@ -7,6 +7,7 @@ if (Vue) {
             <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="traffic-light" size="lg" :variant="headerLight"> L3HWEB 同步異動監控 </lah-fa-icon></h6>
             <b-button-group>
               <lah-button icon="sync" variant='outline-secondary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
+              <lah-button v-if="!maximized" class="border-0" :icon="buttonIcon" variant="outline-primary" title="顯示模式" @click="switchType"></lah-button>
               <lah-button v-if="!maximized" class="border-0" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popupMaximized" action="heartbeat"></lah-button>
               <lah-button icon="question" variant="outline-success" class="border-0" @click="popupQuestion" title="說明"></lah-button>
             </b-button-group>
@@ -57,6 +58,7 @@ if (Vue) {
       reload_timer: null
     }),
     computed: {
+      buttonIcon() { return this.type == 'light' ? 'chart-bar' : 'traffic-light' },
       aspectRatio() { return this.showHeadLight ? this.viewportRatio + 0.2 : this.viewportRatio - 0.2 },
       showHeadLight() { return this.type == 'full' },
       headerLight() {
@@ -74,6 +76,7 @@ if (Vue) {
       list(arr) { this.updChartData(arr) }
     },
     methods: {
+      switchType() { this.type = this.type == 'light' ? 'chart' : 'light' },
       randDate() {
         let rand_date = new Date(+new Date() - this.rand(45 * 60 * 1000));
         return rand_date.getFullYear() + "-" +
