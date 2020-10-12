@@ -12,7 +12,7 @@ if (Vue) {
             </b-button-group>
           </div>
         </template>
-        <div v-if="onlyLight" :id="container_id" class="grids">
+        <div v-if="type == 'light'" :id="container_id" class="grids">
           <div v-for="entry in list" class="grid">
             <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
           </div>
@@ -26,13 +26,9 @@ if (Vue) {
       </b-card>
     </lah-transition>`,
     props: {
-      onlyLight: {
-        type: Boolean,
-        default: true
-      },
-      full: {
-        type: Boolean,
-        default: false
+      type: {
+        type: String,
+        default: 'light'
       },
       demo: {
         type: Boolean,
@@ -62,7 +58,7 @@ if (Vue) {
     }),
     computed: {
       aspectRatio() { return this.showHeadLight ? this.viewportRatio + 0.2 : this.viewportRatio - 0.2 },
-      showHeadLight() { return this.full || this.maximized },
+      showHeadLight() { return this.type == 'full' },
       headerLight() {
         let site_light = 'success';
         for (let i = 0; i < this.list.length; i++) {
@@ -75,13 +71,7 @@ if (Vue) {
     },
     watch: {
       demo(flag) { this.reload() },
-      list(arr) { this.updChartData(arr) },
-      full(flag) {
-        if (flag) {
-          this.maximized = true;
-          this.onlyLight = false;
-        }
-      }
+      list(arr) { this.updChartData(arr) }
     },
     methods: {
       randDate() {
@@ -148,8 +138,7 @@ if (Vue) {
             title: `L3HWEB同步異動監控`,
             message: this.$createElement('lah-l3hweb-traffic-light', {
                 props: {
-                    onlyLight: false,
-                    full: false,
+                    type: 'full',
                     demo: this.demo,
                     aspectRatio: this.viewportRatio,
                     maximized: true
