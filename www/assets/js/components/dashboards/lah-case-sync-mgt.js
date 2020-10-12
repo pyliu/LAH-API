@@ -236,7 +236,7 @@ if (Vue) {
                 this.msgbox({
                     title: "L3HWEB同步異動狀態",
                     message: this.$createElement('lah-l3hweb-traffic-light', {
-                        props: { full: true, maximized: true, onlyLight: false }
+                        props: { type: 'full', maximized: true }
                     }),
                     size: "xl"
                 });}
