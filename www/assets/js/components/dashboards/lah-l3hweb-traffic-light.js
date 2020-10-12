@@ -135,7 +135,7 @@ if (Vue) {
       },
       popupMaximized() {
         this.msgbox({
-            title: `L3HWEB同步異動監控`,
+            title: `燈&圖顯示`,
             message: this.$createElement('lah-l3hweb-traffic-light', {
                 props: {
                     type: 'full',
