@@ -43,11 +43,11 @@ class L3HWEB {
         $sql = "
             SELECT
                 SUBSTR(rowner, 3, 2) AS SITE,
-                rname AS \"TABLE\",
+                rname AS \"TBL\",
                 broken AS \"BROKEN_STATUS\"
             FROM dba_refresh
             WHERE broken = 'Y'
-            ORDER BY rowner
+            ORDER BY SITE, TBL
         ";
         $this->db->parse($sql);
 		$this->db->execute();
