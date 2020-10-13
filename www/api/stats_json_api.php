@@ -206,7 +206,7 @@ switch ($_POST["type"]) {
         if ($system->isKeyValid($_POST['api_key'])) {
             // combine&clean data ... 
             $processed = array();
-            foreach ($records as $record) {
+            foreach ($_POST['records'] as $record) {
                 // record string is like 2,192.168.88.40
                 $pair = explode(',',  $record);
                 $count = $pair[0];
