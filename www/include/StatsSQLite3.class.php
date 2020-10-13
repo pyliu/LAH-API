@@ -166,24 +166,8 @@ class StatsSQLite3 {
         return false;
     }
 
-    public function addAPConnHistory($log_time, $ap_ip, $records) {
+    public function addAPConnHistory($log_time, $ap_ip, $processed) {
         global $log;
-        // clean data ... 
-        $processed = array();
-        foreach ($records as $record) {
-            $pair = explode(',',  $record);
-            $count = $pair[0];
-            $est_ip = $pair[1];
-            if (empty($est_ip)) {
-                $log->warning("IP為空值，將略過此筆紀錄。($est_ip, $count)");
-                continue;
-            }
-            if (array_key_exists($est_ip, $processed)) {
-                $processed[$est_ip] += $count;
-            } else {
-                $processed[$est_ip] = $count;
-            }
-        }
         // inst into db
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.explode('.', $ap_ip)[3].'.db';
         $ap_db = new SQLite3($db_path);
@@ -194,9 +178,9 @@ class StatsSQLite3 {
             $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch)");
             while ($stm === false) {
                 if ($retry > 10) return $success;
+                $log->warning(__METHOD__.": db prepare call not get valid statement ... retry(".++$retry.")");
                 usleep(random_int(500000, 1000000));
                 $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch)");
-                $retry++;
             }
             $stm->bindParam(':log_time', $log_time);
             $stm->bindParam(':ap_ip', $ap_ip);
@@ -209,6 +193,7 @@ class StatsSQLite3 {
                 $success++;
             }
         }
+
         return $success;
     }
 

@@ -204,11 +204,27 @@ switch ($_POST["type"]) {
         break;
     case "stats_set_conn_count":
         if ($system->isKeyValid($_POST['api_key'])) {
-            $count = count($_POST['records']);
-            // record string is like 2,192.168.88.40
-            $success = $stats_sqlite3->addAPConnHistory($_POST['log_time'], $_POST['ap_ip'], $_POST['records']);
-            if ($success != count($_POST['records'])) {
-                $log->error("XHR [stats_set_conn_count] 設定AP歷史連線資料失敗。[成功：${success}，全部：${count}]");
+            // combine&clean data ... 
+            $processed = array();
+            foreach ($records as $record) {
+                // record string is like 2,192.168.88.40
+                $pair = explode(',',  $record);
+                $count = $pair[0];
+                $est_ip = $pair[1];
+                if (empty($est_ip)) {
+                    $log->warning("IP為空值，將略過此筆紀錄。($est_ip, $count)");
+                    continue;
+                }
+                if (array_key_exists($est_ip, $processed)) {
+                    $processed[$est_ip] += $count;
+                } else {
+                    $processed[$est_ip] = $count;
+                }
+            }
+            $clean_count = count($processed);
+            $success = $stats_sqlite3->addAPConnHistory($_POST['log_time'], $_POST['ap_ip'], $processed);
+            if ($success != $clean_count) {
+                $log->error("XHR [stats_set_conn_count] 設定AP歷史連線資料失敗。[成功：${success}，全部：${clean_count}]");
             }
         } else {
             $log->error("XHR [stats_set_conn_count] Wrong API key to set AP connections. [expect: ".$system->get('API_KEY')." get ".$_POST["api_key"]."]");
