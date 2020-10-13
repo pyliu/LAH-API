@@ -234,9 +234,8 @@ class WatchDog {
     }
 
     private function wipeStatsHistoryData() {
-        // clean old data
+        // clean AP stats data one day ago
         $this->stats->wipeAllAPConnHistory();
-        $this->stats->wipeAPConnection();
     }
 
     function __construct() {

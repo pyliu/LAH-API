@@ -230,17 +230,5 @@ class StatsSQLite3 {
         $stm->bindValue(':count', $count);
         return $stm->execute();
     }
-
-    public function wipeAPConnection() {
-        global $log;
-        $one_day_ago = date("YmdHis", time() - 24 * 3600);
-        $stm = $this->db->prepare("DELETE FROM ap_connection WHERE log_time < :time");
-        $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
-        $ret = $stm->execute();
-        if (!$ret) {
-            $log->error(__METHOD__.": 移除一天前資料失敗【".$one_day_ago.", ".$this->db->lastErrorMsg()."】");
-        }
-        return $ret;
-    }
 }
 ?>
