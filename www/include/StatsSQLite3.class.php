@@ -193,8 +193,8 @@ class StatsSQLite3 {
             $retry = 0;
             $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch)");
             while ($stm === false) {
-                if ($retry > 3) return $success;
-                usleep(random_int(100000, 500000));
+                if ($retry > 10) return $success;
+                usleep(random_int(500000, 1000000));
                 $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch)");
                 $retry++;
             }
