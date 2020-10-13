@@ -168,7 +168,7 @@ if (Vue) {
         } else {
           this.isBusy = true;
           this.$http.post(CONFIG.API.JSON.LXHWEB, {
-            type: "l3hweb_update_time"
+            type: "l3hweb_site_update_time"
           }).then(res => {
             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
               // array of {SITE: 'HB', UPDATE_DATETIME: '2020-10-08 21:47:00'}

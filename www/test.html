@@ -88,17 +88,17 @@
     <script>
         let test_vue = new Vue({
             el: '#test_container',
-            template: `<div>
-                {{json}}
-            </div>`,
+            template: `<div></div>`,
             data: () => ({
                 json: null
             }),
             created() {
                 this.$http.post(CONFIG.API.JSON.LXHWEB, {
-                    type: "l3hweb_broken_table"
+                    type: "l3hweb_tbl_update_time",
+                    site: 'HB'
                 }).then(res => {
                     this.json = res.data;
+                    this.$log(this.json);
                     this.notify({
                         title: "同步異動表格檢測",
                         message: `${res.data.message}`,

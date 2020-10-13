@@ -14,9 +14,9 @@ class L3HWEB {
         $this->db = null;
     }
     /**
-     * 同步異動更新時間
+     * 各所同步異動更新時間
      */
-    public function queryUpdateTime($site = '') {
+    public function querySiteUpdateTime($site = '') {
         $prefix = "
             SELECT
                 SUBSTR(sowner, 3, 2) AS SITE,
@@ -26,11 +26,35 @@ class L3HWEB {
         $where = "";
         if (!empty($site) && 2 == strlen($site)) {
             $site = strtoupper($site);
-            $where = " WHERE SUBSTR(sowner, 3, 2) = '$site' ";
+            $where = " WHERE SUBSTR(sowner, 3, 2) = '".strtoupper($site)."' ";
         }
         $postfix = "
             GROUP BY sowner
             ORDER BY SITE, UPDATE_DATETIME
+        ";
+        $this->db->parse($prefix.$where.$postfix);
+		$this->db->execute();
+		return $this->db->fetchAll();
+    }
+    /**
+     * 查詢各所表格更新時間
+     */
+    
+    public function queryTableUpdateTime($site = '') {
+        $prefix = "
+            SELECT 
+                SUBSTR(sowner, 3, 2) AS \"所別\",
+                vname AS \"表格\",
+                TO_CHAR(snaptime, 'yyyy-mm-dd hh24:mi:ss') as \"更新時間\"
+            FROM sys.snap_reftime$
+        ";
+        $where = "";
+        if (!empty($site) && 2 == strlen($site)) {
+            $site = strtoupper($site);
+            $where = " WHERE SUBSTR(sowner, 3, 2) = '".strtoupper($site)."' ";
+        }
+        $postfix = "
+            ORDER BY \"所別\", \"更新時間\"
         ";
         $this->db->parse($prefix.$where.$postfix);
 		$this->db->execute();
