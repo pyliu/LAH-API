@@ -42,9 +42,9 @@ class L3HWEB {
     public function queryBrokenTable() {
         $sql = "
             SELECT
-                SUBSTR(sowner, 3, 2) AS SITE,
-                vname AS \"TABLE\",
-                broken
+                SUBSTR(rowner, 3, 2) AS SITE,
+                rname AS \"TABLE\",
+                broken AS \"BROKEN_STATUS\"
             FROM dba_refresh
             WHERE broken = 'Y'
             ORDER BY rowner
