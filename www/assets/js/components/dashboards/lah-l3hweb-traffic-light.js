@@ -167,7 +167,7 @@ if (Vue) {
           this.reload_timer = this.timeout(() => this.reload(), 5000);
         } else {
           this.isBusy = true;
-          this.$http.post(CONFIG.API.JSON.QUERY, {
+          this.$http.post(CONFIG.API.JSON.LXHWEB, {
             type: "l3hweb_update_time"
           }).then(res => {
             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {

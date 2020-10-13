@@ -534,20 +534,6 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
 		}
 		break;
-	case "l3hweb_update_time":
-		$log->info("XHR [l3hweb_update_time] 查詢同步異動更新時間【".$_POST["site"]."】請求");
-		$rows = $mock ? $cache->get('l3hweb_update_time') : $query->getL3HWEBUpdateTime();
-		if (!$mock) $cache->set('l3hweb_update_time', $rows);
-		$count = $rows === false ? 0 : count($rows);
-		if (empty($count)) {
-			echoJSONResponse('查無同步異動資料庫更新時間資料');
-		} else {
-			echoJSONResponse('共查詢到'.$count.'筆資料', STATUS_CODE::SUCCESS_NORMAL, array(
-				'data_count' => $count,
-				'raw' => $rows
-			));
-		}
-		break;
 	case "diff_xcase":
 		$log->info("XHR [diff_xcase] 查詢同步案件資料【".$_POST["id"]."】請求");
 		$rows = $mock ? $cache->get('diff_xcase') : $query->getXCaseDiff($_POST["id"]);

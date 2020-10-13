@@ -36,5 +36,22 @@ class L3HWEB {
 		$this->db->execute();
 		return $this->db->fetchAll();
     }
+    /**
+     * 查詢是否有BROKEN狀態之TABLE
+     */
+    public function queryBrokenTable() {
+        $sql = "
+            SELECT
+                SUBSTR(sowner, 3, 2) AS SITE,
+                vname AS \"TABLE\",
+                broken
+            FROM dba_refresh
+            WHERE broken = 'Y'
+            ORDER BY rowner
+        ";
+        $this->db->parse($sql);
+		$this->db->execute();
+		return $this->db->fetchAll();
+    }
 }
 ?>
