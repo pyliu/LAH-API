@@ -42,12 +42,12 @@ class L3HWEB {
     public function queryBrokenTable() {
         $sql = "
             SELECT
-                SUBSTR(rowner, 3, 2) AS SITE,
-                rname AS \"TBL\",
-                broken AS \"BROKEN_STATUS\"
+                SUBSTR(rowner, 3, 2) AS \"所別\",
+                rname AS \"表格名稱\",
+                broken AS \"損毀狀態\"
             FROM dba_refresh
             WHERE broken = 'Y'
-            ORDER BY SITE, TBL
+            ORDER BY \"所別\", \"表格名稱\"
         ";
         $this->db->parse($sql);
 		$this->db->execute();

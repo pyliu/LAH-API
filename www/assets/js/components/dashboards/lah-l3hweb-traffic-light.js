@@ -211,7 +211,41 @@ if (Vue) {
             }
           }
         });
-      }
+      },
+      checkBrokenTable() {
+        this.$http.post(CONFIG.API.JSON.LXHWEB, {
+            type: "l3hweb_broken_table"
+        }).then(res => {
+            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+              // found
+              this.alert({
+                  title: "同步異動表格檢測",
+                  message: `<i class="fa fa-exclamation-triangle fa-lg ld ld-beat"></i> 找到 ${res.data.data_count} 筆損毀表格`,
+                  type: "danger"
+              });
+              this.msgbox({
+                title: '同步異動損毀表格',
+                message: this.$createElement('b-table', {
+                    props: {
+                        striped: true,
+                        hover: true,
+                        headVariant: 'dark',
+                        bordered: true,
+                        captionTop: true,
+                        caption: `找到 ${res.data.data_count} 件`,
+                        items: res.data.raw
+                    }
+                }),
+                size: 'xl'
+              });
+            } else {
+              this.$log(res.data.message);
+            }
+        }).catch(err => {
+            this.error = err;
+        }).finally(() => {
+            this.isBusy = false;
+        });}
     },
     created() {
       // mock data
@@ -229,6 +263,7 @@ if (Vue) {
     },
     mounted() {
       if (this.autoHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
+      this.checkBrokenTable();
     }
   });
 } else {
