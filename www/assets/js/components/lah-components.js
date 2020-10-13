@@ -327,11 +327,6 @@ if (Vue) {
                 icon: "cubes",
                 need_admin: true,
                 children: [{
-                    text: "監控看板",
-                    url: "monitor.html",
-                    icon: "tv",
-                    need_admin: true
-                }, {
                     text: "記錄瀏覽",
                     url: "tasklog.html",
                     icon: "paw",
@@ -345,7 +340,7 @@ if (Vue) {
             }, {
                 text: "監控看板",
                 url: "monitor.html",
-                icon: "tv",
+                icon: "diagnoses",
                 need_admin: true,
                 children: [{
                     text: "跨所AP看板",
@@ -360,7 +355,7 @@ if (Vue) {
                 }, {
                     text: "同步異動監控",
                     url: "monitor_l3hweb.html",
-                    icon: "desktop",
+                    icon: "tv",
                     need_admin: true
                 }]
             }, {
