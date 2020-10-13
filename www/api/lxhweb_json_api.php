@@ -31,7 +31,7 @@ switch ($_POST["type"]) {
 		if (!$mock) $cache->set('l3hweb_broken_table', $rows);
 		$count = $rows === false ? 0 : count($rows);
 		if (empty($count)) {
-			echoJSONResponse('查無已損毀的表格', STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+			echoJSONResponse('查無已損毀的同步異動表格', STATUS_CODE::SUCCESS_WITH_NO_RECORD);
 		} else {
 			echoJSONResponse('共查詢到'.$count.'筆資料', STATUS_CODE::SUCCESS_NORMAL, array(
 				'data_count' => $count,
