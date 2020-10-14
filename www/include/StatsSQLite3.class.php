@@ -10,8 +10,48 @@ define('DIMENSION_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."dimension.db");
 class StatsSQLite3 {
     private $db;
 
+    private function getLAHDB() {
+        $db_path = DEF_SQLITE_DB;
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "overdue_stats_detail" (
+                "datetime"	TEXT NOT NULL,
+                "id"	TEXT NOT NULL,
+                "count"	NUMERIC NOT NULL DEFAULT 0,
+                "note"	TEXT,
+                PRIMARY KEY("id","datetime")
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "stats" (
+                "ID"	TEXT,
+                "NAME"	TEXT NOT NULL,
+                "TOTAL"	INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY("ID")
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "stats_raw_data" (
+                "id"	TEXT NOT NULL,
+                "data"	TEXT,
+                PRIMARY KEY("id")
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "xcase_stats" (
+                "datetime"	TEXT NOT NULL,
+                "found"	INTEGER NOT NULL DEFAULT 0,
+                "note"	TEXT,
+                PRIMARY KEY("datetime")
+            )
+        ');
+        return $db_path;
+    }
+
     function __construct($db = DEF_SQLITE_DB) {
-        $this->db = new SQLite3($db);
+        $path = $this->getLAHDB();
+        $this->db = new SQLite3($path);
     }
 
     function __destruct() { $this->db->close(); }
@@ -109,6 +149,9 @@ class StatsSQLite3 {
         $data = $this->db->querySingle("SELECT data from stats_raw_data WHERE id = '$id'");
         return empty($data) ? false : unserialize($data);
     }
+    /**
+     * AP connection count
+     */
 
     private function getAPConnStatsDB($ip_end) {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.$ip_end.'.db';
@@ -122,14 +165,11 @@ class StatsSQLite3 {
                 "count"	INTEGER NOT NULL DEFAULT 0,
                 "batch"	INTEGER NOT NULL DEFAULT 0,
                 PRIMARY KEY("log_time","ap_ip","est_ip")
-            );
+            )
         ');
         return $db_path;
     }
 
-    /**
-     * AP connection count
-     */
     public function getLatestAPConnHistory($ap_ip, $all = 'true') {
         global $log;
         $db_path = $this->getAPConnStatsDB(explode('.', $ap_ip)[3]);
