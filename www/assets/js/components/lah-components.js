@@ -336,6 +336,11 @@ if (Vue) {
                     url: "test.html",
                     icon: "tools",
                     need_admin: true
+                }, {
+                    text: `測試PHP`,
+                    url: "debug.php",
+                    icon: "tools",
+                    need_admin: true
                 }]
             }, {
                 text: "監控看板",

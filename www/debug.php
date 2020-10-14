@@ -13,24 +13,28 @@ require_once("./include/System.class.php");
 require_once("./include/Temperature.class.php");
 require_once("./include/StatsSQLite3.class.php");
 
+try {
 // $stats_sqlite3 = new StatsSQLite3();
 // print_r($stats_sqlite3->getLatestAPConnHistory('220.1.35.123'));
-try {
-    $database = new PDO('sqlite:assets/db/test.db');
-    $database->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $sTable = 'CREATE TABLE IF NOT EXISTS '.$table->name.' (';
-    $sFields;
-    foreach($table->fields as $f) {
-        if($sFields != '')
-        $sFields .= ',';
-        $sFields .= $f->name.' '.$f->type;
-    }
-    $sFields .= ')';
-    $sTable .= $sFields;
-            
-    $database->exec($sTable);
+    // $to_ping='220.1.35.2';
+    // $count=1;
+    // $psize=1;
+    // echo "正在執行php ping命令，請等待...\n<br><br>";
+    // ob_clean();
+    // flush();
+    //     echo "<pre>";
+    //     exec("ping  $to_ping", $list);
+    //     for($i=0;$i<count($list);$i++){
+    //         print $list[$i]."\n";
+    //     }
+    //     echo "</pre>";
+    //     ob_clean();
+    //     flush();
+    $stdout = system("dir", $ret); 
+    echo iconv('BIG5', 'UTF-8', print_r($stdout, true)); 
+    echo iconv('BIG5', 'UTF-8', print_r($ret, true)); 
 }
-catch(PDOException $e)
+catch(Exception $e)
 {
     die($e->getMessage());
 }

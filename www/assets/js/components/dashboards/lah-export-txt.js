@@ -4,12 +4,12 @@ if (Vue) {
         <template v-slot:header>
             <div class="d-flex w-100 justify-content-between mb-0">
                 <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="road" size="lg"> 輸出地籍資料</lah-fa-icon></h6>
-                <b-button-group size="sm" class="align-middle" v-if="!working">
-                    <lah-button icon="train" variant="outline-secondary" @click="tags = ['0200', '0202', '0205', '0210']" class="mr-1">A21站</lah-button>
-                    <lah-button icon="warehouse" variant="outline-secondary" @click="tags = ['0213', '0222']" class="mr-1">中原營區</lah-button>
-                    <lah-button icon="map-signs" variant="outline-secondary" @click="tags = ['0255', '0275', '0277', '0278', '0377']" class="mr-1">草漯</lah-button>
-                    <lah-button icon="undo" action="cycle-alt" variant="outline-success" @click="clean" title="重設" :disabled="tags.length == 0"></lah-button>
-                    <lah-button icon="question" variant="outline-success" class="border-0" @click="popup"></lah-button>
+                <b-button-group size="sm" class="align-middle" v-if="!working" variant="outline-primary">
+                    <lah-button icon="train" @click="tags = ['0200', '0202', '0205', '0210']" v-b-popover.top.hover.focus="'A21站'"></lah-button>
+                    <lah-button icon="warehouse" @click="tags = ['0213', '0222']" v-b-popover.top.hover.focus="'中原營區'"></lah-button>
+                    <lah-button icon="map-signs" @click="tags = ['0255', '0275', '0277', '0278', '0377']" v-b-popover.top.hover.focus="'草漯'"></lah-button>
+                    <lah-button icon="undo" action="cycle-alt" variant="outline-secondary" @click="clean" title="重設" :disabled="tags.length == 0"></lah-button>
+                    <lah-button icon="question" variant="outline-success" @click="popup" title="說明"></lah-button>
                 </b-button-group>
             </div>
         </template>
