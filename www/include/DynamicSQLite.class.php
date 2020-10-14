@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author Christian Tang
  */
@@ -20,6 +19,10 @@ class DynamicSQLite {
         } catch (PDOException $e) {
             die($e->getMessage());
         }
+    }
+
+    public function createTableBySQL($str) {
+        $this->database->exec($str);
     }
 
     function createTable($table) {

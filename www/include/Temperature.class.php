@@ -11,13 +11,15 @@ class Temperature {
         $db = TEMPERATURE_SQLITE_DB;
         $sqlite = new DynamicSQLite($db);
         $sqlite->initDB();
-
-        $table = new SQLiteTable('temperature');
-        $table->addField('datetime', 'TEXT NOT NULL PRIMARY KEY');
-        $table->addField('id', 'TEXT NOT NULL PRIMARY KEY');
-        $table->addField('value', 'REAL NOT NULL DEFAULT 36.0');
-        $table->addField('note', 'TEXT');
-        $sqlite->createTable($table);
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "temperature" (
+                "datetime"	TEXT NOT NULL,
+                "id"	TEXT NOT NULL,
+                "value"	REAL NOT NULL DEFAULT 36.0,
+                "note"	TEXT,
+                PRIMARY KEY("datetime","id")
+            )
+        ');
     }
 
     function __construct() {
