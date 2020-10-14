@@ -49,6 +49,23 @@ class StatsSQLite3 {
         return $db_path;
     }
 
+    private function getAPConnStatsDB($ip_end) {
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.$ip_end.'.db';
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "ap_conn_history" (
+                "log_time"	TEXT NOT NULL,
+                "ap_ip"	TEXT NOT NULL,
+                "est_ip"	TEXT NOT NULL,
+                "count"	INTEGER NOT NULL DEFAULT 0,
+                "batch"	INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY("log_time","ap_ip","est_ip")
+            )
+        ');
+        return $db_path;
+    }
+    
     function __construct() {
         $path = $this->getLAHDB();
         $this->db = new SQLite3($path);
@@ -152,24 +169,6 @@ class StatsSQLite3 {
     /**
      * AP connection count
      */
-
-    private function getAPConnStatsDB($ip_end) {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.$ip_end.'.db';
-        $sqlite = new DynamicSQLite($db_path);
-        $sqlite->initDB();
-        $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "ap_conn_history" (
-                "log_time"	TEXT NOT NULL,
-                "ap_ip"	TEXT NOT NULL,
-                "est_ip"	TEXT NOT NULL,
-                "count"	INTEGER NOT NULL DEFAULT 0,
-                "batch"	INTEGER NOT NULL DEFAULT 0,
-                PRIMARY KEY("log_time","ap_ip","est_ip")
-            )
-        ');
-        return $db_path;
-    }
-
     public function getLatestAPConnHistory($ap_ip, $all = 'true') {
         global $log;
         $db_path = $this->getAPConnStatsDB(explode('.', $ap_ip)[3]);
