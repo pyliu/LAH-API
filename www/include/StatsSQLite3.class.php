@@ -65,6 +65,23 @@ class StatsSQLite3 {
         return $db_path;
     }
 
+    
+    private function getServerConnectivityDB() {
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR."server_connectivity.db";
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "ap_conn_history" (
+                "log_time"	TEXT NOT NULL,
+                "svr_ip"	TEXT NOT NULL,
+                "status"    TEXT NOT NULL DEFAULT \'DOWN\',
+                "latency"	REAL NOT NULL DEFAULT 0.0,
+                PRIMARY KEY("log_time","svr_ip")
+            )
+        ');
+        return $db_path;
+    }
+
     function __construct() {
         $path = $this->getLAHDB();
         $this->db = new SQLite3($path);

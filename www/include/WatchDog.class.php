@@ -238,6 +238,10 @@ class WatchDog {
         $this->stats->wipeAllAPConnHistory();
     }
 
+    private function checkServerConnectivity() {
+
+    }
+
     function __construct() {
         $this->stats = new StatsSQLite3();
     }
@@ -250,6 +254,7 @@ class WatchDog {
             $this->findDelayRegCases();
             $this->compressLog();
             $this->wipeStatsHistoryData();
+            $this->checkServerConnectivity();
             //$this->notifyTemperatureRegistration();
             return true;
         }
