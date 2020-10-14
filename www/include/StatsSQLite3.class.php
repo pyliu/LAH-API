@@ -238,15 +238,5 @@ class StatsSQLite3 {
         $this->wipeAPConnHistory('70');
         $this->wipeAPConnHistory('123');
     }
-
-    public function addAPConnection($log_time, $ip, $site, $count) {
-        // $post_data => ["log_time" => '20200904094300', "ip" => '220.1.35.123', "site" => 'HB', "count" => '10']
-        $stm = $this->db->prepare("INSERT INTO ap_connection (log_time,ip,site,count) VALUES (:log_time, :ip, :site, :count)");
-        $stm->bindParam(':log_time', $log_time);
-        $stm->bindParam(':ip', $ip);
-        $stm->bindParam(':site', $site);
-        $stm->bindValue(':count', $count);
-        return $stm->execute();
-    }
 }
 ?>

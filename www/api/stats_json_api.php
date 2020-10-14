@@ -191,17 +191,6 @@ switch ($_POST["type"]) {
             $log->info("XHR [stats_regf] ${err}。");
         }
         break;
-    case "stats_set_ap_conn":
-        if ($system->isKeyValid($_POST['api_key'])) {
-            for ($i = 0; $i < count($_POST['sites']); $i++) {
-                if (!$stats_sqlite3->addAPConnection($_POST['log_time'], $_POST['ip'], $_POST['sites'][$i], $_POST['counts'][$i])) {
-                    $log->error("XHR [stats_set_ap_conn] 設定 [".$_POST['sites'][$i].",".$_POST['counts'][$i]."] 統計失敗。");
-                }
-            }
-        } else {
-            $log->error("XHR [stats_set_ap_conn] Wrong API key to set AP connections. [expect: ".$system->get('API_KEY')." get ".$_POST["api_key"]."]");
-        }
-        break;
     case "stats_set_conn_count":
         if ($system->isKeyValid($_POST['api_key'])) {
             // combine&clean data ... 
