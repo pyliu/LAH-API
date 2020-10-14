@@ -49,7 +49,7 @@ class StatsSQLite3 {
         return $db_path;
     }
 
-    function __construct($db = DEF_SQLITE_DB) {
+    function __construct() {
         $path = $this->getLAHDB();
         $this->db = new SQLite3($path);
     }
