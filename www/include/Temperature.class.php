@@ -1,10 +1,27 @@
 <?php
 require_once('init.php');
+require_once('DynamicSQLite.class.php');
+
+define('TEMPERATURE_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."Temperature.db");
 
 class Temperature {
     private $db;
 
+    private function init() {
+        $db = TEMPERATURE_SQLITE_DB;
+        $sqlite = new DynamicSQLite($db);
+        $sqlite->initDB();
+
+        $table = new SQLiteTable('temperature');
+        $table->addField('datetime', 'TEXT NOT NULL PRIMARY KEY');
+        $table->addField('id', 'TEXT NOT NULL PRIMARY KEY');
+        $table->addField('value', 'REAL NOT NULL DEFAULT 36.0');
+        $table->addField('note', 'TEXT');
+        $sqlite->createTable($table);
+    }
+
     function __construct() {
+        $this->init();
         $this->db = new SQLite3(TEMPERATURE_SQLITE_DB);
     }
 
