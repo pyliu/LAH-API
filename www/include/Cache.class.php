@@ -1,11 +1,25 @@
 <?php
 require_once("init.php");
-require_once(ROOT_DIR."/include/System.class.php");
+require_once("System.class.php");
+require_once("DynamicSQLite.class.php");
+
 define('CACHE_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."cache.db");
 
 class Cache {
     private $system;
     private $sqlite3;
+
+    private function init() {
+        $db = CACHE_SQLITE_DB;
+        $sqlite = new DynamicSQLite($db);
+        $sqlite->initDB();
+
+        $table = new SQLiteTable('cache');
+        $table->addField('key', 'TEXT PRIMARY KEY');
+        $table->addField('value', 'TEXT');
+        $table->addField('expire', 'INTEGER NOT NULL DEFAULT 864000');
+        $sqlite->createTable($table);
+    }
 
     private function getExpire($key) {
         $val = $this->sqlite3->querySingle("SELECT expire from cache WHERE key = '$key'");
@@ -14,6 +28,7 @@ class Cache {
     }
 
     function __construct() {
+        $this->init();
         $this->sqlite3 = new SQLite3(CACHE_SQLITE_DB);
         $this->system = new System();
     }
