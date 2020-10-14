@@ -1,5 +1,7 @@
 <?php
 require_once("init.php");
+require_once('DynamicSQLite.class.php');
+
 define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."dimension.db");
 
 class System {
@@ -111,7 +113,24 @@ class System {
         return $stm->execute() === FALSE ? false : true;
     }
 
-    function __construct() { $this->sqlite3 = new SQLite3(DIMENSION_SQLITE_DB); }
+    private function getDimensionDB() {
+        $db_path = DIMENSION_SQLITE_DB;
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "config" (
+                "key"	TEXT NOT NULL,
+                "value"	TEXT,
+                PRIMARY KEY("key")
+            )
+        ');
+        return $db_path;
+    }
+
+    function __construct() {
+        $db_path = $this->getDimensionDB();
+        $this->sqlite3 = new SQLite3($db_path);
+    }
 
     function __destruct() { unset($this->sqlite3); }
 

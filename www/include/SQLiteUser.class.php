@@ -1,6 +1,8 @@
 <?php
 require_once('init.php');
 require_once('System.class.php');
+require_once('DynamicSQLite.class.php');
+
 define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."dimension.db");
 
 class SQLiteUser {
@@ -78,8 +80,39 @@ class SQLiteUser {
         return $return;
     }
 
+    private function getDimensionDB() {
+        $db_path = DIMENSION_SQLITE_DB;
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "user" (
+                "id"	TEXT NOT NULL,
+                "name"	TEXT NOT NULL,
+                "sex"	INTEGER NOT NULL DEFAULT 0,
+                "addr"	TEXT,
+                "tel"	TEXT,
+                "ext"	NUMERIC NOT NULL DEFAULT 153,
+                "cell"	TEXT,
+                "unit"	TEXT NOT NULL DEFAULT \'行政課\',
+                "title"	TEXT,
+                "work"	TEXT,
+                "exam"	TEXT,
+                "education"	TEXT,
+                "onboard_date"	TEXT,
+                "offboard_date"	TEXT,
+                "ip"	TEXT NOT NULL DEFAULT \'192.168.xx.xx\',
+                "pw_hash"	TEXT NOT NULL DEFAULT \'827ddd09eba5fdaee4639f30c5b8715d\',
+                "authority"	INTEGER NOT NULL DEFAULT 0,
+                "birthday"	TEXT,
+                PRIMARY KEY("id")
+            )
+        ');
+        return $db_path;
+    }
+
     function __construct() {
-        $this->db = new SQLite3(DIMENSION_SQLITE_DB);
+        $db_path = $this->getDimensionDB();
+        $this->db = new SQLite3($db_path);
     }
 
     function __destruct() { $this->db->close(); }

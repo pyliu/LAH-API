@@ -5,7 +5,6 @@ require_once('IPResolver.class.php');
 
 define('DB_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db");
 define('DEF_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."LAH.db");
-define('DIMENSION_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."dimension.db");
 
 class StatsSQLite3 {
     private $db;
@@ -65,7 +64,7 @@ class StatsSQLite3 {
         ');
         return $db_path;
     }
-    
+
     function __construct() {
         $path = $this->getLAHDB();
         $this->db = new SQLite3($path);
