@@ -2,26 +2,13 @@
 require_once('SQLiteUser.class.php');
 require_once('System.class.php');
 require_once("Cache.class.php");
+require_once("Ping.class.php");
 
 // Function to check response time
 function pingDomain($domain, $port = 80){
-    global $log;
-
-    $starttime = microtime(true);
-    $file      = fsockopen ($domain, $port, $errno, $errstr, 10);
-    $stoptime  = microtime(true);
-    $status    = 0;
-
-    if (!$file) $status = -1;  // Site is down
-    else {
-        fclose($file);
-        $status = ($stoptime - $starttime) * 1000;
-        $status = floor($status);
-    }
-
-    $log->info(__METHOD__.": status: $status, domain: $domain, port: $port, errno: $errno, errstr: $errstr");
-
-    return $status;
+    $ping = new Ping($domain);
+    $ping->setPort($port);
+    return $ping->ping('fsockopen');
 }
 
 function getMyAuthority() {

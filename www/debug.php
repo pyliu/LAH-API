@@ -12,12 +12,12 @@ require_once("./include/SQLiteUser.class.php");
 require_once("./include/System.class.php");
 require_once("./include/Temperature.class.php");
 require_once("./include/StatsSQLite3.class.php");
+require_once("./include/Ping.class.php");
 
 try {
-    // $stdout = system("dir", $ret); 
-    // echo iconv('BIG5', 'UTF-8', print_r($stdout, true)); 
-    // echo iconv('BIG5', 'UTF-8', print_r($ret, true)); 
     pingDomain('220.1.35.84');
+    $ping = new Ping('220.2.33.44');
+    $latency = $ping->ping();
 }
 catch(Exception $e)
 {
