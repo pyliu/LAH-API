@@ -7,4 +7,3 @@ return "(CASE
     WHEN RM31 = 'E' THEN '請示'
     ELSE RM31
 END)";
-?>

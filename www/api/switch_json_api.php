@@ -65,4 +65,3 @@ switch ($_POST["type"]) {
         }
         break;
 }
-?>

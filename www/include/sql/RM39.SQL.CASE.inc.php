@@ -11,4 +11,3 @@ return "(CASE
     WHEN RM39 = 'P' THEN '競合暫停'
     ELSE RM39
 END)";
-?>

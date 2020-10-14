@@ -8,4 +8,3 @@ header("Content-Length: " . filesize($tmp_file));
 header('Content-Disposition: attachment; filename='.($_GET['filename'] ?? 'tmp').'.csv');
 
 readfile($tmp_file);
-?>

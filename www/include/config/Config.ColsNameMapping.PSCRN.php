@@ -34,4 +34,3 @@ return array(
     "SS10" => "SS10",
     "SS11" => "SS11"
 );
-?>

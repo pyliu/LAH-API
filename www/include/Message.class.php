@@ -245,4 +245,3 @@ class Message {
         return $this->update(array( 'done' => 0 ), array( 'sn' => $sn ));
     }
 }
-?>

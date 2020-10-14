@@ -194,4 +194,3 @@ class StatsOracle {
         return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
 }
-?>

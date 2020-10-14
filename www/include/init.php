@@ -35,4 +35,3 @@ set_exception_handler(function(Throwable $e) {
     global $log;
     $log->error($e->getMessage());
 });
-?>

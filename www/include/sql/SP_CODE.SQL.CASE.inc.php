@@ -11,5 +11,4 @@ return "(CASE
         WHEN SP_CODE = 'F' THEN '異動完成'
         ELSE SP_CODE
  END)";
- ?>
  

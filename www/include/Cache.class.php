@@ -57,4 +57,3 @@ class Cache {
         return mktime() > $this->getExpire($key);
     }
 }
-?>

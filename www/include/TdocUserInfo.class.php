@@ -89,4 +89,3 @@ class TdocUserInfo {
         return $results;
     }
 }
-?>

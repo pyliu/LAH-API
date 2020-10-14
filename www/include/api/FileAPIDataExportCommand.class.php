@@ -86,4 +86,3 @@ class FileAPIDataExportCommand extends FileAPICommand {
         $this->export($data);
     }
 }
-?>

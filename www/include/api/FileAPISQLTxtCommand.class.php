@@ -63,4 +63,3 @@ class FileAPISQLTxtCommand extends FileAPICommand {
         $this->writeTXTtmp($data);
     }
 }
-?>

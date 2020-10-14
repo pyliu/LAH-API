@@ -278,4 +278,3 @@ class WatchDog {
         return $status;
     }
 }
-?>

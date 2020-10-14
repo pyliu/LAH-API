@@ -82,4 +82,3 @@ class DocUserInfo {
         return $results;
     }
 }
-?>

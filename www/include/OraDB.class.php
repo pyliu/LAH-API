@@ -152,4 +152,3 @@ class OraDB {
         return $str;
     }
 }
-?>

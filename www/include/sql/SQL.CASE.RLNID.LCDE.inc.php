@@ -16,5 +16,4 @@ return "(CASE
     WHEN LCDE = 'D' THEN '大陸地區法人'
     ELSE LCDE
  END)";
- ?>
  

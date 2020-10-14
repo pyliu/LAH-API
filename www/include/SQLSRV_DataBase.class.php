@@ -660,4 +660,3 @@ class SQLSRV_DataBase {
 		return $this->last_query;
 	}
 }
-?>

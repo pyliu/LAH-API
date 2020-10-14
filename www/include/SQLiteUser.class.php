@@ -262,4 +262,3 @@ class SQLiteUser {
         return $stm->execute() === FALSE ? false : true;
     }
 }
-?>

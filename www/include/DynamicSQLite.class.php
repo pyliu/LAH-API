@@ -76,4 +76,3 @@ class SQLiteField {
         $this->type = $type;
     }
 }
-?>

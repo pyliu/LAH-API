@@ -221,4 +221,3 @@ class System {
         return $this->sqlite3->querySingle("SELECT value from config WHERE key = '$key'");
     }
 }
-?>

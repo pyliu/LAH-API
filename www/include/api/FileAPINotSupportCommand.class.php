@@ -13,4 +13,3 @@ class FileAPINotSupportCommand extends FileAPICommand {
         fclose($out);
     }
 }
-?>

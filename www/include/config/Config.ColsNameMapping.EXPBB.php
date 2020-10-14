@@ -13,4 +13,3 @@ return array(
     "EDITDATE" => "修改日期",
     "EDITTIME" => "修改時間"
 );
-?>

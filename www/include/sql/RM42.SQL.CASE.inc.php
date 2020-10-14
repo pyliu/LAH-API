@@ -12,4 +12,3 @@ return "(CASE
     WHEN RM42 = 'G' THEN '異動有誤'
     ELSE RM42
 END)";
-?>

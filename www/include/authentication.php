@@ -13,4 +13,3 @@ if (!in_array($client_ip, $adm_ips)) {
     ), 0);
     exit;
 }
-?>

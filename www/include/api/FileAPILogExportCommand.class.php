@@ -42,4 +42,3 @@ class FileAPILogExportCommand extends FileAPICommand {
         fclose($out);
     }
 }
-?>

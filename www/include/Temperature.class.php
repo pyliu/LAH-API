@@ -144,4 +144,3 @@ class Temperature {
         return $ret;
     }
 }
-?>

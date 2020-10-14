@@ -185,4 +185,3 @@ class MSDB {
         return $this->dbo->has_rows;
     }
 }
-?>

@@ -99,4 +99,3 @@ class FileAPISQLCsvCommand extends FileAPICommand {
         //$this->outputCSV($data);
     }
 }
-?>

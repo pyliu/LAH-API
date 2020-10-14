@@ -16,4 +16,3 @@ if (isset($_SESSION[$code])) {
     $log->error('$_SESSION variable '.$code.' not set. Can not download the file.');
     die("SESSION變數${code}未設定，無法下載檔案。");
 }
-?>

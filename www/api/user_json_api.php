@@ -161,4 +161,3 @@ switch ($_POST["type"]) {
 		echoErrorJSONString("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
 		break;
 }
-?>

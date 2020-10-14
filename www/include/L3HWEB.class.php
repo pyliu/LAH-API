@@ -78,4 +78,3 @@ class L3HWEB {
 		return $this->db->fetchAll();
     }
 }
-?>

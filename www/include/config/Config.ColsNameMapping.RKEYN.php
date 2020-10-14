@@ -6,4 +6,3 @@ return array(
     "KCNT" => "代碼內容",
     "KRMK" => "代碼註記"
 );
-?>

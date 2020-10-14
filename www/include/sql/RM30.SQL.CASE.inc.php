@@ -20,4 +20,3 @@ return "(CASE
     WHEN RM30 = 'D' THEN '展期'
     ELSE RM30
 END)";
-?>

@@ -233,4 +233,3 @@ function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array =
         exit;
     }
 }
-?>

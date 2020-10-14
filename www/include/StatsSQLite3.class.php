@@ -277,4 +277,3 @@ class StatsSQLite3 {
         $this->wipeAPConnHistory('123');
     }
 }
-?>

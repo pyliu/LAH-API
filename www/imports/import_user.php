@@ -42,4 +42,3 @@ for ($i = 0; $i < $count; $i++) {
     $log->info($this_msg);
 }
 $log->info("Imports users done. ($count)");
-?>

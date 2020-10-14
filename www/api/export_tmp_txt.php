@@ -20,4 +20,3 @@ header("Content-Length: " . filesize($tmp_file));
 header('Content-Disposition: attachment; filename='.($_GET['filename'] ?? 'tmp').'.txt');
 
 readfile($tmp_file);
-?>

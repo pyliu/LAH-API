@@ -1499,4 +1499,3 @@ class Query {
 		return $this->db->fetchAll();
 	}
 }
-?>

@@ -58,4 +58,3 @@ switch ($_POST["type"]) {
         echoErrorJSONString("不支援的讀取型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
         break;
 }
-?>

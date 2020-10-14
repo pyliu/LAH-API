@@ -25,4 +25,3 @@ abstract class FileAPICommand {
         return array_key_exists($input, $this->colsNameMapping) ? ($convert ? mb_convert_encoding($this->colsNameMapping[$input], "big5", "utf-8") : $this->colsNameMapping[$input]) : $input;
     }
 }
-?>

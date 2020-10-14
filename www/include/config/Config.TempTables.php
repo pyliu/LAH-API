@@ -78,4 +78,3 @@ return array(
     "MOIPRT.PNLPO" => "NA",
     "MOIPRT.POA11" => "OA"
 );
-?>

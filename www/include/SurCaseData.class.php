@@ -182,4 +182,3 @@ class SurCaseData {
         return json_encode($result, $flag);
     }
 }
-?>

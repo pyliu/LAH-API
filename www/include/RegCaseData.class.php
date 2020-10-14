@@ -523,4 +523,3 @@ class RegCaseData {
     }
 
 }
-?>

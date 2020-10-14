@@ -11,5 +11,4 @@ return "(CASE
         WHEN RM101 = 'HH' THEN '龜山'
         ELSE RM101
  END)";
- ?>
  

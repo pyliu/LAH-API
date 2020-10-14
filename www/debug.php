@@ -14,25 +14,10 @@ require_once("./include/Temperature.class.php");
 require_once("./include/StatsSQLite3.class.php");
 
 try {
-// $stats_sqlite3 = new StatsSQLite3();
-// print_r($stats_sqlite3->getLatestAPConnHistory('220.1.35.123'));
-    // $to_ping='220.1.35.2';
-    // $count=1;
-    // $psize=1;
-    // echo "正在執行php ping命令，請等待...\n<br><br>";
-    // ob_clean();
-    // flush();
-    //     echo "<pre>";
-    //     exec("ping  $to_ping", $list);
-    //     for($i=0;$i<count($list);$i++){
-    //         print $list[$i]."\n";
-    //     }
-    //     echo "</pre>";
-    //     ob_clean();
-    //     flush();
-    $stdout = system("dir", $ret); 
-    echo iconv('BIG5', 'UTF-8', print_r($stdout, true)); 
-    echo iconv('BIG5', 'UTF-8', print_r($ret, true)); 
+    // $stdout = system("dir", $ret); 
+    // echo iconv('BIG5', 'UTF-8', print_r($stdout, true)); 
+    // echo iconv('BIG5', 'UTF-8', print_r($ret, true)); 
+    pingDomain('220.1.35.84');
 }
 catch(Exception $e)
 {
@@ -40,4 +25,3 @@ catch(Exception $e)
 }
 // echo date("Ymdhis", strtotime("-10 minutes"));
 // echo serialize(array( ));
-?>
