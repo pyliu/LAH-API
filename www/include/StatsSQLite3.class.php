@@ -1,5 +1,6 @@
 <?php
 require_once('init.php');
+require_once('DynamicSQLite.class.php');
 require_once('IPResolver.class.php');
 
 define('DB_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db");
@@ -108,12 +109,30 @@ class StatsSQLite3 {
         $data = $this->db->querySingle("SELECT data from stats_raw_data WHERE id = '$id'");
         return empty($data) ? false : unserialize($data);
     }
+
+    private function initAPConnStatsDB($ip_end) {
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.$ip_end.'.db';
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "ap_conn_history" (
+                "log_time"	TEXT NOT NULL,
+                "ap_ip"	TEXT NOT NULL,
+                "est_ip"	TEXT NOT NULL,
+                "count"	INTEGER NOT NULL DEFAULT 0,
+                "batch"	INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY("log_time","ap_ip","est_ip")
+            );
+        ');
+        return $db_path;
+    }
+
     /**
      * AP connection count
      */
     public function getLatestAPConnHistory($ap_ip, $all = 'true') {
         global $log;
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.explode('.', $ap_ip)[3].'.db';
+        $db_path = $this->initAPConnStatsDB(explode('.', $ap_ip)[3]);
         $ap_db = new SQLite3($db_path);
         // get latest batch log_time
         $latest_log_time = $ap_db->querySingle("SELECT DISTINCT log_time from ap_conn_history ORDER BY log_time DESC");
@@ -140,7 +159,7 @@ class StatsSQLite3 {
     public function getAPConnHistory($ap_ip, $count, $extend = true) {
         global $log;
         // XAP conn only store at AP123 db
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP123.db';
+        $db_path = $this->initAPConnStatsDB('123');
         $ap_db = new SQLite3($db_path);
         if($stmt = $ap_db->prepare('SELECT * FROM ap_conn_history WHERE est_ip = :ip ORDER BY log_time DESC LIMIT :limit')) {
             $stmt->bindParam(':ip', $ap_ip);
@@ -168,7 +187,7 @@ class StatsSQLite3 {
     public function addAPConnHistory($log_time, $ap_ip, $processed) {
         global $log;
         // inst into db
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.explode('.', $ap_ip)[3].'.db';
+        $db_path = $this->initAPConnStatsDB(explode('.', $ap_ip)[3]);
         $ap_db = new SQLite3($db_path);
         $latest_batch = $ap_db->querySingle("SELECT DISTINCT batch from ap_conn_history ORDER BY batch DESC");
         $success = 0;
@@ -199,7 +218,7 @@ class StatsSQLite3 {
     public function wipeAPConnHistory($ip_end) {
         global $log;
         $one_day_ago = date("YmdHis", time() - 24 * 3600);
-        $ap_db = new SQLite3(DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.$ip_end.'.db');
+        $ap_db = new SQLite3($this->initAPConnStatsDB($ip_end));
         $stm = $ap_db->prepare("DELETE FROM ap_conn_history WHERE log_time < :time");
         $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
         $ret = $stm->execute();
