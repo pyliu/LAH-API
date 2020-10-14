@@ -128,7 +128,7 @@ if (Vue) {
                     @keyup.enter="search"
                     title="身分證號"
                 ></b-form-input>
-                <b-button class="ml-1" size="sm" @click="search" variant="outline-primary"><i class="fas fa-search"></i> 搜尋</b-button>
+                <lah-button icon="search" size="sm" @click="search" variant="outline-primary" :disabled="!valid" :state="valid">搜尋</lah-button>
             </b-input-group>
         </b-card>`,
         data: function() {
