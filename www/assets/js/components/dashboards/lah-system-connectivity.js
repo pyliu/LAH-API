@@ -174,7 +174,10 @@ if (Vue) {
                     this.updChartData(this.list);
                     this.reload_timer = this.timeout(() => this.reload(), 5000);
                 } else {
+                    let orig_axio_timeout = axios.defaults.timeout;
                     this.isBusy = true;
+                    // maximum number of timeout in milliseconds
+                    axios.defaults.timeout = this.list.length * 2000 + 5000;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_connectivity_history",
                         force: force
@@ -210,6 +213,7 @@ if (Vue) {
                     }).finally(() => {
                         this.isBusy = false;
                         this.reload_timer = this.timeout(() => this.reload(), this.reload_ms); // default is 15 mins
+                        axios.defaults.timeout = orig_axio_timeout;
                     });
                 }
             },
