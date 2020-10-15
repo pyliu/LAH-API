@@ -1,10 +1,11 @@
 # Taoyuan Land Office Affairs Helper
 A helper web app for land affairs in Taoyuan
 
-1. To connect to Oracle 9i database, we need to put required dlls (oci8 from PECL) to c:\AppServ\php7\ext\.
+1. To connect to Oracle 9i database, we need to put required dlls (php_oci8_11g.dll from PECL, php_sqlsrv.dll for MSSQL connection) to c:\AppServ\php7\ext\.
 2. Edit php.ini to enable extension oci8 (extension=php_oci8_11g.dll).
-3. download oracle instant client and setup up its path to the system path setting.
-4. put sqlsrv.dll(or relative ones) inside ext folder if you need SQL server support
+3. Edit php.ini to enable extension sqlsrv (extension=php_sqlsrv.dll).
+4. Edit php.ini to enable extension pdo_sqlite.
+5. download oracle instant client and setup up its path to the system path setting.
 
 中文：
 1. 安裝 Apache/PHP (以下以 AppServ windows x64 版本為例)
