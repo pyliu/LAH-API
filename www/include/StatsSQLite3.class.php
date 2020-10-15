@@ -255,24 +255,23 @@ class StatsSQLite3 {
         $latest_batch = $ap_db->querySingle("SELECT DISTINCT batch from ap_conn_history ORDER BY batch DESC");
         $success = 0;
         foreach ($processed as $est_ip => $count) {
-            $retry = 0;
             $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch)");
-            while ($stm === false) {
-                if ($retry > 10) return $success;
-                $log->warning(__METHOD__.": db prepare call not get valid statement ... retry(".++$retry.")");
-                usleep(random_int(500000, 1000000));
-                $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch)");
-            }
             $stm->bindParam(':log_time', $log_time);
             $stm->bindParam(':ap_ip', $ap_ip);
             $stm->bindParam(':est_ip', $est_ip);
             $stm->bindParam(':count', $count);
             $stm->bindValue(':batch', $latest_batch + 1);
-            if ($stm->execute() === FALSE) {
-                $log->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $ap_ip, $est_ip, $count)");
-            } else {
-                $success++;
+            $retry = 0;
+            while ($stm->execute() === FALSE) {
+                if ($retry > 10) {
+                    $log->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $ap_ip, $est_ip, $count)");
+                    return $success;
+                }
+                $zzz_us = random_int(100000, 500000);
+                $log->warning(__METHOD__.": execute statement failed ... sleep ".$zzz_us." microseconds, retry(".++$retry.").");
+                usleep($zzz_us);
             }
+            $success++;
         }
 
         return $success;
@@ -340,7 +339,7 @@ class StatsSQLite3 {
             $stm->bindParam(':log_time', $log_time);
             $stm->bindParam(':target_ip', $tgt_ip);
             $stm->bindValue(':status', empty($latency) ? 'DOWN' : 'UP');
-            $stm->bindParam(':latency', $latency);
+            $stm->bindValue(':latency', empty($latency) ? 2000.0 : $latency);   // default ping timeout is 2s
             if ($stm->execute() !== FALSE) {
                 return true;
             } else {
@@ -349,6 +348,30 @@ class StatsSQLite3 {
         }
 
         return false;
+    }
+
+    public function getConnectivityStatus() {
+        global $log;
+        $return = array();
+        $tracking_targets = $this->getCheckingTargets();
+        if (empty($tracking_targets)) {
+            $log->warning(__METHOD__.": tracking targets array is empty.");
+        } else {
+            $db_path = $this->getConnectivityDB();
+            $conn_db = new SQLite3($db_path);
+            if($stmt = $conn_db->prepare('SELECT * FROM connectivity ORDER BY ROWID DESC LIMIT :limit')) {
+                $stmt->bindValue(':limit', count($tracking_targets), SQLITE3_INTEGER);
+                $result = $stmt->execute();
+                if ($result === false) return $return;
+                while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                    $return[] = $row;
+                }
+            } else {
+                global $log;
+                $log->error(__METHOD__.": 取得 connectivity 最新紀錄資料失敗！ (${db_path})");
+            }
+        }
+        return $return;
     }
 
     public function wipeConnectivityHistory() {

@@ -228,7 +228,7 @@ switch ($_POST["type"]) {
             ));
         } else {
             $error = "取得最新AP [".$_POST["ap_ip"]."] 連線數紀錄失敗。";
-            $log->error("XHR [stats_latest_ap_conn] $error");
+            $log->error("XHR [stats_latest_ap_conn] ${error}");
             echoJSONResponse($error);
         }
         break;
@@ -241,7 +241,20 @@ switch ($_POST["type"]) {
             ));
         } else {
             $error = "取得跨所AP ".$_POST["ap_ip"]." 連線歷史紀錄失敗。";
-            $log->error("XHR [stats_ap_conn_history] $error");
+            $log->error("XHR [stats_ap_conn_history] ${error}");
+            echoJSONResponse($error);
+        }
+        break;
+    case "stats_connectivity_history":
+        if ($arr = $stats_sqlite3->getConnectivityStatus()) {
+            $count = count($arr);
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => $count,
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得連結狀態紀錄失敗。";
+            $log->error("XHR [stats_connectivity_history] ${error}");
             echoJSONResponse($error);
         }
         break;

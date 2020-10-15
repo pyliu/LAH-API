@@ -23,6 +23,8 @@ catch(Exception $e)
 {
     die($e->getMessage());
 }
-echo date("YmdHis");
+$stats = new StatsSQLite3();
+print_r($stats->getConnectivityStatus());
+
 // echo date("Ymdhis", strtotime("-10 minutes"));
 // echo serialize(array( ));
