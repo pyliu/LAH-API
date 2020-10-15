@@ -66,17 +66,25 @@ class StatsSQLite3 {
     }
 
     
-    private function getServerConnectivityDB() {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR."server_connectivity.db";
+    private function getConnectivityDB() {
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR."connectivity.db";
         $sqlite = new DynamicSQLite($db_path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "ap_conn_history" (
+            CREATE TABLE IF NOT EXISTS "connectivity" (
                 "log_time"	TEXT NOT NULL,
-                "svr_ip"	TEXT NOT NULL,
+                "target_ip"	TEXT NOT NULL,
                 "status"    TEXT NOT NULL DEFAULT \'DOWN\',
                 "latency"	REAL NOT NULL DEFAULT 0.0,
-                PRIMARY KEY("log_time","svr_ip")
+                PRIMARY KEY("log_time","target_ip")
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "target" (
+                "ip"	TEXT NOT NULL,
+                "name"	TEXT NOT NULL,
+                "note"  TEXT,
+                PRIMARY KEY("ip")
             )
         ');
         return $db_path;
@@ -98,7 +106,7 @@ class StatsSQLite3 {
         return $stm->execute() === FALSE ? false : true;
     }
     /**
-     * Stats
+     * Early LAH Stats
      */
     public function getTotal($id) {
         return $this->db->querySingle("SELECT TOTAL from stats WHERE ID = '$id'");
@@ -183,7 +191,7 @@ class StatsSQLite3 {
         return empty($data) ? false : unserialize($data);
     }
     /**
-     * AP connection count
+     * AP connection history
      */
     public function getLatestAPConnHistory($ap_ip, $all = 'true') {
         global $log;
@@ -278,7 +286,7 @@ class StatsSQLite3 {
         $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
         $ret = $stm->execute();
         if (!$ret) {
-            $log->error(__METHOD__.": stats_ap_conn_AP".$ip_end.".db 移除一天前資料失敗【".$one_day_ago.", ".$this->db->lastErrorMsg()."】");
+            $log->error(__METHOD__.": stats_ap_conn_AP".$ip_end.".db 移除一天前資料失敗【".$one_day_ago.", ".$ap_db->lastErrorMsg()."】");
         }
         return $ret;
     }
@@ -292,5 +300,68 @@ class StatsSQLite3 {
         $this->wipeAPConnHistory('36');
         $this->wipeAPConnHistory('70');
         $this->wipeAPConnHistory('123');
+    }
+    /**
+     * Connectivity Status
+     */
+    public function getCheckingTargets() {
+        global $log;
+        // inst into db
+        $db_path = $this->getConnectivityDB();
+        $ap_db = new SQLite3($db_path);
+        $stm = $ap_db->prepare('SELECT * FROM target');
+        if ($stm === false) {
+            $log->warning(__METHOD__.": 準備資料庫 statement [ SELECT * FROM target ] 失敗。");
+        } else {
+            if ($result = $stm->execute()) {
+                $return = array();
+                if ($result === false) return $return;
+                while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                    $return[$row['name']] = $row['ip'];
+                }
+                return $return;
+            } else {
+                $log->warning(__METHOD__.": 取得檢測目標列表失敗。");
+            }
+        }
+
+        return false;
+    }
+
+    public function addConnectivityStatus($log_time, $tgt_ip, $latency) {
+        global $log;
+        // inst into db
+        $db_path = $this->getConnectivityDB();
+        $ap_db = new SQLite3($db_path);
+        $stm = $ap_db->prepare("REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency)");
+        if ($stm === false) {
+            $log->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency) ] 失敗。($log_time, $tgt_ip, $latency)");
+        } else {
+            $stm->bindParam(':log_time', $log_time);
+            $stm->bindParam(':target_ip', $tgt_ip);
+            $stm->bindValue(':status', empty($latency) ? 'DOWN' : 'UP');
+            $stm->bindParam(':latency', $latency);
+            if ($stm->execute() !== FALSE) {
+                return true;
+            } else {
+                $log->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $tgt_ip, $latency)");
+            }
+        }
+
+        return false;
+    }
+
+    public function wipeConnectivityHistory() {
+        global $log;
+        $db_path = $this->getConnectivityDB();
+        $sc_db = new SQLite3($db_path);
+        $stm = $sc_db->prepare("DELETE FROM connectivity WHERE log_time < :time");
+        $one_day_ago = date("YmdHis", time() - 24 * 3600);
+        $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
+        $ret = $stm->execute();
+        if (!$ret) {
+            $log->error(__METHOD__.": $db_path 移除一天前資料失敗【".$one_day_ago.", ".$sc_db->lastErrorMsg()."】");
+        }
+        return $ret;
     }
 }

@@ -16,12 +16,13 @@ require_once("./include/Ping.class.php");
 
 try {
     pingDomain('220.1.35.84');
-    $ping = new Ping('220.2.33.44');
+    $ping = new Ping('220.2.33.50');
     $latency = $ping->ping();
 }
 catch(Exception $e)
 {
     die($e->getMessage());
 }
+echo date("YmdHis");
 // echo date("Ymdhis", strtotime("-10 minutes"));
 // echo serialize(array( ));

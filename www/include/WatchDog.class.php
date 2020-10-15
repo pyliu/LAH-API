@@ -6,6 +6,7 @@ require_once(ROOT_DIR.'/include/StatsSQLite3.class.php');
 require_once(ROOT_DIR.'/include/Temperature.class.php');
 require_once(ROOT_DIR.'/include/SQLiteUser.class.php');
 require_once(ROOT_DIR.'/include/System.class.php');
+require_once(ROOT_DIR.'/include/Ping.class.php');
 
 class WatchDog {
     
@@ -233,28 +234,34 @@ class WatchDog {
         }
     }
 
-    private function wipeStatsHistoryData() {
-        // clean AP stats data one day ago
-        $this->stats->wipeAllAPConnHistory();
+    private function checkSystemConnectivity() {
+        global $log;
+        $targets = $this->stats->getCheckingTargets();
+        foreach ($targets as $name => $tgt_ip) {
+            if (filter_var($tgt_ip, FILTER_VALIDATE_IP)) {
+                $log_time = date("YmdHis");
+                $ping = new Ping($tgt_ip);
+                $latency = $ping->ping();
+                $this->stats->addConnectivityStatus($log_time, $tgt_ip, $latency);
+            } else {
+                $log->warning(__METHOD__.": $name:$tgt_ip is not a valid IP address.");
+            }
+        }
     }
 
-    private function checkServerConnectivity() {
-
-    }
-
-    function __construct() {
-        $this->stats = new StatsSQLite3();
-    }
-
-    function __destruct() { }
+    function __construct() { $this->stats = new StatsSQLite3(); }
+    function __destruct() { $this->stats = null; }
 
     public function do() {
         if ($this->isOfficeHours()) {
             $this->checkCrossSiteData();
             $this->findDelayRegCases();
             $this->compressLog();
-            $this->wipeStatsHistoryData();
-            $this->checkServerConnectivity();
+            // clean AP stats data one day ago
+            $this->stats->wipeAllAPConnHistory();
+            $this->checkSystemConnectivity();
+            // clean connectivity stats data one day ago
+            $this->stats->wipeConnectivityHistory();
             //$this->notifyTemperatureRegistration();
             return true;
         }
