@@ -40,7 +40,7 @@
             <b-card-group deck class="mt-3">
                 <lah-ap-connection-history-chart ip="220.1.35.123" :demo="storeParams['demo']"></lah-ap-connection-history-chart>
                 <lah-l3hweb-traffic-light :demo="storeParams['demo']"></lah-l3hweb-traffic-light>
-                <lah-l3hweb-traffic-light :demo="storeParams['demo']" type="chart"></lah-l3hweb-traffic-light>
+                <lah-system-connectivity :demo="storeParams['demo']" type="chart"></lah-system-connectivity>
             </b-card-group>
             <b-sidebar id="sidebar-1" title="Sidebar" bg-variant="dark" text-variant="light" backdrop
                 no-close-on-backdrop shadow>
@@ -81,6 +81,7 @@
 
     <script src="assets/js/components/dashboards/lah-export-txt.js"></script>
     <script src="assets/js/components/dashboards/lah-l3hweb-traffic-light.js"></script>
+    <script src="assets/js/components/dashboards/lah-system-connectivity.js"></script>
     
     <script src="assets/js/treant/raphael.min.js"></script>
     <script src="assets/js/treant/treant.min.js"></script>
@@ -98,7 +99,6 @@
                     site: 'HB'
                 }).then(res => {
                     this.json = res.data;
-                    this.$log(this.json);
                     this.notify({
                         title: "同步異動表格檢測",
                         message: `${res.data.message}`,

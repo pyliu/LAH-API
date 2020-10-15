@@ -234,21 +234,6 @@ class WatchDog {
         }
     }
 
-    private function checkSystemConnectivity() {
-        global $log;
-        $targets = $this->stats->getCheckingTargets();
-        foreach ($targets as $name => $tgt_ip) {
-            if (filter_var($tgt_ip, FILTER_VALIDATE_IP)) {
-                $log_time = date("YmdHis");
-                $ping = new Ping($tgt_ip);
-                $latency = $ping->ping();
-                $this->stats->addConnectivityStatus($log_time, $tgt_ip, $latency);
-            } else {
-                $log->warning(__METHOD__.": $name:$tgt_ip is not a valid IP address.");
-            }
-        }
-    }
-
     function __construct() { $this->stats = new StatsSQLite3(); }
     function __destruct() { $this->stats = null; }
 
@@ -259,7 +244,7 @@ class WatchDog {
             $this->compressLog();
             // clean AP stats data one day ago
             $this->stats->wipeAllAPConnHistory();
-            $this->checkSystemConnectivity();
+            $this->stats->checkConnectivity();
             // clean connectivity stats data one day ago
             $this->stats->wipeConnectivityHistory();
             //$this->notifyTemperatureRegistration();

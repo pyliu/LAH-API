@@ -2,6 +2,7 @@
 require_once('init.php');
 require_once('DynamicSQLite.class.php');
 require_once('IPResolver.class.php');
+require_once('Ping.class.php');
 
 define('DB_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db");
 define('DEF_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."LAH.db");
@@ -350,10 +351,32 @@ class StatsSQLite3 {
         return false;
     }
 
-    public function getConnectivityStatus() {
+    public function checkConnectivity() {
         global $log;
-        $return = array();
+        // generate the latest batch records
         $tracking_targets = $this->getCheckingTargets();
+        foreach ($tracking_targets as $name => $tgt_ip) {
+            if (filter_var($tgt_ip, FILTER_VALIDATE_IP)) {
+                $log_time = date("YmdHis");
+                $ping = new Ping($tgt_ip);
+                $latency = $ping->ping();
+                $this->addConnectivityStatus($log_time, $tgt_ip, $latency);
+            } else {
+                $log->warning(__METHOD__.": $name:$tgt_ip is not a valid IP address.");
+            }
+        }
+    }
+
+    public function getConnectivityStatus($force = 'false') {
+        global $log;
+
+        if ($force === 'true') {
+            // generate the latest batch records
+            $this->checkConnectivity();
+        }
+
+        $tracking_targets = $this->getCheckingTargets();
+        $return = array();
         if (empty($tracking_targets)) {
             $log->warning(__METHOD__.": tracking targets array is empty.");
         } else {

@@ -248,6 +248,7 @@ if (Vue) {
         });}
     },
     created() {
+      this.container_id = this.uuid();
       // mock data
       this.list = [
         { SITE: 'HA', UPDATE_DATETIME: this.randDate() },

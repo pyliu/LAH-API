@@ -239,3 +239,16 @@ blockquote {
 	border: 1px solid gray;
 	margin: 0.5%;
 }
+
+.grid-s {
+	width: 32%;
+	height: 16%;
+	box-sizing: border-box;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: auto;
+	border-radius: 10px;
+	border: 1px solid gray;
+	margin: 0.5%;
+}

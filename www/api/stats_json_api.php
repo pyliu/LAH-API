@@ -245,8 +245,21 @@ switch ($_POST["type"]) {
             echoJSONResponse($error);
         }
         break;
+    case "stats_connectivity_target":
+        if ($arr = $stats_sqlite3->getCheckingTargets()) {
+            $count = count($arr);
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => $count,
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得連結狀態目標列表失敗。";
+            $log->error("XHR [stats_connectivity_target] ${error}");
+            echoJSONResponse($error);
+        }
+        break;
     case "stats_connectivity_history":
-        if ($arr = $stats_sqlite3->getConnectivityStatus()) {
+        if ($arr = $stats_sqlite3->getConnectivityStatus($_POST["force"])) {
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => $count,

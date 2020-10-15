@@ -28,7 +28,8 @@
       </b-card-group>
       <b-card-group deck class="mt-3">
         <lah-xap-history-chart site="HB" type='bar' watch-top-site-index="0"></lah-xap-history-chart>
-        <lah-xap-history-chart site="HA" type="bar" watch-top-site-index="1"></lah-xap-history-chart>
+        <!-- <lah-xap-history-chart site="HA" type="bar" watch-top-site-index="1"></lah-xap-history-chart> -->
+        <lah-system-connectivity></lah-system-connectivity>
         <lah-l3hweb-traffic-light></lah-l3hweb-traffic-light>
         <!-- <lah-xap-history-chart site="HC" type="bar" watch-top-site-index="2"></lah-xap-history-chart> -->
       </b-card-group>
@@ -58,6 +59,7 @@
   <script src="assets/js/components/dashboards/lah-xap-history-chart.js"></script>
   <script src="assets/js/components/dashboards/lah-ap-connection-history-chart.js"></script>
   <script src="assets/js/components/dashboards/lah-l3hweb-traffic-light.js"></script>
+  <script src="assets/js/components/dashboards/lah-system-connectivity.js"></script>
   <script> $(document).ready(e => {
     refreshTomorrow8AM('00:00');
     resizeReload();
