@@ -169,7 +169,7 @@ if (Vue) {
                 clearTimeout(this.reload_timer);
                 if (this.demo) {
                     this.list.forEach(item => {
-                        item.latency = this.rand(3000);
+                        item.latency = this.rand(2500);
                     });
                     this.updChartData(this.list);
                     this.reload_timer = this.timeout(() => this.reload(), 5000);
