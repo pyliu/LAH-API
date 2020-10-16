@@ -249,7 +249,7 @@ if (Vue) {
                     headVariant: 'dark',
                     bordered: true,
                     captionTop: true,
-                    caption: `找到 ${this.broken_tbl_raw.length} 件`,
+                    caption: `找到 ${this.broken_tbl_count} 件`,
                     items: this.broken_tbl_raw
                 }
             }),
