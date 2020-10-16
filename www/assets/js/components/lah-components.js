@@ -686,7 +686,10 @@ if (Vue) {
             @blur="mouseleave"
             @click="emitClick($event)"
         >
-            <lah-fa-icon :id="icon_id" :icon="icon" :prefix="fa_icon_prefix"> <slot></slot></lah-fa-icon>
+            <lah-fa-icon :id="icon_id" :icon="icon" :prefix="fa_icon_prefix">
+                <slot></slot>
+                <b-badge v-if="badgeCount > 0" :variant="badgeVariant" :pill="badgePill">{{badgeCount}}</b-badge>
+            </lah-fa-icon>
       </b-button>`,
         props: {
             variant: {
@@ -724,7 +727,10 @@ if (Vue) {
             pressed: {
                 type: Boolean,
                 default: false
-            }
+            },
+            badgeCount: { type: Number, default: 0 },
+            badgeVariant: { type: String, default: 'light' },
+            badgePill: { type: Boolean, default: true }
         },
         data: () => ({
             icon_id: 'xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx'
@@ -763,6 +769,15 @@ if (Vue) {
         created() {
             this.icon_id = this.uuid()
         }
+    });
+    
+    Vue.component('lah-badge-button', {
+        template: `<lah-button>
+            <b-badge variant="light" pill>{{count}}</b-badge>
+        </lah-button>`,
+        data: () => ({
+            count: 0
+        })
     });
 
     // need to include chart.min.js (chart.js) first.
