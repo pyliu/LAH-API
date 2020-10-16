@@ -91,6 +91,39 @@ class StatsSQLite3 {
         return $db_path;
     }
 
+    private function addConnectivityStatus($log_time, $tgt_ip, $latency) {
+        global $log;
+        // inst into db
+        $db_path = $this->getConnectivityDB();
+        $ap_db = new SQLite3($db_path);
+        $stm = $ap_db->prepare("REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency)");
+        if ($stm === false) {
+            $log->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency) ] 失敗。($log_time, $tgt_ip, $latency)");
+        } else {
+            $stm->bindParam(':log_time', $log_time);
+            $stm->bindParam(':target_ip', $tgt_ip);
+            $stm->bindValue(':status', empty($latency) ? 'DOWN' : 'UP');
+            $stm->bindValue(':latency', empty($latency) ? 2000.0 : $latency);   // default ping timeout is 2s
+            if ($stm->execute() !== FALSE) {
+                return true;
+            } else {
+                $log->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $tgt_ip, $latency)");
+            }
+        }
+
+        return false;
+    }
+
+    private function pingAndSave($ip) {
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            $log_time = date("YmdHis");
+            $ping = new Ping($ip);
+            $latency = $ping->ping();
+            return $this->addConnectivityStatus($log_time, $ip, $latency);
+        }
+        return false;
+    }
+
     function __construct() {
         $path = $this->getLAHDB();
         $this->db = new SQLite3($path);
@@ -328,41 +361,20 @@ class StatsSQLite3 {
         return false;
     }
 
-    public function addConnectivityStatus($log_time, $tgt_ip, $latency) {
+    public function checkConnectivity($ip = null) {
         global $log;
-        // inst into db
-        $db_path = $this->getConnectivityDB();
-        $ap_db = new SQLite3($db_path);
-        $stm = $ap_db->prepare("REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency)");
-        if ($stm === false) {
-            $log->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency) ] 失敗。($log_time, $tgt_ip, $latency)");
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            // single ep
+            $this->pingAndSave($ip);
         } else {
-            $stm->bindParam(':log_time', $log_time);
-            $stm->bindParam(':target_ip', $tgt_ip);
-            $stm->bindValue(':status', empty($latency) ? 'DOWN' : 'UP');
-            $stm->bindValue(':latency', empty($latency) ? 2000.0 : $latency);   // default ping timeout is 2s
-            if ($stm->execute() !== FALSE) {
-                return true;
-            } else {
-                $log->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $tgt_ip, $latency)");
-            }
-        }
-
-        return false;
-    }
-
-    public function checkConnectivity() {
-        global $log;
-        // generate the latest batch records
-        $tracking_targets = $this->getCheckingTargets();
-        foreach ($tracking_targets as $name => $tgt_ip) {
-            if (filter_var($tgt_ip, FILTER_VALIDATE_IP)) {
-                $log_time = date("YmdHis");
-                $ping = new Ping($tgt_ip);
-                $latency = $ping->ping();
-                $this->addConnectivityStatus($log_time, $tgt_ip, $latency);
-            } else {
-                $log->warning(__METHOD__.": $name:$tgt_ip is not a valid IP address.");
+            $tracking_targets = $this->getCheckingTargets();
+            // generate the latest batch records
+            foreach ($tracking_targets as $name => $tgt_ip) {
+                if (filter_var($tgt_ip, FILTER_VALIDATE_IP)) {
+                    $this->pingAndSave($tgt_ip);
+                } else {
+                    $log->warning(__METHOD__.": $name:$tgt_ip is not a valid IP address.");
+                }
             }
         }
     }
@@ -382,7 +394,8 @@ class StatsSQLite3 {
         } else {
             $db_path = $this->getConnectivityDB();
             $conn_db = new SQLite3($db_path);
-            if($stmt = $conn_db->prepare('SELECT * FROM connectivity ORDER BY ROWID DESC LIMIT :limit')) {
+            $in_statement = " IN ('".implode("','", $tracking_targets)."') ";
+            if($stmt = $conn_db->prepare('SELECT * FROM connectivity WHERE target_ip '.$in_statement.' ORDER BY ROWID DESC LIMIT :limit')) {
                 $stmt->bindValue(':limit', count($tracking_targets), SQLITE3_INTEGER);
                 $result = $stmt->execute();
                 if ($result === false) return $return;
@@ -390,11 +403,31 @@ class StatsSQLite3 {
                     $return[] = $row;
                 }
             } else {
-                global $log;
                 $log->error(__METHOD__.": 取得 connectivity 最新紀錄資料失敗！ (${db_path})");
             }
         }
         return $return;
+    }
+
+    public function getIPConnectivityStatus($ip, $force = 'false') {
+        if ($force === 'true') {
+            // generate the latest record for $ip
+            $this->checkConnectivity($ip);
+        }
+
+        $db_path = $this->getConnectivityDB();
+        $conn_db = new SQLite3($db_path);
+        if($stmt = $conn_db->prepare('SELECT * FROM connectivity WHERE target_ip = :ip ORDER BY ROWID DESC LIMIT :limit')) {
+            $stmt->bindValue(':limit', 1, SQLITE3_INTEGER);
+            $stmt->bindParam(':ip', $ip);
+            $result = $stmt->execute();
+            if ($result === false) return array();
+            return $result->fetchArray(SQLITE3_ASSOC);
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得 $ip connectivity 最新紀錄資料失敗！ (${db_path})");
+        }
+        return false;
     }
 
     public function wipeConnectivityHistory() {

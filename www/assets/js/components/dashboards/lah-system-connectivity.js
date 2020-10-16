@@ -1,31 +1,119 @@
 if (Vue) {
+    Vue.component('lah-ip-connectivity', {
+        template: `<lah-button icon="circle" :badge-text="latency_txt">{{resolved_name}}</lah-button>`,
+        props: {
+            ip: { type: String, default: '127.0.0.1' }
+        },
+        data: () => ({
+            name: undefined,
+            latency: 0.0,
+            status: 'DOWN',
+            log_time: '20201016185331',
+            reload_timer: null,
+            reload_ms: 15 * 60 * 1000   // 15 minutes
+        }),
+        computed: {
+            resolved_name() { return this.name || this.ip },
+            latency_txt() { return `${this.latency} ms` },
+            name_map() { return this.storeParams['lah-ip-connectivity-map'] }
+        },
+        watch: {
+            name_map(val) {
+                if (val.size > 0) {
+                    this.name = this.storeParams['lah-ip-connectivity-map'].get(this.ip);
+                }
+            }
+        },
+        methods: {
+            prepare() {
+                // store a mapping table in Vuex
+                if (!this.storeParams.hasOwnProperty('lah-ip-connectivity-map')) {
+                    this.addToStoreParams('lah-ip-connectivity-map', new Map());
+                    this.$http.post(CONFIG.API.JSON.STATS, {
+                        type: "stats_connectivity_target"
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            // raw is object of { 'AP31': 'xxx.xxx.xxx.31'}
+                            for (const [name, ip] of Object.entries(res.data.raw)) {
+                                this.storeParams['lah-ip-connectivity-map'].set(ip, name);
+                            }
+                            this.name = this.storeParams['lah-ip-connectivity-map'].get(this.ip)
+                        } else {
+                            this.notify({
+                                title: "初始化 lah-ip-connectivity-map",
+                                message: `${res.data.message}`,
+                                type: "warning"
+                            });
+                        }
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                }
+            },
+            reload(force = false) {
+                clearTimeout(this.reload_timer);
+                this.$http.post(CONFIG.API.JSON.STATS, {
+                    type: "stats_ip_connectivity_history",
+                    force: force,
+                    ip: this.ip
+                }).then(res => {
+                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                        // res.data.raw: object of { target_ip: 'xxx.xxx.xxx.xxx', latency: 2000.0, status: 'DOWN', log_time: '20201005181631' }
+                        // this.$log(res.data.raw);
+                        this.latency = res.data.raw.latency;
+                        this.status = res.data.raw.status;
+                        this.log_time = res.data.raw.log_time;
+                    } else {
+                        this.notify({
+                            title: "檢查IP連結狀態",
+                            message: `${res.data.message}`,
+                            type: "warning"
+                        });
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                    this.reload_timer = this.timeout(() => this.reload(), this.reload_ms); // default is 15 mins
+                });
+            }
+        },
+        created() {
+            this.prepare();
+            this.reload();
+        },
+        mounted() { }
+    });
+
     Vue.component('lah-system-connectivity', {
         template: `<lah-transition appear>
-      <b-card border-variant="secondary" class="shadow">
-        <template v-slot:header>
-          <div class="d-flex w-100 justify-content-between mb-0">
-            <h6 class="my-auto font-weight-bolder"><lah-fa-icon :icon="headerIcon" size="lg" :variant="headerLight"> 系統狀態監控 </lah-fa-icon></h6>
-            <b-button-group>
-              <lah-button icon="sync" variant='outline-secondary' class="border-0" @click="reload(true)" action="cycle" title="重新讀取"></lah-button>
-              <lah-button v-if="!maximized" class="border-0" :icon="btnIcon" variant="outline-primary" title="顯示模式" @click="switchType"></lah-button>
-              <lah-button v-if="!maximized" class="border-0" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popupMaximized" action="heartbeat"></lah-button>
-              <lah-button icon="question" variant="outline-success" class="border-0" @click="popupQuestion" title="說明"></lah-button>
-            </b-button-group>
-          </div>
-        </template>
-        <div v-if="type == 'light'" :id="container_id" class="grids">
-          <div v-for="entry in list" class="grid-s">
-            <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'回應時間: '+entry.latency+'ms'">{{entry.name}}</lah-fa-icon>
-          </div>
-        </div>
-        <div v-else :id="container_id">
-          <div v-if="showHeadLight" class="d-flex justify-content-between mx-auto">
-            <lah-fa-icon v-for="entry in list" icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'回應時間: '+entry.latency+'ms'">{{entry.name}}</lah-fa-icon>
-          </div>
-          <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="aspectRatio" :bg-color="chartItemColor"></lah-chart>
-        </div>
-      </b-card>
-    </lah-transition>`,
+            <b-card border-variant="secondary" class="shadow">
+                <template v-slot:header>
+                    <div class="d-flex w-100 justify-content-between mb-0">
+                        <h6 class="my-auto font-weight-bolder"><lah-fa-icon :icon="headerIcon" size="lg" :variant="headerLight"> 系統狀態監控 </lah-fa-icon></h6>
+                        <b-button-group>
+                            <lah-button icon="sync" variant='outline-secondary' class="border-0" @click="reload(true)" action="cycle" title="重新讀取"></lah-button>
+                            <lah-button v-if="!maximized" class="border-0" :icon="btnIcon" variant="outline-primary" title="顯示模式" @click="switchType"></lah-button>
+                            <lah-button v-if="!maximized" class="border-0" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popupMaximized" action="heartbeat"></lah-button>
+                            <lah-button icon="question" variant="outline-success" class="border-0" @click="popupQuestion" title="說明"></lah-button>
+                        </b-button-group>
+                    </div>
+                </template>
+                <div v-if="type == 'light'" :id="container_id" class="grids">
+                    <div v-for="entry in list" class="grid-s">
+                        <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'回應時間: '+entry.latency+'ms'">{{entry.name}}</lah-fa-icon>
+                    </div>
+                </div>
+                <div v-else :id="container_id">
+                    <div v-if="showHeadLight" class="d-flex justify-content-between mx-auto">
+                        <lah-fa-icon v-for="entry in list" icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'回應時間: '+entry.latency+'ms'">{{entry.name}}</lah-fa-icon>
+                    </div>
+                    <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="aspectRatio" :bg-color="chartItemColor"></lah-chart>
+                </div>
+            </b-card>
+        </lah-transition>`,
         props: {
             type: {
                 type: String,

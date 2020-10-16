@@ -271,6 +271,19 @@ switch ($_POST["type"]) {
             echoJSONResponse($error);
         }
         break;
+    case "stats_ip_connectivity_history":
+        if ($arr = $stats_sqlite3->getIPConnectivityStatus($_POST["ip"], $_POST["force"])) {
+            $count = count($arr);
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => $count,
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得 ".$_POST["ip"]." 連結狀態紀錄失敗。";
+            $log->error("XHR [stats_connectivity_history] ${error}");
+            echoJSONResponse($error);
+        }
+        break;
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

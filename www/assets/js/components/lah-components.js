@@ -688,7 +688,7 @@ if (Vue) {
         >
             <lah-fa-icon :id="icon_id" :icon="icon" :prefix="fa_icon_prefix">
                 <slot></slot>
-                <b-badge v-if="badgeCount > 0" :variant="badgeVariant" :pill="badgePill">{{badgeCount}}</b-badge>
+                <b-badge v-if="!empty(badgeText)" :variant="badgeVariant" :pill="badgePill">{{badgeText}}</b-badge>
             </lah-fa-icon>
       </b-button>`,
         props: {
@@ -728,7 +728,7 @@ if (Vue) {
                 type: Boolean,
                 default: false
             },
-            badgeCount: { type: Number, default: 0 },
+            badgeText: { type: String, default: '' },
             badgeVariant: { type: String, default: 'light' },
             badgePill: { type: Boolean, default: true }
         },
