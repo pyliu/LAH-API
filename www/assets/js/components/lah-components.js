@@ -770,15 +770,6 @@ if (Vue) {
             this.icon_id = this.uuid()
         }
     });
-    
-    Vue.component('lah-badge-button', {
-        template: `<lah-button>
-            <b-badge variant="light" pill>{{count}}</b-badge>
-        </lah-button>`,
-        data: () => ({
-            count: 0
-        })
-    });
 
     // need to include chart.min.js (chart.js) first.
     Vue.component("lah-chart", {
