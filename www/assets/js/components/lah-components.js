@@ -239,6 +239,7 @@ if (Vue) {
                 this.subtitle = opts.subtitle || "";
                 this.autohide = opts.autohide || true;
                 this.message = opts.message;
+                this.delay_ms = opts.delay_ms || opts.delay || opts.timeout || 10000;
                 this.type = opts.type;
                 this.seen = true;
             },

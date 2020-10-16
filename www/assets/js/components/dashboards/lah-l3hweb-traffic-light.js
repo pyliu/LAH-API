@@ -6,6 +6,7 @@ if (Vue) {
           <div class="d-flex w-100 justify-content-between mb-0">
             <h6 class="my-auto font-weight-bolder"><lah-fa-icon :icon="headerIcon" size="lg" :variant="headerLight"> L3HWEB 同步異動監控 </lah-fa-icon></h6>
             <b-button-group>
+              <lah-button v-if="show_broken_btn" icon="unlink" variant='danger' class="border-0" @click="showBrokenTable" action="damage" title="檢視損毀資料表"><b-badge variant="light" pill>{{broken_tbl_count}}</b-badge></lah-button>
               <lah-button icon="sync" variant='outline-secondary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
               <lah-button v-if="!maximized" class="border-0" :icon="btnIcon" variant="outline-primary" title="顯示模式" @click="switchType"></lah-button>
               <lah-button v-if="!maximized" class="border-0" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popupMaximized" action="heartbeat"></lah-button>
@@ -55,7 +56,8 @@ if (Vue) {
         ['平鎮所', 0],
         ['龜山所', 0]
       ],
-      reload_timer: null
+      reload_timer: null,
+      broken_tbl_raw: null
     }),
     computed: {
       btnIcon() { return this.type == 'light' ? 'chart-bar' : 'traffic-light' },
@@ -70,7 +72,9 @@ if (Vue) {
           if (this_light == 'danger') return 'danger';
         }
         return site_light;
-      }
+      },
+      broken_tbl_count() { return this.empty(this.broken_tbl_raw) ? 0 : this.broken_tbl_raw.length },
+      show_broken_btn() { return this.broken_tbl_count > 0 }
     },
     watch: {
       demo(flag) { this.reload() },
@@ -221,23 +225,10 @@ if (Vue) {
               this.alert({
                   title: "同步異動表格檢測",
                   message: `<i class="fa fa-exclamation-triangle fa-lg ld ld-beat"></i> 找到 ${res.data.data_count} 筆損毀表格`,
-                  type: "danger"
+                  type: "danger",
+                  delay: 20000
               });
-              this.msgbox({
-                title: '同步異動損毀表格',
-                message: this.$createElement('b-table', {
-                    props: {
-                        striped: true,
-                        hover: true,
-                        headVariant: 'dark',
-                        bordered: true,
-                        captionTop: true,
-                        caption: `找到 ${res.data.data_count} 件`,
-                        items: res.data.raw
-                    }
-                }),
-                size: 'xl'
-              });
+              this.broken_tbl_raw = res.data.raw;
             } else {
               this.$log(res.data.message);
             }
@@ -245,7 +236,27 @@ if (Vue) {
             this.error = err;
         }).finally(() => {
             this.isBusy = false;
-        });}
+        });
+      },
+      showBrokenTable() {
+        if (!this.empty(this.broken_tbl_raw)) { 
+          this.msgbox({
+            title: '同步異動損毀表格',
+            message: this.$createElement('b-table', {
+                props: {
+                    striped: true,
+                    hover: true,
+                    headVariant: 'dark',
+                    bordered: true,
+                    captionTop: true,
+                    caption: `找到 ${this.broken_tbl_raw.length} 件`,
+                    items: this.broken_tbl_raw
+                }
+            }),
+            size: 'xl'
+          });
+        }
+      }
     },
     created() {
       this.container_id = this.uuid();
