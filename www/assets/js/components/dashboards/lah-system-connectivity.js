@@ -28,7 +28,7 @@ if (Vue) {
             prepare() {
                 // store a mapping table in Vuex
                 if (!this.storeParams.hasOwnProperty('lah-ip-connectivity-map')) {
-                    // add new property to the storeParam with don't care value to reduce the xhr request
+                    // add new property to the storeParam with don't care value to reduce the xhr request (lock concept)
                     this.addToStoreParams('lah-ip-connectivity-map', true);
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_connectivity_target"
