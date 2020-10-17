@@ -6,6 +6,8 @@ if (Vue) {
             :badge-text="latency_txt"
             :variant="style.variant"
             :badge-variant="style.badge"
+            title="重新整理"
+            @click="reload(true)"
         >{{resolved_name}}</lah-button>`,
         props: {
             ip: { type: String, default: '127.0.0.1' },
@@ -80,6 +82,7 @@ if (Vue) {
                     this.log_time = this.now().replace(/[\-\s:]*/, '');
                     this.reload_timer = this.timeout(() => this.reload(), this.reload_ms); // default is 15 mins
                 } else {
+                    if (force) this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_ip_connectivity_history",
                         force: force,
@@ -128,11 +131,16 @@ if (Vue) {
                         </b-button-group>
                     </div>
                 </template>
+                <b-card-group v-if="type == 'light'" columns>
+                    <lah-ip-connectivity v-for="entry in list" :ip="entry.target_ip" class="mb-3" :demo="demo"></lah-ip-connectivity>
+                </b-card-group>
+                <!--
                 <div v-if="type == 'light'" :id="container_id" class="grids">
                     <div v-for="entry in list" class="grid-s">
                         <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'回應時間: '+entry.latency+'ms'">{{entry.name}}</lah-fa-icon>
                     </div>
                 </div>
+                -->
                 <div v-else :id="container_id">
                     <div v-if="showHeadLight" class="d-flex justify-content-between mx-auto">
                         <lah-fa-icon v-for="entry in list" icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'回應時間: '+entry.latency+'ms'">{{entry.name}}</lah-fa-icon>
