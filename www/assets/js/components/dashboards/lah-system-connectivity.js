@@ -19,7 +19,7 @@ if (Vue) {
         },
         watch: {
             name_map(val) {
-                if (val.size > 0) {
+                if (val.size > 12) {
                     this.name = this.storeParams['lah-ip-connectivity-map'].get(this.ip);
                 }
             }
@@ -28,15 +28,19 @@ if (Vue) {
             prepare() {
                 // store a mapping table in Vuex
                 if (!this.storeParams.hasOwnProperty('lah-ip-connectivity-map')) {
-                    this.addToStoreParams('lah-ip-connectivity-map', new Map());
+                    // add new property to the storeParam with don't care value to reduce the xhr request
+                    this.addToStoreParams('lah-ip-connectivity-map', true);
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_connectivity_target"
                     }).then(res => {
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            let map = new Map();
                             // raw is object of { 'AP31': 'xxx.xxx.xxx.31'}
                             for (const [name, ip] of Object.entries(res.data.raw)) {
-                                this.storeParams['lah-ip-connectivity-map'].set(ip, name);
+                                map.set(ip, name);
                             }
+                            // prepared map to the Vuex param
+                            this.storeParams['lah-ip-connectivity-map'] = map;
                             this.name = this.storeParams['lah-ip-connectivity-map'].get(this.ip)
                         } else {
                             this.notify({
