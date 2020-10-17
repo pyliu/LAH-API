@@ -1,8 +1,15 @@
 if (Vue) {
     Vue.component('lah-ip-connectivity', {
-        template: `<lah-button icon="circle" :badge-text="latency_txt">{{resolved_name}}</lah-button>`,
+        template: `<lah-button
+            icon="no"
+            :action="style.action"
+            :badge-text="latency_txt"
+            :variant="style.variant"
+            :badge-variant="style.badge"
+        >{{resolved_name}}</lah-button>`,
         props: {
-            ip: { type: String, default: '127.0.0.1' }
+            ip: { type: String, default: '127.0.0.1' },
+            demo: { type: Boolean, default:false }
         },
         data: () => ({
             name: undefined,
@@ -15,9 +22,18 @@ if (Vue) {
         computed: {
             resolved_name() { return this.name || this.ip },
             latency_txt() { return `${this.latency} ms` },
-            name_map() { return this.storeParams['lah-ip-connectivity-map'] }
+            name_map() { return this.storeParams['lah-ip-connectivity-map'] },
+            style() {
+                if (this.latency == 0 || this.latency > 1999) return { action: 'tremble', variant: 'outline-danger', badge: 'danger' };
+                if (this.latency > 1000) return { action: 'beat', variant: 'outline-warning', badge: 'warning' };
+                return { action: '', variant: 'outline-success', badge: 'success' };
+            }
         },
         watch: {
+            demo(val) {
+                this.reload_ms = val ? 5000 : 15 * 60 * 1000;
+                this.reload();
+            },
             name_map(val) {
                 if (val.size > 12) {
                     this.name = this.storeParams['lah-ip-connectivity-map'].get(this.ip);
@@ -58,30 +74,37 @@ if (Vue) {
             },
             reload(force = false) {
                 clearTimeout(this.reload_timer);
-                this.$http.post(CONFIG.API.JSON.STATS, {
-                    type: "stats_ip_connectivity_history",
-                    force: force,
-                    ip: this.ip
-                }).then(res => {
-                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        // res.data.raw: object of { target_ip: 'xxx.xxx.xxx.xxx', latency: 2000.0, status: 'DOWN', log_time: '20201005181631' }
-                        // this.$log(res.data.raw);
-                        this.latency = res.data.raw.latency;
-                        this.status = res.data.raw.status;
-                        this.log_time = res.data.raw.log_time;
-                    } else {
-                        this.notify({
-                            title: "檢查IP連結狀態",
-                            message: `${res.data.message}`,
-                            type: "warning"
-                        });
-                    }
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
-                    this.isBusy = false;
+                if (this.demo) {
+                    this.latency = this.rand(3000);
+                    this.status = this.latency > 1999 ? 'DOWN' : 'UP';
+                    this.log_time = this.now().replace(/[\-\s:]*/, '');
                     this.reload_timer = this.timeout(() => this.reload(), this.reload_ms); // default is 15 mins
-                });
+                } else {
+                    this.$http.post(CONFIG.API.JSON.STATS, {
+                        type: "stats_ip_connectivity_history",
+                        force: force,
+                        ip: this.ip
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            // res.data.raw: object of { target_ip: 'xxx.xxx.xxx.xxx', latency: 2000.0, status: 'DOWN', log_time: '20201005181631' }
+                            // this.$log(res.data.raw);
+                            this.latency = res.data.raw.latency;
+                            this.status = res.data.raw.status;
+                            this.log_time = res.data.raw.log_time;
+                        } else {
+                            this.notify({
+                                title: "檢查IP連結狀態",
+                                message: `${res.data.message}`,
+                                type: "warning"
+                            });
+                        }
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                        this.reload_timer = this.timeout(() => this.reload(), this.reload_ms); // default is 15 mins
+                    });
+                }
             }
         },
         created() {
