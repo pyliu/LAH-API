@@ -33,7 +33,11 @@ if (Vue) {
         },
         watch: {
             demo(val) { this.reload() },
-            name_map(val) { this.name = val.get(this.ip) }
+            name_map(val) {
+                if (val && val.size > 0) {
+                    this.name = this.storeParams['lah-ip-connectivity-map'].get(this.ip);
+                }
+            }
         },
         methods: {
             prepare() {
@@ -106,8 +110,7 @@ if (Vue) {
         created() {
             this.prepare();
             this.reload();
-        },
-        mounted() { }
+        }
     });
 
     Vue.component('lah-system-connectivity', {
@@ -124,11 +127,6 @@ if (Vue) {
                         </b-button-group>
                     </div>
                 </template>
-                <!--
-                <b-card-group v-if="type == 'light'" columns>
-                    <lah-ip-connectivity v-for="entry in list" :ip="entry.target_ip" class="mb-3" :demo="demo"></lah-ip-connectivity>
-                </b-card-group>
-                -->
                 <div v-if="type == 'light'" :id="container_id" class="grids">
                     <div v-for="entry in list" class="grid-s">
                         <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'回應時間: '+entry.latency+'ms'">{{entry.name}}</lah-fa-icon>
@@ -189,7 +187,7 @@ if (Vue) {
         },
         watch: {
             demo(flag) { this.reload() },
-            list(arr) { if (this.type != 'light') this.updChartData(arr) },
+            list(arr) { this.updChartData(arr) },
             type(dontcare) { this.reload() }
         },
         methods: {
@@ -250,6 +248,14 @@ if (Vue) {
                     size: "xl"
                 });
             },
+            demoReload() {
+                clearTimeout(this.reload_timer);
+                this.list.forEach(item => {
+                    item.latency = this.rand(2500);
+                });
+                this.updChartData(this.list);
+                this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);
+            },
             prepare() {
                 this.isBusy = true;
                 this.$http.post(CONFIG.API.JSON.STATS, {
@@ -282,16 +288,10 @@ if (Vue) {
                 });
             },
             reload(force = false) {
-                clearTimeout(this.reload_timer);
                 if (this.demo) {
-                    this.list.forEach(item => {
-                        item.latency = this.rand(2500);
-                        if (this.type != 'light' && this.$refs.chart) {
-                            this.$refs.chart.changeValue(item.name, item.latency);
-                        }
-                    });
-                    this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);
+                    this.demoReload();
                 } else {
+                    clearTimeout(this.reload_timer);
                     let orig_axio_timeout = axios.defaults.timeout;
                     this.isBusy = true;
                     // maximum number of timeout in milliseconds
