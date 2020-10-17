@@ -18,10 +18,10 @@ if (Vue) {
             latency: 0.0,
             status: 'DOWN',
             log_time: '20201016185331',
-            reload_timer: null,
-            reload_ms: 15 * 60 * 1000   // 15 minutes
+            reload_timer: null
         }),
         computed: {
+            reload_ms() { return this.demo ? 5000 : 15 * 60 * 1000 },
             resolved_name() { return this.name || this.ip },
             latency_txt() { return `${this.latency} ms` },
             name_map() { return this.storeParams['lah-ip-connectivity-map'] },
@@ -32,15 +32,8 @@ if (Vue) {
             }
         },
         watch: {
-            demo(val) {
-                this.reload_ms = val ? 5000 : 15 * 60 * 1000;
-                this.reload();
-            },
-            name_map(val) {
-                if (val.size > 12) {
-                    this.name = this.storeParams['lah-ip-connectivity-map'].get(this.ip);
-                }
-            }
+            demo(val) { this.reload() },
+            name_map(val) { this.name = val.get(this.ip) }
         },
         methods: {
             prepare() {
@@ -131,16 +124,16 @@ if (Vue) {
                         </b-button-group>
                     </div>
                 </template>
+                <!--
                 <b-card-group v-if="type == 'light'" columns>
                     <lah-ip-connectivity v-for="entry in list" :ip="entry.target_ip" class="mb-3" :demo="demo"></lah-ip-connectivity>
                 </b-card-group>
-                <!--
+                -->
                 <div v-if="type == 'light'" :id="container_id" class="grids">
                     <div v-for="entry in list" class="grid-s">
                         <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'回應時間: '+entry.latency+'ms'">{{entry.name}}</lah-fa-icon>
                     </div>
                 </div>
-                -->
                 <div v-else :id="container_id">
                     <div v-if="showHeadLight" class="d-flex justify-content-between mx-auto">
                         <lah-fa-icon v-for="entry in list" icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'回應時間: '+entry.latency+'ms'">{{entry.name}}</lah-fa-icon>
@@ -169,10 +162,10 @@ if (Vue) {
             chartLabel: 'PING回應時間(微秒)',
             charType: 'bar',
             chartItems: [],
-            reload_timer: null,
-            reload_ms: 15 * 60 * 1000 // 15 mins
+            reload_timer: null
         }),
         computed: {
+            reload_ms() { return this.demo ? 5000 : 15 * 60 * 1000 },
             btnIcon() {
                 return this.type == 'light' ? 'chart-bar' : 'traffic-light'
             },
@@ -196,7 +189,7 @@ if (Vue) {
         },
         watch: {
             demo(flag) { this.reload() },
-            list(arr) { this.updChartData(arr) },
+            list(arr) { if (this.type != 'light') this.updChartData(arr) },
             type(dontcare) { this.reload() }
         },
         methods: {
@@ -293,9 +286,11 @@ if (Vue) {
                 if (this.demo) {
                     this.list.forEach(item => {
                         item.latency = this.rand(2500);
+                        if (this.type != 'light' && this.$refs.chart) {
+                            this.$refs.chart.changeValue(item.name, item.latency);
+                        }
                     });
-                    this.updChartData(this.list);
-                    this.reload_timer = this.timeout(() => this.reload(), 5000);
+                    this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);
                 } else {
                     let orig_axio_timeout = axios.defaults.timeout;
                     this.isBusy = true;
@@ -317,7 +312,7 @@ if (Vue) {
                                     found.status = item.status;
                                     found.log_time = item.log_time;
                                     // not reactively ... manual set chartData
-                                    if (this.$refs.chart) {
+                                    if (this.type != 'light' && this.$refs.chart) {
                                         this.$refs.chart.changeValue(found.name, found.latency);
                                     }
                                 } else {
