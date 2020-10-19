@@ -6,7 +6,7 @@ if (Vue) {
                     <div class="d-flex w-100 justify-content-between mb-0">
                         <h6 class="my-auto font-weight-bolder"><lah-fa-icon :icon="headerIcon" size="lg" :variant="headerLight"> 系統狀態監控 </lah-fa-icon></h6>
                         <b-button-group>
-                            <lah-button icon="sync" variant='outline-secondary' class="border-0" @click="reload(true)" action="cycle" title="重新讀取"></lah-button>
+                            <lah-button v-if="type != 'light'" icon="sync" variant='outline-secondary' class="border-0" @click="reload(true)" action="cycle" title="重新讀取"></lah-button>
                             <lah-button v-if="!maximized" class="border-0" :icon="btnIcon" variant="outline-primary" title="顯示模式" @click="switchType"></lah-button>
                             <lah-button v-if="!maximized" class="border-0" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popupMaximized" action="heartbeat"></lah-button>
                             <lah-button icon="question" variant="outline-success" class="border-0" @click="popupQuestion" title="說明"></lah-button>
@@ -14,8 +14,8 @@ if (Vue) {
                     </div>
                 </template>
                 <div v-if="type == 'light'" :id="container_id" class="grids">
-                    <div v-for="entry in list" class="grid-s">
-                        <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'回應時間: '+entry.latency+'ms'">{{entry.name}}</lah-fa-icon>
+                    <div v-for="entry in list" class="grid-one-third">
+                        <lah-ip-connectivity :ip="entry.target_ip" block></lah-ip-connectivity>
                     </div>
                 </div>
                 <div v-else :id="container_id">

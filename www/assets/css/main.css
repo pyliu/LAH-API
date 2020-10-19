@@ -252,3 +252,8 @@ blockquote {
 	border: 1px solid gray;
 	margin: 0.5%;
 }
+
+.grid-one-third {
+	width: 31%;
+	margin: 1%;
+}

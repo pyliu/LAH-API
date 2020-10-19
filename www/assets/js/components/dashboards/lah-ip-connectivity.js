@@ -6,11 +6,13 @@ if (Vue) {
             :badge-text="latency_txt"
             :variant="style.variant"
             :badge-variant="style.badge"
+            :block="block"
             title="重新整理"
             @click="reload(true)"
         >{{resolved_name}}</lah-button>`,
         props: {
             ip: { type: String, default: '127.0.0.1' },
+            block: { type: Boolean, default: false },
             demo: { type: Boolean, default:false }
         },
         data: () => ({
