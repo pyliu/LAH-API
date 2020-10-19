@@ -32,8 +32,8 @@
                     <lah-button @click="if (!storeParams.hasOwnProperty('demo')) addToStoreParams('demo', false); storeParams['demo'] = !storeParams['demo'];" icon="laptop-code" :pressed="storeParams['demo']">DEMO</lah-button>
                     <lah-button v-b-toggle.sidebar-1 icon="bars" action="move-fade-ltr">側邊攔</lah-button>
                     <lah-ip-connectivity ip="220.1.35.37" :demo="storeParams['demo']"></lah-ip-connectivity>
-                    <lah-ip-connectivity ip="220.1.35.35"></lah-ip-connectivity>
-                    <lah-ip-connectivity></lah-ip-connectivity>
+                    <lah-ip-connectivity ip="220.1.35.35" :demo="storeParams['demo']"></lah-ip-connectivity>
+                    <lah-ip-connectivity :demo="storeParams['demo']"></lah-ip-connectivity>
                     <div id="test_container"></div>
                 </b-card>
                 <lah-xap-connection-chart :demo="storeParams['demo']"></lah-xap-connection-chart>

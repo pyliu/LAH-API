@@ -41,35 +41,52 @@ if (Vue) {
         },
         methods: {
             prepare() {
-                // store a mapping table in Vuex
-                if (!this.storeParams.hasOwnProperty('lah-ip-connectivity-map')) {
-                    // add new property to the storeParam with don't care value to reduce the xhr request (lock concept)
-                    this.addToStoreParams('lah-ip-connectivity-map', true);
-                    this.$http.post(CONFIG.API.JSON.STATS, {
-                        type: "stats_connectivity_target"
-                    }).then(res => {
-                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                            let map = new Map();
-                            // raw is object of { 'AP31': 'xxx.xxx.xxx.31'}
-                            for (const [name, ip] of Object.entries(res.data.raw)) {
-                                map.set(ip, name);
-                            }
-                            // prepared map to the Vuex param
-                            this.storeParams['lah-ip-connectivity-map'] = map;
-                            this.name = this.storeParams['lah-ip-connectivity-map'].get(this.ip)
-                        } else {
-                            this.notify({
-                                title: "初始化 lah-ip-connectivity-map",
-                                message: `${res.data.message}`,
-                                type: "warning"
+                this.getLocalCache('lah-ip-connectivity-map').then((cached) => {
+                    if (cached === false) {
+                        if (!this.storeParams.hasOwnProperty('lah-ip-connectivity-map')) {
+                            // add new property to the storeParam with don't care value to reduce the xhr request (lock concept)
+                            this.addToStoreParams('lah-ip-connectivity-map', true);
+                            // store a mapping table in Vuex
+                            this.$http.post(CONFIG.API.JSON.STATS, {
+                                type: "stats_connectivity_target"
+                            }).then(res => {
+                                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                    let map = new Map();
+                                    // raw is object of { 'AP31': 'xxx.xxx.xxx.31'}
+                                    for (const [name, ip] of Object.entries(res.data.raw)) {
+                                        map.set(ip, name);
+                                    }
+                                    // prepared map to the Vuex param
+                                    this.storeParams['lah-ip-connectivity-map'] = map;
+                                    this.name = this.storeParams['lah-ip-connectivity-map'].get(this.ip);
+                                    this.setLocalCache('lah-ip-connectivity-map', res.data.raw);
+                                } else {
+                                    this.notify({
+                                        title: "初始化 lah-ip-connectivity-map",
+                                        message: `${res.data.message}`,
+                                        type: "warning"
+                                    });
+                                }
+                            }).catch(err => {
+                                this.error = err;
+                            }).finally(() => {
+                                this.isBusy = false;
                             });
                         }
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        this.isBusy = false;
-                    });
-                }
+                    } else {
+                        // commit to Vuex store
+                        if (!this.storeParams.hasOwnProperty('lah-ip-connectivity-map')) {
+                            this.addToStoreParams('lah-ip-connectivity-map', true);
+                        }
+                        let map = new Map();
+                        for (const [name, ip] of Object.entries(cached)) {
+                            map.set(ip, name);
+                        }
+                        this.name = map.get(this.ip)
+                        // prepared map to the Vuex param
+                        this.storeParams['lah-ip-connectivity-map'] = map;
+                    }
+                });
             },
             reload(force = false) {
                 clearTimeout(this.reload_timer);
