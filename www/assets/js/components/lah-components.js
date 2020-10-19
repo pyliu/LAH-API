@@ -680,6 +680,7 @@ if (Vue) {
             :variant="variant"
             :size="size"
             :pill="pill"
+            :block="block"
             :pressed="pressed"
             @mouseenter="mouseenter"
             @mouseleave="mouseleave"
@@ -721,6 +722,10 @@ if (Vue) {
                 default: console.log
             },
             pill: {
+                type: Boolean,
+                default: false
+            },
+            block: {
                 type: Boolean,
                 default: false
             },
