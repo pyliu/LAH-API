@@ -1,13 +1,13 @@
 if (Vue) {
     Vue.component('lah-ip-connectivity', {
         template: `<lah-button
-            icon="no"
+            icon="server"
             :action="style.action"
             :badge-text="latency_txt"
             :variant="style.variant"
             :badge-variant="style.badge"
             :block="block"
-            title="重新整理"
+            :title="title"
             @click="reload(true)"
         >{{resolved_name}}</lah-button>`,
         props: {
@@ -23,6 +23,7 @@ if (Vue) {
             reload_timer: null
         }),
         computed: {
+            title() { return `重新整理 ${this.ip} PING回應值`},
             reload_ms() { return this.demo ? 5000 : 15 * 60 * 1000 },
             resolved_name() { return this.name || this.ip },
             latency_txt() { return `${this.latency} ms` },
@@ -30,7 +31,7 @@ if (Vue) {
             style() {
                 if (this.latency == 0 || this.latency > 1999) return { action: 'tremble', variant: 'outline-danger', badge: 'danger' };
                 if (this.latency > 1000) return { action: 'beat', variant: 'outline-warning', badge: 'warning' };
-                return { action: '', variant: 'outline-success', badge: 'success' };
+                return { action: 'breath', variant: 'outline-success', badge: 'success' };
             }
         },
         watch: {

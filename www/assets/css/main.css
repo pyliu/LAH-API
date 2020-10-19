@@ -242,6 +242,7 @@ blockquote {
 
 .grid-s {
 	width: 32%;
+	margin: 0.5%;
 	height: 16%;
 	box-sizing: border-box;
 	display: flex;
@@ -250,10 +251,9 @@ blockquote {
 	padding: auto;
 	border-radius: 10px;
 	border: 1px solid gray;
-	margin: 0.5%;
 }
 
 .grid-one-third {
-	width: 31%;
-	margin: 1%;
+	width: 32%;
+	margin: 0.5%;
 }
