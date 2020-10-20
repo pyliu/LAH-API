@@ -105,8 +105,8 @@ if (Vue) {
                 }
             },
             light(entry) {
-                if (entry.latency > CONFIG.PING.DANGER.0) return 'danger';
-                if (entry.latency > CONFIG.PING.WARNING.0) return 'warning';
+                if (entry.latency > CONFIG.PING.DANGER) return 'danger';
+                if (entry.latency > CONFIG.PING.WARNING) return 'warning';
                 return 'success';
             },
             popupQuestion() {
