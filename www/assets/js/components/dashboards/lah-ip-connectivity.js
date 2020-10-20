@@ -30,7 +30,8 @@ if (Vue) {
             latency_txt() { return `${this.latency} ms` },
             name_map() { return this.storeParams['lah-ip-connectivity-map'] },
             style() {
-                if (this.latency == 0 || this.latency > 1999) return { action: 'tremble', variant: 'outline-danger', badge: 'danger' };
+                if (this.latency == 0) return { action: 'blur', variant: 'secondary', badge: 'light' };
+                if (this.latency > 1999) return { action: 'tremble', variant: 'outline-danger', badge: 'danger' };
                 if (this.latency > 1000) return { action: 'beat', variant: 'outline-warning', badge: 'warning' };
                 return { action: 'breath', variant: 'outline-success', badge: 'success' };
             }
