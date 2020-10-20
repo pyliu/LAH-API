@@ -5,6 +5,10 @@ const CONFIG = {
     AP_SVR: "220.1.35.123",
     SCREENSAVER: false,
     SCREENSAVER_TIMER: 15 * 60 * 1000,
+    PING: {
+        DANGER: 999,
+        WARNING: 499
+    },
     API: {
         XLSX: {
             LANDING: "api/xlsx/landing.php"

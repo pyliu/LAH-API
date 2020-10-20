@@ -48,7 +48,7 @@ class Ping {
      *   Timeout (in seconds) used for ping and fsockopen().
      * @throws \Exception if the host is not set.
      */
-    public function __construct($host, $ttl = 255, $timeout = 2) {
+    public function __construct($host, $ttl = 255, $timeout = 1) {
         if (!isset($host)) {
             throw new \Exception("Error: Host name not supplied.");
         }

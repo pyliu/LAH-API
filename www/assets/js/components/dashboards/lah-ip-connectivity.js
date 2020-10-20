@@ -28,15 +28,14 @@ if (Vue) {
             reload_ms() { return this.demo ? 5000 : 15 * 60 * 1000 },
             resolved_name() { return this.name || (this.ip == '127.0.0.1' ? '本機' : this.ip) },
             latency_txt() {
-                if (this.latency > 1999) return `逾時`;
-                if (this.latency > 999) return `${(this.latency/1000).toFixed(1)} s`;
+                if (this.latency > CONFIG.PING.DANGER) return `逾時`;
                 return `${this.latency} ms`
             },
             name_map() { return this.storeParams['lah-ip-connectivity-map'] },
             style() {
                 if (this.latency == 0) return { action: 'blur', variant: 'secondary', badge: 'light' };
-                if (this.latency > 1999) return { action: 'tremble', variant: 'outline-danger', badge: 'danger' };
-                if (this.latency > 1000) return { action: 'beat', variant: 'outline-warning', badge: 'warning' };
+                if (this.latency > CONFIG.PING.DANGER) return { action: 'tremble', variant: 'outline-danger', badge: 'danger' };
+                if (this.latency > CONFIG.PING.WARNING) return { action: 'beat', variant: 'outline-warning', badge: 'warning' };
                 return { action: 'breath', variant: 'outline-success', badge: 'success' };
             }
         },
@@ -101,7 +100,7 @@ if (Vue) {
                 clearTimeout(this.reload_timer);
                 if (this.demo) {
                     this.latency = this.rand(3000);
-                    this.status = this.latency > 1999 ? 'DOWN' : 'UP';
+                    this.status = this.latency > CONFIG.PING.DANGER ? 'DOWN' : 'UP';
                     this.log_time = this.now().replace(/[\-\s:]*/, '');
                     this.reload_timer = this.timeout(() => this.reload(), this.reload_ms); // default is 15 mins
                 } else {

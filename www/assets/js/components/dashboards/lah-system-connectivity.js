@@ -82,10 +82,10 @@ if (Vue) {
             },
             chartItemColor(dataset_item, opacity) {
                 let rgb, value = dataset_item[1];
-                if (value > 1999) {
+                if (value > CONFIG.PING.DANGER) {
                     rgb = `rgb(243, 0, 19, ${opacity})`
                 } // red
-                else if (value > 999) {
+                else if (value > CONFIG.PING.WARNING) {
                     rgb = `rgb(238, 182, 1, ${opacity})`;
                 } // yellow
                 else {
@@ -105,16 +105,16 @@ if (Vue) {
                 }
             },
             light(entry) {
-                if (entry.latency > 1999.0) return 'danger';
-                if (entry.latency > 999.0) return 'warning';
+                if (entry.latency > CONFIG.PING.DANGER.0) return 'danger';
+                if (entry.latency > CONFIG.PING.WARNING.0) return 'warning';
                 return 'success';
             },
             popupQuestion() {
                 this.msgbox({
                     title: '系統狀態監控說明',
                     message: `
-                        <h6 class="my-2"><i class="fa fa-circle text-danger fa-lg"></i> Ping回應值超過2秒</h6>
-                        <h6 class="my-2"><i class="fa fa-circle text-warning fa-lg"></i> Ping回應值超過1秒</h6>
+                        <h6 class="my-2"><i class="fa fa-circle text-danger fa-lg"></i> Ping回應值超過1秒</h6>
+                        <h6 class="my-2"><i class="fa fa-circle text-warning fa-lg"></i> Ping回應值超過0.5秒</h6>
                         <h6 class="my-2"><i class="fa fa-circle text-success fa-lg"></i> Ping回應值正常</h6>
                     `,
                     size: 'lg'
