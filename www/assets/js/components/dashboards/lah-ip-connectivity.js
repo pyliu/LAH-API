@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component('lah-ip-connectivity', {
         template: `<lah-button
-            icon="server"
+            :icon="icon"
             :action="style.action"
             :badge-text="latency_txt"
             :variant="style.variant"
@@ -23,6 +23,7 @@ if (Vue) {
             reload_timer: null
         }),
         computed: {
+            icon() { return 'NO' },
             title() { return `重新整理 ${this.ip} PING回應值`},
             reload_ms() { return this.demo ? 5000 : 15 * 60 * 1000 },
             resolved_name() { return this.name || this.ip },
