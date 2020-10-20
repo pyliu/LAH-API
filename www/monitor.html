@@ -24,12 +24,12 @@
     <div class="container-fluid" v-cloak>
       <b-card-group deck>
         <lah-xap-connection-chart ip="220.1.35.123"></lah-xap-connection-chart>
-        <lah-ap-connection-history-chart ip="220.1.35.123"></lah-ap-connection-history-chart>
+        <lah-system-connectivity></lah-system-connectivity>
       </b-card-group>
       <b-card-group deck class="mt-3">
+        <lah-ap-connection-history-chart ip="220.1.35.123"></lah-ap-connection-history-chart>
         <lah-xap-history-chart site="HB" type='bar' watch-top-site-index="0"></lah-xap-history-chart>
         <!-- <lah-xap-history-chart site="HA" type="bar" watch-top-site-index="1"></lah-xap-history-chart> -->
-        <lah-system-connectivity></lah-system-connectivity>
         <lah-l3hweb-traffic-light></lah-l3hweb-traffic-light>
         <!-- <lah-xap-history-chart site="HC" type="bar" watch-top-site-index="2"></lah-xap-history-chart> -->
       </b-card-group>

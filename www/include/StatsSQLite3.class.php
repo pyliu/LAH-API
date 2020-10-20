@@ -342,7 +342,7 @@ class StatsSQLite3 {
         // inst into db
         $db_path = $this->getConnectivityDB();
         $ap_db = new SQLite3($db_path);
-        $stm = $ap_db->prepare('SELECT * FROM target');
+        $stm = $ap_db->prepare('SELECT * FROM target ORDER BY name');
         if ($stm === false) {
             $log->warning(__METHOD__.": 準備資料庫 statement [ SELECT * FROM target ] 失敗。");
         } else {
