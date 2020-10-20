@@ -26,7 +26,7 @@ if (Vue) {
             icon() { return 'server' },
             title() { return `重新整理 ${this.ip} PING回應值`},
             reload_ms() { return this.demo ? 5000 : 15 * 60 * 1000 },
-            resolved_name() { return this.name || this.ip },
+            resolved_name() { return this.name || (this.ip == '127.0.0.1' ? '本機' : this.ip) },
             latency_txt() {
                 if (this.latency > 1999) return `逾時`;
                 if (this.latency > 999) return `${(this.latency/1000).toFixed(1)} s`;
