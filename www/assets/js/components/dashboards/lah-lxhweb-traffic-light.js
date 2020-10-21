@@ -148,7 +148,7 @@ if (Vue) {
             title: this.site,
             message: this.$createElement('lah-lxhweb-traffic-light', {
                 props: {
-                    site: `放大顯示`,
+                    site: this.site,
                     type: 'full',
                     demo: this.demo,
                     aspectRatio: this.viewportRatio,
