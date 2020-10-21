@@ -178,13 +178,11 @@ if (Vue) {
                     this.demoReload();
                 } else {
                     clearTimeout(this.reload_timer);
-                    let orig_axio_timeout = axios.defaults.timeout;
                     this.isBusy = true;
-                    // maximum number of timeout in milliseconds
-                    axios.defaults.timeout = this.list.length * 2000 + 5000;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_connectivity_history",
-                        force: force
+                        force: force,
+                        timeout: this.list.length * 2000 + 5000 // maximum number of timeout in milliseconds
                     }).then(res => {
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             //array of { target_ip: 'xxx.xxx.xxx.xxx', latency: 2000.0, status: 'DOWN', log_time: '20201005181631' }
@@ -217,7 +215,6 @@ if (Vue) {
                     }).finally(() => {
                         this.isBusy = false;
                         this.reload_timer = this.timeout(() => this.reload(), this.reload_ms); // default is 15 mins
-                        axios.defaults.timeout = orig_axio_timeout;
                     });
                 }
             },
