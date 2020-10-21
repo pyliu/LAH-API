@@ -249,20 +249,20 @@ class WatchDog {
         
         // TODO ...
         
-        $system = new System();
-        $adm_ips = $system->getRoleAdminIps();
-        foreach ($adm_ips as $adm_ip) {
-            if ($adm_ip == '::1') {
-                continue;
-            }
-            $sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, 840);   // 840 secs => +14 mins
-            $log->info("訊息已送出(${sn})給 ${adm_ip}");
-        }
-        $this->stats->addXcasesStats(array(
-            "date" => date("Y-m-d H:i:s"),
-            "found" => count($rows),
-            "note" => $content
-        ));
+        // $system = new System();
+        // $adm_ips = $system->getRoleAdminIps();
+        // foreach ($adm_ips as $adm_ip) {
+        //     if ($adm_ip == '::1') {
+        //         continue;
+        //     }
+        //     $sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, 840);   // 840 secs => +14 mins
+        //     $log->info("訊息已送出(${sn})給 ${adm_ip}");
+        // }
+        // $this->stats->addXcasesStats(array(
+        //     "date" => date("Y-m-d H:i:s"),
+        //     "found" => count($rows),
+        //     "note" => $content
+        // ));
     }
 
     function __construct() { $this->stats = new StatsSQLite3(); }
