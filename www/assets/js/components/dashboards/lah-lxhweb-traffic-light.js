@@ -29,18 +29,9 @@ if (Vue) {
     </lah-transition>`,
     props: {
       site: { type: String, default: 'L3HWEB' },
-      type: {
-        type: String,
-        default: 'light'
-      },
-      demo: {
-        type: Boolean,
-        default: false
-      },
-      maximized: {
-        type: Boolean,
-        default: false
-      }
+      type: { type: String, default: 'light' },
+      demo: { type: Boolean, default: false },
+      maximized: { type: Boolean, default: false }
     },
     data: () => ({
       container_id: 'grids-container',
