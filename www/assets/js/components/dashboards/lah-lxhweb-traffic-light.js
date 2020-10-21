@@ -75,7 +75,8 @@ if (Vue) {
         return site_light;
       },
       broken_tbl_count() { return this.empty(this.broken_tbl_raw) ? 0 : this.broken_tbl_raw.length },
-      show_broken_btn() { return this.broken_tbl_count > 0 }
+      show_broken_btn() { return this.broken_tbl_count > 0 },
+      reload_ms() { return this.demo ? 5000 : 1 * 60 * 1000 }
     },
     watch: {
       demo(flag) { this.reload() },
@@ -147,7 +148,7 @@ if (Vue) {
             title: this.site,
             message: this.$createElement('lah-lxhweb-traffic-light', {
                 props: {
-                    site: this.site,
+                    site: `放大顯示`,
                     type: 'full',
                     demo: this.demo,
                     aspectRatio: this.viewportRatio,
@@ -170,7 +171,7 @@ if (Vue) {
             { SITE: 'HG', UPDATE_DATETIME: this.randDate() },
             { SITE: 'HH', UPDATE_DATETIME: this.randDate() }
           ];
-          this.reload_timer = this.timeout(() => this.reload(), 5000);
+          this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);
         } else {
           this.isBusy = true;
           this.$http.post(CONFIG.API.JSON.LXHWEB, {
@@ -191,7 +192,7 @@ if (Vue) {
             this.error = err;
           }).finally(() => {
             this.isBusy = false;
-            this.reload_timer = this.timeout(() => this.reload(), 60 * 1000);  // a minute
+            this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);  // a minute
           });
         }
       },
