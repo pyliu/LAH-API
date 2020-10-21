@@ -144,10 +144,10 @@ if (Vue) {
       },
       popupMaximized() {
         this.msgbox({
-            title: `燈&圖顯示`,
+            title: this.site,
             message: this.$createElement('lah-lxhweb-traffic-light', {
                 props: {
-                    target: this.target,
+                    site: this.site,
                     type: 'full',
                     demo: this.demo,
                     aspectRatio: this.viewportRatio,
