@@ -27,7 +27,7 @@ switch ($_POST["type"]) {
 		if (!$mock) $cache->set('lxhweb_site_update_time', $rows);
 		$count = $rows === false ? 0 : count($rows);
 		if (empty($count)) {
-			echoJSONResponse('查無同步異動資料庫更新時間資料');
+			echoJSONResponse('查無同步異動資料庫更新時間資料 '.$_POST["site"]);
 		} else {
 			echoJSONResponse('共查詢到'.$count.'筆資料', STATUS_CODE::SUCCESS_NORMAL, array(
 				'data_count' => $count,
@@ -41,7 +41,7 @@ switch ($_POST["type"]) {
 		if (!$mock) $cache->set('lxhweb_broken_table', $rows);
 		$count = $rows === false ? 0 : count($rows);
 		if (empty($count)) {
-			echoJSONResponse('查無已損毀的同步異動表格', STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+			echoJSONResponse('查無已損毀的同步異動表格 '.$_POST["site"], STATUS_CODE::SUCCESS_WITH_NO_RECORD);
 		} else {
 			echoJSONResponse('共查詢到'.$count.'筆資料', STATUS_CODE::SUCCESS_NORMAL, array(
 				'data_count' => $count,
@@ -55,7 +55,7 @@ switch ($_POST["type"]) {
 		if (!$mock) $cache->set('lxhweb_tbl_update_time', $rows);
 		$count = $rows === false ? 0 : count($rows);
 		if (empty($count)) {
-			echoJSONResponse('查無'.$_POST["site"].'同步異動表格更新時間資料');
+			echoJSONResponse('查無 '.$_POST["office"].' 同步異動表格'.$_POST["site"].'更新時間資料');
 		} else {
 			echoJSONResponse('共查詢到'.$count.'筆資料', STATUS_CODE::SUCCESS_NORMAL, array(
 				'data_count' => $count,

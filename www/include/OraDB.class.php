@@ -27,25 +27,25 @@ class OraDB {
 
     public function connect($type = CONNECTION_TYPE::MAIN) {
         switch($type) {
+            case CONNECTION_TYPE::L1HWEB:
+                $conn_str = $this->L1HWEB_DB;
+                $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB;
+                break;
+            case CONNECTION_TYPE::L2HWEB:
+                $conn_str = $this->L2HWEB_DB;
+                $this->CONN_TYPE = CONNECTION_TYPE::L2HWEB;
+                break;
             case CONNECTION_TYPE::L3HWEB:
                 $conn_str = $this->L3HWEB_DB;
                 $this->CONN_TYPE = CONNECTION_TYPE::L3HWEB;
+                break;
             case CONNECTION_TYPE::TWEB:
                 $conn_str = $this->TWEB_DB;
                 $this->CONN_TYPE = CONNECTION_TYPE::TWEB;
+                break;
             default:
                 $conn_str = $this->MAIN_DB;
                 $this->CONN_TYPE = CONNECTION_TYPE::MAIN;
-        }
-
-        $conn_str = $this->MAIN_DB;
-        $this->CONN_TYPE = CONNECTION_TYPE::MAIN;
-        if ($type == CONNECTION_TYPE::L3HWEB) {
-            $conn_str = $this->L3HWEB_DB;
-            $this->CONN_TYPE = CONNECTION_TYPE::L3HWEB;
-        } else if ($type == CONNECTION_TYPE::TWEB) {
-            $conn_str = $this->TWEB_DB;
-            $this->CONN_TYPE = CONNECTION_TYPE::TWEB;
         }
         
         // clean previous connection first

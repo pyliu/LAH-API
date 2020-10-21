@@ -360,7 +360,7 @@ if (Vue) {
                     need_admin: true
                 }, {
                     text: "同步異動監控",
-                    url: "monitor_l3hweb.html",
+                    url: "monitor_lxhweb.html",
                     icon: "tv",
                     need_admin: true
                 }]

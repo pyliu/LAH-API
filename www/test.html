@@ -100,7 +100,8 @@
             created() {
                 this.$http.post(CONFIG.API.JSON.LXHWEB, {
                     type: "lxhweb_tbl_update_time",
-                    site: 'HB'
+                    office: 'HB',
+                    site: 'L3HWEB'
                 }).then(res => {
                     this.json = res.data;
                     this.notify({

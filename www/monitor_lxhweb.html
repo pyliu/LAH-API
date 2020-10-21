@@ -22,7 +22,11 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-      <lah-lxhweb-traffic-light type="full" :maximized="true"></lah-lxhweb-traffic-light>
+      <b-card-group deck>
+        <lah-lxhweb-traffic-light site="L1HWEB"></lah-lxhweb-traffic-light>
+        <lah-lxhweb-traffic-light site="L2HWEB"></lah-lxhweb-traffic-light>
+        <lah-lxhweb-traffic-light site="L3HWEB"></lah-lxhweb-traffic-light>
+      </b-card-group>
     </div>
   </section>
 
