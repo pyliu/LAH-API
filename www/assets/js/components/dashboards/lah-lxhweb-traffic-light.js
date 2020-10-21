@@ -1,10 +1,10 @@
 if (Vue) {
-  Vue.component('lah-l3hweb-traffic-light', {
+  Vue.component('lah-lxhweb-traffic-light', {
     template: `<lah-transition appear>
       <b-card border-variant="secondary" class="shadow">
         <template v-slot:header>
           <div class="d-flex w-100 justify-content-between mb-0">
-            <h6 class="my-auto font-weight-bolder"><lah-fa-icon :icon="headerIcon" size="lg" :variant="headerLight"> L3HWEB 同步異動監控 </lah-fa-icon></h6>
+            <h6 class="my-auto font-weight-bolder"><lah-fa-icon :icon="headerIcon" size="lg" :variant="headerLight"> {{site}} 同步異動監控 </lah-fa-icon></h6>
             <b-button-group>
               <lah-button v-if="show_broken_btn" icon="unlink" variant='danger' class="border-0" @click="showBrokenTable" action="damage" title="檢視損毀資料表"><b-badge variant="light" pill>{{broken_tbl_count}}</b-badge></lah-button>
               <lah-button icon="sync" variant='outline-secondary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
@@ -28,6 +28,7 @@ if (Vue) {
       </b-card>
     </lah-transition>`,
     props: {
+      site: { type: String, default: 'L3HWEB' },
       type: {
         type: String,
         default: 'light'
@@ -144,8 +145,9 @@ if (Vue) {
       popupMaximized() {
         this.msgbox({
             title: `燈&圖顯示`,
-            message: this.$createElement('lah-l3hweb-traffic-light', {
+            message: this.$createElement('lah-lxhweb-traffic-light', {
                 props: {
+                    target: this.target,
                     type: 'full',
                     demo: this.demo,
                     aspectRatio: this.viewportRatio,
@@ -172,7 +174,8 @@ if (Vue) {
         } else {
           this.isBusy = true;
           this.$http.post(CONFIG.API.JSON.LXHWEB, {
-            type: "l3hweb_site_update_time"
+            type: "lxhweb_site_update_time",
+            site: this.site
           }).then(res => {
             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
               // array of {SITE: 'HB', UPDATE_DATETIME: '2020-10-08 21:47:00'}
@@ -218,7 +221,8 @@ if (Vue) {
       },
       checkBrokenTable() {
         this.$http.post(CONFIG.API.JSON.LXHWEB, {
-            type: "l3hweb_broken_table"
+            type: "lxhweb_broken_table",
+            site: this.site
         }).then(res => {
             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
               // found
@@ -279,5 +283,5 @@ if (Vue) {
     }
   });
 } else {
-  console.error("vue.js not ready ... lah-l3hweb-traffic-light component can not be loaded.");
+  console.error("vue.js not ready ... lah-lxhweb-traffic-light component can not be loaded.");
 }

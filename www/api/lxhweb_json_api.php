@@ -2,19 +2,29 @@
 require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(ROOT_DIR."/include/System.class.php");
 require_once(ROOT_DIR."/include/Cache.class.php");
-require_once(ROOT_DIR."/include/L3HWEB.class.php");
+require_once(ROOT_DIR."/include/LXHWEB.class.php");
 
 $system = new System();
 $cache = new Cache();
-$l3hweb = new L3HWEB();
+$lxhweb = null;
+switch($_POST["site"]) {
+	case 'L1HWEB':
+		$lxhweb = new LXHWEB(CONNECTION_TYPE::L1HWEB);
+		break;
+	case 'L2HWEB':
+		$lxhweb = new LXHWEB(CONNECTION_TYPE::L2HWEB);
+		break;
+	default:
+		$lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
+}
 
 $mock = $system->isMockMode();
 
 switch ($_POST["type"]) {
-	case "l3hweb_site_update_time":
-        // $log->info("XHR [l3hweb_site_update_time] 查詢各所同步異動更新時間 請求 ".$_POST["site"]);
-		$rows = $mock ? $cache->get('l3hweb_site_update_time') : $l3hweb->querySiteUpdateTime();
-		if (!$mock) $cache->set('l3hweb_site_update_time', $rows);
+	case "lxhweb_site_update_time":
+		// $log->info("XHR [lxhweb_site_update_time] 查詢各所同步異動更新時間 請求 ".$_POST["site"]);
+		$rows = $mock ? $cache->get('lxhweb_site_update_time') : $lxhweb->querySiteUpdateTime();
+		if (!$mock) $cache->set('lxhweb_site_update_time', $rows);
 		$count = $rows === false ? 0 : count($rows);
 		if (empty($count)) {
 			echoJSONResponse('查無同步異動資料庫更新時間資料');
@@ -25,10 +35,10 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
-	case "l3hweb_broken_table":
-        $log->info("XHR [l3hweb_broken_table] 檢測損毀之同步異動表格請求");
-		$rows = $mock ? $cache->get('l3hweb_broken_table') : $l3hweb->queryBrokenTable();
-		if (!$mock) $cache->set('l3hweb_broken_table', $rows);
+	case "lxhweb_broken_table":
+        $log->info("XHR [lxhweb_broken_table] 檢測損毀之同步異動表格請求");
+		$rows = $mock ? $cache->get('lxhweb_broken_table') : $lxhweb->queryBrokenTable();
+		if (!$mock) $cache->set('lxhweb_broken_table', $rows);
 		$count = $rows === false ? 0 : count($rows);
 		if (empty($count)) {
 			echoJSONResponse('查無已損毀的同步異動表格', STATUS_CODE::SUCCESS_WITH_NO_RECORD);
@@ -39,10 +49,10 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
-	case "l3hweb_tbl_update_time":
-        $log->info("XHR [l3hweb_tbl_update_time] 查詢同步異動更新時間 請求 ".$_POST["site"]);
-		$rows = $mock ? $cache->get('l3hweb_tbl_update_time') : $l3hweb->queryTableUpdateTime($_POST["site"]);
-		if (!$mock) $cache->set('l3hweb_tbl_update_time', $rows);
+	case "lxhweb_tbl_update_time":
+        $log->info("XHR [lxhweb_tbl_update_time] 查詢同步異動更新時間 請求 ".$_POST["site"]);
+		$rows = $mock ? $cache->get('lxhweb_tbl_update_time') : $lxhweb->queryTableUpdateTime($_POST["site"]);
+		if (!$mock) $cache->set('lxhweb_tbl_update_time', $rows);
 		$count = $rows === false ? 0 : count($rows);
 		if (empty($count)) {
 			echoJSONResponse('查無'.$_POST["site"].'同步異動表格更新時間資料');

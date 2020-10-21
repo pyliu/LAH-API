@@ -5,11 +5,15 @@ putenv('NLS_LANG=American_America.US7ASCII');
 
 abstract class CONNECTION_TYPE {
     const MAIN = 0;
-    const L3HWEB = 1;
-    const TWEB = 2;
+    const TWEB = 1;
+    const L1HWEB = 2;
+    const L2HWEB = 3;
+    const L3HWEB = 4;
 }
 
 class OraDB {
+    private $L1HWEB_DB;
+    private $L2HWEB_DB;
     private $L3HWEB_DB;
     private $TWEB_DB;
     private $MAIN_DB;
@@ -22,6 +26,18 @@ class OraDB {
     private $CONN_TYPE;
 
     public function connect($type = CONNECTION_TYPE::MAIN) {
+        switch($type) {
+            case CONNECTION_TYPE::L3HWEB:
+                $conn_str = $this->L3HWEB_DB;
+                $this->CONN_TYPE = CONNECTION_TYPE::L3HWEB;
+            case CONNECTION_TYPE::TWEB:
+                $conn_str = $this->TWEB_DB;
+                $this->CONN_TYPE = CONNECTION_TYPE::TWEB;
+            default:
+                $conn_str = $this->MAIN_DB;
+                $this->CONN_TYPE = CONNECTION_TYPE::MAIN;
+        }
+
         $conn_str = $this->MAIN_DB;
         $this->CONN_TYPE = CONNECTION_TYPE::MAIN;
         if ($type == CONNECTION_TYPE::L3HWEB) {
@@ -123,6 +139,8 @@ class OraDB {
 
     function __construct($type = CONNECTION_TYPE::MAIN) {
         $system = new System();
+        $this->L1HWEB_DB = $system->get("ORA_DB_L1HWEB");
+        $this->L2HWEB_DB = $system->get("ORA_DB_L2HWEB");
         $this->L3HWEB_DB = $system->get("ORA_DB_L3HWEB");
         $this->TWEB_DB = $system->get("ORA_DB_TWEB");
         $this->MAIN_DB = $system->get("ORA_DB_MAIN");

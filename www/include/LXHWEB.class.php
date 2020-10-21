@@ -2,11 +2,11 @@
 require_once("init.php");
 require_once("OraDB.class.php");
 
-class L3HWEB {
+class LXHWEB {
     private $db;
 
-    function __construct() {
-        $this->db = new OraDB(CONNECTION_TYPE::L3HWEB);
+    function __construct($conn_type = CONNECTION_TYPE::L3HWEB) {
+        $this->db = new OraDB($conn_type);
     }
 
     function __destruct() {
