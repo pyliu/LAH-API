@@ -122,7 +122,7 @@ if (Vue) {
             },
             popupMaximized() {
                 this.msgbox({
-                    title: `燈&圖顯示`,
+                    title: `放大顯示`,
                     message: this.$createElement('lah-system-connectivity', {
                         props: {
                             type: 'full',
