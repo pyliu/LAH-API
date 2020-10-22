@@ -188,7 +188,24 @@ class StatsSQLite3 {
         // 更新 total counter
         $total = $this->getTotal('xcase_found_count') + $data["found"];
         $ret = $this->updateTotal('xcase_found_count', $total);
-        $log->info(__METHOD__.":xcase_found_count 計數器+".$data["found"]."，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
+        $log->info(__METHOD__.": xcase_found_count 計數器+".$data["found"]."，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
+
+    }
+
+    public function addBadSurCaseStats($data) {
+        // $data => ["date" => "2020-03-04 10:10:10","found" => 2, "note" => XXXXXXXXX]
+        // xcase_stats
+        $stm = $this->db->prepare("INSERT INTO found_bad_sur_case_stats (datetime,found,note) VALUES (:date, :found, :note)");
+        $stm->bindParam(':date', $data["date"]);
+        $stm->bindParam(':found', $data["found"]);
+        $stm->bindParam(':note', $data["note"]);
+        $ret = $stm->execute();
+        global $log;
+        $log->info(__METHOD__.": 新增複丈問題案件統計".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+        // 更新 total counter
+        $total = $this->getTotal('bad_sur_case_found_count') + $data["found"];
+        $ret = $this->updateTotal('bad_sur_case_found_count', $total);
+        $log->info(__METHOD__.": bad_sur_case_found_count 計數器+".$data["found"]."，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
 
     }
 

@@ -15,16 +15,10 @@ require_once("./include/StatsSQLite3.class.php");
 require_once("./include/Ping.class.php");
 
 try {
-    pingDomain('220.1.35.84');
-    $ping = new Ping('220.2.33.50');
-    $latency = $ping->ping();
+    $dog = new Watchdog();
+    var_dump($dog->findProblematicSURCases());
 }
 catch(Exception $e)
 {
     die($e->getMessage());
 }
-$stats = new StatsSQLite3();
-print_r($stats->getCheckingTargets());
-
-// echo date("Ymdhis", strtotime("-10 minutes"));
-// echo serialize(array( ));
