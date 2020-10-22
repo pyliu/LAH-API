@@ -3,16 +3,24 @@ require_once("System.class.php");
 // 地所DB的內碼為「American_America.US7ASCII」
 putenv('NLS_LANG=American_America.US7ASCII');
 
+/**
+ * 220.1.33.2 L1HWEB
+ * 220.1.33.3 L2HWEB
+ * 220.1.33.5 L3HWEB
+ * 220.1.33.5 L1HWEB
+*/
 abstract class CONNECTION_TYPE {
     const MAIN = 0;
     const TWEB = 1;
     const L1HWEB = 2;
     const L2HWEB = 3;
     const L3HWEB = 4;
+    const L1HWEB_33_5 = 5;
 }
 
 class OraDB {
     private $L1HWEB_DB;
+    private $L1HWEB_33_5_DB;
     private $L2HWEB_DB;
     private $L3HWEB_DB;
     private $TWEB_DB;
@@ -30,6 +38,10 @@ class OraDB {
             case CONNECTION_TYPE::L1HWEB:
                 $conn_str = $this->L1HWEB_DB;
                 $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB;
+                break;
+            case CONNECTION_TYPE::L1HWEB_33_5:
+                $conn_str = $this->L1HWEB_33_5_DB;
+                $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB_33_5;
                 break;
             case CONNECTION_TYPE::L2HWEB:
                 $conn_str = $this->L2HWEB_DB;
@@ -140,6 +152,7 @@ class OraDB {
     function __construct($type = CONNECTION_TYPE::MAIN) {
         $system = new System();
         $this->L1HWEB_DB = $system->get("ORA_DB_L1HWEB");
+        $this->L1HWEB_33_5_DB = $system->get("ORA_DB_L1HWEB_33_5");
         $this->L2HWEB_DB = $system->get("ORA_DB_L2HWEB");
         $this->L3HWEB_DB = $system->get("ORA_DB_L3HWEB");
         $this->TWEB_DB = $system->get("ORA_DB_TWEB");

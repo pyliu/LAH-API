@@ -11,6 +11,9 @@ switch($_POST["site"]) {
 	case 'L1HWEB':
 		$lxhweb = new LXHWEB(CONNECTION_TYPE::L1HWEB);
 		break;
+	case 'L1HWEB_33_5':
+		$lxhweb = new LXHWEB(CONNECTION_TYPE::L1HWEB_33_5);
+		break;
 	case 'L2HWEB':
 		$lxhweb = new LXHWEB(CONNECTION_TYPE::L2HWEB);
 		break;
