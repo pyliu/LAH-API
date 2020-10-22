@@ -182,7 +182,7 @@ if (Vue) {
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_connectivity_history",
                         force: force,
-                        timeout: this.list.length * 2000 + 5000 // maximum number of timeout in milliseconds
+                        timeout: this.list.length * 1000 + 3000 // maximum number of timeout in milliseconds
                     }).then(res => {
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             //array of { target_ip: 'xxx.xxx.xxx.xxx', latency: 2000.0, status: 'DOWN', log_time: '20201005181631' }
