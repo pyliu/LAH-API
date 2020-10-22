@@ -15,12 +15,12 @@ abstract class CONNECTION_TYPE {
     const L1HWEB = 2;
     const L2HWEB = 3;
     const L3HWEB = 4;
-    const L1HWEB_33_5 = 5;
+    const L1HWEB_Alt = 5;
 }
 
 class OraDB {
     private $L1HWEB_DB;
-    private $L1HWEB_33_5_DB;
+    private $L1HWEB_Alt_DB;
     private $L2HWEB_DB;
     private $L3HWEB_DB;
     private $TWEB_DB;
@@ -39,9 +39,9 @@ class OraDB {
                 $conn_str = $this->L1HWEB_DB;
                 $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB;
                 break;
-            case CONNECTION_TYPE::L1HWEB_33_5:
-                $conn_str = $this->L1HWEB_33_5_DB;
-                $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB_33_5;
+            case CONNECTION_TYPE::L1HWEB_Alt:
+                $conn_str = $this->L1HWEB_Alt_DB;
+                $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB_Alt;
                 break;
             case CONNECTION_TYPE::L2HWEB:
                 $conn_str = $this->L2HWEB_DB;
@@ -152,7 +152,7 @@ class OraDB {
     function __construct($type = CONNECTION_TYPE::MAIN) {
         $system = new System();
         $this->L1HWEB_DB = $system->get("ORA_DB_L1HWEB");
-        $this->L1HWEB_33_5_DB = $system->get("ORA_DB_L1HWEB_33_5");
+        $this->L1HWEB_Alt_DB = $system->get("ORA_DB_L1HWEB_Alt");
         $this->L2HWEB_DB = $system->get("ORA_DB_L2HWEB");
         $this->L3HWEB_DB = $system->get("ORA_DB_L3HWEB");
         $this->TWEB_DB = $system->get("ORA_DB_TWEB");
