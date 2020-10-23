@@ -10,6 +10,7 @@ require_once(INC_DIR."/StatsSQLite3.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/Temperature.class.php");
 require_once(INC_DIR."/System.class.php");
+require_once(INC_DIR."/Ping.class.php");
 
 require_once(INC_DIR."/api/JSONAPICommandFactory.class.php");
 
@@ -47,6 +48,25 @@ switch ($_POST["type"]) {
 			"ip" => $client_ip,
 			"data_count" => "1",
 			"message" => "client ip is ".$client_ip
+		), 0);
+		break;
+	case "ping":
+		$log->info("XHR [ping] Ping ".$_POST["ip"]." request.");
+		$ip = $_POST["ip"];
+		$ping = new Ping($ip, 255, 1);	// ip, ttl, timeout
+		$latency = $ping->ping();
+		$response_code = ($latency > 999) ? STATUS_CODE::FAIL_TIMEOUT : STATUS_CODE::SUCCESS_NORMAL;
+		$message = "$ip 回應時間".(($latency > 999) ? "逾時($latency ms)" : "為 $latency ms");
+		if (empty($latency)) {
+			$response_code = STATUS_CODE::DEFAULT_FAIL;
+			$message = "$ip 回應值為 ".($latency == '' ? '空值' : intval($latency).'ms');
+		}
+		echo json_encode(array(
+			"status" => $response_code,
+			"ip" => $ip,
+			"latency" => $latency,
+			"data_count" => "1",
+			"message" => $message
 		), 0);
 		break;
 	case "overdue_reg_cases":

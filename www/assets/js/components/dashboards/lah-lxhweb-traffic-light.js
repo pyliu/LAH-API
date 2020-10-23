@@ -4,7 +4,7 @@ if (Vue) {
       <b-card border-variant="secondary" class="shadow">
         <template v-slot:header>
           <div class="d-flex w-100 justify-content-between mb-0">
-            <h6 class="my-auto font-weight-bolder"><lah-fa-icon :icon="headerIcon" size="lg" :variant="headerLight"> {{site}} 同步異動監控 </lah-fa-icon></h6>
+            <h6 class="my-auto font-weight-bolder"><lah-fa-icon :icon="headerIcon" size="lg" :variant="headerLight">{{header}}</lah-fa-icon></h6>
             <b-button-group>
               <lah-button v-if="show_broken_btn" icon="unlink" variant='danger' class="border-0" @click="showBrokenTable" action="damage" title="檢視損毀資料表"><b-badge variant="light" pill>{{broken_tbl_count}}</b-badge></lah-button>
               <lah-button icon="sync" variant='outline-secondary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
@@ -14,16 +14,21 @@ if (Vue) {
             </b-button-group>
           </div>
         </template>
-        <div v-if="type == 'light'" :id="container_id" class="grids">
-          <div v-for="entry in list" class="grid">
-            <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
+        <div v-if="alive">
+          <div v-if="type == 'light'" :id="container_id" class="grids">
+            <div v-for="entry in list" class="grid">
+              <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
+            </div>
+          </div>
+          <div v-else :id="container_id">
+            <div v-if="showHeadLight" class="d-flex justify-content-between mx-auto">
+              <lah-fa-icon v-for="entry in list" icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
+            </div>
+            <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="aspectRatio" :bg-color="chartItemColor"></lah-chart>
           </div>
         </div>
-        <div v-else :id="container_id">
-          <div v-if="showHeadLight" class="d-flex justify-content-between mx-auto">
-            <lah-fa-icon v-for="entry in list" icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
-          </div>
-          <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="aspectRatio" :bg-color="chartItemColor"></lah-chart>
+        <div v-else>
+          <lah-fa-icon icon="exclamation-triangle" szie="lg" variant="danger" action="breath">{{site}} 目前無法連線。</lah-fa-icon>
         </div>
       </b-card>
     </lah-transition>`,
@@ -31,9 +36,18 @@ if (Vue) {
       site: { type: String, default: 'L3HWEB' },
       type: { type: String, default: 'light' },
       demo: { type: Boolean, default: false },
-      maximized: { type: Boolean, default: false }
+      maximized: { type: Boolean, default: false },
+      bypassPing: { type: Boolean, default: false}
     },
     data: () => ({
+      hwebMap: new Map([
+          ['L1HWEB', {name: 'L1同步異動', code: 'L1HWEB', ip: '220.1.33.2'}],
+          ['L1HWEB_Alt', {name: 'L1同步異動(備)', code: 'L1HWEB_Alt', ip: '220.1.33.5'}],
+          ['L2HWEB', {name: 'L2同步異動', code: 'L2HWEB', ip: '220.1.33.3'}],
+          ['L3HWEB', {name: 'L3同步異動', code: 'L3HWEB', ip: '220.1.33.5'}]
+      ]),
+      ping_latency: 0,
+      ping_message: '',
       container_id: 'grids-container',
       list: [],
       chartLabel: '未更新時間(分鐘)',
@@ -52,18 +66,33 @@ if (Vue) {
       broken_tbl_raw: null
     }),
     computed: {
+      ip() {
+        return this.hwebMap.get(this.site).ip;
+      },
+      header() {
+        if (this.supported) {
+          let entry = this.hwebMap.get(this.site);
+          return `${entry.name} ${entry.ip}`;
+        }
+        return `未支援 ${this.site} 監控`;
+      },
+      supported() { return this.hwebMap.has(this.site) },
+      alive() { return this.ping_latency > 0 && this.ping_latency < 1000 },
       btnIcon() { return this.type == 'light' ? 'chart-bar' : 'traffic-light' },
-      headerIcon() { return this.type == 'light' ? 'traffic-light' : 'chart-bar' },
       aspectRatio() { return this.showHeadLight ? this.viewportRatio + 0.2 : this.viewportRatio - 0.2 },
       showHeadLight() { return this.type == 'full' },
+      headerIcon() { return this.type == 'light' ? 'traffic-light' : 'chart-bar' },
       headerLight() {
-        let site_light = 'success';
-        for (let i = 0; i < this.list.length; i++) {
-          let this_light = this.light(this.list[i]);
-          if (this_light == 'warning') site_light = 'warning';
-          if (this_light == 'danger') return 'danger';
+        if (this.alive) {
+          let site_light = 'success';
+          for (let i = 0; i < this.list.length; i++) {
+            let this_light = this.light(this.list[i]);
+            if (this_light == 'warning') site_light = 'warning';
+            if (this_light == 'danger') return 'danger';
+          }
+          return site_light;
         }
-        return site_light;
+        return 'secondary';
       },
       broken_tbl_count() { return this.empty(this.broken_tbl_raw) ? 0 : this.broken_tbl_raw.length },
       show_broken_btn() { return this.broken_tbl_count > 0 },
@@ -109,12 +138,15 @@ if (Vue) {
         }
       },
       light(entry) {
-        const now = +new Date(); // in ms
-        const last_update = +new Date(entry.UPDATE_DATETIME.replace(' ', 'T'));
-        let offset = now - last_update;
-        if (offset > 30 * 60 * 1000) return 'danger';
-        else if (offset > 15 * 60 * 1000) return 'warning';
-        return 'success';
+        if (this.alive) {
+          const now = +new Date(); // in ms
+          const last_update = +new Date(entry.UPDATE_DATETIME.replace(' ', 'T'));
+          let offset = now - last_update;
+          if (offset > 30 * 60 * 1000) return 'danger';
+          else if (offset > 15 * 60 * 1000) return 'warning';
+          return 'success';
+        }
+        return 'secondary';
       },
       name(entry) {
         for (var value of this.xapMap.values()) {
@@ -149,42 +181,76 @@ if (Vue) {
             size: "xl"
         });
       },
-      reload() {
-        clearTimeout(this.reload_timer);
-        if (this.demo) {
-          this.list = [
-            { SITE: 'HA', UPDATE_DATETIME: this.randDate() },
-            { SITE: 'HB', UPDATE_DATETIME: this.randDate() },
-            { SITE: 'HC', UPDATE_DATETIME: this.randDate() },
-            { SITE: 'HD', UPDATE_DATETIME: this.randDate() },
-            { SITE: 'HE', UPDATE_DATETIME: this.randDate() },
-            { SITE: 'HF', UPDATE_DATETIME: this.randDate() },
-            { SITE: 'HG', UPDATE_DATETIME: this.randDate() },
-            { SITE: 'HH', UPDATE_DATETIME: this.randDate() }
-          ];
-          this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);
+      ping() {
+        if (this.bypassPing) {
+          this.ping_latency = 1;
+          this.ping_message = '';
+          this.reload();
         } else {
           this.isBusy = true;
-          this.$http.post(CONFIG.API.JSON.LXHWEB, {
-            type: "lxhweb_site_update_time",
-            site: this.site
+          this.$http.post(CONFIG.API.JSON.QUERY, {
+            type: "ping",
+            ip: this.ip
           }).then(res => {
             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
               // array of {SITE: 'HB', UPDATE_DATETIME: '2020-10-08 21:47:00'}
-              this.list = res.data.raw;
+              this.ping_latency = res.data.latency;
+              this.ping_message = res.data.message;
+              this.reload();
             } else {
               this.notify({
-                title: "同步異動主機狀態檢視",
-                message: `${res.data.message}`,
+                title: "PING回應值",
+                message: `${this.site} ${res.data.message}`,
                 type: "warning"
               });
+              this.timeout(() => this.ping(), this.reload_ms);  // a minute
             }
           }).catch(err => {
-            this.error = err;
-          }).finally(() => {
-            this.isBusy = false;
-            this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);  // a minute
-          });
+          this.error = err;
+          this.timeout(() => this.ping(), this.reload_ms);  // a minute
+        }).finally(() => {
+          this.isBusy = false;
+        });
+        }
+      },
+      reload() {
+        if (this.alive) {
+          clearTimeout(this.reload_timer);
+          if (this.demo) {
+            this.list = [
+              { SITE: 'HA', UPDATE_DATETIME: this.randDate() },
+              { SITE: 'HB', UPDATE_DATETIME: this.randDate() },
+              { SITE: 'HC', UPDATE_DATETIME: this.randDate() },
+              { SITE: 'HD', UPDATE_DATETIME: this.randDate() },
+              { SITE: 'HE', UPDATE_DATETIME: this.randDate() },
+              { SITE: 'HF', UPDATE_DATETIME: this.randDate() },
+              { SITE: 'HG', UPDATE_DATETIME: this.randDate() },
+              { SITE: 'HH', UPDATE_DATETIME: this.randDate() }
+            ];
+            this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);
+          } else {
+            this.isBusy = true;
+            this.$http.post(CONFIG.API.JSON.LXHWEB, {
+              type: "lxhweb_site_update_time",
+              site: this.site
+            }).then(res => {
+              if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                // array of {SITE: 'HB', UPDATE_DATETIME: '2020-10-08 21:47:00'}
+                this.list = res.data.raw;
+              } else {
+                this.notify({
+                  title: "同步異動主機狀態檢視",
+                  message: `${res.data.message}`,
+                  type: "warning"
+                });
+              }
+            }).catch(err => {
+              this.error = err;
+            }).finally(() => {
+              this.isBusy = false;
+              this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);  // a minute
+            });
+          }
         }
       },
       updChartData(data) {
@@ -212,10 +278,11 @@ if (Vue) {
         });
       },
       checkBrokenTable() {
-        this.$http.post(CONFIG.API.JSON.LXHWEB, {
-            type: "lxhweb_broken_table",
-            site: this.site
-        }).then(res => {
+        if (this.alive) {
+          this.$http.post(CONFIG.API.JSON.LXHWEB, {
+              type: "lxhweb_broken_table",
+              site: this.site
+          }).then(res => {
             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
               // found
               this.alert({
@@ -233,6 +300,10 @@ if (Vue) {
         }).finally(() => {
             this.isBusy = false;
         });
+        } else {
+          // postpone checking
+          this.timeout(() => this.checkBrokenTable(), this.reload_ms);  // a minute
+        }
       },
       showBrokenTable() {
         if (!this.empty(this.broken_tbl_raw)) { 
@@ -267,11 +338,11 @@ if (Vue) {
         { SITE: 'HG', UPDATE_DATETIME: this.randDate() },
         { SITE: 'HH', UPDATE_DATETIME: this.randDate() }
       ];
-      this.reload();
+      this.ping();
     },
     mounted() {
-      if (this.autoHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
       this.checkBrokenTable();
+      if (this.autoHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
     }
   });
 } else {

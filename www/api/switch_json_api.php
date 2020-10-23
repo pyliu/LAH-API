@@ -7,19 +7,19 @@ switch ($_POST["type"]) {
     case "switch_mock_flag":
         $result = $system->isMockMode();
         $msg = $result ? '目前是MOCK模式' : '目前不是MOCK模式';
-		$log->info("XHR [switch_mock_flag] ".$msg);
+		//$log->info("XHR [switch_mock_flag] ".$msg);
 		echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array('mock_flag' => $result));
         break;
     case "switch_mssql_flag":
         $result = $system->isMSSQLEnable();
         $msg = $result ? '目前是啟用MSSQL模式' : '目前是停用MSSQL模式';
-		$log->info("XHR [switch_mssql_flag] ".$msg);
+		//$log->info("XHR [switch_mssql_flag] ".$msg);
 		echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array('mssql_flag' => $result));
         break;
     case "switch_office_hours_flag":
         $result = $system->isOfficeHoursEnable();
         $msg = $result ? '目前是啟用工作天檢查模式' : '目前是停用工作天檢查模式';
-        $log->info("XHR [switch_office_hours_flag] ".$msg);
+        //$log->info("XHR [switch_office_hours_flag] ".$msg);
         echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array('office_hours_flag' => $result));
         break;
     default:
