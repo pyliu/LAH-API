@@ -77,7 +77,7 @@ if (Vue) {
         return `未支援 ${this.site} 監控`;
       },
       supported() { return this.hwebMap.has(this.site) },
-      alive() { return this.ping_latency > 0 && this.ping_latency < 1000 },
+      alive() { return this.demo || (this.ping_latency > 0 && this.ping_latency < 1000) },
       btnIcon() { return this.type == 'light' ? 'chart-bar' : 'traffic-light' },
       aspectRatio() {
         if (this.showHeadLight) {
