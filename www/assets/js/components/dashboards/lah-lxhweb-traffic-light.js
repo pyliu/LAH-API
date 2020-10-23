@@ -79,7 +79,13 @@ if (Vue) {
       supported() { return this.hwebMap.has(this.site) },
       alive() { return this.ping_latency > 0 && this.ping_latency < 1000 },
       btnIcon() { return this.type == 'light' ? 'chart-bar' : 'traffic-light' },
-      aspectRatio() { return this.showHeadLight ? this.viewportRatio + 0.2 : this.viewportRatio - 0.2 },
+      aspectRatio() {
+        if (this.showHeadLight) {
+          return this.viewportRatio + 0.2;
+        }
+        let el = $(this.$el);
+        return el.width() / el.height() * 1.15;
+      },
       showHeadLight() { return this.type == 'full' },
       headerIcon() { return this.type == 'light' ? 'traffic-light' : 'chart-bar' },
       headerLight() {
@@ -174,7 +180,6 @@ if (Vue) {
                     site: this.site,
                     type: 'full',
                     demo: this.demo,
-                    aspectRatio: this.viewportRatio,
                     maximized: true
                 }
             }),
