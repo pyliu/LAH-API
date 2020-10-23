@@ -14,7 +14,7 @@ if (Vue) {
             </b-button-group>
           </div>
         </template>
-        <div v-if="alive">
+        <div v-if="alive" class="h-100">
           <div v-if="type == 'light'" :id="container_id" class="grids">
             <div v-for="entry in list" class="grid">
               <lah-fa-icon icon="circle" :variant="light(entry)" :action="action(entry)" v-b-popover.hover.focus.top="'最後更新時間: '+entry.UPDATE_DATETIME">{{name(entry)}}</lah-fa-icon>
