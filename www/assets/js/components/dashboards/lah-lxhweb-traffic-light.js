@@ -187,7 +187,7 @@ if (Vue) {
         });
       },
       ping() {
-        if (this.bypassPing) {
+        if (this.bypassPing || this.demo) {
           this.ping_latency = 1;
           this.ping_message = '';
           this.reload();
