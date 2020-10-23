@@ -27,7 +27,7 @@ if (Vue) {
             <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="aspectRatio" :bg-color="chartItemColor"></lah-chart>
           </div>
         </div>
-        <div v-else>
+        <div v-else class="grid-center font-weight-bold h3">
           <lah-fa-icon icon="exclamation-triangle" szie="lg" variant="danger" action="breath">{{site}} 目前無法連線。</lah-fa-icon>
         </div>
       </b-card>

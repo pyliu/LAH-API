@@ -252,17 +252,13 @@ blockquote {
 	margin: 0.5%;
 }
 
-.grid-s {
-	width: 32%;
-	margin: 0.5%;
-	height: 16%;
+.grid-center {
 	box-sizing: border-box;
 	display: flex;
-	justify-content: center;
-	align-items: center;
+    justify-content: center;
+    align-items: center;
 	padding: auto;
-	border-radius: 10px;
-	border: 1px solid gray;
+	height: 100%;
 }
 
 .grid-one-third {
