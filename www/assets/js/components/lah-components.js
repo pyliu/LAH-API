@@ -536,7 +536,8 @@ if (Vue) {
                 if (!this.disableMSDBQuery) {
                     this.$http.post(CONFIG.API.JSON.MSSQL, {
                         type: 'user_unread_message',
-                        ip: this.myip
+                        ip: this.myip,
+                        timeout: 5000
                     }).then(res => {
                         this.avatar_badge = res.data.data_count || false;
                         this.$root.$emit(CONFIG.LAH_ROOT_EVENT ? CONFIG.LAH_ROOT_EVENT.MESSAGE_UNREAD : 'lah::message::unread', {
@@ -564,8 +565,8 @@ if (Vue) {
             let day_of_week = new Date().getDay();
             let hours = new Date().getHours();
             this.fri_noon = day_of_week == 5 && hours < 17 && hours > 12;
-            // delay 15s to get the unread message
-            this.timeout(() => this.setUnreadMessageCount(), 15000);
+            // delay 5s to get the unread message
+            this.timeout(() => this.setUnreadMessageCount(), 5000);
         },
         mounted() {
             this.links.forEach(this.setLeading);
@@ -1953,7 +1954,8 @@ if (Vue) {
                                     id: this.id,
                                     name: this.name,
                                     ip: this.ip || this.myip,
-                                    count: this.count
+                                    count: this.count,
+                                    timeout: 5000
                                 }).then(res => {
                                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                         this.raws = res.data.raw
