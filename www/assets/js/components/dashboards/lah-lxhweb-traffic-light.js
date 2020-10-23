@@ -174,7 +174,7 @@ if (Vue) {
       },
       popupMaximized() {
         this.msgbox({
-            title: this.site,
+            title: `放大顯示`,
             message: this.$createElement('lah-lxhweb-traffic-light', {
                 props: {
                     site: this.site,
