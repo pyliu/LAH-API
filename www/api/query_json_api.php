@@ -54,7 +54,13 @@ switch ($_POST["type"]) {
 		$log->info("XHR [ping] Ping ".$_POST["ip"]." request.");
 		$ip = $_POST["ip"];
 		$ping = new Ping($ip, 255, 1);	// ip, ttl, timeout
-		$latency = $ping->ping();
+		$latency = 0;
+		if ($_POST['port']) {
+    		$ping->setPort($_POST['port']);
+    		$latency = $ping->ping('fsockopen');
+		} else {
+			$latency = $ping->ping();
+		}
 		$response_code = ($latency > 999) ? STATUS_CODE::FAIL_TIMEOUT : STATUS_CODE::SUCCESS_NORMAL;
 		$message = "$ip 回應時間".(($latency > 999) ? "逾時($latency ms)" : "為 $latency ms");
 		if (empty($latency)) {

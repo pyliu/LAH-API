@@ -190,7 +190,8 @@ if (Vue) {
           this.isBusy = true;
           this.$http.post(CONFIG.API.JSON.QUERY, {
             type: "ping",
-            ip: this.ip
+            ip: this.ip,
+            port: 1521  // db port
           }).then(res => {
             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
               // array of {SITE: 'HB', UPDATE_DATETIME: '2020-10-08 21:47:00'}
