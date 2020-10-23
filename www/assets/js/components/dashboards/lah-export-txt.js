@@ -31,7 +31,9 @@ if (Vue) {
                 :tag-validator="validator"
             ></b-form-tags>
         </b-input-group>
-        <lah-button v-for="link in links" icon="download" action="move-fade-ttb" class="s-75 truncate text-secondary" block variant="link" @click="download(link)" :title="'下載 '+link.filename">{{link.filename}}</lah-button>
+        <div class="text-left">
+            <lah-button v-for="link in links" icon="download" action="move-fade-ttb" class="s-75 truncate text-secondary" variant="link" @click="download(link)" :title="'下載 '+link.filename">{{link.filename}}</lah-button>
+        </div>
     </b-card>`,
     computed: {
         disabled() { return this.tags.length == 0 },
