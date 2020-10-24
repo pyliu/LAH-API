@@ -7,7 +7,7 @@ if (Vue) {
             <h6 class="my-auto font-weight-bolder"><lah-fa-icon :icon="headerIcon" size="lg" :variant="headerLight">{{header}}</lah-fa-icon></h6>
             <b-button-group>
               <lah-button v-if="show_broken_btn" icon="unlink" variant='danger' class="border-0" @click="showBrokenTable" action="damage" title="檢視損毀資料表"><b-badge variant="light" pill>{{broken_tbl_count}}</b-badge></lah-button>
-              <lah-button icon="sync" variant='outline-secondary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
+              <lah-button v-if="alive" icon="sync" variant='outline-secondary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
               <lah-button v-if="!maximized && alive" class="border-0" :icon="btnIcon" variant="outline-primary" title="顯示模式" @click="switchType"></lah-button>
               <lah-button v-if="!maximized && alive" class="border-0" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popupMaximized" action="heartbeat"></lah-button>
               <lah-button icon="question" variant="outline-success" class="border-0" @click="popupQuestion" title="說明"></lah-button>
@@ -27,8 +27,8 @@ if (Vue) {
             <lah-chart ref="chart" :label="chartLabel" :items="chartItems" :type="charType" :aspect-ratio="aspectRatio" :bg-color="chartItemColor"></lah-chart>
           </div>
         </div>
-        <div v-else class="grid-center font-weight-bold h3">
-          <lah-fa-icon icon="exclamation-triangle" szie="lg" variant="danger" action="breath">{{site}} 目前無法連線。</lah-fa-icon>
+        <div v-else class="grid-center font-weight-bold h5">
+          <lah-fa-icon icon="exclamation-triangle" szie="lg" variant="danger" action="breath">{{ip}} 目前無法連線。</lah-fa-icon>
         </div>
       </b-card>
     </lah-transition>`,
@@ -206,7 +206,7 @@ if (Vue) {
             } else {
               this.notify({
                 title: "PING回應值",
-                message: `${this.site} ${res.data.message}`,
+                message: `${res.data.message}`,
                 type: "warning"
               });
               this.timeout(() => this.ping(), this.reload_ms);  // a minute

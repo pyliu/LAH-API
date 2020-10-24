@@ -61,12 +61,8 @@ switch ($_POST["type"]) {
 		} else {
 			$latency = $ping->ping();
 		}
-		$response_code = ($latency > 999) ? STATUS_CODE::FAIL_TIMEOUT : STATUS_CODE::SUCCESS_NORMAL;
-		$message = "$ip 回應時間".(($latency > 999) ? "逾時($latency ms)" : "為 $latency ms");
-		if (empty($latency)) {
-			$response_code = STATUS_CODE::DEFAULT_FAIL;
-			$message = "$ip 回應值為 ".($latency == '' ? '空值' : intval($latency).'ms');
-		}
+		$response_code = ($latency > 999 || $latency == '') ? STATUS_CODE::FAIL_TIMEOUT : STATUS_CODE::SUCCESS_NORMAL;
+		$message = "$ip 回應時間".(($latency > 999 || $latency == '') ? "逾時" : "為 $latency ms");
 		echo json_encode(array(
 			"status" => $response_code,
 			"ip" => $ip,
