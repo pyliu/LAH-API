@@ -278,7 +278,7 @@ if (Vue) {
 
     Vue.component("lah-header", {
         template: `<lah-transition slide-down>
-            <b-navbar toggleable="lg" type="dark" variant="dark" class="mb-3" fixed="top" :style="bgStyle">
+            <b-navbar toggleable="lg" type="dark" variant="dark" class="mb-3 shadow" fixed="top" :style="bgStyle">
                 <lah-fa-icon size="2x" variant="light" class="mr-2" :icon="icon"></lah-fa-icon>
                 <b-navbar-brand :href="location.href" v-html="leading"></b-navbar-brand>
                 <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
