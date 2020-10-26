@@ -7,7 +7,7 @@ if (Vue) {
             <h6 class="my-auto font-weight-bolder"><lah-fa-icon :icon="headerIcon" size="lg" :variant="headerLight">{{header}}</lah-fa-icon></h6>
             <b-button-group>
               <lah-button v-if="show_broken_btn" icon="unlink" variant='danger' class="border-0" @click="showBrokenTable" action="damage" title="檢視損毀資料表"><b-badge variant="light" pill>{{broken_tbl_count}}</b-badge></lah-button>
-              <lah-button v-if="alive" icon="sync" variant='outline-secondary' class="border-0" @click="reload" action="cycle" title="重新讀取"></lah-button>
+              <lah-button v-if="alive" icon="sync" variant='outline-secondary' class="border-0" @click="ping" action="cycle" title="重新讀取"></lah-button>
               <lah-button v-if="!maximized && alive" class="border-0" :icon="btnIcon" variant="outline-primary" title="顯示模式" @click="switchType"></lah-button>
               <lah-button v-if="!maximized && alive" class="border-0" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popupMaximized" action="heartbeat"></lah-button>
               <lah-button icon="question" variant="outline-success" class="border-0" @click="popupQuestion" title="說明"></lah-button>
@@ -62,7 +62,7 @@ if (Vue) {
         ['平鎮所', 0],
         ['龜山所', 0]
       ],
-      reload_timer: null,
+      ping_timer: null,
       broken_tbl_raw: null
     }),
     computed: {
@@ -102,7 +102,7 @@ if (Vue) {
       },
       broken_tbl_count() { return this.empty(this.broken_tbl_raw) ? 0 : this.broken_tbl_raw.length },
       show_broken_btn() { return this.broken_tbl_count > 0 },
-      reload_ms() { return this.demo ? 5000 : 1 * 60 * 1000 }
+      ping_ms() { return this.demo ? 5000 : 1 * 60 * 1000 }
     },
     watch: {
       demo(flag) { this.reload() },
@@ -187,11 +187,13 @@ if (Vue) {
         });
       },
       ping() {
+        clearTimeout(this.ping_timer);
         if (this.bypassPing || this.demo) {
           this.ping_latency = 1;
           this.ping_message = 'DEMO';
           this.reload();
           this.checkBrokenTable();
+          this.ping_timer = this.timeout(() => this.ping(), this.ping_ms);  // a minute
         } else {
           this.isBusy = true;
           this.$http.post(CONFIG.API.JSON.QUERY, {
@@ -216,13 +218,12 @@ if (Vue) {
             this.error = err;
           }).finally(() => {
             this.isBusy = false;
-            this.timeout(() => this.ping(), this.reload_ms);  // a minute
+            this.ping_timer = this.timeout(() => this.ping(), this.ping_ms);  // a minute
           });
         }
       },
       reload() {
         if (this.alive) {
-          clearTimeout(this.reload_timer);
           if (this.demo) {
             this.list = [
               { SITE: 'HA', UPDATE_DATETIME: this.randDate() },
@@ -234,7 +235,6 @@ if (Vue) {
               { SITE: 'HG', UPDATE_DATETIME: this.randDate() },
               { SITE: 'HH', UPDATE_DATETIME: this.randDate() }
             ];
-            this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);
           } else {
             this.isBusy = true;
             this.$http.post(CONFIG.API.JSON.LXHWEB, {
@@ -255,7 +255,6 @@ if (Vue) {
               this.error = err;
             }).finally(() => {
               this.isBusy = false;
-              //this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);  // a minute
             });
           }
         }
@@ -289,6 +288,10 @@ if (Vue) {
           this.broken_tbl_raw = [{
             '所別': 'HB',
             '表格名稱': 'DEMO',
+            '損毀狀態': 'Y'
+          }, {
+            '所別': 'HA',
+            '表格名稱': 'DEMO2',
             '損毀狀態': 'Y'
           }];
         } else if (this.alive) {
