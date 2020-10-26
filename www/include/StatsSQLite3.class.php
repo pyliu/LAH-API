@@ -83,8 +83,9 @@ class StatsSQLite3 {
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "target" (
                 "ip"	TEXT NOT NULL,
+                "port"	INTEGER,
                 "name"	TEXT NOT NULL,
-                "note"  TEXT,
+                "note"	TEXT,
                 PRIMARY KEY("ip")
             )
         ');
