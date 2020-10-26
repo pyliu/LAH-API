@@ -105,7 +105,7 @@ if (Vue) {
       ping_ms() { return this.demo ? 5000 : 1 * 60 * 1000 }
     },
     watch: {
-      demo(flag) { this.reload() },
+      demo(flag) { this.ping() },
       list(arr) { this.updChartData(arr) }
     },
     methods: {
