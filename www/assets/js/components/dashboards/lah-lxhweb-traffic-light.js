@@ -193,7 +193,7 @@ if (Vue) {
           this.ping_message = 'DEMO';
           this.reload();
           this.checkBrokenTable();
-          this.ping_timer = this.timeout(() => this.ping(), this.ping_ms);  // a minute
+          this.ping_timer = this.timeout(() => this.ping(), this.ping_ms);  // 5s
         } else {
           this.isBusy = true;
           this.$http.post(CONFIG.API.JSON.QUERY, {
