@@ -115,11 +115,21 @@ class StatsSQLite3 {
         return false;
     }
 
-    private function pingAndSave($ip) {
+    private function pingAndSave($row) {
+        $ip = $row['ip'];
         if (filter_var($ip, FILTER_VALIDATE_IP)) {
             $log_time = date("YmdHis");
             $ping = new Ping($ip);
-            $latency = $ping->ping();
+            $latency = 0;
+            if (empty($row['port'])) {
+                $latency = $ping->ping();
+            } else {
+                $ping->setPort($port);
+                $latency = $ping->ping('fsockopen');
+                if (empty($latency)) {
+                    $latency = $ping->ping('socket');
+                }
+            }
             return $this->addConnectivityStatus($log_time, $ip, $latency);
         }
         return false;
@@ -383,15 +393,15 @@ class StatsSQLite3 {
         global $log;
         if (filter_var($ip, FILTER_VALIDATE_IP)) {
             // single ep
-            $this->pingAndSave($ip);
+            $this->pingAndSave(array('ip' => $ip));
         } else {
             $tracking_targets = $this->getCheckingTargets();
             // generate the latest batch records
-            foreach ($tracking_targets as $name => $tgt_ip) {
-                if (filter_var($tgt_ip, FILTER_VALIDATE_IP)) {
-                    $this->pingAndSave($tgt_ip);
+            foreach ($tracking_targets as $name => $row) {
+                if (filter_var($row['ip'], FILTER_VALIDATE_IP)) {
+                    $this->pingAndSave($row);
                 } else {
-                    $log->warning(__METHOD__.": $name:$tgt_ip is not a valid IP address.");
+                    $log->warning(__METHOD__.": $name:".$row['ip']." is not a valid IP address.");
                 }
             }
         }
@@ -406,13 +416,17 @@ class StatsSQLite3 {
         }
 
         $tracking_targets = $this->getCheckingTargets();
+        $tracking_ips = array();
+        foreach ($tracking_targets as $name => $row) {
+            $tracking_ips[$name] = $row['ip'];
+        }
         $return = array();
-        if (empty($tracking_targets)) {
-            $log->warning(__METHOD__.": tracking targets array is empty.");
+        if (empty($tracking_ips)) {
+            $log->warning(__METHOD__.": tracking ip array is empty.");
         } else {
             $db_path = $this->getConnectivityDB();
             $conn_db = new SQLite3($db_path);
-            $in_statement = " IN ('".implode("','", $tracking_targets)."') ";
+            $in_statement = " IN ('".implode("','", $tracking_ips)."') ";
             if($stmt = $conn_db->prepare('SELECT * FROM connectivity WHERE target_ip '.$in_statement.' ORDER BY ROWID DESC LIMIT :limit')) {
                 $stmt->bindValue(':limit', count($tracking_targets), SQLITE3_INTEGER);
                 $result = $stmt->execute();

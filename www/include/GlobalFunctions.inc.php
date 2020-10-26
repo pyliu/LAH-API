@@ -8,7 +8,11 @@ require_once("Ping.class.php");
 function pingDomain($domain, $port = 80){
     $ping = new Ping($domain);
     $ping->setPort($port);
-    return $ping->ping('fsockopen');
+    $latency = $ping->ping('fsockopen');
+    if (empty($latency)) {
+        $latency = $ping->ping('socket');
+    }
+    return $latency;
 }
 
 function getMyAuthority() {
