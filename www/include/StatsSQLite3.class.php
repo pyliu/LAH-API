@@ -367,7 +367,7 @@ class StatsSQLite3 {
                 $return = array();
                 if ($result === false) return $return;
                 while($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                    $return[$row['name']] = $row['ip'];
+                    $return[$row['name']] = $row;
                 }
                 return $return;
             } else {

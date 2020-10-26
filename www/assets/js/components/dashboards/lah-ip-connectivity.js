@@ -43,7 +43,8 @@ if (Vue) {
             demo(val) { this.reload() },
             name_map(val) {
                 if (val && val.size > 0) {
-                    this.name = this.storeParams['lah-ip-connectivity-map'].get(this.ip);
+                    let entry = this.storeParams['lah-ip-connectivity-map'].get(this.ip);
+                    this.name = entry ? entry.name : undefined;
                 }
             }
         },
@@ -59,15 +60,22 @@ if (Vue) {
                                 type: "stats_connectivity_target"
                             }).then(res => {
                                 if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                    this.setLocalCache('lah-ip-connectivity-map', res.data.raw);
                                     let map = new Map();
-                                    // raw is object of { 'AP31': 'xxx.xxx.xxx.31'}
-                                    for (const [name, ip] of Object.entries(res.data.raw)) {
-                                        map.set(ip, name);
+                                    /* raw is array of { "XXXX": { 
+                                                ip: "220.xxx.xxx.xxx"
+                                                name: "XXXX"
+                                                note: "說明"
+                                                port: (default is NULL)
+                                            }
+                                        }
+                                    */
+                                    for (const [name, raw_obj] of Object.entries(res.data.raw)) {
+                                        map.set(raw_obj.ip, raw_obj);
                                     }
                                     // prepared map to the Vuex param
                                     this.storeParams['lah-ip-connectivity-map'] = map;
-                                    this.name = this.storeParams['lah-ip-connectivity-map'].get(this.ip);
-                                    this.setLocalCache('lah-ip-connectivity-map', res.data.raw);
+                                    this.name = map.get(this.ip) ? map.get(this.ip).name : undefined;
                                 } else {
                                     this.notify({
                                         title: "初始化 lah-ip-connectivity-map",
@@ -87,10 +95,10 @@ if (Vue) {
                             this.addToStoreParams('lah-ip-connectivity-map', true);
                         }
                         let map = new Map();
-                        for (const [name, ip] of Object.entries(cached)) {
-                            map.set(ip, name);
+                        for (const [name, raw_obj] of Object.entries(cached)) {
+                            map.set(raw_obj.ip, raw_obj);
                         }
-                        this.name = map.get(this.ip)
+                        this.name = map.get(this.ip) ? map.get(this.ip).name : undefined;
                         // prepared map to the Vuex param
                         this.storeParams['lah-ip-connectivity-map'] = map;
                     }

@@ -150,11 +150,11 @@ if (Vue) {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         // initializing monitor list entries from DB
                         this.list = [];
-                        // raw is object of { 'AP31': 'xxx.xxx.xxx.31'}
-                        for (const [name, ip] of Object.entries(res.data.raw)) {
+                        // raw is array of { 'AP31': {ip: 'xxx.xxx.xxx.31', name: 'AP31', port: '', note: 'XXX'} }
+                        for (const [name, raw_obj] of Object.entries(res.data.raw)) {
                             this.list.push({
                                 name: name,
-                                target_ip: ip,
+                                target_ip: raw_obj.ip,
                                 latency: 0.0,
                                 status: 'DOWN',
                                 log_time: '20201005181631'
