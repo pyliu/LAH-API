@@ -285,15 +285,15 @@ if (Vue) {
       },
       checkBrokenTable() {
         if (this.demo) {
-          this.broken_tbl_raw = [{
-            '所別': 'HB',
-            '表格名稱': 'DEMO',
-            '損毀狀態': 'Y'
-          }, {
-            '所別': 'HA',
-            '表格名稱': 'DEMO2',
-            '損毀狀態': 'Y'
-          }];
+          let demo_len = this.rand(10);
+          this.broken_tbl_raw = [];
+          for (let i = 0 ; i < demo_len ; i++) {
+            this.broken_tbl_raw.push({
+              '所別': `H${i}`,
+              '表格名稱': `DEMO_${i}`,
+              '損毀狀態': 'Y'
+            });
+          }
         } else if (this.alive) {
           this.$http.post(CONFIG.API.JSON.LXHWEB, {
               type: "lxhweb_broken_table",
