@@ -189,8 +189,9 @@ if (Vue) {
       ping() {
         if (this.bypassPing || this.demo) {
           this.ping_latency = 1;
-          this.ping_message = '';
+          this.ping_message = 'DEMO';
           this.reload();
+          this.checkBrokenTable();
         } else {
           this.isBusy = true;
           this.$http.post(CONFIG.API.JSON.QUERY, {
@@ -203,20 +204,22 @@ if (Vue) {
               this.ping_latency = res.data.latency;
               this.ping_message = res.data.message;
               this.reload();
+              this.checkBrokenTable();
             } else {
               this.notify({
                 title: "PING回應值",
                 message: `${res.data.message}`,
                 type: "warning"
               });
-              this.timeout(() => this.ping(), this.reload_ms);  // a minute
+              this.ping_latency = res.data.latency;
+              this.ping_message = res.data.message;
             }
           }).catch(err => {
-          this.error = err;
-          this.timeout(() => this.ping(), this.reload_ms);  // a minute
-        }).finally(() => {
-          this.isBusy = false;
-        });
+            this.error = err;
+          }).finally(() => {
+            this.isBusy = false;
+            this.timeout(() => this.ping(), this.reload_ms);  // a minute
+          });
         }
       },
       reload() {
@@ -254,7 +257,7 @@ if (Vue) {
               this.error = err;
             }).finally(() => {
               this.isBusy = false;
-              this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);  // a minute
+              //this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);  // a minute
             });
           }
         }
@@ -284,7 +287,13 @@ if (Vue) {
         });
       },
       checkBrokenTable() {
-        if (this.alive) {
+        if (this.demo) {
+          this.broken_tbl_raw = [{
+            '所別': 'HB',
+            '表格名稱': 'DEMO',
+            '損毀狀態': 'Y'
+          }];
+        } else if (this.alive) {
           this.$http.post(CONFIG.API.JSON.LXHWEB, {
               type: "lxhweb_broken_table",
               site: this.site
@@ -301,14 +310,11 @@ if (Vue) {
             } else {
               this.$log(res.data.message);
             }
-        }).catch(err => {
-            this.error = err;
-        }).finally(() => {
-            this.isBusy = false;
-        });
-        } else {
-          // postpone checking
-          this.timeout(() => this.checkBrokenTable(), this.reload_ms);  // a minute
+          }).catch(err => {
+              this.error = err;
+          }).finally(() => {
+              this.isBusy = false;
+          });
         }
       },
       showBrokenTable() {
@@ -344,11 +350,10 @@ if (Vue) {
         { SITE: 'HG', UPDATE_DATETIME: this.randDate() },
         { SITE: 'HH', UPDATE_DATETIME: this.randDate() }
       ];
-      this.ping();
     },
     mounted() {
-      this.checkBrokenTable();
       if (this.autoHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
+      setTimeout(() => this.ping(), this.rand(1000));
     }
   });
 } else {
