@@ -199,10 +199,10 @@ if (Vue) {
             ip: this.ip,
             port: 1521  // db port
           }).then(res => {
+            this.ping_latency = res.data.latency;
+            this.ping_message = res.data.message;
             if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
               // array of {SITE: 'HB', UPDATE_DATETIME: '2020-10-08 21:47:00'}
-              this.ping_latency = res.data.latency;
-              this.ping_message = res.data.message;
               this.reload();
               this.checkBrokenTable();
             } else {
@@ -211,8 +211,6 @@ if (Vue) {
                 message: `${res.data.message}`,
                 type: "warning"
               });
-              this.ping_latency = res.data.latency;
-              this.ping_message = res.data.message;
             }
           }).catch(err => {
             this.error = err;

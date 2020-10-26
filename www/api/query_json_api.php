@@ -66,7 +66,7 @@ switch ($_POST["type"]) {
 		echo json_encode(array(
 			"status" => $response_code,
 			"ip" => $ip,
-			"latency" => $latency,
+			"latency" => empty($latency) ? "0" : $latency,
 			"data_count" => "1",
 			"message" => $message
 		), 0);
