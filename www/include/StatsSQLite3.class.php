@@ -104,7 +104,7 @@ class StatsSQLite3 {
             $stm->bindParam(':log_time', $log_time);
             $stm->bindParam(':target_ip', $tgt_ip);
             $stm->bindValue(':status', empty($latency) ? 'DOWN' : 'UP');
-            $stm->bindValue(':latency', empty($latency) ? 2000.0 : $latency);   // default ping timeout is 2s
+            $stm->bindValue(':latency', empty($latency) ? 1000.0 : $latency);   // default ping timeout is 1s
             if ($stm->execute() !== FALSE) {
                 return true;
             } else {
