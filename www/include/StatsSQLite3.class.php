@@ -124,7 +124,7 @@ class StatsSQLite3 {
             if (empty($row['port'])) {
                 $latency = $ping->ping();
             } else {
-                $ping->setPort($port);
+                $ping->setPort($row['port']);
                 $latency = $ping->ping('fsockopen');
                 if (empty($latency)) {
                     $latency = $ping->ping('socket');
@@ -389,21 +389,26 @@ class StatsSQLite3 {
         return false;
     }
 
-    public function checkConnectivity($ip = null) {
+    public function checkRegisteredConnectivity() {
+        global $log;
+        $tracking_targets = $this->getCheckingTargets();
+        // generate the latest batch records
+        foreach ($tracking_targets as $name => $row) {
+            if (filter_var($row['ip'], FILTER_VALIDATE_IP)) {
+                $this->pingAndSave($row);
+            } else {
+                $log->warning(__METHOD__.": $name:".$row['ip']." is not a valid IP address.".(empty($row['port']) ? '' : ':'.$row['port']));
+            }
+        }
+    }
+
+    public function checkIPConnectivity($ip = null, $port = 0) {
         global $log;
         if (filter_var($ip, FILTER_VALIDATE_IP)) {
             // single ep
-            $this->pingAndSave(array('ip' => $ip));
+            $this->pingAndSave(array('ip' => $ip, 'port' => $port));
         } else {
-            $tracking_targets = $this->getCheckingTargets();
-            // generate the latest batch records
-            foreach ($tracking_targets as $name => $row) {
-                if (filter_var($row['ip'], FILTER_VALIDATE_IP)) {
-                    $this->pingAndSave($row);
-                } else {
-                    $log->warning(__METHOD__.": $name:".$row['ip']." is not a valid IP address.");
-                }
-            }
+            $log->warning(__METHOD__.": $ip".(empty($port) ? '' : ":$port")." is not valid.");
         }
     }
 
@@ -412,7 +417,7 @@ class StatsSQLite3 {
 
         if ($force === 'true') {
             // generate the latest batch records
-            $this->checkConnectivity();
+            $this->checkRegisteredConnectivity();
         }
 
         $tracking_targets = $this->getCheckingTargets();
@@ -441,10 +446,10 @@ class StatsSQLite3 {
         return $return;
     }
 
-    public function getIPConnectivityStatus($ip, $force = 'false') {
+    public function getIPConnectivityStatus($ip, $force = 'false', $port = 0) {
         if ($force === 'true') {
             // generate the latest record for $ip
-            $this->checkConnectivity($ip);
+            $this->checkIPConnectivity($ip, $port);
         }
 
         $db_path = $this->getConnectivityDB();

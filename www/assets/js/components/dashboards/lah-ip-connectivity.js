@@ -12,6 +12,7 @@ if (Vue) {
         >{{resolved_name}}</lah-button>`,
         props: {
             ip: { type: String, default: '127.0.0.1' },
+            port: { type: Number, default: 0 },
             block: { type: Boolean, default: false },
             demo: { type: Boolean, default:false }
         },
@@ -29,7 +30,7 @@ if (Vue) {
             resolved_name() { return this.name || (this.ip == '127.0.0.1' ? '本機' : this.ip) },
             latency_txt() {
                 if (this.latency > CONFIG.PING.DANGER) return `逾時`;
-                return `${this.latency} ms`
+                return `${this.latency.toFixed(0)} ms`
             },
             name_map() { return this.storeParams['lah-ip-connectivity-map'] },
             style() {
@@ -44,7 +45,15 @@ if (Vue) {
             name_map(val) {
                 if (val && val.size > 0) {
                     let entry = this.storeParams['lah-ip-connectivity-map'].get(this.ip);
-                    this.name = entry ? entry.name : undefined;
+                    if (entry) {
+                        this.name = entry.name;
+                        // no specify port number, use the port stored in the DB
+                        if (this.empty(this.port) && !this.empty(entry.port)) {
+                            this.port = entry.port;
+                        }
+                    } else {
+                        this.name = undefined;
+                    }
                 }
             }
         },
@@ -116,7 +125,8 @@ if (Vue) {
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_ip_connectivity_history",
                         force: force,
-                        ip: this.ip
+                        ip: this.ip,
+                        port: this.port
                     }).then(res => {
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             // res.data.raw: object of { target_ip: 'xxx.xxx.xxx.xxx', latency: 2000.0, status: 'DOWN', log_time: '20201005181631' }

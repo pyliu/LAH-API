@@ -272,7 +272,7 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_ip_connectivity_history":
-        if ($arr = $stats_sqlite3->getIPConnectivityStatus($_POST["ip"], $_POST["force"])) {
+        if ($arr = $stats_sqlite3->getIPConnectivityStatus($_POST["ip"], $_POST["force"], $_POST['port'])) {
             echoJSONResponse("取得 1 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => 1,
                 "raw" => $arr

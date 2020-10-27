@@ -296,7 +296,7 @@ class WatchDog {
             $this->compressLog();
             // clean AP stats data one day ago
             $this->stats->wipeAllAPConnHistory();
-            $this->stats->checkConnectivity();
+            $this->stats->checkRegisteredConnectivity();
             // clean connectivity stats data one day ago
             $this->stats->wipeConnectivityHistory();
             //$this->notifyTemperatureRegistration();
