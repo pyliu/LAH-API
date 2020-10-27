@@ -354,7 +354,7 @@ if (Vue) {
     },
     mounted() {
       if (this.autoHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
-      setTimeout(() => this.ping(), this.rand(1000));
+      Vue.nextTick(() => this.ping());
     }
   });
 } else {

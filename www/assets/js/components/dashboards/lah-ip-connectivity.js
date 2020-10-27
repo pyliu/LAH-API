@@ -153,8 +153,10 @@ if (Vue) {
         },
         created() {
             this.prepare();
-            this.reload();
             this.busyIconSize = '1x';
+        },
+        mounted() {
+            Vue.nextTick(() => this.reload());
         }
     });
 } else {
