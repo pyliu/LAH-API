@@ -96,22 +96,23 @@ if (Vue) {
             },
             showPrcCaseDetail(jsonObj) {
                 if (jsonObj.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
-                    this.alert({
+                    this.notify({
+                        title: this.id,
                         message: "查無地價案件資料",
                         type: "warning"
                     });
-                    return;
                 } else if (jsonObj.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
                     throw new Error("查詢失敗：" + jsonObj.message);
+                } else {
+                    let html = "<p>" + jsonObj.html + "</p>";
+                    let modal_size = "lg";
+                    this.msgbox({
+                        body: html,
+                        title: "地價案件詳情",
+                        size: modal_size,
+                        callback: () => { $(".prc_case_serial").off("click").on("click", window.vueApp.fetchRegCase); }
+                    });
                 }
-                let html = "<p>" + jsonObj.html + "</p>";
-                let modal_size = "lg";
-                this.msgbox({
-                    body: html,
-                    title: "地價案件詳情",
-                    size: modal_size,
-                    callback: () => { $(".prc_case_serial").off("click").on("click", window.vueApp.fetchRegCase); }
-                });
             }
         },
         components: {}
