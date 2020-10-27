@@ -25,7 +25,7 @@ if (Vue) {
         }),
         computed: {
             icon() { return 'server' },
-            title() { return `重新整理 ${this.ip} PING回應值`},
+            title() { return `重新整理 ${this.ip}:${this.port} 回應時間`},
             reload_ms() { return this.demo ? 5000 : 15 * 60 * 1000 },
             resolved_name() { return this.name || (this.ip == '127.0.0.1' ? '本機' : this.ip) },
             latency_txt() {

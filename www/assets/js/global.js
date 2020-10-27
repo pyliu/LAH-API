@@ -7,7 +7,7 @@ const CONFIG = {
     SCREENSAVER_TIMER: 15 * 60 * 1000,
     PING: {
         DANGER: 999,
-        WARNING: 499
+        WARNING: 249
     },
     API: {
         XLSX: {
