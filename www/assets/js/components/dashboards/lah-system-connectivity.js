@@ -6,7 +6,7 @@ if (Vue) {
                     <div class="d-flex w-100 justify-content-between mb-0">
                         <h6 class="my-auto font-weight-bolder"><lah-fa-icon :icon="headerIcon" size="lg" :variant="headerLight"> 系統狀態監控 </lah-fa-icon></h6>
                         <b-button-group>
-                            <lah-button icon="sync" variant='outline-secondary' class="border-0" @click="reload(true)" action="cycle" title="重新讀取"></lah-button>
+                            <lah-button v-if="type != 'light'" icon="sync" variant='outline-secondary' class="border-0" @click="reload(true)" action="cycle" title="重新讀取"></lah-button>
                             <lah-button v-if="!maximized" class="border-0" :icon="btnIcon" variant="outline-primary" title="顯示模式" @click="switchType"></lah-button>
                             <lah-button v-if="!maximized" class="border-0" regular icon="window-maximize" variant="outline-primary" title="放大顯示" @click="popupMaximized" action="heartbeat"></lah-button>
                             <lah-button icon="question" variant="outline-success" class="border-0" @click="popupQuestion" title="說明"></lah-button>
@@ -176,7 +176,7 @@ if (Vue) {
             reload(force = false) {
                 if (this.demo) {
                     this.demoReload();
-                } else {
+                } else if (this.type != 'light') {
                     clearTimeout(this.reload_timer);
                     this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
