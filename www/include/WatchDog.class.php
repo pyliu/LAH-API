@@ -38,6 +38,15 @@ class WatchDog {
             'Thu' => ['10:30 AM' => '10:45 AM', '03:30 PM' => '03:45 PM'],
             'Fri' => ['10:30 AM' => '10:45 AM', '03:30 PM' => '03:45 PM'],
             'Sat' => []
+        ],
+        "once_a_day" => [
+            'Sun' => [],
+            'Mon' => ['04:30 PM' => '04:45 PM'],
+            'Tue' => ['04:30 PM' => '04:45 PM'],
+            'Wed' => ['04:30 PM' => '04:45 PM'],
+            'Thu' => ['04:30 PM' => '04:45 PM'],
+            'Fri' => ['04:30 PM' => '04:45 PM'],
+            'Sat' => []
         ]
     );
     private $overdue_cfg = array(
@@ -236,13 +245,15 @@ class WatchDog {
 
     private function findProblematicSURCases() {
         global $log;
-        // 找已結案但卻又延期複丈之案件
-        $q = new Query();
-        $results = $q->getSurProblematicCases();
-        if (count($results) > 0) {
-            $this->sendProblematicSURCasesMessage($results);
-        } else {
-            $log->info(__METHOD__.": 無已結案卻延期複丈之測量案件。");
+        if ($this->isOn($this->schedule["once_a_day"])) {
+            // 找已結案但卻又延期複丈之案件
+            $q = new Query();
+            $results = $q->getSurProblematicCases();
+            if (count($results) > 0) {
+                $this->sendProblematicSURCasesMessage($results);
+            } else {
+                $log->info(__METHOD__.": 無已結案卻延期複丈之測量案件。");
+            }
         }
     }
 
