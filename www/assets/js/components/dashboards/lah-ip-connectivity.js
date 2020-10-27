@@ -11,13 +11,14 @@ if (Vue) {
             @click="reload(true)"
         >{{resolved_name}}</lah-button>`,
         props: {
+            name: { type: String, default: undefined },
             ip: { type: String, default: '127.0.0.1' },
             port: { type: Number, default: 0 },
+            desc: { type: String, default: '' },
             block: { type: Boolean, default: false },
             demo: { type: Boolean, default:false }
         },
         data: () => ({
-            name: undefined,
             latency: 0.0,
             status: 'DOWN',
             log_time: '20201016185331',
