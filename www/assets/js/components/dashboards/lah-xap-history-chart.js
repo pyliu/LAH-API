@@ -5,7 +5,7 @@ if (Vue) {
                 <lah-chart ref="chart" :label="label" :items="items" :type="type" :bg-color="bg_color" @click="show_count" :aspect-ratio="aspectRatio"></lah-chart>
                 <div class="d-flex justify-content-between mt-1">
                     <span class="align-middle small my-auto">
-                        <lah-fa-icon :icon="network_icon" title="現在連線數" :action="icon_action"> <b-badge :variant="badge_variant">{{now_count}}</b-badge></lah-fa-icon>
+                        <lah-fa-icon :icon="network_icon" title="現在連線數" :action="icon_action" :size="icon_size"> <b-badge :variant="badge_variant">{{now_count}}</b-badge></lah-fa-icon>
                         <lah-fa-icon icon="clock" prefix="far" title="更新時間">
                             <b-badge v-if="isOfficeHours() || demo" variant="secondary">{{last_update_time}}</b-badge>
                             <b-badge v-else variant="danger" title="非上班時間所以停止更新">已停止更新</b-badge>
@@ -102,16 +102,20 @@ if (Vue) {
                 return `${this.site_tw}連線`
             },
             network_icon() {
-                [variant, action, rgb, icon] = this.style_by_count(this.now_count);
+                [variant, action, rgb, icon, size] = this.style_by_count(this.now_count);
                 return icon;
             },
             badge_variant() {
-                [variant, action, rgb, icon] = this.style_by_count(this.now_count);
+                [variant, action, rgb, icon, size] = this.style_by_count(this.now_count);
                 return variant;
             },
             icon_action() {
-                [variant, action, rgb, icon] = this.style_by_count(this.now_count);
+                [variant, action, rgb, icon, size] = this.style_by_count(this.now_count);
                 return action;
+            },
+            icon_size() {
+                [variant, action, rgb, icon, size] = this.style_by_count(this.now_count);
+                return size;
             },
             top_site() { return this.storeParams['XAP_CONN_TOP_SITES'] },
             ip() {
@@ -125,18 +129,20 @@ if (Vue) {
         },
         methods: {
             style_by_count(value, opacity = 0.6) {
-                let variant, action, rgb, icon;
+                let variant, action, rgb, icon, size = '';
                 if (value > 200) {
                     icon = 'network-wired';
                     variant = 'danger';
                     action = 'tremble';
-                    rgb = `rgb(243, 0, 19, ${opacity})`
+                    rgb = `rgb(243, 0, 19, ${opacity})`;
+                    size = '2x';
                 } // red
                 else if (value > 100) {
                     icon = 'network-wired';
                     variant = 'warning';
                     action = 'beat';
                     rgb = `rgb(238, 182, 1, ${opacity})`;
+                    size = 'lg';
                 } // yellow
                 else if (value > 5) {
                     icon = 'network-wired';
@@ -150,7 +156,7 @@ if (Vue) {
                     action = '';
                     rgb = `rgb(207, 207, 207, ${opacity})`;
                 } // muted
-                return [variant, action, rgb, icon]
+                return [variant, action, rgb, icon, size]
             },
             bg_color(dataset_item, opacity) {
                 [variant, action, rgb, icon] = this.style_by_count(dataset_item[1], opacity);
