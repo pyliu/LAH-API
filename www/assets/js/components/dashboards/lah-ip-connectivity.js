@@ -49,7 +49,7 @@ if (Vue) {
                     if (entry) {
                         this.name = entry.name;
                         // no specify port number, use the port stored in the DB
-                        if (this.empty(this.port) && !this.empty(entry.port)) {
+                        if (this.port == 0 && !this.empty(entry.port)) {
                             this.port = entry.port;
                         }
                     } else {
