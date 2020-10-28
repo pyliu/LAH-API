@@ -260,17 +260,33 @@ class WatchDog {
     private function sendProblematicSURCasesMessage(&$results) {
         global $log;
         $host_ip = getLocalhostIP();
+        $users = getUserNames();
+        $msg = new Message();
 
         $case_ids = array();
+        $msg_prefix = $msg_content = "系統目前找到下列已結案之測量案件但是狀態卻是「延期複丈」:\r\n\r\n";
         foreach ($results as $result) {
-            $case_ids[] = $result['MM01'].'-'.$result['MM02'].'-'.$result['MM03'];
+            $case_id = $result['MM01'].'-'.$result['MM02'].'-'.$result['MM03'];
+            $case_ids[] = $case_id;
+
+            // notify corresponding operator as well
+            $to_id = trim($result['MD04']); // 測量員ID
+            $this_user = $users[$to_id];
+            if (!empty($this_user)) {
+                $title = "有問題的延期複丈案件(${this_user})通知";
+                $msg_content = $msg_prefix.$case_id."\r\n\r\n請確認該案件狀態以免案件逾期。\r\n如有需要請填寫「電腦問題處理單」交由資訊課協助修正。";
+                $sn = $msg->sysSend($title, $msg_content, $to_id, 85500);   // 85500 = 86400 - 15 * 60 (one day - 15 mins)
+                if ($sn == -1) {
+                    $log->warning("「${title}」訊息無法送出給 ${to_id} 。 (".$this_user.", $sn)");
+                } else {
+                    $log->info("「${title}」訊息(${sn})已送出給 ${to_id} 。 (".$this_user.")");
+                }
+            }
         }
 
-        $msg = new Message();
-        $content = "系統目前找到下列已結案之測量案件但是狀態卻是「延期複丈」:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/dashboard.html 執行複丈案件查詢功能並修正。";
-        
         $system = new System();
         $adm_ips = $system->getRoleAdminIps();
+        $content = "系統目前找到下列已結案之測量案件但是狀態卻是「延期複丈」:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/dashboard.html 執行複丈案件查詢功能並修正。";
         foreach ($adm_ips as $adm_ip) {
             if ($adm_ip == '::1') {
                 continue;
@@ -278,6 +294,7 @@ class WatchDog {
             $sn = $msg->send('複丈問題案件通知', $content, $adm_ip, 840);   // 840 secs => +14 mins
             $log->info("訊息已送出(${sn})給 ${adm_ip}");
         }
+
         $this->stats->addBadSurCaseStats(array(
             "date" => date("Y-m-d H:i:s"),
             "found" => count($case_ids),
