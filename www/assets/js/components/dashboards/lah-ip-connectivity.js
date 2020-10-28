@@ -27,7 +27,7 @@ if (Vue) {
         computed: {
             icon() { return 'server' },
             title() { return `重新整理 ${this.ip}:${this.port} 回應時間`},
-            reload_ms() { return this.demo ? 5000 : 15 * 60 * 1000 },
+            reload_ms() { return this.demo ? 5000 : 15 * 60 * 1000 },   // default is 15 mins
             resolved_name() { return this.name || (this.ip == '127.0.0.1' ? '本機' : this.ip) },
             latency_txt() {
                 if (this.latency > CONFIG.PING.DANGER) return `逾時`;
@@ -120,7 +120,6 @@ if (Vue) {
                     this.latency = this.rand(3000);
                     this.status = this.latency > CONFIG.PING.DANGER ? 'DOWN' : 'UP';
                     this.log_time = this.now().replace(/[\-\s:]*/, '');
-                    this.reload_timer = this.timeout(() => this.reload(), this.reload_ms); // default is 15 mins
                 } else {
                     if (force) this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
@@ -146,9 +145,9 @@ if (Vue) {
                         this.error = err;
                     }).finally(() => {
                         this.isBusy = false;
-                        this.reload_timer = this.timeout(() => this.reload(), this.reload_ms); // default is 15 mins
                     });
                 }
+                this.reload_timer = this.timeout(() => this.reload(), this.reload_ms);
             }
         },
         created() {
