@@ -1,12 +1,12 @@
 <?php
 require_once(dirname(dirname(__FILE__)).'/include/init.php');
-require_once(ROOT_DIR.'/include/Query.class.php');
-require_once(ROOT_DIR.'/include/Message.class.php');
-require_once(ROOT_DIR.'/include/StatsSQLite3.class.php');
-require_once(ROOT_DIR.'/include/Temperature.class.php');
-require_once(ROOT_DIR.'/include/SQLiteUser.class.php');
-require_once(ROOT_DIR.'/include/System.class.php');
-require_once(ROOT_DIR.'/include/Ping.class.php');
+require_once(INC_DIR.'/Query.class.php');
+require_once(INC_DIR.'/Message.class.php');
+require_once(INC_DIR.'/StatsSQLite3.class.php');
+require_once(INC_DIR.'/Temperature.class.php');
+require_once(INC_DIR.'/SQLiteUser.class.php');
+require_once(INC_DIR.'/System.class.php');
+require_once(INC_DIR.'/Ping.class.php');
 
 class WatchDog {
     

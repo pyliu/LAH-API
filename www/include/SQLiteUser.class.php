@@ -2,9 +2,6 @@
 require_once('init.php');
 require_once('System.class.php');
 require_once('DynamicSQLite.class.php');
-
-define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."dimension.db");
-
 class SQLiteUser {
     private $db;
 

@@ -16,7 +16,6 @@ if (!file_exists(EXPORTS_DIR) && !is_dir(EXPORTS_DIR)) {
 } 
 
 // to ensure logs dir exists
-$logs_folder = ROOT_DIR.'logs';
 if (!file_exists(LOGS_DIR) && !is_dir(LOGS_DIR)) {
     mkdir(LOGS_DIR);       
 } 
