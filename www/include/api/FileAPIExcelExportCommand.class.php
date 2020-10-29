@@ -28,7 +28,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $sheet->getCell('A2')->setValue('這是第2格');
 
         $writer = new Xlsx($spreadsheet);
-        $expfile = dirname(dirname(dirname(__FILE__))).'/export/'.$this->filename.'.xlsx';
+        $expfile = EXPORT_DIR.DIRECTORY_SEPARATOR.$this->filename.'.xlsx';
         $writer->save($expfile);
         unset($writer);
 
@@ -53,7 +53,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
     private function write_export_tmp_file(&$spreadsheet, $filename = 'tmp.xlsx') {
         // also write a copy to export folder
         $writer = new Xlsx($spreadsheet);
-        $writer->save(ROOT_DIR.'/export/'.$filename);
+        $writer->save(EXPORT_DIR.DIRECTORY_SEPARATOR.$filename);
         //zipExports();
     }
 

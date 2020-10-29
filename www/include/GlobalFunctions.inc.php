@@ -144,7 +144,7 @@ function zipLogs() {
 function zipExports() {
     global $log;
     // Enter the name of directory
-    $pathdir = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."export";
+    $pathdir = EXPORT_DIR ?? dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."export";
     $dir = opendir($pathdir); 
     $today = date("Y-m-d");
     while($file = readdir($dir)) {

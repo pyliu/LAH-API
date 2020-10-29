@@ -29,7 +29,7 @@ class FileAPIDataExportCommand extends FileAPICommand {
         // set this session to let export_txt_data.php know the file has been created.
         $_SESSION[$this->code] = $output_name;
         
-        $out = fopen(ROOT_DIR.DIRECTORY_SEPARATOR."export".DIRECTORY_SEPARATOR.$output_name, 'w'); 
+        $out = fopen(EXPORT_DIR.DIRECTORY_SEPARATOR.$output_name, 'w'); 
         if (is_array($data)) {
             $count = 0;
             foreach ($data as $row) {
