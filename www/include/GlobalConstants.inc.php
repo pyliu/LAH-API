@@ -27,6 +27,7 @@ abstract class AUTHORITY {
 
 define('ROOT_DIR', dirname(dirname(__FILE__)));
 define('EXPORTS_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'exports');
+define('IMPORT_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'import');
 define('LOG_DIR', ROOT_DIR.DIRECTORY_SEPARATOR.'log');
 define('INC_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."include");
 

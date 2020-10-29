@@ -13,12 +13,17 @@ $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $
 // to ensure exports dir exists
 if (!file_exists(EXPORTS_DIR) && !is_dir(EXPORTS_DIR)) {
     mkdir(EXPORTS_DIR);       
+}
+
+// to ensure import dir exists
+if (!file_exists(IMPORT_DIR) && !is_dir(IMPORT_DIR)) {
+    mkdir(IMPORT_DIR);       
 } 
 
 // to ensure log dir exists
 if (!file_exists(LOG_DIR) && !is_dir(LOG_DIR)) {
     mkdir(LOG_DIR);       
-} 
+}
 
 $today_ad = date('Y-m-d');  // ex: 2019-09-16
 $log = new Logger(LOG_DIR.DIRECTORY_SEPARATOR.'log-' . $today_ad . '.log');
