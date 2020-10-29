@@ -6,7 +6,7 @@ class FileAPISQLTxtCommand extends FileAPICommand {
     private $sql;
     
     private function writeTXTtmp($data, $print_count = true) {
-        $out = fopen(ROOT_DIR.DIRECTORY_SEPARATOR."exports/tmp.txt", 'w'); 
+        $out = fopen(ROOT_DIR.DIRECTORY_SEPARATOR."export/tmp.txt", 'w'); 
         if (is_array($data)) {
             $count = 0;
             foreach ($data as $row) {

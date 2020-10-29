@@ -1,7 +1,7 @@
 <?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."include".DIRECTORY_SEPARATOR."init.php");
 
-$exp_folder = ROOT_DIR.DIRECTORY_SEPARATOR.'exports'.DIRECTORY_SEPARATOR;
+$exp_folder = ROOT_DIR.DIRECTORY_SEPARATOR.'export'.DIRECTORY_SEPARATOR;
 $tmp_file = $exp_folder.'tmp.txt';
 
 if (isset($_SESSION['export_tmp_txt_filename']) && $_SESSION['export_tmp_txt_filename'] != 'tmp') {

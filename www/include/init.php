@@ -11,8 +11,8 @@ require_once("Logger.class.php");
 $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $_SERVER["REMOTE_ADDR"] ?? getLocalhostIP();
 
 // to ensure exports dir exists
-if (!file_exists(EXPORTS_DIR) && !is_dir(EXPORTS_DIR)) {
-    mkdir(EXPORTS_DIR);       
+if (!file_exists(EXPORT_DIR) && !is_dir(EXPORT_DIR)) {
+    mkdir(EXPORT_DIR);       
 }
 
 // to ensure import dir exists

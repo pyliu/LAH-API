@@ -28,12 +28,12 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $sheet->getCell('A2')->setValue('這是第2格');
 
         $writer = new Xlsx($spreadsheet);
-        $expfile = dirname(dirname(dirname(__FILE__))).'/exports/'.$this->filename.'.xlsx';
+        $expfile = dirname(dirname(dirname(__FILE__))).'/export/'.$this->filename.'.xlsx';
         $writer->save($expfile);
         unset($writer);
 
         // $writer = new Xlsx($spreadsheet);
-        // $writer->save('exports/hello world.xlsx');
+        // $writer->save('export/hello world.xlsx');
         ob_end_clean();
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         // header('Content-Type: application/vnd.ms-excel');
@@ -53,7 +53,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
     private function write_export_tmp_file(&$spreadsheet, $filename = 'tmp.xlsx') {
         // also write a copy to export folder
         $writer = new Xlsx($spreadsheet);
-        $writer->save(ROOT_DIR.'/exports/'.$filename);
+        $writer->save(ROOT_DIR.'/export/'.$filename);
         //zipExports();
     }
 

@@ -32,7 +32,7 @@ class FileAPISQLCsvCommand extends FileAPICommand {
     function __destruct() {}
 
     private function writeCSVtmp($data) {
-        $out = fopen(ROOT_DIR.DIRECTORY_SEPARATOR."exports".DIRECTORY_SEPARATOR."tmp.csv", 'w'); 
+        $out = fopen(ROOT_DIR.DIRECTORY_SEPARATOR."export".DIRECTORY_SEPARATOR."tmp.csv", 'w'); 
         if (is_array($data)) {
             $count = 0;
             foreach ($data as $row) {

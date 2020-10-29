@@ -3,7 +3,7 @@ require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."include".DIRECTORY_
 
 $code = $_GET["code"];
 
-$exp_folder = ROOT_DIR.DIRECTORY_SEPARATOR.'exports'.DIRECTORY_SEPARATOR;
+$exp_folder = ROOT_DIR.DIRECTORY_SEPARATOR.'export'.DIRECTORY_SEPARATOR;
 
 if (isset($_SESSION[$code])) {
     // copy tmp.txt to the target as well
