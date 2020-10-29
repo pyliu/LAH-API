@@ -29,7 +29,7 @@ switch ($_POST["type"]) {
         break;
     case "load_log":
         //$log->info("XHR [load_log] 查詢請求【".$_POST["log_filename"]."】");
-        $path = ROOT_DIR."/logs/".$_POST["log_filename"];
+        $path = LOG_DIR.DIRECTORY_SEPARATOR.$_POST["log_filename"];
         if (file_exists($path)) {
             function removeLoadLog($item) {
                 if (empty($item)) {

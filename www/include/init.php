@@ -15,13 +15,13 @@ if (!file_exists(EXPORTS_DIR) && !is_dir(EXPORTS_DIR)) {
     mkdir(EXPORTS_DIR);       
 } 
 
-// to ensure logs dir exists
-if (!file_exists(LOGS_DIR) && !is_dir(LOGS_DIR)) {
-    mkdir(LOGS_DIR);       
+// to ensure log dir exists
+if (!file_exists(LOG_DIR) && !is_dir(LOG_DIR)) {
+    mkdir(LOG_DIR);       
 } 
 
 $today_ad = date('Y-m-d');  // ex: 2019-09-16
-$log = new Logger(LOGS_DIR.DIRECTORY_SEPARATOR.'log-' . $today_ad . '.log');
+$log = new Logger(LOG_DIR.DIRECTORY_SEPARATOR.'log-' . $today_ad . '.log');
 
 $tw_date = new Datetime("now");
 $tw_date->modify("-1911 year");

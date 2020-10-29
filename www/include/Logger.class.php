@@ -2,7 +2,7 @@
 /** 
 * st-PHP-Logger - Simple PHP logging class. Log info, warning, error messages to log files.
 * $time = date('Y-M-d');
-* $log = new Logger('logs/log-' . $time . '.txt');
+* $log = new Logger('log/log-' . $time . '.txt');
 * $log->warning('this is the warning message');
 * $log->info('this is the info message');
 */
@@ -74,7 +74,7 @@ class Logger {
         }
 
         // Enter the name of directory
-        $pathdir = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs";
+        $pathdir = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."log";
         // Enter the name to creating zipped directory
         $zipcreated = "log-${date}.zip";
         $zip_file = $pathdir.DIRECTORY_SEPARATOR.$zipcreated;

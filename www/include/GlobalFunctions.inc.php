@@ -113,7 +113,7 @@ function getUserNames($refresh = false) {
 function zipLogs() {
     global $log;
     // Enter the name of directory
-    $pathdir = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."logs";
+    $pathdir = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."log";
     $dir = opendir($pathdir); 
     $today = date("Y-m-d");
     while($file = readdir($dir)) {
