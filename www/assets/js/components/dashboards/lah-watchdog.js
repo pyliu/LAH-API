@@ -3,19 +3,19 @@ if (Vue) {
     template: `<b-card class="shadow">
         <template v-slot:header>
             <div class="d-flex w-100 justify-content-between mb-0">
-                <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="search"> 快速檢測</lah-fa-icon></h6>
+                <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="dog"> 快速檢測</lah-fa-icon></h6>
             </div>
         </template>
         <b-button-group class="my-1">
-            <lah-button icon="cogs" variant="outline-primary" @click="checkXcase" title="檢測跨所註記遺失問題">跨所註記遺失</lah-button>
+            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkXcase" title="檢測跨所註記遺失問題">跨所註記遺失</lah-button>
             <lah-button icon="question" variant="success" @click="popupXcaseHelp" title="檢測跨所註記遺失說明"></lah-button>
         </b-button-group>
         <b-button-group class="my-1">
-            <lah-button icon="cogs" variant="outline-primary" @click="checkEzPayment" title="檢測悠遊卡付款問題">悠遊卡付款</lah-button>
+            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkEzPayment" title="檢測悠遊卡付款問題">悠遊卡付款</lah-button>
             <lah-button icon="question" variant="success" @click="popupEzPaymentHelp" title="檢測悠遊卡付款問題說明"></lah-button>
         </b-button-group>
         <b-button-group class="my-1">
-            <lah-button icon="cogs" variant="outline-primary" @click="checkSurCase" title="檢測悠遊卡付款問題">測量問題案件</lah-button>
+            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkSurCase" title="檢測測量問題案件">測量問題案件</lah-button>
             <lah-button icon="question" variant="success" @click="popupSurCaseHelp" title="檢測測量問題案件說明"></lah-button>
         </b-button-group>
     </b-card>`,
