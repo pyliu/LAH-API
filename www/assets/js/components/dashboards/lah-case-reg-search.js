@@ -1,16 +1,17 @@
 if (Vue) {
     Vue.component("lah-case-reg-search", {
-        template: `<fieldset>
-            <legend>
-                <i class="fas fa-search"></i>
-                登記案件查詢
-            </legend>
+        template: `<b-card>
+            <template v-slot:header>
+                <div class="d-flex w-100 justify-content-between mb-0">
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="scroll">登記案件查詢</lah-fa-icon></h6>
+                </div>
+            </template>
             <div class="d-flex">
                 <lah-case-input-group-ui v-model="id" @enter="regQuery" type="reg" prefix="case_reg"></lah-case-input-group-ui>
                 <b-button @click="regQuery" variant="outline-primary" size="sm" v-b-tooltip="'查登記案件'" class="mx-1"><i class="fas fa-briefcase"></i></b-button>
                 <b-button @click="prcQuery" variant="outline-secondary" size="sm" v-b-tooltip="'查地價案件'"><i class="fas fa-hand-holding-usd"></i></b-button>
             </div>
-        </fieldset>`,
+        </b-card>`,
         data: () => ({
             id: undefined
         }),
