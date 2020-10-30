@@ -2282,13 +2282,14 @@ if (Vue) {
     });
     
     Vue.component('lah-report', {
-        template: `<fieldset>
-            <legend>
-                <lah-fa-icon icon="file-excel" prefix="far"></lah-fa-icon>
-                報表資料匯出
-                <b-btn @click="popup" variant="outline-success" class="border-0 my-auto" size="sm"><lah-fa-icon icon="question"></lah-fa-icon></b-btn>
-                {{selected}}
-            </legend>
+        template: `<b-card class="shadow">
+            <template v-slot:header>
+                <div class="d-flex w-100 justify-content-between mb-0">
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="file-excel" prefix="far">報表匯出</lah-fa-icon></h6>
+                    <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm" title="備註"></lah-button>
+                    {{selected}}
+                </div>
+            </template>
             <b-input-group size="sm">
                 <b-input-group-prepend is-text>預載查詢選項</b-input-group-prepend>
                 <b-form-select ref="select" v-model="selected" :options="options" @change="change"></b-form-select>
@@ -2304,7 +2305,7 @@ if (Vue) {
                 class="mt-1 overflow-auto no-cache"
                 :state="validate"
             ></b-form-textarea>
-        </fieldset>`,
+        </b-card>`,
         data: () => ({
             selected: '',
             selected_label: '',
