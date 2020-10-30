@@ -28,30 +28,29 @@ if (Vue) {
         created() { }
       }
     },
-    template: `<fieldset>
-      <legend v-b-tooltip="'匯出謄本查詢紀錄'">
-        <i class="fas fa-stamp"></i>
-        謄本紀錄查詢
-        <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
-      </legend>
-      <b-form-row class="position-relative mb-1" style="margin-top: -2rem">
-        <b-col class="text-right">
-          <lah-button
-            icon="undo"
-            title="重設"
-            @click="reset"
-            variant="outline-secondary"
-            action="cycle-alt"
-          ></lah-button>
-          <lah-button
-            icon="search"
-            title="搜尋"
-            @click="query"
-            variant="outline-primary"
-            :disabled="!query_btn_on"
-          ></lah-button>
-        </b-col>
-      </b-form-row>
+    template: `<b-card>
+      <template v-slot:header>
+          <div class="d-flex w-100 justify-content-between mb-0" v-b-tooltip="'匯出謄本查詢紀錄'">
+            <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="wallet">謄本紀錄查詢</lah-fa-icon></h6>
+            <b-button-group size="sm">
+              <lah-button
+                icon="undo"
+                title="重設"
+                @click="reset"
+                variant="outline-secondary"
+                action="cycle-alt"
+              ></lah-button>
+              <lah-button
+                icon="search"
+                title="搜尋"
+                @click="query"
+                variant="outline-primary"
+                :disabled="!query_btn_on"
+              ></lah-button>
+              <lah-button icon="question" @click="popup" variant="outline-success" size="sm"></lah-button>
+            </b-button-group>
+          </div>
+      </template>
       <b-form-row class="mb-1">
         <b-col>
           <b-input-group size="sm" prepend="段/小段">
@@ -81,7 +80,7 @@ if (Vue) {
           <lah-court-log-search-items></lah-court-log-search-items>
         </b-col>
       </b-form-row>
-    </fieldset>`,
+    </b-card>`,
     props: { },
     data: () => ({
       cache_key: 'lah-court-log-search-section-list',
