@@ -1,16 +1,20 @@
 if (Vue) {
     Vue.component("lah-case-sync-mgt", {
-        template: `<fieldset id="lah-case-sync-mgt-fieldset">
-            <legend>
-                <lah-fa-icon icon="sync-alt">同步登記案件</lah-fa-icon>
-                <lah-button action="heartbeat" regular icon="window-maximize" class="border-0" @click="syncStatus" variant="outline-primary" size="sm" title="檢視同步異動狀態"></lah-button>
-                <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm"></lah-button>
-            </legend>
+        template: `<b-card>
+            <template v-slot:header>
+                <div class="d-flex w-100 justify-content-between mb-0">
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="sync-alt">同步登記案件</lah-fa-icon></h6>
+                    <b-button-group>
+                        <lah-button action="heartbeat" regular icon="window-maximize" class="border-0" @click="syncStatus" variant="outline-primary" size="sm" title="檢視同步異動狀態"></lah-button>
+                        <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm"></lah-button>
+                    </b-button-group>
+                </div>
+            </template>
             <div class="d-flex">
                 <lah-case-input-group-ui v-model="id" @enter="check" type="sync" prefix="case_sync"></lah-case-input-group-ui>
                 <b-button @click="check" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋案件'"><i class="fas fa-sync"></i></b-button>
             </div>
-        </fieldset>`,
+        </b-card>`,
         data: () => ({
             year: undefined,
             code: undefined,

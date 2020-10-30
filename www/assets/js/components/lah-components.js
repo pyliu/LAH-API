@@ -2676,12 +2676,13 @@ if (Vue) {
                 }
             }
         },
-        template: `<fieldset>
-            <legend v-b-tooltip="'各段土地標示部筆數＆面積'">
-                <i class="far fa-map"></i>
-                轄區段別資料
-                <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
-            </legend>
+        template: `<b-card>
+            <template v-slot:header>
+                <div class="d-flex w-100 justify-content-between mb-0">
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="map">轄區段別資料</lah-fa-icon></h6>
+                    <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm"></lah-button>
+                </div>
+            </template>
             <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
             <a href="assets/files/%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%B5%81%E9%80%9A%E7%94%B3%E8%AB%8B%E8%A1%A8.doc" target="_blank">電子資料申請書</a> <br />
             <b-input-group size="sm" prepend="關鍵字/段代碼">
@@ -2696,7 +2697,7 @@ if (Vue) {
                     <b-button @click="query" variant="outline-primary" size="sm" v-b-tooltip="'搜尋段小段'" :disabled="!validate"><i class="fas fa-search"></i></b-button>
                 </template>
             </b-input-group>
-        </fieldset>`,
+        </b-card>`,
         data: () => ({
             text: ''
         }),
