@@ -1,16 +1,17 @@
 if (Vue) {
     Vue.component("lah-case-sur-mgt", {
-        template: `<fieldset>
-            <legend>
-                <i class="fas fa-map-marker-alt"></i>
-                複丈案件查詢
-                <b-button class="border-0" @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
-            </legend>
+        template: `<b-card>
+            <template v-slot:header>
+                <div class="d-flex w-100 justify-content-between mb-0">
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="bullhorn">複丈案件查詢</lah-fa-icon></h6>
+                    <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm" title="說明"></lah-button>
+                </div>
+            </template>
             <div class="d-flex">
                 <lah-case-input-group-ui v-model="id" @enter="query" type="sur" prefix="case_sur"></lah-case-input-group-ui>
                 <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'查詢測量案件'"><i class="fas fa-search"></i></b-button>
             </div>
-        </fieldset>`,
+        </b-card>`,
         data: () => ({
             id: undefined
         }),

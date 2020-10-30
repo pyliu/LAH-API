@@ -27,23 +27,23 @@
   
   <section class="hide">
     <b-container fluid v-cloak>
-      <b-card-group deck>
+      <b-card-group deck class="mb-3">
         <b-card no-body border-variant="white"><lah-user-board ref="user_search" max-height="100"></lah-user-board></b-card>
         <b-card no-body border-variant="white"><lah-fee-query-board></lah-fee-query-board></b-card>
         <b-card no-body border-variant="white"><lah-section-search></lah-section-search></b-card>
         <!-- <b-card no-body border-variant="white"><lah-cache-mgt class="shadow"></lah-cache-mgt></b-card> -->
       </b-card-group>
-      <b-card-group deck>
+      <b-card-group deck class="mb-3">
         <b-card no-body border-variant="white"><lah-case-sync-mgt></lah-case-sync-mgt></b-card>
         <b-card no-body border-variant="white"><lah-case-reg-search></lah-case-reg-search></b-card>
-        <b-card no-body border-variant="white"><lah-case-sur-mgt></lah-case-sur-mgt></b-card>
+        <lah-case-sur-mgt class="shadow"></lah-case-sur-mgt>
       </b-card-group>
-      <b-card-group deck>
+      <b-card-group deck class="mb-3">
         <lah-watchdog class="shadow"></lah-watchdog>
         <lah-case-query-by-pid class="shadow"></lah-case-query-by-pid>
         <lah-export-txt class="shadow"></lah-export-txt>
       </b-card-group>
-      <b-card-group deck class="mt-2">
+      <b-card-group deck>
         <lah-announcement-mgt class="shadow"></lah-announcement-mgt>
         <lah-report class="shadow"></lah-report>
         <lah-vuex-switch class="shadow"></lah-vuex-switch>
