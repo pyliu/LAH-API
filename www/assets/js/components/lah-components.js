@@ -1023,16 +1023,16 @@ if (Vue) {
     });
 
     Vue.component("lah-user-board", {
-        template: `<fieldset>
-            <legend>
-                <lah-fa-icon icon="users">
-                    使用者看板
-                </lah-fa-icon>
-                <b-button-group size="sm" class="align-middle my-auto">
-                    <lah-button class="border-0"  @click="location.href='org.html'" variant="outline-primary" size="sm" icon="sitemap"></lah-button>
-                    <lah-button class="border-0"  @click="popup" variant="outline-success" size="sm" icon="question"></lah-button>
-                </b-button-group>
-            </legend>
+        template: `<b-card>
+            <template v-slot:header>
+                <div class="d-flex w-100 justify-content-between mb-0">
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="users">使用者看板</lah-fa-icon></h6>
+                    <b-button-group size="sm" class="align-middle my-auto">
+                        <lah-button class="border-0"  @click="location.href='org.html'" variant="outline-primary" size="sm" icon="sitemap"></lah-button>
+                        <lah-button class="border-0"  @click="popup" variant="outline-success" size="sm" icon="question"></lah-button>
+                    </b-button-group>
+                </div>
+            </template>
             <b-input-group size="sm" prepend="關鍵字">
                 <b-form-input
                     placeholder="'HB05' OR '憶如' OR '220.1.35.x'"
@@ -1065,7 +1065,7 @@ if (Vue) {
                     </div>
                 </transition-group>
             </div>
-        </fieldset>`,
+        </b-card>`,
         props: {
             avatar: {
                 type: Boolean,
