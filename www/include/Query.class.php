@@ -1043,8 +1043,29 @@ class Query {
 		// true -> raw data with converting to utf-8
 		return $this->db->fetch();
 	}
+	
+	// 取得已結案卻延期複丈之案件
+	public function getSurProblematicCases() {
+		$this->db->parse("
+			select t.*, s.*, u.KCNT
+			from MOICAS.CMSMS t
+			left join MOICAS.CMSDS s
+			on t.mm01 = s.md01
+			and t.mm02 = s.md02
+			and t.mm03 = s.md03
+			left join MOIADM.RKEYN u
+			on t.mm06 = u.kcde_2
+			and u.kcde_1 = 'M3'
+			where
+			t.mm22 = 'C' 
+			and t.mm23 in ('A', 'B', 'C', 'F')
+			order by t.mm01, t.mm02, t.mm03
+		");
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
 
-	public function fixSurDelayCase($id, $upd_mm22, $clr_delay) {
+	public function fixSurDelayCase($id, $upd_mm22, $clr_delay, $fix_case_count = 'false') {
 		if (!$this->checkCaseID($id)) {
             return false;
 		}
@@ -1077,6 +1098,19 @@ class Query {
 			$this->db->execute();
 		}
 
+		if ($fix_case_count == "true") {
+			$this->db->parse("
+				UPDATE MOICAS.CMSMS SET MM24 = :bv_count
+				WHERE MM01 = :bv_year AND MM02 = :bv_code AND MM03 = :bv_number
+			");
+			$this->db->bind(":bv_year", $year);
+			$this->db->bind(":bv_code", $code);
+			$this->db->bind(":bv_number", $number);
+			$this->db->bind(":bv_count", 1);
+			// UPDATE/INSERT can not use fetch after execute ... 
+			$this->db->execute();
+		}
+		
 		return true;
 	}
 
@@ -1495,27 +1529,6 @@ class Query {
 			where lidn like :bv_id
 		");
 		$this->db->bind(":bv_id", '%'.$id.'%');
-		$this->db->execute();
-		return $this->db->fetchAll();
-	}
-
-	// 取得已結案卻延期複丈之案件
-	public function getSurProblematicCases() {
-		$this->db->parse("
-			select t.*, s.*, u.KCNT
-			from MOICAS.CMSMS t
-			left join MOICAS.CMSDS s
-			on t.mm01 = s.md01
-			and t.mm02 = s.md02
-			and t.mm03 = s.md03
-			left join MOIADM.RKEYN u
-			on t.mm06 = u.kcde_2
-			and u.kcde_1 = 'M3'
-			where
-			t.mm22 = 'C' 
-			and t.mm23 in ('A', 'B', 'C', 'F')
-			order by t.mm01, t.mm02, t.mm03
-		");
 		$this->db->execute();
 		return $this->db->fetchAll();
 	}

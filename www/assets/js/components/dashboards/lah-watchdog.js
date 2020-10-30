@@ -1,51 +1,101 @@
 if (Vue) {
   Vue.component('lah-watchdog', {
-    template: `<b-card>
+    template: `<b-card class="shadow">
         <template v-slot:header>
             <div class="d-flex w-100 justify-content-between mb-0">
                 <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="search"> 快速檢測</lah-fa-icon></h6>
             </div>
         </template>
-        <b-button-group>
+        <b-button-group class="my-1">
             <lah-button icon="cogs" variant="outline-primary" @click="checkXcase" title="檢測跨所註記遺失問題">跨所註記遺失</lah-button>
             <lah-button icon="question" variant="success" @click="popupXcaseHelp" title="檢測跨所註記遺失說明"></lah-button>
         </b-button-group>
-        <b-button-group>
-            <lah-button icon="cogs" variant="outline-primary" @click="checkEzPayment" title="檢測悠遊卡付款問題">悠遊卡付款問題</lah-button>
+        <b-button-group class="my-1">
+            <lah-button icon="cogs" variant="outline-primary" @click="checkEzPayment" title="檢測悠遊卡付款問題">悠遊卡付款</lah-button>
             <lah-button icon="question" variant="success" @click="popupEzPaymentHelp" title="檢測悠遊卡付款問題說明"></lah-button>
+        </b-button-group>
+        <b-button-group class="my-1">
+            <lah-button icon="cogs" variant="outline-primary" @click="checkSurCase" title="檢測悠遊卡付款問題">測量問題案件</lah-button>
+            <lah-button icon="question" variant="success" @click="popupSurCaseHelp" title="檢測測量問題案件說明"></lah-button>
         </b-button-group>
     </b-card>`,
     components: {
-        "lah-xcase-check-item": {
+        "lah-problem-surcases": {
             template: `<ul style="font-size: 0.9rem">
-                <li v-for="(item, index) in ids">
-                    <a href='javascript:void(0)' class='reg_case_id' @click="window.vueApp.fetchRegCase">{{item}}</a>
-                    <button class='fix_xcase_button btn btn-sm btn-outline-success' :data-id='item' @click.once="fix">修正</button>
+                <li v-for="(id, index) in ids">
+                    <a href='javascript:void(0)' @click="query(id)">{{id}}</a>
+                    <lah-button icon="hammer" variant="outline-success" @click.stop="fix(id, $event)">修正</button>
                 </li>
             </ul>`,
             props: ["ids"],
             methods: {
-                fix: function(e) {
-                    let id = $(e.target).data("id").replace(/[^a-zA-Z0-9]/g, "");
-                    console.log("The problematic xcase id: "+id);
-                    let li = $(e.target).closest("li");
+                query(id) {
                     this.isBusy = true;
-                    $(e.target).remove();
                     this.$http.post(CONFIG.API.JSON.QUERY, {
-                        type: "fix_xcase",
+                        type: "sur_case",
                         id: id
                     }).then(res => {
-                        let msg = `<strong class='text-success'>${id} 跨所註記修正完成!</strong>`;
-                        if (res.data.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                            msg = `<span class='text-danger'>${id} 跨所註記修正失敗! (${res.data.status})</span>`;
+                        if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL && res.data.data_count == 0) {
+                            this.notify({
+                                title: "測量案件查詢",
+                                subtitle: `${this.id}`,
+                                message: "查無資料",
+                                type: "warning"
+                            });
+                        } else {
+                            if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
+                                this.msgbox({
+                                    title: "測量案件查詢",
+                                    message: this.$createElement("lah-sur-case-dialog", { props: { json: res.data } }),
+                                    callback: () => addUserInfoEvent()
+                                });
+                            } else if (res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
+                                throw new Error("查詢失敗：" + res.data.message);
+                            }
                         }
-                        this.notify({ message: msg, variant: "success" });
-                        li.html(msg);
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
                         this.isBusy = false;
                     });
+                },
+                fix(id, evt) {
+                    id = id.replace(/[^a-zA-Z0-9]/g, "");
+                    showConfirm(`確定要修正本案件 ${id} ?`, () => {
+                        this.$log("The problematic sur case id: "+id);
+                        this.isBusy = true;
+                        $(evt.target).remove();
+                        //fix_sur_delay_case
+                        this.$http.post(CONFIG.API.JSON.QUERY, {
+                            type: "fix_sur_delay_case",
+                            id: id,
+                            UPD_MM22: true,
+                            CLR_DELAY: true,
+                            FIX_COUNT: true
+                        }).then(res => {
+                            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                this.notify({
+                                    title: "修正複丈案件",
+                                    subtitle: id,
+                                    type: "success",
+                                    message: "修正成功!"
+                                });
+                            } else {
+                                let msg = "回傳狀態碼不正確!【" + res.data.message + "】";
+                                this.alert({
+                                    title: "修正複丈案件失敗",
+                                    subtitle: id,
+                                    message: msg,
+                                    type: "danger"
+                                });
+                            }
+                        }).catch(err => {
+                            this.error = err;
+                        }).finally(() => {
+                            this.isBusy = false;
+                        });
+                    });
+
                 }
             }
         }
@@ -102,6 +152,44 @@ if (Vue) {
                 size: "lg"
             });
         },
+        popupSurCaseHelp() {
+            this.msgbox({
+                title: "測量案件資料 小幫手提示",
+                message: `<h5><span class="text-danger">※</span>注意：本功能會清除如下圖之欄位資料並將案件辦理情形改為【核定】，請確認後再執行。</h5>
+                <img src="assets/howto/107-HB18-3490_測丈已結案案件辦理情形出現(逾期)延期複丈問題調整【參考】.jpg" class="img-responsive img-thumbnail"/>
+                <h5><span class="text-danger">※</span> 問題原因說明</h5>
+                <div>原因是 CMB0301 延期複丈功能，針對於有連件案件在做處理時，會自動根據MM24案件數，將後面的案件自動做延期複丈的更新。導致後續已結案的案件會被改成延期複丈的狀態 MM22='C' 就是 100、200、300、400為四連件，所以100的案件 MM24='4'，200、300、400 的 MM24='0' 延期複丈的問題再將100號做延期複丈的時候，會將200、300、400也做延期複丈的更新，所以如果400已經結案，100做延期複丈，那400號就會變成 MM22='C' MM23='A' MM24='4' 的異常狀態。</div>`,
+                size: "lg"
+            });
+        },
+        checkSurCase() {
+            const h = this.$createElement;
+            this.isBusy = true;
+            this.$http.post(CONFIG.API.JSON.QUERY, {
+                type: "sur-problem-check"
+            }).then(res => {
+                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                    let vnode = this.$createElement("lah-problem_surcases", { props: { ids: res.data.case_ids } });
+                    this.msgbox({
+                        title: "<i class='fas fa-exclamation-triangle text-danger'></i>&ensp;<strong class='text-info'>請查看下列案件</strong>",
+                        body: vnode,
+                        size: "md"
+                    });
+                } else if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
+                    this.notify({
+                        title: "檢測測量問題案件",
+                        message: "<i class='fas fa-circle text-success'></i>&ensp;"+ res.data.message,
+                        type: "success"
+                    });
+                } else {
+                    this.alert({ title: "檢測測量問題案件", message: res.data.message, type: "danger" });
+                }
+            }).catch(err => {
+                this.error = err;
+            }).finally(() => {
+                this.isBusy = false;
+            });
+        },
         checkXcase() {
             const h = this.$createElement;
             this.isBusy = true;
@@ -142,7 +230,7 @@ if (Vue) {
             const h = this.$createElement;
 
             this.$http.post(CONFIG.API.JSON.QUERY, {
-                type: "easycard",
+                type: "ez-payment-check",
                 qday: this.date
             }).then(res => {
                 if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {

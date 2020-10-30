@@ -200,19 +200,52 @@ switch ($_POST["type"]) {
 				"raw" => $rows
 			);
 			
-			// Send Message to Admins
-			$msg = new Message();
-			$content = "系統目前找到下列跨所註記遺失案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://".$_SERVER["SERVER_ADDR"]."/dashboard.html 修正。";
-			$adm_ips = $system->getRoleAdminIps();
-			foreach ($adm_ips as $adm_ip) {
-				if ($adm_ip == '::1') {
-					continue;
-				}
-				$sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, 'now', 540);	// send right now and drop message after 540 secs if noe read
-				$log->info("訊息已送出(${sn})給 ${adm_ip}");
-			}
-
 			$log->info("XHR [xcase-check] 找到".count($rows)."件案件遺失註記");
+			echo json_encode($result, 0);
+		}
+		break;
+	case "ez-payment-check":
+		$log->info("XHR [ez-payment-check] 查詢悠遊卡資料【".$_POST["qday"]."】請求");
+		$query_result = $mock ? $cache->get('ez-payment-check') : $query->getEasycardPayment($_POST["qday"]);
+		if (!$mock) $cache->set('ez-payment-check', $query_result);
+		if (empty($query_result)) {
+			$msg = $_POST["qday"] ."查無悠遊卡交易異常資料！";
+			if (empty($_POST["qday"])) {
+				$msg = "一周內查無悠遊卡交易異常資料！【大於等於".$week_ago."】";
+			}
+			$log->info("XHR [ez-payment-check] $msg");
+			echoErrorJSONString($msg);
+		} else {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($query_result),
+				"query_string" => $_POST["qday"],
+				"raw" => $query_result
+			);
+			$log->info("XHR [ez-payment-check] 找到 ".count($query_result)." 筆資料");
+			echo json_encode($result, 0);
+		}
+		break;
+	case "sur-problem-check":
+		$log->info("XHR [sur-problem-check] 查詢測量問題案件請求");
+		$query_result = $mock ? $cache->get('sur-problem-check') : $query->getSurProblematicCases();
+		if (!$mock) $cache->set('sur-problem-check', $query_result);
+		if (empty($query_result)) {
+			$msg = "查無異常測量案件資料。";
+			$log->info("XHR [sur-problem-check] $msg");
+			echoErrorJSONString($msg);
+		} else {
+			$case_ids = array();
+			foreach ($query_result as $result) {
+				$case_ids[] = $result['MM01'].$result['MM02'].$result['MM03'];
+			}
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($query_result),
+				"raw" => $query_result,
+				"ids" => $case_ids
+			);
+			$log->info("XHR [sur-problem-check] 找到 ".count($query_result)." 筆異常案件資料");
 			echo json_encode($result, 0);
 		}
 		break;
@@ -321,28 +354,6 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
-	case "easycard":
-		$log->info("XHR [easycard] 查詢悠遊卡資料【".$_POST["qday"]."】請求");
-		$query_result = $mock ? $cache->get('easycard') : $query->getEasycardPayment($_POST["qday"]);
-		if (!$mock) $cache->set('easycard', $query_result);
-		if (empty($query_result)) {
-			$msg = $_POST["qday"] ."查無悠遊卡交易異常資料！";
-			if (empty($_POST["qday"])) {
-				$msg = "一周內查無悠遊卡交易異常資料！【大於等於".$week_ago."】";
-			}
-			$log->info("XHR [easycard] $msg");
-			echoErrorJSONString($msg);
-		} else {
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => count($query_result),
-				"query_string" => $_POST["qday"],
-				"raw" => $query_result
-			);
-			$log->info("XHR [easycard] 找到 ".count($query_result)." 筆資料");
-			echo json_encode($result, 0);
-		}
-		break;
 	case "fix_easycard":
 		$log->info("XHR [fix_easycard] 修正悠遊卡交易【".$_POST["qday"].", ".$_POST["pc_num"]."】請求");
 		$result_flag = $mock ? $cache->get('fix_easycard') : $query->fixEasycardPayment($_POST["qday"], $_POST["pc_num"]);
@@ -384,8 +395,8 @@ switch ($_POST["type"]) {
 			echoErrorJSONString();
 			break;
 		}
-		$log->info("XHR [fix_sur_delay_case] 修正測量延期案件【".$_POST["id"].", ".$_POST["UPD_MM22"].", ".$_POST["CLR_DELAY"]."】請求");
-		$result_flag = $mock ? $cache->get('fix_sur_delay_case') : $query->fixSurDelayCase($_POST["id"], $_POST["UPD_MM22"], $_POST["CLR_DELAY"]);
+		$log->info("XHR [fix_sur_delay_case] 修正測量延期案件【".$_POST["id"].", ".$_POST["UPD_MM22"].", ".$_POST["CLR_DELAY"].", ".$_POST["FIX_COUNT"]."】請求");
+		$result_flag = $mock ? $cache->get('fix_sur_delay_case') : $query->fixSurDelayCase($_POST["id"], $_POST["UPD_MM22"], $_POST["CLR_DELAY"], $_POST["FIX_COUNT"]);
 		if (!$mock) $cache->set('fix_sur_delay_case', $result_flag);
 		if ($result_flag) {
 			$result = array(
