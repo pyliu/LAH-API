@@ -1,6 +1,6 @@
 if (Vue) {
     Vue.component("lah-announcement-mgt", {
-        template: `<b-card class="shadow">
+        template: `<b-card>
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="bullhorn">公告維護</lah-fa-icon></h6>
