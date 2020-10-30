@@ -205,24 +205,20 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "ez-payment-check":
-		$log->info("XHR [ez-payment-check] 查詢悠遊卡資料【".$_POST["qday"]."】請求");
-		$query_result = $mock ? $cache->get('ez-payment-check') : $query->getEasycardPayment($_POST["qday"]);
+		$log->info("XHR [ez-payment-check] 查詢異常悠遊卡交易請求");
+		$query_result = $mock ? $cache->get('ez-payment-check') : $query->getEasycardPayment();
 		if (!$mock) $cache->set('ez-payment-check', $query_result);
 		if (empty($query_result)) {
-			$msg = $_POST["qday"] ."查無悠遊卡交易異常資料！";
-			if (empty($_POST["qday"])) {
-				$msg = "一周內查無悠遊卡交易異常資料！【大於等於".$week_ago."】";
-			}
+			$msg = "一周內查無悠遊卡交易異常資料！【大於等於".$week_ago."】";
 			$log->info("XHR [ez-payment-check] $msg");
 			echoErrorJSONString($msg);
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => count($query_result),
-				"query_string" => $_POST["qday"],
 				"raw" => $query_result
 			);
-			$log->info("XHR [ez-payment-check] 找到 ".count($query_result)." 筆資料");
+			$log->info("XHR [ez-payment-check] 找到 ".count($query_result)." 筆異常資料");
 			echo json_encode($result, 0);
 		}
 		break;

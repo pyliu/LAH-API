@@ -300,7 +300,7 @@ class Query {
 		return $this->db->fetchAll();
 	}
 
-	public function getEasycardPayment($qday) {
+	public function getEasycardPayment($qday = '') {
 		/*
 			"K01","K02","K03","K04"
 			"01","現金","N","N"
@@ -1110,7 +1110,7 @@ class Query {
 			// UPDATE/INSERT can not use fetch after execute ... 
 			$this->db->execute();
 		}
-		
+
 		return true;
 	}
 

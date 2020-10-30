@@ -101,17 +101,11 @@ if (Vue) {
         }
     },
     data: () => ({
-        date: "",
-        ad_date: "2020-10-30"
+        date: ""
     }),
     computed: { },
     watch: { },
     methods: {
-        convertTWDate(val) {
-            let d = new Date(val);
-            this.date = (d.getFullYear() - 1911) + ("0" + (d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2);
-            return val;
-        },
         popupEzPaymentHelp() {
             this.msgbox({
                 title: "悠遊卡自動加值付款失敗回復 小幫手提示",
@@ -219,16 +213,8 @@ if (Vue) {
             });
         },
         checkEzPayment() {
-            // basic checking for tw date input
-            let regex = /^\d{7}$/;
-            if (!this.empty(this.date) && this.date.match(regex) == null) {
-                showPopper("#easycard_query_day");
-                return;
-            }
-
             this.isBusy = true;
             const h = this.$createElement;
-
             this.$http.post(CONFIG.API.JSON.QUERY, {
                 type: "ez-payment-check",
                 qday: this.date
