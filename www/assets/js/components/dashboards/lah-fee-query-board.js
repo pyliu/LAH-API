@@ -1,11 +1,12 @@
 if (Vue) {
     Vue.component("lah-fee-query-board", {
-        template: `<fieldset>
-            <legend class="bg-light text-dark">
-                <b-icon icon="wallet"></b-icon>
-                規費資料查詢
-                <b-button @click="popup" variant="outline-success" size="sm" class="border-0"><i class="fas fa-question"></i></b-button>
-            </legend>
+        template: `<b-card>
+            <template v-slot:header>
+                <div class="d-flex w-100 justify-content-between mb-0">
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="wallet">規費資料查詢</lah-fa-icon></h6>
+                    <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm"></lah-button>
+                </div>
+            </template>
             <b-form-row class="mb-1">
                 <b-input-group size="sm">
                     <b-input-group-prepend is-text>&emsp;日期&emsp;</b-input-group-prepend>
@@ -47,7 +48,7 @@ if (Vue) {
                     </b-button>
                 </b-input-group>
             </b-form-row>
-        </fieldset>`,
+        </b-card>`,
         data: () => ({
             date_obj: null,    // v-model as a date object
             query_date: "",
