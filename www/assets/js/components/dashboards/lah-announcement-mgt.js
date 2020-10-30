@@ -1,16 +1,17 @@
 if (Vue) {
     Vue.component("lah-announcement-mgt", {
-        template: `<fieldset>
-            <legend>
-                <i class="fas fa-bullhorn"></i>
-                公告維護
-                <b-button class="border-0" @click="popup" variant="outline-success" size="sm" title="備註"><i class="fas fa-question"></i></b-button>
-            </legend>
+        template: `<b-card class="shadow">
+            <template v-slot:header>
+                <div class="d-flex w-100 justify-content-between mb-0">
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="bullhorn">公告維護</lah-fa-icon></h6>
+                    <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm" title="備註"></lah-button>
+                </div>
+            </template>
             <div class="d-flex">
                 <announcement-mgt-item :reset-flag="reset_flag" @update-announcement-done="updated" @reset-flags-done="done"></announcement-mgt-item>
                 <b-button @click="clear" variant="outline-danger" size="sm" v-b-tooltip="'清除准登旗標'" class="ml-1"><i class="fas fa-flag"></i></b-button>
             </div>
-        </fieldset>`,
+        </b-card>`,
         data: () => ({
             reset_flag: false
         }),
