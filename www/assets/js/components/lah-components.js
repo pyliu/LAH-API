@@ -1415,7 +1415,7 @@ if (Vue) {
                 <transition-group name="list" mode="out-in" v-else>
                     <b-card
                         v-for="(message, index) in raws"
-                        class="overflow-hidden bg-light"
+                        class="overflow-hidden bg-light shadow-xl"
                         :border-variant="border(index)"
                         :key="'card_'+index"
                     >
