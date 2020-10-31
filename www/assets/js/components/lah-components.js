@@ -1434,8 +1434,9 @@ if (Vue) {
                         <b-card-sub-title sub-title-tag="small">
                             <div class="float-right">
                                 <ul>
-                                    <li>通知：{{message['sendtime']['date'].substring(0, 19)}}</li>
-                                    <li>忽略：{{message['enddate']['date'].substring(0, 19)}}</li>
+                                    <li>通知時間：{{message['sendtime']['date'].substring(0, 19)}}</li>
+                                    <li>停止通知：{{message['enddate']['date'].substring(0, 19)}}</li>
+                                    <li>傳送人員：{{message['sender']}}:{{message['sendCname']}}</li>
                                 </ul>
                             </div>
                         </b-card-sub-title>
@@ -1508,7 +1509,7 @@ if (Vue) {
                                     name: this.name,
                                     ip: this.ip || this.myip,
                                     count: this.count,
-                                    timeout: 5000
+                                    timeout: 3000
                                 }).then(res => {
                                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                         this.raws = res.data.raw
