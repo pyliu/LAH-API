@@ -121,9 +121,9 @@ if (Vue) {
 
     Vue.component("lah-stats-dashboard", {
         template: `<div>
-            <b-card-group v-if="all" columns>
+            <b-card-group v-if="all" columns class="h-100">
                 <transition-group name="list">
-                    <b-card no-body v-for="(item, idx) in items" :key="'stats_'+idx" :border-variant="border_var(item)" class="shadow-xl">
+                    <b-card no-body v-for="(item, idx) in items" :key="'stats_'+idx" :border-variant="border_var(item)" class="shadow-xl my-2">
                         <b-list-group-item button class="d-flex justify-content-between align-items-center" @click.stop="query(item)" title="按我取得詳細資料">
                             <div>
                                 <lah-button pill icon="file-excel" variant="outline-success" action="move-fade-ltr" title="匯出EXCEL" @click="xlsx(item)"></lah-button>
@@ -237,7 +237,7 @@ if (Vue) {
                     case "stats_sur_rain":
                         return 'warning';
                     default:
-                        return 'white';
+                        return 'secondary';
                 }
             },
             badge_var(count) {
