@@ -3,7 +3,7 @@ if (Vue) {
      * Stats Relative Components
      */
     Vue.component("lah-stats-range", {
-        template: `<fieldset class="mb-4 shadow-xl">
+        template: `<fieldset>
             <legend>篩選條件</legend>
             <b-form-row class="mt-2">
                 <b-input-group size="sm" :prepend="date" class="col">
@@ -121,9 +121,9 @@ if (Vue) {
 
     Vue.component("lah-stats-dashboard", {
         template: `<div>
-            <b-card-group v-if="all" columns class="h-100">
+            <b-card-group v-if="all" columns>
                 <transition-group name="list">
-                    <b-card no-body v-for="(item, idx) in items" :key="'stats_'+idx" :border-variant="border_var(item)" class="shadow-xl my-2">
+                    <b-card no-body v-for="(item, idx) in items" :key="'stats_'+idx" :border-variant="border_var(item)" class="shadow my-2">
                         <b-list-group-item button class="d-flex justify-content-between align-items-center" @click.stop="query(item)" title="按我取得詳細資料">
                             <div>
                                 <lah-button pill icon="file-excel" variant="outline-success" action="move-fade-ltr" title="匯出EXCEL" @click="xlsx(item)"></lah-button>
