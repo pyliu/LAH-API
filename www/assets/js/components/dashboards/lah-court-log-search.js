@@ -32,13 +32,14 @@ if (Vue) {
       <template v-slot:header>
           <div class="d-flex w-100 justify-content-between mb-0" v-b-tooltip="'匯出謄本查詢紀錄'">
             <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="wallet">謄本紀錄查詢</lah-fa-icon></h6>
-            <b-button-group size="sm">
+            <b-button-group size="sm" class="border-0">
               <lah-button
                 icon="undo"
                 title="重設"
                 @click="reset"
                 variant="outline-secondary"
                 action="cycle-alt"
+                class="border-0"
               ></lah-button>
               <lah-button
                 icon="search"
@@ -46,8 +47,9 @@ if (Vue) {
                 @click="query"
                 variant="outline-primary"
                 :disabled="!query_btn_on"
+                class="border-0"
               ></lah-button>
-              <lah-button icon="question" @click="popup" variant="outline-success" size="sm"></lah-button>
+              <lah-button icon="question" @click="popup" variant="outline-success" size="sm" class="border-0"></lah-button>
             </b-button-group>
           </div>
       </template>
