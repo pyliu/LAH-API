@@ -28,7 +28,9 @@
         <lah-court-log-search></lah-court-log-search>
       </b-card-group>
       <b-card-group columns>
-        <lah-user-card :no-message="true"></lah-user-card>
+        <!-- <lah-user-card :no-message="true"></lah-user-card> -->
+        <lah-case-reg-search></lah-case-reg-search>
+        <lah-case-sur-mgt></lah-case-sur-mgt>
         <lah-user-message-reservation :heading="false" label="信差提醒"></lah-user-message-reservation>
       </b-card-group>
     </div>
@@ -55,5 +57,8 @@
 
   <script src="assets/js/components/dashboards/lah-court-log-search.js"></script>
   <script src="assets/js/components/lah-card-components.js"></script>
+  <script src="assets/js/components/lah-case-input-group-ui.js"></script>
+  <script src="assets/js/components/dashboards/lah-case-sur-mgt.js"></script>
+  <script src="assets/js/components/dashboards/lah-case-reg-search.js"></script>
 </body>
 </html>
