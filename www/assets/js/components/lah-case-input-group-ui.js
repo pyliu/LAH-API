@@ -1,6 +1,6 @@
 if (Vue) {
     Vue.component("lah-case-input-group-ui", {
-        template: `<div class="d-flex" v-b-popover.hover.focus.bottom.d1000="'目前案件代碼：'+ID">
+        template: `<div class="d-flex" v-b-popover.hover.focus.bottom.d1000="preview">
             <b-input-group size="sm" append="年" @click="getMaxNumber">
                 <b-form-select ref="year" v-model="year" :options="years" @change="emitInput" @change="getMaxNumber" :id="prefix+'_case_update_year'">
                     <template v-slot:first>
@@ -82,7 +82,8 @@ if (Vue) {
             years: []
         }),
         computed: {
-            ID() { return `${this.year}-${this.code}-${this.num}`}
+            ID() { return `${this.year}-${this.code}-${this.num}`},
+            preview() { return `目前案件代碼：${this.ID}` }
         },
         methods: {
             emitInput: function(e) {
