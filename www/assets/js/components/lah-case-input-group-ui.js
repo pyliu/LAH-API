@@ -2,14 +2,27 @@ if (Vue) {
     Vue.component("lah-case-input-group-ui", {
         template: `<div class="d-flex" v-b-popover.hover.focus.bottom.d1000="preview">
             <b-input-group size="sm" append="年" @click="getMaxNumber">
-                <b-form-select ref="year" v-model="year" :options="years" @change="emitInput" @change="getMaxNumber" :id="prefix+'_case_update_year'">
+                <b-form-select
+                    ref="year"
+                    v-model="year"
+                    :options="years"
+                    @change="emitInput"
+                    @change="getMaxNumber"
+                    :state="!empty(year)"
+                >
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇年份 --</b-form-select-option>
                     </template>
                 </b-form-select>
             </b-input-group>
             <b-input-group size="sm" class="mx-1" append="字">
-                <b-form-select ref="code" v-model="code" @change="emitInput" @change="getMaxNumber" :id="prefix+'_case_update_code'">
+                <b-form-select
+                    ref="code"
+                    v-model="code"
+                    @change="emitInput"
+                    @change="getMaxNumber"
+                    :state="!empty(code)"
+                >
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇案件字 --</b-form-select-option>
                     </template>
@@ -29,7 +42,6 @@ if (Vue) {
                     :step="num_step"
                     :min="num_min"
                     :max="num_max"
-                    :id="prefix+'_case_update_num'"
                     :state="num >= num_min && num <= num_max"
                 ></b-form-input>
             </b-input-group>
@@ -90,32 +102,30 @@ if (Vue) {
                 this.$emit('input', `${this.year}${this.code}${this.num}`);
             },
             getMaxNumber: function(e) {
-                let year = this.year;
-                let code = this.code;
-                
-                if (this.empty(code) || this.empty(year)) {
-                    this.notify({message: "案件年或案件字為空白，無法取得案件目前最大號碼。", type: "warning"});
-                    return;
+                if (this.empty(this.year)) {
+                    this.$warn(`案件年不能為空值【${this.year}】`);
+                } else if (this.empty(this.code)) {
+                    this.$warn(`案件字不能為空值【${this.code}】`);
+                } else {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.API.JSON.QUERY, {
+                        "type": "max",
+                        "year": this.year,
+                        "code": this.code
+                    }).then(res => {
+                        if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            // update UI
+                            this.num = res.data.max;
+                            this.emitInput(e);
+                        } else {
+                            this.notify({message: res.data.message, type: "warning"});
+                        }
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
                 }
-
-                this.isBusy = true;
-                this.$http.post(CONFIG.API.JSON.QUERY, {
-                    "type": "max",
-                    "year": year,
-                    "code": code
-                }).then(res => {
-                    if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                        // update UI
-                        this.num = res.data.max;
-                        this.emitInput(e);
-                    } else {
-                        this.notify({message: res.data.message, type: "warning"});
-                    }
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
-                    this.isBusy = false;
-                });
             },
             newCustomEvent: (name, val, target) => {
                 let evt = new CustomEvent(name, {
@@ -168,16 +178,16 @@ if (Vue) {
         },
         watch: {
             year: function(val) {
-                let evt = this.newCustomEvent('year-updated', val, $(this.$el).find(`#${this.prefix}_case_update_year`)[0]);
+                let evt = this.newCustomEvent('year-updated', val, this.$refs.year.$el);
                 this.$emit("year-updated", evt);
             },
             code: function(val) {
                 this.num_step = val == "HB12" || val == "HB17" ? 100 : 10;
-                let evt = this.newCustomEvent('code-updated', val, $(this.$el).find(`#${this.prefix}_case_update_code`)[0]);
+                let evt = this.newCustomEvent('code-updated', val, this.$refs.code.$el);
                 this.$emit("code-updated", evt);
             },
             num: function(val) {
-                let evt = this.newCustomEvent('num-updated', val, $(this.$el).find(`#${this.prefix}_case_update_num`)[0]);
+                let evt = this.newCustomEvent('num-updated', val, this.$refs.num.$el);
                 this.$emit("num-updated", evt);
             }
         },
