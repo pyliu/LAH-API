@@ -309,7 +309,7 @@ if (Vue) {
                         <b-popover target="header-user-icon" triggers="hover focus" placement="bottom" delay="350">
                             <lah-user-message-history ref="message" :ip="myip" count=5 title="最新訊息" class="mb-2" :tabs="true" :tabs-end="true"></lah-user-message-history>
                             <lah-user-ext class="mb-2"></lah-user-ext>
-                            <lah-user-message-reservation></lah-user-message-reservation>
+                            <lah-user-message-reservation class="mb-2"></lah-user-message-reservation>
                             <b-button block @click.stop="clearCache" variant="outline-secondary" size="sm"><lah-fa-icon icon="broom"> 清除快取資料</lah-fa-icon></b-button>
                         </b-popover>
                     </b-navbar-nav>
@@ -1617,134 +1617,137 @@ if (Vue) {
     });
 
     Vue.component('lah-user-message-reservation', {
-        template: `<div v-if="show">
+        components: {
+            'lah-user-message-reservation-ui': {
+                template: `<div>
+                    <b-input-group size="sm" prepend="訊息" class="mt-1">
+                        <b-form-input
+                            v-model="message"
+                            type="text"
+                            placeholder="... 請輸入訊息 ..."
+                            :state="!empty(message)"
+                            inline
+                            @keyup.enter="send"
+                            class="no-cache"
+                        ></b-form-input>
+                    </b-input-group>
+                    <b-button-group size="sm" class="mt-1">
+                        <lah-button class="mr-1" icon="paper-plane" prefix="far" size="sm" title="送出" variant="outline-primary" @click="send" :disabled="disabled_send"></lah-button>
+                        <b-form-timepicker
+                            hide-header
+                            no-close-button
+                            reset-value="17:00:00"
+                            v-model="sendtime"
+                            title="預約時間"
+                            label-close-button="確定"
+                            label-reset-button="預設值"
+                            size="sm"
+                            dropdown
+                            @shown="shown"
+                            :state="valid_sendtime"
+                        ></b-format-timepicker>
+                    </b-button-group>
+                </div>`,
+                data: () => ({
+                    message: '',
+                    sendtime: '17:00:00',
+                    sendtime_ms: +new Date(),
+                    buffer_ms: 5 * 60 * 1000,
+                    nowDate: new Date()
+                }),
+                watch: {
+                    sendtime(nVal, oVal) {
+                        this.sendtime_ms = +new Date(this.ad_date + "T" + nVal);
+                        this.message = `${nVal} 提醒我`;
+                        this.title = `預計 ${this.droptime} 忽略本則訊息`;
+                    }
+                },
+                computed: {
+                    ad_date() {
+                        return this.nowDate.getFullYear() + "-" + ("0" + (this.nowDate.getMonth() + 1)).slice(-2) + "-" + ("0" + this.nowDate.getDate()).slice(-2)
+                    },
+                    droptime() {
+                        let dropdate = new Date(this.sendtime_ms + this.buffer_ms);
+                        return ("0" + dropdate.getHours()).slice(-2) + ":" +
+                            ("0" + dropdate.getMinutes()).slice(-2) + ":" +
+                            ("0" + dropdate.getSeconds()).slice(-2);
+                    },
+                    valid_sendtime() { return  this.sendtime_ms > this.nowDate.getTime() },
+                    disabled_send() { return !this.valid_sendtime || this.empty(this.message) }
+                },
+                methods: {
+                    send() {
+                        if (this.disableMSDBQuery) {
+                            this.$warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping lah-user-message-reservation::send.");
+                            return;
+                        }
+                        if (this.empty(this.message)) {
+                            this.notify({
+                                message: '請輸入訊息',
+                                type: "warning"
+                            })
+                            return;
+                        }
+                        if (this.nowDate.getTime() >= this.sendtime_ms) {
+                            this.notify({
+                                message: '請選擇現在之後的時間',
+                                type: "warning"
+                            })
+                            return;
+                        }
+                        this.isBusy = true;
+                        this.$http.post(CONFIG.API.JSON.MSSQL, {
+                            type: "send_message",
+                            title: this.message,
+                            content: this.message,
+                            who: this.myid,
+                            send_time: this.sendtime,
+                            end_time: this.droptime
+                        }).then(res => {
+                            this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
+                            this.title = '';
+                            this.notify({
+                                title: "傳送訊息",
+                                message: res.data.message
+                            });
+                        }).catch(err => {
+                            this.error = err;
+                        }).finally(() => {
+                            this.isBusy = false;
+                            this.message = '';
+                        });
+                    },
+                    shown() {
+                        this.nowDate = new Date();
+                        let choosed_ms = +new Date(this.ad_date + "T" + this.sendtime);
+                        let now_ms = this.nowDate.getTime() + this.buffer_ms; // add 5 mins buffer
+                        if (now_ms >= choosed_ms) {
+                            let an_hour_later = new Date(now_ms + 10 * 60 * 1000);
+                            this.sendtime = ("0" + an_hour_later.getHours()).slice(-2) + ":" +
+                                ("0" + an_hour_later.getMinutes()).slice(-2) + ":" +
+                                ("0" + an_hour_later.getSeconds()).slice(-2);
+                        }
+                    }
+                }
+            }
+        },
+        template: `<div v-if="!empty(myid)">
             <h6 v-if="heading"><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> 信差提醒</h6>
-            <b-form-group :title="title" label-size="lg">
-                <template v-slot:label v-if="!empty(label)">
-                    <lah-fa-icon icon="bell" prefix="far"> {{label}}</lah-fa-icon>
+            <b-card :no-body="heading" :class="border">
+                <template v-slot:header v-if="!heading">
+                    <div class="d-flex w-100 justify-content-between mb-0">
+                        <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="bell" prefix="far">{{label}}</lah-fa-icon></h6>
+                    </div>
                 </template>
-                <b-input-group size="sm" prepend="訊息" class="mb-1">
-                    <b-form-input
-                        v-model="message"
-                        type="text"
-                        placeholder="17:00:00 打卡提醒 ... "
-                        :state="!empty(message)"
-                        inline
-                        @keyup.enter="send"
-                        class="no-cache"
-                    ></b-form-input>
-                </b-input-group>
-                <b-button-group size="sm">
-                    <b-button size="sm" title="送出" variant="outline-primary" @click.stop="send"><lah-fa-icon icon="paper-plane" prefix="far"></lah-fa-icon></b-button>
-                    <b-form-timepicker
-                        hide-header
-                        reset-value="17:00:00"
-                        v-model="sendtime"
-                        button-only
-                        no-close-button
-                        title="預約時間"
-                        label-close-button="確定"
-                        label-reset-button="預設值"
-                        size="sm"
-                        dropdown
-                        @shown="shown"
-                    ></b-format-timepicker>
-                </b-button-group>
-                <span class="text-muted ml-auto align-middle">預約時間：{{sendtime}}</span>
-            </b-form-group>
+                <lah-user-message-reservation-ui></lah-user-message-reservation-ui>
+            </b-card>
         </div>`,
         props: {
-            heading: {
-                type: Boolean,
-                default: true
-            },
-            label: {
-                type: String,
-                default: ''
-            }
-        },
-        data: () => ({
-            title: '',
-            message: '',
-            sendtime: '17:00:00',
-            sendtime_ms: +new Date(),
-            buffer_ms: 5 * 60 * 1000,
-            now: new Date()
-        }),
-        watch: {
-            sendtime(nVal, oVal) {
-                this.sendtime_ms = +new Date(this.ad_date + "T" + nVal);
-                this.message = `${nVal} 提醒我`;
-                this.title = `預計 ${this.droptime} 忽略本則訊息`;
-            }
+            heading: { type: Boolean, default: true },
+            label: { type: String, default: '' }
         },
         computed: {
-            show() {
-                return !this.empty(this.myid)
-            },
-            ad_date() {
-                return this.now.getFullYear() + "-" + ("0" + (this.now.getMonth() + 1)).slice(-2) + "-" + ("0" + this.now.getDate()).slice(-2)
-            },
-            droptime() {
-                let dropdate = new Date(this.sendtime_ms + this.buffer_ms);
-                return ("0" + dropdate.getHours()).slice(-2) + ":" +
-                    ("0" + dropdate.getMinutes()).slice(-2) + ":" +
-                    ("0" + dropdate.getSeconds()).slice(-2);
-            }
-        },
-        methods: {
-            send() {
-                if (this.disableMSDBQuery) {
-                    this.$warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping lah-user-message-reservation::send.");
-                    return;
-                }
-                if (this.empty(this.title)) {
-                    this.notify({
-                        message: '請輸入訊息',
-                        type: "warning"
-                    })
-                    return;
-                }
-                if (this.now.getTime() >= this.sendtime_ms) {
-                    this.notify({
-                        message: '請選擇現在之後的時間',
-                        type: "warning"
-                    })
-                    return;
-                }
-                this.isBusy = true;
-                this.$http.post(CONFIG.API.JSON.MSSQL, {
-                    type: "send_message",
-                    title: this.message,
-                    content: this.message,
-                    who: this.myid,
-                    send_time: this.sendtime,
-                    end_time: this.droptime
-                }).then(res => {
-                    this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
-                    this.title = '';
-                    this.notify({
-                        title: "傳送訊息",
-                        message: res.data.message
-                    });
-                }).catch(err => {
-                    this.error = err;
-                }).finally(() => {
-                    this.isBusy = false;
-                    this.message = '';
-                });
-            },
-            shown() {
-                this.now = new Date();
-                let choosed_ms = +new Date(this.ad_date + "T" + this.sendtime);
-                let now_ms = this.now.getTime() + this.buffer_ms; // add 5 mins buffer
-                if (now_ms >= choosed_ms) {
-                    let an_hour_later = new Date(now_ms + 10 * 60 * 1000);
-                    this.sendtime = ("0" + an_hour_later.getHours()).slice(-2) + ":" +
-                        ("0" + an_hour_later.getMinutes()).slice(-2) + ":" +
-                        ("0" + an_hour_later.getSeconds()).slice(-2);
-                }
-            }
+            border() { return this.heading ? 'border-0' : '' }
         }
     });
 
