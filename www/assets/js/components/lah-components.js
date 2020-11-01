@@ -1858,6 +1858,7 @@ if (Vue) {
                 </b-col>
                 <b-col>
                     <b-button
+                        v-if="isAdmin"
                         id='mm24_upd_btn'
                         size="sm"
                         variant="outline-primary"
@@ -1876,46 +1877,48 @@ if (Vue) {
             <span class='text-info'>延期時間</span>：{{json.延期時間}} <br/>
             <div v-if="json.結案已否 && json.raw['MM22'] == 'C'">
                 <h6 class="mt-2 mb-2"><span class="text-danger">※</span> 發現 {{json.收件字號}} 已「結案」但辦理情形為「延期複丈」!</h6>
-                <b-button
-                    variant="outline-danger"
-                    id="sur_delay_case_fix_button"
-                    data-trigger="manual"
-                    data-toggle="popover"
-                    data-content="需勾選右邊其中一個選項才能進行修正"
-                    title="錯誤訊息"
-                    data-placement="top"
-                    size="sm"
-                    @click="fix"
-                >修正</b-button>
-                <b-form-checkbox
-                    id='sur_delay_case_fix_set_D'
-                    v-model="setD"
-                    size="sm"
-                    inline
-                >辦理情形改為核定</b-form-checkbox>
-                <b-form-checkbox
-                    id='sur_delay_case_fix_clear_delay_datetime'
-                    type='checkbox'
-                    v-model="clearDatetime"
-                    size="sm"
-                    inline
-                >清除延期時間</b-form-checkbox>
-                <b-form-checkbox
-                    id='sur_delay_case_fix_count'
-                    type='checkbox'
-                    v-model="fixCount"
-                    size="sm"
-                    inline
-                >連件數設為1</b-form-checkbox>
-                <b-popover
-                    :disabled.sync="disabled_popover"
-                    target="sur_delay_case_fix_button"
-                    title="錯誤提示"
-                    ref="popover"
-                    placement="top"
-                >
-                    需勾選右邊其中一個選項才能進行修正
-                </b-popover>
+                <div v-if="isAdmin">
+                    <b-button
+                        variant="outline-danger"
+                        id="sur_delay_case_fix_button"
+                        data-trigger="manual"
+                        data-toggle="popover"
+                        data-content="需勾選右邊其中一個選項才能進行修正"
+                        title="錯誤訊息"
+                        data-placement="top"
+                        size="sm"
+                        @click="fix"
+                    >修正</b-button>
+                    <b-form-checkbox
+                        id='sur_delay_case_fix_set_D'
+                        v-model="setD"
+                        size="sm"
+                        inline
+                    >辦理情形改為核定</b-form-checkbox>
+                    <b-form-checkbox
+                        id='sur_delay_case_fix_clear_delay_datetime'
+                        type='checkbox'
+                        v-model="clearDatetime"
+                        size="sm"
+                        inline
+                    >清除延期時間</b-form-checkbox>
+                    <b-form-checkbox
+                        id='sur_delay_case_fix_count'
+                        type='checkbox'
+                        v-model="fixCount"
+                        size="sm"
+                        inline
+                    >連件數設為1</b-form-checkbox>
+                    <b-popover
+                        :disabled.sync="disabled_popover"
+                        target="sur_delay_case_fix_button"
+                        title="錯誤提示"
+                        ref="popover"
+                        placement="top"
+                    >
+                        需勾選右邊其中一個選項才能進行修正
+                    </b-popover>
+                </div>
             </div>
             <div v-if="debug">{{setD}}, {{clearDatetime}}, {{count}}</div>
         </div>`,
