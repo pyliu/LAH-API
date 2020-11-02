@@ -235,6 +235,16 @@ class StatsSQLite3 {
         return $ret;
     }
 
+    public function removeAllStatsRawData($year_month) {
+        $stm = $this->db->prepare("DELETE FROM stats_raw_data WHERE id LIKE '%_".$year_month."'");
+        $ret = $stm->execute();
+        if (!$ret) {
+            global $log;
+            $log->error(__METHOD__.": 移除統計 RAW DATA 失敗【".$year_month.", ".$stm->getSQL()."】");
+        }
+        return $ret;
+    }
+
     public function removeStatsRawData($id) {
         // $data => php array
         // overdue_stats_detail

@@ -82,6 +82,17 @@ function queryStats($type, $date, $error_msg) {
 }
 
 switch ($_POST["type"]) {
+    case "stats_refresh_month":
+        $result = $stats_sqlite3->removeAllStatsRawData($_POST['date']);
+        if ($result === false) {
+            echoJSONResponse("刪除 ".$_POST['date']." 快取資料失敗");
+        } else {
+            echoJSONResponse("成功刪除 ".$_POST['date']." 快取資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => 1,
+                "raw" => $result
+            ));
+        }
+        break;
     case "stats_reg_reject":
         $log->info("XHR [stats_reg_reject] 取得駁回案件數量(".$_POST['date'].")請求。");
         

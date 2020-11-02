@@ -125,7 +125,7 @@ if (Vue) {
         template: `<div>
             <h6 class="d-flex w-100 justify-content-between mb-0">
                 <lah-fa-icon icon="angle-double-right" variant="success">查詢結果</lah-fa-icon>
-                <lah-button icon="sync" action="cycle" no-border></lah-button>
+                <lah-button icon="sync" action="cycle" no-border @click="refresh" variant="outline-secondary"></lah-button>
             </h6>
             <b-card-group v-if="all" columns>
                 <transition-group name="list">
@@ -228,6 +228,27 @@ if (Vue) {
             }
         },
         methods: {
+            refresh() {
+                this.$confirm(`確定要清除 ${this.date} 已快取資料?`, () => {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.API.JSON.STATS, {
+                        type: 'stats_refresh_month',
+                        date: this.date
+                    }).then(res => {
+                        let ok = res.data.status > 0;
+                        let msg = res.data.message + " " + this.responseMessage(res.data.status);
+                        this.notify({
+                            message: msg,
+                            type: ok ? "success" : "danger"
+                        });
+                        if (ok) this.reload();
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                });
+            },
             border_var(item) {
                 switch (item.category) {
                     case "stats_court":
