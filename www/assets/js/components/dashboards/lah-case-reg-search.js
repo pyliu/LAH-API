@@ -19,7 +19,7 @@ if (Vue) {
         computed: {
             ID() {
                 if (this.empty(this.id)) return '';
-                return this.id.substring(0, 3) + '-' + this.id.substring(3, 7) + '-' + this.id.substring(7);
+                return this.id.substring(0, 3) + '-' + this.id.substring(3, 7) + '-' + this.id.substring(7).padStart(6, '0');
             },
             validate() {
                 let year = this.id.substring(0, 3);
@@ -68,7 +68,7 @@ if (Vue) {
                                         bakedData: res.data.baked
                                     }
                                 }),
-                                title: `登記案件詳情 ${this.id}`,
+                                title: `登記案件詳情 ${this.ID}`,
                                 size: "lg"
                             });
                         }
@@ -80,7 +80,7 @@ if (Vue) {
                 } else {
                     this.alert({
                         title: '登記案件搜尋',
-                        message: `案件ID有問題，請檢查後再重試！ (${this.id})`,
+                        message: `案件ID有問題，請檢查後再重試！ (${this.ID})`,
                         variant: 'warning'
                     });
                 }

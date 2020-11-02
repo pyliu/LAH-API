@@ -18,7 +18,7 @@ if (Vue) {
         computed: {
             ID() {
                 if (this.empty(this.id)) return '';
-                return this.id.substring(0, 3) + '-' + this.id.substring(3, 7) + '-' + this.id.substring(7);
+                return this.id.substring(0, 3) + '-' + this.id.substring(3, 7) + '-' + this.id.substring(7).padStart(6, '0');
             },
             validate() {
                 let year = this.id.substring(0, 3);
@@ -60,7 +60,7 @@ if (Vue) {
                         } else {
                             if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                                 this.msgbox({
-                                    title: "測量案件查詢",
+                                    title: `測量案件查詢 ${this.ID}`,
                                     message: this.$createElement("lah-sur-case-dialog", { props: { json: res.data } }),
                                     callback: () => addUserInfoEvent()
                                 });
@@ -76,7 +76,7 @@ if (Vue) {
                 } else {
                     this.alert({
                         title: '測量案件狀態',
-                        message: `測量案件ID有問題，請檢查後再重試！ (${this.id})`,
+                        message: `測量案件ID有問題，請檢查後再重試！ (${this.ID})`,
                         variant: 'warning'
                     });
                 }
