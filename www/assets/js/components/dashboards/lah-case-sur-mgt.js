@@ -58,7 +58,7 @@ if (Vue) {
                         if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL && res.data.data_count == 0) {
                             this.notify({
                                 title: "測量案件查詢",
-                                subtitle: `${this.id}`,
+                                subtitle: `${this.ID}`,
                                 message: "查無資料",
                                 type: "warning"
                             });

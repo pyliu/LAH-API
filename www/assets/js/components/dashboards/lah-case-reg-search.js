@@ -66,8 +66,12 @@ if (Vue) {
                         id: this.id
                     }).then(res => {
                         if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL || res.data.status == XHR_STATUS_CODE.UNSUPPORT_FAIL) {
-                            this.alert({title: "顯示登記案件詳情", message: res.data.message, type: "warning"});
-                            return;
+                            this.notify({
+                                title: "顯示登記案件詳情",
+                                subtitle: this.ID,
+                                message: res.data.message,
+                                type: "warning"
+                            });
                         } else {
                             this.msgbox({
                                 message: this.$createElement("lah-reg-case-detail", {
