@@ -83,8 +83,20 @@ if (Vue) {
     });
 
     Vue.component("lah-fa-icon", {
-        template: `<span class="align-middle my-auto"><i :id="id" :class="className"></i> <slot></slot></span>`,
-        props: ["size", 'prefix', 'icon', 'variant', 'action', 'id', 'align'],
+        template: `<span class="align-middle my-auto">
+            <span v-if="append"><slot></slot> <i :id="id" :class="className"></i></span>
+            <span v-else><i :id="id" :class="className"></i> <slot></slot></span>
+        </span>`,
+        props: {
+            size: { type: String, default: '' },
+            prefix: { type: String, default: 'fas' },
+            icon: { type: String, default: 'exclamation-circle' },
+            variant: { type: String, default: '' },
+            action: { type: String, default: '' },
+            append: { type: Boolean, default: false },
+            id: { type: String, default: '' },
+            align: { type: String, default: '' }
+        },
         computed: {
             className() {
                 let prefix = this.prefix || 'fas';
