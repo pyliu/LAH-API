@@ -125,7 +125,7 @@ if (Vue) {
         template: `<div>
             <h6 class="d-flex w-100 justify-content-between mb-0">
                 <lah-fa-icon icon="angle-double-right" variant="success">查詢結果</lah-fa-icon>
-                <lah-button icon="sync" action="cycle" no-border @click="refresh" variant="outline-secondary"></lah-button>
+                <lah-button icon="sync" action="cycle" no-border @click="refresh" variant="outline-secondary" title="重新整理"></lah-button>
             </h6>
             <b-card-group v-if="all" columns>
                 <transition-group name="list">
