@@ -8,7 +8,6 @@ if (Vue) {
                     :options="years"
                     @change="emitInput"
                     @change="getMaxNumber"
-                    :state="!empty(year)"
                 >
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇年份 --</b-form-select-option>
@@ -21,7 +20,6 @@ if (Vue) {
                     v-model="code"
                     @change="emitInput"
                     @change="getMaxNumber"
-                    :state="!empty(code)"
                 >
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇案件字 --</b-form-select-option>
@@ -42,7 +40,6 @@ if (Vue) {
                     :step="num_step"
                     :min="num_min"
                     :max="num_max"
-                    :state="num >= num_min && num <= num_max"
                 ></b-form-input>
             </b-input-group>
         </div>`,
