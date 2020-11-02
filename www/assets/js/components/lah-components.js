@@ -1737,6 +1737,7 @@ if (Vue) {
                 <template v-slot:header v-if="!heading">
                     <div class="d-flex w-100 justify-content-between mb-0">
                         <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="bell" prefix="far">{{label}}</lah-fa-icon></h6>
+                        <lah-button icon="question" @click="help" size="sm" variant="outline-success" class="border-0"></lah-button>
                     </div>
                 </template>
                 <lah-user-message-reservation-ui></lah-user-message-reservation-ui>
@@ -1748,6 +1749,15 @@ if (Vue) {
         },
         computed: {
             border() { return this.heading ? 'border-0' : '' }
+        },
+        methods: {
+            help() {
+                this.msgbox({
+                    title: "測量案件查詢說明",
+                    body: `<div>請輸入案件收件年、字、號查詢。</div>`,
+                    size: "md"
+                });
+            },
         }
     });
 

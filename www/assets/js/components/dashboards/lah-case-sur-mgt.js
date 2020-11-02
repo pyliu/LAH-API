@@ -4,7 +4,7 @@ if (Vue) {
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="map-marker-alt">複丈案件查詢</lah-fa-icon></h6>
-                    <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm" title="說明"></lah-button>
+                    <lah-button icon="question" class="border-0" @click="help" variant="outline-success" size="sm" title="說明"></lah-button>
                 </div>
             </template>
             <div class="d-flex">
@@ -77,7 +77,7 @@ if (Vue) {
                     });
                 }
             },
-            popup: function() {
+            help: function() {
                 this.msgbox({
                     title: "測量案件資料 小幫手提示",
                     message: `<h5><span class="text-danger">※</span>注意：本功能會清除如下圖之欄位資料並將案件辦理情形改為【核定】，請確認後再執行。</h5>

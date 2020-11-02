@@ -4,6 +4,7 @@ if (Vue) {
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="scroll">登記案件查詢</lah-fa-icon></h6>
+                    <lah-button icon="question" @click="help" size="sm" variant="outline-success" class="border-0"></lah-button>
                 </div>
             </template>
             <div class="d-flex">
@@ -39,6 +40,13 @@ if (Vue) {
             }
         },
         methods: {
+            help() {
+                this.msgbox({
+                    title: "登記案件查詢說明",
+                    body: `<div>請輸入案件收件年、字、號查詢。</div>`,
+                    size: "md"
+                });
+            },
             regQuery: function(e) {
                 if (this.validate) {
                     this.isBusy = true;

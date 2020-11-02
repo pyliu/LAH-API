@@ -115,7 +115,7 @@ if (Vue) {
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="search"> 查詢人民申請案件</lah-fa-icon></h6>
-                    <b-button @click="msgbox(noteObj)" size="sm" variant="outline-success" class="border-0"><i class="fas fa-question"></i></b-button>
+                    <lah-button icon="question" @click="help" size="sm" variant="outline-success" class="border-0"></lah-button>
                 </div>
             </template>
             <b-input-group size="sm">
@@ -133,8 +133,18 @@ if (Vue) {
         </b-card>`,
         data: function() {
             return {
-                pid: '',
-                noteObj: {
+                pid: ''
+            }
+        },
+        computed: {
+            valid: function() {
+                if (this.pid == '') return null;
+                return this.checkID();
+            }
+        },
+        methods: {
+            help() {
+                this.msgbox({
                     title: "查詢人民申請案件 小幫手提示",
                     body: `<div class="d-block">
                         -- 【法院來函查統編】MOICAS_CRSMS 土地登記案件查詢-權利人+義務人+代理人+複代 <br/>
@@ -153,16 +163,8 @@ if (Vue) {
                         &emsp;&emsp;OR t.MM17_2 = 'H221350201';
                     </div>`,
                     size: "lg"
-                }
-            }
-        },
-        computed: {
-            valid: function() {
-                if (this.pid == '') return null;
-                return this.checkID();
-            }
-        },
-        methods: {
+                });
+            },
             search: function(e) {
                 if (this.valid) {
                     let h = this.$createElement;
