@@ -12,7 +12,7 @@ if (Vue) {
             </template>
             <div class="d-flex">
                 <lah-case-input-group-ui v-model="id" @enter="check" type="sync" prefix="case_sync"></lah-case-input-group-ui>
-                <b-button @click="check" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'搜尋案件'"><i class="fas fa-sync"></i></b-button>
+                <lah-button icon="sync" action="cycle" @click="check" variant="outline-primary" size="sm" class="ml-1" title="搜尋案件"></lah-button>
             </div>
         </b-card>`,
         data: () => ({

@@ -8,6 +8,7 @@ if (Vue) {
                     :options="years"
                     @change="emitInput"
                     @change="getMaxNumber"
+                    class="h-100"
                 >
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇年份 --</b-form-select-option>
@@ -20,6 +21,7 @@ if (Vue) {
                     v-model="code"
                     @change="emitInput"
                     @change="getMaxNumber"
+                    class="h-100"
                 >
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇案件字 --</b-form-select-option>
@@ -33,13 +35,14 @@ if (Vue) {
                 <b-form-input
                     ref="num"
                     v-model="num"
-                    v-b-tooltip.hover="'最多6個數字'"
+                    title="最多6個數字"
                     @input="emitInput"
                     @keyup.enter="$emit('enter', $event)"
                     type="number"
                     :step="num_step"
                     :min="num_min"
                     :max="num_max"
+                    class="h-100"
                 ></b-form-input>
             </b-input-group>
         </div>`,
@@ -91,8 +94,8 @@ if (Vue) {
             years: []
         }),
         computed: {
-            ID() { return `${this.year}-${this.code}-${this.num}`},
-            preview() { return `目前案件代碼：${this.ID}` }
+            ID() { return `${this.year}-${this.code}-${this.num.padStart(6, '0')}`},
+            preview() { return `案件代碼預覽：${this.ID}` }
         },
         methods: {
             emitInput: function(e) {
