@@ -39,7 +39,7 @@ if (Vue) {
                 @click="reset"
                 variant="outline-secondary"
                 action="cycle-alt"
-                class="border-0"
+                no-border
               ></lah-button>
               <lah-button
                 icon="search"
@@ -47,9 +47,9 @@ if (Vue) {
                 @click="query"
                 variant="outline-primary"
                 :disabled="!query_btn_on"
-                class="border-0"
+                no-border
               ></lah-button>
-              <lah-button icon="question" @click="popup" variant="outline-success" size="sm" class="border-0"></lah-button>
+              <lah-button icon="question" @click="popup" variant="outline-success" size="sm" no-border></lah-button>
             </b-button-group>
           </div>
       </template>

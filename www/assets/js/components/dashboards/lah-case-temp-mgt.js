@@ -4,7 +4,7 @@ if (Vue) {
             <legend>
                 <i class="fas fa-layer-group"></i>
                 暫存檔查詢
-                <b-button @click="popup" variant="outline-success" size="sm" class="border-0"><i class="fas fa-question"></i></b-button>
+                <lah-button icon="question" @click="popup" variant="outline-success" size="sm" no-border></lah-button>
             </legend>
             <div class="d-flex">
                 <lah-case-input-group-ui v-model="id" @enter="query" type="tmp" prefix="case_temp"></lah-case-input-group-ui>

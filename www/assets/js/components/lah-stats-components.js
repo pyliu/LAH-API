@@ -123,7 +123,10 @@ if (Vue) {
 
     Vue.component("lah-stats-dashboard", {
         template: `<div>
-            <h6><lah-fa-icon icon="angle-double-right" variant="success">查詢結果</lah-fa-icon></h6>
+            <h6 class="d-flex w-100 justify-content-between mb-0">
+                <lah-fa-icon icon="angle-double-right" variant="success">查詢結果</lah-fa-icon>
+                <lah-button icon="sync" action="cycle" no-border></lah-button>
+            </h6>
             <b-card-group v-if="all" columns>
                 <transition-group name="list">
                     <b-card no-body v-for="(item, idx) in items" :key="'stats_'+idx" :border-variant="border_var(item)" class="shadow my-2">

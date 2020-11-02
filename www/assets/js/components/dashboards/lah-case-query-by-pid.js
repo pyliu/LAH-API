@@ -115,7 +115,7 @@ if (Vue) {
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="search"> 查詢人民申請案件</lah-fa-icon></h6>
-                    <lah-button icon="question" @click="help" size="sm" variant="outline-success" class="border-0"></lah-button>
+                    <lah-button icon="question" @click="help" size="sm" variant="outline-success" no-border></lah-button>
                 </div>
             </template>
             <b-input-group size="sm" prepend="統編">

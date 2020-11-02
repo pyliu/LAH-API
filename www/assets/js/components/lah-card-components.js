@@ -6,8 +6,8 @@ if (Vue) {
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="users">使用者看板</lah-fa-icon></h6>
                     <b-button-group size="sm" class="align-middle my-auto">
-                        <lah-button class="border-0"  @click="location.href='org.html'" variant="outline-primary" size="sm" icon="sitemap"></lah-button>
-                        <lah-button class="border-0"  @click="popup" variant="outline-success" size="sm" icon="question"></lah-button>
+                        <lah-button no-border  @click="location.href='org.html'" variant="outline-primary" size="sm" icon="sitemap"></lah-button>
+                        <lah-button no-border  @click="popup" variant="outline-success" size="sm" icon="question"></lah-button>
                     </b-button-group>
                 </div>
             </template>
@@ -452,7 +452,7 @@ if (Vue) {
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="file-excel" prefix="far">報表匯出</lah-fa-icon></h6>
-                    <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm" title="備註"></lah-button>
+                    <lah-button icon="question" no-border @click="popup" variant="outline-success" size="sm" title="備註"></lah-button>
                     {{selected}}
                 </div>
             </template>
@@ -846,7 +846,7 @@ if (Vue) {
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="map">轄區段別資料</lah-fa-icon></h6>
-                    <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm"></lah-button>
+                    <lah-button icon="question" no-border @click="popup" variant="outline-success" size="sm"></lah-button>
                 </div>
             </template>
             <a href="http://220.1.35.24/%E8%B3%87%E8%A8%8A/webinfo2/%E4%B8%8B%E8%BC%89%E5%8D%80%E9%99%84%E4%BB%B6/%E6%A1%83%E5%9C%92%E5%B8%82%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%94%B6%E8%B2%BB%E6%A8%99%E6%BA%96.pdf" target="_blank">電子資料申請收費標準</a>
@@ -937,7 +937,7 @@ if (Vue) {
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="cogs"> 系統設定</lah-fa-icon></h6>
-                    <lah-button icon="question" @click="popup" size="sm" variant="outline-success" class="border-0"></lah-button>
+                    <lah-button icon="question" @click="popup" size="sm" variant="outline-success" no-border></lah-button>
                 </div>
             </template>
             <b-form-checkbox v-model="enable_msdb_query" switch><span title="是否停用MSSQL資料庫連結">{{enable_msdb_query_desc}}</span></b-form-checkbox>

@@ -695,6 +695,7 @@ if (Vue) {
             :pill="pill"
             :block="block"
             :pressed="pressed"
+            :class="noBorder ? 'border-0' : ''"
             @mouseenter="mouseenter"
             @mouseleave="mouseleave"
             @blur="mouseleave"
@@ -706,6 +707,7 @@ if (Vue) {
             </lah-fa-icon>
       </b-button>`,
         props: {
+            noBorder: { type: Boolean, default: false },
             variant: {
                 type: String,
                 default: 'outline-primary'
@@ -1758,7 +1760,7 @@ if (Vue) {
                 <template v-slot:header v-if="!heading">
                     <div class="d-flex w-100 justify-content-between mb-0">
                         <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="bell" prefix="far">{{label}}</lah-fa-icon></h6>
-                        <lah-button icon="question" @click="help" size="sm" variant="outline-success" class="border-0"></lah-button>
+                        <lah-button icon="question" @click="help" size="sm" variant="outline-success" no-border></lah-button>
                     </div>
                 </template>
                 <lah-user-message-reservation-ui></lah-user-message-reservation-ui>

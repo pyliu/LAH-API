@@ -4,7 +4,7 @@ if (Vue) {
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="bullhorn">公告維護</lah-fa-icon></h6>
-                    <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm" title="備註"></lah-button>
+                    <lah-button icon="question" no-border @click="popup" variant="outline-success" size="sm" title="備註"></lah-button>
                 </div>
             </template>
             <div class="d-flex">

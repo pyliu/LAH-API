@@ -4,7 +4,7 @@ if (Vue) {
             <legend>
                 <i class="far fa-folder"></i>
                 登記案件狀態
-                <b-button class="border-0"  @click="popup" variant="outline-success" size="sm"><i class="fas fa-question"></i></b-button>
+                <lah-button icon="question" no-border  @click="popup" variant="outline-success" size="sm"></lah-button>
             </legend>
             <div class="d-flex">
                 <lah-case-input-group-ui v-model="id" @enter="query" type="reg" prefix="case_state"></lah-case-input-group-ui>

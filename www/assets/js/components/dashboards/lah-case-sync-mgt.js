@@ -11,8 +11,8 @@ if (Vue) {
                         </lah-fa-icon>
                     </h6>
                     <b-button-group>
-                        <lah-button action="heartbeat" regular icon="window-maximize" class="border-0" @click="syncStatus" variant="outline-primary" size="sm" title="檢視同步異動狀態"></lah-button>
-                        <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm"></lah-button>
+                        <lah-button action="heartbeat" regular icon="window-maximize" no-border @click="syncStatus" variant="outline-primary" size="sm" title="檢視同步異動狀態"></lah-button>
+                        <lah-button icon="question" no-border @click="popup" variant="outline-success" size="sm"></lah-button>
                     </b-button-group>
                 </div>
             </template>

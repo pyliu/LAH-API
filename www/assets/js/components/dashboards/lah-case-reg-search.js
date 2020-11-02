@@ -10,7 +10,7 @@ if (Vue) {
                             <lah-fa-icon v-else icon="exclamation-triangle" variant="danger" append>{{ID}}</lah-fa-icon>
                         </lah-fa-icon>
                     </h6>
-                    <lah-button icon="question" @click="help" size="sm" variant="outline-success" class="border-0"></lah-button>
+                    <lah-button icon="question" @click="help" size="sm" variant="outline-success" no-border></lah-button>
                 </div>
             </template>
             <div class="d-flex">
