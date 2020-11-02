@@ -3,7 +3,7 @@ if (Vue) {
         template: `<b-card>
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
-                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="map-marker-alt">複丈案件查詢</lah-fa-icon></h6>
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="map-marker-alt">複丈案件查詢 {{ID}}</lah-fa-icon></h6>
                     <lah-button icon="question" class="border-0" @click="help" variant="outline-success" size="sm" title="說明"></lah-button>
                 </div>
             </template>
@@ -16,6 +16,10 @@ if (Vue) {
             id: undefined
         }),
         computed: {
+            ID() {
+                if (this.empty(this.id)) return '';
+                return this.id.substring(0, 3) + '-' + this.id.substring(3, 7) + '-' + this.id.substring(7);
+            },
             validate() {
                 let year = this.id.substring(0, 3);
                 let code = this.id.substring(3, 7);
