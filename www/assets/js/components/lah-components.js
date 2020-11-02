@@ -1774,8 +1774,8 @@ if (Vue) {
         methods: {
             help() {
                 this.msgbox({
-                    title: "測量案件查詢說明",
-                    body: `<div>請輸入案件收件年、字、號查詢。</div>`,
+                    title: "信差通知說明",
+                    body: `<p>可依選取時間發送訊息給自己，以達到提醒的功能。</p><ul><li>選取預計發送時間</li><li>輸入訊息</li><li>傳送鍵送出</li></ul>`,
                     size: "md"
                 });
             },
