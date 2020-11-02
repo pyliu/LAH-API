@@ -3,14 +3,20 @@ if (Vue) {
         template: `<b-card>
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
-                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="scroll">登記案件查詢 {{ID}}</lah-fa-icon></h6>
+                    <h6 class="my-auto font-weight-bolder">
+                        <lah-fa-icon icon="scroll">
+                            登記案件查詢
+                            <span v-if="validate">{{ID}}</span>
+                            <lah-fa-icon v-else icon="exclamation-triangle" variant="danger" append>{{ID}}</lah-fa-icon>
+                        </lah-fa-icon>
+                    </h6>
                     <lah-button icon="question" @click="help" size="sm" variant="outline-success" class="border-0"></lah-button>
                 </div>
             </template>
             <div class="d-flex">
                 <lah-case-input-group-ui v-model="id" @enter="regQuery" type="reg" prefix="case_reg"></lah-case-input-group-ui>
-                <b-button @click="regQuery" variant="outline-primary" size="sm" v-b-tooltip="'查登記案件'" class="mx-1"><i class="fas fa-briefcase"></i></b-button>
-                <b-button @click="prcQuery" variant="outline-secondary" size="sm" v-b-tooltip="'查地價案件'"><i class="fas fa-hand-holding-usd"></i></b-button>
+                <lah-button icon="briefcase" @click="regQuery" variant="outline-primary" size="sm" v-b-tooltip="'查登記案件'" class="mx-1" :disabled="!validate"></lah-button>
+                <lah-button icon="hand-holding-usd" @click="prcQuery" variant="outline-secondary" size="sm" v-b-tooltip="'查地價案件'" :disabled="!validate"></lah-button>
             </div>
         </b-card>`,
         data: () => ({
@@ -22,6 +28,7 @@ if (Vue) {
                 return this.id.substring(0, 3) + '-' + this.id.substring(3, 7) + '-' + this.id.substring(7).padStart(6, '0');
             },
             validate() {
+                if (this.empty(this.id)) return null;
                 let year = this.id.substring(0, 3);
                 let code = this.id.substring(3, 7);
                 let num = this.id.substring(7);
@@ -36,8 +43,8 @@ if (Vue) {
                     return false;
                 }
                 let number = parseInt(num);
-                if (this.empty(number) || isNaN(number)) {
-                    this.$warn(this.id, "number is empty or NaN!");
+                if (isNaN(number) || !(number > 0 && number < 1000000)) {
+                    this.$warn(this.id, "number is not valid!");
                     return false;
                 }
                 return true;

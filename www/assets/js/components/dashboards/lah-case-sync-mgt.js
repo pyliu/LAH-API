@@ -3,7 +3,13 @@ if (Vue) {
         template: `<b-card>
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
-                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="sync-alt">同步登記案件 {{ID}}</lah-fa-icon></h6>
+                    <h6 class="my-auto font-weight-bolder">
+                        <lah-fa-icon icon="sync-alt">
+                            同步登記案件
+                            <span v-if="validate">{{ID}}</span>
+                            <lah-fa-icon v-else icon="exclamation-triangle" variant="danger" append>{{ID}}</lah-fa-icon>
+                        </lah-fa-icon>
+                    </h6>
                     <b-button-group>
                         <lah-button action="heartbeat" regular icon="window-maximize" class="border-0" @click="syncStatus" variant="outline-primary" size="sm" title="檢視同步異動狀態"></lah-button>
                         <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm"></lah-button>
@@ -12,7 +18,7 @@ if (Vue) {
             </template>
             <div class="d-flex">
                 <lah-case-input-group-ui v-model="id" @enter="check" type="sync" prefix="case_sync"></lah-case-input-group-ui>
-                <lah-button icon="sync" action="cycle" @click="check" variant="outline-primary" size="sm" class="ml-1" title="搜尋案件"></lah-button>
+                <lah-button icon="sync" action="cycle" @click="check" variant="outline-primary" size="sm" class="ml-1" title="搜尋案件" :disabled="!validate"></lah-button>
             </div>
         </b-card>`,
         data: () => ({
@@ -39,8 +45,8 @@ if (Vue) {
                     return false;
                 }
                 let number = parseInt(num);
-                if (this.empty(number) || isNaN(number)) {
-                    this.$warn("number is empty or NaN!", num, this.id);
+                if (isNaN(number) || !(number > 0 && number < 1000000)) {
+                    this.$warn(this.id, "number is not valid!");
                     return false;
                 }
                 return true;

@@ -3,13 +3,17 @@ if (Vue) {
         template: `<b-card>
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
-                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="map-marker-alt">複丈案件查詢 {{ID}}</lah-fa-icon></h6>
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="map-marker-alt">
+                        複丈案件查詢
+                        <span v-if="validate">{{ID}}</span>
+                        <lah-fa-icon v-else icon="exclamation-triangle" variant="danger" append>{{ID}}</lah-fa-icon>
+                    </lah-fa-icon></h6>
                     <lah-button icon="question" class="border-0" @click="help" variant="outline-success" size="sm" title="說明"></lah-button>
                 </div>
             </template>
             <div class="d-flex">
                 <lah-case-input-group-ui v-model="id" @enter="query" type="sur" prefix="case_sur"></lah-case-input-group-ui>
-                <b-button @click="query" variant="outline-primary" size="sm" class="ml-1" v-b-tooltip="'查詢測量案件'"><i class="fas fa-search"></i></b-button>
+                <lah-button icon="search" @click="query" variant="outline-primary" size="sm" class="ml-1" title="查詢測量案件" :disabled="!validate"></lah-button>
             </div>
         </b-card>`,
         data: () => ({
@@ -21,6 +25,7 @@ if (Vue) {
                 return this.id.substring(0, 3) + '-' + this.id.substring(3, 7) + '-' + this.id.substring(7).padStart(6, '0');
             },
             validate() {
+                if (this.empty(this.id)) return null;
                 let year = this.id.substring(0, 3);
                 let code = this.id.substring(3, 7);
                 let num = this.id.substring(7);
@@ -35,8 +40,8 @@ if (Vue) {
                     return false;
                 }
                 let number = parseInt(num);
-                if (this.empty(number) || isNaN(number)) {
-                    this.$warn(this.id, "number is empty or NaN!");
+                if (isNaN(number) || !(number > 0 && number < 1000000)) {
+                    this.$warn(this.id, "number is not valid!");
                     return false;
                 }
                 return true;

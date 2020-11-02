@@ -118,17 +118,17 @@ if (Vue) {
                     <lah-button icon="question" @click="help" size="sm" variant="outline-success" class="border-0"></lah-button>
                 </div>
             </template>
-            <b-input-group size="sm">
-                <b-input-group-prepend is-text><b-icon icon="person-fill"></b-icon></b-input-group-prepend>
+            <b-input-group size="sm" prepend="統編">
                 <b-form-input
                     ref="pid"
                     v-model="pid"
-                    placeholder="A123456789"
+                    placeholder="範例: A123456789"
                     :state="valid"
                     @keyup.enter="search"
                     title="身分證號"
+                    class="h-100 my-auto"
                 ></b-form-input>
-                <lah-button icon="search" size="sm" @click="search" variant="outline-primary" :disabled="!valid" :state="valid">搜尋</lah-button>
+                <lah-button icon="search" action="float" size="sm" @click="search" variant="outline-primary" :disabled="!valid"></lah-button>
             </b-input-group>
         </b-card>`,
         data: function() {
