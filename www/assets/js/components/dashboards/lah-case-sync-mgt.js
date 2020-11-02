@@ -3,7 +3,7 @@ if (Vue) {
         template: `<b-card>
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
-                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="sync-alt">同步登記案件</lah-fa-icon></h6>
+                    <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="sync-alt">同步登記案件 {{ID}}</lah-fa-icon></h6>
                     <b-button-group>
                         <lah-button action="heartbeat" regular icon="window-maximize" class="border-0" @click="syncStatus" variant="outline-primary" size="sm" title="檢視同步異動狀態"></lah-button>
                         <lah-button icon="question" class="border-0" @click="popup" variant="outline-success" size="sm"></lah-button>
@@ -22,6 +22,10 @@ if (Vue) {
             id: undefined
         }),
         computed: {
+            ID() {
+                if (this.empty(this.id)) return '';
+                return this.id.substring(0, 3) + '-' + this.id.substring(3, 7) + '-' + this.id.substring(7).padStart(6, '0');
+            },
             validate() {
                 this.year = this.id.substring(0, 3);
                 this.code = this.id.substring(3, 7);
@@ -68,7 +72,7 @@ if (Vue) {
                             };
                             html += "</table>";
                             this.msgbox({
-                                title: "案件比對詳情",
+                                title: `案件比對詳情 ${this.ID}`,
                                 body: html,
                                 callback: () => {
                                     $("#sync_x_case_confirm_button").off("click").on("click", this.syncWholeCase.bind(this, this.id));
@@ -84,7 +88,7 @@ if (Vue) {
                             });
                         } else if (res.data.status == XHR_STATUS_CODE.FAIL_WITH_LOCAL_NO_RECORD) {
                             this.msgbox({
-                                title: "本地端無資料",
+                                title: `本地端無資料 ${this.ID}`,
                                 body: `<div>
                                     <i class='fas fa-circle text-warning'></i>&ensp;
                                     ${res.data.message}
@@ -100,7 +104,7 @@ if (Vue) {
                             html += "<div><i class='fas fa-circle text-secondary'></i>&ensp;" + res.data.message + "</div>";
                             this.notify({
                                 title: "查詢遠端案件資料",
-                                subtitle: `${this.year}-${this.code}-${this.num}`,
+                                subtitle: ` ${this.ID}`,
                                 message: html,
                                 type: "warning"
                             });
@@ -108,7 +112,7 @@ if (Vue) {
                             html += "<div><i class='fas fa-circle text-success'></i>&ensp;" + res.data.message + "</div>";
                             this.notify({
                                 title: "查詢遠端案件資料",
-                                subtitle: `${this.year}-${this.code}-${this.num}`,
+                                subtitle: ` ${this.ID}`,
                                 message: html,
                                 type: "success",
                                 callback: () => $("#sync_x_case_serial").off("click").on("click", function(e) {
@@ -243,7 +247,8 @@ if (Vue) {
                         props: { type: 'full', maximized: true }
                     }),
                     size: "xl"
-                });}
+                });
+            }
         }
     });
 } else {
