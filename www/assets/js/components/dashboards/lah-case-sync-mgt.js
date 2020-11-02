@@ -16,9 +16,6 @@ if (Vue) {
             </div>
         </b-card>`,
         data: () => ({
-            year: undefined,
-            code: undefined,
-            num: undefined,
             id: undefined
         }),
         computed: {
@@ -27,22 +24,23 @@ if (Vue) {
                 return this.id.substring(0, 3) + '-' + this.id.substring(3, 7) + '-' + this.id.substring(7).padStart(6, '0');
             },
             validate() {
-                this.year = this.id.substring(0, 3);
-                this.code = this.id.substring(3, 7);
-                this.num = this.id.substring(7);
+                if (this.empty(this.id)) return null;
+                let year = this.id.substring(0, 3);
+                let code = this.id.substring(3, 7);
+                let num = this.id.substring(7);
                 let regex = /^[0-9]{3}$/i;
-                if (!regex.test(this.year)) {
-                    this.$warn("year format is not valid.", this.year, this.id);
+                if (!regex.test(year)) {
+                    this.$warn("year format is not valid.", year, this.id);
                     return false;
                 }
                 regex = /^H[A-Z0-9]{3}$/i;
-                if (!regex.test(this.code)) {
-                    this.$warn("code format is not valid.", this.code, this.id);
+                if (!regex.test(code)) {
+                    this.$warn("code format is not valid.", code, this.id);
                     return false;
                 }
-                let number = parseInt(this.num);
+                let number = parseInt(num);
                 if (this.empty(number) || isNaN(number)) {
-                    this.$warn("number is empty or NaN!", this.num, this.id);
+                    this.$warn("number is empty or NaN!", num, this.id);
                     return false;
                 }
                 return true;
@@ -56,7 +54,7 @@ if (Vue) {
                         type: "diff_xcase",
                         id: this.id
                     }).then(res => {
-                        let html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + this.year + '-' + this.code + '-' + this.num + "</a><div>";
+                        let html = "<div>案件詳情：<a href='javascript:void(0)' id='sync_x_case_serial'>" + this.ID + "</a><div>";
                         if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                             html += "<i class='fas fa-circle text-warning'></i>&ensp;請參考下列資訊： <button id='sync_x_case_confirm_button' class='btn btn-sm btn-success' title='同步全部欄位'>同步</button>";
                             html += "<table class='table table-hover b-table table-striped table-bordered table-sm text-center mt-1'>";
@@ -138,7 +136,7 @@ if (Vue) {
                 } else {
                     this.alert({
                         title: '案件同步查詢',
-                        message: `案件ID有問題，請檢查後再重試！ (${this.year}-${this.code}-${this.num})`,
+                        message: `案件ID有問題，請檢查後再重試！ (${this.ID})`,
                         variant: 'warning'
                     });
                 }
