@@ -3089,8 +3089,8 @@ if (Vue) {
     Vue.component('lah-reg-case-timeline', {
         mixins: [regCaseMixin],
         template: `<div class="clearfix">
-            <div class="text-justify">
-                <span>{{title}}</span>
+            <div class="text-justify clearfix">
+                <span class="align-middle">{{title}}</span>
                 <b-button-group size="sm" class="float-right">
                     <lah-button variant="primary" @click="chartType = 'bar'" icon="chart-bar"></lah-button>
                     <lah-button variant="secondary" @click="chartType = 'pie'" icon="chart-pie"></lah-button>
