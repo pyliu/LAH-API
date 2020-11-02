@@ -40,7 +40,7 @@ if (Vue) {
                     return false;
                 }
                 let number = parseInt(num);
-                if (isNaN(number) || !(number > 0 && number < 1000000)) {
+                if (isNaN(number) || !(number > 0 && number < 1000000) || num.length > 6) {
                     this.$warn(this.id, "number is not valid!");
                     return false;
                 }
