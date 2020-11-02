@@ -3,34 +3,36 @@ if (Vue) {
      * Stats Relative Components
      */
     Vue.component("lah-stats-range", {
-        template: `<fieldset>
-            <legend>篩選條件</legend>
-            <b-form-row class="mt-2">
-                <b-input-group size="sm" :prepend="date" class="col">
-                    <b-form-input id="stat_range" v-model="value" type="range" :min="1" :max="max" class="h-100"></b-form-input>
-                </b-input-group>
-                <b-input-group size="sm" prepend="筆數大於" class="col-2">
-                    <b-form-input
-                        type="number"
-                        v-model="filter"
-                        size="sm"
-                        min="0"
-                        max="1000"
-                        class="no-cache h-100"
-                    ></b-form-input>
-                </b-input-group>
-                <b-input-group size="sm" prepend="關鍵字" class="col-2">
-                    <b-form-input
-                        type="text"
-                        v-model="keyword"
-                        size="sm"
-                        class="no-cache h-100"
-                    ></b-form-input>
-                    <b-button v-if="button" size="sm" variant="outline-primary" class="ml-2" @click.stop="update">更新</b-button>
-                </b-input-group>
-                <b-form-checkbox inline v-model="reg_reason" switch class="h-100 my-auto">所有登記原因</b-form-checkbox>
-            </b-form-row>
-        </fieldset>`,
+        template: `<div>
+            <h6><lah-fa-icon icon="angle-double-right" variant="primary">篩選條件</lah-fa-icon></h6>
+            <b-card class="shadow">
+                <b-form-row class="mt-2">
+                    <b-input-group size="sm" :prepend="date" class="col">
+                        <b-form-input id="stat_range" v-model="value" type="range" :min="1" :max="max" class="h-100"></b-form-input>
+                    </b-input-group>
+                    <b-input-group size="sm" prepend="筆數大於" class="col-2">
+                        <b-form-input
+                            type="number"
+                            v-model="filter"
+                            size="sm"
+                            min="0"
+                            max="1000"
+                            class="no-cache h-100"
+                        ></b-form-input>
+                    </b-input-group>
+                    <b-input-group size="sm" prepend="關鍵字" class="col-2">
+                        <b-form-input
+                            type="text"
+                            v-model="keyword"
+                            size="sm"
+                            class="no-cache h-100"
+                        ></b-form-input>
+                        <lah-button v-if="button" icon="edit" size="sm" variant="outline-primary" class="ml-2" @click.stop="update">更新</lah-button>
+                    </b-input-group>
+                    <b-form-checkbox inline v-model="reg_reason" switch class="h-100 my-auto small">顯示所有</b-form-checkbox>
+                </b-form-row>
+            </b-card>
+        </div>`,
         props: {
             button: {
                 type: Boolean,
@@ -121,6 +123,7 @@ if (Vue) {
 
     Vue.component("lah-stats-dashboard", {
         template: `<div>
+            <h6><lah-fa-icon icon="angle-double-right" variant="success">查詢結果</lah-fa-icon></h6>
             <b-card-group v-if="all" columns>
                 <transition-group name="list">
                     <b-card no-body v-for="(item, idx) in items" :key="'stats_'+idx" :border-variant="border_var(item)" class="shadow my-2">
