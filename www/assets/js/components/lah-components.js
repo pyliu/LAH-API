@@ -801,16 +801,15 @@ if (Vue) {
             },
             tooltip: {
                 type: Function,
-                default: function (tooltipItem, data) {
+                default: function (entry) {
                     // add percent ratio to the label
-                    let dataset = data.datasets[tooltipItem.datasetIndex];
-                    let sum = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
+                    let sum = entry.dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
                         return previousValue + currentValue;
                     });
-                    let currentValue = dataset.data[tooltipItem.index];
-                    let percent = Math.round(((currentValue / sum) * 100));
-                    if (isNaN(percent)) return ` ${data.labels[tooltipItem.index]} : ${currentValue}`;
-                    return ` ${data.labels[tooltipItem.index]} : ${currentValue} [${percent}%]`;
+                    let currentVal = entry.dataset.data[entry.dataIndex];
+                    let percent = Math.round(((currentVal / sum) * 100));
+                    if (isNaN(percent)) return ` ${entry.label} : ${currentVal}`;
+                    return ` ${entry.label} : ${currentVal} [${percent}%]`;
                 }
             },
             bgColor: {
@@ -980,16 +979,25 @@ if (Vue) {
                         },
                         onClick: function (e) {
                             let payload = {};
-                            payload["point"] = that.inst.getElementAtEvent(e)[0];
-                            if (payload["point"]) {
-                                // point e.g. {element: i, datasetIndex: 0, index: 14}
-                                let idx = payload["point"].index;
-                                let dataset_idx = payload["point"].datasetIndex; // in my case it should be always be 0
-                                payload["label"] = that.inst.data.labels[idx];
-                                payload["value"] = that.inst.data.datasets[dataset_idx].data[idx];
+                            /**
+                             * getElementAtEvent is replaced with chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, false)
+                             * getElementsAtEvent is replaced with chart.getElementsAtEventForMode(e, 'index', { intersect: true }, false)
+                             * getElementsAtXAxis is replaced with chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false)
+                             * getDatasetAtEvent is replaced with chart.getElementsAtEventForMode(e, 'dataset', { intersect: true }, false)
+                             */
+                            let element = that.inst.getElementsAtEventForMode(e, 'nearest', { intersect: true }, false);
+                            if (!that.empty(element)) {
+                                payload["point"] = element[0];
+                                if (payload["point"]) {
+                                    // point e.g. {element: e, datasetIndex: 0, index: 14}
+                                    let idx = payload["point"].index;
+                                    let dataset_idx = payload["point"].datasetIndex; // only one dataset, it should be always be 0
+                                    payload["label"] = that.inst.data.labels[idx];
+                                    payload["value"] = that.inst.data.datasets[dataset_idx].data[idx];
+                                }
+                                // parent uses a handle function to catch the event, e.g. catchClick(e, payload) { ... }
+                                that.$emit("click", e, payload);
                             }
-                            // parent uses a handle function to catch the event, e.g. catchClick(e, payload) { ... }
-                            that.$emit("click", e, payload);
                         }
                     }, opts)
                 });
@@ -3112,11 +3120,9 @@ if (Vue) {
                     this.timeout(this.prepareItems, 200);
                 }
             },
-            tooltip: function (tooltipItem, data) {
-                let dataset = data.datasets[tooltipItem.datasetIndex];
-                let currentValue = dataset.data[tooltipItem.index];
-                //this.$log(` ${data.labels[tooltipItem.index]} : ${currentValue} 分鐘`);
-                return ` ${data.labels[tooltipItem.index]} : ${currentValue} 分鐘`;
+            tooltip(data) {
+                let currentValue = data.dataset.data[data.dataIndex];
+                return ` ${data.label} : ${currentValue} 分鐘`;
             }
         },
         mounted() {
