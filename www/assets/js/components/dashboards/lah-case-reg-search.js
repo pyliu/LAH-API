@@ -7,7 +7,7 @@ if (Vue) {
                         <lah-fa-icon icon="scroll">
                             登記案件查詢
                             <span v-if="validate">{{ID}}</span>
-                            <lah-fa-icon v-else icon="exclamation-triangle" variant="danger" append>{{ID}}</lah-fa-icon>
+                            <lah-fa-icon v-else icon="exclamation-circle" variant="danger" append action="damage">{{ID}}</lah-fa-icon>
                         </lah-fa-icon>
                     </h6>
                     <lah-button icon="question" @click="help" size="sm" variant="outline-success" no-border></lah-button>
@@ -38,7 +38,8 @@ if (Vue) {
                     return false;
                 }
                 regex = /^[A-Z0-9]{4}$/i;
-                if (!regex.test(code)) {
+                let regex_4num = /^[0-9]{4}$/i;
+                if (regex_4num.test(code) || !regex.test(code)) {
                     this.$warn(this.id, "code format is not valid.");
                     return false;
                 }

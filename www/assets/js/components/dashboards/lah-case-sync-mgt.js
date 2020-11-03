@@ -7,7 +7,7 @@ if (Vue) {
                         <lah-fa-icon icon="sync-alt">
                             同步登記案件
                             <span v-if="validate">{{ID}}</span>
-                            <lah-fa-icon v-else icon="exclamation-triangle" variant="danger" append>{{ID}}</lah-fa-icon>
+                            <lah-fa-icon v-else icon="exclamation-circle" variant="danger" append action="damage">{{ID}}</lah-fa-icon>
                         </lah-fa-icon>
                     </h6>
                     <b-button-group>
