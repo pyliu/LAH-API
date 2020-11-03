@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("lah-case-reg-search", {
         template: `<b-card>
-            <template v-slot:header>
+            <template #header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder">
                         <lah-fa-icon icon="scroll">
