@@ -393,24 +393,24 @@ if (Vue) {
                 icon: "laptop-house",
                 need_admin: false
             }, {
-                text: `組織圖`,
-                url: "org.html",
-                icon: "sitemap",
+                text: "信差訊息",
+                url: "message.html",
+                icon: "comments",
                 need_admin: false
             }, {
-                text: `小幫手`,
+                text: `業務小幫手`,
                 url: "helper.html",
                 icon: "hands-helping",
                 need_admin: false,
                 children: [{
+                    text: `組織圖`,
+                    url: "org.html",
+                    icon: "sitemap",
+                    need_admin: false
+                }, {
                     text: "體溫紀錄",
                     url: "temperature.html",
                     icon: "head-side-mask",
-                    need_admin: false
-                }, {
-                    text: "信差訊息",
-                    url: "message.html",
-                    icon: "comments",
                     need_admin: false
                 }, {
                     text: "繼承應繼分",
