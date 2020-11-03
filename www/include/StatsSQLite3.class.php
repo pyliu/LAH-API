@@ -85,6 +85,7 @@ class StatsSQLite3 {
                 "ip"	TEXT NOT NULL,
                 "port"	INTEGER,
                 "name"	TEXT NOT NULL,
+                "monitor"	TEXT NOT NULL DEFAULT \'Y\',
                 "note"	TEXT,
                 PRIMARY KEY("ip")
             )
