@@ -29,7 +29,7 @@ if (Vue) {
                 <transition-group name="list" mode="out-in">
                     <div
                         v-for="(userinfo, idx) in usernames"
-                        class='float-left m-2 usercard'
+                        class='float-left m-1 usercard'
                         style='font-size: .8rem;'
                         :data-id="userinfo.id"
                         :data-name="userinfo.name"
@@ -38,7 +38,7 @@ if (Vue) {
                         v-if="usertag_flags[userinfo.id]"
                         v-b-popover="popover(userinfo)"
                     >
-                        <b-avatar v-if="avatar" button size="1.5rem" :src="avatar_src(userinfo.name)" variant="light"></b-avatar>
+                        <b-avatar v-if="avatar" button size="1.25rem" :src="avatar_src(userinfo.name)" variant="light"></b-avatar>
                         {{dogtag(userinfo)}}
                     </div>
                 </transition-group>
