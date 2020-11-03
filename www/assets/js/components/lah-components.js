@@ -358,7 +358,7 @@ if (Vue) {
             }, {
                 text: "監控看板",
                 url: "monitor.html",
-                icon: "diagnoses",
+                icon: "desktop",
                 need_admin: true,
                 children: [{
                     text: "跨所AP看板",
