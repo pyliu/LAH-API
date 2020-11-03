@@ -25,24 +25,26 @@ if (Vue) {
                     <lah-button v-if="false" @click="query" variant="outline-primary" size="sm" v-b-tooltip="'搜尋使用者'" icon="search"></lah-button>
                 </template>
             </b-input-group>
-            <div id="usertag_container" class="clearfix overflow-auto" :style="style">
-                <transition-group name="list" mode="out-in">
-                    <div
-                        v-for="(userinfo, idx) in usernames"
-                        class='float-left m-1 usercard'
-                        style='font-size: .8rem;'
-                        :data-id="userinfo.id"
-                        :data-name="userinfo.name"
-                        :key="'usertag_'+userinfo.id"
-                        @click.stop="popUsercard(userinfo.id)"
-                        v-if="usertag_flags[userinfo.id]"
-                        v-b-popover="popover(userinfo)"
-                    >
-                        <b-avatar v-if="avatar" button size="1.25rem" :src="avatar_src(userinfo.name)" variant="light"></b-avatar>
-                        {{dogtag(userinfo)}}
-                    </div>
-                </transition-group>
-            </div>
+            <template #footer>
+                <div id="usertag_container" class="clearfix overflow-auto" :style="style">
+                    <transition-group name="list" mode="out-in">
+                        <div
+                            v-for="(userinfo, idx) in usernames"
+                            class='float-left m-1 usercard'
+                            style='font-size: .75rem;'
+                            :data-id="userinfo.id"
+                            :data-name="userinfo.name"
+                            :key="'usertag_'+userinfo.id"
+                            @click.stop="popUsercard(userinfo.id)"
+                            v-if="usertag_flags[userinfo.id]"
+                            v-b-popover="popover(userinfo)"
+                        >
+                            <b-avatar v-if="avatar" button size="1.2rem" :src="avatar_src(userinfo.name)" variant="light"></b-avatar>
+                            {{dogtag(userinfo)}}
+                        </div>
+                    </transition-group>
+                </div>
+            </template>
         </b-card>`,
         props: {
             avatar: {
