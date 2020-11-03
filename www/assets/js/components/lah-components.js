@@ -778,7 +778,7 @@ if (Vue) {
                     "ld-slide-ltr", "ld-slide-rtl", "ld-slide-ttb", "ld-smash", "ld-spin", "ld-spin-fast", "ld-squeeze",
                     "ld-swim", "ld-swing", "ld-tick-alt", "ld-vortex", "ld-vortex-alt", "ld-wander-h", "ld-wander-v"
                  */
-                let movement = this.action ? `ld-${this.action}` : 'ld-tick';
+                let movement = this.action ? `ld-${this.action}` : 'ld-jump';
                 // movement is "undefined" will be random effect
                 addLDAnimation(`#${this.icon_id}`, movement);
             },
