@@ -286,8 +286,8 @@ if (Vue) {
                     }
                     this.setLocalCache('case_input_years', this.years, 24 * 60 * 60 * 1000);  // cache for a day
                 }
+                this.reloadCode();
             });
-            this.reloadCode();
         }
     });
 } else {
