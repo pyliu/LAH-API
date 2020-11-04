@@ -98,14 +98,23 @@ if (Vue) {
                 Object.defineProperty(evt, 'target', {writable: false, value: target});
                 return evt;
             },
-            loadCodeData() {
+            reloadCode() {
+                this.getLocalCache(this.code_cache_key).then(items => {
+                    if (this.empty(items)) {
+                        this.getDBCodeData();
+                    } else {
+                        this.restoreCodeData(items);
+                    }
+                });
+            },
+            getDBCodeData() {
                 if (this.isBusy) return;
                 this.isBusy = true;
                 this.$http.post(CONFIG.API.JSON.QUERY, {
                     type: 'code_data',
                     year: this.year
                 }).then(res => {
-                    this.setLocalCache(this.code_cache_key, res.data.raw, 1 * 24 * 60 * 60 * 1000);  // cache for a day
+                    this.setLocalCache(this.code_cache_key, res.data.raw, 12 * 60 * 60 * 1000);  // cache for half day
                     this.restoreCodeData(res.data.raw);
                 }).catch(err => {
                     this.error = err;
@@ -248,9 +257,9 @@ if (Vue) {
         },
         watch: {
             year: function(val) {
-                this.loadCodeData();
                 let evt = this.newCustomEvent('year-updated', val, this.$refs.year.$el);
                 this.$emit("year-updated", evt);
+                this.reloadCode();
             },
             code: function(val) {
                 this.num_step = val == "HB12" || val == "HB17" ? 100 : 10;
@@ -277,13 +286,7 @@ if (Vue) {
                     this.setLocalCache('case_input_years', this.years, 24 * 60 * 60 * 1000);  // cache for a day
                 }
             });
-            this.getLocalCache(this.code_cache_key).then(items => {
-                if (this.empty(items)) {
-                    this.loadCodeData();
-                } else {
-                    this.restoreCodeData(items);
-                }
-            });
+            this.reloadCode();
         }
     });
 } else {
