@@ -98,6 +98,71 @@ if (Vue) {
 
                 }
             }
+        },
+        "lah-easycard-payment-check-item": {
+            template: `<ul style="font-size: 0.9rem">
+                <li v-for="(item, index) in data" class='easycard_item'>
+                    日期: {{item["AA01"]}}, 電腦給號: {{item["AA04"]}}, 實收金額: {{item["AA28"]}}<b-badge v-if="!empty(item['AA104'])" variant="danger">, 作廢原因: {{item["AA104"]}}</b-badge>, 目前狀態: {{status(item["AA106"])}}
+                    <button v-if="empty(item['AA104'])" @click="fix($event, item)" class="btn btn-sm btn-outline-success">修正</button>
+                </li>
+            </ul>`,
+            props: ["data"],
+            methods: {
+                fix: function(e, item) {
+                    let el = $(e.target);
+                    let qday = item["AA01"], pc_number = item["AA04"], amount = item["AA28"];
+                    let message = "確定要修正 日期: " + qday + ", 電腦給號: " + pc_number + ", 金額: " + amount + " 悠遊卡付款資料?";
+                    showConfirm(message, () => {
+                        this.isBusy = true;
+                        this.$http.post(CONFIG.API.JSON.QUERY, {
+                            type: "fix_easycard",
+                            qday: qday,
+                            pc_num: pc_number
+                        }).then(res => {
+                            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                el.closest("li").html("修正 日期: " + qday + ", 電腦給號: " + pc_number + " <strong class='text-success'>成功</strong>!");
+                            } else {
+                                throw new Error("回傳狀態碼不正確!【" + res.data.message + "】");
+                            }
+                            el.remove();
+                        }).catch(err => {
+                            this.error = err;
+                        }).finally(() => {
+                            this.isBusy = false;
+                        });
+                    });
+                },
+                status: function(AA106) {
+                    let status = "未知的狀態碼【" + AA106 + "】";
+                    /*
+                        1：扣款成功
+                        2：扣款失敗
+                        3：取消扣款
+                        8：扣款異常交易
+                        9：取消扣款異常交易
+                    */
+                    switch(AA106) {
+                        case "1":
+                            status = "扣款成功";
+                            break;
+                        case "2":
+                            status = "扣款失敗";
+                            break;
+                        case "3":
+                            status = "取消扣款";
+                            break;
+                        case "8":
+                            status = "扣款異常交易";
+                            break;
+                        case "9":
+                            status = "取消扣款異常交易";
+                            break;
+                        default:
+                            break;
+                    }
+                    return status;
+                }
+            }
         }
     },
     data: () => ({
