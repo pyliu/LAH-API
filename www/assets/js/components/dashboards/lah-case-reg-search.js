@@ -7,7 +7,7 @@ if (Vue) {
                         <lah-fa-icon icon="scroll">
                             登記案件查詢
                             <span v-if="validate">{{ID}}</span>
-                            <lah-fa-icon v-else icon="exclamation-circle" variant="danger" append action="damage">{{ID}}</lah-fa-icon>
+                            <lah-fa-icon v-else icon="exclamation-circle" variant="danger" append action="damage" title="案件ID有問題">{{ID}}</lah-fa-icon>
                         </lah-fa-icon>
                     </h6>
                     <lah-button icon="question" @click="help" size="sm" variant="outline-success" no-border></lah-button>
