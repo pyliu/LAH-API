@@ -48,50 +48,15 @@ if (Vue) {
         </div>`,
         props: ["type", "prefix", 'value'],
         data: () => ({
-            codes: {
-                reg: {
-                    HB: {
-                        label: "登記案件-本所",
-                        options: []
-                    },
-                    HXB1: {
-                        label: "登記案件-本所收件(跨所)",
-                        options: []
-                    },
-                    HBX1: {
-                        label: "登記案件-他所收件(跨所)",
-                        options: []
-                    },
-                    H2XX: {
-                        label: "登記案件-本所收件(跨縣市)",
-                        options: []
-                    },
-                    XXHB: {
-                        label: "登記案件-他所收件(跨縣市)",
-                        options: []
-                    }
-                },
-                sur: {
-                    HB: {
-                        label: "測量案件",
-                        options: []
-                    }
-                },
-                prc: {
-                    HB: {
-                        label: "地價案件",
-                        options: ["HB31 地價更正"]
-                    }
-                }
-            },
+            codes: {},
+            code_data: [],
+            years: [],
             year: "109",
             code: "",
             num: "",
             num_step: 10,
             num_min: 10,
-            num_max: 999999,
-            code_data: [],
-            years: []
+            num_max: 999999
         }),
         computed: {
             ID() { return `${this.year}-${this.code}-${this.num.padStart(6, '0')}`},
@@ -140,18 +105,57 @@ if (Vue) {
                     type: 'code_data',
                     year: this.year
                 }).then(res => {
-                    this.restoreCodeData(res.data.raw);
                     this.setLocalCache(this.code_cache_key, res.data.raw, 1 * 24 * 60 * 60 * 1000);  // cache for a day
+                    this.restoreCodeData(res.data.raw);
                 }).catch(err => {
                     this.error = err;
                 }).finally(() => {
                     this.isBusy = false;
                 });
             },
+            resetCodes() {
+                this.codes = Object.assign({}, {
+                    reg: {
+                        HB: {
+                            label: "登記案件-本所",
+                            options: []
+                        },
+                        HXB1: {
+                            label: "登記案件-本所收件(跨所)",
+                            options: []
+                        },
+                        HBX1: {
+                            label: "登記案件-他所收件(跨所)",
+                            options: []
+                        },
+                        H2XX: {
+                            label: "登記案件-本所收件(跨縣市)",
+                            options: []
+                        },
+                        XXHB: {
+                            label: "登記案件-他所收件(跨縣市)",
+                            options: []
+                        }
+                    },
+                    sur: {
+                        HB: {
+                            label: "測量案件",
+                            options: []
+                        }
+                    },
+                    prc: {
+                        HB: {
+                            label: "地價案件",
+                            options: ["HB31 地價更正"]
+                        }
+                    }
+                });
+            },
             restoreCodeData(items) {
                 // ITEM欄位：YEAR, CODE, CODE_NAME, COUNT, CODE_TYPE
                 // [109, HCB1, 壢溪登跨, 1213, reg.HXB1]
                 if (Array.isArray(items)) {
+                    this.resetCodes();
                     items.forEach(item => {
                         let type = item['CODE_TYPE'].split('.');
                         // type => ['reg', 'HXB1']
