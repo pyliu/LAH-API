@@ -838,6 +838,18 @@ switch ($_POST["type"]) {
 			"message" => "取得 ".count($results)." 筆資料。"
 		), 0);
 		break;
+	case "code_data":
+		$rows = $mock ? $cache->get('code_data') : $query->getCodeData($_POST["year"]);
+		if (!$mock) $cache->set('code_data', $rows);
+		// 回傳欄位：YEAR, CODE, CODE_NAME, COUNT, CODE_TYPE
+		$log->info("XHR [code_data] 取得 ".count($rows)." 筆資料");
+		echo json_encode(array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"data_count" => count($rows),
+			"raw" => $rows,
+			"message" => "取得 ".count($rows)." 筆資料。"
+		), 0);
+		break;
 	case "reg_code":
 		$log->info("XHR [reg_code] 取得登記案件字列表請求");
 		$log->info("XHR [reg_code] 取得 ".count(REG_CODE)." 群資料");

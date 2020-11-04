@@ -52,15 +52,15 @@ if (Vue) {
                 reg: {
                     HB: {
                         label: "登記案件-本所",
-                        options: ["HB04 壢登", "HB05 壢永", "HB06 壢速"]
+                        options: []
                     },
                     HXB1: {
                         label: "登記案件-本所收件(跨所)",
-                        options: ["HAB1 壢桃登跨", "HCB1 壢溪登跨", "HDB1 壢楊登跨", "HEB1 壢蘆登跨", "HFB1 壢德登跨", "HGB1 壢平登跨", "HHB1 壢山登跨"]
+                        options: []
                     },
                     HBX1: {
                         label: "登記案件-他所收件(跨所)",
-                        options: ["HBA1 桃壢登跨", "HBC1 溪壢登跨", "HBD1 楊壢登跨", "HBE1 蘆壢登跨", "HBF1 德壢登跨", "HBG1 平壢登跨", "HBH1 山壢登跨"]
+                        options: []
                     },
                     H2XX: {
                         label: "登記案件-本所收件(跨縣市)",
@@ -74,7 +74,7 @@ if (Vue) {
                 sur: {
                     HB: {
                         label: "測量案件",
-                        options: ["HB12 中地測丈", "HB13 中地測建", "HB17 中地法土", "HB18 中地法建"]
+                        options: []
                     }
                 },
                 prc: {
@@ -95,7 +95,8 @@ if (Vue) {
         }),
         computed: {
             ID() { return `${this.year}-${this.code}-${this.num.padStart(6, '0')}`},
-            preview() { return `案件代碼預覽：${this.ID}` }
+            preview() { return `案件代碼預覽：${this.ID}` },
+            code_cache_key() { return `code_data_${this.year}` }
         },
         methods: {
             emitInput: function(e) {
@@ -103,11 +104,10 @@ if (Vue) {
             },
             getMaxNumber: function(e) {
                 if (this.empty(this.year)) {
-                    this.$warn(`案件年不能為空值【${this.year}】`);
+                    // this.$warn(`案件年不能為空值【${this.year}】`);
                 } else if (this.empty(this.code)) {
-                    this.$warn(`案件字不能為空值【${this.code}】`);
+                    // this.$warn(`案件字不能為空值【${this.code}】`);
                 } else {
-                    this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.QUERY, {
                         "type": "max",
                         "year": this.year,
@@ -122,8 +122,6 @@ if (Vue) {
                         }
                     }).catch(err => {
                         this.error = err;
-                    }).finally(() => {
-                        this.isBusy = false;
                     });
                 }
             },
@@ -135,18 +133,86 @@ if (Vue) {
                 Object.defineProperty(evt, 'target', {writable: false, value: target});
                 return evt;
             },
-            restoreCodesByJSON: function(json) {
-                for (let city in json.raw['跨縣市本所收件']) {
-                    for (let code in json.raw['跨縣市本所收件'][city]) {
-                        let clean_name = json.raw['跨縣市本所收件'][city][code].replace('跨縣市（', '').replace('）', '');
-                        this.codes.reg.H2XX.options.push(`${code} ${clean_name} (${city})`);
-                    }
+            loadCodeData() {
+                if (this.isBusy) return;
+                this.isBusy = true;
+                this.$http.post(CONFIG.API.JSON.QUERY, {
+                    type: 'code_data',
+                    year: this.year
+                }).then(res => {
+                    this.restoreCodeData(res.data.raw);
+                    this.setLocalCache(this.code_cache_key, res.data.raw, 1 * 24 * 60 * 60 * 1000);  // cache for a day
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            },
+            restoreCodeData(items) {
+                // ITEM欄位：YEAR, CODE, CODE_NAME, COUNT, CODE_TYPE
+                // [109, HCB1, 壢溪登跨, 1213, reg.HXB1]
+                if (Array.isArray(items)) {
+                    items.forEach(item => {
+                        let type = item['CODE_TYPE'].split('.');
+                        // type => ['reg', 'HXB1']
+                        
+                        if (this.empty(item['CODE_NAME'])) return false;
+                        if (this.empty(this.codes[type[0]])) return false;
+                        if (this.empty(this.codes[type[0]][type[1]])) return false;
+
+                        let combined = item['CODE'] + ` ${item['CODE_NAME']}`;  // 'HCB1 壢溪登跨'
+                        let found = this.codes[type[0]][type[1]].options.find((i, idx, array) => { return i == combined });
+                        if (!found) {
+                            this.codes[type[0]][type[1]].options.push(combined);
+                        }
+                    });
+                    //this.codes = Object.assign({}, this.codes);
+                    this.arrangeCodeList();
+                } else {
+                    this.alert({
+                        title: `案件字讀取`,
+                        message: `無法讀取案件字資料`,
+                        type: 'danger'
+                    });
                 }
-                for (let city in json.raw['跨縣市他所收件']) {
-                    for (let code in json.raw['跨縣市他所收件'][city]) {
-                        let clean_name = json.raw['跨縣市他所收件'][city][code].replace('跨縣市（', '').replace('）', '');
-                        this.codes.reg.XXHB.options.push(`${code} ${clean_name} (${city})`);
-                    }
+            },
+            arrangeCodeList() {
+                this.code_data = [];
+                switch(this.type) {
+                    case "reg":
+                        this.code_data.push(this.codes.reg.HB);
+                        this.code_data.push(this.codes.reg.HXB1);
+                        this.code_data.push(this.codes.reg.HBX1);
+                        this.code_data.push(this.codes.reg.H2XX);
+                        this.code_data.push(this.codes.reg.XXHB);
+                        this.num_step = this.num_min = 10;
+                        break;
+                    case "sur":
+                        this.code_data.push(this.codes.sur.HB);
+                        this.num_step = this.num_min = 100;
+                        this.num = "000100";
+                        break;
+                    case "sync":
+                        this.code_data.push(this.codes.reg.HXB1);
+                        break;
+                    case "tmp":
+                        this.code_data.push(this.codes.reg.HB);
+                        this.code_data.push(this.codes.prc.HB);
+                        this.code_data.push(this.codes.reg.HXB1);
+                        this.code_data.push(this.codes.reg.HBX1);
+                        this.code_data.push(this.codes.reg.H2XX);
+                        this.code_data.push(this.codes.reg.XXHB);
+                        this.num_step = this.num_min = 1;
+                        break;
+                    default:
+                        this.code_data.push(this.codes.reg.HB);
+                        this.code_data.push(this.codes.reg.HXB1);
+                        this.code_data.push(this.codes.reg.HBX1);
+                        this.code_data.push(this.codes.prc.HB);
+                        this.code_data.push(this.codes.sur.HB);
+                        this.code_data.push(this.codes.reg.H2XX);
+                        this.code_data.push(this.codes.reg.XXHB);
+                        break;
                 }
             },
             codeBg(label) {
@@ -178,6 +244,7 @@ if (Vue) {
         },
         watch: {
             year: function(val) {
+                this.loadCodeData();
                 let evt = this.newCustomEvent('year-updated', val, this.$refs.year.$el);
                 this.$emit("year-updated", evt);
             },
@@ -206,70 +273,23 @@ if (Vue) {
                     this.setLocalCache('case_input_years', this.years, 24 * 60 * 60 * 1000);  // cache for a day
                 }
             });
-
-            this.getLocalCache('reg_code').then(json => {
-                if (json !== false) {
-                    this.restoreCodesByJSON(json);
-                } else {
-                    this.isBusy = true;
-                    this.$http.post(CONFIG.API.JSON.QUERY, {
-                        type: 'reg_code'
-                    }).then(res => {
-                        this.restoreCodesByJSON(res.data);
-                        this.setLocalCache('reg_code', res.data, 7 * 24 * 60 * 60 * 1000);  // cache for a week
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        this.isBusy = false;
-                    });
-                }
-            });
-
         },
         mounted: function(e) {
-            switch(this.type) {
-                case "reg":
-                    this.code_data.push(this.codes.reg.HB);
-                    this.code_data.push(this.codes.reg.HXB1);
-                    this.code_data.push(this.codes.reg.HBX1);
-                    this.code_data.push(this.codes.reg.H2XX);
-                    this.code_data.push(this.codes.reg.XXHB);
-                    this.num_step = this.num_min = 10;
-                    break;
-                case "sur":
-                    this.code_data.push(this.codes.sur.HB);
-                    this.num_step = this.num_min = 100;
-                    this.num = "000100";
-                    break;
-                case "sync":
-                    this.code_data.push(this.codes.reg.HXB1);
-                    break;
-                case "tmp":
-                    this.code_data.push(this.codes.reg.HB);
-                    this.code_data.push(this.codes.prc.HB);
-                    this.code_data.push(this.codes.reg.HXB1);
-                    this.code_data.push(this.codes.reg.HBX1);
-                    this.code_data.push(this.codes.reg.H2XX);
-                    this.code_data.push(this.codes.reg.XXHB);
-                    this.num_step = this.num_min = 1;
-                    break;
-                default:
-                    this.code_data.push(this.codes.reg.HB);
-                    this.code_data.push(this.codes.reg.HXB1);
-                    this.code_data.push(this.codes.reg.HBX1);
-                    this.code_data.push(this.codes.prc.HB);
-                    this.code_data.push(this.codes.sur.HB);
-                    this.code_data.push(this.codes.reg.H2XX);
-                    this.code_data.push(this.codes.reg.XXHB);
-                    break;
-            }
             // setup delay timer to allow cached data update to the input/select element
             this.timeout(() => {
                 this.year = this.$refs.year.$el.value;
-                this.code = this.$refs.code.$el.value;
-                this.num = this.$refs.num.$el.value;
-                this.emitInput();
-            }, 400);    // cached data write back
+                this.$log(this.code_cache_key);
+                this.getLocalCache(this.code_cache_key).then(items => {
+                    if (this.empty(items)) {
+                        this.loadCodeData();
+                    } else {
+                        this.restoreCodeData(items);
+                    }
+                    this.code = this.$refs.code.$el.value;
+                    this.num = this.$refs.num.$el.value;
+                    this.emitInput();
+                });
+            }, 800);    // cached data write back
         }
     });
 } else {

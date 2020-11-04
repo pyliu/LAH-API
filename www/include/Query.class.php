@@ -67,6 +67,35 @@ class Query {
         $this->db = null;
     }
 
+	public function getCodeData($year) {
+		$sql = "
+			-- 案件(REG + SUR)數量統計 BY 年
+			SELECT t.RM01 AS YEAR, t.RM02 AS CODE, q.KCNT AS CODE_NAME, COUNT(*) AS COUNT,
+				(CASE
+					WHEN t.RM02 LIKE 'H2%'  THEN 'reg.H2XX'
+					WHEN t.RM02 LIKE '%HB'  THEN 'reg.XXHB'
+					WHEN t.RM02 LIKE 'HB0%' THEN 'reg.HB'
+					WHEN t.RM02 LIKE 'HB%1' THEN 'reg.HBX1'
+					WHEN t.RM02 LIKE 'H%B1' THEN 'reg.HXB1'
+					ELSE '登記案件'
+				END) AS CODE_TYPE FROM MOICAS.CRSMS t
+			LEFT JOIN MOIADM.RKEYN q ON q.kcde_1 = '04' AND q.kcde_2 = t.rm02
+			WHERE RM01 = :bv_year
+			GROUP BY t.RM01, t.RM02, q.KCNT
+			UNION
+			SELECT t.MM01 AS YEAR, t.MM02 AS CODE, q.KCNT AS CODE_NAME, COUNT(*) AS COUNT, 'sur.HB'  AS CODE_TYPE FROM MOICAS.CMSMS t
+			LEFT JOIN MOIADM.RKEYN q ON q.kcde_1 = '04' AND q.kcde_2 = t.mm02
+			WHERE MM01 = :bv_year
+			GROUP BY t.MM01, t.MM02, q.KCNT
+			ORDER BY YEAR, CODE
+		";
+		
+		$this->db->parse($sql);
+		$this->db->bind(":bv_year", $year);
+        $this->db->execute();
+        return $this->db->fetchAll();
+	}
+	
 	public function getSectionRALIDCount($cond = "") {
 		$prefix = "
 			select m.KCDE_2 as \"段代碼\",
@@ -915,7 +944,7 @@ class Query {
 		return $this->db->fetchAll();
 	}
 	
-	// 找全部案件
+	// 找接近逾期案件
 	public function queryNearOverdueCases() {
 		$this->db->parse("
 			SELECT *
