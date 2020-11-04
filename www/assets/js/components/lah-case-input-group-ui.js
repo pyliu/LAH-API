@@ -8,7 +8,7 @@ if (Vue) {
                     :options="years"
                     @change="emitInput"
                     @change="getMaxNumber"
-                    class="h-100"
+                    class="h-100 no-cache"
                 >
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇年份 --</b-form-select-option>
@@ -21,7 +21,7 @@ if (Vue) {
                     v-model="code"
                     @change="emitInput"
                     @change="getMaxNumber"
-                    class="h-100"
+                    class="h-100 no-cache"
                 >
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇案件字 --</b-form-select-option>
@@ -42,7 +42,7 @@ if (Vue) {
                     :step="num_step"
                     :min="num_min"
                     :max="num_max"
-                    class="h-100"
+                    class="h-100 no-cache"
                 ></b-form-input>
             </b-input-group>
         </div>`,
@@ -258,7 +258,7 @@ if (Vue) {
                 this.$emit("num-updated", evt);
             }
         },
-        created: async function() {
+        created() {
             this.getLocalCache('case_input_years').then(years => {
                 if (years !== false) {
                     this.years = years;
@@ -273,23 +273,13 @@ if (Vue) {
                     this.setLocalCache('case_input_years', this.years, 24 * 60 * 60 * 1000);  // cache for a day
                 }
             });
-        },
-        mounted: function(e) {
-            // setup delay timer to allow cached data update to the input/select element
-            this.timeout(() => {
-                this.year = this.$refs.year.$el.value;
-                this.$log(this.code_cache_key);
-                this.getLocalCache(this.code_cache_key).then(items => {
-                    if (this.empty(items)) {
-                        this.loadCodeData();
-                    } else {
-                        this.restoreCodeData(items);
-                    }
-                    this.code = this.$refs.code.$el.value;
-                    this.num = this.$refs.num.$el.value;
-                    this.emitInput();
-                });
-            }, 800);    // cached data write back
+            this.getLocalCache(this.code_cache_key).then(items => {
+                if (this.empty(items)) {
+                    this.loadCodeData();
+                } else {
+                    this.restoreCodeData(items);
+                }
+            });
         }
     });
 } else {
