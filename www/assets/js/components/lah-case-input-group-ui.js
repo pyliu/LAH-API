@@ -1,7 +1,7 @@
 if (Vue) {
     Vue.component("lah-case-input-group-ui", {
         template: `<div class="d-flex" v-b-popover.hover.focus.bottom.d1000="preview">
-            <b-input-group size="sm" append="年" @click="getMaxNumber">
+            <b-input-group size="sm" append="年" @click="getMaxNumber" class="text-nowrap">
                 <b-form-select
                     ref="year"
                     v-model="year"
@@ -15,7 +15,7 @@ if (Vue) {
                     </template>
                 </b-form-select>
             </b-input-group>
-            <b-input-group size="sm" class="mx-1" append="字">
+            <b-input-group size="sm" class="mx-1" append="字" class="text-nowrap">
                 <b-form-select
                     ref="code"
                     v-model="code"
@@ -31,7 +31,7 @@ if (Vue) {
                     </optgroup>
                 </b-form-select>
             </b-input-group>
-            <b-input-group size="sm" append="號">
+            <b-input-group size="sm" append="號" class="text-nowrap">
                 <b-form-input
                     ref="num"
                     v-model="num"
