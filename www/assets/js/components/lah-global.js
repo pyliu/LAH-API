@@ -924,10 +924,10 @@ $(document).ready(() => {
                         if (el.length > 0 && el.is(cached_el_selector)) {
                             el.val(value);
                             // trigger native event to force bound model data to update
-                            if (el[0].nodeName == 'SELECT') {
-                                el[0].dispatchEvent(new Event('change'));
-                            } else {
+                            if (el[0].nodeName == 'INPUT' || el[0].nodeName == 'TEXTAREA') {
                                 el[0].dispatchEvent(new Event('input'));
+                            } else {
+                                el[0].dispatchEvent(new Event('change'));
                             }
                         }
                     } catch(err) {
