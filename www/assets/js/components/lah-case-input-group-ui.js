@@ -26,7 +26,7 @@ if (Vue) {
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇案件字 --</b-form-select-option>
                     </template>
-                    <optgroup v-for="obj in code_data" :label="obj.label" :class="codeBg(obj.label)">
+                    <optgroup v-for="obj in code_data" :label="obj.label" :class="codeBg(obj.label)" v-if="obj.options.length > 0">
                         <option v-for="item in obj.options" :value="item.replace(/[^A-Za-z0-9]/g, '')">{{item}}</option>
                     </optgroup>
                 </b-form-select>
