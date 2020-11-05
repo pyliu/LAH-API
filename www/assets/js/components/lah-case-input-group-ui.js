@@ -15,7 +15,7 @@ if (Vue) {
                     </template>
                 </b-form-select>
             </b-input-group>
-            <b-input-group size="sm" class="mx-1" append="字" class="text-nowrap">
+            <b-input-group size="sm" class="mx-1" append="字" class="text-nowrap mx-1">
                 <b-form-select
                     ref="code"
                     v-model="code"
