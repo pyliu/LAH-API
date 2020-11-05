@@ -1,6 +1,6 @@
 if (Vue) {
     Vue.component("lah-case-input-group-ui", {
-        template: `<div class="d-flex" v-b-popover.hover.focus.bottom.d1000="preview">
+        template: `<div class="d-flex" v-b-popover.hover.bottom.d1000="preview">
             <b-input-group size="sm" append="年" @click="getMaxNumber" class="text-nowrap">
                 <b-form-select
                     ref="year"
@@ -8,7 +8,7 @@ if (Vue) {
                     :options="years"
                     @change="emitInput"
                     @change="getMaxNumber"
-                    class="h-100 no-cache"
+                    class="h-100"
                 >
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇年份 --</b-form-select-option>
@@ -21,7 +21,7 @@ if (Vue) {
                     v-model="code"
                     @change="emitInput"
                     @change="getMaxNumber"
-                    class="h-100 no-cache"
+                    class="h-100"
                 >
                     <template v-slot:first>
                         <b-form-select-option :value="null" disabled>-- 請選擇案件字 --</b-form-select-option>
@@ -42,7 +42,7 @@ if (Vue) {
                     :step="num_step"
                     :min="num_min"
                     :max="num_max"
-                    class="h-100 no-cache"
+                    class="h-100"
                 ></b-form-input>
             </b-input-group>
         </div>`,
@@ -288,6 +288,7 @@ if (Vue) {
                 }
                 this.reloadCode();
             });
+
         }
     });
 } else {

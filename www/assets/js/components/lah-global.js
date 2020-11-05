@@ -923,6 +923,12 @@ $(document).ready(() => {
                         let el = $("#"+key);
                         if (el.length > 0 && el.is(cached_el_selector)) {
                             el.val(value);
+                            // trigger native event to force bound model data to update
+                            if (el[0].nodeName == 'SELECT') {
+                                el[0].dispatchEvent(new Event('change'));
+                            } else {
+                                el[0].dispatchEvent(new Event('input'));
+                            }
                         }
                     } catch(err) {
                         this.$lf.removeItem(key);
