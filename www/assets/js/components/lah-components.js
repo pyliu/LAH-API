@@ -696,6 +696,7 @@ if (Vue) {
             :block="block"
             :pressed="pressed"
             :class="noBorder ? 'border-0' : ''"
+            :href="href"
             @mouseenter="mouseenter"
             @mouseleave="mouseleave"
             @blur="mouseleave"
@@ -707,6 +708,7 @@ if (Vue) {
             </lah-fa-icon>
       </b-button>`,
         props: {
+            href: { type: String, default: ''},
             noBorder: { type: Boolean, default: false },
             variant: {
                 type: String,
@@ -1755,11 +1757,12 @@ if (Vue) {
             }
         },
         template: `<div v-if="!empty(myid)">
-            <h6 v-if="heading"><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> 信差提醒</h6>
+            <h6 v-if="heading"><lah-fa-icon icon="angle-double-right" variant="dark"></lah-fa-icon> 信差提醒鬧鐘</h6>
             <b-card :no-body="heading" :class="border">
                 <template v-slot:header v-if="!heading">
                     <div class="d-flex w-100 justify-content-between mb-0">
                         <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="bell" prefix="far">{{label}}</lah-fa-icon></h6>
+                        <lah-button icon="history" variant="link" href="message.html" class="text-decoration-none">歷史資料</lah-button>
                         <lah-button icon="question" @click="help" size="sm" variant="outline-success" no-border></lah-button>
                     </div>
                 </template>
