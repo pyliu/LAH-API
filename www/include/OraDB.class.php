@@ -42,7 +42,12 @@ class OraDB {
         if ($this->conn) {
             $this->connected = true;
         } else {
+            $this->connected = false;
             $e = oci_error();
+            global $log;
+            if ($log) {
+                $log->error(__METHOD__.": ".$e['message']);
+            }
             trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
         }
     }
@@ -71,6 +76,10 @@ class OraDB {
         $this->stid = oci_parse($this->conn, $str);
         if (!$this->stid) {
             $e = oci_error($this->conn);
+            global $log;
+            if ($log) {
+                $log->error(__METHOD__.": ".$e['message']);
+            }
             trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
         }
     }
