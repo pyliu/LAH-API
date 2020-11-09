@@ -130,6 +130,15 @@ class OraDB {
     }
 
     function __construct($type = CONNECTION_TYPE::MAIN) {
+        $this->initSetting();
+        $this->initType($type);
+    }
+
+    function __destruct() {
+        $this->close();
+    }
+
+    private function initSetting() {
         $system = new System();
         $this->L1HWEB_DB = $system->get("ORA_DB_L1HWEB");
         $this->L1HWEB_Alt_DB = $system->get("ORA_DB_L1HWEB_Alt");
@@ -139,6 +148,9 @@ class OraDB {
         $this->MAIN_DB = $system->get("ORA_DB_MAIN");
         $this->user = $system->get("ORA_DB_USER");
         $this->pass = $system->get("ORA_DB_PASS");
+    }
+
+    private function initType($type) {
         switch($type) {
             case CONNECTION_TYPE::L1HWEB:
                 $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB;
@@ -158,10 +170,6 @@ class OraDB {
             default:
                 $this->CONN_TYPE = CONNECTION_TYPE::MAIN;
         }
-    }
-
-    function __destruct() {
-        $this->close();
     }
 
     private function getConnString() {
