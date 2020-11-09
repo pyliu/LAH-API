@@ -32,39 +32,16 @@ class OraDB {
     private $stid;
     private $numrows;
     private $CONN_TYPE;
+    private $connected = false;
 
-    public function connect($type = CONNECTION_TYPE::MAIN) {
-        switch($type) {
-            case CONNECTION_TYPE::L1HWEB:
-                $conn_str = $this->L1HWEB_DB;
-                $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB;
-                break;
-            case CONNECTION_TYPE::L1HWEB_Alt:
-                $conn_str = $this->L1HWEB_Alt_DB;
-                $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB_Alt;
-                break;
-            case CONNECTION_TYPE::L2HWEB:
-                $conn_str = $this->L2HWEB_DB;
-                $this->CONN_TYPE = CONNECTION_TYPE::L2HWEB;
-                break;
-            case CONNECTION_TYPE::L3HWEB:
-                $conn_str = $this->L3HWEB_DB;
-                $this->CONN_TYPE = CONNECTION_TYPE::L3HWEB;
-                break;
-            case CONNECTION_TYPE::TWEB:
-                $conn_str = $this->TWEB_DB;
-                $this->CONN_TYPE = CONNECTION_TYPE::TWEB;
-                break;
-            default:
-                $conn_str = $this->MAIN_DB;
-                $this->CONN_TYPE = CONNECTION_TYPE::MAIN;
-        }
-        
+    public function connect() {
+        if ($this->connected) return true;
         // clean previous connection first
         $this->close();
-        
-        $this->conn = oci_connect($this->user, $this->pass, $conn_str, $this->nls);
-        if (!$this->conn) {
+        $this->conn = oci_connect($this->user, $this->pass, $this->getConnString(), $this->nls);
+        if ($this->conn) {
+            $this->connected = true;
+        } else {
             $e = oci_error();
             trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
         }
@@ -80,9 +57,12 @@ class OraDB {
             oci_close($this->conn);
             $this->conn = null;
         }
+
+        $this->connected = false;
     }
 
     public function parse($str) {
+        $this->connect();
         // release previous resource
         if ($this->stid) {
             oci_free_statement($this->stid);
@@ -159,11 +139,46 @@ class OraDB {
         $this->MAIN_DB = $system->get("ORA_DB_MAIN");
         $this->user = $system->get("ORA_DB_USER");
         $this->pass = $system->get("ORA_DB_PASS");
-        if (!$system->isMockMode()) $this->connect($type);
+        switch($type) {
+            case CONNECTION_TYPE::L1HWEB:
+                $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB;
+                break;
+            case CONNECTION_TYPE::L1HWEB_Alt:
+                $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB_Alt;
+                break;
+            case CONNECTION_TYPE::L2HWEB:
+                $this->CONN_TYPE = CONNECTION_TYPE::L2HWEB;
+                break;
+            case CONNECTION_TYPE::L3HWEB:
+                $this->CONN_TYPE = CONNECTION_TYPE::L3HWEB;
+                break;
+            case CONNECTION_TYPE::TWEB:
+                $this->CONN_TYPE = CONNECTION_TYPE::TWEB;
+                break;
+            default:
+                $this->CONN_TYPE = CONNECTION_TYPE::MAIN;
+        }
     }
 
     function __destruct() {
         $this->close();
+    }
+
+    private function getConnString() {
+        switch($this->CONN_TYPE) {
+            case CONNECTION_TYPE::L1HWEB:
+                return $this->L1HWEB_DB;
+            case CONNECTION_TYPE::L1HWEB_Alt:
+                return $this->L1HWEB_Alt_DB;
+            case CONNECTION_TYPE::L2HWEB:
+                return $this->L2HWEB_DB;
+            case CONNECTION_TYPE::L3HWEB:
+                return $this->L3HWEB_DB;
+            case CONNECTION_TYPE::TWEB:
+                return $this->TWEB_DB;
+            default:
+                return $this->MAIN_DB;
+        }
     }
 
     private function convert($str, $src_charset, $dest_charset) {
