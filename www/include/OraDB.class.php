@@ -35,38 +35,39 @@ class OraDB {
     private $connected = false;
 
     public function connect() {
-        if ($this->connected) return true;
-        // clean previous connection first
-        $this->close();
-        $this->conn = oci_connect($this->user, $this->pass, $this->getConnString(), $this->nls);
-        if ($this->conn) {
-            $this->connected = true;
-        } else {
-            $this->connected = false;
-            $e = oci_error();
-            global $log;
-            if ($log) {
-                $log->error(__METHOD__.": ".$e['message']);
+        if (!$this->connected) {
+            // clean previous connection first
+            $this->close();
+            $this->conn = oci_connect($this->user, $this->pass, $this->getConnString(), $this->nls);
+            if ($this->conn) {
+                $this->connected = true;
+            } else {
+                $this->connected = false;
+                $e = oci_error();
+                global $log;
+                if ($log) {
+                    $log->error(__METHOD__.": ".$e['message']);
+                }
+                trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
             }
-            trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
         }
+        return true;
     }
 
     public function close() {
         if ($this->stid) {
             oci_free_statement($this->stid);
-            $this->stid = null;
         }
-          
         if ($this->conn) {
             oci_close($this->conn);
-            $this->conn = null;
         }
-
+        $this->stid = null;
+        $this->conn = null;
         $this->connected = false;
     }
 
     public function parse($str) {
+        // lazy connect here
         $this->connect();
         // release previous resource
         if ($this->stid) {
@@ -89,13 +90,16 @@ class OraDB {
         $r = oci_execute($this->stid);
         if (!$r) {
             $e = oci_error($this->stid);
+            global $log;
+            if ($log) {
+                $log->error(__METHOD__.": ".$e['message']);
+            }
             trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
         }
-
         return $this->stid;
     }
 
-	public function fetch($raw = false) {
+    public function fetch($raw = false) {
         $result = oci_fetch_assoc($this->stid); // oci_fetch_assoc is faster than oci_fetch_array
         if ($raw) {
             return $result;
