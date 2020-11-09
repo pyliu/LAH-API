@@ -130,10 +130,6 @@ class OraDB {
         return $this->numrows;
     }
 
-    public function getSTID() {
-        return $this->stid;
-    }
-    
     public function bind($bind_var, $real_var) {
         oci_bind_by_name($this->stid, $bind_var, $real_var);
     }
