@@ -51,7 +51,7 @@ class OraDB {
                 trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
             }
         }
-        return true;
+        return $this->connected;
     }
 
     public function close() {
