@@ -24,27 +24,6 @@ switch($_POST["site"]) {
 $mock = $system->isMockMode();
 
 switch ($_POST["type"]) {
-	case "lxhweb_ping":
-		$log->info("XHR [lxhweb_ping] Ping ".$_POST["ip"]." request.");
-		$ip = $_POST["ip"];
-		$ping = new Ping($ip, 255, 1);	// ip, ttl, timeout
-		$latency = 0;
-		if ($_POST['port']) {
-    		$ping->setPort($_POST['port']);
-    		$latency = $ping->ping('fsockopen');
-		} else {
-			$latency = $ping->ping();
-		}
-		$response_code = ($latency > 999 || $latency == '') ? STATUS_CODE::FAIL_TIMEOUT : STATUS_CODE::SUCCESS_NORMAL;
-		$message = "$ip 回應時間".(($latency > 999 || $latency == '') ? "逾時" : "為 $latency ms");
-		echo json_encode(array(
-			"status" => $response_code,
-			"ip" => $ip,
-			"latency" => empty($latency) ? "0" : $latency,
-			"data_count" => "1",
-			"message" => $message
-		), 0);
-		break;
 	case "lxhweb_site_update_time":
 		// $log->info("XHR [lxhweb_site_update_time] 查詢各所同步異動更新時間 請求 ".$_POST["site"]);
 		$rows = $mock ? $cache->get('lxhweb_site_update_time') : $lxhweb->querySiteUpdateTime($_POST["site"]);
