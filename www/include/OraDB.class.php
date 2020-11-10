@@ -138,28 +138,7 @@ class OraDB {
         oci_bind_by_name($this->stid, $bind_var, $real_var);
     }
 
-    function __construct($type = CONNECTION_TYPE::MAIN) {
-        $this->initSetting();
-        $this->initType($type);
-    }
-
-    function __destruct() {
-        $this->close();
-    }
-
-    private function initSetting() {
-        $system = new System();
-        $this->L1HWEB_DB = $system->get("ORA_DB_L1HWEB");
-        $this->L1HWEB_Alt_DB = $system->get("ORA_DB_L1HWEB_Alt");
-        $this->L2HWEB_DB = $system->get("ORA_DB_L2HWEB");
-        $this->L3HWEB_DB = $system->get("ORA_DB_L3HWEB");
-        $this->TWEB_DB = $system->get("ORA_DB_TWEB");
-        $this->MAIN_DB = $system->get("ORA_DB_MAIN");
-        $this->user = $system->get("ORA_DB_USER");
-        $this->pass = $system->get("ORA_DB_PASS");
-    }
-
-    private function initType($type) {
+    public function setConnType($type) {
         switch($type) {
             case CONNECTION_TYPE::L1HWEB:
                 $this->CONN_TYPE = CONNECTION_TYPE::L1HWEB;
@@ -179,6 +158,29 @@ class OraDB {
             default:
                 $this->CONN_TYPE = CONNECTION_TYPE::MAIN;
         }
+        // clear DB connection
+        $this->close();
+    }
+
+    function __construct($type = CONNECTION_TYPE::MAIN) {
+        $this->initSetting();
+        $this->setConnType($type);
+    }
+
+    function __destruct() {
+        $this->close();
+    }
+
+    private function initSetting() {
+        $system = new System();
+        $this->L1HWEB_DB = $system->get("ORA_DB_L1HWEB");
+        $this->L1HWEB_Alt_DB = $system->get("ORA_DB_L1HWEB_Alt");
+        $this->L2HWEB_DB = $system->get("ORA_DB_L2HWEB");
+        $this->L3HWEB_DB = $system->get("ORA_DB_L3HWEB");
+        $this->TWEB_DB = $system->get("ORA_DB_TWEB");
+        $this->MAIN_DB = $system->get("ORA_DB_MAIN");
+        $this->user = $system->get("ORA_DB_USER");
+        $this->pass = $system->get("ORA_DB_PASS");
     }
 
     private function getConnString() {

@@ -1218,7 +1218,7 @@ class Query {
 		$log->info(__METHOD__.": 找遠端 ${db_user}.CRSMS 的案件資料【${year}, ${code}, ${num}】");
 
 		// connection switch to L3HWEB
-		$this->db->connect(CONNECTION_TYPE::L3HWEB);
+		$this->db->setConnType(CONNECTION_TYPE::L3HWEB);
 		$this->db->parse("
 			SELECT *
 			FROM $db_user.CRSMS t
@@ -1239,7 +1239,7 @@ class Query {
 		$log->info(__METHOD__.": 找本地 MOICAS.CRSMS 的案件資料【${year}, ${code}, ${num}】");
 
 		// connection switch to MAIN
-		$this->db->connect(CONNECTION_TYPE::MAIN);
+		$this->db->setConnType(CONNECTION_TYPE::MAIN);
 		$this->db->parse("
 			SELECT *
 			FROM MOICAS.CRSMS t
@@ -1285,7 +1285,7 @@ class Query {
 		$db_user = "L1H".$code[1]."0H03";
 
 		// connection switch to L3HWEB
-		$this->db->connect(CONNECTION_TYPE::L3HWEB);
+		$this->db->setConnType(CONNECTION_TYPE::L3HWEB);
 		$this->db->parse("
 			SELECT *
 			FROM $db_user.CRSMS t
@@ -1304,7 +1304,7 @@ class Query {
 		}
 
 		// connection switch to MAIN
-		$this->db->connect(CONNECTION_TYPE::MAIN);
+		$this->db->setConnType(CONNECTION_TYPE::MAIN);
 		$this->db->parse("
 			SELECT *
 			FROM MOICAS.CRSMS t
