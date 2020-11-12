@@ -13,10 +13,11 @@ require_once("./include/System.class.php");
 require_once("./include/Temperature.class.php");
 require_once("./include/StatsSQLite3.class.php");
 require_once("./include/Ping.class.php");
+require_once("./include/BKHXWEB.class.php");
 
 try {
-    $dog = new Watchdog();
-    var_dump($dog->findProblematicSURCases());
+    $db = new BKHXWEB();
+    var_dump($db->querySwitchoverStatus());
 }
 catch(Exception $e)
 {

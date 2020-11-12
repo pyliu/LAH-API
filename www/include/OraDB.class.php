@@ -16,6 +16,7 @@ abstract class CONNECTION_TYPE {
     const L2HWEB = 3;
     const L3HWEB = 4;
     const L1HWEB_Alt = 5;
+    const BK = 6;
 }
 
 class OraDB {
@@ -25,6 +26,7 @@ class OraDB {
     private $L3HWEB_DB;
     private $TWEB_DB;
     private $MAIN_DB;
+    private $BK_DB;
     private $user;
     private $pass;
     private $nls = "US7ASCII";
@@ -155,6 +157,9 @@ class OraDB {
             case CONNECTION_TYPE::TWEB:
                 $this->CONN_TYPE = CONNECTION_TYPE::TWEB;
                 break;
+            case CONNECTION_TYPE::BK:
+                $this->CONN_TYPE = CONNECTION_TYPE::BK;
+                break;
             default:
                 $this->CONN_TYPE = CONNECTION_TYPE::MAIN;
         }
@@ -179,6 +184,7 @@ class OraDB {
         $this->L3HWEB_DB = $system->get("ORA_DB_L3HWEB");
         $this->TWEB_DB = $system->get("ORA_DB_TWEB");
         $this->MAIN_DB = $system->get("ORA_DB_MAIN");
+        $this->BK_DB = $system->get("ORA_DB_BK");
         $this->user = $system->get("ORA_DB_USER");
         $this->pass = $system->get("ORA_DB_PASS");
     }
@@ -195,6 +201,8 @@ class OraDB {
                 return $this->L3HWEB_DB;
             case CONNECTION_TYPE::TWEB:
                 return $this->TWEB_DB;
+            case CONNECTION_TYPE::BK:
+                return $this->BK_DB;
             default:
                 return $this->MAIN_DB;
         }
