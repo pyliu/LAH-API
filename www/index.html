@@ -83,7 +83,14 @@
                         </b-button>
                     </div>
                 </div>
+                <b-skeleton-table
+                    :rows="8"
+                    :columns="14"
+                    :table-props="{ bordered: true, striped: true }"
+                    v-if="isBusy"
+                ></b-skeleton-table>
                 <lah-reg-table
+                    v-else
                     :baked-data="reg_cases_by_day"
                     :max-height="reg_cases_by_day_max_height"
                     :color="false"
