@@ -317,7 +317,7 @@ if (Vue) {
                         <b-skeleton-icon v-else 
                             id="header-user-icon"
                             icon="person"
-                            :icon-props="{ fontScale: 2.8 }"
+                            :icon-props="{ fontScale: 2 }"
                             variant="light"
                         ></b-skeleton-icon>
                         <b-popover ref="fun" target="header-user-icon" placement="left" :show="fri_noon">
