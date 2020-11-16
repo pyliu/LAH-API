@@ -100,7 +100,7 @@ if (Vue) {
             },
             reloadCode() {
                 this.getLocalCache(this.code_cache_key).then(items => {
-                    if (this.empty(items)) {
+                    if (items === false || !Array.isArray(items)) {
                         this.getDBCodeData();
                     } else {
                         this.restoreCodeData(items);
