@@ -24,7 +24,7 @@ if (Vue) {
             template: `<ul style="font-size: 0.9rem">
                 <li v-for="(id, index) in ids">
                     <a href='javascript:void(0)' @click="query(id)">{{id}}</a>
-                    <lah-button icon="hammer" variant="outline-success" @click.stop="fix(id, $event)">修正</button>
+                    <lah-button icon="hammer" variant="outline-success" @click="fix(id, $event)">一鍵修正</button>
                 </li>
             </ul>`,
             props: ["ids"],
@@ -61,7 +61,7 @@ if (Vue) {
                 },
                 fix(id, evt) {
                     id = id.replace(/[^a-zA-Z0-9]/g, "");
-                    showConfirm(`確定要修正本案件 ${id} ?`, () => {
+                    showConfirm(`確定要修正本案件 ${id} ?<p><i class="fa fa-exclamation-circle text-danger"></i> 將修正下列欄位：</p>1.辦理情形改為核定<br/>2.清除延期時間<br/>3.連件數設為1`, () => {
                         this.$log("The problematic sur case id: "+id);
                         this.isBusy = true;
                         $(evt.target).remove();
@@ -228,7 +228,7 @@ if (Vue) {
                 type: "sur-problem-check"
             }).then(res => {
                 if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                    let vnode = this.$createElement("lah-problem_surcases", { props: { ids: res.data.case_ids } });
+                    let vnode = this.$createElement("lah-problem-surcases", { props: { ids: res.data.ids } });
                     this.msgbox({
                         title: "<i class='fas fa-exclamation-triangle text-danger'></i>&ensp;<strong class='text-info'>請查看下列案件</strong>",
                         body: vnode,
