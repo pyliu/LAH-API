@@ -284,9 +284,9 @@ if (Vue) {
         });
       },
       checkBrokenTable() {
+        this.broken_tbl_raw = [];
         if (this.demo) {
           let demo_len = this.rand(10);
-          this.broken_tbl_raw = [];
           for (let i = 0 ; i < demo_len ; i++) {
             this.broken_tbl_raw.push({
               '所別': `H${i}`,
