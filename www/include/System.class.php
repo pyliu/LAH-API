@@ -140,7 +140,7 @@ class System {
 
     public function isMockMode() {
         global $client_ip;
-        if ($client_ip == '127.0.0.1') return true;
+        // if ($client_ip == '127.0.0.1') return true;
         return $this->get('ENABLE_MOCK_MODE') == 'true';
     }
     
