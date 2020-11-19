@@ -24,7 +24,7 @@ if (Vue) {
             template: `<ul style="font-size: 0.9rem">
                 <li v-for="(id, index) in ids">
                     <a href='javascript:void(0)' @click="query(id)">{{display(id)}}</a>
-                    <lah-button icon="hammer" variant="outline-success" @click="fix(id, $event)">一鍵修正</button>
+                    <lah-button icon="hammer" variant="outline-success" @click="fix(id, $event)">修正</button>
                 </li>
             </ul>`,
             props: ["ids"],
@@ -68,7 +68,7 @@ if (Vue) {
                 },
                 fix(id, evt) {
                     id = id.replace(/[^a-zA-Z0-9]/g, "");
-                    showConfirm(`確定要修正本案件 ${id} ?<p><i class="fa fa-exclamation-circle text-danger"></i> 將修正下列欄位：</p>1.辦理情形改為核定<br/>2.清除延期時間<br/>3.連件數設為1`, () => {
+                    showConfirm(`確定要修正本案件 ${this.display(id)} ?<p class="pt-3"><i class="fa fa-exclamation-circle text-danger"></i> 將修正下列欄位：</p>1.辦理情形改為核定<br/>2.清除延期時間<br/>3.連件數設為1<br/><br/>如需個別修正請點選連結再行修正。`, () => {
                         this.$log("The problematic sur case id: "+id);
                         this.isBusy = true;
                         $(evt.target).remove();
