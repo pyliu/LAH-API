@@ -23,12 +23,19 @@ if (Vue) {
         "lah-problem-surcases": {
             template: `<ul style="font-size: 0.9rem">
                 <li v-for="(id, index) in ids">
-                    <a href='javascript:void(0)' @click="query(id)">{{id}}</a>
+                    <a href='javascript:void(0)' @click="query(id)">{{display(id)}}</a>
                     <lah-button icon="hammer" variant="outline-success" @click="fix(id, $event)">一鍵修正</button>
                 </li>
             </ul>`,
             props: ["ids"],
             methods: {
+                display(id) {
+                    if (id === undefined || id === '' || id.length !== 13) {
+                        this.$warn(`id is not a valid string, can not oonvert to formated case id. (${id})`);
+                        return id;
+                    }
+                    return `${id.substring(0, 3)}-${id.substring(3, 7)}-${id.substring(7)}`;
+                },
                 query(id) {
                     this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.QUERY, {
