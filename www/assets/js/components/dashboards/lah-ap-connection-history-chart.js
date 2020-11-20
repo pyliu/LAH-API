@@ -202,8 +202,8 @@ if (Vue) {
                     size: "xl"
                 });
             },
-            nav_left() { this.ip = this.next_svr },
-            nav_right() { this.ip = this.prev_svr },
+            nav_left() { this.ip = this.prev_svr },
+            nav_right() { this.ip = this.next_svr },
             style_by_count(value, opacity = 0.6) {
                 let variant, action, rgb, icon;
                 icon = 'question';
