@@ -50,6 +50,15 @@ switch ($_POST["type"]) {
 			"message" => "client ip is ".$client_ip
 		), 0);
 		break;
+	case "svr":
+		$log->info("XHR [svr] Got the server info from \$_SERVER (".$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT'].")");
+		echo json_encode(array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"raw" => $_SERVER,
+			"data_count" => count($_SERVER),
+			"message" => "Got server info from php \$_SERVER variable"
+		), 0);
+		break;
 	case "ping":
 		$log->info("XHR [ping] Ping ".$_POST["ip"]." request.");
 		$ip = $_POST["ip"];
