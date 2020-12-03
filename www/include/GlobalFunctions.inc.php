@@ -183,15 +183,24 @@ function zipExports() {
  */
 function getLocalhostIP() {
     // find this server ip
-    $host_ip = gethostname();
-    $host_ips = gethostbynamel($host_ip);
+    $host_ip = '127.0.0.1';
+    $host_ips = gethostbynamel(gethostname());
+    global $log;
+    $log->info(print_r($host_ips, true));
     foreach ($host_ips as $this_ip) {
-        if (preg_match("/220\.1\.35/", $this_ip)) {
+        if (preg_match("/220\.1\./", $this_ip)) {
             $host_ip = $this_ip;
             break;
         }
     }
     return $host_ip;
+}
+/**
+ * Find the local host IPs
+ * @return array of IPs
+ */
+function getLocalhostIPs() {
+    return gethostbynamel(gethostname());
 }
 /**
  * Get client real IP

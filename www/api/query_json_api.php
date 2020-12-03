@@ -51,12 +51,15 @@ switch ($_POST["type"]) {
 		), 0);
 		break;
 	case "svr":
+		$ips = getLocalhostIPs();
+		$count = count($ips);
 		$log->info("XHR [svr] Got the server info from \$_SERVER (".$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT'].")");
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
-			"raw" => $_SERVER,
-			"data_count" => count($_SERVER),
-			"message" => "Got server info from php \$_SERVER variable"
+			"server" => $_SERVER,
+			"ips" => $ips,
+			"data_count" => count($ips),
+			"message" => "Got server $count ip address => ".str_replace("\n", ' ', print_r($ips, true))
 		), 0);
 		break;
 	case "ping":
