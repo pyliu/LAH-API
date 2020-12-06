@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="For Aviation City use only">
+    <meta name="author" content="LIU, PANG-YU">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <meta http-equiv="cache-control" content="no-cache">
+    <title>桃園市地政局航空城開發科</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="preload" href="../../assets/css/bootstrap.min.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="../../assets/css/loading.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="../../assets/css/loading-btn.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="../../assets/css/animate.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="../../assets/css/awesome-font.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="../../assets/css/bootstrap-vue.min.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="starter-template.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="admin.html"><i class="fa fa-database fa-lg"></i> 更新地籍清冊資料庫</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html"><i class="fa fa-search fa-fw"> </i>地籍整理清冊搜尋</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main role="main" class="container">
+        <div id="land_data_upload"></div>
+        <hr class="my-5"/>
+        <div id="id_data_upload"></div>
+
+    </main><!-- /.container -->
+
+    <!-- Place scripts at the end of the body to let DOM load first then scripts  -->
+    <!-- Bootstrap core JavaScript -->
+    <script src="../../assets/js/jquery.min.js"></script>
+    <script src="../../assets/js/popper.min.js"></script>
+    <script src="../../assets/js/bootstrap.min.js"></script>
+    <!-- Vue -->
+    <script src="../../assets/js/vue.js"></script>
+    <script src="../../assets/js/vuex.js"></script>
+    <script src="../../assets/js/bootstrap-vue.min.js"></script>
+    <script src="../../assets/js/bootstrap-vue-icons.min.js"></script>
+    <!-- Add-On -->
+    <script src="../../assets/js/axios.min.js"></script>
+    <script src="../../assets/js/localforage.min.js"></script>
+    <script>
+        $(document).ready(e => {
+            const land = new Vue({
+                el: '#land_data_upload',
+                template: `<div>
+                    <b-form-group label="地籍整理清冊檔案" label-for="file-land_data_upload" label-cols-sm="2" label-size="lg">
+                        <b-form-file id="file-land_data_upload" size="lg" v-model="landData" :state="Boolean(landData)" placeholder="請選擇地籍整理清冊TXT檔案" drop-placeholder="拖曳檔案到這邊" accept=".txt, .TXT"></b-form-file>
+                    </b-form-group>
+                    <b-button :disabled="!Boolean(landData)" variant="danger">上傳</b-button>
+                </div>`,
+                data: () => ({
+                    landData: null
+                }),
+                watch: {
+                    landData (val) { console.log(val) }
+                }
+            })
+
+            const id = new Vue({
+                el: '#id_data_upload',
+                template: `<div>
+                    <b-form-group label="所有權人歸戶清冊" label-for="file-id_data_upload" label-cols-sm="2" label-size="lg">
+                        <b-form-file id="file-id_data_upload" size="lg" v-model="idData" :state="Boolean(idData)" placeholder="請選擇所有權人歸戶清冊資料檔" drop-placeholder="拖曳檔案到這邊"></b-form-file>
+                    </b-form-group>
+                    <b-button :disabled="!Boolean(idData)" variant="danger">上傳</b-button>
+                </div>`,
+                data: () => ({
+                    idData: null
+                }),
+                watch: {
+                    idData (val) { console.log(val) }
+                }
+            })
+        })
+    </script>
+</body>
+
+</html>
