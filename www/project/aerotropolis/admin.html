@@ -42,9 +42,12 @@
     </nav>
 
     <main role="main" class="container">
+        <h4 class="font-weight-bold text-right"><i class="fa fa-exclamation-circle text-danger"></i> 舊資料會被清除後更新。</h4>
+        <hr class="my-5"/>
         <div id="land_data_upload"></div>
         <hr class="my-5"/>
         <div id="id_data_upload"></div>
+        <hr class="my-5"/>
 
     </main><!-- /.container -->
 
@@ -67,7 +70,7 @@
                 el: '#land_data_upload',
                 template: `<div>
                     <b-form-group label="地籍整理清冊檔案" label-for="file-land_data_upload" label-cols-sm="2" label-size="lg">
-                        <b-form-file id="file-land_data_upload" size="lg" v-model="landData" :state="Boolean(landData)" placeholder="請選擇地籍整理清冊TXT檔案" drop-placeholder="拖曳檔案到這邊" accept=".txt, .TXT"></b-form-file>
+                        <b-form-file id="file-land_data_upload" size="lg" v-model="landData" :state="Boolean(landData)" placeholder="請選擇地籍整理清冊TXT檔案" drop-placeholder="放開以設定上傳檔案" accept=".txt, .TXT"></b-form-file>
                     </b-form-group>
                     <b-button :disabled="!Boolean(landData)" variant="danger">上傳</b-button>
                 </div>`,
@@ -83,7 +86,7 @@
                 el: '#id_data_upload',
                 template: `<div>
                     <b-form-group label="所有權人歸戶清冊" label-for="file-id_data_upload" label-cols-sm="2" label-size="lg">
-                        <b-form-file id="file-id_data_upload" size="lg" v-model="idData" :state="Boolean(idData)" placeholder="請選擇所有權人歸戶清冊資料檔" drop-placeholder="拖曳檔案到這邊"></b-form-file>
+                        <b-form-file id="file-id_data_upload" size="lg" v-model="idData" :state="Boolean(idData)" placeholder="請選擇所有權人歸戶清冊資料檔" drop-placeholder="放開以設定上傳檔案"></b-form-file>
                     </b-form-group>
                     <b-button :disabled="!Boolean(idData)" variant="danger">上傳</b-button>
                 </div>`,
