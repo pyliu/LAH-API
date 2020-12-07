@@ -146,7 +146,7 @@
                 let formData = new FormData();
                 formData.append("file", this.landData);
                 axios.post('import_land_txt.php', formData, {
-                  'Content-Type': 'multipart/form-data'
+                  'Content-Type': 'multipart/form-data',
                 }).then(res => {
                     this.responseData = res.data;
                     this.landData = null;
