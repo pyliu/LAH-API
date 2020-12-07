@@ -1,104 +1,182 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="For Aviation City use only">
-    <meta name="author" content="LIU, PANG-YU">
-    <meta http-equiv="pragma" content="no-cache">
-    <meta http-equiv="expires" content="0">
-    <meta http-equiv="cache-control" content="no-cache">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="For Aviation City use only" />
+    <meta name="author" content="LIU, PANG-YU" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="cache-control" content="no-cache" />
     <title>桃園市地政局航空城開發科</title>
     <!-- Bootstrap core CSS -->
-    <link rel="preload" href="../../assets/css/bootstrap.min.css" as="style"
-        onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="../../assets/css/loading.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="../../assets/css/loading-btn.css" as="style"
-        onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="../../assets/css/animate.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="../../assets/css/awesome-font.css" as="style"
-        onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="../../assets/css/bootstrap-vue.min.css" as="style"
-        onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="starter-template.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-</head>
+    <link
+      rel="preload"
+      href="assets/css/bootstrap.min.css"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <link
+      rel="preload"
+      href="assets/css/loading.css"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <link
+      rel="preload"
+      href="assets/css/loading-btn.css"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <link
+      rel="preload"
+      href="assets/css/animate.css"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <link
+      rel="preload"
+      href="assets/css/awesome-font.css"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <link
+      rel="preload"
+      href="assets/css/bootstrap-vue.min.css"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <link
+      rel="preload"
+      href="starter-template.css"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+  </head>
 
-<body>
+  <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-        <a class="navbar-brand" href="admin.html"><i class="fa fa-database fa-lg"></i> 更新地籍清冊資料庫</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
-            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+      <a class="navbar-brand" href="admin.html"
+        ><i class="fa fa-database fa-lg"></i> 更新地籍清冊資料庫</a
+      >
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarsExampleDefault"
+        aria-controls="navbarsExampleDefault"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.html"><i class="fa fa-search fa-fw"> </i>地籍整理清冊搜尋</a>
-                </li>
-            </ul>
-        </div>
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html"
+              ><i class="fa fa-search fa-fw"> </i>地籍整理清冊搜尋</a
+            >
+          </li>
+        </ul>
+      </div>
     </nav>
 
     <main role="main" class="container">
-        <h4 class="font-weight-bold text-right"><i class="fa fa-exclamation-circle text-danger"></i> 舊資料會被清除後更新。</h4>
-        <hr class="my-5"/>
-        <div id="land_data_upload"></div>
-        <hr class="my-5"/>
-        <div id="id_data_upload"></div>
-        <hr class="my-5"/>
-
-    </main><!-- /.container -->
+      <h4 class="font-weight-bold text-right">
+        <i class="fa fa-exclamation-circle text-danger"></i>
+        舊資料會被清除後更新。
+      </h4>
+      <hr class="my-5" />
+      <div id="land_data_upload"></div>
+      <hr class="my-5" />
+      <div id="id_data_upload"></div>
+      <hr class="my-5" />
+    </main>
+    <!-- /.container -->
 
     <!-- Place scripts at the end of the body to let DOM load first then scripts  -->
     <!-- Bootstrap core JavaScript -->
-    <script src="../../assets/js/jquery.min.js"></script>
-    <script src="../../assets/js/popper.min.js"></script>
-    <script src="../../assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
     <!-- Vue -->
-    <script src="../../assets/js/vue.js"></script>
-    <script src="../../assets/js/vuex.js"></script>
-    <script src="../../assets/js/bootstrap-vue.min.js"></script>
-    <script src="../../assets/js/bootstrap-vue-icons.min.js"></script>
+    <script src="assets/js/vue.js"></script>
+    <script src="assets/js/vuex.js"></script>
+    <script src="assets/js/bootstrap-vue.min.js"></script>
+    <script src="assets/js/bootstrap-vue-icons.min.js"></script>
     <!-- Add-On -->
-    <script src="../../assets/js/axios.min.js"></script>
-    <script src="../../assets/js/localforage.min.js"></script>
+    <script src="assets/js/axios.min.js"></script>
+    <script src="assets/js/localforage.min.js"></script>
+    <script src="assets/js/lodash.min.js"></script>
     <script>
-        $(document).ready(e => {
-            const land = new Vue({
-                el: '#land_data_upload',
-                template: `<div>
+      $(document).ready((e) => {
+        const land = new Vue({
+          el: "#land_data_upload",
+          template: `<div>
                     <b-form-group label="地籍整理清冊檔案" label-for="file-land_data_upload" label-cols-sm="2" label-size="lg">
-                        <b-form-file id="file-land_data_upload" size="lg" v-model="landData" :state="Boolean(landData)" placeholder="請選擇地籍整理清冊TXT檔案" drop-placeholder="放開以設定上傳檔案" accept=".txt, .TXT"></b-form-file>
+                        <b-form-file ref="file-land_data_upload" id="file-land_data_upload" size="lg" v-model="landData" :state="Boolean(this.landData)" placeholder="請選擇地籍整理清冊TXT檔案" drop-placeholder="放開以設定上傳檔案" accept=".txt, .TXT" :disabled="wip"></b-form-file>
                     </b-form-group>
-                    <b-button :disabled="!Boolean(landData)" variant="danger">上傳</b-button>
+                    <div class="text-right">
+                        {{message}}
+                        <b-button :disabled="!Boolean(landData) || wip" variant="danger" @click="upload">上傳</b-button>
+                    </div>
                 </div>`,
-                data: () => ({
-                    landData: null
-                }),
-                watch: {
-                    landData (val) { console.log(val) }
+          data: () => ({
+            landData: null,
+            wip: false,
+            responseData: undefined
+          }),
+          computed: {
+              message () {
+                if (this.responseData) {
+                  return `${this.responseData.message} (${this.responseData.code} ${this.responseData.name}: ${this.responseData.count})`;
                 }
-            })
+                return '';
+              }
+          },
+          methods: {
+            upload() {
+              this.wip = true;
+              if (!_.isEmpty(this.landData)) {
+                let formData = new FormData();
+                formData.append("file", this.landData);
+                axios.post('import_land_txt.php', formData, {
+                  'Content-Type': 'multipart/form-data'
+                }).then(res => {
+                    this.responseData = res.data;
+                    this.landData = null;
+                }).catch(err => console.error(err)).finally(() => this.wip = false);
+              } else {
+                alert("請先選擇一個文字檔");
+              }
+            },
+          },
+        });
 
-            const id = new Vue({
-                el: '#id_data_upload',
-                template: `<div>
+        const id = new Vue({
+          el: "#id_data_upload",
+          template: `<div>
                     <b-form-group label="所有權人歸戶清冊" label-for="file-id_data_upload" label-cols-sm="2" label-size="lg">
                         <b-form-file id="file-id_data_upload" size="lg" v-model="idData" :state="Boolean(idData)" placeholder="請選擇所有權人歸戶清冊資料檔" drop-placeholder="放開以設定上傳檔案"></b-form-file>
                     </b-form-group>
-                    <b-button :disabled="!Boolean(idData)" variant="danger">上傳</b-button>
+                    <div class="text-right">
+                        <b-button :disabled="!Boolean(idData)" variant="danger">上傳</b-button>
+                    </div>
                 </div>`,
-                data: () => ({
-                    idData: null
-                }),
-                watch: {
-                    idData (val) { console.log(val) }
-                }
-            })
-        })
+          data: () => ({
+            idData: null,
+          }),
+          watch: {
+            idData(val) {
+              console.log(val);
+            },
+          },
+        });
+      });
     </script>
-</body>
-
+  </body>
 </html>
