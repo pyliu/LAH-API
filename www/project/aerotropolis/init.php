@@ -5,14 +5,25 @@ date_default_timezone_set("ASIA/TAIPEI");
 session_start();
 // some query take long time ...
 set_time_limit(0);
+$client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $_SERVER["REMOTE_ADDR"];
 
 require_once("Logger.class.php");
-
-$client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $_SERVER["REMOTE_ADDR"];
 
 // to ensure log dir exists
 if (!file_exists('log') && !is_dir('log')) {
     mkdir('log');       
+}
+
+define('FILE_PATH', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."file");
+// to ensure log dir exists
+if (!file_exists(FILE_PATH) && !is_dir(FILE_PATH)) {
+    mkdir(FILE_PATH);       
+}
+
+define('DB_PATH', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db");
+// to ensure log dir exists
+if (!file_exists(DB_PATH) && !is_dir(DB_PATH)) {
+    mkdir(DB_PATH);       
 }
 
 // ex: log-2019-09-16.log

@@ -1,6 +1,7 @@
 <?php
 require_once("init.php");
 require_once(ROOT_DIR.DIRECTORY_SEPARATOR."LandDataDB.class.php");
+
 // $log->info(print_r($_FILES, true));
 
 // Function to check the string is ends 
@@ -15,18 +16,21 @@ function reachEnd($string, $endString) {
 
 if (isset($_FILES['file']['name'])) {
     $filename = $_FILES['file']['name'];
-    $section_code = substr($filename, 0, 4);
+    $found_section_code = substr($filename, 0, 4);
+    $found_section_name = '';
     $valid_extensions = array("txt", "TXT");
     $extension = pathinfo($filename, PATHINFO_EXTENSION);
     $matched_count = 0;
+    $processed_count = 0;
     if (in_array($extension, $valid_extensions)) {
         $path = $_FILES['file']['tmp_name'];
         if (is_file($path)) {
             $message = '上傳成功';
 
-            $sqlite = new LandDataDB();
-            $sqlite->removeLandData($section_code);
-            // $txt_data = file_get_contents($path);
+            // remove old file first
+            $exist_files = glob(FILE_PATH.DIRECTORY_SEPARATOR.$found_section_code."_*.txt");
+            array_map('unlink', $exist_files);
+
             $tmp_file = new SplFileObject($path);
             $now_section_name = '';
             $now_land_number = '';
@@ -39,8 +43,15 @@ if (isset($_FILES['file']['name'])) {
                 if ($now_found) {
                     $now_content .= $line;
                     if (reachEnd($now_content, "\n\n\n")) {
-                        //$log->info("$section_code $now_section_name $now_land_number: ".strlen($now_content));
-                        $sqlite->addLandData($section_code, mb_convert_encoding($now_section_name, 'UTF-8', 'BIG5'), $now_land_number, mb_convert_encoding($now_content, 'UTF-8', 'BIG5'));
+                        $saved_path = FILE_PATH.DIRECTORY_SEPARATOR.$found_section_code."_".mb_convert_encoding($now_section_name, 'UTF-8', 'BIG5')."_".$now_land_number.".txt";
+                        $prev_content = @file_get_contents($saved_path);
+                        $current_content = mb_convert_encoding($now_content, 'UTF-8', 'BIG5');
+                        if ($prev_content === false) {
+                            file_put_contents($saved_path, $current_content);
+                            $processed_count++;
+                        } else {
+                            file_put_contents($saved_path, $prev_content.$current_content);
+                        }
                         // next start paragraph found, reset previous data
                         $now_section_name = '';
                         $now_land_number = '';
@@ -51,7 +62,7 @@ if (isset($_FILES['file']['name'])) {
                     // find the section name and land number as the beginning point
                     $pattern = mb_convert_encoding("[^#]{3}\s(?'section'[^#]+?段)\s(?'number'\d{4}-\d{4})\s地號\n", 'BIG5', 'UTF-8');
                     if(preg_match("/$pattern/m", $line, $matches)) {
-                        $section_name = $now_section_name = $matches['section'];
+                        $found_section_name = $now_section_name = $matches['section'];
                         $now_land_number = $matches['number'];
                         // skip next two lines
                         $line = $tmp_file->current();   // "\n"
@@ -64,33 +75,8 @@ if (isset($_FILES['file']['name'])) {
                     }
                 }
             }
-            $log->info("$section_code processed $matched_count data.");
-            // process the data txt into sqlite db
-            /*
-            $txt_data = mb_convert_encoding(file_get_contents($path), 'UTF-8', 'BIG5');
-            // $log->info($txt_data);
-            if (!empty($txt_data)) {
-                $matches = array();
-                // $pattern = mb_convert_encoding("\s\n桃園市蘆竹地政事務所 土地地籍整理清冊\n列印日期:\s民國\d{3}年\d{1,2}月\d{1,2}日\n蘆竹區\s(?'section'[^#]+?段)\s(?'number'\d{4}-\d{4})\s地號\n\n頁次:\s\d{6}\n(?'content'[^#]+?)\n\n\n", 'BIG5', 'UTF-8');
-                $pattern = "\s\n桃園市蘆竹地政事務所 土地地籍整理清冊\n列印日期:\s民國\d{3}年\d{1,2}月\d{1,2}日\n蘆竹區\s(?'section'[^#]+?段)\s(?'number'\d{4}-\d{4})\s地號\n\n頁次:\s\d{6}\n(?'content'[^#]+?)\n\n\n";
-                preg_match_all(
-                    "/$pattern/m",
-                    $txt_data,
-                    $matches
-                );
-                $matched_count = count($matches[0]);
-                $log->info($section_code.' matched count: '.$matched_count);
-                // $log->info(print_r($matches['section'], true));
-                // $log->info(print_r($matches['number'], true));
-                // $log->info('content count: '.count($matches['content']));
-                if ($matched_count > 0) {
-                    $section_name = $matches['section'][0];
-                    for ($i = 0; $i < $matched_count; $i++) {
-                        $log->info("$section_code $section_name ".$matches['number'][$i].": ".strlen($matches['content'][$i]));
-                    }
-                }
-            }
-            */
+            $message .= "，$found_section_code 總共處理 $matched_count 筆，儲存 $processed_count 個檔案。(".FILE_PATH.")";
+            $log->info($message);
         } else {
             $message = '上傳檔案失敗';
         }
@@ -101,12 +87,10 @@ if (isset($_FILES['file']['name'])) {
     $message = '找不到檔案('.print_r($_FILES, true).')';
 }
 
-$output = array(
+echo json_encode(array(
     'message'  => $message,
     'path'   => $path,
-    'code' => $section_code,
-    'name' => $section_name,
+    'code' => $found_section_code,
+    'name' => $found_section_name,
     'count' => $matched_count
-);
-
-echo json_encode($output);
+));

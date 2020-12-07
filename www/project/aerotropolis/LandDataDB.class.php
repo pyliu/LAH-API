@@ -1,7 +1,6 @@
 <?php
 require_once('init.php');
 require_once(ROOT_DIR.DIRECTORY_SEPARATOR.'DynamicSQLite.class.php');
-define('DB_PATH', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db");
 
 class LandDataDB {
     private $db;
