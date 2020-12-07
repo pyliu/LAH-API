@@ -51,7 +51,7 @@ if (isset($_FILES['file']['name'])) {
                     // find the section name and land number as the beginning point
                     $pattern = mb_convert_encoding("[^#]{3}\s(?'section'[^#]+?段)\s(?'number'\d{4}-\d{4})\s地號\n", 'BIG5', 'UTF-8');
                     if(preg_match("/$pattern/m", $line, $matches)) {
-                        $now_section_name = $matches['section'];
+                        $section_name = $now_section_name = $matches['section'];
                         $now_land_number = $matches['number'];
                         // skip next two lines
                         $line = $tmp_file->current();   // "\n"
