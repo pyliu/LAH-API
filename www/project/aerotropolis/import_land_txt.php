@@ -28,7 +28,7 @@ if (isset($_FILES['file']['name'])) {
             $message = '上傳成功';
 
             // remove old file first
-            $exist_files = glob(FILE_PATH.DIRECTORY_SEPARATOR.$found_section_code."_*.txt");
+            $exist_files = glob(FILE_PATH.DIRECTORY_SEPARATOR.$found_section_code."*.txt");
             array_map('unlink', $exist_files);
 
             $tmp_file = new SplFileObject($path);
@@ -43,7 +43,7 @@ if (isset($_FILES['file']['name'])) {
                 if ($now_found) {
                     $now_content .= $line;
                     if (reachEnd($now_content, "\n\n\n")) {
-                        $saved_path = FILE_PATH.DIRECTORY_SEPARATOR.$found_section_code."_".mb_convert_encoding($now_section_name, 'UTF-8', 'BIG5')."_".$now_land_number.".txt";
+                        $saved_path = FILE_PATH.DIRECTORY_SEPARATOR.$found_section_code.str_replace('-', '', $now_land_number).".txt";
                         $prev_content = @file_get_contents($saved_path);
                         $current_content = mb_convert_encoding($now_content, 'UTF-8', 'BIG5');
                         if ($prev_content === false) {
@@ -52,7 +52,7 @@ if (isset($_FILES['file']['name'])) {
                         } else {
                             file_put_contents($saved_path, $prev_content.$current_content);
                         }
-                        // next start paragraph found, reset previous data
+                        // reset previous data, startover again
                         $now_section_name = '';
                         $now_land_number = '';
                         $now_found = false;
