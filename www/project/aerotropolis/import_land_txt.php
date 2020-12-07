@@ -1,6 +1,6 @@
 <?php
 require_once("init.php");
-
+require_once(ROOT_DIR.DIRECTORY_SEPARATOR."LandDataDB.class.php");
 // $log->info(print_r($_FILES, true));
 
 // Function to check the string is ends 
@@ -23,6 +23,9 @@ if (isset($_FILES['file']['name'])) {
         $path = $_FILES['file']['tmp_name'];
         if (is_file($path)) {
             $message = '上傳成功';
+
+            $sqlite = new LandDataDB();
+            $sqlite->removeLandData($section_code);
             // $txt_data = file_get_contents($path);
             $tmp_file = new SplFileObject($path);
             $now_section_name = '';
@@ -36,9 +39,8 @@ if (isset($_FILES['file']['name'])) {
                 if ($now_found) {
                     $now_content .= $line;
                     if (reachEnd($now_content, "\n\n\n")) {
-                        $log->info("$section_code $now_section_name $now_land_number: ".strlen($now_content));
-                        // TODO: WRITE CONTENT TO DB
-
+                        //$log->info("$section_code $now_section_name $now_land_number: ".strlen($now_content));
+                        $sqlite->addLandData($section_code, mb_convert_encoding($now_section_name, 'UTF-8', 'BIG5'), $now_land_number, mb_convert_encoding($now_content, 'UTF-8', 'BIG5'));
                         // next start paragraph found, reset previous data
                         $now_section_name = '';
                         $now_land_number = '';
@@ -52,7 +54,9 @@ if (isset($_FILES['file']['name'])) {
                         $now_section_name = $matches['section'];
                         $now_land_number = $matches['number'];
                         // skip next two lines
+                        $line = $tmp_file->current();   // "\n"
                         $tmp_file->next();
+                        $line = $tmp_file->current();   // 頁次:000001
                         $tmp_file->next();
 
                         $now_found = true;

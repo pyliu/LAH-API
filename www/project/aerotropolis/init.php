@@ -1,4 +1,6 @@
 <?php
+define('ROOT_DIR', dirname(__FILE__));
+
 date_default_timezone_set("ASIA/TAIPEI");
 session_start();
 // some query take long time ...

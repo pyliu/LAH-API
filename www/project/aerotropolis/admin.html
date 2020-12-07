@@ -121,7 +121,8 @@
                         <b-form-file ref="file-land_data_upload" id="file-land_data_upload" size="lg" v-model="landData" :state="Boolean(this.landData)" placeholder="請選擇地籍整理清冊TXT檔案" drop-placeholder="放開以設定上傳檔案" accept=".txt, .TXT" :disabled="wip"></b-form-file>
                     </b-form-group>
                     <div class="text-right">
-                        {{message}}
+                        <span v-if="wip"><i class="fas fa-spinner fa-spin"></i> 處理中 ... (1MB約需時2分鐘，請勿關閉本視窗)</span>
+                        <span v-else>{{message}}</span>
                         <b-button :disabled="!Boolean(landData) || wip" variant="danger" @click="upload">上傳</b-button>
                     </div>
                 </div>`,
