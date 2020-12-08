@@ -11,14 +11,11 @@
     <meta http-equiv="cache-control" content="no-cache">
     <title>桃園市地政局航空城開發科</title>
     <!-- Bootstrap core CSS -->
-    <link rel="preload" href="assets/css/bootstrap.min.css" as="style"
-        onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="assets/css/loading.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/loading-btn.css" as="style"
-        onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/loading-btn.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="assets/css/animate.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="assets/css/awesome-font.css" as="style"
-        onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style"
         onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="starter-template.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -35,24 +32,14 @@
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="admin.html""><i class="fa fa-database fa-fw"></i> 更新地籍清冊資料庫</a>
+                    <a class="nav-link" href="admin.html""><i class=" fa fa-database fa-fw"></i> 更新資料庫</a>
                 </li>
             </ul>
-            <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="text" placeholder="請輸入統編" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜尋</button>
-            </form>
         </div>
     </nav>
 
     <main role="main" class="container">
-
-        <div class="starter-template">
-            <h1>Bootstrap starter template</h1>
-            <p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text
-                and a mostly barebones HTML document.</p>
-        </div>
-
+        <div id="vueApp"></div>
     </main><!-- /.container -->
 
     <!-- Place scripts at the end of the body to let DOM load first then scripts  -->
@@ -68,6 +55,31 @@
     <!-- Add-On -->
     <script src="assets/js/axios.min.js"></script>
     <script src="assets/js/localforage.min.js"></script>
+    <script>
+        const vueApp = new Vue({
+            el: '#vueApp',
+            template: `<b-container fluid>
+                <b-form-group
+                    id="fieldset-horizontal"
+                    label-cols-sm="4"
+                    label-cols-lg="3"
+                    description="歸戶號 => 機1-00003 或 統編 => A123456789"
+                    label="歸戶號或統編"
+                    label-for="input-horizontal"
+                >
+                    <b-form-input id="input-horizontal" v-model="keyword"></b-form-input>
+                </b-form-group>
+            </b-container>`,
+            data: () => ({
+                keyword: ''
+            }),
+            watch: {
+                keyword(value) {
+                    console.log(value);
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

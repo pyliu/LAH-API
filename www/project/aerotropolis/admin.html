@@ -55,6 +55,50 @@
       as="style"
       onload="this.onload=null;this.rel='stylesheet'"
     />
+    <style type="text/css">
+      /* .v-leave,
+      .v-enter-to {
+        opacity: 1;
+      }
+      .v-leave-active,
+      .v-enter-active {
+        transition: opacity 0.5s;
+      }
+      .v-leave-to,
+      .v-enter {
+        opacity: 0;
+      } */
+      /* Enter and leave animations can use different */
+      /* durations and timing functions.              */
+      .slide-fade-enter-active {
+        transition: all 0.3s ease;
+      }
+      .slide-fade-leave-active {
+        transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+      }
+      .slide-fade-enter,
+      .slide-fade-leave-to {
+        transform: translateX(10px);
+        opacity: 0;
+      }
+      .bounce-enter-active {
+        animation: bounce-in 0.5s;
+      }
+      .bounce-leave-active {
+        animation: bounce-in 0.5s reverse;
+      }
+      @keyframes bounce-in {
+        0% {
+          transform: scale(0);
+        }
+        50% {
+          transform: scale(1.5);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+    </style>
   </head>
 
   <body>
@@ -87,7 +131,7 @@
 
     <main role="main" class="container">
       <h4 class="font-weight-bold text-right">
-        <i class="fa fa-exclamation-circle text-danger ld ld-heartbeat"></i>
+        <i class="fa fa-exclamation-circle text-danger ld ld-breath"></i>
         舊資料會被清除後更新。
       </h4>
       <hr class="my-5" />
@@ -117,50 +161,91 @@
         const land = new Vue({
           el: "#land_data_upload",
           template: `<div>
-                    <b-form-group label="地籍整理清冊檔案" label-for="file-land_data_upload" label-cols-sm="2" label-size="lg">
-                        <b-form-file ref="file-land_data_upload" id="file-land_data_upload" size="lg" v-model="landData" :state="validate" placeholder="請選擇地籍整理清冊TXT檔案" drop-placeholder="放開以設定上傳檔案" accept=".txt, .TXT" :disabled="wip"></b-form-file>
-                    </b-form-group>
-                    <div class="text-right">
-                      <span v-if="!validate"><i class="fas fa-exclamation-triangle text-danger ld ld-breath"></i> 請指定段代碼為檔名(e.g. 0029.txt)</span>
-                      <span v-if="wip"><i class="fas fa-spinner fa-spin"></i> 處理中 ... (請勿關閉本視窗)</span>
-                      <span>{{message}}</span>
-                      <b-button :disabled="!validate || wip" variant="danger" @click="upload">上傳</b-button>
-                    </div>
-                </div>`,
+              <b-form-group label="地籍整理清冊檔案" label-for="file-land_data_upload" label-cols-sm="2" label-size="lg">
+                  <b-progress v-if="uploadPercentage > 0 && uploadPercentage < 100" :value="uploadPercentage" :max="100" show-progress animated></b-progress>
+                  <b-form-file ref="file-land_data_upload" id="file-land_data_upload" size="lg" v-model="landData" :state="validate" placeholder="請選擇地籍整理清冊TXT檔案" drop-placeholder="放開以設定上傳檔案" accept=".txt, .TXT" :disabled="wip"></b-form-file>
+              </b-form-group>
+              <div class="text-right">
+                <transition name="slide-fade">
+                  <span v-if="!validate"><i class="fas fa-exclamation-triangle text-danger ld ld-breath"></i> 請指定段代碼為檔名(e.g. 0029.txt)</span>
+                </transition>
+                <transition name="bounce">
+                  <span v-if="!_.isEmpty(message) && validate" :class="messageVariant" v-html="message"></span>
+                </transition>
+                <b-button :disabled="!validate || wip" variant="primary" @click="upload">上傳</b-button>
+              </div>
+          </div>`,
           data: () => ({
             landData: null,
             wip: false,
-            responseData: undefined
+            responseData: undefined,
+            message: "",
+            messageVariant: "text-success",
+            uploadPercentage: 0,
+            progressHandler: null
           }),
           computed: {
-              message () {
-                if (!_.isEmpty(this.responseData)) {
-                  return `${this.responseData.message} (${this.responseData.code} ${this.responseData.name}: ${this.responseData.count})`;
-                }
-                return '';
-              },
-              validate () {
-                if (!_.isEmpty(this.landData)) {
-                  return /^\d{4}\.txt$/.test(this.landData.name)
-                }
-                return false;
+            validate() {
+              if (!_.isEmpty(this.landData)) {
+                return /^\d{4}\.txt$/.test(this.landData.name);
               }
+              return false;
+            },
           },
           watch: {
-            landData (val) {}
+            landData(val) {},
+            wip(flag) {
+              this.message = flag
+                ? `<i class="fas fa-spinner fa-spin"></i> 處理中 ... (處理1MB約1秒，請勿關閉本視窗)`
+                : "";
+              this.messageVariant = flag ? "text-danger" : "text-success";
+              // if (flag) {
+              //   this.progressHandler = setInterval(() => this.progress(), 3000);
+              // } else {
+              //   clearInterval(this.progressHandler);
+              // }
+            },
           },
           methods: {
+            progress() {
+              let formData = new FormData();
+              formData.append("type", 'data');
+              axios
+                .post("get_progress.php", formData)
+                .then((res) => {
+                  this.uploadPercentage = parseInt( Math.round( ( res.data.processed / res.data.total ) * 100 ) );
+                })
+                .catch((err) => console.error(err))
+                .finally(() => { });
+            },
             upload() {
               this.wip = true;
+              this.uploadPercentage = 0;
               if (!_.isEmpty(this.landData)) {
                 let formData = new FormData();
                 formData.append("file", this.landData);
-                axios.post('import_land_txt.php', formData, {
-                  'Content-Type': 'multipart/form-data'
-                }).then(res => {
+                axios
+                  .post("import_land_txt.php", formData, {
+                    headers: {
+                      'Content-Type': 'multipart/form-data'
+                    },
+                    onUploadProgress: function( progressEvent ) {
+                      this.uploadPercentage = parseInt( Math.round( ( progressEvent.loaded / progressEvent.total ) * 100 ) );
+                    }.bind(this)
+                  })
+                  .then((res) => {
                     this.responseData = res.data;
-                    this.landData = null;
-                }).catch(err => console.error(err)).finally(() => this.wip = false);
+                  })
+                  .catch((err) => console.error(err))
+                  .finally(() => {
+                    this.wip = false;
+                    setTimeout(
+                      () =>
+                        (this.message = `${this.landData.name} 已完成轉檔。`),
+                      400
+                    );
+                    this.uploadPercentage = 0;
+                  });
               } else {
                 alert("請先選擇一個文字檔");
               }
@@ -171,21 +256,92 @@
         const id = new Vue({
           el: "#id_data_upload",
           template: `<div>
-                    <b-form-group label="所有權人歸戶清冊" label-for="file-id_data_upload" label-cols-sm="2" label-size="lg">
-                        <b-form-file id="file-id_data_upload" size="lg" v-model="idData" :state="Boolean(idData)" placeholder="請選擇所有權人歸戶清冊資料檔" drop-placeholder="放開以設定上傳檔案"></b-form-file>
-                    </b-form-group>
-                    <div class="text-right">
-                        <b-button :disabled="!Boolean(idData)" variant="danger">上傳</b-button>
-                    </div>
-                </div>`,
+              <b-form-group label="所有權人歸戶清冊" label-for="file-id_data_upload" label-cols-sm="2" label-size="lg">
+                  <b-progress v-if="uploadPercentage > 0 && uploadPercentage < 100" :value="uploadPercentage" :max="100" show-progress animated></b-progress>
+                  <b-form-file id="file-id_data_upload" size="lg" v-model="idData" :state="Boolean(idData)" placeholder="請選擇所有權人歸戶清冊資料檔" drop-placeholder="放開以設定上傳檔案" accept=".xlsx, .XLSX" :disabled="wip"></b-form-file>
+              </b-form-group>
+              <div class="text-right">
+                <transition name="bounce">
+                  <span v-if="!_.isEmpty(message) && validate" :class="messageVariant" v-html="message"></span>
+                </transition>
+                <b-button :disabled="!Boolean(idData) || wip" variant="secondary" @click="upload">上傳</b-button>
+              </div>
+          </div>`,
           data: () => ({
             idData: null,
+            wip: false,
+            responseData: undefined,
+            message: "",
+            messageVariant: "text-success",
+            uploadPercentage: 0,
+            progressHandler: null
           }),
-          watch: {
-            idData(val) {
-              console.log(val);
+          computed: {
+            validate() {
+              if (!_.isEmpty(this.idData)) {
+                return /\.xlsx$/.test(this.idData.name);
+              }
+              return false;
             },
           },
+          watch: {
+            wip(flag) {
+              this.message = flag
+                ? `<i class="fas fa-spinner fa-spin"></i> 處理中 ... (請勿關閉本視窗)`
+                : "";
+              this.messageVariant = flag ? "text-danger" : "text-success";
+              // if (flag) {
+              //   this.progressHandler = setInterval(() => this.progress(), 3000);
+              // } else {
+              //   clearInterval(this.progressHandler);
+              // }
+            },
+          },
+          methods: {
+            progress() {
+              let formData = new FormData();
+              formData.append("type", 'people');
+              axios
+                .post("get_progress.php", formData)
+                .then((res) => {
+                  this.uploadPercentage = parseInt( Math.round( ( res.data.processed / res.data.total ) * 100 ) );
+                })
+                .catch((err) => console.error(err))
+                .finally(() => { });
+            },
+            upload() {
+              this.wip = true;
+              this.uploadPercentage = 0;
+              if (!_.isEmpty(this.idData)) {
+                let formData = new FormData();
+                formData.append("file", this.idData);
+                axios
+                  .post("import_people_xlsx.php", formData, {
+                    headers: {
+                      'Content-Type': 'multipart/form-data'
+                    },
+                    onUploadProgress: function( progressEvent ) {
+                      this.uploadPercentage = parseInt( Math.round( ( progressEvent.loaded / progressEvent.total ) * 100 ) );
+                    }.bind(this)
+                  })
+                  .then((res) => {
+                    this.responseData = res.data;
+                  })
+                  .catch((err) => console.error(err))
+                  .finally(() => {
+                    this.wip = false;
+                    setTimeout(
+                      () =>
+                        (this.message = `${this.idData.name} 已完成轉檔。`),
+                      400
+                    );
+                    this.uploadPercentage = 0;
+                  });
+              } else {
+                alert("請先選擇一個XLSX檔");
+              }
+            },
+          }
         });
       });
     </script>

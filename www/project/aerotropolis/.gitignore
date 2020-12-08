@@ -1,0 +1,14 @@
+.vscode
+node_modules
+*.ffs_db
+*.ffs_lock
+*.log
+*.cache
+*.zip
+*.db
+*tmp
+*.BAK
+**/vendor/*
+**/log/*
+**/dist/*
+**/assets/file/*
