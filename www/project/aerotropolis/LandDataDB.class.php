@@ -28,14 +28,13 @@ class LandDataDB {
                 "houshold"	TEXT NOT NULL,
                 "pid"	TEXT NOT NULL,
                 "pname"	TEXT NOT NULL,
-                "owned_number"	TEXT,
-                PRIMARY KEY("pid","houshold")
+                "owned_number"	TEXT NOT NULL,
+                PRIMARY KEY("pid","houshold","owned_number")
             )
         ');
         $sqlite->createTableBySQL('
-            CREATE INDEX IF NOT EXISTS "pname_owned_number" ON "people_data_mapping" (
-                "pname",
-                "owned_number"
+            CREATE INDEX IF NOT EXISTS "pname" ON "people_data_mapping" (
+                "pname"
             )
         ');
         return $db_path;

@@ -77,7 +77,9 @@
                 validate() {
                     // 附07-000771 機1-00001
                     // return /^[附機]\d{1,2}\-\d{5,6}$/.test(this.keyword);
-                    return /^(附\d{2}\-\d{6})|(機\d{1}\-\d{5})$/.test(this.keyword);
+                    return /^(附\d{2}\-\d{6})|(機\d{1}\-\d{5})$/.test(this.keyword) ||
+                           /^[A-Z]{1}[1-2]{1}[0-9]{8}$/.test(this.keyword) || 
+                           /^*HE\d{7}$/.test(this.keyword)
                 }
             },
             watch: {

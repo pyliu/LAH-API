@@ -62,7 +62,7 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
             }
             $db = new LandDataDB();
             foreach ($sheetData as $row) {
-                $household = trim($row[0]);
+                $household = str_replace(' ', '', $row[0]);
                 $pids = explode(strpos($row[1], ',') === false ? '、' : ',', $row[1]);
                 $pnames = explode(strpos($row[2], ',') === false ? '、' : ',', $row[2]);
                 $numbers = explode(strpos($row[4], ',') === false ? '、' : ',', $row[4]);
@@ -74,16 +74,16 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
                         continue;
                     }
                     for ($i = 0; $i < count($pids); $i++) {
-                        $pid = trim($pids[$i]);
-                        $pname = trim($pnames[$i]);
+                        $pid = trim(trim($pids[$i], " =\t\n\r\0\x0B"), " \"\t\n\r\0\x0B");
+                        $pname = trim(trim($pnames[$i], " =\t\n\r\0\x0B"), " \"\t\n\r\0\x0B");
                         if (empty($pid) || empty($pname)) {
                             continue;
                         }
                         // to fix the $pid and $pname order is wrong
                         if (preg_match("/[*a-zA-Z\d]+/m", $pname)) {
-                            $db->addPeopleMapping(trim($household), $pname, $pid, $number);
+                            $db->addPeopleMapping($household, $pname, $pid, $number);
                         } else {
-                            $db->addPeopleMapping(trim($household), $pid, $pname, $number);
+                            $db->addPeopleMapping($household, $pid, $pname, $number);
                         }
                         $_SESSTION['people_processed']++;
                     }
