@@ -11,23 +11,16 @@ class LandDataDB {
         $sqlite->initDB();
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "data_mapping" (
-                "id"	INTEGER,
                 "code"	TEXT NOT NULL,
-                "name"	TEXT NOT NULL,
                 "number"	TEXT NOT NULL,
+                "name"	TEXT NOT NULL,
                 "content"	TEXT,
-                PRIMARY KEY("id" AUTOINCREMENT)
+                PRIMARY KEY("code","number")
             )
         ');
         $sqlite->createTableBySQL('
-            CREATE INDEX IF NOT EXISTS "code_number" ON "data_mapping" (
-                "code",
-                "number"
-            )
-        ');
-        $sqlite->createTableBySQL('
-            CREATE INDEX IF NOT EXISTS "code" ON "data_mapping" (
-                "code"
+            CREATE INDEX IF NOT EXISTS "name" ON "data_mapping" (
+                "name"
             )
         ');
         $sqlite->createTableBySQL('
@@ -62,7 +55,7 @@ class LandDataDB {
     }
 
     public function addLandData($code, $name, $number, $content) {
-        $stm = $this->db->prepare("INSERT INTO data_mapping ('code', 'name', 'number', 'content') VALUES (:code, :name, :number, :content)");
+        $stm = $this->db->prepare("REPLACE INTO data_mapping ('code', 'number', 'name', 'content') VALUES (:code, :number, :name, :content)");
         $stm->bindParam(':code', $code);
         $stm->bindParam(':number', $number);
         $stm->bindParam(':name', $name);

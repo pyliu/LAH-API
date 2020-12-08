@@ -24,7 +24,7 @@ if (isset($_FILES['file']['name'])) {
         $path = $_FILES['file']['tmp_name'];
         if (is_file($path)) {
             $message = '上傳成功';
-            // savew txt to sub section code folder
+            // save txt to sub section code folder
             $saved_dir = FILE_PATH.DIRECTORY_SEPARATOR.$found_section_code;
             if (!is_dir($saved_dir)) {
                 mkdir($saved_dir);
@@ -33,6 +33,9 @@ if (isset($_FILES['file']['name'])) {
             $exist_files = glob($saved_dir.DIRECTORY_SEPARATOR."*.txt");
             array_map('unlink', $exist_files);
 
+            $db = new LandDataDB();
+            $db->removeLandData($found_section_code);
+            
             $tmp_file = new SplFileObject($path);
             $now_section_name = '';
             $now_land_number = '';
@@ -45,7 +48,8 @@ if (isset($_FILES['file']['name'])) {
                 if ($now_found) {
                     $now_content .= $line;
                     if (reachEnd($now_content, "\n\n\n")) {
-                        $saved_path = $saved_dir.DIRECTORY_SEPARATOR.str_replace('-', '', $now_land_number).".txt";
+                        $now_land_number = str_replace('-', '', $now_land_number);
+                        $saved_path = $saved_dir.DIRECTORY_SEPARATOR.$now_land_number.".txt";
                         $prev_content = @file_get_contents($saved_path);
                         $current_content = mb_convert_encoding($now_content, 'UTF-8', 'BIG5');
                         if ($prev_content === false) {
@@ -54,6 +58,7 @@ if (isset($_FILES['file']['name'])) {
                         } else {
                             file_put_contents($saved_path, $prev_content.$current_content);
                         }
+                        $db->addLandData($found_section_code, mb_convert_encoding($found_section_name, 'UTF-8', 'BIG5'), $now_land_number, ($prev_content ?? '').$current_content);
                         // reset previous data, startover again
                         $now_section_name = '';
                         $now_land_number = '';
