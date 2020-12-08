@@ -1,166 +1,75 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <meta name="description" content="For Aviation City use only" />
-    <meta name="author" content="LIU, PANG-YU" />
-    <meta http-equiv="pragma" content="no-cache" />
-    <meta http-equiv="expires" content="0" />
-    <meta http-equiv="cache-control" content="no-cache" />
-    <title>桃園市地政局航空城開發科</title>
-    <!-- Bootstrap core CSS -->
-    <link
-      rel="preload"
-      href="assets/css/bootstrap.min.css"
-      as="style"
-      onload="this.onload=null;this.rel='stylesheet'"
-    />
-    <link
-      rel="preload"
-      href="assets/css/loading.css"
-      as="style"
-      onload="this.onload=null;this.rel='stylesheet'"
-    />
-    <link
-      rel="preload"
-      href="assets/css/loading-btn.css"
-      as="style"
-      onload="this.onload=null;this.rel='stylesheet'"
-    />
-    <link
-      rel="preload"
-      href="assets/css/animate.css"
-      as="style"
-      onload="this.onload=null;this.rel='stylesheet'"
-    />
-    <link
-      rel="preload"
-      href="assets/css/awesome-font.css"
-      as="style"
-      onload="this.onload=null;this.rel='stylesheet'"
-    />
-    <link
-      rel="preload"
-      href="assets/css/bootstrap-vue.min.css"
-      as="style"
-      onload="this.onload=null;this.rel='stylesheet'"
-    />
-    <link
-      rel="preload"
-      href="starter-template.css"
-      as="style"
-      onload="this.onload=null;this.rel='stylesheet'"
-    />
-    <style type="text/css">
-      /* .v-leave,
-      .v-enter-to {
-        opacity: 1;
-      }
-      .v-leave-active,
-      .v-enter-active {
-        transition: opacity 0.5s;
-      }
-      .v-leave-to,
-      .v-enter {
-        opacity: 0;
-      } */
-      /* Enter and leave animations can use different */
-      /* durations and timing functions.              */
-      .slide-fade-enter-active {
-        transition: all 0.3s ease;
-      }
-      .slide-fade-leave-active {
-        transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
-      }
-      .slide-fade-enter,
-      .slide-fade-leave-to {
-        transform: translateX(10px);
-        opacity: 0;
-      }
-      .bounce-enter-active {
-        animation: bounce-in 0.5s;
-      }
-      .bounce-leave-active {
-        animation: bounce-in 0.5s reverse;
-      }
-      @keyframes bounce-in {
-        0% {
-          transform: scale(0);
-        }
-        50% {
-          transform: scale(1.5);
-        }
-        100% {
-          transform: scale(1);
-        }
-      }
-    </style>
-  </head>
 
-  <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand" href="admin.html"
-        ><i class="fa fa-database fa-lg"></i> 更新地籍清冊資料庫</a
-      >
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarsExampleDefault"
-        aria-controls="navbarsExampleDefault"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="For Aviation City use only" />
+  <meta name="author" content="LIU, PANG-YU" />
+  <meta http-equiv="pragma" content="no-cache" />
+  <meta http-equiv="expires" content="0" />
+  <meta http-equiv="cache-control" content="no-cache" />
+  <title>桃園市地政局航空城開發科</title>
+  <!-- Bootstrap core CSS -->
+  <link rel="preload" href="assets/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <link rel="preload" href="assets/css/loading.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <link rel="preload" href="assets/css/loading-btn.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <link rel="preload" href="assets/css/animate.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <link rel="preload" href="assets/css/starter-template.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="assets/css/transition.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+</head>
 
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="index.html"
-              ><i class="fa fa-search fa-fw"> </i>地籍整理清冊搜尋</a
-            >
-          </li>
-        </ul>
-      </div>
-    </nav>
+<body>
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="admin.html"><i class="fa fa-database fa-lg"></i> 更新地籍清冊資料庫</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+      aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-    <main role="main" class="container">
-      <h4 class="font-weight-bold text-right">
-        <i class="fa fa-exclamation-circle text-danger ld ld-breath"></i>
-        舊資料會被清除後更新。
-      </h4>
-      <hr class="my-5" />
-      <div id="land_data_upload"></div>
-      <hr class="my-5" />
-      <div id="id_data_upload"></div>
-      <hr class="my-5" />
-    </main>
-    <!-- /.container -->
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="index.html"><i class="fa fa-search fa-fw"> </i>地籍整理清冊搜尋</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
 
-    <!-- Place scripts at the end of the body to let DOM load first then scripts  -->
-    <!-- Bootstrap core JavaScript -->
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/js/popper.min.js"></script>
-    <script src="assets/js/bootstrap.min.js"></script>
-    <!-- Vue -->
-    <script src="assets/js/vue.js"></script>
-    <script src="assets/js/vuex.js"></script>
-    <script src="assets/js/bootstrap-vue.min.js"></script>
-    <script src="assets/js/bootstrap-vue-icons.min.js"></script>
-    <!-- Add-On -->
-    <script src="assets/js/axios.min.js"></script>
-    <script src="assets/js/localforage.min.js"></script>
-    <script src="assets/js/lodash.min.js"></script>
-    <script>
-      $(document).ready((e) => {
-        const land = new Vue({
-          el: "#land_data_upload",
-          template: `<div>
+  <main role="main" class="container">
+    <h4 class="font-weight-bold text-right">
+      <i class="fa fa-exclamation-circle text-danger ld ld-breath"></i>
+      舊資料會被清除後更新。
+    </h4>
+    <hr class="my-5" />
+    <div id="land_data_upload"></div>
+    <hr class="my-5" />
+    <div id="id_data_upload"></div>
+    <hr class="my-5" />
+  </main>
+  <!-- /.container -->
+
+  <!-- Place scripts at the end of the body to let DOM load first then scripts  -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="assets/js/jquery.min.js"></script>
+  <script src="assets/js/popper.min.js"></script>
+  <script src="assets/js/bootstrap.min.js"></script>
+  <!-- Vue -->
+  <script src="assets/js/vue.js"></script>
+  <script src="assets/js/vuex.js"></script>
+  <script src="assets/js/bootstrap-vue.min.js"></script>
+  <script src="assets/js/bootstrap-vue-icons.min.js"></script>
+  <!-- Add-On -->
+  <script src="assets/js/axios.min.js"></script>
+  <script src="assets/js/localforage.min.js"></script>
+  <script src="assets/js/lodash.min.js"></script>
+  <script>
+    $(document).ready((e) => {
+      const land = new Vue({
+        el: "#land_data_upload",
+        template: `<div>
               <b-form-group label="地籍整理清冊檔案" label-for="file-land_data_upload" label-cols-sm="2" label-size="lg">
                   <b-progress v-if="uploadPercentage > 0 && uploadPercentage < 100" :value="uploadPercentage" :max="100" show-progress animated></b-progress>
                   <b-form-file ref="file-land_data_upload" id="file-land_data_upload" size="lg" v-model="landData" :state="validate" placeholder="請選擇地籍整理清冊TXT檔案" drop-placeholder="放開以設定上傳檔案" accept=".txt, .TXT" :disabled="wip"></b-form-file>
@@ -175,87 +84,88 @@
                 <b-button :disabled="!validate || wip" variant="primary" @click="upload">上傳</b-button>
               </div>
           </div>`,
-          data: () => ({
-            landData: null,
-            wip: false,
-            responseData: undefined,
-            message: "",
-            messageVariant: "text-success",
-            uploadPercentage: 0,
-            progressHandler: null
-          }),
-          computed: {
-            validate() {
-              if (!_.isEmpty(this.landData)) {
-                return /^\d{4}\.txt$/.test(this.landData.name);
-              }
-              return false;
-            },
+        data: () => ({
+          landData: null,
+          wip: false,
+          responseData: undefined,
+          message: "",
+          messageVariant: "text-success",
+          uploadPercentage: 0,
+          progressHandler: null
+        }),
+        computed: {
+          validate() {
+            if (!_.isEmpty(this.landData)) {
+              return /^\d{4}\.txt$/.test(this.landData.name);
+            }
+            return false;
           },
-          watch: {
-            landData(val) {},
-            wip(flag) {
-              this.message = flag
-                ? `<i class="fas fa-spinner fa-spin"></i> 處理中 ... (處理1MB約1秒，請勿關閉本視窗)`
-                : "";
-              this.messageVariant = flag ? "text-danger" : "text-success";
-              // if (flag) {
-              //   this.progressHandler = setInterval(() => this.progress(), 3000);
-              // } else {
-              //   clearInterval(this.progressHandler);
-              // }
-            },
+        },
+        watch: {
+          landData(val) {},
+          wip(flag) {
+            this.message = flag ?
+              `<i class="fas fa-spinner fa-spin"></i> 處理中 ... (處理1MB約1秒，請勿關閉本視窗)` :
+              "";
+            this.messageVariant = flag ? "text-danger" : "text-success";
+            // if (flag) {
+            //   this.progressHandler = setInterval(() => this.progress(), 3000);
+            // } else {
+            //   clearInterval(this.progressHandler);
+            // }
           },
-          methods: {
-            progress() {
+        },
+        methods: {
+          progress() {
+            let formData = new FormData();
+            formData.append("type", 'data');
+            axios
+              .post("get_progress.php", formData)
+              .then((res) => {
+                this.uploadPercentage = parseInt(Math.round((res.data.processed / res.data.total) * 100));
+              })
+              .catch((err) => console.error(err))
+              .finally(() => {});
+          },
+          upload() {
+            this.wip = true;
+            this.uploadPercentage = 0;
+            if (!_.isEmpty(this.landData)) {
               let formData = new FormData();
-              formData.append("type", 'data');
+              formData.append("file", this.landData);
               axios
-                .post("get_progress.php", formData)
+                .post("import_land_txt.php", formData, {
+                  headers: {
+                    'Content-Type': 'multipart/form-data'
+                  },
+                  onUploadProgress: function (progressEvent) {
+                    this.uploadPercentage = parseInt(Math.round((progressEvent.loaded / progressEvent
+                      .total) * 100));
+                  }.bind(this)
+                })
                 .then((res) => {
-                  this.uploadPercentage = parseInt( Math.round( ( res.data.processed / res.data.total ) * 100 ) );
+                  this.responseData = res.data;
                 })
                 .catch((err) => console.error(err))
-                .finally(() => { });
-            },
-            upload() {
-              this.wip = true;
-              this.uploadPercentage = 0;
-              if (!_.isEmpty(this.landData)) {
-                let formData = new FormData();
-                formData.append("file", this.landData);
-                axios
-                  .post("import_land_txt.php", formData, {
-                    headers: {
-                      'Content-Type': 'multipart/form-data'
-                    },
-                    onUploadProgress: function( progressEvent ) {
-                      this.uploadPercentage = parseInt( Math.round( ( progressEvent.loaded / progressEvent.total ) * 100 ) );
-                    }.bind(this)
-                  })
-                  .then((res) => {
-                    this.responseData = res.data;
-                  })
-                  .catch((err) => console.error(err))
-                  .finally(() => {
-                    this.wip = false;
-                    setTimeout(
-                      () =>
-                        (this.message = `${this.landData.name} 已完成轉檔。`),
-                      400
-                    );
-                    this.uploadPercentage = 0;
-                  });
-              } else {
-                alert("請先選擇一個文字檔");
-              }
-            },
+                .finally(() => {
+                  this.wip = false;
+                  setTimeout(
+                    () =>
+                    (this.message = `${this.landData.name} 已完成轉檔。`),
+                    400
+                  );
+                  this.uploadPercentage = 0;
+                });
+            } else {
+              alert("請先選擇一個文字檔");
+            }
           },
-        });
+        },
+      });
 
-        const id = new Vue({
-          el: "#id_data_upload",
-          template: `<div>
+      const id = new Vue({
+        el: "#id_data_upload",
+        template: `<div>
               <b-form-group label="所有權人歸戶清冊" label-for="file-id_data_upload" label-cols-sm="2" label-size="lg">
                   <b-progress v-if="uploadPercentage > 0 && uploadPercentage < 100" :value="uploadPercentage" :max="100" show-progress animated></b-progress>
                   <b-form-file id="file-id_data_upload" size="lg" v-model="idData" :state="Boolean(idData)" placeholder="請選擇所有權人歸戶清冊資料檔" drop-placeholder="放開以設定上傳檔案" accept=".xlsx, .XLSX" :disabled="wip"></b-form-file>
@@ -267,83 +177,85 @@
                 <b-button :disabled="!Boolean(idData) || wip" variant="secondary" @click="upload">上傳</b-button>
               </div>
           </div>`,
-          data: () => ({
-            idData: null,
-            wip: false,
-            responseData: undefined,
-            message: "",
-            messageVariant: "text-success",
-            uploadPercentage: 0,
-            progressHandler: null
-          }),
-          computed: {
-            validate() {
-              if (!_.isEmpty(this.idData)) {
-                return /\.xlsx$/.test(this.idData.name);
-              }
-              return false;
-            },
+        data: () => ({
+          idData: null,
+          wip: false,
+          responseData: undefined,
+          message: "",
+          messageVariant: "text-success",
+          uploadPercentage: 0,
+          progressHandler: null
+        }),
+        computed: {
+          validate() {
+            if (!_.isEmpty(this.idData)) {
+              return /\.xlsx$/.test(this.idData.name);
+            }
+            return false;
           },
-          watch: {
-            wip(flag) {
-              this.message = flag
-                ? `<i class="fas fa-spinner fa-spin"></i> 處理中 ... (請勿關閉本視窗)`
-                : "";
-              this.messageVariant = flag ? "text-danger" : "text-success";
-              // if (flag) {
-              //   this.progressHandler = setInterval(() => this.progress(), 3000);
-              // } else {
-              //   clearInterval(this.progressHandler);
-              // }
-            },
+        },
+        watch: {
+          wip(flag) {
+            this.message = flag ?
+              `<i class="fas fa-spinner fa-spin"></i> 處理中 ... (請勿關閉本視窗)` :
+              "";
+            this.messageVariant = flag ? "text-danger" : "text-success";
+            // if (flag) {
+            //   this.progressHandler = setInterval(() => this.progress(), 3000);
+            // } else {
+            //   clearInterval(this.progressHandler);
+            // }
           },
-          methods: {
-            progress() {
+        },
+        methods: {
+          progress() {
+            let formData = new FormData();
+            formData.append("type", 'people');
+            axios
+              .post("get_progress.php", formData)
+              .then((res) => {
+                this.uploadPercentage = parseInt(Math.round((res.data.processed / res.data.total) * 100));
+              })
+              .catch((err) => console.error(err))
+              .finally(() => {});
+          },
+          upload() {
+            this.wip = true;
+            this.uploadPercentage = 0;
+            if (!_.isEmpty(this.idData)) {
               let formData = new FormData();
-              formData.append("type", 'people');
+              formData.append("file", this.idData);
               axios
-                .post("get_progress.php", formData)
+                .post("import_people_xlsx.php", formData, {
+                  headers: {
+                    'Content-Type': 'multipart/form-data'
+                  },
+                  onUploadProgress: function (progressEvent) {
+                    this.uploadPercentage = parseInt(Math.round((progressEvent.loaded / progressEvent
+                      .total) * 100));
+                  }.bind(this)
+                })
                 .then((res) => {
-                  this.uploadPercentage = parseInt( Math.round( ( res.data.processed / res.data.total ) * 100 ) );
+                  this.responseData = res.data;
                 })
                 .catch((err) => console.error(err))
-                .finally(() => { });
-            },
-            upload() {
-              this.wip = true;
-              this.uploadPercentage = 0;
-              if (!_.isEmpty(this.idData)) {
-                let formData = new FormData();
-                formData.append("file", this.idData);
-                axios
-                  .post("import_people_xlsx.php", formData, {
-                    headers: {
-                      'Content-Type': 'multipart/form-data'
-                    },
-                    onUploadProgress: function( progressEvent ) {
-                      this.uploadPercentage = parseInt( Math.round( ( progressEvent.loaded / progressEvent.total ) * 100 ) );
-                    }.bind(this)
-                  })
-                  .then((res) => {
-                    this.responseData = res.data;
-                  })
-                  .catch((err) => console.error(err))
-                  .finally(() => {
-                    this.wip = false;
-                    setTimeout(
-                      () =>
-                        (this.message = `${this.idData.name} 已完成轉檔。`),
-                      400
-                    );
-                    this.uploadPercentage = 0;
-                  });
-              } else {
-                alert("請先選擇一個XLSX檔");
-              }
-            },
-          }
-        });
+                .finally(() => {
+                  this.wip = false;
+                  setTimeout(
+                    () =>
+                    (this.message = `${this.idData.name} 已完成轉檔。`),
+                    400
+                  );
+                  this.uploadPercentage = 0;
+                });
+            } else {
+              alert("請先選擇一個XLSX檔");
+            }
+          },
+        }
       });
-    </script>
-  </body>
+    });
+  </script>
+</body>
+
 </html>
