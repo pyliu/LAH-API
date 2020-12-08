@@ -110,9 +110,15 @@ class SQLiteUser {
     function __construct() {
         $db_path = $this->getDimensionDB();
         $this->db = new SQLite3($db_path);
+        $this->db->exec("PRAGMA cache_size = 100000");
+        $this->db->exec("PRAGMA temp_store = MEMORY");
+        $this->db->exec("BEGIN TRANSACTION");
     }
 
-    function __destruct() { $this->db->close(); }
+    function __destruct() {
+        $this->db->exec("END TRANSACTION");
+        $this->db->close();
+    }
 
     public function import(&$row) {
         if (empty($row['DocUserID'])) {

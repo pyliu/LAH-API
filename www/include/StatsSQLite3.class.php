@@ -139,9 +139,15 @@ class StatsSQLite3 {
     function __construct() {
         $path = $this->getLAHDB();
         $this->db = new SQLite3($path);
+        $this->db->exec("PRAGMA cache_size = 100000");
+        $this->db->exec("PRAGMA temp_store = MEMORY");
+        $this->db->exec("BEGIN TRANSACTION");
     }
 
-    function __destruct() { $this->db->close(); }
+    function __destruct() {
+        $this->db->exec("END TRANSACTION");
+        $this->db->close();
+    }
 
     public function instTotal($id, $name, $total = 0) {
         $stm = $this->db->prepare("INSERT INTO stats ('ID', 'NAME', 'TOTAL') VALUES (:id, :name, :total)");
