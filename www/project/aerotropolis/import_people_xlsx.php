@@ -79,7 +79,12 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
                         if (empty($pid) || empty($pname)) {
                             continue;
                         }
-                        $db->addPeopleMapping(trim($household), $pname, $pid, $number);
+                        // to fix the $pid and $pname order is wrong
+                        if (preg_match("/[*a-zA-Z\d]+/m", $pname)) {
+                            $db->addPeopleMapping(trim($household), $pname, $pid, $number);
+                        } else {
+                            $db->addPeopleMapping(trim($household), $pid, $pname, $number);
+                        }
                         $_SESSTION['people_processed']++;
                     }
                 }
