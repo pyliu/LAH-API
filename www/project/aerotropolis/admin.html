@@ -23,9 +23,6 @@
   a:hover {
       text-decoration: none;
   }
-  .hide {
-      display: none;
-  }
   </style>
 </head>
 
@@ -57,6 +54,7 @@
     <hr class="my-5" />
     <div id="id_data_upload"></div>
     <hr class="my-5" />
+    <div id="footer"></div>
   </main>
   <!-- /.container -->
 
@@ -92,19 +90,6 @@
                 </transition>
                 <b-button :disabled="!validate || wip" variant="primary" @click="upload">上傳</b-button>
               </div>
-              <transition>
-                <p v-if="footer" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded text-center p-2 small shadow">
-                  <span>
-                      <a href="https://github.com/pyliu/aerotropolis" target="_blank" title="View project on Github!">
-                          <i class="fab fa-github fa-lg text-dark"></i>
-                      </a>
-                      <strong><i class="far fa-copyright"></i> <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
-                      <a href="https://vuejs.org/" target="_blank" title="Learn Vue JS!">
-                          <i class="text-success fab fa-vuejs fa-lg"></i>
-                      </a>
-                  </span>
-                </p>
-              </transition>
           </div>`,
         data: () => ({
           landData: null,
@@ -113,8 +98,7 @@
           message: "",
           messageVariant: "text-success",
           uploadPercentage: 0,
-          progressHandler: null,
-          footer: true
+          progressHandler: null
         }),
         computed: {
           validate() {
@@ -183,11 +167,6 @@
               alert("請先選擇一個文字檔");
             }
           },
-        },
-        mounted() {
-          setTimeout(() => {
-            this.footer = false;
-          }, 10000);
         }
       });
 
@@ -280,6 +259,29 @@
               alert("請先選擇一個XLSX檔");
             }
           },
+        }
+      });
+
+      const vueFooter = new Vue({
+        el: '#footer',
+        template: `<transition>
+          <p v-if="show" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded text-center p-2 small shadow">
+            <span>
+                <a href="https://github.com/pyliu/aerotropolis" target="_blank" title="View project on Github!">
+                    <i class="fab fa-github fa-lg text-dark"></i>
+                </a>
+                <strong><i class="far fa-copyright"></i> <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
+                <a href="https://vuejs.org/" target="_blank" title="Learn Vue JS!">
+                    <i class="text-success fab fa-vuejs fa-lg"></i>
+                </a>
+            </span>
+          </p>
+        </transition>`,
+        data: () => ({
+          show: true
+        }),
+        mounted() {
+          setTimeout(() => this.show = false, 10000);
         }
       });
     });
