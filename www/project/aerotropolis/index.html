@@ -68,7 +68,7 @@
             template: `<b-container fluid>
                 <b-input-group prepend="歸戶號或統編" class="my-3">
                     <b-popover target="popover-target-1" triggers="hover" placement="top">
-                        <span>範例：機1-00003 / 附07-000150 / A123456789 / 0000000158 / *HE0173840</span>
+                        <span>範例：<b-link @click="keyword='機1-00063'">機1-00063</b-link> / <b-link @click="keyword='附11-010018'">附11-010018</b-link> / <b-link @click="keyword='A123456789'">A123456789</b-link> / <b-link @click="keyword='0000000158'">0000000158</b-link> / <b-link @click="keyword='*HE0173840'">*HE0173840</b-link></span>
                     </b-popover>
                     <b-form-input ref="keyword" id="popover-target-1" v-model="keyword" :state="validate" @keyup.enter="search" @keyup.enter="searchBy=undefined"></b-form-input>
                     <b-input-group-append>
@@ -127,10 +127,13 @@
             }),
             computed: {
                 validate() {
+                    const chinese = /[\u4E00-\u9FA5]{2,}$/;
                             // 附07-000771 機1-00001
                     return (/^(附\d{2}\-\d{6})|(機\d{1}\-\d{5})$/.test(this.keyword) ||
                             // 統編
                             /^[A-Z]{1}[1-2]{1}[0-9]{8}$/.test(this.keyword) ||
+                            // 名稱
+                            chinese.test(this.keyword) ||
                             // dead
                             /^\*H[A-H]\d{7}$/.test(this.keyword) ||
                             // 法人公司行號統編
