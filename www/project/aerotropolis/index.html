@@ -23,6 +23,9 @@
     a:hover {
         text-decoration: none;
     }
+    .hide {
+        display: none;
+    }
     </style>
 </head>
 
@@ -47,7 +50,17 @@
     <main role="main" class="container">
         <div id="vueApp"></div>
     </main><!-- /.container -->
-
+    <p id="footer" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded text-center p-2 small shadow">
+        <span>
+            <a href="https://github.com/pyliu/aerotropolis" target="_blank" title="View project on Github!">
+                <i class="fab fa-github fa-lg text-dark"></i>
+            </a>
+            <strong><i class="far fa-copyright"></i> <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
+            <a href="https://vuejs.org/" target="_blank" title="Learn Vue JS!">
+                <i class="text-success fab fa-vuejs fa-lg"></i>
+            </a>
+        </span>
+    </p>
     <!-- Place scripts at the end of the body to let DOM load first then scripts  -->
     <!-- Bootstrap core JavaScript -->
     <script src="assets/js/jquery.min.js"></script>
@@ -62,6 +75,9 @@
     <script src="assets/js/axios.min.js"></script>
     <script src="assets/js/localforage.min.js"></script>
     <script>
+        setTimeout(function() {
+            document.getElementById('footer').classList.add("hide");
+        }, 10000);
         const vueApp = new Vue({
             el: '#vueApp',
             template: `<b-container fluid>
@@ -101,13 +117,27 @@
                 >
                     <div v-html="landData"></div>
                 </b-modal>
+                <transition>
+                    <p v-if="footer" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded text-center p-2 small shadow">
+                    <span>
+                        <a href="https://github.com/pyliu/aerotropolis" target="_blank" title="View project on Github!">
+                            <i class="fab fa-github fa-lg text-dark"></i>
+                        </a>
+                        <strong><i class="far fa-copyright"></i> <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
+                        <a href="https://vuejs.org/" target="_blank" title="Learn Vue JS!">
+                            <i class="text-success fab fa-vuejs fa-lg"></i>
+                        </a>
+                    </span>
+                    </p>
+                </transition>
             </b-container>`,
             data: () => ({
                 keyword: '',
                 wip: false,
                 searchResults: [],
                 searchCount: 0,
-                landData: undefined
+                landData: undefined,
+                footer: true
             }),
             computed: {
                 validate() {
@@ -153,6 +183,11 @@
                         this.$refs.modal.show();
                     }).catch((err) => console.error(err)).finally(() => { this.wip = false; });
                 }
+            },
+            mounted() {
+                setTimeout(() => {
+                    this.footer = false;
+                }, 10000);
             }
         });
     </script>

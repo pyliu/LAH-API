@@ -1,4 +1,4 @@
-/* .v-leave,
+.v-leave,
 .v-enter-to {
 opacity: 1;
 }
@@ -9,7 +9,7 @@ transition: opacity 0.5s;
 .v-leave-to,
 .v-enter {
 opacity: 0;
-} */
+}
 /* Enter and leave animations can use different */
 /* durations and timing functions.              */
 .slide-fade-enter-active {

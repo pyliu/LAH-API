@@ -19,6 +19,14 @@
   <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
   <link rel="preload" href="assets/css/starter-template.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" href="assets/css/transition.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <style type="text/css">
+  a:hover {
+      text-decoration: none;
+  }
+  .hide {
+      display: none;
+  }
+  </style>
 </head>
 
 <body>
@@ -84,6 +92,19 @@
                 </transition>
                 <b-button :disabled="!validate || wip" variant="primary" @click="upload">上傳</b-button>
               </div>
+              <transition>
+                <p v-if="footer" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded text-center p-2 small shadow">
+                  <span>
+                      <a href="https://github.com/pyliu/aerotropolis" target="_blank" title="View project on Github!">
+                          <i class="fab fa-github fa-lg text-dark"></i>
+                      </a>
+                      <strong><i class="far fa-copyright"></i> <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
+                      <a href="https://vuejs.org/" target="_blank" title="Learn Vue JS!">
+                          <i class="text-success fab fa-vuejs fa-lg"></i>
+                      </a>
+                  </span>
+                </p>
+              </transition>
           </div>`,
         data: () => ({
           landData: null,
@@ -92,7 +113,8 @@
           message: "",
           messageVariant: "text-success",
           uploadPercentage: 0,
-          progressHandler: null
+          progressHandler: null,
+          footer: true
         }),
         computed: {
           validate() {
@@ -162,6 +184,11 @@
             }
           },
         },
+        mounted() {
+          setTimeout(() => {
+            this.footer = false;
+          }, 10000);
+        }
       });
 
       const id = new Vue({
