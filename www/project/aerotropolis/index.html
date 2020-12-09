@@ -105,7 +105,8 @@
 
                                 <b-link v-if="searchBy !== 'owned_number'" @click.stop="quickSearch(row['owned_number'], 'owned_number')" title="根據段地號查詢">
                                     {{row['owned_number'].slice(0, 4)}}-{{row['owned_number'].slice(4)}}
-                                    <i class="far fa-share-square text-danger" @click.stop="query(row['owned_number'])" title="開啟地籍資料視窗"></i>
+                                    <i class="fas fa-external-link-alt text-success" @click.stop="query(row['owned_number'])" title="檢視地籍資料"></i>
+                                    <i class="fas fa-print text-primary" @click.stop="print(row['owned_number'])" title="開啟列印視窗"></i>
                                 </b-link>
                                 <strong v-else class="bg-success text-light p-1 rounded">{{row['owned_number'].slice(0, 4)}}-{{row['owned_number'].slice(4)}}</strong>
                             </b-list-group-item>
@@ -154,6 +155,9 @@
                 }
             },
             methods: {
+                print(number) {
+                    window.open(`print.html?number=${number}`, '_blank');
+                },
                 quickSearch(data, by) {
                     this.keyword = data;
                     this.searchBy = by;
