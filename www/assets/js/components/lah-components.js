@@ -423,6 +423,11 @@ if (Vue) {
                     icon: "users",
                     need_admin: false
                 }]
+            }, {
+                text: `航空城地籍資料查詢`,
+                url: "project/aerotropolis/index.html",
+                icon: "plane-departure",
+                need_admin: true
             }]
         }),
         computed: {

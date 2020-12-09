@@ -70,9 +70,9 @@
                     <b-popover target="popover-target-1" triggers="hover" placement="top">
                         <span>範例：機1-00003 / 附07-000150 / A123456789 / 0000000158 / *HE0173840</span>
                     </b-popover>
-                    <b-form-input ref="keyword" id="popover-target-1" v-model="keyword" :state="validate" @keyup.enter="search"></b-form-input>
+                    <b-form-input ref="keyword" id="popover-target-1" v-model="keyword" :state="validate" @keyup.enter="search" @keyup.enter="searchBy=undefined"></b-form-input>
                     <b-input-group-append>
-                        <b-button variant="primary" @click="search" :disabled="wip"><i class="fas fa-search"></i> 搜尋</b-button>
+                        <b-button variant="primary" @click="search" @click="searchBy=undefined" :disabled="wip"><i class="fas fa-search"></i> 搜尋</b-button>
                     </b-input-group-append>
                 </b-input-group>
                 <transition name="slide-fade" mode="out-in">
@@ -80,13 +80,20 @@
                         <div class="text-muted text-right">找到 {{searchCount}} 筆資料</div>
                         <b-list-group flush compact>
                             <b-list-group-item v-for="row in searchResults" class="d-flex justify-content-between">
-                                <b-link @click="quickSearch(row['household'])">{{row['household']}}</b-link>
-                                <b-link @click="quickSearch(row['pid'])">{{row['pid']}}</b-link>
-                                <b-link @click="quickSearch(row['pname'])">{{row['pname']}}</b-link>
-                                <b-link @click="quickSearch(row['owned_number'])">
+                                <b-link v-if="searchBy !== 'household'" @click.stop="quickSearch(row['household'], 'household')" title="根據歸戶號查詢">{{row['household']}}</b-link>
+                                <strong v-else class="bg-success text-light p-1 rounded">{{row['household']}}</strong>
+
+                                <b-link v-if="searchBy !== 'pid'" @click.stop="quickSearch(row['pid'], 'pid')" title="根據統編查詢">{{row['pid']}}</b-link>
+                                <strong v-else class="bg-success text-light p-1 rounded">{{row['pid']}}</strong>
+
+                                <b-link v-if="searchBy !== 'pname'" @click.stop="quickSearch(row['pname'], 'pname')" title="根據姓名查詢">{{row['pname']}}</b-link>
+                                <strong v-else class="bg-success text-light p-1 rounded">{{row['pname']}}</strong>
+
+                                <b-link v-if="searchBy !== 'owned_number'" @click.stop="quickSearch(row['owned_number'], 'owned_number')" title="根據段地號查詢">
                                     {{row['owned_number'].slice(0, 4)}}-{{row['owned_number'].slice(4)}}
                                     <i class="far fa-share-square text-danger" @click.stop="query(row['owned_number'])" title="開啟地籍資料視窗"></i>
                                 </b-link>
+                                <strong v-else class="bg-success text-light p-1 rounded">{{row['owned_number'].slice(0, 4)}}-{{row['owned_number'].slice(4)}}</strong>
                             </b-list-group-item>
                         </b-list-group>
                     </div>
@@ -108,6 +115,7 @@
                 wip: false,
                 searchResults: [],
                 searchCount: 0,
+                searchBy: undefined,
                 landData: undefined,
                 footer: true
             }),
@@ -127,18 +135,22 @@
                             /^0\d{11}$/.test(this.keyword)) && this.keyword.length < 13 && this.keyword.length !== 9
                 }
             },
+            watch: {
+                searchBy(val) { console.log(val); }
+            },
             methods: {
-                quickSearch(data) {
+                quickSearch(data, by) {
                     this.keyword = data;
+                    this.searchBy = by;
                     this.search();
                 },
                 search() {
-                    if (!this.wip) {
+                    if (!this.wip && this.keyword !== '' && this.keyword !== undefined) {
                         this.wip = true;
                         this.searchResults = [];
                         this.searchCount = 0;
                         let formData = new FormData();
-                        formData.append("keyword", this.keyword);
+                        formData.append("keyword", this.keyword.trim());
                         axios.post("api/search.php", formData).then((res) => {
                             this.searchResults = res.data.results;
                             this.searchCount = res.data.count;
