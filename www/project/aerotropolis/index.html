@@ -19,6 +19,11 @@
     <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="assets/css/starter-template.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="assets/css/transition.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <style type="text/css">
+    a:hover {
+        text-decoration: none;
+    }
+    </style>
 </head>
 
 <body>
@@ -36,6 +41,7 @@
                 </li>
             </ul>
         </div>
+        <h5 class="text-light my-auto"><i class="fas fa-plane-departure"></i> 航空城開發科</h5>
     </nav>
 
     <main role="main" class="container">
@@ -59,32 +65,93 @@
         const vueApp = new Vue({
             el: '#vueApp',
             template: `<b-container fluid>
-                <b-form-group
-                    id="fieldset-horizontal"
-                    label-cols-sm="4"
-                    label-cols-lg="3"
-                    description="歸戶號 => 機1-00003 或 統編 => A123456789"
-                    label="歸戶號或統編"
-                    label-for="input-horizontal"
+                <b-input-group prepend="歸戶號或統編" class="my-3">
+                    <b-popover target="popover-target-1" triggers="hover" placement="top">
+                        <span>範例：機1-00003 / 附07-000150 / A123456789 / 0000000158 / *HE0173840</span>
+                    </b-popover>
+                    <b-form-input ref="keyword" id="popover-target-1" v-model="keyword" :state="validate" @keyup.enter="search"></b-form-input>
+                    <b-input-group-append>
+                        <b-button variant="primary" @click="search" :disabled="wip"><i class="fas fa-search"></i> 搜尋</b-button>
+                    </b-input-group-append>
+                </b-input-group>
+                <transition name="slide-fade" mode="out-in">
+                    <div v-if="searchCount > 0">
+                        <div class="text-muted text-right">找到 {{searchCount}} 筆資料</div>
+                        <b-list-group flush compact>
+                            <b-list-group-item v-for="row in searchResults" class="d-flex justify-content-between">
+                                <b-link @click="quickSearch(row['household'])">{{row['household']}}</b-link>
+                                <b-link @click="quickSearch(row['pid'])">{{row['pid']}}</b-link>
+                                <b-link @click="quickSearch(row['pname'])">{{row['pname']}}</b-link>
+                                <b-link @click="quickSearch(row['owned_number'])">
+                                    {{row['owned_number'].slice(0, 4)}}-{{row['owned_number'].slice(4)}}
+                                    <i class="far fa-share-square text-danger" @click.stop="query(row['owned_number'])" title="開啟地籍資料視窗"></i>
+                                </b-link>
+                            </b-list-group-item>
+                        </b-list-group>
+                    </div>
+                    <h4 v-else class="text-center text-muted"><i class="fas fa-exclamation-circle"></i> 查無資料。</h4>
+                </transition>
+                <b-modal
+                    ref="modal"
+                    size="lg"
+                    title="地籍資料"
+                    no-close-on-backdrop
+                    ok-title="確認"
+                    ok-only
                 >
-                    <b-form-input id="input-horizontal" v-model="keyword" :state="validate"></b-form-input>
-                </b-form-group>
+                    <div v-html="landData"></div>
+                </b-modal>
             </b-container>`,
             data: () => ({
-                keyword: ''
+                keyword: '',
+                wip: false,
+                searchResults: [],
+                searchCount: 0,
+                landData: undefined
             }),
             computed: {
                 validate() {
-                    // 附07-000771 機1-00001
-                    // return /^[附機]\d{1,2}\-\d{5,6}$/.test(this.keyword);
-                    return /^(附\d{2}\-\d{6})|(機\d{1}\-\d{5})$/.test(this.keyword) ||
-                           /^[A-Z]{1}[1-2]{1}[0-9]{8}$/.test(this.keyword) || 
-                           /^*HE\d{7}$/.test(this.keyword)
+                            // 附07-000771 機1-00001
+                    return (/^(附\d{2}\-\d{6})|(機\d{1}\-\d{5})$/.test(this.keyword) ||
+                            // 統編
+                            /^[A-Z]{1}[1-2]{1}[0-9]{8}$/.test(this.keyword) ||
+                            // dead
+                            /^\*H[A-H]\d{7}$/.test(this.keyword) ||
+                            // 法人公司行號統編
+                            /^\d{8}|\d{10}$/.test(this.keyword) ||
+                            // 外國人
+                            /^\d{8}|[A-Z]{2}$/.test(this.keyword) ||
+                            // 段地號
+                            /^0\d{11}$/.test(this.keyword)) && this.keyword.length < 13 && this.keyword.length !== 9
                 }
             },
-            watch: {
-                keyword(value) {
-                    console.log(value);
+            methods: {
+                quickSearch(data) {
+                    this.keyword = data;
+                    this.search();
+                },
+                search() {
+                    if (!this.wip) {
+                        this.wip = true;
+                        this.searchResults = [];
+                        this.searchCount = 0;
+                        let formData = new FormData();
+                        formData.append("keyword", this.keyword);
+                        axios.post("api/search.php", formData).then((res) => {
+                            this.searchResults = res.data.results;
+                            this.searchCount = res.data.count;
+                        }).catch((err) => console.error(err)).finally(() => { this.wip = false; });
+                    }
+                },
+                query(landNumber) {
+                    this.wip = true;
+                    let formData = new FormData();
+                    formData.append("owned_number", landNumber);
+                    axios.post("api/query_land_data.php", formData).then((res) => {
+                        // console.log(res.data);
+                        this.landData = res.data.result[0].content.trim().replace(/\n/g, '<br />');
+                        this.$refs.modal.show();
+                    }).catch((err) => console.error(err)).finally(() => { this.wip = false; });
                 }
             }
         });

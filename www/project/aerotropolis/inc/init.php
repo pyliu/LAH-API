@@ -9,9 +9,10 @@ $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $
 
 require_once("Logger.class.php");
 
+define('LOG_PATH', ROOT_DIR.DIRECTORY_SEPARATOR."log");
 // to ensure log dir exists
-if (!file_exists('log') && !is_dir('log')) {
-    mkdir('log');       
+if (!file_exists(LOG_PATH) && !is_dir(LOG_PATH)) {
+    mkdir(LOG_PATH);       
 }
 
 define('FILE_PATH', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."file");
