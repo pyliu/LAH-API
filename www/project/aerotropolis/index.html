@@ -135,9 +135,6 @@
                             /^0\d{11}$/.test(this.keyword)) && this.keyword.length < 13 && this.keyword.length !== 9
                 }
             },
-            watch: {
-                searchBy(val) { console.log(val); }
-            },
             methods: {
                 quickSearch(data, by) {
                     this.keyword = data;
