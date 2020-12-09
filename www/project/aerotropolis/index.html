@@ -110,8 +110,8 @@
                                 </b-link>
                                 <strong v-else class="bg-success text-light p-1 rounded">
                                     {{row['owned_number'].slice(0, 4)}}-{{row['owned_number'].slice(4)}}
-                                    <i class="fas fa-external-link-alt text-light" @click.stop="query(row['owned_number'])" title="檢視地籍資料"></i>
-                                    <i class="fas fa-print text-primary" @click.stop="print(row['owned_number'])" title="開啟列印視窗"></i>
+                                    <i class="fas fa-external-link-alt text-light" @click.stop="query(row['owned_number'])" title="檢視地籍資料" style="cursor: pointer;"></i>
+                                    <i class="fas fa-print text-light" @click.stop="print(row['owned_number'])" title="開啟列印視窗" style="cursor: pointer;"></i>
                                 </strong>
                             </b-list-group-item>
                         </b-list-group>
