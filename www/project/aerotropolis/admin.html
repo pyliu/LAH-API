@@ -120,7 +120,7 @@
             let formData = new FormData();
             formData.append("type", 'data');
             axios
-              .post("get_progress.php", formData)
+              .post("api/get_progress.php", formData)
               .then((res) => {
                 this.uploadPercentage = parseInt(Math.round((res.data.processed / res.data.total) * 100));
               })
@@ -134,7 +134,7 @@
               let formData = new FormData();
               formData.append("file", this.landData);
               axios
-                .post("import_land_txt.php", formData, {
+                .post("api/import_land_txt.php", formData, {
                   headers: {
                     'Content-Type': 'multipart/form-data'
                   },
@@ -212,7 +212,7 @@
             let formData = new FormData();
             formData.append("type", 'people');
             axios
-              .post("get_progress.php", formData)
+              .post("api/get_progress.php", formData)
               .then((res) => {
                 this.uploadPercentage = parseInt(Math.round((res.data.processed / res.data.total) * 100));
               })
@@ -226,7 +226,7 @@
               let formData = new FormData();
               formData.append("file", this.idData);
               axios
-                .post("import_people_xlsx.php", formData, {
+                .post("api/import_people_xlsx.php", formData, {
                   headers: {
                     'Content-Type': 'multipart/form-data'
                   },
