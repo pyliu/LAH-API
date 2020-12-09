@@ -62,7 +62,7 @@
                 formData.append("owned_number", urlParams.get('number'));
                 axios.post("api/query_land_data.php", formData).then((res) => {
                     this.landData = res.data.result[0];
-                    window.print();
+                    setTimeout(() => window.print(), 500);
                 }).catch((err) => console.error(err)).finally(() => { });
             }
         });
