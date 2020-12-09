@@ -68,7 +68,15 @@
             template: `<b-container fluid>
                 <b-input-group prepend="歸戶號或統編" class="my-3">
                     <b-popover target="popover-target-1" triggers="hover" placement="top">
-                        <span>範例：<b-link @click="keyword='機1-00063'">機1-00063</b-link> / <b-link @click="keyword='附11-010018'">附11-010018</b-link> / <b-link @click="keyword='A123456789'">A123456789</b-link> / <b-link @click="keyword='0000000158'">0000000158</b-link> / <b-link @click="keyword='*HE0173840'">*HE0173840</b-link></span>
+                        <span>
+                            範例：
+                            <b-link @click="keyword='機1-00063'">機1-00063</b-link> / 
+                            <b-link @click="keyword='附11-010018'">附11-010018</b-link> / 
+                            <b-link @click="keyword='A123456789'">A123456789</b-link> / 
+                            <b-link @click="keyword='0000000158'">0000000158</b-link> / 
+                            <b-link @click="keyword='*HE0173840'">*HE0173840</b-link> / 
+                            <b-link @click="keyword='江川文篤'">江川文篤</b-link>
+                        </span>
                     </b-popover>
                     <b-form-input ref="keyword" id="popover-target-1" v-model="keyword" :state="validate" @keyup.enter="search" @keyup.enter="searchBy=undefined"></b-form-input>
                     <b-input-group-append>
