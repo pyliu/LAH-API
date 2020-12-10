@@ -93,6 +93,27 @@ class LandDataDB {
     /**
      * For Query
      */
+    public function preftechPeopleByColumn($column, $keyword) {
+        $sql = "SELECT * FROM people_data_mapping WHERE $column LIKE '%' || :bv_keyword || '%'";
+        if ($stm = $this->db->prepare($sql)) {
+            $stm->bindParam(':bv_keyword', $keyword);
+            $result = $stm->execute();
+            $return = [];
+            if ($result === false) {
+                global $log;
+                $log->warning(__METHOD__.": 找不到資料 ($column, $keyword)");
+                return $return;
+            }
+            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                $return[] = $row;
+            }
+            return $return;
+        }
+        global $log;
+        $log->error(__METHOD__.': prepare failed. ('.$sql.')');
+        return false;
+    }
+
     private function searchPeopleByColumn($column, $keyword) {
         $sql = "SELECT * FROM people_data_mapping WHERE $column = :bv_keyword";
         if ($stm = $this->db->prepare($sql)) {
@@ -113,6 +134,7 @@ class LandDataDB {
         $log->error(__METHOD__.': prepare failed. ('.$sql.')');
         return false;
     }
+
     public function searchPeopleByHouseholdCode($household_code) {
         return $this->searchPeopleByColumn('household', $household_code);
     }

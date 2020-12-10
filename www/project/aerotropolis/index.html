@@ -20,6 +20,7 @@
     <link rel="preload" href="assets/css/starter-template.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="assets/css/transition.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="assets/css/aerotropolis.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/VueBootstrapTypeahead.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 </head>
 
 <body>
@@ -58,27 +59,38 @@
     <!-- Add-On -->
     <script src="assets/js/axios.min.js"></script>
     <script src="assets/js/localforage.min.js"></script>
+    <script src="assets/js/VueBootstrapTypeahead.umd.min.js"></script>
+    <script src="assets/js/lodash.min.js"></script>
     <script>
-        const vueApp = new Vue({
+        new Vue({
             el: '#vueApp',
             template: `<b-container fluid>
-                <b-input-group prepend="查詢條件" class="my-3">
-                    <b-popover target="popover-target-1" triggers="hover focus" placement="top">
-                        <span>
-                            範例：
-                            <b-link @click="keyword='機1-00063'">機1-00063</b-link> / 
-                            <b-link @click="keyword='附11-010018'">附11-010018</b-link> / 
-                            <b-link @click="keyword='A123456789'">A123456789</b-link> / 
-                            <b-link @click="keyword='0000000158'">0000000158</b-link> / 
-                            <b-link @click="keyword='*HE0173840'">*HE0173840</b-link> / 
-                            <b-link @click="keyword='江川文篤'">江川文篤</b-link>
-                        </span>
-                    </b-popover>
-                    <b-form-input ref="keyword" id="popover-target-1" v-model="keyword" :state="validate" @keyup.enter="search" @keyup.enter="searchBy=undefined"></b-form-input>
-                    <b-input-group-append>
+                <vue-bootstrap-typeahead
+                    ref="typeahead"
+                    id="keyword-input"
+                    v-model="keyword"
+                    :data="preftech"
+                    placeholder="e.g. 附11-010018"
+                    @keyup.enter="search"
+                    @keydown.enter="searchBy=undefined"
+                    prepend="查詢條件"
+                    class="my-3"
+                >
+                    <template #append>
                         <b-button variant="primary" @click="search" @click="searchBy=undefined" :disabled="wip"><i class="fas fa-search"></i> 搜尋</b-button>
-                    </b-input-group-append>
-                </b-input-group>
+                    </template>
+                </vue-bootstrap-typeahead>
+                <b-popover target="keyword-input" triggers="hover focus" placement="top">
+                    <span>
+                        範例：
+                        <b-link @click="changeKeyword('機1-00063')">機1-00063</b-link> / 
+                        <b-link @click="changeKeyword('附11-010018')">附11-010018</b-link> / 
+                        <b-link @click="changeKeyword('A123456789')">A123456789</b-link> / 
+                        <b-link @click="changeKeyword('0000000158')">0000000158</b-link> / 
+                        <b-link @click="changeKeyword('*HE0173840')">*HE0173840</b-link> / 
+                        <b-link @click="changeKeyword('江川文篤')">江川文篤</b-link>
+                    </span>
+                </b-popover>
                 <transition name="slide-fade" mode="out-in">
                     <div v-if="searchCount > 0">
                         <div class="text-muted text-right">找到 {{searchCount}} 筆資料</div>
@@ -127,6 +139,9 @@
                     <div v-html="landData"></div>
                 </b-modal>
             </b-container>`,
+            components: {
+                VueBootstrapTypeahead
+            },
             data: () => ({
                 keyword: '',
                 wip: false,
@@ -135,7 +150,15 @@
                 searchBy: undefined,
                 landData: undefined,
                 landTitle: '地籍資料',
-                footer: true
+                footer: true,
+                preftech: [
+                    '機1-00063',
+                    '附11-010018',
+                    'A123456789',
+                    '0000000158',
+                    '*HE0173840',
+                    '江川文篤'
+                ]
             }),
             computed: {
                 validate() {
@@ -156,7 +179,19 @@
                             /^0\d{11}$/.test(this.keyword)) && this.keyword.length < 13 && this.keyword.length !== 9
                 }
             },
+            watch: {
+                // debounce the query to API to reduce the http request
+                keyword: _.debounce(function(theVal) {
+                    this.getPrefetch(theVal);
+                }, 750)
+            },
             methods: {
+                changeKeyword(val) {
+                    // hack for the vue-bootstrap-typeahead component when v-model value update by others
+                    this.$refs.typeahead.$el.childNodes[0].childNodes[1].value = val;
+                    const event = new Event('input', { bubbles: true, cancelable: true });
+                    this.$refs.typeahead.$el.childNodes[0].childNodes[1].dispatchEvent(event);
+                },
                 print(number) {
                     window.open(`print.html?number=${number}`, '_blank');
                 },
@@ -187,6 +222,13 @@
                         this.landData = res.data.result[0].content.trim().replace(/\n/g, '<br />');
                         this.$refs.modal.show();
                     }).catch((err) => console.error(err)).finally(() => { this.wip = false; });
+                },
+                getPrefetch(keyword) {
+                    let formData = new FormData();
+                    formData.append("keyword", keyword);
+                    axios.post("api/prefetch.php", formData).then((res) => {
+                        this.preftech = res.data.items;
+                    }).catch((err) => console.error(err)).finally(() => {});
                 }
             },
             mounted() {
@@ -194,7 +236,8 @@
                     this.footer = false;
                 }, 10000);
             }
-        });
+        }).$mount('#vueApp');
+
         const vueFooter = new Vue({
             el: '#footer',
             template: `<transition>
