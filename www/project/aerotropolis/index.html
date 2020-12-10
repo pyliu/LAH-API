@@ -183,7 +183,7 @@
                 // debounce the query to API to reduce the http request
                 keyword: _.debounce(function(theVal) {
                     this.getPrefetch(theVal);
-                }, 750)
+                }, 500)
             },
             methods: {
                 triggerInputEvent(val) {
