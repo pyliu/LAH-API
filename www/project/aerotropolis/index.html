@@ -122,12 +122,13 @@
                 <b-modal
                     ref="modal"
                     size="lg"
-                    title="地籍資料"
+                    :title="landTitle"
                     no-close-on-backdrop
                     ok-title="關閉"
                     ok-variant="secondary"
                     ok-only
                     scrollable
+                    hide-footer
                 >
                     <div v-html="landData"></div>
                 </b-modal>
@@ -139,6 +140,7 @@
                 searchCount: 0,
                 searchBy: undefined,
                 landData: undefined,
+                landTitle: '地籍資料',
                 footer: true
             }),
             computed: {
@@ -187,7 +189,7 @@
                     let formData = new FormData();
                     formData.append("owned_number", landNumber);
                     axios.post("api/query_land_data.php", formData).then((res) => {
-                        // console.log(res.data);
+                        this.landTitle = res.data.result[0].code + ' ' + res.data.result[0].name + ' ' + res.data.result[0].number.slice(0, 4) + '-' + res.data.result[0].number.slice(4);
                         this.landData = res.data.result[0].content.trim().replace(/\n/g, '<br />');
                         this.$refs.modal.show();
                     }).catch((err) => console.error(err)).finally(() => { this.wip = false; });
