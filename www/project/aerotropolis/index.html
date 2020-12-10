@@ -116,6 +116,7 @@
                             </b-list-group-item>
                         </b-list-group>
                     </div>
+                    <h4 v-else-if="wip" class="text-center text-muted"><i class="fas fa-sync fa-spin"></i> 讀取中 ... </h4>
                     <h4 v-else class="text-center text-muted"><i class="fas fa-exclamation-circle"></i> 查無資料。</h4>
                 </transition>
                 <b-modal
