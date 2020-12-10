@@ -3,7 +3,7 @@ a:hover {
 }
 
 body{
-    background-image:url('assets/img/logo.png');
+    background-image:url('../img/logo.png');
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-position: calc(100% - 20px) calc(100% - 20px);
