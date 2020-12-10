@@ -28,6 +28,9 @@ foreach($merged as $item) {
     if (preg_match("/$keyword/i", $item['owned_number']) && !in_array($item['owned_number'], $set)) {
         $set[] = $item['owned_number'];
     }
+    if (count($set) > 9) {
+        break;
+    }
 }
 
 $count = count($set);
