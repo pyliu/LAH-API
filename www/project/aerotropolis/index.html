@@ -87,12 +87,6 @@
                     <div v-if="searchCount > 0">
                         <div class="text-muted text-right">找到 {{searchCount}} 筆資料</div>
                         <b-list-group flush compact>
-                            <b-list-group-item class="d-flex justify-content-between">
-                                <strong>歸戶號</strong>
-                                <strong>統編</strong>
-                                <strong>姓名/名稱</strong>
-                                <strong>段地號</strong>
-                            </b-list-group-item>
                             <b-list-group-item v-for="row in searchResults" class="d-flex justify-content-between">
                                 <b-link v-if="searchBy !== 'household'" @click.stop="quickSearch(row['household'], 'household')" title="根據歸戶號查詢">{{row['household']}}</b-link>
                                 <strong v-else class="bg-success text-light p-1 rounded">{{row['household']}}</strong>
