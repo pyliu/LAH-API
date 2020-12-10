@@ -83,12 +83,12 @@
                 <b-popover target="keyword-input" triggers="hover focus" placement="top">
                     <span>
                         範例：
-                        <b-link @click="changeKeyword('機1-00063')">機1-00063</b-link> / 
-                        <b-link @click="changeKeyword('附11-010018')">附11-010018</b-link> / 
-                        <b-link @click="changeKeyword('A123456789')">A123456789</b-link> / 
-                        <b-link @click="changeKeyword('0000000158')">0000000158</b-link> / 
-                        <b-link @click="changeKeyword('*HE0173840')">*HE0173840</b-link> / 
-                        <b-link @click="changeKeyword('江川文篤')">江川文篤</b-link>
+                        <b-link @click="triggerInputEvent('機1-00063')">機1-00063</b-link> / 
+                        <b-link @click="triggerInputEvent('附11-010018')">附11-010018</b-link> / 
+                        <b-link @click="triggerInputEvent('A123456789')">A123456789</b-link> / 
+                        <b-link @click="triggerInputEvent('0000000158')">0000000158</b-link> / 
+                        <b-link @click="triggerInputEvent('*HE0173840')">*HE0173840</b-link> / 
+                        <b-link @click="triggerInputEvent('江川文篤')">江川文篤</b-link>
                     </span>
                 </b-popover>
                 <transition name="slide-fade" mode="out-in">
@@ -186,7 +186,7 @@
                 }, 750)
             },
             methods: {
-                changeKeyword(val) {
+                triggerInputEvent(val) {
                     // hack for the vue-bootstrap-typeahead component when v-model value update by others
                     this.$refs.typeahead.$el.childNodes[0].childNodes[1].value = val;
                     const event = new Event('input', { bubbles: true, cancelable: true });
@@ -198,6 +198,7 @@
                 quickSearch(data, by) {
                     this.keyword = data;
                     this.searchBy = by;
+                    this.triggerInputEvent(data);
                     this.search();
                 },
                 search() {
