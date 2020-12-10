@@ -63,7 +63,6 @@
     <script src="assets/js/lodash.min.js"></script>
     <script>
         new Vue({
-            el: '#vueApp',
             template: `<b-container fluid>
                 <vue-bootstrap-typeahead
                     ref="typeahead"
@@ -240,7 +239,6 @@
         }).$mount('#vueApp');
 
         const vueFooter = new Vue({
-            el: '#footer',
             template: `<transition>
                 <p v-if="show" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded text-center p-2 small shadow">
                 <span>
@@ -260,7 +258,7 @@
             mounted() {
                 setTimeout(() => this.show = false, 10000);
             }
-        });
+        }).$mount('#footer');
     </script>
 </body>
 
