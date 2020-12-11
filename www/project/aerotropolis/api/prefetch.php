@@ -15,7 +15,6 @@ $merged = $householdData + $pidData + $nameData + $ownedNumberData;
 $set = array();
 $keyword = str_replace('*', '\*', $keyword);
 foreach($merged as $item) {
-    // if(!preg_match("/^[A-Z]{1}[12ABCD]{1}[[:digit:]]{8}$/i", $id))
     if (preg_match("/$keyword/i", $item['household']) && !in_array($item['household'], $set)) {
         $set[] = $item['household'];
     }
@@ -34,7 +33,13 @@ foreach($merged as $item) {
 }
 
 $count = count($set);
-
+// if ($count > 12) {
+//     $shuffle = array();
+//     $shuffle[] = array_shift($set);
+//     $shuffle[] = array_shift($set);
+//     $set = array_slice($shuffle + shuffle($set), 0, 10);
+//     $count = count($set);
+// }
 echo json_encode(array(
     'keyword' => $keyword,
     'items' => $set,

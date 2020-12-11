@@ -74,6 +74,7 @@
                     @keyup.enter="searchBy=undefined"
                     prepend="查詢條件"
                     class="my-3"
+                    min-matching-chars="1"
                 >
                     <template #append>
                         <b-button variant="primary" @click="search" @click="searchBy=undefined" :disabled="wip"><i class="fas fa-search"></i> 搜尋</b-button>
@@ -224,9 +225,13 @@
                     }).catch((err) => console.error(err)).finally(() => { this.wip = false; });
                 },
                 getPrefetch(keyword) {
+                    if (_.isEmpty(keyword)) {
+                        return false;
+                    }
+                    keyword = keyword.replace(/^0+/m, '');
                     let formData = new FormData();
                     formData.append("keyword", keyword);
-                    axios.post("api/prefetch.php", formData).then((res) => {
+                    axios.post("api/prefetch.php", formData, { timeout: 1000 }).then((res) => {
                         this.preftech = res.data.items;
                     }).catch((err) => console.error(err)).finally(() => {});
                 }
