@@ -1155,6 +1155,7 @@ switch ($_POST["type"]) {
 			}
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS,
+				"message" => "查詢成功，找到 $total 筆公告中資料。",
 				"data_count" => $total,
 				"baked" => $baked
 			);
