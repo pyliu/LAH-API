@@ -69,9 +69,8 @@
                     id="keyword-input"
                     v-model="keyword"
                     :data="preftech"
-                    placeholder="e.g. 附11-010018"
+                    placeholder="請輸入關鍵字查詢 ... "
                     prepend="查詢條件"
-                    class="my-3"
                     min-matching-chars="1"
                     @hit="search"
                 >
@@ -79,17 +78,15 @@
                         <b-button variant="primary" @click="search" @click="searchBy=undefined" :disabled="wip"><i class="fas fa-search"></i> 搜尋</b-button>
                     </template>
                 </vue-bootstrap-typeahead>
-                <b-popover target="keyword-input" triggers="hover focus" placement="top">
-                    <span>
-                        範例：
-                        <b-link @click="triggerInputEvent('機1-00063')">機1-00063</b-link> / 
-                        <b-link @click="triggerInputEvent('附11-010018')">附11-010018</b-link> / 
-                        <b-link @click="triggerInputEvent('A123456789')">A123456789</b-link> / 
-                        <b-link @click="triggerInputEvent('0000000158')">0000000158</b-link> / 
-                        <b-link @click="triggerInputEvent('*HE0173840')">*HE0173840</b-link> / 
-                        <b-link @click="triggerInputEvent('江川文篤')">江川文篤</b-link>
-                    </span>
-                </b-popover>
+                <div class="text-muted small mb-3" style="padding-left: 90px">
+                    範例：
+                    <b-link @click="triggerInputEvent('機1-00063')">機1-00063</b-link> / 
+                    <b-link @click="triggerInputEvent('附11-010018')">附11-010018</b-link> / 
+                    <b-link @click="triggerInputEvent('A123456789')">A123456789</b-link> / 
+                    <b-link @click="triggerInputEvent('0000000158')">0000000158</b-link> / 
+                    <b-link @click="triggerInputEvent('*HE0173840')">*HE0173840</b-link> / 
+                    <b-link @click="triggerInputEvent('江川文篤')">江川文篤</b-link>
+                </div>
                 <transition name="slide-fade" mode="out-in">
                     <div v-if="searchCount > 0">
                         <div class="text-muted text-right">找到 {{searchCount}} 筆資料</div>
