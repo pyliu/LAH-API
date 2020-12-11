@@ -70,11 +70,10 @@
                     v-model="keyword"
                     :data="preftech"
                     placeholder="e.g. 附11-010018"
-                    @keyup.enter="search"
-                    @keyup.enter="searchBy=undefined"
                     prepend="查詢條件"
                     class="my-3"
                     min-matching-chars="1"
+                    @hit="search"
                 >
                     <template #append>
                         <b-button variant="primary" @click="search" @click="searchBy=undefined" :disabled="wip"><i class="fas fa-search"></i> 搜尋</b-button>
@@ -177,7 +176,8 @@
                             /^\d{8}|[A-Z]{2}$/.test(this.keyword) ||
                             // 段地號
                             /^0\d{11}$/.test(this.keyword)) && this.keyword.length < 13 && this.keyword.length !== 9
-                }
+                },
+                input() { return this.$refs.typeahead.$el.childNodes[0].childNodes[1]; }
             },
             watch: {
                 // debounce the query to API to reduce the http request
@@ -188,9 +188,9 @@
             methods: {
                 triggerInputEvent(val) {
                     // hack for the vue-bootstrap-typeahead component when v-model value update by others
-                    this.$refs.typeahead.$el.childNodes[0].childNodes[1].value = val;
+                    this.input.value = val;
                     const event = new Event('input', { bubbles: true, cancelable: true });
-                    this.$refs.typeahead.$el.childNodes[0].childNodes[1].dispatchEvent(event);
+                    this.input.dispatchEvent(event);
                 },
                 print(number) {
                     window.open(`print.html?number=${number}`, '_blank');
@@ -244,6 +244,16 @@
                 setTimeout(() => {
                     this.footer = false;
                 }, 10000);
+                // hack for listen keyup event at search input
+                const that = this;
+                $(this.input).keyup(function(e){ 
+                    var code = e.key; // recommended to use e.key, it's normalized across devices and languages
+                    if(code==="Enter") { e.preventDefault(); }
+                    if(code===" " || code==="Enter" || code===","|| code===";") {
+                        that.searchBy = undefined;
+                        that.search();
+                    } // missing closing if brace
+                });
             }
         }).$mount('#vueApp');
 
