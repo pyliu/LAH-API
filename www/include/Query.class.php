@@ -1561,4 +1561,22 @@ class Query {
 		$this->db->execute();
 		return $this->db->fetchAll();
 	}
+
+	/**
+	 * 取得目前為公告狀態案件
+	 */
+	public function getRM30HCase() {
+		$this->db->parse("
+			SELECT DISTINCT S.RM01,S.RM02,S.RM03,S.RM09,Ar.kcnt,Au.USER_NAME,S.RM49,S.RM50 
+			from MOICAS.CRSMS S,MOIADM.RKEYN Ar,MOIADM.SYSAUTH1 Au,MOIADM.SYSAUTH1 Au2 where 1=1 
+			and S.rm30='H' 
+			and S.rm09=Ar.kcde_2
+			and kcde_1='06' 
+			and S.RM45 = Au.USER_ID
+			and S.RM30_1=Au2.USER_ID
+			order by S.RM50,Au.USER_NAME
+		");
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
 }
