@@ -1567,14 +1567,19 @@ class Query {
 	 */
 	public function getRM30HCase() {
 		$this->db->parse("
-			SELECT DISTINCT S.RM01,S.RM02,S.RM03,S.RM09,Ar.kcnt,Au.USER_NAME,S.RM49,S.RM50 
-			from MOICAS.CRSMS S,MOIADM.RKEYN Ar,MOIADM.SYSAUTH1 Au,MOIADM.SYSAUTH1 Au2 where 1=1 
-			and S.rm30='H' 
-			and S.rm09=Ar.kcde_2
-			and kcde_1='06' 
-			and S.RM45 = Au.USER_ID
-			and S.RM30_1=Au2.USER_ID
-			order by S.RM50,Au.USER_NAME
+			-- RM49 公告日期, RM50 公告到期日
+			SELECT DISTINCT
+				Q.KCNT AS RM09_CHT,
+				Au.USER_NAME AS RM45_RM31_1_USERNAME,
+				s.*
+			FROM
+				MOICAS.CRSMS s LEFT JOIN MOIADM.RKEYN Q ON s.RM09=Q.KCDE_2 AND Q.KCDE_1 = '06',
+				MOIADM.SYSAUTH1 Au,
+				MOIADM.SYSAUTH1 Au2
+			WHERE s.RM30='H'
+				AND s.RM45 = Au.USER_ID
+				AND s.RM30_1=Au2.USER_ID
+			ORDER BY s.RM50,  Au.USER_NAME
 		");
 		$this->db->execute();
 		return $this->db->fetchAll();
