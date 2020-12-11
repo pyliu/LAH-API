@@ -228,12 +228,16 @@
                     if (_.isEmpty(keyword)) {
                         return false;
                     }
-                    keyword = keyword.replace(/^0+/m, '');
-                    let formData = new FormData();
-                    formData.append("keyword", keyword);
-                    axios.post("api/prefetch.php", formData, { timeout: 1000 }).then((res) => {
-                        this.preftech = res.data.items;
-                    }).catch((err) => console.error(err)).finally(() => {});
+                    // detect chinese char
+                    const arr = keyword.match(/[^\x00-\xff]/ig);   
+                    const len = arr === null ? keyword.length : keyword.length + arr.length;
+                    if (len > 1) {
+                        let formData = new FormData();
+                        formData.append("keyword", keyword);
+                        axios.post("api/prefetch.php", formData, { timeout: 1000 }).then((res) => {
+                            this.preftech = res.data.items;
+                        }).catch((err) => console.error(err)).finally(() => {});
+                    }
                 }
             },
             mounted() {
