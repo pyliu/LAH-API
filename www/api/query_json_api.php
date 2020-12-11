@@ -1138,6 +1138,29 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("更新案件欄位失敗");
 		}
 		break;
+	case "reg_rm30_H_case":
+		$log->info("XHR [reg_rm30_H_case] 查詢登記公告中案件請求");
+		$rows = $mock ? $cache->get('reg_rm30_H_case') : $query->getRM30HCase();
+		if (!$mock) $cache->set('reg_rm30_H_case', $rows);
+		if (empty($rows)) {
+			$log->info("XHR [reg_rm30_H_case] 查無資料");
+			echoErrorJSONString();
+		} else {
+			$total = count($rows);
+			$log->info("XHR [reg_rm30_H_case] 查詢成功($total)");
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($rows);
+				$baked[] = $data->getBakedData();
+			}
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS,
+				"data_count" => $total,
+				"baked" => $baked
+			);
+			echo json_encode($result, 0);
+		}
+		break;
 	case "expba_refund_cases_by_month":
 		if (empty($_POST["query_month"])) {
 			$_POST["query_month"] = substr($today, 0, 5);
