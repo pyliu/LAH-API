@@ -1577,7 +1577,9 @@ class Query {
 				MOIADM.SYSAUTH1 Au,
 				MOIADM.SYSAUTH1 Au2
 			WHERE s.RM30='H'
+				-- RM45 初審人員
 				AND s.RM45 = Au.USER_ID
+				-- RM30_1 作業人員
 				AND s.RM30_1=Au2.USER_ID
 			ORDER BY s.RM50,  Au.USER_NAME
 		");
