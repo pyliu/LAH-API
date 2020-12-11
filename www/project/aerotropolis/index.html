@@ -72,7 +72,7 @@
                     placeholder="請輸入關鍵字查詢 ... "
                     prepend="查詢條件"
                     min-matching-chars="1"
-                    @hit="search"
+                    @hit="chooseTypeahead"
                 >
                     <template #append>
                         <b-button variant="primary" @click="search" @click="searchBy=undefined" :disabled="wip"><i class="fas fa-search"></i> 搜尋</b-button>
@@ -188,6 +188,11 @@
                     this.input.value = val;
                     const event = new Event('input', { bubbles: true, cancelable: true });
                     this.input.dispatchEvent(event);
+                    this.search();
+                },
+                chooseTypeahead() {
+                    this.searchBy = undefined;
+                    this.search();
                 },
                 print(number) {
                     window.open(`print.html?number=${number}`, '_blank');
@@ -196,7 +201,6 @@
                     this.keyword = data;
                     this.searchBy = by;
                     this.triggerInputEvent(data);
-                    this.search();
                 },
                 search() {
                     if (!this.wip && this.keyword !== '' && this.keyword !== undefined) {
