@@ -1150,7 +1150,7 @@ switch ($_POST["type"]) {
 			$log->info("XHR [reg_rm30_H_case] 查詢成功($total)");
 			$baked = array();
 			foreach ($rows as $row) {
-				$data = new RegCaseData($rows);
+				$data = new RegCaseData($row);
 				$baked[] = $data->getBakedData();
 			}
 			$result = array(
