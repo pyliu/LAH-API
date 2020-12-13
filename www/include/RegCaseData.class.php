@@ -170,6 +170,7 @@ class RegCaseData {
             ),
             "紅綠燈背景CSS" => $this->getStatusCss(),
             "燈號" => $this->getState(),
+            "公告燈號" => $this->getRM30HState(),
             "收件字號" => $this->getReceiveSerial(),
             "收件日期" => RegCaseData::toDate($row["RM07_1"]),
             "收件時間" => RegCaseData::toDate($row["RM07_1"])." ".RegCaseData::toDate($row["RM07_2"]),
@@ -286,6 +287,36 @@ class RegCaseData {
 
     public function getCaseReason() {
         return $this->row["KCNT"] ?? $this->row["RM09_CHT"] ?? $this->row["RM09"];
+    }
+
+    public function getRM30HState() {
+        // RM30 - 案件辦理情形
+        if ($this->row["RM30"] != "H") {
+            return "light";
+        }
+        
+        // RM50 - 公告到期日
+        $Y = substr($this->row["RM50"], 0, 3) + 1911;
+        $M = substr($this->row["RM50"], 3, 2);
+        $D = substr($this->row["RM50"], 5, 2);
+        
+        $H = '17';
+        $i = '00';
+        $s = '00';
+        
+        $now         = mktime();
+        $deadline    = mktime($H, $i, $s, $M, $D, $Y);
+        
+        // overdue
+        if ($now - $deadline > 0) {
+            return "danger";
+        }
+        // reach the deadline (within 24hrs)
+        if ($now - $deadline > - 24 * 60 * 60) {
+            return "warning";
+        }
+
+        return "success";
     }
 
     public function getStatus() {
