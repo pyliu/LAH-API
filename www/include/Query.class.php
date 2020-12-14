@@ -1588,4 +1588,15 @@ class Query {
 		$this->db->execute();
 		return $this->db->fetchAll();
 	}
+	/**
+	 * 取得目前為請示狀態案件
+	 */
+	public function getRM30ECase() {
+		$this->db->parse("
+			SELECT * FROM MOICAS.CRSMS t
+			WHERE RM30 = 'E' 
+		");
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
 }
