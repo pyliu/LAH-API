@@ -424,9 +424,14 @@ if (Vue) {
                     need_admin: false
                 }]
             }, {
-                text: `航空城地籍資料查詢`,
+                text: `航空城`,
                 url: "project/aerotropolis/index.html",
                 icon: "plane-departure",
+                need_admin: true
+            }, {
+                text: `智慧管控系統`,
+                url: "http://220.1.35.84:8080/",
+                icon: "landmark",
                 need_admin: true
             }]
         }),
