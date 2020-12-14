@@ -1594,6 +1594,7 @@ class Query {
 	public function getRM30ECase() {
 		$this->db->parse("
 			SELECT * FROM MOICAS.CRSMS t
+			LEFT JOIN MOIADM.RKEYN q ON t.RM09=q.KCDE_2 AND q.KCDE_1 = '06'
 			WHERE RM30 = 'E' 
 		");
 		$this->db->execute();
