@@ -1595,7 +1595,8 @@ class Query {
 		$this->db->parse("
 			SELECT * FROM MOICAS.CRSMS t
 			LEFT JOIN MOIADM.RKEYN q ON t.RM09=q.KCDE_2 AND q.KCDE_1 = '06'
-			WHERE RM30 = 'E' 
+			WHERE RM80 IS NOT NULL AND RM31 NOT IN ('A', 'B', 'C', 'D')
+			ORDER BY t.RM29_1, t.RM80
 		");
 		$this->db->execute();
 		return $this->db->fetchAll();
