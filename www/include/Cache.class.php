@@ -22,6 +22,7 @@ class Cache {
     }
 
     private function getExpire($key) {
+        // $val should be mktime() + $expire in set method
         $val = $this->sqlite3->querySingle("SELECT expire from cache WHERE key = '$key'");
         if (empty($val)) return 0;
         return intval($val);
@@ -51,6 +52,13 @@ class Cache {
         $val = $this->sqlite3->querySingle("SELECT value from cache WHERE key = '$key'");
         if (empty($val)) return false;
         return unserialize($val);
+    }
+
+    public function del($key) {
+        if ($this->system->isMockMode()) return false;
+        $stm = $this->sqlite3->prepare("DELETE from cache WHERE key = :key");
+        $stm->bindParam(':key', $key);
+        return $stm->execute() === FALSE ? false : true;
     }
 
     public function isExpired($key) {
