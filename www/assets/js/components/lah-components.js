@@ -329,111 +329,12 @@ if (Vue) {
             </b-navbar>
         </lah-transition>`,
         data: () => ({
+            svr_info: undefined,
             fri_noon: false,
             icon: "question",
             leading: "Unknown",
             active: undefined,
-            avatar_badge: false,
-            links: [{
-                text: `系管看板`,
-                url: "dashboard.html",
-                icon: "cubes",
-                need_admin: true,
-                children: [{
-                    text: "記錄瀏覽",
-                    url: "tasklog.html",
-                    icon: "paw",
-                    need_admin: true
-                }, {
-                    text: `測試`,
-                    url: "test.html",
-                    icon: "tools",
-                    need_admin: true
-                }, {
-                    text: `測試PHP`,
-                    url: "debug.php",
-                    icon: "tools",
-                    need_admin: true
-                }]
-            }, {
-                text: "監控看板",
-                url: "monitor.html",
-                icon: "desktop",
-                need_admin: true,
-                children: [{
-                    text: "跨所AP看板",
-                    url: "monitor_cross_ap.html",
-                    icon: "server",
-                    need_admin: true
-                }, {
-                    text: "AP連線數看板",
-                    url: "monitor_ap_conn.html",
-                    icon: "user-friends",
-                    need_admin: true
-                }, {
-                    text: "同步異動監控",
-                    url: "monitor_lxhweb.html",
-                    icon: "tv",
-                    need_admin: true
-                }]
-            }, {
-                text: "今日案件",
-                url: ["index.html", "/"],
-                icon: "briefcase",
-                need_admin: false
-            }, {
-                text: "逾期案件",
-                url: "overdue_reg_cases.html",
-                icon: "calendar-alt",
-                need_admin: false,
-                children: []
-            }, {
-                text: `統計看板`,
-                url: "stats.html",
-                icon: "laptop-house",
-                need_admin: false
-            }, {
-                text: "信差訊息",
-                url: "message.html",
-                icon: "comments",
-                need_admin: false
-            }, {
-                text: `業務小幫手`,
-                url: "helper.html",
-                icon: "hands-helping",
-                need_admin: false,
-                children: [{
-                    text: `組織圖`,
-                    url: "org.html",
-                    icon: "sitemap",
-                    need_admin: false
-                }, {
-                    text: "體溫紀錄",
-                    url: "temperature.html",
-                    icon: "head-side-mask",
-                    need_admin: false
-                }, {
-                    text: "繼承應繼分",
-                    url: "heir_share.html",
-                    icon: "chart-pie",
-                    need_admin: false
-                }, {
-                    text: "使用者查詢",
-                    url: "user.html",
-                    icon: "users",
-                    need_admin: false
-                }]
-            }, {
-                text: `航空城`,
-                url: "project/aerotropolis/index.html",
-                icon: "plane-departure",
-                need_admin: true
-            }, {
-                text: `智慧管控系統`,
-                url: "http://220.1.35.84:8080/",
-                icon: "landmark",
-                need_admin: true
-            }]
+            avatar_badge: false
         }),
         computed: {
             showBadge() {
@@ -471,6 +372,109 @@ if (Vue) {
             left_hours() {
                 let hours = new Date().getHours();
                 return 17 - hours;
+            },
+            server_ip() { return this.empty(this.svr_info) ? '127.0.0.1' : this.svr_info.ips[0]; },
+            links() {
+                return [{
+                    text: `系管看板`,
+                    url: "dashboard.html",
+                    icon: "cubes",
+                    need_admin: true,
+                    children: [{
+                        text: "記錄瀏覽",
+                        url: "tasklog.html",
+                        icon: "paw",
+                        need_admin: true
+                    }, {
+                        text: `測試`,
+                        url: "test.html",
+                        icon: "tools",
+                        need_admin: true
+                    }, {
+                        text: `測試PHP`,
+                        url: "debug.php",
+                        icon: "tools",
+                        need_admin: true
+                    }]
+                }, {
+                    text: "監控看板",
+                    url: "monitor.html",
+                    icon: "desktop",
+                    need_admin: true,
+                    children: [{
+                        text: "跨所AP看板",
+                        url: "monitor_cross_ap.html",
+                        icon: "server",
+                        need_admin: true
+                    }, {
+                        text: "AP連線數看板",
+                        url: "monitor_ap_conn.html",
+                        icon: "user-friends",
+                        need_admin: true
+                    }, {
+                        text: "同步異動監控",
+                        url: "monitor_lxhweb.html",
+                        icon: "tv",
+                        need_admin: true
+                    }]
+                }, {
+                    text: "今日案件",
+                    url: ["index.html", "/"],
+                    icon: "briefcase",
+                    need_admin: false
+                }, {
+                    text: "逾期案件",
+                    url: "overdue_reg_cases.html",
+                    icon: "calendar-alt",
+                    need_admin: false,
+                    children: []
+                }, {
+                    text: `統計看板`,
+                    url: "stats.html",
+                    icon: "laptop-house",
+                    need_admin: false
+                }, {
+                    text: "信差訊息",
+                    url: "message.html",
+                    icon: "comments",
+                    need_admin: false
+                }, {
+                    text: `業務小幫手`,
+                    url: "helper.html",
+                    icon: "hands-helping",
+                    need_admin: false,
+                    children: [{
+                        text: `組織圖`,
+                        url: "org.html",
+                        icon: "sitemap",
+                        need_admin: false
+                    }, {
+                        text: "體溫紀錄",
+                        url: "temperature.html",
+                        icon: "head-side-mask",
+                        need_admin: false
+                    }, {
+                        text: "繼承應繼分",
+                        url: "heir_share.html",
+                        icon: "chart-pie",
+                        need_admin: false
+                    }, {
+                        text: "使用者查詢",
+                        url: "user.html",
+                        icon: "users",
+                        need_admin: false
+                    }]
+                }, {
+                    text: `航空城`,
+                    url: "project/aerotropolis/index.html",
+                    icon: "plane-departure",
+                    need_admin: true
+                }, {
+                    text: `智慧管控系統`,
+                    url: `http://${this.server_ip}:8080/`,
+                    icon: "landmark",
+                    need_admin: true
+                }];
             }
         },
         methods: {
@@ -581,9 +585,30 @@ if (Vue) {
                         type: "success"
                     })
                 })
+            },
+            setServerInfo() {
+                this.getLocalCache('server-info').then((json) => {
+                    if (json === false) {
+                        this.isBusy = true
+                        this.$http.post(CONFIG.API.JSON.QUERY, {
+                            type: 'svr'
+                        }).then((res) => {
+                            this.svr_info = res.data;
+                            this.setLocalCache('server-info', res.data, 86400000) // cache for a day
+                        }).catch((err) => {
+                            this.$error(err)
+                        }).finally(() => {
+                            this.isBusy = false
+                        })
+                    } else {
+                        this.svr_info = json;
+                        this.$log(json);
+                    }
+                })
             }
         },
         created() {
+            this.setServerInfo();
             let day_of_week = new Date().getDay();
             let hours = new Date().getHours();
             this.fri_noon = day_of_week == 5 && hours < 17 && hours > 12;
