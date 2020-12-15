@@ -1601,4 +1601,17 @@ class Query {
 		$this->db->execute();
 		return $this->db->fetchAll();
 	}
+	/**
+	 * 取得曾經取消請示案件
+	 */
+	public function getCancelRM30ECase() {
+		$this->db->parse("
+			SELECT * FROM MOICAS.CRSMS t
+			LEFT JOIN MOIADM.RKEYN q ON t.RM09=q.KCDE_2 AND q.KCDE_1 = '06'
+			WHERE RM83 IS NOT NULL AND RM29_1 < RM58_1
+			ORDER BY t.RM29_1, t.RM58_1
+		");
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
 }
