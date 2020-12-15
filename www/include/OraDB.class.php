@@ -178,13 +178,13 @@ class OraDB {
 
     private function initSetting() {
         $system = new System();
-        $this->L1HWEB_DB = $system->get("ORA_DB_L1HWEB");
-        $this->L1HWEB_Alt_DB = $system->get("ORA_DB_L1HWEB_Alt");
-        $this->L2HWEB_DB = $system->get("ORA_DB_L2HWEB");
-        $this->L3HWEB_DB = $system->get("ORA_DB_L3HWEB");
-        $this->TWEB_DB = $system->get("ORA_DB_TWEB");
-        $this->MAIN_DB = $system->get("ORA_DB_MAIN");
-        $this->BK_DB = $system->get("ORA_DB_BK");
+        $this->L1HWEB_DB = $system->getOraL1hwebDBConnStr();
+        $this->L1HWEB_Alt_DB = $system->getOraL3hwebL1DBConnStr();
+        $this->L2HWEB_DB = $system->getOraL2hwebDBConnStr();
+        $this->L3HWEB_DB = $system->getOraL3hwebDBConnStr();
+        $this->TWEB_DB = $system->getOraTestDBConnStr();
+        $this->MAIN_DB = $system->getOraMainDBConnStr();
+        $this->BK_DB = $system->getOraBackupDBConnStr();
         $this->user = $system->get("ORA_DB_USER");
         $this->pass = $system->get("ORA_DB_PASS");
     }

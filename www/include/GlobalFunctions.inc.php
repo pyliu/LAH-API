@@ -41,10 +41,10 @@ function getMyAuthority() {
 
 function GetOraUser() {
     $system = new System();
-    $db = $system->get("ORA_DB_MAIN");
+    $db = $system->getOraMainDBConnStr();
 
     global $log;
-    $log->info(__METHOD__.": query system ORA_DB_MAIN database users.");
+    $log->info(__METHOD__.": query system ORA_DB_HXHEB database users.");
     $log->info(__METHOD__.": $db");
     
     $conn = oci_connect($system->get("ORA_DB_USER"), $system->get("ORA_DB_PASS"), $db, "US7ASCII");

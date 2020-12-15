@@ -124,6 +124,44 @@ class System {
                 PRIMARY KEY("key")
             )
         ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "authority" (
+                "id"	INTEGER,
+                "role"	TEXT NOT NULL DEFAULT \'user\',
+                "ip"	TEXT NOT NULL DEFAULT \'192.168.xx.xx\',
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "user" (
+                "id"	TEXT NOT NULL,
+                "name"	TEXT NOT NULL,
+                "sex"	INTEGER NOT NULL DEFAULT 0,
+                "addr"	TEXT,
+                "tel"	TEXT,
+                "ext"	NUMERIC NOT NULL DEFAULT 153,
+                "cell"	TEXT,
+                "unit"	TEXT NOT NULL DEFAULT \'行政課\',
+                "title"	TEXT,
+                "work"	TEXT,
+                "exam"	TEXT,
+                "education"	TEXT,
+                "onboard_date"	TEXT,
+                "offboard_date"	TEXT,
+                "ip"	TEXT NOT NULL DEFAULT \'192.168.xx.xx\',
+                "pw_hash"	TEXT NOT NULL DEFAULT \'827ddd09eba5fdaee4639f30c5b8715d\',
+                "authority"	INTEGER NOT NULL DEFAULT 0,
+                "birthday"	TEXT,
+                PRIMARY KEY("id")
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "unit" (
+                "id"	INTEGER NOT NULL DEFAULT 0,
+                "name"	TEXT NOT NULL,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
         return $db_path;
     }
 
@@ -139,9 +177,9 @@ class System {
     }
 
     public function isMockMode() {
-        global $client_ip;
+        // global $client_ip;
         // if ($client_ip == '127.0.0.1') return true;
-        return $this->get('ENABLE_MOCK_MODE') == 'true';
+        return $this->get('ENABLE_MOCK_MODE') === 'true';
     }
     
     public function enableMockMode() {
@@ -215,6 +253,51 @@ class System {
             "isRAE"   => in_array($ip, $this->getRoleRAEIps()),
             "isGA"    => in_array($ip, $this->getRoleGAIps())
         );
+    }
+
+    public function getOraMainDBConnStr() {
+        $site = strtoupper($this->get('SITE'));
+        $ip = $this->get('ORA_DB_HXWEB_IP');
+        $port = $this->get('ORA_DB_HXWEB_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=${ip})(PORT=${port})))(CONNECT_DATA=(SERVICE_NAME=${site}WEB)))";
+    }
+
+    public function getOraBackupDBConnStr() {
+        $site = strtoupper($this->get('SITE'));
+        $ip = $this->get('ORA_DB_BACKUP_IP');
+        $port = $this->get('ORA_DB_BACKUP_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=${ip})(PORT=${port})))(CONNECT_DATA=(SERVICE_NAME=${site}WEB)))";
+    }
+
+    public function getOraTestDBConnStr() {
+        $site = strtoupper($this->get('SITE'));
+        $ip = $this->get('ORA_DB_HXT_IP');
+        $port = $this->get('ORA_DB_HXT_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=${ip})(PORT=${port})))(CONNECT_DATA=(SERVICE_NAME=${site}WEBT)))";
+    }
+
+    public function getOraL3hwebDBConnStr() {
+        $ip = $this->get('ORA_DB_L3HWEB_IP');
+        $port = $this->get('ORA_DB_L3HWEB_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=${ip})(PORT=${port})))(CONNECT_DATA=(SERVICE_NAME=L3HWEB)))";
+    }
+
+    public function getOraL3hwebL1DBConnStr() {
+        $ip = $this->get('ORA_DB_L3HWEB_IP');
+        $port = $this->get('ORA_DB_L3HWEB_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=${ip})(PORT=${port})))(CONNECT_DATA=(SERVICE_NAME=L1HWEB)))";
+    }
+
+    public function getOraL1hwebDBConnStr() {
+        $ip = $this->get('ORA_DB_L1HWEB_IP');
+        $port = $this->get('ORA_DB_L1HWEB_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=${ip})(PORT=${port})))(CONNECT_DATA=(SERVICE_NAME=L1HWEB)))";
+    }
+
+    public function getOraL2hwebDBConnStr() {
+        $ip = $this->get('ORA_DB_L2HWEB_IP');
+        $port = $this->get('ORA_DB_L2HWEB_PORT');
+        return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=${ip})(PORT=${port})))(CONNECT_DATA=(SERVICE_NAME=L2HWEB)))";
     }
 
     public function get($key) {
