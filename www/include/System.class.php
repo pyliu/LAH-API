@@ -130,6 +130,7 @@ class System {
                 "role"	TEXT NOT NULL DEFAULT \'user\',
                 "ip"	TEXT NOT NULL DEFAULT \'192.168.xx.xx\',
                 "user_id"	TEXT NOT NULL DEFAULT \'HX0000\',
+                "note"	TEXT,
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
