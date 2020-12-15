@@ -235,7 +235,7 @@ class WatchDog {
         if (php_sapi_name() != "cli") {
             global $log;
             $cache = new Cache();
-            // compress all log every monday
+            // compress all log when zipLogs_flag is expired
             if ($cache->isExpired('zipLogs_flag')) {
                 $log->info("開始壓縮LOG檔！");
                 zipLogs();
