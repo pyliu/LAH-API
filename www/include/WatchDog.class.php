@@ -7,6 +7,7 @@ require_once(INC_DIR.'/Temperature.class.php');
 require_once(INC_DIR.'/SQLiteUser.class.php');
 require_once(INC_DIR.'/System.class.php');
 require_once(INC_DIR.'/Ping.class.php');
+require_once(INC_DIR.'/Cache.class.php');
 
 class WatchDog {
     
@@ -233,12 +234,14 @@ class WatchDog {
     private function compressLog() {
         if (php_sapi_name() != "cli") {
             global $log;
+            $cache = new Cache();
             // compress all log every monday
-            if (date("w") == "1" && !isset($_SESSION["LOG_COMPRESSION_DONE"])) {
-                $log->info("今天星期一，開始壓縮LOG檔！");
+            if ($cache->isExpired('zipLogs_flag')) {
+                $log->info("開始壓縮LOG檔！");
                 zipLogs();
-                $_SESSION["LOG_COMPRESSION_DONE"] = true;
                 $log->info("壓縮LOG檔結束！");
+                // cache the flag for a week
+                $cache->set('zipLogs_flag', true, 604800);
             }
         }
     }

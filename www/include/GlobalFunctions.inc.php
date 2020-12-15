@@ -97,7 +97,7 @@ function getUserNames($refresh = false) {
             $sqlite_user = new SQLiteUser();
             $all_users = $sqlite_user->getAllUsers();
             foreach($all_users as $this_user) {
-                $user_id =trim($this_user["id"]);
+                $user_id = trim($this_user["id"]);
                 if (empty($user_id)) {
                     continue;
                 }
