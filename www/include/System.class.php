@@ -7,30 +7,51 @@ define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SE
 class System {
     private $sqlite3;
 
+    private function getRoleIps($role) {
+        if($stmt = $this->sqlite3->prepare('SELECT * FROM authority WHERE role = :role')) {
+            $stmt->bindParam(':role', $role);
+            $result = $stmt->execute();
+            $return = [];
+            if ($result === false) return $return;
+            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                if (!in_array($row['ip'], $return)) {
+                    $return[] = $row['ip'];
+                }
+            }
+            return $return;
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得 $role IPs 資料失敗！");
+        }
+        return false;
+    }
+
     private function addLoopIPsAuthority() {
         $ret = false;
         
-        $super_array = unserialize($this->get('ROLE_SUPER_IPS'));
+        $super_array = $this->getRoleSuperIps();
         if (!in_array('127.0.0.1', $super_array)) {
             $super_array[] = '127.0.0.1';
             $stm = $this->sqlite3->prepare("
-                REPLACE INTO config ('key', 'value')
-                VALUES (:key, :value)
+                REPLACE INTO authority ('role', 'ip', 'note')
+                VALUES (:role, :ip, :note)
             ");
-            $stm->bindValue(':key', 'ROLE_SUPER_IPS');
-            $stm->bindValue(':value', serialize($super_array));
+            $stm->bindValue(':role', 'super');
+            $stm->bindValue(':ip', '127.0.0.1');
+            $stm->bindValue(':note', 'added by system automatically');
             $ret = $stm->execute() === FALSE ? false : true;
         }
         
-        $adm_array = unserialize($this->get('ROLE_ADM_IPS'));
+        $adm_array = $this->getRoleAdminIps();
         if (!in_array('::1', $adm_array)) {
             $adm_array[] = '::1';
             $stm = $this->sqlite3->prepare("
-                REPLACE INTO config ('key', 'value')
-                VALUES (:key, :value)
+                REPLACE INTO authority ('role', 'ip', 'note')
+                VALUES (:role, :ip, :note)
             ");
-            $stm->bindValue(':key', 'ROLE_ADM_IPS');
-            $stm->bindValue(':value', serialize($adm_array));
+            $stm->bindValue(':role', 'admin');
+            $stm->bindValue(':ip', '::1');
+            $stm->bindValue(':note', 'added by system automatically');
             $ret = $stm->execute() === FALSE ? false : true;
         }
 
@@ -228,23 +249,23 @@ class System {
     }
 
     public function getRoleAdminIps() {
-        return unserialize($this->get('ROLE_ADM_IPS'));
+        return $this->getRoleIps('admin');
     }
 
     public function getRoleChiefIps() {
-        return unserialize($this->get('ROLE_CHIEF_IPS'));
+        return $this->getRoleIps('chief');
     }
 
     public function getRoleSuperIps() {
-        return unserialize($this->get('ROLE_SUPER_IPS'));
+        return $this->getRoleIps('super');
     }
 
     public function getRoleRAEIps() {
-        return unserialize($this->get('ROLE_RAE_IPS'));
+        return $this->getRoleIps('rae');
     }
 
     public function getRoleGAIps() {
-        return unserialize($this->get('ROLE_GA_IPS'));
+        return $this->getRoleIps('ga');
     }
 
     public function getAuthority($ip) {
