@@ -185,8 +185,6 @@ function getLocalhostIP() {
     // find this server ip
     $host_ip = '127.0.0.1';
     $host_ips = gethostbynamel(gethostname());
-    global $log;
-    $log->info(print_r($host_ips, true));
     foreach ($host_ips as $this_ip) {
         if (preg_match("/220\.1\./", $this_ip)) {
             $host_ip = $this_ip;
