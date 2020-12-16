@@ -82,6 +82,6 @@ class Prefetch {
 
             return $result;
         }
-        return $this->getCache()->get('Prefetch::getRM30HCase');
+        return $this->getCache()->get(self::KEYS['RM30H']);
 	}
 }
