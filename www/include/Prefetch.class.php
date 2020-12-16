@@ -8,8 +8,9 @@ class Prefetch {
     private const PREFETCH_SQLITE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."prefetch.db";
     private const KEYS = array(
         'RM30H' => 'Prefetch::getRM30HCase',
-        'OVERDUE' => 'Prefetch::getOverdueCasesIn15Days',
-        'ALMOST_OVERDUE' => 'Prefetch::getAlmostOverdueCases'
+        'OVERDUE' => 'Prefetch::getOverdueCaseIn15Days',
+        'ALMOST_OVERDUE' => 'Prefetch::getAlmostOverdueCase',
+        'ASK' => 'Prefetch::getAskCase'
     );
     private $ora_db = null;
     private $cache = null;
@@ -99,16 +100,16 @@ class Prefetch {
     /**
      * 強制重新讀取15天內逾期案件
      */
-    public function reloadOverdueCasesIn15Days() {
+    public function reloadOverdueCaseIn15Days() {
         $this->getCache()->del(self::KEYS['OVERDUE']);
-        return $this->getOverdueCasesIn15Days();
+        return $this->getOverdueCaseIn15Days();
     }
     /**
 	 * 取得15天內逾期案件
      * default cache time is 15 minutes * 60 seconds = 900 seconds
 	 */
 	// 找近15天逾期的案件
-	public function getOverdueCasesIn15Days($expire_duration = 900) {
+	public function getOverdueCaseIn15Days($expire_duration = 900) {
         if ($this->getCache()->isExpired(self::KEYS['OVERDUE'])) {
             global $log;
             $log->info('['.self::KEYS['OVERDUE'].'] 快取資料已失效，重新擷取 ... ');
@@ -161,12 +162,12 @@ class Prefetch {
     /**
      * 強制重新讀取快逾期案件
      */
-    public function reloadAlmostOverdueCases() {
+    public function reloadAlmostOverdueCase() {
         $this->getCache()->del(self::KEYS['ALMOST_OVERDUE']);
-        return $this->getAlmostOverdueCases();
+        return $this->getAlmostOverdueCase();
     }
 	// 找快逾期的案件
-	public function getAlmostOverdueCases($expire_duration = 900) {
+	public function getAlmostOverdueCase($expire_duration = 900) {
         if ($this->getCache()->isExpired(self::KEYS['ALMOST_OVERDUE'])) {
             global $log;
             $log->info('['.self::KEYS['ALMOST_OVERDUE'].'] 快取資料已失效，重新擷取 ... ');
@@ -212,4 +213,64 @@ class Prefetch {
         }
         return $this->getCache()->get(self::KEYS['ALMOST_OVERDUE']);
     }
+    /**
+     * 取消請示案件快取剩餘時間
+     */
+    public function getAskCaseCacheRemainingTime() {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['ASK']);
+    }
+    /**
+     * 強制重新讀取取消請示案件
+     */
+    public function reloadAskCase() {
+        $this->getCache()->del(self::KEYS['ASK']);
+        return $this->getAskCase();
+    }
+	// 找取消請示的案件
+	public function getAskCase($expire_duration = 3600) {
+        if ($this->getCache()->isExpired(self::KEYS['ASK'])) {
+            global $log;
+            $log->info('['.self::KEYS['ASK'].'] 快取資料已失效，重新擷取 ... ');
+
+            $db = $this->getOraDB();
+            $db->parse("
+                SELECT *
+                FROM SCRSMS
+                LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+                WHERE
+                    RM02 NOT LIKE 'HB%1'		-- only search our own cases
+                    AND RM03 LIKE '%0' 			-- without sub-case
+                    AND RM31 IS NULL			-- not closed case
+                    AND RM29_1 || RM29_2 < :bv_now_plus_4hrs
+                    AND RM29_1 || RM29_2 > :bv_now
+                ORDER BY RM29_1 DESC, RM29_2 DESC
+            ");
+
+            $tw_date = new Datetime("now");
+            $tw_date->modify("-1911 year");
+            $now = ltrim($tw_date->format("YmdHis"), "0");	// ex: 1080325152111
+
+            $date_4hrs_later = new Datetime("now");
+            $date_4hrs_later->modify("-1911 year");
+            $date_4hrs_later->modify("+4 hours");
+            if ($date_4hrs_later->format("H") > 17) {
+                $log->info(__METHOD__.": ".$date_4hrs_later->format("YmdHis")." is over 17:00:00, so add 16 hrs ... ");
+                $date_4hrs_later->modify("+16 hours");
+            }
+            $now_plus_4hrs = ltrim($date_4hrs_later->format("YmdHis"), "0");	// ex: 1090107081410
+            
+            $log->info(__METHOD__.": Find almost overdue date between $now and $now_plus_4hrs cases.");
+
+            $db->bind(":bv_now", $now);
+            $db->bind(":bv_now_plus_4hrs", $now_plus_4hrs);
+            $db->execute();
+            $result = $db->fetchAll();
+            $this->getCache()->set(self::KEYS['ASK'], $result, $expire_duration);
+
+            $log->info("[".self::KEYS['ASK']."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+            return $result;
+        }
+        return $this->getCache()->get(self::KEYS['ASK']);
+	}
 }
