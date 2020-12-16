@@ -4,13 +4,14 @@ require_once("System.class.php");
 require_once("DynamicSQLite.class.php");
 
 class Cache {
-    private const CACHE_SQLITE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."cache.db";
+    private const DEF_CACHE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."cache.db";
     private $config = null;
     private $sqlite3 = null;
+    private $db_path = self::DEF_CACHE_DB;
 
-    private function init($path) {
-        if (!file_exists($path)) {
-            $sqlite = new DynamicSQLite($path);
+    private function init() {
+        if (!file_exists($this->db_path)) {
+            $sqlite = new DynamicSQLite($this->db_path);
             $sqlite->initDB();
             $table = new SQLiteTable('cache');
             $table->addField('key', 'TEXT PRIMARY KEY');
@@ -20,9 +21,9 @@ class Cache {
         }
     }
 
-    private function getSqliteDB($path = self::CACHE_SQLITE_DB) {
+    private function getSqliteDB() {
         if ($this->sqlite3 === null) {
-            $this->sqlite3 = new SQLite3($path);
+            $this->sqlite3 = new SQLite3($this->db_path);
         }
         return $this->sqlite3;
     }
@@ -34,8 +35,9 @@ class Cache {
         return $this->config;
     }
 
-    function __construct($path = self::CACHE_SQLITE_DB) {
-        $this->init($path);
+    function __construct($path = self::DEF_CACHE_DB) {
+        $this->db_path = $path;
+        $this->init();
     }
 
     function __destruct() { }
