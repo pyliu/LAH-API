@@ -43,8 +43,8 @@ class Cache {
     function __destruct() { }
     
     public function getExpireTimestamp($key) {
-        // mock mode always returns now + 60 seconds
-        if ($this->getSystemConfig()->isMockMode()) return mktime() + 60;
+        // mock mode always returns now + 15 seconds
+        if ($this->getSystemConfig()->isMockMode()) return mktime() + 15;
         // $val should be mktime() + $expire in set method
         $val = $this->getSqliteDB()->querySingle("SELECT expire from cache WHERE key = '$key'");
         if (empty($val)) return 0;
