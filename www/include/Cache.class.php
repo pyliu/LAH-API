@@ -73,6 +73,7 @@ class Cache {
     }
 
     public function isExpired($key) {
+        if ($this->getSystemConfig()->isMockMode()) return false;
         return mktime() > $this->getExpireTimestamp($key);
     }
 }
