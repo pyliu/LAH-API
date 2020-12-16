@@ -6,6 +6,9 @@ require_once("Cache.class.php");
 
 class Prefetch {
     private const PREFETCH_SQLITE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."prefetch.db";
+    private const KEYS = array(
+        'RM30H' => 'Prefetch::getRM30HCase'
+    );
     private $ora_db = null;
     private $cache = null;
 
@@ -30,16 +33,16 @@ class Prefetch {
      * 目前為公告狀態案件快取剩餘時間
      */
     public function getRM30HCaseCacheRemainingTime() {
-        if ($this->getCache()->isExpired('Prefetch::getRM30HCase')) {
+        if ($this->getCache()->isExpired(self::KEYS['RM30H'])) {
             return 0;
         }
-        return $this->getCache()->getExpireTimestamp('Prefetch::getRM30HCase') - mktime();
+        return $this->getCache()->getExpireTimestamp(self::KEYS['RM30H']) - mktime();
     }
     /**
      * 強制重新讀取目前為公告狀態案件
      */
     public function reloadRM30HCase() {
-        $this->getCache()->del('Prefetch::getRM30HCase');
+        $this->getCache()->del(self::KEYS['RM30H']);
         return $this->getRM30HCase();
     }
     /**
@@ -47,7 +50,7 @@ class Prefetch {
      * default cache time is 60 minutes * 60 seconds = 3600 seconds
 	 */
 	public function getRM30HCase($expire_duration = 3600) {
-        if ($this->getCache()->isExpired('Prefetch::getRM30HCase')) {
+        if ($this->getCache()->isExpired(self::KEYS['RM30H'])) {
             global $log;
             $log->info('[Prefetch::getRM30HCase] 快取資料已失效，重新擷取 ... ');
 
@@ -73,7 +76,7 @@ class Prefetch {
             ");
             $db->execute();
             $result = $db->fetchAll();
-            $this->getCache()->set('Prefetch::getRM30HCase', $result, $expire_duration);
+            $this->getCache()->set(self::KEYS['RM30H'], $result, $expire_duration);
 
             $log->info("[Prefetch::getRM30HCase] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
