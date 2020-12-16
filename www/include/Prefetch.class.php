@@ -28,6 +28,13 @@ class Prefetch {
         return $this->cache;
     }
 
+    private function getRemainingCacheTimeByKey($key) {
+        if ($this->getCache()->isExpired($key)) {
+            return 0;
+        }
+        return $this->getCache()->getExpireTimestamp($key) - mktime();
+    }
+
     function __construct() { }
 
     function __destruct() { }
@@ -35,10 +42,7 @@ class Prefetch {
      * 目前為公告狀態案件快取剩餘時間
      */
     public function getRM30HCaseCacheRemainingTime() {
-        if ($this->getCache()->isExpired(self::KEYS['RM30H'])) {
-            return 0;
-        }
-        return $this->getCache()->getExpireTimestamp(self::KEYS['RM30H']) - mktime();
+        return $this->getRemainingCacheTimeByKey(self::KEYS['RM30H']);
     }
     /**
      * 強制重新讀取目前為公告狀態案件
@@ -90,10 +94,7 @@ class Prefetch {
      * 15天內逾期案件快取剩餘時間
      */
     public function getOverdueCaseCacheRemainingTime() {
-        if ($this->getCache()->isExpired(self::KEYS['OVERDUE'])) {
-            return 0;
-        }
-        return $this->getCache()->getExpireTimestamp(self::KEYS['OVERDUE']) - mktime();
+        return $this->getRemainingCacheTimeByKey(self::KEYS['OVERDUE']);
     }
     /**
      * 強制重新讀取15天內逾期案件
@@ -155,10 +156,7 @@ class Prefetch {
      * 快逾期案件快取剩餘時間
      */
     public function getAlmostOverdueCaseCacheRemainingTime() {
-        if ($this->getCache()->isExpired(self::KEYS['ALMOST_OVERDUE'])) {
-            return 0;
-        }
-        return $this->getCache()->getExpireTimestamp(self::KEYS['ALMOST_OVERDUE']) - mktime();
+        return $this->getRemainingCacheTimeByKey(self::KEYS['ALMOST_OVERDUE']);
     }
     /**
      * 強制重新讀取快逾期案件
