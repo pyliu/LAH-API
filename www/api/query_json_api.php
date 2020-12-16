@@ -1139,30 +1139,6 @@ switch ($_POST["type"]) {
 			echoErrorJSONString("更新案件欄位失敗");
 		}
 		break;
-	case "reg_rm30_H_case":
-		$log->info("XHR [reg_rm30_H_case] 查詢登記公告中案件請求");
-		$rows = $mock ? $cache->get('reg_rm30_H_case') : $query->getRM30HCase();
-		$cache->set('reg_rm30_H_case', $rows);
-		if (empty($rows)) {
-			$log->info("XHR [reg_rm30_H_case] 查無資料");
-			echoErrorJSONString();
-		} else {
-			$total = count($rows);
-			$log->info("XHR [reg_rm30_H_case] 查詢成功($total)");
-			$baked = array();
-			foreach ($rows as $row) {
-				$data = new RegCaseData($row);
-				$baked[] = $data->getBakedData();
-			}
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS,
-				"message" => "查詢成功，找到 $total 筆公告中資料。",
-				"data_count" => $total,
-				"baked" => $baked
-			);
-			echo json_encode($result, 0);
-		}
-		break;
 	case "reg_rm30_E_case":
 		$log->info("XHR [reg_rm30_E_case] 查詢登記請示案件請求");
 		$rows = $mock ? $cache->get('reg_rm30_E_case') : $query->getRM30ECase();
