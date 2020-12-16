@@ -58,6 +58,7 @@ switch ($_POST["type"]) {
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
 			"server" => $_SERVER,
 			"ips" => $ips,
+			"mock" => $mock,
 			"data_count" => count($ips),
 			"message" => "Got server $count ip address => ".str_replace("\n", ' ', print_r($ips, true))
 		), 0);
