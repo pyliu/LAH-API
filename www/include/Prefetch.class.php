@@ -48,6 +48,9 @@ class Prefetch {
 	 */
 	public function getRM30HCase($expire_duration = 3600) {
         if ($this->getCache()->isExpired('Prefetch::getRM30HCase')) {
+            global $log;
+            $log->info('[Prefetch::getRM30HCase] 快取資料已失效，重新擷取 ... ');
+
             $db = $this->getOraDB();
             $db->parse("
                 -- RM49 公告日期, RM50 公告到期日
@@ -71,6 +74,9 @@ class Prefetch {
             $db->execute();
             $result = $db->fetchAll();
             $this->getCache()->set('Prefetch::getRM30HCase', $result, $expire_duration);
+
+            $log->info("[Prefetch::getRM30HCase] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
             return $result;
         }
         return $this->getCache()->get('Prefetch::getRM30HCase');
