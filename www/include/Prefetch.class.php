@@ -7,7 +7,8 @@ require_once("Cache.class.php");
 class Prefetch {
     private const PREFETCH_SQLITE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."prefetch.db";
     private const KEYS = array(
-        'RM30H' => 'Prefetch::getRM30HCase'
+        'RM30H' => 'Prefetch::getRM30HCase',
+        'OVERDUE' => 'Prefetch::getOverdueCasesIn15Days'
     );
     private $ora_db = null;
     private $cache = null;
@@ -52,7 +53,7 @@ class Prefetch {
 	public function getRM30HCase($expire_duration = 3600) {
         if ($this->getCache()->isExpired(self::KEYS['RM30H'])) {
             global $log;
-            $log->info('[Prefetch::getRM30HCase] 快取資料已失效，重新擷取 ... ');
+            $log->info('['.self::KEYS['RM30H'].'] 快取資料已失效，重新擷取 ... ');
 
             $db = $this->getOraDB();
             $db->parse("
@@ -78,10 +79,125 @@ class Prefetch {
             $result = $db->fetchAll();
             $this->getCache()->set(self::KEYS['RM30H'], $result, $expire_duration);
 
-            $log->info("[Prefetch::getRM30HCase] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+            $log->info("[".self::KEYS['RM30H']."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
             return $result;
         }
         return $this->getCache()->get(self::KEYS['RM30H']);
+    }
+    /**
+     * 15天內逾期案件快取剩餘時間
+     */
+    public function getOverdueCaseCacheRemainingTime() {
+        if ($this->getCache()->isExpired(self::KEYS['OVERDUE'])) {
+            return 0;
+        }
+        return $this->getCache()->getExpireTimestamp(self::KEYS['RM30H']) - mktime();
+    }
+    /**
+     * 強制重新讀取15天內逾期案件
+     */
+    public function reloadOverdueCasesIn15Days() {
+        $this->getCache()->del(self::KEYS['OVERDUE']);
+        return $this->getOverdueCasesIn15Days();
+    }
+    /**
+	 * 取得15天內逾期案件
+     * default cache time is 15 minutes * 60 seconds = 900 seconds
+	 */
+	// 找近15天逾期的案件
+	public function getOverdueCasesIn15Days($expire_duration = 900) {
+        if ($this->getCache()->isExpired(self::KEYS['OVERDUE'])) {
+            global $log;
+            $log->info('['.self::KEYS['OVERDUE'].'] 快取資料已失效，重新擷取 ... ');
+
+            $db = $this->getOraDB();
+            $db->parse("
+                SELECT *
+                FROM SCRSMS
+                LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+                WHERE
+                    -- RM07_1 > :bv_start
+                    RM02 NOT LIKE 'HB%1'		-- only search our own cases
+                    AND RM03 LIKE '%0' 			-- without sub-case
+                    AND RM31 IS NULL			-- not closed case
+                    AND RM29_1 || RM29_2 < :bv_now
+                    AND RM29_1 || RM29_2 > :bv_start
+                ORDER BY RM29_1 DESC, RM29_2 DESC
+            ");
+
+            $tw_date = new Datetime("now");
+            $tw_date->modify("-1911 year");
+            $now = ltrim($tw_date->format("YmdHis"), "0");	// ex: 1080325152111
+
+            $date_15days_before = new Datetime("now");
+            $date_15days_before->modify("-1911 year");
+            $date_15days_before->modify("-15 days");
+            $start = ltrim($date_15days_before->format("YmdHis"), "0");	// ex: 1090107081410
+            
+            global $log;
+            $log->info(__METHOD__.": Find overdue date between $start and $now cases.");
+
+            $db->bind(":bv_now", $now);
+            $db->bind(":bv_start", $start);
+            $db->execute();
+            $result = $db->fetchAll();
+            $this->getCache()->set(self::KEYS['OVERDUE'], $result, $expire_duration);
+
+            $log->info("[".self::KEYS['OVERDUE']."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+            return $result;
+        }
+        return $this->getCache()->get(self::KEYS['OVERDUE']);
+	}
+
+	// 找快逾期的案件
+	public function queryAlmostOverdueCases($reviewer_id = "") {
+		$query_str = "
+			SELECT *
+			FROM SCRSMS
+			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+			WHERE
+				RM02 NOT LIKE 'HB%1'		-- only search our own cases
+				AND RM03 LIKE '%0' 			-- without sub-case
+				AND RM31 IS NULL			-- not closed case
+				AND RM29_1 || RM29_2 < :bv_now_plus_4hrs
+				AND RM29_1 || RM29_2 > :bv_now
+		";
+		if (empty($reviewer_id)) {
+			$this->db->parse("
+				${query_str}
+				ORDER BY RM29_1 DESC, RM29_2 DESC
+			");
+		} else {
+			$this->db->parse("
+				${query_str}
+					AND RM45 = :bv_reviewer_id
+				ORDER BY RM29_1 DESC, RM29_2 DESC
+			");
+			$this->db->bind(":bv_reviewer_id", $reviewer_id);	// HBxxxx
+		}
+
+		global $log;
+
+		$tw_date = new Datetime("now");
+		$tw_date->modify("-1911 year");
+		$now = ltrim($tw_date->format("YmdHis"), "0");	// ex: 1080325152111
+
+		$date_4hrs_later = new Datetime("now");
+		$date_4hrs_later->modify("-1911 year");
+		$date_4hrs_later->modify("+4 hours");
+		if ($date_4hrs_later->format("H") > 17) {
+			$log->info(__METHOD__.": ".$date_4hrs_later->format("YmdHis")." is over 17:00:00, so add 16 hrs ... ");
+			$date_4hrs_later->modify("+16 hours");
+		}
+		$now_plus_4hrs = ltrim($date_4hrs_later->format("YmdHis"), "0");	// ex: 1090107081410
+		
+		$log->info(__METHOD__.": Find overdue date between $now and $now_plus_4hrs cases.");
+
+		$this->db->bind(":bv_now", $now);
+		$this->db->bind(":bv_now_plus_4hrs", $now_plus_4hrs);
+		$this->db->execute();
+		return $this->db->fetchAll();
 	}
 }
