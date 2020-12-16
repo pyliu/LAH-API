@@ -45,49 +45,45 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
-	// case "almost_overdue_reg_cases":
-	// 	$log->info("XHR [almost_overdue_reg_cases] 即將逾期案件查詢請求");
-	// 	$log->info("XHR [almost_overdue_reg_cases] reviewer ID is '".$_POST["reviewer_id"]."'");
-	// 	$rows = $mock ? $cache->get('almost_overdue_reg_cases') : $query->queryAlmostOverdueCases($_POST["reviewer_id"]);
-	// 	$cache->set('almost_overdue_reg_cases', $rows);
-	// 	if (empty($rows)) {
-	// 		$log->info("XHR [almost_overdue_reg_cases] 近4小時內查無即將逾期資料");
-	// 		$result = array(
-	// 			"status" => STATUS_CODE::SUCCESS_WITH_NO_RECORD,
-	// 			"items" => array(),
-	// 			"items_by_id" => array(),
-	// 			"data_count" => 0,
-	// 			"message" => "近4小時內查無即將逾期資料"
-	// 		);
-	// 		echo json_encode($result, 0);
-	// 	} else {
-	// 		$items = [];
-	// 		$items_by_id = [];
-	// 		foreach ($rows as $row) {
-	// 			$regdata = new RegCaseData($row);
-	// 			$this_item = array(
-	// 				"收件字號" => $regdata->getReceiveSerial(),
-	// 				"登記原因" => $regdata->getCaseReason(),
-	// 				"辦理情形" => $regdata->getStatus(),
-	// 				"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
-	// 				"限辦期限" => $regdata->getDueDate(),
-	// 				"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
-	// 				"作業人員" => $regdata->getCurrentOperator()
-	// 			);
-	// 			$items[] = $this_item;
-	// 			$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
-	// 		}
-	// 		$result = array(
-	// 			"status" => STATUS_CODE::SUCCESS_NORMAL,
-	// 			"items" => $items,
-	// 			"items_by_id" => $items_by_id,
-	// 			"data_count" => count($items),
-	// 			"raw" => $rows
-	// 		);
-	// 		$log->info("XHR [almost_overdue_reg_cases] 近4小時內找到".count($items)."件即將逾期案件");
-	// 		echo json_encode($result, 0);
-	// 	}
-	// 	break;
+	case "almost_overdue_reg_cases":
+		$log->info("XHR [almost_overdue_reg_cases] 即將逾期案件查詢請求");
+		$rows = $prefetch->getAlmostOverdueCases();
+		if (empty($rows)) {
+			$log->info("XHR [almost_overdue_reg_cases] 近4小時內查無即將逾期資料");
+			echoJSONResponse("近4小時內查無即將逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(
+				"items" => array(),
+				"items_by_id" => array(),
+				"data_count" => 0,
+				"raw" => $rows,
+				'cache_remaining_time' => $prefetch->getAlmostOverdueCaseCacheRemainingTime()
+			));
+		} else {
+			$items = [];
+			$items_by_id = [];
+			foreach ($rows as $row) {
+				$regdata = new RegCaseData($row);
+				$this_item = array(
+					"收件字號" => $regdata->getReceiveSerial(),
+					"登記原因" => $regdata->getCaseReason(),
+					"辦理情形" => $regdata->getStatus(),
+					"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
+					"限辦期限" => $regdata->getDueDate(),
+					"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
+					"作業人員" => $regdata->getCurrentOperator()
+				);
+				$items[] = $this_item;
+				$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
+			}
+			$log->info("XHR [almost_overdue_reg_cases] 近4小時內找到".count($items)."件即將逾期案件");
+			echoJSONResponse("近4小時內找到".count($items)."件即將逾期案件", STATUS_CODE::SUCCESS_NORMAL, array(
+				"items" => $items,
+				"items_by_id" => $items_by_id,
+				"data_count" => count($items),
+				"raw" => $rows,
+				'cache_remaining_time' => $prefetch->getAlmostOverdueCaseCacheRemainingTime()
+			));
+		}
+		break;
 	case "reg_rm30_H_case":
 		$log->info("XHR [reg_rm30_H_case] 查詢登記公告中案件請求 (".str_replace("\n", ' ', print_r($_POST, true)).")");
 		$rows = $_POST['reload'] === 'false' ? $prefetch->getRM30HCase() : $prefetch->reloadRM30HCase();
