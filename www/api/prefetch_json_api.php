@@ -8,7 +8,7 @@ $prefetch = new Prefetch();
 switch ($_POST["type"]) {
 	case "overdue_reg_cases":
 		$log->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
-		$rows = $prefetch->getOverdueCasesIn15Days();
+		$rows = $_POST['reload'] === 'false' ? $prefetch->getOverdueCaseIn15Days() : $prefetch->reloadOverdueCaseIn15Days();
 		if (empty($rows)) {
 			$log->info("XHR [overdue_reg_cases] 近15天查無逾期資料");
 			echoJSONResponse("15天內查無逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(
@@ -47,7 +47,7 @@ switch ($_POST["type"]) {
 		break;
 	case "almost_overdue_reg_cases":
 		$log->info("XHR [almost_overdue_reg_cases] 即將逾期案件查詢請求");
-		$rows = $_POST['reload'] === 'false' ? $prefetch->getAlmostOverdueCases() : $prefetch->reloadAlmostOverdueCases();
+		$rows = $_POST['reload'] === 'false' ? $prefetch->getAlmostOverdueCase() : $prefetch->reloadAlmostOverdueCase();
 		if (empty($rows)) {
 			$log->info("XHR [almost_overdue_reg_cases] 近4小時內查無即將逾期資料");
 			echoJSONResponse("近4小時內查無即將逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(
@@ -85,9 +85,8 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_rm30_H_case":
-		$log->info("XHR [reg_rm30_H_case] 查詢登記公告中案件請求 (".str_replace("\n", ' ', print_r($_POST, true)).")");
+		$log->info("XHR [reg_rm30_H_case] 查詢登記公告中案件請求");
 		$rows = $_POST['reload'] === 'false' ? $prefetch->getRM30HCase() : $prefetch->reloadRM30HCase();
-		$remaining = $prefetch->getRM30HCaseCacheRemainingTime();
 		if (empty($rows)) {
 			$log->info("XHR [reg_rm30_H_case] 查無資料");
 			echoJSONResponse('查無公告中案件');
@@ -102,7 +101,28 @@ switch ($_POST["type"]) {
 			echoJSONResponse("查詢成功，找到 $total 筆公告中資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				'data_count' => $total,
 				'baked' => $baked,
-				'cache_remaining_time' => $remaining
+				'cache_remaining_time' => $prefetch->getRM30HCaseCacheRemainingTime()
+			));
+		}
+		break;
+	case "reg_cancel_ask_case":
+		$log->info("XHR [reg_cancel_ask_case] 查詢取消請示案件請求");
+		$rows = $_POST['reload'] === 'false' ? $prefetch->getAskCase() : $prefetch->reloadAskCase();
+		if (empty($rows)) {
+			$log->info("XHR [reg_cancel_ask_case] 查無資料");
+			echoJSONResponse('查無取消請示案件');
+		} else {
+			$total = count($rows);
+			$log->info("XHR [reg_cancel_ask_case] 查詢成功($total)");
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$baked[] = $data->getBakedData();
+			}
+			echoJSONResponse("查詢成功，找到 $total 筆請示中資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"baked" => $baked,
+				'cache_remaining_time' => $prefetch->getAskCaseCacheRemainingTime()
 			));
 		}
 		break;
