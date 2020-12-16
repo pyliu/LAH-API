@@ -47,7 +47,7 @@ switch ($_POST["type"]) {
 		break;
 	case "almost_overdue_reg_cases":
 		$log->info("XHR [almost_overdue_reg_cases] 即將逾期案件查詢請求");
-		$rows = $prefetch->getAlmostOverdueCases();
+		$rows = $_POST['reload'] === 'false' ? $prefetch->getAlmostOverdueCases() : $prefetch->reloadAlmostOverdueCases();
 		if (empty($rows)) {
 			$log->info("XHR [almost_overdue_reg_cases] 近4小時內查無即將逾期資料");
 			echoJSONResponse("近4小時內查無即將逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(

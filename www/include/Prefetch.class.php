@@ -161,7 +161,7 @@ class Prefetch {
     /**
      * 強制重新讀取快逾期案件
      */
-    public function reloadAlmostOverdueCasesIn15Days() {
+    public function reloadAlmostOverdueCases() {
         $this->getCache()->del(self::KEYS['ALMOST_OVERDUE']);
         return $this->getAlmostOverdueCases();
     }
@@ -211,5 +211,5 @@ class Prefetch {
             return $result;
         }
         return $this->getCache()->get(self::KEYS['ALMOST_OVERDUE']);
-	}
+    }
 }
