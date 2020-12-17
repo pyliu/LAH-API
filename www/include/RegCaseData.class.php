@@ -379,16 +379,23 @@ class RegCaseData {
 
         
         $now = mktime();
-        // RM58_1 - 結案日期
         if (!empty($this->row["RM58_1"])) {
+            // RM58_1 - 結案日期
             $Y = substr($this->row["RM58_1"], 0, 3) + 1911;
             $M = substr($this->row["RM58_1"], 3, 2);
             $D = substr($this->row["RM58_1"], 5, 2);
-            
-            $H = '17';
-            $i = '00';
-            $s = '00';
-
+            $now = mktime($H, $i, $s, $M, $D, $Y);
+        } else if (!empty($this->row["RM48_1"])) {
+            // RM48_1 駁回日期
+            $Y = substr($this->row["RM48_1"], 0, 3) + 1911;
+            $M = substr($this->row["RM48_1"], 3, 2);
+            $D = substr($this->row["RM48_1"], 5, 2);
+            $now = mktime($H, $i, $s, $M, $D, $Y);
+        } else if (!empty($this->row["RM93_1"])) {
+            // RM93_1 撤回日期
+            $Y = substr($this->row["RM93_1"], 0, 3) + 1911;
+            $M = substr($this->row["RM93_1"], 3, 2);
+            $D = substr($this->row["RM93_1"], 5, 2);
             $now = mktime($H, $i, $s, $M, $D, $Y);
         }
         

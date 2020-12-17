@@ -253,9 +253,10 @@ class Prefetch {
                 WHERE
                     (RM02 LIKE :bv_office || '%' AND RM02 NOT LIKE 'H' || :bv_office_end || '%1') AND
                     RM83 IS NOT NULL AND
-                    RM29_1 < RM58_1 AND
+                    -- RM31 in ('A', 'B', 'C', 'D') AND
+                    -- RM29_1 < RM58_1 AND
                     RM07_1 BETWEEN :bv_start AND :bv_today
-                ORDER BY t.RM29_1 DESC, t.RM58_1
+                ORDER BY t.RM29_1 DESC, t.RM58_1 DESC
             ");
             
             $tw_date = new Datetime("now");
@@ -264,8 +265,8 @@ class Prefetch {
 
             $date_a_year_before = new Datetime("now");
             $date_a_year_before->modify("-1911 year");
-            $date_a_year_before->modify("-365 days");
-            $start = ltrim($date_a_year_before->format("Ymd"), "0");	// ex: 1081217
+            $date_a_year_before->modify("-92 days");
+            $start = ltrim($date_a_year_before->format("Ymd"), "0");	// ex: 1090617
 
             $office = $this->getSystemConfig()->get('SITE');    // e.g. HB
             $db->bind(":bv_office_end", $office[1]);
