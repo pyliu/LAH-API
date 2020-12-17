@@ -3,6 +3,7 @@ require_once("init.php");
 require_once("DynamicSQLite.class.php");
 require_once("OraDB.class.php");
 require_once("Cache.class.php");
+require_once("System.class.php");
 
 class Prefetch {
     private const PREFETCH_SQLITE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."prefetch.db";
@@ -14,6 +15,7 @@ class Prefetch {
     );
     private $ora_db = null;
     private $cache = null;
+    private $config = null;
 
     private function getOraDB() {
         if ($this->ora_db === null) {
@@ -27,6 +29,13 @@ class Prefetch {
             $this->cache = new Cache(self::PREFETCH_SQLITE_DB);
         }
         return $this->cache;
+    }
+
+    private function getSystemConfig() {
+        if ($this->config === null) {
+            $this->config = new System();
+        }
+        return $this->config;
     }
 
     private function getRemainingCacheTimeByKey($key) {
@@ -108,7 +117,6 @@ class Prefetch {
 	 * 取得15天內逾期案件
      * default cache time is 15 minutes * 60 seconds = 900 seconds
 	 */
-	// 找近15天逾期的案件
 	public function getOverdueCaseIn15Days($expire_duration = 900) {
         if ($this->getCache()->isExpired(self::KEYS['OVERDUE'])) {
             global $log;
@@ -166,7 +174,10 @@ class Prefetch {
         $this->getCache()->del(self::KEYS['ALMOST_OVERDUE']);
         return $this->getAlmostOverdueCase();
     }
-	// 找快逾期的案件
+    /**
+	 * 取得快逾期的案件
+     * default cache time is 15 minutes * 60 seconds = 900 seconds
+	 */
 	public function getAlmostOverdueCase($expire_duration = 900) {
         if ($this->getCache()->isExpired(self::KEYS['ALMOST_OVERDUE'])) {
             global $log;
@@ -226,7 +237,10 @@ class Prefetch {
         $this->getCache()->del(self::KEYS['ASK']);
         return $this->getAskCase();
     }
-	// 找取消請示的案件
+    /**
+	 * 取得取消請示的案件
+     * default cache time is 15 minutes * 60 seconds = 900 seconds
+	 */
 	public function getAskCase($expire_duration = 3600) {
         if ($this->getCache()->isExpired(self::KEYS['ASK'])) {
             global $log;
@@ -234,35 +248,30 @@ class Prefetch {
 
             $db = $this->getOraDB();
             $db->parse("
-                SELECT *
-                FROM SCRSMS
-                LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+                SELECT * FROM MOICAS.CRSMS t
+                LEFT JOIN MOIADM.RKEYN q ON t.RM09=q.KCDE_2 AND q.KCDE_1 = '06'
                 WHERE
-                    RM02 NOT LIKE 'HB%1'		-- only search our own cases
-                    AND RM03 LIKE '%0' 			-- without sub-case
-                    AND RM31 IS NULL			-- not closed case
-                    AND RM29_1 || RM29_2 < :bv_now_plus_4hrs
-                    AND RM29_1 || RM29_2 > :bv_now
-                ORDER BY RM29_1 DESC, RM29_2 DESC
+                    (RM02 LIKE :bv_office || '%' AND RM02 NOT LIKE 'H' || :bv_office_end || '%1') AND
+                    RM83 IS NOT NULL AND
+                    RM29_1 < RM58_1 AND
+                    RM07_1 BETWEEN :bv_start AND :bv_today
+                ORDER BY t.RM29_1 DESC, t.RM58_1
             ");
-
+            
             $tw_date = new Datetime("now");
             $tw_date->modify("-1911 year");
-            $now = ltrim($tw_date->format("YmdHis"), "0");	// ex: 1080325152111
+            $today = ltrim($tw_date->format("Ymd"), "0");	// ex: 1091217
 
-            $date_4hrs_later = new Datetime("now");
-            $date_4hrs_later->modify("-1911 year");
-            $date_4hrs_later->modify("+4 hours");
-            if ($date_4hrs_later->format("H") > 17) {
-                $log->info(__METHOD__.": ".$date_4hrs_later->format("YmdHis")." is over 17:00:00, so add 16 hrs ... ");
-                $date_4hrs_later->modify("+16 hours");
-            }
-            $now_plus_4hrs = ltrim($date_4hrs_later->format("YmdHis"), "0");	// ex: 1090107081410
-            
-            $log->info(__METHOD__.": Find almost overdue date between $now and $now_plus_4hrs cases.");
+            $date_a_year_before = new Datetime("now");
+            $date_a_year_before->modify("-1911 year");
+            $date_a_year_before->modify("-365 days");
+            $start = ltrim($date_a_year_before->format("Ymd"), "0");	// ex: 1081217
 
-            $db->bind(":bv_now", $now);
-            $db->bind(":bv_now_plus_4hrs", $now_plus_4hrs);
+            $office = $this->getSystemConfig()->get('SITE');    // e.g. HB
+            $db->bind(":bv_office_end", $office[1]);
+            $db->bind(":bv_office", $office);
+            $db->bind(":bv_today", $today);
+            $db->bind(":bv_start", $start);
             $db->execute();
             $result = $db->fetchAll();
             $this->getCache()->set(self::KEYS['ASK'], $result, $expire_duration);

@@ -172,6 +172,7 @@ class RegCaseData {
             "紅綠燈背景CSS" => $this->getStatusCss(),
             "燈號" => $this->trafficLight(),
             "公告燈號" => $this->trafficLightRM30H(),
+            "請示燈號" => $this->trafficLightAsk(),
             "收件字號" => $this->getReceiveSerial(),
             "收件日期" => RegCaseData::toDate($row["RM07_1"]),
             "收件時間" => RegCaseData::toDate($row["RM07_1"])." ".RegCaseData::toDate($row["RM07_2"]),
@@ -222,6 +223,8 @@ class RegCaseData {
             "補正日期" => RegCaseData::toDate($row["RM53_1"])." ".RegCaseData::toDate($row["RM53_2"]),
             "請示人員" => $this->getIDorName($this->row["RM82"]),
             "請示日期" => RegCaseData::toDate($row["RM80"])." ".RegCaseData::toDate($row["RM81"]),
+            "取消請示人員" => $this->getIDorName($this->row["RM85"]),
+            "取消請示日期" => RegCaseData::toDate($row["RM83"])." ".RegCaseData::toDate($row["RM84"]),
             "展期人員" => $this->getIDorName($this->row["RM88"]),
             "展期日期" => RegCaseData::toDate($row["RM86"])." ".RegCaseData::toDate($row["RM87"]),
             "展期天數" => $this->row["RM89"],
@@ -352,6 +355,48 @@ class RegCaseData {
             return "warning";
         }
 
+        return "success";
+    }
+
+    public function trafficLightAsk() {
+        // RM83 - 取消請示日期
+        if (empty($this->row["RM83"])) {
+            return "light";
+        }
+        
+        // RM29_1 - 預定結案日期
+        $Y = substr($this->row["RM29_1"], 0, 3) + 1911;
+        $M = substr($this->row["RM29_1"], 3, 2);
+        $D = substr($this->row["RM29_1"], 5, 2);
+        
+        $H = '17';
+        $i = '00';
+        $s = '00';
+        
+        $deadline = mktime($H, $i, $s, $M, $D, $Y);
+
+        
+        $now = mktime();
+        // RM58_1 - 結案日期
+        if (!empty($this->row["RM58_1"])) {
+            $Y = substr($this->row["RM58_1"], 0, 3) + 1911;
+            $M = substr($this->row["RM58_1"], 3, 2);
+            $D = substr($this->row["RM58_1"], 5, 2);
+            
+            $H = '17';
+            $i = '00';
+            $s = '00';
+
+            $now = mktime($H, $i, $s, $M, $D, $Y);
+        }
+        
+        if ($now - $deadline > 0) {
+            return "danger";
+        }
+        // reach the deadline (within 24hrs)
+        if ($now - $deadline > - 24 * 60 * 60) {
+            return "warning";
+        }
         return "success";
     }
 

@@ -322,7 +322,7 @@ class System {
         $port = $this->get('ORA_DB_L2HWEB_PORT');
         return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=${ip})(PORT=${port})))(CONNECT_DATA=(SERVICE_NAME=L2HWEB)))";
     }
-
+    
     public function get($key) {
         return $this->sqlite3->querySingle("SELECT value from config WHERE key = '$key'");
     }
