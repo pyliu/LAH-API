@@ -96,7 +96,7 @@ class RegCaseData {
 
     private function formatID(&$id) {
 		global $log;
-		if (!empty($id)) {
+		if (!empty($id) && is_string($id)) {
 			$year = substr($id, 0, 3);
 			$code = substr($id, 3, 4);
 			$number = str_pad(substr($id, 7, 6), 6, "0", STR_PAD_LEFT);
