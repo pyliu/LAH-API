@@ -94,8 +94,63 @@ class RegCaseData {
         return mktime($H, $i, $s, $M, $D, $Y);
     }
 
-    function __construct($db_record) {
-        $this->row = $db_record;
+    private function formatID(&$id) {
+		global $log;
+		if (!empty($id)) {
+			$year = substr($id, 0, 3);
+			$code = substr($id, 3, 4);
+			$number = str_pad(substr($id, 7, 6), 6, "0", STR_PAD_LEFT);
+			if (
+				preg_match("/^[0-9A-Za-z]{3}$/i", $year) &&
+				preg_match("/^[0-9A-Za-z]{4}$/i", $code) &&
+				preg_match("/^[0-9A-Za-z]{6}$/i", $number)
+			) {
+				$log->info(__METHOD__.": $id passed the id verification.");
+				$nid = $year.$code.$number;
+				if ($id != $nid) {
+					// recomposition the $id
+					$id = $nid;
+					$log->info(__METHOD__.": update the case id to '$nid'.");
+				}
+				return true;
+			}
+		}
+		$log->warning(__METHOD__.": $id failed the id verification.");
+		return false;
+    }
+    
+    private function fetch($id) {
+        if ($this->formatID($id)) {
+            $db = new OraDB(CONNECTION_TYPE::MAIN);
+            $db->parse(
+                "SELECT s.*, u.KCNT AS RM11_CNT
+                FROM (SELECT r.*, q.AB02
+                    FROM (
+                        SELECT t.*, m.KCNT 
+                        FROM MOICAS.CRSMS t
+                        LEFT JOIN MOIADM.RKEYN m ON (m.KCDE_1 = '06' AND t.RM09 = m.KCDE_2)
+                        WHERE t.RM01 = :bv_rm01_year and t.RM02 = :bv_rm02_code and t.RM03 = :bv_rm03_number
+                    ) r
+                    LEFT JOIN MOICAS.CABRP q ON r.RM24 = q.AB01) s
+                LEFT JOIN MOIADM.RKEYN u ON (u.KCDE_1 = '48' AND s.RM11 = u.KCDE_2)"
+            );
+            
+            $db->bind(":bv_rm01_year", substr($id, 0, 3));
+            $db->bind(":bv_rm02_code", substr($id, 3, 4));
+            $db->bind(":bv_rm03_number", substr($id, 7, 6));
+
+            $db->execute();
+            return $db->fetch();
+        }
+        return array();
+    }
+
+    function __construct($rows_or_id) {
+        if (is_array($rows_or_id)) {
+            $this->row = $rows_or_id;
+        } else {
+            $this->row = $this->fetch($rows_or_id);
+        }
         if (is_null(RegCaseData::$operators)) {
             RegCaseData::$operators = getUserNames();
         }
