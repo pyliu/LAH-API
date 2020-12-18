@@ -176,42 +176,6 @@ class RegCaseData {
         return json_encode($this->convertCharset(), $flag);
     }
 
-    private function getTableHtml() {
-        $str = "<table id='case_results' border='1' class='table-hover text-center col-lg-12'>\n";
-        $str .= "<thead id='case_table_header'><tr class='header'>".
-            "<th id='fixed_th1'>收件字號</th>\n".
-            "<th id='fixed_th2'>收件日期</th>\n".
-            "<th id='fixed_th3'>限辦</th>\n".
-            "<th id='fixed_th4'>辦理情形</th>\n".
-            "<th id='fixed_th5'>收件人員</th>\n".
-            "<th id='fixed_th6'>作業人員</th>\n".
-            "<th id='fixed_th7'>初審人員</th>\n".
-            "<th id='fixed_th8'>複審人員</th>\n".
-            "<th id='fixed_th9'>准登人員</th>\n".
-            "<th id='fixed_th10'>登記人員</th>\n".
-            "<th id='fixed_th11'>校對人員</th>\n".
-            "<th id='fixed_th12'>結案人員</th>\n".
-            "</tr></thead>\n";
-        $str .= "<tbody>\n";
-        $str .= "<tr class='".$this->getStatusCss()."'>\n";
-        $str .= "<td class='text-center px-3 ".($this->isDanger() ? "text-danger" : "")." reg_case_id'>".$this->getReceiveSerial()."</td>\n".
-            "<td data-toggle='tooltip'>".$this->getReceiveDate()."</td>\n".
-            "<td data-toggle='tooltip' data-placement='right' title='限辦期限：".$this->getDueDate()."'>".$this->getDueHrs()."</td>\n".
-            "<td data-toggle='tooltip'>".$this->getStatus()."</td>\n".
-            "<td ".$this->getReceptionistTooltipAttr().">".$this->getReceptionist()."</td>\n".
-            "<td ".$this->getCurrentOperatorTooltipAttr().">".$this->getCurrentOperator()."</td>\n".
-            "<td ".$this->getFirstReviewerTooltipAttr().">".$this->getFirstReviewer()."</td>\n".
-            "<td ".$this->getSecondReviewerTooltipAttr().">".$this->getSecondReviewer()."</td>\n".
-            "<td ".$this->getPreRegisterTooltipAttr().">".$this->getPreRegister()."</td>\n".
-            "<td ".$this->getRegisterTooltipAttr().">".$this->getRegister()."</td>\n".
-            "<td ".$this->getCheckerTooltipAttr().">".$this->getChecker()."</td>\n".
-            "<td ".$this->getCloserTooltipAttr().">".$this->getCloser()."</td>\n";
-        $str .= "</tr>\n";
-        $str .= "</tbody>\n";
-        $str .= "</table>\n";
-        return $str;
-    }
-
     public function getBakedData() {
         $row = &$this->row;
         $ret = array(
