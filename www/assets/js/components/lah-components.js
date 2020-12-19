@@ -473,7 +473,7 @@ if (Vue) {
                     text: `智慧管控系統`,
                     url: `http://${this.server_ip}:8080/`,
                     icon: "landmark",
-                    need_admin: true
+                    need_admin: false
                 }];
             }
         },
