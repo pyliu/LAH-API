@@ -128,9 +128,14 @@ switch ($_POST["type"]) {
 		break;
 	case "reg_trust_case":
 		$log->info("XHR [reg_trust_case] 查詢取消請示案件請求");
-		// 建物所有權部資料
 		if ($_POST['query'] === 'E') {
+			// 建物所有權部資料
 			$rows = $_POST['reload'] === 'false' ? $prefetch->getTrustRebow($_POST['year']) : $prefetch->reloadTrustRebow($_POST['year']);
+			$cache_remaining = $prefetch->getTrustRebowCacheRemainingTime($_POST['year']);
+		} else if ($_POST['query'] === 'B') {
+			// 土地所有權部資料
+			$rows = $_POST['reload'] === 'false' ? $prefetch->getTrustRblow($_POST['year']) : $prefetch->reloadTrustRblow($_POST['year']);
+			$cache_remaining = $prefetch->getTrustRblowCacheRemainingTime($_POST['year']);
 		}
 		if (empty($rows)) {
 			$log->info("XHR [reg_trust_case] 查無資料");
@@ -141,7 +146,7 @@ switch ($_POST["type"]) {
 			echoJSONResponse("查詢成功，找到 $total 筆信託註記資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"raw" => $rows,
-				'cache_remaining_time' => $prefetch->getTrustRebowCacheRemainingTime($_POST['year'])
+				'cache_remaining_time' => $cache_remaining
 			));
 		}
 		break;
