@@ -369,7 +369,7 @@ class Prefetch {
 
             $db = $this->getOraDB();
             $db->parse("
-                SELECT is48,r1.kcnt,is49,is01,is09,isname,'','','','','',is03,is04_1,is04_2,'',is05,is_date FROM moiadm.rkeyn r1, 
+                SELECT is48,r1.kcnt,is49,is01,is09,isname,'','','','','','',is03,is04_1,is04_2,'',is05,is_date FROM moiadm.rkeyn r1, 
                     (SELECT *FROM (SELECT * FROM (SELECT * FROM moicad.rsindx  WHERE is00 IN ('E') AND IS_type IN ('M','D') AND IS06='CU') 
                 WHERE NOT EXISTS 
                 (SELECT gg48,gg49,gg01 FROM (SELECT * FROM moicad.rgall WHERE gg00='E' AND gg30_1 in ('GH','GJ'))  
@@ -476,7 +476,7 @@ class Prefetch {
 
             $db = $this->getOraDB();
             $db->parse("
-                SELECT is48,r1.kcnt,is49,is01,is09,isname,'','','','','',is03,is04_1,is04_2,'',is05,is_date FROM moiadm.rkeyn r1, 
+                SELECT is48,r1.kcnt,is49,is01,is09,isname,'','','','','','',is03,is04_1,is04_2,'',is05,is_date FROM moiadm.rkeyn r1, 
                     (SELECT *FROM (SELECT * FROM (SELECT * FROM moicad.rsindx  WHERE is00 IN ('B') AND IS_type IN ('M','D') AND IS06='CU') 
                 WHERE NOT EXISTS 
                 (SELECT gg48,gg49,gg01 FROM (SELECT * FROM moicad.rgall WHERE gg00='B' AND gg30_1 in ('GH','GJ'))  
