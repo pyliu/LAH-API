@@ -126,6 +126,25 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
+	case "reg_trust_case":
+		$log->info("XHR [reg_trust_case] 查詢取消請示案件請求");
+		// 建物所有權部資料
+		if ($_POST['query'] === 'E') {
+			$rows = $_POST['reload'] === 'false' ? $prefetch->getTrustRebow($_POST['year']) : $prefetch->reloadTrustRebow($_POST['year']);
+		}
+		if (empty($rows)) {
+			$log->info("XHR [reg_trust_case] 查無資料");
+			echoJSONResponse('查無信託註記資料');
+		} else {
+			$total = count($rows);
+			$log->info("XHR [reg_trust_case] 查詢成功($total)");
+			echoJSONResponse("查詢成功，找到 $total 筆信託註記資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"raw" => $rows,
+				'cache_remaining_time' => $prefetch->getTrustRebowCacheRemainingTime($_POST['year'])
+			));
+		}
+		break;
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

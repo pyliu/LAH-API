@@ -285,20 +285,20 @@ class Prefetch {
         return $this->getCache()->get(self::KEYS['ASK']);
 	}
     /**
-     * 信託註記建物標示部資料快取剩餘時間
+     * 信託註記建物所有部資料快取剩餘時間
      */
-    public function getRebowCacheRemainingTime($year) {
+    public function getTrustRebowCacheRemainingTime($year) {
         return $this->getRemainingCacheTimeByKey(self::KEYS['TRUST_REBOW'].$year);
     }
     /**
-     * 強制重新讀取信託註記建物標示部資料
+     * 強制重新讀取信託註記建物所有部資料
      */
-    public function reloadRebow($year) {
+    public function reloadTrustRebow($year) {
         $this->getCache()->del(self::KEYS['TRUST_REBOW'].$year);
         return $this->getTrustRebow($year);
     }
     /**
-	 * 取得信託註記建物標示部資料
+	 * 取得信託註記建物所有部資料
      * default cache time is 8 hours * 60 minutes * 60 seconds = 28800 seconds
 	 */
 	public function getTrustRebow($year, $expire_duration = 28800) {
