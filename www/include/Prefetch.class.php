@@ -13,7 +13,9 @@ class Prefetch {
         'ALMOST_OVERDUE' => 'Prefetch::getAlmostOverdueCase',
         'ASK' => 'Prefetch::getAskCase',
         'TRUST_REBOW' => 'Prefetch::getTrustRebow',
-        'TRUST_RBLOW' => 'Prefetch::getTrustRblow'
+        'TRUST_REBOW_EXCEPTION' => 'Prefetch::getTrustRebowException',
+        'TRUST_RBLOW' => 'Prefetch::getTrustRblow',
+        'TRUST_RBLOW_EXCEPTION' => 'Prefetch::getTrustRblowException'
     );
     private $ora_db = null;
     private $cache = null;
@@ -344,6 +346,55 @@ class Prefetch {
         return $this->getCache()->get(self::KEYS['TRUST_REBOW'].$year);
 	}
     /**
+     * 信託註記建物所有部例外資料快取剩餘時間
+     */
+    public function getTrustRebowExceptionCacheRemainingTime($year) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['TRUST_REBOW_EXCEPTION'].$year);
+    }
+    /**
+     * 強制重新讀取信託註記建物所有部例外資料
+     */
+    public function reloadTrustRebowException($year) {
+        $this->getCache()->del(self::KEYS['TRUST_REBOW_EXCEPTION'].$year);
+        return $this->getTrustRebowException($year);
+    }
+    /**
+	 * 取得信託註記建物所有部例外資料
+     * default cache time is 8 hours * 60 minutes * 60 seconds = 28800 seconds
+	 */
+	public function getTrustRebowException($year, $expire_duration = 28800) {
+        if ($this->getCache()->isExpired(self::KEYS['TRUST_REBOW_EXCEPTION'].$year)) {
+            global $log;
+            $log->info('['.self::KEYS['TRUST_REBOW_EXCEPTION'].$year.'] 快取資料已失效，重新擷取 ... ');
+
+            $db = $this->getOraDB();
+            $db->parse("
+                SELECT is48,r1.kcnt,is49,is01,is09,isname,'','','','','',is03,is04_1,is04_2,'',is05,is_date FROM moiadm.rkeyn r1, 
+                    (SELECT *FROM (SELECT * FROM (SELECT * FROM moicad.rsindx  WHERE is00 IN ('E') AND IS_type IN ('M','D') AND IS06='CU') 
+                WHERE NOT EXISTS 
+                (SELECT gg48,gg49,gg01 FROM (SELECT * FROM moicad.rgall WHERE gg00='E' AND gg30_1 in ('GH','GJ'))  
+                WHERE is00=gg00
+                AND is48=gg48
+                AND is49=gg49
+                AND is01=gg01))) 
+                WHERE r1.kcde_1='48' 
+                AND r1.kcde_2=is48
+                and    is03= :bv_year
+                ORDER BY is03 desc,is48 desc,is49
+            ");
+            
+            $db->bind(":bv_year", $year);
+            $db->execute();
+            $result = $db->fetchAll();
+            $this->getCache()->set(self::KEYS['TRUST_REBOW_EXCEPTION'].$year, $result, $expire_duration);
+
+            $log->info("[".self::KEYS['TRUST_REBOW_EXCEPTION'].$year."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+            return $result;
+        }
+        return $this->getCache()->get(self::KEYS['TRUST_REBOW_EXCEPTION'].$year);
+	}
+    /**
      * 信託註記土地所有部資料快取剩餘時間
      */
     public function getTrustRblowCacheRemainingTime($year) {
@@ -400,5 +451,51 @@ class Prefetch {
             return $result;
         }
         return $this->getCache()->get(self::KEYS['TRUST_RBLOW'].$year);
+	}
+    /**
+     * 信託註記土地所有部例外資料快取剩餘時間
+     */
+    public function getTrustRblowExceptionCacheRemainingTime($year) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['TRUST_RBLOW_EXCEPTION'].$year);
+    }
+    /**
+     * 強制重新讀取信託註記土地所有部例外資料
+     */
+    public function reloadTrustRblowException($year) {
+        $this->getCache()->del(self::KEYS['TRUST_RBLOW_EXCEPTION'].$year);
+        return $this->getTrustRblowException($year);
+    }
+    /**
+	 * 取得信託註記土地所有部例外資料
+     * default cache time is 8 hours * 60 minutes * 60 seconds = 28800 seconds
+	 */
+	public function getTrustRblowException($year, $expire_duration = 28800) {
+        if ($this->getCache()->isExpired(self::KEYS['TRUST_RBLOW_EXCEPTION'].$year)) {
+            global $log;
+            $log->info('['.self::KEYS['TRUST_RBLOW_EXCEPTION'].$year.'] 快取資料已失效，重新擷取 ... ');
+
+            $db = $this->getOraDB();
+            $db->parse("
+                SELECT is48,r1.kcnt,is49,is01,is09,isname,'','','','','',is03,is04_1,is04_2,'',is05,is_date FROM moiadm.rkeyn r1, 
+                    (SELECT *FROM (SELECT * FROM (SELECT * FROM moicad.rsindx  WHERE is00 IN ('B') AND IS_type IN ('M','D') AND IS06='CU') 
+                WHERE NOT EXISTS 
+                (SELECT gg48,gg49,gg01 FROM (SELECT * FROM moicad.rgall WHERE gg00='B' AND gg30_1 in ('GH','GJ'))  
+                WHERE is00=gg00 AND is48=gg48 AND is49=gg49 AND is01=gg01))) 
+                WHERE r1.kcde_1='48' 
+                AND r1.kcde_2=is48
+                and    is03= :bv_year
+                ORDER BY is03 desc,is48 desc,is49
+            ");
+            
+            $db->bind(":bv_year", $year);
+            $db->execute();
+            $result = $db->fetchAll();
+            $this->getCache()->set(self::KEYS['TRUST_RBLOW_EXCEPTION'].$year, $result, $expire_duration);
+
+            $log->info("[".self::KEYS['TRUST_RBLOW_EXCEPTION'].$year."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+            return $result;
+        }
+        return $this->getCache()->get(self::KEYS['TRUST_RBLOW_EXCEPTION'].$year);
 	}
 }

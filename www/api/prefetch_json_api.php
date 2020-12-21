@@ -136,6 +136,14 @@ switch ($_POST["type"]) {
 			// 土地所有權部資料
 			$rows = $_POST['reload'] === 'false' ? $prefetch->getTrustRblow($_POST['year']) : $prefetch->reloadTrustRblow($_POST['year']);
 			$cache_remaining = $prefetch->getTrustRblowCacheRemainingTime($_POST['year']);
+		} else if ($_POST['query'] === 'TE') {
+			// 建物所有權部例外資料
+			$rows = $_POST['reload'] === 'false' ? $prefetch->getTrustRebowException($_POST['year']) : $prefetch->reloadTrustRebowException($_POST['year']);
+			$cache_remaining = $prefetch->getTrustRebowExceptionCacheRemainingTime($_POST['year']);
+		} else if ($_POST['query'] === 'TB') {
+			// 土地所有權部例外資料
+			$rows = $_POST['reload'] === 'false' ? $prefetch->getTrustRblowException($_POST['year']) : $prefetch->reloadTrustRblowException($_POST['year']);
+			$cache_remaining = $prefetch->getTrustRblowExceptionCacheRemainingTime($_POST['year']);
 		}
 		if (empty($rows)) {
 			$log->info("XHR [reg_trust_case] 查無資料");
