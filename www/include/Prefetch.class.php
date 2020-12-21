@@ -11,7 +11,8 @@ class Prefetch {
         'RM30H' => 'Prefetch::getRM30HCase',
         'OVERDUE' => 'Prefetch::getOverdueCaseIn15Days',
         'ALMOST_OVERDUE' => 'Prefetch::getAlmostOverdueCase',
-        'ASK' => 'Prefetch::getAskCase'
+        'ASK' => 'Prefetch::getAskCase',
+        'TRUST_REBOW' => 'Prefetch::getTrustRebow'
     );
     private $ora_db = null;
     private $cache = null;
@@ -239,7 +240,7 @@ class Prefetch {
     }
     /**
 	 * 取得取消請示的案件
-     * default cache time is 15 minutes * 60 seconds = 900 seconds
+     * default cache time is 60 minutes * 60 seconds = 3600 seconds
 	 */
 	public function getAskCase($expire_duration = 3600) {
         if ($this->getCache()->isExpired(self::KEYS['ASK'])) {
@@ -282,5 +283,63 @@ class Prefetch {
             return $result;
         }
         return $this->getCache()->get(self::KEYS['ASK']);
+	}
+    /**
+     * 信託註記建物標示部資料快取剩餘時間
+     */
+    public function getRebowCacheRemainingTime($year) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['TRUST_REBOW'].$year);
+    }
+    /**
+     * 強制重新讀取信託註記建物標示部資料
+     */
+    public function reloadRebow($year) {
+        $this->getCache()->del(self::KEYS['TRUST_REBOW'].$year);
+        return $this->getTrustRebow($year);
+    }
+    /**
+	 * 取得信託註記建物標示部資料
+     * default cache time is 8 hours * 60 minutes * 60 seconds = 28800 seconds
+	 */
+	public function getTrustRebow($year, $expire_duration = 28800) {
+        if ($this->getCache()->isExpired(self::KEYS['TRUST_REBOW'].$year)) {
+            global $log;
+            $log->info('['.self::KEYS['TRUST_REBOW'].$year.'] 快取資料已失效，重新擷取 ... ');
+
+            $db = $this->getOraDB();
+            $db->parse("
+                SELECT is48,r1.kcnt,is49,is01,is09,isname,gg30_1,r3.kcnt as gg30_1_cht,gg30_2,ee15_1,ee15_3,ee15_2,is03,is04_1,is04_2,r2.kcnt,is05,is_date
+                FROM moicad.rsindx,moicad.rgall,moicad.rebow,moiadm.rkeyn r1,moiadm.rkeyn r2,moiadm.rkeyn r3
+                where 1=1
+                and   is03 = :bv_year
+                and   is00 IN ('E')
+                AND IS_type IN ('A','M','D') 
+                AND gg00='E' 
+                AND gg30_1 in ('GH','GJ') 
+                AND gg48=is48 
+                AND gg49=is49 
+                AND gg01=is01 
+                AND gg48=ed48 
+                AND gg49=ed49 
+                AND gg01=ee01 
+                AND r1.kcde_1='48' 
+                AND r1.kcde_2=is48 
+                AND r2.kcde_1='06' 
+                AND r2.kcde_2=ee06
+                AND r3.kcde_1='30'
+                AND r3.kcde_2=gg30_1
+                ORDER BY is03 desc,is04_1,is04_2 
+            ");
+            
+            $db->bind(":bv_year", $year);
+            $db->execute();
+            $result = $db->fetchAll();
+            $this->getCache()->set(self::KEYS['TRUST_REBOW'].$year, $result, $expire_duration);
+
+            $log->info("[".self::KEYS['TRUST_REBOW'].$year."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+            return $result;
+        }
+        return $this->getCache()->get(self::KEYS['TRUST_REBOW'].$year);
 	}
 }
