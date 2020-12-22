@@ -317,9 +317,9 @@ class Prefetch {
     }
     /**
 	 * 取得信託註記建物所有部資料
-     * default cache time is 8 hours * 60 minutes * 60 seconds = 28800 seconds
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
-	public function getTrustRebow($year, $expire_duration = 28800) {
+	public function getTrustRebow($year, $expire_duration = 86400) {
         if ($this->getCache()->isExpired(self::KEYS['TRUST_REBOW'].$year)) {
             global $log;
             $log->info('['.self::KEYS['TRUST_REBOW'].$year.'] 快取資料已失效，重新擷取 ... ');
@@ -375,9 +375,9 @@ class Prefetch {
     }
     /**
 	 * 取得信託註記建物所有部例外資料
-     * default cache time is 8 hours * 60 minutes * 60 seconds = 28800 seconds
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
-	public function getTrustRebowException($year, $expire_duration = 28800) {
+	public function getTrustRebowException($year, $expire_duration = 86400) {
         if ($this->getCache()->isExpired(self::KEYS['TRUST_REBOW_EXCEPTION'].$year)) {
             global $log;
             $log->info('['.self::KEYS['TRUST_REBOW_EXCEPTION'].$year.'] 快取資料已失效，重新擷取 ... ');
@@ -424,9 +424,9 @@ class Prefetch {
     }
     /**
 	 * 取得信託註記土地所有部資料
-     * default cache time is 8 hours * 60 minutes * 60 seconds = 28800 seconds
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
-	public function getTrustRblow($year, $expire_duration = 28800) {
+	public function getTrustRblow($year, $expire_duration = 86400) {
         if ($this->getCache()->isExpired(self::KEYS['TRUST_RBLOW'].$year)) {
             global $log;
             $log->info('['.self::KEYS['TRUST_RBLOW'].$year.'] 快取資料已失效，重新擷取 ... ');
@@ -482,9 +482,9 @@ class Prefetch {
     }
     /**
 	 * 取得信託註記土地所有部例外資料
-     * default cache time is 8 hours * 60 minutes * 60 seconds = 28800 seconds
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
-	public function getTrustRblowException($year, $expire_duration = 28800) {
+	public function getTrustRblowException($year, $expire_duration = 86400) {
         if ($this->getCache()->isExpired(self::KEYS['TRUST_RBLOW_EXCEPTION'].$year)) {
             global $log;
             $log->info('['.self::KEYS['TRUST_RBLOW_EXCEPTION'].$year.'] 快取資料已失效，重新擷取 ... ');
