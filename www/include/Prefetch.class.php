@@ -20,6 +20,10 @@ class Prefetch {
     private $ora_db = null;
     private $cache = null;
     private $config = null;
+    
+	private $site;
+	private $site_code;
+	private $site_number;
 
     private function getOraDB() {
         if ($this->ora_db === null) {
@@ -38,6 +42,16 @@ class Prefetch {
     private function getSystemConfig() {
         if ($this->config === null) {
             $this->config = new System();
+            // initialize site info
+            $this->site = strtoupper($this->config->get('SITE'));
+            if (empty($this->site)) {
+                $this->site = 'HB';
+                $this->site_code = 'B';
+                $this->site_number = 2;
+            } else {
+                $this->site_code = $this->site[1];
+                $this->site_number = ord($this->site_code) - ord('A') + 1;
+            }
         }
         return $this->config;
     }
@@ -133,7 +147,7 @@ class Prefetch {
                 LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
                 WHERE
                     -- RM07_1 > :bv_start
-                    RM02 NOT LIKE 'HB%1'		-- only search our own cases
+                    RM02 NOT LIKE '".$this->site."%1'		-- only search our own cases
                     AND RM03 LIKE '%0' 			-- without sub-case
                     AND RM31 IS NULL			-- not closed case
                     AND RM29_1 || RM29_2 < :bv_now
@@ -193,7 +207,7 @@ class Prefetch {
                 FROM SCRSMS
                 LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
                 WHERE
-                    RM02 NOT LIKE 'HB%1'		-- only search our own cases
+                    RM02 NOT LIKE '".$this->site."%1'		-- only search our own cases
                     AND RM03 LIKE '%0' 			-- without sub-case
                     AND RM31 IS NULL			-- not closed case
                     AND RM29_1 || RM29_2 < :bv_now_plus_4hrs
