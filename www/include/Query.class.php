@@ -2,10 +2,15 @@
 require_once("init.php");
 require_once("OraDB.class.php");
 require_once("RegCaseData.class.php");
+require_once("System.class.php");
 
 class Query {
 
-    private $db;
+	private $db;
+	private $config;
+	private $site;
+	private $site_code;
+	private $site_number;
 
 	private function checkPID($id) {
 		if( !$id ) {
@@ -59,8 +64,25 @@ class Query {
 		return false;
 	}
 
+	
+    private function getSystemConfig() {
+        if ($this->config === null) {
+            $this->config = new System();
+        }
+        return $this->config;
+	}
+	
     function __construct() {
-        $this->db = new OraDB(CONNECTION_TYPE::MAIN);
+		$this->db = new OraDB(CONNECTION_TYPE::MAIN);
+		$this->site = strtoupper($this->getSystemConfig()->get('SITE'));
+		if (empty($this->site)) {
+			$this->site = 'HB';
+			$this->site_code = 'B';
+			$this->site_number = 1;
+		} else {
+			$this->site_code = $this->site[1];
+			$this->site_number = ord($this->site_code) - ord('A') + 1;
+		}
     }
 
     function __destruct() {
@@ -72,11 +94,11 @@ class Query {
 			-- 案件(REG + SUR)數量統計 BY 年
 			SELECT t.RM01 AS YEAR, t.RM02 AS CODE, q.KCNT AS CODE_NAME, COUNT(*) AS COUNT,
 				(CASE
-					WHEN t.RM02 LIKE 'H2%'  THEN 'reg.H2XX'
-					WHEN t.RM02 LIKE '%HB'  THEN 'reg.XXHB'
-					WHEN t.RM02 LIKE 'HB0%' THEN 'reg.HB'
-					WHEN t.RM02 LIKE 'HB%1' THEN 'reg.HBX1'
-					WHEN t.RM02 LIKE 'H%B1' THEN 'reg.HXB1'
+					WHEN t.RM02 LIKE 'H".$this->site_number."%'  THEN 'reg.H2XX'
+					WHEN t.RM02 LIKE '%".$this->site."'  THEN 'reg.XXHB'
+					WHEN t.RM02 LIKE '".$this->site."0%' THEN 'reg.HB'
+					WHEN t.RM02 LIKE '".$this->site."%1' THEN 'reg.HBX1'
+					WHEN t.RM02 LIKE 'H%".$this->site_code."1' THEN 'reg.HXB1'
 					ELSE '登記案件'
 				END) AS CODE_TYPE FROM MOICAS.CRSMS t
 			LEFT JOIN MOIADM.RKEYN q ON q.kcde_1 = '04' AND q.kcde_2 = t.rm02
@@ -622,7 +644,6 @@ class Query {
 				LEFT JOIN MOICAS.CABRP v ON t.RM24 = v.AB01  -- 代理人
 				LEFT JOIN MOIADM.RKEYN w ON t.RM09 = w.KCDE_2 AND w.KCDE_1 = '06'   -- 登記原因
 			WHERE 
-				--t.RM02 = 'HB06' AND 
 				t.RM07_1 LIKE :bv_qmonth || '%' AND 
 				(u.LADR NOT LIKE '%' || :bv_city || '%' AND u.LADR NOT LIKE '%' || :bv_county || '%') AND 
                 (v.AB03 NOT LIKE '%' || :bv_city || '%' AND v.AB03 NOT LIKE '%' || :bv_county || '%')
@@ -827,7 +848,7 @@ class Query {
 				LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 				WHERE
 					-- RM07_1 > :bv_start
-					RM02 NOT LIKE 'HB%1'		-- only search our own cases
+					RM02 NOT LIKE '".$this->site."%1'		-- only search our own cases
 					AND RM03 LIKE '%0' 			-- without sub-case
 					AND RM31 IS NULL			-- not closed case
 					AND RM29_1 || RM29_2 < :bv_now
@@ -841,7 +862,7 @@ class Query {
 				LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 				WHERE
 					-- RM07_1 > :bv_start
-					RM02 NOT LIKE 'HB%1'		-- only search our own cases
+					RM02 NOT LIKE '".$this->site."%1'		-- only search our own cases
 					AND RM03 LIKE '%0' 			-- without sub-case
 					AND RM31 IS NULL			-- not closed case
 					AND RM29_1 || RM29_2 < :bv_now
@@ -877,7 +898,7 @@ class Query {
 			FROM SCRSMS
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE
-				RM02 NOT LIKE 'HB%1'		-- only search our own cases
+				RM02 NOT LIKE '".$this->site."%1'		-- only search our own cases
 				AND RM03 LIKE '%0' 			-- without sub-case
 				AND RM31 IS NULL			-- not closed case
 				AND RM29_1 || RM29_2 < :bv_now_plus_4hrs
@@ -932,7 +953,7 @@ class Query {
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE
 				RM07_1 = :bv_qday AND 
-				RM02 NOT LIKE 'HB%1'	-- only search our own cases
+				RM02 NOT LIKE '".$this->site."%1'	-- only search our own cases
 				AND RM03 LIKE '%0' 		-- without sub-case
 				AND RM31 IS NULL
 				AND RM29_1 || RM29_2 < :bv_qdatetime
@@ -951,7 +972,7 @@ class Query {
 			FROM SCRSMS
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE
-				RM02 NOT LIKE 'HB%1'	-- only search our own cases
+				RM02 NOT LIKE '".$this->site."%1'	-- only search our own cases
 				AND RM31 IS NULL
 				AND (RM29_1 || RM29_2 < :bv_4hours_later AND RM29_1 || RM29_2 > :bv_now)
 			ORDER BY RM07_1, RM07_2 DESC
@@ -977,7 +998,7 @@ class Query {
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE
 				RM07_1 = :bv_qday AND 
-				RM02 NOT LIKE 'HB%1'
+				RM02 NOT LIKE '".$this->site."%1'
 				AND RM31 IS NULL
 				AND (RM29_1 || RM29_2 < :bv_4hours_later AND RM29_1 || RM29_2 > :bv_now)
 			ORDER BY RM07_1, RM07_2 DESC
