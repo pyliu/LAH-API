@@ -46,7 +46,7 @@ class StatsOracle {
             FROM MOICAS.CRSMS t
             WHERE t.RM07_1 LIKE :bv_cond || '%'
             AND t.RM09 in ('33', '34', '49', '54', '50', '55', '52', '57', '51', '56', 'FB', 'FC', 'AU')
-		    ");
+		");
         $this->db->bind(":bv_cond", $year_month);
         $this->db->execute();
         return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
@@ -62,7 +62,7 @@ class StatsOracle {
             left join SCMSDS q on MM01 = MD01 and MM02 = MD02 and MM03 = MD03
             where t.MM04_1 LIKE :bv_cond || '%'
             and MD12 = '1'
-		    ");
+		");
         $this->db->bind(":bv_cond", $year_month);
         $this->db->execute();
         return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
