@@ -274,7 +274,7 @@ class RegCaseData {
             case '12':
                 return '觀音區';
             default:
-                return $this->row["RM10"].'【'.array_key_exists($this->row["RM100"], OFFICE) ? OFFICE[$this->row["RM100"]] : $this->row["RM100"].'】';
+                return (array_key_exists($this->row["RM100"], OFFICE) ? OFFICE[$this->row["RM100"]] : $this->row["RM100"]).'所轄區';
         }
     }
 
