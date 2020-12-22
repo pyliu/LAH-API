@@ -78,7 +78,7 @@ class Query {
 		if (empty($this->site)) {
 			$this->site = 'HB';
 			$this->site_code = 'B';
-			$this->site_number = 1;
+			$this->site_number = 2;
 		} else {
 			$this->site_code = $this->site[1];
 			$this->site_number = ord($this->site_code) - ord('A') + 1;
