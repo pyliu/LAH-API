@@ -21,9 +21,9 @@ class Prefetch {
     private $cache = null;
     private $config = null;
     
-	private $site;
-	private $site_code;
-	private $site_number;
+	private $site = 'HB';
+	private $site_code = 'B';
+	private $site_number = 2;
 
     private function getOraDB() {
         if ($this->ora_db === null) {
@@ -43,12 +43,8 @@ class Prefetch {
         if ($this->config === null) {
             $this->config = new System();
             // initialize site info
-            $this->site = strtoupper($this->config->get('SITE'));
-            if (empty($this->site)) {
-                $this->site = 'HB';
-                $this->site_code = 'B';
-                $this->site_number = 2;
-            } else {
+            $this->site = strtoupper($this->config->get('SITE')) ?? 'HB';
+            if (!empty($this->site)) {
                 $this->site_code = $this->site[1];
                 $this->site_number = ord($this->site_code) - ord('A') + 1;
             }
@@ -63,7 +59,10 @@ class Prefetch {
         return $this->getCache()->getExpireTimestamp($key) - mktime();
     }
 
-    function __construct() { }
+    function __construct() {
+        // init system config first to assign site data code
+        $this->getSystemConfig();
+    }
 
     function __destruct() { }
     /**

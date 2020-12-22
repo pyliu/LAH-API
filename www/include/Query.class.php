@@ -8,9 +8,9 @@ class Query {
 
 	private $db;
 	private $config;
-	private $site;
-	private $site_code;
-	private $site_number;
+	private $site = 'HB';
+	private $site_code = 'B';
+	private $site_number = 2;
 
 	private function checkPID($id) {
 		if( !$id ) {
@@ -74,12 +74,8 @@ class Query {
 	
     function __construct() {
 		$this->db = new OraDB(CONNECTION_TYPE::MAIN);
-		$this->site = strtoupper($this->getSystemConfig()->get('SITE'));
-		if (empty($this->site)) {
-			$this->site = 'HB';
-			$this->site_code = 'B';
-			$this->site_number = 2;
-		} else {
+		$this->site = strtoupper($this->getSystemConfig()->get('SITE')) ?? 'HB';
+		if (!empty($this->site)) {
 			$this->site_code = $this->site[1];
 			$this->site_number = ord($this->site_code) - ord('A') + 1;
 		}
