@@ -51,11 +51,15 @@ switch ($_POST["type"]) {
 		), 0);
 		break;
 	case "svr":
+		$webap_ip = $system->get('WEBAP_IP') ?? '220.1.35.123';
 		$ips = getLocalhostIPs();
 		$count = count($ips);
 		$log->info("XHR [svr] Got the server info from \$_SERVER (".$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT'].")");
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"config" => array(
+				'webap_ip' => $webap_ip
+			),
 			"server" => $_SERVER,
 			"ips" => $ips,
 			"mock" => $mock,
