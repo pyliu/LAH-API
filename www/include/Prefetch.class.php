@@ -252,15 +252,15 @@ class Prefetch {
     /**
      * 強制重新讀取取消請示案件
      */
-    public function reloadAskCase() {
+    public function reloadAskCase($days = 92) {
         $this->getCache()->del(self::KEYS['ASK']);
-        return $this->getAskCase();
+        return $this->getAskCase($days);
     }
     /**
 	 * 取得取消請示的案件
      * default cache time is 60 minutes * 60 seconds = 3600 seconds
 	 */
-	public function getAskCase($expire_duration = 3600) {
+	public function getAskCase($days = 92, $expire_duration = 3600) {
         if ($this->getCache()->isExpired(self::KEYS['ASK'])) {
             global $log;
             $log->info('['.self::KEYS['ASK'].'] 快取資料已失效，重新擷取 ... ');
@@ -284,7 +284,7 @@ class Prefetch {
 
             $date_a_year_before = new Datetime("now");
             $date_a_year_before->modify("-1911 year");
-            $date_a_year_before->modify("-92 days");
+            $date_a_year_before->modify("-$days days");
             $start = ltrim($date_a_year_before->format("Ymd"), "0");	// ex: 1090617
 
             $office = $this->getSystemConfig()->get('SITE');    // e.g. HB

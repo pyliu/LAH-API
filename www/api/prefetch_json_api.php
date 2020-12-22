@@ -107,7 +107,8 @@ switch ($_POST["type"]) {
 		break;
 	case "reg_cancel_ask_case":
 		$log->info("XHR [reg_cancel_ask_case] 查詢取消請示案件請求");
-		$rows = $_POST['reload'] === 'false' ? $prefetch->getAskCase() : $prefetch->reloadAskCase();
+		$days = $_POST['days'] ?? 92;	// default is 3 months
+		$rows = $_POST['reload'] === 'false' ? $prefetch->getAskCase($days) : $prefetch->reloadAskCase($days);
 		if (empty($rows)) {
 			$log->info("XHR [reg_cancel_ask_case] 查無資料");
 			echoJSONResponse('查無取消請示案件');
