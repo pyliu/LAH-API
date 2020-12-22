@@ -246,14 +246,14 @@ class Prefetch {
     /**
      * 取消請示案件快取剩餘時間
      */
-    public function getAskCaseCacheRemainingTime() {
-        return $this->getRemainingCacheTimeByKey(self::KEYS['ASK']);
+    public function getAskCaseCacheRemainingTime($days = 92) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['ASK']."_$days");
     }
     /**
      * 強制重新讀取取消請示案件
      */
     public function reloadAskCase($days = 92) {
-        $this->getCache()->del(self::KEYS['ASK']);
+        $this->getCache()->del(self::KEYS['ASK']."_$days");
         return $this->getAskCase($days);
     }
     /**
@@ -261,9 +261,9 @@ class Prefetch {
      * default cache time is 60 minutes * 60 seconds = 3600 seconds
 	 */
 	public function getAskCase($days = 92, $expire_duration = 3600) {
-        if ($this->getCache()->isExpired(self::KEYS['ASK'])) {
+        if ($this->getCache()->isExpired(self::KEYS['ASK']."_$days")) {
             global $log;
-            $log->info('['.self::KEYS['ASK'].'] 快取資料已失效，重新擷取 ... ');
+            $log->info('['.self::KEYS['ASK']."_$days".'] 快取資料已失效，重新擷取 ... ');
 
             $db = $this->getOraDB();
             $db->parse("
@@ -294,13 +294,13 @@ class Prefetch {
             $db->bind(":bv_start", $start);
             $db->execute();
             $result = $db->fetchAll();
-            $this->getCache()->set(self::KEYS['ASK'], $result, $expire_duration);
+            $this->getCache()->set(self::KEYS['ASK']."_$days", $result, $expire_duration);
 
-            $log->info("[".self::KEYS['ASK']."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+            $log->info("[".self::KEYS['ASK']."_$days"."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
             return $result;
         }
-        return $this->getCache()->get(self::KEYS['ASK']);
+        return $this->getCache()->get(self::KEYS['ASK']."_$days");
 	}
     /**
      * 信託註記建物所有部資料快取剩餘時間
