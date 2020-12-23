@@ -602,7 +602,6 @@ if (Vue) {
                         })
                     } else {
                         this.svr_info = json;
-                        this.$log(json);
                     }
                 })
             }

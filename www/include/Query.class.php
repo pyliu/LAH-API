@@ -90,7 +90,8 @@ class Query {
 			-- 案件(REG + SUR)數量統計 BY 年
 			SELECT t.RM01 AS YEAR, t.RM02 AS CODE, q.KCNT AS CODE_NAME, COUNT(*) AS COUNT,
 				(CASE
-					WHEN REGEXP_LIKE(t.RM02, '^".$this->site."[[:alpha:]]1$') THEN 'reg.HBX1'
+					--WHEN REGEXP_LIKE(t.RM02, '^".$this->site."[[:alpha:]]1$') THEN 'reg.HBX1'
+					WHEN RM02 IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1') THEN 'reg.HBX1'
 					WHEN t.RM02 LIKE 'H".$this->site_number."%'  THEN 'reg.H2XX'
 					WHEN t.RM02 LIKE '%".$this->site."'  THEN 'reg.XXHB'
 					WHEN t.RM02 LIKE 'H%".$this->site_code."1' THEN 'reg.HXB1'
@@ -844,8 +845,9 @@ class Query {
 				LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 				WHERE
 					-- RM07_1 > :bv_start
-					NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
+					-- NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
 					--RM02 NOT LIKE '".$this->site."%1'		-- only search our own cases
+					RM02 NOT IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1')
 					AND RM03 LIKE '%0' 			-- without sub-case
 					AND RM31 IS NULL			-- not closed case
 					AND RM29_1 || RM29_2 < :bv_now
@@ -859,8 +861,9 @@ class Query {
 				LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 				WHERE
 					-- RM07_1 > :bv_start
-					NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
+					-- NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
 					-- RM02 NOT LIKE '".$this->site."%1'		-- only search our own cases
+					RM02 NOT IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1')
 					AND RM03 LIKE '%0' 			-- without sub-case
 					AND RM31 IS NULL			-- not closed case
 					AND RM29_1 || RM29_2 < :bv_now
@@ -896,8 +899,9 @@ class Query {
 			FROM SCRSMS
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE
-				NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
+				-- NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
 				-- RM02 NOT LIKE '".$this->site."%1'		-- only search our own cases
+				RM02 NOT IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1')
 				AND RM03 LIKE '%0' 			-- without sub-case
 				AND RM31 IS NULL			-- not closed case
 				AND RM29_1 || RM29_2 < :bv_now_plus_4hrs
@@ -952,8 +956,9 @@ class Query {
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE
 				RM07_1 = :bv_qday AND 
-				NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
-				-- RM02 NOT LIKE '".$this->site."%1'	-- only search our own cases
+				-- NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
+				-- RM02 NOT LIKE 'HB%1'	-- only search our own cases
+				RM02 NOT IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1')
 				AND RM03 LIKE '%0' 		-- without sub-case
 				AND RM31 IS NULL
 				AND RM29_1 || RM29_2 < :bv_qdatetime
@@ -972,8 +977,9 @@ class Query {
 			FROM SCRSMS
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE
-				NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
+				-- NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
 				-- RM02 NOT LIKE '".$this->site."%1'	-- only search our own cases
+				RM02 NOT IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1')
 				AND RM31 IS NULL
 				AND (RM29_1 || RM29_2 < :bv_4hours_later AND RM29_1 || RM29_2 > :bv_now)
 			ORDER BY RM07_1, RM07_2 DESC
@@ -999,8 +1005,9 @@ class Query {
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE
 				RM07_1 = :bv_qday AND 
-				NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
+				-- NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
 				-- RM02 NOT LIKE '".$this->site."%1'
+				RM02 NOT IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1')
 				AND RM31 IS NULL
 				AND (RM29_1 || RM29_2 < :bv_4hours_later AND RM29_1 || RM29_2 > :bv_now)
 			ORDER BY RM07_1, RM07_2 DESC

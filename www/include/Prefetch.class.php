@@ -146,8 +146,9 @@ class Prefetch {
                 LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
                 WHERE
                     -- RM07_1 > :bv_start
-                    NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
+                    -- NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
                     -- RM02 NOT LIKE '".$this->site."%1'		-- only search our own cases
+                    RM02 NOT IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1')
                     AND RM03 LIKE '%0' 			-- without sub-case
                     AND RM31 IS NULL			-- not closed case
                     AND RM29_1 || RM29_2 < :bv_now
@@ -207,8 +208,9 @@ class Prefetch {
                 FROM SCRSMS
                 LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
                 WHERE
-                    NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
+                    -- NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
                     -- RM02 NOT LIKE '".$this->site."%1'		-- only search our own cases
+                    RM02 NOT IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1')
                     AND RM03 LIKE '%0' 			-- without sub-case
                     AND RM31 IS NULL			-- not closed case
                     AND RM29_1 || RM29_2 < :bv_now_plus_4hrs
