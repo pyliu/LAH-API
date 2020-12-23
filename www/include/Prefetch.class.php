@@ -348,7 +348,7 @@ class Prefetch {
                 AND r2.kcde_2=ee06
                 AND r3.kcde_1='30'
                 AND r3.kcde_2=gg30_1
-                ORDER BY is03 desc,is04_1,is04_2 
+                ORDER BY is05 desc,is03 desc,is04_1,is04_2 desc
             ");
             
             $db->bind(":bv_year", $year);
@@ -397,7 +397,7 @@ class Prefetch {
                 WHERE r1.kcde_1='48' 
                 AND r1.kcde_2=is48
                 and    is03= :bv_year
-                ORDER BY is03 desc,is48 desc,is49
+                ORDER BY is05 desc,is03 desc,is48 desc,is49
             ");
             
             $db->bind(":bv_year", $year);
@@ -455,7 +455,7 @@ class Prefetch {
                 AND r2.kcde_2=bb06 
                 AND r3.kcde_1='30'
                 AND r3.kcde_2=gg30_1
-                ORDER BY is03 desc,is04_1,is04_2 
+                ORDER BY is05 desc,is03 desc,is04_1,is04_2 
             ");
             
             $db->bind(":bv_year", $year);
@@ -501,7 +501,7 @@ class Prefetch {
                 WHERE r1.kcde_1='48' 
                 AND r1.kcde_2=is48
                 and    is03= :bv_year
-                ORDER BY is03 desc,is48 desc,is49
+                ORDER BY is05 desc,is03 desc,is48 desc,is49
             ");
             
             $db->bind(":bv_year", $year);
