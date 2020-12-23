@@ -120,7 +120,7 @@ if (Vue) {
             top_site() { return this.storeParams['XAP_CONN_TOP_SITES'] },
             ip() {
                 for (var value of this.xapMap.values()) {
-                    if (value.code == this.site) {
+                    if (value.code == this.site_code) {
                         return value.ip;
                     }
                 }
@@ -309,6 +309,7 @@ if (Vue) {
                     default:
                         this.site_code = '未知';
                 }
+                this.reload(true);
             },
             nav_right() {
                 switch (this.site_code) {
@@ -342,6 +343,7 @@ if (Vue) {
                     default:
                         this.site_code = '未知';
                 }
+                this.reload(true);
             }
         },
         created() {
