@@ -217,7 +217,7 @@ if (Vue) {
                         rgb = `rgb(255, 0, 19, ${opacity})`;
                     } // bright red
                     else if (value > 200) {
-                        rgb = `rgb(243, 0, 19, ${opacity})`
+                        rgb = `rgb(200, 0, 19, ${opacity})`
                     } // dark red
                     else if (value > 100) {
                         rgb = `rgb(238, 182, 1, ${opacity})`;
