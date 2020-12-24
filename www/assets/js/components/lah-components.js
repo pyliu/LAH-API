@@ -2610,7 +2610,7 @@ if (Vue) {
                                     作業人員：<span class='user_tag'>{{bakedData.作業人員}}</span> <br/>
                                     辦理情形：{{bakedData.辦理情形}} <br/>
                                     登記原因：{{bakedData.登記原因}} <br/>
-                                    區域：{{area}}【{{bakedData.RM10}}】 <br/>
+                                    區域：{{bakedData.區名稱}}【{{bakedData.RM10}}】 <br/>
                                     段小段：{{bakedData.段小段}}【{{bakedData.段代碼}}】 <br/>
                                     地號：{{bakedData.地號}} <br/>
                                     建號：{{bakedData.建號}} <br/>
@@ -2779,7 +2779,6 @@ if (Vue) {
         </div>`,
         props: ['tabsEnd'],
         data: () => ({
-            area: "",
             rm10: null,
             ap_server: "220.1.35.123",
             show_op_card: true
@@ -2806,17 +2805,6 @@ if (Vue) {
         },
         mounted() {
             this.rm10 = this.bakedData.RM10 ? this.bakedData.RM10 : "XX";
-            switch (this.rm10) {
-                case "03":
-                    this.area = "中壢區";
-                    break;
-                case "12":
-                    this.area = "觀音區";
-                    break;
-                default:
-                    this.area = "其他(" + this.bakedData.資料管轄所 + "區)";
-                    break;
-            }
         },
         mounted() {
             addUserInfoEvent();
