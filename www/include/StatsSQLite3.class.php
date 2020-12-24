@@ -334,14 +334,14 @@ class StatsSQLite3 {
         $latest_batch = $ap_db->querySingle("SELECT DISTINCT batch from ap_conn_history ORDER BY batch DESC");
         $success = 0;
         foreach ($processed as $est_ip => $count) {
-            $stm = $ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch)");
+            $stm = @$ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch)");
             $stm->bindParam(':log_time', $log_time);
             $stm->bindParam(':ap_ip', $ap_ip);
             $stm->bindParam(':est_ip', $est_ip);
             $stm->bindParam(':count', $count);
             $stm->bindValue(':batch', $latest_batch + 1);
             $retry = 0;
-            while ($stm->execute() === FALSE) {
+            while (@$stm->execute() === FALSE) {
                 if ($retry > 10) {
                     $log->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $ap_ip, $est_ip, $count)");
                     return $success;
