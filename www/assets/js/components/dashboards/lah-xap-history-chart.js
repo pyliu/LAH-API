@@ -130,11 +130,25 @@ if (Vue) {
         methods: {
             style_by_count(value, opacity = 0.6) {
                 let variant, action, rgb, icon, size = '';
-                if (value > 200) {
+                if (value > 600) {
+                    icon = 'network-wired';
+                    variant = 'danger';
+                    action = 'coin-h';
+                    rgb = `rgb(139, 0, 199, ${opacity})`;
+                    size = '4x';
+                } // dark
+                else if (value > 400) {
+                    icon = 'network-wired';
+                    variant = 'danger';
+                    action = 'shiver';
+                    rgb = `rgb(255, 0, 19, ${opacity})`;
+                    size = '3x';
+                } // dark
+                else if (value > 200) {
                     icon = 'network-wired';
                     variant = 'danger';
                     action = 'tremble';
-                    rgb = `rgb(243, 0, 19, ${opacity})`;
+                    rgb = `rgb(200, 0, 19, ${opacity})`;
                     size = '2x';
                 } // red
                 else if (value > 100) {
@@ -159,7 +173,7 @@ if (Vue) {
                 return [variant, action, rgb, icon, size]
             },
             bg_color(dataset_item, opacity) {
-                [variant, action, rgb, icon] = this.style_by_count(dataset_item[1], opacity);
+                [variant, action, rgb, icon, size] = this.style_by_count(dataset_item[1], opacity);
                 return rgb;
             },
             set_items(raw) {
@@ -269,7 +283,7 @@ if (Vue) {
             },
             show_count(e, payload) {
                 if (this.empty(payload['label'])) return;
-                [variant, action, rgb] = this.style_by_count(payload['value']);
+                [variant, action, rgb, icon, size] = this.style_by_count(payload['value']);
                 this.notify({
                     title: `${this.site_tw}連線數`,
                     subtitle: `${payload['label']}`,
