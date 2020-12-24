@@ -1052,7 +1052,7 @@ class Query {
 		}
 		
 		$this->db->parse("
-			SELECT s.*, v.KNAME AS RM11_CNT
+			SELECT s.*, v.KNAME AS RM11_CHT
 				FROM (SELECT r.*, q.AB02
 					FROM (
 						SELECT t.*, m.KCNT 

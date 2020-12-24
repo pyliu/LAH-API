@@ -122,8 +122,8 @@ class RegCaseData {
     private function fetch($id) {
         if ($this->formatID($id)) {
             $db = new OraDB(CONNECTION_TYPE::MAIN);
-            $db->parse(
-                "SELECT s.*, u.KCNT AS RM11_CNT
+            $db->parse("
+                SELECT s.*, v.KNAME AS RM11_CHT
                 FROM (SELECT r.*, q.AB02
                     FROM (
                         SELECT t.*, m.KCNT 
@@ -131,9 +131,10 @@ class RegCaseData {
                         LEFT JOIN MOIADM.RKEYN m ON (m.KCDE_1 = '06' AND t.RM09 = m.KCDE_2)
                         WHERE t.RM01 = :bv_rm01_year and t.RM02 = :bv_rm02_code and t.RM03 = :bv_rm03_number
                     ) r
-                    LEFT JOIN MOICAS.CABRP q ON r.RM24 = q.AB01) s
-                LEFT JOIN MOIADM.RKEYN u ON (u.KCDE_1 = '48' AND s.RM11 = u.KCDE_2)"
-            );
+                LEFT JOIN MOICAS.CABRP q ON r.RM24 = q.AB01) s
+                --LEFT JOIN MOIADM.RKEYN u ON (u.KCDE_1 = '48' AND s.RM11 = u.KCDE_2)
+                LEFT JOIN MOIADM.RKEYN_ALL v ON (v.KCDE_1 = '48' AND v.KCDE_2 = 'H' AND v.KCDE_3 = s.RM10 AND s.RM11 = v.KCDE_4)
+            ");
             
             $db->bind(":bv_rm01_year", substr($id, 0, 3));
             $db->bind(":bv_rm02_code", substr($id, 3, 4));
@@ -212,7 +213,7 @@ class RegCaseData {
             "區代碼" =>  $row["RM10"],
             "區名稱" =>  $this->getAreaName(),
             "段代碼" =>  empty($row["RM11"]) ? "" : $row["RM11"],
-            "段小段" =>  empty($row["RM11_CNT"]) ? "" : $row["RM11_CNT"],
+            "段小段" =>  empty($row["CHT"]) ? "" : $row["RM11_CHT"],
             "地號" =>  empty($row["RM12"]) ? "" : substr($row["RM12"], 0, 4)."-".substr($row["RM12"], 4),
             "建號" =>  empty($row["RM15"]) ? "" : substr($row["RM15"], 0, 5)."-".substr($row["RM15"], 5),
             "件數" =>  empty($row["RM32"]) ? "" : $row["RM32"],
