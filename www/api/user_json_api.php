@@ -148,7 +148,7 @@ switch ($_POST["type"]) {
 			));
 		} else {
 			$_SESSION["myinfo"] = $results[0];
-			$log->info("XHR [my_info/authentication] 查詢 ".$client_ip." 成功。 (".str_replace("\n", ' ', print_r($result['authority'], true)).")");
+			$log->info("XHR [my_info/authentication] 查詢 ".$client_ip." 成功。");
             echoJSONResponse("查詢 ".$client_ip." 成功。 (".$results[0]["id"].":".$results[0]["name"].")", STATUS_CODE::SUCCESS_NORMAL, array(
 				"data_count" => count($results),
 				"info" => $results[0],
