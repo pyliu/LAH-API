@@ -213,7 +213,7 @@ class RegCaseData {
             "區代碼" =>  $row["RM10"],
             "區名稱" =>  $this->getAreaName(),
             "段代碼" =>  empty($row["RM11"]) ? "" : $row["RM11"],
-            "段小段" =>  empty($row["CHT"]) ? "" : $row["RM11_CHT"],
+            "段小段" =>  empty($row["RM11_CHT"]) ? "無對應資料" : $row["RM11_CHT"],
             "地號" =>  empty($row["RM12"]) ? "" : substr($row["RM12"], 0, 4)."-".substr($row["RM12"], 4),
             "建號" =>  empty($row["RM15"]) ? "" : substr($row["RM15"], 0, 5)."-".substr($row["RM15"], 5),
             "件數" =>  empty($row["RM32"]) ? "" : $row["RM32"],
