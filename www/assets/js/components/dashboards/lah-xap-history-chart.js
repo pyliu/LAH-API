@@ -136,21 +136,21 @@ if (Vue) {
                     action = 'coin-h';
                     rgb = `rgb(139, 0, 199, ${opacity})`;
                     size = '4x';
-                } // dark
+                } // purple
                 else if (value > 400) {
                     icon = 'network-wired';
                     variant = 'danger';
                     action = 'shiver';
                     rgb = `rgb(255, 0, 19, ${opacity})`;
                     size = '3x';
-                } // dark
+                } // bright red
                 else if (value > 200) {
                     icon = 'network-wired';
                     variant = 'danger';
                     action = 'tremble';
                     rgb = `rgb(200, 0, 19, ${opacity})`;
                     size = '2x';
-                } // red
+                } // dark red
                 else if (value > 100) {
                     icon = 'network-wired';
                     variant = 'warning';
