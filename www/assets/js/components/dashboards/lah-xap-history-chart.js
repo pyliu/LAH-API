@@ -130,13 +130,20 @@ if (Vue) {
         methods: {
             style_by_count(value, opacity = 0.6) {
                 let variant, action, rgb, icon, size = '';
-                if (value > 600) {
+                if (value > 800) {
+                    icon = 'network-wired';
+                    variant = 'danger';
+                    action = 'surprise';
+                    rgb = `rgb(179, 0, 255, ${opacity})`;
+                    size = '5x';
+                } // bright purple
+                else if (value > 600) {
                     icon = 'network-wired';
                     variant = 'danger';
                     action = 'coin-h';
-                    rgb = `rgb(139, 0, 199, ${opacity})`;
+                    rgb = `rgb(114, 0, 159, ${opacity})`;
                     size = '4x';
-                } // purple
+                } // dark purple
                 else if (value > 400) {
                     icon = 'network-wired';
                     variant = 'danger';

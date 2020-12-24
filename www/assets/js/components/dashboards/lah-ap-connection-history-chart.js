@@ -210,9 +210,12 @@ if (Vue) {
                 variant = 'secondary';
                 action = '';
                 if (this.type == 'bar') {
-                    if (value > 600) {
-                        rgb = `rgb(139, 0, 199, ${opacity})`;
-                    } // purple
+                    if (value > 800) {
+                        rgb = `rgb(179, 0, 255, ${opacity})`;
+                    } // bright purple
+                    else if (value > 600) {
+                        rgb = `rgb(114, 0, 159, ${opacity})`;
+                    } // dark purple
                     else if (value > 400) {
                         rgb = `rgb(255, 0, 19, ${opacity})`;
                     } // bright red
