@@ -55,7 +55,10 @@ abstract class IPResolver {
             // find user by ip address
             $sqlite_user = new SQLiteUser();
             $user_data = $sqlite_user->getUserByIP($ip);
-            return $user_data === false ? '' : $user_data[0]['name'];
+            if (array_key_exists(0, $user_data)) {
+                return $user_data[0]['name'];
+            }
+            return '';
         } else {
             $log->warning(__METHOD__.": Not a valid IP address. [$ip]");
         }
