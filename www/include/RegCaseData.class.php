@@ -210,6 +210,8 @@ class RegCaseData {
             "手機號碼" => empty($row["RM102"]) ? "" : $row["RM102"],
             "代理人統編" => empty($row["RM24"]) ? "" : $row["RM24"],
             "代理人姓名" => empty($row["AB02"]) ? "" : $row["AB02"],
+            "代理人住址" => empty($row["AB03"]) ? "" : $row["AB03"],
+            "代理人電話" => empty($row["AB04_1"]) ? "" : $row["AB04_1"].$row["AB04_2"],
             "區代碼" =>  $row["RM10"],
             "區名稱" =>  $this->getAreaName(),
             "段代碼" =>  empty($row["RM11"]) ? "" : $row["RM11"],

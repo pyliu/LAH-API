@@ -15,7 +15,8 @@ class Prefetch {
         'TRUST_REBOW' => 'Prefetch::getTrustRebow',
         'TRUST_REBOW_EXCEPTION' => 'Prefetch::getTrustRebowException',
         'TRUST_RBLOW' => 'Prefetch::getTrustRblow',
-        'TRUST_RBLOW_EXCEPTION' => 'Prefetch::getTrustRblowException'
+        'TRUST_RBLOW_EXCEPTION' => 'Prefetch::getTrustRblowException',
+        'NON_SCRIVENER' => 'Prefetch::getNonScrivenerCase'
     );
     private $ora_db = null;
     private $cache = null;
@@ -517,5 +518,68 @@ class Prefetch {
             return $result;
         }
         return $this->getCache()->get(self::KEYS['TRUST_RBLOW_EXCEPTION'].$year);
+	}
+    /**
+     * 非專業代理人區間案件快取剩餘時間
+     */
+    public function getNonScrivenerCaseCacheRemainingTime($st, $ed) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['NON_SCRIVENER'].$st.$ed);
+    }
+    /**
+     * 強制重新讀取非專業代理人區間案件
+     */
+    public function reloadNonScrivenerCase($st, $ed) {
+        $this->getCache()->del(self::KEYS['NON_SCRIVENER'].$st.$ed);
+        return $this->getNonScrivenerCase($st, $ed);
+    }
+    /**
+	 * 取得非專業代理人區間案件
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getNonScrivenerCase($st, $ed, $expire_duration = 86400) {
+        if ($this->getCache()->isExpired(self::KEYS['NON_SCRIVENER'].$st.$ed)) {
+            global $log;
+            $log->info('['.self::KEYS['NON_SCRIVENER'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+
+            $db = $this->getOraDB();
+            $db->parse("
+                SELECT
+                    t.*,
+                    r.ab02 AS RM24_NAME,
+                    r.ab03 AS RM24_ADDR,
+                    r.ab04_1 || r.ab04_2 AS RM24_TEL,
+                    r.*
+                FROM
+                    MOICAS.CRSMS t
+                    LEFT JOIN MOICAS.CABRP r ON t.RM24 = r.AB01
+                WHERE 1=1
+                    AND RM07_1 BETWEEN :bv_st AND :bv_ed
+                    AND t.RM24 IN (
+                        SELECT DISTINCT RM24  from MOICAS.CRSMS t
+                        WHERE RM07_1 BETWEEN :bv_st AND :bv_ed
+                        AND RM24 IS NOT NULL
+                        AND RM24 NOT IN (
+                            SELECT DISTINCT s.AB01
+                            FROM MOICAS.CABRP s
+                            WHERE 1=1
+                                AND AB09 = 'N'
+                                AND AB10 = 'N'
+                                AND AB11 = 'N'
+                        )
+                    )
+                ORDER BY t.RM07_1     
+            ");
+            
+            $db->bind(":bv_st", $st);
+            $db->bind(":bv_ed", $ed);
+            $db->execute();
+            $result = $db->fetchAll();
+            $this->getCache()->set(self::KEYS['NON_SCRIVENER'].$st.$ed, $result, $expire_duration);
+
+            $log->info("[".self::KEYS['NON_SCRIVENER'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+            return $result;
+        }
+        return $this->getCache()->get(self::KEYS['NON_SCRIVENER'].$st.$ed);
 	}
 }
