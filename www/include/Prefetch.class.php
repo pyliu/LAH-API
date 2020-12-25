@@ -92,11 +92,14 @@ class Prefetch {
                 -- RM49 公告日期, RM50 公告到期日
                 SELECT
                     Q.KCNT AS RM09_CHT,
+                    v.KNAME AS RM11_CHT,
                     sa11.USER_NAME AS RM45_USERNAME,
                     sa12.USER_NAME AS RM30_1_USERNAME,
                     s.*
                 FROM
-                    MOICAS.CRSMS s LEFT JOIN MOIADM.RKEYN Q ON s.RM09=Q.KCDE_2 AND Q.KCDE_1 = '06',
+                    MOICAS.CRSMS s
+                    LEFT JOIN MOIADM.RKEYN Q ON s.RM09=Q.KCDE_2 AND Q.KCDE_1 = '06'
+                    LEFT JOIN MOIADM.RKEYN_ALL v ON (v.KCDE_1 = '48' AND v.KCDE_2 = 'H' AND v.KCDE_3 = s.RM10 AND s.RM11 = v.KCDE_4),
                     MOIADM.SYSAUTH1 sa11,
                     MOIADM.SYSAUTH1 sa12
                 WHERE s.RM30 = 'H'
