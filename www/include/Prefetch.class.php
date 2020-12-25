@@ -545,6 +545,8 @@ class Prefetch {
             $db->parse("
                 SELECT
                     t.*,
+                    u.KCNT AS RM09_CHT,
+                    v.KNAME AS RM11_CHT,
                     r.ab02 AS RM24_NAME,
                     r.ab03 AS RM24_ADDR,
                     r.ab04_1 || r.ab04_2 AS RM24_TEL,
@@ -552,6 +554,8 @@ class Prefetch {
                 FROM
                     MOICAS.CRSMS t
                     LEFT JOIN MOICAS.CABRP r ON t.RM24 = r.AB01
+                    LEFT JOIN MOIADM.RKEYN u ON t.RM09 = u.KCDE_2 AND u.KCDE_1 = '06'
+                    LEFT JOIN MOIADM.RKEYN_ALL v ON (v.KCDE_1 = '48' AND v.KCDE_2 = 'H' AND v.KCDE_3 = t.RM10 AND t.RM11 = v.KCDE_4)
                 WHERE 1=1
                     AND RM07_1 BETWEEN :bv_st AND :bv_ed
                     AND t.RM24 IN (
