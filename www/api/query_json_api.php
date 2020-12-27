@@ -58,11 +58,12 @@ switch ($_POST["type"]) {
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
 			"config" => array(
-				'webap_ip' => $webap_ip
+				'webap_ip' => $webap_ip,
+				'mock' => $mock,
+				"authority" => $system->getAuthority($_POST['client_ip'])
 			),
 			"server" => $_SERVER,
 			"ips" => $ips,
-			"mock" => $mock,
 			"data_count" => count($ips),
 			"message" => "Got server $count ip address => ".str_replace("\n", ' ', print_r($ips, true))
 		), 0);
