@@ -182,12 +182,13 @@ if (Vue) {
                     //this.codes = Object.assign({}, this.codes);
                     this.arrangeCodeList();
                 } else {
-                    this.alert({
+                    this.notify({
                         title: `案件字還原`,
                         subtitle: this.code_cache_key,
                         message: `無法讀取案件「字」資料`,
-                        type: 'danger'
+                        type: 'warning'
                     });
+                    this.timeout(window.location.reload, 1000);
                 }
             },
             arrangeCodeList() {
