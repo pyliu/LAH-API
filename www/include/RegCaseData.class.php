@@ -204,18 +204,21 @@ class RegCaseData {
             "辦理情形" => $this->getStatus(),
             "權利人統編" => empty($row["RM18"]) ? "" : $row["RM18"],
             "權利人姓名" => empty($row["RM19"]) ? "" : preg_replace("/(BAD\+[[:alpha:][:digit:]]{2,3})|(&#\d+;)/", "○", $row["RM19"]),
+            "權利人住址" => empty($row["RM18_ADDR"]) ? "" : preg_replace("/(BAD\+[[:alpha:][:digit:]]{2,3})|(&#\d+;)/", "○", $row["RM18_ADDR"]),
             "義務人統編" => empty($row["RM21"]) ? "" : $row["RM21"],
             "義務人姓名" => empty($row["RM22"]) ? "" : preg_replace("/(BAD\+[[:alpha:][:digit:]]{2,3})|(&#\d+;)/", "○", $row["RM22"]),
+            "義務人住址" => empty($row["RM21_ADDR"]) ? "" : preg_replace("/(BAD\+[[:alpha:][:digit:]]{2,3})|(&#\d+;)/", "○", $row["RM21_ADDR"]),
             "義務人人數" => empty($row["RM23"]) ? "" : $row["RM23"],
             "手機號碼" => empty($row["RM102"]) ? "" : $row["RM102"],
             "代理人統編" => empty($row["RM24"]) ? "" : $row["RM24"],
             "代理人姓名" => empty($row["AB02"]) ? "" : preg_replace("/(BAD\+[[:alpha:][:digit:]]{2,3})|(&#\d+;)/", "○", $row["AB02"]),
             "代理人住址" => empty($row["AB03"]) ? "" : preg_replace("/(BAD\+[[:alpha:][:digit:]]{2,3})|(&#\d+;)/", "○", $row["AB03"]),
             "代理人電話" => empty($row["AB04_1"]) ? "" : $row["AB04_1"].$row["AB04_2"],
+            "非專代電話" => $row["AB04_NON_SCRIVENER_TEL"] ?? "",
             "區代碼" =>  $row["RM10"],
-            "區名稱" =>  $this->getAreaName(),
+            "區名稱" =>  $row["RM10_C_KCNT"] ?? $this->getAreaName(),
             "段代碼" =>  empty($row["RM11"]) ? "" : $row["RM11"],
-            "段小段" =>  empty($row["RM11_CHT"]) ? "無對應資料" : $row["RM11_CHT"],
+            "段小段" =>  $row["RM11_CHT"] ?? $row["RM11_C_KCNT"] ?? "無對應資料",
             "地號" =>  empty($row["RM12"]) ? "" : substr($row["RM12"], 0, 4)."-".substr($row["RM12"], 4),
             "建號" =>  empty($row["RM15"]) ? "" : substr($row["RM15"], 0, 5)."-".substr($row["RM15"], 5),
             "件數" =>  empty($row["RM32"]) ? "" : $row["RM32"],
@@ -349,7 +352,7 @@ class RegCaseData {
     }
 
     public function getCaseReason() {
-        return $this->row["KCNT"] ?? $this->row["RM09_CHT"] ?? $this->row["RM09"];
+        return $this->row["KCNT"] ?? $this->row["RM09_CHT"] ?? $this->row["RM09_C_KCNT"] ?? $this->row["RM09"];
     }
 
     public function getStatus() {
