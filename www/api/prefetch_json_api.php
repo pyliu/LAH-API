@@ -182,6 +182,29 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
+	case "reg_foreigner_case":
+		$log->info("XHR [reg_foreigner_case] 查詢外國人案件請求");
+		$st = $_POST['year_month'];
+		$ed = $_POST['end_date'];
+		$rows = $_POST['reload'] === 'false' ? $prefetch->getForeignerCase($_POST['year_month']) : $prefetch->reloadForeignerCase($_POST['year_month']);
+		if (empty($rows)) {
+			$log->info("XHR [reg_foreigner_case] 查無資料");
+			echoJSONResponse('查無非專代案件');
+		} else {
+			$total = count($rows);
+			$log->info("XHR [reg_foreigner_case] 查詢成功($total)");
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$baked[] = $data->getBakedData();
+			}
+			echoJSONResponse("查詢成功，找到 $total 筆外國人案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"baked" => $baked,
+				'cache_remaining_time' => $prefetch->getForeignerCaseCacheRemainingTime($_POST['year_month'])
+			));
+		}
+		break;
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

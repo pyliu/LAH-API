@@ -16,7 +16,8 @@ class Prefetch {
         'TRUST_REBOW_EXCEPTION' => 'Prefetch::getTrustRebowException',
         'TRUST_RBLOW' => 'Prefetch::getTrustRblow',
         'TRUST_RBLOW_EXCEPTION' => 'Prefetch::getTrustRblowException',
-        'NON_SCRIVENER' => 'Prefetch::getNonScrivenerCase'
+        'NON_SCRIVENER' => 'Prefetch::getNonScrivenerCase',
+        'FOREIGNER' => 'Prefetch::getForeignerCase'
     );
     private $ora_db = null;
     private $cache = null;
@@ -585,5 +586,106 @@ class Prefetch {
             return $result;
         }
         return $this->getCache()->get(self::KEYS['NON_SCRIVENER'].$st.$ed);
+	}
+    /**
+     * 外國人案件快取剩餘時間
+     */
+    public function getForeignerCaseCacheRemainingTime($year_month) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['FOREIGNER'].$year_month);
+    }
+    /**
+     * 強制重新讀取外國人案件
+     */
+    public function reloadForeignerCase($year_month) {
+        $this->getCache()->del(self::KEYS['FOREIGNER'].$year_month);
+        return $this->getForeignerCase($year_month);
+    }
+    /**
+	 * 取得外國人案件
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getForeignerCase($year_month, $expire_duration = 86400) {
+        if ($this->getCache()->isExpired(self::KEYS['FOREIGNER'].$year_month)) {
+            global $log;
+            $log->info('['.self::KEYS['FOREIGNER'].$year_month.'] 快取資料已失效，重新擷取 ... ');
+
+            $db = $this->getOraDB();
+            $db->parse("
+                SELECT DISTINCT
+                    t.RM01   AS \"收件年\",
+                    t.RM02   AS \"收件字\",
+                    t.RM03   AS \"收件號\",
+                    t.RM09   AS \"登記原因代碼\",
+                    r.KCNT    AS \"登記原因\",
+                    t.RM07_1 AS \"收件日期\",
+                    t.RM58_1 AS \"結案日期\",
+                    t.RM18   AS \"權利人統一編號\",
+                    t.RM19   AS \"權利人姓名\",
+                    t.RM21   AS \"義務人統一編號\",
+                    t.RM22   AS \"義務人姓名\",
+                    (CASE
+                        WHEN q.LCDE = '1' THEN '本國人'
+                        WHEN q.LCDE = '2' THEN '外國人'
+                        WHEN q.LCDE = '3' THEN '國有（中央機關）'
+                        WHEN q.LCDE = '4' THEN '省市有（省市機關）'
+                        WHEN q.LCDE = '5' THEN '縣市有（縣市機關）'
+                        WHEN q.LCDE = '6' THEN '鄉鎮市有（鄉鎮市機關）'
+                        WHEN q.LCDE = '7' THEN '本國私法人'
+                        WHEN q.LCDE = '8' THEN '外國法人'
+                        WHEN q.LCDE = '9' THEN '祭祀公業'
+                        WHEN q.LCDE = 'A' THEN '其他'
+                        WHEN q.LCDE = 'B' THEN '銀行法人'
+                        WHEN q.LCDE = 'C' THEN '大陸地區自然人'
+                        WHEN q.LCDE = 'D' THEN '大陸地區法人'
+                        ELSE q.LCDE
+                    END) AS \"外國人類別\",
+                    (CASE
+                        WHEN t.RM30 = 'A' THEN '初審'
+                        WHEN t.RM30 = 'B' THEN '複審'
+                        WHEN t.RM30 = 'H' THEN '公告'
+                        WHEN t.RM30 = 'I' THEN '補正'
+                        WHEN t.RM30 = 'R' THEN '登錄'
+                        WHEN t.RM30 = 'C' THEN '校對'
+                        WHEN t.RM30 = 'U' THEN '異動完成'
+                        WHEN t.RM30 = 'F' THEN '結案'
+                        WHEN t.RM30 = 'X' THEN '補正初核'
+                        WHEN t.RM30 = 'Y' THEN '駁回初核'
+                        WHEN t.RM30 = 'J' THEN '撤回初核'
+                        WHEN t.RM30 = 'K' THEN '撤回'
+                        WHEN t.RM30 = 'Z' THEN '歸檔'
+                        WHEN t.RM30 = 'N' THEN '駁回'
+                        WHEN t.RM30 = 'L' THEN '公告初核'
+                        WHEN t.RM30 = 'E' THEN '請示'
+                        WHEN t.RM30 = 'D' THEN '展期'
+                        ELSE t.RM30
+                    END) AS \"辦理情形\",
+                    (CASE
+                        WHEN t.RM31 = 'A' THEN '結案'
+                        WHEN t.RM31 = 'B' THEN '撤回'
+                        WHEN t.RM31 = 'C' THEN '併案'
+                        WHEN t.RM31 = 'D' THEN '駁回'
+                        WHEN t.RM31 = 'E' THEN '請示'
+                        ELSE t.RM31
+                    END) AS \"結案與否\"
+                FROM
+                    (select * from MOICAS.CRSMS where RM07_1 LIKE :bv_year || '%' AND RM56_1 LIKE :bv_year_month || '%') t,
+                    (select * from MOICAD.RLNID p where p.LCDE in ('2', '8', 'C', 'D') ) q, -- 代碼檔 09
+                    (select * from MOICAD.RKEYN k where k.KCDE_1 = '06') r
+                WHERE
+                    ( t.RM18 = q.LIDN OR t.RM21 = q.LIDN ) AND
+                    r.KCDE_2 = t.RM09
+            ");
+            
+            $db->bind(":bv_year", substr($year_month, 0, 3));
+            $db->bind(":bv_year_month", $year_month);
+            $db->execute();
+            $result = $db->fetchAll();
+            $this->getCache()->set(self::KEYS['FOREIGNER'].$year_month, $result, $expire_duration);
+
+            $log->info("[".self::KEYS['FOREIGNER'].$year_month."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+            return $result;
+        }
+        return $this->getCache()->get(self::KEYS['FOREIGNER'].$year_month);
 	}
 }
