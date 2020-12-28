@@ -17,6 +17,7 @@ class Prefetch {
         'TRUST_RBLOW' => 'Prefetch::getTrustRblow',
         'TRUST_RBLOW_EXCEPTION' => 'Prefetch::getTrustRblowException',
         'NON_SCRIVENER' => 'Prefetch::getNonScrivenerCase',
+        'NON_SCRIVENER_WEB' => 'Prefetch::getNonScrivenerWebCase',
         'FOREIGNER' => 'Prefetch::getForeignerCase'
     );
     private $ora_db = null;
@@ -586,7 +587,146 @@ class Prefetch {
             return $result;
         }
         return $this->getCache()->get(self::KEYS['NON_SCRIVENER'].$st.$ed);
-	}
+    }
+    /**
+     * 非專業代理人區間WEB案件快取剩餘時間
+     */
+    public function getNonScrivenerWebCaseCacheRemainingTime($st, $ed) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['NON_SCRIVENER_WEB'].$st.$ed);
+    }
+    /**
+     * 強制重新讀取非專業代理人區間WEB案件
+     */
+    public function reloadNonScrivenerWebCase($st, $ed) {
+        $this->getCache()->del(self::KEYS['NON_SCRIVENER_WEB'].$st.$ed);
+        return $this->getNonScrivenerWebCase($st, $ed);
+    }
+    /**
+	 * 取得非專業代理人區間WEB案件
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getNonScrivenerWebCase($st, $ed, $expire_duration = 86400) {
+        if ($this->getCache()->isExpired(self::KEYS['NON_SCRIVENER_WEB'].$st.$ed)) {
+            global $log;
+            $log->info('['.self::KEYS['NON_SCRIVENER_WEB'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+
+            $db = $this->getOraDB();
+            $db->parse("
+                -- 登記案件
+                SELECT 'R' AS CASE_TYPE,
+                    AB01,
+                    AB02,
+                    AB03,
+                    AB13,
+                    AB23,
+                    RM01,
+                    RM02,
+                    RM03,
+                    RM19,
+                    RM22,
+                    RM07_1,
+                    SUBSTR(AB01, 1, 5) || LPAD('*', LENGTH(SUBSTR(AB01, 6)), '*') AS AB01_S,
+                    (RM01 || '-' || RM02_C.KCNT || '-' || RM03) AS RM123,
+                    (RM18_A.LADR) AS RM18_ADDR,
+                    (RM21_A.LADR) AS RM21_ADDR,
+                    (RM09_C.KCNT) AS RM09_C_KCNT,
+                    (RM10_C.KCNT) AS RM10_C_KCNT,
+                    (RM11_C.KNAME) AS RM11_C_KCNT,
+                    (SUBSTR(RM12, 1, 4) || '-' || SUBSTR(RM12, 5, 4)) AS RM12_C,
+                    (SUBSTR(RM15, 1, 5) || '-' || SUBSTR(RM15, 6, 3)) AS RM15_C
+                FROM SCRSMS
+                LEFT OUTER JOIN SRLNID RM18_A
+                    ON RM18_A.LIDN = RM18
+                LEFT OUTER JOIN SRLNID RM21_A
+                    ON RM21_A.LIDN = RM21
+                LEFT OUTER JOIN SRKEYN RM02_C
+                    ON RM02_C.KCDE_1 = '04'
+                AND RM02_C.KCDE_2 = RM02
+                LEFT OUTER JOIN SRKEYN RM09_C
+                    ON RM09_C.KCDE_1 = '06'
+                AND RM09_C.KCDE_2 = RM09
+                LEFT OUTER JOIN SRKEYN RM10_C
+                    ON RM10_C.KCDE_1 = '46'
+                AND RM10_C.KCDE_2 = RM10
+                LEFT OUTER JOIN MOIADM.RKEYN_ALL RM11_C
+                    ON RM11_C.KCDE_1 = '48'
+                    AND RM11_C.KCDE_2 = 'H'
+                    AND RM11_C.KCDE_3 = RM10
+                    AND RM11_C.KCDE_4 = RM11,
+                SCABRP
+                WHERE 1 = 1
+                AND RM07_1 BETWEEN :bv_st AND :bv_ed
+                AND AB_FLAG = 'N'
+                AND (AB13 > 2 OR AB23 > 5)
+                AND (RM24 = AB01 OR RM24_OTHER = AB01)
+                AND NVL(RM18, 'X') <> AB01
+                AND NVL(RM21, 'X') <> AB01
+                AND AB01 NOT IN ('H000000001', 'H000000002', 'H000000003')
+                UNION ALL
+                -- 測量案件
+                SELECT 'M' AS CASE_TYPE,
+                    AB01,
+                    AB02,
+                    AB03,
+                    AB13,
+                    AB23,
+                    MM01,
+                    MM02,
+                    MM03,
+                    MM14,
+                    '',
+                    MM04_1,
+                    SUBSTR(AB01, 1, 5) || LPAD('*', LENGTH(SUBSTR(AB01, 6)), '*') AS AB01_S,
+                    (MM01 || '-' || MM02_C.KCNT || '-' || MM03) AS MM123,
+                    (MM13_A.LADR) AS MM13_ADDR,
+                    '',
+                    (MM06_C.KCNT) AS RM09_C_KCNT,
+                    (MM07_C.KCNT) AS RM10_C_KCNT,
+                    (MM08_C.KNAME) AS RM11_C_KCNT,
+                    (SUBSTR(MM09, 1, 4) || '-' || SUBSTR(MM09, 5, 4)) AS RM12_C,
+                    (SUBSTR(MM10, 1, 5) || '-' || SUBSTR(MM10, 6, 3)) AS RM15_C
+                FROM SCMSMS
+                LEFT OUTER JOIN SRLNID MM13_A
+                    ON MM13_A.LIDN = MM13
+                LEFT OUTER JOIN SRKEYN MM02_C
+                    ON MM02_C.KCDE_1 = '04'
+                AND MM02_C.KCDE_2 = MM02
+                LEFT OUTER JOIN SRKEYN MM06_C
+                    ON MM06_C.KCDE_1 = 'M3'
+                AND MM06_C.KCDE_2 = MM06
+                LEFT OUTER JOIN SRKEYN MM07_C
+                    ON MM07_C.KCDE_1 = '46'
+                AND MM07_C.KCDE_2 = MM07
+                LEFT OUTER JOIN MOIADM.RKEYN_ALL MM08_C
+                    ON MM08_C.KCDE_1 = '48'
+                    AND MM08_C.KCDE_2 = 'H'
+                    AND MM08_C.KCDE_3 = MM07
+                    AND MM08_C.KCDE_4 = MM08,
+                SCABRP
+                WHERE 1 = 1
+                AND MM04_1 BETWEEN :bv_st AND :bv_ed
+                AND AB_FLAG = 'N'
+                AND (AB13 > 2 OR AB23 > 5)
+                AND (MM17_1 = AB01 OR MM17_2 = AB01)
+                AND NVL(MM13, 'X') <> AB01
+                AND NVL(MM13, 'X') <> AB01
+                AND AB01 NOT IN ('H000000001', 'H000000002', 'H000000003')
+                
+                ORDER BY AB01, CASE_TYPE DESC, RM01, RM02, RM03            
+            ");
+            
+            $db->bind(":bv_st", $st);
+            $db->bind(":bv_ed", $ed);
+            $db->execute();
+            $result = $db->fetchAll();
+            $this->getCache()->set(self::KEYS['NON_SCRIVENER_WEB'].$st.$ed, $result, $expire_duration);
+
+            $log->info("[".self::KEYS['NON_SCRIVENER_WEB'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+            return $result;
+        }
+        return $this->getCache()->get(self::KEYS['NON_SCRIVENER_WEB'].$st.$ed);
+    }
     /**
      * 外國人案件快取剩餘時間
      */
