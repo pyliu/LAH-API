@@ -214,12 +214,12 @@ switch ($_POST["type"]) {
 			echoJSONResponse('查無非專代案件');
 		} else {
 			$total = count($rows);
-			$log->info("XHR [reg_foreigner_case] 查詢成功($total)");
 			$baked = array();
 			foreach ($rows as $row) {
 				$data = new RegCaseData($row);
 				$baked[] = $data->getBakedData();
 			}
+			$log->info("XHR [reg_foreigner_case] 查詢成功($total)");
 			echoJSONResponse("查詢成功，找到 $total 筆外國人案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,

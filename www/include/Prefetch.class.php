@@ -702,9 +702,12 @@ class Prefetch {
             $db = $this->getOraDB();
             $db->parse("
                 SELECT DISTINCT
+                    t.*,
+                    r.KCNT AS RM09_CHT,
                     t.RM01   AS \"收件年\",
                     t.RM02   AS \"收件字\",
                     t.RM03   AS \"收件號\",
+                    t.RM01 || '-' || t.RM02 || '-' || t.RM03 AS \"收件字號\",
                     t.RM09   AS \"登記原因代碼\",
                     r.KCNT    AS \"登記原因\",
                     t.RM07_1 AS \"收件日期\",
@@ -714,47 +717,47 @@ class Prefetch {
                     t.RM21   AS \"義務人統一編號\",
                     t.RM22   AS \"義務人姓名\",
                     (CASE
-                        WHEN q.LCDE = '1' THEN '本國人'
-                        WHEN q.LCDE = '2' THEN '外國人'
-                        WHEN q.LCDE = '3' THEN '國有（中央機關）'
-                        WHEN q.LCDE = '4' THEN '省市有（省市機關）'
-                        WHEN q.LCDE = '5' THEN '縣市有（縣市機關）'
-                        WHEN q.LCDE = '6' THEN '鄉鎮市有（鄉鎮市機關）'
-                        WHEN q.LCDE = '7' THEN '本國私法人'
-                        WHEN q.LCDE = '8' THEN '外國法人'
-                        WHEN q.LCDE = '9' THEN '祭祀公業'
-                        WHEN q.LCDE = 'A' THEN '其他'
-                        WHEN q.LCDE = 'B' THEN '銀行法人'
-                        WHEN q.LCDE = 'C' THEN '大陸地區自然人'
-                        WHEN q.LCDE = 'D' THEN '大陸地區法人'
+                        WHEN q.LCDE = '1' THEN '".mb_convert_encoding('本國人', 'BIG5', 'UTF-8')."'
+                        WHEN q.LCDE = '2' THEN '".mb_convert_encoding('外國人', 'BIG5', 'UTF-8')."'
+                        WHEN q.LCDE = '3' THEN '".mb_convert_encoding('國有（中央機關）', 'BIG5', 'UTF-8')."'
+                        WHEN q.LCDE = '4' THEN '".mb_convert_encoding('省市有（省市機關）', 'BIG5', 'UTF-8')."'
+                        WHEN q.LCDE = '5' THEN '".mb_convert_encoding('縣市有（縣市機關）', 'BIG5', 'UTF-8')."'
+                        WHEN q.LCDE = '6' THEN '".mb_convert_encoding('鄉鎮市有（鄉鎮市機關）', 'BIG5', 'UTF-8')."'
+                        WHEN q.LCDE = '7' THEN '".mb_convert_encoding('本國私法人', 'BIG5', 'UTF-8')."'
+                        WHEN q.LCDE = '8' THEN '".mb_convert_encoding('外國法人', 'BIG5', 'UTF-8')."'
+                        WHEN q.LCDE = '9' THEN '".mb_convert_encoding('祭祀公業', 'BIG5', 'UTF-8')."'
+                        WHEN q.LCDE = 'A' THEN '".mb_convert_encoding('其他', 'BIG5', 'UTF-8')."'
+                        WHEN q.LCDE = 'B' THEN '".mb_convert_encoding('銀行法人', 'BIG5', 'UTF-8')."'
+                        WHEN q.LCDE = 'C' THEN '".mb_convert_encoding('大陸地區自然人', 'BIG5', 'UTF-8')."'
+                        WHEN q.LCDE = 'D' THEN '".mb_convert_encoding('大陸地區法人', 'BIG5', 'UTF-8')."'
                         ELSE q.LCDE
                     END) AS \"外國人類別\",
                     (CASE
-                        WHEN t.RM30 = 'A' THEN '初審'
-                        WHEN t.RM30 = 'B' THEN '複審'
-                        WHEN t.RM30 = 'H' THEN '公告'
-                        WHEN t.RM30 = 'I' THEN '補正'
-                        WHEN t.RM30 = 'R' THEN '登錄'
-                        WHEN t.RM30 = 'C' THEN '校對'
-                        WHEN t.RM30 = 'U' THEN '異動完成'
-                        WHEN t.RM30 = 'F' THEN '結案'
-                        WHEN t.RM30 = 'X' THEN '補正初核'
-                        WHEN t.RM30 = 'Y' THEN '駁回初核'
-                        WHEN t.RM30 = 'J' THEN '撤回初核'
-                        WHEN t.RM30 = 'K' THEN '撤回'
-                        WHEN t.RM30 = 'Z' THEN '歸檔'
-                        WHEN t.RM30 = 'N' THEN '駁回'
-                        WHEN t.RM30 = 'L' THEN '公告初核'
-                        WHEN t.RM30 = 'E' THEN '請示'
-                        WHEN t.RM30 = 'D' THEN '展期'
+                        WHEN t.RM30 = 'A' THEN '".mb_convert_encoding('初審', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'B' THEN '".mb_convert_encoding('複審', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'H' THEN '".mb_convert_encoding('公告', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'I' THEN '".mb_convert_encoding('補正', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'R' THEN '".mb_convert_encoding('登錄', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'C' THEN '".mb_convert_encoding('校對', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'U' THEN '".mb_convert_encoding('異動完成', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'F' THEN '".mb_convert_encoding('結案', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'X' THEN '".mb_convert_encoding('補正初核', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'Y' THEN '".mb_convert_encoding('駁回初核', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'J' THEN '".mb_convert_encoding('撤回初核', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'K' THEN '".mb_convert_encoding('撤回', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'Z' THEN '".mb_convert_encoding('歸檔', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'N' THEN '".mb_convert_encoding('駁回', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'L' THEN '".mb_convert_encoding('公告初核', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'E' THEN '".mb_convert_encoding('請示', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM30 = 'D' THEN '".mb_convert_encoding('展期', 'BIG5', 'UTF-8')."'
                         ELSE t.RM30
                     END) AS \"辦理情形\",
                     (CASE
-                        WHEN t.RM31 = 'A' THEN '結案'
-                        WHEN t.RM31 = 'B' THEN '撤回'
-                        WHEN t.RM31 = 'C' THEN '併案'
-                        WHEN t.RM31 = 'D' THEN '駁回'
-                        WHEN t.RM31 = 'E' THEN '請示'
+                        WHEN t.RM31 = 'A' THEN '".mb_convert_encoding('結案', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM31 = 'B' THEN '".mb_convert_encoding('撤回', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM31 = 'C' THEN '".mb_convert_encoding('併案', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM31 = 'D' THEN '".mb_convert_encoding('駁回', 'BIG5', 'UTF-8')."'
+                        WHEN t.RM31 = 'E' THEN '".mb_convert_encoding('請示', 'BIG5', 'UTF-8')."'
                         ELSE t.RM31
                     END) AS \"結案與否\"
                 FROM
