@@ -434,7 +434,7 @@ if (Vue) {
                     icon: "laptop-house",
                     need_admin: false
                 }, {
-                    text: "信差訊息",
+                    text: "信差歷史訊息",
                     url: "message.html",
                     icon: "comments",
                     need_admin: false
