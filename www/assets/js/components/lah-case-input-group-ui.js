@@ -61,7 +61,8 @@ if (Vue) {
         computed: {
             ID() { return `${this.year}-${this.code}-${this.num.padStart(6, '0')}`},
             preview() { return `案件代碼預覽：${this.ID}` },
-            code_cache_key() { return `code_data_${this.year}` }
+            code_cache_key() { return `code_data_${this.year}` },
+            code_cache_key_permanent() { return `code_data_${this.year}_permanent` }
         },
         methods: {
             emitInput: function(e) {
@@ -115,6 +116,10 @@ if (Vue) {
                     year: this.year
                 }).then(res => {
                     this.setLocalCache(this.code_cache_key, res.data.raw, 12 * 60 * 60 * 1000);  // cache for half day
+                    if (!this.empty(res.data.raw)) {
+                        // no expire time
+                        this.setLocalCache(this.code_cache_key_permanent, res.data.raw, 0);
+                    }
                     this.restoreCodeData(res.data.raw);
                 }).catch(err => {
                     this.error = err;
@@ -160,9 +165,13 @@ if (Vue) {
                     }
                 });
             },
-            restoreCodeData(items) {
+            async restoreCodeData(items) {
                 // ITEM欄位：YEAR, CODE, CODE_NAME, COUNT, CODE_TYPE
                 // [109, HCB1, 壢溪登跨, 1213, reg.HXB1]
+                if (!Array.isArray(items)) {
+                    items = await this.getLocalCache(this.code_cache_key_permanent);
+                }
+
                 if (Array.isArray(items)) {
                     this.resetCodes();
                     items.forEach(item => {
