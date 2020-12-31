@@ -1679,20 +1679,11 @@ if (Vue) {
         components: {
             'lah-user-message-reservation-ui': {
                 template: `<div>
-                    <b-input-group size="sm" prepend="訊息" class="mt-1">
-                        <b-form-input
-                            v-model="message"
-                            type="text"
-                            placeholder="... 請輸入訊息 ..."
-                            :state="!empty(message)"
-                            inline
-                            @keyup.enter="send"
-                            class="no-cache"
-                        ></b-form-input>
-                    </b-input-group>
-                    <b-button-group size="sm" class="mt-1">
-                        <lah-button class="mr-1" icon="paper-plane" prefix="far" size="sm" title="送出" variant="outline-primary" @click="send" :disabled="disabled_send"></lah-button>
-                        <b-form-timepicker
+                    <b-input-group class="mb-1">
+                        <b-input-group-text>
+                            時間
+                        </b-input-group-text>
+                        <b-timepicker
                             hide-header
                             no-close-button
                             reset-value="17:00:00"
@@ -1704,8 +1695,26 @@ if (Vue) {
                             dropdown
                             @shown="shown"
                             :state="valid_sendtime"
-                        ></b-format-timepicker>
-                    </b-button-group>
+                            :hour12="false"
+                        />
+                    </b-input-group>
+                    <b-input-group>
+                        <b-input-group-text>
+                            訊息
+                        </b-input-group-text>
+                        <b-form-input
+                            v-model="message"
+                            type="text"
+                            placeholder="... 訊息 ..."
+                            :state="!empty(message)"
+                            inline
+                            @keyup.enter="send"
+                            class="no-cache my-auto"
+                        />
+                        <template #append>
+                            <lah-button icon="paper-plane" prefix="far" size="sm" title="送出" variant="outline-primary" @click="send" :disabled="disabled_send">確定</lah-button>
+                        </template>
+                    </b-input-group>
                 </div>`,
                 data: () => ({
                     message: '',
