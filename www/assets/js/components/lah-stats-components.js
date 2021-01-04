@@ -112,6 +112,10 @@ if (Vue) {
             let now = new Date();
             this.year = now.getFullYear() - 1911;
             this.month = now.getMonth(); // set last month as default
+
+            // to fix cross year issue
+            this.month === 0 && (this.month = 12, this.year--);
+
             this.value = this.max - 1;
             this.base = this.year * 12 + now.getMonth() + 1;
             this.addToStoreParams('stats_date', this.date);
