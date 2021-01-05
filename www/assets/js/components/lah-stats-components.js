@@ -47,7 +47,7 @@ if (Vue) {
             value: 23,
             filter: 0,
             keyword: '',
-            reg_reason: true,
+            reg_reason: false,
             value_timer: null,
             filter_timer: null,
             keyword_timer: null,

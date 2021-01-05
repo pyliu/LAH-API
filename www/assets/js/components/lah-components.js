@@ -381,6 +381,11 @@ if (Vue) {
                     icon: "cubes",
                     need_admin: true,
                     children: [{
+                        text: "每日檢核表",
+                        url: "checklist.html",
+                        icon: "check-double",
+                        need_admin: true
+                    }, {
                         text: "記錄瀏覽",
                         url: "tasklog.html",
                         icon: "paw",
