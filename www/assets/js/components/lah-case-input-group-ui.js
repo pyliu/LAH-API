@@ -84,7 +84,7 @@ if (Vue) {
                             this.num = res.data.max;
                             this.emitInput(e);
                         } else {
-                            this.notify({message: res.data.message, type: "warning"});
+                            this.$warn(`無法取得最大號 ${this.year}-${this.code}`);
                         }
                     }).catch(err => {
                         this.error = err;
