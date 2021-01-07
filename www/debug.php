@@ -14,10 +14,11 @@ require_once("./include/Temperature.class.php");
 require_once("./include/StatsSQLite3.class.php");
 require_once("./include/Ping.class.php");
 require_once("./include/BKHXWEB.class.php");
+require_once("./include/Checklist.class.php");
 
 try {
-    $db = new BKHXWEB();
-    var_dump($db->querySwitchoverStatus());
+    $cl = new Checklist();
+    $cl->debug();
 }
 catch(Exception $e)
 {
