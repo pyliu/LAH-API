@@ -622,6 +622,11 @@ if (Vue) {
         mounted() {
             this.links.forEach(this.setLeading);
             this.checkAuthority();
+            
+            const ua = window.navigator.userAgent
+            if (ua.indexOf('MSIE ') > 0 || ua.indexOf('Trident/') > 0 || ua.indexOf('Edge/') > 0) {
+                alert('不支援IE瀏覽器，建議使用最新版本 Firefox 或 Chrome。')
+            }
         }
     });
 
