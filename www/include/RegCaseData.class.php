@@ -178,7 +178,7 @@ class RegCaseData {
     }
 
     public function getBakedData() {
-        $rare_word_regex = "/(BAD\+[[:alpha:][:digit:]]{2,3}.*[[:alpha:][:digit:]])|(&#\d+;)/i";
+        $rare_word_regex = "/(BAD\+[[:alpha:][:digit:]]{2,3}.*[[:alpha:][:digit:]]?)|(&#\d+;)/i";
         $row = &$this->row;
         $ret = array(
             "ID" => $row["RM01"].$row["RM02"].$row["RM03"],
