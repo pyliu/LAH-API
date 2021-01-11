@@ -29,7 +29,7 @@ if (Vue) {
         props: {
             type: {
                 type: String,
-                default: 'light'
+                default: 'chart'
             },
             demo: {
                 type: Boolean,
