@@ -83,9 +83,9 @@ class Prefetch {
     }
     /**
 	 * 取得目前為公告狀態案件
-     * default cache time is 60 minutes * 60 seconds = 3600 seconds
+     * default cache time is 12 hours * 60 minutes * 60 seconds = 3600 seconds
 	 */
-	public function getRM30HCase($expire_duration = 3600) {
+	public function getRM30HCase($expire_duration = 43200) {
         if ($this->getCache()->isExpired(self::KEYS['RM30H'])) {
             global $log;
             $log->info('['.self::KEYS['RM30H'].'] 快取資料已失效，重新擷取 ... ');
