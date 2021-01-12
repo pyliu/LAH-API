@@ -68,12 +68,12 @@ if (Vue) {
         watch: {
             disableOfficeHours(val) { if (val) this.reload() },
             ap_count(val) {
-                if (val > 500) {
-                    if (val > 750) {
+                if (val > 750) {
+                    if (val > 1000) {
                         this.alert({
                             title: '跨所AP連線數超標警示',
                             type: 'danger',
-                            message: `<i class="fas fa-bomb fa-lg text-dark ld ld-tremble"></i> 目前連線數已達 <b>${val}</b>，可能造成伺服器回應緩慢，應進行適當處理。`
+                            message: `<i class="fas fa-bomb fa-lg text-dark ld ld-tremble"></i> 目前連線數已達 <b>${val}</b>，過高可能造成伺服器回應緩慢。`
                         });
                     } else {
                         this.notify({
@@ -117,9 +117,9 @@ if (Vue) {
             },
             ap_vars() {
                 // return [color, action, size, icon]
-                if (this.ap_count > 750) return ['danger', 'tremble', '2x', 'bomb'];
-                if (this.ap_count > 500) return ['danger', 'shiver', 'lg', 'server'];
-                if (this.ap_count > 250) return ['warning', 'beat', '1x', 'server'];
+                if (this.ap_count > 1000) return ['danger', 'tremble', '2x', 'bomb'];
+                if (this.ap_count > 750) return ['danger', 'shiver', 'lg', 'server'];
+                if (this.ap_count > 500) return ['warning', 'beat', '1x', 'server'];
                 return ['success', 'breath', 'sm', 'server'];
             },
             db_vars() {
