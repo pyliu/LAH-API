@@ -57,18 +57,26 @@ class LandDataDB {
      * For Data Import
      */
     public function addLandData($code, $name, $number, $content) {
-        $stm = $this->db->prepare("REPLACE INTO data_mapping ('code', 'number', 'name', 'content') VALUES (:code, :number, :name, :content)");
-        $stm->bindParam(':code', $code);
-        $stm->bindParam(':number', $number);
-        $stm->bindParam(':name', $name);
-        $stm->bindParam(':content', $content);
-        return $stm->execute() === FALSE ? false : true;
+        if ($stm = $this->db->prepare("REPLACE INTO data_mapping ('code', 'number', 'name', 'content') VALUES (:code, :number, :name, :content)")) {
+            $stm->bindParam(':code', $code);
+            $stm->bindParam(':number', $number);
+            $stm->bindParam(':name', $name);
+            $stm->bindParam(':content', $content);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        global $log;
+        $log->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO data_mapping ('code', 'number', 'name', 'content') VALUES (:code, :number, :name, :content) ] 失敗。($code, $name, $number, $content)");
+        return false;
     }
 
     public function removeLandData($code) {
-        $stm = $this->db->prepare("DELETE FROM data_mapping WHERE code = :code");
-        $stm->bindParam(':code', $code);
-        return $stm->execute() === FALSE ? false : true;
+        if ($stm = $this->db->prepare("DELETE FROM data_mapping WHERE code = :code")) {
+            $stm->bindParam(':code', $code);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        global $log;
+        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM data_mapping WHERE code = :code ] 失敗。($code)");
+        return false;
     }
 
     public function addPeopleMapping($household, $pid, $pname, $owned_number) {
@@ -81,8 +89,7 @@ class LandDataDB {
     }
 
     public function removePeopleMapping($keyword) {
-        $stm = $this->db->prepare("DELETE FROM people_data_mapping WHERE household LIKE '".$keyword."%'");
-        if ($stm) {
+        if ($stm = $this->db->prepare("DELETE FROM people_data_mapping WHERE household LIKE '".$keyword."%'")) {
             // $stm->bindParam(':keyword', $keyword);
             return $stm->execute() === FALSE ? false : true;
         }
