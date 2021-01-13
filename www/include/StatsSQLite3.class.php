@@ -150,12 +150,16 @@ class StatsSQLite3 {
     }
 
     public function instTotal($id, $name, $total = 0) {
-        $stm = $this->db->prepare("INSERT INTO stats ('ID', 'NAME', 'TOTAL') VALUES (:id, :name, :total)");
-        //$stm = $this->db->prepare("INSERT INTO stats set TOTAL = :total WHERE  ID = :id");
-        $stm->bindValue(':total', intval($total));
-        $stm->bindParam(':id', $id);
-        $stm->bindParam(':name', $name);
-        return $stm->execute() === FALSE ? false : true;
+        if ($stm = $this->db->prepare("INSERT INTO stats ('ID', 'NAME', 'TOTAL') VALUES (:id, :name, :total)")) {
+            //$stm = $this->db->prepare("INSERT INTO stats set TOTAL = :total WHERE  ID = :id");
+            $stm->bindValue(':total', intval($total));
+            $stm->bindParam(':id', $id);
+            $stm->bindParam(':name', $name);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        global $log;
+        $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO stats ('ID', 'NAME', 'TOTAL') VALUES (:id, :name, :total) ] 失敗。($id, $name, $total)");
+        return false;
     }
     /**
      * Early LAH Stats
@@ -165,10 +169,14 @@ class StatsSQLite3 {
     }
 
     public function updateTotal($id, $total) {
-        $stm = $this->db->prepare("UPDATE stats set TOTAL = :total WHERE  ID = :id");
-        $stm->bindValue(':total', intval($total));
-        $stm->bindParam(':id', $id);
-        return $stm->execute() === FALSE ? false : true;
+        if ($stm = $this->db->prepare("UPDATE stats set TOTAL = :total WHERE  ID = :id")) {
+            $stm->bindValue(':total', intval($total));
+            $stm->bindParam(':id', $id);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        global $log;
+        $log->warning(__METHOD__.": 準備資料庫 statement [ UPDATE stats set TOTAL = :total WHERE  ID = :id ] 失敗。($id, $total)");
+        return false;
     }
 
     public function addOverdueMsgCount($count = 1) {
@@ -181,88 +189,110 @@ class StatsSQLite3 {
     public function addOverdueStatsDetail($data) {
         // $data => ["ID" => HB0000, "RECORDS" => array, "DATETIME" => 2020-03-04 08:50:23, "NOTE" => XXX]
         // overdue_stats_detail
-        $stm = $this->db->prepare("INSERT INTO overdue_stats_detail (datetime,id,count,note) VALUES (:date, :id, :count, :note)");
-        $stm->bindParam(':date', $data["DATETIME"]);
-        $stm->bindParam(':id', $data["ID"]);
-        $stm->bindValue(':count', count($data["RECORDS"]));
-        $stm->bindParam(':note', $data["NOTE"]);
-        $ret = $stm->execute();
-        if (!$ret) {
-            global $log;
-            $log->error(__METHOD__.": 新增逾期統計詳情失敗【".$stm->getSQL()."】");
+        if ($stm = $this->db->prepare("INSERT INTO overdue_stats_detail (datetime,id,count,note) VALUES (:date, :id, :count, :note)")) {
+            $stm->bindParam(':date', $data["DATETIME"]);
+            $stm->bindParam(':id', $data["ID"]);
+            $stm->bindValue(':count', count($data["RECORDS"]));
+            $stm->bindParam(':note', $data["NOTE"]);
+            $ret = $stm->execute();
+            if (!$ret) {
+                global $log;
+                $log->error(__METHOD__.": 新增逾期統計詳情失敗【".$stm->getSQL()."】");
+            }
         }
+        global $log;
+        $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO overdue_stats_detail (datetime,id,count,note) VALUES (:date, :id, :count, :note) ] 失敗。(".print_r($data, true).")");
+        return false;
     }
 
     public function addXcasesStats($data) {
         // $data => ["date" => "2020-03-04 10:10:10","found" => 2, "note" => XXXXXXXXX]
         // xcase_stats
-        $stm = $this->db->prepare("INSERT INTO xcase_stats (datetime,found,note) VALUES (:date, :found, :note)");
-        $stm->bindParam(':date', $data["date"]);
-        $stm->bindParam(':found', $data["found"]);
-        $stm->bindParam(':note', $data["note"]);
-        $ret = $stm->execute();
+        if ($stm = $this->db->prepare("INSERT INTO xcase_stats (datetime,found,note) VALUES (:date, :found, :note)")) {
+            $stm->bindParam(':date', $data["date"]);
+            $stm->bindParam(':found', $data["found"]);
+            $stm->bindParam(':note', $data["note"]);
+            $ret = $stm->execute();
+            global $log;
+            $log->info(__METHOD__.": 新增跨所註記遺失案件統計".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+            // 更新 total counter
+            $total = $this->getTotal('xcase_found_count') + $data["found"];
+            $ret = $this->updateTotal('xcase_found_count', $total);
+            $log->info(__METHOD__.": xcase_found_count 計數器+".$data["found"]."，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
+        }
         global $log;
-        $log->info(__METHOD__.": 新增跨所註記遺失案件統計".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
-        // 更新 total counter
-        $total = $this->getTotal('xcase_found_count') + $data["found"];
-        $ret = $this->updateTotal('xcase_found_count', $total);
-        $log->info(__METHOD__.": xcase_found_count 計數器+".$data["found"]."，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
-
+        $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO xcase_stats (datetime,found,note) VALUES (:date, :found, :note) ] 失敗。(".print_r($data, true).")");
+        return false;
     }
 
     public function addBadSurCaseStats($data) {
         // $data => ["date" => "2020-03-04 10:10:10","found" => 2, "note" => XXXXXXXXX]
         // xcase_stats
-        $stm = $this->db->prepare("INSERT INTO found_bad_sur_case_stats (datetime,found,note) VALUES (:date, :found, :note)");
-        $stm->bindParam(':date', $data["date"]);
-        $stm->bindParam(':found', $data["found"]);
-        $stm->bindParam(':note', $data["note"]);
-        $ret = $stm->execute();
+        if ($stm = $this->db->prepare("INSERT INTO found_bad_sur_case_stats (datetime,found,note) VALUES (:date, :found, :note)")) {
+            $stm->bindParam(':date', $data["date"]);
+            $stm->bindParam(':found', $data["found"]);
+            $stm->bindParam(':note', $data["note"]);
+            $ret = $stm->execute();
+            global $log;
+            $log->info(__METHOD__.": 新增複丈問題案件統計".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+            // 更新 total counter
+            $total = $this->getTotal('bad_sur_case_found_count') + $data["found"];
+            $ret = $this->updateTotal('bad_sur_case_found_count', $total);
+            $log->info(__METHOD__.": bad_sur_case_found_count 計數器+".$data["found"]."，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
+        }
         global $log;
-        $log->info(__METHOD__.": 新增複丈問題案件統計".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
-        // 更新 total counter
-        $total = $this->getTotal('bad_sur_case_found_count') + $data["found"];
-        $ret = $this->updateTotal('bad_sur_case_found_count', $total);
-        $log->info(__METHOD__.": bad_sur_case_found_count 計數器+".$data["found"]."，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
-
+        $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO found_bad_sur_case_stats (datetime,found,note) VALUES (:date, :found, :note) ] 失敗。(".print_r($data, true).")");
+        return false;
     }
 
     public function addStatsRawData($id, $data) {
         // $data => php array
         // overdue_stats_detail
-        $stm = $this->db->prepare("INSERT INTO stats_raw_data (id,data) VALUES (:id, :data)");
-        $param = serialize($data);
-        $stm->bindParam(':data', $param);
-        $stm->bindParam(':id', $id);
-        $ret = $stm->execute();
-        if (!$ret) {
-            global $log;
-            $log->error(__METHOD__.": 新增統計 RAW DATA 失敗【".$id.", ".$stm->getSQL()."】");
+        if ($stm = $this->db->prepare("INSERT INTO stats_raw_data (id,data) VALUES (:id, :data)")) {
+            $param = serialize($data);
+            $stm->bindParam(':data', $param);
+            $stm->bindParam(':id', $id);
+            $ret = $stm->execute();
+            if (!$ret) {
+                global $log;
+                $log->error(__METHOD__.": 新增統計 RAW DATA 失敗【".$id.", ".$stm->getSQL()."】");
+            }
+            return $ret;
         }
-        return $ret;
+        global $log;
+        $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO stats_raw_data (id,data) VALUES (:id, :data) ] 失敗。($id, ".print_r($data, true).")");
+        return false;
     }
 
     public function removeAllStatsRawData($year_month) {
-        $stm = $this->db->prepare("DELETE FROM stats_raw_data WHERE id LIKE '%_".$year_month."'");
-        $ret = $stm->execute();
-        if (!$ret) {
-            global $log;
-            $log->error(__METHOD__.": 移除統計 RAW DATA 失敗【".$year_month.", ".$stm->getSQL()."】");
+        if ($stm = $this->db->prepare("DELETE FROM stats_raw_data WHERE id LIKE '%_".$year_month."'")) {
+            $ret = $stm->execute();
+            if (!$ret) {
+                global $log;
+                $log->error(__METHOD__.": 移除統計 RAW DATA 失敗【".$year_month.", ".$stm->getSQL()."】");
+            }
+            return $ret;
         }
-        return $ret;
+        global $log;
+        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM stats_raw_data WHERE id LIKE '%_".$year_month."' ] 失敗。($year_month)");
+        return false;
     }
 
     public function removeStatsRawData($id) {
         // $data => php array
         // overdue_stats_detail
-        $stm = $this->db->prepare("DELETE FROM stats_raw_data WHERE id = :id");
-        $stm->bindParam(':id', $id);
-        $ret = $stm->execute();
-        if (!$ret) {
-            global $log;
-            $log->error(__METHOD__.": 移除統計 RAW DATA 失敗【".$id.", ".$stm->getSQL()."】");
+        if ($stm = $this->db->prepare("DELETE FROM stats_raw_data WHERE id = :id")) {
+            $stm->bindParam(':id', $id);
+            $ret = $stm->execute();
+            if (!$ret) {
+                global $log;
+                $log->error(__METHOD__.": 移除統計 RAW DATA 失敗【".$id.", ".$stm->getSQL()."】");
+            }
+            return $ret;
         }
-        return $ret;
+        global $log;
+        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM stats_raw_data WHERE id = :id ] 失敗。($id)");
+        return false;
     }
 
     public function getStatsRawData($id) {
@@ -334,23 +364,27 @@ class StatsSQLite3 {
         $latest_batch = $ap_db->querySingle("SELECT DISTINCT batch from ap_conn_history ORDER BY batch DESC");
         $success = 0;
         foreach ($processed as $est_ip => $count) {
-            $stm = @$ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch)");
-            $stm->bindParam(':log_time', $log_time);
-            $stm->bindParam(':ap_ip', $ap_ip);
-            $stm->bindParam(':est_ip', $est_ip);
-            $stm->bindParam(':count', $count);
-            $stm->bindValue(':batch', $latest_batch + 1);
-            $retry = 0;
-            while (@$stm->execute() === FALSE) {
-                if ($retry > 10) {
-                    $log->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $ap_ip, $est_ip, $count)");
-                    return $success;
+            if ($stm = @$ap_db->prepare("INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch)")) {
+                $stm->bindParam(':log_time', $log_time);
+                $stm->bindParam(':ap_ip', $ap_ip);
+                $stm->bindParam(':est_ip', $est_ip);
+                $stm->bindParam(':count', $count);
+                $stm->bindValue(':batch', $latest_batch + 1);
+                $retry = 0;
+                while (@$stm->execute() === FALSE) {
+                    if ($retry > 10) {
+                        $log->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $ap_ip, $est_ip, $count)");
+                        return $success;
+                    }
+                    $zzz_us = random_int(100000, 500000);
+                    $log->warning(__METHOD__.": execute statement failed ... sleep ".$zzz_us." microseconds, retry(".++$retry.").");
+                    usleep($zzz_us);
                 }
-                $zzz_us = random_int(100000, 500000);
-                $log->warning(__METHOD__.": execute statement failed ... sleep ".$zzz_us." microseconds, retry(".++$retry.").");
-                usleep($zzz_us);
+                $success++;
+            } else {
+                global $log;
+                $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch) ] 失敗。($log_time, $ap_ip, $est_ip, $count)");
             }
-            $success++;
         }
 
         return $success;
@@ -360,13 +394,17 @@ class StatsSQLite3 {
         global $log;
         $one_day_ago = date("YmdHis", time() - 24 * 3600);
         $ap_db = new SQLite3($this->getAPConnStatsDB($ip_end));
-        $stm = $ap_db->prepare("DELETE FROM ap_conn_history WHERE log_time < :time");
-        $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
-        $ret = $stm->execute();
-        if (!$ret) {
-            $log->error(__METHOD__.": stats_ap_conn_AP".$ip_end.".db 移除一天前資料失敗【".$one_day_ago.", ".$ap_db->lastErrorMsg()."】");
+        if ($stm = $ap_db->prepare("DELETE FROM ap_conn_history WHERE log_time < :time")) {
+            $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
+            $ret = $stm->execute();
+            if (!$ret) {
+                $log->error(__METHOD__.": stats_ap_conn_AP".$ip_end.".db 移除一天前資料失敗【".$one_day_ago.", ".$ap_db->lastErrorMsg()."】");
+            }
+            return $ret;
         }
-        return $ret;
+        global $log;
+        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM ap_conn_history WHERE log_time < :time ] 失敗。($ip_end)");
+        return false;
     }
 
     public function wipeAllAPConnHistory() {
@@ -488,13 +526,17 @@ class StatsSQLite3 {
         global $log;
         $db_path = $this->getConnectivityDB();
         $sc_db = new SQLite3($db_path);
-        $stm = $sc_db->prepare("DELETE FROM connectivity WHERE log_time < :time");
-        $one_day_ago = date("YmdHis", time() - 24 * 3600);
-        $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
-        $ret = $stm->execute();
-        if (!$ret) {
-            $log->error(__METHOD__.": $db_path 移除一天前資料失敗【".$one_day_ago.", ".$sc_db->lastErrorMsg()."】");
+        if ($stm = $sc_db->prepare("DELETE FROM connectivity WHERE log_time < :time")) {
+            $one_day_ago = date("YmdHis", time() - 24 * 3600);
+            $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
+            $ret = $stm->execute();
+            if (!$ret) {
+                $log->error(__METHOD__.": $db_path 移除一天前資料失敗【".$one_day_ago.", ".$sc_db->lastErrorMsg()."】");
+            }
+            return $ret;
         }
-        return $ret;
+        global $log;
+        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM connectivity WHERE log_time < :time ] 失敗。");
+        return false;
     }
 }
