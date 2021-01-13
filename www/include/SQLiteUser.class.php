@@ -11,6 +11,13 @@ class SQLiteUser {
     }
 
     private function bindUserParams(&$stm, &$row) {
+
+        if ($stm === false) {
+            global $log;
+            $log->error(__METHOD__.": bindUserParams because of \$stm is false.");
+            return;
+        }
+
         $stm->bindParam(':id', $row['DocUserID']);
         $stm->bindParam(':name', $row['AP_USER_NAME']);
         $stm->bindValue(':sex', $row['AP_SEX'] == '男' ? 1 : 0);
@@ -259,9 +266,14 @@ class SQLiteUser {
     }
 
     public function updateExt($id, $ext) {
-        $stm = $this->db->prepare("UPDATE user SET ext = :ext WHERE id = :id");
-        $stm->bindParam(':ext', $ext);
-        $stm->bindParam(':id', $id);
-        return $stm->execute() === FALSE ? false : true;
+        if ($stm = $this->db->prepare("UPDATE user SET ext = :ext WHERE id = :id")) {
+            $stm->bindParam(':ext', $ext);
+            $stm->bindParam(':id', $id);
+            return $stm->execute() === FALSE ? false : true;
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 更新分機(${id}, ${ext})資料失敗！");
+            return false;
+        }
     }
 }
