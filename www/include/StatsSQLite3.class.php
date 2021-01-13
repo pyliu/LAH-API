@@ -199,6 +199,7 @@ class StatsSQLite3 {
                 global $log;
                 $log->error(__METHOD__.": 新增逾期統計詳情失敗【".$stm->getSQL()."】");
             }
+            return $ret;
         }
         global $log;
         $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO overdue_stats_detail (datetime,id,count,note) VALUES (:date, :id, :count, :note) ] 失敗。(".print_r($data, true).")");
