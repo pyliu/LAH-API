@@ -178,9 +178,8 @@ if (Vue) {
             else if (this.number < 1) this.number = '';
         },
         mounted() {
-            let that = this;
             // restore cached data back
-            this.timeout(() => that.number = that.$refs.number.$el.value, 200);
+            this.timeout(() => this.number = this.$refs.number.$el.value, 200);
         },
         components: {
             "expaa-category-dashboard": {
