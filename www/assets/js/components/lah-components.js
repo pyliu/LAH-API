@@ -1022,7 +1022,10 @@ if (Vue) {
                         responsive: true, 
                         maintainAspectRatio: true,
                         aspectRatio: that.aspectRatio,
-                        elements: { line: { tension: 0.5, fill: true, stepped: false } },
+                        elements: {
+                            point: { pointStyle: 'circle', radius: 4, hoverRadius: 6, borderWidth: 1, hoverBorderWidth: 2 },
+                            line: { tension: 0.5, fill: true, stepped: false }
+                        },
                         tooltips: {
                             callbacks: {
                                 label: this.tooltip
