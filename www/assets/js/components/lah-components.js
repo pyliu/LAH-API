@@ -1022,7 +1022,7 @@ if (Vue) {
                         responsive: true, 
                         maintainAspectRatio: true,
                         aspectRatio: that.aspectRatio,
-                        elements: { line: { tension: 0.25 } },
+                        elements: { line: { tension: 0.5, fill: true, stepped: false } },
                         tooltips: {
                             callbacks: {
                                 label: this.tooltip
