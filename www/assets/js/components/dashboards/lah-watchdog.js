@@ -170,6 +170,39 @@ if (Vue) {
                     return status;
                 }
             }
+        },
+        "lah-xcase-check-item": {
+            template: `<ul style="font-size: 0.9rem">
+                <li v-for="(item, index) in ids">
+                    <a href='javascript:void(0)' class='reg_case_id' @click="window.vueApp.fetchRegCase">{{item}}</a>
+                    <button class='fix_xcase_button btn btn-sm btn-outline-success' :data-id='item' @click.once="fix">修正</button>
+                </li>
+            </ul>`,
+            props: ["ids"],
+            methods: {
+                fix: function(e) {
+                    let id = $(e.target).data("id").replace(/[^a-zA-Z0-9]/g, "");
+                    console.log("The problematic xcase id: "+id);
+                    let li = $(e.target).closest("li");
+                    this.isBusy = true;
+                    $(e.target).remove();
+                    this.$http.post(CONFIG.API.JSON.QUERY, {
+                        type: "fix_xcase",
+                        id: id
+                    }).then(res => {
+                        let msg = `<strong class='text-success'>${id} 跨所註記修正完成!</strong>`;
+                        if (res.data.status != XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                            msg = `<span class='text-danger'>${id} 跨所註記修正失敗! (${res.data.status})</span>`;
+                        }
+                        this.notify({ message: msg, variant: "success" });
+                        li.html(msg);
+                    }).catch(err => {
+                        this.error = err;
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                }
+            }
         }
     },
     data: () => ({

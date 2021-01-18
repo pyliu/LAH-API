@@ -113,8 +113,8 @@ if (Vue) {
                 this.msgbox({
                     title: '系統狀態監控說明',
                     message: `
-                        <h6 class="my-2"><i class="fa fa-circle text-danger fa-lg"></i> Ping回應值超過1秒</h6>
-                        <h6 class="my-2"><i class="fa fa-circle text-warning fa-lg"></i> Ping回應值超過0.5秒</h6>
+                        <h6 class="my-2"><i class="fa fa-circle text-danger fa-lg"></i> Ping回應值超過0.5秒</h6>
+                        <h6 class="my-2"><i class="fa fa-circle text-warning fa-lg"></i> Ping回應值超過0.1秒</h6>
                         <h6 class="my-2"><i class="fa fa-circle text-success fa-lg"></i> Ping回應值正常</h6>
                     `,
                     size: 'lg'
@@ -243,10 +243,10 @@ if (Vue) {
         created() {
             this.container_id = this.uuid();
             this.prepare();
-            this.reload();
         },
         mounted() {
             // if (this.autoHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
+            this.reload();
         }
     });
 } else {

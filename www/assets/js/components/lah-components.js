@@ -448,12 +448,12 @@ if (Vue) {
                     url: "helper.html",
                     icon: "hands-helping",
                     need_admin: false,
-                    children: [{
+                    children: [/*{
                         text: `組織圖`,
                         url: "org.html",
                         icon: "sitemap",
                         need_admin: false
-                    }, {
+                    }, */{
                         text: "體溫紀錄",
                         url: "temperature.html",
                         icon: "head-side-mask",
@@ -976,7 +976,7 @@ if (Vue) {
                     this.$warn(`lah-chart: Not found "${label}" in dataset, the ${value} will not be updated.`, this.chartData);
                 }
             },
-            buildChart: function (opts = {}) {
+            buildChart: function (opts = { plugins: {} }) {
                 if (this.inst) {
                     // reset the chart
                     this.inst.destroy();
@@ -992,7 +992,7 @@ if (Vue) {
                     case "polarArea":
                     case "doughnut":
                         // put legend to the right for some chart type
-                        opts.legend = {
+                        opts.plugins.legend = {
                             display: this.legend,
                             position: opts.legend_pos || 'right'
                         };
@@ -1010,6 +1010,12 @@ if (Vue) {
                             }
                         };
                 }
+                // update title
+                opts.plugins.title = {
+                    display: !this.empty(this.title),
+                    text: this.title,
+                    position: this.titlePos
+                };
                 // use chart.js directly
                 // let ctx = this.$el.childNodes[0];
                 let ctx = $(`#${this.id}`);
@@ -1022,16 +1028,14 @@ if (Vue) {
                         responsive: true, 
                         maintainAspectRatio: true,
                         aspectRatio: that.aspectRatio,
-                        elements: { line: { tension: 0.25 } },
+                        elements: {
+                            point: { pointStyle: 'circle', radius: 4, hoverRadius: 6, borderWidth: 1, hoverBorderWidth: 2 },
+                            line: { tension: this.type === 'line' ? 0.35 : 0.1, fill: true, stepped: false }
+                        },
                         tooltips: {
                             callbacks: {
                                 label: this.tooltip
                             }
-                        },
-                        title: {
-                            display: !this.empty(this.title),
-                            text: this.title,
-                            position: this.titlePos
                         },
                         onClick: function (e) {
                             let payload = {};
