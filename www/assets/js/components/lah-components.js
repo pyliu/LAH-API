@@ -448,12 +448,12 @@ if (Vue) {
                     url: "helper.html",
                     icon: "hands-helping",
                     need_admin: false,
-                    children: [{
+                    children: [/*{
                         text: `組織圖`,
                         url: "org.html",
                         icon: "sitemap",
                         need_admin: false
-                    }, {
+                    }, */{
                         text: "體溫紀錄",
                         url: "temperature.html",
                         icon: "head-side-mask",
