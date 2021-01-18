@@ -60,7 +60,14 @@ switch ($_POST["type"]) {
 			"config" => array(
 				'webap_ip' => $webap_ip,
 				'mock' => $mock,
-				"authority" => $system->getAuthority($_POST['client_ip'])
+				"authority" => $system->getAuthority($_POST['client_ip']),
+				"ip_maps" => array(
+					"admin" => $system->getRoleAdminIps(),
+					"chief" => $system->getRoleChiefIps(),
+					"super" => $system->getRoleSuperIps(),
+					"rae" => $system->getRoleRAEIps(),
+					"ga" => $system->getRoleGAIps()
+				)
 			),
 			"server" => $_SERVER,
 			"ips" => $ips,
