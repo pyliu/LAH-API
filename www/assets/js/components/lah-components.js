@@ -976,7 +976,7 @@ if (Vue) {
                     this.$warn(`lah-chart: Not found "${label}" in dataset, the ${value} will not be updated.`, this.chartData);
                 }
             },
-            buildChart: function (opts = {}) {
+            buildChart: function (opts = { plugins: {} }) {
                 if (this.inst) {
                     // reset the chart
                     this.inst.destroy();
@@ -992,7 +992,7 @@ if (Vue) {
                     case "polarArea":
                     case "doughnut":
                         // put legend to the right for some chart type
-                        opts.legend = {
+                        opts.plugins.legend = {
                             display: this.legend,
                             position: opts.legend_pos || 'right'
                         };
@@ -1010,6 +1010,12 @@ if (Vue) {
                             }
                         };
                 }
+                // update title
+                opts.plugins.title = {
+                    display: !this.empty(this.title),
+                    text: this.title,
+                    position: this.titlePos
+                };
                 // use chart.js directly
                 // let ctx = this.$el.childNodes[0];
                 let ctx = $(`#${this.id}`);
@@ -1030,11 +1036,6 @@ if (Vue) {
                             callbacks: {
                                 label: this.tooltip
                             }
-                        },
-                        title: {
-                            display: !this.empty(this.title),
-                            text: this.title,
-                            position: this.titlePos
                         },
                         onClick: function (e) {
                             let payload = {};
