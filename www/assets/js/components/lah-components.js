@@ -1030,7 +1030,7 @@ if (Vue) {
                         aspectRatio: that.aspectRatio,
                         elements: {
                             point: { pointStyle: 'circle', radius: 4, hoverRadius: 6, borderWidth: 1, hoverBorderWidth: 2 },
-                            line: { tension: 0.5, fill: true, stepped: false }
+                            line: { tension: this.type === 'line' ? 0.35 : 0.1, fill: true, stepped: false }
                         },
                         tooltips: {
                             callbacks: {
