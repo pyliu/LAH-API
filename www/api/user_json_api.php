@@ -113,6 +113,36 @@ switch ($_POST["type"]) {
             ));
         }
         break;
+    case "off_board_users":
+        $log->info("XHR [off_board_users] 取得所有離職使用者資料請求");
+        $sqlite_user = new SQLiteUser();
+        $results = $sqlite_user->getOffboardUsers();
+        if (empty($results)) {
+            $log->info("XHR [off_board_users] 查無離職使用者資料。");
+            echoJSONResponse("查無離職使用者資料。");
+        } else {
+            $log->info("XHR [off_board_users] 查詢離職使用者資料成功。");
+            echoJSONResponse('查詢離職使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($results),
+                "raw" => $results
+            ));
+        }
+        break;
+    case "all_users":
+        $log->info("XHR [all_users] 取得所有使用者資料請求");
+        $sqlite_user = new SQLiteUser();
+        $results = $sqlite_user->getAllUsers();
+        if (empty($results)) {
+            $log->info("XHR [all_users] 查無使用者資料。");
+            echoJSONResponse("查無使用者資料。");
+        } else {
+            $log->info("XHR [all_users] 查詢所有使用者資料成功。");
+            echoJSONResponse('查詢所有使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($results),
+                "raw" => $results
+            ));
+        }
+        break;
     case "upd_ext":
         $log->info("XHR [upd_ext] 更新分機號碼【".$_POST["id"].", ".$_POST["ext"]."】請求");
         $sqlite_user = new SQLiteUser();
