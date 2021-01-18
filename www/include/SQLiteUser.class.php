@@ -141,8 +141,18 @@ class SQLiteUser {
         return  $this->db->querySingle("SELECT authority from user WHERE id = '".trim($id)."'") ?? AUTHORITY::NORMAL;
     }
 
+    public function getAllUsers() {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE 1 = 1 ORDER BY id")) {
+            return $this->prepareArray($stmt);
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得所有使用者資料失敗！");
+        }
+        return false;
+    }
+
     public function getOnboardUsers() {
-        if($stmt = $this->db->prepare("SELECT * FROM user WHERE offboard_date is NULL or offboard_date = '' ORDER BY id")) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE offboard_date IS NULL OR offboard_date = '' ORDER BY id")) {
             return $this->prepareArray($stmt);
         } else {
             global $log;
@@ -152,21 +162,11 @@ class SQLiteUser {
     }
 
     public function getOffboardUsers() {
-        if($stmt = $this->db->prepare("SELECT * FROM user WHERE offboard_date != '' ORDER BY id")) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE offboard_date IS NOT NULL AND offboard_date <> '' ORDER BY id")) {
             return $this->prepareArray($stmt);
         } else {
             global $log;
             $log->error(__METHOD__.": 取得離職使用者資料失敗！");
-        }
-        return false;
-    }
-
-    public function getAllUsers() {
-        if($stmt = $this->db->prepare("SELECT * FROM user ORDER BY id")) {
-            return $this->prepareArray($stmt);
-        } else {
-            global $log;
-            $log->error(__METHOD__.": 取得全部使用者資料失敗！");
         }
         return false;
     }
