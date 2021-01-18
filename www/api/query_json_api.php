@@ -67,7 +67,8 @@ switch ($_POST["type"]) {
 					"super" => $system->getRoleSuperIps(),
 					"rae" => $system->getRoleRAEIps(),
 					"ga" => $system->getRoleGAIps()
-				)
+				),
+				"site" => strtoupper($system->get('SITE'))
 			),
 			"server" => $_SERVER,
 			"ips" => $ips,
