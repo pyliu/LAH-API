@@ -243,10 +243,10 @@ if (Vue) {
         created() {
             this.container_id = this.uuid();
             this.prepare();
-            this.reload();
         },
         mounted() {
             // if (this.autoHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
+            this.reload();
         }
     });
 } else {
