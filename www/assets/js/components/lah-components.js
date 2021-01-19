@@ -434,6 +434,11 @@ if (Vue) {
                     need_admin: false,
                     children: []
                 }, {
+                    text: "體溫紀錄",
+                    url: "temperature.html",
+                    icon: "head-side-mask",
+                    need_admin: false
+                }, {
                     text: `統計看板`,
                     url: "stats.html",
                     icon: "laptop-house",
@@ -454,10 +459,10 @@ if (Vue) {
                         icon: "sitemap",
                         need_admin: false
                     }, */{
-                        text: "體溫紀錄",
-                        url: "temperature.html",
-                        icon: "head-side-mask",
-                        need_admin: false
+                        text: `航空城`,
+                        url: "project/aerotropolis/index.html",
+                        icon: "plane-departure",
+                        need_admin: true
                     }, {
                         text: "繼承應繼分",
                         url: "heir_share.html",
@@ -469,11 +474,6 @@ if (Vue) {
                         icon: "users",
                         need_admin: false
                     }]
-                }, {
-                    text: `航空城`,
-                    url: "project/aerotropolis/index.html",
-                    icon: "plane-departure",
-                    need_admin: true
                 }, {
                     text: `智慧管控系統`,
                     url: `http://${this.server_ip}:8080/`,
