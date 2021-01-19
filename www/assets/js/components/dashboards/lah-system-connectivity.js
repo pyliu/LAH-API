@@ -82,7 +82,9 @@ if (Vue) {
             },
             chartItemColor(dataset_item, opacity) {
                 let rgb, value = dataset_item[1];
-                if (value > CONFIG.PING.DANGER) {
+                if (value > CONFIG.PING.BLACK) {
+                    rgb = `rgb(179, 0, 255, ${opacity})`
+                } else if (value > CONFIG.PING.DANGER) {
                     rgb = `rgb(243, 0, 19, ${opacity})`
                 } // red
                 else if (value > CONFIG.PING.WARNING) {
@@ -113,8 +115,8 @@ if (Vue) {
                 this.msgbox({
                     title: '系統狀態監控說明',
                     message: `
-                        <h6 class="my-2"><i class="fa fa-circle text-danger fa-lg"></i> Ping回應值超過0.5秒</h6>
-                        <h6 class="my-2"><i class="fa fa-circle text-warning fa-lg"></i> Ping回應值超過0.1秒</h6>
+                        <h6 class="my-2"><i class="fa fa-circle text-danger fa-lg"></i> Ping回應值超過0.03秒</h6>
+                        <h6 class="my-2"><i class="fa fa-circle text-warning fa-lg"></i> Ping回應值超過0.015秒</h6>
                         <h6 class="my-2"><i class="fa fa-circle text-success fa-lg"></i> Ping回應值正常</h6>
                     `,
                     size: 'lg'

@@ -6,8 +6,9 @@ const CONFIG = {
     SCREENSAVER: false,
     SCREENSAVER_TIMER: 15 * 60 * 1000,
     PING: {
-        DANGER: 499,
-        WARNING: 99
+        BLACK: 49,
+        DANGER: 29,
+        WARNING: 14
     },
     API: {
         XLSX: {
