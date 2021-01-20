@@ -188,6 +188,6 @@ switch ($_POST["type"]) {
 		break;
     default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
-		echoErrorJSONString("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
 		break;
 }
