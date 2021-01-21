@@ -305,6 +305,34 @@ class SQLiteUser {
         return false;
     }
 
+    
+    public function onboardUser($id) {
+        global $log;
+        if (empty($id)) {
+            $log->warning(__METHOD__.': id is a required param, it\'s empty.');
+            return false;
+        }
+
+        
+        $today = new Datetime("now");
+        $today = ltrim($today->format("Y/m/d"), "0");	// ex: 2021/01/21
+
+        if($stmt = $this->db->prepare("
+            UPDATE user SET
+                offboard_date = :offboard_date,
+                onboard_date = :onboard_date,
+            WHERE id = :id
+        ")) {
+            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':onboard_date', $today);
+            $stmt->bindParam(':offboard_date', '');
+            return $stmt->execute() === FALSE ? false : true;
+        } else {
+            $log->warning(__METHOD__.": 復職使用者(".$id.")失敗！");
+        }
+        return false;
+    }
+
     public function getUserByName($name) {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE name = :name")) {
             $stmt->bindParam(':name', $name);

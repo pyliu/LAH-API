@@ -60,6 +60,22 @@ switch ($_POST["type"]) {
             ));
         }
         break;
+    case "user_offboard":
+        break;
+    case "user_onboard":
+        $log->info("XHR [user_onboard] 設定使用者復職請求");
+        $sqlite_user = new SQLiteUser();
+        $result = $sqlite_user->onboardUser($_POST["id"]);
+        if ($result === true) {
+            $msg = $_POST['id'].' 設定復職成功';
+            $log->info("XHR [user_onboard] ${msg}。");
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            $log->error("XHR [user_onboard] set user onboard failed.");
+            $log->info("XHR [user_onboard] ".print_r($_POST['id'], true));
+            echoJSONResponse($_POST['id'].' 設定復職失敗');
+        }
+        break;
     case "save_user_info":
         $log->info("XHR [save_user_info] 儲存使用者資料【".print_r($_POST["data"], true)."】請求");
         $sqlite_user = new SQLiteUser();
