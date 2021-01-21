@@ -60,6 +60,20 @@ switch ($_POST["type"]) {
             ));
         }
         break;
+    case "save_user_info":
+        $log->info("XHR [save_user_info] 儲存使用者資料【".print_r($_POST["data"], true)."】請求");
+        $sqlite_user = new SQLiteUser();
+        $result = $sqlite_user->saveUser($_POST["data"]);
+        if ($result === true) {
+            $msg = "儲存 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 成功";
+            $log->info("XHR [save_user_info] ${msg}。");
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            $log->error("XHR [save_user_info] save user info failed.");
+            $log->info("XHR [save_user_info] ".print_r($_POST['data'], true));
+            echoJSONResponse("儲存 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 失敗");
+        }
+        break;
     case "user_info":
         $log->info("XHR [user_info] 查詢使用者資料【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"]."】請求");
         $sqlite_user = new SQLiteUser();

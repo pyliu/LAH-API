@@ -10,6 +10,27 @@ class SQLiteUser {
         return !empty($ret);
     }
 
+    private function calculateAuthority($ip) {
+        $authority = 0;
+        $system = new System();
+        if (in_array($ip, $system->getRoleSuperIps())) {
+            $authority = $authority | AUTHORITY::SUPER;
+        }
+        if (in_array($ip, $system->getRoleAdminIps())) {
+            $authority = $authority | AUTHORITY::ADMIN;
+        }
+        if (in_array($ip, $system->getRoleChiefIps())) {
+            $authority = $authority | AUTHORITY::CHIEF;
+        }
+        if (in_array($ip, $system->getRoleRAEIps())) {
+            $authority = $authority | AUTHORITY::RESEARCH_AND_EVALUATION;
+        }
+        if (in_array($ip, $system->getRoleGAIps())) {
+            $authority = $authority | AUTHORITY::GENERAL_AFFAIRS;
+        }
+        return $authority;
+    }
+
     private function bindUserParams(&$stm, &$row) {
 
         if ($stm === false) {
@@ -239,6 +260,49 @@ class SQLiteUser {
         }
         return false;
         
+    }
+
+    public function saveUser($data) {
+        global $log;
+        if (empty($data['id'])) {
+            $log->warning(__METHOD__.': id is a required param, it\'s empty.');
+            return false;
+        }
+        if ($data['sex'] != 1) {
+            $data['sex'] = 0;
+        }
+        if($stmt = $this->db->prepare("
+            UPDATE user SET
+                name = :name,
+                sex = :sex,
+                ext = :ext,
+                cell = :cell,
+                unit = :unit,
+                title = :title,
+                work = :work,
+                exam = :exam,
+                education = :education,
+                ip = :ip,
+                authority = :authority
+            WHERE id = :id
+        ")) {
+            $stmt->bindParam(':id', $data['id']);
+            $stmt->bindParam(':name', $data['name']);
+            $stmt->bindParam(':sex', $data['sex']);
+            $stmt->bindParam(':ext', $data['ext']);
+            $stmt->bindParam(':cell', $data['cell']);
+            $stmt->bindParam(':unit', $data['unit']);
+            $stmt->bindParam(':title', $data['title']);
+            $stmt->bindParam(':work', $data['work']);
+            $stmt->bindParam(':exam', $data['exam']);
+            $stmt->bindParam(':education', $data['education']);
+            $stmt->bindParam(':ip', $data['ip']);
+            $stmt->bindValue(':authority', $this->calculateAuthority($data['ip']));
+            return $stmt->execute() === FALSE ? false : true;
+        } else {
+            $log->warning(__METHOD__.": 更新使用者(".$data['id'].")資料失敗！");
+        }
+        return false;
     }
 
     public function getUserByName($name) {
