@@ -250,6 +250,43 @@ class SQLiteUser {
         return $director;
     }
 
+    public function addUser($data) {
+        global $log;
+        if (empty($data['id'])) {
+            $log->warning(__METHOD__.': id is a required param, it\'s empty.');
+            return false;
+        }
+        if ($data['sex'] != 1) {
+            $data['sex'] = 0;
+        }
+        if($stmt = $this->db->prepare("
+          REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
+          VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
+        ")) {
+            $stmt->bindParam(':id', $data['id']);
+            $stmt->bindParam(':name', $data['name']);
+            $stmt->bindParam(':sex', $data['sex']);
+            $stmt->bindParam(':addr', $data['addr']);
+            $stmt->bindParam(':tel', $data['tel']);
+            $stmt->bindParam(':ext', $data['ext']);
+            $stmt->bindParam(':cell', $data['cell']);
+            $stmt->bindParam(':unit', $data['unit']);
+            $stmt->bindParam(':title', $data['title']);
+            $stmt->bindParam(':work', $data['work']);
+            $stmt->bindParam(':exam', $data['exam']);
+            $stmt->bindParam(':education', $data['education']);
+            $stmt->bindParam(':onboard_date', $data['onboard_date']);
+            $stmt->bindValue(':offboard_date', '');
+            $stmt->bindParam(':ip', $data['ip']);
+            $stmt->bindValue(':authority', $this->calculateAuthority($data['ip']));
+            $stmt->bindParam(':birthday', $data['birthday']);
+            return $stmt->execute() === FALSE ? false : true;
+        } else {
+            $log->warning(__METHOD__.": 新增使用者(".$data['id'].", ".$data['name'].")資料失敗！");
+        }
+        return false;
+    }
+
     public function getUser($id) {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE id = :id")) {
             $stmt->bindParam(':id', $id);

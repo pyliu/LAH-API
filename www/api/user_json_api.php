@@ -96,7 +96,6 @@ switch ($_POST["type"]) {
             echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
         } else {
             $log->error("XHR [save_user_info] save user info failed.");
-            $log->info("XHR [save_user_info] ".print_r($_POST['data'], true));
             echoJSONResponse("儲存 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 失敗");
         }
         break;
@@ -127,6 +126,19 @@ switch ($_POST["type"]) {
                 "raw" => $results,
                 "query_string" => "id=".$_POST["id"]."&name=".$_POST["name"]."&ip=".$_POST["ip"]
             ));
+        }
+        break;
+    case "add_user":
+        $log->info("XHR [add_user] 新增使用者資料【".print_r($_POST["data"], true)."】請求");
+        $sqlite_user = new SQLiteUser();
+        $result = $sqlite_user->addUser($_POST["data"]);
+        if ($result === true) {
+            $msg = "新增 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 成功";
+            $log->info("XHR [add_user] ${msg}。");
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            $log->error("XHR [add_user] add user failed.");
+            echoJSONResponse("新增 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 失敗");
         }
         break;
     case "org_data":
