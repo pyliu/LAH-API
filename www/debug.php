@@ -17,8 +17,11 @@ require_once("./include/BKHXWEB.class.php");
 require_once("./include/Checklist.class.php");
 
 try {
-    $cl = new Checklist();
-    $cl->debug();
+    // $cl = new Checklist();
+    // $cl->debug();
+    $today = new Datetime("now");
+    $today = ltrim($today->format("Y/m/d"), "0");	// ex: 2021/01/21
+    echo $today;
 }
 catch(Exception $e)
 {

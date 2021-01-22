@@ -61,6 +61,17 @@ switch ($_POST["type"]) {
         }
         break;
     case "user_offboard":
+        $log->info("XHR [user_offboard] 設定使用者離職請求");
+        $sqlite_user = new SQLiteUser();
+        $result = $sqlite_user->offboardUser($_POST["id"]);
+        if ($result === true) {
+            $msg = $_POST['id'].' 設定離職成功';
+            $log->info("XHR [user_offboard] ${msg}。");
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            $log->error("XHR [user_offboard] set user ".$_POST['id']." offboard failed.");
+            echoJSONResponse($_POST['id'].' 設定離職失敗');
+        }
         break;
     case "user_onboard":
         $log->info("XHR [user_onboard] 設定使用者復職請求");
@@ -71,8 +82,7 @@ switch ($_POST["type"]) {
             $log->info("XHR [user_onboard] ${msg}。");
             echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
         } else {
-            $log->error("XHR [user_onboard] set user onboard failed.");
-            $log->info("XHR [user_onboard] ".print_r($_POST['id'], true));
+            $log->error("XHR [user_onboard] set user ".$_POST['id']." onboard failed.");
             echoJSONResponse($_POST['id'].' 設定復職失敗');
         }
         break;
