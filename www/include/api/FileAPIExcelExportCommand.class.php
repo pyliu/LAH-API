@@ -1,9 +1,10 @@
 ﻿<?php
-require_once(dirname(dirname(__FILE__))."/init.php");
-require_once(ROOT_DIR."/include/Cache.class.php");
-require_once(ROOT_DIR."/include/Query.class.php");
-require_once(ROOT_DIR."/include/System.class.php");
-require_once(ROOT_DIR."/include/RegCaseData.class.php");
+require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."init.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."Cache.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."Query.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."RegCaseData.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteUser.class.php");
 require_once(ROOT_DIR.'/vendor/autoload.php');
 require_once("FileAPICommand.class.php");
 
@@ -418,10 +419,15 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         }
     }
 
+    private function all_user_export() {
+        // TODO export all users xlsx
+        $sqlite_user = new SQLiteUser();
+    }
+
     function __construct() {
         $this->query = new Query();
         $this->cache = new Cache();
-        $this->type = $_SESSION['xlsx_type'] ?? false;
+        $this->type = $_SESSION['xlsx_type'] ?? $_REQUEST['type'] ?? false;
         $system = new System();
         $this->mock_mode = $system->isMockMode();
     }
@@ -437,6 +443,9 @@ class FileAPIExcelExportCommand extends FileAPICommand {
                 break;
             case 'stats_export':
                 $this->stats_export_factory();
+                break;
+            case 'all_users_export':
+                $this->all_user_export();
                 break;
             default:
                 $log->error('xlsx_type is not set, can not output xlsx file! ['.print_r($_SESSION, true).']');

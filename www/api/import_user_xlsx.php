@@ -14,8 +14,6 @@ $tmp_file = '';
 $succeeded = 0;
 $failed = 0;
 
-$log->info(print_r($_FILES, true));
-
 if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
     $filename = $_FILES['file']['name'];
     $valid_extensions = array("xlsx", "XLSX");
