@@ -11,7 +11,7 @@ $full_path = $default_path.$key.'.jpg';
 if (!file_exists($full_path)) {
     $full_path = $default_path.$key.'-1.jpg';
     if (!file_exists($full_path)) {
-        $full_path = $default_path.trim($_REQUEST["name"], '_avatar').'.jpg';
+        $full_path = $default_path.trim($key, '_avatar').'.jpg';
         if (!file_exists($full_path)) {
             if ($system->isMockMode()) {
                 $log->warning("Can not find the $key photo ... ");
