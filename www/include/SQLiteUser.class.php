@@ -251,7 +251,7 @@ class SQLiteUser {
         return $director;
     }
 
-    public function importXlsxUser($xlsx_row) {
+    public function importXlsxUser(&$xlsx_row) {
         /*
             [0] => 使用者代碼
             [1] => 使用者姓名
@@ -282,7 +282,7 @@ class SQLiteUser {
           REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
           VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
         ")) {
-            $stmt->bindParam(':id', $xlsx_row[0]]);
+            $stmt->bindParam(':id', $xlsx_row[0]);
             $stmt->bindParam(':name', $xlsx_row[1]);
             $stmt->bindParam(':sex', $xlsx_row[2]);
             $stmt->bindParam(':addr', $xlsx_row[3]);
