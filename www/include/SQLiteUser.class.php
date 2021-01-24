@@ -202,6 +202,7 @@ class SQLiteUser {
         }
         return false;
     }
+
     public function getChief($unit) {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE (offboard_date is NULL OR offboard_date = '') AND authority & :chief_bit AND unit = :unit ORDER BY id")) {
             $stmt->bindValue(':chief_bit', AUTHORITY::CHIEF, SQLITE3_INTEGER);
@@ -248,6 +249,61 @@ class SQLiteUser {
         $secretary['staffs'][] = $this->getTreeData('會計室');
         $secretary['staffs'][] = $this->getTreeData('人事室');
         return $director;
+    }
+
+    public function importXlsxUser($xlsx_row) {
+        /*
+            [0] => 使用者代碼
+            [1] => 使用者姓名
+            [2] => 性別
+            [3] => 地址
+            [4] => 電話
+            [5] => 分機
+            [6] => 手機
+            [7] => 部門
+            [8] => 職稱
+            [9] => 工作
+            [10] => 考試
+            [11] => 教育程度
+            [12] => 報到日期
+            [13] => 離職日期
+            [14] => IP
+            [15] => 生日
+        */
+        global $log;
+        if (empty($xlsx_row[0])) {
+            $log->warning(__METHOD__.': id is a required param, it\'s empty.');
+            return false;
+        }
+        if ($xlsx_row[2] !== "女") {
+            $xlsx_row[2] = '男';
+        }
+        if($stmt = $this->db->prepare("
+          REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
+          VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
+        ")) {
+            $stmt->bindParam(':id', $xlsx_row[0]]);
+            $stmt->bindParam(':name', $xlsx_row[1]);
+            $stmt->bindParam(':sex', $xlsx_row[2]);
+            $stmt->bindParam(':addr', $xlsx_row[3]);
+            $stmt->bindParam(':tel', $xlsx_row[4]);
+            $stmt->bindParam(':ext', $xlsx_row[5]);
+            $stmt->bindParam(':cell', $xlsx_row[6]);
+            $stmt->bindParam(':unit', $xlsx_row[7]);
+            $stmt->bindParam(':title', $xlsx_row[8]);
+            $stmt->bindParam(':work', $xlsx_row[9]);
+            $stmt->bindParam(':exam', $xlsx_row[10]);
+            $stmt->bindParam(':education', $xlsx_row[11]);
+            $stmt->bindParam(':onboard_date', $xlsx_row[12]);
+            $stmt->bindValue(':offboard_date', $xlsx_row[13]);
+            $stmt->bindParam(':ip', $xlsx_row[14]);
+            $stmt->bindValue(':authority', $this->calculateAuthority($xlsx_row[14]));
+            $stmt->bindParam(':birthday', $xlsx_row[15]);
+            return $stmt->execute() === FALSE ? false : true;
+        } else {
+            $log->warning(__METHOD__.": 新增/更新使用者(".$xlsx_row[0].", ".$xlsx_row[1].")資料失敗！");
+        }
+        return false;
     }
 
     public function addUser($data) {
