@@ -381,6 +381,11 @@ if (Vue) {
                     icon: "cubes",
                     need_admin: true,
                     children: [{
+                        text: `使用者管理`,
+                        url: `http://${location.host}:8080/admin/user-mgt`,
+                        icon: "users",
+                        need_admin: true
+                    }, {
                         text: "每日檢核表",
                         url: "checklist.html",
                         icon: "check-double",
