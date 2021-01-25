@@ -30,7 +30,7 @@ if (Vue) {
             <template v-slot:header>
                 <h6 class="d-flex justify-content-between mb-0">
                     <span class="my-auto">體溫紀錄 {{today}}</span>
-                    <b-button v-if="isChief || isRAE || isAdmin || isSuper" @click="overview" variant="primary" size="sm">全所登錄一覽</b-button>
+                    <b-button @click="overview" variant="primary" size="sm">全所登錄一覽</b-button>
                 </h6>
             </template>
             <b-form-row>
