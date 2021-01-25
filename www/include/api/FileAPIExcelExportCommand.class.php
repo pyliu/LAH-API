@@ -191,24 +191,6 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $this->write_meta_output($spreadsheet, $xlsx_item, $title);
     }
 
-    private function cert_log() {
-        // from init.php
-        global $log, $today;
-
-        if ($this->mock_mode) $log->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！【cert_log】");
-        $query_result = $this->mock_mode ? $this->cache->get('cert_log') : $this->query->getCertLog($_SESSION['section_code'], $_SESSION['numbers']);
-        if (!$this->mock_mode) $this->cache->set('cert_log', $query_result);
-
-        $spreadsheet = IOFactory::load(ROOT_DIR.'/assets/xlsx/cert_log.tpl.xlsx');
-        // $spreadsheet = new Spreadsheet();
-        $worksheet = $spreadsheet->getActiveSheet();
-
-        $this->write_col_data($worksheet, $query_result);
-        $filename = $today.'_'.$_SESSION['section_code'].'_'.implode('_', $_SESSION['numbers']).'.xlsx';
-        $xlsx_item = array('text' => '謄本LOG檔');
-        $this->write_meta_output($spreadsheet, $xlsx_item, "謄本LOG檔", $filename);
-    }
-
     private function stats_export_reg_reason(&$xlsx_item) {
         // from init.php
         global $log;
@@ -419,9 +401,44 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         }
     }
 
+    private function cert_log() {
+        // from init.php
+        global $log, $today;
+
+        if ($this->mock_mode) $log->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！【cert_log】");
+        $query_result = $this->mock_mode ? $this->cache->get('cert_log') : $this->query->getCertLog($_SESSION['section_code'], $_SESSION['numbers']);
+        if (!$this->mock_mode) $this->cache->set('cert_log', $query_result);
+
+        $spreadsheet = IOFactory::load(XLSX_TPL_DIR.DIRECTORY_SEPARATOR.'cert_log.tpl.xlsx');
+        // $spreadsheet = new Spreadsheet();
+        $worksheet = $spreadsheet->getActiveSheet();
+
+        $this->write_col_data($worksheet, $query_result);
+        $filename = $today.'_'.$_SESSION['section_code'].'_'.implode('_', $_SESSION['numbers']).'.xlsx';
+        $xlsx_item = array('text' => '謄本LOG檔');
+        $this->write_meta_output($spreadsheet, $xlsx_item, "謄本LOG檔", $filename);
+    }
+
     private function all_user_export() {
-        // TODO export all users xlsx
+        // from init.php
+        global $log, $today;
+
         $sqlite_user = new SQLiteUser();
+        $all_users = $sqlite_user->getAllUsers() ?? [];
+
+        $log->info(__METHOD__.': 找到 '.count($all_users).' 個使用者。');
+
+        $spreadsheet = IOFactory::load(XLSX_TPL_DIR.DIRECTORY_SEPARATOR.'user_export.tpl.xlsx');
+        $worksheet = $spreadsheet->getActiveSheet();
+
+        $this->write_col_data($worksheet, $all_users);
+        
+        $system = new System();
+        $site = $system->get('SITE');
+        $filename = $today.'_'.$site.'_users.xlsx';
+
+        $xlsx_item = array('text' => "${site}使用者列表");
+        $this->write_meta_output($spreadsheet, $xlsx_item, "${site}使用者列表", $filename);
     }
 
     function __construct() {
