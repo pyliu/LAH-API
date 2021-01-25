@@ -79,7 +79,7 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
                 }
             }
             $status = STATUS_CODE::SUCCESS_NORMAL;
-            $message = '已匯入 '.$succeeded.' 筆使用者資料。';
+            $message = '已匯入 '.$succeeded.' 筆使用者資料(失敗: '.$failed.')。';
             $log->info($message);
         } else {
             $message = '上傳檔案無資料。';
