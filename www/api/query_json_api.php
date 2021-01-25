@@ -72,7 +72,7 @@ switch ($_POST["type"]) {
 			),
 			"server" => $_SERVER,
 			"ips" => $ips,
-			"message" => "Got server $count ip address => ".str_replace("\n", ' ', print_r($ips, true))
+			"message" => "Got server ip address => ".preg_replace('/[\n\s]+/i', ' ', print_r($ips, true))
 		), 0);
 		break;
 	case "ping":
