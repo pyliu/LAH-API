@@ -545,7 +545,9 @@ if (Vue) {
             },
             checkAuthority: async function () {
                 if (this.isAdmin === undefined) {
+                    this.$log('[lah-header] Checking authority ... ');
                     await this.$store.dispatch('authenticate');
+                    this.$log('[lah-header]', this.authority);
                 }
                 if (!this.active || (this.active.need_admin && !this.isAdmin)) {
                     $('body').html("<h3 class='text-center m-5 font-weight-bold'><a href='javascript:history.back()' class='text-danger'>限制存取區域，請返回上一頁！</a></h3>");
