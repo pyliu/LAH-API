@@ -72,7 +72,6 @@ switch ($_POST["type"]) {
 			),
 			"server" => $_SERVER,
 			"ips" => $ips,
-			"data_count" => count($ips),
 			"message" => "Got server $count ip address => ".str_replace("\n", ' ', print_r($ips, true))
 		), 0);
 		break;
