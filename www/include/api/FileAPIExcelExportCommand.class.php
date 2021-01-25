@@ -193,7 +193,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
 
     private function stats_export_reg_reason(&$xlsx_item) {
         // from init.php
-        global $log;
+        global $log, $today;
         
         if (empty($xlsx_item["query_month"])) {
 			$xlsx_item["query_month"] = substr($today, 0, 5);
@@ -210,7 +210,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
     }
 
     private function stats_export_reg_fix(&$xlsx_item) {
-        global $log;
+        global $log, $today;
 
         if (empty($xlsx_item["query_month"])) {
 			$xlsx_item["query_month"] = substr($today, 0, 5);
@@ -226,7 +226,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
     }
 
     private function stats_export_reg_reject(&$xlsx_item) {
-        global $log;
+        global $log, $today;
 
         if (empty($xlsx_item["query_month"])) {
 			$xlsx_item["query_month"] = substr($today, 0, 5);
@@ -242,7 +242,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
     }
 
     private function stats_export_court(&$xlsx_item) {
-        global $log;
+        global $log, $today;
 
         if (empty($xlsx_item["query_month"])) {
 			$xlsx_item["query_month"] = substr($today, 0, 5);

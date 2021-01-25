@@ -6,8 +6,19 @@ $system = new System();
 $default_path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."img".DIRECTORY_SEPARATOR."users".DIRECTORY_SEPARATOR;
 $fallback_path = rtrim($system->getUserPhotoFolderPath());
 
-$key = $_REQUEST["name"] ?? $_REQUEST["id"] ?? "not_found";
+$key = $_REQUEST["id"];
+// $full_path = $default_path.$key.'.jpg';
 $full_path = $default_path.$key.'.jpg';
+if (!file_exists($full_path)) {
+    $key = $_REQUEST["name"];
+    $full_path = $default_path.$_REQUEST["name"].'.jpg';
+    if (!file_exists($full_path)) {
+        $key = 'not_found';
+        $full_path = $default_path.'not_found.jpg';
+    }
+}
+
+
 if (!file_exists($full_path)) {
     $full_path = $default_path.$key.'-1.jpg';
     if (!file_exists($full_path)) {
