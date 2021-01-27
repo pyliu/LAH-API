@@ -88,4 +88,14 @@ class TdocUserInfo {
     
         return $results;
     }
+
+    public function updateIp($id, $ip) {
+        $this->jungli_in_db->update('AP_USER', array('AP_PCIP' => $ip), array('DocUserID' => $id));
+        return $this->jungli_in_db->hasError();
+        // return true;
+    }
+
+    public function getLastError() {
+        return $this->jungli_in_db->getLastError();
+    }
 }

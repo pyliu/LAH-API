@@ -41,7 +41,7 @@ class DocUserInfo {
     }
 
     public function updateExt($id, $ext) {
-        $this->doc_db->update($table, array('SUB_TEL' => $ext), array('USER_ID' => $id));
+        $this->doc_db->update('DOC_USER', array('SUB_TEL' => $ext), array('USER_ID' => $id));
         return $this->hasError();
     }
 

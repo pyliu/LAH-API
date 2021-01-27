@@ -1,6 +1,7 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(INC_DIR."/DocUserInfo.class.php");
+require_once(INC_DIR."/TdocUserInfo.class.php");
 require_once(INC_DIR."/Message.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/System.class.php");
@@ -153,6 +154,28 @@ switch ($_POST["type"]) {
             echoJSONResponse("更新舊資料庫分機號碼 ".$_POST["id"].", ".$_POST["ext"]." 失敗。");
         }
         break;
+	case "upd_ip_tdoc":
+		$log->info("XHR [upd_ip_tdoc] 設定 ".$_POST['id']." 為 ".$_POST['ip']."請求");
+		$mssql_on = $system->isMSSQLEnable();
+		if ($mssql_on) {
+			// connect MSSQL tdoc DB AP_USER to update legacy data (AP_PCIP)
+			$tdoc = new TdocUserInfo();
+			$result = $mock ? $cache->get('upd_ip_tdoc') : $tdoc->updateIp($_POST["id"], $_POST["ip"]);
+			if (!$mock) $cache->set('upd_ip_tdoc', $result);
+			// if ($result) {
+				$msg = "更新知識網使用者 ".$_POST["id"]." IP  => ".$_POST["ip"]." 已送出";
+				$log->info("XHR [upd_ip_tdoc] ".$msg);
+				echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
+			// } else {
+			// 	$msg = "更新知識網IP ".$_POST["id"]." => ".$_POST["ip"]." 失敗。".print_r($tdoc->getLastError(), true);
+			// 	$log->info("XHR [upd_ip_tdoc] $msg");
+			// 	echoJSONResponse($msg);
+			// }
+		} else {
+			$log->info("XHR [upd_ip_tdoc] MSSQL連線未啟用。");
+			echoJSONResponse("MSSQL連線未啟用。");
+		}
+		break;
     default:
         $log->error("不支援的查詢型態【".$_POST["type"]."】");
         echoErrorJSONString("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

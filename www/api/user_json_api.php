@@ -237,7 +237,7 @@ switch ($_POST["type"]) {
 				"authority" => getMyAuthority()
 			));
 		}
-		break;
+        break;
     default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
