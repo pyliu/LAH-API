@@ -415,12 +415,13 @@ if (Vue) {
             :class="[selector, 'text-left', 'mr-1', 'mb-1', 'temperature', 'lah-user-card', 'position-relative']"
             size="sm"
             @click="usercard"
+            v-b-hover="hover"
             style="width: 100.3px; height: 73.81px;"
         >
             <div><b-avatar button variant="light" :size="avatar_size" :src="avatar_src"></b-avatar> {{name}}</div>
             <lah-fa-icon  v-if="temperature['AM'] > 0" :icon="am_icon" :variant="am_color" class="d-block"> {{temperature['AM']}} &#8451; AM</lah-fa-icon>
             <lah-fa-icon v-if="temperature['PM'] > 0" :icon="pm_icon" :variant="pm_color" class="d-block"> {{temperature['PM']}} &#8451; PM</lah-fa-icon>
-            <b-popover :target="btnid" triggers="hover focus" placement="top" delay="250">
+            <b-popover :target="btnid" triggers="hover focus" placement="top" delay="1250">
                 {{id}} : {{name}}
                 <lah-fa-icon :icon="am_icon" :variant="am_color" class="d-block"> {{temperature['AM']}} &#8451; AM</lah-fa-icon>
                 <lah-fa-icon :icon="pm_icon" :variant="pm_color" class="d-block"> {{temperature['PM']}} &#8451; PM</lah-fa-icon>
