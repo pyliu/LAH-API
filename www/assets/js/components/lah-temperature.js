@@ -415,7 +415,6 @@ if (Vue) {
             :class="[selector, 'text-left', 'mr-1', 'mb-1', 'temperature', 'lah-user-card', 'position-relative']"
             size="sm"
             @click="usercard"
-            v-b-hover="hover"
             style="width: 100.3px; height: 73.81px;"
         >
             <div><b-avatar button variant="light" :size="avatar_size" :src="avatar_src"></b-avatar> {{name}}</div>
