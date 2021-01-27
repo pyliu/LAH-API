@@ -382,7 +382,7 @@ if (Vue) {
                     need_admin: true,
                     children: [{
                         text: `使用者管理`,
-                        url: `http://${location.host}:8080/admin/user-mgt`,
+                        url: `http://${location.host}:8080/admin/users`,
                         icon: "users",
                         need_admin: true
                     }, {

@@ -6,7 +6,7 @@ if (Vue) {
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="users">使用者看板</lah-fa-icon></h6>
                     <b-button-group size="sm" class="align-middle my-auto">
-                        <lah-button no-border @click="location.href='http://'+location.host+':8080/admin/user-mgt'" variant="outline-primary" icon="users-cog"></lah-button>
+                        <lah-button no-border @click="location.href='http://'+location.host+':8080/admin/users'" variant="outline-primary" icon="users-cog"></lah-button>
                         <lah-button no-border  @click="location.href='org.html'" variant="outline-primary" icon="sitemap"></lah-button>
                         <lah-button no-border  @click="popup" variant="outline-success" icon="question"></lah-button>
                     </b-button-group>
