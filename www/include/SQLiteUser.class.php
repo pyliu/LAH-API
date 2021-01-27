@@ -483,4 +483,14 @@ class SQLiteUser {
             return false;
         }
     }
+
+    public function getAllRoleList() {
+        if($stmt = $this->db->prepare("SELECT * FROM authority WHERE 1=1 ORDER BY role, ip")) {
+            return $this->prepareArray($stmt);
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得人員角色資料失敗！");
+        }
+        return false;
+    }
 }

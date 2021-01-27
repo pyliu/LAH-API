@@ -10,31 +10,6 @@ $system = new System();
 $mock = $system->isMockMode();
 
 switch ($_POST["type"]) {
-	case "user_mapping":
-		$operators = getUserNames();
-		$count = count($operators);
-        $log->info("XHR [user_mapping] 取得使用者對應表($count)。");
-        echoJSONResponse("取得 $count 筆使用者資料。", STATUS_CODE::SUCCESS_NORMAL, array(
-			"data_count" => $count,
-			"data" => $operators
-		));
-		break;
-    case "user_names":
-        $log->info("XHR [user_names] 查詢使用者名冊資料請求 (SQLite DB: dimension.db)");
-        $sqlite_user = new SQLiteUser();
-        $all_users = $sqlite_user->getAllUsers();
-        if (empty($all_users)) {
-            $msg = "查無使用者名冊資料。( dimension.db exists?? )";
-            echoJSONResponse($msg);
-            $log->info("XHR [user_names] $msg");
-        } else {
-            $log->info("XHR [user_names] 查詢使用者名冊資料成功。");
-            echoJSONResponse('查詢使用者名冊資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => count($all_users),
-                "raw" => $all_users
-            ));
-        }
-        break;
     case "search_user":
         $log->info("XHR [search_user] 查詢使用者資料【".$_POST["keyword"]."】請求");
         $sqlite_user = new SQLiteUser();
@@ -57,6 +32,31 @@ switch ($_POST["type"]) {
                 "data_count" => count($results),
                 "raw" => $results,
                 "query_string" => "keyword=".$_POST["keyword"]
+            ));
+        }
+        break;
+	case "user_mapping":
+		$operators = getUserNames();
+		$count = count($operators);
+        $log->info("XHR [user_mapping] 取得使用者對應表($count)。");
+        echoJSONResponse("取得 $count 筆使用者資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+			"data_count" => $count,
+			"data" => $operators
+		));
+		break;
+    case "user_names":
+        $log->info("XHR [user_names] 查詢使用者名冊資料請求 (SQLite DB: dimension.db)");
+        $sqlite_user = new SQLiteUser();
+        $all_users = $sqlite_user->getAllUsers();
+        if (empty($all_users)) {
+            $msg = "查無使用者名冊資料。( dimension.db exists?? )";
+            echoJSONResponse($msg);
+            $log->info("XHR [user_names] $msg");
+        } else {
+            $log->info("XHR [user_names] 查詢使用者名冊資料成功。");
+            echoJSONResponse('查詢使用者名冊資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($all_users),
+                "raw" => $all_users
             ));
         }
         break;
@@ -86,19 +86,6 @@ switch ($_POST["type"]) {
             echoJSONResponse($_POST['id'].' 設定復職失敗');
         }
         break;
-    case "save_user_info":
-        $log->info("XHR [save_user_info] 儲存使用者資料【".print_r($_POST["data"], true)."】請求");
-        $sqlite_user = new SQLiteUser();
-        $result = $sqlite_user->saveUser($_POST["data"]);
-        if ($result === true) {
-            $msg = "儲存 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 成功";
-            $log->info("XHR [save_user_info] ${msg}。");
-            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
-        } else {
-            $log->error("XHR [save_user_info] save user info failed.");
-            echoJSONResponse("儲存 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 失敗");
-        }
-        break;
     case "user_info":
         $log->info("XHR [user_info] 查詢使用者資料【".$_POST["id"].", ".$_POST["name"].", ".$_POST["ip"]."】請求");
         $sqlite_user = new SQLiteUser();
@@ -126,6 +113,19 @@ switch ($_POST["type"]) {
                 "raw" => $results,
                 "query_string" => "id=".$_POST["id"]."&name=".$_POST["name"]."&ip=".$_POST["ip"]
             ));
+        }
+        break;
+    case "save_user_info":
+        $log->info("XHR [save_user_info] 儲存使用者資料【".print_r($_POST["data"], true)."】請求");
+        $sqlite_user = new SQLiteUser();
+        $result = $sqlite_user->saveUser($_POST["data"]);
+        if ($result === true) {
+            $msg = "儲存 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 成功";
+            $log->info("XHR [save_user_info] ${msg}。");
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            $log->error("XHR [save_user_info] save user info failed.");
+            echoJSONResponse("儲存 ".($_POST['data']['id'].', '.$_POST['data']['name'])." 失敗");
         }
         break;
     case "add_user":
@@ -190,6 +190,21 @@ switch ($_POST["type"]) {
         } else {
             $log->info("XHR [all_users] 查詢所有使用者資料成功。");
             echoJSONResponse('查詢所有使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($results),
+                "raw" => $results
+            ));
+        }
+        break;
+    case "all_role_list":
+        $log->info("XHR [all_role_list] 取得使用者角色列表請求");
+        $sqlite_user = new SQLiteUser();
+        $results = $sqlite_user->getAllRoleList();
+        if (empty($results)) {
+            $log->info("XHR [all_role_list] 查無使用者角色列表。");
+            echoJSONResponse("查無使用者角色列表。");
+        } else {
+            $log->info("XHR [all_role_list] 查詢所有使用者角色列表成功。");
+            echoJSONResponse('查詢所有使用者角色列表成功', STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => count($results),
                 "raw" => $results
             ));
