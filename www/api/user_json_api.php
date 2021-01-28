@@ -210,6 +210,19 @@ switch ($_POST["type"]) {
             ));
         }
         break;
+    case "remove_authority":
+        $log->info("XHR [remove_authority] 移除使用者授權請求");
+        $result = $system->removeAuthority($_POST['role_id'], $_POST['ip']);
+        if ($result === true) {
+            $message = "移除使用者授權 ".$_POST['role_id']." ".$_POST['ip']." 成功";
+            $log->info("XHR [remove_authority] ${message}。");
+            echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            $message = '移除使用者授權失敗';
+            $log->info("XHR [remove_authority] ${message}。");
+            echoJSONResponse($message);
+        }
+        break;
     case "upd_ext":
         $log->info("XHR [upd_ext] 更新分機號碼【".$_POST["id"].", ".$_POST["ext"]."】請求");
         $sqlite_user = new SQLiteUser();

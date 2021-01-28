@@ -338,6 +338,25 @@ class System {
         );
     }
 
+    public function removeAuthority($role_id, $ip) {
+        global $log;
+        if (empty($role_id)) {
+            $log->warning(__METHOD__.": role_id could not be empty. $role_id");
+            return false;
+        }
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            $log->warning(__METHOD__.": $ip is not a valid IP address.");
+            return false;
+        }
+        if ($stm = $this->sqlite3->prepare("DELETE from authority WHERE role_id = :role_id AND ip = :ip")) {
+            $stm->bindParam(':role_id', $role_id);
+            $stm->bindParam(':ip', $ip);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE from authority WHERE role_id = :role_id AND ip = :ip ] 失敗。($role_id, $ip)");
+        return false;
+    }
+
     public function getOraMainDBConnStr() {
         $site = strtoupper($this->get('SITE'));
         $ip = $this->get('ORA_DB_HXWEB_IP');
