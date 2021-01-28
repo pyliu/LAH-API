@@ -195,16 +195,16 @@ switch ($_POST["type"]) {
             ));
         }
         break;
-    case "all_role_list":
-        $log->info("XHR [all_role_list] 取得使用者角色列表請求");
+    case "authority_list":
+        $log->info("XHR [authority_list] 取得使用者授權列表請求");
         $sqlite_user = new SQLiteUser();
-        $results = $sqlite_user->getAllRoleList();
+        $results = $sqlite_user->getAuthorityList();
         if (empty($results)) {
-            $log->info("XHR [all_role_list] 查無使用者角色列表。");
-            echoJSONResponse("查無使用者角色列表。");
+            $log->info("XHR [authority_list] 查無使用者授權列表。");
+            echoJSONResponse("查無使用者授權列表。");
         } else {
-            $log->info("XHR [all_role_list] 查詢所有使用者角色列表成功。");
-            echoJSONResponse('查詢所有使用者角色列表成功', STATUS_CODE::SUCCESS_NORMAL, array(
+            $log->info("XHR [authority_list] 查詢所有使用者授權列表成功。");
+            echoJSONResponse('查詢所有使用者授權列表成功', STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => count($results),
                 "raw" => $results
             ));

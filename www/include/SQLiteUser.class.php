@@ -484,12 +484,17 @@ class SQLiteUser {
         }
     }
 
-    public function getAllRoleList() {
-        if($stmt = $this->db->prepare("SELECT * FROM authority WHERE 1=1 ORDER BY role, ip")) {
+    public function getAuthorityList() {
+        if($stmt = $this->db->prepare("
+            SELECT a.*, r.name, u.id AS uid, u.name AS uname FROM authority a 
+            LEFT JOIN role r ON a.role_id = r.id
+            LEFT JOIN user u ON a.ip = u.ip AND (u.offboard_date = '')
+            WHERE 1=1 ORDER BY r.name, a.ip
+        ")) {
             return $this->prepareArray($stmt);
         } else {
             global $log;
-            $log->error(__METHOD__.": 取得人員角色資料失敗！");
+            $log->error(__METHOD__.": 取得人員授權資料失敗！");
         }
         return false;
     }

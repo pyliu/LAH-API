@@ -1,5 +1,4 @@
 <?php
-
 abstract class STATUS_CODE {
     const SUCCESS_WITH_NO_RECORD = 3;
     const SUCCESS_WITH_MULTIPLE_RECORDS = 2;
@@ -14,15 +13,6 @@ abstract class STATUS_CODE {
     const FAIL_NOT_FOUND = -7;
     const FAIL_LOAD_ERROR = -8;
     const FAIL_TIMEOUT = -9;
-}
-
-abstract class AUTHORITY {
-    const NORMAL = 0;
-    const SUPER = 1;                    // pyliu
-    const ADMIN = 2;                    // 管理者
-    const CHIEF = 4;                    // 主管
-    const RESEARCH_AND_EVALUATION = 8;  // 研考
-    const GENERAL_AFFAIRS = 16;         // 總務
 }
 
 define('ROOT_DIR', dirname(dirname(__FILE__)));

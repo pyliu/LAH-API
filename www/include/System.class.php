@@ -4,12 +4,32 @@ require_once('DynamicSQLite.class.php');
 
 define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."dimension.db");
 
+abstract class ROLE {
+    const NORMAL = 1;
+    const SUPER = 2;                    // 超級管理者
+    const ADMIN = 3;                    // 管理者
+    const CHIEF = 4;                    // 主管
+    const RESEARCH_AND_EVALUATION = 5;  // 研考
+    const GENERAL_AFFAIRS = 6;          // 總務
+}
+
+// could processed by bitwise operation
+abstract class AUTHORITY {
+    const NORMAL = 0;
+    const SUPER = 1;
+    const ADMIN = 2;
+    const CHIEF = 4;
+    const RESEARCH_AND_EVALUATION = 8;
+    const GENERAL_AFFAIRS = 16;
+}
+
 class System {
     private $sqlite3;
+    private $ROLE;
 
-    private function getRoleIps($role) {
-        if($stmt = $this->sqlite3->prepare('SELECT * FROM authority WHERE role = :role')) {
-            $stmt->bindParam(':role', $role);
+    private function getRoleIps($role_id) {
+        if($stmt = $this->sqlite3->prepare('SELECT * FROM authority WHERE role_id = :role_id')) {
+            $stmt->bindParam(':role_id', $role_id);
             $result = $stmt->execute();
             $return = [];
             if ($result === false) return $return;
@@ -21,7 +41,7 @@ class System {
             return $return;
         } else {
             global $log;
-            $log->error(__METHOD__.": 取得 $role IPs 資料失敗！");
+            $log->error(__METHOD__.": 取得 $role_id IPs 資料失敗！");
         }
         return false;
     }
@@ -33,12 +53,11 @@ class System {
         if (!in_array('127.0.0.1', $super_array)) {
             $super_array[] = '127.0.0.1';
             $stm = $this->sqlite3->prepare("
-                REPLACE INTO authority ('role', 'ip', 'note')
-                VALUES (:role, :ip, :note)
+                REPLACE INTO authority ('role_id', 'ip')
+                VALUES (:role_id, :ip)
             ");
-            $stm->bindValue(':role', 'super');
+            $stm->bindValue(':role_id', ROLE::SUPER);
             $stm->bindValue(':ip', '127.0.0.1');
-            $stm->bindValue(':note', 'added by system automatically');
             $ret = $stm->execute() === FALSE ? false : true;
         }
         
@@ -46,12 +65,11 @@ class System {
         if (!in_array('::1', $adm_array)) {
             $adm_array[] = '::1';
             $stm = $this->sqlite3->prepare("
-                REPLACE INTO authority ('role', 'ip', 'note')
-                VALUES (:role, :ip, :note)
+                REPLACE INTO authority ('role_id', 'ip')
+                VALUES (:role_id, :ip)
             ");
-            $stm->bindValue(':role', 'admin');
+            $stm->bindValue(':role_id', ROLE::ADMIN);
             $stm->bindValue(':ip', '::1');
-            $stm->bindValue(':note', 'added by system automatically');
             $ret = $stm->execute() === FALSE ? false : true;
         }
 
@@ -169,11 +187,17 @@ class System {
         ');
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "authority" (
-                "id"	INTEGER,
-                "role"	TEXT NOT NULL DEFAULT \'user\',
+                "role_id"	INTEGER NOT NULL DEFAULT 0,
                 "ip"	TEXT NOT NULL DEFAULT \'192.168.xx.xx\',
-                "user_id"	TEXT NOT NULL DEFAULT \'HX0000\',
-                "note"	TEXT,
+                PRIMARY KEY("role_id","ip")
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "role" (
+                "id"	INTEGER NOT NULL,
+                "e_name"	TEXT NOT NULL,
+                "name"	TEXT NOT NULL,
+                "authority"	INTEGER NOT NULL DEFAULT 0,
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
@@ -285,23 +309,23 @@ class System {
     }
 
     public function getRoleAdminIps() {
-        return $this->getRoleIps('admin');
+        return $this->getRoleIps(ROLE::ADMIN);
     }
 
     public function getRoleChiefIps() {
-        return $this->getRoleIps('chief');
+        return $this->getRoleIps(ROLE::CHIEF);
     }
 
     public function getRoleSuperIps() {
-        return $this->getRoleIps('super');
+        return $this->getRoleIps(ROLE::SUPER);
     }
 
     public function getRoleRAEIps() {
-        return $this->getRoleIps('rae');
+        return $this->getRoleIps(ROLE::RESEARCH_AND_EVALUATION);
     }
 
     public function getRoleGAIps() {
-        return $this->getRoleIps('ga');
+        return $this->getRoleIps(ROLE::GENERAL_AFFAIRS);
     }
 
     public function getAuthority($ip) {
