@@ -214,12 +214,25 @@ switch ($_POST["type"]) {
         $log->info("XHR [remove_authority] 移除使用者授權請求");
         $result = $system->removeAuthority($_POST['user']);
         if ($result === true) {
-            $message = "移除使用者授權 ".$_POST['role_id']." ".$_POST['ip']." 成功";
+            $message = "移除使用者授權 ".$_POST['user']['role_name']." ".$_POST['user']['role_ip']." 成功";
             $log->info("XHR [remove_authority] ${message}。");
             echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL);
         } else {
-            $message = '移除使用者授權失敗';
+            $message = '移除使用者授權 '.$_POST['user']['role_name']." ".$_POST['user']['role_ip'].' 失敗';
             $log->info("XHR [remove_authority] ${message}。");
+            echoJSONResponse($message);
+        }
+        break;
+    case "add_authority":
+        $log->info("XHR [add_authority] 增加使用者授權請求");
+        $result = $system->addAuthority($_POST['role_id'], $_POST['ip']);
+        if ($result === true) {
+            $message = "增加使用者授權 ".$_POST['role_id']." ".$_POST['ip']." 成功";
+            $log->info("XHR [add_authority] ${message}。");
+            echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            $message = '增加使用者授權失敗';
+            $log->info("XHR [add_authority] ${message}。");
             echoJSONResponse($message);
         }
         break;
