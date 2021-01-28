@@ -338,7 +338,9 @@ class System {
         );
     }
 
-    public function removeAuthority($role_id, $ip) {
+    public function removeAuthority($user) {
+        $role_id = $user['role_id'];
+        $ip = $user['role_ip'];
         global $log;
         if (empty($role_id)) {
             $log->warning(__METHOD__.": role_id could not be empty. $role_id");

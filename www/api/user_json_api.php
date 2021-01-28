@@ -212,7 +212,7 @@ switch ($_POST["type"]) {
         break;
     case "remove_authority":
         $log->info("XHR [remove_authority] 移除使用者授權請求");
-        $result = $system->removeAuthority($_POST['role_id'], $_POST['ip']);
+        $result = $system->removeAuthority($_POST['user']);
         if ($result === true) {
             $message = "移除使用者授權 ".$_POST['role_id']." ".$_POST['ip']." 成功";
             $log->info("XHR [remove_authority] ${message}。");
