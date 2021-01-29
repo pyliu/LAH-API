@@ -426,6 +426,22 @@ class System {
         return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=${ip})(PORT=${port})))(CONNECT_DATA=(SERVICE_NAME=L2HWEB)))";
     }
     
+    public function getConfigs() {
+        if($stmt = $this->sqlite3->prepare('SELECT * FROM config WHERE 1=1')) {
+            $result = $stmt->execute();
+            $return = [];
+            if ($result === false) return $return;
+            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                $return[] = $row;
+            }
+            return $return;
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得 system config 資料失敗！");
+        }
+        return false;
+    }
+
     public function get($key) {
         return $this->sqlite3->querySingle("SELECT value from config WHERE key = '$key'");
     }

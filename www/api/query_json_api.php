@@ -75,6 +75,15 @@ switch ($_POST["type"]) {
 			"message" => "Got server ip address => ".preg_replace('/[\n\s]+/i', ' ', print_r($ips, true))
 		), 0);
 		break;
+	case "configs":
+		$log->info("XHR [configs] 查詢系統設定資料請求。");
+		$configs = $system->getConfigs();
+		$message = '查詢到'.count($configs).'筆資料';
+		$log->info("XHR [configs] ${message}。");
+		echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
+			'raw' => $configs
+		));
+		break;
 	case "ping":
 		$log->info("XHR [ping] Ping ".$_POST["ip"]." request.");
 		$ip = $_POST["ip"];
