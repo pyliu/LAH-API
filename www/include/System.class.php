@@ -442,6 +442,29 @@ class System {
         return false;
     }
 
+    public function updateConfigs($configs) {
+        global $log;
+        // $log->info(__METHOD__.": ".print_r($configs, true));
+        $success = 0;
+        $error = 0;
+        foreach ($configs as $pair) {
+            if($stmt = $this->sqlite3->prepare('UPDATE config SET value = :value WHERE key = :key')) {
+                $stmt->bindParam(':key', $pair['key']);
+                $stmt->bindParam(':value', $pair['value']);
+                $result = $stmt->execute() === FALSE ? false : true;
+                if ($result) {
+                    $success++;
+                } else {
+                    $error++;
+                }
+            } else {
+                global $log;
+                $log->error(__METHOD__.": 準備更新SQL失敗！ [ UPDATE config SET value = :value WHERE key = :key ] ".print_r($pair, true));
+            }
+        }
+        return count($configs) === $success;
+    }
+
     public function get($key) {
         return $this->sqlite3->querySingle("SELECT value from config WHERE key = '$key'");
     }
