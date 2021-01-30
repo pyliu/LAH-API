@@ -28,22 +28,21 @@ class System {
     private $ROLE;
 
     private function getRoleIps($role_id) {
+        $return = [];
         if($stmt = $this->sqlite3->prepare('SELECT * FROM authority WHERE role_id = :role_id')) {
             $stmt->bindParam(':role_id', $role_id);
             $result = $stmt->execute();
-            $return = [];
             if ($result === false) return $return;
             while($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 if (!in_array($row['ip'], $return)) {
                     $return[] = $row['ip'];
                 }
             }
-            return $return;
         } else {
             global $log;
             $log->error(__METHOD__.": 取得 $role_id IPs 資料失敗！");
         }
-        return false;
+        return $return;
     }
 
     private function addLoopIPsAuthority() {
@@ -309,7 +308,14 @@ class System {
     }
 
     public function getRoleAdminIps() {
-        return $this->getRoleIps(ROLE::ADMIN);
+        $array = $this->getRoleIps(ROLE::ADMIN);
+        if (!in_array('127.0.0.1', $array)) {
+            $array[] = '127.0.0.1';
+        }
+        if (!in_array('::1', $array)) {
+            $array[] = '::1';
+        }
+        return $array;
     }
 
     public function getRoleChiefIps() {
@@ -432,7 +438,7 @@ class System {
             $return = [];
             if ($result === false) return $return;
             while($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                $return[] = $row;
+                $return[$row['key']] = $row['value'];
             }
             return $return;
         } else {
