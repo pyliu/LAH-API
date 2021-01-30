@@ -453,10 +453,10 @@ class System {
         // $log->info(__METHOD__.": ".print_r($configs, true));
         $success = 0;
         $error = 0;
-        foreach ($configs as $pair) {
+        foreach ($configs as $key => $value) {
             if($stmt = $this->sqlite3->prepare('UPDATE config SET value = :value WHERE key = :key')) {
-                $stmt->bindParam(':key', $pair['key']);
-                $stmt->bindParam(':value', $pair['value']);
+                $stmt->bindParam(':key', $key);
+                $stmt->bindParam(':value', $value);
                 $result = $stmt->execute() === FALSE ? false : true;
                 if ($result) {
                     $success++;
@@ -468,7 +468,7 @@ class System {
                 $log->error(__METHOD__.": 準備更新SQL失敗！ [ UPDATE config SET value = :value WHERE key = :key ] ".print_r($pair, true));
             }
         }
-        return count($configs) === $success;
+        return $success;
     }
 
     public function get($key) {

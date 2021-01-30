@@ -86,11 +86,13 @@ switch ($_POST["type"]) {
 		break;
 	case "update_configs":
 		$log->info("XHR [configs] 更新系統設定資料請求。");
-		$result = $system->updateConfigs($_POST['configs']);
-		$message = '更新系統設定資料'.($result ? '成功' : '失敗');
-		$status = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+		$success = $system->updateConfigs($_POST['configs']);
+		$message = '成功更新 '.$success.' / '.count($_POST['configs']).'筆系統設定。';
+		$status = $success > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
 		$log->info("XHR [configs] ${message}。");
-		echoJSONResponse($message, $status);
+		echoJSONResponse($message, $status, array(
+			'success' => $success
+		));
 		break;
 	case "ping":
 		$log->info("XHR [ping] Ping ".$_POST["ip"]." request.");
