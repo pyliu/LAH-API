@@ -62,9 +62,9 @@ switch ($_POST["type"]) {
 
 		$ips = getLocalhostIPs();
 		$count = count($ips);
-		$message = "取得API伺服器IP位址 => ".preg_replace('/[\n\s]+/i', ' ', print_r($ips, true));
+		$message = "PHP 取得 API 伺服器 IP 位址 => ".preg_replace('/[\n\s]+/i', ' ', print_r($ips, true));
 
-		$log->info("XHR [svr] API伺服器端點： ".$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']);
+		$log->info("XHR [svr] APACHE API 伺服器端點資訊： ".$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']);
 		$log->info("XHR [svr] $message");
 
 		echo json_encode(array(
