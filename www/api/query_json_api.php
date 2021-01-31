@@ -60,29 +60,34 @@ switch ($_POST["type"]) {
 			$log->info("XHR [svr] ".$_SESSION["myinfo"]['id']." ".$_SESSION["myinfo"]['name']." 已登入。");
 		}
 
-		$webap_ip = $system->get('WEBAP_IP') ?? '220.1.35.123';
 		$ips = getLocalhostIPs();
 		$count = count($ips);
-		$log->info("XHR [svr] Got the server info from \$_SERVER (".$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT'].")");
+		$message = "取得API伺服器IP位址 => ".preg_replace('/[\n\s]+/i', ' ', print_r($ips, true));
+
+		$log->info("XHR [svr] API伺服器端點： ".$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']);
+		$log->info("XHR [svr] $message");
+
 		echo json_encode(array(
 			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"message" => $message,
+			"server" => $_SERVER,
+			"ips" => $ips,
+			"user" => $_SESSION["myinfo"],
 			"config" => array(
-				'webap_ip' => $webap_ip,
-				'mock' => $mock,
+				'webap_ip' => $system->get('WEBAP_IP'),
+				'mock' => $system->isMockMode(),
+				'mssql' => $system->isMSSQLEnable(),
+				'officehours' => $system->isOfficeHoursEnable(),
 				"authority" => $system->getAuthority($_POST['client_ip']),
+				"site" => strtoupper($system->get('SITE')),
 				"ip_maps" => array(
 					"admin" => $system->getRoleAdminIps(),
 					"chief" => $system->getRoleChiefIps(),
 					"super" => $system->getRoleSuperIps(),
 					"rae" => $system->getRoleRAEIps(),
 					"ga" => $system->getRoleGAIps()
-				),
-				"site" => strtoupper($system->get('SITE'))
-			),
-			"server" => $_SERVER,
-			"ips" => $ips,
-			"user" => $_SESSION["myinfo"],
-			"message" => "Got server ip address => ".preg_replace('/[\n\s]+/i', ' ', print_r($ips, true))
+				)
+			)
 		), 0);
 		break;
 	case "configs":
