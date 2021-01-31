@@ -14,14 +14,6 @@ require_once(INC_DIR."/Ping.class.php");
 
 require_once(INC_DIR."/api/JSONAPICommandFactory.class.php");
 
-function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
-	echo json_encode(array(
-		"status" => $status,
-		"data_count" => "0",
-		"message" => empty($msg) ? "查無資料" : $msg
-	), 0);
-}
-
 $query = new Query();
 $cache = new Cache();
 $system = new System();
@@ -217,11 +209,11 @@ switch ($_POST["type"]) {
 				), 0);
 			} else {
 				$log->warning("XHR [watchdog] 非上班時段停止執行。");
-				echoErrorJSONString("XHR [watchdog] 非上班時段停止執行。");
+				echoJSONResponse("XHR [watchdog] 非上班時段停止執行。");
 			}
 		} else {
 			$log->info("XHR [watchdog] 停止執行WATCHDOG，因為IP不為「::1」");
-			echoErrorJSONString("XHR [watchdog] 停止執行WATCHDOG，因為IP不為「::1」", STATUS_CODE::FAIL_NOT_VALID_SERVER);
+			echoJSONResponse("XHR [watchdog] 停止執行WATCHDOG，因為IP不為「::1」", STATUS_CODE::FAIL_NOT_VALID_SERVER);
 		}
 		break;
 	case "xcase-check":
@@ -230,7 +222,7 @@ switch ($_POST["type"]) {
 		$cache->set('xcase-check', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [xcase-check] 查無資料");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 		} else {
 			$rows = $query_result;
 			$case_ids = [];
@@ -255,7 +247,7 @@ switch ($_POST["type"]) {
 		if (empty($query_result)) {
 			$msg = "一周內查無悠遊卡交易異常資料！【大於等於".$week_ago."】";
 			$log->info("XHR [ez-payment-check] $msg");
-			echoErrorJSONString($msg);
+			echoJSONResponse($msg);
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -273,7 +265,7 @@ switch ($_POST["type"]) {
 		if (empty($query_result)) {
 			$msg = "查無異常測量案件資料。";
 			$log->info("XHR [sur-problem-check] $msg");
-			echoErrorJSONString($msg);
+			echoJSONResponse($msg);
 		} else {
 			$case_ids = array();
 			foreach ($query_result as $result) {
@@ -302,7 +294,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [fix_xcase] 更新失敗【".$_POST["id"]."】");
-			echoErrorJSONString("更新失敗【".$_POST["id"]."】");
+			echoJSONResponse("更新失敗【".$_POST["id"]."】");
 		}
 		break;
 	case "max":
@@ -324,7 +316,7 @@ switch ($_POST["type"]) {
 		$cache->set('ralid', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [ralid] 查無資料");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -342,7 +334,7 @@ switch ($_POST["type"]) {
 		$cache->set('cert_log', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [cert_log] 查無資料");
-			echoErrorJSONString("查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+			echoJSONResponse("查無資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD);
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -359,7 +351,7 @@ switch ($_POST["type"]) {
 		$cache->set('crsms', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [crsms] 查無資料");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 		} else {
 			$baked = array();
 			foreach ($query_result as $key => $row) {
@@ -382,7 +374,7 @@ switch ($_POST["type"]) {
 		$cache->set('cmsms', $query_result);
 		if (empty($query_result)) {
 			$log->info("XHR [cmsms] 查無資料");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -408,13 +400,13 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [fix_easycard] 更新失敗【".$_POST["qday"].", ".$_POST["pc_num"]."】");
-			echoErrorJSONString("更新失敗【".$_POST["qday"].", ".$_POST["pc_num"]."】");
+			echoJSONResponse("更新失敗【".$_POST["qday"].", ".$_POST["pc_num"]."】");
 		}
 		break;
 	case "sur_case":
 		if (empty($_POST["id"])) {
 			$log->error("XHR [sur_case] 查詢ID為空值");
-			echoErrorJSONString();
+			echoJSONResponse('查詢ID為空值');
 			break;
 		}
 		$log->info("XHR [sur_case] 查詢測量案件【".$_POST["id"]."】請求");
@@ -422,7 +414,7 @@ switch ($_POST["type"]) {
 		$cache->set('sur_case', $row);
 		if (empty($row)) {
 			$log->info("XHR [sur_case] 查無資料");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 		} else {
 			$data = new SurCaseData($row);
 			$log->info("XHR [sur_case] 查詢成功");
@@ -432,7 +424,7 @@ switch ($_POST["type"]) {
 	case "fix_sur_delay_case":
 		if (empty($_POST["id"])) {
 			$log->error("XHR [fix_sur_delay_case] 查詢ID為空值");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 			break;
 		}
 		$log->info("XHR [fix_sur_delay_case] 修正測量延期案件【".$_POST["id"].", ".$_POST["UPD_MM22"].", ".$_POST["CLR_DELAY"].", ".$_POST["FIX_COUNT"]."】請求");
@@ -448,7 +440,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->info("XHR [fix_sur_delay_case] 更新失敗【".$_POST["id"]."】");
-			echoErrorJSONString("更新失敗【".$_POST["id"]."】");
+			echoJSONResponse("更新失敗【".$_POST["id"]."】");
 		}
 		break;
 	case "prc_case":
@@ -457,7 +449,7 @@ switch ($_POST["type"]) {
 		$cache->set('prc_case', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [prc_case] 查無資料");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 		} else {
 			$data = new PrcAllCasesData($rows);
 			$log->info("XHR [prc_case] 查詢成功");
@@ -475,7 +467,7 @@ switch ($_POST["type"]) {
 		$cache->set('expac', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [expac] 查無資料");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -502,7 +494,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [mod_expac] 更新失敗【".$_POST["year"].", ".$_POST["num"].", ".$_POST["code"].", ".$_POST["amount"]."】");
-			echoErrorJSONString("更新失敗【".$_POST["year"].", ".$_POST["num"].", ".$_POST["code"].", ".$_POST["amount"]."】");
+			echoJSONResponse("更新失敗【".$_POST["year"].", ".$_POST["num"].", ".$_POST["code"].", ".$_POST["amount"]."】");
 		}
 		break;
 	case "expaa":
@@ -512,7 +504,7 @@ switch ($_POST["type"]) {
 		$cache->set('expaa', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [expaa] 查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
-			echoErrorJSONString("查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
+			echoJSONResponse("查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
 		} else if (count($rows) == 1 && $_POST["list_mode"] == "false") {
 			$mapping = array();
 			// AA39 is 承辦人員, AA89 is 修改人員代碼
@@ -566,7 +558,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [expaa_AA08_update/expaa_AA09_update/expaa_AA100_update] 更新規費欄位失敗【".$_POST["date"].", ".$_POST["number"].", ".$column.", ".$_POST["update_value"]."】");
-			echoErrorJSONString("更新規費欄位失敗【".$_POST["date"].", ".$_POST["number"].", ".$column.", ".$_POST["update_value"]."】");
+			echoJSONResponse("更新規費欄位失敗【".$_POST["date"].", ".$_POST["number"].", ".$column.", ".$_POST["update_value"]."】");
 		}
 		break;
 	case "get_dummy_ob_fees":
@@ -585,7 +577,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [get_dummy_ob_fees] 本年度(${this_year})查無作廢規費假資料");
-			echoErrorJSONString("本年度(${this_year})查無作廢規費假資料");
+			echoJSONResponse("本年度(${this_year})查無作廢規費假資料");
 		}
 		break;
 	case "add_dummy_ob_fees":
@@ -604,7 +596,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [add_dummy_ob_fees] 新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
-			echoErrorJSONString("新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
+			echoJSONResponse("新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
 		}
 		break;
 	case "diff_xcase":
@@ -613,16 +605,16 @@ switch ($_POST["type"]) {
 		$cache->set('diff_xcase', $rows);
 		if ($rows === -1) {
 			$log->warning("XHR [diff_xcase] 參數格式錯誤【".$_POST["id"]."】");
-			echoErrorJSONString("參數格式錯誤【".$_POST["id"]."】");
+			echoJSONResponse("參數格式錯誤【".$_POST["id"]."】");
 		} else if ($rows === -2) {
 			$log->warning("XHR [diff_xcase] 遠端查無資料【".$_POST["id"]."】");
-			echoErrorJSONString("遠端查無資料【".$_POST["id"]."】", STATUS_CODE::FAIL_WITH_REMOTE_NO_RECORD);
+			echoJSONResponse("遠端查無資料【".$_POST["id"]."】", STATUS_CODE::FAIL_WITH_REMOTE_NO_RECORD);
 		} else if ($rows === -3) {
 			$log->warning("XHR [diff_xcase] 本地查無資料【".$_POST["id"]."】");
-			echoErrorJSONString("本地查無資料【".$_POST["id"]."】", STATUS_CODE::FAIL_WITH_LOCAL_NO_RECORD);
+			echoJSONResponse("本地查無資料【".$_POST["id"]."】", STATUS_CODE::FAIL_WITH_LOCAL_NO_RECORD);
 		} else if (is_array($rows) && empty($rows)) {
 			$log->info("XHR [diff_xcase] 遠端資料與本所一致【".$_POST["id"]."】");
-			echoErrorJSONString("遠端資料與本所一致【".$_POST["id"]."】");
+			echoJSONResponse("遠端資料與本所一致【".$_POST["id"]."】");
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -648,13 +640,13 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else if ($result_flag === -1) {
 			$log->error("XHR [inst_xcase] 傳入ID錯誤，新增失敗【".$_POST["id"]."】");
-			echoErrorJSONString("傳入ID錯誤，新增失敗【".$_POST["id"]."】");
+			echoJSONResponse("傳入ID錯誤，新增失敗【".$_POST["id"]."】");
 		} else if ($result_flag === -2) {
 			$log->error("XHR [inst_xcase] 遠端無案件資料，新增失敗【".$_POST["id"]."】");
-			echoErrorJSONString("遠端無案件資料，新增失敗【".$_POST["id"]."】");
+			echoJSONResponse("遠端無案件資料，新增失敗【".$_POST["id"]."】");
 		} else {
 			$log->error("XHR [inst_xcase] 新增失敗【".$_POST["id"]."】");
-			echoErrorJSONString("新增失敗【".$_POST["id"]."】");
+			echoJSONResponse("新增失敗【".$_POST["id"]."】");
 		}
 		break;
 	case "sync_xcase":
@@ -671,7 +663,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [sync_xcase] 同步失敗【".$_POST["id"]."】");
-			echoErrorJSONString("同步失敗【".$_POST["id"]."】");
+			echoJSONResponse("同步失敗【".$_POST["id"]."】");
 		}
 		break;
 	case "sync_xcase_column":
@@ -688,7 +680,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [sync_xcase_column] 同步失敗【".$_POST["id"].", ".$_POST["column"]."】");
-			echoErrorJSONString("同步失敗【".$_POST["id"].", ".$_POST["column"]."】");
+			echoJSONResponse("同步失敗【".$_POST["id"].", ".$_POST["column"]."】");
 		}
 		break;
 	case "announcement_data":
@@ -717,7 +709,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [update_announcement_data] 更新公告期限失敗【".$_POST["code"].", ".$_POST["day"].", ".$_POST["flag"]."】");
-			echoErrorJSONString("更新公告期限失敗【".$_POST["code"].", ".$_POST["day"].", ".$_POST["flag"]."】");
+			echoJSONResponse("更新公告期限失敗【".$_POST["code"].", ".$_POST["day"].", ".$_POST["flag"]."】");
 		}
 		break;
 	case "clear_announcement_flag":
@@ -734,7 +726,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [clear_announcement_flag] 清除先行准登失敗");
-			echoErrorJSONString("清除先行准登失敗");
+			echoJSONResponse("清除先行准登失敗");
 		}
 		break;
 	case "query_temp_data":
@@ -751,7 +743,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->info("XHR [query_temp_data] ".$_POST["year"]."-".$_POST["code"]."-".$_POST["number"]." 查無暫存資料");
-			echoErrorJSONString("本案件查無暫存資料。");
+			echoJSONResponse("本案件查無暫存資料。");
 		}
 		break;
 	case "clear_temp_data":
@@ -769,7 +761,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [clear_temp_data] 清除暫存資料失敗");
-			echoErrorJSONString("清除暫存資料失敗");
+			echoJSONResponse("清除暫存資料失敗");
 		}
 		break;
 	case "upd_case_column":
@@ -787,7 +779,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [upd_case_column] 更新".$_POST["table"].".".$_POST["column"]."欄位為「".$_POST["value"]."」失敗");
-			echoErrorJSONString("更新".$_POST["table"].".".$_POST["column"]."欄位為「".$_POST["value"]."」失敗");
+			echoJSONResponse("更新".$_POST["table"].".".$_POST["column"]."欄位為「".$_POST["value"]."」失敗");
 		}
 		break;
 	case "zip_log":
@@ -817,7 +809,7 @@ switch ($_POST["type"]) {
 			$log->info("XHR [remove_temperature] ".$json_array["message"]);
 			echo json_encode($json_array, 0);
 		} else {
-			echoErrorJSONString("刪除 ".$_POST["id"].", ".$_POST["datetime"]." 體溫紀錄失敗。");
+			echoJSONResponse("刪除 ".$_POST["id"].", ".$_POST["datetime"]." 體溫紀錄失敗。");
 			$log->info("XHR [remove_temperature] 刪除 ".$_POST["id"]." 體溫紀錄失敗。");
 		}
 		break;	
@@ -838,7 +830,7 @@ switch ($_POST["type"]) {
 			$log->info("XHR [add_temperature] ".$json_array["message"]);
 			echo json_encode($json_array, 0);
 		} else {
-			echoErrorJSONString("已有 ".$_POST["id"]." 體溫紀錄，如需更新請刪除舊資料。");
+			echoJSONResponse("已有 ".$_POST["id"]." 體溫紀錄，如需更新請刪除舊資料。");
 			$log->warning("XHR [add_temperature] 新增 ".$_POST["id"]." 體溫紀錄失敗。");
 		}
 		break;
@@ -907,7 +899,7 @@ switch ($_POST["type"]) {
 	case "reg_case":
 		if (empty($_POST["id"])) {
 			$log->error("XHR [reg_case] 查詢ID為空值");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 			break;
 		}
 		$log->info("XHR [reg_case] 查詢登記案件【".$_POST["id"]."】請求");
@@ -915,7 +907,7 @@ switch ($_POST["type"]) {
 		$cache->set('reg_case', $row);
 		if (empty($row)) {
 			$log->info("XHR [reg_case] 查無資料");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 		} else {
 			$data = new RegCaseData($row);
 			$log->info("XHR [reg_case] 查詢成功");
@@ -937,7 +929,7 @@ switch ($_POST["type"]) {
 		$cache->set('reg_cases_by_day', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [reg_cases_by_day] 查無資料");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 		} else {
 			$baked = array();
 			foreach ($rows as $row) {
@@ -1111,7 +1103,7 @@ switch ($_POST["type"]) {
 	case "reg_stats":
 		if (empty($_POST["year_month"])) {
 			$log->error("XHR [reg_stats] 查詢年月為空值");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 			break;
 		}
 		$log->info("XHR [reg_stats] 查詢登記案件統計【".$_POST["year_month"]."】請求");
@@ -1119,7 +1111,7 @@ switch ($_POST["type"]) {
 		$cache->set('reg_stats', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [reg_stats] 查無資料");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 		} else {
 			$log->info("XHR [reg_stats] 查詢成功");
 			$result = array(
@@ -1167,7 +1159,7 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		} else {
 			$log->error("XHR [reg_upd_col] 更新案件欄位失敗");
-			echoErrorJSONString("更新案件欄位失敗");
+			echoJSONResponse("更新案件欄位失敗");
 		}
 		break;
 	case "reg_rm30_E_case":
@@ -1176,7 +1168,7 @@ switch ($_POST["type"]) {
 		$cache->set('reg_rm30_E_case', $rows);
 		if (empty($rows)) {
 			$log->info("XHR [reg_rm30_E_case] 查無資料");
-			echoErrorJSONString();
+			echoJSONResponse('查無資料');
 		} else {
 			$total = count($rows);
 			$log->info("XHR [reg_rm30_E_case] 查詢成功($total)");
@@ -1244,7 +1236,7 @@ switch ($_POST["type"]) {
 		$results = $mock ? $cache->get('rlnid') : $query->getRLNIDByID($param);
 		$cache->set('rlnid', $results);
 		if (empty($results)) {
-			echoErrorJSONString("查無 ${param} 權利人資訊。");
+			echoJSONResponse("查無 ${param} 權利人資訊。");
 			$log->info("XHR [rlnid] 查無 ${param} 權利人資訊。");
 		} else {
 			$json = array(
@@ -1281,13 +1273,13 @@ switch ($_POST["type"]) {
 			$log->info($json["message"]);
 			echo json_encode($json, 0);
 		} else {
-			echoErrorJSONString("設定 xlsx session 參數失敗。(${params})");
+			echoJSONResponse("設定 xlsx session 參數失敗。(${params})");
 			$log->info("XHR [xlsx_params] 設定 xlsx session 參數失敗。");
 			$log->info("XHR [xlsx_params] ${params}");
 		}
 		break;
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
-		echoErrorJSONString("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
 		break;
 }
