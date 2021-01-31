@@ -45,19 +45,17 @@ switch ($_POST["type"]) {
 		break;
 	case "svr":
 		// find current connected user
-		if (empty($_SESSION["myinfo"])) {
-			$sqlite_user = new SQLiteUser();
-			$queried_user = $sqlite_user->getUserByIP($_POST['client_ip']);
-			$found_count = count($queried_user);
-			if ($found_count > 1) {
-				$queried_user = array($queried_user[$found_count - 1]);
-			}
-			if (!empty($queried_count)) {
-				$_SESSION["myinfo"] = $queried_user[0];
-				$log->info("XHR [svr] 查詢 ".$_POST['client_ip']." 使用者 ".$_SESSION["myinfo"]['id']." ".$_SESSION["myinfo"]['name']." 成功。");
-			}
+		$sqlite_user = new SQLiteUser();
+		$queried_user = $sqlite_user->getUserByIP($_POST['client_ip']);
+		$found_count = count($queried_user);
+		if ($found_count > 1) {
+			$queried_user = array($queried_user[$found_count - 1]);
+		}
+		if (empty($found_count)) {
+			$log->info("XHR [svr] 找不到 ".$_POST['client_ip']." 使用者。");
 		} else {
-			$log->info("XHR [svr] ".$_SESSION["myinfo"]['id']." ".$_SESSION["myinfo"]['name']." 已登入。");
+			$_SESSION["myinfo"] = $queried_user[0];
+			$log->info("XHR [svr] 找到 ".$_POST['client_ip']." 使用者 ".$_SESSION["myinfo"]['id']." ".$_SESSION["myinfo"]['name']."。");
 		}
 
 		$ips = getLocalhostIPs();
