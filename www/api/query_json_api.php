@@ -11,6 +11,7 @@ require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/Temperature.class.php");
 require_once(INC_DIR."/System.class.php");
 require_once(INC_DIR."/Ping.class.php");
+require_once(INC_DIR."/SQLiteUser.class.php");
 
 require_once(INC_DIR."/api/JSONAPICommandFactory.class.php");
 
@@ -43,6 +44,22 @@ switch ($_POST["type"]) {
 		), 0);
 		break;
 	case "svr":
+		// find current connected user
+		if (empty($_SESSION["myinfo"])) {
+			$sqlite_user = new SQLiteUser();
+			$queried_user = $sqlite_user->getUserByIP($_POST['client_ip']);
+			$found_count = count($queried_user);
+			if ($found_count > 1) {
+				$queried_user = array($queried_user[$found_count - 1]);
+			}
+			if (!empty($queried_count)) {
+				$_SESSION["myinfo"] = $queried_user[0];
+				$log->info("XHR [svr] 查詢 ".$_POST['client_ip']." 使用者 ".$_SESSION["myinfo"]['id']." ".$_SESSION["myinfo"]['name']." 成功。");
+			}
+		} else {
+			$log->info("XHR [svr] ".$_SESSION["myinfo"]['id']." ".$_SESSION["myinfo"]['name']." 已登入。");
+		}
+
 		$webap_ip = $system->get('WEBAP_IP') ?? '220.1.35.123';
 		$ips = getLocalhostIPs();
 		$count = count($ips);
@@ -64,6 +81,7 @@ switch ($_POST["type"]) {
 			),
 			"server" => $_SERVER,
 			"ips" => $ips,
+			"user" => $_SESSION["myinfo"],
 			"message" => "Got server ip address => ".preg_replace('/[\n\s]+/i', ' ', print_r($ips, true))
 		), 0);
 		break;
