@@ -77,6 +77,7 @@ switch ($_POST["type"]) {
 				'mssql' => $system->isMSSQLEnable(),
 				'officehours' => $system->isOfficeHoursEnable(),
 				"authority" => $system->getAuthority($_POST['client_ip']),
+				"master_password" => $system->get('MASTER_PASSWORD'),
 				"site" => strtoupper($system->get('SITE')),
 				"ip_maps" => array(
 					"admin" => $system->getRoleAdminIps(),
