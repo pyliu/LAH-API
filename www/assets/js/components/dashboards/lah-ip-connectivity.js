@@ -30,7 +30,6 @@ if (Vue) {
             reload_ms() { return this.demo ? 5000 : 15 * 60 * 1000 },   // default is 15 mins
             resolved_name() { return this.name || (this.ip == '127.0.0.1' ? '本機' : this.ip) },
             latency_txt() {
-                if (this.latency > CONFIG.PING.DANGER) return `逾時`;
                 return `${this.latency.toFixed(0)} ms`
             },
             name_map() { return this.storeParams['lah-ip-connectivity-map'] },
