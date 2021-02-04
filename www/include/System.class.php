@@ -432,6 +432,19 @@ class System {
         return "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=${ip})(PORT=${port})))(CONNECT_DATA=(SERVICE_NAME=L2HWEB)))";
     }
     
+    public function getLXHWEBConfigs() {
+        $configs = $this->getConfigs();
+        return array(
+            'ORA_DB_L1HWEB_IP' => $configs['ORA_DB_L1HWEB_IP'],
+            'ORA_DB_L1HWEB_PORT' => $configs['ORA_DB_L1HWEB_PORT'],
+            'ORA_DB_L2HWEB_IP' => $configs['ORA_DB_L2HWEB_IP'],
+            'ORA_DB_L2HWEB_PORT' => $configs['ORA_DB_L2HWEB_PORT'],
+            'ORA_DB_L3HWEB_IP' => $configs['ORA_DB_L3HWEB_IP'],
+            'ORA_DB_L3HWEB_PORT' => $configs['ORA_DB_L3HWEB_PORT'],
+            'PING_INTERVAL_SECONDS' => $configs['PING_INTERVAL_SECONDS']
+        );
+    }
+
     public function getConfigs() {
         if($stmt = $this->sqlite3->prepare('SELECT * FROM config WHERE 1=1')) {
             $result = $stmt->execute();

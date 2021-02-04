@@ -24,6 +24,21 @@ switch($_POST["site"]) {
 $mock = $system->isMockMode();
 
 switch ($_POST["type"]) {
+	case "lxhweb_config":
+		/*
+			'ORA_DB_L1HWEB_IP' => $configs['ORA_DB_L1HWEB_IP'],
+            'ORA_DB_L1HWEB_PORT' => $configs['ORA_DB_L1HWEB_PORT'],
+            'ORA_DB_L2HWEB_IP' => $configs['ORA_DB_L2HWEB_IP'],
+            'ORA_DB_L2HWEB_PORT' => $configs['ORA_DB_L2HWEB_PORT'],
+            'ORA_DB_L3HWEB_IP' => $configs['ORA_DB_L3HWEB_IP'],
+            'ORA_DB_L3HWEB_PORT' => $configs['ORA_DB_L3HWEB_PORT'],
+            'PING_INTERVAL_SECONDS' => $configs['PING_INTERVAL_SECONDS']
+		*/
+		$configs = $system->getLXHWEBConfigs();
+		echoJSONResponse('共查詢到 '.count($configs).' 筆設定', STATUS_CODE::SUCCESS_NORMAL, array(
+			'raw' => $configs
+		));
+		break;
 	case "lxhweb_site_update_time":
 		// $log->info("XHR [lxhweb_site_update_time] 查詢各所同步異動更新時間 請求 ".$_POST["site"]);
 		$rows = $mock ? $cache->get('lxhweb_site_update_time') : $lxhweb->querySiteUpdateTime($_POST["site"]);
