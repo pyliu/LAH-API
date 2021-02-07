@@ -22,7 +22,6 @@ switch ($_POST["type"]) {
 		}
 
 		$ips = getLocalhostIPs();
-		$count = count($ips);
 		$message = "PHP 取得 API 伺服器 IP 位址 => ".preg_replace('/[\n\s]+/i', ' ', print_r($ips, true));
 		$log->info("XHR [login] $message");
 
@@ -37,7 +36,7 @@ switch ($_POST["type"]) {
 				'mock' => $system->isMockMode(),
 				'mssql' => $system->isMSSQLEnable(),
 				'officehours' => $system->isOfficeHoursEnable(),
-				"authority" => $system->getAuthority($_POST['client_ip']),
+				"authority" => $system->getAuthority($_POST['req_ip']),
 				"master_password" => $system->get('MASTER_PASSWORD'),
 				"site" => strtoupper($system->get('SITE')),
 				"ip_maps" => array(
