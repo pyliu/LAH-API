@@ -275,8 +275,13 @@ class SQLiteUser {
             $log->warning(__METHOD__.': id is a required param, it\'s empty.');
             return false;
         }
-        if ($xlsx_row[2] !== "女") {
-            $xlsx_row[2] = '男';
+        switch ($xlsx_row[2]) {
+            case '女':
+            case '0':
+                $xlsx_row[2] = 0;
+                break;
+            default:
+                $xlsx_row[2] = 1;
         }
         if($stmt = $this->db->prepare("
           REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
