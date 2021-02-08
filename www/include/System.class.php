@@ -11,6 +11,8 @@ abstract class ROLE {
     const CHIEF = 4;                    // 主管
     const RESEARCH_AND_EVALUATION = 5;  // 研考
     const GENERAL_AFFAIRS = 6;          // 總務
+    const HUMAN_RESOURCE = 7;           // 人事
+    const ACCOUNTING = 8;               // 會計
 }
 
 // could processed by bitwise operation
@@ -21,6 +23,8 @@ abstract class AUTHORITY {
     const CHIEF = 4;
     const RESEARCH_AND_EVALUATION = 8;
     const GENERAL_AFFAIRS = 16;
+    const HUMAN_RESOURCE = 32;
+    const ACCOUNTING = 64;
 }
 
 class System {
@@ -334,13 +338,23 @@ class System {
         return $this->getRoleIps(ROLE::GENERAL_AFFAIRS);
     }
 
+    public function getRoleHRIps() {
+        return $this->getRoleIps(ROLE::HUMAN_RESOURCE);
+    }
+
+    public function getRoleAccountingIps() {
+        return $this->getRoleIps(ROLE::ACCOUNTING);
+    }
+
     public function getAuthority($ip) {
         return array(
             "isAdmin" => in_array($ip, $this->getRoleAdminIps()),
             "isChief" => in_array($ip, $this->getRoleChiefIps()),
             "isSuper" => in_array($ip, $this->getRoleSuperIps()),
             "isRAE"   => in_array($ip, $this->getRoleRAEIps()),
-            "isGA"    => in_array($ip, $this->getRoleGAIps())
+            "isGA"    => in_array($ip, $this->getRoleGAIps()),
+            "isHR"    => in_array($ip, $this->getRoleHRIps()),
+            "isAccounting" => in_array($ip, $this->getRoleAccountingIps())
         );
     }
 
