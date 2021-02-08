@@ -431,6 +431,15 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $spreadsheet = IOFactory::load(XLSX_TPL_DIR.DIRECTORY_SEPARATOR.'user_export.tpl.xlsx');
         $worksheet = $spreadsheet->getActiveSheet();
 
+        function delete_array_col(&$array, $key) {
+            return array_walk($array, function (&$v) use ($key) {
+                unset($v[$key]);
+            });
+        }
+
+        delete_array_col($all_users, 'pw_hash');
+        delete_array_col($all_users, 'authority');
+
         $this->write_col_data($worksheet, $all_users);
         
         $system = new System();
