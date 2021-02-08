@@ -185,7 +185,7 @@ class SurCaseData {
     public function getBakedData() {
         $row = &$this->row;
         $ret = array(
-            "ID" => $row["MM01"].$row["MM02"].$row["MM03"],
+            "ID" => $row["MM01"].$row["MM02"].$row["MM03"]
         );
         return $ret + $row; // merge raw data ($row["MM01"] ... etc) and keep original key index
     }
