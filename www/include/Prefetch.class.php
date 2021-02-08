@@ -663,6 +663,7 @@ class Prefetch {
                 $IN_CONDITION
                 
                 ORDER BY AB01 DESC, RM07_1 DESC
+
             ");
             
             $db->bind(":bv_st", $st);
@@ -676,6 +677,102 @@ class Prefetch {
             return $result;
         }
         return $this->getCache()->get(self::KEYS['NON_SCRIVENER_WEB'].$md5_hash);
+    }
+    /**
+     * 非專業代理人區間測量案件快取剩餘時間
+     */
+    public function getNonScrivenerSurCaseCacheRemainingTime($st, $ed, $not_inc_ids = array()) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['NON_SCRIVENER_SUR'].md5($st.$ed.implode('', $not_inc_ids)));
+    }
+    /**
+     * 強制重新讀取非專業代理人區間測量案件
+     */
+    public function reloadNonScrivenerSurCase($st, $ed, $not_inc_ids = array()) {
+        $this->getCache()->del(self::KEYS['NON_SCRIVENER_SUR'].md5($st.$ed.implode('', $not_inc_ids)));
+        return $this->getNonScrivenerWebCase($st, $ed, $not_inc_ids);
+    }
+    /**
+	 * 取得非專業代理人區間測量案件
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getNonScrivenerSurCase($st, $ed, $not_inc_ids = array(), $expire_duration = 86400) {
+        $md5_hash = md5($st.$ed.implode('', $not_inc_ids));
+        if ($this->getCache()->isExpired(self::KEYS['NON_SCRIVENER_SUR'].$md5_hash)) {
+            global $log;
+            $log->info('['.self::KEYS['NON_SCRIVENER_SUR'].$md5_hash.'] 快取資料已失效，重新擷取 ... ');
+
+            $db = $this->getOraDB();
+            $IN_CONDITION = "";
+            if (!empty($not_inc_ids)) {
+                $IN_CONDITION = "AND AB01 NOT IN ('";
+                $IN_CONDITION .= implode("','", $not_inc_ids);
+                $IN_CONDITION .= "')";
+            }
+            $db->parse("
+                -- 測量案件
+                SELECT 'M' AS CASE_TYPE,
+                    AB01,
+                    AB02,
+                    AB03,
+                    AB13,
+                    AB23,
+                    MM01,
+                    MM02,
+                    MM03,
+                    MM14,
+                    '',
+                    MM04_1,
+                    SUBSTR(AB01, 1, 5) || LPAD('*', LENGTH(SUBSTR(AB01, 6)), '*') AS AB01_S,
+                    (MM01 || '-' || MM02_C.KCNT || '-' || MM03) AS MM123,
+                    (MM13_A.LADR) AS MM13_ADDR,
+                    '',
+                    (MM06_C.KCNT) AS RM09_C_KCNT,
+                    (MM07_C.KCNT) AS RM10_C_KCNT,
+                    (MM08_C.KNAME) AS RM11_C_KCNT,
+                    (SUBSTR(MM09, 1, 4) || '-' || SUBSTR(MM09, 5, 4)) AS RM12_C,
+                    (SUBSTR(MM10, 1, 5) || '-' || SUBSTR(MM10, 6, 3)) AS RM15_C
+                FROM SCMSMS
+                LEFT OUTER JOIN SRLNID MM13_A
+                    ON MM13_A.LIDN = MM13
+                LEFT OUTER JOIN SRKEYN MM02_C
+                    ON MM02_C.KCDE_1 = '04'
+                AND MM02_C.KCDE_2 = MM02
+                LEFT OUTER JOIN SRKEYN MM06_C
+                    ON MM06_C.KCDE_1 = 'M3'
+                AND MM06_C.KCDE_2 = MM06
+                LEFT OUTER JOIN SRKEYN MM07_C
+                    ON MM07_C.KCDE_1 = '46'
+                AND MM07_C.KCDE_2 = MM07
+                LEFT OUTER JOIN MOIADM.RKEYN_ALL MM08_C
+                    ON MM08_C.KCDE_1 = '48'
+                    AND MM08_C.KCDE_2 = 'H'
+                    AND MM08_C.KCDE_3 = MM07
+                    AND MM08_C.KCDE_4 = MM08,
+                SCABRP
+                WHERE 1 = 1
+                AND MM04_1 BETWEEN '1100101' AND '1101231'
+                AND AB_FLAG = 'N'
+                AND (AB13 > 2 OR AB23 > 5)
+                AND (MM17_1 = AB01 OR MM17_2 = AB01)
+                AND NVL(MM13, 'X') <> AB01
+                AND NVL(MM13, 'X') <> AB01
+                
+                $IN_CONDITION
+                
+                ORDER BY AB01 DESC, MM01 || MM02 || MM03 DESC
+            ");
+            
+            $db->bind(":bv_st", $st);
+            $db->bind(":bv_ed", $ed);
+            $db->execute();
+            $result = $db->fetchAll();
+            $this->getCache()->set(self::KEYS['NON_SCRIVENER_SUR'].$md5_hash, $result, $expire_duration);
+
+            $log->info("[".self::KEYS['NON_SCRIVENER_SUR'].$md5_hash."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+            return $result;
+        }
+        return $this->getCache()->get(self::KEYS['NON_SCRIVENER_SUR'].$md5_hash);
     }
     /**
      * 外國人案件快取剩餘時間

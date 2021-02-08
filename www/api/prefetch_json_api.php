@@ -2,6 +2,7 @@
 require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(INC_DIR."/Prefetch.class.php");
 require_once(INC_DIR."/RegCaseData.class.php");
+require_once(INC_DIR."/SurCaseData.class.php");
 
 $prefetch = new Prefetch();
 
@@ -201,7 +202,30 @@ switch ($_POST["type"]) {
 			echoJSONResponse("查詢成功，找到 $total 筆非專代案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
-				'cache_remaining_time' => $prefetch->getNonScrivenerCaseCacheRemainingTime($st, $ed)
+				'cache_remaining_time' => $prefetch->getNonScrivenerWebCaseCacheRemainingTime($st, $ed)
+			));
+		}
+		break;
+	case "reg_non_scrivener_sur_case":
+		$log->info("XHR [reg_non_scrivener_sur_case] 查詢非專代測量案件請求");
+		$st = $_POST['start_date'];
+		$ed = $_POST['end_date'];
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNonScrivenerSurCase($st, $ed, $_POST['ignore']) : $prefetch->getNonScrivenerSurCase($st, $ed, $_POST['ignore']);
+		if (empty($rows)) {
+			$log->info("XHR [reg_non_scrivener_sur_case] 查無資料");
+			echoJSONResponse('查無非專代測量案件');
+		} else {
+			$total = count($rows);
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new SurCaseData($row);
+				$baked[] = $data->getBakedData();
+			}
+			$log->info("XHR [reg_non_scrivener_sur_case] 查詢成功($total)");
+			echoJSONResponse("查詢成功，找到 $total 筆非專代測量案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"baked" => $baked,
+				'cache_remaining_time' => $prefetch->getNonScrivenerSurCaseCacheRemainingTime($st, $ed)
 			));
 		}
 		break;
