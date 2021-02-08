@@ -222,12 +222,15 @@ function getRealIPAddr() {
  * print the json string
  */
 function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array = array()) {
+    global $log;
 	$str = json_encode(array_merge(array(
 		"status" => $status,
         "message" => $msg
     ), $in_array), 0);
+    
+    // $log->info($str);
+    
     if ($str === false) {
-        global $log;
         $log->warning(__METHOD__.": 轉換JSON字串失敗。");
         $log->warning(__METHOD__.":".print_r($in_array, true));
         echo json_encode(array( "status" => STATUS_CODE::FAIL_JSON_ENCODE, "message" => "無法轉換陣列資料到JSON物件。" ));

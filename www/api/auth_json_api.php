@@ -27,7 +27,7 @@ switch ($_POST["type"]) {
 
 		$log->info("XHR [login] APACHE API 伺服器端點資訊： ".$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']);
 
-        echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL,array(
+        echoJSONResponse('取得 '.$_POST['req_ip'].' 登入資訊', STATUS_CODE::SUCCESS_NORMAL, array(
 			"server" => $_SERVER,
 			"ips" => $ips,
 			"user" => $_SESSION["myinfo"],
