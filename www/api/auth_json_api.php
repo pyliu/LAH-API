@@ -44,7 +44,9 @@ switch ($_POST["type"]) {
 					"chief" => $system->getRoleChiefIps(),
 					"super" => $system->getRoleSuperIps(),
 					"rae" => $system->getRoleRAEIps(),
-					"ga" => $system->getRoleGAIps()
+					"ga" => $system->getRoleGAIps(),
+					"hr" => $system->getRoleHRIps(),
+					"accounting" => $system->getRoleAccountingIps(),
 				)
 			)
         ));
