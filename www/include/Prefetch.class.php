@@ -18,6 +18,7 @@ class Prefetch {
         'TRUST_RBLOW_EXCEPTION' => 'Prefetch::getTrustRblowException',
         'NON_SCRIVENER' => 'Prefetch::getNonScrivenerCase',
         'NON_SCRIVENER_WEB' => 'Prefetch::getNonScrivenerWebCase',
+        'NON_SCRIVENER_SUR' => 'Prefetch::getNonScrivenerSurCase',
         'FOREIGNER' => 'Prefetch::getForeignerCase'
     );
     private $ora_db = null;
@@ -689,7 +690,7 @@ class Prefetch {
      */
     public function reloadNonScrivenerSurCase($st, $ed, $not_inc_ids = array()) {
         $this->getCache()->del(self::KEYS['NON_SCRIVENER_SUR'].md5($st.$ed.implode('', $not_inc_ids)));
-        return $this->getNonScrivenerWebCase($st, $ed, $not_inc_ids);
+        return $this->getNonScrivenerSurCase($st, $ed, $not_inc_ids);
     }
     /**
 	 * 取得非專業代理人區間測量案件
@@ -710,28 +711,19 @@ class Prefetch {
             }
             $db->parse("
                 -- 測量案件
-                SELECT 'M' AS CASE_TYPE,
-                    AB01,
-                    AB02,
-                    AB03,
-                    AB13,
-                    AB23,
-                    MM01,
-                    MM02,
-                    MM03,
-                    MM14,
-                    '',
-                    MM04_1,
-                    SUBSTR(AB01, 1, 5) || LPAD('*', LENGTH(SUBSTR(AB01, 6)), '*') AS AB01_S,
-                    (MM01 || '-' || MM02_C.KCNT || '-' || MM03) AS MM123,
+                SELECT
+                    c.*,    -- CABRP
+                    m.*,    -- CMSMS
+                    c.AB04_1 || c.AB04_2 AS AB04_NON_SCRIVENER_TEL,
+                    -- SUBSTR(c.AB01, 1, 5) || LPAD('*', LENGTH(SUBSTR(c.AB01, 6)), '*') AS AB01_S,
+                    (m.MM01 || '-' || m.MM02_C.KCNT || '(' || m.MM02 || ')-' || m.MM03) AS MM123,
                     (MM13_A.LADR) AS MM13_ADDR,
-                    '',
-                    (MM06_C.KCNT) AS RM09_C_KCNT,
+                    (MM06_C.KCNT) AS RM09_C_KCNT,    -- 事由中文
                     (MM07_C.KCNT) AS RM10_C_KCNT,
                     (MM08_C.KNAME) AS RM11_C_KCNT,
                     (SUBSTR(MM09, 1, 4) || '-' || SUBSTR(MM09, 5, 4)) AS RM12_C,
                     (SUBSTR(MM10, 1, 5) || '-' || SUBSTR(MM10, 6, 3)) AS RM15_C
-                FROM SCMSMS
+                FROM SCMSMS m
                 LEFT OUTER JOIN SRLNID MM13_A
                     ON MM13_A.LIDN = MM13
                 LEFT OUTER JOIN SRKEYN MM02_C
@@ -748,9 +740,9 @@ class Prefetch {
                     AND MM08_C.KCDE_2 = 'H'
                     AND MM08_C.KCDE_3 = MM07
                     AND MM08_C.KCDE_4 = MM08,
-                SCABRP
+                SCABRP c
                 WHERE 1 = 1
-                AND MM04_1 BETWEEN '1100101' AND '1101231'
+                AND MM04_1 BETWEEN :bv_st AND :bv_ed
                 AND AB_FLAG = 'N'
                 AND (AB13 > 2 OR AB23 > 5)
                 AND (MM17_1 = AB01 OR MM17_2 = AB01)

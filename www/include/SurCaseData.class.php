@@ -183,13 +183,15 @@ class SurCaseData {
     }
 
     public function getBakedData() {
+        $operators = getUserNames();
         $row = &$this->row;
         $ret = array(
             "ID" => $row["MM01"].$row["MM02"].$row["MM03"],
             "收件字號" => $row["MM01"]."-".$row["MM02"]."-".$row["MM03"],
-            "收件時間" => $this->toDate($row["MM04_1"])." ".$this->toDate($row["MM04_2"]),
+            "收件日期" => $this->toDate($row["MM04_1"]),
+            "收件時間" => $this->toDate($row["MM04_2"]),
             "收件人員" => empty($operators[$row["MM31"]]) ? $row["MM31"] : "<span class='user_tag' data-id='".$row["MM31"]."' data-name='".$operators[$row["MM31"]]."'>".$operators[$row["MM31"]]."【".$row["MM31"]."】</span>",
-			"申請事由" => $row["KCNT"],
+			"申請事由" => $row["KCNT"] ?? $row['RM09_C_KCNT'],
             "辦理情形" => $this->getStatus(),
             "結案已否" => $this->isClose(),
             "結案狀態" => $this->getCloseState(),
