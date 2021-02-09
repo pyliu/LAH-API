@@ -17,7 +17,7 @@ class Prefetch {
         'TRUST_RBLOW' => 'Prefetch::getTrustRblow',
         'TRUST_RBLOW_EXCEPTION' => 'Prefetch::getTrustRblowException',
         'NON_SCRIVENER' => 'Prefetch::getNonScrivenerCase',
-        'NON_SCRIVENER_WEB' => 'Prefetch::getNonScrivenerWebCase',
+        'NON_SCRIVENER_REG' => 'Prefetch::getNonScrivenerWebCase',
         'NON_SCRIVENER_SUR' => 'Prefetch::getNonScrivenerSurCase',
         'FOREIGNER' => 'Prefetch::getForeignerCase'
     );
@@ -593,13 +593,13 @@ class Prefetch {
      * 非專業代理人區間WEB案件快取剩餘時間
      */
     public function getNonScrivenerWebCaseCacheRemainingTime($st, $ed, $not_inc_ids = array()) {
-        return $this->getRemainingCacheTimeByKey(self::KEYS['NON_SCRIVENER_WEB'].md5($st.$ed.implode('', $not_inc_ids)));
+        return $this->getRemainingCacheTimeByKey(self::KEYS['NON_SCRIVENER_REG'].md5($st.$ed.implode('', $not_inc_ids)));
     }
     /**
      * 強制重新讀取非專業代理人區間WEB案件
      */
     public function reloadNonScrivenerWebCase($st, $ed, $not_inc_ids = array()) {
-        $this->getCache()->del(self::KEYS['NON_SCRIVENER_WEB'].md5($st.$ed.implode('', $not_inc_ids)));
+        $this->getCache()->del(self::KEYS['NON_SCRIVENER_REG'].md5($st.$ed.implode('', $not_inc_ids)));
         return $this->getNonScrivenerWebCase($st, $ed, $not_inc_ids);
     }
     /**
@@ -608,9 +608,9 @@ class Prefetch {
 	 */
 	public function getNonScrivenerWebCase($st, $ed, $not_inc_ids = array(), $expire_duration = 86400) {
         $md5_hash = md5($st.$ed.implode('', $not_inc_ids));
-        if ($this->getCache()->isExpired(self::KEYS['NON_SCRIVENER_WEB'].$md5_hash)) {
+        if ($this->getCache()->isExpired(self::KEYS['NON_SCRIVENER_REG'].$md5_hash)) {
             global $log;
-            $log->info('['.self::KEYS['NON_SCRIVENER_WEB'].$md5_hash.'] 快取資料已失效，重新擷取 ... ');
+            $log->info('['.self::KEYS['NON_SCRIVENER_REG'].$md5_hash.'] 快取資料已失效，重新擷取 ... ');
 
             $db = $this->getOraDB();
             $IN_CONDITION = "";
@@ -671,13 +671,13 @@ class Prefetch {
             $db->bind(":bv_ed", $ed);
             $db->execute();
             $result = $db->fetchAll();
-            $this->getCache()->set(self::KEYS['NON_SCRIVENER_WEB'].$md5_hash, $result, $expire_duration);
+            $this->getCache()->set(self::KEYS['NON_SCRIVENER_REG'].$md5_hash, $result, $expire_duration);
 
-            $log->info("[".self::KEYS['NON_SCRIVENER_WEB'].$md5_hash."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+            $log->info("[".self::KEYS['NON_SCRIVENER_REG'].$md5_hash."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
             return $result;
         }
-        return $this->getCache()->get(self::KEYS['NON_SCRIVENER_WEB'].$md5_hash);
+        return $this->getCache()->get(self::KEYS['NON_SCRIVENER_REG'].$md5_hash);
     }
     /**
      * 非專業代理人區間測量案件快取剩餘時間
