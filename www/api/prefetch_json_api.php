@@ -183,13 +183,13 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
-	case "reg_non_scrivener_web_case":
-		$log->info("XHR [reg_non_scrivener_web_case] 查詢非專代案件請求");
+	case "reg_non_scrivener_reg_case":
+		$log->info("XHR [reg_non_scrivener_reg_case] 查詢非專代案件請求");
 		$st = $_POST['start_date'];
 		$ed = $_POST['end_date'];
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNonScrivenerWebCase($st, $ed, $_POST['ignore']) : $prefetch->getNonScrivenerWebCase($st, $ed, $_POST['ignore']);
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNonScrivenerRegCase($st, $ed, $_POST['ignore']) : $prefetch->getNonScrivenerRegCase($st, $ed, $_POST['ignore']);
 		if (empty($rows)) {
-			$log->info("XHR [reg_non_scrivener_web_case] 查無資料");
+			$log->info("XHR [reg_non_scrivener_reg_case] 查無資料");
 			echoJSONResponse('查無非專代案件');
 		} else {
 			$total = count($rows);
@@ -198,11 +198,11 @@ switch ($_POST["type"]) {
 				$data = new RegCaseData($row);
 				$baked[] = $data->getBakedData();
 			}
-			$log->info("XHR [reg_non_scrivener_web_case] 查詢成功($total)");
+			$log->info("XHR [reg_non_scrivener_reg_case] 查詢成功($total)");
 			echoJSONResponse("查詢成功，找到 $total 筆非專代案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
-				'cache_remaining_time' => $prefetch->getNonScrivenerWebCaseCacheRemainingTime($st, $ed)
+				'cache_remaining_time' => $prefetch->getNonScrivenerRegCaseCacheRemainingTime($st, $ed)
 			));
 		}
 		break;

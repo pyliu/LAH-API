@@ -17,7 +17,7 @@ class Prefetch {
         'TRUST_RBLOW' => 'Prefetch::getTrustRblow',
         'TRUST_RBLOW_EXCEPTION' => 'Prefetch::getTrustRblowException',
         'NON_SCRIVENER' => 'Prefetch::getNonScrivenerCase',
-        'NON_SCRIVENER_REG' => 'Prefetch::getNonScrivenerWebCase',
+        'NON_SCRIVENER_REG' => 'Prefetch::getNonScrivenerRegCase',
         'NON_SCRIVENER_SUR' => 'Prefetch::getNonScrivenerSurCase',
         'FOREIGNER' => 'Prefetch::getForeignerCase'
     );
@@ -590,23 +590,23 @@ class Prefetch {
         return $this->getCache()->get(self::KEYS['NON_SCRIVENER'].$st.$ed);
     }
     /**
-     * 非專業代理人區間WEB案件快取剩餘時間
+     * 非專業代理人區間登記案件快取剩餘時間
      */
-    public function getNonScrivenerWebCaseCacheRemainingTime($st, $ed, $not_inc_ids = array()) {
+    public function getNonScrivenerRegCaseCacheRemainingTime($st, $ed, $not_inc_ids = array()) {
         return $this->getRemainingCacheTimeByKey(self::KEYS['NON_SCRIVENER_REG'].md5($st.$ed.implode('', $not_inc_ids)));
     }
     /**
-     * 強制重新讀取非專業代理人區間WEB案件
+     * 強制重新讀取非專業代理人區間登記案件
      */
-    public function reloadNonScrivenerWebCase($st, $ed, $not_inc_ids = array()) {
+    public function reloadNonScrivenerRegCase($st, $ed, $not_inc_ids = array()) {
         $this->getCache()->del(self::KEYS['NON_SCRIVENER_REG'].md5($st.$ed.implode('', $not_inc_ids)));
-        return $this->getNonScrivenerWebCase($st, $ed, $not_inc_ids);
+        return $this->getNonScrivenerRegCase($st, $ed, $not_inc_ids);
     }
     /**
-	 * 取得非專業代理人區間WEB案件
+	 * 取得非專業代理人區間登記案件
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
-	public function getNonScrivenerWebCase($st, $ed, $not_inc_ids = array(), $expire_duration = 86400) {
+	public function getNonScrivenerRegCase($st, $ed, $not_inc_ids = array(), $expire_duration = 86400) {
         $md5_hash = md5($st.$ed.implode('', $not_inc_ids));
         if ($this->getCache()->isExpired(self::KEYS['NON_SCRIVENER_REG'].$md5_hash)) {
             global $log;
