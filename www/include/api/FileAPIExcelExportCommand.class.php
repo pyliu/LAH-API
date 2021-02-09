@@ -440,6 +440,14 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         delete_array_col($all_users, 'pw_hash');
         delete_array_col($all_users, 'authority');
 
+        function convert_sex_col(&$array, $key = 'sex') {
+            return array_walk($array, function (&$v) use ($key) {
+                $v[$key] = $v[$key] == 0 ? '女' : '男';
+            });
+        }
+
+        convert_sex_col($all_users);
+
         $this->write_col_data($worksheet, $all_users);
         
         $system = new System();
