@@ -215,6 +215,7 @@ if (Vue) {
             this.msgbox({
                 title: "悠遊卡自動加值付款失敗回復 小幫手提示",
                 body: `
+                    <img src="assets/howto/easycard_payment_fix.jpg" class="img-responsive img-thumbnail" />
                     <ol>
                         <li>櫃台來電通知悠遊卡扣款成功但地政系統卻顯示扣款失敗，需跟櫃台要【電腦給號】</li>
                         <li>管理師處理方法：AA106為'2' OR '8'將AA106更正為'1'即可【AA01:事發日期、AA04:電腦給號】。<br />
