@@ -56,7 +56,8 @@ if (Vue) {
             num: "",
             num_step: 10,
             num_min: 10,
-            num_max: 999999
+            num_max: 999999,
+            retry: 3
         }),
         computed: {
             ID() { return `${this.year}-${this.code}-${this.num.padStart(6, '0')}`},
@@ -191,13 +192,19 @@ if (Vue) {
                     //this.codes = Object.assign({}, this.codes);
                     this.arrangeCodeList();
                 } else {
-                    this.notify({
-                        title: `案件字還原`,
-                        subtitle: this.code_cache_key,
-                        message: `無法讀取案件「字」資料`,
-                        type: 'warning'
-                    });
-                    this.timeout(window.location.reload, 1000);
+                    if (--this.retry > 0) {
+                        this.timeout(() => {
+                            this.reloadCode();
+                        }, 200);
+                    } else {
+                        this.notify({
+                            title: `案件字還原`,
+                            subtitle: this.code_cache_key,
+                            message: `無法讀取案件「字」資料`,
+                            type: 'warning'
+                        });
+                        this.timeout(window.location.reload, 1000);
+                    }
                 }
             },
             arrangeCodeList() {
