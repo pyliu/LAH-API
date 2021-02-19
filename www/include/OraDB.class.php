@@ -168,6 +168,16 @@ class OraDB {
     }
 
     function __construct($type = CONNECTION_TYPE::MAIN) {
+        if ($type === CONNECTION_TYPE::MAIN) {
+            // get config from system
+            $system = new System();
+            $target_str = $system->getOraConnectTarget();
+            if ($target_str === 'TEST') {
+                $type = CONNECTION_TYPE::TWEB;
+            } else if ($target_str === 'BACKUP') {
+                $type = CONNECTION_TYPE::BK;
+            }
+        }
         $this->initSetting();
         $this->setConnType($type);
     }

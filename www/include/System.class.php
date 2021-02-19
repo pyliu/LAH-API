@@ -401,6 +401,19 @@ class System {
         return false;
     }
 
+    public function getOraConnectTarget() {
+        $target = $this->get('ORA_DB_TARGET');
+        switch ($target) {
+            case 'HXT':
+            case 'TEST':
+                return 'TEST';
+            case 'BACKUP':
+                return 'BACKUP';
+            default:
+                return 'MAIN';
+        }
+    }
+
     public function getOraMainDBConnStr() {
         $site = strtoupper($this->get('SITE'));
         $ip = $this->get('ORA_DB_HXWEB_IP');
