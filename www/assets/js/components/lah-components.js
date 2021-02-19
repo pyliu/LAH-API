@@ -1497,7 +1497,7 @@ if (Vue) {
                         <b-card-title title-tag="h6">
                             <strong class="align-middle">
                                 <lah-fa-icon v-if="raws[index]['done'] != 1" icon="angle-double-right" variant="danger" action="wander"></lah-fa-icon>
-                                <span class="text-primary">{{index+1}}</span>. 
+                                <span :class="index < 3 ? 'text-primary' : ''">{{index+1}}</span>. 
                                 {{message['xname']}}
                             </strong>
                             <span v-if="showCtlBtn(message['sendtime']['date'].substring(0, 19))">
