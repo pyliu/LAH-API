@@ -40,7 +40,6 @@ class LXHWEB {
     /**
      * 查詢各所表格更新時間
      */
-    
     public function queryTableUpdateTime($site = '') {
         $prefix = "
             SELECT 
@@ -77,5 +76,41 @@ class LXHWEB {
         $this->db->parse($sql);
 		$this->db->execute();
 		return $this->db->fetchAll();
+    }
+    /**
+     * 查詢同步異動各所之 SYSAUTH1 TABLE
+     */
+    public function querySYSAUTH1ValidUserNames() {
+        $sql = "
+            SELECT * FROM L1HA0H03.SYSAUTH1
+            UNION
+            SELECT * FROM L1HB0H03.SYSAUTH1
+            UNION
+            SELECT * FROM L1HC0H03.SYSAUTH1
+            UNION
+            SELECT * FROM L1HD0H03.SYSAUTH1
+            UNION
+            SELECT * FROM L1HE0H03.SYSAUTH1
+            UNION
+            SELECT * FROM L1HF0H03.SYSAUTH1
+            UNION
+            SELECT * FROM L1HG0H03.SYSAUTH1
+            UNION
+            SELECT * FROM L1HH0H03.SYSAUTH1
+        ";
+        $this->db->parse($sql);
+		$this->db->execute();
+		$rows = $this->db->fetchAll();
+        $filtered = array();
+        foreach ($rows as $row) {
+            if (array_key_exists($row['USER_ID'], $filtered)) {
+                if (strlen($row['USER_NAME']) < strlen($filtered[$row['USER_ID']])) {
+                    $filtered[$row['USER_ID']] = $row['USER_NAME'];
+                }
+            } else  {
+                $filtered[$row['USER_ID']] = $row['USER_NAME'];
+            }
+        }
+        return $filtered;
     }
 }

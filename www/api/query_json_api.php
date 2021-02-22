@@ -79,6 +79,7 @@ switch ($_POST["type"]) {
 				"authority" => $system->getAuthority($_POST['client_ip']),
 				"master_password" => $system->get('MASTER_PASSWORD'),
 				"site" => strtoupper($system->get('SITE')),
+				"lxhweb" => $system->getLXHWEBConfigs(),
 				"ip_maps" => array(
 					"admin" => $system->getRoleAdminIps(),
 					"chief" => $system->getRoleChiefIps(),

@@ -3,13 +3,65 @@ require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(INC_DIR."/SQLiteUser.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/System.class.php");
+require_once(INC_DIR."/LXHWEB.class.php");
 
 $cache = new Cache();
 $system = new System();
 
-$mock = $system->isMockMode();
-
 switch ($_POST["type"]) {
+    case "import_l3hweb_users":
+        $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
+        $mappings = $lxhweb->querySYSAUTH1ValidUserNames();
+        $len = count($mappings);
+        $log->info("XHR [import_l3hweb_users] 匯入同步異動使用者請求($len)。");
+        
+        $sqlite_user = new SQLiteUser();
+
+        $succeed = 0;
+        $failed = 0;
+
+        foreach($mappings as $id => $name) {
+            $def = array(
+                'id' => $id,
+                'name' => $name,
+                'sex' => 1,
+                'title' => '無資料',
+                'work' => '無資料',
+                'ext' => '153',
+                'birthday' => '',
+                'unit' => '未分配',
+                'ip' => '192.168.xx.xx',
+                'education' => '無資料',
+                'exam' => '無資料',
+                'cell' => '',
+                'onboard_date' => ''
+            );
+            $result = $sqlite_user->addUser($def);
+            if ($result === true) {
+                $msg = "新增 ".($def['id'].', '.$def['name'])." 成功";
+                $log->info("XHR [import_l3hweb_users] ${msg}。");
+                $succeed++;
+            } else {
+                $log->error("XHR [import_l3hweb_users] 新增 ".($def['id'].', '.$def['name'])." 失敗 (已存在)");
+                $failed++;
+            }
+        }
+        
+        echoJSONResponse("匯入同步異動使用者執行完成", STATUS_CODE::SUCCESS_NORMAL, array(
+            "succeed" => $succeed,
+            "failed" => $failed
+        ));
+        break;
+    case "l3hweb_user_mappings":
+        $log->info("XHR [l3hweb_user_mappings] 查詢同步異動使用者對應表請求。");
+        $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
+        $mappings = $lxhweb->querySYSAUTH1ValidUserNames();
+        $len = count($mappings);
+        $log->info("XHR [l3hweb_user_mappings] 查詢同步異動使用者對應表成功($len)。");
+        echoJSONResponse("查詢同步異動使用者對應表成功($len)", STATUS_CODE::SUCCESS_NORMAL, array(
+            "raw" => $mappings
+        ));
+        break;
     case "search_user":
         $log->info("XHR [search_user] 查詢使用者資料【".$_POST["keyword"]."】請求");
         $sqlite_user = new SQLiteUser();
