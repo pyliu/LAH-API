@@ -3,6 +3,7 @@ require_once('SQLiteUser.class.php');
 require_once('System.class.php');
 require_once("Cache.class.php");
 require_once("Ping.class.php");
+require_once("LXHWEB.class.php");
 
 // Function to check response time
 function pingDomain($domain, $port = 80){
@@ -39,43 +40,57 @@ function getMyAuthority() {
     return $res;
 }
 
-function GetOraUser() {
-    $system = new System();
-    $db = $system->getOraMainDBConnStr();
-
+function queryOraUsers() {
     global $log;
-    $log->info(__METHOD__.": query system ORA_DB_HXHEB database users.");
-    $log->info(__METHOD__.": $db");
-    
-    $conn = oci_connect($system->get("ORA_DB_USER"), $system->get("ORA_DB_PASS"), $db, "US7ASCII");
-    if (!$conn) {
-        $e = oci_error();
-        trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+    $system = new System();
+
+    // check if l3hweb is reachable
+    $lxhweb_configs = $system->getLXHWEBConfigs();
+    $l3hweb_ip = $lxhweb_configs['ORA_DB_L3HWEB_IP'];
+    $l3hweb_port = $lxhweb_configs['ORA_DB_L3HWEB_PORT'];
+    $latency = pingDomain($l3hweb_ip, $l3hweb_port);
+
+    // not reachable use local DB instead
+    if ($latency > 999 || $latency == '') {
+        $log->warning(__METHOD__.": $l3hweb_ip:$l3hweb_port is not reachable, use local DB instead.");
+        $db = $system->getOraMainDBConnStr();
+
+        $log->info(__METHOD__.": query system ORA_DB_HXHEB database users.");
+        $log->info(__METHOD__.": $db");
+        
+        $conn = oci_connect($system->get("ORA_DB_USER"), $system->get("ORA_DB_PASS"), $db, "US7ASCII");
+        if (!$conn) {
+            $e = oci_error();
+            trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+        }
+        // Prepare the statement
+        $stid = oci_parse($conn, "SELECT * FROM SSYSAUTH1");
+        if (!$stid) {
+            $e = oci_error($conn);
+            trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+        }
+        
+        // Perform the logic of the query
+        $r = oci_execute($stid);
+        if (!$r) {
+            $e = oci_error($stid);
+            trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+        }
+        $result = array();
+        while ($row = oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS)) {
+            $result[$row["USER_ID"]] = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", "BIG5");
+        }
+        if ($stid) {
+            oci_free_statement($stid);
+        }
+        if ($conn) {
+            oci_close($conn);
+        }
+        return $result;
+    } else {
+        $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
+        return $lxhweb->querySYSAUTH1UserNames();
     }
-    // Prepare the statement
-    $stid = oci_parse($conn, "SELECT * FROM SSYSAUTH1");
-    if (!$stid) {
-        $e = oci_error($conn);
-        trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
-    }
-    
-    // Perform the logic of the query
-    $r = oci_execute($stid);
-    if (!$r) {
-        $e = oci_error($stid);
-        trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
-    }
-    $result = array();
-    while ($row = oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS)) {
-        $result[$row["USER_ID"]] = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", "BIG5");
-    }
-    if ($stid) {
-        oci_free_statement($stid);
-    }
-    if ($conn) {
-        oci_close($conn);
-    }
-    return $result;
 }
 
 function getUserNames($refresh = false) {
@@ -89,7 +104,7 @@ function getUserNames($refresh = false) {
     }
 
     if ($refresh === true || $cache->isExpired('user_mapping')) {
-        $result = GetOraUser();
+        $result = queryOraUsers();
         try {
             /**
              * Also get user info from SQLite DB
