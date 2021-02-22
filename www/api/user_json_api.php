@@ -11,7 +11,7 @@ $system = new System();
 switch ($_POST["type"]) {
     case "import_l3hweb_users":
         $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
-        $mappings = $lxhweb->querySYSAUTH1ValidUserNames();
+        $mappings = $lxhweb->querySYSAUTH1UserNames();
         $len = count($mappings);
         $log->info("XHR [import_l3hweb_users] 匯入同步異動使用者請求($len)。");
         
@@ -55,7 +55,7 @@ switch ($_POST["type"]) {
     case "l3hweb_user_mappings":
         $log->info("XHR [l3hweb_user_mappings] 查詢同步異動使用者對應表請求。");
         $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
-        $mappings = $lxhweb->querySYSAUTH1ValidUserNames();
+        $mappings = $lxhweb->querySYSAUTH1UserNames();
         $len = count($mappings);
         $log->info("XHR [l3hweb_user_mappings] 查詢同步異動使用者對應表成功($len)。");
         echoJSONResponse("查詢同步異動使用者對應表成功($len)", STATUS_CODE::SUCCESS_NORMAL, array(

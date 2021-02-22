@@ -88,7 +88,7 @@ class LXHWEB {
     /**
      * 查詢同步異動各所之 SYSAUTH1 TABLE
      */
-    public function querySYSAUTH1ValidUserNames() {
+    public function querySYSAUTH1UserNames() {
         $sql = "
             SELECT * FROM L1HA0H03.SYSAUTH1
             UNION
@@ -111,12 +111,13 @@ class LXHWEB {
 		$rows = $this->getDB()->fetchAll();
         $filtered = array();
         foreach ($rows as $row) {
+            $user_name = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", "BIG5");
             if (array_key_exists($row['USER_ID'], $filtered)) {
-                if (strlen($row['USER_NAME']) < strlen($filtered[$row['USER_ID']])) {
-                    $filtered[$row['USER_ID']] = $row['USER_NAME'];
+                if (strlen($user_name) < strlen($filtered[$row['USER_ID']])) {
+                    $filtered[$row['USER_ID']] = $user_name;
                 }
             } else  {
-                $filtered[$row['USER_ID']] = $row['USER_NAME'];
+                $filtered[$row['USER_ID']] = $user_name;
             }
         }
         return $filtered;
