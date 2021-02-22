@@ -514,7 +514,9 @@ class System {
         $success = 0;
         $error = 0;
         foreach ($configs as $key => $value) {
-            if($stmt = $this->sqlite3->prepare('UPDATE config SET value = :value WHERE key = :key')) {
+            // $stmt = $this->sqlite3->prepare('UPDATE config SET value = :value WHERE key = :key');
+            $stmt = $this->sqlite3->prepare("REPLACE INTO config ('key', 'value') VALUES (:key, :value)");
+            if($stmt) {
                 $stmt->bindParam(':key', $key);
                 $stmt->bindParam(':value', $value);
                 $result = $stmt->execute() === FALSE ? false : true;
