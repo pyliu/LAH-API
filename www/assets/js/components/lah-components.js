@@ -448,17 +448,17 @@ if (Vue) {
                     url: "message.html",
                     icon: "comments",
                     need_admin: false
+                },{
+                    text: "體溫紀錄",
+                    url: "temperature.html",
+                    icon: "head-side-mask",
+                    need_admin: false
                 }, {
                     text: `業務小幫手`,
                     url: "helper.html",
                     icon: "hands-helping",
                     need_admin: false,
-                    children: [{
-                        text: "體溫紀錄",
-                        url: "temperature.html",
-                        icon: "head-side-mask",
-                        need_admin: false
-                    }, /*{
+                    children: [/*{
                         text: `組織圖`,
                         url: "org.html",
                         icon: "sitemap",
