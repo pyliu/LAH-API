@@ -511,7 +511,6 @@ class System {
 
     public function updateConfigs($configs) {
         global $log;
-        // $log->info(__METHOD__.": ".print_r($configs, true));
         $success = 0;
         $error = 0;
         foreach ($configs as $key => $value) {
