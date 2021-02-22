@@ -4,14 +4,22 @@ require_once("OraDB.class.php");
 require_once("System.class.php");
 
 class LXHWEB {
-    private $db;
+    private $db = null;
+    private $conn_type = CONNECTION_TYPE::L3HWEB;
+
+    private function getDB() {
+        if ($this->db === null) {
+            $this->db = new OraDB($this->conn_type);
+        }
+        return $this->db;
+    }
 
     function __construct($conn_type = CONNECTION_TYPE::L3HWEB) {
-        $this->db = new OraDB($conn_type);
+        $this->conn_type = $conn_type;
     }
 
     function __destruct() {
-        $this->db->close();
+        $this->getDB()->close();
         $this->db = null;
     }
     /**
@@ -33,9 +41,9 @@ class LXHWEB {
             GROUP BY sowner
             ORDER BY SITE, UPDATE_DATETIME
         ";
-        $this->db->parse($prefix.$where.$postfix);
-		$this->db->execute();
-		return $this->db->fetchAll();
+        $this->getDB()->parse($prefix.$where.$postfix);
+		$this->getDB()->execute();
+		return $this->getDB()->fetchAll();
     }
     /**
      * 查詢各所表格更新時間
@@ -56,9 +64,9 @@ class LXHWEB {
         $postfix = "
             ORDER BY \"所別\", \"更新時間\"
         ";
-        $this->db->parse($prefix.$where.$postfix);
-		$this->db->execute();
-		return $this->db->fetchAll();
+        $this->getDB()->parse($prefix.$where.$postfix);
+		$this->getDB()->execute();
+		return $this->getDB()->fetchAll();
     }
     /**
      * 查詢是否有BROKEN狀態之TABLE
@@ -73,9 +81,9 @@ class LXHWEB {
             WHERE broken = 'Y'
             ORDER BY \"所別\", \"表格名稱\"
         ";
-        $this->db->parse($sql);
-		$this->db->execute();
-		return $this->db->fetchAll();
+        $this->getDB()->parse($sql);
+		$this->getDB()->execute();
+		return $this->getDB()->fetchAll();
     }
     /**
      * 查詢同步異動各所之 SYSAUTH1 TABLE
@@ -98,9 +106,9 @@ class LXHWEB {
             UNION
             SELECT * FROM L1HH0H03.SYSAUTH1
         ";
-        $this->db->parse($sql);
-		$this->db->execute();
-		$rows = $this->db->fetchAll();
+        $this->getDB()->parse($sql);
+		$this->getDB()->execute();
+		$rows = $this->getDB()->fetchAll();
         $filtered = array();
         foreach ($rows as $row) {
             if (array_key_exists($row['USER_ID'], $filtered)) {
