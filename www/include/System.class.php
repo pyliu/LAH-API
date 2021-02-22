@@ -307,6 +307,27 @@ class System {
         return false;
     }
 
+    public function isAvatarEnable() {
+        return $this->get('ENABLE_AVATAR') === 'true';
+    }
+
+    public function setAvatarEnable($flag) {
+        if ($stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ")) {
+            $stm->bindValue(':key', 'ENABLE_AVATAR');
+            $stm->bindValue(':value', $flag ? 'true' : 'false');
+            return $stm->execute() === FALSE ? false : true;
+        }
+        global $log;
+        $log->warning(__METHOD__.": 準備資料庫 statement [ 
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ] 失敗。($flag)");
+        return false;
+    }
+
     public function getUserPhotoFolderPath() {
         return rtrim($this->get('USER_PHOTO_FOLDER'), "\\");
     }

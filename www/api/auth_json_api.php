@@ -35,6 +35,7 @@ switch ($_POST["type"]) {
 				'webap_ip' => $system->get('WEBAP_IP'),
 				'mock' => $system->isMockMode(),
 				'mssql' => $system->isMSSQLEnable(),
+				'avatar' => $system->isAvatarEnable(),
 				'officehours' => $system->isOfficeHoursEnable(),
 				"authority" => $system->getAuthority($_POST['req_ip']),
 				"master_password" => $system->get('MASTER_PASSWORD'),
