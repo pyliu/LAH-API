@@ -3,7 +3,7 @@ require_once('SQLiteUser.class.php');
 require_once('System.class.php');
 require_once("Cache.class.php");
 require_once("Ping.class.php");
-require_once("LXHWEB.class.php");
+require_once("OraDB.class.php");
 
 // Function to check response time
 function pingDomain($domain, $port = 80){
@@ -34,75 +34,15 @@ function getMyAuthority() {
             $res["isSuper"] = $res["isSuper"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::SUPER);
             $res["isRAE"] = $res["isRAE"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::RESEARCH_AND_EVALUATION);
             $res["isGA"] = $res["isGA"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::GENERAL_AFFAIRS);
+            $res["isAccounting"] = $res["isAccounting"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::ACCOUNTING);
+            $res["isHR"] = $res["isHR"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::HUMAN_RESOURCE);
         }
     }
     
     return $res;
 }
 
-function queryOraUsers() {
-    global $log;
-    $system = new System();
-
-    // check if l3hweb is reachable
-    $l3hweb_ip = $system->get('ORA_DB_L3HWEB_IP');
-    $l3hweb_port = $system->get('ORA_DB_L3HWEB_PORT');
-    $latency = pingDomain($l3hweb_ip, $l3hweb_port);
-
-    // not reachable use local DB instead
-    if ($latency > 999 || $latency == '') {
-        $log->warning(__METHOD__.": $l3hweb_ip:$l3hweb_port is not reachable, use local DB instead.");
-
-        $result = array();
-
-        // check if the main db is reachable
-        $main_db_ip = $system->get('ORA_DB_HXWEB_IP');
-        $main_db_port = $system->get('ORA_DB_HXWEB_PORT');
-        $latency = pingDomain($main_db_ip, $main_db_port);
-        if ($latency > 999 || $latency == '') {
-            return $result;
-        }
-
-        $db = $system->getOraMainDBConnStr();
-        $log->info(__METHOD__.": query system ORA_DB_HXHEB database users.");
-        $log->info(__METHOD__.": $db");
-        
-        $conn = oci_connect($system->get("ORA_DB_USER"), $system->get("ORA_DB_PASS"), $db, "US7ASCII");
-        if (!$conn) {
-            $e = oci_error();
-            trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
-        }
-        // Prepare the statement
-        $stid = oci_parse($conn, "SELECT * FROM SSYSAUTH1");
-        if (!$stid) {
-            $e = oci_error($conn);
-            trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
-        }
-        
-        // Perform the logic of the query
-        $r = oci_execute($stid);
-        if (!$r) {
-            $e = oci_error($stid);
-            trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
-        }
-        while ($row = oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS)) {
-            $result[$row["USER_ID"]] = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", "BIG5");
-        }
-        if ($stid) {
-            oci_free_statement($stid);
-        }
-        if ($conn) {
-            oci_close($conn);
-        }
-        return $result;
-    } else {
-        $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
-        return $lxhweb->querySYSAUTH1UserNames();
-    }
-}
-
 function getUserNames($refresh = false) {
-
     $system = new System();
     $cache = new Cache();
     $result = $cache->get('user_mapping');
@@ -112,7 +52,7 @@ function getUserNames($refresh = false) {
     }
 
     if ($refresh === true || $cache->isExpired('user_mapping')) {
-        $result = queryOraUsers();
+        $result = OraDB::queryOraUsers();
         try {
             /**
              * Also get user info from SQLite DB
