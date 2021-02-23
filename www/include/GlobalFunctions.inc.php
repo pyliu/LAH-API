@@ -53,8 +53,18 @@ function queryOraUsers() {
     // not reachable use local DB instead
     if ($latency > 999 || $latency == '') {
         $log->warning(__METHOD__.": $l3hweb_ip:$l3hweb_port is not reachable, use local DB instead.");
-        $db = $system->getOraMainDBConnStr();
 
+        $result = array();
+
+        // check if the main db is reachable
+        $main_db_ip = $system->get('ORA_DB_HXWEB_IP');
+        $main_db_port = $system->get('ORA_DB_HXWEB_PORT');
+        $latency = pingDomain($main_db_ip, $main_db_port);
+        if ($latency > 999 || $latency == '') {
+            return $result;
+        }
+
+        $db = $system->getOraMainDBConnStr();
         $log->info(__METHOD__.": query system ORA_DB_HXHEB database users.");
         $log->info(__METHOD__.": $db");
         
@@ -76,7 +86,6 @@ function queryOraUsers() {
             $e = oci_error($stid);
             trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
         }
-        $result = array();
         while ($row = oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS)) {
             $result[$row["USER_ID"]] = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", "BIG5");
         }
