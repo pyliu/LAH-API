@@ -121,7 +121,7 @@ class RegCaseData {
     
     private function fetch($id) {
         if ($this->formatID($id)) {
-            $db = new OraDB(CONNECTION_TYPE::MAIN);
+            $db = new OraDB();
             $db->parse("
                 SELECT s.*, v.KNAME AS RM11_CHT
                 FROM (SELECT r.*, q.AB02
