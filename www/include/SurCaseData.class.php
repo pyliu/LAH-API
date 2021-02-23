@@ -1,6 +1,7 @@
 <?php
 require_once("init.php");
 require_once("OraDB.class.php");
+require_once("Cache.class.php");
 
 class SurCaseData {
     
@@ -162,7 +163,8 @@ class SurCaseData {
     }
 
     public function getJsonHtmlData($flag = 0) {
-        $operators = getUserNames();
+        $cache = new Cache();
+        $operators = $cache->getUserNames();
         $row = &$this->row;
         $result = array(
             "status" => 0,
@@ -183,7 +185,8 @@ class SurCaseData {
     }
 
     public function getBakedData() {
-        $operators = getUserNames();
+        $cache = new Cache();
+        $operators = $cache->getUserNames();
         $row = &$this->row;
         $ret = array(
             "ID" => $row["MM01"].$row["MM02"].$row["MM03"],

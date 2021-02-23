@@ -1,7 +1,7 @@
 <?php
 require_once('SQLiteUser.class.php');
+require_once('SQLiteSYSAUTH1.class.php');
 require_once('System.class.php');
-require_once("Cache.class.php");
 require_once("Ping.class.php");
 require_once("OraDB.class.php");
 
@@ -40,42 +40,6 @@ function getMyAuthority() {
     }
     
     return $res;
-}
-
-function getUserNames($refresh = false) {
-    $system = new System();
-    $cache = new Cache();
-    $result = $cache->get('user_mapping');
-
-    if ($system->isMockMode() === true) {
-        return $result;
-    }
-
-    if ($refresh === true || $cache->isExpired('user_mapping')) {
-        $result = OraDB::queryOraUsers();
-        try {
-            /**
-             * Also get user info from SQLite DB
-             */
-            $sqlite_user = new SQLiteUser();
-            $all_users = $sqlite_user->getAllUsers();
-            foreach($all_users as $this_user) {
-                $user_id = trim($this_user["id"]);
-                if (empty($user_id)) {
-                    continue;
-                }
-                $result[$user_id] = preg_replace('/\d+/', "", trim($this_user["name"]));
-            }
-        } catch (\Throwable $th) {
-            //throw $th;
-            global $log;
-            $log->error("取得SQLite內網使用者失敗。【".$th->getMessage()."】");
-        } finally {
-            // cache
-            $cache->set('user_mapping', $result, 86400);
-        }
-    }
-    return $result;
 }
 
 function zipLogs() {

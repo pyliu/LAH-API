@@ -2,6 +2,7 @@
 require_once("init.php");
 require_once("OraDB.class.php");
 require_once("System.class.php");
+require_once("SQLiteSYSAUTH1.class.php");
 
 class LXHWEB {
     private $db = null;
@@ -110,7 +111,9 @@ class LXHWEB {
 		$this->getDB()->execute();
 		$rows = $this->getDB()->fetchAll();
         $filtered = array();
+        $sysauth1 = new SQLiteSYSAUTH1();
         foreach ($rows as $row) {
+            $sysauth1->import($row);
             // $user_name = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", "BIG5");
             $user_name = $row["USER_NAME"];
             if (array_key_exists($row['USER_ID'], $filtered)) {

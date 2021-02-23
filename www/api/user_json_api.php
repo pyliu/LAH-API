@@ -88,7 +88,7 @@ switch ($_POST["type"]) {
         }
         break;
 	case "user_mapping":
-		$operators = getUserNames();
+		$operators = $cache->getUserNames();
 		$count = count($operators);
         $log->info("XHR [user_mapping] 取得使用者對應表($count)。");
         echoJSONResponse("取得 $count 筆使用者資料。", STATUS_CODE::SUCCESS_NORMAL, array(

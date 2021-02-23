@@ -6,13 +6,7 @@ require_once('DynamicSQLite.class.php');
 class SQLiteSYSAUTH1 {
     private $db;
 
-    private function exists($id) {
-        $ret = $this->db->querySingle("SELECT USER_ID from SYSAUTH1 WHERE USER_ID = '".trim($id)."'");
-        return !empty($ret);
-    }
-
     private function bindParams(&$stm, &$row) {
-
         if ($stm === false) {
             global $log;
             $log->error(__METHOD__.": bindUserParams because of \$stm is false.");
@@ -49,7 +43,7 @@ class SQLiteSYSAUTH1 {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
-            CREATE TABLE "SYSAUTH1" (
+            CREATE TABLE IF NOT EXISTS "SYSAUTH1" (
                 "USER_ID"	TEXT NOT NULL,
                 "USER_PSW"	TEXT,
                 "USER_NAME"	TEXT NOT NULL,
@@ -83,6 +77,11 @@ class SQLiteSYSAUTH1 {
     function __destruct() {
         $this->db->exec("END TRANSACTION");
         $this->db->close();
+    }
+
+    public function exists($id) {
+        $ret = $this->db->querySingle("SELECT USER_ID from SYSAUTH1 WHERE USER_ID = '".trim($id)."'");
+        return !empty($ret);
     }
 
     public function import(&$row) {

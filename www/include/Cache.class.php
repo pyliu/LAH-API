@@ -2,6 +2,10 @@
 require_once("init.php");
 require_once("System.class.php");
 require_once("DynamicSQLite.class.php");
+require_once("SQLiteSYSAUTH1.class.php");
+require_once('SQLiteUser.class.php');
+require_once("Ping.class.php");
+require_once("OraDB.class.php");
 
 class Cache {
     private const DEF_CACHE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."cache.db";
@@ -82,5 +86,49 @@ class Cache {
     public function isExpired($key) {
         if ($this->getSystemConfig()->isMockMode()) return false;
         return mktime() > $this->getExpireTimestamp($key);
+    }
+
+    public function getUserNames() {
+        $system = new System();
+        $result = OraDB::queryOraUsers(false);  // get cached data in SYSAUTH1.db
+
+        if ($system->isMockMode() === true) {
+            return $result;
+        }
+
+        if ($this->isExpired('user_mapping_cached_datetime')) {
+            $result = OraDB::queryOraUsers(true);
+            try {
+                $sysauth1 = new SQLiteSYSAUTH1();
+                /**
+                 * Also get user info from SQLite DB
+                 */
+                $sqlite_user = new SQLiteUser();
+                $all_users = $sqlite_user->getAllUsers();
+                foreach($all_users as $this_user) {
+                    $user_id = trim($this_user["id"]);
+                    if (empty($user_id) || $sysauth1->exists($user_id)) {
+                        continue;
+                    }
+                    $name_filtered = preg_replace('/\d+/', "", trim($this_user["name"]));
+                    $result[$user_id] = $name_filtered;
+                    $tmp_row = array(
+                        "USER_ID" => $user_id,
+                        "USER_NAME" => $name_filtered,
+                        "USER_PSW" => "",
+                        "GROUP_ID" => "",
+                        "VALID" => 1
+                    );
+                    $sysauth1->import($tmp_row);
+                }
+            } catch (\Throwable $th) {
+                //throw $th;
+                global $log;
+                $log->error("取得SQLite內網使用者失敗。【".$th->getMessage()."】");
+            } finally {
+                $this->set('user_mapping_cached_datetime', date("Y-m-d H:i:s"), 86400);
+            }
+        }
+        return $result;
     }
 }

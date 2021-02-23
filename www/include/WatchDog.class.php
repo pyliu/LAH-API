@@ -139,7 +139,8 @@ class WatchDog {
         $rows = $query->queryOverdueCasesIn15Days();
         if (!empty($rows)) {
             $log->info('15天內找到'.count($rows).'件逾期登記案件。');
-            $users = getUserNames();
+            $cache = new Cache();
+            $users = $cache->getUserNames();
             $case_records = [];
             foreach ($rows as $row) {
                 $this_msg = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']);
@@ -172,7 +173,8 @@ class WatchDog {
         global $log;
         $chief_id = $this->overdue_cfg["REG_CHIEF_ID"];
         $host_ip = getLocalhostIP();
-        $users = getUserNames();
+        $cache = new Cache();
+        $users = $cache->getUserNames();
         $msg = new Message();
         $url = "http://${host_ip}/overdue_reg_cases.html";
         if ($to_id != "ALL") {
@@ -272,7 +274,8 @@ class WatchDog {
     private function sendProblematicSURCasesMessage(&$results) {
         global $log;
         $host_ip = getLocalhostIP();
-        $users = getUserNames();
+        $cache = new Cache();
+        $users = $cache->getUserNames();
         $msg = new Message();
 
         $case_ids = array();

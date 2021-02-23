@@ -1,6 +1,7 @@
 <?php
 require_once("init.php");
 require_once("OraDB.class.php");
+require_once("Cache.class.php");
 
 class RegCaseData {
     static private $operators;
@@ -153,7 +154,8 @@ class RegCaseData {
             $this->row = $this->fetch($rows_or_id);
         }
         if (is_null(RegCaseData::$operators)) {
-            RegCaseData::$operators = getUserNames();
+            $cache = new Cache();
+            RegCaseData::$operators = $cache->getUserNames();
         }
     }
 
