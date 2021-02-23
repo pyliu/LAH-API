@@ -45,9 +45,8 @@ function queryOraUsers() {
     $system = new System();
 
     // check if l3hweb is reachable
-    $lxhweb_configs = $system->getLXHWEBConfigs();
-    $l3hweb_ip = $lxhweb_configs['ORA_DB_L3HWEB_IP'];
-    $l3hweb_port = $lxhweb_configs['ORA_DB_L3HWEB_PORT'];
+    $l3hweb_ip = $system->get('ORA_DB_L3HWEB_IP');
+    $l3hweb_port = $system->get('ORA_DB_L3HWEB_PORT');
     $latency = pingDomain($l3hweb_ip, $l3hweb_port);
 
     // not reachable use local DB instead
