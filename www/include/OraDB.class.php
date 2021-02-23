@@ -37,6 +37,19 @@ class OraDB {
     private $CONN_TYPE;
     private $connected = false;
 
+    public static function getPointDBTarget() {
+        $type = CONNECTION_TYPE::MAIN;
+        // get config from system
+        $system = new System();
+        $target_str = $system->getOraConnectTarget();
+        if ($target_str === 'TEST') {
+            $type = CONNECTION_TYPE::TWEB;
+        } else if ($target_str === 'BACKUP') {
+            $type = CONNECTION_TYPE::BK;
+        }
+        return $type;
+    }
+
     public static function queryOraUsers() {
         global $log;
         $system = new System();
@@ -241,14 +254,7 @@ class OraDB {
 
     function __construct($type = CONNECTION_TYPE::MAIN) {
         if ($type === CONNECTION_TYPE::MAIN) {
-            // get config from system
-            $system = new System();
-            $target_str = $system->getOraConnectTarget();
-            if ($target_str === 'TEST') {
-                $type = CONNECTION_TYPE::TWEB;
-            } else if ($target_str === 'BACKUP') {
-                $type = CONNECTION_TYPE::BK;
-            }
+            $type = self::getPointDBTarget();
         }
         $this->initSetting();
         $this->setConnType($type);
