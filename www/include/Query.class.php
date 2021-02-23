@@ -73,7 +73,16 @@ class Query {
 	}
 	
     function __construct() {
-		$this->db = new OraDB(CONNECTION_TYPE::MAIN);
+		// get config from system
+		$target_str = $this->getSystemConfig()->getOraConnectTarget();
+		$type = CONNECTION_TYPE::MAIN;
+		if ($target_str === 'TEST') {
+			$type = CONNECTION_TYPE::TWEB;
+		} else if ($target_str === 'BACKUP') {
+			$type = CONNECTION_TYPE::BK;
+		}
+
+		$this->db = new OraDB($type);
 		$this->site = strtoupper($this->getSystemConfig()->get('SITE')) ?? 'HB';
 		if (!empty($this->site)) {
 			$this->site_code = $this->site[1];
