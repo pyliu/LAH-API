@@ -120,7 +120,6 @@ class Temperature {
             $log->warning(__METHOD__.": ${id} ${AMPM} 已有體溫紀錄。");
             return false;
         }
-
         $stm = $this->db->prepare("INSERT INTO temperature (datetime,id,value,note) VALUES (:date,:id,:value,:note)");
         $stm->bindParam(':date', date("Y-m-d H:i:s"));
         $stm->bindParam(':id', $id);
