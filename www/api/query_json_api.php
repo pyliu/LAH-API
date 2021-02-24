@@ -46,16 +46,17 @@ switch ($_POST["type"]) {
 	case "svr":
 		// find current connected user
 		$sqlite_user = new SQLiteUser();
-		$queried_user = $sqlite_user->getUserByIP($_POST['client_ip']);
+		$client_ip = array_key_exists('client_ip', $_POST) ? $_POST['client_ip'] : '';
+		$queried_user = $sqlite_user->getUserByIP($client_ip);
 		$found_count = count($queried_user);
 		if ($found_count > 1) {
 			$queried_user = array($queried_user[$found_count - 1]);
 		}
 		if (empty($found_count)) {
-			$log->info("XHR [svr] 找不到 ".$_POST['client_ip']." 使用者。");
+			$log->info("XHR [svr] 找不到 $client_ip 使用者。");
 		} else {
 			$_SESSION["myinfo"] = $queried_user[0];
-			$log->info("XHR [svr] 找到 ".$_POST['client_ip']." 使用者 ".$_SESSION["myinfo"]['id']." ".$_SESSION["myinfo"]['name']."。");
+			$log->info("XHR [svr] 找到 $client_ip 使用者 ".$_SESSION["myinfo"]['id']." ".$_SESSION["myinfo"]['name']."。");
 		}
 
 		$ips = getLocalhostIPs();
@@ -76,7 +77,7 @@ switch ($_POST["type"]) {
 				'mock' => $system->isMockMode(),
 				'mssql' => $system->isMSSQLEnable(),
 				'officehours' => $system->isOfficeHoursEnable(),
-				"authority" => $system->getAuthority($_POST['client_ip']),
+				"authority" => $system->getAuthority($client_ip),
 				"master_password" => $system->get('MASTER_PASSWORD'),
 				"site" => strtoupper($system->get('SITE')),
 				"lxhweb" => $system->getLXHWEBConfigs(),
