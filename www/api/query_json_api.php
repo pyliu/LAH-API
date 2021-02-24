@@ -71,7 +71,7 @@ switch ($_POST["type"]) {
 			"message" => $message,
 			"server" => $_SERVER,
 			"ips" => $ips,
-			"user" => $_SESSION["myinfo"],
+			"user" => array_key_exists('myinfo', $_SESSION) ? $_SESSION['myinfo'] : array(),
 			"config" => array(
 				'webap_ip' => $system->get('WEBAP_IP'),
 				'mock' => $system->isMockMode(),
