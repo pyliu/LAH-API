@@ -6,7 +6,7 @@ $system = new System();
 $default_path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."img".DIRECTORY_SEPARATOR."users".DIRECTORY_SEPARATOR;
 $fallback_path = rtrim($system->getUserPhotoFolderPath());
 
-$key = $_REQUEST["id"];
+$key = array_key_exists('id', $_REQUEST) ? $_REQUEST['id'] : '';
 // $full_path = $default_path.$key.'.jpg';
 $full_path = $default_path.$key.'.jpg';
 if (!file_exists($full_path)) {
