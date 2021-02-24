@@ -50,9 +50,9 @@ class Cache {
         // mock mode always returns now + 300 seconds (default)
         if ($this->getSystemConfig()->isMockMode()) {
             $seconds = $this->getSystemConfig()->get('MOCK_CACHE_SECONDS') ?? 300;
-            return mktime() + $seconds;
+            return time() + $seconds;
         }
-        // $val should be mktime() + $expire in set method
+        // $val should be time() + $expire in set method
         $val = $this->getSqliteDB()->querySingle("SELECT expire from cache WHERE key = '$key'");
         if (empty($val)) return 0;
         return intval($val);
@@ -66,7 +66,7 @@ class Cache {
         ");
         $stm->bindParam(':key', $key);
         $stm->bindValue(':value', serialize($val));
-        $stm->bindValue(':expire', mktime() + $expire); // in seconds, 86400 => one day
+        $stm->bindValue(':expire', time() + $expire); // in seconds, 86400 => one day
         return $stm->execute() === FALSE ? false : true;
     }
 
@@ -85,7 +85,7 @@ class Cache {
 
     public function isExpired($key) {
         if ($this->getSystemConfig()->isMockMode()) return false;
-        return mktime() > $this->getExpireTimestamp($key);
+        return time() > $this->getExpireTimestamp($key);
     }
 
     public function getUserNames() {

@@ -377,7 +377,7 @@ class RegCaseData {
         $i = substr($this->row["RM07_2"], 2, 2);
         $s = substr($this->row["RM07_2"], 4, 2);
         
-        $now         = mktime();
+        $now         = time();
         $begin       = mktime($H, $i, $s, $M, $D, $Y);
         $due_in_secs = $this->getDueTime($begin);
         
@@ -408,7 +408,7 @@ class RegCaseData {
         $i = '00';
         $s = '00';
         
-        $now         = mktime();
+        $now         = time();
         $deadline    = mktime($H, $i, $s, $M, $D, $Y);
         
         // overdue
@@ -441,7 +441,7 @@ class RegCaseData {
         $deadline = mktime($H, $i, $s, $M, $D, $Y);
 
         
-        $now = mktime();
+        $now = time();
         if (!empty($this->row["RM58_1"])) {
             // RM58_1 - 結案日期
             $Y = substr($this->row["RM58_1"], 0, 3) + 1911;
@@ -487,7 +487,7 @@ class RegCaseData {
         $i = substr($this->row["RM07_2"], 2, 2);
         $s = substr($this->row["RM07_2"], 4, 2);
         
-        $now         = mktime();
+        $now         = time();
         $begin       = mktime($H, $i, $s, $M, $D, $Y);
         $due_in_secs = $this->getDueTime($begin);
         

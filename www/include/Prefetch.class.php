@@ -61,7 +61,7 @@ class Prefetch {
         if ($this->getCache()->isExpired($key)) {
             return 0;
         }
-        return $this->getCache()->getExpireTimestamp($key) - mktime();
+        return $this->getCache()->getExpireTimestamp($key) - time();
     }
 
     function __construct() {
