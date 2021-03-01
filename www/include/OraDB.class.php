@@ -62,7 +62,7 @@ class OraDB {
             $l3hweb_port = $system->get('ORA_DB_L3HWEB_PORT');
             $latency = self::pingDomain($l3hweb_ip, $l3hweb_port);
         
-            // not reachable use local DB instead
+            // not reachable use office DB instead
             if ($latency > 999 || $latency == '') {
                 $log->warning(__METHOD__.": $l3hweb_ip:$l3hweb_port is not reachable, use local DB instead.");
                 $result = array();
