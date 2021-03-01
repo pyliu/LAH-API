@@ -6,8 +6,8 @@ require_once("Ping.class.php");
 require_once("OraDB.class.php");
 
 // Function to check response time
-function pingDomain($domain, $port = 80){
-    $ping = new Ping($domain);
+function pingDomain($domain, $port = 80, $timeout = 1){
+    $ping = new Ping($domain, $timeout);
     $ping->setPort($port);
     $latency = $ping->ping('fsockopen');
     if (empty($latency)) {
