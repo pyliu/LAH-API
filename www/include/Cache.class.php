@@ -88,15 +88,13 @@ class Cache {
         return time() > $this->getExpireTimestamp($key);
     }
 
-    public function getUserNames() {
+    public function getUserNames($refresh = false) {
         $system = new System();
         $result = OraDB::queryOraUsers(false);  // get cached data in SYSAUTH1.db
 
         if ($system->isMockMode() === true) {
             return $result;
-        }
-
-        if ($this->isExpired('user_mapping_cached_datetime')) {
+        } else if ($this->isExpired('user_mapping_cached_datetime') || $refresh === true) {
             $result = OraDB::queryOraUsers(true);
             try {
                 $sysauth1 = new SQLiteSYSAUTH1();
@@ -129,6 +127,7 @@ class Cache {
                 $this->set('user_mapping_cached_datetime', date("Y-m-d H:i:s"), 86400);
             }
         }
+
         return $result;
     }
 }
