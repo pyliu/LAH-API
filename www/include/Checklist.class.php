@@ -7,7 +7,6 @@ class Checklist {
     private const CHECKLIST_SQLITE_DB = DB_DIR.DIRECTORY_SEPARATOR."checklist.db";
 
     private $db = null;
-    private $config = null;
 
     private function getDB() {
         if ($this->db === null) {
@@ -33,13 +32,6 @@ class Checklist {
             $this->db = new SQLite3(self::CHECKLIST_SQLITE_DB);
         }
         return $this->db;
-    }
-
-    private function getSystemConfig() {
-        if ($this->config === null) {
-            $this->config = System::getInstance();
-        }
-        return $this->config;
     }
 
     function __construct() { }

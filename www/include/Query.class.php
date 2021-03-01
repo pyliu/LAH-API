@@ -7,7 +7,6 @@ require_once("System.class.php");
 class Query {
 
 	private $db;
-	private $config;
 	private $site = 'HB';
 	private $site_code = 'B';
 	private $site_number = 2;
@@ -64,18 +63,10 @@ class Query {
 		return false;
 	}
 
-	
-    private function getSystemConfig() {
-        if ($this->config === null) {
-            $this->config = System::getInstance();
-        }
-        return $this->config;
-	}
-	
     function __construct() {
 		$type = OraDB::getPointDBTarget();
 		$this->db = new OraDB($type);
-		$this->site = strtoupper($this->getSystemConfig()->get('SITE')) ?? 'HB';
+		$this->site = strtoupper(System::getInstance()->get('SITE')) ?? 'HB';
 		if (!empty($this->site)) {
 			$this->site_code = $this->site[1];
 			$this->site_number = ord($this->site_code) - ord('A') + 1;
