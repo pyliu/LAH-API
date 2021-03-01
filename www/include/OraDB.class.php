@@ -122,8 +122,8 @@ class OraDB {
         }
     }    
 
-    private static function pingDomain($domain, $port = 80){
-        $ping = new Ping($domain);
+    private static function pingDomain($domain, $port = 80, $timeout = 1){
+        $ping = new Ping($domain, $timeout);
         $ping->setPort($port);
         $latency = $ping->ping('fsockopen');
         if (empty($latency)) {
