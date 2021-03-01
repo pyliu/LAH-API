@@ -450,7 +450,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
 
         $this->write_col_data($worksheet, $all_users);
         
-        $system = new System();
+        $system = System::getInstance();
         $site = $system->get('SITE');
         $filename = $today.'_'.$site.'_users.xlsx';
 
@@ -462,7 +462,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $this->query = new Query();
         $this->cache = new Cache();
         $this->type = $_SESSION['xlsx_type'] ?? $_REQUEST['type'] ?? false;
-        $system = new System();
+        $system = System::getInstance();
         $this->mock_mode = $system->isMockMode();
     }
 

@@ -6,7 +6,7 @@ require_once(INC_DIR."/System.class.php");
 require_once(INC_DIR."/LXHWEB.class.php");
 
 $cache = new Cache();
-$system = new System();
+$system = System::getInstance();
 
 switch ($_POST["type"]) {
     case "import_l3hweb_users":

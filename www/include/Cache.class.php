@@ -11,7 +11,6 @@ require_once("LXHWEB.class.php");
 
 class Cache {
     private const DEF_CACHE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."cache.db";
-    private $config = null;
     private $sqlite3 = null;
     private $db_path = self::DEF_CACHE_DB;
 
@@ -34,17 +33,10 @@ class Cache {
         return $this->sqlite3;
     }
 
-    private function getSystemConfig() {
-        if ($this->config === null) {
-            $this->config = new System();
-        }
-        return $this->config;
-    }
-
     private function queryOraUsers($refresh = false) {
         if ($refresh === true) {
             global $log;
-            $system = new System();
+            $system = System::getInstance();
         
             // check if l3hweb is reachable
             $l3hweb_ip = $system->get('ORA_DB_L3HWEB_IP');
@@ -121,8 +113,8 @@ class Cache {
     
     public function getExpireTimestamp($key) {
         // mock mode always returns now + 300 seconds (default)
-        if ($this->getSystemConfig()->isMockMode()) {
-            $seconds = $this->getSystemConfig()->get('MOCK_CACHE_SECONDS') ?? 300;
+        if (System::getInstance()->isMockMode()) {
+            $seconds = System::getInstance()->get('MOCK_CACHE_SECONDS') ?? 300;
             return time() + $seconds;
         }
         // $val should be time() + $expire in set method
@@ -132,7 +124,7 @@ class Cache {
     }
 
     public function set($key, $val, $expire = 86400) {
-        if ($this->getSystemConfig()->isMockMode()) return false;
+        if (System::getInstance()->isMockMode()) return false;
         $stm = $this->getSqliteDB()->prepare("
             REPLACE INTO cache ('key', 'value', 'expire')
             VALUES (:key, :value, :expire)
@@ -150,19 +142,19 @@ class Cache {
     }
 
     public function del($key) {
-        if ($this->getSystemConfig()->isMockMode()) return false;
+        if (System::getInstance()->isMockMode()) return false;
         $stm = $this->getSqliteDB()->prepare("DELETE from cache WHERE key = :key");
         $stm->bindParam(':key', $key);
         return $stm->execute() === FALSE ? false : true;
     }
 
     public function isExpired($key) {
-        if ($this->getSystemConfig()->isMockMode()) return false;
+        if (System::getInstance()->isMockMode()) return false;
         return time() > $this->getExpireTimestamp($key);
     }
 
     public function getUserNames($refresh = false) {
-        $system = new System();
+        $system = System::getInstance();
         $result = $this->queryOraUsers(false);  // get cached data in SYSAUTH1.db
 
         if ($system->isMockMode() === true) {

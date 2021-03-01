@@ -46,7 +46,7 @@ class Prefetch {
 
     private function getSystemConfig() {
         if ($this->config === null) {
-            $this->config = new System();
+            $this->config = System::getInstance();
             // initialize site info
             $this->site = strtoupper($this->config->get('SITE')) ?? 'HB';
             if (!empty($this->site)) {

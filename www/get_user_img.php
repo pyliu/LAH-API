@@ -2,7 +2,7 @@
 require_once("./include/init.php");
 require_once("./include/System.class.php");
 
-$system = new System();
+$system = System::getInstance();
 $default_path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."img".DIRECTORY_SEPARATOR."users".DIRECTORY_SEPARATOR;
 $fallback_path = rtrim($system->getUserPhotoFolderPath());
 

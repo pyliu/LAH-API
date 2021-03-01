@@ -7,7 +7,7 @@ require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/System.class.php");
 
 $cache = new Cache();
-$system = new System();
+$system = System::getInstance();
 
 $mock = $system->isMockMode();
 $mssql_on = $system->isMSSQLEnable();

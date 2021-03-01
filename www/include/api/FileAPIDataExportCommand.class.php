@@ -75,7 +75,7 @@ class FileAPIDataExportCommand extends FileAPICommand {
         $sql = str_replace('##REPLACEMENT##', $replacement, $content);
         
         global $log;
-        $system = new System();
+        $system = System::getInstance();
         $mock = $system->isMockMode();
         if ($mock) $log->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！");
         $cache = new Cache();

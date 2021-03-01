@@ -8,7 +8,7 @@ require_once(ROOT_DIR."/include/StatsSQLite3.class.php");
 $stats = new StatsOracle();
 $stats_sqlite3 = new StatsSQLite3();
 $cache = new Cache();
-$system = new System();
+$system = System::getInstance();
 
 $this_month = (date("Y") - 1911)."".date("m");
 

@@ -19,7 +19,7 @@ class MSDB {
     }
     
     function __construct($conn_info = array()) {
-        $this->system = new System();
+        $this->system = System::getInstance();
         if ($this->system->isMockMode() === true) return;
         
         if (empty($conn_info)) {

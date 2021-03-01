@@ -7,7 +7,7 @@ class DocUserInfo {
     private $doc_db;
 
     function __construct() {
-        $system = new System();
+        $system = System::getInstance();
         $this->doc_db = new MSDB(array(
             'MS_DB_UID' => $system->get('MS_DOC_DB_UID'),
             'MS_DB_PWD' => $system->get('MS_DOC_DB_PWD'),

@@ -17,7 +17,7 @@ require_once(INC_DIR."/api/JSONAPICommandFactory.class.php");
 
 $query = new Query();
 $cache = new Cache();
-$system = new System();
+$system = System::getInstance();
 
 $mock = $system->isMockMode();
 

@@ -108,7 +108,7 @@ class WatchDog {
             $host_ip = getLocalhostIP();
             $msg = new Message();
             $content = "系統目前找到下列跨所註記遺失案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/dashboard.html 執行檢查功能並修正。";
-            $system = new System();
+            $system = System::getInstance();
             $adm_ips = $system->getRoleAdminIps();
             foreach ($adm_ips as $adm_ip) {
                 if ($adm_ip == '::1') {
@@ -299,7 +299,7 @@ class WatchDog {
             }
         }
 
-        $system = new System();
+        $system = System::getInstance();
         $adm_ips = $system->getRoleAdminIps();
         $content = "系統目前找到下列已結案之測量案件但是狀態卻是「延期複丈」:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/dashboard.html 執行複丈案件查詢功能並修正。";
         foreach ($adm_ips as $adm_ip) {

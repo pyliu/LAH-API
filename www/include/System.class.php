@@ -28,6 +28,9 @@ abstract class AUTHORITY {
 }
 
 class System {
+    // singleton
+    private static $_instance = null;
+
     private $sqlite3;
     private $ROLE;
 
@@ -237,12 +240,24 @@ class System {
         return $db_path;
     }
 
-    function __construct() {
+    // private because of singleton
+    private function __construct() {
         $db_path = $this->getDimensionDB();
         $this->sqlite3 = new SQLite3($db_path);
     }
 
+    // private because of singleton
+    private function __clone() { }
+
     function __destruct() { unset($this->sqlite3); }
+
+    // singleton
+    public static function getInstance() {
+        if (!(self::$_instance instanceof System)) {
+            self::$_instance = new System();
+        }
+        return self::$_instance;
+    }
 
     public function isKeyValid($key) {
         return $key == $this->get('API_KEY');

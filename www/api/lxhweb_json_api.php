@@ -4,7 +4,7 @@ require_once(ROOT_DIR."/include/System.class.php");
 require_once(ROOT_DIR."/include/Cache.class.php");
 require_once(ROOT_DIR."/include/LXHWEB.class.php");
 
-$system = new System();
+$system = System::getInstance();
 $cache = new Cache();
 $lxhweb = null;
 switch($_POST["site"]) {

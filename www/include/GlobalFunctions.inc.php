@@ -20,7 +20,7 @@ function getMyAuthority() {
     global $client_ip;
 
     // check authority by ip address
-    $system = new System();
+    $system = System::getInstance();
     $res = $system->getAuthority($client_ip);
     if ($res['isSuper']) array_walk($res, function(&$value) { $value = true; });
 

@@ -1,7 +1,7 @@
 <?php
 require_once("init.php");
 require_once(ROOT_DIR."/include/System.class.php");
-$system = new System();
+$system = System::getInstance();
 $adm_ips = $system->getRoleAdminIps();
 // $client_ip is from init.php
 if (!in_array($client_ip, $adm_ips)) {

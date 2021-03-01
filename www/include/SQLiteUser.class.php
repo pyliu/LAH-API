@@ -12,7 +12,7 @@ class SQLiteUser {
 
     private function calculateAuthority($ip) {
         $authority = 0;
-        $system = new System();
+        $system = System::getInstance();
         if (in_array($ip, $system->getRoleSuperIps())) {
             $authority = $authority | AUTHORITY::SUPER;
         }
@@ -75,7 +75,7 @@ class SQLiteUser {
         // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
         
         $authority = $this->getAuthority($row['DocUserID']);
-        $system = new System();
+        $system = System::getInstance();
         // add admin privilege
         if (in_array($row['AP_PCIP'], $system->getRoleAdminIps())) {
             $authority = $authority | AUTHORITY::ADMIN;

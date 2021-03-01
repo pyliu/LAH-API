@@ -1,7 +1,7 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(ROOT_DIR."/include/System.class.php");
-$system = new System();
+$system = System::getInstance();
 
 switch ($_POST["type"]) {
     case "switch_mock_flag":

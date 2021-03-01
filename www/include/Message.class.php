@@ -195,7 +195,7 @@ class Message {
         if ($user !== false) {
             $id = $user["id"];
 
-            $system = new System();
+            $system = System::getInstance();
 
             $tdoc_db = new MSDB(array(
                 "MS_DB_UID" => $system->get("MS_DB_UID"),
@@ -221,7 +221,7 @@ class Message {
         if ($user !== false) {
             $id = $user["id"];
 
-            $system = new System();
+            $system = System::getInstance();
 
             $tdoc_db = new MSDB(array(
                 "MS_DB_UID" => $system->get("MS_DB_UID"),

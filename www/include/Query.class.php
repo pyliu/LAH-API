@@ -67,7 +67,7 @@ class Query {
 	
     private function getSystemConfig() {
         if ($this->config === null) {
-            $this->config = new System();
+            $this->config = System::getInstance();
         }
         return $this->config;
 	}

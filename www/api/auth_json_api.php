@@ -3,7 +3,7 @@ require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(INC_DIR."/System.class.php");
 require_once(INC_DIR."/SQLiteUser.class.php");
 
-$system = new System();
+$system = System::getInstance();
 
 switch ($_POST["type"]) {
 	case "login":

@@ -39,7 +39,7 @@ class OraDB {
     public static function getPointDBTarget() {
         $type = CONNECTION_TYPE::MAIN;
         // get config from system
-        $system = new System();
+        $system = System::getInstance();
         $target_str = $system->getOraConnectTarget();
         if ($target_str === 'TEST') {
             $type = CONNECTION_TYPE::TWEB;
@@ -193,7 +193,7 @@ class OraDB {
     }
 
     private function initSetting() {
-        $system = new System();
+        $system = System::getInstance();
         $this->L1HWEB_DB = $system->getOraL1hwebDBConnStr();
         $this->L1HWEB_Alt_DB = $system->getOraL3hwebL1DBConnStr();
         $this->L2HWEB_DB = $system->getOraL2hwebDBConnStr();
