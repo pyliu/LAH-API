@@ -34,6 +34,8 @@ class Ping {
      *
      * @param string $host
      *   The host to be pinged.
+     *   Timeout (in seconds) used for ping and fsockopen().
+     * @param int $timeout
      * @param int $ttl
      *   Time-to-live (TTL) (You may get a 'Time to live exceeded' error if this
      *   value is set too low. The TTL value indicates the scope or range in which
@@ -44,11 +46,9 @@ class Ping {
      *     - 64 = same region
      *     - 128 = same continent
      *     - 255 = unrestricted
-     * @param int $timeout
-     *   Timeout (in seconds) used for ping and fsockopen().
      * @throws \Exception if the host is not set.
      */
-    public function __construct($host, $ttl = 255, $timeout = 1) {
+    public function __construct($host, $timeout = 1, $ttl = 255) {
         if (!isset($host)) {
             throw new \Exception("Error: Host name not supplied.");
         }

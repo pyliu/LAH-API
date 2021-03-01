@@ -113,7 +113,7 @@ switch ($_POST["type"]) {
 	case "ping":
 		$log->info("XHR [ping] Ping ".$_POST["ip"]." request.");
 		$ip = $_POST["ip"];
-		$ping = new Ping($ip, 255, 1);	// ip, ttl, timeout
+		$ping = new Ping($ip, 1, 255);	// ip, timeout, ttl
 		$latency = 0;
 		if ($_POST['port']) {
     		$ping->setPort($_POST['port']);
