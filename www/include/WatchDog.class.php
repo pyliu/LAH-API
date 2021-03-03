@@ -42,11 +42,11 @@ class WatchDog {
         // ],
         "temperature" => [
             'Sun' => [],
-            'Mon' => ['10:30 AM' => '10:45 AM'],
-            'Tue' => ['10:30 AM' => '10:45 AM'],
-            'Wed' => ['10:30 AM' => '10:45 AM'],
-            'Thu' => ['10:30 AM' => '10:45 AM'],
-            'Fri' => ['10:30 AM' => '10:45 AM'],
+            'Mon' => ['03:30 PM' => '03:45 PM'],
+            'Tue' => ['03:30 PM' => '03:45 PM'],
+            'Wed' => ['03:30 PM' => '03:45 PM'],
+            'Thu' => ['03:30 PM' => '03:45 PM'],
+            'Fri' => ['03:30 PM' => '03:45 PM'],
             'Sat' => []
         ],
         "once_a_day" => [
@@ -331,7 +331,7 @@ class WatchDog {
             $this->stats->checkRegisteredConnectivity();
             // clean connectivity stats data one day ago
             $this->stats->wipeConnectivityHistory();
-            // $this->notifyTemperatureRegistration();
+            $this->notifyTemperatureRegistration();
             return true;
         }
         return false;
