@@ -16,7 +16,7 @@ require_once(INC_DIR."/SQLiteUser.class.php");
 require_once(INC_DIR."/api/JSONAPICommandFactory.class.php");
 
 $query = new Query();
-$cache = new Cache();
+$cache = Cache::getInstance();
 $system = System::getInstance();
 
 $mock = $system->isMockMode();

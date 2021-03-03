@@ -42,7 +42,7 @@ class Prefetch {
     
     private function getCache() {
         if ($this->cache === null) {
-            $this->cache = new Cache(self::PREFETCH_SQLITE_DB);
+            $this->cache = Cache::getInstance(self::PREFETCH_SQLITE_DB);
         }
         return $this->cache;
     }

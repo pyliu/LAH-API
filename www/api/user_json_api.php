@@ -5,7 +5,7 @@ require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/System.class.php");
 require_once(INC_DIR."/LXHWEB.class.php");
 
-$cache = new Cache();
+$cache = Cache::getInstance();
 $system = System::getInstance();
 
 switch ($_POST["type"]) {

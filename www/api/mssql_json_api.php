@@ -6,7 +6,7 @@ require_once(INC_DIR."/Message.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/System.class.php");
 
-$cache = new Cache();
+$cache = Cache::getInstance();
 $system = System::getInstance();
 
 $mock = $system->isMockMode();

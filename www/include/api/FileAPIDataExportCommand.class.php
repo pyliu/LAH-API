@@ -78,7 +78,7 @@ class FileAPIDataExportCommand extends FileAPICommand {
         $system = System::getInstance();
         $mock = $system->isMockMode();
         if ($mock) $log->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！");
-        $cache = new Cache();
+        $cache = Cache::getInstance();
         $q = new Query();
 		$data = $mock ? $cache->get('FileAPIDataExportCommand') : $q->getSelectSQLData($sql, true); // true - get raw big5 data; default is false.
         if (!$mock) $cache->set('FileAPIDataExportCommand', $data);

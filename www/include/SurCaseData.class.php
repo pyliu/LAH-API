@@ -163,7 +163,7 @@ class SurCaseData {
     }
 
     public function getJsonHtmlData($flag = 0) {
-        $cache = new Cache();
+        $cache = Cache::getInstance();
         $operators = $cache->getUserNames();
         $row = &$this->row;
         $result = array(
@@ -185,7 +185,7 @@ class SurCaseData {
     }
 
     public function getBakedData() {
-        $cache = new Cache();
+        $cache = Cache::getInstance();
         $operators = $cache->getUserNames();
         $row = &$this->row;
         $ret = array(

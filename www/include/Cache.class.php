@@ -10,6 +10,9 @@ require_once("Ping.class.php");
 require_once("LXHWEB.class.php");
 
 class Cache {
+    // singleton
+    private static $_instance = null;
+
     private const DEF_CACHE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."cache.db";
     private $sqlite3 = null;
     private $db_path = self::DEF_CACHE_DB;
@@ -104,13 +107,25 @@ class Cache {
         }
     }
 
-    function __construct($path = self::DEF_CACHE_DB) {
+    // private because of singleton
+    private function __construct($path = self::DEF_CACHE_DB) {
         $this->db_path = $path;
         $this->init();
     }
 
+    // private because of singleton
+    private function __clone() { }
+
     function __destruct() { }
     
+    // singleton
+    public static function getInstance($path = self::DEF_CACHE_DB) {
+        if (!(self::$_instance instanceof Cache)) {
+            self::$_instance = new Cache($path);
+        }
+        return self::$_instance;
+    }
+
     public function getExpireTimestamp($key) {
         // mock mode always returns now + 300 seconds (default)
         if (System::getInstance()->isMockMode()) {

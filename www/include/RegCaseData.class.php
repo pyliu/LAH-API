@@ -155,7 +155,7 @@ class RegCaseData {
             $this->row = $this->fetch($rows_or_id);
         }
         if (is_null(RegCaseData::$operators)) {
-            $cache = new Cache();
+            $cache = Cache::getInstance();
             RegCaseData::$operators = $cache->getUserNames();
         }
     }

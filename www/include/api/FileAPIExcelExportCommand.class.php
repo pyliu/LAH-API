@@ -460,7 +460,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
 
     function __construct() {
         $this->query = new Query();
-        $this->cache = new Cache();
+        $this->cache = Cache::getInstance();
         $this->type = $_SESSION['xlsx_type'] ?? $_REQUEST['type'] ?? false;
         $system = System::getInstance();
         $this->mock_mode = $system->isMockMode();

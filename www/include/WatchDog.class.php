@@ -139,7 +139,7 @@ class WatchDog {
         $rows = $query->queryOverdueCasesIn15Days();
         if (!empty($rows)) {
             $log->info('15天內找到'.count($rows).'件逾期登記案件。');
-            $cache = new Cache();
+            $cache = Cache::getInstance();
             $users = $cache->getUserNames();
             $case_records = [];
             foreach ($rows as $row) {
@@ -173,7 +173,7 @@ class WatchDog {
         global $log;
         $chief_id = $this->overdue_cfg["REG_CHIEF_ID"];
         $host_ip = getLocalhostIP();
-        $cache = new Cache();
+        $cache = Cache::getInstance();
         $users = $cache->getUserNames();
         $msg = new Message();
         $url = "http://${host_ip}/overdue_reg_cases.html";
@@ -245,7 +245,7 @@ class WatchDog {
     private function compressLog() {
         if (php_sapi_name() != "cli") {
             global $log;
-            $cache = new Cache();
+            $cache = Cache::getInstance();
             // compress all log when zipLogs_flag is expired
             if ($cache->isExpired('zipLogs_flag')) {
                 $log->info("開始壓縮LOG檔！");
@@ -274,7 +274,7 @@ class WatchDog {
     private function sendProblematicSURCasesMessage(&$results) {
         global $log;
         $host_ip = getLocalhostIP();
-        $cache = new Cache();
+        $cache = Cache::getInstance();
         $users = $cache->getUserNames();
         $msg = new Message();
 
