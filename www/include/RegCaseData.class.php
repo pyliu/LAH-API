@@ -10,7 +10,7 @@ class RegCaseData {
     private $row;
 
     private function getIDorName($id) {
-        return RegCaseData::$operators[$id] ?? $id;
+        return preg_replace("/(BAD\+[[:alpha:][:digit:]]{2,3}.*[[:alpha:][:digit:]]?)|(&#\d+;)/i", "○", RegCaseData::$operators[$id] ?? $id);
     }
 
     private function getDueTime($begin) {
@@ -260,7 +260,7 @@ class RegCaseData {
             "展期人員" => $this->getIDorName($this->row["RM88"]),
             "展期日期" => RegCaseData::toDate($row["RM86"])." ".RegCaseData::toDate($row["RM87"]),
             "展期天數" => $this->row["RM89"],
-            "登錄人員" => preg_replace($rare_word_regex, "○", $this->getIDorName($this->row["RM55"])),
+            "登錄人員" => $this->getIDorName($this->row["RM55"]),
             "登錄日期" => RegCaseData::toDate($row["RM54_1"])." ".RegCaseData::toDate($row["RM54_2"]),
             "准登人員" => $this->getIDorName($this->row["RM63"]),
             "准登日期" => RegCaseData::toDate($row["RM62_1"])." ".RegCaseData::toDate($row["RM62_2"]),
