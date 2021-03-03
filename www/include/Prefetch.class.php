@@ -19,7 +19,8 @@ class Prefetch {
         'NON_SCRIVENER' => 'Prefetch::getNonScrivenerCase',
         'NON_SCRIVENER_REG' => 'Prefetch::getNonScrivenerRegCase',
         'NON_SCRIVENER_SUR' => 'Prefetch::getNonScrivenerSurCase',
-        'FOREIGNER' => 'Prefetch::getForeignerCase'
+        'FOREIGNER' => 'Prefetch::getForeignerCase',
+        'TRUST_REG_QUERY' => 'Prefetch::getTrustRegQuery'
     );
     private $ora_db = null;
     private $cache = null;
@@ -85,7 +86,7 @@ class Prefetch {
     }
     /**
 	 * 取得目前為公告狀態案件
-     * default cache time is 12 hours * 60 minutes * 60 seconds = 3600 seconds
+     * default cache time is 12 hours * 60 minutes * 60 seconds = 43200 seconds
 	 */
 	public function getRM30HCase($expire_duration = 43200) {
         if ($this->getCache()->isExpired(self::KEYS['RM30H'])) {
@@ -871,4 +872,59 @@ class Prefetch {
         }
         return $this->getCache()->get(self::KEYS['FOREIGNER'].$year_month);
 	}
+
+
+
+
+    
+    /**
+     * 信託資料查詢快取剩餘時間
+     */
+    public function getTrustRegQueryCacheRemainingTime($st, $ed) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['TRUST_REG_QUERY'].$st.$ed);
+    }
+    /**
+     * 強制重新讀取信託資料查詢
+     */
+    public function reloadTrustQuery($st, $ed) {
+        $this->getCache()->del(self::KEYS['TRUST_REG_QUERY'].$st.$ed);
+        return $this->getTrustRegQuery($st, $ed);
+    }
+    /**
+	 * 取得信託區間資料查詢
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getTrustRegQuery($st, $ed, $expire_duration = 86400) {
+        if ($this->getCache()->isExpired(self::KEYS['TRUST_REG_QUERY'].$st.$ed)) {
+            global $log;
+            $log->info('['.self::KEYS['TRUST_REG_QUERY'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+
+            $db = $this->getOraDB();
+            $db->parse("
+                SELECT
+                    t.*,
+                    u.KCNT AS RM09_CHT,
+                    v.KNAME AS RM11_CHT
+                FROM
+                    MOICAS.CRSMS t
+                    LEFT JOIN MOIADM.RKEYN u ON t.RM09 = u.KCDE_2 AND u.KCDE_1 = '06'
+                    LEFT JOIN MOIADM.RKEYN_ALL v ON (v.KCDE_1 = '48' AND v.KCDE_2 = 'H' AND v.KCDE_3 = t.RM10 AND t.RM11 = v.KCDE_4)
+                WHERE 1=1
+                    AND RM07_1 BETWEEN :bv_st AND :bv_ed
+                    AND t.RM09 IN ('CU', 'CX', 'CV', 'CW')
+                ORDER BY t.RM07_1     
+            ");
+            
+            $db->bind(":bv_st", $st);
+            $db->bind(":bv_ed", $ed);
+            $db->execute();
+            $result = $db->fetchAll();
+            $this->getCache()->set(self::KEYS['TRUST_REG_QUERY'].$st.$ed, $result, $expire_duration);
+
+            $log->info("[".self::KEYS['TRUST_REG_QUERY'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+            return $result;
+        }
+        return $this->getCache()->get(self::KEYS['TRUST_REG_QUERY'].$st.$ed);
+    }
 }

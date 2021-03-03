@@ -251,6 +251,34 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
+	case "trust_query":
+		$log->info("XHR [trust_query] 查詢取消請示案件請求");
+		if ($_POST['query'] === 'land') {
+			// 土地註記塗銷
+		} else if ($_POST['query'] === 'building') {
+			// 建物註記塗銷
+		} else if ($_POST['query'] === 'reg_reason') {
+			// 信託案件資料查詢
+			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustQuery($_POST['start'], $_POST['end']) : $prefetch->getTrustRegQuery($_POST['start'], $_POST['end']);
+			$cache_remaining = $prefetch->getTrustRegQueryCacheRemainingTime($_POST['start'], $_POST['end']);
+			foreach ($rows as $idx => $row) {
+				$regdata = new RegCaseData($row);
+				$rows[$idx] = $regdata->getBakedData();
+			}
+		}
+		if (empty($rows)) {
+			$log->info("XHR [trust_query] 查無資料");
+			echoJSONResponse('查無信託案件資料');
+		} else {
+			$total = count($rows);
+			$log->info("XHR [trust_query] 查詢成功($total)");
+			echoJSONResponse("查詢成功，找到 $total 筆信託案件資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"raw" => $rows,
+				'cache_remaining_time' => $cache_remaining
+			));
+		}
+		break;
 	default:
 		$log->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
