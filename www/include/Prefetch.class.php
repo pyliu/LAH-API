@@ -20,7 +20,9 @@ class Prefetch {
         'NON_SCRIVENER_REG' => 'Prefetch::getNonScrivenerRegCase',
         'NON_SCRIVENER_SUR' => 'Prefetch::getNonScrivenerSurCase',
         'FOREIGNER' => 'Prefetch::getForeignerCase',
-        'TRUST_REG_QUERY' => 'Prefetch::getTrustRegQuery'
+        'TRUST_REG_QUERY' => 'Prefetch::getTrustRegQuery',
+        'TRUST_OBLITERATE_LAND' => 'Prefetch::getTrustObliterateLand',
+        'TRUST_OBLITERATE_BUILD' => 'Prefetch::getTrustObliterateBuilding'
     );
     private $ora_db = null;
     private $cache = null;
@@ -872,11 +874,6 @@ class Prefetch {
         }
         return $this->getCache()->get(self::KEYS['FOREIGNER'].$year_month);
 	}
-
-
-
-
-    
     /**
      * 信託資料查詢快取剩餘時間
      */
@@ -927,4 +924,168 @@ class Prefetch {
         }
         return $this->getCache()->get(self::KEYS['TRUST_REG_QUERY'].$st.$ed);
     }
+    /**
+     * 土地註記塗銷查詢快取剩餘時間
+     */
+    public function getTrustObliterateLandCacheRemainingTime($st, $ed) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed);
+    }
+    /**
+     * 強制重新讀取土地註記塗銷資料查詢
+     */
+    public function reloadTrustObliterateLand($st, $ed) {
+        $this->getCache()->del(self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed);
+        return $this->getTrustObliterateLand($st, $ed);
+    }
+    /**
+	 * 取得土地註記塗銷資料查詢
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getTrustObliterateLand($st, $ed, $expire_duration = 86400) {
+        if ($this->getCache()->isExpired(self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed)) {
+            global $log;
+            $log->info('['.self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+
+            $db = $this->getOraDB();
+            $db->parse("
+                SELECT DISTINCT
+                    GG48,
+                    ra.KNAME AS GG48_CHT,
+                    GG49,
+                    GG01,
+                    BB09,
+                    LNAM,
+                    GS_TYPE,
+                    s.RM01 || '-' || s.RM02 || '-' || s.RM03 AS RM123,
+                    s.RM09,
+                    r.KCNT AS RM09_CHT,
+                    s.RM33,
+                    GG30_1,
+                    GG30_2
+                FROM WRGALL, SCRSMS s, WRBLOW, SRLNID, MOIADM.RKEYN r, MOIADM.RKEYN_ALL ra
+                WHERE 1=1
+                    AND ra.KCDE_1 = '48'
+                    AND ra.KCDE_2 = 'H'
+                    AND GG48 = ra.KCDE_4(+) 
+                    AND r.KCDE_1 = '06'
+                    AND s.RM09 = r.KCDE_2(+)
+                    AND RM54_1 BETWEEN :bv_st AND :bv_ed
+                    AND GG00 = 'B'
+                    AND GG30_1 IN ('GH', 'GJ')
+                    AND GS_TYPE IN ('D', 'M')
+                    AND s.RM01 = GS03
+                    AND s.RM02 = GS04_1
+                    AND s.RM03 = GS04_2
+                    AND NOT EXISTS (
+                        SELECT *
+                        FROM MOICAD.RBLOW
+                        WHERE 1=1
+                            AND GG48 = BA48
+                            AND GG49 = BA49
+                            AND GG01 = BB01
+                            AND GS03 = s.RM01
+                            AND GS04_1 = s.RM02
+                            AND GS04_2 = s.RM03
+                    )
+                    AND GG48 = BA48
+                    AND GG49 = BA49
+                    AND GG01 = BB01
+                    AND BB09 = LIDN
+                ORDER BY RM123, GG48, GG49, GG01
+            ");
+            
+            $db->bind(":bv_st", $st);
+            $db->bind(":bv_ed", $ed);
+            $db->execute();
+            $result = $db->fetchAll();
+            $this->getCache()->set(self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed, $result, $expire_duration);
+
+            $log->info("[".self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+            return $result;
+        }
+        return $this->getCache()->get(self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed);
+    }
+    /**
+     * 建物註記塗銷查詢快取剩餘時間
+     */
+    public function getTrustObliterateBuildingCacheRemainingTime($st, $ed) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed);
+    }
+    /**
+     * 強制重新讀取建物註記塗銷資料查詢
+     */
+    public function reloadTrustObliterateBuilding($st, $ed) {
+        $this->getCache()->del(self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed);
+        return $this->getTrustObliterateBuilding($st, $ed);
+    }
+    /**
+	 * 取得建物註記塗銷資料查詢
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getTrustObliterateBuilding($st, $ed, $expire_duration = 86400) {
+        if ($this->getCache()->isExpired(self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed)) {
+            global $log;
+            $log->info('['.self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+
+            $db = $this->getOraDB();
+            $db->parse("
+                SELECT DISTINCT
+                    GG48,
+                    ra.KNAME AS GG48_CHT,
+                    GG49,
+                    GG01,
+                    EE09 AS BB09, -- rename to BB09 to align with land query
+                    LNAM,
+                    GS_TYPE,
+                    s.RM01 || '-' || s.RM02 || '-' || s.RM03 AS RM123,
+                    s.RM09,
+                    r.KCNT AS RM09_CHT,
+                    s.RM33,
+                    GG30_1,
+                    GG30_2
+                FROM WRGALL, SCRSMS s, WREBOW, SRLNID, MOIADM.RKEYN r, MOIADM.RKEYN_ALL ra
+                WHERE 1=1
+                    AND ra.KCDE_1 = '48'
+                    AND ra.KCDE_2 = 'H'
+                    AND GG48 = ra.KCDE_4(+) 
+                    AND r.KCDE_1 = '06'
+                    AND s.RM09 = r.KCDE_2(+)
+                    AND RM54_1 BETWEEN '1100101' AND '1100228'
+                    AND GG00 = 'E'
+                    AND GG30_1 in ('GH', 'GJ')
+                    AND GS_TYPE in ('D', 'M')
+                    AND s.RM01 = GS03
+                    AND s.RM02 = GS04_1
+                    AND s.RM03 = GS04_2
+                    AND NOT EXISTS (
+                        SELECT *
+                        FROM MOICAD.REBOW
+                        WHERE GG48 = ED48
+                            AND GG49 = ED49
+                            AND GG01 = EE01
+                            AND GS03 = s.RM01
+                            AND GS04_1 = s.RM02
+                            AND GS04_2 = s.RM03
+                    )
+                    AND GG48 = ED48
+                    AND GG49 = ED49
+                    AND GG01 = EE01
+                    AND EE09 = LIDN
+                ORDER BY RM123, GG48, GG49, GG01     
+            ");
+            
+            $db->bind(":bv_st", $st);
+            $db->bind(":bv_ed", $ed);
+            $db->execute();
+            $result = $db->fetchAll();
+            $this->getCache()->set(self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed, $result, $expire_duration);
+
+            $log->info("[".self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+            return $result;
+        }
+        return $this->getCache()->get(self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed);
+    }
+
 }

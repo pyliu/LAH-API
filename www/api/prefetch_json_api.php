@@ -255,8 +255,12 @@ switch ($_POST["type"]) {
 		$log->info("XHR [trust_query] 查詢取消請示案件請求");
 		if ($_POST['query'] === 'land') {
 			// 土地註記塗銷
+			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustObliterateLand($_POST['start'], $_POST['end']) : $prefetch->getTrustObliterateLand($_POST['start'], $_POST['end']);
+			$cache_remaining = $prefetch->getTrustObliterateLandCacheRemainingTime($_POST['start'], $_POST['end']);
 		} else if ($_POST['query'] === 'building') {
 			// 建物註記塗銷
+			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustObliterateBuilding($_POST['start'], $_POST['end']) : $prefetch->getTrustObliterateBuilding($_POST['start'], $_POST['end']);
+			$cache_remaining = $prefetch->getTrustObliterateBuildingCacheRemainingTime($_POST['start'], $_POST['end']);
 		} else if ($_POST['query'] === 'reg_reason') {
 			// 信託案件資料查詢
 			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustQuery($_POST['start'], $_POST['end']) : $prefetch->getTrustRegQuery($_POST['start'], $_POST['end']);
@@ -268,11 +272,11 @@ switch ($_POST["type"]) {
 		}
 		if (empty($rows)) {
 			$log->info("XHR [trust_query] 查無資料");
-			echoJSONResponse('查無信託案件資料');
+			echoJSONResponse('查無信託資料');
 		} else {
 			$total = count($rows);
 			$log->info("XHR [trust_query] 查詢成功($total)");
-			echoJSONResponse("查詢成功，找到 $total 筆信託案件資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+			echoJSONResponse("查詢成功，找到 $total 筆信託查詢資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"raw" => $rows,
 				'cache_remaining_time' => $cache_remaining
