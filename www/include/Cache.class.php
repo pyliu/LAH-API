@@ -68,7 +68,7 @@ class Cache {
                     trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
                 }
                 // Prepare the statement
-                $stid = oci_parse($conn, "SELECT * FROM SSYSAUTH1");
+                $stid = oci_parse($conn, "SELECT DISTINCT USER_ID, USER_NAME FROM SSYSAUTH1 UNION SELECT DISTINCT USER_ID, USER_NAME FROM SSYSAUTH1V");
                 if (!$stid) {
                     $e = oci_error($conn);
                     trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);

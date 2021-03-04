@@ -91,21 +91,21 @@ class LXHWEB {
      */
     public function querySYSAUTH1UserNames() {
         $sql = "
-            SELECT * FROM L1HA0H03.SYSAUTH1
+            SELECT DISTINCT * FROM L1HA0H03.SYSAUTH1
             UNION
-            SELECT * FROM L1HB0H03.SYSAUTH1
+            SELECT DISTINCT * FROM L1HB0H03.SYSAUTH1
             UNION
-            SELECT * FROM L1HC0H03.SYSAUTH1
+            SELECT DISTINCT * FROM L1HC0H03.SYSAUTH1
             UNION
-            SELECT * FROM L1HD0H03.SYSAUTH1
+            SELECT DISTINCT * FROM L1HD0H03.SYSAUTH1
             UNION
-            SELECT * FROM L1HE0H03.SYSAUTH1
+            SELECT DISTINCT * FROM L1HE0H03.SYSAUTH1
             UNION
-            SELECT * FROM L1HF0H03.SYSAUTH1
+            SELECT DISTINCT * FROM L1HF0H03.SYSAUTH1
             UNION
-            SELECT * FROM L1HG0H03.SYSAUTH1
+            SELECT DISTINCT * FROM L1HG0H03.SYSAUTH1
             UNION
-            SELECT * FROM L1HH0H03.SYSAUTH1
+            SELECT DISTINCT * FROM L1HH0H03.SYSAUTH1
         ";
         $this->getDB()->parse($sql);
 		$this->getDB()->execute();
