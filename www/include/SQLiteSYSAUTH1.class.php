@@ -104,6 +104,21 @@ class SQLiteSYSAUTH1 {
         return false;
     }
 
+    public function getUserDictionary() {
+        $result = array();
+        if($stmt = $this->db->prepare("SELECT * FROM SYSAUTH1_ALL WHERE 1 = 1 ORDER BY USER_ID")) {
+            $cached = $this->prepareArray($stmt);
+            foreach ($cached as $row) {
+                $result[$row["USER_ID"]] = $row["USER_NAME"];
+            }
+            return $result;
+        } else {
+            global $log;
+            $log->error(__METHOD__.": 取得所有使用者名稱對應表失敗！");
+        }
+        return $result;
+    }
+
     public function getValidUsers() {
         return $this->getUsersByValid(1);
     }
