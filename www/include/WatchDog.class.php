@@ -1,13 +1,15 @@
 <?php
-require_once(dirname(dirname(__FILE__)).'/include/init.php');
-require_once(INC_DIR.'/Query.class.php');
-require_once(INC_DIR.'/Message.class.php');
-require_once(INC_DIR.'/StatsSQLite3.class.php');
-require_once(INC_DIR.'/Temperature.class.php');
-require_once(INC_DIR.'/SQLiteUser.class.php');
-require_once(INC_DIR.'/System.class.php');
-require_once(INC_DIR.'/Ping.class.php');
-require_once(INC_DIR.'/Cache.class.php');
+require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'init.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'Query.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'Message.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'StatsSQLite3.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'Temperature.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteUser.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'System.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'Ping.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'Cache.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR."OraDB.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
 
 class WatchDog {
     
@@ -56,6 +58,15 @@ class WatchDog {
             'Wed' => ['08:30 AM' => '08:45 AM'],
             'Thu' => ['08:30 AM' => '08:45 AM'],
             'Fri' => ['08:30 AM' => '08:45 AM'],
+            'Sat' => []
+        ],
+        "test" => [
+            'Sun' => [],
+            'Mon' => ['00:00 AM' => '11:59 PM'],
+            'Tue' => ['00:00 AM' => '11:59 PM'],
+            'Wed' => ['00:00 AM' => '11:59 PM'],
+            'Thu' => ['00:00 AM' => '11:59 PM'],
+            'Fri' => ['00:00 AM' => '11:59 PM'],
             'Sat' => []
         ]
     );
@@ -317,6 +328,58 @@ class WatchDog {
         ));
     }
 
+    private function importUserFromL3HWEB() {
+        global $log;
+        
+        if ($this->isOn($this->schedule["once_a_day"])) {
+            // check if l3hweb is reachable
+            $l3hweb_ip = System::getInstance()->get('ORA_DB_L3HWEB_IP');
+            $l3hweb_port = System::getInstance()->get('ORA_DB_L3HWEB_PORT');
+            $latency = pingDomain($l3hweb_ip, $l3hweb_port);
+        
+            // not reachable
+            if ($latency > 999 || $latency == '') {
+                $log->error(__METHOD__.': 無法連線L3HWEB，無法進行匯入使用者名稱。');
+                return false;
+            }
+
+            $db = new OraDB(CONNECTION_TYPE::L3HWEB);
+            $sql = "
+                SELECT DISTINCT * FROM L1HA0H03.SYSAUTH1
+                UNION
+                SELECT DISTINCT * FROM L1HB0H03.SYSAUTH1
+                UNION
+                SELECT DISTINCT * FROM L1HC0H03.SYSAUTH1
+                UNION
+                SELECT DISTINCT * FROM L1HD0H03.SYSAUTH1
+                UNION
+                SELECT DISTINCT * FROM L1HE0H03.SYSAUTH1
+                UNION
+                SELECT DISTINCT * FROM L1HF0H03.SYSAUTH1
+                UNION
+                SELECT DISTINCT * FROM L1HG0H03.SYSAUTH1
+                UNION
+                SELECT DISTINCT * FROM L1HH0H03.SYSAUTH1
+            ";
+            $db->parse($sql);
+            $db->execute();
+            $rows = $db->fetchAll();
+            $sysauth1 = new SQLiteSYSAUTH1();
+            $count = 0;
+            foreach ($rows as $row) {
+                // $row['USER_NAME'] = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", "BIG5");
+                $sysauth1->import($row);
+                $count++;
+            }
+
+            $log->error(__METHOD__.': 匯入 '.$count.' 筆使用者資料。 【SYSAUTH1.db，SYSAUTH1 table】');
+
+            return true;
+        }
+
+        return false;
+    }
+
     function __construct() { $this->stats = new StatsSQLite3(); }
     function __destruct() { $this->stats = null; }
 
@@ -332,6 +395,7 @@ class WatchDog {
             // clean connectivity stats data one day ago
             $this->stats->wipeConnectivityHistory();
             $this->notifyTemperatureRegistration();
+            $this->importUserFromL3HWEB();
             return true;
         }
         return false;

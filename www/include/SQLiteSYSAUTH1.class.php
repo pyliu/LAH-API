@@ -28,6 +28,24 @@ class SQLiteSYSAUTH1 {
         $this->bindParams($stm, $row);
         return $stm->execute() === FALSE ? false : true;
     }
+
+    private function replaceDict(&$row) {
+        $stm = $this->db->prepare("
+            REPLACE INTO SYSAUTH1_ALL ('USER_ID', 'USER_NAME')
+            VALUES (:id, :name)
+        ");
+        
+        if ($stm === false) {
+            global $log;
+            $log->error(__METHOD__.": failed because of \$stm is false.");
+            return false;
+        }
+
+        $stm->bindParam(':id', $row['USER_ID']);
+        $stm->bindParam(':name', $row['USER_NAME']);
+
+        return $stm->execute() === FALSE ? false : true;
+    }
     
     private function prepareArray(&$stmt) {
         $result = $stmt->execute();
@@ -49,6 +67,13 @@ class SQLiteSYSAUTH1 {
                 "USER_NAME"	TEXT NOT NULL,
                 "GROUP_ID"	INTEGER,
                 "VALID"	INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY("USER_ID")
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "SYSAUTH1_ALL" (
+                "USER_ID"	TEXT NOT NULL,
+                "USER_NAME"	TEXT,
                 PRIMARY KEY("USER_ID")
             )
         ');
@@ -87,7 +112,7 @@ class SQLiteSYSAUTH1 {
     public function import(&$row) {
         if (empty($row['USER_ID']) || empty($row['USER_NAME'])) {
             global $log;
-            $log->warning(__METHOD__.": USER_ID is empty. Import procedure can not be proceeded.");
+            $log->warning(__METHOD__.": USER_ID or USER_NAME is empty. Import procedure can not be proceeded.");
             $log->warning(__METHOD__.": ".print_r($row, true));
             return false;
         }
@@ -106,12 +131,11 @@ class SQLiteSYSAUTH1 {
 
     public function getUserDictionary() {
         $result = array();
-        if($stmt = $this->db->prepare("SELECT * FROM SYSAUTH1_ALL WHERE 1 = 1 ORDER BY USER_ID")) {
-            $cached = $this->prepareArray($stmt);
-            foreach ($cached as $row) {
-                $result[$row["USER_ID"]] = $row["USER_NAME"];
+        if($stmt = $this->db->prepare("SELECT DISTINCT USER_ID, USER_NAME FROM SYSAUTH1_ALL UNION SELECT DISTINCT USER_ID, USER_NAME FROM SYSAUTH1 ORDER BY USER_ID")) {
+            $handle = $stmt->execute();
+            while($row = $handle->fetchArray(SQLITE3_ASSOC)) {
+                $result[$row['USER_ID']] = $row['USER_NAME'];
             }
-            return $result;
         } else {
             global $log;
             $log->error(__METHOD__.": 取得所有使用者名稱對應表失敗！");
