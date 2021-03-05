@@ -40,11 +40,11 @@ if (Vue) {
             }
         },
         data: () => ({
-            year: 109,
-            month: 10,
+            year: 110,
+            month: 03,
             base: 0,
-            max: 24,
-            value: 23,
+            max: 36,
+            value: 35,
             filter: 0,
             keyword: '',
             reg_reason: false,
