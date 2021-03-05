@@ -1,4 +1,5 @@
 <?php
+require_once('GlobalConstants.inc.php');
 /** 
 * st-PHP-Logger - Simple PHP logging class. Log info, warning, error messages to log files.
 * $time = date('Y-M-d');
@@ -14,7 +15,15 @@
 */
 
 class Logger {
-
+    // singleton
+    private static $_instance = null;
+    // private static $_path = dirname(dirname(__FILE__))LOG_DIR.DIRECTORY_SEPARATOR.'log-' . date('Y-m-d') . '.log';
+    public static function getInstance($log_file = 'self::$_path', $params = array()) {
+        if (!(self::$_instance instanceof Logger)) {
+            self::$_instance = new Logger($log_file, $params);
+        }
+        return self::$_instance;
+    }
     /**
     * $log_file - path and log file name
     * @var string
@@ -40,7 +49,7 @@ class Logger {
     * @param string $log_file - path and filename of log
     * @param array $params
     */
-    public function __construct($log_file = 'error.txt', $params = array()){
+    private function __construct($log_file = 'error.txt', $params = array()){
         $this->log_file = $log_file;
         $this->params = array_merge($this->options, $params);
 
@@ -55,6 +64,9 @@ class Logger {
             throw new Exception("ERROR: Unable to write to file!", 1);
         }
     }
+
+    // private because of singleton
+    private function __clone() { }
 
     /**
     * Zip method (zip the log file)

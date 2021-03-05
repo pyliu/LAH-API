@@ -27,7 +27,7 @@ if (!file_exists(LOG_DIR) && !is_dir(LOG_DIR)) {
 }
 
 // ex: log-2019-09-16.log
-$log = new Logger(LOG_DIR.DIRECTORY_SEPARATOR.'log-' . date('Y-m-d') . '.log');
+$log = Logger::getInstance(LOG_DIR.DIRECTORY_SEPARATOR.'log-' . date('Y-m-d') . '.log');
 
 set_exception_handler(function(Throwable $e) {
     global $log;
