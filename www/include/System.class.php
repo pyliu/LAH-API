@@ -1,6 +1,7 @@
 <?php
 require_once("init.php");
 require_once('DynamicSQLite.class.php');
+require_once('Ping.class.php');
 
 define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."dimension.db");
 
@@ -259,6 +260,19 @@ class System {
         return self::$_instance;
     }
 
+    public function ping($ip, $port = 80, $timeout = 1){
+        if ($this->isMockMode()) {
+            return 87;
+        }
+        $ping = new Ping($ip, $timeout);
+        $ping->setPort($port);
+        $latency = $ping->ping('fsockopen');
+        if (empty($latency)) {
+            $latency = $ping->ping('socket');
+        }
+        return $latency;
+    }
+
     public function isKeyValid($key) {
         return $key == $this->get('API_KEY');
     }
@@ -435,6 +449,32 @@ class System {
         }
         $log->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO authority ('role_id', 'ip') VALUES (:role_id, :ip) ] 失敗。($role_id, $ip)");
         return false;
+    }
+
+    public function getOraTargetDBIP() {
+        $target = $this->get('ORA_DB_TARGET');
+        switch ($target) {
+            case 'HXT':
+            case 'TEST':
+                return $this->get('ORA_DB_HXT_IP');
+            case 'BACKUP':
+                return $this->get('ORA_DB_BACKUP_IP');
+            default:
+                return $this->get('ORA_DB_HXWEB_IP');
+        }
+    }
+
+    public function getOraTargetDBPort() {
+        $target = $this->get('ORA_DB_TARGET');
+        switch ($target) {
+            case 'HXT':
+            case 'TEST':
+                return $this->get('ORA_DB_HXT_PORT');
+            case 'BACKUP':
+                return $this->get('ORA_DB_BACKUP_PORT');
+            default:
+                return $this->get('ORA_DB_HXWEB_PORT');
+        }
     }
 
     public function getOraConnectTarget() {

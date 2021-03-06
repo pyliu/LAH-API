@@ -1,8 +1,17 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
+require_once(INC_DIR."/System.class.php");
 require_once(INC_DIR."/Prefetch.class.php");
 require_once(INC_DIR."/RegCaseData.class.php");
 require_once(INC_DIR."/SurCaseData.class.php");
+
+$db_ip = System::getInstance()->getOraTargetDBIP();
+$db_port = System::getInstance()->getOraTargetDBPort();
+$latency = System::getInstance()->ping($db_ip, $db_port);
+if ($latency > 999 || $latency == '') {
+	echoJSONResponse("API無法連線至DB，請確認網路可連線至 $db_ip:$db_port!", STATUS_CODE::FAIL_REMOTE_UNREACHABLE);
+	exit;
+}
 
 $prefetch = new Prefetch();
 

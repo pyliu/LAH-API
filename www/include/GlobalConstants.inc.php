@@ -13,6 +13,7 @@ abstract class STATUS_CODE {
     const FAIL_NOT_FOUND = -7;
     const FAIL_LOAD_ERROR = -8;
     const FAIL_TIMEOUT = -9;
+    const FAIL_REMOTE_UNREACHABLE = -10;
 }
 
 define('ROOT_DIR', dirname(dirname(__FILE__)));

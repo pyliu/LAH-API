@@ -7,6 +7,9 @@ require_once("OraDB.class.php");
 
 // Function to check response time
 function pingDomain($domain, $port = 80, $timeout = 1){
+    if (System::getInstance()->isMockMode()) {
+        return 87;
+    }
     $ping = new Ping($domain, $timeout);
     $ping->setPort($port);
     $latency = $ping->ping('fsockopen');
