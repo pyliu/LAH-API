@@ -13,9 +13,10 @@ function pingDomain($domain, $port = 80, $timeout = 1){
     $ping = new Ping($domain, $timeout);
     $ping->setPort($port);
     $latency = $ping->ping('fsockopen');
-    if (empty($latency)) {
-        $latency = $ping->ping('socket');
-    }
+    // timeout does not apply to socket
+    // if (empty($latency)) {
+    //     $latency = $ping->ping('socket');
+    // }
     return $latency;
 }
 
