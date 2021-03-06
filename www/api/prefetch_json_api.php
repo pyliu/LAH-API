@@ -9,7 +9,8 @@ $db_ip = System::getInstance()->getOraTargetDBIP();
 $db_port = System::getInstance()->getOraTargetDBPort();
 $latency = System::getInstance()->ping($db_ip, $db_port);
 if ($latency > 999 || $latency == '') {
-	$msg = "API伺服器無法連線至DB，請確認網路可連線至 $db_ip:$db_port!";
+	$db_target = System::getInstance()->getOraConnectTarget();
+	$msg = "API伺服器無法連線至DB，請確認網路可連線至 $db_target 資料庫. ($db_ip:$db_port)";
 	$log->error($msg);
 	echoJSONResponse($msg, STATUS_CODE::FAIL_REMOTE_UNREACHABLE);
 } else {

@@ -226,9 +226,9 @@ switch ($_POST["type"]) {
 		// Need to connect to DB, so ping it first
 		$db_ip = $system->getOraTargetDBIP();
 		$db_port = $system->getOraTargetDBPort();
-		$db_target = $system->getOraConnectTarget();
 		$latency = $system->ping($db_ip, $db_port, 1);
 		if ($latency > 999 || $latency == '') {
+			$db_target = $system->getOraConnectTarget();
 			$msg = "API伺服器無法連線至DB，請確認網路可連線至 $db_target 資料庫. ($db_ip:$db_port)";
 			$log->error($msg);
 			echoJSONResponse($msg, STATUS_CODE::FAIL_REMOTE_UNREACHABLE);
