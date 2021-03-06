@@ -6,17 +6,18 @@ require_once("Ping.class.php");
 require_once("OraDB.class.php");
 
 // Function to check response time
-function pingDomain($domain, $port = 80, $timeout = 1){
+function pingDomain($domain, $port = 0, $timeout = 1){
     if (System::getInstance()->isMockMode()) {
         return 87;
     }
     $ping = new Ping($domain, $timeout);
-    $ping->setPort($port);
-    $latency = $ping->ping('fsockopen');
-    // timeout does not apply to socket
-    // if (empty($latency)) {
-    //     $latency = $ping->ping('socket');
-    // }
+    $port = intval($port);
+    if ($port < 1 || $port > 65535) {
+        $latency = $ping->ping();
+    } else {
+        $ping->setPort($port);
+        $latency = $ping->ping('fsockopen');
+    }
     return $latency;
 }
 

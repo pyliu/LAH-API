@@ -260,19 +260,17 @@ class System {
         return self::$_instance;
     }
 
-    public function ping($ip, $port = 80, $timeout = 1, $ttl = 255){
+    public function ping($ip, $port = 0, $timeout = 1, $ttl = 255){
         if ($this->isMockMode()) {
             return 87;
         }
         $ping = new Ping($ip, $timeout, $ttl);
-        $latency = $ping->ping();
-        if (empty($latency)) {
+        $port = intval($port);
+        if ($port < 1 || $port > 65535) {
+            $latency = $ping->ping();
+        } else {
             $ping->setPort($port);
             $latency = $ping->ping('fsockopen');
-            // timeout does not apply to socket ... 
-            // if (empty($latency)) {
-            //     $latency = $ping->ping('socket');
-            // }
         }
         return $latency;
     }
