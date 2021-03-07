@@ -275,6 +275,13 @@ class System {
         return $latency;
     }
 
+    public function isDBReachable() {
+        $db_ip = $this->getOraTargetDBIP();
+        $db_port = $this->getOraTargetDBPort();
+        $latency = $this->ping($db_ip, $db_port, 1, 255);
+        return !($latency > 999 || $latency == '');
+    }
+
     public function isKeyValid($key) {
         return $key == $this->get('API_KEY');
     }
