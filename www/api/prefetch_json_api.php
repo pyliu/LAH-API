@@ -287,6 +287,29 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
+	case "375_land_change":
+		Logger::getInstance()->info("XHR [375_lang_change] 查詢信託相關資料請求");
+		// 375租約土地標示部異動查詢
+		$message = "375租約土地標示部異動查詢";
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadLand375Change($_POST['start'], $_POST['end']) : $prefetch->getLand375Change($_POST['start'], $_POST['end']);
+		$cache_remaining = $prefetch->getLand375ChangeCacheRemainingTime($_POST['start'], $_POST['end']);
+		foreach ($rows as $idx => $row) {
+			$regdata = new RegCaseData($row);
+			$rows[$idx] = $regdata->getBakedData();
+		}
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [375_lang_change] 查無 ${message} 資料");
+			echoJSONResponse("查無 ${message} 資料");
+		} else {
+			$total = count($rows);
+			Logger::getInstance()->info("XHR [375_lang_change] 查詢成功($total)");
+			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"raw" => $rows,
+				'cache_remaining_time' => $cache_remaining
+			));
+		}
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

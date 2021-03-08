@@ -22,7 +22,8 @@ class Prefetch {
         'FOREIGNER' => 'Prefetch::getForeignerCase',
         'TRUST_REG_QUERY' => 'Prefetch::getTrustRegQuery',
         'TRUST_OBLITERATE_LAND' => 'Prefetch::getTrustObliterateLand',
-        'TRUST_OBLITERATE_BUILD' => 'Prefetch::getTrustObliterateBuilding'
+        'TRUST_OBLITERATE_BUILD' => 'Prefetch::getTrustObliterateBuilding',
+        '375_LAND_CHANGE' => 'Prefetch::getLand375Change'
     );
     private $ora_db = null;
     private $cache = null;
@@ -1122,5 +1123,71 @@ class Prefetch {
         }
         return $this->getCache()->get(self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed);
     }
+    /**
+     * 375租約異動[土地標示部]查詢快取剩餘時間
+     */
+    public function getLand375ChangeCacheRemainingTime($st, $ed) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['375_LAND_CHANGE'].$st.$ed);
+    }
+    /**
+     * 強制重新讀取375租約異動[土地標示部]查詢
+     */
+    public function reloadLand375Change($st, $ed) {
+        $this->getCache()->del(self::KEYS['375_LAND_CHANGE'].$st.$ed);
+        return $this->getLand375Change($st, $ed);
+    }
+    /**
+	 * 取得375租約異動[土地標示部]查詢
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getLand375Change($st, $ed, $expire_duration = 86400) {
+        if ($this->getCache()->isExpired(self::KEYS['375_LAND_CHANGE'].$st.$ed)) {
+            Logger::getInstance()->info('['.self::KEYS['375_LAND_CHANGE'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable(self::KEYS['375_LAND_CHANGE'])) {
+                $db = $this->getOraDB();
+                $db->parse("
+                    --375租約異動 MOICAW.RGALL土地標示部
+                    SELECT 
+                        t.*,
+                        t.RM01 || '-' || t.RM02 || '-' || t.RM03 AS \"RM123\",
+                        rkeyn.KCNT AS RM09_CHT,
+                        rkeyn_all.KNAME AS RM11_CHT,
+                        rkeyn_all.KNAME AS GG48_CHT,
+                        (CASE
+                            WHEN t.GS_TYPE = 'A' THEN '".mb_convert_encoding('新增', 'BIG5', 'UTF-8')."'
+                            WHEN t.GS_TYPE = 'D' THEN '".mb_convert_encoding('刪除', 'BIG5', 'UTF-8')."'
+                            WHEN t.GS_TYPE = 'N' THEN '".mb_convert_encoding('修改前', 'BIG5', 'UTF-8')."'
+                            WHEN t.GS_TYPE = 'M' THEN '".mb_convert_encoding('修改後', 'BIG5', 'UTF-8')."'
+                            ELSE t.GS_TYPE
+                        END) AS GS_TYPE_CHT
+                    FROM 
+                        (SELECT * FROM MOICAW.RGALL rgall LEFT JOIN MOICAS.CRSMS crsms ON rgall.GS03 = crsms.RM01 AND rgall.GS04_1 = crsms.RM02 AND rgall.GS04_2 = crsms.RM03) t
+                        LEFT JOIN MOIADM.RKEYN rkeyn ON t.RM09 = rkeyn.KCDE_2
+                        LEFT JOIN MOIADM.RKEYN_ALL rkeyn_all ON (rkeyn_all.KCDE_1 = '48' AND rkeyn_all.KCDE_2 = 'H' AND rkeyn_all.KCDE_3 = t.RM10 AND t.RM11 = rkeyn_all.KCDE_4)
+                    WHERE
+                        t.RM56_1 BETWEEN :bv_st AND :bv_ed
+                        AND t.GG30_1 = 'A6'
+                    ORDER BY t.GS03,
+                        t.GS04_1,
+                        t.GS04_2,
+                        t.GG48,
+                        t.GG49  
+                ");
+                
+                $db->bind(":bv_st", $st);
+                $db->bind(":bv_ed", $ed);
+                $db->execute();
+                $result = $db->fetchAll();
+                $this->getCache()->set(self::KEYS['375_LAND_CHANGE'].$st.$ed, $result, $expire_duration);
 
+                Logger::getInstance()->info("[".self::KEYS['375_LAND_CHANGE'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+                return $result;
+            } else {
+                return array();
+            }
+        }
+        return $this->getCache()->get(self::KEYS['375_LAND_CHANGE'].$st.$ed);
+    }
+    
 }
