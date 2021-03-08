@@ -26,11 +26,8 @@ if (!file_exists(LOG_DIR) && !is_dir(LOG_DIR)) {
     mkdir(LOG_DIR);       
 }
 
-$log = Logger::getInstance();
-
 set_exception_handler(function(Throwable $e) {
-    global $log;
-    $log->error($e->getMessage());
+    Logger::getInstance()->error($e->getMessage());
 });
 
 $tw_date = new Datetime("now");

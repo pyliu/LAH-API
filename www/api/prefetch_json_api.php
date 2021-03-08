@@ -8,10 +8,10 @@ require_once(INC_DIR."/SurCaseData.class.php");
 $prefetch = new Prefetch();
 switch ($_POST["type"]) {
 	case "overdue_reg_cases":
-		$log->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
+		Logger::getInstance()->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadOverdueCaseIn15Days() : $prefetch->getOverdueCaseIn15Days();
 		if (empty($rows)) {
-			$log->info("XHR [overdue_reg_cases] 近15天查無逾期資料");
+			Logger::getInstance()->info("XHR [overdue_reg_cases] 近15天查無逾期資料");
 			echoJSONResponse("15天內查無逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(
 				"items" => array(),
 				"items_by_id" => array(),
@@ -36,7 +36,7 @@ switch ($_POST["type"]) {
 				$items[] = $this_item;
 				$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
 			}
-			$log->info("XHR [overdue_reg_cases] 近15天找到".count($items)."件逾期案件");
+			Logger::getInstance()->info("XHR [overdue_reg_cases] 近15天找到".count($items)."件逾期案件");
 			echoJSONResponse("近15天找到".count($items)."件逾期案件", STATUS_CODE::SUCCESS_NORMAL, array(
 				"items" => $items,
 				"items_by_id" => $items_by_id,
@@ -47,10 +47,10 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "almost_overdue_reg_cases":
-		$log->info("XHR [almost_overdue_reg_cases] 即將逾期案件查詢請求");
+		Logger::getInstance()->info("XHR [almost_overdue_reg_cases] 即將逾期案件查詢請求");
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadAlmostOverdueCase() : $prefetch->getAlmostOverdueCase();
 		if (empty($rows)) {
-			$log->info("XHR [almost_overdue_reg_cases] 近4小時內查無即將逾期資料");
+			Logger::getInstance()->info("XHR [almost_overdue_reg_cases] 近4小時內查無即將逾期資料");
 			echoJSONResponse("近4小時內查無即將逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(
 				"items" => array(),
 				"items_by_id" => array(),
@@ -75,7 +75,7 @@ switch ($_POST["type"]) {
 				$items[] = $this_item;
 				$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
 			}
-			$log->info("XHR [almost_overdue_reg_cases] 近4小時內找到".count($items)."件即將逾期案件");
+			Logger::getInstance()->info("XHR [almost_overdue_reg_cases] 近4小時內找到".count($items)."件即將逾期案件");
 			echoJSONResponse("近4小時內找到".count($items)."件即將逾期案件", STATUS_CODE::SUCCESS_NORMAL, array(
 				"items" => $items,
 				"items_by_id" => $items_by_id,
@@ -86,14 +86,14 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_rm30_H_case":
-		$log->info("XHR [reg_rm30_H_case] 查詢登記公告中案件請求");
+		Logger::getInstance()->info("XHR [reg_rm30_H_case] 查詢登記公告中案件請求");
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRM30HCase() : $prefetch->getRM30HCase();
 		if (empty($rows)) {
-			$log->info("XHR [reg_rm30_H_case] 查無資料");
+			Logger::getInstance()->info("XHR [reg_rm30_H_case] 查無資料");
 			echoJSONResponse('查無公告中案件');
 		} else {
 			$total = count($rows);
-			$log->info("XHR [reg_rm30_H_case] 查詢成功($total)");
+			Logger::getInstance()->info("XHR [reg_rm30_H_case] 查詢成功($total)");
 			$baked = array();
 			foreach ($rows as $row) {
 				$data = new RegCaseData($row);
@@ -107,15 +107,15 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_cancel_ask_case":
-		$log->info("XHR [reg_cancel_ask_case] 查詢取消請示案件請求");
+		Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查詢取消請示案件請求");
 		$days = $_POST['days'] ?? 92;	// default is 3 months
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadAskCase($days) : $prefetch->getAskCase($days);
 		if (empty($rows)) {
-			$log->info("XHR [reg_cancel_ask_case] 查無資料");
+			Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查無資料");
 			echoJSONResponse('查無取消請示案件');
 		} else {
 			$total = count($rows);
-			$log->info("XHR [reg_cancel_ask_case] 查詢成功($total)");
+			Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查詢成功($total)");
 			$baked = array();
 			foreach ($rows as $row) {
 				$data = new RegCaseData($row);
@@ -129,7 +129,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_trust_case":
-		$log->info("XHR [reg_trust_case] 查詢取消請示案件請求");
+		Logger::getInstance()->info("XHR [reg_trust_case] 查詢取消請示案件請求");
 		if ($_POST['query'] === 'E') {
 			// 建物所有權部資料
 			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustRebow($_POST['year']) : $prefetch->getTrustRebow($_POST['year']);
@@ -148,11 +148,11 @@ switch ($_POST["type"]) {
 			$cache_remaining = $prefetch->getTrustRblowExceptionCacheRemainingTime($_POST['year']);
 		}
 		if (empty($rows)) {
-			$log->info("XHR [reg_trust_case] 查無資料");
+			Logger::getInstance()->info("XHR [reg_trust_case] 查無資料");
 			echoJSONResponse('查無信託註記資料');
 		} else {
 			$total = count($rows);
-			$log->info("XHR [reg_trust_case] 查詢成功($total)");
+			Logger::getInstance()->info("XHR [reg_trust_case] 查詢成功($total)");
 			echoJSONResponse("查詢成功，找到 $total 筆信託註記資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"raw" => $rows,
@@ -161,16 +161,16 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_non_scrivener_case":
-		$log->info("XHR [reg_non_scrivener_case] 查詢非專代案件請求");
+		Logger::getInstance()->info("XHR [reg_non_scrivener_case] 查詢非專代案件請求");
 		$st = $_POST['start_date'];
 		$ed = $_POST['end_date'];
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNonScrivenerCase($st, $ed) : $prefetch->getNonScrivenerCase($st, $ed);
 		if (empty($rows)) {
-			$log->info("XHR [reg_non_scrivener_case] 查無資料");
+			Logger::getInstance()->info("XHR [reg_non_scrivener_case] 查無資料");
 			echoJSONResponse('查無非專代案件');
 		} else {
 			$total = count($rows);
-			$log->info("XHR [reg_non_scrivener_case] 查詢成功($total)");
+			Logger::getInstance()->info("XHR [reg_non_scrivener_case] 查詢成功($total)");
 			$baked = array();
 			foreach ($rows as $row) {
 				$data = new RegCaseData($row);
@@ -184,12 +184,12 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_non_scrivener_reg_case":
-		$log->info("XHR [reg_non_scrivener_reg_case] 查詢非專代案件請求");
+		Logger::getInstance()->info("XHR [reg_non_scrivener_reg_case] 查詢非專代案件請求");
 		$st = $_POST['start_date'];
 		$ed = $_POST['end_date'];
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNonScrivenerRegCase($st, $ed, $_POST['ignore']) : $prefetch->getNonScrivenerRegCase($st, $ed, $_POST['ignore']);
 		if (empty($rows)) {
-			$log->info("XHR [reg_non_scrivener_reg_case] 查無資料");
+			Logger::getInstance()->info("XHR [reg_non_scrivener_reg_case] 查無資料");
 			echoJSONResponse('查無非專代案件');
 		} else {
 			$total = count($rows);
@@ -198,7 +198,7 @@ switch ($_POST["type"]) {
 				$data = new RegCaseData($row);
 				$baked[] = $data->getBakedData();
 			}
-			$log->info("XHR [reg_non_scrivener_reg_case] 查詢成功($total)");
+			Logger::getInstance()->info("XHR [reg_non_scrivener_reg_case] 查詢成功($total)");
 			echoJSONResponse("查詢成功，找到 $total 筆非專代案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
@@ -207,12 +207,12 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_non_scrivener_sur_case":
-		$log->info("XHR [reg_non_scrivener_sur_case] 查詢非專代測量案件請求");
+		Logger::getInstance()->info("XHR [reg_non_scrivener_sur_case] 查詢非專代測量案件請求");
 		$st = $_POST['start_date'];
 		$ed = $_POST['end_date'];
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNonScrivenerSurCase($st, $ed, $_POST['ignore']) : $prefetch->getNonScrivenerSurCase($st, $ed, $_POST['ignore']);
 		if (empty($rows)) {
-			$log->info("XHR [reg_non_scrivener_sur_case] 查無資料");
+			Logger::getInstance()->info("XHR [reg_non_scrivener_sur_case] 查無資料");
 			echoJSONResponse('查無非專代測量案件');
 		} else {
 			$total = count($rows);
@@ -221,7 +221,7 @@ switch ($_POST["type"]) {
 				$data = new SurCaseData($row);
 				$baked[] = $data->getBakedData();
 			}
-			$log->info("XHR [reg_non_scrivener_sur_case] 查詢成功($total)");
+			Logger::getInstance()->info("XHR [reg_non_scrivener_sur_case] 查詢成功($total)");
 			echoJSONResponse("查詢成功，找到 $total 筆非專代測量案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
@@ -230,11 +230,11 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_foreigner_case":
-		$log->info("XHR [reg_foreigner_case] 查詢外國人地權案件請求");
+		Logger::getInstance()->info("XHR [reg_foreigner_case] 查詢外國人地權案件請求");
 		$st = $_POST['year_month'];
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadForeignerCase($_POST['year_month']) : $prefetch->getForeignerCase($_POST['year_month']);
 		if (empty($rows)) {
-			$log->info("XHR [reg_foreigner_case] 查無資料");
+			Logger::getInstance()->info("XHR [reg_foreigner_case] 查無資料");
 			echoJSONResponse('查無外國人地權案件');
 		} else {
 			$total = count($rows);
@@ -243,7 +243,7 @@ switch ($_POST["type"]) {
 				$data = new RegCaseData($row);
 				$baked[] = $data->getBakedData();
 			}
-			$log->info("XHR [reg_foreigner_case] 查詢成功($total)");
+			Logger::getInstance()->info("XHR [reg_foreigner_case] 查詢成功($total)");
 			echoJSONResponse("查詢成功，找到 $total 筆外國人地權案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
@@ -252,7 +252,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "trust_query":
-		$log->info("XHR [trust_query] 查詢信託相關資料請求");
+		Logger::getInstance()->info("XHR [trust_query] 查詢信託相關資料請求");
 		$type_msg = "信託相關資料";
 		if ($_POST['query'] === 'land') {
 			// 土地註記塗銷
@@ -275,11 +275,11 @@ switch ($_POST["type"]) {
 			}
 		}
 		if (empty($rows)) {
-			$log->info("XHR [trust_query] 查無${type_msg}資料");
+			Logger::getInstance()->info("XHR [trust_query] 查無${type_msg}資料");
 			echoJSONResponse('查無信託相關資料');
 		} else {
 			$total = count($rows);
-			$log->info("XHR [trust_query] 查詢成功($total)");
+			Logger::getInstance()->info("XHR [trust_query] 查詢成功($total)");
 			echoJSONResponse("查詢成功，找到 $total 筆${type_msg}資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"raw" => $rows,
@@ -288,7 +288,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	default:
-		$log->error("不支援的查詢型態【".$_POST["type"]."】");
+		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
 		break;
 }

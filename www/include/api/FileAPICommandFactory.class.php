@@ -9,26 +9,25 @@ require_once("FileAPIDataExportCommand.class.php");
 
 abstract class FileAPICommandFactory {
     public static function getCommand($type) {
-        global $log;
         switch ($type) {
             case "file_sql_csv":
-                $log->info("輸出CSV檔案");
-                $log->info($_POST["sql"]);
+                Logger::getInstance()->info("輸出CSV檔案");
+                Logger::getInstance()->info($_POST["sql"]);
                 return new FileAPISQLCsvCommand($_POST["sql"]);
             case "file_sql_txt":
-                $log->info("輸出TXT檔案");
-                $log->info($_POST["sql"]);
+                Logger::getInstance()->info("輸出TXT檔案");
+                Logger::getInstance()->info($_POST["sql"]);
                 $_SESSION['export_tmp_txt_filename'] = $_POST["filename"] ?? 'tmp';
                 return new FileAPISQLTxtCommand($_POST["sql"]);
             case "file_data_export":
-                $log->info("輸出 ".$_POST["code"]." TXT 檔案");
+                Logger::getInstance()->info("輸出 ".$_POST["code"]." TXT 檔案");
                 return new FileAPIDataExportCommand($_POST["code"], $_POST['section']);
             case "file_log":
-                $log->info("輸出LOG檔案");
-                $log->info($_POST["date"]);
+                Logger::getInstance()->info("輸出LOG檔案");
+                Logger::getInstance()->info($_POST["date"]);
                 return new FileAPILogExportCommand($_POST["date"]);
             case "file_xlsx":
-                $log->info("輸出XLSX檔案");
+                Logger::getInstance()->info("輸出XLSX檔案");
                 return new FileAPIExcelExportCommand();
             default:
                 return new FileAPINotSupportCommand();

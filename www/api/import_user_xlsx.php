@@ -63,11 +63,11 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
         if ($len > 0) {
             if (preg_match("/桃園市智慧管控系統/m", $sheetData[0][0])) {
                 $title_row = array_shift($sheetData);
-                $log->info('偵測到標題 => '.str_replace("\n", ' ', print_r($title_row, true)));
+                Logger::getInstance()->info('偵測到標題 => '.str_replace("\n", ' ', print_r($title_row, true)));
             }
             if (preg_match("/使用者代碼/m", $sheetData[0][0])) {
                 $header_row = array_shift($sheetData);
-                $log->info('偵測到表頭 => '.str_replace("\n", ' ', print_r($header_row, true)));
+                Logger::getInstance()->info('偵測到表頭 => '.str_replace("\n", ' ', print_r($header_row, true)));
             }
             $sqlite_user = new SQLiteUser();
             foreach ($sheetData as $row) {
@@ -75,19 +75,19 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
                     $succeeded++;
                 } else {
                     $failed++;
-                    $log->warning("新增/更新使用者失敗。(".print_r($row, true).")");
+                    Logger::getInstance()->warning("新增/更新使用者失敗。(".print_r($row, true).")");
                 }
             }
             $status = STATUS_CODE::SUCCESS_NORMAL;
             $message = '已匯入 '.$succeeded.' 筆使用者資料(失敗: '.$failed.')。';
-            $log->info($message);
+            Logger::getInstance()->info($message);
         } else {
             $message = '上傳檔案無資料。';
-            $log->error($message.print_r($sheetData, true));
+            Logger::getInstance()->error($message.print_r($sheetData, true));
         }
     } else {
         $message = '上傳檔案有問題。';
-        $log->error($message.print_r($_FILES, true));
+        Logger::getInstance()->error($message.print_r($_FILES, true));
     }
 }
 

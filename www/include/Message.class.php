@@ -142,8 +142,8 @@ class Message {
             }
             return -1;
         }
-        global $log;
-        $log->error(__METHOD__.": \$drop_seconds_range 需為秒數 (${drop_seconds_range})");
+        
+        Logger::getInstance()->error(__METHOD__.": \$drop_seconds_range 需為秒數 (${drop_seconds_range})");
         return -2;
     }
 
@@ -160,35 +160,35 @@ class Message {
      * $drop_datetime: string, date("Y-m-d H:i:s") format
      */
     public function sendByInterval($title, $content, $to_who, $send_datetime, $drop_datetime) : int {
-        global $log;
+        
         $d0 = new DateTime('now');
         $d1 = new DateTime($send_datetime);
         $d2 = new DateTime($drop_datetime);
 
         $diff = $d2->diff($d1);
         if ($diff->invert != 1) {
-            $log->error(__METHOD__.": 時間區間有問題 => 開始: ${send_datetime} 忽略:${drop_datetime}");
+            Logger::getInstance()->error(__METHOD__.": 時間區間有問題 => 開始: ${send_datetime} 忽略:${drop_datetime}");
             return -3;
         }
 
         $diff = $d2->diff($d0);
         if ($diff->invert == 1) {
             $seconds = (60 * $diff->h + $diff->i) * 60 + $diff->s;
-            $log->info(__METHOD__.": 設定時間區間 => 開始: ${send_datetime}, 忽略: ${drop_datetime}, seconds: ".$seconds);
+            Logger::getInstance()->info(__METHOD__.": 設定時間區間 => 開始: ${send_datetime}, 忽略: ${drop_datetime}, seconds: ".$seconds);
             return $this->send($title, $content, $to_who, $send_datetime, $seconds, false);
         }
-        $log->error(__METHOD__.": 忽略時間已超過現在時間 => 忽略: ${drop_datetime} 現在: ".date('Y-m-d H:i:s'));
+        Logger::getInstance()->error(__METHOD__.": 忽略時間已超過現在時間 => 忽略: ${drop_datetime} 現在: ".date('Y-m-d H:i:s'));
         return -4;
     }
 
     public function getMessageByUser($name_or_id_or_ip, $top = 5) {
-        global $log;
+        
         if (!is_numeric($top) || $top < 1) {
-            $log->warning(__METHOD__.": top 必須是正整數！(${top})");
+            Logger::getInstance()->warning(__METHOD__.": top 必須是正整數！(${top})");
             return false;
         }
         if (empty($name_or_id_or_ip)) {
-            $log->warning(__METHOD__.": 輸入參數為空白，無法查詢使用者！");
+            Logger::getInstance()->warning(__METHOD__.": 輸入參數為空白，無法查詢使用者！");
             return false;
         }
         $user = $this->getUserInfo($name_or_id_or_ip);
@@ -207,14 +207,14 @@ class Message {
             $sql = "SELECT TOP ${top} * FROM Message WHERE receiver = '${id}' ORDER BY sendtime DESC";
             return $tdoc_db->fetchAll($sql);
         }
-        $log->warning(__METHOD__.": 找不到使用者資料！【${name_or_id_or_ip}】");
+        Logger::getInstance()->warning(__METHOD__.": 找不到使用者資料！【${name_or_id_or_ip}】");
         return false;
     }
 
     public function getUnreadMessageByUser($name_or_id_or_ip) {
-        global $log;
+        
         if (empty($name_or_id_or_ip)) {
-            $log->warning(__METHOD__.": 輸入參數為空白，無法查詢使用者！");
+            Logger::getInstance()->warning(__METHOD__.": 輸入參數為空白，無法查詢使用者！");
             return false;
         }
         $user = $this->getUserInfo($name_or_id_or_ip);
@@ -233,7 +233,7 @@ class Message {
             $sql = "SELECT * FROM Message WHERE receiver = '${id}' AND done <> '1' ORDER BY sendtime DESC";
             return $tdoc_db->fetchAll($sql);
         }
-        $log->warning(__METHOD__.": 找不到使用者資料！【${name_or_id_or_ip}】");
+        Logger::getInstance()->warning(__METHOD__.": 找不到使用者資料！【${name_or_id_or_ip}】");
         return false;
     }
 

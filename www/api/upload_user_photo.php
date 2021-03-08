@@ -36,7 +36,7 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
         }
     } else {
         $message = "檔案不是JPG";
-        $log->error('檔案不是JPG。 '.print_r($_FILES, true));
+        Logger::getInstance()->error('檔案不是JPG。 '.print_r($_FILES, true));
     }
 }
 

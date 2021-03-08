@@ -34,8 +34,7 @@ class SQLiteUser {
     private function bindUserParams(&$stm, &$row) {
 
         if ($stm === false) {
-            global $log;
-            $log->error(__METHOD__.": bindUserParams because of \$stm is false.");
+            Logger::getInstance()->error(__METHOD__.": bindUserParams because of \$stm is false.");
             return;
         }
 
@@ -150,9 +149,9 @@ class SQLiteUser {
 
     public function import(&$row) {
         if (empty($row['DocUserID'])) {
-            global $log;
-            $log->warning(__METHOD__.": DocUserID is empty. Import user procedure can not be proceeded.");
-            $log->warning(__METHOD__.": ".print_r($row, true));
+            
+            Logger::getInstance()->warning(__METHOD__.": DocUserID is empty. Import user procedure can not be proceeded.");
+            Logger::getInstance()->warning(__METHOD__.": ".print_r($row, true));
             return false;
         }
         return $this->replace($row);
@@ -166,8 +165,8 @@ class SQLiteUser {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE 1 = 1 ORDER BY id")) {
             return $this->prepareArray($stmt);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得所有使用者資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得所有使用者資料失敗！");
         }
         return false;
     }
@@ -176,8 +175,8 @@ class SQLiteUser {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE offboard_date IS NULL OR offboard_date = '' ORDER BY id")) {
             return $this->prepareArray($stmt);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得在職使用者資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得在職使用者資料失敗！");
         }
         return false;
     }
@@ -186,8 +185,8 @@ class SQLiteUser {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE offboard_date IS NOT NULL AND offboard_date <> '' ORDER BY id")) {
             return $this->prepareArray($stmt);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得離職使用者資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得離職使用者資料失敗！");
         }
         return false;
     }
@@ -197,8 +196,8 @@ class SQLiteUser {
             $stmt->bindValue(':chief_bit', AUTHORITY::CHIEF, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得主管資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得主管資料失敗！");
         }
         return false;
     }
@@ -209,8 +208,8 @@ class SQLiteUser {
             $stmt->bindParam(':unit', $unit, SQLITE3_TEXT);
             return $this->prepareArray($stmt);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得${unit}主管資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得${unit}主管資料失敗！");
         }
         return false;
     }
@@ -220,8 +219,8 @@ class SQLiteUser {
             $stmt->bindParam(':unit', $unit, SQLITE3_TEXT);
             return $this->prepareArray($stmt);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得${unit}人員資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得${unit}人員資料失敗！");
         }
         return false;
     }
@@ -270,9 +269,9 @@ class SQLiteUser {
             [14] => IP
             [15] => 生日
         */
-        global $log;
+        
         if (empty($xlsx_row[0])) {
-            $log->warning(__METHOD__.': id is a required param, it\'s empty.');
+            Logger::getInstance()->warning(__METHOD__.': id is a required param, it\'s empty.');
             return false;
         }
         switch ($xlsx_row[2]) {
@@ -306,15 +305,15 @@ class SQLiteUser {
             $stmt->bindParam(':birthday', $xlsx_row[15]);
             return $stmt->execute() === FALSE ? false : true;
         } else {
-            $log->warning(__METHOD__.": 新增/更新使用者(".$xlsx_row[0].", ".$xlsx_row[1].")資料失敗！");
+            Logger::getInstance()->warning(__METHOD__.": 新增/更新使用者(".$xlsx_row[0].", ".$xlsx_row[1].")資料失敗！");
         }
         return false;
     }
 
     public function addUser($data) {
-        global $log;
+        
         if (empty($data['id'])) {
-            $log->warning(__METHOD__.': id is a required param, it\'s empty.');
+            Logger::getInstance()->warning(__METHOD__.': id is a required param, it\'s empty.');
             return false;
         }
         if ($data['sex'] != 1) {
@@ -343,7 +342,7 @@ class SQLiteUser {
             $stmt->bindParam(':birthday', $data['birthday']);
             return $stmt->execute() === FALSE ? false : true;
         } else {
-            $log->warning(__METHOD__.": 新增使用者(".$data['id'].", ".$data['name'].")資料失敗！");
+            Logger::getInstance()->warning(__METHOD__.": 新增使用者(".$data['id'].", ".$data['name'].")資料失敗！");
         }
         return false;
     }
@@ -353,17 +352,17 @@ class SQLiteUser {
             $stmt->bindParam(':id', $id);
             return $this->prepareArray($stmt);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得使用者($id)資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得使用者($id)資料失敗！");
         }
         return false;
         
     }
 
     public function saveUser($data) {
-        global $log;
+        
         if (empty($data['id'])) {
-            $log->warning(__METHOD__.': id is a required param, it\'s empty.');
+            Logger::getInstance()->warning(__METHOD__.': id is a required param, it\'s empty.');
             return false;
         }
         if ($data['sex'] != 1) {
@@ -398,15 +397,15 @@ class SQLiteUser {
             $stmt->bindValue(':authority', $this->calculateAuthority($data['ip']));
             return $stmt->execute() === FALSE ? false : true;
         } else {
-            $log->warning(__METHOD__.": 更新使用者(".$data['id'].")資料失敗！");
+            Logger::getInstance()->warning(__METHOD__.": 更新使用者(".$data['id'].")資料失敗！");
         }
         return false;
     }
 
     public function onboardUser($id) {
-        global $log;
+        
         if (empty($id)) {
-            $log->warning(__METHOD__.': id is a required param, it\'s empty.');
+            Logger::getInstance()->warning(__METHOD__.': id is a required param, it\'s empty.');
             return false;
         }
 
@@ -424,15 +423,15 @@ class SQLiteUser {
             $stmt->bindValue(':offboard_date', '');
             return $stmt->execute() === FALSE ? false : true;
         } else {
-            $log->warning(__METHOD__.": 復職使用者(".$id.")失敗！");
+            Logger::getInstance()->warning(__METHOD__.": 復職使用者(".$id.")失敗！");
         }
         return false;
     }
 
     public function offboardUser($id) {
-        global $log;
+        
         if (empty($id)) {
-            $log->warning(__METHOD__.': id is a required param, it\'s empty.');
+            Logger::getInstance()->warning(__METHOD__.': id is a required param, it\'s empty.');
             return false;
         }
 
@@ -448,7 +447,7 @@ class SQLiteUser {
             $stmt->bindParam(':offboard_date', $today);
             return $stmt->execute() === FALSE ? false : true;
         } else {
-            $log->warning(__METHOD__.": 離職使用者(".$id.")失敗！");
+            Logger::getInstance()->warning(__METHOD__.": 離職使用者(".$id.")失敗！");
         }
         return false;
     }
@@ -458,8 +457,8 @@ class SQLiteUser {
             $stmt->bindParam(':name', $name);
             return $this->prepareArray($stmt);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得使用者($name)資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得使用者($name)資料失敗！");
         }
         return false;
         
@@ -470,8 +469,8 @@ class SQLiteUser {
             $stmt->bindParam(':ip', $ip);
             return $this->prepareArray($stmt);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得使用者($ip)資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得使用者($ip)資料失敗！");
         }
         return false;
         
@@ -483,8 +482,8 @@ class SQLiteUser {
             $stm->bindParam(':id', $id);
             return $stm->execute() === FALSE ? false : true;
         } else {
-            global $log;
-            $log->error(__METHOD__.": 更新分機(${id}, ${ext})資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 更新分機(${id}, ${ext})資料失敗！");
             return false;
         }
     }
@@ -502,8 +501,8 @@ class SQLiteUser {
         ")) {
             return $this->prepareArray($stmt);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得人員授權資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得人員授權資料失敗！");
         }
         return false;
     }

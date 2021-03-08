@@ -62,9 +62,8 @@ class FileAPIDataExportCommand extends FileAPICommand {
         $path = ROOT_DIR.DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'files'.DIRECTORY_SEPARATOR.$this->code.'_sql.tpl';
         $content = @file_get_contents($path);
         if (empty($content)) {
-            global $log;
             $msg = '無法讀取 '.$path.' 檔案。';
-            $log->error(__METHOD__.': '.$msg);
+            Logger::getInstance()->error(__METHOD__.': '.$msg);
             echoJSONResponse($msg, STATUS_CODE::FAIL_LOAD_ERROR);
             return false;
         }
@@ -74,10 +73,10 @@ class FileAPIDataExportCommand extends FileAPICommand {
         $replacement = "'".implode("','", $this->sections)."'";
         $sql = str_replace('##REPLACEMENT##', $replacement, $content);
         
-        global $log;
+        
         $system = System::getInstance();
         $mock = $system->isMockMode();
-        if ($mock) $log->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！");
+        if ($mock) Logger::getInstance()->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！");
         $cache = Cache::getInstance();
         $q = new Query();
 		$data = $mock ? $cache->get('FileAPIDataExportCommand') : $q->getSelectSQLData($sql, true); // true - get raw big5 data; default is false.

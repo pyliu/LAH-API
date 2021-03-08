@@ -8,8 +8,7 @@ class SQLiteSYSAUTH1 {
 
     private function bindParams(&$stm, &$row) {
         if ($stm === false) {
-            global $log;
-            $log->error(__METHOD__.": bindUserParams because of \$stm is false.");
+            Logger::getInstance()->error(__METHOD__.": bindUserParams because of \$stm is false.");
             return;
         }
 
@@ -36,8 +35,8 @@ class SQLiteSYSAUTH1 {
         ");
         
         if ($stm === false) {
-            global $log;
-            $log->error(__METHOD__.": failed because of \$stm is false.");
+            
+            Logger::getInstance()->error(__METHOD__.": failed because of \$stm is false.");
             return false;
         }
 
@@ -85,8 +84,8 @@ class SQLiteSYSAUTH1 {
             $stmt->bindParam(':valid', $int);
             return $this->prepareArray($stmt);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得合法使用者資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得合法使用者資料失敗！");
         }
         return false;
     }
@@ -111,9 +110,9 @@ class SQLiteSYSAUTH1 {
 
     public function import(&$row) {
         if (empty($row['USER_ID']) || empty($row['USER_NAME'])) {
-            global $log;
-            $log->warning(__METHOD__.": USER_ID or USER_NAME is empty. Import procedure can not be proceeded.");
-            $log->warning(__METHOD__.": ".print_r($row, true));
+            
+            Logger::getInstance()->warning(__METHOD__.": USER_ID or USER_NAME is empty. Import procedure can not be proceeded.");
+            Logger::getInstance()->warning(__METHOD__.": ".print_r($row, true));
             return false;
         }
         return $this->replace($row);
@@ -123,8 +122,8 @@ class SQLiteSYSAUTH1 {
         if($stmt = $this->db->prepare("SELECT * FROM SYSAUTH1 WHERE 1 = 1 ORDER BY USER_ID")) {
             return $this->prepareArray($stmt);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得所有使用者資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得所有使用者資料失敗！");
         }
         return false;
     }
@@ -137,8 +136,8 @@ class SQLiteSYSAUTH1 {
                 $result[$row['USER_ID']] = $row['USER_NAME'];
             }
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得所有使用者名稱對應表失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得所有使用者名稱對應表失敗！");
         }
         return $result;
     }

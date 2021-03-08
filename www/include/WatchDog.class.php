@@ -79,41 +79,40 @@ class WatchDog {
     );
 
     private function isOfficeHours() {
-        global $log;
-        $log->info("檢查是否處於上班時間 ... ");
+        Logger::getInstance()->info("檢查是否處於上班時間 ... ");
         $result = $this->isOn($this->schedule["office"]);
-        $log->info('現在是'.($result ? "上班" : "下班")."時段。");
+        Logger::getInstance()->info('現在是'.($result ? "上班" : "下班")."時段。");
         return $result;
     }
 
     private function isOverdueCheckNeeded() {
-        global $log;
-        $log->info("檢查是否需要執行逾期案件檢查 ... ");
+        
+        Logger::getInstance()->info("檢查是否需要執行逾期案件檢查 ... ");
         $result = $this->isOn($this->schedule["overdue"]);
-        $log->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
+        Logger::getInstance()->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
 
     private function isTemperatureNotifyNeeded() {
-        global $log;
-        $log->info("檢查是否需要體溫通知 ... ");
+        
+        Logger::getInstance()->info("檢查是否需要體溫通知 ... ");
         $result = $this->isOn($this->schedule["temperature"]);
-        $log->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
+        Logger::getInstance()->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
 
     private function checkCrossSiteData() {
-        global $log;
+        
         $query = new Query();
         // check reg case missing RM99~RM101 data
-        $log->info('開始跨所註記遺失檢查 ... ');
+        Logger::getInstance()->info('開始跨所註記遺失檢查 ... ');
         $rows = $query->getProblematicCrossCases();
         if (!empty($rows)) {
-            $log->warning('找到'.count($rows).'件跨所註記遺失！');
+            Logger::getInstance()->warning('找到'.count($rows).'件跨所註記遺失！');
             $case_ids = [];
             foreach ($rows as $row) {
                 $case_ids[] = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
-                $log->warning($row['RM01'].'-'.$row['RM02'].'-'.$row['RM03']);
+                Logger::getInstance()->warning($row['RM01'].'-'.$row['RM02'].'-'.$row['RM03']);
             }
             
             $host_ip = getLocalhostIP();
@@ -126,7 +125,7 @@ class WatchDog {
                     continue;
                 }
                 $sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, 840);   // 840 secs => +14 mins
-                $log->info("訊息已送出(${sn})給 ${adm_ip}");
+                Logger::getInstance()->info("訊息已送出(${sn})給 ${adm_ip}");
             }
             $this->stats->addXcasesStats(array(
                 "date" => date("Y-m-d H:i:s"),
@@ -134,22 +133,22 @@ class WatchDog {
                 "note" => $content
             ));
         }
-        $log->info('跨所註記遺失檢查結束。');
+        Logger::getInstance()->info('跨所註記遺失檢查結束。');
     }
 
     private function findDelayRegCases() {
-        global $log;
+        
         if (!$this->isOverdueCheckNeeded()) {
-            $log->warning(__METHOD__.": 非設定時間內，跳過逾期案件檢測。");
+            Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期案件檢測。");
             return false;
         }
         $query = new Query();
         // check reg case missing RM99~RM101 data
-        $log->info('開始查詢15天內逾期登記案件 ... ');
+        Logger::getInstance()->info('開始查詢15天內逾期登記案件 ... ');
 
         $rows = $query->queryOverdueCasesIn15Days();
         if (!empty($rows)) {
-            $log->info('15天內找到'.count($rows).'件逾期登記案件。');
+            Logger::getInstance()->info('15天內找到'.count($rows).'件逾期登記案件。');
             $cache = Cache::getInstance();
             $users = $cache->getUserNames();
             $case_records = [];
@@ -157,7 +156,7 @@ class WatchDog {
                 $this_msg = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']);
                 $case_records[$row['RM45']][] = $this_msg;
                 $case_records["ALL"][] = $this_msg;
-                //$log->info("找到逾期案件：${this_msg}");
+                //Logger::getInstance()->info("找到逾期案件：${this_msg}");
             }
             
             // send to the reviewer
@@ -176,12 +175,12 @@ class WatchDog {
             
             $this->stats->addOverdueMsgCount($stats);
         }
-        $log->info('查詢近15天逾期登記案件完成。');
+        Logger::getInstance()->info('查詢近15天逾期登記案件完成。');
         return true;
     }
 
     private function sendOverdueMessage($to_id, $case_records) {
-        global $log;
+        
         $chief_id = $this->overdue_cfg["REG_CHIEF_ID"];
         $host_ip = getLocalhostIP();
         $cache = Cache::getInstance();
@@ -195,28 +194,28 @@ class WatchDog {
         if ($to_id == "ALL") {
             $title = "15天內逾期案件(全部)通知";
             $sn = $msg->sysSend($title, $content, $chief_id, 14399);  // 14399 secs => +3 hours 59 mins 59 secs
-            $log->info("${title}訊息(${sn})已送出給 ${chief_id} 。 (".$users[$chief_id].")");
+            Logger::getInstance()->info("${title}訊息(${sn})已送出給 ${chief_id} 。 (".$users[$chief_id].")");
             // send all cases notice to subscribers
             foreach ($this->overdue_cfg["SUBSCRIBER"] as $subscriber_ip) {
                 $sn = $msg->send($title, $content, $subscriber_ip, 'now', 14399);
-                $log->info("${title}訊息(${sn})已送出給 ${subscriber_ip} 。 (訂閱者)");
+                Logger::getInstance()->info("${title}訊息(${sn})已送出給 ${subscriber_ip} 。 (訂閱者)");
             }
         } else {
             $this_user = $users[$to_id];
             $title = "15天內逾期案件(${this_user})通知";
             $sn = $msg->sysSend($title, $content, $to_id, 14399);
             if ($sn == -1) {
-                $log->warning("${title}訊息無法送出給 ${to_id} 。 (".$this_user.", $sn)");
+                Logger::getInstance()->warning("${title}訊息無法送出給 ${to_id} 。 (".$this_user.", $sn)");
             } else {
-                $log->info("${title}訊息(${sn})已送出給 ${to_id} 。 (".$this_user.")");
+                Logger::getInstance()->info("${title}訊息(${sn})已送出給 ${to_id} 。 (".$this_user.")");
             }
         }
     }
 
     public function notifyTemperatureRegistration() {
-        global $log;
+        
         if (!$this->isTemperatureNotifyNeeded()) {
-            $log->warning(__METHOD__.": 非設定時間內，跳過體溫通知排程。");
+            Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過體溫通知排程。");
             return false;
         }
         // get all on-board users
@@ -236,7 +235,7 @@ class WatchDog {
     }
 
     private function sendTemperatureMessage($user) {
-        global $log;
+        
         $to_id = trim($user['id']);
         $to_name = $user['name'];
         $AMPM = date('A');
@@ -247,21 +246,21 @@ class WatchDog {
         $title = "體溫登記通知";
         $sn = $msg->sysSend($title, $content, $to_id, 840); // 14 mins == 840 secs
         if ($sn == -1) {
-            $log->warning("${title} 訊息無法送出給 ${to_id}。($to_name, $sn)");
+            Logger::getInstance()->warning("${title} 訊息無法送出給 ${to_id}。($to_name, $sn)");
         } else {
-            $log->info("${title} 訊息(${sn})已送出給 ${to_id}。($to_name)");
+            Logger::getInstance()->info("${title} 訊息(${sn})已送出給 ${to_id}。($to_name)");
         }
     }
 
     private function compressLog() {
         if (php_sapi_name() != "cli") {
-            global $log;
+            
             $cache = Cache::getInstance();
             // compress all log when zipLogs_flag is expired
             if ($cache->isExpired('zipLogs_flag')) {
-                $log->info("開始壓縮LOG檔！");
+                Logger::getInstance()->info("開始壓縮LOG檔！");
                 zipLogs();
-                $log->info("壓縮LOG檔結束！");
+                Logger::getInstance()->info("壓縮LOG檔結束！");
                 // cache the flag for a week
                 $cache->set('zipLogs_flag', true, 604800);
             }
@@ -269,7 +268,7 @@ class WatchDog {
     }
 
     private function findProblematicSURCases() {
-        global $log;
+        
         if ($this->isOn($this->schedule["once_a_day"])) {
             // 找已結案但卻又延期複丈之案件
             $q = new Query();
@@ -277,13 +276,13 @@ class WatchDog {
             if (count($results) > 0) {
                 $this->sendProblematicSURCasesMessage($results);
             } else {
-                $log->info(__METHOD__.": 無已結案卻延期複丈之測量案件。");
+                Logger::getInstance()->info(__METHOD__.": 無已結案卻延期複丈之測量案件。");
             }
         }
     }
 
     private function sendProblematicSURCasesMessage(&$results) {
-        global $log;
+        
         $host_ip = getLocalhostIP();
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
@@ -303,9 +302,9 @@ class WatchDog {
                 $msg_content = $msg_prefix.$case_id."\r\n\r\n請確認該案件狀態以免案件逾期。\r\n如有需要請填寫「電腦問題處理單」交由資訊課協助修正。";
                 $sn = $msg->sysSend($title, $msg_content, $to_id, 85500);   // 85500 = 86400 - 15 * 60 (one day - 15 mins)
                 if ($sn == -1) {
-                    $log->warning("「${title}」訊息無法送出給 ${to_id} 。 (".$this_user.", $sn)");
+                    Logger::getInstance()->warning("「${title}」訊息無法送出給 ${to_id} 。 (".$this_user.", $sn)");
                 } else {
-                    $log->info("「${title}」訊息(${sn})已送出給 ${to_id} 。 (".$this_user.")");
+                    Logger::getInstance()->info("「${title}」訊息(${sn})已送出給 ${to_id} 。 (".$this_user.")");
                 }
             }
         }
@@ -318,7 +317,7 @@ class WatchDog {
                 continue;
             }
             $sn = $msg->send('複丈問題案件通知', $content, $adm_ip, 840);   // 840 secs => +14 mins
-            $log->info("訊息已送出(${sn})給 ${adm_ip}");
+            Logger::getInstance()->info("訊息已送出(${sn})給 ${adm_ip}");
         }
 
         $this->stats->addBadSurCaseStats(array(
@@ -329,7 +328,7 @@ class WatchDog {
     }
 
     private function importUserFromL3HWEB() {
-        global $log;
+        
         
         if ($this->isOn($this->schedule["once_a_day"])) {
             // check if l3hweb is reachable
@@ -339,7 +338,7 @@ class WatchDog {
         
             // not reachable
             if ($latency > 999 || $latency == '') {
-                $log->error(__METHOD__.': 無法連線L3HWEB，無法進行匯入使用者名稱。');
+                Logger::getInstance()->error(__METHOD__.': 無法連線L3HWEB，無法進行匯入使用者名稱。');
                 return false;
             }
 
@@ -372,7 +371,7 @@ class WatchDog {
                 $count++;
             }
 
-            $log->error(__METHOD__.': 匯入 '.$count.' 筆使用者資料。 【SYSAUTH1.db，SYSAUTH1 table】');
+            Logger::getInstance()->error(__METHOD__.': 匯入 '.$count.' 筆使用者資料。 【SYSAUTH1.db，SYSAUTH1 table】');
 
             return true;
         }

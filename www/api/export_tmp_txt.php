@@ -9,9 +9,9 @@ if (isset($_SESSION['export_tmp_txt_filename']) && $_SESSION['export_tmp_txt_fil
     $target = $exp_folder.$_SESSION['export_tmp_txt_filename'].'.txt';
     $res = @copy($tmp_file, $target);
     if ($res) {
-        $log->info('Copied tmp.txt to '.$target);
+        Logger::getInstance()->info('Copied tmp.txt to '.$target);
     } else {
-        $log->error('Cannot copy tmp.txt to '.$target);
+        Logger::getInstance()->error('Cannot copy tmp.txt to '.$target);
     }
 }
 

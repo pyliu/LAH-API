@@ -2,7 +2,7 @@
 /** 
 * st-PHP-Logger - Simple PHP logging class. Log info, warning, error messages to log files.
 * $time = date('Y-M-d');
-* $log = new Logger('log/log-' . $time . '.txt');
+* $log = Logger::getInstance('log/log-' . $time . '.txt');
 * $log->warning('this is the warning message');
 * $log->info('this is the info message');
 */

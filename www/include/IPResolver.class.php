@@ -45,7 +45,6 @@ abstract class IPResolver {
     function __destruct() { }
 
     public static function resolve($ip) {
-        global $log;
         if (filter_var($ip, FILTER_VALIDATE_IP)) {
             if (array_key_exists($ip, IPResolver::$server_map)) {
                 return IPResolver::$server_map[$ip];
@@ -60,7 +59,7 @@ abstract class IPResolver {
             }
             return '';
         } else {
-            $log->warning(__METHOD__.": Not a valid IP address. [$ip]");
+            Logger::getInstance()->warning(__METHOD__.": Not a valid IP address. [$ip]");
         }
         return false;
     }

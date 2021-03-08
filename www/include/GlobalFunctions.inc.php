@@ -48,7 +48,6 @@ function getMyAuthority() {
 }
 
 function zipLogs() {
-    global $log;
     // Enter the name of directory
     $pathdir = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."log";
     $dir = opendir($pathdir); 
@@ -56,7 +55,7 @@ function zipLogs() {
     while($file = readdir($dir)) {
         // skip today
         if (stristr($file, $today)) {
-            //$log->info("Skipping today's log for compression.【${file}】");
+            //Logger::getInstance()->info("Skipping today's log for compression.【${file}】");
             continue;
         }
         $full_filename = $pathdir.DIRECTORY_SEPARATOR.$file;
@@ -68,18 +67,17 @@ function zipLogs() {
             $zipcreated = $pinfo["dirname"].DIRECTORY_SEPARATOR.$pinfo["filename"].".zip";
             $zip = new ZipArchive();
             if($zip->open($zipcreated, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-                $log->info("New zip file created.【${zipcreated}】");
+                Logger::getInstance()->info("New zip file created.【${zipcreated}】");
                 $zip->addFile($full_filename, $file);
                 $zip->close();
             }
-            $log->info("remove log file.【".$pinfo["basename"]."】");
+            Logger::getInstance()->info("remove log file.【".$pinfo["basename"]."】");
             @unlink($full_filename);
         }
     }
 }
 
 function zipExports() {
-    global $log;
     // Enter the name of directory
     $pathdir = EXPORT_DIR ?? dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."export";
     $dir = opendir($pathdir); 
@@ -88,7 +86,7 @@ function zipExports() {
         if ($file == 'tmp.txt') continue;
         // skip today
         if (stristr($file, $today)) {
-            $log->info("Skipping today's log for compression.【${file}】");
+            Logger::getInstance()->info("Skipping today's log for compression.【${file}】");
             continue;
         }
         $full_filename = $pathdir.DIRECTORY_SEPARATOR.$file;
@@ -100,11 +98,11 @@ function zipExports() {
             $zipcreated = $pinfo["dirname"].DIRECTORY_SEPARATOR.$pinfo["filename"].".zip";
             $zip = new ZipArchive();
             if($zip->open($zipcreated, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-                $log->info("New zip file created.【${zipcreated}】");
+                Logger::getInstance()->info("New zip file created.【${zipcreated}】");
                 $zip->addFile($full_filename, $file);
                 $zip->close();
             }
-            $log->info("remove zipped file.【".$pinfo["basename"]."】");
+            Logger::getInstance()->info("remove zipped file.【".$pinfo["basename"]."】");
             @unlink($full_filename);
         }
     }
@@ -154,17 +152,16 @@ function getRealIPAddr() {
  * print the json string
  */
 function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array = array()) {
-    global $log;
 	$str = json_encode(array_merge(array(
 		"status" => $status,
         "message" => $msg
     ), $in_array), 0);
     
-    // $log->info($str);
+    // Logger::getInstance()->info($str);
     
     if ($str === false) {
-        $log->warning(__METHOD__.": 轉換JSON字串失敗。");
-        $log->warning(__METHOD__.":".print_r($in_array, true));
+        Logger::getInstance()->warning(__METHOD__.": 轉換JSON字串失敗。");
+        Logger::getInstance()->warning(__METHOD__.":".print_r($in_array, true));
         echo json_encode(array( "status" => STATUS_CODE::FAIL_JSON_ENCODE, "message" => "無法轉換陣列資料到JSON物件。" ));
     } else {
         echo $str;

@@ -97,7 +97,7 @@ class RegCaseData {
     }
 
     private function formatID(&$id) {
-		global $log;
+		
 		if (!empty($id) && is_string($id)) {
 			$year = substr($id, 0, 3);
 			$code = substr($id, 3, 4);
@@ -107,17 +107,17 @@ class RegCaseData {
 				preg_match("/^[0-9A-Za-z]{4}$/i", $code) &&
 				preg_match("/^[0-9A-Za-z]{6}$/i", $number)
 			) {
-				$log->info(__METHOD__.": $id passed the id verification.");
+				Logger::getInstance()->info(__METHOD__.": $id passed the id verification.");
 				$nid = $year.$code.$number;
 				if ($id != $nid) {
 					// recomposition the $id
 					$id = $nid;
-					$log->info(__METHOD__.": update the case id to '$nid'.");
+					Logger::getInstance()->info(__METHOD__.": update the case id to '$nid'.");
 				}
 				return true;
 			}
 		}
-		$log->warning(__METHOD__.": $id failed the id verification.");
+		Logger::getInstance()->warning(__METHOD__.": $id failed the id verification.");
 		return false;
     }
     

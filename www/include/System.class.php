@@ -47,8 +47,7 @@ class System {
                 }
             }
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得 $role_id IPs 資料失敗！");
+            Logger::getInstance()->error(__METHOD__.": 取得 $role_id IPs 資料失敗！");
         }
         return $return;
     }
@@ -119,8 +118,8 @@ class System {
             $stm->bindParam(':authority', $authority);
             return $stm->execute() === FALSE ? false : true;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ 
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ 
             REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
             VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday
         ) ] 失敗。");
@@ -153,8 +152,8 @@ class System {
             $stm->bindParam(':authority', $authority);
             return $stm->execute() === FALSE ? false : true;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ 
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ 
             REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
             VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
         ] 失敗。");
@@ -166,8 +165,8 @@ class System {
             $stm->bindValue(':id', 'HBSUPER');
             return $stm->execute() === FALSE ? false : true;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE from user WHERE id = :id ] 失敗。(HBSUPER)");
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE from user WHERE id = :id ] 失敗。(HBSUPER)");
         return false;
     }
 
@@ -176,8 +175,8 @@ class System {
             $stm->bindValue(':id', 'HBWATCHDOG');
             return $stm->execute() === FALSE ? false : true;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE from user WHERE id = :id ] 失敗。(HBWATCHDOG");
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE from user WHERE id = :id ] 失敗。(HBWATCHDOG");
         return false;
     }
 
@@ -316,8 +315,8 @@ class System {
             $stm->bindValue(':value', $flag ? 'true' : 'false');
             return $stm->execute() === FALSE ? false : true;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ 
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ 
             REPLACE INTO config ('key', 'value')
             VALUES (:key, :value)
         ] 失敗。($flag)");
@@ -337,8 +336,8 @@ class System {
             $stm->bindValue(':value', $flag ? 'true' : 'false');
             return $stm->execute() === FALSE ? false : true;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ 
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ 
             REPLACE INTO config ('key', 'value')
             VALUES (:key, :value)
         ] 失敗。($flag)");
@@ -358,8 +357,8 @@ class System {
             $stm->bindValue(':value', $flag ? 'true' : 'false');
             return $stm->execute() === FALSE ? false : true;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ 
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ 
             REPLACE INTO config ('key', 'value')
             VALUES (:key, :value)
         ] 失敗。($flag)");
@@ -420,13 +419,13 @@ class System {
     public function removeAuthority($user) {
         $role_id = $user['role_id'];
         $ip = $user['role_ip'];
-        global $log;
+        
         if (empty($role_id)) {
-            $log->warning(__METHOD__.": role_id could not be empty. $role_id");
+            Logger::getInstance()->warning(__METHOD__.": role_id could not be empty. $role_id");
             return false;
         }
         if (!filter_var($ip, FILTER_VALIDATE_IP)) {
-            $log->warning(__METHOD__.": $ip is not a valid IP address.");
+            Logger::getInstance()->warning(__METHOD__.": $ip is not a valid IP address.");
             return false;
         }
         if ($stm = $this->sqlite3->prepare("DELETE from authority WHERE role_id = :role_id AND ip = :ip")) {
@@ -434,18 +433,18 @@ class System {
             $stm->bindParam(':ip', $ip);
             return $stm->execute() === FALSE ? false : true;
         }
-        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE from authority WHERE role_id = :role_id AND ip = :ip ] 失敗。($role_id, $ip)");
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE from authority WHERE role_id = :role_id AND ip = :ip ] 失敗。($role_id, $ip)");
         return false;
     }
 
     public function addAuthority($role_id, $ip) {
-        global $log;
+        
         if (empty($role_id)) {
-            $log->warning(__METHOD__.": role_id could not be empty. $role_id");
+            Logger::getInstance()->warning(__METHOD__.": role_id could not be empty. $role_id");
             return false;
         }
         if (!filter_var($ip, FILTER_VALIDATE_IP)) {
-            $log->warning(__METHOD__.": $ip is not a valid IP address.");
+            Logger::getInstance()->warning(__METHOD__.": $ip is not a valid IP address.");
             return false;
         }
         if ($stm = $this->sqlite3->prepare("
@@ -456,7 +455,7 @@ class System {
             $stm->bindParam(':ip', $ip);
             return $stm->execute() === FALSE ? false : true;
         }
-        $log->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO authority ('role_id', 'ip') VALUES (:role_id, :ip) ] 失敗。($role_id, $ip)");
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO authority ('role_id', 'ip') VALUES (:role_id, :ip) ] 失敗。($role_id, $ip)");
         return false;
     }
 
@@ -567,14 +566,14 @@ class System {
             }
             return $return;
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得 system config 資料失敗！");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得 system config 資料失敗！");
         }
         return false;
     }
 
     public function updateConfigs($configs) {
-        global $log;
+        
         $success = 0;
         $error = 0;
         foreach ($configs as $key => $value) {
@@ -590,8 +589,8 @@ class System {
                     $error++;
                 }
             } else {
-                global $log;
-                $log->error(__METHOD__.": 準備更新SQL失敗！ [ UPDATE config SET value = :value WHERE key = :key ] ".print_r($pair, true));
+                
+                Logger::getInstance()->error(__METHOD__.": 準備更新SQL失敗！ [ UPDATE config SET value = :value WHERE key = :key ] ".print_r($pair, true));
             }
         }
         return $success;

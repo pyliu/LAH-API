@@ -30,7 +30,7 @@ for ($i = 0; $i < $count; $i++) {
     // old DB data is not clean ... Orz
     $all[$i] = array_map('trim', $all[$i]);
     if (empty($all[$i]["DocUserID"])) {
-        $log->info($i.": DocUserID is empty ... skipped.");
+        Logger::getInstance()->info($i.": DocUserID is empty ... skipped.");
         continue;
     }
 
@@ -39,6 +39,6 @@ for ($i = 0; $i < $count; $i++) {
     $ret = $sqlite_user->import($all[$i]);
     
     $this_msg .= ($ret ? "OK ".$all[$i]['AP_EXT'] : "Failed").".";
-    $log->info($this_msg);
+    Logger::getInstance()->info($this_msg);
 }
-$log->info("Imports users done. ($count)");
+Logger::getInstance()->info("Imports users done. ($count)");

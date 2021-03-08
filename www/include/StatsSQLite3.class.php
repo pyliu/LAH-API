@@ -94,13 +94,12 @@ class StatsSQLite3 {
     }
 
     private function addConnectivityStatus($log_time, $tgt_ip, $latency) {
-        global $log;
         // inst into db
         $db_path = $this->getConnectivityDB();
         $ap_db = new SQLite3($db_path);
         $stm = $ap_db->prepare("REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency)");
         if ($stm === false) {
-            $log->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency) ] 失敗。($log_time, $tgt_ip, $latency)");
+            Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency) ] 失敗。($log_time, $tgt_ip, $latency)");
         } else {
             $stm->bindParam(':log_time', $log_time);
             $stm->bindParam(':target_ip', $tgt_ip);
@@ -109,7 +108,7 @@ class StatsSQLite3 {
             if ($stm->execute() !== FALSE) {
                 return true;
             } else {
-                $log->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $tgt_ip, $latency)");
+                Logger::getInstance()->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $tgt_ip, $latency)");
             }
         }
 
@@ -157,8 +156,8 @@ class StatsSQLite3 {
             $stm->bindParam(':name', $name);
             return $stm->execute() === FALSE ? false : true;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO stats ('ID', 'NAME', 'TOTAL') VALUES (:id, :name, :total) ] 失敗。($id, $name, $total)");
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO stats ('ID', 'NAME', 'TOTAL') VALUES (:id, :name, :total) ] 失敗。($id, $name, $total)");
         return false;
     }
     /**
@@ -174,16 +173,16 @@ class StatsSQLite3 {
             $stm->bindParam(':id', $id);
             return $stm->execute() === FALSE ? false : true;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ UPDATE stats set TOTAL = :total WHERE  ID = :id ] 失敗。($id, $total)");
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ UPDATE stats set TOTAL = :total WHERE  ID = :id ] 失敗。($id, $total)");
         return false;
     }
 
     public function addOverdueMsgCount($count = 1) {
-        global $log;
+        
         $total = $this->getTotal('overdue_msg_count') + $count;
         $ret = $this->updateTotal('overdue_msg_count', $total);
-        $log->info(__METHOD__.": overdue_msg_count 計數器+${count}，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
+        Logger::getInstance()->info(__METHOD__.": overdue_msg_count 計數器+${count}，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
     }
 
     public function addOverdueStatsDetail($data) {
@@ -196,13 +195,13 @@ class StatsSQLite3 {
             $stm->bindParam(':note', $data["NOTE"]);
             $ret = $stm->execute();
             if (!$ret) {
-                global $log;
-                $log->error(__METHOD__.": 新增逾期統計詳情失敗【".$stm->getSQL()."】");
+                
+                Logger::getInstance()->error(__METHOD__.": 新增逾期統計詳情失敗【".$stm->getSQL()."】");
             }
             return $ret;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO overdue_stats_detail (datetime,id,count,note) VALUES (:date, :id, :count, :note) ] 失敗。(".print_r($data, true).")");
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO overdue_stats_detail (datetime,id,count,note) VALUES (:date, :id, :count, :note) ] 失敗。(".print_r($data, true).")");
         return false;
     }
 
@@ -214,15 +213,15 @@ class StatsSQLite3 {
             $stm->bindParam(':found', $data["found"]);
             $stm->bindParam(':note', $data["note"]);
             $ret = $stm->execute();
-            global $log;
-            $log->info(__METHOD__.": 新增跨所註記遺失案件統計".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+            
+            Logger::getInstance()->info(__METHOD__.": 新增跨所註記遺失案件統計".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
             // 更新 total counter
             $total = $this->getTotal('xcase_found_count') + $data["found"];
             $ret = $this->updateTotal('xcase_found_count', $total);
-            $log->info(__METHOD__.": xcase_found_count 計數器+".$data["found"]."，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
+            Logger::getInstance()->info(__METHOD__.": xcase_found_count 計數器+".$data["found"]."，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO xcase_stats (datetime,found,note) VALUES (:date, :found, :note) ] 失敗。(".print_r($data, true).")");
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO xcase_stats (datetime,found,note) VALUES (:date, :found, :note) ] 失敗。(".print_r($data, true).")");
         return false;
     }
 
@@ -234,15 +233,15 @@ class StatsSQLite3 {
             $stm->bindParam(':found', $data["found"]);
             $stm->bindParam(':note', $data["note"]);
             $ret = $stm->execute();
-            global $log;
-            $log->info(__METHOD__.": 新增複丈問題案件統計".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+            
+            Logger::getInstance()->info(__METHOD__.": 新增複丈問題案件統計".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
             // 更新 total counter
             $total = $this->getTotal('bad_sur_case_found_count') + $data["found"];
             $ret = $this->updateTotal('bad_sur_case_found_count', $total);
-            $log->info(__METHOD__.": bad_sur_case_found_count 計數器+".$data["found"]."，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
+            Logger::getInstance()->info(__METHOD__.": bad_sur_case_found_count 計數器+".$data["found"]."，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO found_bad_sur_case_stats (datetime,found,note) VALUES (:date, :found, :note) ] 失敗。(".print_r($data, true).")");
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO found_bad_sur_case_stats (datetime,found,note) VALUES (:date, :found, :note) ] 失敗。(".print_r($data, true).")");
         return false;
     }
 
@@ -255,13 +254,13 @@ class StatsSQLite3 {
             $stm->bindParam(':id', $id);
             $ret = $stm->execute();
             if (!$ret) {
-                global $log;
-                $log->error(__METHOD__.": 新增統計 RAW DATA 失敗【".$id.", ".$stm->getSQL()."】");
+                
+                Logger::getInstance()->error(__METHOD__.": 新增統計 RAW DATA 失敗【".$id.", ".$stm->getSQL()."】");
             }
             return $ret;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO stats_raw_data (id,data) VALUES (:id, :data) ] 失敗。($id, ".print_r($data, true).")");
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO stats_raw_data (id,data) VALUES (:id, :data) ] 失敗。($id, ".print_r($data, true).")");
         return false;
     }
 
@@ -269,13 +268,13 @@ class StatsSQLite3 {
         if ($stm = $this->db->prepare("DELETE FROM stats_raw_data WHERE id LIKE '%_".$year_month."'")) {
             $ret = $stm->execute();
             if (!$ret) {
-                global $log;
-                $log->error(__METHOD__.": 移除統計 RAW DATA 失敗【".$year_month.", ".$stm->getSQL()."】");
+                
+                Logger::getInstance()->error(__METHOD__.": 移除統計 RAW DATA 失敗【".$year_month.", ".$stm->getSQL()."】");
             }
             return $ret;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM stats_raw_data WHERE id LIKE '%_".$year_month."' ] 失敗。($year_month)");
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM stats_raw_data WHERE id LIKE '%_".$year_month."' ] 失敗。($year_month)");
         return false;
     }
 
@@ -286,13 +285,13 @@ class StatsSQLite3 {
             $stm->bindParam(':id', $id);
             $ret = $stm->execute();
             if (!$ret) {
-                global $log;
-                $log->error(__METHOD__.": 移除統計 RAW DATA 失敗【".$id.", ".$stm->getSQL()."】");
+                
+                Logger::getInstance()->error(__METHOD__.": 移除統計 RAW DATA 失敗【".$id.", ".$stm->getSQL()."】");
             }
             return $ret;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM stats_raw_data WHERE id = :id ] 失敗。($id)");
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM stats_raw_data WHERE id = :id ] 失敗。($id)");
         return false;
     }
 
@@ -304,7 +303,7 @@ class StatsSQLite3 {
      * AP connection history
      */
     public function getLatestAPConnHistory($ap_ip, $all = 'true') {
-        global $log;
+        
         $db_path = $this->getAPConnStatsDB(explode('.', $ap_ip)[3]);
         $ap_db = new SQLite3($db_path);
         // get latest batch log_time
@@ -323,14 +322,14 @@ class StatsSQLite3 {
             }
             return $return;
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得 $ap_ip 最新紀錄資料失敗！ (${db_path})");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得 $ap_ip 最新紀錄資料失敗！ (${db_path})");
         }
         return false;
     }
 
     public function getAPConnHistory($ap_ip, $count, $extend = true) {
-        global $log;
+        
         // XAP conn only store at AP123 db
         $db_path = $this->getAPConnStatsDB('123');
         $ap_db = new SQLite3($db_path);
@@ -351,14 +350,14 @@ class StatsSQLite3 {
             }
             return $return;
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得 $ap_ip 歷史紀錄資料失敗！ (${db_path})");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得 $ap_ip 歷史紀錄資料失敗！ (${db_path})");
         }
         return false;
     }
 
     public function addAPConnHistory($log_time, $ap_ip, $processed) {
-        global $log;
+        
         // inst into db
         $db_path = $this->getAPConnStatsDB(explode('.', $ap_ip)[3]);
         $ap_db = new SQLite3($db_path);
@@ -374,17 +373,17 @@ class StatsSQLite3 {
                 $retry = 0;
                 while (@$stm->execute() === FALSE) {
                     if ($retry > 10) {
-                        $log->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $ap_ip, $est_ip, $count)");
+                        Logger::getInstance()->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $ap_ip, $est_ip, $count)");
                         return $success;
                     }
                     $zzz_us = random_int(100000, 500000);
-                    $log->warning(__METHOD__.": execute statement failed ... sleep ".$zzz_us." microseconds, retry(".++$retry.").");
+                    Logger::getInstance()->warning(__METHOD__.": execute statement failed ... sleep ".$zzz_us." microseconds, retry(".++$retry.").");
                     usleep($zzz_us);
                 }
                 $success++;
             } else {
-                global $log;
-                $log->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch) ] 失敗。($log_time, $ap_ip, $est_ip, $count)");
+                
+                Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch) ] 失敗。($log_time, $ap_ip, $est_ip, $count)");
             }
         }
 
@@ -392,19 +391,19 @@ class StatsSQLite3 {
     }
 
     public function wipeAPConnHistory($ip_end) {
-        global $log;
+        
         $one_day_ago = date("YmdHis", time() - 24 * 3600);
         $ap_db = new SQLite3($this->getAPConnStatsDB($ip_end));
         if ($stm = $ap_db->prepare("DELETE FROM ap_conn_history WHERE log_time < :time")) {
             $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
             $ret = $stm->execute();
             if (!$ret) {
-                $log->error(__METHOD__.": stats_ap_conn_AP".$ip_end.".db 移除一天前資料失敗【".$one_day_ago.", ".$ap_db->lastErrorMsg()."】");
+                Logger::getInstance()->error(__METHOD__.": stats_ap_conn_AP".$ip_end.".db 移除一天前資料失敗【".$one_day_ago.", ".$ap_db->lastErrorMsg()."】");
             }
             return $ret;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM ap_conn_history WHERE log_time < :time ] 失敗。($ip_end)");
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM ap_conn_history WHERE log_time < :time ] 失敗。($ip_end)");
         return false;
     }
 
@@ -422,13 +421,13 @@ class StatsSQLite3 {
      * Connectivity Status
      */
     public function getCheckingTargets() {
-        global $log;
+        
         // inst into db
         $db_path = $this->getConnectivityDB();
         $ap_db = new SQLite3($db_path);
         $stm = $ap_db->prepare("SELECT * FROM target WHERE monitor = 'Y' ORDER BY name");
         if ($stm === false) {
-            $log->warning(__METHOD__.": 準備資料庫 statement [ SELECT * FROM target ] 失敗。");
+            Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ SELECT * FROM target ] 失敗。");
         } else {
             if ($result = $stm->execute()) {
                 $return = array();
@@ -438,7 +437,7 @@ class StatsSQLite3 {
                 }
                 return $return;
             } else {
-                $log->warning(__METHOD__.": 取得檢測目標列表失敗。");
+                Logger::getInstance()->warning(__METHOD__.": 取得檢測目標列表失敗。");
             }
         }
 
@@ -446,30 +445,30 @@ class StatsSQLite3 {
     }
 
     public function checkRegisteredConnectivity() {
-        global $log;
+        
         $tracking_targets = $this->getCheckingTargets();
         // generate the latest batch records
         foreach ($tracking_targets as $name => $row) {
             if (filter_var($row['ip'], FILTER_VALIDATE_IP)) {
                 $this->pingAndSave($row);
             } else {
-                $log->warning(__METHOD__.": $name:".$row['ip']." is not a valid IP address.".(empty($row['port']) ? '' : ':'.$row['port']));
+                Logger::getInstance()->warning(__METHOD__.": $name:".$row['ip']." is not a valid IP address.".(empty($row['port']) ? '' : ':'.$row['port']));
             }
         }
     }
 
     public function checkIPConnectivity($ip = null, $port = 0) {
-        global $log;
+        
         if (filter_var($ip, FILTER_VALIDATE_IP)) {
             // single ep
             $this->pingAndSave(array('ip' => $ip, 'port' => $port));
         } else {
-            $log->warning(__METHOD__.": $ip".(empty($port) ? '' : ":$port")." is not valid.");
+            Logger::getInstance()->warning(__METHOD__.": $ip".(empty($port) ? '' : ":$port")." is not valid.");
         }
     }
 
     public function getConnectivityStatus($force = 'false') {
-        global $log;
+        
 
         if ($force === 'true') {
             // generate the latest batch records
@@ -483,7 +482,7 @@ class StatsSQLite3 {
         }
         $return = array();
         if (empty($tracking_ips)) {
-            $log->warning(__METHOD__.": tracking ip array is empty.");
+            Logger::getInstance()->warning(__METHOD__.": tracking ip array is empty.");
         } else {
             $db_path = $this->getConnectivityDB();
             $conn_db = new SQLite3($db_path);
@@ -496,7 +495,7 @@ class StatsSQLite3 {
                     $return[] = $row;
                 }
             } else {
-                $log->error(__METHOD__.": 取得 connectivity 最新紀錄資料失敗！ (${db_path})");
+                Logger::getInstance()->error(__METHOD__.": 取得 connectivity 最新紀錄資料失敗！ (${db_path})");
             }
         }
         return $return;
@@ -517,14 +516,14 @@ class StatsSQLite3 {
             if ($result === false) return array();
             return $result->fetchArray(SQLITE3_ASSOC);
         } else {
-            global $log;
-            $log->error(__METHOD__.": 取得 $ip connectivity 最新紀錄資料失敗！ (${db_path})");
+            
+            Logger::getInstance()->error(__METHOD__.": 取得 $ip connectivity 最新紀錄資料失敗！ (${db_path})");
         }
         return false;
     }
 
     public function wipeConnectivityHistory() {
-        global $log;
+        
         $db_path = $this->getConnectivityDB();
         $sc_db = new SQLite3($db_path);
         if ($stm = $sc_db->prepare("DELETE FROM connectivity WHERE log_time < :time")) {
@@ -532,12 +531,12 @@ class StatsSQLite3 {
             $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
             $ret = $stm->execute();
             if (!$ret) {
-                $log->error(__METHOD__.": $db_path 移除一天前資料失敗【".$one_day_ago.", ".$sc_db->lastErrorMsg()."】");
+                Logger::getInstance()->error(__METHOD__.": $db_path 移除一天前資料失敗【".$one_day_ago.", ".$sc_db->lastErrorMsg()."】");
             }
             return $ret;
         }
-        global $log;
-        $log->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM connectivity WHERE log_time < :time ] 失敗。");
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM connectivity WHERE log_time < :time ] 失敗。");
         return false;
     }
 }

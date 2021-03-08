@@ -11,7 +11,7 @@ function echoErrorJSONString($msg = "", $status = STATUS_CODE::DEFAULT_FAIL) {
 
 switch ($_POST["type"]) {
     case "load_select_sql":
-        $log->info("XHR [load_select_sql] 查詢請求【".$_POST["file_name"]."】");
+        Logger::getInstance()->info("XHR [load_select_sql] 查詢請求【".$_POST["file_name"]."】");
         $path = ROOT_DIR."/assets/files/".$_POST["file_name"];
         $content = file_get_contents($path);
         if (file_exists($path)) {
@@ -20,15 +20,15 @@ switch ($_POST["type"]) {
                 "data" => $content,
                 "query_string" => "file_name=".$_POST["file_name"]."&type=".$_POST["type"]
             );
-            $log->info("XHR [load_select_sql] 讀取成功【".$path."】");
+            Logger::getInstance()->info("XHR [load_select_sql] 讀取成功【".$path."】");
             echo json_encode($result, 0);
         } else {
-            $log->error("XHR [load_select_sql] 找不到檔案【".$path."】");
+            Logger::getInstance()->error("XHR [load_select_sql] 找不到檔案【".$path."】");
             echoErrorJSONString("找不到檔案【".$path."】");
         }
         break;
     case "load_log":
-        //$log->info("XHR [load_log] 查詢請求【".$_POST["log_filename"]."】");
+        //Logger::getInstance()->info("XHR [load_log] 查詢請求【".$_POST["log_filename"]."】");
         $path = LOG_DIR.DIRECTORY_SEPARATOR.$_POST["log_filename"];
         if (file_exists($path)) {
             function removeLoadLog($item) {
@@ -46,15 +46,15 @@ switch ($_POST["type"]) {
                 "data" => $data,
                 "query_string" => "log_filename=".$_POST["log_filename"]."&type=".$_POST["type"]."&slice_offset=".$_POST["slice_offset"]
             );
-            //$log->info("XHR [load_log] 讀取成功【".$path."】");
+            //Logger::getInstance()->info("XHR [load_log] 讀取成功【".$path."】");
             echo json_encode($result, 0);
         } else {
-            $log->error("XHR [load_log] 找不到檔案【".$path."】");
+            Logger::getInstance()->error("XHR [load_log] 找不到檔案【".$path."】");
             echoErrorJSONString("找不到檔案【".$path."】");
         }
         break;
     default:
-        $log->error("XHR [".$_POST["type"]."] 不支援的讀取型態");
+        Logger::getInstance()->error("XHR [".$_POST["type"]."] 不支援的讀取型態");
         echoErrorJSONString("不支援的讀取型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
         break;
 }

@@ -40,7 +40,7 @@ switch ($_POST["type"]) {
 		));
 		break;
 	case "lxhweb_site_update_time":
-		// $log->info("XHR [lxhweb_site_update_time] 查詢各所同步異動更新時間 請求 ".$_POST["site"]);
+		// Logger::getInstance()->info("XHR [lxhweb_site_update_time] 查詢各所同步異動更新時間 請求 ".$_POST["site"]);
 		$rows = $mock ? $cache->get('lxhweb_site_update_time') : $lxhweb->querySiteUpdateTime($_POST["site"]);
 		if (!$mock) $cache->set('lxhweb_site_update_time', $rows);
 		$count = $rows === false ? 0 : count($rows);
@@ -54,7 +54,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "lxhweb_broken_table":
-        $log->info("XHR [lxhweb_broken_table] 檢測損毀之同步異動表格請求");
+        Logger::getInstance()->info("XHR [lxhweb_broken_table] 檢測損毀之同步異動表格請求");
 		$rows = $mock ? $cache->get('lxhweb_broken_table') : $lxhweb->queryBrokenTable();
 		if (!$mock) $cache->set('lxhweb_broken_table', $rows);
 		$count = $rows === false ? 0 : count($rows);
@@ -68,7 +68,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "lxhweb_tbl_update_time":
-        $log->info("XHR [lxhweb_tbl_update_time] 查詢同步異動更新時間 請求 ".$_POST["site"]);
+        Logger::getInstance()->info("XHR [lxhweb_tbl_update_time] 查詢同步異動更新時間 請求 ".$_POST["site"]);
 		$rows = $mock ? $cache->get('lxhweb_tbl_update_time') : $lxhweb->queryTableUpdateTime($_POST["site"]);
 		if (!$mock) $cache->set('lxhweb_tbl_update_time', $rows);
 		$count = $rows === false ? 0 : count($rows);
@@ -82,7 +82,7 @@ switch ($_POST["type"]) {
 		}
 		break;
     default:
-        $log->error("不支援的查詢型態【".$_POST["type"]."】");
+        Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
         echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
         break;
 }

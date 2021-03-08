@@ -59,10 +59,7 @@ class OraDB {
             } else {
                 $this->connected = false;
                 $e = oci_error();
-                global $log;
-                if ($log) {
-                    $log->error(__METHOD__.": ".$e['message']);
-                }
+                Logger::getInstance()->error(__METHOD__.": ".$e['message']);
                 trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
             }
         }
@@ -92,10 +89,8 @@ class OraDB {
         $this->stid = oci_parse($this->conn, $str);
         if (!$this->stid) {
             $e = oci_error($this->conn);
-            global $log;
-            if ($log) {
-                $log->error(__METHOD__.": ".$e['message']);
-            }
+            
+            Logger::getInstance()->error(__METHOD__.": ".$e['message']);
             trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
         }
     }
@@ -105,10 +100,8 @@ class OraDB {
         $r = oci_execute($this->stid);
         if (!$r) {
             $e = oci_error($this->stid);
-            global $log;
-            if ($log) {
-                $log->error(__METHOD__.": ".$e['message']);
-            }
+            
+            Logger::getInstance()->error(__METHOD__.": ".$e['message']);
             trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
         }
         return $this->stid;

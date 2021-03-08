@@ -13,6 +13,6 @@ if (isset($_SESSION[$code])) {
     header('Content-Disposition: attachment; filename='.($_SESSION[$code] ?? $code.'.txt'));
     readfile($target);
 } else {
-    $log->error('$_SESSION variable '.$code.' not set. Can not download the file.');
+    Logger::getInstance()->error('$_SESSION variable '.$code.' not set. Can not download the file.');
     die("SESSION變數${code}未設定，無法下載檔案。");
 }

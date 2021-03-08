@@ -6,9 +6,8 @@ class StatsOracle {
     private $db;
 
     private function checkYearMonth($year_month) {
-        global $log;
-		    if (empty($year_month) || strlen($year_month) != 5) {
-            $log->error(__METHOD__.": $year_month foramt is not correct.");
+        if (empty($year_month) || strlen($year_month) != 5) {
+            Logger::getInstance()->error(__METHOD__.": $year_month foramt is not correct.");
             return false;
         }
         return true;

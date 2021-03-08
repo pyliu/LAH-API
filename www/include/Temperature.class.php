@@ -39,8 +39,8 @@ class Temperature {
         }
         $ret = $stm->execute();
 
-        global $log;
-        $log->info(__METHOD__.": 取得溫度紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+        
+        Logger::getInstance()->info(__METHOD__.": 取得溫度紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
         $array = array();
         $count = 0;
         while (($row = $ret->fetchArray()) && $count < $limit) {
@@ -56,8 +56,8 @@ class Temperature {
         $stm->bindValue(':date', $date."%");
         $ret = $stm->execute();
 
-        global $log;
-        $log->info(__METHOD__.": 取得 ${date} 溫度紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+        
+        Logger::getInstance()->info(__METHOD__.": 取得 ${date} 溫度紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
         $array = array();
         while ($row = $ret->fetchArray()) {
             $array[] = $row;
@@ -73,8 +73,8 @@ class Temperature {
         $stm->bindValue(':date', $date."%");
         $ret = $stm->execute();
 
-        global $log;
-        $log->info(__METHOD__.": 取得 ${$id} ${date} 溫度紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+        
+        Logger::getInstance()->info(__METHOD__.": 取得 ${$id} ${date} 溫度紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
         $array = array();
         while ($row = $ret->fetchArray()) {
             $array[] = $row;
@@ -112,12 +112,12 @@ class Temperature {
     }
 
     public function add($id, $temperature_value, $note = '') {
-        global $log;
+        
         $id = trim($id);
         $AMPM = date('A');
         $records = $this->getAMPMTemperatures($id, $AMPM);
         if (count($records) != 0) {
-            $log->warning(__METHOD__.": ${id} ${AMPM} 已有體溫紀錄。");
+            Logger::getInstance()->warning(__METHOD__.": ${id} ${AMPM} 已有體溫紀錄。");
             return false;
         }
         $stm = $this->db->prepare("INSERT INTO temperature (datetime,id,value,note) VALUES (:date,:id,:value,:note)");
@@ -127,7 +127,7 @@ class Temperature {
         $stm->bindParam(':note', $note);
         $ret = $stm->execute();
 
-        $log->info(__METHOD__.": 新增體溫紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+        Logger::getInstance()->info(__METHOD__.": 新增體溫紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
 
         return $ret;
     }
@@ -138,8 +138,8 @@ class Temperature {
         $stm->bindParam(':date', $datetime);
         $stm->bindParam(':id', $id);
         $ret = $stm->execute();
-        global $log;
-        $log->info(__METHOD__.": 刪除體溫紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
+        
+        Logger::getInstance()->info(__METHOD__.": 刪除體溫紀錄".($ret ? "成功" : "失敗【".$stm->getSQL()."】")."。");
         return $ret;
     }
 }

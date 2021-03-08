@@ -108,9 +108,9 @@ class FileAPIExcelExportCommand extends FileAPICommand {
 
     private function write_reg_case_xlsx(&$rows, &$xlsx_item, $title) {
         // from init.php
-        global $log, $today;
+        global $today;
 
-        $log->info('查到 '.count($rows).' 筆資料');
+        Logger::getInstance()->info('查到 '.count($rows).' 筆資料');
         $baked = [];
         foreach ($rows as $row) {
             $data = new RegCaseData($row);
@@ -201,7 +201,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         
 		$reason_code = $xlsx_item['id'];
 		$query_month = $xlsx_item['query_month'];
-		$log->info("匯出登記案件 BY MONTH【${reason_code}, ${query_month}】");
+		Logger::getInstance()->info("匯出登記案件 BY MONTH【${reason_code}, ${query_month}】");
 		$rows = $this->mock_mode ? $this->cache->get('reg_reason_cases_by_month') : $this->query->queryReasonCasesByMonth($reason_code, $query_month);
         if (!$this->mock_mode) $this->cache->set('reg_reason_cases_by_month', $rows);
         
@@ -217,7 +217,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         }
         
         $query_month = $xlsx_item["query_month"];
-		$log->info("匯出登記補正案件 BY MONTH【${query_month}】");
+		Logger::getInstance()->info("匯出登記補正案件 BY MONTH【${query_month}】");
 		$rows = $this->mock_mode ? $this->cache->get('reg_fix_cases_by_month') : $this->query->queryFixCasesByMonth($query_month);
 		if (!$this->mock_mode) $this->cache->set('reg_fix_cases_by_month', $rows);
         
@@ -233,7 +233,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         }
         
         $query_month = $xlsx_item["query_month"];
-		$log->info("匯出登記駁回案件 BY MONTH【${query_month}】");
+		Logger::getInstance()->info("匯出登記駁回案件 BY MONTH【${query_month}】");
 		$rows = $this->mock_mode ? $this->cache->get('reg_reject_cases_by_month') : $this->query->queryRejectCasesByMonth($query_month);
 		if (!$this->mock_mode) $this->cache->set('reg_reject_cases_by_month', $rows);
 
@@ -249,7 +249,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         }
         
         $query_month = $xlsx_item["query_month"];
-		$log->info("匯出登記法院囑託案件 BY MONTH【${query_month}】");
+		Logger::getInstance()->info("匯出登記法院囑託案件 BY MONTH【${query_month}】");
 		$rows = $this->mock_mode ? $this->cache->get('reg_court_cases_by_month') : $this->query->queryCourtCasesByMonth($query_month);
 		if (!$this->mock_mode) $this->cache->set('reg_court_cases_by_month', $rows);
 
@@ -265,11 +265,11 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         }
         
         $query_month = $xlsx_item["query_month"];
-		$log->info("匯出本所處理跨所子號案件 BY MONTH【${query_month}】");
+		Logger::getInstance()->info("匯出本所處理跨所子號案件 BY MONTH【${query_month}】");
 		$rows = $this->mock_mode ? $this->cache->get('reg_subcases_by_month') : $this->query->queryRegSubCasesByMonth($query_month);
 		if (!$this->mock_mode) $this->cache->set('reg_subcases_by_month', $rows);
         
-        $log->info('查到 '.count($rows).' 筆資料');
+        Logger::getInstance()->info('查到 '.count($rows).' 筆資料');
         
         $spreadsheet = IOFactory::load(ROOT_DIR.'/assets/xlsx/stats_reg_subcase.tpl.xlsx');
         $worksheet = $spreadsheet->getActiveSheet();
@@ -286,11 +286,11 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         }
         
         $query_month = $xlsx_item["query_month"];
-		$log->info("匯出遠途先審案件 BY MONTH【${query_month}】");
+		Logger::getInstance()->info("匯出遠途先審案件 BY MONTH【${query_month}】");
 		$rows = $this->mock_mode ? $this->cache->get('reg_remote_cases_by_month') : $this->query->queryRegRemoteCasesByMonth($query_month);
 		if (!$this->mock_mode) $this->cache->set('reg_remote_cases_by_month', $rows);
         
-        $log->info('查到 '.count($rows).' 筆資料');
+        Logger::getInstance()->info('查到 '.count($rows).' 筆資料');
         
         $spreadsheet = IOFactory::load(ROOT_DIR.'/assets/xlsx/stats_reg_remote.tpl.xlsx');
         $worksheet = $spreadsheet->getActiveSheet();
@@ -307,11 +307,11 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         }
         
         $query_month = $xlsx_item["query_month"];
-		$log->info("匯出外國人地權登記統計檔 BY MONTH【${query_month}】");
+		Logger::getInstance()->info("匯出外國人地權登記統計檔 BY MONTH【${query_month}】");
 		$rows = $this->mock_mode ? $this->cache->get('regf_by_month') : $this->query->queryRegfCasesByMonth($query_month);
 		if (!$this->mock_mode) $this->cache->set('regf_by_month', $rows);
         
-        $log->info('查到 '.count($rows).' 筆資料');
+        Logger::getInstance()->info('查到 '.count($rows).' 筆資料');
         
         $spreadsheet = IOFactory::load(ROOT_DIR.'/assets/xlsx/stats_regf.tpl.xlsx');
         $worksheet = $spreadsheet->getActiveSheet();
@@ -328,11 +328,11 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         }
         
         $query_month = $xlsx_item["query_month"];
-		$log->info("匯出測量因雨延期案件 BY MONTH【${query_month}】");
+		Logger::getInstance()->info("匯出測量因雨延期案件 BY MONTH【${query_month}】");
 		$rows = $this->mock_mode ? $this->cache->get('sur_rain_cases_by_month') : $this->query->querySurRainCasesByMonth($query_month);
 		if (!$this->mock_mode) $this->cache->set('sur_rain_cases_by_month', $rows);
         
-        $log->info('查到 '.count($rows).' 筆資料');
+        Logger::getInstance()->info('查到 '.count($rows).' 筆資料');
         
         $spreadsheet = IOFactory::load(ROOT_DIR.'/assets/xlsx/stats_sur_rain.tpl.xlsx');
         $worksheet = $spreadsheet->getActiveSheet();
@@ -349,11 +349,11 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         }
         
         $query_month = $xlsx_item["query_month"];
-		$log->info("匯出退費案件 BY MONTH【${query_month}】");
+		Logger::getInstance()->info("匯出退費案件 BY MONTH【${query_month}】");
 		$rows = $this->mock_mode ? $this->cache->get('expba_refund_cases_by_month') : $this->query->queryEXPBARefundCasesByMonth($query_month);
 		if (!$this->mock_mode) $this->cache->set('expba_refund_cases_by_month', $rows);
         
-        $log->info('查到 '.count($rows).' 筆資料');
+        Logger::getInstance()->info('查到 '.count($rows).' 筆資料');
         
         $spreadsheet = IOFactory::load(ROOT_DIR.'/assets/xlsx/stats_refund.tpl.xlsx');
         $worksheet = $spreadsheet->getActiveSheet();
@@ -363,8 +363,6 @@ class FileAPIExcelExportCommand extends FileAPICommand {
     }
 
     private function stats_export_factory() {
-        // from init.php
-        global $log;
         // $_SESSION['xlsx_item'] => Array ( [query_month] => 10907 [id] => 67 [text] => 拍賣 [count] => 21 [category] => stats_reg_reason )
         $type = $_SESSION["xlsx_item"]["category"];
         switch ($type) {
@@ -397,7 +395,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
                 break;
             default:
                 echo "<span style='color: red; font-weight: bold;'>※</span> 不支援的統計資料型態。【${type}】";
-                $log->warning(__METHOD__.":不支援的統計資料型態。【${type}】");
+                Logger::getInstance()->warning(__METHOD__.":不支援的統計資料型態。【${type}】");
         }
     }
 
@@ -405,7 +403,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         // from init.php
         global $log, $today;
 
-        if ($this->mock_mode) $log->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！【cert_log】");
+        if ($this->mock_mode) Logger::getInstance()->warning("現在處於模擬模式(mock mode)，API僅會回應之前已被快取之最新的資料！【cert_log】");
         $query_result = $this->mock_mode ? $this->cache->get('cert_log') : $this->query->getCertLog($_SESSION['section_code'], $_SESSION['numbers']);
         if (!$this->mock_mode) $this->cache->set('cert_log', $query_result);
 
@@ -426,7 +424,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $sqlite_user = new SQLiteUser();
         $all_users = $sqlite_user->getAllUsers() ?? [];
 
-        $log->info(__METHOD__.': 找到 '.count($all_users).' 個使用者。');
+        Logger::getInstance()->info(__METHOD__.': 找到 '.count($all_users).' 個使用者。');
 
         $spreadsheet = IOFactory::load(XLSX_TPL_DIR.DIRECTORY_SEPARATOR.'user_export.tpl.xlsx');
         $worksheet = $spreadsheet->getActiveSheet();
@@ -469,7 +467,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
     function __destruct() {}
 
     public function execute() {
-        global $log;
+        
         // factory method here
         switch($this->type) {
             case 'cert_log':
@@ -482,7 +480,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
                 $this->all_user_export();
                 break;
             default:
-                $log->error('xlsx_type is not set, can not output xlsx file! ['.print_r($_SESSION, true).']');
+                Logger::getInstance()->error('xlsx_type is not set, can not output xlsx file! ['.print_r($_SESSION, true).']');
                 break;
         }
     }

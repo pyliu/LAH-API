@@ -25,7 +25,7 @@ if (!file_exists($full_path)) {
         $full_path = $default_path.trim($key, '_avatar').'.jpg';
         if (!file_exists($full_path)) {
             if ($system->isMockMode()) {
-                $log->warning("Can not find the $key photo ... ");
+                Logger::getInstance()->warning("Can not find the $key photo ... ");
                 $full_path = 'assets\\img\\not_found.jpg';
             } else {
                 // try to use fallback to get the image
@@ -34,11 +34,11 @@ if (!file_exists($full_path)) {
                     $full_path = $fallback_path.DIRECTORY_SEPARATOR.$key.'.jpg';
                 }
                 if (file_exists($full_path)) {
-                    $log->info("Trying to copy the $full_path to ./$default_path$key.jpg");
+                    Logger::getInstance()->info("Trying to copy the $full_path to ./$default_path$key.jpg");
                     copy($full_path, $default_path.$key.".jpg");
                     $full_path = $default_path.$key.".jpg";
                 } else {
-                    $log->warning("Can not find the $key photo ... ");
+                    Logger::getInstance()->warning("Can not find the $key photo ... ");
                     $full_path = 'assets\\img\\not_found.jpg';
                 }
             }
