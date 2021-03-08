@@ -23,7 +23,8 @@ class Prefetch {
         'TRUST_REG_QUERY' => 'Prefetch::getTrustRegQuery',
         'TRUST_OBLITERATE_LAND' => 'Prefetch::getTrustObliterateLand',
         'TRUST_OBLITERATE_BUILD' => 'Prefetch::getTrustObliterateBuilding',
-        '375_LAND_CHANGE' => 'Prefetch::getLand375Change'
+        '375_LAND_CHANGE' => 'Prefetch::getLand375Change',
+        '375_OWNER_CHANGE' => 'Prefetch::getOwner375Change'
     );
     private $ora_db = null;
     private $cache = null;
@@ -1189,5 +1190,67 @@ class Prefetch {
         }
         return $this->getCache()->get(self::KEYS['375_LAND_CHANGE'].$st.$ed);
     }
-    
+    /**
+     * 375租約異動[土地所有權部]查詢快取剩餘時間
+     */
+    public function getOwner375ChangeCacheRemainingTime($st, $ed) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['375_OWNER_CHANGE'].$st.$ed);
+    }
+    /**
+     * 強制重新讀取375租約異動[土地所有權部]查詢
+     */
+    public function reloadOwner375Change($st, $ed) {
+        $this->getCache()->del(self::KEYS['375_OWNER_CHANGE'].$st.$ed);
+        return $this->getOwner375Change($st, $ed);
+    }
+    /**
+	 * 取得375租約異動[土地所有權部]查詢
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getOwner375Change($st, $ed, $expire_duration = 86400) {
+        if ($this->getCache()->isExpired(self::KEYS['375_OWNER_CHANGE'].$st.$ed)) {
+            Logger::getInstance()->info('['.self::KEYS['375_OWNER_CHANGE'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable(self::KEYS['375_OWNER_CHANGE'])) {
+                $db = $this->getOraDB();
+                $db->parse("
+                    SELECT DISTINCT
+                        r.*,
+                        t.*,
+                        u.KCNT AS RM09_CHT,
+                        w.KNAME    AS BA48_CHT,
+                        (CASE
+                            WHEN r.BS_TYPE = 'A' THEN '".mb_convert_encoding('新增', 'BIG5', 'UTF-8')."'
+                            WHEN r.BS_TYPE = 'D' THEN '".mb_convert_encoding('刪除', 'BIG5', 'UTF-8')."'
+                            WHEN r.BS_TYPE = 'N' THEN '".mb_convert_encoding('修改前', 'BIG5', 'UTF-8')."'
+                            WHEN r.BS_TYPE = 'M' THEN '".mb_convert_encoding('修改後', 'BIG5', 'UTF-8')."'
+                            ELSE r.BS_TYPE
+                        END) AS BS_TYPE_CHT,
+                        v.LNAM AS BB09_NAME,
+                        v.LADR AS BB09_ADDR
+                    FROM
+                        MOICAW.RBLOW r
+                    LEFT JOIN MOICAD.RGALL s ON r.BA49 = s.GG49 AND r.BA48 = s.GG48 AND s.GG30_1 = 'A6'
+                    LEFT JOIN MOICAS.CRSMS t ON r.BS04_2 = t.RM03 AND r.BS04_1 = t.RM02 AND r.BS03 = t.RM01
+                    LEFT JOIN MOIADM.RKEYN u ON u.KCDE_1 = '06' AND t.RM09 = u.KCDE_2
+                    LEFT JOIN MOICAD.RLNID v ON r.BB09 = v.LIDN
+                    LEFT JOIN MOIADM.RKEYN_ALL w ON (w.KCDE_1 = '48' AND w.KCDE_2 = 'H' AND w.KCDE_3 = t.RM10 AND t.RM11 = w.KCDE_4)
+                    WHERE
+                        r.BB05 BETWEEN :bv_st AND :bv_ed    -- BY 登記日期
+                ");
+                
+                $db->bind(":bv_st", $st);
+                $db->bind(":bv_ed", $ed);
+                $db->execute();
+                $result = $db->fetchAll();
+                $this->getCache()->set(self::KEYS['375_OWNER_CHANGE'].$st.$ed, $result, $expire_duration);
+
+                Logger::getInstance()->info("[".self::KEYS['375_OWNER_CHANGE'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+                return $result;
+            } else {
+                return array();
+            }
+        }
+        return $this->getCache()->get(self::KEYS['375_OWNER_CHANGE'].$st.$ed);
+    }
 }
