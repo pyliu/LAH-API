@@ -1,5 +1,4 @@
 <?php
-require_once('GlobalConstants.inc.php');
 /** 
 * st-PHP-Logger - Simple PHP logging class. Log info, warning, error messages to log files.
 * $time = date('Y-M-d');
@@ -17,9 +16,12 @@ require_once('GlobalConstants.inc.php');
 class Logger {
     // singleton
     private static $_instance = null;
-    // private static $_path = dirname(dirname(__FILE__))LOG_DIR.DIRECTORY_SEPARATOR.'log-' . date('Y-m-d') . '.log';
-    public static function getInstance($log_file = 'self::$_path', $params = array()) {
+    public static function getInstance($log_file = '', $params = array()) {
         if (!(self::$_instance instanceof Logger)) {
+            if (empty($log_file)) {
+                // ex: log-2019-09-16.log
+                $log_file = __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.'log-'.date('Y-m-d').'.log';
+            }
             self::$_instance = new Logger($log_file, $params);
         }
         return self::$_instance;

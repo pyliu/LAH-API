@@ -26,8 +26,7 @@ if (!file_exists(LOG_DIR) && !is_dir(LOG_DIR)) {
     mkdir(LOG_DIR);       
 }
 
-// ex: log-2019-09-16.log
-$log = Logger::getInstance(LOG_DIR.DIRECTORY_SEPARATOR.'log-' . date('Y-m-d') . '.log');
+$log = Logger::getInstance();
 
 set_exception_handler(function(Throwable $e) {
     global $log;
