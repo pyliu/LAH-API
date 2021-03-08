@@ -63,9 +63,21 @@ class Query {
 		return false;
 	}
 
+	
+    private function isDBReachable($txt = __METHOD__) {
+        $flag = System::getInstance()->isDBReachable();
+        if (!$flag) {
+            Logger::getInstance()->error('資料庫無法連線，無法取得資料。['.$txt.']');
+        }
+        return $flag;
+    }
+
+
     function __construct() {
-		$type = OraDB::getPointDBTarget();
-		$this->db = new OraDB($type);
+		if ($this->isDBReachable()) {
+			$type = OraDB::getPointDBTarget();
+			$this->db = new OraDB($type);
+		}
 		$this->site = strtoupper(System::getInstance()->get('SITE')) ?? 'HB';
 		if (!empty($this->site)) {
 			$this->site_code = $this->site[1];
