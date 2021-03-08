@@ -7,6 +7,7 @@ require_once("System.class.php");
 class Query {
 
 	private $db;
+	private $db_ok = true;
 	private $site = 'HB';
 	private $site_code = 'B';
 	private $site_number = 2;
@@ -65,11 +66,11 @@ class Query {
 
 	
     private function isDBReachable($txt = __METHOD__) {
-        $flag = System::getInstance()->isDBReachable();
-        if (!$flag) {
+        $this->db_ok = System::getInstance()->isDBReachable();
+        if (!$this->db_ok) {
             Logger::getInstance()->error('資料庫無法連線，無法取得資料。['.$txt.']');
         }
-        return $flag;
+        return $this->db_ok;
     }
 
 
@@ -90,6 +91,9 @@ class Query {
     }
 
 	public function getCodeData($year) {
+		if (!$this->db_ok) {
+			return array();
+		}
 		$sql = "
 			-- 案件(REG + SUR)數量統計 BY 年
 			SELECT t.RM01 AS YEAR, t.RM02 AS CODE, q.KCNT AS CODE_NAME, COUNT(*) AS COUNT,
@@ -120,6 +124,10 @@ class Query {
 	}
 	
 	public function getSectionRALIDCount($cond = "") {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$prefix = "
 			select m.KCDE_2 as \"段代碼\",
 				m.KCNT as \"段名稱\",
@@ -152,6 +160,10 @@ class Query {
 	}
 
 	public function getCertLog($section_code, $numbers) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		global $log;
 		if (empty($section_code) || empty($numbers)) {
 			$log->warning(__METHOD__.": 輸入參數為空，無法查詢謄本記錄檔。");
@@ -248,6 +260,10 @@ class Query {
 	}
 	
 	public function getProblematicCrossCases() {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		global $week_ago;
 		$this->db->parse("SELECT * FROM SCRSMS WHERE RM07_1 >= :bv_week_ago AND RM02 LIKE 'H%1' AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL)");
 		$this->db->bind(":bv_week_ago", $week_ago);
@@ -256,6 +272,10 @@ class Query {
 	}
 
 	public function fixProblematicCrossCases($id) {
+		if (!$this->db_ok) {
+			return false;
+		}
+
 		if (!$this->checkCaseID($id)) {
             return false;
 		}
@@ -278,6 +298,10 @@ class Query {
 	}
 	
 	public function getMaxNumByYearWord($year, $code) {
+		if (!$this->db_ok) {
+			return '0';
+		}
+
 		if (!filter_var($year, FILTER_SANITIZE_NUMBER_INT)) {
 			return false;
 		}
@@ -314,6 +338,10 @@ class Query {
 	}
 
 	public function getCRSMSCasesByPID($id) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$id = strtoupper($id);
         if (!$this->checkPID($id)) {
             return false;
@@ -334,6 +362,10 @@ class Query {
 	}
 
 	public function getCMSMSCasesByPID($id) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$id = strtoupper($id);
 		if (!$this->checkPID($id)) {
             return false;
@@ -353,6 +385,10 @@ class Query {
 	}
 
 	public function getEasycardPayment($qday = '') {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		/*
 			"K01","K02","K03","K04"
 			"01","現金","N","N"
@@ -386,6 +422,10 @@ class Query {
 	}
 
 	public function fixEasycardPayment($qday, $pc_num) {
+		if (!$this->db_ok) {
+			return false;
+		}
+
 		// ex: UPDATE MOIEXP.EXPAA SET AA106 = '1' WHERE AA01 = '1080321' AND AA106 <> '1' AND AA100 = '06' AND AA04 = '0015746';
 		$this->db->parse("
 			UPDATE MOIEXP.EXPAA SET AA106 = '1' WHERE AA01 = :bv_qday AND AA106 <> '1' AND AA100 = '06' AND AA04 = :bv_pc_num
@@ -398,6 +438,10 @@ class Query {
 	}
 
 	public function getExpacItems($year, $num) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		/*
 			01	土地法65條登記費
 			02	土地法76條登記費
@@ -438,6 +482,10 @@ class Query {
 	}
 
 	public function modifyExpacItem($year, $num, $code, $amount) {
+		if (!$this->db_ok) {
+			return false;
+		}
+
 		// ex: UPDATE MOIEXP.EXPAC SET AC20 = '35' WHERE AC04 = '0021131' AND AC25 = '108' AND AC30 = '280';
 		$this->db->parse("
 			UPDATE MOIEXP.EXPAC SET AC20 = :bv_code WHERE AC04 = :bv_pc_num AND AC25 = :bv_year AND AC30 = :bv_amount
@@ -452,6 +500,10 @@ class Query {
 	}
 
 	public function getExpaaData($qday, $num) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		if (empty($num)) {
 			$this->db->parse("
 				SELECT *
@@ -472,6 +524,10 @@ class Query {
 	}
 
 	public function updateExpaaData($column, $date, $number, $update_val) {
+		if (!$this->db_ok) {
+			return false;
+		}
+
 		if (strlen($date) != 7 || strlen($number) != 7) {
 			return false;
 		}
@@ -490,6 +546,10 @@ class Query {
 	}
 
 	public function getDummyObFees() {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$tw_date = new Datetime("now");
 		$tw_date->modify("-1911 year");
 		$this_year = ltrim($tw_date->format("Y"), "0");	// ex: 109
@@ -506,6 +566,10 @@ class Query {
 	}
 
 	public function addDummyObFees($date, $pc_num, $operator, $fee_number, $reason) {
+		if (!$this->db_ok) {
+			return false;
+		}
+
 		global $log;
 		if (empty($date) || empty($pc_num) || empty($operator) || empty($fee_number) || empty($reason)) {
 			$log->error(__METHOD__.": One of the parameters is empty. The system can not add obsolete fee expaa data.");
@@ -529,6 +593,10 @@ class Query {
 	}
 
 	public function getForeignCasesByYearMonth($year_month) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		if (!filter_var($year_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
         }
@@ -566,6 +634,10 @@ class Query {
 	}
 
 	public function getChargeItems() {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$this->db->parse("select * from MOIEXP.EXPE t");
 		$this->db->execute();
 		$all = $this->db->fetchAll();
@@ -578,6 +650,10 @@ class Query {
 
     // template method for query all cases by date
     public function queryAllCasesByDate($qday) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
         // only allow int number for $qday
         if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
@@ -589,6 +665,10 @@ class Query {
     }
 
 	public function queryReasonCasesByMonth($reason_code, $query_month) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
@@ -601,6 +681,10 @@ class Query {
 	}
 
 	public function queryCourtCasesByMonth($query_month) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
@@ -620,6 +704,10 @@ class Query {
 	}
 
 	public function queryRegRemoteCasesByMonth($query_month) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
@@ -657,6 +745,10 @@ class Query {
 	}
 
 	public function queryRegSubCasesByMonth($query_month) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
@@ -692,6 +784,10 @@ class Query {
 	}
 
 	public function queryRegfCasesByMonth($query_month) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
@@ -718,6 +814,10 @@ class Query {
 	}
 
 	public function queryFixCasesByMonth($query_month) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
@@ -736,6 +836,10 @@ class Query {
 	}
 
 	public function queryRejectCasesByMonth($query_month) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
@@ -754,6 +858,10 @@ class Query {
 	}
 
 	public function queryEXPBARefundCasesByMonth($query_month) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
@@ -780,6 +888,10 @@ class Query {
 	}
 
 	public function querySurRainCasesByMonth($query_month) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		// only allow int number for $query_month
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
@@ -842,6 +954,10 @@ class Query {
 
 	// 找近15天逾期的案件
 	public function queryOverdueCasesIn15Days($reviewer_id = "") {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		if (empty($reviewer_id)) {
 			$this->db->parse("
 				SELECT *
@@ -898,6 +1014,10 @@ class Query {
 
 	// 找快逾期的案件
 	public function queryAlmostOverdueCases($reviewer_id = "") {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$query_str = "
 			SELECT *
 			FROM SCRSMS
@@ -950,6 +1070,10 @@ class Query {
 
 	// 查詢指定收件日期之案件
     public function queryOverdueCasesByDate($qday) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
         // only allow int number for $qday
         if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
@@ -976,6 +1100,10 @@ class Query {
 	
 	// 找接近逾期案件
 	public function queryNearOverdueCases() {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$this->db->parse("
 			SELECT *
 			FROM SCRSMS
@@ -999,6 +1127,10 @@ class Query {
 
 	// 查詢指定收件日期之案件
 	public function queryNearOverdueCasesByDate($qday) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
         // only allow int number for $qday
         if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
@@ -1024,6 +1156,10 @@ class Query {
 	}
 
 	public function getRegCaseStatsMonthly($year_month) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		global $log;
         // only allow int number for $qday
         if (!filter_var($year_month, FILTER_SANITIZE_NUMBER_INT)) {
@@ -1051,6 +1187,10 @@ class Query {
 	}
 
     public function getRegCaseDetail($id) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
         if (!$this->checkCaseID($id)) {
             return array();
 		}
@@ -1078,6 +1218,10 @@ class Query {
 	}
 
     public function getSurCaseDetail($id) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
         if (!$this->checkCaseID($id)) {
             return "";
 		}
@@ -1109,6 +1253,10 @@ class Query {
 	
 	// 取得已結案卻延期複丈之案件
 	public function getSurProblematicCases() {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$this->db->parse("
 			select t.*, s.*, u.KCNT
 			from MOICAS.CMSMS t
@@ -1129,6 +1277,10 @@ class Query {
 	}
 
 	public function fixSurDelayCase($id, $upd_mm22, $clr_delay, $fix_case_count = 'false') {
+		if (!$this->db_ok) {
+			return false;
+		}
+
 		if (!$this->checkCaseID($id)) {
             return false;
 		}
@@ -1178,6 +1330,10 @@ class Query {
 	}
 
 	public function getPrcCaseAll($id) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
         if (!$this->checkCaseID($id)) {
             return "";
 		}
@@ -1238,6 +1394,10 @@ class Query {
 	}
 	
 	public function getXCaseDiff($id, $raw = false) {
+		if (!$this->db_ok) {
+			return -1;
+		}
+
         if (!$this->checkCaseID($id)) {
             return -1;
 		}
@@ -1308,6 +1468,10 @@ class Query {
 	}
 	
 	public function instXCase($id, $raw = true) {
+		if (!$this->db_ok) {
+			return false;
+		}
+
 		if (!$this->checkCaseID($id)) {
             return -1;
 		}
@@ -1381,6 +1545,10 @@ class Query {
 	}
 
 	public function syncXCaseColumn($id, $wanted_column) {
+		if (!$this->db_ok) {
+			return false;
+		}
+
 		$diff = $this->getXCaseDiff($id, true);	// true -> use raw data to update
 		if (!empty($diff)) {
 			global $log;
@@ -1415,6 +1583,10 @@ class Query {
 	}
 	
 	public function getSelectSQLData($sql, $raw = false) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		global $log;
 		// non-select statement will skip
 		if (!preg_match("/^SELECT/i", $sql)) {
@@ -1435,6 +1607,10 @@ class Query {
 	}
 	
 	public function getAnnouncementData() {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$this->db->parse("
 			SELECT t.RA01, m.kcnt, t.RA02, t.RA03
 			FROM MOICAS.CRACD t
@@ -1448,6 +1624,10 @@ class Query {
 	}
 
 	public function updateAnnouncementData($code, $day, $flag) {
+		if (!$this->db_ok) {
+			return false;
+		}
+
 		$this->db->parse("
 			UPDATE MOICAS.CRACD SET RA02 = :bv_ra02_day, RA03 = :bv_ra03_flag WHERE RA01 = :bv_ra01_code
 		");
@@ -1461,6 +1641,10 @@ class Query {
 	}
 
 	public function clearAnnouncementFlag() {
+		if (!$this->db_ok) {
+			return false;
+		}
+
 		$this->db->parse("
 			UPDATE MOICAS.CRACD SET RA03 = 'N' WHERE RA03 <> 'N'
 		");
@@ -1469,6 +1653,10 @@ class Query {
 	}
 
 	public function getCaseTemp($year, $code, $number) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$result = array();
 		if (empty($year) || empty($code) || empty($number)) {
 			return $result;
@@ -1507,6 +1695,10 @@ class Query {
 	}
 
 	public function clearCaseTemp($year, $code, $number, $table = "") {
+		if (!$this->db_ok) {
+			return false;
+		}
+
 		global $log;
 
 		if (empty($year) || empty($code) || empty($number)) {
@@ -1549,6 +1741,10 @@ class Query {
 	}
 
 	public function updateCaseColumnData($id, $table, $column, $val) {
+		if (!$this->db_ok) {
+			return false;
+		}
+
 		global $log;
 
 		if (empty($id) || empty($table) || empty($column) || (empty($val) && $val !== '0' && $val !=='')) {
@@ -1587,6 +1783,10 @@ class Query {
 
 	// 取得權利人資料
 	public function getRLNIDByID($id) {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$this->db->parse("
 			select * from MOICAD.RLNID t
 			where lidn like :bv_id
@@ -1600,6 +1800,10 @@ class Query {
 	 * 取得目前為公告狀態案件
 	 */
 	public function getRM30HCase() {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$this->db->parse("
 			-- RM49 公告日期, RM50 公告到期日
 			SELECT
@@ -1626,6 +1830,10 @@ class Query {
 	 * 取得目前為請示狀態案件
 	 */
 	public function getRM30ECase() {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$this->db->parse("
 			SELECT * FROM MOICAS.CRSMS t
 			LEFT JOIN MOIADM.RKEYN q ON t.RM09=q.KCDE_2 AND q.KCDE_1 = '06'
@@ -1639,6 +1847,10 @@ class Query {
 	 * 取得曾經取消請示案件
 	 */
 	public function getCancelRM30ECase() {
+		if (!$this->db_ok) {
+			return array();
+		}
+
 		$this->db->parse("
 			SELECT * FROM MOICAS.CRSMS t
 			LEFT JOIN MOIADM.RKEYN q ON t.RM09=q.KCDE_2 AND q.KCDE_1 = '06'
