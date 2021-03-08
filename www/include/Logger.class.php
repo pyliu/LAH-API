@@ -18,10 +18,6 @@ class Logger {
     private static $_instance = null;
     public static function getInstance($log_file = '', $params = array()) {
         if (!(self::$_instance instanceof Logger)) {
-            if (empty($log_file)) {
-                // ex: log-2019-09-16.log
-                $log_file = __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.'log-'.date('Y-m-d').'.log';
-            }
             self::$_instance = new Logger($log_file, $params);
         }
         return self::$_instance;
@@ -51,7 +47,11 @@ class Logger {
     * @param string $log_file - path and filename of log
     * @param array $params
     */
-    private function __construct($log_file = 'error.txt', $params = array()){
+    private function __construct($log_file = '', $params = array()){
+        if (empty($log_file)) {
+            // ex: log-2019-09-16.log
+            $log_file = __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.'log-'.date('Y-m-d').'.log';
+        }
         $this->log_file = $log_file;
         $this->params = array_merge($this->options, $params);
 
