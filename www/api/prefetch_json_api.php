@@ -288,7 +288,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "375_land_change":
-		Logger::getInstance()->info("XHR [375_lang_change] 查詢信託相關資料請求");
+		Logger::getInstance()->info("XHR [375_lang_change] 查詢375租約土標部異動資料請求");
 		// 375租約土地標示部異動查詢
 		$message = "375租約土地標示部異動查詢";
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadLand375Change($_POST['start'], $_POST['end']) : $prefetch->getLand375Change($_POST['start'], $_POST['end']);
