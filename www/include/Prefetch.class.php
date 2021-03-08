@@ -1148,7 +1148,7 @@ class Prefetch {
                 $db = $this->getOraDB();
                 $db->parse("
                     --375租約異動 MOICAW.RGALL土地標示部
-                    SELECT 
+                    SELECT DISTINCT
                         t.*,
                         t.RM01 || '-' || t.RM02 || '-' || t.RM03 AS \"RM123\",
                         rkeyn.KCNT AS RM09_CHT,
