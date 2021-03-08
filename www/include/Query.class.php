@@ -40,7 +40,7 @@ class Query {
 	}
 
 	private function checkCaseID(&$id) {
-		global $log;
+		
 		if (!empty($id)) {
 			$year = substr($id, 0, 3);
 			$code = substr($id, 3, 4);
@@ -50,17 +50,17 @@ class Query {
 				preg_match("/^[0-9A-Za-z]{4}$/i", $code) &&
 				preg_match("/^[0-9A-Za-z]{6}$/i", $number)
 			) {
-				$log->info(__METHOD__.": $id passed the id verification.");
+				Logger::getInstance()->info(__METHOD__.": $id passed the id verification.");
 				$nid = $year.$code.$number;
 				if ($id != $nid) {
 					// recomposition the $id
 					$id = $nid;
-					$log->info(__METHOD__.": update the case id to '$nid'.");
+					Logger::getInstance()->info(__METHOD__.": update the case id to '$nid'.");
 				}
 				return true;
 			}
 		}
-		$log->warning(__METHOD__.": $id failed the id verification.");
+		Logger::getInstance()->warning(__METHOD__.": $id failed the id verification.");
 		return false;
 	}
 
@@ -164,9 +164,9 @@ class Query {
 			return array();
 		}
 
-		global $log;
+		
 		if (empty($section_code) || empty($numbers)) {
-			$log->warning(__METHOD__.": 輸入參數為空，無法查詢謄本記錄檔。");
+			Logger::getInstance()->warning(__METHOD__.": 輸入參數為空，無法查詢謄本記錄檔。");
 			return false;
 		}
 		$sql = "
@@ -570,10 +570,10 @@ class Query {
 			return false;
 		}
 
-		global $log;
+		
 		if (empty($date) || empty($pc_num) || empty($operator) || empty($fee_number) || empty($reason)) {
-			$log->error(__METHOD__.": One of the parameters is empty. The system can not add obsolete fee expaa data.");
-			$log->warning(__METHOD__.": The input params: ${date}, ${pc_num}, ${operator}, ${fee_number}, ${reason}.");
+			Logger::getInstance()->error(__METHOD__.": One of the parameters is empty. The system can not add obsolete fee expaa data.");
+			Logger::getInstance()->warning(__METHOD__.": The input params: ${date}, ${pc_num}, ${operator}, ${fee_number}, ${reason}.");
 			return false;
 		}
 
@@ -586,7 +586,7 @@ class Query {
 		$this->db->bind(":bv_operator", $operator);
 		$this->db->bind(":bv_reason", iconv("utf-8", "big5", $reason));
 
-		$log->info(__METHOD__.": 插入 SQL \"$sql\"");
+		Logger::getInstance()->info(__METHOD__.": 插入 SQL \"$sql\"");
 
 		$this->db->execute();
 		return true;
@@ -1003,8 +1003,8 @@ class Query {
 		$date_15days_before->modify("-15 days");
 		$start = ltrim($date_15days_before->format("YmdHis"), "0");	// ex: 1090107081410
 		
-		global $log;
-		$log->info(__METHOD__.": Find overdue date between $start and $now cases.");
+		
+		Logger::getInstance()->info(__METHOD__.": Find overdue date between $start and $now cases.");
 
 		$this->db->bind(":bv_now", $now);
 		$this->db->bind(":bv_start", $start);
@@ -1045,7 +1045,7 @@ class Query {
 			$this->db->bind(":bv_reviewer_id", $reviewer_id);	// HBxxxx
 		}
 
-		global $log;
+		
 
 		$tw_date = new Datetime("now");
 		$tw_date->modify("-1911 year");
@@ -1055,12 +1055,12 @@ class Query {
 		$date_4hrs_later->modify("-1911 year");
 		$date_4hrs_later->modify("+4 hours");
 		if ($date_4hrs_later->format("H") > 17) {
-			$log->info(__METHOD__.": ".$date_4hrs_later->format("YmdHis")." is over 17:00:00, so add 16 hrs ... ");
+			Logger::getInstance()->info(__METHOD__.": ".$date_4hrs_later->format("YmdHis")." is over 17:00:00, so add 16 hrs ... ");
 			$date_4hrs_later->modify("+16 hours");
 		}
 		$now_plus_4hrs = ltrim($date_4hrs_later->format("YmdHis"), "0");	// ex: 1090107081410
 		
-		$log->info(__METHOD__.": Find overdue date between $now and $now_plus_4hrs cases.");
+		Logger::getInstance()->info(__METHOD__.": Find overdue date between $now and $now_plus_4hrs cases.");
 
 		$this->db->bind(":bv_now", $now);
 		$this->db->bind(":bv_now_plus_4hrs", $now_plus_4hrs);
@@ -1160,14 +1160,14 @@ class Query {
 			return array();
 		}
 
-		global $log;
+		
         // only allow int number for $qday
         if (!filter_var($year_month, FILTER_SANITIZE_NUMBER_INT)) {
-			$log->info(__METHOD__.": 不允許非數字參數【${year_month}】");
+			Logger::getInstance()->info(__METHOD__.": 不允許非數字參數【${year_month}】");
             return false;
         }
 		if (strlen($year_month) != 5) {
-			$log->info(__METHOD__.": 參數須為5碼【${year_month}】");
+			Logger::getInstance()->info(__METHOD__.": 參數須為5碼【${year_month}】");
 			return false;
 		}
 		
@@ -1408,8 +1408,8 @@ class Query {
 		$num = substr($id, 7, 6);
 		$db_user = "L1H".$code[1]."0H03";
 
-		global $log;
-		$log->info(__METHOD__.": 找遠端 ${db_user}.CRSMS 的案件資料【${year}, ${code}, ${num}】");
+		
+		Logger::getInstance()->info(__METHOD__.": 找遠端 ${db_user}.CRSMS 的案件資料【${year}, ${code}, ${num}】");
 
 		// connection switch to L3HWEB
 		$this->db->setConnType(CONNECTION_TYPE::L3HWEB);
@@ -1426,11 +1426,11 @@ class Query {
 
 		// 遠端無此資料
 		if (empty($remote_row)) {
-			$log->warning(__METHOD__.": 遠端 ${db_user}.CRSMS 查無 ${year}-${code}-${num} 案件資料");
+			Logger::getInstance()->warning(__METHOD__.": 遠端 ${db_user}.CRSMS 查無 ${year}-${code}-${num} 案件資料");
 			return -2;
 		}
 
-		$log->info(__METHOD__.": 找本地 MOICAS.CRSMS 的案件資料【${year}, ${code}, ${num}】");
+		Logger::getInstance()->info(__METHOD__.": 找本地 MOICAS.CRSMS 的案件資料【${year}, ${code}, ${num}】");
 
 		// connection switch to MAIN
 		$this->db->setConnType(CONNECTION_TYPE::MAIN);
@@ -1447,7 +1447,7 @@ class Query {
 
 		// 本地無此資料
 		if (empty($local_row)) {
-			$log->warning(__METHOD__.": 本地 MOICAS.CRSMS 查無 ${year}-${code}-${num} 案件資料");
+			Logger::getInstance()->warning(__METHOD__.": 本地 MOICAS.CRSMS 查無 ${year}-${code}-${num} 案件資料");
 			return -3;
 		}
 
@@ -1476,7 +1476,7 @@ class Query {
             return -1;
 		}
 
-		global $log;
+		
 		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
 		$num = substr($id, 7, 6);
@@ -1497,7 +1497,7 @@ class Query {
 
 		// 遠端無此資料
 		if (empty($remote_row)) {
-			$log->warning(__METHOD__.": 遠端 ${db_user}.CRSMS 查無 ${year}-${code}-${num} 案件資料");
+			Logger::getInstance()->warning(__METHOD__.": 遠端 ${db_user}.CRSMS 查無 ${year}-${code}-${num} 案件資料");
 			return -2;
 		}
 
@@ -1531,12 +1531,12 @@ class Query {
 				INSERT INTO MOICAS.CRSMS ".$columns." VALUES ".$values."
 			");
 
-			$log->info(__METHOD__.": 插入 SQL \"INSERT INTO MOICAS.CRSMS ".$columns." VALUES ".$values."\"");
+			Logger::getInstance()->info(__METHOD__.": 插入 SQL \"INSERT INTO MOICAS.CRSMS ".$columns." VALUES ".$values."\"");
 			$this->db->execute();
 
 			return true;
 		}
-		$log->error(__METHOD__.": 本地 MOICAS.CRSMS 已有 ${year}-${code}-${num} 案件資料");
+		Logger::getInstance()->error(__METHOD__.": 本地 MOICAS.CRSMS 已有 ${year}-${code}-${num} 案件資料");
 		return false;
 	}
 
@@ -1551,7 +1551,7 @@ class Query {
 
 		$diff = $this->getXCaseDiff($id, true);	// true -> use raw data to update
 		if (!empty($diff)) {
-			global $log;
+			
 			$year = substr($id, 0, 3);
 			$code = substr($id, 3, 4);
 			$number = str_pad(substr($id, 7, 6), 6, "0", STR_PAD_LEFT);
@@ -1573,7 +1573,7 @@ class Query {
 			$this->db->bind(":bv_rm02_code", $code);
 			$this->db->bind(":bv_rm03_number", $number);
 
-			$log->info(__METHOD__.": 更新 SQL \"UPDATE MOICAS.CRSMS SET ".$set_str." WHERE RM01 = '$year' AND RM02 = '$code' AND RM03 = '$number'\"");
+			Logger::getInstance()->info(__METHOD__.": 更新 SQL \"UPDATE MOICAS.CRSMS SET ".$set_str." WHERE RM01 = '$year' AND RM02 = '$code' AND RM03 = '$number'\"");
 
 			$this->db->execute();
 
@@ -1587,17 +1587,17 @@ class Query {
 			return array();
 		}
 
-		global $log;
+		
 		// non-select statement will skip
 		if (!preg_match("/^SELECT/i", $sql)) {
-			$log->error(__METHOD__.": 非SELECT起始之SQL!");
-			$log->error(__METHOD__.": $sql");
+			Logger::getInstance()->error(__METHOD__.": 非SELECT起始之SQL!");
+			Logger::getInstance()->error(__METHOD__.": $sql");
 			return false;
 		}
 		// second defense line
 		if (preg_match("/^.*(INSERT|DELETE|UPDATE)/i", $sql)) {
-			$log->error(__METHOD__.": 不能使用非SELECT起始之SQL!");
-			$log->error(__METHOD__.": $sql");
+			Logger::getInstance()->error(__METHOD__.": 不能使用非SELECT起始之SQL!");
+			Logger::getInstance()->error(__METHOD__.": $sql");
 			return false;
 		}
 
@@ -1665,19 +1665,19 @@ class Query {
 		// prevent length not enough issue
 		$number = str_pad($number, 6, "0", STR_PAD_LEFT);
 
-		global $log;
+		
 
 		// an array to express temp tables and key field names that need to be checked.
 		$temp_tables = include("config/Config.TempTables.php");
 		//foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
 		foreach ($temp_tables as $tmp_tbl_name => $key) {
 			/*
-			$log->info(__METHOD__.": 查詢 $tmp_tbl_name 的暫存資料 ... 【".$key_fields[0].", ".$key_fields[1].", ".$key_fields[2]."】");
+			Logger::getInstance()->info(__METHOD__.": 查詢 $tmp_tbl_name 的暫存資料 ... 【".$key_fields[0].", ".$key_fields[1].", ".$key_fields[2]."】");
 			$this->db->parse("
 				SELECT * FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = :bv_year AND ".$key_fields[1]." = :bv_code AND ".$key_fields[2]." = :bv_number
 			");
 			*/
-			$log->info(__METHOD__.": 查詢 $tmp_tbl_name 的暫存資料 ... 【".$key."03, ".$key."04_1, ".$key."04_2】");
+			Logger::getInstance()->info(__METHOD__.": 查詢 $tmp_tbl_name 的暫存資料 ... 【".$key."03, ".$key."04_1, ".$key."04_2】");
 			$this->db->parse("
 				SELECT * FROM ".$tmp_tbl_name." WHERE ".$key."03 = :bv_year AND ".$key."04_1 = :bv_code AND ".$key."04_2 = :bv_number
 			");
@@ -1699,10 +1699,10 @@ class Query {
 			return false;
 		}
 
-		global $log;
+		
 
 		if (empty($year) || empty($code) || empty($number)) {
-			$log->error(__METHOD__."：輸入案件參數不能為空白【${year}, ${code}, ${number}】");
+			Logger::getInstance()->error(__METHOD__."：輸入案件參數不能為空白【${year}, ${code}, ${number}】");
 			return false;
 		}
 
@@ -1714,18 +1714,18 @@ class Query {
 		//foreach ($temp_tables as $tmp_tbl_name => $key_fields) {
 		foreach ($temp_tables as $tmp_tbl_name => $key) {
 			if (!empty($table) && $tmp_tbl_name != $table) {
-				$log->info(__METHOD__."：指定刪除 $table 故跳過 $tmp_tbl_name 。");
+				Logger::getInstance()->info(__METHOD__."：指定刪除 $table 故跳過 $tmp_tbl_name 。");
 				continue;
 			}
 			if ($tmp_tbl_name == "MOICAT.RINDX") {
-				$log->warning(__METHOD__."：無法刪除 MOICAT.RINDX 跳過！");
+				Logger::getInstance()->warning(__METHOD__."：無法刪除 MOICAT.RINDX 跳過！");
 				continue;
 			}
 			if ($tmp_tbl_name == "MOIPRT.PHIND") {
-				$log->warning(__METHOD__."：無法刪除 MOIPRT.PHIND 跳過！");
+				Logger::getInstance()->warning(__METHOD__."：無法刪除 MOIPRT.PHIND 跳過！");
 				continue;
 			}
-			$log->info(__METHOD__."：刪除 $tmp_tbl_name 資料 ... ");
+			Logger::getInstance()->info(__METHOD__."：刪除 $tmp_tbl_name 資料 ... ");
 			$this->db->parse("
 				DELETE FROM ".$tmp_tbl_name." WHERE ".$key."03 = :bv_year AND ".$key."04_1 = :bv_code AND ".$key."04_2 = :bv_number
 			");
@@ -1745,15 +1745,15 @@ class Query {
 			return false;
 		}
 
-		global $log;
+		
 
 		if (empty($id) || empty($table) || empty($column) || (empty($val) && $val !== '0' && $val !=='')) {
-			$log->error(__METHOD__."：輸入參數不能為空白【${id}, ${table}, ${column}, ${val}】");
+			Logger::getInstance()->error(__METHOD__."：輸入參數不能為空白【${id}, ${table}, ${column}, ${val}】");
 			return false;
 		}
 
 		if (!$this->checkCaseID($id)) {
-			$log->error(__METHOD__."：ID格式不正確【應為13碼，目前：${id}】");
+			Logger::getInstance()->error(__METHOD__."：ID格式不正確【應為13碼，目前：${id}】");
 			return false;
 		}
 
@@ -1767,7 +1767,7 @@ class Query {
 
 		$sql = "UPDATE ${table} SET ${column} = :bv_val WHERE ${year_col} = :bv_year AND ${code_col} = :bv_code AND ${num_col} = :bv_number";
 		
-		$log->info(__METHOD__."：預備執行 $sql");
+		Logger::getInstance()->info(__METHOD__."：預備執行 $sql");
 
 		$this->db->parse($sql);
 
