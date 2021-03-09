@@ -1163,7 +1163,7 @@ class Prefetch {
                         END) AS GS_TYPE_CHT
                     FROM 
                         (SELECT * FROM MOICAW.RGALL rgall LEFT JOIN MOICAS.CRSMS crsms ON rgall.GS03 = crsms.RM01 AND rgall.GS04_1 = crsms.RM02 AND rgall.GS04_2 = crsms.RM03) t
-                        LEFT JOIN MOIADM.RKEYN rkeyn ON t.RM09 = rkeyn.KCDE_2
+                        LEFT JOIN MOIADM.RKEYN rkeyn ON t.RM09 = rkeyn.KCDE_2 AND rkeyn.KCDE_1 = '06'
                         LEFT JOIN MOIADM.RKEYN_ALL rkeyn_all ON (rkeyn_all.KCDE_1 = '48' AND rkeyn_all.KCDE_2 = 'H' AND rkeyn_all.KCDE_3 = t.RM10 AND t.RM11 = rkeyn_all.KCDE_4)
                     WHERE
                         t.RM56_1 BETWEEN :bv_st AND :bv_ed
@@ -1229,13 +1229,15 @@ class Prefetch {
                         v.LADR AS BB09_ADDR
                     FROM
                         MOICAW.RBLOW r
-                    LEFT JOIN MOICAD.RGALL s ON r.BA49 = s.GG49 AND r.BA48 = s.GG48 AND s.GG30_1 = 'A6'
+                    LEFT JOIN MOICAD.RGALL s ON r.BA49 = s.GG49 AND r.BA48 = s.GG48
                     LEFT JOIN MOICAS.CRSMS t ON r.BS04_2 = t.RM03 AND r.BS04_1 = t.RM02 AND r.BS03 = t.RM01
                     LEFT JOIN MOIADM.RKEYN u ON u.KCDE_1 = '06' AND t.RM09 = u.KCDE_2
                     LEFT JOIN MOICAD.RLNID v ON r.BB09 = v.LIDN
                     LEFT JOIN MOIADM.RKEYN_ALL w ON (w.KCDE_1 = '48' AND w.KCDE_2 = 'H' AND w.KCDE_3 = t.RM10 AND t.RM11 = w.KCDE_4)
-                    WHERE
-                        r.BB05 BETWEEN :bv_st AND :bv_ed    -- BY 登記日期
+                    WHERE 1 = 1
+                        -- AND r.BB05 BETWEEN :bv_st AND :bv_ed    -- BY 登記日期
+                        AND t.RM56_1 BETWEEN :bv_st AND :bv_ed  -- BY 校對日期
+                        AND s.GG30_1 = 'A6' -- 其他登記事項代碼 A6 => ３７５
                 ");
                 
                 $db->bind(":bv_st", $st);
