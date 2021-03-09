@@ -6,7 +6,7 @@ require_once("Cache.class.php");
 class RegCaseData {
     static private $operators;
     static private $RM31_CASE_CLOSE_STATE = array('A', 'B', 'C', 'D');
-    static private $rare_word_regex = "/(BAD\+[[:alpha:][:digit:]]{2,3}.*[[:alpha:][:digit:]]?)|(&#\d+;)/i";
+    static private $rare_word_regex = "/(BAD\+[[:alpha:][:digit:]]{2,3}[[:alpha:][:digit:]]?)|(&#\d+;)/i";
 
     private $row;
 
