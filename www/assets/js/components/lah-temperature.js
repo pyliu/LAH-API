@@ -168,7 +168,7 @@ if (Vue) {
                     this.$warn('輸入資料未齊全，跳過登錄。')
                     return;
                 }
-                if (this.empty(this.name)) {
+                if (this.empty(this.name) && this.ID !== 'HB1108') {
                     this.notify({
                         message: `無法找到使用者 ${this.ID}，無法登錄。`,
                         type: "warning"
