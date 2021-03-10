@@ -464,6 +464,11 @@ if (Vue) {
                         icon: "sitemap",
                         need_admin: false
                     }, */{
+                        text: `海報輪播`,
+                        url: "carousel.html",
+                        icon: "scroll",
+                        need_admin: false
+                    }, {
                         text: `航空城`,
                         url: "project/aerotropolis/index.html",
                         icon: "plane-departure",

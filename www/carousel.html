@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="For Aviation City use only">
+  <meta name="description" content="for zhongli land affairs office use only">
   <meta name="author" content="LIU, PANG-YU">
   <meta http-equiv="pragma" content="no-cache">
   <meta http-equiv="expires" content="0">
@@ -28,6 +28,10 @@
       height: 100vh;
       width: 100vw;
     }
+    html, body {
+      margin: 0;
+      background-color: black;
+    }
   </style>
 </head>
 
@@ -48,32 +52,31 @@
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/localforage.min.js"></script>
   <script>
+    // PHP default uses QueryString as the parsing source but axios use json object instead
+    axios.defaults.transformRequest = [data => $.param(data)];
     new Vue({
       template: `<b-container fluid class="center">
         <b-aspect :aspect="ratio">
           <b-carousel
             style="text-shadow: 0px 0px 2px #000"
-            indicators
+            :interval="slidePeriod"
             :img-width="vw"
             :img-height="vh"
-            class="full-vwh"
+            :fade="fade"
+            no-hover-pause
+            controls
           >
-            <b-carousel-slide
-              caption="First slide"
-              img-src="https://picsum.photos/1024/480/?image=10"
-            ></b-carousel-slide>
-            <b-carousel-slide
-              caption="Second Slide"
-              img-src="https://picsum.photos/1024/480/?image=12"
-            ></b-carousel-slide>
-            <b-carousel-slide
-              caption="Third Slide"
-              img-src="https://picsum.photos/1024/480/?image=22"
-            ></b-carousel-slide>
-            <b-carousel-slide
-              caption="Fourth Slide"
-              img-src="https://picsum.photos/1024/480/?image=23"
-            ></b-carousel-slide>
+            <b-carousel-slide v-for="(jpg, idx) in posters">
+              <template #img>
+                <img
+                  class="d-block img-fluid full-vwh"
+                  :width="vw"
+                  :height="vh"
+                  :src="'assets/img/poster/'+jpg"
+                  alt="image slot"
+                >
+              </template>
+            </b-carousel-slide>
           </b-carousel>
         </b-aspect>
       </b-container>`,
@@ -81,15 +84,42 @@
 
       },
       data: () => ({
+        timer: null,
+        slidePeriod: 10 * 1000,  // in milliseconds, e.g. 2s -> 2000ms
+        posters: [],
+        fade: true
       }),
       computed: {
         vw() { return window.innerWidth; },
         vh() { return window.innerHeight; },
         ratio () { return (window.innerWidth / window.innerHeight).toFixed(2) },
       },
-      watch: { },
-      methods: { },
-      mounted() {}
+      watch: {},
+      methods: {
+        loadFiles() {
+          axios.post('api/carousel_json_api.php', {
+            type: 'list'
+          }).then(({ data }) => {
+            this.posters = [...data.files];
+          }).finally(() => {
+            this.fade = !this.fade;
+          });
+        }
+      },
+      created() {
+        // load remote files
+        this.loadFiles();
+      },
+      mounted() {
+        // after 12 hrs reload the page
+        setTimeout(() => {
+          location.reload();
+        }, 12 * 60 * 60 * 1000);
+        // refresh posters every 5 mins
+        this.timer = setInterval(() => {
+          this.loadFiles();
+        }, 5 * 60 * 1000);
+      }
     }).$mount('#vueApp');
   </script>
 </body>
