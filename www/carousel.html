@@ -67,6 +67,8 @@
             :fade="fade"
             no-hover-pause
             controls
+            @sliding-start="onSlideStart"
+            @sliding-end="onSlideEnd"
           >
             <b-carousel-slide v-for="(jpg, idx) in posters">
               <template #img>
@@ -86,7 +88,6 @@
 
       },
       data: () => ({
-        timer: null,
         slidePeriod: 10 * 1000,  // in milliseconds, e.g. 2s -> 2000ms
         posters: [],
         fade: true
@@ -106,6 +107,13 @@
           }).finally(() => {
             this.fade = !this.fade;
           });
+        },
+        onSlideStart(slide) {},
+        onSlideEnd(slide) {
+          if (this.posters.length == slide) {
+            // reload the remote files list when all post displayed
+            this.loadFiles();
+          }
         }
       },
       created() {
@@ -117,10 +125,6 @@
         setTimeout(() => {
           location.reload();
         }, 12 * 60 * 60 * 1000);
-        // refresh posters every 5 mins
-        this.timer = setInterval(() => {
-          this.loadFiles();
-        }, 5 * 60 * 1000);
       }
     }).$mount('#vueApp');
   </script>
