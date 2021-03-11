@@ -77,8 +77,6 @@
               <template #img>
                 <img
                   class="d-block img-fluid full-vwh"
-                  :width="vw"
-                  :height="vh"
                   :src="'assets/img/poster/'+jpg"
                   alt="image slot"
                 >
@@ -107,15 +105,17 @@
             type: 'list'
           }).then(({ data }) => {
             this.posters = [...data.files];
+            console.log(`已讀取 ${this.posters.length} 筆資料。`);
           }).finally(() => {
             this.fade = !this.fade;
           });
         },
         onSlideStart(slide) {
-          console.log(this.posters[slide - 1]);
+          console.log(this.posters[slide]);
         },
         onSlideEnd(slide) {
-          if (this.posters.length == slide) {
+          // console.log(`${slide}`, this.posters.length);
+          if ((this.posters.length - 1) == slide) {
             // reload the remote files list when all post displayed
             this.loadFiles();
           }
