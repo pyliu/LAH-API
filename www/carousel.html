@@ -60,17 +60,20 @@
       template: `<b-container fluid class="center">
         <b-aspect :aspect="ratio">
           <b-carousel
-            style="text-shadow: 0px 0px 2px #000"
+            style="text-shadow: 1px 1px 2px #333;"
             :interval="slidePeriod"
             :img-width="vw"
             :img-height="vh"
             :fade="fade"
             no-hover-pause
             controls
+            indicators
             @sliding-start="onSlideStart"
             @sliding-end="onSlideEnd"
           >
-            <b-carousel-slide v-for="(jpg, idx) in posters">
+            <b-carousel-slide
+              v-for="(jpg, idx) in posters"
+            >
               <template #img>
                 <img
                   class="d-block img-fluid full-vwh"
@@ -78,7 +81,6 @@
                   :height="vh"
                   :src="'assets/img/poster/'+jpg"
                   alt="image slot"
-                  :caption="jpg"
                 >
               </template>
             </b-carousel-slide>
