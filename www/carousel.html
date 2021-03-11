@@ -78,6 +78,7 @@
                   :height="vh"
                   :src="'assets/img/poster/'+jpg"
                   alt="image slot"
+                  :caption="jpg"
                 >
               </template>
             </b-carousel-slide>
@@ -88,7 +89,7 @@
 
       },
       data: () => ({
-        slidePeriod: 10 * 1000,  // in milliseconds, e.g. 2s -> 2000ms
+        slidePeriod: 7.5 * 1000,  // in milliseconds, e.g. 2s -> 2000ms
         posters: [],
         fade: true
       }),
@@ -108,7 +109,9 @@
             this.fade = !this.fade;
           });
         },
-        onSlideStart(slide) {},
+        onSlideStart(slide) {
+          console.log(this.posters[slide - 1]);
+        },
         onSlideEnd(slide) {
           if (this.posters.length == slide) {
             // reload the remote files list when all post displayed
