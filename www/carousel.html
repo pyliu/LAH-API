@@ -57,7 +57,7 @@
     // PHP default uses QueryString as the parsing source but axios use json object instead
     axios.defaults.transformRequest = [data => $.param(data)];
     new Vue({
-      template: `<b-container fluid class="center">
+      template: `<div class="center">
         <b-aspect :aspect="ratio">
           <b-carousel
             style="text-shadow: 1px 1px 2px #333;"
@@ -86,7 +86,7 @@
             </b-carousel-slide>
           </b-carousel>
         </b-aspect>
-      </b-container>`,
+      </div>`,
       components: {
 
       },
