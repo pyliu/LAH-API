@@ -14,6 +14,7 @@ node_modules
 **/users/*.jpg
 **/howto/*.jpg
 **/howto/*.txt
+**/poster/*
 **/vendor/*
 **/log/*
 **/export/*
