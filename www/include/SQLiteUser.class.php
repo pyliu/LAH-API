@@ -60,8 +60,16 @@ class SQLiteUser {
             $stm->bindParam(':onboard_date', $row['AP_ON_DATE']);
         }
         
+        // clean up AP_OFF_DATE when AP_OFF_JOB flag is N
+        if ($row['AP_OFF_JOB'] == 'N') {
+            $row['AP_OFF_DATE'] = '';
+        }
+
         if (empty($row['AP_OFF_DATE']) && $row['AP_OFF_JOB'] == 'Y') {
-            $row['AP_OFF_DATE'] = '109/09/24';
+            $tw_date = new Datetime("now");
+            $tw_date->modify("-1911 year");
+            $today = ltrim($tw_date->format("Y/m/d"), "0");	// ex: 110/03/11
+            $row['AP_OFF_DATE'] = $today;
         }
 
         $stm->bindParam(':offboard_date', $row['AP_OFF_DATE']);
