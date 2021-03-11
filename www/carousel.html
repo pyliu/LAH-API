@@ -54,6 +54,10 @@
   <script src="assets/js/axios.min.js"></script>
   <script src="assets/js/localforage.min.js"></script>
   <script>
+    /*
+      Start Web App by Chrome in KIOSK mode
+      Chrome.exe --app=http://[YOUR_SERVER_ADDRESS]/carousel.html --kiosk --disable-pinch --overscroll-history-navigation=0
+    */
     // PHP default uses QueryString as the parsing source but axios use json object instead
     axios.defaults.transformRequest = [data => $.param(data)];
     new Vue({
