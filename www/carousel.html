@@ -110,6 +110,12 @@
           }).then(({ data }) => {
             this.posters = [...data.files];
             console.log(`已讀取 ${this.posters.length} 筆資料。`);
+            if (this.posters.length === 0) {
+              // reload after 10s
+              setTimeout(() => {
+                this.loadFiles();
+              }, 10000);
+            }
           }).finally(() => {
             this.fade = !this.fade;
           });
