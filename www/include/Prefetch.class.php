@@ -272,24 +272,24 @@ class Prefetch {
     /**
      * 取消請示案件快取剩餘時間
      */
-    public function getAskCaseCacheRemainingTime($days = 92) {
-        return $this->getRemainingCacheTimeByKey(self::KEYS['ASK']."_$days");
+    public function getAskCaseCacheRemainingTime($begin, $end) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['ASK']."_${begin}_${end}");
     }
     /**
      * 強制重新讀取取消請示案件
      */
-    public function reloadAskCase($days = 92) {
-        $this->getCache()->del(self::KEYS['ASK']."_$days");
-        return $this->getAskCase($days);
+    public function reloadAskCase($begin, $end) {
+        $this->getCache()->del(self::KEYS['ASK']."_${begin}_${end}");
+        return $this->getAskCase($begin, $end);
     }
     /**
 	 * 取得取消請示的案件
      * default cache time is 60 minutes * 60 seconds = 3600 seconds
 	 */
-	public function getAskCase($days = 92, $expire_duration = 3600) {
-        if ($this->getCache()->isExpired(self::KEYS['ASK']."_$days")) {
-            Logger::getInstance()->info('['.self::KEYS['ASK']."_$days".'] 快取資料已失效，重新擷取 ... ');
-            if ($this->isDBReachable(self::KEYS['ASK'])) {
+	public function getAskCase($begin, $end, $expire_duration = 3600) {
+        if ($this->getCache()->isExpired(self::KEYS['ASK']."_${begin}_${end}")) {
+            Logger::getInstance()->info('['.self::KEYS['ASK']."_${begin}_${end}".'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable(self::KEYS['ASK']."_${begin}_${end}")) {
                 $db = $this->getOraDB();
                 $db->parse("
                     SELECT * FROM MOICAS.CRSMS t
@@ -299,36 +299,27 @@ class Prefetch {
                         RM83 IS NOT NULL AND
                         -- RM31 in ('A', 'B', 'C', 'D') AND
                         -- RM29_1 < RM58_1 AND
-                        RM07_1 BETWEEN :bv_start AND :bv_today
+                        RM07_1 BETWEEN :bv_begin AND :bv_end
                     ORDER BY t.RM29_1 DESC, t.RM58_1 DESC
                 ");
                 
-                $tw_date = new Datetime("now");
-                $tw_date->modify("-1911 year");
-                $today = ltrim($tw_date->format("Ymd"), "0");	// ex: 1091217
-
-                $date_a_year_before = new Datetime("now");
-                $date_a_year_before->modify("-1911 year");
-                $date_a_year_before->modify("-$days days");
-                $start = ltrim($date_a_year_before->format("Ymd"), "0");	// ex: 1090617
-
                 $office = $this->getSystemConfig()->get('SITE');    // e.g. HB
                 $db->bind(":bv_office_end", $office[1]);
                 $db->bind(":bv_office", $office);
-                $db->bind(":bv_today", $today);
-                $db->bind(":bv_start", $start);
+                $db->bind(":bv_begin", $begin);
+                $db->bind(":bv_end", $end);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['ASK']."_$days", $result, $expire_duration);
+                $this->getCache()->set(self::KEYS['ASK']."_${begin}_${end}", $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['ASK']."_$days"."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".self::KEYS['ASK']."_${begin}_${end}"."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['ASK']."_$days");
+        return $this->getCache()->get(self::KEYS['ASK']."_${begin}_${end}");
 	}
     /**
      * 信託註記建物所有部資料快取剩餘時間
