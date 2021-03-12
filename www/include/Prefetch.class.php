@@ -811,7 +811,7 @@ class Prefetch {
 	public function getForeignerCase($year_month, $expire_duration = 86400) {
         if ($this->getCache()->isExpired(self::KEYS['FOREIGNER'].$year_month)) {
             Logger::getInstance()->info('['.self::KEYS['FOREIGNER'].$year_month.'] 快取資料已失效，重新擷取 ... ');
-            if ($this->isDBReachable(self::KEYS['FOREIGNER'])) {
+            if ($this->isDBReachable(self::KEYS['FOREIGNER'].$year_month)) {
                 $db = $this->getOraDB();
                 $db->parse("
                     SELECT DISTINCT
