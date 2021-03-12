@@ -124,7 +124,7 @@ switch ($_POST["type"]) {
 			echoJSONResponse("查詢成功，找到 $total 筆請示中資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
-				'cache_remaining_time' => $prefetch->getAskCaseCacheRemainingTime()
+				'cache_remaining_time' => $prefetch->getAskCaseCacheRemainingTime($days)
 			));
 		}
 		break;
