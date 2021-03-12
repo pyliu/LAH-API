@@ -125,7 +125,7 @@ class Prefetch {
                         -- RM30_1 作業人員
                         AND s.RM30_1 = sa12.USER_ID
                         -- RM49 公告日期, RM50 公告到期日
-                    ORDER BY s.RM50, sa11.USER_NAME
+                    ORDER BY s.RM50, sa11.USER_NAME, s.RM01, s.RM02, s.RM03
                 ");
                 $db->execute();
                 $result = $db->fetchAll();
@@ -300,7 +300,8 @@ class Prefetch {
                         -- RM31 in ('A', 'B', 'C', 'D') AND
                         -- RM29_1 < RM58_1 AND
                         RM07_1 BETWEEN :bv_begin AND :bv_end
-                    ORDER BY t.RM29_1 DESC, t.RM58_1 DESC
+                    --ORDER BY t.RM29_1 DESC, t.RM58_1 DESC
+                    ORDER BY t.RM01, t.RM02, t.RM03, t.RM83, t.RM07_1
                 ");
                 
                 $office = $this->getSystemConfig()->get('SITE');    // e.g. HB
