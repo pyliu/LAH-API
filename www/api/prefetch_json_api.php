@@ -202,7 +202,7 @@ switch ($_POST["type"]) {
 			echoJSONResponse("查詢成功，找到 $total 筆非專代案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
-				'cache_remaining_time' => $prefetch->getNonScrivenerRegCaseCacheRemainingTime($st, $ed)
+				'cache_remaining_time' => $prefetch->getNonScrivenerRegCaseCacheRemainingTime($st, $ed, $_POST['ignore'])
 			));
 		}
 		break;
@@ -225,7 +225,7 @@ switch ($_POST["type"]) {
 			echoJSONResponse("查詢成功，找到 $total 筆非專代測量案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
-				'cache_remaining_time' => $prefetch->getNonScrivenerSurCaseCacheRemainingTime($st, $ed)
+				'cache_remaining_time' => $prefetch->getNonScrivenerSurCaseCacheRemainingTime($st, $ed, $_POST['ignore'])
 			));
 		}
 		break;
