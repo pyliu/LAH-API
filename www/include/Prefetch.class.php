@@ -802,7 +802,7 @@ class Prefetch {
      */
     public function reloadForeignerCase($st, $ed) {
         $this->getCache()->del(self::KEYS['FOREIGNER']."_${st}_${ed}");
-        return $this->getForeignerCase($year_month);
+        return $this->getForeignerCase($st, $ed);
     }
     /**
 	 * 取得外國人案件
