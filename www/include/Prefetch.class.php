@@ -794,24 +794,24 @@ class Prefetch {
     /**
      * 外國人案件快取剩餘時間
      */
-    public function getForeignerCaseCacheRemainingTime($year_month) {
-        return $this->getRemainingCacheTimeByKey(self::KEYS['FOREIGNER'].$year_month);
+    public function getForeignerCaseCacheRemainingTime($st, $ed) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['FOREIGNER']."_${st}_${ed}");
     }
     /**
      * 強制重新讀取外國人案件
      */
-    public function reloadForeignerCase($year_month) {
-        $this->getCache()->del(self::KEYS['FOREIGNER'].$year_month);
+    public function reloadForeignerCase($st, $ed) {
+        $this->getCache()->del(self::KEYS['FOREIGNER']."_${st}_${ed}");
         return $this->getForeignerCase($year_month);
     }
     /**
 	 * 取得外國人案件
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
-	public function getForeignerCase($year_month, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['FOREIGNER'].$year_month)) {
-            Logger::getInstance()->info('['.self::KEYS['FOREIGNER'].$year_month.'] 快取資料已失效，重新擷取 ... ');
-            if ($this->isDBReachable(self::KEYS['FOREIGNER'].$year_month)) {
+	public function getForeignerCase($st, $ed, $expire_duration = 86400) {
+        if ($this->getCache()->isExpired(self::KEYS['FOREIGNER']."_${st}_${ed}")) {
+            Logger::getInstance()->info('['.self::KEYS['FOREIGNER']."_${st}_${ed}".'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable(self::KEYS['FOREIGNER']."_${st}_${ed}")) {
                 $db = $this->getOraDB();
                 $db->parse("
                     SELECT DISTINCT
@@ -874,7 +874,7 @@ class Prefetch {
                             ELSE t.RM31
                         END) AS \"結案與否\"
                     FROM
-                        (select * from MOICAS.CRSMS where RM07_1 LIKE :bv_year || '%' AND RM56_1 LIKE :bv_year_month || '%') t,
+                        (select * from MOICAS.CRSMS where RM07_1 BETWEEN :bv_begin AND :bv_end) t,
                         (select * from MOICAD.RLNID p where p.LCDE in ('2', '8', 'C', 'D') ) q, -- 代碼檔 09
                         (select * from MOICAD.RKEYN k where k.KCDE_1 = '06') r
                     WHERE
@@ -882,20 +882,20 @@ class Prefetch {
                         r.KCDE_2 = t.RM09
                 ");
                 
-                $db->bind(":bv_year", substr($year_month, 0, 3));
-                $db->bind(":bv_year_month", $year_month);
+                $db->bind(":bv_begin", $begin);
+                $db->bind(":bv_end", $end);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['FOREIGNER'].$year_month, $result, $expire_duration);
+                $this->getCache()->set(self::KEYS['FOREIGNER']."_${st}_${ed}", $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['FOREIGNER'].$year_month."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".self::KEYS['FOREIGNER']."_${st}_${ed}"."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['FOREIGNER'].$year_month);
+        return $this->getCache()->get(self::KEYS['FOREIGNER']."_${st}_${ed}");
 	}
     /**
      * 信託資料查詢快取剩餘時間

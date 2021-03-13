@@ -232,8 +232,7 @@ switch ($_POST["type"]) {
 		break;
 	case "reg_foreigner_case":
 		Logger::getInstance()->info("XHR [reg_foreigner_case] 查詢外國人地權案件請求");
-		$st = $_POST['year_month'];
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadForeignerCase($_POST['year_month']) : $prefetch->getForeignerCase($_POST['year_month']);
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadForeignerCase($_POST['begin'], $_POST['end']) : $prefetch->getForeignerCase($_POST['begin'], $_POST['end']);
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [reg_foreigner_case] 查無資料");
 			echoJSONResponse('查無外國人地權案件');
@@ -248,7 +247,7 @@ switch ($_POST["type"]) {
 			echoJSONResponse("查詢成功，找到 $total 筆外國人地權案件。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
-				'cache_remaining_time' => $prefetch->getForeignerCaseCacheRemainingTime($_POST['year_month'])
+				'cache_remaining_time' => $prefetch->getForeignerCaseCacheRemainingTime($_POST['begin'], $_POST['end'])
 			));
 		}
 		break;
