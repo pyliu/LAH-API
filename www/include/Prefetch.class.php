@@ -874,7 +874,7 @@ class Prefetch {
                             ELSE t.RM31
                         END) AS \"結案與否\"
                     FROM
-                        (select * from MOICAS.CRSMS where RM07_1 BETWEEN :bv_begin AND :bv_end) t,
+                        (select * from MOICAS.CRSMS where RM56_1 BETWEEN :bv_begin AND :bv_end) t,  -- RM56_1 校對日期
                         (select * from MOICAD.RLNID p where p.LCDE in ('2', '8', 'C', 'D') ) q, -- 代碼檔 09
                         (select * from MOICAD.RKEYN k where k.KCDE_1 = '06') r
                     WHERE
