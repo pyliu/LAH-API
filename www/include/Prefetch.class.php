@@ -882,8 +882,8 @@ class Prefetch {
                         r.KCDE_2 = t.RM09
                 ");
                 
-                $db->bind(":bv_begin", $begin);
-                $db->bind(":bv_end", $end);
+                $db->bind(":bv_begin", $st);
+                $db->bind(":bv_end", $ed);
                 $db->execute();
                 $result = $db->fetchAll();
                 $this->getCache()->set(self::KEYS['FOREIGNER']."_${st}_${ed}", $result, $expire_duration);
