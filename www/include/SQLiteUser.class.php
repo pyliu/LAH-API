@@ -61,18 +61,16 @@ class SQLiteUser {
         }
         
         // clean up AP_OFF_DATE when AP_OFF_JOB flag is N
-        if ($row['AP_OFF_JOB'] == 'N') {
+        if ($row['AP_OFF_JOB'] !== 'Y') {
             $row['AP_OFF_DATE'] = '';
-        }
-
-        if (empty($row['AP_OFF_DATE']) && $row['AP_OFF_JOB'] == 'Y') {
+        } else if (empty($row['AP_OFF_DATE']) && $row['AP_OFF_JOB'] == 'Y') {
             $tw_date = new Datetime("now");
             $tw_date->modify("-1911 year");
             $today = ltrim($tw_date->format("Y/m/d"), "0");	// ex: 110/03/11
             $row['AP_OFF_DATE'] = $today;
         }
-
         $stm->bindParam(':offboard_date', $row['AP_OFF_DATE']);
+
         if (empty($row['AP_PCIP'])) {
             $stm->bindValue(':ip', '192.168.xx.xx');
         } else {
@@ -157,7 +155,6 @@ class SQLiteUser {
 
     public function import(&$row) {
         if (empty($row['DocUserID'])) {
-            
             Logger::getInstance()->warning(__METHOD__.": DocUserID is empty. Import user procedure can not be proceeded.");
             Logger::getInstance()->warning(__METHOD__.": ".print_r($row, true));
             return false;

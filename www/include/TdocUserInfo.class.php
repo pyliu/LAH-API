@@ -37,7 +37,7 @@ class TdocUserInfo {
     public function getAllUsers() {
         
         Logger::getInstance()->info(__METHOD__.": 取得所內所有使用者(包含離職)。");
-        return $this->jungli_in_db->fetchAll("SELECT * FROM AP_USER ORDER BY AP_UNIT_NAME, DocUserID");
+        return $this->jungli_in_db->fetchAll("SELECT * FROM AP_USER ORDER BY AP_OFF_DATE DESC");
     }
 
 
