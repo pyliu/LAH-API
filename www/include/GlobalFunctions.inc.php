@@ -154,6 +154,7 @@ function getRealIPAddr() {
 function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array = array()) {
 	$str = json_encode(array_merge(array(
 		"status" => $status,
+        "data_count" => 0,
         "message" => $msg
     ), $in_array), 0);
     
