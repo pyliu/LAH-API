@@ -853,6 +853,10 @@ if (Vue) {
                 type: String,
                 default: '統計圖表'
             },
+            labelFontSize: {
+                type: Number,
+                default: 14
+            },
             opacity: {
                 type: Number,
                 default: 0.6
@@ -907,6 +911,10 @@ if (Vue) {
             titlePos: {
                 type: String,
                 default: 'top'
+            },
+            titleFontSize: {
+                type: Number,
+                default: 14
             },
             aspectRatio: { type: Number, default: 2}
         },
@@ -1001,7 +1009,8 @@ if (Vue) {
                         // put legend to the right for some chart type
                         opts.plugins.legend = {
                             display: this.legend,
-                            position: opts.legend_pos || 'right'
+                            position: opts.legend_pos || 'right',
+                            labels: { font: { size: parseInt(this.labelFontSize) } }
                         };
                         break;
                     case "radar":
@@ -1021,7 +1030,8 @@ if (Vue) {
                 opts.plugins.title = {
                     display: !this.empty(this.title),
                     text: this.title,
-                    position: this.titlePos
+                    position: this.titlePos,
+                    font: { size: parseInt(this.titleFontSize) }
                 };
                 // use chart.js directly
                 // let ctx = this.$el.childNodes[0];
