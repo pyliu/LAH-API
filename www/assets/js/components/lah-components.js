@@ -1010,7 +1010,7 @@ if (Vue) {
                         opts.plugins.legend = {
                             display: this.legend,
                             position: opts.legend_pos || 'right',
-                            labels: { font: { size: parseInt(this.labelFontSize) } }
+                            labels: { font: { size: +this.labelFontSize } }
                         };
                         break;
                     case "radar":
@@ -1031,7 +1031,7 @@ if (Vue) {
                     display: !this.empty(this.title),
                     text: this.title,
                     position: this.titlePos,
-                    font: { size: parseInt(this.titleFontSize) }
+                    font: { size: +this.titleFontSize }
                 };
                 // use chart.js directly
                 // let ctx = this.$el.childNodes[0];
