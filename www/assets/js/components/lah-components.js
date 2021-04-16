@@ -1029,7 +1029,7 @@ if (Vue) {
                 // update title
                 opts.plugins.title = {
                     display: !this.empty(this.title),
-                    text: this.title,
+                    text: this.title, // support multiple text if it is array
                     position: this.titlePos,
                     font: { size: +this.titleFontSize }
                 };
