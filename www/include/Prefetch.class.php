@@ -1149,8 +1149,8 @@ class Prefetch {
                         (CASE
                             WHEN t.GS_TYPE = 'A' THEN '".mb_convert_encoding('新增', 'BIG5', 'UTF-8')."'
                             WHEN t.GS_TYPE = 'D' THEN '".mb_convert_encoding('刪除', 'BIG5', 'UTF-8')."'
-                            WHEN t.GS_TYPE = 'N' THEN '".mb_convert_encoding('修改前', 'BIG5', 'UTF-8')."'
-                            WHEN t.GS_TYPE = 'M' THEN '".mb_convert_encoding('修改後', 'BIG5', 'UTF-8')."'
+                            WHEN t.GS_TYPE = 'N' THEN '".mb_convert_encoding('修改後', 'BIG5', 'UTF-8')."'
+                            WHEN t.GS_TYPE = 'M' THEN '".mb_convert_encoding('修改前', 'BIG5', 'UTF-8')."'
                             ELSE t.GS_TYPE
                         END) AS GS_TYPE_CHT
                     FROM 
