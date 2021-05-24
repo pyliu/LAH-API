@@ -1282,7 +1282,7 @@ class Prefetch {
                         u.GS03,                 -- 收件年
                         u.GS04_1,               -- 收件字
                         u.GS04_2,               -- 收件號
-                        v.KCNT,                 -- 登記原因
+                        v.KCNT AS RM09_CHT,     -- 登記原因
                         u.RM56_1,               -- 校對日期
                         (CASE
                             WHEN u.GS_TYPE = 'N' THEN '".mb_convert_encoding('更新後', 'BIG5', 'UTF-8')."'

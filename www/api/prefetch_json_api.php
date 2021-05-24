@@ -339,10 +339,6 @@ switch ($_POST["type"]) {
 		$message = "未辦標的註記異動查詢";
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNotDoneChange($_POST['start'], $_POST['end']) : $prefetch->getNotDoneChange($_POST['start'], $_POST['end']);
 		$cache_remaining = $prefetch->getNotDoneChangeCacheRemainingTime($_POST['start'], $_POST['end']);
-		foreach ($rows as $idx => $row) {
-			$regdata = new RegCaseData($row);
-			$rows[$idx] = $regdata->getBakedData();
-		}
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [not_done_change] 查無 ${message} 資料");
 			echoJSONResponse("查無 ${message} 資料");
