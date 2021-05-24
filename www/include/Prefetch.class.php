@@ -1273,41 +1273,41 @@ class Prefetch {
             if ($this->isDBReachable(self::KEYS['NOT_DONE_CHANGE'])) {
                 $db = $this->getOraDB();
                 $db->parse("
-                SELECT DISTINCT
-                    (CASE
-                        WHEN u.GG00 = 'B' THEN '".mb_convert_encoding('土地', 'BIG5', 'UTF-8')."'
-                        WHEN u.GG00 = 'E' THEN '".mb_convert_encoding('建物', 'BIG5', 'UTF-8')."'
-                        ELSE u.GG00
-                    END) AS TARGET_TYPE,    -- 部別
-                    u.GS03,                 -- 收件年
-                    u.GS04_1,               -- 收件字
-                    u.GS04_2,               -- 收件號
-                    v.KCNT,                 -- 登記原因
-                    u.RM56_1,               -- 校對日期
-                    (CASE
-                        WHEN u.GS_TYPE = 'N' THEN '".mb_convert_encoding('更新後', 'BIG5', 'UTF-8')."'
-                        WHEN u.GS_TYPE = 'M' THEN '".mb_convert_encoding('更新前', 'BIG5', 'UTF-8')."'
-                        WHEN u.GS_TYPE = 'A' THEN '".mb_convert_encoding('新增', 'BIG5', 'UTF-8')."'
-                        WHEN u.GS_TYPE = 'D' THEN '".mb_convert_encoding('刪除', 'BIG5', 'UTF-8')."'
-                        ELSE u.GG00
-                    END) AS GS_TYPE,        -- 異動狀態
-                    u.GG48,                 -- 段代碼,
-                    u.GG49,                 -- 地/建號
-                    u.GG01,                 -- 登序
-                    w.IS09,                 -- 編統
-                    w.ISNAME,               -- 權利人
-                    u.GG30_2                -- 內容
-                FROM
-                    (SELECT * FROM MOICAW.RGALL t,  MOICAS.CRSMS s WHERE  t.GS04_2 = s.RM03 AND t.GS04_1 = s.RM02 AND t.GS03 = s.RM01 AND t.GG30_1 = '9H' AND s.RM56_1 BETWEEN :bv_st AND :bv_ed) u
-                    LEFT JOIN MOIADM.RKEYN v ON u.RM09 = v.kcde_2 AND v.kcde_1 = '06'
-                    LEFT JOIN MOICAD.RSINDX w ON u.GG01 = w.IS01 AND u.GG49 = w.IS49 AND u.GG48 = w.IS48 AND u.GS04_2 = w.IS04_2 AND u.GS04_1 = w.IS04_1 AND u.GS03 = w.IS03
-                ORDER BY TARGET_TYPE,
-                    u.GS03,
-                    u.GS04_1,
-                    u.GS04_2,
-                    u.GG48,
-                    u.GG49,
-                    u.GG01
+                    SELECT DISTINCT
+                        (CASE
+                            WHEN u.GG00 = 'B' THEN '".mb_convert_encoding('土地', 'BIG5', 'UTF-8')."'
+                            WHEN u.GG00 = 'E' THEN '".mb_convert_encoding('建物', 'BIG5', 'UTF-8')."'
+                            ELSE u.GG00
+                        END) AS TARGET_TYPE,    -- 部別
+                        u.GS03,                 -- 收件年
+                        u.GS04_1,               -- 收件字
+                        u.GS04_2,               -- 收件號
+                        v.KCNT,                 -- 登記原因
+                        u.RM56_1,               -- 校對日期
+                        (CASE
+                            WHEN u.GS_TYPE = 'N' THEN '".mb_convert_encoding('更新後', 'BIG5', 'UTF-8')."'
+                            WHEN u.GS_TYPE = 'M' THEN '".mb_convert_encoding('更新前', 'BIG5', 'UTF-8')."'
+                            WHEN u.GS_TYPE = 'A' THEN '".mb_convert_encoding('新增', 'BIG5', 'UTF-8')."'
+                            WHEN u.GS_TYPE = 'D' THEN '".mb_convert_encoding('刪除', 'BIG5', 'UTF-8')."'
+                            ELSE u.GG00
+                        END) AS GS_TYPE,        -- 異動狀態
+                        u.GG48,                 -- 段代碼,
+                        u.GG49,                 -- 地/建號
+                        u.GG01,                 -- 登序
+                        w.IS09,                 -- 編統
+                        w.ISNAME,               -- 權利人
+                        u.GG30_2                -- 內容
+                    FROM
+                        (SELECT * FROM MOICAW.RGALL t,  MOICAS.CRSMS s WHERE  t.GS04_2 = s.RM03 AND t.GS04_1 = s.RM02 AND t.GS03 = s.RM01 AND t.GG30_1 = '9H' AND s.RM56_1 BETWEEN :bv_st AND :bv_ed) u
+                        LEFT JOIN MOIADM.RKEYN v ON u.RM09 = v.kcde_2 AND v.kcde_1 = '06'
+                        LEFT JOIN MOICAD.RSINDX w ON u.GG01 = w.IS01 AND u.GG49 = w.IS49 AND u.GG48 = w.IS48 AND u.GS04_2 = w.IS04_2 AND u.GS04_1 = w.IS04_1 AND u.GS03 = w.IS03
+                    ORDER BY TARGET_TYPE,
+                        u.GS03,
+                        u.GS04_1,
+                        u.GS04_2,
+                        u.GG48,
+                        u.GG49,
+                        u.GG01
                 ");
                 
                 $db->bind(":bv_st", $st);
