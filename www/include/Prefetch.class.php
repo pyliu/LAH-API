@@ -24,7 +24,8 @@ class Prefetch {
         'TRUST_OBLITERATE_LAND' => 'Prefetch::getTrustObliterateLand',
         'TRUST_OBLITERATE_BUILD' => 'Prefetch::getTrustObliterateBuilding',
         '375_LAND_CHANGE' => 'Prefetch::getLand375Change',
-        '375_OWNER_CHANGE' => 'Prefetch::getOwner375Change'
+        '375_OWNER_CHANGE' => 'Prefetch::getOwner375Change',
+        'NOT_DONE_CHANGE' => 'Prefetch::getNotDoneChange'
     );
     private $ora_db = null;
     private $cache = null;
@@ -1246,5 +1247,82 @@ class Prefetch {
             }
         }
         return $this->getCache()->get(self::KEYS['375_OWNER_CHANGE'].$st.$ed);
+    }
+
+    
+    /**
+     * 未辦標的註記異動查詢快取剩餘時間
+     */
+    public function getNotDoneChangeCacheRemainingTime($st, $ed) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['NOT_DONE_CHANGE'].$st.$ed);
+    }
+    /**
+     * 強制重新讀取未辦標的註記異動查詢
+     */
+    public function reloadNotDoneChange($st, $ed) {
+        $this->getCache()->del(self::KEYS['NOT_DONE_CHANGE'].$st.$ed);
+        return $this->getNotDoneChange($st, $ed);
+    }
+    /**
+	 * 取得未辦標的註記異動查詢
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getNotDoneChange($st, $ed, $expire_duration = 86400) {
+        if ($this->getCache()->isExpired(self::KEYS['NOT_DONE_CHANGE'].$st.$ed)) {
+            Logger::getInstance()->info('['.self::KEYS['NOT_DONE_CHANGE'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable(self::KEYS['NOT_DONE_CHANGE'])) {
+                $db = $this->getOraDB();
+                $db->parse("
+                SELECT DISTINCT
+                    (CASE
+                        WHEN u.GG00 = 'B' THEN '".mb_convert_encoding('土地', 'BIG5', 'UTF-8')."'
+                        WHEN u.GG00 = 'E' THEN '".mb_convert_encoding('建物', 'BIG5', 'UTF-8')."'
+                        ELSE u.GG00
+                    END) AS TARGET_TYPE,    -- 部別
+                    u.GS03,                 -- 收件年
+                    u.GS04_1,               -- 收件字
+                    u.GS04_2,               -- 收件號
+                    v.KCNT,                 -- 登記原因
+                    u.RM56_1,               -- 校對日期
+                    (CASE
+                        WHEN u.GS_TYPE = 'N' THEN '".mb_convert_encoding('更新後', 'BIG5', 'UTF-8')."'
+                        WHEN u.GS_TYPE = 'M' THEN '".mb_convert_encoding('更新前', 'BIG5', 'UTF-8')."'
+                        WHEN u.GS_TYPE = 'A' THEN '".mb_convert_encoding('新增', 'BIG5', 'UTF-8')."'
+                        WHEN u.GS_TYPE = 'D' THEN '".mb_convert_encoding('刪除', 'BIG5', 'UTF-8')."'
+                        ELSE u.GG00
+                    END) AS GS_TYPE,        -- 異動狀態
+                    u.GG48,                 -- 段代碼,
+                    u.GG49,                 -- 地/建號
+                    u.GG01,                 -- 登序
+                    w.IS09,                 -- 編統
+                    w.ISNAME,               -- 權利人
+                    u.GG30_2                -- 內容
+                FROM
+                    (SELECT * FROM MOICAW.RGALL t,  MOICAS.CRSMS s WHERE  t.GS04_2 = s.RM03 AND t.GS04_1 = s.RM02 AND t.GS03 = s.RM01 AND t.GG30_1 = '9H' AND s.RM56_1 BETWEEN :bv_st AND :bv_ed) u
+                    LEFT JOIN MOIADM.RKEYN v ON u.RM09 = v.kcde_2 AND v.kcde_1 = '06'
+                    LEFT JOIN MOICAD.RSINDX w ON u.GG01 = w.IS01 AND u.GG49 = w.IS49 AND u.GG48 = w.IS48 AND u.GS04_2 = w.IS04_2 AND u.GS04_1 = w.IS04_1 AND u.GS03 = w.IS03
+                ORDER BY TARGET_TYPE,
+                    u.GS03,
+                    u.GS04_1,
+                    u.GS04_2,
+                    u.GG48,
+                    u.GG49,
+                    u.GG01
+                ");
+                
+                $db->bind(":bv_st", $st);
+                $db->bind(":bv_ed", $ed);
+                $db->execute();
+                $result = $db->fetchAll();
+                $this->getCache()->set(self::KEYS['NOT_DONE_CHANGE'].$st.$ed, $result, $expire_duration);
+
+                Logger::getInstance()->info("[".self::KEYS['NOT_DONE_CHANGE'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+                return $result;
+            } else {
+                return array();
+            }
+        }
+        return $this->getCache()->get(self::KEYS['NOT_DONE_CHANGE'].$st.$ed);
     }
 }
