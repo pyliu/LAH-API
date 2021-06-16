@@ -1,5 +1,6 @@
 Config.inc.php
 .vscode
+.gitconfig
 node_modules
 *.ffs_db
 *.ffs_lock
