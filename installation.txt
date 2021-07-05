@@ -33,9 +33,9 @@
 	extension=xmlrpc
 	extension=xsl
 	; For Oracle9i (自己加)
-	extension=php_oci8_11g
+	extension=oci8_11g
 	; For MSSQL  (自己加)
-	extension=php_sqlsrv_73_ts
+	extension=sqlsrv_73_ts
 		
     3. 複製 PHP7.4 x64 thread safe 版本之 php_oci8_11g.dll 及 php_sqlsrv_74_ts.dll 到 D:/DEV/php7/ext 下
 
