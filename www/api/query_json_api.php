@@ -347,7 +347,7 @@ switch ($_POST["type"]) {
 			}
 		}
 
-		$cache->set('xcase-check', $query_result);
+		$cache->set('xcase-check', $rows);
 		if (empty($case_ids)) {
 			Logger::getInstance()->info("XHR [xcase-check] 查無資料");
 			echoJSONResponse('查無資料');
