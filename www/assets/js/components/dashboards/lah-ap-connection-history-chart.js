@@ -33,7 +33,7 @@ if (Vue) {
         props: {
             ip: {
                 type: String,
-                default: CONFIG.AP_SVR || '220.1.35.123'
+                default: CONFIG.AP_SVR || '220.1.34.161'
             },
             type: {
                 type: String,
@@ -59,7 +59,7 @@ if (Vue) {
             reload_timer: null,
             refresh_ip_timer: null,
             type_carousel: ['bar', 'line', 'pie', 'polarArea', 'doughnut', 'radar'],
-            svr_carousel: ['31', '32', '33', '34', '35', '36', '70', '123']
+            svr_carousel: ['205', '206', '207', '156', '118', '60', '161']
         }),
         watch: {
             disableOfficeHours(val) { if (val) this.reload() },
@@ -84,7 +84,7 @@ if (Vue) {
                     return item == this.curr_svr;
                 });
                 let next_idx = (curr_idx + 1) % this.svr_carousel.length;
-                return `220.1.35.${this.svr_carousel[next_idx]}`;
+                return `220.1.34.${this.svr_carousel[next_idx]}`;
             },
             next_svr() {
                 let curr_idx = -1;
@@ -93,7 +93,7 @@ if (Vue) {
                     return item == this.curr_svr;
                 });
                 let prev_idx = (curr_idx - 1) == -1 ? this.svr_carousel.length - 1 : curr_idx - 1;
-                return `220.1.35.${this.svr_carousel[prev_idx]}`;
+                return `220.1.34.${this.svr_carousel[prev_idx]}`;
             }
         },
         methods: {
@@ -126,8 +126,8 @@ if (Vue) {
                                     /*
                                         item = {
                                             log_time: '20201005181631',
-                                            ap_ip: '220.1.35.123',
-                                            est_ip: '220.1.35.36',
+                                            ap_ip: '220.1.34.161',
+                                            est_ip: '220.1.34.36',
                                             count: '2',
                                             batch: '490',
                                             name: '資訊主機'

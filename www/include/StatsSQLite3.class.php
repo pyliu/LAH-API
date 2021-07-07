@@ -3,6 +3,7 @@ require_once('init.php');
 require_once('DynamicSQLite.class.php');
 require_once('IPResolver.class.php');
 require_once('Ping.class.php');
+require_once('System.class.php');
 
 define('DB_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db");
 define('DEF_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."LAH.db");
@@ -329,9 +330,9 @@ class StatsSQLite3 {
     }
 
     public function getAPConnHistory($ap_ip, $count, $extend = true) {
-        
-        // XAP conn only store at AP123 db
-        $db_path = $this->getAPConnStatsDB('123');
+        $webap_ip = System::getInstance()->getWebAPIp() ?? '220.1.34.161';
+        // e.g. $sebap_ip = '220.1.34.161' then XAP conn only store at AP161 db
+        $db_path = $this->getAPConnStatsDB((explode('.', $webap_ip)[3]));
         $ap_db = new SQLite3($db_path);
         if($stmt = $ap_db->prepare('SELECT * FROM ap_conn_history WHERE est_ip = :ip ORDER BY log_time DESC LIMIT :limit')) {
             $stmt->bindParam(':ip', $ap_ip);

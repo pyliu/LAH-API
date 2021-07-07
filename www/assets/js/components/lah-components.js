@@ -2815,7 +2815,7 @@ if (Vue) {
         props: ['tabsEnd'],
         data: () => ({
             rm10: null,
-            ap_server: "220.1.35.123",
+            ap_server: "220.1.34.161",
             show_op_card: true
         }),
         computed: {

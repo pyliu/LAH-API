@@ -30,7 +30,7 @@ if (Vue) {
         props: {
             ip: {
                 type: String,
-                default: CONFIG.AP_SVR || '220.1.35.123'
+                default: CONFIG.AP_SVR || '220.1.34.161'
             },
             type: {
                 type: String,
@@ -213,7 +213,7 @@ if (Vue) {
                                 /*
                                     item = {
                                         log_time: '20201005181631',
-                                        ap_ip: '220.1.35.123',
+                                        ap_ip: '220.1.34.161',
                                         est_ip: '220.1.35.36',
                                         count: '2',
                                         batch: '490',

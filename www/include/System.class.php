@@ -556,6 +556,10 @@ class System {
         );
     }
 
+    public function getWebAPIp() {
+        return $this->get('WEBAP_IP');
+    }
+
     public function getConfigs() {
         if($stmt = $this->sqlite3->prepare('SELECT * FROM config WHERE 1=1')) {
             $result = $stmt->execute();

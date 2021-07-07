@@ -2,7 +2,7 @@
 const CONFIG = {
     DISABLE_MSDB_QUERY: false,
     DEBUG_MODE: false,
-    AP_SVR: "220.1.35.123",
+    AP_SVR: "220.1.34.161",
     SCREENSAVER: false,
     SCREENSAVER_TIMER: 15 * 60 * 1000,
     PING: {

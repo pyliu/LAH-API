@@ -384,9 +384,9 @@ class WatchDog {
 
     public function do() {
         if ($this->isOfficeHours()) {
-            $this->checkCrossSiteData();
-            $this->findDelayRegCases();
-            $this->findProblematicSURCases();
+            // $this->checkCrossSiteData();
+            // $this->findDelayRegCases();
+            // $this->findProblematicSURCases();
             $this->compressLog();
             // clean AP stats data one day ago
             $this->stats->wipeAllAPConnHistory();
@@ -394,7 +394,7 @@ class WatchDog {
             // clean connectivity stats data one day ago
             $this->stats->wipeConnectivityHistory();
             // $this->notifyTemperatureRegistration();
-            $this->importUserFromL3HWEB();
+            // $this->importUserFromL3HWEB();
             return true;
         }
         return false;
