@@ -337,16 +337,21 @@ switch ($_POST["type"]) {
 	case "xcase-check":
 		Logger::getInstance()->info("XHR [xcase-check] 查詢跨所註記遺失請求");
 		$query_result = $mock ? $cache->get('xcase-check') : $query->getProblematicCrossCases();
+			
+		$case_ids = [];
+		$rows = [];
+		foreach ($query_result as $row) {
+			if (preg_match("/^H[A-Z]{2}1$/i", $row['RM02'])) {
+				$case_ids[] = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
+				$rows[] = $row;
+			}
+		}
+
 		$cache->set('xcase-check', $query_result);
-		if (empty($query_result)) {
+		if (empty($case_ids)) {
 			Logger::getInstance()->info("XHR [xcase-check] 查無資料");
 			echoJSONResponse('查無資料');
 		} else {
-			$rows = $query_result;
-			$case_ids = [];
-			foreach ($rows as $row) {
-				$case_ids[] = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
-			}
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"case_ids" => $case_ids,
