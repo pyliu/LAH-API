@@ -3,12 +3,12 @@
 # */1 7-21   *   *  1-6 for i in 1 2 3 4 ; do /home/jboss/cron/send_netstats.sh 2>&1 > /dev/null & [[ i -ne 4 ]] && sleep 15; done
 
 ip=`netstat -ie | grep 'inet addr:' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{print $1}'`
-api="http://220.1.35.84/api/stats_json_api.php"
+api="http://220.1.34.75/api/stats_json_api.php"
 log_time=`date "+%Y%m%d%H%M%S"`
 
-# AP123 needs to collect other XAP data even if it's zero.
+# cross AP needs to collect other XAP data even if it's zero.
 DEF_RECORDS=''
-if [ "$ip" == "220.1.35.123" ]; then
+if [ "$ip" == "220.1.34.161" ]; then
      DEF_RECORDS+=" -d records[]=0,220.1.35.123"
      DEF_RECORDS+=" -d records[]=0,220.1.37.246"
      DEF_RECORDS+=" -d records[]=0,220.1.38.30"
