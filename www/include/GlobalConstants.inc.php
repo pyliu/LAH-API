@@ -93,8 +93,7 @@ define('OFFICE', [
     'BI' => '大里',
     'BJ' => '太平',
     'BK' => '龍井',
-    'CB' => '信義',
-    'CC' => '安樂',
+    'CD' => '基隆',
     'DA' => '台南',
     'DB' => '安南',
     'DC' => '東南',
@@ -263,8 +262,7 @@ define('REG_CODE', [
             'H'.$site_idx.'BK' => '跨縣市（'.$site_name.'龍井）'
         ],
         '基隆市' => [
-            'H'.$site_idx.'CB' => '跨縣市（'.$site_name.'信義）',
-            'H'.$site_idx.'CC' => '跨縣市（'.$site_name.'安樂）'
+            'H'.$site_idx.'CD' => '跨縣市（'.$site_name.'基隆）'
         ],
         '台南市' => [
             'H'.$site_idx.'DA' => '跨縣市（'.$site_name.'台南）',
@@ -400,8 +398,7 @@ define('REG_CODE', [
             'BY'.$site_code => '跨縣市（龍井'.$site_name.'）'
         ],
         '基隆市' => [
-            'C1'.$site_code => '跨縣市（信義'.$site_name.'）',
-            'C2'.$site_code => '跨縣市（安樂'.$site_name.'）'
+            'C3'.$site_code => '跨縣市（基隆'.$site_name.'）',
         ],
         '台南市' => [
             'D1'.$site_code => '跨縣市（台南'.$site_name.'）',
@@ -560,8 +557,7 @@ define('REG_WORD', [
     'B9'.$site_code => '跨縣市（大里'.$site_name.'）',
     'BZ'.$site_code => '跨縣市（太平'.$site_name.'）',
     'BY'.$site_code => '跨縣市（龍井'.$site_name.'）',
-    'C1'.$site_code => '跨縣市（信義'.$site_name.'）',
-    'C2'.$site_code => '跨縣市（安樂'.$site_name.'）',
+    'C3'.$site_code => '跨縣市（基隆'.$site_name.'）',
     'D1'.$site_code => '跨縣市（台南'.$site_name.'）',
     'D2'.$site_code => '跨縣市（安南'.$site_name.'）',
     'D3'.$site_code => '跨縣市（東南'.$site_name.'）',
@@ -664,8 +660,7 @@ define('REG_WORD', [
     'H'.$site_idx.'BI' => '跨縣市（'.$site_name.'大里）',
     'H'.$site_idx.'BJ' => '跨縣市（'.$site_name.'太平）',
     'H'.$site_idx.'BK' => '跨縣市（'.$site_name.'龍井）',
-    'H'.$site_idx.'CB' => '跨縣市（'.$site_name.'信義）',
-    'H'.$site_idx.'CC' => '跨縣市（'.$site_name.'安樂）',
+    'H'.$site_idx.'CD' => '跨縣市（'.$site_name.'基隆）',
     'H'.$site_idx.'DA' => '跨縣市（'.$site_name.'台南）',
     'H'.$site_idx.'DB' => '跨縣市（'.$site_name.'安南）',
     'H'.$site_idx.'DC' => '跨縣市（'.$site_name.'東南）',
