@@ -23,7 +23,10 @@ try {
     $today = ltrim($today->format("Y/m/d"), "0");	// ex: 2021/01/21
     echo $today;
     // $files = array_diff(scandir("assets/img/poster"), array('..', '.'));
-    echo print_r($files, true);
+    // echo print_r($files, true);
+    echo '<br/><br/>';
+
+    echo ord('A');
 }
 catch(Exception $e)
 {

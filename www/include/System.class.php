@@ -560,6 +560,10 @@ class System {
         return $this->get('WEBAP_IP');
     }
 
+    public function getSiteCode() {
+        return strtoupper($this->get('SITE'));
+    }
+
     public function getConfigs() {
         if($stmt = $this->sqlite3->prepare('SELECT * FROM config WHERE 1=1')) {
             $result = $stmt->execute();
