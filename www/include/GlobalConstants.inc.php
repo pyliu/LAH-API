@@ -196,7 +196,7 @@ define('PRC_WORD', [
 ]);
 
 require_once('System.class.php');
-$site_code = System::getInstance()->getSiteCode();  // HA
+$site_code = System::getInstance()->getSiteCode() ?? 'HA';  // HA
 $site_code_tail = $site_code[1];    // A
 $site_short_name = '？';
 switch ($site_code) {
