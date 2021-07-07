@@ -409,14 +409,14 @@ class StatsSQLite3 {
     }
 
     public function wipeAllAPConnHistory() {
-        $this->wipeAPConnHistory('31');
-        $this->wipeAPConnHistory('32');
-        $this->wipeAPConnHistory('33');
-        $this->wipeAPConnHistory('34');
-        $this->wipeAPConnHistory('35');
-        $this->wipeAPConnHistory('36');
-        $this->wipeAPConnHistory('70');
-        $this->wipeAPConnHistory('123');
+        $this->wipeAPConnHistory('205');
+        $this->wipeAPConnHistory('206');
+        $this->wipeAPConnHistory('207');
+        $this->wipeAPConnHistory('62');
+        $this->wipeAPConnHistory('156');
+        $this->wipeAPConnHistory('118');
+        $this->wipeAPConnHistory('161');
+        $this->wipeAPConnHistory('60');
     }
     /**
      * Connectivity Status
