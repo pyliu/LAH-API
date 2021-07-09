@@ -47,7 +47,7 @@ if (Vue) {
                 type: Boolean,
                 default: true
             },
-            allSwitch: { type: Boolean, default: false },
+            allSwitch: { type: Boolean, default: true },
             aspectRatio: { type: Number, default: 2 }
         },
         data: () => ({
