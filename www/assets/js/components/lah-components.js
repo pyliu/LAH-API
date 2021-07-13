@@ -926,7 +926,13 @@ if (Vue) {
             resize_timer: null
         }),
         computed: {
-            style() { return `max-height: ${window.innerHeight - 185}px; max-width: ${window.innerWidth * 0.75}px;` }
+            style() { return `max-height: ${window.innerHeight - 185}px; max-width: ${window.innerWidth * 0.75}px;` },
+            dynamicAspectRation() {
+                if (window.innerHeight > 0 && window.innerWidth > 0) {
+                    return Number.parseFloat(window.innerWidth / window.innerHeight).toFixed(1) * 1.25
+                }
+                return false
+            }
         },
         watch: {
             type: function (val) {
@@ -1042,9 +1048,9 @@ if (Vue) {
                     data: this.chartData,
                     options: Object.assign({
                         showTooltips: true,
-                        responsive: true, 
+                        responsive: true,
                         maintainAspectRatio: true,
-                        aspectRatio: that.aspectRatio,
+                        aspectRatio: that.dynamicAspectRation || that.aspectRatio,
                         elements: {
                             point: { pointStyle: 'circle', radius: 4, hoverRadius: 6, borderWidth: 1, hoverBorderWidth: 2 },
                             line: { tension: this.type === 'line' ? 0.35 : 0.1, fill: true, stepped: false }
@@ -1097,6 +1103,7 @@ if (Vue) {
         created() { this.id = this.uuid() },
         mounted() {
             this.setData(this.items);
+            console.log(this.dynamicAspectRation)
             // this.style = `max-height: ${window.innerHeight - 185}px; max-width: ${window.innerWidth - 20}px;`;
             // window.addEventListener("resize", e => {
             //     clearTimeout(this.resize_timer);
