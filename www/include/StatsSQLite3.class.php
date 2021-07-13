@@ -471,7 +471,7 @@ class StatsSQLite3 {
     public function getConnectivityStatus($force = 'false') {
         
 
-        if ($force === 'true') {
+        if ($force === 'true' && !System::getInstance()->isMockMode()) {
             // generate the latest batch records
             $this->checkRegisteredConnectivity();
         }
@@ -503,7 +503,7 @@ class StatsSQLite3 {
     }
 
     public function getIPConnectivityStatus($ip, $force = 'false', $port = 0) {
-        if ($force === 'true') {
+        if ($force === 'true' && !System::getInstance()->isMockMode()) {
             // generate the latest record for $ip
             $this->checkIPConnectivity($ip, $port);
         }
