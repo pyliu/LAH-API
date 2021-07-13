@@ -1103,7 +1103,8 @@ if (Vue) {
         created() { this.id = this.uuid() },
         mounted() {
             this.setData(this.items);
-            console.log(this.dynamicAspectRation)
+            console.log(`Chart apsect ratio: ${this.dynamicAspectRation}`)
+            console.log(`window inner width: ${window.innerWidth}, window inner height: ${window.innerHeight}`)
             // this.style = `max-height: ${window.innerHeight - 185}px; max-width: ${window.innerWidth - 20}px;`;
             // window.addEventListener("resize", e => {
             //     clearTimeout(this.resize_timer);
