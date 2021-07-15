@@ -1363,6 +1363,7 @@ class Prefetch {
                             ELSE t.as_type
                         END) AS as_type_cht,
                         t.aa48,     -- 段代碼
+                        x.kname as aa48_cht,    -- 段名稱
                         t.aa49,     -- 地號
                         v.gg30_2,   -- 其他登記事項內容
                         r.af08,     -- 土參類別代碼
@@ -1384,7 +1385,10 @@ class Prefetch {
                         on t.as03 = s.rm01 and t.as04_1 = s.rm02 and t.as04_2 = s.rm03
                     left join MOICAW.RGALL v
                         on t.as03 = v.gs03 and t.as04_1 = v.gs04_1 and t.as04_2 = v.gs04_2
-                    left join MOIADM.RKEYN w ON s.rm09 = w.kcde_2 AND w.kcde_1 = '06'
+                    left join MOIADM.RKEYN w
+                        on s.rm09 = w.kcde_2 AND w.kcde_1 = '06'
+                    left join MOIADM.RKEYN_ALL x
+                        on x.kcde_2 = 'H' and x.kcde_1 = '48' and x.kcde_4 = t.aa48
                     where 1 = 1
                         and (t.aa05 between :bv_st and :bv_ed)
                         and r.af09 IS NOT NULL
