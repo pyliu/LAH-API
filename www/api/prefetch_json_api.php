@@ -335,7 +335,7 @@ switch ($_POST["type"]) {
 		break;
 	case "not_done_change":
 		Logger::getInstance()->info("XHR [not_done_change] 查詢未辦標的註記異動資料請求");
-		// 375租約土地標示部異動查詢
+		// 未辦標的註記異動查詢
 		$message = "未辦標的註記異動查詢";
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNotDoneChange($_POST['start'], $_POST['end']) : $prefetch->getNotDoneChange($_POST['start'], $_POST['end']);
 		$cache_remaining = $prefetch->getNotDoneChangeCacheRemainingTime($_POST['start'], $_POST['end']);
@@ -345,6 +345,25 @@ switch ($_POST["type"]) {
 		} else {
 			$total = count($rows);
 			Logger::getInstance()->info("XHR [not_done_change] 查詢成功($total)");
+			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"raw" => $rows,
+				'cache_remaining_time' => $cache_remaining
+			));
+		}
+		break;
+	case "land_ref_change":
+		Logger::getInstance()->info("XHR [land_ref_change] 查詢土地參考資訊異動資料請求");
+		// 土地參考資訊異動查詢
+		$message = "土地參考資訊異動查詢";
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadLandRefChange($_POST['start'], $_POST['end']) : $prefetch->getLandRefChange($_POST['start'], $_POST['end']);
+		$cache_remaining = $prefetch->getLandRefChangeCacheRemainingTime($_POST['start'], $_POST['end']);
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [land_ref_change] 查無 ${message} 資料");
+			echoJSONResponse("查無 ${message} 資料");
+		} else {
+			$total = count($rows);
+			Logger::getInstance()->info("XHR [land_ref_change] 查詢成功($total)");
 			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"raw" => $rows,

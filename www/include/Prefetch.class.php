@@ -1355,14 +1355,26 @@ class Prefetch {
                 $db->parse("
                     select distinct
                         t.as_type,  -- 異動類別
+                        (CASE
+                            WHEN t.as_type = 'A' THEN '".mb_convert_encoding('新增', 'BIG5', 'UTF-8')."'
+                            WHEN t.as_type = 'D' THEN '".mb_convert_encoding('刪除', 'BIG5', 'UTF-8')."'
+                            WHEN t.as_type = 'N' THEN '".mb_convert_encoding('更新後', 'BIG5', 'UTF-8')."'
+                            WHEN t.as_type = 'M' THEN '".mb_convert_encoding('更新前', 'BIG5', 'UTF-8')."'
+                            ELSE t.as_type
+                        END) AS as_type_cht,
                         t.aa48,     -- 段代碼
                         t.aa49,     -- 地號
                         v.gg30_2,   -- 其他登記事項內容
                         r.af08,     -- 土參類別代碼
                         u.kcnt as af08_cht, -- 土參類別內容
                         r.af09,     -- 土參資訊內容
+                        -- s.*         -- 案件資料
+                        s.rm01,
+                        s.rm02,
+                        s.rm03,
+                        s.rm09,
                         w.kcnt as rm09_cht, -- 登記原因
-                        s.*         -- 案件資料
+                        s.rm56_1    -- 校對日期
                     from MOICAW.RALID t
                     left join MOICAD.AFLBF r
                         on t.aa48 = r.af03 and t.aa49 = r.af04 || r.af05
@@ -1374,7 +1386,7 @@ class Prefetch {
                         on t.as03 = v.gs03 and t.as04_1 = v.gs04_1 and t.as04_2 = v.gs04_2
                     left join MOIADM.RKEYN w ON s.rm09 = w.kcde_2 AND w.kcde_1 = '06'
                     where 1 = 1
-                        and (AA05 between :bv_st and :bv_ed)
+                        and (t.aa05 between :bv_st and :bv_ed)
                         and r.af09 IS NOT NULL
                 ");
                 
