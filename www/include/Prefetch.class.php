@@ -25,7 +25,8 @@ class Prefetch {
         'TRUST_OBLITERATE_BUILD' => 'Prefetch::getTrustObliterateBuilding',
         '375_LAND_CHANGE' => 'Prefetch::getLand375Change',
         '375_OWNER_CHANGE' => 'Prefetch::getOwner375Change',
-        'NOT_DONE_CHANGE' => 'Prefetch::getNotDoneChange'
+        'NOT_DONE_CHANGE' => 'Prefetch::getNotDoneChange',
+        'LAND_REF_CHANGE' => 'Prefetch::getLandRefChange'
     );
     private $ora_db = null;
     private $cache = null;
@@ -1328,4 +1329,70 @@ class Prefetch {
         }
         return $this->getCache()->get(self::KEYS['NOT_DONE_CHANGE'].$st.$ed);
     }
+
+    /**
+     * 土地參考異動查詢快取剩餘時間
+     */
+    public function getLandRefChangeCacheRemainingTime($st, $ed) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['LAND_REF_CHANGE'].$st.$ed);
+    }
+    /**
+     * 強制重新讀取土地參考異動查詢
+     */
+    public function reloadLandRefChange($st, $ed) {
+        $this->getCache()->del(self::KEYS['LAND_REF_CHANGE'].$st.$ed);
+        return $this->getLandRefChange($st, $ed);
+    }
+    /**
+	 * 取得土地參考異動查詢
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getLandRefChange($st, $ed, $expire_duration = 86400) {
+        if ($this->getCache()->isExpired(self::KEYS['LAND_REF_CHANGE'].$st.$ed)) {
+            Logger::getInstance()->info('['.self::KEYS['LAND_REF_CHANGE'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable(self::KEYS['LAND_REF_CHANGE'])) {
+                $db = $this->getOraDB();
+                $db->parse("
+                    select distinct
+                        t.as_type,  -- 異動類別
+                        t.aa48,     -- 段代碼
+                        t.aa49,     -- 地號
+                        v.gg30_2,   -- 其他登記事項內容
+                        r.af08,     -- 土參類別代碼
+                        u.kcnt as af08_cht, -- 土參類別內容
+                        r.af09,     -- 土參資訊內容
+                        w.kcnt as rm09_cht, -- 登記原因
+                        s.*         -- 案件資料
+                    from MOICAW.RALID t
+                    left join MOICAD.AFLBF r
+                        on t.aa48 = r.af03 and t.aa49 = r.af04 || r.af05
+                    left join RKEYN u
+                        on r.af08 = u.kcde_2 and u.kcde_1 = '91'
+                    left join MOICAS.CRSMS s
+                        on t.as03 = s.rm01 and t.as04_1 = s.rm02 and t.as04_2 = s.rm03
+                    left join MOICAW.RGALL v
+                        on t.as03 = v.gs03 and t.as04_1 = v.gs04_1 and t.as04_2 = v.gs04_2
+                    left join MOIADM.RKEYN w ON s.rm09 = w.kcde_2 AND w.kcde_1 = '06'
+                    where 1 = 1
+                        and (AA05 between :bv_st and :bv_ed)
+                        and r.af09 IS NOT NULL
+                ");
+                
+                $db->bind(":bv_st", $st);
+                $db->bind(":bv_ed", $ed);
+                $db->execute();
+                $result = $db->fetchAll();
+                $this->getCache()->set(self::KEYS['LAND_REF_CHANGE'].$st.$ed, $result, $expire_duration);
+
+                Logger::getInstance()->info("[".self::KEYS['LAND_REF_CHANGE'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+                return $result;
+            } else {
+                return array();
+            }
+        }
+        return $this->getCache()->get(self::KEYS['LAND_REF_CHANGE'].$st.$ed);
+    }
+
+    
 }
