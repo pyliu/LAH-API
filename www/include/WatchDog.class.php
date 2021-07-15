@@ -394,7 +394,7 @@ class WatchDog {
             // clean connectivity stats data one day ago
             $this->stats->wipeConnectivityHistory();
             // $this->notifyTemperatureRegistration();
-            // $this->importUserFromL3HWEB();
+            $this->importUserFromL3HWEB();
             return true;
         }
         return false;

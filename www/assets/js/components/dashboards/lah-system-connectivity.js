@@ -248,11 +248,7 @@ if (Vue) {
         },
         mounted() {
             // if (this.autoHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
-            this.reload(true);
-            // temporally fix for periodically update
-            setInterval(() => {
-                this.reload(true)
-            }, 60 * 1000)
+            this.reload();
         }
     });
 } else {
