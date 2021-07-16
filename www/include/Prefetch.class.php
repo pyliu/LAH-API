@@ -26,7 +26,8 @@ class Prefetch {
         '375_LAND_CHANGE' => 'Prefetch::getLand375Change',
         '375_OWNER_CHANGE' => 'Prefetch::getOwner375Change',
         'NOT_DONE_CHANGE' => 'Prefetch::getNotDoneChange',
-        'LAND_REF_CHANGE' => 'Prefetch::getLandRefChange'
+        'LAND_REF_CHANGE' => 'Prefetch::getLandRefChange',
+        'REG_FIX_CASE' => 'Prefetch::getRegFixCase'
     );
     private $ora_db = null;
     private $cache = null;
@@ -1410,5 +1411,70 @@ class Prefetch {
         return $this->getCache()->get(self::KEYS['LAND_REF_CHANGE'].$st.$ed);
     }
 
+
     
+
+
+
+    
+    /**
+     * 補正案件查詢快取剩餘時間
+     */
+    public function getRegFixCaseCacheRemainingTime() {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['REG_FIX_CASE']);
+    }
+    /**
+     * 強制重新讀取補正案件查詢
+     */
+    public function reloadRegFixCase() {
+        $this->getCache()->del(self::KEYS['REG_FIX_CASE']);
+        return $this->getRegFixCase();
+    }
+    /**
+	 * 取得補正案件查詢
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getRegFixCase($expire_duration = 86400) {
+        if ($this->getCache()->isExpired(self::KEYS['REG_FIX_CASE'])) {
+            Logger::getInstance()->info('['.self::KEYS['REG_FIX_CASE'].'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable(self::KEYS['REG_FIX_CASE'])) {
+                $db = $this->getOraDB();
+                $db->parse("
+                    SELECT DISTINCT
+                        S.RM01,
+                        S.RM02,
+                        S.RM03,
+                        S.RM09,
+                        Ar.kcnt,
+                        Au.USER_NAME,
+                        S.RM49,
+                        S.RM50
+                    from MOICAS.CRSMS    S,
+                        MOIADM.RKEYN    Ar,
+                        MOIADM.SYSAUTH1 Au,
+                        MOIADM.SYSAUTH1 Au2
+                    where 1 = 1
+                        and S.rm30 in ('I', 'X') -- 補正、補正初核
+                        and S.rm09 = Ar.kcde_2
+                        and kcde_1 = '06'
+                        and S.RM45 = Au.USER_ID
+                        and S.RM30_1 = Au2.USER_ID
+                    order by S.RM50, Au.USER_NAME
+                ");
+                
+                $db->execute();
+                $result = $db->fetchAll();
+                $this->getCache()->set(self::KEYS['REG_FIX_CASE'], $result, $expire_duration);
+
+                Logger::getInstance()->info("[".self::KEYS['REG_FIX_CASE']."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+
+                return $result;
+            } else {
+                return array();
+            }
+        }
+        return $this->getCache()->get(self::KEYS['REG_FIX_CASE']);
+    }
+
+
 }
