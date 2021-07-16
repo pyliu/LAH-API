@@ -1,102 +1,17 @@
 <?php
 require_once('init.php');
-require_once('DynamicSQLite.class.php');
+require_once('StatsSQLite3Factory.class.php');
 require_once('IPResolver.class.php');
 require_once('Ping.class.php');
 require_once('System.class.php');
 
-define('DB_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db");
-define('DEF_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."LAH.db");
 
 class StatsSQLite3 {
     private $db;
 
-    private function getLAHDB() {
-        $db_path = DEF_SQLITE_DB;
-        $sqlite = new DynamicSQLite($db_path);
-        $sqlite->initDB();
-        $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "overdue_stats_detail" (
-                "datetime"	TEXT NOT NULL,
-                "id"	TEXT NOT NULL,
-                "count"	NUMERIC NOT NULL DEFAULT 0,
-                "note"	TEXT,
-                PRIMARY KEY("id","datetime")
-            )
-        ');
-        $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "stats" (
-                "ID"	TEXT,
-                "NAME"	TEXT NOT NULL,
-                "TOTAL"	INTEGER NOT NULL DEFAULT 0,
-                PRIMARY KEY("ID")
-            )
-        ');
-        $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "stats_raw_data" (
-                "id"	TEXT NOT NULL,
-                "data"	TEXT,
-                PRIMARY KEY("id")
-            )
-        ');
-        $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "xcase_stats" (
-                "datetime"	TEXT NOT NULL,
-                "found"	INTEGER NOT NULL DEFAULT 0,
-                "note"	TEXT,
-                PRIMARY KEY("datetime")
-            )
-        ');
-        return $db_path;
-    }
-
-    private function getAPConnStatsDB($ip_end) {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'stats_ap_conn_AP'.$ip_end.'.db';
-        $sqlite = new DynamicSQLite($db_path);
-        $sqlite->initDB();
-        $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "ap_conn_history" (
-                "log_time"	TEXT NOT NULL,
-                "ap_ip"	TEXT NOT NULL,
-                "est_ip"	TEXT NOT NULL,
-                "count"	INTEGER NOT NULL DEFAULT 0,
-                "batch"	INTEGER NOT NULL DEFAULT 0,
-                PRIMARY KEY("log_time","ap_ip","est_ip")
-            )
-        ');
-        return $db_path;
-    }
-
-    
-    private function getConnectivityDB() {
-        $db_path = DB_DIR.DIRECTORY_SEPARATOR."connectivity.db";
-        $sqlite = new DynamicSQLite($db_path);
-        $sqlite->initDB();
-        $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "connectivity" (
-                "log_time"	TEXT NOT NULL,
-                "target_ip"	TEXT NOT NULL,
-                "status"    TEXT NOT NULL DEFAULT \'DOWN\',
-                "latency"	REAL NOT NULL DEFAULT 0.0,
-                PRIMARY KEY("log_time","target_ip")
-            )
-        ');
-        $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "target" (
-                "ip"	TEXT NOT NULL,
-                "port"	INTEGER,
-                "name"	TEXT NOT NULL,
-                "monitor"	TEXT NOT NULL DEFAULT \'Y\',
-                "note"	TEXT,
-                PRIMARY KEY("ip")
-            )
-        ');
-        return $db_path;
-    }
-
     private function addConnectivityStatus($log_time, $tgt_ip, $latency) {
         // inst into db
-        $db_path = $this->getConnectivityDB();
+        $db_path = StatsSQLite3Factory::getConnectivityDB();
         $ap_db = new SQLite3($db_path);
         $stm = $ap_db->prepare("REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency)");
         if ($stm === false) {
@@ -137,7 +52,7 @@ class StatsSQLite3 {
     }
 
     function __construct() {
-        $path = $this->getLAHDB();
+        $path = StatsSQLite3Factory::getLAHDB();
         $this->db = new SQLite3($path);
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");
@@ -305,7 +220,7 @@ class StatsSQLite3 {
      */
     public function getLatestAPConnHistory($ap_ip, $all = 'true') {
         
-        $db_path = $this->getAPConnStatsDB(explode('.', $ap_ip)[3]);
+        $db_path = StatsSQLite3Factory::getAPConnStatsDB(explode('.', $ap_ip)[3]);
         $ap_db = new SQLite3($db_path);
         // get latest batch log_time
         $latest_log_time = $ap_db->querySingle("SELECT DISTINCT log_time from ap_conn_history ORDER BY log_time DESC");
@@ -332,7 +247,7 @@ class StatsSQLite3 {
     public function getAPConnHistory($ap_ip, $count, $extend = true) {
         $webap_ip = System::getInstance()->getWebAPIp() ?? '220.1.34.161';
         // e.g. $sebap_ip = '220.1.34.161' then XAP conn only store at AP161 db
-        $db_path = $this->getAPConnStatsDB((explode('.', $webap_ip)[3]));
+        $db_path = StatsSQLite3Factory::getAPConnStatsDB((explode('.', $webap_ip)[3]));
         $ap_db = new SQLite3($db_path);
         if($stmt = $ap_db->prepare('SELECT * FROM ap_conn_history WHERE est_ip = :ip ORDER BY log_time DESC LIMIT :limit')) {
             $stmt->bindParam(':ip', $ap_ip);
@@ -360,7 +275,7 @@ class StatsSQLite3 {
     public function addAPConnHistory($log_time, $ap_ip, $processed) {
         
         // inst into db
-        $db_path = $this->getAPConnStatsDB(explode('.', $ap_ip)[3]);
+        $db_path = StatsSQLite3Factory::getAPConnStatsDB(explode('.', $ap_ip)[3]);
         $ap_db = new SQLite3($db_path);
         $latest_batch = $ap_db->querySingle("SELECT DISTINCT batch from ap_conn_history ORDER BY batch DESC");
         $success = 0;
@@ -394,7 +309,7 @@ class StatsSQLite3 {
     public function wipeAPConnHistory($ip_end) {
         
         $one_day_ago = date("YmdHis", time() - 24 * 3600);
-        $ap_db = new SQLite3($this->getAPConnStatsDB($ip_end));
+        $ap_db = new SQLite3(StatsSQLite3Factory::getAPConnStatsDB($ip_end));
         if ($stm = $ap_db->prepare("DELETE FROM ap_conn_history WHERE log_time < :time")) {
             $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
             $ret = $stm->execute();
@@ -424,7 +339,7 @@ class StatsSQLite3 {
     public function getCheckingTargets() {
         
         // inst into db
-        $db_path = $this->getConnectivityDB();
+        $db_path = StatsSQLite3Factory::getConnectivityDB();
         $ap_db = new SQLite3($db_path);
         $stm = $ap_db->prepare("SELECT * FROM target WHERE monitor = 'Y' ORDER BY name");
         if ($stm === false) {
@@ -485,7 +400,7 @@ class StatsSQLite3 {
         if (empty($tracking_ips)) {
             Logger::getInstance()->warning(__METHOD__.": tracking ip array is empty.");
         } else {
-            $db_path = $this->getConnectivityDB();
+            $db_path = StatsSQLite3Factory::getConnectivityDB();
             $conn_db = new SQLite3($db_path);
             $in_statement = " IN ('".implode("','", $tracking_ips)."') ";
             if($stmt = $conn_db->prepare('SELECT * FROM connectivity WHERE target_ip '.$in_statement.' ORDER BY ROWID DESC LIMIT :limit')) {
@@ -508,7 +423,7 @@ class StatsSQLite3 {
             $this->checkIPConnectivity($ip, $port);
         }
 
-        $db_path = $this->getConnectivityDB();
+        $db_path = StatsSQLite3Factory::getConnectivityDB();
         $conn_db = new SQLite3($db_path);
         if($stmt = $conn_db->prepare('SELECT * FROM connectivity WHERE target_ip = :ip ORDER BY ROWID DESC LIMIT :limit')) {
             $stmt->bindValue(':limit', 1, SQLITE3_INTEGER);
@@ -525,7 +440,7 @@ class StatsSQLite3 {
 
     public function wipeConnectivityHistory() {
         
-        $db_path = $this->getConnectivityDB();
+        $db_path = StatsSQLite3Factory::getConnectivityDB();
         $sc_db = new SQLite3($db_path);
         if ($stm = $sc_db->prepare("DELETE FROM connectivity WHERE log_time < :time")) {
             $one_day_ago = date("YmdHis", time() - 24 * 3600);
