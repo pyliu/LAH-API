@@ -15,6 +15,7 @@ require_once("./include/StatsSQLite3.class.php");
 require_once("./include/Ping.class.php");
 require_once("./include/BKHXWEB.class.php");
 require_once("./include/Checklist.class.php");
+require_once("./include/SQLiteRegFixCaseStore.class.php");
 
 try {
     // $cl = new Checklist();
@@ -27,6 +28,11 @@ try {
     echo '<br/><br/>';
 
     echo ord('A');
+    
+    echo '<br/><br/>';
+    
+    $rfcs = new SQLiteRegFixCaseStore();
+    print_r($rfcs->getRegFixCaseRecord('110HA81000000'));
 }
 catch(Exception $e)
 {

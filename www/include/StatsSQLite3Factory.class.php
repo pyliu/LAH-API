@@ -10,15 +10,14 @@ class StatsSQLite3Factory {
         $sqlite->initDB();
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "reg_fix_case_store" (
-                "id"	INTEGER,
-                "case_no"	TEXT NOT NULL,
-                "done_date"	TEXT,
-                "confirm_date"	TEXT,
-                "due_date"	TEXT,
-                "fix_date"	TEXT,
+                "case_no"	TEXT,
+                "done_date"	NUMERIC,
+                "confirm_date"	NUMERIC,
+                "due_date"	NUMERIC,
+                "fix_date"	NUMERIC,
                 "pic"	TEXT,
                 "note"	TEXT,
-                PRIMARY KEY("id")
+                PRIMARY KEY("case_no")
             )
         ');
         return $db_path;
