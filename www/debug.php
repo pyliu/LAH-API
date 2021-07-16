@@ -11,7 +11,7 @@ require_once("./include/StatsOracle.class.php");
 require_once("./include/SQLiteUser.class.php");
 require_once("./include/System.class.php");
 require_once("./include/Temperature.class.php");
-require_once("./include/StatsSQLite3.class.php");
+require_once("./include/StatsSQLite.class.php");
 require_once("./include/Ping.class.php");
 require_once("./include/BKHXWEB.class.php");
 require_once("./include/Checklist.class.php");

@@ -6,7 +6,7 @@ require_once(INC_DIR."/PrcAllCasesData.class.php");
 require_once(INC_DIR."/Query.class.php");
 require_once(INC_DIR."/Message.class.php");
 require_once(INC_DIR."/WatchDog.class.php");
-require_once(INC_DIR."/StatsSQLite3.class.php");
+require_once(INC_DIR."/StatsSQLite.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/Temperature.class.php");
 require_once(INC_DIR."/System.class.php");
@@ -22,7 +22,7 @@ $mock = $system->isMockMode();
 
 switch ($_POST["type"]) {
 	case "stats_overdue_msg_total":
-		$stats = new StatsSQLite3();
+		$stats = new StatsSQLite();
 		$total = $stats->getTotal('overdue_msg_count');
 		// $total = $mock ? $cache->get('overdue_msg_count') : $stats->getTotal('overdue_msg_count');
 		// $cache->set('overdue_msg_count', $total);

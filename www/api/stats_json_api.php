@@ -3,10 +3,10 @@ require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(ROOT_DIR."/include/Cache.class.php");
 require_once(ROOT_DIR."/include/System.class.php");
 require_once(ROOT_DIR."/include/StatsOracle.class.php");
-require_once(ROOT_DIR."/include/StatsSQLite3.class.php");
+require_once(ROOT_DIR."/include/StatsSQLite.class.php");
 
 $stats = new StatsOracle();
-$stats_sqlite3 = new StatsSQLite3();
+$stats_sqlite3 = new StatsSQLite();
 $cache = Cache::getInstance();
 $system = System::getInstance();
 

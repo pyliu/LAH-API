@@ -6,7 +6,7 @@ require_once('Ping.class.php');
 require_once('System.class.php');
 
 
-class StatsSQLite3 {
+class StatsSQLite {
     private $db;
 
     private function addConnectivityStatus($log_time, $tgt_ip, $latency) {

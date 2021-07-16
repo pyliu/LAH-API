@@ -2,7 +2,7 @@
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'init.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Query.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Message.class.php');
-require_once(INC_DIR.DIRECTORY_SEPARATOR.'StatsSQLite3.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'StatsSQLite.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Temperature.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteUser.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'System.class.php');
@@ -379,7 +379,7 @@ class WatchDog {
         return false;
     }
 
-    function __construct() { $this->stats = new StatsSQLite3(); }
+    function __construct() { $this->stats = new StatsSQLite(); }
     function __destruct() { $this->stats = null; }
 
     public function do() {
