@@ -1,6 +1,6 @@
 <?php
 require_once('init.php');
-require_once('SQLite3DBFactory.class.php');
+require_once('SQLiteDBFactory.class.php');
 require_once('IPResolver.class.php');
 require_once('Ping.class.php');
 require_once('System.class.php');
@@ -11,7 +11,7 @@ class StatsSQLite3 {
 
     private function addConnectivityStatus($log_time, $tgt_ip, $latency) {
         // inst into db
-        $db_path = SQLite3DBFactory::getConnectivityDB();
+        $db_path = SQLiteDBFactory::getConnectivityDB();
         $ap_db = new SQLite3($db_path);
         $stm = $ap_db->prepare("REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency)");
         if ($stm === false) {
@@ -52,7 +52,7 @@ class StatsSQLite3 {
     }
 
     function __construct() {
-        $path = SQLite3DBFactory::getLAHDB();
+        $path = SQLiteDBFactory::getLAHDB();
         $this->db = new SQLite3($path);
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");
@@ -220,7 +220,7 @@ class StatsSQLite3 {
      */
     public function getLatestAPConnHistory($ap_ip, $all = 'true') {
         
-        $db_path = SQLite3DBFactory::getAPConnStatsDB(explode('.', $ap_ip)[3]);
+        $db_path = SQLiteDBFactory::getAPConnStatsDB(explode('.', $ap_ip)[3]);
         $ap_db = new SQLite3($db_path);
         // get latest batch log_time
         $latest_log_time = $ap_db->querySingle("SELECT DISTINCT log_time from ap_conn_history ORDER BY log_time DESC");
@@ -247,7 +247,7 @@ class StatsSQLite3 {
     public function getAPConnHistory($ap_ip, $count, $extend = true) {
         $webap_ip = System::getInstance()->getWebAPIp() ?? '220.1.34.161';
         // e.g. $sebap_ip = '220.1.34.161' then XAP conn only store at AP161 db
-        $db_path = SQLite3DBFactory::getAPConnStatsDB((explode('.', $webap_ip)[3]));
+        $db_path = SQLiteDBFactory::getAPConnStatsDB((explode('.', $webap_ip)[3]));
         $ap_db = new SQLite3($db_path);
         if($stmt = $ap_db->prepare('SELECT * FROM ap_conn_history WHERE est_ip = :ip ORDER BY log_time DESC LIMIT :limit')) {
             $stmt->bindParam(':ip', $ap_ip);
@@ -275,7 +275,7 @@ class StatsSQLite3 {
     public function addAPConnHistory($log_time, $ap_ip, $processed) {
         
         // inst into db
-        $db_path = SQLite3DBFactory::getAPConnStatsDB(explode('.', $ap_ip)[3]);
+        $db_path = SQLiteDBFactory::getAPConnStatsDB(explode('.', $ap_ip)[3]);
         $ap_db = new SQLite3($db_path);
         $latest_batch = $ap_db->querySingle("SELECT DISTINCT batch from ap_conn_history ORDER BY batch DESC");
         $success = 0;
@@ -309,7 +309,7 @@ class StatsSQLite3 {
     public function wipeAPConnHistory($ip_end) {
         
         $one_day_ago = date("YmdHis", time() - 24 * 3600);
-        $ap_db = new SQLite3(SQLite3DBFactory::getAPConnStatsDB($ip_end));
+        $ap_db = new SQLite3(SQLiteDBFactory::getAPConnStatsDB($ip_end));
         if ($stm = $ap_db->prepare("DELETE FROM ap_conn_history WHERE log_time < :time")) {
             $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
             $ret = $stm->execute();
@@ -339,7 +339,7 @@ class StatsSQLite3 {
     public function getCheckingTargets() {
         
         // inst into db
-        $db_path = SQLite3DBFactory::getConnectivityDB();
+        $db_path = SQLiteDBFactory::getConnectivityDB();
         $ap_db = new SQLite3($db_path);
         $stm = $ap_db->prepare("SELECT * FROM target WHERE monitor = 'Y' ORDER BY name");
         if ($stm === false) {
@@ -400,7 +400,7 @@ class StatsSQLite3 {
         if (empty($tracking_ips)) {
             Logger::getInstance()->warning(__METHOD__.": tracking ip array is empty.");
         } else {
-            $db_path = SQLite3DBFactory::getConnectivityDB();
+            $db_path = SQLiteDBFactory::getConnectivityDB();
             $conn_db = new SQLite3($db_path);
             $in_statement = " IN ('".implode("','", $tracking_ips)."') ";
             if($stmt = $conn_db->prepare('SELECT * FROM connectivity WHERE target_ip '.$in_statement.' ORDER BY ROWID DESC LIMIT :limit')) {
@@ -423,7 +423,7 @@ class StatsSQLite3 {
             $this->checkIPConnectivity($ip, $port);
         }
 
-        $db_path = SQLite3DBFactory::getConnectivityDB();
+        $db_path = SQLiteDBFactory::getConnectivityDB();
         $conn_db = new SQLite3($db_path);
         if($stmt = $conn_db->prepare('SELECT * FROM connectivity WHERE target_ip = :ip ORDER BY ROWID DESC LIMIT :limit')) {
             $stmt->bindValue(':limit', 1, SQLITE3_INTEGER);
@@ -440,7 +440,7 @@ class StatsSQLite3 {
 
     public function wipeConnectivityHistory() {
         
-        $db_path = SQLite3DBFactory::getConnectivityDB();
+        $db_path = SQLiteDBFactory::getConnectivityDB();
         $sc_db = new SQLite3($db_path);
         if ($stm = $sc_db->prepare("DELETE FROM connectivity WHERE log_time < :time")) {
             $one_day_ago = date("YmdHis", time() - 24 * 3600);

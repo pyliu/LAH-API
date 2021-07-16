@@ -1,6 +1,6 @@
 <?php
 require_once('init.php');
-require_once('SQLite3DBFactory.class.php');
+require_once('SQLiteDBFactory.class.php');
 require_once('System.class.php');
 
 class SQLiteRegFixCaseStore {
@@ -44,7 +44,7 @@ class SQLiteRegFixCaseStore {
     }
 
     function __construct() {
-        $this->db = new SQLite3(SQLite3DBFactory::getRegFixCaseStoreDB());
+        $this->db = new SQLite3(SQLiteDBFactory::getRegFixCaseStoreDB());
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");
         $this->db->exec("BEGIN TRANSACTION");
@@ -65,7 +65,7 @@ class SQLiteRegFixCaseStore {
             $stmt->bindParam(':bv_case_no', $case_no);
             return $this->prepareArray($stmt);
         } else {
-            Logger::getInstance()->error(__METHOD__.": 取得 $case_no 補正紀錄資料失敗！ (".SQLite3DBFactory::getRegFixCaseStoreDB().")");
+            Logger::getInstance()->error(__METHOD__.": 取得 $case_no 補正紀錄資料失敗！ (".SQLiteDBFactory::getRegFixCaseStoreDB().")");
         }
         return false;
     }
