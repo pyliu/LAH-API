@@ -1410,12 +1410,6 @@ class Prefetch {
         }
         return $this->getCache()->get(self::KEYS['LAND_REF_CHANGE'].$st.$ed);
     }
-
-
-    
-
-
-
     
     /**
      * 補正案件查詢快取剩餘時間
@@ -1441,14 +1435,9 @@ class Prefetch {
                 $db = $this->getOraDB();
                 $db->parse("
                     SELECT DISTINCT
-                        S.RM01,
-                        S.RM02,
-                        S.RM03,
-                        S.RM09,
-                        Ar.kcnt,
-                        Au.USER_NAME,
-                        S.RM49,
-                        S.RM50
+                        S.*,
+                        Ar.kcnt AS RM09_CHT,
+                        Au.USER_NAME AS RM45_CHT
                     from MOICAS.CRSMS    S,
                         MOIADM.RKEYN    Ar,
                         MOIADM.SYSAUTH1 Au,

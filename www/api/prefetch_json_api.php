@@ -289,7 +289,6 @@ switch ($_POST["type"]) {
 		break;
 	case "375_land_change":
 		Logger::getInstance()->info("XHR [375_lang_change] 查詢375租約土標部異動資料請求");
-		// 375租約土地標示部異動查詢
 		$message = "375租約土地標示部異動查詢";
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadLand375Change($_POST['start'], $_POST['end']) : $prefetch->getLand375Change($_POST['start'], $_POST['end']);
 		$cache_remaining = $prefetch->getLand375ChangeCacheRemainingTime($_POST['start'], $_POST['end']);
@@ -312,7 +311,6 @@ switch ($_POST["type"]) {
 		break;
 	case "375_owner_change":
 		Logger::getInstance()->info("XHR [375_owner_change] 查詢375租約土所部異動資料請求");
-		// 375租約土地標示部異動查詢
 		$message = "375租約土地所有權部異動查詢";
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadOwner375Change($_POST['start'], $_POST['end']) : $prefetch->getOwner375Change($_POST['start'], $_POST['end']);
 		$cache_remaining = $prefetch->getOwner375ChangeCacheRemainingTime($_POST['start'], $_POST['end']);
@@ -335,7 +333,6 @@ switch ($_POST["type"]) {
 		break;
 	case "not_done_change":
 		Logger::getInstance()->info("XHR [not_done_change] 查詢未辦標的註記異動資料請求");
-		// 未辦標的註記異動查詢
 		$message = "未辦標的註記異動查詢";
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNotDoneChange($_POST['start'], $_POST['end']) : $prefetch->getNotDoneChange($_POST['start'], $_POST['end']);
 		$cache_remaining = $prefetch->getNotDoneChangeCacheRemainingTime($_POST['start'], $_POST['end']);
@@ -354,7 +351,6 @@ switch ($_POST["type"]) {
 		break;
 	case "land_ref_change":
 		Logger::getInstance()->info("XHR [land_ref_change] 查詢土地參考資訊異動資料請求");
-		// 土地參考資訊異動查詢
 		$message = "土地參考資訊異動查詢";
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadLandRefChange($_POST['start'], $_POST['end']) : $prefetch->getLandRefChange($_POST['start'], $_POST['end']);
 		$cache_remaining = $prefetch->getLandRefChangeCacheRemainingTime($_POST['start'], $_POST['end']);
@@ -367,6 +363,29 @@ switch ($_POST["type"]) {
 			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"raw" => $rows,
+				'cache_remaining_time' => $cache_remaining
+			));
+		}
+		break;
+	case "reg_fix_case":
+		Logger::getInstance()->info("XHR [reg_fix_case] 查詢補正案件查詢請求");
+		$message = "補正案件查詢";
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRegFixCase() : $prefetch->getRegFixCase();
+		$cache_remaining = $prefetch->getRegFixCaseCacheRemainingTime();
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [reg_fix_case] 查無 ${message} 資料");
+			echoJSONResponse("查無 ${message} 資料");
+		} else {
+			$total = count($rows);
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$baked[] = $data->getBakedData();
+			}
+			Logger::getInstance()->info("XHR [reg_fix_case] 查詢成功($total)");
+			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"raw" => $baked,
 				'cache_remaining_time' => $cache_remaining
 			));
 		}
