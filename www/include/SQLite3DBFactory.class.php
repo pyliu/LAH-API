@@ -2,7 +2,7 @@
 require_once('init.php');
 require_once('DynamicSQLite.class.php');
 
-class StatsSQLite3Factory {
+class SQLite3DBFactory {
 
     public static function getRegFixCaseStoreDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_fix_case_store.db';
