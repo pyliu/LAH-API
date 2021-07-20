@@ -1434,20 +1434,18 @@ class Prefetch {
             if ($this->isDBReachable(self::KEYS['REG_FIX_CASE'])) {
                 $db = $this->getOraDB();
                 $db->parse("
-                    SELECT DISTINCT
+                    select distinct 
                         S.*,
-                        Ar.kcnt AS RM09_CHT,
-                        Au.USER_NAME AS RM45_CHT
-                    from MOICAS.CRSMS    S,
-                        MOIADM.RKEYN    Ar,
-                        MOIADM.SYSAUTH1 Au,
-                        MOIADM.SYSAUTH1 Au2
+                        Ar.kcnt      AS RM09_CHT,
+                        Au.USER_NAME AS RM45_CHT,
+                        v.KNAME      AS RM11_CHT
+                    from MOICAS.CRSMS     S
+                    left join MOIADM.RKEYN Ar on Ar.kcde_1 = '06' and S.rm09 = Ar.kcde_2
+                    left join MOIADM.SYSAUTH1  Au on S.RM45 = Au.USER_ID
+                    left join MOIADM.SYSAUTH1  Au2 on S.RM30_1 = Au2.USER_ID
+                    left join MOIADM.RKEYN_ALL v on (v.KCDE_1 = '48' AND v.KCDE_2 = 'H' AND v.KCDE_3 = S.RM10 AND S.RM11 = v.KCDE_4)
                     where 1 = 1
                         and S.rm30 in ('I', 'X') -- 補正、補正初核
-                        and S.rm09 = Ar.kcde_2
-                        and kcde_1 = '06'
-                        and S.RM45 = Au.USER_ID
-                        and S.RM30_1 = Au2.USER_ID
                     order by S.RM50, Au.USER_NAME
                 ");
                 
