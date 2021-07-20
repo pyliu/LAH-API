@@ -13,11 +13,7 @@ class SQLiteRegFixCaseStore {
         }
 
         $stm->bindParam(':case_no', $row['case_no']);
-        $stm->bindParam(':done_date', $row['done_date']);
-        $stm->bindValue(':confirm_date', $row['confirm_date']);
-        $stm->bindParam(':due_date', $row['due_date']);
-        $stm->bindParam(':fix_date', $row['fix_date']);
-        $stm->bindParam(':pic', $row['pic']);
+        $stm->bindParam(':notify_delivered_date', $row['notify_delivered_date']);
         $stm->bindParam(':note', $row['note']);
 
         return true;
@@ -25,8 +21,8 @@ class SQLiteRegFixCaseStore {
 
     private function replace(&$row) {
         $stm = $this->db->prepare("
-            REPLACE INTO SYSAUTH1 ('case_no', 'done_date', 'confirm_date', 'due_date', 'fix_date', 'pic', 'note')
-            VALUES (:case_no, :done_date, :confirm_date, :due_date, :fix_date, :pic, :note)
+            REPLACE INTO reg_fix_case_store ('case_no', 'notify_delivered_date', 'note')
+            VALUES (:case_no, :notify_delivered_date, :note)
         ");
         if ($this->bindParams($stm, $row)) {
             return $stm->execute() === FALSE ? false : true;
