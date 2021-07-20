@@ -1429,6 +1429,7 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getRegFixCase($expire_duration = 86400) {
+        global $site_code; // should from GlobalConstants.inc.php
         if ($this->getCache()->isExpired(self::KEYS['REG_FIX_CASE'])) {
             Logger::getInstance()->info('['.self::KEYS['REG_FIX_CASE'].'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['REG_FIX_CASE'])) {
@@ -1446,6 +1447,7 @@ class Prefetch {
                     left join MOIADM.RKEYN_ALL v on (v.KCDE_1 = '48' AND v.KCDE_2 = 'H' AND v.KCDE_3 = S.RM10 AND S.RM11 = v.KCDE_4)
                     where 1 = 1
                         and S.rm30 in ('I', 'X') -- 補正、補正初核
+                        and (S.rm99 IS NULL or (S.rm99 = 'Y' and S.rm101 = '${site_code}'))  -- 本所案件
                     order by S.RM50, Au.USER_NAME
                 ");
                 
