@@ -19,17 +19,6 @@ class SQLiteRegFixCaseStore {
         return true;
     }
 
-    private function replace(&$row) {
-        $stm = $this->db->prepare("
-            REPLACE INTO reg_fix_case_store ('case_no', 'notify_delivered_date', 'note')
-            VALUES (:case_no, :notify_delivered_date, :note)
-        ");
-        if ($this->bindParams($stm, $row)) {
-            return $stm->execute() === FALSE ? false : true;
-        }
-        return false;
-    }
-
     private function prepareArray(&$stmt) {
         $result = $stmt->execute();
         $return = [];
@@ -62,6 +51,17 @@ class SQLiteRegFixCaseStore {
             return $this->prepareArray($stmt);
         } else {
             Logger::getInstance()->error(__METHOD__.": 取得 $case_no 補正紀錄資料失敗！ (".SQLiteDBFactory::getRegFixCaseStoreDB().")");
+        }
+        return false;
+    }
+
+    public function replace(&$row) {
+        $stm = $this->db->prepare("
+            REPLACE INTO reg_fix_case_store ('case_no', 'notify_delivered_date', 'note')
+            VALUES (:case_no, :notify_delivered_date, :note)
+        ");
+        if ($this->bindParams($stm, $row)) {
+            return $stm->execute() === FALSE ? false : true;
         }
         return false;
     }
