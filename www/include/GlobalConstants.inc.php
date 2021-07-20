@@ -14,6 +14,7 @@ abstract class STATUS_CODE {
     const FAIL_LOAD_ERROR = -8;
     const FAIL_TIMEOUT = -9;
     const FAIL_REMOTE_UNREACHABLE = -10;
+    const FAIL_DB_ERROR = -11;
 }
 
 define('ROOT_DIR', dirname(dirname(__FILE__)));
