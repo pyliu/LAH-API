@@ -532,7 +532,7 @@ define('REG_WORD', [
 	"HE${site_code_tail}1" => "${site_short_name}蘆登跨",
 	"HF${site_code_tail}1" => "${site_short_name}德登跨",
 	"HG${site_code_tail}1" => "${site_short_name}平登跨",
-    "HH${site_code_tail}1A1" => "${site_short_name}山登跨",
+    "HH${site_code_tail}1" => "${site_short_name}山登跨",
     // 跨所他所收件
 	"${site_code}A1" => "桃${site_short_name}登跨",
 	"${site_code}B1" => "壢${site_short_name}登跨",
