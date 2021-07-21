@@ -35,6 +35,14 @@ if (Vue) {
                 type: String,
                 default: CONFIG.AP_SVR || '220.1.34.161'
             },
+            site: {
+                type: String,
+                default: 'HA'
+            },
+            carousel: {
+                type: Array,
+                default: ['205', '206', '207', '156', '118', '60', '161']
+            },
             type: {
                 type: String,
                 default: 'bar'
@@ -58,8 +66,7 @@ if (Vue) {
             last_update_time: '',
             reload_timer: null,
             refresh_ip_timer: null,
-            type_carousel: ['bar', 'line', 'pie', 'polarArea', 'doughnut', 'radar'],
-            svr_carousel: ['205', '206', '207', '156', '118', '60', '161']
+            type_carousel: ['bar', 'line', 'pie', 'polarArea', 'doughnut', 'radar']
         }),
         watch: {
             disableOfficeHours(val) { if (val) this.reload() },
@@ -76,24 +83,25 @@ if (Vue) {
             label() { return this.allSwitch ? `AP所有連線數 [${this.ip}]` : `AP使用者連線數 [${this.ip}]` },
             title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
             all_switch_desc() { return this.allSwitch ? '全部顯示' : '僅使用者' },
+            site_number() { return this.ip.split('.')[2] },
             curr_svr() { return this.ip.split('.')[3] },
             prev_svr() {
                 let curr_idx = -1;
-                this.svr_carousel.find((item, idx, array) => {
+                this.carousel.find((item, idx, array) => {
                     curr_idx = item == this.curr_svr ? idx : -1;
                     return item == this.curr_svr;
                 });
-                let next_idx = (curr_idx + 1) % this.svr_carousel.length;
-                return `220.1.34.${this.svr_carousel[next_idx]}`;
+                let next_idx = (curr_idx + 1) % this.carousel.length;
+                return `220.1.${this.site_number}.${this.carousel[next_idx]}`;
             },
             next_svr() {
                 let curr_idx = -1;
-                this.svr_carousel.find((item, idx, array) => {
+                this.carousel.find((item, idx, array) => {
                     curr_idx = item == this.curr_svr ? idx : -1;
                     return item == this.curr_svr;
                 });
-                let prev_idx = (curr_idx - 1) == -1 ? this.svr_carousel.length - 1 : curr_idx - 1;
-                return `220.1.34.${this.svr_carousel[prev_idx]}`;
+                let prev_idx = (curr_idx - 1) == -1 ? this.carousel.length - 1 : curr_idx - 1;
+                return `220.1.${this.site_number}.${this.carousel[prev_idx]}`;
             }
         },
         methods: {
