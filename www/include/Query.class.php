@@ -637,15 +637,9 @@ class Query {
 		if (!$this->db_ok) {
 			return array();
 		}
-
 		$this->db->parse("select * from MOIEXP.EXPE t");
 		$this->db->execute();
-		$all = $this->db->fetchAll();
-		$return_arr = array();
-		foreach ($all as $row) {
-			$return_arr[$row["E20"]] = iconv("big5", "utf-8", $row["E21"]);
-		}
-		return $return_arr;
+		return $this->db->fetchAll();
 	}
 
     // template method for query all cases by date

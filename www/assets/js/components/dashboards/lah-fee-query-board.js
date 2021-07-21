@@ -913,7 +913,7 @@ if (Vue) {
                         { value: "01", text: "01：土地法65條登記費" },
                         { value: "02", text: "02：土地法76條登記費" },
                         { value: "03", text: "03：土地法67條書狀費" },
-                        { value: "04", text: "04：地籍謄本工本費" },
+                        { value: "04", text: "04：地籍謄本抄錄費" },
                         { value: "06", text: "06：檔案閱覽抄錄複製費" },
                         { value: "07", text: "07：閱覽費" },
                         { value: "08", text: "08：門牌查詢費" },
@@ -978,7 +978,42 @@ if (Vue) {
                         });
                     }
                 },
-                mounted: function() {},
+                async created() {
+                    const expe_list = await this.getLocalCache('MOIEXP.EXPE');
+                    if ( expe_list === false) {
+                        // query MOIEXP.EXPE for the items
+                        this.isBusy = true;
+                        this.$http.post(CONFIG.API.JSON.QUERY, {
+                            type: "expe"
+                        }).then(res => {
+                            if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                                if (res.data.data_count > 0) {
+                                    const expe_list = [];
+                                    res.data.raw.forEach((element) => {
+                                        expe_list.push({
+                                            value: element.E20,
+                                            text: `${element.E20}：${element.E21}`
+                                        });
+                                    });
+                                    this.expe_list = expe_list;
+                                    // cache for a day
+                                    this.setLocalCache('MOIEXP.EXPE', expe_list, 86400);
+                                } else {
+                                    console.warn("MOIEXP.EXPE沒有回傳資料!")
+                                }
+                            } else {
+                                throw new Error("回傳狀態碼不正確!【" + res.data.message + "】");
+                            }
+                        }).catch(err => {
+                            this.error = err;
+                        }).finally(() => {
+                            this.isBusy = false;
+                        });
+                    } else {
+                        this.expe_list = expe_list;
+                    }
+                },
+                mounted() {},
                 updated() {
                     Vue.nextTick(() => 
                         this.animated(".reg_case_id", {

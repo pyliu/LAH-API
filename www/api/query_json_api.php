@@ -583,6 +583,24 @@ switch ($_POST["type"]) {
 			), 0);
 		}
 		break;
+	case "expe":
+		Logger::getInstance()->info("XHR [expe] 查詢規費收費類別請求");
+		// make total number length is 7
+		$rows = $mock ? $cache->get('expe') : $query->getChargeItems();
+		$cache->set('expe', $rows);
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [expe] 查無資料");
+			echoJSONResponse('查無資料');
+		} else {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($rows),
+				"raw" => $rows
+			);
+			Logger::getInstance()->info("XHR [expe] 查詢成功");
+			echo json_encode($result, 0);
+		}
+		break;
 	case "expac":
 		Logger::getInstance()->info("XHR [expac] 查詢規費收費項目【".$_POST["year"].", ".$_POST["num"]."】請求");
 		// make total number length is 7
