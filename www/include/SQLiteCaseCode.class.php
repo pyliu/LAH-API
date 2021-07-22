@@ -58,27 +58,5 @@ class SQLiteCaseCode {
         return $stm->execute() === FALSE ? false : true;
     }
 
-    public function getAllUsers() {
-        if($stmt = $this->db->prepare("SELECT * FROM SYSAUTH1 WHERE 1 = 1 ORDER BY USER_ID")) {
-            return $this->prepareArray($stmt);
-        } else {
-            
-            Logger::getInstance()->error(__METHOD__.": 取得所有使用者資料失敗！");
-        }
-        return false;
-    }
-
-    public function getUserDictionary() {
-        $result = array();
-        if($stmt = $this->db->prepare("SELECT DISTINCT USER_ID, USER_NAME FROM SYSAUTH1_ALL UNION SELECT DISTINCT USER_ID, USER_NAME FROM SYSAUTH1 ORDER BY USER_ID")) {
-            $handle = $stmt->execute();
-            while($row = $handle->fetchArray(SQLITE3_ASSOC)) {
-                $result[$row['USER_ID']] = $row['USER_NAME'];
-            }
-        } else {
-            
-            Logger::getInstance()->error(__METHOD__.": 取得所有使用者名稱對應表失敗！");
-        }
-        return $result;
-    }
+    // TODO: get various code by KRMK ..
 }
