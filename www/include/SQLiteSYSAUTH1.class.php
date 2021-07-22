@@ -1,7 +1,7 @@
 <?php
 require_once('init.php');
 require_once('System.class.php');
-require_once('DynamicSQLite.class.php');
+require_once('SQLiteDBFactory.class.php');
 
 class SQLiteSYSAUTH1 {
     private $db;
@@ -55,30 +55,6 @@ class SQLiteSYSAUTH1 {
         return $return;
     }
 
-    private function initDB() {
-        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."SYSAUTH1.db";
-        $sqlite = new DynamicSQLite($path);
-        $sqlite->initDB();
-        $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "SYSAUTH1" (
-                "USER_ID"	TEXT NOT NULL,
-                "USER_PSW"	TEXT,
-                "USER_NAME"	TEXT NOT NULL,
-                "GROUP_ID"	INTEGER,
-                "VALID"	INTEGER NOT NULL DEFAULT 0,
-                PRIMARY KEY("USER_ID")
-            )
-        ');
-        $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "SYSAUTH1_ALL" (
-                "USER_ID"	TEXT NOT NULL,
-                "USER_NAME"	TEXT,
-                PRIMARY KEY("USER_ID")
-            )
-        ');
-        return $path;
-    }
-
     private function getUsersByValid($int) {
         if($stmt = $this->db->prepare("SELECT * FROM SYSAUTH1 WHERE VALID = :valid ORDER BY USER_ID, USER_NAME")) {
             $stmt->bindParam(':valid', $int);
@@ -91,7 +67,7 @@ class SQLiteSYSAUTH1 {
     }
 
     function __construct() {
-        $db_path = $this->initDB();
+        $db_path = SQLiteDBFactory::getSYSAUTH1DB();
         $this->db = new SQLite3($db_path);
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");

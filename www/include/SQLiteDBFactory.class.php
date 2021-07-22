@@ -4,6 +4,21 @@ require_once('DynamicSQLite.class.php');
 
 class SQLiteDBFactory {
 
+    public static function getCaseCodeDB() {
+        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."CaseCode.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "CaseCode" (
+                "KCDE_2"	TEXT NOT NULL,
+                "KCNT"	TEXT NOT NULL,
+                "KRMK"	TEXT,
+                PRIMARY KEY("KCDE_2")
+            )
+        ');
+        return $path;
+    }
+
     public static function getRegFixCaseStoreDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_fix_case_store.db';
         $sqlite = new DynamicSQLite($db_path);
@@ -17,6 +32,30 @@ class SQLiteDBFactory {
             )
         ');
         return $db_path;
+    }
+
+    public static function getSYSAUTH1DB() {
+        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."SYSAUTH1.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "SYSAUTH1" (
+                "USER_ID"	TEXT NOT NULL,
+                "USER_PSW"	TEXT,
+                "USER_NAME"	TEXT NOT NULL,
+                "GROUP_ID"	INTEGER,
+                "VALID"	INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY("USER_ID")
+            )
+        ');
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "SYSAUTH1_ALL" (
+                "USER_ID"	TEXT NOT NULL,
+                "USER_NAME"	TEXT,
+                PRIMARY KEY("USER_ID")
+            )
+        ');
+        return $path;
     }
 
     public static function getLAHDB() {
