@@ -16,6 +16,7 @@ require_once("./include/Ping.class.php");
 require_once("./include/BKHXWEB.class.php");
 require_once("./include/Checklist.class.php");
 require_once("./include/SQLiteRegFixCaseStore.class.php");
+require_once("./include/SQLiteCaseCode.class.php");
 
 try {
     // $cl = new Checklist();
@@ -30,6 +31,9 @@ try {
     echo ord('A');
     
     echo '<br/><br/>';
+
+    $scc = new SQLiteCaseCode();
+    $scc->importFromOraDB();
     
 }
 catch(Exception $e)
