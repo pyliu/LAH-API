@@ -888,7 +888,7 @@ if (Vue) {
         }),
         computed: {
             validate() {
-                return isNaN(parseInt(this.text)) ? true : (this.text <= 400 && this.text >= 200)
+                return isNaN(parseInt(this.text)) ? true : (this.text <= 2000 && this.text >= 1)
             },
             cache_key() {
                 return 'lah-section-search_' + this.text
