@@ -10,7 +10,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR.'Ping.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Cache.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR."OraDB.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteCaseCode.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
 
 class WatchDog {
     
@@ -380,10 +380,10 @@ class WatchDog {
         return false;
     }
 
-    private function importCaseCodeFromRKEYN() {
+    private function importRKEYN() {
         if ($this->isOn($this->schedule["once_a_day"])) {
-            Logger::getInstance()->info(__METHOD__.': 匯入收件字代碼排程啟動。');
-            $sqlite_cc = new SQLiteCaseCode();
+            Logger::getInstance()->info(__METHOD__.': 匯入RKEYN代碼檔排程啟動。');
+            $sqlite_cc = new SQLiteRKEYN();
             $sqlite_cc->importFromOraDB();
             return true;
         }
@@ -405,7 +405,7 @@ class WatchDog {
             // clean connectivity stats data one day ago
             $this->stats->wipeConnectivityHistory();
             // $this->notifyTemperatureRegistration();
-            $this->importCaseCodeFromRKEYN();
+            $this->importRKEYN();
             $this->importUserFromL3HWEB();
             return true;
         }
