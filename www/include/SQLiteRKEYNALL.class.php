@@ -89,9 +89,18 @@ class SQLiteRKEYNALL {
      * 取得段代碼對應BY縣市 (H => 桃園)
      */
     public function getSectionsByCounty($county = 'H') {
-        $site = System::getInstance()->getSiteCode();
         // KCDE_4 < 9000 to avoid invalid data
         if($stmt = $this->db->prepare("SELECT * FROM RKEYN_ALL WHERE KCDE_1 = '48' AND KCDE_2 = '${county}' AND KCDE_4 < 9000")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得段代碼對應資料
+     */
+    public function getSections() {
+        // KCDE_4 < 9000 to avoid invalid data
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN_ALL WHERE KCDE_1 = '48' AND KCDE_4 < 9000 ORDER BY KRMK, KCDE_4")) {
             return $this->prepareArray($stmt);
         }
         return false;
@@ -101,6 +110,15 @@ class SQLiteRKEYNALL {
      */
     public function getOffices() {
         if($stmt = $this->db->prepare("select * from RKEYN_ALL t where KCDE_1 = 'LN' ORDER BY KCDE_3")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得各鄉鎮區對應資料
+     */
+    public function getDistricts() {
+        if($stmt = $this->db->prepare("select * from RKEYN_ALL t where KCDE_1 = '46' ORDER BY KRMK, KCDE_4")) {
             return $this->prepareArray($stmt);
         }
         return false;
