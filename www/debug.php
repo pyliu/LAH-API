@@ -15,7 +15,7 @@ require_once("./include/StatsSQLite.class.php");
 require_once("./include/Ping.class.php");
 require_once("./include/BKHXWEB.class.php");
 require_once("./include/Checklist.class.php");
-require_once("./include/SQLiteRegFixCaseStore.class.php");
+require_once("./include/SQLiteRKEYNALL.class.php");
 
 try {
     // $cl = new Checklist();
@@ -31,8 +31,8 @@ try {
     
     echo '<br/><br/>';
 
-    // $scc = new Watchdog();
-    // $scc->importRKEYN();
+    $scc = new SQLiteRKEYNALL();
+    $scc->importFromOraDB();
     
 }
 catch(Exception $e)

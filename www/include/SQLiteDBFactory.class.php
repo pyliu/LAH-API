@@ -4,6 +4,24 @@ require_once('DynamicSQLite.class.php');
 
 class SQLiteDBFactory {
 
+    public static function getRKEYNALLDB() {
+        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."RKEYN_ALL.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "RKEYN_ALL" (
+                "KCDE_1"	TEXT NOT NULL,
+                "KCDE_2"	TEXT NOT NULL,
+                "KCDE_3"	TEXT NOT NULL,
+                "KCDE_4"	TEXT NOT NULL,
+                "KNAME"	TEXT NOT NULL,
+                "KRMK"	TEXT,
+                PRIMARY KEY("KCDE_1", "KCDE_2", "KCDE_3", "KCDE_4")
+            )
+        ');
+        return $path;
+    }
+
     public static function getRKEYNDB() {
         $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."RKEYN.db";
         $sqlite = new DynamicSQLite($path);

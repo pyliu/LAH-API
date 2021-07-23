@@ -303,7 +303,7 @@ class RegCaseData {
             case '13':
                 return '復興區';
             default:
-                return (array_key_exists($this->row["RM100"], OFFICE) ? OFFICE[$this->row["RM100"]].'所' : $this->row["RM100"]).'轄區';
+                return (array_key_exists($this->row["RM100"], OFFICE) ? OFFICE[$this->row["RM100"]] : $this->row["RM100"]).'轄區';
         }
     }
 

@@ -53,7 +53,7 @@ class SQLiteRKEYN {
         }
 
         $db = new OraDB();
-        $sql = "select * from RKEYN t";
+        $sql = "select * from MOIADM.RKEYN t";
         $db->parse($sql);
         $db->execute();
         $rows = $db->fetchAll();
@@ -64,7 +64,7 @@ class SQLiteRKEYN {
             $count++;
         }
 
-        Logger::getInstance()->error(__METHOD__.': 匯入 '.$count.' 筆案件字資料。 【RKEYN.db、RKEYN table】');
+        Logger::getInstance()->info(__METHOD__.': 匯入 '.$count.' 筆代碼檔資料。 【RKEYN.db、RKEYN table】');
     }
 
     public function exists($category, $id) {

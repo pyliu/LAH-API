@@ -328,6 +328,9 @@ class WatchDog {
         ));
     }
 
+    function __construct() { $this->stats = new StatsSQLite(); }
+    function __destruct() { $this->stats = null; }
+
     private function importUserFromL3HWEB() {
         
         if ($this->isOn($this->schedule["once_a_day"])) {
@@ -383,15 +386,22 @@ class WatchDog {
     private function importRKEYN() {
         if ($this->isOn($this->schedule["once_a_day"])) {
             Logger::getInstance()->info(__METHOD__.': 匯入RKEYN代碼檔排程啟動。');
-            $sqlite_cc = new SQLiteRKEYN();
-            $sqlite_cc->importFromOraDB();
+            $sqlite_sr = new SQLiteRKEYN();
+            $sqlite_sr->importFromOraDB();
             return true;
         }
         return false;
     }
 
-    function __construct() { $this->stats = new StatsSQLite(); }
-    function __destruct() { $this->stats = null; }
+    private function importRKEYNALL() {
+        if ($this->isOn($this->schedule["once_a_day"])) {
+            Logger::getInstance()->info(__METHOD__.': 匯入RKEYN_ALL代碼檔排程啟動。');
+            $sqlite_sra = new SQLiteRKEYNALL();
+            $sqlite_sra->importFromOraDB();
+            return true;
+        }
+        return false;
+    }
 
     public function do() {
         if ($this->isOfficeHours()) {
@@ -405,7 +415,11 @@ class WatchDog {
             // clean connectivity stats data one day ago
             $this->stats->wipeConnectivityHistory();
             // $this->notifyTemperatureRegistration();
+            /**
+             * 匯入WEB DB固定資料
+             */
             $this->importRKEYN();
+            $this->importRKEYNALL();
             $this->importUserFromL3HWEB();
             return true;
         }

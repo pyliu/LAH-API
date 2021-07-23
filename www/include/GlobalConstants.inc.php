@@ -1,5 +1,7 @@
 <?php
 require_once('Logger.class.php');
+require_once('SQLiteRKEYNALL.class.php');
+require_once('SQLiteRKEYN.class.php');
 
 abstract class STATUS_CODE {
     const SUCCESS_WITH_NO_RECORD = 3;
@@ -72,120 +74,20 @@ define('VAL_NOTE', [
     "G" => "異動有誤"
 ]);
 
-define('OFFICE', [
-    "HA" => "桃園",
-    "HB" => "中壢",
-    "HC" => "大溪",
-    "HD" => "楊梅",
-    "HE" => "蘆竹",
-    "HF" => "八德",
-    "HG" => "平鎮",
-    "HH" => "龜山",
-    'AA' => '古亭',
-    'AB' => '建成',
-    'AC' => '中山',
-    'AD' => '松山',
-    'AE' => '士林',
-    'AF' => '大安',
-    'BA' => '中山',
-    'BB' => '中正',
-    'BC' => '中興',
-    'BD' => '豐原',
-    'BE' => '大甲',
-    'BF' => '清水',
-    'BG' => '東勢',
-    'BH' => '雅潭',
-    'BI' => '大里',
-    'BJ' => '太平',
-    'BK' => '龍井',
-    'CD' => '基隆',
-    'DA' => '台南',
-    'DB' => '安南',
-    'DC' => '東南',
-    'DD' => '鹽水',
-    'DE' => '白河',
-    'DF' => '麻豆',
-    'DG' => '佳里',
-    'DH' => '新化',
-    'DI' => '歸仁',
-    'DJ' => '玉井',
-    'DK' => '永康',
-    'EA' => '鹽埕',
-    'EB' => '新興',
-    'EC' => '前鎮',
-    'ED' => '三民',
-    'EE' => '楠梓',
-    'EF' => '岡山',
-    'EG' => '鳳山',
-    'EH' => '旗山',
-    'EI' => '仁武',
-    'EJ' => '路竹',
-    'EK' => '美濃',
-    'EL' => '大寮',
-    'FA' => '板橋',
-    'FB' => '新莊',
-    'FC' => '新店',
-    'FD' => '汐止',
-    'FE' => '淡水',
-    'FF' => '瑞芳',
-    'FG' => '三重',
-    'FH' => '中和',
-    'FI' => '樹林',
-    'GA' => '羅東',
-    'GB' => '宜蘭',
-    'IA' => '嘉義市',
-    'JB' => '竹北',
-    'JC' => '竹東',
-    'JD' => '新湖',
-    'KA' => '大湖',
-    'KB' => '苗栗',
-    'KC' => '通霄',
-    'KD' => '竹南',
-    'KE' => '銅鑼',
-    'KF' => '頭份',
-    'MA' => '南投',
-    'MB' => '草屯',
-    'MC' => '埔里',
-    'MD' => '竹山',
-    'ME' => '水里',
-    'NA' => '彰化',
-    'NB' => '和美',
-    'NC' => '鹿港',
-    'ND' => '員林',
-    'NE' => '田中',
-    'NF' => '北斗',
-    'NG' => '二林',
-    'NH' => '溪湖',
-    'OA' => '新竹市',
-    'PA' => '斗六',
-    'PB' => '斗南',
-    'PC' => '西螺',
-    'PD' => '虎尾',
-    'PE' => '北港',
-    'PF' => '台西',
-    'QB' => '朴子',
-    'QC' => '大林',
-    'QD' => '水上',
-    'QE' => '竹崎',
-    'TA' => '屏東',
-    'TB' => '里港',
-    'TC' => '潮州',
-    'TD' => '東港',
-    'TE' => '恆春',
-    'TF' => '枋寮',
-    'UA' => '花蓮',
-    'UB' => '鳳林',
-    'UC' => '玉里',
-    'VA' => '台東',
-    'VB' => '成功',
-    'VC' => '關山',
-    'VD' => '太麻里',
-    'WA' => '金門',
-    'XA' => '澎湖',
-    'ZA' => '連江'
-]);
+$srkeynall = new SQLiteRKEYNALL();
+$offices = $srkeynall->getOffices();
 
-require_once('SQLiteRKEYN.class.php');
+// 準備辦公室對應表
+if ($offices) {
+    $altered = [];
+    foreach ($offices as $row) {
+        $altered[$row['KCDE_3']] = $row['KNAME'];
+    }
+    define('OFFICE', $altered);
+} else {
+    Logger::getInstance()->warning('取得 OFFICE 資料失敗，請確認 RKEYN_ALL.db 中資料使否正確匯入。');
+}
+
 $srkeyn = new SQLiteRKEYN();
 
 // 準備登記原因
@@ -249,7 +151,7 @@ switch ($site_code) {
     case 'HG': $site_short_name = '平'; break;
     case 'HH': $site_short_name = '山'; break;
 }
-$site_name = OFFICE[$site_code];    // 桃園
+$site_name = mb_substr(OFFICE[$site_code], 0, 2);    // 桃園
 $site_idx = ord($site_code_tail) - ord('A') + 1;  // 1
 
 define('REG_CODE', [
@@ -575,3 +477,5 @@ unset($site_code_tail);
 unset($site_short_name);
 unset($site_name);
 unset($site_idx);
+unset($srkeynall);
+unset($offices);
