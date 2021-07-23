@@ -39,6 +39,36 @@ class SQLiteCaseCode {
         $this->db->close();
     }
 
+    public function importFromOraDB() {
+        // check if l3hweb is reachable
+        $main_db_ip = System::getInstance()->get('ORA_DB_HXWEB_IP');
+        $main_db_port = System::getInstance()->get('ORA_DB_HXWEB_PORT');
+        $latency = pingDomain($main_db_ip, $main_db_port);
+    
+        // not reachable
+        if ($latency > 999 || $latency == '') {
+            Logger::getInstance()->error(__METHOD__.': 無法連線主DB，無法進行匯入收件字快取資料庫。');
+            return false;
+        }
+
+        $db = new OraDB();
+        $sql = "
+            select * from RKEYN t
+            where kcde_1 = '04'
+        ";
+        $db->parse($sql);
+        $db->execute();
+        $rows = $db->fetchAll();
+        $this->clean();
+        $count = 0;
+        foreach ($rows as $row) {
+            $this->replace($row);
+            $count++;
+        }
+
+        Logger::getInstance()->error(__METHOD__.': 匯入 '.$count.' 筆案件字資料。 【CaseCode.db、CaseCode table】');
+    }
+
     public function exists($id) {
         $ret = $this->db->querySingle("SELECT KCDE_2 from CaseCode WHERE KCDE_2 = '".trim($id)."'");
         return !empty($ret);

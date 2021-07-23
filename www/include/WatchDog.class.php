@@ -331,6 +331,7 @@ class WatchDog {
     private function importUserFromL3HWEB() {
         
         if ($this->isOn($this->schedule["once_a_day"])) {
+            Logger::getInstance()->info(__METHOD__.': 匯入L3HWEB使用者資料排程啟動。');
             // check if l3hweb is reachable
             $l3hweb_ip = System::getInstance()->get('ORA_DB_L3HWEB_IP');
             $l3hweb_port = System::getInstance()->get('ORA_DB_L3HWEB_PORT');
@@ -380,42 +381,12 @@ class WatchDog {
     }
 
     private function importCaseCodeFromRKEYN() {
-        
         if ($this->isOn($this->schedule["once_a_day"])) {
-            // check if l3hweb is reachable
-            $main_db_ip = System::getInstance()->get('ORA_DB_HXWEB_IP');
-            $main_db_port = System::getInstance()->get('ORA_DB_HXWEB_PORT');
-            $latency = pingDomain($main_db_ip, $main_db_port);
-        
-            // not reachable
-            if ($latency > 999 || $latency == '') {
-                Logger::getInstance()->error(__METHOD__.': 無法連線主DB，無法進行匯入收件字快取資料庫。');
-                return false;
-            }
-
-            // $site = System::getInstance()->getSiteCode();
-
-            $db = new OraDB();
-            $sql = "
-                select * from RKEYN t
-                where kcde_1 = '04'
-            ";
-            $db->parse($sql);
-            $db->execute();
-            $rows = $db->fetchAll();
-            $casecode = new SQLiteCaseCode();
-            $casecode->clean();
-            $count = 0;
-            foreach ($rows as $row) {
-                $casecode->replace($row);
-                $count++;
-            }
-
-            Logger::getInstance()->error(__METHOD__.': 匯入 '.$count.' 筆案件字資料。 【CaseCode.db，CaseCode table】');
-
+            Logger::getInstance()->info(__METHOD__.': 匯入收件字代碼排程啟動。');
+            $sqlite_cc = new SQLiteCaseCode();
+            $sqlite_cc->importFromOraDB();
             return true;
         }
-
         return false;
     }
 
@@ -434,8 +405,8 @@ class WatchDog {
             // clean connectivity stats data one day ago
             $this->stats->wipeConnectivityHistory();
             // $this->notifyTemperatureRegistration();
-            $this->importUserFromL3HWEB();
             $this->importCaseCodeFromRKEYN();
+            $this->importUserFromL3HWEB();
             return true;
         }
         return false;

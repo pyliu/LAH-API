@@ -31,8 +31,6 @@ try {
     
     echo '<br/><br/>';
     
-    $rfcs = new SQLiteRegFixCaseStore();
-    print_r($rfcs->getRegFixCaseRecord('110HA81000000'));
 }
 catch(Exception $e)
 {

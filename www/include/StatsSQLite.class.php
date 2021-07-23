@@ -286,6 +286,11 @@ class StatsSQLite {
                 $stm->bindParam(':est_ip', $est_ip);
                 $stm->bindParam(':count', $count);
                 $stm->bindValue(':batch', $latest_batch + 1);
+
+                // $ret = $stm->execute();
+                // $ret !== FALSE ?? $success++;
+                // $ret === FALSE ?? Logger::getInstance()->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $ap_ip, $est_ip, $count)");
+
                 $retry = 0;
                 while (@$stm->execute() === FALSE) {
                     if ($retry > 10) {
@@ -298,7 +303,6 @@ class StatsSQLite {
                 }
                 $success++;
             } else {
-                
                 Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO ap_conn_history (log_time,ap_ip,est_ip,count,batch) VALUES (:log_time, :ap_ip, :est_ip, :count, :batch) ] 失敗。($log_time, $ap_ip, $est_ip, $count)");
             }
         }
@@ -316,6 +320,7 @@ class StatsSQLite {
             if (!$ret) {
                 Logger::getInstance()->error(__METHOD__.": stats_ap_conn_AP".$ip_end.".db 移除一天前資料失敗【".$one_day_ago.", ".$ap_db->lastErrorMsg()."】");
             }
+            Logger::getInstance()->info(__METHOD__.": 移除一天前連線資料成功。($ip_end)");
             return $ret;
         }
         
@@ -446,9 +451,7 @@ class StatsSQLite {
             $one_day_ago = date("YmdHis", time() - 24 * 3600);
             $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
             $ret = $stm->execute();
-            if (!$ret) {
-                Logger::getInstance()->error(__METHOD__.": $db_path 移除一天前資料失敗【".$one_day_ago.", ".$sc_db->lastErrorMsg()."】");
-            }
+            Logger::getInstance()->error(__METHOD__.": $db_path 移除一天前資料".($ret ? "成功" : "失敗")."【".$one_day_ago.", ".$sc_db->lastErrorMsg()."】");
             return $ret;
         }
         
