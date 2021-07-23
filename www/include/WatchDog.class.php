@@ -335,48 +335,8 @@ class WatchDog {
         
         if ($this->isOn($this->schedule["once_a_day"])) {
             Logger::getInstance()->info(__METHOD__.': 匯入L3HWEB使用者資料排程啟動。');
-            // check if l3hweb is reachable
-            $l3hweb_ip = System::getInstance()->get('ORA_DB_L3HWEB_IP');
-            $l3hweb_port = System::getInstance()->get('ORA_DB_L3HWEB_PORT');
-            $latency = pingDomain($l3hweb_ip, $l3hweb_port);
-        
-            // not reachable
-            if ($latency > 999 || $latency == '') {
-                Logger::getInstance()->error(__METHOD__.': 無法連線L3HWEB，無法進行匯入使用者名稱。');
-                return false;
-            }
-
-            $db = new OraDB(CONNECTION_TYPE::L3HWEB);
-            $sql = "
-                SELECT DISTINCT * FROM L1HA0H03.SYSAUTH1
-                UNION
-                SELECT DISTINCT * FROM L1HB0H03.SYSAUTH1
-                UNION
-                SELECT DISTINCT * FROM L1HC0H03.SYSAUTH1
-                UNION
-                SELECT DISTINCT * FROM L1HD0H03.SYSAUTH1
-                UNION
-                SELECT DISTINCT * FROM L1HE0H03.SYSAUTH1
-                UNION
-                SELECT DISTINCT * FROM L1HF0H03.SYSAUTH1
-                UNION
-                SELECT DISTINCT * FROM L1HG0H03.SYSAUTH1
-                UNION
-                SELECT DISTINCT * FROM L1HH0H03.SYSAUTH1
-            ";
-            $db->parse($sql);
-            $db->execute();
-            $rows = $db->fetchAll();
             $sysauth1 = new SQLiteSYSAUTH1();
-            $count = 0;
-            foreach ($rows as $row) {
-                // $row['USER_NAME'] = mb_convert_encoding(preg_replace('/\d+/', "", $row["USER_NAME"]), "UTF-8", "BIG5");
-                $sysauth1->import($row);
-                $count++;
-            }
-
-            Logger::getInstance()->error(__METHOD__.': 匯入 '.$count.' 筆使用者資料。 【SYSAUTH1.db，SYSAUTH1 table】');
-
+            $sysauth1->importFromL3HWEBDB();
             return true;
         }
 

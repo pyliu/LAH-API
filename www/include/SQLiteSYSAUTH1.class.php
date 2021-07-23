@@ -2,6 +2,7 @@
 require_once('init.php');
 require_once('System.class.php');
 require_once('SQLiteDBFactory.class.php');
+require_once('OraDB.class.php');
 
 class SQLiteSYSAUTH1 {
     private $db;
@@ -84,9 +85,52 @@ class SQLiteSYSAUTH1 {
         return !empty($ret);
     }
 
+    public function importFromL3HWEBDB() {
+        // check if l3hweb is reachable
+        $l3hweb_ip = System::getInstance()->get('ORA_DB_L3HWEB_IP');
+        $l3hweb_port = System::getInstance()->get('ORA_DB_L3HWEB_PORT');
+        $latency = pingDomain($l3hweb_ip, $l3hweb_port);
+    
+        // not reachable
+        if ($latency > 999 || $latency == '') {
+            Logger::getInstance()->error(__METHOD__.': 無法連線L3HWEB，無法進行匯入使用者名稱。');
+            return false;
+        }
+
+        $db = new OraDB(CONNECTION_TYPE::L3HWEB);
+        $sql = "
+            SELECT DISTINCT * FROM L1HA0H03.SYSAUTH1
+            UNION
+            SELECT DISTINCT * FROM L1HB0H03.SYSAUTH1
+            UNION
+            SELECT DISTINCT * FROM L1HC0H03.SYSAUTH1
+            UNION
+            SELECT DISTINCT * FROM L1HD0H03.SYSAUTH1
+            UNION
+            SELECT DISTINCT * FROM L1HE0H03.SYSAUTH1
+            UNION
+            SELECT DISTINCT * FROM L1HF0H03.SYSAUTH1
+            UNION
+            SELECT DISTINCT * FROM L1HG0H03.SYSAUTH1
+            UNION
+            SELECT DISTINCT * FROM L1HH0H03.SYSAUTH1
+        ";
+        $db->parse($sql);
+        $db->execute();
+        $rows = $db->fetchAll();
+        $count = 0;
+        foreach ($rows as $row) {
+            $this->import($row);
+            $count++;
+        }
+
+        Logger::getInstance()->info(__METHOD__.': 匯入 '.$count.' 筆使用者資料。 【SYSAUTH1.db，SYSAUTH1 table】');
+        
+        return $count;
+    }
+
     public function import(&$row) {
         if (empty($row['USER_ID']) || empty($row['USER_NAME'])) {
-            
             Logger::getInstance()->warning(__METHOD__.": USER_ID or USER_NAME is empty. Import procedure can not be proceeded.");
             Logger::getInstance()->warning(__METHOD__.": ".print_r($row, true));
             return false;
