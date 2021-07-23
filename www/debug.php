@@ -31,8 +31,8 @@ try {
     
     echo '<br/><br/>';
 
-    $scc = new SQLiteRKEYNALL();
-    $scc->importFromOraDB();
+    // $scc = new SQLiteRKEYNALL();
+    // $scc->importFromOraDB();
     
 }
 catch(Exception $e)
