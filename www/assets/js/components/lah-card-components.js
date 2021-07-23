@@ -840,7 +840,7 @@ if (Vue) {
                         return val ? this.format(val) + ' 平方米' : ''
                     },
                     section(val) {
-                        let name = '未知'
+                        let name = '無資料'
                         switch (val) {
                             case '01': return '桃園區'
                             case '02': return '大溪區'
