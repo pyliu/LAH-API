@@ -87,6 +87,119 @@ class SQLiteCaseCode {
         $this->bindParams($stm, $row);
         return $stm->execute() === FALSE ? false : true;
     }
-
-    // TODO: get various code by KRMK ..
+    /**
+     * 取得本所登記收件字
+     */
+    public function getRegHostCode() {
+        $site = System::getInstance()->getSiteCode();
+        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK = 'R' AND KCDE_2 LIKE '".$site."%'")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得本所收件跨所登記收件字
+     */
+    public function getRegCrossHostCode() {
+        $site = System::getInstance()->getSiteCode();   // HA
+        $postfix = $site[1];    // A
+        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK = 'R' AND KCDE_2 LIKE '%".$postfix."1'")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得他所收件跨所登記收件字
+     */
+    public function getRegCrossOtherCode() {
+        $site = System::getInstance()->getSiteCode();   // HA
+        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK = 'T' AND KCDE_2 LIKE '".$site."%'")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得他所收件跨縣市登記收件字
+     */
+    public function getRegCrossCountyOtherCode() {
+        $site = System::getInstance()->getSiteCode();   // HA
+        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK = 'T' AND KCDE_2 LIKE '%".$site."'")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得本所收件跨縣市登記收件字
+     */
+    public function getRegCrossCountyHostCode() {
+        $site = System::getInstance()->getSiteCode();   // HA
+        $prefix = $site[0];    // H
+        $postfix = $site[1];    // A
+        $site_idx = ord($postfix) - ord('A') + 1;  // 1
+        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK = 'T' AND KCDE_2 LIKE '".$prefix.$site_idx."%'")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得本所其他登記收件字
+     */
+    public function getRegOtherCode() {
+        $site = System::getInstance()->getSiteCode();   // HA
+        $postfix = $site[1];    // A
+        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK = 'R' AND KCDE_2 NOT LIKE '%".$postfix."1' AND KCDE_2 NOT LIKE '".$site."%'")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得本所測量收件字
+     */
+    public function getSurCode() {
+        $site = System::getInstance()->getSiteCode();
+        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK IN ('SL', 'SB') AND KCDE_2 LIKE '".$site."%'")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得本所測量其他收件字
+     */
+    public function getSurOtherCode() {
+        $site = System::getInstance()->getSiteCode();
+        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK IN ('SL', 'SB') AND KCDE_2 NOT LIKE '".$site."%'")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得本所地價收件字
+     */
+    public function getValCode() {
+        $site = System::getInstance()->getSiteCode();
+        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK IN ('V') AND KCDE_2 LIKE '".$site."%'")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得本所地價其他收件字
+     */
+    public function getValOtherCode() {
+        $site = System::getInstance()->getSiteCode();
+        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK IN ('V') AND KCDE_2 NOT LIKE '".$site."%'")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得本所謄本收件字
+     */
+    public function getCertCode() {
+        $site = System::getInstance()->getSiteCode();
+        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK IN ('UN') AND KCDE_2 LIKE '".$site."%'")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
 }
