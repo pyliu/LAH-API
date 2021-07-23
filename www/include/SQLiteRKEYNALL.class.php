@@ -100,8 +100,7 @@ class SQLiteRKEYNALL {
      * 取得各地所對應資料
      */
     public function getOffices() {
-        $site = System::getInstance()->getSiteCode();
-        if($stmt = $this->db->prepare("select * from RKEYN_ALL t where kcde_1 = 'LN' ORDER BY KCDE_3")) {
+        if($stmt = $this->db->prepare("select * from RKEYN_ALL t where KCDE_1 = 'LN' ORDER BY KCDE_3")) {
             return $this->prepareArray($stmt);
         }
         return false;

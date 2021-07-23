@@ -1,7 +1,5 @@
 <?php
 require_once('Logger.class.php');
-require_once('SQLiteRKEYNALL.class.php');
-require_once('SQLiteRKEYN.class.php');
 
 abstract class STATUS_CODE {
     const SUCCESS_WITH_NO_RECORD = 3;
@@ -74,6 +72,7 @@ define('VAL_NOTE', [
     "G" => "異動有誤"
 ]);
 
+require_once('SQLiteRKEYNALL.class.php');
 $srkeynall = new SQLiteRKEYNALL();
 $offices = $srkeynall->getOffices();
 
@@ -81,13 +80,14 @@ $offices = $srkeynall->getOffices();
 if ($offices) {
     $altered = [];
     foreach ($offices as $row) {
-        $altered[$row['KCDE_3']] = $row['KNAME'];
+        $altered[$row['KCDE_3']] = str_replace('地政事務所', '', $row['KNAME']);
     }
     define('OFFICE', $altered);
 } else {
     Logger::getInstance()->warning('取得 OFFICE 資料失敗，請確認 RKEYN_ALL.db 中資料使否正確匯入。');
 }
 
+require_once('SQLiteRKEYN.class.php');
 $srkeyn = new SQLiteRKEYN();
 
 // 準備登記原因

@@ -13,10 +13,9 @@ class SQLiteDBFactory {
                 "KCDE_1"	TEXT NOT NULL,
                 "KCDE_2"	TEXT NOT NULL,
                 "KCDE_3"	TEXT NOT NULL,
-                "KCDE_4"	TEXT NOT NULL,
+                "KCDE_4"	TEXT,
                 "KNAME"	TEXT NOT NULL,
-                "KRMK"	TEXT,
-                PRIMARY KEY("KCDE_1", "KCDE_2", "KCDE_3", "KCDE_4")
+                "KRMK"	TEXT
             )
         ');
         return $path;
