@@ -3,17 +3,18 @@ require_once('init.php');
 require_once('System.class.php');
 require_once('SQLiteDBFactory.class.php');
 
-class SQLiteCaseCode {
+class SQLiteRKEYN {
     private $db;
 
     private function bindParams(&$stm, &$row) {
         if ($stm === false) {
-            Logger::getInstance()->error(__METHOD__.": bindUserParams because of \$stm is false.");
+            Logger::getInstance()->error(__METHOD__.": bindParams because of \$stm is false.");
             return;
         }
 
+        $stm->bindParam(':category', $row['KCDE_1']);
         $stm->bindParam(':id', $row['KCDE_2']);
-        $stm->bindParam(':name', $row['KCNT']);
+        $stm->bindParam(':content', $row['KCNT']);
         $stm->bindValue(':attr', $row['KRMK']);
     }
 
@@ -27,7 +28,7 @@ class SQLiteCaseCode {
     }
 
     function __construct() {
-        $db_path = SQLiteDBFactory::getCaseCodeDB();
+        $db_path = SQLiteDBFactory::getRKEYNDB();
         $this->db = new SQLite3($db_path);
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");
@@ -52,10 +53,7 @@ class SQLiteCaseCode {
         }
 
         $db = new OraDB();
-        $sql = "
-            select * from RKEYN t
-            where kcde_1 = '04'
-        ";
+        $sql = "select * from RKEYN t";
         $db->parse($sql);
         $db->execute();
         $rows = $db->fetchAll();
@@ -66,23 +64,23 @@ class SQLiteCaseCode {
             $count++;
         }
 
-        Logger::getInstance()->error(__METHOD__.': 匯入 '.$count.' 筆案件字資料。 【CaseCode.db、CaseCode table】');
+        Logger::getInstance()->error(__METHOD__.': 匯入 '.$count.' 筆案件字資料。 【RKEYN.db、RKEYN table】');
     }
 
-    public function exists($id) {
-        $ret = $this->db->querySingle("SELECT KCDE_2 from CaseCode WHERE KCDE_2 = '".trim($id)."'");
+    public function exists($category, $id) {
+        $ret = $this->db->querySingle("SELECT KCDE_1 || '-' || KCDE_2 from RKEYN WHERE KCDE_1 = '$category' AND KCDE_2 = '$id'");
         return !empty($ret);
     }
 
     public function clean() {
-        $stm = $this->db->prepare(" DELETE FROM CaseCode");
+        $stm = $this->db->prepare("DELETE FROM RKEYN");
         return $stm->execute() === FALSE ? false : true;
     }
 
     public function replace(&$row) {
         $stm = $this->db->prepare("
-            REPLACE INTO CaseCode ('KCDE_2', 'KCNT', 'KRMK')
-            VALUES (:id, :name, :attr)
+            REPLACE INTO RKEYN ('KCDE_1', 'KCDE_2', 'KCNT', 'KRMK')
+            VALUES (:category, :id, :content, :attr)
         ");
         $this->bindParams($stm, $row);
         return $stm->execute() === FALSE ? false : true;
@@ -92,7 +90,7 @@ class SQLiteCaseCode {
      */
     public function getRegHostCode() {
         $site = System::getInstance()->getSiteCode();
-        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK = 'R' AND KCDE_2 LIKE '".$site."%'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK = 'R' AND KCDE_2 LIKE '".$site."%'")) {
             return $this->prepareArray($stmt);
         }
         return false;
@@ -103,7 +101,7 @@ class SQLiteCaseCode {
     public function getRegCrossHostCode() {
         $site = System::getInstance()->getSiteCode();   // HA
         $postfix = $site[1];    // A
-        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK = 'R' AND KCDE_2 LIKE '%".$postfix."1'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK = 'R' AND KCDE_2 LIKE '%".$postfix."1'")) {
             return $this->prepareArray($stmt);
         }
         return false;
@@ -113,7 +111,7 @@ class SQLiteCaseCode {
      */
     public function getRegCrossOtherCode() {
         $site = System::getInstance()->getSiteCode();   // HA
-        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK = 'T' AND KCDE_2 LIKE '".$site."%'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK = 'T' AND KCDE_2 LIKE '".$site."%'")) {
             return $this->prepareArray($stmt);
         }
         return false;
@@ -123,7 +121,7 @@ class SQLiteCaseCode {
      */
     public function getRegCrossCountyOtherCode() {
         $site = System::getInstance()->getSiteCode();   // HA
-        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK = 'T' AND KCDE_2 LIKE '%".$site."'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK = 'T' AND KCDE_2 LIKE '%".$site."'")) {
             return $this->prepareArray($stmt);
         }
         return false;
@@ -136,7 +134,7 @@ class SQLiteCaseCode {
         $prefix = $site[0];    // H
         $postfix = $site[1];    // A
         $site_idx = ord($postfix) - ord('A') + 1;  // 1
-        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK = 'T' AND KCDE_2 LIKE '".$prefix.$site_idx."%'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK = 'T' AND KCDE_2 LIKE '".$prefix.$site_idx."%'")) {
             return $this->prepareArray($stmt);
         }
         return false;
@@ -147,7 +145,7 @@ class SQLiteCaseCode {
     public function getRegOtherCode() {
         $site = System::getInstance()->getSiteCode();   // HA
         $postfix = $site[1];    // A
-        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK = 'R' AND KCDE_2 NOT LIKE '%".$postfix."1' AND KCDE_2 NOT LIKE '".$site."%'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK = 'R' AND KCDE_2 NOT LIKE '%".$postfix."1' AND KCDE_2 NOT LIKE '".$site."%'")) {
             return $this->prepareArray($stmt);
         }
         return false;
@@ -157,7 +155,7 @@ class SQLiteCaseCode {
      */
     public function getSurCode() {
         $site = System::getInstance()->getSiteCode();
-        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK IN ('SL', 'SB') AND KCDE_2 LIKE '".$site."%'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK IN ('SL', 'SB') AND KCDE_2 LIKE '".$site."%'")) {
             return $this->prepareArray($stmt);
         }
         return false;
@@ -167,7 +165,7 @@ class SQLiteCaseCode {
      */
     public function getSurOtherCode() {
         $site = System::getInstance()->getSiteCode();
-        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK IN ('SL', 'SB') AND KCDE_2 NOT LIKE '".$site."%'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK IN ('SL', 'SB') AND KCDE_2 NOT LIKE '".$site."%'")) {
             return $this->prepareArray($stmt);
         }
         return false;
@@ -177,7 +175,7 @@ class SQLiteCaseCode {
      */
     public function getValCode() {
         $site = System::getInstance()->getSiteCode();
-        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK IN ('V') AND KCDE_2 LIKE '".$site."%'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK IN ('V') AND KCDE_2 LIKE '".$site."%'")) {
             return $this->prepareArray($stmt);
         }
         return false;
@@ -187,7 +185,7 @@ class SQLiteCaseCode {
      */
     public function getValOtherCode() {
         $site = System::getInstance()->getSiteCode();
-        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK IN ('V') AND KCDE_2 NOT LIKE '".$site."%'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK IN ('V') AND KCDE_2 NOT LIKE '".$site."%'")) {
             return $this->prepareArray($stmt);
         }
         return false;
@@ -197,7 +195,7 @@ class SQLiteCaseCode {
      */
     public function getCertCode() {
         $site = System::getInstance()->getSiteCode();
-        if($stmt = $this->db->prepare("SELECT * FROM CaseCode WHERE KRMK IN ('UN') AND KCDE_2 LIKE '".$site."%'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK IN ('UN') AND KCDE_2 LIKE '".$site."%'")) {
             return $this->prepareArray($stmt);
         }
         return false;

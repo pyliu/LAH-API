@@ -405,11 +405,11 @@ define('REG_REASON', [
     "ZZ" => "分割轉載"
 ]);
 
-require_once('SQLiteCaseCode.class.php');
-$scc = new SQLiteCaseCode();
+require_once('SQLiteRKEYN.class.php');
+$srkeyn = new SQLiteRKEYN();
 
 // 準備測量收件字
-$codes = $scc->getSurCode();
+$codes = $srkeyn->getSurCode();
 if ($codes) {
     $altered = [];
     foreach ($codes as $row) {
@@ -417,11 +417,11 @@ if ($codes) {
     }
     define('SUR_WORD', $altered);
 } else {
-    Logger::getInstance()->warning('取得 SUR_WORD 資料失敗，請確認 CaseCode.db 中資料使否正確匯入。');
+    Logger::getInstance()->warning('取得 SUR_WORD 資料失敗，請確認 RKEYN.db 中資料使否正確匯入。');
 }
 
 // 準備地價收件字
-$codes = $scc->getValCode();
+$codes = $srkeyn->getValCode();
 if ($codes) {
     $altered = [];
     foreach ($codes as $row) {
@@ -429,18 +429,18 @@ if ($codes) {
     }
     define('PRC_WORD', $altered);
 } else {
-    Logger::getInstance()->warning('取得 PRC_WORD 資料失敗，請確認 CaseCode.db 中資料使否正確匯入。');
+    Logger::getInstance()->warning('取得 PRC_WORD 資料失敗，請確認 RKEYN.db 中資料使否正確匯入。');
 }
 
 // 準備本所登記收件字
-$codes = $scc->getRegHostCode();
+$codes = $srkeyn->getRegHostCode();
 $altered = [];
 if ($codes) {
     foreach ($codes as $row) {
         $altered[$row['KCDE_2']] = $row['KCNT'];
     }
 } else {
-    Logger::getInstance()->warning('取得 本所收件字 資料失敗，請確認 CaseCode.db 中資料使否正確匯入。');
+    Logger::getInstance()->warning('取得 本所收件字 資料失敗，請確認 RKEYN.db 中資料使否正確匯入。');
 }
 
 require_once('System.class.php');
@@ -757,19 +757,19 @@ define('REG_CODE', [
 ]);
 
 $alerted2 = [];
-$cross_host = $scc->getRegCrossHostCode();
+$cross_host = $srkeyn->getRegCrossHostCode();
 foreach ($cross_host as $row) { $alerted2[$row['KCDE_2']] = $row['KCNT']; }
-$cross_other = $scc->getRegCrossOtherCode();
+$cross_other = $srkeyn->getRegCrossOtherCode();
 foreach ($cross_other as $row) { $alerted2[$row['KCDE_2']] = $row['KCNT']; }
-$cross_county_other = $scc->getRegCrossCountyOtherCode();
+$cross_county_other = $srkeyn->getRegCrossCountyOtherCode();
 foreach ($cross_county_other as $row) { $alerted2[$row['KCDE_2']] = $row['KCNT']; }
-$cross_county_host = $scc->getRegCrossCountyHostCode();
+$cross_county_host = $srkeyn->getRegCrossCountyHostCode();
 foreach ($cross_county_host as $row) { $alerted2[$row['KCDE_2']] = $row['KCNT']; }
 
 // $altered is pprocessed before
 define('REG_WORD', array_merge($altered, $alerted2));
 
-unset($scc);
+unset($srkeyn);
 unset($codes);
 unset($altered);
 unset($altered2);

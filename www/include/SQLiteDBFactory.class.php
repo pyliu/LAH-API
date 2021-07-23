@@ -4,6 +4,22 @@ require_once('DynamicSQLite.class.php');
 
 class SQLiteDBFactory {
 
+    public static function getRKEYNDB() {
+        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."RKEYN.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "RKEYN" (
+                "KCDE_1"	TEXT NOT NULL,
+                "KCDE_2"	TEXT NOT NULL,
+                "KCNT"	TEXT NOT NULL,
+                "KRMK"	TEXT,
+                PRIMARY KEY("KCDE_1", "KCDE_2")
+            )
+        ');
+        return $path;
+    }
+
     public static function getCaseCodeDB() {
         $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."CaseCode.db";
         $sqlite = new DynamicSQLite($path);
@@ -140,7 +156,7 @@ class SQLiteDBFactory {
         return $db_path;
     }
 
-    function __construct() {}
+    private function __construct() {}
 
     function __destruct() {}
 
