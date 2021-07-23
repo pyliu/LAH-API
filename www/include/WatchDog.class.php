@@ -13,8 +13,8 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
 
 class WatchDog {
-    
     private $stats = null;
+
     private $schedule = array(
         "office" => [
             'Sun' => [],
@@ -71,6 +71,7 @@ class WatchDog {
             'Sat' => []
         ]
     );
+
     private $overdue_cfg = array(
         "REG_CHIEF_ID" => "HB1214",
         "SUBSCRIBER" => array(
@@ -328,9 +329,6 @@ class WatchDog {
         ));
     }
 
-    function __construct() { $this->stats = new StatsSQLite(); }
-    function __destruct() { $this->stats = null; }
-
     private function importUserFromL3HWEB() {
         
         if ($this->isOn($this->schedule["once_a_day"])) {
@@ -362,6 +360,9 @@ class WatchDog {
         }
         return false;
     }
+
+    function __construct() { $this->stats = new StatsSQLite(); }
+    function __destruct() { $this->stats = null; }
 
     public function do() {
         if ($this->isOfficeHours()) {
