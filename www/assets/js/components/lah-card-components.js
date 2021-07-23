@@ -840,7 +840,23 @@ if (Vue) {
                         return val ? this.format(val) + ' 平方米' : ''
                     },
                     section(val) {
-                        return val ? (val == '03' ? '中壢區' : '觀音區') : ''
+                        let name = '未知'
+                        switch (val) {
+                            case '01': return '桃園區'
+                            case '02': return '大溪區'
+                            case '03': return '中壢區'
+                            case '04': return '楊梅區'
+                            case '05': return '蘆竹區'
+                            case '06': return '大園區'
+                            case '07': return '龜山區'
+                            case '08': return '八德區'
+                            case '09': return '龍潭區'
+                            case '10': return '平鎮區'
+                            case '11': return '新屋區'
+                            case '12': return '觀音區'
+                            case '13': return '復興區'
+                        }
+                        return name
                     }
                 }
             }
