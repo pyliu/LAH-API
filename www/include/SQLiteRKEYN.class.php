@@ -85,6 +85,9 @@ class SQLiteRKEYN {
         $this->bindParams($stm, $row);
         return $stm->execute() === FALSE ? false : true;
     }
+
+
+
     /**
      * 取得本所登記收件字
      */
@@ -196,6 +199,19 @@ class SQLiteRKEYN {
     public function getCertCode() {
         $site = System::getInstance()->getSiteCode();
         if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '04' AND KRMK IN ('UN') AND KCDE_2 LIKE '".$site."%'")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    
+
+
+    /**
+     * 取得本所登記原因
+     */
+    public function getRegReason() {
+        $site = System::getInstance()->getSiteCode();
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '06' AND KCDE_2 NOT IN ('/*  */', '-') ORDER BY KCDE_2")) {
             return $this->prepareArray($stmt);
         }
         return false;
