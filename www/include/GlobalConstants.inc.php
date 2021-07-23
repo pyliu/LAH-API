@@ -190,7 +190,7 @@ $srkeyn = new SQLiteRKEYN();
 
 // 準備登記原因
 $reasons = $srkeyn->getRegReason();
-if ($codes) {
+if ($reasons) {
     $altered = [];
     foreach ($reasons as $row) {
         $altered[$row['KCDE_2']] = $row['KCNT'];
