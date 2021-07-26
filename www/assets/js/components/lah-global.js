@@ -264,7 +264,8 @@ Vue.mixin({
         nowDate() { return this.now().split(' ')[0] },
         nowTime() { return this.now().split(' ')[1] },
         viewportRatio() { return ((window.innerWidth) * 1.08).toFixed(2) / (window.innerHeight - 85 - 20).toFixed(2) },
-        xapMap() { return this.$store.getters.xapMap }
+        xapMap() { return this.$store.getters.xapMap },
+        configs() { return this.$store.getters.configs }
     },
     methods: {
         addToStoreParams: function(key, value) {
@@ -1009,7 +1010,6 @@ $(document).ready(() => {
                 });
             },
             initConfigs: function() {
-                
                 axios.post(CONFIG.API.JSON.QUERY, {
                     type: 'configs'
                 }).then(res => {
@@ -1023,53 +1023,13 @@ $(document).ready(() => {
                             title: '模擬模式提醒',
                             message: '目前系統處於模擬模式下，所有資訊都會是從快取資料回復！',
                             type: 'info',
-                            delay: 10000,
                             pos: 'bl'
                         });
                     }
                 });
-                /*
-                axios.post(CONFIG.API.JSON.SYSTEM, {
-                    type: 'switch_mssql_flag'
-                }).then(res => {
-                    let enable_mssql = res.data.mssql_flag;
-                    this.$store.commit("disableMSDBQuery", !enable_mssql);
-                }).catch(err => {
-                    this.$error = err;
-                });
-
-                axios.post(CONFIG.API.JSON.SYSTEM, {
-                    type: 'switch_office_hours_flag'
-                }).then(res => {
-                    let enable_office_hours = res.data.office_hours_flag;
-                    this.$store.commit("disableOfficeHours", !enable_office_hours);
-                }).catch(err => {
-                    this.$error = err;
-                });
-
-                axios.post(CONFIG.API.JSON.SYSTEM, {
-                    type: 'switch_mock_flag'
-                }).then(res => {
-                    //console.log(res.data.authority);
-                    let mock_on = res.data.mock_flag;
-                    this.$store.commit("disableMockMode", !mock_on);
-                }).catch(err => {
-                    this.$error = err;
-                }).finally(() => {
-                    if (!this.disableMockMode) {
-                        this.notify({
-                            title: '模擬模式提醒',
-                            message: '目前系統處於模擬模式下，所有資訊都會是從快取資料回復！',
-                            type: 'info',
-                            delay: 10000,
-                            pos: 'bl'
-                        });
-                    }
-                });
-                */
             }
         },
-        created: function(e) {
+        created() {
             this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
                 //console.log('Modal is about to be shown', bvEvent, modalId)
             });

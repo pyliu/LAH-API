@@ -975,9 +975,9 @@ if (Vue) {
             heading: { type: Boolean, default: true }
         },
         data: () => ({
-            enable_msdb_query: true,
-            enable_office_hours: true,
-            enable_mock_mode: false
+            enable_msdb_query: undefined,
+            enable_office_hours: undefined,
+            enable_mock_mode: undefined
         }),
         computed: {
             enable_msdb_query_desc() { return this.enable_msdb_query ? '啟用外部MSSQL連線功能' : '停用外部MSSQL連線功能' },
@@ -986,52 +986,55 @@ if (Vue) {
             show_mock_mode_switch() { return this.myip != '127.0.0.1' }
         },
         watch: {
-            disableMSDBQuery(flag) {
-                this.enable_msdb_query = !flag;
+            enable_msdb_query(nFlag, oFlag) {
+                if (oFlag !== undefined) {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.API.JSON.SYSTEM, {
+                        type: 'switch_set_mssql_mode',
+                        flag: nFlag
+                    }).then(res => {
+                        this.$warn(res.data.message);
+                    }).catch(err => {
+                        this.$error(err);
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                }
             },
-            enable_msdb_query(flag) {
-                this.isBusy = true;
-                this.$http.post(CONFIG.API.JSON.SYSTEM, {
-                    type: 'switch_set_mssql_mode',
-                    flag: flag
-                }).then(res => {
-                    this.$warn(res.data.message);
-                }).catch(err => {
-                    this.$error(err);
-                }).finally(() => {
-                    this.isBusy = false;
-                });
+            enable_office_hours(nFlag, oFlag) {
+                if (oFlag !== undefined) {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.API.JSON.SYSTEM, {
+                        type: 'switch_set_office_hours_mode',
+                        flag: nFlag
+                    }).then(res => {
+                        this.$warn(res.data.message);
+                    }).catch(err => {
+                        this.$error(err);
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                }
             },
-            disableOfficeHours(flag) {
-                this.enable_office_hours = !flag;
+            enable_mock_mode(nFlag, oFlag) {
+                if (oFlag !== undefined) {
+                    this.isBusy = true;
+                    this.$http.post(CONFIG.API.JSON.SYSTEM, {
+                        type: nFlag ? 'switch_enable_mock' : 'switch_disable_mock'
+                    }).then(res => {
+                        this.$warn(res.data.message);
+                    }).catch(err => {
+                        this.$error(err);
+                    }).finally(() => {
+                        this.isBusy = false;
+                    });
+                }
             },
-            enable_office_hours(flag) {
-                this.isBusy = true;
-                this.$http.post(CONFIG.API.JSON.SYSTEM, {
-                    type: 'switch_set_office_hours_mode',
-                    flag: flag
-                }).then(res => {
-                    this.$warn(res.data.message);
-                }).catch(err => {
-                    this.$error(err);
-                }).finally(() => {
-                    this.isBusy = false;
-                });
-            },
-            disableMockMode(flag) {
-                this.enable_mock_mode = !flag;
-            },
-            enable_mock_mode(flag) {
-                this.isBusy = true;
-                this.$http.post(CONFIG.API.JSON.SYSTEM, {
-                    type: flag ? 'switch_enable_mock' : 'switch_disable_mock'
-                }).then(res => {
-                    this.$warn(res.data.message);
-                }).catch(err => {
-                    this.$error(err);
-                }).finally(() => {
-                    this.isBusy = false;
-                });
+            configs(val) {
+                // system configs loaded 
+                this.enable_office_hours = val.ENABLE_OFFICE_HOURS !== 'false';
+                this.enable_msdb_query = val.ENABLE_MSSQL_CONN !== 'false';
+                this.enable_mock_mode = val.ENABLE_MOCK_MODE !== 'false';
             }
         },
         methods: {
