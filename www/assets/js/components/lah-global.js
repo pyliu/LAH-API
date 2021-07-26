@@ -104,7 +104,7 @@ Vue.prototype.$store = (() => {
                     state.isSuper = authPayload.isSuper;
                 },
                 userNames(state, mappingPayload) {
-                    state.userNames = mappingPayload || {};
+                    state.userNames = { ...mappingPayload };
                 },
                 dynaParams(state, objPayload) {
                     state.dynaParams = Object.assign({}, state.dynaParams, objPayload);
