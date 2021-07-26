@@ -951,7 +951,7 @@ if (Vue) {
    /**
      * Vuex switches
      */
-    Vue.component("lah-vuex-switch", {
+    Vue.component("lah-system-config", {
         template: `<b-card>
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
@@ -959,6 +959,14 @@ if (Vue) {
                     <lah-button icon="question" @click="popup" size="sm" variant="outline-success" no-border></lah-button>
                 </div>
             </template>
+            <b-row class="mb-1">
+                <div class="my-auto mr-1 ml-3">手動匯入</div>
+                <b-button-group>
+                    <b-button variant="primary" title="使用者名稱對應" @click="table_import('l3hweb_sysauth1')">SYSAUTH1</b-button>
+                    <b-button variant="info" title="地政WEB版代碼檔" @click="table_import('rkeyn')">RKEYN</b-button>
+                    <b-button variant="success" title="全國鄉鎮區段代碼" @click="table_import('rkeyn_all')">RKEYN_ALL</b-button>
+                </b-button-group>
+            </b-row>
             <b-form-checkbox v-model="enable_msdb_query" switch><span title="是否停用MSSQL資料庫連結">{{enable_msdb_query_desc}}</span></b-form-checkbox>
             <b-form-checkbox v-model="enable_office_hours" switch><span title="是否啟用工作天時檢查">{{enable_office_hours_desc}}</span></b-form-checkbox>
             <b-form-checkbox v-if="show_mock_mode_switch" v-model="enable_mock_mode" switch><span title="是否處於模擬模式">{{enable_mock_mode_desc}}</span></b-form-checkbox>
@@ -1038,6 +1046,23 @@ if (Vue) {
                         </ul>
                     `,
                     size: "lg"
+                });
+            },
+            table_import(type) {
+                this.isBusy = true;
+                this.$http.post(CONFIG.API.JSON.SYSTEM, {
+                    type: `import_${type}`
+                }).then(res => {
+                    this.$warn(res.data.message);
+                    this.notify({
+                        title: `import_${type}`,
+                        message: res.data.message,
+                        type: 'warning'
+                    });
+                }).catch(err => {
+                    this.$error(err);
+                }).finally(() => {
+                    this.isBusy = false;
                 });
             }
         }
