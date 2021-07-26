@@ -140,7 +140,7 @@ class Query {
 		";
 		
 		if (is_numeric($cond)) {
-			$prefix .= "AND m.KCDE_2 LIKE '_' || :bv_cond";
+			$prefix .= "AND m.KCDE_2 LIKE '%' || :bv_cond";
 		} else if (!empty($cond)) {
 			$prefix .= "AND m.KCNT LIKE '%' || :bv_cond || '%'";
 		}
