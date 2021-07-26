@@ -1040,6 +1040,7 @@ if (Vue) {
                     title: "系統設定 相關設定說明",
                     body: `
                         <ul>
+                            <li>手動匯入 - 從地政系統WEB版資料庫快取相關代碼檔至本地端使用。</li>
                             <li>${this.enable_msdb_query_desc} - 有關外部MSSQL查詢都會影響。</li>
                             <li>${this.enable_office_hours_desc} - 是否受工作天檢查影響。</li>
                             <li>${this.enable_mock_mode_desc} - 伺服器是否只會傳回快取的資料。</li>
