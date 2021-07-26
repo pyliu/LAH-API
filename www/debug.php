@@ -15,7 +15,7 @@ require_once("./include/StatsSQLite.class.php");
 require_once("./include/Ping.class.php");
 require_once("./include/BKHXWEB.class.php");
 require_once("./include/Checklist.class.php");
-require_once("./include/SQLiteRKEYNALL.class.php");
+require_once("./include/SQLiteSYSAUTH1.class.php");
 
 try {
     // $cl = new Checklist();
@@ -31,8 +31,8 @@ try {
     
     echo '<br/><br/>';
 
-    // $scc = new SQLiteRKEYNALL();
-    // $scc->importFromOraDB();
+    // $sysauth1 = new SQLiteSYSAUTH1();
+    // $sysauth1->importFromL3HWEBDB();
     
 }
 catch(Exception $e)

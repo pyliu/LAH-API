@@ -1016,7 +1016,7 @@ $(document).ready(() => {
                 });
             },
             initSystemSwitches: function() {
-                axios.post(CONFIG.API.JSON.SWITCH, {
+                axios.post(CONFIG.API.JSON.SYSTEM, {
                     type: 'switch_mssql_flag'
                 }).then(res => {
                     let enable_mssql = res.data.mssql_flag;
@@ -1025,7 +1025,7 @@ $(document).ready(() => {
                     this.$error = err;
                 });
 
-                axios.post(CONFIG.API.JSON.SWITCH, {
+                axios.post(CONFIG.API.JSON.SYSTEM, {
                     type: 'switch_office_hours_flag'
                 }).then(res => {
                     let enable_office_hours = res.data.office_hours_flag;
@@ -1034,7 +1034,7 @@ $(document).ready(() => {
                     this.$error = err;
                 });
 
-                axios.post(CONFIG.API.JSON.SWITCH, {
+                axios.post(CONFIG.API.JSON.SYSTEM, {
                     type: 'switch_mock_flag'
                 }).then(res => {
                     //console.log(res.data.authority);

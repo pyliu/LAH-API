@@ -983,7 +983,7 @@ if (Vue) {
             },
             enable_msdb_query(flag) {
                 this.isBusy = true;
-                this.$http.post(CONFIG.API.JSON.SWITCH, {
+                this.$http.post(CONFIG.API.JSON.SYSTEM, {
                     type: 'switch_set_mssql_mode',
                     flag: flag
                 }).then(res => {
@@ -999,7 +999,7 @@ if (Vue) {
             },
             enable_office_hours(flag) {
                 this.isBusy = true;
-                this.$http.post(CONFIG.API.JSON.SWITCH, {
+                this.$http.post(CONFIG.API.JSON.SYSTEM, {
                     type: 'switch_set_office_hours_mode',
                     flag: flag
                 }).then(res => {
@@ -1015,7 +1015,7 @@ if (Vue) {
             },
             enable_mock_mode(flag) {
                 this.isBusy = true;
-                this.$http.post(CONFIG.API.JSON.SWITCH, {
+                this.$http.post(CONFIG.API.JSON.SYSTEM, {
                     type: flag ? 'switch_enable_mock' : 'switch_disable_mock'
                 }).then(res => {
                     this.$warn(res.data.message);
