@@ -60,9 +60,7 @@ Vue.prototype.$store = (() => {
                     isRAE: undefined,
                     isGA: undefined
                 },
-                disableMSDBQuery: CONFIG.DISABLE_MSDB_QUERY,
-                disableOfficeHours: false,
-                disableMockMode: true,
+                configs: {},
                 xapMap: new Map([
                     ['220.1.33.71', {name: '地政局', code: 'H0', ip: '220.1.33.71'}],
                     ['220.1.34.161', {name: '桃園所', code: 'HA', ip: '220.1.34.161'}],
@@ -85,10 +83,11 @@ Vue.prototype.$store = (() => {
                 myip: state => state.myip,
                 myid: state => state.myid,
                 myinfo: state => state.myinfo,
-                disableMSDBQuery: state => state.disableMSDBQuery,
-                disableOfficeHours: state => state.disableOfficeHours,
-                disableMockMode: state => state.disableMockMode,
-                xapMap: state => state.xapMap
+                disableMSDBQuery: state => state.configs.ENABLE_MSSQL_CONN === 'false',
+                disableOfficeHours: state => state.configs.ENABLE_OFFICE_HOURS === 'false',
+                disableMockMode: state => state.configs.ENABLE_MOCK_MODE === 'false',
+                xapMap: state => state.xapMap,
+                configs: state => state.configs
             },
             mutations: {
                 cache(state, objPayload) {
@@ -136,14 +135,8 @@ Vue.prototype.$store = (() => {
                     state.myinfo = infoPayload;
                     state.myid = $.trim(infoPayload['id']) || undefined;
                 },
-                disableMSDBQuery(state, flagPayload) {
-                    state.disableMSDBQuery = flagPayload === true;
-                },
-                disableOfficeHours(state, flagPayload) {
-                    state.disableOfficeHours = flagPayload === true;
-                },
-                disableMockMode(state, flagPayload) {
-                    state.disableMockMode = flagPayload === true;
+                configs(state, configsPayload) {
+                    state.configs = { ...state.configs, ...configsPayload };
                 }
             },
             actions: {
@@ -1015,7 +1008,27 @@ $(document).ready(() => {
                     }
                 });
             },
-            initSystemSwitches: function() {
+            initConfigs: function() {
+                
+                axios.post(CONFIG.API.JSON.QUERY, {
+                    type: 'configs'
+                }).then(res => {
+                    const configs = res.data.raw;
+                    this.$store.commit("configs", configs);
+                }).catch(err => {
+                    this.$error = err;
+                }).finally(() => {
+                    if (!this.disableMockMode) {
+                        this.notify({
+                            title: '模擬模式提醒',
+                            message: '目前系統處於模擬模式下，所有資訊都會是從快取資料回復！',
+                            type: 'info',
+                            delay: 10000,
+                            pos: 'bl'
+                        });
+                    }
+                });
+                /*
                 axios.post(CONFIG.API.JSON.SYSTEM, {
                     type: 'switch_mssql_flag'
                 }).then(res => {
@@ -1053,6 +1066,7 @@ $(document).ready(() => {
                         });
                     }
                 });
+                */
             }
         },
         created: function(e) {
@@ -1088,7 +1102,7 @@ $(document).ready(() => {
         mounted() {
             this.initCache();
             this.initMyInfo();
-            this.initSystemSwitches();
+            this.initConfigs();
         }
     });
 });
