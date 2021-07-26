@@ -2,6 +2,8 @@
 require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYNALL.class.php");
 
 $auth = getMyAuthority();
 if (!$auth['isAdmin'] && !$auth['isSuper']) {
@@ -58,6 +60,30 @@ switch ($_POST["type"]) {
         $msg = $result ? $on_off_msg.'成功' : $on_off_msg.'失敗';
         Logger::getInstance()->info("XHR [switch_set_office_hours_mode] ".$msg);
         echoJSONResponse($msg, $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
+        break;
+    case "import_l3hweb_sysauth1":
+        Logger::getInstance()->info("XHR [import_l3hweb_sysauth1] 匯入 L3HWEB SYSAUTH1 使用者名稱請求。");
+        $sysauth1 = new SQLiteSYSAUTH1();
+        $count = $sysauth1->importFromL3HWEBDB();
+        $msg = "已匯入 $count 筆資料。";
+        Logger::getInstance()->info("XHR [import_l3hweb_sysauth1] ".$msg);
+        echoJSONResponse($msg, $count !== false ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
+        break;
+    case "import_rkeyn":
+        Logger::getInstance()->info("XHR [import_rkeyn] 匯入 RKEYN 代碼檔請求。");
+        $sqlite_sr = new SQLiteRKEYN();
+        $count = $sqlite_sr->importFromOraDB();
+        $msg = "已匯入 $count 筆資料。";
+        Logger::getInstance()->info("XHR [import_rkeyn] ".$msg);
+        echoJSONResponse($msg, $count !== false ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
+        break;
+    case "import_rkeyn_all":
+        Logger::getInstance()->info("XHR [import_rkeyn_all] 匯入 RKEYN_ALL 代碼檔請求。");
+        $sqlite_sra = new SQLiteRKEYNALL();
+        $count = $sqlite_sra->importFromOraDB();
+        $msg = "已匯入 $count 筆資料。";
+        Logger::getInstance()->info("XHR [import_rkeyn_all] ".$msg);
+        echoJSONResponse($msg, $count !== false ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
         break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");

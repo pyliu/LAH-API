@@ -65,6 +65,8 @@ class SQLiteRKEYN {
         }
 
         Logger::getInstance()->info(__METHOD__.': 匯入 '.$count.' 筆代碼檔資料。 【RKEYN.db、RKEYN table】');
+        
+        return $count;
     }
 
     public function exists($category, $id) {

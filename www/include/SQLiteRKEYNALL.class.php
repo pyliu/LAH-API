@@ -67,6 +67,8 @@ class SQLiteRKEYNALL {
         }
 
         Logger::getInstance()->info(__METHOD__.': 匯入 '.$count.' 筆資料。 【RKEYN_ALL.db、RKEYN_ALL table】');
+
+        return $count;
     }
 
     public function clean() {
