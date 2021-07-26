@@ -4,7 +4,15 @@ if (Vue) {
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="wallet">規費資料查詢</lah-fa-icon></h6>
-                    <lah-button icon="question" no-border @click="popup" variant="outline-success" size="sm"></lah-button>
+                    <div>
+                        <b-button variant="outline-warning" size="sm" title="無電腦給號規費聯單作廢作業" @click="obsolete" style="border: 0">
+                            <span class="fa-stack" style="font-size: 0.5rem">
+                                <i class="fas fa-file-alt fa-stack-1x"></i>
+                                <i class="fas fa-ban fa-stack-2x text-danger"></i>
+                            </span>
+                        </b-button>
+                        <lah-button icon="question" no-border @click="popup" variant="outline-success" size="sm"></lah-button>
+                    <div>
                 </div>
             </template>
             <b-form-row class="mb-1">
@@ -38,14 +46,7 @@ if (Vue) {
                         @keyup.enter="queryByNumber"
                     >
                     </b-form-input>
-                    <b-button class="mx-1" @click="queryByNumber" variant="outline-primary" size="sm" title="依據電腦給號"><i class="fas fa-search"></i> 查詢</b-button>
-                    <b-button @click="obsolete" variant="warning" size="sm" class="h-100" title="無電腦給號規費聯單作廢">
-                        <span class="fa-stack" style="font-size: 0.5rem">
-                            <i class="fas fa-file-alt fa-stack-1x"></i>
-                            <i class="fas fa-ban fa-stack-2x text-danger"></i>
-                        </span>
-                        作廢
-                    </b-button>
+                    <b-button class="ml-1" @click="queryByNumber" variant="outline-primary" size="sm" title="依據電腦給號" :disabled="!isNumberValid"><i class="fas fa-search"></i> 查詢</b-button>
                 </b-input-group>
             </b-form-row>
         </b-card>`,
