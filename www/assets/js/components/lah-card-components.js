@@ -960,7 +960,7 @@ if (Vue) {
                 </div>
             </template>
             <b-row class="mb-1">
-                <div class="my-auto mr-1 ml-3">手動匯入</div>
+                <div class="my-auto mr-1 ml-3">更新快取資料</div>
                 <b-button-group size="sm">
                     <b-button variant="outline-info" title="使用者名稱對應" @click="table_import('l3hweb_sysauth1')" style="border-radius: 15px">SYSAUTH1</b-button>
                     <b-button variant="outline-info" title="地政WEB版代碼檔" @click="table_import('rkeyn')" class="mx-1" style="border-radius: 15px">RKEYN</b-button>
@@ -1040,7 +1040,7 @@ if (Vue) {
                     title: "系統設定 相關設定說明",
                     body: `
                         <ul>
-                            <li>手動匯入 - 從地政系統WEB版資料庫快取相關代碼檔至本地端使用。</li>
+                            <li>更新快取資料 - 從地政系統WEB版資料庫快取相關代碼檔至本地端使用。</li>
                             <li>啟用SQL SERVER連線功能 - 有關SQL SERVER查詢都會影響。</li>
                             <li>啟用排程工作天檢查 - 排程工作是否受工作天設定影響。</li>
                             <li>啟用模擬模式 - 伺服器是否只會傳回快取的資料。</li>
