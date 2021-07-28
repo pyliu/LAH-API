@@ -136,7 +136,7 @@ class Query {
 				t.AA46 as \"區代碼\"
 			FROM MOIADM.RKEYN m
 			LEFT JOIN MOICAD.RALID t on m.KCDE_2 = t.AA48 -- 段小段面積計算 (RALID 登記－土地標示部)
-			WHERE m.KCDE_1 = '48'
+			WHERE m.KCDE_1 = '48' AND m.KCDE_2 NOT LIKE '/*%'
 		";
 		
 		if (is_numeric($cond)) {
