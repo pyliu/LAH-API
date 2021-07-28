@@ -390,6 +390,31 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
+	case "reg_not_done_case":
+		Logger::getInstance()->info("XHR [reg_not_done_case] 查詢未結案登記案件請求");
+		$message = "未結案登記案件查詢";
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRegNotDoneCase() : $prefetch->getRegNotDoneCase();
+		$cache_remaining = $prefetch->getRegNotDoneCaseCacheRemainingTime();
+		
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [reg_not_done_case] 查無 ${message} 資料");
+			echoJSONResponse("查無 ${message} 資料");
+		} else {
+			$total = count($rows);
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$baked[] = $data->getBakedData();
+			}
+			Logger::getInstance()->info("XHR [reg_not_done_case] 查詢成功($total)");
+			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"raw" => $baked,
+				'cache_remaining_time' => $cache_remaining
+			));
+		}
+
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

@@ -27,15 +27,16 @@ class Prefetch {
         '375_OWNER_CHANGE' => 'Prefetch::getOwner375Change',
         'NOT_DONE_CHANGE' => 'Prefetch::getNotDoneChange',
         'LAND_REF_CHANGE' => 'Prefetch::getLandRefChange',
-        'REG_FIX_CASE' => 'Prefetch::getRegFixCase'
+        'REG_FIX_CASE' => 'Prefetch::getRegFixCase',
+        'REG_NOT_DONE_CASE' => 'Prefetch::getRegNotDoneCase'
     );
     private $ora_db = null;
     private $cache = null;
     private $config = null;
     
-	private $site = 'HB';
-	private $site_code = 'B';
-	private $site_number = 2;
+	private $site = 'HA';
+	private $site_code = 'A';
+	private $site_number = 1;
 
     private function getOraDB() {
         if ($this->ora_db === null) {
@@ -56,7 +57,7 @@ class Prefetch {
         if ($this->config === null) {
             $this->config = System::getInstance();
             // initialize site info
-            $this->site = strtoupper($this->config->get('SITE')) ?? 'HB';
+            $this->site = strtoupper($this->config->get('SITE')) ?? 'HA';
             if (!empty($this->site)) {
                 $this->site_code = $this->site[1];
                 $this->site_number = ord($this->site_code) - ord('A') + 1;
@@ -1465,5 +1466,47 @@ class Prefetch {
         return $this->getCache()->get(self::KEYS['REG_FIX_CASE']);
     }
 
+    /**
+     * 未結案登記案件查詢快取剩餘時間
+     */
+    public function getRegNotDoneCaseCacheRemainingTime() {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['REG_NOT_DONE_CASE']);
+    }
+    /**
+     * 強制重新讀取未結案登記案件查詢
+     */
+    public function reloadRegNotDoneCase() {
+        $this->getCache()->del(self::KEYS['REG_NOT_DONE_CASE']);
+        return $this->getRegNotDoneCase();
+    }
+    /**
+	 * 取得未結案登記案件查詢
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getRegNotDoneCase($expire_duration = 86400) {
+        global $site_code; // should from GlobalConstants.inc.php
+        if ($this->getCache()->isExpired(self::KEYS['REG_NOT_DONE_CASE'])) {
+            Logger::getInstance()->info('['.self::KEYS['REG_NOT_DONE_CASE'].'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable(self::KEYS['REG_NOT_DONE_CASE'])) {
+                $db = $this->getOraDB();
+                $db->parse("
+                    SELECT *
+                    FROM SCRSMS 
+                    LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+                    WHERE RM31 IS NULL AND (RM99 IS NULL OR (RM99 = 'Y' AND RM101 = :bv_site))
+                    ORDER BY RM07_1, RM07_2 DESC
+                ");
+                $db->bind(":bv_site", $this->site);
+                $db->execute();
+                $result = $db->fetchAll();
+                $this->getCache()->set(self::KEYS['REG_NOT_DONE_CASE'], $result, $expire_duration);
+                Logger::getInstance()->info("[".self::KEYS['REG_NOT_DONE_CASE']."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                return $result;
+            } else {
+                return array();
+            }
+        }
+        return $this->getCache()->get(self::KEYS['REG_NOT_DONE_CASE']);
+    }
 
 }
