@@ -642,6 +642,23 @@ class Query {
 		return $this->db->fetchAll();
 	}
 
+    public function queryAllCasesNotDone() {
+		if (!$this->db_ok) {
+			return array();
+		}
+		$site = System::getInstance()->getSiteCode();
+        $this->db->parse("
+			SELECT *
+			FROM SCRSMS 
+			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+			WHERE RM31 IS NULL AND (RM99 IS NULL OR (RM99 = 'Y' AND RM101 = :bv_site))
+			ORDER BY RM07_1, RM07_2 DESC
+		");
+		$this->db->bind(":bv_site", $site);
+		$this->db->execute();
+		return $this->db->fetchAll();
+    }
+
     // template method for query all cases by date
     public function queryAllCasesByDate($qday) {
 		if (!$this->db_ok) {
@@ -652,8 +669,17 @@ class Query {
         if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
         }
-        $this->db->parse("SELECT * FROM SCRSMS LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2 WHERE RM07_1 BETWEEN :bv_qday and :bv_qday ORDER BY RM07_1, RM07_2 DESC");
+		
+		$site = System::getInstance()->getSiteCode();
+        $this->db->parse("
+			SELECT *
+			FROM SCRSMS
+			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+			WHERE (RM07_1 BETWEEN :bv_qday AND :bv_qday) AND (RM99 IS NULL OR (RM99 = 'Y' AND RM101 = :bv_site))
+			ORDER BY RM07_1, RM07_2 DESC
+		");
         $this->db->bind(":bv_qday", $qday);
+		$this->db->bind(":bv_site", $site);
 		$this->db->execute();
 		return $this->db->fetchAll();
     }

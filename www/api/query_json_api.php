@@ -969,6 +969,27 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
+	case "reg_cases_not_done":
+		Logger::getInstance()->info("XHR [reg_cases_not_close] 查詢未結案登記案件請求");
+		$rows = $mock ? $cache->get('reg_cases_not_close') : $query->queryAllCasesNotDone();
+		$cache->set('reg_cases_not_close', $rows);
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [reg_cases_not_close] 查無資料");
+			echoJSONResponse('查無未結案登記案件資料');
+		} else {
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$baked[] = $data->getBakedData();
+			}
+			$count = count($baked);
+			Logger::getInstance()->info("XHR [reg_cases_not_close] 查詢成功 ($count)");
+			echoJSONResponse("共查到 $count 筆未結案登記案件資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+				"data_count" => $count,
+				"baked" => $baked
+			));
+		}
+		break;
 	case "reg_cases_by_day":
 		if (empty($_POST["qday"])) {
 			$_POST["qday"] = $today;
