@@ -52,6 +52,21 @@ class SQLiteDBFactory {
         return $path;
     }
 
+    public static function getRegAuthChecksStoreDB() {
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_auth_checks_store.db';
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "reg_auth_checks_store" (
+                "case_no"	TEXT,
+                "authority"	INTEGER NOT NULL DEFAULT 0,
+                "note"	TEXT,
+                PRIMARY KEY("case_no")
+            )
+        ');
+        return $db_path;
+    }
+
     public static function getRegFixCaseStoreDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_fix_case_store.db';
         $sqlite = new DynamicSQLite($db_path);

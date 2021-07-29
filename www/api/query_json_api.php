@@ -1099,49 +1099,6 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
-	case "reg_fix_case_delivered_date":
-		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegFixCaseStore.class.php');
-		$sqlite_db = new SQLiteRegFixCaseStore();
-		$id = $_POST["id"];
-		Logger::getInstance()->info("XHR [reg_fix_case_delivered_date] 查詢登記補正案件通知書送達日期【${id}】請求");
-
-		// this query goes to SQLite DB, it does not need cache result
-		$result = $sqlite_db->getRegFixCaseRecord($id);
-
-		if (empty($result)) {
-			$message = "$id 查無資料";
-			Logger::getInstance()->info("XHR [reg_fix_case_delivered_date] $message");
-			echoJSONResponse($message, STATUS_CODE::SUCCESS_WITH_NO_RECORD);
-		} else {
-			$message = "查詢 $id 補正單送達日期成功";
-			Logger::getInstance()->info("XHR [reg_fix_case_delivered_date] $message");
-			echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
-				'data_count' => 1,
-				'raw' => $result[0]
-			));
-		}
-		break;
-	case "upd_reg_fix_case_delivered_date":
-		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegFixCaseStore.class.php');
-		$sqlite_db = new SQLiteRegFixCaseStore();
-		$id = $_POST["id"];
-		$date = $_POST["date"];
-		$note = $_POST['note'];
-		$row = array(
-			'case_no' => $_POST["id"],
-			'notify_delivered_date' => $_POST["date"],
-			'note' => $_POST['note']
-		);
-		if (!empty($id)) {
-			$result = $sqlite_db->replace($row);
-			$message = "更新 $id 補正單送達日期 $date ".($result ? '成功' : '失敗');
-			echoJSONResponse($message, $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
-		} else {
-			$message = "更新 $id 補正單送達日期 $date 失敗";
-			Logger::getInstance()->info("XHR [upd_reg_fix_case_delivered_date] $message");
-			echoJSONResponse($message);
-		}
-		break;
 	case "reg_reject_cases_by_month":
 		if (empty($_POST["query_month"])) {
 			$_POST["query_month"] = substr($today, 0, 5);
@@ -1297,6 +1254,93 @@ switch ($_POST["type"]) {
 				"baked" => $baked
 			);
 			echo json_encode($result, 0);
+		}
+		break;
+	case "reg_auth_checks":
+		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegAuthChecksStore.class.php');
+		$sqlite_db = new SQLiteRegAuthChecksStore();
+		$id = $_POST["id"];
+		Logger::getInstance()->info("XHR [reg_auth_checks] 查詢登記辦畢通知設定【${id}】請求");
+
+		// this query goes to SQLite DB, it does not need cache result
+		$result = $sqlite_db->getRegAuthChecksRecord($id);
+
+		if (empty($result)) {
+			$message = "$id 查無資料";
+			Logger::getInstance()->info("XHR [reg_auth_checks] $message");
+			echoJSONResponse($message, STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+		} else {
+			$message = "查詢 $id 登記辦畢通知設定成功";
+			Logger::getInstance()->info("XHR [reg_auth_checks] $message");
+			echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
+				'data_count' => 1,
+				'raw' => $result[0]
+			));
+		}
+		break;
+	case "upd_reg_auth_checks":
+		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegAuthChecksStore.class.php');
+		$sqlite_db = new SQLiteRegAuthChecksStore();
+		$id = $_POST["id"];
+		$note = $_POST['note'];
+		$authority = $_POST["authority"];
+		if (empty($id)) {
+			$message = "更新 $id 登記辦畢通知設定 $authority 失敗";
+			Logger::getInstance()->info("XHR [upd_reg_auth_checks] $message (無 id)");
+			echoJSONResponse($message);
+		} else {
+			$row = array(
+				'case_no' => $_POST["id"],
+				'authority' => $_POST["authority"],
+				'note' => $_POST['note']
+			);
+			$result = $sqlite_db->replace($row);
+			$message = "更新 $id 登記辦畢通知設定 $authority ".($result ? '成功' : '失敗');
+			Logger::getInstance()->info("XHR [upd_reg_auth_checks] $message");
+			echoJSONResponse($message, $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
+		}
+		break;
+	case "reg_fix_case_delivered_date":
+		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegFixCaseStore.class.php');
+		$sqlite_db = new SQLiteRegFixCaseStore();
+		$id = $_POST["id"];
+		Logger::getInstance()->info("XHR [reg_fix_case_delivered_date] 查詢登記補正案件通知書送達日期【${id}】請求");
+
+		// this query goes to SQLite DB, it does not need cache result
+		$result = $sqlite_db->getRegFixCaseRecord($id);
+
+		if (empty($result)) {
+			$message = "$id 查無資料";
+			Logger::getInstance()->info("XHR [reg_fix_case_delivered_date] $message");
+			echoJSONResponse($message, STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+		} else {
+			$message = "查詢 $id 補正單送達日期成功";
+			Logger::getInstance()->info("XHR [reg_fix_case_delivered_date] $message");
+			echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
+				'data_count' => 1,
+				'raw' => $result[0]
+			));
+		}
+		break;
+	case "upd_reg_fix_case_delivered_date":
+		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegFixCaseStore.class.php');
+		$sqlite_db = new SQLiteRegFixCaseStore();
+		$id = $_POST["id"];
+		$date = $_POST["date"];
+		$note = $_POST['note'];
+		if (empty($id)) {
+			$message = "更新 $id 補正單送達日期 $date 失敗";
+			Logger::getInstance()->info("XHR [upd_reg_fix_case_delivered_date] $message (無 id)");
+			echoJSONResponse($message);
+		} else {
+			$row = array(
+				'case_no' => $_POST["id"],
+				'notify_delivered_date' => $_POST["date"],
+				'note' => $_POST['note']
+			);
+			$result = $sqlite_db->replace($row);
+			$message = "更新 $id 補正單送達日期 $date ".($result ? '成功' : '失敗');
+			echoJSONResponse($message, $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
 		}
 		break;
 	case "expba_refund_cases_by_month":
