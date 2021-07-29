@@ -376,11 +376,22 @@ switch ($_POST["type"]) {
 			Logger::getInstance()->info("XHR [reg_fix_case] 查無 ${message} 資料");
 			echoJSONResponse("查無 ${message} 資料");
 		} else {
+			require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegFixCaseStore.class.php');
+			$sqlite_db = new SQLiteRegFixCaseStore();
+
 			$total = count($rows);
 			$baked = array();
 			foreach ($rows as $row) {
 				$data = new RegCaseData($row);
-				$baked[] = $data->getBakedData();
+				$this_baked = $data->getBakedData();
+
+				
+				$id = $this_baked['ID'];
+				// this query goes to SQLite DB
+				$result = $sqlite_db->getRegFixCaseRecord($id);
+				$this_baked['FIX_DELIVERED_DATE'] = $result[0] ?? [];
+
+				$baked[] = $this_baked;
 			}
 			Logger::getInstance()->info("XHR [reg_fix_case] 查詢成功($total)");
 			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
