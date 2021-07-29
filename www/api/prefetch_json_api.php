@@ -400,11 +400,24 @@ switch ($_POST["type"]) {
 			Logger::getInstance()->info("XHR [reg_not_done_case] 查無 ${message} 資料");
 			echoJSONResponse("查無 ${message} 資料");
 		} else {
+			// also get authority from sqlite db
+			require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegAuthChecksStore.class.php');
+			$sqlite_db = new SQLiteRegAuthChecksStore();
+
 			$total = count($rows);
 			$baked = array();
 			foreach ($rows as $row) {
 				$data = new RegCaseData($row);
-				$baked[] = $data->getBakedData();
+				$this_baked = $data->getBakedData();
+
+				$id = $this_baked['ID'];
+				// this query goes to SQLite DB, return array of result
+				$result = $sqlite_db->getRegAuthChecksRecord($id);
+				$auth = $result[0] ?? [];
+				// Logger::getInstance()->info("XHR [reg_not_done_case] 取得 $id AUTH 資料 ".$auth['authority']);
+				$this_baked['FINISH_NOTIFY_AUTHORITY'] = $auth['authority'] ?? 0;
+
+				$baked[] = $this_baked;
 			}
 			Logger::getInstance()->info("XHR [reg_not_done_case] 查詢成功($total)");
 			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
