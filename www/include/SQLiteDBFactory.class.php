@@ -52,6 +52,24 @@ class SQLiteDBFactory {
         return $path;
     }
 
+    public static function getRegUntakenStoreDB() {
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_untaken_store.db';
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "reg_untaken_store" (
+                "case_no"	TEXT,
+                "taken_date" TEXT,
+                "borrowed_date" TEXT,
+                "returned_date" TEXT,
+                "borrower" TEXT,
+                "note"	TEXT,
+                PRIMARY KEY("case_no")
+            )
+        ');
+        return $db_path;
+    }
+
     public static function getRegAuthChecksStoreDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_auth_checks_store.db';
         $sqlite = new DynamicSQLite($db_path);

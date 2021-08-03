@@ -439,6 +439,49 @@ switch ($_POST["type"]) {
 		}
 
 		break;
+	case "reg_untaken_case":
+		Logger::getInstance()->info("XHR [reg_untaken_case] 查詢結案未歸檔登記案件請求");
+		$message = "結案未歸檔登記案件查詢";
+		$st = $_POST['start'];
+		$ed = $_POST['end'];
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRegUntakenCase($st, $ed) : $prefetch->getRegUntakenCase($st, $ed);
+		$cache_remaining = $prefetch->getRegUntakenCaseCacheRemainingTime($st, $ed);
+		
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [reg_untaken_case] 查無 ${message} 資料");
+			echoJSONResponse("查無 ${message} 資料($st ~ $ed)");
+		} else {
+			// also get authority from sqlite db
+			require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegUntakenStore.class.php');
+			$sqlite_db = new SQLiteRegUntakenStore();
+
+			$total = count($rows);
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$this_baked = $data->getBakedData();
+
+				$id = $this_baked['ID'];
+				// this query goes to SQLite DB, return array of result
+				$result = $sqlite_db->getRegUntakenRecord($id);
+				$record = $result[0] ?? [];
+				$this_baked['UNTAKEN_TAKEN_DATE'] = $record['taken_date'] ?? '';
+				$this_baked['UNTAKEN_BORROWED_DATE'] = $record['borrowed_date'] ?? '';
+				$this_baked['UNTAKEN_RETURNED_DATE'] = $record['returned_date'] ?? '';
+				$this_baked['UNTAKEN_BORROWER'] = $record['borrower'] ?? '';
+				$this_baked['UNTAKEN_NOTE'] = $record['note'] ?? '';
+
+				$baked[] = $this_baked;
+			}
+			Logger::getInstance()->info("XHR [reg_untaken_case] 查詢成功($total, $st ~ $ed)");
+			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。($st ~ $ed)", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"raw" => $baked,
+				'cache_remaining_time' => $cache_remaining
+			));
+		}
+
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

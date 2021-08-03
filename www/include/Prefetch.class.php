@@ -28,7 +28,8 @@ class Prefetch {
         'NOT_DONE_CHANGE' => 'Prefetch::getNotDoneChange',
         'LAND_REF_CHANGE' => 'Prefetch::getLandRefChange',
         'REG_FIX_CASE' => 'Prefetch::getRegFixCase',
-        'REG_NOT_DONE_CASE' => 'Prefetch::getRegNotDoneCase'
+        'REG_NOT_DONE_CASE' => 'Prefetch::getRegNotDoneCase',
+        'REG_UNTAKEN_CASE' => 'Prefetch::getRegUntakenCase'
     );
     private $ora_db = null;
     private $cache = null;
@@ -1507,6 +1508,53 @@ class Prefetch {
             }
         }
         return $this->getCache()->get(self::KEYS['REG_NOT_DONE_CASE']);
+    }
+    
+    /**
+     * 結案未歸檔登記案件查詢快取剩餘時間
+     */
+    public function getRegUntakenCaseCacheRemainingTime($st, $ed) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['REG_UNTAKEN_CASE'].$st.$ed);
+    }
+    /**
+     * 強制重新讀取結案未歸檔登記案件查詢
+     */
+    public function reloadRegUntakenCase($st, $ed) {
+        $this->getCache()->del(self::KEYS['REG_UNTAKEN_CASE'].$st.$ed);
+        return $this->getRegUntakenCase($st, $ed);
+    }
+    /**
+	 * 取得結案未歸檔登記案件查詢
+     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+	 */
+	public function getRegUntakenCase($st, $ed, $expire_duration = 86400) {
+        global $site_code; // should from GlobalConstants.inc.php
+        if ($this->getCache()->isExpired(self::KEYS['REG_UNTAKEN_CASE'].$st.$ed)) {
+            Logger::getInstance()->info('['.self::KEYS['REG_UNTAKEN_CASE'].'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable(self::KEYS['REG_UNTAKEN_CASE'])) {
+                $db = $this->getOraDB();
+                $db->parse("
+                    select * from MOICAS.CRSMS t
+                    left join MOIADM.RKEYN r ON r.KCDE_1 = '06' AND t.RM09 = r.KCDE_2
+                    where RM07_1 between :bv_st and :bv_ed
+                    and (rm99 is null or rm101 = :bv_site)
+                    and rm31 = 'A'
+                    and rm30 <> 'Z'
+                    order by rm07_1, rm07_2 desc
+                ");
+                $db->bind(":bv_site", $this->site);
+                $db->bind(":bv_st", $st);
+                $db->bind(":bv_ed", $ed);
+                $db->execute();
+                $result = $db->fetchAll();
+                $this->getCache()->set(self::KEYS['REG_UNTAKEN_CASE'], $result, $expire_duration);
+                Logger::getInstance()->info("[".self::KEYS['REG_UNTAKEN_CASE']."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                return $result;
+            } else {
+                return array();
+            }
+        }
+        return $this->getCache()->get(self::KEYS['REG_UNTAKEN_CASE'].$st.$ed);
     }
 
 }
