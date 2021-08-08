@@ -1343,6 +1343,57 @@ switch ($_POST["type"]) {
 			echoJSONResponse($message, $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
 		}
 		break;
+	case "reg_cert_taken_date":
+		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegUntakenStore.class.php');
+		$sqlite_db = new SQLiteRegUntakenStore();
+		$id = $_POST["id"];
+		Logger::getInstance()->info("XHR [reg_cert_taken_date] 查詢登記已結案件領狀資料【${id}】請求");
+
+		// this query goes to SQLite DB, it does not need cache result
+		$result = $sqlite_db->getRegUntakenRecord($id);
+
+		if (empty($result)) {
+			$message = "$id 查無資料";
+			Logger::getInstance()->info("XHR [reg_cert_taken_date] $message");
+			echoJSONResponse($message, STATUS_CODE::SUCCESS_WITH_NO_RECORD);
+		} else {
+			$message = "查詢 $id 登記已結案件領狀資料成功";
+			Logger::getInstance()->info("XHR [reg_cert_taken_date] $message");
+			echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
+				'data_count' => 1,
+				'raw' => $result[0]
+			));
+		}
+		break;
+	case "upd_reg_cert_taken_date":
+		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegUntakenStore.class.php');
+		$sqlite_db = new SQLiteRegUntakenStore();
+		$id = $_POST["id"];
+		$taken_date = $_POST["taken_date"];
+		$taken_status = $_POST["taken_status"];
+		$lent_date = $_POST["lent_date"];
+		$return_date = $_POST["return_date"];
+		$borrower = $_POST["borrower"];
+		$note = $_POST['note'];
+		if (empty($id)) {
+			$message = "更新 $id 登記已結案件領狀資料失敗";
+			Logger::getInstance()->info("XHR [upd_reg_cert_taken_date] $message (無 id)");
+			echoJSONResponse($message);
+		} else {
+			$row = array(
+				'case_no' => $_POST["id"],
+				'taken_date' => $_POST["taken_date"],
+				'taken_status' => $_POST["taken_status"],
+				'lent_date' => $_POST["lent_date"],
+				'return_date' => $_POST["return_date"],
+				'borrower' => $_POST["borrower"],
+				'note' => $_POST['note']
+			);
+			$result = $sqlite_db->replace($row);
+			$message = "更新 $id 登記已結案件領狀資料".($result ? '成功' : '失敗');
+			echoJSONResponse($message, $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
+		}
+		break;
 	case "expba_refund_cases_by_month":
 		if (empty($_POST["query_month"])) {
 			$_POST["query_month"] = substr($today, 0, 5);
