@@ -15,9 +15,10 @@ class SQLiteRegUntakenStore {
 
         $stm->bindParam(':case_no', $row['case_no']);
         $stm->bindParam(':taken_date', $row['taken_date']);
-        $stm->bindParam(':borrowed_date', $row['borrowed_date']);
+        $stm->bindParam(':taken_status', $row['taken_status']);
+        $stm->bindParam(':lent_date', $row['lent_date']);
+        $stm->bindParam(':return_date', $row['return_date']);
         $stm->bindParam(':borrower', $row['borrower']);
-        $stm->bindParam(':returned_date', $row['returned_date']);
         $stm->bindParam(':note', $row['note']);
 
         return true;
@@ -61,8 +62,8 @@ class SQLiteRegUntakenStore {
 
     public function replace(&$row) {
         $stm = $this->db->prepare("
-            REPLACE INTO ".$this->tbl_name." ('case_no', 'taken_date', 'borrowed_date', 'borrower', 'returned_date', 'note')
-            VALUES (:case_no, :taken_date, :borrowed_date, :borrower, :returned_date, :note)
+            REPLACE INTO ".$this->tbl_name." ('case_no', 'taken_date', 'taken_status', 'lent_date', 'borrower', 'return_date', 'note')
+            VALUES (:case_no, :taken_date, :taken_status, :lent_date, :borrower, :return_date, :note)
         ");
         if ($this->bindParams($stm, $row)) {
             return $stm->execute() === FALSE ? false : true;
