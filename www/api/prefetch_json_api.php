@@ -466,8 +466,9 @@ switch ($_POST["type"]) {
 				$result = $sqlite_db->getRegUntakenRecord($id);
 				$record = $result[0] ?? [];
 				$this_baked['UNTAKEN_TAKEN_DATE'] = $record['taken_date'] ?? '';
-				$this_baked['UNTAKEN_BORROWED_DATE'] = $record['borrowed_date'] ?? '';
-				$this_baked['UNTAKEN_RETURNED_DATE'] = $record['returned_date'] ?? '';
+				$this_baked['UNTAKEN_TAKEN_STATUS'] = $record['taken_status'] ?? '';
+				$this_baked['UNTAKEN_LENT_DATE'] = $record['lent_date'] ?? '';
+				$this_baked['UNTAKEN_RETURN_DATE'] = $record['return_date'] ?? '';
 				$this_baked['UNTAKEN_BORROWER'] = $record['borrower'] ?? '';
 				$this_baked['UNTAKEN_NOTE'] = $record['note'] ?? '';
 

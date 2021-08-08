@@ -60,6 +60,7 @@ class SQLiteDBFactory {
             CREATE TABLE IF NOT EXISTS "reg_untaken_store" (
                 "case_no"	TEXT,
                 "taken_date" TEXT,
+                "taken_status" TEXT,
                 "lent_date" TEXT,
                 "return_date" TEXT,
                 "borrower" TEXT,
