@@ -913,15 +913,23 @@ if (Vue) {
                 this.msgbox({
                     title: '土地標示部筆數＆面積查詢',
                     message: `-- 段小段筆數＆面積計算 (RALID 登記－土地標示部) <br/>
-                  SELECT t.AA48 as "段代碼", <br/>
-                  　　m.KCNT as "段名稱", <br/>
-                  　　SUM(t.AA10) as "面積", <br/>
-                  　　COUNT(t.AA10) as "筆數" <br/>
-                  FROM MOICAD.RALID t <br/>
-                  LEFT JOIN MOIADM.RKEYN m ON (m.KCDE_1 = '48' and m.KCDE_2 = t.AA48) <br/>
-                  --WHERE t.AA48 = '%【輸入數字】'<br/>
-                  --WHERE m.KCNT = '%【輸入文字】%'<br/>
-                  GROUP BY t.AA48, m.KCNT;`,
+                    SELECT m.KCDE_2 as "段代碼", <br/>
+                    　　m.KCNT as "段名稱", <br/>
+                    　　SUM(t.AA10) as "面積", <br/>
+                    　　COUNT(t.AA10) as "土地標示部筆數", <br/>
+                    　　t.AA46 as "區代碼", <br/>
+                    　　q.KNAME as "區名稱" <br/>
+                    FROM MOIADM.RKEYN m <br/>
+                    LEFT JOIN MOICAD.RALID t <br/>
+                    　　ON m.KCDE_2 = t.AA48 -- 段小段面積計算 (RALID 登記－土地標示部) <br/>
+                    LEFT JOIN MOIADM.RKEYN_ALL q <br/>
+                    　　ON q.KCDE_1 = '46' <br/>
+                    AND q.KCDE_2 = 'H' <br/>
+                    AND t.AA46 = q.KCDE_3 <br/>
+                    WHERE m.KCDE_1 = '48' <br/>
+                    AND m.KCDE_2 NOT LIKE '/*%' <br/>
+                    AND t.AA46 IS NOT NULL <br/>
+                    GROUP BY m.KCDE_2, m.KCNT, t.AA46, q.KNAME <br/>`,
                     size: 'lg'
                 });
             }
