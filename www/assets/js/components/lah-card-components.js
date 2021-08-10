@@ -778,9 +778,6 @@ if (Vue) {
                         class="text-center"
                         caption-top
                     >
-                        <template v-slot:cell(區代碼)="{ item }">
-                            <span v-b-tooltip.d400="item.區代碼">{{section(item.區代碼)}}</span>
-                        </template>
                         <template v-slot:cell(面積)="{ item }">
                             <span v-b-tooltip.d400="area(item.面積)">{{areaM2(item.面積)}}</span>
                         </template>
@@ -801,11 +798,15 @@ if (Vue) {
                     }
                 },
                 data: () => ({
-                    fields: [{
+                    fields: [
+                        {
                             key: "區代碼",
-                            label: "區域",
+                            sortable: true
+                        },{
+                            key: "區名稱",
                             sortable: true
                         },
+
                         {
                             key: "段代碼",
                             sortable: true
@@ -838,25 +839,6 @@ if (Vue) {
                     },
                     areaM2(val) {
                         return val ? this.format(val) + ' 平方米' : ''
-                    },
-                    section(val) {
-                        let name = '無資料'
-                        switch (val) {
-                            case '01': return '桃園區'
-                            case '02': return '大溪區'
-                            case '03': return '中壢區'
-                            case '04': return '楊梅區'
-                            case '05': return '蘆竹區'
-                            case '06': return '大園區'
-                            case '07': return '龜山區'
-                            case '08': return '八德區'
-                            case '09': return '龍潭區'
-                            case '10': return '平鎮區'
-                            case '11': return '新屋區'
-                            case '12': return '觀音區'
-                            case '13': return '復興區'
-                        }
-                        return name
                     }
                 }
             }
