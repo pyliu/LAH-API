@@ -150,7 +150,7 @@ if (Vue) {
             if (item["段代碼"] == '0500' || item["段代碼"] == '/*  */') return;
             this.sections.push({
               value: item["段代碼"],
-              text: (item["區代碼"] == '03' ? '中壢區' : '觀音區') + '：【' + item["段代碼"] + '】' + item["段名稱"]
+              text: item["區名稱"] + '：【' + item["段代碼"] + '】' + item["段名稱"]
             });
           });
         } else {

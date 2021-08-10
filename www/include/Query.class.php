@@ -129,14 +129,16 @@ class Query {
 		}
 
 		$prefix = "
-			select m.KCDE_2 as \"段代碼\",
-				m.KCNT as \"段名稱\",
-				SUM(t.AA10) as \"面積\",
-				COUNT(t.AA10) as \"土地標示部筆數\",
-				t.AA46 as \"區代碼\"
+			SELECT m.KCDE_2 AS \"段代碼\",
+				m.KCNT AS \"段名稱\",
+				t.AA46 AS \"區代碼\",
+				q.KNAME AS \"區名稱\",
+				SUM(t.AA10) AS \"面積\",
+				COUNT(t.AA10) AS \"土地標示部筆數\"
 			FROM MOIADM.RKEYN m
-			LEFT JOIN MOICAD.RALID t on m.KCDE_2 = t.AA48 -- 段小段面積計算 (RALID 登記－土地標示部)
-			WHERE m.KCDE_1 = '48' AND m.KCDE_2 NOT LIKE '/*%'
+			LEFT JOIN MOICAD.RALID t ON m.KCDE_2 = t.AA48 -- 段小段面積計算 (RALID 登記－土地標示部)
+			LEFT JOIN MOIADM.RKEYN_ALL q ON q.KCDE_1 = '46' AND q.KCDE_2 = 'H' AND t.AA46 = q.KCDE_3
+			WHERE m.KCDE_1 = '48' AND m.KCDE_2 NOT LIKE '/*%' AND t.AA46 IS NOT NULL
 		";
 		
 		if (is_numeric($cond)) {
@@ -146,7 +148,7 @@ class Query {
 		}
 
 		$postfix = "
-			GROUP BY m.KCDE_2, m.KCNT, t.AA46
+			GROUP BY m.KCDE_2, m.KCNT, t.AA46, q.KNAME
 		";
 
 		$this->db->parse($prefix.$postfix);
