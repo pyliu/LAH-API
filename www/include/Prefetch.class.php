@@ -1530,8 +1530,8 @@ class Prefetch {
 	public function getRegUntakenCase($st, $ed, $expire_duration = 3600) {
         global $site_code; // should from GlobalConstants.inc.php
         if ($this->getCache()->isExpired(self::KEYS['REG_UNTAKEN_CASE'].$st.$ed)) {
-            Logger::getInstance()->info('['.self::KEYS['REG_UNTAKEN_CASE'].'] 快取資料已失效，重新擷取 ... ');
-            if ($this->isDBReachable(self::KEYS['REG_UNTAKEN_CASE'])) {
+            Logger::getInstance()->info('['.self::KEYS['REG_UNTAKEN_CASE'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable(self::KEYS['REG_UNTAKEN_CASE'].$st.$ed)) {
                 $db = $this->getOraDB();
                 $db->parse("
                     select * from MOICAS.CRSMS t
