@@ -1525,7 +1525,7 @@ class Prefetch {
     }
     /**
 	 * 取得結案未歸檔登記案件查詢
-     * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
+     * default cache time is 60 minutes * 60 seconds = 3600 seconds
 	 */
 	public function getRegUntakenCase($st, $ed, $expire_duration = 3600) {
         global $site_code; // should from GlobalConstants.inc.php
