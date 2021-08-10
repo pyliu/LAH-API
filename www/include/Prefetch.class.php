@@ -1527,7 +1527,7 @@ class Prefetch {
 	 * 取得結案未歸檔登記案件查詢
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
-	public function getRegUntakenCase($st, $ed, $expire_duration = 86400) {
+	public function getRegUntakenCase($st, $ed, $expire_duration = 3600) {
         global $site_code; // should from GlobalConstants.inc.php
         if ($this->getCache()->isExpired(self::KEYS['REG_UNTAKEN_CASE'].$st.$ed)) {
             Logger::getInstance()->info('['.self::KEYS['REG_UNTAKEN_CASE'].'] 快取資料已失效，重新擷取 ... ');
