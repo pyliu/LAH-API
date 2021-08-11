@@ -292,9 +292,10 @@ class Prefetch {
      * default cache time is 60 minutes * 60 seconds = 3600 seconds
 	 */
 	public function getAskCase($begin, $end, $expire_duration = 3600) {
-        if ($this->getCache()->isExpired(self::KEYS['ASK']."_${begin}_${end}")) {
-            Logger::getInstance()->info('['.self::KEYS['ASK']."_${begin}_${end}".'] 快取資料已失效，重新擷取 ... ');
-            if ($this->isDBReachable(self::KEYS['ASK']."_${begin}_${end}")) {
+        $cache_key = self::KEYS['ASK']."_${begin}_${end}";
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable($cache_key)) {
                 $db = $this->getOraDB();
                 $db->parse("
                     SELECT * FROM MOICAS.CRSMS t
@@ -316,16 +317,16 @@ class Prefetch {
                 $db->bind(":bv_end", $end);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['ASK']."_${begin}_${end}", $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['ASK']."_${begin}_${end}"."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['ASK']."_${begin}_${end}");
+        return $this->getCache()->get($cache_key);
 	}
     /**
      * 信託註記建物所有部資料快取剩餘時間
@@ -345,8 +346,9 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getTrustRebow($year, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['TRUST_REBOW'].$year)) {
-            Logger::getInstance()->info('['.self::KEYS['TRUST_REBOW'].$year.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['TRUST_REBOW'].$year;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['TRUST_REBOW'])) {
                 $db = $this->getOraDB();
                 $db->parse("
@@ -376,16 +378,16 @@ class Prefetch {
                 $db->bind(":bv_year", $year);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['TRUST_REBOW'].$year, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['TRUST_REBOW'].$year."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['TRUST_REBOW'].$year);
+        return $this->getCache()->get($cache_key);
 	}
     /**
      * 信託註記建物所有部例外資料快取剩餘時間
@@ -405,8 +407,9 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getTrustRebowException($year, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['TRUST_REBOW_EXCEPTION'].$year)) {
-            Logger::getInstance()->info('['.self::KEYS['TRUST_REBOW_EXCEPTION'].$year.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['TRUST_REBOW_EXCEPTION'].$year;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['TRUST_REBOW_EXCEPTION'])) {
                 $db = $this->getOraDB();
                 $db->parse("
@@ -427,16 +430,16 @@ class Prefetch {
                 $db->bind(":bv_year", $year);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['TRUST_REBOW_EXCEPTION'].$year, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['TRUST_REBOW_EXCEPTION'].$year."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['TRUST_REBOW_EXCEPTION'].$year);
+        return $this->getCache()->get($cache_key);
 	}
     /**
      * 信託註記土地所有部資料快取剩餘時間
@@ -456,8 +459,9 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getTrustRblow($year, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['TRUST_RBLOW'].$year)) {
-            Logger::getInstance()->info('['.self::KEYS['TRUST_RBLOW'].$year.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['TRUST_RBLOW'].$year;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['TRUST_RBLOW'])) {
                 $db = $this->getOraDB();
                 $db->parse("
@@ -487,16 +491,16 @@ class Prefetch {
                 $db->bind(":bv_year", $year);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['TRUST_RBLOW'].$year, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['TRUST_RBLOW'].$year."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['TRUST_RBLOW'].$year);
+        return $this->getCache()->get($cache_key);
 	}
     /**
      * 信託註記土地所有部例外資料快取剩餘時間
@@ -516,8 +520,9 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getTrustRblowException($year, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['TRUST_RBLOW_EXCEPTION'].$year)) {
-            Logger::getInstance()->info('['.self::KEYS['TRUST_RBLOW_EXCEPTION'].$year.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['TRUST_RBLOW_EXCEPTION'].$year;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['TRUST_RBLOW_EXCEPTION'])) {
                 $db = $this->getOraDB();
                 $db->parse("
@@ -535,16 +540,16 @@ class Prefetch {
                 $db->bind(":bv_year", $year);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['TRUST_RBLOW_EXCEPTION'].$year, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['TRUST_RBLOW_EXCEPTION'].$year."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['TRUST_RBLOW_EXCEPTION'].$year);
+        return $this->getCache()->get($cache_key);
 	}
     /**
      * 非專業代理人區間案件快取剩餘時間
@@ -564,8 +569,9 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getNonScrivenerCase($st, $ed, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['NON_SCRIVENER'].$st.$ed)) {
-            Logger::getInstance()->info('['.self::KEYS['NON_SCRIVENER'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['NON_SCRIVENER'].$st.$ed;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['NON_SCRIVENER'])) {
                 $db = $this->getOraDB();
                 $db->parse("
@@ -604,16 +610,16 @@ class Prefetch {
                 $db->bind(":bv_ed", $ed);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['NON_SCRIVENER'].$st.$ed, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['NON_SCRIVENER'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['NON_SCRIVENER'].$st.$ed);
+        return $this->getCache()->get($cache_key);
     }
     /**
      * 非專業代理人區間登記案件快取剩餘時間
@@ -634,8 +640,9 @@ class Prefetch {
 	 */
 	public function getNonScrivenerRegCase($st, $ed, $not_inc_ids = array(), $expire_duration = 86400) {
         $md5_hash = md5($st.$ed.implode('', $not_inc_ids));
-        if ($this->getCache()->isExpired(self::KEYS['NON_SCRIVENER_REG'].$md5_hash)) {
-            Logger::getInstance()->info('['.self::KEYS['NON_SCRIVENER_REG'].$md5_hash.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['NON_SCRIVENER_REG'].$md5_hash;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['NON_SCRIVENER_REG'])) {
                 $db = $this->getOraDB();
                 $IN_CONDITION = "";
@@ -696,16 +703,16 @@ class Prefetch {
                 $db->bind(":bv_ed", $ed);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['NON_SCRIVENER_REG'].$md5_hash, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['NON_SCRIVENER_REG'].$md5_hash."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['NON_SCRIVENER_REG'].$md5_hash);
+        return $this->getCache()->get($cache_key);
     }
     /**
      * 非專業代理人區間測量案件快取剩餘時間
@@ -726,8 +733,9 @@ class Prefetch {
 	 */
 	public function getNonScrivenerSurCase($st, $ed, $not_inc_ids = array(), $expire_duration = 86400) {
         $md5_hash = md5($st.$ed.implode('', $not_inc_ids));
-        if ($this->getCache()->isExpired(self::KEYS['NON_SCRIVENER_SUR'].$md5_hash)) {
-            Logger::getInstance()->info('['.self::KEYS['NON_SCRIVENER_SUR'].$md5_hash.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['NON_SCRIVENER_SUR'].$md5_hash;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['NON_SCRIVENER_SUR'])) {
                 $db = $this->getOraDB();
                 $IN_CONDITION = "";
@@ -785,16 +793,16 @@ class Prefetch {
                 $db->bind(":bv_ed", $ed);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['NON_SCRIVENER_SUR'].$md5_hash, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['NON_SCRIVENER_SUR'].$md5_hash."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['NON_SCRIVENER_SUR'].$md5_hash);
+        return $this->getCache()->get($cache_key);
     }
     /**
      * 外國人案件快取剩餘時間
@@ -920,8 +928,9 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getTrustRegQuery($st, $ed, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['TRUST_REG_QUERY'].$st.$ed)) {
-            Logger::getInstance()->info('['.self::KEYS['TRUST_REG_QUERY'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['TRUST_REG_QUERY'].$st.$ed;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['TRUST_REG_QUERY'])) {
                 $db = $this->getOraDB();
                 $db->parse("
@@ -943,16 +952,16 @@ class Prefetch {
                 $db->bind(":bv_ed", $ed);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['TRUST_REG_QUERY'].$st.$ed, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['TRUST_REG_QUERY'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['TRUST_REG_QUERY'].$st.$ed);
+        return $this->getCache()->get($cache_key);
     }
     /**
      * 土地註記塗銷查詢快取剩餘時間
@@ -972,8 +981,9 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getTrustObliterateLand($st, $ed, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed)) {
-            Logger::getInstance()->info('['.self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['TRUST_OBLITERATE_LAND'])) {
                 $db = $this->getOraDB();
                 $db->parse("
@@ -1027,16 +1037,16 @@ class Prefetch {
                 $db->bind(":bv_ed", $ed);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['TRUST_OBLITERATE_LAND'].$st.$ed);
+        return $this->getCache()->get($cache_key);
     }
     /**
      * 建物註記塗銷查詢快取剩餘時間
@@ -1056,8 +1066,9 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getTrustObliterateBuilding($st, $ed, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed)) {
-            Logger::getInstance()->info('['.self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['TRUST_OBLITERATE_BUILD'])) {
                 $db = $this->getOraDB();
                 $db->parse("
@@ -1110,16 +1121,16 @@ class Prefetch {
                 $db->bind(":bv_ed", $ed);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['TRUST_OBLITERATE_BUILD'].$st.$ed);
+        return $this->getCache()->get($cache_key);
     }
     /**
      * 375租約異動[土地標示部]查詢快取剩餘時間
@@ -1139,8 +1150,9 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getLand375Change($st, $ed, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['375_LAND_CHANGE'].$st.$ed)) {
-            Logger::getInstance()->info('['.self::KEYS['375_LAND_CHANGE'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['375_LAND_CHANGE'].$st.$ed;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['375_LAND_CHANGE'])) {
                 $db = $this->getOraDB();
                 $db->parse("
@@ -1176,16 +1188,16 @@ class Prefetch {
                 $db->bind(":bv_ed", $ed);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['375_LAND_CHANGE'].$st.$ed, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['375_LAND_CHANGE'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['375_LAND_CHANGE'].$st.$ed);
+        return $this->getCache()->get($cache_key);
     }
     /**
      * 375租約異動[土地所有權部]查詢快取剩餘時間
@@ -1205,8 +1217,9 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getOwner375Change($st, $ed, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['375_OWNER_CHANGE'].$st.$ed)) {
-            Logger::getInstance()->info('['.self::KEYS['375_OWNER_CHANGE'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['375_OWNER_CHANGE'].$st.$ed;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['375_OWNER_CHANGE'])) {
                 $db = $this->getOraDB();
                 $db->parse("
@@ -1241,16 +1254,16 @@ class Prefetch {
                 $db->bind(":bv_ed", $ed);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['375_OWNER_CHANGE'].$st.$ed, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['375_OWNER_CHANGE'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['375_OWNER_CHANGE'].$st.$ed);
+        return $this->getCache()->get($cache_key);
     }
 
     
@@ -1272,8 +1285,9 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getNotDoneChange($st, $ed, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['NOT_DONE_CHANGE'].$st.$ed)) {
-            Logger::getInstance()->info('['.self::KEYS['NOT_DONE_CHANGE'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['NOT_DONE_CHANGE'].$st.$ed;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['NOT_DONE_CHANGE'])) {
                 $db = $this->getOraDB();
                 $db->parse("
@@ -1321,16 +1335,16 @@ class Prefetch {
                 $db->bind(":bv_ed", $ed);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['NOT_DONE_CHANGE'].$st.$ed, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['NOT_DONE_CHANGE'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['NOT_DONE_CHANGE'].$st.$ed);
+        return $this->getCache()->get($cache_key);
     }
 
     /**
@@ -1351,8 +1365,9 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getLandRefChange($st, $ed, $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['LAND_REF_CHANGE'].$st.$ed)) {
-            Logger::getInstance()->info('['.self::KEYS['LAND_REF_CHANGE'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
+        $cache_key = self::KEYS['LAND_REF_CHANGE'].$st.$ed;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['LAND_REF_CHANGE'])) {
                 $db = $this->getOraDB();
                 $db->parse("
@@ -1401,16 +1416,16 @@ class Prefetch {
                 $db->bind(":bv_ed", $ed);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['LAND_REF_CHANGE'].$st.$ed, $result, $expire_duration);
+                $this->getCache()->set($cache_key, $result, $expire_duration);
 
-                Logger::getInstance()->info("[".self::KEYS['LAND_REF_CHANGE'].$st.$ed."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
 
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['LAND_REF_CHANGE'].$st.$ed);
+        return $this->getCache()->get($cache_key);
     }
     
     /**
