@@ -451,7 +451,7 @@ class StatsSQLite {
             $one_day_ago = date("YmdHis", time() - 24 * 3600);
             $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
             $ret = $stm->execute();
-            Logger::getInstance()->error(__METHOD__.": $db_path 移除一天前資料".($ret ? "成功" : "失敗")."【".$one_day_ago.", ".$sc_db->lastErrorMsg()."】");
+            Logger::getInstance()->info(__METHOD__.": $db_path 移除一天前資料".($ret ? "成功" : "失敗")."【".$one_day_ago.", ".$sc_db->lastErrorMsg()."】");
             return $ret;
         }
         
