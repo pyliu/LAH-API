@@ -1528,10 +1528,10 @@ class Prefetch {
      * default cache time is 60 minutes * 60 seconds = 3600 seconds
 	 */
 	public function getRegUntakenCase($st, $ed, $expire_duration = 3600) {
-        global $site_code; // should from GlobalConstants.inc.php
-        if ($this->getCache()->isExpired(self::KEYS['REG_UNTAKEN_CASE'].$st.$ed)) {
-            Logger::getInstance()->info('['.self::KEYS['REG_UNTAKEN_CASE'].$st.$ed.'] 快取資料已失效，重新擷取 ... ');
-            if ($this->isDBReachable(self::KEYS['REG_UNTAKEN_CASE'].$st.$ed)) {
+        $cache_key = self::KEYS['REG_UNTAKEN_CASE'].$st.$ed;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable($cache_key)) {
                 $db = $this->getOraDB();
                 $db->parse("
                     select * from MOICAS.CRSMS t
@@ -1547,14 +1547,14 @@ class Prefetch {
                 $db->bind(":bv_ed", $ed);
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['REG_UNTAKEN_CASE'], $result, $expire_duration);
-                Logger::getInstance()->info("[".self::KEYS['REG_UNTAKEN_CASE']."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                $this->getCache()->set($cache_key, $result, $expire_duration);
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
                 return $result;
             } else {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['REG_UNTAKEN_CASE'].$st.$ed);
+        return $this->getCache()->get($cache_key);
     }
 
 }
