@@ -265,7 +265,10 @@ if (Vue) {
                             // a 必須等於 b
                             return 0
                         }).map((postfix) => {
-                            return postfix.trim()
+                            const integer = parseInt(postfix.trim())
+                            return integer && integer < 255 && integer > 0 ? integer : undefined
+                        }).filter((item) => {
+                            return item !== undefined
                         })
                         this.carousel = [ ...list ]
                     }
