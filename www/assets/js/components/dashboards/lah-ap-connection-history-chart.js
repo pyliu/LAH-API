@@ -248,7 +248,6 @@ if (Vue) {
                 console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得系統設定回傳狀態碼有問題【${res.data.status}】`);
                 if (res.data.status === XHR_STATUS_CODE.SUCCESS_NORMAL) {
                     const configs = res.data.raw
-                    console.log(configs)
                     this.ip = configs.WEBAP_IP || '220.1.35.123'
                     this.site = configs.SITE || 'HB'
                     // HB ap list
