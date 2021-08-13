@@ -248,13 +248,23 @@ if (Vue) {
                 console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得系統設定回傳狀態碼有問題【${res.data.status}】`);
                 if (res.data.status === XHR_STATUS_CODE.SUCCESS_NORMAL) {
                     const configs = res.data.raw
+                    // 起始顯示之AP
                     this.ip = configs.WEBAP_IP || '220.1.35.123'
                     this.site = configs.SITE || 'HB'
-                    // HB ap list
+                    // default is HB ap list
                     this.carousel = ['31', '32', '33', '34', '35', '70', '123']
                     if (configs.WEBAP_POSTFIXES) {
                         // expect ip postfix string => "205, 206, 207, 156, 118, 60, 161"
-                        const list = configs.WEBAP_POSTFIXES.split(',').map((postfix) => {
+                        const list = configs.WEBAP_POSTFIXES.split(',').sort((a,b) => {
+                            if (parseInt(a) < parseInt(b)) {
+                                return 1
+                            }
+                            if (parseInt(a) > parseInt(b)) {
+                                return -1
+                            }
+                            // a 必須等於 b
+                            return 0
+                        }).map((postfix) => {
                             return postfix.trim()
                         })
                         this.carousel = [ ...list ]
