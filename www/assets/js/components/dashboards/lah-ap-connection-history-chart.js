@@ -31,18 +31,6 @@ if (Vue) {
             </b-card>
         </lah-transition>`,
         props: {
-            ip: {
-                type: String,
-                default: CONFIG.AP_SVR || '220.1.34.161'
-            },
-            site: {
-                type: String,
-                default: 'HA'
-            },
-            carousel: {
-                type: Array,
-                default: ['205', '206', '207', '156', '118', '60', '161']
-            },
             type: {
                 type: String,
                 default: 'bar'
@@ -66,7 +54,10 @@ if (Vue) {
             last_update_time: '',
             reload_timer: null,
             refresh_ip_timer: null,
-            type_carousel: ['bar', 'line', 'pie', 'polarArea', 'doughnut', 'radar']
+            type_carousel: ['bar', 'line', 'pie', 'polarArea', 'doughnut', 'radar'],
+            ip: undefined,
+            site: undefined,
+            carousel: undefined
         }),
         watch: {
             disableOfficeHours(val) { if (val) this.reload() },
@@ -250,8 +241,38 @@ if (Vue) {
             },
         },
         created() {
-            this.reload(true);
-            this.addToStoreParams('XAP_CONN_TOP_SITES', []);
+            // get settings from config sqlite db
+            this.$http.post(CONFIG.API.JSON.QUERY, {
+                type: "configs"
+            }).then(res => {
+                console.assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, `取得系統設定回傳狀態碼有問題【${res.data.status}】`);
+                if (res.data.status === XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                    const configs = res.data.raw
+                    console.log(configs)
+                    this.ip = configs.WEBAP_IP || '220.1.35.123'
+                    this.site = configs.SITE || 'HB'
+                    // HB ap list
+                    this.carousel = ['31', '32', '33', '34', '35', '70', '123']
+                    if (configs.WEBAP_POSTFIXES) {
+                        // expect ip postfix string => "205, 206, 207, 156, 118, 60, 161"
+                        const list = configs.WEBAP_POSTFIXES.split(',').map((postfix) => {
+                            return postfix.trim()
+                        })
+                        this.carousel = [ ...list ]
+                    }
+                } else {
+                    this.alert({
+                        title: `取得系統設定失敗`,
+                        message: `取得系統設定狀態碼有問題【${res.data.status}】`,
+                        variant: "warning"
+                    });
+                }
+            }).catch(err => {
+                this.error = err;
+            }).finally(() => {
+                this.reload(true);
+                this.addToStoreParams('XAP_CONN_TOP_SITES', []);
+            });
         }
     });
 } else {
