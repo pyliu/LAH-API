@@ -275,6 +275,8 @@ if (Vue) {
                             return item !== undefined
                         })
                         this.carousel = [ ...list ]
+                    } else {
+                        console.warning(`No configs.WEBAP_POSTFIXES found, use HB default list!`)
                     }
                 } else {
                     this.alert({
