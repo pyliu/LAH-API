@@ -266,7 +266,11 @@ if (Vue) {
                             return 0
                         }).map((postfix) => {
                             const integer = parseInt(postfix.trim())
-                            return integer && integer < 255 && integer > 0 ? integer : undefined
+                            if (integer && integer < 255 && integer > 0) {
+                                return integer
+                            }
+                            console.warning(`The webap ip postfix from config(WEBAP_POSTFIXES) format is wrong => "${postfix}"`)
+                            return undefined
                         }).filter((item) => {
                             return item !== undefined
                         })
