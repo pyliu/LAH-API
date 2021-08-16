@@ -269,14 +269,14 @@ if (Vue) {
                             if (integer && integer < 255 && integer > 0) {
                                 return integer
                             }
-                            console.warning(`The webap ip postfix from config(WEBAP_POSTFIXES) format is wrong => "${postfix}"`)
+                            console.warn(`The webap ip postfix from config(WEBAP_POSTFIXES) format is wrong => "${postfix}"`)
                             return undefined
                         }).filter((item) => {
                             return item !== undefined
                         })
                         this.carousel = [ ...list ]
                     } else {
-                        console.warning(`No configs.WEBAP_POSTFIXES found, use HB default list!`)
+                        console.warn(`No configs.WEBAP_POSTFIXES found, use HB default list!`)
                     }
                 } else {
                     this.alert({
