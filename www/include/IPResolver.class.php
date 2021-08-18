@@ -1,14 +1,15 @@
 <?php
 require_once('init.php');
 require_once('SQLiteUser.class.php');
+require_once('SQLiteDBFactory.class.php');
 
-abstract class IPResolver {
+class IPResolver {
     private static $server_map = array(
         '220.1.34.43' => 'G08儲存',
         '220.1.34.3' => 'AD主機',
         '220.1.34.212' => 'PS謄本主機',
         '220.1.34.211' => '建物平面圖同步主機',
-        '220.1.35.214' => 'PS權狀主機',
+        '220.1.34.214' => 'PS權狀主機',
         '220.1.34.204' => '次AD主機',
         '220.1.34.205' => 'AP1登記(1)',
         '220.1.34.206' => 'AP2登記(2)',
@@ -43,9 +44,57 @@ abstract class IPResolver {
         '220.2.33.43' => '觀音審查'
     );
 
-    function __construct() { }
+    private $db;
 
-    function __destruct() { }
+    
+    private function bindParams(&$stm, &$row) {
+        if ($stm === false) {
+            Logger::getInstance()->error(__METHOD__.": bindUserParams because of \$stm is false.");
+            return false;
+        }
+
+        $stm->bindParam(':ip', $row['ip']);
+        $stm->bindParam(':added_type', $row['added_type']);
+        $stm->bindParam(':entry_type', $row['entry_type']);
+        $stm->bindParam(':entry_desc', $row['entry_desc']);
+        $stm->bindParam(':entry_id' , $row['entry_id']);
+        $stm->bindParam(':timestamp', $row['timestamp']);
+        $stm->bindParam(':note', $row['note']);
+
+        return true;
+    }
+
+    private function prepareArray(&$stmt) {
+        $result = $stmt->execute();
+        $return = [];
+        while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            $return[] = $row;
+        }
+        return $return;
+    }
+
+    function __construct() {
+        $this->db = new SQLite3(SQLiteDBFactory::getIPResolverDB());
+        $this->db->exec("PRAGMA cache_size = 100000");
+        $this->db->exec("PRAGMA temp_store = MEMORY");
+        $this->db->exec("BEGIN TRANSACTION");
+    }
+
+    function __destruct() {
+        $this->db->exec("END TRANSACTION");
+        $this->db->close();
+    }
+
+    public function addIpEntry($post) {
+        $stm = $this->db->prepare("
+            REPLACE INTO IPResolver ('ip', 'added_type', 'entry_type', 'entry_desc', 'entry_id', 'timestamp', 'note')
+            VALUES (:ip, :added_type, :entry_type, :entry_desc, :entry_id, :timestamp, :note)
+        ");
+        if ($this->bindParams($stm, $row)) {
+            return $stm->execute() === FALSE ? false : true;
+        }
+        return false;
+    }
 
     public static function resolve($ip) {
         if (filter_var($ip, FILTER_VALIDATE_IP)) {

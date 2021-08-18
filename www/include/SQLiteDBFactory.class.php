@@ -4,6 +4,25 @@ require_once('DynamicSQLite.class.php');
 
 class SQLiteDBFactory {
 
+    public static function getIPResolverDB() {
+        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."IPResolver.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "IPResolver" (
+                "ip" TEXT NOT NULL,
+                "added_type" TEXT NOT NULL DEFAULT \'DYNAMIC\',
+                "entry_type" TEXT NOT NULL DEFAULT \'USER\',
+                "entry_desc" TEXT NOT NULL,
+                "entry_id" TEXT,
+                "timestamp" NUMERIC NOT NULL,
+                "note" TEXT,
+                PRIMARY KEY("ip", "added_type", "entry_type")
+            )
+        ');
+        return $path;
+    }
+
     public static function getRKEYNALLDB() {
         $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."RKEYN_ALL.db";
         $sqlite = new DynamicSQLite($path);
