@@ -90,7 +90,7 @@ class IPResolver {
             REPLACE INTO IPResolver ('ip', 'added_type', 'entry_type', 'entry_desc', 'entry_id', 'timestamp', 'note')
             VALUES (:ip, :added_type, :entry_type, :entry_desc, :entry_id, :timestamp, :note)
         ");
-        if ($this->bindParams($stm, $row)) {
+        if ($this->bindParams($stm, $post)) {
             return $stm->execute() === FALSE ? false : true;
         }
         return false;

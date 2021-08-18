@@ -7,6 +7,7 @@ $system = System::getInstance();
 
 switch ($_POST["type"]) {
     case "add_ip_entry":
+        // Logger::getInstance()->info(print_r($_POST, true));
         $ipr = new IPResolver();
         $data = array(
             'ip' => $_POST['ip'],
