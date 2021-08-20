@@ -31,8 +31,7 @@ try {
     
     echo '<br/><br/>';
 
-    // $sysauth1 = new SQLiteSYSAUTH1();
-    // $sysauth1->importFromL3HWEBDB();
+    echo print_r(System::getInstance()->getWebAPPostfix(), true);
     
 }
 catch(Exception $e)
