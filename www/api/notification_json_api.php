@@ -7,7 +7,8 @@ $system = System::getInstance();
 
 switch ($_POST["type"]) {
     case "add_notification":
-        // Logger::getInstance()->info(print_r($_POST, true));
+        Logger::getInstance()->info(print_r($_POST, true));
+        echoJSONResponse('NOT IMPLEMENTED');
         // $ipr = new IPResolver();
         // $data = array(
         //     'ip' => $_POST['ip'],
@@ -24,8 +25,12 @@ switch ($_POST["type"]) {
         // echoJSONResponse($message, $status_code);
         break;
     case "upd_notificatione":
+        Logger::getInstance()->info(print_r($_POST, true));
+        echoJSONResponse('NOT IMPLEMENTED');
         break;
     case "remove_notification":
+        Logger::getInstance()->info(print_r($_POST, true));
+        echoJSONResponse('NOT IMPLEMENTED');
         break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");

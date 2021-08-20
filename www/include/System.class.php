@@ -564,6 +564,10 @@ class System {
         return strtoupper($this->get('SITE'));
     }
 
+    public function getWSDBPath() {
+        return strtoupper($this->get('WS_DB_PATH'));
+    }
+
     public function getConfigs() {
         if($stmt = $this->sqlite3->prepare('SELECT * FROM config WHERE 1=1')) {
             $result = $stmt->execute();
