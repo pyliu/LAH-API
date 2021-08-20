@@ -562,7 +562,7 @@ class System {
 
     public function getWebAPPostfix() {
         $str = $this->get('WEBAP_POSTFIXES') ?? '205,206,207,62,156,118,161,60';
-        return explode(',', preg_replace("/\s+/", '', $str));
+        return explode(',', preg_replace("/(\s+|[^0-9,])/", '', $str));
     }
 
     public function getSiteCode() {
