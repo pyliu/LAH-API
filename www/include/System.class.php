@@ -560,6 +560,11 @@ class System {
         return $this->get('WEBAP_IP');
     }
 
+    public function getWebAPPostfix() {
+        $str = $this->get('WEBAP_POSTFIXES') ?? '205,206,207,62,156,118,161,60';
+        return explode(',', )
+    }
+
     public function getSiteCode() {
         return strtoupper($this->get('SITE'));
     }
