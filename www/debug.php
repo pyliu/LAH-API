@@ -31,7 +31,7 @@ try {
     
     echo '<br/><br/>';
 
-    echo print_r(System::getInstance()->getWebAPPostfix(), true);
+    echo date('Y-m-d H:i:s');
     
 }
 catch(Exception $e)

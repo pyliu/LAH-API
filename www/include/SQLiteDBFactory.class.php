@@ -3,6 +3,26 @@ require_once('init.php');
 require_once('DynamicSQLite.class.php');
 
 class SQLiteDBFactory {
+    
+    public static function getMessageDB($path) {
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "message" (
+                "id"	INTEGER,
+                "title"	TEXT,
+                "content"	TEXT NOT NULL,
+                "priority"	INTEGER NOT NULL DEFAULT 3,
+                "create_datetime"	TEXT NOT NULL,
+                "expire_datetime"	TEXT,
+                "sender"	TEXT NOT NULL,
+                "from_ip"	TEXT,
+                "flag"	INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        return $path;
+    }
 
     public static function getIPResolverDB() {
         $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."IPResolver.db";

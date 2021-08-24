@@ -8,21 +8,20 @@ $system = System::getInstance();
 switch ($_POST["type"]) {
     case "add_notification":
         Logger::getInstance()->info(print_r($_POST, true));
-        echoJSONResponse('NOT IMPLEMENTED');
-        // $ipr = new IPResolver();
-        // $data = array(
-        //     'ip' => $_POST['ip'],
-        //     'added_type' => $_POST['added_type'] ?? 'DYNAMIC',
-        //     'entry_type' => $_POST['entry_type'] ?? 'USER',
-        //     'entry_desc' => $_POST['entry_desc'] ?? '',
-        //     'entry_id' => $_POST['entry_id'] ?? '',
-        //     'timestamp' => time(),
-        //     'note' => $_POST['note'] ?? ''
-        // );
-        // $result = $ipr->addIpEntry($data);
-        // $message = $result ? '完成 '.$data['ip'].' ('.$data['added_type'].', '.$data['entry_type'].') 更新' : '更新 '.$data['ip'].' 資料失敗';
-		// $status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
-        // echoJSONResponse($message, $status_code);
+        $channel = $_POST['channel'] ?? $_POST['sender'];
+        $title = trim($_POST['title']);
+        $notify = new Notification();
+        $result = $notify->addMessage($channel, array(
+            'title' => $title,
+            'content' => trim($_POST['content']),
+            'priority' => intval($_POST['priority']),
+            'expire_datetime' => $_POST['expire_datetime'],
+            'sender' => $_POST['sender'],
+            'from_ip' => $_POST['from_ip']
+        ));
+        $message = $result ? "新增 $channel 頻道訊息成功 ($title)" : "新增 $channel 頻道訊息失敗 ($title)";
+        $status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+        echoJSONResponse($message, $status_code);
         break;
     case "upd_notificatione":
         Logger::getInstance()->info(print_r($_POST, true));
