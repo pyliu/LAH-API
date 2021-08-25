@@ -61,6 +61,9 @@ class Notification {
             Logger::getInstance()->error(__METHOD__.': required param is missing. ('.$channel.')');
             return false;
         }
+        if (in_array($channel, array('all', 'hr', 'acc', 'adm', 'reg', 'sur', 'val', 'inf', 'supervisor'))) {
+            $channel = $channel === 'all' ? 'announcement' : 'announcement_'.$channel;
+        }
         if ($this->prepareDB($channel)) {
             // TODO: add message
             $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
@@ -68,7 +71,7 @@ class Notification {
                 INSERT INTO message ('title', 'content', 'priority', 'create_datetime', 'expire_datetime', 'sender', 'from_ip', 'flag')
                 VALUES (:bv_title, :bv_content, :bv_priority, :bv_create_datetime, :bv_expire_datetime, :bv_sender, :bv_from_ip, :bv_flag)
             ");
-            if ($this->bindParams($stm, $row)) {
+            if ($this->bindParams($stm, $payload)) {
                 return $stm->execute() === FALSE ? false : true;
             }
             return false;
