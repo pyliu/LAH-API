@@ -97,9 +97,10 @@ class IPResolver {
     }
     
     public function getIPEntries($threadhold = 31556926) {
-        $month_ago = time() - 2629743;
-        $year_ago = time() - 31556926;
-        $ondemand = time() - $threadhold;
+        $now = time();
+        $month_ago = $now - 2629743;
+        $year_ago = $now - 31556926;
+        $ondemand = $now - $threadhold;
         if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE timestamp > :bv_ondemand OR added_type <> 'DYNAMIC'")) {
             $stmt->bindParam(':bv_ondemand', $ondemand);
             return $this->prepareArray($stmt);
