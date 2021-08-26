@@ -97,6 +97,7 @@ class IPResolver {
     }
     
     public function getIPEntries($threadhold = 31556926) {
+        // default get entry within a year
         $now = time();
         $month_ago = $now - 2629743;
         $year_ago = $now - 31556926;
