@@ -2,13 +2,13 @@
 require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."IPResolver.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteUser.class.php");
 
 $system = System::getInstance();
 $ipr = new IPResolver();
 
 switch ($_POST["type"]) {
     case "add_ip_entry":
-        // Logger::getInstance()->info(print_r($_POST, true));
         $data = array(
             'ip' => $_POST['ip'],
             'added_type' => $_POST['added_type'] ?? 'DYNAMIC',
@@ -19,6 +19,13 @@ switch ($_POST["type"]) {
             'note' => $_POST['note'] ?? ''
         );
         $result = $ipr->addIpEntry($data);
+
+        if ($result) {
+            // also update to user table in dimension.db
+            $user = new SQLiteUser();
+            $user->autoImportUser($data);
+        }
+
         $message = $result ? '完成 '.$data['ip'].' ('.$data['added_type'].', '.$data['entry_type'].') 更新' : '更新 '.$data['ip'].' 資料失敗';
 		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
         echoJSONResponse($message, $status_code);

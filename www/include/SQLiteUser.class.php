@@ -407,6 +407,70 @@ class SQLiteUser {
         return false;
     }
 
+    public function autoImportUser($data) {
+        if (empty($data['entry_id'])) {
+            Logger::getInstance()->warning(__METHOD__.': id(entry_id) is a required param, it\'s empty.');
+            return false;
+        }
+        $unit = '未分配';
+        if (!empty($data['note'])) {
+            $key = explode(' ', $data['note'])[1];
+            switch ($key) {
+                case 'inf':
+                    $unit = '資訊課';
+                    break;
+                case 'reg':
+                    $unit = '登記課';
+                    break;
+                case 'adm':
+                    $unit = '行政課';
+                    break;
+                case 'sur':
+                    $unit = '測量課';
+                    break;
+                case 'val':
+                    $unit = '地價課';
+                    break;
+                case 'acc':
+                    $unit = '會計室';
+                    break;
+                case 'hr':
+                    $unit = '人事室';
+                    break;
+                case 'supervisor':
+                    $unit = '主任室';
+                    break;
+            }
+        }
+        Logger::getInstance()->info(__METHOD__.': 新增/更新使用者資訊 ('.$data['entry_id'].', '.$data['entry_desc'].', '.$unit.', '.$data['ip'].')');
+        if ($this->exists($data['entry_id'])) {
+            // update
+            if($stmt = $this->db->prepare("
+                UPDATE user SET
+                    name = :name,
+                    unit = :unit,
+                    ip = :ip,
+                    offboard_date = :offboard_date
+                WHERE id = :id
+            ")) {
+                $stmt->bindParam(':id', $data['entry_id']);
+                $stmt->bindParam(':name', $data['entry_desc']);
+                $stmt->bindParam(':unit', $unit);
+                $stmt->bindParam(':ip', $data['ip']);
+                $stmt->bindValue(':offboard_date', '');
+                return $stmt->execute() === FALSE ? false : true;
+            }
+        } else {
+            // insert
+            return $this->addUser(array(
+                'id' => $data['entry_id'],
+                'name' => $data['entry_desc'],
+                'unit' => $unit,
+                'ip' => $data['ip']
+            ));
+        }
+    }
+
     public function onboardUser($id) {
         
         if (empty($id)) {
