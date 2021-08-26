@@ -23,7 +23,9 @@ switch ($_POST["type"]) {
         if ($result) {
             // also update to user table in dimension.db
             $user = new SQLiteUser();
-            $user->autoImportUser($data);
+            if (!$user->autoImportUser($data)) {
+                Logger::getInstance()->warning('自動匯入使用者資訊失敗。');
+            }
         }
 
         $message = $result ? '完成 '.$data['ip'].' ('.$data['added_type'].', '.$data['entry_type'].') 更新' : '更新 '.$data['ip'].' 資料失敗';
