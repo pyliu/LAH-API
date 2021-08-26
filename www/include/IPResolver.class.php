@@ -95,6 +95,19 @@ class IPResolver {
         }
         return false;
     }
+    
+    public function getIPEntries($threadhold = 31556926) {
+        $month_ago = time() - 2629743;
+        $year_ago = time() - 31556926;
+        $ondemand = time() - $threadhold;
+        if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE timestamp > :bv_ondemand OR added_type <> 'DYNAMIC'")) {
+            $stmt->bindParam(':bv_ondemand', $ondemand);
+            return $this->prepareArray($stmt);
+        } else {
+            Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM IPResolver WHERE 1 = 1」SQL描述。");
+        }
+        return array();
+    }
 
     public static function resolve($ip) {
         if (filter_var($ip, FILTER_VALIDATE_IP)) {
