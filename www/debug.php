@@ -16,6 +16,7 @@ require_once("./include/Ping.class.php");
 require_once("./include/BKHXWEB.class.php");
 require_once("./include/Checklist.class.php");
 require_once("./include/SQLiteSYSAUTH1.class.php");
+require_once("./include/IPResolver.class.php");
 
 try {
     // $cl = new Checklist();
@@ -31,7 +32,8 @@ try {
     
     echo '<br/><br/>';
 
-    echo date('Y-m-d H:i:s');
+    echo IPResolver::resolve('192.168.13.96');
+    echo IPResolver::resolve('192.168.56.1');
     
 }
 catch(Exception $e)
