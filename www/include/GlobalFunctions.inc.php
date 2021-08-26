@@ -4,6 +4,13 @@ require_once('System.class.php');
 require_once("Ping.class.php");
 require_once("OraDB.class.php");
 
+// e.g. startsWith("abcde", "a")
+function startsWith($string, $startString)
+{
+    $len = strlen($startString);
+    return (substr($string, 0, $len) === $startString);
+}
+
 // Function to check response time
 function pingDomain($domain, $port = 0, $timeout = 1){
     if (System::getInstance()->isMockMode()) {
