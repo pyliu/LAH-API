@@ -20,7 +20,7 @@ switch ($_POST["type"]) {
         );
         $result = $ipr->addIpEntry($data);
 
-        if ($result) {
+        if ($result && $data['entry_type'] === 'USER' && startsWith($data['entry_id'], $system->getSiteCode())) {
             // also update to user table in dimension.db
             $user = new SQLiteUser();
             if (!$user->autoImportUser($data)) {
