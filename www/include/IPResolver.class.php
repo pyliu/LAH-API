@@ -105,7 +105,7 @@ class IPResolver {
             $stmt->bindParam(':bv_ondemand', $ondemand);
             return $this->prepareArray($stmt);
         } else {
-            Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM IPResolver WHERE 1 = 1」SQL描述。");
+            Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM IPResolver WHERE timestamp > $ondemand OR added_type <> 'DYNAMIC'」SQL描述。");
         }
         return array();
     }
