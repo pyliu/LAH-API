@@ -127,6 +127,29 @@ class IPResolver {
         return array();
     }
 
+    public static function packUserData($data) {
+        $unit = IPResolver::parseUnit($data['note']);
+        Logger::getInstance()->info(__METHOD__.': 打包找到的資料 ('.$data['entry_id'].', '.$data['entry_desc'].', '.$unit.', '.$data['ip'].')');
+        return array(
+            'id' => $data['entry_id'],
+            'name' => $data['entry_desc'],
+            'unit' => $unit,
+            'ip' => $data['ip'],
+            'sex' => 0,
+            'addr' => '',
+            'tel' => '',
+            'ext' => '',
+            'cell' => '',
+            'title' => '',
+            'work' => '',
+            'exam' => '',
+            'education' => '',
+            'onboard_date' => '110/06/01',
+            'offboard_date' => '',
+            'birthday' => '066/05/23'
+        );
+    }
+
     public static function parseUnit($note) {
         $unit = '未分配';
         if (!empty($note)) {

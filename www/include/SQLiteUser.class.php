@@ -380,24 +380,7 @@ class SQLiteUser {
         } else {
             Logger::getInstance()->info(__METHOD__.': 新增使用者資訊 ('.$data['entry_id'].', '.$data['entry_desc'].', '.$unit.', '.$data['ip'].')');
             // insert
-            return $this->addUser(array(
-                'id' => $data['entry_id'],
-                'name' => $data['entry_desc'],
-                'unit' => $unit,
-                'ip' => $data['ip'],
-                'sex' => 0,
-                'addr' => '',
-                'tel' => '',
-                'ext' => '',
-                'cell' => '',
-                'title' => '',
-                'work' => '',
-                'exam' => '',
-                'education' => '',
-                'onboard_date' => '',
-                'offboard_date' => '',
-                'birthday' => ''
-            ));
+            return $this->addUser(IPResolver::packUserData($data));
         }
     }
 
@@ -524,31 +507,13 @@ class SQLiteUser {
             $result = $this->prepareArray($stmt);
             if(empty($result)) {
                 // To find IPResolver table record by ip
+                Logger::getInstance()->info(__METHOD__.': 利用 IPResolver 表格資料查詢使用者資料。');
                 $ipr = new IPResolver();
                 $result = $ipr->getIPEntry($ip);
-                $data = $result[0];
-                if (!empty($result)) {
-                    $unit = IPResolver::parseUnit($data['note']);
-                    return array(
-                        array(
-                            'id' => $data['entry_id'],
-                            'name' => $data['entry_desc'],
-                            'unit' => $unit,
-                            'ip' => $data['ip'],
-                            'sex' => 0,
-                            'addr' => '',
-                            'tel' => '',
-                            'ext' => '',
-                            'cell' => '',
-                            'title' => '',
-                            'work' => '',
-                            'exam' => '',
-                            'education' => '',
-                            'onboard_date' => '110/06/01',
-                            'offboard_date' => '',
-                            'birthday' => '066/05/23'
-                        )
-                    );
+                if (empty($result)) {
+                    Logger::getInstance()->warning(__METHOD__.": IPResolver 表格也查不到 $ip 資料。");
+                } else {
+                    return array(IPResolver::packUserData($result[0]));
                 }
             }
         } else {
