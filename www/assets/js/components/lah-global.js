@@ -40,6 +40,7 @@ Vue.prototype.$error = console.error.bind(console);
 Vue.prototype.$warn = console.warn.bind(console);
 Vue.prototype.$assert = console.assert.bind(console);
 Vue.prototype.$http = axios;
+Vue.prototype.$axios = axios;
 Vue.prototype.$lf = localforage || {};
 // single source of truth
 Vue.prototype.$store = (() => {

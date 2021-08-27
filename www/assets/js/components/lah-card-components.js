@@ -946,7 +946,10 @@ if (Vue) {
             <template v-slot:header>
                 <div class="d-flex w-100 justify-content-between mb-0">
                     <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="cogs"> 系統設定</lah-fa-icon></h6>
-                    <lah-button icon="question" @click="popup" size="sm" variant="outline-success" no-border></lah-button>
+                    <div>
+                        <lah-button icon="cog" @click="open" size="sm" variant="outline-primary" no-border></lah-button>
+                        <lah-button icon="question" @click="popup" size="sm" variant="outline-success" no-border></lah-button>
+                    </div>
                 </div>
             </template>
             <b-row class="mb-1">
@@ -967,7 +970,8 @@ if (Vue) {
         data: () => ({
             enable_msdb_query: undefined,
             enable_office_hours: undefined,
-            enable_mock_mode: undefined
+            enable_mock_mode: undefined,
+            svr_ip: '127.0.0.1'
         }),
         computed: {
             show_mock_mode_switch() { return this.myip != '127.0.0.1' }
@@ -1025,6 +1029,9 @@ if (Vue) {
             }
         },
         methods: {
+            open () {
+                this.openNewWindow(`http://${this.svr_ip}:8080/admin/configs/`);
+            },
             popup() {
                 this.msgbox({
                     title: "系統設定 相關設定說明",
@@ -1057,6 +1064,17 @@ if (Vue) {
                     this.isBusy = false;
                 });
             }
+        },
+        created () {
+            this.$axios.post(CONFIG.API.JSON.QUERY, {
+                type: 'svr'
+            }).then(({ data }) => {
+                this.svr_ip = data.ips[data.ips.length - 1]
+            }).catch((err) => {
+                this.$error = err;
+            }).finally(() => {
+
+            })
         }
     });
 } else {
