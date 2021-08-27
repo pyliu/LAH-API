@@ -3,8 +3,6 @@ require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."Notification.class.php");
 
-$system = System::getInstance();
-
 switch ($_POST["type"]) {
     case "add_notification":
         // Logger::getInstance()->info(print_r($_POST, true));
@@ -18,6 +16,15 @@ switch ($_POST["type"]) {
         $success = 0;
         $fail = 0;
         foreach ($channels as $channel) {
+            if ($channel === 'myself') {
+                $siteCode = System::getInstance()->getSiteCode();
+                if (startsWith($_POST['sender'], $siteCode)) {
+                    $channel = $_POST['sender'];
+                } else {
+                    Logger::getInstance()->warning('因 $_POST["sender"] 欄位 '.$_POST['sender'].' 開頭並非 '.$siteCode.' 故略過處理送給自己之公告。');
+                    continue;
+                }
+            }
             Logger::getInstance()->info('新增公告訊息至 '.$channel.' 頻道。');
             $result = $notify->addMessage($channel, array(
                 'title' => $title,
