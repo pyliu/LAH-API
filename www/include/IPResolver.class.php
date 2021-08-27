@@ -96,6 +96,22 @@ class IPResolver {
         return false;
     }
     
+    public function getIPEntry($ip, $threadhold = 31556926) {
+        // default get entry within a year
+        $now = time();
+        $month_ago = $now - 2629743;
+        $year_ago = $now - 31556926;
+        $ondemand = $now - $threadhold;
+        if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE timestamp > :bv_ondemand AND ip = :bv_ip'")) {
+            $stmt->bindParam(':bv_ondemand', $ondemand);
+            $stmt->bindParam(':bv_ip', $ip);
+            return $this->prepareArray($stmt);
+        } else {
+            Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM IPResolver WHERE timestamp > $ondemand AND ip = '$ip'」SQL描述。");
+        }
+        return array();
+    }
+
     public function getIPEntries($threadhold = 31556926) {
         // default get entry within a year
         $now = time();
@@ -109,6 +125,40 @@ class IPResolver {
             Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM IPResolver WHERE timestamp > $ondemand OR added_type <> 'DYNAMIC'」SQL描述。");
         }
         return array();
+    }
+
+    public static function parseUnit($note) {
+        $unit = '未分配';
+        if (!empty($note)) {
+            $key = explode(' ', $note)[1];
+            switch ($key) {
+                case 'inf':
+                    $unit = '資訊課';
+                    break;
+                case 'reg':
+                    $unit = '登記課';
+                    break;
+                case 'adm':
+                    $unit = '行政課';
+                    break;
+                case 'sur':
+                    $unit = '測量課';
+                    break;
+                case 'val':
+                    $unit = '地價課';
+                    break;
+                case 'acc':
+                    $unit = '會計室';
+                    break;
+                case 'hr':
+                    $unit = '人事室';
+                    break;
+                case 'supervisor':
+                    $unit = '主任室';
+                    break;
+            }
+        }
+        return $unit;
     }
 
     public static function resolve($ip) {

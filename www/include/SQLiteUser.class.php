@@ -1,6 +1,7 @@
 <?php
 require_once('init.php');
 require_once('System.class.php');
+require_once('IPResolver.class.php');
 require_once('DynamicSQLite.class.php');
 class SQLiteUser {
     private $db;
@@ -357,37 +358,7 @@ class SQLiteUser {
             Logger::getInstance()->warning(__METHOD__.': id(entry_id) is a required param, it\'s empty.');
             return false;
         }
-        $unit = '未分配';
-        if (!empty($data['note'])) {
-            $key = explode(' ', $data['note'])[1];
-            switch ($key) {
-                case 'inf':
-                    $unit = '資訊課';
-                    break;
-                case 'reg':
-                    $unit = '登記課';
-                    break;
-                case 'adm':
-                    $unit = '行政課';
-                    break;
-                case 'sur':
-                    $unit = '測量課';
-                    break;
-                case 'val':
-                    $unit = '地價課';
-                    break;
-                case 'acc':
-                    $unit = '會計室';
-                    break;
-                case 'hr':
-                    $unit = '人事室';
-                    break;
-                case 'supervisor':
-                    $unit = '主任室';
-                    break;
-            }
-        }
-        
+        $unit = IPResolver::parseUnit($data['note']);
         if ($this->exists($data['entry_id'])) {
             Logger::getInstance()->info(__METHOD__.': 更新使用者資訊 ('.$data['entry_id'].', '.$data['entry_desc'].', '.$unit.', '.$data['ip'].')');
             // update
@@ -550,9 +521,37 @@ class SQLiteUser {
     public function getUserByIP($ip) {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE ip = :ip")) {
             $stmt->bindParam(':ip', $ip);
-            return $this->prepareArray($stmt);
+            $result = $this->prepareArray($stmt);
+            if(empty($result)) {
+                // To find IPResolver table record by ip
+                $ipr = new IPResolver();
+                $result = $ipr->getIPEntry($ip);
+                $data = $result[0];
+                if (!empty($result)) {
+                    $unit = IPResolver::parseUnit($data['note']);
+                    return array(
+                        array(
+                            'id' => $data['entry_id'],
+                            'name' => $data['entry_desc'],
+                            'unit' => $unit,
+                            'ip' => $data['ip'],
+                            'sex' => 0,
+                            'addr' => '',
+                            'tel' => '',
+                            'ext' => '',
+                            'cell' => '',
+                            'title' => '',
+                            'work' => '',
+                            'exam' => '',
+                            'education' => '',
+                            'onboard_date' => '110/06/01',
+                            'offboard_date' => '',
+                            'birthday' => '066/05/23'
+                        )
+                    );
+                }
+            }
         } else {
-            
             Logger::getInstance()->error(__METHOD__.": 取得使用者($ip)資料失敗！");
         }
         return false;
