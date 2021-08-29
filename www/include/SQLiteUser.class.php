@@ -3,6 +3,7 @@ require_once('init.php');
 require_once('System.class.php');
 require_once('IPResolver.class.php');
 require_once('DynamicSQLite.class.php');
+
 class SQLiteUser {
     private $db;
 
@@ -513,14 +514,15 @@ class SQLiteUser {
         // To check if the $ip is from localhost
         if (in_array($ip, ['127.0.0.1', '::1'])) {
             Logger::getInstance()->info(__METHOD__.': 偵測到來自 localhost IP，判定為系統管理者。');
+            $site_code = System::getInstance()->getSiteCode();
             return array(IPResolver::packUserData(array(
                 'ip' => $ip,
                 'added_type' => 'STATIC',
                 'entry_type' => 'SYSTEM',
                 'entry_desc' => '系統管理者(AUTO)',
-                'entry_id' => 'ADMIN',
+                'entry_id' => $site_code.'ADMIN',
                 'timestamp' => time(),
-                'note' => 'HA.CENWEB.MOI.LAND inf'
+                'note' => $site_code.'.CENWEB.MOI.LAND inf'
             )));
         } else {
             // To find IPResolver table record by ip
