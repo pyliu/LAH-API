@@ -505,20 +505,35 @@ class SQLiteUser {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE ip = :ip")) {
             $stmt->bindParam(':ip', $ip);
             $result = $this->prepareArray($stmt);
-            if(empty($result)) {
-                // To find IPResolver table record by ip
-                Logger::getInstance()->info(__METHOD__.': 利用 IPResolver 表格資料查詢使用者資料。');
-                $ipr = new IPResolver();
-                $result = $ipr->getIPEntry($ip);
-                if (empty($result)) {
-                    Logger::getInstance()->warning(__METHOD__.": IPResolver 表格也查不到 $ip 資料。");
-                } else {
-                    return array(IPResolver::packUserData($result[0]));
-                }
+            if(!empty($result)) {
+                return $result;
             }
-        } else {
-            Logger::getInstance()->error(__METHOD__.": 取得使用者($ip)資料失敗！");
+            Logger::getInstance()->warning(__METHOD__.": 從 dimension.db user 表格取得使用者($ip)資料失敗！");
         }
+        // To check if the $ip is from localhost
+        if (in_array($ip, ['127.0.0.1', '::1'])) {
+            Logger::getInstance()->info(__METHOD__.': 偵測到來自 localhost IP，判定為系統管理者。');
+            return array(IPResolver::packUserData(array(
+                'ip' => $ip,
+                'added_type' => 'STATIC',
+                'entry_type' => 'SYSTEM',
+                'entry_desc' => '系統管理者(AUTO)',
+                'entry_id' => 'ADMIN',
+                'timestamp' => time(),
+                'note' => 'HA.CENWEB.MOI.LAND inf'
+            )));
+        } else {
+            // To find IPResolver table record by ip
+            Logger::getInstance()->info(__METHOD__.': 利用 IPResolver.db IPResolver 表格資料查詢使用者資料。');
+            $ipr = new IPResolver();
+            $result = $ipr->getIPEntry($ip);
+            if (empty($result)) {
+                Logger::getInstance()->warning(__METHOD__.": IPResolver.db IPResolver 表格查不到 $ip 資料。");
+            } else {
+                return array(IPResolver::packUserData($result[0]));
+            }
+        }
+
         return false;
         
     }
