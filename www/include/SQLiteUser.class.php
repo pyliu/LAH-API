@@ -367,14 +367,13 @@ class SQLiteUser {
                 UPDATE user SET
                     name = :name,
                     unit = :unit,
-                    ip = :ip,
                     offboard_date = :offboard_date
                 WHERE id = :id
             ")) {
                 $stmt->bindParam(':id', $data['entry_id']);
                 $stmt->bindParam(':name', $data['entry_desc']);
                 $stmt->bindParam(':unit', $unit);
-                $stmt->bindParam(':ip', $data['ip']);
+                // $stmt->bindParam(':ip', $data['ip']);
                 $stmt->bindValue(':offboard_date', '');
                 return $stmt->execute() === FALSE ? false : true;
             }
