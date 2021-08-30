@@ -95,6 +95,20 @@ class IPResolver {
         }
         return false;
     }
+
+    public function removeIpEntry($post) {
+        if ($stm = $this->db->prepare("
+            DELETE * FROM IPResolver WHERE ip = :bv_ip AND added_type = :bv_added_type AND entry_type = :bv_entry_type
+        ")) {
+            
+            $stm->bindParam(':ip', $post['ip']);
+            $stm->bindParam(':added_type', $post['added_type']);
+            $stm->bindParam(':entry_type', $post['entry_type']);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        Logger::getInstance()->warning(__METHOD__.": 無法執行 DELETE * FROM IPResolver WHERE ip = '".$post['ip']."' AND added_type = '".$post['added_type']."' AND entry_type = '".$post['entry_type']."' SQL描述。");
+        return false;
+    }
     
     public function getIPEntry($ip, $threadhold = 31556926) {
         // default get entry within a year
@@ -186,11 +200,6 @@ class IPResolver {
 
     public static function resolve($ip) {
         if (filter_var($ip, FILTER_VALIDATE_IP)) {
-            if (array_key_exists($ip, IPResolver::$server_map)) {
-                return IPResolver::$server_map[$ip];
-            } else if (array_key_exists($ip, IPResolver::$remote_eps)) {
-                return IPResolver::$remote_eps[$ip];
-            }
             // query IPResolver table
             $db = new SQLite3(SQLiteDBFactory::getIPResolverDB());
             if($stmt = $db->prepare("SELECT * FROM IPResolver WHERE ip = :ip")) {
@@ -212,6 +221,14 @@ class IPResolver {
             } else {
                 Logger::getInstance()->warning(__METHOD__.": 找不到 $ip 對應資料。(user table, dimension.db)");
             }
+
+            // find hard coded entry
+            if (array_key_exists($ip, IPResolver::$server_map)) {
+                return IPResolver::$server_map[$ip];
+            } else if (array_key_exists($ip, IPResolver::$remote_eps)) {
+                return IPResolver::$remote_eps[$ip];
+            }
+
             return '';
         } else {
             Logger::getInstance()->warning(__METHOD__.": Not a valid IP address. [$ip]");

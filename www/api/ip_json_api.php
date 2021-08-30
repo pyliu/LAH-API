@@ -32,7 +32,6 @@ switch ($_POST["type"]) {
 		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
         echoJSONResponse($message, $status_code);
         break;
-    
     case "add_static_ip_entry":
         $siteCode = System::getInstance()->getSiteCode();
         $data = array(
@@ -46,6 +45,19 @@ switch ($_POST["type"]) {
         );
         $result = $ipr->addIpEntry($data);
         $message = $result ? '完成 '.$data['ip'].' ('.$data['added_type'].', '.$data['entry_type'].') 更新' : '更新 '.$data['ip'].' 資料失敗';
+        $status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+        echoJSONResponse($message, $status_code);
+        break;
+    
+    case "remove_ip_entry":
+        $siteCode = System::getInstance()->getSiteCode();
+        $data = array(
+            'ip' => $_POST['ip'],
+            'added_type' => $_POST['added_type'],
+            'entry_type' => $_POST['entry_type'],
+        );
+        $result = $ipr->removeIpEntry($data);
+        $message = $result ? '完成 '.$data['ip'].' ('.$data['added_type'].', '.$data['entry_type'].') 資料刪除' : '刪除 '.$data['ip'].' 資料失敗';
         $status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
         echoJSONResponse($message, $status_code);
         break;
