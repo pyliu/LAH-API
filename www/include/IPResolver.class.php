@@ -97,16 +97,11 @@ class IPResolver {
     }
 
     public function removeIpEntry($post) {
-        if ($stm = $this->db->prepare("
-            DELETE * FROM IPResolver WHERE ip = :bv_ip AND added_type = :bv_added_type AND entry_type = :bv_entry_type
-        ")) {
-            
-            $stm->bindParam(':bv_ip', $post['ip']);
-            $stm->bindParam(':bv_added_type', $post['added_type']);
-            $stm->bindParam(':bv_entry_type', $post['entry_type']);
+        $sql = "DELETE FROM IPResolver WHERE ip = '".$post['ip']."' AND added_type = '".$post['added_type']."' AND entry_type = '".$post['entry_type']."'";
+        if ($stm = $this->db->prepare($sql)) {
             return $stm->execute() === FALSE ? false : true;
         }
-        Logger::getInstance()->warning(__METHOD__.": 無法執行 DELETE FROM IPResolver WHERE ip = '".$post['ip']."' AND added_type = '".$post['added_type']."' AND entry_type = '".$post['entry_type']."' SQL描述。");
+        Logger::getInstance()->warning(__METHOD__.": 無法執行 「${sql}」 SQL描述。");
         return false;
     }
     
