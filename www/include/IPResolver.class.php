@@ -4,49 +4,8 @@ require_once('SQLiteUser.class.php');
 require_once('SQLiteDBFactory.class.php');
 
 class IPResolver {
-    private static $server_map = array(
-        '220.1.34.43' => 'G08儲存',
-        '220.1.34.3' => 'AD主機',
-        '220.1.34.212' => 'PS謄本主機',
-        '220.1.34.211' => '建物平面圖同步主機',
-        '220.1.34.214' => 'PS權狀主機',
-        '220.1.34.204' => '次AD主機',
-        '220.1.34.205' => 'AP1登記(1)',
-        '220.1.34.206' => 'AP2登記(2)',
-        '220.1.34.156' => 'AP8地價',
-        '220.1.34.207' => 'AP3測量(1)',
-        '220.1.34.62' => 'AP6測量(2)',
-        '220.1.34.118' => 'AP15工作站',
-        '220.1.34.161' => 'AP61跨域',
-        '220.1.34.60' => 'AP14外掛',
-        '220.1.34.50' => '資料庫HA-MASTER',
-        '220.1.34.51' => '資料庫HA-SLAVE',
-        '220.1.33.5' => '局同步異動',
-        '220.5.61.33' => '內政部主機'
-    );
-    private static $remote_eps = array(
-        '220.1.34.2' => '資料庫',
-        '220.1.33.71' => '地政局',
-        '220.1.35.123' => '中壢跨域',
-        '220.1.37.246' => '楊梅跨域',
-        '220.1.38.30' => '蘆竹跨域',
-        '220.1.34.161' => '桃園跨域',
-        '220.1.36.45' => '大溪跨域',
-        '220.1.39.57' => '八德跨域',
-        '220.1.40.33' => '平鎮跨域',
-        '220.1.41.20' => '龜山跨域',
-        '220.2.33.85' => '自強櫃台',
-        '220.2.33.84' => '自強審查',
-        '220.2.33.89' => '普義櫃台1',
-        '220.2.33.90' => '普義審查',
-        '220.2.33.93' => '普義櫃台2',
-        '220.2.33.44' => '觀音櫃台',
-        '220.2.33.43' => '觀音審查'
-    );
-
     private $db;
 
-    
     private function bindParams(&$stm, &$row) {
         if ($stm === false) {
             Logger::getInstance()->error(__METHOD__.": bindUserParams because of \$stm is false.");
@@ -127,11 +86,11 @@ class IPResolver {
         $month_ago = $now - 2629743;
         $year_ago = $now - 31556926;
         $ondemand = $now - $threadhold;
-        if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE timestamp > :bv_ondemand OR added_type <> 'DYNAMIC'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE timestamp > :bv_ondemand OR added_type <> 'DYNAMIC' ORDER BY timestamp DESC")) {
             $stmt->bindParam(':bv_ondemand', $ondemand);
             return $this->prepareArray($stmt);
         } else {
-            Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM IPResolver WHERE timestamp > $ondemand OR added_type <> 'DYNAMIC'」SQL描述。");
+            Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM IPResolver WHERE timestamp > $ondemand OR added_type <> 'DYNAMIC' ORDER BY timestamp DESC」SQL描述。");
         }
         return array();
     }
@@ -193,11 +152,10 @@ class IPResolver {
         return $unit;
     }
 
-    public static function resolve($ip) {
+    public function resolve($ip) {
         if (filter_var($ip, FILTER_VALIDATE_IP)) {
             // query IPResolver table
-            $db = new SQLite3(SQLiteDBFactory::getIPResolverDB());
-            if($stmt = $db->prepare("SELECT * FROM IPResolver WHERE ip = :ip")) {
+            if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE ip = :ip")) {
                 $stmt->bindParam(':ip', $ip);
                 $result = $stmt->execute();
                 $row = $result->fetchArray(SQLITE3_ASSOC);
@@ -217,13 +175,6 @@ class IPResolver {
                 Logger::getInstance()->warning(__METHOD__.": 找不到 $ip 對應資料。(user table, dimension.db)");
             }
 
-            // find hard coded entry
-            if (array_key_exists($ip, IPResolver::$server_map)) {
-                return IPResolver::$server_map[$ip];
-            } else if (array_key_exists($ip, IPResolver::$remote_eps)) {
-                return IPResolver::$remote_eps[$ip];
-            }
-
             return '';
         } else {
             Logger::getInstance()->warning(__METHOD__.": Not a valid IP address. [$ip]");
@@ -231,8 +182,9 @@ class IPResolver {
         return false;
     }
 
-    public static function isServerIP($ip) {
-        return array_key_exists($ip, IPResolver::$server_map);
+    public function isServerIP($ip) {
+        $ret = $this->db->querySingle("SELECT ip FROM IPResolver WHERE added_type = 'STATIC' AND entry_type = 'SERVER' AND ip = '".trim($ip)."'");
+        return !empty($ret);
     }
     
 }

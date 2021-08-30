@@ -229,10 +229,11 @@ class StatsSQLite {
             $result = $stmt->execute();
             $return = [];
             if ($result === false) return $return;
+            $ipr = new IPResolver();
             while($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                if ($all == 'false' && IPResolver::isServerIP($row['est_ip'])) continue;
+                if ($all == 'false' && $ipr->isServerIP($row['est_ip'])) continue;
                 // turn est_ip to user
-                $name = IPResolver::resolve($row['est_ip']);
+                $name = $ipr->resolve($row['est_ip']);
                 $row['name'] = empty($name) ? $row['est_ip'] : $name;
                 $return[] = $row;
             }
