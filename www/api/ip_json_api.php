@@ -8,7 +8,7 @@ $system = System::getInstance();
 $ipr = new IPResolver();
 
 switch ($_POST["type"]) {
-    case "add_ip_entry":
+    case "add_user_ip_entry":
         $data = array(
             'ip' => $_POST['ip'],
             'added_type' => $_POST['added_type'] ?? 'DYNAMIC',
@@ -30,6 +30,23 @@ switch ($_POST["type"]) {
 
         $message = $result ? '完成 '.$data['ip'].' ('.$data['added_type'].', '.$data['entry_type'].') 更新' : '更新 '.$data['ip'].' 資料失敗';
 		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+        echoJSONResponse($message, $status_code);
+        break;
+    
+    case "add_static_ip_entry":
+        $siteCode = System::getInstance()->getSiteCode();
+        $data = array(
+            'ip' => $_POST['ip'],
+            'added_type' => $_POST['added_type'] ?? 'STATIC',
+            'entry_type' => $_POST['entry_type'] ?? 'OTHER_EP',
+            'entry_desc' => $_POST['entry_desc'] ?? '',
+            'entry_id' => $siteCode.'_'.$_POST['ip'],
+            'timestamp' => time(),
+            'note' => $_POST['note'] ?? ''
+        );
+        $result = $ipr->addIpEntry($data);
+        $message = $result ? '完成 '.$data['ip'].' ('.$data['added_type'].', '.$data['entry_type'].') 更新' : '更新 '.$data['ip'].' 資料失敗';
+        $status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
         echoJSONResponse($message, $status_code);
         break;
     case "ip_entries":
