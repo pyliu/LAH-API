@@ -102,7 +102,7 @@ class IPResolver {
         $month_ago = $now - 2629743;
         $year_ago = $now - 31556926;
         $ondemand = $now - $threadhold;
-        if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE timestamp > :bv_ondemand AND ip = :bv_ip'")) {
+        if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE timestamp > :bv_ondemand AND ip = :bv_ip")) {
             $stmt->bindParam(':bv_ondemand', $ondemand);
             $stmt->bindParam(':bv_ip', $ip);
             return $this->prepareArray($stmt);
