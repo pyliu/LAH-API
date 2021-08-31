@@ -391,23 +391,20 @@ class Query {
 			return array();
 		}
 		// AA100 付款方式代碼，EXPK付款方式表格 (K02 => 中文)
+		$this->db->parse("
+			SELECT t.*, s.K02
+			FROM MOIEXP.EXPAA t
+			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
+			WHERE AA01 >= :bv_qday AND AA106 <> '1' AND s.K02 = '悠遊卡'
+		");
 		if (empty($qday)) {
 			global $week_ago;
 			// fetch all data wthin a week back
-			$this->db->parse("
-				SELECT t.*, s.K02
-				FROM MOIEXP.EXPAA t
-				LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
-				WHERE AA01 >= :bv_qday AND AA106 <> '1' AND s.K02 = '悠遊卡'
-			");
 			$this->db->bind(":bv_qday", $week_ago);
 		} else {
 			if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
             	return false;
 			}
-			$this->db->parse("
-				SELECT * FROM MOIEXP.EXPAA WHERE AA01 = :bv_qday AND AA106 <> '1' AND AA100 = '06'
-			");
 			$this->db->bind(":bv_qday", $qday);
 		}
 		$this->db->execute();
