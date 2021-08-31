@@ -390,24 +390,15 @@ class Query {
 		if (!$this->db_ok) {
 			return array();
 		}
-
-		/*
-			"K01","K02","K03","K04"
-			"01","現金","N","N"
-			"02","支票","N","N"
-			"03","匯票","Y","N"
-			"04","iBon","Y","Y"
-			"05","ATM","N","N"
-			"06","悠遊卡","N","N"
-			"07","其他匯款","N","N"
-			"08","信用卡","N","N"
-			"09","行動支付","N","N"
-		*/
+		// AA100 付款方式代碼，EXPK付款方式表格 (K02 => 中文)
 		if (empty($qday)) {
 			global $week_ago;
 			// fetch all data wthin a week back
 			$this->db->parse("
-				SELECT * FROM MOIEXP.EXPAA WHERE AA01 >= :bv_qday AND AA106 <> '1' AND AA100 = '06'
+				SELECT t.*, s.K02
+				FROM MOIEXP.EXPAA t
+				LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
+				WHERE AA01 >= :bv_qday AND AA106 <> '1' AND s.K02 = '悠遊卡'
 			");
 			$this->db->bind(":bv_qday", $week_ago);
 		} else {
