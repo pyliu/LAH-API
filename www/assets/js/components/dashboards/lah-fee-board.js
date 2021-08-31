@@ -42,12 +42,7 @@ if (Vue) {
         data: () => ({
             date_obj: null,
             query_date: "1090311",
-            raw_data: null,
-            cash: [],
-            ezcard: [],
-            mobile: [],
-            credit: [],
-            other: [],
+            raw_data: [],
             chartInst: null,
             chartData: {
                 labels:[],
@@ -91,6 +86,11 @@ if (Vue) {
             money_other: function() { return this.sum(this.other); },
             money_credit: function() { return this.sum(this.credit); },
             money_all: function() { return this.sum(this.raw_data); },
+            cash () { return this.raw_data.filter(this_record => this_record["AA100_CHT"] === "現金"); },
+            ezcard () { return this.raw_data.filter(this_record => this_record["AA100_CHT"] === "悠遊卡"); },
+            mobile () { return this.raw_data.filter(this_record => ['APPLE PAY', '安卓 PAY', '三星 PAY', '行動支付'].includes(this_record["AA100_CHT"])); },
+            credit () { return this.raw_data.filter(this_record => this_record["AA100_CHT"] === "信用卡"); },
+            other () { return this.raw_data.filter(this_record => !['APPLE PAY', '安卓 PAY', '三星 PAY', '行動支付', '現金', '悠遊卡', '信用卡'].includes(this_record["AA100_CHT"])); }
         },
         methods: {
             open: function(title, data) {
@@ -208,13 +208,6 @@ if (Vue) {
                     return;
                 }
                 this.raw_data = res.data.raw;
-                this.cash = this.raw_data.filter(this_record => this_record["AA100"] == "01");
-                this.ezcard = this.raw_data.filter(this_record => this_record["AA100"] == "06");
-                this.mobile = this.raw_data.filter(this_record => this_record["AA100"] == "09");
-                this.credit = this.raw_data.filter(this_record => this_record["AA100"] == "08");
-                this.other = this.raw_data.filter(this_record => {
-                    return this_record["AA100"] != "06" && this_record["AA100"] != "01" && this_record["AA100"] != "08" && this_record["AA100"] != "09";
-                });
                 this.buildChart();
             }).catch(err => {
                 this.error = err;
