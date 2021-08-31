@@ -62,16 +62,34 @@ switch ($_POST["type"]) {
         echoJSONResponse($message, $status_code);
         break;
     case "ip_entries":
-        $rows = $ipr->getIPEntries();
+        // default get active IP entries within a year(unix timestamp is 31556926)
+        $interval = intval($_POST['offset'] ?? 31556926);
+        $days = ceil(abs($interval / 86400));
+        $rows = $ipr->getIPEntries($interval);
         $count = count($rows);
-        echoJSONResponse("查詢到 $count 筆資料", STATUS_CODE::SUCCESS_NORMAL, array(
+        echoJSONResponse("查詢到 $count 筆資料( ${days} 天內)", STATUS_CODE::SUCCESS_NORMAL, array(
             'raw' => $rows,
             'data_count' => $count
         ));
         break;
     case "dynamic_ip_entries":
+        // default get active IP entries within a week(unix timestamp is 604800)
+        $interval = intval($_POST['offset'] ?? 604800);
+        $days = ceil(abs($interval / 86400));
+        $rows = $ipr->getDynamicIPEntries();
+        $count = count($rows);
+        echoJSONResponse("查詢到 $count 筆動態 IP 資料( ${days} 天內)", STATUS_CODE::SUCCESS_NORMAL, array(
+            'raw' => $rows,
+            'data_count' => $count
+        ));
         break;
     case "static_ip_entries":
+        $rows = $ipr->getStaticIPEntries();
+        $count = count($rows);
+        echoJSONResponse("查詢到 $count 筆靜態 IP 資料", STATUS_CODE::SUCCESS_NORMAL, array(
+            'raw' => $rows,
+            'data_count' => $count
+        ));
         break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");

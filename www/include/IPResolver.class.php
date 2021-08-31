@@ -65,10 +65,13 @@ class IPResolver {
     }
     
     public function getIPEntry($ip, $threadhold = 31556926) {
-        // default get entry within a year
+        /**
+         * default get entry within a year
+         * a year: 31556926
+         * a month: 2629743
+         * a week: 604800
+         **/
         $now = time();
-        $month_ago = $now - 2629743;
-        $year_ago = $now - 31556926;
         $ondemand = $now - $threadhold;
         if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE timestamp > :bv_ondemand AND ip = :bv_ip")) {
             $stmt->bindParam(':bv_ondemand', $ondemand);
@@ -81,16 +84,46 @@ class IPResolver {
     }
 
     public function getIPEntries($threadhold = 31556926) {
-        // default get entry within a year
+        /**
+         * default get entry within a year
+         * a year: 31556926
+         * a month: 2629743
+         * a week: 604800
+         **/
         $now = time();
-        $month_ago = $now - 2629743;
-        $year_ago = $now - 31556926;
         $ondemand = $now - $threadhold;
         if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE timestamp > :bv_ondemand OR added_type <> 'DYNAMIC' ORDER BY timestamp DESC")) {
             $stmt->bindParam(':bv_ondemand', $ondemand);
             return $this->prepareArray($stmt);
         } else {
             Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM IPResolver WHERE timestamp > $ondemand OR added_type <> 'DYNAMIC' ORDER BY timestamp DESC」SQL描述。");
+        }
+        return array();
+    }
+
+    public function getDynamicIPEntries($threadhold = 604800) {
+        /**
+         * default get entry within a year
+         * a year: 31556926
+         * a month: 2629743
+         * a week: 604800
+         **/
+        $now = time();
+        $ondemand = $now - $threadhold;
+        if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE timestamp > :bv_ondemand AND added_type = 'DYNAMIC' ORDER BY timestamp DESC")) {
+            $stmt->bindParam(':bv_ondemand', $ondemand);
+            return $this->prepareArray($stmt);
+        } else {
+            Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM IPResolver WHERE timestamp > $ondemand AND added_type = 'DYNAMIC' ORDER BY timestamp DESC」SQL描述。");
+        }
+        return array();
+    }
+    
+    public function getStaticIPEntries() {
+        if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE added_type = 'STATIC' ORDER BY timestamp DESC")) {
+            return $this->prepareArray($stmt);
+        } else {
+            Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM IPResolver WHERE added_type = 'STATIC' ORDER BY timestamp DESC」SQL描述。");
         }
         return array();
     }
