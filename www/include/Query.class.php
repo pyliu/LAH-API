@@ -416,9 +416,9 @@ class Query {
 			return false;
 		}
 
-		// ex: UPDATE MOIEXP.EXPAA SET AA106 = '1' WHERE AA01 = '1080321' AND AA106 <> '1' AND AA100 = '06' AND AA04 = '0015746';
+		// ex: UPDATE MOIEXP.EXPAA SET AA106 = '1' WHERE AA01 = '1080321' AND AA106 <> '1' AND AA04 = '0015746';
 		$this->db->parse("
-			UPDATE MOIEXP.EXPAA SET AA106 = '1' WHERE AA01 = :bv_qday AND AA106 <> '1' AND AA100 = '06' AND AA04 = :bv_pc_num
+			UPDATE MOIEXP.EXPAA SET AA106 = '1' WHERE AA01 = :bv_qday AND AA106 <> '1' AND AA04 = :bv_pc_num
 		");
 		$this->db->bind(":bv_qday", $qday);
 		$this->db->bind(":bv_pc_num", $pc_num);
