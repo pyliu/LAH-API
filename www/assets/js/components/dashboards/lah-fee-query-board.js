@@ -277,7 +277,7 @@ if (Vue) {
                     ezcard () { return this.raw_data.filter(this_record => this_record["AA100_CHT"] === "悠遊卡"); },
                     mobile () { return this.raw_data.filter(this_record => ['APPLE PAY', '安卓 PAY', '三星 PAY', '行動支付'].includes(this_record["AA100_CHT"])); },
                     credit () { return this.raw_data.filter(this_record => this_record["AA100_CHT"] === "信用卡"); },
-                    other () { return this.raw_data.filter(this_record => !['APPLE PAY', '安卓 PAY', '三星 PAY', '行動支付', '現金', '悠遊卡', '信用卡'].includes(this_record["AA100_CHT"]));  }
+                    other () { return this.raw_data.filter(this_record => !['APPLE PAY', '安卓 PAY', '三星 PAY', '行動支付', '現金', '悠遊卡', '信用卡'].includes(this_record["AA100_CHT"])); }
                 },
                 methods: {
                     open: function(title, data) {
@@ -810,9 +810,9 @@ if (Vue) {
                                 <fee-detail-fix-ezcard :raw="expaa_data" :date="date" :pc_number="pc_number"></fee-detail-fix-ezcard>
                             </span>
                             <span v-else-if="key == '單據狀況'">
-                            <fee-detail-obselete-mgt :value="item" :date="date" :pc_number="pc_number"></fee-detail-obselete-mgt>
+                                <fee-detail-obselete-mgt :value="item" :date="date" :pc_number="pc_number"></fee-detail-obselete-mgt>
                             </span>
-                            <span v-else>{{key}}：{{item}}</span>
+                            <span v-else-if="key !== 'AA100_CHT'">{{key}}：{{item}}</span>
                         </div>
                     </fieldset>
                 </b-col>
