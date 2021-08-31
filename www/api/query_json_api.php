@@ -589,8 +589,8 @@ switch ($_POST["type"]) {
 		$rows = $mock ? $cache->get('expe') : $query->getChargeItems();
 		$cache->set('expe', $rows);
 		if (empty($rows)) {
-			Logger::getInstance()->info("XHR [expe] 查無資料");
-			echoJSONResponse('查無資料');
+			Logger::getInstance()->info("XHR [expe] 查無規費收費類別資料");
+			echoJSONResponse('查無規費收費類別資料');
 		} else {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -620,6 +620,24 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
+	case "expk":
+		Logger::getInstance()->info("XHR [expk] 查詢規費付款項目請求");
+		// make total number length is 7
+		$rows = $mock ? $cache->get('expk') : $query->getExpkItems();
+		$cache->set('expk', $rows);
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [expk] 查無資料");
+			echoJSONResponse('查無規費付款項目資料');
+		} else {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => count($rows),
+				"raw" => $rows
+			);
+			Logger::getInstance()->info("XHR [expk] 查詢成功");
+			echo json_encode($result, 0);
+		}
+		break;
 	case "mod_expac":
 		Logger::getInstance()->info("XHR [mod_expac] 修正規費項目【".$_POST["year"].", ".$_POST["num"].", ".$_POST["code"].", ".$_POST["amount"]."】請求");
 		// make total number length is 7
@@ -646,7 +664,7 @@ switch ($_POST["type"]) {
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [expaa] 查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
 			echoJSONResponse("查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
-		} else if (count($rows) == 1 && $_POST["list_mode"] == "false") {
+		} else if (count($rows) == 1 && $_POST["list_mode"] === "false") {
 			$mapping = array();
 			// AA39 is 承辦人員, AA89 is 修改人員代碼
 			$users = $cache->getUserNames();

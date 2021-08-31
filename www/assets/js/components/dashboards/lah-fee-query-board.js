@@ -99,9 +99,7 @@ if (Vue) {
                         return;
                     }
                     let VNode = this.$createElement("expaa-category-dashboard", {
-                        props: {
-                            raw_data: res.data.raw
-                        },
+                        props: { raw_data: res.data.raw },
                         on: {
                             "number_clicked": number => {
                                this.number = number;
@@ -223,13 +221,15 @@ if (Vue) {
                         <b-col><canvas id="feeBarChart" class="w-100"></canvas></b-col>
                     </b-row>
                 </b-container>`,
-                props: ["raw_data"],
+                props: {
+                    raw_data: { type: Array, default: [] }
+                },
                 data: () => ({
-                    cash: [],
-                    ezcard: [],
-                    mobile: [],
-                    credit: [],
-                    other: [],
+                    // cash: [],
+                    // ezcard: [],
+                    // mobile: [],
+                    // credit: [],
+                    // other: [],
                     chartInst: null,
                     chartData: {
                         labels:[],
@@ -273,6 +273,11 @@ if (Vue) {
                     money_other: function() { return this.sum(this.other); },
                     money_credit: function() { return this.sum(this.credit); },
                     money_all: function() { return this.sum(this.raw_data); },
+                    cash () { return this.raw_data.filter(this_record => this_record["AA100_CHT"] === "現金"); },
+                    ezcard () { return this.raw_data.filter(this_record => this_record["AA100_CHT"] === "悠遊卡"); },
+                    mobile () { return this.raw_data.filter(this_record => ['APPLE PAY', '安卓 PAY', '三星 PAY', '行動支付'].includes(this_record["AA100_CHT"])); },
+                    credit () { return this.raw_data.filter(this_record => this_record["AA100_CHT"] === "信用卡"); },
+                    other () { return this.raw_data.filter(this_record => !['APPLE PAY', '安卓 PAY', '三星 PAY', '行動支付', '現金', '悠遊卡', '信用卡'].includes(this_record["AA100_CHT"]));  }
                 },
                 methods: {
                     open: function(title, data) {
@@ -342,26 +347,7 @@ if (Vue) {
                         }
                     }
                 },
-                created: function () {
-                    /* AA100 mapping
-                        "01","現金"
-                        "02","支票"
-                        "03","匯票"
-                        "04","iBon"
-                        "05","ATM"
-                        "06","悠遊卡"
-                        "07","其他匯款"
-                        "08","信用卡"
-                        "09","行動支付"
-                    */
-                    this.cash = this.raw_data.filter(this_record => this_record["AA100"] == "01");
-                    this.ezcard = this.raw_data.filter(this_record => this_record["AA100"] == "06");
-                    this.mobile = this.raw_data.filter(this_record => this_record["AA100"] == "09");
-                    this.credit = this.raw_data.filter(this_record => this_record["AA100"] == "08");
-                    this.other = this.raw_data.filter(this_record => {
-                        return this_record["AA100"] != "06" && this_record["AA100"] != "01" && this_record["AA100"] != "08" && this_record["AA100"] != "09";
-                    });
-                },
+                created: function () {},
                 mounted: function() {
                     // prepare chart data
                     this.chartData.labels = ["現金", "悠遊卡", "信用卡", "行動支付", "其他"];
@@ -614,16 +600,7 @@ if (Vue) {
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="inputGroup-exapp_method_select">付款方式</span>
                 </div>
-                <select id='exapp_method_select' class='form-control' v-model="value">
-                    <option value='01'>現金[01]</option>
-                    <option value='02'>支票[02]</option>
-                    <option value='03'>匯票[03]</option>
-                    <option value='04'>iBon[04]</option>
-                    <option value='05'>ATM[05]</option>
-                    <option value='06'>悠遊卡[06]</option>
-                    <option value='07'>其他匯款[07]</option>
-                    <option value='08'>信用卡[08]</option>
-                    <option value='09'>行動支付[09]</option>
+                <select id='exapp_method_select' class='form-control' v-model="value" v-html="paymentOptsMarkup">
                 </select>
             </div>
             <div class='filter-btn-group col'>
@@ -631,6 +608,43 @@ if (Vue) {
             </div>
         </div>`,
         props: ["value", "date", "pc_number", "noConfirm"],
+        data: () => ({
+            cacheKey: 'moiexp.expk',
+            expk: []
+        }),
+        computed: {
+            paymentOptsMarkup () {
+                return this.expk.reduce((acc, item, idx, arr) => {
+                    return acc + `<option value='${item.K01}'>[${item.K01}] ${item.K02}</option>\n`
+                }, '')
+            }
+        },
+        async created () {
+            const cachedExpk = await this.getLocalCache(this.cacheKey);
+            if (cachedExpk) {
+                this.expk = [...cachedExpk];
+            } else {
+                this.isBusy = true;
+                this.$http.post(CONFIG.API.JSON.QUERY, {
+                    type: "expk"
+                }).then(res => {
+                    if (res.data.data_count == 0) {
+                        this.notify({
+                            title: "查詢規費付款項目",
+                            message: `查無規費付款項目資料`,
+                            type: "warning"
+                        });
+                    } else {
+                        this.expk = [...res.data.raw]
+                        this.setLocalCache(this.cacheKey, this.expk);
+                    }
+                }).catch(err => {
+                    this.error = err;
+                }).finally(() => {
+                    this.isBusy = false;
+                });
+            }
+        },
         methods: {
             update: function(e) {
                 if (this.noConfirm) {

@@ -427,6 +427,33 @@ class Query {
 		return true;
 	}
 
+	public function getExpkItems() {
+		if (!$this->db_ok) {
+			return array();
+		}
+		/*
+			e.g. HA
+			K01 K02 K03 K04
+			01	現金
+			02	支票
+			03	匯票
+			04	iBon
+			06	悠遊卡
+			07	其他匯款
+			08	晶片金融卡(網路ATM)
+			09	信用卡
+			10	APPLE PAY
+			11	安卓 PAY
+			12	三星 PAY
+			16	信用卡(罰鍰)
+			14	內政部線上申辦
+			15	桃園e指通線上申辦
+		 */
+		$this->db->parse("SELECT * FROM MOIEXP.EXPK t ORDER BY K01");
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
 	public function getExpacItems($year, $num) {
 		if (!$this->db_ok) {
 			return array();
@@ -496,14 +523,16 @@ class Query {
 
 		if (empty($num)) {
 			$this->db->parse("
-				SELECT *
+				SELECT t.*, s.K02 AS AA100_CHT
 				FROM MOIEXP.EXPAA t
+				LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
 				WHERE t.AA01 = :bv_qday
 			");
 		} else {
 			$this->db->parse("
-				SELECT *
+				SELECT t.*, s.K02 AS AA100_CHT
 				FROM MOIEXP.EXPAA t
+				LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
 				WHERE t.AA04 = :bv_num AND t.AA01 = :bv_qday
 			");
 			$this->db->bind(":bv_num", $num);
