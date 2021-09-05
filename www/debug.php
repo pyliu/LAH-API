@@ -32,8 +32,7 @@ try {
     
     echo '<br/><br/>';
 
-    echo IPResolver::resolve('192.168.13.96');
-    echo IPResolver::resolve('192.168.56.1');
+    echo print_r(System::getInstance()->calcAuthority($_SESSION['myinfo']['authority']), true);
     
 }
 catch(Exception $e)

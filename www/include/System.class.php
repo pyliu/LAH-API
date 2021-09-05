@@ -2,6 +2,7 @@
 require_once("init.php");
 require_once('DynamicSQLite.class.php');
 require_once('Ping.class.php');
+require_once('SQLiteUser.class.php');
 
 define('DIMENSION_SQLITE_DB', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."dimension.db");
 
@@ -19,13 +20,14 @@ abstract class ROLE {
 // could processed by bitwise operation
 abstract class AUTHORITY {
     const NORMAL = 0;
-    const SUPER = 1;
+    const DISABLED = 1;
     const ADMIN = 2;
-    const CHIEF = 4;
-    const RESEARCH_AND_EVALUATION = 8;
-    const GENERAL_AFFAIRS = 16;
-    const HUMAN_RESOURCE = 32;
-    const ACCOUNTING = 64;
+    const ANNOUNCEMENT_MANAGEMENT = 4;
+    const USER_MANAGEMENT = 8;
+    const CHIEF = 16;
+    const RESEARCH_AND_EVALUATION = 32;
+    // const REVIEW_LV_1 = 64;     // 初審
+    // const REVIEW_LV_2 = 128;    // 複審
 }
 
 class System {
@@ -114,8 +116,7 @@ class System {
             $stm->bindValue(':offboard_date', '');
             $stm->bindValue(':ip', '127.0.0.1');
             // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
-            $authority = AUTHORITY::SUPER;
-            $stm->bindParam(':authority', $authority);
+            $stm->bindValue(':authority', AUTHORITY::ADMIN);
             return $stm->execute() === FALSE ? false : true;
         }
         
@@ -148,8 +149,7 @@ class System {
             $stm->bindValue(':offboard_date', '');
             $stm->bindValue(':ip', '::1');
             // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
-            $authority = AUTHORITY::ADMIN;
-            $stm->bindParam(':authority', $authority);
+            $stm->bindValue(':authority', AUTHORITY::ADMIN);
             return $stm->execute() === FALSE ? false : true;
         }
         
@@ -404,16 +404,30 @@ class System {
         return $this->getRoleIps(ROLE::ACCOUNTING);
     }
 
+    public function calcAuthority($intval) {
+        $auth = [];
+        $authority = intval($intval) ?? 0;
+        $auth['isDisabled'] = boolval($authority & AUTHORITY::DISABLED);
+        $auth['isAdmin'] = boolval($authority & AUTHORITY::ADMIN);
+        $auth['isChief'] = boolval($authority & AUTHORITY::CHIEF);
+        $auth['isRAE'] = boolval($authority & AUTHORITY::RESEARCH_AND_EVALUATION);
+        $auth['isUserMgtStaff'] = boolval($authority & AUTHORITY::USER_MANAGEMENT);
+        $auth['isNotifyMgtStaff'] = boolval($authority & AUTHORITY::ANNOUNCEMENT_MANAGEMENT);
+        return $auth;
+    }
+
     public function getAuthority($ip) {
-        return array(
-            "isAdmin" => in_array($ip, $this->getRoleAdminIps()),
-            "isChief" => in_array($ip, $this->getRoleChiefIps()),
-            "isSuper" => in_array($ip, $this->getRoleSuperIps()),
-            "isRAE"   => in_array($ip, $this->getRoleRAEIps()),
-            "isGA"    => in_array($ip, $this->getRoleGAIps()),
-            "isHR"    => in_array($ip, $this->getRoleHRIps()),
-            "isAccounting" => in_array($ip, $this->getRoleAccountingIps())
-        );
+        $sqlite_user = new SQLiteUser();
+		$queried_user = $sqlite_user->getUserByIP($ip);
+		$found_count = count($queried_user);
+		if (empty($found_count)) {
+            return $this->calcAuthority(0);
+        } else {
+			if ($found_count > 1) {
+				$queried_user = array($queried_user[$found_count - 1]);
+			}
+            return $this->calcAuthority($queried_user[0]['authority']);
+		}
     }
 
     public function removeAuthority($user) {

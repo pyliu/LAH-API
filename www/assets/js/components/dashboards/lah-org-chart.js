@@ -125,7 +125,7 @@ if (Vue) {
                 }
                 this.depth--;
                 let collapsable = this.depth_switch && children.length > 0;
-                let inf_chief = (raw_obj.authority & 4 && raw_obj.unit == '資訊課');
+                // let inf_chief = (raw_obj.authority & 4 && raw_obj.unit == '資訊課');
                 // expand own unit by global myinfo variable
                 let isMyUnit = this.myinfo ? raw_obj.unit == this.myinfo['unit'] : false;
                 let this_node =  {

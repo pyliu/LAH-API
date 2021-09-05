@@ -27,32 +27,6 @@ function pingDomain($domain, $port = 0, $timeout = 1){
     return $latency;
 }
 
-function getMyAuthority() {
-    global $client_ip;
-
-    // check authority by ip address
-    $system = System::getInstance();
-    $res = $system->getAuthority($client_ip);
-    if ($res['isSuper']) array_walk($res, function(&$value) { $value = true; });
-
-    // check user authority from DB
-    if (isset($_SESSION['myinfo'])) {
-        if (boolval($_SESSION['myinfo']["authority"] & AUTHORITY::SUPER)) {
-            array_walk($res, function(&$value) { $value = true; });
-        } else {
-            $res["isAdmin"] = $res["isAdmin"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::ADMIN);
-            $res["isChief"] = $res["isChief"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::CHIEF);
-            $res["isSuper"] = $res["isSuper"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::SUPER);
-            $res["isRAE"] = $res["isRAE"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::RESEARCH_AND_EVALUATION);
-            $res["isGA"] = $res["isGA"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::GENERAL_AFFAIRS);
-            $res["isAccounting"] = $res["isAccounting"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::ACCOUNTING);
-            $res["isHR"] = $res["isHR"] || boolval($_SESSION['myinfo']["authority"] & AUTHORITY::HUMAN_RESOURCE);
-        }
-    }
-    
-    return $res;
-}
-
 function zipLogs() {
     // Enter the name of directory
     $pathdir = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."log";

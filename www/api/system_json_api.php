@@ -5,10 +5,10 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYNALL.class.php");
 
-$auth = getMyAuthority();
-if (!$auth['isAdmin'] && !$auth['isSuper']) {
-    Logger::getInstance()->error("$client_ip 不是 Admin/Super 使用者無法存取此API(".__FILE__.")");
-    echoJSONResponse("非 Admin/Super 無法執行命令。", STATUS_CODE::DEFAULT_FAIL);
+$auth = System::getInstance()->calcAuthority($_SESSION['myinfo']['authority']);
+if (!$auth['isAdmin']) {
+    Logger::getInstance()->error("$client_ip 不是 Admin 使用者無法存取此API(".__FILE__.")");
+    echoJSONResponse("非 Admin 無法執行命令。", STATUS_CODE::DEFAULT_FAIL);
     exit;
 }
 

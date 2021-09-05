@@ -38,16 +38,7 @@ switch ($_POST["type"]) {
 				'officehours' => $system->isOfficeHoursEnable(),
 				"authority" => $system->getAuthority($_POST['req_ip']),
 				"master_password" => $system->get('MASTER_PASSWORD'),
-				"site" => strtoupper($system->get('SITE')),
-				"ip_maps" => array(
-					"admin" => $system->getRoleAdminIps(),
-					"chief" => $system->getRoleChiefIps(),
-					"super" => $system->getRoleSuperIps(),
-					"rae" => $system->getRoleRAEIps(),
-					"ga" => $system->getRoleGAIps(),
-					"hr" => $system->getRoleHRIps(),
-					"accounting" => $system->getRoleAccountingIps(),
-				)
+				"site" => strtoupper($system->get('SITE'))
 			)
         ));
 		break;

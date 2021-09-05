@@ -79,14 +79,7 @@ switch ($_POST["type"]) {
 				"authority" => $system->getAuthority($client_ip),
 				"master_password" => $system->get('MASTER_PASSWORD'),
 				"site" => strtoupper($system->get('SITE')),
-				"lxhweb" => $system->getLXHWEBConfigs(),
-				"ip_maps" => array(
-					"admin" => $system->getRoleAdminIps(),
-					"chief" => $system->getRoleChiefIps(),
-					"super" => $system->getRoleSuperIps(),
-					"rae" => $system->getRoleRAEIps(),
-					"ga" => $system->getRoleGAIps()
-				)
+				"lxhweb" => $system->getLXHWEBConfigs()
 			)
 		), 0);
 		break;
@@ -1301,7 +1294,7 @@ switch ($_POST["type"]) {
 		$sqlite_db = new SQLiteRegAuthChecksStore();
 		$id = $_POST["id"];
 		$note = $_POST['note'];
-		$authority = $_POST["authority"];
+		$authority = $_POST['authority'];
 		if (empty($id)) {
 			$message = "更新 $id 登記辦畢通知設定 $authority 失敗";
 			Logger::getInstance()->info("XHR [upd_reg_auth_checks] $message (無 id)");
@@ -1309,7 +1302,7 @@ switch ($_POST["type"]) {
 		} else {
 			$row = array(
 				'case_no' => $_POST["id"],
-				'authority' => $_POST["authority"],
+				'authority' => $_POST['authority'],
 				'note' => $_POST['note']
 			);
 			$result = $sqlite_db->replace($row);

@@ -147,7 +147,8 @@ class IPResolver {
             'education' => '',
             'onboard_date' => '110/06/01',
             'offboard_date' => '',
-            'birthday' => '066/05/23'
+            'birthday' => '066/05/23',
+            'authority' => $data['authority'] ?? 0
         );
     }
 

@@ -12,27 +12,6 @@ class SQLiteUser {
         return !empty($ret);
     }
 
-    private function calculateAuthority($ip) {
-        $authority = 0;
-        $system = System::getInstance();
-        if (in_array($ip, $system->getRoleSuperIps())) {
-            $authority = $authority | AUTHORITY::SUPER;
-        }
-        if (in_array($ip, $system->getRoleAdminIps())) {
-            $authority = $authority | AUTHORITY::ADMIN;
-        }
-        if (in_array($ip, $system->getRoleChiefIps())) {
-            $authority = $authority | AUTHORITY::CHIEF;
-        }
-        if (in_array($ip, $system->getRoleRAEIps())) {
-            $authority = $authority | AUTHORITY::RESEARCH_AND_EVALUATION;
-        }
-        if (in_array($ip, $system->getRoleGAIps())) {
-            $authority = $authority | AUTHORITY::GENERAL_AFFAIRS;
-        }
-        return $authority;
-    }
-
     private function bindUserParams(&$stm, &$row) {
 
         if ($stm === false) {
@@ -80,18 +59,7 @@ class SQLiteUser {
         }
 
         // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
-        
-        $authority = $this->getAuthority($row['DocUserID']);
-        $system = System::getInstance();
-        // add admin privilege
-        if (in_array($row['AP_PCIP'], $system->getRoleAdminIps())) {
-            $authority = $authority | AUTHORITY::ADMIN;
-        }
-        // add chief privilege
-        if (in_array($row['AP_PCIP'], $system->getRoleChiefIps())) {
-            $authority = $authority | AUTHORITY::CHIEF;
-        }
-        $stm->bindParam(':authority', $authority);
+        $stm->bindValue(':authority', $this->getAuthority($row['DocUserID']));
     }
 
     private function replace(&$row) {
@@ -179,7 +147,8 @@ class SQLiteUser {
     }
 
     public function getOnboardUsers() {
-        if($stmt = $this->db->prepare("SELECT * FROM user WHERE offboard_date IS NULL OR offboard_date = '' ORDER BY id")) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :disabled_bit) <> :disabled_bit ORDER BY id")) {
+            $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
         } else {
             
@@ -188,8 +157,9 @@ class SQLiteUser {
         return false;
     }
 
-    public function getOffboardUsers() {
-        if($stmt = $this->db->prepare("SELECT * FROM user WHERE offboard_date IS NOT NULL AND offboard_date <> '' ORDER BY id")) {
+    public function getDisabledUsers() {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :disabled_bit) = :disabled_bit ORDER BY id")) {
+            $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
         } else {
             
@@ -198,9 +168,14 @@ class SQLiteUser {
         return false;
     }
 
+    public function getOffboardUsers() {
+        return $this->getDisabledUsers();
+    }
+
     public function getChiefs() {
-        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (offboard_date is NULL OR offboard_date = '') AND authority & :chief_bit ORDER BY id")) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :chief_bit) = :chief_bit AND (authority & :disabled_bit) <> :disabled_bit ORDER BY id")) {
             $stmt->bindValue(':chief_bit', AUTHORITY::CHIEF, SQLITE3_INTEGER);
+            $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
         } else {
             
@@ -210,8 +185,9 @@ class SQLiteUser {
     }
 
     public function getChief($unit) {
-        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (offboard_date is NULL OR offboard_date = '') AND authority & :chief_bit AND unit = :unit ORDER BY id")) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :chief_bit) = :chief_bit AND (authority & :disabled_bit) <> :disabled_bit AND unit = :unit ORDER BY id")) {
             $stmt->bindValue(':chief_bit', AUTHORITY::CHIEF, SQLITE3_INTEGER);
+            $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             $stmt->bindParam(':unit', $unit, SQLITE3_TEXT);
             return $this->prepareArray($stmt);
         } else {
@@ -222,8 +198,9 @@ class SQLiteUser {
     }
 
     public function getStaffs($unit) {
-        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (offboard_date is NULL or offboard_date = '') AND unit = :unit ORDER BY id")) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :disabled_bit) <> :disabled_bit AND unit = :unit ORDER BY id")) {
             $stmt->bindParam(':unit', $unit, SQLITE3_TEXT);
+            $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
         } else {
             
@@ -308,7 +285,7 @@ class SQLiteUser {
             $stmt->bindParam(':onboard_date', $xlsx_row[12]);
             $stmt->bindValue(':offboard_date', $xlsx_row[13]);
             $stmt->bindParam(':ip', $xlsx_row[14]);
-            $stmt->bindValue(':authority', $this->calculateAuthority($xlsx_row[14]));
+            $stmt->bindValue(':authority', 0);  // TBD
             $stmt->bindParam(':birthday', $xlsx_row[15]);
             return $stmt->execute() === FALSE ? false : true;
         } else {
@@ -345,7 +322,7 @@ class SQLiteUser {
             $stmt->bindParam(':onboard_date', $data['onboard_date']);
             $stmt->bindValue(':offboard_date', '');
             $stmt->bindParam(':ip', $data['ip']);
-            $stmt->bindValue(':authority', $this->calculateAuthority($data['ip']));
+            $stmt->bindValue(':authority', $data['authority']);
             $stmt->bindParam(':birthday', $data['birthday']);
             return $stmt->execute() === FALSE ? false : true;
         } else {
@@ -431,7 +408,7 @@ class SQLiteUser {
             $stmt->bindParam(':exam', $data['exam']);
             $stmt->bindParam(':education', $data['education']);
             $stmt->bindParam(':ip', $data['ip']);
-            $stmt->bindValue(':authority', $this->calculateAuthority($data['ip']));
+            $stmt->bindValue(':authority', $data['authority']);
             return $stmt->execute() === FALSE ? false : true;
         } else {
             Logger::getInstance()->warning(__METHOD__.": 更新使用者(".$data['id'].")資料失敗！");
@@ -513,7 +490,8 @@ class SQLiteUser {
                 'entry_desc' => '系統管理者(AUTO)',
                 'entry_id' => $site_code.'ADMIN',
                 'timestamp' => time(),
-                'note' => $site_code.'.CENWEB.MOI.LAND inf'
+                'note' => $site_code.'.CENWEB.MOI.LAND inf',
+                'authority' => AUTHORITY::ADMIN
             )));
         } else {
             // To find IPResolver table record by ip

@@ -102,7 +102,6 @@ Vue.prototype.$store = (() => {
                     state.authority = authPayload;
                     state.isAdmin = authPayload.isAdmin;
                     state.isChief = authPayload.isChief;
-                    state.isSuper = authPayload.isSuper;
                 },
                 userNames(state, mappingPayload) {
                     state.userNames = { ...mappingPayload };
