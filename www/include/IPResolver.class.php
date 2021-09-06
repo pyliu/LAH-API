@@ -206,12 +206,12 @@ class IPResolver {
             if (array_key_exists(0, $user_data)) {
                 return $user_data[0]['name'];
             } else {
-                Logger::getInstance()->warning(__METHOD__.": 找不到 $ip 對應資料。(user table, dimension.db)");
+                // Logger::getInstance()->warning(__METHOD__.": 找不到 $ip 對應資料。(user table, dimension.db)");
             }
 
             return '';
         } else {
-            Logger::getInstance()->warning(__METHOD__.": Not a valid IP address. [$ip]");
+            Logger::getInstance()->warning(__METHOD__.": ${ip}不是一個正確的IPv4位址。");
         }
         return false;
     }
