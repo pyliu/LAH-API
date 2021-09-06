@@ -196,7 +196,7 @@ class IPResolver {
                 if (is_array($row)) {
                     return $row['entry_desc'];
                 } else {
-                    Logger::getInstance()->warning(__METHOD__.": 找不到 $ip 對應資料。(IPResolver table, IPResolver.db)");
+                    // Logger::getInstance()->warning(__METHOD__.": 找不到 $ip 對應資料。(IPResolver table, IPResolver.db)");
                 }
             }
 
