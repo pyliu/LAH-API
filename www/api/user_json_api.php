@@ -203,27 +203,27 @@ switch ($_POST["type"]) {
         ));
         break;
     case "on_board_users":
-        Logger::getInstance()->info("XHR [on_board_users] 取得所有在職使用者資料請求");
+        Logger::getInstance()->info("XHR [on_board_users] 取得所有正常使用者資料請求");
         $sqlite_user = new SQLiteUser();
         $results = $sqlite_user->getOnboardUsers();
         if (empty($results)) {
-            Logger::getInstance()->info("XHR [on_board_users] 查無在職使用者資料。");
-            echoJSONResponse("查無在職使用者資料。");
+            Logger::getInstance()->info("XHR [on_board_users] 查無正常使用者資料。");
+            echoJSONResponse("查無正常使用者資料。");
         } else {
-            Logger::getInstance()->info("XHR [on_board_users] 查詢在職使用者資料成功。");
-            echoJSONResponse('查詢在職使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
+            Logger::getInstance()->info("XHR [on_board_users] 查詢正常使用者資料成功。");
+            echoJSONResponse('查詢正常使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => count($results),
                 "raw" => $results
             ));
         }
         break;
     case "off_board_users":
-        Logger::getInstance()->info("XHR [off_board_users] 取得所有離職使用者資料請求");
+        Logger::getInstance()->info("XHR [off_board_users] 取得所有已禁用使用者資料請求");
         $sqlite_user = new SQLiteUser();
         $results = $sqlite_user->getOffboardUsers();
         if (empty($results)) {
-            Logger::getInstance()->info("XHR [off_board_users] 查無離職使用者資料。");
-            echoJSONResponse("查無離職使用者資料。");
+            Logger::getInstance()->info("XHR [off_board_users] 查無已禁用使用者資料。");
+            echoJSONResponse("查無已禁用使用者資料。");
         } else {
             Logger::getInstance()->info("XHR [off_board_users] 查詢離職使用者資料成功。");
             echoJSONResponse('查詢離職使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(

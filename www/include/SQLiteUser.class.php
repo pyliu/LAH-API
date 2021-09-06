@@ -151,7 +151,6 @@ class SQLiteUser {
             $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
         } else {
-            
             Logger::getInstance()->error(__METHOD__.": 取得在職使用者資料失敗！");
         }
         return false;
@@ -162,7 +161,6 @@ class SQLiteUser {
             $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
         } else {
-            
             Logger::getInstance()->error(__METHOD__.": 取得離職使用者資料失敗！");
         }
         return false;
