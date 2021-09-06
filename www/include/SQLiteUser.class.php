@@ -501,9 +501,11 @@ class SQLiteUser {
             if (empty($result)) {
                 // Logger::getInstance()->warning(__METHOD__.": IPResolver.db IPResolver 表格查不到 $ip 資料。");
             } else {
+                // add authority value into packed data
+                $result[0]['authority'] = $this->getAuthority($result[0]['entry_id']);
                 return array(IPResolver::packUserData($result[0]));
             }
-            // dimension.db user at the last priority
+            // authority stored at dimension.db user table
             if($stmt = $this->db->prepare("SELECT * FROM user WHERE ip = :ip")) {
                 $stmt->bindParam(':ip', $ip);
                 $result = $this->prepareArray($stmt);
