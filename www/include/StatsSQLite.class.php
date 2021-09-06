@@ -330,14 +330,10 @@ class StatsSQLite {
     }
 
     public function wipeAllAPConnHistory() {
-        $this->wipeAPConnHistory('205');
-        $this->wipeAPConnHistory('206');
-        $this->wipeAPConnHistory('207');
-        $this->wipeAPConnHistory('62');
-        $this->wipeAPConnHistory('156');
-        $this->wipeAPConnHistory('118');
-        $this->wipeAPConnHistory('161');
-        $this->wipeAPConnHistory('60');
+        $postfixs = System::getInstance()->getWebAPPostfix();
+        foreach ($postfixs as $postfix) {
+            $this->wipeAPConnHistory($postfix);
+        }
     }
     /**
      * Connectivity Status
