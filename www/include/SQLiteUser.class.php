@@ -495,11 +495,11 @@ class SQLiteUser {
             )));
         } else {
             // To find IPResolver table record by ip
-            Logger::getInstance()->info(__METHOD__.': 利用 IPResolver.db IPResolver 表格資料查詢使用者資料。');
+            // Logger::getInstance()->info(__METHOD__.': 利用 IPResolver.db IPResolver 表格資料查詢使用者資料。');
             $ipr = new IPResolver();
             $result = $ipr->getIPEntry($ip);
             if (empty($result)) {
-                Logger::getInstance()->warning(__METHOD__.": IPResolver.db IPResolver 表格查不到 $ip 資料。");
+                // Logger::getInstance()->warning(__METHOD__.": IPResolver.db IPResolver 表格查不到 $ip 資料。");
             } else {
                 return array(IPResolver::packUserData($result[0]));
             }
@@ -510,7 +510,7 @@ class SQLiteUser {
                 if(!empty($result)) {
                     return $result;
                 }
-                Logger::getInstance()->warning(__METHOD__.": 從 dimension.db user 表格取得使用者($ip)資料失敗！");
+                // Logger::getInstance()->warning(__METHOD__.": 從 dimension.db user 表格取得使用者($ip)資料失敗！");
             }
         }
 
