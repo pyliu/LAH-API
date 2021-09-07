@@ -72,7 +72,11 @@ class Notification {
                 VALUES (:bv_title, :bv_content, :bv_priority, :bv_create_datetime, :bv_expire_datetime, :bv_sender, :bv_from_ip, :bv_flag)
             ");
             if ($this->bindParams($stm, $payload)) {
-                return $stm->execute() === FALSE ? false : true;
+                if ($stm->execute() !== FALSE) {
+                    // return last inserted id
+                    return $db->querySingle("SELECT id from message ORDER BY id DESC LIMIT 1");
+                }
+                // return $stm->execute() === FALSE ? false : true;
             }
             return false;
         }
