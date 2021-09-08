@@ -85,9 +85,13 @@ class Notification {
     
     public function removeMessage($channel, $payload) {
         // expect payload has id and type info
-        if (empty($channel) || empty($payload['id']) || empty($payload['type'])) {
-            Logger::getInstance()->error(__METHOD__.': required param is missing. ('.$channel.', '.$payload['id'].', '.$payload['type'].')');
+        if (empty($channel) || empty($payload['type'])) {
+            Logger::getInstance()->error(__METHOD__.': required param is missing. ('.$channel.', '.$payload['type'].')');
             return false;
+        }
+        if (empty($payload['id'])) {
+            Logger::getInstance()->warning(__METHOD__.': 沒有指定 id 略過處理本次刪除請求. ('.$channel.', '.$payload['type'].')');
+            return true;
         }
         if ($payload['type'] === 'announcement') {
             if (in_array($channel, array('all', 'hr', 'acc', 'adm', 'reg', 'sur', 'val', 'inf', 'supervisor'))) {

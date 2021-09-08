@@ -58,8 +58,30 @@ switch ($_POST["type"]) {
         echoJSONResponse('NOT IMPLEMENTED');
         break;
     case "remove_notification":
-        Logger::getInstance()->info(print_r($_POST, true));
-        echoJSONResponse('NOT IMPLEMENTED');
+        $type = $_POST['message_type'];
+        // e.g. ['inf', '3']
+        $channels = $_POST['channels'];
+        $notify = new Notification();
+        $success = 0;
+        $fail = 0;
+        $successfulAdded = array();
+        foreach ($channels as $data) {
+            $channel = $data['channel'];
+            $id = $data['id'];
+            $res = $notify->removeMessage($channel, array(
+                'id' => $id,
+                'type' => $type
+            ));
+            Logger::getInstance()->info('從 '.$channel.' 頻道移除公告訊息。 ('.($res === false ? '失敗' : '成功').')');
+            if ($res === false) {
+                $fail++;
+            } else {
+                $success++;
+            }
+        }
+        $message = "移除訊息成功 $success 筆，失敗 $fail 筆。";
+        $status_code = $fail === 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+        echoJSONResponse($message, $status_code);
         break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
