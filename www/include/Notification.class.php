@@ -93,18 +93,17 @@ class Notification {
             Logger::getInstance()->warning(__METHOD__.': 沒有指定 id 略過處理本次刪除請求. ('.$channel.', '.$payload['type'].')');
             return true;
         }
-        if ($payload['type'] === 'announcement') {
-            if (in_array($channel, array('all', 'hr', 'acc', 'adm', 'reg', 'sur', 'val', 'inf', 'supervisor'))) {
-                $channel = $channel === 'all' ? 'announcement' : 'announcement_'.$channel;
-            }
-            Logger::getInstance()->info(__METHOD__.': 準備刪除 '.$channel.' 頻道 '.$payload['id'].' 資料');
-            if ($this->prepareDB($channel)) {
-                // TODO: add message
-                $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
-                if ($stm = $db->prepare("DELETE FROM message WHERE id = :bv_id")) {
-                    $stm->bindParam(':bv_id', $payload['id']);
-                    return $stm->execute() === FALSE ? false : true;
-                }
+        // special handling for announcement
+        if ($payload['type'] === 'announcement' && in_array($channel, array('all', 'hr', 'acc', 'adm', 'reg', 'sur', 'val', 'inf', 'supervisor'))) {
+            $channel = $channel === 'all' ? 'announcement' : 'announcement_'.$channel;
+        }
+        Logger::getInstance()->info(__METHOD__.': 準備刪除 '.$channel.' 頻道 '.$payload['id'].' 資料');
+        if ($this->prepareDB($channel)) {
+            // TODO: add message
+            $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            if ($stm = $db->prepare("DELETE FROM message WHERE id = :bv_id")) {
+                $stm->bindParam(':bv_id', $payload['id']);
+                return $stm->execute() === FALSE ? false : true;
             }
         }
         return false;
