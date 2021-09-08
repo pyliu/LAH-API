@@ -96,10 +96,8 @@ class Notification {
         if ($payload['type'] === 'announcement') {
             if (in_array($channel, array('all', 'hr', 'acc', 'adm', 'reg', 'sur', 'val', 'inf', 'supervisor'))) {
                 $channel = $channel === 'all' ? 'announcement' : 'announcement_'.$channel;
-            } else {
-                $myChannel = $_SESSION["myinfo"]["id"];
-                $channel = $myChannel;
             }
+            Logger::getInstance()->info(__METHOD__.': 準備刪除 '.$channel.' 頻道 '.$payload['id'].' 資料');
             if ($this->prepareDB($channel)) {
                 // TODO: add message
                 $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
@@ -108,7 +106,7 @@ class Notification {
                     return $stm->execute() === FALSE ? false : true;
                 }
             }
-            return false;
         }
+        return false;
     }
 }
