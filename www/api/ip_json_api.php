@@ -73,8 +73,8 @@ switch ($_POST["type"]) {
         ));
         break;
     case "dynamic_ip_entries":
-        // default get active IP entries within a week(unix timestamp is 604800)
-        $interval = intval($_POST['offset'] ?? 604800);
+        // default get active IP entries within a month(unix timestamp is 2629743)
+        $interval = intval($_POST['offset'] ?? 2629743);
         $days = ceil(abs($interval / 86400));
         $rows = $ipr->getDynamicIPEntries();
         $count = count($rows);

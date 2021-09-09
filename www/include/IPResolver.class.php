@@ -101,7 +101,7 @@ class IPResolver {
         return array();
     }
 
-    public function getDynamicIPEntries($threadhold = 604800) {
+    public function getDynamicIPEntries($threadhold = 2629743) {
         /**
          * default get entry within a year
          * a year: 31556926
