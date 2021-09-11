@@ -3,6 +3,7 @@ require_once('init.php');
 require_once('System.class.php');
 require_once('IPResolver.class.php');
 require_once('DynamicSQLite.class.php');
+require_once('Cache.class.php');
 
 class SQLiteUser {
     private $db;
@@ -337,6 +338,8 @@ class SQLiteUser {
         $unit = IPResolver::parseUnit($data['note']);
         if ($this->exists($data['entry_id'])) {
             Logger::getInstance()->info(__METHOD__.': 更新使用者資訊 ('.$data['entry_id'].', '.$data['entry_desc'].', '.$unit.', '.$data['ip'].')');
+            $operators = Cache::getInstance()->getUserNames();
+            $mapped_name = $operators[$data['entry_id']] ?? $data['entry_desc'];
             // update
             if($stmt = $this->db->prepare("
                 UPDATE user SET
@@ -346,7 +349,7 @@ class SQLiteUser {
                 WHERE id = :id
             ")) {
                 $stmt->bindParam(':id', $data['entry_id']);
-                $stmt->bindParam(':name', $data['entry_desc']);
+                $stmt->bindParam(':name', $mapped_name);
                 $stmt->bindParam(':unit', $unit);
                 // $stmt->bindParam(':ip', $data['ip']);
                 $stmt->bindValue(':offboard_date', '');
