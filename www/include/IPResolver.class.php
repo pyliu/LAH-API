@@ -2,6 +2,7 @@
 require_once('init.php');
 require_once('SQLiteUser.class.php');
 require_once('SQLiteDBFactory.class.php');
+require_once('System.class.php');
 
 class IPResolver {
     private $db;
@@ -131,6 +132,8 @@ class IPResolver {
     public static function packUserData($data) {
         $unit = IPResolver::parseUnit($data['note']);
         Logger::getInstance()->info(__METHOD__.': 打包找到的資料 ('.$data['entry_id'].', '.$data['entry_desc'].', '.$unit.', '.$data['ip'].')');
+        $site_code = System::getInstance()->getSiteCode();
+        $auto_admin = $data['entry_id'] === $site_code.'ADMIN';
         return array(
             'id' => $data['entry_id'],
             'name' => $data['entry_desc'],
@@ -141,13 +144,13 @@ class IPResolver {
             'tel' => '',
             'ext' => '',
             'cell' => '',
-            'title' => '',
-            'work' => '',
+            'title' => $auto_admin ? '系管人員' : '',
+            'work' => $auto_admin ? '智慧管控系統管理' : '',
             'exam' => '',
-            'education' => '',
-            'onboard_date' => '110/06/01',
+            'education' => $auto_admin ? '北科大資工所' : '',
+            'onboard_date' => $auto_admin ? '110/06/01' : '',
             'offboard_date' => '',
-            'birthday' => '066/05/23',
+            'birthday' => $auto_admin ? '066/05/23' : '',
             'authority' => $data['authority'] ?? 0
         );
     }

@@ -488,7 +488,7 @@ class SQLiteUser {
                 'ip' => $ip,
                 'added_type' => 'STATIC',
                 'entry_type' => 'SYSTEM',
-                'entry_desc' => '系統管理者(AUTO)',
+                'entry_desc' => '系統管理者',
                 'entry_id' => $site_code.'ADMIN',
                 'timestamp' => time(),
                 'note' => $site_code.'.CENWEB.MOI.LAND inf',
