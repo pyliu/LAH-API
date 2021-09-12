@@ -4,6 +4,35 @@ require_once('System.class.php');
 require_once("Ping.class.php");
 require_once("OraDB.class.php");
 
+function resizeImage($filename, $max_width = 960, $max_height = 540) {
+    list($orig_width, $orig_height) = getimagesize($filename);
+    $width = $orig_width;
+    $height = $orig_height;
+    // uploaded image height is over max width
+    if ($height > $max_height) {
+        // scale width by height ratio
+        $width = ($max_height / $height) * $width;
+        // specified height as max height
+        $height = $max_height;
+    }
+    // the calculated width still higher that max width
+    if ($width > $max_width) {
+        // scale height also
+        $height = ($max_width / $width) * $height;
+        // set width to max width
+        $width = $max_width;
+    }
+    // create plain canvas
+    $image_p = imagecreatetruecolor($width, $height);
+    // load image
+    $image = imagecreatefromjpeg($filename);
+    // copy & re-sampling
+    imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $orig_width, $orig_height);
+    // clean the loaded image
+    imagedestroy($image);
+    return $image_p;
+}
+
 // e.g. startsWith("abcde", "a")
 function startsWith($string, $startString)
 {

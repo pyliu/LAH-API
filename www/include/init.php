@@ -26,6 +26,16 @@ if (!file_exists(LOG_DIR) && !is_dir(LOG_DIR)) {
     mkdir(LOG_DIR);       
 }
 
+// to ensure upload image dir exists
+if (!file_exists(UPLOAD_IMG_DIR) && !is_dir(UPLOAD_IMG_DIR)) {
+    mkdir(UPLOAD_IMG_DIR);       
+}
+
+// to ensure user image dir exists
+if (!file_exists(USER_IMG_DIR) && !is_dir(USER_IMG_DIR)) {
+    mkdir(USER_IMG_DIR);       
+}
+
 set_exception_handler(function(Throwable $e) {
     Logger::getInstance()->error($e->getMessage());
 });

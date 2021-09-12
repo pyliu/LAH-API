@@ -4,6 +4,24 @@ require_once('DynamicSQLite.class.php');
 
 class SQLiteDBFactory {
     
+    public static function getImageDB() {
+        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."image.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "image" (
+                "id"	INTEGER NOT NULL,
+                "name"	TEXT NOT NULL,
+                "path"	TEXT,
+                "data"	BLOB,
+                "timestamp"	INTEGER NOT NULL,
+                "note"	TEXT,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        return $path;
+    }
+
     public static function getMessageDB($path) {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();

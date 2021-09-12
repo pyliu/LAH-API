@@ -12,6 +12,8 @@ node_modules
 *.db
 *tmp
 *.BAK
+
+**/upload/*
 **/users/*.JPG
 **/users/*.jpg
 **/howto/*.jpg
