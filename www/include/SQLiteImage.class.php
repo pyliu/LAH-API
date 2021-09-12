@@ -52,7 +52,11 @@ class SQLiteImage {
     }
 
     public function exists($path) {
-        return $this->db->querySingle("SELECT id from image WHERE path = '$path'");
+        $id = $this->db->querySingle("SELECT id from image WHERE path = '$path'");
+        if (!$id) {
+            $id = $this->db->querySingle("SELECT id from image WHERE name = '$path'");
+        }
+        return $id;
     }
 
     public function addImage($post) {
@@ -82,7 +86,7 @@ class SQLiteImage {
     }
 
     public function getImageByFilename($filename) {
-        $id = $this->db->querySingle("SELECT id from image WHERE name = '$filename'");
+        $id = $this->db->querySingle("SELECT id from image WHERE name = '$filename' ORDER BY timestamp DESC");
         if ($id) {
             return $this->getImageById($id);
         }
@@ -90,7 +94,7 @@ class SQLiteImage {
     }
 
     public function getImageByPath($path) {
-        $id = $this->db->querySingle("SELECT id from image WHERE path = '$path'");
+        $id = $this->db->querySingle("SELECT id from image WHERE path = '$path' ORDER BY timestamp DESC");
         if ($id) {
             return $this->getImageById($id);
         }
