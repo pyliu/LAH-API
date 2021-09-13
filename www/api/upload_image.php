@@ -33,7 +33,6 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
                 "name" => $filename,
                 "path" => $to_file,
                 "iana" => 'image/jpeg',
-                'size' => filesize($to_file),
                 "note" => $_POST["note"]
             ));
             

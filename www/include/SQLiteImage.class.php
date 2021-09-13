@@ -20,8 +20,8 @@ class SQLiteImage {
         $stm->bindParam(':name', $row['name']);
         $stm->bindParam(':path', $row['path']);
         $stm->bindValue(':data', file_get_contents($row['path']), SQLITE3_BLOB);
-        $stm->bindValue(':iana', $row['iana']);
-        $stm->bindValue(':size', $row['size']);
+        $stm->bindParam(':iana', $row['iana']);
+        $stm->bindValue(':size', filesize($row['path']));
         $stm->bindValue(':timestamp', time());
         $stm->bindParam(':note', $row['note']);
 
@@ -70,10 +70,12 @@ class SQLiteImage {
                 return false;
             }
             Logger::getInstance()->warning(__METHOD__.": 影像資料已存在，將更新BLOB資料。(id: $id)");
-            $stm = $this->db->prepare("UPDATE image SET data = :data, note = :note WHERE id = :id");
+            $stm = $this->db->prepare("UPDATE image SET data = :data, note = :note, size = :size, iana = :iana WHERE id = :id");
             $stm->bindParam(':id', $id);
             $stm->bindParam(':note', $post['note']);
             $stm->bindValue(':data', file_get_contents($post['path']), SQLITE3_BLOB);
+            $stm->bindParam(':iana', $post['iana']);
+            $stm->bindParam(':size', filesize($post['path']));
             return $stm->execute() === FALSE ? false : $id;
         } else {
             $stm = $this->db->prepare("
