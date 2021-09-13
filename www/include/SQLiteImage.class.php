@@ -20,6 +20,8 @@ class SQLiteImage {
         $stm->bindParam(':name', $row['name']);
         $stm->bindParam(':path', $row['path']);
         $stm->bindValue(':data', file_get_contents($row['path']), SQLITE3_BLOB);
+        $stm->bindValue(':iana', $row['iana']);
+        $stm->bindValue(':iana', $row['size']);
         $stm->bindValue(':timestamp', time());
         $stm->bindParam(':note', $row['note']);
 
@@ -75,8 +77,8 @@ class SQLiteImage {
             return $stm->execute() === FALSE ? false : $id;
         } else {
             $stm = $this->db->prepare("
-                INSERT INTO image ('name', 'path', 'data', 'timestamp', 'note')
-                VALUES (:name, :path, :data, :timestamp, :note)
+                INSERT INTO image ('name', 'path', 'data', 'iana', 'size', 'timestamp', 'note')
+                VALUES (:name, :path, :data, :iana, :size, :timestamp, :note)
             ");
             if ($this->bindParams($stm, $post)) {
                 return $stm->execute() === FALSE ? false : $this->getLastInsertedId();

@@ -14,6 +14,8 @@ class SQLiteDBFactory {
                 "name"	TEXT NOT NULL,
                 "path"	TEXT,
                 "data"	BLOB,
+                "iana"	TEXT DEFAULT "image/jpeg",
+                "size"	INTEGER DEFAULT 0,
                 "timestamp"	INTEGER NOT NULL,
                 "note"	TEXT,
                 PRIMARY KEY("id" AUTOINCREMENT)
