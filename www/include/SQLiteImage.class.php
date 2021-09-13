@@ -89,6 +89,20 @@ class SQLiteImage {
         return false;
     }
 
+    public function getImageData($name_or_path) {
+        $id = $this->db->querySingle("SELECT id from image WHERE name = '$name_or_path' ORDER BY timestamp DESC");
+        if (!$id) {
+            $id = $this->db->querySingle("SELECT id from image WHERE path = '$name_or_path' ORDER BY timestamp DESC");
+        }
+        if($stmt = $this->db->prepare("SELECT * FROM image WHERE id = :bv_id")) {
+            $stmt->bindParam(':bv_id', $id);
+            return $this->prepareArray($stmt);
+        } else {
+            Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM image WHERE id = '${id}'」SQL描述。");
+        }
+        return array();
+    }
+
     public function getImageByFilename($filename) {
         $id = $this->db->querySingle("SELECT id from image WHERE name = '$filename' ORDER BY timestamp DESC");
         if ($id) {
