@@ -21,7 +21,7 @@ class SQLiteImage {
         $stm->bindParam(':path', $row['path']);
         $stm->bindValue(':data', file_get_contents($row['path']), SQLITE3_BLOB);
         $stm->bindValue(':iana', $row['iana']);
-        $stm->bindValue(':iana', $row['size']);
+        $stm->bindValue(':size', $row['size']);
         $stm->bindValue(':timestamp', time());
         $stm->bindParam(':note', $row['note']);
 
