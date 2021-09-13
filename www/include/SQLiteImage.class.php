@@ -20,7 +20,7 @@ class SQLiteImage {
         $stm->bindParam(':name', $row['name']);
         $stm->bindParam(':path', $row['path']);
         $stm->bindValue(':data', file_get_contents($row['path']), SQLITE3_BLOB);
-        $stm->bindParam(':iana', $row['iana']);
+        $stm->bindValue(':iana', mime_content_type($row['path']));
         $stm->bindValue(':size', filesize($row['path']));
         $stm->bindValue(':timestamp', time());
         $stm->bindParam(':note', $row['note']);
@@ -74,7 +74,7 @@ class SQLiteImage {
             $stm->bindParam(':id', $id);
             $stm->bindParam(':note', $post['note']);
             $stm->bindValue(':data', file_get_contents($post['path']), SQLITE3_BLOB);
-            $stm->bindParam(':iana', $post['iana']);
+            $stm->bindParam(':iana', mime_content_type($post['path']));
             $stm->bindParam(':size', filesize($post['path']));
             return $stm->execute() === FALSE ? false : $id;
         } else {

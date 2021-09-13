@@ -32,7 +32,6 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
             $inserted_id = $sqlite_image->addImage(array(
                 "name" => $filename,
                 "path" => $to_file,
-                "iana" => 'image/jpeg',
                 "note" => $_POST["note"]
             ));
             
