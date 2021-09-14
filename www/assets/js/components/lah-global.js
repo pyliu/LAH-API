@@ -517,12 +517,20 @@ Vue.mixin({
             if (typeof opts == "string") {
                 opts = { message: opts }
             }
+            if (document && document.hidden) {
+                this.$warn(`document 不可見，省略 alert! (${opts.message})`)
+                return;
+            }
             if (!this.empty(opts.message)) {
                 let alert = window.vueApp.$refs.alert || window.dynaApp.$refs.alert;
                 alert.show(opts);
             }
         },
         notify: function(msg, opts) {
+            if (document && document.hidden) {
+                this.$warn(`document 不可見，省略 notification! (${msg})`)
+                return;
+            }
             // previous only use one object param
             if (typeof msg == "object") {
                 let message = msg.body || msg.message;
