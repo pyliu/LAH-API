@@ -247,6 +247,23 @@ switch ($_POST["type"]) {
             ));
         }
         break;
+    case "department_users":
+        Logger::getInstance()->info("XHR [department_users] 取得所有使用者資料請求");
+        $dept = $_POST['department'];
+        $valid = $_POST['valid'];
+        $sqlite_user = new SQLiteUser();
+        $results = $sqlite_user->getDepartmentUsers($dept, $valid);
+        if (empty($results)) {
+            Logger::getInstance()->info("XHR [department_users] 查無使用者資料。");
+            echoJSONResponse("查無使用者資料。");
+        } else {
+            Logger::getInstance()->info("XHR [department_users] 查詢部門使用者資料成功。");
+            echoJSONResponse('查詢部門使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($results),
+                "raw" => $results
+            ));
+        }
+        break;
     case "authority_list":
         Logger::getInstance()->info("XHR [authority_list] 取得使用者授權列表請求");
         $sqlite_user = new SQLiteUser();

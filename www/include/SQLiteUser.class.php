@@ -147,6 +147,35 @@ class SQLiteUser {
         return false;
     }
 
+    public function getDepartmentUsers($dept, $valid = 'on_board_users') {
+        $all = $dept === '全所';
+        $no_valid = $valid === 'all_users';
+        $sql = "SELECT * FROM user WHERE ".($all ? "1=1" : "unit = :bv_unit");
+        if ($valid === 'on_board_users') {
+            $sql .= " AND ((authority & :disabled_bit) <> :disabled_bit AND offboard_date = '') ";
+        } else if ($valid === 'off_board_users') {
+            $sql .= " AND ((authority & :disabled_bit) = :disabled_bit OR offboard_date <> '') ";
+        }
+        $sql .= " ORDER BY id";
+        Logger::getInstance()->info($all);
+        Logger::getInstance()->info($no_valid);
+        Logger::getInstance()->info($dept);
+        Logger::getInstance()->info($valid);
+        Logger::getInstance()->info($sql);
+        if($stmt = $this->db->prepare($sql)) {
+            if (!$no_valid) {
+                $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
+            }
+            if (!$all) {
+                $stmt->bindParam(':bv_unit', $dept);
+            }
+            return $this->prepareArray($stmt);
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 取得部門使用者資料失敗！");
+        }
+        return false;
+    }
+
     public function getOnboardUsers() {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :disabled_bit) <> :disabled_bit AND offboard_date = '' ORDER BY id")) {
             $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
