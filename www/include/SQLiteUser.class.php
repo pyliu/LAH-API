@@ -148,7 +148,7 @@ class SQLiteUser {
     }
 
     public function getOnboardUsers() {
-        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :disabled_bit) <> :disabled_bit ORDER BY id")) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :disabled_bit) <> :disabled_bit AND offboard_date = '' ORDER BY id")) {
             $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
         } else {
@@ -158,7 +158,7 @@ class SQLiteUser {
     }
 
     public function getDisabledUsers() {
-        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :disabled_bit) = :disabled_bit ORDER BY id")) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :disabled_bit) = :disabled_bit OR offboard_date <> '' ORDER BY id")) {
             $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
         } else {
