@@ -5,9 +5,10 @@ switch ($_POST["type"]) {
 	case "list":
         Logger::getInstance()->info("準備搜尋海報資料夾 ".POSTER_IMG_DIR);
         $files = array_diff(scandir(POSTER_IMG_DIR), array('..', '.'));
+        $regex = '/\.(jpe?g)(?:[\?\#].*)?$/i';
         $found_jpgs = array();
         foreach ($files as $file) {
-            if (endsWith($file, '.jpg') || endsWith($file, '.JPG')) {
+            if (preg_match($regex, $file)) {
                 $found_jpgs[] = $file;
             }
         }
