@@ -46,11 +46,12 @@ switch ($_POST["type"]) {
                 );
             }
         }
-        $message = "新增訊息成功 $success 筆，失敗 $fail 筆。($title)";
+        $message = "新增訊息成功 $success 筆，失敗 $fail 筆。";
         $status_code = $fail === 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
         echoJSONResponse($message, $status_code, array(
             "added" => $successfulAdded,
-            "data_count" => $success
+            "data_count" => $success,
+            "title" => $title
         ));
         break;
     case "upd_notification":
