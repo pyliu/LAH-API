@@ -1,22 +1,10 @@
 <?php
-require_once(__DIR__."/../include/init.php");
-
-function startsWith( $haystack, $needle ) {
-    $length = strlen( $needle );
-    return substr( $haystack, 0, $length ) === $needle;
-}
-
-function endsWith( $haystack, $needle ) {
-    $length = strlen( $needle );
-    if( !$length ) {
-        return true;
-    }
-    return substr( $haystack, -$length ) === $needle;
-}
+require_once(dirname(dirname(__FILE__))."/include/init.php");
 
 switch ($_POST["type"]) {
 	case "list":
-        $files = array_diff(scandir(__DIR__."/../assets/img/poster"), array('..', '.'));
+        Logger::getInstance()->info("準備搜尋海報資料夾 ".POSTER_IMG_DIR);
+        $files = array_diff(scandir(POSTER_IMG_DIR), array('..', '.'));
         $found_jpgs = array();
         foreach ($files as $file) {
             if (endsWith($file, '.jpg') || endsWith($file, '.JPG')) {
@@ -24,6 +12,7 @@ switch ($_POST["type"]) {
             }
         }
         $count = count($found_jpgs);
+        Logger::getInstance()->info("找到 $count 個 JPEG 檔案");
         echoJSONResponse("找到 $count 個 JPEG 檔案", STATUS_CODE::SUCCESS_NORMAL, array(
             'files' => $found_jpgs,
         ));

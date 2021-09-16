@@ -40,6 +40,14 @@ function startsWith($string, $startString)
     return (substr($string, 0, $len) === $startString);
 }
 
+function endsWith($haystack, $needle) {
+    $length = strlen( $needle );
+    if( !$length ) {
+        return true;
+    }
+    return substr( $haystack, -$length ) === $needle;
+}
+
 // Function to check response time
 function pingDomain($domain, $port = 0, $timeout = 1){
     if (System::getInstance()->isMockMode()) {
