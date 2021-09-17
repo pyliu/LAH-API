@@ -445,11 +445,6 @@ if (Vue) {
                     icon: "laptop-house",
                     need_admin: false
                 }, {
-                    text: "信差歷史訊息",
-                    url: "message.html",
-                    icon: "comments",
-                    need_admin: false
-                },{
                     text: "體溫紀錄",
                     url: "temperature.html",
                     icon: "head-side-mask",
@@ -486,6 +481,12 @@ if (Vue) {
                         need_admin: false
                     }]
                 }];
+                // {
+                //     text: "信差歷史訊息",
+                //     url: "message.html",
+                //     icon: "comments",
+                //     need_admin: false
+                // }];
             }
         },
         methods: {
