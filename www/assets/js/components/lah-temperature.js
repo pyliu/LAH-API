@@ -68,10 +68,12 @@ if (Vue) {
             </div>
             <template v-if="seen" v-slot:footer>
                 <div class="my-2">
-                    <b-button-group size="sm" class="float-right">
-                        <b-button variant="primary" @click="chart_type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
-                        <b-button variant="success" @click="chart_type = 'line'"><i class="fas fa-chart-line"></i></b-button>
-                    </b-button-group>
+                    <div class="d-flex justify-content-end mb-1">
+                        <b-button-group size="sm">
+                            <b-button variant="primary" @click="chart_type = 'bar'"><i class="fas fa-chart-bar"></i></b-button>
+                            <b-button variant="success" @click="chart_type = 'line'"><i class="fas fa-chart-line"></i></b-button>
+                        </b-button-group>
+                    </div>
                     <lah-chart
                         ref="chart"
                         :items="chart_items"
@@ -102,7 +104,7 @@ if (Vue) {
                 return this.userNames[this.ID] || ''
             },
             validateID() {
-                return (/^HB\d{4}$/i).test(this.ID)
+                return this.name !== ''
             },
             validateTemperature() {
                 let fn = parseFloat(this.temperature);
