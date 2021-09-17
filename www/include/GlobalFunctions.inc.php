@@ -33,6 +33,15 @@ function resizeImage($filename, $max_width = 960, $max_height = 540) {
     return $image_p;
 }
 
+function base64EncodedImage($imageFile) {
+    $imageInfo = getimagesize($imageFile);
+    $imageData = file_get_contents($imageFile);
+    return array(
+        'prefix' => 'data:' . $imageInfo['mime'] . ';base64,',
+        'base64' => base64_encode($imageData)
+    );
+}
+
 // e.g. startsWith("abcde", "a")
 function startsWith($string, $startString)
 {

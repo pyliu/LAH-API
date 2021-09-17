@@ -1,6 +1,5 @@
 <?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR."init.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteImage.class.php");
 
 $status = STATUS_CODE::DEFAULT_FAIL;
 $message = '已上傳';
@@ -16,32 +15,18 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
 
         $tmp_file = $_FILES['file']['tmp_name'];
         $timestamp = time();
-        $to_file = UPLOAD_IMG_DIR.DIRECTORY_SEPARATOR.$filename;
-        $w = $_POST['width'] ?? 960;
-        $h = $_POST['height'] ?? 540;
+        $to_file = UPLOAD_IMG_DIR.DIRECTORY_SEPARATOR.'tmp_base64.jpg';
+        $w = $_POST['width'] ?? 320;
+        $h = $_POST['height'] ?? 240;
         $q = $_POST['quality'] ?? 75;
 
         $resized = resizeImage($tmp_file, $w, $h);
 
         if (imagejpeg($resized, $to_file, $q)) {
             $status = STATUS_CODE::SUCCESS_NORMAL;
-            $message = '影像已儲存 '.$to_file;
-
-            Logger::getInstance()->info("檔案已存放到 $to_file");
-            
-            $sqlite_image = new SQLiteImage();
-            $inserted_id = $sqlite_image->addImage(array(
-                "name" => $filename,
-                "path" => $to_file,
-                "note" => $_POST["note"]
-            ));
-            
-            if ($inserted_id === false) {
-                Logger::getInstance()->error("新增一筆影像BLOB資料失敗");
-            } else {
-                Logger::getInstance()->info("上傳影像BLOB資料成功 ($inserted_id)");
-                $converted = base64EncodedImage($to_file);
-            }
+            $message = '暫存影像已儲存到 '.$to_file;
+            Logger::getInstance()->info($message);
+            $converted = base64EncodedImage($to_file);
         } else {
             $message = '處理失敗 '.$tmp_file.' => '.$to_file;
         }
