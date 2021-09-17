@@ -344,7 +344,8 @@ if (Vue) {
                 return !this.empty(this.myip)
             },
             url() {
-                let page_url = new URL(location.href).pathname.substring(1);
+                // may comes from ~:8080/legacy, so get rid of '/legacy' ... 
+                let page_url = new URL(location.href).pathname.replace('/legacy', '').substring(1);
                 if (this.empty(page_url)) {
                     return 'index.html';
                 }
