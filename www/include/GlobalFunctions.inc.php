@@ -37,8 +37,8 @@ function base64EncodedImage($imageFile) {
     $imageInfo = getimagesize($imageFile);
     $imageData = file_get_contents($imageFile);
     return array(
-        'prefix' => 'data:' . $imageInfo['mime'] . ';base64,',
-        'base64' => base64_encode($imageData)
+        'uri' => 'data:' . $imageInfo['mime'] . ';base64,',
+        'encoded' => base64_encode($imageData)
     );
 }
 

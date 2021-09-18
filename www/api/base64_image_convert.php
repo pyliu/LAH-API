@@ -39,6 +39,6 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
 echo json_encode(array(
     'status' => $status,
     'message'  => $message,
-    'prefix' => $converted['prefix'],
-    'base64' => $converted['base64']
+    'uri' => $converted['uri'],
+    'encoded' => $converted['encoded']
 ));
