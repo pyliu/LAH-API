@@ -131,7 +131,7 @@ class IPResolver {
 
     public static function packUserData($data) {
         $unit = IPResolver::parseUnit($data['note']);
-        Logger::getInstance()->info(__METHOD__.': 打包找到的資料 ('.$data['entry_id'].', '.$data['entry_desc'].', '.$unit.', '.$data['ip'].')');
+        // Logger::getInstance()->info(__METHOD__.': 打包找到的資料 ('.$data['entry_id'].', '.$data['entry_desc'].', '.$unit.', '.$data['ip'].')');
         $site_code = System::getInstance()->getSiteCode();
         $auto_admin = $data['entry_id'] === $site_code.'ADMIN';
         return array(

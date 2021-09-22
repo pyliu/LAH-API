@@ -511,7 +511,7 @@ class SQLiteUser {
     public function getUserByIP($ip) {
         // To check if the $ip is from localhost
         if (in_array($ip, ['127.0.0.1', '::1'])) {
-            Logger::getInstance()->info(__METHOD__.': 偵測到來自 localhost IP，判定為系統管理者。');
+            // Logger::getInstance()->info(__METHOD__.': 偵測到來自 localhost IP，判定為系統管理者。');
             $site_code = System::getInstance()->getSiteCode();
             return array(IPResolver::packUserData(array(
                 'ip' => $ip,
