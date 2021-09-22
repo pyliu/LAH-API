@@ -18,6 +18,7 @@ switch ($_POST["type"]) {
             'timestamp' => time(),
             'note' => $_POST['note'] ?? ''
         );
+        Logger::getInstance()->info('更新使用者回報IP資料 '.$data['ip'].' '.$data['entry_id'].' '.$data['entry_desc']);
         $result = $ipr->addIpEntry($data);
 
         if ($result && $data['entry_type'] === 'USER' && startsWith($data['entry_id'], $system->getSiteCode())) {
@@ -29,6 +30,7 @@ switch ($_POST["type"]) {
         }
 
         $message = $result ? '完成 '.$data['ip'].' ('.$data['added_type'].', '.$data['entry_type'].') 更新' : '更新 '.$data['ip'].' 資料失敗';
+        Logger::getInstance()->info($message);
 		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
         echoJSONResponse($message, $status_code);
         break;
