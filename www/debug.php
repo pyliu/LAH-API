@@ -32,7 +32,7 @@ try {
     
     echo '<br/><br/>';
 
-    echo print_r(System::getInstance()->calcAuthority($_SESSION['myinfo']['authority']), true);
+    echo print_r(preg_replace("/(桃園所|中壢所|大溪所|楊梅所|蘆竹所|八德所|平鎮所|龜山所|桃園|中壢|大溪|楊梅|蘆竹|八德|平鎮|龜山)/i", '', '桃園湖百松'), true);
     
 }
 catch(Exception $e)
