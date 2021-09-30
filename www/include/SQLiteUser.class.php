@@ -424,7 +424,8 @@ class SQLiteUser {
                 exam = :exam,
                 education = :education,
                 ip = :ip,
-                authority = :authority
+                authority = :authority,
+                onboard_date = :onboard_date
             WHERE id = :id
         ")) {
             $stmt->bindParam(':id', $data['id']);
@@ -439,6 +440,7 @@ class SQLiteUser {
             $stmt->bindParam(':education', $data['education']);
             $stmt->bindParam(':ip', $data['ip']);
             $stmt->bindValue(':authority', $data['authority']);
+            $stmt->bindValue(':onboard_date', $data['onboard_date']);
             return $stmt->execute() === FALSE ? false : true;
         } else {
             Logger::getInstance()->warning(__METHOD__.": 更新使用者(".$data['id'].")資料失敗！");
