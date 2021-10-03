@@ -308,7 +308,7 @@ switch ($_POST["type"]) {
 		Logger::getInstance()->info("XHR [watchdog] 監控請求");
 		// use http://localhost the client will be "::1"
 		// if you want to enable the watchdog, open http://localhost/watchdog,html with chrome on server. (do not close it)
-		if ($client_ip == "::1") {	// $client_ip from init.php
+		if ($client_ip === "::1" || $client_ip === '127.0.0.1') {	// $client_ip from init.php
 			$watchdog = new WatchDog();
 			$done = $watchdog->do();
 			if ($done) {
