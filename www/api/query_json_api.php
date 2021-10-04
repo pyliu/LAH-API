@@ -316,7 +316,8 @@ switch ($_POST["type"]) {
 				echo json_encode(array(
 					"status" => STATUS_CODE::SUCCESS_NORMAL,
 					"data_count" => 0,
-					"raw" => $done
+					"raw" => $done,
+					"message" => "Watchdog查詢檢查完成"
 				), 0);
 			} else {
 				Logger::getInstance()->warning("XHR [watchdog] 非上班時段停止執行。");
