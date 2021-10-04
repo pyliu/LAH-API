@@ -274,7 +274,7 @@ if (Vue) {
                     rand: (range) => Math.floor(Math.random() * Math.floor(range || 100))
                 },
                 mounted() {
-                    this.callWatchdogAPI();
+                    // this.callWatchdogAPI();
                     this.changeWIPMessageAnim();
                 }
             }
