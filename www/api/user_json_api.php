@@ -320,28 +320,29 @@ switch ($_POST["type"]) {
         break;
 	case "my_info":
 	case "authentication":
-		Logger::getInstance()->info("XHR [my_info/authentication] 查詢 $client_ip 請求");
+        $query_ip = empty($_POST['ip']) ? $client_ip : $_POST['ip'];
+		Logger::getInstance()->info("XHR [my_info/authentication] 查詢 $query_ip 請求");
         $sqlite_user = new SQLiteUser();
         
         Logger::getInstance()->info("XHR [my_info/authentication] 查詢 by ip");
 
-		$results = $sqlite_user->getUserByIP($client_ip);
+		$results = $sqlite_user->getUserByIP($query_ip);
 		$len = count($results);
 		if ($len > 1) {
 			$last = $results[$len - 1];
 			$results = array($last);
 		}
 		if (empty($results)) {
-			Logger::getInstance()->info("XHR [my_info/authentication] 查無 $client_ip 資料/授權");
-            echoJSONResponse("查無 ".$client_ip." 資料/授權。", STATUS_CODE::FAIL_NOT_FOUND, array(
+			Logger::getInstance()->info("XHR [my_info/authentication] 查無 $query_ip 資料/授權");
+            echoJSONResponse("查無 ".$query_ip." 資料/授權。", STATUS_CODE::FAIL_NOT_FOUND, array(
 				"data_count" => 0,
 				"info" => false,
 				"authority" => System::getInstance()->calcAuthority(0)
 			));
 		} else {
 			$_SESSION["myinfo"] = $results[0];
-			Logger::getInstance()->info("XHR [my_info/authentication] 查詢 ".$client_ip." 成功。");
-            echoJSONResponse("查詢 ".$client_ip." 成功。 (".$results[0]["id"].":".$results[0]["name"].")", STATUS_CODE::SUCCESS_NORMAL, array(
+			Logger::getInstance()->info("XHR [my_info/authentication] 查詢 ".$query_ip." 成功。");
+            echoJSONResponse("查詢 ".$query_ip." 成功。 (".$results[0]["id"].":".$results[0]["name"].")", STATUS_CODE::SUCCESS_NORMAL, array(
 				"data_count" => count($results),
 				"info" => $results[0],
 				"authority" => System::getInstance()->calcAuthority($_SESSION["myinfo"]['authority'])
