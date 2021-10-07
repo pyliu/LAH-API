@@ -4,7 +4,7 @@ require_once('System.class.php');
 require_once("Ping.class.php");
 require_once("OraDB.class.php");
 
-function resizeImage($filename, $max_width = 960, $max_height = 540) {
+function resizeImage($filename, $max_width = 1920, $max_height = 1080, $type = 'jpg') {
     list($orig_width, $orig_height) = getimagesize($filename);
     $width = $orig_width;
     $height = $orig_height;
@@ -25,7 +25,21 @@ function resizeImage($filename, $max_width = 960, $max_height = 540) {
     // create plain canvas
     $image_p = imagecreatetruecolor($width, $height);
     // load image
-    $image = imagecreatefromjpeg($filename);
+    switch ($type) {
+        case 'png':
+        case 'PNG':
+            $image = @imagecreatefrompng($filename);
+            break;
+        case 'gif':
+        case 'GIF':
+            $image = @imagecreatefromgif($filename);
+            break;
+        case 'string':
+            $image = @imagecreatefromstring($filename);
+            break;
+        default:
+            $image = @imagecreatefromjpeg($filename);
+    }
     // copy & re-sampling
     imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $orig_width, $orig_height);
     // clean the loaded image

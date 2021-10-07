@@ -9,20 +9,33 @@ $base64 = '';
 
 if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
     $filename = $_FILES['file']['name'];
-    $valid_extensions = array("jpg", "JPG", 'jpeg', 'JPEG');
+    $valid_extensions = array("jpg", "JPG", 'jpeg', 'JPEG', 'png', 'PNG', 'gif', 'GIF');
     $extension = pathinfo($filename, PATHINFO_EXTENSION);
     if (in_array($extension, $valid_extensions)) {
 
         $tmp_file = $_FILES['file']['tmp_name'];
         $timestamp = time();
-        $to_file = UPLOAD_IMG_DIR.DIRECTORY_SEPARATOR.'tmp_base64.jpg';
-        $w = $_POST['width'] ?? 320;
-        $h = $_POST['height'] ?? 240;
-        $q = $_POST['quality'] ?? 75;
+        $to_file = UPLOAD_IMG_DIR.DIRECTORY_SEPARATOR.'tmp_base64.'.$extension;
+        $w = $_POST['width'] ?? 1920;
+        $h = $_POST['height'] ?? 1080;
+        $q = $_POST['quality'] ?? 80;
 
-        $resized = resizeImage($tmp_file, $w, $h);
+        $resized = resizeImage($tmp_file, $w, $h, $extension);
 
-        if (imagejpeg($resized, $to_file, $q)) {
+        switch ($type) {
+            case 'png':
+            case 'PNG':
+                $result = @imagepng($resized, $to_file);
+                break;
+            case 'gif':
+            case 'GIF':
+                $result = @imagegif($resized, $to_file);
+                break;
+            default:
+                $result = @imagejpeg($resized, $to_file, $q);
+        }
+
+        if ($result) {
             $status = STATUS_CODE::SUCCESS_NORMAL;
             $message = '暫存影像已儲存到 '.$to_file;
             Logger::getInstance()->info($message);
@@ -31,8 +44,8 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
             $message = '處理失敗 '.$tmp_file.' => '.$to_file;
         }
     } else {
-        $message = "檔案不是JPG";
-        Logger::getInstance()->error(__FILE__.': 檔案不是JPG。 '.print_r($_FILES, true));
+        $message = "檔案不是支援的影像檔案 (JPG/PNG/GIF)";
+        Logger::getInstance()->error(__FILE__.': '.$message.'。 '.print_r($_FILES, true));
     }
 }
 
