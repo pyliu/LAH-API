@@ -2050,7 +2050,7 @@ if (Vue) {
             }
         },
         data: () => ({
-            orig_ext: 503
+            orig_ext: 411
         }),
         watch: {
             myinfo(val) { this.orig_ext = val['ext'] }
@@ -2081,29 +2081,6 @@ if (Vue) {
                             this.removeLocalCache('myinfo');
                             this.removeLocalCache('lah-org-chart');
                         }
-                    }).catch(err => {
-                        this.error = err;
-                    }).finally(() => {
-                        this.isBusy = false;
-                        this.update_doc();
-                    });
-                }
-            },
-            update_doc() {
-                if (!this.disableMSDBQuery) {
-                    this.isBusy = true;
-                    // also update old db database
-                    this.$http.post(CONFIG.API.JSON.MSSQL, {
-                        type: "upd_ext_doc",
-                        id: this.myinfo['id'],
-                        ext: this.myinfo['ext']
-                    }).then(res => {
-                        this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
-                        this.notify({
-                            title: "更新doc資料庫分機號碼",
-                            message: res.data.message,
-                            type: res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL ? 'success' : 'danger'
-                        });
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
