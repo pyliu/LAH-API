@@ -203,13 +203,23 @@ class SQLiteUser {
         return $this->getDisabledUsers();
     }
 
+    public function getAdmins() {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :admin_bit) = :admin_bit AND (authority & :disabled_bit) <> :disabled_bit ORDER BY id")) {
+            $stmt->bindValue(':admin_bit', AUTHORITY::ADMIN, SQLITE3_INTEGER);
+            $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
+            return $this->prepareArray($stmt);
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 取得管理者資料失敗！");
+        }
+        return false;
+    }
+    
     public function getChiefs() {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :chief_bit) = :chief_bit AND (authority & :disabled_bit) <> :disabled_bit ORDER BY id")) {
             $stmt->bindValue(':chief_bit', AUTHORITY::CHIEF, SQLITE3_INTEGER);
             $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
         } else {
-            
             Logger::getInstance()->error(__METHOD__.": 取得主管資料失敗！");
         }
         return false;
