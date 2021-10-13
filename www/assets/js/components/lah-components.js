@@ -1228,12 +1228,14 @@ if (Vue) {
                         </b-link>
                         <lah-user-description :user_data="user_data"></lah-user-description>
                     </b-tab>
+                    <!--
                     <b-tab v-if="foundCount == 1 && !foundLeft && message_ui">
                         <template v-slot:title>
                             <lah-fa-icon icon="comment-dots" prefix="far"> 傳送信差</lah-fa-icon>
                         </template>
                         <lah-user-message-form :ID="ID" :NAME="foundName" no-body></lah-user-message-form>
                     </b-tab>
+                    -->
                 </b-tabs>
             </b-card>
             <lah-fa-icon icon="exclamation-circle" size="lg" variant="danger" class="my-2" v-else>找不到使用者「{{name || id || ip}}」！</lah-fa-icon>
