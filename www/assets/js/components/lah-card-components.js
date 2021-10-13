@@ -18,7 +18,7 @@ if (Vue) {
                     ref="input"
                     v-model="input"
                     @keyup.enter="query"
-                    title="HBXXXX 或 姓名 或 IP"
+                    title="HAXXXX 或 姓名 或 IP"
                     :state="validate"
                     class="no-cache"
                 ></b-form-input>
@@ -70,7 +70,7 @@ if (Vue) {
             input(nVal, oVal) {
                 this.filter()
             },
-            myid(val) { this.input = val.replace(/\d{1}$/g, "") },
+            myid(val) { this.input = val.substring(0, 4) },
             usernames(val) {
                 this.ids = val.map((item, idx, array) => {
                     // set all flags to false at first
