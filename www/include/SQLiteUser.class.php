@@ -19,13 +19,16 @@ class SQLiteUser {
             Logger::getInstance()->error(__METHOD__.": bindUserParams because of \$stm is false.");
             return;
         }
-
+        
+        // remove additional prefix by previous data in ora db
+        $row['AP_USER_NAME'] = preg_replace("/(桃園所|中壢所|大溪所|楊梅所|蘆竹所|八德所|平鎮所|龜山所|桃園|中壢|大溪|楊梅|蘆竹|八德|平鎮|龜山)/i", '', $row['AP_USER_NAME']);
+        
         $stm->bindParam(':id', $row['DocUserID']);
         $stm->bindParam(':name', $row['AP_USER_NAME']);
         $stm->bindValue(':sex', $row['AP_SEX'] == '男' ? 1 : 0);
         $stm->bindParam(':addr', $row['AP_ADR']);
         $stm->bindParam(':tel', $row['AP_TEL'], SQLITE3_TEXT);
-        $stm->bindValue(':ext', empty($row['AP_EXT']) ? '153' : $row['AP_EXT'], SQLITE3_TEXT); // 總機 153
+        $stm->bindValue(':ext', empty($row['AP_EXT']) ? '411' : $row['AP_EXT'], SQLITE3_TEXT); // 總機 411
         $stm->bindParam(':cell', $row['AP_SEL'], SQLITE3_TEXT);
         $stm->bindParam(':unit', $row['AP_UNIT_NAME']);
         $stm->bindParam(':title', $row['AP_JOB']);
