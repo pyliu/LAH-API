@@ -2,6 +2,7 @@
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'init.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Query.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Message.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'Notification.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'StatsSQLite.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Temperature.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteUser.class.php');

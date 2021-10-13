@@ -1,6 +1,7 @@
 <?php
 require_once('init.php');
 require_once("OraDB.class.php");
+require_once("System.class.php");
 
 class StatsOracle {
     private $db;
@@ -167,11 +168,19 @@ class StatsOracle {
         if (!$this->checkYearMonth($year_month)) {
             return false;
         }
+
+		$site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
+        $site_code = 'A';
+		if (!empty($site)) {
+			$site_code = $site[1];
+			$site_number = ord($site_code) - ord('A');
+		}
+
         $this->db->parse("
             SELECT '本所處理跨所子號案件' AS \"text\", COUNT(*) AS \"count\"
             FROM MOICAS.CRSMS tt
             WHERE tt.rm07_1 LIKE :bv_cond || '%'
-                AND tt.rm02 LIKE 'H%B1' -- 本所處理跨所案件
+                AND tt.rm02 LIKE 'H%".$site_code."1' -- 本所處理跨所案件
                 AND tt.RM03 NOT LIKE '%0' -- 子號案件
         ");
         $this->db->bind(":bv_cond", $year_month);

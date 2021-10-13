@@ -8,9 +8,9 @@ class Query {
 
 	private $db;
 	private $db_ok = true;
-	private $site = 'HB';
-	private $site_code = 'B';
-	private $site_number = 2;
+	private $site = 'HA';
+	private $site_code = 'A';
+	private $site_number = 1;
 
 	private function checkPID($id) {
 		if( !$id ) {
@@ -79,10 +79,10 @@ class Query {
 			$type = OraDB::getPointDBTarget();
 			$this->db = new OraDB($type);
 		}
-		$this->site = strtoupper(System::getInstance()->get('SITE')) ?? 'HB';
+		$this->site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
 		if (!empty($this->site)) {
 			$this->site_code = $this->site[1];
-			$this->site_number = ord($this->site_code) - ord('A') + 1;
+			$this->site_number = ord($this->site_code) - ord('A');
 		}
     }
 
@@ -267,7 +267,7 @@ class Query {
 		}
 
 		global $week_ago;
-		$this->db->parse("SELECT * FROM SCRSMS WHERE RM07_1 >= :bv_week_ago AND RM02 LIKE 'H%1' AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL)");
+		$this->db->parse("SELECT * FROM SCRSMS WHERE RM07_1 >= :bv_week_ago AND RM02 LIKE 'H%".$this->site_code."1' AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL)");
 		$this->db->bind(":bv_week_ago", $week_ago);
         $this->db->execute();
         return $this->db->fetchAll();
@@ -810,7 +810,7 @@ class Query {
 			FROM (SELECT *
 					FROM MOICAS.CRSMS tt
 					WHERE tt.rm07_1 LIKE :bv_qmonth || '%'
-					AND tt.rm02 LIKE 'H%B1' -- 本所處理跨所案件
+					AND tt.RM02 LIKE 'H%".$this->site_code."1' -- 本所處理跨所案件
 					AND tt.RM03 NOT LIKE '%0' -- 子號案件
 					) SQ
 			LEFT JOIN MOICAD.RKEYN k
