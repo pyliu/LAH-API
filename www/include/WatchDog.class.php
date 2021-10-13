@@ -73,10 +73,12 @@ class WatchDog {
     );
 
     private $overdue_cfg = array(
-        "REG_CHIEF_ID" => "HB1214",
+        "REG_CHIEF_ID" => "HA10021802",
         "SUBSCRIBER" => array(
-            "192.168.24.2",  // pyliu
-            "192.168.24.150"  // INF Chief
+            "192.168.13.96",    // pyliu
+            "192.168.13.100",   // #501
+            "192.168.13.98",    // #502
+            "192.168.13.168"    // #506
         )
     );
 
@@ -113,22 +115,27 @@ class WatchDog {
             Logger::getInstance()->warning('找到'.count($rows).'件跨所註記遺失！');
             $case_ids = [];
             foreach ($rows as $row) {
-                $case_ids[] = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
-                Logger::getInstance()->warning($row['RM01'].'-'.$row['RM02'].'-'.$row['RM03']);
+                $case_ids[] = '🔴 '.$row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
+                Logger::getInstance()->warning('🔴 '.$row['RM01'].'-'.$row['RM02'].'-'.$row['RM03']);
             }
             
             $host_ip = getLocalhostIP();
-            $msg = new Message();
-            $content = "系統目前找到下列跨所註記遺失案件:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/dashboard.html 執行檢查功能並修正。";
-            $system = System::getInstance();
-            $adm_ips = $system->getRoleAdminIps();
-            foreach ($adm_ips as $adm_ip) {
-                if ($adm_ip == '::1') {
-                    continue;
-                }
-                $sn = $msg->send('跨所案件註記遺失通知', $content, $adm_ip, 840);   // 840 secs => +14 mins
-                Logger::getInstance()->info("訊息已送出(${sn})給 ${adm_ip}");
+            $content = "⚠️地政系統目前找到下列跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://$host_ip/dashboard.html) 執行檢查功能並修正。";
+            $sqlite_user = new SQLiteUser();
+            $notify = new Notification();
+            $admins = $sqlite_user->getAdmins();
+            foreach ($admins as $admin) {
+                $lastId = $notify->addMessage($admin['id'], array(
+                    'title' => 'dontcare',
+                    'content' => trim($content),
+                    'priority' => 3,
+                    'expire_datetime' => '',
+                    'sender' => '系統排程',
+                    'from_ip' => $host_ip
+                ));
+                echo '新增「跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')';
             }
+            
             $this->stats->addXcasesStats(array(
                 "date" => date("Y-m-d H:i:s"),
                 "found" => count($rows),
@@ -366,7 +373,7 @@ class WatchDog {
 
     public function do() {
         if ($this->isOfficeHours()) {
-            // $this->checkCrossSiteData();
+            $this->checkCrossSiteData();
             // $this->findDelayRegCases();
             // $this->findProblematicSURCases();
             $this->compressLog();
