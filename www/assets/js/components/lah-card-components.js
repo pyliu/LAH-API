@@ -252,22 +252,8 @@ if (Vue) {
             <b-form-group
                 label-cols-sm="auto"
                 label-cols-lg="auto"
-                :description="msgTitleCount"
-                label="標題"
-                label-align="right"
-            >
-                <b-form-input
-                    v-model="msg_title"
-                    type="text"
-                    placeholder="Hi there!"
-                    :state="msgTitleOK"
-                ></b-form-input>
-            </b-form-group>
-            <b-form-group
-                label-cols-sm="auto"
-                label-cols-lg="auto"
                 :description="msgContentCount"
-                label="內文"
+                label="私訊內容"
                 label-align="right"
             >
                 <b-form-textarea
@@ -281,38 +267,7 @@ if (Vue) {
             </b-form-group>
             <div class="d-flex" :id="btn_grp_id">
                 <b-input-group style="margin:auto; width:auto;">
-                    <b-input-group-prepend>
-                        <b-form-timepicker
-                            :reset-value="send_time"
-                            v-model="send_time"
-                            size="sm"
-                            show-seconds
-                            now-button
-                            label-now-button="現在"
-                            label-close-button="完成"
-                            label-reset-button="預設值"
-                            button-only
-                            button-variant="success"
-                            v-b-tooltip.left="msgSendTime"
-                        ></b-form-timepicker>
-                    </b-input-group-prepend>
                     <b-button ref="msgbtn" variant="outline-primary" @click="send" :disabled="!sendMessageOK" size="sm"><lah-fa-icon icon="paper-plane" prefix="far"> 傳送</lah-fa-icon></b-button>
-                    <b-input-group-append>
-                        <b-form-timepicker
-                            reset-value="23:59:59"
-                            v-model="end_time"
-                            size="sm"
-                            show-seconds
-                            now-button
-                            reset-button
-                            label-now-button="現在"
-                            label-close-button="完成"
-                            label-reset-button="預設值"
-                            button-only
-                            button-variant="secondary"
-                            v-b-tooltip.right="msgEndTime"
-                        ></b-form-timepicker>
-                    </b-input-group-append>
                 </b-input-group>
             </div>
         </b-card>`,
@@ -357,7 +312,7 @@ if (Vue) {
                 return this.empty(this.ID) && this.empty(this.NAME)
             },
             sendMessageOK: function () {
-                return this.msgTitleOK && this.msgContentOK && (!this.empty(this.ID) || !this.empty(this.id))
+                return this.msgContentOK && (!this.empty(this.ID) || !this.empty(this.id))
             },
             msgContentOK: function () {
                 return this.empty(this.msg_content) ? null : this.msg_content.length <= 500
@@ -380,10 +335,6 @@ if (Vue) {
         },
         methods: {
             send: function (e) {
-                if (this.disableMSDBQuery) {
-                    this.$warn("CONFIG.DISABLE_MSDB_QUERY is true, skipping lah-user-message-form::send.");
-                    return;
-                }
                 let title = this.msg_title;
                 let content = this.msg_content.replace(/\n/g, "\r\n"); // Messenger client is Windows app, so I need to replace \n to \r\n
                 let who = this.ID || this.NAME || this.id;
@@ -402,41 +353,46 @@ if (Vue) {
                 }
             },
             callback: function () {
-                let title = this.msg_title;
-                let content = this.msg_content.replace(/\n/g, "\r\n"); // Messenger client is Windows app, so I need to replace \n to \r\n
-                let who = this.ID || this.NAME || this.id;
+                let content = this.msg_content.replace(/\n/g, "  \n"); // markd treat "  \n" as break line
+                let who = this.ID || this.id;
                 this.animated(`#${this.btn_grp_id}`, {
                     name: 'lightSpeedOut',
                     duration: 'once-anim-cfg-2x',
                     callback: () => {
                         $(`#${this.btn_grp_id}`).hide();
-                        this.isBusy = true;
-                        this.$http.post(CONFIG.API.JSON.MSSQL, {
-                            type: "send_message",
-                            title: title,
+
+                        this.isBusy = true
+                        const snapshot = {
+                            channels: [who],
+                            from_ip: this.myip,
+                            title: 'dontcare',
                             content: content,
-                            who: who,
-                            send_time: this.send_time,
-                            end_time: this.end_time
-                        }).then(res => {
-                            this.$assert(res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + res.data.message + "】");
+                            priority: 3,
+                            sender: this.myid,
+                            create_datetime: this.now()
+                        }
+                        this.$http.post(CONFIG.API.JSON.NOTIFICATION, {
+                            type: 'add_notification',
+                            ...snapshot
+                        }).then(({ data }) => {
+                            this.$assert(data.status == XHR_STATUS_CODE.SUCCESS_NORMAL, "回傳之json object status異常【" + data.message + "】");
                             this.animated(`#${this.btn_grp_id}`, {
                                 name: 'slideInUp',
                                 callback: () => {
                                     this.msg_content = '';
                                     this.msg_title = '';
                                     this.notify({
-                                        title: "傳送訊息",
-                                        message: res.data.message
+                                        title: "📢 傳送訊息",
+                                        message: data.message
                                     });
                                 }
                             });
-                        }).catch(err => {
+                        }).catch((err) => {
                             this.error = err;
                         }).finally(() => {
                             this.isBusy = false;
                             $(`#${this.btn_grp_id}`).show();
-                        });
+                        })
                     }
                 });
             },
