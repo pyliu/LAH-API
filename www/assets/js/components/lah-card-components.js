@@ -70,7 +70,7 @@ if (Vue) {
             input(nVal, oVal) {
                 this.filter()
             },
-            myid(val) { this.input = val.substring(0, 4) },
+            myid(val) { this.input = val.substring(0, 5) },
             usernames(val) {
                 this.ids = val.map((item, idx, array) => {
                     // set all flags to false at first
@@ -94,7 +94,7 @@ if (Vue) {
                 let admin = '';
                 if (this.isAdmin) {
                     admin = `
-                        <div>生日：${userinfo.birthday}</div>
+                        <div>生日：${userinfo.birthday || ''}</div>
                         <div>學歷：${userinfo.education}</div>
                         <div>考試：${userinfo.exam}</div>
                         <div>手機：${userinfo.cell}</div>
@@ -118,7 +118,7 @@ if (Vue) {
                     html: true
                 };
             },
-            left(userinfo) { return !this.empty(userinfo.offboard_date) },
+            left(userinfo) { return userinfo.authority & 1 },   // 1 means DISABLED
             length(s) {
                 var b = 0,
                     i = 0,
