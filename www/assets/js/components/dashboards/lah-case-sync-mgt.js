@@ -16,13 +16,16 @@ if (Vue) {
                     </b-button-group>
                 </div>
             </template>
-            <div class="d-flex">
+            <div class="d-flex" v-if="connectable">
                 <lah-case-input-group-ui v-model="id" @enter="check" type="sync" prefix="case_sync"></lah-case-input-group-ui>
                 <lah-button icon="sync" action="cycle" @click="check" variant="outline-primary" size="sm" class="ml-1" title="搜尋案件" :disabled="!validate"></lah-button>
             </div>
+            <h6 v-else>⚠️ 同步異動伺服器 ({{ l3hweb }}) 無法連線</h6>
         </b-card>`,
         data: () => ({
-            id: undefined
+            id: undefined,
+            l3hweb: '220.1.33.5',
+            connectable: false
         }),
         computed: {
             ID() {
@@ -51,6 +54,29 @@ if (Vue) {
                 }
                 return true;
             }
+        },
+        created () {
+          // ping to l3hweb
+          this.isBusy = true;
+          this.$http.post(CONFIG.API.JSON.QUERY, {
+            type: "ping",
+            ip: this.l3hweb,
+            port: 1521  // db port
+          }).then(res => {
+            if (res.data.status === XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                this.connectable = true
+            } else {
+              this.notify({
+                title: "⚠️ L3HWEB 同步異動伺服器連線檢測",
+                message: `${res.data.message}`,
+                type: "warning"
+              });
+            }
+          }).catch(err => {
+            this.error = err;
+          }).finally(() => {
+            this.isBusy = false;
+          });
         },
         methods: {
             check: function(e) {
