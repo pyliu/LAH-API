@@ -22,13 +22,11 @@
 <body>
   <section class="hide">
     <div class="container-fluid" v-cloak>
-      <b-card-group deck class="mb-3">
+      <b-card-group columns>
         <lah-user-board ref="user_search"></lah-user-board>
         <lah-section-search></lah-section-search>
         <lah-court-log-search></lah-court-log-search>
-      </b-card-group>
-      <b-card-group columns>
-        <!-- <lah-user-card :no-message="true"></lah-user-card> -->
+        <lah-user-card :no-message="true"></lah-user-card>
         <lah-case-reg-search></lah-case-reg-search>
         <lah-case-sur-mgt></lah-case-sur-mgt>
         <!-- <lah-user-message-reservation :heading="false" label="信差提醒"></lah-user-message-reservation> -->
