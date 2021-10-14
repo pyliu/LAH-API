@@ -62,6 +62,15 @@ class WatchDog {
             'Fri' => ['08:50 AM' => '09:05 AM'],
             'Sat' => []
         ],
+        "twice_a_day" => [
+            'Sun' => [],
+            'Mon' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
+            'Tue' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
+            'Wed' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
+            'Thu' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
+            'Fri' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
+            'Sat' => []
+        ],
         "test" => [
             'Sun' => [],
             'Mon' => ['00:00 AM' => '11:59 PM'],
@@ -107,7 +116,7 @@ class WatchDog {
     }
 
     private function checkCrossSiteData() {
-        if ($this->isOn($this->schedule["once_a_day"])) {
+        if ($this->isOn($this->schedule["twice_a_day"])) {
             $query = new Query();
             // check reg case missing RM99~RM101 data
             Logger::getInstance()->info('開始跨所註記遺失檢查 ... ');
@@ -145,7 +154,7 @@ class WatchDog {
             }
             Logger::getInstance()->info('跨所註記遺失檢查結束。');
         } else {
-            Logger::getInstance()->warning('不在啟動區間「once_a_day」，略過跨所註記遺失檢查。');
+            Logger::getInstance()->warning('不在啟動區間「twice_a_day」，略過跨所註記遺失檢查。');
         }
     }
 
