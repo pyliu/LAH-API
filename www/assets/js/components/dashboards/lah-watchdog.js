@@ -237,7 +237,7 @@ if (Vue) {
                     &emsp;FROM SCRSMS <br />
                     &emsp;WHERE  <br />
                     &emsp;&emsp;RM07_1 >= '1080715' <br />
-                    &emsp;&emsp;AND RM02 LIKE 'H%1' <br />
+                    &emsp;&emsp;AND RM02 LIKE 'H%A1' <br />
                     &emsp;&emsp;AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL) 
                     <br /><br />
                     <p class="text-success">FIX:</p>
