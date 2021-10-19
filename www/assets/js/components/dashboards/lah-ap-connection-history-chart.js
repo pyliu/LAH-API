@@ -119,6 +119,7 @@ if (Vue) {
                                 });
                             } else {
                                 this.items = [];
+                                this.db_count = 0;
                                 // reset connection count top site
                                 this.storeParams['XAP_CONN_TOP_SITES'] = [];
                                 res.data.raw.forEach((item, raw_idx, array) => {
@@ -132,7 +133,7 @@ if (Vue) {
                                             name: '資訊主機'
                                         }
                                     */
-                                    if (item.ap_ip?.endsWith('.2')) {
+                                    if (item.name === '資料庫') {
                                         this.db_count = item.count;
                                     } else if (item.est_ip === '127.0.0.1') {
                                         // skip 127.0.0.1, SYSTEM ADMIN default ip
