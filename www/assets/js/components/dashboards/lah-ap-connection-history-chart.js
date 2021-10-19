@@ -6,7 +6,7 @@ if (Vue) {
                 <div class="d-flex justify-content-between mt-1">
                     <span class="small align-middle my-auto">
                     <b-form-checkbox v-model="allSwitch" switch inline><span title="全部/使用者切換">{{all_switch_desc}}</span></b-form-checkbox>
-                    <lah-fa-icon icon="database" title="資料庫連線數"> <b-badge variant="muted" pill>{{db_count}}</b-badge></lah-fa-icon>
+                    <lah-fa-icon icon="database" title="資料庫連線數" v-if="db_count > 0"> <b-badge variant="muted" pill>{{db_count}}</b-badge></lah-fa-icon>
                         <lah-fa-icon icon="clock" prefix="far" title="更新時間" variant="secondary">
                             <b-badge v-if="isOfficeHours() || demo" variant="muted">{{last_update_time}}</b-badge>
                             <b-badge v-else variant="danger" title="非上班時間所以停止更新">已停止更新</b-badge>
@@ -132,10 +132,9 @@ if (Vue) {
                                             name: '資訊主機'
                                         }
                                     */
-                                //    this.$warn(item)
-                                    if (item.name == '資料庫') {
+                                    if (item.ap_ip?.endsWith('.2')) {
                                         this.db_count = item.count;
-                                    } else if (item.est_ip == '127.0.0.1') {
+                                    } else if (item.est_ip === '127.0.0.1') {
                                         // skip 127.0.0.1, SYSTEM ADMIN default ip
                                     } else {
                                         if (this.xapMap.has(item.est_ip)) {
