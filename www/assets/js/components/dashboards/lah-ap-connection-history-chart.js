@@ -2,7 +2,7 @@ if (Vue) {
     Vue.component('lah-ap-connection-history-chart', {
         template: `<lah-transition appear>
             <b-card border-variant="secondary" class="shadow" v-b-visible="visible">
-                <h3 v-if="items.length === 0" class="text-center h-90" style="padding-top: 25%">{{ ip }} 無連線資料</h3>
+                <h3 v-if="items.length === 0" class="text-center h-90 pt-5">{{ ip }} 無連線資料</h3>
                 <lah-chart v-else ref="chart" :label="label" :items="items" :type="type" :title="title" title-pos="left" :aspect-ratio="aspectRatio" :bg-color="bg_color"></lah-chart>
                 <div class="d-flex justify-content-between mt-1">
                     <span class="small align-middle my-auto">
