@@ -278,8 +278,6 @@ if (Vue) {
             },
         },
         created() {
-            // bar or line
-            this.type = this.type_carousel[+new Date() % 2];
             // get settings from config sqlite db
             this.$http.post(CONFIG.API.JSON.QUERY, {
                 type: "configs"
