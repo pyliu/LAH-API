@@ -101,8 +101,8 @@ if (Vue) {
                 if (this.demo && this.items.length > 0) {
                     this.reload_demo_data();
                     this.reload_timer = this.timeout(this.reload, this.timer_ms);
-                } else if (force || this.isOfficeHours()) {
-                    //this.isBusy = true;
+                } else if (force || this.isOfficeHours() && !this.isBusy) {
+                    this.isBusy = true;
                     this.$http.post(CONFIG.API.JSON.STATS, {
                         type: "stats_latest_ap_conn",
                         ap_ip: this.ip,
@@ -159,7 +159,7 @@ if (Vue) {
                     }).catch(err => {
                         this.error = err;
                     }).finally(() => {
-                        //this.isBusy = false;
+                        this.isBusy = false;
                         // reload every 15s
                         this.reload_timer = this.timeout(this.reload, this.timer_ms);
                         Vue.nextTick(() => {
