@@ -2,7 +2,8 @@ if (Vue) {
     Vue.component('lah-ap-connection-history-chart', {
         template: `<lah-transition appear>
             <b-card border-variant="secondary" class="shadow" v-b-visible="visible">
-                <lah-chart ref="chart" :label="label" :items="items" :type="type" :title="title" title-pos="left" :aspect-ratio="aspectRatio" :bg-color="bg_color"></lah-chart>
+                <h3 v-if="items.length === 0" class="text-center h-90" style="padding-top: 25%">{{ ip }} 無連線資料</h3>
+                <lah-chart v-else ref="chart" :label="label" :items="items" :type="type" :title="title" title-pos="left" :aspect-ratio="aspectRatio" :bg-color="bg_color"></lah-chart>
                 <div class="d-flex justify-content-between mt-1">
                     <span class="small align-middle my-auto">
                     <b-form-checkbox v-model="allSwitch" switch inline><span title="全部/使用者切換">{{all_switch_desc}}</span></b-form-checkbox>
@@ -12,7 +13,7 @@ if (Vue) {
                             <b-badge v-else variant="danger" title="非上班時間所以停止更新">已停止更新</b-badge>
                         </lah-fa-icon>
                     </span>
-                    <div :title="ip">
+                    <div :title="ip" v-if="items.length !== 0">
                         <b-button-group size="sm">
                             <lah-button icon="chart-bar" variant="primary" v-if="type != 'bar'" @click="type = 'bar'" title="切換長條圖"></lah-button>
                             <lah-button icon="chart-pie" variant="secondary" v-if="type != 'pie'" @click="type = 'pie'" title="切換圓餅圖"></lah-button>
@@ -73,7 +74,7 @@ if (Vue) {
             timer_ms() { return this.demo ? 5000 : 15000 },
             label() { return this.allSwitch ? `AP所有連線數 [${this.ip}]` : `AP使用者連線數 [${this.ip}]` },
             title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
-            all_switch_desc() { return this.allSwitch ? '全部顯示' : '僅使用者' },
+            all_switch_desc() { return this.allSwitch ? '顯示全部連線' : '顯示使用者連線' },
             site_number() { return this.ip.split('.')[2] },
             curr_svr() { return this.ip.split('.')[3] },
             prev_svr() {
