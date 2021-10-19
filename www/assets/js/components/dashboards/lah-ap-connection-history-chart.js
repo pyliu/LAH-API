@@ -6,7 +6,7 @@ if (Vue) {
                 <lah-chart v-else ref="chart" :label="label" :items="items" :type="type" :title="title" title-pos="left" :aspect-ratio="aspectRatio" :bg-color="bg_color"></lah-chart>
                 <div class="d-flex justify-content-between mt-1">
                     <span class="small align-middle my-auto">
-                    <b-form-checkbox v-model="allSwitch" switch inline><span title="全部/使用者切換">{{all_switch_desc}}</span></b-form-checkbox>
+                    <b-form-checkbox v-model="allSwitch" switch inline><span title="全部/使用者連線顯示切換">顯示全部連線</span></b-form-checkbox>
                     <lah-fa-icon icon="database" title="資料庫連線數" v-if="db_count > 0"> <b-badge variant="muted" pill>{{db_count}}</b-badge></lah-fa-icon>
                         <lah-fa-icon icon="clock" prefix="far" title="更新時間" variant="secondary">
                             <b-badge v-if="isOfficeHours() || demo" variant="muted">{{last_update_time}}</b-badge>
@@ -74,7 +74,6 @@ if (Vue) {
             timer_ms() { return this.demo ? 5000 : 15000 },
             label() { return this.allSwitch ? `AP所有連線數 [${this.ip}]` : `AP使用者連線數 [${this.ip}]` },
             title() { return (this.type == 'line' || this.type == 'bar' || this.type == 'radar') ? '' : this.label },
-            all_switch_desc() { return this.allSwitch ? '顯示全部連線' : '顯示使用者連線' },
             site_number() { return this.ip.split('.')[2] },
             curr_svr() { return this.ip.split('.')[3] },
             prev_svr() {
