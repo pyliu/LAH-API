@@ -164,7 +164,7 @@ if (Vue) {
                         // reload every 15s
                         this.reload_timer = this.timeout(this.reload, this.timer_ms);
                         Vue.nextTick(() => {
-                            this.$refs.chart.update();
+                            this.$refs.chart && this.$refs.chart.update();
                         });
                     });
                 } else {
