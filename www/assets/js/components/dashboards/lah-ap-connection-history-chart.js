@@ -207,7 +207,7 @@ if (Vue) {
             },
             nav_left() { this.ip = this.prev_svr },
             nav_right() { this.ip = this.next_svr },
-            style_by_count(value, opacity = 0.6) {
+            style_by_count_all(value, opacity = 0.6) {
                 let variant, action, rgb, icon;
                 icon = 'question';
                 variant = 'secondary';
@@ -228,7 +228,39 @@ if (Vue) {
                     else if (value > 100) {
                         rgb = `rgb(238, 182, 1, ${opacity})`;
                     } // yellow
+                    else if (value > 3) {
+                        rgb = `rgb(0, 200, 0, ${opacity})`
+                    } // green
+                    else {
+                        rgb = `rgb(207, 207, 207, ${opacity})`;
+                    } // muted
+                    return [variant, action, rgb, icon]
+                } else {
+                    return [variant, action, `rgb(${this.rand(255)}, ${this.rand(255)}, ${this.rand(255)}, ${opacity})`, icon];
+                }
+            },
+            style_by_count(value, opacity = 0.6) {
+                let variant, action, rgb, icon;
+                icon = 'question';
+                variant = 'secondary';
+                action = '';
+                if (this.type == 'bar') {
+                    if (value > 14) {
+                        rgb = `rgb(179, 0, 255, ${opacity})`;
+                    } // bright purple
+                    else if (value > 12) {
+                        rgb = `rgb(114, 0, 159, ${opacity})`;
+                    } // dark purple
+                    else if (value > 10) {
+                        rgb = `rgb(255, 0, 19, ${opacity})`;
+                    } // bright red
+                    else if (value > 8) {
+                        rgb = `rgb(200, 0, 19, ${opacity})`
+                    } // dark red
                     else if (value > 5) {
+                        rgb = `rgb(238, 182, 1, ${opacity})`;
+                    } // yellow
+                    else if (value > 2) {
                         rgb = `rgb(0, 200, 0, ${opacity})`
                     } // green
                     else {
@@ -240,7 +272,7 @@ if (Vue) {
                 }
             },
             bg_color(dataset_item, opacity) {
-                [variant, action, rgb, icon] = this.style_by_count(dataset_item[1], opacity);
+                [variant, action, rgb, icon] = this.allSwitch ? this.style_by_count_all(dataset_item[1], opacity) : this.style_by_count(dataset_item[1], opacity);
                 return rgb;
             },
         },
