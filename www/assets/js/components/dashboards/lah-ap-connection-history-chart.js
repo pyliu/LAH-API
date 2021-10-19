@@ -245,6 +245,8 @@ if (Vue) {
             },
         },
         created() {
+            // bar or line
+            this.type = this.type_carousel[+new Date() % 2];
             // get settings from config sqlite db
             this.$http.post(CONFIG.API.JSON.QUERY, {
                 type: "configs"
@@ -253,10 +255,10 @@ if (Vue) {
                 if (res.data.status === XHR_STATUS_CODE.SUCCESS_NORMAL) {
                     const configs = res.data.raw
                     // 起始顯示之AP
-                    this.ip = configs.WEBAP_IP || '220.1.35.123'
-                    this.site = configs.SITE || 'HB'
+                    this.ip = configs.WEBAP_IP || '220.1.34.161'
+                    this.site = configs.SITE || 'HA'
                     // default is HB ap list
-                    this.carousel = ['31', '32', '33', '34', '35', '70', '123']
+                    this.carousel = ['205', '206', '207', '62', '156', '118', '60', '161']
                     if (configs.WEBAP_POSTFIXES) {
                         // expect ip postfix string => "205, 206, 207, 156, 118, 60, 161"
                         const list = configs.WEBAP_POSTFIXES.split(',').sort((a,b) => {
