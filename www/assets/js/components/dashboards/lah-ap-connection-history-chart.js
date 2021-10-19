@@ -132,6 +132,7 @@ if (Vue) {
                                             name: '資訊主機'
                                         }
                                     */
+                                //    this.$warn(item)
                                     if (item.name == '資料庫') {
                                         this.db_count = item.count;
                                     } else if (item.est_ip == '127.0.0.1') {
@@ -140,7 +141,11 @@ if (Vue) {
                                         if (this.xapMap.has(item.est_ip)) {
                                             this.storeParams['XAP_CONN_TOP_SITES'].push(this.xapMap.get(item.est_ip).code);
                                         }
-                                        this.items.push([item.name, item.count]);
+                                        if (this.allSwitch) {
+                                            this.items.push([item.name, item.count]);
+                                        } else if (!this.xapMap.has(item.est_ip)) {
+                                            this.items.push([item.name, item.count]);
+                                        }
                                     }
                                 });
                                 this.last_update_time = this.now().split(' ')[1];
