@@ -249,6 +249,11 @@ if (Vue) {
         mounted() {
             // if (this.autoHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
             this.reload();
+            setTimeout(() => {
+                if (this.list.lenght === 0) {
+                    this.reload(true)
+                }
+            }, 3000)
         }
     });
 } else {
