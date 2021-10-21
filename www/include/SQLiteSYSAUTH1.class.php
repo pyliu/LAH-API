@@ -42,7 +42,7 @@ class SQLiteSYSAUTH1 {
         }
 
         $stm->bindParam(':id', $row['USER_ID']);
-        $stm->bindParam(':name', $row['USER_NAME']);
+        $stm->bindParam(':name', preg_replace("/^(桃園所|中壢所|大溪所|楊梅所|蘆竹所|八德所|平鎮所|龜山所|桃園|中壢|大溪|楊梅|蘆竹|八德|平鎮|龜山)/i", '', $row['USER_NAME']));
 
         return $stm->execute() === FALSE ? false : true;
     }
@@ -135,7 +135,11 @@ class SQLiteSYSAUTH1 {
             Logger::getInstance()->warning(__METHOD__.": ".print_r($row, true));
             return false;
         }
-        return $this->replace($row);
+        $result = $this->replace($row);
+        if ($result) {
+            $this->replaceDict($row);
+        }
+        return $result;
     }
 
     public function getAllUsers() {
