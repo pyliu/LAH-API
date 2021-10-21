@@ -246,15 +246,7 @@ if (Vue) {
             this.container_id = this.uuid();
             this.prepare();
         },
-        mounted() {
-            // if (this.autoHeight) $(`#${this.container_id}`).css('height', `${window.innerHeight-195}px`);
-            this.reload();
-            setTimeout(() => {
-                if (this.list.lenght === 0) {
-                    this.reload(true)
-                }
-            }, 3000)
-        }
+        mounted() { this.reload(true); }
     });
 } else {
     console.error("vue.js not ready ... lah-system-connectivity component can not be loaded.");
