@@ -298,7 +298,45 @@ class Query {
 		$this->db->execute();
 		return true;
 	}
-	
+
+	public function getPSCRNProblematicCrossCases() {
+		if (!$this->db_ok) {
+			return array();
+		}
+
+		global $week_ago;
+		$this->db->parse("SELECT * FROM MOIPRC.PSCRN WHERE SS07 >= :bv_week_ago AND SS04_1 LIKE 'H%".$this->site_code."1' AND (SS99 is NULL OR SS100 is NULL OR SS100_1 is NULL OR SS101 is NULL OR SS101_1 is NULL)");
+		$this->db->bind(":bv_week_ago", $week_ago);
+        $this->db->execute();
+        return $this->db->fetchAll();
+	}
+
+	public function fixPSCRNProblematicCrossCases($id) {
+		if (!$this->db_ok) {
+			return false;
+		}
+
+		if (!$this->checkCaseID($id)) {
+            return false;
+		}
+		
+		$this->db->parse("
+			UPDATE MOIPRC.PSCRN SET SS99 = 'Y', SS100 = :bv_hold_code, SS100_1 = :bv_county_code, SS101 = :bv_receive_code, SS101_1 = :bv_county_code
+			WHERE SS03 = :bv_ss03_year AND SS04_1 = :bv_ss04_1_code AND SS04_2 = :bv_ss04_2_number
+		");
+
+		$code = substr($id, 3, 4);
+		$this->db->bind(":bv_ss03_year", substr($id, 0, 3));
+        $this->db->bind(":bv_ss04_1_code", $code);
+		$this->db->bind(":bv_ss04_2_number", substr($id, 7, 6));
+		$this->db->bind(":bv_county_code", $code[0]);
+		$this->db->bind(":bv_hold_code", $code[0].$code[1]);
+		$this->db->bind(":bv_receive_code", $code[0].$code[2]);
+		// UPDATE/INSERT can not use fetch after execute ... 
+		$this->db->execute();
+		return true;
+	}
+
 	public function getMaxNumByYearWord($year, $code) {
 		if (!$this->db_ok) {
 			return '0';

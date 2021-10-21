@@ -7,8 +7,9 @@ if (Vue) {
             </div>
         </template>
         <b-button-group class="my-1">
-            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkXcase" title="檢測跨所註記遺失問題">跨所註記遺失</lah-button>
-            <lah-button icon="question" variant="success" @click="popupXcaseHelp" title="檢測跨所註記遺失說明"></lah-button>
+            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkRegXcase" title="檢測登記案件跨所註記遺失問題">登記跨所註記檢測</lah-button>
+            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkValXcase" title="檢測地價案件跨所註記遺失問題">地價跨所註記檢測</lah-button>
+            <lah-button icon="question" variant="success" @click="popupXcaseHelp" title="檢測登記案件跨所註記遺失說明"></lah-button>
         </b-button-group>
         <b-button-group class="my-1">
             <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkEzPayment" title="檢測悠遊卡付款問題">悠遊卡付款</lah-button>
@@ -178,7 +179,7 @@ if (Vue) {
                     <button class='fix_xcase_button btn btn-sm btn-outline-success' :data-id='item' @click.once="fix">修正</button>
                 </li>
             </ul>`,
-            props: ["ids"],
+            props: ["ids", "type"],
             methods: {
                 fix: function(e) {
                     let id = $(e.target).data("id").replace(/[^a-zA-Z0-9]/g, "");
@@ -187,7 +188,7 @@ if (Vue) {
                     this.isBusy = true;
                     $(e.target).remove();
                     this.$http.post(CONFIG.API.JSON.QUERY, {
-                        type: "fix_xcase",
+                        type: this.type === 'reg' ? "fix_xcase" : "fix_xcase_val",
                         id: id
                     }).then(res => {
                         let msg = `<strong class='text-success'>${id} 跨所註記修正完成!</strong>`;
@@ -289,14 +290,14 @@ if (Vue) {
                 this.isBusy = false;
             });
         },
-        checkXcase() {
+        checkRegXcase() {
             const h = this.$createElement;
             this.isBusy = true;
             this.$http.post(CONFIG.API.JSON.QUERY, {
                 type: "xcase-check"
             }).then(res => {
                 if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
-                    let vnode = h("lah-xcase-check-item", { props: { ids: res.data.case_ids } });
+                    let vnode = h("lah-xcase-check-item", { props: { ids: res.data.case_ids, type: 'reg' } });
                     this.msgbox({
                         title: "<i class='fas fa-circle text-danger'></i>&ensp;<strong class='text-info'>請查看並修正下列案件</strong>",
                         body: vnode,
@@ -304,12 +305,40 @@ if (Vue) {
                     });
                 } else if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
                     this.notify({
-                        title: "檢測系統跨所註記遺失",
-                        message: "<i class='fas fa-circle text-success'></i>&ensp;目前無跨所註記遺失問題",
+                        title: "檢測系統登記案件跨所註記遺失",
+                        message: "<i class='fas fa-circle text-success'></i>&ensp;目前無登記案件跨所註記遺失問題",
                         type: "success"
                     });
                 } else {
-                    this.alert({ title: "檢測系統跨所註記遺失", message: res.data.message, type: "danger" });
+                    this.alert({ title: "檢測系統登記案件跨所註記遺失", message: res.data.message, type: "danger" });
+                }
+            }).catch(err => {
+                this.error = err;
+            }).finally(() => {
+                this.isBusy = false;
+            });
+        },
+        checkValXcase() {
+            const h = this.$createElement;
+            this.isBusy = true;
+            this.$http.post(CONFIG.API.JSON.QUERY, {
+                type: "val-xcase-check"
+            }).then(res => {
+                if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
+                    let vnode = h("lah-xcase-check-item", { props: { ids: res.data.case_ids, type: 'val' } });
+                    this.msgbox({
+                        title: "<i class='fas fa-circle text-danger'></i>&ensp;<strong class='text-info'>請查看並修正下列案件</strong>",
+                        body: vnode,
+                        size: "md"
+                    });
+                } else if (res.data.status == XHR_STATUS_CODE.DEFAULT_FAIL) {
+                    this.notify({
+                        title: "檢測系統地價案件跨所註記遺失",
+                        message: "<i class='fas fa-circle text-success'></i>&ensp;目前無地價案件跨所註記遺失問題",
+                        type: "success"
+                    });
+                } else {
+                    this.alert({ title: "檢測系統地價案件跨所註記遺失", message: res.data.message, type: "danger" });
                 }
             }).catch(err => {
                 this.error = err;

@@ -119,10 +119,10 @@ class WatchDog {
         if ($this->isOn($this->schedule["twice_a_day"])) {
             $query = new Query();
             // check reg case missing RM99~RM101 data
-            Logger::getInstance()->info('開始跨所註記遺失檢查 ... ');
+            Logger::getInstance()->info('開始登記案件跨所註記遺失檢查 ... ');
             $rows = $query->getProblematicCrossCases();
             if (!empty($rows)) {
-                Logger::getInstance()->warning('找到'.count($rows).'件跨所註記遺失！');
+                Logger::getInstance()->warning('找到'.count($rows).'件跨所註記遺失登記案件！');
                 $case_ids = [];
                 foreach ($rows as $row) {
                     $case_ids[] = '🔴 '.$row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
@@ -130,7 +130,7 @@ class WatchDog {
                 }
                 
                 $host_ip = getLocalhostIP();
-                $content = "⚠️地政系統目前找到下列跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://$host_ip/dashboard.html) 執行檢查功能並修正。";
+                $content = "⚠️地政系統目前找到下列「登記案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://$host_ip/dashboard.html) 執行檢查功能並修正。";
                 $sqlite_user = new SQLiteUser();
                 $notify = new Notification();
                 $admins = $sqlite_user->getAdmins();
@@ -143,7 +143,7 @@ class WatchDog {
                         'sender' => '系統排程',
                         'from_ip' => $host_ip
                     ));
-                    echo '新增「跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')';
+                    echo '新增「登記案件跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')';
                 }
                 
                 $this->stats->addXcasesStats(array(
@@ -152,9 +152,52 @@ class WatchDog {
                     "note" => $content
                 ));
             }
-            Logger::getInstance()->info('跨所註記遺失檢查結束。');
+            Logger::getInstance()->info('登記案件跨所註記遺失檢查結束。');
         } else {
-            Logger::getInstance()->warning('不在啟動區間「twice_a_day」，略過跨所註記遺失檢查。');
+            Logger::getInstance()->warning('不在啟動區間「twice_a_day」，略過登記案件跨所註記遺失檢查。');
+        }
+    }
+
+    private function checkValCrossSiteData() {
+        if ($this->isOn($this->schedule["twice_a_day"])) {
+            $query = new Query();
+            // check val case missing SS99~SS101 data
+            Logger::getInstance()->info('開始地價案件跨所註記遺失檢查 ... ');
+            $rows = $query->getPSCRNProblematicCrossCases();
+            if (!empty($rows)) {
+                Logger::getInstance()->warning('找到'.count($rows).'件跨所註記遺失地價案件！');
+                $case_ids = [];
+                foreach ($rows as $row) {
+                    $case_ids[] = '🔴 '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2'];
+                    Logger::getInstance()->warning('🔴 '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2']);
+                }
+                
+                $host_ip = getLocalhostIP();
+                $content = "⚠️地政系統目前找到下列「地價案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://$host_ip/dashboard.html) 執行檢查功能並修正。";
+                $sqlite_user = new SQLiteUser();
+                $notify = new Notification();
+                $admins = $sqlite_user->getAdmins();
+                foreach ($admins as $admin) {
+                    $lastId = $notify->addMessage($admin['id'], array(
+                        'title' => 'dontcare',
+                        'content' => trim($content),
+                        'priority' => 3,
+                        'expire_datetime' => '',
+                        'sender' => '系統排程',
+                        'from_ip' => $host_ip
+                    ));
+                    echo '新增「地價案件跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')';
+                }
+                
+                $this->stats->addXcasesStats(array(
+                    "date" => date("Y-m-d H:i:s"),
+                    "found" => count($rows),
+                    "note" => $content
+                ));
+            }
+            Logger::getInstance()->info('地價案件跨所註記遺失檢查結束。');
+        } else {
+            Logger::getInstance()->warning('不在啟動區間「twice_a_day」，略過跨所註記遺失地價案件檢查。');
         }
     }
 
@@ -387,6 +430,7 @@ class WatchDog {
     public function do() {
         if ($this->isOfficeHours()) {
             $this->checkCrossSiteData();
+            $this->checkValCrossSiteData();
             // $this->findDelayRegCases();
             // $this->findProblematicSURCases();
             $this->compressLog();
