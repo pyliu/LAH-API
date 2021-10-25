@@ -122,7 +122,7 @@ if (Vue) {
                 <b-form-input
                     ref="pid"
                     v-model="pid"
-                    placeholder="範例: A123456789"
+                    placeholder="🔍 A123456789"
                     :state="valid"
                     @keyup.enter="search"
                     title="身分證號"

@@ -14,7 +14,7 @@ if (Vue) {
             </template>
             <b-input-group size="sm" prepend="關鍵字">
                 <b-form-input
-                    placeholder="'HB05' OR '憶如' OR '220.1.35.x'"
+                    placeholder="🔍 'HB05' OR '憶如' OR '220.1.35.x'"
                     ref="input"
                     v-model="input"
                     @keyup.enter="query"
@@ -649,7 +649,7 @@ if (Vue) {
             <a href="assets/files/%E5%9C%9F%E5%9C%B0%E5%9F%BA%E6%9C%AC%E8%B3%87%E6%96%99%E5%BA%AB%E9%9B%BB%E5%AD%90%E8%B3%87%E6%96%99%E6%B5%81%E9%80%9A%E7%94%B3%E8%AB%8B%E8%A1%A8.doc" target="_blank">電子資料申請書</a> <br />
             <b-input-group size="sm" prepend="關鍵字/段代碼">
                 <b-form-input
-                    placeholder="'榮民段' OR '0200'"
+                    placeholder="🔍 '榮民段' OR '0200'"
                     ref="text"
                     v-model="text"
                     @keyup.enter="query"

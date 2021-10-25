@@ -21,7 +21,7 @@ if (Vue) {
                     <b-form-datepicker
                         value-as-date
                         v-model="date_obj"
-                        placeholder="請選擇日期"
+                        placeholder="🔍 請選擇日期"
                         size="sm"
                         :date-disabled-fn="dateDisabled"
                         :max="new Date()"
@@ -36,7 +36,7 @@ if (Vue) {
                         ref="number"
                         v-model="number"
                         type="number"
-                        placeholder="0005789"
+                        placeholder="🔍 0005789"
                         :state="isNumberValid"
                         size="sm"
                         max=9999999
