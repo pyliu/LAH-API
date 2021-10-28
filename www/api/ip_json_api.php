@@ -78,7 +78,7 @@ switch ($_POST["type"]) {
         // default get active IP entries within a week(unix timestamp is 604800)
         $interval = intval($_POST['offset'] ?? 604800);
         $days = ceil(abs($interval / 86400));
-        $rows = $ipr->getDynamicIPEntries();
+        $rows = $ipr->getDynamicIPEntries($interval);
         $count = count($rows);
         echoJSONResponse("查詢到 $count 筆動態 IP 資料( ${days} 天內)", STATUS_CODE::SUCCESS_NORMAL, array(
             'raw' => $rows,
