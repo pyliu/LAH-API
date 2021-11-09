@@ -119,6 +119,24 @@ class IPResolver {
         }
         return array();
     }
+
+    public function removeDynamicIPEntries($threadhold = 604800) {
+        /**
+         * default remove entries within a week
+         * a year: 31556926
+         * a month: 2629743
+         * a week: 604800
+         **/
+        $now = time();
+        $ondemand = $now - $threadhold;
+        if($stmt = $this->db->prepare("DELETE FROM IPResolver WHERE timestamp < :bv_ondemand AND added_type = 'DYNAMIC'")) {
+            $stmt->bindParam(':bv_ondemand', $ondemand);
+            return $stmt->execute() === FALSE ? false : true;
+        } else {
+            Logger::getInstance()->warning(__METHOD__.": 無法執行「DELETE FROM IPResolver WHERE timestamp < :bv_ondemand AND added_type = 'DYNAMIC'」SQL描述。");
+        }
+        return false;
+    }
     
     public function getStaticIPEntries() {
         if($stmt = $this->db->prepare("SELECT * FROM IPResolver WHERE added_type = 'STATIC' ORDER BY timestamp DESC")) {

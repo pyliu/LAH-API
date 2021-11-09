@@ -12,6 +12,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR.'Cache.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR."OraDB.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."IPResolver.class.php");
 
 class WatchDog {
     private $stats = null;
@@ -424,6 +425,13 @@ class WatchDog {
         return false;
     }
 
+    private function wipeOutdatedIPEntries() {
+        if ($this->isOn($this->schedule["once_a_day"])) {
+            $ipr = new IPResolver();
+            $ipr->removeDynamicIPEntries(604800);   // a week
+        }
+    }
+
     function __construct() { $this->stats = new StatsSQLite(); }
     function __destruct() { $this->stats = null; }
 
@@ -440,6 +448,7 @@ class WatchDog {
             // clean connectivity stats data one day ago
             $this->stats->wipeConnectivityHistory();
             // $this->notifyTemperatureRegistration();
+            $this->wipeOutdatedIPEntries();
             /**
              * 匯入WEB DB固定資料
              */
