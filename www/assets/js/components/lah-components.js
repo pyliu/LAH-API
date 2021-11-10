@@ -2363,6 +2363,19 @@ if (Vue) {
             </div>
             <div class="form-row mt-1">
                 <b-input-group size="sm" class="col">
+                    <b-input-group-prepend is-text>　　結案狀態</b-input-group-prepend>
+                    <b-form-select v-model="bakedData['RM31']" :options="rm31_map">
+                        <template v-slot:first>
+                            <b-form-select-option value="">-- 無狀態 --</b-form-select-option>
+                        </template>
+                    </b-form-select>
+                </b-input-group>
+                <div class="filter-btn-group col-auto">
+                    <b-button @click="updateRM31" size="sm" variant="outline-primary"><lah-fa-icon icon="edit"> 更新</lah-fa-icon></b-button>
+                </div>
+            </div>
+            <div class="form-row mt-1">
+                <b-input-group size="sm" class="col">
                     <b-input-group-prepend is-text>登記處理註記</b-input-group-prepend>
                     <b-form-select v-model="bakedData['RM39']" :options="rm39_map">
                         <template v-slot:first>
@@ -2392,6 +2405,7 @@ if (Vue) {
         props: ['progress'],
         data: () => ({
             rm30_orig: "",
+            rm31_orig: "",
             rm39_orig: "",
             rm42_orig: "",
             sync_rm30_1: true,
@@ -2462,6 +2476,27 @@ if (Vue) {
                 {
                     value: 'D',
                     text: 'D: 展期'
+                },
+            ],
+            rm31_map: [{
+                    value: 'A',
+                    text: 'A: 結案'
+                },
+                {
+                    value: 'B',
+                    text: 'B: 撤回'
+                },
+                {
+                    value: 'C',
+                    text: 'C: 併案'
+                },
+                {
+                    value: 'D',
+                    text: 'D: 駁回'
+                },
+                {
+                    value: 'E',
+                    text: 'E: 請示'
                 },
             ],
             rm39_map: [{
@@ -2579,6 +2614,9 @@ if (Vue) {
             },
             rm30() {
                 return this.bakedData["RM30"] || ""
+            },
+            rm31() {
+                return this.bakedData["RM31"] || ""
             },
             rm39() {
                 return this.bakedData["RM39"] || ""
@@ -2700,6 +2738,29 @@ if (Vue) {
                     }
                 });
             },
+            updateRM31: function (e) {
+                if (this.rm31 == this.rm31_orig) {
+                    this.notify({
+                        title: "更新案件結案狀態",
+                        message: "案件結案狀態沒變動",
+                        type: "warning"
+                    });
+                    return;
+                }
+                window.vueApp.confirm(`您確定要更新結案狀態為「${this.rm31}」?`, {
+                    title: '請確認更新案件結案狀態',
+                    callback: () => {
+                        this.updateRegCaseCol({
+                            rm01: this.year,
+                            rm02: this.code,
+                            rm03: this.number,
+                            col: "RM31",
+                            val: this.rm31
+                        });
+                        this.rm31_orig = this.bakedData["RM31"] || "";
+                    }
+                });
+            },
             updateRM39: function (e) {
                 if (this.rm39 == this.rm39_orig) {
                     this.notify({
@@ -2749,6 +2810,7 @@ if (Vue) {
         },
         created() {
             this.rm30_orig = this.bakedData["RM30"] || "";
+            this.rm31_orig = this.bakedData["RM31"] || "";
             this.rm39_orig = this.bakedData["RM39"] || "";
             this.rm42_orig = this.bakedData["RM42"] || "";
         },
