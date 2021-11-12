@@ -2509,11 +2509,11 @@ if (Vue) {
                 },
                 {
                     value: 'C',
-                    text: 'C: 校對開始'
+                    text: 'C: 校對結束'
                 },
                 {
-                    value: 'D',
-                    text: 'D: 校對完成'
+                    value: 'E',
+                    text: 'D: 校對有誤'
                 },
                 {
                     value: 'S',
