@@ -12,7 +12,7 @@ if (Vue) {
         </b-button-group>
         <b-button-group class="my-1">
             <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkValXcase" title="檢測地價案件跨所註記遺失問題">「地價」跨所註記檢測</lah-button>
-            <lah-button icon="question" variant="success" @click="popupXcaseHelp" title="檢測登記案件跨所註記遺失說明"></lah-button>
+            <lah-button icon="question" variant="success" @click="popupXcaseValHelp" title="檢測登記案件跨所註記遺失說明"></lah-button>
         </b-button-group>
         <b-button-group class="my-1">
             <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkEzPayment" title="檢測悠遊卡付款問題">悠遊卡付款</lah-button>
@@ -233,15 +233,13 @@ if (Vue) {
         },
         popupXcaseHelp() {
             this.msgbox({
-                title: "跨所註記遺失檢測 小幫手提示",
+                title: "登記跨所註記遺失檢測 小幫手提示",
                 body: `<div class="d-block">
-                    <h5><span class="text-danger">※</span>僅檢測一周內資料。</h5>
                     <p class="text-info">QUERY:</p>
                     &emsp;SELECT * <br />
                     &emsp;FROM SCRSMS <br />
                     &emsp;WHERE  <br />
-                    &emsp;&emsp;RM07_1 >= '1080715' <br />
-                    &emsp;&emsp;AND RM02 LIKE 'H%A1' <br />
+                    &emsp;&emsp;RM02 LIKE 'H%A1' <br />
                     &emsp;&emsp;AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL) 
                     <br /><br />
                     <p class="text-success">FIX:</p>
@@ -251,6 +249,28 @@ if (Vue) {
                     &emsp;&emsp;RM100_1 = '資料管轄所縣市代碼', <br />
                     &emsp;&emsp;RM101 = '收件所代碼', RM101_1 = '收件所縣市代碼' <br />
                     &emsp;WHERE RM01 = '收件年' AND RM02 = '收件字' AND RM03 = '收件號'
+                </div>`,
+                size: "lg"
+            });
+        },
+        popupXcaseValHelp() {
+            this.msgbox({
+                title: "地價跨所註記遺失檢測 小幫手提示",
+                body: `<div class="d-block">
+                    <p class="text-info">QUERY:</p>
+                    &emsp;SELECT * <br />
+                    &emsp;FROM MOIPRC.PSCRN <br />
+                    &emsp;WHERE  <br />
+                    &emsp;&emsp;SS04_1 IN ('HAA1', 'HAB1', 'HAC1', 'HAD1', 'HAE1', 'HAF1', 'HAG1', 'HAH1')<br />
+                    &emsp;&emsp;AND (SS99 is NULL OR SS100 is NULL OR SS100_1 is NULL OR SS101 is NULL OR SS101_1 is NULL) 
+                    <br /><br />
+                    <p class="text-success">FIX:</p>
+                    &emsp;UPDATE MOIPRC.PSCRN SET <br />
+                    &emsp;&emsp;SS99 = 'Y', <br />
+                    &emsp;&emsp;SS100 = '資料管轄所代碼', <br />
+                    &emsp;&emsp;SS100_1 = '資料管轄所縣市代碼', <br />
+                    &emsp;&emsp;SS101 = '收件所代碼', RM101_1 = '收件所縣市代碼' <br />
+                    &emsp;WHERE SS03 = '收件年' AND SS04_1 = '收件字' AND SS04_2 = '收件號'
                 </div>`,
                 size: "lg"
             });
