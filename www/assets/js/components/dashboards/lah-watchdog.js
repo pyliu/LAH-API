@@ -7,8 +7,11 @@ if (Vue) {
             </div>
         </template>
         <b-button-group class="my-1">
-            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkRegXcase" title="檢測登記案件跨所註記遺失問題">登記跨所註記檢測</lah-button>
-            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkValXcase" title="檢測地價案件跨所註記遺失問題">地價跨所註記檢測</lah-button>
+            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkRegXcase" title="檢測登記案件跨所註記遺失問題">「登記」跨所註記檢測</lah-button>
+            <lah-button icon="question" variant="success" @click="popupXcaseHelp" title="檢測登記案件跨所註記遺失說明"></lah-button>
+        </b-button-group>
+        <b-button-group class="my-1">
+            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkValXcase" title="檢測地價案件跨所註記遺失問題">「地價」跨所註記檢測</lah-button>
             <lah-button icon="question" variant="success" @click="popupXcaseHelp" title="檢測登記案件跨所註記遺失說明"></lah-button>
         </b-button-group>
         <b-button-group class="my-1">
