@@ -358,7 +358,7 @@ switch ($_POST["type"]) {
 		break;
 	case "val-xcase-check":
 		Logger::getInstance()->info("XHR [val-xcase-check] 查詢地價案件跨所註記遺失請求");
-		$query_result = $mock ? $cache->get('val-xcase-check') : $query->getProblematicCrossCases();
+		$query_result = $mock ? $cache->get('val-xcase-check') : $query->getPSCRNProblematicCrossCases();
 			
 		$case_ids = [];
 		$rows = [];

@@ -304,9 +304,9 @@ class Query {
 			return array();
 		}
 
-		global $week_ago;
-		$this->db->parse("SELECT * FROM MOIPRC.PSCRN WHERE SS07 >= :bv_week_ago AND SS04_1 LIKE 'H%".$this->site_code."1' AND (SS99 is NULL OR SS100 is NULL OR SS100_1 is NULL OR SS101 is NULL OR SS101_1 is NULL)");
-		$this->db->bind(":bv_week_ago", $week_ago);
+		// global $week_ago;
+		$this->db->parse("SELECT * FROM MOIPRC.PSCRN WHERE SS04_1 IN ('HAB1', 'HAC1', 'HAD1', 'HAE1', 'HAF1', 'HAG1', 'HAH1') AND (SS99 is NULL OR SS100 is NULL OR SS100_1 is NULL OR SS101 is NULL OR SS101_1 is NULL)");
+		// $this->db->bind(":bv_week_ago", $amonth);
         $this->db->execute();
         return $this->db->fetchAll();
 	}
