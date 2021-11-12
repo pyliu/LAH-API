@@ -266,9 +266,9 @@ class Query {
 			return array();
 		}
 
-		global $week_ago;
-		$this->db->parse("SELECT * FROM SCRSMS WHERE RM07_1 >= :bv_week_ago AND RM02 LIKE 'H%".$this->site_code."1' AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL)");
-		$this->db->bind(":bv_week_ago", $week_ago);
+		// global $week_ago;
+		$this->db->parse("SELECT * FROM SCRSMS WHERE RM02 LIKE 'H%".$this->site_code."1' AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL)");
+		// $this->db->bind(":bv_week_ago", $week_ago);
         $this->db->execute();
         return $this->db->fetchAll();
 	}
