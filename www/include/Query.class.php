@@ -305,7 +305,7 @@ class Query {
 		}
 
 		// global $week_ago;
-		$this->db->parse("SELECT * FROM MOIPRC.PSCRN WHERE SS04_1 IN ('HAB1', 'HAC1', 'HAD1', 'HAE1', 'HAF1', 'HAG1', 'HAH1') AND (SS99 is NULL OR SS100 is NULL OR SS100_1 is NULL OR SS101 is NULL OR SS101_1 is NULL)");
+		$this->db->parse("SELECT * FROM MOIPRC.PSCRN WHERE SS04_1 IN ('H".$this->site_code."A1', 'H".$this->site_code."B1', 'H".$this->site_code."C1', 'H".$this->site_code."D1', 'H".$this->site_code."E1', 'H".$this->site_code."F1', 'H".$this->site_code."G1', 'H".$this->site_code."H1') AND (SS99 is NULL OR SS100 is NULL OR SS100_1 is NULL OR SS101 is NULL OR SS101_1 is NULL)");
 		// $this->db->bind(":bv_week_ago", $amonth);
         $this->db->execute();
         return $this->db->fetchAll();
