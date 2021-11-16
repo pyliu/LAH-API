@@ -206,7 +206,8 @@ class WatchDog {
             $case_records = [];
             foreach ($rows as $row) {
                 $this_msg = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']);
-                $case_records[$row['RM45']][] = $this_msg;
+                // fall back to RM96(收件人員) if RM45(初審) is not presented
+                $case_records[$row['RM45'] ?? $row['RM96']][] = $this_msg;
                 $case_records["ALL"][] = $this_msg;
             }
             // send to the reviewer
