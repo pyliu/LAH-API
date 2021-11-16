@@ -256,8 +256,8 @@ class WatchDog {
         );
         if ($to_id == "ALL") {
             $sqlite_user = new SQLiteUser();
-            $chief = $sqlite_user->getChief('reg');
-            if ($chief === false) {
+            $chief = $sqlite_user->getChief('登記課');
+            if (empty($chief)) {
                 Logger::getInstance()->warning('找不到登記課課長帳號，無法傳送即時通知給他/她!!');
             } else {
                 $lastId = $notify->addMessage($chief['id'], $payload);
