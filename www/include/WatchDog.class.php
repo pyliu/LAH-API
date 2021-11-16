@@ -236,10 +236,12 @@ class WatchDog {
         $notify = new Notification();
 
         $url = "http://${host_ip}/overdue_reg_cases.html";
+        // $url = "http://${host_ip}:8080/expire/";
         if ($to_id != "ALL") {
             $url .= "?ID=${to_id}";
+            // $url .= "${to_id}/";
         }
-        $content = "⚠️ 目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($case_records, 0, 4))."<br/>...<br/><br/>👉 請用 CHROME 瀏覽器前往 ${url}<br/>查看詳細列表。";
+        $content = "⚠️ 目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($case_records, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[案件逾期顯示頁面](${url})</b> 查看詳細資料。";
         $payload = array(
             'title' => 'dontcare',
             'content' => trim($content),
