@@ -232,7 +232,6 @@ class SQLiteUser {
             $stmt->bindParam(':unit', $unit, SQLITE3_TEXT);
             return $this->prepareArray($stmt);
         } else {
-            
             Logger::getInstance()->error(__METHOD__.": 取得${unit}主管資料失敗！");
         }
         return false;

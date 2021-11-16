@@ -29,11 +29,11 @@ class WatchDog {
         ],
         "overdue" => [
             'Sun' => [],
-            'Mon' => ['08:40 AM' => '08:55 AM', '01:40 PM' => '01:55 PM'],
-            'Tue' => ['08:40 AM' => '08:55 AM', '01:40 PM' => '01:55 PM'],
-            'Wed' => ['08:40 AM' => '08:55 AM', '01:40 PM' => '01:55 PM'],
-            'Thu' => ['08:40 AM' => '08:55 AM', '01:40 PM' => '01:55 PM'],
-            'Fri' => ['08:40 AM' => '08:55 AM', '01:40 PM' => '01:55 PM'],
+            'Mon' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
+            'Tue' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
+            'Wed' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
+            'Thu' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
+            'Fri' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
             'Sat' => []
         ],
         // "temperature" => [
@@ -83,16 +83,6 @@ class WatchDog {
         ]
     );
 
-    private $overdue_cfg = array(
-        "REG_CHIEF_ID" => "HA10021802",
-        "SUBSCRIBER" => array(
-            "192.168.13.96",    // pyliu
-            "192.168.13.100",   // #501
-            "192.168.13.98",    // #502
-            "192.168.13.168"    // #506
-        )
-    );
-
     private function isOfficeHours() {
         Logger::getInstance()->info("檢查是否處於上班時間 ... ");
         $result = $this->isOn($this->schedule["office"]);
@@ -101,7 +91,6 @@ class WatchDog {
     }
 
     private function isOverdueCheckNeeded() {
-        
         Logger::getInstance()->info("檢查是否需要執行逾期案件檢查 ... ");
         $result = $this->isOn($this->schedule["overdue"]);
         Logger::getInstance()->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
@@ -203,15 +192,12 @@ class WatchDog {
     }
 
     private function findDelayRegCases() {
-        
         if (!$this->isOverdueCheckNeeded()) {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期案件檢測。");
             return false;
         }
         $query = new Query();
-        // check reg case missing RM99~RM101 data
         Logger::getInstance()->info('開始查詢15天內逾期登記案件 ... ');
-
         $rows = $query->queryOverdueCasesIn15Days();
         if (!empty($rows)) {
             Logger::getInstance()->info('15天內找到'.count($rows).'件逾期登記案件。');
@@ -222,9 +208,7 @@ class WatchDog {
                 $this_msg = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']);
                 $case_records[$row['RM45']][] = $this_msg;
                 $case_records["ALL"][] = $this_msg;
-                //Logger::getInstance()->info("找到逾期案件：${this_msg}");
             }
-            
             // send to the reviewer
             $stats = 0;
             $date = date('Y-m-d H:i:s');
@@ -246,34 +230,43 @@ class WatchDog {
     }
 
     private function sendOverdueMessage($to_id, $case_records) {
-        
-        $chief_id = $this->overdue_cfg["REG_CHIEF_ID"];
         $host_ip = getLocalhostIP();
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
-        $msg = new Message();
+        $notify = new Notification();
+
         $url = "http://${host_ip}/overdue_reg_cases.html";
         if ($to_id != "ALL") {
             $url .= "?ID=${to_id}";
         }
-        $content = "目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):\r\n\r\n".implode("\r\n", array_slice($case_records, 0, 4))."\r\n...\r\n\r\n請用 CHROME 瀏覽器前往 ${url}\r\n查看詳細列表。";
+        $content = "⚠️ 目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>".implode("<br/>", array_slice($case_records, 0, 4))."<br/>...<br/><br/>請用 CHROME 瀏覽器前往 ${url}<br/>查看詳細列表。";
+        $payload = array(
+            'title' => 'dontcare',
+            'content' => trim($content),
+            'priority' => 3,
+            'expire_datetime' => '',
+            'sender' => '系統排程',
+            'from_ip' => $host_ip
+        );
         if ($to_id == "ALL") {
-            $title = "15天內逾期案件(全部)通知";
-            $sn = $msg->sysSend($title, $content, $chief_id, 14399);  // 14399 secs => +3 hours 59 mins 59 secs
-            Logger::getInstance()->info("${title}訊息(${sn})已送出給 ${chief_id} 。 (".$users[$chief_id].")");
-            // send all cases notice to subscribers
-            foreach ($this->overdue_cfg["SUBSCRIBER"] as $subscriber_ip) {
-                $sn = $msg->send($title, $content, $subscriber_ip, 'now', 14399);
-                Logger::getInstance()->info("${title}訊息(${sn})已送出給 ${subscriber_ip} 。 (訂閱者)");
+            $sqlite_user = new SQLiteUser();
+            $chief = $sqlite_user->getChief('reg');
+            if ($chief === false) {
+                Logger::getInstance()->warning('找不到登記課課長帳號，無法傳送即時通知給他/她!!');
+            } else {
+                $lastId = $notify->addMessage($chief['id'], $payload);
+                Logger::getInstance()->info('新增逾期案件通知訊息至 '.$chief['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
             }
+            // send to dev for debugging
+            $lastId = $notify->addMessage('HA10013859', $payload);
+            Logger::getInstance()->info('新增逾期案件通知訊息至 HA10013859 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
         } else {
             $this_user = $users[$to_id];
-            $title = "15天內逾期案件(${this_user})通知";
-            $sn = $msg->sysSend($title, $content, $to_id, 14399);
-            if ($sn == -1) {
-                Logger::getInstance()->warning("${title}訊息無法送出給 ${to_id} 。 (".$this_user.", $sn)");
+            $lastId = $notify->addMessage($to_id, $payload);
+            if ($lastId === false) {
+                Logger::getInstance()->warning("逾期案件訊息無法送出給 ${to_id} 。 (".$this_user.")");
             } else {
-                Logger::getInstance()->info("${title}訊息(${sn})已送出給 ${to_id} 。 (".$this_user.")");
+                Logger::getInstance()->info("逾期案件訊息(${lastId})已送出給 ${to_id} 。 (".$this_user.")");
             }
         }
     }
@@ -437,10 +430,9 @@ class WatchDog {
 
     public function do() {
         if ($this->isOfficeHours()) {
-            $this->checkCrossSiteData();
-            $this->checkValCrossSiteData();
-            // $this->findDelayRegCases();
-            // $this->findProblematicSURCases();
+            /**
+             * 系統維護作業
+             */
             $this->compressLog();
             // clean AP stats data one day ago
             $this->stats->wipeAllAPConnHistory();
@@ -455,6 +447,14 @@ class WatchDog {
             $this->importRKEYN();
             $this->importRKEYNALL();
             $this->importUserFromL3HWEB();
+            /**
+             * 案件檢測作業
+             */
+            $this->checkCrossSiteData();
+            $this->checkValCrossSiteData();
+            $this->findDelayRegCases();
+            // $this->findProblematicSURCases();
+
             return true;
         }
         return false;
