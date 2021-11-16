@@ -239,7 +239,7 @@ class WatchDog {
         if ($to_id != "ALL") {
             $url .= "?ID=${to_id}";
         }
-        $content = "⚠️ 目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>".implode("<br/>", array_slice($case_records, 0, 4))."<br/>...<br/><br/>請用 CHROME 瀏覽器前往 ${url}<br/>查看詳細列表。";
+        $content = "⚠️ 目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($case_records, 0, 4))."<br/>...<br/><br/>👉 請用 CHROME 瀏覽器前往 ${url}<br/>查看詳細列表。";
         $payload = array(
             'title' => 'dontcare',
             'content' => trim($content),
