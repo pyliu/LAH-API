@@ -49,6 +49,10 @@ if (Vue) {
             aspectRatio: {
                 type: Number,
                 default: 2
+            },
+            right: {
+                type: Boolean,
+                default: false
             }
         },
         data: () => ({
@@ -184,7 +188,10 @@ if (Vue) {
                 return rgb;
             },
             set_items(raw) {
-                raw.forEach((item, raw_idx, raw) => {
+                // display now to the chart right bound
+                const mRaw = this.right ? raw.reverse() : raw;
+                const rawLen = mRaw.length || 0;
+                mRaw.forEach((item, raw_idx, raw) => {
                     /*
                         item = {
                             log_time: '20201005181631',
@@ -195,7 +202,10 @@ if (Vue) {
                             name: '資訊主機'
                         }
                     */
-                    let text = (raw_idx == 0) ? '現在' : `${raw_idx}分前`;
+                    let text = (raw_idx === 0) ? '現在' : `${raw_idx}分前`;
+                    if (this.right) {
+                        text = (raw_idx === (rawLen -1)) ? '現在' : `${rawLen - raw_idx - 1}分前`;
+                    }
                     let val = item.count;
                     if (this.items.length == raw.length) {
                         this.items[raw_idx][1] = val;
@@ -206,7 +216,7 @@ if (Vue) {
                     }
                 });
                 this.last_update_time = this.now().split(' ')[1];
-                this.now_count = this.items[0][1];
+                this.now_count = this.right ? this.items[rawLen - 1][1] : this.items[0][1];
             },
             reload(force) {
                 clearTimeout(this.reload_timer);
