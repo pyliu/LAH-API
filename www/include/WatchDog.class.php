@@ -196,6 +196,8 @@ class WatchDog {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期案件檢測。");
             return false;
         }
+        $host_ip = getLocalhostIP();
+        $query_url_base = "http://${host_ip}:8080/regcase/";
         $query = new Query();
         Logger::getInstance()->info('開始查詢15天內逾期登記案件 ... ');
         $rows = $query->queryOverdueCasesIn15Days();
@@ -205,7 +207,8 @@ class WatchDog {
             $users = $cache->getUserNames();
             $case_records = [];
             foreach ($rows as $row) {
-                $this_msg = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']);
+                $case_id = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
+                $this_msg = "[${case_id}](${query_url_base}${case_id})".' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']) ?? ($users[$row['RM96']] ?? $row['RM96']);
                 // fall back to RM96(收件人員) if RM45(初審) is not presented
                 $case_records[$row['RM45'] ?? $row['RM96']][] = $this_msg;
                 $case_records["ALL"][] = $this_msg;
