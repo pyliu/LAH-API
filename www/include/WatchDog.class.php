@@ -264,8 +264,8 @@ class WatchDog {
                 Logger::getInstance()->info('新增逾期案件通知訊息至 '.$chief['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
             }
             // send to dev for debugging
-            $lastId = $notify->addMessage('HA10013859', $payload);
-            Logger::getInstance()->info('新增逾期案件通知訊息至 HA10013859 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
+            // $lastId = $notify->addMessage('HA10013859', $payload);
+            // Logger::getInstance()->info('新增逾期案件通知訊息至 HA10013859 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
         } else {
             $this_user = $users[$to_id];
             $lastId = $notify->addMessage($to_id, $payload);
