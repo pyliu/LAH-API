@@ -230,9 +230,10 @@ class SQLiteUser {
             $stmt->bindValue(':chief_bit', AUTHORITY::CHIEF, SQLITE3_INTEGER);
             $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             $stmt->bindParam(':unit', $unit, SQLITE3_TEXT);
-            return $this->prepareArray($stmt);
+            // always return items in array, so return first element
+            return $this->prepareArray($stmt)[0];
         } else {
-            Logger::getInstance()->error(__METHOD__.": 取得${unit}主管資料失敗！");
+            Logger::getInstance()->error(__METHOD__.": 取得 ${unit} 主管資料失敗！");
         }
         return false;
     }
