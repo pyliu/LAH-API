@@ -260,8 +260,9 @@ class WatchDog {
             if (empty($chief)) {
                 Logger::getInstance()->warning('找不到登記課課長帳號，無法傳送即時通知給他/她!!');
             } else {
+                $this_user = $users[$chief['id']];
                 $lastId = $notify->addMessage($chief['id'], $payload);
-                Logger::getInstance()->info('新增逾期案件通知訊息至 '.$chief['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
+                Logger::getInstance()->info('新增逾期案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
             }
             // send to dev for debugging
             // $lastId = $notify->addMessage('HA10013859', $payload);
