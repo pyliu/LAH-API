@@ -1181,7 +1181,7 @@ class Prefetch {
                         t.GS04_1,
                         t.GS04_2,
                         t.GG48,
-                        t.GG49  
+                        t.GG49
                 ");
                 
                 $db->bind(":bv_st", $st);

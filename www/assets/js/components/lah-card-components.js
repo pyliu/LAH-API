@@ -755,8 +755,8 @@ if (Vue) {
                     <b-button variant="outline-info" title="全國鄉鎮區段代碼" @click="table_import('rkeyn_all')" style="border-radius: 15px">RKEYN_ALL</b-button>
                 </b-button-group>
             </b-row>
-            <b-form-checkbox v-model="enable_msdb_query" switch><span title="是否啟用MSSQL資料庫連結">啟用 SQL SERVER 連線功能</span></b-form-checkbox>
-            <b-form-checkbox v-model="enable_office_hours" switch><span title="是否啟用工作天時檢查">啟用排程工作天檢查</span></b-form-checkbox>
+            <b-form-checkbox v-if="false" v-model="enable_msdb_query" switch><span title="是否啟用MSSQL資料庫連結">啟用 SQL SERVER 連線功能</span></b-form-checkbox>
+            <b-form-checkbox v-if="false" v-model="enable_office_hours" switch><span title="是否啟用工作天時檢查">啟用排程工作天檢查</span></b-form-checkbox>
             <b-form-checkbox v-if="show_mock_mode_switch" v-model="enable_mock_mode" switch><span title="是否啟用模擬模式">啟用模擬模式</span></b-form-checkbox>
         </b-card>`,
         props: {
