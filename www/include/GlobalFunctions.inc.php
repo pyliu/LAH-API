@@ -3,6 +3,8 @@ require_once('SQLiteUser.class.php');
 require_once('System.class.php');
 require_once("Ping.class.php");
 require_once("OraDB.class.php");
+require_once("SQLiteUser.class.php");
+require_once("Logger.class.php");
 
 function resizeImage($filename, $max_width = 1920, $max_height = 1080, $type = 'jpg') {
     list($orig_width, $orig_height) = getimagesize($filename);
@@ -57,8 +59,7 @@ function base64EncodedImage($imageFile) {
 }
 
 // e.g. startsWith("abcde", "a")
-function startsWith($string, $startString)
-{
+function startsWith($string, $startString) {
     $len = strlen($startString);
     return (substr($string, 0, $len) === $startString);
 }
@@ -187,6 +188,30 @@ function getRealIPAddr() {
       $ip=$_SERVER['REMOTE_ADDR'];
     }
     return $ip;
+}
+/**
+ * Handle Query User if SESSION data not found
+ */
+function prepareSessionMyInfo() {
+    global $client_ip;
+    if (empty($client_ip)) {
+        $client_ip = getRealIPAddr();
+    }
+    session_start();
+    if (empty($_SESSION['myinfo'])) {
+        $sqlite_user = new SQLiteUser();
+        $queried_user = $sqlite_user->getUserByIP($client_ip);
+        $found_count = count($queried_user);
+        if (empty($found_count)) {
+            Logger::getInstance()->info(__FILE__."：找不到 ".$client_ip." 使用者。");
+        } else {
+            if ($found_count > 1) {
+                $queried_user = array($queried_user[$found_count - 1]);
+            }
+            $_SESSION["myinfo"] = $queried_user[0];
+            Logger::getInstance()->info(__FILE__."：找到 ".$client_ip." 使用者 ".$_SESSION["myinfo"]['id']." ".$_SESSION["myinfo"]['name']."。");
+        }
+    }
 }
 /**
  * print the json string

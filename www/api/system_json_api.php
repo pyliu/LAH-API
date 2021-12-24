@@ -4,6 +4,10 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYNALL.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteUser.class.php");
+
+// in case session not have myinfo
+prepareSessionMyInfo();
 
 $auth = System::getInstance()->calcAuthority($_SESSION['myinfo']['authority']);
 if (!$auth['isAdmin']) {
