@@ -117,4 +117,14 @@ class SQLiteMonitorMail {
         }
         return false;
     }
+    /**
+     * 取得郵件 BY 搜尋 subject 關鍵字
+     */
+    public function getMailsBySubject($query_string, $seconds_before = 24 * 60 * 60) {
+        $ts = time() - intval($seconds_before);
+        if($stmt = $this->db->prepare("SELECT * FROM mail WHERE timestamp >= $ts AND subject LIKE '%$query_string%' ORDER BY timestamp DESC")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
 }
