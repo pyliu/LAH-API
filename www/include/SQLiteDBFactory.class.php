@@ -4,6 +4,25 @@ require_once('DynamicSQLite.class.php');
 
 class SQLiteDBFactory {
     
+    public static function getMonitorMailDB() {
+        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."monitor_mail.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "mail" (
+                "id"	INTEGER NOT NULL,
+                "from"	TEXT NOT NULL,
+                "to"	TEXT NOT NULL,
+                "subject"	TEXT NOT NULL,
+                "message"	TEXT,
+                "mailbox"	TEXT NOT NULL DEFAULT \'INBOX\',
+                "timestamp"	INTEGER NOT NULL,
+                PRIMARY KEY("id")
+            )
+        ');
+        return $path;
+    }
+
     public static function getImageDB() {
         $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."image.db";
         $sqlite = new DynamicSQLite($path);

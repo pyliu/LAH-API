@@ -13,6 +13,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."OraDB.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."IPResolver.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteMonitorMail.class.php");
 
 class WatchDog {
     private $stats = null;
@@ -432,6 +433,11 @@ class WatchDog {
         }
     }
 
+    private function fetchMonitorMail() {
+        $monitor = new SQLiteMonitorMail();
+        $monitor->fetchFromMailServer();
+    }
+
     function __construct() { $this->stats = new StatsSQLite(); }
     function __destruct() { $this->stats = null; }
 
@@ -449,19 +455,21 @@ class WatchDog {
             // $this->notifyTemperatureRegistration();
             $this->wipeOutdatedIPEntries();
             /**
-             * 匯入WEB DB固定資料
-             */
-            $this->importRKEYN();
-            $this->importRKEYNALL();
-            $this->importUserFromL3HWEB();
-            /**
              * 案件檢測作業
              */
             $this->checkCrossSiteData();
             $this->checkValCrossSiteData();
             $this->findDelayRegCases();
-            // $this->findProblematicSURCases();
-
+            /**
+             * 擷取監控郵件
+             */
+            $this->fetchMonitorMail();
+            /**
+             * 匯入WEB DB固定資料
+             */
+            $this->importRKEYN();
+            $this->importRKEYNALL();
+            $this->importUserFromL3HWEB();
             return true;
         }
         return false;

@@ -18,7 +18,7 @@ require_once("./include/Checklist.class.php");
 require_once("./include/SQLiteSYSAUTH1.class.php");
 require_once("./include/IPResolver.class.php");
 require_once("./include/Notification.class.php");
-require_once("./include/MonitorMail.class.php");
+require_once("./include/SQLiteMonitorMail.class.php");
 
 try {
     // $cl = new Checklist();
@@ -52,8 +52,9 @@ try {
     //     }
     // }
     // Create PhpImap\Mailbox instance for all further actions
-    $mailbox = new MonitorMail();
-    print_r($mailbox->getLatestMail());
+    
+    // $monitor = new SQLiteMonitorMail();
+    // $monitor->fetchFromMailServer();
 }
 catch(Exception $e)
 {
