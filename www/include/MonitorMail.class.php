@@ -36,6 +36,13 @@ class MonitorMail {
         unset($this->mailbox);
     }
 
+    public function getCurrentServerTime() {
+        // Call imap_check() - see http://php.net/manual/function.imap-check.php
+        $info = $this->mailbox->imap('check');
+        // Show current time for the mailbox
+        return isset($info->Date) && $info->Date ? date('Y-m-d H:i:s', strtotime($info->Date)) : 'Unknown';
+    }
+
     public function getLatestMail() {
         $mail = null;
         try {
