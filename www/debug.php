@@ -18,17 +18,18 @@ require_once("./include/Checklist.class.php");
 require_once("./include/SQLiteSYSAUTH1.class.php");
 require_once("./include/IPResolver.class.php");
 require_once("./include/Notification.class.php");
+require_once("./include/MonitorMail.class.php");
 
 try {
     // $cl = new Checklist();
     // $cl->debug();
-    $today = new Datetime("now");
-    $today = ltrim($today->format("Y/m/d"), "0");	// ex: 2021/01/21
-    echo $today;
+    // $today = new Datetime("now");
+    // $today = ltrim($today->format("Y/m/d"), "0");	// ex: 2021/01/21
+    // echo $today;
     // $files = array_diff(scandir("assets/img/poster"), array('..', '.'));
     // echo print_r($files, true);
-    echo '<br/><br/>';
-    echo print_r(preg_replace("/^(桃園所|中壢所|大溪所|楊梅所|蘆竹所|八德所|平鎮所|龜山所|桃園|中壢|大溪|楊梅|蘆竹|八德|平鎮|龜山)/i", '', '桃園湖百松'), true);
+    // echo '<br/><br/>';
+    // echo print_r(preg_replace("/^(桃園所|中壢所|大溪所|楊梅所|蘆竹所|八德所|平鎮所|龜山所|桃園|中壢|大溪|楊梅|蘆竹|八德|平鎮|龜山)/i", '', '桃園湖百松'), true);
     
     // $host_ip = getLocalhostIP();
     // $content = "⚠️地政系統目前找到下列跨所註記遺失案件:<br/><br/>".implode("<br/>", array(
@@ -50,6 +51,9 @@ try {
     //         echo '新增「跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')';
     //     }
     // }
+    // Create PhpImap\Mailbox instance for all further actions
+    $mailbox = new MonitorMail();
+    print_r($mailbox->getLatestMail());
 }
 catch(Exception $e)
 {
