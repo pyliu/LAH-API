@@ -7,14 +7,61 @@ use PhpImap\Mailbox;
 use PhpImap\Exceptions\ConnectionException;
 
 class MonitorMail {
+    private $host;
     private $mailbox;
 
+    private function getFullMailboxPath($folder) {
+        return "{".$this->host."/novalidate-cert}".$folder;
+    }
+
+    private function selectFolder($folder) {
+        $fullpath = $this->getFullMailboxPath($folder);
+        $this->mailbox->switchMailbox($fullpath);
+    }
+
+    private function getUnseenMailIds($folder = "INBOX", $days_before = 0) {
+        // PHP.net imap_search criteria: http://php.net/manual/en/function.imap-search.php
+        $tag = "UNSEEN";
+        if ($days_before > 0) {
+            // $tag .= " SINCE ".date('d-M-Y G\:i', time() - $days_before);
+            $tag .= " SINCE ".date('d-M-Y', time() - $days_before * 24 * 60 * 60);
+        }
+        Logger::getInstance()->info(__METHOD__.": $tag");
+        $this->selectFolder($folder);
+        return $this->mailbox->searchMailbox($tag);
+    }
+
+    private function getAllMailIds($folder = "INBOX", $days_before = 0) {
+        // PHP.net imap_search criteria: http://php.net/manual/en/function.imap-search.php
+        $tag = "All";
+        if ($days_before > 0) {
+            // $tag .= " SINCE ".date('d-M-Y G\:i', time() - $days_before);
+            $tag .= " SINCE ".date('d-M-Y', time() - $days_before * 24 * 60 * 60);
+        }
+        Logger::getInstance()->info(__METHOD__.": $tag");
+        $this->selectFolder($folder);
+        return $this->mailbox->searchMailbox($tag);
+    }
+
+    private function getSubjectMailIds($keyword, $folder = "INBOX", $days_before = 0) {
+        // PHP.net imap_search criteria: http://php.net/manual/en/function.imap-search.php
+        $tag = 'SUBJECT "'.$keyword.'"';
+        if ($days_before > 0) {
+            $tag .= " SINCE ".date('d-M-Y', time() - $days_before * 24 * 60 * 60);
+        }
+        Logger::getInstance()->info(__METHOD__.": $tag");
+        $this->selectFolder($folder);
+        return $this->mailbox->searchMailbox($tag);
+    }
+
     function __construct() {
+        $this->host = System::getInstance()->get("MONITOR_MAIL_HOST");
         $account = System::getInstance()->get("MONITOR_MAIL_ACCOUNT");
         $password = System::getInstance()->get("MONITOR_MAIL_PASSWORD");
         try {
+            $fullpath = $this->getFullMailboxPath("INBOX");
             $this->mailbox = new Mailbox(
-                '{mail.ha.cenweb.land.moi/novalidate-cert}INBOX', // IMAP server and mailbox folder
+                $fullpath, // IMAP server and mailbox folder
                 $account, // Username for the before configured mailbox
                 $password, // Password for the before configured username
                 __DIR__, // Directory, where attachments will be saved (optional)
@@ -27,12 +74,15 @@ class MonitorMail {
                 CL_EXPUNGE // expunge deleted mails upon mailbox close
                 // | OP_SECURE // don't do non-secure authentication
             );
+            // If you don't need to grab attachments you can significantly increase performance of your application
+            $this->mailbox->setAttachmentsIgnore(true);
         } catch (ConnectionException $ex) {
-            Logger::getInstance()->error("IMAP connection failed: " . $ex);
+            Logger::getInstance()->error("IMAP 連線 ${fullpath} 失敗: " . $ex);
         }
     }
 
     function __destruct() {
+        $this->mailbox->disconnect();
         unset($this->mailbox);
     }
 
@@ -43,48 +93,124 @@ class MonitorMail {
         return isset($info->Date) && $info->Date ? date('Y-m-d H:i:s', strtotime($info->Date)) : 'Unknown';
     }
 
-    public function getLatestMail() {
+    public function getMailboxes() {
+        return $this->mailbox->getMailboxes('*');
+    }
+
+    public function getLatestMail($folder = "INBOX") {
         $mail = null;
         try {
-            // Get all emails (messages)
-            // PHP.net imap_search criteria: http://php.net/manual/en/function.imap-search.php
-            $mailsIds = $this->mailbox->searchMailbox('ALL');
+            $mailsIds = $this->getAllMailIds();
             $total = count($mailsIds);
             Logger::getInstance()->info(__METHOD__.": 找到 $total 封郵件。");
             // If $mailsIds is empty, no emails could be found
             if (empty($mailsIds)) {
                 Logger::getInstance()->warning(__METHOD__.": 找不到郵件。");
             } else {
-
-                $mail = $this->mailbox->getMail($mailsIds[$total - 1]);
+                $mail = $this->mailbox->getMail(
+                    $mailsIds[$total - 1],
+                    false   // Do NOT mark emails as seen (optional)
+                );
             }
         } catch(Exception $ex) {
-            Logger::getInstance()->error("IMAP connection failed: " . $ex);
+            Logger::getInstance()->error("IMAP 取得 ${folder} 最新郵件失敗: " . $ex);
         } finally {
-            return $mail;
+            return $this->extract([$mail]);
         }
     }
 
-    public function getAllMails() {
+    public function getAllMails($folder = "INBOX", $days_before = 1) {
         $mails = [];
         try {
-            // Get all emails (messages)
-            // PHP.net imap_search criteria: http://php.net/manual/en/function.imap-search.php
-            $mailsIds = $this->mailbox->searchMailbox('ALL');
+            $mailsIds = $this->getAllMailIds($folder, $days_before);
             Logger::getInstance()->info(__METHOD__.": 找到 ".count($mailsIds)." 封郵件。");
             // If $mailsIds is empty, no emails could be found
             if (empty($mailsIds)) {
                 Logger::getInstance()->warning(__METHOD__.": 找不到郵件。");
             } else {
-                // foreach ($mailsIds as $mailId) {
-                //     $mails[] = $this->mailbox->getMail($mailId);
-                //     break;
-                // }
+                foreach ($mailsIds as $mailId) {
+                    $mails[] = $this->mailbox->getMail(
+                        $mailId,
+                        false   // Do NOT mark emails as seen (optional)
+                    );
+                }
             }
-        } catch(ConnectionException $ex) {
-            Logger::getInstance()->error("IMAP connection failed: " . $ex);
+        } catch(Exception $ex) {
+            Logger::getInstance()->error("IMAP 取得 ${folder} 郵件失敗: " . $ex);
         } finally {
-            return $mails;
+            return $this->extract($mails);
         }
+    }
+
+    public function getAllMailsCount($folder = "INBOX", $days_before = 1) {
+        return count($this->getAllMailIds($folder, $days_before));
+    }
+    
+    public function getAllUnseenMails($folder = "INBOX", $days_before = 1) {
+        $mails = [];
+        try {
+            $mailsIds = $this->getUnseenMailIds($folder, $days_before);
+            Logger::getInstance()->info(__METHOD__.": 找到 ".count($mailsIds)." 封郵件。");
+            // If $mailsIds is empty, no emails could be found
+            if (empty($mailsIds)) {
+                Logger::getInstance()->warning(__METHOD__.": 找不到郵件。");
+            } else {
+                foreach ($mailsIds as $mailId) {
+                    $mails[] = $this->mailbox->getMail(
+                        $mailId,
+                        false   // Do NOT mark emails as seen (optional)
+                    );
+                }
+            }
+        } catch(Exception $ex) {
+            Logger::getInstance()->error("IMAP 取得 ${folder} 郵件失敗: " . $ex);
+        } finally {
+            return $this->extract($mails);
+        }
+    }
+    
+    public function getAllUnseenMailsCount($folder = "INBOX", $days_before = 1) {
+        return count($this->getUnseenMailIds($folder, $days_before));
+    }
+
+    public function getMailsBySubject($keyword, $folder = "INBOX", $days_before = 1) {
+        $mails = [];
+        try {
+            $mailsIds = $this->getSubjectMailIds($keyword, $folder, $days_before);
+            Logger::getInstance()->info(__METHOD__.": 找到 ".count($mailsIds)." 封郵件。");
+            // If $mailsIds is empty, no emails could be found
+            if (empty($mailsIds)) {
+                Logger::getInstance()->warning(__METHOD__.": 找不到郵件。");
+            } else {
+                foreach ($mailsIds as $mailId) {
+                    $mails[] = $this->mailbox->getMail(
+                        $mailId,
+                        false   // Do NOT mark emails as seen (optional)
+                    );
+                }
+            }
+        } catch(Exception $ex) {
+            Logger::getInstance()->error("IMAP 取得 ${folder} 郵件失敗: " . $ex);
+        } finally {
+            return $this->extract($mails);
+        }
+    }
+    
+    public function extract(&$mail_objs) {
+        $mails = array();
+        if (!empty($mail_objs)) {
+            foreach($mail_objs as $obj) {
+                $mails[] = array(
+                    "id" => intval($obj->id),
+                    "from" => $obj->fromName ?? $obj->fromAddress,
+                    "to" => $obj->toString,
+                    "subject" => $obj->subject,
+                    "message" => $obj->textPlain,
+                    "on" => strtotime($obj->date),  // timestamp
+                    "mailbox" => $obj->mailboxFolder
+                );
+            }
+        }
+        return $mails;
     }
 }
