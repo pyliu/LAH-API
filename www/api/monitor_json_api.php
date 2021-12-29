@@ -21,7 +21,8 @@ switch ($_POST["type"]) {
         $keyword = $_POST["keyword"];
         // 搜尋 via subject
         Logger::getInstance()->info("XHR [subject] 查詢監控郵件 BY '%${keyword}%' IN SUBJECT 請求");
-        $mails = $sqlite_monitor_mail->getMailsBySubject($_POST["keyword"]);
+        $days_before = $_POST["days"] ?? 1;
+        $mails = $sqlite_monitor_mail->getMailsBySubject($_POST["keyword"], $days_before * 24 * 60 * 60);
         if (empty($mails)) {
             echoJSONResponse("'%${keyword}%' IN SUBJECT 沒有找到郵件");
         } else {
