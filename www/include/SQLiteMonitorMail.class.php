@@ -17,7 +17,7 @@ class SQLiteMonitorMail {
         $stm->bindParam(':from', $row['from']);
         $stm->bindParam(':to', $row['to']);
         $stm->bindParam(':subject', $row['subject']);
-        $stm->bindParam(':message', (string)$row['message'] ?? '');
+        $stm->bindValue(':message', (string)$row['message'] ?? '');
         $stm->bindParam(':timestamp', $row['timestamp']);
         $stm->bindParam(':mailbox', $row['mailbox']);
     }

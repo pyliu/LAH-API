@@ -55,6 +55,8 @@ try {
     
     // $monitor = new SQLiteMonitorMail();
     // $monitor->fetchFromMailServer();
+    // $watchdog = new WatchDog();
+	// $done = $watchdog->do();
 }
 catch(Exception $e)
 {
