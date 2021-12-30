@@ -205,7 +205,7 @@ class MonitorMail {
                     "from" => $obj->fromName ?? $obj->fromAddress,
                     "to" => $obj->toString,
                     "subject" => $obj->subject,
-                    "message" => $obj->textPlain . "",  // prevent blob 
+                    "message" => is_string($obj->textPlain) ? $obj->textPlain : "",
                     "timestamp" => strtotime($obj->date),  // timestamp
                     "mailbox" => $obj->mailboxFolder
                 );
