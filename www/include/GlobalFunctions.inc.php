@@ -213,22 +213,36 @@ function prepareSessionMyInfo() {
         }
     }
 }
+
+function utf8ize($mixed) {
+    if (is_array($mixed)) {
+        foreach ($mixed as $key => $value) {
+            $mixed[$key] = utf8ize($value);
+        }
+    } elseif (is_string($mixed)) {
+        return mb_convert_encoding($mixed, "UTF-8", "UTF-8");
+    }
+    return $mixed;
+}
 /**
  * print the json string
  */
 function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array = array()) {
-	$str = json_encode(array_merge(array(
+    $value = array_merge(array(
 		"status" => $status,
         "data_count" => 0,
         "message" => $msg
-    ), $in_array), 0);
+    ), $in_array);
+	$str = json_encode($value, 0);
     
-    // Logger::getInstance()->info($str);
+    if ($str === false && $value && json_last_error() == JSON_ERROR_UTF8) {
+        $str = json_encode(utf8ize($value), 0);
+    }
     
     if ($str === false) {
         Logger::getInstance()->warning(__METHOD__.": 轉換JSON字串失敗。");
         Logger::getInstance()->warning(__METHOD__.":".print_r($in_array, true));
-        echo json_encode(array( "status" => STATUS_CODE::FAIL_JSON_ENCODE, "message" => "無法轉換陣列資料到JSON物件。" ));
+        echo json_encode(array( "status" => STATUS_CODE::FAIL_JSON_ENCODE, "message" => "無法轉換陣列資料到JSON物件。".json_last_error() ));
     } else {
         echo $str;
         exit;

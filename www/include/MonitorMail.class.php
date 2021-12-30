@@ -205,7 +205,7 @@ class MonitorMail {
                     "from" => $obj->fromName ?? $obj->fromAddress,
                     "to" => $obj->toString,
                     "subject" => $obj->subject,
-                    "message" => is_string($obj->textPlain) ? $obj->textPlain : "",
+                    "message" => $obj->textPlain,
                     "timestamp" => strtotime($obj->date),  // timestamp
                     "mailbox" => $obj->mailboxFolder
                 );
