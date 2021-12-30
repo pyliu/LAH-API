@@ -64,7 +64,7 @@ class MonitorMail {
                 $fullpath, // IMAP server and mailbox folder
                 $account, // Username for the before configured mailbox
                 $password, // Password for the before configured username
-                __DIR__, // Directory, where attachments will be saved (optional)
+                sys_get_temp_dir(), // Directory, where attachments will be saved (optional)
                 'UTF-8', // Server encoding (optional)
                 true, // Trim leading/ending whitespaces of IMAP path (optional)
                 true // Attachment filename mode (optional; false = random filename; true = original filename)
