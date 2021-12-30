@@ -10,16 +10,16 @@ class MonitorMail {
     private $host;
     private $mailbox;
 
-    private function getFullMailboxPath($folder) {
+    private function getFullMailboxPath($folder): string {
         return "{".$this->host."/novalidate-cert}".$folder;
     }
 
-    private function selectFolder($folder) {
+    private function selectFolder($folder): void {
         $fullpath = $this->getFullMailboxPath($folder);
         $this->mailbox->switchMailbox($fullpath);
     }
 
-    private function getUnseenMailIds($folder = "INBOX", $days_before = 0) {
+    private function getUnseenMailIds($folder = "INBOX", $days_before = 0): array {
         // PHP.net imap_search criteria: http://php.net/manual/en/function.imap-search.php
         $tag = "UNSEEN";
         if ($days_before > 0) {
@@ -31,7 +31,7 @@ class MonitorMail {
         return $this->mailbox->searchMailbox($tag);
     }
 
-    private function getAllMailIds($folder = "INBOX", $days_before = 0) {
+    private function getAllMailIds($folder = "INBOX", $days_before = 0): array {
         // PHP.net imap_search criteria: http://php.net/manual/en/function.imap-search.php
         $tag = "All";
         if ($days_before > 0) {
@@ -43,7 +43,7 @@ class MonitorMail {
         return $this->mailbox->searchMailbox($tag);
     }
 
-    private function getSubjectMailIds($keyword, $folder = "INBOX", $days_before = 0) {
+    private function getSubjectMailIds($keyword, $folder = "INBOX", $days_before = 0): array {
         // PHP.net imap_search criteria: http://php.net/manual/en/function.imap-search.php
         $tag = 'SUBJECT "'.$keyword.'"';
         if ($days_before > 0) {
@@ -86,18 +86,18 @@ class MonitorMail {
         unset($this->mailbox);
     }
 
-    public function getCurrentServerTime() {
+    public function getCurrentServerTime(): string {
         // Call imap_check() - see http://php.net/manual/function.imap-check.php
         $info = $this->mailbox->imap('check');
         // Show current time for the mailbox
         return isset($info->Date) && $info->Date ? date('Y-m-d H:i:s', strtotime($info->Date)) : 'Unknown';
     }
 
-    public function getMailboxes() {
+    public function getMailboxes(): array {
         return $this->mailbox->getMailboxes('*');
     }
 
-    public function getLatestMail($folder = "INBOX") {
+    public function getLatestMail($folder = "INBOX"): array {
         $mail = null;
         try {
             $mailsIds = $this->getAllMailIds();
@@ -119,7 +119,7 @@ class MonitorMail {
         }
     }
 
-    public function getAllMails($folder = "INBOX", $days_before = 1) {
+    public function getAllMails($folder = "INBOX", $days_before = 1): array {
         $mails = [];
         try {
             $mailsIds = $this->getAllMailIds($folder, $days_before);
@@ -142,11 +142,11 @@ class MonitorMail {
         }
     }
 
-    public function getAllMailsCount($folder = "INBOX", $days_before = 1) {
+    public function getAllMailsCount($folder = "INBOX", $days_before = 1): int {
         return count($this->getAllMailIds($folder, $days_before));
     }
     
-    public function getAllUnseenMails($folder = "INBOX", $days_before = 1) {
+    public function getAllUnseenMails($folder = "INBOX", $days_before = 1): array {
         $mails = [];
         try {
             $mailsIds = $this->getUnseenMailIds($folder, $days_before);
@@ -169,11 +169,11 @@ class MonitorMail {
         }
     }
     
-    public function getAllUnseenMailsCount($folder = "INBOX", $days_before = 1) {
+    public function getAllUnseenMailsCount($folder = "INBOX", $days_before = 1): int {
         return count($this->getUnseenMailIds($folder, $days_before));
     }
 
-    public function getMailsBySubject($keyword, $folder = "INBOX", $days_before = 1) {
+    public function getMailsBySubject($keyword, $folder = "INBOX", $days_before = 1): array {
         $mails = [];
         try {
             $mailsIds = $this->getSubjectMailIds($keyword, $folder, $days_before);
@@ -196,7 +196,7 @@ class MonitorMail {
         }
     }
     
-    public function extract(&$mail_objs) {
+    public function extract(&$mail_objs): array {
         $mails = array();
         if (!empty($mail_objs)) {
             foreach($mail_objs as $obj) {
