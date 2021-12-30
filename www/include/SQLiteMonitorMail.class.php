@@ -12,6 +12,11 @@ class SQLiteMonitorMail {
             Logger::getInstance()->error(__METHOD__.": bindParams because of \$stm is false.");
             return;
         }
+        // debug
+        if (!is_string($row['message'])) {
+            Logger::getInstance()->warning(__CLASS__.": message column is not string!");
+            Logger::getInstance()->warning(__CLASS__.": ".print_r($row, true));
+        }
 
         $stm->bindParam(':id', $row['id']);
         $stm->bindParam(':from', $row['from']);
