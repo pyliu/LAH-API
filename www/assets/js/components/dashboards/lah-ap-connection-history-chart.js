@@ -284,7 +284,7 @@ if (Vue) {
                     // 起始顯示之AP
                     this.ip = configs.WEBAP_IP || '220.1.34.161'
                     this.site = configs.SITE || 'HA'
-                    // default is HB ap list
+                    // default is HA ap list
                     this.carousel = ['205', '206', '207', '62', '156', '118', '60', '161']
                     if (configs.WEBAP_POSTFIXES) {
                         // expect ip postfix string => "205, 206, 207, 156, 118, 60, 161"
@@ -309,7 +309,7 @@ if (Vue) {
                         })
                         this.carousel = [ ...list ]
                     } else {
-                        console.warn(`No configs.WEBAP_POSTFIXES found, use HB default list!`)
+                        console.warn(`No configs.WEBAP_POSTFIXES found, use HA default list!`)
                     }
                 } else {
                     this.alert({
