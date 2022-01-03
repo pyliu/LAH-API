@@ -32,6 +32,7 @@ switch ($_POST["type"]) {
 			"user" => $_SESSION["myinfo"],
 			"configs" => array(
 				'webap_ip' => $system->get('WEBAP_IP'),
+				'webap_postfix' => $system->get('WEBAP_POSTFIXES'),
 				'mock' => $system->isMockMode(),
 				'mssql' => $system->isMSSQLEnable(),
 				'avatar' => $system->isAvatarEnable(),
