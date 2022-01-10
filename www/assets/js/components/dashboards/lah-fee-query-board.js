@@ -494,7 +494,7 @@ if (Vue) {
                     },
                     isOperatorValid: function() {
                         let regex = /^HA/i;
-                        return regex.test(this.operator) && this.operator.length == 6;
+                        return regex.test(this.operator);
                     },
                     isReasonValid: function() {
                         return this.reason != '' && this.reason != undefined && this.reason != null;
