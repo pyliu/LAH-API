@@ -214,7 +214,7 @@ class IPResolver {
                 $stmt->bindParam(':ip', $ip);
                 $result = $stmt->execute();
                 $row = $result->fetchArray(SQLITE3_ASSOC);
-                if (is_array($row)) {
+                if (is_array($row) && !empty($row['entry_desc'])) {
                     return $row['entry_desc'];
                 } else {
                     // Logger::getInstance()->warning(__METHOD__.": 找不到 $ip 對應資料。(IPResolver table, IPResolver.db)");
