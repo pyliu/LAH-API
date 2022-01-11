@@ -425,7 +425,7 @@ if (Vue) {
                                 <b-form-input
                                     v-model="operator"
                                     id="dummy_operator"
-                                    placeholder="HBXXXX"
+                                    placeholder="HAXXXX"
                                     size="sm"
                                     trim
                                     :state="isOperatorValid"
@@ -439,7 +439,7 @@ if (Vue) {
                                 <b-form-input
                                     v-model="AB_number"
                                     id="dummy_fee_number"
-                                    placeholder="ABXXXXXXXX"
+                                    placeholder="AAXXXXXXXX"
                                     :state="isNumberValid"
                                     size="sm"
                                     trim
@@ -471,8 +471,8 @@ if (Vue) {
                 </div>`,
                 props: ["raw_data"],
                 data: () => ({
-                    year: "109",
-                    next_pc_number: 9109001,  // 9 + year (3 digits) + serial (3 digits)
+                    year: "111",
+                    next_pc_number: 9111001,  // 9 + year (3 digits) + serial (3 digits)
                     today: "",
                     operator: "",   // 作業人員
                     operator_name: "",
@@ -493,14 +493,14 @@ if (Vue) {
                         return regex.test(this.today) && this.today.length == 7;
                     },
                     isOperatorValid: function() {
-                        let regex = /^HB/i;
-                        return regex.test(this.operator) && this.operator.length == 6;
+                        let regex = /^HA/i;
+                        return regex.test(this.operator);
                     },
                     isReasonValid: function() {
                         return this.reason != '' && this.reason != undefined && this.reason != null;
                     },
                     isNumberValid: function() {
-                        let regex = /^AB/i;
+                        let regex = /^AA/i;
                         return regex.test(this.AB_number) && this.AB_number.length == 10;
                     },
                     isDisabled: function() {
