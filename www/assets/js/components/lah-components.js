@@ -440,6 +440,11 @@ if (Vue) {
                     need_admin: false,
                     children: []
                 }, {
+                    text: "信差歷史訊息",
+                    url: "message.html",
+                    icon: "comments",
+                    need_admin: false
+                }, {
                     text: `統計看板`,
                     url: "stats.html",
                     icon: "laptop-house",
@@ -481,12 +486,6 @@ if (Vue) {
                         need_admin: false
                     }]
                 }];
-                // {
-                //     text: "信差歷史訊息",
-                //     url: "message.html",
-                //     icon: "comments",
-                //     need_admin: false
-                // }];
             }
         },
         methods: {
