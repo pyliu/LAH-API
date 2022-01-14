@@ -493,15 +493,13 @@ if (Vue) {
                         return regex.test(this.today) && this.today.length == 7;
                     },
                     isOperatorValid: function() {
-                        let regex = /^HA/i;
-                        return regex.test(this.operator);
+                        return !this.empty(this.userNames[this.operator])
                     },
                     isReasonValid: function() {
                         return this.reason != '' && this.reason != undefined && this.reason != null;
                     },
                     isNumberValid: function() {
-                        let regex = /^AA/i;
-                        return regex.test(this.AB_number) && this.AB_number.length == 10;
+                        return this.AB_number.length == 10;
                     },
                     isDisabled: function() {
                         return !this.isOperatorValid || !this.isNumberValid || !this.isReasonValid || !this.isDateValid;
