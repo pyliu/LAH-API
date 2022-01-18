@@ -2,6 +2,7 @@
 require_once("Logger.class.php");
 require_once("System.class.php");
 require_once("SQLiteDBFactory.class.php");
+require_once("StatsSQLite.class.php");
 
 class Notification {
     
@@ -73,6 +74,9 @@ class Notification {
             ");
             if ($this->bindParams($stm, $payload)) {
                 if ($stm->execute() !== FALSE) {
+                    // add stats
+                    $stats = new StatsSQLite();
+                    $stats->addNotificationCount();
                     // return last inserted id
                     return $db->querySingle("SELECT id from message ORDER BY id DESC LIMIT 1");
                 }

@@ -8,6 +8,7 @@ require_once('System.class.php');
 
 class StatsSQLite {
     private $db;
+    private $querySingleFail = array(NULL, FALSE, array());
 
     private function addConnectivityStatus($log_time, $tgt_ip, $latency) {
         // inst into db
@@ -94,8 +95,19 @@ class StatsSQLite {
         return false;
     }
 
+    public function addNotificationCount($count = 1) {
+        $total = $this->getTotal('notification_msg_count');
+        // in case the entry not exists
+        if (in_array($total, $this->querySingleFail)) {
+            $this->instTotal('notification_msg_count', '即時通訊息統計');
+            $total = 0;
+        }
+        $total += $count;
+        $ret = $this->updateTotal('notification_msg_count', $total);
+        Logger::getInstance()->info(__METHOD__.": notification_msg_count 計數器+${count}，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
+    }
+
     public function addOverdueMsgCount($count = 1) {
-        
         $total = $this->getTotal('overdue_msg_count') + $count;
         $ret = $this->updateTotal('overdue_msg_count', $total);
         Logger::getInstance()->info(__METHOD__.": overdue_msg_count 計數器+${count}，目前值為 ${total} 【".($ret ? "成功" : "失敗")."】");
