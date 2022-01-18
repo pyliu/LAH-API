@@ -442,7 +442,13 @@ class WatchDog {
         if ($this->isOn($this->schedule["once_a_day"])) {
             $monitor = new SQLiteMonitorMail();
             // remove mails by a month ago
-            $monitor->removeOutdatedMail(30 * 24 * 60 * 60);
+            $days = 30;
+            $month_secs = $days * 24 * 60 * 60;
+            if ($monitor->removeOutdatedMail($month_secs)) {
+                Logger::getInstance()->info(__METHOD__.": 移除過時的監控郵件成功。(${days}天之前)");
+            } else {
+                Logger::getInstance()->warning(__METHOD__.": 移除過時的監控郵件失敗。(${days}天之前)");
+            }
         }
     }
 
