@@ -386,13 +386,12 @@ class SQLiteUser {
             if($stmt = $this->db->prepare("
                 UPDATE user SET
                     name = :name,
-                    unit = :unit,
                     offboard_date = :offboard_date
                 WHERE id = :id
             ")) {
                 $stmt->bindParam(':id', $data['entry_id']);
                 $stmt->bindParam(':name', $mapped_name);
-                $stmt->bindParam(':unit', $unit);
+                // $stmt->bindParam(':unit', $unit);
                 // $stmt->bindParam(':ip', $data['ip']);
                 $stmt->bindValue(':offboard_date', '');
                 return $stmt->execute() === FALSE ? false : true;
