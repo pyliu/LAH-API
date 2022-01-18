@@ -52,9 +52,8 @@ try {
     //     }
     // }
     // Create PhpImap\Mailbox instance for all further actions
-    
     // $monitor = new SQLiteMonitorMail();
-    // $monitor->fetchFromMailServer();
+    // print($monitor->removeOutdatedMail());
     // $watchdog = new WatchDog();
 	// $done = $watchdog->do();
 }

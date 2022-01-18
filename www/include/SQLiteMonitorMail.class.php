@@ -118,6 +118,19 @@ class SQLiteMonitorMail {
         return false;
     }
     /**
+     * 移除區間外郵件(default is one month)
+     */
+    public function removeOutdatedMail($seconds_before = 30 * 24 * 60 * 60) {
+        $ts = time() - intval($seconds_before);
+        $sql = "DELETE FROM mail WHERE timestamp <= :ts";
+        if ($stmt = $this->db->prepare($sql)) {
+            $stmt->bindParam(":ts", $ts);
+            return $stmt->execute() === FALSE ? false : true;
+        }
+        Logger::getInstance()->warning(__METHOD__.": 無法執行 「${sql}」 SQL描述。");
+        return false;
+    }
+    /**
      * 取得郵件 BY 搜尋 subject 關鍵字
      */
     public function getMailsBySubject($query_string, $seconds_before = 24 * 60 * 60) {

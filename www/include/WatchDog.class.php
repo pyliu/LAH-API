@@ -438,6 +438,14 @@ class WatchDog {
         $monitor->fetchFromMailServer();
     }
 
+    private function wipeOutdatedMonitorMail() {
+        if ($this->isOn($this->schedule["once_a_day"])) {
+            $monitor = new SQLiteMonitorMail();
+            // remove mails by a month ago
+            $monitor->removeOutdatedMail(30 * 24 * 60 * 60);
+        }
+    }
+
     function __construct() { $this->stats = new StatsSQLite(); }
     function __destruct() { $this->stats = null; }
 
@@ -454,6 +462,7 @@ class WatchDog {
             $this->stats->wipeConnectivityHistory();
             // $this->notifyTemperatureRegistration();
             $this->wipeOutdatedIPEntries();
+            $this->wipeOutdatedMonitorMail();
             /**
              * 案件檢測作業
              */
