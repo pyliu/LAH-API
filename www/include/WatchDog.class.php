@@ -321,7 +321,6 @@ class WatchDog {
 
     private function compressLog() {
         if (php_sapi_name() != "cli") {
-            
             $cache = Cache::getInstance();
             // compress all log when zipLogs_flag is expired
             if ($cache->isExpired('zipLogs_flag')) {
@@ -334,8 +333,15 @@ class WatchDog {
         }
     }
 
+    private function wipeOutdatedLog() {
+        if ($this->isOn($this->schedule["once_a_day"])) {
+            if (php_sapi_name() != "cli") {
+                Logger::getInstance()->removeOutdatedLog();
+            }
+        }
+    }
+
     private function findProblematicSURCases() {
-        
         if ($this->isOn($this->schedule["once_a_day"])) {
             // 找已結案但卻又延期複丈之案件
             $q = new Query();
@@ -469,6 +475,7 @@ class WatchDog {
             // $this->notifyTemperatureRegistration();
             $this->wipeOutdatedIPEntries();
             $this->wipeOutdatedMonitorMail();
+            $this->wipeOutdatedLog();
             /**
              * 案件檢測作業
              */

@@ -56,6 +56,7 @@ try {
     // print($monitor->removeOutdatedMail());
     // $watchdog = new WatchDog();
 	// $done = $watchdog->do();
+    // Logger::getInstance()->removeOutdatedLog();
 }
 catch(Exception $e)
 {

@@ -22,6 +22,13 @@ class Logger {
         }
         return self::$_instance;
     }
+
+    /**
+    * $log_dir - dir of logs
+    * @var string
+    */
+    protected $log_dir;
+
     /**
     * $log_file - path and log file name
     * @var string
@@ -48,22 +55,23 @@ class Logger {
     * @param array $params
     */
     private function __construct($log_file = '', $params = array()){
+        $this->log_dir = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."log";
         if (empty($log_file)) {
             // ex: log-2019-09-16.log
-            $log_file = __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.'log-'.date('Y-m-d').'.log';
+            $log_file = $this->log_dir.DIRECTORY_SEPARATOR.'log-'.date('Y-m-d').'.log';
         }
         $this->log_file = $log_file;
         $this->params = array_merge($this->options, $params);
 
         //Create log file if it doesn't exist.
         if(!file_exists($log_file)){               
-            fopen($log_file, 'w') or exit("Can't create $log_file!");
+            fopen($log_file, 'w') or exit("無法建立 ${log_file}！");
         }
 
         //Check permissions of file.
         if(!is_writable($log_file)){   
             //throw exception if not writable
-            throw new Exception("ERROR: Unable to write to file!", 1);
+            throw new Exception("ERROR: 無法寫入檔案 ${log_file}", 1);
         }
     }
 
@@ -87,13 +95,11 @@ class Logger {
             return false;
         }
 
-        // Enter the name of directory
-        $pathdir = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."log";
         // Enter the name to creating zipped directory
         $zipcreated = "log-${date}.zip";
-        $zip_file = $pathdir.DIRECTORY_SEPARATOR.$zipcreated;
+        $zip_file = $this->log_dir.DIRECTORY_SEPARATOR.$zipcreated;
         $log_file = "log-${date}.log";
-        $log_path = $pathdir.DIRECTORY_SEPARATOR.$log_file;
+        $log_path = $this->log_dir.DIRECTORY_SEPARATOR.$log_file;
 
         if (!file_exists($log_path)) {
             $this->error("log file doesn't exists! 【${log_path}】");
@@ -112,7 +118,21 @@ class Logger {
 
         return true;
     }
-
+    /**
+     * Remove outdated log file
+     */
+    public function removeOutdatedLog($seconds_before = 30 * 24 * 60 * 60) {
+        $ts = time() - $seconds_before;
+        // Assigning files inside the directory
+        $dir = new RecursiveDirectoryIterator($this->log_dir, FilesystemIterator::SKIP_DOTS | RecursiveIteratorIterator::CHILD_FIRST);
+        // Removing directories and files inside the specified folder
+        foreach ($dir as $file) { 
+            if ($file->isFile() && $file->getMTime() <= $ts) {
+                $this->info("移除".$file->getFilename());
+                @unlink($file);
+            }
+        }
+    }
     /**
     * Info method (write info message)
     * @param string $message
