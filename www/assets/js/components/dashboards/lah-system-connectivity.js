@@ -155,7 +155,7 @@ if (Vue) {
                         // raw is array of { 'AP31': {ip: 'xxx.xxx.xxx.31', name: 'AP31', port: '', note: 'XXX'} }
                         for (const [name, raw_obj] of Object.entries(res.data.raw)) {
                             this.list.push({
-                                name: name,
+                                name: raw_obj.name,
                                 target_ip: raw_obj.ip,
                                 latency: 0.0,
                                 status: 'DOWN',
