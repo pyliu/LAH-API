@@ -37,7 +37,7 @@ switch ($_POST["type"]) {
     case "monitor_targets":
         Logger::getInstance()->info("XHR [monitor_targets] 查詢監控系統標的請求");
         $conn = new SQLiteConnectivity();
-        if ($arr = $conn->getTargets()) {
+        if ($arr = $conn->getTargets($_POST["raw"])) {
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => $count,

@@ -59,7 +59,7 @@ class SQLiteConnectivity {
         $this->db->close();
     }
 
-    public function getTargets() {
+    public function getTargets($raw = false) {
         $stm = $this->db->prepare("SELECT * FROM target WHERE monitor = 'Y' ORDER BY name");
         if ($stm === false) {
             Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ SELECT * FROM target ] 失敗。");
@@ -68,7 +68,11 @@ class SQLiteConnectivity {
                 $return = array();
                 if ($result === false) return $return;
                 while($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                    $return[$row['name']] = $row;
+                    if ($raw === false) {
+                        $return[$row['name']] = $row;
+                    } else {
+                        $return[] = $row;
+                    }
                 }
                 return $return;
             } else {
