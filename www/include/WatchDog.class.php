@@ -320,24 +320,21 @@ class WatchDog {
     }
 
     private function compressLog() {
-        if (php_sapi_name() != "cli") {
-            $cache = Cache::getInstance();
-            // compress all log when zipLogs_flag is expired
-            if ($cache->isExpired('zipLogs_flag')) {
-                Logger::getInstance()->info("開始壓縮LOG檔！");
-                zipLogs();
-                Logger::getInstance()->info("壓縮LOG檔結束！");
-                // cache the flag for a week
-                $cache->set('zipLogs_flag', true, 604800);
-            }
+        $cache = Cache::getInstance();
+        // compress all log when zipLogs_flag is expired
+        if ($cache->isExpired('zipLogs_flag')) {
+            Logger::getInstance()->info("開始壓縮LOG檔！");
+            zipLogs();
+            Logger::getInstance()->info("壓縮LOG檔結束！");
+            // cache the flag for a week
+            $cache->set('zipLogs_flag', true, 604800);
         }
     }
 
     private function wipeOutdatedLog() {
         if ($this->isOn($this->schedule["once_a_day"])) {
-            if (php_sapi_name() != "cli") {
-                Logger::getInstance()->removeOutdatedLog();
-            }
+            Logger::getInstance()->info("啟動清除過時記錄檔排程。");
+            Logger::getInstance()->removeOutdatedLog();
         }
     }
 
@@ -434,6 +431,7 @@ class WatchDog {
 
     private function wipeOutdatedIPEntries() {
         if ($this->isOn($this->schedule["once_a_day"])) {
+            Logger::getInstance()->info("啟動清除過時 dynamic ip 資料排程。");
             $ipr = new IPResolver();
             $ipr->removeDynamicIPEntries(604800);   // a week
         }
@@ -450,6 +448,7 @@ class WatchDog {
             // remove mails by a month ago
             $days = 30;
             $month_secs = $days * 24 * 60 * 60;
+            Logger::getInstance()->info("啟動清除過時監控郵件排程。(${days}, ${month_secs})");
             if ($monitor->removeOutdatedMail($month_secs)) {
                 Logger::getInstance()->info(__METHOD__.": 移除過時的監控郵件成功。(${days}天之前)");
             } else {
