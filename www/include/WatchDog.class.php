@@ -229,6 +229,7 @@ class WatchDog {
             }
             
             $this->stats->addOverdueMsgCount($stats);
+            $this->stats->addNotificationCount($stats);
         }
         Logger::getInstance()->info('查詢近15天逾期登記案件完成。');
         return true;

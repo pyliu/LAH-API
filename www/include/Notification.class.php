@@ -62,6 +62,7 @@ class Notification {
             Logger::getInstance()->error(__METHOD__.': required param is missing. ('.$channel.')');
             return false;
         }
+        // 公告頻道轉換
         if (in_array($channel, array('all', 'hr', 'acc', 'adm', 'reg', 'sur', 'val', 'inf', 'supervisor'))) {
             $channel = $channel === 'all' ? 'announcement' : 'announcement_'.$channel;
         }
@@ -74,13 +75,9 @@ class Notification {
             ");
             if ($this->bindParams($stm, $payload)) {
                 if ($stm->execute() !== FALSE) {
-                    // add stats
-                    $stats = new StatsSQLite();
-                    $stats->addNotificationCount();
                     // return last inserted id
                     return $db->querySingle("SELECT id from message ORDER BY id DESC LIMIT 1");
                 }
-                // return $stm->execute() === FALSE ? false : true;
             }
             return false;
         }

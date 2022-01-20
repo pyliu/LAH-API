@@ -99,7 +99,7 @@ class StatsSQLite {
         $total = $this->getTotal('notification_msg_count');
         // in case the entry not exists
         if (in_array($total, $this->querySingleFail)) {
-            $this->instTotal('notification_msg_count', '即時通訊息統計');
+            $this->instTotal('notification_msg_count', '桃園即時通訊息傳送統計');
             $total = 0;
         }
         $total += $count;
