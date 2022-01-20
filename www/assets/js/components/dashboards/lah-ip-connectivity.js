@@ -65,8 +65,8 @@ if (Vue) {
                             // add new property to the storeParam with don't care value to reduce the xhr request (lock concept)
                             this.addToStoreParams('lah-ip-connectivity-map', true);
                             // store a mapping table in Vuex
-                            this.$http.post(CONFIG.API.JSON.STATS, {
-                                type: "stats_connectivity_target"
+                            this.$http.post(CONFIG.API.JSON.MONITOR, {
+                                type: "monitor_targets"
                             }).then(res => {
                                 if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                                     this.setLocalCache('lah-ip-connectivity-map', res.data.raw);
@@ -121,8 +121,8 @@ if (Vue) {
                     this.log_time = this.now().replace(/[\-\s:]*/, '');
                 } else {
                     if (force) this.isBusy = true;
-                    this.$http.post(CONFIG.API.JSON.STATS, {
-                        type: "stats_ip_connectivity_history",
+                    this.$http.post(CONFIG.API.JSON.MONITOR, {
+                        type: "monitor_target_history",
                         force: force,
                         ip: this.ip,
                         port: this.port

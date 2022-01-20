@@ -3,7 +3,7 @@ require_once('init.php');
 require_once('SQLiteDBFactory.class.php');
 require_once('Ping.class.php');
 
-class Connectivity {
+class SQLiteConnectivity {
     private $db;
     private $path;
 
@@ -23,6 +23,26 @@ class Connectivity {
             }
         }
 
+        return false;
+    }
+
+    private function pingAndSave($arr) {
+        $ip = $arr['ip'];
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            $log_time = date("YmdHis");
+            $ping = new Ping($ip);
+            $latency = 0;
+            if (empty($arr['port'])) {
+                $latency = $ping->ping();
+            } else {
+                $ping->setPort($arr['port']);
+                $latency = $ping->ping('fsockopen');
+                if (empty($latency)) {
+                    $latency = $ping->ping('socket');
+                }
+            }
+            return $this->addConnectivityStatus($log_time, $ip, $latency);
+        }
         return false;
     }
 
@@ -54,26 +74,6 @@ class Connectivity {
             } else {
                 Logger::getInstance()->warning(__METHOD__.": 取得檢測目標列表失敗。");
             }
-        }
-        return false;
-    }
-
-    public function pingAndSave($arr) {
-        $ip = $arr['ip'];
-        if (filter_var($ip, FILTER_VALIDATE_IP)) {
-            $log_time = date("YmdHis");
-            $ping = new Ping($ip);
-            $latency = 0;
-            if (empty($arr['port'])) {
-                $latency = $ping->ping();
-            } else {
-                $ping->setPort($arr['port']);
-                $latency = $ping->ping('fsockopen');
-                if (empty($latency)) {
-                    $latency = $ping->ping('socket');
-                }
-            }
-            return $this->addConnectivityStatus($log_time, $ip, $latency);
         }
         return false;
     }

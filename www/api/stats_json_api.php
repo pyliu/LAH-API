@@ -4,7 +4,7 @@ require_once(ROOT_DIR."/include/Cache.class.php");
 require_once(ROOT_DIR."/include/System.class.php");
 require_once(ROOT_DIR."/include/StatsOracle.class.php");
 require_once(ROOT_DIR."/include/StatsSQLite.class.php");
-require_once(ROOT_DIR."/include/Connectivity.class.php");
+require_once(ROOT_DIR."/include/SQLiteConnectivity.class.php");
 
 $stats = new StatsOracle();
 $stats_sqlite3 = new StatsSQLite();
@@ -254,47 +254,6 @@ switch ($_POST["type"]) {
         } else {
             $error = "取得跨所AP ".$_POST["ap_ip"]." 連線歷史紀錄失敗。";
             Logger::getInstance()->error("XHR [stats_ap_conn_history] ${error}");
-            echoJSONResponse($error);
-        }
-        break;
-    case "stats_connectivity_target":
-        $conn = new Connectivity();
-        if ($arr = $conn->getTargets()) {
-            $count = count($arr);
-            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => $count,
-                "raw" => $arr
-            ));
-        } else {
-            $error = "取得連結狀態目標列表失敗。";
-            Logger::getInstance()->error("XHR [stats_connectivity_target] ${error}");
-            echoJSONResponse($error);
-        }
-        break;
-    case "stats_connectivity_history":
-        $conn = new Connectivity();
-        if ($arr = $conn->getStatus($_POST["force"])) {
-            $count = count($arr);
-            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => $count,
-                "raw" => $arr
-            ));
-        } else {
-            $error = "取得連結狀態紀錄失敗。";
-            Logger::getInstance()->error("XHR [stats_connectivity_history] ${error}");
-            echoJSONResponse($error);
-        }
-        break;
-    case "stats_ip_connectivity_history":
-        $conn = new Connectivity();
-        if ($arr = $conn->getIPStatus($_POST["ip"], $_POST["force"], $_POST['port'])) {
-            echoJSONResponse("取得 1 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => 1,
-                "raw" => $arr
-            ));
-        } else {
-            $error = "取得 ".$_POST["ip"]." 連結狀態紀錄失敗。";
-            Logger::getInstance()->error("XHR [stats_connectivity_history] ${error}");
             echoJSONResponse($error);
         }
         break;

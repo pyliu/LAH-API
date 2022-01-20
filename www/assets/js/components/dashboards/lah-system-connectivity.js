@@ -146,8 +146,8 @@ if (Vue) {
             },
             prepare() {
                 this.isBusy = true;
-                this.$http.post(CONFIG.API.JSON.STATS, {
-                    type: "stats_connectivity_target"
+                this.$http.post(CONFIG.API.JSON.MONITOR, {
+                    type: "monitor_targets"
                 }).then(res => {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         // initializing monitor list entries from DB
@@ -181,8 +181,8 @@ if (Vue) {
                 } else if (this.type != 'light') {
                     clearTimeout(this.reload_timer);
                     this.isBusy = true;
-                    this.$http.post(CONFIG.API.JSON.STATS, {
-                        type: "stats_connectivity_history",
+                    this.$http.post(CONFIG.API.JSON.MONITOR, {
+                        type: "monitor_targets_history",
                         force: force,
                         timeout: this.list.length * 1000 + 3000 // maximum number of timeout in milliseconds
                     }).then(res => {

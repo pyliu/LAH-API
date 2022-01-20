@@ -1,6 +1,7 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteMonitorMail.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteConnectivity.class.php");
 
 $sqlite_monitor_mail = new SQLiteMonitorMail();
 
@@ -31,6 +32,50 @@ switch ($_POST["type"]) {
 				'data_count' => $count,
 				'raw' => $mails
 			));
+        }
+        break;
+    case "monitor_targets":
+        Logger::getInstance()->info("XHR [monitor_targets] 查詢監控系統標的請求");
+        $conn = new SQLiteConnectivity();
+        if ($arr = $conn->getTargets()) {
+            $count = count($arr);
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => $count,
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得監控系統標的失敗。";
+            Logger::getInstance()->error("XHR [monitor_targets] ${error}");
+            echoJSONResponse($error);
+        }
+        break;
+    case "monitor_targets_history":
+        Logger::getInstance()->info("XHR [monitor_targets_history] 查詢全監控系統標的歷史資料請求");
+        $conn = new SQLiteConnectivity();
+        if ($arr = $conn->getStatus($_POST["force"])) {
+            $count = count($arr);
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => $count,
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得全監控系統標的歷史資料失敗。";
+            Logger::getInstance()->error("XHR [monitor_targets_history] ${error}");
+            echoJSONResponse($error);
+        }
+        break;
+    case "monitor_target_history":
+        Logger::getInstance()->info("XHR [monitor_target_history] 查詢監控系統標的歷史資料請求");
+        $conn = new SQLiteConnectivity();
+        if ($arr = $conn->getIPStatus($_POST["ip"], $_POST["force"], $_POST['port'])) {
+            echoJSONResponse("取得 1 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => 1,
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得 ".$_POST["ip"]." 監控系統標的歷史資料失敗。";
+            Logger::getInstance()->error("XHR [monitor_target_history] ${error}");
+            echoJSONResponse($error);
         }
         break;
     default:

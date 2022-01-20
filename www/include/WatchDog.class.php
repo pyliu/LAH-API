@@ -14,7 +14,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."IPResolver.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteMonitorMail.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."Connectivity.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteConnectivity.class.php");
 
 class WatchDog {
     private $stats = null;
@@ -471,7 +471,7 @@ class WatchDog {
             // clean AP stats data one day ago
             $this->stats->wipeAllAPConnHistory();
             // check systems connectivity
-            $conn = new Connectivity();
+            $conn = new SQLiteConnectivity();
             $conn->check();
             // clean connectivity stats data one day ago
             $conn->wipeHistory(1);
