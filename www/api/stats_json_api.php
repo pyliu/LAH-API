@@ -4,6 +4,7 @@ require_once(ROOT_DIR."/include/Cache.class.php");
 require_once(ROOT_DIR."/include/System.class.php");
 require_once(ROOT_DIR."/include/StatsOracle.class.php");
 require_once(ROOT_DIR."/include/StatsSQLite.class.php");
+require_once(ROOT_DIR."/include/Connectivity.class.php");
 
 $stats = new StatsOracle();
 $stats_sqlite3 = new StatsSQLite();
@@ -257,7 +258,8 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_connectivity_target":
-        if ($arr = $stats_sqlite3->getCheckingTargets()) {
+        $conn = new Connectivity();
+        if ($arr = $conn->getTargets()) {
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => $count,
@@ -270,7 +272,8 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_connectivity_history":
-        if ($arr = $stats_sqlite3->getConnectivityStatus($_POST["force"])) {
+        $conn = new Connectivity();
+        if ($arr = $conn->getStatus($_POST["force"])) {
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => $count,
@@ -283,7 +286,8 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_ip_connectivity_history":
-        if ($arr = $stats_sqlite3->getIPConnectivityStatus($_POST["ip"], $_POST["force"], $_POST['port'])) {
+        $conn = new Connectivity();
+        if ($arr = $conn->getIPStatus($_POST["ip"], $_POST["force"], $_POST['port'])) {
             echoJSONResponse("取得 1 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => 1,
                 "raw" => $arr

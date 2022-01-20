@@ -2,55 +2,12 @@
 require_once('init.php');
 require_once('SQLiteDBFactory.class.php');
 require_once('IPResolver.class.php');
-require_once('Ping.class.php');
 require_once('System.class.php');
-
+require_once('Connectivity.class.php');
 
 class StatsSQLite {
     private $db;
     private $querySingleFail = array(NULL, FALSE, array());
-
-    private function addConnectivityStatus($log_time, $tgt_ip, $latency) {
-        // inst into db
-        $db_path = SQLiteDBFactory::getConnectivityDB();
-        $ap_db = new SQLite3($db_path);
-        $stm = $ap_db->prepare("REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency)");
-        if ($stm === false) {
-            Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency) ] 失敗。($log_time, $tgt_ip, $latency)");
-        } else {
-            $stm->bindParam(':log_time', $log_time);
-            $stm->bindParam(':target_ip', $tgt_ip);
-            $stm->bindValue(':status', empty($latency) ? 'DOWN' : 'UP');
-            $stm->bindValue(':latency', empty($latency) ? 1000.0 : $latency);   // default ping timeout is 1s
-            if ($stm->execute() !== FALSE) {
-                return true;
-            } else {
-                Logger::getInstance()->warning(__METHOD__.": 更新資料庫(${db_path})失敗。($log_time, $tgt_ip, $latency)");
-            }
-        }
-
-        return false;
-    }
-
-    private function pingAndSave($row) {
-        $ip = $row['ip'];
-        if (filter_var($ip, FILTER_VALIDATE_IP)) {
-            $log_time = date("YmdHis");
-            $ping = new Ping($ip);
-            $latency = 0;
-            if (empty($row['port'])) {
-                $latency = $ping->ping();
-            } else {
-                $ping->setPort($row['port']);
-                $latency = $ping->ping('fsockopen');
-                if (empty($latency)) {
-                    $latency = $ping->ping('socket');
-                }
-            }
-            return $this->addConnectivityStatus($log_time, $ip, $latency);
-        }
-        return false;
-    }
 
     function __construct() {
         $path = SQLiteDBFactory::getLAHDB();
@@ -346,125 +303,5 @@ class StatsSQLite {
         foreach ($postfixs as $postfix) {
             $this->wipeAPConnHistory($postfix);
         }
-    }
-    /**
-     * Connectivity Status
-     */
-    public function getCheckingTargets() {
-        
-        // inst into db
-        $db_path = SQLiteDBFactory::getConnectivityDB();
-        $ap_db = new SQLite3($db_path);
-        $stm = $ap_db->prepare("SELECT * FROM target WHERE monitor = 'Y' ORDER BY name");
-        if ($stm === false) {
-            Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ SELECT * FROM target ] 失敗。");
-        } else {
-            if ($result = $stm->execute()) {
-                $return = array();
-                if ($result === false) return $return;
-                while($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                    $return[$row['name']] = $row;
-                }
-                return $return;
-            } else {
-                Logger::getInstance()->warning(__METHOD__.": 取得檢測目標列表失敗。");
-            }
-        }
-
-        return false;
-    }
-
-    public function checkRegisteredConnectivity() {
-        
-        $tracking_targets = $this->getCheckingTargets();
-        // generate the latest batch records
-        foreach ($tracking_targets as $name => $row) {
-            if (filter_var($row['ip'], FILTER_VALIDATE_IP)) {
-                $this->pingAndSave($row);
-            } else {
-                Logger::getInstance()->warning(__METHOD__.": $name:".$row['ip']." is not a valid IP address.".(empty($row['port']) ? '' : ':'.$row['port']));
-            }
-        }
-    }
-
-    public function checkIPConnectivity($ip = null, $port = 0) {
-        
-        if (filter_var($ip, FILTER_VALIDATE_IP)) {
-            // single ep
-            $this->pingAndSave(array('ip' => $ip, 'port' => $port));
-        } else {
-            Logger::getInstance()->warning(__METHOD__.": $ip".(empty($port) ? '' : ":$port")." is not valid.");
-        }
-    }
-
-    public function getConnectivityStatus($force = 'false') {
-        
-
-        if ($force === 'true' && !System::getInstance()->isMockMode()) {
-            // generate the latest batch records
-            $this->checkRegisteredConnectivity();
-        }
-
-        $tracking_targets = $this->getCheckingTargets();
-        $tracking_ips = array();
-        foreach ($tracking_targets as $name => $row) {
-            $tracking_ips[$name] = $row['ip'];
-        }
-        $return = array();
-        if (empty($tracking_ips)) {
-            Logger::getInstance()->warning(__METHOD__.": tracking ip array is empty.");
-        } else {
-            $db_path = SQLiteDBFactory::getConnectivityDB();
-            $conn_db = new SQLite3($db_path);
-            $in_statement = " IN ('".implode("','", $tracking_ips)."') ";
-            if($stmt = $conn_db->prepare('SELECT * FROM connectivity WHERE target_ip '.$in_statement.' ORDER BY ROWID DESC LIMIT :limit')) {
-                $stmt->bindValue(':limit', count($tracking_targets), SQLITE3_INTEGER);
-                $result = $stmt->execute();
-                if ($result === false) return $return;
-                while($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                    $return[] = $row;
-                }
-            } else {
-                Logger::getInstance()->error(__METHOD__.": 取得 connectivity 最新紀錄資料失敗！ (${db_path})");
-            }
-        }
-        return $return;
-    }
-
-    public function getIPConnectivityStatus($ip, $force = 'false', $port = 0) {
-        if ($force === 'true' && !System::getInstance()->isMockMode()) {
-            // generate the latest record for $ip
-            $this->checkIPConnectivity($ip, $port);
-        }
-
-        $db_path = SQLiteDBFactory::getConnectivityDB();
-        $conn_db = new SQLite3($db_path);
-        if($stmt = $conn_db->prepare('SELECT * FROM connectivity WHERE target_ip = :ip ORDER BY ROWID DESC LIMIT :limit')) {
-            $stmt->bindValue(':limit', 1, SQLITE3_INTEGER);
-            $stmt->bindParam(':ip', $ip);
-            $result = $stmt->execute();
-            if ($result === false) return array();
-            return $result->fetchArray(SQLITE3_ASSOC);
-        } else {
-            
-            Logger::getInstance()->error(__METHOD__.": 取得 $ip connectivity 最新紀錄資料失敗！ (${db_path})");
-        }
-        return false;
-    }
-
-    public function wipeConnectivityHistory() {
-        
-        $db_path = SQLiteDBFactory::getConnectivityDB();
-        $sc_db = new SQLite3($db_path);
-        if ($stm = $sc_db->prepare("DELETE FROM connectivity WHERE log_time < :time")) {
-            $one_day_ago = date("YmdHis", time() - 24 * 3600);
-            $stm->bindParam(':time', $one_day_ago, SQLITE3_TEXT);
-            $ret = $stm->execute();
-            Logger::getInstance()->info(__METHOD__.": $db_path 移除一天前資料".($ret ? "成功" : "失敗")."【".$one_day_ago.", ".$sc_db->lastErrorMsg()."】");
-            return $ret;
-        }
-        
-        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM connectivity WHERE log_time < :time ] 失敗。");
-        return false;
     }
 }

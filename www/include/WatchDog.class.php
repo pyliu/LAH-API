@@ -14,6 +14,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."IPResolver.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteMonitorMail.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."Connectivity.class.php");
 
 class WatchDog {
     private $stats = null;
@@ -469,9 +470,11 @@ class WatchDog {
             $this->compressLog();
             // clean AP stats data one day ago
             $this->stats->wipeAllAPConnHistory();
-            $this->stats->checkRegisteredConnectivity();
+            // check systems connectivity
+            $conn = new Connectivity();
+            $conn->check();
             // clean connectivity stats data one day ago
-            $this->stats->wipeConnectivityHistory();
+            $conn->wipeHistory(1);
             // $this->notifyTemperatureRegistration();
             $this->wipeOutdatedIPEntries();
             $this->wipeOutdatedMonitorMail();

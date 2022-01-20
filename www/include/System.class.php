@@ -35,7 +35,6 @@ class System {
     private static $_instance = null;
 
     private $sqlite3;
-    private $ROLE;
 
     private function getRoleIps($role_id) {
         $return = [];
