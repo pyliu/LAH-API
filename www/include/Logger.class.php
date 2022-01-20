@@ -123,6 +123,7 @@ class Logger {
      */
     public function removeOutdatedLog($seconds_before = 30 * 24 * 60 * 60) {
         $ts = time() - $seconds_before;
+        $this->info("開始移除 ".date("Y-m-d H:i:s", $ts)." 之前的紀錄檔案。");
         // Assigning files inside the directory
         $dir = new RecursiveDirectoryIterator($this->log_dir, FilesystemIterator::SKIP_DOTS | RecursiveIteratorIterator::CHILD_FIRST);
         // Removing directories and files inside the specified folder

@@ -57,6 +57,7 @@ try {
     // $watchdog = new WatchDog();
 	// $done = $watchdog->do();
     // Logger::getInstance()->removeOutdatedLog();
+    echo date("Y-m-d H:i:s", 1640536507);
 }
 catch(Exception $e)
 {
