@@ -152,8 +152,8 @@ if (Vue) {
                     if (res.data.status == XHR_STATUS_CODE.SUCCESS_NORMAL) {
                         // initializing monitor list entries from DB
                         this.list = [];
-                        // raw is array of { 'AP31': {ip: 'xxx.xxx.xxx.31', name: 'AP31', port: '', note: 'XXX'} }
-                        for (const [name, raw_obj] of Object.entries(res.data.raw)) {
+                        // raw is array of {ip: 'xxx.xxx.xxx.31', name: 'AP31', port: '', note: 'XXX'}
+                        res.data.raw.forEach((raw_obj) => {
                             this.list.push({
                                 name: raw_obj.name,
                                 target_ip: raw_obj.ip,
@@ -161,7 +161,7 @@ if (Vue) {
                                 status: 'DOWN',
                                 log_time: '20201005181631'
                             });
-                        }
+                        })
                     } else {
                         this.notify({
                             title: "初始化圖表監測目標",
