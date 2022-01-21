@@ -59,6 +59,29 @@ class SQLiteConnectivity {
         $this->db->close();
     }
 
+    public function replaceTarget($data) {
+        $sql = "REPLACE INTO target ('ip', 'port', 'name', 'monitor', 'note') VALUES (:bv_ip, :bv_port, :bv_name, :bv_monitor, :bv_note)";
+        $stm = $this->db->prepare($sql);
+        if ($stm === false) {
+            Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ $sql ] 失敗。");
+        } else {
+            $stm->bindParam(":bv_ip", $data["ip"]);
+            $stm->bindParam(":bv_port", $data["port"]);
+            $stm->bindParam(":bv_name", $data["name"]);
+            $stm->bindParam(":bv_monitor", $data["monitor"]);
+            $stm->bindParam(":bv_note", $data["note"]);
+            $result = $stm->execute() === FALSE ? false : true;
+            if ($result) {
+                Logger::getInstance()->info(__METHOD__.": 新增監控標的成功。(".implode(', ', $data).")");
+            } else {
+                Logger::getInstance()->warning(__METHOD__.": 新增監控標的失敗。");
+                Logger::getInstance()->warning(print_r($data, true));
+            }
+            return $result;
+        }
+        return false;
+    }
+
     public function getTargets() {
         $stm = $this->db->prepare("SELECT * FROM target WHERE monitor = 'Y' ORDER BY name");
         if ($stm === false) {
