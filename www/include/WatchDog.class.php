@@ -27,7 +27,7 @@ class WatchDog {
             'Wed' => ['07:30 AM' => '05:30 PM'],
             'Thu' => ['07:30 AM' => '05:30 PM'],
             'Fri' => ['07:30 AM' => '05:30 PM'],
-            'Sat' => []
+            'Sat' => ['07:30 AM' => '05:30 PM']
         ],
         "overdue" => [
             'Sun' => [],
@@ -463,6 +463,10 @@ class WatchDog {
     function __destruct() { $this->stats = null; }
 
     public function do() {
+        /**
+         * 擷取監控郵件
+         */
+        $this->fetchMonitorMail();
         if ($this->isOfficeHours()) {
             /**
              * 系統維護作業
@@ -485,10 +489,6 @@ class WatchDog {
             $this->checkCrossSiteData();
             $this->checkValCrossSiteData();
             $this->findDelayRegCases();
-            /**
-             * 擷取監控郵件
-             */
-            $this->fetchMonitorMail();
             /**
              * 匯入WEB DB固定資料
              */
