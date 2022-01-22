@@ -35,9 +35,10 @@ switch ($_POST["type"]) {
         }
         break;
     case "monitor_targets":
-        Logger::getInstance()->info("XHR [monitor_targets] 查詢監控系統標的請求");
+        $active = $_POST["all"] !== "true";
+        Logger::getInstance()->info("XHR [monitor_targets] 查詢監控系統標的請求 (active = $active)");
         $conn = new SQLiteConnectivity();
-        if ($arr = $conn->getTargets($_POST["all"] !== "true")) {
+        if ($arr = $conn->getTargets($active)) {
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => $count,
