@@ -93,6 +93,20 @@ switch ($_POST["type"]) {
             echoJSONResponse($error);
         }
         break;
+    case "remove_connectivity_target":
+        Logger::getInstance()->info("XHR [remove_connectivity_target] 刪除監控系統標的請求");
+        $conn = new SQLiteConnectivity();
+        if ($arr = $conn->removeTarget($_POST)) {
+            echoJSONResponse("已刪除 ".$_POST["name"]." ".$_POST["ip"].":".$_POST["port"]." 監控標的資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => 1,
+                "raw" => $arr
+            ));
+        } else {
+            $error = "刪除 ".$_POST["name"]." 監控系統標的失敗。";
+            Logger::getInstance()->error("XHR [remove_connectivity_target] ${error}");
+            echoJSONResponse($error);
+        }
+        break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
         echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
