@@ -99,6 +99,14 @@ class Cache {
 
     public function getUserNames() {
         $sysauth1 = new SQLiteSYSAUTH1();
-        return $sysauth1->getUserDictionary();
+        $all_merged = $sysauth1->getUserDictionary();
+        $sqliteuser = new SQLiteUser();
+        $all_from_local_db = $sqliteuser->getAllUsers();
+        if (is_array($all_from_local_db)) {
+            foreach($all_from_local_db as $user) {
+                $all_merged[$user["id"]] = $user["name"];
+            }
+        }
+        return $all_merged;
     }
 }
