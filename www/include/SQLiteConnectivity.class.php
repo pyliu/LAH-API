@@ -82,10 +82,11 @@ class SQLiteConnectivity {
         return false;
     }
 
-    public function getTargets() {
-        $stm = $this->db->prepare("SELECT * FROM target WHERE monitor = 'Y' ORDER BY name");
+    public function getTargets($active = true) {
+        $sql = $active ? "SELECT * FROM target WHERE monitor = 'Y' ORDER BY name" : "SELECT * FROM target ORDER BY name";
+        $stm = $this->db->prepare($sql);
         if ($stm === false) {
-            Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ SELECT * FROM target ] 失敗。");
+            Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ $sql ] 失敗。");
         } else {
             if ($result = $stm->execute()) {
                 $return = array();
