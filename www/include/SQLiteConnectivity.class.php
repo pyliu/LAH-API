@@ -7,19 +7,19 @@ class SQLiteConnectivity {
     private $db;
     private $path;
 
-    private function addConnectivityStatus($log_time, $tgt_ip, $latency) {
+    private function addConnectivityStatus($log_time, $tgt_ip, $tgt_port, $latency) {
         $stm = $this->db->prepare("REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency)");
         if ($stm === false) {
-            Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency) ] 失敗。($log_time, $tgt_ip, $latency)");
+            Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ REPLACE INTO connectivity (log_time,target_ip,status,latency) VALUES (:log_time, :target_ip, :status, :latency) ] 失敗。($log_time, $tgt_ip:$tgt_port, $latency)");
         } else {
             $stm->bindParam(':log_time', $log_time);
-            $stm->bindParam(':target_ip', $tgt_ip);
+            $stm->bindValue(':target_ip', $tgt_ip.":".$tgt_port);
             $stm->bindValue(':status', empty($latency) ? 'DOWN' : 'UP');
             $stm->bindValue(':latency', empty($latency) ? 1000.0 : $latency);   // default ping timeout is 1s
             if ($stm->execute() !== FALSE) {
                 return true;
             } else {
-                Logger::getInstance()->warning(__METHOD__.": 更新資料庫(".$this->path.")失敗。($log_time, $tgt_ip, $latency)");
+                Logger::getInstance()->warning(__METHOD__.": 更新資料庫(".$this->path.")失敗。($log_time, $tgt_ip, $tgt_port, $latency)");
             }
         }
 
@@ -28,20 +28,21 @@ class SQLiteConnectivity {
 
     private function pingAndSave($arr) {
         $ip = $arr['ip'];
+        $port = $arr['port'];
         if (filter_var($ip, FILTER_VALIDATE_IP)) {
             $log_time = date("YmdHis");
             $ping = new Ping($ip);
             $latency = 0;
-            if (empty($arr['port'])) {
+            if (empty($port)) {
                 $latency = $ping->ping();
             } else {
-                $ping->setPort($arr['port']);
+                $ping->setPort($port);
                 $latency = $ping->ping('fsockopen');
                 if (empty($latency)) {
                     $latency = $ping->ping('socket');
                 }
             }
-            return $this->addConnectivityStatus($log_time, $ip, $latency);
+            return $this->addConnectivityStatus($log_time, $ip, $port, $latency);
         }
         return false;
     }
@@ -153,7 +154,7 @@ class SQLiteConnectivity {
         $tracking_targets = $this->getTargets();
         $tracking_ips = array();
         foreach ($tracking_targets as $name => $row) {
-            $tracking_ips[$name] = $row['ip'];
+            $tracking_ips[$name] = $row['ip'].":".$row['port'];
         }
         $return = array();
         if (empty($tracking_ips)) {
@@ -174,14 +175,14 @@ class SQLiteConnectivity {
         return $return;
     }
 
-    public function getIPStatus($ip, $force = 'false', $port = 0) {
+    public function getIPStatus($ip, $force = 'false', $port = "") {
         if ($force === 'true' && !System::getInstance()->isMockMode()) {
             // generate the latest record for $ip
             $this->checkIP($ip, $port);
         }
         if($stmt = $this->db->prepare('SELECT * FROM connectivity WHERE target_ip = :ip ORDER BY ROWID DESC LIMIT :limit')) {
             $stmt->bindValue(':limit', 1, SQLITE3_INTEGER);
-            $stmt->bindParam(':ip', $ip);
+            $stmt->bindValue(':ip', $ip.":".$port);
             $result = $stmt->execute();
             if ($result === false) return array();
             return $result->fetchArray(SQLITE3_ASSOC);
