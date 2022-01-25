@@ -51,7 +51,7 @@ if (Vue) {
             codes: {},
             code_data: [],
             years: [],
-            year: "110",
+            year: "111",
             code: "",
             num: "",
             num_step: 10,
@@ -290,13 +290,14 @@ if (Vue) {
             }
         },
         created() {
+            // set year select options
+            var d = new Date();
+            this.year = (d.getFullYear() - 1911);
             this.getLocalCache('case_input_years').then(years => {
                 if (years !== false) {
                     this.years = years;
                 } else {
                     // set year select options
-                    var d = new Date();
-                    this.year = (d.getFullYear() - 1911);
                     let len = this.year - 100;
                     for (let i = 0; i <= len; i++) {
                         this.years.push({value: 100 + i, text: 100 + i});
