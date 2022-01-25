@@ -80,16 +80,30 @@ switch ($_POST["type"]) {
         }
         break;
     case "replace_connectivity_target":
-        Logger::getInstance()->info("XHR [replace_connectivity_target] 更新監控系統標的請求");
+        Logger::getInstance()->info("XHR [replace_connectivity_target] 取代監控系統標的請求");
         $conn = new SQLiteConnectivity();
         if ($arr = $conn->replaceTarget($_POST)) {
+            echoJSONResponse("已取代 ".$_POST["name"]." ".$_POST["ip"].":".$_POST["port"]." 監控標的資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => 1,
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取代 ".$_POST["ip"]." 監控系統標的失敗。";
+            Logger::getInstance()->error("XHR [replace_connectivity_target] ${error}");
+            echoJSONResponse($error);
+        }
+        break;
+    case "edit_connectivity_target":
+        Logger::getInstance()->info("XHR [edit_connectivity_target] 更新監控系統標的請求");
+        $conn = new SQLiteConnectivity();
+        if ($arr = $conn->editTarget($_POST, $_POST['editIp'], $_POST['editPort'])) {
             echoJSONResponse("已更新 ".$_POST["name"]." ".$_POST["ip"].":".$_POST["port"]." 監控標的資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => 1,
                 "raw" => $arr
             ));
         } else {
             $error = "更新 ".$_POST["ip"]." 監控系統標的失敗。";
-            Logger::getInstance()->error("XHR [replace_connectivity_target] ${error}");
+            Logger::getInstance()->error("XHR [edit_connectivity_target] ${error}");
             echoJSONResponse($error);
         }
         break;
