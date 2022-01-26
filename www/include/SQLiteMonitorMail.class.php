@@ -75,14 +75,21 @@ class SQLiteMonitorMail {
         $monitor = new MonitorMail();
         $mails = $monitor->getAllMails();
         $inserted = 0;
+        $failed = 0;
         foreach($mails as $mail) {
             if ($mail["id"] > $latest_id) {
-                $this->replace($mail);
-                $inserted++;
+                $result = $this->replace($mail);
+                if ($result) {
+                    $inserted++;
+                } else {
+                    $failed++;
+                    Logger::getInstance()->warning(__METHOD__.': 插入監控郵件資料庫失敗。');
+                    Logger::getInstance()->info(__METHOD__.': payload => '.print_r($mail, true));
+                }
             }
         }
 
-        Logger::getInstance()->info(__METHOD__.':已擷取 '.$inserted.' 封監控郵件。');
+        Logger::getInstance()->info(__METHOD__.': 已擷取 '.$inserted.' 封監控郵件。(失敗: '.$failed.')');
         
         return $inserted;
     }
