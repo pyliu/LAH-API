@@ -1,6 +1,11 @@
 <?php
 error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
 date_default_timezone_set("ASIA/TAIPEI");
+// https://stackoverflow.com/questions/60157086/php-samesite-session-problem-session-doesnt-work
+// To fix the cross site cookies error on browswer
+session_set_cookie_params(["SameSite" => "None"]); //none, lax, strict
+session_set_cookie_params(["Secure" => "false"]); //false, true
+session_set_cookie_params(["HttpOnly" => "true"]); //false, true
 session_start();
 // some query take long time ...
 set_time_limit(0);
