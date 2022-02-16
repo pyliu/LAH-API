@@ -4,7 +4,6 @@ require_once(INC_DIR."/RegCaseData.class.php");
 require_once(INC_DIR."/SurCaseData.class.php");
 require_once(INC_DIR."/PrcAllCasesData.class.php");
 require_once(INC_DIR."/Query.class.php");
-require_once(INC_DIR."/Message.class.php");
 require_once(INC_DIR."/WatchDog.class.php");
 require_once(INC_DIR."/StatsSQLite.class.php");
 require_once(INC_DIR."/Cache.class.php");

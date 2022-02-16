@@ -1,7 +1,6 @@
 ﻿<?php
 require_once("./include/init.php");
 require_once("./include/Query.class.php");
-require_once("./include/Message.class.php");
 require_once("./include/StatsOracle.class.php");
 require_once("./include/Logger.class.php");
 require_once("./include/TdocUserInfo.class.php");
