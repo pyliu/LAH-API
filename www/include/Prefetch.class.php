@@ -173,7 +173,8 @@ class Prefetch {
                         -- RM07_1 > :bv_start
                         -- NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
                         -- RM02 NOT LIKE '".$this->site."%1'		-- only search our own cases
-                        RM02 NOT IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1')
+                        -- RM02 NOT IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1')
+                        1 = 1
                         AND RM03 LIKE '%0' 			-- without sub-case
                         AND RM31 IS NULL			-- not closed case
                         AND RM29_1 || RM29_2 < :bv_now
@@ -236,7 +237,8 @@ class Prefetch {
                     WHERE
                         -- NOT REGEXP_LIKE(RM02, '^".$this->site."[[:alpha:]]1$')
                         -- RM02 NOT LIKE '".$this->site."%1'		-- only search our own cases
-                        RM02 NOT IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1')
+                        -- RM02 NOT IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1')
+                        1 = 1
                         AND RM03 LIKE '%0' 			-- without sub-case
                         AND RM31 IS NULL			-- not closed case
                         AND RM29_1 || RM29_2 < :bv_now_plus_4hrs
