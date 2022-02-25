@@ -463,41 +463,44 @@ class WatchDog {
     function __destruct() { $this->stats = null; }
 
     public function do() {
-        /**
-         * 擷取監控郵件
-         */
-        $this->fetchMonitorMail();
-        if ($this->isOfficeHours()) {
+        try {
+            if ($this->isOfficeHours()) {
+                /**
+                 * 系統維護作業
+                 */
+                $this->compressLog();
+                // clean AP stats data one day ago
+                $this->stats->wipeAllAPConnHistory();
+                // check systems connectivity
+                $conn = new SQLiteConnectivity();
+                $conn->check();
+                // clean connectivity stats data one day ago
+                $conn->wipeHistory(1);
+                // $this->notifyTemperatureRegistration();
+                $this->wipeOutdatedIPEntries();
+                $this->wipeOutdatedMonitorMail();
+                $this->wipeOutdatedLog();
+                /**
+                 * 案件檢測作業
+                 */
+                $this->checkCrossSiteData();
+                $this->checkValCrossSiteData();
+                $this->findDelayRegCases();
+                /**
+                 * 匯入WEB DB固定資料
+                 */
+                $this->importRKEYN();
+                $this->importRKEYNALL();
+                $this->importUserFromL3HWEB();
+                return true;
+            }
+            return false;
+        } finally {
             /**
-             * 系統維護作業
+             * 擷取監控郵件
              */
-            $this->compressLog();
-            // clean AP stats data one day ago
-            $this->stats->wipeAllAPConnHistory();
-            // check systems connectivity
-            $conn = new SQLiteConnectivity();
-            $conn->check();
-            // clean connectivity stats data one day ago
-            $conn->wipeHistory(1);
-            // $this->notifyTemperatureRegistration();
-            $this->wipeOutdatedIPEntries();
-            $this->wipeOutdatedMonitorMail();
-            $this->wipeOutdatedLog();
-            /**
-             * 案件檢測作業
-             */
-            $this->checkCrossSiteData();
-            $this->checkValCrossSiteData();
-            $this->findDelayRegCases();
-            /**
-             * 匯入WEB DB固定資料
-             */
-            $this->importRKEYN();
-            $this->importRKEYNALL();
-            $this->importUserFromL3HWEB();
-            return true;
+            $this->fetchMonitorMail();
         }
-        return false;
     }
     
     public function isOn($schedule) {
