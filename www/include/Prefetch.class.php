@@ -124,7 +124,7 @@ class Prefetch {
                         LEFT JOIN MOIADM.RKEYN_ALL v ON (v.KCDE_1 = '48' AND v.KCDE_2 = 'H' AND v.KCDE_3 = s.RM10 AND s.RM11 = v.KCDE_4),
                         MOIADM.SYSAUTH1 sa11,
                         MOIADM.SYSAUTH1 sa12
-                    WHERE s.RM30 = 'H'
+                    WHERE (s.RM30 = 'H' OR s.RM30 = 'L')
                         -- RM45 初審人員
                         AND s.RM45 = sa11.USER_ID
                         -- RM30_1 作業人員
