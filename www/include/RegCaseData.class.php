@@ -396,7 +396,7 @@ class RegCaseData {
     public function trafficLightRM30H() {
         // RM30 - 案件辦理情形
         if ($this->row["RM30"] != "H") {
-            return "light";
+            return "info";
         }
         
         // RM50 - 公告到期日
