@@ -6,6 +6,20 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteConnectivity.class.php");
 $sqlite_monitor_mail = new SQLiteMonitorMail();
 
 switch ($_POST["type"]) {
+    case "check_mail":
+        Logger::getInstance()->info("XHR [check_mail] 檢查最新監控郵件請求");
+        $inserted = $sqlite_monitor_mail->fetchFromMailServer();
+        $message = "查詢到 $inserted 封郵件";
+        Logger::getInstance()->info("XHR [check_mail] $message");
+        if (empty($inserted)) {
+            echoJSONResponse('沒有新的監控郵件');
+        } else {
+            echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
+				'data_count' => $inserted,
+				'raw' => $inserted
+			));
+        }
+        break;
     case "latest":
         Logger::getInstance()->info("XHR [latest] 查詢最新監控郵件請求");
         $mail = $sqlite_monitor_mail->getLatestMail();
