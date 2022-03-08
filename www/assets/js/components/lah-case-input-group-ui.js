@@ -100,6 +100,20 @@ if (Vue) {
                 Object.defineProperty(evt, 'target', {writable: false, value: target});
                 return evt;
             },
+            reloadYear() {
+                this.getLocalCache('case_input_years').then(years => {
+                    if (years !== false) {
+                        this.years = years;
+                    } else {
+                        // set year select options
+                        let len = this.year - 100;
+                        for (let i = 0; i <= len; i++) {
+                            this.years.push({value: 100 + i, text: 100 + i});
+                        }
+                        this.setLocalCache('case_input_years', this.years, 24 * 60 * 60 * 1000);  // cache for a day
+                    }
+                });
+            },
             reloadCode() {
                 this.getLocalCache(this.code_cache_key).then(items => {
                     if (items === false || !Array.isArray(items)) {
@@ -293,20 +307,8 @@ if (Vue) {
             // set year select options
             var d = new Date();
             this.year = (d.getFullYear() - 1911);
-            this.getLocalCache('case_input_years').then(years => {
-                if (years !== false) {
-                    this.years = years;
-                } else {
-                    // set year select options
-                    let len = this.year - 100;
-                    for (let i = 0; i <= len; i++) {
-                        this.years.push({value: 100 + i, text: 100 + i});
-                    }
-                    this.setLocalCache('case_input_years', this.years, 24 * 60 * 60 * 1000);  // cache for a day
-                }
-                this.reloadCode();
-            });
-
+            this.reloadYear();
+            this.reloadCode();
         }
     });
 } else {
