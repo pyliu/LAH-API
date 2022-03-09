@@ -1520,6 +1520,7 @@ switch ($_POST["type"]) {
 			if (empty($_POST) || session_status() === PHP_SESSION_DISABLED) return false;
 			foreach($_POST as $key => $value) {
 				if ($value !== NULL) {
+					Logger::getInstance()->info("XHR [xlsx_params] 設定xlsx查詢參數 ${key}:".print_r($value, true));
 					$_SESSION[$key] = $value;
 				}
 			}
