@@ -8,7 +8,7 @@ $scheduler = new Scheduler();
 switch ($_POST["type"]) {
     case "reqular":
         $scheduler->do();
-        echoJSONResponse('已呼叫 Scheduler 執行完成。', STATUS_CODE::SUCCESS_NORMAL);
+        echoJSONResponse('正常(regular)排程已執行完成。', STATUS_CODE::SUCCESS_NORMAL);
         break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
