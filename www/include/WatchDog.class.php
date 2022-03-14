@@ -7,14 +7,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR.'StatsSQLite.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Temperature.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteUser.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'System.class.php');
-require_once(INC_DIR.DIRECTORY_SEPARATOR.'Ping.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Cache.class.php');
-require_once(INC_DIR.DIRECTORY_SEPARATOR."OraDB.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."IPResolver.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteMonitorMail.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteConnectivity.class.php");
 
 class WatchDog {
     private $stats = null;
@@ -321,25 +314,6 @@ class WatchDog {
         }
     }
 
-    private function compressLog() {
-        $cache = Cache::getInstance();
-        // compress all log when zipLogs_flag is expired
-        if ($cache->isExpired('zipLogs_flag')) {
-            Logger::getInstance()->info("開始壓縮LOG檔！");
-            zipLogs();
-            Logger::getInstance()->info("壓縮LOG檔結束！");
-            // cache the flag for a week
-            $cache->set('zipLogs_flag', true, 604800);
-        }
-    }
-
-    private function wipeOutdatedLog() {
-        if ($this->isOn($this->schedule["once_a_day"])) {
-            Logger::getInstance()->info("啟動清除過時記錄檔排程。");
-            Logger::getInstance()->removeOutdatedLog();
-        }
-    }
-
     private function findProblematicSURCases() {
         if ($this->isOn($this->schedule["once_a_day"])) {
             // 找已結案但卻又延期複丈之案件
@@ -399,66 +373,6 @@ class WatchDog {
         ));
     }
 
-    private function importUserFromL3HWEB() {
-        
-        if ($this->isOn($this->schedule["once_a_day"])) {
-            Logger::getInstance()->info(__METHOD__.': 匯入L3HWEB使用者資料排程啟動。');
-            $sysauth1 = new SQLiteSYSAUTH1();
-            $sysauth1->importFromL3HWEBDB();
-            return true;
-        }
-
-        return false;
-    }
-
-    private function importRKEYN() {
-        if ($this->isOn($this->schedule["once_a_day"])) {
-            Logger::getInstance()->info(__METHOD__.': 匯入RKEYN代碼檔排程啟動。');
-            $sqlite_sr = new SQLiteRKEYN();
-            $sqlite_sr->importFromOraDB();
-            return true;
-        }
-        return false;
-    }
-
-    private function importRKEYNALL() {
-        if ($this->isOn($this->schedule["once_a_day"])) {
-            Logger::getInstance()->info(__METHOD__.': 匯入RKEYN_ALL代碼檔排程啟動。');
-            $sqlite_sra = new SQLiteRKEYNALL();
-            $sqlite_sra->importFromOraDB();
-            return true;
-        }
-        return false;
-    }
-
-    private function wipeOutdatedIPEntries() {
-        if ($this->isOn($this->schedule["once_a_day"])) {
-            Logger::getInstance()->info("啟動清除過時 dynamic ip 資料排程。");
-            $ipr = new IPResolver();
-            $ipr->removeDynamicIPEntries(604800);   // a week
-        }
-    }
-
-    private function fetchMonitorMail() {
-        $monitor = new SQLiteMonitorMail();
-        $monitor->fetchFromMailServer();
-    }
-
-    private function wipeOutdatedMonitorMail() {
-        if ($this->isOn($this->schedule["once_a_day"])) {
-            $monitor = new SQLiteMonitorMail();
-            // remove mails by a month ago
-            $days = 30;
-            $month_secs = $days * 24 * 60 * 60;
-            Logger::getInstance()->info("啟動清除過時監控郵件排程。(${days}, ${month_secs})");
-            if ($monitor->removeOutdatedMail($month_secs)) {
-                Logger::getInstance()->info(__METHOD__.": 移除過時的監控郵件成功。(${days}天之前)");
-            } else {
-                Logger::getInstance()->warning(__METHOD__.": 移除過時的監控郵件失敗。(${days}天之前)");
-            }
-        }
-    }
-
     function __construct() { $this->stats = new StatsSQLite(); }
     function __destruct() { $this->stats = null; }
 
@@ -466,40 +380,15 @@ class WatchDog {
         try {
             if ($this->isOfficeHours()) {
                 /**
-                 * 系統維護作業
-                 */
-                $this->compressLog();
-                // clean AP stats data one day ago
-                $this->stats->wipeAllAPConnHistory();
-                // check systems connectivity
-                $conn = new SQLiteConnectivity();
-                $conn->check();
-                // clean connectivity stats data one day ago
-                $conn->wipeHistory(1);
-                // $this->notifyTemperatureRegistration();
-                $this->wipeOutdatedIPEntries();
-                $this->wipeOutdatedMonitorMail();
-                $this->wipeOutdatedLog();
-                /**
                  * 案件檢測作業
                  */
                 $this->checkCrossSiteData();
                 $this->checkValCrossSiteData();
                 $this->findDelayRegCases();
-                /**
-                 * 匯入WEB DB固定資料
-                 */
-                $this->importRKEYN();
-                $this->importRKEYNALL();
-                $this->importUserFromL3HWEB();
                 return true;
             }
             return false;
         } finally {
-            /**
-             * 擷取監控郵件
-             */
-            $this->fetchMonitorMail();
         }
     }
     
