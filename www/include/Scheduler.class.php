@@ -82,16 +82,16 @@ class Scheduler {
                 // check systems connectivity
                 $conn = new SQLiteConnectivity();
                 $conn->check();
+                /**
+                 * 擷取監控郵件
+                 */
+                $this->fetchMonitorMail();
             }
             return true;
         } catch (Exception $e) {
             Logger::getInstance()->warning(__METHOD__.": 執行每15分鐘的排程失敗。");
             Logger::getInstance()->warning(__METHOD__.": ".$e->getMessage());
         } finally {
-            /**
-             * 擷取監控郵件
-             */
-            $this->fetchMonitorMail();
         }
         return false;
     }
