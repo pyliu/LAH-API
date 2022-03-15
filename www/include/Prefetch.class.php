@@ -1002,17 +1002,21 @@ class Prefetch {
                         r.KCNT AS RM09_CHT,
                         s.RM33,
                         GG30_1,
-                        GG30_2
-                    FROM WRGALL, SCRSMS s, WRBLOW, SRLNID, MOIADM.RKEYN r, MOIADM.RKEYN_ALL ra
+                        rb.KCNT AS GG30_1_CHT,
+                        GG30_2,
+                        RM54_1
+                    FROM WRGALL, SCRSMS s, WRBLOW, SRLNID, MOIADM.RKEYN r, MOIADM.RKEYN_ALL ra, MOIADM.RKEYN rb
                     WHERE 1=1
+                        AND RM54_1 BETWEEN :bv_st AND :bv_ed
                         AND ra.KCDE_1 = '48'
                         AND ra.KCDE_2 = 'H'
-                        AND GG48 = ra.KCDE_4(+) 
+                        AND GG48 = ra.KCDE_4(+)
                         AND r.KCDE_1 = '06'
                         AND s.RM09 = r.KCDE_2(+)
-                        AND RM54_1 BETWEEN :bv_st AND :bv_ed
-                        AND GG00 = 'B'
-                        AND GG30_1 IN ('GH', 'GJ')
+                        AND rb.KCDE_1 = '30'
+                        AND GG30_1 = rb.KCDE_2(+)
+                        AND GG00 in ('B', 'C')
+                        AND (GG30_1 IN ('GH', 'GJ') OR GG30_2 LIKE '%".mb_convert_encoding('信託', 'BIG5', 'UTF-8')."%')
                         AND GS_TYPE IN ('D', 'M')
                         AND s.RM01 = GS03
                         AND s.RM02 = GS04_1
@@ -1032,7 +1036,7 @@ class Prefetch {
                         AND GG49 = BA49
                         AND GG01 = BB01
                         AND BB09 = LIDN
-                    ORDER BY RM123, GG48, GG49, GG01
+                    ORDER BY RM54_1, RM123, GG48, GG49, GG01
                 ");
                 
                 $db->bind(":bv_st", $st);
@@ -1087,17 +1091,21 @@ class Prefetch {
                         r.KCNT AS RM09_CHT,
                         s.RM33,
                         GG30_1,
-                        GG30_2
-                    FROM WRGALL, SCRSMS s, WREBOW, SRLNID, MOIADM.RKEYN r, MOIADM.RKEYN_ALL ra
+                        rb.KCNT AS GG30_1_CHT,
+                        GG30_2,
+                        RM54_1
+                    FROM WRGALL, SCRSMS s, WREBOW, SRLNID, MOIADM.RKEYN r, MOIADM.RKEYN_ALL ra, MOIADM.RKEYN rb
                     WHERE 1=1
+                        AND RM54_1 BETWEEN :bv_st AND :bv_ed
                         AND ra.KCDE_1 = '48'
                         AND ra.KCDE_2 = 'H'
                         AND GG48 = ra.KCDE_4(+) 
                         AND r.KCDE_1 = '06'
                         AND s.RM09 = r.KCDE_2(+)
-                        AND RM54_1 BETWEEN '1100101' AND '1100228'
-                        AND GG00 = 'E'
-                        AND GG30_1 in ('GH', 'GJ')
+                        AND rb.KCDE_1 = '30'
+                        AND GG30_1 = rb.KCDE_2(+)
+                        AND GG00 in ('D', 'E')
+                        AND (GG30_1 IN ('GH', 'GJ') OR GG30_2 LIKE '%".mb_convert_encoding('信託', 'BIG5', 'UTF-8')."%')
                         AND GS_TYPE in ('D', 'M')
                         AND s.RM01 = GS03
                         AND s.RM02 = GS04_1
@@ -1116,7 +1124,7 @@ class Prefetch {
                         AND GG49 = ED49
                         AND GG01 = EE01
                         AND EE09 = LIDN
-                    ORDER BY RM123, GG48, GG49, GG01     
+                    ORDER BY RM54_1, RM123, GG48, GG49, GG01     
                 ");
                 
                 $db->bind(":bv_st", $st);
