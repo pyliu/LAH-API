@@ -1017,7 +1017,7 @@ class Prefetch {
                         AND GG30_1 = rb.KCDE_2(+)
                         AND GG00 in ('B', 'C')
                         AND (GG30_1 IN ('GH', 'GJ') OR GG30_2 LIKE '%".mb_convert_encoding('信託', 'BIG5', 'UTF-8')."%')
-                        AND GS_TYPE IN ('D', 'M')
+                        --AND GS_TYPE IN ('D', 'M')
                         AND s.RM01 = GS03
                         AND s.RM02 = GS04_1
                         AND s.RM03 = GS04_2
@@ -1106,7 +1106,7 @@ class Prefetch {
                         AND GG30_1 = rb.KCDE_2(+)
                         AND GG00 in ('D', 'E')
                         AND (GG30_1 IN ('GH', 'GJ') OR GG30_2 LIKE '%".mb_convert_encoding('信託', 'BIG5', 'UTF-8')."%')
-                        AND GS_TYPE in ('D', 'M')
+                        --AND GS_TYPE in ('D', 'M')
                         AND s.RM01 = GS03
                         AND s.RM02 = GS04_1
                         AND s.RM03 = GS04_2
