@@ -197,10 +197,8 @@ class Ping {
             default:
                 throw new \InvalidArgumentException('Unsupported ping method.');
         }
-
-        Logger::getInstance()->info(__METHOD__.": $method console output: ".iconv('BIG5', 'UTF-8', $this->getCommandOutput()));
-        Logger::getInstance()->info(__METHOD__.": ping ".$this->host." latency: ".$latency);
-
+        // Logger::getInstance()->info(__METHOD__.": $method console output: ".iconv('BIG5', 'UTF-8', $this->getCommandOutput()));
+        // Logger::getInstance()->info(__METHOD__.": ping ".$this->host." latency: ".$latency);
         // Return the latency.
         return $latency;
     }
