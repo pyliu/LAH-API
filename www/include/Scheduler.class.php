@@ -9,6 +9,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."IPResolver.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYNALL.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."StatsSQLite.class.php");
 
 class Scheduler {
     private $tmp;
@@ -75,7 +76,8 @@ class Scheduler {
     
     private function do15minsJobs () {
         try {
-            if (file_get_contents($this->tickets['15m']) <= time()) {
+            $ticketTs = file_get_contents($this->tickets['15m']);
+            if ($ticketTs <= time()) {
                 Logger::getInstance()->info(__METHOD__.": 開始執行每15分鐘的排程。");
                 // place next timestamp to the tmp ticket file 
                 file_put_contents($this->tickets['15m'], strtotime('+15 mins', time()));
@@ -86,6 +88,8 @@ class Scheduler {
                  * 擷取監控郵件
                  */
                 $this->fetchMonitorMail();
+            } else {
+                Logger::getInstance()->info(__METHOD__.": 每15分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
@@ -98,11 +102,14 @@ class Scheduler {
 
     private function do30minsJobs () {
         try {
-            if (file_get_contents($this->tickets['30m']) <= time()) {
+            $ticketTs = file_get_contents($this->tickets['30m']);
+            if ($ticketTs <= time()) {
                 Logger::getInstance()->info(__METHOD__.": 開始執行每30分鐘的排程。");
                 // place next timestamp to the tmp ticket file 
                 file_put_contents($this->tickets['30m'], strtotime('+30 mins', time()));
                 // job execution below ...
+            } else {
+                Logger::getInstance()->info(__METHOD__.": 每30分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
@@ -115,11 +122,14 @@ class Scheduler {
 
     private function do1HourJobs () {
         try {
-            if (file_get_contents($this->tickets['1h']) <= time()) {
+            $ticketTs = file_get_contents($this->tickets['1h']);
+            if ($ticketTs <= time()) {
                 Logger::getInstance()->info(__METHOD__.": 開始執行每小時的排程。");
                 // place next timestamp to the tmp ticket file 
                 file_put_contents($this->tickets['1h'], strtotime('+60 mins', time()));
                 // job execution below ...
+            } else {
+                Logger::getInstance()->info(__METHOD__.": 每小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
@@ -132,11 +142,14 @@ class Scheduler {
 
     private function do4HoursJobs () {
         try {
-            if (file_get_contents($this->tickets['4h']) <= time()) {
+            $ticketTs = file_get_contents($this->tickets['4h']);
+            if ($ticketTs <= time()) {
                 Logger::getInstance()->info(__METHOD__.": 開始執行每4小時的排程。");
                 // place next timestamp to the tmp ticket file 
                 file_put_contents($this->tickets['4h'], strtotime('+240 mins', time()));
                 // job execution below ...
+            } else {
+                Logger::getInstance()->info(__METHOD__.": 每4小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
@@ -149,11 +162,14 @@ class Scheduler {
     
     private function do8HoursJobs () {
         try {
-            if (file_get_contents($this->tickets['8h']) <= time()) {
+            $ticketTs = file_get_contents($this->tickets['8h']);
+            if ($ticketTs <= time()) {
                 Logger::getInstance()->info(__METHOD__.": 開始執行每8小時的排程。");
                 // place next timestamp to the tmp ticket file 
                 file_put_contents($this->tickets['8h'], strtotime('+480 mins', time()));
                 // job execution below ...
+            } else {
+                Logger::getInstance()->info(__METHOD__.": 每8小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
@@ -166,11 +182,14 @@ class Scheduler {
     
     private function doHalfDayJobs () {
         try {
-            if (file_get_contents($this->tickets['12h']) <= time()) {
+            $ticketTs = file_get_contents($this->tickets['12h']);
+            if ($ticketTs <= time()) {
                 Logger::getInstance()->info(__METHOD__.": 開始執行每12小時的排程。");
                 // place next timestamp to the tmp ticket file 
                 file_put_contents($this->tickets['12h'], strtotime('+720 mins', time()));
                 // job execution below ...
+            } else {
+                Logger::getInstance()->info(__METHOD__.": 每12小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
@@ -183,7 +202,8 @@ class Scheduler {
     
     private function doOneDayJobs () {
         try {
-            if (file_get_contents($this->tickets['24h']) <= time()) {
+            $ticketTs = file_get_contents($this->tickets['24h']);
+            if ($ticketTs <= time()) {
                 Logger::getInstance()->info(__METHOD__.": 開始執行每24小時的排程。");
                 // place next timestamp to the tmp ticket file 
                 file_put_contents($this->tickets['24h'], strtotime('+1440 mins', time()));
@@ -206,6 +226,8 @@ class Scheduler {
                 $this->importRKEYN();
                 $this->importRKEYNALL();
                 $this->importUserFromL3HWEB();
+            } else {
+                Logger::getInstance()->info(__METHOD__.": 每24小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
