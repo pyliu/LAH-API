@@ -73,8 +73,37 @@ class Scheduler {
         $monitor = new SQLiteMonitorMail();
         $monitor->fetchFromMailServer();
     }
-    
-    private function do15minsJobs () {
+
+    function __construct() {
+        $this->tmp = sys_get_temp_dir();
+        $this->tickets = array(
+            '5m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-5mins.ts',
+            '10m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-10mins.ts',
+            '15m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-15mins.ts',
+            '30m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-30mins.ts',
+            '1h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-1hour.ts',
+            '2h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-2hours.ts',
+            '4h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-4hours.ts',
+            '8h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-8hours.ts',
+            '12h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-12hours.ts',
+            '24h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-24hours.ts'
+        );
+    }
+    function __destruct() {}
+
+    public function do() {
+        Logger::getInstance()->info(__METHOD__.": Scheduler 開始執行。");
+        $this->do15minsJobs();
+        $this->do30minsJobs();
+        $this->do1HourJobs();
+        $this->do4HoursJobs();
+        $this->do8HoursJobs();
+        $this->doHalfDayJobs();
+        $this->doOneDayJobs();
+        Logger::getInstance()->info(__METHOD__.": Scheduler 執行完成。");
+    }
+
+    public function do15minsJobs () {
         try {
             $ticketTs = file_get_contents($this->tickets['15m']);
             if ($ticketTs <= time()) {
@@ -100,7 +129,7 @@ class Scheduler {
         return false;
     }
 
-    private function do30minsJobs () {
+    public function do30minsJobs () {
         try {
             $ticketTs = file_get_contents($this->tickets['30m']);
             if ($ticketTs <= time()) {
@@ -120,7 +149,7 @@ class Scheduler {
         return false;
     }
 
-    private function do1HourJobs () {
+    public function do1HourJobs () {
         try {
             $ticketTs = file_get_contents($this->tickets['1h']);
             if ($ticketTs <= time()) {
@@ -140,7 +169,7 @@ class Scheduler {
         return false;
     }
 
-    private function do4HoursJobs () {
+    public function do4HoursJobs () {
         try {
             $ticketTs = file_get_contents($this->tickets['4h']);
             if ($ticketTs <= time()) {
@@ -160,7 +189,7 @@ class Scheduler {
         return false;
     }
     
-    private function do8HoursJobs () {
+    public function do8HoursJobs () {
         try {
             $ticketTs = file_get_contents($this->tickets['8h']);
             if ($ticketTs <= time()) {
@@ -180,7 +209,7 @@ class Scheduler {
         return false;
     }
     
-    private function doHalfDayJobs () {
+    public function doHalfDayJobs () {
         try {
             $ticketTs = file_get_contents($this->tickets['12h']);
             if ($ticketTs <= time()) {
@@ -200,7 +229,7 @@ class Scheduler {
         return false;
     }
     
-    private function doOneDayJobs () {
+    public function doOneDayJobs () {
         try {
             $ticketTs = file_get_contents($this->tickets['24h']);
             if ($ticketTs <= time()) {
@@ -236,34 +265,5 @@ class Scheduler {
         } finally {
         }
         return false;
-    }
-
-    function __construct() {
-        $this->tmp = sys_get_temp_dir();
-        $this->tickets = array(
-            '5m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-5mins.ts',
-            '10m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-10mins.ts',
-            '15m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-15mins.ts',
-            '30m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-30mins.ts',
-            '1h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-1hour.ts',
-            '2h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-2hours.ts',
-            '4h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-4hours.ts',
-            '8h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-8hours.ts',
-            '12h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-12hours.ts',
-            '24h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-24hours.ts'
-        );
-    }
-    function __destruct() {}
-
-    public function do() {
-        Logger::getInstance()->info(__METHOD__.": Scheduler 開始執行。");
-        $this->do15minsJobs();
-        $this->do30minsJobs();
-        $this->do1HourJobs();
-        $this->do4HoursJobs();
-        $this->do8HoursJobs();
-        $this->doHalfDayJobs();
-        $this->doOneDayJobs();
-        Logger::getInstance()->info(__METHOD__.": Scheduler 執行完成。");
     }
 }
