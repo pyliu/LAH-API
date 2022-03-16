@@ -269,7 +269,7 @@ class RegCaseData {
             "結案人員" => $this->getIDorName($this->row["RM59"]),
             "結案日期" => RegCaseData::toDate($row["RM58_1"])." ".RegCaseData::toDate($row["RM58_2"]),
             "預定結案日期" => RegCaseData::toDate($row["RM29_1"])." ".RegCaseData::toDate($row["RM29_2"]),
-            "結案與否" => in_array($this->row["RM31"], RegCaseData::$RM31_CASE_CLOSE_STATE) ? "Y【".$this->getCaseCloseStatus()."】" : "N"
+            "結案與否" => in_array($this->row["RM31"], RegCaseData::$RM31_CASE_CLOSE_STATE) ? "Y" : "N"
         );
         return $ret + $row; // merge raw data ($row["RM01"] ... etc) and keep original key index
     }

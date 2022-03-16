@@ -829,15 +829,15 @@ class Prefetch {
             if ($this->isDBReachable(self::KEYS['FOREIGNER']."_${st}_${ed}")) {
                 $db = $this->getOraDB();
                 $db->parse("
-                    SELECT DISTINCT
+                    SELECT DISTINCT t.*,
                         t.*,
-                        r.KCNT AS RM09_CHT,
+                        k.KCNT AS RM09_CHT,
                         t.RM01   AS \"收件年\",
                         t.RM02   AS \"收件字\",
                         t.RM03   AS \"收件號\",
                         t.RM01 || '-' || t.RM02 || '-' || t.RM03 AS \"收件字號\",
                         t.RM09   AS \"登記原因代碼\",
-                        r.KCNT    AS \"登記原因\",
+                        k.KCNT    AS \"登記原因\",
                         t.RM07_1 AS \"收件日期\",
                         t.RM58_1 AS \"結案日期\",
                         t.RM18   AS \"權利人統一編號\",
@@ -845,20 +845,20 @@ class Prefetch {
                         t.RM21   AS \"義務人統一編號\",
                         t.RM22   AS \"義務人姓名\",
                         (CASE
-                            WHEN q.LCDE = '1' THEN '".mb_convert_encoding('本國人', 'BIG5', 'UTF-8')."'
-                            WHEN q.LCDE = '2' THEN '".mb_convert_encoding('外國人', 'BIG5', 'UTF-8')."'
-                            WHEN q.LCDE = '3' THEN '".mb_convert_encoding('國有（中央機關）', 'BIG5', 'UTF-8')."'
-                            WHEN q.LCDE = '4' THEN '".mb_convert_encoding('省市有（省市機關）', 'BIG5', 'UTF-8')."'
-                            WHEN q.LCDE = '5' THEN '".mb_convert_encoding('縣市有（縣市機關）', 'BIG5', 'UTF-8')."'
-                            WHEN q.LCDE = '6' THEN '".mb_convert_encoding('鄉鎮市有（鄉鎮市機關）', 'BIG5', 'UTF-8')."'
-                            WHEN q.LCDE = '7' THEN '".mb_convert_encoding('本國私法人', 'BIG5', 'UTF-8')."'
-                            WHEN q.LCDE = '8' THEN '".mb_convert_encoding('外國法人', 'BIG5', 'UTF-8')."'
-                            WHEN q.LCDE = '9' THEN '".mb_convert_encoding('祭祀公業', 'BIG5', 'UTF-8')."'
-                            WHEN q.LCDE = 'A' THEN '".mb_convert_encoding('其他', 'BIG5', 'UTF-8')."'
-                            WHEN q.LCDE = 'B' THEN '".mb_convert_encoding('銀行法人', 'BIG5', 'UTF-8')."'
-                            WHEN q.LCDE = 'C' THEN '".mb_convert_encoding('大陸地區自然人', 'BIG5', 'UTF-8')."'
-                            WHEN q.LCDE = 'D' THEN '".mb_convert_encoding('大陸地區法人', 'BIG5', 'UTF-8')."'
-                            ELSE q.LCDE
+                            WHEN p.LCDE = '1' THEN '".mb_convert_encoding('本國人', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = '2' THEN '".mb_convert_encoding('外國人', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = '3' THEN '".mb_convert_encoding('國有（中央機關）', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = '4' THEN '".mb_convert_encoding('省市有（省市機關）', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = '5' THEN '".mb_convert_encoding('縣市有（縣市機關）', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = '6' THEN '".mb_convert_encoding('鄉鎮市有（鄉鎮市機關）', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = '7' THEN '".mb_convert_encoding('本國私法人', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = '8' THEN '".mb_convert_encoding('外國法人', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = '9' THEN '".mb_convert_encoding('祭祀公業', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = 'A' THEN '".mb_convert_encoding('其他', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = 'B' THEN '".mb_convert_encoding('銀行法人', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = 'C' THEN '".mb_convert_encoding('大陸地區自然人', 'BIG5', 'UTF-8')."'
+                            WHEN p.LCDE = 'D' THEN '".mb_convert_encoding('大陸地區法人', 'BIG5', 'UTF-8')."'
+                            ELSE p.LCDE
                         END) AS \"外國人類別\",
                         (CASE
                             WHEN t.RM30 = 'A' THEN '".mb_convert_encoding('初審', 'BIG5', 'UTF-8')."'
@@ -887,14 +887,26 @@ class Prefetch {
                             WHEN t.RM31 = 'D' THEN '".mb_convert_encoding('駁回', 'BIG5', 'UTF-8')."'
                             WHEN t.RM31 = 'E' THEN '".mb_convert_encoding('請示', 'BIG5', 'UTF-8')."'
                             ELSE t.RM31
-                        END) AS \"結案與否\"
-                    FROM
-                        (select * from MOICAS.CRSMS where RM56_1 BETWEEN :bv_begin AND :bv_end) t,  -- RM56_1 校對日期
-                        (select * from MOICAD.RLNID p where p.LCDE in ('2', '8', 'C', 'D') ) q, -- 代碼檔 09
-                        (select * from MOICAD.RKEYN k where k.KCDE_1 = '06') r
-                    WHERE
-                        ( t.RM18 = q.LIDN OR t.RM21 = q.LIDN ) AND
-                        r.KCDE_2 = t.RM09
+                        END) AS \"結案與否\",
+                        s.RECA AS \"土地筆數\",
+                        s.RF10 AS \"土地面積\",
+                        s.RECD AS \"建物筆數\",
+                        s.RF08 AS \"建物面積\"
+                    FROM (select *
+                            from MOICAS.CRSMS
+                            where (RM56_1 BETWEEN :bv_begin AND :bv_end) -- RM56_1 校對日期
+                          union
+                          select *
+                            from MOICAS.CRSMS
+                            where RM01 || RM02 || RM03 IN
+                            (select RF03 || RF04_1 || RF04_2 AS RM123
+                                from MOICAD.REGF
+                                where RF40 BETWEEN :bv_begin AND :bv_end)
+                         ) t
+                        LEFT JOIN MOICAD.REGF s ON t.RM01 = s.RF03 AND t.RM02 = s.RF04_1 AND t.RM03 = s.RF04_2
+                        LEFT JOIN MOICAD.RLNID p ON t.RM18 = p.LIDN OR t.RM21 = p.LIDN
+                        LEFT JOIN MOICAD.RKEYN k ON k.KCDE_1 = '06' AND k.KCDE_2 = t.RM09
+                    WHERE p.LCDE in ('2', '8', 'C', 'D')
                 ");
                 
                 $db->bind(":bv_begin", $st);
