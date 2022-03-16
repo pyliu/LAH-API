@@ -1339,9 +1339,10 @@ class Prefetch {
                         u.GG01,                 -- 登序
                         w.IS09,                 -- 編統
                         w.ISNAME,               -- 權利人
-                        u.GG30_2                -- 內容
+                        u.GG30_2,               -- 內容
+                        u.GG30_1
                     FROM
-                        (SELECT * FROM MOICAW.RGALL t,  MOICAS.CRSMS s WHERE  t.GS04_2 = s.RM03 AND t.GS04_1 = s.RM02 AND t.GS03 = s.RM01 AND t.GG30_1 = '9H' AND s.RM56_1 BETWEEN :bv_st AND :bv_ed) u
+                        (SELECT * FROM MOICAW.RGALL t,  MOICAS.CRSMS s WHERE  t.GS04_2 = s.RM03 AND t.GS04_1 = s.RM02 AND t.GS03 = s.RM01 AND t.GG30_1 in ('9H', 'GP') AND s.RM56_1 BETWEEN :bv_st AND :bv_ed) u
                         LEFT JOIN MOIADM.RKEYN v ON u.RM09 = v.kcde_2 AND v.kcde_1 = '06'
                         LEFT JOIN MOICAD.RSINDX w ON u.GG01 = w.IS01 AND u.GG49 = w.IS49 AND u.GG48 = w.IS48 AND u.GS04_2 = w.IS04_2 AND u.GS04_1 = w.IS04_1 AND u.GS03 = w.IS03
                     ORDER BY GG00_CHT,
