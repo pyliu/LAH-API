@@ -1377,29 +1377,6 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
-	case "upd_reg_fix_case_delivered_date":
-		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegFixCaseStore.class.php');
-		$sqlite_db = new SQLiteRegFixCaseStore();
-		$id = $_POST["id"];
-		$deadline = $_POST["deadline"];
-		$date = $_POST["date"];
-		$note = $_POST['note'];
-		if (empty($id)) {
-			$message = "更新 $id 補正單送達日期 $date 失敗";
-			Logger::getInstance()->info("XHR [upd_reg_fix_case_delivered_date] $message (無 id)");
-			echoJSONResponse($message);
-		} else {
-			$row = array(
-				'case_no' => $_POST["id"],
-				'fix_deadline_date' => $deadline,
-				'notify_delivered_date' => $_POST["date"],
-				'note' => $_POST['note']
-			);
-			$result = $sqlite_db->replace($row);
-			$message = "更新 $id 補正單送達日期 $date ".($result ? '成功' : '失敗');
-			echoJSONResponse($message, $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
-		}
-		break;
 	case "upd_reg_fix_case_data":
 		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegFixCaseStore.class.php');
 		$sqlite_db = new SQLiteRegFixCaseStore();
