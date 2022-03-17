@@ -171,6 +171,7 @@ class SQLiteDBFactory {
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "reg_fix_case_store" (
                 "case_no"	TEXT,
+                "fix_deadline_date"	TEXT,
                 "notify_delivered_date"	TEXT,
                 "note"	TEXT,
                 PRIMARY KEY("case_no")

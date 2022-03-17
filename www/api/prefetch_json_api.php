@@ -389,7 +389,7 @@ switch ($_POST["type"]) {
 				$id = $this_baked['ID'];
 				// this query goes to SQLite DB
 				$result = $sqlite_db->getRegFixCaseRecord($id);
-				$this_baked['FIX_DELIVERED_DATE'] = $result[0] ?? [];
+				$this_baked['REG_FIX_CASE_RECORD'] = $result[0] ?? [];
 
 				$baked[] = $this_baked;
 			}
