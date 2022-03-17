@@ -1382,7 +1382,7 @@ switch ($_POST["type"]) {
 		$sqlite_db = new SQLiteRegFixCaseStore();
 		$id = $_POST["id"];
 		$deadline = $_POST["deadline"];
-		$date = $_POST["date"];
+		$delivered = $_POST["delivered"];
 		$note = $_POST['note'];
 		if (empty($id)) {
 			$message = "更新 $id 補正案件資料失敗";
@@ -1392,7 +1392,7 @@ switch ($_POST["type"]) {
 			$row = array(
 				'case_no' => $id,
 				'fix_deadline_date' => $deadline,
-				'notify_delivered_date' => $_POST["date"],
+				'notify_delivered_date' => $delivered,
 				'note' => $_POST['note']
 			);
 			$result = $sqlite_db->replace($row);
