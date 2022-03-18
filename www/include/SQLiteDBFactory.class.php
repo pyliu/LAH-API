@@ -156,7 +156,7 @@ class SQLiteDBFactory {
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "reg_auth_checks_store" (
                 "case_no"	TEXT,
-                "authority"	INTEGER NOT NULL DEFAULT 0,
+                "authority"	INTEGER NOT NULL DEFAULT 1,
                 "note"	TEXT,
                 PRIMARY KEY("case_no")
             )
