@@ -424,9 +424,16 @@ switch ($_POST["type"]) {
 				$id = $this_baked['ID'];
 				// this query goes to SQLite DB, return array of result
 				$result = $sqlite_db->getRegAuthChecksRecord($id);
-				$auth = $result[0] ?? [];
-				// Logger::getInstance()->info("XHR [reg_not_done_case] 取得 $id AUTH 資料 ".$auth['authority']);
-				$this_baked['FINISH_NOTIFY_AUTHORITY'] = $auth['authority'] ?? 0;
+				$this_baked['CASE_NOTIFY_RAW'] = $result;
+				if (is_array($result) && count($result) === 1) {
+					$auth = $result[0];
+					$this_baked['CASE_NOTIFY_AUTHORITY'] = $auth['authority'];
+					$this_baked['CASE_NOTIFY_NOTE'] = $auth['note'];
+				} else{
+					// default is 1 that means the case needs to notify applicant
+					$this_baked['CASE_NOTIFY_AUTHORITY'] = 1;
+					$this_baked['CASE_NOTIFY_NOTE'] = '';
+				}
 
 				$baked[] = $this_baked;
 			}

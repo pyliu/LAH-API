@@ -1350,7 +1350,7 @@ switch ($_POST["type"]) {
 				'note' => $_POST['note']
 			);
 			$result = $sqlite_db->replace($row);
-			$message = "更新 $id 登記辦畢通知設定 $authority ".($result ? '成功' : '失敗');
+			$message = "更新 $id 登記辦畢通知設定【flag: $authority, note: ${note}】".($result ? '成功' : '失敗');
 			Logger::getInstance()->info("XHR [upd_reg_auth_checks] $message");
 			echoJSONResponse($message, $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
 		}
