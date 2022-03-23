@@ -490,6 +490,63 @@ switch ($_POST["type"]) {
 		}
 
 		break;
+	case "sur_overdue_case":
+		Logger::getInstance()->info("XHR [sur_overdue_case] 查詢測量逾期案件請求");
+		$message = "逾期測量案件";
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadSurOverdueCase() : $prefetch->getSurOverdueCase();
+		$cache_remaining = $prefetch->getSurOverdueCaseCacheRemainingTime();
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [sur_overdue_case] 查無 ${message} 資料");
+			echoJSONResponse("查無 ${message} 資料");
+		} else {
+			$total = count($rows);
+			Logger::getInstance()->info("XHR [sur_overdue_case] 查詢成功($total)");
+			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"raw" => $rows,
+				'cache_remaining_time' => $cache_remaining
+			));
+		}
+
+		break;
+	case "sur_not_close_case":
+		Logger::getInstance()->info("XHR [sur_not_close_case] 查詢未結案測量案件請求");
+		$message = "未結案測量案件";
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadSurNotCloseCase() : $prefetch->getSurNotCloseCase();
+		$cache_remaining = $prefetch->getSurNotCloseCaseCacheRemainingTime();
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [sur_not_close_case] 查無 ${message} 資料");
+			echoJSONResponse("查無 ${message} 資料");
+		} else {
+			$total = count($rows);
+			Logger::getInstance()->info("XHR [sur_not_close_case] 查詢成功($total)");
+			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"raw" => $rows,
+				'cache_remaining_time' => $cache_remaining
+			));
+		}
+
+		break;
+	case "sur_near_case":
+		Logger::getInstance()->info("XHR [sur_near_case] 查詢即將到期測量案件請求");
+		$message = "即將到期測量案件";
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadSurNearCase() : $prefetch->getSurNearCase();
+		$cache_remaining = $prefetch->getSurNearCaseCacheRemainingTime();
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [sur_near_case] 查無 ${message} 資料");
+			echoJSONResponse("查無 ${message} 資料");
+		} else {
+			$total = count($rows);
+			Logger::getInstance()->info("XHR [sur_near_case] 查詢成功($total)");
+			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				"data_count" => $total,
+				"raw" => $rows,
+				'cache_remaining_time' => $cache_remaining
+			));
+		}
+
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

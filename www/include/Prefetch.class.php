@@ -29,7 +29,10 @@ class Prefetch {
         'LAND_REF_CHANGE' => 'Prefetch::getLandRefChange',
         'REG_FIX_CASE' => 'Prefetch::getRegFixCase',
         'REG_NOT_DONE_CASE' => 'Prefetch::getRegNotDoneCase',
-        'REG_UNTAKEN_CASE' => 'Prefetch::getRegUntakenCase'
+        'REG_UNTAKEN_CASE' => 'Prefetch::getRegUntakenCase',
+        'SUR_OVERDUE_CASE' => 'Prefetch::getSurOverdueCase',
+        'SUR_NOT_CLOSE_CASE' => 'Prefetch::getSurNotCloseCase',
+        'SUR_NEAR_CASE' => 'Prefetch::getSurNearCase'
     );
     private $ora_db = null;
     private $cache = null;
@@ -1595,4 +1598,221 @@ class Prefetch {
         return $this->getCache()->get($cache_key);
     }
 
+    /**
+     * 逾期測量案件查詢快取剩餘時間
+     */
+    public function getSurOverdueCaseCacheRemainingTime() {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['SUR_OVERDUE_CASE']);
+    }
+    /**
+     * 強制重新讀取逾期測量案件查詢
+     */
+    public function reloadSurOverdueCase() {
+        $this->getCache()->del(self::KEYS['SUR_OVERDUE_CASE']);
+        return $this->getSurOverdueCase();
+    }
+    /**
+	 * 取得逾期測量案件查詢
+     * default cache time is 15 minutes * 60 seconds = 900 seconds
+	 */
+	public function getSurOverdueCase($expire_duration = 900) {
+        $cache_key = self::KEYS['SUR_OVERDUE_CASE'];
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable($cache_key)) {
+                $db = $this->getOraDB();
+                $db->parse("
+                    SELECT
+                        r.MM01,                 -- 收件年
+                        t.KCNT AS MM02_CHT,     -- 收件字
+                        r.MM02,                 -- 收件字代碼
+                        r.MM03,                 -- 收件號
+                        r.MM06,                 -- 複丈原因代碼
+                        u.KCNT AS MM06_CHT,     -- 複丈原因
+                        r.MM22,                 -- 辦理情形代碼
+                        x.KCNT AS MM22_CHT,     -- 辦理情形
+                        v.MD04,                 -- 測量員代碼
+                        w.USER_NAME AS MD04_CHT,-- 測量員
+                        r.MM04_1,               -- 收件日期
+                        r.MM04_2,               -- 收件時間
+                        v.MD05_1,               -- 複丈日期
+                        v.MD05_2,               -- 複丈時間
+                        v.MD13_1,               -- 延期複丈日期
+                        v.MD13_2,               -- 延期複丈時間
+                        v.MD06_1,               -- 結案日期
+                        v.MD06_2,               -- 結案時間
+                        r.MM21_1,               -- 逾期日期
+                        r.MM21_2,               -- 逾期時間
+                        r.MM23,                 -- 結案已否
+                        v.MD09,                 -- 通知補正日期
+                        v.MD10                  -- 補正期滿日期
+                    FROM MOICAS.CMSMS r
+                        LEFT JOIN MOICAS.CMSDS v ON r.MM01 = v.MD01 AND r.MM02 = v.MD02 AND r.MM03 = v.MD03
+                        LEFT JOIN MOIADM.SYSAUTH1 w ON v.MD04 = w.USER_ID
+                        LEFT JOIN MOIADM.RKEYN u ON u.KCDE_1 = 'M3' AND r.MM06 = u.KCDE_2
+                        LEFT JOIN MOIADM.RKEYN t ON t.KCDE_1 = '04' AND r.MM02 = t.KCDE_2
+                        LEFT JOIN MOIADM.RKEYN x ON x.KCDE_1 = 'M7' AND r.MM22 = x.KCDE_2
+                    WHERE r.MM23 IS NULL AND :bv_today > r.MM21_1 
+                    ORDER BY r.MM01, r.MM02, r.MM03
+                ");
+                global $today;
+                $db->bind(":bv_today", $today);
+                $db->execute();
+                $result = $db->fetchAll();
+                $this->getCache()->set($cache_key, $result, $expire_duration);
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                return $result;
+            } else {
+                return array();
+            }
+        }
+        return $this->getCache()->get($cache_key);
+    }
+
+    /**
+     * 未結案測量案件查詢快取剩餘時間
+     */
+    public function getSurNotCloseCaseCacheRemainingTime() {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['SUR_NOT_CLOSE_CASE']);
+    }
+    /**
+     * 強制重新讀取未結案測量案件查詢
+     */
+    public function reloadSurNotCloseCase() {
+        $this->getCache()->del(self::KEYS['SUR_NOT_CLOSE_CASE']);
+        return $this->getSurNotCloseCase();
+    }
+    /**
+	 * 取得未結案測量案件查詢
+     * default cache time is 15 minutes * 60 seconds = 900 seconds
+	 */
+	public function getSurNotCloseCase($expire_duration = 900) {
+        $cache_key = self::KEYS['SUR_NOT_CLOSE_CASE'];
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable($cache_key)) {
+                $db = $this->getOraDB();
+                $db->parse("
+                    SELECT
+                        r.MM01,                 -- 收件年
+                        t.KCNT AS MM02_CHT,     -- 收件字
+                        r.MM02,                 -- 收件字代碼
+                        r.MM03,                 -- 收件號
+                        r.MM06,                 -- 複丈原因代碼
+                        u.KCNT AS MM06_CHT,     -- 複丈原因
+                        r.MM22,                 -- 辦理情形代碼
+                        x.KCNT AS MM22_CHT,     -- 辦理情形
+                        v.MD04,                 -- 測量員代碼
+                        w.USER_NAME AS MD04_CHT,-- 測量員
+                        r.MM04_1,               -- 收件日期
+                        r.MM04_2,               -- 收件時間
+                        v.MD05_1,               -- 複丈日期
+                        v.MD05_2,               -- 複丈時間
+                        v.MD13_1,               -- 延期複丈日期
+                        v.MD13_2,               -- 延期複丈時間
+                        v.MD06_1,               -- 結案日期
+                        v.MD06_2,               -- 結案時間
+                        r.MM21_1,               -- 逾期日期
+                        r.MM21_2,               -- 逾期時間
+                        r.MM23,                 -- 結案已否
+                        v.MD09,                 -- 通知補正日期
+                        v.MD10                  -- 補正期滿日期
+                    FROM MOICAS.CMSMS r
+                        LEFT JOIN MOICAS.CMSDS v ON r.MM01 = v.MD01 AND r.MM02 = v.MD02 AND r.MM03 = v.MD03
+                        LEFT JOIN MOIADM.SYSAUTH1 w ON v.MD04 = w.USER_ID
+                        LEFT JOIN MOIADM.RKEYN u ON u.KCDE_1 = 'M3' AND r.MM06 = u.KCDE_2
+                        LEFT JOIN MOIADM.RKEYN t ON t.KCDE_1 = '04' AND r.MM02 = t.KCDE_2
+                        LEFT JOIN MOIADM.RKEYN x ON x.KCDE_1 = 'M7' AND r.MM22 = x.KCDE_2
+                    WHERE r.MM23 IS NULL
+                    ORDER BY r.MM01, r.MM02, r.MM03
+                ");
+                // $db->bind(":bv_site", $this->site);
+                $db->execute();
+                $result = $db->fetchAll();
+                $this->getCache()->set($cache_key, $result, $expire_duration);
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                return $result;
+            } else {
+                return array();
+            }
+        }
+        return $this->getCache()->get($cache_key);
+    }
+
+
+    /**
+     * 即將到期測量案件查詢快取剩餘時間
+     */
+    public function getSurNearCaseCacheRemainingTime() {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['SUR_NEAR_CASE']);
+    }
+    /**
+     * 強制重新讀取即將到期測量案件查詢
+     */
+    public function reloadSurNearCase() {
+        $this->getCache()->del(self::KEYS['SUR_NEAR_CASE']);
+        return $this->getSurNearCase();
+    }
+    /**
+	 * 取得即將到期測量案件查詢
+     * default cache time is 15 minutes * 60 seconds = 900 seconds
+	 */
+	public function getSurNearCase($expire_duration = 900) {
+        $cache_key = self::KEYS['SUR_NEAR_CASE'];
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable($cache_key)) {
+                $db = $this->getOraDB();
+                $db->parse("
+                    SELECT
+                        r.MM01,                 -- 收件年
+                        t.KCNT AS MM02_CHT,     -- 收件字
+                        r.MM02,                 -- 收件字代碼
+                        r.MM03,                 -- 收件號
+                        r.MM06,                 -- 複丈原因代碼
+                        u.KCNT AS MM06_CHT,     -- 複丈原因
+                        r.MM22,                 -- 辦理情形代碼
+                        x.KCNT AS MM22_CHT,     -- 辦理情形
+                        v.MD04,                 -- 測量員代碼
+                        w.USER_NAME AS MD04_CHT,-- 測量員
+                        r.MM04_1,               -- 收件日期
+                        r.MM04_2,               -- 收件時間
+                        v.MD05_1,               -- 複丈日期
+                        v.MD05_2,               -- 複丈時間
+                        v.MD13_1,               -- 延期複丈日期
+                        v.MD13_2,               -- 延期複丈時間
+                        v.MD06_1,               -- 結案日期
+                        v.MD06_2,               -- 結案時間
+                        r.MM21_1,               -- 逾期日期
+                        r.MM21_2,               -- 逾期時間
+                        r.MM23,                 -- 結案已否
+                        v.MD09,                 -- 通知補正日期
+                        v.MD10                  -- 補正期滿日期
+                    FROM MOICAS.CMSMS r
+                        LEFT JOIN MOICAS.CMSDS v ON r.MM01 = v.MD01 AND r.MM02 = v.MD02 AND r.MM03 = v.MD03
+                        LEFT JOIN MOIADM.SYSAUTH1 w ON v.MD04 = w.USER_ID
+                        LEFT JOIN MOIADM.RKEYN u ON u.KCDE_1 = 'M3' AND r.MM06 = u.KCDE_2
+                        LEFT JOIN MOIADM.RKEYN t ON t.KCDE_1 = '04' AND r.MM02 = t.KCDE_2
+                        LEFT JOIN MOIADM.RKEYN x ON x.KCDE_1 = 'M7' AND r.MM22 = x.KCDE_2
+                    WHERE r.MM23 IS NULL AND r.MM21_1 BETWEEN :bv_st AND :bv_ed
+                    ORDER BY r.MM01, r.MM02, r.MM03
+                ");
+                global $today;
+                $tw_date = new Datetime("now");
+                $tw_date->modify("-1911 year");
+                $tw_date->modify("-3 day");
+                $three_days_ago = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080318
+                $db->bind(":bv_st", $three_days_ago);
+                $db->bind(":bv_ed", $today);
+                $db->execute();
+                $result = $db->fetchAll();
+                $this->getCache()->set($cache_key, $result, $expire_duration);
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                return $result;
+            } else {
+                return array();
+            }
+        }
+        return $this->getCache()->get($cache_key);
+    }
 }
