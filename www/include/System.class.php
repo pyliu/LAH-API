@@ -273,6 +273,10 @@ class System {
         return $latency;
     }
 
+    public function isHB() {
+        return $this->getSiteCode() === 'HB';
+    }
+
     public function isDBReachable() {
         $db_ip = $this->getOraTargetDBIP();
         $db_port = $this->getOraTargetDBPort();

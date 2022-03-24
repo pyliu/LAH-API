@@ -1,6 +1,7 @@
 <?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'init.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Query.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'Prefetch.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Message.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Notification.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'StatsSQLite.class.php');
@@ -31,15 +32,6 @@ class WatchDog {
             'Fri' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
             'Sat' => []
         ],
-        // "temperature" => [
-        //     'Sun' => [],
-        //     'Mon' => ['10:30 AM' => '10:45 AM', '03:30 PM' => '03:45 PM'],
-        //     'Tue' => ['10:30 AM' => '10:45 AM', '03:30 PM' => '03:45 PM'],
-        //     'Wed' => ['10:30 AM' => '10:45 AM', '03:30 PM' => '03:45 PM'],
-        //     'Thu' => ['10:30 AM' => '10:45 AM', '03:30 PM' => '03:45 PM'],
-        //     'Fri' => ['10:30 AM' => '10:45 AM', '03:30 PM' => '03:45 PM'],
-        //     'Sat' => []
-        // ],
         "temperature" => [
             'Sun' => [],
             'Mon' => ['10:35 AM' => '10:50 AM'],
@@ -100,6 +92,53 @@ class WatchDog {
         return $result;
     }
 
+    private function addHBMessage($title, $content, $to_id, $to_name, $timeout = 85500) {
+        // filtering for the HB messenger
+        $content = str_replace('<br/>', '\r\n', $content);
+        $content = strip_tags($content);
+        $msg = new Message();
+        // 85500 = 86400 - 15 * 60 (one day - 15 mins)
+        $sn = $msg->sysSend($title, $content, $to_id, $timeout);
+        if ($sn == -1) {
+            Logger::getInstance()->warning("HB: ${title} 訊息無法送出給 ${to_id}。($to_name, $sn)");
+            Logger::getInstance()->info($content);
+        } else {
+            Logger::getInstance()->info("HB: ${title} 訊息(${sn})已送出給 ${to_id}。($to_name)");
+        }
+        return $sn;
+    }
+
+    private function addNotification($message, $to_id, $title = '系統排程訊息') {
+        if (empty($to_id)) {
+            Logger::getInstance()->warning("未指定接收者 id 下面訊息無法送出！");
+            Logger::getInstance()->warning($message);
+            return false;
+        }
+        $cache = Cache::getInstance();
+        $users = $cache->getUserNames();
+        $notify = new Notification();
+        $payload = array(
+            'title' =>  $title,
+            'content' => trim($message),
+            'priority' => 3,
+            'expire_datetime' => '',
+            'sender' => '系統排程',
+            'from_ip' => getLocalhostIP()
+        );
+        $lastId = $notify->addMessage($to_id, $payload);
+        $nameTag = rtrim("${to_id}:".$users[$to_id], ":");
+        if ($lastId === false || empty($lastId)) {
+            Logger::getInstance()->warning("訊息無法送出給 ${nameTag}");
+        } else {
+            Logger::getInstance()->info("訊息(${lastId})已送出給 ${nameTag}");
+        }
+        // particular impl for HB messenger system
+        if (System::getInstance()->isHB()) {
+            $this->addHBMessage($title, $message, $to_id, $users[$to_id]);
+        }
+        return $lastId;
+    }
+
     private function checkCrossSiteData() {
         if ($this->isOn($this->schedule["twice_a_day"])) {
             $query = new Query();
@@ -117,17 +156,9 @@ class WatchDog {
                 $host_ip = getLocalhostIP();
                 $content = "⚠️地政系統目前找到下列「登記案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://$host_ip/dashboard.html) 執行檢查功能並修正。";
                 $sqlite_user = new SQLiteUser();
-                $notify = new Notification();
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
-                    $lastId = $notify->addMessage($admin['id'], array(
-                        'title' => 'dontcare',
-                        'content' => trim($content),
-                        'priority' => 3,
-                        'expire_datetime' => '',
-                        'sender' => '系統排程',
-                        'from_ip' => $host_ip
-                    ));
+                    $lastId = $this->addNotification($content, $admin['id']);
                     echo '新增「登記案件跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')';
                 }
                 
@@ -160,17 +191,9 @@ class WatchDog {
                 $host_ip = getLocalhostIP();
                 $content = "⚠️地政系統目前找到下列「地價案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://$host_ip/dashboard.html) 執行檢查功能並修正。";
                 $sqlite_user = new SQLiteUser();
-                $notify = new Notification();
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
-                    $lastId = $notify->addMessage($admin['id'], array(
-                        'title' => 'dontcare',
-                        'content' => trim($content),
-                        'priority' => 3,
-                        'expire_datetime' => '',
-                        'sender' => '系統排程',
-                        'from_ip' => $host_ip
-                    ));
+                    $lastId = $this->addNotification($content, $admin['id']);
                     echo '新增「地價案件跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')';
                 }
                 
@@ -186,9 +209,9 @@ class WatchDog {
         }
     }
 
-    private function findDelayRegCases() {
+    private function findRegOverdueCases() {
         if (!$this->isOverdueCheckNeeded()) {
-            Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期案件檢測。");
+            Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期登記案件檢測。");
             return false;
         }
         $host_ip = getLocalhostIP();
@@ -212,7 +235,7 @@ class WatchDog {
             $stats = 0;
             $date = date('Y-m-d H:i:s');
             foreach ($case_records as $ID => $records) {
-                $this->sendOverdueMessage($ID, $records);
+                $this->sendRegOverdueMessage($ID, $records);
                 $this->stats->addOverdueStatsDetail(array(
                     "ID" => $ID,
                     "RECORDS" => $records,
@@ -229,11 +252,10 @@ class WatchDog {
         return true;
     }
 
-    private function sendOverdueMessage($to_id, $case_records) {
+    private function sendRegOverdueMessage($to_id, $case_records) {
         $host_ip = getLocalhostIP();
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
-        $notify = new Notification();
         // $url = "http://${host_ip}/overdue_reg_cases.html";
         // if ($to_id != "ALL") {
         //     $url .= "?ID=${to_id}";
@@ -243,16 +265,7 @@ class WatchDog {
         if ($to_id != "ALL") {
             $url .= $to_id;
         }
-        
-        $content = "⚠️ 目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($case_records, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[案件逾期顯示頁面](${url})</b> 查看詳細資料。";
-        $payload = array(
-            'title' => 'dontcare',
-            'content' => trim($content),
-            'priority' => 3,
-            'expire_datetime' => '',
-            'sender' => '系統排程',
-            'from_ip' => $host_ip
-        );
+        $content = "🚩 目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($case_records, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[案件逾期顯示頁面](${url})</b> 查看詳細資料。";
         if ($to_id == "ALL") {
             $sqlite_user = new SQLiteUser();
             $chief = $sqlite_user->getChief('登記課');
@@ -260,20 +273,149 @@ class WatchDog {
                 Logger::getInstance()->warning('找不到登記課課長帳號，無法傳送即時通知給他/她!!');
             } else {
                 $this_user = $users[$chief['id']];
-                $lastId = $notify->addMessage($chief['id'], $payload);
+                // $lastId = $notify->addMessage($chief['id'], $payload);
+                $lastId = $this->addNotification($content, $chief['id']);
                 Logger::getInstance()->info('新增逾期案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
             }
             // send to dev for debugging
             // $lastId = $notify->addMessage('HA10013859', $payload);
             // Logger::getInstance()->info('新增逾期案件通知訊息至 HA10013859 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
         } else {
-            $this_user = $users[$to_id];
-            $lastId = $notify->addMessage($to_id, $payload);
-            if ($lastId === false) {
-                Logger::getInstance()->warning("逾期案件訊息無法送出給 ${to_id} 。 (".$this_user.")");
-            } else {
-                Logger::getInstance()->info("逾期案件訊息(${lastId})已送出給 ${to_id} 。 (".$this_user.")");
+            $lastId = $this->addNotification($content, $to_id);
+        }
+    }
+
+    private function findSurNearOverdueCases() {
+        if (!$this->isOverdueCheckNeeded()) {
+            Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過即將逾期測量案件檢測。");
+            return false;
+        }
+        $host_ip = getLocalhostIP();
+        $query_url_base = "http://${host_ip}:8080/expire/sur";
+        $prefetch = new Prefetch();
+        Logger::getInstance()->info('開始查詢即將逾期(未來3日內)登記案件 ... ');
+        $rows = $prefetch->getSurNearCase();
+        if (!empty($rows)) {
+            Logger::getInstance()->info('未來3天內找到'.count($rows).'件即將逾期測量案件。');
+            $cache = Cache::getInstance();
+            $users = $cache->getUserNames();
+            $case_records = [];
+            foreach ($rows as $row) {
+                $case_id = $row['MM01'].'-'.$row['MM02'].'-'.$row['MM03'];
+                $this_msg = "[${case_id}](${query_url_base})".' '.$row['MM06_CHT'].' '.$row['MD04_CHT'];
+                $case_records[$row['MD04']][] = $this_msg;
+                $case_records["ALL"][] = $this_msg;
             }
+            // send to the MD04(測量員代碼)
+            $stats = 0;
+            $date = date('Y-m-d H:i:s');
+            foreach ($case_records as $ID => $records) {
+                $this->sendSurNearOverdueMessage($ID, $records);
+                $this->stats->addOverdueStatsDetail(array(
+                    "ID" => $ID,
+                    "RECORDS" => $records,
+                    "DATETIME" => $date,
+                    "NOTE" => array_key_exists($ID, $users) ? $users[$ID] : ''
+                ));
+                $stats++;
+            }
+            
+            $this->stats->addOverdueMsgCount($stats);
+            $this->stats->addNotificationCount($stats);
+        }
+        Logger::getInstance()->info('查詢近3天即將逾期測量案件完成。');
+        return true;
+    }
+
+    private function sendSurNearOverdueMessage($to_id, $cases) {
+        $host_ip = getLocalhostIP();
+        $cache = Cache::getInstance();
+        $users = $cache->getUserNames();
+        $url = "http://${host_ip}:8080/expire/sur";
+        $content = "⚠️ 目前有 ".count($cases)." 件即將逾期案件(未來3天".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
+        if ($to_id == "ALL") {
+            $sqlite_user = new SQLiteUser();
+            $chief = $sqlite_user->getChief('測量課');
+            if (empty($chief)) {
+                Logger::getInstance()->warning('找不到測量課課長帳號，無法傳送即時通知給他/她!!');
+            } else {
+                $this_user = $users[$chief['id']];
+                // $lastId = $notify->addMessage($chief['id'], $payload);
+                $lastId = $this->addNotification($content, $chief['id']);
+                Logger::getInstance()->info('新增即將逾期測量案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
+            }
+            // send to dev for debugging
+            // $lastId = $notify->addMessage('HA10013859', $payload);
+            // Logger::getInstance()->info('新增逾期案件通知訊息至 HA10013859 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
+        } else {
+            $lastId = $this->addNotification($content, $to_id);
+        }
+    }
+
+    private function findSurOverdueCases() {
+        if (!$this->isOverdueCheckNeeded()) {
+            Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期測量案件檢測。");
+            return false;
+        }
+        $host_ip = getLocalhostIP();
+        $query_url_base = "http://${host_ip}:8080/expire/sur";
+        $prefetch = new Prefetch();
+        Logger::getInstance()->info('開始查詢逾期測量案件 ... ');
+        $rows = $prefetch->getSurOverdueCase();
+        if (!empty($rows)) {
+            Logger::getInstance()->info('找到'.count($rows).'件逾期測量案件。');
+            $cache = Cache::getInstance();
+            $users = $cache->getUserNames();
+            $case_records = [];
+            foreach ($rows as $row) {
+                $case_id = $row['MM01'].'-'.$row['MM02'].'-'.$row['MM03'];
+                $this_msg = "[${case_id}](${query_url_base})".' '.$row['MM06_CHT'].' '.$row['MD04_CHT'];
+                $case_records[$row['MD04']][] = $this_msg;
+                $case_records["ALL"][] = $this_msg;
+            }
+            // send to the MD04(測量員代碼)
+            $stats = 0;
+            $date = date('Y-m-d H:i:s');
+            foreach ($case_records as $ID => $records) {
+                $this->sendSurOverdueMessage($ID, $records);
+                $this->stats->addOverdueStatsDetail(array(
+                    "ID" => $ID,
+                    "RECORDS" => $records,
+                    "DATETIME" => $date,
+                    "NOTE" => array_key_exists($ID, $users) ? $users[$ID] : ''
+                ));
+                $stats++;
+            }
+            
+            $this->stats->addOverdueMsgCount($stats);
+            $this->stats->addNotificationCount($stats);
+        }
+        Logger::getInstance()->info('查詢逾期測量案件完成。');
+        return true;
+    }
+
+    private function sendSurOverdueMessage($to_id, $cases) {
+        $host_ip = getLocalhostIP();
+        $cache = Cache::getInstance();
+        $users = $cache->getUserNames();
+        $url = "http://${host_ip}:8080/expire/sur";
+        $content = "🚩 目前有 ".count($cases)." 件逾期案件(".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
+        if ($to_id == "ALL") {
+            $sqlite_user = new SQLiteUser();
+            $chief = $sqlite_user->getChief('測量課');
+            if (empty($chief)) {
+                Logger::getInstance()->warning('找不到測量課課長帳號，無法傳送即時通知給他/她!!');
+            } else {
+                $this_user = $users[$chief['id']];
+                // $lastId = $notify->addMessage($chief['id'], $payload);
+                $lastId = $this->addNotification($content, $chief['id']);
+                Logger::getInstance()->info('新增逾期測量案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
+            }
+            // send to dev for debugging
+            // $lastId = $notify->addMessage('HA10013859', $payload);
+            // Logger::getInstance()->info('新增逾期案件通知訊息至 HA10013859 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
+        } else {
+            $lastId = $this->addNotification($content, $to_id);
         }
     }
 
@@ -300,7 +442,6 @@ class WatchDog {
     }
 
     private function sendTemperatureMessage($user) {
-        
         $to_id = trim($user['id']);
         $to_name = $user['name'];
         $AMPM = date('A');
@@ -387,7 +528,9 @@ class WatchDog {
                  */
                 $this->checkCrossSiteData();
                 $this->checkValCrossSiteData();
-                $this->findDelayRegCases();
+                $this->findRegOverdueCases();
+                $this->findSurOverdueCases();
+                $this->findSurNearOverdueCases();
                 return true;
             }
             return false;
