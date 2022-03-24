@@ -49,8 +49,12 @@ class Notification {
 
     function __construct() {
         $this->ws_db_path = System::getInstance()->getWSDBPath();
-        if (empty($this->ws_db_path)) {
-            $this->ws_db_path = dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'nuxtjs'.DIRECTORY_SEPARATOR.'ws'.DIRECTORY_SEPARATOR.'db';
+        if (!is_dir($this->ws_db_path)) {
+            // use default lah-messenger-server path
+            $defaultNotificationDBPath = dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'lah-messenger-server'.DIRECTORY_SEPARATOR.'db';
+            Logger::getInstance()->warning($this->ws_db_path." 不是正常即時通DB目錄，改用預設值 ... ");
+            Logger::getInstance()->info($defaultNotificationDBPath);
+            $this->ws_db_path = $defaultNotificationDBPath;
         }
         $this->ws_share_db_file = dirname($this->ws_db_path).DIRECTORY_SEPARATOR.'dimension'.DIRECTORY_SEPARATOR.'message.db';
     }
