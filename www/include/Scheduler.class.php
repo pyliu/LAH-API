@@ -118,7 +118,7 @@ class Scheduler {
                  */
                 $this->fetchMonitorMail();
             } else {
-                Logger::getInstance()->info(__METHOD__.": 每15分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
+                // Logger::getInstance()->info(__METHOD__.": 每15分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
@@ -138,7 +138,7 @@ class Scheduler {
                 file_put_contents($this->tickets['30m'], strtotime('+30 mins', time()));
                 // job execution below ...
             } else {
-                Logger::getInstance()->info(__METHOD__.": 每30分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
+                // Logger::getInstance()->info(__METHOD__.": 每30分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
@@ -158,7 +158,7 @@ class Scheduler {
                 file_put_contents($this->tickets['1h'], strtotime('+60 mins', time()));
                 // job execution below ...
             } else {
-                Logger::getInstance()->info(__METHOD__.": 每小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
+                // Logger::getInstance()->info(__METHOD__.": 每小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
@@ -178,7 +178,7 @@ class Scheduler {
                 file_put_contents($this->tickets['4h'], strtotime('+240 mins', time()));
                 // job execution below ...
             } else {
-                Logger::getInstance()->info(__METHOD__.": 每4小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
+                // Logger::getInstance()->info(__METHOD__.": 每4小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
@@ -198,7 +198,7 @@ class Scheduler {
                 file_put_contents($this->tickets['8h'], strtotime('+480 mins', time()));
                 // job execution below ...
             } else {
-                Logger::getInstance()->info(__METHOD__.": 每8小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
+                // Logger::getInstance()->info(__METHOD__.": 每8小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
@@ -218,7 +218,7 @@ class Scheduler {
                 file_put_contents($this->tickets['12h'], strtotime('+720 mins', time()));
                 // job execution below ...
             } else {
-                Logger::getInstance()->info(__METHOD__.": 每12小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
+                // Logger::getInstance()->info(__METHOD__.": 每12小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
@@ -256,7 +256,7 @@ class Scheduler {
                 $this->importRKEYNALL();
                 $this->importUserFromL3HWEB();
             } else {
-                Logger::getInstance()->info(__METHOD__.": 每24小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
+                // Logger::getInstance()->info(__METHOD__.": 每24小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
