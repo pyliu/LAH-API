@@ -1645,13 +1645,16 @@ class Prefetch {
                         r.MM21_2,               -- 逾期時間
                         r.MM23,                 -- 結案已否
                         v.MD09,                 -- 通知補正日期
-                        v.MD10                  -- 補正期滿日期
+                        v.MD10,                 -- 補正期滿日期
+                        v.MD12,                 -- 延期複丈原因代碼
+                        y.KCNT AS MD12_CHT      -- 延期複丈原因
                     FROM MOICAS.CMSMS r
                         LEFT JOIN MOICAS.CMSDS v ON r.MM01 = v.MD01 AND r.MM02 = v.MD02 AND r.MM03 = v.MD03
                         LEFT JOIN MOIADM.SYSAUTH1 w ON v.MD04 = w.USER_ID
                         LEFT JOIN MOIADM.RKEYN u ON u.KCDE_1 = 'M3' AND r.MM06 = u.KCDE_2
                         LEFT JOIN MOIADM.RKEYN t ON t.KCDE_1 = '04' AND r.MM02 = t.KCDE_2
                         LEFT JOIN MOIADM.RKEYN x ON x.KCDE_1 = 'M7' AND r.MM22 = x.KCDE_2
+                        LEFT JOIN MOIADM.RKEYN y ON y.KCDE_1 = 'M4' AND v.MD12 = y.KCDE_2
                     WHERE r.MM23 IS NULL AND :bv_today > r.MM21_1 
                     ORDER BY r.MM01, r.MM02, r.MM03
                 ");
@@ -1716,13 +1719,16 @@ class Prefetch {
                         r.MM21_2,               -- 逾期時間
                         r.MM23,                 -- 結案已否
                         v.MD09,                 -- 通知補正日期
-                        v.MD10                  -- 補正期滿日期
+                        v.MD10,                 -- 補正期滿日期
+                        v.MD12,                 -- 延期複丈原因代碼
+                        y.KCNT AS MD12_CHT      -- 延期複丈原因
                     FROM MOICAS.CMSMS r
                         LEFT JOIN MOICAS.CMSDS v ON r.MM01 = v.MD01 AND r.MM02 = v.MD02 AND r.MM03 = v.MD03
                         LEFT JOIN MOIADM.SYSAUTH1 w ON v.MD04 = w.USER_ID
                         LEFT JOIN MOIADM.RKEYN u ON u.KCDE_1 = 'M3' AND r.MM06 = u.KCDE_2
                         LEFT JOIN MOIADM.RKEYN t ON t.KCDE_1 = '04' AND r.MM02 = t.KCDE_2
                         LEFT JOIN MOIADM.RKEYN x ON x.KCDE_1 = 'M7' AND r.MM22 = x.KCDE_2
+                        LEFT JOIN MOIADM.RKEYN y ON y.KCDE_1 = 'M4' AND v.MD12 = y.KCDE_2
                     WHERE r.MM23 IS NULL AND r.MM02 <> 'ST'
                     ORDER BY r.MM01, r.MM02, r.MM03
                 ");
@@ -1787,13 +1793,16 @@ class Prefetch {
                         r.MM21_2,               -- 逾期時間
                         r.MM23,                 -- 結案已否
                         v.MD09,                 -- 通知補正日期
-                        v.MD10                  -- 補正期滿日期
+                        v.MD10,                 -- 補正期滿日期
+                        v.MD12,                 -- 延期複丈原因代碼
+                        y.KCNT AS MD12_CHT      -- 延期複丈原因
                     FROM MOICAS.CMSMS r
                         LEFT JOIN MOICAS.CMSDS v ON r.MM01 = v.MD01 AND r.MM02 = v.MD02 AND r.MM03 = v.MD03
                         LEFT JOIN MOIADM.SYSAUTH1 w ON v.MD04 = w.USER_ID
                         LEFT JOIN MOIADM.RKEYN u ON u.KCDE_1 = 'M3' AND r.MM06 = u.KCDE_2
                         LEFT JOIN MOIADM.RKEYN t ON t.KCDE_1 = '04' AND r.MM02 = t.KCDE_2
                         LEFT JOIN MOIADM.RKEYN x ON x.KCDE_1 = 'M7' AND r.MM22 = x.KCDE_2
+                        LEFT JOIN MOIADM.RKEYN y ON y.KCDE_1 = 'M4' AND v.MD12 = y.KCDE_2
                     WHERE r.MM23 IS NULL AND r.MM21_1 BETWEEN :bv_st AND :bv_ed
                     ORDER BY r.MM01, r.MM02, r.MM03
                 ");
