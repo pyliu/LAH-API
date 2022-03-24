@@ -1800,10 +1800,10 @@ class Prefetch {
                 global $today;
                 $tw_date = new Datetime("now");
                 $tw_date->modify("-1911 year");
-                $tw_date->modify("-3 day");
-                $three_days_ago = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080318
-                $db->bind(":bv_st", $three_days_ago);
-                $db->bind(":bv_ed", $today);
+                $tw_date->modify("+3 day");
+                $three_days_later = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080318
+                $db->bind(":bv_st", $today);
+                $db->bind(":bv_ed", $three_days_later);
                 $db->execute();
                 $result = $db->fetchAll();
                 $this->getCache()->set($cache_key, $result, $expire_duration);
