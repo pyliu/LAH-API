@@ -262,11 +262,12 @@ class WatchDog {
         //     // $url .= "${to_id}/";
         // }
         $url = "http://${host_ip}:8080/expire/";
-        if ($to_id != "ALL") {
+        if ($to_id !== "ALL") {
             $url .= $to_id;
         }
-        $content = "🚩 目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($case_records, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[案件逾期顯示頁面](${url})</b> 查看詳細資料。";
-        if ($to_id == "ALL") {
+        $displayName = $to_id === "ALL" ? "登記課" : "您";
+        $content = "🚩 ${displayName}目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($case_records, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[案件逾期顯示頁面](${url})</b> 查看詳細資料。";
+        if ($to_id === "ALL") {
             $sqlite_user = new SQLiteUser();
             $chief = $sqlite_user->getChief('登記課');
             if (empty($chief)) {
@@ -332,8 +333,9 @@ class WatchDog {
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
         $url = "http://${host_ip}:8080/expire/sur";
-        $content = "⚠️ 目前有 ".count($cases)." 件即將逾期案件(未來3天".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
-        if ($to_id == "ALL") {
+        $displayName = $to_id === "ALL" ? "測量課" : "您";
+        $content = "⚠️ ${displayName}目前有 ".count($cases)." 件即將逾期案件(未來3天".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
+        if ($to_id === "ALL") {
             $sqlite_user = new SQLiteUser();
             $chief = $sqlite_user->getChief('測量課');
             if (empty($chief)) {
@@ -399,8 +401,9 @@ class WatchDog {
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
         $url = "http://${host_ip}:8080/expire/sur";
-        $content = "🚩 目前有 ".count($cases)." 件逾期案件(".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
-        if ($to_id == "ALL") {
+        $displayName = $to_id === "ALL" ? "測量課" : "您";
+        $content = "🚩 ${displayName}目前有 ".count($cases)." 件逾期案件".(count($cases) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
+        if ($to_id === "ALL") {
             $sqlite_user = new SQLiteUser();
             $chief = $sqlite_user->getChief('測量課');
             if (empty($chief)) {
