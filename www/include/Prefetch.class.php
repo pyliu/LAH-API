@@ -1723,7 +1723,7 @@ class Prefetch {
                         LEFT JOIN MOIADM.RKEYN u ON u.KCDE_1 = 'M3' AND r.MM06 = u.KCDE_2
                         LEFT JOIN MOIADM.RKEYN t ON t.KCDE_1 = '04' AND r.MM02 = t.KCDE_2
                         LEFT JOIN MOIADM.RKEYN x ON x.KCDE_1 = 'M7' AND r.MM22 = x.KCDE_2
-                    WHERE r.MM23 IS NULL
+                    WHERE r.MM23 IS NULL AND r.MM02 <> 'ST'
                     ORDER BY r.MM01, r.MM02, r.MM03
                 ");
                 // $db->bind(":bv_site", $this->site);
