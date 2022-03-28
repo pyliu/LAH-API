@@ -49,12 +49,16 @@ class Notification {
 
     function __construct() {
         $this->ws_db_path = System::getInstance()->getWSDBPath();
-        if (!is_dir($this->ws_db_path)) {
+        $this->ws_share_db_file = dirname($this->ws_db_path).DIRECTORY_SEPARATOR.'dimension'.DIRECTORY_SEPARATOR.'message.db';
+        if (!is_dir($this->ws_db_path) || !is_file($this->ws_share_db_file)) {
+            Logger::getInstance()->info('ws_db_path: '.$this->ws_db_path.", ws_share_db_file: ".$this->ws_share_db_file);
+            Logger::getInstance()->warning(__CLASS__.': 即時通DB設定參數錯誤，改用預設值！');
             // use default lah-messenger-server path
             $defaultNotificationDBPath = dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'lah-messenger-server'.DIRECTORY_SEPARATOR.'db';
-            Logger::getInstance()->warning($this->ws_db_path." 不是正常即時通DB目錄，改用預設值 ... ");
-            Logger::getInstance()->info($defaultNotificationDBPath);
+            $defaultNotificationMessageFile = dirname($defaultNotificationDBPath).DIRECTORY_SEPARATOR.'dimension'.DIRECTORY_SEPARATOR.'message.db';
+            Logger::getInstance()->info('ws_db_path: '.$defaultNotificationDBPath.", ws_share_db_file: ".$defaultNotificationMessageFile);
             $this->ws_db_path = $defaultNotificationDBPath;
+            $this->ws_share_db_file = $defaultNotificationMessageFile;
         }
         $this->ws_share_db_file = dirname($this->ws_db_path).DIRECTORY_SEPARATOR.'dimension'.DIRECTORY_SEPARATOR.'message.db';
     }
@@ -87,7 +91,6 @@ class Notification {
         }
     }
 
-    
     public function removeMessage($channel, $payload) {
         // expect payload has id and type info
         if (empty($channel) || empty($payload['type'])) {
@@ -112,5 +115,36 @@ class Notification {
             }
         }
         return false;
+    }
+
+    public function getMessageByDuration($channel, $payload) {
+        if (is_array($payload)) {
+            Logger::getInstance()->warning(__METHOD__.': 查詢的參數應為陣列!');
+            Logger::getInstance()->info(__METHOD__.': $payload => '.$payload);
+            return false;
+        }
+        if (!array_key_exists('st', $payload) || !array_key_exists('ed', $payload) || $payload['st'] > $payload['ed']) {
+            Logger::getInstance()->warning(__METHOD__.': 查詢的參數錯誤');
+            Logger::getInstance()->info(__METHOD__.': $payload => '.$payload);
+            return false;
+        }
+        // get messages
+        if ($this->prepareDB($channel)) {
+            // TODO: add message
+            $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            $stm = $db->prepare("
+                INSERT INTO message ('title', 'content', 'priority', 'create_datetime', 'expire_datetime', 'sender', 'from_ip', 'flag')
+                VALUES (:bv_title, :bv_content, :bv_priority, :bv_create_datetime, :bv_expire_datetime, :bv_sender, :bv_from_ip, :bv_flag)
+            ");
+            if ($this->bindParams($stm, $payload)) {
+                if ($stm->execute() !== FALSE) {
+                    // return last inserted id
+                    return $db->querySingle("SELECT id from message ORDER BY id DESC LIMIT 1");
+                }
+            }
+            return false;
+        }
+        $messages = array();
+        return $messages;
     }
 }
