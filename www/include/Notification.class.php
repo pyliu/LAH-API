@@ -25,7 +25,6 @@ class Notification {
         return true;
     }
 
-    
     private function bindParams(&$stm, &$row) {
         if ($stm === false) {
             Logger::getInstance()->error(__METHOD__.": bindUserParams because of \$stm is false.");
@@ -45,6 +44,15 @@ class Notification {
         $stm->bindParam(':bv_flag', $flag);
 
         return true;
+    }
+
+    private function prepareArray(&$stmt) {
+        $result = $stmt->execute();
+        $return = [];
+        while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            $return[] = $row;
+        }
+        return $return;
     }
 
     function __construct() {
@@ -117,6 +125,26 @@ class Notification {
         return false;
     }
 
+    public function getMessages($channel, $top = 10) {
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) {
+            Logger::getInstance()->error(__METHOD__.': DB檔案路徑有誤('.$channelDBPath.')有誤，無法取得訊息。');
+            return false;
+        }
+        if (!is_numeric($top) || intval($top) < 1 ) {
+            Logger::getInstance()->warning(__METHOD__.': $top 變數('.$top.')有誤，改用預設值 $top = 10');
+            $top = 10;
+        }
+        // get messages
+        if ($this->prepareDB($channel)) {
+            $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+            $stm = $db->prepare("SELECT * FROM message ORDER BY id DESC LIMIT :bv_top");
+            $stm->bindParam(':bv_top', $top);
+            return $this->prepareArray($stm);
+        }
+        return false;
+    }
+
     public function getMessageByDuration($channel, $payload) {
         if (is_array($payload)) {
             Logger::getInstance()->warning(__METHOD__.': 查詢的參數應為陣列!');
@@ -131,17 +159,17 @@ class Notification {
         // get messages
         if ($this->prepareDB($channel)) {
             // TODO: add message
-            $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
-            $stm = $db->prepare("
-                INSERT INTO message ('title', 'content', 'priority', 'create_datetime', 'expire_datetime', 'sender', 'from_ip', 'flag')
-                VALUES (:bv_title, :bv_content, :bv_priority, :bv_create_datetime, :bv_expire_datetime, :bv_sender, :bv_from_ip, :bv_flag)
-            ");
-            if ($this->bindParams($stm, $payload)) {
-                if ($stm->execute() !== FALSE) {
-                    // return last inserted id
-                    return $db->querySingle("SELECT id from message ORDER BY id DESC LIMIT 1");
-                }
-            }
+            // $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            // $stm = $db->prepare("
+            //     INSERT INTO message ('title', 'content', 'priority', 'create_datetime', 'expire_datetime', 'sender', 'from_ip', 'flag')
+            //     VALUES (:bv_title, :bv_content, :bv_priority, :bv_create_datetime, :bv_expire_datetime, :bv_sender, :bv_from_ip, :bv_flag)
+            // ");
+            // if ($this->bindParams($stm, $payload)) {
+            //     if ($stm->execute() !== FALSE) {
+            //         // return last inserted id
+            //         return $db->querySingle("SELECT id from message ORDER BY id DESC LIMIT 1");
+            //     }
+            // }
             return false;
         }
         $messages = array();

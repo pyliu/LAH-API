@@ -84,6 +84,23 @@ switch ($_POST["type"]) {
         $status_code = $fail === 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
         echoJSONResponse($message, $status_code);
         break;
+    case "get_notification":
+        $channel = $_POST['channel'];
+        $limit = $_POST['limit'] ?? 10;
+        $notify = new Notification();
+        $raw = $notify->getMessages($channel, $limit);
+        $count = count($raw) ?? 0;
+        $message = "取得 $count 筆訊息成功。";
+        if (is_array($raw)) {
+            $status = $count > 0 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
+            echoJSONResponse($message, $status, array(
+                "data_count" => $count,
+                "raw" => $raw
+            ));
+        } else {
+            echoJSONResponse($message, STATUS_CODE::DEFAULT_FAIL);
+        }
+        break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
         echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
