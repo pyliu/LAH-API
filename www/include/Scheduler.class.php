@@ -14,6 +14,48 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."StatsSQLite.class.php");
 class Scheduler {
     private $tmp;
     private $tickets;
+    private $schedule = array(
+        "office" => [
+            'Sun' => [],
+            'Mon' => ['07:30 AM' => '05:30 PM'],
+            'Tue' => ['07:30 AM' => '05:30 PM'],
+            'Wed' => ['07:30 AM' => '05:30 PM'],
+            'Thu' => ['07:30 AM' => '05:30 PM'],
+            'Fri' => ['07:30 AM' => '05:30 PM'],
+            'Sat' => ['07:30 AM' => '05:30 PM']
+        ],
+        "test" => [
+            'Sun' => [],
+            'Mon' => ['00:00 AM' => '11:59 PM'],
+            'Tue' => ['00:00 AM' => '11:59 PM'],
+            'Wed' => ['00:00 AM' => '11:59 PM'],
+            'Thu' => ['00:00 AM' => '11:59 PM'],
+            'Fri' => ['00:00 AM' => '11:59 PM'],
+            'Sat' => []
+        ]
+    );
+
+    private function isOn($schedule) {
+        // current or user supplied UNIX timestamp
+        $timestamp = time();
+        // default status
+        $status = false;
+        // get current time object
+        $currentTime = (new DateTime())->setTimestamp($timestamp);
+        // loop through time ranges for current day
+        foreach ($schedule[date('D', $timestamp)] as $startTime => $endTime) {
+            // create time objects from start/end times
+            $st = DateTime::createFromFormat('h:i A', $startTime);
+            $ed = DateTime::createFromFormat('h:i A', $endTime);
+
+            // check if current time is within a range
+            if (($st < $currentTime) && ($currentTime < $ed)) {
+                $status = true;
+                break;
+            }
+        }
+        return $status;
+    }
 
     private function compressLog() {
         $cache = Cache::getInstance();
