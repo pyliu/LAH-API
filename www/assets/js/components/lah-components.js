@@ -409,7 +409,7 @@ if (Vue) {
                     }]
                 }, {
                     text: "監控看板",
-                    url: "monitor.html",
+                    url: `http://${location.host}:8080/monitor`,
                     icon: "desktop",
                     need_admin: true,
                     children: [{
