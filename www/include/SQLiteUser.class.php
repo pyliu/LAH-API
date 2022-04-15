@@ -578,6 +578,17 @@ class SQLiteUser {
         }
     }
 
+    public function updateDept($id, $unit) {
+        if ($stm = $this->db->prepare("UPDATE user SET unit = :unit WHERE id = :id")) {
+            $stm->bindParam(':unit', $unit);
+            $stm->bindParam(':id', $id);
+            return $stm->execute() === FALSE ? false : true;
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 更新部門(${id}, ${unit})資料失敗！");
+            return false;
+        }
+    }
+
     public function getAuthorityList() {
         if($stmt = $this->db->prepare("
             SELECT
