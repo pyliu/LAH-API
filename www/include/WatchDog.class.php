@@ -9,6 +9,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR.'Temperature.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteUser.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'System.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Cache.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'LXHWEB.class.php');
 
 class WatchDog {
     private $stats = null;
@@ -150,7 +151,7 @@ class WatchDog {
                 $case_ids = [];
                 foreach ($rows as $row) {
                     $case_ids[] = '🔴 '.$row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
-                    Logger::getInstance()->warning('🔴 '.$row['RM01'].'-'.$row['RM02'].'-'.$row['RM03']);
+                    Logger::getInstance()->warning('🔴 '.$row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' 地價案件跨所註記遺失!');
                 }
                 
                 $host_ip = getLocalhostIP();
@@ -178,7 +179,7 @@ class WatchDog {
         if ($this->isOn($this->schedule["twice_a_day"])) {
             $query = new Query();
             // check val case missing SS99~SS101 data
-            Logger::getInstance()->info('開始地價案件跨所註記遺失檢查 ... ');
+            Logger::getInstance()->info('開始本所管轄地價案件跨所註記遺失檢查 ... ');
             $rows = $query->getPSCRNProblematicCrossCases();
             if (!empty($rows)) {
                 Logger::getInstance()->warning('找到'.count($rows).'件跨所註記遺失地價案件！');
@@ -194,7 +195,7 @@ class WatchDog {
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
                     $lastId = $this->addNotification($content, $admin['id']);
-                    echo '新增「地價案件跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')';
+                    Logger::getInstance()->info('新增「地價案件跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
                 }
                 
                 $this->stats->addXcasesStats(array(
@@ -203,9 +204,44 @@ class WatchDog {
                     "note" => $content
                 ));
             }
-            Logger::getInstance()->info('地價案件跨所註記遺失檢查結束。');
+            Logger::getInstance()->info('本所管轄地價案件跨所註記遺失檢查完成。');
         } else {
             Logger::getInstance()->warning('不在啟動區間「twice_a_day」，略過跨所註記遺失地價案件檢查。');
+        }
+    }
+
+    private function checkValCrossOtherSitesData() {
+        $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
+        // get rid of our site
+        $all = array('HA', 'HB', 'HC', 'HD', 'HE', 'HF', 'HG', 'HH');
+        $remove_idx = array_search(System::getInstance()->getSiteCode(), $all);
+        unset($all[$remove_idx]);
+        foreach ($all as $site) {
+            // check val case missing SS99~SS101 data
+            Logger::getInstance()->info("開始 ${site} 管轄地價案件跨所註記遺失檢查 ... ");
+            $rows = $lxhweb->getMissingXNoteXValCases($site);
+            if (count($rows) > 0) {
+                $case_ids = [];
+                foreach ($rows as $row) {
+                    $case_ids[] = '🔴 '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2'];
+                    Logger::getInstance()->warning('🔴 '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2'].' 地價案件跨所註記遺失!');
+                }
+                
+                $content = "⚠️地政系統目前找到下列「地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫跨所問題處理單通知管轄所 ${site} 修正。";
+                $sqlite_user = new SQLiteUser();
+                $admins = $sqlite_user->getAdmins();
+                foreach ($admins as $admin) {
+                    $lastId = $this->addNotification($content, $admin['id']);
+                    Logger::getInstance()->info('新增「地價案件跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
+                }
+                
+                $this->stats->addXcasesStats(array(
+                    "date" => date("Y-m-d H:i:s"),
+                    "found" => count($rows),
+                    "note" => $content
+                ));
+            }
+            Logger::getInstance()->info("${site} 管轄地價案件跨所註記遺失檢查完成。");
         }
     }
 
@@ -531,6 +567,7 @@ class WatchDog {
                  */
                 $this->checkCrossSiteData();
                 $this->checkValCrossSiteData();
+                $this->checkValCrossOtherSitesData();
                 $this->findRegOverdueCases();
                 $this->findSurOverdueCases();
                 $this->findSurNearOverdueCases();

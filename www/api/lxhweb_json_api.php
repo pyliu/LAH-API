@@ -81,6 +81,20 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
+	case "l3hweb_pscrn_check":
+		Logger::getInstance()->info("XHR [l3hweb_pscrn_check] 檢查地價案件跨所註記 請求 ".$_POST["site"] ?? 'L3HWEB');
+		$rows = $mock ? $cache->get('l3hweb_pscrn_check') : $lxhweb->getMissingXNoteXValCases($_POST["office"]);
+		if (!$mock) $cache->set('l3hweb_pscrn_check', $rows);
+		$count = $rows === false ? 0 : count($rows);
+		if (empty($count)) {
+			echoJSONResponse('查無 '.$_POST["office"].' 地價案件遺失跨所註記。');
+		} else {
+			echoJSONResponse('共查詢到'.$count.'筆資料', STATUS_CODE::SUCCESS_NORMAL, array(
+				'data_count' => $count,
+				'raw' => $rows
+			));
+		}
+		break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
         echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

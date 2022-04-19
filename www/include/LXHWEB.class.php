@@ -126,4 +126,40 @@ class LXHWEB {
         }
         return $filtered;
     }
+    /**
+     * 查詢跨所地價案件跨所註記遺失
+     */
+    // I could use local DB table(MOIPRC.PSCRN) here but this class uses LXHWEB instead.
+    public function getMissingXNoteXValCasesLocal() {
+        // find the cases we own, e.g. L1HA0H03.PSCRN, SS04_1 => 'HA[B-H]1'
+        $alphabet = ltrim(System::getInstance()->getSiteCode(), 'H');
+        $sql = "
+            SELECT *
+            FROM L1H${alphabet}0H03.PSCRN t
+            WHERE 1 = 1
+                AND t.SS04_1 in ('H${alphabet}A1', 'H${alphabet}B1', 'H${alphabet}C1', 'H${alphabet}D1', 'H${alphabet}E1', 'H${alphabet}F1', 'H${alphabet}G1', 'H${alphabet}H1')
+                AND SS99 IS NULL
+        ";
+        $this->getDB()->parse($sql);
+		$this->getDB()->execute();
+		return $this->getDB()->fetchAll();
+    }
+    // find the cases not we own but concern, e.g. check L1H[B-H]0H03.PSCRN, SS04_1 => 'H[B-H]A1'
+    public function getMissingXNoteXValCases($remote) {
+        $local = ltrim(System::getInstance()->getSiteCode(), 'H');
+        $remote = strlen($remote) > 1 ? ltrim($remote, 'H') : $remote;
+        if ($local === $remote) {
+            return $this->getMissingXNoteXValCasesLocal();
+        }
+        $sql = "
+            SELECT *
+            FROM L1H${remote}0H03.PSCRN t
+            WHERE 1 = 1
+                AND t.SS04_1 = 'H${remote}${local}1'
+                AND SS99 IS NULL
+        ";
+        $this->getDB()->parse($sql);
+		$this->getDB()->execute();
+		return $this->getDB()->fetchAll();
+    }
 }
