@@ -305,25 +305,30 @@ switch ($_POST["type"]) {
 		break;
 	case "watchdog":
 		Logger::getInstance()->info("XHR [watchdog] 監控請求");
-		// api for scheduler calling from localhost
-		if ($client_ip === "::1" || $client_ip === '127.0.0.1') {	// $client_ip from init.php
-			$watchdog = new WatchDog();
-			$done = $watchdog->do();
-			if ($done) {
-				Logger::getInstance()->info("XHR [watchdog] 檢查完成");
-				echo json_encode(array(
-					"status" => STATUS_CODE::SUCCESS_NORMAL,
-					"data_count" => 0,
-					"raw" => $done,
-					"message" => "Watchdog查詢檢查完成"
-				), 0);
+		$ticket = sys_get_temp_dir().DIRECTORY_SEPARATOR.'LAH-watchdog-15m.ts';
+		$ticketTs = file_get_contents($ticket);
+		if ($ticketTs <= time()) {
+			file_put_contents($ticket, strtotime('+15 mins', time()));
+			// api for scheduler calling from localhost
+			if ($client_ip === "::1" || $client_ip === '127.0.0.1') {	// $client_ip from init.php
+				$watchdog = new WatchDog();
+				$done = $watchdog->do();
+				if ($done) {
+					Logger::getInstance()->info("XHR [watchdog] 檢查完成");
+					echo json_encode(array(
+						"status" => STATUS_CODE::SUCCESS_NORMAL,
+						"data_count" => 0,
+						"raw" => $done,
+						"message" => "Watchdog查詢檢查完成"
+					), 0);
+				} else {
+					Logger::getInstance()->warning("XHR [watchdog] 非上班時段停止執行。");
+					echoJSONResponse("XHR [watchdog] 非上班時段停止執行。");
+				}
 			} else {
-				Logger::getInstance()->warning("XHR [watchdog] 非上班時段停止執行。");
-				echoJSONResponse("XHR [watchdog] 非上班時段停止執行。");
+				Logger::getInstance()->info("XHR [watchdog] 停止執行WATCHDOG，因為IP不為「::1」");
+				echoJSONResponse("XHR [watchdog] 停止執行WATCHDOG，因為IP不為「::1」", STATUS_CODE::FAIL_NOT_VALID_SERVER);
 			}
-		} else {
-			Logger::getInstance()->info("XHR [watchdog] 停止執行WATCHDOG，因為IP不為「::1」");
-			echoJSONResponse("XHR [watchdog] 停止執行WATCHDOG，因為IP不為「::1」", STATUS_CODE::FAIL_NOT_VALID_SERVER);
 		}
 		break;
 	case "xcase-check":
