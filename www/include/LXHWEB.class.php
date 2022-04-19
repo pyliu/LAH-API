@@ -132,7 +132,7 @@ class LXHWEB {
     // I could use local DB table(MOIPRC.PSCRN) here but this class uses LXHWEB instead.
     public function getMissingXNoteXValCasesLocal() {
         // find the cases we own, e.g. L1HA0H03.PSCRN, SS04_1 => 'HA[B-H]1'
-        $alphabet = ltrim(System::getInstance()->getSiteCode(), 'H');
+        $alphabet = substr(System::getInstance()->getSiteCode(), 1);
         $sql = "
             SELECT *
             FROM L1H${alphabet}0H03.PSCRN t
@@ -146,8 +146,8 @@ class LXHWEB {
     }
     // find the cases not we own but concern, e.g. check L1H[B-H]0H03.PSCRN, SS04_1 => 'H[B-H]A1'
     public function getMissingXNoteXValCases($remote) {
-        $local = ltrim(System::getInstance()->getSiteCode(), 'H');
-        $remote = strlen($remote) > 1 ? ltrim($remote, 'H') : $remote;
+        $local = substr(System::getInstance()->getSiteCode(), 1);
+        $remote = strlen($remote) > 1 ? substr($remote, 1) : $remote;
         if ($local === $remote) {
             return $this->getMissingXNoteXValCasesLocal();
         }

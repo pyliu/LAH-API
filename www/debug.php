@@ -8,8 +8,10 @@ try {
     echo strtotime('+1440 mins', time()) - time();
     echo '<br/>';
     echo false <= time();
-    $sd = new Scheduler();
-    $sd->do();
+    // $sd = new Scheduler();
+    // $sd->do();
+    $site = "HH";
+    echo substr($site, 1);
 }
 catch(Exception $e)
 {
