@@ -7,15 +7,9 @@ $scheduler = new Scheduler();
 
 switch ($_POST["type"]) {
     case "reqular":
-		$ticket = sys_get_temp_dir().DIRECTORY_SEPARATOR.'LAH-scheduler-regular-5m.ts';
-		$ticketTs = file_get_contents($ticket);
-		if ($ticketTs <= time()) {
-			file_put_contents($ticket, strtotime('+5 mins', time()));
-            $scheduler->do();
-            echoJSONResponse('正常(regular)排程已執行完成。', STATUS_CODE::SUCCESS_NORMAL);
-        } else {
-            echoJSONResponse('正常(regular)排程已略過執行(未滿5分鐘)。', STATUS_CODE::SUCCESS_NORMAL);
-        }
+        file_put_contents($ticket, strtotime('+5 mins', time()));
+        $scheduler->do();
+        echoJSONResponse('正常(regular)排程已執行完成。', STATUS_CODE::SUCCESS_NORMAL);
         break;
     case "15m":
         $result = $scheduler->do15minsJobs();
