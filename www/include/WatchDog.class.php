@@ -211,37 +211,39 @@ class WatchDog {
     }
 
     private function checkValCrossOtherSitesData() {
-        $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
-        // get rid of our site
-        $all = array('HA', 'HB', 'HC', 'HD', 'HE', 'HF', 'HG', 'HH');
-        $remove_idx = array_search(System::getInstance()->getSiteCode(), $all);
-        unset($all[$remove_idx]);
-        foreach ($all as $site) {
-            // check val case missing SS99~SS101 data
-            Logger::getInstance()->info("開始 ${site} 管轄地價案件跨所註記遺失檢查 ... ");
-            $rows = $lxhweb->getMissingXNoteXValCases($site);
-            if (count($rows) > 0) {
-                $case_ids = [];
-                foreach ($rows as $row) {
-                    $case_ids[] = '🔴 '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2'];
-                    Logger::getInstance()->warning('🔴 '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2'].' 地價案件跨所註記遺失!');
+        if ($this->isOn($this->schedule["twice_a_day"])) {
+            $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
+            // get rid of our site
+            $all = array('HA', 'HB', 'HC', 'HD', 'HE', 'HF', 'HG', 'HH');
+            $remove_idx = array_search(System::getInstance()->getSiteCode(), $all);
+            unset($all[$remove_idx]);
+            foreach ($all as $site) {
+                // check val case missing SS99~SS101 data
+                Logger::getInstance()->info("開始 ${site} 管轄地價案件跨所註記遺失檢查 ... ");
+                $rows = $lxhweb->getMissingXNoteXValCases($site);
+                if (count($rows) > 0) {
+                    $case_ids = [];
+                    foreach ($rows as $row) {
+                        $case_ids[] = '⚠ '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2'];
+                        Logger::getInstance()->warning('⚠ '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2'].' 「跨所地價案件」跨所註記遺失!');
+                    }
+                    
+                    $content = "🚩 地政系統於同步異動資料庫找到下列「跨所地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫跨所問題處理單通知管轄所 ${site} 修正。";
+                    $sqlite_user = new SQLiteUser();
+                    $admins = $sqlite_user->getAdmins();
+                    foreach ($admins as $admin) {
+                        $lastId = $this->addNotification($content, $admin['id']);
+                        Logger::getInstance()->info('新增「跨所地價案件」跨所註記遺失通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
+                    }
+                    
+                    $this->stats->addXcasesStats(array(
+                        "date" => date("Y-m-d H:i:s"),
+                        "found" => count($rows),
+                        "note" => $content
+                    ));
                 }
-                
-                $content = "🚩 地政系統於同步異動資料庫找到下列「跨所地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫跨所問題處理單通知管轄所 ${site} 修正。";
-                $sqlite_user = new SQLiteUser();
-                $admins = $sqlite_user->getAdmins();
-                foreach ($admins as $admin) {
-                    $lastId = $this->addNotification($content, $admin['id']);
-                    Logger::getInstance()->info('新增「跨所地價案件」跨所註記遺失通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
-                }
-                
-                $this->stats->addXcasesStats(array(
-                    "date" => date("Y-m-d H:i:s"),
-                    "found" => count($rows),
-                    "note" => $content
-                ));
+                Logger::getInstance()->info("${site} 管轄地價案件跨所註記遺失檢查完成。");
             }
-            Logger::getInstance()->info("${site} 管轄地價案件跨所註記遺失檢查完成。");
         }
     }
 
