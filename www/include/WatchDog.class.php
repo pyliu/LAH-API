@@ -190,7 +190,7 @@ class WatchDog {
                 }
                 
                 $host_ip = getLocalhostIP();
-                $content = "⚠️地政系統目前找到下列「地價案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://$host_ip/dashboard.html) 執行檢查功能並修正。";
+                $content = "⚠️ 地政系統目前找到下列「地價案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://$host_ip/dashboard.html) 執行檢查功能並修正。";
                 $sqlite_user = new SQLiteUser();
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
@@ -227,12 +227,12 @@ class WatchDog {
                     Logger::getInstance()->warning('🔴 '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2'].' 地價案件跨所註記遺失!');
                 }
                 
-                $content = "⚠️地政系統目前找到下列「地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫跨所問題處理單通知管轄所 ${site} 修正。";
+                $content = "🚩 地政系統於同步異動資料庫找到下列「跨所地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫跨所問題處理單通知管轄所 ${site} 修正。";
                 $sqlite_user = new SQLiteUser();
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
                     $lastId = $this->addNotification($content, $admin['id']);
-                    Logger::getInstance()->info('新增「地價案件跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
+                    Logger::getInstance()->info('新增「跨所地價案件」跨所註記遺失通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
                 }
                 
                 $this->stats->addXcasesStats(array(
