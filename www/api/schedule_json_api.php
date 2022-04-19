@@ -13,6 +13,8 @@ switch ($_POST["type"]) {
 			file_put_contents($ticket, strtotime('+5 mins', time()));
             $scheduler->do();
             echoJSONResponse('正常(regular)排程已執行完成。', STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            echoJSONResponse('正常(regular)排程已略過執行(未滿5分鐘)。', STATUS_CODE::SUCCESS_NORMAL);
         }
         break;
     case "15m":

@@ -329,6 +329,8 @@ switch ($_POST["type"]) {
 				Logger::getInstance()->info("XHR [watchdog] 停止執行WATCHDOG，因為IP不為「::1」");
 				echoJSONResponse("XHR [watchdog] 停止執行WATCHDOG，因為IP不為「::1」", STATUS_CODE::FAIL_NOT_VALID_SERVER);
 			}
+		} else {
+			echoJSONResponse('WATCHDOG排程已略過執行(未滿15分鐘)。', STATUS_CODE::SUCCESS_NORMAL);
 		}
 		break;
 	case "xcase-check":
