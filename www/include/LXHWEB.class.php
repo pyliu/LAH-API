@@ -138,7 +138,7 @@ class LXHWEB {
             FROM L1H${alphabet}0H03.PSCRN t
             WHERE 1 = 1
                 AND t.SS04_1 in ('H${alphabet}A1', 'H${alphabet}B1', 'H${alphabet}C1', 'H${alphabet}D1', 'H${alphabet}E1', 'H${alphabet}F1', 'H${alphabet}G1', 'H${alphabet}H1')
-                AND SS99 IS NULL
+                AND t.SS99 IS NULL
         ";
         $this->getDB()->parse($sql);
 		$this->getDB()->execute();
@@ -156,7 +156,7 @@ class LXHWEB {
             FROM L1H${remote}0H03.PSCRN t
             WHERE 1 = 1
                 AND t.SS04_1 = 'H${remote}${local}1'
-                AND SS99 IS NULL
+                AND t.SS99 IS NULL
         ";
         $this->getDB()->parse($sql);
 		$this->getDB()->execute();
