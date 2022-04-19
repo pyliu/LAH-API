@@ -228,7 +228,8 @@ class WatchDog {
                         Logger::getInstance()->warning('⚠ '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2'].' 「跨所地價案件」跨所註記遺失!');
                     }
                     
-                    $content = "🚩 地政系統同步異動資料庫(L3HWEB)找到下列「跨所地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫跨所問題處理單通知管轄所 ${site} 修正。";
+                    $site_name = System::getInstance()->getSiteName($site);
+                    $content = "🚩 地政系統同步異動資料庫(L3HWEB)找到下列「跨所地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫「跨所問題處理單」通知管轄所「${site_name}」修正。";
                     $sqlite_user = new SQLiteUser();
                     $admins = $sqlite_user->getAdmins();
                     foreach ($admins as $admin) {

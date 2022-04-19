@@ -586,6 +586,20 @@ class System {
         return strtoupper($this->get('SITE'));
     }
 
+    public function getSiteName($code) {
+        switch ($code) {
+            case "HA": return "桃園";
+            case "HB": return "中壢";
+            case "HC": return "大溪";
+            case "HD": return "楊梅";
+            case "HE": return "蘆竹";
+            case "HF": return "八德";
+            case "HG": return "平鎮";
+            case "HH": return "龜山";
+        }
+        return "無定義($code)";
+    }
+
     public function getWSDBPath() {
         return strtoupper($this->get('WS_DB_PATH'));
     }
