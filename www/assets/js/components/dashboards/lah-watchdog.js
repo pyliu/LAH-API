@@ -3,25 +3,37 @@ if (Vue) {
     template: `<b-card>
         <template v-slot:header>
             <div class="d-flex w-100 justify-content-between mb-0">
-                <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="dog"> 快速檢測</lah-fa-icon></h6>
+                <h6 class="my-auto font-weight-bolder"><lah-fa-icon icon="dog"> 快速檢測＆修正資料庫</lah-fa-icon></h6>
             </div>
         </template>
-        <b-button-group class="my-1">
-            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkRegXcase" title="檢測登記案件跨所註記遺失問題">「登記」跨所註記檢測</lah-button>
-            <lah-button icon="question" variant="success" @click="popupXcaseHelp" title="檢測登記案件跨所註記遺失說明"></lah-button>
-        </b-button-group>
-        <b-button-group class="my-1">
-            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkValXcase" title="檢測地價案件跨所註記遺失問題">「地價」跨所註記檢測</lah-button>
-            <lah-button icon="question" variant="success" @click="popupXcaseValHelp" title="檢測登記案件跨所註記遺失說明"></lah-button>
-        </b-button-group>
-        <b-button-group class="my-1">
-            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkEzPayment" title="檢測悠遊卡付款問題">悠遊卡付款</lah-button>
-            <lah-button icon="question" variant="success" @click="popupEzPaymentHelp" title="檢測悠遊卡付款問題說明"></lah-button>
-        </b-button-group>
-        <b-button-group class="my-1">
-            <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkSurCase" title="檢測測量問題案件">測量問題案件</lah-button>
-            <lah-button icon="question" variant="success" @click="popupSurCaseHelp" title="檢測測量問題案件說明"></lah-button>
-        </b-button-group>
+        <b-row class="my-1">
+            <b-col>
+                <b-button-group class="w-100">
+                    <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkRegXcase" title="檢測登記案件跨所註記遺失問題">「登記」跨所註記檢測</lah-button>
+                    <lah-button icon="question" variant="success" @click="popupXcaseHelp" title="檢測登記案件跨所註記遺失說明" style="max-width:48px"></lah-button>
+                </b-button-group>
+            </b-col>
+            <b-col>
+                <b-button-group class="w-100">
+                    <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkValXcase" title="檢測地價案件跨所註記遺失問題">「地價」跨所註記檢測</lah-button>
+                    <lah-button icon="question" variant="success" @click="popupXcaseValHelp" title="檢測登記案件跨所註記遺失說明" style="max-width:48px"></lah-button>
+                </b-button-group>
+            <b-col>
+        </b-row>
+        <b-row>
+            <b-col>
+                <b-button-group class="w-100">
+                    <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkEzPayment" title="檢測悠遊卡付款問題">悠遊卡付款問題檢測</lah-button>
+                    <lah-button icon="question" variant="success" @click="popupEzPaymentHelp" title="檢測悠遊卡付款問題說明" style="max-width:48px"></lah-button>
+                </b-button-group>
+            </b-col>
+            <b-col>
+                <b-button-group class="w-100">
+                    <lah-button icon="cog" action="spin" variant="outline-primary" @click="checkSurCase" title="檢測測量問題案件">測量問題案件檢測</lah-button>
+                    <lah-button icon="question" variant="success" @click="popupSurCaseHelp" title="檢測測量問題案件說明" style="max-width:48px"></lah-button>
+                </b-button-group>
+            <b-col>
+        </b-row>
     </b-card>`,
     components: {
         "lah-problem-surcases": {
