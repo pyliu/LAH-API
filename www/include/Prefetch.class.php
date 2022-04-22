@@ -1409,7 +1409,7 @@ class Prefetch {
                         t.aa48,     -- 段代碼
                         x.kname as aa48_cht,    -- 段名稱
                         t.aa49,     -- 地號
-                        v.gg30_2,   -- 其他登記事項內容
+                        --v.gg30_2,   -- 其他登記事項內容
                         r.af08,     -- 土參類別代碼
                         u.kcnt as af08_cht, -- 土參類別內容
                         r.af09,     -- 土參資訊內容
