@@ -145,6 +145,27 @@ class Notification {
         return false;
     }
 
+    public function getMessagesBefore($channel, $before, $limit) {
+        $channelDBPath = $this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db';
+        if (!file_exists($channelDBPath)) {
+            Logger::getInstance()->error(__METHOD__.': DB檔案路徑有誤('.$channelDBPath.')有誤，無法取得訊息。');
+            return false;
+        }
+        if (!is_numeric($limit) || intval($limit) < 1 ) {
+            Logger::getInstance()->warning(__METHOD__.': $limit 變數('.$limit.')有誤，改用預設值 $limit = 10');
+            $limit = 10;
+        }
+        // get messages
+        if ($this->prepareDB($channel)) {
+            $db = new SQLite3(SQLiteDBFactory::getMessageDB($channelDBPath));
+            $stm = $db->prepare("SELECT * FROM message WHERE id < :bv_before ORDER BY id DESC LIMIT :bv_limit");
+            $stm->bindParam(':bv_before', $before);
+            $stm->bindParam(':bv_limit', $limit);
+            return $this->prepareArray($stm);
+        }
+        return false;
+    }
+
     public function getMessageByDuration($channel, $payload) {
         if (is_array($payload)) {
             Logger::getInstance()->warning(__METHOD__.': 查詢的參數應為陣列!');
