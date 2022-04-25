@@ -228,6 +228,7 @@ class OraDB {
             mb_regex_encoding($dest_charset); // 宣告 要進行 regex 的多位元編碼轉換格式 為 $dest_charset
             mb_substitute_character('long'); // 宣告 缺碼字改以U+16進位碼為標記取代
         }
+        // $str = iconv("BIG5", "UTF-8//IGNORE", $str);
         $str = mb_convert_encoding($str, $dest_charset, $src_charset);
         if ($additional_process) {
             $str = preg_replace_callback(
