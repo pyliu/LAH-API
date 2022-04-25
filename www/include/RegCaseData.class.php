@@ -14,13 +14,10 @@ class RegCaseData {
     }
 
     private function handleEUDC($in) {
-        if (empty($in)) {
-            return "";
-        }
-        if (preg_match("/(BAD\+[[:alpha:][:digit:]]{2,3}[[:alpha:][:digit:]]?)|(&#\d+;)/i", $in, $match)) {
+        if (preg_match("/(BAD\+[[:alpha:][:digit:]]{2,3}[[:alpha:][:digit:]]?)|(&#\d+;)/i", $in, $matches)) {
             return '(請至地政系統查看)';
         }
-        return $in;
+        return $in ?? '';
     }
 
     private function getDueTime($begin) {
