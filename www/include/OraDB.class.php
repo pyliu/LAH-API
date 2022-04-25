@@ -115,6 +115,7 @@ class OraDB {
         $convert = array();
         if (!empty($result)) {
             foreach ($result as $key=>$value) {
+                $convert[$key.'_RAW'] = $value;
                 $convert[$key] = empty($value) ? $value : $this->convert($value, "big5", "utf-8");
             }
         }
@@ -129,6 +130,7 @@ class OraDB {
                 if ($raw) {
                     $row[$key] = $value;
                 } else {
+                    $convert[$key.'_RAW'] = $value;
                     $row[$key] = empty($value) ? $value : $this->convert($value, "big5", "utf-8");
                 }
             }

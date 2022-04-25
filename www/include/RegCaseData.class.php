@@ -211,7 +211,7 @@ class RegCaseData {
             "限辦時間" => $this->getDueHrs(),
             "作業人員" => $this->getCurrentOperator(),
             "辦理情形" => $this->getStatus(),
-            "權利人統編" => $this->handleEUDC($row["RM18"]),
+            "權利人統編" => $row["RM18"] ?? '',
             "權利人姓名" => $this->handleEUDC($row["RM19"]),
             "權利人住址" => $this->handleEUDC($row["RM18_ADDR"]),
             "義務人統編" => empty($row["RM21"]) ? "" : $row["RM21"],
