@@ -115,8 +115,10 @@ class OraDB {
         $convert = array();
         if (!empty($result)) {
             foreach ($result as $key=>$value) {
-                $convert[$key.'_RAW'] = $value;
                 $convert[$key] = empty($value) ? $value : $this->convert($value, "big5", "utf-8");
+                if ($convert[$key] !== $value) {
+                    $convert[$key.'_RAW'] = $value;
+                }
             }
         }
         return $convert;
@@ -130,8 +132,10 @@ class OraDB {
                 if ($raw) {
                     $row[$key] = $value;
                 } else {
-                    $convert[$key.'_RAW'] = $value;
                     $row[$key] = empty($value) ? $value : $this->convert($value, "big5", "utf-8");
+                    if ($row[$key] !== $value) {
+                        $row[$key.'_RAW'] = $value;
+                    }
                 }
             }
             $results[] = $row;
@@ -219,20 +223,24 @@ class OraDB {
         }
     }
 
-    private function convert($str, $src_charset, $dest_charset) {
-        mb_regex_encoding($dest_charset); // 宣告 要進行 regex 的多位元編碼轉換格式 為 $dest_charset
-        mb_substitute_character('long'); // 宣告 缺碼字改以U+16進位碼為標記取代
+    private function convert($str, $src_charset, $dest_charset, $additional_process = true) {
+        if ($additional_process) {
+            mb_regex_encoding($dest_charset); // 宣告 要進行 regex 的多位元編碼轉換格式 為 $dest_charset
+            mb_substitute_character('long'); // 宣告 缺碼字改以U+16進位碼為標記取代
+        }
         $str = mb_convert_encoding($str, $dest_charset, $src_charset);
-        $str = preg_replace_callback(
-            "/U\+([0-9A-F]{4})/",
-            function($matches) {
-                foreach($matches as $match){
-                    // find first one and return
-                    return "&#".intval($match, 16).";";
-                }
-            }, 
-            $str
-        );
+        if ($additional_process) {
+            $str = preg_replace_callback(
+                "/U\+([0-9A-F]{4})/",
+                function($matches) {
+                    foreach($matches as $match){
+                        // find first one and return
+                        return "&#".intval($match, 16).";";
+                    }
+                }, 
+                $str
+            );
+        }
         return $str;
     }
 }
