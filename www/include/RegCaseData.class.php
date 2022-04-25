@@ -6,15 +6,21 @@ require_once("Cache.class.php");
 class RegCaseData {
     static private $operators;
     static private $RM31_CASE_CLOSE_STATE = array('A', 'B', 'C', 'D');
-    static private $rare_word_regex = "/(BAD\+[[:alpha:][:digit:]]{2,3}[[:alpha:][:digit:]]?)|(&#\d+;)/i";
 
     private $row;
 
     private function getIDorName($id) {
-        if (preg_match(self::$rare_word_regex, RegCaseData::$operators[$id])) {
-            return $id."(有罕字請參閱地政系統)";
+        return $this->handleEUDC(RegCaseData::$operators[$id] ?? $id);
+    }
+
+    private function handleEUDC($in) {
+        if (empty($in)) {
+            return "";
         }
-        return preg_replace(self::$rare_word_regex, "○", RegCaseData::$operators[$id] ?? $id);
+        if (preg_match("/(BAD\+[[:alpha:][:digit:]]{2,3}[[:alpha:][:digit:]]?)|(&#\d+;)/i", $in, $match)) {
+            return '(請至地政系統查看)';
+        }
+        return $in;
     }
 
     private function getDueTime($begin) {
@@ -208,17 +214,17 @@ class RegCaseData {
             "限辦時間" => $this->getDueHrs(),
             "作業人員" => $this->getCurrentOperator(),
             "辦理情形" => $this->getStatus(),
-            "權利人統編" => empty($row["RM18"]) ? "" : $row["RM18"],
-            "權利人姓名" => empty($row["RM19"]) ? "" : (preg_match(self::$rare_word_regex, $row["RM19"]) ? '(包含罕字請參閱地政系統)' : preg_replace(self::$rare_word_regex, "○", $row["RM19"])),
-            "權利人住址" => empty($row["RM18_ADDR"]) ? "" : (preg_match(self::$rare_word_regex, $row["RM18_ADDR"]) ? '(包含罕字請參閱地政系統)' : preg_replace(self::$rare_word_regex, "○", $row["RM18_ADDR"])),
+            "權利人統編" => $this->handleEUDC($row["RM18"]),
+            "權利人姓名" => $this->handleEUDC($row["RM19"]),
+            "權利人住址" => $this->handleEUDC($row["RM18_ADDR"]),
             "義務人統編" => empty($row["RM21"]) ? "" : $row["RM21"],
-            "義務人姓名" => empty($row["RM22"]) ? "" : (preg_match(self::$rare_word_regex, $row["RM22"]) ? '(包含罕字請參閱地政系統)' : preg_replace(self::$rare_word_regex, "○", $row["RM22"])),
-            "義務人住址" => empty($row["RM21_ADDR"]) ? "" : (preg_match(self::$rare_word_regex, $row["RM21_ADDR"]) ? '(包含罕字請參閱地政系統)' : preg_replace(self::$rare_word_regex, "○", $row["RM21_ADDR"])),
+            "義務人姓名" => $this->handleEUDC($row["RM22"]),
+            "義務人住址" => $this->handleEUDC($row["RM21_ADDR"]),
             "義務人人數" => empty($row["RM23"]) ? "" : $row["RM23"],
             "手機號碼" => empty($row["RM102"]) ? "" : $row["RM102"],
             "代理人統編" => empty($row["RM24"]) ? "" : $row["RM24"],
-            "代理人姓名" => empty($row["AB02"]) ? "" : (preg_match(self::$rare_word_regex, $row["AB02"]) ? '(包含罕字請參閱地政系統)' : preg_replace(self::$rare_word_regex, "○", $row["AB02"])),
-            "代理人住址" => empty($row["AB03"]) ? "" : (preg_match(self::$rare_word_regex, $row["AB03"]) ? '(包含罕字請參閱地政系統)' : preg_replace(self::$rare_word_regex, "○", $row["AB03"])),
+            "代理人姓名" => $this->handleEUDC($row["AB02"]),
+            "代理人住址" => $this->handleEUDC($row["AB03"]),
             "代理人電話" => empty($row["AB04_1"]) ? "" : $row["AB04_1"].$row["AB04_2"],
             "非專代電話" => $row["AB04_NON_SCRIVENER_TEL"] ?? "",
             "區代碼" =>  $row["RM10"],
