@@ -38,6 +38,50 @@ class OraDB {
     private $db_encoding = 'BIG5';
     private $web_encoding = 'UTF-8';
 
+    private function initSetting() {
+        $system = System::getInstance();
+        $this->L1HWEB_DB = $system->getOraL1hwebDBConnStr();
+        $this->L1HWEB_Alt_DB = $system->getOraL3hwebL1DBConnStr();
+        $this->L2HWEB_DB = $system->getOraL2hwebDBConnStr();
+        $this->L3HWEB_DB = $system->getOraL3hwebDBConnStr();
+        $this->TWEB_DB = $system->getOraTestDBConnStr();
+        $this->MAIN_DB = $system->getOraMainDBConnStr();
+        $this->BK_DB = $system->getOraBackupDBConnStr();
+        $this->user = $system->get("ORA_DB_USER");
+        $this->pass = $system->get("ORA_DB_PASS");
+    }
+
+    private function getConnString() {
+        switch($this->CONN_TYPE) {
+            case CONNECTION_TYPE::L1HWEB:
+                return $this->L1HWEB_DB;
+            case CONNECTION_TYPE::L1HWEB_Alt:
+                return $this->L1HWEB_Alt_DB;
+            case CONNECTION_TYPE::L2HWEB:
+                return $this->L2HWEB_DB;
+            case CONNECTION_TYPE::L3HWEB:
+                return $this->L3HWEB_DB;
+            case CONNECTION_TYPE::TWEB:
+                return $this->TWEB_DB;
+            case CONNECTION_TYPE::BK:
+                return $this->BK_DB;
+            default:
+                return $this->MAIN_DB;
+        }
+    }
+
+    function __construct($type = CONNECTION_TYPE::MAIN) {
+        if ($type === CONNECTION_TYPE::MAIN) {
+            $type = self::getPointDBTarget();
+        }
+        $this->initSetting();
+        $this->setConnType($type);
+    }
+
+    function __destruct() {
+        $this->close();
+    }
+
     public static function getPointDBTarget() {
         $type = CONNECTION_TYPE::MAIN;
         // get config from system
@@ -173,51 +217,5 @@ class OraDB {
         }
         // clear DB connection
         $this->close();
-    }
-
-    function __construct($type = CONNECTION_TYPE::MAIN) {
-        if ($type === CONNECTION_TYPE::MAIN) {
-            $type = self::getPointDBTarget();
-        }
-        $this->initSetting();
-        $this->setConnType($type);
-    }
-
-    function __destruct() {
-        $this->close();
-    }
-
-    private function initSetting() {
-        $system = System::getInstance();
-        $this->L1HWEB_DB = $system->getOraL1hwebDBConnStr();
-        $this->L1HWEB_Alt_DB = $system->getOraL3hwebL1DBConnStr();
-        $this->L2HWEB_DB = $system->getOraL2hwebDBConnStr();
-        $this->L3HWEB_DB = $system->getOraL3hwebDBConnStr();
-        $this->TWEB_DB = $system->getOraTestDBConnStr();
-        $this->MAIN_DB = $system->getOraMainDBConnStr();
-        $this->BK_DB = $system->getOraBackupDBConnStr();
-        $this->user = $system->get("ORA_DB_USER");
-        $this->pass = $system->get("ORA_DB_PASS");
-        mb_regex_encoding($this->web_encoding);
-        mb_substitute_character(0xFFFD); // 設定缺碼字改以 U+FFFD (a.k.a. "�") 取代
-    }
-
-    private function getConnString() {
-        switch($this->CONN_TYPE) {
-            case CONNECTION_TYPE::L1HWEB:
-                return $this->L1HWEB_DB;
-            case CONNECTION_TYPE::L1HWEB_Alt:
-                return $this->L1HWEB_Alt_DB;
-            case CONNECTION_TYPE::L2HWEB:
-                return $this->L2HWEB_DB;
-            case CONNECTION_TYPE::L3HWEB:
-                return $this->L3HWEB_DB;
-            case CONNECTION_TYPE::TWEB:
-                return $this->TWEB_DB;
-            case CONNECTION_TYPE::BK:
-                return $this->BK_DB;
-            default:
-                return $this->MAIN_DB;
-        }
     }
 }
