@@ -152,7 +152,7 @@ if (Vue) {
                         });
                     },
                     flags: function() {
-                        this.flag_on_announcements = this.announcement_data.filter(item => {
+                        this.flag_on_announcements = this.announcement_data?.filter(item => {
                             /*
                                 RA01: "02"
                                 KCNT: "第一次登記"
