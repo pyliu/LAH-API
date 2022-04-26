@@ -14,7 +14,11 @@ class RegCaseData {
     }
 
     private function handleEUDC($in) {
-        if (preg_match("/(BAD\+[[:alpha:][:digit:]]{2,3}[[:alpha:][:digit:]]?)|(&#\d+;)/i", $in, $matches)) {
+        // if (preg_match("/(BAD\+[[:alpha:][:digit:]]{2,3}[[:alpha:][:digit:]]?)|(&#\d+;)/i", $in, $matches)) {
+        if (preg_match("/(�)|(&#\d+;)/i", $in, $matches)) {
+            // $trim0x8c = preg_replace("/BAD\+[[:alpha:][:digit:]]{2,3}[[:alpha:][:digit:]]?/i", '○', $in);
+            // return $trim0x8c;
+            // return mb_convert_encoding($in, "BIG5", "UTF-8");
             return '(有罕用字請至地政系統查看)';
         }
         return $in ?? '';
