@@ -117,7 +117,7 @@ class OraDB {
         $convert = array();
         if (!empty($result)) {
             foreach ($result as $key=>$value) {
-                $convert[$key] = empty($value) ? $value : $this->convert($value);
+                $convert[$key] = empty($value) ? $value : UConverter::transcode($value, $this->web_encoding, $this->db_encoding);
             }
         }
         return $convert;
@@ -131,7 +131,7 @@ class OraDB {
                 if ($raw) {
                     $row[$key] = $value;
                 } else {
-                    $row[$key] = empty($value) ? $value : $this->convert($value);
+                    $row[$key] = empty($value) ? $value : UConverter::transcode($value, $this->web_encoding, $this->db_encoding);
                 }
             }
             $results[] = $row;
@@ -219,137 +219,5 @@ class OraDB {
             default:
                 return $this->MAIN_DB;
         }
-    }
-
-    private function convert($str) {
-        if (!mb_check_encoding($str, $this->web_encoding)) {
-            $converted = UConverter::transcode($str, $this->web_encoding, $this->db_encoding);
-            // if ($str !== $converted) {
-            //     Logger::getInstance()->info('ORIG: '.$str);
-            //     Logger::getInstance()->info('CONV: '.$converted);
-            // }
-            return $converted;
-        }
-        return $str;
-    }
-
-    private function replace_invalid_byte_sequence($str) {
-        return mb_convert_encoding($str, $this->db_encoding, $this->db_encoding);
-    }
-
-    private function replace_invalid_byte_sequence2($str) {
-        return htmlspecialchars_decode(htmlspecialchars($str, ENT_SUBSTITUTE, $this->db_encoding));
-    }
-    // UConverter offers both procedual and object-oriented API.
-    private function replace_invalid_byte_sequence3($str) {
-        return UConverter::transcode($str, $this->db_encoding, $this->db_encoding, array("to_subst" => "�"));
-    }
-
-    private function replace_invalid_byte_sequence4($str) {
-        return (new UConverter($this->db_encoding, $this->db_encoding))->convert($str);
-    }
-
-    private function replace_invalid_byte_sequence6($str) {
-
-        $size = strlen($str);
-        $substitute = "\xEF\xBF\xBD";
-        $ret = '';
-    
-        $pos = 0;
-        $char;
-        $char_size;
-        $valid;
-    
-        while ($this->utf8_get_next_char($str, $size, $pos, $char, $char_size, $valid)) {
-            $ret .= $valid ? $char : $substitute;
-        }
-    
-        return $ret;
-    }
-    
-    private function utf8_get_next_char($str, $str_size, &$pos, &$char, &$char_size, &$valid)
-    {
-        $valid = false;
-    
-        if ($str_size <= $pos) {
-            return false;
-        }
-    
-        if ($str[$pos] < "\x80") {
-    
-            $valid = true;
-            $char_size =  1;
-    
-        } else if ($str[$pos] < "\xC2") {
-    
-            $char_size = 1;
-    
-        } else if ($str[$pos] < "\xE0")  {
-    
-            if (!isset($str[$pos+1]) || $str[$pos+1] < "\x80" || "\xBF" < $str[$pos+1]) {
-    
-                $char_size = 1;
-    
-            } else {
-    
-                $valid = true;
-                $char_size = 2;
-    
-            }
-    
-        } else if ($str[$pos] < "\xF0") {
-    
-            $left = "\xE0" === $str[$pos] ? "\xA0" : "\x80";
-            $right = "\xED" === $str[$pos] ? "\x9F" : "\xBF";
-    
-            if (!isset($str[$pos+1]) || $str[$pos+1] < $left || $right < $str[$pos+1]) {
-    
-                $char_size = 1;
-    
-            } else if (!isset($str[$pos+2]) || $str[$pos+2] < "\x80" || "\xBF" < $str[$pos+2]) {
-    
-                $char_size = 2;
-    
-            } else {
-    
-                $valid = true;
-                $char_size = 3;
-    
-           }
-    
-        } else if ($str[$pos] < "\xF5") {
-    
-            $left = "\xF0" === $str[$pos] ? "\x90" : "\x80";
-            $right = "\xF4" === $str[$pos] ? "\x8F" : "\xBF";
-    
-            if (!isset($str[$pos+1]) || $str[$pos+1] < $left || $right < $str[$pos+1]) {
-    
-                $char_size = 1;
-    
-            } else if (!isset($str[$pos+2]) || $str[$pos+2] < "\x80" || "\xBF" < $str[$pos+2]) {
-    
-                $char_size = 2;
-    
-            } else if (!isset($str[$pos+3]) || $str[$pos+3] < "\x80" || "\xBF" < $str[$pos+3]) {
-    
-                $char_size = 3;
-    
-            } else {
-    
-                $valid = true;
-                $char_size = 4;
-    
-            }
-    
-        } else {
-    
-            $char_size = 1;
-    
-        }
-    
-        $char = substr($str, $pos, $char_size);
-        $pos += $char_size;
-    
-        return true;
     }
 }
