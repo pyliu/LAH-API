@@ -135,7 +135,7 @@ class WatchDog {
         }
         // particular impl for HB messenger system
         if (System::getInstance()->isHB()) {
-            $this->addHBMessage($title, $message, $to_id, $users[$to_id]);
+            $this->addHBMessage($title, str_replace("\\\\", "\\", $message), $to_id, $users[$to_id]);
         }
         return $lastId;
     }
