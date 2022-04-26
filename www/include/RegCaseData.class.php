@@ -10,21 +10,9 @@ class RegCaseData {
     private $row;
 
     private function getIDorName($id) {
-        return $this->handleEUDC(RegCaseData::$operators[$id] ?? $id);
+        return RegCaseData::$operators[$id] ?? $id;
     }
-
-    private function handleEUDC($in) {
-        // if (preg_match("/(BAD\+[[:alpha:][:digit:]]{2,3}[[:alpha:][:digit:]]?)|(&#\d+;)/i", $in, $matches)) {
-        if (preg_match("/(�)|(&#\d+;)/i", $in, $matches)) {
-            // $trim0x8c = preg_replace("/BAD\+[[:alpha:][:digit:]]{2,3}[[:alpha:][:digit:]]?/i", '○', $in);
-            // return $trim0x8c;
-            // return mb_convert_encoding($in, "BIG5", "UTF-8");
-            // Logger::getInstance()->warning(print_r($matches, true));
-            return '(有罕用字請至地政系統查看)';
-        }
-        return $in ?? '';
-    }
-
+    
     private function getDueTime($begin) {
         /*
         // RM27 - 案件辦理期限 (8 hrs a day)
@@ -58,21 +46,8 @@ class RegCaseData {
     private function convertCharset() {
         $convert = array();
         foreach ($this->row as $key=>$value) {
-            if (!empty($value)) {
-                $conv_str = iconv("big5", "utf-8", $value);
-                if (empty($conv_str)) {
-                    // has rare word inside
-                    mb_regex_encoding("utf-8"); // 宣告 要進行 regex 的多位元編碼轉換格式
-                    mb_substitute_character('long'); // 宣告 缺碼字改以U+16進位碼為標記取代
-                    $conv_str = mb_convert_encoding($value, "utf-8", "big5");
-                    //$conv_str = preg_replace('/U\+([0-9A-F]{4})/e', '"&#".intval("\\1",16).";"', $conv_str); // 將U+16進位碼標記轉換為UnicodeHTML碼
-                    $conv_str = preg_replace('/U\+([0-9A-F]{4})/e', '？', $conv_str); // 將U+16進位碼標記轉換為？
-                }
-                $convert[$key] = $conv_str;
-            } else {
-                $convert[$key] = "";
-            }
-            //$convert[$key] = empty($value) ? $value : mb_convert_encoding($value, "utf-8", "big5");
+            $conv_str = UConverter::transcode($value, $this->web_encoding, $this->db_encoding);
+            $convert[$key] = $conv_str;
         }
         return $convert;
     }
@@ -218,16 +193,16 @@ class RegCaseData {
             "作業人員" => $this->getCurrentOperator(),
             "辦理情形" => $this->getStatus(),
             "權利人統編" => empty($row["RM18"]) ? '' : $row["RM18"],
-            "權利人姓名" => $this->handleEUDC($row["RM19"]),
-            "權利人住址" => $this->handleEUDC($row["RM18_ADDR"]),
+            "權利人姓名" => $row["RM19"],
+            "權利人住址" => $row["RM18_ADDR"],
             "義務人統編" => empty($row["RM21"]) ? "" : $row["RM21"],
-            "義務人姓名" => $this->handleEUDC($row["RM22"]),
-            "義務人住址" => $this->handleEUDC($row["RM21_ADDR"]),
+            "義務人姓名" => $row["RM22"],
+            "義務人住址" => $row["RM21_ADDR"],
             "義務人人數" => empty($row["RM23"]) ? "" : $row["RM23"],
             "手機號碼" => empty($row["RM102"]) ? "" : $row["RM102"],
             "代理人統編" => empty($row["RM24"]) ? "" : $row["RM24"],
-            "代理人姓名" => $this->handleEUDC($row["AB02"]),
-            "代理人住址" => $this->handleEUDC($row["AB03"]),
+            "代理人姓名" => $row["AB02"],
+            "代理人住址" => $row["AB03"],
             "代理人電話" => empty($row["AB04_1"]) ? "" : $row["AB04_1"].$row["AB04_2"],
             "非專代電話" => $row["AB04_NON_SCRIVENER_TEL"] ?? "",
             "區代碼" =>  $row["RM10"],

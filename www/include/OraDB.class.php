@@ -223,27 +223,10 @@ class OraDB {
 
     private function convert($str) {
         if (!mb_check_encoding($str, $this->web_encoding)) {
-            $converted = mb_convert_encoding($str, $this->web_encoding, $this->db_encoding);
-            if ($str !== $converted) {
-                Logger::getInstance()->info('ORIG: '.$str);
-                Logger::getInstance()->info('CONV: '.$converted);
-            }
-            // if (preg_match("/[\x{FFFD}]/u", $converted, $matches)) {
-            //     // detect invalid converted code, return original text
-            //     return $str;
-            // }
-            // $converted = $this->replace_invalid_byte_sequence6($converted);
-            // if ($additional_process) {
-            //     $converted = preg_replace_callback(
-            //         "/U\+([0-9A-F]{4})/i",
-            //         function($matches) {
-            //             foreach($matches as $match){
-            //                 // find first one and return
-            //                 return "&#".intval($match, 16).";";
-            //             }
-            //         }, 
-            //         $converted
-            //     );
+            $converted = UConverter::transcode($str, $this->web_encoding, $this->db_encoding);
+            // if ($str !== $converted) {
+            //     Logger::getInstance()->info('ORIG: '.$str);
+            //     Logger::getInstance()->info('CONV: '.$converted);
             // }
             return $converted;
         }
