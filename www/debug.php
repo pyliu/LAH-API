@@ -10,8 +10,9 @@ try {
     echo false <= time();
     // $sd = new Scheduler();
     // $sd->do();
-    $site = "HH";
-    echo substr($site, 1);
+    echo '<br/>';
+    echo  mb_check_encoding();
+    
 }
 catch(Exception $e)
 {

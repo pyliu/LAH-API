@@ -19,6 +19,7 @@ class RegCaseData {
             // $trim0x8c = preg_replace("/BAD\+[[:alpha:][:digit:]]{2,3}[[:alpha:][:digit:]]?/i", '○', $in);
             // return $trim0x8c;
             // return mb_convert_encoding($in, "BIG5", "UTF-8");
+            // Logger::getInstance()->warning(print_r($matches, true));
             return '(有罕用字請至地政系統查看)';
         }
         return $in ?? '';
