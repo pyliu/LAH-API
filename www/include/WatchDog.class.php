@@ -95,7 +95,7 @@ class WatchDog {
 
     private function addHBMessage($title, $content, $to_id, $to_name, $timeout = 85500) {
         // filtering for the HB messenger
-        $content = str_replace('<br/>', '\r\n', $content);
+        $content = str_replace('<br/>', "\r\n", $content);
         $content = strip_tags($content);
         $msg = new Message();
         // 85500 = 86400 - 15 * 60 (one day - 15 mins)
@@ -135,7 +135,7 @@ class WatchDog {
         }
         // particular impl for HB messenger system
         if (System::getInstance()->isHB()) {
-            $this->addHBMessage($title, str_replace("\\\\", "\\", $message), $to_id, $users[$to_id]);
+            $this->addHBMessage($title, $message, $to_id, $users[$to_id]);
         }
         return $lastId;
     }
@@ -159,7 +159,7 @@ class WatchDog {
                 $sqlite_user = new SQLiteUser();
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
-                    $lastId = $this->addNotification($content, $admin['id']);
+                    $lastId = $this->addNotification($content, $admin['id'], "登記案件跨所註記遺失檢查結果");
                     echo '新增「登記案件跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')';
                 }
                 
@@ -194,7 +194,7 @@ class WatchDog {
                 $sqlite_user = new SQLiteUser();
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
-                    $lastId = $this->addNotification($content, $admin['id']);
+                    $lastId = $this->addNotification($content, $admin['id'], "地價案件跨所註記遺失檢查結果");
                     Logger::getInstance()->info('新增「地價案件跨所註記遺失」通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
                 }
                 
@@ -233,7 +233,7 @@ class WatchDog {
                     $sqlite_user = new SQLiteUser();
                     $admins = $sqlite_user->getAdmins();
                     foreach ($admins as $admin) {
-                        $lastId = $this->addNotification($content, $admin['id']);
+                        $lastId = $this->addNotification($content, $admin['id'], "${site} 管轄地價案件跨所註記遺失檢查結果");
                         Logger::getInstance()->info('新增「跨所地價案件」跨所註記遺失通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
                     }
                     
@@ -313,15 +313,14 @@ class WatchDog {
                 Logger::getInstance()->warning('找不到登記課課長帳號，無法傳送即時通知給他/她!!');
             } else {
                 $this_user = $users[$chief['id']];
-                // $lastId = $notify->addMessage($chief['id'], $payload);
-                $lastId = $this->addNotification($content, $chief['id']);
+                $lastId = $this->addNotification($content, $chief['id'], "登記課逾期案件彙總");
                 Logger::getInstance()->info('新增逾期案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
             }
             // send to dev for debugging
             // $lastId = $notify->addMessage('HA10013859', $payload);
             // Logger::getInstance()->info('新增逾期案件通知訊息至 HA10013859 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
         } else {
-            $lastId = $this->addNotification($content, $to_id);
+            $lastId = $this->addNotification($content, $to_id, "您的登記逾期案件統計");
         }
     }
 
@@ -381,15 +380,14 @@ class WatchDog {
                 Logger::getInstance()->warning('找不到測量課課長帳號，無法傳送即時通知給他/她!!');
             } else {
                 $this_user = $users[$chief['id']];
-                // $lastId = $notify->addMessage($chief['id'], $payload);
-                $lastId = $this->addNotification($content, $chief['id']);
+                $lastId = $this->addNotification($content, $chief['id'], "測量課即將逾期案件彙總");
                 Logger::getInstance()->info('新增即將逾期測量案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
             }
             // send to dev for debugging
             // $lastId = $notify->addMessage('HA10013859', $payload);
             // Logger::getInstance()->info('新增逾期案件通知訊息至 HA10013859 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
         } else {
-            $lastId = $this->addNotification($content, $to_id);
+            $lastId = $this->addNotification($content, $to_id, "您的即將逾期案件統計");
         }
     }
 
@@ -450,14 +448,14 @@ class WatchDog {
             } else {
                 $this_user = $users[$chief['id']];
                 // $lastId = $notify->addMessage($chief['id'], $payload);
-                $lastId = $this->addNotification($content, $chief['id']);
+                $lastId = $this->addNotification($content, $chief['id'], "測量課已逾期測量案件彙總");
                 Logger::getInstance()->info('新增逾期測量案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
             }
             // send to dev for debugging
             // $lastId = $notify->addMessage('HA10013859', $payload);
             // Logger::getInstance()->info('新增逾期案件通知訊息至 HA10013859 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
         } else {
-            $lastId = $this->addNotification($content, $to_id);
+            $lastId = $this->addNotification($content, $to_id, "您的已逾期測量案件統計");
         }
     }
 
