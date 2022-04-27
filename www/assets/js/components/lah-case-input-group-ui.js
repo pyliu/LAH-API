@@ -112,6 +112,10 @@ if (Vue) {
                         }
                         this.setLocalCache('case_input_years', this.years, 24 * 60 * 60 * 1000);  // cache for a day
                     }
+                }).finally(() => {
+                    if (this.empty(this.years)) {
+                        setTimeout(() => { this.reloadYear(); }, 1000);
+                    }
                 });
             },
             reloadCode() {
@@ -120,6 +124,10 @@ if (Vue) {
                         this.getDBCodeData();
                     } else {
                         this.restoreCodeData(items);
+                    }
+                }).finally(() => {
+                    if (this.empty(this.codes)) {
+                        setTimeout(() => { this.reloadCode(); }, 1000);
                     }
                 });
             },
@@ -307,6 +315,8 @@ if (Vue) {
             // set year select options
             var d = new Date();
             this.year = (d.getFullYear() - 1911);
+        },
+        mounted() {
             this.reloadYear();
             this.reloadCode();
         }
