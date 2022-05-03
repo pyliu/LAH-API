@@ -11,8 +11,8 @@ class SQLiteDBFactory {
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "mail" (
                 "id"	INTEGER NOT NULL,
-                "from"	TEXT NOT NULL,
-                "to"	TEXT NOT NULL,
+                "sender"	TEXT NOT NULL,
+                "receiver"	TEXT NOT NULL,
                 "subject"	TEXT NOT NULL,
                 "message"	TEXT,
                 "mailbox"	TEXT NOT NULL DEFAULT \'INBOX\',

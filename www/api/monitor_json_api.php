@@ -48,6 +48,22 @@ switch ($_POST["type"]) {
 			));
         }
         break;
+    case "sender":
+        $keyword = $_POST["keyword"];
+        // 搜尋 via subject
+        Logger::getInstance()->info("XHR [sender] 查詢監控郵件 BY sender: ${keyword}  請求");
+        $days_before = $_POST["days"] ?? 1;
+        $mails = $sqlite_monitor_mail->getMailsBySender($keyword, $days_before * 24 * 60 * 60);
+        if (empty($mails)) {
+            echoJSONResponse("sender: ${keyword} 沒有找到郵件");
+        } else {
+            $count = count($mails);
+            echoJSONResponse("查詢到 $count 封郵件", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				'data_count' => $count,
+				'raw' => $mails
+			));
+        }
+        break;
     case "monitor_targets":
         $active = $_POST["all"] !== "true";
         Logger::getInstance()->info("XHR [monitor_targets] 查詢監控系統標的請求 (active = $active)");
