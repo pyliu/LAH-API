@@ -20,6 +20,16 @@ class IPResolver {
         $stm->bindParam(':entry_id' , $row['entry_id']);
         $stm->bindParam(':timestamp', $row['timestamp']);
         $stm->bindParam(':note', $row['note']);
+        // for update
+        if (!empty($row['orig_ip'])) {
+            $stm->bindParam(':orig_ip', $row['orig_ip']);
+        }
+        if (!empty($row['orig_added_type'])) {
+            $stm->bindParam(':orig_added_type', $row['orig_added_type']);
+        }
+        if (!empty($row['orig_entry_type'])) {
+            $stm->bindParam(':orig_entry_type', $row['orig_entry_type']);
+        }
 
         return true;
     }
@@ -54,6 +64,18 @@ class IPResolver {
             return $stm->execute() === FALSE ? false : true;
         }
         return false;
+    }
+
+    public function editIpEntry($post) {
+        $result = $this->removeIpEntry(array(
+            'ip' => $post['orig_ip'],
+            'added_type' => $post['orig_added_type'],
+            'entry_type' => $post['orig_entry_type']
+        ));
+        if ($result) {
+            $result = $this->addIpEntry($post);
+        }
+        return $result;
     }
 
     public function removeIpEntry($post) {
