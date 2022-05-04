@@ -73,9 +73,9 @@ class IPResolver {
             'entry_type' => $post['orig_entry_type']
         ));
         if ($result) {
-            $result = $this->addIpEntry($post);
+            return $this->addIpEntry($post);
         }
-        return $result;
+        return false;
     }
 
     public function removeIpEntry($post) {
