@@ -112,28 +112,6 @@ class SQLiteConnectivity {
             return $this->replaceTarget($data);
         }
         return false;
-        // $sql = "UPDATE target SET ip = :bv_ip, port = :bv_port, name = :bv_name, monitor = :bv_monitor, note = :bv_note WHERE ip = :bv_edit_ip AND port = :bv_edit_port";
-        // $stm = $this->db->prepare($sql);
-        // if ($stm === false) {
-        //     Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ $sql ] 失敗。");
-        // } else {
-        //     $stm->bindParam(":bv_ip", $data["ip"]);
-        //     $stm->bindParam(":bv_port", $data["port"]);
-        //     $stm->bindParam(":bv_name", $data["name"]);
-        //     $stm->bindParam(":bv_monitor", $data["monitor"]);
-        //     $stm->bindParam(":bv_note", $data["note"]);
-        //     $stm->bindParam(":bv_edit_ip", $edit_ip);
-        //     $stm->bindParam(":bv_edit_port", $edit_port);
-        //     $result = $stm->execute() === FALSE ? false : true;
-        //     if ($result) {
-        //         Logger::getInstance()->info(__METHOD__.": 更新監控標的成功。(".implode(', ', $data).")");
-        //     } else {
-        //         Logger::getInstance()->warning(__METHOD__.": 更新監控標的失敗。");
-        //         Logger::getInstance()->warning(print_r($data, true));
-        //     }
-        //     return $result;
-        // }
-        // return false;
     }
 
     public function getTargets($active = true) {
