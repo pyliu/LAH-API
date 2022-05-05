@@ -33,7 +33,7 @@ class SQLiteMonitorMail {
 
     private function replace(&$row) {
         $stm = $this->db->prepare("
-            REPLACE INTO mail ('id', 'from', 'to', 'subject', 'message', 'timestamp', 'mailbox')
+            REPLACE INTO mail ('id', 'sender', 'receiver', 'subject', 'message', 'timestamp', 'mailbox')
             VALUES (:id, :from, :to, :subject, :message, :timestamp, :mailbox)
         ");
         $this->bindParams($stm, $row);
