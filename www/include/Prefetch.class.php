@@ -910,7 +910,7 @@ class Prefetch {
                          ) t
                         LEFT JOIN MOICAD.REGF s ON t.RM01 = s.RF03 AND t.RM02 = s.RF04_1 AND t.RM03 = s.RF04_2
                         LEFT JOIN MOICAD.RLNID p ON t.RM18 = p.LIDN OR t.RM21 = p.LIDN
-                        LEFT JOIN MOICAD.RKEYN k ON k.KCDE_1 = '06' AND k.KCDE_2 = t.RM09
+                        LEFT JOIN MOIADM.RKEYN k ON k.KCDE_1 = '06' AND k.KCDE_2 = t.RM09
                     WHERE p.LCDE in ('2', '8', 'C', 'D')
                 ");
                 
