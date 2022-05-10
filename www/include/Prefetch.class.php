@@ -1492,7 +1492,7 @@ class Prefetch {
                     left join MOIADM.RKEYN_ALL v on (v.KCDE_1 = '48' AND v.KCDE_2 = 'H' AND v.KCDE_3 = S.RM10 AND S.RM11 = v.KCDE_4)
                     where 1 = 1
                         and S.rm30 in ('I', 'X') -- 補正、補正初核
-                        and (S.rm99 IS NULL or (S.rm99 = 'Y' and S.rm101 = '${site_code}'))  -- 本所案件
+                        -- and (S.rm99 IS NULL or (S.rm99 = 'Y' and S.rm101 = '${site_code}'))
                     order by S.RM50, Au.USER_NAME
                 ");
                 
