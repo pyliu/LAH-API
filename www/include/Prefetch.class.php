@@ -629,32 +629,33 @@ class Prefetch {
     /**
      * 非專業代理人區間登記案件快取剩餘時間
      */
-    public function getNonScrivenerRegCaseCacheRemainingTime($st, $ed, $not_inc_ids = array()) {
-        return $this->getRemainingCacheTimeByKey(self::KEYS['NON_SCRIVENER_REG'].md5($st.$ed.implode('', $not_inc_ids)));
+    public function getNonScrivenerRegCaseCacheRemainingTime($st, $ed, $no_land_office = 'true') {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['NON_SCRIVENER_REG'].md5($st.$ed.$no_land_office));
     }
     /**
      * 強制重新讀取非專業代理人區間登記案件
      */
-    public function reloadNonScrivenerRegCase($st, $ed, $not_inc_ids = array()) {
-        $this->getCache()->del(self::KEYS['NON_SCRIVENER_REG'].md5($st.$ed.implode('', $not_inc_ids)));
-        return $this->getNonScrivenerRegCase($st, $ed, $not_inc_ids);
+    public function reloadNonScrivenerRegCase($st, $ed, $no_land_office = 'true') {
+        $this->getCache()->del(self::KEYS['NON_SCRIVENER_REG'].md5($st.$ed.$no_land_office));
+        return $this->getNonScrivenerRegCase($st, $ed, $no_land_office);
     }
     /**
 	 * 取得非專業代理人區間登記案件
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
-	public function getNonScrivenerRegCase($st, $ed, $not_inc_ids = array(), $expire_duration = 86400) {
-        $md5_hash = md5($st.$ed.implode('', $not_inc_ids));
+	public function getNonScrivenerRegCase($st, $ed, $no_land_office = 'true', $expire_duration = 86400) {
+        $md5_hash = md5($st.$ed.$no_land_office);
         $cache_key = self::KEYS['NON_SCRIVENER_REG'].$md5_hash;
         if ($this->getCache()->isExpired($cache_key)) {
             Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['NON_SCRIVENER_REG'])) {
                 $db = $this->getOraDB();
                 $IN_CONDITION = "";
-                if (!empty($not_inc_ids)) {
-                    $IN_CONDITION = "AND AB01 NOT IN ('";
-                    $IN_CONDITION .= implode("','", $not_inc_ids);
-                    $IN_CONDITION .= "')";
+                if ($no_land_office === 'true') {
+                    // $IN_CONDITION = "AND AB01 NOT IN ('";
+                    // $IN_CONDITION .= implode("','", $no_land_office);
+                    // $IN_CONDITION .= "')";
+                    $IN_CONDITION = "AND AB02 NOT LIKE '%".mb_convert_encoding('地政事務所', 'BIG5', 'UTF-8')."'";
                 }
                 $db->parse("
                     -- 登記案件
@@ -722,32 +723,33 @@ class Prefetch {
     /**
      * 非專業代理人區間測量案件快取剩餘時間
      */
-    public function getNonScrivenerSurCaseCacheRemainingTime($st, $ed, $not_inc_ids = array()) {
-        return $this->getRemainingCacheTimeByKey(self::KEYS['NON_SCRIVENER_SUR'].md5($st.$ed.implode('', $not_inc_ids)));
+    public function getNonScrivenerSurCaseCacheRemainingTime($st, $ed, $no_land_office = 'true') {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['NON_SCRIVENER_SUR'].md5($st.$ed.$no_land_office));
     }
     /**
      * 強制重新讀取非專業代理人區間測量案件
      */
-    public function reloadNonScrivenerSurCase($st, $ed, $not_inc_ids = array()) {
-        $this->getCache()->del(self::KEYS['NON_SCRIVENER_SUR'].md5($st.$ed.implode('', $not_inc_ids)));
-        return $this->getNonScrivenerSurCase($st, $ed, $not_inc_ids);
+    public function reloadNonScrivenerSurCase($st, $ed, $no_land_office = 'true') {
+        $this->getCache()->del(self::KEYS['NON_SCRIVENER_SUR'].md5($st.$ed.$no_land_office));
+        return $this->getNonScrivenerSurCase($st, $ed, $no_land_office);
     }
     /**
 	 * 取得非專業代理人區間測量案件
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
-	public function getNonScrivenerSurCase($st, $ed, $not_inc_ids = array(), $expire_duration = 86400) {
-        $md5_hash = md5($st.$ed.implode('', $not_inc_ids));
+	public function getNonScrivenerSurCase($st, $ed, $no_land_office = 'true', $expire_duration = 86400) {
+        $md5_hash = md5($st.$ed.$no_land_office);
         $cache_key = self::KEYS['NON_SCRIVENER_SUR'].$md5_hash;
         if ($this->getCache()->isExpired($cache_key)) {
             Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['NON_SCRIVENER_SUR'])) {
                 $db = $this->getOraDB();
                 $IN_CONDITION = "";
-                if (!empty($not_inc_ids)) {
-                    $IN_CONDITION = "AND AB01 NOT IN ('";
-                    $IN_CONDITION .= implode("','", $not_inc_ids);
-                    $IN_CONDITION .= "')";
+                if ($no_land_office === 'true') {
+                    // $IN_CONDITION = "AND AB01 NOT IN ('";
+                    // $IN_CONDITION .= implode("','", $no_land_office);
+                    // $IN_CONDITION .= "')";
+                    $IN_CONDITION = "AND AB02 NOT LIKE '%".mb_convert_encoding('地政事務所', 'BIG5', 'UTF-8')."'";
                 }
                 $db->parse("
                     -- 測量案件
