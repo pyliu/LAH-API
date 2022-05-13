@@ -196,7 +196,7 @@ if (Vue) {
           this.ping_timer = this.timeout(() => this.ping(), this.ping_ms);  // 5s
         } else {
           this.isBusy = true;
-          this.$http.post(CONFIG.API.JSON.QUERY, {
+          this.$http.post(CONFIG.API.JSON.IP, {
             type: "ping",
             ip: this.ip,
             port: 1521  // db port

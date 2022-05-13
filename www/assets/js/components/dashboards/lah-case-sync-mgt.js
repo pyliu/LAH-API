@@ -58,7 +58,7 @@ if (Vue) {
         created () {
           // ping to l3hweb
           this.isBusy = true;
-          this.$http.post(CONFIG.API.JSON.QUERY, {
+          this.$http.post(CONFIG.API.JSON.IP, {
             type: "ping",
             ip: this.l3hweb,
             port: 1521  // db port

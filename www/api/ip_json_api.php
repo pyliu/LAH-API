@@ -1,8 +1,9 @@
 <?php
-require_once(dirname(dirname(__FILE__))."/include/init.php");
+require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."include".DIRECTORY_SEPARATOR."init.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."IPResolver.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteUser.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."Ping.class.php");
 
 $system = System::getInstance();
 $ipr = new IPResolver();
@@ -110,6 +111,27 @@ switch ($_POST["type"]) {
             'raw' => $rows,
             'data_count' => $count
         ));
+        break;
+    case "ping":
+        Logger::getInstance()->info("XHR [ping] Ping ".$_POST["ip"]." request.");
+        $ip = $_POST["ip"];
+        $ping = new Ping($ip, 1, 255);	// ip, timeout, ttl
+        $latency = 0;
+        if ($_POST['port']) {
+            $ping->setPort($_POST['port']);
+            $latency = $ping->ping('fsockopen');
+        } else {
+            $latency = $ping->ping();
+        }
+        $response_code = ($latency > 999 || $latency == '') ? STATUS_CODE::FAIL_TIMEOUT : STATUS_CODE::SUCCESS_NORMAL;
+        $message = "$ip 回應時間".(($latency > 999 || $latency == '') ? "逾時" : "為 $latency ms");
+        echo json_encode(array(
+            "status" => $response_code,
+            "ip" => $ip,
+            "latency" => empty($latency) ? "0" : $latency,
+            "data_count" => "1",
+            "message" => $message
+        ), 0);
         break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
