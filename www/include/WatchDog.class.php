@@ -13,6 +13,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR.'LXHWEB.class.php');
 
 class WatchDog {
     private $stats = null;
+    private $host_ip = '';
 
     private $schedule = array(
         "office" => [
@@ -154,8 +155,7 @@ class WatchDog {
                     Logger::getInstance()->warning('🔴 '.$row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' 地價案件跨所註記遺失!');
                 }
                 
-                $host_ip = getLocalhostIP();
-                $content = "⚠️地政系統目前找到下列「登記案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://$host_ip/dashboard.html) 執行檢查功能並修正。";
+                $content = "⚠️地政系統目前找到下列「登記案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://".$this->host_ip."/dashboard.html) 執行檢查功能並修正。";
                 $sqlite_user = new SQLiteUser();
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
@@ -189,8 +189,7 @@ class WatchDog {
                     Logger::getInstance()->warning('🔴 '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2']);
                 }
                 
-                $host_ip = getLocalhostIP();
-                $content = "⚠️ 地政系統目前找到下列「地價案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://$host_ip/dashboard.html) 執行檢查功能並修正。";
+                $content = "⚠️ 地政系統目前找到下列「地價案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://".$this->host_ip."/dashboard.html) 執行檢查功能並修正。";
                 $sqlite_user = new SQLiteUser();
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
@@ -253,8 +252,7 @@ class WatchDog {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期登記案件檢測。");
             return false;
         }
-        $host_ip = getLocalhostIP();
-        $query_url_base = "http://${host_ip}:8080/regcase/";
+        $query_url_base = "http://".$this->host_ip.":8080/regcase/";
         $query = new Query();
         Logger::getInstance()->info('開始查詢15天內逾期登記案件 ... ');
         $rows = $query->queryOverdueCasesIn15Days();
@@ -292,15 +290,14 @@ class WatchDog {
     }
 
     private function sendRegOverdueMessage($to_id, $case_records) {
-        $host_ip = getLocalhostIP();
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
-        // $url = "http://${host_ip}/overdue_reg_cases.html";
+        // $url = "http://".$this->host_ip."/overdue_reg_cases.html";
         // if ($to_id != "ALL") {
         //     $url .= "?ID=${to_id}";
         //     // $url .= "${to_id}/";
         // }
-        $url = "http://${host_ip}:8080/expire/";
+        $url = "http://".$this->host_ip.":8080/expire/";
         if ($to_id !== "ALL") {
             $url .= $to_id;
         }
@@ -329,8 +326,7 @@ class WatchDog {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過即將逾期測量案件檢測。");
             return false;
         }
-        $host_ip = getLocalhostIP();
-        $query_url_base = "http://${host_ip}:8080/expire/sur";
+        $query_url_base = "http://".$this->host_ip.":8080/expire/sur";
         $prefetch = new Prefetch();
         Logger::getInstance()->info('開始查詢即將逾期(未來3日內)登記案件 ... ');
         $rows = $prefetch->getSurNearCase();
@@ -367,10 +363,9 @@ class WatchDog {
     }
 
     private function sendSurNearOverdueMessage($to_id, $cases) {
-        $host_ip = getLocalhostIP();
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
-        $url = "http://${host_ip}:8080/expire/sur";
+        $url = "http://".$this->host_ip.":8080/expire/sur";
         $displayName = $to_id === "ALL" ? "測量課" : "您";
         $content = "⚠️ ${displayName}目前有 ".count($cases)." 件即將逾期案件(未來3天".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
         if ($to_id === "ALL") {
@@ -396,8 +391,7 @@ class WatchDog {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期測量案件檢測。");
             return false;
         }
-        $host_ip = getLocalhostIP();
-        $query_url_base = "http://${host_ip}:8080/expire/sur";
+        $query_url_base = "http://".$this->host_ip.":8080/expire/sur";
         $prefetch = new Prefetch();
         Logger::getInstance()->info('開始查詢逾期測量案件 ... ');
         $rows = $prefetch->getSurOverdueCase();
@@ -434,10 +428,9 @@ class WatchDog {
     }
 
     private function sendSurOverdueMessage($to_id, $cases) {
-        $host_ip = getLocalhostIP();
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
-        $url = "http://${host_ip}:8080/expire/sur";
+        $url = "http://".$this->host_ip.":8080/expire/sur";
         $displayName = $to_id === "ALL" ? "測量課" : "您";
         $content = "🚩 ${displayName}目前有 ".count($cases)." 件逾期案件".(count($cases) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
         if ($to_id === "ALL") {
@@ -485,9 +478,8 @@ class WatchDog {
         $to_id = trim($user['id']);
         $to_name = $user['name'];
         $AMPM = date('A');
-        $host_ip = getLocalhostIP();
         $msg = new Message();
-        $url = "http://${host_ip}/temperature.html?id=${to_id}";
+        $url = "http://".$this->host_ip."/temperature.html?id=${to_id}";
         $content = "$to_name 您好\r\n\r\n系統偵測您於今日 $AMPM 尚未登記體溫！\r\n\r\n請用 CHROME 瀏覽器前往 ${url} 進行登記。";
         $title = "體溫登記通知";
         $sn = $msg->sysSend($title, $content, $to_id, 840); // 14 mins == 840 secs
@@ -511,9 +503,48 @@ class WatchDog {
         }
     }
 
+    private function findRegFixCases() {
+        if ($this->isOn($this->schedule["twice_a_day"])) {
+        }
+        $query_url_base = "http://".$this->host_ip.":8080/regcase/";
+        $query = new Query();
+        Logger::getInstance()->info('開始查詢15天內逾期登記案件 ... ');
+        $rows = $query->queryOverdueCasesIn15Days();
+        if (!empty($rows)) {
+            Logger::getInstance()->info('15天內找到'.count($rows).'件逾期登記案件。');
+            $cache = Cache::getInstance();
+            $users = $cache->getUserNames();
+            $case_records = [];
+            foreach ($rows as $row) {
+                $case_id = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
+                $this_msg = "[${case_id}](${query_url_base}${case_id})".' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']) ?? ($users[$row['RM96']] ?? $row['RM96']);
+                // fall back to RM96(收件人員) if RM45(初審) is not presented
+                $case_records[$row['RM45'] ?? $row['RM96']][] = $this_msg;
+                $case_records["ALL"][] = $this_msg;
+            }
+            // send to the reviewer
+            $stats = 0;
+            $date = date('Y-m-d H:i:s');
+            foreach ($case_records as $ID => $records) {
+                $this->sendRegOverdueMessage($ID, $records);
+                $this->stats->addOverdueStatsDetail(array(
+                    "ID" => $ID,
+                    "RECORDS" => $records,
+                    "DATETIME" => $date,
+                    "NOTE" => array_key_exists($ID, $users) ? $users[$ID] : ''
+                ));
+                $stats++;
+            }
+            
+            $this->stats->addOverdueMsgCount($stats);
+            $this->stats->addNotificationCount($stats);
+        }
+        Logger::getInstance()->info('查詢近15天逾期登記案件完成。');
+        return true;
+    }
+
     private function sendProblematicSURCasesMessage(&$results) {
         
-        $host_ip = getLocalhostIP();
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
         $msg = new Message();
@@ -541,7 +572,7 @@ class WatchDog {
 
         $system = System::getInstance();
         $adm_ips = $system->getRoleAdminIps();
-        $content = "系統目前找到下列已結案之測量案件但是狀態卻是「延期複丈」:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://$host_ip/dashboard.html 執行複丈案件查詢功能並修正。";
+        $content = "系統目前找到下列已結案之測量案件但是狀態卻是「延期複丈」:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://".$this->host_ip."/dashboard.html 執行複丈案件查詢功能並修正。";
         foreach ($adm_ips as $adm_ip) {
             if ($adm_ip == '::1') {
                 continue;
@@ -557,7 +588,10 @@ class WatchDog {
         ));
     }
 
-    function __construct() { $this->stats = new StatsSQLite(); }
+    function __construct() {
+        $this->stats = new StatsSQLite();
+        $this->host_ip = getLocalhostIP();
+    }
     function __destruct() { $this->stats = null; }
 
     public function do() {
