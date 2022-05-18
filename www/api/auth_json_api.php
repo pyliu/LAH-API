@@ -37,9 +37,14 @@ switch ($_POST["type"]) {
 				'mssql' => $system->isMSSQLEnable(),
 				'avatar' => $system->isAvatarEnable(),
 				'officehours' => $system->isOfficeHoursEnable(),
-				"authority" => $system->getAuthority($_POST['req_ip']),
-				"master_password" => $system->get('MASTER_PASSWORD'),
-				"site" => strtoupper($system->get('SITE'))
+				'authority' => $system->getAuthority($_POST['req_ip']),
+				'master_password' => $system->get('MASTER_PASSWORD'),
+				'site' => strtoupper($system->get('SITE')),
+				'monitor' => array(
+					'host' => $system->get('MONITOR_MAIL_HOST'),
+					'account' => $system->get('MONITOR_MAIL_ACCOUNT'),
+					'password' => $system->get('MONITOR_MAIL_PASSWORD')
+				)
 			)
         ));
 		break;
