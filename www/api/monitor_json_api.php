@@ -6,7 +6,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteConnectivity.class.php");
 $sqlite_monitor_mail = new SQLiteMonitorMail();
 
 switch ($_POST["type"]) {
-    case "check_connectivity":
+    case "imap_open":
         Logger::getInstance()->info("XHR [check_connectivity] 檢查監控伺服器連線狀態請求");
         $url = "{".$_POST['host']."/novalidate-cert}INBOX";
         $id = $_POST['account'];
