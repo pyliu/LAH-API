@@ -6,6 +6,21 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteConnectivity.class.php");
 $sqlite_monitor_mail = new SQLiteMonitorMail();
 
 switch ($_POST["type"]) {
+    case "check_connectivity":
+        Logger::getInstance()->info("XHR [check_connectivity] 檢查監控伺服器連線狀態請求");
+        $url = "{".$_POST['host']."/novalidate-cert}INBOX";
+        $id = $_POST['account'];
+        $pwd = $_POST['password'];
+        //Optional parameters
+        $options = OP_READONLY;
+        $retries = 3;
+        $mailbox = imap_open($url, $id, $pwd, $options, $retries);
+        if($mailbox) {
+            echoJSONResponse('郵件伺服器('.$_POST['host'].')可正常連線', STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            echoJSONResponse('無法連線伺服器('.$url.')');
+        }
+        break;
     case "check_mail":
         Logger::getInstance()->info("XHR [check_mail] 檢查最新監控郵件請求");
         $inserted = $sqlite_monitor_mail->fetchFromMailServer();
