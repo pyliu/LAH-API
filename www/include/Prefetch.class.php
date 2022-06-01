@@ -1270,7 +1270,7 @@ class Prefetch {
                     LEFT JOIN MOICAS.CRSMS t ON r.BS04_2 = t.RM03 AND r.BS04_1 = t.RM02 AND r.BS03 = t.RM01
                     LEFT JOIN MOIADM.RKEYN u ON u.KCDE_1 = '06' AND t.RM09 = u.KCDE_2
                     LEFT JOIN MOICAD.RLNID v ON r.BB09 = v.LIDN
-                    LEFT JOIN MOIADM.RKEYN_ALL w ON (w.KCDE_1 = '48' AND w.KCDE_2 = 'H' AND w.KCDE_3 = t.RM10 AND t.BA48 = w.KCDE_4)
+                    LEFT JOIN MOIADM.RKEYN_ALL w ON (w.KCDE_1 = '48' AND w.KCDE_2 = 'H' AND w.KCDE_3 = t.RM10 AND r.BA48 = w.KCDE_4)
                     WHERE 1 = 1
                         -- AND r.BB05 BETWEEN :bv_st AND :bv_ed    -- BY 登記日期
                         AND t.RM56_1 BETWEEN :bv_st AND :bv_ed  -- BY 校對日期
