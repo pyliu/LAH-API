@@ -503,46 +503,6 @@ class WatchDog {
         }
     }
 
-    private function findRegFixCases() {
-        if ($this->isOn($this->schedule["twice_a_day"])) {
-        }
-        $query_url_base = "http://".$this->host_ip.":8080/regcase/";
-        $query = new Query();
-        Logger::getInstance()->info('開始查詢15天內逾期登記案件 ... ');
-        $rows = $query->queryOverdueCasesIn15Days();
-        if (!empty($rows)) {
-            Logger::getInstance()->info('15天內找到'.count($rows).'件逾期登記案件。');
-            $cache = Cache::getInstance();
-            $users = $cache->getUserNames();
-            $case_records = [];
-            foreach ($rows as $row) {
-                $case_id = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
-                $this_msg = "[${case_id}](${query_url_base}${case_id})".' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']) ?? ($users[$row['RM96']] ?? $row['RM96']);
-                // fall back to RM96(收件人員) if RM45(初審) is not presented
-                $case_records[$row['RM45'] ?? $row['RM96']][] = $this_msg;
-                $case_records["ALL"][] = $this_msg;
-            }
-            // send to the reviewer
-            $stats = 0;
-            $date = date('Y-m-d H:i:s');
-            foreach ($case_records as $ID => $records) {
-                $this->sendRegOverdueMessage($ID, $records);
-                $this->stats->addOverdueStatsDetail(array(
-                    "ID" => $ID,
-                    "RECORDS" => $records,
-                    "DATETIME" => $date,
-                    "NOTE" => array_key_exists($ID, $users) ? $users[$ID] : ''
-                ));
-                $stats++;
-            }
-            
-            $this->stats->addOverdueMsgCount($stats);
-            $this->stats->addNotificationCount($stats);
-        }
-        Logger::getInstance()->info('查詢近15天逾期登記案件完成。');
-        return true;
-    }
-
     private function sendProblematicSURCasesMessage(&$results) {
         
         $cache = Cache::getInstance();
