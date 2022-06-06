@@ -73,7 +73,6 @@ class Query {
         return $this->db_ok;
     }
 
-
     function __construct() {
 		if ($this->isDBReachable()) {
 			$type = OraDB::getPointDBTarget();
@@ -87,6 +86,9 @@ class Query {
     }
 
     function __destruct() {
+		if ($this->db) {
+			$this->db->close();
+		}
         $this->db = null;
     }
 
