@@ -64,7 +64,6 @@ class Query {
 		return false;
 	}
 
-	
     private function isDBReachable($txt = __METHOD__) {
         $this->db_ok = System::getInstance()->isDBReachable();
         if (!$this->db_ok) {

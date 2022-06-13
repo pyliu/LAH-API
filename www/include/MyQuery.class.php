@@ -9,6 +9,7 @@ class MyQuery {
 	private $site = 'HA';
 	private $site_code = 'A';
 	private $site_number = 1;
+	private $user_id;
 
     private function isDBReachable($txt = __METHOD__) {
         $this->db_ok = System::getInstance()->isDBReachable();
@@ -18,7 +19,7 @@ class MyQuery {
         return $this->db_ok;
     }
 
-    function __construct() {
+    function __construct($user_id) {
 		if ($this->isDBReachable()) {
 			$type = OraDB::getPointDBTarget();
 			$this->db = new OraDB($type);
@@ -28,6 +29,7 @@ class MyQuery {
 			$this->site_code = $this->site[1];
 			$this->site_number = ord($this->site_code) - ord('A');
 		}
+		$this->user_id = $user_id;
     }
 
     function __destruct() {
@@ -36,4 +38,8 @@ class MyQuery {
 		}
         $this->db = null;
     }
+
+	public function queryMyOpenRegCase() {
+
+	}
 }
