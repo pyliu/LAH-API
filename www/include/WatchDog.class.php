@@ -553,7 +553,7 @@ class WatchDog {
     function __construct() {
         $this->stats = new StatsSQLite();
         $this->host_ip = getLocalhostIP();
-        $this->date = date("m-d");
+        $this->date = date("m/d");
         $this->time = date("H:i");
     }
     function __destruct() { $this->stats = null; }
