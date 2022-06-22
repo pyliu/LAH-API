@@ -157,7 +157,7 @@ class WatchDog {
                     Logger::getInstance()->warning('🔴 '.$row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' 地價案件跨所註記遺失!');
                 }
                 
-                $content = "⚠️ ".$this->date." ".$this->time." 地政系統目前找到下列「登記案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://".$this->host_ip."/dashboard.html) 執行檢查功能並修正。";
+                $content = "⚠️ ".$this->date."  ".$this->time." 地政系統目前找到下列「登記案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://".$this->host_ip."/dashboard.html) 執行檢查功能並修正。";
                 $sqlite_user = new SQLiteUser();
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
@@ -191,7 +191,7 @@ class WatchDog {
                     Logger::getInstance()->warning('🔴 '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2']);
                 }
                 
-                $content = "⚠️ ".$this->date." ".$this->time." 地政系統目前找到下列「地價案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://".$this->host_ip."/dashboard.html) 執行檢查功能並修正。";
+                $content = "⚠️ ".$this->date."  ".$this->time." 地政系統目前找到下列「地價案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://".$this->host_ip."/dashboard.html) 執行檢查功能並修正。";
                 $sqlite_user = new SQLiteUser();
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
@@ -230,7 +230,7 @@ class WatchDog {
                     }
                     
                     $site_name = System::getInstance()->getSiteName($site);
-                    $content = "🚩 ".$this->date." ".$this->time." 地政系統同步異動資料庫(L3HWEB)找到下列「跨所地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫「跨所問題處理單」通知管轄所「${site_name}」修正。";
+                    $content = "🚩 ".$this->date."  ".$this->time." 地政系統同步異動資料庫(L3HWEB)找到下列「跨所地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫「跨所問題處理單」通知管轄所「${site_name}」修正。";
                     $sqlite_user = new SQLiteUser();
                     $admins = $sqlite_user->getAdmins();
                     foreach ($admins as $admin) {
@@ -369,7 +369,7 @@ class WatchDog {
         $users = $cache->getUserNames();
         $url = "http://".$this->host_ip.":8080/expire/sur";
         $displayName = $to_id === "ALL" ? "測量課" : "您";
-        $content = "⚠️ ".$this->date." ".$this->time." ${displayName}目前有 ".count($cases)." 件即將逾期案件(未來3天".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
+        $content = "⚠️ ".$this->date."  ".$this->time." ${displayName}目前有 ".count($cases)." 件即將逾期案件(未來3天".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
         if ($to_id === "ALL") {
             $sqlite_user = new SQLiteUser();
             $chief = $sqlite_user->getChief('測量課');
@@ -434,7 +434,7 @@ class WatchDog {
         $users = $cache->getUserNames();
         $url = "http://".$this->host_ip.":8080/expire/sur";
         $displayName = $to_id === "ALL" ? "測量課" : "您";
-        $content = "🚩 ".$this->date." ".$this->time." ${displayName}目前有 ".count($cases)." 件逾期案件".(count($cases) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
+        $content = "🚩 ".$this->date."  ".$this->time." ${displayName}目前有 ".count($cases)." 件逾期案件".(count($cases) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧管控系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
         if ($to_id === "ALL") {
             $sqlite_user = new SQLiteUser();
             $chief = $sqlite_user->getChief('測量課');
