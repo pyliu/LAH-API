@@ -10,6 +10,10 @@ if (!file_exists($full_path)) {
     $full_path = $default_path.$_REQUEST["name"].'.jpg';
     if (!file_exists($full_path)) {
         $full_path = $default_path.(strpos($key, '_avatar') ? 'not_found_avatar'.rand(1, 12).'.jpg' : 'not_found.jpg');
+        // rollback to default if still not found
+        if (!file_exists($full_path) && strpos($key, '_avatar')) {
+            $full_path = $default_path.'not_found_avatar.jpg';
+        }
         $key = 'not_found';
     }
 }
