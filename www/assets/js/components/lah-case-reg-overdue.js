@@ -357,6 +357,8 @@ if (Vue) {
             // } else {
             //     this.height = window.innerHeight - 100 + "px";
             // }
+            // temporally added to show stats chart first
+            this.switchMode();
         },
         created() {
             if (!this.is_in_modal_mode) {
