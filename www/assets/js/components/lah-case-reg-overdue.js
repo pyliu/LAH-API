@@ -102,8 +102,8 @@ if (Vue) {
             caption: "查詢中 ... ",
             small: true,
             milliseconds: 15 * 60 * 1000,
-            listMode: true,
-            statsMode: false,
+            listMode: false,
+            statsMode: true,
             overdueMode: true,
             modeText: "逾期模式",
             modeTooltip: "逾期案件查詢模式",
@@ -358,7 +358,7 @@ if (Vue) {
             //     this.height = window.innerHeight - 100 + "px";
             // }
             // temporally added to show stats chart first
-            this.switchMode();
+            // this.switchMode();
         },
         created() {
             if (!this.is_in_modal_mode) {
