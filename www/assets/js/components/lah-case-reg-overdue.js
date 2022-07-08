@@ -60,7 +60,7 @@ if (Vue) {
                         {{data.index + 1}}
                     </template>
                     <template v-slot:cell(初審人員)="data">
-                        <b-button v-if="all_cases_mode" :variant="is_overdue_mode ? 'outline-danger' : 'warning'" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value)" :title="'查詢 '+data.value+' 的'+(is_overdue_mode ? '逾期' : '即將逾期')+'案件'">{{data.value.split(" ")[0]}}</b-button>
+                        <b-button v-if="all_cases_mode" :variant="is_overdue_mode ? 'outline-danger' : 'warning'" :size="small ? 'sm' : 'md'" @click="searchByReviewer(data.value, true)" :title="'查詢 '+data.value+' 的'+(is_overdue_mode ? '逾期' : '即將逾期')+'案件'">{{data.value.split(" ")[0]}}</b-button>
                         <span v-else>{{data.value.split(" ")[0]}}</span>
                     </template>
                     <template v-slot:cell(作業人員)="data">
@@ -85,7 +85,7 @@ if (Vue) {
                 </div>
             </lah-transition>
         </div>`,
-        props: ['inSearchID'],
+        props: ['inSearchID', 'modalMode'],
         data: () => ({
             fields: [
                 '序號',
@@ -102,8 +102,8 @@ if (Vue) {
             caption: "查詢中 ... ",
             small: true,
             milliseconds: 15 * 60 * 1000,
-            listMode: false,
-            statsMode: true,
+            listMode: true,
+            statsMode: false,
             overdueMode: true,
             modeText: "逾期模式",
             modeTooltip: "逾期案件查詢模式",
@@ -218,7 +218,7 @@ if (Vue) {
                 .on("click", window.vueApp.fetchRegCase)
                 .addClass("reg_case_id");
             },
-            searchByReviewer: function(reviewer_data) {
+            searchByReviewer: function(reviewer_data, modal = false) {
                 if (this.empty(reviewer_data)) {
                     this.$warn(`reviewer_data is empty. skip searchByReviewer function call.`);
                     return;
@@ -226,7 +226,7 @@ if (Vue) {
                 // reviewer_data, e.g. "ＯＯＯ HB1184"
                 this.msgbox({
                     title: `查詢 ${reviewer_data} 登記案件(${this.title})`,
-                    message: this.$createElement('lah-case-reg-overdue', { props: { inSearchID: reviewer_data.split(" ")[1] } }),
+                    message: this.$createElement('lah-case-reg-overdue', { props: { inSearchID: reviewer_data.split(" ")[1], modalMode: modal } }),
                     size: "xl"
                 });
             },
@@ -235,7 +235,7 @@ if (Vue) {
             handleChartClick: function (e, payload) {
                 // show the modal of user's case table
                 // payload, e.g. {point: i, label: "黃欣怡 HB1206", value: 5}
-                this.searchByReviewer(payload.label);
+                this.searchByReviewer(payload.label, true);
             },
             reload: async function () {
                 try {
@@ -357,10 +357,12 @@ if (Vue) {
             // } else {
             //     this.height = window.innerHeight - 100 + "px";
             // }
-            // temporally added to show stats chart first
-            // this.switchMode();
         },
         created() {
+            if (this.getUrlParameter("chart") === '1' && !this.modalMode) {
+                this.listMode = false;
+                this.statsMode = true;
+            }
             if (!this.is_in_modal_mode) {
                 // register specific data store for using in both mode (page/modal)
                 this.$store.registerModule('overdue_reg_cases', this.storeModule);
