@@ -185,7 +185,7 @@ class IPResolver {
             'ext' => '',
             'cell' => '',
             'title' => $auto_admin ? '系管人員' : '',
-            'work' => $auto_admin ? '智慧管控系統管理' : '',
+            'work' => $auto_admin ? '智慧控管系統管理' : '',
             'exam' => '',
             'education' => $auto_admin ? '北科大資工所' : '',
             'onboard_date' => $auto_admin ? '110/06/01' : '',

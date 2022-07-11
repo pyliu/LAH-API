@@ -61,7 +61,7 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
         */
         $len = count($sheetData) - 2;
         if ($len > 0) {
-            if (preg_match("/桃園市智慧管控系統/m", $sheetData[0][0])) {
+            if (preg_match("/桃園市智慧控管系統/m", $sheetData[0][0])) {
                 $title_row = array_shift($sheetData);
                 Logger::getInstance()->info('偵測到標題 => '.str_replace("\n", ' ', print_r($title_row, true)));
             }

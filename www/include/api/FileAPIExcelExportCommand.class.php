@@ -91,8 +91,8 @@ class FileAPIExcelExportCommand extends FileAPICommand {
 			$xlsx_item["query_month"] = substr($today, 0, 5);
         }
         $spreadsheet->getProperties()
-            ->setCreator("地政智慧管控系統")
-            ->setLastModifiedBy("地政智慧管控系統")
+            ->setCreator("地政智慧控管系統")
+            ->setLastModifiedBy("地政智慧控管系統")
             ->setTitle("地政系統WEB版 ${title} 匯出")
             ->setSubject("地政系統WEB版 ${title} 匯出")
             ->setDescription(
