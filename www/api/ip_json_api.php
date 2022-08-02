@@ -115,7 +115,7 @@ switch ($_POST["type"]) {
     case "ping":
         Logger::getInstance()->info("XHR [ping] Ping ".$_POST["ip"]." request.");
         $ip = $_POST["ip"];
-        $ping = new Ping($ip, 3, 255);	// ip, timeout, ttl
+        $ping = new Ping($ip, 1, 255);	// ip, timeout, ttl
         $latency = 0;
         if ($_POST['port']) {
             $ping->setPort($_POST['port']);
@@ -123,8 +123,8 @@ switch ($_POST["type"]) {
         } else {
             $latency = $ping->ping();
         }
-        $response_code = ($latency > 2999 || $latency == '') ? STATUS_CODE::FAIL_TIMEOUT : STATUS_CODE::SUCCESS_NORMAL;
-        $message = "$ip 回應時間".(($latency > 2999 || $latency == '') ? "逾時" : "為 $latency ms");
+        $response_code = ($latency > 999 || $latency == '') ? STATUS_CODE::FAIL_TIMEOUT : STATUS_CODE::SUCCESS_NORMAL;
+        $message = "$ip 回應時間".(($latency > 999 || $latency == '') ? "逾時" : "為 $latency ms");
         echo json_encode(array(
             "status" => $response_code,
             "ip" => $ip,

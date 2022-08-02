@@ -10,6 +10,7 @@ require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/Temperature.class.php");
 require_once(INC_DIR."/System.class.php");
 require_once(INC_DIR."/SQLiteUser.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."Ping.class.php");
 
 require_once(INC_DIR."/api/JSONAPICommandFactory.class.php");
 
@@ -30,8 +31,8 @@ switch ($_POST["type"]) {
         } else {
             $latency = $ping->ping();
         }
-        $response_code = ($latency > 2999 || $latency == '') ? STATUS_CODE::FAIL_TIMEOUT : STATUS_CODE::SUCCESS_NORMAL;
-        $message = "$ip 回應時間".(($latency > 2999 || $latency == '') ? "逾時" : "為 $latency ms");
+        $response_code = ($latency > 999 || $latency == '') ? STATUS_CODE::FAIL_TIMEOUT : STATUS_CODE::SUCCESS_NORMAL;
+        $message = "$ip 回應時間".(($latency > 999 || $latency == '') ? "逾時" : "為 $latency ms");
         echo json_encode(array(
             "status" => $response_code,
             "ip" => $ip,
