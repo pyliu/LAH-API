@@ -517,7 +517,6 @@ class SQLiteUser {
             $stmt->bindParam(':name', $name);
             return $this->prepareArray($stmt);
         } else {
-            
             Logger::getInstance()->error(__METHOD__.": 取得使用者($name)資料失敗！");
         }
         return false;
