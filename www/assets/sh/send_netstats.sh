@@ -21,6 +21,10 @@ if [ "$ip" == "220.1.34.161" ]; then
 fi
 
 POST_PARAMS=$(netstat -ntu | grep ESTAB | awk '{print $5}' | sed -e 's/^::ffff://'  | cut -d : -f 1 | sort | uniq -c | sort -nr | awk '{print " -d records[]="$1","$2}')
+# 1110831 added to monitor jboss server cpu utilization
+JBOSS_CPU_USAGE=`ps -eo %cpu,cmd | grep -i 'org.jboss.Main'| grep -v 'grep' | cut -f2 | awk '{print $1}'`
+JBOSS_PARAMS=" -d records[]=${JBOSS_CPU_USAGE},JBOSS_CPU_USAGE"
+
 curl -s -X POST \
      -d "type=stats_set_conn_count" \
      -d "log_time=$log_time" \
@@ -28,4 +32,5 @@ curl -s -X POST \
      -d "api_key=4a0494ad2055969f758260e8055dcb99" \
      $DEF_RECORDS \
      $POST_PARAMS \
+     $JBOSS_PARAMS \
      $api
