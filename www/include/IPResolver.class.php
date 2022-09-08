@@ -253,7 +253,7 @@ class IPResolver {
             }
 
             return '';
-        } else {
+        } else if ($ip !== 'JBOSS_CPU_USAGE') {
             Logger::getInstance()->warning(__METHOD__.": ${ip}不是一個正確的IPv4位址。");
         }
         return false;
