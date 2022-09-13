@@ -31,8 +31,9 @@ switch ($_POST["type"]) {
 			"ips" => getLocalhostIPs(),
 			"user" => $_SESSION["myinfo"],
 			"configs" => array(
-				'webap_ip' => $system->get('WEBAP_IP'),
-				'webap_postfix' => $system->get('WEBAP_POSTFIXES'),
+				'l3hweb_db_ip' => $system->getL3hwebDBIp(),
+				'webap_ip' => $system->getWebAPIp(),
+				'webap_postfix' => $system->getWebAPPostfix(),
 				'mock' => $system->isMockMode(),
 				'mssql' => $system->isMSSQLEnable(),
 				'avatar' => $system->isAvatarEnable(),

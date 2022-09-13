@@ -573,6 +573,10 @@ class System {
         );
     }
 
+    public function getL3hwebDBIp() {
+        return $this->get('ORA_DB_L3HWEB_IP');
+    }
+
     public function getWebAPIp() {
         return $this->get('WEBAP_IP');
     }
