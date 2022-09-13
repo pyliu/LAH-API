@@ -1741,7 +1741,7 @@ class Query {
 				SELECT * FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = :bv_year AND ".$key_fields[1]." = :bv_code AND ".$key_fields[2]." = :bv_number
 			");
 			*/
-			Logger::getInstance()->info(__METHOD__.": 查詢 $tmp_tbl_name 的暫存資料 ... 【".$key."03, ".$key."04_1, ".$key."04_2】");
+			// Logger::getInstance()->info(__METHOD__.": 查詢 $tmp_tbl_name 的暫存資料 ... 【".$key."03, ".$key."04_1, ".$key."04_2】");
 			$this->db->parse("
 				SELECT * FROM ".$tmp_tbl_name." WHERE ".$key."03 = :bv_year AND ".$key."04_1 = :bv_code AND ".$key."04_2 = :bv_number
 			");
