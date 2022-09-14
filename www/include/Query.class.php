@@ -1809,8 +1809,6 @@ class Query {
 			return false;
 		}
 
-		
-
 		if (empty($id) || empty($table) || empty($column) || (empty($val) && $val !== '0' && $val !=='')) {
 			Logger::getInstance()->error(__METHOD__."：輸入參數不能為空白【${id}, ${table}, ${column}, ${val}】");
 			return false;
@@ -1838,7 +1836,7 @@ class Query {
 		$this->db->bind(":bv_year", $year);
 		$this->db->bind(":bv_code", $code);
 		$this->db->bind(":bv_number", $num);
-		$this->db->bind(":bv_val", $val);
+		$this->db->bind(":bv_val", mb_convert_encoding($val, "big5"));
 		
 		$this->db->execute();
 
