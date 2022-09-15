@@ -157,7 +157,7 @@ class WatchDog {
                     Logger::getInstance()->warning('🔴 '.$row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'].' 地價案件跨所註記遺失!');
                 }
                 
-                $content = "⚠️ ".$this->date."  ".$this->time." 地政系統目前找到下列「登記案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://".$this->host_ip."/dashboard.html) 執行檢查功能並修正。";
+                $content = "⚠️ ".$this->date."  ".$this->time." 地政系統目前找到下列「登記案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://".$this->host_ip.":8080/inf/mgt) 執行檢查功能並修正。";
                 $sqlite_user = new SQLiteUser();
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
@@ -191,7 +191,7 @@ class WatchDog {
                     Logger::getInstance()->warning('🔴 '.$row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2']);
                 }
                 
-                $content = "⚠️ ".$this->date."  ".$this->time." 地政系統目前找到下列「地價案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://".$this->host_ip."/dashboard.html) 執行檢查功能並修正。";
+                $content = "⚠️ ".$this->date."  ".$this->time." 地政系統目前找到下列「地價案件」跨所註記遺失案件:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請前往 👉 [系管面板](http://".$this->host_ip.":8080/inf/mgt) 執行檢查功能並修正。";
                 $sqlite_user = new SQLiteUser();
                 $admins = $sqlite_user->getAdmins();
                 foreach ($admins as $admin) {
@@ -534,7 +534,7 @@ class WatchDog {
 
         $system = System::getInstance();
         $adm_ips = $system->getRoleAdminIps();
-        $content = "系統目前找到下列已結案之測量案件但是狀態卻是「延期複丈」:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://".$this->host_ip."/dashboard.html 執行複丈案件查詢功能並修正。";
+        $content = "系統目前找到下列已結案之測量案件但是狀態卻是「延期複丈」:\r\n\r\n".implode("\r\n", $case_ids)."\r\n\r\n請前往 http://".$this->host_ip.":8080/inf/mgt 執行複丈案件查詢功能並修正。";
         foreach ($adm_ips as $adm_ip) {
             if ($adm_ip == '::1') {
                 continue;
