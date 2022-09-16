@@ -1,10 +1,10 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
-require_once(INC_DIR."/Query.class.php");
+require_once(INC_DIR."/MOIEXP.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/System.class.php");
 
-$query = new Query();
+$query = new MOIEXP();
 $cache = Cache::getInstance();
 $system = System::getInstance();
 $mock = $system->isMockMode();
