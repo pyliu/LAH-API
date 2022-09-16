@@ -157,7 +157,7 @@ switch ($_POST["type"]) {
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => $len,
 				"raw" => $rows,
-				"message" => "更新 ${column} 成功"
+				"message" => "查詢到 ${len} 筆資料"
 			);
 			Logger::getInstance()->info("XHR [get_dummy_ob_fees] 取得 ${len} 件假資料");
 			echo json_encode($result, 0);
