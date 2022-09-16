@@ -2,6 +2,7 @@
 require_once("init.php");
 require_once("OraDB.class.php");
 require_once("System.class.php");
+require_once("Cache.class.php");
 
 class MOIEXP {
 
@@ -227,6 +228,25 @@ class MOIEXP {
 		return $this->db->fetchAll();
 	}
 
+	public function getBakedExpaaData($rows) {
+		$mapping = array();
+		$cache = Cache::getInstance();
+		// AA39 is 承辦人員, AA89 is 修改人員代碼
+		$users = $cache->getUserNames();
+		foreach ($rows[0] as $key => $value) {
+			if (is_null($value)) {
+				continue;
+			}
+			$col_mapping = include(INC_DIR."/config/Config.ColsNameMapping.EXPAA.php");
+			if (empty($col_mapping[$key])) {
+				$mapping[$key] = $value;
+			} else {
+				$mapping[$col_mapping[$key]] = ($key == "AA39" || $key == "AA89") ? $users[$value]."【${value}】" : $value;
+			}
+		}
+		return $mapping;
+	}
+
 	public function getExpaaDataByPc($year, $keyword) {
 		if (!$this->db_ok) {
 			return array();
@@ -369,5 +389,14 @@ class MOIEXP {
 
 		$this->db->execute();
 		return true;
+	}
+	
+	public function getExpeItems() {
+		if (!$this->db_ok) {
+			return array();
+		}
+		$this->db->parse("select * from MOIEXP.EXPE t");
+		$this->db->execute();
+		return $this->db->fetchAll();
 	}
 }

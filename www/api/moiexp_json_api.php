@@ -4,7 +4,7 @@ require_once(INC_DIR."/MOIEXP.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/System.class.php");
 
-$query = new MOIEXP();
+$moiexp = new MOIEXP();
 $cache = Cache::getInstance();
 $system = System::getInstance();
 $mock = $system->isMockMode();
@@ -13,7 +13,7 @@ switch ($_POST["type"]) {
 	case "expe":
 		Logger::getInstance()->info("XHR [expe] 查詢規費收費類別請求");
 		// make total number length is 7
-		$rows = $mock ? $cache->get('expe') : $query->getChargeItems();
+		$rows = $mock ? $cache->get('expe') : $moiexp->getExpeItems();
 		$cache->set('expe', $rows);
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [expe] 查無規費收費類別資料");
@@ -31,7 +31,7 @@ switch ($_POST["type"]) {
 	case "expac":
 		Logger::getInstance()->info("XHR [expac] 查詢規費收費項目【".$_POST["year"].", ".$_POST["num"]."】請求");
 		// make total number length is 7
-		$rows = $mock ? $cache->get('expac') : $query->getExpacItems($_POST["year"], str_pad($_POST["num"], 7, '0', STR_PAD_LEFT));
+		$rows = $mock ? $cache->get('expac') : $moiexp->getExpacItems($_POST["year"], str_pad($_POST["num"], 7, '0', STR_PAD_LEFT));
 		$cache->set('expac', $rows);
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [expac] 查無資料");
@@ -50,7 +50,7 @@ switch ($_POST["type"]) {
 	case "expk":
 		Logger::getInstance()->info("XHR [expk] 查詢規費付款項目請求");
 		// make total number length is 7
-		$rows = $mock ? $cache->get('expk') : $query->getExpkItems();
+		$rows = $mock ? $cache->get('expk') : $moiexp->getExpkItems();
 		$cache->set('expk', $rows);
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [expk] 查無資料");
@@ -68,7 +68,7 @@ switch ($_POST["type"]) {
 	case "mod_expac":
 		Logger::getInstance()->info("XHR [mod_expac] 修正規費項目【".$_POST["year"].", ".$_POST["num"].", ".$_POST["code"].", ".$_POST["amount"]."】請求");
 		// make total number length is 7
-		$result_flag = $mock ? $cache->get('mod_expac') : $query->modifyExpacItem($_POST["year"], str_pad($_POST["num"], 7, '0', STR_PAD_LEFT), $_POST["code"], $_POST["amount"]);
+		$result_flag = $mock ? $cache->get('mod_expac') : $moiexp->modifyExpacItem($_POST["year"], str_pad($_POST["num"], 7, '0', STR_PAD_LEFT), $_POST["code"], $_POST["amount"]);
 		$cache->set('mod_expac', $result_flag);
 		if ($result_flag) {
 			$result = array(
@@ -86,7 +86,7 @@ switch ($_POST["type"]) {
 	case "expaa":
 		Logger::getInstance()->info("XHR [expaa] 查詢規費資料【".$_POST["qday"].", ".(array_key_exists('num', $_POST) ? $_POST["num"] : '')."】請求");
 		// make total number length is 7
-		$rows = $mock ? $cache->get('expaa') : $query->getExpaaData($_POST["qday"], empty($_POST["num"]) ? "" : str_pad($_POST["num"], 7, '0', STR_PAD_LEFT));
+		$rows = $mock ? $cache->get('expaa') : $moiexp->getExpaaData($_POST["qday"], empty($_POST["num"]) ? "" : str_pad($_POST["num"], 7, '0', STR_PAD_LEFT));
 		$cache->set('expaa', $rows);
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [expaa] 查無資料。【".$_POST["qday"].", ".$_POST["num"]."】");
@@ -129,7 +129,7 @@ switch ($_POST["type"]) {
 	case "expaa_max_pc":
 		Logger::getInstance()->info("XHR [expaa_max_pc] 查詢規費最大電腦給號【".$_POST["year"]."】請求");
 		// make total number length is 7
-		$number = $mock ? $cache->get('expaa_max_pc') : $query->getExpaaMaxPc($_POST["year"]);
+		$number = $mock ? $cache->get('expaa_max_pc') : $moiexp->getExpaaMaxPc($_POST["year"]);
 		$cache->set('expaa_max_pc', $number);
 		$msg - $_POST["year"]."年度，最大電腦給號為 ".$number."。";
 		$result = array(
@@ -143,7 +143,7 @@ switch ($_POST["type"]) {
 	case "expaa_by_pc":
 		Logger::getInstance()->info("XHR [expaa_by_pc] 查詢規費資料【".$_POST["year"].", ".($_POST["keyword"] ?? '')."】請求");
 		// make total number length is 7
-		$rows = $mock ? $cache->get('expaa_by_pc') : $query->getExpaaDataByPc($_POST["year"], str_pad($_POST["keyword"], 7, '0', STR_PAD_LEFT));
+		$rows = $mock ? $cache->get('expaa_by_pc') : $moiexp->getExpaaDataByPc($_POST["year"], str_pad($_POST["keyword"], 7, '0', STR_PAD_LEFT));
 		$cache->set('expaa_by_pc', $rows);
 		if (empty($rows)) {
 			$msg = " 🔴 查無資料，年度：".$_POST["year"]." 電腦給號：".str_pad($_POST["keyword"], 7, '0', STR_PAD_LEFT);
@@ -153,7 +153,8 @@ switch ($_POST["type"]) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"message" => $_POST["year"]."年度，找到 ".count($rows)." 筆規費資料",
-				"raw" => $rows
+				"raw" => $rows,
+				"baked" => $moiexp->getBakedExpaaData($rows)
 			);
 			Logger::getInstance()->info("XHR [expaa_by_pc] 於 ".$_POST["year"]."年度 找到 ".count($rows)." 筆資料");
 			echo json_encode($result, 0);
@@ -162,7 +163,7 @@ switch ($_POST["type"]) {
 	case "expaa_by_aa":
 		Logger::getInstance()->info("XHR [expaa_by_aa] 查詢規費資料【".($_POST["keyword"] ?? '')."】請求");
 		// make total number length is 7
-		$rows = $mock ? $cache->get('expaa_by_aa') : $query->getExpaaDataByAa($_POST["keyword"]);
+		$rows = $mock ? $cache->get('expaa_by_aa') : $moiexp->getExpaaDataByAa($_POST["keyword"]);
 		$cache->set('expaa_by_aa', $rows);
 		if (empty($rows)) {
 			$msg = " 🔴 查無資料，規費編號：".$_POST["keyword"];
@@ -172,7 +173,8 @@ switch ($_POST["type"]) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"message" => "找到 ".count($rows)." 筆規費資料",
-				"raw" => $rows
+				"raw" => $rows,
+				"baked" => $moiexp->getBakedExpaaData($rows)
 			);
 			Logger::getInstance()->info("XHR [expaa_by_aa] 找到 ".count($rows)." 筆資料");
 			echo json_encode($result, 0);
@@ -181,7 +183,7 @@ switch ($_POST["type"]) {
 	case "expaa_latest_aa":
 		Logger::getInstance()->info("XHR [expaa_latest_aa] 查詢規費最新單據編號【".$_POST["year"]."】請求");
 		// make total number length is 7
-		$aaNumber = $mock ? $cache->get('expaa_latest_aa') : $query->getExpaaLatestAa($_POST["year"]);
+		$aaNumber = $mock ? $cache->get('expaa_latest_aa') : $moiexp->getExpaaLatestAa($_POST["year"]);
 		$cache->set('expaa_latest_aa', $aaNumber);
 		$msg - $_POST["year"]."年度，最大電腦給號為 ".$aaNumber."。";
 		$result = array(
@@ -197,7 +199,7 @@ switch ($_POST["type"]) {
 	case "expaa_AA100_update":
 		$column = $_POST["type"] == "expaa_AA09_update" ? "AA09" : ($_POST["type"] == "expaa_AA100_update" ? "AA100" : "AA08");
 		Logger::getInstance()->info("XHR [expaa_AA08_update/expaa_AA09_update/expaa_AA100_update] 修正規費資料【$column".", ".$_POST["date"].", ".$_POST["number"].", ".$_POST["update_value"]."】請求");
-		$result_flag = $mock ? $cache->get("expaa_${column}_update") : $query->updateExpaaData($column, $_POST["date"], str_pad($_POST["number"], 7, '0', STR_PAD_LEFT), $_POST["update_value"]);
+		$result_flag = $mock ? $cache->get("expaa_${column}_update") : $moiexp->updateExpaaData($column, $_POST["date"], str_pad($_POST["number"], 7, '0', STR_PAD_LEFT), $_POST["update_value"]);
 		$cache->set("expaa_${column}_update", $result_flag);
 		if ($result_flag) {
 			$result = array(
@@ -215,7 +217,7 @@ switch ($_POST["type"]) {
 		break;
 	case "get_dummy_ob_fees":
 		Logger::getInstance()->info("XHR [get_dummy_ob_fees] 查詢作廢規費假資料 請求");
-		$rows = $mock ? $cache->get('get_dummy_ob_fees') : $query->getDummyObFees();
+		$rows = $mock ? $cache->get('get_dummy_ob_fees') : $moiexp->getDummyObFees();
 		$cache->set('get_dummy_ob_fees', $rows);
 		$len = count($rows);
 		if ($len > 0) {
@@ -234,7 +236,7 @@ switch ($_POST["type"]) {
 		break;
 	case "add_dummy_ob_fees":
 		Logger::getInstance()->info("XHR [add_dummy_ob_fees] 新增作廢規費假資料 請求");
-		$result_flag = $mock ? $cache->get('add_dummy_ob_fees') : $query->addDummyObFees($_POST["today"], $_POST["pc_number"], $_POST["operator"], $_POST["fee_number"], $_POST["reason"]);
+		$result_flag = $mock ? $cache->get('add_dummy_ob_fees') : $moiexp->addDummyObFees($_POST["today"], $_POST["pc_number"], $_POST["operator"], $_POST["fee_number"], $_POST["reason"]);
 		$cache->set('add_dummy_ob_fees', $result_flag);
 		if ($result_flag) {
 			$result = array(
