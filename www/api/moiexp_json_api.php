@@ -126,6 +126,72 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
+	case "expaa_max_pc":
+		Logger::getInstance()->info("XHR [expaa_max_pc] 查詢規費最大電腦給號【".$_POST["year"]."】請求");
+		// make total number length is 7
+		$number = $mock ? $cache->get('expaa_max_pc') : $query->getExpaaMaxPc($_POST["year"]);
+		$cache->set('expaa_max_pc', $number);
+		$msg - $_POST["year"]."年度，最大電腦給號為 ".$number."。";
+		$result = array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"message" => $msg,
+			"raw" => $number
+		);
+		Logger::getInstance()->info("XHR [expaa_max_pc] 於 ".$msg);
+		echo json_encode($result, 0);
+		break;
+	case "expaa_by_pc":
+		Logger::getInstance()->info("XHR [expaa_by_pc] 查詢規費資料【".$_POST["year"].", ".($_POST["keyword"] ?? '')."】請求");
+		// make total number length is 7
+		$rows = $mock ? $cache->get('expaa_by_pc') : $query->getExpaaDataByPc($_POST["year"], str_pad($_POST["keyword"], 7, '0', STR_PAD_LEFT));
+		$cache->set('expaa_by_pc', $rows);
+		if (empty($rows)) {
+			$msg = " 🔴 查無資料，年度：".$_POST["year"]." 電腦給號：".str_pad($_POST["keyword"], 7, '0', STR_PAD_LEFT);
+			Logger::getInstance()->info("XHR [expaa_by_pc] ${msg}");
+			echoJSONResponse($msg);
+		} else {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"message" => $_POST["year"]."年度，找到 ".count($rows)." 筆規費資料",
+				"raw" => $rows
+			);
+			Logger::getInstance()->info("XHR [expaa_by_pc] 於 ".$_POST["year"]."年度 找到 ".count($rows)." 筆資料");
+			echo json_encode($result, 0);
+		}
+		break;
+	case "expaa_by_aa":
+		Logger::getInstance()->info("XHR [expaa_by_aa] 查詢規費資料【".($_POST["keyword"] ?? '')."】請求");
+		// make total number length is 7
+		$rows = $mock ? $cache->get('expaa_by_aa') : $query->getExpaaDataByAa($_POST["keyword"]);
+		$cache->set('expaa_by_aa', $rows);
+		if (empty($rows)) {
+			$msg = " 🔴 查無資料，規費編號：".$_POST["keyword"];
+			Logger::getInstance()->info("XHR [expaa_by_aa] ${msg}");
+			echoJSONResponse($msg);
+		} else {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"message" => "找到 ".count($rows)." 筆規費資料",
+				"raw" => $rows
+			);
+			Logger::getInstance()->info("XHR [expaa_by_aa] 找到 ".count($rows)." 筆資料");
+			echo json_encode($result, 0);
+		}
+		break;
+	case "expaa_latest_aa":
+		Logger::getInstance()->info("XHR [expaa_latest_aa] 查詢規費最新單據編號【".$_POST["year"]."】請求");
+		// make total number length is 7
+		$aaNumber = $mock ? $cache->get('expaa_latest_aa') : $query->getExpaaLatestAa($_POST["year"]);
+		$cache->set('expaa_latest_aa', $aaNumber);
+		$msg - $_POST["year"]."年度，最大電腦給號為 ".$aaNumber."。";
+		$result = array(
+			"status" => STATUS_CODE::SUCCESS_NORMAL,
+			"message" => $msg,
+			"raw" => $aaNumber
+		);
+		Logger::getInstance()->info("XHR [expaa_latest_aa] 於 ".$msg);
+		echo json_encode($result, 0);
+		break;
 	case "expaa_AA08_update":
 	case "expaa_AA09_update":
 	case "expaa_AA100_update":

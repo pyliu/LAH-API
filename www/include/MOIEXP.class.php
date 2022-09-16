@@ -227,6 +227,81 @@ class MOIEXP {
 		return $this->db->fetchAll();
 	}
 
+	public function getExpaaDataByPc($year, $keyword) {
+		if (!$this->db_ok) {
+			return array();
+		}
+		$this->db->parse("
+			SELECT t.*, s.K02 AS AA100_CHT
+			FROM MOIEXP.EXPAA t
+			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
+			WHERE t.AA04 = :bv_pcnum AND t.AA01 LIKE :bv_year
+		");
+		$this->db->bind(":bv_pcnum", $keyword);
+		$this->db->bind(":bv_year", "${year}%");
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
+	public function getExpaaMaxPc($year) {
+		if (!$this->db_ok) {
+			return '0';
+		}
+
+		if (!filter_var($year, FILTER_SANITIZE_NUMBER_INT)) {
+			return '0';
+		}
+
+		$this->db->parse("
+			SELECT t.*, s.K02 AS AA100_CHT
+			FROM MOIEXP.EXPAA t
+			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
+			WHERE t.AA01 LIKE :bv_year AND rownum = 1
+			ORDER BY t.AA04 DESC
+		");
+		$this->db->bind(":bv_year", "${year}%");
+		$this->db->execute();
+		$row = $this->db->fetch();
+		return empty($row) ? "0" : ltrim($row['AA04'], "0");
+	}
+
+	public function getExpaaDataByAa($keyword) {
+		if (!$this->db_ok) {
+			return array();
+		}
+		$this->db->parse("
+			SELECT t.*, s.K02 AS AA100_CHT
+			FROM MOIEXP.EXPAA t
+			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
+			WHERE t.AA05 = :bv_aa
+		");
+		$this->db->bind(":bv_aa", $keyword);
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
+	public function getExpaaLatestAa($year) {
+		if (!$this->db_ok) {
+			return '';
+		}
+
+		if (!filter_var($year, FILTER_SANITIZE_NUMBER_INT)) {
+			return '';
+		}
+
+		$this->db->parse("
+			SELECT t.*, s.K02 AS AA100_CHT
+			FROM MOIEXP.EXPAA t
+			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
+			WHERE t.AA01 LIKE :bv_year AND rownum = 1
+			ORDER BY t.AA04 DESC
+		");
+		$this->db->bind(":bv_year", "${year}%");
+		$this->db->execute();
+		$row = $this->db->fetch();
+		return empty($row) ? "" : ltrim($row['AA05'], "");
+	}
+
 	public function updateExpaaData($column, $date, $number, $update_val) {
 		if (!$this->db_ok) {
 			return false;
