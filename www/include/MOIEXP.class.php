@@ -364,31 +364,41 @@ class MOIEXP {
 		return $this->db->fetchAll();
 	}
 
-	public function addDummyObFees($date, $pc_num, $operator, $fee_number, $reason) {
+	public function addDummyObFee($date, $pc_num, $operator, $fee_number, $reason) {
 		if (!$this->db_ok) {
 			return false;
 		}
+		try {
+			if (empty($date) || empty($pc_num) || empty($operator) || empty($fee_number) || empty($reason)) {
+				Logger::getInstance()->error(__METHOD__.": One of the parameters is empty. The system can not add obsolete fee expaa data.");
+				Logger::getInstance()->warning(__METHOD__.": The input params: ${date}, ${pc_num}, ${operator}, ${fee_number}, ${reason}.");
+				return false;
+			}
 
-		
-		if (empty($date) || empty($pc_num) || empty($operator) || empty($fee_number) || empty($reason)) {
-			Logger::getInstance()->error(__METHOD__.": One of the parameters is empty. The system can not add obsolete fee expaa data.");
-			Logger::getInstance()->warning(__METHOD__.": The input params: ${date}, ${pc_num}, ${operator}, ${fee_number}, ${reason}.");
+			$existed = $this->getExpaaDataByAa($fee_number);
+			if (count($existed) > 0) {
+				Logger::getInstance()->warning(__METHOD__.": $fee_number 資料已存在！");
+				Logger::getInstance()->info(__METHOD__.": 「${date}、${pc_num}、${fee_number}、${operator}、${reason}」無法新增資料到 EXPAA 表格。");
+				return false;
+			}
+
+			$sql = "INSERT INTO MOIEXP.EXPAA (AA01,AA04,AA05,AA06,AA07,AA08,AA09,AA02,AA24,AA25,AA39,AA104) VALUES (:bv_date, :bv_pc_num, :bv_fee_num, '1', '0', '0', '1', :bv_date, :bv_date, :bv_year, :bv_operator, :bv_reason)";
+			$this->db->parse($sql);
+			$this->db->bind(":bv_date", $date);
+			$this->db->bind(":bv_year", substr($date, 0, 3));
+			$this->db->bind(":bv_pc_num", $pc_num);
+			$this->db->bind(":bv_fee_num", $fee_number);
+			$this->db->bind(":bv_operator", $operator);
+			$this->db->bind(":bv_reason", iconv("utf-8", "big5", $reason));
+
+			Logger::getInstance()->info(__METHOD__.": 插入 SQL \"$sql\"");
+
+			$this->db->execute();
+			return true;
+		} catch (Exception $ex) {
+			Logger::getInstance()->warning(__METHOD__.": ".$ex->getMessage());
 			return false;
 		}
-
-		$sql = "INSERT INTO MOIEXP.EXPAA (AA01,AA04,AA05,AA06,AA07,AA08,AA09,AA02,AA24,AA25,AA39,AA104) VALUES (:bv_date, :bv_pc_num, :bv_fee_num, '1', '0', '0', '1', :bv_date, :bv_date, :bv_year, :bv_operator, :bv_reason)";
-		$this->db->parse($sql);
-		$this->db->bind(":bv_date", $date);
-		$this->db->bind(":bv_year", substr($date, 0, 3));
-		$this->db->bind(":bv_pc_num", $pc_num);
-		$this->db->bind(":bv_fee_num", $fee_number);
-		$this->db->bind(":bv_operator", $operator);
-		$this->db->bind(":bv_reason", iconv("utf-8", "big5", $reason));
-
-		Logger::getInstance()->info(__METHOD__.": 插入 SQL \"$sql\"");
-
-		$this->db->execute();
-		return true;
 	}
 	
 	public function getExpeItems() {

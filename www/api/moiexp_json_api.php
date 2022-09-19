@@ -234,10 +234,10 @@ switch ($_POST["type"]) {
 			echoJSONResponse("本年度(${this_year})查無作廢規費假資料");
 		}
 		break;
-	case "add_dummy_ob_fees":
-		Logger::getInstance()->info("XHR [add_dummy_ob_fees] 新增作廢規費假資料 請求");
-		$result_flag = $mock ? $cache->get('add_dummy_ob_fees') : $moiexp->addDummyObFees($_POST["today"], $_POST["pc_number"], $_POST["operator"], $_POST["fee_number"], $_POST["reason"]);
-		$cache->set('add_dummy_ob_fees', $result_flag);
+	case "add_dummy_ob_fee":
+		Logger::getInstance()->info("XHR [add_dummy_ob_fee] 新增作廢規費假資料 請求");
+		$result_flag = $mock ? $cache->get('add_dummy_ob_fee') : $moiexp->addDummyObFee($_POST["bill_date"], $_POST["pc_number"], $_POST["operator"], $_POST["fee_number"], $_POST["reason"]);
+		$cache->set('add_dummy_ob_fee', $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
@@ -246,10 +246,10 @@ switch ($_POST["type"]) {
 				"raw" => $result_flag,
 				"message" => "新增假資料成功【".$_POST["today"].", ".$_POST["pc_number"]."】"
 			);
-			Logger::getInstance()->info("XHR [add_dummy_ob_fees] 新增假資料成功");
+			Logger::getInstance()->info("XHR [add_dummy_ob_fee] 新增假資料成功");
 			echo json_encode($result, 0);
 		} else {
-			Logger::getInstance()->error("XHR [add_dummy_ob_fees] 新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
+			Logger::getInstance()->error("XHR [add_dummy_ob_fee] 新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
 			echoJSONResponse("新增假資料失敗【".$_POST["today"].", ".$_POST["pc_number"].", ".$_POST["operator"].", ".$_POST["fee_number"].", ".$_POST["reason"]."】");
 		}
 		break;
