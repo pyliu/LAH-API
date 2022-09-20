@@ -281,7 +281,7 @@ class System {
         $db_ip = $this->getOraTargetDBIP();
         $db_port = $this->getOraTargetDBPort();
         $latency = $this->ping($db_ip, $db_port, 3, 255);
-        return !($latency > 999 || $latency == '');
+        return !($latency > 2999 || $latency == '');
     }
 
     public function isKeyValid($key) {
