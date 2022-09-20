@@ -280,7 +280,7 @@ class System {
     public function isDBReachable() {
         $db_ip = $this->getOraTargetDBIP();
         $db_port = $this->getOraTargetDBPort();
-        $latency = $this->ping($db_ip, $db_port, 1, 255);
+        $latency = $this->ping($db_ip, $db_port, 3, 255);
         return !($latency > 999 || $latency == '');
     }
 
