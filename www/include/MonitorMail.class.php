@@ -11,6 +11,10 @@ class MonitorMail {
     private $mailbox;
 
     private function getFullMailboxPath($folder): string {
+        $mail_ssl = System::getInstance()->get('MONITOR_MAIL_SSL') === 'true';
+        if ($mail_ssl) {
+            return "{".$this->host.":993/imap/ssl/novalidate-cert}".$folder;
+        }
         return "{".$this->host."/novalidate-cert}".$folder;
     }
 

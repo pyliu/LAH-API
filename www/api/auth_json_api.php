@@ -44,7 +44,8 @@ switch ($_POST["type"]) {
 				'monitor' => array(
 					'host' => $system->get('MONITOR_MAIL_HOST'),
 					'account' => $system->get('MONITOR_MAIL_ACCOUNT'),
-					'password' => $system->get('MONITOR_MAIL_PASSWORD')
+					'password' => $system->get('MONITOR_MAIL_PASSWORD'),
+					'ssl' => $system->get('MONITOR_MAIL_SSL') === 'true'
 				)
 			)
         ));

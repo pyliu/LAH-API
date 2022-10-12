@@ -56,7 +56,8 @@ class SQLiteMonitorMail {
     public function fetchFromMailServer() {
         // check if mail server is reachable
         $mail_host = System::getInstance()->get('MONITOR_MAIL_HOST');
-        $latency = pingDomain($mail_host, 143);
+        $mail_ssl = System::getInstance()->get('MONITOR_MAIL_SSL') === 'true';
+        $latency = pingDomain($mail_host, $mail_ssl ? 993 : 143);
     
         // not reachable
         if ($latency > 999 || $latency == '') {
