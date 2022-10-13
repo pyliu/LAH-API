@@ -18,7 +18,7 @@ switch ($_POST["type"]) {
         if($mailbox) {
             echoJSONResponse('郵件伺服器('.$_POST['host'].')可正常連線', STATUS_CODE::SUCCESS_NORMAL);
         } else {
-            echoJSONResponse('無法連線伺服器('.$url.')');
+            echoJSONResponse('無法連線伺服器 - '.$url);
         }
         break;
     case "check_mail":
