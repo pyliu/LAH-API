@@ -349,8 +349,12 @@ switch ($_POST["type"]) {
                     break;
                 }
             }
-			// $last = $results[$len - 1];
-			// $results = array($last);
+            // not found valid user
+            $len = count($results);
+            if ($len > 1) {
+                $last = $results[$len - 1];
+                $results = array($last);
+            }
 		}
 		if (empty($results)) {
 			Logger::getInstance()->info("XHR [my_info/authentication] 查無 $query_ip 資料/授權");
