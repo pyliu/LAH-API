@@ -523,7 +523,7 @@ class SQLiteUser {
         
     }
 
-    public function getUserByIP($ip) {
+    public function getUserByIP($ip, $on_board = false) {
         // To check if the $ip is from localhost
         if (in_array($ip, ['127.0.0.1', '::1'])) {
             // Logger::getInstance()->info(__METHOD__.': 偵測到來自 localhost IP，判定為系統管理者。');
@@ -551,13 +551,25 @@ class SQLiteUser {
                 return array(IPResolver::packUserData($result[0]));
             }
             // authority stored at dimension.db user table
-            if($stmt = $this->db->prepare("SELECT * FROM user WHERE ip = :ip")) {
-                $stmt->bindParam(':ip', $ip);
-                $result = $this->prepareArray($stmt);
-                if(!empty($result)) {
-                    return $result;
+            if ($on_board) {
+                if($stmt = $this->db->prepare("SELECT * FROM user WHERE ip = :ip AND (authority & :disabled_bit) <> :disabled_bit")) {
+                    $stmt->bindParam(':ip', $ip);
+                    $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
+                    $result = $this->prepareArray($stmt);
+                    if(!empty($result)) {
+                        return $result;
+                    }
+                    // Logger::getInstance()->warning(__METHOD__.": 從 dimension.db user 表格取得使用者($ip)資料失敗！");
                 }
-                // Logger::getInstance()->warning(__METHOD__.": 從 dimension.db user 表格取得使用者($ip)資料失敗！");
+            } else {
+                if($stmt = $this->db->prepare("SELECT * FROM user WHERE ip = :ip")) {
+                    $stmt->bindParam(':ip', $ip);
+                    $result = $this->prepareArray($stmt);
+                    if(!empty($result)) {
+                        return $result;
+                    }
+                    // Logger::getInstance()->warning(__METHOD__.": 從 dimension.db user 表格取得使用者($ip)資料失敗！");
+                }
             }
         }
 
