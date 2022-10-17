@@ -342,8 +342,15 @@ switch ($_POST["type"]) {
 		$results = $sqlite_user->getUserByIP($query_ip);
 		$len = count($results);
 		if ($len > 1) {
-			$last = $results[$len - 1];
-			$results = array($last);
+            // find the one that is not disabled
+            for ($i = 0; $i < $len; $i++) {
+                if (!$results[$i]['authority'] & AUTHORITY::DISABLED) {
+                    $results = array($results[$i]);
+                    break;
+                }
+            }
+			// $last = $results[$len - 1];
+			// $results = array($last);
 		}
 		if (empty($results)) {
 			Logger::getInstance()->info("XHR [my_info/authentication] 查無 $query_ip 資料/授權");
