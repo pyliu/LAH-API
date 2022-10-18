@@ -230,7 +230,7 @@ class WatchDog {
                     }
                     
                     $site_name = System::getInstance()->getSiteName($site);
-                    $content = "🚩 ".$this->date."  ".$this->time." 地政系統同步異動資料庫(L3HWEB)找到下列「跨所地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫「跨所問題處理單」通知管轄所「${site_name}」修正。";
+                    $content = "🚩 ".$this->date."  ".$this->time." 地政系統同步異動資料庫(L3HWEB, MOIPRC.PSCRN Table)找到下列「跨所地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫「跨所問題處理單」通知管轄所「${site_name}」修正。";
                     $sqlite_user = new SQLiteUser();
                     $admins = $sqlite_user->getAdmins();
                     foreach ($admins as $admin) {
