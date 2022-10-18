@@ -40,7 +40,7 @@ class Query {
 	}
 
 	private function checkCaseID(&$id) {
-		
+		$id = str_replace('-', '', $id);
 		if (!empty($id)) {
 			$year = substr($id, 0, 3);
 			$code = substr($id, 3, 4);
