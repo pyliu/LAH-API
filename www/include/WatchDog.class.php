@@ -36,6 +36,15 @@ class WatchDog {
             'Fri' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
             'Sat' => []
         ],
+        "announcement" => [
+            'Sun' => [],
+            'Mon' => ['09:50 AM' => '10:05 AM'],
+            'Tue' => ['09:50 AM' => '10:05 AM'],
+            'Wed' => ['09:50 AM' => '10:05 AM'],
+            'Thu' => ['09:50 AM' => '10:05 AM'],
+            'Fri' => ['09:50 AM' => '10:05 AM'],
+            'Sat' => []
+        ],
         "temperature" => [
             'Sun' => [],
             'Mon' => ['10:35 AM' => '10:50 AM'],
@@ -84,6 +93,13 @@ class WatchDog {
     private function isOverdueCheckNeeded() {
         Logger::getInstance()->info("檢查是否需要執行逾期案件檢查 ... ");
         $result = $this->isOn($this->schedule["overdue"]);
+        Logger::getInstance()->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
+        return $result;
+    }
+
+    private function isAnnouncementCheckNeeded() {
+        Logger::getInstance()->info("檢查是否需要執行到期公告案件檢查 ... ");
+        $result = $this->isOn($this->schedule["announcement"]);
         Logger::getInstance()->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
@@ -323,6 +339,77 @@ class WatchDog {
         }
     }
 
+    private function findRegExpiredAnnouncementCases() {
+        if (!$this->isAnnouncementCheckNeeded()) {
+            Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過到期登記公告案件檢測。");
+            return false;
+        }
+        $query_url_base = "http://".$this->host_ip.":8080/expiry-of-announcement";
+        $query = new Query();
+        Logger::getInstance()->info('開始查詢到期登記公告案件 ... ');
+        $rows = $query->queryExpiredAnnouncementCases();
+        if (!empty($rows)) {
+            Logger::getInstance()->info('今日找到'.count($rows).'件到期登記公告案件。');
+            $cache = Cache::getInstance();
+            $users = $cache->getUserNames();
+            $case_records = [];
+            foreach ($rows as $row) {
+                $case_id = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
+                $this_msg = "[${case_id}](${query_url_base}${case_id})".' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']) ?? ($users[$row['RM96']] ?? $row['RM96']);
+                // fall back to RM96(收件人員) if RM45(初審) is not presented
+                $case_records[$row['RM45'] ?? $row['RM96']][] = $this_msg;
+                $case_records["ALL"][] = $this_msg;
+            }
+            // send to the reviewer
+            $stats = 0;
+            $date = date('Y-m-d H:i:s');
+            foreach ($case_records as $ID => $records) {
+                $this->sendRegExpiredAnnouncementMessage($ID, $records);
+                $this->stats->addOverdueStatsDetail(array(
+                    "ID" => $ID,
+                    "RECORDS" => $records,
+                    "DATETIME" => $date,
+                    "NOTE" => array_key_exists($ID, $users) ? $users[$ID] : ''
+                ));
+                $stats++;
+            }
+            
+            // $this->stats->addOverdueMsgCount($stats);
+            $this->stats->addNotificationCount($stats);
+        }
+        Logger::getInstance()->info('查詢到期登記公告案件完成。');
+        return true;
+    }
+
+    private function sendRegExpiredAnnouncementMessage($to_id, $case_records) {
+        $cache = Cache::getInstance();
+        $users = $cache->getUserNames();
+        // $url = "http://".$this->host_ip."/overdue_reg_cases.html";
+        // if ($to_id != "ALL") {
+        //     $url .= "?ID=${to_id}";
+        //     // $url .= "${to_id}/";
+        // }
+        $url = "http://".$this->host_ip.":8080/expiry-of-announcement";
+        if ($to_id !== "ALL") {
+            $url .= $to_id;
+        }
+        $displayName = $to_id === "ALL" ? "登記課" : "您";
+        $content = "🚩 ".$this->date."  ".$this->time." ${displayName}目前有 ".count($case_records)." 件到期公告案件(".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($case_records, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[公告案件頁面](${url})</b> 查看詳細資料。";
+        if ($to_id === "ALL") {
+            $sqlite_user = new SQLiteUser();
+            $chief = $sqlite_user->getChief('登記課');
+            if (empty($chief)) {
+                Logger::getInstance()->warning('找不到登記課課長帳號，無法傳送即時通知給他/她!!');
+            } else {
+                $this_user = $users[$chief['id']];
+                $lastId = $this->addNotification($content, $chief['id'], "登記課公告到期案件彙總");
+                Logger::getInstance()->info('新增公告到期案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
+            }
+        } else {
+            $lastId = $this->addNotification($content, $to_id, "您的公告到期登記案件統計");
+        }
+    }
+    
     private function findSurNearOverdueCases() {
         if (!$this->isOverdueCheckNeeded()) {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過即將逾期測量案件檢測。");
@@ -568,6 +655,7 @@ class WatchDog {
                 $this->checkValCrossSiteData();
                 $this->checkValCrossOtherSitesData();
                 $this->findRegOverdueCases();
+                $this->findRegExpiredAnnouncementCases();
                 $this->findSurOverdueCases();
                 $this->findSurNearOverdueCases();
                 return true;

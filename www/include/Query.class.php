@@ -1030,6 +1030,53 @@ class Query {
 		return $this->db->fetchAll();
 	}
 
+	public function queryExpiredAnnouncementCases($reviewer_id = "") {
+		if (!$this->db_ok) {
+			return array();
+		}
+
+		if (empty($reviewer_id)) {
+			$this->db->parse("
+				SELECT *
+				FROM SCRSMS
+				LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+				WHERE 1=1
+				AND (RM99 IS NULL OR RM101 = 'HA')
+				--AND RM03 LIKE '%0'-- without sub-case
+				AND RM31 IS NULL	-- not closed case
+				AND RM30 = 'H'		-- announcement case
+				AND RM50 < :bv_now
+				ORDER BY RM29_1 DESC, RM29_2 DESC
+			");
+		} else {
+			$this->db->parse("
+				SELECT *
+				FROM SCRSMS
+				LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+				WHERE 1=1
+				AND (RM99 IS NULL OR RM101 = 'HA')
+				--AND RM03 LIKE '%0'-- without sub-case
+				AND RM31 IS NULL	-- not closed case
+				AND RM30 = 'H'		-- announcement case
+				AND RM50 < :bv_now
+				AND RM45 = :bv_reviewer_id
+				ORDER BY RM29_1 DESC, RM29_2 DESC
+			");
+			$this->db->bind(":bv_reviewer_id", $reviewer_id);	// HB1184
+		}
+
+		// bind today
+		$tw_date = new Datetime("now");
+		$tw_date->modify("-1911 year");
+		$now = ltrim($tw_date->format("Ymd"), "0");	// ex: 1111121
+		$this->db->bind(":bv_now", $now);
+
+		Logger::getInstance()->info(__METHOD__.": Find expired announcement cases.");
+
+		$this->db->execute();
+		return $this->db->fetchAll();
+	}
+
 	// 找近15天逾期的案件
 	public function queryOverdueCasesIn15Days($reviewer_id = "") {
 		if (!$this->db_ok) {
