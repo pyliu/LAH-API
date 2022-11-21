@@ -394,7 +394,7 @@ class WatchDog {
             $url .= $to_id;
         }
         $displayName = $to_id === "ALL" ? "登記課" : "您";
-        $content = "🚩 ".$this->date."  ".$this->time." ${displayName}目前有 ".count($case_records)." 件到期公告案件(".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($case_records, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[公告案件頁面](${url})</b> 查看詳細資料。";
+        $content = "📢 ".$this->date."  ".$this->time." ${displayName}目前有 ".count($case_records)." 件到期公告案件(".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>🔴 ".implode("<br/>🔴 ", array_slice($case_records, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[公告案件頁面](${url})</b> 查看詳細資料。";
         if ($to_id === "ALL") {
             $sqlite_user = new SQLiteUser();
             $chief = $sqlite_user->getChief('登記課');
