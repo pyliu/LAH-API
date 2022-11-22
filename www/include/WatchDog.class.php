@@ -38,11 +38,11 @@ class WatchDog {
         ],
         "announcement" => [
             'Sun' => [],
-            'Mon' => ['09:50 AM' => '10:05 AM'],
-            'Tue' => ['09:50 AM' => '10:05 AM'],
-            'Wed' => ['09:50 AM' => '10:05 AM'],
-            'Thu' => ['09:50 AM' => '10:05 AM'],
-            'Fri' => ['09:50 AM' => '10:05 AM'],
+            'Mon' => ['07:50 AM' => '08:05 AM'],
+            'Tue' => ['07:50 AM' => '08:05 AM'],
+            'Wed' => ['07:50 AM' => '08:05 AM'],
+            'Thu' => ['07:50 AM' => '08:05 AM'],
+            'Fri' => ['07:50 AM' => '08:05 AM'],
             'Sat' => []
         ],
         "temperature" => [
@@ -394,19 +394,23 @@ class WatchDog {
             $url .= $to_id;
         }
         $displayName = $to_id === "ALL" ? "登記課" : "您";
-        $content = "📢 ".$this->date."  ".$this->time." ${displayName}目前有 ".count($case_records)." 件到期公告案件(".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>🔴 ".implode("<br/>🔴 ", array_slice($case_records, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[公告案件頁面](${url})</b> 查看詳細資料。";
+        $content = "📢 ".$this->date."  ".$this->time." ${displayName}目前有 ".count($case_records)." 件到期公告案件:<br/><br/>🔴 ".implode("<br/>🔴 ", $case_records)."<br/>...<br/>👉 請前往智慧控管系統 <b>[公告案件頁面](${url})</b> 查看詳細資料。";
         if ($to_id === "ALL") {
-            $sqlite_user = new SQLiteUser();
-            $chief = $sqlite_user->getChief('登記課');
-            if (empty($chief)) {
-                Logger::getInstance()->warning('找不到登記課課長帳號，無法傳送即時通知給他/她!!');
-            } else {
-                $this_user = $users[$chief['id']];
-                $lastId = $this->addNotification($content, $chief['id'], "登記課公告到期案件彙總");
-                Logger::getInstance()->info('新增公告到期案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
-            }
+            // $sqlite_user = new SQLiteUser();
+            // $chief = $sqlite_user->getChief('登記課');
+            // if (empty($chief)) {
+            //     Logger::getInstance()->warning('找不到登記課課長帳號，無法傳送即時通知給他/她!!');
+            // } else {
+            //     $this_user = $users[$chief['id']];
+            //     $lastId = $this->addNotification($content, $chief['id'], "登記課公告到期案件彙總");
+            //     Logger::getInstance()->info('新增公告到期案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
+            // }
+
+            // send to reg chat channel
+            $lastId = $this->addNotification($content, "reg", "登記課公告到期案件彙總");
+            Logger::getInstance()->info('新增公告到期案件通知訊息至 reg 頻道。 '.($lastId === false ? '失敗' : '成功').')');
         } else {
-            $lastId = $this->addNotification($content, $to_id, "您的公告到期登記案件統計");
+            // $lastId = $this->addNotification($content, $to_id, "您的公告到期登記案件統計");
         }
     }
     
