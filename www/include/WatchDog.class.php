@@ -128,7 +128,7 @@ class WatchDog {
         return $sn;
     }
 
-    private function addNotification($message, $to_id, $title = '系統排程訊息') {
+    private function addNotification($message, $to_id, $title = '系統排程訊息', $skip_announcement_convert = false) {
         if (empty($to_id)) {
             Logger::getInstance()->warning("未指定接收者 id 下面訊息無法送出！");
             Logger::getInstance()->warning($message);
@@ -145,7 +145,7 @@ class WatchDog {
             'sender' => '系統排程',
             'from_ip' => getLocalhostIP()
         );
-        $lastId = $notify->addMessage($to_id, $payload);
+        $lastId = $notify->addMessage($to_id, $payload, $skip_announcement_convert);
         $nameTag = rtrim("${to_id}:".$users[$to_id], ":");
         if ($lastId === false || empty($lastId)) {
             Logger::getInstance()->warning("訊息無法送出給 ${nameTag}");
@@ -355,22 +355,23 @@ class WatchDog {
             $case_records = [];
             foreach ($rows as $row) {
                 $case_id = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
-                $this_msg = "[${case_id}](${query_url_base}${case_id})".' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']) ?? ($users[$row['RM96']] ?? $row['RM96']);
+                // combine link to smart control system
+                $this_msg = "[${case_id}](${query_url_base}?id=${case_id})".' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']) ?? ($users[$row['RM96']] ?? $row['RM96']);
                 // fall back to RM96(收件人員) if RM45(初審) is not presented
                 $case_records[$row['RM45'] ?? $row['RM96']][] = $this_msg;
                 $case_records["ALL"][] = $this_msg;
             }
             // send to the reviewer
             $stats = 0;
-            $date = date('Y-m-d H:i:s');
+            // $date = date('Y-m-d H:i:s');
             foreach ($case_records as $ID => $records) {
                 $this->sendRegExpiredAnnouncementMessage($ID, $records);
-                $this->stats->addOverdueStatsDetail(array(
-                    "ID" => $ID,
-                    "RECORDS" => $records,
-                    "DATETIME" => $date,
-                    "NOTE" => array_key_exists($ID, $users) ? $users[$ID] : ''
-                ));
+                // $this->stats->addOverdueStatsDetail(array(
+                //     "ID" => $ID,
+                //     "RECORDS" => $records,
+                //     "DATETIME" => $date,
+                //     "NOTE" => array_key_exists($ID, $users) ? $users[$ID] : ''
+                // ));
                 $stats++;
             }
             
@@ -391,10 +392,10 @@ class WatchDog {
         // }
         $url = "http://".$this->host_ip.":8080/expiry-of-announcement";
         if ($to_id !== "ALL") {
-            $url .= $to_id;
+            $url .= '?reviewer='.$to_id;
         }
         $displayName = $to_id === "ALL" ? "登記課" : "您";
-        $content = "📢 ".$this->date."  ".$this->time." ${displayName}目前有 ".count($case_records)." 件到期公告案件:<br/><br/>🔴 ".implode("<br/>🔴 ", $case_records)."<br/>...<br/>👉 請前往智慧控管系統 <b>[公告案件頁面](${url})</b> 查看詳細資料。";
+        $content = "📢 ".$this->date."  ".$this->time." ${displayName}目前有 ".count($case_records)." 件到期公告案件:<br/><br/>🔴 ".implode("<br/>🔴 ", $case_records)."<br/><br/>👉 請前往智慧控管系統 <b>[公告案件頁面](${url})</b> 查看詳細資料。";
         if ($to_id === "ALL") {
             // $sqlite_user = new SQLiteUser();
             // $chief = $sqlite_user->getChief('登記課');
@@ -407,7 +408,7 @@ class WatchDog {
             // }
 
             // send to reg chat channel
-            $lastId = $this->addNotification($content, "reg", "登記課公告到期案件彙總");
+            $lastId = $this->addNotification($content, "reg", "登記課公告到期案件彙總", true);
             Logger::getInstance()->info('新增公告到期案件通知訊息至 reg 頻道。 '.($lastId === false ? '失敗' : '成功').')');
         } else {
             // $lastId = $this->addNotification($content, $to_id, "您的公告到期登記案件統計");

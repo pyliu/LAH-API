@@ -73,13 +73,13 @@ class Notification {
 
     function __destruct() { }
 
-    public function addMessage($channel, $payload) {
+    public function addMessage($channel, $payload, $skip_announcement_convert = false) {
         if (empty($channel) || !is_array($payload) || empty($payload)) {
             Logger::getInstance()->error(__METHOD__.': required param is missing. ('.$channel.')');
             return false;
         }
         // 公告頻道轉換
-        if (in_array($channel, array('all', 'hr', 'acc', 'adm', 'reg', 'sur', 'val', 'inf', 'supervisor'))) {
+        if (!$skip_announcement_convert && in_array($channel, array('all', 'hr', 'acc', 'adm', 'reg', 'sur', 'val', 'inf', 'supervisor'))) {
             $channel = $channel === 'all' ? 'announcement' : 'announcement_'.$channel;
         }
         if ($this->prepareDB($channel)) {
