@@ -547,6 +547,51 @@ switch ($_POST["type"]) {
 		}
 
 		break;
+	case "val_realprice_map":
+		Logger::getInstance()->info("XHR [val_realprice_map] 查詢實價登錄申報對應請求");
+		$message = "實價登錄申報案件";
+		$st = $_POST["start_date"];
+		$ed = $_POST["end_date"];
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadValRealPriceMap($st, $ed) : $prefetch->getValRealPriceMap($st, $ed);
+		$cache_remaining = $prefetch->getValRealPriceMapCacheRemainingTime($st, $ed);
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [val_realprice_map] 查無 ${message} 資料");
+			echoJSONResponse("查無 ${message} 資料");
+		} else {
+			$total = count($rows);
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$this_baked = $data->getBakedData();
+
+				// $id = $this_baked['ID'];
+				// this query goes to SQLite DB, return array of result
+				// $result = $sqlite_db->getRegAuthChecksRecord($id);
+				// $this_baked['CASE_NOTIFY_RAW'] = $result;
+				// if (is_array($result) && count($result) === 1) {
+				// 	$auth = $result[0];
+				// 	$this_baked['CASE_NOTIFY_AUTHORITY'] = $auth['authority'];
+				// 	$this_baked['CASE_NOTIFY_NOTE'] = $auth['note'];
+				// } else{
+				// 	// default is 1 that means the case needs to notify applicant
+				// 	$this_baked['CASE_NOTIFY_AUTHORITY'] = 1;
+				// 	$this_baked['CASE_NOTIFY_NOTE'] = '';
+				// }
+
+				$baked[] = $this_baked;
+			}
+
+			Logger::getInstance()->info("XHR [val_realprice_map] 查詢成功($total)");
+			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				// "data_count" => $total,
+				// "raw" => $rows,
+				// 'cache_remaining_time' => $cache_remaining,
+				"data_count" => $total,
+				"baked" => $baked,
+				'cache_remaining_time' => $cache_remaining
+			));
+		}
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

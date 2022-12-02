@@ -4,6 +4,7 @@ require_once("DynamicSQLite.class.php");
 require_once("OraDB.class.php");
 require_once("Cache.class.php");
 require_once("System.class.php");
+require_once("MOIPRC.class.php");
 
 class Prefetch {
     private const PREFETCH_SQLITE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."prefetch.db";
@@ -32,7 +33,8 @@ class Prefetch {
         'REG_UNTAKEN_CASE' => 'Prefetch::getRegUntakenCase',
         'SUR_OVERDUE_CASE' => 'Prefetch::getSurOverdueCase',
         'SUR_NOT_CLOSE_CASE' => 'Prefetch::getSurNotCloseCase',
-        'SUR_NEAR_CASE' => 'Prefetch::getSurNearCase'
+        'SUR_NEAR_CASE' => 'Prefetch::getSurNearCase',
+        'VAL_REALPRICE_MAP' => 'Prefetch::getValRealPriceMap'
     );
     private $ora_db = null;
     private $cache = null;
@@ -1826,4 +1828,37 @@ class Prefetch {
         }
         return $this->getCache()->get($cache_key);
     }
+
+
+    /**
+     * 實價登錄控管案件快取剩餘時間
+     */
+    public function getValRealPriceMapCacheRemainingTime($st, $ed) {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['VAL_REALPRICE_MAP'].$st.$ed);
+    }
+    /**
+     * 強制重新讀取實價登錄控管案件查詢
+     */
+    public function reloadValRealPriceMap($st, $ed) {
+        $this->getCache()->del(self::KEYS['VAL_REALPRICE_MAP']);
+        return $this->getValRealPriceMap($st, $ed);
+    }
+    /**
+	 * 取得實價登錄控管案件查詢
+     * default cache time is 15 minutes * 60 seconds = 900 seconds
+	 */
+	public function getValRealPriceMap($st, $ed, $expire_duration = 900) {
+        $cache_key = self::KEYS['VAL_REALPRICE_MAP'];
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
+            $moiprc = new MOIPRC();
+            $results = $moiprc->getRealPriceMap($st, $ed);
+            $this->getCache()->set($cache_key, $results, $expire_duration);
+            Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($results)." 筆，預計 ${expire_duration} 秒後到期)");
+            return $results;
+        }
+        Logger::getInstance()->info('['.$cache_key.'] 快取資料 ... 尚餘'.$this->getValRealPriceMapCacheRemainingTime($st, $ed));
+        return $this->getCache()->get($cache_key);
+    }
+    
 }
