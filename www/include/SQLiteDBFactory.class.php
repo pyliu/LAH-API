@@ -149,6 +149,21 @@ class SQLiteDBFactory {
         return $db_path;
     }
 
+    public static function getValRealpriceMemoStoreDB() {
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR.'val_realprice_memo_store.db';
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "val_realprice_memo_store" (
+                "case_no"	TEXT,
+                "declare_date" TEXT,
+                "declare_note"	TEXT,
+                PRIMARY KEY("case_no")
+            )
+        ');
+        return $db_path;
+    }
+
     public static function getRegAuthChecksStoreDB() {
         $db_path = DB_DIR.DIRECTORY_SEPARATOR.'reg_auth_checks_store.db';
         $sqlite = new DynamicSQLite($db_path);

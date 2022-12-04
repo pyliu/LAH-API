@@ -560,27 +560,31 @@ switch ($_POST["type"]) {
 		} else {
 			$total = count($rows);
 			$baked = array();
+
+			require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteValRealpriceMemoStore.class.php');
+			$sqlite_db = new SQLiteValRealpriceMemoStore();
+
 			foreach ($rows as $row) {
 				$data = new RegCaseData($row);
 				$this_baked = $data->getBakedData();
 
-				// $id = $this_baked['ID'];
-				// this query goes to SQLite DB, return array of result
-				// $result = $sqlite_db->getRegAuthChecksRecord($id);
-				// $this_baked['CASE_NOTIFY_RAW'] = $result;
-				// if (is_array($result) && count($result) === 1) {
-				// 	$auth = $result[0];
-				// 	$this_baked['CASE_NOTIFY_AUTHORITY'] = $auth['authority'];
-				// 	$this_baked['CASE_NOTIFY_NOTE'] = $auth['note'];
-				// } else{
-				// 	// default is 1 that means the case needs to notify applicant
-				// 	$this_baked['CASE_NOTIFY_AUTHORITY'] = 1;
-				// 	$this_baked['CASE_NOTIFY_NOTE'] = '';
-				// }
-
+				$caseNo = $this_baked['P1MP_CASENO'];
+				if (!empty($caseNo)) {
+					// this query goes to SQLite DB, return array of result
+					$result = $sqlite_db->getValRealpriceMemoRecord($caseNo);
+					$this_baked['P1MP_DECLARE_RAW'] = $result;
+					if (is_array($result) && count($result) === 1) {
+						$memo = $result[0];
+						$this_baked['P1MP_DECLARE_DATE'] = $memo['declare_date'];
+						$this_baked['P1MP_DECLARE_NOTE'] = $memo['declare_note'];
+					} else{
+						// default is 1 that means the case needs to notify applicant
+						$this_baked['P1MP_DECLARE_DATE'] = '';
+						$this_baked['P1MP_DECLARE_NOTE'] = '';
+					}
+				}
 				$baked[] = $this_baked;
 			}
-
 			Logger::getInstance()->info("XHR [val_realprice_map] 查詢成功($total)");
 			echoJSONResponse("查詢成功，找到 $total 筆 ${message} 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				// "data_count" => $total,
