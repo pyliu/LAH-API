@@ -1840,7 +1840,7 @@ class Prefetch {
      * 強制重新讀取實價登錄控管案件查詢
      */
     public function reloadValRealPriceMap($st, $ed) {
-        $this->getCache()->del(self::KEYS['VAL_REALPRICE_MAP']);
+        $this->getCache()->del(self::KEYS['VAL_REALPRICE_MAP'].$st.$ed);
         return $this->getValRealPriceMap($st, $ed);
     }
     /**
@@ -1848,7 +1848,7 @@ class Prefetch {
      * default cache time is 15 minutes * 60 seconds = 900 seconds
 	 */
 	public function getValRealPriceMap($st, $ed, $expire_duration = 900) {
-        $cache_key = self::KEYS['VAL_REALPRICE_MAP'];
+        $cache_key = self::KEYS['VAL_REALPRICE_MAP'].$st.$ed;
         if ($this->getCache()->isExpired($cache_key)) {
             Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
             $moiprc = new MOIPRC();
