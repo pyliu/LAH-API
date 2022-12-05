@@ -11,5 +11,7 @@ return array(
     "P1MP_CNFLAG" => "CNFLAG",
     "P1MP_CNDATE" => "CNDATE",
     "P1MP_CNTIME" => "CNTIME",
-    "P1MP_CASETYPE" => "TYPE"
+    "P1MP_CASETYPE" => "申報類別",
+    "P1MP_DECLARE_DATE" => "申報日期",
+    "P1MP_DECLARE_NOTE" => "申報備註"
 );
