@@ -65,6 +65,7 @@ class MOIPRC {
 			WHERE 1 = 1
 				AND s.RM07_1 BETWEEN :bv_st AND :bv_ed
 				AND s.RM09 = '64'
+			ORDER BY s.RM07_1 DESC
 		");
 		$this->db->bind(":bv_st", $st);
 		$this->db->bind(":bv_ed", $ed);

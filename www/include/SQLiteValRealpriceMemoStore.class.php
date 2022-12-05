@@ -18,6 +18,8 @@ class SQLiteValRealpriceMemoStore {
         $stm->bindParam(':bv_declare_date', $row['declare_date']);
         // 申報備註
         $stm->bindParam(':bv_declare_note', $row['declare_note']);
+        // store timestamp
+        $stm->bindValue(':bv_timestamp', time());
 
         return true;
     }
@@ -60,8 +62,8 @@ class SQLiteValRealpriceMemoStore {
 
     public function replace(&$row) {
         $stm = $this->db->prepare("
-            REPLACE INTO ".$this->tbl_name." ('case_no', 'declare_date', 'declare_note')
-            VALUES (:bv_case_no, :bv_declare_date, :bv_declare_note)
+            REPLACE INTO ".$this->tbl_name." ('case_no', 'declare_date', 'declare_note', 'timestamp')
+            VALUES (:bv_case_no, :bv_declare_date, :bv_declare_note, :bv_timestmap)
         ");
         if ($this->bindParams($stm, $row)) {
             return $stm->execute() === FALSE ? false : true;

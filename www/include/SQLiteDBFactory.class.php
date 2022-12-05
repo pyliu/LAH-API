@@ -155,10 +155,12 @@ class SQLiteDBFactory {
         $sqlite->initDB();
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "val_realprice_memo_store" (
-                "case_no"	TEXT,
-                "declare_date" TEXT,
+                "id"	INTEGER,
+                "case_no"	TEXT UNIQUE,
+                "declare_date"	TEXT,
                 "declare_note"	TEXT,
-                PRIMARY KEY("case_no")
+                "timestamp"	INTEGER,
+                PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');
         return $db_path;
