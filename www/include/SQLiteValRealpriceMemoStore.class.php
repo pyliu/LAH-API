@@ -63,7 +63,7 @@ class SQLiteValRealpriceMemoStore {
     public function replace(&$row) {
         $stm = $this->db->prepare("
             REPLACE INTO ".$this->tbl_name." ('case_no', 'declare_date', 'declare_note', 'timestamp')
-            VALUES (:bv_case_no, :bv_declare_date, :bv_declare_note, :bv_timestmap)
+            VALUES (:bv_case_no, :bv_declare_date, :bv_declare_note, :bv_timestamp)
         ");
         if ($this->bindParams($stm, $row)) {
             return $stm->execute() === FALSE ? false : true;
