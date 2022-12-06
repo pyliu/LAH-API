@@ -3,6 +3,7 @@ require_once("init.php");
 require_once("OraDB.class.php");
 require_once("System.class.php");
 require_once("Cache.class.php");
+require_once("LXHWEB.class.php");
 
 class MOIPRC {
 
@@ -70,7 +71,20 @@ class MOIPRC {
 		$this->db->bind(":bv_st", $st);
 		$this->db->bind(":bv_ed", $ed);
 		$this->db->execute();
-		return $this->db->fetchAll();
+		$records = $this->db->fetchAll();
+
+		// set other site's case no data
+		$l3hweb = new LXHWEB();
+		$map = $l3hweb->getRealpriceCaseNoMap($st, $ed);
+		// assign other site's case no into records
+		foreach ($records as $idx => $record) {
+			if (empty(trim($record['P1MP_CASENO'])) || is_null($record['P1MP_CASENO'])) {
+				$key = $record['RM01'].$record['RM02'].$record['RM03'];
+				$records[$idx]['P1MP_CASENO'] = $map[$key];
+			}
+		}
+		
+		return $records;
 	}
 
 }

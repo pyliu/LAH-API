@@ -162,4 +162,55 @@ class LXHWEB {
 		$this->getDB()->execute();
 		return $this->getDB()->fetchAll();
     }
+    /**
+     * 查詢跨所實價登錄序號
+     */
+    public function getREALPRICE1_MAP($site, $st, $ed) {
+        // echo "$site $st $ed <br/>";
+        // find the cases we want, e.g. L1HB0H03.CRSMS
+        $dbUser = "L1${site}0H03";
+        $alphabet = substr(System::getInstance()->getSiteCode(), 1);
+        $code = "${site}${alphabet}1";
+        $sql = "
+            SELECT 
+                t.*
+            FROM ${dbUser}.CRSMS s -- need to filter according to RM07_1/RM09
+            LEFT JOIN ${dbUser}.REALPRICE1_MAP t
+                ON s.RM01 = t.P1MP_RM01
+                AND s.RM02 = t.P1MP_RM02
+                AND s.RM03 = t.P1MP_RM03
+            WHERE 1 = 1
+                AND t.P1MP_RM01 IS NOT NULL
+                AND t.P1MP_RM02 IS NOT NULL
+                AND t.P1MP_RM03 IS NOT NULL
+                AND s.RM07_1 BETWEEN :bv_st AND :bv_ed
+                AND s.RM09 = '64' -- trade case
+                AND s.RM02 = :bv_rm02
+        ";
+        $this->getDB()->parse($sql);
+        $this->getDB()->bind(':bv_st', $st);
+        $this->getDB()->bind(':bv_ed', $ed);
+        $this->getDB()->bind(':bv_rm02', $code);
+		$this->getDB()->execute();
+		return $this->getDB()->fetchAll();
+    }
+    // collect HX offices realprice case no mapping
+    public function getRealpriceCaseNoMap($st, $ed) {
+        $HX = array_merge(
+            $this->getREALPRICE1_MAP('HA', $st, $ed),
+            $this->getREALPRICE1_MAP('HB', $st, $ed),
+            $this->getREALPRICE1_MAP('HC', $st, $ed),
+            $this->getREALPRICE1_MAP('HD', $st, $ed),
+            $this->getREALPRICE1_MAP('HE', $st, $ed),
+            $this->getREALPRICE1_MAP('HF', $st, $ed),
+            $this->getREALPRICE1_MAP('HG', $st, $ed),
+            $this->getREALPRICE1_MAP('HH', $st, $ed)
+        );
+        $map = [];
+        foreach ($HX as $record) {
+            $key = $record['P1MP_RM01'].$record['P1MP_RM02'].$record['P1MP_RM03'];
+            $map[$key] = $record['P1MP_CASENO'];
+        }
+        return $map;
+    }
 }

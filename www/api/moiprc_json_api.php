@@ -1,15 +1,35 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
-require_once(INC_DIR."/MOIEXP.class.php");
+require_once(INC_DIR."/MOIPCR.class.php");
+require_once(INC_DIR."/LXHWEB.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/System.class.php");
 
-$moiexp = new MOIEXP();
 $cache = Cache::getInstance();
 $system = System::getInstance();
 $mock = $system->isMockMode();
 
 switch ($_POST["type"]) {
+	case "val_realprice_caseno_map":
+		$st = $_POST["st_date"];
+		$ed = $_POST["ed_date"];
+		Logger::getInstance()->info("XHR [val_realprice_caseno_map] 查詢實價登錄申報序號資料請求【${st} ~ ${ed}】");
+		if (empty($st) || empty($ed) || $ed < $st) {
+			$message = "時間區間資料不正確【${st} ~ ${ed}】";
+			Logger::getInstance()->info("XHR [val_realprice_caseno_map] $message");
+			echoJSONResponse($message, STATUS_CODE::DEFAULT_FAIL);
+		} else {
+			$lxheb = new LXHWEB();
+			$map = $lxheb->getRealpriceCaseNoMap($st, $ed);
+			$message = "查詢實價登錄申報序號資料成功";
+			$count = count($map);
+			Logger::getInstance()->info("XHR [val_realprice_caseno_map] $message (${count}筆)");
+			echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
+				'data_count' => $count,
+				'raw' => $map
+			));
+		}
+		break;
 	case "val_realprice_memo":
 		require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteValRealpriceMemoStore.class.php');
 		$sqlite_db = new SQLiteValRealpriceMemoStore();

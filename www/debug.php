@@ -1,18 +1,13 @@
 ﻿<?php
 require_once("./include/init.php");
-require_once("./include/Scheduler.class.php");
+require_once("./include/MOIPRC.class.php");
+require_once("./include/LXHWEB.class.php");
 
 try {
-    echo strtotime('+15 mins', time());
-    echo '<br/>';
-    echo strtotime('+1440 mins', time()) - time();
-    echo '<br/>';
-    echo false <= time();
-    // $sd = new Scheduler();
-    // $sd->do();
-    echo '<br/>';
-    echo  mb_check_encoding();
-    
+    echo 'TEST HA 1111201 ~ 1111231 <br/>';
+    $moiprc = new MOIPRC();
+    $map = $moiprc->getRealPriceMap('1111201', '1111231');
+    var_dump($map);
 }
 catch(Exception $e)
 {
