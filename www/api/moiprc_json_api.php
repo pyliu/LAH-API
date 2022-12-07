@@ -20,7 +20,8 @@ switch ($_POST["type"]) {
 			echoJSONResponse($message, STATUS_CODE::DEFAULT_FAIL);
 		} else {
 			$lxheb = new LXHWEB();
-			$map = $lxheb->getRealpriceCaseNoMap($st, $ed);
+			$map = $mock ? $cache->get('val_realprice_caseno_map') : $lxheb->getRealpriceCaseNoMap($st, $ed);
+			$cache->set('val_realprice_caseno_map', $map);
 			$message = "查詢實價登錄申報序號資料成功";
 			$count = count($map);
 			Logger::getInstance()->info("XHR [val_realprice_caseno_map] $message (${count}筆)");
