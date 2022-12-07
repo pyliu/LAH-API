@@ -1,6 +1,6 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
-require_once(INC_DIR."/MOIPCR.class.php");
+require_once(INC_DIR."/MOIPRC.class.php");
 require_once(INC_DIR."/LXHWEB.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/System.class.php");
