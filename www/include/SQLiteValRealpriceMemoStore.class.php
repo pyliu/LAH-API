@@ -50,17 +50,10 @@ class SQLiteValRealpriceMemoStore {
         return !empty($ret);
     }
 
-    public function getValRealpriceMemoRecord($case_no, $reg_no = "") {
+    public function getValRealpriceMemoRecord($case_no) {
         if($stmt = $this->db->prepare("SELECT * from ".$this->tbl_name." WHERE case_no = :bv_case_no")) {
             $stmt->bindParam(':bv_case_no', $case_no);
-            $result = $this->prepareArray($stmt);
-            // fallback to use reg case no to get data
-            if (empty($result)) {
-                if ($stmt = $this->db->prepare("SELECT * from ".$this->tbl_name." WHERE case_no = :bv_case_no")) {
-                    $stmt->bindParam(':bv_case_no', $reg_no);
-                    return $this->prepareArray($stmt);
-                }
-            }
+            return $this->prepareArray($stmt);
         } else {
             Logger::getInstance()->error(__METHOD__.": 取得 $case_no 申報紀錄資料失敗！ (".SQLiteDBFactory::getValRealpriceMemoStoreDB().")");
         }
