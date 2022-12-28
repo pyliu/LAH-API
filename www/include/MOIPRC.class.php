@@ -49,9 +49,14 @@ class MOIPRC {
 			SELECT s.rm01 || '-' || s.rm02 || '-' || s.rm03 as \"RM123\",
 				r.KCNT as \"RM09_CHT\",
 				u.KNAME as \"RM11_CHT\",
+				v.*,
 				t.*,
 				s.*
 			FROM MOICAS.CRSMS s
+			LEFT JOIN MOIPRC.PSCRN v
+				ON s.RM01 = v.SS03
+				AND s.RM02 = v.SS04_1
+				AND s.RM03 = v.SS04_2
 			LEFT JOIN MOIPRC.REALPRICE1_MAP t
 				ON s.RM01 = t.P1MP_RM01
 				AND s.RM02 = t.P1MP_RM02
