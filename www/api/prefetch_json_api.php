@@ -568,10 +568,10 @@ switch ($_POST["type"]) {
 				$data = new RegCaseData($row);
 				$this_baked = $data->getBakedData();
 
-				$caseNo = $this_baked['P1MP_CASENO'];
+				$caseNo = $this_baked['P1MP_CASENO'] ?? $this_baked['ID'];
 				if (!empty($caseNo)) {
 					// this query goes to SQLite DB, return array of result
-					$result = $sqlite_db->getValRealpriceMemoRecord($caseNo);
+					$result = $sqlite_db->getValRealpriceMemoRecord($caseNo, $this_baked['ID']);
 					$this_baked['P1MP_DECLARE_RAW'] = $result;
 					if (is_array($result) && count($result) === 1) {
 						$memo = $result[0];
