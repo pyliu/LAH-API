@@ -46,7 +46,7 @@ class MOIPRC {
 		}
 
 		$this->db->parse("
-			SELECT s.rm01 || '-' || s.rm02 || '-' || s.rm03 as \"RM123\",
+			SELECT DISTINCT s.rm01 || '-' || s.rm02 || '-' || s.rm03 as \"RM123\",
 				r.KCNT as \"RM09_CHT\",
 				u.KNAME as \"RM11_CHT\",
 				v.*,
