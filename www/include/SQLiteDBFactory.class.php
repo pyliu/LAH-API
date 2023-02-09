@@ -23,6 +23,23 @@ class SQLiteDBFactory {
         return $path;
     }
 
+    public static function getRegPDFDB() {
+        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."reg_pdf.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "reg_pdf" (
+                "id"	INTEGER NOT NULL,
+                "filename"	TEXT NOT NULL,
+                "path"	TEXT,
+                "timestamp"	INTEGER NOT NULL,
+                "note"	TEXT,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        return $path;
+    }
+
     public static function getImageDB() {
         $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."image.db";
         $sqlite = new DynamicSQLite($path);
