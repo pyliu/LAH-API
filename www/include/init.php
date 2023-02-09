@@ -41,6 +41,11 @@ if (!file_exists(USER_IMG_DIR) && !is_dir(USER_IMG_DIR)) {
     mkdir(USER_IMG_DIR);       
 }
 
+// to ensure pdf dir exists
+if (!file_exists(UPLOAD_PDF_DIR) && !is_dir(UPLOAD_PDF_DIR)) {
+    mkdir(UPLOAD_PDF_DIR);       
+}
+
 set_exception_handler(function(Throwable $e) {
     Logger::getInstance()->error($e->getMessage());
 });
