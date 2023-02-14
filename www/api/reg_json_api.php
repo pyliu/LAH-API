@@ -18,9 +18,9 @@ switch ($_POST["type"]) {
         // $cache->set('foreigner_pdf_list', $query_result);
 				// $count = count($query_result);
 				// $response_code = STATUS_CODE::SUCCESS_NORMAL;
-        $message = "取的 $count 筆PDF資料";
+        $message = "取得 $count 筆外國人PDF資料";
         echoJSONResponse($message, $response_code, array(
-            "data" => $query_result,
+            "raw" => $query_result,
             "data_count" => $count
 				));
         break;
