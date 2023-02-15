@@ -1,11 +1,11 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
-require_once(INC_DIR."/RegCaseData.class.php");
-require_once(INC_DIR."/Query.class.php");
+// require_once(INC_DIR."/RegCaseData.class.php");
+require_once(INC_DIR."/RegQuery.class.php");
 require_once(INC_DIR."/Cache.class.php");
 require_once(INC_DIR."/System.class.php");
 
-$query = new Query();
+$query = new RegQuery();
 $cache = Cache::getInstance();
 $system = System::getInstance();
 $mock = $system->isMockMode();
@@ -14,13 +14,13 @@ switch ($_POST["type"]) {
     case "foreigner_pdf_list":
         Logger::getInstance()->info("XHR [foreigner_pdf_list] get pdf list request.");
         $count = 0;
-				// $query_result = $mock ? $cache->get('foreigner_pdf_list') : $query->getProblematicCrossCases();
-        // $cache->set('foreigner_pdf_list', $query_result);
-				// $count = count($query_result);
-				// $response_code = STATUS_CODE::SUCCESS_NORMAL;
-        $message = "取得 $count 筆外國人PDF資料";
+				$result = $mock ? $cache->get('foreigner_pdf_list') : $query->getRegPDF($_POST['st'], $_POST['ed'], $_POST['keyword']);
+        $cache->set('foreigner_pdf_list', $result);
+				$count = count($result);
+				$response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "取得 $count 筆外國人PDF資料" : "無法取得外國人PDF資料";
         echoJSONResponse($message, $response_code, array(
-            "raw" => $query_result,
+            "raw" => $result,
             "data_count" => $count
 				));
         break;
