@@ -1,6 +1,6 @@
 <?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR."init.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegPDF.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegForeignerPDF.class.php");
 
 $status = STATUS_CODE::DEFAULT_FAIL;
 $message = '已上傳';
@@ -16,7 +16,7 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
         $timestamp = time();
         $to_file = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.$filename;
 
-        $sqlite_pdf = new SQLiteRegPDF();
+        $sqlite_pdf = new SQLiteRegForeignerPDF();
 
         // $resized = resizeImage($tmp_file, $w, $h);
 

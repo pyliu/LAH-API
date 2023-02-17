@@ -23,16 +23,17 @@ class SQLiteDBFactory {
         return $path;
     }
 
-    public static function getRegPDFDB() {
+    public static function getRegForeignerPDFDB() {
         $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."reg_pdf.db";
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
-            CREATE TABLE IF NOT EXISTS "reg_pdf" (
+            CREATE TABLE IF NOT EXISTS "reg_foreigner_pdf" (
                 "id"	INTEGER NOT NULL,
-                "filename"	TEXT NOT NULL,
-                "path"	TEXT,
-                "timestamp"	INTEGER NOT NULL,
+                "fid"   TEXT NOT NULL,
+                "fname" TEXT NOT NULL,
+                "createtime"	INTEGER NOT NULL,
+                "modifytime"	INTEGER,
                 "note"	TEXT,
                 PRIMARY KEY("id" AUTOINCREMENT)
             )

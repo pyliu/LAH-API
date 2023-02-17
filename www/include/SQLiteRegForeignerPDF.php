@@ -2,7 +2,7 @@
 require_once('init.php');
 require_once('SQLiteDBFactory.class.php');
 
-class SQLiteRegPDF {
+class SQLiteRegForeignerPDF {
     private $db;
 
     private function bindParams(&$stm, &$row) {
@@ -38,7 +38,7 @@ class SQLiteRegPDF {
     }
 
     function __construct() {
-        $this->db = new SQLite3(SQLiteDBFactory::getRegPDFDB());
+        $this->db = new SQLite3(SQLiteDBFactory::getRegForeignerPDFDB());
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");
         $this->db->exec("BEGIN TRANSACTION");
