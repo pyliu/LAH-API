@@ -3,9 +3,10 @@ require_once('init.php');
 require_once('DynamicSQLite.class.php');
 
 class SQLiteDBFactory {
-    
+    private static $db_folder = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db";
+
     public static function getMonitorMailDB() {
-        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."monitor_mail.db";
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."monitor_mail.db";
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -24,7 +25,7 @@ class SQLiteDBFactory {
     }
 
     public static function getRegForeignerPDFDB() {
-        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."reg_pdf.db";
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."reg_foreigner_pdf.db";
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -44,7 +45,7 @@ class SQLiteDBFactory {
     }
 
     public static function getImageDB() {
-        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."image.db";
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."image.db";
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -84,7 +85,7 @@ class SQLiteDBFactory {
     }
 
     public static function getIPResolverDB() {
-        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."IPResolver.db";
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."IPResolver.db";
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -103,7 +104,7 @@ class SQLiteDBFactory {
     }
 
     public static function getRKEYNALLDB() {
-        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."RKEYN_ALL.db";
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."RKEYN_ALL.db";
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -120,7 +121,7 @@ class SQLiteDBFactory {
     }
 
     public static function getRKEYNDB() {
-        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."RKEYN.db";
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."RKEYN.db";
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -136,7 +137,7 @@ class SQLiteDBFactory {
     }
 
     public static function getCaseCodeDB() {
-        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."CaseCode.db";
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."CaseCode.db";
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
@@ -218,7 +219,7 @@ class SQLiteDBFactory {
     }
 
     public static function getSYSAUTH1DB() {
-        $path = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."SYSAUTH1.db";
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."SYSAUTH1.db";
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
