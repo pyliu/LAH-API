@@ -11,19 +11,13 @@ class SQLiteRegForeignerPDF {
             return false;
         }
 
-        if (!file_exists($row['path'])) {
-            Logger::getInstance()->error(__METHOD__.": ".$row['path']);
-            Logger::getInstance()->error(__METHOD__.": 檔案不存在，無法綁定BLOB資料。");
-            return false;
-        }
-
-        $stm->bindParam(':name', $row['name']);
-        $stm->bindParam(':path', $row['path']);
-        $stm->bindValue(':data', file_get_contents($row['path']), SQLITE3_BLOB);
-        $stm->bindValue(':iana', mime_content_type($row['path']));
-        $stm->bindValue(':size', filesize($row['path']));
-        $stm->bindValue(':timestamp', time());
+        $stm->bindParam(':year', $row['year']);
+        $stm->bindParam(':number', $row['number']);
+        $stm->bindParam(':fid', $row['fid']);
+        $stm->bindParam(':fname', $row['fname']);
         $stm->bindParam(':note', $row['note']);
+        $stm->bindParam(':createtime', $row['createtime']);
+        $stm->bindValue(':modifytime', time());
 
         return true;
     }
