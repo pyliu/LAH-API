@@ -27,4 +27,5 @@ node_modules
 **/aerotropolis/assets/file/*
 **/include/*.txt
 **/monitor/*
+**/pdf/*
 **/thunder-tests/*
