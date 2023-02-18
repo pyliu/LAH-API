@@ -46,7 +46,11 @@ switch ($_POST["type"]) {
 					'account' => $system->get('MONITOR_MAIL_ACCOUNT'),
 					'password' => $system->get('MONITOR_MAIL_PASSWORD'),
 					'ssl' => $system->get('MONITOR_MAIL_SSL') === 'true'
-				)
+				),
+				'API_SERVER_IP' => $system->get('API_SERVER_IP'),
+				'API_SERVER_PORT' => $system->get('API_SERVER_PORT'),
+				'WS_SERVER_IP' => $system->get('WS_SERVER_IP'),
+				'WS_SERVER_PORT' => $system->get('WS_SERVER_PORT')
 			)
         ));
 		break;
