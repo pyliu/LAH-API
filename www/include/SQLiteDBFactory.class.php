@@ -30,11 +30,13 @@ class SQLiteDBFactory {
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "reg_foreigner_pdf" (
                 "id"	INTEGER NOT NULL,
+                "year"   TEXT NOT NULL,
+                "number"   TEXT NOT NULL,
                 "fid"   TEXT NOT NULL,
                 "fname" TEXT NOT NULL,
+                "note"	TEXT,
                 "createtime"	INTEGER NOT NULL,
                 "modifytime"	INTEGER,
-                "note"	TEXT,
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');

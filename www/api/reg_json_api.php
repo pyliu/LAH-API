@@ -14,7 +14,7 @@ switch ($_POST["type"]) {
     case "foreigner_pdf_list":
         Logger::getInstance()->info("XHR [foreigner_pdf_list] get pdf list request.");
         $count = 0;
-				$result = $mock ? $cache->get('foreigner_pdf_list') : $query->getRegPDF($_POST['st'], $_POST['ed'], $_POST['keyword']);
+				$result = $mock ? $cache->get('foreigner_pdf_list') : $query->getRegForeignerPDF($_POST['st'], $_POST['ed'], $_POST['keyword']);
         $cache->set('foreigner_pdf_list', $result);
 				$count = count($result);
 				$response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;

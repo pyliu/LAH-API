@@ -19,7 +19,7 @@ class RegQuery {
 
 	function __destruct() {}
 
-	public function getRegPDF($st, $ed, $keyword = '') {
+	public function getRegForeignerPDF($st, $ed, $keyword = '') {
 		$rows = array();
 		return $rows;
 	}
