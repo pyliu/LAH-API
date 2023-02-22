@@ -47,93 +47,68 @@ class SQLiteRegForeignerPDF {
         return $this->db->lastInsertRowID();
     }
 
-    // public function exists($path) {
-    //     $id = $this->db->querySingle("SELECT id from image WHERE path = '$path'");
-    //     if (!$id) {
-    //         $id = $this->db->querySingle("SELECT id from image WHERE name = '$path'");
-    //     }
-    //     return $id;
-    // }
+    public function exists($year, $number, $fid) {
+        return $this->db->querySingle("SELECT id from reg_foreigner_pdf WHERE year = '$year' and number = '$number' and fid = '$fid'");
+    }
 
-    // public function addImage($post) {
-    //     $id = $this->exists($post['path']);
-    //     if ($id) {
-    //         if (!file_exists($post['path'])) {
-    //             Logger::getInstance()->error(__METHOD__.": ".$post['path']);
-    //             Logger::getInstance()->error(__METHOD__.": 存放檔案不存在，無法更新BLOB資料。");
-    //             return false;
-    //         }
-    //         Logger::getInstance()->warning(__METHOD__.": 影像資料已存在，將更新BLOB資料。(id: $id)");
-    //         $stm = $this->db->prepare("UPDATE image SET data = :data, note = :note, size = :size, iana = :iana WHERE id = :id");
-    //         $stm->bindParam(':id', $id);
-    //         $stm->bindParam(':note', $post['note']);
-    //         $stm->bindValue(':data', file_get_contents($post['path']), SQLITE3_BLOB);
-    //         $stm->bindParam(':iana', mime_content_type($post['path']));
-    //         $stm->bindParam(':size', filesize($post['path']));
-    //         return $stm->execute() === FALSE ? false : $id;
-    //     } else {
-    //         $stm = $this->db->prepare("
-    //             INSERT INTO image ('name', 'path', 'data', 'iana', 'size', 'timestamp', 'note')
-    //             VALUES (:name, :path, :data, :iana, :size, :timestamp, :note)
-    //         ");
-    //         if ($this->bindParams($stm, $post)) {
-    //             return $stm->execute() === FALSE ? false : $this->getLastInsertedId();
-    //         }
-    //     }
-    //     return false;
-    // }
+    public function add($post) {
+        $id = $this->exists($post['year'], $post['number'], $post['fid']);
+        if ($id) {
+            Logger::getInstance()->warning(__METHOD__.": 外國人資料已存在，將更新它。(id: $id)");
+            $post['id'] = $id;
+            return $this->update($post);
+        } else {
+            $stm = $this->db->prepare("
+                INSERT INTO reg_foreigner_pdf ('year', 'number', 'fid', 'fname', 'note', 'createtime', 'modifytime')
+                VALUES (:year, :number, :fid, :fname, :note, :createtime, :modifytime)
+            ");
+            
+            $stm->bindParam(':year', $post['year']);
+            $stm->bindParam(':number', $post['number']);
+            $stm->bindParam(':fid', $post['fid']);
+            $stm->bindParam(':fname', $post['fname']);
+            $stm->bindParam(':note', $post['note']);
+            $stm->bindValue(':createtime', time());
+            $stm->bindValue(':modifytime', time());
 
-    // public function getImageData($name_or_path) {
-    //     $id = $this->db->querySingle("SELECT id from image WHERE name = '$name_or_path' ORDER BY timestamp DESC");
-    //     if (!$id) {
-    //         $id = $this->db->querySingle("SELECT id from image WHERE path = '$name_or_path' ORDER BY timestamp DESC");
-    //     }
-    //     if($stmt = $this->db->prepare("SELECT * FROM image WHERE id = :bv_id")) {
-    //         $stmt->bindParam(':bv_id', $id);
-    //         return $this->prepareArray($stmt);
-    //     } else {
-    //         Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM image WHERE id = '${id}'」SQL描述。");
-    //     }
-    //     return array();
-    // }
+            return $stm->execute() === FALSE ? false : $this->getLastInsertedId();
+        }
+        return false;
+    }
 
-    // public function getImageByFilename($filename) {
-    //     $id = $this->db->querySingle("SELECT id from image WHERE name = '$filename' ORDER BY timestamp DESC");
-    //     if ($id) {
-    //         return $this->getImageById($id);
-    //     }
-    //     return false;
-    // }
+    public function update($post) {
+        $id = $post['id'];
+        $year = $post['year'];
+        $number = $post['number'];
+        $fid = $post['fid'];
+        Logger::getInstance()->warning(__METHOD__.": 更新外國人資料。(id: $id, year: $year, number: $number, fid: $fid)");
+        $stm = $this->db->prepare("UPDATE reg_foreigner_pdf SET year = :year, number = :number, fid = :fid, fname = :fname, note = :note, modifytime = :modifytime WHERE id = :id");
+        $stm->bindParam(':id', $id);
+        $stm->bindParam(':year', $year);
+        $stm->bindParam(':number', $number);
+        $stm->bindParam(':fid', $fid);
+        $stm->bindParam(':fname', $post['fname']);
+        $stm->bindParam(':note', $post['note']);
+        $stm->bindValue(':modifytime', time());
+        return $stm->execute() !== FALSE;
+    }
 
-    // public function getImageByPath($path) {
-    //     $id = $this->db->querySingle("SELECT id from image WHERE path = '$path' ORDER BY timestamp DESC");
-    //     if ($id) {
-    //         return $this->getImageById($id);
-    //     }
-    //     return false;
-    // }
-
-    // public function getImageById($id) {
-    //     $stream = $this->db->openBlob('image', 'data', $id);
-    //     $binary = stream_get_contents($stream);
-    //     fclose($stream); // mandatory, otherwise the next line would fail
-    //     return $binary;
-    // }
-
-    // public function getImages($threadhold = 604800) {
-    //     /**
-    //      * default get entry within a year
-    //      * a year: 31556926
-    //      * a month: 2629743
-    //      * a week: 604800
-    //      **/
-    //     $ondemand = time() - $threadhold;
-    //     if($stmt = $this->db->prepare("SELECT * FROM image WHERE timestamp > :bv_ondemand ORDER BY timestamp DESC")) {
-    //         $stmt->bindParam(':bv_ondemand', $ondemand);
-    //         return $this->prepareArray($stmt);
-    //     } else {
-    //         Logger::getInstance()->warning(__METHOD__.": 無法執行「SELECT * FROM image WHERE timestamp > $ondemand ORDER BY timestamp DESC」SQL描述。");
-    //     }
-    //     return array();
-    // }
+    public function delete($params) {
+        if (is_array($params)) {
+            $year = $params['year'];
+            $number = $params['number'];
+            $fid = $params['fid'];
+            $stm = $this->db->prepare("DELETE FROM reg_foreigner_pdf WHERE year = :year and number = :number and fid = :fid");
+            $stm->bindParam(':year', $year);
+            $stm->bindParam(':number', $number);
+            $stm->bindParam(':fid', $fid);
+            return $stm->execute() !== FALSE;
+        } else {
+            // not array, treat it as string
+            $id = $params;
+            $stm = $this->db->prepare("DELETE FROM reg_foreigner_pdf WHERE id = :id");
+            $stm->bindParam(':id', $id);
+            return $stm->execute() !== FALSE;
+        }
+    }
 }
