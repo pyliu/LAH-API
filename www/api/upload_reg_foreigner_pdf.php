@@ -38,6 +38,7 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
             $status = $row_id !== false ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
             $message = $status === STATUS_CODE::SUCCESS_NORMAL ? "已新增資料並儲存PDF完成" : "於資料庫新增資料失敗";
             $payload['file'] = $to_file;
+            $payload['id'] = $row_id;
         } else {    
             $message = "無法移動上傳檔案 $tmp_file → $to_file";
             Logger::getInstance()->error(__FILE__.': '.$message);
