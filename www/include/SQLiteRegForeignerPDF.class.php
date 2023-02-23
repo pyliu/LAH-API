@@ -71,9 +71,8 @@ class SQLiteRegForeignerPDF {
                 INSERT INTO reg_foreigner_pdf ('year', 'number', 'fid', 'fname', 'note', 'createtime', 'modifytime')
                 VALUES (:year, :number, :fid, :fname, :note, :createtime, :modifytime)
             ");
-            
             $stm->bindParam(':year', $post['year']);
-            $stm->bindParam(':number', $post['number']);
+            $stm->bindValue(':number', str_pad($post['number'], 6, '0', STR_PAD_LEFT));
             $stm->bindParam(':fid', $post['fid']);
             $stm->bindParam(':fname', $post['fname']);
             $stm->bindParam(':note', $post['note']);
@@ -94,7 +93,7 @@ class SQLiteRegForeignerPDF {
         $stm = $this->db->prepare("UPDATE reg_foreigner_pdf SET year = :year, number = :number, fid = :fid, fname = :fname, note = :note, modifytime = :modifytime WHERE id = :id");
         $stm->bindParam(':id', $id);
         $stm->bindParam(':year', $year);
-        $stm->bindParam(':number', $number);
+        $stm->bindParam(':number', str_pad($number, 6, '0', STR_PAD_LEFT));
         $stm->bindParam(':fid', $fid);
         $stm->bindParam(':fname', $post['fname']);
         $stm->bindParam(':note', $post['note']);
