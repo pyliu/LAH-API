@@ -31,10 +31,22 @@ class SQLiteRegForeignerPDF {
     }
 
     public function exists($year, $number, $fid) {
+        $number = str_pad($number, 6, '0', STR_PAD_LEFT);
         return $this->db->querySingle("SELECT id from reg_foreigner_pdf WHERE year = '$year' and number = '$number' and fid = '$fid'");
     }
 
-    public function get($st, $ed, $keyword = '') {
+    public function getOne($id) {
+        Logger::getInstance()->info(__METHOD__.": 取得 $id 資料");
+        if($stmt = $this->db->prepare('SELECT * from reg_foreigner_pdf WHERE id = :bv_id')) {
+            $stmt->bindParam(':bv_id', $id);
+            $result = $this->prepareArray($stmt);
+            return count($result) > 0 ? $result[0] : false;
+        }
+        Logger::getInstance()->error(__METHOD__.": 無法取得 $id 資料！ (".SQLiteDBFactory::getRegForeignerPDFDB().")");
+        return false;
+    }
+
+    public function search($st, $ed, $keyword = '') {
         $st_date = date("Y-m-d", $st);
         $ed_date = date("Y-m-d", $ed);
         Logger::getInstance()->info(__METHOD__.": 搜尋 $st_date ~ $ed_date 區間資料，關鍵字: $keyword");
@@ -63,6 +75,7 @@ class SQLiteRegForeignerPDF {
     }
 
     public function add($post) {
+        $post['number'] = str_pad($post['number'], 6, '0', STR_PAD_LEFT);
         $id = $this->exists($post['year'], $post['number'], $post['fid']);
         if ($id) {
             Logger::getInstance()->warning(__METHOD__.": 外國人資料已存在，將更新它。(id: $id)");
@@ -74,7 +87,7 @@ class SQLiteRegForeignerPDF {
                 VALUES (:year, :number, :fid, :fname, :note, :createtime, :modifytime)
             ");
             $stm->bindParam(':year', $post['year']);
-            $stm->bindValue(':number', str_pad($post['number'], 6, '0', STR_PAD_LEFT));
+            $stm->bindValue(':number', $post['number']);
             $stm->bindParam(':fid', $post['fid']);
             $stm->bindParam(':fname', $post['fname']);
             $stm->bindParam(':note', $post['note']);
@@ -89,13 +102,13 @@ class SQLiteRegForeignerPDF {
     public function update($post) {
         $id = $post['id'];
         $year = $post['year'];
-        $number = $post['number'];
+        $number = str_pad($post['number'], 6, '0', STR_PAD_LEFT);
         $fid = $post['fid'];
         Logger::getInstance()->warning(__METHOD__.": 更新外國人資料。(id: $id, year: $year, number: $number, fid: $fid)");
         $stm = $this->db->prepare("UPDATE reg_foreigner_pdf SET year = :year, number = :number, fid = :fid, fname = :fname, note = :note, modifytime = :modifytime WHERE id = :id");
         $stm->bindParam(':id', $id);
         $stm->bindParam(':year', $year);
-        $stm->bindParam(':number', str_pad($number, 6, '0', STR_PAD_LEFT));
+        $stm->bindParam(':number', $number);
         $stm->bindParam(':fid', $fid);
         $stm->bindParam(':fname', $post['fname']);
         $stm->bindParam(':note', $post['note']);
@@ -106,7 +119,7 @@ class SQLiteRegForeignerPDF {
     public function delete($params) {
         if (is_array($params)) {
             $year = $params['year'];
-            $number = $params['number'];
+            $number = str_pad($params['number'], 6, '0', STR_PAD_LEFT);
             $fid = $params['fid'];
             $stm = $this->db->prepare("DELETE FROM reg_foreigner_pdf WHERE year = :year and number = :number and fid = :fid");
             $stm->bindParam(':year', $year);

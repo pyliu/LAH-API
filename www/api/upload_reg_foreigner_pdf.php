@@ -17,7 +17,7 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
         $tmp_file = $_FILES['file']['tmp_name'];
 
         $payload['year'] = $year = $_POST['year'];
-        $payload['number'] = $number = $_POST['number'];
+        $payload['number'] = $number = str_pad($_POST['number'], 6, '0', STR_PAD_LEFT);;
         $payload['fid'] = $fid = $_POST['fid'];
         $payload['fname'] = $fname = $_POST['fname'];
         $payload['note'] = $note = $_POST['note'];
