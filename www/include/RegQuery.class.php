@@ -25,4 +25,23 @@ class RegQuery {
 		$rows = $sqlite_rfpdf->search($st, $ed, $keyword);
 		return $rows;
 	}
+
+	public function removeRegForeignerPDF($id) {
+		$sqlite_rfpdf = new SQLiteRegForeignerPDF();
+		$orig = $sqlite_rfpdf->getOne($id);
+		$result = $sqlite_rfpdf->delete($id);
+		if ($result) {
+			Logger::getInstance()->info(__METHOD__.": ✅ foreigner record removed.");
+			// continue to delete pdf file
+			$parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.$orig['year'];
+      $orig_file = $parent_dir.DIRECTORY_SEPARATOR.$orig['number']."_".$orig['fid']."_".$orig['fname'].".pdf";
+      $unlink_result = @unlink($orig_file);
+			if (!$unlink_result) {Logger::getInstance()->error("⚠ 刪除 $orig_file 檔案失敗!");
+			}
+			return true;
+		} else {
+			Logger::getInstance()->warning(__METHOD__.": ⚠️ foreigner record does not remove.");
+		}
+		return false;
+	}
 }

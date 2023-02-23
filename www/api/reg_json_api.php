@@ -21,13 +21,19 @@ switch ($_POST["type"]) {
 				$response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "取得 $count 筆外國人PDF資料" : "無法取得外國人PDF資料";
         Logger::getInstance()->info("XHR [foreigner_pdf_list] $message");
-        echoJSONResponse($message, $response_code, array(
-            "raw" => $result,
-            "data_count" => $count
-				));
+        echoJSONResponse($message, $response_code, array( "raw" => $result ));
         break;
-	default:
-		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
-		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
-		break;
+    case "remove_foreigner_pdf":
+        Logger::getInstance()->info("XHR [remove_foreigner_pdf] remove foreigner pdf request.");
+        $id = $_POST['id'];
+        $result = $query->removeRegForeignerPDF($id);
+        $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除外國人PDF資料 ($id)" : "無法刪除外國人PDF資料 ($id)";
+        Logger::getInstance()->info("XHR [remove_foreigner_pdf] $message");
+        echoJSONResponse($message, $response_code);
+        break;
+    default:
+        Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
+        echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
+        break;
 }
