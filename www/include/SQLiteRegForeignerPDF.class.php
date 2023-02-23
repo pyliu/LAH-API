@@ -5,23 +5,6 @@ require_once('SQLiteDBFactory.class.php');
 class SQLiteRegForeignerPDF {
     private $db;
 
-    private function bindParams(&$stm, &$row) {
-        if ($stm === false) {
-            Logger::getInstance()->error(__METHOD__.": 無法綁定變數 \$stm is false.");
-            return false;
-        }
-
-        $stm->bindParam(':year', $row['year']);
-        $stm->bindParam(':number', $row['number']);
-        $stm->bindParam(':fid', $row['fid']);
-        $stm->bindParam(':fname', $row['fname']);
-        $stm->bindParam(':note', $row['note']);
-        $stm->bindParam(':createtime', $row['createtime']);
-        $stm->bindValue(':modifytime', time());
-
-        return true;
-    }
-
     private function prepareArray(&$stmt) {
         $result = $stmt->execute();
         $return = [];
