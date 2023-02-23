@@ -1,8 +1,9 @@
 <?php
 require_once("init.php");
 require_once("OraDB.class.php");
-require_once("RegCaseData.class.php");
 require_once("System.class.php");
+require_once("RegCaseData.class.php");
+require_once("SQLiteRegForeignerPDF.class.php");
 
 class RegQuery {
 	private $site = 'HA';
@@ -20,7 +21,8 @@ class RegQuery {
 	function __destruct() {}
 
 	public function getRegForeignerPDF($st, $ed, $keyword = '') {
-		$rows = array();
+		$sqlite_rfpdf = new SQLiteRegForeignerPDF();
+		$rows = $sqlite_rfpdf->get($st, $ed, $keyword);
 		return $rows;
 	}
 }

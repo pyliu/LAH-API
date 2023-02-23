@@ -34,6 +34,32 @@ class SQLiteRegForeignerPDF {
         return $this->db->querySingle("SELECT id from reg_foreigner_pdf WHERE year = '$year' and number = '$number' and fid = '$fid'");
     }
 
+    public function get($st, $ed, $keyword = '') {
+        $st_date = date("Y-m-d", $st);
+        $ed_date = date("Y-m-d", $ed);
+        Logger::getInstance()->info(__METHOD__.": 搜尋 $st_date ~ $ed_date 區間資料，關鍵字: $keyword");
+        $result = array();
+        if (empty($keyword)) {
+            if($stmt = $this->db->prepare('SELECT * from reg_foreigner_pdf WHERE createtime BETWEEN :bv_createtime_st AND :bv_createtime_ed')) {
+                $stmt->bindParam(':bv_createtime_st', $st);
+                $stmt->bindParam(':bv_createtime_ed', $ed);
+                $result = $this->prepareArray($stmt);
+            } else {
+                Logger::getInstance()->error(__METHOD__.": 無法取得 $st_date ~ $ed_date 資料！ (".SQLiteDBFactory::getRegForeignerPDFDB().")");
+            }
+        } else {
+            if($stmt = $this->db->prepare('SELECT * from reg_foreigner_pdf WHERE createtime BETWEEN :bv_createtime_st AND :bv_createtime_ed AND (note LIKE :bv_keyword OR fname LIKE :bv_keyword OR fid LIKE :bv_keyword)')) {
+                $stmt->bindParam(':bv_createtime_st', $st);
+                $stmt->bindParam(':bv_createtime_ed', $ed);
+                $stmt->bindValue(':bv_keyword', "%$keyword%");
+                $result = $this->prepareArray($stmt);
+            } else {
+                Logger::getInstance()->error(__METHOD__.": 無法取得 $st_date ~ $ed_date 內含 %$keyword% 資料！ (".SQLiteDBFactory::getRegForeignerPDFDB().")");
+            }
+        }
+        return $result;
+    }
+
     public function add($post) {
         $id = $this->exists($post['year'], $post['number'], $post['fid']);
         if ($id) {

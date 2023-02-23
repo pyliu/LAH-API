@@ -14,11 +14,12 @@ switch ($_POST["type"]) {
     case "foreigner_pdf_list":
         Logger::getInstance()->info("XHR [foreigner_pdf_list] get pdf list request.");
         $count = 0;
-				$result = $mock ? $cache->get('foreigner_pdf_list') : $query->getRegForeignerPDF($_POST['st'], $_POST['ed'], $_POST['keyword']);
+				$result = $mock ? $cache->get('foreigner_pdf_list') : $query->getRegForeignerPDF($_POST['start_ts'], $_POST['end_ts'], $_POST['keyword']);
         $cache->set('foreigner_pdf_list', $result);
 				$count = count($result);
 				$response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "取得 $count 筆外國人PDF資料" : "無法取得外國人PDF資料";
+        Logger::getInstance()->info("XHR [foreigner_pdf_list] $message");
         echoJSONResponse($message, $response_code, array(
             "raw" => $result,
             "data_count" => $count
