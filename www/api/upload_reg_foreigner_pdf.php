@@ -6,6 +6,7 @@ $status = STATUS_CODE::DEFAULT_FAIL;
 $message = '未知的失敗';
 $filename = '';
 $tmp_file = '';
+$payload = array();
 
 Logger::getInstance()->info("收到上傳登記外國人PDF請求");
 
@@ -14,13 +15,12 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
     $extension = pathinfo($filename, PATHINFO_EXTENSION);
     if (strtoupper($extension) === 'PDF') {
         $tmp_file = $_FILES['file']['tmp_name'];
-        $timestamp = time();
 
-        $year = $_POST['year'];
-        $number = $_POST['number'];
-        $fid = $_POST['fid'];
-        $fname = $_POST['fname'];
-        $note = $_POST['note'];
+        $payload['year'] = $year = $_POST['year'];
+        $payload['number'] = $number = $_POST['number'];
+        $payload['fid'] = $fid = $_POST['fid'];
+        $payload['fname'] = $fname = $_POST['fname'];
+        $payload['note'] = $note = $_POST['note'];
 
         // make sure the parent dir has been created
         $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.$year;
@@ -34,39 +34,14 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
         if ($moved) {
             // cont. to add database record ...
             $sqlite_pdf = new SQLiteRegForeignerPDF();
-            $status = STATUS_CODE::SUCCESS_NORMAL;
-            $message = "已新增儲存完成";
-            $filename = $to_file;
+            $row_id = $sqlite_pdf->add($_POST);
+            $status = $row_id !== false ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
+            $message = $status === STATUS_CODE::SUCCESS_NORMAL ? "已新增資料並儲存PDF完成" : "於資料庫新增資料失敗";
+            $payload['file'] = $to_file;
         } else {    
             $message = "無法移動上傳檔案 $tmp_file → $to_file";
             Logger::getInstance()->error(__FILE__.': '.$message);
         }
-
-
-        // $resized = resizeImage($tmp_file, $w, $h);
-
-        // if (imagejpeg($resized, $to_file, $q)) {
-        //     $status = STATUS_CODE::SUCCESS_NORMAL;
-        //     $message = '影像已儲存 '.$to_file;
-
-        //     Logger::getInstance()->info("檔案已存放到 $to_file");
-            
-        //     $sqlite_image = new SQLiteImage();
-        //     $inserted_id = $sqlite_image->addImage(array(
-        //         "name" => $filename,
-        //         "path" => $to_file,
-        //         "note" => $_POST["note"]
-        //     ));
-            
-        //     if ($inserted_id === false) {
-        //         Logger::getInstance()->error("新增一筆影像BLOB資料失敗");
-        //     } else {
-        //         Logger::getInstance()->info("上傳影像BLOB資料成功 ($inserted_id)");
-        //         $converted = base64EncodedImage($to_file);
-        //     }
-        // } else {
-        //     $message = '處理失敗 '.$tmp_file.' => '.$to_file;
-        // }
     } else {
         $message = "檔案不是PDF";
         Logger::getInstance()->error(__FILE__.': 檔案不是PDF。 '.print_r($_FILES, true));
@@ -76,5 +51,5 @@ if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
 echo json_encode(array(
     'status' => $status,
     'message'  => $message,
-    'filename' => $filename
+    'payload' => $payload
 ));
