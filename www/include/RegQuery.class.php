@@ -22,7 +22,7 @@ class RegQuery {
 
 	public function getRegForeignerPDF($st, $ed, $keyword = '') {
 		$sqlite_rfpdf = new SQLiteRegForeignerPDF();
-		$rows = $sqlite_rfpdf->get($st, $ed, $keyword);
+		$rows = $sqlite_rfpdf->search($st, $ed, $keyword);
 		return $rows;
 	}
 }
