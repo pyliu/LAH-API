@@ -45,7 +45,7 @@ class MOICAS
 	/**
 	 * Find empty record that causes user from SUR section can't generate notification application pdf ... 
 	 */
-	public function getCMCRDMC03Records($year = '')
+	public function getCMCRDTempRecords($year = '')
 	{
 		if (!$this->db_ok) {
 			return array();
@@ -66,5 +66,21 @@ class MOICAS
 		$this->db->bind(":bv_Y_record", 'Y%');
 		$this->db->execute();
 		return $this->db->fetchAll();
+	}
+
+	public function removeCMCRDRecords($mc01, $mc02)
+	{
+		if (!$this->db_ok) {
+			return false;
+		}
+		$this->db->parse("
+		  delete from MOICAS.CMCRD
+			where 1=1
+				and mc01 = :bv_mc01
+				and mc02 = :bv_mc02
+		");
+		$this->db->bind(":bv_mc01", $mc01);
+		$this->db->bind(":bv_mc02", $mc02);
+		return $this->db->execute() === FALSE ? false : true;
 	}
 }
