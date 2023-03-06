@@ -45,10 +45,14 @@ class MOICAS
 	/**
 	 * Find empty record that causes user from SUR section can't generate notification application pdf ... 
 	 */
-	public function getCMCRDEmptyMC03Records($year)
+	public function getCMCRDEmptyMC03Records($year = '')
 	{
 		if (!$this->db_ok) {
 			return array();
+		}
+		if (empty($year)) {
+			// default query this year
+			$year = date('Y') - 1911;
 		}
 		$this->db->parse("
 			select * from MOICAS.CMCRD t
