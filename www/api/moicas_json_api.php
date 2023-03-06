@@ -12,7 +12,7 @@ $mock = $system->isMockMode();
 switch ($_POST["type"]) {
 	case "cmcrd_tmp_check":
 		Logger::getInstance()->info("XHR [cmcrd_tmp_check] check CMCRD empty temp record request.");
-		$rows = $mock ? $cache->get('cmcrd_tmp_check') : $moicas->getCMCRDEmptyMC03Records($_POST['year']);
+		$rows = $mock ? $cache->get('cmcrd_tmp_check') : $moicas->getCMCRDMC03Records($_POST['year']);
 		$cache->set('cmcrd_tmp_check', $rows);
 		$message = is_array($rows) ? "目前查到CMCRD裡有 ".count($rows)." 筆暫存('Y%')資料" : '查詢CMCRD失敗';
 		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;

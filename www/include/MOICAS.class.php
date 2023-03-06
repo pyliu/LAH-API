@@ -45,7 +45,7 @@ class MOICAS
 	/**
 	 * Find empty record that causes user from SUR section can't generate notification application pdf ... 
 	 */
-	public function getCMCRDEmptyMC03Records($year = '')
+	public function getCMCRDMC03Records($year = '')
 	{
 		if (!$this->db_ok) {
 			return array();
@@ -59,7 +59,7 @@ class MOICAS
 			where 1=1
 				and mc01 = :bv_year
 				and mc02 like :bv_Y_record
-				and (mc03 is null or mc03 = '')
+				--and (mc03 is null or mc03 = '')
 			order by mc02
 		");
 		$this->db->bind(":bv_year", $year);
