@@ -228,6 +228,14 @@ function utf8ize($mixed) {
  * print the json string
  */
 function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array = array()) {
+    // auto count the number of popular using data key
+    if (is_array($in_array['raw'])) {
+        $in_array['data_count'] = count($in_array['raw']);
+    } else if (is_array($in_array['data'])) {
+        $in_array['data_count'] = count($in_array['data']);
+    } else if (is_array($in_array['items'])) {
+        $in_array['data_count'] = count($in_array['items']);
+    }
     $value = array_merge(array(
 		"status" => $status,
         "data_count" => 0,
