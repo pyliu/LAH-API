@@ -10,6 +10,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYNALL.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."StatsSQLite.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."Prefetch.class.php");
 
 class Scheduler {
     private $tmp;
@@ -291,6 +292,8 @@ class Scheduler {
                 $this->wipeOutdatedIPEntries();
                 $this->wipeOutdatedMonitorMail();
                 $this->wipeOutdatedLog();
+                // wipe out expired cached data once a day
+                Prefetch::wipeExpiredData();
                 /**
                  * 匯入WEB DB固定資料
                  */

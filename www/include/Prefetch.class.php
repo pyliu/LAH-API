@@ -93,6 +93,27 @@ class Prefetch {
     }
 
     function __destruct() { }
+
+    /**
+     * Wipe expired cache data
+     */
+    public static function wipeExpiredData() {
+        $now = date("YmdHis");
+        $prefetch_db = new SQLite3(self::PREFETCH_SQLITE_DB);
+        if ($stm = $prefetch_db->prepare("DELETE FROM cache WHERE expire < :time")) {
+            $stm->bindParam(':time', $now, SQLITE3_TEXT);
+            $ret = $stm->execute();
+            if (!$ret) {
+                Logger::getInstance()->error(__METHOD__.": 移除過期資料失敗【".$now.", ".$prefetch_db->lastErrorMsg()."】");
+            }
+            Logger::getInstance()->info(__METHOD__.": 移除過期快取資料成功。");
+            return $ret;
+        }
+        
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM cache WHERE expire < :time ] 失敗。($now)");
+        return false;
+    }
+
     /**
      * 目前為公告狀態案件快取剩餘時間
      */
