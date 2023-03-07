@@ -280,7 +280,6 @@ class StatsSQLite {
     }
 
     public function wipeAPConnHistory($ip_end) {
-        
         $one_day_ago = date("YmdHis", time() - 24 * 3600);
         $ap_db = new SQLite3(SQLiteDBFactory::getAPConnStatsDB($ip_end));
         if ($stm = $ap_db->prepare("DELETE FROM ap_conn_history WHERE log_time < :time")) {
