@@ -23,7 +23,7 @@ switch ($_POST["type"]) {
 		break;
 	case "remove_cmcrd_tmp_record":
 		Logger::getInstance()->info("XHR [remove_cmcrd_tmp_record] remove CMCRD temp record request.");
-		$result = $mock ? $cache->get('remove_cmcrd_tmp_record') : $moicas->removeCMCRDRecords($_POST['mc01'], $_POST['mc02']);
+		$result = $mock ? $cache->get('remove_cmcrd_tmp_record') : $moicas->removeCMCRDRecords($_POST['MC01'], $_POST['MC02']);
 		$cache->set('remove_cmcrd_tmp_record', $result);
 		$message = $result !== false ? '刪除 '.$_POST['MC01'].'-'.$_POST['MC02'].' CMCRD 暫存檔成功' : '刪除 CMCRD 暫存檔失敗【'.$_POST['MC01'].', '.$_POST['MC02'].'】';
 		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
