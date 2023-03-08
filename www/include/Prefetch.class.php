@@ -98,19 +98,19 @@ class Prefetch {
      * Wipe expired cache data
      */
     public static function wipeExpiredData() {
-        $now = date("YmdHis");
+        $one_week_ago_seconds = time() - 7 * 24 * 3600;
         $prefetch_db = new SQLite3(self::PREFETCH_SQLITE_DB);
         if ($stm = $prefetch_db->prepare("DELETE FROM cache WHERE expire < :time")) {
-            $stm->bindParam(':time', $now, SQLITE3_TEXT);
+            $stm->bindParam(':time', $one_week_ago_seconds, SQLITE3_TEXT);
             $ret = $stm->execute();
             if (!$ret) {
-                Logger::getInstance()->error(__METHOD__.": 移除過期資料失敗【".$now.", ".$prefetch_db->lastErrorMsg()."】");
+                Logger::getInstance()->error(__METHOD__.": 移除過期資料失敗【".$one_week_ago_seconds.", ".$prefetch_db->lastErrorMsg()."】");
             }
             Logger::getInstance()->info(__METHOD__.": 移除過期快取資料成功。");
             return $ret;
         }
         
-        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM cache WHERE expire < :time ] 失敗。($now)");
+        Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM cache WHERE expire < :time ] 失敗。($one_week_ago_seconds)");
         return false;
     }
 
