@@ -430,8 +430,8 @@ switch ($_POST["type"]) {
 					$this_baked['CASE_NOTIFY_AUTHORITY'] = $auth['authority'];
 					$this_baked['CASE_NOTIFY_NOTE'] = $auth['note'];
 				} else{
-					// default is 1 that means the case needs to notify applicant
-					$this_baked['CASE_NOTIFY_AUTHORITY'] = 1;
+					// default is 0 that means the case don't need to notify applicant
+					$this_baked['CASE_NOTIFY_AUTHORITY'] = 0;
 					$this_baked['CASE_NOTIFY_NOTE'] = '';
 				}
 
