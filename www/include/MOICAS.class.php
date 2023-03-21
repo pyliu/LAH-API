@@ -1,60 +1,32 @@
 <?php
 require_once("init.php");
-require_once("OraDB.class.php");
+require_once("OraDBWrapper.class.php");
 require_once("System.class.php");
 require_once("Cache.class.php");
 
 class MOICAS
 {
-
-	private $db;
-	private $db_ok = true;
-	private $site = 'HA';
-	private $site_code = 'A';
-	private $site_number = 1;
-
-	private function isDBReachable($txt = __METHOD__)
-	{
-		$this->db_ok = System::getInstance()->isDBReachable();
-		if (!$this->db_ok) {
-			Logger::getInstance()->error('資料庫無法連線，無法取得資料。[' . $txt . ']');
-		}
-		return $this->db_ok;
+	private $db_wrapper = null;
+	function __construct() {
+		$this->db_wrapper = new OraDBWrapper();
 	}
 
-	function __construct()
-	{
-		if ($this->isDBReachable()) {
-			$type = OraDB::getPointDBTarget();
-			$this->db = new OraDB($type);
-		}
-		$this->site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
-		if (!empty($this->site)) {
-			$this->site_code = $this->site[1];
-			$this->site_number = ord($this->site_code) - ord('A');
-		}
-	}
-
-	function __destruct()
-	{
-		if ($this->db) {
-			$this->db->close();
-		}
-		$this->db = null;
+	function __destruct() {
+		$this->db_wrapper = null;
 	}
 	/**
 	 * Find empty record that causes user from SUR section can't generate notification application pdf ... 
 	 */
 	public function getCMCRDTempRecords($year = '')
 	{
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 		if (empty($year)) {
 			// default query this year
 			$year = date('Y') - 1911;
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			select * from MOICAS.CMCRD t
 			where 1=1
 				and mc01 = :bv_year
@@ -62,25 +34,25 @@ class MOICAS
 				--and (mc03 is null or mc03 = '')
 			order by mc02
 		");
-		$this->db->bind(":bv_year", $year);
-		$this->db->bind(":bv_Y_record", 'Y%');
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_Y_record", 'Y%');
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function removeCMCRDRecords($mc01, $mc02)
 	{
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 		  delete from MOICAS.CMCRD
 			where 1=1
 				and mc01 = :bv_mc01
 				and mc02 = :bv_mc02
 		");
-		$this->db->bind(":bv_mc01", $mc01);
-		$this->db->bind(":bv_mc02", $mc02);
-		return $this->db->execute() === FALSE ? false : true;
+		$this->db_wrapper->getDB()->bind(":bv_mc01", $mc01);
+		$this->db_wrapper->getDB()->bind(":bv_mc02", $mc02);
+		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 	}
 }
