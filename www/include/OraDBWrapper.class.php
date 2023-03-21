@@ -5,8 +5,7 @@ require_once("System.class.php");
 require_once("Cache.class.php");
 
 class OraDBWrapper {
-    
-    private $db = null;
+	private $db = null;
 	private $db_ok = false;
 	private $site = 'HA';
 	private $site_code = 'A';
@@ -42,15 +41,23 @@ class OraDBWrapper {
 		$this->db = null;
 	}
 
-    public function getSite() {
-        return $this->site;
-    }
+	public function getSite() {
+		return $this->site;
+	}
 
-    public function reachable() {
-        return $this->db_ok;
-    }
+	public function getSiteCode() {
+		return $this->site_code;
+	}
 
-    public function getDB() {
-        return $this->db;
-    }
+	public function getSiteNumber() {
+		return $this->site_number;
+	}
+
+	public function reachable() {
+		return $this->db_ok;
+	}
+
+	public function getDB() {
+		return $this->db;
+	}
 }
