@@ -209,7 +209,9 @@ class StatsOracle {
         $this->db->execute();
         return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
-
+    /**
+     * the stats data will be collected every night (22:00) on cross site AP
+     */
     public function getRegaCount($day) {
         if (!$this->checkYearMonthDay($day)) {
             return false;

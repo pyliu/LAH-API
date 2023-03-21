@@ -4,6 +4,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR.'Query.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Prefetch.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Message.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Notification.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'StatsOracle.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'StatsSQLite.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Temperature.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteUser.class.php');
@@ -642,6 +643,41 @@ class WatchDog {
         ));
     }
 
+    private function checkRegaDailyStatsData($day = '') {
+        if ($this->isOn($this->schedule["once_a_day"])) {
+            if (empty($day)) {
+                $tw_date = new Datetime("now");
+                // tw format
+                $tw_date->modify("-1911 year");
+                // default is yesterday
+                $tw_date->modify("-1 day");
+                $day = ltrim($tw_date->format("Ymd"), "0");	
+            }
+            $stats = new StatsOracle();
+            $raw = $stats->getRegaCount($day);
+            // not found the data
+            if (count($raw) === 0) {
+                $this->sendRegaDailyStatsMessage($day);
+            }
+        }
+    }
+
+    private function sendRegaDailyStatsMessage($day) {
+        $msg = new Message();
+
+        $content = "⚠ 系統目前找不到 $day 產製的登記土地建物統計資料\r\n\r\n請確認跨域AP排程是否正常執行，若無可手動於地政系統內 登記系統/統計/土地建物統計表/土地建物統計表產製作業 項下產製。";
+        
+        $system = System::getInstance();
+        $adm_ips = $system->getRoleAdminIps();
+        foreach ($adm_ips as $adm_ip) {
+            if ($adm_ip == '::1') {
+                continue;
+            }
+            $sn = $msg->send('土地建物統計問題通知', $content, $adm_ip);
+            Logger::getInstance()->info("土地建物統計問題通知訊息已送出給 $adm_ip ($sn)");
+        }
+    }
+
     function __construct() {
         $this->stats = new StatsSQLite();
         $this->host_ip = getLocalhostIP();
@@ -654,7 +690,7 @@ class WatchDog {
         try {
             if ($this->isOfficeHours()) {
                 /**
-                 * 案件檢測作業
+                 * 系統檢測作業
                  */
                 $this->checkCrossSiteData();
                 $this->checkValCrossSiteData();
@@ -663,6 +699,7 @@ class WatchDog {
                 $this->findRegExpiredAnnouncementCases();
                 $this->findSurOverdueCases();
                 $this->findSurNearOverdueCases();
+                $this->checkRegaDailyStatsData();
                 return true;
             }
             return false;
