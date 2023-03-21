@@ -1,58 +1,34 @@
 <?php
 require_once("init.php");
-require_once("OraDB.class.php");
+require_once("OraDBWrapper.class.php");
 require_once("System.class.php");
 require_once("Cache.class.php");
 
 class MOIEXP {
+	private $db_wrapper = null;
 
-	private $db;
-	private $db_ok = true;
-	private $site = 'HA';
-	private $site_code = 'A';
-	private $site_number = 1;
+	function __construct() {
+		$this->db_wrapper = new OraDBWrapper();
+	}
 
-    private function isDBReachable($txt = __METHOD__) {
-        $this->db_ok = System::getInstance()->isDBReachable();
-        if (!$this->db_ok) {
-            Logger::getInstance()->error('資料庫無法連線，無法取得資料。['.$txt.']');
-        }
-        return $this->db_ok;
-    }
-
-    function __construct() {
-		if ($this->isDBReachable()) {
-			$type = OraDB::getPointDBTarget();
-			$this->db = new OraDB($type);
-		}
-		$this->site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
-		if (!empty($this->site)) {
-			$this->site_code = $this->site[1];
-			$this->site_number = ord($this->site_code) - ord('A');
-		}
-    }
-
-    function __destruct() {
-		if ($this->db) {
-			$this->db->close();
-		}
-        $this->db = null;
-    }
+	function __destruct() {
+		$this->db_wrapper = null;
+	}
 
 	public function getCodeData($year) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 		$sql = "
 			-- 案件(REG + SUR)數量統計 BY 年
 			SELECT t.RM01 AS YEAR, t.RM02 AS CODE, q.KCNT AS CODE_NAME, COUNT(*) AS COUNT,
 				(CASE
-					--WHEN REGEXP_LIKE(t.RM02, '^".$this->site."[[:alpha:]]1$') THEN 'reg.HBX1'
-					WHEN RM02 IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1') THEN 'reg.HBX1'
-					WHEN t.RM02 LIKE 'H".$this->site_number."%'  THEN 'reg.H2XX'
-					WHEN t.RM02 LIKE '%".$this->site."'  THEN 'reg.XXHB'
-					WHEN t.RM02 LIKE 'H%".$this->site_code."1' THEN 'reg.HXB1'
-					WHEN t.RM02 LIKE '".$this->site."%' THEN 'reg.HB'
+					--WHEN REGEXP_LIKE(t.RM02, '^".$this->db_wrapper->getSite()."[[:alpha:]]1$') THEN 'reg.HBX1'
+					WHEN RM02 IN ('".$this->db_wrapper->getSite()."A1', '".$this->db_wrapper->getSite()."B1', '".$this->db_wrapper->getSite()."C1', '".$this->db_wrapper->getSite()."D1', '".$this->db_wrapper->getSite()."E1', '".$this->db_wrapper->getSite()."F1', '".$this->db_wrapper->getSite()."G1', '".$this->db_wrapper->getSite()."H1') THEN 'reg.HBX1'
+					WHEN t.RM02 LIKE 'H".$this->db_wrapper->getSiteNumber()."%'  THEN 'reg.H2XX'
+					WHEN t.RM02 LIKE '%".$this->db_wrapper->getSite()."'  THEN 'reg.XXHB'
+					WHEN t.RM02 LIKE 'H%".$this->db_wrapper->getSiteCode()."1' THEN 'reg.HXB1'
+					WHEN t.RM02 LIKE '".$this->db_wrapper->getSite()."%' THEN 'reg.HB'
 					ELSE '登記案件'
 				END) AS CODE_TYPE FROM MOICAS.CRSMS t
 			LEFT JOIN MOIADM.RKEYN q ON q.kcde_1 = '04' AND q.kcde_2 = t.rm02
@@ -66,18 +42,18 @@ class MOIEXP {
 			ORDER BY YEAR, CODE
 		";
 		
-		$this->db->parse($sql);
-		$this->db->bind(":bv_year", $year);
-        $this->db->execute();
-        return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->parse($sql);
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function getEasycardPayment($qday = '') {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 		// AA100 付款方式代碼，EXPK付款方式表格 (K02 => 中文)
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT t.*, s.K02
 			FROM MOIEXP.EXPAA t
 			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
@@ -86,35 +62,35 @@ class MOIEXP {
 		if (empty($qday)) {
 			global $week_ago;
 			// fetch all data wthin a week back
-			$this->db->bind(":bv_qday", $week_ago);
+			$this->db_wrapper->getDB()->bind(":bv_qday", $week_ago);
 		} else {
 			if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
             	return false;
 			}
-			$this->db->bind(":bv_qday", $qday);
+			$this->db_wrapper->getDB()->bind(":bv_qday", $qday);
 		}
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function fixEasycardPayment($qday, $pc_num) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
 		// ex: UPDATE MOIEXP.EXPAA SET AA106 = '1' WHERE AA01 = '1080321' AND AA106 <> '1' AND AA04 = '0015746';
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			UPDATE MOIEXP.EXPAA SET AA106 = '1' WHERE AA01 = :bv_qday AND AA106 <> '1' AND AA04 = :bv_pc_num
 		");
-		$this->db->bind(":bv_qday", $qday);
-		$this->db->bind(":bv_pc_num", $pc_num);
+		$this->db_wrapper->getDB()->bind(":bv_qday", $qday);
+		$this->db_wrapper->getDB()->bind(":bv_pc_num", $pc_num);
 		// UPDATE/INSERT can not use fetch after execute ... 
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 		return true;
 	}
 
 	public function getExpkItems() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 		/*
@@ -135,13 +111,13 @@ class MOIEXP {
 			14	內政部線上申辦
 			15	桃園e指通線上申辦
 		 */
-		$this->db->parse("SELECT * FROM MOIEXP.EXPK t ORDER BY K01");
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->parse("SELECT * FROM MOIEXP.EXPK t ORDER BY K01");
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function getExpacItems($year, $num) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -171,61 +147,61 @@ class MOIEXP {
 			40	107年度登記罰鍰
 			41	108年度登記罰鍰
 		 */
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT *
 			FROM MOIEXP.EXPAC t
 			LEFT JOIN MOIEXP.EXPE p
 				ON p.E20 = t.AC20
 			WHERE t.AC04 = :bv_num AND t.AC25 = :bv_year
         ");
-		$this->db->bind(":bv_year", $year);
-		$this->db->bind(":bv_num", $num);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_num", $num);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function modifyExpacItem($year, $num, $code, $amount) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
 		// ex: UPDATE MOIEXP.EXPAC SET AC20 = '35' WHERE AC04 = '0021131' AND AC25 = '108' AND AC30 = '280';
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			UPDATE MOIEXP.EXPAC SET AC20 = :bv_code WHERE AC04 = :bv_pc_num AND AC25 = :bv_year AND AC30 = :bv_amount
 		");
-		$this->db->bind(":bv_year", $year);
-		$this->db->bind(":bv_pc_num", $num);
-		$this->db->bind(":bv_code", $code);
-		$this->db->bind(":bv_amount", $amount);
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_pc_num", $num);
+		$this->db_wrapper->getDB()->bind(":bv_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_amount", $amount);
 		// UPDATE/INSERT can not use fetch after execute ... 
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 		return true;
 	}
 
 	public function getExpaaData($qday, $num) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
 		if (empty($num)) {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT t.*, s.K02 AS AA100_CHT
 				FROM MOIEXP.EXPAA t
 				LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
 				WHERE t.AA01 = :bv_qday
 			");
 		} else {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT t.*, s.K02 AS AA100_CHT
 				FROM MOIEXP.EXPAA t
 				LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
 				WHERE t.AA04 = :bv_num AND t.AA01 = :bv_qday
 			");
-			$this->db->bind(":bv_num", $num);
+			$this->db_wrapper->getDB()->bind(":bv_num", $num);
 		}
-		$this->db->bind(":bv_qday", $qday);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_qday", $qday);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function getBakedExpaaData($rows) {
@@ -248,23 +224,23 @@ class MOIEXP {
 	}
 
 	public function getExpaaDataByPc($year, $keyword) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT t.*, s.K02 AS AA100_CHT
 			FROM MOIEXP.EXPAA t
 			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
 			WHERE t.AA04 = :bv_pcnum AND t.AA01 LIKE :bv_year
 		");
-		$this->db->bind(":bv_pcnum", $keyword);
-		$this->db->bind(":bv_year", "${year}%");
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_pcnum", $keyword);
+		$this->db_wrapper->getDB()->bind(":bv_year", "${year}%");
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function getExpaaMaxPc($year) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return '0';
 		}
 
@@ -272,36 +248,36 @@ class MOIEXP {
 			return '0';
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT t.*, s.K02 AS AA100_CHT
 			FROM MOIEXP.EXPAA t
 			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
 			WHERE t.AA01 LIKE :bv_year AND rownum = 1
 			ORDER BY t.AA04 DESC
 		");
-		$this->db->bind(":bv_year", "${year}%");
-		$this->db->execute();
-		$row = $this->db->fetch();
+		$this->db_wrapper->getDB()->bind(":bv_year", "${year}%");
+		$this->db_wrapper->getDB()->execute();
+		$row = $this->db_wrapper->getDB()->fetch();
 		return empty($row) ? "0" : ltrim($row['AA04'], "0");
 	}
 
 	public function getExpaaDataByAa($keyword) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT t.*, s.K02 AS AA100_CHT
 			FROM MOIEXP.EXPAA t
 			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
 			WHERE t.AA05 = :bv_aa
 		");
-		$this->db->bind(":bv_aa", $keyword);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_aa", $keyword);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function getExpaaLatestAa($year) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return '';
 		}
 
@@ -309,21 +285,21 @@ class MOIEXP {
 			return '';
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT t.*, s.K02 AS AA100_CHT
 			FROM MOIEXP.EXPAA t
 			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
 			WHERE t.AA01 LIKE :bv_year AND rownum = 1
 			ORDER BY t.AA04 DESC
 		");
-		$this->db->bind(":bv_year", "${year}%");
-		$this->db->execute();
-		$row = $this->db->fetch();
+		$this->db_wrapper->getDB()->bind(":bv_year", "${year}%");
+		$this->db_wrapper->getDB()->execute();
+		$row = $this->db_wrapper->getDB()->fetch();
 		return empty($row) ? "" : ltrim($row['AA05'], "");
 	}
 
 	public function updateExpaaData($column, $date, $number, $update_val) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
@@ -331,21 +307,21 @@ class MOIEXP {
 			return false;
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			UPDATE MOIEXP.EXPAA SET ${column} = :bv_update_value WHERE AA01 = :bv_aa01 AND AA04 = :bv_aa04
 		");
 
-		$this->db->bind(":bv_update_value", $update_val);
-		$this->db->bind(":bv_aa01", $date);
-		$this->db->bind(":bv_aa04", $number);
+		$this->db_wrapper->getDB()->bind(":bv_update_value", $update_val);
+		$this->db_wrapper->getDB()->bind(":bv_aa01", $date);
+		$this->db_wrapper->getDB()->bind(":bv_aa04", $number);
 		
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 
 		return true;
 	}
 
 	public function getDummyObFees() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -354,18 +330,18 @@ class MOIEXP {
 		$this_year = ltrim($tw_date->format("Y"), "0");	// ex: 109
 
 		// use '9' + year(3 digits) + '000' to stand for the obsolete fee application
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			select * from MOIEXP.EXPAA t
 			where aa04 like '9' || :bv_year || '%'
 			order by AA01 desc, AA04 desc
 		");
-		$this->db->bind(":bv_year", $this_year);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_year", $this_year);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function addDummyObFee($date, $pc_num, $operator, $fee_number, $reason) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 		try {
@@ -383,17 +359,17 @@ class MOIEXP {
 			}
 
 			$sql = "INSERT INTO MOIEXP.EXPAA (AA01,AA04,AA05,AA06,AA07,AA08,AA09,AA02,AA24,AA25,AA39,AA104) VALUES (:bv_date, :bv_pc_num, :bv_fee_num, '1', '0', '0', '1', :bv_date, :bv_date, :bv_year, :bv_operator, :bv_reason)";
-			$this->db->parse($sql);
-			$this->db->bind(":bv_date", $date);
-			$this->db->bind(":bv_year", substr($date, 0, 3));
-			$this->db->bind(":bv_pc_num", $pc_num);
-			$this->db->bind(":bv_fee_num", $fee_number);
-			$this->db->bind(":bv_operator", $operator);
-			$this->db->bind(":bv_reason", iconv("utf-8", "big5", $reason));
+			$this->db_wrapper->getDB()->parse($sql);
+			$this->db_wrapper->getDB()->bind(":bv_date", $date);
+			$this->db_wrapper->getDB()->bind(":bv_year", substr($date, 0, 3));
+			$this->db_wrapper->getDB()->bind(":bv_pc_num", $pc_num);
+			$this->db_wrapper->getDB()->bind(":bv_fee_num", $fee_number);
+			$this->db_wrapper->getDB()->bind(":bv_operator", $operator);
+			$this->db_wrapper->getDB()->bind(":bv_reason", iconv("utf-8", "big5", $reason));
 
 			Logger::getInstance()->info(__METHOD__.": 插入 SQL \"$sql\"");
 
-			$this->db->execute();
+			$this->db_wrapper->getDB()->execute();
 			return true;
 		} catch (Exception $ex) {
 			Logger::getInstance()->warning(__METHOD__.": ".$ex->getMessage());
@@ -402,11 +378,11 @@ class MOIEXP {
 	}
 	
 	public function getExpeItems() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
-		$this->db->parse("select * from MOIEXP.EXPE t");
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->parse("select * from MOIEXP.EXPE t");
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 }
