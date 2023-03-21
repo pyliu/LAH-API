@@ -817,7 +817,7 @@ class Query {
 		");
 		$this->db->bind(":bv_qmonth", $query_month);
 		$this->db->bind(":bv_city", mb_convert_encoding('桃園市', "big5"));
-        $this->db->bind(":bv_county", mb_convert_encoding('桃園縣', "big5"));
+    $this->db->bind(":bv_county", mb_convert_encoding('桃園縣', "big5"));
 		$this->db->execute();
 		return $this->db->fetchAll();
 	}
