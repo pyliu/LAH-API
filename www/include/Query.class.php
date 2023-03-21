@@ -1,16 +1,11 @@
 <?php
 require_once("init.php");
-require_once("OraDB.class.php");
+require_once("OraDBWrapper.class.php");
 require_once("RegCaseData.class.php");
 require_once("System.class.php");
 
 class Query {
-
-	private $db;
-	private $db_ok = true;
-	private $site = 'HA';
-	private $site_code = 'A';
-	private $site_number = 1;
+	private $db_wrapper = null;
 
 	private function checkPID($id) {
 		if( !$id ) {
@@ -64,47 +59,28 @@ class Query {
 		return false;
 	}
 
-    private function isDBReachable($txt = __METHOD__) {
-        $this->db_ok = System::getInstance()->isDBReachable();
-        if (!$this->db_ok) {
-            Logger::getInstance()->error('資料庫無法連線，無法取得資料。['.$txt.']');
-        }
-        return $this->db_ok;
-    }
+	function __construct() {
+		$this->db_wrapper = new OraDBWrapper();
+	}
 
-    function __construct() {
-		if ($this->isDBReachable()) {
-			$type = OraDB::getPointDBTarget();
-			$this->db = new OraDB($type);
-		}
-		$this->site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
-		if (!empty($this->site)) {
-			$this->site_code = $this->site[1];
-			$this->site_number = ord($this->site_code) - ord('A');
-		}
-    }
-
-    function __destruct() {
-		if ($this->db) {
-			$this->db->close();
-		}
-        $this->db = null;
-    }
+	function __destruct() {
+		$this->db_wrapper = null;
+	}
 
 	public function getCodeData($year) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 		$sql = "
 			-- 案件(REG + SUR)數量統計 BY 年
 			SELECT t.RM01 AS YEAR, t.RM02 AS CODE, q.KCNT AS CODE_NAME, COUNT(*) AS COUNT,
 				(CASE
-					--WHEN REGEXP_LIKE(t.RM02, '^".$this->site."[[:alpha:]]1$') THEN 'reg.HBX1'
-					WHEN RM02 IN ('".$this->site."A1', '".$this->site."B1', '".$this->site."C1', '".$this->site."D1', '".$this->site."E1', '".$this->site."F1', '".$this->site."G1', '".$this->site."H1') THEN 'reg.HBX1'
-					WHEN t.RM02 LIKE 'H".$this->site_number."%'  THEN 'reg.H2XX'
-					WHEN t.RM02 LIKE '%".$this->site."'  THEN 'reg.XXHB'
-					WHEN t.RM02 LIKE 'H%".$this->site_code."1' THEN 'reg.HXB1'
-					WHEN t.RM02 LIKE '".$this->site."%' THEN 'reg.HB'
+					--WHEN REGEXP_LIKE(t.RM02, '^".$this->db_wrapper->getSite()."[[:alpha:]]1$') THEN 'reg.HBX1'
+					WHEN RM02 IN ('".$this->db_wrapper->getSite()."A1', '".$this->db_wrapper->getSite()."B1', '".$this->db_wrapper->getSite()."C1', '".$this->db_wrapper->getSite()."D1', '".$this->db_wrapper->getSite()."E1', '".$this->db_wrapper->getSite()."F1', '".$this->db_wrapper->getSite()."G1', '".$this->db_wrapper->getSite()."H1') THEN 'reg.HBX1'
+					WHEN t.RM02 LIKE 'H".$this->db_wrapper->getSiteNumber()."%'  THEN 'reg.H2XX'
+					WHEN t.RM02 LIKE '%".$this->db_wrapper->getSite()."'  THEN 'reg.XXHB'
+					WHEN t.RM02 LIKE 'H%".$this->db_wrapper->getSiteCode()."1' THEN 'reg.HXB1'
+					WHEN t.RM02 LIKE '".$this->db_wrapper->getSite()."%' THEN 'reg.HB'
 					ELSE '登記案件'
 				END) AS CODE_TYPE FROM MOICAS.CRSMS t
 			LEFT JOIN MOIADM.RKEYN q ON q.kcde_1 = '04' AND q.kcde_2 = t.rm02
@@ -118,14 +94,14 @@ class Query {
 			ORDER BY YEAR, CODE
 		";
 		
-		$this->db->parse($sql);
-		$this->db->bind(":bv_year", $year);
-        $this->db->execute();
-        return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->parse($sql);
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll();
 	}
 	
 	public function getSectionRALIDCount($cond = "") {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -152,18 +128,18 @@ class Query {
 			GROUP BY m.KCDE_2, m.KCNT, t.AA46, q.KNAME
 		";
 
-		$this->db->parse($prefix.$postfix);
+		$this->db_wrapper->getDB()->parse($prefix.$postfix);
 		if (!empty($cond)) {
-			$this->db->bind(":bv_cond", iconv("utf-8", "big5", ltrim($cond, '0')));
+			$this->db_wrapper->getDB()->bind(":bv_cond", iconv("utf-8", "big5", ltrim($cond, '0')));
 		}
 
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 		
-		return $this->db->fetchAll();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function getCertLog($section_code, $numbers) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -256,26 +232,26 @@ class Query {
 		";
 		//$sql = mb_convert_encoding($sql, "big5", "utf-8");
 		// $sql = iconv("utf-8", "big5", $sql);
-		$this->db->parse($sql);
-		$this->db->bind(":bv_section_code", $section_code);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->parse($sql);
+		$this->db_wrapper->getDB()->bind(":bv_section_code", $section_code);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 	
 	public function getProblematicCrossCases() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
 		// global $week_ago;
-		$this->db->parse("SELECT * FROM SCRSMS WHERE RM02 LIKE 'H%".$this->site_code."1' AND RM03 LIKE '%0' AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL)");
-		// $this->db->bind(":bv_week_ago", $week_ago);
-        $this->db->execute();
-        return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->parse("SELECT * FROM SCRSMS WHERE RM02 LIKE 'H%".$this->db_wrapper->getSiteCode()."1' AND RM03 LIKE '%0' AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL)");
+		// $this->db_wrapper->getDB()->bind(":bv_week_ago", $week_ago);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function fixProblematicCrossCases($id) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
@@ -283,37 +259,37 @@ class Query {
             return false;
 		}
 		
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			UPDATE MOICAS.CRSMS SET RM99 = 'Y', RM100 = :bv_hold_code, RM100_1 = :bv_county_code, RM101 = :bv_receive_code, RM101_1 = :bv_county_code
 			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
 		");
 
 		$code = substr($id, 3, 4);
-		$this->db->bind(":bv_rm01_year", substr($id, 0, 3));
-        $this->db->bind(":bv_rm02_code", $code);
-		$this->db->bind(":bv_rm03_number", substr($id, 7, 6));
-		$this->db->bind(":bv_county_code", $code[0]);
-		$this->db->bind(":bv_hold_code", $code[0].$code[1]);
-		$this->db->bind(":bv_receive_code", $code[0].$code[2]);
+		$this->db_wrapper->getDB()->bind(":bv_rm01_year", substr($id, 0, 3));
+        $this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_rm03_number", substr($id, 7, 6));
+		$this->db_wrapper->getDB()->bind(":bv_county_code", $code[0]);
+		$this->db_wrapper->getDB()->bind(":bv_hold_code", $code[0].$code[1]);
+		$this->db_wrapper->getDB()->bind(":bv_receive_code", $code[0].$code[2]);
 		// UPDATE/INSERT can not use fetch after execute ... 
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 		return true;
 	}
 
 	public function getPSCRNProblematicCrossCases() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
 		// global $week_ago;
-		$this->db->parse("SELECT * FROM MOIPRC.PSCRN WHERE SS04_1 IN ('H".$this->site_code."A1', 'H".$this->site_code."B1', 'H".$this->site_code."C1', 'H".$this->site_code."D1', 'H".$this->site_code."E1', 'H".$this->site_code."F1', 'H".$this->site_code."G1', 'H".$this->site_code."H1') AND (SS99 is NULL OR SS100 is NULL OR SS100_1 is NULL OR SS101 is NULL OR SS101_1 is NULL)");
-		// $this->db->bind(":bv_week_ago", $amonth);
-        $this->db->execute();
-        return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->parse("SELECT * FROM MOIPRC.PSCRN WHERE SS04_1 IN ('H".$this->db_wrapper->getSiteCode()."A1', 'H".$this->db_wrapper->getSiteCode()."B1', 'H".$this->db_wrapper->getSiteCode()."C1', 'H".$this->db_wrapper->getSiteCode()."D1', 'H".$this->db_wrapper->getSiteCode()."E1', 'H".$this->db_wrapper->getSiteCode()."F1', 'H".$this->db_wrapper->getSiteCode()."G1', 'H".$this->db_wrapper->getSiteCode()."H1') AND (SS99 is NULL OR SS100 is NULL OR SS100_1 is NULL OR SS101 is NULL OR SS101_1 is NULL)");
+		// $this->db_wrapper->getDB()->bind(":bv_week_ago", $amonth);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function fixPSCRNProblematicCrossCases($id) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
@@ -321,25 +297,25 @@ class Query {
             return false;
 		}
 		
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			UPDATE MOIPRC.PSCRN SET SS99 = 'Y', SS100 = :bv_hold_code, SS100_1 = :bv_county_code, SS101 = :bv_receive_code, SS101_1 = :bv_county_code
 			WHERE SS03 = :bv_ss03_year AND SS04_1 = :bv_ss04_1_code AND SS04_2 = :bv_ss04_2_number
 		");
 
 		$code = substr($id, 3, 4);
-		$this->db->bind(":bv_ss03_year", substr($id, 0, 3));
-        $this->db->bind(":bv_ss04_1_code", $code);
-		$this->db->bind(":bv_ss04_2_number", substr($id, 7, 6));
-		$this->db->bind(":bv_county_code", $code[0]);
-		$this->db->bind(":bv_hold_code", $code[0].$code[1]);
-		$this->db->bind(":bv_receive_code", $code[0].$code[2]);
+		$this->db_wrapper->getDB()->bind(":bv_ss03_year", substr($id, 0, 3));
+        $this->db_wrapper->getDB()->bind(":bv_ss04_1_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_ss04_2_number", substr($id, 7, 6));
+		$this->db_wrapper->getDB()->bind(":bv_county_code", $code[0]);
+		$this->db_wrapper->getDB()->bind(":bv_hold_code", $code[0].$code[1]);
+		$this->db_wrapper->getDB()->bind(":bv_receive_code", $code[0].$code[2]);
 		// UPDATE/INSERT can not use fetch after execute ... 
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 		return true;
 	}
 
 	public function getMaxNumByYearWord($year, $code) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return '0';
 		}
 
@@ -349,37 +325,37 @@ class Query {
 
 		$num_key = "RM03";
 		if (array_key_exists($code, SUR_WORD)) {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT * from MOICAS.CMSMS t
 				WHERE MM01 = :bv_year AND MM02 = :bv_code AND rownum = 1
 				ORDER BY MM01 DESC, MM03 DESC
 			");
 			$num_key = "MM03";
 		} else if (array_key_exists($code, PRC_WORD)) {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT * from MOIPRC.PSCRN t
 				WHERE SS03 = :bv_year AND SS04_1 = :bv_code AND rownum = 1
 				ORDER BY SS03 DESC, SS04_1 DESC
 			");
 			$num_key = "SS04_2";
 		} else  {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT * from MOICAS.CRSMS t
 				WHERE RM01 = :bv_year AND RM02 = :bv_code AND rownum = 1
 				ORDER BY RM01 DESC, RM03 DESC
 			");
 		}
 		
-		$this->db->bind(":bv_year", $year);
-		$this->db->bind(":bv_code", trim($code));
-		$this->db->execute();
-		$row = $this->db->fetch();
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_code", trim($code));
+		$this->db_wrapper->getDB()->execute();
+		$row = $this->db_wrapper->getDB()->fetch();
 
 		return empty($row) ? "0" : ltrim($row[$num_key], "0");
 	}
 
 	public function getCRSMSCasesByPID($id) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -387,7 +363,7 @@ class Query {
         if (!$this->checkPID($id)) {
             return false;
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT t.*, w.KCNT AS \"RM09_CHT\"
 			FROM MOICAS.CRSMS t
 			LEFT JOIN MOIADM.RKEYN w ON t.RM09 = w.KCDE_2 AND w.KCDE_1 = '06'   -- 登記原因
@@ -397,13 +373,13 @@ class Query {
 			OR t.RM25 = :bv_id
 			ORDER BY RM07_1 DESC
         ");
-		$this->db->bind(":bv_id", $id);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_id", $id);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function getCMSMSCasesByPID($id) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -411,7 +387,7 @@ class Query {
 		if (!$this->checkPID($id)) {
             return false;
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT t.*, w.KCNT AS \"MM06_CHT\"
 			FROM MOICAS.CMSMS t
 			LEFT JOIN MOIADM.RKEYN w ON t.MM06 = w.KCDE_2 AND w.KCDE_1 = 'M3'   -- 登記原因
@@ -420,17 +396,17 @@ class Query {
 			OR t.MM17_2 = :bv_id
 			ORDER BY MM04_1 DESC
         ");
-		$this->db->bind(":bv_id", $id);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_id", $id);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function getEasycardPayment($qday = '') {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 		// AA100 付款方式代碼，EXPK付款方式表格 (K02 => 中文)
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT t.*, s.K02
 			FROM MOIEXP.EXPAA t
 			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
@@ -439,35 +415,35 @@ class Query {
 		if (empty($qday)) {
 			global $week_ago;
 			// fetch all data wthin a week back
-			$this->db->bind(":bv_qday", $week_ago);
+			$this->db_wrapper->getDB()->bind(":bv_qday", $week_ago);
 		} else {
 			if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
             	return false;
 			}
-			$this->db->bind(":bv_qday", $qday);
+			$this->db_wrapper->getDB()->bind(":bv_qday", $qday);
 		}
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function fixEasycardPayment($qday, $pc_num) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
 		// ex: UPDATE MOIEXP.EXPAA SET AA106 = '1' WHERE AA01 = '1080321' AND AA106 <> '1' AND AA04 = '0015746';
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			UPDATE MOIEXP.EXPAA SET AA106 = '1' WHERE AA01 = :bv_qday AND AA106 <> '1' AND AA04 = :bv_pc_num
 		");
-		$this->db->bind(":bv_qday", $qday);
-		$this->db->bind(":bv_pc_num", $pc_num);
+		$this->db_wrapper->getDB()->bind(":bv_qday", $qday);
+		$this->db_wrapper->getDB()->bind(":bv_pc_num", $pc_num);
 		// UPDATE/INSERT can not use fetch after execute ... 
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 		return true;
 	}
 
 	public function getExpkItems() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 		/*
@@ -488,13 +464,13 @@ class Query {
 			14	內政部線上申辦
 			15	桃園e指通線上申辦
 		 */
-		$this->db->parse("SELECT * FROM MOIEXP.EXPK t ORDER BY K01");
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->parse("SELECT * FROM MOIEXP.EXPK t ORDER BY K01");
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function getExpacItems($year, $num) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -524,65 +500,65 @@ class Query {
 			40	107年度登記罰鍰
 			41	108年度登記罰鍰
 		 */
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT *
 			FROM MOIEXP.EXPAC t
 			LEFT JOIN MOIEXP.EXPE p
 				ON p.E20 = t.AC20
 			WHERE t.AC04 = :bv_num AND t.AC25 = :bv_year
         ");
-		$this->db->bind(":bv_year", $year);
-		$this->db->bind(":bv_num", $num);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_num", $num);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function modifyExpacItem($year, $num, $code, $amount) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
 		// ex: UPDATE MOIEXP.EXPAC SET AC20 = '35' WHERE AC04 = '0021131' AND AC25 = '108' AND AC30 = '280';
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			UPDATE MOIEXP.EXPAC SET AC20 = :bv_code WHERE AC04 = :bv_pc_num AND AC25 = :bv_year AND AC30 = :bv_amount
 		");
-		$this->db->bind(":bv_year", $year);
-		$this->db->bind(":bv_pc_num", $num);
-		$this->db->bind(":bv_code", $code);
-		$this->db->bind(":bv_amount", $amount);
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_pc_num", $num);
+		$this->db_wrapper->getDB()->bind(":bv_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_amount", $amount);
 		// UPDATE/INSERT can not use fetch after execute ... 
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 		return true;
 	}
 
 	public function getExpaaData($qday, $num) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
 		if (empty($num)) {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT t.*, s.K02 AS AA100_CHT
 				FROM MOIEXP.EXPAA t
 				LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
 				WHERE t.AA01 = :bv_qday
 			");
 		} else {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT t.*, s.K02 AS AA100_CHT
 				FROM MOIEXP.EXPAA t
 				LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
 				WHERE t.AA04 = :bv_num AND t.AA01 = :bv_qday
 			");
-			$this->db->bind(":bv_num", $num);
+			$this->db_wrapper->getDB()->bind(":bv_num", $num);
 		}
-		$this->db->bind(":bv_qday", $qday);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_qday", $qday);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function updateExpaaData($column, $date, $number, $update_val) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
@@ -590,21 +566,21 @@ class Query {
 			return false;
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			UPDATE MOIEXP.EXPAA SET ${column} = :bv_update_value WHERE AA01 = :bv_aa01 AND AA04 = :bv_aa04
 		");
 
-		$this->db->bind(":bv_update_value", $update_val);
-		$this->db->bind(":bv_aa01", $date);
-		$this->db->bind(":bv_aa04", $number);
+		$this->db_wrapper->getDB()->bind(":bv_update_value", $update_val);
+		$this->db_wrapper->getDB()->bind(":bv_aa01", $date);
+		$this->db_wrapper->getDB()->bind(":bv_aa04", $number);
 		
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 
 		return true;
 	}
 
 	public function getDummyObFees() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -613,18 +589,18 @@ class Query {
 		$this_year = ltrim($tw_date->format("Y"), "0");	// ex: 109
 
 		// use '9' + year(3 digits) + '000' to stand for the obsolete fee application
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			select * from MOIEXP.EXPAA t
 			where aa04 like '9' || :bv_year || '%'
 			order by AA01 desc, AA04 desc
 		");
-		$this->db->bind(":bv_year", $this_year);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_year", $this_year);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function addDummyObFees($date, $pc_num, $operator, $fee_number, $reason) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
@@ -636,29 +612,29 @@ class Query {
 		}
 
 		$sql = "INSERT INTO MOIEXP.EXPAA (AA01,AA04,AA05,AA06,AA07,AA08,AA09,AA02,AA24,AA25,AA39,AA104) VALUES (:bv_date, :bv_pc_num, :bv_fee_num, '1', '0', '0', '1', :bv_date, :bv_date, :bv_year, :bv_operator, :bv_reason)";
-		$this->db->parse($sql);
-		$this->db->bind(":bv_date", $date);
-		$this->db->bind(":bv_year", substr($date, 0, 3));
-		$this->db->bind(":bv_pc_num", $pc_num);
-		$this->db->bind(":bv_fee_num", $fee_number);
-		$this->db->bind(":bv_operator", $operator);
-		$this->db->bind(":bv_reason", iconv("utf-8", "big5", $reason));
+		$this->db_wrapper->getDB()->parse($sql);
+		$this->db_wrapper->getDB()->bind(":bv_date", $date);
+		$this->db_wrapper->getDB()->bind(":bv_year", substr($date, 0, 3));
+		$this->db_wrapper->getDB()->bind(":bv_pc_num", $pc_num);
+		$this->db_wrapper->getDB()->bind(":bv_fee_num", $fee_number);
+		$this->db_wrapper->getDB()->bind(":bv_operator", $operator);
+		$this->db_wrapper->getDB()->bind(":bv_reason", iconv("utf-8", "big5", $reason));
 
 		Logger::getInstance()->info(__METHOD__.": 插入 SQL \"$sql\"");
 
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 		return true;
 	}
 
 	public function getForeignCasesByYearMonth($year_month) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
 		if (!filter_var($year_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
         }
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			-- 每月權利人&義務人為外國人案件
 			SELECT 
 				SQ.RM01 AS \"收件年\",
@@ -686,40 +662,40 @@ class Query {
 			)) SQ LEFT JOIN MOICAD.RKEYN k on k.KCDE_2 = SQ.RM09
 			WHERE k.KCDE_1 = '06'
 		");
-		$this->db->bind(":bv_year_month", $year_month);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_year_month", $year_month);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function getChargeItems() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
-		$this->db->parse("select * from MOIEXP.EXPE t");
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->parse("select * from MOIEXP.EXPE t");
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
     public function queryAllCasesNotDone() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 		$site = System::getInstance()->getSiteCode();
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
 			SELECT *
 			FROM SCRSMS 
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE RM31 IS NULL AND (RM99 IS NULL OR (RM99 = 'Y' AND RM101 = :bv_site))
 			ORDER BY RM07_1, RM07_2 DESC
 		");
-		$this->db->bind(":bv_site", $site);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_site", $site);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
     }
 
     // template method for query all cases by date
     public function queryAllCasesByDate($qday) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -729,21 +705,21 @@ class Query {
         }
 		
 		$site = System::getInstance()->getSiteCode();
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
 			SELECT *
 			FROM SCRSMS
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE (RM07_1 BETWEEN :bv_qday AND :bv_qday) AND (RM99 IS NULL OR (RM99 = 'Y' AND RM101 = :bv_site))
 			ORDER BY RM07_1, RM07_2 DESC
 		");
-        $this->db->bind(":bv_qday", $qday);
-		$this->db->bind(":bv_site", $site);
-		$this->db->execute();
-		return $this->db->fetchAll();
+        $this->db_wrapper->getDB()->bind(":bv_qday", $qday);
+		$this->db_wrapper->getDB()->bind(":bv_site", $site);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
     }
 
 	public function queryReasonCasesByMonth($reason_code, $query_month) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -751,15 +727,15 @@ class Query {
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
         }
-        $this->db->parse("SELECT * FROM SCRSMS LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2 WHERE RM07_1 LIKE :bv_qmonth || '%' AND RM09 = :bv_rcode ORDER BY RM07_1, RM07_2 DESC");
-		$this->db->bind(":bv_qmonth", $query_month);
-		$this->db->bind(":bv_rcode", $reason_code);
-		$this->db->execute();
-		return $this->db->fetchAll();
+        $this->db_wrapper->getDB()->parse("SELECT * FROM SCRSMS LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2 WHERE RM07_1 LIKE :bv_qmonth || '%' AND RM09 = :bv_rcode ORDER BY RM07_1, RM07_2 DESC");
+		$this->db_wrapper->getDB()->bind(":bv_qmonth", $query_month);
+		$this->db_wrapper->getDB()->bind(":bv_rcode", $reason_code);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function queryCourtCasesByMonth($query_month) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -767,7 +743,7 @@ class Query {
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
         }
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
 			SELECT *
 			FROM SCRSMS
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
@@ -776,13 +752,13 @@ class Query {
 				RM09 in ('33', '34', '49', '54', '50', '55', '52', '57', '51', '56', 'FB', 'FC', 'AU')
 			ORDER BY RM07_1, RM07_2 DESC
 		");
-		$this->db->bind(":bv_qmonth", $query_month);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_qmonth", $query_month);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function queryRegRemoteCasesByMonth($query_month) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -790,7 +766,7 @@ class Query {
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT
 				t.RM01 AS \"收件年\",
 				t.RM02 AS \"收件字\",
@@ -815,15 +791,15 @@ class Query {
 				(u.LADR NOT LIKE '%' || :bv_city || '%' AND u.LADR NOT LIKE '%' || :bv_county || '%') AND 
                 (v.AB03 NOT LIKE '%' || :bv_city || '%' AND v.AB03 NOT LIKE '%' || :bv_county || '%')
 		");
-		$this->db->bind(":bv_qmonth", $query_month);
-		$this->db->bind(":bv_city", mb_convert_encoding('桃園市', "big5"));
-    $this->db->bind(":bv_county", mb_convert_encoding('桃園縣', "big5"));
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_qmonth", $query_month);
+		$this->db_wrapper->getDB()->bind(":bv_city", mb_convert_encoding('桃園市', "big5"));
+    $this->db_wrapper->getDB()->bind(":bv_county", mb_convert_encoding('桃園縣', "big5"));
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function queryRegSubCasesByMonth($query_month) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -831,7 +807,7 @@ class Query {
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			-- 本所處理跨所子號案件
 			SELECT SQ.RM01   AS \"收件年\",
 				SQ.RM02   AS \"收件字\",
@@ -849,20 +825,20 @@ class Query {
 			FROM (SELECT *
 					FROM MOICAS.CRSMS tt
 					WHERE tt.rm07_1 LIKE :bv_qmonth || '%'
-					AND tt.RM02 LIKE 'H%".$this->site_code."1' -- 本所處理跨所案件
+					AND tt.RM02 LIKE 'H%".$this->db_wrapper->getSiteCode()."1' -- 本所處理跨所案件
 					AND tt.RM03 NOT LIKE '%0' -- 子號案件
 					) SQ
 			LEFT JOIN MOICAD.RKEYN k
 				ON k.KCDE_2 = SQ.RM09
 			WHERE k.KCDE_1 = '06'
 		");
-		$this->db->bind(":bv_qmonth", $query_month);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_qmonth", $query_month);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function queryRegfCasesByMonth($query_month) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -870,7 +846,7 @@ class Query {
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			-- REGF 登記主檔－外國人地權登記統計檔 (SREGF)
 			SELECT
 				MOICAD.REGF.RF03 AS \"收件年\",
@@ -886,13 +862,13 @@ class Query {
 			FROM MOICAD.REGF
 			WHERE MOICAD.REGF.RF40 LIKE :bv_qmonth || '%'
 		");
-		$this->db->bind(":bv_qmonth", $query_month);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_qmonth", $query_month);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function queryFixCasesByMonth($query_month) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -900,7 +876,7 @@ class Query {
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT DISTINCT t.*, s.KCNT AS \"RM09_CHT\"
 			FROM MOICAS.CRSMS t
 			LEFT JOIN SRKEYN s ON s.KCDE_1 = '06' AND t.RM09 = s.KCDE_2
@@ -908,13 +884,13 @@ class Query {
 				AND t.RM51 Is Not Null
 				AND t.RM52 Is Not Null
 		");
-		$this->db->bind(":bv_qmonth", $query_month);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_qmonth", $query_month);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function queryRejectCasesByMonth($query_month) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -922,7 +898,7 @@ class Query {
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT DISTINCT t.*, s.KCNT AS \"RM09_CHT\"
 			FROM MOICAS.CRSMS t
 			LEFT JOIN SRKEYN s ON s.KCDE_1 = '06' AND t.RM09 = s.KCDE_2
@@ -930,13 +906,13 @@ class Query {
 				AND t.RM48_1 Is Not Null
 				AND t.RM48_2 Is Not Null
 		");
-		$this->db->bind(":bv_qmonth", $query_month);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_qmonth", $query_month);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function queryEXPBARefundCasesByMonth($query_month) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -944,7 +920,7 @@ class Query {
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			-- 主動申請退費
 			select
 				BA32  AS  \"退費日期\",
@@ -960,13 +936,13 @@ class Query {
 			from MOIEXP.EXPBA t
 			where ba32 LIKE :bv_qmonth || '%' and BA42 = '01'  --溢繳規費
 		");
-		$this->db->bind(":bv_qmonth", $query_month);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_qmonth", $query_month);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function querySurRainCasesByMonth($query_month) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -974,7 +950,7 @@ class Query {
         if (!filter_var($query_month, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
 		}
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			select
 				t.MM01   AS \"收件年\",
 				t.MM02   AS \"收件字\",
@@ -1025,18 +1001,18 @@ class Query {
 			where t.MM04_1 LIKE :bv_qmonth || '%'
 				and q.MD12 = '1' -- 因雨延期代碼
 		");
-		$this->db->bind(":bv_qmonth", $query_month);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_qmonth", $query_month);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function queryExpiredAnnouncementCases($reviewer_id = "") {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
 		if (empty($reviewer_id)) {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT *
 				FROM SCRSMS
 				LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
@@ -1049,7 +1025,7 @@ class Query {
 				ORDER BY RM29_1 DESC, RM29_2 DESC
 			");
 		} else {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT *
 				FROM SCRSMS
 				LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
@@ -1062,34 +1038,34 @@ class Query {
 				AND RM45 = :bv_reviewer_id
 				ORDER BY RM29_1 DESC, RM29_2 DESC
 			");
-			$this->db->bind(":bv_reviewer_id", $reviewer_id);	// HB1184
+			$this->db_wrapper->getDB()->bind(":bv_reviewer_id", $reviewer_id);	// HB1184
 		}
 
 		// bind today
 		$tw_date = new Datetime("now");
 		$tw_date->modify("-1911 year");
 		$now = ltrim($tw_date->format("Ymd"), "0");	// ex: 1111121
-		$this->db->bind(":bv_now", $now);
+		$this->db_wrapper->getDB()->bind(":bv_now", $now);
 
 		Logger::getInstance()->info(__METHOD__.": Find expired announcement cases.");
 
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	// 找近15天逾期的案件
 	public function queryOverdueCasesIn15Days($reviewer_id = "") {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
 		if (empty($reviewer_id)) {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT *
 				FROM SCRSMS
 				LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 				WHERE 1=1
-					AND (RM99 IS NULL OR RM101 = '".$this->site."')
+					AND (RM99 IS NULL OR RM101 = '".$this->db_wrapper->getSite()."')
 					AND RM03 LIKE '%0' 			-- without sub-case
 					AND RM31 IS NULL			-- not closed case
 					AND RM29_1 || RM29_2 < :bv_now
@@ -1097,12 +1073,12 @@ class Query {
 				ORDER BY RM29_1 DESC, RM29_2 DESC
 			");
 		} else {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT *
 				FROM SCRSMS
 				LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 				WHERE 1=1
-					AND (RM99 IS NULL OR RM101 = '".$this->site."')
+					AND (RM99 IS NULL OR RM101 = '".$this->db_wrapper->getSite()."')
 					AND RM03 LIKE '%0' 			-- without sub-case
 					AND RM31 IS NULL			-- not closed case
 					AND RM29_1 || RM29_2 < :bv_now
@@ -1110,7 +1086,7 @@ class Query {
 					AND RM45 = :bv_reviewer_id
 				ORDER BY RM29_1 DESC, RM29_2 DESC
 			");
-			$this->db->bind(":bv_reviewer_id", $reviewer_id);	// HBxxxx
+			$this->db_wrapper->getDB()->bind(":bv_reviewer_id", $reviewer_id);	// HBxxxx
 		}
 
 		$tw_date = new Datetime("now");
@@ -1125,15 +1101,15 @@ class Query {
 		
 		Logger::getInstance()->info(__METHOD__.": Find overdue date between $start and $now cases.");
 
-		$this->db->bind(":bv_now", $now);
-		$this->db->bind(":bv_start", $start);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_now", $now);
+		$this->db_wrapper->getDB()->bind(":bv_start", $start);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	// 找快逾期的案件
 	public function queryAlmostOverdueCases($reviewer_id = "") {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -1142,24 +1118,24 @@ class Query {
 			FROM SCRSMS
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE 1=1
-				AND (RM99 IS NULL OR RM101 = '".$this->site."')
+				AND (RM99 IS NULL OR RM101 = '".$this->db_wrapper->getSite()."')
 				AND RM03 LIKE '%0' 			-- without sub-case
 				AND RM31 IS NULL			-- not closed case
 				AND RM29_1 || RM29_2 < :bv_now_plus_4hrs
 				AND RM29_1 || RM29_2 > :bv_now
 		";
 		if (empty($reviewer_id)) {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				${query_str}
 				ORDER BY RM29_1 DESC, RM29_2 DESC
 			");
 		} else {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				${query_str}
 					AND RM45 = :bv_reviewer_id
 				ORDER BY RM29_1 DESC, RM29_2 DESC
 			");
-			$this->db->bind(":bv_reviewer_id", $reviewer_id);	// HBxxxx
+			$this->db_wrapper->getDB()->bind(":bv_reviewer_id", $reviewer_id);	// HBxxxx
 		}
 
 		
@@ -1179,15 +1155,15 @@ class Query {
 		
 		Logger::getInstance()->info(__METHOD__.": Find overdue date between $now and $now_plus_4hrs cases.");
 
-		$this->db->bind(":bv_now", $now);
-		$this->db->bind(":bv_now_plus_4hrs", $now_plus_4hrs);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_now", $now);
+		$this->db_wrapper->getDB()->bind(":bv_now_plus_4hrs", $now_plus_4hrs);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	// 查詢指定收件日期之案件
     public function queryOverdueCasesByDate($qday) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -1195,36 +1171,36 @@ class Query {
         if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
         }
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT *
 			FROM SCRSMS
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE
 				RM07_1 = :bv_qday
-				AND (RM99 IS NULL OR RM101 = '".$this->site."')	-- 找本所案件
+				AND (RM99 IS NULL OR RM101 = '".$this->db_wrapper->getSite()."')	-- 找本所案件
 				AND RM03 LIKE '%0' 		-- without sub-case
 				AND RM31 IS NULL
 				AND RM29_1 || RM29_2 < :bv_qdatetime
 			ORDER BY RM07_1, RM07_2 DESC
 		");
-		$this->db->bind(":bv_qday", $qday);
-        $this->db->bind(":bv_qdatetime", $qday.date("His"));
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_qday", $qday);
+        $this->db_wrapper->getDB()->bind(":bv_qdatetime", $qday.date("His"));
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 	
 	// 找接近逾期案件
 	public function queryNearOverdueCases() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT *
 			FROM SCRSMS
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE 1=1
-				AND (RM99 IS NULL OR RM101 = '".$this->site."') -- 找本所案件
+				AND (RM99 IS NULL OR RM101 = '".$this->db_wrapper->getSite()."') -- 找本所案件
 				AND RM31 IS NULL
 				AND (RM29_1 || RM29_2 < :bv_4hours_later AND RM29_1 || RM29_2 > :bv_now)
 			ORDER BY RM07_1, RM07_2 DESC
@@ -1232,15 +1208,15 @@ class Query {
 		$tw_date = new Datetime("now");
 		$tw_date->modify("-1911 year");
 		$today = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080325152111
-		$this->db->bind(":bv_4hours_later", $today.date("His", strtotime("+4 hours")));
-		$this->db->bind(":bv_now", $today.date("His"));
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_4hours_later", $today.date("His", strtotime("+4 hours")));
+		$this->db_wrapper->getDB()->bind(":bv_now", $today.date("His"));
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	// 查詢指定收件日期之案件
 	public function queryNearOverdueCasesByDate($qday) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -1248,26 +1224,26 @@ class Query {
         if (!filter_var($qday, FILTER_SANITIZE_NUMBER_INT)) {
             return false;
         }
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT *
 			FROM SCRSMS
 			LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
 			WHERE
 				RM07_1 = :bv_qday
-				AND (RM99 IS NULL OR RM101 = '".$this->site."')	-- 本所案件
+				AND (RM99 IS NULL OR RM101 = '".$this->db_wrapper->getSite()."')	-- 本所案件
 				AND RM31 IS NULL
 				AND (RM29_1 || RM29_2 < :bv_4hours_later AND RM29_1 || RM29_2 > :bv_now)
 			ORDER BY RM07_1, RM07_2 DESC
 		");
-		$this->db->bind(":bv_qday", $qday);
-		$this->db->bind(":bv_4hours_later", $qday.date("His", strtotime("+4 hours")));
-		$this->db->bind(":bv_now", $qday.date("His"));
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_qday", $qday);
+		$this->db_wrapper->getDB()->bind(":bv_4hours_later", $qday.date("His", strtotime("+4 hours")));
+		$this->db_wrapper->getDB()->bind(":bv_now", $qday.date("His"));
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function getRegCaseStatsMonthly($year_month) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -1282,7 +1258,7 @@ class Query {
 			return false;
 		}
 		
-		$this->db->parse(
+		$this->db_wrapper->getDB()->parse(
 			"SELECT s.kcnt AS \"reason\", COUNT(*) AS \"count\"
 			FROM SCRSMS t
 			LEFT JOIN SRKEYN s
@@ -1292,13 +1268,13 @@ class Query {
 			GROUP BY s.kcnt"
         );
         
-		$this->db->bind(":bv_year_month", $year_month);
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_year_month", $year_month);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
     public function getRegCaseDetail($id) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -1306,7 +1282,7 @@ class Query {
             return array();
 		}
 		
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT s.*, v.KNAME AS RM11_CHT
 				FROM (SELECT r.*, q.AB02
 					FROM (
@@ -1319,17 +1295,17 @@ class Query {
 				LEFT JOIN MOIADM.RKEYN_ALL v ON (v.KCDE_1 = '48' AND v.KCDE_2 = 'H' AND v.KCDE_3 = s.RM10 AND s.RM11 = v.KCDE_4)
 		");
 		
-        $this->db->bind(":bv_rm01_year", substr($id, 0, 3));
-        $this->db->bind(":bv_rm02_code", substr($id, 3, 4));
-        $this->db->bind(":bv_rm03_number", substr($id, 7, 6));
+        $this->db_wrapper->getDB()->bind(":bv_rm01_year", substr($id, 0, 3));
+        $this->db_wrapper->getDB()->bind(":bv_rm02_code", substr($id, 3, 4));
+        $this->db_wrapper->getDB()->bind(":bv_rm03_number", substr($id, 7, 6));
 
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 		// true -> raw data with converting to utf-8
-		return $this->db->fetch();
+		return $this->db_wrapper->getDB()->fetch();
 	}
 
     public function getSurCaseDetail($id) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -1337,7 +1313,7 @@ class Query {
             return "";
 		}
 		
-		$this->db->parse(
+		$this->db_wrapper->getDB()->parse(
 			"select t.*, s.*, u.KCNT
 			from MOICAS.CMSMS t
 			left join MOICAS.CMSDS s
@@ -1353,22 +1329,22 @@ class Query {
 			 and t.mm03 = :bv_number"
         );
         
-        $this->db->bind(":bv_year", substr($id, 0, 3));
-        $this->db->bind(":bv_code", substr($id, 3, 4));
-        $this->db->bind(":bv_number", substr($id, 7, 6));
+        $this->db_wrapper->getDB()->bind(":bv_year", substr($id, 0, 3));
+        $this->db_wrapper->getDB()->bind(":bv_code", substr($id, 3, 4));
+        $this->db_wrapper->getDB()->bind(":bv_number", substr($id, 7, 6));
 
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 		// true -> raw data with converting to utf-8
-		return $this->db->fetch();
+		return $this->db_wrapper->getDB()->fetch();
 	}
 	
 	// 取得已結案卻延期複丈之案件
 	public function getSurProblematicCases() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			select t.*, s.*, u.KCNT
 			from MOICAS.CMSMS t
 			left join MOICAS.CMSDS s
@@ -1383,12 +1359,12 @@ class Query {
 			and t.mm23 in ('A', 'B', 'C', 'F')
 			order by t.mm01, t.mm02, t.mm03
 		");
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function fixSurDelayCase($id, $upd_mm22, $clr_delay, $fix_case_count = 'false') {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
@@ -1401,47 +1377,47 @@ class Query {
 		$number = str_pad(substr($id, 7, 6), 6, "0", STR_PAD_LEFT);
 		
 		if ($upd_mm22 == "true") {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				UPDATE MOICAS.CMSMS SET MM22 = 'D'
 				WHERE MM01 = :bv_year AND MM02 = :bv_code AND MM03 = :bv_number
 			");
-			$this->db->bind(":bv_year", $year);
-			$this->db->bind(":bv_code", $code);
-			$this->db->bind(":bv_number", $number);
+			$this->db_wrapper->getDB()->bind(":bv_year", $year);
+			$this->db_wrapper->getDB()->bind(":bv_code", $code);
+			$this->db_wrapper->getDB()->bind(":bv_number", $number);
 			// UPDATE/INSERT can not use fetch after execute ... 
-			$this->db->execute();
+			$this->db_wrapper->getDB()->execute();
 		}
 
 		if ($clr_delay == "true") {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				UPDATE MOICAS.CMSDS SET MD12 = '', MD13_1 = '', MD13_2 = ''
 				WHERE MD01 = :bv_year AND MD02 = :bv_code AND MD03 = :bv_number
 			");
-			$this->db->bind(":bv_year", $year);
-			$this->db->bind(":bv_code", $code);
-			$this->db->bind(":bv_number", $number);
+			$this->db_wrapper->getDB()->bind(":bv_year", $year);
+			$this->db_wrapper->getDB()->bind(":bv_code", $code);
+			$this->db_wrapper->getDB()->bind(":bv_number", $number);
 			// UPDATE/INSERT can not use fetch after execute ... 
-			$this->db->execute();
+			$this->db_wrapper->getDB()->execute();
 		}
 
 		if ($fix_case_count == "true") {
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				UPDATE MOICAS.CMSMS SET MM24 = :bv_count
 				WHERE MM01 = :bv_year AND MM02 = :bv_code AND MM03 = :bv_number
 			");
-			$this->db->bind(":bv_year", $year);
-			$this->db->bind(":bv_code", $code);
-			$this->db->bind(":bv_number", $number);
-			$this->db->bind(":bv_count", 1);
+			$this->db_wrapper->getDB()->bind(":bv_year", $year);
+			$this->db_wrapper->getDB()->bind(":bv_code", $code);
+			$this->db_wrapper->getDB()->bind(":bv_number", $number);
+			$this->db_wrapper->getDB()->bind(":bv_count", 1);
 			// UPDATE/INSERT can not use fetch after execute ... 
-			$this->db->execute();
+			$this->db_wrapper->getDB()->execute();
 		}
 
 		return true;
 	}
 
 	public function getPrcCaseAll($id) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -1494,18 +1470,18 @@ class Query {
 				SS04_1 = :bv_ss04_1_code AND
 				SS04_2 = :bv_ss04_2_number
 		";
-		$this->db->parse(iconv("utf-8", "big5", $sql));
+		$this->db_wrapper->getDB()->parse(iconv("utf-8", "big5", $sql));
 		
-        $this->db->bind(":bv_ss03_year", substr($id, 0, 3));
-        $this->db->bind(":bv_ss04_1_code", substr($id, 3, 4));
-        $this->db->bind(":bv_ss04_2_number", substr($id, 7, 6));
+        $this->db_wrapper->getDB()->bind(":bv_ss03_year", substr($id, 0, 3));
+        $this->db_wrapper->getDB()->bind(":bv_ss04_1_code", substr($id, 3, 4));
+        $this->db_wrapper->getDB()->bind(":bv_ss04_2_number", substr($id, 7, 6));
 
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 	
 	public function getXCaseDiff($id, $raw = false) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return -1;
 		}
 
@@ -1523,17 +1499,17 @@ class Query {
 		Logger::getInstance()->info(__METHOD__.": 找遠端 ${db_user}.CRSMS 的案件資料【${year}, ${code}, ${num}】");
 
 		// connection switch to L3HWEB
-		$this->db->setConnType(CONNECTION_TYPE::L3HWEB);
-		$this->db->parse("
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::L3HWEB);
+		$this->db_wrapper->getDB()->parse("
 			SELECT *
 			FROM $db_user.CRSMS t
 			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
 		");
-        $this->db->bind(":bv_rm01_year", $year);
-        $this->db->bind(":bv_rm02_code", $code);
-        $this->db->bind(":bv_rm03_number", $num);
-		$this->db->execute();
-		$remote_row = $this->db->fetch($raw);
+        $this->db_wrapper->getDB()->bind(":bv_rm01_year", $year);
+        $this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+        $this->db_wrapper->getDB()->bind(":bv_rm03_number", $num);
+		$this->db_wrapper->getDB()->execute();
+		$remote_row = $this->db_wrapper->getDB()->fetch($raw);
 
 		// 遠端無此資料
 		if (empty($remote_row)) {
@@ -1544,17 +1520,17 @@ class Query {
 		Logger::getInstance()->info(__METHOD__.": 找本地 MOICAS.CRSMS 的案件資料【${year}, ${code}, ${num}】");
 
 		// connection switch to MAIN
-		$this->db->setConnType(CONNECTION_TYPE::MAIN);
-		$this->db->parse("
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::MAIN);
+		$this->db_wrapper->getDB()->parse("
 			SELECT *
 			FROM MOICAS.CRSMS t
 			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
 		");
-        $this->db->bind(":bv_rm01_year", $year);
-        $this->db->bind(":bv_rm02_code", $code);
-        $this->db->bind(":bv_rm03_number", $num);
-		$this->db->execute();
-		$local_row = $this->db->fetch($raw);
+        $this->db_wrapper->getDB()->bind(":bv_rm01_year", $year);
+        $this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+        $this->db_wrapper->getDB()->bind(":bv_rm03_number", $num);
+		$this->db_wrapper->getDB()->execute();
+		$local_row = $this->db_wrapper->getDB()->fetch($raw);
 
 		// 本地無此資料
 		if (empty($local_row)) {
@@ -1579,7 +1555,7 @@ class Query {
 	}
 	
 	public function instXCase($id, $raw = true) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
@@ -1594,17 +1570,17 @@ class Query {
 		$db_user = "L1H".$code[1]."0H03";
 
 		// connection switch to L3HWEB
-		$this->db->setConnType(CONNECTION_TYPE::L3HWEB);
-		$this->db->parse("
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::L3HWEB);
+		$this->db_wrapper->getDB()->parse("
 			SELECT *
 			FROM $db_user.CRSMS t
 			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
 		");
-        $this->db->bind(":bv_rm01_year", $year);
-        $this->db->bind(":bv_rm02_code", $code);
-        $this->db->bind(":bv_rm03_number", $num);
-		$this->db->execute();
-		$remote_row = $this->db->fetch($raw);
+        $this->db_wrapper->getDB()->bind(":bv_rm01_year", $year);
+        $this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+        $this->db_wrapper->getDB()->bind(":bv_rm03_number", $num);
+		$this->db_wrapper->getDB()->execute();
+		$remote_row = $this->db_wrapper->getDB()->fetch($raw);
 
 		// 遠端無此資料
 		if (empty($remote_row)) {
@@ -1613,17 +1589,17 @@ class Query {
 		}
 
 		// connection switch to MAIN
-		$this->db->setConnType(CONNECTION_TYPE::MAIN);
-		$this->db->parse("
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::MAIN);
+		$this->db_wrapper->getDB()->parse("
 			SELECT *
 			FROM MOICAS.CRSMS t
 			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
 		");
-        $this->db->bind(":bv_rm01_year", $year);
-        $this->db->bind(":bv_rm02_code", $code);
-        $this->db->bind(":bv_rm03_number", $num);
-		$this->db->execute();
-		$local_row = $this->db->fetch($raw);
+        $this->db_wrapper->getDB()->bind(":bv_rm01_year", $year);
+        $this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+        $this->db_wrapper->getDB()->bind(":bv_rm03_number", $num);
+		$this->db_wrapper->getDB()->execute();
+		$local_row = $this->db_wrapper->getDB()->fetch($raw);
 
 		// 本地無此資料才能新增
 		if (empty($local_row)) {
@@ -1638,12 +1614,12 @@ class Query {
 			$columns = rtrim($columns, ",").")";
 			$values = rtrim($values, ",").")";
 
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				INSERT INTO MOICAS.CRSMS ".$columns." VALUES ".$values."
 			");
 
 			Logger::getInstance()->info(__METHOD__.": 插入 SQL \"INSERT INTO MOICAS.CRSMS ".$columns." VALUES ".$values."\"");
-			$this->db->execute();
+			$this->db_wrapper->getDB()->execute();
 
 			return true;
 		}
@@ -1656,7 +1632,7 @@ class Query {
 	}
 
 	public function syncXCaseColumn($id, $wanted_column) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
@@ -1676,17 +1652,17 @@ class Query {
 			}
 			$set_str = rtrim($set_str, ",");
 
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				UPDATE MOICAS.CRSMS SET ".$set_str." WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
 			");
 
-			$this->db->bind(":bv_rm01_year", $year);
-			$this->db->bind(":bv_rm02_code", $code);
-			$this->db->bind(":bv_rm03_number", $number);
+			$this->db_wrapper->getDB()->bind(":bv_rm01_year", $year);
+			$this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+			$this->db_wrapper->getDB()->bind(":bv_rm03_number", $number);
 
 			Logger::getInstance()->info(__METHOD__.": 更新 SQL \"UPDATE MOICAS.CRSMS SET ".$set_str." WHERE RM01 = '$year' AND RM02 = '$code' AND RM03 = '$number'\"");
 
-			$this->db->execute();
+			$this->db_wrapper->getDB()->execute();
 
 			return true;
 		}
@@ -1694,7 +1670,7 @@ class Query {
 	}
 	
 	public function getSelectSQLData($sql, $raw = false) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -1712,17 +1688,17 @@ class Query {
 			return false;
 		}
 
-		$this->db->parse(mb_convert_encoding(rtrim($sql, ";"), "big5", "utf-8"));
-		$this->db->execute();
-		return $this->db->fetchAll($raw);
+		$this->db_wrapper->getDB()->parse(mb_convert_encoding(rtrim($sql, ";"), "big5", "utf-8"));
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll($raw);
 	}
 	
 	public function getAnnouncementData() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT t.RA01, m.kcnt, t.RA02, t.RA03
 			FROM MOICAS.CRACD t
 			LEFT JOIN MOIADM.RKEYN m
@@ -1730,41 +1706,41 @@ class Query {
 			WHERE m.kcde_1 = '06'
 			ORDER BY RA01
 		");
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function updateAnnouncementData($code, $day, $flag) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			UPDATE MOICAS.CRACD SET RA02 = :bv_ra02_day, RA03 = :bv_ra03_flag WHERE RA01 = :bv_ra01_code
 		");
 
-		$this->db->bind(":bv_ra01_code", $code);
-		$this->db->bind(":bv_ra02_day", $day);
-		$this->db->bind(":bv_ra03_flag", $flag == "Y" ? $flag : "N");
+		$this->db_wrapper->getDB()->bind(":bv_ra01_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_ra02_day", $day);
+		$this->db_wrapper->getDB()->bind(":bv_ra03_flag", $flag == "Y" ? $flag : "N");
 		
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 		return true;
 	}
 
 	public function clearAnnouncementFlag() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			UPDATE MOICAS.CRACD SET RA03 = 'N' WHERE RA03 <> 'N'
 		");
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 		return true;
 	}
 
 	public function getCaseTemp($year, $code, $number) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
@@ -1784,29 +1760,29 @@ class Query {
 		foreach ($temp_tables as $tmp_tbl_name => $key) {
 			/*
 			Logger::getInstance()->info(__METHOD__.": 查詢 $tmp_tbl_name 的暫存資料 ... 【".$key_fields[0].", ".$key_fields[1].", ".$key_fields[2]."】");
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT * FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = :bv_year AND ".$key_fields[1]." = :bv_code AND ".$key_fields[2]." = :bv_number
 			");
 			*/
 			// Logger::getInstance()->info(__METHOD__.": 查詢 $tmp_tbl_name 的暫存資料 ... 【".$key."03, ".$key."04_1, ".$key."04_2】");
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				SELECT * FROM ".$tmp_tbl_name." WHERE ".$key."03 = :bv_year AND ".$key."04_1 = :bv_code AND ".$key."04_2 = :bv_number
 			");
 
-			$this->db->bind(":bv_year", $year);
-			$this->db->bind(":bv_code", $code);
-			$this->db->bind(":bv_number", $number);
+			$this->db_wrapper->getDB()->bind(":bv_year", $year);
+			$this->db_wrapper->getDB()->bind(":bv_code", $code);
+			$this->db_wrapper->getDB()->bind(":bv_number", $number);
 			
-			$this->db->execute();
+			$this->db_wrapper->getDB()->execute();
 			// for FE, 0 -> table name, 1 -> data, 2 -> SQL statement
-			//$result[] = array($tmp_tbl_name, $this->db->fetchAll(), "SELECT * FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = '$year' AND ".$key_fields[1]." = '$code' AND ".$key_fields[2]." = '$number'");
-			$result[] = array($tmp_tbl_name, $this->db->fetchAll(), "SELECT * FROM ".$tmp_tbl_name." WHERE ".$key."03 = '$year' AND ".$key."04_1 = '$code' AND ".$key."04_2 = '$number'");
+			//$result[] = array($tmp_tbl_name, $this->db_wrapper->getDB()->fetchAll(), "SELECT * FROM ".$tmp_tbl_name." WHERE ".$key_fields[0]." = '$year' AND ".$key_fields[1]." = '$code' AND ".$key_fields[2]." = '$number'");
+			$result[] = array($tmp_tbl_name, $this->db_wrapper->getDB()->fetchAll(), "SELECT * FROM ".$tmp_tbl_name." WHERE ".$key."03 = '$year' AND ".$key."04_1 = '$code' AND ".$key."04_2 = '$number'");
 		}
 		return $result;
 	}
 
 	public function clearCaseTemp($year, $code, $number, $table = "") {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
@@ -1837,22 +1813,22 @@ class Query {
 				continue;
 			}
 			Logger::getInstance()->info(__METHOD__."：刪除 $tmp_tbl_name 資料 ... ");
-			$this->db->parse("
+			$this->db_wrapper->getDB()->parse("
 				DELETE FROM ".$tmp_tbl_name." WHERE ".$key."03 = :bv_year AND ".$key."04_1 = :bv_code AND ".$key."04_2 = :bv_number
 			");
 
-			$this->db->bind(":bv_year", $year);
-			$this->db->bind(":bv_code", $code);
-			$this->db->bind(":bv_number", $number);
+			$this->db_wrapper->getDB()->bind(":bv_year", $year);
+			$this->db_wrapper->getDB()->bind(":bv_code", $code);
+			$this->db_wrapper->getDB()->bind(":bv_number", $number);
 			
-			$this->db->execute();
+			$this->db_wrapper->getDB()->execute();
 			
 		}
 		return true;
 	}
 
 	public function updateCaseColumnData($id, $table, $column, $val) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
@@ -1878,42 +1854,42 @@ class Query {
 		
 		Logger::getInstance()->info(__METHOD__."：預備執行 $sql");
 
-		$this->db->parse($sql);
+		$this->db_wrapper->getDB()->parse($sql);
 
-		$this->db->bind(":bv_year", $year);
-		$this->db->bind(":bv_code", $code);
-		$this->db->bind(":bv_number", $num);
-		$this->db->bind(":bv_val", mb_convert_encoding($val, "big5"));
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_number", $num);
+		$this->db_wrapper->getDB()->bind(":bv_val", mb_convert_encoding($val, "big5"));
 		
-		$this->db->execute();
+		$this->db_wrapper->getDB()->execute();
 
 		return true;
 	}
 
 	// 取得權利人資料
 	public function getRLNIDByID($id) {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			select * from MOICAD.RLNID t
 			where lidn like :bv_id
 		");
-		$this->db->bind(":bv_id", '%'.$id.'%');
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_id", '%'.$id.'%');
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	/**
 	 * 取得目前為公告狀態案件
 	 */
 	public function getRM30HCase() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			-- RM49 公告日期, RM50 公告到期日
 			SELECT
 				Q.KCNT AS RM09_CHT,
@@ -1932,41 +1908,41 @@ class Query {
 				-- RM49 公告日期, RM50 公告到期日
 			ORDER BY s.RM50, sa11.USER_NAME
 		");
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 	/**
 	 * 取得目前為請示狀態案件
 	 */
 	public function getRM30ECase() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT * FROM MOICAS.CRSMS t
 			LEFT JOIN MOIADM.RKEYN q ON t.RM09=q.KCDE_2 AND q.KCDE_1 = '06'
 			WHERE RM80 IS NOT NULL AND RM31 NOT IN ('A', 'B', 'C', 'D')
 			ORDER BY t.RM29_1, t.RM80
 		");
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 	/**
 	 * 取得曾經取消請示案件
 	 */
 	public function getCancelRM30ECase() {
-		if (!$this->db_ok) {
+		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT * FROM MOICAS.CRSMS t
 			LEFT JOIN MOIADM.RKEYN q ON t.RM09=q.KCDE_2 AND q.KCDE_1 = '06'
 			WHERE RM83 IS NOT NULL AND RM29_1 < RM58_1
 			ORDER BY t.RM29_1, t.RM58_1
 		");
-		$this->db->execute();
-		return $this->db->fetchAll();
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 }
