@@ -1,51 +1,26 @@
 <?php
 require_once("init.php");
-require_once("OraDB.class.php");
+require_once("OraDBWrapper.class.php");
 require_once("System.class.php");
 require_once("Cache.class.php");
 require_once("LXHWEB.class.php");
 
 class MOIPRC {
+	private $db_wrapper = null;
+	function __construct() {
+		$this->db_wrapper = new OraDBWrapper();
+	}
 
-	private $db;
-	private $db_ok = true;
-	private $site = 'HA';
-	private $site_code = 'A';
-	private $site_number = 1;
-
-    private function isDBReachable($txt = __METHOD__) {
-        $this->db_ok = System::getInstance()->isDBReachable();
-        if (!$this->db_ok) {
-            Logger::getInstance()->error('資料庫無法連線，無法取得資料。['.$txt.']');
-        }
-        return $this->db_ok;
-    }
-
-    function __construct() {
-		if ($this->isDBReachable()) {
-			$type = OraDB::getPointDBTarget();
-			$this->db = new OraDB($type);
-		}
-		$this->site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
-		if (!empty($this->site)) {
-			$this->site_code = $this->site[1];
-			$this->site_number = ord($this->site_code) - ord('A');
-		}
-    }
-
-    function __destruct() {
-		if ($this->db) {
-			$this->db->close();
-		}
-        $this->db = null;
-    }
+	function __destruct() {
+		$this->db_wrapper = null;
+	}
 
 	public function getRealPriceMap($st, $ed) {
-		if (!$this->db_ok || empty($st) || empty($ed)) {
+		if (!$this->db_wrapper->reachable() || empty($st) || empty($ed)) {
 			return array();
 		}
 
-		$this->db->parse("
+		$this->db_wrapper->getDB()->parse("
 			SELECT DISTINCT s.rm01 || '-' || s.rm02 || '-' || s.rm03 as \"RM123\",
 				r.KCNT as \"RM09_CHT\",
 				u.KNAME as \"RM11_CHT\",
@@ -73,10 +48,10 @@ class MOIPRC {
 				AND s.RM09 = '64'
 			ORDER BY s.RM07_1 DESC
 		");
-		$this->db->bind(":bv_st", $st);
-		$this->db->bind(":bv_ed", $ed);
-		$this->db->execute();
-		$records = $this->db->fetchAll();
+		$this->db_wrapper->getDB()->bind(":bv_st", $st);
+		$this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+		$this->db_wrapper->getDB()->execute();
+		$records = $this->db_wrapper->getDB()->fetchAll();
 
 		// set other site's case no data
 		$l3hweb = new LXHWEB();
