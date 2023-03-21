@@ -673,9 +673,13 @@ class WatchDog {
             if ($adm_ip == '::1') {
                 continue;
             }
-            $sn = $msg->send('土地建物統計問題通知', $content, $adm_ip);
+            $sn = $msg->send('登記土地建物統計問題通知', $content, $adm_ip);
             Logger::getInstance()->info("土地建物統計問題通知訊息已送出給 $adm_ip ($sn)");
         }
+
+        // send messsage to reg chat room as well
+        $lastId = $this->addNotification($content, "reg", "登記土地建物統計資料通知", true);
+        Logger::getInstance()->info('新增登記土地建物統計資料通知訊息至 reg 頻道。 '.($lastId === false ? '失敗' : '成功').')');
     }
 
     function __construct() {
