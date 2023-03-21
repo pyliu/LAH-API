@@ -8,7 +8,15 @@ class StatsOracle {
 
     private function checkYearMonth($year_month) {
         if (empty($year_month) || strlen($year_month) != 5) {
-            Logger::getInstance()->error(__METHOD__.": $year_month foramt is not correct.");
+            Logger::getInstance()->error(__METHOD__.": $year_month foramt is not correct. (ex. 11203)");
+            return false;
+        }
+        return true;
+    }
+
+    private function checkYearMonthDay($year_month_day) {
+        if (empty($year_month_day) || strlen($year_month_day) != 7) {
+            Logger::getInstance()->error(__METHOD__.": $year_month_day foramt is not correct. (ex. 1120321)");
             return false;
         }
         return true;
@@ -200,5 +208,19 @@ class StatsOracle {
         $this->db->bind(":bv_cond", $year_month);
         $this->db->execute();
         return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+    }
+
+    public function getRegaCount($day) {
+        if (!$this->checkYearMonthDay($day)) {
+            return false;
+        }
+        $this->db->parse("
+            select * from MOICAD.REGA t
+            where ra40 like :bv_cond
+        ");
+        $this->db->bind(":bv_cond", $day);
+        $this->db->execute();
+        return $this->db->fetchAll(true);   // true 
+        
     }
 }
