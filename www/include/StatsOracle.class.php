@@ -1,10 +1,10 @@
 <?php
 require_once('init.php');
-require_once("OraDB.class.php");
+require_once("OraDBWrapper.class.php");
 require_once("System.class.php");
 
 class StatsOracle {
-    private $db;
+	private $db_wrapper = null;
 
     private function checkYearMonth($year_month) {
         if (empty($year_month) || strlen($year_month) != 5) {
@@ -22,31 +22,33 @@ class StatsOracle {
         return true;
     }
 
-    function __construct() {
-        $this->db = new OraDB();
-    }
+	function __construct() {
+		$this->db_wrapper = new OraDBWrapper();
+	}
 
-    function __destruct() { }
+	function __destruct() {
+		$this->db_wrapper = null;
+	}
 
     public function getRefundCount($year_month) {
         if (!$this->checkYearMonth($year_month)) {
             return false;
         }
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
             -- 主動申請退費
             SELECT '主動申請退費' AS \"text\", COUNT(*) AS \"count\" FROM MOIEXP.EXPBA t
             WHERE t.BA32 LIKE :bv_cond || '%' and t.BA42 = '01'  --溢繳規費
         ");
-        $this->db->bind(":bv_cond", $year_month);
-        $this->db->execute();
-        return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+        $this->db_wrapper->getDB()->bind(":bv_cond", $year_month);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
 
     public function getCourtCaseCount($year_month) {
         if (!$this->checkYearMonth($year_month)) {
             return false;
         }
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
             -- 法院囑託案件
             -- 登記原因為查封(33)、塗銷查封(34)、假扣押(49)、塗銷假扣押(54)、假處分(50)、塗銷假處分(55)
             -- 禁止處分(52)、塗銷禁止處分(57)、破產登記(51)、塗銷破產登記(56)、暫時處分(FB)、塗銷暫時處分(FC)、未登記建物查封(AU)
@@ -55,32 +57,32 @@ class StatsOracle {
             WHERE t.RM07_1 LIKE :bv_cond || '%'
             AND t.RM09 in ('33', '34', '49', '54', '50', '55', '52', '57', '51', '56', 'FB', 'FC', 'AU')
 		");
-        $this->db->bind(":bv_cond", $year_month);
-        $this->db->execute();
-        return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+        $this->db_wrapper->getDB()->bind(":bv_cond", $year_month);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
 
     public function getSurRainCount($year_month) {
         if (!$this->checkYearMonth($year_month)) {
             return false;
         }
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
             -- 測量因雨延期
             select '測量因雨延期案件' AS \"text\", COUNT(*) AS \"count\" from SCMSMS t
             left join SCMSDS q on MM01 = MD01 and MM02 = MD02 and MM03 = MD03
             where t.MM04_1 LIKE :bv_cond || '%'
             and MD12 = '1'
 		");
-        $this->db->bind(":bv_cond", $year_month);
-        $this->db->execute();
-        return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+        $this->db_wrapper->getDB()->bind(":bv_cond", $year_month);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
 
     public function getRegFixCount($year_month) {
         if (!$this->checkYearMonth($year_month)) {
             return false;
         }
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
             -- 補正統計
             SELECT DISTINCT COUNT(*) AS \"count\", '登記補正案件' AS \"text\"
             FROM MOICAS.CRSMS
@@ -88,16 +90,16 @@ class StatsOracle {
             AND MOICAS.CRSMS.RM51 Is Not Null
             AND MOICAS.CRSMS.RM52 Is Not Null
         ");
-        $this->db->bind(":bv_cond", $year_month);
-        $this->db->execute();
-        return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+        $this->db_wrapper->getDB()->bind(":bv_cond", $year_month);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
 
     public function getRegRejectCount($year_month) {
         if (!$this->checkYearMonth($year_month)) {
             return false;
         }
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
             -- 駁回統計
             SELECT DISTINCT COUNT(*) AS \"count\", '登記駁回案件' AS \"text\"
             FROM MOICAS.CRSMS
@@ -105,16 +107,16 @@ class StatsOracle {
             AND MOICAS.CRSMS.RM48_1 Is Not Null
             AND MOICAS.CRSMS.RM48_2 Is Not Null
         ");
-        $this->db->bind(":bv_cond", $year_month);
-        $this->db->execute();
-        return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+        $this->db_wrapper->getDB()->bind(":bv_cond", $year_month);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
 
     public function getRegReasonCount($year_month) {
         if (!$this->checkYearMonth($year_month)) {
             return false;
         }
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
             -- 合併 11、分割  06、第一次登記 02、滅失 21、逕為分割 07、遺漏更正 CN、判決共有物分割  35、和解共有物分割 36、調解共有物分割 37
             -- 住址變更 48、拍賣 67、清償 AF、徵收  70、管理機關變更  46
             SELECT t.RM09 AS \"id\", q.kcnt AS \"text\", COUNT(*) AS \"count\"
@@ -125,16 +127,16 @@ class StatsOracle {
               AND t.RM07_1 LIKE :bv_cond || '%'
             GROUP BY t.RM09, q.kcnt
         ");
-        $this->db->bind(":bv_cond", $year_month);
-        $this->db->execute();
-        return $this->db->fetchAll();   // true => fetch raw data instead of converting to UTF-8
+        $this->db_wrapper->getDB()->bind(":bv_cond", $year_month);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll();   // true => fetch raw data instead of converting to UTF-8
     }
 
     public function getRegCaseCount($year_month) {
         if (!$this->checkYearMonth($year_month)) {
             return false;
         }
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
             SELECT t.RM09 AS \"id\", q.kcnt AS \"text\", COUNT(*) AS \"count\"
             FROM MOICAS.CRSMS t
             LEFT JOIN MOICAD.RKEYN q
@@ -143,16 +145,16 @@ class StatsOracle {
             WHERE t.RM07_1 LIKE :bv_cond || '%'
             GROUP BY t.RM09, q.kcnt
         ");
-        $this->db->bind(":bv_cond", $year_month);
-        $this->db->execute();
-        return $this->db->fetchAll();   // true => fetch raw data instead of converting to UTF-8
+        $this->db_wrapper->getDB()->bind(":bv_cond", $year_month);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll();   // true => fetch raw data instead of converting to UTF-8
     }
 
     public function getRegRemoteCount($year_month) {
         if (!$this->checkYearMonth($year_month)) {
             return false;
         }
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
             SELECT
                 '遠途先審案件' AS \"text\", COUNT(*) AS \"count\"
             FROM MOICAS.CRSMS t
@@ -165,11 +167,11 @@ class StatsOracle {
                 (u.LADR NOT LIKE '%' || :bv_city || '%' AND u.LADR NOT LIKE '%' || :bv_county || '%') AND 
                 (v.AB03 NOT LIKE '%' || :bv_city || '%' AND v.AB03 NOT LIKE '%' || :bv_county || '%')
         ");
-        $this->db->bind(":bv_cond", $year_month);
-        $this->db->bind(":bv_city", mb_convert_encoding('桃園市', "big5"));
-        $this->db->bind(":bv_county", mb_convert_encoding('桃園縣', "big5"));
-        $this->db->execute();
-        return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+        $this->db_wrapper->getDB()->bind(":bv_cond", $year_month);
+        $this->db_wrapper->getDB()->bind(":bv_city", mb_convert_encoding('桃園市', "big5"));
+        $this->db_wrapper->getDB()->bind(":bv_county", mb_convert_encoding('桃園縣', "big5"));
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
 
     public function getRegSubCaseCount($year_month) {
@@ -184,45 +186,45 @@ class StatsOracle {
 			$site_number = ord($site_code) - ord('A');
 		}
 
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
             SELECT '本所處理跨所子號案件' AS \"text\", COUNT(*) AS \"count\"
             FROM MOICAS.CRSMS tt
             WHERE tt.rm07_1 LIKE :bv_cond || '%'
                 AND tt.rm02 LIKE 'H%".$site_code."1' -- 本所處理跨所案件
                 AND tt.RM03 NOT LIKE '%0' -- 子號案件
         ");
-        $this->db->bind(":bv_cond", $year_month);
-        $this->db->execute();
-        return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+        $this->db_wrapper->getDB()->bind(":bv_cond", $year_month);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
 
     public function getRegfCount($year_month) {
         if (!$this->checkYearMonth($year_month)) {
             return false;
         }
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
             SELECT '外國人地權登記統計' AS \"text\", COUNT(*) AS \"count\"
             FROM MOICAD.REGF
             WHERE MOICAD.REGF.RF40 LIKE :bv_cond || '%'
         ");
-        $this->db->bind(":bv_cond", $year_month);
-        $this->db->execute();
-        return $this->db->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+        $this->db_wrapper->getDB()->bind(":bv_cond", $year_month);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
     }
     /**
      * the stats data will be collected every night (22:00) on cross site AP
      */
     public function getRegaCount($day) {
-        if (!$this->checkYearMonthDay($day)) {
+        if (!$this->db_wrapper->reachable() || !$this->checkYearMonthDay($day)) {
             return false;
         }
-        $this->db->parse("
+        $this->db_wrapper->getDB()->parse("
             select * from MOICAD.REGA t
             where ra40 like :bv_cond
         ");
-        $this->db->bind(":bv_cond", $day);
-        $this->db->execute();
-        return $this->db->fetchAll(true);   // true 
+        $this->db_wrapper->getDB()->bind(":bv_cond", $day);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll(true);   // true 
         
     }
 }
