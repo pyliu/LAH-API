@@ -5,6 +5,7 @@ require_once("OraDB.class.php");
 require_once("Cache.class.php");
 require_once("System.class.php");
 require_once("MOIPRC.class.php");
+require_once("MOICAD.class.php");
 
 class Prefetch {
     private const PREFETCH_SQLITE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."prefetch.db";
@@ -34,7 +35,8 @@ class Prefetch {
         'SUR_OVERDUE_CASE' => 'Prefetch::getSurOverdueCase',
         'SUR_NOT_CLOSE_CASE' => 'Prefetch::getSurNotCloseCase',
         'SUR_NEAR_CASE' => 'Prefetch::getSurNearCase',
-        'VAL_REALPRICE_MAP' => 'Prefetch::getValRealPriceMap'
+        'VAL_REALPRICE_MAP' => 'Prefetch::getValRealPriceMap',
+        'REG_INHERITANCE_RESTRICTION' => 'Prefetch::getRegInheritanceRestriction'
     );
     private $ora_db = null;
     private $cache = null;
@@ -1316,7 +1318,6 @@ class Prefetch {
         return $this->getCache()->get($cache_key);
     }
 
-    
     /**
      * 未辦標的註記異動查詢快取剩餘時間
      */
@@ -1770,7 +1771,6 @@ class Prefetch {
         return $this->getCache()->get($cache_key);
     }
 
-
     /**
      * 即將到期測量案件查詢快取剩餘時間
      */
@@ -1850,7 +1850,6 @@ class Prefetch {
         return $this->getCache()->get($cache_key);
     }
 
-
     /**
      * 實價登錄控管案件快取剩餘時間
      */
@@ -1882,4 +1881,35 @@ class Prefetch {
         return $this->getCache()->get($cache_key);
     }
     
+
+    /**
+     * 外國人繼承限制資料快取剩餘時間
+     */
+    public function getRegInheritanceRestrictionCacheRemainingTime() {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['REG_INHERITANCE_RESTRICTION']);
+    }
+    /**
+     * 強制重新讀取外國人繼承限制資料
+     */
+    public function reloadRegInheritanceRestriction($expire_duration = 86400) {
+        $this->getCache()->del(self::KEYS['REG_INHERITANCE_RESTRICTION']);
+        return $this->getRegInheritanceRestriction($expire_duration);
+    }
+    /**
+	 * 取得外國人繼承限制資料
+     * default cache time is 24 hrs * 60 minutes * 60 seconds = 86,400 seconds
+	 */
+	public function getRegInheritanceRestriction($expire_duration = 86400) {
+        $cache_key = self::KEYS['REG_INHERITANCE_RESTRICTION'];
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
+            $moicad = new MOICAD();
+            $results = $moicad->getInheritanceRestrictionRecords();
+            $this->getCache()->set($cache_key, $results, $expire_duration);
+            Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($results)." 筆，預計 $expire_duration 秒後到期)");
+            return $results;
+        }
+        Logger::getInstance()->info('['.$cache_key.'] 快取資料 ... 尚餘'.$this->getRegInheritanceRestrictionCacheRemainingTime());
+        return $this->getCache()->get($cache_key);
+    }
 }
