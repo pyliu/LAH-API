@@ -600,6 +600,33 @@ switch ($_POST["type"]) {
 			));
 		}
 		break;
+	case "reg_inheritance_restriction":
+		Logger::getInstance()->info("XHR [reg_inheritance_restriction] 查詢外人繼承限制資料請求");
+		$message = "外人繼承限制";
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRegInheritanceRestriction() : $prefetch->getRegInheritanceRestriction();
+		$cache_remaining = $prefetch->getRegInheritanceRestrictionCacheRemainingTime();
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [reg_inheritance_restriction] 查無 $message 資料");
+			echoJSONResponse("查無 $message 資料");
+		} else {
+			$total = count($rows);
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$this_baked = $data->getBakedData();
+				$baked[] = $this_baked;
+			}
+			Logger::getInstance()->info("XHR [reg_inheritance_restriction] 查詢成功($total)");
+			echoJSONResponse("查詢成功，找到 $total 筆 $message 資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+				// "data_count" => $total,
+				// "raw" => $rows,
+				// 'cache_remaining_time' => $cache_remaining,
+				"data_count" => $total,
+				"baked" => $baked,
+				'cache_remaining_time' => $cache_remaining
+			));
+		}
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
