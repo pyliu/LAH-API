@@ -11,6 +11,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteUser.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'System.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Cache.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'LXHWEB.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'MOICAD.class.php');
 
 class WatchDog {
     private $stats = null;
@@ -271,7 +272,7 @@ class WatchDog {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期登記案件檢測。");
             return false;
         }
-        $query_url_base = "http://".$this->host_ip.":8080/regcase/";
+        $query_url_base = "http://".$this->host_ip.":8080/reg/expire";
         $query = new Query();
         Logger::getInstance()->info('開始查詢15天內逾期登記案件 ... ');
         $rows = $query->queryOverdueCasesIn15Days();
@@ -316,7 +317,7 @@ class WatchDog {
         //     $url .= "?ID=${to_id}";
         //     // $url .= "${to_id}/";
         // }
-        $url = "http://".$this->host_ip.":8080/expire/";
+        $url = "http://".$this->host_ip.":8080/reg/expire";
         if ($to_id !== "ALL") {
             $url .= $to_id;
         }
@@ -345,7 +346,7 @@ class WatchDog {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過到期登記公告案件檢測。");
             return false;
         }
-        $query_url_base = "http://".$this->host_ip.":8080/expiry-of-announcement";
+        $query_url_base = "http://".$this->host_ip.":8080/reg/expiry-of-announcement";
         $query = new Query();
         Logger::getInstance()->info('開始查詢到期登記公告案件 ... ');
         $rows = $query->queryExpiredAnnouncementCases();
@@ -391,7 +392,7 @@ class WatchDog {
         //     $url .= "?ID=${to_id}";
         //     // $url .= "${to_id}/";
         // }
-        $url = "http://".$this->host_ip.":8080/expiry-of-announcement";
+        $url = "http://".$this->host_ip.":8080/reg/expiry-of-announcement";
         if ($to_id !== "ALL") {
             $url .= '?reviewer='.$to_id;
         }
@@ -421,7 +422,7 @@ class WatchDog {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過即將逾期測量案件檢測。");
             return false;
         }
-        $query_url_base = "http://".$this->host_ip.":8080/expire/sur";
+        $query_url_base = "http://".$this->host_ip.":8080/sur/expire";
         $prefetch = new Prefetch();
         Logger::getInstance()->info('開始查詢即將逾期(未來3日內)登記案件 ... ');
         $rows = $prefetch->getSurNearCase();
@@ -460,7 +461,7 @@ class WatchDog {
     private function sendSurNearOverdueMessage($to_id, $cases) {
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
-        $url = "http://".$this->host_ip.":8080/expire/sur";
+        $url = "http://".$this->host_ip.":8080/sur/expire";
         $displayName = $to_id === "ALL" ? "測量課" : "您";
         $content = "⚠️ ".$this->date."  ".$this->time." ${displayName}目前有 ".count($cases)." 件即將逾期案件(未來3天".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
         if ($to_id === "ALL") {
@@ -486,7 +487,7 @@ class WatchDog {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期測量案件檢測。");
             return false;
         }
-        $query_url_base = "http://".$this->host_ip.":8080/expire/sur";
+        $query_url_base = "http://".$this->host_ip.":8080/sur/expire";
         $prefetch = new Prefetch();
         Logger::getInstance()->info('開始查詢逾期測量案件 ... ');
         $rows = $prefetch->getSurOverdueCase();
@@ -525,7 +526,7 @@ class WatchDog {
     private function sendSurOverdueMessage($to_id, $cases) {
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
-        $url = "http://".$this->host_ip.":8080/expire/sur";
+        $url = "http://".$this->host_ip.":8080/sur/expire";
         $displayName = $to_id === "ALL" ? "測量課" : "您";
         $content = "🚩 ".$this->date."  ".$this->time." ${displayName}目前有 ".count($cases)." 件逾期案件".(count($cases) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
         if ($to_id === "ALL") {
@@ -643,6 +644,32 @@ class WatchDog {
         ));
     }
 
+    private function sendForeignerInheritanceRestrictionNotification() {
+        if ($this->isOn($this->schedule["once_a_day"])) {
+            $moicad = new MOICAD();
+            $altered = $moicad->getInheritanceRestrictionRecordsAdvanced();
+            if (count($altered) > 0) {
+                $now = time();
+                $duration = 6 * 30 * 24 * 60 * 60;
+                $cases = [];
+                foreach($altered as $record) {
+                    $needNotify = $now - $record['deadline_ts'] > $duration;
+                    if ($needNotify) {
+                        $cases[] = $record;
+                    }
+                }
+                $total = count($cases);
+                if ($total > 0) {
+                    $host_ip = getLocalhostIP();
+                    $url = "http://".$host_ip.":8080/reg/foreigner-inheritance-restriction";
+                    $message = "##### ".date("Y-m-d")." 外國人繼承限制通知\r\n***\r\n⚠ 系統今日找到 $total 件外國人繼承限制需進行(或半年內)處理，請進系統查看案件資料。\r\n\r\n👉 $url";
+                    // send to reg chat channel
+                    $this->addNotification($message, "reg");
+                }
+            }
+        }
+    }
+
     private function checkRegaDailyStatsData($day = '') {
         if ($this->isOn($this->schedule["once_a_day"])) {
             if (empty($day)) {
@@ -704,6 +731,7 @@ class WatchDog {
                 $this->findSurOverdueCases();
                 $this->findSurNearOverdueCases();
                 $this->checkRegaDailyStatsData();
+                $this->sendForeignerInheritanceRestrictionNotification();
                 return true;
             }
             return false;

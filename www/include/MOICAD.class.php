@@ -55,4 +55,47 @@ class MOICAD
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
+	/**
+	 * Find foreigner inheritance restriction records that retrive the deadline from GG30_2
+	 */
+	public function getInheritanceRestrictionRecordsAdvanced()
+	{
+		$raw = $this->getInheritanceRestrictionRecords();
+		$len = count($raw);
+		if ($len > 0) {
+			for ($i = 0; $i < $len; $i++) {
+				$gg30_2 = $raw[$i]['GG30_2'];
+				$begin = mb_strpos($gg30_2, '本筆土地應於');
+				$end = mb_strpos($gg30_2, '日前移轉與本國人');
+				$date = mb_substr($gg30_2, $begin + 6, $end - $begin - 5);
+				$y_begin = mb_strpos($date, '年');
+				$m_begin = mb_strpos($date, '月');
+				$d_begin = mb_strpos($date, '日');
+				// TW year
+				$y = convertMBNumberString(mb_substr($date, 0, $y_begin));
+				$m = str_pad(
+					convertMBNumberString(mb_substr($date, $y_begin + 1, $m_begin - $y_begin - 1)),
+					2,
+					'0',
+					STR_PAD_LEFT
+				);
+				$d = str_pad(
+					convertMBNumberString(mb_substr($date, $m_begin + 1, $d_begin - $m_begin - 1)),
+					2,
+					'0',
+					STR_PAD_LEFT
+				);
+				$raw[$i]['deadline_tw'] = $y.str_pad($m, 2, '0').$d;
+				$raw[$i]['deadline_ts'] = strtotime(($y + 1911).'-'.$m.'-'.$d);
+				$raw[$i]['deadline'] = ($y + 1911).$m.$d;
+				$raw[$i]['deadline_raw'] = array(
+					'ad_y' => $y + 1911,
+					'y' => $y,
+					'm' => $m,
+					'd' => $d
+				);
+			}
+		}
+		return $raw;
+	}
 }
