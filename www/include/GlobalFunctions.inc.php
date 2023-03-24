@@ -6,6 +6,52 @@ require_once("OraDB.class.php");
 require_once("SQLiteUser.class.php");
 require_once("Logger.class.php");
 
+function convertMBNumberString($input) {
+    if (empty($input)) {
+        return '';
+    }
+    $len = mb_strlen($input);
+    $number = '';
+    for ($i = 0; $i < $len; $i++) {
+        $char = mb_substr($input, $i, 1);
+        switch ($char) {
+            case '０':
+                $number .= '0';
+                break;
+            case '１':
+                $number .= '1';
+                break;
+            case '２':
+                $number .= '2';
+                break;
+            case '３':
+                $number .= '3';
+                break;
+            case '４':
+                $number .= '4';
+                break;
+            case '５':
+                $number .= '5';
+                break;
+            case '６':
+                $number .= '6';
+                break;
+            case '７':
+                $number .= '7';
+                break;
+            case '８':
+                $number .= '8';
+                break;
+            case '９':
+                $number .= '9';
+                break;
+            default:
+                break;
+        }
+    }
+    return $number;
+}
+
 function resizeImage($filename, $max_width = 1920, $max_height = 1080, $type = 'jpg') {
     list($orig_width, $orig_height) = getimagesize($filename);
     $width = $orig_width;
