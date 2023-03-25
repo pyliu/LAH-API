@@ -653,6 +653,11 @@ class WatchDog {
                 $duration = 6 * 30 * 24 * 60 * 60;
                 $cases = [];
                 foreach($altered as $record) {
+                    $needNotify = $now >= $record['deadline_ts'];
+                    if (!$needNotify) {
+                        // to check if 6 months away the deadline
+                        $needNotify = $record['deadline_ts'] - $now <= $duration;
+                    }
                     $needNotify = $now - $record['deadline_ts'] > $duration;
                     if ($needNotify) {
                         $cases[] = $record;
@@ -662,7 +667,7 @@ class WatchDog {
                 if ($total > 0) {
                     $host_ip = getLocalhostIP();
                     $url = "http://".$host_ip.":8080/reg/foreigner-inheritance-restriction";
-                    $message = "##### ".date("Y-m-d")." 外國人繼承限制通知\r\n***\r\n⚠ 系統今日找到 $total 件外國人繼承限制需進行處理(逾期或半年內到期)，請進系統查看案件資料。\r\n\r\n👉 $url";
+                    $message = "##### ".date("Y-m-d")." 外國人繼承限制通知\r\n***\r\n⚠ 系統今日找到 $total 件外國人繼承限制需進行處理(逾期或3年內到期)，請進系統查看案件資料。\r\n\r\n👉 $url";
                     // send to reg chat channel
                     $this->addNotification($message, "reg");
                 }
