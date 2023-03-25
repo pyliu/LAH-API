@@ -658,7 +658,6 @@ class WatchDog {
                         // to check if 6 months away the deadline
                         $needNotify = $record['deadline_ts'] - $now <= $duration;
                     }
-                    $needNotify = $now - $record['deadline_ts'] > $duration;
                     if ($needNotify) {
                         $cases[] = $record;
                     }
