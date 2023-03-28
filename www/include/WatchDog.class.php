@@ -680,8 +680,15 @@ class WatchDog {
                 $tw_date = new Datetime("now");
                 // tw format
                 $tw_date->modify("-1911 year");
-                // default is yesterday
-                $tw_date->modify("-1 day");
+                $weekday = date('w');
+                if ($weekday == 1) {
+                    // friday
+                    $tw_date->modify("-3 day");
+                } else {
+                    // default is yesterday
+                    $tw_date->modify("-1 day");
+                }
+                
                 $day = ltrim($tw_date->format("Ymd"), "0");	
             }
             $stats = new StatsOracle();
