@@ -647,7 +647,7 @@ class WatchDog {
     private function sendForeignerInheritanceRestrictionNotification() {
         if ($this->isOn($this->schedule["once_a_day"])) {
             $moicad = new MOICAD();
-            $altered = $moicad->getInheritanceRestrictionRecordsAdvanced();
+            $altered = $moicad->getInheritanceRestrictionTODORecordsAdvanced();
             if (count($altered) > 0) {
                 $now = time();
                 $duration = 6 * 30 * 24 * 60 * 60;
