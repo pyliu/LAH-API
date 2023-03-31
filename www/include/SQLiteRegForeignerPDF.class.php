@@ -61,7 +61,7 @@ class SQLiteRegForeignerPDF {
                 Logger::getInstance()->error(__METHOD__.": 無法取得 $st_date ~ $ed_date 資料！ (".SQLiteDBFactory::getRegForeignerPDFDB().")");
             }
         } else {
-            if($stmt = $this->db->prepare('SELECT * from reg_foreigner_pdf WHERE createtime BETWEEN :bv_createtime_st AND :bv_createtime_ed AND (note LIKE :bv_keyword OR fname LIKE :bv_keyword OR fid LIKE :bv_keyword) order by modifytime DESC')) {
+            if($stmt = $this->db->prepare('SELECT * from reg_foreigner_pdf WHERE createtime BETWEEN :bv_createtime_st AND :bv_createtime_ed AND (note LIKE :bv_keyword OR fname LIKE :bv_keyword OR fid LIKE :bv_keyword OR number LIKE :bv_keyword) order by modifytime DESC')) {
                 $stmt->bindParam(':bv_createtime_st', $st);
                 // 在結束日的那天內都算，所以加上 86399 秒
                 $stmt->bindValue(':bv_createtime_ed', $ed + 86399);
