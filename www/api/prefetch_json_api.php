@@ -601,8 +601,8 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_inheritance_restriction":
-		Logger::getInstance()->info("XHR [reg_inheritance_restriction] 查詢外人繼承限制資料請求");
-		$message = "外人繼承限制";
+		Logger::getInstance()->info("XHR [reg_inheritance_restriction] 查詢外人管制清冊資料請求");
+		$message = "外人管制清冊";
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRegInheritanceRestriction() : $prefetch->getRegInheritanceRestriction();
 		$cache_remaining = $prefetch->getRegInheritanceRestrictionCacheRemainingTime();
 		if (empty($rows)) {
