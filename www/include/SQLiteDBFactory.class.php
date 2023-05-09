@@ -24,6 +24,28 @@ class SQLiteDBFactory {
         return $path;
     }
 
+    public static function getRegForeignerRestrictionDB() {
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."reg_foreigner_restriction.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "reg_foreigner_restriction" (
+                "cert_no"	TEXT NOT NULL,
+                "nation"   TEXT,
+                "reg_date" TEXT,
+                "reg_caseno" TEXT,
+                "transfer_date" TEXT,
+                "transfer_caseno" TEXT,
+                "transfer_local_date" TEXT,
+                "transfer_local_principle" TEXT,
+                "restore_local_date" TEXT,
+                "note" TEXT,
+                PRIMARY KEY("cert_no")
+            )
+        ');
+        return $path;
+    }
+
     public static function getRegForeignerPDFDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."reg_foreigner_pdf.db";
         $sqlite = new DynamicSQLite($path);
