@@ -4,6 +4,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."RegQuery.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."Cache.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegForeignerPDF.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRegForeignerRestriction.class.php");
 
 $query = new RegQuery();
 $cache = Cache::getInstance();
@@ -149,6 +150,28 @@ switch ($_POST["type"]) {
         $result = $query->removeRegForeignerPDF($id);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除外國人PDF資料 ($id)" : "無法刪除外國人PDF資料 ($id)";
+        Logger::getInstance()->info("XHR [remove_foreigner_pdf] $message");
+        echoJSONResponse($message, $response_code);
+        break;
+    case "add_foreigner_data":
+    case "edit_foreigner_data":
+        Logger::getInstance()->info("XHR [edit_foreigner_data] edit foreigner data request.");
+        $data = $_POST['data'];
+        $cert_no = $data['cert_no'];
+        $srfr = new SQLiteRegForeignerRestriction();
+        $result = $srfr->add($data);
+        $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已更新外國人管制資料 ($cert_no)" : "無法更新外國人管制資料 ($cert_no)";
+        Logger::getInstance()->info("XHR [edit_foreigner_data] $message");
+        echoJSONResponse($message, $response_code);
+        break;
+    case "remove_foreigner_data":
+        Logger::getInstance()->info("XHR [remove_foreigner_data] remove foreigner data request.");
+        $cert_no = $_POST['cert_no'];
+        $srfr = new SQLiteRegForeignerRestriction();
+        $result = $srfr->delete($cert_no);
+        $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除外國人管制資料 ($cert_no)" : "無法刪除外國人管制資料 ($cert_no)";
         Logger::getInstance()->info("XHR [remove_foreigner_pdf] $message");
         echoJSONResponse($message, $response_code);
         break;

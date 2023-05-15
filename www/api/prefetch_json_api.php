@@ -4,6 +4,7 @@ require_once(INC_DIR."/System.class.php");
 require_once(INC_DIR."/Prefetch.class.php");
 require_once(INC_DIR."/RegCaseData.class.php");
 require_once(INC_DIR."/SurCaseData.class.php");
+require_once(INC_DIR."/SQLiteRegForeignerRestriction.class.php");
 
 $prefetch = new Prefetch();
 switch ($_POST["type"]) {
@@ -610,10 +611,13 @@ switch ($_POST["type"]) {
 			echoJSONResponse("查無 $message 資料");
 		} else {
 			$total = count($rows);
+			$srfr = new SQLiteRegForeignerRestriction();
 			$baked = array();
 			foreach ($rows as $row) {
 				$data = new RegCaseData($row);
 				$this_baked = $data->getBakedData();
+				// use cert no to read restriction data
+				$this_baked['RESTRICTION_DATA'] = $srfr->getOne($row['BB16']);
 				$baked[] = $this_baked;
 			}
 			Logger::getInstance()->info("XHR [reg_inheritance_restriction] 查詢成功($total)");
