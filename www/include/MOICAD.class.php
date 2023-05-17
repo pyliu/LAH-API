@@ -120,6 +120,7 @@ class MOICAD
 			left join MOIADM.RKEYN_ALL v ON v.kcde_1 = '46' and v.kcde_2 = 'H' and u.rm10 = v.kcde_3
 			left join MOIADM.RKEYN_ALL w ON w.kcde_1 = '48' and w.kcde_2 = 'H' and t.ba48 = w.kcde_4
 			where s.lcde in ('2', '8')
+			order by t.bb16
 		");
 		// GG30_1: '00' => 搜尋其他登記事項 ' ... 移轉與本國人 .... ' 字樣
 		$this->db_wrapper->getDB()->bind(":bv_key1", mb_convert_encoding('移轉與', "big5"));
