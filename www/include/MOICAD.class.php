@@ -65,6 +65,8 @@ class MOICAD
 			select
 				RGALL_00_GP_FOREIGNER.*,
 				t.*,
+				r.*,											-- 土地標示部
+				z.kcnt as aa11_cht,
 				y.kcnt as bb15_1_cht,
 				x.kcnt as bb06_cht,
 				s.lnam as bb09_cht,
@@ -106,10 +108,15 @@ class MOICAD
 				t.ba48 = RGALL_00_GP_FOREIGNER.gg48
 				and t.ba49 = RGALL_00_GP_FOREIGNER.gg49
 				and t.bb01 = RGALL_00_GP_FOREIGNER.gg01
+			left join MOICAD.RALID r on
+				r.aa48 = RGALL_00_GP_FOREIGNER.gg48
+				and r.aa49 = RGALL_00_GP_FOREIGNER.gg49
+				--and t.bb01 = RGALL_00_GP_FOREIGNER.gg01
 			left join MOICAD.RLNID s on t.bb09 = s.lidn
 			left join MOICAS.CRSMS u on u.rm01 = t.bb03 and u.rm02 = t.bb04_1 and u.rm03 = t.bb04_2
 			left join MOIADM.RKEYN x ON x.kcde_1 = '06' and t.bb06 = x.kcde_2
 			left join MOIADM.RKEYN y ON y.kcde_1 = '15' and t.bb15_1 = y.kcde_2
+			left join MOIADM.RKEYN z ON z.kcde_1 = '11' and r.aa11 = z.kcde_2	-- 使用分區代碼
 			left join MOIADM.RKEYN_ALL v ON v.kcde_1 = '46' and v.kcde_2 = 'H' and u.rm10 = v.kcde_3
 			left join MOIADM.RKEYN_ALL w ON w.kcde_1 = '48' and w.kcde_2 = 'H' and t.ba48 = w.kcde_4
 			where s.lcde in ('2', '8')
