@@ -45,34 +45,6 @@ class SQLiteRegForeignerRestriction {
         return false;
     }
 
-    public function search($st, $ed, $keyword = '') {
-        // $st_date = date("Y-m-d", $st);
-        // $ed_date = date("Y-m-d", $ed);
-        // Logger::getInstance()->info(__METHOD__.": 搜尋 $st_date ~ $ed_date 區間資料，關鍵字: $keyword");
-        // $result = array();
-        // if (empty($keyword)) {
-        //     if($stmt = $this->db->prepare('SELECT * from reg_foreigner_pdf WHERE createtime BETWEEN :bv_createtime_st AND :bv_createtime_ed order by modifytime DESC')) {
-        //         $stmt->bindParam(':bv_createtime_st', $st);
-        //         // 在結束日的那天內都算，所以加上 86399 秒
-        //         $stmt->bindValue(':bv_createtime_ed', $ed + 86399);
-        //         $result = $this->prepareArray($stmt);
-        //     } else {
-        //         Logger::getInstance()->error(__METHOD__.": 無法取得 $st_date ~ $ed_date 資料！ (".SQLiteDBFactory::getRegForeignerPDFDB().")");
-        //     }
-        // } else {
-        //     if($stmt = $this->db->prepare('SELECT * from reg_foreigner_pdf WHERE createtime BETWEEN :bv_createtime_st AND :bv_createtime_ed AND (note LIKE :bv_keyword OR fname LIKE :bv_keyword OR fid LIKE :bv_keyword OR number LIKE :bv_keyword) order by modifytime DESC')) {
-        //         $stmt->bindParam(':bv_createtime_st', $st);
-        //         // 在結束日的那天內都算，所以加上 86399 秒
-        //         $stmt->bindValue(':bv_createtime_ed', $ed + 86399);
-        //         $stmt->bindValue(':bv_keyword', "%$keyword%");
-        //         $result = $this->prepareArray($stmt);
-        //     } else {
-        //         Logger::getInstance()->error(__METHOD__.": 無法取得 $st_date ~ $ed_date 內含 %$keyword% 資料！ (".SQLiteDBFactory::getRegForeignerPDFDB().")");
-        //     }
-        // }
-        // return $result;
-    }
-
     public function add($post) {
         $id = $this->exists($post['cert_no']);
         if ($id) {
@@ -80,8 +52,8 @@ class SQLiteRegForeignerRestriction {
             return $this->update($post);
         } else {
             $stm = $this->db->prepare("
-                INSERT INTO reg_foreigner_restriction ('cert_no', 'nation', 'reg_date', 'reg_caseno', 'transfer_date', 'transfer_caseno', 'transfer_local_date', 'transfer_local_principle', 'restore_local_date', 'note')
-                VALUES (:cert_no, :nation, :reg_date, :reg_caseno, :transfer_date, :transfer_caseno, :transfer_local_date, :transfer_local_principle, :restore_local_date, :note)
+                INSERT INTO reg_foreigner_restriction ('cert_no', 'nation', 'reg_date', 'reg_caseno', 'transfer_date', 'transfer_caseno', 'transfer_local_date', 'transfer_local_principle', 'restore_local_date', 'use_partition', 'note')
+                VALUES (:cert_no, :nation, :reg_date, :reg_caseno, :transfer_date, :transfer_caseno, :transfer_local_date, :transfer_local_principle, :restore_local_date, :use_partition, :note)
             ");
             $stm->bindParam(':cert_no', $post['cert_no']);
             $stm->bindParam(':nation', $post['nation']);
@@ -92,6 +64,7 @@ class SQLiteRegForeignerRestriction {
             $stm->bindParam(':transfer_local_date', $post['transfer_local_date']);
             $stm->bindParam(':transfer_local_principle', $post['transfer_local_principle']);
             $stm->bindParam(':restore_local_date', $post['restore_local_date']);
+            $stm->bindParam(':use_partition', $post['use_partition']);
             $stm->bindParam(':note', $post['note']);
             return $stm->execute() === FALSE ? false : $this->getLastInsertedId();
         }
@@ -111,6 +84,7 @@ class SQLiteRegForeignerRestriction {
                 transfer_local_date = :transfer_local_date,
                 transfer_local_principle = :transfer_local_principle,
                 restore_local_date = :restore_local_date,
+                use_partition = :use_partition,
                 note = :note
             WHERE cert_no = :cert_no
         ");
@@ -123,6 +97,7 @@ class SQLiteRegForeignerRestriction {
         $stm->bindParam(':transfer_local_date', $post['transfer_local_date']);
         $stm->bindParam(':transfer_local_principle', $post['transfer_local_principle']);
         $stm->bindParam(':restore_local_date', $post['restore_local_date']);
+        $stm->bindParam(':use_partition', $post['use_partition']);
         $stm->bindParam(':note', $post['note']);
         return $stm->execute() !== FALSE;
     }
