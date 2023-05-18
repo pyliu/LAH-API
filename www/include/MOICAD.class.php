@@ -66,12 +66,13 @@ class MOICAD
 				RGALL_00_GP_FOREIGNER.*,
 				t.*,
 				r.*,											-- 土地標示部
-				z.kcnt as aa11_cht,
+				a.kcnt as aa46_cht,				-- 土標部鄉鎮市區
+				z.kcnt as aa11_cht,				-- 土地使用分區
 				y.kcnt as bb15_1_cht,
 				x.kcnt as bb06_cht,
 				s.lnam as bb09_cht,
-				w.kname as ba48_cht,
-				v.kname as rm10_cht,
+				w.kname as ba48_cht,			-- 土所部段名
+				v.kname as rm10_cht,			-- 收件資料鄉鎮市區
 				s.*,
 				u.*,
 				v.*
@@ -117,6 +118,7 @@ class MOICAD
 			left join MOIADM.RKEYN x ON x.kcde_1 = '06' and t.bb06 = x.kcde_2
 			left join MOIADM.RKEYN y ON y.kcde_1 = '15' and t.bb15_1 = y.kcde_2
 			left join MOIADM.RKEYN z ON z.kcde_1 = '11' and r.aa11 = z.kcde_2	-- 使用分區代碼
+			left join MOIADM.RKEYN a ON a.kcde_1 = '46' and r.aa46 = a.kcde_2 -- 土標部鄉鎮市區
 			left join MOIADM.RKEYN_ALL v ON v.kcde_1 = '46' and v.kcde_2 = 'H' and u.rm10 = v.kcde_3
 			left join MOIADM.RKEYN_ALL w ON w.kcde_1 = '48' and w.kcde_2 = 'H' and t.ba48 = w.kcde_4
 			where s.lcde in ('2', '8')
