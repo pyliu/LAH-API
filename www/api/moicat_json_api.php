@@ -24,6 +24,19 @@ switch ($_POST["type"]) {
 			"raw" => $rows
 		));
 		break;
+	case "moicat_rxseq_latest":
+		Logger::getInstance()->info("XHR [moicat_rxseq_latest] get latest cert seq record request.");
+		$record = $mock ? $cache->get('moicat_rxseq_latest') : $moicat->getLatestCertSeqRecord();
+		$cache->set('moicat_rxseq_latest', $record);
+		$message = is_array($record) ? "查到 MOICAT.RXSEQ 最新一筆資料序號為 ".$record['XS16'] : '查詢 MOICAT.RXSEQ 失敗';
+		$status_code = is_array($record) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
+		Logger::getInstance()->info("XHR [moicat_rxseq_latest] $message");
+		echoJSONResponse($message, $status_code, array(
+			"raw" => $record,
+			"serial" => is_array($record) ? $record['XS16'] : '',
+			"caseno" => is_array($record) ? $record['XS03']."-".$record['XS04_1']."-".$record['XS04_2'] : '',
+		));
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

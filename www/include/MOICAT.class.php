@@ -47,4 +47,30 @@ class MOICAT {
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
+
+	public function getLatestCertSeqRecord() {
+		global $today;
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		if (empty($today)) {
+			$tw_date = new Datetime("now");
+			$tw_date->modify("-1911 year");
+			$today = ltrim($tw_date->format("Ymd"), "0");	
+		}
+		$year = substr($today, 0, 3);
+		$month = substr($today, 3, 2);
+		$day = substr($today, 5, 2);
+		$this->db_wrapper->getDB()->parse("
+			-- 權狀序號查詢
+			select * from MOICAT.RXSEQ t
+			where 1=1
+				and xsdate like :bv_ymd || '%'
+				and rownum = 1
+			order by xsdate desc
+		");
+		$this->db_wrapper->getDB()->bind(":bv_ymd", $year.$month.$day);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetch();
+	}
 }
