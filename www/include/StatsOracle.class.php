@@ -227,4 +227,61 @@ class StatsOracle {
         return $this->db_wrapper->getDB()->fetchAll(true);   // true 
         
     }
+    /**
+     * collect REG case count data by the hour period between dates
+     */
+    public function getRegPeriodCount($st, $ed) {
+        if (!$this->db_wrapper->reachable() || !$this->checkYearMonthDay($st) || !$this->checkYearMonthDay($ed)) {
+            return false;
+        }
+        $this->db_wrapper->getDB()->parse("
+            SELECT
+                COUNT(CASE WHEN t.RM07_2 LIKE '08%' THEN 1 ELSE NULL END) AS \"08\",
+                COUNT(CASE WHEN t.RM07_2 LIKE '09%' THEN 1 ELSE NULL END) AS \"09\",
+                COUNT(CASE WHEN t.RM07_2 LIKE '10%' THEN 1 ELSE NULL END) AS \"10\",
+                COUNT(CASE WHEN t.RM07_2 LIKE '11%' THEN 1 ELSE NULL END) AS \"11\",
+                COUNT(CASE WHEN t.RM07_2 LIKE '12%' THEN 1 ELSE NULL END) AS \"12\",
+                COUNT(CASE WHEN t.RM07_2 LIKE '13%' THEN 1 ELSE NULL END) AS \"13\",
+                COUNT(CASE WHEN t.RM07_2 LIKE '14%' THEN 1 ELSE NULL END) AS \"14\",
+                COUNT(CASE WHEN t.RM07_2 LIKE '15%' THEN 1 ELSE NULL END) AS \"15\",
+                COUNT(CASE WHEN t.RM07_2 LIKE '16%' THEN 1 ELSE NULL END) AS \"16\",
+                COUNT(CASE WHEN t.RM07_2 LIKE '17%' THEN 1 ELSE NULL END) AS \"17\"
+                FROM MOICAS.CRSMS t
+            WHERE 1=1
+                AND (t.RM07_1 BETWEEN :bv_st And :bv_ed)
+                AND (t.RM101 = 'HA' OR t.RM101 IS NULL)
+        ");
+        $this->db_wrapper->getDB()->bind(":bv_st", $st);
+        $this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetch(true);  // true => fetch raw data instead converting to UTF-8
+    }
+    /**
+     * collect SUR case count data by the hour period between dates
+     */
+    public function getSurPeriodCount($st, $ed) {
+        if (!$this->db_wrapper->reachable() || !$this->checkYearMonthDay($st) || !$this->checkYearMonthDay($ed)) {
+            return false;
+        }
+        $this->db_wrapper->getDB()->parse("
+            SELECT
+                COUNT(CASE WHEN t.MM04_2 LIKE '08%' THEN 1 ELSE NULL END) AS \"08\",
+                COUNT(CASE WHEN t.MM04_2 LIKE '09%' THEN 1 ELSE NULL END) AS \"09\",
+                COUNT(CASE WHEN t.MM04_2 LIKE '10%' THEN 1 ELSE NULL END) AS \"10\",
+                COUNT(CASE WHEN t.MM04_2 LIKE '11%' THEN 1 ELSE NULL END) AS \"11\",
+                COUNT(CASE WHEN t.MM04_2 LIKE '12%' THEN 1 ELSE NULL END) AS \"12\",
+                COUNT(CASE WHEN t.MM04_2 LIKE '13%' THEN 1 ELSE NULL END) AS \"13\",
+                COUNT(CASE WHEN t.MM04_2 LIKE '14%' THEN 1 ELSE NULL END) AS \"14\",
+                COUNT(CASE WHEN t.MM04_2 LIKE '15%' THEN 1 ELSE NULL END) AS \"15\",
+                COUNT(CASE WHEN t.MM04_2 LIKE '16%' THEN 1 ELSE NULL END) AS \"16\",
+                COUNT(CASE WHEN t.MM04_2 LIKE '17%' THEN 1 ELSE NULL END) AS \"17\"
+                FROM MOICAS.CMSMS t
+            WHERE 1=1
+                AND (t.MM04_1 BETWEEN :bv_st And :bv_ed)
+        ");
+        $this->db_wrapper->getDB()->bind(":bv_st", $st);
+        $this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetch(true);  // true => fetch raw data instead converting to UTF-8
+    }
 }

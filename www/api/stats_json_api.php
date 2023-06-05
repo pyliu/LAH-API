@@ -257,6 +257,30 @@ switch ($_POST["type"]) {
             echoJSONResponse($error);
         }
         break;
+    case "stats_reg_period_count":
+        if ($arr = $stats->getRegPeriodCount($_POST["st"], $_POST["ed"])) {
+            $count = count($arr);
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得登記案件區間統計數 ".$_POST["st"]." ~ ".$_POST["ed"]." 失敗。";
+            Logger::getInstance()->error("XHR [stats_reg_period_count] $error");
+            echoJSONResponse($error);
+        }
+        break;
+    case "stats_sur_period_count":
+        if ($arr = $stats->getSurPeriodCount($_POST["st"], $_POST["ed"])) {
+            $count = count($arr);
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得測量案件區間統計數 ".$_POST["st"]." ~ ".$_POST["ed"]." 失敗。";
+            Logger::getInstance()->error("XHR [stats_sur_period_count] $error");
+            echoJSONResponse($error);
+        }
+        break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
