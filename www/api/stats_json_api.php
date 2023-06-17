@@ -285,7 +285,6 @@ switch ($_POST["type"]) {
     case "stats_reg_first_count":
         if ($arr = $stats->getRegFirstCount($_POST["st"], $_POST["ed"])) {
             $count = count($arr);
-
             $baked = array();
             foreach ($arr as $row) {
                 $data = new RegCaseData($row);
@@ -303,7 +302,6 @@ switch ($_POST["type"]) {
     case "stats_reg_first_sub_count":
         if ($arr = $stats->getRegFirstSubCount($_POST["st"], $_POST["ed"])) {
             $count = count($arr);
-
             $baked = array();
             foreach ($arr as $row) {
                 $data = new RegCaseData($row);
@@ -321,7 +319,6 @@ switch ($_POST["type"]) {
     case "stats_reg_rm02_count":
         if ($arr = $stats->getRegRM02Count($_POST["rm02"], $_POST["st"], $_POST["ed"])) {
             $count = count($arr);
-
             $baked = array();
             foreach ($arr as $row) {
                 $data = new RegCaseData($row);
@@ -339,7 +336,6 @@ switch ($_POST["type"]) {
     case "stats_reg_rm02_sub_count":
         if ($arr = $stats->getRegRM02SubCount($_POST["rm02"], $_POST["st"], $_POST["ed"])) {
             $count = count($arr);
-
             $baked = array();
             foreach ($arr as $row) {
                 $data = new RegCaseData($row);
