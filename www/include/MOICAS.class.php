@@ -94,5 +94,61 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
-
+	// 第一次登記案件 BY 日期區間
+	public function getCRSMSFirstRegCase($st, $ed) {
+		$this->db_wrapper->getDB()->parse("
+				SELECT * FROM MOICAS.CRSMS t
+				WHERE t.RM09 = '02' and t.RM07_1 BETWEEN :bv_st AND :bv_ed
+				ORDER BY t.RM03
+		");
+		$this->db_wrapper->getDB()->bind(":bv_st", $st);
+		$this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
+	// 第一次登記(子號)案件 BY 日期區間
+	public function getCRSMSFirstRegSubCase($st, $ed) {
+		$this->db_wrapper->getDB()->parse("
+				SELECT * FROM MOICAS.CRSMS t
+				WHERE 1=1
+					AND (t.RM09 = '02' and t.RM07_1 BETWEEN :bv_st AND :bv_ed)
+					AND t.RM03 NOT LIKE '%0'
+				ORDER BY t.RM03
+		");
+		$this->db_wrapper->getDB()->bind(":bv_st", $st);
+		$this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
+	// 搜尋案件 BY RM02, 日期區間
+	public function getCRSMSRegRM02Case($rm02, $st, $ed) {
+		$this->db_wrapper->getDB()->parse("
+				SELECT * FROM MOICAS.CRSMS t
+				WHERE 1=1
+					AND (t.RM02 = :bv_rm02 and t.RM07_1 BETWEEN :bv_st AND :bv_ed)
+					AND t.RM03 LIKE '%0'
+				order by t.RM03
+		");
+		$this->db_wrapper->getDB()->bind(":bv_rm02", $rm02);
+		$this->db_wrapper->getDB()->bind(":bv_st", $st);
+		$this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
+	// 搜尋(子號)案件 BY RM02, 日期區間
+	public function getCRSMSRegRM02SubCase($rm02, $st, $ed) {
+		$this->db_wrapper->getDB()->parse("
+				SELECT * FROM MOICAS.CRSMS t
+				WHERE 1=1
+					AND (t.RM02 = :bv_rm02 and t.RM07_1 BETWEEN :bv_st AND :bv_ed)
+					AND t.RM03 NOT LIKE '%0'
+				order by t.RM03
+		");
+		$this->db_wrapper->getDB()->bind(":bv_rm02", $rm02);
+		$this->db_wrapper->getDB()->bind(":bv_st", $st);
+		$this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
+	
 }

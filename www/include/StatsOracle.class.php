@@ -1,6 +1,7 @@
 <?php
 require_once('init.php');
 require_once("OraDBWrapper.class.php");
+require_once("MOICAS.class.php");
 require_once("System.class.php");
 
 class StatsOracle {
@@ -210,6 +211,26 @@ class StatsOracle {
         $this->db_wrapper->getDB()->bind(":bv_cond", $year_month);
         $this->db_wrapper->getDB()->execute();
         return $this->db_wrapper->getDB()->fetchAll(true);   // true => fetch raw data instead of converting to UTF-8
+    }
+
+    public function getRegFirstCount($st, $ed) {
+        $moicas = new MOICAS();
+        return $moicas->getCRSMSFirstRegCase($st, $ed);
+    }
+
+    public function getRegFirstSubCount($st, $ed) {
+        $moicas = new MOICAS();
+        return $moicas->getCRSMSFirstRegSubCase($st, $ed);
+    }
+
+    public function getRegRM02Count($rm02, $st, $ed) {
+        $moicas = new MOICAS();
+        return $moicas->getCRSMSRegRM02Case($rm02, $st, $ed);
+    }
+
+    public function getRegRM02SubCount($rm02, $st, $ed) {
+        $moicas = new MOICAS();
+        return $moicas->getCRSMSRegRM02SubCase($rm02, $st, $ed);
     }
     /**
      * the stats data will be collected every night (22:00) on cross site AP

@@ -5,6 +5,7 @@ require_once(ROOT_DIR."/include/System.class.php");
 require_once(ROOT_DIR."/include/StatsOracle.class.php");
 require_once(ROOT_DIR."/include/StatsSQLite.class.php");
 require_once(ROOT_DIR."/include/SQLiteConnectivity.class.php");
+require_once(ROOT_DIR."/include/RegCaseData.class.php");
 
 $stats = new StatsOracle();
 $stats_sqlite3 = new StatsSQLite();
@@ -278,6 +279,78 @@ switch ($_POST["type"]) {
         } else {
             $error = "取得測量案件區間統計數 ".$_POST["st"]." ~ ".$_POST["ed"]." 失敗。";
             Logger::getInstance()->error("XHR [stats_sur_period_count] $error");
+            echoJSONResponse($error);
+        }
+        break;
+    case "stats_reg_first_count":
+        if ($arr = $stats->getRegFirstCount($_POST["st"], $_POST["ed"])) {
+            $count = count($arr);
+
+            $baked = array();
+            foreach ($arr as $row) {
+                $data = new RegCaseData($row);
+                $baked[] = $data->getBakedData();
+            }
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $baked
+            ));
+        } else {
+            $error = "取得第一次登記案件 ".$_POST["st"]." ~ ".$_POST["ed"]." 失敗。";
+            Logger::getInstance()->error("XHR [stats_reg_first_count] $error");
+            echoJSONResponse($error);
+        }
+        break;
+    case "stats_reg_first_sub_count":
+        if ($arr = $stats->getRegFirstSubCount($_POST["st"], $_POST["ed"])) {
+            $count = count($arr);
+
+            $baked = array();
+            foreach ($arr as $row) {
+                $data = new RegCaseData($row);
+                $baked[] = $data->getBakedData();
+            }
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $baked
+            ));
+        } else {
+            $error = "取得第一次登記案件 ".$_POST["st"]." ~ ".$_POST["ed"]." 失敗。";
+            Logger::getInstance()->error("XHR [stats_reg_first_sub_count] $error");
+            echoJSONResponse($error);
+        }
+        break;
+    case "stats_reg_rm02_count":
+        if ($arr = $stats->getRegRM02Count($_POST["rm02"], $_POST["st"], $_POST["ed"])) {
+            $count = count($arr);
+
+            $baked = array();
+            foreach ($arr as $row) {
+                $data = new RegCaseData($row);
+                $baked[] = $data->getBakedData();
+            }
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $baked
+            ));
+        } else {
+            $error = "取得".$_POST["rm02"]."案件 ".$_POST["st"]." ~ ".$_POST["ed"]." 失敗。";
+            Logger::getInstance()->error("XHR [stats_reg_rm02_count] $error");
+            echoJSONResponse($error);
+        }
+        break;
+    case "stats_reg_rm02_sub_count":
+        if ($arr = $stats->getRegRM02SubCount($_POST["rm02"], $_POST["st"], $_POST["ed"])) {
+            $count = count($arr);
+
+            $baked = array();
+            foreach ($arr as $row) {
+                $data = new RegCaseData($row);
+                $baked[] = $data->getBakedData();
+            }
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $baked
+            ));
+        } else {
+            $error = "取得".$_POST["rm02"]."案件 ".$_POST["st"]." ~ ".$_POST["ed"]." 失敗。";
+            Logger::getInstance()->error("XHR [stats_reg_rm02_sub_count] $error");
             echoJSONResponse($error);
         }
         break;
