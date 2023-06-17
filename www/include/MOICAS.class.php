@@ -97,7 +97,11 @@ class MOICAS
 	// 第一次登記案件 BY 日期區間
 	public function getCRSMSFirstRegCase($st, $ed) {
 		$this->db_wrapper->getDB()->parse("
-				SELECT * FROM MOICAS.CRSMS t
+				SELECT
+					t.*,
+					w.KCNT AS \"RM09_CHT\"
+				FROM MOICAS.CRSMS t
+				LEFT JOIN MOIADM.RKEYN w ON t.RM09 = w.KCDE_2 AND w.KCDE_1 = '06'   -- 登記原因
 				WHERE t.RM09 = '02' and t.RM07_1 BETWEEN :bv_st AND :bv_ed
 				ORDER BY t.RM03
 		");
@@ -109,7 +113,11 @@ class MOICAS
 	// 第一次登記(子號)案件 BY 日期區間
 	public function getCRSMSFirstRegSubCase($st, $ed) {
 		$this->db_wrapper->getDB()->parse("
-				SELECT * FROM MOICAS.CRSMS t
+				SELECT
+					t.*,
+					w.KCNT AS \"RM09_CHT\"
+				FROM MOICAS.CRSMS t
+				LEFT JOIN MOIADM.RKEYN w ON t.RM09 = w.KCDE_2 AND w.KCDE_1 = '06'   -- 登記原因
 				WHERE 1=1
 					AND (t.RM09 = '02' and t.RM07_1 BETWEEN :bv_st AND :bv_ed)
 					AND t.RM03 NOT LIKE '%0'
@@ -123,7 +131,11 @@ class MOICAS
 	// 搜尋案件 BY RM02, 日期區間
 	public function getCRSMSRegRM02Case($rm02, $st, $ed) {
 		$this->db_wrapper->getDB()->parse("
-				SELECT * FROM MOICAS.CRSMS t
+				SELECT
+					t.*,
+					w.KCNT AS \"RM09_CHT\"
+				FROM MOICAS.CRSMS t
+				LEFT JOIN MOIADM.RKEYN w ON t.RM09 = w.KCDE_2 AND w.KCDE_1 = '06'   -- 登記原因
 				WHERE 1=1
 					AND (t.RM02 = :bv_rm02 and t.RM07_1 BETWEEN :bv_st AND :bv_ed)
 					AND t.RM03 LIKE '%0'
@@ -138,7 +150,11 @@ class MOICAS
 	// 搜尋(子號)案件 BY RM02, 日期區間
 	public function getCRSMSRegRM02SubCase($rm02, $st, $ed) {
 		$this->db_wrapper->getDB()->parse("
-				SELECT * FROM MOICAS.CRSMS t
+				SELECT
+					t.*,
+					w.KCNT AS \"RM09_CHT\"
+				FROM MOICAS.CRSMS t
+				LEFT JOIN MOIADM.RKEYN w ON t.RM09 = w.KCDE_2 AND w.KCDE_1 = '06'   -- 登記原因
 				WHERE 1=1
 					AND (t.RM02 = :bv_rm02 and t.RM07_1 BETWEEN :bv_st AND :bv_ed)
 					AND t.RM03 NOT LIKE '%0'
