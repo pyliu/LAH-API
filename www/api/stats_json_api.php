@@ -259,7 +259,9 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_reg_period_count":
-        if ($arr = $stats->getRegPeriodCount($_POST["st"], $_POST["ed"])) {
+        $arr = $mock ? $cache->get('stats_reg_period_count') : $stats->getRegPeriodCount($_POST["st"], $_POST["ed"]);
+		$cache->set('stats_reg_period_count', $arr);
+        if ($arr) {
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "raw" => $arr
@@ -271,7 +273,9 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_sur_period_count":
-        if ($arr = $stats->getSurPeriodCount($_POST["st"], $_POST["ed"])) {
+        $arr = $mock ? $cache->get('stats_sur_period_count') : $stats->getSurPeriodCount($_POST["st"], $_POST["ed"]);
+		$cache->set('stats_sur_period_count', $arr);
+        if ($arr) {
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "raw" => $arr
@@ -283,7 +287,9 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_reg_first_count":
-        if ($arr = $stats->getRegFirstCount($_POST["st"], $_POST["ed"])) {
+        $arr = $mock ? $cache->get('stats_reg_first_count') : $stats->getRegFirstCount($_POST["st"], $_POST["ed"]);
+		$cache->set('stats_reg_first_count', $arr);
+        if ($arr) {
             $count = count($arr);
             $baked = array();
             foreach ($arr as $row) {
@@ -300,7 +306,9 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_reg_first_sub_count":
-        if ($arr = $stats->getRegFirstSubCount($_POST["st"], $_POST["ed"])) {
+        $arr = $mock ? $cache->get('stats_reg_first_sub_count') : $stats->getRegFirstSubCount($_POST["st"], $_POST["ed"]);
+		$cache->set('stats_reg_first_sub_count', $arr);
+        if ($arr) {
             $count = count($arr);
             $baked = array();
             foreach ($arr as $row) {
@@ -317,7 +325,9 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_reg_rm02_count":
-        if ($arr = $stats->getRegRM02Count($_POST["rm02"], $_POST["st"], $_POST["ed"])) {
+        $arr = $mock ? $cache->get('stats_reg_rm02_count') : $stats->getRegRM02Count($_POST["rm02"], $_POST["st"], $_POST["ed"]);
+		$cache->set('stats_reg_rm02_count', $arr);
+        if ($arr) {
             $count = count($arr);
             $baked = array();
             foreach ($arr as $row) {
@@ -334,7 +344,9 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_reg_rm02_sub_count":
-        if ($arr = $stats->getRegRM02SubCount($_POST["rm02"], $_POST["st"], $_POST["ed"])) {
+        $arr = $mock ? $cache->get('stats_reg_rm02_sub_count') : $stats->getRegRM02SubCount($_POST["rm02"], $_POST["st"], $_POST["ed"]);
+		$cache->set('stats_reg_rm02_sub_count', $arr);
+        if ($arr) {
             $count = count($arr);
             $baked = array();
             foreach ($arr as $row) {
