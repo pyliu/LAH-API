@@ -87,9 +87,6 @@ class SQLiteRKEYN {
         $this->bindParams($stm, $row);
         return $stm->execute() === FALSE ? false : true;
     }
-
-
-
     /**
      * 取得本所登記收件字
      */
