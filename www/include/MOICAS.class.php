@@ -96,6 +96,9 @@ class MOICAS
 	}
 	// 第一次登記案件 BY 日期區間
 	public function getCRSMSFirstRegCase($st, $ed) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
 		$this->db_wrapper->getDB()->parse("
 				SELECT
 					t.*,
@@ -112,6 +115,9 @@ class MOICAS
 	}
 	// 第一次登記(子號)案件 BY 日期區間
 	public function getCRSMSFirstRegSubCase($st, $ed) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
 		$this->db_wrapper->getDB()->parse("
 				SELECT
 					t.*,
@@ -130,6 +136,9 @@ class MOICAS
 	}
 	// 搜尋案件 BY RM02, 日期區間
 	public function getCRSMSRegRM02Case($rm02, $st, $ed) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
 		$this->db_wrapper->getDB()->parse("
 				SELECT
 					t.*,
@@ -149,6 +158,9 @@ class MOICAS
 	}
 	// 搜尋(子號)案件 BY RM02, 日期區間
 	public function getCRSMSRegRM02SubCase($rm02, $st, $ed) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
 		$this->db_wrapper->getDB()->parse("
 				SELECT
 					t.*,
