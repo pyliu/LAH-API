@@ -289,7 +289,7 @@ switch ($_POST["type"]) {
     case "stats_reg_first_count":
         $arr = $mock ? $cache->get('stats_reg_first_count') : $stats->getRegFirstCount($_POST["st"], $_POST["ed"]);
 		$cache->set('stats_reg_first_count', $arr);
-        if ($arr) {
+        if (is_array($arr)) {
             $count = count($arr);
             $baked = array();
             foreach ($arr as $row) {
@@ -308,7 +308,7 @@ switch ($_POST["type"]) {
     case "stats_reg_first_sub_count":
         $arr = $mock ? $cache->get('stats_reg_first_sub_count') : $stats->getRegFirstSubCount($_POST["st"], $_POST["ed"]);
 		$cache->set('stats_reg_first_sub_count', $arr);
-        if ($arr) {
+        if (is_array($arr)) {
             $count = count($arr);
             $baked = array();
             foreach ($arr as $row) {
@@ -327,7 +327,7 @@ switch ($_POST["type"]) {
     case "stats_reg_rm02_count":
         $arr = $mock ? $cache->get('stats_reg_rm02_count') : $stats->getRegRM02Count($_POST["rm02"], $_POST["st"], $_POST["ed"]);
 		$cache->set('stats_reg_rm02_count', $arr);
-        if ($arr) {
+        if (is_array($arr)) {
             $count = count($arr);
             $baked = array();
             foreach ($arr as $row) {
@@ -346,7 +346,7 @@ switch ($_POST["type"]) {
     case "stats_reg_rm02_sub_count":
         $arr = $mock ? $cache->get('stats_reg_rm02_sub_count') : $stats->getRegRM02SubCount($_POST["rm02"], $_POST["st"], $_POST["ed"]);
 		$cache->set('stats_reg_rm02_sub_count', $arr);
-        if ($arr) {
+        if (is_array($arr)) {
             $count = count($arr);
             $baked = array();
             foreach ($arr as $row) {
