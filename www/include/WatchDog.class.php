@@ -283,9 +283,15 @@ class WatchDog {
             $case_records = [];
             foreach ($rows as $row) {
                 $case_id = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
-                $this_msg = "[${case_id}](${query_url_base}${case_id})".' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']) ?? ($users[$row['RM96']] ?? $row['RM96']);
-                // fall back to RM96(收件人員) if RM45(初審) is not presented
-                $case_records[$row['RM45'] ?? $row['RM96']][] = $this_msg;
+                // fall back to RM45(初審) then RM96(收件人員) if RM30_1(作業人員) is not presented
+                $target_name = ($users[$row['RM30_1']] ?? $row['RM30_1']);
+                $target_id = $row['RM30_1'];
+                if ($target_name === 'XXXXXXXX' || empty($target_name)) {
+                    $target_name = ($users[$row['RM45']] ?? $row['RM45']) ?? ($users[$row['RM96']] ?? $row['RM96']);
+                    $target_id = $row['RM45'] ?? $row['RM96'];
+                }
+                $this_msg = "[".$case_id."](".$query_url_base.$case_id.")".' '.REG_REASON[$row['RM09']].' '.$target_name;
+                $case_records[$target_id][] = $this_msg;
                 $case_records["ALL"][] = $this_msg;
             }
             // send to the reviewer
