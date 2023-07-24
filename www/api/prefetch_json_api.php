@@ -24,6 +24,15 @@ switch ($_POST["type"]) {
 			$items = [];
 			$items_by_id = [];
 			// TODO: filter case by RM29 and RM32
+			$tw_date = new Datetime("now");
+			$tw_date->modify("-1911 year");
+			$now = ltrim($tw_date->format("YmdHis"), "0");	// ex: 1080325152111
+
+			$date_15days_before = new Datetime("now");
+			$date_15days_before->modify("-1911 year");
+			$date_15days_before->modify("-15 days");
+			$start = ltrim($date_15days_before->format("YmdHis"), "0");	// ex: 1090107081410
+			
 			// foreach ($rows as $row) {
 			// 	$regdata = new RegCaseData($row);
 			// 	$this_item = $regdata->getBakedData();
