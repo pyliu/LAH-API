@@ -25,15 +25,16 @@ switch ($_POST["type"]) {
 			$items_by_id = [];
 			foreach ($rows as $row) {
 				$regdata = new RegCaseData($row);
-				$this_item = array(
-					"收件字號" => $regdata->getReceiveSerial(),
-					"登記原因" => $regdata->getCaseReason(),
-					"辦理情形" => $regdata->getStatus(),
-					"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
-					"限辦期限" => $regdata->getDueDate(),
-					"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
-					"作業人員" => $regdata->getCurrentOperator()
-				);
+				$this_item = $regdata->getBakedData();
+				// $this_item = array(
+				// 	"收件字號" => $regdata->getReceiveSerial(),
+				// 	"登記原因" => $regdata->getCaseReason(),
+				// 	"辦理情形" => $regdata->getStatus(),
+				// 	"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
+				// 	"限辦期限" => $regdata->getDueDate(),
+				// 	"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
+				// 	"作業人員" => $regdata->getCurrentOperator()
+				// );
 				$items[] = $this_item;
 				$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
 			}
@@ -64,15 +65,7 @@ switch ($_POST["type"]) {
 			$items_by_id = [];
 			foreach ($rows as $row) {
 				$regdata = new RegCaseData($row);
-				$this_item = array(
-					"收件字號" => $regdata->getReceiveSerial(),
-					"登記原因" => $regdata->getCaseReason(),
-					"辦理情形" => $regdata->getStatus(),
-					"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
-					"限辦期限" => $regdata->getDueDate(),
-					"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
-					"作業人員" => $regdata->getCurrentOperator()
-				);
+				$this_item = $regdata->getBakedData();
 				$items[] = $this_item;
 				$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
 			}
