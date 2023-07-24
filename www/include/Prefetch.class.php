@@ -11,6 +11,7 @@ class Prefetch {
     private const PREFETCH_SQLITE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."prefetch.db";
     private const KEYS = array(
         'RM30H' => 'Prefetch::getRM30HCase',
+        'NOT_CLOSE' => 'Prefetch::getNotCloseCase',
         'OVERDUE' => 'Prefetch::getOverdueCaseIn15Days',
         'ALMOST_OVERDUE' => 'Prefetch::getAlmostOverdueCase',
         'ASK' => 'Prefetch::getAskCase',
@@ -171,6 +172,53 @@ class Prefetch {
         }
         return $this->getCache()->get(self::KEYS['RM30H']);
     }
+    /**
+     * 登記未結案件快取剩餘時間
+     */
+    public function getNotCloseCaseCacheRemainingTime() {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['NOT_CLOSE']);
+    }
+    /**
+     * 強制重新讀取登記未結案件
+     */
+    public function reloadNotCloseCase() {
+        $this->getCache()->del(self::KEYS['NOT_CLOSE']);
+        return $this->getNotCloseCase();
+    }
+    /**
+	 * 取得登記未結案件
+     * default cache time is 15 minutes * 60 seconds = 900 seconds
+	 */
+	public function getNotCloseCase($expire_duration = 900) {
+        if ($this->getCache()->isExpired(self::KEYS['NOT_CLOSE'])) {
+            Logger::getInstance()->info('['.self::KEYS['NOT_CLOSE'].'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable(self::KEYS['NOT_CLOSE'])) {
+                $db = $this->getOraDB();
+                $db->parse("
+                    SELECT *
+                        FROM MOICAS.CRSMS t
+                        LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+                    WHERE 1 = 1
+                        --AND RM03 LIKE '%0'       -- without sub-case
+                        AND RM31 IS NULL -- not closed case
+                    ORDER BY RM01, RM02, RM03
+                ");
+                
+                Logger::getInstance()->info(__METHOD__.": 尋找未結案案件 ~");
+
+                $db->execute();
+                $result = $db->fetchAll();
+                $this->getCache()->set(self::KEYS['NOT_CLOSE'], $result, $expire_duration);
+
+                Logger::getInstance()->info("[".self::KEYS['NOT_CLOSE']."] 快取資料已更新 ( ".count($result)." 筆，預計 $expire_duration 秒後到期)");
+
+                return $result;
+            } else {
+                return array();
+            }
+        }
+        return $this->getCache()->get(self::KEYS['NOT_CLOSE']);
+	}
     /**
      * 15天內逾期案件快取剩餘時間
      */

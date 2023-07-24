@@ -8,6 +8,38 @@ require_once(INC_DIR."/SQLiteRegForeignerRestriction.class.php");
 
 $prefetch = new Prefetch();
 switch ($_POST["type"]) {
+	case "overdue_reg_cases_filtered":
+		Logger::getInstance()->info("XHR [overdue_reg_cases_filtered] 逾期案件查詢請求");
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNotCloseCase() : $prefetch->getNotCloseCase();
+		if (empty($rows)) {
+			Logger::getInstance()->info("XHR [overdue_reg_cases_filtered] 查無逾期資料");
+			echoJSONResponse("查無逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(
+				"items" => array(),
+				"items_by_id" => array(),
+				"data_count" => 0,
+				"raw" => $rows,
+				'cache_remaining_time' => $prefetch->getOverdueCaseCacheRemainingTime()
+			));
+		} else {
+			$items = [];
+			$items_by_id = [];
+			// TODO: filter case by RM29 and RM32
+			// foreach ($rows as $row) {
+			// 	$regdata = new RegCaseData($row);
+			// 	$this_item = $regdata->getBakedData();
+			// 	$items[] = $this_item;
+			// 	$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
+			// }
+			Logger::getInstance()->info("XHR [overdue_reg_cases_filtered] 找到".count($items)."件逾期案件");
+			echoJSONResponse("找到".count($items)."件逾期案件", STATUS_CODE::SUCCESS_NORMAL, array(
+				"items" => $items,
+				"items_by_id" => $items_by_id,
+				"data_count" => count($items),
+				"raw" => $rows,
+				'cache_remaining_time' => $prefetch->getOverdueCaseCacheRemainingTime()
+			));
+		}
+		break;
 	case "overdue_reg_cases":
 		Logger::getInstance()->info("XHR [overdue_reg_cases] 近15天逾期案件查詢請求");
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadOverdueCaseIn15Days() : $prefetch->getOverdueCaseIn15Days();
@@ -25,16 +57,15 @@ switch ($_POST["type"]) {
 			$items_by_id = [];
 			foreach ($rows as $row) {
 				$regdata = new RegCaseData($row);
-				$this_item = $regdata->getBakedData();
-				// $this_item = array(
-				// 	"收件字號" => $regdata->getReceiveSerial(),
-				// 	"登記原因" => $regdata->getCaseReason(),
-				// 	"辦理情形" => $regdata->getStatus(),
-				// 	"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
-				// 	"限辦期限" => $regdata->getDueDate(),
-				// 	"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
-				// 	"作業人員" => $regdata->getCurrentOperator()
-				// );
+				$this_item = array(
+					"收件字號" => $regdata->getReceiveSerial(),
+					"登記原因" => $regdata->getCaseReason(),
+					"辦理情形" => $regdata->getStatus(),
+					"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
+					"限辦期限" => $regdata->getDueDate(),
+					"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
+					"作業人員" => $regdata->getCurrentOperator()
+				);
 				$items[] = $this_item;
 				$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
 			}
@@ -65,7 +96,15 @@ switch ($_POST["type"]) {
 			$items_by_id = [];
 			foreach ($rows as $row) {
 				$regdata = new RegCaseData($row);
-				$this_item = $regdata->getBakedData();
+				$this_item = array(
+					"收件字號" => $regdata->getReceiveSerial(),
+					"登記原因" => $regdata->getCaseReason(),
+					"辦理情形" => $regdata->getStatus(),
+					"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
+					"限辦期限" => $regdata->getDueDate(),
+					"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
+					"作業人員" => $regdata->getCurrentOperator()
+				);
 				$items[] = $this_item;
 				$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
 			}
