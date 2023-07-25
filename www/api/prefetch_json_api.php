@@ -29,7 +29,7 @@ function findMaxScheduledCloseDatetime(&$rows, $st_index) {
 	for ($i = 1; $i < $rm32; $i++) {
 		$row = $rows[$st_index + $i];
 
-		Logger::getInstance()->info("$st_rm01-$st_rm02-$st_rm03 <=> ".$row['RM01']."-".$row['RM02']."-".$row['RM03']);
+		// Logger::getInstance()->info("$st_rm01-$st_rm02-$st_rm03 <=> ".$row['RM01']."-".$row['RM02']."-".$row['RM03']);
 		$now_rm03_val = intval($row['RM03']);
 		$offset = $now_rm03_val - $st_rm03_val;
 		if ($st_rm01 !== $row['RM01'] || $st_rm02 !== $row['RM02'] || $offset > 10 || $offset < 0) {
@@ -37,7 +37,7 @@ function findMaxScheduledCloseDatetime(&$rows, $st_index) {
 		}
 
 		$current = $row['RM29_1'].$row['RM29_2'];
-		Logger::getInstance()->info("檢查".$row['RM01']."-".$row['RM02']."-".$row['RM03']." ... ".$current." vs ".$max);
+		// Logger::getInstance()->info("檢查".$row['RM01']."-".$row['RM02']."-".$row['RM03']." ... ".$current." vs ".$max);
 		if ($current > $max) {
 			$max = $current;
 			Logger::getInstance()->info("最大預計結案日期時間設定為 ".$row['RM01']."-".$row['RM02']."-".$row['RM03']." 案件資料 👉 $max");
