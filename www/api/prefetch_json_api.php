@@ -6,6 +6,46 @@ require_once(INC_DIR."/RegCaseData.class.php");
 require_once(INC_DIR."/SurCaseData.class.php");
 require_once(INC_DIR."/SQLiteRegForeignerRestriction.class.php");
 
+function getExpireCaseData (&$regdata) {
+	return array(
+		"收件字號" => $regdata->getReceiveSerial(),
+		"登記原因" => $regdata->getCaseReason(),
+		"辦理情形" => $regdata->getStatus(),
+		"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
+		"限辦期限" => $regdata->getDueDate(),
+		"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
+		"作業人員" => $regdata->getCurrentOperator()
+	);
+}
+
+function findMaxScheduledCloseDatetime(&$rows, $st_index) {
+	$row = $rows[$st_index];
+	$st_rm01 = $row['RM01'];
+	$st_rm02 = $row['RM02'];
+	$st_rm03 = $row['RM03'];
+	$st_rm03_val = intval($row['RM03']);
+	$max = $row['RM29_1'].$row['RM29_2'];
+	$rm32 = intval($row['RM32']);
+	for ($i = 1; $i < $rm32; $i++) {
+		$row = $rows[$st_index + $i];
+
+		Logger::getInstance()->info("$st_rm01-$st_rm02-$st_rm03 <=> ".$row['RM01']."-".$row['RM02']."-".$row['RM03']);
+		$now_rm03_val = intval($row['RM03']);
+		$offset = $now_rm03_val - $st_rm03_val;
+		if ($st_rm01 !== $row['RM01'] || $st_rm02 !== $row['RM02'] || $offset > 10 || $offset < 0) {
+			return false;
+		}
+
+		$current = $row['RM29_1'].$row['RM29_2'];
+		Logger::getInstance()->info("檢查".$row['RM01']."-".$row['RM02']."-".$row['RM03']." ... ".$current." vs ".$max);
+		if ($current > $max) {
+			$max = $current;
+			Logger::getInstance()->info("最大預計結案日期時間設定為 ".$row['RM01']."-".$row['RM02']."-".$row['RM03']." 案件資料 👉 $max");
+		}
+	}
+	return $max;
+}
+
 $prefetch = new Prefetch();
 switch ($_POST["type"]) {
 	case "overdue_reg_cases_filtered":
@@ -23,29 +63,66 @@ switch ($_POST["type"]) {
 		} else {
 			$items = [];
 			$items_by_id = [];
-			// TODO: filter case by RM29 and RM32
+
 			$tw_date = new Datetime("now");
 			$tw_date->modify("-1911 year");
-			$now = ltrim($tw_date->format("YmdHis"), "0");	// ex: 1080325152111
+			$now = ltrim($tw_date->format("YmdHis"), "0");	// ex: 1120725084812
 
 			$date_15days_before = new Datetime("now");
 			$date_15days_before->modify("-1911 year");
 			$date_15days_before->modify("-15 days");
-			$start = ltrim($date_15days_before->format("YmdHis"), "0");	// ex: 1090107081410
+			$start = ltrim($date_15days_before->format("YmdHis"), "0");	// ex: 1120710084812
 			
-			// foreach ($rows as $row) {
-			// 	$regdata = new RegCaseData($row);
-			// 	$this_item = $regdata->getBakedData();
-			// 	$items[] = $this_item;
-			// 	$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
-			// }
+			$count = count($rows);
+			for ($i = 0; $i < $count; $i++) {
+				$row = $rows[$i];
+				$scheduled_close_datetime = $row['RM29_1'].$row['RM29_2'];
+				// only care about cases in 15 days
+				// if ($scheduled_close_datetime > $start) {
+					$case_count = intval($row['RM32']);
+					if ($case_count === 1) {
+						if ($now >= $scheduled_close_datetime) {
+							$regdata = new RegCaseData($row);
+							$this_item = getExpireCaseData($regdata);
+							$items[] = $this_item;
+							$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
+						}
+					} else {
+						// find max scheduled close datetime
+						$max_scheduled_close_datetime = findMaxScheduledCloseDatetime($rows, $i);
+						if ($max_scheduled_close_datetime === false) {
+							// the series cases not valid ... skip this case
+							Logger::getInstance()->info("XHR [overdue_reg_cases_filtered] 連件資料判斷有誤，當作單獨案件處理 ".$rows[$i]['RM01']."-".$rows[$i]['RM02']."-".$rows[$i]['RM03']);
+							if ($now >= $scheduled_close_datetime) {
+								$regdata = new RegCaseData($row);
+								$this_item = getExpireCaseData($regdata);
+								$items[] = $this_item;
+								$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
+							}
+							continue;
+						}
+						// all or nothing
+						if ($now >= $max_scheduled_close_datetime) {
+							for ($y = 0; $y < $case_count; $y++) {
+								$tmp = $rows[$i + $y];
+								$regdata = new RegCaseData($tmp);
+								$this_item = getExpireCaseData($regdata);
+								$items[] = $this_item;
+								$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
+							}
+						}
+						$i += $case_count;
+					}
+				// }
+			}
+
 			Logger::getInstance()->info("XHR [overdue_reg_cases_filtered] 找到".count($items)."件逾期案件");
 			echoJSONResponse("找到".count($items)."件逾期案件", STATUS_CODE::SUCCESS_NORMAL, array(
 				"items" => $items,
 				"items_by_id" => $items_by_id,
 				"data_count" => count($items),
 				"raw" => $rows,
-				'cache_remaining_time' => $prefetch->getOverdueCaseCacheRemainingTime()
+				'cache_remaining_time' => $prefetch->getNotCloseCaseCacheRemainingTime()
 			));
 		}
 		break;
@@ -66,15 +143,7 @@ switch ($_POST["type"]) {
 			$items_by_id = [];
 			foreach ($rows as $row) {
 				$regdata = new RegCaseData($row);
-				$this_item = array(
-					"收件字號" => $regdata->getReceiveSerial(),
-					"登記原因" => $regdata->getCaseReason(),
-					"辦理情形" => $regdata->getStatus(),
-					"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
-					"限辦期限" => $regdata->getDueDate(),
-					"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
-					"作業人員" => $regdata->getCurrentOperator()
-				);
+				$this_item = getExpireCaseData($regdata);
 				$items[] = $this_item;
 				$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
 			}
@@ -105,15 +174,7 @@ switch ($_POST["type"]) {
 			$items_by_id = [];
 			foreach ($rows as $row) {
 				$regdata = new RegCaseData($row);
-				$this_item = array(
-					"收件字號" => $regdata->getReceiveSerial(),
-					"登記原因" => $regdata->getCaseReason(),
-					"辦理情形" => $regdata->getStatus(),
-					"收件時間" => $regdata->getReceiveDate()." ".$regdata->getReceiveTime(),
-					"限辦期限" => $regdata->getDueDate(),
-					"初審人員" => $regdata->getFirstReviewer() . " " . $regdata->getFirstReviewerID(),
-					"作業人員" => $regdata->getCurrentOperator()
-				);
+				$this_item = getExpireCaseData($regdata);
 				$items[] = $this_item;
 				$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
 			}
