@@ -20,13 +20,15 @@ function getExpireCaseData (&$regdata) {
 
 function findMaxScheduledCloseDatetime(&$rows, $st_index) {
 	$row = $rows[$st_index];
-	$st_rm01 = $row['RM01'];
-	$st_rm02 = $row['RM02'];
-	$st_rm03 = $row['RM03'];
-	$st_rm03_val = intval($row['RM03']);
 	$max = $row['RM29_1'].$row['RM29_2'];
 	$rm32 = intval($row['RM32']);
 	for ($i = 1; $i < $rm32; $i++) {
+		// init val
+		$st_rm01 = $row['RM01'];
+		$st_rm02 = $row['RM02'];
+		$st_rm03 = $row['RM03'];
+		$st_rm03_val = intval($row['RM03']);
+		// move to next row
 		$row = $rows[$st_index + $i];
 
 		// Logger::getInstance()->info("$st_rm01-$st_rm02-$st_rm03 <=> ".$row['RM01']."-".$row['RM02']."-".$row['RM03']);

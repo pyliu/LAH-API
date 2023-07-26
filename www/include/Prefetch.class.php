@@ -195,7 +195,7 @@ class Prefetch {
             if ($this->isDBReachable(self::KEYS['NOT_CLOSE'])) {
                 $db = $this->getOraDB();
                 $db->parse("
-                    SELECT *
+                    SELECT t.*
                         FROM MOICAS.CRSMS t
                         LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
                     WHERE 1 = 1
