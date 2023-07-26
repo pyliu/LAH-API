@@ -31,15 +31,14 @@ function findMaxScheduledCloseDatetime(&$rows, $st_index) {
 		// move to next row
 		$row = $rows[$st_index + $i];
 
-		// Logger::getInstance()->info("$st_rm01-$st_rm02-$st_rm03 <=> ".$row['RM01']."-".$row['RM02']."-".$row['RM03']);
 		$now_rm03_val = intval($row['RM03']);
 		$offset = $now_rm03_val - $st_rm03_val;
 		if ($st_rm01 !== $row['RM01'] || $st_rm02 !== $row['RM02'] || $offset > 10 || $offset < 0) {
+			Logger::getInstance()->warning("目前：$st_rm01-$st_rm02-$st_rm03 <==> 下一筆：".$row['RM01']."-".$row['RM02']."-".$row['RM03']);
 			return false;
 		}
 
 		$current = $row['RM29_1'].$row['RM29_2'];
-		// Logger::getInstance()->info("檢查".$row['RM01']."-".$row['RM02']."-".$row['RM03']." ... ".$current." vs ".$max);
 		if ($current > $max) {
 			$max = $current;
 			Logger::getInstance()->info("最大預計結案日期時間設定為 ".$row['RM01']."-".$row['RM02']."-".$row['RM03']." 案件資料 👉 $max");
@@ -79,43 +78,41 @@ switch ($_POST["type"]) {
 			for ($i = 0; $i < $count; $i++) {
 				$row = $rows[$i];
 				$scheduled_close_datetime = $row['RM29_1'].$row['RM29_2'];
-				// only care about cases in 15 days
-				// if ($scheduled_close_datetime > $start) {
-					$case_count = intval($row['RM32']);
-					if ($case_count === 1) {
+				$case_count = intval($row['RM32']);
+				if ($case_count < 2) {
+					if ($now >= $scheduled_close_datetime) {
+						$regdata = new RegCaseData($row);
+						$this_item = getExpireCaseData($regdata);
+						$items[] = $this_item;
+						$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
+					}
+				} else {
+					// find max scheduled close datetime
+					$max_scheduled_close_datetime = findMaxScheduledCloseDatetime($rows, $i);
+					if ($max_scheduled_close_datetime === false) {
+						// the series cases not valid ... skip this case
+						Logger::getInstance()->warning($row['RM01']."-".$row['RM02']."-".$row['RM03']." 連件資料判斷有誤，當作單獨案件處理。");
 						if ($now >= $scheduled_close_datetime) {
 							$regdata = new RegCaseData($row);
 							$this_item = getExpireCaseData($regdata);
 							$items[] = $this_item;
 							$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
 						}
-					} else {
-						// find max scheduled close datetime
-						$max_scheduled_close_datetime = findMaxScheduledCloseDatetime($rows, $i);
-						if ($max_scheduled_close_datetime === false) {
-							// the series cases not valid ... skip this case
-							Logger::getInstance()->info("XHR [overdue_reg_cases_filtered] 連件資料判斷有誤，當作單獨案件處理 ".$rows[$i]['RM01']."-".$rows[$i]['RM02']."-".$rows[$i]['RM03']);
-							if ($now >= $scheduled_close_datetime) {
-								$regdata = new RegCaseData($row);
-								$this_item = getExpireCaseData($regdata);
-								$items[] = $this_item;
-								$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
-							}
-							continue;
-						}
-						// all or nothing
-						if ($now >= $max_scheduled_close_datetime) {
-							for ($y = 0; $y < $case_count; $y++) {
-								$tmp = $rows[$i + $y];
-								$regdata = new RegCaseData($tmp);
-								$this_item = getExpireCaseData($regdata);
-								$items[] = $this_item;
-								$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
-							}
-						}
-						$i += $case_count;
+						continue;
 					}
-				// }
+					// all or nothing
+					if ($now >= $max_scheduled_close_datetime) {
+						for ($y = 0; $y < $case_count; $y++) {
+							$tmp = $rows[$i + $y];
+							$regdata = new RegCaseData($tmp);
+							$this_item = getExpireCaseData($regdata);
+							$items[] = $this_item;
+							$items_by_id[$regdata->getFirstReviewerID()][] = $this_item;
+						}
+					}
+					// skip series cases to next start pivot
+					$i += ($case_count - 1);
+				}
 			}
 
 			Logger::getInstance()->info("XHR [overdue_reg_cases_filtered] 找到".count($items)."件逾期案件");
