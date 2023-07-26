@@ -195,13 +195,14 @@ class Prefetch {
             if ($this->isDBReachable(self::KEYS['NOT_CLOSE'])) {
                 $db = $this->getOraDB();
                 $db->parse("
-                    SELECT t.*
+                    SELECT t.*,
+                        s.KCNT AS \"RM09_CHT\"
                         FROM MOICAS.CRSMS t
-                        LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+                        LEFT JOIN MOIADM.RKEYN s ON s.KCDE_1 = '06' AND t.RM09 = KCDE_2
                     WHERE 1 = 1
-                        --AND RM03 LIKE '%0'       -- without sub-case
-                        AND RM31 IS NULL -- not closed case
-                    ORDER BY RM01, RM02, RM03
+                        --AND t.RM03 LIKE '%0'       -- without sub-case
+                        AND t.RM31 IS NULL -- not closed case
+                    ORDER BY t.RM01, t.RM02, t.RM03
                 ");
                 
                 Logger::getInstance()->info(__METHOD__.": 尋找未結案案件 ~");
