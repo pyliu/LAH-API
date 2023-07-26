@@ -656,7 +656,8 @@ class WatchDog {
             $altered = $moicad->getInheritanceRestrictionTODORecordsAdvanced();
             if (count($altered) > 0) {
                 $now = time();
-                $duration = 6 * 30 * 24 * 60 * 60;
+                // 列管期滿「前6個月」提醒承辦人員發函通知該外國人。
+                $duration = 182.5 * 24 * 60 * 60;
                 $cases = [];
                 foreach($altered as $record) {
                     $needNotify = $now >= $record['deadline_ts'];
