@@ -89,6 +89,17 @@ switch ($_POST["type"]) {
         Logger::getInstance()->info("XHR [import_rkeyn_all] ".$msg);
         echoJSONResponse($msg, $count !== false ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
         break;
+    case "rkeyn_use_zone":
+        Logger::getInstance()->info("XHR [rkeyn_use_zone] 取得使用分區代碼資料請求。");
+        $sqlite_sr = new SQLiteRKEYN();
+        $records = $sqlite_sr->getUseZone();
+        $count = count($records);
+        $msg = "取得 $count 筆使用分區代碼資料。";
+        Logger::getInstance()->info("XHR [rkeyn_use_zone] ".$msg);
+        echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+            'raw' => $records
+        ));
+        break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
         echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
