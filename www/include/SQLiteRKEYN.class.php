@@ -202,15 +202,20 @@ class SQLiteRKEYN {
         }
         return false;
     }
-    
-
-
     /**
      * 取得本所登記原因
      */
     public function getRegReason() {
-        $site = System::getInstance()->getSiteCode();
         if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '06' AND KCDE_2 NOT IN ('/*  */', '-') ORDER BY KCDE_2")) {
+            return $this->prepareArray($stmt);
+        }
+        return false;
+    }
+    /**
+     * 取得使用分區代碼資料
+     */
+    public function getUseZone() {
+        if($stmt = $this->db->prepare("SELECT * FROM RKEYN WHERE KCDE_1 = '11' AND KCDE_2 NOT IN ('/*  */', '-') ORDER BY KCDE_2")) {
             return $this->prepareArray($stmt);
         }
         return false;
