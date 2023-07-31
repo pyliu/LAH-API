@@ -40,6 +40,8 @@ class SQLiteDBFactory {
                 "transfer_local_principle" TEXT,
                 "restore_local_date" TEXT,
                 "use_partition" TEXT,
+                "control" TEXT,
+                "logout" TEXT,
                 "note" TEXT,
                 PRIMARY KEY("cert_no")
             )
