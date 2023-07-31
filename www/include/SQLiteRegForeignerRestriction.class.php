@@ -52,8 +52,8 @@ class SQLiteRegForeignerRestriction {
             return $this->update($post);
         } else {
             $stm = $this->db->prepare("
-                INSERT INTO reg_foreigner_restriction ('cert_no', 'nation', 'reg_date', 'reg_caseno', 'transfer_date', 'transfer_caseno', 'transfer_local_date', 'transfer_local_principle', 'restore_local_date', 'use_partition', 'note')
-                VALUES (:cert_no, :nation, :reg_date, :reg_caseno, :transfer_date, :transfer_caseno, :transfer_local_date, :transfer_local_principle, :restore_local_date, :use_partition, :note)
+                INSERT INTO reg_foreigner_restriction ('cert_no', 'nation', 'reg_date', 'reg_caseno', 'transfer_date', 'transfer_caseno', 'transfer_local_date', 'transfer_local_principle', 'restore_local_date', 'use_partition', 'logout', 'control', 'note')
+                VALUES (:cert_no, :nation, :reg_date, :reg_caseno, :transfer_date, :transfer_caseno, :transfer_local_date, :transfer_local_principle, :restore_local_date, :use_partition, :logout, :control, :note)
             ");
             $stm->bindParam(':cert_no', $post['cert_no']);
             $stm->bindParam(':nation', $post['nation']);
@@ -65,6 +65,8 @@ class SQLiteRegForeignerRestriction {
             $stm->bindParam(':transfer_local_principle', $post['transfer_local_principle']);
             $stm->bindParam(':restore_local_date', $post['restore_local_date']);
             $stm->bindParam(':use_partition', $post['use_partition']);
+            $stm->bindParam(':logout', $post['logout']);
+            $stm->bindParam(':control', $post['control']);
             $stm->bindParam(':note', $post['note']);
             return $stm->execute() === FALSE ? false : $this->getLastInsertedId();
         }
@@ -85,6 +87,8 @@ class SQLiteRegForeignerRestriction {
                 transfer_local_principle = :transfer_local_principle,
                 restore_local_date = :restore_local_date,
                 use_partition = :use_partition,
+                logout = :logout,
+                control = :control,
                 note = :note
             WHERE cert_no = :cert_no
         ");
@@ -98,6 +102,8 @@ class SQLiteRegForeignerRestriction {
         $stm->bindParam(':transfer_local_principle', $post['transfer_local_principle']);
         $stm->bindParam(':restore_local_date', $post['restore_local_date']);
         $stm->bindParam(':use_partition', $post['use_partition']);
+        $stm->bindParam(':logout', $post['logout']);
+        $stm->bindParam(':control', $post['control']);
         $stm->bindParam(':note', $post['note']);
         return $stm->execute() !== FALSE;
     }
