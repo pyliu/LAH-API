@@ -91,7 +91,7 @@ class MOICAD
 					where 1=1
 						and gg00 = 'B'
 						and gg30_1 in ('00')
-						and gg30_2 like '%' || :bv_key1 || '%'
+						and (gg30_2 like '%' || :bv_key1 || '%' or gg30_2 like '%' || :bv_key3 || '%')
 				) a
 				left join (
 					select *
@@ -128,6 +128,8 @@ class MOICAD
 		$this->db_wrapper->getDB()->bind(":bv_key1", mb_convert_encoding('移轉與', "big5"));
 		// GG30_1: 'GP' => 同時合併 ' ... 移請財政部國有財產屬公開標售。' 字樣
 		$this->db_wrapper->getDB()->bind(":bv_key2", mb_convert_encoding('移請', "big5"));
+		// GG30_1: '00' => 搜尋其他登記事項 ' ... 移轉於本國人 .... ' 字樣
+		$this->db_wrapper->getDB()->bind(":bv_key3", mb_convert_encoding('移轉於', "big5"));
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
