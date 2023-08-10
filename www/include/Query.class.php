@@ -410,7 +410,7 @@ class Query {
 			SELECT t.*, s.K02
 			FROM MOIEXP.EXPAA t
 			LEFT JOIN MOIEXP.EXPK s ON t.AA100 = s.K01
-			WHERE AA01 >= :bv_qday AND AA106 <> '1' AND s.K02 = '悠遊卡'
+			WHERE AA01 >= :bv_qday AND AA106 <> '1' AND s.K02 = '".iconv("utf-8", "big5", '悠遊卡')."'
 		");
 		if (empty($qday)) {
 			global $week_ago;
