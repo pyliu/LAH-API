@@ -31,6 +31,7 @@ define('POSTER_IMG_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARAT
 define('XLSX_TPL_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."xlsx");
 define('DB_DIR', ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db");
 define('DEF_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."LAH.db");
+define('BUREAU_REVERSE_PROXY', "220.1.33.71");
 
 define('CASE_STATUS',[
     "A" => "初審",
@@ -160,24 +161,24 @@ $site_idx = ord($site_code_tail) - ord('A') + 1;  // 1
 define('REG_CODE', [
     "本所" => $altered,
     "本所收件" => [
-        "HA${site_code_tail}1" => "${site_short_name}桃登跨",
-        "HB${site_code_tail}1" => "${site_short_name}壢登跨",
-        "HF${site_code_tail}1" => "${site_short_name}德登跨",
-        "HC${site_code_tail}1" => "${site_short_name}溪登跨",
-        "HG${site_code_tail}1" => "${site_short_name}平登跨",
-        "HD${site_code_tail}1" => "${site_short_name}楊登跨",
-	    "HE${site_code_tail}1" => "${site_short_name}蘆登跨",
-	    "HH${site_code_tail}1" => "${site_short_name}山登跨"
+        "HA".$site_code_tail."1" => $site_short_name."桃登跨",
+        "HB".$site_code_tail."1" => $site_short_name."壢登跨",
+        "HF".$site_code_tail."1" => $site_short_name."德登跨",
+        "HC".$site_code_tail."1" => $site_short_name."溪登跨",
+        "HG".$site_code_tail."1" => $site_short_name."平登跨",
+        "HD".$site_code_tail."1" => $site_short_name."楊登跨",
+	    "HE".$site_code_tail."1" => $site_short_name."蘆登跨",
+	    "HH".$site_code_tail."1" => $site_short_name."山登跨"
     ],
     "他所收件" => [
-        "${site_code}A1" => "桃${site_short_name}登跨",
-        "${site_code}B1" => "壢${site_short_name}登跨",
-        "${site_code}G1" => "平${site_short_name}登跨",
-        "${site_code}E1" => "蘆${site_short_name}登跨",
-        "${site_code}H1" => "山${site_short_name}登跨",
-        "${site_code}F1" => "德${site_short_name}登跨",
-        "${site_code}D1" => "楊${site_short_name}登跨",
-        "${site_code}C1" => "溪${site_short_name}登跨"
+        $site_code."A1" => "桃".$site_short_name."登跨",
+        $site_code."B1" => "壢".$site_short_name."登跨",
+        $site_code."G1" => "平".$site_short_name."登跨",
+        $site_code."E1" => "蘆".$site_short_name."登跨",
+        $site_code."H1" => "山".$site_short_name."登跨",
+        $site_code."F1" => "德".$site_short_name."登跨",
+        $site_code."D1" => "楊".$site_short_name."登跨",
+        $site_code."C1" => "溪".$site_short_name."登跨"
     ],
     "跨縣市本所收件" => [
         '台北市' => [
@@ -463,7 +464,7 @@ foreach ($cross_county_other as $row) { $altered2[$row['KCDE_2']] = $row['KCNT']
 $cross_county_host = $srkeyn->getRegCrossCountyHostCode();
 foreach ($cross_county_host as $row) { $altered2[$row['KCDE_2']] = $row['KCNT']; }
 
-// $altered is pprocessed before
+// $altered is processed before
 define('REG_WORD', array_merge($altered, $altered2));
 
 unset($srkeyn);
