@@ -145,14 +145,14 @@ $site_code = System::getInstance()->getSiteCode() ?? 'HA';  // HA
 $site_code_tail = $site_code[1];    // A
 $site_short_name = '？';
 switch ($site_code) {
-    case 'HA': $site_short_name = '桃'; break;
-    case 'HB': $site_short_name = '壢'; break;
-    case 'HC': $site_short_name = '溪'; break;
-    case 'HD': $site_short_name = '楊'; break;
-    case 'HE': $site_short_name = '蘆'; break;
-    case 'HF': $site_short_name = '德'; break;
-    case 'HG': $site_short_name = '平'; break;
-    case 'HH': $site_short_name = '山'; break;
+    case 'HA': $site_short_name = '桃'; define('WEB_XAP', "220.1.34.161"); break;
+    case 'HB': $site_short_name = '壢'; define('WEB_XAP', "220.1.35.123"); break;
+    case 'HC': $site_short_name = '溪'; define('WEB_XAP', "220.1.36.45"); break;
+    case 'HD': $site_short_name = '楊'; define('WEB_XAP', "220.1.37.246"); break;
+    case 'HE': $site_short_name = '蘆'; define('WEB_XAP', "220.1.38.30"); break;
+    case 'HF': $site_short_name = '德'; define('WEB_XAP', "220.1.39.57"); break;
+    case 'HG': $site_short_name = '平'; define('WEB_XAP', "220.1.40.33"); break;
+    case 'HH': $site_short_name = '山'; define('WEB_XAP', "220.1.41.20"); break;
 }
 $site_name = mb_substr(OFFICE[$site_code], 0, 2);    // 桃園
 $site_idx = ord($site_code_tail) - ord('A') + 1;  // 1
