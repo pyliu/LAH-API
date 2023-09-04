@@ -5,6 +5,7 @@ require_once(INC_DIR."/Prefetch.class.php");
 require_once(INC_DIR."/RegCaseData.class.php");
 require_once(INC_DIR."/SurCaseData.class.php");
 require_once(INC_DIR."/SQLiteRegForeignerRestriction.class.php");
+require_once(INC_DIR."/SQLiteRegForeignerPDF.class.php");
 
 function getExpireCaseData (&$regdata) {
 	return array(
@@ -714,12 +715,15 @@ switch ($_POST["type"]) {
 			$total = count($rows);
 			$srfr = new SQLiteRegForeignerRestriction();
 			$baked = array();
+			// to check if PDF exists
+			$srfp = new SQLiteRegForeignerPDF();
 			foreach ($rows as $row) {
 				$data = new RegCaseData($row);
 				$this_baked = $data->getBakedData();
 				// use pkey(地段+地號+統編) to read restriction data
 				$pkey = $row['BA48'].$row['BA49'].$row['BB09'];
 				$this_baked['RESTRICTION_DATA'] = $srfr->getOne($pkey);
+				$this_baked['hasPDF'] = $srfp->exists($row['BB03'], $row['BB04_2'], $row['BB09']) > 0;
 				$baked[] = $this_baked;
 			}
 			Logger::getInstance()->info("XHR [reg_inheritance_restriction] 查詢成功($total)");
