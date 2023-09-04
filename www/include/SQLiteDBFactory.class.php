@@ -30,7 +30,7 @@ class SQLiteDBFactory {
         $sqlite->initDB();
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "reg_foreigner_restriction" (
-                "cert_no"	TEXT NOT NULL,
+                "pkey"	TEXT NOT NULL,
                 "nation"   TEXT,
                 "reg_date" TEXT,
                 "reg_caseno" TEXT,
@@ -43,7 +43,7 @@ class SQLiteDBFactory {
                 "control" TEXT,
                 "logout" TEXT,
                 "note" TEXT,
-                PRIMARY KEY("cert_no")
+                PRIMARY KEY("pkey")
             )
         ');
         return $path;

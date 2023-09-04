@@ -30,32 +30,32 @@ class SQLiteRegForeignerRestriction {
         return $this->db->lastInsertRowID();
     }
 
-    public function exists($cid) {
-        return $this->db->querySingle("SELECT cert_no from reg_foreigner_restriction WHERE cert_no = '$cid'");
+    public function exists($pkey) {
+        return $this->db->querySingle("SELECT pkey from reg_foreigner_restriction WHERE pkey = '$pkey'");
     }
 
-    public function getOne($cid) {
-        Logger::getInstance()->info(__METHOD__.": 取得 $cid 資料");
-        if($stmt = $this->db->prepare('SELECT * from reg_foreigner_restriction WHERE cert_no = :bv_cid')) {
-            $stmt->bindParam(':bv_cid', $cid);
+    public function getOne($pkey) {
+        Logger::getInstance()->info(__METHOD__.": 取得 $pkey 資料");
+        if($stmt = $this->db->prepare('SELECT * from reg_foreigner_restriction WHERE pkey = :bv_pkey')) {
+            $stmt->bindParam(':bv_pkey', $pkey);
             $result = $this->prepareArray($stmt);
             return count($result) > 0 ? $result[0] : false;
         }
-        Logger::getInstance()->error(__METHOD__.": 無法取得 $cid 資料！ (".SQLiteDBFactory::getRegForeignerRestrictionDB().")");
+        Logger::getInstance()->error(__METHOD__.": 無法取得 $pkey 資料！ (".SQLiteDBFactory::getRegForeignerRestrictionDB().")");
         return false;
     }
 
     public function add($post) {
-        $id = $this->exists($post['cert_no']);
+        $id = $this->exists($post['pkey']);
         if ($id) {
             Logger::getInstance()->warning(__METHOD__.": 外國人資料已存在，將更新它。(id: $id)");
             return $this->update($post);
         } else {
             $stm = $this->db->prepare("
-                INSERT INTO reg_foreigner_restriction ('cert_no', 'nation', 'reg_date', 'reg_caseno', 'transfer_date', 'transfer_caseno', 'transfer_local_date', 'transfer_local_principle', 'restore_local_date', 'use_partition', 'logout', 'control', 'note')
-                VALUES (:cert_no, :nation, :reg_date, :reg_caseno, :transfer_date, :transfer_caseno, :transfer_local_date, :transfer_local_principle, :restore_local_date, :use_partition, :logout, :control, :note)
+                INSERT INTO reg_foreigner_restriction ('pkey', 'nation', 'reg_date', 'reg_caseno', 'transfer_date', 'transfer_caseno', 'transfer_local_date', 'transfer_local_principle', 'restore_local_date', 'use_partition', 'logout', 'control', 'note')
+                VALUES (:pkey, :nation, :reg_date, :reg_caseno, :transfer_date, :transfer_caseno, :transfer_local_date, :transfer_local_principle, :restore_local_date, :use_partition, :logout, :control, :note)
             ");
-            $stm->bindParam(':cert_no', $post['cert_no']);
+            $stm->bindParam(':pkey', $post['pkey']);
             $stm->bindParam(':nation', $post['nation']);
             $stm->bindParam(':reg_date', $post['reg_date']);
             $stm->bindParam(':reg_caseno', $post['reg_caseno']);
@@ -74,8 +74,8 @@ class SQLiteRegForeignerRestriction {
     }
 
     public function update($post) {
-        $cert_no = $post['cert_no'];
-        Logger::getInstance()->warning(__METHOD__.": 更新外國人資料。(cert_no: $cert_no)");
+        $pkey = $post['pkey'];
+        Logger::getInstance()->warning(__METHOD__.": 更新外國人資料。(pkey: $pkey)");
         $stm = $this->db->prepare("
             UPDATE reg_foreigner_restriction SET
                 nation = :nation,
@@ -90,9 +90,9 @@ class SQLiteRegForeignerRestriction {
                 logout = :logout,
                 control = :control,
                 note = :note
-            WHERE cert_no = :cert_no
+            WHERE pkey = :pkey
         ");
-        $stm->bindParam(':cert_no', $cert_no);
+        $stm->bindParam(':pkey', $pkey);
         $stm->bindParam(':nation', $post['nation']);
         $stm->bindParam(':reg_date', $post['reg_date']);
         $stm->bindParam(':reg_caseno', $post['reg_caseno']);
@@ -108,9 +108,9 @@ class SQLiteRegForeignerRestriction {
         return $stm->execute() !== FALSE;
     }
 
-    public function delete($cid) {
-        $stm = $this->db->prepare("DELETE FROM reg_foreigner_restriction WHERE cert_no = :bv_cid");
-        $stm->bindParam(':bv_cid', $cid);
+    public function delete($pkey) {
+        $stm = $this->db->prepare("DELETE FROM reg_foreigner_restriction WHERE pkey = :bv_pkey");
+        $stm->bindParam(':bv_pkey', $pkey);
         return $stm->execute() !== FALSE;
     }
 }

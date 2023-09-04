@@ -717,8 +717,9 @@ switch ($_POST["type"]) {
 			foreach ($rows as $row) {
 				$data = new RegCaseData($row);
 				$this_baked = $data->getBakedData();
-				// use cert no to read restriction data
-				$this_baked['RESTRICTION_DATA'] = $srfr->getOne($row['BB16']);
+				// use pkey(地段+地號+統編) to read restriction data
+				$pkey = $row['BB16'];
+				$this_baked['RESTRICTION_DATA'] = $srfr->getOne($pkey);
 				$baked[] = $this_baked;
 			}
 			Logger::getInstance()->info("XHR [reg_inheritance_restriction] 查詢成功($total)");
