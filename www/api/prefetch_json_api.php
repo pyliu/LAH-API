@@ -718,7 +718,7 @@ switch ($_POST["type"]) {
 				$data = new RegCaseData($row);
 				$this_baked = $data->getBakedData();
 				// use pkey(地段+地號+統編) to read restriction data
-				$pkey = $row['BB16'];
+				$pkey = $row['BA48'].$row['BA49'].$row['BB09'];
 				$this_baked['RESTRICTION_DATA'] = $srfr->getOne($pkey);
 				$baked[] = $this_baked;
 			}
