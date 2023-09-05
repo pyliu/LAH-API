@@ -157,8 +157,7 @@ switch ($_POST["type"]) {
         echo json_encode(array(
             "status" => $response_code,
             "site" => $_POST['site'],
-            "headers" => $headers,
-            "data_count" => "1",
+            "raw" => $headers,
             "message" => $message
         ), 0);
         break;
