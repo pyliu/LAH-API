@@ -8,6 +8,19 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."Ping.class.php");
 $system = System::getInstance();
 $ipr = new IPResolver();
 
+function httpHeader($url) {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_HEADER, 1);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+    $header = curl_exec($ch);
+    curl_close($ch);
+
+    $headers = explode("\n", $header);
+    return $headers;
+}
+
 switch ($_POST["type"]) {
     case "add_user_ip_entry":
         $data = array(
@@ -129,6 +142,22 @@ switch ($_POST["type"]) {
             "status" => $response_code,
             "ip" => $ip,
             "latency" => empty($latency) ? "0" : $latency,
+            "data_count" => "1",
+            "message" => $message
+        ), 0);
+        break;
+    case "check_site_http":
+        $webAP = $system->getWebAPIp();
+        $url = "http://$webAP/Land".strtoupper($_POST['site'])."/";
+        $headers = httpHeader($url);
+        // if service available, HTTP response code will return 401
+        $response401 = trim($headers[0]) === 'HTTP/1.1 401 Unauthorized';
+        $response_code = $response401 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+        $message = $_POST['site'].($response401 ? '服務正常' : '服務異常');
+        echo json_encode(array(
+            "status" => $response_code,
+            "site" => $_POST['site'],
+            "headers" => $headers,
             "data_count" => "1",
             "message" => $message
         ), 0);
