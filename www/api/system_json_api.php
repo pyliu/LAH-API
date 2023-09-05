@@ -5,6 +5,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYNALL.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteUser.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteOFFICES.class.php");
 
 // in case session not have myinfo
 prepareSessionMyInfo();
@@ -93,9 +94,25 @@ switch ($_POST["type"]) {
         Logger::getInstance()->info("XHR [rkeyn_use_zone] 取得使用分區代碼資料請求。");
         $sqlite_sr = new SQLiteRKEYN();
         $records = $sqlite_sr->getUseZone();
+        // to prevent the rkeyndb never imported
+        if (count($records) === 0) {
+            $sqlite_sr->importFromOraDB();
+            $records = $sqlite_sr->getUseZone();
+        }
         $count = count($records);
         $msg = "取得 $count 筆使用分區代碼資料。";
         Logger::getInstance()->info("XHR [rkeyn_use_zone] ".$msg);
+        echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+            'raw' => $records
+        ));
+        break;
+    case "all_offices":
+        Logger::getInstance()->info("XHR [all_offices] 取得全部地政事務所資料請求。");
+        $sqlite_so = new SQLiteOFFICES();
+        $records = $sqlite_so->getAll();
+        $count = count($records);
+        $msg = "取得 $count 筆使用地政事務所資料。";
+        Logger::getInstance()->info("XHR [all_offices] ".$msg);
         echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
             'raw' => $records
         ));
