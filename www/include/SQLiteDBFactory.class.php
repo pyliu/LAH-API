@@ -161,6 +161,21 @@ class SQLiteDBFactory {
         return $path;
     }
 
+    public static function getOFFICESDB() {
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."OFFICES.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "OFFICES" (
+                "ID"	TEXT NOT NULL,
+                "NAME"	TEXT NOT NULL,
+                "ALIAS"	TEXT NOT NULL,
+                PRIMARY KEY("ID")
+            )
+        ');
+        return $path;
+    }
+
     public static function getCaseCodeDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."CaseCode.db";
         $sqlite = new DynamicSQLite($path);

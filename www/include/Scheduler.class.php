@@ -11,6 +11,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYNALL.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."StatsSQLite.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."Prefetch.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteOFFICES.class.php");
 
 class Scheduler {
     private $tmp;
@@ -91,6 +92,12 @@ class Scheduler {
         Logger::getInstance()->info(__METHOD__.': 匯入RKEYN_ALL代碼檔排程啟動。');
         $sqlite_sra = new SQLiteRKEYNALL();
         $sqlite_sra->importFromOraDB();
+    }
+
+    private function importOFFICES() {
+        Logger::getInstance()->info(__METHOD__.': 匯入LANDIP資料排程啟動。');
+        $sqlite_so = new SQLiteOFFICES();
+        $sqlite_so->importFromOraDB();
     }
 
     private function wipeOutdatedIPEntries() {
@@ -299,6 +306,7 @@ class Scheduler {
                  */
                 $this->importRKEYN();
                 $this->importRKEYNALL();
+                $this->importOFFICES();
                 $this->importUserFromL3HWEB();
             } else {
                 // Logger::getInstance()->info(__METHOD__.": 每24小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
