@@ -17,7 +17,7 @@ function httpHeader($url) {
     $header = curl_exec($ch);
     curl_close($ch);
 
-    $headers = explode("\n", $header);
+    $headers = explode("\r\n", $header);
     return $headers;
 }
 
