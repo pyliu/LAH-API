@@ -143,14 +143,37 @@ class Scheduler {
 
     public function do() {
         Logger::getInstance()->info(__METHOD__.": Scheduler 開始執行。");
-        $this->do15minsJobs();
-        $this->do30minsJobs();
-        $this->do1HourJobs();
-        $this->do4HoursJobs();
-        $this->do8HoursJobs();
-        $this->doHalfDayJobs();
         $this->doOneDayJobs();
+        $this->doHalfDayJobs();
+        $this->do8HoursJobs();
+        $this->do4HoursJobs();
+        $this->do1HourJobs();
+        $this->do30minsJobs();
+        $this->do15minsJobs();
+        $this->do5minsJobs();
         Logger::getInstance()->info(__METHOD__.": Scheduler 執行完成。");
+    }
+
+    public function do5minsJobs () {
+        try {
+            
+            $ticketTs = file_get_contents($this->tickets['5m']);
+            if ($ticketTs <= time()) {
+                Logger::getInstance()->info(__METHOD__.": 開始執行每5分鐘的排程。");
+                // place next timestamp to the tmp ticket file 
+                file_put_contents($this->tickets['5m'], strtotime('+5 mins', time()));
+                // check all offices connectivity
+                
+            } else {
+                // Logger::getInstance()->info(__METHOD__.": 每5分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
+            }
+            return true;
+        } catch (Exception $e) {
+            Logger::getInstance()->warning(__METHOD__.": 執行每5分鐘的排程失敗。");
+            Logger::getInstance()->warning(__METHOD__.": ".$e->getMessage());
+        } finally {
+        }
+        return false;
     }
 
     public function do15minsJobs () {
