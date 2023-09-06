@@ -176,6 +176,24 @@ class SQLiteDBFactory {
         return $path;
     }
 
+    public static function getOFFICESSTATSDB() {
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."OFFICES_STATS.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE "OFFICES_STATS" (
+                "serial"	INTEGER,
+                "id"	TEXT NOT NULL,
+                "name"	TEXT,
+                "state"	TEXT NOT NULL DEFAULT \'DOWN\',
+                "response"	TEXT,
+                "timestamp"	INTEGER NOT NULL,
+                PRIMARY KEY("serial" AUTOINCREMENT)
+            )
+        ');
+        return $path;
+    }
+
     public static function getCaseCodeDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."CaseCode.db";
         $sqlite = new DynamicSQLite($path);
