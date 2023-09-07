@@ -2,6 +2,7 @@
 require_once('init.php');
 require_once('System.class.php');
 require_once('SQLiteDBFactory.class.php');
+require_once('SQLiteOFFICES.class.php');
 
 class SQLiteOFFICESSTATS {
     private $db;
@@ -53,6 +54,20 @@ class SQLiteOFFICESSTATS {
         ");
         $this->bindParams($stm, $row);
         return $stm->execute() === FALSE ? false : true;
+    }
+    
+    public function getLatestBatch() {
+        $latest_id = $this->db->querySingle("SELECT serial from OFFICES_STATS ORDER BY serial DESC");
+        $office = new SQLiteOFFICES();
+        $total = $office->count();
+        if($stmt = $this->db->prepare("
+            SELECT * FROM OFFICES_STATS
+            WHERE
+                serial > ".($latest_id - $total)."
+            ORDER BY serial
+        ")) {
+            return $this->prepareArray($stmt);
+        }
     }
     /**
      * 移除某時間前資料

@@ -101,10 +101,22 @@ class SQLiteOFFICES {
     /**
      * 取得所有辦公室資料
      */
-    public function getAll() {
-        if($stmt = $this->db->prepare("SELECT * FROM OFFICES ORDER BY ID")) {
-            return $this->prepareArray($stmt);
+    public function getAll($filter = false) {
+        if ($filter) {
+            if($stmt = $this->db->prepare("SELECT * FROM OFFICES WHERE (ID != 'CB' AND ID != 'CC') ORDER BY ID")) {
+                return $this->prepareArray($stmt);
+            }
+        } else {
+            if($stmt = $this->db->prepare("SELECT * FROM OFFICES ORDER BY ID")) {
+                return $this->prepareArray($stmt);
+            }
         }
         return false;
+    }
+    /**
+     * 取得總數
+     */
+    public function count() {
+        return count($this->getAll(true));
     }
 }

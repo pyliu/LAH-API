@@ -6,6 +6,7 @@ require_once(ROOT_DIR."/include/StatsOracle.class.php");
 require_once(ROOT_DIR."/include/StatsSQLite.class.php");
 require_once(ROOT_DIR."/include/SQLiteConnectivity.class.php");
 require_once(ROOT_DIR."/include/RegCaseData.class.php");
+require_once(ROOT_DIR."/include/SQLiteOFFICESSTATS.class.php");
 
 $stats = new StatsOracle();
 $stats_sqlite3 = new StatsSQLite();
@@ -359,6 +360,26 @@ switch ($_POST["type"]) {
         } else {
             $error = "取得".$_POST["rm02"]."案件 ".$_POST["st"]." ~ ".$_POST["ed"]." 失敗。";
             Logger::getInstance()->error("XHR [stats_reg_rm02_sub_count] $error");
+            echoJSONResponse($error);
+        }
+        break;
+    case "stats_xap_stats":
+        $arr = [];
+        if ($mock) {
+            $arr = $cache->get('stats_xap_stats');
+        } else {
+            $sqlite = new SQLiteOFFICESSTATS();
+            $arr = $sqlite->getLatestBatch();
+        }
+        $cache->set('stats_xap_stats', $arr);
+        if (is_array($arr)) {
+            $count = count($arr);
+            echoJSONResponse("取得 ".count($arr)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得最近各地所連線狀態失敗。";
+            Logger::getInstance()->error("XHR [stats_xap_stats] $error");
             echoJSONResponse($error);
         }
         break;
