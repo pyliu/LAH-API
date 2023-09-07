@@ -181,7 +181,7 @@ class SQLiteDBFactory {
         $sqlite = new DynamicSQLite($path);
         $sqlite->initDB();
         $sqlite->createTableBySQL('
-            CREATE TABLE "OFFICES_STATS" (
+            CREATE TABLE IF NOT EXISTS "OFFICES_STATS" (
                 "serial"	INTEGER,
                 "id"	TEXT NOT NULL,
                 "name"	TEXT,
