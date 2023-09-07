@@ -270,6 +270,11 @@ function utf8ize($mixed) {
     }
     return $mixed;
 }
+// reference from https://stackoverflow.com/questions/3656713/how-to-get-current-time-in-milliseconds-in-php
+function milliseconds() {
+    $mt = explode(' ', microtime());
+    return intval( $mt[1] * 1E3 ) + intval( round( $mt[0] * 1E3 ) );
+}
 /**
  * print the json string
  */
