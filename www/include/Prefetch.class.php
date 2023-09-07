@@ -1,6 +1,6 @@
 <?php
 require_once("init.php");
-require_once("DynamicSQLite.class.php");
+require_once("SQLiteDBFactory.class.php");
 require_once("OraDB.class.php");
 require_once("Cache.class.php");
 require_once("System.class.php");
@@ -8,7 +8,7 @@ require_once("MOIPRC.class.php");
 require_once("MOICAD.class.php");
 
 class Prefetch {
-    private const PREFETCH_SQLITE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."prefetch.db";
+    // private const PREFETCH_SQLITE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."prefetch.db";
     private const KEYS = array(
         'RM30H' => 'Prefetch::getRM30HCase',
         'NOT_CLOSE' => 'Prefetch::getNotCloseCase',
@@ -57,7 +57,7 @@ class Prefetch {
     
     private function getCache() {
         if ($this->cache === null) {
-            $this->cache = Cache::getInstance(self::PREFETCH_SQLITE_DB);
+            $this->cache = Cache::getInstance(SQLiteDBFactory::getPrefetchDB());
         }
         return $this->cache;
     }
@@ -102,7 +102,7 @@ class Prefetch {
      */
     public static function wipeExpiredData() {
         $one_week_ago_seconds = time() - 7 * 24 * 3600;
-        $prefetch_db = new SQLite3(self::PREFETCH_SQLITE_DB);
+        $prefetch_db = new SQLite3(SQLiteDBFactory::getPrefetchDB());
         if ($stm = $prefetch_db->prepare("DELETE FROM cache WHERE expire < :time")) {
             $stm->bindParam(':time', $one_week_ago_seconds, SQLITE3_TEXT);
             $ret = $stm->execute();
