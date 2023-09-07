@@ -275,6 +275,15 @@ function milliseconds() {
     $mt = explode(' ', microtime());
     return intval( $mt[1] * 1E3 ) + intval( round( $mt[0] * 1E3 ) );
 }
+// reference from bard.google.com
+function timestampToDate(int $time, string $format = 'Y-m-d H:i:s'): string {
+    if (strlen($time) === 10) {
+        return date($format, $time);
+    }
+    // Convert milliseconds to seconds
+    $seconds = $time / 1000;
+    return date($format, $seconds);
+}
 /**
  * print the json string
  */
