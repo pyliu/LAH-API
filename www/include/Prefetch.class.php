@@ -8,7 +8,6 @@ require_once("MOIPRC.class.php");
 require_once("MOICAD.class.php");
 
 class Prefetch {
-    // private const PREFETCH_SQLITE_DB = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db".DIRECTORY_SEPARATOR."prefetch.db";
     private const KEYS = array(
         'RM30H' => 'Prefetch::getRM30HCase',
         'NOT_CLOSE' => 'Prefetch::getNotCloseCase',
