@@ -8,19 +8,6 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."Ping.class.php");
 $system = System::getInstance();
 $ipr = new IPResolver();
 
-function httpHeader($url) {
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_HEADER, 1);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-    $header = curl_exec($ch);
-    curl_close($ch);
-
-    $headers = explode("\r\n", $header);
-    return $headers;
-}
-
 switch ($_POST["type"]) {
     case "add_user_ip_entry":
         $data = array(

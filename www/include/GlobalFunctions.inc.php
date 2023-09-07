@@ -302,3 +302,18 @@ function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array =
         exit;
     }
 }
+/**
+ * get http headers
+ */
+function httpHeader($url) {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_HEADER, 1);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+    $header = curl_exec($ch);
+    curl_close($ch);
+
+    $headers = explode("\r\n", $header);
+    return $headers;
+}
