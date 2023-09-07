@@ -12,6 +12,8 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."StatsSQLite.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."Prefetch.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteOFFICES.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteOFFICESSTATS.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 
 class Scheduler {
     private $tmp;
@@ -124,6 +126,37 @@ class Scheduler {
         $monitor->fetchFromMailServer();
     }
 
+    public function addOfficeCheckStatus() {
+        Logger::getInstance()->info(__METHOD__.": 開始進行全國地所連線測試 ... ");
+
+        $xap_ip = System::getInstance()->getWebAPIp();
+        $sqlite_so = new SQLiteOFFICES();
+        $sqlite_sos = new SQLiteOFFICESSTATS();
+        $sites = $sqlite_so->getAll();
+        foreach ($sites as $site) {
+            // skip out of date sites
+            if ($site['ID'] === 'CB' || $site['ID'] === 'CC') {
+                continue;
+            }
+            Logger::getInstance()->info(__METHOD__.": 檢測".$site['ID']." ".$site['ALIAS']." ".$site['NAME']."。");
+            $url = "http://$xap_ip/Land".strtoupper($site['ID'])."/";
+            Logger::getInstance()->info(__METHOD__.": url:$url");
+            $headers = httpHeader($url);
+            $response = trim($headers[0]);
+            Logger::getInstance()->info(__METHOD__.": header: $response");
+            $sqlite_sos->replace(array(
+                'id' => $site['ID'],
+                'name' => $site['NAME'],
+                // if service available, HTTP response code will return 401
+                'state' => $response === 'HTTP/1.1 401 Unauthorized' ? 'UP' : 'DOWN',
+                'response' => $response,
+                'timestamp' => time(),
+            ));
+            Logger::getInstance()->info(__METHOD__.": timestamp: ".time());
+        }
+        Logger::getInstance()->info(__METHOD__.": 全國地所連線測試完成。");
+    }
+
     function __construct() {
         $this->tmp = sys_get_temp_dir();
         $this->tickets = array(
@@ -150,26 +183,52 @@ class Scheduler {
         $this->do1HourJobs();
         $this->do30minsJobs();
         $this->do15minsJobs();
+        $this->do10minsJobs();
         $this->do5minsJobs();
         Logger::getInstance()->info(__METHOD__.": Scheduler 執行完成。");
     }
 
     public function do5minsJobs () {
         try {
-            
             $ticketTs = file_get_contents($this->tickets['5m']);
             if ($ticketTs <= time()) {
                 Logger::getInstance()->info(__METHOD__.": 開始執行每5分鐘的排程。");
                 // place next timestamp to the tmp ticket file 
                 file_put_contents($this->tickets['5m'], strtotime('+5 mins', time()));
-                // check all offices connectivity
-                
+                // check all offices connectivity during office hours
+                if ($this->isOn($this->schedule["office"])) {
+                    $this->addOfficeCheckStatus();
+                }
             } else {
                 // Logger::getInstance()->info(__METHOD__.": 每5分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
             return true;
         } catch (Exception $e) {
             Logger::getInstance()->warning(__METHOD__.": 執行每5分鐘的排程失敗。");
+            Logger::getInstance()->warning(__METHOD__.": ".$e->getMessage());
+        } finally {
+        }
+        return false;
+    }
+
+    public function do10minsJobs () {
+        try {
+            
+            $ticketTs = file_get_contents($this->tickets['10m']);
+            if ($ticketTs <= time()) {
+                Logger::getInstance()->info(__METHOD__.": 開始執行每10分鐘的排程。");
+                // place next timestamp to the tmp ticket file 
+                file_put_contents($this->tickets['10m'], strtotime('+10 mins', time()));
+                /**
+                 * 擷取監控郵件
+                 */
+                $this->fetchMonitorMail();
+            } else {
+                // Logger::getInstance()->info(__METHOD__.": 每10分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
+            }
+            return true;
+        } catch (Exception $e) {
+            Logger::getInstance()->warning(__METHOD__.": 執行每10分鐘的排程失敗。");
             Logger::getInstance()->warning(__METHOD__.": ".$e->getMessage());
         } finally {
         }
@@ -186,10 +245,6 @@ class Scheduler {
                 // check systems connectivity
                 $conn = new SQLiteConnectivity();
                 $conn->check();
-                /**
-                 * 擷取監控郵件
-                 */
-                $this->fetchMonitorMail();
             } else {
                 // Logger::getInstance()->info(__METHOD__.": 每15分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
