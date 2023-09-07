@@ -133,17 +133,18 @@ class Scheduler {
         $sqlite_so = new SQLiteOFFICES();
         $sqlite_sos = new SQLiteOFFICESSTATS();
         $sites = $sqlite_so->getAll();
+        $count = 0;
         foreach ($sites as $site) {
             // skip out of date sites
             if ($site['ID'] === 'CB' || $site['ID'] === 'CC') {
                 continue;
             }
-            Logger::getInstance()->info(__METHOD__.": 檢測".$site['ID']." ".$site['ALIAS']." ".$site['NAME']."。");
+            // Logger::getInstance()->info(__METHOD__.": 檢測".$site['ID']." ".$site['ALIAS']." ".$site['NAME']."。");
             $url = "http://$xap_ip/Land".strtoupper($site['ID'])."/";
-            Logger::getInstance()->info(__METHOD__.": url:$url");
+            // Logger::getInstance()->info(__METHOD__.": url:$url");
             $headers = httpHeader($url);
             $response = trim($headers[0]);
-            Logger::getInstance()->info(__METHOD__.": header: $response");
+            // Logger::getInstance()->info(__METHOD__.": header: $response");
             $sqlite_sos->replace(array(
                 'id' => $site['ID'],
                 'name' => $site['NAME'],
@@ -152,9 +153,10 @@ class Scheduler {
                 'response' => $response,
                 'timestamp' => time(),
             ));
-            Logger::getInstance()->info(__METHOD__.": timestamp: ".time());
+            // Logger::getInstance()->info(__METHOD__.": timestamp: ".time());
+            $count++;
         }
-        Logger::getInstance()->info(__METHOD__.": 全國地所連線測試完成。");
+        Logger::getInstance()->info(__METHOD__.": 全國地所連線測試共完成 $count 所測試。");
     }
 
     function __construct() {
