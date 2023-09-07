@@ -276,12 +276,20 @@ function milliseconds() {
     return intval( $mt[1] * 1E3 ) + intval( round( $mt[0] * 1E3 ) );
 }
 // reference from bard.google.com
-function timestampToDate(int $time, string $format = 'Y-m-d H:i:s'): string {
+function timestampToDate(int $time, string $roc = 'AD', string $format = 'Y-m-d H:i:s'): string {
     if (strlen($time) === 10) {
+        if ($roc !== 'AD') {
+            $roc_year = str_pad(date("Y", $time) - 1911, 3, '0', STR_PAD_LEFT);
+            return $roc_year.date('-m-d H:i:s', $time);
+        }
         return date($format, $time);
     }
     // Convert milliseconds to seconds
     $seconds = $time / 1000;
+    if ($roc !== 'AD') {
+        $roc_year = str_pad(date("Y", $seconds) - 1911, 3, '0', STR_PAD_LEFT);
+        return $roc_year.date('-m-d H:i:s', $seconds);
+    }
     return date($format, $seconds);
 }
 /**
