@@ -5,6 +5,21 @@ require_once('DynamicSQLite.class.php');
 class SQLiteDBFactory {
     private static $db_folder = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db";
 
+    public static function getPrefetchDB() {
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."prefetch.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "cache" (
+                "key"	TEXT,
+                "value"	TEXT,
+                "expire"	INTEGER NOT NULL DEFAULT 864000,
+                PRIMARY KEY("key")
+            )
+        ');
+        return $path;
+    }
+
     public static function getMonitorMailDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."monitor_mail.db";
         $sqlite = new DynamicSQLite($path);
