@@ -327,7 +327,7 @@ function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array =
 /**
  * get http headers
  */
-function httpHeader($url, $timeout = 1) {
+function httpHeader($url, $timeout = 2) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_HEADER, 1);
