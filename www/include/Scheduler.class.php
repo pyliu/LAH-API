@@ -127,36 +127,45 @@ class Scheduler {
     }
 
     public function addOfficeCheckStatus() {
-        Logger::getInstance()->info(__METHOD__.": 開始進行全國地所連線測試 ... ");
+        $ticketTs = file_get_contents($this->tickets['office_check']);
+        $now = time();
+        $offset = $now - $ticketTs;
+        if (empty($ticketTs) || $offset > 900) {
+            Logger::getInstance()->info(__METHOD__.": 開始進行全國地所連線測試 ... ");
 
-        $xap_ip = System::getInstance()->getWebAPIp();
-        $sqlite_so = new SQLiteOFFICES();
-        $sqlite_sos = new SQLiteOFFICESSTATS();
-        $sites = $sqlite_so->getAll();
-        $count = 0;
-        foreach ($sites as $site) {
-            // skip out of date sites
-            if ($site['ID'] === 'CB' || $site['ID'] === 'CC') {
-                continue;
+            $xap_ip = System::getInstance()->getWebAPIp();
+            $sqlite_so = new SQLiteOFFICES();
+            $sqlite_sos = new SQLiteOFFICESSTATS();
+            $sites = $sqlite_so->getAll();
+            $count = 0;
+            foreach ($sites as $site) {
+                // skip out of date sites
+                if ($site['ID'] === 'CB' || $site['ID'] === 'CC') {
+                    continue;
+                }
+                // Logger::getInstance()->info(__METHOD__.": 檢測".$site['ID']." ".$site['ALIAS']." ".$site['NAME']."。");
+                $url = "http://$xap_ip/Land".strtoupper($site['ID'])."/";
+                // Logger::getInstance()->info(__METHOD__.": url:$url");
+                $headers = httpHeader($url);
+                $response = trim($headers[0]);
+                // Logger::getInstance()->info(__METHOD__.": header: $response");
+                $sqlite_sos->replace(array(
+                    'id' => $site['ID'],
+                    'name' => $site['NAME'],
+                    // if service available, HTTP response code will return 401
+                    'state' => $response === 'HTTP/1.1 401 Unauthorized' ? 'UP' : 'DOWN',
+                    'response' => $response,
+                    'timestamp' => time(),
+                ));
+                // Logger::getInstance()->info(__METHOD__.": timestamp: ".time());
+                $count++;
             }
-            // Logger::getInstance()->info(__METHOD__.": 檢測".$site['ID']." ".$site['ALIAS']." ".$site['NAME']."。");
-            $url = "http://$xap_ip/Land".strtoupper($site['ID'])."/";
-            // Logger::getInstance()->info(__METHOD__.": url:$url");
-            $headers = httpHeader($url);
-            $response = trim($headers[0]);
-            // Logger::getInstance()->info(__METHOD__.": header: $response");
-            $sqlite_sos->replace(array(
-                'id' => $site['ID'],
-                'name' => $site['NAME'],
-                // if service available, HTTP response code will return 401
-                'state' => $response === 'HTTP/1.1 401 Unauthorized' ? 'UP' : 'DOWN',
-                'response' => $response,
-                'timestamp' => time(),
-            ));
-            // Logger::getInstance()->info(__METHOD__.": timestamp: ".time());
-            $count++;
+            Logger::getInstance()->info(__METHOD__.": 全國地所連線測試共完成 $count 所測試。");
+            // finished 
+            file_put_contents($this->tickets['office_check'], 0);
+        } else {
+            Logger::getInstance()->warning(__METHOD__.": 上一次全國地所連線測試工作仍在進行中，略過本次檢查。");
         }
-        Logger::getInstance()->info(__METHOD__.": 全國地所連線測試共完成 $count 所測試。");
     }
 
     function __construct() {
@@ -171,7 +180,8 @@ class Scheduler {
             '4h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-4hours.ts',
             '8h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-8hours.ts',
             '12h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-12hours.ts',
-            '24h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-24hours.ts'
+            '24h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-24hours.ts',
+            'office_check' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-office-check.ts'
         );
     }
     function __destruct() {}
