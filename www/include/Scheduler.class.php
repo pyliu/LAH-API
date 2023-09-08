@@ -131,6 +131,7 @@ class Scheduler {
         $now = time();
         $offset = $now - $ticketTs;
         if (empty($ticketTs) || $offset > 900) {
+            file_put_contents($this->tickets['office_check'], $now);
             Logger::getInstance()->info(__METHOD__.": 開始進行全國地所連線測試 ... ");
 
             $xap_ip = System::getInstance()->getWebAPIp();
