@@ -327,12 +327,12 @@ function echoJSONResponse($msg, $status = STATUS_CODE::DEFAULT_FAIL, $in_array =
 /**
  * get http headers
  */
-function httpHeader($url, $timeout = 2) {
+function httpHeader($url, $timeout = 10) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_HEADER, 1);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout ?? 1);
+    curl_setopt($ch, CURLOPT_TIMEOUT, intval($timeout) ?? 1);
 
     $header = curl_exec($ch);
     curl_close($ch);
