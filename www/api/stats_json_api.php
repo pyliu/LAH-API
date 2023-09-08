@@ -7,6 +7,7 @@ require_once(ROOT_DIR."/include/StatsSQLite.class.php");
 require_once(ROOT_DIR."/include/SQLiteConnectivity.class.php");
 require_once(ROOT_DIR."/include/RegCaseData.class.php");
 require_once(ROOT_DIR."/include/SQLiteOFFICESSTATS.class.php");
+require_once(ROOT_DIR."/include/Scheduler.class.php");
 
 $stats = new StatsOracle();
 $stats_sqlite3 = new StatsSQLite();
@@ -368,6 +369,11 @@ switch ($_POST["type"]) {
         if ($mock) {
             $arr = $cache->get('stats_xap_stats');
         } else {
+            Logger::getInstance()->error("XHR [stats_xap_stats] force: ".$_POST['force']);
+            if ($_POST['force'] === 'true') {
+                $scheduler = new Scheduler();
+                $scheduler->addOfficeCheckStatus();
+            }
             $sqlite = new SQLiteOFFICESSTATS();
             $arr = $sqlite->getLatestBatch();
         }
