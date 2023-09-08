@@ -127,45 +127,51 @@ class Scheduler {
     }
 
     public function addOfficeCheckStatus() {
-        $ticketTs = file_get_contents($this->tickets['office_check']);
-        $now = time();
-        $offset = $now - $ticketTs;
-        if (empty($ticketTs) || $offset > 900) {
-            file_put_contents($this->tickets['office_check'], $now);
-            Logger::getInstance()->info(__METHOD__.": 開始進行全國地所連線測試 ... ");
+        try {
+            $ticketTs = file_get_contents($this->tickets['office_check']);
+            $now = time();
+            $offset = $now - $ticketTs;
+            if (empty($ticketTs) || $offset > 900) {
+                file_put_contents($this->tickets['office_check'], $now);
+                Logger::getInstance()->info(__METHOD__.": 開始進行全國地所連線測試 ... ");
 
-            $xap_ip = System::getInstance()->getWebAPIp();
-            $sqlite_so = new SQLiteOFFICES();
-            $sqlite_sos = new SQLiteOFFICESSTATS();
-            $sites = $sqlite_so->getAll();
-            $count = 0;
-            foreach ($sites as $site) {
-                // skip out of date sites
-                if ($site['ID'] === 'CB' || $site['ID'] === 'CC') {
-                    continue;
+                $xap_ip = System::getInstance()->getWebAPIp();
+                $sqlite_so = new SQLiteOFFICES();
+                $sqlite_sos = new SQLiteOFFICESSTATS();
+                $sites = $sqlite_so->getAll();
+                $count = 0;
+                foreach ($sites as $site) {
+                    // skip out of date sites
+                    if ($site['ID'] === 'CB' || $site['ID'] === 'CC') {
+                        continue;
+                    }
+                    // Logger::getInstance()->info(__METHOD__.": 檢測".$site['ID']." ".$site['ALIAS']." ".$site['NAME']."。");
+                    $url = "http://$xap_ip/Land".strtoupper($site['ID'])."/";
+                    // Logger::getInstance()->info(__METHOD__.": url:$url");
+                    $headers = httpHeader($url);
+                    $response = trim($headers[0]);
+                    // Logger::getInstance()->info(__METHOD__.": header: $response");
+                    $sqlite_sos->replace(array(
+                        'id' => $site['ID'],
+                        'name' => $site['NAME'],
+                        // if service available, HTTP response code will return 401
+                        'state' => $response === 'HTTP/1.1 401 Unauthorized' ? 'UP' : 'DOWN',
+                        'response' => $response,
+                        'timestamp' => time(),
+                    ));
+                    // Logger::getInstance()->info(__METHOD__.": timestamp: ".time());
+                    $count++;
                 }
-                // Logger::getInstance()->info(__METHOD__.": 檢測".$site['ID']." ".$site['ALIAS']." ".$site['NAME']."。");
-                $url = "http://$xap_ip/Land".strtoupper($site['ID'])."/";
-                // Logger::getInstance()->info(__METHOD__.": url:$url");
-                $headers = httpHeader($url);
-                $response = trim($headers[0]);
-                // Logger::getInstance()->info(__METHOD__.": header: $response");
-                $sqlite_sos->replace(array(
-                    'id' => $site['ID'],
-                    'name' => $site['NAME'],
-                    // if service available, HTTP response code will return 401
-                    'state' => $response === 'HTTP/1.1 401 Unauthorized' ? 'UP' : 'DOWN',
-                    'response' => $response,
-                    'timestamp' => time(),
-                ));
-                // Logger::getInstance()->info(__METHOD__.": timestamp: ".time());
-                $count++;
+                Logger::getInstance()->info(__METHOD__.": 全國地所連線測試共完成 $count 所測試。");
+            } else {
+                Logger::getInstance()->warning(__METHOD__.": 上一次全國地所連線測試工作仍在進行中，略過本次檢查。");
             }
-            Logger::getInstance()->info(__METHOD__.": 全國地所連線測試共完成 $count 所測試。");
+        } catch (Exception $e) {
+            Logger::getInstance()->warning(__METHOD__.": 執行全國地所連線測試失敗。");
+            Logger::getInstance()->warning(__METHOD__.": ".$e->getMessage());
+        } finally {
             // finished 
             file_put_contents($this->tickets['office_check'], 0);
-        } else {
-            Logger::getInstance()->warning(__METHOD__.": 上一次全國地所連線測試工作仍在進行中，略過本次檢查。");
         }
     }
 
