@@ -369,7 +369,7 @@ switch ($_POST["type"]) {
         if ($mock) {
             $arr = $cache->get('stats_xap_stats');
         } else {
-            Logger::getInstance()->error("XHR [stats_xap_stats] force: ".$_POST['force']);
+            // Logger::getInstance()->error("XHR [stats_xap_stats] force: ".$_POST['force']);
             if ($_POST['force'] === 'true') {
                 $scheduler = new Scheduler();
                 $scheduler->addOfficeCheckStatus();
