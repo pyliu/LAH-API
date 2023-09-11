@@ -140,6 +140,8 @@ class Scheduler {
                 $sqlite_sos = new SQLiteOFFICESSTATS();
                 $sites = $sqlite_so->getAll();
                 $count = 0;
+                // clear normal stats records previously
+                $sqlite_sos->cleanNormalRecords();
                 foreach ($sites as $site) {
                     // skip out of date sites
                     if ($site['ID'] === 'CB' || $site['ID'] === 'CC') {

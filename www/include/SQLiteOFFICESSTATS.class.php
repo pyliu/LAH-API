@@ -47,6 +47,11 @@ class SQLiteOFFICESSTATS {
         return $stm->execute() === FALSE ? false : true;
     }
 
+    public function cleanNormalRecords() {
+        $stm = $this->db->prepare("DELETE FROM OFFICES_STATS WHERE state = 'UP'");
+        return $stm->execute() === FALSE ? false : true;
+    }
+
     public function replace($row) {
         $stm = $this->db->prepare("
             REPLACE INTO OFFICES_STATS ('id', 'name', 'state', 'response', 'timestamp')
