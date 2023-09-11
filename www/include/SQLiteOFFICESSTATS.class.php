@@ -74,6 +74,18 @@ class SQLiteOFFICESSTATS {
             return $this->prepareArray($stmt);
         }
     }
+    
+    public function getRecentDownRecords($limit = 100) {
+        if($stmt = $this->db->prepare("
+            SELECT * FROM OFFICES_STATS
+            WHERE
+                state <> 'UP'
+            ORDER BY timestamp DESC
+            LIMIT ".$limit."
+        ")) {
+            return $this->prepareArray($stmt);
+        }
+    }
     /**
      * 移除某時間前資料
      */
