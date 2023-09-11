@@ -12,6 +12,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR.'System.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Cache.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'LXHWEB.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'MOICAD.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteOFFICESSTATS.class.php");
 
 class WatchDog {
     private $stats = null;
@@ -681,6 +682,42 @@ class WatchDog {
         }
     }
 
+    private function sendOfficeCheckNotification() {
+        if ($this->isOn($this->schedule["office"])) {
+            $stats = new SQLiteOFFICESSTATS();
+            $offices = $stats->getLatestBatch();
+            $count = count($offices);
+            if (count($offices) > 0) {
+                /**
+                 *     [serial] => xxxxx
+                 *     [id] => XX
+                 *     [name] => XXX
+                 *     [state] => UP/DOWN
+                 *     [response] => HTTP/1.1 401 Unauthorized
+                 *     [timestamp] => 1694413367
+                 */
+                Logger::getInstance()->info(__METHOD__.": 開始檢查各地所狀態資料 ... ($count)");
+                $downOffices = array_filter($offices, function($office) {
+                    return $office['state'] === 'DOWN';
+                });
+                $downCount = count($downOffices);
+                if ($downCount > 0) {
+                    $host_ip = getLocalhostIP();
+                    $url = "http://".$host_ip.":8080/inf/xap/broken_cached";
+                    $message = "##### 📢 ".$this->date."  ".$this->time." 跨域AP停止服務通知\r\n***\r\n⚠ 系統目前找到 $downCount 個地所伺服器已離線。\r\n\r\n";
+                    foreach ($downOffices as $downOffice) {
+                        $message .= "🔴 ".$downOffice['id']." ".$downOffice['name']." (偵測時間：".timestampToDate($downOffice['timestamp'], 'TW', 'H:i:s').")\r\n";
+                    }
+                    $message .= "\r\n***\r\n詳情請參考 👉 $url";
+                    // send to reg chat channel
+                    $this->addNotification($message, "lds", '地政系統跨域服務監測通知', true);
+                }
+            } else {
+                Logger::getInstance()->warning(__METHOD__.": 無法取得各地所最新批次的檢查資料。");
+            }
+        }
+    }
+
     private function checkRegaDailyStatsData($day = '') {
         if ($this->isOn($this->schedule["once_a_day"])) {
             if (empty($day)) {
@@ -750,6 +787,7 @@ class WatchDog {
                 $this->findSurNearOverdueCases();
                 $this->checkRegaDailyStatsData();
                 $this->sendForeignerInheritanceRestrictionNotification();
+                $this->sendOfficeCheckNotification();
                 return true;
             }
             return false;

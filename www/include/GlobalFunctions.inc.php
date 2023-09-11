@@ -279,8 +279,10 @@ function milliseconds() {
 function timestampToDate(int $time, string $roc = 'AD', string $format = 'Y-m-d H:i:s'): string {
     if (strlen($time) === 10) {
         if ($roc !== 'AD') {
-            $roc_year = str_pad(date("Y", $time) - 1911, 3, '0', STR_PAD_LEFT);
-            return $roc_year.date('-m-d H:i:s', $time);
+            if ($format === 'Y-m-d H:i:s') {
+                $roc_year = str_pad(date("Y", $time) - 1911, 3, '0', STR_PAD_LEFT);
+                return $roc_year.date('-m-d H:i:s', $time);
+            }
         }
         return date($format, $time);
     }

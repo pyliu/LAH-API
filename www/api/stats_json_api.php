@@ -389,6 +389,26 @@ switch ($_POST["type"]) {
             echoJSONResponse($error);
         }
         break;
+    case "stats_xap_stats_cached":
+        $arr = [];
+        if ($mock) {
+            $arr = $cache->get('stats_xap_stats_cached');
+        } else {
+            $sqlite = new SQLiteOFFICESSTATS();
+            $arr = $sqlite->getLatestBatch();
+        }
+        $cache->set('stats_xap_stats_cached', $arr);
+        if (is_array($arr)) {
+            $count = count($arr);
+            echoJSONResponse("取得 ".count($arr)." 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得已快取的最新各地所連線狀態失敗。";
+            Logger::getInstance()->error("XHR [stats_xap_stats_cached] $error");
+            echoJSONResponse($error);
+        }
+        break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
