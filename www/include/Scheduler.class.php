@@ -132,6 +132,8 @@ class Scheduler {
             $now = time();
             $offset = $now - $ticketTs;
             if (empty($ticketTs) || $offset > 900) {
+                // prevent hanging
+                @unlink(DB_DIR.DIRECTORY_SEPARATOR."OFFICES_STATS.db-journal");
                 file_put_contents($this->tickets['office_check'], $now);
                 Logger::getInstance()->info(__METHOD__.": 開始進行全國地所連線測試 ... ");
 
