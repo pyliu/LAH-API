@@ -415,7 +415,27 @@ switch ($_POST["type"]) {
             $arr = $cache->get('stats_xap_stats_down');
         } else {
             $sqlite = new SQLiteOFFICESSTATS();
-            $arr = $sqlite->getRecentDownRecords($_POST['count'] ?? 100);
+            $current_datetime = new DateTime();
+            $day_seconds =  24 * 60 * 60;
+            if ($_POST['opt'] == 'day') {
+                $one_day_ago_datetime = new DateTime("-1 days");
+                $offset = $current_datetime->diff($one_day_ago_datetime)->days * $day_seconds;
+                $arr = $sqlite->getRecentDownRecordsByTimestamp($offset);
+            } else if ($_POST['opt'] == 'week') {
+                $one_week_ago_datetime = new DateTime("-1 weeks");
+                $offset = $current_datetime->diff($one_week_ago_datetime)->days * $day_seconds;
+                $arr = $sqlite->getRecentDownRecordsByTimestamp($offset);
+            } else if ($_POST['opt'] == 'month') {
+                $one_month_ago_datetime = new DateTime("-1 months");
+                $offset = $current_datetime->diff($one_month_ago_datetime)->days * $day_seconds;
+                $arr = $sqlite->getRecentDownRecordsByTimestamp($offset);
+            } else if ($_POST['opt'] == 'year') {
+                $one_years_ago_datetime = new DateTime("-1 years");
+                $offset = $current_datetime->diff($one_years_ago_datetime)->days * $day_seconds;
+                $arr = $sqlite->getRecentDownRecordsByTimestamp($offset);
+            } else {
+                $arr = $sqlite->getRecentDownRecords($_POST['count'] ?? 100);
+            }
         }
         $cache->set('stats_xap_stats_down', $arr);
         if (is_array($arr)) {

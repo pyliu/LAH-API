@@ -86,6 +86,18 @@ class SQLiteOFFICESSTATS {
             return $this->prepareArray($stmt);
         }
     }
+
+    public function getRecentDownRecordsByTimestamp($offset) {
+        if($stmt = $this->db->prepare("
+            SELECT * FROM OFFICES_STATS
+            WHERE
+                state <> 'UP' AND
+                timestamp > ".(time() - $offset)."
+            ORDER BY timestamp DESC
+        ")) {
+            return $this->prepareArray($stmt);
+        }
+    }
     /**
      * 移除某時間前資料
      */
