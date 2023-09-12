@@ -708,7 +708,7 @@ class WatchDog {
                 if ($downCount > 0) {
                     // mark detected down last time
                     file_put_contents($ticket, 1);
-                    $message = "##### 📢 ".$this->date."  ".$this->time." 跨域AP停止服務通知\r\n***\r\n⚠ 系統目前找到 $downCount 個地所伺服器已離線。\r\n\r\n";
+                    $message = "##### 📢 ".$this->date."  ".$this->time." 地政系統跨域AP服務離線通知\r\n***\r\n⚠ 目前有 $downCount 個地所伺服器偵測為離線。\r\n\r\n";
                     foreach ($downOffices as $downOffice) {
                         $message .= "🔴 ".$downOffice['id']." ".$downOffice['name']." (偵測時間：".timestampToDate($downOffice['timestamp'], 'TW', 'H:i:s').")\r\n";
                     }
@@ -717,7 +717,7 @@ class WatchDog {
                     $this->addNotification($message, "lds", '地政系統跨域服務監測通知', true);
                 } else {
                     if ($prevTicketFlag) {
-                        $message = "##### 📢 ".$this->date."  ".$this->time." 跨域AP服務恢復通知\r\n***\r\n✔ 目前各地所伺服器皆已上線。\r\n";
+                        $message = "##### 📢 ".$this->date."  ".$this->time." 地政系統跨域AP服務離線通知\r\n***\r\n✔ 目前各地所伺服器皆已上線。";
                         $message .= "\r\n***\r\n詳情請參考 👉 $url";
                         // send to lds chat channel
                         $this->addNotification($message, "lds", '地政系統跨域服務監測通知', true);
