@@ -30,6 +30,15 @@ class WatchDog {
             'Fri' => ['07:30 AM' => '05:30 PM'],
             'Sat' => ['07:30 AM' => '05:30 PM']
         ],
+        "office_check" => [
+            'Sun' => [],
+            'Mon' => ['08:00 AM' => '05:00 PM'],
+            'Tue' => ['08:00 AM' => '05:00 PM'],
+            'Wed' => ['08:00 AM' => '05:00 PM'],
+            'Thu' => ['08:00 AM' => '05:00 PM'],
+            'Fri' => ['08:00 AM' => '05:00 PM'],
+            'Sat' => ['08:00 AM' => '05:00 PM']
+        ],
         "overdue" => [
             'Sun' => [],
             'Mon' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
@@ -683,7 +692,7 @@ class WatchDog {
     }
 
     private function sendOfficeCheckNotification() {
-        if ($this->isOfficeHours()) {
+        if ($this->isOn($this->schedule["office_check"])) {
             $stats = new SQLiteOFFICESSTATS();
             $offices = $stats->getLatestBatch();
             $count = count($offices);
