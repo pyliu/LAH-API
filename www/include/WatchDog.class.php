@@ -701,29 +701,38 @@ class WatchDog {
                     return $office['state'] === 'DOWN';
                 });
                 $downCount = count($downOffices);
-                $ticket = sys_get_temp_dir().DIRECTORY_SEPARATOR.'LAH-OFFICE-DOWN.ts';
-                $prevTicketFlag = intval(file_get_contents($ticket)) === 1;
                 $host_ip = getLocalhostIP();
                 $url = "http://".$host_ip.":8080/inf/xap/broken_cached";
+
+                // restore last time data
+                $ticket = sys_get_temp_dir().DIRECTORY_SEPARATOR.'LAH-OFFICE-DOWN.ts';
+                $prevTicketFlag = file_exists($ticket);
+                $prevDownOffices = [];
+                if ($prevTicketFlag) {
+                    $prevDownOffices = unserialize(file_get_contents($ticket));
+                    // TODO ... know which one is back/down from previous test
+                    // Logger::getInstance()->warning(print_r(array_udiff($downOffices, $prevDownOffices, function($v1, $v2){ return $v1['id'] === $v2['id']; }), true));
+                }
+
                 if ($downCount > 0) {
                     // mark detected down last time
-                    file_put_contents($ticket, 1);
-                    $message = "##### 📢 ".$this->date."  ".$this->time." 地政系統跨域AP服務離線通知\r\n***\r\n⚠ 目前有 $downCount 個地所伺服器偵測為離線。\r\n\r\n";
+                    file_put_contents($ticket, serialize($downOffices));
+                    $message = "##### 📢 ".$this->date."  ".$this->time." 地政系統跨域服務離線\r\n***\r\n⚠ 目前有 $downCount 個地所伺服器偵測為離線。\r\n\r\n";
                     foreach ($downOffices as $downOffice) {
-                        $message .= "🔴 ".$downOffice['id']." ".$downOffice['name']." (偵測時間：".timestampToDate($downOffice['timestamp'], 'TW', 'H:i:s').")\r\n";
+                        $message .= "🔴 ".$downOffice['id']." ".$downOffice['name']." (檢測時間：".timestampToDate($downOffice['timestamp'], 'TW', 'H:i:s').")\r\n";
                     }
                     $message .= "\r\n***\r\n詳情請參考 👉 $url";
                     // send to lds chat channel
-                    $this->addNotification($message, "lds", '地政系統跨域服務監測通知', true);
+                    $this->addNotification($message, "lds", '地政系統跨域服務監測', true);
                 } else {
                     if ($prevTicketFlag) {
-                        $message = "##### 📢 ".$this->date."  ".$this->time." 地政系統跨域AP服務離線通知\r\n***\r\n✔ 目前各地所伺服器皆已上線。";
+                        $message = "##### 📢 ".$this->date."  ".$this->time." 地政系統跨域服務回復\r\n***\r\n✔ 目前各地所伺服器皆已上線。";
                         $message .= "\r\n***\r\n詳情請參考 👉 $url";
                         // send to lds chat channel
-                        $this->addNotification($message, "lds", '地政系統跨域服務監測通知', true);
+                        $this->addNotification($message, "lds", '地政系統跨域服務監測', true);
                     }
-                    // clean flag
-                    file_put_contents($ticket, 0);
+                    // clear ticket
+                    @unlink($ticket);
                 }
             } else {
                 Logger::getInstance()->warning(__METHOD__.": 無法取得各地所最新批次的檢查資料。");
