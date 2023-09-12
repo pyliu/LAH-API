@@ -434,7 +434,7 @@ switch ($_POST["type"]) {
                 $offset = $current_datetime->diff($one_years_ago_datetime)->days * $day_seconds;
                 $arr = $sqlite->getRecentDownRecordsByTimestamp($offset);
             } else {
-                $arr = $sqlite->getRecentDownRecords($_POST['count'] ?? 100);
+                $arr = $sqlite->getRecentDownRecords($_POST['count'] ?? 10);
             }
         }
         $cache->set('stats_xap_stats_down', $arr);
