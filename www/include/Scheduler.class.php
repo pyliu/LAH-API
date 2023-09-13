@@ -28,6 +28,15 @@ class Scheduler {
             'Fri' => ['07:30 AM' => '05:30 PM'],
             'Sat' => ['07:30 AM' => '05:30 PM']
         ],
+        "office_check" => [
+            'Sun' => [],
+            'Mon' => ['08:00 AM' => '05:00 PM'],
+            'Tue' => ['08:00 AM' => '05:00 PM'],
+            'Wed' => ['08:00 AM' => '05:00 PM'],
+            'Thu' => ['08:00 AM' => '05:00 PM'],
+            'Fri' => ['08:00 AM' => '05:00 PM'],
+            'Sat' => ['08:00 AM' => '05:00 PM']
+        ],
         "test" => [
             'Sun' => [],
             'Mon' => ['00:00 AM' => '11:59 PM'],
@@ -219,7 +228,7 @@ class Scheduler {
                 // place next timestamp to the tmp ticket file 
                 file_put_contents($this->tickets['5m'], strtotime('+5 mins', time()));
                 // check all offices connectivity during office hours
-                if ($this->isOn($this->schedule["office"])) {
+                if ($this->isOn($this->schedule["office_check"])) {
                     $this->addOfficeCheckStatus();
                 }
             } else {
