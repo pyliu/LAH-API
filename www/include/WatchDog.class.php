@@ -720,6 +720,7 @@ class WatchDog {
                     $prevDownOffices = unserialize(file_get_contents($ticket));
                     // the same as previouly result, just skip the notification
                     if (sameArrayCompare($prevDownOffices, $downOffices)) {
+                        Logger::getInstance()->warning(__METHOD__.": 斷線的辦公室跟之前偵測結果一樣，略過本次訊息發送。");
                         return;
                     }
                     // TODO ... know which one is back/down from previous test
