@@ -716,13 +716,16 @@ class WatchDog {
                 // restore last time data
                 $ticket = sys_get_temp_dir().DIRECTORY_SEPARATOR.'LAH-OFFICE-DOWN.ts';
                 $prevTicketFlag = file_exists($ticket);
-                $prevDownOffices = [];
                 if ($prevTicketFlag) {
                     $prevDownOffices = unserialize(file_get_contents($ticket));
+                    // the same as previouly result, just skip the notification
+                    if (sameArrayCompare($prevDownOffices, $downOffices)) {
+                        return;
+                    }
                     // TODO ... know which one is back/down from previous test
                     // Logger::getInstance()->warning(print_r(array_udiff($downOffices, $prevDownOffices, function($v1, $v2){ return $v1['id'] === $v2['id']; }), true));
                 }
-
+                
                 if ($downCount > 0) {
                     // mark detected down last time
                     file_put_contents($ticket, serialize($downOffices));

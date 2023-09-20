@@ -343,3 +343,24 @@ function httpHeader($url, $timeout = false) {
     $headers = explode("\r\n", $header);
     return $headers;
 }
+
+function sameArrayCompare($array1, $array2) {
+    if ($array1 === $array2) {
+      return true;
+    }
+    if (!is_array($array1) || !is_array($array2)) {
+      return false;
+    }
+    if (count($array1) !== count($array2)) {
+      return false;
+    }
+    foreach ($array1 as $key => $value) {
+      if (!isset($array2[$key])) {
+        return false;
+      }
+      if (!deepArrayCompare($array1[$key], $array2[$key])) {
+        return false;
+      }
+    }
+    return true;
+}
