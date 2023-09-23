@@ -171,6 +171,11 @@ class WatchDog {
         return $lastId;
     }
 
+    private function removeTodayOutdatedOfficeDownNotification() {
+        $notify = new Notification();
+        return $notify->removeTodayOfficeDownMessage();
+    }
+
     private function checkCrossSiteData() {
         if ($this->isOn($this->schedule["twice_a_day"])) {
             $query = new Query();
@@ -735,18 +740,16 @@ class WatchDog {
                         $message .= "🔴 ".$downOffice['id']." ".$downOffice['name']." (檢測時間：".timestampToDate($downOffice['timestamp'], 'TW', 'H:i:s').")\r\n";
                     }
                     $message .= "\r\n***\r\n詳情請參考 👉 $url";
-                    // send to reg/val/inf chat channel
-                    $this->addNotification($message, "reg", '地政系統跨域服務監測', true);
-                    // $this->addNotification($message, "val", '地政系統跨域服務監測', true);
-                    $this->addNotification($message, "inf", '地政系統跨域服務監測', true);
+                    // remove today's old notified message
+                    $this->removeTodayOutdatedOfficeDownNotification();
+                    // send to lds chat channel
+                    $this->addNotification($message, "lds", '地政系統跨域服務監測', true);
                 } else {
                     if ($prevTicketFlag) {
                         $message = "##### 👌 ".$this->date."  ".$this->time." 地政系統跨域服務回復\r\n***\r\n##### ✔ 目前各地所伺服器皆已上線。";
                         $message .= "\r\n***\r\n詳情請參考 👉 $url";
-                        // send to reg/val/inf chat channel
-                        $this->addNotification($message, "reg", '地政系統跨域服務監測', true);
-                        // $this->addNotification($message, "val", '地政系統跨域服務監測', true);
-                        $this->addNotification($message, "inf", '地政系統跨域服務監測', true);
+                        // send to lds chat channel
+                        $this->addNotification($message, "lds", '地政系統跨域服務監測', true);
                     }
                     // clear ticket
                     @unlink($ticket);
