@@ -196,4 +196,18 @@ class Notification {
         $messages = array();
         return $messages;
     }
+
+    public function removeTodayOfficeDownMessage($channel = 'lds') {
+        Logger::getInstance()->info(__METHOD__.': 準備刪除 '.$channel.' 頻道今日地所離線訊息');
+        if ($this->prepareDB($channel)) {
+            $today = date("Y-m-d");
+            $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            if ($stm = $db->prepare("DELETE FROM message WHERE title = :bv_title and create_datetime like :bv_create_datetime")) {
+                $stm->bindValue(':bv_title', '地政系統跨域服務監測');
+                $stm->bindValue(':bv_create_datetime', $today.'%');
+                return $stm->execute() === FALSE ? false : true;
+            }
+        }
+        return false;
+    }
 }
