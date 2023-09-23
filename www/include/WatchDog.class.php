@@ -737,7 +737,7 @@ class WatchDog {
                     $message .= "\r\n***\r\n詳情請參考 👉 $url";
                     // send to reg/val/inf chat channel
                     $this->addNotification($message, "reg", '地政系統跨域服務監測', true);
-                    $this->addNotification($message, "val", '地政系統跨域服務監測', true);
+                    // $this->addNotification($message, "val", '地政系統跨域服務監測', true);
                     $this->addNotification($message, "inf", '地政系統跨域服務監測', true);
                 } else {
                     if ($prevTicketFlag) {
@@ -745,7 +745,7 @@ class WatchDog {
                         $message .= "\r\n***\r\n詳情請參考 👉 $url";
                         // send to reg/val/inf chat channel
                         $this->addNotification($message, "reg", '地政系統跨域服務監測', true);
-                        $this->addNotification($message, "val", '地政系統跨域服務監測', true);
+                        // $this->addNotification($message, "val", '地政系統跨域服務監測', true);
                         $this->addNotification($message, "inf", '地政系統跨域服務監測', true);
                     }
                     // clear ticket
