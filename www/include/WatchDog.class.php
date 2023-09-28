@@ -171,6 +171,11 @@ class WatchDog {
         return $lastId;
     }
 
+    private function removeOutdatedOfficeDownNotification() {
+        $notify = new Notification();
+        return $notify->removeOfficeDownMessage();
+    }
+
     private function removeTodayOutdatedOfficeDownNotification() {
         $notify = new Notification();
         return $notify->removeTodayOfficeDownMessage();
@@ -740,8 +745,8 @@ class WatchDog {
                         $message .= "🔴 ".$downOffice['id']." ".$downOffice['name']." (檢測時間：".timestampToDate($downOffice['timestamp'], 'TW', 'H:i:s').")\r\n";
                     }
                     $message .= "\r\n***\r\n詳情請參考 👉 $url";
-                    // remove today's old notified message
-                    $this->removeTodayOutdatedOfficeDownNotification();
+                    // remove old notified message
+                    $this->removeOutdatedOfficeDownNotification();
                     // send to lds chat channel
                     $this->addNotification($message, "lds", '地政系統跨域服務監測', true);
                 } else {
