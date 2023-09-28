@@ -212,7 +212,7 @@ class Notification {
     }
 
     public function removeOfficeDownMessage($channel = 'lds') {
-        Logger::getInstance()->info(__METHOD__.': 準備刪除 '.$channel.' 頻道今日地所離線訊息');
+        Logger::getInstance()->info(__METHOD__.': 準備刪除 '.$channel.' 頻道地所離線訊息');
         if ($this->prepareDB($channel)) {
             $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
             if ($stm = $db->prepare("DELETE FROM message WHERE title = :bv_title")) {
