@@ -197,21 +197,29 @@ switch ($_POST["type"]) {
 	case "expaa_AA08_update":
 	case "expaa_AA09_update":
 	case "expaa_AA100_update":
-		$column = $_POST["type"] == "expaa_AA09_update" ? "AA09" : ($_POST["type"] == "expaa_AA100_update" ? "AA100" : "AA08");
-		Logger::getInstance()->info("XHR [expaa_AA08_update/expaa_AA09_update/expaa_AA100_update] 修正規費資料【$column".", ".$_POST["date"].", ".$_POST["number"].", ".$_POST["update_value"]."】請求");
-		$result_flag = $mock ? $cache->get("expaa_${column}_update") : $moiexp->updateExpaaData($column, $_POST["date"], str_pad($_POST["number"], 7, '0', STR_PAD_LEFT), $_POST["update_value"]);
-		$cache->set("expaa_${column}_update", $result_flag);
+	case "expaa_AA104_update":
+		$column = "AA08";
+		if ($_POST["type"] === "expaa_AA09_update") {
+			$column = "AA09";
+		} else if ($_POST["type"] === "expaa_AA100_update") {
+			$column = "AA100";
+		} else if ($_POST["type"] === "expaa_AA104_update") {
+			$column = "AA104";
+		}
+		Logger::getInstance()->info("XHR [expaa_AAXX_update] 修正規費資料【$column".", ".$_POST["date"].", ".$_POST["number"].", ".$_POST["update_value"]."】請求");
+		$result_flag = $mock ? $cache->get("expaa_".$column."_update") : $moiexp->updateExpaaData($column, $_POST["date"], str_pad($_POST["number"], 7, '0', STR_PAD_LEFT), $_POST["update_value"]);
+		$cache->set("expaa_".$column."_update", $result_flag);
 		if ($result_flag) {
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => "0",
 				"raw" => $result_flag,
-				"message" => "更新 ${column} 成功"
+				"message" => "更新 ".$column." 成功"
 			);
-			Logger::getInstance()->info("XHR [expaa_AA08_update/expaa_AA09_update/expaa_AA100_update] 更新 ${column} 成功");
+			Logger::getInstance()->info("XHR [expaa_AAXX_update] 更新 ".$column." 成功");
 			echo json_encode($result, 0);
 		} else {
-			Logger::getInstance()->error("XHR [expaa_AA08_update/expaa_AA09_update/expaa_AA100_update] 更新規費欄位失敗【".$_POST["date"].", ".$_POST["number"].", ".$column.", ".$_POST["update_value"]."】");
+			Logger::getInstance()->error("XHR [expaa_AAXX_update] 更新規費欄位失敗【".$_POST["date"].", ".$_POST["number"].", ".$column.", ".$_POST["update_value"]."】");
 			echoJSONResponse("更新規費欄位失敗【".$_POST["date"].", ".$_POST["number"].", ".$column.", ".$_POST["update_value"]."】");
 		}
 		break;
