@@ -308,10 +308,11 @@ class MOIEXP {
 		}
 
 		$this->db_wrapper->getDB()->parse("
-			UPDATE MOIEXP.EXPAA SET ${column} = :bv_update_value WHERE AA01 = :bv_aa01 AND AA04 = :bv_aa04
+			UPDATE MOIEXP.EXPAA SET $column = :bv_update_value WHERE AA01 = :bv_aa01 AND AA04 = :bv_aa04
 		");
 
-		$this->db_wrapper->getDB()->bind(":bv_update_value", $update_val);
+		$converted = mb_convert_encoding($update_val, 'BIG5', 'UTF-8');
+		$this->db_wrapper->getDB()->bind(":bv_update_value", $converted);
 		$this->db_wrapper->getDB()->bind(":bv_aa01", $date);
 		$this->db_wrapper->getDB()->bind(":bv_aa04", $number);
 		
