@@ -12,10 +12,14 @@ class MonitorMail {
 
     private function getFullMailboxPath($folder): string {
         $mail_ssl = System::getInstance()->get('MONITOR_MAIL_SSL') === 'true';
+        // if ($mail_ssl) {
+        //     return "{".$this->host.":993/imap/ssl/novalidate-cert}".$folder;
+        // }
+        // return "{".$this->host.":143/novalidate-cert}".$folder;
         if ($mail_ssl) {
-            return "{".$this->host.":993/imap/ssl/novalidate-cert}".$folder;
+            return "{".$this->host.":995/pop3/ssl/novalidate-cert}".$folder;
         }
-        return "{".$this->host."/novalidate-cert}".$folder;
+        return "{".$this->host.":110/pop3/novalidate-cert}".$folder;
     }
 
     private function selectFolder($folder): void {
@@ -81,7 +85,7 @@ class MonitorMail {
             // If you don't need to grab attachments you can significantly increase performance of your application
             $this->mailbox->setAttachmentsIgnore(true);
         } catch (ConnectionException $ex) {
-            Logger::getInstance()->error("IMAP 連線 ${fullpath} 失敗: " . $ex);
+            Logger::getInstance()->error("IMAP 連線 $fullpath 失敗: " . $ex);
         }
     }
 
@@ -92,9 +96,10 @@ class MonitorMail {
 
     public function getCurrentServerTime(): string {
         // Call imap_check() - see http://php.net/manual/function.imap-check.php
-        $info = $this->mailbox->imap('check');
+        // $info = $this->mailbox->imap_check('check');
         // Show current time for the mailbox
-        return isset($info->Date) && $info->Date ? date('Y-m-d H:i:s', strtotime($info->Date)) : 'Unknown';
+        // return isset($info->Date) && $info->Date ? date('Y-m-d H:i:s', strtotime($info->Date)) : 'Unknown';
+        return 'Unknown';
     }
 
     public function getMailboxes(): array {
