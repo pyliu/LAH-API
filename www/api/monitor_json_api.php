@@ -8,7 +8,7 @@ $sqlite_monitor_mail = new SQLiteMonitorMail();
 switch ($_POST["type"]) {
     case "imap_open":
         Logger::getInstance()->info("XHR [check_connectivity] 檢查監控伺服器連線狀態請求");
-        $url = "{".$_POST['host'].($_POST['ssl'] === 'true' ? ':993/imap/ssl' : '')."/novalidate-cert}INBOX";
+        $url = "{".$_POST['host'].($_POST['ssl'] === 'true' ? ':993/imap/ssl/novalidate-cert' : ':143/notls')."}INBOX";
         $id = $_POST['account'];
         $pwd = $_POST['password'];
         //Optional parameters
