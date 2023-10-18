@@ -12,14 +12,14 @@ class MonitorMail {
 
     private function getFullMailboxPath($folder): string {
         $mail_ssl = System::getInstance()->get('MONITOR_MAIL_SSL') === 'true';
-        // if ($mail_ssl) {
-        //     return "{".$this->host.":993/imap/ssl/novalidate-cert}".$folder;
-        // }
-        // return "{".$this->host.":143/novalidate-cert}".$folder;
         if ($mail_ssl) {
-            return "{".$this->host.":995/pop3/ssl/novalidate-cert}".$folder;
+            return "{".$this->host.":993/imap/ssl/novalidate-cert}".$folder;
         }
-        return "{".$this->host.":110/pop3/novalidate-cert}".$folder;
+        return "{".$this->host.":143/notls}".$folder;
+        // if ($mail_ssl) {
+        //     return "{".$this->host.":995/pop3/ssl/novalidate-cert}".$folder;
+        // }
+        // return "{".$this->host.":110/pop3/notls}".$folder;
     }
 
     private function selectFolder($folder): void {
@@ -39,7 +39,7 @@ class MonitorMail {
         return $this->mailbox->searchMailbox($tag);
     }
 
-    private function getAllMailIds($folder = "INBOX", $days_before = 0): array {
+    private function getAllMailIds($folder = "INBOX", $days_before = 1): array {
         // PHP.net imap_search criteria: http://php.net/manual/en/function.imap-search.php
         $tag = "All";
         if ($days_before > 0) {
@@ -68,6 +68,9 @@ class MonitorMail {
         $password = System::getInstance()->get("MONITOR_MAIL_PASSWORD");
         try {
             $fullpath = $this->getFullMailboxPath("INBOX");
+
+            Logger::getInstance()->info("連線 $fullpath");
+
             $this->mailbox = new Mailbox(
                 $fullpath, // IMAP server and mailbox folder
                 $account, // Username for the before configured mailbox

@@ -57,8 +57,10 @@ class SQLiteMonitorMail {
         // check if mail server is reachable
         $mail_host = System::getInstance()->get('MONITOR_MAIL_HOST');
         $mail_ssl = System::getInstance()->get('MONITOR_MAIL_SSL') === 'true';
+        // IMAP 993/143
         $latency = pingDomain($mail_host, $mail_ssl ? 993 : 143);
-    
+        // POP3 995/110
+        // $latency = pingDomain($mail_host, $mail_ssl ? 995 : 110);
         // not reachable
         if ($latency > 999 || $latency == '') {
             Logger::getInstance()->error(__METHOD__.': 無法連線郵件伺服器 '.$mail_host.'，無法擷取監控郵件。');
@@ -74,7 +76,7 @@ class SQLiteMonitorMail {
         Logger::getInstance()->info(__METHOD__.':目前最新郵件 id 為 '.$latest_id);
         
         $monitor = new MonitorMail();
-        $mails = $monitor->getAllMails();
+        $mails = $monitor->getAllMails('INBOX', 1);  // INBOX, wthin 1 day
         $inserted = 0;
         $failed = 0;
         foreach($mails as $mail) {

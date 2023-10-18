@@ -1,9 +1,7 @@
 ﻿<?php
 require_once("./include/init.php");
-require_once("./include/Prefetch.class.php");
-require_once("./include/Watchdog.class.php");
-// require_once("./include/Notification.class.php");
-
+require_once("./include/MonitorMail.class.php");
+require_once("./include/SQLiteMonitorMail.class.php");
 try {
     echo "now is ".milliseconds()." ms\n";
     echo "ms date is ".timestampToDate(milliseconds())."\n";
@@ -12,12 +10,16 @@ try {
     echo "sec date is ".timestampToDate(time())."\n";
     echo "tw date is ".timestampToDate(time(), 'TW')."\n";
 
-    // $notify = new Notification();
-    // $notify->removeTodayOfficeDownMessage('inf');
-    // $w = new Watchdog();
-    // $arr = $w->sendOfficeCheckNotification();
-    // echo count($arr)."\n";
+    
+    // $monitor = new MonitorMail();
+    // $mails = $monitor->getAllMails();
+    // var_dump($mails);
+    
+    // $monitor = new SQLiteMonitorMail();
+    // $mails = $monitor->fetchFromMailServer();
+    // var_dump($mails);
 
 } catch(Exception $e) {
     die($e->getMessage());
+} finally {
 }
