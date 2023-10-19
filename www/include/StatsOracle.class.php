@@ -305,4 +305,31 @@ class StatsOracle {
         $this->db_wrapper->getDB()->execute();
         return $this->db_wrapper->getDB()->fetch(true);  // true => fetch raw data instead converting to UTF-8
     }
+
+    public function getRegCertCase($st, $ed) {
+        global $today;
+        $st = $st ?? $today;
+        $ed = $ed ?? $today;
+        if (!$this->db_wrapper->reachable() || !$this->checkYearMonthDay($st) || !$this->checkYearMonthDay($ed)) {
+            return false;
+        }
+        $this->db_wrapper->getDB()->parse("
+            -- 謄本核發資料(未加外網電子謄本數量) by period
+            SELECT
+                *
+            FROM MOICAS.CUSMM
+            INNER JOIN MOICAS.RSCNRL
+                ON (MOICAS.CUSMM.MU01 = MOICAS.RSCNRL.SR01)
+            AND (MOICAS.CUSMM.MU02 = MOICAS.RSCNRL.SR02)
+            AND (MOICAS.CUSMM.MU03 = MOICAS.RSCNRL.SR03)
+            WHERE (((MOICAS.CUSMM.MU12) Between :bv_st And :bv_ed) AND
+                ((MOICAS.RSCNRL.SR06) = :bv_site))
+        ");
+        $site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
+        $this->db_wrapper->getDB()->bind(":bv_st", $st);
+        $this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+        $this->db_wrapper->getDB()->bind(":bv_site", $site);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetch(true);
+    }
 }

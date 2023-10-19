@@ -206,6 +206,26 @@ switch ($_POST["type"]) {
             Logger::getInstance()->info("XHR [stats_regf] ${err}。");
         }
         break;
+    case "stats_reg_cert_case":
+        Logger::getInstance()->info("XHR [stats_reg_cert_case] 取得臨櫃謄本統計(".$_POST['st']." ~ ".$_POST['ed'].")請求。");
+        $_POST['st'] = $_POST['st'] ?? $today;
+        $_POST['ed'] = $_POST['ed'] ?? $today;
+        $err = "取得臨櫃謄本統計資料失敗。 ".$_POST['st']." ~ ".$_POST['ed'];
+        
+        $arr = $mock ? $cache->get('stats_reg_cert_case') : $stats->getRegCertCase($_POST['st'], $_POST['ed']);
+		$cache->set('stats_reg_cert_case', $arr);
+
+        if ($arr) {
+            Logger::getInstance()->info("XHR [stats_reg_cert_case] 取得臨櫃謄本統計(".$_POST['st']." ~ ".$_POST['ed'].")成功。");
+            $count = count($arr);
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $arr
+            ));
+        } else {
+            Logger::getInstance()->info("XHR [stats_reg_cert_case] $err");
+            echoJSONResponse($err);
+        }
+        break;
     case "stats_set_conn_count":
         if ($system->isKeyValid($_POST['api_key'])) {
             // combine&clean data ... 
