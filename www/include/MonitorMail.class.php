@@ -20,10 +20,10 @@ class MonitorMail {
             }
             return "{".$this->host.":110/pop3/notls}";
         } else {
-        if ($mail_ssl) {
-            return "{".$this->host.":993/imap/ssl/novalidate-cert}";
-        }
-        return "{".$this->host.":143/notls}";
+            if ($mail_ssl) {
+                return "{".$this->host.":993/imap/ssl/novalidate-cert}";
+            }
+            return "{".$this->host.":143/notls}";
         }
     }
 
