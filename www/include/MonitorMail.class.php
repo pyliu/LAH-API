@@ -10,12 +10,17 @@ class MonitorMail {
     private $host;
     private $mailbox;
 
-    private function getFullMailboxPath($folder): string {
-        $mail_ssl = System::getInstance()->get('MONITOR_MAIL_SSL') === 'true';
+    private function getConnectionString(): string {
+        $v = System::getInstance()->get('MONITOR_MAIL_SSL');
+        $mail_ssl = $v=== 'true' || $v === true;
         if ($mail_ssl) {
-            return "{".$this->host.":993/imap/ssl/novalidate-cert}".$folder;
+            return "{".$this->host.":993/imap/ssl/novalidate-cert}";
         }
-        return "{".$this->host.":143/notls}".$folder;
+        return "{".$this->host.":143/notls}";
+    }
+
+    private function getFullMailboxPath($folder): string {
+        return $this->getConnectionString().$folder;
         // if ($mail_ssl) {
         //     return "{".$this->host.":995/pop3/ssl/novalidate-cert}".$folder;
         // }
@@ -67,12 +72,13 @@ class MonitorMail {
         $account = System::getInstance()->get("MONITOR_MAIL_ACCOUNT");
         $password = System::getInstance()->get("MONITOR_MAIL_PASSWORD");
         try {
-            $fullpath = $this->getFullMailboxPath("INBOX");
+            $conn = $this->getFullMailboxPath("INBOX");
+            // $conn = $this->getConnectionString();
 
-            Logger::getInstance()->info("連線 $fullpath");
+            Logger::getInstance()->info("連線 $conn");
 
             $this->mailbox = new Mailbox(
-                $fullpath, // IMAP server and mailbox folder
+                $conn, // IMAP server and mailbox folder
                 $account, // Username for the before configured mailbox
                 $password, // Password for the before configured username
                 LOG_DIR ?? sys_get_temp_dir(), // Directory, where attachments will be saved (optional)
@@ -88,7 +94,7 @@ class MonitorMail {
             // If you don't need to grab attachments you can significantly increase performance of your application
             $this->mailbox->setAttachmentsIgnore(true);
         } catch (ConnectionException $ex) {
-            Logger::getInstance()->error("IMAP 連線 $fullpath 失敗: " . $ex);
+            Logger::getInstance()->error("IMAP 連線 $conn 失敗: " . $ex);
         }
     }
 
@@ -148,7 +154,7 @@ class MonitorMail {
                 }
             }
         } catch(Exception $ex) {
-            Logger::getInstance()->error("IMAP 取得 ${folder} 郵件失敗: " . $ex);
+            Logger::getInstance()->error("IMAP 取得 $folder 郵件失敗: " . $ex);
         } finally {
             return $this->extract($mails);
         }
