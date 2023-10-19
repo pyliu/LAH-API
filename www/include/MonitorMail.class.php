@@ -8,15 +8,23 @@ use PhpImap\Exceptions\ConnectionException;
 
 class MonitorMail {
     private $host;
+    private $method;
     private $mailbox;
 
     private function getConnectionString(): string {
         $v = System::getInstance()->get('MONITOR_MAIL_SSL');
         $mail_ssl = $v=== 'true' || $v === true;
+        if ($this->method === 'pop3') {
+            if ($mail_ssl) {
+                return "{".$this->host.":995/pop3/ssl/novalidate-cert}";
+            }
+            return "{".$this->host.":110/pop3/notls}";
+        } else {
         if ($mail_ssl) {
             return "{".$this->host.":993/imap/ssl/novalidate-cert}";
         }
         return "{".$this->host.":143/notls}";
+        }
     }
 
     private function getFullMailboxPath($folder): string {
@@ -69,6 +77,7 @@ class MonitorMail {
 
     function __construct() {
         $this->host = System::getInstance()->get("MONITOR_MAIL_HOST");
+        $this->method = System::getInstance()->get("MONITOR_MAIL_METHOD") || 'imap';
         $account = System::getInstance()->get("MONITOR_MAIL_ACCOUNT");
         $password = System::getInstance()->get("MONITOR_MAIL_PASSWORD");
         try {
