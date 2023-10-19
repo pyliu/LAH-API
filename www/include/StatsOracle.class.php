@@ -307,9 +307,6 @@ class StatsOracle {
     }
 
     public function getRegCertCase($st, $ed) {
-        global $today;
-        $st = $st ?? $today;
-        $ed = $ed ?? $today;
         if (!$this->db_wrapper->reachable() || !$this->checkYearMonthDay($st) || !$this->checkYearMonthDay($ed)) {
             return false;
         }
@@ -330,6 +327,6 @@ class StatsOracle {
         $this->db_wrapper->getDB()->bind(":bv_ed", $ed);
         $this->db_wrapper->getDB()->bind(":bv_site", $site);
         $this->db_wrapper->getDB()->execute();
-        return $this->db_wrapper->getDB()->fetch(true);
+        return $this->db_wrapper->getDB()->fetchAll(true);
     }
 }
