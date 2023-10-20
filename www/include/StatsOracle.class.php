@@ -327,6 +327,6 @@ class StatsOracle {
         $this->db_wrapper->getDB()->bind(":bv_ed", $ed);
         $this->db_wrapper->getDB()->bind(":bv_site", $site);
         $this->db_wrapper->getDB()->execute();
-        return $this->db_wrapper->getDB()->fetchAll(true);
+        return $this->db_wrapper->getDB()->fetchAll();
     }
 }
