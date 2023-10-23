@@ -21,6 +21,10 @@ switch ($_POST["type"]) {
             echoJSONResponse('無法連線伺服器 - '.$url);
         }
         break;
+    case "insert_mail":
+        Logger::getInstance()->info("XHR [insert_mail] 新增監控郵件請求");
+        echoJSONResponse('尚未實作');
+        break;
     case "check_mail":
         Logger::getInstance()->info("XHR [check_mail] 檢查最新監控郵件請求");
         $inserted = $sqlite_monitor_mail->fetchFromMailServer();
