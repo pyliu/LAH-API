@@ -740,7 +740,7 @@ class WatchDog {
                 if ($downCount > 0) {
                     // mark detected down last time
                     file_put_contents($ticket, serialize($downOffices));
-                    $message = "##### ⚠ ".$this->date."  ".$this->time." 地政系統跨域服務離線\r\n***\r\n⚠ 目前有 $downCount 個地所伺服器偵測為離線。\r\n\r\n";
+                    $message = "##### ⚠ ".$this->date."  ".$this->time." 地政系統跨域服務離線\r\n***\r\n👉 目前有 $downCount 個地所伺服器偵測為離線。\r\n\r\n";
                     foreach ($downOffices as $downOffice) {
                         $message .= "🔴 ".$downOffice['id']." ".$downOffice['name']." (檢測時間：".timestampToDate($downOffice['timestamp'], 'TW', 'H:i:s').")\r\n";
                     }
