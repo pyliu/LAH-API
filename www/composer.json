@@ -1,6 +1,7 @@
 {
     "require": {
         "phpoffice/phpspreadsheet": "^1.14",
-        "php-imap/php-imap": "4.5.3"
+        "php-imap/php-imap": "4.5.3",
+        "eden/mail": "^4.0"
     }
 }
