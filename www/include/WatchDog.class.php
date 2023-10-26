@@ -751,8 +751,8 @@ class WatchDog {
                     $this->addNotification($message, "lds", '地政系統跨域服務監測', true);
                 } else {
                     if ($prevTicketFlag) {
-                        $message = "##### 🟢 ".$this->date."  ".$this->time." 地政系統跨域服務回復\r\n***\r\n##### 目前各地所伺服器皆已上線 ✔。";
-                        $message .= "\r\n***\r\n詳情請參考 👉 $url";
+                        $message = "##### 🟢 ".$this->date."  ".$this->time." 地政系統跨域服務皆已回復。";
+                        // $message .= "\r\n***\r\n詳情請參考 👉 $url";
                         // send to lds chat channel
                         $this->addNotification($message, "lds", '地政系統跨域服務監測', true);
                     }
