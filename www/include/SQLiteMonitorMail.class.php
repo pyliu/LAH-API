@@ -84,6 +84,8 @@ class SQLiteMonitorMail {
                 $result = $this->replace($mail);
                 if ($result) {
                     $inserted++;
+                    // extracted from server, mark it as \Deleted
+                    $monitor->markMailAsDeleted($mail['id']);
                 } else {
                     $failed++;
                     Logger::getInstance()->warning(__METHOD__.': 插入監控郵件資料庫失敗。');
@@ -91,7 +93,8 @@ class SQLiteMonitorMail {
                 }
             }
         }
-
+        // clean mails on the server
+        $monitor->expungeDeletedMails();
         Logger::getInstance()->info(__METHOD__.': 已擷取 '.$inserted.' 封監控郵件。(失敗: '.$failed.')');
         
         return $inserted;

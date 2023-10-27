@@ -5,13 +5,16 @@ require_once(ROOT_DIR.'/vendor/autoload.php');
 
 use PhpImap\Mailbox;
 use PhpImap\Exceptions\ConnectionException;
+/**
+ * When using composer, there is not an easy way to access functions from packages.
+ * As a workaround, adding this constant in your code will allow eden() to be available after.
+ */
+Eden::DECORATOR;
 
-class MonitorMail {
+class MonitorMailEden {
     private $host;
     private $method;
     private $mailbox;
-    private $account;
-    private $password;
 
     private function getConnectionString(): string {
         $v = System::getInstance()->get('MONITOR_MAIL_SSL');
@@ -78,33 +81,23 @@ class MonitorMail {
     }
 
     function __construct() {
-        $this->host = System::getInstance()->get("MONITOR_MAIL_HOST");
-        $this->method = System::getInstance()->get("MONITOR_MAIL_METHOD") || 'imap';
-        $this->account = System::getInstance()->get("MONITOR_MAIL_ACCOUNT");
-        $this->password = System::getInstance()->get("MONITOR_MAIL_PASSWORD");
         try {
-            $conn = $this->getFullMailboxPath("INBOX");
-            // $conn = $this->getConnectionString();
+            $this->host = System::getInstance()->get("MONITOR_MAIL_HOST");
+            $this->method = System::getInstance()->get("MONITOR_MAIL_METHOD") || 'imap';
+            $account = System::getInstance()->get("MONITOR_MAIL_ACCOUNT");
+            $password = System::getInstance()->get("MONITOR_MAIL_PASSWORD");
 
-            Logger::getInstance()->info("連線 $conn");
+            $v = System::getInstance()->get('MONITOR_MAIL_SSL');
+            $ssl = $v=== 'true' || $v === true;
 
-            $this->mailbox = new Mailbox(
-                $conn, // IMAP server and mailbox folder
-                $this->account, // Username for the before configured mailbox
-                $this->password, // Password for the before configured username
-                LOG_DIR ?? sys_get_temp_dir(), // Directory, where attachments will be saved (optional)
-                'UTF-8', // Server encoding (optional)
-                true, // Trim leading/ending whitespaces of IMAP path (optional)
-                true // Attachment filename mode (optional; false = random filename; true = original filename)
+            $imap = eden('mail')->imap(
+                $this->host, 
+                $account, 
+                $password, 
+                $ssl ? 993 : 143, 
+                $ssl
             );
-            // set some connection arguments (if appropriate)
-            $this->mailbox->setConnectionArgs(
-                CL_EXPUNGE // expunge deleted mails upon mailbox close
-                // | OP_SECURE // don't do non-secure authentication
-            );
-            // If you don't need to grab attachments you can significantly increase performance of your application
-            $this->mailbox->setAttachmentsIgnore(true);
-        } catch (ConnectionException $ex) {
+        } catch (Exception $ex) {
             Logger::getInstance()->error("IMAP 連線 $conn 失敗: " . $ex);
         }
     }
@@ -238,52 +231,8 @@ class MonitorMail {
                     "timestamp" => strtotime($obj->date),  // timestamp
                     "mailbox" => $obj->mailboxFolder
                 );
-                // $this->mailbox->markMailAsRead($obj->id);
             }
         }
         return $mails;
-    }
-
-    public function markMailAsDeleted($mail_id): void {
-        $this->mailbox->deleteMail($mail_id);
-    }
-
-    public function expungeDeletedMails(): void {
-        $this->mailbox->expungeDeletedMails();
-    }
-
-    public function removeOutdatedMails() {
-        $server = $this->getConnectionString();
-        $user = $this->account;
-        $pass = $this->password;
-
-        $del = new DateTime();
-        $del->modify('-1 month');
-        Logger::getInstance()->info('Removing mail older than ' . $del->format('D, d M Y H:i:s O').PHP_EOL);
-
-        $mbox = imap_open($server, $user, $pass) or die("can't connect: " . imap_last_error());
-        
-        $mailboxes = imap_list($mbox, $server, '*');
-        $deleted = 0;
-        foreach($mailboxes as $mailbox) {
-            $shortname = str_replace($server, '', $mailbox);
-            Logger::getInstance()->info('Opening '.$shortname.PHP_EOL);   
-            imap_reopen($mbox, $mailbox);
-            $MC = imap_check($mbox);
-            // Fetch an overview for all messages in INBOX
-            $result = imap_fetch_overview($mbox,"1:{$MC->Nmsgs}",0);
-            foreach ($result as $email) {
-                preg_match('/^\w{1,3}, \d{1,2} \w{1,4} \d{4} \d{2}:\d{2}:\d{2} [-+]\d{4}/', $email->date, $edate);
-                $date = DateTime::createFromFormat('D, d M Y H:i:s O', $edate[0]); 
-                if($date < $del) {
-                    // echo 'Try to delete '.$date->format('D, d M Y H:i:s O').' | '.$email->from.' - '.$email->subject.PHP_EOL;
-                    imap_delete($mbox,$email->msgno);
-                    $deleted++;
-                }
-            }   
-            imap_expunge($mbox);
-        }
-        imap_close($mbox);
-        Logger::getInstance()->info('Deleted '.$deleted.' emails.'.PHP_EOL);
     }
 }

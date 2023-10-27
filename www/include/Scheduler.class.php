@@ -2,6 +2,7 @@
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'init.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Message.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Notification.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR."MonitorMail.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteMonitorMail.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteConnectivity.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Cache.class.php');
@@ -122,12 +123,15 @@ class Scheduler {
         // remove mails by a month ago
         $days = 30;
         $month_secs = $days * 24 * 60 * 60;
-        Logger::getInstance()->info("啟動清除過時監控郵件排程。(${days}, ${month_secs})");
+        Logger::getInstance()->info("啟動清除本地端過時監控郵件排程。(${days}, ${month_secs})");
         if ($monitor->removeOutdatedMail($month_secs)) {
             Logger::getInstance()->info(__METHOD__.": 移除過時的監控郵件成功。(${days}天之前)");
         } else {
             Logger::getInstance()->warning(__METHOD__.": 移除過時的監控郵件失敗。(${days}天之前)");
         }
+        Logger::getInstance()->info("開始清除伺服器端過時監控郵件排程。(1個月前)");
+        $imapServer = new MonitorMail();
+        $imapServer->removeOutdatedMails();
     }
 
     private function fetchMonitorMail() {
@@ -418,6 +422,10 @@ class Scheduler {
                 $this->importRKEYNALL();
                 $this->importOFFICES();
                 $this->importUserFromL3HWEB();
+                /**
+                 * 移除過期的監控郵件
+                 */
+
             } else {
                 // Logger::getInstance()->info(__METHOD__.": 每24小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
