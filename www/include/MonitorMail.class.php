@@ -253,37 +253,42 @@ class MonitorMail {
     }
 
     public function removeOutdatedMails() {
-        $server = $this->getConnectionString();
+        $conn = $this->getFullMailboxPath("INBOX");
         $user = $this->account;
         $pass = $this->password;
+        $mbox = null;
+        try {
+            $del = new DateTime();
+            $del->modify('-1 month');
+            Logger::getInstance()->info('Removing mail older than ' . $del->format('D, d M Y H:i:s O').' in INBOX'.PHP_EOL);
 
-        $del = new DateTime();
-        $del->modify('-1 month');
-        Logger::getInstance()->info('Removing mail older than ' . $del->format('D, d M Y H:i:s O').PHP_EOL);
-
-        $mbox = imap_open($server, $user, $pass) or die("can't connect: " . imap_last_error());
-        
-        $mailboxes = imap_list($mbox, $server, '*');
-        $deleted = 0;
-        foreach($mailboxes as $mailbox) {
-            $shortname = str_replace($server, '', $mailbox);
-            Logger::getInstance()->info('Opening '.$shortname.PHP_EOL);   
-            imap_reopen($mbox, $mailbox);
-            $MC = imap_check($mbox);
-            // Fetch an overview for all messages in INBOX
-            $result = imap_fetch_overview($mbox,"1:{$MC->Nmsgs}",0);
-            foreach ($result as $email) {
-                preg_match('/^\w{1,3}, \d{1,2} \w{1,4} \d{4} \d{2}:\d{2}:\d{2} [-+]\d{4}/', $email->date, $edate);
-                $date = DateTime::createFromFormat('D, d M Y H:i:s O', $edate[0]); 
-                if($date < $del) {
-                    // echo 'Try to delete '.$date->format('D, d M Y H:i:s O').' | '.$email->from.' - '.$email->subject.PHP_EOL;
-                    imap_delete($mbox,$email->msgno);
-                    $deleted++;
-                }
-            }   
-            imap_expunge($mbox);
+            $mbox = imap_open($conn, $user, $pass) or die("can't connect: " . imap_last_error());
+            
+            $mailboxes = imap_list($mbox, $conn, '*');
+            $deleted = 0;
+            foreach($mailboxes as $mailbox) {
+                $shortname = str_replace($conn, '', $mailbox);
+                Logger::getInstance()->info('Opening '.$shortname.PHP_EOL);   
+                imap_reopen($mbox, $mailbox);
+                $MC = imap_check($mbox);
+                // Fetch an overview for all messages in INBOX
+                $result = imap_fetch_overview($mbox,"1:{$MC->Nmsgs}",0);
+                foreach ($result as $email) {
+                    preg_match('/^\w{1,3}, \d{1,2} \w{1,4} \d{4} \d{2}:\d{2}:\d{2} [-+]\d{4}/', $email->date, $edate);
+                    $date = DateTime::createFromFormat('D, d M Y H:i:s O', $edate[0]); 
+                    if($date < $del) {
+                        // echo 'Try to delete '.$date->format('D, d M Y H:i:s O').' | '.$email->from.' - '.$email->subject.PHP_EOL;
+                        imap_delete($mbox,$email->msgno);
+                        $deleted++;
+                    }
+                }   
+                imap_expunge($mbox);
+            }
+            Logger::getInstance()->info('Deleted '.$deleted.' emails.'.PHP_EOL);
+        } catch (Exception $e) {
+            Logger::getInstance()->warning($e);
+        } finally {
+            imap_close($mbox, CL_EXPUNGE);
         }
-        imap_close($mbox);
-        Logger::getInstance()->info('Deleted '.$deleted.' emails.'.PHP_EOL);
     }
 }
