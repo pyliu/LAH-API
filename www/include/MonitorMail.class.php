@@ -253,7 +253,7 @@ class MonitorMail {
     }
 
     public function removeOutdatedMails() {
-        $conn = $this->getFullMailboxPath("INBOX");
+        $conn = $this->getConnectionString();
         $user = $this->account;
         $pass = $this->password;
         $mbox = null;
