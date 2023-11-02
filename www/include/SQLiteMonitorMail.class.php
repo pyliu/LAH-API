@@ -140,7 +140,7 @@ class SQLiteMonitorMail {
             $stmt->bindParam(":ts", $ts);
             return $stmt->execute() === FALSE ? false : true;
         }
-        Logger::getInstance()->warning(__METHOD__.": 無法執行 「${sql}」 SQL描述。");
+        Logger::getInstance()->warning(__METHOD__.": 無法執行 「".$sql."」 SQL描述。");
         return false;
     }
     /**
