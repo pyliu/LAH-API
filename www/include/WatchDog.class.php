@@ -349,6 +349,7 @@ class WatchDog {
         }
         $displayName = $to_id === "ALL" ? "登記課" : "您";
         $content = "🚩 ".$this->date."  ".$this->time." ${displayName}目前有 ".count($case_records)." 件逾期案件(近15天".(count($case_records) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($case_records, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[案件逾期顯示頁面](${url})</b> 查看詳細資料。";
+        $notification = new Notification();
         if ($to_id === "ALL") {
             $sqlite_user = new SQLiteUser();
             $chief = $sqlite_user->getChief('登記課');
@@ -356,14 +357,17 @@ class WatchDog {
                 Logger::getInstance()->warning('找不到登記課課長帳號，無法傳送即時通知給他/她!!');
             } else {
                 $this_user = $users[$chief['id']];
+                // remove outdated messages
+                $notification->removeOutdatedMessageByTitle($chief['id'], '登記課逾期案件彙總');
+                // add current stats message
                 $lastId = $this->addNotification($content, $chief['id'], "登記課逾期案件彙總");
                 Logger::getInstance()->info('新增逾期案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
             }
-            // send to dev for debugging
-            // $lastId = $notify->addMessage('HA10013859', $payload);
-            // Logger::getInstance()->info('新增逾期案件通知訊息至 HA10013859 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
         } else {
+            // remove outdated messages
+            $notification->removeOutdatedMessageByTitle($to_id, '您的登記逾期案件統計');
             $lastId = $this->addNotification($content, $to_id, "您的登記逾期案件統計");
+            Logger::getInstance()->info('新增逾期案件通知訊息至 '.$to_id.' 頻道。('.($lastId === false ? '失敗' : '成功').')');
         }
     }
 
@@ -411,35 +415,19 @@ class WatchDog {
     }
 
     private function sendRegExpiredAnnouncementMessage($to_id, $case_records) {
-        $cache = Cache::getInstance();
-        $users = $cache->getUserNames();
-        // $url = "http://".$this->host_ip."/overdue_reg_cases.html";
-        // if ($to_id != "ALL") {
-        //     $url .= "?ID=${to_id}";
-        //     // $url .= "${to_id}/";
-        // }
+        $notification = new Notification();
         $url = "http://".$this->host_ip.":8080/reg/expiry-of-announcement";
         if ($to_id !== "ALL") {
             $url .= '?reviewer='.$to_id;
         }
         $displayName = $to_id === "ALL" ? "登記課" : "您";
-        $content = "##### 📢 ".$this->date."  ".$this->time." ${displayName}目前有 ".count($case_records)." 件到期公告案件:<br/><br/>🔴 ".implode("<br/>🔴 ", $case_records)."<br/><br/>👉 請前往智慧控管系統 <b>[公告案件頁面](${url})</b> 查看詳細資料。";
+        $content = "##### 📢 ".$this->date."  ".$this->time." ".$displayName."目前有 ".count($case_records)." 件到期公告案件:<br/><br/>🔴 ".implode("<br/>🔴 ", $case_records)."<br/><br/>👉 請前往智慧控管系統 <b>[公告案件頁面](".$url.")</b> 查看詳細資料。";
         if ($to_id === "ALL") {
-            // $sqlite_user = new SQLiteUser();
-            // $chief = $sqlite_user->getChief('登記課');
-            // if (empty($chief)) {
-            //     Logger::getInstance()->warning('找不到登記課課長帳號，無法傳送即時通知給他/她!!');
-            // } else {
-            //     $this_user = $users[$chief['id']];
-            //     $lastId = $this->addNotification($content, $chief['id'], "登記課公告到期案件彙總");
-            //     Logger::getInstance()->info('新增公告到期案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
-            // }
-
+            // remove outdated messages
+            $notification->removeOutdatedMessageByTitle('reg', '登記課公告到期案件彙總');
             // send to reg chat channel
             $lastId = $this->addNotification($content, "reg", "登記課公告到期案件彙總", true);
             Logger::getInstance()->info('新增公告到期案件通知訊息至 reg 頻道。 '.($lastId === false ? '失敗' : '成功').')');
-        } else {
-            // $lastId = $this->addNotification($content, $to_id, "您的公告到期登記案件統計");
         }
     }
     
@@ -487,6 +475,7 @@ class WatchDog {
     private function sendSurNearOverdueMessage($to_id, $cases) {
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
+        $notification = new Notification();
         $url = "http://".$this->host_ip.":8080/sur/expire";
         $displayName = $to_id === "ALL" ? "測量課" : "您";
         $content = "⚠️ ".$this->date."  ".$this->time." ${displayName}目前有 ".count($cases)." 件即將逾期案件(未來3天".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
@@ -497,13 +486,14 @@ class WatchDog {
                 Logger::getInstance()->warning('找不到測量課課長帳號，無法傳送即時通知給他/她!!');
             } else {
                 $this_user = $users[$chief['id']];
+                // remove outdated messages
+                $notification->removeOutdatedMessageByTitle($chief['id'], '測量課即將逾期案件彙總');
                 $lastId = $this->addNotification($content, $chief['id'], "測量課即將逾期案件彙總");
                 Logger::getInstance()->info('新增即將逾期測量案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
             }
-            // send to dev for debugging
-            // $lastId = $notify->addMessage('HA10013859', $payload);
-            // Logger::getInstance()->info('新增逾期案件通知訊息至 HA10013859 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
         } else {
+            // remove outdated messages
+            $notification->removeOutdatedMessageByTitle($to_id, '您的即將逾期案件統計');
             $lastId = $this->addNotification($content, $to_id, "您的即將逾期案件統計");
         }
     }
@@ -550,6 +540,7 @@ class WatchDog {
     }
 
     private function sendSurOverdueMessage($to_id, $cases) {
+        $notification = new Notification();
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
         $url = "http://".$this->host_ip.":8080/sur/expire";
@@ -562,14 +553,15 @@ class WatchDog {
                 Logger::getInstance()->warning('找不到測量課課長帳號，無法傳送即時通知給他/她!!');
             } else {
                 $this_user = $users[$chief['id']];
-                // $lastId = $notify->addMessage($chief['id'], $payload);
+                // remove outdated messages
+                $notification->removeOutdatedMessageByTitle($chief['id'], '測量課已逾期測量案件彙總');
+                // send current message to the channel
                 $lastId = $this->addNotification($content, $chief['id'], "測量課已逾期測量案件彙總");
                 Logger::getInstance()->info('新增逾期測量案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
             }
-            // send to dev for debugging
-            // $lastId = $notify->addMessage('HA10013859', $payload);
-            // Logger::getInstance()->info('新增逾期案件通知訊息至 HA10013859 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
         } else {
+            // remove outdated messages
+            $notification->removeOutdatedMessageByTitle($to_id, '您的已逾期測量案件統計');
             $lastId = $this->addNotification($content, $to_id, "您的已逾期測量案件統計");
         }
     }
@@ -694,6 +686,8 @@ class WatchDog {
                     $host_ip = getLocalhostIP();
                     $url = "http://".$host_ip.":8080/reg/foreigner-inheritance-restriction";
                     $message = "##### 📢 ".$this->date."  ".$this->time." 外國人繼承限制通知\r\n***\r\n⚠ 系統今日找到 $total 件外國人繼承限制需進行處理(逾期或半年內即將到期)，請進系統查看案件資料。\r\n\r\n👉 $url";
+                    $notification = new Notification();
+                    $notification->removeOutdatedMessageByTitle('reg', '外國人繼承限制通知');
                     // send to reg chat channel
                     $this->addNotification($message, "reg", '外國人繼承限制通知', true);
                 }
@@ -806,6 +800,8 @@ class WatchDog {
             Logger::getInstance()->info("土地建物統計問題通知訊息已送出給 $adm_ip ($sn)");
         }
 
+        $notification = new Notification();
+        $notification->removeOutdatedMessageByTitle('reg', '登記土地建物統計資料通知');
         // send messsage to reg chat room as well
         $lastId = $this->addNotification($content, "reg", "登記土地建物統計資料通知", true);
         Logger::getInstance()->info('新增登記土地建物統計資料通知訊息至 reg 頻道。 '.($lastId === false ? '失敗' : '成功').')');

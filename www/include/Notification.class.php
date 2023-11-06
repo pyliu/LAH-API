@@ -222,4 +222,16 @@ class Notification {
         }
         return false;
     }
+
+    public function removeOutdatedMessageByTitle($channel, $title) {
+        Logger::getInstance()->info(__METHOD__.': 準備刪除「'.$channel.'」頻道標題為「'.$title.'」的訊息');
+        if ($this->prepareDB($channel)) {
+            $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            if ($stm = $db->prepare("DELETE FROM message WHERE title = :bv_title")) {
+                $stm->bindParam(':bv_title', $title);
+                return $stm->execute() === FALSE ? false : true;
+            }
+        }
+        return false;
+    }
 }
