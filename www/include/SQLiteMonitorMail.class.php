@@ -67,20 +67,20 @@ class SQLiteMonitorMail {
             return false;
         }
 
-        $latest_id = 0;
-        $latest_mail = $this->getLatestMail();
-        if ($latest_mail) {
-            $latest_id = $latest_mail["id"];
-        }
+        // $latest_id = 0;
+        // $latest_mail = $this->getLatestMail();
+        // if ($latest_mail) {
+        //     $latest_id = $latest_mail["id"];
+        // }
         
-        Logger::getInstance()->info(__METHOD__.':目前最新郵件 id 為 '.$latest_id);
+        // Logger::getInstance()->info(__METHOD__.':目前最新郵件 id 為 '.$latest_id);
         
         $monitor = new MonitorMail();
         $mails = $monitor->getAllMails('INBOX', 1);  // INBOX, wthin 1 day
         $inserted = 0;
         $failed = 0;
         foreach($mails as $mail) {
-            if ($mail["id"] > $latest_id) {
+            // if ($mail["id"] > $latest_id) {
                 $result = $this->replace($mail);
                 if ($result) {
                     $inserted++;
@@ -91,7 +91,7 @@ class SQLiteMonitorMail {
                     Logger::getInstance()->warning(__METHOD__.': 插入監控郵件資料庫失敗。');
                     Logger::getInstance()->info(__METHOD__.': payload => '.print_r($mail, true));
                 }
-            }
+            // }
         }
         // clean mails on the server
         $monitor->expungeDeletedMails();
