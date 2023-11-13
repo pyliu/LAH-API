@@ -18,14 +18,9 @@ try {
     echo "The current write timeout is " . imap_timeout(IMAP_WRITETIMEOUT) . "\n";
     echo "The current close timeout is " . imap_timeout(IMAP_CLOSETIMEOUT) . "\n";
 
-    // Logger::getInstance()->info("XHR [ping] Ping ".$_POST["ip"]." request.");
-    // for ($i = 1; $i < 255; $i++) {
-    //     $ip = '192.168.13.'.$i;
-    //     $ping = new Ping($ip, 1, 255);	// ip, timeout, ttl
-    //     $latency = $ping->ping();
-    //     echo $ip . ' ';
-    //     echo empty($latency) ? 'timeout!' :  $latency . 'ms'."\n";
-    // }
+    $file = new SplFileInfo('d:\\DEV\\Land-Affairs-Helper\\www\\log\\log-2023-10-13.log');
+    echo "file modified ts: ".$file->getMTime()." month ago ts: ".(time() - 30 * 24 * 60 * 60)."\n";
+    echo "file modified date: ".date("Y-m-d H:i:s", $file->getMTime())." month ago date: ".date("Y-m-d H:i:s", time() - 30 * 24 * 60 * 60)."\n";
 
 } catch(Exception $e) {
     die($e->getMessage());
