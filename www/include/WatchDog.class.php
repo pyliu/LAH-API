@@ -732,10 +732,10 @@ class WatchDog {
                     
                     // remove outdated messages
                     $notification = new Notification();
-                    $notification->removeOutdatedMessageByTitle('lds', '地政系統跨域服務監測');
+                    $notification->removeOutdatedMessageByTitle('reg', '地政系統跨域服務監測');
 
-                    // send to lds chat channel
-                    $this->addNotification($message, "lds", '地政系統跨域服務監測', true);
+                    // send to reg chat channel
+                    $this->addNotification($message, "reg", '地政系統跨域服務監測', true);
                 } else {
                     if ($prevTicketFlag) {
                         $message = "##### 🟢 ".$this->date."  ".$this->time." 地政系統跨域服務皆已回復。";
