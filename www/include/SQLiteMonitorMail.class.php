@@ -76,7 +76,7 @@ class SQLiteMonitorMail {
         // Logger::getInstance()->info(__METHOD__.':目前最新郵件 id 為 '.$latest_id);
         
         $monitor = new MonitorMail();
-        $mails = $monitor->getAllMails('INBOX', 1);  // INBOX, wthin 1 day
+        $mails = $monitor->getAllUnseenMails('INBOX', 1);  // INBOX, wthin 1 day
         $inserted = 0;
         $failed = 0;
         foreach($mails as $mail) {
