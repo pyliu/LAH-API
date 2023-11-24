@@ -741,7 +741,7 @@ class WatchDog {
                         $message = "##### 🟢 ".$this->date."  ".$this->time." 地政系統跨域服務皆已回復。";
                         // $message .= "\r\n***\r\n詳情請參考 👉 $url";
                         // send to lds chat channel
-                        $this->addNotification($message, "lds", '地政系統跨域服務監測', true);
+                        $this->addNotification($message, "reg", '地政系統跨域服務監測', true);
                     }
                     // clear ticket
                     @unlink($ticket);
