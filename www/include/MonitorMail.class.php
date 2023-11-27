@@ -238,10 +238,14 @@ class MonitorMail {
                     "timestamp" => strtotime($obj->date),  // timestamp
                     "mailbox" => $obj->mailboxFolder
                 );
-                $this->mailbox->markMailAsRead($obj->id);
+                // $this->mailbox->markMailAsRead($obj->id);
             }
         }
         return $mails;
+    }
+
+    public function markMailAsRead($mail_id): void {
+        $this->mailbox->markMailAsRead($mail_id);
     }
 
     public function markMailAsDeleted($mail_id): void {

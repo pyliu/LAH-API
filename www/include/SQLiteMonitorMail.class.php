@@ -84,8 +84,8 @@ class SQLiteMonitorMail {
                 $result = $this->replace($mail);
                 if ($result) {
                     $inserted++;
-                    // extracted from server, mark it as \Deleted, but HC needs to keept it on server ...
-                    // $monitor->markMailAsDeleted($mail['id']);
+                    // extracted from server, mark it as \Seen ...
+                    $monitor->markMailAsRead($mail['id']);
                 } else {
                     $failed++;
                     Logger::getInstance()->warning(__METHOD__.': 插入監控郵件資料庫失敗。');
