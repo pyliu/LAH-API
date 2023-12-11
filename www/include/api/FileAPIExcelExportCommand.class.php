@@ -29,7 +29,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         $sheet->getCell('A2')->setValue('這是第2格');
 
         $writer = new Xlsx($spreadsheet);
-        $expfile = EXPORT_DIR.DIRECTORY_SEPARATOR.$this->filename.'.xlsx';
+        $expfile = EXPORT_DIR.DIRECTORY_SEPARATOR.'test.xlsx';
         $writer->save($expfile);
         unset($writer);
 
@@ -38,7 +38,7 @@ class FileAPIExcelExportCommand extends FileAPICommand {
         ob_end_clean();
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         // header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="'.$this->filename.'.xlsx"');
+        header('Content-Disposition: attachment;filename="test.xlsx"');
         header('Cache-control: no-cache, pre-check=0, post-check=0, max-age=0');
         // https://stackoverflow.com/questions/34381816/phpexcel-return-a-corrupted-file
         // need to add this line to prevent corrupted file
