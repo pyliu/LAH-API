@@ -29,6 +29,9 @@ abstract class FileAPICommandFactory {
             case "file_xlsx":
                 Logger::getInstance()->info("輸出XLSX檔案");
                 return new FileAPIExcelExportCommand();
+            case "file_inheritance_restriction_xlsx":
+                Logger::getInstance()->info("輸出外國人管制清冊XLSX檔案");
+                return new FileAPIExcelExportCommand();
             default:
                 return new FileAPINotSupportCommand();
         }
