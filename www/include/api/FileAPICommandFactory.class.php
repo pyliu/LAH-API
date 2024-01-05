@@ -6,6 +6,7 @@ require_once("FileAPISQLTxtCommand.class.php");
 require_once("FileAPILogExportCommand.class.php");
 require_once("FileAPIExcelExportCommand.class.php");
 require_once("FileAPIDataExportCommand.class.php");
+require_once("FileAPIInheritanceRestrictionXlsxExportCommand.class.php");
 
 abstract class FileAPICommandFactory {
     public static function getCommand($type) {
@@ -31,7 +32,7 @@ abstract class FileAPICommandFactory {
                 return new FileAPIExcelExportCommand();
             case "file_inheritance_restriction_xlsx":
                 Logger::getInstance()->info("輸出外國人管制清冊XLSX檔案");
-                return new FileAPIExcelExportCommand();
+                return new FileAPIInheritanceRestrictionXlsxExportCommand();
             default:
                 return new FileAPINotSupportCommand();
         }
