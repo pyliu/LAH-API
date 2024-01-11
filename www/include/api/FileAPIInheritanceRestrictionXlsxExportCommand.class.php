@@ -103,10 +103,27 @@ class FileAPIInheritanceRestrictionXlsxExportCommand extends FileAPICommand {
         Logger::getInstance()->info($params['is17']);
         Logger::getInstance()->info('查到 '.$count.' 筆資料');
         // construct tpl path
-        $tpl = ROOT_DIR.DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'xlsx'.DIRECTORY_SEPARATOR.'foreigner_restriction_'.$params['site'].'_17'.($params['is17'] ? '' : 'o').'.tpl.xlsx';
+        $tpl = ROOT_DIR.DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'xlsx'.DIRECTORY_SEPARATOR.'foreigner_restriction_17'.($params['is17'] ? '' : 'o').'.tpl.xlsx';
         Logger::getInstance()->info('讀取 '.$tpl.' 樣板XLSX');
         $spreadsheet = IOFactory::load($tpl);
         $worksheet = $spreadsheet->getActiveSheet();
+        // set office name
+        $site = $params['site'];
+        switch ($params['site']) {
+            case 'HA': $site = '桃園'; break;
+            case 'HB': $site = '中壢'; break;
+            case 'HC': $site = '大溪'; break;
+            case 'HD': $site = '楊梅'; break;
+            case 'HE': $site = '蘆竹'; break;
+            case 'HF': $site = '八德'; break;
+            case 'HG': $site = '平鎮'; break;
+            case 'HH': $site = '龜山'; break;
+        }
+        $worksheet->setCellValueExplicit(
+            'A1',
+            '桃園市'.$site.'地政事務所',
+            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+        );
         $worksheet->getStyle('A'.($count+5).':Q'.($count+5))->getAlignment()->setWrapText(true);
         /** json data example
          * 編號: "001"
