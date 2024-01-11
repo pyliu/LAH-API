@@ -64,7 +64,7 @@ class FileAPIInheritanceRestrictionXlsxExportCommand extends FileAPICommand {
         $writer->save('php://output');
     }
 
-    private function export(&$spreadsheet, &$params, $title, $filename = '') {
+    private function export(&$spreadsheet, &$params, $title) {
         $spreadsheet->getProperties()
             ->setCreator("地政智慧控管系統")
             ->setLastModifiedBy("地政智慧控管系統")
@@ -76,7 +76,7 @@ class FileAPIInheritanceRestrictionXlsxExportCommand extends FileAPICommand {
             ->setKeywords("office 2007 openxml php xlsx")
             ->setCategory("export");
 
-        $filename = empty($filename) ? $params['site'].'.xlsx' : $filename;
+        $filename = $params['site'].'.xlsx';
         Logger::getInstance()->info('寫入 '.$filename);
         $this->write_export_tmp_file($spreadsheet, $filename);
         Logger::getInstance()->info('輸出 RESPONSE STREAM ... ');
