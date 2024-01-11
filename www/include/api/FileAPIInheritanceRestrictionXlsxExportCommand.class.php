@@ -76,7 +76,7 @@ class FileAPIInheritanceRestrictionXlsxExportCommand extends FileAPICommand {
             ->setKeywords("office 2007 openxml php xlsx")
             ->setCategory("export");
 
-        $filename = $params['site'].'.xlsx';
+        $filename = strtoupper($params['site']).'.xlsx';
         Logger::getInstance()->info('寫入 '.$filename);
         $this->write_export_tmp_file($spreadsheet, $filename);
         Logger::getInstance()->info('輸出 RESPONSE STREAM ... ');
