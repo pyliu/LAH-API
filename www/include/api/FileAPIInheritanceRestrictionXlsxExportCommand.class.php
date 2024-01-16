@@ -246,8 +246,8 @@ class FileAPIInheritanceRestrictionXlsxExportCommand extends FileAPICommand {
         $worksheet->mergeCells('A'.$row_num.':'.'Q'.$row_num);
         $worksheet->setCellValueExplicit(
             'A'.$row_num,
-            '承辦人                              '.
-            '主管                                '.
+            '填表人                              '.
+            '登記課長                            '.
             '秘書                                '.
             '主任                                ',
             \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
