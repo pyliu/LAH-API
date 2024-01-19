@@ -85,6 +85,7 @@ class Scheduler {
 
     private function wipeOutdatedLog() {
         Logger::getInstance()->info(__METHOD__.": 啟動清除過時記錄檔排程。");
+        // Logger::getInstance()->warning(__METHOD__.": 暫時略過清除過時記錄檔排程。");
         Logger::getInstance()->removeOutdatedLog();
     }
 
