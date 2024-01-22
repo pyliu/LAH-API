@@ -721,7 +721,7 @@ switch ($_POST["type"]) {
 				$data = new RegCaseData($row);
 				$this_baked = $data->getBakedData();
 				// use pkey(地段+地號+統編) to read restriction data
-				$pkey = $row['BA48'].$row['BA49'].$row['BB09'];
+				$pkey = $row['BA48'].$row['BA49'].$row['BB09'].$row['BB07'];
 				$this_baked['RESTRICTION_DATA'] = $srfr->getOne($pkey);
 				$this_baked['hasPDF'] = $srfp->exists($row['BB03'], $row['BB04_2'], $row['BB09']) > 0;
 				$baked[] = $this_baked;
