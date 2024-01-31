@@ -84,6 +84,25 @@ class SQLiteDBFactory {
         return $path;
     }
 
+    public static function getAdmReserveFilePDFDB() {
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."adm_reserve_file_pdf.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "adm_reserve_file_pdf" (
+                "id"	INTEGER NOT NULL,
+                "number"   TEXT NOT NULL,
+                "pid"   TEXT NOT NULL,
+                "pname" TEXT NOT NULL,
+                "note"	TEXT,
+                "createtime"	INTEGER NOT NULL,
+                "endtime"	INTEGER,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        return $path;
+    }
+    
     public static function getImageDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."image.db";
         $sqlite = new DynamicSQLite($path);
