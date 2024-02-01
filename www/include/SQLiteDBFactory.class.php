@@ -91,7 +91,7 @@ class SQLiteDBFactory {
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "adm_reserve_file_pdf" (
                 "id"	INTEGER NOT NULL,
-                "number"   TEXT NOT NULL,
+                "number"   TEXT NOT NULL UNIQUE,
                 "pid"   TEXT NOT NULL,
                 "pname" TEXT NOT NULL,
                 "note"	TEXT,
