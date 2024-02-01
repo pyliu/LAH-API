@@ -22,7 +22,7 @@ switch ($_POST["type"]) {
         Logger::getInstance()->info("XHR [reserve_pdf_list] $message");
         echoJSONResponse($message, $response_code, array( "raw" => $result ));
         break;
-    case "add_foreigner_pdf":
+    case "add_reserve_pdf":
         Logger::getInstance()->info("XHR [add_foreigner_pdf] add foreigner pdf request.");
         $status = STATUS_CODE::DEFAULT_FAIL;
         $message = '未知的失敗';
@@ -73,7 +73,7 @@ switch ($_POST["type"]) {
         ));
         break;
     
-    case "edit_foreigner_pdf":
+    case "edit_reserve_pdf":
         Logger::getInstance()->info("XHR [edit_foreigner_pdf] edit foreigner pdf request.");
         
         $status = STATUS_CODE::DEFAULT_FAIL;
@@ -142,7 +142,7 @@ switch ($_POST["type"]) {
             'payload' => $payload
         ));
         break;
-    case "remove_foreigner_pdf":
+    case "remove_reserve_pdf":
         Logger::getInstance()->info("XHR [remove_foreigner_pdf] remove foreigner pdf request.");
         $id = $_POST['id'];
         $result = $query->removeRegForeignerPDF($id);
