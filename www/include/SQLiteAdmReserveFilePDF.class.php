@@ -57,6 +57,13 @@ class SQLiteAdmReserveFilePDF {
         return false;
     }
 
+    public function getLatestNumber() {
+        Logger::getInstance()->info(__METHOD__.": 取得最新收件編號 ... ");
+        $number = $this->db->querySingle("SELECT number from adm_reserve_file_pdf ORDER BY id DESC LIMIT 1");
+        Logger::getInstance()->info(__METHOD__.": 最新收件編號為 $number");
+        return $number;
+    }
+
     public function search($st, $ed, $keyword = '') {
         $st_date = date("Y-m-d", $st);
         $ed_date = date("Y-m-d", $ed);
