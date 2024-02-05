@@ -46,6 +46,11 @@ if (!file_exists(UPLOAD_PDF_DIR) && !is_dir(UPLOAD_PDF_DIR)) {
     mkdir(UPLOAD_PDF_DIR);       
 }
 
+// to ensure reserve pdf dir exists
+if (!file_exists(UPLOAD_RESERVE_PDF_DIR) && !is_dir(UPLOAD_RESERVE_PDF_DIR)) {
+    mkdir(UPLOAD_RESERVE_PDF_DIR);       
+}
+
 set_exception_handler(function(Throwable $e) {
     Logger::getInstance()->error($e->getMessage());
 });
