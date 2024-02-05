@@ -58,9 +58,14 @@ class SQLiteAdmReserveFilePDF {
     }
 
     public function getLatestNumber() {
-        Logger::getInstance()->info(__METHOD__.": 取得最新收件編號 ... ");
-        $number = $this->db->querySingle("SELECT number from adm_reserve_file_pdf ORDER BY id DESC LIMIT 1");
-        Logger::getInstance()->info(__METHOD__.": 最新收件編號為 $number");
+        // from init.php => TW year
+        global $this_year;
+        Logger::getInstance()->info(__METHOD__.": 取得 $this_year 最新收件編號 ... ");
+        $number = $this->db->querySingle("SELECT number from adm_reserve_file_pdf WHERE number LIKE '$this_year%' ORDER BY id DESC LIMIT 1");
+        if (!$number) {
+            $number = $this_year."0000000";
+        }
+        Logger::getInstance()->info(__METHOD__.": $this_year 最新收件編號為 $number");
         return $number;
     }
 
@@ -136,9 +141,9 @@ class SQLiteAdmReserveFilePDF {
 
     public function delete($params) {
         if (is_array($params)) {
-            $number = $params['number'];
-            $stm = $this->db->prepare("DELETE FROM adm_reserve_file_pdf WHERE number = :number");
-            $stm->bindParam(':number', $number);
+            $id = $params['id'];
+            $stm = $this->db->prepare("DELETE FROM adm_reserve_file_pdf WHERE id = :id");
+            $stm->bindParam(':id', $id);
             return $stm->execute() !== FALSE;
         } else {
             // not array, treat it as string
@@ -148,4 +153,23 @@ class SQLiteAdmReserveFilePDF {
             return $stm->execute() !== FALSE;
         }
     }
+
+	public function removeReservePDF($id) {
+		$orig = $this->getOne($id);
+        // remove database record
+		$result = $this->delete($id);
+		if ($result) {
+			Logger::getInstance()->info(__METHOD__.": ✅ reserve record removed.");
+			// continue to delete pdf file
+			$orig_file = UPLOAD_RESERVE_PDF_DIR.DIRECTORY_SEPARATOR.$orig['number'].".pdf";
+            $unlink_result = @unlink($orig_file);
+			if (!$unlink_result) {
+                Logger::getInstance()->error("⚠ 刪除 $orig_file 檔案失敗!");
+			}
+			return true;
+		} else {
+			Logger::getInstance()->warning(__METHOD__.": ⚠️ reserve record does not remove.");
+		}
+		return false;
+	}
 }

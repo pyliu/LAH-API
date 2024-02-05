@@ -1,29 +1,30 @@
 <?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."include".DIRECTORY_SEPARATOR."init.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."Cache.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteAdmReserveFilePDF.class.php");
 
-$cache = Cache::getInstance();
-$system = System::getInstance();
-$mock = $system->isMockMode();
+$reservePDF = new SQLiteAdmReserveFilePDF();
 
 switch ($_POST["type"]) {
+    case "get_reserve_pdf_latest_number":
+        Logger::getInstance()->info("XHR [get_reserve_pdf_latest_number] get reserve pdf latest number request.");
+        $latest_number = $reservePDF->getLatestNumber();
+        $response_code = $latest_number ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "取得最新檔案應用預約收件號為 $latest_number" : "無法取得最新檔案應用預約收件號";
+        Logger::getInstance()->info("XHR [reserve_pdf_list] $message");
+        echoJSONResponse($message, $response_code, array( "number" => $latest_number ));
+        break;
     case "reserve_pdf_list":
         Logger::getInstance()->info("XHR [reserve_pdf_list] get reserve pdf list request.");
-        $query = new SQLiteAdmReserveFilePDF();
         $count = 0;
-        $result = $query->search($_POST['start_ts'], $_POST['end_ts'], $_POST['keyword']);
-		// $result = $mock ? $cache->get('reserve_pdf_list') : $query->getRegForeignerPDF($_POST['start_ts'], $_POST['end_ts'], $_POST['keyword']);
-        // $cache->set('reserve_pdf_list', $result);
-        $count = count($result);
+        $result = $reservePDF->search($_POST['start_ts'], $_POST['end_ts'], $_POST['keyword']);
+		$count = count($result);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "取得 $count 筆檔案應用預約資料" : "無法取得檔案預約資料";
         Logger::getInstance()->info("XHR [reserve_pdf_list] $message");
         echoJSONResponse($message, $response_code, array( "raw" => $result ));
         break;
     case "add_reserve_pdf":
-        Logger::getInstance()->info("XHR [add_foreigner_pdf] add foreigner pdf request.");
+        Logger::getInstance()->info("XHR [add_reserve_pdf] add reserve pdf request.");
         $status = STATUS_CODE::DEFAULT_FAIL;
         $message = '未知的失敗';
         $filename = '';
@@ -67,14 +68,14 @@ switch ($_POST["type"]) {
                 Logger::getInstance()->error(__FILE__.': 檔案不是PDF。 '.print_r($_FILES, true));
             }
         }
-        Logger::getInstance()->info("XHR [add_foreigner_pdf] $message");
+        Logger::getInstance()->info("XHR [add_reserve_pdf] $message");
         echoJSONResponse($message, $status, array(
             'payload' => $payload
         ));
         break;
     
     case "edit_reserve_pdf":
-        Logger::getInstance()->info("XHR [edit_foreigner_pdf] edit foreigner pdf request.");
+        Logger::getInstance()->info("XHR [edit_reserve_pdf] edit reserve pdf request.");
         
         $status = STATUS_CODE::DEFAULT_FAIL;
         $message = '未知的失敗';
@@ -137,18 +138,18 @@ switch ($_POST["type"]) {
                 $message = "更新資料庫失敗 ($id)";
             }
         }
-        Logger::getInstance()->info("XHR [edit_foreigner_pdf] $message");
+        Logger::getInstance()->info("XHR [edit_reserve_pdf] $message");
         echoJSONResponse($message, $status, array(
             'payload' => $payload
         ));
         break;
     case "remove_reserve_pdf":
-        Logger::getInstance()->info("XHR [remove_foreigner_pdf] remove foreigner pdf request.");
+        Logger::getInstance()->info("XHR [remove_reserve_pdf] remove reserve pdf request.");
         $id = $_POST['id'];
-        $result = $query->removeRegForeignerPDF($id);
+        $result = $reservePDF->removeReservePDF($id);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
-        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除外國人PDF資料 ($id)" : "無法刪除外國人PDF資料 ($id)";
-        Logger::getInstance()->info("XHR [remove_foreigner_pdf] $message");
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已刪除檔案預約PDF資料 ($id)" : "無法刪除外國人PDF資料 ($id)";
+        Logger::getInstance()->info("XHR [remove_reserve_pdf] $message");
         echoJSONResponse($message, $response_code);
         break;
     default:
