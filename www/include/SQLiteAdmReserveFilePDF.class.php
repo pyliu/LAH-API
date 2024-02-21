@@ -114,8 +114,8 @@ class SQLiteAdmReserveFilePDF {
             $stm->bindParam(':pid', $post['pid']);
             $stm->bindParam(':pname', $post['pname']);
             $stm->bindParam(':note', $post['note']);
-            $stm->bindValue(':createtime', time());
-            $stm->bindValue(':endtime', time());
+            $stm->bindValue(':createtime', $post['createtime'] ?? time());
+            $stm->bindValue(':endtime', $post['endtime']);
 
             return $stm->execute() === FALSE ? false : $this->getLastInsertedId();
         }
@@ -127,15 +127,15 @@ class SQLiteAdmReserveFilePDF {
         $number = $post['number'];
         $pid = $post['pid'];
         $pname = $post['pname'];
+        $note = $post['note'];
+        $endtime = $post['endtime'];
         Logger::getInstance()->warning(__METHOD__.": 更新檔案預約資料。(id: $id, number: $number, pid: $pid, pname: $pname)");
-        $stm = $this->db->prepare("UPDATE adm_reserve_file_pdf SET number = :number, pid = :pid, pname = :pname, note = :note, createtime = :createtime, endtime = :endtime WHERE id = :id");
+        $stm = $this->db->prepare("UPDATE adm_reserve_file_pdf SET pid = :pid, pname = :pname, note = :note, endtime = :endtime WHERE id = :id");
         $stm->bindParam(':id', $id);
-        $stm->bindParam(':number', $number);
-        $stm->bindParam(':pid', $fid);
+        $stm->bindParam(':pid', $pid);
         $stm->bindParam(':pname', $pname);
-        $stm->bindParam(':note', $post['note']);
-        $stm->bindParam(':createtime', $post['createtime']);
-        $stm->bindValue(':endtime', $post['endtime']);
+        $stm->bindParam(':note', $note);
+        $stm->bindParam(':endtime', $endtime);
         return $stm->execute() !== FALSE;
     }
 

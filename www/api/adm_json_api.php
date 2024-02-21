@@ -36,25 +36,25 @@ switch ($_POST["type"]) {
             if (strtoupper($extension) === 'PDF') {
                 $tmp_file = $_FILES['file']['tmp_name'];
         
-                $payload['year'] = $year = $_POST['year'];
-                $payload['number'] = $number = str_pad($_POST['number'], 6, '0', STR_PAD_LEFT);;
-                $payload['fid'] = $fid = $_POST['fid'];
-                $payload['fname'] = $fname = $_POST['fname'];
+                $payload['number'] = $_POST['number'];
+                $payload['pid'] = $fid = $_POST['pid'];
+                $payload['pname'] = $fname = $_POST['pname'];
                 $payload['note'] = $note = $_POST['note'];
+                $payload['createtime'] = $_POST['createtime'];
+                $payload['endtime'] = $_POST['endtime'];
         
                 // make sure the parent dir has been created
-                $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.$year;
+                $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.'adm_reserve_file';
                 if (!file_exists($parent_dir) || !is_dir($parent_dir)) {
                     Logger::getInstance()->info("建立 $parent_dir ...");
                     @mkdir($parent_dir, 0777, true);
                 }
                 
-                $to_file = $parent_dir.DIRECTORY_SEPARATOR.$number."_".$fid."_".$fname.".".$extension;
+                $to_file = $parent_dir.DIRECTORY_SEPARATOR.$payload['number'].".".$extension;
                 $moved = move_uploaded_file($tmp_file, $to_file);
                 if ($moved) {
                     // cont. to add database record ...
-                    $sqlite_pdf = new SQLiteRegForeignerPDF();
-                    $row_id = $sqlite_pdf->add($_POST);
+                    $row_id = $reservePDF->add($_POST);
                     $status = $row_id !== false ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
                     $message = $status === STATUS_CODE::SUCCESS_NORMAL ? "已新增資料並儲存PDF完成" : "於資料庫新增資料失敗";
                     $payload['file'] = $to_file;
@@ -83,52 +83,39 @@ switch ($_POST["type"]) {
         $payload = array();
         // primary key in DB
         $payload['id'] = $id = $_POST['id'];
-        $payload['year'] = $year = $_POST['year'];
-        $payload['number'] = $number = str_pad($_POST['number'], 6, '0', STR_PAD_LEFT);;
-        $payload['fid'] = $fid = $_POST['fid'];
-        $payload['fname'] = $fname = $_POST['fname'];
-        $payload['note'] = $note = $_POST['note'];
-        $payload['modifytime'] = $modifytime = time();
+        $payload['number'] = $_POST['number'];
+        $payload['pid'] = $_POST['pid'];
+        $payload['pname'] = $_POST['pname'];
+        $payload['note'] = $_POST['note'];
+        $payload['createtime'] = $_POST['createtime'];
+        $payload['endtime'] = $_POST['endtime'];
 
-        $rfpdf = new SQLiteRegForeignerPDF();
-        $record = $rfpdf->getOne($id);
+        $record = $reservePDF->getOne($id);
 
         if ($record === false) {
             $status = STATUS_CODE::FAIL_NOT_FOUND;
             $message = "資料庫無法找到資料 ($id)";
         } else {
-            $result = $rfpdf->update($_POST);
+            $result = $reservePDF->update($payload);
             if ($result === true) {
                 // 更新成功
                 $status = STATUS_CODE::SUCCESS_NORMAL;
                 $message = "資料庫資料已更新($id)";
-                $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.$year;
-                $orig_file = $parent_dir.DIRECTORY_SEPARATOR.$record['number']."_".$record['fid']."_".$record['fname'].".pdf";
-                $new_file = $parent_dir.DIRECTORY_SEPARATOR.$number."_".$fid."_".$fname.".pdf";
-                // rename orig file
-                $rename_result = @rename($orig_file, $new_file);
-                if ($rename_result) {
-                    $orig_file = $new_file;
-                } else {
-                    $log = "更名 ".ltrim($orig_file, $parent_dir.DIRECTORY_SEPARATOR)." 至 ".ltrim($new_file, $parent_dir.DIRECTORY_SEPARATOR)." 失敗";
-                    $message .= "-($log)";
-                    Logger::getInstance()->error("⚠ $log");
-                }
-
+                $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.'adm_reserve_file';
+                $to_file = $parent_dir.DIRECTORY_SEPARATOR.$record['number'].".pdf";
                 // handle upload new pdf file
                 if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
                     // remove orig pdf
-                    $unlink_result = @unlink($orig_file);
+                    $unlink_result = @unlink($to_file);
                     if (!$unlink_result) {
-                        $message .= "-(刪除 ".ltrim($orig_file, $parent_dir.DIRECTORY_SEPARATOR)." 檔案失敗)";
-                        Logger::getInstance()->error("⚠ 刪除 $orig_file 檔案失敗!");
+                        $message .= "-(刪除 ".ltrim($to_file, $parent_dir.DIRECTORY_SEPARATOR)." 檔案失敗)";
+                        Logger::getInstance()->error("⚠ 刪除 $to_file 檔案失敗!");
                     }
                     // move uploaded file
                     $filename = $_FILES['file']['name'];
                     $extension = pathinfo($filename, PATHINFO_EXTENSION);
                     if (strtoupper($extension) === 'PDF') {
                         $tmp_file = $_FILES['file']['tmp_name'];
-                        $to_file = $parent_dir.DIRECTORY_SEPARATOR.$number."_".$fid."_".$fname.".".$extension;
                         $moved = move_uploaded_file($tmp_file, $to_file);
                         $message .= $moved ? '-(PDF檔案置換成功)' : '-(PDF檔置換失敗)';
                     }
