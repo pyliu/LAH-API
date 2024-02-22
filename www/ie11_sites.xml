@@ -1,0 +1,51 @@
+<site-list version="9">
+  <created-by>
+    <tool>EMIESiteListManager</tool>
+    <version>12.0.0.0</version>
+    <date-created>02/22/2024 07:05:37</date-created>
+  </created-by>
+  <site url="220.1.34.161">
+    <compat-mode>IE8</compat-mode>
+    <open-in>IE11</open-in>
+  </site>
+  <site url="220.1.34.205">
+    <compat-mode>IE8</compat-mode>
+    <open-in>IE11</open-in>
+  </site>
+  <site url="220.1.34.206">
+    <compat-mode>IE8</compat-mode>
+    <open-in>IE11</open-in>
+  </site>
+  <site url="220.1.34.207">
+    <compat-mode>IE8</compat-mode>
+    <open-in>IE11</open-in>
+  </site>
+  <site url="220.1.34.62">
+    <compat-mode>IE8</compat-mode>
+    <open-in>IE11</open-in>
+  </site>
+  <site url="220.1.34.156">
+    <compat-mode>IE8</compat-mode>
+    <open-in>IE11</open-in>
+  </site>
+  <site url="220.1.34.60">
+    <compat-mode>IE8</compat-mode>
+    <open-in>IE11</open-in>
+  </site>
+  <site url="220.1.34.118">
+    <compat-mode>IE8</compat-mode>
+    <open-in>IE11</open-in>
+  </site>
+  <site url="220.1.34.162">
+    <compat-mode>IE8</compat-mode>
+    <open-in>IE11</open-in>
+  </site>
+  <site url="220.1.34.15/NLOWeb/">
+    <compat-mode>Default</compat-mode>
+    <open-in>IE11</open-in>
+  </site>
+  <site url="220.5.61.53/message/index.jsp">
+    <compat-mode>Default</compat-mode>
+    <open-in>IE11</open-in>
+  </site>
+</site-list>
