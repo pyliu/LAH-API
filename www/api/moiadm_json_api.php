@@ -15,7 +15,7 @@ switch ($_POST["type"]) {
 		$keyword = $_POST['keyword'];
 		$rows = $mock ? $cache->get('moiadm_smslog') : $moiadm->getSMSLogRecords($keyword);
 		$cache->set('moiadm_smslog', $rows);
-		$message = is_array($rows) ? "目前查到 MOIADM.SMSLog 裡有 ".count($rows)." 筆資料" : '查詢 MOICAT.RXSEQ 失敗';
+		$message = is_array($rows) ? "目前查到 MOIADM.SMSLog 裡有 ".count($rows)." 筆資料" : '查詢 MOIADM.SMSLog 失敗';
 		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
 		Logger::getInstance()->info("XHR [moiadm_smslog] $message");
 		echoJSONResponse($message, $status_code, array(
