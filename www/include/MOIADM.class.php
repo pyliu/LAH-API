@@ -25,7 +25,7 @@ class MOIADM {
 			-- SMS Log 查詢
 			select * from MOIADM.SMSLOG t
 			where 1=1
-				and (ms14 like '%' || :bv_keyword || '%' OR MS_MAIL like '%' || :bv_keyword || '%')
+				and (ms14 like '%' || :bv_keyword || '%' OR MS_MAIL like '%' || :bv_keyword || '%' OR MS_NOTE like '%' || :bv_keyword || '%')
 			order by ms07_1 desc, ms07_2 desc
 		");
 		$this->db_wrapper->getDB()->bind(":bv_keyword", $keyword);
