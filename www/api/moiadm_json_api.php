@@ -13,7 +13,23 @@ switch ($_POST["type"]) {
 	case "moiadm_smslog":
 		Logger::getInstance()->info("XHR [moiadm_smslog] get sms log record request.");
 		$keyword = $_POST['keyword'];
-		$rows = $mock ? $cache->get('moiadm_smslog') : $moiadm->getSMSLogRecords($keyword);
+		$type = $_POST['searchType'];
+		switch ($type) {
+			case 'date':
+				$rows = $mock ? $cache->get('moiadm_smslog') : $moiadm->getSMSLogRecordsByDate($keyword);
+				break;
+			case 'cell':
+				$rows = $mock ? $cache->get('moiadm_smslog') : $moiadm->getSMSLogRecordsByCell($keyword);
+				break;
+			case 'note':
+				$rows = $mock ? $cache->get('moiadm_smslog') : $moiadm->getSMSLogRecordsByNote($keyword);
+				break;
+			case 'email':
+				$rows = $mock ? $cache->get('moiadm_smslog') : $moiadm->getSMSLogRecordsByEmail($keyword);
+				break;
+			default:
+				$rows = $mock ? $cache->get('moiadm_smslog') : $moiadm->getSMSLogRecords($keyword);
+		}
 		$cache->set('moiadm_smslog', $rows);
 		$message = is_array($rows) ? "目前查到 MOIADM.SMSLog 裡有 ".count($rows)." 筆資料" : '查詢 MOIADM.SMSLog 失敗';
 		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
