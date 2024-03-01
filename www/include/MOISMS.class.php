@@ -4,6 +4,20 @@ require_once("OraDBWrapper.class.php");
 require_once("System.class.php");
 require_once("Cache.class.php");
 
+/** json response schema
+	{ key: 'MS03', label: '收件年', sortable: true },
+	{ key: 'MS04_1', label: '收件字', sortable: true },
+	{ key: 'MS04_2', label: '收件字號', sortable: true },
+	{ key: 'MS_TYPE', label: '案件種類', sortable: true },
+	{ key: 'MS07_1', label: '傳送日期', sortable: true },
+	{ key: 'MS07_2', label: '傳送時間', sortable: true },
+	{ key: 'MS14', label: '手機號碼', sortable: true },
+	{ key: 'MS_MAIL', label: '電子郵件', sortable: true },
+	// { key: 'MS30', label: '傳送狀態', sortable: true },
+	{ key: 'MS31', label: '傳送結果', sortable: true },
+	// { key: 'MS33', label: '傳送紀錄', sortable: true },
+	{ key: 'MS_NOTE', label: '傳送內容', sortable: true }
+ */
 class MOISMS {
 	private $db_wrapper = null;
 
