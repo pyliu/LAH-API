@@ -12,7 +12,7 @@ $mock = $system->isMockMode();
 switch ($_POST["type"]) {
 	case "moisms_log_query":
 		Logger::getInstance()->info("XHR [moisms_log_query] get sms log record request.");
-		$keyword = $_POST['keyword'];
+		$keyword = mb_convert_encoding($_POST['keyword'], 'BIG5', 'UTF-8');
 		$type = $_POST['searchType'];
 		switch ($type) {
 			case 'date':
