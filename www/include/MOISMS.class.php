@@ -35,9 +35,35 @@ class MOISMS {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
+		
+/** json response schema
+	{ key: 'MS03', label: '收件年', sortable: true },
+	{ key: 'MS04_1', label: '收件字', sortable: true },
+	{ key: 'MS04_2', label: '收件字號', sortable: true },
+	{ key: 'MS_TYPE', label: '案件種類', sortable: true },
+	{ key: 'MS07_1', label: '傳送日期', sortable: true },
+	{ key: 'MS07_2', label: '傳送時間', sortable: true },
+	{ key: 'MS14', label: '手機號碼', sortable: true },
+	{ key: 'MS_MAIL', label: '電子郵件', sortable: true },
+	// { key: 'MS30', label: '傳送狀態', sortable: true },
+	{ key: 'MS31', label: '傳送結果', sortable: true },
+	// { key: 'MS33', label: '傳送紀錄', sortable: true },
+	{ key: 'MS_NOTE', label: '傳送內容', sortable: true }
+ */
 		$this->db_wrapper->getDB()->parse("
 			-- SMS Log 查詢
-			select * from MOIADM.SMSLOG t
+			select
+			   MS03 AS SMS_YEAR,
+				 MS04_1 AS SMS_CODE,
+				 MS04_2 AS SMS_NUMBER,
+				 MS_TYPE AS SMS_TYPE,
+				 MS07_1 AS SMS_DATE,
+				 MS07_2 AS SMS_TIME,
+				 MS14 AS SMS_CELL,
+				 MS_MAIL AS SMS_MAIL,
+				 MS31 AS SMS_RESULT,
+				 MS_NOTE AS SMS_CONTENT
+		  from MOIADM.SMSLOG t
 			where 1=1
 				and (ms14 like '%' || :bv_keyword || '%' OR MS_MAIL like '%' || :bv_keyword || '%' OR MS07_1 like '%' || :bv_keyword || '%')
 			order by ms07_1 desc, ms07_2 desc
@@ -54,7 +80,18 @@ class MOISMS {
 			return array();
 		}
 		$this->db_wrapper->getDB()->parse("
-			select * from MOIADM.SMSLOG t
+			select
+				MS03 AS SMS_YEAR,
+				MS04_1 AS SMS_CODE,
+				MS04_2 AS SMS_NUMBER,
+				MS_TYPE AS SMS_TYPE,
+				MS07_1 AS SMS_DATE,
+				MS07_2 AS SMS_TIME,
+				MS14 AS SMS_CELL,
+				MS_MAIL AS SMS_MAIL,
+				MS31 AS SMS_RESULT,
+				MS_NOTE AS SMS_CONTENT
+			from MOIADM.SMSLOG t
 			where 1=1
 				and (MS07_1 like '%' || :bv_keyword || '%')
 			order by ms07_1 desc, ms07_2 desc
@@ -71,7 +108,18 @@ class MOISMS {
 			return array();
 		}
 		$this->db_wrapper->getDB()->parse("
-			select * from MOIADM.SMSLOG t
+			select
+				MS03 AS SMS_YEAR,
+				MS04_1 AS SMS_CODE,
+				MS04_2 AS SMS_NUMBER,
+				MS_TYPE AS SMS_TYPE,
+				MS07_1 AS SMS_DATE,
+				MS07_2 AS SMS_TIME,
+				MS14 AS SMS_CELL,
+				MS_MAIL AS SMS_MAIL,
+				MS31 AS SMS_RESULT,
+				MS_NOTE AS SMS_CONTENT
+				from MOIADM.SMSLOG t
 			where 1=1
 				and (MS14 like '%' || :bv_keyword || '%')
 			order by ms07_1 desc, ms07_2 desc
@@ -88,7 +136,18 @@ class MOISMS {
 			return array();
 		}
 		$this->db_wrapper->getDB()->parse("
-			select * from MOIADM.SMSLOG t
+			select
+				MS03 AS SMS_YEAR,
+				MS04_1 AS SMS_CODE,
+				MS04_2 AS SMS_NUMBER,
+				MS_TYPE AS SMS_TYPE,
+				MS07_1 AS SMS_DATE,
+				MS07_2 AS SMS_TIME,
+				MS14 AS SMS_CELL,
+				MS_MAIL AS SMS_MAIL,
+				MS31 AS SMS_RESULT,
+				MS_NOTE AS SMS_CONTENT
+			from MOIADM.SMSLOG t
 			where 1=1
 				and (MS_MAIL like '%' || :bv_keyword || '%')
 			order by ms07_1 desc, ms07_2 desc
@@ -105,7 +164,18 @@ class MOISMS {
 			return array();
 		}
 		$this->db_wrapper->getDB()->parse("
-			select * from MOIADM.SMSLOG t
+			select
+				MS03 AS SMS_YEAR,
+				MS04_1 AS SMS_CODE,
+				MS04_2 AS SMS_NUMBER,
+				MS_TYPE AS SMS_TYPE,
+				MS07_1 AS SMS_DATE,
+				MS07_2 AS SMS_TIME,
+				MS14 AS SMS_CELL,
+				MS_MAIL AS SMS_MAIL,
+				MS31 AS SMS_RESULT,
+				MS_NOTE AS SMS_CONTENT
+			from MOIADM.SMSLOG t
 			where 1=1
 				and (MS_NOTE like '%' || :bv_keyword || '%')
 			order by ms07_1 desc, ms07_2 desc
