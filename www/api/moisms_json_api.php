@@ -14,16 +14,24 @@ switch ($_POST["type"]) {
 		Logger::getInstance()->info("XHR [moisms_log_query] get sms log record request.");
 		// possible to search by content, so needs to do BIG5 convertion here
 		$keyword = mb_convert_encoding($_POST['keyword'], 'BIG5', 'UTF-8');
+		
 		$moiadm_rows = $mock ? $cache->get('moisms_log_query_moiadm') : $moisms->getMOIADMSMSLogRecords($keyword);
 		$cache->set('moisms_log_query_moiadm', $moiadm_rows);
+		Logger::getInstance()->info("XHR [moisms_log_query] MOIADM query has ".count($moiadm_rows)." records");
+
 		$sms98_rows = $mock ? $cache->get('moisms_log_query_sms98') : $moisms->getSMS98LOG_SMSRecords($keyword);
 		$cache->set('moisms_log_query_sms98', $sms98_rows);
+		Logger::getInstance()->info("XHR [moisms_log_query] SMS98 query has ".count($sms98_rows)." records");
+
 		$ma04_rows = $mock ? $cache->get('moisms_log_query_ma04') : $moisms->getMOICASSMS_MA04Records($keyword);
 		$cache->set('moisms_log_query_ma04', $ma04_rows);
+		Logger::getInstance()->info("XHR [moisms_log_query] MOICAS MA04 query has ".count($ma04_rows)." records");
+
 		$ma05_rows = $mock ? $cache->get('moisms_log_query_ma05') : $moisms->getMOICASSMS_MA05Records($keyword);
 		$cache->set('moisms_log_query_ma05', $ma05_rows);
+		Logger::getInstance()->info("XHR [moisms_log_query] MOICAS MA05 query has ".count($ma05_rows)." records");
 		
-		$rows = $moiadm_rows + $sms98_rows + $ma04_rows + $ma05_rows;
+		$rows = array_merge($moiadm_rows, $sms98_rows, $ma04_rows, $ma05_rows);
 		// sort by datetime desc
 		function DATETIME_CMP($a, $b)
 		{
