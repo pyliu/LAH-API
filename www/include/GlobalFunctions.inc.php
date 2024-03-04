@@ -358,9 +358,9 @@ function sameArrayCompare($array1, $array2) {
       if (!isset($array2[$key])) {
         return false;
       }
-      if (!deepArrayCompare($array1[$key], $array2[$key])) {
-        return false;
-      }
+    //   if (!deepArrayCompare($array1[$key], $array2[$key])) {
+    //     return false;
+    //   }
     }
     return true;
 }

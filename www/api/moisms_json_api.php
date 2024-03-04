@@ -12,26 +12,26 @@ $mock = $system->isMockMode();
 switch ($_POST["type"]) {
 	case "moisms_log_query":
 		Logger::getInstance()->info("XHR [moisms_log_query] get sms log record request.");
+		// possible to search by content, so needs to do BIG5 convertion here
 		$keyword = mb_convert_encoding($_POST['keyword'], 'BIG5', 'UTF-8');
-		$type = $_POST['searchType'];
-		switch ($type) {
-			case 'date':
-				$rows = $mock ? $cache->get('moisms_log_query') : $moisms->getMOIADMSMSLogRecordsByDate($keyword);
-				break;
-			case 'cell':
-				$rows = $mock ? $cache->get('moisms_log_query') : $moisms->getMOIADMSMSLogRecordsByCell($keyword);
-				break;
-			case 'note':
-				$rows = $mock ? $cache->get('moisms_log_query') : $moisms->getMOIADMSMSLogRecordsByNote($keyword);
-				break;
-			case 'email':
-				$rows = $mock ? $cache->get('moisms_log_query') : $moisms->getMOIADMSMSLogRecordsByEmail($keyword);
-				break;
-			default:
-				$rows = $mock ? $cache->get('moisms_log_query') : $moisms->getMOIADMSMSLogRecords($keyword);
+		$moiadm_rows = $mock ? $cache->get('moisms_log_query_moiadm') : $moisms->getMOIADMSMSLogRecords($keyword);
+		$cache->set('moisms_log_query_moiadm', $moiadm_rows);
+		$sms98_rows = $mock ? $cache->get('moisms_log_query_sms98') : $moisms->getSMS98LOG_SMSRecords($keyword);
+		$cache->set('moisms_log_query_sms98', $sms98_rows);
+		$ma04_rows = $mock ? $cache->get('moisms_log_query_ma04') : $moisms->getMOICASSMS_MA04Records($keyword);
+		$cache->set('moisms_log_query_ma04', $ma04_rows);
+		$ma05_rows = $mock ? $cache->get('moisms_log_query_ma05') : $moisms->getMOICASSMS_MA05Records($keyword);
+		$cache->set('moisms_log_query_ma05', $ma05_rows);
+		
+		$rows = $moiadm_rows + $sms98_rows + $ma04_rows + $ma05_rows;
+		// sort by datetime desc
+		function DATETIME_CMP($a, $b)
+		{
+				return strcmp($b['SMS_DATE'].$b['SMS_TIME'], $a['SMS_DATE'].$a['SMS_TIME']);
 		}
-		$cache->set('moisms_log_query', $rows);
-		$message = is_array($rows) ? "目前查到 MOIADM.SMSLog 裡有 ".count($rows)." 筆資料" : '查詢 MOIADM.SMSLog 失敗';
+		usort($rows, "DATETIME_CMP");
+
+		$message = is_array($rows) ? "目前查到 ".count($rows)." 筆資料" : '查詢SMS Log失敗';
 		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
 		Logger::getInstance()->info("XHR [moisms_log_query] $message");
 		echoJSONResponse($message, $status_code, array(
