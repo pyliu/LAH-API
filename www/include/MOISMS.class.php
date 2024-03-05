@@ -81,7 +81,7 @@ class MOISMS {
 				TO_CHAR( t.send_time, 'HH24MISS' ) AS SMS_TIME,
 				t.PHONE AS SMS_CELL,
 				t.ID AS SMS_MAIL,
-				(CASE WHEN t.LOG_REMARK = 'OK!' THEN 'S' WHEN t.LOG_REMARK = 'OK!(".mb_convert_encoding('自定', 'BIG5', 'UTF-8').")' THEN 'S' ELSE t.LOG_REMARK END) AS SMS_RESULT,
+				(CASE WHEN t.LOG_REMARK = 'OK!' THEN 'S' ELSE t.LOG_REMARK END) AS SMS_RESULT,
 				t.SMS_BODY AS SMS_CONTENT
 			from SMS98.LOG_SMS t
 			where 1=1
