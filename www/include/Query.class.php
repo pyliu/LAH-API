@@ -326,23 +326,29 @@ class Query {
 		$num_key = "RM03";
 		if (array_key_exists($code, SUR_WORD)) {
 			$this->db_wrapper->getDB()->parse("
-				SELECT * from MOICAS.CMSMS t
-				WHERE MM01 = :bv_year AND MM02 = :bv_code AND rownum = 1
-				ORDER BY MM01 DESC, MM03 DESC
+				SELECT * FROM (
+					SELECT * from MOICAS.CMSMS t
+					WHERE MM01 = :bv_year AND MM02 = :bv_code AND rownum = 1
+					ORDER BY MM03 DESC
+				) WHERE ROWNUM = 1
 			");
 			$num_key = "MM03";
 		} else if (array_key_exists($code, PRC_WORD)) {
 			$this->db_wrapper->getDB()->parse("
-				SELECT * from MOIPRC.PSCRN t
-				WHERE SS03 = :bv_year AND SS04_1 = :bv_code AND rownum = 1
-				ORDER BY SS03 DESC, SS04_1 DESC
+				SELECT * FROM (
+					SELECT * from MOIPRC.PSCRN t
+					WHERE SS03 = :bv_year AND SS04_1 = :bv_code
+					ORDER BY SS04_1 DESC
+				) WHERE ROWNUM = 1
 			");
 			$num_key = "SS04_2";
 		} else  {
 			$this->db_wrapper->getDB()->parse("
-				SELECT * from MOICAS.CRSMS t
-				WHERE RM01 = :bv_year AND RM02 = :bv_code AND rownum = 1
-				ORDER BY RM01 DESC, RM03 DESC
+				SELECT * FROM (
+					SELECT * from MOICAS.CRSMS t
+					WHERE RM01 = :bv_year AND RM02 = :bv_code
+					ORDER BY RM03 DESC
+				) WHERE ROWNUM = 1
 			");
 		}
 		
