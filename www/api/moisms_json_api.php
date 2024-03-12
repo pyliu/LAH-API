@@ -46,27 +46,27 @@ switch ($_POST["type"]) {
 			"raw" => $rows
 		));
 		break;
-	case "moisms_log_stats":
-		Logger::getInstance()->info("XHR [moisms_log_stats] get sms log stats request.");
+	case "moisms_log_query_by_date":
+		Logger::getInstance()->info("XHR [moisms_log_query_by_date] get sms log stats request.");
 
 		$st = $_POST['st'];
 		$ed = $_POST['ed'];
 		
-		$moiadm_rows = $mock ? $cache->get('moisms_log_stats_moiadm') : $moisms->getMOIADMSMSLogRecordsByDate($st, $ed);
-		$cache->set('moisms_log_stats_moiadm', $moiadm_rows);
-		Logger::getInstance()->info("XHR [moisms_log_stats] MOIADM query has ".count($moiadm_rows)." records");
+		$moiadm_rows = $mock ? $cache->get('moisms_log_query_by_date_moiadm') : $moisms->getMOIADMSMSLogRecordsByDate($st, $ed);
+		$cache->set('moisms_log_query_by_date_moiadm', $moiadm_rows);
+		Logger::getInstance()->info("XHR [moisms_log_query_by_date] MOIADM query has ".count($moiadm_rows)." records");
 
-		$sms98_rows = $mock ? $cache->get('moisms_log_stats_sms98') : $moisms->getSMS98LOG_SMSRecordsByDate($st, $ed);
-		$cache->set('moisms_log_stats_sms98', $sms98_rows);
-		Logger::getInstance()->info("XHR [moisms_log_stats] SMS98 query has ".count($sms98_rows)." records");
+		$sms98_rows = $mock ? $cache->get('moisms_log_query_by_date_sms98') : $moisms->getSMS98LOG_SMSRecordsByDate($st, $ed);
+		$cache->set('moisms_log_query_by_date_sms98', $sms98_rows);
+		Logger::getInstance()->info("XHR [moisms_log_query_by_date] SMS98 query has ".count($sms98_rows)." records");
 
-		$ma04_rows = $mock ? $cache->get('moisms_log_stats_ma04') : $moisms->getMOICASSMS_MA04RecordsByDate($st, $ed);
-		$cache->set('moisms_log_stats_ma04', $ma04_rows);
-		Logger::getInstance()->info("XHR [moisms_log_stats] MOICAS MA04 query has ".count($ma04_rows)." records");
+		$ma04_rows = $mock ? $cache->get('moisms_log_query_by_date_ma04') : $moisms->getMOICASSMS_MA04RecordsByDate($st, $ed);
+		$cache->set('moisms_log_query_by_date_ma04', $ma04_rows);
+		Logger::getInstance()->info("XHR [moisms_log_query_by_date] MOICAS MA04 query has ".count($ma04_rows)." records");
 
-		$ma05_rows = $mock ? $cache->get('moisms_log_stats_ma05') : $moisms->getMOICASSMS_MA05RecordsByDate($st, $ed);
-		$cache->set('moisms_log_stats_ma05', $ma05_rows);
-		Logger::getInstance()->info("XHR [moisms_log_stats] MOICAS MA05 query has ".count($ma05_rows)." records");
+		$ma05_rows = $mock ? $cache->get('moisms_log_query_by_date_ma05') : $moisms->getMOICASSMS_MA05RecordsByDate($st, $ed);
+		$cache->set('moisms_log_query_by_date_ma05', $ma05_rows);
+		Logger::getInstance()->info("XHR [moisms_log_query_by_date] MOICAS MA05 query has ".count($ma05_rows)." records");
 		
 		$rows = array_merge($moiadm_rows, $sms98_rows, $ma04_rows, $ma05_rows);
 		// sort by datetime desc
@@ -78,7 +78,7 @@ switch ($_POST["type"]) {
 
 		$message = is_array($rows) ? "目前查到 ".count($rows)." 筆資料" : '查詢SMS Log失敗';
 		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
-		Logger::getInstance()->info("XHR [moisms_log_stats] $message");
+		Logger::getInstance()->info("XHR [moisms_log_query_by_date] $message");
 		echoJSONResponse($message, $status_code, array(
 			"raw" => $rows
 		));
