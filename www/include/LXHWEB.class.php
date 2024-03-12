@@ -135,9 +135,9 @@ class LXHWEB {
         $alphabet = substr(System::getInstance()->getSiteCode(), 1);
         $sql = "
             SELECT *
-            FROM L1H${alphabet}0H03.PSCRN t
+            FROM L1H".$alphabet."0H03.PSCRN t
             WHERE 1 = 1
-                AND t.SS04_1 in ('H${alphabet}A1', 'H${alphabet}B1', 'H${alphabet}C1', 'H${alphabet}D1', 'H${alphabet}E1', 'H${alphabet}F1', 'H${alphabet}G1', 'H${alphabet}H1')
+                AND t.SS04_1 in ('H".$alphabet."A1', 'H".$alphabet."B1', 'H".$alphabet."C1', 'H".$alphabet."D1', 'H".$alphabet."E1', 'H".$alphabet."F1', 'H".$alphabet."G1', 'H".$alphabet."H1')
                 AND t.SS99 IS NULL
         ";
         $this->getDB()->parse($sql);
@@ -153,9 +153,9 @@ class LXHWEB {
         }
         $sql = "
             SELECT *
-            FROM L1H${remote}0H03.PSCRN t
+            FROM L1H".$remote."0H03.PSCRN t
             WHERE 1 = 1
-                AND t.SS04_1 = 'H${remote}${local}1'
+                AND t.SS04_1 = 'H".$remote.$local."1'
                 AND t.SS99 IS NULL
         ";
         $this->getDB()->parse($sql);
@@ -168,14 +168,14 @@ class LXHWEB {
     public function getREALPRICE1_MAP($site, $st, $ed) {
         // echo "$site $st $ed <br/>";
         // find the cases we want, e.g. L1HB0H03.CRSMS
-        $dbUser = "L1${site}0H03";
+        $dbUser = "L1".$site."0H03";
         $alphabet = substr(System::getInstance()->getSiteCode(), 1);
-        $code = "${site}${alphabet}1";
+        $code = $site.$alphabet."1";
         $sql = "
             SELECT 
                 t.*
-            FROM ${dbUser}.CRSMS s -- need to filter according to RM07_1/RM09
-            LEFT JOIN ${dbUser}.REALPRICE1_MAP t
+            FROM ".$dbUser.".CRSMS s -- need to filter according to RM07_1/RM09
+            LEFT JOIN ".$dbUser.".REALPRICE1_MAP t
                 ON s.RM01 = t.P1MP_RM01
                 AND s.RM02 = t.P1MP_RM02
                 AND s.RM03 = t.P1MP_RM03
