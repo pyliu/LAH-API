@@ -28,6 +28,7 @@ class MOICAS
 		}
 		$this->db_wrapper->getDB()->parse("
 			select * from MOICAS.CMCRD t
+			left join MOICAS.CMCLD s ON cl04 = mc02 AND cl05 = mc01
 			where 1=1
 				and mc01 = :bv_year
 				and mc02 like :bv_Y_record
@@ -39,20 +40,73 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
+	/**
+	 * Remove the link data for CMCRD 
+	 */
+	public function removeCMCLDRecords($cl05, $cl04)
+	{
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
 
+		Logger::getInstance()->info(__METHOD__.": Going to remove CRCLD record. (CL04: $cl04, CL05: $cl05)");
+
+		$this->db_wrapper->getDB()->parse("
+		  delete from MOICAS.CMCLD
+			where 1=1
+				and CL04 = :bv_cl04
+				and CL05 = :bv_cl05
+		");
+		// CL04 - NO., e.g. Y00286
+		// CL05 - YEAR, e.g. 113
+		$this->db_wrapper->getDB()->bind(":bv_cl04", $cl04);
+		$this->db_wrapper->getDB()->bind(":bv_cl05", $cl05);
+		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+	}
+	/**
+	 * Remove the record data for CMCLD 
+	 */
 	public function removeCMCRDRecords($mc01, $mc02)
 	{
 		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
+
+		Logger::getInstance()->info(__METHOD__.": Going to remove CRCRD record. (MC01: $mc01, MC02: $mc02)");
+
 		$this->db_wrapper->getDB()->parse("
 		  delete from MOICAS.CMCRD
 			where 1=1
 				and mc01 = :bv_mc01
 				and mc02 = :bv_mc02
 		");
+		// MC01 - YEAR, e.g. 113
+		// MC02 - NO, e.g. Y00286
 		$this->db_wrapper->getDB()->bind(":bv_mc01", $mc01);
 		$this->db_wrapper->getDB()->bind(":bv_mc02", $mc02);
+		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+	}
+	/**
+	 * Set CMSMS operation state to 'A' (外業作業)
+	 */
+	public function setCMSMS_MM22_A($year, $code, $num)
+	{
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+
+		Logger::getInstance()->info(__METHOD__.": Going to set $year-$code-$num CMSMS MM22 to 'A'.");
+
+		$this->db_wrapper->getDB()->parse("
+			UPDATE MOICAS.CMSMS SET MM22='A' 
+			WHERE MM01 = :bv_year
+			  AND MM02 = :bv_code
+				AND MM03 = :bv_num
+		");
+		$num = str_pad($num, 6, '0');
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_num", $num);
 		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 	}
 	/**

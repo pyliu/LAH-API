@@ -42,13 +42,36 @@ switch ($_POST["type"]) {
 			"raw" => $rows
 		));
 		break;
-	case "remove_cmcrd_tmp_record":
-		Logger::getInstance()->info("XHR [remove_cmcrd_tmp_record] remove CMCRD temp record request.");
-		$result = $mock ? $cache->get('remove_cmcrd_tmp_record') : $moicas->removeCMCRDRecords($_POST['MC01'], $_POST['MC02']);
+	case "remove_sur_notify_application_tmp_record":
+		Logger::getInstance()->info("XHR [remove_sur_notify_application_tmp_record] remove CMCRD temp record request.");
+
+		$year = $_POST['MC01'];
+		$no = $_POST['MC02'];
+
+		$result = $mock ? $cache->get('remove_cmcrd_tmp_record') : $moicas->removeCMCRDRecords($year, $no);
 		$cache->set('remove_cmcrd_tmp_record', $result);
-		$message = $result !== false ? '刪除 '.$_POST['MC01'].'-'.$_POST['MC02'].' CMCRD 暫存檔成功' : '刪除 CMCRD 暫存檔失敗【'.$_POST['MC01'].', '.$_POST['MC02'].'】';
-		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
-		Logger::getInstance()->info("XHR [remove_cmcrd_tmp_record] $message");
+		$message = $result !== false ? '刪除 '.$year.'-'.$no.' CMCRD 暫存檔成功' : '刪除 CMCRD 暫存檔失敗【'.$_POST['MC01'].', '.$_POST['MC02'].'】';
+
+		$message .= " | ";
+
+		$result = $mock ? $cache->get('remove_cmcld_tmp_record') : $moicas->removeCMCLDRecords($year, $no);
+		$cache->set('remove_cmcld_tmp_record', $result);
+		$message .= $result !== false ? '刪除 '.$year.'-'.$no.' CMCLD 連結檔成功' : '刪除 CMCLD 連結檔失敗【'.$_POST['MC01'].', '.$_POST['MC02'].'】';
+
+		if (!empty($_POST['CODE'])) {
+			$year = $_POST['YEAR'];
+			$code = $_POST['CODE'];
+			$num = str_pad($_POST['NUM'], 6, '0');
+			$message .= " | ";
+
+			$result = $mock ? $cache->get('set_cmsms_MM22_A') : $moicas->setCMSMS_MM22_A($year, $code, $num);
+			$cache->set('set_cmsms_MM22_A', $result);
+			$tmp = '設定 '.$year.'-'.$code.'-'.$num.' 辦理情形為「外業作業」';
+			$message .= $result !== false ? $tmp.'成功' : $tmp.'失敗';
+		}
+
+		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+		Logger::getInstance()->info("XHR [remove_sur_notify_application_tmp_record] $message");
 		echoJSONResponse($message, $status_code, array(
 			"raw" => $result
 		));
