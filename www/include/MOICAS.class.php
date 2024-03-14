@@ -43,10 +43,15 @@ class MOICAS
 	/**
 	 * Remove the link data for CMCRD 
 	 */
-	public function cleanCMCLDCMCRDRecords($year)
+	public function cleanCMCLDCMCRDRecords($year = '')
 	{
+		global $this_year;
 		if (!$this->db_wrapper->reachable()) {
 			return false;
+		}
+
+		if (empty($year)) {
+			$year = $this_year;
 		}
 
 		Logger::getInstance()->info(__METHOD__.": Going to clean CMCLD&CMCRD record. (YEAR: $year)");
