@@ -43,13 +43,35 @@ class MOICAS
 	/**
 	 * Remove the link data for CMCRD 
 	 */
+	public function cleanCMCLDCMCRDRecords($year)
+	{
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+
+		Logger::getInstance()->info(__METHOD__.": Going to clean CMCLD&CMCRD record. (YEAR: $year)");
+
+		$this->db_wrapper->getDB()->parse("
+			DELETE FROM MOICAS.CMCRD
+			WHERE 1=1
+				AND MC01 = :bv_year
+				AND (MC01,MC02) NOT IN (SELECT CL05,CL04 FROM MOICAS.CMCLD)
+		");
+		// CL04 - NO., e.g. Y00286
+		// CL05 - YEAR, e.g. 113
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+	}
+	/**
+	 * Remove the link data for CMCRD 
+	 */
 	public function removeCMCLDRecords($cl05, $cl04)
 	{
 		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 
-		Logger::getInstance()->info(__METHOD__.": Going to remove CRCLD record. (CL04: $cl04, CL05: $cl05)");
+		Logger::getInstance()->info(__METHOD__.": Going to remove CMCLD record. (CL04: $cl04, CL05: $cl05)");
 
 		$this->db_wrapper->getDB()->parse("
 		  delete from MOICAS.CMCLD
@@ -72,7 +94,7 @@ class MOICAS
 			return false;
 		}
 
-		Logger::getInstance()->info(__METHOD__.": Going to remove CRCRD record. (MC01: $mc01, MC02: $mc02)");
+		Logger::getInstance()->info(__METHOD__.": Going to remove CMCRD record. (MC01: $mc01, MC02: $mc02)");
 
 		$this->db_wrapper->getDB()->parse("
 		  delete from MOICAS.CMCRD
