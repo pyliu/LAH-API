@@ -41,9 +41,9 @@ class MOICAS
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
 	/**
-	 * Remove the link data for CMCRD 
+	 * Remove the dangling(No CMCLD record link with) data of CMCRD
 	 */
-	public function cleanCMCLDCMCRDRecords($year = '')
+	public function removeDanglingCMCRDRecords($year = '')
 	{
 		global $this_year;
 		if (!$this->db_wrapper->reachable()) {
@@ -54,7 +54,7 @@ class MOICAS
 			$year = $this_year;
 		}
 
-		Logger::getInstance()->info(__METHOD__.": Going to clean CMCLD&CMCRD record. (YEAR: $year)");
+		Logger::getInstance()->info(__METHOD__.": Going to remove dangling record of CMCRD record. (YEAR: $year)");
 
 		$this->db_wrapper->getDB()->parse("
 			DELETE FROM MOICAS.CMCRD

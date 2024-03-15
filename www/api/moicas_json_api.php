@@ -42,6 +42,18 @@ switch ($_POST["type"]) {
 			"raw" => $rows
 		));
 		break;
+	case "remove_dangling_sur_notify_application_tmp_record":
+		Logger::getInstance()->info("XHR [remove_dangling_sur_notify_application_tmp_record] remove CMCRD temp record request.");
+		//removeDanglingCMCRDRecords
+		$result = $mock ? $cache->get('remove_dangling_sur_notify_application_tmp_record') : $moicas->removeDanglingCMCRDRecords($_POST['year']);
+		$cache->set('remove_dangling_sur_notify_application_tmp_record', $result);
+		$message = "清除CMCRD裡懸浮的暫存('Y%')資料".($result ? '成功' : '失敗');
+		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
+		Logger::getInstance()->info("XHR [remove_dangling_sur_notify_application_tmp_record] $message");
+		echoJSONResponse($message, $status_code, array(
+			"raw" => $result
+		));
+		break;
 	case "remove_sur_notify_application_tmp_record":
 		Logger::getInstance()->info("XHR [remove_sur_notify_application_tmp_record] remove CMCRD temp record request.");
 
