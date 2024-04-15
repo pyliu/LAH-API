@@ -26,8 +26,13 @@ class MOICAS
 		$year = str_pad($year, 3, '0', STR_PAD_LEFT);
 		$num = str_pad($num, 6, '0', STR_PAD_LEFT);
 
+		$tmp_date = timestampToDate(time(), 'TW');
+		$parts = explode(' ', $tmp_date);
+		$date_str = implode('', explode('-', $parts[0]));
+		$time_str = implode('', explode(':', $parts[1]));
+
 		$this->db_wrapper->getDB()->parse("
-			UPDATE MOICAS.CRSMS SET RM38 = '', RM39 = 'F' 
+			UPDATE MOICAS.CRSMS SET RM38 = '', RM39 = 'F' , RM40 = :bv_date, RM41 = :bv_time
 			WHERE RM01 = :bv_year
 			  AND RM02 = :bv_code
 				AND RM03 = :bv_num
@@ -36,6 +41,8 @@ class MOICAS
 		$this->db_wrapper->getDB()->bind(":bv_year", $year);
 		$this->db_wrapper->getDB()->bind(":bv_code", $code);
 		$this->db_wrapper->getDB()->bind(":bv_num", $num);
+		$this->db_wrapper->getDB()->bind(":bv_date", $date_str);
+		$this->db_wrapper->getDB()->bind(":bv_time", $time_str);
 		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 	}
 	/**
