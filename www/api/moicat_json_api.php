@@ -37,6 +37,20 @@ switch ($_POST["type"]) {
 			"caseno" => is_array($record) ? $record['XS03']."-".$record['XS04_1']."-".$record['XS04_2'] : '',
 		));
 		break;
+	case "moicat_rindx":
+		Logger::getInstance()->info("XHR [moicat_rindx] get query temp rindx request.");
+		$id = $_POST['year'];
+		$code = $_POST['code'];
+		$num = $_POST['num'];
+		$rows = $mock ? $cache->get('moicat_rindx') : $moicat->getRINDXRecords($year, $code, $num);
+		$cache->set('moicat_rindx', $rows);
+		$message = is_array($rows) ? "目前查到 MOICAT.RINDX 裡有 ".count($rows)." 筆資料" : '查詢 MOICAT.RXSEQ 失敗';
+		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
+		Logger::getInstance()->info("XHR [moicat_rindx] $message");
+		echoJSONResponse($message, $status_code, array(
+			"raw" => $rows
+		));
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

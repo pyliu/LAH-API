@@ -506,7 +506,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "crsms":
-		Logger::getInstance()->info("XHR [crsms] 查詢登記案件資料【".$_POST["id"]."】請求");
+		Logger::getInstance()->info("XHR [crsms] 依身分證號【".$_POST["id"]."】查詢登記案件資料請求");
 		$query_result = $mock ? $cache->get('crsms') : $query->getCRSMSCasesByPID($_POST["id"]);
 		$cache->set('crsms', $query_result);
 		if (empty($query_result)) {

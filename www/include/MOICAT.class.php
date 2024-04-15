@@ -73,4 +73,27 @@ class MOICAT {
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetch();
 	}
+	/**
+	 * Find reg case temp records
+	 */
+	public function getRINDXRecords($year, $code, $num) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		$year = str_pad($year, 3, '0', STR_PAD_LEFT);
+		$num = str_pad($num, 6, '0', STR_PAD_LEFT);
+		$this->db_wrapper->getDB()->parse("
+			-- 登記暫存檔
+			select * from MOICAT.RINDX t
+			where 1=1
+				and t.II03 = :bv_year
+				and II04_1 = :bv_code
+				and II04_2 = :bv_num
+		");
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_num", $num);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
 }
