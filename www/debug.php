@@ -12,15 +12,9 @@ try {
     echo "now is ".time()." s\n";
     echo "sec date is ".timestampToDate(time())."\n";
     echo "tw date is ".timestampToDate(time(), 'TW')."\n";
-
-    echo "The current read timeout is " . imap_timeout(IMAP_READTIMEOUT) . "\n";
-    echo "The current open timeout is " . imap_timeout(IMAP_OPENTIMEOUT) . "\n";
-    echo "The current write timeout is " . imap_timeout(IMAP_WRITETIMEOUT) . "\n";
-    echo "The current close timeout is " . imap_timeout(IMAP_CLOSETIMEOUT) . "\n";
-
-    $file = new SplFileInfo('d:\\DEV\\Land-Affairs-Helper\\www\\log\\log-2023-10-13.log');
-    echo "file modified ts: ".$file->getMTime()." month ago ts: ".(time() - 30 * 24 * 60 * 60)."\n";
-    echo "file modified date: ".date("Y-m-d H:i:s", $file->getMTime())." month ago date: ".date("Y-m-d H:i:s", time() - 30 * 24 * 60 * 60)."\n";
+    
+    echo "\$this_year now is " . $this_year . "\n";
+    echo "\$today now is " . $today . "\n";
 
 } catch(Exception $e) {
     die($e->getMessage());
