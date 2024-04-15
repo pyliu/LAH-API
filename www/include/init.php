@@ -55,9 +55,11 @@ set_exception_handler(function(Throwable $e) {
     Logger::getInstance()->error($e->getMessage());
 });
 
-$tw_date = new Datetime("now");
-$tw_date->modify("-1911 year");
-$this_year = ltrim($tw_date->format("Y"), "0");	// ex: 108
-$today = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080325
-$tw_date->modify("-1 week");
-$week_ago = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080318
+$tmp_date = timestampToDate(time(), 'TW');
+$parts = explode(' ', $tmp_date);
+$date_parts = explode('-', $parts[0]);
+$time_parts = explode(':', $parts[1]);
+// ex. 113
+$this_year = $date_parts[0];
+// ex. 1130415
+$today = implode('', $date_parts);

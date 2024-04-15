@@ -60,7 +60,10 @@ class MOIEXP {
 			WHERE AA01 >= :bv_qday AND AA106 <> '1' AND s.K02 = '悠遊卡'
 		");
 		if (empty($qday)) {
-			global $week_ago;
+			$tw_date = new Datetime("now");
+			$tw_date->modify("-1911 year");
+			$tw_date->modify("-1 week");
+			$week_ago = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080318
 			// fetch all data wthin a week back
 			$this->db_wrapper->getDB()->bind(":bv_qday", $week_ago);
 		} else {

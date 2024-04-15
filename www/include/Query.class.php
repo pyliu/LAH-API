@@ -243,11 +243,9 @@ class Query {
 			return array();
 		}
 
-		// global $week_ago;
 		$this->db_wrapper->getDB()->parse("SELECT * FROM SCRSMS WHERE RM02 LIKE 'H%".$this->db_wrapper->getSiteCode()."1' AND RM03 LIKE '%0' AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL)");
-		// $this->db_wrapper->getDB()->bind(":bv_week_ago", $week_ago);
-        $this->db_wrapper->getDB()->execute();
-        return $this->db_wrapper->getDB()->fetchAll();
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
 	public function fixProblematicCrossCases($id) {
@@ -419,7 +417,10 @@ class Query {
 			WHERE AA01 >= :bv_qday AND AA106 <> '1' AND s.K02 = '".iconv("utf-8", "big5", '悠遊卡')."'
 		");
 		if (empty($qday)) {
-			global $week_ago;
+			$tw_date = new Datetime("now");
+			$tw_date->modify("-1911 year");
+			$tw_date->modify("-1 week");
+			$week_ago = ltrim($tw_date->format("Ymd"), "0");	// ex: 1080318
 			// fetch all data wthin a week back
 			$this->db_wrapper->getDB()->bind(":bv_qday", $week_ago);
 		} else {
