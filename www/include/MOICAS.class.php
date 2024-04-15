@@ -32,7 +32,8 @@ class MOICAS
 		$time_str = implode('', explode(':', $parts[1]));
 
 		$this->db_wrapper->getDB()->parse("
-			UPDATE MOICAS.CRSMS SET RM38 = '', RM39 = 'F' , RM40 = :bv_date, RM41 = :bv_time
+			UPDATE MOICAS.CRSMS
+				SET RM38 = '', RM39 = 'F' , RM40 = :bv_date, RM41 = :bv_time, RM42 = ''
 			WHERE RM01 = :bv_year
 			  AND RM02 = :bv_code
 				AND RM03 = :bv_num
