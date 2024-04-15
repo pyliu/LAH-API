@@ -37,6 +37,7 @@ class MOICAS
 			WHERE RM01 = :bv_year
 			  AND RM02 = :bv_code
 				AND RM03 = :bv_num
+				AND RM30 NOT IN ('Z', 'F')
 		");
 		
 		$this->db_wrapper->getDB()->bind(":bv_year", $year);
