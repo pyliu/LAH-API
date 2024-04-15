@@ -51,6 +51,21 @@ switch ($_POST["type"]) {
 			"raw" => $rows
 		));
 		break;
+	case "fix_moicat_rindx":
+		Logger::getInstance()->info("XHR [fix_moicat_rindx] fix reg case temp rindx request.");
+		$id = $_POST['year'];
+		$code = $_POST['code'];
+		$num = $_POST['num'];
+		$result = $mock ? $cache->get('fix_moicat_rindx') : $moicat->fixRINDXCode($year, $code, $num);
+		$cache->set('moicat_rindx', $result);
+		$message = '設定 '.$year.'-'.$code.'-'.$num.' MOICAT.RINDX IP_CODE 為 F ';
+		$message .= $result ? "成功" : '失敗';
+		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+		Logger::getInstance()->info("XHR [fix_moicat_rindx] $message");
+		echoJSONResponse($message, $status_code, array(
+			"raw" => $result
+		));
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

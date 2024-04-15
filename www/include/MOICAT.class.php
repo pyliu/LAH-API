@@ -77,9 +77,6 @@ class MOICAT {
 	 * Find reg case temp records
 	 */
 	public function getRINDXRecords($year, $code, $num) {
-		if (!$this->db_wrapper->reachable()) {
-			return array();
-		}
 		$year = str_pad($year, 3, '0', STR_PAD_LEFT);
 		$num = str_pad($num, 6, '0', STR_PAD_LEFT);
 		$this->db_wrapper->getDB()->parse("
@@ -87,13 +84,38 @@ class MOICAT {
 			select * from MOICAT.RINDX t
 			where 1=1
 				and t.II03 = :bv_year
-				and II04_1 = :bv_code
-				and II04_2 = :bv_num
+				and t.II04_1 = :bv_code
+				and t.II04_2 = :bv_num
 		");
 		$this->db_wrapper->getDB()->bind(":bv_year", $year);
 		$this->db_wrapper->getDB()->bind(":bv_code", $code);
 		$this->db_wrapper->getDB()->bind(":bv_num", $num);
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
+	}
+	/**
+	 * To fix reg case temp record to F
+	 */
+	public function fixRINDXCode($year, $code, $num) {
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+		
+		Logger::getInstance()->info(__METHOD__.": Going to set $year-$code-$num MOICAT.RINDX IP_CODE to 'F'.");
+
+		$year = str_pad($year, 3, '0', STR_PAD_LEFT);
+		$num = str_pad($num, 6, '0', STR_PAD_LEFT);
+
+		$this->db_wrapper->getDB()->parse("
+			UPDATE MOICAT.RINDX SET IP_CODE = 'F' 
+			WHERE II03 = :bv_year
+			  AND II04_1 = :bv_code
+				AND II04_2 = :bv_num
+		");
+		
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_num", $num);
+		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 	}
 }

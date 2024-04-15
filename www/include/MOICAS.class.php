@@ -15,6 +15,30 @@ class MOICAS
 		$this->db_wrapper = null;
 	}
 	/**
+	 * To fix th RM38/RM39 wrong change issue
+	 */
+	public function fixRegWrongChangeCase($year, $code, $num) {
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+		Logger::getInstance()->info(__METHOD__.": Going to set $year-$code-$num CRSMS RM39 to 'F' and RM38 = ''.");
+
+		$year = str_pad($year, 3, '0', STR_PAD_LEFT);
+		$num = str_pad($num, 6, '0', STR_PAD_LEFT);
+
+		$this->db_wrapper->getDB()->parse("
+			UPDATE MOICAS.CRSMS SET RM38 = '', RM39 = 'F' 
+			WHERE RM01 = :bv_year
+			  AND RM02 = :bv_code
+				AND RM03 = :bv_num
+		");
+		
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_num", $num);
+		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+	}
+	/**
 	 * Find empty record that causes user from SUR section can't generate notification application pdf ... 
 	 */
 	public function getCMCRDTempRecords($year = '')

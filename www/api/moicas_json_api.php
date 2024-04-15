@@ -88,6 +88,21 @@ switch ($_POST["type"]) {
 			"raw" => $result
 		));
 		break;
+	case "fix_rm38_rm39_problem":
+		Logger::getInstance()->info("XHR [fix_reg_wrong_change] fix CRSMS RM38、RM39 wrong change case request.");
+		$year = $_POST['year'];
+		$code = $_POST['code'];
+		$num = $_POST['number'];
+		$result = $mock ? $cache->get('fix_reg_wrong_change') : $moicas->fixRegWrongChangeCase($year, $code, $num);
+		$cache->set('fix_reg_wrong_change', $result);
+		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+		$message = '更新 '.$year.'-'.$code.'-'.$num.' RM38/RM39 ';
+		$message .= $result !== false ? '成功' : '失敗';
+		Logger::getInstance()->info("XHR [fix_reg_wrong_change] $message");
+		echoJSONResponse($message, $status_code, array(
+			"raw" => $result
+		));
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
