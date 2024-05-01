@@ -83,12 +83,6 @@ class Scheduler {
         }
     }
 
-    private function wipeOutdatedLog() {
-        Logger::getInstance()->info(__METHOD__.": 啟動清除過時記錄檔排程。");
-        // Logger::getInstance()->warning(__METHOD__.": 暫時略過清除過時記錄檔排程。");
-        Logger::getInstance()->removeOutdatedLog();
-    }
-
     private function importUserFromL3HWEB() {
         Logger::getInstance()->info(__METHOD__.': 匯入L3HWEB使用者資料排程啟動。');
         $sysauth1 = new SQLiteSYSAUTH1();
@@ -111,6 +105,17 @@ class Scheduler {
         Logger::getInstance()->info(__METHOD__.': 匯入LANDIP資料排程啟動。');
         $sqlite_so = new SQLiteOFFICES();
         $sqlite_so->importFromOraDB();
+    }
+
+    private function removePrefetchDB() {
+        Logger::getInstance()->info(__METHOD__.": 啟動清除 Prefetch Cache 排程。");
+        return Prefetch::removeDBFile();
+    }
+
+    private function wipeOutdatedLog() {
+        Logger::getInstance()->info(__METHOD__.": 啟動清除過時記錄檔排程。");
+        // Logger::getInstance()->warning(__METHOD__.": 暫時略過清除過時記錄檔排程。");
+        Logger::getInstance()->removeOutdatedLog();
     }
 
     private function wipeOutdatedIPEntries() {
@@ -412,10 +417,13 @@ class Scheduler {
                 $conn->wipeHistory(1);
                 // $this->notifyTemperatureRegistration();
                 $this->wipeOutdatedIPEntries();
+                /**
+                 * 移除過期的監控郵件
+                 */
                 $this->wipeOutdatedMonitorMail();
                 $this->wipeOutdatedLog();
-                // wipe out expired cached data once a day
-                Prefetch::wipeExpiredData();
+                // remove cached prefetch data once a day
+                $this->removePrefetchDB();
                 /**
                  * 匯入WEB DB固定資料
                  */
@@ -423,10 +431,6 @@ class Scheduler {
                 $this->importRKEYNALL();
                 $this->importOFFICES();
                 $this->importUserFromL3HWEB();
-                /**
-                 * 移除過期的監控郵件
-                 */
-
             } else {
                 // Logger::getInstance()->info(__METHOD__.": 每24小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }

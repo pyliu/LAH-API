@@ -116,6 +116,18 @@ class Prefetch {
         return false;
     }
 
+    public static function removeDBFile() {
+        Logger::getInstance()->info(__METHOD__.": 清除 Prefetch DB 檔案 ... ");
+        $dbPath = SQLiteDBFactory::getPrefetchDB();
+        Logger::getInstance()->info("🕓 開始移除 ".$dbPath);
+        if (file_exists($dbPath)) {
+            @unlink($dbPath);
+            Logger::getInstance()->info("✔ 移除 ".$dbPath." 已完成。");
+            return true;
+        }
+        Logger::getInstance()->warning("⚠ 移除 ".$dbPath." 失敗。");
+        return false;
+    }
     /**
      * 目前為公告狀態案件快取剩餘時間
      */
