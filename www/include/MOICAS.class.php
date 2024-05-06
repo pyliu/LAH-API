@@ -7,8 +7,14 @@ require_once("Cache.class.php");
 class MOICAS
 {
 	private $db_wrapper = null;
+	private $site = 'HA';
+	private $site_number = 1;
+
 	function __construct() {
 		$this->db_wrapper = new OraDBWrapper();
+		$this->site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
+		$site_code = $this->site[1];	// A ... H
+		$this->site_number = ord($site_code) - ord('A');
 	}
 
 	function __destruct() {
@@ -292,5 +298,34 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
-	
+	// 查詢本所關注案件異動LOG
+	public function getConcernCRSMSLog($tw_date = '', $last_query_time = '000000') {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		if (empty($tw_date)) {
+			$tmp_date = timestampToDate(time(), 'TW');
+			$parts = explode(' ', $tmp_date);
+			// ex: 1130506
+			$tw_date = implode('', explode('-', $parts[0]));
+		}
+		$this->db_wrapper->getDB()->parse("
+			SELECT
+				t.*,
+				s.KCNT AS \"RM09_CHT\"
+			FROM MOICAS.CRSMSLOG t
+			LEFT JOIN MOIADM.RKEYN s ON s.KCDE_1 = '06' AND s.KCDE_2 = t.RM09
+			WHERE 1=1
+			  AND rm105_1 = :bv_date
+				AND rm105_2 > :bv_time
+				-- only cares about our own case
+				AND (t.RM99 IS NULL OR t.RM101 = :bv_site)
+			ORDER BY rm105_2 DESC
+		");
+		$this->db_wrapper->getDB()->bind(":bv_date", $tw_date);
+		$this->db_wrapper->getDB()->bind(":bv_time", $last_query_time);
+		$this->db_wrapper->getDB()->bind(":bv_site", $this->site);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
 }

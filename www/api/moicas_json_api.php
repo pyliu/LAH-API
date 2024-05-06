@@ -103,6 +103,20 @@ switch ($_POST["type"]) {
 			"raw" => $result
 		));
 		break;
+	case "crsmslog":
+			Logger::getInstance()->info("XHR [crsmslog] get CRSMSLog request.");
+			$moicas = new MOICAS();
+			$rows = $moicas->getConcernCRSMSLog($_POST['qday'], $_POST['qtime']);
+			$response_code = STATUS_CODE::SUCCESS_NORMAL;
+			$message = $_POST['qday'].'已找到'.count($rows).'異動更新紀錄';
+			$baked = array();
+			foreach ($rows as $key => $row) {
+					$data = new RegCaseData($row);
+					$baked[] = $data->getBakedData();
+			}
+			Logger::getInstance()->info("XHR [crsmslog] $message");
+			echoJSONResponse($message, $response_code, array( "baked" => $baked ));
+			break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

@@ -199,7 +199,6 @@ class RegCaseData {
             "義務人姓名" => $row["RM22"],
             "義務人住址" => $row["RM21_ADDR"],
             "義務人人數" => empty($row["RM23"]) ? "" : $row["RM23"],
-            "手機號碼" => empty($row["RM102"]) ? "" : $row["RM102"],
             "代理人統編" => empty($row["RM24"]) ? "" : $row["RM24"],
             "代理人姓名" => $row["AB02"],
             "代理人住址" => $row["AB03"],
@@ -256,7 +255,11 @@ class RegCaseData {
             "結案人員" => $this->getIDorName($this->row["RM59"]),
             "結案日期" => RegCaseData::toDate($row["RM58_1"])." ".RegCaseData::toDate($row["RM58_2"]),
             "預定結案日期" => RegCaseData::toDate($row["RM29_1"])." ".RegCaseData::toDate($row["RM29_2"]),
-            "結案與否" => in_array($this->row["RM31"], RegCaseData::$RM31_CASE_CLOSE_STATE) ? "Y" : "N"
+            "結案與否" => in_array($this->row["RM31"], RegCaseData::$RM31_CASE_CLOSE_STATE) ? "Y" : "N",
+            "異動日期" => empty($row["RM105_1"]) ? '' : $row["RM105_1"],
+            "異動時間" => empty($row["RM105_2"]) ? '' : $row["RM105_2"],
+            "異動人員" => $this->getIDorName($row["RM103"]),
+            "手機號碼" => empty($row["RM102"]) ? "" : $row["RM102"]
         );
         return $ret + $row; // merge raw data ($row["RM01"] ... etc) and keep original key index
     }
