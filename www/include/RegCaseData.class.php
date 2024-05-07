@@ -184,6 +184,7 @@ class RegCaseData {
             "公告燈號" => $this->trafficLightRM30H(),
             "請示燈號" => $this->trafficLightAsk(),
             "收件字號" => $this->getReceiveSerial(),
+            "收件字" => $this->getCodeName(),
             "收件日期" => RegCaseData::toDate($row["RM07_1"]),
             "收件時間" => RegCaseData::toDate($row["RM07_1"])." ".RegCaseData::toDate($row["RM07_2"]),
             "測量案件" => $row["RM04"]."-".$row["RM05"]."-".$row["RM06"],
@@ -301,12 +302,16 @@ class RegCaseData {
         return empty(REG_WORD[$this->row["RM02"]]);
     }
 	
+    public function getCodeName() {
+        return REG_WORD[$this->row["RM02"]];
+    }
+
     public function getReceiveSerial() {
         // 收件年+字（代碼）+號（6碼）
         if ($this->isDanger()) {
 			return $this->row["RM01"]."年 ".$this->row["RM02"]." 第 ".$this->row["RM03"]." 號";
         }
-        return $this->row["RM01"]."年 ".REG_WORD[$this->row["RM02"]]."(".$this->row["RM02"].")字 第 ".$this->row["RM03"]." 號";
+        return $this->row["RM01"]."年 ".$this->getCodeName()."(".$this->row["RM02"].")字 第 ".$this->row["RM03"]." 號";
     }
 	
     public function getReceiveDate() {
