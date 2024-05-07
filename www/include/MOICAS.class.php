@@ -320,7 +320,7 @@ class MOICAS
 			LEFT JOIN MOICAS.CRSMS u ON t.RM01 = u.RM01 AND t.RM02 = u.RM02 AND t.RM03 = u.RM03
 			WHERE 1=1
 			  AND rm105_1 = :bv_date
-				AND rm105_2 > :bv_time
+				AND rm105_2 >= :bv_time
 				-- only cares about our own case
 				AND (t.RM99 IS NULL OR t.RM101 = :bv_site)
 			ORDER BY rm105_2 DESC
