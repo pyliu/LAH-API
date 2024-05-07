@@ -354,12 +354,19 @@ class RegCaseData {
     }
 
     public function getStatus() {
-        return CASE_STATUS[$this->row["RM30"]];
+        return CASE_STATUS[$this->row["RM30_NOW"]] ?? CASE_STATUS[$this->row["RM30"]];
     }
 
     public function trafficLight() {
-        // RM30 - 案件辦理情形
-        if ($this->row["RM30"] == "F" || $this->row["RM30"] == "Z"  || in_array($this->row["RM31"], RegCaseData::$RM31_CASE_CLOSE_STATE)) {
+        // RM30_NOW / RM30 - 案件辦理情形
+        if (
+            $this->row["RM30_NOW"] == "F" ||
+            $this->row["RM30_NOW"] == "Z"  || 
+            in_array($this->row["RM31_NOW"], RegCaseData::$RM31_CASE_CLOSE_STATE) ||
+            $this->row["RM30"] == "F" ||
+            $this->row["RM30"] == "Z"  || 
+            in_array($this->row["RM31"], RegCaseData::$RM31_CASE_CLOSE_STATE)
+        ) {
             return "success";
         }
         

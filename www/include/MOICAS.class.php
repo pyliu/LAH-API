@@ -312,9 +312,12 @@ class MOICAS
 		$this->db_wrapper->getDB()->parse("
 			SELECT
 				t.*,
-				s.KCNT AS \"RM09_CHT\"
+				s.KCNT AS \"RM09_CHT\",
+				u.RM30 AS \"RM30_NOW\",
+				u.RM31 AS \"RM31_NOW\"
 			FROM MOICAS.CRSMSLOG t
 			LEFT JOIN MOIADM.RKEYN s ON s.KCDE_1 = '06' AND s.KCDE_2 = t.RM09
+			LEFT JOIN MOICAS.CRSMS u ON t.RM01 = u.RM01 AND t.RM02 = u.RM02 AND t.RM03 = u.RM03
 			WHERE 1=1
 			  AND rm105_1 = :bv_date
 				AND rm105_2 > :bv_time
