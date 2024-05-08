@@ -298,6 +298,55 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
+	// 查詢本所關注案件異動
+	public function getCRSMSUpdateCase($tw_date = '') {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		if (empty($tw_date)) {
+			$tmp_date = timestampToDate(time(), 'TW');
+			$parts = explode(' ', $tmp_date);
+			// ex: 1130506
+			$tw_date = implode('', explode('-', $parts[0]));
+		}
+		$this->db_wrapper->getDB()->parse("
+			-- 找案件異動時間(本所關注案件)
+			SELECT
+				t.*,
+				s.KCNT AS \"RM09_CHT\"
+				FROM MOICAS.CRSMS t
+				LEFT JOIN MOIADM.RKEYN s ON s.KCDE_1 = '06' AND s.KCDE_2 = t.RM09
+			WHERE 1 = 1
+				AND (rm07_1 = :bv_date or rm44_1 = :bv_date or rm46_1 = :bv_date or
+						rm48_1 = :bv_date or rm53_1 = :bv_date or rm54_1 = :bv_date or
+						rm56_1 = :bv_date or rm58_1 = :bv_date or rm62_1 = :bv_date or
+						rm80 = :bv_date or rm83 = :bv_date or rm86 = :bv_date or
+						-- 不看歸檔時間，偏差很大!
+						-- rm91_1 = :bv_date or
+						rm93_1 = :bv_date or rm106_1 = :bv_date or rm107_1 = :bv_date)
+						-- 只關心本所處理案件
+				AND (t.RM99 IS NULL OR t.RM101 = :bv_site)
+			ORDER BY rm107_2 desc,
+								rm106_2 desc,
+								rm93_2 desc,
+								rm87 desc,
+								rm84 desc,
+								rm81 desc,
+								rm62_2 desc,
+								rm58_2 desc,
+								rm56_2 desc,
+								rm54_2 desc,
+								rm53_2 desc,
+								rm48_2 desc,
+								rm46_2 desc,
+								rm44_2 desc,
+								rm07_2 desc
+		");
+		$this->db_wrapper->getDB()->bind(":bv_date", $tw_date);
+		$this->db_wrapper->getDB()->bind(":bv_site", $this->site);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
 	// 查詢本所關注案件異動LOG
 	public function getConcernCRSMSLog($tw_date = '', $last_query_time = '000000') {
 		if (!$this->db_wrapper->reachable()) {

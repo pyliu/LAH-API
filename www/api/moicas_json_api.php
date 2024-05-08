@@ -103,6 +103,20 @@ switch ($_POST["type"]) {
 			"raw" => $result
 		));
 		break;
+	case "crsms_update_by_date":
+			Logger::getInstance()->info("XHR [crsms_update_by_date] get CRSMS update by date request.");
+			$moicas = new MOICAS();
+			$rows = $moicas->getCRSMSUpdateCase($_POST['qday']);
+			$response_code = STATUS_CODE::SUCCESS_NORMAL;
+			$message = $_POST['qday'].'已找到'.count($rows).'CRSMS案件時間異動更新紀錄';
+			$baked = array();
+			foreach ($rows as $key => $row) {
+					$data = new RegCaseData($row);
+					$baked[] = $data->getBakedData();
+			}
+			Logger::getInstance()->info("XHR [crsms_update_by_date] $message");
+			echoJSONResponse($message, $response_code, array( "baked" => $baked ));
+		break;
 	case "crsmslog":
 			Logger::getInstance()->info("XHR [crsmslog] get CRSMSLog request.");
 			$moicas = new MOICAS();
