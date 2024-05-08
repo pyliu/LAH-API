@@ -360,10 +360,12 @@ class MOICAS
 		}
 		$this->db_wrapper->getDB()->parse("
 			SELECT
-				t.*,
+				u.*,
 				s.KCNT AS \"RM09_CHT\",
-				u.RM30 AS \"RM30_NOW\",
-				u.RM31 AS \"RM31_NOW\"
+				t.RM103,	-- 異動人員
+				t.RM104,	-- 異動類別
+				t.RM105_1,-- 異動日期
+				t.RM105_2 -- 異動時間
 			FROM MOICAS.CRSMSLOG t
 			LEFT JOIN MOIADM.RKEYN s ON s.KCDE_1 = '06' AND s.KCDE_2 = t.RM09
 			LEFT JOIN MOICAS.CRSMS u ON t.RM01 = u.RM01 AND t.RM02 = u.RM02 AND t.RM03 = u.RM03
