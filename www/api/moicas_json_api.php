@@ -108,7 +108,7 @@ switch ($_POST["type"]) {
 			$moicas = new MOICAS();
 			$rows = $moicas->getCRSMSUpdateCase($_POST['qday']);
 			$response_code = STATUS_CODE::SUCCESS_NORMAL;
-			$message = $_POST['qday'].'已找到'.count($rows).'CRSMS案件時間異動更新紀錄';
+			$message = $_POST['qday'].'已找到'.count($rows).'件CRSMS案件時間異動更新紀錄';
 			$baked = array();
 			foreach ($rows as $key => $row) {
 					$data = new RegCaseData($row);
