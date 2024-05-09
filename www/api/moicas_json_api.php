@@ -120,7 +120,7 @@ switch ($_POST["type"]) {
 	case "crsmslog":
 			Logger::getInstance()->info("XHR [crsmslog] get CRSMSLog request.");
 			$moicas = new MOICAS();
-			$rows = $moicas->getConcernCRSMSLog($_POST['qday'], $_POST['qtime']);
+			$rows = $moicas->getConcernCRSMSLog($_POST['qday'], $_POST['qtime'] ?? '000000');
 			$response_code = STATUS_CODE::SUCCESS_NORMAL;
 			$message = $_POST['qday'].'已找到'.count($rows).'異動更新紀錄';
 			$baked = array();
