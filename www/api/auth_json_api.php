@@ -26,13 +26,15 @@ switch ($_POST["type"]) {
 		// Logger::getInstance()->info("XHR [login] $message");
 		// Logger::getInstance()->info("XHR [login] APACHE API 伺服器端點資訊： ".$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']);
 
-        echoJSONResponse('取得 '.$_POST['req_ip'].' 登入資訊', STATUS_CODE::SUCCESS_NORMAL, array(
+    echoJSONResponse('取得 '.$_POST['req_ip'].' 登入資訊', STATUS_CODE::SUCCESS_NORMAL, array(
 			"server" => $_SERVER,
 			"ips" => getLocalhostIPs(),
 			"user" => $_SESSION["myinfo"],
 			"configs" => array(
 				'l3hweb_db_ip' => $system->getL3hwebDBIp(),
 				'webap_ip' => $system->getWebAPIp(),
+				'webap_jndi_local' => $system->getWebAPJndiLocal(),
+				'webap_jndi_xalocal' => $system->getWebAPJndiXaLocal(),
 				'webap_postfix' => $system->getWebAPPostfix(),
 				'mock' => $system->isMockMode(),
 				'mssql' => $system->isMSSQLEnable(),
