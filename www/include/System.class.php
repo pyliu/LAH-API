@@ -577,6 +577,14 @@ class System {
         return $this->get('ORA_DB_L3HWEB_IP');
     }
 
+    public function getWebAPJndiXaLocal() {
+        return $this->get('WEBAP_JNDI_XALOCAL') ?? 990;
+    }
+
+    public function getWebAPJndiLocal() {
+        return $this->get('WEBAP_JNDI_LOCAL') ?? 2500;
+    }
+
     public function getWebAPIp() {
         return $this->get('WEBAP_IP');
     }
