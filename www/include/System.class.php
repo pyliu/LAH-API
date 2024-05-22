@@ -577,8 +577,34 @@ class System {
         return $this->get('ORA_DB_L3HWEB_IP');
     }
 
+    public function setWebAPJndiXaLocal($xalocal) {
+        if ($stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ")) {
+            $stm->bindValue(':key', 'WEBAP_JNDI_XALOCAL');
+            $stm->bindParam(':value', $xalocal);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        Logger::getInstance()->warning(__METHOD__.": 更新 WEBAP_JNDI_XALOCAL 失敗。($xalocal)");
+        return false;
+    }
+
     public function getWebAPJndiXaLocal() {
         return $this->get('WEBAP_JNDI_XALOCAL') ?? 990;
+    }
+
+    public function setWebAPJndiLocal($local) {
+        if ($stm = $this->sqlite3->prepare("
+            REPLACE INTO config ('key', 'value')
+            VALUES (:key, :value)
+        ")) {
+            $stm->bindValue(':key', 'WEBAP_JNDI_LOCAL');
+            $stm->bindParam(':value', $local);
+            return $stm->execute() === FALSE ? false : true;
+        }
+        Logger::getInstance()->warning(__METHOD__.": 更新 WEBAP_JNDI_LOCAL 失敗。($local)");
+        return false;
     }
 
     public function getWebAPJndiLocal() {

@@ -66,6 +66,15 @@ switch ($_POST["type"]) {
         Logger::getInstance()->info("XHR [switch_set_office_hours_mode] ".$msg);
         echoJSONResponse($msg, $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
         break;
+    case "set_webap_jndi":
+        $local = $_POST['local'] ?? 2500;
+        $xalocal = $_POST['xalocal'] ?? 990;
+        $local_ok = $system->setWebAPJndiLocal($local);
+        $xalocal_ok = $system->setWebAPJndiXaLocal($xalocal);
+        $message = "設定 WEBAP_JNDI_LOCAL $local ".($local_ok ? '成功' : '失敗');
+        $message .= "、WEBAP_JNDI_XALOCAL $xalocal ".($xalocal_ok ? '成功' : '失敗');
+        echoJSONResponse($message, $local_ok && $xalocal_ok ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
+        break;
     case "import_l3hweb_sysauth1":
         Logger::getInstance()->info("XHR [import_l3hweb_sysauth1] 匯入 L3HWEB SYSAUTH1 使用者名稱請求。");
         $sysauth1 = new SQLiteSYSAUTH1();
