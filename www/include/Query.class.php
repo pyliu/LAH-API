@@ -243,7 +243,30 @@ class Query {
 			return array();
 		}
 
-		$this->db_wrapper->getDB()->parse("SELECT * FROM SCRSMS WHERE RM02 LIKE 'H%".$this->db_wrapper->getSiteCode()."1' AND RM03 LIKE '%0' AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR RM101_1 is NULL)");
+		$site_code = $this->db_wrapper->getSiteCode();
+		$this->db_wrapper->getDB()->parse("
+			SELECT *
+				FROM MOICAS.CRSMS
+			WHERE (
+				    -- 本所跨他所
+						RM02 LIKE 'H%".$site_code."1'
+						-- 他所跨本所
+						OR RM02 LIKE 'H".$site_code."A1'
+						OR RM02 LIKE 'H".$site_code."B1'
+						OR RM02 LIKE 'H".$site_code."B1'
+						OR RM02 LIKE 'H".$site_code."C1'
+						OR RM02 LIKE 'H".$site_code."D1'
+						OR RM02 LIKE 'H".$site_code."E1'
+						OR RM02 LIKE 'H".$site_code."F1'
+						OR RM02 LIKE 'H".$site_code."G1'
+						OR RM02 LIKE 'H".$site_code."H1'
+						-- 他所跨(縣市)本所
+						OR RM02 LIKE '%H".$site_code."'
+				) 
+				AND RM03 LIKE '%0'
+				AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR
+						RM101_1 is NULL)
+		");
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
