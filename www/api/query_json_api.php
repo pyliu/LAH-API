@@ -333,10 +333,10 @@ switch ($_POST["type"]) {
 		$case_ids = [];
 		$rows = [];
 		foreach ($query_result as $row) {
-			if (preg_match("/^H[A-Z]{2}1$/i", $row['RM02'])) {
+			// if (preg_match("/^H[A-Z]{2}1$/i", $row['RM02'])) {
 				$case_ids[] = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
 				$rows[] = $row;
-			}
+			// }
 		}
 
 		$cache->set('xcase-check', $rows);
