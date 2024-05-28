@@ -3,6 +3,9 @@ require_once("./include/init.php");
 require_once("./include/MonitorMail.class.php");
 require_once("./include/SQLiteMonitorMail.class.php");
 require_once("./include/Ping.class.php");
+require_once("./include/SQLiteOFFICESSTATS.class.php");
+require_once("./include/StatsSQLite.class.php");
+require_once("./include/System.class.php");
 require 'vendor/autoload.php';
 
 try {
@@ -16,6 +19,10 @@ try {
     echo "\$this_year now is " . $this_year . "\n";
     echo "\$today now is " . $today . "\n";
 
+    $sqlite = new StatsSQLite();
+    System::getInstance()->
+    $arr = $sqlite->getLatestAPConnHistory();
+    var_dump($arr);
 } catch(Exception $e) {
     die($e->getMessage());
 } finally {
