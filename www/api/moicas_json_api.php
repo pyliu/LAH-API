@@ -131,6 +131,24 @@ switch ($_POST["type"]) {
 			Logger::getInstance()->info("XHR [crsmslog] $message");
 			echoJSONResponse($message, $response_code, array( "baked" => $baked ));
 			break;
+	case "cusmm_by_date":
+			Logger::getInstance()->info("XHR [cusmm_by_date] get CUSMM by date request.");
+			$moicas = new MOICAS();
+			$rows = $moicas->getCUSMMByDate($_POST['begin'], $_POST['end']);
+			$response_code = count($rows) > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+			$message = $_POST['begin'].' ~ '.$_POST['end'].' 已找到'.count($rows).'筆謄本調閱紀錄';
+			Logger::getInstance()->info("XHR [cusmm_by_date] $message");
+			echoJSONResponse($message, $response_code, array( "raw" => $rows ));
+			break;
+	case "cusmm_by_pid":
+			Logger::getInstance()->info("XHR [cusmm_by_pid] get CUSMM by PID request.");
+			$moicas = new MOICAS();
+			$rows = $moicas->getCUSMMByPid($_POST['pid']);
+			$response_code = count($rows) > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+			$message = '已找到'.count($rows).'筆 '.$_POST['pid'].' 有關的謄本調閱紀錄';
+			Logger::getInstance()->info("XHR [cusmm_by_pid] $message");
+			echoJSONResponse($message, $response_code, array( "raw" => $rows ));
+			break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
