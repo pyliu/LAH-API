@@ -426,9 +426,9 @@ class MOICAS
 				ELSE s.md04
 			END) AS \"申請類別\",
 			s.md06 AS \"段代碼\",
-			u.kcnt AS \"段小段\",
+			u.kname AS \"段小段\",
 			s.md09 AS \"鄉鎮市區代碼\",
-			v.kcnt AS \"鄉鎮市區\",
+			v.kname AS \"鄉鎮市區\",
 			(CASE
 				WHEN s.md07 = 'C' THEN '".mb_convert_encoding('土地', 'BIG5', 'UTF-8')."'
 				WHEN s.md07 = 'F' THEN '".mb_convert_encoding('建物', 'BIG5', 'UTF-8')."'
@@ -444,8 +444,8 @@ class MOICAS
 			--s.*
 			from MOICAS.CUSMM t
 			left join MOICAS.CUSMD2 s on t.mu01 = s.md01 and t.mu02 = s.md02 and t.mu03 = s.md03
-			left join MOIADM.RKEYN u on u.kcde_1 = '48' and u.kcde_2 = s.md06
-			left join MOIADM.RKEYN v on v.kcde_1 = '46' and v.kcde_2 = s.md09
+			left join MOIADM.RKEYN_ALL u on u.kcde_1 = '48' and u.kcde_2 = 'H' and u.kcde_3 = s.md06
+			left join MOIADM.RKEYN_ALL v on v.kcde_1 = '46' and v.kcde_2 = 'H' and v.kcde_3 = s.md09
 			where 1=1
 				and (t.mu05 = :bv_pid or t.mu08 = :bv_pid) -- 統編
 		");
@@ -497,9 +497,9 @@ class MOICAS
 					ELSE s.md04
 				END) AS \"申請類別\",
 				s.md06 AS \"段代碼\",
-				u.kcnt AS \"段小段\",
+				u.kname AS \"段小段\",
 				s.md09 AS \"鄉鎮市區代碼\",
-				v.kcnt AS \"鄉鎮市區\",
+				v.kname AS \"鄉鎮市區\",
 				(CASE
 					WHEN s.md07 = 'C' THEN '".mb_convert_encoding('土地', 'BIG5', 'UTF-8')."'
 					WHEN s.md07 = 'F' THEN '".mb_convert_encoding('建物', 'BIG5', 'UTF-8')."'
@@ -515,8 +515,8 @@ class MOICAS
 				--s.*
 			from MOICAS.CUSMM t
 			left join MOICAS.CUSMD2 s on t.mu01 = s.md01 and t.mu02 = s.md02 and t.mu03 = s.md03
-			left join MOIADM.RKEYN u on u.kcde_1 = '48' and u.kcde_2 = s.md06
-			left join MOIADM.RKEYN v on v.kcde_1 = '46' and v.kcde_2 = s.md09
+			left join MOIADM.RKEYN_ALL u on u.kcde_1 = '48' and u.kcde_2 = 'H' and u.kcde_3 = s.md06
+			left join MOIADM.RKEYN_ALL v on v.kcde_1 = '46' and v.kcde_2 = 'H' and v.kcde_3 = s.md09
 			where 1=1
 				and t.mu12 between :bv_begin and :bv_end -- 收件日期
 		");
