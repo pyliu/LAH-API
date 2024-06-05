@@ -382,12 +382,14 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
-	// 取得謄本紀錄 BY 統編
-  public function getCUSMMByPid($pid) {
-		if (!$this->db_wrapper->reachable() || empty($pid)) {
-			return array();
+
+	// 取得謄本紀錄SQL
+	private function getCUSMMSQL($date_or_pid) {
+		$where_cond = "and (t.mu05 LIKE '%' || :bv_pid || '%' or t.mu08 LIKE '%' || :bv_pid || '%') -- 統編";
+		if ($date_or_pid === 'date') {
+			$where_cond = "and t.mu12 between :bv_begin and :bv_end -- 收件日期";
 		}
-		$this->db_wrapper->getDB()->parse("
+		return "
 			-- 謄本記錄查詢 BY 統編
 			select
 			t.mu01 AS \"收件年\",
@@ -444,11 +446,20 @@ class MOICAS
 			--s.*
 			from MOICAS.CUSMM t
 			left join MOICAS.CUSMD2 s on t.mu01 = s.md01 and t.mu02 = s.md02 and t.mu03 = s.md03
-			left join MOIADM.RKEYN_ALL u on u.kcde_1 = '48' and u.kcde_2 = 'H' and u.kcde_3 = s.md06
+			left join MOIADM.RKEYN_ALL u on u.kcde_1 = '48' and u.kcde_2 = 'H' and u.kcde_3 = s.md09 and u.kcde_4 = s.md06
 			left join MOIADM.RKEYN_ALL v on v.kcde_1 = '46' and v.kcde_2 = 'H' and v.kcde_3 = s.md09
 			where 1=1
-				and (t.mu05 = :bv_pid or t.mu08 = :bv_pid) -- 統編
-		");
+				$where_cond
+			order by t.mu12 desc, t.mu13 desc
+		";
+	}
+
+	// 取得謄本紀錄 BY 統編
+  public function getCUSMMByPid($pid) {
+		if (!$this->db_wrapper->reachable() || empty($pid)) {
+			return array();
+		}
+		$this->db_wrapper->getDB()->parse($this->getCUSMMSQL('pid'));
 		$this->db_wrapper->getDB()->bind(":bv_pid", $pid);
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
@@ -458,68 +469,7 @@ class MOICAS
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
-		$this->db_wrapper->getDB()->parse("
-			-- 謄本記錄查詢 BY 收件日期
-			select
-				t.mu01 AS \"收件年\",
-				t.mu02 AS \"收件字\",
-				t.mu03 AS \"收件號\",
-				(CASE
-					WHEN t.mu04 = '1' THEN '".mb_convert_encoding('現場申請', 'BIG5', 'UTF-8')."'
-					WHEN t.mu04 = '2' THEN '".mb_convert_encoding('隨案謄本', 'BIG5', 'UTF-8')."'
-					WHEN t.mu04 = '3' THEN '".mb_convert_encoding('內部使用', 'BIG5', 'UTF-8')."'
-					WHEN t.mu04 = '4' THEN '".mb_convert_encoding('傳真申請', 'BIG5', 'UTF-8')."'
-					ELSE t.mu04
-				END) AS \"申請方式\",
-				(CASE
-					WHEN t.mu42 = '00' THEN '".mb_convert_encoding('公務用', 'BIG5', 'UTF-8')."'
-					WHEN t.mu42 = '01' THEN '".mb_convert_encoding('第一類', 'BIG5', 'UTF-8')."'
-					WHEN t.mu42 = '02' THEN '".mb_convert_encoding('第二類', 'BIG5', 'UTF-8')."'
-					WHEN t.mu42 = '04' THEN '".mb_convert_encoding('第三類', 'BIG5', 'UTF-8')."'
-					ELSE t.mu42
-				END) AS \"申請類別\",
-				t.mu05 AS \"申請人統編\",
-				t.mu06 AS \"申請人姓名\",
-				t.mu08 AS \"代理人統編\",
-				t.mu09 AS \"代理人姓名\",
-				t.mu12 AS \"收件日期\",
-				t.mu13 AS \"收件時間\",
-				(CASE
-					WHEN s.md04 = 'A' THEN '".mb_convert_encoding('登記電子資料謄本', 'BIG5', 'UTF-8')."'
-					WHEN s.md04 = 'C' THEN '".mb_convert_encoding('地價電子資料謄本', 'BIG5', 'UTF-8')."'
-					WHEN s.md04 = 'D' THEN '".mb_convert_encoding('建物平面圖謄本', 'BIG5', 'UTF-8')."'
-					WHEN s.md04 = 'E' THEN '".mb_convert_encoding('人工登記簿謄本', 'BIG5', 'UTF-8')."'
-					WHEN s.md04 = 'F' THEN '".mb_convert_encoding('閱覽', 'BIG5', 'UTF-8')."'
-					WHEN s.md04 = 'G' THEN '".mb_convert_encoding('列印電子資料', 'BIG5', 'UTF-8')."'
-					WHEN s.md04 = 'H' THEN '".mb_convert_encoding('申請', 'BIG5', 'UTF-8')."'
-					WHEN s.md04 = 'I' THEN '".mb_convert_encoding('其他', 'BIG5', 'UTF-8')."'
-					WHEN s.md04 = 'J' THEN '".mb_convert_encoding('異動索引', 'BIG5', 'UTF-8')."'
-					ELSE s.md04
-				END) AS \"申請類別\",
-				s.md06 AS \"段代碼\",
-				u.kname AS \"段小段\",
-				s.md09 AS \"鄉鎮市區代碼\",
-				v.kname AS \"鄉鎮市區\",
-				(CASE
-					WHEN s.md07 = 'C' THEN '".mb_convert_encoding('土地', 'BIG5', 'UTF-8')."'
-					WHEN s.md07 = 'F' THEN '".mb_convert_encoding('建物', 'BIG5', 'UTF-8')."'
-					ELSE s.md07
-				END) AS \"地建別\",
-				s.md08 AS \"地建號\",
-				--t.mu28 AS \"電子資料登記謄本張數\",
-				t.mu29 AS \"登記簿謄本張數\",
-				t.mu30 AS \"地價謄本張數\",
-				t.mu31 AS \"地籍圖謄本張數\",
-				t.mu32 AS \"建物平面圖謄本張數\"
-				--t.*,
-				--s.*
-			from MOICAS.CUSMM t
-			left join MOICAS.CUSMD2 s on t.mu01 = s.md01 and t.mu02 = s.md02 and t.mu03 = s.md03
-			left join MOIADM.RKEYN_ALL u on u.kcde_1 = '48' and u.kcde_2 = 'H' and u.kcde_3 = s.md06
-			left join MOIADM.RKEYN_ALL v on v.kcde_1 = '46' and v.kcde_2 = 'H' and v.kcde_3 = s.md09
-			where 1=1
-				and t.mu12 between :bv_begin and :bv_end -- 收件日期
-		");
+		$this->db_wrapper->getDB()->parse($this->getCUSMMSQL('date'));
 		$this->db_wrapper->getDB()->bind(":bv_begin", $tw_date_beg);
 		$this->db_wrapper->getDB()->bind(":bv_end", $tw_date_end);
 		$this->db_wrapper->getDB()->execute();
