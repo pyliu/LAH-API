@@ -385,7 +385,12 @@ class MOICAS
 
 	// 取得謄本紀錄SQL
 	private function getCUSMMSQL($date_or_pid) {
-		$where_cond = "and (t.mu05 LIKE '%' || :bv_pid || '%' or t.mu08 LIKE '%' || :bv_pid || '%' or t.mu06 LIKE '%' || :bv_pid || '%' or t.mu09 LIKE '%' || :bv_pid || '%') -- 統編/姓名";
+		$where_cond = "and (
+			t.mu05 LIKE '%' || :bv_pid || '%'     -- 申請人統編
+			or t.mu08 LIKE '%' || :bv_pid || '%'  -- 代理人統編
+			or t.mu06 LIKE '%' || :bv_pid || '%'  -- 申請人姓名
+			or t.mu09 LIKE '%' || :bv_pid || '%'  -- 代理人姓名
+		) -- 統編/姓名";
 		if ($date_or_pid === 'date') {
 			$where_cond = "and t.mu12 between :bv_begin and :bv_end -- 收件日期";
 		}
@@ -460,7 +465,7 @@ class MOICAS
 			return array();
 		}
 		$this->db_wrapper->getDB()->parse($this->getCUSMMSQL('pid'));
-		$this->db_wrapper->getDB()->bind(":bv_pid", $pid);
+		$this->db_wrapper->getDB()->bind(":bv_pid", mb_convert_encoding($pid, 'BIG5', 'UTF-8'));
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
