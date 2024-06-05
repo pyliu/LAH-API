@@ -143,7 +143,7 @@ switch ($_POST["type"]) {
 	case "cusmm_by_pid":
 			Logger::getInstance()->info("XHR [cusmm_by_pid] get CUSMM by PID request.");
 			$moicas = new MOICAS();
-			$rows = $moicas->getCUSMMByPid($_POST['pid']);
+			$rows = $moicas->getCUSMMByQuery($_POST['pid']);
 			$response_code = count($rows) > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
 			$message = '已找到'.count($rows).'筆 '.$_POST['pid'].' 有關的謄本調閱紀錄';
 			Logger::getInstance()->info("XHR [cusmm_by_pid] $message");

@@ -385,7 +385,7 @@ class MOICAS
 
 	// 取得謄本紀錄SQL
 	private function getCUSMMSQL($date_or_pid) {
-		$where_cond = "and (t.mu05 LIKE '%' || :bv_pid || '%' or t.mu08 LIKE '%' || :bv_pid || '%') -- 統編";
+		$where_cond = "and (t.mu05 LIKE '%' || :bv_pid || '%' or t.mu08 LIKE '%' || :bv_pid || '%' or t.mu06 LIKE '%' || :bv_pid || '%' or t.mu09 LIKE '%' || :bv_pid || '%') -- 統編/姓名";
 		if ($date_or_pid === 'date') {
 			$where_cond = "and t.mu12 between :bv_begin and :bv_end -- 收件日期";
 		}
@@ -454,8 +454,8 @@ class MOICAS
 		";
 	}
 
-	// 取得謄本紀錄 BY 統編
-  public function getCUSMMByPid($pid) {
+	// 取得謄本紀錄 BY 統編/姓名
+  public function getCUSMMByQuery($pid) {
 		if (!$this->db_wrapper->reachable() || empty($pid)) {
 			return array();
 		}
