@@ -15,6 +15,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."Prefetch.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteOFFICES.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteOFFICESSTATS.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."MOICAS.class.php");
 
 class Scheduler {
     private $tmp;
@@ -143,6 +144,12 @@ class Scheduler {
     private function fetchMonitorMail() {
         $monitor = new SQLiteMonitorMail();
         $monitor->fetchFromMailServer();
+    }
+
+    private function optimizeTables() {
+        $moicas = new MOICAS();
+        $result = $moicas->analyzeCRSMS();
+        Logger::getInstance()->info(__METHOD__.": ANALYZE CRSMS TABLE ".($result ? '成功' : '失敗'));
     }
 
     public function addOfficeCheckStatus() {
@@ -431,6 +438,7 @@ class Scheduler {
                 $this->importRKEYNALL();
                 $this->importOFFICES();
                 $this->importUserFromL3HWEB();
+                $this->optimizeTables();
             } else {
                 // Logger::getInstance()->info(__METHOD__.": 每24小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }

@@ -21,6 +21,20 @@ class MOICAS
 		$this->db_wrapper = null;
 	}
 	/**
+	 * 調教 CRSMS 資料集，解決SQL查詢 CRSMS 過慢問題
+	 */
+	public function analyzeCRSMS() {
+		//ANALYZE TABLE MOICAS.CRSMS delete statistics;
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+		
+		Logger::getInstance()->info(__METHOD__.": Going to analyze CRSMS table and delete statistics.");
+		$this->db_wrapper->getDB()->parse("ANALYZE TABLE MOICAS.CRSMS delete statistics");
+		
+		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+	}
+	/**
 	 * To fix th RM38/RM39 wrong change issue
 	 */
 	public function fixRegWrongChangeCase($year, $code, $num) {
