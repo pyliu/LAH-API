@@ -21,16 +21,21 @@ class MOICAS
 		$this->db_wrapper = null;
 	}
 	/**
-	 * 調教 CRSMS 資料集，解決SQL查詢 CRSMS 過慢問題
+	 * 調教資料集，解決SQL查詢表格過慢問題
+	 * -- 檢查最近一次是什麼時後做ANALYZE
+   * select OWNER,TABLE_NAME,LAST_ANALYZED from all_tables where table_name='CRSMS';
 	 */
-	public function analyzeCRSMS() {
-		//ANALYZE TABLE MOICAS.CRSMS delete statistics;
+	public function analyzeMOICASTable($name) {
+		if (empty($name)) {
+			return false;
+		}
+		
 		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
 		
-		Logger::getInstance()->info(__METHOD__.": Going to analyze CRSMS table and delete statistics.");
-		$this->db_wrapper->getDB()->parse("ANALYZE TABLE MOICAS.CRSMS delete statistics");
+		Logger::getInstance()->info(__METHOD__.": Going to analyze MOICAS.$name table and delete statistics.");
+		$this->db_wrapper->getDB()->parse("ANALYZE TABLE MOICAS.".$name." delete statistics");
 		
 		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 	}

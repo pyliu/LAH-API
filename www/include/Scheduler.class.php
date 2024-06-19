@@ -148,7 +148,7 @@ class Scheduler {
 
     private function optimizeTables() {
         $moicas = new MOICAS();
-        $result = $moicas->analyzeCRSMS();
+        $result = $moicas->analyzeMOICASTable('CRSMS');
         Logger::getInstance()->info(__METHOD__.": ANALYZE CRSMS TABLE ".($result ? '成功' : '失敗'));
     }
 
