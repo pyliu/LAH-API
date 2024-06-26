@@ -15,6 +15,25 @@ class MOIADM {
 		$this->db_wrapper = null;
 	}
 	/**
+	 * 調教資料集，解決SQL查詢表格過慢問題
+	 * -- 檢查最近一次是什麼時後做ANALYZE
+   * select OWNER,TABLE_NAME,LAST_ANALYZED from all_tables where table_name='PUBLICATION_HISTORY';
+	 */
+	public function analyzeMOIADMTable($name) {
+		if (empty($name)) {
+			return false;
+		}
+		
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+		
+		Logger::getInstance()->info(__METHOD__.": Going to analyze MOIADM.$name table and delete statistics.");
+		$this->db_wrapper->getDB()->parse("ANALYZE TABLE MOIADM.".$name." delete statistics");
+		
+		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+	}
+	/**
 	 * Find SMSLog records
 	 */
 	public function getSMSLogRecords($keyword) {
