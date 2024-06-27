@@ -808,6 +808,16 @@ class WatchDog {
     }
     function __destruct() { $this->stats = null; }
 
+    public function testSendNotification() {
+        $host_ip = getLocalhostIP();
+        $url = "http://".$host_ip.":8080/reg/foreigner-inheritance-restriction";
+        $message = "##### 📢 ".$this->date."  ".$this->time." 外國人繼承限制通知\r\n***\r\n⚠ 系統今日找到 5 件外國人繼承限制需進行處理(逾期或半年內即將到期)，請進系統查看案件資料。\r\n\r\n👉 $url";
+        $notification = new Notification();
+        $notification->removeOutdatedMessageByTitle('reg', '外國人繼承限制通知');
+        // send to reg chat channel
+        $this->addNotification($message, "HA10013859", '外國人繼承限制通知', true);
+    }
+
     public function do() {
         try {
             if ($this->isOfficeHours()) {
