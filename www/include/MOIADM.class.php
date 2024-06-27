@@ -15,6 +15,34 @@ class MOIADM {
 		$this->db_wrapper = null;
 	}
 	/**
+	 * Find write back history record in rdy status (default)
+	 */
+	public function getPublicationHistory($date = '', $status = 'rdy') {
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+		// default use today
+		$date = empty($date) ? date('Y/m/d') : $date;
+		Logger::getInstance()->info(__METHOD__.': Going to fetch MOIADM.PUBLICATION_HISTORY in '.$status.' status on '.$date);
+		$this->db_wrapper->getDB()->parse("
+			-- 回寫資料查詢
+			SELECT t.*
+				FROM MOIADM.PUBLICATION_HISTORY t
+			WHERE 1=1
+				--AND SUBSTR(t.DATE_TIME, 0, 10) = :bv_date
+				AND t.DATE_TIME LIKE :bv_date || '%'
+				AND t.PUBLICATION_STATUS = :bv_status
+				--AND t.to_org_id = 'H0' -- To which county/city
+			ORDER BY t.DATE_TIME DESC
+		");
+		$this->db_wrapper->getDB()->bind(":bv_date", $date);
+		$this->db_wrapper->getDB()->bind(":bv_status", $status);
+		$this->db_wrapper->getDB()->execute();
+		$records = $this->db_wrapper->getDB()->fetchAll();
+		Logger::getInstance()->info(__METHOD__.': Found '.count($records).' record(s) in MOIADM.PUBLICATION_HISTORY with '.$status.' status on '.$date);
+		return $records;
+	}
+	/**
 	 * 調教資料集，解決SQL查詢表格過慢問題
 	 * -- 檢查最近一次是什麼時後做ANALYZE
    * select OWNER,TABLE_NAME,LAST_ANALYZED from all_tables where table_name='PUBLICATION_HISTORY';

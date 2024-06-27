@@ -10,6 +10,19 @@ $moiadm = new MOIADM();
 $mock = $system->isMockMode();
 
 switch ($_POST["type"]) {
+	case "moiadm_publication_history":
+		Logger::getInstance()->info("XHR [moiadm_publication_history] get publication_history record request.");
+		$date = $_POST['date'] ?? date('Y/m/d');
+		$type = $_POST['status'] ?? 'rdy';
+		$rows = $mock ? $cache->get('moiadm_publication_history') : $moiadm->getPublicationHistory($date, $status);
+		$cache->set('moiadm_publication_history', $rows);
+		$message = is_array($rows) ? "目前查到 MOIADM.PUBLICATION_HISTORY 裡有 ".count($rows)." 筆資料" : '查詢 MOIADM.PUBLICATION_HISTORY 失敗';
+		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
+		Logger::getInstance()->info("XHR [moiadm_publication_history] $message");
+		echoJSONResponse($message, $status_code, array(
+			"raw" => $rows
+		));
+		break;
 	case "moiadm_smslog":
 		Logger::getInstance()->info("XHR [moiadm_smslog] get sms log record request.");
 		$keyword = $_POST['keyword'];
