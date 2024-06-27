@@ -24,7 +24,7 @@ class MOIADM {
 		// default use today
 		$date = empty($date) ? date('Y/m/d') : $date;
 		Logger::getInstance()->info(__METHOD__.': Going to fetch MOIADM.PUBLICATION_HISTORY in '.$status.' status on '.$date);
-		if (empty($status)) {
+		if ($status === 'all') {
 			$this->db_wrapper->getDB()->parse("
 				-- 回寫資料查詢
 				SELECT t.*
@@ -49,7 +49,7 @@ class MOIADM {
 		$this->db_wrapper->getDB()->bind(":bv_date", $date);
 		$this->db_wrapper->getDB()->execute();
 		$records = $this->db_wrapper->getDB()->fetchAll();
-		Logger::getInstance()->info(__METHOD__.': Found '.count($records).' record(s) in MOIADM.PUBLICATION_HISTORY with '.(empty($status) ? 'all' : $status).' status on '.$date);
+		Logger::getInstance()->info(__METHOD__.': Found '.count($records).' record(s) in MOIADM.PUBLICATION_HISTORY with '.$status.' status on '.$date);
 		return $records;
 	}
 	/**
