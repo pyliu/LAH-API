@@ -24,22 +24,32 @@ class MOIADM {
 		// default use today
 		$date = empty($date) ? date('Y/m/d') : $date;
 		Logger::getInstance()->info(__METHOD__.': Going to fetch MOIADM.PUBLICATION_HISTORY in '.$status.' status on '.$date);
-		$this->db_wrapper->getDB()->parse("
-			-- 回寫資料查詢
-			SELECT t.*
-				FROM MOIADM.PUBLICATION_HISTORY t
-			WHERE 1=1
-				--AND SUBSTR(t.DATE_TIME, 0, 10) = :bv_date
-				AND t.DATE_TIME LIKE :bv_date || '%'
-				AND t.PUBLICATION_STATUS = :bv_status
-				--AND t.to_org_id = 'H0' -- To which county/city
-			ORDER BY t.DATE_TIME DESC
-		");
+		if (empty($status)) {
+			$this->db_wrapper->getDB()->parse("
+				-- 回寫資料查詢
+				SELECT t.*
+					FROM MOIADM.PUBLICATION_HISTORY t
+				WHERE 1=1
+					AND t.DATE_TIME LIKE :bv_date || '%'
+				ORDER BY t.DATE_TIME DESC
+			");
+		} else {
+			$this->db_wrapper->getDB()->parse("
+				SELECT t.*
+					FROM MOIADM.PUBLICATION_HISTORY t
+				WHERE 1=1
+					--AND SUBSTR(t.DATE_TIME, 0, 10) = :bv_date
+					AND t.DATE_TIME LIKE :bv_date || '%'
+					AND t.PUBLICATION_STATUS = :bv_status
+					--AND t.to_org_id = 'H0' -- To which county/city
+				ORDER BY t.DATE_TIME DESC
+			");
+			$this->db_wrapper->getDB()->bind(":bv_status", $status);
+		}
 		$this->db_wrapper->getDB()->bind(":bv_date", $date);
-		$this->db_wrapper->getDB()->bind(":bv_status", $status);
 		$this->db_wrapper->getDB()->execute();
 		$records = $this->db_wrapper->getDB()->fetchAll();
-		Logger::getInstance()->info(__METHOD__.': Found '.count($records).' record(s) in MOIADM.PUBLICATION_HISTORY with '.$status.' status on '.$date);
+		Logger::getInstance()->info(__METHOD__.': Found '.count($records).' record(s) in MOIADM.PUBLICATION_HISTORY with '.(empty($status) ? 'all' : $status).' status on '.$date);
 		return $records;
 	}
 	/**
