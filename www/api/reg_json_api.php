@@ -85,6 +85,7 @@ switch ($_POST["type"]) {
         // primary key in DB
         $payload['id'] = $id = $_POST['id'];
         $payload['year'] = $year = $_POST['year'];
+        $payload['old_year'] = $old_year = $_POST['old_year'];
         $payload['number'] = $number = str_pad($_POST['number'], 6, '0', STR_PAD_LEFT);;
         $payload['fid'] = $fid = $_POST['fid'];
         $payload['fname'] = $fname = $_POST['fname'];
@@ -103,15 +104,16 @@ switch ($_POST["type"]) {
                 // 更新成功
                 $status = STATUS_CODE::SUCCESS_NORMAL;
                 $message = "資料庫資料已更新($id)";
-                $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.$year;
-                $orig_file = $parent_dir.DIRECTORY_SEPARATOR.$record['number']."_".$record['fid']."_".$record['fname'].".pdf";
-                $new_file = $parent_dir.DIRECTORY_SEPARATOR.$number."_".$fid."_".$fname.".pdf";
+                $old_parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.$old_year;
+                $new_parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.$year;
+                $orig_file = $old_parent_dir.DIRECTORY_SEPARATOR.$record['number']."_".$record['fid']."_".$record['fname'].".pdf";
+                $new_file = $new_parent_dir.DIRECTORY_SEPARATOR.$number."_".$fid."_".$fname.".pdf";
                 // rename orig file
                 $rename_result = @rename($orig_file, $new_file);
                 if ($rename_result) {
                     $orig_file = $new_file;
                 } else {
-                    $log = "更名 ".ltrim($orig_file, $parent_dir.DIRECTORY_SEPARATOR)." 至 ".ltrim($new_file, $parent_dir.DIRECTORY_SEPARATOR)." 失敗";
+                    $log = "更名 ".$orig_file." 至 ".$new_file." 失敗";
                     $message .= "-($log)";
                     Logger::getInstance()->error("⚠ $log");
                 }
@@ -121,7 +123,7 @@ switch ($_POST["type"]) {
                     // remove orig pdf
                     $unlink_result = @unlink($orig_file);
                     if (!$unlink_result) {
-                        $message .= "-(刪除 ".ltrim($orig_file, $parent_dir.DIRECTORY_SEPARATOR)." 檔案失敗)";
+                        $message .= "-(刪除 ".$orig_file." 檔案失敗)";
                         Logger::getInstance()->error("⚠ 刪除 $orig_file 檔案失敗!");
                     }
                     // move uploaded file
