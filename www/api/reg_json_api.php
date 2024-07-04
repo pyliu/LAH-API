@@ -105,7 +105,18 @@ switch ($_POST["type"]) {
                 $status = STATUS_CODE::SUCCESS_NORMAL;
                 $message = "資料庫資料已更新($id)";
                 $old_parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.$old_year;
+                
                 $new_parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.$year;
+                // in case new dir does not exist
+                if (!is_dir($new_parent_dir)) {
+                    // Create the directory with permissions 0777 (modify if needed)
+                    if (mkdir($new_parent_dir, 0777, true)) {
+                        Logger::getInstance()->info("$new_parent_dir directory created successfully.");
+                    } else {
+                        Logger::getInstance()->info("Failed to create $new_parent_dir directory.");
+                    }
+                }
+
                 $orig_file = $old_parent_dir.DIRECTORY_SEPARATOR.$record['number']."_".$record['fid']."_".$record['fname'].".pdf";
                 $new_file = $new_parent_dir.DIRECTORY_SEPARATOR.$number."_".$fid."_".$fname.".pdf";
                 // rename orig file
