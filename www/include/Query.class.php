@@ -180,16 +180,21 @@ class Query {
 		}
 		$sql = "
 			-- 案件(REG + SUR)數量統計 BY 年
-			SELECT t.RM01 AS YEAR, t.RM02 AS CODE, q.KCNT AS CODE_NAME, COUNT(*) AS COUNT,
+			SELECT
+				t.RM01 AS YEAR,
+				t.RM02 AS CODE,
+				q.KCNT AS CODE_NAME,
+				COUNT(*) AS COUNT,
 				(CASE
 					--WHEN REGEXP_LIKE(t.RM02, '^".$this->db_wrapper->getSite()."[[:alpha:]]1$') THEN 'reg.HBX1'
 					WHEN RM02 IN ('".$this->db_wrapper->getSite()."A1', '".$this->db_wrapper->getSite()."B1', '".$this->db_wrapper->getSite()."C1', '".$this->db_wrapper->getSite()."D1', '".$this->db_wrapper->getSite()."E1', '".$this->db_wrapper->getSite()."F1', '".$this->db_wrapper->getSite()."G1', '".$this->db_wrapper->getSite()."H1') THEN 'reg.HBX1'
-					WHEN t.RM02 LIKE 'H".$this->db_wrapper->getSiteNumber()."%'  THEN 'reg.H2XX'
-					WHEN t.RM02 LIKE '%".$this->db_wrapper->getSite()."'  THEN 'reg.XXHB'
+					WHEN t.RM02 LIKE 'H".$this->db_wrapper->getSiteNumber()."%' THEN 'reg.H2XX'
+					WHEN t.RM02 LIKE '%".$this->db_wrapper->getSite()."' THEN 'reg.XXHB'
 					WHEN t.RM02 LIKE 'H%".$this->db_wrapper->getSiteCode()."1' THEN 'reg.HXB1'
 					WHEN t.RM02 LIKE '".$this->db_wrapper->getSite()."%' THEN 'reg.HB'
-					ELSE '登記案件'
-				END) AS CODE_TYPE FROM MOICAS.CRSMS t
+					ELSE '".mb_convert_encoding('登記案件', 'UTF-8', 'BIG5')."'
+				END) AS CODE_TYPE
+			FROM MOICAS.CRSMS t
 			LEFT JOIN MOIADM.RKEYN q ON q.kcde_1 = '04' AND q.kcde_2 = t.rm02
 			WHERE RM01 = :bv_year
 			GROUP BY t.RM01, t.RM02, q.KCNT
@@ -203,8 +208,8 @@ class Query {
 		
 		$this->db_wrapper->getDB()->parse($sql);
 		$this->db_wrapper->getDB()->bind(":bv_year", $year);
-        $this->db_wrapper->getDB()->execute();
-        return $this->db_wrapper->getDB()->fetchAll();
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
 	}
 	
 	public function getSectionRALIDCount($cond = "") {
