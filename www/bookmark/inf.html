@@ -25,15 +25,19 @@
 		.card {
 			border: 2px solid black;
 		}
+		.out-site {
+			border: 3px solid rgb(16, 151, 9);
+		}
 		.card:hover {
 			background-color: #cdf8eb;
-			border: 4px dashed black;
-		}
-		.card-link {
-			width: 32.5% !important;
+			border: 4px dashed rgb(8, 138, 189);
 		}
 		.card-title h5 {
 			text-decoration: underline;
+		}
+		.fixed-height {
+			width: 100%;
+			height: 17.5vh;
 		}
 	</style>
 </head>
@@ -95,96 +99,97 @@
 		</div>
 	</nav>
 	<section class="container-fluid">
-		<div class="d-flex justify-content-around">
-			<div class="card card-link">
-				<!-- <img src="../assets/img/bookmark/18.jpg" class="card-img-top img-fluid" alt="知識網"> -->
-				<div class="card-body">
-					<div class="card-title d-flex justify-content-between align-items-center">
-						<h5><i class="fa fa-home fa-lg mr-1"></i>資訊課專屬入口網站</h5>
-						<a href="http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/index.htm" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+		<div class="d-flex flex-wrap">
+			<div class="col-md-4 mb-3">
+				<div class="card fixed-height">
+					<!-- <img src="../assets/img/bookmark/18.jpg" class="card-img-top img-fluid" alt="知識網"> -->
+					<div class="card-body">
+						<div class="card-title d-flex justify-content-between align-items-center">
+							<h5><i class="fa fa-home fa-lg mr-1"></i>資訊課專屬入口網站</h5>
+							<a href="http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/index.htm" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+						</div>
+						<p class="card-text">最新消息、表單下載、會議記錄 ... </p>
 					</div>
-					<p class="card-text">最新消息、表單下載、會議記錄 ... </p>
+				</div>					
+			</div>
+			<div class="col-md-4 mb-3">
+				<div class="card fixed-height">
+					<div class="card-body">
+						<div class="card-title d-flex justify-content-between align-items-center">
+							<h5><i class="fa fa-tv fa-lg mr-1 text-success"></i>地政資訊智慧監控系統</h5>
+							<a href="http://220.1.34.75:8080/inf" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+						</div>
+						<p class="card-text">以紅綠燈即可判斷最即時的系統狀態 http://220.1.34.75:8080/inf</p>
+					</div>
 				</div>
 			</div>
-			<div class="card card-link">
-				<div class="card-body">
-					<div class="card-title d-flex justify-content-between align-items-center">
-						<h5><i class="fa fa-tv fa-lg mr-1 text-success"></i>地政資訊智慧監控系統</h5>
-						<a href="http://220.1.34.75:8080/inf" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+			<div class="col-md-4 mb-3">
+				<div class="card out-site fixed-height">
+					<div class="card-body">
+						<div class="card-title d-flex justify-content-between align-items-center">
+							<h5><i class="fa fa-comment fa-lg mr-1"></i>111數發部政府簡訊平台</h5>
+							<a href="https://111.gov.tw/psms_web/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+						</div>
+						<p class="card-text">政府專屬短碼簡訊平臺(<i class="text-danger font-weight-bold">外網</i>) https://111.gov.tw/psms_web/</p>
 					</div>
-					<p class="card-text">以紅綠燈即可判斷最即時的系統狀態 http://220.1.34.75:8080/inf</p>
 				</div>
 			</div>
-			<div class="card card-link">
-				<div class="card-body">
-					<div class="card-title d-flex justify-content-between align-items-center">
-						<h5><i class="fa fa-comment fa-lg mr-1"></i>111數發部政府簡訊平台</h5>
-						<a href="https://111.gov.tw/psms_web/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+			<div class="col-md-4 mb-3">
+				<div class="card fixed-height">
+					<!-- <img src="../assets/img/bookmark/18.jpg" class="card-img-top img-fluid" alt="知識網"> -->
+					<div class="card-body">
+						<div class="card-title d-flex justify-content-between align-items-center">
+							<h5><i class="fa fa-server fa-lg mr-1"></i>地政系統WEB版-跨縣市測試機</h5>
+							<a href="http://192.168.17.20:9080/LandHA/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+						</div>
+						<p class="card-text">地政系統WEB版-跨縣市測試機 http://192.168.17.20:9080/LandHA/</p>
 					</div>
-					<p class="card-text">政府專屬短碼簡訊平臺(外網) https://111.gov.tw/psms_web/</p>
 				</div>
 			</div>
-		</div>
-
-		<div class="d-flex justify-content-around mt-3">
-			<div class="card card-link">
-				<!-- <img src="../assets/img/bookmark/18.jpg" class="card-img-top img-fluid" alt="知識網"> -->
-				<div class="card-body">
-					<div class="card-title d-flex justify-content-between align-items-center">
-						<h5><i class="fa fa-server fa-lg mr-1"></i>地政系統WEB版-跨縣市測試機</h5>
-						<a href="http://192.168.17.20:9080/LandHA/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+			<div class="col-md-4 mb-3">
+				<div class="card fixed-height">
+					<div class="card-body">
+						<div class="card-title d-flex justify-content-between align-items-center">
+							<h5><i class="fa fa-server fa-lg mr-1"></i>地政系統WEB版-桃園外掛測試機</h5>
+							<a href="http://192.168.17.21:9080/LandHA/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+						</div>
+						<p class="card-text">地政系統WEB版-桃園外掛測試機 http://192.168.17.21:9080/LandHA/</p>
 					</div>
-					<p class="card-text">地政系統WEB版-跨縣市測試機 http://192.168.17.20:9080/LandHA/</p>
 				</div>
 			</div>
-			<div class="card card-link">
-				<div class="card-body">
-					<div class="card-title d-flex justify-content-between align-items-center">
-						<h5><i class="fa fa-server fa-lg mr-1"></i>地政系統WEB版-桃園外掛測試機</h5>
-						<a href="http://192.168.17.21:9080/LandHA/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+			<div class="col-md-4 mb-3">
+				<div class="card fixed-height">
+					<div class="card-body">
+						<div class="card-title d-flex justify-content-between align-items-center">
+							<h5><i class="fa fa-comment-dots fa-lg mr-1"></i>案件辦理情形通知系統</h5>
+							<a href="http://220.1.34.221:8080/SMS98/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+						</div>
+						<p class="card-text">精誠開發之系統透過「中華電信訊息中心API」傳送案件辦理狀態簡訊及電子郵件 http://220.1.34.221:8080/SMS98/</p>
 					</div>
-					<p class="card-text">地政系統WEB版-桃園外掛測試機 http://192.168.17.21:9080/LandHA/</p>
 				</div>
 			</div>
-			<div class="card card-link">
-				<div class="card-body">
-					<div class="card-title d-flex justify-content-between align-items-center">
-						<h5><i class="fa fa-comment-dots fa-lg mr-1"></i>案件辦理情形通知系統</h5>
-						<a href="http://220.1.34.221:8080/SMS98/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+			<div class="col-md-4 mb-3">
+				<div class="card fixed-height">
+					<!-- <img src="../assets/img/bookmark/18.jpg" class="card-img-top img-fluid" alt="知識網"> -->
+					<div class="card-body">
+						<div class="card-title d-flex justify-content-between align-items-center">
+							<h5><i class="fa fa-desktop fa-lg mr-1"></i>便民觸控查詢控制台</h5>
+							<a href="http://220.1.34.211:9080/touch/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+						</div>
+						<p class="card-text">便民觸控查詢控制台 http://220.1.34.211:9080/touch/</p>
 					</div>
-					<p class="card-text">精誠開發之系統透過「中華電信訊息中心API」傳送案件辦理狀態簡訊及電子郵件 http://220.1.34.221:8080/SMS98/</p>
 				</div>
 			</div>
-		</div>
-
-		<div class="d-flex justify-content-around mt-3">
-			<div class="card card-link">
-				<!-- <img src="../assets/img/bookmark/18.jpg" class="card-img-top img-fluid" alt="知識網"> -->
-				<div class="card-body">
-					<div class="card-title d-flex justify-content-between align-items-center">
-						<h5><i class="fa fa-desktop fa-lg mr-1"></i>便民觸控查詢控制台</h5>
-						<a href="http://220.1.34.211:9080/touch/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+			<div class="col-md-4 mb-3">
+				<div class="card fixed-height">
+					<div class="card-body">
+						<div class="card-title d-flex justify-content-between align-items-center">
+							<h5><i class="fa fa-cloud-sun-rain fa-lg mr-1"></i>SRMAS 機房天氣圖</h5>
+							<a href="http://220.1.34.75:8080/inf/weather/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
+						</div>
+						<p class="card-text">機房網路及主要系統狀態顯示 http://220.1.34.75:8080/inf/weather/</p>
 					</div>
-					<p class="card-text">便民觸控查詢控制台 http://220.1.34.211:9080/touch/</p>
 				</div>
-			</div>
-			<div class="card card-link">
-				<div class="card-body">
-					<div class="card-title d-flex justify-content-between align-items-center">
-						<h5><i class="fa fa-cloud-sun-rain fa-lg mr-1"></i>SRMAS 機房天氣圖</h5>
-						<a href="http://220.1.34.75:8080/inf/weather/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
-					</div>
-					<p class="card-text">機房網路及主要系統狀態顯示 http://220.1.34.75:8080/inf/weather/</p>
-				</div>
-			</div>
-			<div class="card card-link invisible">
-				<!-- <div class="card-body">
-					<div class="card-title d-flex justify-content-between align-items-center">
-						<h5><i class="fa fa-comment-dots fa-lg mr-1"></i>案件辦理情形通知系統</h5>
-						<a href="http://220.1.34.221:8080/SMS98/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
-					</div>
-					<p class="card-text">精誠開發之系統透過「中華電信訊息中心API」傳送案件辦理狀態簡訊及電子郵件 http://220.1.34.221:8080/SMS98/</p>
-				</div> -->
 			</div>
 		</div>
 	</section><!-- /section -->
