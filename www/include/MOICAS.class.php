@@ -26,6 +26,13 @@ class MOICAS
    * select OWNER,TABLE_NAME,LAST_ANALYZED from all_tables where table_name='CRSMS';
 	 */
 	public function analyzeMOICASTable($name) {
+		/**
+		 * Here are some additional things to keep in mind when using ANALYZE TABLE:
+		 * ANALYZE TABLE can be a time-consuming operation, so it is best to run it during off-peak hours.
+		 * You can use the ESTIMATE STATISTICS clause to control how many rows are sampled to generate the statistics. A larger sample will produce more accurate statistics, but it will also take longer to run.
+		 * You can use the COMPUTE STATISTICS clause to specify which statistics to gather. The default is to gather all of the statistics, but you can also choose to gather only specific statistics, such as the number of rows or the distribution of values in a column.
+		 * In general, it is a good practice to use ANALYZE TABLE regularly to keep the statistics for your tables up-to-date. This can help to improve the performance of your Oracle database applications.
+		 */
 		if (empty($name)) {
 			return false;
 		}
@@ -34,8 +41,11 @@ class MOICAS
 			return false;
 		}
 		
-		Logger::getInstance()->info(__METHOD__.": Going to analyze MOICAS.$name table and delete statistics.");
-		$this->db_wrapper->getDB()->parse("ANALYZE TABLE MOICAS.".$name." delete statistics");
+		// Logger::getInstance()->info(__METHOD__.": Going to analyze MOICAS.$name table and delete statistics.");
+		// $this->db_wrapper->getDB()->parse("ANALYZE TABLE MOICAS.".$name." delete statistics");
+		Logger::getInstance()->info(__METHOD__.": Going to analyze MOICAS.$name table compute statistics.");
+		// sampling by 10% records 👉 ANALYZE TABLE MOICAS.CRSMS ESTIMATE STATISTICS SAMPLE 10 PERCENT;
+		$this->db_wrapper->getDB()->parse("ANALYZE TABLE MOICAS.".$name." compute statistics");
 		
 		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 	}

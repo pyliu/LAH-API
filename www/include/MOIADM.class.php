@@ -66,8 +66,8 @@ class MOIADM {
 			return false;
 		}
 		
-		Logger::getInstance()->info(__METHOD__.": Going to analyze MOIADM.$name table and delete statistics.");
-		$this->db_wrapper->getDB()->parse("ANALYZE TABLE MOIADM.".$name." delete statistics");
+		Logger::getInstance()->info(__METHOD__.": Going to analyze MOIADM.$name table compute statistics.");
+		$this->db_wrapper->getDB()->parse("ANALYZE TABLE MOIADM.".$name." compute statistics");
 		
 		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 	}
