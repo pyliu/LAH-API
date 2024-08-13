@@ -113,21 +113,20 @@ class SQLiteMonitorMail {
     /**
      * 取得最新郵件
      */
-    public function getLatestMail() {
+    public function getLatestMail($convert = false) {
         // $site = System::getInstance()->getSiteCode();
         if($stmt = $this->db->prepare("SELECT * FROM mail ORDER BY id DESC LIMIT 1")) {
-            return mb_convert_encoding($this->prepareArray($stmt)[0], 'UTF-8', 'BIG5');
+            return $convert ? mb_convert_encoding($this->prepareArray($stmt)[0], 'UTF-8', 'BIG5') : $this->prepareArray($stmt)[0];
         }
         return false;
     }
     /**
      * 取得最近區間郵件
      */
-    public function getMailsWithinSeconds($seconds_before = 15 * 60) {
+    public function getMailsWithinSeconds($seconds_before = 15 * 60, $convert = false) {
         $ts = time() - intval($seconds_before);
         if($stmt = $this->db->prepare("SELECT * FROM mail WHERE timestamp >= $ts ORDER BY id DESC")) {
-            $arrs =  mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', 'BIG5');
-            return $arrs;
+            return $convert ? mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', 'BIG5') : $this->prepareArray($stmt);
         }
         return false;
     }
@@ -147,22 +146,20 @@ class SQLiteMonitorMail {
     /**
      * 取得郵件 BY 搜尋 subject
      */
-    public function getMailsBySubject($query_string, $seconds_before = 24 * 60 * 60) {
+    public function getMailsBySubject($query_string, $seconds_before = 24 * 60 * 60, $convert = false) {
         $ts = time() - intval($seconds_before);
         if($stmt = $this->db->prepare("SELECT * FROM mail WHERE timestamp >= $ts AND subject LIKE '%$query_string%' ORDER BY timestamp DESC")) {
-            $arrs =  mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', 'BIG5');
-            return $arrs;
+            return $convert ? mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', 'BIG5') : $this->prepareArray($stmt);
         }
         return false;
     }
     /**
      * 取得郵件 BY 搜尋 sender
      */
-    public function getMailsBySender($query_string, $seconds_before = 24 * 60 * 60) {
+    public function getMailsBySender($query_string, $seconds_before = 24 * 60 * 60, $convert = false) {
         $ts = time() - intval($seconds_before);
         if($stmt = $this->db->prepare("SELECT * FROM mail WHERE timestamp >= $ts AND sender LIKE '%$query_string%' ORDER BY timestamp DESC")) {
-            $arrs =  mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', 'BIG5');
-            return $arrs;
+            return $convert ? mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', 'BIG5') : $this->prepareArray($stmt);
         }
         return false;
     }

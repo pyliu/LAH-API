@@ -40,8 +40,9 @@ switch ($_POST["type"]) {
         }
         break;
     case "latest":
+        $convert = $_POST['convert'] === 'true';
         Logger::getInstance()->info("XHR [latest] 查詢最新監控郵件請求");
-        $mail = $sqlite_monitor_mail->getLatestMail();
+        $mail = $sqlite_monitor_mail->getLatestMail($convert);
         if (empty($mail)) {
             echoJSONResponse('沒有找到郵件');
         } else {
@@ -53,10 +54,11 @@ switch ($_POST["type"]) {
         break;
     case "subject":
         $keyword = $_POST["keyword"];
+        $convert = $_POST['convert'] === 'true';
         // 搜尋 via subject
         Logger::getInstance()->info("XHR [subject] 查詢監控郵件 BY '%${keyword}%' IN SUBJECT 請求");
         $days_before = $_POST["days"] ?? 1;
-        $mails = $sqlite_monitor_mail->getMailsBySubject($_POST["keyword"], $days_before * 24 * 60 * 60);
+        $mails = $sqlite_monitor_mail->getMailsBySubject($_POST["keyword"], $days_before * 24 * 60 * 60, $convert);
         if (empty($mails)) {
             echoJSONResponse("'%${keyword}%' IN SUBJECT 沒有找到郵件");
         } else {
@@ -69,10 +71,11 @@ switch ($_POST["type"]) {
         break;
     case "sender":
         $keyword = $_POST["keyword"];
+        $convert = $_POST['convert'] === 'true';
         // 搜尋 via subject
         Logger::getInstance()->info("XHR [sender] 查詢監控郵件 BY sender: ${keyword}  請求");
         $days_before = $_POST["days"] ?? 1;
-        $mails = $sqlite_monitor_mail->getMailsBySender($keyword, $days_before * 24 * 60 * 60);
+        $mails = $sqlite_monitor_mail->getMailsBySender($keyword, $days_before * 24 * 60 * 60, $convert);
         if (empty($mails)) {
             echoJSONResponse("sender: ${keyword} 沒有找到郵件");
         } else {
