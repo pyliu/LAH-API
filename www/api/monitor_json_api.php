@@ -40,7 +40,7 @@ switch ($_POST["type"]) {
         }
         break;
     case "latest":
-        $convert = $_POST['convert'] === 'true';
+        $convert = $_POST['convert'] === 'true' ? true : false;
         Logger::getInstance()->info("XHR [latest] 查詢最新監控郵件請求");
         $mail = $sqlite_monitor_mail->getLatestMail($convert);
         if (empty($mail)) {
@@ -54,7 +54,7 @@ switch ($_POST["type"]) {
         break;
     case "subject":
         $keyword = $_POST["keyword"];
-        $convert = $_POST['convert'] === 'true';
+        $convert = $_POST['convert'] === 'true' ? true : false;
         // 搜尋 via subject
         Logger::getInstance()->info("XHR [subject] 查詢監控郵件 BY '%${keyword}%' IN SUBJECT 請求");
         $days_before = $_POST["days"] ?? 1;
@@ -71,7 +71,7 @@ switch ($_POST["type"]) {
         break;
     case "sender":
         $keyword = $_POST["keyword"];
-        $convert = $_POST['convert'] === 'true';
+        $convert = $_POST['convert'] === 'true' ? true : false;
         // 搜尋 via subject
         Logger::getInstance()->info("XHR [sender] 查詢監控郵件 BY sender: ${keyword}  請求");
         $days_before = $_POST["days"] ?? 1;
