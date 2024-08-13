@@ -114,9 +114,9 @@ class SQLiteMonitorMail {
      * 取得最新郵件
      */
     public function getLatestMail() {
-        $site = System::getInstance()->getSiteCode();
+        // $site = System::getInstance()->getSiteCode();
         if($stmt = $this->db->prepare("SELECT * FROM mail ORDER BY id DESC LIMIT 1")) {
-            return $this->prepareArray($stmt)[0];
+            return mb_convert_encoding($this->prepareArray($stmt)[0], 'UTF-8', 'BIG5');
         }
         return false;
     }
@@ -126,7 +126,8 @@ class SQLiteMonitorMail {
     public function getMailsWithinSeconds($seconds_before = 15 * 60) {
         $ts = time() - intval($seconds_before);
         if($stmt = $this->db->prepare("SELECT * FROM mail WHERE timestamp >= $ts ORDER BY id DESC")) {
-            return $this->prepareArray($stmt);
+            $arrs =  mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', 'BIG5');
+            return $arrs;
         }
         return false;
     }
@@ -149,7 +150,8 @@ class SQLiteMonitorMail {
     public function getMailsBySubject($query_string, $seconds_before = 24 * 60 * 60) {
         $ts = time() - intval($seconds_before);
         if($stmt = $this->db->prepare("SELECT * FROM mail WHERE timestamp >= $ts AND subject LIKE '%$query_string%' ORDER BY timestamp DESC")) {
-            return $this->prepareArray($stmt);
+            $arrs =  mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', 'BIG5');
+            return $arrs;
         }
         return false;
     }
@@ -159,7 +161,8 @@ class SQLiteMonitorMail {
     public function getMailsBySender($query_string, $seconds_before = 24 * 60 * 60) {
         $ts = time() - intval($seconds_before);
         if($stmt = $this->db->prepare("SELECT * FROM mail WHERE timestamp >= $ts AND sender LIKE '%$query_string%' ORDER BY timestamp DESC")) {
-            return $this->prepareArray($stmt);
+            $arrs =  mb_convert_encoding($this->prepareArray($stmt), 'UTF-8', 'BIG5');
+            return $arrs;
         }
         return false;
     }
