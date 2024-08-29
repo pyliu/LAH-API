@@ -1619,8 +1619,9 @@ class Prefetch {
                 $db = $this->getOraDB();
                 $db->parse("
                     SELECT *
-                    FROM SCRSMS 
-                    LEFT JOIN SRKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+                    FROM MOICAS.CRSMS 
+                    LEFT JOIN MOIADM.RKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+                    LEFT JOIN MOICAS.CABRP ON AB01 = RM24
                     WHERE RM31 IS NULL AND (RM99 IS NULL OR (RM99 = 'Y' AND RM101 = :bv_site))
                     ORDER BY RM07_1, RM07_2 DESC
                 ");
