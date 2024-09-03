@@ -34,12 +34,14 @@ class MOICAT {
 		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
+
+		$action = 'delete';//'compute';
 		
 		// Logger::getInstance()->info(__METHOD__.": Going to analyze MOICAS.$name table and delete statistics.");
 		// $this->db_wrapper->getDB()->parse("ANALYZE TABLE MOICAS.".$name." delete statistics");
-		Logger::getInstance()->info(__METHOD__.": Going to analyze MOICAT.$name table compute statistics.");
+		Logger::getInstance()->info(__METHOD__.": Going to analyze MOICAT.$name table $action statistics.");
 		// sampling by 10% records 👉 ANALYZE TABLE MOICAS.CRSMS ESTIMATE STATISTICS SAMPLE 10 PERCENT;
-		$this->db_wrapper->getDB()->parse("ANALYZE TABLE MOICAT.".$name." compute statistics");
+		$this->db_wrapper->getDB()->parse("ANALYZE TABLE MOICAT.".$name." $action statistics");
 		
 		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 	}
