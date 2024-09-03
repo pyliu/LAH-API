@@ -149,20 +149,17 @@ class Scheduler {
     }
 
     private function optimizeTables() {
-        /**
-         * temporally disabled
-         */
-        // $moicas = new MOICAS();
-        // $result = $moicas->analyzeMOICASTable('CRSMS');
-        // Logger::getInstance()->info(__METHOD__.": ANALYZE MOICAS.CRSMS TABLE ".($result ? '成功' : '失敗'));
+        $moicas = new MOICAS();
+        $result = $moicas->analyzeMOICASTable('CRSMS');
+        Logger::getInstance()->info(__METHOD__.": ANALYZE MOICAS.CRSMS TABLE ".($result ? '成功' : '失敗'));
         
-        // $moiadm = new MOIADM();
-        // $result = $moiadm->analyzeMOIADMTable('PUBLICATION_HISTORY');
-        // Logger::getInstance()->info(__METHOD__.": ANALYZE MOIADM.PUBLICATION_HISTORY TABLE ".($result ? '成功' : '失敗'));
+        $moiadm = new MOIADM();
+        $result = $moiadm->analyzeMOIADMTable('PUBLICATION_HISTORY');
+        Logger::getInstance()->info(__METHOD__.": ANALYZE MOIADM.PUBLICATION_HISTORY TABLE ".($result ? '成功' : '失敗'));
         
-        // $moicat = new MOICAT();
-        // $result = $moicat->analyzeMOICATTable('RINDX');
-        // Logger::getInstance()->info(__METHOD__.": ANALYZE MOICAT.RINDX TABLE ".($result ? '成功' : '失敗'));
+        $moicat = new MOICAT();
+        $result = $moicat->analyzeMOICATTable('RINDX');
+        Logger::getInstance()->info(__METHOD__.": ANALYZE MOICAT.RINDX TABLE ".($result ? '成功' : '失敗'));
     }
 
     public function addOfficeCheckStatus() {
