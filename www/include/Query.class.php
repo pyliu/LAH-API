@@ -1665,8 +1665,8 @@ class Query {
 			return -1;
 		}
 
-        if (!$this->checkCaseID($id)) {
-            return -1;
+    if (!$this->checkCaseID($id)) {
+      return -1;
 		}
 		
 		$diff_result = array();
@@ -1848,7 +1848,11 @@ class Query {
 		}
 		return false;
 	}
-	
+
+	public function syncXCaseFixData($id) {
+		// return $this->syncXCaseColumn($id, "");
+	}
+
 	public function getSelectSQLData($sql, $raw = false) {
 		if (!$this->db_wrapper->reachable()) {
 			return array();

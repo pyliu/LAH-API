@@ -705,6 +705,23 @@ switch ($_POST["type"]) {
 			echoJSONResponse("同步失敗【".$_POST["id"].", ".$_POST["column"]."】");
 		}
 		break;
+	case "sync_xcase_fix_data":
+		Logger::getInstance()->info("XHR [sync_xcase_fix_data] 同步遠端案件之補正資料【".$_POST["id"]."】請求");
+		$result_flag = $mock ? $cache->get('sync_xcase_fix_data') : $query->syncXCaseFixData($_POST["id"]);
+		$cache->set('sync_xcase_fix_data', $result_flag);
+		if ($result_flag) {
+			$result = array(
+				"status" => STATUS_CODE::SUCCESS_NORMAL,
+				"data_count" => "0",
+				"raw" => $result_flag
+			);
+			Logger::getInstance()->info("XHR [sync_xcase_fix_data] 同步補正資料成功【".$_POST["id"]."】");
+			echo json_encode($result, 0);
+		} else {
+			Logger::getInstance()->error("XHR [sync_xcase_fix_data] 同步補正資料失敗【".$_POST["id"]."】");
+			echoJSONResponse("同步補正資料失敗【".$_POST["id"]."】");
+		}
+		break;
 	case "announcement_data":
 		Logger::getInstance()->info("XHR [announcement_data] 查詢公告資料請求");
 		$rows = $mock ? $cache->get('announcement_data') : $query->getAnnouncementData();
