@@ -1,6 +1,7 @@
 <?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'init.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Query.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'XCase.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Prefetch.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Message.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Notification.class.php');
@@ -173,10 +174,10 @@ class WatchDog {
 
     private function checkCrossSiteData() {
         if ($this->isOn($this->schedule["twice_a_day"])) {
-            $query = new Query();
+            $xcase = new XCase();
             // check reg case missing RM99~RM101 data
             Logger::getInstance()->info('開始登記案件跨所註記遺失檢查 ... ');
-            $rows = $query->getProblematicCrossCases();
+            $rows = $xcase->getProblematicCrossCases();
             if (!empty($rows)) {
                 Logger::getInstance()->warning('找到'.count($rows).'件跨所註記遺失登記案件！');
                 $case_ids = [];
@@ -207,10 +208,10 @@ class WatchDog {
 
     private function checkValCrossSiteData() {
         if ($this->isOn($this->schedule["twice_a_day"])) {
-            $query = new Query();
+            $xcase = new XCase();
             // check val case missing SS99~SS101 data
             Logger::getInstance()->info('開始本所管轄地價案件跨所註記遺失檢查 ... ');
-            $rows = $query->getPSCRNProblematicCrossCases();
+            $rows = $xcase->getPSCRNProblematicCrossCases();
             if (!empty($rows)) {
                 Logger::getInstance()->warning('找到'.count($rows).'件跨所註記遺失地價案件！');
                 $case_ids = [];
