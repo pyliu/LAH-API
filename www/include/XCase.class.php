@@ -371,7 +371,7 @@ class XCase {
 					$this->updateLocalCRCRD($l3_crcrd);
 				}
 				Logger::getInstance()->info(__METHOD__.": 同步遠端案件 $rc01-$rc04-$rc06 補正資料成功");
-				return true;
+				return $l3_crcrd['RC05'];
 			}
 			Logger::getInstance()->warning(__METHOD__.": 同步遠端案件 $rc01-$rc04-$rc06 補正資料錯誤(回傳值：$l3_crcrd)");
 			return false;

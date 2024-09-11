@@ -709,16 +709,13 @@ switch ($_POST["type"]) {
 	case "sync_xcase_fix_data":
 		Logger::getInstance()->info("XHR [sync_xcase_fix_data] 同步遠端案件之補正資料【".$_POST["id"]."】請求");
 		$xcase = new XCase();
-		$result_flag = $mock ? $cache->get('sync_xcase_fix_data') : $xcase->syncXCaseFixData($_POST["id"]);
-		$cache->set('sync_xcase_fix_data', $result_flag);
-		if ($result_flag) {
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => "0",
-				"raw" => $result_flag
-			);
+		$response = $mock ? $cache->get('sync_xcase_fix_data') : $xcase->syncXCaseFixData($_POST["id"]);
+		$cache->set('sync_xcase_fix_data', $response);
+		if ($response !== false) {
 			Logger::getInstance()->info("XHR [sync_xcase_fix_data] 同步補正資料成功【".$_POST["id"]."】");
-			echo json_encode($result, 0);
+			echoJSONResponse("同步補正資料成功【".$_POST["id"]."】", STATUS_CODE::SUCCESS_NORMAL, array(
+				"raw" => mb_convert_encoding($response, 'UTF-8', 'BIG-5')
+			));
 		} else {
 			Logger::getInstance()->error("XHR [sync_xcase_fix_data] 同步補正資料失敗【".$_POST["id"]."】");
 			echoJSONResponse("同步補正資料失敗【".$_POST["id"]."】");
