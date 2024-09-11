@@ -32,86 +32,6 @@ class XCase {
 		return false;
 	}
 
-	private function getXCaseCRCLD($id) {
-		if (!$this->db_wrapper->reachable()) {
-			return -1;
-		}
-
-    if (!$this->checkCaseID($id)) {
-      return -2;
-		}
-		
-		$year = substr($id, 0, 3);
-		$code = substr($id, 3, 4);
-		$num = substr($id, 7, 6);
-		$db_user = "L1H".$code[1]."0H03";
-
-		Logger::getInstance()->info(__METHOD__.": 找遠端 $db_user.CRCLD 的案件連結資料【$year, $code, $num"."】");
-
-		// connection switch to L3HWEB
-		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::L3HWEB);
-		$this->db_wrapper->getDB()->parse("
-			SELECT * FROM $db_user.CRCLD t
-			WHERE 1=1
-				AND cl01 = :bv_year
-				AND cl02 = :bv_code
-				AND cl03 = :bv_number
-		");
-		$this->db_wrapper->getDB()->bind(":bv_year", $year);
-		$this->db_wrapper->getDB()->bind(":bv_code", $code);
-		$this->db_wrapper->getDB()->bind(":bv_number", $num);
-		$this->db_wrapper->getDB()->execute();
-		$remote_row = $this->db_wrapper->getDB()->fetch(true);
-
-		// 遠端無連結資料
-		if (empty($remote_row)) {
-			Logger::getInstance()->warning(__METHOD__.": 遠端 $db_user.CRCLD 查無 $year-$code-$num 案件連結資料");
-			return -3;
-		}
-
-		return $remote_row;
-	}
-	
-	private function getLocalCRCLD($id) {
-		if (!$this->db_wrapper->reachable()) {
-			return -1;
-		}
-
-    if (!$this->checkCaseID($id)) {
-      return -1;
-		}
-		
-		$year = substr($id, 0, 3);
-		$code = substr($id, 3, 4);
-		$num = substr($id, 7, 6);
-		$db_user = "MOICAS";
-
-		Logger::getInstance()->info(__METHOD__.": 找本地 $db_user.CRCLD 的案件連結資料【$year, $code, $num"."】");
-
-		// connection switch to MAIN
-		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::MAIN);
-		$this->db_wrapper->getDB()->parse("
-			select * from $db_user.CRCLD t
-			where 1=1
-				and cl01 = :bv_year
-				and cl02 = :bv_code
-				and cl03 = :bv_number
-		");
-		$this->db_wrapper->getDB()->bind(":bv_year", $year);
-		$this->db_wrapper->getDB()->bind(":bv_code", $code);
-		$this->db_wrapper->getDB()->bind(":bv_number", $num);
-		$this->db_wrapper->getDB()->execute();
-		$row = $this->db_wrapper->getDB()->fetch(true);
-
-		// 無連結資料
-		if (empty($row)) {
-			Logger::getInstance()->warning(__METHOD__.": 本地 $db_user.CRCLD 查無 $year-$code-$num 案件連結資料");
-			return -2;
-		}
-
-		return $row;
-	}
-	
 	private function insertLocalCRCLD($l3_crcld) {
 		if (is_array($l3_crcld)) {
 			$year = $l3_crcld['CL01'];
@@ -176,90 +96,6 @@ class XCase {
 		return false;
 	}
 
-	private function getXCaseCRCRD($crcld) {
-		if (!$this->db_wrapper->reachable()) {
-			return -1;
-		}
-
-    if (!is_array($crcld)) {
-      return -2;
-		}
-		
-		// $year = $crcld['CL01'];
-		// $code = $crcld['CL02'];
-		// $num = $crcld['CL03'];
-		$rc04 = $crcld['CL04'];	// 序號
-		$rc01 = $crcld['CL05'];	// 年
-		$rc06 = $crcld['CL06'];	// 所別
-
-		$db_user = "L1H".$rc06[1]."0H03";
-
-		Logger::getInstance()->info(__METHOD__.": 找遠端 $db_user.CRCRD 的案件補正資料【$rc04, $rc01, $rc06"."】");
-
-		// connection switch to L3HWEB
-		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::L3HWEB);
-		$this->db_wrapper->getDB()->parse("
-			SELECT * FROM $db_user.CRCRD t
-			WHERE 1=1
-				and RC01 = :bv_rc01
-				and RC04 = :bv_rc04
-				and RC06 = :bv_rc06
-		");
-		$this->db_wrapper->getDB()->bind(":bv_rc01", $rc01);
-		$this->db_wrapper->getDB()->bind(":bv_rc04", $rc04);
-		$this->db_wrapper->getDB()->bind(":bv_rc06", $rc06);
-		$this->db_wrapper->getDB()->execute();
-		$remote_row = $this->db_wrapper->getDB()->fetch(true);
-
-		// 遠端無補正資料
-		if (empty($remote_row)) {
-			Logger::getInstance()->warning(__METHOD__.": 遠端 $db_user.CRCRD 查無 $rc04-$rc01-$rc06 案件補正資料");
-			return -2;
-		}
-
-		return $remote_row;
-	}
-	
-	private function getLocalCRCRD($crcld) {
-		if (!$this->db_wrapper->reachable()) {
-			return -1;
-		}
-
-    if (!is_array($crcld)) {
-      return -2;
-		}
-		
-		$rc04 = $crcld['CL04'];	// 序號
-		$rc01 = $crcld['CL05'];	// 年
-		$rc06 = $crcld['CL06'];	// 所別
-		$db_user = "MOICAS";
-
-		Logger::getInstance()->info(__METHOD__.": 找本地 $db_user.CRCRD 的案件補正資料【$rc04-$rc01-$rc06"."】");
-
-		// connection switch to MAIN
-		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::MAIN);
-		$this->db_wrapper->getDB()->parse("
-			SELECT * FROM $db_user.CRCRD t
-			WHERE 1=1
-				and RC01 = :bv_rc01
-				and RC04 = :bv_rc04
-				and RC06 = :bv_rc06
-		");
-		$this->db_wrapper->getDB()->bind(":bv_rc01", $rc01);
-		$this->db_wrapper->getDB()->bind(":bv_rc04", $rc04);
-		$this->db_wrapper->getDB()->bind(":bv_rc06", $rc06);
-		$this->db_wrapper->getDB()->execute();
-		$row = $this->db_wrapper->getDB()->fetch(true);
-
-		// 無補正資料
-		if (empty($row)) {
-			Logger::getInstance()->warning(__METHOD__.": 本地 $db_user.CRCRD 查無 $rc04-$rc01-$rc06 案件補正資料");
-			return -3;
-		}
-
-		return $row;
-	}
-	
 	private function insertLocalCRCRD($l3_crcrd) {
 		if (is_array($l3_crcrd)) {
 			$content = $l3_crcrd['RC05'];	// 補正資料內容
@@ -328,6 +164,169 @@ class XCase {
 		$this->db_wrapper = null;
 	}
 
+	public function getXCaseCRCLD($id) {
+		if (!$this->db_wrapper->reachable()) {
+			return -1;
+		}
+
+    if (!$this->checkCaseID($id)) {
+      return -2;
+		}
+		
+		$year = substr($id, 0, 3);
+		$code = substr($id, 3, 4);
+		$num = substr($id, 7, 6);
+		$db_user = "L1H".$code[1]."0H03";
+
+		Logger::getInstance()->info(__METHOD__.": 找遠端 $db_user.CRCLD 的案件連結資料【$year, $code, $num"."】");
+
+		// connection switch to L3HWEB
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::L3HWEB);
+		$this->db_wrapper->getDB()->parse("
+			SELECT * FROM $db_user.CRCLD t
+			WHERE 1=1
+				AND cl01 = :bv_year
+				AND cl02 = :bv_code
+				AND cl03 = :bv_number
+		");
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_number", $num);
+		$this->db_wrapper->getDB()->execute();
+		$remote_row = $this->db_wrapper->getDB()->fetch(true);
+
+		// 遠端無連結資料
+		if (empty($remote_row)) {
+			Logger::getInstance()->warning(__METHOD__.": 遠端 $db_user.CRCLD 查無 $year-$code-$num 案件連結資料");
+			return -3;
+		}
+
+		return $remote_row;
+	}
+	
+	public function getLocalCRCLD($id) {
+		if (!$this->db_wrapper->reachable()) {
+			return -1;
+		}
+
+    if (!$this->checkCaseID($id)) {
+      return -1;
+		}
+		
+		$year = substr($id, 0, 3);
+		$code = substr($id, 3, 4);
+		$num = substr($id, 7, 6);
+		$db_user = "MOICAS";
+
+		Logger::getInstance()->info(__METHOD__.": 找本地 $db_user.CRCLD 的案件連結資料【$year, $code, $num"."】");
+
+		// connection switch to MAIN
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::MAIN);
+		$this->db_wrapper->getDB()->parse("
+			select * from $db_user.CRCLD t
+			where 1=1
+				and cl01 = :bv_year
+				and cl02 = :bv_code
+				and cl03 = :bv_number
+		");
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_number", $num);
+		$this->db_wrapper->getDB()->execute();
+		$row = $this->db_wrapper->getDB()->fetch(true);
+
+		// 無連結資料
+		if (empty($row)) {
+			Logger::getInstance()->warning(__METHOD__.": 本地 $db_user.CRCLD 查無 $year-$code-$num 案件連結資料");
+			return -2;
+		}
+
+		return $row;
+	}
+	
+	public function getXCaseCRCRD($crcld) {
+		if (!$this->db_wrapper->reachable()) {
+			return -1;
+		}
+
+    if (!is_array($crcld)) {
+      return -2;
+		}
+		
+		// $year = $crcld['CL01'];
+		// $code = $crcld['CL02'];
+		// $num = $crcld['CL03'];
+		$rc04 = $crcld['CL04'];	// 序號
+		$rc01 = $crcld['CL05'];	// 年
+		$rc06 = $crcld['CL06'];	// 所別
+
+		$db_user = "L1H".$rc06[1]."0H03";
+
+		Logger::getInstance()->info(__METHOD__.": 找遠端 $db_user.CRCRD 的案件補正資料【$rc04, $rc01, $rc06"."】");
+
+		// connection switch to L3HWEB
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::L3HWEB);
+		$this->db_wrapper->getDB()->parse("
+			SELECT * FROM $db_user.CRCRD t
+			WHERE 1=1
+				and RC01 = :bv_rc01
+				and RC04 = :bv_rc04
+				and RC06 = :bv_rc06
+		");
+		$this->db_wrapper->getDB()->bind(":bv_rc01", $rc01);
+		$this->db_wrapper->getDB()->bind(":bv_rc04", $rc04);
+		$this->db_wrapper->getDB()->bind(":bv_rc06", $rc06);
+		$this->db_wrapper->getDB()->execute();
+		$remote_row = $this->db_wrapper->getDB()->fetch(true);
+
+		// 遠端無補正資料
+		if (empty($remote_row)) {
+			Logger::getInstance()->warning(__METHOD__.": 遠端 $db_user.CRCRD 查無 $rc04-$rc01-$rc06 案件補正資料");
+			return -2;
+		}
+
+		return $remote_row;
+	}
+	
+	public function getLocalCRCRD($crcld) {
+		if (!$this->db_wrapper->reachable()) {
+			return -1;
+		}
+
+    if (!is_array($crcld)) {
+      return -2;
+		}
+		
+		$rc04 = $crcld['CL04'];	// 序號
+		$rc01 = $crcld['CL05'];	// 年
+		$rc06 = $crcld['CL06'];	// 所別
+		$db_user = "MOICAS";
+
+		Logger::getInstance()->info(__METHOD__.": 找本地 $db_user.CRCRD 的案件補正資料【$rc04-$rc01-$rc06"."】");
+
+		// connection switch to MAIN
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::MAIN);
+		$this->db_wrapper->getDB()->parse("
+			SELECT * FROM $db_user.CRCRD t
+			WHERE 1=1
+				and RC01 = :bv_rc01
+				and RC04 = :bv_rc04
+				and RC06 = :bv_rc06
+		");
+		$this->db_wrapper->getDB()->bind(":bv_rc01", $rc01);
+		$this->db_wrapper->getDB()->bind(":bv_rc04", $rc04);
+		$this->db_wrapper->getDB()->bind(":bv_rc06", $rc06);
+		$this->db_wrapper->getDB()->execute();
+		$row = $this->db_wrapper->getDB()->fetch(true);
+
+		// 無補正資料
+		if (empty($row)) {
+			Logger::getInstance()->warning(__METHOD__.": 本地 $db_user.CRCRD 查無 $rc04-$rc01-$rc06 案件補正資料");
+			return -3;
+		}
+
+		return $row;
+	}
 	/**
 	 * Public interface for 同步跨所登記補正資料
 	 */

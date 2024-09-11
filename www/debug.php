@@ -6,7 +6,8 @@ require_once("./include/Ping.class.php");
 require_once("./include/SQLiteOFFICESSTATS.class.php");
 require_once("./include/StatsSQLite.class.php");
 require_once("./include/System.class.php");
-require_once("./include/Watchdog.class.php");
+require_once("./include/MOIADM.class.php");
+require_once("./include/XCase.class.php");
 require 'vendor/autoload.php';
 
 try {
@@ -20,10 +21,14 @@ try {
     // echo "\$this_year now is " . $this_year . "\n";
     // echo "\$today now is " . $today . "\n";
 
-    $moicas = new Watchdog();
+    $q = new XCase();
     // $arr = $moicas->getCUSMMByDate('1130530', '1130531');
-    $arr = $moicas->testSendNotification();
-    // var_dump($arr);
+    // $l3_crcld = $q->getXCaseCRCLD("113HBA177830");
+    // var_dump($l3_crcld);
+    // $l3_crcrd = $q->getXCaseCRCRD($l3_crcld);
+    // var_dump($l3_crcrd);
+    $result = $q->syncXCaseFixData("113HBA177830");
+    var_dump($result);
 } catch(Exception $e) {
     die($e->getMessage());
 } finally {
