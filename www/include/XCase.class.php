@@ -379,4 +379,193 @@ class XCase {
 		Logger::getInstance()->warning(__METHOD__.": 同步遠端案件 $id 補正連結資料錯誤(回傳值：$l3_crcld)");
 		return false;
 	}
+
+	public function getXCaseDiff($id, $raw = false) {
+		if (!$this->db_wrapper->reachable()) {
+			return -1;
+		}
+
+    if (!$this->checkCaseID($id)) {
+      return -1;
+		}
+		
+		$diff_result = array();
+		$year = substr($id, 0, 3);
+		$code = substr($id, 3, 4);
+		$num = substr($id, 7, 6);
+		$db_user = "L1H".$code[1]."0H03";
+
+		
+		Logger::getInstance()->info(__METHOD__.": 找遠端 ${db_user}.CRSMS 的案件資料【${year}, ${code}, ${num}】");
+
+		// connection switch to L3HWEB
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::L3HWEB);
+		$this->db_wrapper->getDB()->parse("
+			SELECT *
+			FROM $db_user.CRSMS t
+			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
+		");
+        $this->db_wrapper->getDB()->bind(":bv_rm01_year", $year);
+        $this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+        $this->db_wrapper->getDB()->bind(":bv_rm03_number", $num);
+		$this->db_wrapper->getDB()->execute();
+		$remote_row = $this->db_wrapper->getDB()->fetch($raw);
+
+		// 遠端無此資料
+		if (empty($remote_row)) {
+			Logger::getInstance()->warning(__METHOD__.": 遠端 ${db_user}.CRSMS 查無 ${year}-${code}-${num} 案件資料");
+			return -2;
+		}
+
+		Logger::getInstance()->info(__METHOD__.": 找本地 MOICAS.CRSMS 的案件資料【${year}, ${code}, ${num}】");
+
+		// connection switch to MAIN
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::MAIN);
+		$this->db_wrapper->getDB()->parse("
+			SELECT *
+			FROM MOICAS.CRSMS t
+			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
+		");
+        $this->db_wrapper->getDB()->bind(":bv_rm01_year", $year);
+        $this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+        $this->db_wrapper->getDB()->bind(":bv_rm03_number", $num);
+		$this->db_wrapper->getDB()->execute();
+		$local_row = $this->db_wrapper->getDB()->fetch($raw);
+
+		// 本地無此資料
+		if (empty($local_row)) {
+			Logger::getInstance()->warning(__METHOD__.": 本地 MOICAS.CRSMS 查無 ${year}-${code}-${num} 案件資料");
+			return -3;
+		}
+
+		$colsNameMapping = include("config/Config.ColsNameMapping.CRSMS.php");
+		// compare each column base on remote data
+		foreach ($remote_row as $key => $value) {
+			if ($value != $local_row[$key]) { // use == to get every column for testing
+				$diff_result[$key] = array(
+					"REMOTE" => $value,
+					"LOCAL" => $local_row[$key],
+					"TEXT" => $colsNameMapping[$key],
+					"COLUMN" => $key
+				);
+			}
+		}
+
+		return $diff_result;
+	}
+	
+	public function instXCase($id, $raw = true) {
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+
+		if (!$this->checkCaseID($id)) {
+            return -1;
+		}
+
+		
+		$year = substr($id, 0, 3);
+		$code = substr($id, 3, 4);
+		$num = substr($id, 7, 6);
+		$db_user = "L1H".$code[1]."0H03";
+
+		// connection switch to L3HWEB
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::L3HWEB);
+		$this->db_wrapper->getDB()->parse("
+			SELECT *
+			FROM $db_user.CRSMS t
+			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
+		");
+		$this->db_wrapper->getDB()->bind(":bv_rm01_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_rm03_number", $num);
+		$this->db_wrapper->getDB()->execute();
+		$remote_row = $this->db_wrapper->getDB()->fetch($raw);
+
+		// 遠端無此資料
+		if (empty($remote_row)) {
+			Logger::getInstance()->warning(__METHOD__.": 遠端 ${db_user}.CRSMS 查無 ${year}-${code}-${num} 案件資料");
+			return -2;
+		}
+
+		// connection switch to MAIN
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::MAIN);
+		$this->db_wrapper->getDB()->parse("
+			SELECT *
+			FROM MOICAS.CRSMS t
+			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
+		");
+		$this->db_wrapper->getDB()->bind(":bv_rm01_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_rm03_number", $num);
+		$this->db_wrapper->getDB()->execute();
+		$local_row = $this->db_wrapper->getDB()->fetch($raw);
+
+		// 本地無此資料才能新增
+		if (empty($local_row)) {
+			// 使用遠端資料新增本所資料
+			$remote_row;
+			$columns = "(";
+			$values = "(";
+			foreach ($remote_row as $key => $value) {
+				$columns .= $key.",";
+				$values .= "'".($raw ? $value : iconv("utf-8", "big5", $value))."',";
+			}
+			$columns = rtrim($columns, ",").")";
+			$values = rtrim($values, ",").")";
+
+			$this->db_wrapper->getDB()->parse("
+				INSERT INTO MOICAS.CRSMS ".$columns." VALUES ".$values."
+			");
+
+			Logger::getInstance()->info(__METHOD__.": 插入 SQL \"INSERT INTO MOICAS.CRSMS ".$columns." VALUES ".$values."\"");
+			$this->db_wrapper->getDB()->execute();
+
+			return true;
+		}
+		Logger::getInstance()->error(__METHOD__.": 本地 MOICAS.CRSMS 已有 ${year}-${code}-${num} 案件資料");
+		return false;
+	}
+
+	public function syncXCase($id) {
+		return $this->syncXCaseColumn($id, "");
+	}
+
+	public function syncXCaseColumn($id, $wanted_column) {
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+
+		$diff = $this->getXCaseDiff($id, true);	// true -> use raw data to update
+		if (!empty($diff)) {
+			
+			$year = substr($id, 0, 3);
+			$code = substr($id, 3, 4);
+			$number = str_pad(substr($id, 7, 6), 6, "0", STR_PAD_LEFT);
+
+			$set_str = "";
+			foreach ($diff as $col_name => $arr_vals) {
+				if (!empty($wanted_column) && $col_name != $wanted_column) {
+					continue;
+				}
+				$set_str .= $col_name." = '".$arr_vals["REMOTE"]."',";
+			}
+			$set_str = rtrim($set_str, ",");
+
+			$this->db_wrapper->getDB()->parse("
+				UPDATE MOICAS.CRSMS SET ".$set_str." WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
+			");
+
+			$this->db_wrapper->getDB()->bind(":bv_rm01_year", $year);
+			$this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+			$this->db_wrapper->getDB()->bind(":bv_rm03_number", $number);
+
+			Logger::getInstance()->info(__METHOD__.": 更新 SQL \"UPDATE MOICAS.CRSMS SET ".$set_str." WHERE RM01 = '$year' AND RM02 = '$code' AND RM03 = '$number'\"");
+
+			$this->db_wrapper->getDB()->execute();
+
+			return true;
+		}
+		return false;
+	}
 }
