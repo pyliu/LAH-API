@@ -11,6 +11,7 @@ require_once(INC_DIR."/Temperature.class.php");
 require_once(INC_DIR."/System.class.php");
 require_once(INC_DIR."/SQLiteUser.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."Ping.class.php");
+require_once(INC_DIR."/XCase.class.php");
 
 require_once(INC_DIR."/api/JSONAPICommandFactory.class.php");
 
@@ -707,7 +708,8 @@ switch ($_POST["type"]) {
 		break;
 	case "sync_xcase_fix_data":
 		Logger::getInstance()->info("XHR [sync_xcase_fix_data] 同步遠端案件之補正資料【".$_POST["id"]."】請求");
-		$result_flag = $mock ? $cache->get('sync_xcase_fix_data') : $query->syncXCaseFixData($_POST["id"]);
+		$xcase = new XCase();
+		$result_flag = $mock ? $cache->get('sync_xcase_fix_data') : $xcase->syncXCaseFixData($_POST["id"]);
 		$cache->set('sync_xcase_fix_data', $result_flag);
 		if ($result_flag) {
 			$result = array(
