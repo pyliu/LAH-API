@@ -568,7 +568,7 @@ class XCase {
 		return false;
 	}
 
-	public function getProblematicCrossCases() {
+	public function getProblematicXCases() {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
@@ -601,7 +601,7 @@ class XCase {
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
 
-	public function fixProblematicCrossCases($id) {
+	public function fixProblematicXCases($id) {
 		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
@@ -648,7 +648,7 @@ class XCase {
 		return true;
 	}
 
-	public function getPSCRNProblematicCrossCases() {
+	public function getPSCRNProblematicXCases() {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
@@ -677,7 +677,7 @@ class XCase {
         return $this->db_wrapper->getDB()->fetchAll();
 	}
 
-	public function fixPSCRNProblematicCrossCases($id) {
+	public function fixPSCRNProblematicXCases($id) {
 		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}

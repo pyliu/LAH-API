@@ -177,7 +177,7 @@ class WatchDog {
             $xcase = new XCase();
             // check reg case missing RM99~RM101 data
             Logger::getInstance()->info('開始登記案件跨所註記遺失檢查 ... ');
-            $rows = $xcase->getProblematicCrossCases();
+            $rows = $xcase->getProblematicXCases();
             if (!empty($rows)) {
                 Logger::getInstance()->warning('找到'.count($rows).'件跨所註記遺失登記案件！');
                 $case_ids = [];
@@ -211,7 +211,7 @@ class WatchDog {
             $xcase = new XCase();
             // check val case missing SS99~SS101 data
             Logger::getInstance()->info('開始本所管轄地價案件跨所註記遺失檢查 ... ');
-            $rows = $xcase->getPSCRNProblematicCrossCases();
+            $rows = $xcase->getPSCRNProblematicXCases();
             if (!empty($rows)) {
                 Logger::getInstance()->warning('找到'.count($rows).'件跨所註記遺失地價案件！');
                 $case_ids = [];

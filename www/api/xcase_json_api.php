@@ -12,7 +12,7 @@ $mock = $system->isMockMode();
 switch ($_POST["type"]) {
 	case "xcase-check":
 		Logger::getInstance()->info("XHR [xcase-check] 查詢登記案件跨所註記遺失請求");
-		$query_result = $mock ? $cache->get('xcase-check') : $xcase->getProblematicCrossCases();
+		$query_result = $mock ? $cache->get('xcase-check') : $xcase->getProblematicXCases();
 			
 		$case_ids = [];
 		$rows = [];
@@ -41,7 +41,7 @@ switch ($_POST["type"]) {
 		break;
 	case "val-xcase-check":
 		Logger::getInstance()->info("XHR [val-xcase-check] 查詢地價案件跨所註記遺失請求");
-		$query_result = $mock ? $cache->get('val-xcase-check') : $xcase->getPSCRNProblematicCrossCases();
+		$query_result = $mock ? $cache->get('val-xcase-check') : $xcase->getPSCRNProblematicXCases();
 			
 		$case_ids = [];
 		$rows = [];
@@ -70,7 +70,7 @@ switch ($_POST["type"]) {
 		break;
 	case "fix_xcase":
 		Logger::getInstance()->info("XHR [fix_xcase] 修正登記案件跨所註記遺失【".$_POST["id"]."】請求");
-		$result_flag = $mock ? $cache->get('fix_xcase') : $xcase->fixProblematicCrossCases($_POST["id"]);
+		$result_flag = $mock ? $cache->get('fix_xcase') : $xcase->fixProblematicXCases($_POST["id"]);
 		$cache->set('fix_xcase', $result_flag);
 		if ($result_flag) {
 			$result = array(
@@ -86,7 +86,7 @@ switch ($_POST["type"]) {
 		break;
 	case "fix_xcase_val":
 		Logger::getInstance()->info("XHR [fix_xcase_val] 修正地價案件跨所註記遺失【".$_POST["id"]."】請求");
-		$result_flag = $mock ? $cache->get('fix_xcase_val') : $xcase->fixPSCRNProblematicCrossCases($_POST["id"]);
+		$result_flag = $mock ? $cache->get('fix_xcase_val') : $xcase->fixPSCRNProblematicXCases($_POST["id"]);
 		$cache->set('fix_xcase_val', $result_flag);
 		if ($result_flag) {
 			$result = array(
