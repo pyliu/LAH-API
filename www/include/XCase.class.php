@@ -568,4 +568,138 @@ class XCase {
 		}
 		return false;
 	}
+	public function getProblematicCrossCases() {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+
+		$site_code = $this->db_wrapper->getSiteCode();
+		$this->db_wrapper->getDB()->parse("
+			SELECT *
+				FROM MOICAS.CRSMS
+			WHERE (
+				    -- 本所跨他所
+						RM02 LIKE 'H%".$site_code."1'
+						-- 他所跨本所
+						OR RM02 LIKE 'H".$site_code."A1'
+						OR RM02 LIKE 'H".$site_code."B1'
+						OR RM02 LIKE 'H".$site_code."B1'
+						OR RM02 LIKE 'H".$site_code."C1'
+						OR RM02 LIKE 'H".$site_code."D1'
+						OR RM02 LIKE 'H".$site_code."E1'
+						OR RM02 LIKE 'H".$site_code."F1'
+						OR RM02 LIKE 'H".$site_code."G1'
+						OR RM02 LIKE 'H".$site_code."H1'
+						-- 他所跨(縣市)本所
+						OR RM02 LIKE '%H".$site_code."'
+				) 
+				AND RM03 LIKE '%0'
+				AND (RM99 is NULL OR RM100 is NULL OR RM100_1 is NULL OR RM101 is NULL OR
+						RM101_1 is NULL)
+		");
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
+
+	public function fixProblematicCrossCases($id) {
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+
+		if (!$this->checkCaseID($id)) {
+            return false;
+		}
+		
+		$this->db_wrapper->getDB()->parse("
+			UPDATE MOICAS.CRSMS SET 
+				RM99 = 'Y',
+				RM100 = :bv_hold_code,
+				RM100_1 = :bv_hold_county_code,
+				RM101 = :bv_receive_code,
+				RM101_1 = :bv_receive_county_code
+			WHERE
+				RM01 = :bv_rm01_year
+				AND RM02 = :bv_rm02_code
+				AND RM03 = :bv_rm03_number
+		");
+
+		$code = substr($id, 3, 4);
+		$this->db_wrapper->getDB()->bind(":bv_rm01_year", substr($id, 0, 3));
+    $this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_rm03_number", substr($id, 7, 6));
+		
+		$ty_hold_site_code = "H".$this->db_wrapper->getSiteCode();
+		$receive_office_code = $code[0].$code[2];
+		if (endsWith($code, $ty_hold_site_code)) {
+			$map = getCrossCountyCodeMap();
+			$receive_office_code = $map[$code[0].$code[1]][0];
+			// 跨縣市
+			$this->db_wrapper->getDB()->bind(":bv_hold_county_code", 'H');
+			$this->db_wrapper->getDB()->bind(":bv_hold_code", $ty_hold_site_code);
+		} else {
+			// 桃園市內跨所
+			$this->db_wrapper->getDB()->bind(":bv_hold_county_code", $code[0]);
+			$this->db_wrapper->getDB()->bind(":bv_hold_code", $code[0].$code[1]);
+		}
+		$this->db_wrapper->getDB()->bind(":bv_receive_code", $receive_office_code);
+		$this->db_wrapper->getDB()->bind(":bv_receive_county_code", $code[0]);
+		// UPDATE/INSERT can not use fetch after execute ... 
+		$this->db_wrapper->getDB()->execute();
+		return true;
+	}
+
+	public function getPSCRNProblematicCrossCases() {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+
+		// global $week_ago;
+		$this->db_wrapper->getDB()->parse("
+			SELECT * FROM MOIPRC.PSCRN
+			WHERE SS04_1 IN (
+				'H".$this->db_wrapper->getSiteCode()."A1',
+				'H".$this->db_wrapper->getSiteCode()."B1',
+				'H".$this->db_wrapper->getSiteCode()."C1',
+				'H".$this->db_wrapper->getSiteCode()."D1',
+				'H".$this->db_wrapper->getSiteCode()."E1',
+				'H".$this->db_wrapper->getSiteCode()."F1',
+				'H".$this->db_wrapper->getSiteCode()."G1',
+				'H".$this->db_wrapper->getSiteCode()."H1'
+			) AND (
+				SS99 is NULL
+				OR SS100 is NULL
+				OR SS100_1 is NULL
+				OR SS101 is NULL
+				OR SS101_1 is NULL
+			)");
+		// $this->db_wrapper->getDB()->bind(":bv_week_ago", $amonth);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll();
+	}
+
+	public function fixPSCRNProblematicCrossCases($id) {
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+
+		if (!$this->checkCaseID($id)) {
+            return false;
+		}
+		
+		$this->db_wrapper->getDB()->parse("
+			UPDATE MOIPRC.PSCRN SET SS99 = 'Y', SS100 = :bv_hold_code, SS100_1 = :bv_county_code, SS101 = :bv_receive_code, SS101_1 = :bv_county_code
+			WHERE SS03 = :bv_ss03_year AND SS04_1 = :bv_ss04_1_code AND SS04_2 = :bv_ss04_2_number
+		");
+
+		$code = substr($id, 3, 4);
+		$this->db_wrapper->getDB()->bind(":bv_ss03_year", substr($id, 0, 3));
+        $this->db_wrapper->getDB()->bind(":bv_ss04_1_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_ss04_2_number", substr($id, 7, 6));
+		$this->db_wrapper->getDB()->bind(":bv_county_code", $code[0]);
+		$this->db_wrapper->getDB()->bind(":bv_hold_code", $code[0].$code[1]);
+		$this->db_wrapper->getDB()->bind(":bv_receive_code", $code[0].$code[2]);
+		// UPDATE/INSERT can not use fetch after execute ... 
+		$this->db_wrapper->getDB()->execute();
+		return true;
+	}
 }

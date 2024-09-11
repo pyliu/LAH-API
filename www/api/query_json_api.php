@@ -11,9 +11,6 @@ require_once(INC_DIR."/Temperature.class.php");
 require_once(INC_DIR."/System.class.php");
 require_once(INC_DIR."/SQLiteUser.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."Ping.class.php");
-require_once(INC_DIR."/XCase.class.php");
-
-require_once(INC_DIR."/api/JSONAPICommandFactory.class.php");
 
 $query = new Query();
 $cache = Cache::getInstance();
@@ -327,64 +324,6 @@ switch ($_POST["type"]) {
 			echoJSONResponse("XHR [watchdog] 停止執行WATCHDOG，因為IP不為「::1」", STATUS_CODE::FAIL_NOT_VALID_SERVER);
 		}
 		break;
-	case "xcase-check":
-		Logger::getInstance()->info("XHR [xcase-check] 查詢登記案件跨所註記遺失請求");
-		$query_result = $mock ? $cache->get('xcase-check') : $query->getProblematicCrossCases();
-			
-		$case_ids = [];
-		$rows = [];
-		foreach ($query_result as $row) {
-			// if (preg_match("/^H[A-Z]{2}1$/i", $row['RM02'])) {
-				$case_ids[] = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
-				$rows[] = $row;
-			// }
-		}
-
-		$cache->set('xcase-check', $rows);
-		if (empty($case_ids)) {
-			Logger::getInstance()->info("XHR [xcase-check] 查無資料");
-			echoJSONResponse('查無資料');
-		} else {
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"case_ids" => $case_ids,
-				"data_count" => count($rows),
-				"raw" => $rows
-			);
-			
-			Logger::getInstance()->info("XHR [xcase-check] 找到".count($rows)."件登記案件遺失註記");
-			echo json_encode($result, 0);
-		}
-		break;
-	case "val-xcase-check":
-		Logger::getInstance()->info("XHR [val-xcase-check] 查詢地價案件跨所註記遺失請求");
-		$query_result = $mock ? $cache->get('val-xcase-check') : $query->getPSCRNProblematicCrossCases();
-			
-		$case_ids = [];
-		$rows = [];
-		foreach ($query_result as $row) {
-			if (preg_match("/^H[A-Z]{2}1$/i", $row['SS04_1'])) {
-				$case_ids[] = $row['SS03'].'-'.$row['SS04_1'].'-'.$row['SS04_2'];
-				$rows[] = $row;
-			}
-		}
-
-		$cache->set('val-xcase-check', $rows);
-		if (empty($case_ids)) {
-			Logger::getInstance()->info("XHR [val-xcase-check] 查無資料");
-			echoJSONResponse('查無資料');
-		} else {
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"case_ids" => $case_ids,
-				"data_count" => count($rows),
-				"raw" => $rows
-			);
-			
-			Logger::getInstance()->info("XHR [val-xcase-check] 找到".count($rows)."件地價案件遺失註記");
-			echo json_encode($result, 0);
-		}
-		break;
 	case "ez-payment-check":
 		Logger::getInstance()->info("XHR [ez-payment-check] 查詢異常悠遊卡交易請求");
 		$query_result = $mock ? $cache->get('ez-payment-check') : $query->getEasycardPayment();
@@ -424,38 +363,6 @@ switch ($_POST["type"]) {
 			);
 			Logger::getInstance()->info("XHR [sur-problem-check] 找到 ".count($query_result)." 筆異常案件資料");
 			echo json_encode($result, 0);
-		}
-		break;
-	case "fix_xcase":
-		Logger::getInstance()->info("XHR [fix_xcase] 修正登記案件跨所註記遺失【".$_POST["id"]."】請求");
-		$result_flag = $mock ? $cache->get('fix_xcase') : $query->fixProblematicCrossCases($_POST["id"]);
-		$cache->set('fix_xcase', $result_flag);
-		if ($result_flag) {
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => "0",
-				"raw" => $result_flag
-			);
-			echo json_encode($result, 0);
-		} else {
-			Logger::getInstance()->error("XHR [fix_xcase] 更新失敗【".$_POST["id"]."】");
-			echoJSONResponse("更新失敗【".$_POST["id"]."】");
-		}
-		break;
-	case "fix_xcase_val":
-		Logger::getInstance()->info("XHR [fix_xcase_val] 修正地價案件跨所註記遺失【".$_POST["id"]."】請求");
-		$result_flag = $mock ? $cache->get('fix_xcase_val') : $query->fixPSCRNProblematicCrossCases($_POST["id"]);
-		$cache->set('fix_xcase_val', $result_flag);
-		if ($result_flag) {
-			$result = array(
-				"status" => STATUS_CODE::SUCCESS_NORMAL,
-				"data_count" => "0",
-				"raw" => $result_flag
-			);
-			echo json_encode($result, 0);
-		} else {
-			Logger::getInstance()->error("XHR [fix_xcase_val] 更新失敗【".$_POST["id"]."】");
-			echoJSONResponse("更新失敗【".$_POST["id"]."】");
 		}
 		break;
 	case "max":
