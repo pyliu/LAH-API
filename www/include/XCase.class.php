@@ -568,6 +568,7 @@ class XCase {
 		}
 		return false;
 	}
+
 	public function getProblematicCrossCases() {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
