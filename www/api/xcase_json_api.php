@@ -184,6 +184,28 @@ switch ($_POST["type"]) {
 			echoJSONResponse("同步失敗【".$_POST["id"].", ".$_POST["column"]."】");
 		}
 		break;
+	case "check_xcase_fix_data":
+		Logger::getInstance()->info("XHR [check_xcase_fix_data] 檢查遠端案件之補正連結資料【".$_POST["id"]."】請求");
+		$xcase = new XCase();
+		$response = $mock ? $cache->get('check_xcase_fix_data') : $xcase->getXCaseCRCLD($_POST["id"]);
+		$cache->set('sync_xcase_fix_data', $response);
+		$message = "局端有 ".$_POST["id"]."補正連結資料。";
+		if ($response === -1) {
+			Logger::getInstance()->info("XHR [check_xcase_fix_data] 局端L3資料庫無法連線【".$_POST["id"]."】");
+			echoJSONResponse("局端L3資料庫無法連線【".$_POST["id"]."】");
+		} else if ($response === -2) {
+			Logger::getInstance()->info("XHR [check_xcase_fix_data] 案件代碼不正確【".$_POST["id"]."】");
+			echoJSONResponse("案件代碼不正確【".$_POST["id"]."】");
+		} else if ($response === -3) {
+			Logger::getInstance()->info("XHR [check_xcase_fix_data] 局端無補正連結資料【".$_POST["id"]."】");
+			echoJSONResponse("局端無補正連結資料【".$_POST["id"]."】");
+		} else {
+			Logger::getInstance()->error("XHR [check_xcase_fix_data] 局端案件補正連結取的成功【".$_POST["id"]."】");
+			echoJSONResponse("局端案件補正連結取的成功【".$_POST["id"]."】", STATUS_CODE::SUCCESS_NORMAL, array(
+				"raw" => mb_convert_encoding($response, 'UTF-8', 'BIG-5')
+			));
+		}
+		break;
 	case "sync_xcase_fix_data":
 		Logger::getInstance()->info("XHR [sync_xcase_fix_data] 同步遠端案件之補正資料【".$_POST["id"]."】請求");
 		$xcase = new XCase();
