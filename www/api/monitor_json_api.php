@@ -2,6 +2,7 @@
 require_once(dirname(dirname(__FILE__))."/include/init.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteMonitorMail.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteConnectivity.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 
 $sqlite_monitor_mail = new SQLiteMonitorMail();
 
@@ -171,6 +172,37 @@ switch ($_POST["type"]) {
             $error = "刪除 ".$_POST["name"]." 監控系統標的失敗。";
             Logger::getInstance()->error("XHR [remove_connectivity_target] ${error}");
             echoJSONResponse($error);
+        }
+        break;
+    case "add_mail_entry":
+        Logger::getInstance()->info("XHR [add_mail_entry] 收到新增監控郵件的請求");
+        $mail = $sqlite_monitor_mail->getLatestMail();
+        $next_id = intval($mail['id'] ?? 0) + 1;
+        Logger::getInstance()->info("XHR [add_mail_entry] NEXT ID: $next_id");
+        $site_code = System::getInstance()->getSiteCode();
+        // Logger::getInstance()->info("XHR [add_mail_entry] SITE CODE: $site_code");
+        $params = array(
+            'id' => $next_id,
+            'from' => $_POST['FROM'] ?? 'add_mail_entry@API',
+            'to' => strtolower($site_code.'monitor@mail.'.$site_code.'.cenweb.land.moi'),
+            'subject' => $_POST['SUBJECT'],
+            'message' => $_POST['MESSAGE'],
+            'timestamp' => time(),
+            'mailbox' => $_POST['MAILBOX'] ?? 'INBOX'
+        );
+        $result = $sqlite_monitor_mail->replace($params);
+        if ($result) {
+            $message = "已新增 ".$_POST['SUBJECT']." 監控MAIL";
+            Logger::getInstance()->info("XHR [add_mail_entry] $message");
+            echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
+                'raw' => $result
+            ));
+        } else {
+            $message = $_POST['SUBJECT']." 監控MAIL新增失敗";
+            Logger::getInstance()->info("XHR [add_mail_entry] $message");
+            echoJSONResponse($message, STATUS_CODE::DEFAULT_FAIL, array(
+                'raw' => $_POST
+            ));
         }
         break;
     default:

@@ -31,15 +31,6 @@ class SQLiteMonitorMail {
         return $return;
     }
 
-    private function replace(&$row) {
-        $stm = $this->db->prepare("
-            REPLACE INTO mail ('id', 'sender', 'receiver', 'subject', 'message', 'timestamp', 'mailbox')
-            VALUES (:id, :from, :to, :subject, :message, :timestamp, :mailbox)
-        ");
-        $this->bindParams($stm, $row);
-        return $stm->execute() === FALSE ? false : true;
-    }
-
     function __construct() {
         $db_path = SQLiteDBFactory::getMonitorMailDB();
         $this->db = new SQLite3($db_path);
@@ -51,6 +42,15 @@ class SQLiteMonitorMail {
     function __destruct() {
         $this->db->exec("END TRANSACTION");
         $this->db->close();
+    }
+
+    public function replace(&$row) {
+        $stm = $this->db->prepare("
+            REPLACE INTO mail ('id', 'sender', 'receiver', 'subject', 'message', 'timestamp', 'mailbox')
+            VALUES (:id, :from, :to, :subject, :message, :timestamp, :mailbox)
+        ");
+        $this->bindParams($stm, $row);
+        return $stm->execute() === FALSE ? false : true;
     }
 
     public function fetchFromMailServer() {
