@@ -177,7 +177,8 @@ switch ($_POST["type"]) {
     case "add_mail_entry":
         Logger::getInstance()->info("XHR [add_mail_entry] 收到新增監控郵件的請求");
         $mail = $sqlite_monitor_mail->getLatestMail();
-        $next_id = intval($mail['id'] ?? 0) + 1;
+        // use minus id for the mail id since it will use the actual maid id
+        $next_id = (intval($mail['id'] ?? 0) + 1) * -1;
         Logger::getInstance()->info("XHR [add_mail_entry] NEXT ID: $next_id");
         $site_code = System::getInstance()->getSiteCode();
         // Logger::getInstance()->info("XHR [add_mail_entry] SITE CODE: $site_code");
