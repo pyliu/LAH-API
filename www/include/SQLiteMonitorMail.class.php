@@ -121,6 +121,13 @@ class SQLiteMonitorMail {
         return false;
     }
     /**
+     * 取得最新API郵件ID
+     */
+    public function getNextAPIMailID() {
+        $id = $this->db->querySingle("SELECT id from mail WHERE id < 0 ORDER BY id LIMIT 1");
+        return intval($id) - 1;
+    }
+    /**
      * 取得最近區間郵件
      */
     public function getMailsWithinSeconds($seconds_before = 15 * 60, $convert = false) {
