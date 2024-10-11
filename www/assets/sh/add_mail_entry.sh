@@ -8,16 +8,16 @@ fi
 
 subject=$2
 if [ -z "$subject" ]; then
-     subject="Not specified SUBJECT"
+     subject="No SUBJECT"
 fi
 
 message=$3
-if [ -z "$message" ]; then
-     message=`date "+%Y%m%d%H%M%S"`
-     message="Finished timestamp: $message"
-else
+if [ -f "$message" ]; then
      # expect a log path to read
      message=$(cat "$message")
+elif [ -z "$message" ]; then
+     message=`date "+%Y%m%d%H%M%S"`
+     message="Finished timestamp: $message"
 fi
 
 ip=`netstat -ie | grep 'inet ' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{print $2; exit}'`
