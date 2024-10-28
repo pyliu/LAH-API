@@ -83,6 +83,31 @@ switch ($_POST["type"]) {
 			"raw" => $rows
 		));
 		break;
+	case "moiadm_smslog_query_by_date":
+		// 地籍異動即時通LOG紀錄
+		Logger::getInstance()->info("XHR [moiadm_smslog_query_by_date] get MOIADM.SMSLOG query request.");
+
+		$st = $_POST['st'];
+		$ed = $_POST['ed'];
+		
+		$rows = $mock ? $cache->get('moiadm_smslog_query_by_date') : $moisms->getMOIADMSMSLogRecordsByDate($st, $ed);
+		$cache->set('moiadm_smslog_query_by_date', $rows);
+		Logger::getInstance()->info("XHR [moiadm_smslog_query_by_date] MOIADM query has ".count($rows)." records");
+
+		// sort by datetime desc
+		function DATETIME_CMP($a, $b)
+		{
+				return strcmp($b['SMS_DATE'].$b['SMS_TIME'], $a['SMS_DATE'].$a['SMS_TIME']);
+		}
+		usort($rows, "DATETIME_CMP");
+
+		$message = is_array($rows) ? "目前查到 ".count($rows)." 筆資料" : '查詢MOIADM.SMSLOG失敗';
+		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
+		Logger::getInstance()->info("XHR [moiadm_smslog_query_by_date] $message");
+		echoJSONResponse($message, $status_code, array(
+			"raw" => $rows
+		));
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
