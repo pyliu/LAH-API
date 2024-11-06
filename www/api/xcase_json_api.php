@@ -221,6 +221,21 @@ switch ($_POST["type"]) {
 			echoJSONResponse("同步補正資料失敗【".$_POST["id"]."】");
 		}
 		break;
+	case "get_xcase_fix_data":
+		Logger::getInstance()->info("XHR [get_xcase_fix_data] 同步遠端案件之補正資料【".$_POST["id"]."】請求");
+		$xcase = new XCase();
+		$response = $mock ? $cache->get('sync_xcase_fix_data') : $xcase->getXCaseFixData($_POST["id"]);
+		$cache->set('get_xcase_fix_data', $response);
+		if ($response !== false) {
+			Logger::getInstance()->info("XHR [get_xcase_fix_data] 取得遠端同步補正資料成功【".$_POST["id"]."】");
+			echoJSONResponse("取得遠端同步補正資料成功【".$_POST["id"]."】", STATUS_CODE::SUCCESS_NORMAL, array(
+				"raw" => mb_convert_encoding($response, 'UTF-8', 'BIG-5')
+			));
+		} else {
+			Logger::getInstance()->error("XHR [get_xcase_fix_data] 取得遠端同步補正資料失敗【".$_POST["id"]."】");
+			echoJSONResponse("取得遠端補正資料失敗【".$_POST["id"]."】");
+		}
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

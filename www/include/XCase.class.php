@@ -375,7 +375,31 @@ class XCase {
 			Logger::getInstance()->warning(__METHOD__.": 同步遠端案件 $rc01-$rc04-$rc06 補正資料錯誤(回傳值：$l3_crcrd)");
 			return false;
 		}
-		Logger::getInstance()->warning(__METHOD__.": 同步遠端案件 $id 補正連結資料錯誤(回傳值：$l3_crcld)");
+		Logger::getInstance()->warning(__METHOD__.": 取得遠端案件 $id 補正連結資料錯誤(回傳值：$l3_crcld)");
+		return false;
+	}
+
+	/**
+	 * Public interface for 取得跨所登記補正資料
+	 */
+	public function getXCaseFixData($id) {
+		// L1HX0H03 has link data of the case (先取得 L3 連結資料)
+		$l3_crcld = $this->getXCaseCRCLD($id);
+		if (is_array($l3_crcld)) {
+			// 檢查 CRCRD 並更新資料
+			$rc04 = $l3_crcld['CL04'];	// 序號
+			$rc01 = $l3_crcld['CL05'];	// 年
+			$rc06 = $l3_crcld['CL06'];	// 所別
+			$office_code = $l3_crcld['CL02'][1];
+			$l3_crcrd = $this->getXCaseCRCRD($l3_crcld, $office_code);
+			if (is_array($l3_crcrd)) {
+				Logger::getInstance()->warning(__METHOD__.": 取得遠端案件 $rc01-$rc04-$rc06 補正資料成功");
+				return $l3_crcrd;
+			}
+			Logger::getInstance()->warning(__METHOD__.": 取得遠端案件 $rc01-$rc04-$rc06 補正資料錯誤(回傳值：$l3_crcrd)");
+			return false;
+		}
+		Logger::getInstance()->warning(__METHOD__.": 取得遠端案件 $id 補正連結資料錯誤(回傳值：$l3_crcld)");
 		return false;
 	}
 
