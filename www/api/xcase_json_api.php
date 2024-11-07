@@ -222,7 +222,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "get_xcase_fix_data":
-		Logger::getInstance()->info("XHR [get_xcase_fix_data] 同步遠端案件之補正資料【".$_POST["id"]."】請求");
+		Logger::getInstance()->info("XHR [get_xcase_fix_data] 取得遠端案件之補正資料【".$_POST["id"]."】請求");
 		$xcase = new XCase();
 		$response = $mock ? $cache->get('sync_xcase_fix_data') : $xcase->getXCaseFixData($_POST["id"]);
 		$cache->set('get_xcase_fix_data', $response);
@@ -232,8 +232,33 @@ switch ($_POST["type"]) {
 				"raw" => mb_convert_encoding($response, 'UTF-8', 'BIG-5')
 			));
 		} else {
-			Logger::getInstance()->error("XHR [get_xcase_fix_data] 取得遠端同步補正資料失敗【".$_POST["id"]."】");
+			Logger::getInstance()->error("XHR [get_xcase_fix_data] 取得遠端補正資料失敗【".$_POST["id"]."】");
 			echoJSONResponse("取得遠端補正資料失敗【".$_POST["id"]."】");
+		}
+		break;
+	case "get_local_fix_data":
+		Logger::getInstance()->info("XHR [get_local_fix_data] 取得本地案件之補正資料【".$_POST["id"]."】請求");
+		$xcase = new XCase();
+		$local_crcld = $xcase->getLocalCRCLD($_POST["id"]);
+		if (is_array($local_crcld)) {
+			$response = $mock ? $cache->get('get_local_fix_data') : $xcase->getLocalCRCRD($local_crcld);
+			$cache->set('get_local_fix_data', $response);
+			if ($response !== false) {
+				Logger::getInstance()->info("XHR [get_local_fix_data] 取得本地同步補正資料成功【".$_POST["id"]."】");
+				echoJSONResponse("取得本地同步補正資料成功【".$_POST["id"]."】", STATUS_CODE::SUCCESS_NORMAL, array(
+					"raw" => mb_convert_encoding($response, 'UTF-8', 'BIG-5')
+				));
+			} else {
+				Logger::getInstance()->error("XHR [get_local_fix_data] 取得本地補正資料失敗【".$_POST["id"]."】");
+				echoJSONResponse("取得遠端補正資料失敗【".$_POST["id"]."】");
+			}
+		} else {
+			$message = "取得本地補正連結資料失敗【".$_POST["id"]."】";
+			if ($local_crcld === -2) {
+				$message = "本地資料庫無【".$_POST["id"]."】案件之連結資料";
+			}
+			Logger::getInstance()->error("XHR [get_local_fix_data] $message");
+			echoJSONResponse($message);
 		}
 		break;
 	default:
