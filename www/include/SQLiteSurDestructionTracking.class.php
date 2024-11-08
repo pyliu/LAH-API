@@ -165,6 +165,7 @@ class SQLiteSurDestructionTracking {
         $stm->bindParam(':construction_permit', $post['construction_permit']);
         $stm->bindParam(':note', $post['note']);
         $stm->bindValue(':createtime', $post['createtime'] ?? time());
+        $stm->bindValue(':done', boolval($post['done']) ? 1 : 0);
 
         return $stm->execute() !== FALSE;
     }
@@ -175,6 +176,23 @@ class SQLiteSurDestructionTracking {
         $stm = $this->db->prepare("DELETE FROM sur_destruction_tracking WHERE id = :id");
         $stm->bindParam(':id', $id);
         return $stm->execute() !== FALSE;
+    }
+
+    public function switchDone($id) {
+        Logger::getInstance()->warning(__METHOD__.": 切換建物滅失追蹤資料辦畢屬性。(id: $id)");
+        $record = $this->getOne($id);
+        if ($record !== false) {
+            $stm = $this->db->prepare("
+                UPDATE sur_destruction_tracking SET
+                    done = :done
+                WHERE id = :id"
+            );
+            $bool = boolval($record['done']);
+            // reverse done attribute
+            $stm->bindValue(':done', $bool ? 0 : 1);
+            return $stm->execute() !== FALSE;
+        }
+        return false;
     }
 
 	public function removePDF($id) {

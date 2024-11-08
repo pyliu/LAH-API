@@ -112,14 +112,15 @@ class SQLiteDBFactory {
                 "id"	INTEGER,
                 "number"	TEXT(10) NOT NULL UNIQUE,
                 "section_code"	TEXT(4),
-                "land_number"	TEXT(8),
-                "building_number"	TEXT(8),
+                "land_number"	TEXT(100),
+                "building_number"	TEXT(100),
                 "issue_date"	TEXT(7),
                 "apply_date"	TEXT(7),
                 "address"	TEXT(200),
                 "occupancy_permit"	TEXT(100),
                 "construction_permit"	TEXT(100),
                 "note"	TEXT(2000),
+                "done"	INTEGER NOT NULL DEFAULT 0,
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');

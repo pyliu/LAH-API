@@ -3,6 +3,7 @@ require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."include".DIRECTORY_
 require_once(INC_DIR.DIRECTORY_SEPARATOR."Cache.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."MOIADM.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYNALL.class.php");
 
 $cache = Cache::getInstance();
 $system = System::getInstance();
@@ -49,6 +50,29 @@ switch ($_POST["type"]) {
 		Logger::getInstance()->info("XHR [moiadm_smslog] $message");
 		echoJSONResponse($message, $status_code, array(
 			"raw" => $rows
+		));
+		break;
+	case "host_sections":
+		Logger::getInstance()->info("XHR [host_sections] get sections data request.");
+		$sqlite = new SQLiteRKEYNALL();
+		$rows = $mock ? $cache->get('host_sections') : $sqlite->getSectionsByCounty('H');
+		$cache->set('host_sections', $rows);
+		$result = [];
+		$site = System::getInstance()->getSiteCode();
+		foreach ($rows as $row) {
+			// filter by site code
+			if ($row['KRMK'] === $site) {
+				$result[] = array(
+					'code' => $row['KCDE_4'],
+					'name' => $row['KNAME']
+				);
+			}
+		}
+		$message = $rows !== false ? "目前查到快取的 RKEYN_ALL 裡有 ".count($result)." 筆本所管轄地段資料" : '查詢快取的 RKEYN_ALL 失敗';
+		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
+		Logger::getInstance()->info("XHR [host_sections] $message");
+		echoJSONResponse($message, $status_code, array(
+			"raw" => $result
 		));
 		break;
 	default:

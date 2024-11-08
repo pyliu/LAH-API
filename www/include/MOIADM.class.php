@@ -159,4 +159,23 @@ class MOIADM {
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
+	/**
+	 * Get all section data by the site
+	 */
+	public function getHostSections() {
+		$site = SYSTEM::getInstance()->getSiteCode();
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		$this->db_wrapper->getDB()->parse("
+			select * from RKEYN_ALL t
+			where kcde_1 = '48'
+				and kcde_2 = 'H'
+				and krmk = :bv_site
+			order by kcde_4
+		");
+		$this->db_wrapper->getDB()->bind(":bv_site", $site);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
 }
