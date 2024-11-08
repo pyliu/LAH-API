@@ -103,6 +103,30 @@ class SQLiteDBFactory {
         return $path;
     }
     
+    public static function getSurDestructionTrackingDB() {
+        $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."sur_destruction_tracking.db";
+        $sqlite = new DynamicSQLite($path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "sur_destruction_tracking" (
+                "id"	INTEGER NOT NULL,
+                "number"   TEXT(10) NOT NULL UNIQUE,
+                "section_code" INTEGER NOT NULL,
+                "land_number" TEXT(8) NOT NULL,
+                "building_number"(8) TEXT,
+                "issue_date" TEXT(7),
+                "apply_date" TEXT(7),
+                "address" TEXT(200),
+                "occupancy_permit" TEXT(100),
+                "construction_permit" TEXT(100),
+                "note" TEXT(2000),
+                "createtime"	INTEGER NOT NULL,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        return $path;
+    }
+    
     public static function getImageDB() {
         $path = SQLiteDBFactory::$db_folder.DIRECTORY_SEPARATOR."image.db";
         $sqlite = new DynamicSQLite($path);
