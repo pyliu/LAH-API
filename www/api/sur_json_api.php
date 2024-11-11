@@ -21,7 +21,7 @@ switch ($_POST["type"]) {
         $message = '未知的失敗';
         $filename = '';
         $tmp_file = '';
-        $payload = array();
+        $payload = $_POST;
         if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
             $filename = $_FILES['file']['name'];
             $extension = pathinfo($filename, PATHINFO_EXTENSION);
@@ -29,11 +29,7 @@ switch ($_POST["type"]) {
                 $tmp_file = $_FILES['file']['tmp_name'];
         
                 $payload['number'] = $_POST['number'];
-                $payload['pid'] = $fid = $_POST['pid'];
-                $payload['pname'] = $fname = $_POST['pname'];
                 $payload['note'] = $note = $_POST['note'];
-                $payload['createtime'] = $_POST['createtime'];
-                $payload['endtime'] = $_POST['endtime'];
         
                 // make sure the parent dir has been created
                 $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.'sur_destruction_tracking';

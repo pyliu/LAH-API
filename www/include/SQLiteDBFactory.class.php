@@ -121,6 +121,7 @@ class SQLiteDBFactory {
                 "construction_permit"	TEXT(100),
                 "note"	TEXT(2000),
                 "done"	INTEGER NOT NULL DEFAULT 0,
+                "updatetime"    INTEGER NOT NULL DEFAULT 0,
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
         ');

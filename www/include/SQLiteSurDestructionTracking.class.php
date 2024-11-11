@@ -102,7 +102,8 @@ class SQLiteSurDestructionTracking {
                     'occupancy_permit',
                     'construction_permit',
                     'note',
-                    'createtime'
+                    'updatetime',
+                    'done'
                 )
                 VALUES (
                     :number,
@@ -115,10 +116,11 @@ class SQLiteSurDestructionTracking {
                     :occupancy_permit,
                     :construction_permit,
                     :note,
-                    :createtime
+                    :updatetime,
+                    0
                 )
             ");
-            $stm->bindValue(':number', $post['number']);
+            $stm->bindParam(':number', $post['number']);
             $stm->bindParam(':section_code', $post['section_code']);
             $stm->bindParam(':land_number', $post['land_number']);
             $stm->bindParam(':building_number', $post['building_number']);
@@ -128,7 +130,8 @@ class SQLiteSurDestructionTracking {
             $stm->bindParam(':occupancy_permit', $post['occupancy_permit']);
             $stm->bindParam(':construction_permit', $post['construction_permit']);
             $stm->bindParam(':note', $post['note']);
-            $stm->bindValue(':createtime', $post['createtime'] ?? time());
+            $updatetime = $post['updatetime'] ?? time();
+            $stm->bindParam(':updatetime', $updatetime);
 
             return $stm->execute() === FALSE ? false : $this->getLastInsertedId();
         }
@@ -150,11 +153,12 @@ class SQLiteSurDestructionTracking {
                 occupancy_permit = :occupancy_permit,
                 construction_permit = :construction_permit,
                 note = :note,
-                createtime = :createtime
+                updatetime = :updatetime,
+                done = :done
             WHERE id = :id"
         );
         
-        $stm->bindValue(':number', $post['number']);
+        $stm->bindParam(':number', $post['number']);
         $stm->bindParam(':section_code', $post['section_code']);
         $stm->bindParam(':land_number', $post['land_number']);
         $stm->bindParam(':building_number', $post['building_number']);
@@ -164,7 +168,7 @@ class SQLiteSurDestructionTracking {
         $stm->bindParam(':occupancy_permit', $post['occupancy_permit']);
         $stm->bindParam(':construction_permit', $post['construction_permit']);
         $stm->bindParam(':note', $post['note']);
-        $stm->bindValue(':createtime', $post['createtime'] ?? time());
+        $stm->bindValue(':updatetime', $post['createtime'] ?? time());
         $stm->bindValue(':done', boolval($post['done']) ? 1 : 0);
 
         return $stm->execute() !== FALSE;
