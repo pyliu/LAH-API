@@ -1,7 +1,7 @@
 <?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."include".DIRECTORY_SEPARATOR."init.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSurDestructionTracking.class.php");
-Logger::getInstance()->info("XHR [destruction_tracking_list] 0");
+
 $destructionTracking = new SQLiteSurDestructionTracking();
 
 switch ($_POST["type"]) {
