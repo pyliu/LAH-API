@@ -8,7 +8,7 @@ switch ($_POST["type"]) {
     case "destruction_tracking_list":
         Logger::getInstance()->info("XHR [destruction_tracking_list] get tracking list request.");
         $count = 0;
-        $result = $destructionTracking->searchByIssueDate($_POST['tw_start'], $_POST['tw_ed']);
+        $result = $destructionTracking->searchByIssueDate($_POST['tw_start'], $_POST['tw_end']);
 		$count = count($result);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "取得 $count 筆建物滅失追蹤資料" : "無法取得建物滅失追蹤資料";
