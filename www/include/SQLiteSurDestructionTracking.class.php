@@ -35,11 +35,24 @@ class SQLiteSurDestructionTracking {
         return $this->db->querySingle("SELECT id from sur_destruction_tracking WHERE number = '$number'");
     }
 
+    // 取渠發文字號資料
+    public function getAllNumbers() {
+        Logger::getInstance()->info(__METHOD__.": 取得目前資料庫中所有的發文字號");
+        $result = array();
+        if($stmt = $this->db->prepare('SELECT number from sur_destruction_tracking order by number')) {
+            $result = $this->prepareArray($stmt);
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 無法取得發文字號資料！ (".SQLiteDBFactory::getSurDestructionTrackingDB().")");
+        }
+        return $result;
+    }
+
     public function getOne($id) {
-        Logger::getInstance()->info(__METHOD__.": 取得 $id 資料");
-        if($stmt = $this->db->prepare('SELECT * from sur_destruction_tracking WHERE id = :bv_id')) {
+        Logger::getInstance()->info(__METHOD__.": 取得 id:$id 資料");
+        if($stmt = $this->db->prepare("SELECT * from sur_destruction_tracking WHERE id = :bv_id")) {
             $stmt->bindParam(':bv_id', $id);
             $result = $this->prepareArray($stmt);
+            Logger::getInstance()->info(__METHOD__.": ".print_r($result, true));
             return count($result) > 0 ? $result[0] : false;
         }
         Logger::getInstance()->error(__METHOD__.": 無法取得 $id 資料！ (".SQLiteDBFactory::getSurDestructionTrackingDB().")");
@@ -130,7 +143,7 @@ class SQLiteSurDestructionTracking {
             $stm->bindParam(':occupancy_permit', $post['occupancy_permit']);
             $stm->bindParam(':construction_permit', $post['construction_permit']);
             $stm->bindParam(':note', $post['note']);
-            $updatetime = $post['updatetime'] ?? time();
+            $updatetime = time();
             $stm->bindParam(':updatetime', $updatetime);
 
             return $stm->execute() === FALSE ? false : $this->getLastInsertedId();
@@ -140,7 +153,7 @@ class SQLiteSurDestructionTracking {
 
     public function update($post) {
         $id = $post['id'];
-        Logger::getInstance()->warning(__METHOD__.": 更新建物滅失追蹤資料。(id: $id)");
+        Logger::getInstance()->info(__METHOD__.": 更新建物滅失追蹤資料。(id: $id)");
         $stm = $this->db->prepare("
             UPDATE sur_destruction_tracking SET
                 number = :number,
@@ -157,7 +170,8 @@ class SQLiteSurDestructionTracking {
                 done = :done
             WHERE id = :id"
         );
-        
+
+        $stm->bindParam(':id', $id);
         $stm->bindParam(':number', $post['number']);
         $stm->bindParam(':section_code', $post['section_code']);
         $stm->bindParam(':land_number', $post['land_number']);
@@ -168,7 +182,7 @@ class SQLiteSurDestructionTracking {
         $stm->bindParam(':occupancy_permit', $post['occupancy_permit']);
         $stm->bindParam(':construction_permit', $post['construction_permit']);
         $stm->bindParam(':note', $post['note']);
-        $stm->bindValue(':updatetime', $post['createtime'] ?? time());
+        $stm->bindValue(':updatetime', time());
         $stm->bindValue(':done', boolval($post['done']) ? 1 : 0);
 
         return $stm->execute() !== FALSE;

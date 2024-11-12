@@ -5,6 +5,31 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSurDestructionTracking.class.php
 $destructionTracking = new SQLiteSurDestructionTracking();
 
 switch ($_POST["type"]) {
+    case "destruction_tracking_number_list":
+        Logger::getInstance()->info("XHR [destruction_tracking_number_list] get tracking number list request.");
+        $rows = $destructionTracking->getAllNumbers();
+        $count = count($rows);
+        $response_code = $rows === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "取得 $count 筆建物滅失追蹤發文字號資料" : "無法取得建物滅失追蹤發文字號資料";
+        
+        $result = array();
+        if ($rows !== false) {
+            foreach ($rows as $row) {
+                $result[] = $row['number'];
+            }
+        }
+
+        Logger::getInstance()->info("XHR [destruction_tracking_number_list] $message");
+        echoJSONResponse($message, $response_code, array( "raw" => $result ));
+        break;
+    case "destruction_tracking_number_exist":
+        Logger::getInstance()->info("XHR [destruction_tracking_number_exist] get tracking number list request.");
+        $existed = $destructionTracking->exists($_POST['number']);
+        $response_code = $existed === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? $_POST['number'].'已建立' : $_POST['number'].'查無資料';
+        Logger::getInstance()->info("XHR [destruction_tracking_number_exist] $message");
+        echoJSONResponse($message, $response_code, array( "raw" => $existed ));
+        break;
     case "destruction_tracking_list":
         Logger::getInstance()->info("XHR [destruction_tracking_list] get tracking list request.");
         $count = 0;
@@ -70,13 +95,7 @@ switch ($_POST["type"]) {
 
         $payload = array();
         // primary key in DB
-        $payload['id'] = $id = $_POST['id'];
-        $payload['number'] = $_POST['number'];
-        $payload['pid'] = $_POST['pid'];
-        $payload['pname'] = $_POST['pname'];
-        $payload['note'] = $_POST['note'];
-        $payload['createtime'] = $_POST['createtime'];
-        $payload['endtime'] = $_POST['endtime'];
+        $id = $_POST['id'];
 
         $record = $destructionTracking->getOne($id);
 
@@ -84,7 +103,7 @@ switch ($_POST["type"]) {
             $status = STATUS_CODE::FAIL_NOT_FOUND;
             $message = "資料庫無法找到資料 ($id)";
         } else {
-            $result = $destructionTracking->update($payload);
+            $result = $destructionTracking->update($_POST);
             if ($result === true) {
                 // 更新成功
                 $status = STATUS_CODE::SUCCESS_NORMAL;
@@ -114,9 +133,7 @@ switch ($_POST["type"]) {
             }
         }
         Logger::getInstance()->info("XHR [edit_destruction_tracking] $message");
-        echoJSONResponse($message, $status, array(
-            'payload' => $payload
-        ));
+        echoJSONResponse($message, $status);
         break;
     case "remove_destruction_tracking":
         Logger::getInstance()->info("XHR [remove_destruction_tracking] remove tracking data request.");
