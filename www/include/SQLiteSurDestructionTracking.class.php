@@ -52,7 +52,6 @@ class SQLiteSurDestructionTracking {
         if($stmt = $this->db->prepare("SELECT * from sur_destruction_tracking WHERE id = :bv_id")) {
             $stmt->bindParam(':bv_id', $id);
             $result = $this->prepareArray($stmt);
-            Logger::getInstance()->info(__METHOD__.": ".print_r($result, true));
             return count($result) > 0 ? $result[0] : false;
         }
         Logger::getInstance()->error(__METHOD__.": 無法取得 $id 資料！ (".SQLiteDBFactory::getSurDestructionTrackingDB().")");
