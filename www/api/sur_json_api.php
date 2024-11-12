@@ -147,7 +147,8 @@ switch ($_POST["type"]) {
     case "switch_done_destruction_tracking":
         Logger::getInstance()->info("XHR [switch_done_destruction_tracking] switch done tracking data request.");
         $id = $_POST['id'];
-        $result = $destructionTracking->switchDone($id);
+        $done = $_POST['done'];
+        $result = $destructionTracking->setDone($id, $done);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
         $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已切換建物滅失追蹤資料辦畢屬性 ($id)" : "無法設定建物滅失追蹤資料辦畢屬性 ($id)";
         Logger::getInstance()->info("XHR [switch_done_destruction_tracking] $message");

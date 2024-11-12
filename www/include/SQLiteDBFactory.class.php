@@ -120,7 +120,7 @@ class SQLiteDBFactory {
                 "occupancy_permit"	TEXT(100),
                 "construction_permit"	TEXT(100),
                 "note"	TEXT(2000),
-                "done"	INTEGER NOT NULL DEFAULT 0,
+                "done"	TEXT(5) NOT NULL DEFAULT "false",
                 "updatetime"    INTEGER NOT NULL DEFAULT 0,
                 PRIMARY KEY("id" AUTOINCREMENT)
             )

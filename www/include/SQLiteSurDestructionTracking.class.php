@@ -129,7 +129,7 @@ class SQLiteSurDestructionTracking {
                     :construction_permit,
                     :note,
                     :updatetime,
-                    0
+                    'false'
                 )
             ");
             $stm->bindParam(':number', $post['number']);
@@ -182,7 +182,7 @@ class SQLiteSurDestructionTracking {
         $stm->bindParam(':construction_permit', $post['construction_permit']);
         $stm->bindParam(':note', $post['note']);
         $stm->bindValue(':updatetime', time());
-        $stm->bindValue(':done', boolval($post['done']) ? 1 : 0);
+        $stm->bindValue(':done', boolval($post['done']) ? 'true' : 'false');
 
         return $stm->execute() !== FALSE;
     }
@@ -204,9 +204,28 @@ class SQLiteSurDestructionTracking {
                     done = :done
                 WHERE id = :id"
             );
+            $stm->bindParam(':id', $id);
             $bool = boolval($record['done']);
             // reverse done attribute
-            $stm->bindValue(':done', $bool ? 0 : 1);
+            $stm->bindValue(':done', $bool ? 'false' : 'true');
+            return $stm->execute() !== FALSE;
+        }
+        return false;
+    }
+
+    public function setDone($id, $done) {
+        Logger::getInstance()->warning(__METHOD__.": 設定建物滅失追蹤資料辦畢屬性。(id: $id 👉 $done)");
+        $record = $this->getOne($id);
+        if ($record !== false) {
+            $stm = $this->db->prepare("
+                UPDATE sur_destruction_tracking SET
+                    done = :done
+                WHERE id = :id"
+            );
+            $stm->bindParam(':id', $id);
+            $bool = boolval($done);
+            // reverse done attribute
+            $stm->bindValue(':done', $bool ? 'true' : 'false');
             return $stm->execute() !== FALSE;
         }
         return false;
