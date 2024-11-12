@@ -63,7 +63,7 @@ class SQLiteSurDestructionTracking {
         if (empty($keyword)) {
             if($stmt = $this->db->prepare('SELECT * from sur_destruction_tracking WHERE issue_date BETWEEN :bv_issue_date_st AND :bv_issue_date_ed order by issue_date DESC')) {
                 $stmt->bindParam(':bv_issue_date_st', $st);
-                $stmt->bindValue(':bv_issue_date_ed', $ed);
+                $stmt->bindParam(':bv_issue_date_ed', $ed);
                 $result = $this->prepareArray($stmt);
             } else {
                 Logger::getInstance()->error(__METHOD__.": 無法取得 $st ~ $ed 資料！ (".SQLiteDBFactory::getSurDestructionTrackingDB().")");
@@ -71,7 +71,7 @@ class SQLiteSurDestructionTracking {
         } else {
             if($stmt = $this->db->prepare('SELECT * from sur_destruction_tracking WHERE issue_date BETWEEN :bv_issue_date_st AND :bv_issue_date_ed AND (note LIKE :bv_keyword OR address LIKE :bv_keyword OR occupancy_permit LIKE :bv_keyword OR construction_permit LIKE :bv_keyword) order by issue_date DESC')) {
                 $stmt->bindParam(':bv_issue_date_st', $st);
-                $stmt->bindValue(':bv_issue_date_ed', $ed);
+                $stmt->bindParam(':bv_issue_date_ed', $ed);
                 $stmt->bindValue(':bv_keyword', "%$keyword%");
                 $result = $this->prepareArray($stmt);
             } else {
