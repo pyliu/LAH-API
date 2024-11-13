@@ -68,22 +68,22 @@ class SQLiteSurDestructionTracking {
         Logger::getInstance()->error(__METHOD__.": 無法取得 $number 資料！ (".SQLiteDBFactory::getSurDestructionTrackingDB().")");
         return false;
     }
-    // BY 發文日期
-    public function searchByIssueDate($st, $ed, $keyword = '') {
-        Logger::getInstance()->info(__METHOD__.": 搜尋發文日期 $st ~ $ed 區間資料，關鍵字: $keyword");
+    // BY 申請日期
+    public function searchByApplyDate($st, $ed, $keyword = '') {
+        Logger::getInstance()->info(__METHOD__.": 搜尋申請日期 $st ~ $ed 區間資料，關鍵字: $keyword");
         $result = array();
         if (empty($keyword)) {
-            if($stmt = $this->db->prepare('SELECT * from sur_destruction_tracking WHERE issue_date BETWEEN :bv_issue_date_st AND :bv_issue_date_ed order by issue_date DESC')) {
-                $stmt->bindParam(':bv_issue_date_st', $st);
-                $stmt->bindParam(':bv_issue_date_ed', $ed);
+            if($stmt = $this->db->prepare('SELECT * from sur_destruction_tracking WHERE apply_date BETWEEN :bv_apply_date_st AND :bv_apply_date_ed order by apply_date DESC')) {
+                $stmt->bindParam(':bv_apply_date_st', $st);
+                $stmt->bindParam(':bv_apply_date_ed', $ed);
                 $result = $this->prepareArray($stmt);
             } else {
                 Logger::getInstance()->error(__METHOD__.": 無法取得 $st ~ $ed 資料！ (".SQLiteDBFactory::getSurDestructionTrackingDB().")");
             }
         } else {
-            if($stmt = $this->db->prepare('SELECT * from sur_destruction_tracking WHERE issue_date BETWEEN :bv_issue_date_st AND :bv_issue_date_ed AND (note LIKE :bv_keyword OR address LIKE :bv_keyword OR occupancy_permit LIKE :bv_keyword OR construction_permit LIKE :bv_keyword) order by issue_date DESC')) {
-                $stmt->bindParam(':bv_issue_date_st', $st);
-                $stmt->bindParam(':bv_issue_date_ed', $ed);
+            if($stmt = $this->db->prepare('SELECT * from sur_destruction_tracking WHERE apply_date BETWEEN :bv_apply_date_st AND :bv_apply_date_ed AND (note LIKE :bv_keyword OR address LIKE :bv_keyword OR occupancy_permit LIKE :bv_keyword OR construction_permit LIKE :bv_keyword) order by apply_date DESC')) {
+                $stmt->bindParam(':bv_apply_date_st', $st);
+                $stmt->bindParam(':bv_apply_date_ed', $ed);
                 $stmt->bindValue(':bv_keyword', "%$keyword%");
                 $result = $this->prepareArray($stmt);
             } else {
