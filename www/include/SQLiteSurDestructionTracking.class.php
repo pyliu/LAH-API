@@ -92,6 +92,37 @@ class SQLiteSurDestructionTracking {
         }
         return $result;
     }
+
+    public function searchByBelowApplyDate($dateAgo) {
+        $twYear = substr($dateAgo, 0, 4) - 1911;
+        $twDateAgo = $twYear.substr($dateAgo, 4);
+        Logger::getInstance()->info(__METHOD__.": 搜尋逕辦建物滅失案件資料 apply_date 小於 $twDateAgo 且無發文日期");
+        $result = array();
+        // TODO: After testing, change >= back to <
+        if($stmt = $this->db->prepare("
+            SELECT * from sur_destruction_tracking
+            WHERE 1=1
+                AND apply_date >= :bv_overdue_date_st
+                AND issue_date IS NOT NULL
+            ORDER BY apply_date
+        ")) {
+            $stmt->bindParam(':bv_overdue_date_st', $twDateAgo);
+            $result = $this->prepareArray($stmt);
+        } else {
+            Logger::getInstance()->warning(__METHOD__.": 無法取得逕辦建物滅失案件資料！ (".SQLiteDBFactory::getSurDestructionTrackingDB().")");
+        }
+        return $result;
+    }
+
+    public function searchByConcerned() {
+        $fiveMonthsAnd23DaysAgo = date('Ymd', strtotime('-5 months -23 days'));
+        return $this->searchByBelowApplyDate($fiveMonthsAnd23DaysAgo);
+    }
+
+    public function searchByOverdue() {
+        $sixMonthsAgo = date('Ymd', strtotime('-6 months'));
+        return $this->searchByBelowApplyDate($sixMonthsAgo);
+    }
     // 取的PDF檔名
     public function getPDFFilename($id) {
         Logger::getInstance()->info(__METHOD__.": 建物滅失追蹤資料電子檔檔名。(id: $id)");

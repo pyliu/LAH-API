@@ -14,6 +14,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR.'Cache.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'LXHWEB.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'MOICAD.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteOFFICESSTATS.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSurDestructionTracking.class.php");
 
 class WatchDog {
     private $stats = null;
@@ -557,6 +558,39 @@ class WatchDog {
         }
     }
 
+    private function findSurDestructionConcernedCases() {
+        if (!$this->isOverdueCheckNeeded()) {
+            Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期測量案件檢測。");
+            return false;
+        }
+        Logger::getInstance()->info('開始查詢須關注的測量逕辦建物滅失案件 ... ');
+        $query = new SQLiteSurDestructionTracking();
+        $rows = $query->searchByConcerned();
+        if (!empty($rows)) {
+            Logger::getInstance()->info('找到'.count($rows).'件須關注的測量逕辦建物滅失案件。');
+            $baked = [];
+            foreach ($rows as $row) {
+                $baked[] = $row['apply_date']." ".$row['address'];
+            }
+            // TODO: change inf to sur
+            $this->sendSurDestructionConcernedMessage('inf', $baked);
+            $this->stats->addNotificationCount(1);
+        }
+        Logger::getInstance()->info('查詢須關注的測量逕辦建物滅失案件完成。');
+        return true;
+    }
+
+    private function sendSurDestructionConcernedMessage($to_id, $bakedStrings) {
+        $notification = new Notification();
+        $url = "http://".$this->host_ip.":8080/sur/destruction";
+        $content = "⚠ ".$this->date."  ".$this->time." 逕辦建物滅失追蹤案件目前有 ".count($bakedStrings)." 件須關注的追蹤案件".(count($bakedStrings) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>❗ ".implode("<br/>❗ ", array_slice($bakedStrings, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量逕辦建物滅失案件查詢頁面]($url)</b> 查看詳細資料。";
+        // remove outdated messages
+        $notification->removeOutdatedMessageByTitle($to_id, '測量課關注逕辦建物滅失追蹤案件彙總');
+        // send current message to $to_id channel
+        $lastId = $this->addNotification($content, $to_id, '測量課關注逕辦建物滅失追蹤案件彙總');
+        Logger::getInstance()->info('新增關注逕辦建物滅失追蹤案件通知訊息至 '.$to_id.' 頻道。 '.($lastId === false ? '失敗' : '成功').')');
+    }
+
     public function notifyTemperatureRegistration() {
         
         if (!$this->isTemperatureNotifyNeeded()) {
@@ -832,6 +866,7 @@ class WatchDog {
                 $this->findRegExpiredAnnouncementCases();
                 $this->findSurOverdueCases();
                 $this->findSurNearOverdueCases();
+                $this->findSurDestructionConcernedCases();
                 $this->checkRegaDailyStatsData();
                 $this->sendForeignerInheritanceRestrictionNotification();
                 $this->sendOfficeCheckNotification();
