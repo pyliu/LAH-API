@@ -115,7 +115,8 @@ class SQLiteSurDestructionTracking {
     }
 
     public function searchByConcerned() {
-        $fiveMonthsAnd23DaysAgo = date('Ymd', strtotime('-5 months -23 days'));
+        // 6個月的前1周
+        $fiveMonthsAnd23DaysAgo = date('Ymd', strtotime('-6 months +1 week'));
         return $this->searchByBelowApplyDate($fiveMonthsAnd23DaysAgo);
     }
 
