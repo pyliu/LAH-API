@@ -35,7 +35,7 @@ class SQLiteSurDestructionTracking {
         return $this->db->querySingle("SELECT id from sur_destruction_tracking WHERE number = '$number'");
     }
 
-    // 取渠發文字號資料
+    // 取得已存的發文字號資料
     public function getAllNumbers() {
         Logger::getInstance()->info(__METHOD__.": 取得目前資料庫中所有的發文字號");
         $result = array();
@@ -92,13 +92,45 @@ class SQLiteSurDestructionTracking {
         }
         return $result;
     }
+    // 取的PDF檔名
+    public function getPDFFilename($id) {
+        Logger::getInstance()->info(__METHOD__.": 建物滅失追蹤資料電子檔檔名。(id: $id)");
+        $orig = $this->getOne($id);
+        if ($orig === false) {
+            Logger::getInstance()->warning(__METHOD__.": 找不到建物滅失追蹤資料，無法組成檔名。(id: $id)");
+            return false;
+        }
+        $file = $orig['apply_date'].'_'.$orig['section_code'].'_'.$orig['land_number'].'_'.$orig['building_number'].".pdf";
+        Logger::getInstance()->info(__METHOD__.": 合成電子檔檔名：$file");
+        return $file;
+    }
+    // 變更PDF檔名
+    public function renamePDFFilename($id, $orig_name) {
+        Logger::getInstance()->info(__METHOD__.": 變更建物滅失追蹤資料電子檔檔名。(id: $id from $orig_name)");
+        $now = $this->getOne($id);
+        if ($now === false) {
+            Logger::getInstance()->warning(__METHOD__.": 找不到建物滅失追蹤資料，無法變更檔名。(id: $id)");
+            return false;
+        }
+        $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.'sur_destruction_tracking';
+        Logger::getInstance()->info(__METHOD__.": 電子檔存放目錄：$parent_dir");
+        $target_name = $now['apply_date'].'_'.$now['section_code'].'_'.$now['land_number'].'_'.$now['building_number'].".pdf";
+        Logger::getInstance()->info(__METHOD__.": 目標電子檔檔名：$target_name");
+        $bool = rename($parent_dir.DIRECTORY_SEPARATOR.$orig_name, $parent_dir.DIRECTORY_SEPARATOR.$target_name);
+        if ($bool) {
+            Logger::getInstance()->info(__METHOD__.": 電子檔檔名已變更：$target_name ✔");
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 電子檔檔名變更失敗：$orig_name 👉 $target_name ❌");
+        }
+        return $bool;
+    }
 
     public function add($post) {
         $post['number'] = str_pad($post['number'], 10, '0', STR_PAD_LEFT);
         // 依收件號判斷
         $id = $this->exists($post['number']);
         if ($id) {
-            Logger::getInstance()->warning(__METHOD__.": 建物滅失追蹤資料已存在，將更新它。(id: $id)");
+            Logger::getInstance()->info(__METHOD__.": 建物滅失追蹤資料已存在，將更新它。(id: $id)");
             $post['id'] = $id;
             return $this->update($post);
         } else {
@@ -152,6 +184,8 @@ class SQLiteSurDestructionTracking {
 
     public function update($post) {
         $id = $post['id'];
+        Logger::getInstance()->info(__METHOD__.": 取得建物滅失追蹤資料電子檔原始檔名。(id: $id)");
+        $ofile = $this->getPDFFilename($id);
         Logger::getInstance()->info(__METHOD__.": 更新建物滅失追蹤資料。(id: $id)");
         $stm = $this->db->prepare("
             UPDATE sur_destruction_tracking SET
@@ -184,7 +218,13 @@ class SQLiteSurDestructionTracking {
         $stm->bindValue(':updatetime', time());
         $stm->bindValue(':done', boolval($post['done']) ? 'true' : 'false');
 
-        return $stm->execute() !== FALSE;
+        $upd_result = $stm->execute() !== FALSE;
+
+        if ($upd_result) {
+            $this->renamePDFFilename($id, $ofile);
+        }
+
+        return $upd_result;
     }
 
     public function delete($params) {
@@ -238,7 +278,8 @@ class SQLiteSurDestructionTracking {
 		if ($result) {
 			Logger::getInstance()->info(__METHOD__.": ✅ 建物滅失追蹤資料已移除");
 			// continue to delete pdf file
-			$orig_file = UPLOAD_SUR_DESTRUCTION_TRACKING_PDF_DIR.DIRECTORY_SEPARATOR.$orig['number'].".pdf";
+            $filename = $orig['apply_date'].'_'.$orig['section_code'].'_'.$orig['land_number'].'_'.$orig['building_number'];
+			$orig_file = UPLOAD_SUR_DESTRUCTION_TRACKING_PDF_DIR.DIRECTORY_SEPARATOR.$filename.".pdf";
             $unlink_result = @unlink($orig_file);
 			if (!$unlink_result) {
                 Logger::getInstance()->error("⚠ 刪除 $orig_file 檔案失敗!");

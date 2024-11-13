@@ -53,8 +53,7 @@ switch ($_POST["type"]) {
             if (strtoupper($extension) === 'PDF') {
                 $tmp_file = $_FILES['file']['tmp_name'];
         
-                $payload['number'] = $_POST['number'];
-                $payload['note'] = $note = $_POST['note'];
+                $payload['filename'] = $_POST['apply_date'].'_'.$_POST['section_code'].'_'.$_POST['land_number'].'_'.$_POST['building_number'];
         
                 // make sure the parent dir has been created
                 $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.'sur_destruction_tracking';
@@ -63,7 +62,7 @@ switch ($_POST["type"]) {
                     @mkdir($parent_dir, 0777, true);
                 }
                 
-                $to_file = $parent_dir.DIRECTORY_SEPARATOR.$payload['number'].".".$extension;
+                $to_file = $parent_dir.DIRECTORY_SEPARATOR.$payload['filename'].".".$extension;
                 $moved = move_uploaded_file($tmp_file, $to_file);
                 if ($moved) {
                     // cont. to add database record ...
@@ -97,9 +96,9 @@ switch ($_POST["type"]) {
         // primary key in DB
         $id = $_POST['id'];
 
-        $record = $destructionTracking->getOne($id);
+        $orig = $destructionTracking->getOne($id);
 
-        if ($record === false) {
+        if ($orig === false) {
             $status = STATUS_CODE::FAIL_NOT_FOUND;
             $message = "資料庫無法找到資料 ($id)";
         } else {
@@ -108,22 +107,23 @@ switch ($_POST["type"]) {
                 // 更新成功
                 $status = STATUS_CODE::SUCCESS_NORMAL;
                 $message = "資料庫資料已更新($id)";
-                $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.'sur_destruction_tracking';
-                $to_file = $parent_dir.DIRECTORY_SEPARATOR.$record['number'].".pdf";
                 // handle upload new pdf file
                 if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
-                    // remove orig pdf
-                    $unlink_result = @unlink($to_file);
+                    $parent_dir = UPLOAD_PDF_DIR.DIRECTORY_SEPARATOR.'sur_destruction_tracking';
+                    $current_pdf_file = $destructionTracking->getPDFFilename($id);
+                    $target_file_path = $parent_dir.DIRECTORY_SEPARATOR.$current_pdf_file;
+                    // remove old pdf
+                    $unlink_result = @unlink($target_file_path);
                     if (!$unlink_result) {
-                        $message .= "-(刪除 ".ltrim($to_file, $parent_dir.DIRECTORY_SEPARATOR)." 檔案失敗)";
-                        Logger::getInstance()->error("⚠ 刪除 $to_file 檔案失敗!");
+                        $message .= "-(刪除 ".ltrim($target_file_path, $parent_dir.DIRECTORY_SEPARATOR)." 檔案失敗)";
+                        Logger::getInstance()->error("⚠ 刪除 $target_file_path 檔案失敗!");
                     }
                     // move uploaded file
                     $filename = $_FILES['file']['name'];
                     $extension = pathinfo($filename, PATHINFO_EXTENSION);
                     if (strtoupper($extension) === 'PDF') {
                         $tmp_file = $_FILES['file']['tmp_name'];
-                        $moved = move_uploaded_file($tmp_file, $to_file);
+                        $moved = move_uploaded_file($tmp_file, $target_file_path);
                         $message .= $moved ? '-(PDF檔案置換成功)' : '-(PDF檔置換失敗)';
                     }
                 }
