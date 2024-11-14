@@ -110,11 +110,11 @@ class SQLiteDBFactory {
         $sqlite->createTableBySQL('
             CREATE TABLE IF NOT EXISTS "sur_destruction_tracking" (
                 "id"	INTEGER,
-                "number"	TEXT(10) UNIQUE,
+                "number"	TEXT(10) NOT NULL UNIQUE,
                 "section_code"	TEXT(4),
                 "land_number"	TEXT(100),
                 "building_number"	TEXT(100),
-                "issue_date"	TEXT(7),
+                "issue_date"	TEXT(7) NOT NULL,
                 "apply_date"	TEXT(7),
                 "address"	TEXT(200),
                 "occupancy_permit"	TEXT(100),
