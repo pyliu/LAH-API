@@ -47,6 +47,12 @@ switch ($_POST["type"]) {
         $filename = '';
         $tmp_file = '';
         $payload = $_POST;
+
+        // $payload['debug'] = array(
+        //     'done_is_bool' => is_bool($_POST['done']),
+        //     'done_val' => $_POST['done'],
+        // );
+
         if (isset($_FILES['file']['name']) && isset($_FILES['file']['tmp_name'])) {
             $filename = $_FILES['file']['name'];
             $extension = pathinfo($filename, PATHINFO_EXTENSION);
@@ -150,7 +156,8 @@ switch ($_POST["type"]) {
         $done = $_POST['done'];
         $result = $destructionTracking->setDone($id, $done);
         $response_code = $result === false ? STATUS_CODE::DEFAULT_FAIL : STATUS_CODE::SUCCESS_NORMAL;
-        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? "已切換建物滅失追蹤資料辦畢屬性 ($id)" : "無法設定建物滅失追蹤資料辦畢屬性 ($id)";
+        $success_message = $done === 'true' ? "已設定解除列管 ($id)" : "已設定管制 ($id)";
+        $message = $response_code === STATUS_CODE::SUCCESS_NORMAL ? $success_message : "無法設定解除列管屬性 ($id)";
         Logger::getInstance()->info("XHR [switch_done_destruction_tracking] $message");
         echoJSONResponse($message, $response_code);
         break;

@@ -93,18 +93,18 @@ class SQLiteSurDestructionTracking {
         return $result;
     }
 
-    public function searchByBelowApplyDate($dateAgo) {
+    public function searchByBelowIssueDate($dateAgo) {
         $twYear = substr($dateAgo, 0, 4) - 1911;
         $twDateAgo = $twYear.substr($dateAgo, 4);
-        Logger::getInstance()->info(__METHOD__.": 搜尋逕辦建物滅失案件資料 apply_date 小於 $twDateAgo 且無發文日期");
+        Logger::getInstance()->info(__METHOD__.": 搜尋逕辦建物滅失案件資料 issue_date 小於 $twDateAgo 且無發文日期");
         $result = array();
         // TODO: After testing, change >= back to <
         if($stmt = $this->db->prepare("
             SELECT * from sur_destruction_tracking
             WHERE 1=1
-                AND apply_date >= :bv_overdue_date_st
-                AND issue_date IS NOT NULL
-            ORDER BY apply_date
+                AND issue_date >= :bv_overdue_date_st
+                AND done <> 'true'
+            ORDER BY issue_date DESC
         ")) {
             $stmt->bindParam(':bv_overdue_date_st', $twDateAgo);
             $result = $this->prepareArray($stmt);
@@ -117,12 +117,12 @@ class SQLiteSurDestructionTracking {
     public function searchByConcerned() {
         // 6個月的前1周
         $fiveMonthsAnd23DaysAgo = date('Ymd', strtotime('-6 months +1 week'));
-        return $this->searchByBelowApplyDate($fiveMonthsAnd23DaysAgo);
+        return $this->searchByBelowIssueDate($fiveMonthsAnd23DaysAgo);
     }
 
     public function searchByOverdue() {
         $sixMonthsAgo = date('Ymd', strtotime('-6 months'));
-        return $this->searchByBelowApplyDate($sixMonthsAgo);
+        return $this->searchByBelowIssueDate($sixMonthsAgo);
     }
     // 取的PDF檔名
     public function getPDFFilename($id) {
@@ -286,7 +286,7 @@ class SQLiteSurDestructionTracking {
     }
 
     public function setDone($id, $done) {
-        Logger::getInstance()->warning(__METHOD__.": 設定建物滅失追蹤資料辦畢屬性。(id: $id 👉 $done)");
+        Logger::getInstance()->warning(__METHOD__.": 設定建物滅失追蹤資料辦畢屬性。(id: $id)");
         $record = $this->getOne($id);
         if ($record !== false) {
             $stm = $this->db->prepare("
@@ -295,9 +295,10 @@ class SQLiteSurDestructionTracking {
                 WHERE id = :id"
             );
             $stm->bindParam(':id', $id);
-            $bool = boolval($done);
+            // $bool = $done === 'true' ? 'true' : 'false';
+            // Logger::getInstance()->warning(__METHOD__.": 設定辦畢屬性 raw: $done VS bool: $bool");
             // reverse done attribute
-            $stm->bindValue(':done', $bool ? 'true' : 'false');
+            $stm->bindValue(':done', $done === 'true' ? 'true' : 'false');
             return $stm->execute() !== FALSE;
         }
         return false;
