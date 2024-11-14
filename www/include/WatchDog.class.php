@@ -148,8 +148,7 @@ class WatchDog {
             Logger::getInstance()->warning($message);
             return false;
         }
-        $cache = Cache::getInstance();
-        $users = $cache->getUserNames();
+        $users = Cache::getInstance()->getUserNames();
         $notify = new Notification();
         $payload = array(
             'title' =>  $title,
@@ -160,11 +159,11 @@ class WatchDog {
             'from_ip' => getLocalhostIP()
         );
         $lastId = $notify->addMessage($to_id, $payload, $skip_announcement_convert);
-        $nameTag = rtrim("${to_id}:".$users[$to_id], ":");
+        $nameTag = rtrim("$to_id:".$users[$to_id], ":");
         if ($lastId === false || empty($lastId)) {
-            Logger::getInstance()->warning("訊息無法送出給 ${nameTag}");
+            Logger::getInstance()->warning("訊息無法送出給 $nameTag");
         } else {
-            Logger::getInstance()->info("訊息(${lastId})已送出給 ${nameTag}");
+            Logger::getInstance()->info("訊息($lastId)已送出給 $nameTag");
         }
         // particular impl for HB messenger system
         if (System::getInstance()->isHB()) {
@@ -572,8 +571,7 @@ class WatchDog {
             foreach ($rows as $row) {
                 $baked[] = $row['apply_date']." ".$row['address'];
             }
-            // TODO: change inf to sur
-            $this->sendSurDestructionConcernedMessage('inf', $baked);
+            $this->sendSurDestructionConcernedMessage('sur', $baked);
             $this->stats->addNotificationCount(1);
         }
         Logger::getInstance()->info('查詢須關注的測量逕辦建物滅失案件完成。');
@@ -586,8 +584,8 @@ class WatchDog {
         $content = "⚠ ".$this->date."  ".$this->time." 逕辦建物滅失追蹤案件目前有 ".count($bakedStrings)." 件須關注的追蹤案件".(count($bakedStrings) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>❗ ".implode("<br/>❗ ", array_slice($bakedStrings, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量逕辦建物滅失案件查詢頁面]($url)</b> 查看詳細資料。";
         // remove outdated messages
         $notification->removeOutdatedMessageByTitle($to_id, '測量課關注逕辦建物滅失追蹤案件彙總');
-        // send current message to $to_id channel
-        $lastId = $this->addNotification($content, $to_id, '測量課關注逕辦建物滅失追蹤案件彙總');
+        // send current message to $to_id channel AND SKIP Announcement convertion
+        $lastId = $this->addNotification($content, $to_id, '測量課關注逕辦建物滅失追蹤案件彙總', true);
         Logger::getInstance()->info('新增關注逕辦建物滅失追蹤案件通知訊息至 '.$to_id.' 頻道。 '.($lastId === false ? '失敗' : '成功').')');
     }
 
