@@ -98,11 +98,11 @@ class SQLiteSurDestructionTracking {
         $twDateAgo = $twYear.substr($dateAgo, 4);
         Logger::getInstance()->info(__METHOD__.": 搜尋逕辦建物滅失案件資料 issue_date 小於 $twDateAgo 且無發文日期");
         $result = array();
-        // TODO: After testing, change >= back to <
+        // using issue_date as criteria
         if($stmt = $this->db->prepare("
             SELECT * from sur_destruction_tracking
             WHERE 1=1
-                AND issue_date >= :bv_overdue_date_st
+                AND issue_date < :bv_overdue_date_st
                 AND done <> 'true'
             ORDER BY issue_date DESC
         ")) {
