@@ -29,7 +29,7 @@ switch ($_POST["type"]) {
             $zzz_us = random_int(100000, 500000);
             usleep($zzz_us);
         }
-        Logger::getInstance()->info('更新使用者回報IP資料 '.$data['ip'].' '.$data['entry_id'].' '.$data['entry_desc'].' ('.$retry.')');
+        Logger::getInstance()->info('更新使用者回報IP資料 '.$data['ip'].' '.$data['entry_id'].' '.$data['entry_desc'].' (重試：'.$retry.')');
         if ($result && $data['entry_type'] === 'USER' && startsWith($data['entry_id'], $system->getSiteCode())) {
             // also update to user table in dimension.db
             $user = new SQLiteUser();
