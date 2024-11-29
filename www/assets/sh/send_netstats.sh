@@ -23,7 +23,7 @@ fi
 POST_PARAMS=$(netstat -ntu | grep ESTAB | awk '{print $5}' | sed -e 's/^::ffff://'  | cut -d : -f 1 | sort | uniq -c | sort -nr | awk '{print " -d records[]="$1","$2}')
 # 1110831 added to monitor jboss server cpu utilization
 JBOSS_CPU_USAGE=`top -b -n 1 | grep -i java | grep jboss | cut -f2 | awk '{print $9}'`
-JBOSS_PARAMS=" -d records[]=${JBOSS_CPU_USAGE},JBOSS_CPU_USAGE"
+JBOSS_PARAMS=" -d records[]=$JBOSS_CPU_USAGE,JBOSS_CPU_USAGE"
 
 curl -s -X POST \
      -d "type=stats_set_conn_count" \

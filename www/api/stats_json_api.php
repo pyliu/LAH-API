@@ -19,7 +19,7 @@ $this_month = (date("Y") - 1911)."".date("m");
 $mock = $system->isMockMode();
 
 function queryStats($type, $date, $error_msg) {
-    global $stats_sqlite3, $mock, $cache, $stats, $this_month, $log;
+    global $stats_sqlite3, $mock, $cache, $this_month, $log;
     $key = $type.'_'.$date;
     
     // remove old record first for rest operation
@@ -30,6 +30,7 @@ function queryStats($type, $date, $error_msg) {
     $result = $stats_sqlite3->getStatsRawData($key);
     if ($this_month == $date || empty($result)) {
         $result = $cache->get($type);
+        $stats = new StatsOracle();
         if (!$mock) {
             switch ($type) {
                 case "stats_refund":
