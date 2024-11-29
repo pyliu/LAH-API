@@ -57,11 +57,11 @@ switch ($_POST["type"]) {
         $keyword = $_POST["keyword"];
         $convert = $_POST['convert'] === 'true' ? true : false;
         // 搜尋 via subject
-        Logger::getInstance()->info("XHR [subject] 查詢監控郵件 BY '%${keyword}%' IN SUBJECT 請求");
+        Logger::getInstance()->info("XHR [subject] 查詢監控郵件 BY '%$keyword%' IN SUBJECT 請求");
         $days_before = $_POST["days"] ?? 1;
         $mails = $sqlite_monitor_mail->getMailsBySubject($_POST["keyword"], $days_before * 24 * 60 * 60, $convert);
         if (empty($mails)) {
-            echoJSONResponse("'%${keyword}%' IN SUBJECT 沒有找到郵件");
+            echoJSONResponse("'%$keyword%' IN SUBJECT 沒有找到郵件");
         } else {
             $count = count($mails);
             echoJSONResponse("查詢到 $count 封郵件", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
