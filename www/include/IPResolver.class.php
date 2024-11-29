@@ -61,7 +61,17 @@ class IPResolver {
             VALUES (:ip, :added_type, :entry_type, :entry_desc, :entry_id, :timestamp, :note)
         ");
         if ($this->bindParams($stm, $post)) {
-            return $stm->execute() === FALSE ? false : true;
+            $result = $stm->execute() === FALSE ? false : true;
+            // SQLite 的設計初衷並非為了高並行寫入動作，所以我實作重試機制以減低寫入失敗的情形
+            $retry = 0;
+            while ($result === false && $retry < 5) {
+                $retry++;
+                $zzz_us = random_int(100000, 500000);
+                Logger::getInstance()->warning(__METHOD__.": ".$post['ip']." 寫入 IPResolver 失敗 ".$zzz_us." μs 後重試。($retry)");
+                usleep($zzz_us);
+                $result = $stm->execute() === FALSE ? false : true;
+            }
+            return $result;
         }
         return false;
     }
@@ -81,9 +91,19 @@ class IPResolver {
     public function removeIpEntry($post) {
         $sql = "DELETE FROM IPResolver WHERE ip = '".$post['ip']."' AND added_type = '".$post['added_type']."' AND entry_type = '".$post['entry_type']."'";
         if ($stm = $this->db->prepare($sql)) {
-            return $stm->execute() === FALSE ? false : true;
+            $result = $stm->execute() === FALSE ? false : true;
+            // SQLite 的設計初衷並非為了高並行寫入動作，所以我實作重試機制以減低寫入失敗的情形
+            $retry = 0;
+            while ($result === false && $retry < 5) {
+                $retry++;
+                $zzz_us = random_int(100000, 500000);
+                Logger::getInstance()->warning(__METHOD__.": ".$post['ip']." 寫入 IPResolver 失敗 ".$zzz_us." μs 後重試。($retry)");
+                usleep($zzz_us);
+                $result = $stm->execute() === FALSE ? false : true;
+            }
+            return $result;
         }
-        Logger::getInstance()->warning(__METHOD__.": 無法執行 「${sql}」 SQL描述。");
+        Logger::getInstance()->warning(__METHOD__.": 無法執行 「".$sql."」 SQL描述。");
         return false;
     }
     

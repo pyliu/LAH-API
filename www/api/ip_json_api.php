@@ -19,18 +19,8 @@ switch ($_POST["type"]) {
             'timestamp' => time(),
             'note' => $_POST['note'] ?? ''
         );
-        // SQLite 的設計初衷並非為了高並行寫入動作，所以我實作重試機制以減低寫入失敗的情形
-        $result = false;
-        $retry = 0;
-        while ($result === false) {
-            $retry++;
-            $result = $ipr->addIpEntry($data);
-            if ($result === true) { break; }
-            if ($retry > 4) { break; }
-            $zzz_us = random_int(100000, 500000);
-            usleep($zzz_us);
-        }
-        Logger::getInstance()->info('更新使用者回報IP資料 '.$data['ip'].' '.$data['entry_id'].' '.$data['entry_desc'].' (重試：'.$retry.')');
+        $result = $ipr->addIpEntry($data);
+        Logger::getInstance()->info('更新使用者回報IP資料 '.$data['ip'].' '.$data['entry_id'].' '.$data['entry_desc']);
         if ($result && $data['entry_type'] === 'USER' && startsWith($data['entry_id'], $system->getSiteCode())) {
             // also update to user table in dimension.db
             $user = new SQLiteUser();
@@ -38,7 +28,6 @@ switch ($_POST["type"]) {
                 Logger::getInstance()->warning('自動匯入使用者資訊失敗。');
             }
         }
-
         $message = $result ? '完成 '.$data['ip'].' ('.$data['added_type'].', '.$data['entry_type'].') 更新' : '更新 '.$data['ip'].' 資料失敗';
         Logger::getInstance()->info($message);
 		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
@@ -86,16 +75,7 @@ switch ($_POST["type"]) {
             'added_type' => $_POST['added_type'],
             'entry_type' => $_POST['entry_type'],
         );
-        $result = false;
-        $retry = 0;
-        while ($result === false) {
-            $retry++;
-            $result = $ipr->removeIpEntry($data);
-            if ($result === true) { break; }
-            if ($retry > 4) { break; }
-            $zzz_us = random_int(100000, 500000);
-            usleep($zzz_us);
-        }
+        $result = $ipr->removeIpEntry($data);
         $message = $result ? '完成 '.$data['ip'].' ('.$data['added_type'].', '.$data['entry_type'].') 資料刪除' : '刪除 '.$data['ip'].' 資料失敗';
         $status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
         echoJSONResponse($message, $status_code);
