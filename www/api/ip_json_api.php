@@ -19,6 +19,7 @@ switch ($_POST["type"]) {
             'timestamp' => time(),
             'note' => $_POST['note'] ?? ''
         );
+        // SQLite 的設計初衷並非為了高並行寫入動作，所以我實作重試機制以減低寫入失敗的情形
         $result = false;
         $retry = 0;
         while ($result === false) {
