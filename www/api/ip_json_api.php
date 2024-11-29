@@ -19,9 +19,17 @@ switch ($_POST["type"]) {
             'timestamp' => time(),
             'note' => $_POST['note'] ?? ''
         );
-        Logger::getInstance()->info('更新使用者回報IP資料 '.$data['ip'].' '.$data['entry_id'].' '.$data['entry_desc']);
-        $result = $ipr->addIpEntry($data);
-
+        $result = false;
+        $retry = 0;
+        while ($result === false) {
+            $retry++;
+            $result = $ipr->addIpEntry($data);
+            if ($result === true) { break; }
+            if ($retry > 4) { break; }
+            $zzz_us = random_int(100000, 500000);
+            usleep($zzz_us);
+        }
+        Logger::getInstance()->info('更新使用者回報IP資料 '.$data['ip'].' '.$data['entry_id'].' '.$data['entry_desc'].' ('.$retry.')');
         if ($result && $data['entry_type'] === 'USER' && startsWith($data['entry_id'], $system->getSiteCode())) {
             // also update to user table in dimension.db
             $user = new SQLiteUser();
@@ -77,7 +85,16 @@ switch ($_POST["type"]) {
             'added_type' => $_POST['added_type'],
             'entry_type' => $_POST['entry_type'],
         );
-        $result = $ipr->removeIpEntry($data);
+        $result = false;
+        $retry = 0;
+        while ($result === false) {
+            $retry++;
+            $result = $ipr->removeIpEntry($data);
+            if ($result === true) { break; }
+            if ($retry > 4) { break; }
+            $zzz_us = random_int(100000, 500000);
+            usleep($zzz_us);
+        }
         $message = $result ? '完成 '.$data['ip'].' ('.$data['added_type'].', '.$data['entry_type'].') 資料刪除' : '刪除 '.$data['ip'].' 資料失敗';
         $status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
         echoJSONResponse($message, $status_code);
