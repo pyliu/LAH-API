@@ -18,6 +18,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."MOICAS.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."MOIADM.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."MOICAT.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteAPConnectionHistory.class.php");
 
 class Scheduler {
     private $tmp;
@@ -113,6 +114,11 @@ class Scheduler {
     private function removePrefetchDB() {
         Logger::getInstance()->info(__METHOD__.": 啟動清除 Prefetch Cache 排程。");
         return Prefetch::removeDBFile();
+    }
+
+    private function wipeAPConnectionHistoryDB() {
+        Logger::getInstance()->info(__METHOD__.": 啟動清除AP連線歷史紀錄DB排程。");
+        return SQLiteAPConnectionHistory::removeDBFile();
     }
 
     private function wipeOutdatedLog() {
@@ -441,6 +447,8 @@ class Scheduler {
                 $this->wipeOutdatedLog();
                 // remove cached prefetch data once a day
                 $this->removePrefetchDB();
+                // remove cached AP connection history data once a day
+                $this->wipeAPConnectionHistoryDB();
                 /**
                  * 匯入WEB DB固定資料
                  */
