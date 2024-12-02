@@ -94,29 +94,26 @@ class SQLiteMonitorMail {
         $inserted = 0;
         $failed = 0;
         foreach($mails as $mail) {
-            // if ($mail["id"] > $latest_id) {
+            $retry = 0;
+            $result = false;
+            do {
                 $result = $this->replace($mail);
-
-                $retry = 0;
-                while ($result === false && $retry < 3) {
-                    // like TCP congestion retry delay ... 
-                    $zzz_us = random_int(100000, 500000) * pow(2, $retry);
-                    Logger::getInstance()->warning(__METHOD__.": 寫入 MonitorMail 失敗 ".number_format($zzz_us / 1000000, 3)." 秒後重試。(".($retry + 1).")");
-                    usleep($zzz_us);
-                    $retry++;
-                    $result = $this->replace($mail);
-                }
-                
-                if ($result) {
-                    $inserted++;
-                    // extracted from server, mark it as \Seen ...
-                    $monitor->markMailAsRead($mail['id']);
-                } else {
-                    $failed++;
-                    Logger::getInstance()->warning(__METHOD__.': 插入監控郵件資料庫失敗。');
-                    Logger::getInstance()->info(__METHOD__.': payload => '.print_r($mail, true));
-                }
-            // }
+                if ($result) { break; }
+                // like TCP congestion retry delay ... 
+                $zzz_us = random_int(100000, 500000) * pow(2, $retry);
+                Logger::getInstance()->warning(__METHOD__.": 寫入 MonitorMail 失敗 ".number_format($zzz_us / 1000000, 3)." 秒後重試。(".($retry + 1).")");
+                usleep($zzz_us);
+                $retry++;
+            } while ($result === false && $retry <= 3);
+            if ($result) {
+                $inserted++;
+                // extracted from server, mark it as \Seen ...
+                $monitor->markMailAsRead($mail['id']);
+            } else {
+                $failed++;
+                Logger::getInstance()->warning(__METHOD__.': 插入監控郵件資料庫失敗。');
+                Logger::getInstance()->info(__METHOD__.': payload => '.print_r($mail, true));
+            }
         }
         // clean mails on the server
         // $monitor->expungeDeletedMails();
