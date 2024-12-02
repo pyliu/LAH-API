@@ -1,5 +1,5 @@
-# Taoyuan Land Office Affairs Helper
-A WEB API for land affairs in Taoyuan
+# LAH-API
+A WEB API for LAH-NUXTJS
 
 1. To connect to Oracle 9i database, we need to put required dlls (php_oci8_11g.dll from PECL, php_sqlsrv.dll for MSSQL connection) to c:\AppServ\php7\ext\.
 2. Edit php.ini to enable extension oci8 (extension=php_oci8_11g.dll).
