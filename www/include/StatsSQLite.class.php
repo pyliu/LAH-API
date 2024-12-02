@@ -267,7 +267,7 @@ class StatsSQLite {
                         return $success;
                     }
                     $zzz_us = random_int(100000, 500000) * pow(2, $retry);
-                    Logger::getInstance()->warning(__METHOD__.": 嘗試新增 $ap_ip AP 歷史資料失敗 ".$zzz_us." µs 後重試(".++$retry.")。");
+                    Logger::getInstance()->warning(__METHOD__.": 嘗試新增 $ap_ip AP 歷史資料失敗 ".($zzz_us / 1000000)." 秒後重試(".++$retry.")。");
                     usleep($zzz_us);
                 }
                 $success++;
