@@ -432,9 +432,8 @@ class Scheduler {
                 // job execution below ...
                 // compress other days log
                 $this->compressLog();
-                // clean AP stats data one day ago
-                $stats = new StatsSQLite();
-                $stats->wipeAllAPConnHistory();
+                // clean all AP history data one day ago
+                SQLiteAPConnectionHistory::cleanOneDayAgoAll();
                 // clean connectivity stats data one day ago
                 $conn = new SQLiteConnectivity();
                 $conn->wipeHistory(1);

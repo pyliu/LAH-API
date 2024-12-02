@@ -9,6 +9,7 @@ require_once("./include/System.class.php");
 require_once("./include/MOIADM.class.php");
 require_once("./include/XCase.class.php");
 require_once("./include/SQLiteSurDestructionTracking.class.php");
+require_once(ROOT_DIR."/include/SQLiteAPConnectionHistory.class.php");
 require 'vendor/autoload.php';
 
 try {
@@ -20,6 +21,7 @@ try {
     } else {
         echo "Unable to retrieve CPU information." . "\n";
     }
+    // SQLiteAPConnectionHistory::removeDBFiles();
 } catch (Exception $ex) {
     echo 'Caught exception: ', $e->getMessage(), "\n";
 } finally {

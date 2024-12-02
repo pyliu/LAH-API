@@ -441,6 +441,27 @@ class SQLiteDBFactory {
         return $db_path;
     }
 
+    public static function getAPConnectionHistoryDB($ip) {
+        $postfix = $ip;
+        if (stripos($ip, '.') !== false) {
+            $postfix = explode('.', $ip)[3];
+        }
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR."stats_ap_conn_AP".$postfix.".db";
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "ap_conn_history" (
+                "log_time"	TEXT NOT NULL,
+                "ap_ip"	TEXT NOT NULL,
+                "est_ip"	TEXT NOT NULL,
+                "count"	INTEGER NOT NULL DEFAULT 0,
+                "batch"	INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY("log_time","ap_ip","est_ip")
+            )
+        ');
+        return $db_path;
+    }
+
     private function __construct() {}
 
     function __destruct() {}
