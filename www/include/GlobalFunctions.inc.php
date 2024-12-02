@@ -471,3 +471,18 @@ function getCrossCountyCodeMap() {
         'Z1' => array('ZA', '連江')
     );
 }
+
+function getCPUInfo() {
+    $cmd = 'wmic cpu get /format:list';
+    $output = [];
+    exec($cmd, $output);
+
+    $cpuInfo = [];
+    foreach ($output as $line) {
+        if (strpos($line, '=') !== false) {
+            list($key, $value) = explode('=', $line);
+            $cpuInfo[trim($key)] = trim($value);
+        }
+    }
+    return $cpuInfo;
+}
