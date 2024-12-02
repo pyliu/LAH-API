@@ -336,7 +336,7 @@ class StatsSQLite {
                     $retry = 0;
                     while (@$stm->execute() === FALSE) {
                         $ap_db->exec("COMMIT");
-                        if ($retry > 3) {
+                        if ($retry > 2) {
                             Logger::getInstance()->warning(__METHOD__.": 更新資料庫($db_path)失敗。($log_time, $ap_ip, $est_ip, $count)");
                             return $success;
                         }
