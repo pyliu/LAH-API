@@ -7,6 +7,7 @@ require_once(ROOT_DIR."/include/StatsSQLite.class.php");
 require_once(ROOT_DIR."/include/SQLiteConnectivity.class.php");
 require_once(ROOT_DIR."/include/RegCaseData.class.php");
 require_once(ROOT_DIR."/include/SQLiteOFFICESSTATS.class.php");
+require_once(ROOT_DIR."/include/SQLiteAPConnectionHistory.class.php");
 require_once(ROOT_DIR."/include/Scheduler.class.php");
 
 $stats = new StatsOracle();
@@ -247,7 +248,8 @@ switch ($_POST["type"]) {
                 }
             }
             $clean_count = count($processed);
-            $success = $stats_sqlite3->addAPConnHistory($_POST['log_time'], $_POST['ap_ip'], $processed);
+            $apHistory = new SQLiteAPConnectionHistory($_POST['ap_ip']);
+            $success = $apHistory->add($_POST['log_time'], $processed);
             if ($success != $clean_count) {
                 Logger::getInstance()->error("XHR [stats_set_conn_count] 設定AP歷史連線資料失敗。[成功：${success}，全部：${clean_count}]");
             }
@@ -256,7 +258,8 @@ switch ($_POST["type"]) {
         }
         break;
     case "stats_latest_ap_conn":
-        if (!empty($_POST["ap_ip"]) && $arr = $stats_sqlite3->getLatestAPConnHistory($_POST["ap_ip"], $_POST["all"])) {
+        $apHistory = new SQLiteAPConnectionHistory($_POST["ap_ip"]);
+        if (!empty($_POST["ap_ip"]) && $arr = $apHistory->getLatest($_POST["all"])) {
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => $count,
@@ -264,12 +267,13 @@ switch ($_POST["type"]) {
             ));
         } else {
             $error = "取得最新AP [".$_POST["ap_ip"]."] 連線數紀錄失敗。";
-            Logger::getInstance()->error("XHR [stats_latest_ap_conn] ${error}");
+            Logger::getInstance()->error("XHR [stats_latest_ap_conn] $error");
             echoJSONResponse($error);
         }
         break;
     case "stats_ap_conn_history":
-        if ($arr = $stats_sqlite3->getAPConnHistory($_POST["ap_ip"], $_POST["count"])) {
+        $apHistory = new SQLiteAPConnectionHistory($_POST["ap_ip"]);
+        if ($arr = $apHistory->get($_POST["ap_ip"], $_POST["count"])) {
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => $count,
