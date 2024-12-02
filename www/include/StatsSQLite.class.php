@@ -262,11 +262,11 @@ class StatsSQLite {
 
                 $retry = 0;
                 while (@$stm->execute() === FALSE) {
-                    if ($retry > 10) {
+                    if ($retry > 3) {
                         Logger::getInstance()->warning(__METHOD__.": 更新資料庫($db_path)失敗。($log_time, $ap_ip, $est_ip, $count)");
                         return $success;
                     }
-                    $zzz_us = random_int(100000, 500000);
+                    $zzz_us = random_int(100000, 500000) * pow(2, $retry);
                     Logger::getInstance()->warning(__METHOD__.": execute statement failed ... sleep ".$zzz_us." microseconds, retry(".++$retry.").");
                     usleep($zzz_us);
                 }
