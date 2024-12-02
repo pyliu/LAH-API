@@ -37,8 +37,12 @@ class IPResolver {
     private function prepareArray(&$stmt) {
         $result = $stmt->execute();
         $return = [];
-        while($row = $result->fetchArray(SQLITE3_ASSOC)) {
-            $return[] = $row;
+        if ($result) {
+            while($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                $return[] = $row;
+            }
+        } else {
+            Logger::getInstance()->warning(__CLASS__."::".__METHOD__.": execute SQL unsuccessfully.");
         }
         return $return;
     }
