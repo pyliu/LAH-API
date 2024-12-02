@@ -82,6 +82,17 @@ class SQLiteMonitorMail {
         foreach($mails as $mail) {
             // if ($mail["id"] > $latest_id) {
                 $result = $this->replace($mail);
+
+                $retry = 0;
+                while ($result === false && $retry < 3) {
+                    // like TCP congestion retry delay ... 
+                    $zzz_us = random_int(100000, 500000) * pow(2, $retry);
+                    Logger::getInstance()->warning(__METHOD__.": 寫入 MonitorMail 失敗 ".$zzz_us." μs 後重試。(".($retry + 1).")");
+                    usleep($zzz_us);
+                    $retry++;
+                    $result = $this->replace($mail);
+                }
+                
                 if ($result) {
                     $inserted++;
                     // extracted from server, mark it as \Seen ...
