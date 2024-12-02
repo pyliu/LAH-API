@@ -36,21 +36,30 @@ class SQLiteMonitorMail {
         $this->db = new SQLite3($db_path);
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");
-        $this->db->exec("BEGIN TRANSACTION");
+        // $this->db->exec("BEGIN TRANSACTION");
     }
 
     function __destruct() {
-        $this->db->exec("END TRANSACTION");
+        // $this->db->exec("END TRANSACTION");
         $this->db->close();
     }
 
     public function replace(&$row) {
-        $stm = $this->db->prepare("
-            REPLACE INTO mail ('id', 'sender', 'receiver', 'subject', 'message', 'timestamp', 'mailbox')
-            VALUES (:id, :from, :to, :subject, :message, :timestamp, :mailbox)
-        ");
-        $this->bindParams($stm, $row);
-        return $stm->execute() === FALSE ? false : true;
+        try {
+            $stm = $this->db->prepare("
+                REPLACE INTO mail ('id', 'sender', 'receiver', 'subject', 'message', 'timestamp', 'mailbox')
+                VALUES (:id, :from, :to, :subject, :message, :timestamp, :mailbox)
+            ");
+            $this->db->exec("BEGIN IMMEDIATE TRANSACTION");
+            $this->bindParams($stm, $row);
+            $result = $stm->execute() === FALSE ? false : true;
+            $this->db->exec("COMMIT");
+            return $result;
+        } catch (Exception $e) {
+            $this->db->exec("ROLLBACK");
+            Logger::getInstance()->error(__METHOD__.': '.$e->getMessage());
+        }
+        return false;
     }
 
     public function fetchFromMailServer() {
@@ -155,8 +164,17 @@ class SQLiteMonitorMail {
         $ts = time() - intval($seconds_before);
         $sql = "DELETE FROM mail WHERE timestamp <= :ts";
         if ($stmt = $this->db->prepare($sql)) {
-            $stmt->bindParam(":ts", $ts);
-            return $stmt->execute() === FALSE ? false : true;
+            try {
+                $this->db->exec("BEGIN IMMEDIATE TRANSACTION");
+                $stmt->bindParam(":ts", $ts);
+                $result = $stmt->execute() === FALSE ? false : true;
+                $this->db->exec("COMMIT");
+                return $result;
+            } catch (Exception $e) {
+                $this->db->exec("ROLLBACK");
+                Logger::getInstance()->error(__METHOD__.': '.$e->getMessage());
+            }
+            return false;
         }
         Logger::getInstance()->warning(__METHOD__.": 無法執行 「".$sql."」 SQL描述。");
         return false;
