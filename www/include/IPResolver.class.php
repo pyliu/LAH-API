@@ -47,32 +47,41 @@ class IPResolver {
         $this->db = new SQLite3(SQLiteDBFactory::getIPResolverDB());
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");
-        $this->db->exec("BEGIN TRANSACTION");
+        // $this->db->exec("BEGIN TRANSACTION");
     }
 
     function __destruct() {
-        $this->db->exec("END TRANSACTION");
+        // $this->db->exec("END TRANSACTION");
         $this->db->close();
     }
 
     public function addIpEntry($post) {
-        $stm = $this->db->prepare("
-            REPLACE INTO IPResolver ('ip', 'added_type', 'entry_type', 'entry_desc', 'entry_id', 'timestamp', 'note')
-            VALUES (:ip, :added_type, :entry_type, :entry_desc, :entry_id, :timestamp, :note)
-        ");
-        if ($this->bindParams($stm, $post)) {
-            $result = $stm->execute() === FALSE ? false : true;
-            // SQLite 的設計初衷並非為了高並行寫入動作，所以我實作重試機制以減低寫入失敗的情形
-            $retry = 0;
-            while ($result === false && $retry < 5) {
-                // like TCP congestion retry delay ... 
-                $zzz_us = random_int(100000, 500000) * pow(2, $retry);
-                Logger::getInstance()->warning(__METHOD__.": ".$post['ip']." 寫入 IPResolver 失敗 ".number_format($zzz_us / 1000000, 3)." 秒後重試。(".($retry + 1).")");
-                usleep($zzz_us);
+        try {
+            $stm = $this->db->prepare("
+                REPLACE INTO IPResolver ('ip', 'added_type', 'entry_type', 'entry_desc', 'entry_id', 'timestamp', 'note')
+                VALUES (:ip, :added_type, :entry_type, :entry_desc, :entry_id, :timestamp, :note)
+            ");
+            $this->db->exec("BEGIN IMMEDIATE TRANSACTION");
+            
+            if ($this->bindParams($stm, $post)) {
                 $result = $stm->execute() === FALSE ? false : true;
-                $retry++;
+                // SQLite 的設計初衷並非為了高並行寫入動作，所以我實作重試機制以減低寫入失敗的情形
+                $retry = 0;
+                while ($result === false && $retry < 5) {
+                    // like TCP congestion retry delay ... 
+                    $zzz_us = random_int(100000, 500000) * pow(2, $retry);
+                    Logger::getInstance()->warning(__METHOD__.": ".$post['ip']." 寫入 IPResolver 失敗 ".number_format($zzz_us / 1000000, 3)." 秒後重試。(".($retry + 1).")");
+                    usleep($zzz_us);
+                    $result = $stm->execute() === FALSE ? false : true;
+                    $retry++;
+                }
+                $this->db->exec("COMMIT");
+                return $result;
             }
-            return $result;
+            return false;
+        } catch (Exception $e) {
+            $this->db->exec("ROLLBACK");
+            Logger::getInstance()->error(__METHOD__.': '.$e->getMessage());
         }
         return false;
     }
@@ -90,20 +99,28 @@ class IPResolver {
     }
 
     public function removeIpEntry($post) {
-        $sql = "DELETE FROM IPResolver WHERE ip = '".$post['ip']."' AND added_type = '".$post['added_type']."' AND entry_type = '".$post['entry_type']."'";
-        if ($stm = $this->db->prepare($sql)) {
-            $result = $stm->execute() === FALSE ? false : true;
-            // SQLite 的設計初衷並非為了高並行寫入動作，所以我實作重試機制以減低寫入失敗的情形
-            $retry = 0;
-            while ($result === false && $retry < 5) {
-                // like TCP congestion retry delay ... 
-                $zzz_us = random_int(100000, 500000) * pow(2, $retry);
-                Logger::getInstance()->warning(__METHOD__.": ".$post['ip']." 寫入 IPResolver 失敗 ".number_format($zzz_us / 1000000, 3)." 秒後重試。(".($retry + 1).")");
-                usleep($zzz_us);
-                $retry++;
+        try {
+            $sql = "DELETE FROM IPResolver WHERE ip = '".$post['ip']."' AND added_type = '".$post['added_type']."' AND entry_type = '".$post['entry_type']."'";
+            if ($stm = $this->db->prepare($sql)) {
+                $this->db->exec("BEGIN IMMEDIATE TRANSACTION");
+
                 $result = $stm->execute() === FALSE ? false : true;
+                // SQLite 的設計初衷並非為了高並行寫入動作，所以我實作重試機制以減低寫入失敗的情形
+                $retry = 0;
+                while ($result === false && $retry < 5) {
+                    // like TCP congestion retry delay ... 
+                    $zzz_us = random_int(100000, 500000) * pow(2, $retry);
+                    Logger::getInstance()->warning(__METHOD__.": ".$post['ip']." 寫入 IPResolver 失敗 ".number_format($zzz_us / 1000000, 3)." 秒後重試。(".($retry + 1).")");
+                    usleep($zzz_us);
+                    $retry++;
+                    $result = $stm->execute() === FALSE ? false : true;
+                }
+                $this->db->exec("COMMIT");
+                return $result;
             }
-            return $result;
+        } catch (Exception $e) {
+            $this->db->exec("ROLLBACK");
+            Logger::getInstance()->error(__METHOD__.': '.$e->getMessage());
         }
         Logger::getInstance()->warning(__METHOD__.": 無法執行 「".$sql."」 SQL描述。");
         return false;
