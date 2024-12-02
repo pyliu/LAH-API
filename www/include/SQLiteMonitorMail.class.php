@@ -53,6 +53,7 @@ class SQLiteMonitorMail {
             $this->db->exec("BEGIN IMMEDIATE TRANSACTION");
             $this->bindParams($stm, $row);
             $result = $stm->execute() === FALSE ? false : true;
+            // Execute COMMIT/ROLLBACK will end the transaction
             $this->db->exec("COMMIT");
             return $result;
         } catch (Exception $e) {
