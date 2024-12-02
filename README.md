@@ -1,5 +1,5 @@
 # Taoyuan Land Office Affairs Helper
-A helper web app for land affairs in Taoyuan
+A WEB API for land affairs in Taoyuan
 
 1. To connect to Oracle 9i database, we need to put required dlls (php_oci8_11g.dll from PECL, php_sqlsrv.dll for MSSQL connection) to c:\AppServ\php7\ext\.
 2. Edit php.ini to enable extension oci8 (extension=php_oci8_11g.dll).
@@ -18,7 +18,6 @@ A helper web app for land affairs in Taoyuan
    https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
 8. 將 instantclient 剛解壓縮後的位址（e.g. C:\instantclient_11_2）加入系統的 PATH 變數
 9. 將 www 目錄下檔案全部拷貝到 C:\AppServ\www 目錄底下
-10. 重新啟動電腦
-11. 開啟CHROME，網址列輸入 http://localhost/index.html 即可使用網站
+10. 重新啟動電腦即完成
 
 * NO IE support.
