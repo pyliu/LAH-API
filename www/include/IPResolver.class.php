@@ -65,11 +65,12 @@ class IPResolver {
             // SQLite 的設計初衷並非為了高並行寫入動作，所以我實作重試機制以減低寫入失敗的情形
             $retry = 0;
             while ($result === false && $retry < 5) {
-                $retry++;
-                $zzz_us = random_int(100000, 500000);
-                Logger::getInstance()->warning(__METHOD__.": ".$post['ip']." 寫入 IPResolver 失敗 ".$zzz_us." μs 後重試。($retry)");
+                // like TCP congestion retry delay ... 
+                $zzz_us = random_int(100000, 500000) * pow(2, $retry);
+                Logger::getInstance()->warning(__METHOD__.": ".$post['ip']." 寫入 IPResolver 失敗 ".$zzz_us." μs 後重試。(".($retry + 1).")");
                 usleep($zzz_us);
                 $result = $stm->execute() === FALSE ? false : true;
+                $retry++;
             }
             return $result;
         }
@@ -95,10 +96,11 @@ class IPResolver {
             // SQLite 的設計初衷並非為了高並行寫入動作，所以我實作重試機制以減低寫入失敗的情形
             $retry = 0;
             while ($result === false && $retry < 5) {
-                $retry++;
-                $zzz_us = random_int(100000, 500000);
-                Logger::getInstance()->warning(__METHOD__.": ".$post['ip']." 寫入 IPResolver 失敗 ".$zzz_us." μs 後重試。($retry)");
+                // like TCP congestion retry delay ... 
+                $zzz_us = random_int(100000, 500000) * pow(2, $retry);
+                Logger::getInstance()->warning(__METHOD__.": ".$post['ip']." 寫入 IPResolver 失敗 ".$zzz_us." μs 後重試。(".($retry + 1).")");
                 usleep($zzz_us);
+                $retry++;
                 $result = $stm->execute() === FALSE ? false : true;
             }
             return $result;
