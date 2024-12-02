@@ -24,7 +24,7 @@ class SQLiteAPConnectionHistory {
         $postfixs = System::getInstance()->getWebAPPostfix();
         foreach ($postfixs as $postfix) {
             $ap = new SQLiteAPConnectionHistory($postfix);
-            $ap->cleanOneDayAgo();
+            $ap->cleanDaysAgo(1);
         }
     }
 
@@ -140,8 +140,8 @@ class SQLiteAPConnectionHistory {
         return $success;
     }
 
-    public function cleanOneDayAgo() {
-        $one_day_ago = date("YmdHis", time() - 24 * 3600);
+    public function cleanDaysAgo($days = 1) {
+        $one_day_ago = date("YmdHis", time() - $days * 24 * 3600);
         $result = false;
         try {
             if ($stm = $this->db->prepare("DELETE FROM ap_conn_history WHERE log_time < :time")) {
