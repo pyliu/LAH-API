@@ -233,7 +233,7 @@ if (Vue) {
             request() {
                 //this.isBusy = true;
                 this.$http.post(CONFIG.API.JSON.STATS, {
-                    type: "stats_ap_conn_history",
+                    type: "stats_xap_conn_history",
                     ap_ip: this.ip,
                     count: parseInt(this.mins) + 1
                 }).then(res => {

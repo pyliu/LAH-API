@@ -271,7 +271,7 @@ switch ($_POST["type"]) {
             echoJSONResponse($error);
         }
         break;
-    case "stats_ap_conn_history":
+    case "stats_xap_conn_history":
         // Only XWEB AP has other site connection data
         $web_ip = System::getInstance()->getWebAPIp();
         $apHistory = new SQLiteAPConnectionHistory($web_ip);
@@ -283,7 +283,7 @@ switch ($_POST["type"]) {
             ));
         } else {
             $error = "取得跨所AP ".$_POST["ap_ip"]." 連線歷史紀錄失敗。";
-            Logger::getInstance()->error("XHR [stats_ap_conn_history] ${error}");
+            Logger::getInstance()->error("XHR [stats_xap_conn_history] ${error}");
             echoJSONResponse($error);
         }
         break;
