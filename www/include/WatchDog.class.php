@@ -345,7 +345,10 @@ class WatchDog {
             $sqlite_user = new SQLiteUser();
             $chief = $sqlite_user->getChief('登記課');
             if (empty($chief)) {
-                Logger::getInstance()->warning('找不到登記課課長帳號，無法傳送即時通知給他/她!!');
+                Logger::getInstance()->warning('找不到登記課課長帳號，改送即時通訊息到登記課頻道。');
+                // add current stats message
+                $lastId = $this->addNotification($content, 'reg', "登記課逾期案件彙總");
+                Logger::getInstance()->info('新增逾期案件通知訊息至 reg 頻道'.($lastId === false ? '失敗' : '成功').')');
             } else {
                 $this_user = $users[$chief['id']];
                 // remove outdated messages
