@@ -259,10 +259,10 @@ switch ($_POST["type"]) {
         break;
     case "stats_latest_ap_conn":
         $apHistory = new SQLiteAPConnectionHistory($_POST["ap_ip"]);
-        if (!empty($_POST["ap_ip"]) && $arr = $apHistory->getLatest($_POST["all"])) {
+        $arr = $apHistory->getLatest($_POST["all"]);
+        if ($arr !== false) {
             $count = count($arr);
             echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => $count,
                 "raw" => $arr
             ));
         } else {
