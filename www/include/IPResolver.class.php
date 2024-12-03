@@ -71,9 +71,9 @@ class IPResolver {
                 $result = $stm->execute() === FALSE ? false : true;
                 // SQLite 的設計初衷並非為了高並行寫入動作，所以我實作重試機制以減低寫入失敗的情形
                 $retry = 0;
-                while ($result === false && $retry < 5) {
+                while ($result === false && $retry < 4) {
                     // like TCP congestion retry delay ... 
-                    $zzz_us = random_int(100000, 500000) * pow(2, $retry);
+                    $zzz_us = random_int(100000, 500000) * pow(3, $retry);
                     Logger::getInstance()->warning(__METHOD__.": ".$post['ip']." 寫入 IPResolver 失敗 ".number_format($zzz_us / 1000000, 3)." 秒後重試。(".($retry + 1).")");
                     usleep($zzz_us);
                     $result = $stm->execute() === FALSE ? false : true;
