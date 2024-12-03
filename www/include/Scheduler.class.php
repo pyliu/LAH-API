@@ -116,7 +116,7 @@ class Scheduler {
         return Prefetch::removeDBFile();
     }
 
-    private function wipeAPConnectionHistoryDB() {
+    private function removeAPConnectionHistoryDB() {
         Logger::getInstance()->info(__METHOD__.": 啟動清除AP連線歷史紀錄DB排程。");
         return SQLiteAPConnectionHistory::removeDBFiles();
     }
@@ -447,7 +447,7 @@ class Scheduler {
                 // remove cached prefetch data once a day
                 $this->removePrefetchDB();
                 // remove cached AP connection history data once a day
-                $this->wipeAPConnectionHistoryDB();
+                $this->removeAPConnectionHistoryDB();
                 /**
                  * 匯入WEB DB固定資料
                  */
