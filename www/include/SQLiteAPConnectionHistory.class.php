@@ -121,7 +121,7 @@ class SQLiteAPConnectionHistory {
                             Logger::getInstance()->warning(__METHOD__.": 更新 $this->ap_ip 資料庫失敗。($log_time, $est_ip, $count)");
                             return $success;
                         }
-                        $zzz_us = random_int(100000, 500000) * pow(2, $retry);
+                        $zzz_us = random_int(300000, 500000) * pow(2, $retry);
                         ++$retry;
                         Logger::getInstance()->warning(__METHOD__.": 嘗試新增 $this->ap_ip AP 歷史資料失敗 ".number_format($zzz_us / 1000000, 3)." 秒後重試(".$retry.")。");
                         usleep($zzz_us);
