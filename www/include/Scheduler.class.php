@@ -121,8 +121,8 @@ class Scheduler {
         return SQLiteAPConnectionHistory::removeDBFiles();
     }
 
-    private function wipeOutdatedLog() {
-        Logger::getInstance()->info(__METHOD__.": 啟動清除過時記錄檔排程。");
+    private function removeOutdatedLog() {
+        Logger::getInstance()->info(__METHOD__.": 啟動刪除過時記錄檔排程。");
         // Logger::getInstance()->warning(__METHOD__.": 暫時略過清除過時記錄檔排程。");
         Logger::getInstance()->removeOutdatedLog();
     }
@@ -443,7 +443,7 @@ class Scheduler {
                  * 移除過期的監控郵件
                  */
                 $this->wipeOutdatedMonitorMail();
-                $this->wipeOutdatedLog();
+                $this->removeOutdatedLog();
                 // remove cached prefetch data once a day
                 $this->removePrefetchDB();
                 // remove cached AP connection history data once a day
