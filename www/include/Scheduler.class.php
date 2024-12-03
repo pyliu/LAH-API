@@ -118,7 +118,7 @@ class Scheduler {
 
     private function wipeAPConnectionHistoryDB() {
         Logger::getInstance()->info(__METHOD__.": 啟動清除AP連線歷史紀錄DB排程。");
-        return SQLiteAPConnectionHistory::removeDBFile();
+        return SQLiteAPConnectionHistory::removeDBFiles();
     }
 
     private function wipeOutdatedLog() {
