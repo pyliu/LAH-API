@@ -112,12 +112,12 @@ class Scheduler {
     }
 
     private function removePrefetchDB() {
-        Logger::getInstance()->info(__METHOD__.": 啟動清除 Prefetch Cache 排程。");
+        Logger::getInstance()->info(__METHOD__.": 啟動刪除 Prefetch Cache DB 排程。");
         return Prefetch::removeDBFile();
     }
 
     private function removeAPConnectionHistoryDB() {
-        Logger::getInstance()->info(__METHOD__.": 啟動清除AP連線歷史紀錄DB排程。");
+        Logger::getInstance()->info(__METHOD__.": 啟動刪除AP連線歷史紀錄DB排程。");
         return SQLiteAPConnectionHistory::removeDBFiles();
     }
 
