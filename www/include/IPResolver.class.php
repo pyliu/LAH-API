@@ -65,9 +65,9 @@ class IPResolver {
                 REPLACE INTO IPResolver ('ip', 'added_type', 'entry_type', 'entry_desc', 'entry_id', 'timestamp', 'note')
                 VALUES (:ip, :added_type, :entry_type, :entry_desc, :entry_id, :timestamp, :note)
             ");
-            $this->db->exec("BEGIN IMMEDIATE TRANSACTION");
             $result = false;
             if ($this->bindParams($stm, $post)) {
+                $this->db->exec("BEGIN IMMEDIATE TRANSACTION");
                 $result = $stm->execute() === FALSE ? false : true;
                 // SQLite 的設計初衷並非為了高並行寫入動作，所以我實作重試機制以減低寫入失敗的情形
                 $retry = 0;
@@ -79,10 +79,9 @@ class IPResolver {
                     $result = $stm->execute() === FALSE ? false : true;
                     $retry++;
                 }
+                // Execute COMMIT/ROLLBACK will end the transaction
+                $this->db->exec("COMMIT");
             }
-            
-            // Execute COMMIT/ROLLBACK will end the transaction
-            $this->db->exec("COMMIT");
             return $result;
         } catch (Exception $e) {
             $this->db->exec("ROLLBACK");
