@@ -35,6 +35,7 @@ class MOISMS {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
+		Logger::getInstance()->info(__METHOD__.': 取得 MOIADM SMSLog 資料 keyword: '.$keyword.'。 db is '.gettype($this->db_wrapper->getDB()));
 		$this->db_wrapper->getDB()->parse("
 			-- SMS Log 查詢
 			select
@@ -70,6 +71,7 @@ class MOISMS {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
+		Logger::getInstance()->info(__METHOD__.': 取得 MOIADM SMSLog 資料 BY 區間 '.$st.' ~ '.$ed.'。 db is '.gettype($this->db_wrapper->getDB()));
 		$this->db_wrapper->getDB()->parse("
 			-- SMS Log 查詢
 			select
@@ -103,6 +105,7 @@ class MOISMS {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
+		Logger::getInstance()->info(__METHOD__.': 取得 SMS98 LOG_SMS 資料 keyword: '.$keyword.'。 db is '.gettype($this->db_wrapper->getDB()));
 		$this->db_wrapper->getDB()->parse("
 			-- LOG_SMS 查詢
 			select
@@ -138,6 +141,7 @@ class MOISMS {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
+		Logger::getInstance()->info(__METHOD__.': 取得 SMS98 LOG_SMS 資料 BY 區間 '.$st.' ~ '.$ed.'。 db is '.gettype($this->db_wrapper->getDB()));
 		$this->db_wrapper->getDB()->parse("
 			-- LOG_SMS 查詢
 			select
@@ -171,6 +175,7 @@ class MOISMS {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
+		Logger::getInstance()->info(__METHOD__.': 取得 MOICAS SMS_MA04 資料 keyword: '.$keyword.'。 db is '.gettype($this->db_wrapper->getDB()));
 		$this->db_wrapper->getDB()->parse("
 			-- SMS_MA04 查詢
 			select
@@ -206,6 +211,7 @@ class MOISMS {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
+		Logger::getInstance()->info(__METHOD__.': 取得 MOICAS SMS_MA04 資料 BY 區間 '.$st.' ~ '.$ed.'。 db is '.gettype($this->db_wrapper->getDB()));
 		$this->db_wrapper->getDB()->parse("
 			-- SMS_MA04 查詢
 			select
@@ -239,6 +245,7 @@ class MOISMS {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
+		Logger::getInstance()->info(__METHOD__.': 取得 MOICAS SMS_MA05 資料 keyword: '.$keyword.'。 db is '.gettype($this->db_wrapper->getDB()));
 		$this->db_wrapper->getDB()->parse("
 			-- SMS_MA05 查詢
 			select
@@ -274,6 +281,7 @@ class MOISMS {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
+		Logger::getInstance()->info(__METHOD__.': 取得 MOICAS SMS_MA05 資料 BY 區間 '.$st.' ~ '.$ed.'。 db is '.gettype($this->db_wrapper->getDB()));
 		$this->db_wrapper->getDB()->parse("
 			-- SMS_MA05 查詢
 			select
