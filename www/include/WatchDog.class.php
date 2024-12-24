@@ -561,7 +561,7 @@ class WatchDog {
             }
             // remove outdated messages
             $notification->removeOutdatedMessageByTitle($to_id, '您的已逾期測量案件統計');
-            $lastId = $this->addNotification($content, $to_id, "您的已逾期測量案件統計");
+            $lastId = $this->addNotification($content, $to_id, "您的已逾期測量案件統計", true);
         }
     }
 
