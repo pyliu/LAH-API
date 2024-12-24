@@ -554,6 +554,10 @@ class WatchDog {
                 Logger::getInstance()->info('新增逾期測量案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
             }
         } else {
+            if (empty($to_id)) {
+                $to_id = 'sur';
+                $content = "🚩 ".$this->date."  ".$this->time." 測量課目前有 ".count($cases)." 件逾期案件(無指定測量員)".(count($cases) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
+            }
             // remove outdated messages
             $notification->removeOutdatedMessageByTitle($to_id, '您的已逾期測量案件統計');
             $lastId = $this->addNotification($content, $to_id, "您的已逾期測量案件統計");
