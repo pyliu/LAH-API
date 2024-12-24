@@ -134,10 +134,10 @@ class WatchDog {
         // 85500 = 86400 - 15 * 60 (one day - 15 mins)
         $sn = $msg->sysSend($title, $content, $to_id, $timeout);
         if ($sn == -1) {
-            Logger::getInstance()->warning("HB: ${title} 訊息無法送出給 ${to_id}。($to_name, $sn)");
+            Logger::getInstance()->warning("HB: $title 訊息無法送出給 $to_id 。($to_name, $sn)");
             Logger::getInstance()->info($content);
         } else {
-            Logger::getInstance()->info("HB: ${title} 訊息(${sn})已送出給 ${to_id}。($to_name)");
+            Logger::getInstance()->info("HB: $title 訊息($sn)已送出給 $to_id 。($to_name)");
         }
         return $sn;
     }
@@ -249,7 +249,7 @@ class WatchDog {
             unset($all[$remove_idx]);
             foreach ($all as $site) {
                 // check val case missing SS99~SS101 data
-                Logger::getInstance()->info("開始 ${site} 管轄地價案件跨所註記遺失檢查 ... ");
+                Logger::getInstance()->info("開始 $site 管轄地價案件跨所註記遺失檢查 ... ");
                 $rows = $lxhweb->getMissingXNoteXValCases($site);
                 if (count($rows) > 0) {
                     $case_ids = [];
@@ -259,11 +259,11 @@ class WatchDog {
                     }
                     
                     $site_name = System::getInstance()->getSiteName($site);
-                    $content = "🚩 ".$this->date."  ".$this->time." 地政系統同步異動資料庫(L3HWEB, MOIPRC.PSCRN Table)找到下列「跨所地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫「跨所問題處理單」通知管轄所「${site_name}」修正。";
+                    $content = "🚩 ".$this->date."  ".$this->time." 地政系統同步異動資料庫(L3HWEB, MOIPRC.PSCRN Table)找到下列「跨所地價案件」跨所註記遺失:<br/><br/>".implode(" <br/> ", $case_ids)."<br/><br/>請填寫「跨所問題處理單」通知管轄所「 $site_name 」修正。";
                     $sqlite_user = new SQLiteUser();
                     $admins = $sqlite_user->getAdmins();
                     foreach ($admins as $admin) {
-                        $lastId = $this->addNotification($content, $admin['id'], "${site} 管轄地價案件跨所註記遺失檢查結果");
+                        $lastId = $this->addNotification($content, $admin['id'], "$site 管轄地價案件跨所註記遺失檢查結果");
                         Logger::getInstance()->info('新增「跨所地價案件」跨所註記遺失通知訊息至 '.$admin['id'].' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
                     }
                     
@@ -273,7 +273,7 @@ class WatchDog {
                         "note" => $content
                     ));
                 }
-                Logger::getInstance()->info("${site} 管轄地價案件跨所註記遺失檢查完成。");
+                Logger::getInstance()->info("$site 管轄地價案件跨所註記遺失檢查完成。");
             }
         }
     }
@@ -382,7 +382,7 @@ class WatchDog {
             foreach ($rows as $row) {
                 $case_id = $row['RM01'].'-'.$row['RM02'].'-'.$row['RM03'];
                 // combine link to smart control system
-                $this_msg = "[${case_id}](${query_url_base}?id=${case_id})".' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']) ?? ($users[$row['RM96']] ?? $row['RM96']);
+                $this_msg = "[$case_id]($query_url_base?id=$case_id)".' '.REG_REASON[$row['RM09']].' '.($users[$row['RM45']] ?? $row['RM45']) ?? ($users[$row['RM96']] ?? $row['RM96']);
                 // fall back to RM96(收件人員) if RM45(初審) is not presented
                 $case_records[$row['RM45'] ?? $row['RM96']][] = $this_msg;
                 $case_records["ALL"][] = $this_msg;
@@ -441,7 +441,7 @@ class WatchDog {
             $case_records = [];
             foreach ($rows as $row) {
                 $case_id = $row['MM01'].'-'.$row['MM02'].'-'.$row['MM03'];
-                $this_msg = "[${case_id}](${query_url_base})".' '.$row['MM06_CHT'].' '.$row['MD04_CHT'];
+                $this_msg = "[$case_id]($query_url_base)".' '.$row['MM06_CHT'].' '.$row['MD04_CHT'];
                 $case_records[$row['MD04']][] = $this_msg;
                 $case_records["ALL"][] = $this_msg;
             }
@@ -472,7 +472,7 @@ class WatchDog {
         $notification = new Notification();
         $url = "http://".$this->host_ip.":8080/sur/expire";
         $displayName = $to_id === "ALL" ? "測量課" : "您";
-        $content = "⚠️ ".$this->date."  ".$this->time." ${displayName}目前有 ".count($cases)." 件即將逾期案件(未來3天".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
+        $content = "⚠️ ".$this->date."  ".$this->time." $displayName 目前有 ".count($cases)." 件即將逾期案件(未來3天".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量案件查詢頁面]($url)</b> 查看詳細資料。";
         if ($to_id === "ALL") {
             $sqlite_user = new SQLiteUser();
             $chief = $sqlite_user->getChief('測量課');
@@ -508,7 +508,7 @@ class WatchDog {
             $case_records = [];
             foreach ($rows as $row) {
                 $case_id = $row['MM01'].'-'.$row['MM02'].'-'.$row['MM03'];
-                $this_msg = "[${case_id}](${query_url_base})".' '.$row['MM06_CHT'].' '.$row['MD04_CHT'];
+                $this_msg = "[$case_id]($query_url_base)".' '.$row['MM06_CHT'].' '.$row['MD04_CHT'];
                 $case_records[$row['MD04']][] = $this_msg;
                 $case_records["ALL"][] = $this_msg;
             }
@@ -539,7 +539,7 @@ class WatchDog {
         $users = $cache->getUserNames();
         $url = "http://".$this->host_ip.":8080/sur/expire";
         $displayName = $to_id === "ALL" ? "測量課" : "您";
-        $content = "🚩 ".$this->date."  ".$this->time." ${displayName}目前有 ".count($cases)." 件逾期案件".(count($cases) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
+        $content = "🚩 ".$this->date."  ".$this->time." $displayName 目前有 ".count($cases)." 件逾期案件".(count($cases) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量案件查詢頁面]($url)</b> 查看詳細資料。";
         if ($to_id === "ALL") {
             $sqlite_user = new SQLiteUser();
             $chief = $sqlite_user->getChief('測量課');
@@ -557,7 +557,7 @@ class WatchDog {
             if (empty($to_id)) {
                 Logger::getInstance()->warning('$to_id為空值不知道是誰的案件，故傳送到測量課頻道。');
                 $to_id = 'sur';
-                $content = "🚩 ".$this->date."  ".$this->time." 測量課目前有 ".count($cases)." 件逾期案件(無指定測量員)".(count($cases) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量案件查詢頁面](${url})</b> 查看詳細資料。";
+                $content = "🚩 ".$this->date."  ".$this->time." 測量課目前有 ".count($cases)." 件逾期案件(無指定測量員)".(count($cases) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量案件查詢頁面]($url)</b> 查看詳細資料。";
             }
             // remove outdated messages
             $notification->removeOutdatedMessageByTitle($to_id, '您的已逾期測量案件統計');
@@ -624,14 +624,14 @@ class WatchDog {
         $to_name = $user['name'];
         $AMPM = date('A');
         $msg = new Message();
-        $url = "http://".$this->host_ip."/temperature.html?id=${to_id}";
-        $content = "$to_name 您好\r\n\r\n系統偵測您於今日 $AMPM 尚未登記體溫！\r\n\r\n請用 CHROME 瀏覽器前往 ${url} 進行登記。";
+        $url = "http://".$this->host_ip."/temperature.html?id=$to_id";
+        $content = "$to_name 您好\r\n\r\n系統偵測您於今日 $AMPM 尚未登記體溫！\r\n\r\n請用 CHROME 瀏覽器前往 $url 進行登記。";
         $title = "體溫登記通知";
         $sn = $msg->sysSend($title, $content, $to_id, 840); // 14 mins == 840 secs
         if ($sn == -1) {
-            Logger::getInstance()->warning("${title} 訊息無法送出給 ${to_id}。($to_name, $sn)");
+            Logger::getInstance()->warning("$title 訊息無法送出給 $to_id。($to_name, $sn)");
         } else {
-            Logger::getInstance()->info("${title} 訊息(${sn})已送出給 ${to_id}。($to_name)");
+            Logger::getInstance()->info("$title 訊息($sn)已送出給 $to_id 。($to_name)");
         }
     }
 
@@ -664,13 +664,13 @@ class WatchDog {
             $to_id = trim($result['MD04']); // 測量員ID
             $this_user = $users[$to_id];
             if (!empty($this_user)) {
-                $title = "有問題的延期複丈案件(${this_user})通知";
+                $title = "有問題的延期複丈案件($this_user)通知";
                 $msg_content = $msg_prefix.$case_id."\r\n\r\n請確認該案件狀態以免案件逾期。\r\n如有需要請填寫「電腦問題處理單」交由資訊課協助修正。";
                 $sn = $msg->sysSend($title, $msg_content, $to_id, 85500);   // 85500 = 86400 - 15 * 60 (one day - 15 mins)
                 if ($sn == -1) {
-                    Logger::getInstance()->warning("「${title}」訊息無法送出給 ${to_id} 。 (".$this_user.", $sn)");
+                    Logger::getInstance()->warning("「 $title 」訊息無法送出給 $to_id 。 (".$this_user.", $sn)");
                 } else {
-                    Logger::getInstance()->info("「${title}」訊息(${sn})已送出給 ${to_id} 。 (".$this_user.")");
+                    Logger::getInstance()->info("「 $title 」訊息($sn)已送出給 $to_id 。 (".$this_user.")");
                 }
             }
         }
@@ -683,7 +683,7 @@ class WatchDog {
                 continue;
             }
             $sn = $msg->send('複丈問題案件通知', $content, $adm_ip, 840);   // 840 secs => +14 mins
-            Logger::getInstance()->info("訊息已送出(${sn})給 ${adm_ip}");
+            Logger::getInstance()->info("訊息已送出($sn)給 $adm_ip");
         }
 
         $this->stats->addBadSurCaseStats(array(
