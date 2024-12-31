@@ -22,9 +22,9 @@ class FileAPIDataExportCommand extends FileAPICommand {
     );
 
     private function export($data, $print_count = true) {
-
         global $today;  // from init.php
-        $flat_section = 'HB'.implode('_HB', $this->sections);
+        $site = System::getInstance()->getSiteCode();
+        $flat_section = $site.implode('_'.$site, $this->sections);
         $output_name = $today.'_'.$this->code.'_'.$flat_section.'_'.$this->name_map[$this->code].'.txt';
         // set this session to let export_txt_data.php know the file has been created.
         $_SESSION[$this->code] = $output_name;
