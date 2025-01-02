@@ -165,4 +165,20 @@ class MOICAD
 		$raw = $this->getInheritanceRestrictionRecords();
 		return $this->calcDeadlineByGG30_2($raw);
 	}
+	/**
+	 * 登記原因代碼檔統計項目代碼資料 給 REGA 用
+	 */
+	public function getRCODA() {
+		
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		$this->db_wrapper->getDB()->parse("
+			select * from MOICAD.RCODA t
+			left join MOIADM.RKEYN s on s.kcde_1 = '06' and s.kcde_2 = t.cod06
+			order by t.item
+		");
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
 }
