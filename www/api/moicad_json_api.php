@@ -21,6 +21,19 @@ switch ($_POST["type"]) {
 			"raw" => $rows
 		));
 		break;
+	case "rega":
+		Logger::getInstance()->info("XHR [rega] get REGA record request.");
+		$st = $_POST['st'];
+		$ed = $_POST['ed'];
+		$rows = $mock ? $cache->get('moicad_rega') : $moicad->getREGA($st, $ed);
+		$cache->set('moicad_rega', $rows);
+		$message = is_array($rows) ? "$st ~ $ed 查到 MOICAD.REGA 裡有 ".count($rows)." 筆資料" : '查詢 MOICAD.REGA 失敗';
+		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
+		Logger::getInstance()->info("XHR [rega] $message");
+		echoJSONResponse($message, $status_code, array(
+			"raw" => $rows
+		));
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

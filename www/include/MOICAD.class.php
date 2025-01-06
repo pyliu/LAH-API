@@ -181,4 +181,21 @@ class MOICAD
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
+	/**
+	 * 統計資料 BY 日期區間
+	 */
+	public function getREGA($st, $ed) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		$this->db_wrapper->getDB()->parse("
+			select * from MOICAD.REGA t
+			where ra40 between :bv_st and :bv_ed
+			order by ITEM, ra40
+		");
+		$this->db_wrapper->getDB()->bind(":bv_st", $st);
+		$this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
 }
