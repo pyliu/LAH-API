@@ -462,6 +462,23 @@ class SQLiteDBFactory {
         return $db_path;
     }
 
+    public static function getAdminActionLogDB() {
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR."admin_action_log.db";
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "admin_action_log" (
+                "id"	INTEGER,
+                "ip"	TEXT(15) NOT NULL,
+                "path"	TEXT(100),
+                "params"	TEXT,
+                "note"	TEXT,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        return $db_path;
+    }
+
     private function __construct() {}
 
     function __destruct() {}
