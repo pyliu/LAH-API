@@ -65,13 +65,13 @@ class Logger {
 
         //Create log file if it doesn't exist.
         if(!file_exists($log_file)){               
-            fopen($log_file, 'w') or exit("無法建立 ${log_file}！");
+            fopen($log_file, 'w') or exit("無法建立 $log_file ！");
         }
 
         //Check permissions of file.
         if(!is_writable($log_file)){   
             //throw exception if not writable
-            throw new Exception("ERROR: 無法寫入檔案 ${log_file}", 1);
+            throw new Exception("ERROR: 無法寫入檔案 $log_file", 1);
         }
     }
 
@@ -102,7 +102,7 @@ class Logger {
         $log_path = $this->log_dir.DIRECTORY_SEPARATOR.$log_file;
 
         if (!file_exists($log_path)) {
-            $this->error("log file doesn't exists! 【${log_path}】");
+            $this->error("log file doesn't exists! 【 $log_path 】");
             return false;
         }
 
