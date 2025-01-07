@@ -25,8 +25,21 @@ switch ($_POST["type"]) {
 		Logger::getInstance()->info("XHR [rega] get REGA record request.");
 		$st = $_POST['st'];
 		$ed = $_POST['ed'];
-		$rows = $mock ? $cache->get('moicad_rega') : $moicad->getREGA($st, $ed);
-		$cache->set('moicad_rega', $rows);
+		$reload = $_POST['reload'] === 'true';
+		// Logger::getInstance()->info("XHR [rega] reload flag $reload");
+		$cache_key = 'moicad_rega'.$st.$ed;
+		if ($reload && !$mock) {
+			// Logger::getInstance()->info("XHR [rega] RELOAD!");
+			$rows = $moicad->getREGA($st, $ed);
+		} else {
+			// Logger::getInstance()->info("XHR [rega] CACHED!");
+			$rows = $cache->get($cache_key);
+			if ($cache->isExpired($cache_key) && !$mock) {
+				// Logger::getInstance()->info("XHR [rega] Refresh CACHE!");
+				$rows = $moicad->getREGA($st, $ed);
+			}
+		}
+		$cache->set($cache_key, $rows);
 		$message = is_array($rows) ? "$st ~ $ed 查到 MOICAD.REGA 裡有 ".count($rows)." 筆資料" : '查詢 MOICAD.REGA 失敗';
 		$status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
 		Logger::getInstance()->info("XHR [rega] $message");
