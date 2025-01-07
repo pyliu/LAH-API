@@ -61,7 +61,7 @@ class Logger {
             $log_file = $this->log_dir.DIRECTORY_SEPARATOR.'log-'.date('Y-m-d').'.log';
         }
         $this->log_file = $log_file;
-        $this->params = array_merge($this->options, $params);
+        $this->options = array_merge($this->options, $params);
 
         //Create log file if it doesn't exist.
         if(!file_exists($log_file)){               
@@ -187,7 +187,7 @@ class Logger {
         $path = ($_SERVER["SERVER_NAME"] ?? getLocalhostIP()) . ($_SERVER["REQUEST_URI"] ?? '/CLI');
 
         //Grab time - based on timezone in php.ini
-        $time = date($this->params['dateFormat']);
+        $time = date($this->options['dateFormat']);
         // Write time, url, & message to end of file
         fwrite($this->file, "[$time] [$path] : [$severity] - $message [$client_ip]" . PHP_EOL);
     }
