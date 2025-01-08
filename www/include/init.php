@@ -12,7 +12,6 @@ set_time_limit(0);
 
 require_once("GlobalConstants.inc.php");
 require_once("GlobalFunctions.inc.php");
-require_once("Logger.class.php");
 
 $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $_SERVER["REMOTE_ADDR"] ?? getLocalhostIP();
 
