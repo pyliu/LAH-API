@@ -1,7 +1,4 @@
 <?php
-require_once('Logger.class.php');
-// require_once("SQLiteAdminActionLog.class.php");
-
 abstract class STATUS_CODE {
     const SUCCESS_WITH_NO_RECORD = 3;
     const SUCCESS_WITH_MULTIPLE_RECORDS = 2;
@@ -77,6 +74,12 @@ define('VAL_NOTE', [
     "F" => "異動完成",
     "G" => "異動有誤"
 ]);
+
+/**
+ * include global used classes here
+ */
+require_once('Logger.class.php');
+// require_once("SQLiteAdminActionLog.class.php");
 
 require_once('SQLiteRKEYNALL.class.php');
 $srkeynall = new SQLiteRKEYNALL();

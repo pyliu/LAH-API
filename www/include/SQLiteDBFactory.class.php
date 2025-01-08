@@ -470,8 +470,9 @@ class SQLiteDBFactory {
             CREATE TABLE IF NOT EXISTS "admin_action_log" (
                 "id"	INTEGER,
                 "ip"	TEXT(15) NOT NULL,
+                "timestamp"	INTEGER NOT NULL,
+                "action"	TEXT(100),
                 "path"	TEXT(100),
-                "params"	TEXT,
                 "note"	TEXT,
                 PRIMARY KEY("id" AUTOINCREMENT)
             )
@@ -480,7 +481,7 @@ class SQLiteDBFactory {
     }
 
     private function __construct() {}
-
+    // private because of singleton
+    private function __clone() { }
     function __destruct() {}
-
 }
