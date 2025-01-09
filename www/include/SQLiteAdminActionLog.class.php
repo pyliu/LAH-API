@@ -15,16 +15,23 @@ class SQLiteAdminActionLog {
     private $db;
 
     private function bindParams(&$stm, &$row) {
-        try {
-            Logger::getInstance()->info(__CLASS__.'::'.__METHOD__.': '.print_r($row, true));
-            $stm->bindParam(':ip', $row['ip']);
-            $stm->bindParam(':action', $row['action']);
-            $stm->bindParam(':path', $row['path']);
-            $stm->bindParam(':note', $row['note']);
-            $stm->bindValue(':timestamp', time());
-        } catch (Exception $ex) {
-            Logger::getInstance()->error(__CLASS__.'::'.__METHOD__.": ".$ex->getMessage());
+        if ($stm === false) {
+            Logger::getInstance()->error(__METHOD__.": \$stm is false, can not bind parameters.");
+            Logger::getInstance()->warning(__METHOD__.": ".print_r($row, true));
+        } else {
+            try {
+                Logger::getInstance()->info(__CLASS__.'::'.__METHOD__.': '.print_r($row, true));
+                $stm->bindParam(':ip', $row['ip']);
+                $stm->bindParam(':action', $row['action']);
+                $stm->bindParam(':path', $row['path']);
+                $stm->bindParam(':note', $row['note']);
+                $stm->bindValue(':timestamp', time());
+                return true;
+            } catch (Exception $ex) {
+                Logger::getInstance()->error(__CLASS__.'::'.__METHOD__.": ".$ex->getMessage());
+            }
         }
+        return false;
     }
 
     private function prepareArray(&$stmt) {
