@@ -50,11 +50,11 @@ class SQLiteMonitorMail {
 
     public function replace(&$row) {
         try {
+            $this->db->exec("BEGIN IMMEDIATE TRANSACTION");
             $stm = $this->db->prepare("
                 REPLACE INTO mail ('id', 'sender', 'receiver', 'subject', 'message', 'timestamp', 'mailbox')
                 VALUES (:id, :from, :to, :subject, :message, :timestamp, :mailbox)
             ");
-            $this->db->exec("BEGIN IMMEDIATE TRANSACTION");
             $this->bindParams($stm, $row);
             $result = $stm->execute() === FALSE ? false : true;
             // Execute COMMIT/ROLLBACK will end the transaction
@@ -163,20 +163,19 @@ class SQLiteMonitorMail {
      * 移除區間外郵件(default is one month)
      */
     public function removeOutdatedMail($seconds_before = 30 * 24 * 60 * 60) {
+        $this->db->exec("BEGIN IMMEDIATE TRANSACTION");
         $ts = time() - intval($seconds_before);
         $sql = "DELETE FROM mail WHERE timestamp <= :ts";
-        if ($stmt = $this->db->prepare($sql)) {
-            try {
-                $this->db->exec("BEGIN IMMEDIATE TRANSACTION");
+        try {
+            if ($stmt = $this->db->prepare($sql)) {
                 $stmt->bindParam(":ts", $ts);
                 $result = $stmt->execute() === FALSE ? false : true;
                 $this->db->exec("COMMIT");
                 return $result;
-            } catch (Exception $e) {
-                $this->db->exec("ROLLBACK");
-                Logger::getInstance()->error(__METHOD__.': '.$e->getMessage());
             }
-            return false;
+        } catch (Exception $e) {
+            $this->db->exec("ROLLBACK");
+            Logger::getInstance()->error(__METHOD__.': '.$e->getMessage());
         }
         Logger::getInstance()->warning(__METHOD__.": 無法執行 「".$sql."」 SQL描述。");
         return false;

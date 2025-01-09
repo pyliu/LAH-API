@@ -125,7 +125,7 @@ class SQLiteAPConnectionHistory {
                         ++$retry;
                         Logger::getInstance()->warning(__METHOD__.": 嘗試新增 $this->ap_ip AP 歷史資料失敗 ".number_format($zzz_us / 1000000, 3)." 秒後重試(".$retry.")。");
                         usleep($zzz_us);
-                        $this->db->exec("BEGIN IMMEDIATE TRANSACTION");
+                        $this->beginImmediateTransaction();
                     }
                     $this->commit();
                     $success++;

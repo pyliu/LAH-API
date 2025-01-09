@@ -36,21 +36,20 @@ class StatsSQLite {
     public function instTotal($id, $name, $total = 0) {
         $result = false;
         try {
+            $this->beginImmediateTransation();
             if ($stm = $this->db->prepare("INSERT INTO stats ('ID', 'NAME', 'TOTAL') VALUES (:id, :name, :total)")) {
                 //$stm = $this->db->prepare("INSERT INTO stats set TOTAL = :total WHERE  ID = :id");
                 $stm->bindValue(':total', intval($total));
                 $stm->bindParam(':id', $id);
                 $stm->bindParam(':name', $name);
-                $this->beginImmediateTransation();
                 $result = $stm->execute() === FALSE ? false : true;
                 $this->commit();
                 return $result;
             }
         } catch (Exception $ex) {
             Logger::getInstance()->warning(__METHOD__.": ".$ex->getMessage());
-            $this->rollback();
-            return $result;
         }
+        $this->rollback();
         Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO stats ('ID', 'NAME', 'TOTAL') VALUES (:id, :name, :total) ] 失敗。($id, $name, $total)");
         return $result;
     }
@@ -64,19 +63,18 @@ class StatsSQLite {
     public function updateTotal($id, $total) {
         $result = false;
         try {
+            $this->beginImmediateTransation();
             if ($stm = $this->db->prepare("UPDATE stats set TOTAL = :total WHERE  ID = :id")) {
                 $stm->bindValue(':total', intval($total));
                 $stm->bindParam(':id', $id);
-                $this->beginImmediateTransation();
                 $result = $stm->execute() === FALSE ? false : true;
                 $this->commit();
                 return $result;
             }
         } catch (Exception $ex) {
             Logger::getInstance()->warning(__METHOD__.": ".$ex->getMessage());
-            $this->rollback();
-            return $result;
         }
+        $this->rollback();
         Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ UPDATE stats set TOTAL = :total WHERE  ID = :id ] 失敗。($id, $total)");
         return $result;
         
@@ -105,12 +103,12 @@ class StatsSQLite {
         // overdue_stats_detail
         $result = false;
         try {
+            $this->beginImmediateTransation();
             if ($stm = $this->db->prepare("INSERT INTO overdue_stats_detail (datetime,id,count,note) VALUES (:date, :id, :count, :note)")) {
                 $stm->bindParam(':date', $data["DATETIME"]);
                 $stm->bindParam(':id', $data["ID"]);
                 $stm->bindValue(':count', count($data["RECORDS"]));
                 $stm->bindParam(':note', $data["NOTE"]);
-                $this->beginImmediateTransation();
                 $result = $stm->execute();
                 $this->commit();
                 if (!$result) {
@@ -120,9 +118,8 @@ class StatsSQLite {
             }
         } catch (Exception $ex) {
             Logger::getInstance()->warning(__METHOD__.": ".$ex->getMessage());
-            $this->rollback();
-            return $result;
         }
+        $this->rollback();
         Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO overdue_stats_detail (datetime,id,count,note) VALUES (:date, :id, :count, :note) ] 失敗。(".print_r($data, true).")");
         return $result;
     }
@@ -132,11 +129,11 @@ class StatsSQLite {
         // xcase_stats
         $result = false;
         try {
+            $this->beginImmediateTransation();
             if ($stm = $this->db->prepare("INSERT INTO xcase_stats (datetime,found,note) VALUES (:date, :found, :note)")) {
                 $stm->bindParam(':date', $data["date"]);
                 $stm->bindParam(':found', $data["found"]);
                 $stm->bindParam(':note', $data["note"]);
-                $this->beginImmediateTransation();
                 $result = $stm->execute();
                 $this->commit();
                 Logger::getInstance()->info(__METHOD__.": 新增跨所註記遺失案件統計".($result ? "成功" : "失敗【".$stm->getSQL()."】")."。");
@@ -148,9 +145,8 @@ class StatsSQLite {
             }
         } catch (Exception $ex) {
             Logger::getInstance()->warning(__METHOD__.": ".$ex->getMessage());
-            $this->rollback();
-            return $result;
         }
+        $this->rollback();
         Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO xcase_stats (datetime,found,note) VALUES (:date, :found, :note) ] 失敗。(".print_r($data, true).")");
         return $result;
     }
@@ -160,11 +156,11 @@ class StatsSQLite {
         // xcase_stats
         $result = false;
         try {
+            $this->beginImmediateTransation();
             if ($stm = $this->db->prepare("INSERT INTO found_bad_sur_case_stats (datetime,found,note) VALUES (:date, :found, :note)")) {
                 $stm->bindParam(':date', $data["date"]);
                 $stm->bindParam(':found', $data["found"]);
                 $stm->bindParam(':note', $data["note"]);
-                $this->beginImmediateTransation();
                 $result = $stm->execute();
                 $this->commit();
                 Logger::getInstance()->info(__METHOD__.": 新增複丈問題案件統計".($result ? "成功" : "失敗【".$stm->getSQL()."】")."。");
@@ -176,9 +172,8 @@ class StatsSQLite {
             }
         } catch (Exception $ex) {
             Logger::getInstance()->warning(__METHOD__.": ".$ex->getMessage());
-            $this->rollback();
-            return $result;
         }
+        $this->rollback();
         Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO found_bad_sur_case_stats (datetime,found,note) VALUES (:date, :found, :note) ] 失敗。(".print_r($data, true).")");
         return $result;
     }
@@ -188,11 +183,11 @@ class StatsSQLite {
         // overdue_stats_detail
         $result = false;
         try {
+            $this->beginImmediateTransation();
             if ($stm = $this->db->prepare("INSERT INTO stats_raw_data (id,data) VALUES (:id, :data)")) {
                 $param = serialize($data);
                 $stm->bindParam(':data', $param);
                 $stm->bindParam(':id', $id);
-                $this->beginImmediateTransation();
                 $result = $stm->execute();
                 $this->commit();
                 if (!$result) {
@@ -202,9 +197,8 @@ class StatsSQLite {
             }
         } catch (Exception $ex) {
             Logger::getInstance()->warning(__METHOD__.": ".$ex->getMessage());
-            $this->rollback();
-            return $result;
         }
+        $this->rollback();
         Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ INSERT INTO stats_raw_data (id,data) VALUES (:id, :data) ] 失敗。($id, ".print_r($data, true).")");
         return $result;
     }
@@ -212,8 +206,8 @@ class StatsSQLite {
     public function removeAllStatsRawData($year_month) {
         $result = false;
         try {
+            $this->beginImmediateTransation();
             if ($stm = $this->db->prepare("DELETE FROM stats_raw_data WHERE id LIKE '%_".$year_month."'")) {
-                $this->beginImmediateTransation();
                 $result = $stm->execute();
                 $this->commit();
                 if (!$result) {
@@ -223,9 +217,8 @@ class StatsSQLite {
             }
         } catch (Exception $ex) {
             Logger::getInstance()->warning(__METHOD__.": ".$ex->getMessage());
-            $this->rollback();
-            return $result;
         }
+        $this->rollback();
         Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM stats_raw_data WHERE id LIKE '%_".$year_month."' ] 失敗。($year_month)");
         return $result;
     }
@@ -235,9 +228,9 @@ class StatsSQLite {
         // overdue_stats_detail
         $result = false;
         try {
+            $this->beginImmediateTransation();
             if ($stm = $this->db->prepare("DELETE FROM stats_raw_data WHERE id = :id")) {
                 $stm->bindParam(':id', $id);
-                $this->beginImmediateTransation();
                 $result = $stm->execute();
                 $this->commit();
                 if (!$result) {
@@ -247,9 +240,8 @@ class StatsSQLite {
             }
         } catch (Exception $ex) {
             Logger::getInstance()->warning(__METHOD__.": ".$ex->getMessage());
-            $this->rollback();
-            return $result;
         }
+        $this->rollback();
         Logger::getInstance()->warning(__METHOD__.": 準備資料庫 statement [ DELETE FROM stats_raw_data WHERE id = :id ] 失敗。($id)");
         return $result;
     }
