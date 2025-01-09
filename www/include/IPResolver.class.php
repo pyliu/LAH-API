@@ -9,29 +9,33 @@ class IPResolver {
 
     private function bindParams(&$stm, &$row) {
         if ($stm === false) {
-            Logger::getInstance()->error(__METHOD__.": bindUserParams because of \$stm is false.");
-            return false;
+            Logger::getInstance()->error(__METHOD__.": \$stm is false, can not bind parameters.");
+            Logger::getInstance()->warning(__METHOD__.": ".print_r($row, true));
+        } else {
+            try {
+                $stm->bindParam(':ip', $row['ip']);
+                $stm->bindParam(':added_type', $row['added_type']);
+                $stm->bindParam(':entry_type', $row['entry_type']);
+                $stm->bindParam(':entry_desc', $row['entry_desc']);
+                $stm->bindParam(':entry_id' , $row['entry_id']);
+                $stm->bindParam(':timestamp', $row['timestamp']);
+                $stm->bindParam(':note', $row['note']);
+                // for update
+                if (!empty($row['orig_ip'])) {
+                    $stm->bindParam(':orig_ip', $row['orig_ip']);
+                }
+                if (!empty($row['orig_added_type'])) {
+                    $stm->bindParam(':orig_added_type', $row['orig_added_type']);
+                }
+                if (!empty($row['orig_entry_type'])) {
+                    $stm->bindParam(':orig_entry_type', $row['orig_entry_type']);
+                }
+                return true;
+            } catch (Exception $ex) {
+                Logger::getInstance()->error(__CLASS__.'::'.__METHOD__.": ".$ex->getMessage());
+            }
         }
-
-        $stm->bindParam(':ip', $row['ip']);
-        $stm->bindParam(':added_type', $row['added_type']);
-        $stm->bindParam(':entry_type', $row['entry_type']);
-        $stm->bindParam(':entry_desc', $row['entry_desc']);
-        $stm->bindParam(':entry_id' , $row['entry_id']);
-        $stm->bindParam(':timestamp', $row['timestamp']);
-        $stm->bindParam(':note', $row['note']);
-        // for update
-        if (!empty($row['orig_ip'])) {
-            $stm->bindParam(':orig_ip', $row['orig_ip']);
-        }
-        if (!empty($row['orig_added_type'])) {
-            $stm->bindParam(':orig_added_type', $row['orig_added_type']);
-        }
-        if (!empty($row['orig_entry_type'])) {
-            $stm->bindParam(':orig_entry_type', $row['orig_entry_type']);
-        }
-
-        return true;
+        return false;
     }
 
     private function prepareArray(&$stmt) {
