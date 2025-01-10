@@ -79,7 +79,7 @@ define('VAL_NOTE', [
  * include global used classes here
  */
 require_once('Logger.class.php');
-// require_once("SQLiteAdminActionLog.class.php");
+require_once("SQLiteAdminActionLog.class.php");
 
 require_once('SQLiteRKEYNALL.class.php');
 $srkeynall = new SQLiteRKEYNALL();

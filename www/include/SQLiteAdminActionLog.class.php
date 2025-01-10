@@ -78,8 +78,13 @@ class SQLiteAdminActionLog {
     }
 
     public function clean() {
-        $stm = $this->db->prepare("DELETE FROM admin_action_log");
-        return $stm->execute() === FALSE ? false : true;
+        try {
+            $stm = $this->db->prepare("DELETE FROM admin_action_log");
+            return $stm->execute() === FALSE ? false : true;
+        } catch (Exception $ex) {
+            Logger::getInstance()->error(__CLASS__.'::'.__METHOD__.": ".$ex->getMessage());
+        }
+        return false;
     }
 
     public function replace(&$row) {
@@ -112,5 +117,6 @@ class SQLiteAdminActionLog {
         } catch (Exception $ex) {
             Logger::getInstance()->error(__CLASS__.'::'.__METHOD__.": ".$ex->getMessage());
         }
+        return array();
     }
 }
