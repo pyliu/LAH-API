@@ -1582,12 +1582,12 @@ class Query {
 		}
 
 		if (empty($id) || empty($table) || empty($column) || (empty($val) && $val !== '0' && $val !=='')) {
-			Logger::getInstance()->error(__METHOD__."：輸入參數不能為空白【${id}, ${table}, ${column}, ${val}】");
+			Logger::getInstance()->error(__METHOD__."：輸入參數不能為空白【 $id, $table, $column, $val 】");
 			return false;
 		}
 
 		if (!$this->checkCaseID($id)) {
-			Logger::getInstance()->error(__METHOD__."：ID格式不正確【應為13碼，目前：${id}】");
+			Logger::getInstance()->error(__METHOD__."：ID格式不正確【應為13碼，目前： $id 】");
 			return false;
 		}
 
@@ -1599,20 +1599,26 @@ class Query {
 		$code = substr($id, 3, 4);
 		$num = substr($id, 7, 6);
 
-		$sql = "UPDATE ${table} SET ${column} = :bv_val WHERE ${year_col} = :bv_year AND ${code_col} = :bv_code AND ${num_col} = :bv_number";
+		$sql = "UPDATE $table SET $column = :bv_val WHERE $year_col = :bv_year AND $code_col = :bv_code AND $num_col = :bv_number";
 		
 		Logger::getInstance()->info(__METHOD__."：預備執行 $sql");
 
-		$this->db_wrapper->getDB()->parse($sql);
+		try {
+			$this->db_wrapper->getDB()->parse($sql);
+			$this->db_wrapper->getDB()->bind(":bv_year", $year);
+			$this->db_wrapper->getDB()->bind(":bv_code", $code);
+			$this->db_wrapper->getDB()->bind(":bv_number", $num);
+			$this->db_wrapper->getDB()->bind(":bv_val", mb_convert_encoding($val, "big5"));
+			$this->db_wrapper->getDB()->execute();
 
-		$this->db_wrapper->getDB()->bind(":bv_year", $year);
-		$this->db_wrapper->getDB()->bind(":bv_code", $code);
-		$this->db_wrapper->getDB()->bind(":bv_number", $num);
-		$this->db_wrapper->getDB()->bind(":bv_val", mb_convert_encoding($val, "big5"));
-		
-		$this->db_wrapper->getDB()->execute();
-
-		return true;
+			$note = "year: $year, code: $code, number: $num, $column: $val\n\n$sql";
+			SQLiteAdminActionLog::getInstance()->add(ADMIN_ACTION_TYPE::UPDATE_CRSMS_COLUMN, '/api/query_json_api/reg_upd_col', $note);
+			
+			return true;
+		} catch (Exception $ex) {
+			Logger::getInstance()->error(__CLASS__.'::'.__METHOD__.': '.$ex->getMessage());
+		}
+		return false;
 	}
 
 	// 取得權利人資料

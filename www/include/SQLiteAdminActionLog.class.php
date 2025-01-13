@@ -1,7 +1,9 @@
 <?php
 require_once('init.php');
 require_once('SQLiteDBFactory.class.php');
-
+abstract class ADMIN_ACTION_TYPE {
+    const UPDATE_CRSMS_COLUMN = 'Update MOICAS.CRSMS Column';
+}
 class SQLiteAdminActionLog {
     // singleton
     private static $_instance = null;
@@ -20,11 +22,13 @@ class SQLiteAdminActionLog {
             Logger::getInstance()->warning(__METHOD__.": ".print_r($row, true));
         } else {
             try {
+                // client_ip is from init.php
+                global $client_ip;
                 Logger::getInstance()->info(__CLASS__.'::'.__METHOD__.': '.print_r($row, true));
-                $stm->bindParam(':ip', $row['ip']);
                 $stm->bindParam(':action', $row['action']);
                 $stm->bindParam(':path', $row['path']);
                 $stm->bindParam(':note', $row['note']);
+                $stm->bindParam(':ip', $client_ip);
                 $stm->bindValue(':timestamp', time());
                 return true;
             } catch (Exception $ex) {
@@ -62,6 +66,19 @@ class SQLiteAdminActionLog {
         return $date->format('Y-m-d H:i:s'); 
     }
 
+    private function replace(&$row) {
+        try {
+            $stm = $this->db->prepare("
+                REPLACE INTO admin_action_log ('ip', 'timestamp', 'action', 'path', 'note')
+                VALUES (:ip, :timestamp, :action, :path, :note)
+            ");
+            $this->bindParams($stm, $row);
+            return $stm->execute() === FALSE ? false : true;
+        } catch (Exception $ex) {
+            Logger::getInstance()->error(__CLASS__.'::'.__METHOD__.": ".$ex->getMessage());
+        }
+    }
+
     private function __construct() {
         $db_path = SQLiteDBFactory::getAdminActionLogDB();
         $this->db = new SQLite3($db_path);
@@ -77,6 +94,15 @@ class SQLiteAdminActionLog {
         $this->db->close();
     }
 
+    public function add($action, $path, $note) {
+        $param = array(
+            "action" => $action,
+            "path" => $path,
+            "note" => $note
+        );
+        return $this->replace($param);
+    }
+
     public function clean() {
         try {
             $stm = $this->db->prepare("DELETE FROM admin_action_log");
@@ -87,18 +113,6 @@ class SQLiteAdminActionLog {
         return false;
     }
 
-    public function replace(&$row) {
-        try {
-            $stm = $this->db->prepare("
-                REPLACE INTO admin_action_log ('ip', 'timestamp', 'action', 'path', 'note')
-                VALUES (:ip, :timestamp, :action, :path, :note)
-            ");
-            $this->bindParams($stm, $row);
-            return $stm->execute() === FALSE ? false : true;
-        } catch (Exception $ex) {
-            Logger::getInstance()->error(__CLASS__.'::'.__METHOD__.": ".$ex->getMessage());
-        }
-    }
     /**
      * use timestamp to get the records
      */
