@@ -509,4 +509,28 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
+	// 取得地政系統工作天設定
+	public function getWorkdays($tw_year = null) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		if (empty($tw_year)) {
+			// 使用 null 合併運算符簡化判斷
+			$tw_year = $GLOBALS['this_year'] ?? null; // 嘗試使用全域變數
+			if ($tw_year === null) {
+					// timestampToDate is a custummized global method
+					$tmp_date = timestampToDate(time(), 'TW');
+					$date_parts = explode('-', explode(' ', $tmp_date)[0]);
+					$tw_year = $date_parts[0];
+			}
+		}
+		$this->db_wrapper->getDB()->parse("
+			SELECT * FROM MOICAS.SYSHOL t
+			WHERE SYSDAT LIKE :bv_year || '%'
+			ORDER BY SYSDAT
+		");
+		$this->db_wrapper->getDB()->bind(":bv_year", $tw_year);
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
 }
