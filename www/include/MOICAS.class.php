@@ -243,7 +243,7 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
-	// 第一次登記案件 BY 日期區間
+	// 第一次登記案件(排除子號) BY 日期區間
 	public function getCRSMSFirstRegCase($st, $ed) {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
@@ -254,7 +254,10 @@ class MOICAS
 					w.KCNT AS \"RM09_CHT\"
 				FROM MOICAS.CRSMS t
 				LEFT JOIN MOIADM.RKEYN w ON t.RM09 = w.KCDE_2 AND w.KCDE_1 = '06'   -- 登記原因
-				WHERE t.RM09 = '02' and t.RM07_1 BETWEEN :bv_st AND :bv_ed
+				WHERE 
+					t.RM09 = '02'
+					and t.RM07_1 BETWEEN :bv_st AND :bv_ed
+					and t.RM03 LIKE '%0'
 				ORDER BY t.RM03
 		");
 		$this->db_wrapper->getDB()->bind(":bv_st", $st);
