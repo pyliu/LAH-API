@@ -149,6 +149,17 @@ switch ($_POST["type"]) {
 			Logger::getInstance()->info("XHR [cusmm_by_pid] $message");
 			echoJSONResponse($message, $response_code, array( "raw" => $rows ));
 			break;
+	case "workdays":
+			Logger::getInstance()->info("XHR [workdays] get workdays request.");
+			$moicas = new MOICAS();
+			$rows = $moicas->getWorkdays($_POST['year']);
+			$rows = $mock ? $cache->get('workdays') : $moicas->getWorkdays($_POST['year']);
+			$cache->set('workdays', $rows);
+			$response_code = count($rows) > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+			$message = $_POST['year'].' 已找到'.count($rows).'筆 '.$_POST['pid'].' 工作天紀錄';
+			Logger::getInstance()->info("XHR [workdays] $message");
+			echoJSONResponse($message, $response_code, array( "raw" => $rows ));
+			break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
