@@ -536,4 +536,91 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
+	// 根據日期區間取的初審案件
+	public function getInitialReviewCase($st, $ed, $id) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		$this->db_wrapper->getDB()->parse("
+				SELECT
+					ssc.*,
+					s.KCNT AS \"RM09_CHT\"
+				FROM MOICAS.CRSMS ssc
+				LEFT JOIN MOIADM.RKEYN s ON s.KCDE_1 = '06' AND s.KCDE_2 = ssc.RM09
+				WHERE 1=1
+				  AND ssc.RM03 LIKE '%0'
+					AND ssc.RM45 = :bv_rm45
+					AND ssc.RM44_1 BETWEEN :bv_st AND :bv_ed
+					AND ((ssc.RM99 IS NULL) OR (ssc.RM99 IS NOT NULL AND ssc.RM101 = :bv_site))
+				ORDER BY ssc.RM07_1
+		");
+		$site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
+		$this->db_wrapper->getDB()->bind(":bv_rm45", $id);
+		$this->db_wrapper->getDB()->bind(":bv_site", $site);
+		$this->db_wrapper->getDB()->bind(":bv_st", $st);
+		$this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+
+		Logger::getInstance()->info(__METHOD__.": received params: $site $id $st $ed");
+
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
+	// 根據日期區間取的複審案件
+	public function getFinalReviewCase($st, $ed, $id) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		$this->db_wrapper->getDB()->parse("
+				SELECT
+					ssc.*,
+					s.KCNT AS \"RM09_CHT\"
+				FROM MOICAS.CRSMS ssc
+				LEFT JOIN MOIADM.RKEYN s ON s.KCDE_1 = '06' AND s.KCDE_2 = ssc.RM09
+				WHERE 1=1
+				  AND ssc.RM03 LIKE '%0'
+					AND ssc.RM47 = :bv_rm47
+					AND ssc.RM46_1 BETWEEN :bv_st AND :bv_ed
+					AND ((ssc.RM99 IS NULL) OR (ssc.RM99 IS NOT NULL AND ssc.RM101 = :bv_site))
+				ORDER BY ssc.RM07_1
+		");
+		$site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
+		$this->db_wrapper->getDB()->bind(":bv_rm47", $id);
+		$this->db_wrapper->getDB()->bind(":bv_site", $site);
+		$this->db_wrapper->getDB()->bind(":bv_st", $st);
+		$this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+
+		Logger::getInstance()->info(__METHOD__.": received params: $site $id $st $ed");
+
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
+	// 根據日期區間取的課長案件
+	public function getChiefReviewCase($st, $ed, $id) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		$this->db_wrapper->getDB()->parse("
+				SELECT
+					ssc.*,
+					s.KCNT AS \"RM09_CHT\"
+				FROM MOICAS.CRSMS ssc
+				LEFT JOIN MOIADM.RKEYN s ON s.KCDE_1 = '06' AND s.KCDE_2 = ssc.RM09
+				WHERE 1=1
+				  AND ssc.RM03 LIKE '%0'
+					AND ssc.RM106 = :bv_rm47
+					AND ssc.RM106_1 BETWEEN :bv_st AND :bv_ed
+					AND ((ssc.RM99 IS NULL) OR (ssc.RM99 IS NOT NULL AND ssc.RM101 = :bv_site))
+				ORDER BY ssc.RM07_1
+		");
+		$site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
+		$this->db_wrapper->getDB()->bind(":bv_rm47", $id);
+		$this->db_wrapper->getDB()->bind(":bv_site", $site);
+		$this->db_wrapper->getDB()->bind(":bv_st", $st);
+		$this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+
+		Logger::getInstance()->info(__METHOD__.": received params: $site $id $st $ed");
+
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
 }
