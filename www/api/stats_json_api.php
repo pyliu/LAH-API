@@ -490,6 +490,34 @@ switch ($_POST["type"]) {
             echoJSONResponse($error);
         }
         break;
+    case "stats_reg_final_review_count":
+        $arr = $mock ? $cache->get('stats_reg_final_review_count') : $stats->getFinalReviewCaseStats($_POST["st"], $_POST["ed"]);
+        $cache->set('stats_reg_final_review_count', $arr);
+        if (is_array($arr)) {
+            $count = count($arr);
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得複審案件統計資料 ".$_POST["st"]." ~ ".$_POST["ed"]." 失敗。";
+            Logger::getInstance()->error("XHR [stats_reg_final_review_count] $error");
+            echoJSONResponse($error);
+        }
+        break;
+    case "stats_reg_chief_review_count":
+        $arr = $mock ? $cache->get('stats_reg_chief_review_count') : $stats->getChiefReviewCaseStats($_POST["st"], $_POST["ed"]);
+        $cache->set('stats_reg_chief_review_count', $arr);
+        if (is_array($arr)) {
+            $count = count($arr);
+            echoJSONResponse("取得 $count 筆資料。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $arr
+            ));
+        } else {
+            $error = "取得課長案件統計資料 ".$_POST["st"]." ~ ".$_POST["ed"]." 失敗。";
+            Logger::getInstance()->error("XHR [stats_reg_chief_review_count] $error");
+            echoJSONResponse($error);
+        }
+        break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

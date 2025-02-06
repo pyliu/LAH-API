@@ -329,7 +329,6 @@ class StatsOracle {
         $this->db_wrapper->getDB()->execute();
         return $this->db_wrapper->getDB()->fetchAll();
     }
-
     /**
      * 初審案件統計
      */
@@ -337,16 +336,6 @@ class StatsOracle {
         if (!$this->db_wrapper->reachable()) {
             return false;
         }
-		if (empty($tw_year)) {
-			// 使用 null 合併運算符簡化判斷
-			$tw_year = $GLOBALS['this_year'] ?? null; // 嘗試使用全域變數
-			if ($tw_year === null) {
-                // timestampToDate is a custummized global method
-                $tmp_date = timestampToDate(time(), 'TW');
-                $date_parts = explode('-', explode(' ', $tmp_date)[0]);
-                $tw_year = $date_parts[0];
-			}
-		}
         $site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
         $this->db_wrapper->getDB()->parse("
             -- 初審年度案件統計
@@ -369,6 +358,78 @@ class StatsOracle {
                     ssc.rm45, ssa.user_name
                 ORDER BY 
                     \"total_case_count\" DESC
+            )
+        ");
+        $this->db_wrapper->getDB()->bind(":bv_st", $st);
+        $this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+        $this->db_wrapper->getDB()->bind(":bv_site", $site);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll();
+    }
+    /**
+     * 複審案件統計
+     */
+    public function getFinalReviewCaseStats($st, $ed) {
+        if (!$this->db_wrapper->reachable()) {
+            return false;
+        }
+        $site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
+        $this->db_wrapper->getDB()->parse("
+            -- 複審年度案件統計
+            select :bv_site as \"office_name\", \"final_id\", \"final_name\", \"case_count\" from (
+                SELECT 
+                    ssc.rm47 AS \"final_id\",
+                    ssa.user_name AS \"final_name\",
+                    COUNT(*) AS \"case_count\"
+                FROM 
+                    moicas.crsms ssc
+                JOIN 
+                    moiadm.sysauth1 ssa ON ssc.rm47 = ssa.user_id
+                WHERE 
+                    ssc.rm47 IS NOT NULL 
+                    AND ssc.rm03 LIKE '%0' 
+                    AND ssc.rm46_1 BETWEEN :bv_st AND :bv_ed
+                    AND ((ssc.rm99 IS NULL) OR (ssc.rm99 IS NOT NULL AND ssc.rm101 = :bv_site))
+                GROUP BY 
+                    ssc.rm47, ssa.user_name
+                ORDER BY 
+                    \"case_count\" DESC
+            )
+        ");
+        $this->db_wrapper->getDB()->bind(":bv_st", $st);
+        $this->db_wrapper->getDB()->bind(":bv_ed", $ed);
+        $this->db_wrapper->getDB()->bind(":bv_site", $site);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll();
+    }
+    /**
+     * 課長案件統計
+     */
+    public function getChiefReviewCaseStats($st, $ed) {
+        if (!$this->db_wrapper->reachable()) {
+            return false;
+        }
+        $site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
+        $this->db_wrapper->getDB()->parse("
+            -- 課長年度案件統計
+            select :bv_site as \"office_name\", \"chief_id\", \"chief_name\", \"case_count\" from (
+                SELECT 
+                    ssc.rm106 AS \"chief_id\",
+                    ssa.user_name AS \"chief_name\",
+                    COUNT(*) AS \"case_count\"
+                FROM 
+                    moicas.crsms ssc
+                JOIN 
+                    moiadm.sysauth1 ssa ON ssc.rm106 = ssa.user_id
+                WHERE 
+                    ssc.rm106 IS NOT NULL 
+                    AND ssc.rm03 LIKE '%0' 
+                    AND ssc.rm106_1 BETWEEN :bv_st AND :bv_ed
+                    AND (ssc.rm99 IS NULL OR ssc.rm101 = :bv_site)
+                GROUP BY 
+                    ssc.rm106, ssa.user_name
+                ORDER BY 
+                    \"case_count\" DESC
             )
         ");
         $this->db_wrapper->getDB()->bind(":bv_st", $st);
