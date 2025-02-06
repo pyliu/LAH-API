@@ -160,6 +160,24 @@ switch ($_POST["type"]) {
 			Logger::getInstance()->info("XHR [workdays] $message");
 			echoJSONResponse($message, $response_code, array( "raw" => $rows ));
 			break;
+		case "crsms_rm45_case":
+			Logger::getInstance()->info("XHR [crsms_rm45_case] get initial review case request.");
+			$moicas = new MOICAS();
+			$rows = $mock ? $cache->get('crsms_rm45_case') : $moicas->getInitialReviewCase($_POST['st'], $_POST['ed'], $_POST['user_id']);
+			$cache->set('crsms_rm45_case', $rows);
+			
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$baked[] = $data->getBakedData();
+			}
+			$count = count($baked);
+
+			$response_code = $count > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+			$message = $_POST['year'].' 已找到'.$count.'筆 '.$_POST['user_id'].' 初審案件紀錄';
+			Logger::getInstance()->info("XHR [crsms_rm45_case] $message");
+			echoJSONResponse($message, $response_code, array( "baked" => $baked ));
+			break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
