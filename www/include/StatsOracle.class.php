@@ -339,7 +339,7 @@ class StatsOracle {
         $site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
         $this->db_wrapper->getDB()->parse("
             -- 初審年度案件統計
-            select :bv_site as \"office_name\", \"initial_id\", \"initial_name\", \"normal_case_count\", \"easy_case_count\" from (
+            select :bv_site as \"office_name\", \"initial_id\", \"initial_name\", \"normal_case_count\", \"easy_case_count\", \"total_case_count\" from (
                 SELECT 
                     ssc.rm45 AS \"initial_id\",
                     ssa.user_name AS \"initial_name\",
