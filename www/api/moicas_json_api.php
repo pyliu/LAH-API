@@ -174,8 +174,44 @@ switch ($_POST["type"]) {
 			$count = count($baked);
 
 			$response_code = $count > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
-			$message = $_POST['year'].' 已找到'.$count.'筆 '.$_POST['user_id'].' 初審案件紀錄';
+			$message = $_POST['st'].' ~ '.$_POST['ed'].' 已找到'.$count.'筆 '.$_POST['user_id'].' 初審案件紀錄';
 			Logger::getInstance()->info("XHR [crsms_rm45_case] $message");
+			echoJSONResponse($message, $response_code, array( "baked" => $baked ));
+			break;
+		case "crsms_rm47_case":
+			Logger::getInstance()->info("XHR [crsms_rm47_case] get final review case request.");
+			$moicas = new MOICAS();
+			$rows = $mock ? $cache->get('crsms_rm47_case') : $moicas->getFinalReviewCase($_POST['st'], $_POST['ed'], $_POST['user_id']);
+			$cache->set('crsms_rm47_case', $rows);
+			
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$baked[] = $data->getBakedData();
+			}
+			$count = count($baked);
+
+			$response_code = $count > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+			$message = $_POST['st'].' ~ '.$_POST['ed'].' 已找到'.$count.'筆 '.$_POST['user_id'].' 複審案件紀錄';
+			Logger::getInstance()->info("XHR [crsms_rm47_case] $message");
+			echoJSONResponse($message, $response_code, array( "baked" => $baked ));
+			break;
+		case "crsms_rm106_case":
+			Logger::getInstance()->info("XHR [crsms_rm106_case] get chief review case request.");
+			$moicas = new MOICAS();
+			$rows = $mock ? $cache->get('crsms_rm106_case') : $moicas->getChiefReviewCase($_POST['st'], $_POST['ed'], $_POST['user_id']);
+			$cache->set('crsms_rm106_case', $rows);
+			
+			$baked = array();
+			foreach ($rows as $row) {
+				$data = new RegCaseData($row);
+				$baked[] = $data->getBakedData();
+			}
+			$count = count($baked);
+
+			$response_code = $count > 0 ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+			$message = $_POST['st'].' ~ '.$_POST['ed'].' 已找到'.$count.'筆 '.$_POST['user_id'].' 課長案件紀錄';
+			Logger::getInstance()->info("XHR [crsms_rm106_case] $message");
 			echoJSONResponse($message, $response_code, array( "baked" => $baked ));
 			break;
 	default:
