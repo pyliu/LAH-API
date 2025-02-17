@@ -124,7 +124,10 @@ class Notification {
         }
         return false;
     }
-
+    /**
+     * Get Logs by create_datetime
+     * e.g. 2024-01-01 00:00:00 ~ 2024-12-31 23:59:59
+     */
     public function getLogs($st, $ed) {
         try {
             // notification log db

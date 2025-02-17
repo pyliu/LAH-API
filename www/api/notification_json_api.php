@@ -122,8 +122,24 @@ switch ($_POST["type"]) {
     case "get_log":
         $st = $_POST['st'];
         $ed = $_POST['ed'];
+
+        Logger::getInstance()->info(__FILE__.": [get_log] 接收到 get_log 請求 $st ~ $ed");
+
+        $year = substr($st, 0, 3) + 1911; // 113 + 1911
+        $month = substr($st, 3, 2); // 02
+        $day = substr($st, 5, 2); // 17
+        $dateTime = new DateTime("$year-$month-$day");
+        $formattedSt = $dateTime->format("Y-m-d H:i:s");
+
+
+        $year = substr($ed, 0, 3) + 1911; // 114 + 1911
+        $month = substr($ed, 3, 2); // 02
+        $day = substr($ed, 5, 2); // 17
+        $dateTime = new DateTime("$year-$month-$day 23:59:59");
+        $formattedEd = $dateTime->format("Y-m-d H:i:s");
+
         $notify = new Notification();
-        $logs = $notify->getLogs($st, $ed);
+        $logs = $notify->getLogs($formattedSt, $formattedEd);
         $count = count($logs) ?? 0;
         if (is_array($logs)) {
             $status = $count > 0 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
