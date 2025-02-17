@@ -77,6 +77,72 @@ class Notification {
 
     function __destruct() { }
 
+    public function addLog($channel, $payload) {
+        try {
+            // notification log db
+            $db = new SQLite3(SQLiteDBFactory::getNotificationLogDB());
+            $stm = $db->prepare("
+                INSERT INTO notification_log (
+                    'channel',
+                    'title',
+                    'content',
+                    'priority',
+                    'create_datetime',
+                    'expire_datetime',
+                    'sender',
+                    'from_ip',
+                    'flag'
+                )
+                VALUES (
+                    :bv_channel,
+                    :bv_title,
+                    :bv_content,
+                    :bv_priority,
+                    :bv_create_datetime,
+                    :bv_expire_datetime,
+                    :bv_sender,
+                    :bv_from_ip, 
+                    :bv_flag
+                )
+            ");
+            $create_datetime = date('Y-m-d H:i:s');
+            $expire_datetime = empty($payload['expire_datetime']) ? '' : $payload['expire_datetime'];
+            $priority = $payload['priority'] ?? 3;  // 0-3: critical -> high -> average -> low
+            $flag = empty(intval($payload['flag'])) ? 0 : intval($payload['flag']);
+            $stm->bindParam(':bv_channel', $channel);
+            $stm->bindParam(':bv_title', $payload['title']);
+            $stm->bindParam(':bv_content', $payload['content']);
+            $stm->bindParam(':bv_priority', $priority);
+            $stm->bindParam(':bv_create_datetime', $create_datetime);
+            $stm->bindParam(':bv_expire_datetime', $expire_datetime);
+            $stm->bindParam(':bv_sender', $payload['sender']);
+            $stm->bindParam(':bv_from_ip', $payload['from_ip']);
+            $stm->bindParam(':bv_flag', $flag);
+            return $stm->execute();
+        } catch (Exception $ex) {
+            Logger::getInstance()->warning(__CLASS__.': 寫入訊息紀錄 notification_log 失敗。('.$ex->getMessage().')');
+        }
+        return false;
+    }
+
+    public function getLogs($st, $ed) {
+        try {
+            // notification log db
+            $db = new SQLite3(SQLiteDBFactory::getNotificationLogDB());
+            $stm = $db->prepare("
+                SELECT * FROM notification_log
+                WHERE create_datetime BETWEEN :bv_st AND :bv_ed
+                ORDER BY id DESC
+            ");
+            $stm->bindParam(':bv_st', $st);
+            $stm->bindParam(':bv_ed', $ed);
+            return $this->prepareArray($stm);
+        } catch (Exception $ex) {
+            Logger::getInstance()->warning(__CLASS__.': 取得訊息紀錄 notification_log 失敗。('.$ex->getMessage().')');
+        }
+        return false;
+    }
+
     public function addMessage($channel, $payload, $skip_announcement_convert = false) {
         if (empty($channel) || !is_array($payload) || empty($payload)) {
             Logger::getInstance()->error(__METHOD__.': required param is missing. ('.$channel.')');
@@ -87,7 +153,6 @@ class Notification {
             $channel = $channel === 'all' ? 'announcement' : 'announcement_'.$channel;
         }
         if ($this->prepareDB($channel)) {
-            // TODO: add message
             $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
             $stm = $db->prepare("
                 INSERT INTO message ('title', 'content', 'priority', 'create_datetime', 'expire_datetime', 'sender', 'from_ip', 'flag')
@@ -95,6 +160,8 @@ class Notification {
             ");
             if ($this->bindParams($stm, $payload)) {
                 if ($stm->execute() !== FALSE) {
+                    // add to notification log
+                    $this->addLog($channel, $payload);
                     // return last inserted id
                     return $db->querySingle("SELECT id from message ORDER BY id DESC LIMIT 1");
                 }
