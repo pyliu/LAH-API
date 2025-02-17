@@ -480,6 +480,28 @@ class SQLiteDBFactory {
         return $db_path;
     }
 
+    public static function getNotificationLogDB() {
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR."notification_log.db";
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "notification_log" (
+                "id"	INTEGER,
+                "channel" TEXT,
+                "title"	TEXT,
+                "content"	TEXT NOT NULL,
+                "priority"	INTEGER NOT NULL DEFAULT 3,
+                "create_datetime"	TEXT NOT NULL,
+                "expire_datetime"	TEXT,
+                "sender"	TEXT NOT NULL,
+                "from_ip"	TEXT,
+                "flag"	INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        return $db_path;
+    }
+
     private function __construct() {}
     // private because of singleton
     private function __clone() { }
