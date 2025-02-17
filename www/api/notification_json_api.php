@@ -119,6 +119,21 @@ switch ($_POST["type"]) {
             echoJSONResponse($message, STATUS_CODE::DEFAULT_FAIL);
         }
         break;
+    case "get_log":
+        $st = $_POST['st'];
+        $ed = $_POST['ed'];
+        $notify = new Notification();
+        $logs = $notify->getLogs($st, $ed);
+        $count = count($logs) ?? 0;
+        if (is_array($logs)) {
+            $status = $count > 0 ? STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS : STATUS_CODE::SUCCESS_NORMAL;
+            echoJSONResponse("取得 $count 筆紀錄成功。", $status, array(
+                "raw" => $logs
+            ));
+        } else {
+            echoJSONResponse('讀取 notification_log 失敗', STATUS_CODE::DEFAULT_FAIL);
+        }
+        break;
     default:
         Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
         echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
