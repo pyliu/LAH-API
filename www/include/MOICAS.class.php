@@ -623,4 +623,47 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
+	// 過去權利人為私人設定的案件(排除連件、年齡大於?歲)
+	public function getDaysAgoOverAgeSetCase($age = 60, $days = 365) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		// RM09 👉 83 設定、97 判決設定、98 和解設定、99 調解設定、EP 設定目的變更、ES 讓與或設定抵押權限制變更 
+		$this->db_wrapper->getDB()->parse("
+				-- 查詢過去1年權利人為私人設定(排除連件)的案件(年齡大於60歲)
+				SELECT rm01, rm02, rm03, rm07_1, rm18, rm19
+				FROM (
+					select rm01, rm02, rm03, rm07_1, rm18, rm19, lbir_2
+					from scrsms, srlnid
+					where rm18 = lidn
+						and rm09 in ('83', '97', '98', '99', 'EP', 'ES')
+						and lcde in ('1', '2', 'C') -- LCDE 為 1, 2 或 C(本國人、外國人以及大陸地區自然人)
+						and rm07_1 >= TO_CHAR(TO_CHAR(SYSDATE, - :bv_days, 'YYYYMMDD') - 19110000) -- 搜尋過去一年
+						and rm31 is not null
+					minus
+					select rm01, rm02, rm03, rm07_1, rm18, rm19, lbir_2
+					from scrtocr,
+									(select rm01, rm02, rm03, rm07_1, rm18, rm19, lbir_2
+										from scrsms, srlnid
+									where rm18 = lidn
+										and rm09 in ('83', '97', '98', '99', 'EP', 'ES')
+										and lcde in ('1', '2', 'C')
+										and rm07_1 >= TO_CHAR(TO_CHAR(SYSDATE - :bv_days, 'YYYYMMDD') - 19110000) -- 搜尋過去一年
+										and rm31 is not null
+									)
+					where (rm01 = to01 and rm02 = to02 and rm03 = to03)
+						or (rm01 = to04 and rm02 = to05 and rm03 = to06)
+				)
+				WHERE (SUBSTR(to_char(sysdate, 'yyyyMMdd'), 1, 4) - 1911 - SUBSTR(lbir_2, 1, 3) >= :bv_age)
+				ORDER BY rm07_1 DESC
+		");
+
+		$this->db_wrapper->getDB()->bind(":bv_days", $days);
+		$this->db_wrapper->getDB()->bind(":bv_age", $age);
+
+		Logger::getInstance()->info(__METHOD__.": $days ago, over $age");
+
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
 }
