@@ -43,7 +43,11 @@ class MOISMS {
 				 MS04_1 AS SMS_CODE,
 				 MS04_2 AS SMS_NUMBER,
 				 --MS_TYPE AS SMS_TYPE,
-				 '".mb_convert_encoding('地籍異動即時通', 'BIG5', 'UTF-8')."' AS SMS_TYPE,
+				 (CASE
+				   WHEN t.MS_TYPE = 'M' THEN '".mb_convert_encoding('地籍異動即時通', 'BIG5', 'UTF-8')."'
+					 WHEN t.MS_TYPE = 'W' THEN '".mb_convert_encoding('指定送達處所', 'BIG5', 'UTF-8')."'
+					 ELSE t.MS_TYPE
+				 END) AS SMS_TYPE,
 				 MS07_1 AS SMS_DATE,
 				 MS07_2 AS SMS_TIME,
 				 MS14 AS SMS_CELL,
@@ -79,7 +83,11 @@ class MOISMS {
 				 MS04_1 AS SMS_CODE,
 				 MS04_2 AS SMS_NUMBER,
 				 --MS_TYPE AS SMS_TYPE,
-				 '".mb_convert_encoding('地籍異動即時通', 'BIG5', 'UTF-8')."' AS SMS_TYPE,
+				 (CASE
+				   WHEN t.MS_TYPE = 'M' THEN '".mb_convert_encoding('地籍異動即時通', 'BIG5', 'UTF-8')."'
+					 WHEN t.MS_TYPE = 'W' THEN '".mb_convert_encoding('指定送達處所', 'BIG5', 'UTF-8')."'
+					 ELSE t.MS_TYPE
+				 END) AS SMS_TYPE,
 				 MS07_1 AS SMS_DATE,
 				 MS07_2 AS SMS_TIME,
 				 MS14 AS SMS_CELL,
