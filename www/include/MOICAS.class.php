@@ -705,9 +705,13 @@ class MOICAS
 		// $this->db_wrapper->getDB()->bind(":bv_mins", $mins);
 		$this->db_wrapper->getDB()->bind(":bv_age", $age);
 
-		Logger::getInstance()->info(__METHOD__.": $mins minutes ago, over $age");
+		Logger::getInstance()->info(__METHOD__.": $mins minutes ago, over $age or null");
 
 		$this->db_wrapper->getDB()->execute();
-		return $this->db_wrapper->getDB()->fetchAll();
+		$arr = $this->db_wrapper->getDB()->fetchAll();
+
+		Logger::getInstance()->info(__METHOD__.": got ".count($arr)." records.");
+
+		return $arr;
 	}
 }
