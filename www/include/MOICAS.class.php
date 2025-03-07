@@ -666,4 +666,48 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
+	// 查詢預設5分鐘內為私人設定的案件(預設年齡大於60歲或是空值)
+	public function getPossibleFruadCase($mins = 5, $age = 59) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		if (intval($mins) < 1) {
+			Logger::getInstance()->warning(__METHOD__.": $mins 不是正常的整數。");
+			return array();
+		}
+		// RM09 👉 83 設定、97 判決設定、98 和解設定、99 調解設定、EP 設定目的變更、ES 讓與或設定抵押權限制變更 
+		$this->db_wrapper->getDB()->parse("
+				SELECT *
+				FROM (
+				    SELECT t.*,
+									SUBSTR(TO_CHAR(SYSDATE, 'YYYYMMDD'), 1, 4) - 1911 - SUBSTR(u.lbir_2, 1, 3) AS age,
+									COALESCE(u.ladr_a, u.ladr) AS address, -- ladr_a 優先
+									TO_DATE(TO_CHAR(SYSDATE, 'YYYYMMDD') || t.rm07_2, 'YYYYMMDDHH24MISS') AS rm07_2_time -- 將 rm07_2 轉換為時間類型
+						FROM scrsms t
+						LEFT JOIN srlnid u ON u.lidn = t.rm18
+						WHERE 1 = 1
+							-- 自然人ID
+							AND LENGTH(t.RM18) = 10
+							AND ASCII(UPPER(SUBSTR(t.RM18, 1, 1))) BETWEEN 65 AND 90
+							-- 今天
+							AND rm07_1 = TO_CHAR(TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000)
+							-- 設定(將下一行移出註解以啟用)
+							--AND rm09 = '83'
+				) v
+				WHERE 1 = 1
+					-- 年齡大於?或無法計算
+					AND (age > :bv_age OR age IS NULL)
+					-- 篩選 ? 分鐘內的資料
+					AND rm07_2_time >= SYSDATE - INTERVAL '".intval($mins)."' MINUTE
+				ORDER BY rm07_2_time DESC
+		");
+
+		// $this->db_wrapper->getDB()->bind(":bv_mins", $mins);
+		$this->db_wrapper->getDB()->bind(":bv_age", $age);
+
+		Logger::getInstance()->info(__METHOD__.": $mins minutes ago, over $age");
+
+		$this->db_wrapper->getDB()->execute();
+		return $this->db_wrapper->getDB()->fetchAll();
+	}
 }
