@@ -666,8 +666,9 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
-	// 查詢預設5分鐘內為私人設定的案件(預設年齡大於60歲或是空值)
-	public function getPossibleFruadCase($mins = 5, $age = 59) {
+	// 查詢預設15分鐘內為私人設定的案件(預設年齡大於60歲或是空值)
+	// Scheduler for Watchdog class execution window is 15 mins
+	public function getPossibleFruadCase($mins = 15, $age = 59) {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
@@ -680,11 +681,13 @@ class MOICAS
 				SELECT *
 				FROM (
 				    SELECT t.*,
+						      v.kcnt AS \"RM09_CHT\",
 									SUBSTR(TO_CHAR(SYSDATE, 'YYYYMMDD'), 1, 4) - 1911 - SUBSTR(u.lbir_2, 1, 3) AS age,
 									COALESCE(u.ladr_a, u.ladr) AS address, -- ladr_a 優先
 									TO_DATE(TO_CHAR(SYSDATE, 'YYYYMMDD') || t.rm07_2, 'YYYYMMDDHH24MISS') AS rm07_2_time -- 將 rm07_2 轉換為時間類型
 						FROM scrsms t
 						LEFT JOIN srlnid u ON u.lidn = t.rm18
+						LEFT JOIN srkeyn v ON v.kcde_1 = '06' AND v.kcde_2 = t.rm09
 						WHERE 1 = 1
 							-- 自然人ID
 							AND LENGTH(t.RM18) = 10
@@ -692,7 +695,9 @@ class MOICAS
 							-- 今天
 							AND rm07_1 = TO_CHAR(TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000)
 							-- 設定(將下一行移出註解以啟用)
-							--AND rm09 = '83'
+							--AND t.RM09 = '83'
+							-- 本所關注案件
+							AND (t.RM99 <> 'Y' OR (t.RM99 = 'Y' AND t.RM101 = :bv_site))
 				) v
 				WHERE 1 = 1
 					-- 年齡大於?或無法計算
@@ -702,7 +707,8 @@ class MOICAS
 				ORDER BY rm07_2_time DESC
 		");
 
-		// $this->db_wrapper->getDB()->bind(":bv_mins", $mins);
+		$site = SYSTEM::getInstance()->getSiteCode();
+		$this->db_wrapper->getDB()->bind(":bv_site", $site);
 		$this->db_wrapper->getDB()->bind(":bv_age", $age);
 
 		Logger::getInstance()->info(__METHOD__.": $mins minutes ago, over $age or null");
@@ -710,7 +716,7 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		$arr = $this->db_wrapper->getDB()->fetchAll();
 
-		Logger::getInstance()->info(__METHOD__.": got ".count($arr)." records.");
+		Logger::getInstance()->info(__METHOD__.": 取得預設15分鐘內為私人設定的案件(預設年齡大於60歲或是空值)：".count($arr)." 筆。");
 
 		return $arr;
 	}

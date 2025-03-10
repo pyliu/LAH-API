@@ -13,6 +13,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR.'System.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'Cache.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'LXHWEB.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR.'MOICAD.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'MOICAS.class.php');
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteOFFICESSTATS.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSurDestructionTracking.class.php");
 
@@ -841,6 +842,23 @@ class WatchDog {
         Logger::getInstance()->info('新增登記土地建物統計資料通知訊息至 reg 頻道。 '.($lastId === false ? '失敗' : '成功').')');
     }
 
+    private function checkPossibleFraudCases() {
+        $moicas = new MOICAS();
+        $records = $moicas->getPossibleFruadCase(15, 59);
+        if (count($records) > 0) {
+            $content = "##### ⚠ 私人設定警訊通知\r\n\r\n";
+            foreach ($records as $record) {
+                $content .= "- ".$record['RM01']."-".$record['RM02']."-".$record['RM03']." ".$record['RM09_CHT']." ".$record['RM18']." ".$record['RM19']."\r\n";
+            }
+            $content .= "\r\n\r\n##### 請注意上述案件以免詐騙案件發生 ❗";
+            // $notification = new Notification();
+            // $notification->removeOutdatedMessageByTitle('reg', '登記土地建物統計資料通知');
+            
+            $lastId = $this->addNotification($content, "HA10013859", "私人設定警訊通知", true);
+            Logger::getInstance()->info('新增私人設定警訊通知至 reg 頻道。 '.($lastId === false ? '失敗' : '成功').')');
+        }
+    }
+
     function __construct() {
         $this->stats = new StatsSQLite();
         $this->host_ip = getLocalhostIP();
@@ -876,6 +894,7 @@ class WatchDog {
                 $this->checkRegaDailyStatsData();
                 $this->sendForeignerInheritanceRestrictionNotification();
                 $this->sendOfficeCheckNotification();
+                $this->checkPossibleFraudCases();
                 return true;
             }
             return false;
