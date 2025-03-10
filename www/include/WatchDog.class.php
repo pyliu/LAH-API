@@ -846,9 +846,12 @@ class WatchDog {
         $moicas = new MOICAS();
         $records = $moicas->getPossibleFruadCase(15, 59);
         if (count($records) > 0) {
+            $host_ip = getLocalhostIP();
+            $url = "http://".$host_ip.":8080/reg/case/";
             $content = "##### ⚠ 私人設定警訊通知\r\n\r\n";
             foreach ($records as $record) {
-                $content .= "- ".$record['RM01']."-".$record['RM02']."-".$record['RM03']." ".$record['RM09_CHT']." ".$record['RM18']." ".$record['RM19']."\r\n";
+                $id = $record['RM01']."-".$record['RM02']."-".$record['RM03'];
+                $content .= "- [".$id."](".$url.$id.") ".$record['RM09_CHT']." ".$record['RM18']." ".$record['RM19']."\r\n";
             }
             $content .= "\r\n\r\n##### 請注意上述案件以免詐騙案件發生 ❗";
             // $notification = new Notification();
