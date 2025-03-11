@@ -856,8 +856,8 @@ class WatchDog {
             $content .= "\r\n\r\n##### 請注意上述案件以免詐騙案件發生 ❗";
             // $notification = new Notification();
             // $notification->removeOutdatedMessageByTitle('reg', '登記土地建物統計資料通知');
-            
-            $lastId = $this->addNotification($content, "HA10013859", "私人設定警訊通知", true);
+            // send notification to 登記課
+            $lastId = $this->addNotification($content, "reg", "私人設定警訊通知", true);
             Logger::getInstance()->info('新增私人設定警訊通知至 reg 頻道。 '.($lastId === false ? '失敗' : '成功').')');
         }
     }

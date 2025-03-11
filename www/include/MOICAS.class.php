@@ -695,7 +695,7 @@ class MOICAS
 							-- 今天
 							AND rm07_1 = TO_CHAR(TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000)
 							-- 設定(將下一行移出註解以啟用)
-							--AND t.RM09 = '83'
+							AND t.RM09 = '83'
 							-- 本所關注案件
 							AND (t.RM99 <> 'Y' OR (t.RM99 = 'Y' AND t.RM101 = :bv_site))
 				) v
