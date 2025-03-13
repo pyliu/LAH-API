@@ -99,7 +99,7 @@ class WatchDog {
         return $result;
     }
 
-    private function isTwiceADayCheckNeeded() {
+    private function twiceADayCheck() {
         Logger::getInstance()->info("檢查是否需要執行一天兩次的檢查 ... ");
         $result = $this->isOnTime($this->checking_schedule["twice_a_day"]);
         Logger::getInstance()->info('現在是一天兩次檢查的'.($result ? "啟動" : "非啟動")."時段。");
@@ -168,7 +168,7 @@ class WatchDog {
     }
 
     private function checkCrossSiteData() {
-        if ($this->isTwiceADayCheckNeeded()) {
+        if ($this->twiceADayCheck()) {
             $xcase = new XCase();
             // check reg case missing RM99~RM101 data
             Logger::getInstance()->info('開始登記案件跨所註記遺失檢查 ... ');
@@ -200,7 +200,7 @@ class WatchDog {
     }
 
     private function checkValCrossSiteData() {
-        if ($this->isTwiceADayCheckNeeded()) {
+        if ($this->twiceADayCheck()) {
             $xcase = new XCase();
             // check val case missing SS99~SS101 data
             Logger::getInstance()->info('開始本所管轄地價案件跨所註記遺失檢查 ... ');
@@ -232,7 +232,7 @@ class WatchDog {
     }
 
     private function checkValCrossOtherSitesData() {
-        if ($this->isTwiceADayCheckNeeded()) {
+        if ($this->twiceADayCheck()) {
             $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
             // get rid of our site
             $all = array('HA', 'HB', 'HC', 'HD', 'HE', 'HF', 'HG', 'HH');
@@ -270,7 +270,7 @@ class WatchDog {
     }
 
     private function findRegOverdueCases() {
-        if (!$this->isTwiceADayCheckNeeded()) {
+        if (!$this->twiceADayCheck()) {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期登記案件檢測。");
             return false;
         }
@@ -412,7 +412,7 @@ class WatchDog {
     }
     
     private function findSurNearOverdueCases() {
-        if (!$this->isTwiceADayCheckNeeded()) {
+        if (!$this->twiceADayCheck()) {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過即將逾期測量案件檢測。");
             return false;
         }
@@ -479,7 +479,7 @@ class WatchDog {
     }
 
     private function findSurOverdueCases() {
-        if (!$this->isTwiceADayCheckNeeded()) {
+        if (!$this->twiceADayCheck()) {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期測量案件檢測。");
             return false;
         }
@@ -552,7 +552,7 @@ class WatchDog {
     }
 
     private function findSurDestructionConcernedCases() {
-        if (!$this->isTwiceADayCheckNeeded()) {
+        if (!$this->twiceADayCheck()) {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期測量案件檢測。");
             return false;
         }
