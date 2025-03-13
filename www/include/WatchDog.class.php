@@ -110,14 +110,14 @@ class WatchDog {
     private function isOverdueCheckNeeded() {
         Logger::getInstance()->info("檢查是否需要執行逾期案件檢查 ... ");
         $result = $this->isOnTime($this->notification_schedule["overdue"]);
-        Logger::getInstance()->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
+        Logger::getInstance()->info('現在是逾期案件檢查'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
 
     private function isAnnouncementCheckNeeded() {
         Logger::getInstance()->info("檢查是否需要執行到期公告案件檢查 ... ");
         $result = $this->isOnTime($this->notification_schedule["announcement"]);
-        Logger::getInstance()->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
+        Logger::getInstance()->info('現在是到期公告案件檢查'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
 
@@ -125,7 +125,7 @@ class WatchDog {
         
         Logger::getInstance()->info("檢查是否需要體溫通知 ... ");
         $result = $this->isInTimespan($this->schedule_timespan["temperature"]);
-        Logger::getInstance()->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
+        Logger::getInstance()->info('現在是體溫通知'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
 
