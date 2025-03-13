@@ -864,7 +864,7 @@ class WatchDog {
         $currentDay = date('D', $timestamp);
 
         if (isset($schedule[$currentDay])) {
-            Logger::getInstance()->info(__METHOD__."檢測時段：".implode(' ↔ ', $schedule[$currentDay]));
+            // Logger::getInstance()->info(__METHOD__."檢測時段：".implode(', ', $schedule[$currentDay]));
             foreach ($schedule[$currentDay] as $timePoint) {
                 // Logger::getInstance()->info(__METHOD__.": $timePoint 👉 ".$currentTime->format('h:i A'));
                 $nowPoint = $currentTime->format('h:i A');
