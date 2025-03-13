@@ -23,7 +23,7 @@ class WatchDog {
     private $date = '';
     private $time = '';
 
-    private $schedule = array(
+    private $schedule_timespan = array(
         "office" => [
             'Sun' => [],
             'Mon' => ['07:30 AM' => '05:30 PM'],
@@ -42,24 +42,6 @@ class WatchDog {
             'Fri' => ['08:15 AM' => '05:00 PM'],
             'Sat' => []
         ],
-        "overdue" => [
-            'Sun' => [],
-            'Mon' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
-            'Tue' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
-            'Wed' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
-            'Thu' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
-            'Fri' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
-            'Sat' => []
-        ],
-        "announcement" => [
-            'Sun' => [],
-            'Mon' => ['07:50 AM' => '08:05 AM'],
-            'Tue' => ['07:50 AM' => '08:05 AM'],
-            'Wed' => ['07:50 AM' => '08:05 AM'],
-            'Thu' => ['07:50 AM' => '08:05 AM'],
-            'Fri' => ['07:50 AM' => '08:05 AM'],
-            'Sat' => []
-        ],
         "temperature" => [
             'Sun' => [],
             'Mon' => ['10:35 AM' => '10:50 AM'],
@@ -69,25 +51,7 @@ class WatchDog {
             'Fri' => ['10:35 AM' => '10:50 AM'],
             'Sat' => []
         ],
-        "once_a_day" => [
-            'Sun' => [],
-            'Mon' => ['08:50 AM' => '09:05 AM'],
-            'Tue' => ['08:50 AM' => '09:05 AM'],
-            'Wed' => ['08:50 AM' => '09:05 AM'],
-            'Thu' => ['08:50 AM' => '09:05 AM'],
-            'Fri' => ['08:50 AM' => '09:05 AM'],
-            'Sat' => []
-        ],
-        "twice_a_day" => [
-            'Sun' => [],
-            'Mon' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
-            'Tue' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
-            'Wed' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
-            'Thu' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
-            'Fri' => ['08:50 AM' => '09:05 AM', '01:50 PM' => '02:05 PM'],
-            'Sat' => []
-        ],
-        "test" => [
+        "MON-FRI" => [
             'Sun' => [],
             'Mon' => ['00:00 AM' => '11:59 PM'],
             'Tue' => ['00:00 AM' => '11:59 PM'],
@@ -97,24 +61,62 @@ class WatchDog {
             'Sat' => []
         ]
     );
+    
+    private $notification_schedule = array(
+        "overdue" => [
+            'Sun' => [],
+            'Mon' => ['08:50 AM', '01:50 PM'],
+            'Tue' => ['08:50 AM', '01:50 PM'],
+            'Thu' => ['08:50 AM', '01:50 PM'],
+            'Fri' => ['08:50 AM', '01:50 PM'],
+            'Sat' => []
+        ],
+        "announcement" => [
+            'Sun' => [],
+            'Mon' => ['08:05 AM'],
+            'Tue' => ['08:05 AM'],
+            'Wed' => ['08:05 AM'],
+            'Thu' => ['08:05 AM'],
+            'Fri' => ['08:05 AM'],
+            'Sat' => []
+        ],
+        "once_a_day" => [
+            'Sun' => [],
+            'Mon' => ['08:55 AM'],
+            'Tue' => ['08:55 AM'],
+            'Wed' => ['08:55 AM'],
+            'Thu' => ['08:55 AM'],
+            'Fri' => ['08:55 AM'],
+            'Sat' => []
+        ],
+        "twice_a_day" => [
+            'Sun' => [],
+            'Mon' => ['08:59 AM', '01:59 PM'],
+            'Tue' => ['08:59 AM', '01:59 PM'],
+            'Wed' => ['08:59 AM', '01:59 PM'],
+            'Thu' => ['08:59 AM', '01:59 PM'],
+            'Fri' => ['08:59 AM', '01:59 PM'],
+            'Sat' => []
+        ]
+    );
 
     private function isOfficeHours() {
         Logger::getInstance()->info("檢查是否處於上班時間 ... ");
-        $result = $this->isOn($this->schedule["office"]);
+        $result = $this->isInTimespan($this->schedule_timespan["office"]);
         Logger::getInstance()->info('現在是'.($result ? "上班" : "下班")."時段。");
         return $result;
     }
 
     private function isOverdueCheckNeeded() {
         Logger::getInstance()->info("檢查是否需要執行逾期案件檢查 ... ");
-        $result = $this->isOn($this->schedule["overdue"]);
+        $result = $this->isOnTime($this->notification_schedule["overdue"]);
         Logger::getInstance()->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
 
     private function isAnnouncementCheckNeeded() {
         Logger::getInstance()->info("檢查是否需要執行到期公告案件檢查 ... ");
-        $result = $this->isOn($this->schedule["announcement"]);
+        $result = $this->isOnTime($this->notification_schedule["announcement"]);
         Logger::getInstance()->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
@@ -122,7 +124,7 @@ class WatchDog {
     private function isTemperatureNotifyNeeded() {
         
         Logger::getInstance()->info("檢查是否需要體溫通知 ... ");
-        $result = $this->isOn($this->schedule["temperature"]);
+        $result = $this->isInTimespan($this->schedule_timespan["temperature"]);
         Logger::getInstance()->info('現在是'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
@@ -174,7 +176,7 @@ class WatchDog {
     }
 
     private function checkCrossSiteData() {
-        if ($this->isOn($this->schedule["twice_a_day"])) {
+        if ($this->isOnTime($this->notification_schedule["twice_a_day"])) {
             $xcase = new XCase();
             // check reg case missing RM99~RM101 data
             Logger::getInstance()->info('開始登記案件跨所註記遺失檢查 ... ');
@@ -208,7 +210,7 @@ class WatchDog {
     }
 
     private function checkValCrossSiteData() {
-        if ($this->isOn($this->schedule["twice_a_day"])) {
+        if ($this->isOnTime($this->notification_schedule["twice_a_day"])) {
             $xcase = new XCase();
             // check val case missing SS99~SS101 data
             Logger::getInstance()->info('開始本所管轄地價案件跨所註記遺失檢查 ... ');
@@ -242,7 +244,7 @@ class WatchDog {
     }
 
     private function checkValCrossOtherSitesData() {
-        if ($this->isOn($this->schedule["twice_a_day"])) {
+        if ($this->isOnTime($this->notification_schedule["twice_a_day"])) {
             $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
             // get rid of our site
             $all = array('HA', 'HB', 'HC', 'HD', 'HE', 'HF', 'HG', 'HH');
@@ -637,7 +639,7 @@ class WatchDog {
     }
 
     private function findProblematicSURCases() {
-        if ($this->isOn($this->schedule["once_a_day"])) {
+        if ($this->isOnTime($this->notification_schedule["once_a_day"])) {
             // 找已結案但卻又延期複丈之案件
             $q = new Query();
             $results = $q->getSurProblematicCases();
@@ -695,7 +697,7 @@ class WatchDog {
     }
 
     private function sendForeignerInheritanceRestrictionNotification() {
-        if ($this->isOn($this->schedule["once_a_day"])) {
+        if ($this->isOnTime($this->notification_schedule["once_a_day"])) {
             $moicad = new MOICAD();
             $altered = $moicad->getInheritanceRestrictionTODORecordsAdvanced();
             if (count($altered) > 0) {
@@ -728,7 +730,7 @@ class WatchDog {
     }
 
     private function sendOfficeCheckNotification() {
-        if ($this->isOn($this->schedule["office_check"])) {
+        if ($this->isInTimespan($this->schedule_timespan["office_check"])) {
             $stats = new SQLiteOFFICESSTATS();
             $offices = $stats->getLatestBatch();
             $count = count($offices);
@@ -795,7 +797,7 @@ class WatchDog {
     }
 
     private function checkRegaDailyStatsData($day = '') {
-        if ($this->isOn($this->schedule["once_a_day"])) {
+        if ($this->isOnTime($this->notification_schedule["once_a_day"])) {
             if (empty($day)) {
                 $tw_date = new Datetime("now");
                 // tw format
@@ -861,6 +863,39 @@ class WatchDog {
             Logger::getInstance()->info('新增私人設定警訊通知至 reg 頻道。 '.($lastId === false ? '失敗' : '成功').')');
         }
     }
+    /**
+     * fined to minute
+     * e.g. 👉 $once_a_day = [
+     *  'Sun' => [],
+     *  'Mon' => ['09:05 AM', '02:00 PM'],
+     *  'Tue' => ['01:03 PM'],
+     *  'Wed' => ['01:06 PM'],
+     *  'Thu' => ['01:10 PM'],
+     *  'Fri' => ['10:25 AM'],
+     *  'Sat' => [],
+     * ];
+     */
+    private function isOnTime($schedule) {
+        $timestamp = time();
+        $currentTime = (new DateTime())->setTimestamp($timestamp);
+        $currentDay = date('D', $timestamp);
+
+        if (isset($schedule[$currentDay])) {
+            foreach ($schedule[$currentDay] as $timePoint) {
+                $tp = DateTime::createFromFormat('h:i A', $timePoint);
+                if ($tp) {
+                    $tp->setDate($currentTime->format('Y'), $currentTime->format('m'), $currentTime->format('d'));
+                } else {
+                    Logger::getInstance()->warning("$timePoint: Datetime::createFromFormat failed" . PHP_EOL);
+                }
+                if ($tp && $tp->format('Y-m-d H:i') === $currentTime->format('Y-m-d H:i')) {
+                    return true;
+                } 
+            }
+        }
+
+        return false;
+    }
 
     function __construct() {
         $this->stats = new StatsSQLite();
@@ -905,7 +940,7 @@ class WatchDog {
         }
     }
     
-    public function isOn($schedule) {
+    public function isInTimespan($schedule) {
         // current or user supplied UNIX timestamp
         $timestamp = time();
         // default status
