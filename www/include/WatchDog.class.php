@@ -878,6 +878,28 @@ class WatchDog {
         return false;
     }
 
+    private function isInTimespan($schedule) {
+        // current or user supplied UNIX timestamp
+        $timestamp = time();
+        // default status
+        $status = false;
+        // get current time object
+        $currentTime = (new DateTime())->setTimestamp($timestamp);
+        // loop through time ranges for current day
+        foreach ($schedule[date('D', $timestamp)] as $startTime => $endTime) {
+            // create time objects from start/end times
+            $st = DateTime::createFromFormat('h:i A', $startTime);
+            $ed = DateTime::createFromFormat('h:i A', $endTime);
+
+            // check if current time is within a range
+            if (($st < $currentTime) && ($currentTime < $ed)) {
+                $status = true;
+                break;
+            }
+        }
+        return $status;
+    }
+
     function __construct() {
         $this->stats = new StatsSQLite();
         $this->host_ip = getLocalhostIP();
@@ -919,27 +941,5 @@ class WatchDog {
             return false;
         } finally {
         }
-    }
-    
-    public function isInTimespan($schedule) {
-        // current or user supplied UNIX timestamp
-        $timestamp = time();
-        // default status
-        $status = false;
-        // get current time object
-        $currentTime = (new DateTime())->setTimestamp($timestamp);
-        // loop through time ranges for current day
-        foreach ($schedule[date('D', $timestamp)] as $startTime => $endTime) {
-            // create time objects from start/end times
-            $st = DateTime::createFromFormat('h:i A', $startTime);
-            $ed = DateTime::createFromFormat('h:i A', $endTime);
-
-            // check if current time is within a range
-            if (($st < $currentTime) && ($currentTime < $ed)) {
-                $status = true;
-                break;
-            }
-        }
-        return $status;
     }
 }
