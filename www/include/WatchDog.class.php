@@ -62,7 +62,7 @@ class WatchDog {
         ]
     );
     
-    private $notification_schedule = array(
+    private $checking_schedule = array(
         "overdue" => [
             'Sun' => [],
             'Mon' => ['08:50 AM', '01:50 PM'],
@@ -73,11 +73,11 @@ class WatchDog {
         ],
         "announcement" => [
             'Sun' => [],
-            'Mon' => ['08:05 AM'],
-            'Tue' => ['08:05 AM'],
-            'Wed' => ['08:05 AM'],
-            'Thu' => ['08:05 AM'],
-            'Fri' => ['08:05 AM'],
+            'Mon' => ['08:35 AM'],
+            'Tue' => ['08:35 AM'],
+            'Wed' => ['08:35 AM'],
+            'Thu' => ['08:35 AM'],
+            'Fri' => ['08:35 AM'],
             'Sat' => []
         ],
         "once_a_day" => [
@@ -91,11 +91,11 @@ class WatchDog {
         ],
         "twice_a_day" => [
             'Sun' => [],
-            'Mon' => ['08:59 AM', '02:18 PM'],
-            'Tue' => ['08:59 AM', '02:18 PM'],
-            'Wed' => ['08:59 AM', '02:18 PM'],
-            'Thu' => ['08:59 AM', '02:18 PM'],
-            'Fri' => ['08:59 AM', '02:18 PM'],
+            'Mon' => ['08:59 AM', '01:30 PM'],
+            'Tue' => ['08:59 AM', '01:30 PM'],
+            'Wed' => ['08:59 AM', '01:30 PM'],
+            'Thu' => ['08:59 AM', '01:30 PM'],
+            'Fri' => ['08:59 AM', '01:30 PM'],
             'Sat' => []
         ]
     );
@@ -109,14 +109,14 @@ class WatchDog {
 
     private function isOverdueCheckNeeded() {
         Logger::getInstance()->info("檢查是否需要執行逾期案件檢查 ... ");
-        $result = $this->isOnTime($this->notification_schedule["overdue"]);
+        $result = $this->isOnTime($this->checking_schedule["overdue"]);
         Logger::getInstance()->info('現在是逾期案件檢查'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
 
     private function isAnnouncementCheckNeeded() {
         Logger::getInstance()->info("檢查是否需要執行到期公告案件檢查 ... ");
-        $result = $this->isOnTime($this->notification_schedule["announcement"]);
+        $result = $this->isOnTime($this->checking_schedule["announcement"]);
         Logger::getInstance()->info('現在是到期公告案件檢查'.($result ? "啟動" : "非啟動")."時段。");
         return $result;
     }
@@ -176,7 +176,7 @@ class WatchDog {
     }
 
     private function checkCrossSiteData() {
-        if ($this->isOnTime($this->notification_schedule["twice_a_day"])) {
+        if ($this->isOnTime($this->checking_schedule["twice_a_day"])) {
             $xcase = new XCase();
             // check reg case missing RM99~RM101 data
             Logger::getInstance()->info('開始登記案件跨所註記遺失檢查 ... ');
@@ -210,7 +210,7 @@ class WatchDog {
     }
 
     private function checkValCrossSiteData() {
-        if ($this->isOnTime($this->notification_schedule["twice_a_day"])) {
+        if ($this->isOnTime($this->checking_schedule["twice_a_day"])) {
             $xcase = new XCase();
             // check val case missing SS99~SS101 data
             Logger::getInstance()->info('開始本所管轄地價案件跨所註記遺失檢查 ... ');
@@ -244,7 +244,7 @@ class WatchDog {
     }
 
     private function checkValCrossOtherSitesData() {
-        if ($this->isOnTime($this->notification_schedule["twice_a_day"])) {
+        if ($this->isOnTime($this->checking_schedule["twice_a_day"])) {
             $lxhweb = new LXHWEB(CONNECTION_TYPE::L3HWEB);
             // get rid of our site
             $all = array('HA', 'HB', 'HC', 'HD', 'HE', 'HF', 'HG', 'HH');
@@ -639,7 +639,7 @@ class WatchDog {
     }
 
     private function findProblematicSURCases() {
-        if ($this->isOnTime($this->notification_schedule["once_a_day"])) {
+        if ($this->isOnTime($this->checking_schedule["once_a_day"])) {
             // 找已結案但卻又延期複丈之案件
             $q = new Query();
             $results = $q->getSurProblematicCases();
@@ -697,7 +697,7 @@ class WatchDog {
     }
 
     private function sendForeignerInheritanceRestrictionNotification() {
-        if ($this->isOnTime($this->notification_schedule["once_a_day"])) {
+        if ($this->isOnTime($this->checking_schedule["once_a_day"])) {
             $moicad = new MOICAD();
             $altered = $moicad->getInheritanceRestrictionTODORecordsAdvanced();
             if (count($altered) > 0) {
@@ -797,7 +797,7 @@ class WatchDog {
     }
 
     private function checkRegaDailyStatsData($day = '') {
-        if ($this->isOnTime($this->notification_schedule["once_a_day"])) {
+        if ($this->isOnTime($this->checking_schedule["once_a_day"])) {
             if (empty($day)) {
                 $tw_date = new Datetime("now");
                 // tw format
