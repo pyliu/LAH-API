@@ -666,9 +666,9 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
-	// 查詢預設15分鐘內為私人設定的案件(預設年齡大於60歲或是空值)
+	// 查詢預設1分鐘內為私人設定的案件(預設年齡大於60歲或是空值)
 	// Scheduler for Watchdog class execution window is 15 mins
-	public function getPossibleFruadCase($mins = 15, $age = 59) {
+	public function getPossibleFruadCase($mins = 1, $age = 59) {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
@@ -716,7 +716,7 @@ class MOICAS
 		$this->db_wrapper->getDB()->execute();
 		$arr = $this->db_wrapper->getDB()->fetchAll();
 
-		Logger::getInstance()->info(__METHOD__.": 取得預設15分鐘內為私人設定的案件(預設年齡大於60歲或是空值)：".count($arr)." 筆。");
+		Logger::getInstance()->info(__METHOD__.": 取得 $mins 分鐘內為私人設定的案件(年齡大於 $age 歲或是空值)：".count($arr)." 筆。");
 
 		return $arr;
 	}

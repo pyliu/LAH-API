@@ -91,11 +91,11 @@ class WatchDog {
         ],
         "twice_a_day" => [
             'Sun' => [],
-            'Mon' => ['08:59 AM', '01:59 PM'],
-            'Tue' => ['08:59 AM', '01:59 PM'],
-            'Wed' => ['08:59 AM', '01:59 PM'],
-            'Thu' => ['08:59 AM', '01:59 PM'],
-            'Fri' => ['08:59 AM', '01:59 PM'],
+            'Mon' => ['08:59 AM', '02:18 PM'],
+            'Tue' => ['08:59 AM', '02:18 PM'],
+            'Wed' => ['08:59 AM', '02:18 PM'],
+            'Thu' => ['08:59 AM', '02:18 PM'],
+            'Fri' => ['08:59 AM', '02:18 PM'],
             'Sat' => []
         ]
     );
@@ -846,7 +846,7 @@ class WatchDog {
 
     private function checkPossibleFraudCases() {
         $moicas = new MOICAS();
-        $records = $moicas->getPossibleFruadCase(15, 59);
+        $records = $moicas->getPossibleFruadCase(1, 59);
         if (count($records) > 0) {
             $host_ip = getLocalhostIP();
             $url = "http://".$host_ip.":8080/reg/case/";
@@ -882,15 +882,12 @@ class WatchDog {
 
         if (isset($schedule[$currentDay])) {
             foreach ($schedule[$currentDay] as $timePoint) {
-                $tp = DateTime::createFromFormat('h:i A', $timePoint);
-                if ($tp) {
-                    $tp->setDate($currentTime->format('Y'), $currentTime->format('m'), $currentTime->format('d'));
-                } else {
-                    Logger::getInstance()->warning("$timePoint: Datetime::createFromFormat failed" . PHP_EOL);
-                }
-                if ($tp && $tp->format('Y-m-d H:i') === $currentTime->format('Y-m-d H:i')) {
+                Logger::getInstance()->info(__METHOD__.": $timePoint 👉 ".$currentTime->format('h:i A'));
+                $nowPoint = $currentTime->format('h:i A');
+                if ($timePoint === $nowPoint) {
                     return true;
-                } 
+                }
+                Logger::getInstance()->info(__METHOD__.": ".$nowPoint." 不是 $timePoint ");
             }
         }
 
