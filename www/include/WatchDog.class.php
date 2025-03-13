@@ -882,12 +882,12 @@ class WatchDog {
 
         if (isset($schedule[$currentDay])) {
             foreach ($schedule[$currentDay] as $timePoint) {
-                Logger::getInstance()->info(__METHOD__.": $timePoint 👉 ".$currentTime->format('h:i A'));
+                // Logger::getInstance()->info(__METHOD__.": $timePoint 👉 ".$currentTime->format('h:i A'));
                 $nowPoint = $currentTime->format('h:i A');
                 if ($timePoint === $nowPoint) {
                     return true;
                 }
-                Logger::getInstance()->info(__METHOD__.": ".$nowPoint." 不是 $timePoint ");
+                Logger::getInstance()->info(__METHOD__.": ".$nowPoint." 不是 $timePoint ... 跳過");
             }
         }
 
