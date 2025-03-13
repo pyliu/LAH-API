@@ -870,7 +870,7 @@ class WatchDog {
                 if ($timePoint === $nowPoint) {
                     return true;
                 }
-                Logger::getInstance()->info(__METHOD__.": ".$nowPoint." 不是 $timePoint ... 跳過");
+                // Logger::getInstance()->info(__METHOD__.": ".$nowPoint." 不是 $timePoint ... 跳過");
             }
         }
 
