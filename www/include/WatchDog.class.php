@@ -93,31 +93,26 @@ class WatchDog {
     );
 
     private function isOfficeHours() {
-        Logger::getInstance()->info("檢查是否處於上班時間 ... ");
         $result = $this->isInTimespan($this->schedule_timespan["office"]);
-        Logger::getInstance()->info('現在是'.($result ? "上班" : "下班")."時段。");
+        Logger::getInstance()->info("判斷上班時間 ... $result");
         return $result;
     }
 
     private function twiceADayCheck() {
-        Logger::getInstance()->info("檢查是否需要執行一天兩次的檢查 ... ");
         $result = $this->isOnTime($this->checking_schedule["twice_a_day"]);
-        Logger::getInstance()->info('現在是一天兩次檢查的'.($result ? "啟動" : "非啟動")."時段。");
+        Logger::getInstance()->info("執行一天兩次的檢查 ... $result");
         return $result;
     }
 
     private function isAnnouncementCheckNeeded() {
-        Logger::getInstance()->info("檢查是否需要執行到期公告案件檢查 ... ");
         $result = $this->isOnTime($this->checking_schedule["announcement"]);
-        Logger::getInstance()->info('現在是到期公告案件檢查'.($result ? "啟動" : "非啟動")."時段。");
+        Logger::getInstance()->info("執行到期公告案件檢查 ... $result");
         return $result;
     }
 
     private function isTemperatureNotifyNeeded() {
-        
-        Logger::getInstance()->info("檢查是否需要體溫通知 ... ");
         $result = $this->isInTimespan($this->schedule_timespan["temperature"]);
-        Logger::getInstance()->info('現在是體溫通知'.($result ? "啟動" : "非啟動")."時段。");
+        Logger::getInstance()->info("體溫通知 ... $result");
         return $result;
     }
 
