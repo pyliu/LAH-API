@@ -448,33 +448,21 @@ class WatchDog {
     }
 
     private function sendSurNearOverdueMessage($to_id, $cases) {
-        $cache = Cache::getInstance();
-        $users = $cache->getUserNames();
         $notification = new Notification();
         $url = "http://".$this->host_ip.":8080/sur/expire";
         $displayName = $to_id === "ALL" ? "測量課" : "您";
         $content = "⚠️ ".$this->date."  ".$this->time." $displayName 目前有 ".count($cases)." 件即將逾期案件(未來3天".(count($cases) > 4 ? "，僅顯示前4筆" : "")."):<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量案件查詢頁面]($url)</b> 查看詳細資料。";
+        $title = '測量課即將逾期案件彙總';
         if ($to_id === "ALL") {
-            // $sqlite_user = new SQLiteUser();
-            // $chief = $sqlite_user->getChief('測量課');
-            // if (empty($chief)) {
-            //     Logger::getInstance()->warning('找不到測量課課長帳號，無法傳送即時通知給他/她!!');
-            // } else {
-            //     $this_user = $users[$chief['id']];
-            //     // remove outdated messages
-            //     $notification->removeOutdatedMessageByTitle($chief['id'], '測量課即將逾期案件彙總');
-            //     $lastId = $this->addNotification($content, $chief['id'], "測量課即將逾期案件彙總");
-            //     Logger::getInstance()->info('新增即將逾期測量案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
-            // }
-            // send to sur channel
             // remove outdated messages
-            $notification->removeOutdatedMessageByTitle('sur', '測量課即將逾期案件彙總');
-            $lastId = $this->addNotification('sur', "測量課即將逾期案件彙總");
+            $notification->removeOutdatedMessageByTitle('sur', $title);
+            // send to sur channel
+            $lastId = $this->addNotification($content, 'sur', $title);
             Logger::getInstance()->info('新增即將逾期測量案件通知訊息至 sur 頻道。 '. '('.($lastId === false ? '失敗' : '成功').')');
         } else {
             // remove outdated messages
             $notification->removeOutdatedMessageByTitle($to_id, '您的即將逾期案件統計');
-            $lastId = $this->addNotification($content, $to_id, "您的即將逾期案件統計");
+            $lastId = $this->addNotification($content, $to_id, "您的即將逾期案件統計", true);
         }
     }
 
@@ -521,29 +509,15 @@ class WatchDog {
 
     private function sendSurOverdueMessage($to_id, $cases) {
         $notification = new Notification();
-        $cache = Cache::getInstance();
-        $users = $cache->getUserNames();
         $url = "http://".$this->host_ip.":8080/sur/expire";
         $displayName = $to_id === "ALL" ? "測量課" : "您";
         $content = "🚩 ".$this->date."  ".$this->time." $displayName 目前有 ".count($cases)." 件逾期案件".(count($cases) > 4 ? "(僅顯示前4筆)" : "").":<br/><br/>💥 ".implode("<br/>💥 ", array_slice($cases, 0, 4))."<br/>...<br/>👉 請前往智慧控管系統 <b>[測量案件查詢頁面]($url)</b> 查看詳細資料。";
+        $title = '測量課已逾期測量案件彙總';
         if ($to_id === "ALL") {
-            // $sqlite_user = new SQLiteUser();
-            // $chief = $sqlite_user->getChief('測量課');
-            // if (empty($chief)) {
-            //     Logger::getInstance()->warning('找不到測量課課長帳號，無法傳送即時通知給他/她!!');
-            // } else {
-            //     $this_user = $users[$chief['id']];
-            //     // remove outdated messages
-            //     $notification->removeOutdatedMessageByTitle($chief['id'], '測量課已逾期測量案件彙總');
-            //     // send current message to the channel
-            //     $lastId = $this->addNotification($content, $chief['id'], "測量課已逾期測量案件彙總");
-            //     Logger::getInstance()->info('新增逾期測量案件通知訊息至 '.$chief['id'].' 頻道。 '. '(課長：'.$this_user.'，'.($lastId === false ? '失敗' : '成功').')');
-            // }
-            // send to sur channel
             // remove outdated messages
-            $notification->removeOutdatedMessageByTitle('sur', '測量課已逾期測量案件彙總');
-            // send current message to the channel
-            $lastId = $this->addNotification($content, 'sur', "測量課已逾期測量案件彙總");
+            $notification->removeOutdatedMessageByTitle('sur', $title);
+            // send to sur channel
+            $lastId = $this->addNotification($content, 'sur', $title);
             Logger::getInstance()->info('新增逾期測量案件通知訊息至 sur 頻道。 '. '('.($lastId === false ? '失敗' : '成功').')');
         } else {
             if (empty($to_id)) {
