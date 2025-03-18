@@ -132,7 +132,7 @@ class WatchDog {
         return $sn;
     }
 
-    private function addNotification($message, $to_id, $title = '系統排程訊息', $skip_announcement_convert = false) {
+    private function addNotification($message, $to_id, $title = '系統排程訊息') {
         if (empty($to_id)) {
             Logger::getInstance()->warning("未指定接收者 id 下面訊息無法送出！");
             Logger::getInstance()->warning($message);
@@ -148,7 +148,8 @@ class WatchDog {
             'sender' => '系統排程',
             'from_ip' => getLocalhostIP()
         );
-        $lastId = $notify->addMessage($to_id, $payload, $skip_announcement_convert);
+        $skip_announcement_convertion = true;
+        $lastId = $notify->addMessage($to_id, $payload, $skip_announcement_convertion);
         $nameTag = rtrim("$to_id:".$users[$to_id], ":");
         if ($lastId === false || empty($lastId)) {
             Logger::getInstance()->warning("訊息無法送出給 $nameTag");
@@ -401,7 +402,7 @@ class WatchDog {
             // remove outdated messages
             $notification->removeOutdatedMessageByTitle('reg', '登記課公告到期案件彙總');
             // send to reg chat channel
-            $lastId = $this->addNotification($content, "reg", "登記課公告到期案件彙總", true);
+            $lastId = $this->addNotification($content, "reg", "登記課公告到期案件彙總");
             Logger::getInstance()->info('新增公告到期案件通知訊息至 reg 頻道。 '.($lastId === false ? '失敗' : '成功').')');
         }
     }
@@ -457,7 +458,7 @@ class WatchDog {
             // remove outdated messages
             $notification->removeOutdatedMessageByTitle('sur', $title);
             // send to sur channel
-            $lastId = $this->addNotification($content, 'sur', $title, true);
+            $lastId = $this->addNotification($content, 'sur', $title);
             Logger::getInstance()->info('新增即將逾期測量案件通知訊息至 sur 頻道。 '. '('.($lastId === false ? '失敗' : '成功').')');
         } else {
             // remove outdated messages
@@ -517,7 +518,7 @@ class WatchDog {
             // remove outdated messages
             $notification->removeOutdatedMessageByTitle('sur', $title);
             // send to sur channel
-            $lastId = $this->addNotification($content, 'sur', $title, true);
+            $lastId = $this->addNotification($content, 'sur', $title);
             Logger::getInstance()->info('新增逾期測量案件通知訊息至 sur 頻道。 '. '('.($lastId === false ? '失敗' : '成功').')');
         } else {
             if (empty($to_id)) {
@@ -559,7 +560,7 @@ class WatchDog {
         // remove outdated messages
         $notification->removeOutdatedMessageByTitle($to_id, '測量課關注逕辦建物滅失追蹤案件彙總');
         // send current message to $to_id channel AND SKIP Announcement convertion
-        $lastId = $this->addNotification($content, $to_id, '測量課關注逕辦建物滅失追蹤案件彙總', true);
+        $lastId = $this->addNotification($content, $to_id, '測量課關注逕辦建物滅失追蹤案件彙總');
         Logger::getInstance()->info('新增關注逕辦建物滅失追蹤案件通知訊息至 '.$to_id.' 頻道。 '.($lastId === false ? '失敗' : '成功').')');
     }
 
@@ -686,7 +687,7 @@ class WatchDog {
                     $notification = new Notification();
                     $notification->removeOutdatedMessageByTitle('reg', '外國人繼承限制通知');
                     // send to reg chat channel
-                    $this->addNotification($message, "reg", '外國人繼承限制通知', true);
+                    $this->addNotification($message, "reg", '外國人繼承限制通知');
                 }
             }
         }
@@ -742,13 +743,13 @@ class WatchDog {
                     $notification->removeOutdatedMessageByTitle('reg', '地政系統跨域服務監測');
 
                     // send to reg chat channel
-                    $this->addNotification($message, "reg", '地政系統跨域服務監測', true);
+                    $this->addNotification($message, "reg", '地政系統跨域服務監測');
                 } else {
                     if ($prevTicketFlag) {
                         $message = "##### 🟢 ".$this->date."  ".$this->time." 地政系統跨域服務皆已回復。";
                         // $message .= "\r\n***\r\n詳情請參考 👉 $url";
                         // send to lds chat channel
-                        $this->addNotification($message, "reg", '地政系統跨域服務監測', true);
+                        $this->addNotification($message, "reg", '地政系統跨域服務監測');
                     }
                     // clear ticket
                     @unlink($ticket);
@@ -803,7 +804,7 @@ class WatchDog {
         $notification = new Notification();
         $notification->removeOutdatedMessageByTitle('reg', '登記土地建物統計資料通知');
         // send messsage to reg chat room as well
-        $lastId = $this->addNotification($content, "reg", "登記土地建物統計資料通知", true);
+        $lastId = $this->addNotification($content, "reg", "登記土地建物統計資料通知");
         Logger::getInstance()->info('新增登記土地建物統計資料通知訊息至 reg 頻道。 '.($lastId === false ? '失敗' : '成功').')');
     }
 
@@ -822,7 +823,7 @@ class WatchDog {
             // $notification = new Notification();
             // $notification->removeOutdatedMessageByTitle('reg', '登記土地建物統計資料通知');
             // send notification to 登記課
-            $lastId = $this->addNotification($content, "reg", "私人設定警訊通知", true);
+            $lastId = $this->addNotification($content, "reg", "私人設定警訊通知");
             Logger::getInstance()->info('新增私人設定警訊通知至 reg 頻道。 '.($lastId === false ? '失敗' : '成功').')');
         }
     }
@@ -895,7 +896,7 @@ class WatchDog {
         $notification = new Notification();
         $notification->removeOutdatedMessageByTitle('reg', '外國人繼承限制通知');
         // send to reg chat channel
-        $this->addNotification($message, "HA10013859", '外國人繼承限制通知', true);
+        $this->addNotification($message, "HA10013859", '外國人繼承限制通知');
     }
 
     public function do() {
