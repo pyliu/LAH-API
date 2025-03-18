@@ -457,12 +457,12 @@ class WatchDog {
             // remove outdated messages
             $notification->removeOutdatedMessageByTitle('sur', $title);
             // send to sur channel
-            $lastId = $this->addNotification($content, 'sur', $title);
+            $lastId = $this->addNotification($content, 'sur', $title, true);
             Logger::getInstance()->info('新增即將逾期測量案件通知訊息至 sur 頻道。 '. '('.($lastId === false ? '失敗' : '成功').')');
         } else {
             // remove outdated messages
             $notification->removeOutdatedMessageByTitle($to_id, '您的即將逾期案件統計');
-            $lastId = $this->addNotification($content, $to_id, "您的即將逾期案件統計", true);
+            $lastId = $this->addNotification($content, $to_id, "您的即將逾期案件統計");
         }
     }
 
@@ -517,7 +517,7 @@ class WatchDog {
             // remove outdated messages
             $notification->removeOutdatedMessageByTitle('sur', $title);
             // send to sur channel
-            $lastId = $this->addNotification($content, 'sur', $title);
+            $lastId = $this->addNotification($content, 'sur', $title, true);
             Logger::getInstance()->info('新增逾期測量案件通知訊息至 sur 頻道。 '. '('.($lastId === false ? '失敗' : '成功').')');
         } else {
             if (empty($to_id)) {
@@ -527,7 +527,7 @@ class WatchDog {
             }
             // remove outdated messages
             $notification->removeOutdatedMessageByTitle($to_id, '您的已逾期測量案件統計');
-            $lastId = $this->addNotification($content, $to_id, "您的已逾期測量案件統計", true);
+            $lastId = $this->addNotification($content, $to_id, "您的已逾期測量案件統計");
         }
     }
 
