@@ -89,6 +89,15 @@ class WatchDog {
             'Thu' => ['08:59 AM', '01:30 PM'],
             'Fri' => ['08:59 AM', '01:30 PM'],
             'Sat' => []
+        ],
+        "twice_a_day_alt" => [
+            'Sun' => [],
+            'Mon' => ['09:04 AM', '01:35 PM'],
+            'Tue' => ['09:04 AM', '01:35 PM'],
+            'Wed' => ['09:04 AM', '01:35 PM'],
+            'Thu' => ['09:04 AM', '01:35 PM'],
+            'Fri' => ['09:04 AM', '01:35 PM'],
+            'Sat' => []
         ]
     );
 
@@ -100,6 +109,12 @@ class WatchDog {
 
     private function twiceADayCheck() {
         $result = $this->isOnTime($this->checking_schedule["twice_a_day"]);
+        Logger::getInstance()->info("執行一天兩次的檢查 ... $result");
+        return $result;
+    }
+
+    private function twiceADayAltCheck() {
+        $result = $this->isOnTime($this->checking_schedule["twice_a_day_alt"]);
         Logger::getInstance()->info("執行一天兩次的檢查 ... $result");
         return $result;
     }
@@ -468,7 +483,7 @@ class WatchDog {
     }
 
     private function findSurOverdueCases() {
-        if (!$this->twiceADayCheck()) {
+        if (!$this->twiceADayAltCheck()) {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期測量案件檢測。");
             return false;
         }
