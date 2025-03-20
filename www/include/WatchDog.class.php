@@ -858,11 +858,13 @@ class WatchDog {
      * ];
      */
     private function isOnTime($schedule) {
+        // Logger::getInstance()->info(__METHOD__."檢測時段：".$this->checkingHM);
         if (isset($schedule[$this->checkingDay])) {
             // Logger::getInstance()->info(__METHOD__."檢測時段：".implode(', ', $schedule[$currentDay]));
             foreach ($schedule[$this->checkingDay] as $timePoint) {
-                // Logger::getInstance()->info(__METHOD__.": $timePoint 👉 ".$currentTime->format('h:i A'));
+                // Logger::getInstance()->info(__METHOD__.": 設定時間點 $timePoint");
                 if ($timePoint === $this->checkingHM) {
+                    Logger::getInstance()->info(__METHOD__."設定時段：$timePoint ✔");
                     return true;
                 }
                 // Logger::getInstance()->info(__METHOD__.": ".$nowPoint." 不是 $timePoint ... 跳過");
