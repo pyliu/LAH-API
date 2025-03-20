@@ -22,6 +22,9 @@ class WatchDog {
     private $host_ip = '';
     private $date = '';
     private $time = '';
+    private $checkingHM = '';
+    private $checkingDay = '';
+    private $checkingTime = 0;
 
     private $schedule_timespan = array(
         "office" => [
@@ -855,22 +858,16 @@ class WatchDog {
      * ];
      */
     private function isOnTime($schedule) {
-        $timestamp = time();
-        $currentTime = (new DateTime())->setTimestamp($timestamp);
-        $currentDay = date('D', $timestamp);
-
-        if (isset($schedule[$currentDay])) {
+        if (isset($schedule[$this->checkingDay])) {
             // Logger::getInstance()->info(__METHOD__."檢測時段：".implode(', ', $schedule[$currentDay]));
-            foreach ($schedule[$currentDay] as $timePoint) {
+            foreach ($schedule[$this->checkingDay] as $timePoint) {
                 // Logger::getInstance()->info(__METHOD__.": $timePoint 👉 ".$currentTime->format('h:i A'));
-                $nowPoint = $currentTime->format('h:i A');
-                if ($timePoint === $nowPoint) {
+                if ($timePoint === $this->checkingHM) {
                     return true;
                 }
                 // Logger::getInstance()->info(__METHOD__.": ".$nowPoint." 不是 $timePoint ... 跳過");
             }
         }
-
         return false;
     }
 
@@ -917,6 +914,10 @@ class WatchDog {
     public function do() {
         try {
             if ($this->isOfficeHours()) {
+                // remember this batch execution point
+                $this->checkingTime = time();
+                $this->checkingDay = date('D', $this->checkingTime);
+                $this->checkingHM = (new DateTime())->setTimestamp($this->checkingTime)->format('h:i A');
                 /**
                  * 系統檢測作業
                  */
@@ -935,6 +936,8 @@ class WatchDog {
                 return true;
             }
             return false;
+        } catch (Exception $ex) {
+            Logger::getInstance()->warning(__METHOD__.': 執行 Watchdog 系統檢測作業發生例外錯誤。('.$ex->getMessage().')');
         } finally {
         }
     }
