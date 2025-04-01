@@ -108,6 +108,20 @@ switch ($_POST["type"]) {
 			"raw" => $rows
 		));
 		break;
+	case "moiadm_failure_sms_resend":
+		// 重送失敗的地籍異動即時通紀錄
+		Logger::getInstance()->info("XHR [moiadm_failure_sms_resend] resending MOIADM failure SMS request.");
+
+		$tw_date = $_POST['tw_date'];
+		
+		$result = $mock ? $cache->get('moiadm_failure_sms_resend') : $moisms->resendFailureMessageByDate($tw_date);
+		$cache->set('moiadm_failure_sms_resend', $result);
+		Logger::getInstance()->info("XHR [moiadm_failure_sms_resend] operation has been done.");
+		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+		echoJSONResponse("重送失敗的地籍異動即時通紀錄完成", $status_code, array(
+			"raw" => $result
+		));
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
