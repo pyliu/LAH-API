@@ -108,15 +108,41 @@ switch ($_POST["type"]) {
 			"raw" => $rows
 		));
 		break;
+	case "moiadm_failure_sms_query":
+		// 取得失敗的地籍異動即時通紀錄
+		Logger::getInstance()->info("XHR [moiadm_failure_sms_query] get MOIADM failure SMS request.");
+
+		$tw_date = $_POST['tw_date'];
+
+		$valid = isValidTaiwanDate($tw_date);
+		$result = false;
+		if ($valid) {
+			$result = $mock ? $cache->get('moiadm_failure_sms_query') : $moisms->getMOIADM_SMSLOGFailureMessageByDate($tw_date);
+			$cache->set('moiadm_failure_sms_query', $result);
+			Logger::getInstance()->info("XHR [moiadm_failure_sms_query] operation has been done.");
+		} else {
+			Logger::getInstance()->info("XHR [moiadm_failure_sms_query] tw_date 參數格式錯誤. ($tw_date)");
+		}
+		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+		echoJSONResponse("重送失敗的地籍異動即時通紀錄完成", $status_code, array(
+			"raw" => $result
+		));
+		break;
 	case "moiadm_failure_sms_resend":
 		// 重送失敗的地籍異動即時通紀錄
 		Logger::getInstance()->info("XHR [moiadm_failure_sms_resend] resending MOIADM failure SMS request.");
 
 		$tw_date = $_POST['tw_date'];
-		
-		$result = $mock ? $cache->get('moiadm_failure_sms_resend') : $moisms->resendFailureMessageByDate($tw_date);
-		$cache->set('moiadm_failure_sms_resend', $result);
-		Logger::getInstance()->info("XHR [moiadm_failure_sms_resend] operation has been done.");
+
+		$valid = isValidTaiwanDate($tw_date);
+		$result = false;
+		if ($valid) {
+			$result = $mock ? $cache->get('moiadm_failure_sms_resend') : $moisms->resendMOIADM_SMSFailureMessageByDate($tw_date);
+			$cache->set('moiadm_failure_sms_resend', $result);
+			Logger::getInstance()->info("XHR [moiadm_failure_sms_resend] operation has been done.");
+		} else {
+			Logger::getInstance()->info("XHR [moiadm_failure_sms_resend] tw_date 參數格式錯誤. ($tw_date)");
+		}
 		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
 		echoJSONResponse("重送失敗的地籍異動即時通紀錄完成", $status_code, array(
 			"raw" => $result

@@ -317,9 +317,41 @@ class MOISMS {
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
 	/**
+	 * Find MOIADM.SMSLOG faulure records by date
+	 */
+	public function getMOIADM_SMSLOGFailureMessageByDate($tw_date) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		Logger::getInstance()->info(__METHOD__.': 取得 MOIADM SMSLOG 失敗資料 BY '.$tw_date.'。');
+		$this->db_wrapper->getDB()->parse("
+			SELECT *
+				FROM MOIADM.SMSLOG A
+		 WHERE MS07_1 = :bv_date
+				AND MS_TYPE = 'M'
+				AND MS31 = 'F'
+				AND MS14 IS NOT NULL
+				AND NOT EXISTS (SELECT 'X'
+								FROM MOIADM.SMSLOG B
+							WHERE B.MS03 = A.MS03
+								AND B.MS04_1 = A.MS04_1
+								AND B.MS04_2 = A.MS04_2
+								AND B.MS30 = A.MS30
+								AND B.MS_TYPE = A.MS_TYPE
+								AND B.MS14 = A.MS14
+								AND B.MS31 = 'S')
+			ORDER BY MS14, MS07_1, MS07_2
+		");
+		$this->db_wrapper->getDB()->bind(":bv_date", $tw_date);
+		$this->db_wrapper->getDB()->execute();
+		$rows = $this->db_wrapper->getDB()->fetchAll();
+		Logger::getInstance()->info(__METHOD__.': '.$tw_date.' 取得 '.count($rows).' 筆失敗資料 BY 。');
+		return $rows;
+	}
+	/**
 	 * Find failure data and insert into MOIADM.SMSWAIT table by date.
 	 */
-	public function resendFailureMessageByDate($tw_date) {
+	public function resendMOIADM_SMSFailureMessageByDate($tw_date) {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}

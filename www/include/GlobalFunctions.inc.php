@@ -6,6 +6,30 @@ require_once("OraDB.class.php");
 require_once("SQLiteUser.class.php");
 require_once("Logger.class.php");
 
+function isValidTaiwanDate($tw_date) {
+    // 檢查是否為 7 碼數字
+    if (!preg_match('/^\d{7}$/', $tw_date)) {
+        return false;
+    }
+
+    // 解析年、月、日
+    $year = intval(substr($tw_date, 0, 3)) + 1911; // 轉換為西元年
+    $month = intval(substr($tw_date, 3, 2));
+    $day = intval(substr($tw_date, 5, 2));
+
+    // 檢查月份是否有效
+    if ($month < 1 || $month > 12) {
+        return false;
+    }
+
+    // 檢查日期是否有效
+    if ($day < 1 || $day > cal_days_in_month(CAL_GREGORIAN, $month, $year)) {
+        return false;
+    }
+
+    return true;
+}
+
 function convertMBNumberString($input) {
     if (empty($input)) {
         return '';
