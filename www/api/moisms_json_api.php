@@ -117,15 +117,15 @@ switch ($_POST["type"]) {
 		$valid = isValidTaiwanDate($tw_date);
 		$result = false;
 		if ($valid) {
-			$result = $mock ? $cache->get('moiadm_failure_sms_query') : $moisms->getMOIADM_SMSLOGFailureMessageByDate($tw_date);
-			$cache->set('moiadm_failure_sms_query', $result);
+			$rows = $mock ? $cache->get('moiadm_failure_sms_query') : $moisms->getMOIADM_SMSLOGFailureMessageByDate($tw_date);
+			$cache->set('moiadm_failure_sms_query', $rows);
 			Logger::getInstance()->info("XHR [moiadm_failure_sms_query] operation has been done.");
 		} else {
 			Logger::getInstance()->info("XHR [moiadm_failure_sms_query] tw_date 參數格式錯誤. ($tw_date)");
 		}
 		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
-		echoJSONResponse("重送失敗的地籍異動即時通紀錄完成", $status_code, array(
-			"raw" => $result
+		echoJSONResponse("取得失敗的地籍異動即時通紀錄完成", $status_code, array(
+			"raw" => $rows
 		));
 		break;
 	case "moiadm_failure_sms_resend":
