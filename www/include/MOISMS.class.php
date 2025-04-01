@@ -316,4 +316,55 @@ class MOISMS {
 		$this->db_wrapper->getDB()->execute();
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
+	/**
+	 * Find failure data and insert into MOIADM.SMSWAIT table by date.
+	 */
+	public function resendFailureMessageByDate($tw_date) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		Logger::getInstance()->info(__METHOD__.": 取得 $tw_date MOIADM.SMSLOG 裡失敗資料並插入重送佇列 MOIADM.SMSWAIT。");
+		$this->db_wrapper->getDB()->parse("
+			INSERT INTO SSMSWAIT
+			(MS03,
+			MS04_1,
+			MS04_2,
+			MS07_1,
+			MS07_2,
+			MS30,
+			MS_TYPE,
+			MS14,
+			MS_NOTE,
+			MS32)
+			SELECT MS03,
+						MS04_1,
+						MS04_2,
+						(select to_char(sysdate, 'YYYYMMDD') - 19110000 from dual),
+						(select to_char(sysdate, 'HH24MISS') from dual),
+						MS30,
+						MS_TYPE,
+						MS14,
+						MS_NOTE,
+						1
+				FROM ssmslog A
+			where ms07_1 = :bv_date
+				and MS_TYPE = 'M'
+				AND MS31 = 'F'
+				AND MS14 IS NOT NULL
+				AND NOT EXISTS (SELECT 'X'
+								FROM ssmslog B
+							WHERE B.MS03 = A.MS03
+								AND B.MS04_1 = A.MS04_1
+								AND B.MS04_2 = A.MS04_2
+								AND B.MS30 = A.MS30
+								AND B.MS_TYPE = A.MS_TYPE
+								AND B.MS14 = A.MS14
+								AND B.MS31 = 'S')
+			ORDER BY MS14, MS07_1, MS07_2
+		");
+		$this->db_wrapper->getDB()->bind(":bv_date", $tw_date);
+		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+		Logger::getInstance()->info(__METHOD__.": 插入重送佇列 ".$result ? "成功" : "失敗"."。");
+		return $result;
+	}
 }
