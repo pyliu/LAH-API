@@ -70,6 +70,7 @@ class MOISMS {
 	}
 	/**
 	 * Find MOIADM.SMSLog records by date
+	 * 地籍異動即時通/指定送達處所 使用這個表格紀錄
 	 */
 	public function getMOIADMSMSLogRecordsByDate($st, $ed) {
 		if (!$this->db_wrapper->reachable()) {
@@ -178,6 +179,8 @@ class MOISMS {
 	}
 	/**
 	 * Find MOICAS.SMS_MA04 records
+	 * 看起來是簡訊建檔功能(H0CAS027)使用的表格
+	 * 資料看起來多是寄送跨域代收案件通知申請人使用
 	 */
 	public function getMOICASSMS_MA04Records($keyword) {
 		if (!$this->db_wrapper->reachable()) {
@@ -190,7 +193,11 @@ class MOISMS {
 				SUBSTR(t.MA4_NO, 1, 3) AS SMS_YEAR,
 				SUBSTR(t.MA4_NO, 4, 4) AS SMS_CODE,
 				SUBSTR(t.MA4_NO, 8, 6) AS SMS_NUMBER,
-				'".mb_convert_encoding('跨域代收代寄', 'BIG5', 'UTF-8')."' AS SMS_TYPE,
+				(CASE
+					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('隱匿', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', 'BIG5', 'UTF-8')."'
+					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('跨縣市', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', 'BIG5', 'UTF-8')."'
+					ELSE '".mb_convert_encoding('手動', 'BIG5', 'UTF-8')."'
+				END) AS SMS_TYPE,
 				t.EDITDATE AS SMS_DATE,
 				t.EDITTIME AS SMS_TIME,
 				t.MA4_MP AS SMS_CELL,
@@ -226,7 +233,11 @@ class MOISMS {
 				SUBSTR(t.MA4_NO, 1, 3) AS SMS_YEAR,
 				SUBSTR(t.MA4_NO, 4, 4) AS SMS_CODE,
 				SUBSTR(t.MA4_NO, 8, 6) AS SMS_NUMBER,
-				'".mb_convert_encoding('跨域代收代寄', 'BIG5', 'UTF-8')."' AS SMS_TYPE,
+				(CASE
+					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('隱匿', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', 'BIG5', 'UTF-8')."'
+					WHEN t.MA4_CONT LIKE '%".mb_convert_encoding('跨縣市', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', 'BIG5', 'UTF-8')."'
+					ELSE '".mb_convert_encoding('手動', 'BIG5', 'UTF-8')."'
+				END) AS SMS_TYPE,
 				t.EDITDATE AS SMS_DATE,
 				t.EDITTIME AS SMS_TIME,
 				t.MA4_MP AS SMS_CELL,
@@ -248,6 +259,7 @@ class MOISMS {
 	}
 	/**
 	 * Find MOICAS.SMS_MA05 records
+	 * 感覺上是 住址隱匿/代收代寄/手動建檔/部分異動即時通 使用
 	 */
 	public function getMOICASSMS_MA05Records($keyword) {
 		if (!$this->db_wrapper->reachable()) {
@@ -260,7 +272,11 @@ class MOISMS {
 				SUBSTR(t.MA5_NO, 1, 3) AS SMS_YEAR,
 				SUBSTR(t.MA5_NO, 4, 4) AS SMS_CODE,
 				SUBSTR(t.MA5_NO, 8, 6) AS SMS_NUMBER,
-				'".mb_convert_encoding('其他(住址隱匿/代收代寄/手動)', 'BIG5', 'UTF-8')."' AS SMS_TYPE,
+				(CASE
+					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('隱匿', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', 'BIG5', 'UTF-8')."'
+					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('跨縣市', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', 'BIG5', 'UTF-8')."'
+					ELSE '".mb_convert_encoding('手動', 'BIG5', 'UTF-8')."'
+				END) AS SMS_TYPE,
 				t.MA5_SDATE AS SMS_DATE,
 				t.MA5_STIME AS SMS_TIME,
 				t.MA5_MP AS SMS_CELL,
@@ -296,7 +312,11 @@ class MOISMS {
 				SUBSTR(t.MA5_NO, 1, 3) AS SMS_YEAR,
 				SUBSTR(t.MA5_NO, 4, 4) AS SMS_CODE,
 				SUBSTR(t.MA5_NO, 8, 6) AS SMS_NUMBER,
-				'".mb_convert_encoding('其他(住址隱匿/代收代寄/手動)', 'BIG5', 'UTF-8')."' AS SMS_TYPE,
+				(CASE
+					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('隱匿', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('住址隱匿', 'BIG5', 'UTF-8')."'
+					WHEN t.MA5_CONT LIKE '%".mb_convert_encoding('跨縣市', 'BIG5', 'UTF-8')."%' THEN '".mb_convert_encoding('跨域代收代寄', 'BIG5', 'UTF-8')."'
+					ELSE '".mb_convert_encoding('手動', 'BIG5', 'UTF-8')."'
+				END) AS SMS_TYPE,
 				t.MA5_SDATE AS SMS_DATE,
 				t.MA5_STIME AS SMS_TIME,
 				t.MA5_MP AS SMS_CELL,
