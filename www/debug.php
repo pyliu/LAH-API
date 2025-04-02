@@ -1,7 +1,7 @@
 ﻿<?php
 require_once("./include/init.php");
 require_once(ROOT_DIR."/include/SQLiteAdminActionLog.class.php");
-require_once(ROOT_DIR."/include/MOICAS.class.php");
+require_once(ROOT_DIR."/include/MOISMS.class.php");
 require 'vendor/autoload.php';
 
 try {
@@ -9,9 +9,9 @@ try {
     // $records = SQLiteAdminActionLog::getInstance()->get(time(), time() - 86400);
     // var_dump($records);
 
-    $moicas = new MOICAS();
-    $records = $moicas->getPossibleFruadCase(180, 59);
-    var_dump($records);
+    $moisms = new MOISMS();
+    $result = $moisms->manualSendSMS('0911225023', '測試!!');
+    var_dump($result);
 
     // $cpuInfo = getCpuInfo();
     // if (!empty($cpuInfo)) {

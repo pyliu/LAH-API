@@ -29,6 +29,126 @@ class MOISMS {
 		$this->db_wrapper = null;
 	}
 	/**
+	 * 使用晶茂在 webapp 裡的 /message/* API去連線到局端送111簡訊(測試中...)
+	 */
+	public function sendToMoi(string $tel, string $subject, string $msg): bool {
+    $ret = true;
+    $success = "0";
+
+    try {
+        // STEP ONE 登入
+        $ch = curl_init("http://" . getMA0_LINE() . "/message/apisend/login.jsp");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+            'userid' => getMA0_ID(),
+            'password' => getMA0_PWD(),
+        ]));
+        curl_setopt($ch, CURLOPT_TIMEOUT, 4); // 4 秒 timeout
+
+        $res = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            error_log("cURL Error: " . curl_error($ch));
+            $ret = false;
+        } else if (!str_starts_with($res, "0: success!")) {
+            error_log("STEP ONE 登入-發送失敗:" . $tel . ":" . $res);
+            $i = strpos($res, ":");
+            $apiResult = trim(substr($res, $i + 1));
+            setAPI_SENDMSG($apiResult);
+            $ret = false;
+        }
+
+        curl_close($ch);
+
+        if ($ret) {
+            // STEP TWO 指定訊息接收者
+            $ch = curl_init("http://" . getMA0_LINE() . "/message/apisend/receiver_sms.jsp");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                'receiver' => $tel,
+            ]));
+            curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+
+            $res = curl_exec($ch);
+
+            if (curl_errno($ch)) {
+                error_log("cURL Error: " . curl_error($ch));
+                $ret = false;
+            } else if (!str_starts_with($res, "0: success!")) {
+                error_log("STEP TWO 指定訊息接收者-發送失敗:" . $tel . ":" . $res);
+                $i = strpos($res, ":");
+                $apiResult = trim(substr($res, $i + 1));
+                setAPI_SENDMSG($apiResult);
+                $ret = false;
+            }
+
+            curl_close($ch);
+        }
+
+        if ($ret) {
+            // STEP THREE 指定訊息標題,訊息內容,傳送形式
+            $ch = curl_init("http://" . getMA0_LINE() . "/message/apisend/sendmessage.jsp");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                'subject' => base64_encode($subject),
+                'messagebody' => base64_encode($msg),
+                'sendtype' => "0",
+            ]));
+            curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+
+            $res = curl_exec($ch);
+
+            if (curl_errno($ch)) {
+                error_log("cURL Error: " . curl_error($ch));
+                $ret = false;
+            } else if (!str_starts_with($res, "0: success!")) {
+                error_log("STEP THREE 指定訊息標題,訊息內容,傳送形式-發送失敗:" . $tel . ":" . $res);
+                $i = strpos($res, ":");
+                $apiResult = trim(substr($res, $i + 1));
+                setAPI_SENDMSG($apiResult);
+                $ret = false;
+            }
+
+            curl_close($ch);
+        }
+
+        if ($ret) {
+            // STEP FOUR 發送訊息
+            $ch = curl_init("http://" . getMA0_LINE() . "/message/apisend/send.jsp");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+
+            $res = curl_exec($ch);
+
+            if (curl_errno($ch)) {
+                error_log("cURL Error: " . curl_error($ch));
+                $ret = false;
+            } else if (!str_starts_with($res, "0: success!")) {
+                error_log("STEP FOUR 發送訊息-發送失敗:" . $tel . ":" . $res);
+                $i = strpos($res, ":");
+                $apiResult = trim(substr($res, $i + 1));
+                setAPI_SENDMSG($apiResult);
+                $ret = false;
+            } else {
+                error_log("發送成功:" . $tel . ":" . $res);
+            }
+
+            curl_close($ch);
+        }
+
+    } catch (Exception $ex) {
+        error_log("非預期-發送失敗:" . $tel);
+        error_log($ex->getMessage());
+        $ret = false;
+    }
+
+    return $ret;
+	}
+	/**
 	 * Find MOIADM.SMSLog records
 	 */
 	public function getMOIADMSMSLogRecords($keyword) {
@@ -260,7 +380,7 @@ class MOISMS {
 	}
 	/**
 	 * Find MOICAS.SMS_MA05 records
-	 * 感覺上是 住址隱匿/代收代寄/手動建檔/部分異動即時通 使用
+	 * 感覺上是 住址隱匿/代收代寄/手動建檔 使用
 	 */
 	public function getMOICASSMS_MA05Records($keyword) {
 		if (!$this->db_wrapper->reachable()) {
@@ -417,7 +537,7 @@ class MOISMS {
 		");
 		$this->db_wrapper->getDB()->bind(":bv_date", $tw_date);
 		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
-		Logger::getInstance()->info(__METHOD__.": 插入等待佇列 ".$result ? "成功" : "失敗"."。");
+		Logger::getInstance()->info(__METHOD__.": 插入等待佇列 ".($result ? "成功" : "失敗")."。");
 		return $result;
 	}
 	/**
@@ -467,7 +587,86 @@ class MOISMS {
 		$this->db_wrapper->getDB()->bind(":bv_ms14", $record['MS14']);
 		$this->db_wrapper->getDB()->bind(":bv_ms_note", $record['MS_NOTE']);
 		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
-		Logger::getInstance()->info(__METHOD__.": 插入等待佇列 ".$result ? "成功" : "失敗"."。");
+		Logger::getInstance()->info(__METHOD__.": 插入等待佇列 ".($result ? "成功" : "失敗")."。");
+		return $result;
+	}
+	/**
+	 * 查詢最新 MA5_NO 序號
+	 */
+	public function getNextMA5_NO() {
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+		global $today;
+		$next_no = $today.'000001';
+		$this->db_wrapper->getDB()->parse("
+			SELECT  (MA5_NO + 1) AS NEXT_NO
+			FROM MOICAS.SMS_MA05
+			WHERE ROWNUM = 1
+			ORDER BY MA5_NO DESC
+		");
+		$this->db_wrapper->getDB()->execute();
+		$row = $this->db_wrapper->getDB()->fetch();
+		if (!empty($row)) {
+			$next_no = $row['NEXT_NO'];
+		}
+		Logger::getInstance()->info(__METHOD__.": 取得下一個 MOICAS.SMS_MA05 序號 $next_no 。");
+		return $next_no;
+	}
+	/**
+	 * 使用 MOICAS.SMS_MA05 來傳送手動建檔訊息
+	 * MA5_TYPE: 0 👉 immediately, 1 👉 reserved
+	 * MA5_RDATE: MA5_TYPE = 1 時必填
+	 * MA5_RTIME: MA5_TYPE = 1 時必填
+	 * MA5_STATUS: 1 👉 READY, 2 👉 OK, 3 👉 RETRY LIMIT REACHED, 4 👉 RETRY
+	 */
+	public function manualSendSMS($cell, $cont, $name = __METHOD__) {
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+		Logger::getInstance()->info(__METHOD__.": 插入 MOICAS.SMS_MA05 以利人工發送簡訊。");
+		$this->db_wrapper->getDB()->parse("
+			INSERT INTO MOICAS.SMS_MA05
+				(MA5_NO,
+				MA5_MID,
+				MA5_CDATE,
+				MA5_CTIME,
+				MA5_NAME,
+				MA5_MP,
+				MA5_CONT,
+				MA5_TYPE,
+				MA5_RDATE,
+				MA5_RTIME,
+				MA5_STATUS,
+				MA5_AGAIN,
+				EDITID,
+				EDITDATE,
+				EDITTIME)
+			VALUES (
+			  :bv_ma5_no,
+				'MOISMS-API',
+				TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000,
+				TO_CHAR(SYSDATE, 'HH24MISS'),
+				:bv_ma5_name,
+				:bv_ma5_mp,
+				:bv_ma5_cont,
+				'0',
+				'',
+				'',
+				'1',
+				'0',
+				'MOISMS-API',
+				TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000,
+				TO_CHAR(SYSDATE, 'HH24MISS')
+			)
+		");
+		$next_no = $this->getNextMA5_NO();
+		$this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
+		$this->db_wrapper->getDB()->bind(":bv_ma5_name", mb_convert_encoding($name, 'BIG5', 'UTF-8'));
+		$this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
+		$this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($cont, 'BIG5', 'UTF-8'));
+		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+		Logger::getInstance()->info(__METHOD__.": 插入 MOICAS.SMS_MA05 ($next_no) ".($result ? "成功" : "失敗")."。");
 		return $result;
 	}
 }
