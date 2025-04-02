@@ -117,7 +117,7 @@ switch ($_POST["type"]) {
 		$valid = isValidTaiwanDate($tw_date);
 		$result = false;
 		if ($valid) {
-			$rows = $mock ? $cache->get('moiadm_failure_sms_query') : $moisms->getMOIADM_SMSLOGFailureMessageByDate($tw_date);
+			$rows = $mock ? $cache->get('moiadm_failure_sms_query') : $moisms->getMOIADMSMSLOGFailureRecordsByDate($tw_date);
 			$cache->set('moiadm_failure_sms_query', $rows);
 			Logger::getInstance()->info("XHR [moiadm_failure_sms_query] operation has been done.");
 		} else {
@@ -137,7 +137,7 @@ switch ($_POST["type"]) {
 		$valid = isValidTaiwanDate($tw_date);
 		$result = false;
 		if ($valid) {
-			$result = $mock ? $cache->get('moiadm_failure_sms_resend') : $moisms->resendMOIADM_SMSFailureMessageByDate($tw_date);
+			$result = $mock ? $cache->get('moiadm_failure_sms_resend') : $moisms->resendMOIADMSMSFailureRecordsByDate($tw_date);
 			$cache->set('moiadm_failure_sms_resend', $result);
 			Logger::getInstance()->info("XHR [moiadm_failure_sms_resend] operation has been done.");
 		} else {

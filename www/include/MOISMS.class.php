@@ -319,7 +319,7 @@ class MOISMS {
 	/**
 	 * Find MOIADM.SMSLOG faulure records by date
 	 */
-	public function getMOIADM_SMSLOGFailureMessageByDate($tw_date) {
+	public function getMOIADMSMSLOGFailureRecordsByDate($tw_date) {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
@@ -351,13 +351,13 @@ class MOISMS {
 	/**
 	 * Find failure data and insert into MOIADM.SMSWAIT table by date.
 	 */
-	public function resendMOIADM_SMSFailureMessageByDate($tw_date) {
+	public function resendMOIADMSMSFailureRecordsByDate($tw_date) {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
 		Logger::getInstance()->info(__METHOD__.": 取得 $tw_date MOIADM.SMSLOG 裡失敗資料並插入重送佇列 MOIADM.SMSWAIT。");
 		$this->db_wrapper->getDB()->parse("
-			INSERT INTO SSMSWAIT
+			INSERT INTO MOIADM.SMSWAIT
 			(MS03,
 			MS04_1,
 			MS04_2,
@@ -378,13 +378,13 @@ class MOISMS {
 						MS14,
 						MS_NOTE,
 						1
-				FROM ssmslog A
+				FROM MOIADM.SMSLOG A
 			where ms07_1 = :bv_date
 				and MS_TYPE = 'M'
 				AND MS31 = 'F'
 				AND MS14 IS NOT NULL
 				AND NOT EXISTS (SELECT 'X'
-								FROM ssmslog B
+								FROM MOIADM.SMSLOG B
 							WHERE B.MS03 = A.MS03
 								AND B.MS04_1 = A.MS04_1
 								AND B.MS04_2 = A.MS04_2
