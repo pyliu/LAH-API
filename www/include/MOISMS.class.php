@@ -87,6 +87,7 @@ class MOISMS {
 				 (CASE
 				   WHEN t.MS_TYPE = 'M' THEN '".mb_convert_encoding('地籍異動即時通', 'BIG5', 'UTF-8')."'
 					 WHEN t.MS_TYPE = 'W' THEN '".mb_convert_encoding('指定送達處所', 'BIG5', 'UTF-8')."'
+					 WHEN t.MS_TYPE = 'Z' THEN '".mb_convert_encoding('智慧控管系統', 'BIG5', 'UTF-8')."'
 					 ELSE t.MS_TYPE
 				 END) AS SMS_TYPE,
 				 MS07_1 AS SMS_DATE,
@@ -375,7 +376,7 @@ class MOISMS {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
-		Logger::getInstance()->info(__METHOD__.": 取得 $tw_date MOIADM.SMSLOG 裡失敗資料並插入重送佇列 MOIADM.SMSWAIT。");
+		Logger::getInstance()->info(__METHOD__.": 取得 $tw_date MOIADM.SMSLOG 裡失敗資料並插入等待佇列 MOIADM.SMSWAIT。");
 		$this->db_wrapper->getDB()->parse("
 			INSERT INTO MOIADM.SMSWAIT
 			(MS03,
@@ -416,7 +417,57 @@ class MOISMS {
 		");
 		$this->db_wrapper->getDB()->bind(":bv_date", $tw_date);
 		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
-		Logger::getInstance()->info(__METHOD__.": 插入重送佇列 ".$result ? "成功" : "失敗"."。");
+		Logger::getInstance()->info(__METHOD__.": 插入等待佇列 ".$result ? "成功" : "失敗"."。");
+		return $result;
+	}
+	/**
+	 * insert into MOIADM.SMSWAIT table maunally
+	 * expect param array
+	 * array(
+	 *   "MS30" => '0',
+	 *   "MS_NOTE" => '',
+	 *   "MS14" => '09XXXXXXXX',
+	 *   "MS03" => '114',
+	 *   "MS04_1" => 'HA81',
+	 *   "MS04_2" => '000000'
+	 * )
+	 */
+	public function resendMOIADMSMSRecord($record) {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		Logger::getInstance()->info(__METHOD__.": 插入等待佇列 MOIADM.SMSWAIT 以利後續人工發送簡訊。");
+		$this->db_wrapper->getDB()->parse("
+			INSERT INTO MOIADM.SMSWAIT (MS03, MS04_1, MS04_2, MS07_1, MS07_2, MS30, MS_TYPE, MS14, MS_NOTE, MS32)
+			VALUES (
+					:bv_ms03,
+					:bv_ms04_1,
+					:bv_ms04_2,
+					TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000,
+					TO_CHAR(SYSDATE, 'HH24MISS'),
+					:bv_ms30,
+					'M',
+					:bv_ms14,
+					:bv_ms_note,
+					1
+			)
+		");
+		$this->db_wrapper->getDB()->bind(":bv_ms03", $record['MS03']);
+		$this->db_wrapper->getDB()->bind(":bv_ms04_1", $record['MS04_1']);
+		$this->db_wrapper->getDB()->bind(":bv_ms04_2", $record['MS04_2']);
+		/**
+		 * MS30:
+		 * 0：待傳送
+		 * I：補正
+		 * D：駁回
+		 * C：延期複丈
+		 * F：結案
+		 */	
+		$this->db_wrapper->getDB()->bind(":bv_ms30", '0');
+		$this->db_wrapper->getDB()->bind(":bv_ms14", $record['MS14']);
+		$this->db_wrapper->getDB()->bind(":bv_ms_note", $record['MS_NOTE']);
+		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+		Logger::getInstance()->info(__METHOD__.": 插入等待佇列 ".$result ? "成功" : "失敗"."。");
 		return $result;
 	}
 }
