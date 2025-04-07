@@ -9,9 +9,10 @@ try {
     // $records = SQLiteAdminActionLog::getInstance()->get(time(), time() - 86400);
     // var_dump($records);
 
-    $moisms = new MOISMS();
-    $result = $moisms->manualSendSMS('0911225023', '測試!!');
-    var_dump($result);
+    // $moisms = new MOISMS();
+    // $result = $moisms->manualSendSMS('0911225023', '手動測試');
+    // $result = $moisms->manualSendBookingSMS('0911225023', 'BOOKING測試', '1140407', '174000');
+    // var_dump($result);
 
     // $cpuInfo = getCpuInfo();
     // if (!empty($cpuInfo)) {
