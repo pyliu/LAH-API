@@ -623,6 +623,14 @@ class MOISMS {
 		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
+
+    // 移除所有非數字字元
+    $cell = preg_replace('/[^0-9]/', '', $cell);
+		if (strlen($cell) !== 10 || substr($cell, 0, 2) !== '09' || !ctype_digit(substr($cell, 2))) {
+			Logger::getInstance()->warning(__METHOD__.": $cell 非正確手機號碼格式，無法傳送簡訊");
+			return false;
+		}
+
 		Logger::getInstance()->info(__METHOD__.": 插入 MOICAS.SMS_MA05 以利人工發送簡訊。");
 		$next_no = $this->getNextMA5_NO();
 		$this->db_wrapper->getDB()->parse("
