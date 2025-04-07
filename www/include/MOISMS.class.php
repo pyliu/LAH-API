@@ -620,8 +620,75 @@ class MOISMS {
 	 * MA5_STATUS: 1 👉 READY, 2 👉 OK, 3 👉 RETRY LIMIT REACHED, 4 👉 RETRY
 	 */
 	public function manualSendSMS($cell, $cont, $name = __METHOD__) {
+		if (empty($cont)) {
+			Logger::getInstance()->warning(__METHOD__.": 無內容，無法傳送簡訊");
+			return false;
+		}
+
+    // 移除所有非數字字元
+    $cell = preg_replace('/[^0-9]/', '', $cell);
+		if (strlen($cell) !== 10 || substr($cell, 0, 2) !== '09' || !ctype_digit(substr($cell, 2))) {
+			Logger::getInstance()->warning(__METHOD__.": $cell 非正確手機號碼格式，無法傳送簡訊");
+			return false;
+		}
+
 		if (!$this->db_wrapper->reachable()) {
 			return false;
+		}
+
+		Logger::getInstance()->info(__METHOD__.": 插入 MOICAS.SMS_MA05 以利人工發送簡訊。");
+		$next_no = $this->getNextMA5_NO();
+		$this->db_wrapper->getDB()->parse("
+			INSERT INTO MOICAS.SMS_MA05
+				(MA5_NO,
+				MA5_MID,
+				MA5_CDATE,
+				MA5_CTIME,
+				MA5_NAME,
+				MA5_MP,
+				MA5_CONT,
+				MA5_TYPE,
+				MA5_STATUS,
+				EDITID,
+				EDITDATE,
+				EDITTIME)
+			VALUES (
+			  '".$next_no."',
+				'MOISMS-API',
+				TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000,
+				TO_CHAR(SYSDATE, 'HH24MISS'),
+				:bv_ma5_name,
+				:bv_ma5_mp,
+				:bv_ma5_cont,
+				'0',
+				'1',
+				'MOISMS-API',
+				TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000,
+				TO_CHAR(SYSDATE, 'HH24MISS')
+			)
+		");
+		// $this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
+		$this->db_wrapper->getDB()->bind(":bv_ma5_name", mb_convert_encoding($name, 'BIG5', 'UTF-8'));
+		$this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
+		$this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($cont, 'BIG5', 'UTF-8'));
+		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+		Logger::getInstance()->info(__METHOD__.": 即時簡訊插入 MOICAS.SMS_MA05 ($next_no) ".($result ? "成功" : "失敗")."。");
+		return $result;
+	}
+
+	public function manualSendBookingSMS($cell, $cont, $rdate, $rtime, $name = __METHOD__) {
+		if(!isValidTaiwanDate($rdate) || !isValidTime($rtime)) {
+			Logger::getInstance()->warning(__METHOD__.": 沒有正確的預約日期時間，改為直接發送簡訊。");
+			return $this->manualSendSMS($cell, $cont, $name);
+		}
+
+		$tmp_date = timestampToDate(time(), 'TW');
+		$parts = explode(' ', $tmp_date);
+		$today = preg_replace('/[^0-9]/', '', $parts[0]);
+		$now = preg_replace('/[^0-9]/', '', $parts[1]);
+		if ($rdate < $today || ($rdate == $today && $rtime < $now)) {
+			Logger::getInstance()->warning(__METHOD__.": 預約日期時間已過，改為直接發送簡訊。");
+			return $this->manualSendSMS($cell, $cont, $name);
 		}
 
 		if (empty($cont)) {
@@ -636,7 +703,12 @@ class MOISMS {
 			return false;
 		}
 
-		Logger::getInstance()->info(__METHOD__.": 插入 MOICAS.SMS_MA05 以利人工發送簡訊。");
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+
+		Logger::getInstance()->info(__METHOD__.": 插入 MOICAS.SMS_MA05 以利人工發送預約簡訊 $rdate $rtime 。");
+		$next_no = $this->getNextMA5_NO();
 		$this->db_wrapper->getDB()->parse("
 			INSERT INTO MOICAS.SMS_MA05
 				(MA5_NO,
@@ -654,29 +726,31 @@ class MOISMS {
 				EDITDATE,
 				EDITTIME)
 			VALUES (
-			  :bv_ma5_no,
+			  '".$next_no."',
 				'MOISMS-API',
 				TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000,
 				TO_CHAR(SYSDATE, 'HH24MISS'),
 				:bv_ma5_name,
 				:bv_ma5_mp,
 				:bv_ma5_cont,
-				'0',
-				null,
-				null,
+				'1',
+				:bv_ma5_rdate,
+				:bv_ma5_rtime,
 				'1',
 				'MOISMS-API',
 				TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000,
 				TO_CHAR(SYSDATE, 'HH24MISS')
 			)
 		");
-		$next_no = $this->getNextMA5_NO();
-		$this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
+		// $this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
 		$this->db_wrapper->getDB()->bind(":bv_ma5_name", mb_convert_encoding($name, 'BIG5', 'UTF-8'));
 		$this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
 		$this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($cont, 'BIG5', 'UTF-8'));
+		$this->db_wrapper->getDB()->bind(":bv_ma5_rdate", $rdate);
+		$this->db_wrapper->getDB()->bind(":bv_ma5_rtime", $rtime);
 		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
-		Logger::getInstance()->info(__METHOD__.": 插入 MOICAS.SMS_MA05 ($next_no) ".($result ? "成功" : "失敗")."。");
+		Logger::getInstance()->info(__METHOD__.": 預約簡訊 $rdate $rtime 插入 MOICAS.SMS_MA05 ($next_no) ".($result ? "成功" : "失敗")."。");
 		return $result;
 	}
+
 }

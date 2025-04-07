@@ -30,6 +30,25 @@ function isValidTaiwanDate($tw_date) {
     return true;
 }
 
+function isValidTime($timeString) {
+    // 檢查字串長度是否為 6
+    if (strlen($timeString) !== 6) {
+        return false;
+    }
+
+    // 提取時、分、秒
+    $hour = substr($timeString, 0, 2);
+    $minute = substr($timeString, 2, 2);
+    $second = substr($timeString, 4, 2);
+
+    // 檢查時分秒是否為有效值
+    if ($hour < 0 || $hour > 23 || $minute < 0 || $minute > 59 || $second < 0 || $second > 59) {
+        return false;
+    }
+
+    return true;
+}
+
 function convertMBNumberString($input) {
     if (empty($input)) {
         return '';
