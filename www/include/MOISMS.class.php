@@ -624,6 +624,11 @@ class MOISMS {
 			return false;
 		}
 
+		if (empty($cont)) {
+			Logger::getInstance()->warning(__METHOD__.": 無內容，無法傳送簡訊");
+			return false;
+		}
+
     // 移除所有非數字字元
     $cell = preg_replace('/[^0-9]/', '', $cell);
 		if (strlen($cell) !== 10 || substr($cell, 0, 2) !== '09' || !ctype_digit(substr($cell, 2))) {
