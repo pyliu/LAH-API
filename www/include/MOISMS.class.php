@@ -615,8 +615,6 @@ class MOISMS {
 	/**
 	 * 使用 MOICAS.SMS_MA05 來傳送手動建檔訊息
 	 * MA5_TYPE: 0 👉 immediately, 1 👉 reserved
-	 * MA5_RDATE: MA5_TYPE = 1 時必填
-	 * MA5_RTIME: MA5_TYPE = 1 時必填
 	 * MA5_STATUS: 1 👉 READY, 2 👉 OK, 3 👉 RETRY LIMIT REACHED, 4 👉 RETRY
 	 */
 	public function manualSendSMS($cell, $cont, $name = __METHOD__) {
@@ -675,7 +673,13 @@ class MOISMS {
 		Logger::getInstance()->info(__METHOD__.": 即時簡訊插入 MOICAS.SMS_MA05 ($next_no) ".($result ? "成功" : "失敗")."。");
 		return $result;
 	}
-
+	/**
+	 * 使用 MOICAS.SMS_MA05 來傳送手動預約建檔訊息
+	 * MA5_TYPE: 0 👉 immediately, 1 👉 reserved
+	 * MA5_RDATE: MA5_TYPE = 1 時必填
+	 * MA5_RTIME: MA5_TYPE = 1 時必填
+	 * MA5_STATUS: 1 👉 READY, 2 👉 OK, 3 👉 RETRY LIMIT REACHED, 4 👉 RETRY
+	 */
 	public function manualSendBookingSMS($cell, $cont, $rdate, $rtime, $name = __METHOD__) {
 		if(!isValidTaiwanDate($rdate) || !isValidTime($rtime)) {
 			Logger::getInstance()->warning(__METHOD__.": 沒有正確的預約日期時間，改為直接發送簡訊。");
