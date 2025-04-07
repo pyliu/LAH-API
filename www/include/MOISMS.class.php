@@ -600,17 +600,16 @@ class MOISMS {
 		global $today;
 		$next_no = $today.'000001';
 		$this->db_wrapper->getDB()->parse("
-			SELECT  (MA5_NO + 1) AS NEXT_NO
+			SELECT (MAX(MA5_NO) + 1) AS NEXT_NO
 			FROM MOICAS.SMS_MA05
-			WHERE ROWNUM = 1
-			ORDER BY MA5_NO DESC
+			WHERE MA5_NO LIKE '".$today."%'
 		");
 		$this->db_wrapper->getDB()->execute();
 		$row = $this->db_wrapper->getDB()->fetch();
 		if (!empty($row)) {
 			$next_no = $row['NEXT_NO'];
 		}
-		Logger::getInstance()->info(__METHOD__.": 取得下一個 MOICAS.SMS_MA05 序號 $next_no 。");
+		Logger::getInstance()->info(__METHOD__.": 下一個序號是 $next_no 。");
 		return $next_no;
 	}
 	/**
@@ -625,6 +624,7 @@ class MOISMS {
 			return false;
 		}
 		Logger::getInstance()->info(__METHOD__.": 插入 MOICAS.SMS_MA05 以利人工發送簡訊。");
+		$next_no = $this->getNextMA5_NO();
 		$this->db_wrapper->getDB()->parse("
 			INSERT INTO MOICAS.SMS_MA05
 				(MA5_NO,
@@ -638,7 +638,6 @@ class MOISMS {
 				MA5_RDATE,
 				MA5_RTIME,
 				MA5_STATUS,
-				MA5_AGAIN,
 				EDITID,
 				EDITDATE,
 				EDITTIME)
@@ -651,16 +650,15 @@ class MOISMS {
 				:bv_ma5_mp,
 				:bv_ma5_cont,
 				'0',
-				'',
-				'',
+				null,
+				null,
 				'1',
-				'0',
 				'MOISMS-API',
 				TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000,
 				TO_CHAR(SYSDATE, 'HH24MISS')
 			)
 		");
-		$next_no = $this->getNextMA5_NO();
+		// $next_no = $this->getNextMA5_NO();
 		$this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
 		$this->db_wrapper->getDB()->bind(":bv_ma5_name", mb_convert_encoding($name, 'BIG5', 'UTF-8'));
 		$this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);

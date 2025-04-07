@@ -33,6 +33,7 @@ class XCase {
 	}
 
 	private function insertLocalCRCLD($l3_crcld) {
+		$result = false;
 		if (is_array($l3_crcld)) {
 			$year = $l3_crcld['CL01'];
 			$code = $l3_crcld['CL02'];
@@ -58,13 +59,13 @@ class XCase {
 			$this->db_wrapper->getDB()->bind(":bv_rc04", $rc04);
 			$this->db_wrapper->getDB()->bind(":bv_rc01", $rc01);
 			$this->db_wrapper->getDB()->bind(":bv_rc06", $rc06);
-			$this->db_wrapper->getDB()->execute();
-			return true;
+			$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 		}
-		return false;
+		return $result;
 	}
 
 	private function updateLocalCRCLD($l3_crcld) {
+		$result = false;
 		if (is_array($l3_crcld)) {
 			$year = $l3_crcld['CL01'];
 			$code = $l3_crcld['CL02'];
@@ -90,10 +91,9 @@ class XCase {
 			$this->db_wrapper->getDB()->bind(":bv_rc04", $rc04);
 			$this->db_wrapper->getDB()->bind(":bv_rc01", $rc01);
 			$this->db_wrapper->getDB()->bind(":bv_rc06", $rc06);
-			$this->db_wrapper->getDB()->execute();
-			return true;
+			$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 		}
-		return false;
+		return $result;
 	}
 
 	private function insertLocalCRCRD($l3_crcrd) {
