@@ -614,7 +614,7 @@ class MOISMS {
 	}
 	/**
 	 * 使用 MOICAS.SMS_MA05 來傳送手動建檔訊息
-	 * MA5_TYPE: 0 👉 immediately, 1 👉 reserved
+	 * MA5_TYPE: 0 👉 immediately
 	 * MA5_STATUS: 1 👉 READY, 2 👉 OK, 3 👉 RETRY LIMIT REACHED, 4 👉 RETRY
 	 */
 	public function manualSendSMS($cell, $cont, $name = __METHOD__) {
@@ -675,7 +675,7 @@ class MOISMS {
 	}
 	/**
 	 * 使用 MOICAS.SMS_MA05 來傳送手動預約建檔訊息
-	 * MA5_TYPE: 0 👉 immediately, 1 👉 reserved
+	 * MA5_TYPE: 1 👉 reserved
 	 * MA5_RDATE: MA5_TYPE = 1 時必填
 	 * MA5_RTIME: MA5_TYPE = 1 時必填
 	 * MA5_STATUS: 1 👉 READY, 2 👉 OK, 3 👉 RETRY LIMIT REACHED, 4 👉 RETRY

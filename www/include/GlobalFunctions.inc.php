@@ -11,41 +11,34 @@ function isValidTaiwanDate($tw_date) {
     if (!preg_match('/^\d{7}$/', $tw_date)) {
         return false;
     }
-
     // 解析年、月、日
     $year = intval(substr($tw_date, 0, 3)) + 1911; // 轉換為西元年
     $month = intval(substr($tw_date, 3, 2));
     $day = intval(substr($tw_date, 5, 2));
-
     // 檢查月份是否有效
     if ($month < 1 || $month > 12) {
         return false;
     }
-
     // 檢查日期是否有效
     if ($day < 1 || $day > cal_days_in_month(CAL_GREGORIAN, $month, $year)) {
         return false;
     }
-
     return true;
 }
 
 function isValidTime($timeString) {
-    // 檢查字串長度是否為 6
-    if (strlen($timeString) !== 6) {
+    // 檢查是否為 6 碼數字
+    if (!preg_match('/^\d{6}$/', $timeString)) {
         return false;
     }
-
     // 提取時、分、秒
     $hour = substr($timeString, 0, 2);
     $minute = substr($timeString, 2, 2);
     $second = substr($timeString, 4, 2);
-
     // 檢查時分秒是否為有效值
     if ($hour < 0 || $hour > 23 || $minute < 0 || $minute > 59 || $second < 0 || $second > 59) {
         return false;
     }
-
     return true;
 }
 
