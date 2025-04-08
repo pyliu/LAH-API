@@ -602,7 +602,7 @@ class MOISMS {
 		$this->db_wrapper->getDB()->parse("
 			SELECT (MAX(MA5_NO) + 1) AS NEXT_NO
 			FROM MOICAS.SMS_MA05
-			WHERE MA5_NO LIKE '".$today."%'
+			WHERE MA5_NO LIKE TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000 || '%'
 		");
 		$this->db_wrapper->getDB()->execute();
 		$row = $this->db_wrapper->getDB()->fetch();
@@ -612,6 +612,80 @@ class MOISMS {
 		Logger::getInstance()->info(__METHOD__.": 下一個序號是 $next_no 。");
 		return $next_no;
 	}
+  /**
+   * 檢查 MOICAS.SMS_MA05 表格中是否已存在指定的 MA5_NO 資料
+   *
+   * @param string $ma5_no 要檢查的 MA5_NO
+   * @return bool 如果存在則返回 true，否則返回 false
+   */
+  public function isMA5NoExists($ma5_no) {
+    if (!preg_match('/^\d{13}$/', $ma5_no)) {
+      Logger::getInstance()->warning(__METHOD__.": MA5_NO 必須為13碼數字。");
+      return false;
+    }
+
+    if (!$this->db_wrapper->reachable()) {
+      return false;
+    }
+
+    $sql = "
+      SELECT COUNT(*) AS COUNT
+      FROM MOICAS.SMS_MA05
+      WHERE MA5_NO = :bv_ma5_no
+    ";
+
+    $this->db_wrapper->getDB()->parse($sql);
+    $this->db_wrapper->getDB()->bind(":bv_ma5_no", $ma5_no);
+    $result = $this->db_wrapper->getDB()->execute();
+
+    if ($result === FALSE) {
+      Logger::getInstance()->error(__METHOD__.": 查詢 MOICAS.SMS_MA05 失敗：" . print_r($this->db_wrapper->getError(), true));
+      return false;
+    }
+
+    $row = $this->db_wrapper->getDB()->fetch();
+		// Logger::getInstance()->info(__METHOD__.": 查詢結果：" . print_r($row, true));
+		return (int) $row['COUNT'] > 0;
+  }
+	/**
+   * 檢查 MOICAS.SMS_MA05 表格中是否已存在指定的 $cell (手機號碼) 和 $message (內容) 資料
+   *
+   * @param string $cell 手機號碼
+   * @param string $message 簡訊內容
+   * @return bool 如果存在則返回 true，否則返回 false
+   */
+  public function isTodaySMSExistsByCellAndMessage($cell, $message) {
+    if (empty($cell) || empty($message)) {
+      Logger::getInstance()->warning(__METHOD__.": 傳入的手機號碼或簡訊內容為空。");
+      return false;
+    }
+
+    if (!$this->db_wrapper->reachable()) {
+      return false;
+    }
+
+    $sql = "
+      SELECT COUNT(*) AS COUNT
+      FROM MOICAS.SMS_MA05
+      WHERE MA5_MP = :bv_ma5_mp
+        AND MA5_CONT = :bv_ma5_cont
+				AND MA5_NO LIKE TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000 || '%'
+    ";
+
+    $this->db_wrapper->getDB()->parse($sql);
+    $this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
+    $this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($message, 'BIG5', 'UTF-8'));
+    $result = $this->db_wrapper->getDB()->execute();
+
+    if ($result === FALSE) {
+      Logger::getInstance()->error(__METHOD__.": 查詢 MOICAS.SMS_MA05 失敗：" . print_r($this->db_wrapper->getError(), true));
+      return false;
+    }
+
+    $row = $this->db_wrapper->getDB()->fetch();
+
+    return (int) $row['COUNT'] > 0;
+  }
 	/**
 	 * 使用 MOICAS.SMS_MA05 來傳送手動建檔訊息
 	 * MA5_TYPE: 0 👉 immediately
@@ -756,5 +830,78 @@ class MOISMS {
 		Logger::getInstance()->info(__METHOD__.": 預約簡訊 $rdate $rtime 插入 MOICAS.SMS_MA05 ($next_no) ".($result ? "成功" : "失敗")."。");
 		return $result ? $next_no : false;
 	}
+	/**
+   * 根據手機號碼和簡訊內容，將 MOICAS.SMS_MA05 表格中今天符合條件的記錄的 MA5_STATUS 設定為 '1' (READY)，
+   * 及 MA5_AGAIN 設定為 '0' 以便進行重送。
+   *
+   * @param string $cell 手機號碼
+   * @param string $message 簡訊內容
+   * @return bool 修改成功返回 true，否則返回 false
+   */
+  public function setTodayMA05SMSToResend($cell, $message) {
+    if (empty($cell) || empty($message)) {
+      Logger::getInstance()->warning(__METHOD__.": 傳入的手機號碼或簡訊內容為空，無法進行重送設定。");
+      return false;
+    }
 
+    if (!$this->db_wrapper->reachable()) {
+      return false;
+    }
+
+    $sql = "
+      UPDATE MOICAS.SMS_MA05
+      SET MA5_STATUS = '1', MA5_AGAIN = '0', MA5_NAME = :bv_ma5_name
+      WHERE MA5_MP = :bv_ma5_mp
+        AND MA5_CONT = :bv_ma5_cont
+				AND MA5_NO LIKE TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000 || '%'
+    ";
+
+    $this->db_wrapper->getDB()->parse($sql);
+    $this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
+    $this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($message, 'BIG5', 'UTF-8'));
+    $this->db_wrapper->getDB()->bind(":bv_ma5_name", __METHOD__);
+    $result = $this->db_wrapper->getDB()->execute();
+
+    if ($result === FALSE) {
+      Logger::getInstance()->error(__METHOD__.": 更新 MOICAS.SMS_MA05 失敗：" . print_r($this->db_wrapper->getDB()->getError(), true));
+      return false;
+    }
+		Logger::getInstance()->info(__METHOD__.": 設定 MOICAS.SMS_MA05 今日 $cell 簡訊重送成功");
+    return true;
+  }
+	/**
+   * 根據 MA5_NO，將 MOICAS.SMS_MA05 表格中符合條件的記錄的 MA5_STATUS 設定為 '1' (READY)，
+   * 及 MA5_AGAIN 設定為 '0' 以便進行重送。
+   *
+   * @param string $ma5_no 要設定為重送的 MA5_NO
+   * @return bool 修改成功返回 true，否則返回 false
+   */
+  public function setMA05SMSToResendByMA5NO($ma5_no) {
+    if (!preg_match('/^\d{13}$/', $ma5_no)) {
+      Logger::getInstance()->warning(__METHOD__.": 傳入的 MA5_NO 必須為13碼數字否則無法進行重送設定。");
+      return false;
+    }
+
+    if (!$this->db_wrapper->reachable()) {
+      return false;
+    }
+
+    $sql = "
+      UPDATE MOICAS.SMS_MA05
+      SET MA5_STATUS = '1', MA5_AGAIN = '0', MA5_NAME = :bv_ma5_name
+      WHERE MA5_NO = :bv_ma5_no
+    ";
+
+    $this->db_wrapper->getDB()->parse($sql);
+		$this->db_wrapper->getDB()->bind(":bv_ma5_no", $ma5_no);
+    $this->db_wrapper->getDB()->bind(":bv_ma5_name", __METHOD__);
+    $result = $this->db_wrapper->getDB()->execute();
+
+    if ($result === FALSE) {
+      Logger::getInstance()->error(__METHOD__.": 更新 MOICAS.SMS_MA05 失敗：" . print_r($this->db_wrapper->getDB()->getError(), true));
+      return false;
+    }
+		Logger::getInstance()->info(__METHOD__.": 設定 MOICAS.SMS_MA05 $ma5_no 簡訊重送成功");
+    return true;
+  }
 }
