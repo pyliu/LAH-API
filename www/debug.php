@@ -11,7 +11,7 @@ try {
 
     // $moisms = new MOISMS();
     // $result = $moisms->manualSendSMS('0911225023', '手動測試');
-    // $result = $moisms->manualSendBookingSMS('0911225023', 'BOOKING測試', '1140407', '174000');
+    // $result = $moisms->manualSendBookingSMS('0911225023', 'BOOKING測試', '1140408', '083000');
     // var_dump($result);
 
     // $cpuInfo = getCpuInfo();

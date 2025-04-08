@@ -635,6 +635,7 @@ class MOISMS {
 		}
 
 		Logger::getInstance()->info(__METHOD__.": 插入 MOICAS.SMS_MA05 以利人工發送簡訊。");
+		$next_no = $this->getNextMA5_NO();
 		$this->db_wrapper->getDB()->parse("
 			INSERT INTO MOICAS.SMS_MA05
 				(MA5_NO,
@@ -650,7 +651,7 @@ class MOISMS {
 				EDITDATE,
 				EDITTIME)
 			VALUES (
-			  TO_CHAR(:bv_ma5_no),
+			  '".$next_no."',
 				'MOISMS-API',
 				TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000,
 				TO_CHAR(SYSDATE, 'HH24MISS'),
@@ -664,7 +665,6 @@ class MOISMS {
 				TO_CHAR(SYSDATE, 'HH24MISS')
 			)
 		");
-		$next_no = $this->getNextMA5_NO();
 		$this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
 		$this->db_wrapper->getDB()->bind(":bv_ma5_name", mb_convert_encoding($name, 'BIG5', 'UTF-8'));
 		$this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
@@ -712,6 +712,7 @@ class MOISMS {
 		}
 
 		Logger::getInstance()->info(__METHOD__.": 插入 MOICAS.SMS_MA05 以利人工發送預約簡訊 $rdate $rtime 。");
+		$next_no = $this->getNextMA5_NO();
 		$this->db_wrapper->getDB()->parse("
 			INSERT INTO MOICAS.SMS_MA05
 				(MA5_NO,
@@ -729,7 +730,7 @@ class MOISMS {
 				EDITDATE,
 				EDITTIME)
 			VALUES (
-			  TO_CHAR(:bv_ma5_no),
+			  '".$next_no."',
 				'MOISMS-API',
 				TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000,
 				TO_CHAR(SYSDATE, 'HH24MISS'),
@@ -745,8 +746,7 @@ class MOISMS {
 				TO_CHAR(SYSDATE, 'HH24MISS')
 			)
 		");
-		$next_no = $this->getNextMA5_NO();
-		$this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
+		// $this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
 		$this->db_wrapper->getDB()->bind(":bv_ma5_name", mb_convert_encoding($name, 'BIG5', 'UTF-8'));
 		$this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
 		$this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($cont, 'BIG5', 'UTF-8'));
