@@ -606,7 +606,7 @@ class MOISMS {
 		");
 		$this->db_wrapper->getDB()->execute();
 		$row = $this->db_wrapper->getDB()->fetch();
-		if (!empty($row)) {
+		if (!empty($row) && !empty($row['NEXT_NO'])) {
 			$next_no = $row['NEXT_NO'];
 		}
 		Logger::getInstance()->info(__METHOD__.": 下一個序號是 $next_no 。");
@@ -635,7 +635,6 @@ class MOISMS {
 		}
 
 		Logger::getInstance()->info(__METHOD__.": 插入 MOICAS.SMS_MA05 以利人工發送簡訊。");
-		$next_no = $this->getNextMA5_NO();
 		$this->db_wrapper->getDB()->parse("
 			INSERT INTO MOICAS.SMS_MA05
 				(MA5_NO,
@@ -651,7 +650,7 @@ class MOISMS {
 				EDITDATE,
 				EDITTIME)
 			VALUES (
-			  '".$next_no."',
+			  TO_CHAR(:bv_ma5_no),
 				'MOISMS-API',
 				TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000,
 				TO_CHAR(SYSDATE, 'HH24MISS'),
@@ -665,7 +664,8 @@ class MOISMS {
 				TO_CHAR(SYSDATE, 'HH24MISS')
 			)
 		");
-		// $this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
+		$next_no = $this->getNextMA5_NO();
+		$this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
 		$this->db_wrapper->getDB()->bind(":bv_ma5_name", mb_convert_encoding($name, 'BIG5', 'UTF-8'));
 		$this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
 		$this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($cont, 'BIG5', 'UTF-8'));
@@ -712,7 +712,6 @@ class MOISMS {
 		}
 
 		Logger::getInstance()->info(__METHOD__.": 插入 MOICAS.SMS_MA05 以利人工發送預約簡訊 $rdate $rtime 。");
-		$next_no = $this->getNextMA5_NO();
 		$this->db_wrapper->getDB()->parse("
 			INSERT INTO MOICAS.SMS_MA05
 				(MA5_NO,
@@ -730,7 +729,7 @@ class MOISMS {
 				EDITDATE,
 				EDITTIME)
 			VALUES (
-			  '".$next_no."',
+			  TO_CHAR(:bv_ma5_no),
 				'MOISMS-API',
 				TO_CHAR(SYSDATE, 'YYYYMMDD') - 19110000,
 				TO_CHAR(SYSDATE, 'HH24MISS'),
@@ -746,7 +745,8 @@ class MOISMS {
 				TO_CHAR(SYSDATE, 'HH24MISS')
 			)
 		");
-		// $this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
+		$next_no = $this->getNextMA5_NO();
+		$this->db_wrapper->getDB()->bind(":bv_ma5_no", $next_no);
 		$this->db_wrapper->getDB()->bind(":bv_ma5_name", mb_convert_encoding($name, 'BIG5', 'UTF-8'));
 		$this->db_wrapper->getDB()->bind(":bv_ma5_mp", $cell);
 		$this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($cont, 'BIG5', 'UTF-8'));
