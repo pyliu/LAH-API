@@ -148,6 +148,40 @@ switch ($_POST["type"]) {
 			"raw" => $result
 		));
 		break;
+	case "moicas_ma05_sms":
+		// 利用 MOICAS.MA05 表格手動發送簡訊
+		Logger::getInstance()->info("XHR [moicas_ma05_sms] send MOICAS MA05 SMS request.");
+
+		$cell = $_POST['cell'];
+		$message = $_POST['message'];
+		// 預約日期、時間(可為空值 👉 即時發送出去)
+		$rdate = $_POST['rdate'];
+		$rtime = $_POST['rtime'];
+		
+		$result = $mock ? $cache->get('moicas_ma05_sms') : $moisms->manualSendBookingSMS($cell, $message, $rdate, $rtime);
+		$cache->set('moicas_ma05_sms', $result);
+		Logger::getInstance()->info("XHR [moicas_ma05_sms] operation has been done.");
+		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+		echoJSONResponse("傳送手動簡訊進入待傳送佇列完成", $status_code, array(
+			"raw" => $result
+		));
+		break;
+	case "moicas_ma05_resend_sms":
+		// 利用 MOICAS.MA05 表格手動發送簡訊
+		Logger::getInstance()->info("XHR [moicas_ma05_resend_sms] re-send MOICAS MA05 SMS request.");
+
+		$ma5_no = $_POST['ma5_no'];
+		$cell = $_POST['cell'];
+		$message = $_POST['message'];
+		
+		$result = $mock ? $cache->get('moicas_ma05_resend_sms') : (empty($ma5_no) ? $moisms->setTodayMA05SMSToResend($cell, $message) : $moisms->setMA05SMSToResendByMA5NO($ma5_no));
+		$cache->set('moicas_ma05_resend_sms', $result);
+		Logger::getInstance()->info("XHR [moicas_ma05_resend_sms] operation has been done.");
+		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
+		echoJSONResponse("重送簡訊設定完成", $status_code, array(
+			"raw" => $result
+		));
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
