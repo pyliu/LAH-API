@@ -218,4 +218,14 @@ class OraDB {
         // clear DB connection
         $this->close();
     }
+
+    public function getError() {
+        if ($this->stid) {
+            return oci_error($this->stid);
+        }
+        if ($this->conn) {
+            return oci_error($this->conn);
+        }
+        return oci_error();
+    }
 }
