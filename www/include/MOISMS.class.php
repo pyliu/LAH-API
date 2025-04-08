@@ -671,7 +671,7 @@ class MOISMS {
 		$this->db_wrapper->getDB()->bind(":bv_ma5_cont", mb_convert_encoding($cont, 'BIG5', 'UTF-8'));
 		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 		Logger::getInstance()->info(__METHOD__.": 即時簡訊插入 MOICAS.SMS_MA05 ($next_no) ".($result ? "成功" : "失敗")."。");
-		return $result;
+		return $result ? $next_no : false;
 	}
 	/**
 	 * 使用 MOICAS.SMS_MA05 來傳送手動預約建檔訊息
@@ -754,7 +754,7 @@ class MOISMS {
 		$this->db_wrapper->getDB()->bind(":bv_ma5_rtime", $rtime);
 		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
 		Logger::getInstance()->info(__METHOD__.": 預約簡訊 $rdate $rtime 插入 MOICAS.SMS_MA05 ($next_no) ".($result ? "成功" : "失敗")."。");
-		return $result;
+		return $result ? $next_no : false;
 	}
 
 }
