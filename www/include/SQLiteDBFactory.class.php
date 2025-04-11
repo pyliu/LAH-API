@@ -502,6 +502,25 @@ class SQLiteDBFactory {
         return $db_path;
     }
 
+    public static function getSMSLogDB() {
+        $db_path = DB_DIR.DIRECTORY_SEPARATOR."sms_moicas_ma05_log.db";
+        $sqlite = new DynamicSQLite($db_path);
+        $sqlite->initDB();
+        $sqlite->createTableBySQL('
+            CREATE TABLE IF NOT EXISTS "MOICAS_MA05_LOG" (
+                "id"	INTEGER,
+                "MA5_NO" TEXT NOT NULL UNIQUE,
+                "MOBILE"	TEXT NOT NULL,
+                "MESSAGE"	TEXT,
+                "COUNT"	INTEGER DEFAULT 0,
+                "NOTE"	TEXT,
+                "TIMESTAMP"	INTEGER NOT NULL,
+                PRIMARY KEY("id" AUTOINCREMENT)
+            )
+        ');
+        return $db_path;
+    }
+
     private function __construct() {}
     // private because of singleton
     private function __clone() { }
