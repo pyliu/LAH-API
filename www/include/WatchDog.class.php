@@ -690,12 +690,12 @@ class WatchDog {
                 $cases = [];
 
                 // in order to skip done case
-                $srfr = new SQLiteRegForeignerRestriction();
+                // $srfr = new SQLiteRegForeignerRestriction();
 
                 foreach($altered as $record) {
                     // use pkey(地段+地號+統編) to read restriction data
-                    $pkey = $record['BA48'].$record['BA49'].$record['BB09'].$record['BB07'];
-                    $RESTRICTION_DATA = $srfr->getOne($pkey);
+                    // $pkey = $record['BA48'].$record['BA49'].$record['BB09'].$record['BB07'];
+                    // $RESTRICTION_DATA = $srfr->getOne($pkey);
                     /** example of $RESTRICTION_DATA
                         [pkey] => 14486008000019590422LI0930930
                         [nation] => 美國
@@ -712,14 +712,14 @@ class WatchDog {
                         [note] => 與107-HA81-179690號併案列管
                      */
                     // 若有輸入移轉日期後則略過通知
-                    if (
-                        !empty($RESTRICTION_DATA['transfer_date']) ||
-                        !empty($RESTRICTION_DATA['transfer_local_date']) ||
-                        !empty($RESTRICTION_DATA['restore_local_date'])
-                    ) {
-                        Logger::getInstance()->info(__METHOD__.": 外國人繼承限制已登錄移轉或回復本國身分日期，故 ".$RESTRICTION_DATA['reg_caseno']." 解除列管通知。");
-                        continue;
-                    }
+                    // if (
+                    //     !empty($RESTRICTION_DATA['transfer_date']) ||
+                    //     !empty($RESTRICTION_DATA['transfer_local_date']) ||
+                    //     !empty($RESTRICTION_DATA['restore_local_date'])
+                    // ) {
+                    //     Logger::getInstance()->info(__METHOD__.": 外國人繼承限制已登錄移轉或回復本國身分日期，故 ".$RESTRICTION_DATA['reg_caseno']." 解除列管通知。");
+                    //     continue;
+                    // }
                     $needNotify = $now >= $record['deadline_ts'];
                     if (!$needNotify) {
                         // to check if 6 months away the deadline
@@ -733,7 +733,7 @@ class WatchDog {
                 if ($total > 0) {
                     $host_ip = getLocalhostIP();
                     $url = "http://".$host_ip.":8080/reg/foreigner-inheritance-restriction";
-                    $message = "##### 📢 ".$this->date."  ".$this->time." 外國人繼承限制通知\r\n***\r\n⚠ 系統今日找到 $total 件外國人繼承限制需進行處理(逾期或半年內即將到期)，請進系統查看案件資料。\r\n\r\n👉 $url\r\n\r\n⭐ 如欲解除列管請進入個別案件輸入移轉日期資訊。";
+                    $message = "##### 📢 ".$this->date."  ".$this->time." 外國人繼承限制通知\r\n***\r\n⚠ 系統今日找到 $total 件外國人繼承限制需進行處理(逾期或半年內即將到期)，請進系統查看案件資料。\r\n\r\n👉 $url\r\n\r\n⭐ 如欲解除列管請於地政系統將該案件之其他登記事項加入「移請財政部國有財產署公開標售」一般註記事項。";
                     $notification = new Notification();
                     $notification->removeOutdatedMessageByTitle('reg', '外國人繼承限制通知');
                     // send to reg chat channel
