@@ -2,259 +2,368 @@
 <html lang="zh-TW">
 
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
-	<meta name="description" content="The bookmark index for taoyuan land office">
-	<meta name="author" content="LIU, PANG-YU">
-	<title>桃園地所書籤索引</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桃園地所書籤索引</title>
+    <script src="tailwind.js"></script>
+    <script src="lucide.min.js"></script>
+    <style>
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        body {
+            font-family: 'Inter', sans-serif; /* Default Tailwind font for the page itself */
+        }
+        .sidebar-item.active {
+            background-color: #4A5568; /* bg-gray-700 */
+            color: white;
+        }
+        .sidebar-item:hover {
+            background-color: #2D3748; /* bg-gray-800 */
+            color: white;
+        }
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Card min width adjusted as images are removed */
+            gap: 1.5rem; /* gap-6 */
+        }
+        /* Lucide icon styling */
+        i[data-lucide] {
+            display: inline-block; 
+            width: 1.25em; /* Increased icon size by 1.25 times */
+            height: 1.25em; /* Increased icon size by 1.25 times */
+            vertical-align: -0.2em; /* Adjusted for better alignment with increased size */
+            line-height: 1; 
+        }
+        .sidebar-item i[data-lucide] {
+             margin-right: 1rem; /* Increased gap for sidebar icons (equivalent to Tailwind mr-4) */
+        }
+        .card-title i[data-lucide] {
+            margin-right: 0.75rem; /* Gap for card title icons (mr-3) */
+            color: #4f46e5; 
+        }
+        .action-button { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .action-button span { 
+            margin-right: 0.375rem; /* Gap between "前往" text and arrow icon */
+        }
+        /* Legacy link items are removed, so this style might not be needed anymore */
+        /* .legacy-link-item i[data-lucide] {
+            margin-left: 0.25rem; 
+            color: #eab308; 
+        } */
 
-	<!-- Bootstrap core CSS -->
-	<link rel="stylesheet" href="../assets/css/bootstrap.min.css">
-
-	<!-- Custom styles for this template -->
-	<link href="../assets/css/starter-template.css" rel="stylesheet">
-	<link href="../assets/css/awesome-font.css" rel="stylesheet">
-	<link href="../assets/css/main.css" rel="stylesheet">
-	<style>
-		* {
-			font-size: large;
-		}
-		li a {
-			font-size: x-large !important;
-		}
-		.card {
-			border: 2px solid black;
-		}
-		.card:hover {
-			background-color: #cdf8eb;
-			border: 4px dashed rgb(243, 107, 129);
-		}
-		.card img {
-			max-height: 120px;
-		}
-		.card-title h5 {
-			text-decoration: underline;
-		}
-		.bg-tao {
-			background-color: rgb(215, 163, 172);
-		}
-		.fixed-height {
-			height: 29vh;
-			overflow: hidden;
-		}
-	</style>
+    </style>
 </head>
 
-<body>
+<body class="bg-gray-100 text-gray-900">
+    <div class="flex h-screen overflow-hidden">
+        <aside id="sidebar" class="w-64 bg-gray-900 text-gray-200 p-4 space-y-2 overflow-y-auto transition-transform duration-300 ease-in-out transform -translate-x-full sm:translate-x-0">
+            <div class="text-2xl font-semibold text-white mb-6 flex items-center">
+                <i data-lucide="link" class="mr-3"></i>
+                <span>書籤索引</span>
+            </div>
+            </aside>
 
-	<nav class="navbar navbar-expand-md navbar-dark bg-tao fixed-top font-weight-bold">
-		<i class="fas fa-link fa-2x text-white mr-1"></i>
-		<a class="navbar-brand" href="index.html">桃園地所書籤索引</a>
-		<div class="collapse navbar-collapse" id="navbarSupportedContent">
-			<ul class="navbar-nav mr-auto">
-				<li class="nav-item active d-flex align-items-center">
-					<i class="fas fa-angle-right text-white"></i>
-					<a class="nav-link" href="index.html">共通網址 <span class="sr-only">(current)</span></a>
-					<i class="fas fa-angle-left text-white"></i>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="counter.html">全功能櫃台</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="reg.html">登記課</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="sur.html">測量課</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="val.html">地價課</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="adm.html">行政課</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="inf.html">資訊課</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="hr.html">人事室</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="acc.html">會計室</a>
-				</li>
-				<li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						其他
-					</a>
-					<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-						<a class="dropdown-item" href="legacy.html" target="_blank">舊版書籤</a>
-						<div class="dropdown-divider"></div>
-						<a class="dropdown-item" href="#">其他說明</a>
-					</div>
-				</li>
-				<!-- <li class="nav-item">
-					<a class="nav-link disabled" href="#">Disabled</a>
-				</li> -->
-			</ul>
-			<!-- <form class="form-inline my-2 my-lg-0">
-				<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-				<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-			</form> -->
-		</div>
-	</nav>
-	<section class="container-fluid">
-		<div class="d-flex flex-wrap">
+        <main class="flex-1 p-6 overflow-y-auto">
+            <header class="mb-6 flex justify-between items-center">
+                <h1 id="current-category-title" class="text-3xl font-bold text-gray-800">共通網址</h1>
+                <button id="sidebar-toggle" class="sm:hidden p-2 rounded-md text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                    <i data-lucide="menu" class="text-xl"></i>
+                </button>
+            </header>
+            <div id="bookmarks-content" class="card-container">
+                </div>
+            </main>
+    </div>
 
-			<div class="col-md-4 mb-3">
-				<div class="card fixed-height">
-					<img src="../assets/img/bookmark/PORTAL.jpg" class="card-img-top img-fluid" alt="內外網交換系統">
-					<div class="card-body">
-						<div class="card-title d-flex justify-content-between align-items-center">
-							<h5><i class="fa fa-signs-post fa-lg mr-1"></i>地政事務所入口網</h5>
-							<a href="http://220.1.34.75:8080/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
-						</div>
-						<p class="card-text">顯示<b class="text-danger">最新公告</b>及各業務小幫手連結</p>
-					</div>
-				</div>
-			</div>
+    <script>
+        const bookmarksData = [
+            {
+                category: "共通網址",
+                id: "common",
+                icon: "home",
+                links: [
+                    { title: "地政事務所入口網", href: "http://220.1.34.75:8080/", description: "顯示最新公告及各業務小幫手連結", icon: "layout-dashboard" },
+                    { title: "機關內部人事業務系統", href: "https://webitr.tycg.gov.tw/WebITR/", description: "桃園市政府差勤系統 https://webitr.tycg.gov.tw/WebITR/", icon: "clock" },
+                    { title: "公文整合資訊系統", href: "https://odis.tycg.gov.tw/", description: "市府公文系統 https://odis.tycg.gov.tw/", icon: "book-marked" },
+                    { title: "地政系統WEB版跨縣市伺服器", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統WEB版跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server" },
+                    { title: "資訊課各式表單下載", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/download.html", description: "提供各式資訊課申請表單下載", icon: "database" },
+                    { title: "人事室各式表單下載", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download.html", description: "提供各式人事相關申請表單下載", icon: "user" },
+                    { title: "桃園市政府公務雲", href: "https://tycgcloud.tycg.gov.tw/", description: "桃園市政府公務雲(內網) https://tycgcloud.tycg.gov.tw/", icon: "cloud" },
+                    { title: "地所員工知識網", href: "http://220.1.34.18:8888", description: "提供公告、各課室專屬區、員工資訊、會議室預約 ... 等功能", icon: "home" },
+                    { title: "內外網檔案交換系統", href: "http://220.1.34.26:8008/", description: "內網電腦檔案交換至外網的交換系統，外網下載請至 http://220.2.34.17:8008/", icon: "file-output" },
+                    { title: "行政課各式下載區", href: "http://220.1.34.18/service/section/04/download.htm", description: "行政課各式下載專區", icon: "user-cog" }
+                ]
+            },
+            {
+                category: "全功能櫃台",
+                id: "counter",
+                icon: "concierge-bell",
+                links: [
+                    { title: "地政系統WEB版-跨縣市AP(161)", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統WEB版跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統WEB版-桃園外掛AP(60)", href: "http://220.1.34.60:9080/LandHA/", description: "地政系統WEB版桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統WEB版-工作站AP(118)", href: "http://220.1.34.118:9080/LandHA/", description: "地政系統WEB版工作站操作專屬伺服器 http://220.1.34.118:9080/LandHA/", icon: "server-cog" },
+                    { title: "登記課專屬入口網站", href: "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/index.htm", description: "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", icon: "layout-list" },
+                    { title: "地政智慧控管系統", href: "http://220.1.34.75:8080/reg/", description: "提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/", icon: "landmark" },
+                    { title: "地政歷史資料查詢系統", href: "http://220.1.34.15/NLOWeb/", description: "地政歷史資料查詢系統 http://220.1.34.15/NLOWeb/", icon: "history" },
+                    { title: "謄本櫃員機後台管理", href: "http://220.1.33.117/MGMT/", description: "管理謄本櫃員機會員帳號、顯示統計資料", icon: "settings-2" },
+                    { title: "簡訊發送紀錄查詢", href: "http://220.1.34.75:8080/reg/sms", description: "提供地政系統傳送地籍異動即時通等簡訊紀錄查詢 http://220.1.34.75:8080/reg/sms", icon: "message-square-text" }
+                ]
+            },
+            {
+                category: "登記課",
+                id: "reg",
+                icon: "file-signature",
+                links: [
+                    { title: "登記課專屬入口網站", href: "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/index.htm", description: "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", icon: "layout-list" },
+                    { title: "地政智慧控管系統", href: "http://220.1.34.75:8080/reg/", description: "提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/", icon: "landmark" },
+                    { title: "地政系統WEB版-跨縣市AP(161)", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統WEB版跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統WEB版-桃園外掛AP(60)", href: "http://220.1.34.60:9080/LandHA/", description: "地政系統WEB版桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統WEB版-登記課AP1(205)", href: "http://220.1.34.205:9080/LandHA/", description: "地政系統WEB版登記課操作專屬伺服器 http://220.1.34.205:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統WEB版-登記課AP2(206)", href: "http://220.1.34.206:9080/LandHA/", description: "地政系統WEB版登記課操作專屬伺服器 http://220.1.34.206:9080/LandHA/", icon: "server-cog" },
+                    { title: "內政部地政司-電子產權憑證後台", href: "https://220.5.61.73/etd-manager/", description: "內政部地政司開發提供電子產權憑證管理功能... https://220.5.61.73/etd-manager/", icon: "shield-check" },
+                    { title: "地政歷史資料查詢系統", href: "http://220.1.34.15/NLOWeb/", description: "地政歷史資料查詢系統 http://220.1.34.15/NLOWeb/", icon: "history" },
+                    { title: "土地參考資訊檔查詢系統", href: "http://220.1.34.213/ref/jsp/security/login.jsp", description: "土地參考資訊檔查詢系統 http://220.1.34.213/ref/jsp/security/login.jsp", icon: "file-search" },
+                    { title: "內政部地政司-數位櫃台", href: "http://220.5.61.14/", description: "內政部地政司數位櫃臺公務端網站 http://220.5.61.14/", icon: "monitor-smartphone" },
+                    { title: "內政部地政司-罕用字查詢系統", href: "http://220.5.61.32/MOILAND/", description: "內政部地政司開發建置之罕用字查詢系統 http://220.5.61.32/MOILAND/", icon: "spell-check" },
+                    { title: "內政部戶役政電子閘門系統", href: "https://210.241.18.131/", description: "內政部戶役政電子閘門系統 https://210.241.18.131/", icon: "door-open" },
+                    { title: "內政部地政司-未辦繼承", href: "http://220.1.33.37:8091/OIB6/Login.jsp", description: "內政部地政司未辦繼承登記土地及建物管理系統 http://220.1.33.37:8091/OIB6/Login.jsp", icon: "user-x" },
+                    { title: "內政部地政司-地籍清理", href: "http://220.1.33.79:8080/TAZQ/index.jsp", description: "內政部地政司地籍清理管理系統 http://220.1.33.79:8080/TAZQ/index.jsp", icon: "files" },
+                    { title: "內政部地政司-線上申辦", href: "http://220.5.61.17/cms/", description: "內政部地政司線上申辦系統 http://220.5.61.17/cms/", icon: "file-plus-2" },
+                    { title: "謄本櫃員機後台管理", href: "http://220.1.33.117/MGMT/", description: "管理謄本櫃員機會員帳號、顯示統計資料", icon: "settings-2" },
+                    { title: "地政系統WEB版-罰鍰裁處AP(162)", href: "http://220.1.34.162:9080/LandHA/", description: "地政系統WEB版罰鍰裁處操作專屬伺服器 http://220.1.34.162:9080/LandHA/", icon: "gavel" },
+                    { title: "私法人購置住宅", href: "http://220.1.33.80/PcQ.aspx", description: "私法人購置住宅 http://220.1.33.80/PcQ.aspx", icon: "building" }
+                ]
+            },
+            {
+                category: "測量課",
+                id: "sur",
+                icon: "ruler",
+                links: [
+                    { title: "測量課專屬入口網站", href: "http://220.1.34.18/service/section/%E6%B8%AC%E9%87%8F%E8%AA%B2/index.htm", description: "法院判決案例、會議紀錄、法令規範、測量成果交換、應用軟體、常用表格 ...", icon: "layout-list" },
+                    { title: "地政系統WEB版-測量課AP1(207)", href: "http://220.1.34.207:9080/LandHA/", description: "地政系統WEB版測量課操作專屬伺服器 http://220.1.34.207:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統WEB版-測量課AP2(62)", href: "http://220.1.34.62:9080/LandHA/", description: "地政系統WEB版測量課操作專屬伺服器 http://220.1.34.62:9080/LandHA/", icon: "server-cog" },
+                    { title: "建管圖資介接系統", href: "http://220.1.33.43:8080/Q14Web/", description: "建物第一次測量-使用執照資訊及竣工圖介接系統 http://220.1.33.43:8080/Q14Web/", icon: "map" },
+                    { title: "測量逾期案件查詢", href: "http://220.1.34.75:8080/sur/expire", description: "測量逾期案件查詢 http://220.1.34.75:8080/sur/expire", icon: "calendar-clock" },
+                    { title: "重測換狀通知書系統", href: "http://220.1.34.211:9080/XDT98/", description: "重測換狀通知書系統 http://220.1.34.211:9080/XDT98/", icon: "file-text" }
+                ]
+            },
+            {
+                category: "地價課",
+                id: "val",
+                icon: "tags",
+                links: [
+                    { title: "地價課專屬入口網站", href: "http://220.1.34.18/service/section/%E8%A1%8C%E6%94%BF%E8%AA%B2/fram.htm", description: "最新消息、會議紀錄、表單下載 ...", icon: "layout-list" },
+                    { title: "地政系統WEB版-地價課AP(156)", href: "http://220.1.34.156:9080/LandHA/", description: "地政系統WEB版地價課操作專屬伺服器 http://220.1.34.156:9080/LandHA/", icon: "server-cog" },
+                    { title: "實價登錄案件控管", href: "http://220.1.34.75:8080/prc/realprice", description: "實價登錄案件控管頁面 http://220.1.34.75:8080/prc/realprice", icon: "file-check-2" },
+                    { title: "實價登錄JSON資料解析", href: "http://220.1.34.75:8080/prc/json-converter", description: "實價登錄JSON資料解析 http://220.1.34.75:8080/prc/json-converter", icon: "file-json" },
+                    { title: "不動產交易成交資訊登錄機制系統", href: "http://220.5.61.195:8080/RPM/", description: "不動產交易成交資訊登錄機制系統 http://220.5.61.195:8080/RPM/", icon: "database-zap" },
+                    { title: "五方區估系統", href: "http://220.1.34.12/TomMis/", description: "地價區段劃分及區段地價估價作業系統 http://220.1.34.12/TomMis/", icon: "area-chart" },
+                    { title: "實價登錄清理系統", href: "http://220.1.34.12/moi_estate/", description: "實價登錄清理系統 http://220.1.34.12/moi_estate/", icon: "file-scan" },
+                    { title: "實價登錄簡訊系統", href: "http://220.1.34.221/", description: "實價登錄簡訊系統 http://220.1.34.221/", icon: "message-square-more" }
+                ]
+            },
+            {
+                category: "行政課",
+                id: "adm",
+                icon: "briefcase",
+                links: [
+                    { title: "行政課專屬入口網站", href: "http://220.1.34.18/service/section/04/index.htm", description: "最新消息、年度計畫、公文稽催 ...", icon: "layout-list" },
+                    { title: "檔案知識庫", href: "http://220.1.34.18/service/section/archives/archives.html", description: "檔案作業規劃、檔案應用、檔案分類表、會議記錄 ...", icon: "archive" },
+                    { title: "地政系統WEB版-行政課AP(156)", href: "http://220.1.34.156:9080/LandHA/", description: "地政系統WEB版行政課操作專屬伺服器 http://220.1.34.156:9080/LandHA/", icon: "server-cog" },
+                    { title: "非都市土地使用編定管理系統", href: "http://220.1.34.12:8080/LandHA/", description: "非都市土地使用編定管理系統 http://220.1.34.12:8080/LandHA/", icon: "map-pin" },
+                    { title: "檔案應用預約申請控管系統", href: "http://220.1.34.75:8080/adm/file", description: "民眾檔案應用服務申請控管 http://220.1.34.75:8080/adm/file", icon: "file-archive" },
+                    { title: "土地參考資訊檔查詢系統", href: "http://220.1.34.213/ref/jsp/security/login.jsp", description: "土地參考資訊檔查詢系統 http://220.1.34.213/ref/jsp/security/login.jsp", icon: "file-search" }
+                ]
+            },
+            {
+                category: "資訊課",
+                id: "inf",
+                icon: "laptop",
+                links: [
+                    { title: "資訊課專屬入口網站", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/index.htm", description: "最新消息、表單下載、會議記錄 ...", icon: "home" },
+                    { title: "地政資訊系統監控", href: "http://220.1.34.75:8080/inf", description: "以儀表板呈現最即時的系統狀態 http://220.1.34.75:8080/inf", icon: "tv" },
+                    { title: "111數發部政府簡訊平台", href: "https://111.gov.tw/psms_web/", description: "政府專屬短碼簡訊平臺(外網) https://111.gov.tw/psms_web/", icon: "message-circle" },
+                    { title: "地政系統WEB版-本所測試機", href: "http://192.168.17.20:9080/LandHA/", description: "地政系統WEB版-跨縣市測試機 http://192.168.17.20:9080/LandHA/", icon: "server" },
+                    { title: "地政系統WEB版-桃園外掛測試機", href: "http://192.168.17.21:9080/LandHA/", description: "地政系統WEB版-桃園外掛測試機 http://192.168.17.21:9080/LandHA/", icon: "server" },
+                    { title: "地政系統WEB版-跨縣市測試機", href: "http://192.168.17.22:9080/LandHA/", description: "地政系統WEB版-跨縣市測試機 http://192.168.17.22:9080/LandHA/", icon: "server" },
+                    { title: "案件辦理情形通知系統", href: "http://220.1.34.221:8080/SMS98/", description: "精誠開發之系統透過「中華電信訊息中心API」傳送案件辦理狀態簡訊及電子郵件 http://220.1.34.221:8080/SMS98/", icon: "message-circle-dots" },
+                    { title: "便民觸控查詢控制台", href: "http://220.1.34.211:9080/touch/", description: "便民觸控查詢控制台 http://220.1.34.211:9080/touch/", icon: "monitor" },
+                    { title: "SRMAS 機房天氣圖", href: "http://220.1.34.75:8080/inf/weather/", description: "機房網路及主要系統狀態顯示 http://220.1.34.75:8080/inf/weather/", icon: "cloud-sun-rain" }
+                ]
+            },
+            {
+                category: "人事室",
+                id: "hr",
+                icon: "users",
+                links: [
+                    { title: "人事室專屬入口網站", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/index.htm", description: "最新消息、表單下載、職掌業務 ...", icon: "layout-list" }
+                ]
+            },
+            {
+                category: "會計室",
+                id: "acc",
+                icon: "calculator",
+                links: [
+                    { title: "會計室(內部控制)專屬入口網站", href: "http://220.1.34.18/service/section/%E6%9C%83%E8%A8%88%E5%AE%A4/index.htm", description: "參考資料、會議紀錄、內控制度 ...", icon: "layout-list" }
+                ]
+            },
+            // Updated "舊版書籤" to be a direct link
+            {
+                category: "舊版書籤",
+                id: "legacy",
+                icon: "archive",
+                href: "old.html", // Points to old.html
+                isDirectLink: true // Flag to identify this as a direct link
+            }
+        ];
 
-			<div class="col-md-4 mb-3">
-				<div class="card fixed-height">
-					<img src="../assets/img/bookmark/webitr.jpg" class="card-img-top img-fluid" alt="差勤系統">
-					<div class="card-body">
-						<div class="card-title d-flex justify-content-between align-items-center">
-							<h5><i class="far fa-clock fa-lg mr-1"></i>機關內部人事業務系統</h5>
-							<a href="https://webitr.tycg.gov.tw/WebITR/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
-						</div>
-						<p class="card-text">桃園市政府差勤系統 https://webitr.tycg.gov.tw/WebITR/</p>
-					</div>
-				</div>
-			</div>
+        const sidebar = document.getElementById('sidebar');
+        const bookmarksContent = document.getElementById('bookmarks-content');
+        // const legacyBookmarksContent = document.getElementById('legacy-bookmarks-content'); // No longer needed
+        const currentCategoryTitle = document.getElementById('current-category-title');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        
+        // Render sidebar navigation
+        bookmarksData.forEach((item) => { // Removed index as it's not used for active class logic here
+            const linkElement = document.createElement('a'); 
+            linkElement.href = item.isDirectLink ? item.href : '#';
+            if (item.isDirectLink) {
+                linkElement.target = "_blank";
+                linkElement.rel = "noopener noreferrer";
+            }
+            linkElement.classList.add('sidebar-item', 'block', 'py-2.5', 'px-4', 'rounded-md', 'transition', 'duration-200', 'flex', 'items-center');
+            
+            linkElement.dataset.id = item.id; // Store id for all items for potential use
+            linkElement.innerHTML = `<i data-lucide="${item.icon}"></i> ${item.category}`;
 
-			<div class="col-md-4 mb-3">
-				<div class="card fixed-height">
-					<img src="../assets/img/bookmark/odis.jpg" class="card-img-top img-fluid" alt="公文系統">
-					<div class="card-body">
-						<div class="card-title d-flex justify-content-between align-items-center">
-							<h5><i class="fa fa-book fa-lg mr-1"></i>公文整合資訊系統</h5>
-							<a href="https://odis.tycg.gov.tw/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
-						</div>
-						<p class="card-text">市府公文系統 https://odis.tycg.gov.tw/</p>
-					</div>
-				</div>
-			</div>
+            if (!item.isDirectLink) {
+                linkElement.onclick = (e) => {
+                    e.preventDefault();
+                    loadCategory(item.id); // Load content for this category
+                    
+                    // Update active class: remove from all non-direct links, then add to current
+                    document.querySelectorAll('#sidebar .sidebar-item').forEach(el => {
+                        const elId = el.dataset.id;
+                        const elData = bookmarksData.find(b => b.id === elId);
+                        if (elData && !elData.isDirectLink) {
+                            el.classList.remove('active');
+                        }
+                    });
+                    linkElement.classList.add('active');
 
-			<div class="col-md-4 mb-3">
-				<div class="card fixed-height">
-					<img src="../assets/img/bookmark/161.jpg" class="card-img-top img-fluid" alt="跨縣市伺服器">
-					<div class="card-body">
-						<div class="card-title d-flex justify-content-between align-items-center">
-							<h5><i class="fa fa-server fa-lg mr-1 text-primary"></i>地政系統WEB版跨縣市伺服器</h5>
-							<a href="http://220.1.34.161:9080/LandHA/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
-						</div>
-						<p class="card-text">地政系統WEB版<strong class="text-primary">跨縣市</strong>操作專屬伺服器 http://220.1.34.161:9080/LandHA/</p>
-					</div>
-				</div>
-			</div>
+                    if (window.innerWidth < 640) { 
+                        sidebar.classList.add('-translate-x-full');
+                    }
+                };
+            }
+            sidebar.appendChild(linkElement);
+        });
 
-			<div class="col-md-4 mb-3">
-				<div class="card fixed-height">
-					<img src="../assets/img/bookmark/inf_help.jpg" class="card-img-top img-fluid" alt="資訊課各式表單下載">
-					<div class="card-body">
-						<div class="card-title d-flex justify-content-between align-items-center">
-							<h5><i class="fas fa-database fa-lg mr-1 text-danger"></i>資訊課各式表單下載</h5>
-							<a href="http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/download.html" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
-						</div>
-						<p class="card-text">提供各式資訊課申請表單下載</p>
-					</div>
-				</div>
-			</div>
+        // Function to render bookmark cards
+        function renderBookmarks(links) {
+            bookmarksContent.innerHTML = ''; // Clear previous cards
+            if (!links || links.length === 0) {
+                bookmarksContent.innerHTML = '<p class="text-gray-500 text-center py-10">此類別下沒有書籤。</p>';
+                lucide.createIcons(); // Ensure icons are rendered if any were in the message
+                return;
+            }
+            links.forEach(link => {
+                const card = document.createElement('div');
+                card.classList.add('bg-white', 'rounded-xl', 'shadow-lg', 'overflow-hidden', 'flex', 'flex-col', 'hover:shadow-2xl', 'transition-shadow', 'duration-300', 'p-5'); 
+                
+                card.innerHTML = `
+                    <div class="flex flex-col flex-grow">
+                        <h5 class="text-xl font-semibold text-gray-800 mb-2 flex items-center card-title">
+                            ${link.icon ? `<i data-lucide="${link.icon}"></i>` : ''}
+                            <span>${link.title}</span>
+                        </h5>
+                        <p class="text-gray-600 text-sm mb-4 flex-grow">${link.description || '點擊「前往」按鈕訪問此連結。'}</p>
+                        <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="action-button mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 text-center">
+                            <span>前往</span>
+                            <i data-lucide="arrow-right"></i>
+                        </a>
+                    </div>
+                `;
+                bookmarksContent.appendChild(card);
+            });
+            lucide.createIcons(); 
+        }
 
-			<div class="col-md-4 mb-3">
-				<div class="card fixed-height">
-					<img src="../assets/img/bookmark/personnel_help.jpg" class="card-img-top img-fluid" alt="人事室各式表單下載">
-					<div class="card-body">
-						<div class="card-title d-flex justify-content-between align-items-center">
-							<h5><i class="fa fa-user fa-lg mr-1 text-success"></i>人事室各式表單下載</h5>
-							<a href="http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download.html" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
-						</div>
-						<p class="card-text">提供各式人事相關申請表單下載</p>
-					</div>
-				</div>
-			</div>
+        // renderLegacyBookmarks function is removed
 
-			<div class="col-md-4 mb-3">
-				<div class="card fixed-height">
-					<img src="../assets/img/bookmark/taoyuan_gov.jpg" class="card-img-top img-fluid" alt="公務雲">
-					<div class="card-body">
-						<div class="card-title d-flex justify-content-between align-items-center">
-							<h5><i class="fa fa-cloud fa-lg mr-1"></i>桃園市政府公務雲</h5>
-							<a href="https://tycgcloud.tycg.gov.tw/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
-						</div>
-						<p class="card-text">桃園市政府公務雲(內網) https://tycgcloud.tycg.gov.tw/</p>
-					</div>
-				</div>
-			</div>
+        // Function to load a category
+        function loadCategory(categoryId) {
+            const categoryData = bookmarksData.find(item => item.id === categoryId && !item.isDirectLink); 
+            
+            if (categoryData) { 
+                currentCategoryTitle.textContent = categoryData.category;
+                bookmarksContent.classList.remove('hidden'); 
+                // legacyBookmarksContent related lines are removed
+                renderBookmarks(categoryData.links); // Pass links array
+            } else {
+                // Fallback for unknown category ID, or if a direct link ID was somehow passed
+                const itemStillExists = bookmarksData.find(i => i.id === categoryId);
+                if (itemStillExists && !itemStillExists.isDirectLink){ // It's a category but has no links defined in data
+                     currentCategoryTitle.textContent = itemStillExists.category;
+                     bookmarksContent.classList.remove('hidden');
+                     bookmarksContent.innerHTML = '<p class="text-gray-500 text-center py-10">此類別下沒有書籤。</p>';
+                } else if (!itemStillExists) { // Category ID not found at all
+                     currentCategoryTitle.textContent = "未知類別";
+                     bookmarksContent.classList.remove('hidden');
+                     bookmarksContent.innerHTML = '<p class="text-gray-500 text-center py-10">找不到指定的類別。</p>';
+                }
+                // If it's a direct link, no content change is needed here.
+                lucide.createIcons(); // Call if the messages above might contain icons
+            }
+        }
 
-			<div class="col-md-4 mb-3">
-				<div class="card fixed-height">
-					<img src="../assets/img/bookmark/18.jpg" class="card-img-top img-fluid" alt="知識網">
-					<div class="card-body">
-						<div class="card-title d-flex justify-content-between align-items-center">
-							<h5><i class="fas fa-house-user fa-lg mr-1"></i>地所員工知識網</h5>
-							<a href="http://220.1.34.18:8888" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
-						</div>
-						<p class="card-text">提供公告、各課室專屬區、員工資訊、會議室預約 ... 等功能</p>
-					</div>
-				</div>
-			</div>
+        // Sidebar toggle for mobile
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            setTimeout(() => lucide.createIcons(), 0); 
+        });
+        
+        document.addEventListener('click', (event) => {
+            if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target) && window.innerWidth < 640) { 
+                 if (!sidebar.classList.contains('-translate-x-full')) {
+                    sidebar.classList.add('-translate-x-full');
+                 }
+            }
+        });
 
-			<div class="col-md-4 mb-3">
-				<div class="card fixed-height">
-					<img src="../assets/img/bookmark/exchange-new.jpg" class="card-img-top img-fluid" alt="內外網交換系統">
-					<div class="card-body">
-						<div class="card-title d-flex justify-content-between align-items-center">
-							<h5><i class="fa fa-file-export fa-lg mr-1"></i>內外網檔案交換系統</h5>
-							<a href="http://220.1.34.26:8008/" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
-						</div>
-						<p class="card-text">內網電腦檔案交換至外網的交換系統，外網下載請至 http://220.2.34.17:8008/</p>
-					</div>
-				</div>
-			</div>
-
-			<div class="col-md-4 mb-3">
-				<div class="card fixed-height">
-					<img src="../assets/img/bookmark/adm_help.jpg" class="card-img-top img-fluid" alt="行政課各式表單下載">
-					<div class="card-body">
-						<div class="card-title d-flex justify-content-between align-items-center">
-							<h5><i class="fa fa-user-tie fa-lg mr-1 text-info"></i>行政課各式下載區</h5>
-							<a href="http://220.1.34.18/service/section/04/download.htm" class="btn btn-primary stretched-link text-white" target="_blank">前往</a>
-						</div>
-						<p class="card-text">行政課各式下載專區</p>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section><!-- /section -->
-	<!-- Bootstrap core JavaScript
-  ================================================== -->
-	<!-- Placed at the end of the document so the pages load faster -->
-	<script src="../assets/js/jquery.min.js"></script>
-	<!-- <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery.min.js"><\/script>')</script> -->
-	<script src="../assets/js/popper.min.js"></script>
-	<script src="../assets/js/bootstrap.min.js"></script>
-	<script type="text/javascript">
-		function openLink(title, link) {
-			window.open(link, "_blank");
-		}
-		// tooltip init
-		$('[data-toggle="tooltip"]').tooltip({
-			placement: "right",
-			delay: {
-				show: 300,
-				hide: 100
-			}
-		});
-	</script>
+        // Initial load: find the first non-direct link category to display
+        const firstLoadableCategory = bookmarksData.find(item => !item.isDirectLink);
+        if (firstLoadableCategory) {
+            loadCategory(firstLoadableCategory.id);
+            // Set the first actual category as active in the sidebar
+            const firstActiveSidebarItem = document.querySelector(`.sidebar-item[data-id='${firstLoadableCategory.id}']`);
+            if (firstActiveSidebarItem) {
+                firstActiveSidebarItem.classList.add('active');
+            }
+        } else {
+            // Handle case where there are no actual categories to load
+            currentCategoryTitle.textContent = "沒有可顯示的書籤";
+            bookmarksContent.innerHTML = '<p class="text-gray-500 text-center py-10">請先新增書籤類別。</p>';
+        }
+        lucide.createIcons(); 
+    </script>
 </body>
-
 </html>
