@@ -4,97 +4,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>桃園地所書籤索引</title>
+    <title>桃園地所書籤索引 (新版)</title>
     <script src="tailwind.js"></script>
     <script src="lucide.min.js"></script>
     <style>
         /* Custom scrollbar for webkit browsers */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        body {
-            font-family: 'Inter', sans-serif; /* Default Tailwind font for the page itself */
-        }
-        .sidebar-item.active {
-            background-color: #4A5568; /* bg-gray-700 */
-            color: white;
-        }
-        .sidebar-item:hover {
-            background-color: #2D3748; /* bg-gray-800 */
-            color: white;
-        }
-        .card-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Card min width adjusted as images are removed */
-            gap: 1.5rem; /* gap-6 */
-        }
-        /* Lucide icon styling */
-        i[data-lucide] {
-            display: inline-block; 
-            width: 1.25em; /* Increased icon size by 1.25 times */
-            height: 1.25em; /* Increased icon size by 1.25 times */
-            vertical-align: -0.2em; /* Adjusted for better alignment with increased size */
-            line-height: 1; 
-        }
-        .sidebar-item i[data-lucide] {
-             margin-right: 1rem; /* Increased gap for sidebar icons (equivalent to Tailwind mr-4) */
-        }
-        .card-title i[data-lucide] {
-            margin-right: 0.75rem; /* Gap for card title icons (mr-3) */
-            color: #4f46e5; 
-        }
-        .action-button { 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
-        .action-button span { 
-            margin-right: 0.375rem; /* Gap between "前往" text and arrow icon */
-        }
-        /* Legacy link items are removed, so this style might not be needed anymore */
-        /* .legacy-link-item i[data-lucide] {
-            margin-left: 0.25rem; 
-            color: #eab308; 
-        } */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-track { background: #374151; }
+        ::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #6b7280; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
 
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Sidebar item base styles */
+        .sidebar-item {
+            display: flex; align-items: center; justify-content: flex-start;
+            padding: 0.625rem 1rem; border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            width: 100%; cursor: pointer;
+        }
+
+        /* Light theme specific styles */
+        body { background-color: #f3f4f6; color: #1f2937; }
+        #sidebar { background-color: #111827; color: #e5e7eb; }
+        .sidebar-item { color: #e5e7eb; }
+        .sidebar-item:hover { background-color: #374151; color: #ffffff; }
+        .sidebar-item.active { background-color: #4b5563; color: #ffffff; }
+        main { background-color: #f3f4f6; }
+        #current-category-title { color: #1f2937; }
+        
+        /* Explicit Bookmark Card Styles */
+        .bookmark-card-styled {
+            /* Light Mode Default Visuals - these are the base */
+            background-color: #ffffff; /* bg-white */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+            /* Structural Styles */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out; /* Added background-color transition */
+        }
+        .bookmark-card-styled:hover { /* Light mode hover */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-2xl */
+        }
+
+        .card-content-wrapper { 
+            padding: 1.25rem; /* p-5 */
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card-title span { color: #1f2937; }
+        .card-title + p { color: #4b5563; }
+        .card-title i[data-lucide] { color: #4f46e5; }
+        .action-button { background-color: #4f46e5; color: #ffffff; }
+        .action-button:hover { background-color: #4338ca; }
+        #sidebar-toggle { color: #374151; }
+        #sidebar-toggle:hover { background-color: #e5e7eb; }
+
+        /* Dark theme overrides */
+        .dark body { background-color: #030712; color: #d1d5db; }
+        .dark #sidebar { background-color: #1f2937; color: #d1d5db; }
+        .dark .sidebar-item { color: #d1d5db; }
+        .dark .sidebar-item:hover { background-color: #374151; color: #f9fafb; }
+        .dark .sidebar-item.active { background-color: #4b5563; color: #f9fafb; }
+        .dark main { background-color: #111827; }
+        .dark #current-category-title { color: #e5e7eb; }
+        .dark #sidebar-header .text-white { color: #e5e7eb; }
+        
+        .dark .bookmark-card-styled { /* Card in dark mode - overrides .bookmark-card-styled */
+            background-color: #1f2937; /* slate-800 */
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5), 0 2px 4px -1px rgba(0,0,0,0.4); /* Darker shadow */
+        }
+        .dark .bookmark-card-styled:hover {
+             box-shadow: 0 10px 15px -3px rgba(0,0,0,0.6), 0 4px 6px -2px rgba(0,0,0,0.5); /* Darker hover shadow */
+        }
+        .dark .card-title span { color: #e5e7eb; }
+        .dark .card-title + p { color: #9ca3af; }
+        .dark .card-title i[data-lucide] { color: #818cf8; }
+        .dark .action-button { background-color: #6366f1; }
+        .dark .action-button:hover { background-color: #4f46e5; }
+        .dark #sidebar-toggle { color: #9ca3af; }
+        .dark #sidebar-toggle:hover { background-color: #374151; }
+
+        /* Grid container */
+        #bookmarks-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem; 
+        }
+
+        /* Lucide icon styling */
+        i[data-lucide] { display: inline-block; width: 1.25em; height: 1.25em; vertical-align: -0.2em; line-height: 1; }
+        .sidebar-item i[data-lucide] { margin-right: 1rem; }
+        .card-title i[data-lucide] { margin-right: 0.75rem; }
+        .action-button { display: inline-flex; align-items: center; justify-content: center; }
+        .action-button span { margin-right: 0.375rem; }
+        #theme-toggle-button { margin-top: auto; }
     </style>
 </head>
 
-<body class="bg-gray-100 text-gray-900">
+<body class="">
     <div class="flex h-screen overflow-hidden">
-        <aside id="sidebar" class="w-64 bg-gray-900 text-gray-200 p-4 space-y-2 overflow-y-auto transition-transform duration-300 ease-in-out transform -translate-x-full sm:translate-x-0">
-            <div class="text-2xl font-semibold text-white mb-6 flex items-center">
-                <i data-lucide="link" class="mr-3"></i>
-                <span>書籤索引</span>
+        <aside id="sidebar" class="w-64 p-4 flex flex-col overflow-y-auto transition-transform duration-300 ease-in-out transform -translate-x-full sm:translate-x-0">
+            <div id="sidebar-header" class="mb-6">
+                <div class="text-2xl font-semibold flex items-center">
+                    <i data-lucide="link" class="mr-3"></i>
+                    <span>書籤索引</span>
+                </div>
             </div>
-            </aside>
-
+            <div id="sidebar-links" class="space-y-2 flex-grow">
+                </div>
+            <button id="theme-toggle-button" class="sidebar-item mt-4">
+                <i data-lucide="sun"></i> <span>切換主題</span>
+            </button>
+        </aside>
         <main class="flex-1 p-6 overflow-y-auto">
             <header class="mb-6 flex justify-between items-center">
-                <h1 id="current-category-title" class="text-3xl font-bold text-gray-800">共通網址</h1>
-                <button id="sidebar-toggle" class="sm:hidden p-2 rounded-md text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                <h1 id="current-category-title" class="text-3xl font-bold">共通網址</h1>
+                <button id="sidebar-toggle" class="sm:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500">
                     <i data-lucide="menu" class="text-xl"></i>
                 </button>
             </header>
-            <div id="bookmarks-content" class="card-container">
+            <div id="bookmarks-content"> 
                 </div>
-            </main>
+        </main>
     </div>
 
     <script>
         const bookmarksData = [
+            // ... (您的 bookmarksData 維持不變) ...
             {
                 category: "共通網址",
                 id: "common",
@@ -225,24 +272,47 @@
                     { title: "會計室(內部控制)專屬入口網站", href: "http://220.1.34.18/service/section/%E6%9C%83%E8%A8%88%E5%AE%A4/index.htm", description: "參考資料、會議紀錄、內控制度 ...", icon: "layout-list" }
                 ]
             },
-            // Updated "舊版書籤" to be a direct link
             {
                 category: "舊版書籤",
                 id: "legacy",
                 icon: "archive",
-                href: "old.html", // Points to old.html
-                isDirectLink: true // Flag to identify this as a direct link
+                href: "old.html", 
+                isDirectLink: true 
             }
         ];
 
         const sidebar = document.getElementById('sidebar');
+        const sidebarLinksContainer = document.getElementById('sidebar-links'); 
         const bookmarksContent = document.getElementById('bookmarks-content');
-        // const legacyBookmarksContent = document.getElementById('legacy-bookmarks-content'); // No longer needed
         const currentCategoryTitle = document.getElementById('current-category-title');
         const sidebarToggle = document.getElementById('sidebar-toggle');
+        const themeToggleButton = document.getElementById('theme-toggle-button');
+        const htmlElement = document.documentElement;
+
+        function applyTheme(theme) {
+            const iconName = theme === 'dark' ? 'moon' : 'sun';
+            themeToggleButton.innerHTML = `<i data-lucide="${iconName}"></i> <span>切換主題</span>`;
+            
+            if (theme === 'dark') {
+                htmlElement.classList.add('dark');
+            } else {
+                htmlElement.classList.remove('dark');
+            }
+            lucide.createIcons(); 
+        }
+
+        function toggleTheme() {
+            const currentTheme = htmlElement.classList.contains('dark') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        }
+
+        if (themeToggleButton) {
+            themeToggleButton.addEventListener('click', toggleTheme);
+        }
         
-        // Render sidebar navigation
-        bookmarksData.forEach((item) => { // Removed index as it's not used for active class logic here
+        bookmarksData.forEach((item) => {
             const linkElement = document.createElement('a'); 
             linkElement.href = item.isDirectLink ? item.href : '#';
             if (item.isDirectLink) {
@@ -251,52 +321,55 @@
             }
             linkElement.classList.add('sidebar-item', 'block', 'py-2.5', 'px-4', 'rounded-md', 'transition', 'duration-200', 'flex', 'items-center');
             
-            linkElement.dataset.id = item.id; // Store id for all items for potential use
+            linkElement.dataset.id = item.id; 
             linkElement.innerHTML = `<i data-lucide="${item.icon}"></i> ${item.category}`;
 
             if (!item.isDirectLink) {
                 linkElement.onclick = (e) => {
                     e.preventDefault();
-                    loadCategory(item.id); // Load content for this category
+                    loadCategory(item.id); 
                     
-                    // Update active class: remove from all non-direct links, then add to current
-                    document.querySelectorAll('#sidebar .sidebar-item').forEach(el => {
-                        const elId = el.dataset.id;
-                        const elData = bookmarksData.find(b => b.id === elId);
-                        if (elData && !elData.isDirectLink) {
-                            el.classList.remove('active');
-                        }
+                    document.querySelectorAll('#sidebar-links .sidebar-item').forEach(el => {
+                       el.classList.remove('active'); 
                     });
-                    linkElement.classList.add('active');
+                    linkElement.classList.add('active'); 
 
                     if (window.innerWidth < 640) { 
                         sidebar.classList.add('-translate-x-full');
                     }
                 };
             }
-            sidebar.appendChild(linkElement);
+            sidebarLinksContainer.appendChild(linkElement); 
         });
 
-        // Function to render bookmark cards
         function renderBookmarks(links) {
-            bookmarksContent.innerHTML = ''; // Clear previous cards
+            bookmarksContent.innerHTML = ''; 
             if (!links || links.length === 0) {
-                bookmarksContent.innerHTML = '<p class="text-gray-500 text-center py-10">此類別下沒有書籤。</p>';
-                lucide.createIcons(); // Ensure icons are rendered if any were in the message
+                bookmarksContent.innerHTML = '<p class="text-center py-10">此類別下沒有書籤。</p>';
+                if (htmlElement.classList.contains('dark')) {
+                    bookmarksContent.querySelector('p').classList.add('text-gray-400');
+                } else {
+                    bookmarksContent.querySelector('p').classList.add('text-gray-500');
+                }
+                lucide.createIcons(); 
                 return;
             }
             links.forEach(link => {
                 const card = document.createElement('div');
-                card.classList.add('bg-white', 'rounded-xl', 'shadow-lg', 'overflow-hidden', 'flex', 'flex-col', 'hover:shadow-2xl', 'transition-shadow', 'duration-300', 'p-5'); 
-                
+                // Only add the CSS class for theming. Other Tailwind classes for structure are in the CSS.
+                card.classList.add('bookmark-card-styled'); 
+                // Tailwind classes for hover effects can be added if they differ from CSS :hover
+                card.classList.add('hover:shadow-2xl', 'dark:hover:shadow-lg');
+
+
                 card.innerHTML = `
-                    <div class="flex flex-col flex-grow">
-                        <h5 class="text-xl font-semibold text-gray-800 mb-2 flex items-center card-title">
+                    <div class="card-content-wrapper"> 
+                        <h5 class="text-xl font-semibold mb-2 flex items-center card-title">
                             ${link.icon ? `<i data-lucide="${link.icon}"></i>` : ''}
                             <span>${link.title}</span>
                         </h5>
-                        <p class="text-gray-600 text-sm mb-4 flex-grow">${link.description || '點擊「前往」按鈕訪問此連結。'}</p>
-                        <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="action-button mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 text-center">
+                        <p class="text-sm mb-4 flex-grow">${link.description || '點擊「前往」按鈕訪問此連結。'}</p>
+                        <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="action-button mt-auto font-medium py-2 px-4 rounded-lg transition duration-300 text-center">
                             <span>前往</span>
                             <i data-lucide="arrow-right"></i>
                         </a>
@@ -307,35 +380,41 @@
             lucide.createIcons(); 
         }
 
-        // renderLegacyBookmarks function is removed
-
-        // Function to load a category
         function loadCategory(categoryId) {
             const categoryData = bookmarksData.find(item => item.id === categoryId && !item.isDirectLink); 
             
             if (categoryData) { 
                 currentCategoryTitle.textContent = categoryData.category;
                 bookmarksContent.classList.remove('hidden'); 
-                // legacyBookmarksContent related lines are removed
-                renderBookmarks(categoryData.links); // Pass links array
+                renderBookmarks(categoryData.links); 
             } else {
-                // Fallback for unknown category ID, or if a direct link ID was somehow passed
                 const itemStillExists = bookmarksData.find(i => i.id === categoryId);
-                if (itemStillExists && !itemStillExists.isDirectLink){ // It's a category but has no links defined in data
+                 let messageP = document.createElement('p');
+                 messageP.classList.add('text-center', 'py-10');
+                if (htmlElement.classList.contains('dark')) {
+                    messageP.classList.add('text-gray-400');
+                } else {
+                    messageP.classList.add('text-gray-500');
+                }
+
+                if (itemStillExists && !itemStillExists.isDirectLink){ 
                      currentCategoryTitle.textContent = itemStillExists.category;
                      bookmarksContent.classList.remove('hidden');
-                     bookmarksContent.innerHTML = '<p class="text-gray-500 text-center py-10">此類別下沒有書籤。</p>';
-                } else if (!itemStillExists) { // Category ID not found at all
+                     messageP.textContent = '此類別下沒有書籤。';
+                     bookmarksContent.innerHTML = ''; 
+                     bookmarksContent.appendChild(messageP);
+
+                } else if (!itemStillExists) { 
                      currentCategoryTitle.textContent = "未知類別";
                      bookmarksContent.classList.remove('hidden');
-                     bookmarksContent.innerHTML = '<p class="text-gray-500 text-center py-10">找不到指定的類別。</p>';
+                     messageP.textContent = '找不到指定的類別。';
+                     bookmarksContent.innerHTML = ''; 
+                     bookmarksContent.appendChild(messageP);
                 }
-                // If it's a direct link, no content change is needed here.
-                lucide.createIcons(); // Call if the messages above might contain icons
+                lucide.createIcons(); 
             }
         }
 
-        // Sidebar toggle for mobile
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('-translate-x-full');
             setTimeout(() => lucide.createIcons(), 0); 
@@ -349,19 +428,28 @@
             }
         });
 
-        // Initial load: find the first non-direct link category to display
+        const savedTheme = localStorage.getItem('theme') || 'light'; 
+        applyTheme(savedTheme);
+
         const firstLoadableCategory = bookmarksData.find(item => !item.isDirectLink);
         if (firstLoadableCategory) {
             loadCategory(firstLoadableCategory.id);
-            // Set the first actual category as active in the sidebar
-            const firstActiveSidebarItem = document.querySelector(`.sidebar-item[data-id='${firstLoadableCategory.id}']`);
+            const firstActiveSidebarItem = document.querySelector(`#sidebar-links .sidebar-item[data-id='${firstLoadableCategory.id}']`);
             if (firstActiveSidebarItem) {
                 firstActiveSidebarItem.classList.add('active');
             }
         } else {
-            // Handle case where there are no actual categories to load
             currentCategoryTitle.textContent = "沒有可顯示的書籤";
-            bookmarksContent.innerHTML = '<p class="text-gray-500 text-center py-10">請先新增書籤類別。</p>';
+            let messageP = document.createElement('p');
+            messageP.classList.add('text-center', 'py-10');
+            if (htmlElement.classList.contains('dark')) {
+                messageP.classList.add('text-gray-400');
+            } else {
+                messageP.classList.add('text-gray-500');
+            }
+            messageP.textContent = '請先新增書籤類別。';
+            bookmarksContent.innerHTML = ''; 
+            bookmarksContent.appendChild(messageP);
         }
         lucide.createIcons(); 
     </script>
