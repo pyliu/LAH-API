@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>桃園地所書籤索引</title>
+    <title>桃園地所書籤索引 (新版)</title>
     <script src="tailwind.js"></script>
     <script src="lucide.min.js"></script>
     <style>
@@ -25,43 +25,59 @@
         /* Sidebar item base styles */
         .sidebar-item {
             display: flex; align-items: center; justify-content: flex-start;
-            padding: 0.625rem 1rem; border-radius: 0.375rem;
+            padding: 0.625rem 1rem; /* py-2.5 px-4 */
+            border-radius: 0.375rem; /* rounded-md */
             transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
             width: 100%; cursor: pointer;
         }
+        .sidebar-item > span { /* Ensure text within sidebar items also transitions color */
+            transition: color 0.2s ease-in-out;
+        }
 
-        /* Light theme specific styles */
-        body { background-color: #f3f4f6; color: #1f2937; }
-        #sidebar { background-color: #111827; color: #e5e7eb; }
-        .sidebar-item { color: #e5e7eb; }
-        .sidebar-item:hover { background-color: #374151; color: #ffffff; }
-        .sidebar-item.active { background-color: #4b5563; color: #ffffff; }
-        main { background-color: #f3f4f6; }
-        #current-category-title { color: #1f2937; }
+
+        /* --- Light Theme --- */
+        body { background-color: #f3f4f6; color: #1f2937; } /* bg-gray-100, text-gray-800 */
         
-        /* Explicit Bookmark Card Styles */
+        #sidebar { 
+            background-color: #e5e7eb; /* Light gray background: bg-gray-200 */
+            color: #374151; /* Darker text for readability: text-gray-700 */
+        }
+        #sidebar-header .font-semibold { 
+            color: #1f2937; /* Darker text for title: text-gray-800 */
+        }
+        .sidebar-item { 
+            color: #374151; /* Darker text for items: text-gray-700 */
+        }
+        .sidebar-item:hover { 
+            background-color: #d1d5db; /* Slightly darker gray for hover: bg-gray-300 */
+            color: #111827; /* Darkest text on hover: text-gray-900 */
+        }
+        .sidebar-item.active { 
+            background-color: #9ca3af; /* Medium gray for active: bg-gray-400 */
+            color: #ffffff; /* White text for active */
+        }
+        #theme-toggle-button { /* Ensure theme toggle button also follows light theme */
+             color: #374151;
+        }
+        #theme-toggle-button:hover {
+            background-color: #d1d5db;
+            color: #111827;
+        }
+
+        main { background-color: #f3f4f6; } /* bg-gray-100 */
+        #current-category-title { color: #1f2937; } /* text-gray-800 */
+        
         .bookmark-card-styled {
-            /* Light Mode Default Visuals - these are the base */
-            background-color: #ffffff; /* bg-white */
-            border-radius: 0.75rem; /* rounded-xl */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
-            /* Structural Styles */
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out; /* Added background-color transition */
+            background-color: #ffffff; 
+            border-radius: 0.75rem; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+            overflow: hidden; display: flex; flex-direction: column;
+            transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
         }
-        .bookmark-card-styled:hover { /* Light mode hover */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-2xl */
+        .bookmark-card-styled:hover { 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
         }
-
-        .card-content-wrapper { 
-            padding: 1.25rem; /* p-5 */
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-
+        .card-content-wrapper { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
         .card-title span { color: #1f2937; }
         .card-title + p { color: #4b5563; }
         .card-title i[data-lucide] { color: #4f46e5; }
@@ -70,30 +86,49 @@
         #sidebar-toggle { color: #374151; }
         #sidebar-toggle:hover { background-color: #e5e7eb; }
 
-        /* Dark theme overrides */
-        .dark body { background-color: #030712; color: #d1d5db; }
-        .dark #sidebar { background-color: #1f2937; color: #d1d5db; }
-        .dark .sidebar-item { color: #d1d5db; }
-        .dark .sidebar-item:hover { background-color: #374151; color: #f9fafb; }
-        .dark .sidebar-item.active { background-color: #4b5563; color: #f9fafb; }
-        .dark main { background-color: #111827; }
-        .dark #current-category-title { color: #e5e7eb; }
-        .dark #sidebar-header .text-white { color: #e5e7eb; }
+        /* --- Dark Theme Overrides --- */
+        .dark body { background-color: #0f172a; color: #cbd5e1; } /* slate-900, slate-300 */
+        .dark #sidebar { 
+            background-color: #1e293b; /* slate-800 */
+            color: #e2e8f0; /* slate-200 */
+        }
+        .dark #sidebar-header .font-semibold { color: #f1f5f9; } /* slate-100 */
+        .dark .sidebar-item { 
+            color: #e2e8f0; /* slate-200 */
+        }
+        .dark .sidebar-item:hover { 
+            background-color: #334155; /* slate-700 */
+            color: #f8fafc; /* slate-50 */
+        }
+        .dark .sidebar-item.active { 
+            background-color: #475569; /* slate-600 */
+            color: #f8fafc; /* slate-50 */
+        }
+         .dark #theme-toggle-button {
+             color: #e2e8f0;
+        }
+        .dark #theme-toggle-button:hover {
+            background-color: #334155;
+            color: #f8fafc;
+        }
+
+        .dark main { background-color: #0f172a; } /* slate-900 */
+        .dark #current-category-title { color: #f1f5f9; /* slate-100 */ }
         
-        .dark .bookmark-card-styled { /* Card in dark mode - overrides .bookmark-card-styled */
-            background-color: #1f2937; /* slate-800 */
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5), 0 2px 4px -1px rgba(0,0,0,0.4); /* Darker shadow */
+        .dark .bookmark-card-styled { 
+            background-color: #1e293b; /* slate-800 */
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.6), 0 2px 4px -1px rgba(0,0,0,0.5); 
         }
         .dark .bookmark-card-styled:hover {
-             box-shadow: 0 10px 15px -3px rgba(0,0,0,0.6), 0 4px 6px -2px rgba(0,0,0,0.5); /* Darker hover shadow */
+             box-shadow: 0 10px 15px -3px rgba(0,0,0,0.7), 0 4px 6px -2px rgba(0,0,0,0.6); 
         }
-        .dark .card-title span { color: #e5e7eb; }
-        .dark .card-title + p { color: #9ca3af; }
-        .dark .card-title i[data-lucide] { color: #818cf8; }
+        .dark .card-title span { color: #f1f5f9; }
+        .dark .card-title + p { color: #94a3b8; }
+        .dark .card-title i[data-lucide] { color: #a5b4fc; }
         .dark .action-button { background-color: #6366f1; }
         .dark .action-button:hover { background-color: #4f46e5; }
-        .dark #sidebar-toggle { color: #9ca3af; }
-        .dark #sidebar-toggle:hover { background-color: #374151; }
+        .dark #sidebar-toggle { color: #94a3b8; }
+        .dark #sidebar-toggle:hover { background-color: #334155; }
 
         /* Grid container */
         #bookmarks-content {
@@ -102,12 +137,31 @@
             gap: 1.5rem; 
         }
 
-        /* Lucide icon styling */
-        i[data-lucide] { display: inline-block; width: 1.25em; height: 1.25em; vertical-align: -0.2em; line-height: 1; }
-        .sidebar-item i[data-lucide] { margin-right: 1rem; }
-        .card-title i[data-lucide] { margin-right: 0.75rem; }
-        .action-button { display: inline-flex; align-items: center; justify-content: center; }
-        .action-button span { margin-right: 0.375rem; }
+        /* Lucide icon styling & Increased Gaps */
+        i[data-lucide] { 
+            display: inline-block; 
+            width: 1.25em; 
+            height: 1.25em; 
+            vertical-align: -0.2em; /* Adjusted for better alignment */
+            line-height: 1; 
+            flex-shrink: 0; /* Prevent icon from shrinking */
+        }
+        /* Sidebar title icon gap (controlled by Tailwind mr-3 on the icon itself) */
+        #sidebar-header i[data-lucide] { margin-right: 0.75rem !important; } /* Tailwind mr-3 */
+        /* Sidebar item icon gap */
+        .sidebar-item > i[data-lucide] { margin-right: 1.25rem !important; /* Increased from 1rem, approx mr-5 */ }
+        /* Card title icon gap */
+        .card-title > i[data-lucide] { margin-right: 1rem !important; /* Increased from 0.75rem, approx mr-4 */ }
+        
+        /* Action button: text and icon alignment and gap */
+        .action-button { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .action-button > span { 
+            margin-right: 0.5rem !important; /* Increased from 0.375rem, approx mr-2 */
+        }
         #theme-toggle-button { margin-top: auto; }
     </style>
 </head>
@@ -117,7 +171,7 @@
         <aside id="sidebar" class="w-64 p-4 flex flex-col overflow-y-auto transition-transform duration-300 ease-in-out transform -translate-x-full sm:translate-x-0">
             <div id="sidebar-header" class="mb-6">
                 <div class="text-2xl font-semibold flex items-center">
-                    <i data-lucide="link" class="mr-3"></i>
+                    <i data-lucide="link" class="mr-3"></i> 
                     <span>書籤索引</span>
                 </div>
             </div>
@@ -146,7 +200,7 @@
                 category: "共通網址",
                 id: "common",
                 icon: "home",
-                links: [
+                links: [ 
                     { title: "地政事務所入口網", href: "http://220.1.34.75:8080/", description: "顯示最新公告及各業務小幫手連結", icon: "layout-dashboard" },
                     { title: "機關內部人事業務系統", href: "https://webitr.tycg.gov.tw/WebITR/", description: "桃園市政府差勤系統 https://webitr.tycg.gov.tw/WebITR/", icon: "clock" },
                     { title: "公文整合資訊系統", href: "https://odis.tycg.gov.tw/", description: "市府公文系統 https://odis.tycg.gov.tw/", icon: "book-marked" },
@@ -319,10 +373,10 @@
                 linkElement.target = "_blank";
                 linkElement.rel = "noopener noreferrer";
             }
-            linkElement.classList.add('sidebar-item', 'block', 'py-2.5', 'px-4', 'rounded-md', 'transition', 'duration-200', 'flex', 'items-center');
+            linkElement.classList.add('sidebar-item'); 
             
             linkElement.dataset.id = item.id; 
-            linkElement.innerHTML = `<i data-lucide="${item.icon}"></i> ${item.category}`;
+            linkElement.innerHTML = `<i data-lucide="${item.icon}"></i><span>${item.category}</span>`;
 
             if (!item.isDirectLink) {
                 linkElement.onclick = (e) => {
@@ -356,10 +410,9 @@
             }
             links.forEach(link => {
                 const card = document.createElement('div');
-                // Only add the CSS class for theming. Other Tailwind classes for structure are in the CSS.
                 card.classList.add('bookmark-card-styled'); 
-                // Tailwind classes for hover effects can be added if they differ from CSS :hover
-                card.classList.add('hover:shadow-2xl', 'dark:hover:shadow-lg');
+                // Add Tailwind classes for hover effects, rounded corners, and overflow
+                card.classList.add('hover:shadow-2xl', 'dark:hover:shadow-lg', 'rounded-xl', 'overflow-hidden');
 
 
                 card.innerHTML = `
