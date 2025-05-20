@@ -67,28 +67,44 @@
 
         /* --- Bookmark Cards --- */
         .bookmark-card-styled {
-            overflow: hidden; display: flex; flex-direction: column;
+            display: block; 
+            overflow: hidden;
             transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
+            text-decoration: none; 
+        }
+        .bookmark-card-styled:hover {
+            /* Existing hover styles */
         }
         .card-content-wrapper {
             padding: 1.25rem; display: flex;
             flex-direction: column; flex-grow: 1;
+            height: 100%; 
         }
-        .card-title > i[data-lucide] + span { margin-left: 0.5rem; }
+        /* Removed: .card-title > i[data-lucide] + span { margin-left: 0.5rem; } */
+        /* Spacing is now handled by mr-2 on the icon itself via JS */
 
-        /* --- Action Button --- */
-        .action-button {
+        /* --- Action Button (visual cue) --- */
+        .action-button-visual { 
             display: inline-flex; align-items: center; justify-content: center;
             white-space: nowrap;
         }
-        .action-button > span { margin-right: 0.25rem; }
+        .action-button-visual > span { margin-right: 0.25rem; }
 
         /* --- Lucide Icons --- */
         i[data-lucide] {
-            display: inline-block; vertical-align: -0.2em; line-height: 1; flex-shrink: 0;
+            display: inline-block; 
+            vertical-align: -0.2em; 
+            line-height: 1; 
+            flex-shrink: 0;
         }
-        i[data-lucide]:not(.card-title > i[data-lucide]) { width: 1.25em; height: 1.25em; }
-        .card-title > i[data-lucide] { margin-right:0; width: 1.4em; height: 1.4em; vertical-align: -0.25em; }
+        i[data-lucide]:not(.card-title > i[data-lucide]) { 
+            width: 1.25em; 
+            height: 1.25em;
+        }
+        .card-title > i[data-lucide] { 
+            /* margin-right is now handled by mr-2 class in JS */
+            /* width and height will be set by inline style in JS */
+        } 
 
 
         /* --- Light Theme --- */
@@ -103,19 +119,32 @@
         #theme-toggle-button:hover { background-color: var(--bootstrap-primary-hover); color: #ffffff !important; }
         main { background-color: #f3f4f6; }
         #current-category-title { color: #1f2937; }
-        .bookmark-card-styled {
+        .bookmark-card-styled { 
             background-color: #ffffff; border-radius: 0.75rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            color: inherit; 
         }
-        .bookmark-card-styled:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        .card-title span { color: #1f2937; }
-        .card-title + p { color: #4b5563; }
-        .card-title > i[data-lucide] { color: var(--bootstrap-primary); }
-        .action-button { background-color: var(--bootstrap-primary); color: #ffffff; }
-        .action-button:hover { background-color: var(--bootstrap-primary-hover); }
+        .bookmark-card-styled:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .card-title span { color: #1f2937; } 
+        .card-title + p { color: #4b5563; } 
+        .card-title > i[data-lucide] { color: var(--bootstrap-primary); } 
+        .action-button-visual { 
+            background-color: var(--bootstrap-primary);
+            color: #ffffff;
+            padding-top: 0.5rem; padding-bottom: 0.5rem;
+            padding-left: 1rem; padding-right: 1rem;
+            border-radius: 0.5rem; 
+            transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+            text-align: center;
+        }
+        .bookmark-card-styled:hover .action-button-visual { 
+             background-color: var(--bootstrap-primary-hover);
+        }
         #sidebar-toggle-button { color: #374151; }
         #sidebar-toggle-button:hover { background-color: #e5e7eb; }
-        /* Updated CSS selector to target SVG for red color */
         #sidebar-toggle-button.open-icon-red svg { color: #ef4444; }
 
 
@@ -130,19 +159,26 @@
         .dark #theme-toggle-button:hover { background-color: var(--bootstrap-primary-dark-hover-bg); color: #f8fafc !important; }
         .dark main { background-color: #0f172a; }
         .dark #current-category-title { color: #f1f5f9; }
-        .dark .bookmark-card-styled {
+        .dark .bookmark-card-styled { 
             background-color: #1e293b;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.6), 0 2px 4px -1px rgba(0,0,0,0.5);
+            color: inherit; 
         }
-        .dark .bookmark-card-styled:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.7), 0 4px 6px -2px rgba(0,0,0,0.6); }
-        .dark .card-title span { color: #f1f5f9; }
-        .dark .card-title + p { color: #94a3b8; }
-        .dark .card-title > i[data-lucide] { color: var(--bootstrap-primary-dark-hover-bg); }
-        .dark .action-button { background-color: var(--bootstrap-primary-dark-bg); }
-        .dark .action-button:hover { background-color: var(--bootstrap-primary-dark-hover-bg); }
+        .dark .bookmark-card-styled:hover {
+             box-shadow: 0 10px 15px -3px rgba(0,0,0,0.7), 0 4px 6px -2px rgba(0,0,0,0.6);
+        }
+        .dark .card-title span { color: #f1f5f9; } 
+        .dark .card-title + p { color: #94a3b8; } 
+        .dark .card-title > i[data-lucide] { color: var(--bootstrap-primary-dark-hover-bg); } 
+        .dark .action-button-visual {
+            background-color: var(--bootstrap-primary-dark-bg);
+            color: #f8fafc; 
+        }
+        .dark .bookmark-card-styled:hover .action-button-visual {
+             background-color: var(--bootstrap-primary-dark-hover-bg);
+        }
         .dark #sidebar-toggle-button { color: #94a3b8; }
         .dark #sidebar-toggle-button:hover { background-color: #334155; }
-        /* Updated CSS selector to target SVG for red color in dark mode */
         .dark #sidebar-toggle-button.open-icon-red svg { color: #f87171; }
 
 
@@ -164,7 +200,7 @@
                 </div>
             </div>
             <div id="sidebar-links" class="space-y-2 flex-grow"></div>
-            <button id="theme-toggle-button" class="sidebar-item mt-4">
+            <button id="theme-toggle-button" class="sidebar-item mt-4" title="切換顯示主題">
                 <i data-lucide="sun"></i>
                 <span>切換主題</span>
             </button>
@@ -172,7 +208,7 @@
 
         <main class="flex-1 p-4 overflow-y-auto">
             <div class="flex items-center mb-6">
-                <button id="sidebar-toggle-button" class="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 z-30 mr-3">
+                <button id="sidebar-toggle-button" class="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 z-30 mr-3" title="開啟/收合側邊欄">
                     <i data-lucide="menu" class="text-xl"></i>
                 </button>
                 <h1 id="current-category-title" class="text-3xl font-bold">共通網址</h1>
@@ -338,7 +374,7 @@
 
 
         // --- Sidebar State Constants ---
-        const SIDEBAR_OPEN_WIDTH_CLASS = 'w-64';
+        const SIDEBAR_OPEN_WIDTH_CLASS = 'w-48'; 
         const SIDEBAR_COLLAPSED_WIDTH_CLASS = 'w-16';
 
         let isSidebarVisuallyOpen = false;
@@ -351,7 +387,7 @@
             if (isSidebarVisuallyOpen) {
                 sidebarTexts.forEach(span => span.classList.remove('hidden'));
                 sidebar.classList.remove('collapsed');
-                iconName = 'x';
+                iconName = 'sidebar-close'; 
                 sidebarToggleButton.classList.add('open-icon-red');
             } else {
                 sidebarTexts.forEach(span => span.classList.add('hidden'));
@@ -360,10 +396,8 @@
                 sidebarToggleButton.classList.remove('open-icon-red');
             }
             
-            // Update the icon by changing the innerHTML of the button
             sidebarToggleButton.innerHTML = `<i data-lucide="${iconName}" class="text-xl"></i>`;
             
-            // Re-render Lucide icons to process the new icon
             setTimeout(() => {
                 lucide.createIcons();
             }, 0);
@@ -381,7 +415,7 @@
                 isSidebarVisuallyOpen = false;
             }
             localStorage.setItem('sidebarState', visualState); 
-            updateSidebarIconAndText(); // Update icon and text visibility
+            updateSidebarIconAndText(); 
         }
 
 
@@ -398,7 +432,6 @@
             }
             setTimeout(() => {
                 lucide.createIcons();
-                // Ensure sidebar text visibility is correct after theme change potentially affecting theme button's span
                 updateSidebarIconAndText(); 
             }, 0);
         }
@@ -420,6 +453,7 @@
         bookmarksData.forEach((item) => {
             const linkElement = document.createElement('a');
             linkElement.href = item.isDirectLink ? item.href : '#';
+            linkElement.title = item.category; // Add title attribute for tooltip
             if (item.isDirectLink) {
                 linkElement.target = "_blank";
                 linkElement.rel = "noopener noreferrer";
@@ -431,7 +465,7 @@
             if (!item.isDirectLink) {
                 linkElement.onclick = (e) => {
                     e.preventDefault();
-                    loadCategory(item.id);
+                    loadCategory(item.id); 
                     document.querySelectorAll('#sidebar-links .sidebar-item').forEach(el => {
                        el.classList.remove('active');
                     });
@@ -451,22 +485,30 @@
                 return;
             }
             links.forEach(link => {
-                const card = document.createElement('div');
-                card.classList.add('bookmark-card-styled', 'hover:shadow-2xl', 'dark:hover:shadow-lg', 'rounded-xl', 'overflow-hidden');
-                card.innerHTML = `
+                const cardLink = document.createElement('a'); 
+                cardLink.href = link.href;
+                cardLink.target = "_blank";
+                cardLink.rel = "noopener noreferrer";
+                cardLink.title = link.href; 
+                cardLink.classList.add('bookmark-card-styled', 'hover:shadow-2xl', 'dark:hover:shadow-lg', 'rounded-xl');
+                
+                // Apply inline style for icon size and add mr-2 class
+                const iconHtml = link.icon ? `<i data-lucide="${link.icon}" class="mr-2" style="width: 2.1em; height: 2.1em;"></i>` : '';
+
+                cardLink.innerHTML = `
                     <div class="card-content-wrapper">
                         <h5 class="text-xl font-semibold mb-2 flex items-center card-title">
-                            ${link.icon ? `<i data-lucide="${link.icon}" class="mr-2"></i>` : ''}
+                            ${iconHtml}
                             <span>${link.title}</span>
                         </h5>
-                        <p class="text-sm mb-4 flex-grow">${link.description || '點擊「前往」按鈕訪問此連結。'}</p>
-                        <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="action-button mt-auto font-medium py-2 px-4 rounded-lg transition duration-300 text-center">
+                        <p class="text-sm mb-4 flex-grow">${link.description || '點擊前往此連結。'}</p>
+                        <div class="action-button-visual mt-auto font-medium">
                             <span>前往</span>
                             <i data-lucide="arrow-right"></i>
-                        </a>
+                        </div>
                     </div>
                 `;
-                bookmarksContent.appendChild(card);
+                bookmarksContent.appendChild(cardLink);
             });
         }
 
@@ -477,24 +519,10 @@
                 currentCategoryTitle.textContent = categoryData.category;
                 bookmarksContent.classList.remove('hidden');
                 renderBookmarks(categoryData.links);
+                localStorage.setItem('lastSelectedCategory', categoryId); 
             } else {
-                const itemStillExists = bookmarksData.find(i => i.id === categoryId);
-                let messageP = document.createElement('p');
-                messageP.classList.add('text-center', 'py-10');
-                messageP.classList.toggle('text-gray-400', htmlElement.classList.contains('dark'));
-                messageP.classList.toggle('text-gray-500', !htmlElement.classList.contains('dark'));
-
-                if (itemStillExists && !itemStillExists.isDirectLink){
-                     currentCategoryTitle.textContent = itemStillExists.category;
-                     bookmarksContent.classList.remove('hidden');
-                     messageP.textContent = '此類別下沒有書籤。';
-                } else if (!itemStillExists) {
-                     currentCategoryTitle.textContent = "未知類別";
-                     bookmarksContent.classList.remove('hidden');
-                     messageP.textContent = '找不到指定的類別。';
-                }
-                bookmarksContent.innerHTML = '';
-                bookmarksContent.appendChild(messageP);
+                console.warn(`Category with ID '${categoryId}' not found.`);
+                localStorage.removeItem('lastSelectedCategory'); 
             }
             setTimeout(() => lucide.createIcons(), 0);
         }
@@ -513,12 +541,32 @@
         const initialSidebarState = localStorage.getItem('sidebarState') || 'collapsed'; 
         setSidebarVisualState(initialSidebarState); 
 
-        const firstLoadableCategory = bookmarksData.find(item => !item.isDirectLink);
-        if (firstLoadableCategory) {
-            loadCategory(firstLoadableCategory.id);
-            const firstActiveSidebarItem = document.querySelector(`#sidebar-links .sidebar-item[data-id='${firstLoadableCategory.id}']`);
-            if (firstActiveSidebarItem) {
-                firstActiveSidebarItem.classList.add('active');
+        let categoryToLoadId = localStorage.getItem('lastSelectedCategory');
+        let categoryIsValid = false;
+
+        if (categoryToLoadId) {
+            const categoryExists = bookmarksData.find(item => item.id === categoryToLoadId && !item.isDirectLink);
+            if (categoryExists) {
+                categoryIsValid = true;
+            } else {
+                localStorage.removeItem('lastSelectedCategory'); 
+                categoryToLoadId = null; 
+            }
+        }
+
+        if (!categoryIsValid) { 
+            const firstLoadableCategory = bookmarksData.find(item => !item.isDirectLink);
+            if (firstLoadableCategory) {
+                categoryToLoadId = firstLoadableCategory.id;
+            }
+        }
+
+        if (categoryToLoadId) {
+            loadCategory(categoryToLoadId); 
+            const activeSidebarItem = document.querySelector(`#sidebar-links .sidebar-item[data-id='${categoryToLoadId}']`);
+            if (activeSidebarItem) {
+                document.querySelectorAll('#sidebar-links .sidebar-item.active').forEach(el => el.classList.remove('active'));
+                activeSidebarItem.classList.add('active');
             }
         } else {
             currentCategoryTitle.textContent = "沒有可顯示的書籤";
