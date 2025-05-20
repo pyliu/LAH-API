@@ -8,6 +8,16 @@
     <script src="tailwind.js"></script>
     <script src="lucide.min.js"></script>
     <style>
+        /* Bootstrap Primary Color Variable */
+        :root {
+            --bootstrap-primary: #0d6efd;
+            --bootstrap-primary-hover: #0b5ed7; 
+            --bootstrap-primary-active: #0a58ca;
+            --bootstrap-primary-dark-bg: #0d6efd; 
+            --bootstrap-primary-dark-hover-bg: #3c87fd;
+            --bootstrap-primary-dark-active-bg: #0b5ed7;
+        }
+
         /* Custom scrollbar for webkit browsers */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 10px; }
@@ -25,47 +35,57 @@
         /* Sidebar item base styles */
         .sidebar-item {
             display: flex; align-items: center; justify-content: flex-start;
-            padding: 0.625rem 1rem; /* py-2.5 px-4 */
-            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.625rem 1rem; border-radius: 0.375rem;
             transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
             width: 100%; cursor: pointer;
         }
-        .sidebar-item > span { /* Ensure text within sidebar items also transitions color */
+        .sidebar-item > span { 
             transition: color 0.2s ease-in-out;
+            margin-left: 0.5rem; /* Reduced gap for sidebar item text */
+        }
+        .sidebar-item > i[data-lucide] {
+            margin-right: 0; 
         }
 
 
         /* --- Light Theme --- */
-        body { background-color: #f3f4f6; color: #1f2937; } /* bg-gray-100, text-gray-800 */
+        body { background-color: #f3f4f6; color: #1f2937; } 
         
         #sidebar { 
-            background-color: #e5e7eb; /* Light gray background: bg-gray-200 */
-            color: #374151; /* Darker text for readability: text-gray-700 */
+            background-color: #e9ecef; /* Bootstrap $gray-200 */
+            color: #212529; /* Bootstrap default body text */
         }
         #sidebar-header .font-semibold { 
-            color: #1f2937; /* Darker text for title: text-gray-800 */
+            color: #212529; /* Darker text for title in light mode */
+        }
+        #sidebar-header .font-semibold > i[data-lucide] + span {
+            margin-left: 0.375rem; /* Reduced gap for main sidebar title */
         }
         .sidebar-item { 
-            color: #374151; /* Darker text for items: text-gray-700 */
+            color: #212529; 
         }
         .sidebar-item:hover { 
-            background-color: #d1d5db; /* Slightly darker gray for hover: bg-gray-300 */
-            color: #111827; /* Darkest text on hover: text-gray-900 */
+            background-color: var(--bootstrap-primary-hover); 
+            color: #ffffff; 
         }
         .sidebar-item.active { 
-            background-color: #9ca3af; /* Medium gray for active: bg-gray-400 */
-            color: #ffffff; /* White text for active */
+            background-color: var(--bootstrap-primary); 
+            color: #ffffff; 
         }
-        #theme-toggle-button { /* Ensure theme toggle button also follows light theme */
-             color: #374151;
+        #theme-toggle-button {
+             color: #212529;
         }
         #theme-toggle-button:hover {
-            background-color: #d1d5db;
-            color: #111827;
+            background-color: var(--bootstrap-primary-hover);
+            color: #ffffff;
+        }
+         #theme-toggle-button > i[data-lucide] + span {
+            margin-left: 0.5rem; /* Reduced gap for theme toggle button text */
         }
 
-        main { background-color: #f3f4f6; } /* bg-gray-100 */
-        #current-category-title { color: #1f2937; } /* text-gray-800 */
+
+        main { background-color: #f3f4f6; } 
+        #current-category-title { color: #1f2937; } 
         
         .bookmark-card-styled {
             background-color: #ffffff; 
@@ -78,55 +98,60 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
         }
         .card-content-wrapper { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
-        .card-title span { color: #1f2937; }
+        .card-title span { color: #1f2937; margin-left: 0.5rem; /* Reduced gap for card title text */ }
         .card-title + p { color: #4b5563; }
-        .card-title i[data-lucide] { color: #4f46e5; }
-        .action-button { background-color: #4f46e5; color: #ffffff; }
-        .action-button:hover { background-color: #4338ca; }
+        .card-title > i[data-lucide] { color: var(--bootstrap-primary); margin-right: 0;} 
+        
+        .action-button { 
+            background-color: var(--bootstrap-primary); 
+            color: #ffffff; 
+        }
+        .action-button:hover { background-color: var(--bootstrap-primary-hover); }
         #sidebar-toggle { color: #374151; }
         #sidebar-toggle:hover { background-color: #e5e7eb; }
 
         /* --- Dark Theme Overrides --- */
-        .dark body { background-color: #0f172a; color: #cbd5e1; } /* slate-900, slate-300 */
+        .dark body { background-color: #0f172a; color: #cbd5e1; } 
         .dark #sidebar { 
-            background-color: #1e293b; /* slate-800 */
-            color: #e2e8f0; /* slate-200 */
+            background-color: #1e293b; 
+            color: #e2e8f0; 
         }
-        .dark #sidebar-header .font-semibold { color: #f1f5f9; } /* slate-100 */
+        .dark #sidebar-header .font-semibold { color: #f1f5f9; } 
         .dark .sidebar-item { 
-            color: #e2e8f0; /* slate-200 */
+            color: #e2e8f0; 
         }
         .dark .sidebar-item:hover { 
-            background-color: #334155; /* slate-700 */
-            color: #f8fafc; /* slate-50 */
+            background-color: var(--bootstrap-primary-dark-hover-bg); 
+            color: #f8fafc; 
         }
         .dark .sidebar-item.active { 
-            background-color: #475569; /* slate-600 */
-            color: #f8fafc; /* slate-50 */
+            background-color: var(--bootstrap-primary-dark-active-bg); 
+            color: #f8fafc; 
         }
          .dark #theme-toggle-button {
              color: #e2e8f0;
         }
         .dark #theme-toggle-button:hover {
-            background-color: #334155;
+            background-color: var(--bootstrap-primary-dark-hover-bg);
             color: #f8fafc;
         }
 
-        .dark main { background-color: #0f172a; } /* slate-900 */
-        .dark #current-category-title { color: #f1f5f9; /* slate-100 */ }
+        .dark main { background-color: #0f172a; } 
+        .dark #current-category-title { color: #f1f5f9; } 
         
         .dark .bookmark-card-styled { 
-            background-color: #1e293b; /* slate-800 */
+            background-color: #1e293b; 
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.6), 0 2px 4px -1px rgba(0,0,0,0.5); 
         }
         .dark .bookmark-card-styled:hover {
              box-shadow: 0 10px 15px -3px rgba(0,0,0,0.7), 0 4px 6px -2px rgba(0,0,0,0.6); 
         }
-        .dark .card-title span { color: #f1f5f9; }
+        .dark .card-title span { color: #f1f5f9; margin-left: 0.5rem; /* Reduced gap */ }
         .dark .card-title + p { color: #94a3b8; }
-        .dark .card-title i[data-lucide] { color: #a5b4fc; }
-        .dark .action-button { background-color: #6366f1; }
-        .dark .action-button:hover { background-color: #4f46e5; }
+        .dark .card-title > i[data-lucide] { color: var(--bootstrap-primary-dark-hover-bg); margin-right: 0; } 
+        
+        .dark .action-button { background-color: var(--bootstrap-primary-dark-bg); }
+        .dark .action-button:hover { background-color: var(--bootstrap-primary-dark-hover-bg); }
         .dark #sidebar-toggle { color: #94a3b8; }
         .dark #sidebar-toggle:hover { background-color: #334155; }
 
@@ -137,30 +162,24 @@
             gap: 1.5rem; 
         }
 
-        /* Lucide icon styling & Increased Gaps */
+        /* Lucide icon styling */
         i[data-lucide] { 
             display: inline-block; 
             width: 1.25em; 
             height: 1.25em; 
-            vertical-align: -0.2em; /* Adjusted for better alignment */
+            vertical-align: -0.2em; 
             line-height: 1; 
-            flex-shrink: 0; /* Prevent icon from shrinking */
+            flex-shrink: 0; 
         }
-        /* Sidebar title icon gap (controlled by Tailwind mr-3 on the icon itself) */
-        #sidebar-header i[data-lucide] { margin-right: 0.75rem !important; } /* Tailwind mr-3 */
-        /* Sidebar item icon gap */
-        .sidebar-item > i[data-lucide] { margin-right: 1.25rem !important; /* Increased from 1rem, approx mr-5 */ }
-        /* Card title icon gap */
-        .card-title > i[data-lucide] { margin-right: 1rem !important; /* Increased from 0.75rem, approx mr-4 */ }
         
-        /* Action button: text and icon alignment and gap */
         .action-button { 
             display: inline-flex; 
             align-items: center; 
             justify-content: center; 
+            white-space: nowrap; 
         }
         .action-button > span { 
-            margin-right: 0.5rem !important; /* Increased from 0.375rem, approx mr-2 */
+            margin-right: 0.25rem; /* Reduced gap */
         }
         #theme-toggle-button { margin-top: auto; }
     </style>
@@ -171,7 +190,7 @@
         <aside id="sidebar" class="w-64 p-4 flex flex-col overflow-y-auto transition-transform duration-300 ease-in-out transform -translate-x-full sm:translate-x-0">
             <div id="sidebar-header" class="mb-6">
                 <div class="text-2xl font-semibold flex items-center">
-                    <i data-lucide="link" class="mr-3"></i> 
+                    <i data-lucide="link" class="mr-2"></i> 
                     <span>書籤索引</span>
                 </div>
             </div>
@@ -184,7 +203,7 @@
         <main class="flex-1 p-6 overflow-y-auto">
             <header class="mb-6 flex justify-between items-center">
                 <h1 id="current-category-title" class="text-3xl font-bold">共通網址</h1>
-                <button id="sidebar-toggle" class="sm:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500">
+                <button id="sidebar-toggle" class="sm:hidden p-2 rounded-md focus:outline-none focus:ring-2">
                     <i data-lucide="menu" class="text-xl"></i>
                 </button>
             </header>
@@ -345,7 +364,7 @@
 
         function applyTheme(theme) {
             const iconName = theme === 'dark' ? 'moon' : 'sun';
-            themeToggleButton.innerHTML = `<i data-lucide="${iconName}"></i> <span>切換主題</span>`;
+            themeToggleButton.innerHTML = `<i data-lucide="${iconName}"></i><span>切換主題</span>`;
             
             if (theme === 'dark') {
                 htmlElement.classList.add('dark');
@@ -411,7 +430,6 @@
             links.forEach(link => {
                 const card = document.createElement('div');
                 card.classList.add('bookmark-card-styled'); 
-                // Add Tailwind classes for hover effects, rounded corners, and overflow
                 card.classList.add('hover:shadow-2xl', 'dark:hover:shadow-lg', 'rounded-xl', 'overflow-hidden');
 
 
