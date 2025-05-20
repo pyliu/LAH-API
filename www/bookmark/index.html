@@ -8,17 +8,21 @@
     <script src="tailwind.js"></script>
     <script src="lucide.min.js"></script>
     <style>
-        /* Bootstrap Primary Color Variable */
+        /* --- CSS Variables --- */
         :root {
             --bootstrap-primary: #0d6efd;
             --bootstrap-primary-hover: #0b5ed7; 
             --bootstrap-primary-active: #0a58ca;
             --bootstrap-primary-dark-bg: #0d6efd; 
             --bootstrap-primary-dark-hover-bg: #3c87fd;
-            --bootstrap-primary-dark-active-bg: #0b5ed7;
+            --bootstrap-primary-dark-active-bg: #0b5ed7; 
         }
 
-        /* Custom scrollbar for webkit browsers */
+        /* --- General Body & Scrollbar --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 10px; }
         .dark ::-webkit-scrollbar-track { background: #374151; }
@@ -27,118 +31,105 @@
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
         .dark ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        /* Sidebar item base styles */
+        /* --- Sidebar --- */
         .sidebar-item {
             display: flex; align-items: center; justify-content: flex-start;
-            padding: 0.625rem 1rem; border-radius: 0.375rem;
+            padding: 0.625rem 1rem; 
+            border-radius: 0.375rem;
             transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
             width: 100%; cursor: pointer;
         }
         .sidebar-item > span { 
             transition: color 0.2s ease-in-out;
-            margin-left: 0.5rem; /* Reduced gap for sidebar item text */
+            margin-left: 0.5rem; 
         }
         .sidebar-item > i[data-lucide] {
             margin-right: 0; 
         }
+        #theme-toggle-button { margin-top: auto; }
 
+        /* --- Bookmark Cards --- */
+        .bookmark-card-styled {
+            overflow: hidden; display: flex; flex-direction: column;
+            transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
+        }
+        .card-content-wrapper { 
+            padding: 1.25rem; display: flex; 
+            flex-direction: column; flex-grow: 1; 
+        }
+        .card-title > i[data-lucide] + span { margin-left: 0.5rem; }
+        
+        /* --- Action Button (e.g., "前往") --- */
+        .action-button { 
+            display: inline-flex; align-items: center; justify-content: center; 
+            white-space: nowrap; 
+        }
+        .action-button > span { 
+            margin-right: 0.25rem; 
+        }
+
+        /* --- Lucide Icons General Styling --- */
+        i[data-lucide] { 
+            display: inline-block; 
+            vertical-align: -0.2em; 
+            line-height: 1; 
+            flex-shrink: 0; 
+        }
+        /* Default icon size for icons NOT in .card-title */
+        i[data-lucide]:not(.card-title > i[data-lucide]) {
+            width: 1.25em; 
+            height: 1.25em;
+        }
+         /* Specific styling for icons within card titles (enlarged) */
+        .card-title > i[data-lucide] { 
+            margin-right:0; /* Text span will handle the left margin */
+            width: 1.4em;  
+            height: 1.4em; 
+            vertical-align: -0.25em; 
+        } 
 
         /* --- Light Theme --- */
         body { background-color: #f3f4f6; color: #1f2937; } 
-        
-        #sidebar { 
-            background-color: #e9ecef; /* Bootstrap $gray-200 */
-            color: #212529; /* Bootstrap default body text */
-        }
-        #sidebar-header .font-semibold { 
-            color: #212529; /* Darker text for title in light mode */
-        }
-        #sidebar-header .font-semibold > i[data-lucide] + span {
-            margin-left: 0.375rem; /* Reduced gap for main sidebar title */
-        }
-        .sidebar-item { 
-            color: #212529; 
-        }
-        .sidebar-item:hover { 
-            background-color: var(--bootstrap-primary-hover); 
-            color: #ffffff; 
-        }
-        .sidebar-item.active { 
-            background-color: var(--bootstrap-primary); 
-            color: #ffffff; 
-        }
-        #theme-toggle-button {
-             color: #212529;
-        }
-        #theme-toggle-button:hover {
-            background-color: var(--bootstrap-primary-hover);
-            color: #ffffff;
-        }
-         #theme-toggle-button > i[data-lucide] + span {
-            margin-left: 0.5rem; /* Reduced gap for theme toggle button text */
-        }
-
-
+        #sidebar { background-color: #e9ecef; color: #212529; }
+        #sidebar-header .font-semibold { color: #212529; }
+        #sidebar-header .font-semibold > i[data-lucide] + span { margin-left: 0.5rem; }
+        .sidebar-item { color: #212529; }
+        .sidebar-item:hover { background-color: var(--bootstrap-primary-hover); color: #ffffff !important; }
+        .sidebar-item.active { background-color: var(--bootstrap-primary); color: #ffffff !important; }
+        #theme-toggle-button { color: #212529; }
+        #theme-toggle-button:hover { background-color: var(--bootstrap-primary-hover); color: #ffffff !important; }
+        #theme-toggle-button > i[data-lucide] + span { margin-left: 0.5rem; }
         main { background-color: #f3f4f6; } 
         #current-category-title { color: #1f2937; } 
-        
         .bookmark-card-styled {
             background-color: #ffffff; 
             border-radius: 0.75rem; 
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
-            overflow: hidden; display: flex; flex-direction: column;
-            transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
         }
         .bookmark-card-styled:hover { 
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
         }
-        .card-content-wrapper { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
-        .card-title span { color: #1f2937; margin-left: 0.5rem; /* Reduced gap for card title text */ }
+        .card-title span { color: #1f2937; }
         .card-title + p { color: #4b5563; }
-        .card-title > i[data-lucide] { color: var(--bootstrap-primary); margin-right: 0;} 
-        
-        .action-button { 
-            background-color: var(--bootstrap-primary); 
-            color: #ffffff; 
-        }
+        .card-title > i[data-lucide] { color: var(--bootstrap-primary); } 
+        .action-button { background-color: var(--bootstrap-primary); color: #ffffff; }
         .action-button:hover { background-color: var(--bootstrap-primary-hover); }
         #sidebar-toggle { color: #374151; }
         #sidebar-toggle:hover { background-color: #e5e7eb; }
 
         /* --- Dark Theme Overrides --- */
         .dark body { background-color: #0f172a; color: #cbd5e1; } 
-        .dark #sidebar { 
-            background-color: #1e293b; 
-            color: #e2e8f0; 
-        }
+        .dark #sidebar { background-color: #1e293b; color: #e2e8f0; }
         .dark #sidebar-header .font-semibold { color: #f1f5f9; } 
-        .dark .sidebar-item { 
-            color: #e2e8f0; 
-        }
-        .dark .sidebar-item:hover { 
-            background-color: var(--bootstrap-primary-dark-hover-bg); 
-            color: #f8fafc; 
-        }
-        .dark .sidebar-item.active { 
-            background-color: var(--bootstrap-primary-dark-active-bg); 
-            color: #f8fafc; 
-        }
-         .dark #theme-toggle-button {
-             color: #e2e8f0;
-        }
-        .dark #theme-toggle-button:hover {
-            background-color: var(--bootstrap-primary-dark-hover-bg);
-            color: #f8fafc;
-        }
-
+        .dark #sidebar-header .font-semibold > i[data-lucide] + span { margin-left: 0.5rem; }
+        .dark .sidebar-item { color: #e2e8f0; }
+        .dark .sidebar-item:hover { background-color: var(--bootstrap-primary-dark-hover-bg); color: #f8fafc !important; }
+        .dark .sidebar-item.active { background-color: var(--bootstrap-primary-dark-active-bg); color: #f8fafc !important; }
+        .dark #theme-toggle-button { color: #e2e8f0; }
+        .dark #theme-toggle-button:hover { background-color: var(--bootstrap-primary-dark-hover-bg); color: #f8fafc !important; }
+        .dark #theme-toggle-button > i[data-lucide] + span { margin-left: 0.5rem; }
         .dark main { background-color: #0f172a; } 
         .dark #current-category-title { color: #f1f5f9; } 
-        
         .dark .bookmark-card-styled { 
             background-color: #1e293b; 
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.6), 0 2px 4px -1px rgba(0,0,0,0.5); 
@@ -146,52 +137,30 @@
         .dark .bookmark-card-styled:hover {
              box-shadow: 0 10px 15px -3px rgba(0,0,0,0.7), 0 4px 6px -2px rgba(0,0,0,0.6); 
         }
-        .dark .card-title span { color: #f1f5f9; margin-left: 0.5rem; /* Reduced gap */ }
+        .dark .card-title span { color: #f1f5f9; }
+        .dark .card-title > i[data-lucide] + span { margin-left: 0.5rem; } 
         .dark .card-title + p { color: #94a3b8; }
-        .dark .card-title > i[data-lucide] { color: var(--bootstrap-primary-dark-hover-bg); margin-right: 0; } 
-        
+        .dark .card-title > i[data-lucide] { color: var(--bootstrap-primary-dark-hover-bg); } 
         .dark .action-button { background-color: var(--bootstrap-primary-dark-bg); }
         .dark .action-button:hover { background-color: var(--bootstrap-primary-dark-hover-bg); }
         .dark #sidebar-toggle { color: #94a3b8; }
         .dark #sidebar-toggle:hover { background-color: #334155; }
 
-        /* Grid container */
+        /* Grid container for bookmarks */
         #bookmarks-content {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem; 
         }
-
-        /* Lucide icon styling */
-        i[data-lucide] { 
-            display: inline-block; 
-            width: 1.25em; 
-            height: 1.25em; 
-            vertical-align: -0.2em; 
-            line-height: 1; 
-            flex-shrink: 0; 
-        }
-        
-        .action-button { 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            white-space: nowrap; 
-        }
-        .action-button > span { 
-            margin-right: 0.25rem; /* Reduced gap */
-        }
-        #theme-toggle-button { margin-top: auto; }
     </style>
 </head>
 
-<body class="">
-    <div class="flex h-screen overflow-hidden">
+<body class=""> <div class="flex h-screen overflow-hidden">
+        
         <aside id="sidebar" class="w-64 p-4 flex flex-col overflow-y-auto transition-transform duration-300 ease-in-out transform -translate-x-full sm:translate-x-0">
             <div id="sidebar-header" class="mb-6">
                 <div class="text-2xl font-semibold flex items-center">
-                    <i data-lucide="link" class="mr-2"></i> 
-                    <span>書籤索引</span>
+                    <i data-lucide="link" class="mr-2"></i> <span>書籤索引</span>
                 </div>
             </div>
             <div id="sidebar-links" class="space-y-2 flex-grow">
@@ -200,6 +169,7 @@
                 <i data-lucide="sun"></i> <span>切換主題</span>
             </button>
         </aside>
+
         <main class="flex-1 p-6 overflow-y-auto">
             <header class="mb-6 flex justify-between items-center">
                 <h1 id="current-category-title" class="text-3xl font-bold">共通網址</h1>
@@ -213,8 +183,8 @@
     </div>
 
     <script>
+        // --- Data ---
         const bookmarksData = [
-            // ... (您的 bookmarksData 維持不變) ...
             {
                 category: "共通網址",
                 id: "common",
@@ -436,7 +406,7 @@
                 card.innerHTML = `
                     <div class="card-content-wrapper"> 
                         <h5 class="text-xl font-semibold mb-2 flex items-center card-title">
-                            ${link.icon ? `<i data-lucide="${link.icon}"></i>` : ''}
+                            ${link.icon ? `<i data-lucide="${link.icon}" class="mr-2"></i>` : ''}
                             <span>${link.title}</span>
                         </h5>
                         <p class="text-sm mb-4 flex-grow">${link.description || '點擊「前往」按鈕訪問此連結。'}</p>
