@@ -57,9 +57,18 @@
             padding: 0.625rem 0.5rem;
         }
         #sidebar.collapsed #sidebar-header .font-semibold > span,
-        #sidebar.collapsed .sidebar-item > span {
+        #sidebar.collapsed .sidebar-item > span,
+        #sidebar.collapsed #current-time-section h2,
+        #sidebar.collapsed #current-time-section div {
             display: none;
         }
+         #sidebar.collapsed #current-time-section { /* Ensure section itself doesn't take up space when collapsed */
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-top:0;
+            margin-bottom:0;
+        }
+
         #sidebar.collapsed #sidebar-header .font-semibold {
             justify-content: center;
         }
@@ -80,8 +89,6 @@
             flex-direction: column; flex-grow: 1;
             height: 100%;
         }
-        /* Removed: .card-title > i[data-lucide] + span { margin-left: 0.5rem; } */
-        /* Spacing is now handled by mr-2 on the icon itself via JS */
 
         /* --- Action Button (visual cue) --- */
         .action-button-visual {
@@ -103,18 +110,19 @@
         }
         .card-title > i[data-lucide] {
             /* margin-right is now handled by mr-2 class in JS */
-            /* width and height will be set by inline style in JS */
         }
 
 
         /* --- Light Theme --- */
         body { background-color: #f3f4f6; color: #1f2937; }
-        #sidebar { background-color: #e9ecef; color: #212529; }
+        #sidebar { background-color: #e9ecef; color: #212529; } 
         #sidebar-header .font-semibold { color: #212529; }
         #sidebar-header .font-semibold > i[data-lucide] + span { margin-left: 0.5rem; }
         .sidebar-item { color: #212529; }
         .sidebar-item:hover { background-color: var(--bootstrap-primary-hover); color: #ffffff !important; }
         .sidebar-item.active { background-color: var(--bootstrap-primary); color: #ffffff !important; }
+        #current-time-section h2 { color: #212529; border-color: #d1d5db; } /* Light theme for time title */
+        #current-time-display { background-color: #f9fafb; color: #374151; } /* Light theme for time display box */
         #theme-toggle-button { color: #212529; }
         #theme-toggle-button:hover { background-color: var(--bootstrap-primary-hover); color: #ffffff !important; }
         main { background-color: #f3f4f6; }
@@ -155,6 +163,8 @@
         .dark .sidebar-item { color: #e2e8f0; }
         .dark .sidebar-item:hover { background-color: var(--bootstrap-primary-dark-hover-bg); color: #f8fafc !important; }
         .dark .sidebar-item.active { background-color: var(--bootstrap-primary-dark-active-bg); color: #f8fafc !important; }
+        .dark #current-time-section h2 { color: #e2e8f0; border-color: #374151; } /* Dark theme for time title */
+        .dark #current-time-display { background-color: #374151; color: #9ca3af; } /* Dark theme for time display box */
         .dark #theme-toggle-button { color: #e2e8f0; }
         .dark #theme-toggle-button:hover { background-color: var(--bootstrap-primary-dark-hover-bg); color: #f8fafc !important; }
         .dark main { background-color: #0f172a; }
@@ -188,20 +198,6 @@
             gap: 1.5rem;
         }
 
-        /* --- Copyright --- */
-        .copyright-footer {
-            position: fixed;
-            bottom: 1rem; /* Tailwind class: bottom-4 */
-            right: 1rem; /* Tailwind class: right-4 */
-            font-size: 0.75rem; /* Tailwind class: text-xs */
-            color: #6b7280; /* Tailwind class: text-gray-500 */
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* 浮動效果 */
-            z-index: 50; /* 確保在最上層 */
-        }
-        .dark .copyright-footer {
-            color: #9ca3af; /* Tailwind class: dark:text-gray-400 */
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.1); /* 深色模式下的浮動效果 */
-        }
     </style>
 </head>
 
@@ -215,6 +211,13 @@
                 </div>
             </div>
             <div id="sidebar-links" class="space-y-2 flex-grow"></div>
+            
+            <section id="current-time-section" class="mt-6 mb-2">
+                <h2 class="text-lg font-semibold mb-2 pb-1 border-b">目前時間</h2>
+                <div id="current-time-display" class="text-sm p-3 rounded-md shadow-sm"> 
+                    </div>
+            </section>
+
             <button id="theme-toggle-button" class="sidebar-item mt-4" title="切換顯示主題">
                 <i data-lucide="sun"></i>
                 <span>切換主題</span>
@@ -234,28 +237,37 @@
         </main>
     </div>
 
-    <div class="copyright-footer">
-        © Taoyuan Land Office 2025 All Rights Reserved.
-    </div>
-
     <script>
         // --- Data (same as before) ---
         const bookmarksData = [
             {
                 category: "共通網址",
                 id: "common",
-                icon: "home",
+                icon: "send-horizontal",
                 links: [
                     { title: "地政事務所入口網", href: "http://220.1.34.75:8080/", description: "顯示最新公告及各業務小幫手連結", icon: "layout-dashboard" },
                     { title: "機關內部人事業務系統", href: "https://webitr.tycg.gov.tw/WebITR/", description: "桃園市政府差勤系統 https://webitr.tycg.gov.tw/WebITR/", icon: "clock" },
                     { title: "公文整合資訊系統", href: "https://odis.tycg.gov.tw/", description: "市府公文系統 https://odis.tycg.gov.tw/", icon: "book-marked" },
                     { title: "地所員工知識網", href: "http://220.1.34.18:8888", description: "提供公告、各課室專屬區、員工資訊、會議室預約 ... 等功能", icon: "home" },
                     { title: "桃園市政府公務雲", href: "https://tycgcloud.tycg.gov.tw/", description: "桃園市政府公務雲(內網) https://tycgcloud.tycg.gov.tw/", icon: "cloud" },
-                    { title: "地政系統跨縣市伺服器", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server" },
+                    { title: "地政系統161-跨縣市", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server-cog" },
                     { title: "內外網檔案交換系統", href: "http://220.1.34.26:8008/", description: "內網電腦檔案交換至外網的交換系統，外網下載請至 http://220.2.34.17:8008/", icon: "file-output" },
-                    { title: "資訊課各式表單下載", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/download.html", description: "提供各式資訊課申請表單下載", icon: "database" },
+                    { title: "資訊課各式表單下載", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/download.html", description: "提供各式資訊課申請表單下載", icon: "computer" },
                     { title: "人事室各式表單下載", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download.html", description: "提供各式人事相關申請表單下載", icon: "user" },
                     { title: "行政課各式下載區", href: "http://220.1.34.18/service/section/04/download.htm", description: "行政課各式下載專區", icon: "user-cog" }
+                ]
+            },
+            {
+                category: "常用表單下載",
+                id: "files",
+                icon: "file-down",
+                links: [
+                    { title: "【本所】電腦問題處理表", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/%E5%B8%B8%E7%94%A8%E8%A1%A8%E6%A0%BC/%E9%9B%BB%E8%85%A6%E4%BD%9C%E6%A5%AD%E7%B3%BB%E7%B5%B1%E4%BD%BF%E7%94%A8%E8%80%85%E5%95%8F%E9%A1%8C%E5%8F%8A%E8%99%95%E7%90%86%E6%83%85%E5%BD%A2%E7%B4%80%E9%8C%84%E8%A1%A8(%E6%A9%AB).doc", description: "資訊課-電腦問題處理表 ", icon: "bug" },
+                    { title: "【跨所】跨所案件通報單", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/%E5%B8%B8%E7%94%A8%E8%A1%A8%E6%A0%BC/%E8%B7%A8%E6%89%80%E6%A1%88%E4%BB%B6%E9%80%9A%E5%A0%B1%E5%96%AE.doc", description: "資訊課-受理跨所登記案件通報單", icon: "arrow-right-left" },
+                    { title: "差勤更正單", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/107/00%E6%A1%83%E5%9C%92%E5%9C%B0%E6%94%BF%E4%BA%8B%E5%8B%99%E6%89%80%E5%8A%A0%E7%8F%AD%E8%AB%8B%E5%81%87%E6%9B%B4%E6%AD%A3%E7%94%B3%E8%AB%8B%E8%A1%A8.pdf", description: "人事室-桃園地政事務所加班請假更正申請表", icon: "file-check-2" },
+                    { title: "申請健檢補助費憑證", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/105%E5%81%A5%E6%AA%A2%E6%86%91%E8%AD%89%E7%94%A8%E7%B4%99.pdf", description: "人事室-40歲以上公務人員申請健康檢查補助費憑證用紙(須區域醫院以上醫院)", icon: "heart-plus" },
+                    { title: "", href: "", description: "", icon: "" },
+                    { title: "", href: "", description: "", icon: "" }
                 ]
             },
             {
@@ -263,9 +275,9 @@
                 id: "counter",
                 icon: "concierge-bell",
                 links: [
-                    { title: "地政系統-跨縣市AP(161)", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server-cog" },
-                    { title: "地政系統-桃園外掛AP(60)", href: "http://220.1.34.60:9080/LandHA/", description: "地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/", icon: "server-cog" },
-                    { title: "地政系統-工作站AP(118)", href: "http://220.1.34.118:9080/LandHA/", description: "地政系統工作站操作專屬伺服器 http://220.1.34.118:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統161-跨縣市", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統60-桃園外掛", href: "http://220.1.34.60:9080/LandHA/", description: "地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/", icon: "server" },
+                    { title: "地政系統118-工作站", href: "http://220.1.34.118:9080/LandHA/", description: "地政系統工作站操作專屬伺服器 http://220.1.34.118:9080/LandHA/", icon: "server" },
                     { title: "登記課專屬入口網站", href: "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/index.htm", description: "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", icon: "layout-list" },
                     { title: "地政智慧控管系統", href: "http://220.1.34.75:8080/reg/", description: "提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/", icon: "landmark" },
                     { title: "地政歷史資料查詢系統", href: "http://220.1.34.15/NLOWeb/", description: "地政歷史資料查詢系統 http://220.1.34.15/NLOWeb/", icon: "history" },
@@ -280,10 +292,10 @@
                 links: [
                     { title: "登記課專屬入口網站", href: "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/index.htm", description: "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", icon: "layout-list" },
                     { title: "地政智慧控管系統", href: "http://220.1.34.75:8080/reg/", description: "提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/", icon: "landmark" },
-                    { title: "地政系統-跨縣市AP(161)", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server-cog" },
-                    { title: "地政系統-桃園外掛AP(60)", href: "http://220.1.34.60:9080/LandHA/", description: "地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/", icon: "server-cog" },
-                    { title: "地政系統-登記課AP1(205)", href: "http://220.1.34.205:9080/LandHA/", description: "地政系統登記課操作專屬伺服器 http://220.1.34.205:9080/LandHA/", icon: "server-cog" },
-                    { title: "地政系統-登記課AP2(206)", href: "http://220.1.34.206:9080/LandHA/", description: "地政系統登記課操作專屬伺服器 http://220.1.34.206:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統161-跨縣市", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統60-桃園外掛", href: "http://220.1.34.60:9080/LandHA/", description: "地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/", icon: "server" },
+                    { title: "地政系統205-登記課1", href: "http://220.1.34.205:9080/LandHA/", description: "地政系統登記課操作專屬伺服器 http://220.1.34.205:9080/LandHA/", icon: "server" },
+                    { title: "地政系統206-登記課2", href: "http://220.1.34.206:9080/LandHA/", description: "地政系統登記課操作專屬伺服器 http://220.1.34.206:9080/LandHA/", icon: "server" },
                     { title: "內政部地政司-電子產權憑證後台", href: "https://220.5.61.73/etd-manager/", description: "內政部地政司開發提供電子產權憑證管理功能... https://220.5.61.73/etd-manager/", icon: "shield-check" },
                     { title: "地政歷史資料查詢系統", href: "http://220.1.34.15/NLOWeb/", description: "地政歷史資料查詢系統 http://220.1.34.15/NLOWeb/", icon: "history" },
                     { title: "土地參考資訊檔查詢系統", href: "http://220.1.34.213/ref/jsp/security/login.jsp", description: "土地參考資訊檔查詢系統 http://220.1.34.213/ref/jsp/security/login.jsp", icon: "file-search" },
@@ -304,8 +316,8 @@
                 icon: "ruler",
                 links: [
                     { title: "測量課專屬入口網站", href: "http://220.1.34.18/service/section/%E6%B8%AC%E9%87%8F%E8%AA%B2/index.htm", description: "法院判決案例、會議紀錄、法令規範、測量成果交換、應用軟體、常用表格 ...", icon: "layout-list" },
-                    { title: "地政系統-測量課AP1(207)", href: "http://220.1.34.207:9080/LandHA/", description: "地政系統測量課操作專屬伺服器 http://220.1.34.207:9080/LandHA/", icon: "server-cog" },
-                    { title: "地政系統-測量課AP2(62)", href: "http://220.1.34.62:9080/LandHA/", description: "地政系統測量課操作專屬伺服器 http://220.1.34.62:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統207-測量課1", href: "http://220.1.34.207:9080/LandHA/", description: "地政系統測量課操作專屬伺服器 http://220.1.34.207:9080/LandHA/", icon: "server" },
+                    { title: "地政系統62-測量課2", href: "http://220.1.34.62:9080/LandHA/", description: "地政系統測量課操作專屬伺服器 http://220.1.34.62:9080/LandHA/", icon: "server" },
                     { title: "建管圖資介接系統", href: "http://220.1.33.43:8080/Q14Web/", description: "建物第一次測量-使用執照資訊及竣工圖介接系統 http://220.1.33.43:8080/Q14Web/", icon: "map" },
                     { title: "測量逾期案件查詢", href: "http://220.1.34.75:8080/sur/expire", description: "測量逾期案件查詢 http://220.1.34.75:8080/sur/expire", icon: "calendar-clock" },
                     { title: "重測換狀通知書系統", href: "http://220.1.34.211:9080/XDT98/", description: "重測換狀通知書系統 http://220.1.34.211:9080/XDT98/", icon: "file-text" }
@@ -317,7 +329,7 @@
                 icon: "tags",
                 links: [
                     { title: "地價課專屬入口網站", href: "http://220.1.34.18/service/section/%E8%A1%8C%E6%94%BF%E8%AA%B2/fram.htm", description: "最新消息、會議紀錄、表單下載 ...", icon: "layout-list" },
-                    { title: "地政系統-地價課AP(156)", href: "http://220.1.34.156:9080/LandHA/", description: "地政系統地價課操作專屬伺服器 http://220.1.34.156:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統156-地價課", href: "http://220.1.34.156:9080/LandHA/", description: "地政系統地價課操作專屬伺服器 http://220.1.34.156:9080/LandHA/", icon: "server" },
                     { title: "實價登錄案件控管", href: "http://220.1.34.75:8080/prc/realprice", description: "實價登錄案件控管頁面 http://220.1.34.75:8080/prc/realprice", icon: "file-check-2" },
                     { title: "實價登錄JSON資料解析", href: "http://220.1.34.75:8080/prc/json-converter", description: "實價登錄JSON資料解析 http://220.1.34.75:8080/prc/json-converter", icon: "file-json" },
                     { title: "不動產交易成交資訊登錄機制系統", href: "http://220.5.61.195:8080/RPM/", description: "不動產交易成交資訊登錄機制系統 http://220.5.61.195:8080/RPM/", icon: "database-zap" },
@@ -333,7 +345,7 @@
                 links: [
                     { title: "行政課專屬入口網站", href: "http://220.1.34.18/service/section/04/index.htm", description: "最新消息、年度計畫、公文稽催 ...", icon: "layout-list" },
                     { title: "檔案知識庫", href: "http://220.1.34.18/service/section/archives/archives.html", description: "檔案作業規劃、檔案應用、檔案分類表、會議記錄 ...", icon: "archive" },
-                    { title: "地政系統-行政課AP(156)", href: "http://220.1.34.156:9080/LandHA/", description: "地政系統行政課操作專屬伺服器 http://220.1.34.156:9080/LandHA/", icon: "server-cog" },
+                    { title: "地政系統156-行政課", href: "http://220.1.34.156:9080/LandHA/", description: "地政系統行政課操作專屬伺服器 http://220.1.34.156:9080/LandHA/", icon: "server" },
                     { title: "非都市土地使用編定管理系統", href: "http://220.1.34.12:8080/LandHA/", description: "非都市土地使用編定管理系統 http://220.1.34.12:8080/LandHA/", icon: "map-pin" },
                     { title: "檔案應用預約申請控管系統", href: "http://220.1.34.75:8080/adm/file", description: "民眾檔案應用服務申請控管 http://220.1.34.75:8080/adm/file", icon: "file-archive" },
                     { title: "土地參考資訊檔查詢系統", href: "http://220.1.34.213/ref/jsp/security/login.jsp", description: "土地參考資訊檔查詢系統 http://220.1.34.213/ref/jsp/security/login.jsp", icon: "file-search" }
@@ -342,14 +354,14 @@
             {
                 category: "資訊課",
                 id: "inf",
-                icon: "laptop",
+                icon: "computer",
                 links: [
                     { title: "資訊課專屬入口網站", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/", description: "最新消息、表單下載、會議記錄 ...", icon: "layout-list" },
                     { title: "地政資訊系統監控", href: "http://220.1.34.75:8080/inf/dashboard", description: "以儀表板呈現最即時的系統狀態 http://220.1.34.75:8080/inf/dashboard", icon: "tv" },
                     { title: "111數發部政府簡訊平台", href: "https://111.gov.tw/psms_web/", description: "政府專屬短碼簡訊平臺(外網) https://111.gov.tw/psms_web/", icon: "message-circle" },
-                    { title: "地政系統-本所測試機", href: "http://192.168.17.20:9080/LandHA/", description: "地政系統-跨縣市測試機 http://192.168.17.20:9080/LandHA/", icon: "server" },
-                    { title: "地政系統-桃園外掛測試機", href: "http://192.168.17.21:9080/LandHA/", description: "地政系統-桃園外掛測試機 http://192.168.17.21:9080/LandHA/", icon: "server" },
-                    { title: "地政系統-跨縣市測試機", href: "http://192.168.17.22:9080/LandHA/", description: "地政系統-跨縣市測試機 http://192.168.17.22:9080/LandHA/", icon: "server" },
+                    { title: "地政系統17.20-本所測試機", href: "http://192.168.17.20:9080/LandHA/", description: "地政系統-跨縣市測試機 http://192.168.17.20:9080/LandHA/", icon: "server" },
+                    { title: "地政系統17.21-桃園外掛測試機", href: "http://192.168.17.21:9080/LandHA/", description: "地政系統-桃園外掛測試機 http://192.168.17.21:9080/LandHA/", icon: "server" },
+                    { title: "地政系統17.22-跨縣市測試機", href: "http://192.168.17.22:9080/LandHA/", description: "地政系統-跨縣市測試機 http://192.168.17.22:9080/LandHA/", icon: "server" },
                     { title: "案件辦理情形通知系統", href: "http://220.1.34.221:8080/SMS98/", description: "精誠開發之系統透過「中華電信訊息中心API」傳送案件辦理狀態簡訊及電子郵件 http://220.1.34.221:8080/SMS98/", icon: "message-circle-more" },
                     { title: "便民觸控查詢控制台", href: "http://220.1.34.211:9080/touch/", description: "便民觸控查詢控制台 http://220.1.34.211:9080/touch/", icon: "monitor" },
                     { title: "SRMAS 機房天氣圖", href: "http://220.1.34.75:8080/inf/weather/", description: "機房網路及主要系統狀態顯示 http://220.1.34.75:8080/inf/weather/", icon: "cloud-sun-rain" }
@@ -387,9 +399,10 @@
         const bookmarksContent = document.getElementById('bookmarks-content');
         const currentCategoryTitle = document.getElementById('current-category-title');
         const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
-        // const sidebarToggleIcon = sidebarToggleButton.querySelector('i'); // No longer globally cached
         const themeToggleButton = document.getElementById('theme-toggle-button');
         const htmlElement = document.documentElement;
+        const currentTimeDisplay = document.getElementById('current-time-display'); 
+        const currentTimeSection = document.getElementById('current-time-section'); // Get the section element
 
 
         // --- Sidebar State Constants ---
@@ -428,13 +441,15 @@
                 sidebar.classList.remove(SIDEBAR_COLLAPSED_WIDTH_CLASS);
                 sidebar.classList.add(SIDEBAR_OPEN_WIDTH_CLASS);
                 isSidebarVisuallyOpen = true;
+                if (currentTimeSection) currentTimeSection.classList.remove('hidden'); 
             } else { // 'collapsed'
                 sidebar.classList.remove(SIDEBAR_OPEN_WIDTH_CLASS);
                 sidebar.classList.add(SIDEBAR_COLLAPSED_WIDTH_CLASS);
                 isSidebarVisuallyOpen = false;
+                if (currentTimeSection) currentTimeSection.classList.add('hidden'); 
             }
             localStorage.setItem('sidebarState', visualState);
-            updateSidebarIconAndText();
+            updateSidebarIconAndText(); 
         }
 
 
@@ -451,7 +466,7 @@
             }
             setTimeout(() => {
                 lucide.createIcons();
-                updateSidebarIconAndText();
+                updateSidebarIconAndText(); 
             }, 0);
         }
 
@@ -472,7 +487,7 @@
         bookmarksData.forEach((item) => {
             const linkElement = document.createElement('a');
             linkElement.href = item.isDirectLink ? item.href : '#';
-            linkElement.title = item.category; // Add title attribute for tooltip
+            linkElement.title = item.category; 
             if (item.isDirectLink) {
                 linkElement.target = "_blank";
                 linkElement.rel = "noopener noreferrer";
@@ -504,6 +519,10 @@
                 return;
             }
             links.forEach(link => {
+                if (!link.href || link.href.trim() === "") {
+                    return;
+                }
+
                 const cardLink = document.createElement('a');
                 cardLink.href = link.href;
                 cardLink.target = "_blank";
@@ -511,7 +530,6 @@
                 cardLink.title = link.href;
                 cardLink.classList.add('bookmark-card-styled', 'hover:shadow-2xl', 'dark:hover:shadow-lg', 'rounded-xl');
 
-                // Apply inline style for icon size and add mr-2 class
                 const iconHtml = link.icon ? `<i data-lucide="${link.icon}" class="mr-2" style="width: 2.1em; height: 2.1em;"></i>` : '';
 
                 cardLink.innerHTML = `
@@ -552,13 +570,26 @@
             setSidebarVisualState(newState);
         });
 
+        // Function to update and display current time
+        function updateCurrentTime() {
+            if (currentTimeDisplay) {
+                const now = new Date();
+                const dateString = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const timeString = `${hours}:${minutes}:${seconds}`;
+                currentTimeDisplay.innerHTML = `<p class="mb-1">日期：${dateString}</p><p>時間：${timeString}</p>`;
+            }
+        }
+
 
         // --- Initial Setup on Page Load ---
         const savedTheme = localStorage.getItem('theme') || 'light';
         applyTheme(savedTheme);
 
         const initialSidebarState = localStorage.getItem('sidebarState') || 'collapsed';
-        setSidebarVisualState(initialSidebarState);
+        setSidebarVisualState(initialSidebarState); 
 
         let categoryToLoadId = localStorage.getItem('lastSelectedCategory');
         let categoryIsValid = false;
@@ -598,6 +629,10 @@
             bookmarksContent.appendChild(messageP);
             setTimeout(() => lucide.createIcons(), 0);
         }
+        
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+
     </script>
 </body>
 </html>
