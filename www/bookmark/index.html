@@ -241,33 +241,17 @@
         // --- Data (same as before) ---
         const bookmarksData = [
             {
-                category: "共通網址",
+                category: "共通系統網址",
                 id: "common",
                 icon: "send-horizontal",
                 links: [
-                    { title: "地政事務所入口網", href: "http://220.1.34.75:8080/", description: "顯示最新公告及各業務小幫手連結", icon: "layout-dashboard" },
+                    { title: "地所員工知識網", href: "http://220.1.34.18:8888", description: "提供公告、各課室專屬區、員工資訊、會議室預約 ... 等功能", icon: "layout-dashboard" },
                     { title: "機關內部人事業務系統", href: "https://webitr.tycg.gov.tw/WebITR/", description: "桃園市政府差勤系統 https://webitr.tycg.gov.tw/WebITR/", icon: "clock" },
                     { title: "公文整合資訊系統", href: "https://odis.tycg.gov.tw/", description: "市府公文系統 https://odis.tycg.gov.tw/", icon: "book-marked" },
-                    { title: "地所員工知識網", href: "http://220.1.34.18:8888", description: "提供公告、各課室專屬區、員工資訊、會議室預約 ... 等功能", icon: "home" },
                     { title: "桃園市政府公務雲", href: "https://tycgcloud.tycg.gov.tw/", description: "桃園市政府公務雲(內網) https://tycgcloud.tycg.gov.tw/", icon: "cloud" },
-                    { title: "地政系統161-跨縣市", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server-cog" },
                     { title: "內外網檔案交換系統", href: "http://220.1.34.26:8008/", description: "內網電腦檔案交換至外網的交換系統，外網下載請至 http://220.2.34.17:8008/", icon: "file-output" },
-                    { title: "資訊課各式表單下載", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/download.html", description: "提供各式資訊課申請表單下載", icon: "computer" },
-                    { title: "人事室各式表單下載", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download.html", description: "提供各式人事相關申請表單下載", icon: "user" },
-                    { title: "行政課各式下載區", href: "http://220.1.34.18/service/section/04/download.htm", description: "行政課各式下載專區", icon: "user-cog" }
-                ]
-            },
-            {
-                category: "常用表單下載",
-                id: "files",
-                icon: "file-down",
-                links: [
-                    { title: "【本所】電腦問題處理表", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/%E5%B8%B8%E7%94%A8%E8%A1%A8%E6%A0%BC/%E9%9B%BB%E8%85%A6%E4%BD%9C%E6%A5%AD%E7%B3%BB%E7%B5%B1%E4%BD%BF%E7%94%A8%E8%80%85%E5%95%8F%E9%A1%8C%E5%8F%8A%E8%99%95%E7%90%86%E6%83%85%E5%BD%A2%E7%B4%80%E9%8C%84%E8%A1%A8(%E6%A9%AB).doc", description: "資訊課-電腦問題處理表 ", icon: "bug" },
-                    { title: "【跨所】跨所案件通報單", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/%E5%B8%B8%E7%94%A8%E8%A1%A8%E6%A0%BC/%E8%B7%A8%E6%89%80%E6%A1%88%E4%BB%B6%E9%80%9A%E5%A0%B1%E5%96%AE.doc", description: "資訊課-受理跨所登記案件通報單", icon: "arrow-right-left" },
-                    { title: "差勤更正單", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/107/00%E6%A1%83%E5%9C%92%E5%9C%B0%E6%94%BF%E4%BA%8B%E5%8B%99%E6%89%80%E5%8A%A0%E7%8F%AD%E8%AB%8B%E5%81%87%E6%9B%B4%E6%AD%A3%E7%94%B3%E8%AB%8B%E8%A1%A8.pdf", description: "人事室-桃園地政事務所加班請假更正申請表", icon: "file-check-2" },
-                    { title: "申請健檢補助費憑證", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/105%E5%81%A5%E6%AA%A2%E6%86%91%E8%AD%89%E7%94%A8%E7%B4%99.pdf", description: "人事室-40歲以上公務人員申請健康檢查補助費憑證用紙(須區域醫院以上醫院)", icon: "heart-plus" },
-                    { title: "所內電話一覽表", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E6%89%80%E5%85%A7%E9%9B%BB%E8%A9%B1%E4%B8%80%E8%A6%BD%E8%A1%A8.pdf", description: "最新事務所內電話一覽表", icon: "phone-forwarded" },
-                    { title: "資訊課每日輪值表", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/資訊課輪值表.pdf", description: "最新資訊課每日工作輪值表", icon: "refresh-ccw-dot" }
+                    { title: "電子相簿", href: "http://220.1.34.18/album.asp", description: "本所電子相簿(每日更新)", icon: "images" },
+                    { title: "智慧控管系統", href: "http://220.1.34.75:8080/", description: "顯示最新公告及各業務小幫手連結", icon: "monitor-smartphone" }
                 ]
             },
             {
@@ -278,11 +262,11 @@
                     { title: "地政系統161-跨縣市", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server-cog" },
                     { title: "地政系統60-桃園外掛", href: "http://220.1.34.60:9080/LandHA/", description: "地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/", icon: "server" },
                     { title: "地政系統118-工作站", href: "http://220.1.34.118:9080/LandHA/", description: "地政系統工作站操作專屬伺服器 http://220.1.34.118:9080/LandHA/", icon: "server" },
-                    { title: "登記課專屬入口網站", href: "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/index.htm", description: "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", icon: "layout-list" },
                     { title: "地政智慧控管系統", href: "http://220.1.34.75:8080/reg/", description: "提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/", icon: "landmark" },
                     { title: "地政歷史資料查詢系統", href: "http://220.1.34.15/NLOWeb/", description: "地政歷史資料查詢系統 http://220.1.34.15/NLOWeb/", icon: "history" },
                     { title: "謄本櫃員機後台管理", href: "http://220.1.33.117/MGMT/", description: "管理謄本櫃員機會員帳號、顯示統計資料", icon: "settings-2" },
-                    { title: "簡訊發送紀錄查詢", href: "http://220.1.34.75:8080/reg/sms", description: "提供地政系統傳送地籍異動即時通等簡訊紀錄查詢 http://220.1.34.75:8080/reg/sms", icon: "message-square-text" }
+                    { title: "簡訊發送紀錄查詢", href: "http://220.1.34.75:8080/reg/sms", description: "提供地政系統傳送地籍異動即時通等簡訊紀錄查詢 http://220.1.34.75:8080/reg/sms", icon: "message-square-text" },
+                    { title: "登記課專屬入口網站", href: "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/index.htm", description: "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", icon: "layout-list" }
                 ]
             },
             {
@@ -291,6 +275,7 @@
                 icon: "file-signature",
                 links: [
                     { title: "登記課專屬入口網站", href: "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/index.htm", description: "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", icon: "layout-list" },
+                    { title: "登記課下載區", href: "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/download.htm", description: "登記課自行維護之各式檔案下載專區", icon: "download" },
                     { title: "地政智慧控管系統", href: "http://220.1.34.75:8080/reg/", description: "提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/", icon: "landmark" },
                     { title: "地政系統161-跨縣市", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server-cog" },
                     { title: "地政系統60-桃園外掛", href: "http://220.1.34.60:9080/LandHA/", description: "地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/", icon: "server" },
@@ -316,6 +301,7 @@
                 icon: "ruler",
                 links: [
                     { title: "測量課專屬入口網站", href: "http://220.1.34.18/service/section/%E6%B8%AC%E9%87%8F%E8%AA%B2/index.htm", description: "法院判決案例、會議紀錄、法令規範、測量成果交換、應用軟體、常用表格 ...", icon: "layout-list" },
+                    { title: "測量課下載區", href: "http://220.1.34.18/service/section/%E6%B8%AC%E9%87%8F%E8%AA%B2/feedback.htm", description: "測量課自行維護之各式檔案下載專區", icon: "download" },
                     { title: "地政系統207-測量課1", href: "http://220.1.34.207:9080/LandHA/", description: "地政系統測量課操作專屬伺服器 http://220.1.34.207:9080/LandHA/", icon: "server" },
                     { title: "地政系統62-測量課2", href: "http://220.1.34.62:9080/LandHA/", description: "地政系統測量課操作專屬伺服器 http://220.1.34.62:9080/LandHA/", icon: "server" },
                     { title: "建管圖資介接系統", href: "http://220.1.33.43:8080/Q14Web/", description: "建物第一次測量-使用執照資訊及竣工圖介接系統 http://220.1.33.43:8080/Q14Web/", icon: "map" },
@@ -329,6 +315,7 @@
                 icon: "tags",
                 links: [
                     { title: "地價課專屬入口網站", href: "http://220.1.34.18/service/section/%E8%A1%8C%E6%94%BF%E8%AA%B2/fram.htm", description: "最新消息、會議紀錄、表單下載 ...", icon: "layout-list" },
+                    { title: "地價課下載區", href: "http://220.1.34.18/service/section/%E8%A1%8C%E6%94%BF%E8%AA%B2/fram.htm", description: "地價課自行維護之各式檔案下載專區", icon: "download" },
                     { title: "地政系統156-地價課", href: "http://220.1.34.156:9080/LandHA/", description: "地政系統地價課操作專屬伺服器 http://220.1.34.156:9080/LandHA/", icon: "server" },
                     { title: "實價登錄案件控管", href: "http://220.1.34.75:8080/prc/realprice", description: "實價登錄案件控管頁面 http://220.1.34.75:8080/prc/realprice", icon: "file-check-2" },
                     { title: "實價登錄JSON資料解析", href: "http://220.1.34.75:8080/prc/json-converter", description: "實價登錄JSON資料解析 http://220.1.34.75:8080/prc/json-converter", icon: "file-json" },
@@ -344,6 +331,7 @@
                 icon: "briefcase",
                 links: [
                     { title: "行政課專屬入口網站", href: "http://220.1.34.18/service/section/04/index.htm", description: "最新消息、年度計畫、公文稽催 ...", icon: "layout-list" },
+                    { title: "行政課下載區", href: "http://220.1.34.18/service/section/04/download.htm", description: "行政課自行維護各式下載專區", icon: "download" },
                     { title: "檔案知識庫", href: "http://220.1.34.18/service/section/archives/archives.html", description: "檔案作業規劃、檔案應用、檔案分類表、會議記錄 ...", icon: "archive" },
                     { title: "地政系統156-行政課", href: "http://220.1.34.156:9080/LandHA/", description: "地政系統行政課操作專屬伺服器 http://220.1.34.156:9080/LandHA/", icon: "server" },
                     { title: "非都市土地使用編定管理系統", href: "http://220.1.34.12:8080/LandHA/", description: "非都市土地使用編定管理系統 http://220.1.34.12:8080/LandHA/", icon: "map-pin" },
@@ -357,6 +345,7 @@
                 icon: "computer",
                 links: [
                     { title: "資訊課專屬入口網站", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/", description: "最新消息、表單下載、會議記錄 ...", icon: "layout-list" },
+                    { title: "資訊課表單下載", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/download.html", description: "提供各式資訊課申請表單下載", icon: "download" },
                     { title: "地政資訊系統監控", href: "http://220.1.34.75:8080/inf/dashboard", description: "以儀表板呈現最即時的系統狀態 http://220.1.34.75:8080/inf/dashboard", icon: "tv" },
                     { title: "111數發部政府簡訊平台", href: "https://111.gov.tw/psms_web/", description: "政府專屬短碼簡訊平臺(外網) https://111.gov.tw/psms_web/", icon: "message-circle" },
                     { title: "地政系統17.20-本所測試機", href: "http://192.168.17.20:9080/LandHA/", description: "地政系統-跨縣市測試機 http://192.168.17.20:9080/LandHA/", icon: "server" },
@@ -373,7 +362,8 @@
                 id: "hr",
                 icon: "users",
                 links: [
-                    { title: "人事室專屬入口網站", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/index.htm", description: "最新消息、表單下載、職掌業務 ...", icon: "layout-list" }
+                    { title: "人事室專屬入口網站", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/index.htm", description: "最新消息、表單下載、職掌業務 ...", icon: "layout-list" },
+                    { title: "人事室各式表單下載", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download.html", description: "提供各式人事相關申請表單下載", icon: "user" }
                 ]
             },
             {
@@ -385,12 +375,25 @@
                 ]
             },
             {
-                category: "舊版書籤",
-                id: "legacy",
-                icon: "archive",
-                href: "old.html",
-                isDirectLink: true
+                category: "常用表單下載",
+                id: "files",
+                icon: "file-down",
+                links: [
+                    { title: "【本所】電腦問題處理表", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/%E5%B8%B8%E7%94%A8%E8%A1%A8%E6%A0%BC/%E9%9B%BB%E8%85%A6%E4%BD%9C%E6%A5%AD%E7%B3%BB%E7%B5%B1%E4%BD%BF%E7%94%A8%E8%80%85%E5%95%8F%E9%A1%8C%E5%8F%8A%E8%99%95%E7%90%86%E6%83%85%E5%BD%A2%E7%B4%80%E9%8C%84%E8%A1%A8(%E6%A9%AB).doc", description: "資訊課-電腦問題處理表 ", icon: "bug" },
+                    { title: "【跨所】跨所案件通報單", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/%E5%B8%B8%E7%94%A8%E8%A1%A8%E6%A0%BC/%E8%B7%A8%E6%89%80%E6%A1%88%E4%BB%B6%E9%80%9A%E5%A0%B1%E5%96%AE.doc", description: "資訊課-受理跨所登記案件通報單", icon: "arrow-right-left" },
+                    { title: "差勤更正單", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/107/00%E6%A1%83%E5%9C%92%E5%9C%B0%E6%94%BF%E4%BA%8B%E5%8B%99%E6%89%80%E5%8A%A0%E7%8F%AD%E8%AB%8B%E5%81%87%E6%9B%B4%E6%AD%A3%E7%94%B3%E8%AB%8B%E8%A1%A8.pdf", description: "人事室-桃園地政事務所加班請假更正申請表", icon: "file-check-2" },
+                    { title: "申請健檢補助費憑證", href: "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/105%E5%81%A5%E6%AA%A2%E6%86%91%E8%AD%89%E7%94%A8%E7%B4%99.pdf", description: "人事室-40歲以上公務人員申請健康檢查補助費憑證用紙(須區域醫院以上醫院)", icon: "heart-plus" },
+                    { title: "所內電話一覽表", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E6%89%80%E5%85%A7%E9%9B%BB%E8%A9%B1%E4%B8%80%E8%A6%BD%E8%A1%A8.pdf", description: "最新事務所內電話一覽表", icon: "phone-forwarded" },
+                    { title: "資訊課每日輪值表", href: "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/資訊課輪值表.pdf", description: "最新資訊課每日工作輪值表", icon: "refresh-ccw-dot" }
+                ]
             }
+            // {
+            //     category: "舊版書籤",
+            //     id: "legacy",
+            //     icon: "archive",
+            //     href: "old.html",
+            //     isDirectLink: true
+            // }
         ];
 
         // --- DOM Elements ---
