@@ -14,8 +14,6 @@ require_once("GlobalConstants.inc.php");
 require_once("GlobalFunctions.inc.php");
 
 /**
- * 專案初始化檔案：包含無命名空間的自動載入器設定。
- *
  * 當 PHP 嘗試使用一個尚未載入的類別時，這個自動載入器會被觸發。
  * 它會根據類別名稱，直接在 'include/' 資料夾中尋找對應的檔案。
  */
