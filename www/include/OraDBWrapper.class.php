@@ -1,8 +1,5 @@
 <?php
 require_once("init.php");
-require_once("OraDB.class.php");
-require_once("System.class.php");
-require_once("Cache.class.php");
 
 class OraDBWrapper {
 	private $db = null;

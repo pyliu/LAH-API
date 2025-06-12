@@ -1,7 +1,5 @@
 <?php
 require_once("init.php");
-require_once("MSDB.class.php");
-require_once("System.class.php");
 
 class DocUserInfo {
     private $doc_db;

@@ -1,6 +1,5 @@
 <?php
 require_once('init.php');
-require_once('DynamicSQLite.class.php');
 
 class SQLiteDBFactory {
     private static $db_folder = ROOT_DIR.DIRECTORY_SEPARATOR."assets".DIRECTORY_SEPARATOR."db";

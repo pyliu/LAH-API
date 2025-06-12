@@ -1,7 +1,5 @@
 <?php
-require_once("MSDB.class.php");
-require_once("SQLiteUser.class.php");
-require_once("System.class.php");
+require_once("init.php");
 
 class Message {
     private $jungli_in_db;
