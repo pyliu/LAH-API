@@ -1,7 +1,5 @@
 <?php
 require_once("init.php");
-require_once("SQLSRV_DataBase.class.php");
-require_once("System.class.php");
 
 class MSDB {
     private $dbo;

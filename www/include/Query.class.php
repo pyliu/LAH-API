@@ -1,9 +1,5 @@
 <?php
 require_once("init.php");
-require_once("OraDBWrapper.class.php");
-require_once("RegCaseData.class.php");
-require_once("System.class.php");
-
 class Query {
 	private $db_wrapper = null;
 

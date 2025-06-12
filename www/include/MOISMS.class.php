@@ -1,8 +1,5 @@
 <?php
 require_once("init.php");
-require_once("OraDBWrapper.class.php");
-require_once("System.class.php");
-require_once("Cache.class.php");
 
 /** MOIADM.SMSLOG schema
 	{ key: 'MS03', label: '收件年', sortable: true },
@@ -196,7 +193,7 @@ class MOISMS {
 		if (!$this->db_wrapper->reachable()) {
 			return array();
 		}
-		Logger::getInstance()->info(__METHOD__.': 取得 MOIADM SMSLog 資料 BY 區間 '.$st.' ~ '.$ed.'。 db is '.gettype($this->db_wrapper->getDB()));
+		Logger::getInstance()->info(__METHOD__.': 取得 MOIADM SMSLog 資料 BY 區間 '.$st.' ~ '.$ed.'。');
 		$this->db_wrapper->getDB()->parse("
 			-- SMS Log 查詢
 			select

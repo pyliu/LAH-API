@@ -1,6 +1,6 @@
 <?php
 require_once("init.php");
-require_once("OraDBWrapper.class.php");
+// require_once("OraDBWrapper.class.php");
 /**
  * 跨所相關操作專用類別
  */

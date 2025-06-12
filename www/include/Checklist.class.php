@@ -1,7 +1,5 @@
 <?php
 require_once("init.php");
-require_once("DynamicSQLite.class.php");
-require_once("System.class.php");
 
 class Checklist {
     private const CHECKLIST_SQLITE_DB = DB_DIR.DIRECTORY_SEPARATOR."checklist.db";

@@ -1,8 +1,5 @@
 <?php
 require_once('init.php');
-require_once('SQLiteUser.class.php');
-require_once('SQLiteDBFactory.class.php');
-require_once('System.class.php');
 
 class IPResolver {
     private $db;

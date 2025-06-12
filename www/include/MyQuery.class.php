@@ -1,7 +1,5 @@
 <?php
 require_once("init.php");
-require_once("OraDB.class.php");
-require_once("System.class.php");
 
 class MyQuery {
 	private $db;

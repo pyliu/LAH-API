@@ -1,6 +1,5 @@
 <?php
 require_once('init.php');
-require_once('SQLiteDBFactory.class.php');
 
 class SQLiteImage {
     private $db;

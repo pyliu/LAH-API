@@ -1,7 +1,5 @@
 <?php
 require_once('init.php');
-require_once('SQLiteDBFactory.class.php');
-require_once('Ping.class.php');
 
 class SQLiteConnectivity {
     private $db;
