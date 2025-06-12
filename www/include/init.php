@@ -13,6 +13,31 @@ set_time_limit(0);
 require_once("GlobalConstants.inc.php");
 require_once("GlobalFunctions.inc.php");
 
+/**
+ * 專案初始化檔案：包含無命名空間的自動載入器設定。
+ *
+ * 當 PHP 嘗試使用一個尚未載入的類別時，這個自動載入器會被觸發。
+ * 它會根據類別名稱，直接在 'include/' 資料夾中尋找對應的檔案。
+ */
+spl_autoload_register(function (string $class_name) {
+    // 定義所有類別檔案的基礎目錄。
+    // __DIR__ 在這裡指向 'includes/' 資料夾。
+    $base_dir = __DIR__ . DIRECTORY_SEPARATOR;
+
+    // 直接將類別名稱轉換為檔案路徑。
+    // 例如：'IPResolver' 變成 'IPResolver.class.php'
+    // 然後與 $base_dir 結合：'include/IPResolver.class.php'
+    $file = $base_dir . $class_name . '.class.php';
+
+    // 檢查這個檔案是否存在。
+    if (file_exists($file)) {
+        // 如果檔案存在，就使用 require_once 載入它。
+        require_once $file;
+    } else {
+        Logger::getInstance()->error($file.'不存在，無法自動導入'.$class_name);
+    }
+});
+
 $client_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? $_SERVER["HTTP_CLIENT_IP"] ?? $_SERVER["REMOTE_ADDR"] ?? getLocalhostIP();
 
 // to ensure exports dir exists
