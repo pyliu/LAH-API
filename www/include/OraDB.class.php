@@ -1,5 +1,5 @@
 <?php
-require_once("init.php");
+require_once("System.class.php");
 // 地所DB的內碼為「American_America.US7ASCII」
 putenv('NLS_LANG=American_America.US7ASCII');
 

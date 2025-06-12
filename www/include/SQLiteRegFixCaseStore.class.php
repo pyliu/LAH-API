@@ -1,5 +1,7 @@
 <?php
 require_once('init.php');
+require_once('SQLiteDBFactory.class.php');
+require_once('System.class.php');
 
 class SQLiteRegFixCaseStore {
     private $db;

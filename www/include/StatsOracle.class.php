@@ -1,5 +1,8 @@
 <?php
 require_once('init.php');
+require_once("OraDBWrapper.class.php");
+require_once("MOICAS.class.php");
+require_once("System.class.php");
 
 class StatsOracle {
 	private $db_wrapper = null;

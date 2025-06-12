@@ -1,5 +1,13 @@
 <?php
 require_once("init.php");
+require_once("System.class.php");
+require_once("DynamicSQLite.class.php");
+require_once("SQLiteSYSAUTH1.class.php");
+require_once('SQLiteUser.class.php');
+require_once("Ping.class.php");
+require_once("OraDB.class.php");
+require_once("Ping.class.php");
+// require_once("LXHWEB.class.php");
 
 class Cache {
     // singleton

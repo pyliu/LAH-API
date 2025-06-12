@@ -1,5 +1,11 @@
 <?php
 require_once("init.php");
+require_once("SQLiteDBFactory.class.php");
+require_once("OraDB.class.php");
+require_once("Cache.class.php");
+require_once("System.class.php");
+require_once("MOIPRC.class.php");
+require_once("MOICAD.class.php");
 
 class Prefetch {
     private const KEYS = array(

@@ -1,5 +1,24 @@
 <?php
 require_once(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'init.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'Message.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'Notification.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR."MonitorMail.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteMonitorMail.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteConnectivity.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'Cache.class.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR."IPResolver.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYN.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteRKEYNALL.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteSYSAUTH1.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."StatsSQLite.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."Prefetch.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteOFFICES.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteOFFICESSTATS.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."MOICAS.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."MOIADM.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."MOICAT.class.php");
+require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteAPConnectionHistory.class.php");
 
 class Scheduler {
     private $tmp;

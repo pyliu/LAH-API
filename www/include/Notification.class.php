@@ -1,5 +1,8 @@
 <?php
 require_once("Logger.class.php");
+require_once("System.class.php");
+require_once("SQLiteDBFactory.class.php");
+require_once("StatsSQLite.class.php");
 
 class Notification {
     

@@ -1,5 +1,6 @@
 <?php
 require_once('init.php');
+require_once('DynamicSQLite.class.php');
 
 define('TEMPERATURE_SQLITE_DB', DB_DIR.DIRECTORY_SEPARATOR."Temperature.db");
 

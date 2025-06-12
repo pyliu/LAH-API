@@ -1,5 +1,6 @@
 <?php
 require_once("init.php");
+require_once("System.class.php");
 require_once(ROOT_DIR.'/vendor/autoload.php');
 
 use PhpImap\Mailbox;

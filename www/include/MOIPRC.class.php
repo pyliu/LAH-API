@@ -1,5 +1,9 @@
 <?php
 require_once("init.php");
+require_once("OraDBWrapper.class.php");
+require_once("System.class.php");
+require_once("Cache.class.php");
+require_once("LXHWEB.class.php");
 
 class MOIPRC {
 	private $db_wrapper = null;

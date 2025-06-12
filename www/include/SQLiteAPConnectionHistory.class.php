@@ -1,5 +1,6 @@
 <?php
 require_once('init.php');
+require_once(INC_DIR.DIRECTORY_SEPARATOR.'System.class.php');
 
 class SQLiteAPConnectionHistory {
     public static function removeDBFiles() {

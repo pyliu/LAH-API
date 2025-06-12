@@ -1,5 +1,8 @@
 <?php
 require_once("init.php");
+require_once("OraDB.class.php");
+require_once("System.class.php");
+require_once("SQLiteSYSAUTH1.class.php");
 
 class LXHWEB {
     private $db = null;

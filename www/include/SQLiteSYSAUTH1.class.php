@@ -1,5 +1,8 @@
 <?php
 require_once('init.php');
+require_once('System.class.php');
+require_once('SQLiteDBFactory.class.php');
+require_once('OraDB.class.php');
 
 class SQLiteSYSAUTH1 {
     private $db;

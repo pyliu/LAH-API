@@ -1,5 +1,9 @@
 <?php
 require_once('init.php');
+require_once('System.class.php');
+require_once('IPResolver.class.php');
+require_once('DynamicSQLite.class.php');
+require_once('Cache.class.php');
 
 class SQLiteUser {
     private $db;

@@ -1,5 +1,7 @@
 <?php
 require_once("init.php");
+require_once("OraDB.class.php");
+
 class BKHXWEB {
     private $db;
 

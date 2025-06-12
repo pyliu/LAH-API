@@ -1,6 +1,6 @@
 <?php
 require_once('init.php');
-
+require_once('SQLiteDBFactory.class.php');
 abstract class ADMIN_ACTION_TYPE {
     const UPDATE_CRSMS_COLUMN = 'Update MOICAS.CRSMS Column';
 }
