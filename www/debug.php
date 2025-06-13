@@ -1,6 +1,5 @@
 ﻿<?php
 require_once("./include/init.php");
-require 'vendor/autoload.php';
 
 try {
     // $s = SQLiteAdminActionLog::getInstance();
