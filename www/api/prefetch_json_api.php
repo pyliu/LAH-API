@@ -1,11 +1,5 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
-require_once(INC_DIR."/System.class.php");
-require_once(INC_DIR."/Prefetch.class.php");
-require_once(INC_DIR."/RegCaseData.class.php");
-require_once(INC_DIR."/SurCaseData.class.php");
-require_once(INC_DIR."/SQLiteRegForeignerRestriction.class.php");
-require_once(INC_DIR."/SQLiteRegForeignerPDF.class.php");
 
 function getExpireCaseData (&$regdata) {
 	return array(

@@ -1,16 +1,5 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
-require_once(INC_DIR."/RegCaseData.class.php");
-require_once(INC_DIR."/SurCaseData.class.php");
-require_once(INC_DIR."/PrcAllCasesData.class.php");
-require_once(INC_DIR."/Query.class.php");
-require_once(INC_DIR."/WatchDog.class.php");
-require_once(INC_DIR."/StatsSQLite.class.php");
-require_once(INC_DIR."/Cache.class.php");
-require_once(INC_DIR."/Temperature.class.php");
-require_once(INC_DIR."/System.class.php");
-require_once(INC_DIR."/SQLiteUser.class.php");
-require_once(INC_DIR.DIRECTORY_SEPARATOR."Ping.class.php");
 
 $query = new Query();
 $cache = Cache::getInstance();
