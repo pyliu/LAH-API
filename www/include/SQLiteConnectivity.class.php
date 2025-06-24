@@ -50,6 +50,8 @@ class SQLiteConnectivity {
     function __construct() {
         $this->path = SQLiteDBFactory::getConnectivityDB();
         $this->db = new SQLite3($this->path);
+        // 對於高併發的讀寫場景，可以考慮將 SQLite 的日誌模式切換為「預寫式日誌 (Write-Ahead Logging)」。它對併發的處理更好，可以減少鎖定問題
+        $this->db->exec("PRAGMA journal_mode = WAL");
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");
         $this->db->exec("BEGIN TRANSACTION");
