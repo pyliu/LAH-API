@@ -211,7 +211,7 @@ class Scheduler {
         }
         $host_ip = getLocalhostIP();
         $base_url = "http://".$host_ip.":8080/reg/case/";
-        $message = "##### ✨ 智慧監控系統已修復下列跨所案件未回寫問題：\n***\n";
+        $message = "##### ✨ 智慧監控系統已修復下列跨所案件(".count($done)."件)未回寫問題：\n***\n";
         // 1. 將案件陣列 $done 每 2 個一組，分割成一個新的二維陣列 $chunks
         $chunks = array_chunk($done, 2);
         // 2. 遍歷這個包含「案件對」的新陣列
@@ -223,7 +223,7 @@ class Scheduler {
                 $formatted_links[] = "[$case_id]($base_url$case_id)";
             }
             // 4. 將同一組的連結用空格連接，並附加到主訊息中
-            $message .= "- " . implode(' ', $formatted_links) . "\n";
+            $message .= "1. " . implode(' ', $formatted_links) . "\n";
         }
         $this->addNotification($message, 'reg');
         $this->addNotification($message, 'inf');
