@@ -212,18 +212,37 @@ class Scheduler {
         $host_ip = getLocalhostIP();
         $base_url = "http://".$host_ip.":8080/reg/case/";
         $message = "##### ✨ 智慧監控系統已修復下列跨所案件(".count($done)."件)未回寫問題：\n***\n";
-        // 1. 將案件陣列 $done 每 2 個一組，分割成一個新的二維陣列 $chunks
+        // // 1. 將案件陣列 $done 每 2 個一組，分割成一個新的二維陣列 $chunks
+        // $chunks = array_chunk($done, 2);
+        // // 2. 遍歷這個包含「案件對」的新陣列
+        // foreach ($chunks as $chunk) {
+        //     $formatted_links = [];
+        //     // 3. 處理每一對(或單個)案件
+        //     foreach ($chunk as $case_id) {
+        //         // 將每個案件格式化為 Markdown 連結
+        //         $formatted_links[] = "[$case_id]($base_url$case_id)";
+        //     }
+        //     // 4. 將同一組的連結用空格連接，並附加到主訊息中
+        //     $message .= "1. " . implode(' ', $formatted_links) . "\n";
+        // }
+        // 1. 加入表格的標頭
+        $message .= "| 案件第1行 | 案件第2行 |\n";
+        $message .= "| :--- | :--- |\n";
+        // 2. 將案件陣列每 2 個一組
         $chunks = array_chunk($done, 2);
-        // 2. 遍歷這個包含「案件對」的新陣列
+        // 3. 遍歷案件組，產生表格的每一列 (row)
         foreach ($chunks as $chunk) {
             $formatted_links = [];
-            // 3. 處理每一對(或單個)案件
             foreach ($chunk as $case_id) {
                 // 將每個案件格式化為 Markdown 連結
                 $formatted_links[] = "[$case_id]($base_url$case_id)";
             }
-            // 4. 將同一組的連結用空格連接，並附加到主訊息中
-            $message .= "1. " . implode(' ', $formatted_links) . "\n";
+            
+            // 4. 組成表格的一列
+            // 如果 chunk 只有一個元素，第二個欄位填空
+            $col1 = $formatted_links[0] ?? ''; 
+            $col2 = $formatted_links[1] ?? '';
+            $message .= "| $col1 | $col2 |\n";
         }
         // send message
         $notification = new Notification();
