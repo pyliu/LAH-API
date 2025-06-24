@@ -88,7 +88,7 @@ $tmp_date = timestampToDate(time(), 'TW');
 $parts = explode(' ', $tmp_date);
 $date_parts = explode('-', $parts[0]);
 $time_parts = explode(':', $parts[1]);
-// ex. 113
+// ex. 114
 $this_year = $date_parts[0];
-// ex. 1130415
+// ex. 1140624
 $today = implode('', $date_parts);

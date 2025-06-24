@@ -164,6 +164,36 @@ class XCase {
 		$this->db_wrapper = null;
 	}
 
+	public function getLocalDBMaxNumByWord($code, $year = '') {
+		if (!$this->db_wrapper->reachable()) {
+			return false;
+		}
+		if (empty($year)) {
+			global $this_year;
+			$year = $this_year;
+		}
+		if (!filter_var($year, FILTER_SANITIZE_NUMBER_INT) || strlen($year) !== 3) {
+			Logger::getInstance()->warning(__METHOD__.": \$year 不符合規範。($year)");
+			return false;
+		}
+		// connection switch to MAIN
+		$this->db_wrapper->getDB()->setConnType(CONNECTION_TYPE::MAIN);
+		$num_key = "RM03";
+		$this->db_wrapper->getDB()->parse("
+			SELECT * FROM (
+				SELECT * from MOICAS.CRSMS t
+				WHERE RM01 = :bv_year AND RM02 = :bv_code
+				ORDER BY RM03 DESC
+			) WHERE ROWNUM = 1
+		");
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_code", trim($code));
+		$this->db_wrapper->getDB()->execute();
+		$row = $this->db_wrapper->getDB()->fetch();
+
+		return empty($row) ? "0" : ltrim($row[$num_key], "0");
+	}
+
 	public function getXCaseCRCLD($id) {
 		if (!$this->db_wrapper->reachable()) {
 			return -1;
@@ -378,7 +408,6 @@ class XCase {
 		Logger::getInstance()->warning(__METHOD__.": 取得遠端案件 $id 補正連結資料錯誤(回傳值：$l3_crcld)");
 		return false;
 	}
-
 	/**
 	 * Public interface for 取得跨所登記補正資料
 	 */
@@ -486,7 +515,6 @@ class XCase {
             return -1;
 		}
 
-		
 		$year = substr($id, 0, 3);
 		$code = substr($id, 3, 4);
 		$num = substr($id, 7, 6);
@@ -507,7 +535,7 @@ class XCase {
 
 		// 遠端無此資料
 		if (empty($remote_row)) {
-			Logger::getInstance()->warning(__METHOD__.": 遠端 ${db_user}.CRSMS 查無 ${year}-${code}-${num} 案件資料");
+			Logger::getInstance()->warning(__METHOD__.": 遠端 $db_user.CRSMS 查無 $year-$code-$num 案件資料");
 			return -2;
 		}
 
@@ -546,7 +574,7 @@ class XCase {
 
 			return true;
 		}
-		Logger::getInstance()->error(__METHOD__.": 本地 MOICAS.CRSMS 已有 ${year}-${code}-${num} 案件資料");
+		Logger::getInstance()->error(__METHOD__.": 本地 MOICAS.CRSMS 已有 $year-$code-$num 案件資料");
 		return false;
 	}
 

@@ -168,6 +168,102 @@ class Scheduler {
         // Logger::getInstance()->info(__METHOD__.": ANALYZE MOICAT.RINDX TABLE ".($result ? '成功' : '失敗'));
     }
 
+    private function fixXCaseFailures() {
+        $codes = array_keys(REG_CODE["本所收件"]);
+        $site = System::getInstance()->getSiteCode();
+        // 過濾掉本所收本所的跨所收件碼
+        $filtered_codes = array_filter($codes, function($code) use ($site) {
+            // 檢查 $code 字串的開頭是否為 $site
+            // strpos() 的回傳值若為 0，代表 $site 就在字串的開頭
+            // 我們要保留的是「開頭不是 $site」的元素，所以條件是 !== 0
+            return strpos($code, $site) !== 0;
+        });
+        global $this_year;
+        $done = [];
+        $xcase = new XCase();
+        foreach ($filtered_codes as $code) {
+            $latestNum = $xcase->getLocalDBMaxNumByWord($code);
+            if ($latestNum > 0) {
+                $result = false;
+                $step = 10;
+                do {
+                    $nextNum = str_pad($latestNum + $step, 6, '0', STR_PAD_LEFT);
+                    // e.g. 114HAB1017600
+                    $nextCaseID = $this_year.$code.$nextNum;
+                    Logger::getInstance()->info(__METHOD__.": 檢查 $nextCaseID 是否可以新增到本地資料庫。");
+                    $result = $xcase->instXCase($nextCaseID);
+                    if ($result === true) {
+                        $done[] = "$this_year-$code-$nextNum";
+                        Logger::getInstance()->info(__METHOD__.": $nextCaseID 已成功新增到本地資料庫。");
+                    } else {
+                        Logger::getInstance()->info(__METHOD__.": $nextCaseID 是否可以新增到本地資料庫。");
+                    }
+                    $step += 10;
+                } while($result === true);
+            }
+        }
+        $this->sendFixXCaseFailuresNotification($done);
+    }
+
+    private function sendFixXCaseFailuresNotification($done) {
+        if (empty($done)) {
+            return;
+        }
+        $host_ip = getLocalhostIP();
+        $base_url = "http://".$host_ip.":8080/reg/case/";
+        $message = "✨ 智慧監控系統已修復下列跨所案件未回寫問題：\n";
+        foreach ($done as $case_id) {
+            $message .= "- [$case_id]($base_url.$case_id)\n";
+        }
+        $this->addNotification($message, 'reg');
+        $this->addNotification($message, 'inf');
+    }
+
+    private function addNotification($message, $to_id, $title = '系統排程訊息') {
+        if (empty($to_id)) {
+            Logger::getInstance()->warning("未指定接收者 id 下面訊息無法送出！");
+            Logger::getInstance()->warning($message);
+            return false;
+        }
+        $users = Cache::getInstance()->getUserNames();
+        $notify = new Notification();
+        $payload = array(
+            'title' =>  $title,
+            'content' => trim($message),
+            'priority' => 3,
+            'expire_datetime' => '',
+            'sender' => '系統排程',
+            'from_ip' => getLocalhostIP()
+        );
+        $skip_announcement_convertion = true;
+        $lastId = $notify->addMessage($to_id, $payload, $skip_announcement_convertion);
+        $nameTag = rtrim("$to_id:".$users[$to_id], ":");
+        if ($lastId === false || empty($lastId)) {
+            Logger::getInstance()->warning("訊息無法送出給 $nameTag");
+        } else {
+            Logger::getInstance()->info("訊息($lastId)已送出給 $nameTag");
+        }
+        return $lastId;
+    }
+
+    function __construct() {
+        $this->tmp = sys_get_temp_dir();
+        $this->tickets = array(
+            '5m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-5mins.ts',
+            '10m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-10mins.ts',
+            '15m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-15mins.ts',
+            '30m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-30mins.ts',
+            '1h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-1hour.ts',
+            '2h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-2hours.ts',
+            '4h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-4hours.ts',
+            '8h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-8hours.ts',
+            '12h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-12hours.ts',
+            '24h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-24hours.ts',
+            'office_check' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-office-check.ts'
+        );
+    }
+    function __destruct() {}
+
     public function addOfficeCheckStatus() {
         try {
             $ticketTs = file_get_contents($this->tickets['office_check']);
@@ -221,24 +317,6 @@ class Scheduler {
         }
     }
 
-    function __construct() {
-        $this->tmp = sys_get_temp_dir();
-        $this->tickets = array(
-            '5m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-5mins.ts',
-            '10m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-10mins.ts',
-            '15m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-15mins.ts',
-            '30m' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-30mins.ts',
-            '1h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-1hour.ts',
-            '2h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-2hours.ts',
-            '4h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-4hours.ts',
-            '8h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-8hours.ts',
-            '12h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-12hours.ts',
-            '24h' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-24hours.ts',
-            'office_check' => $this->tmp.DIRECTORY_SEPARATOR.'LAH-office-check.ts'
-        );
-    }
-    function __destruct() {}
-
     public function do() {
         Logger::getInstance()->info(__METHOD__.": Scheduler 開始執行。");
         $this->doOneDayJobs();
@@ -288,6 +366,10 @@ class Scheduler {
                  * 擷取監控郵件
                  */
                 $this->fetchMonitorMail();
+                /**
+                 * 避免回寫失效問題
+                 */
+                $this->fixXCaseFailures();
             } else {
                 // Logger::getInstance()->info(__METHOD__.": 每10分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
