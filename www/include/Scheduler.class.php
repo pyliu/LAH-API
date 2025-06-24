@@ -225,8 +225,12 @@ class Scheduler {
             // 4. 將同一組的連結用空格連接，並附加到主訊息中
             $message .= "1. " . implode(' ', $formatted_links) . "\n";
         }
-        $this->addNotification($message, 'reg');
-        $this->addNotification($message, 'inf');
+        // send message
+        $notification = new Notification();
+        foreach (['reg', 'inf'] as $channel) {
+            $notification->removeOutdatedMessageByTitle($channel, "跨所案件同步檢測");
+            $this->addNotification($message, $channel, "跨所案件同步檢測");
+        }
     }
 
     private function addNotification($message, $to_id, $title = '系統排程訊息') {
