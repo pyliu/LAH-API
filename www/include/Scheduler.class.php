@@ -247,7 +247,7 @@ class Scheduler {
         // send message
         $notification = new Notification();
         foreach (['reg', 'inf'] as $channel) {
-            $notification->removeOutdatedMessageByTitle($channel, "跨所案件同步檢測");
+            // $notification->removeOutdatedMessageByTitle($channel, "跨所案件同步檢測");
             $this->addNotification($message, $channel, "跨所案件同步檢測");
         }
     }
