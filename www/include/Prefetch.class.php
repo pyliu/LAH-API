@@ -1666,7 +1666,7 @@ class Prefetch {
                     left join MOIADM.RKEYN r ON r.KCDE_1 = '06' AND t.RM09 = r.KCDE_2
                     where RM07_1 between :bv_st and :bv_ed
                     and (rm99 is null or rm101 = :bv_site)
-                    and rm31 = 'A'
+                    and rm31 in ('A', 'B', 'D')
                     and rm30 <> 'Z'
                     order by rm07_1, rm07_2 desc
                 ");
