@@ -22,7 +22,7 @@ MAIL_SUBJECT="[Health Check] - ${HOSTNAME_TAG} - $(date +'%Y-%m-%d %H:%M')"
 CLEANUP_DAYS=7 # 清理幾天前的日誌
 
 # !! 請根據 p8_52 主機的實際情況修改此處的 ORACLE INSTANCE 名稱 !!
-ORACLE_INSTANCE_NAME="HBWEB" # 假設 p8_52 對應的是 HBWEB
+ORACLE_INSTANCE_NAME="HAWEB" # 假設 p8_52 對應的是 HAWEB
 
 # --- 動態產生的變數 (Dynamically Generated Variables) ---
 ORACLE_DUMP_DIR="/WEB/DB3/DBF/admin/${ORACLE_INSTANCE_NAME}/bdump"
