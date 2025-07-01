@@ -226,7 +226,7 @@ class Scheduler {
         //     $message .= "1. " . implode(' ', $formatted_links) . "\n";
         // }
         // 1. 加入表格的標頭
-        $message .= "| 案件第1行 | 案件第2行 |\n";
+        $message .= "| 　 | 　 |\n";
         $message .= "| :--- | :--- |\n";
         // 2. 將案件陣列每 2 個一組
         $chunks = array_chunk($done, 2);
