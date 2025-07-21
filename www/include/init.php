@@ -1,6 +1,11 @@
 <?php
 error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
 date_default_timezone_set("ASIA/TAIPEI");
+
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 // https://stackoverflow.com/questions/60157086/php-samesite-session-problem-session-doesnt-work
 // To fix the cross site cookies error on browswer
 session_set_cookie_params(["SameSite" => "None"]); //none, lax, strict
