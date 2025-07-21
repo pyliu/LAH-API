@@ -519,9 +519,9 @@
                         link.href = currentHref;
                         link.description = description;
                         link.title = `${currentRocYear}年${currentMonth}月大門輪值表`;
-                        console.log(`成功更新「${originalTitle}」。`);
-                        console.log(`- 當月連結: ${currentHref}`);
-                        console.log(`- 描述更新為: ${description}`);
+                        // console.log(`成功更新「${originalTitle}」。`);
+                        // console.log(`- 當月連結: ${currentHref}`);
+                        // console.log(`- 描述更新為: ${description}`);
                         return; // Exit after finding and updating
                     }
                 }
@@ -544,7 +544,7 @@
                 for (const link of category.links) {
                     if (link.title === originalTitle) {
                         link.title = newTitle;
-                        console.log(`成功更新「${originalTitle}」標題為「${newTitle}」。`);
+                        // console.log(`成功更新「${originalTitle}」標題為「${newTitle}」。`);
                         return;
                     }
                 }
