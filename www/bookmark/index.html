@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>桃園地所書籤索引 (Vue 3)</title>
+    <title>桃園地所書籤索引</title>
     
     <!-- 禁止快取的 Meta 標籤 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -16,7 +16,7 @@
     <script src="lucide.min.js"></script>
     <link href="tailwind.min.css" rel="stylesheet">
 
-    <!-- 自訂樣式 (與原版相同) -->
+    <!-- 自訂樣式 -->
     <style>
         :root {
             --bootstrap-primary: #0d6efd;
@@ -106,7 +106,6 @@
         .bookmark-card-styled:hover .action-button-visual { background-color: var(--bootstrap-primary-hover); }
         #sidebar-toggle-button { color: #374151; }
         #sidebar-toggle-button:hover { background-color: #e5e7eb; }
-        #sidebar-toggle-button.open-icon-red svg { color: #ef4444; }
         .dark body { background-color: #0f172a; color: #cbd5e1; }
         .dark #sidebar { background-color: #1e293b; color: #e2e8f0; }
         .dark #sidebar-header .font-semibold { color: #f1f5f9; }
@@ -133,11 +132,12 @@
         .dark .bookmark-card-styled:hover .action-button-visual { background-color: var(--bootstrap-primary-dark-hover-bg); }
         .dark #sidebar-toggle-button { color: #94a3b8; }
         .dark #sidebar-toggle-button:hover { background-color: #334155; }
-        .dark #sidebar-toggle-button.open-icon-red svg { color: #f87171; }
         #bookmarks-content { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
         #pdf-popover {
             pointer-events: none;
             transition: opacity 0.2s ease-in-out;
+            width: 297px;
+            height: 415px;
         }
     </style>
 </head>
@@ -182,13 +182,13 @@
         <main class="flex-1 p-4 overflow-y-auto">
             <div class="flex items-center mb-6">
                 <!-- 側邊欄開關 -->
-                <button id="sidebar-toggle-button" class="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 z-30 mr-3" title="開啟/收合側邊欄" @click="toggleSidebar" :class="{'open-icon-red': !isSidebarCollapsed}">
-                    <i :data-lucide="isSidebarCollapsed ? 'menu' : 'sidebar-close'" class="text-xl"></i>
+                <button id="sidebar-toggle-button" class="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 z-30 mr-3" title="開啟/收合側邊欄" @click="toggleSidebar">
+                    <span class="text-xl font-bold w-6 text-center">{{ isSidebarCollapsed ? '☰' : '◀' }}</span>
                 </button>
                 <!-- 目前分類標題 -->
                 <h1 id="current-category-title" class="text-3xl font-bold flex items-center" v-if="currentCategory">
                     <span>{{ currentCategory.category }}</span>
-                    <i :data-lucide="currentCategory.icon" class="ml-3"></i>
+                    <!-- <i :data-lucide="currentCategory.icon" class="ml-3"></i> -->
                 </h1>
             </div>
 
@@ -213,7 +213,7 @@
         <!-- PDF 預覽 Modal -->
         <div v-if="pdfModal.visible" id="pdf-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4 transition-opacity duration-300" @click.self="closePdfModal">
             <div class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full h-full max-w-6xl flex flex-col">
-                <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
                     <h3 id="pdf-modal-title" class="text-xl font-semibold text-gray-900 dark:text-white truncate">{{ pdfModal.title }}</h3>
                     <button id="pdf-modal-close" @click="closePdfModal" class="text-gray-400 bg-transparent hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
                         <i data-lucide="x" class="w-6 h-6"></i>
@@ -227,7 +227,7 @@
         </div>
         
         <!-- PDF 懸浮預覽 Popover -->
-        <div id="pdf-popover" ref="pdfPopover" class="hidden fixed z-[100] w-[320px] h-[450px] bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl overflow-hidden">
+        <div id="pdf-popover" ref="pdfPopover" class="hidden fixed z-[100] bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl overflow-hidden">
             <div class="w-full h-full p-1">
                 <iframe id="pdf-popover-iframe" class="w-full h-full" :src="pdfPopoverState.src"></iframe>
             </div>
@@ -235,14 +235,13 @@
     </div>
 
     <script>
-        const { createApp, ref, reactive, onMounted, onUpdated, computed, watch, nextTick } = Vue;
+        const { createApp, ref, reactive, onMounted, computed, watch, nextTick } = Vue;
 
         const app = createApp({
             setup() {
                 // --- 響應式狀態 (Reactive State) ---
                 const bookmarks = ref([
-                    // 你的 bookmarksData 資料會放在這裡
-                    // 為了簡潔，我會從原來的程式碼複製過來
+                    // Data omitted for brevity, but it's the same as before
                     { category: "共通系統網址", id: "common", icon: "send-horizontal", links: [ { title: "地所員工知識網", href: "http://220.1.34.18:8888", description: "提供公告、各課室專屬區、員工資訊、會議室預約 ... 等功能", icon: "layout-dashboard" }, { title: "機關內部人事業務系統", href: "https://webitr.tycg.gov.tw/WebITR/", description: "桃園市政府差勤系統 https://webitr.tycg.gov.tw/WebITR/", icon: "clock" }, { title: "公文整合資訊系統", href: "https://odis.tycg.gov.tw/", description: "市府公文系統 https://odis.tycg.gov.tw/", icon: "book-marked" }, { title: "桃園市政府公務雲", href: "https://tycgcloud.tycg.gov.tw/", description: "桃園市政府公務雲(內網) https://tycgcloud.tycg.gov.tw/", icon: "cloud" }, { title: "內外網檔案交換系統", href: "http://220.1.34.26:8008/", description: "內網電腦檔案交換至外網的交換系統，外網下載請至 http://220.2.34.17:8008/", icon: "file-output" }, { title: "工作生活點滴", href: "http://220.1.34.18/album.asp", description: "本所電子相簿(每小時更新)", icon: "image-play" }, { title: "智慧控管系統", href: "http://220.1.34.75:8080/", description: "提供十多項登記輔助功能以及顯示最新公告及各業務小幫手連結", icon: "monitor-smartphone" } ] },
                     { category: "全功能櫃台", id: "counter", icon: "concierge-bell", links: [ { title: "地政系統161-跨縣市", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server-cog" }, { title: "地政系統60-桃園外掛", href: "http://220.1.34.60:9080/LandHA/", description: "地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/", icon: "server" }, { title: "地政系統118-工作站", href: "http://220.1.34.118:9080/LandHA/", description: "地政系統工作站操作專屬伺服器 http://220.1.34.118:9080/LandHA/", icon: "server" }, { title: "地政智慧控管系統", href: "http://220.1.34.75:8080/reg/", description: "提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/", icon: "landmark" }, { title: "地政歷史資料查詢系統", href: "http://220.1.34.15/NLOWeb/", description: "地政歷史資料查詢系統 http://220.1.34.15/NLOWeb/", icon: "history" }, { title: "謄本櫃員機後台管理", href: "http://220.1.33.117/MGMT/", description: "管理謄本櫃員機會員帳號、顯示統計資料", icon: "settings-2" }, { title: "簡訊發送紀錄查詢", href: "http://220.1.34.75:8080/reg/sms", description: "提供地政系統傳送地籍異動即時通等簡訊紀錄查詢 http://220.1.34.75:8080/reg/sms", icon: "message-square-text" }, { title: "登記課專屬入口網站", href: "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/index.htm", description: "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", icon: "layout-list" } ] },
                     { category: "登記課", id: "reg", icon: "file-signature", links: [ { title: "登記課專屬入口網站", href: "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/index.htm", description: "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", icon: "layout-list" }, { title: "登記課下載區", href: "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/download.htm", description: "登記課自行維護之各式檔案下載專區", icon: "download" }, { title: "地政智慧控管系統", href: "http://220.1.34.75:8080/reg/", description: "提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/", icon: "landmark" }, { title: "地政系統161-跨縣市", href: "http://220.1.34.161:9080/LandHA/", description: "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", icon: "server-cog" }, { title: "地政系統60-桃園外掛", href: "http://220.1.34.60:9080/LandHA/", description: "地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/", icon: "server" }, { title: "地政系統205-登記課1", href: "http://220.1.34.205:9080/LandHA/", description: "地政系統登記課操作專屬伺服器 http://220.1.34.205:9080/LandHA/", icon: "server" }, { title: "地政系統206-登記課2", href: "http://220.1.34.206:9080/LandHA/", description: "地政系統登記課操作專屬伺服器 http://220.1.34.206:9080/LandHA/", icon: "server" }, { title: "內政部地政司-電子產權憑證後台", href: "https://220.5.61.73/etd-manager/", description: "內政部地政司開發提供電子產權憑證管理功能... https://220.5.61.73/etd-manager/", icon: "shield-check" }, { title: "地政歷史資料查詢系統", href: "http://220.1.34.15/NLOWeb/", description: "地政歷史資料查詢系統 http://220.1.34.15/NLOWeb/", icon: "history" }, { title: "土地參考資訊檔查詢系統", href: "http://220.1.34.213/ref/jsp/security/login.jsp", description: "土地參考資訊檔查詢系統 http://220.1.34.213/ref/jsp/security/login.jsp", icon: "file-search" }, { title: "內政部地政司-數位櫃台", href: "http://220.5.61.14/", description: "內政部地政司數位櫃臺公務端網站 http://220.5.61.14/", icon: "monitor-smartphone" }, { title: "內政部地政司-罕用字查詢系統", href: "http://220.5.61.32/MOILAND/", description: "內政部地政司開發建置之罕用字查詢系統 http://220.5.61.32/MOILAND/", icon: "spell-check" }, { title: "內政部戶役政電子閘門系統", href: "https://210.241.18.131/", description: "內政部戶役政電子閘門系統 https://210.241.18.131/", icon: "door-open" }, { title: "內政部地政司-未辦繼承", href: "http://220.1.33.37:8091/OIB6/Login.jsp", description: "內政部地政司未辦繼承登記土地及建物管理系統 http://220.1.33.37:8091/OIB6/Login.jsp", icon: "user-x" }, { title: "內政部地政司-地籍清理", href: "http://220.1.33.79:8080/TAZQ/index.jsp", description: "內政部地政司地籍清理管理系統 http://220.1.33.79:8080/TAZQ/index.jsp", icon: "files" }, { title: "內政部地政司-線上申辦", href: "http://220.5.61.17/cms/", description: "內政部地政司線上申辦系統 http://220.5.61.17/cms/", icon: "file-plus-2" }, { title: "謄本櫃員機後台管理", href: "http://220.1.33.117/MGMT/", description: "管理謄本櫃員機會員帳號、顯示統計資料", icon: "settings-2" }, { title: "地政系統-罰鍰裁處AP(162)", href: "http://220.1.34.162:9080/LandHA/", description: "地政系統罰鍰裁處操作專屬伺服器 http://220.1.34.162:9080/LandHA/", icon: "gavel" }, { title: "私法人購置住宅", href: "http://220.1.33.80/PcQ.aspx", description: "私法人購置住宅 http://220.1.33.80/PcQ.aspx", icon: "building" } ] },
@@ -261,14 +260,13 @@
                 const currentDate = ref('');
                 const pdfModal = reactive({ visible: false, src: '', title: '' });
                 const pdfPopoverState = reactive({ src: '' });
-                const pdfPopover = ref(null); // DOM element ref
+                const pdfPopover = ref(null);
                 let popoverTimeout = null;
+                const renderKey = ref(0);
 
-                // --- 計算屬性 (Computed Properties) ---
                 const currentCategory = computed(() => bookmarks.value.find(c => c.id === currentCategoryId.value));
                 const currentCategoryLinks = computed(() => currentCategory.value ? currentCategory.value.links : []);
 
-                // --- 方法 (Methods) ---
                 const selectCategory = (id) => {
                     currentCategoryId.value = id;
                 };
@@ -313,34 +311,26 @@
 
                 const handleLinkClick = (event, link) => {
                     const internalLink = event.target.closest('[data-internal-link="true"]');
-                    
-                    // 優先處理卡片內描述中的連結點擊
                     if (internalLink) {
                         event.preventDefault();
-                        event.stopPropagation(); // 防止觸發外層卡片的點擊事件
-                        
+                        event.stopPropagation();
                         const url = internalLink.getAttribute('href');
                         const title = internalLink.textContent;
-                        
                         if (url && url.toLowerCase().endsWith('.pdf')) {
                             openPdfModal(url, title);
                         } else if (url) {
-                            // 對於非 PDF 的內部連結，在新分頁中開啟
                             window.open(url, '_blank', 'noopener,noreferrer');
                         }
-                        return; // 處理完畢，結束函式
+                        return;
                     }
-                    
-                    // 如果不是點擊內部連結，則處理整個卡片的點擊事件
                     if (isPdf(link)) {
                         event.preventDefault();
                         openPdfModal(link.href, link.title);
                     }
-                    // 如果是可下載或一般連結，<a> 標籤的預設行為會處理 (在新分頁開啟)
                 };
 
                 const openPdfModal = (src, title) => {
-                    pdfModal.src = `${src}#view=FitH`;
+                    pdfModal.src = `${src}#view=Fit&toolbar=0&navpanes=0`;
                     pdfModal.title = title;
                     pdfModal.visible = true;
                 };
@@ -357,21 +347,16 @@
                     clearTimeout(popoverTimeout);
                     popoverTimeout = setTimeout(() => {
                         const cardRect = targetCard.getBoundingClientRect();
-                        pdfPopoverState.src = `${link.href}#view=FitH`;
-                        
+                        pdfPopoverState.src = `${link.href}#view=FitH&toolbar=0&navpanes=0`;
                         const popoverEl = pdfPopover.value;
                         popoverEl.classList.remove('hidden');
-                        
-                        const popoverWidth = 320;
-                        const popoverHeight = 450;
+                        const popoverWidth = 297;
+                        const popoverHeight = 415;
                         const margin = 10;
-                        
                         let top = cardRect.top + (cardRect.height / 2) - (popoverHeight / 2);
                         let left;
-                        
                         const spaceRight = window.innerWidth - cardRect.right;
                         const spaceLeft = cardRect.left;
-
                         if (spaceRight >= popoverWidth + margin) {
                             left = cardRect.right + margin;
                         } else if (spaceLeft >= popoverWidth + margin) {
@@ -379,11 +364,8 @@
                         } else {
                             left = spaceRight > spaceLeft ? cardRect.right + margin : cardRect.left - popoverWidth - margin;
                         }
-
-                        // 邊界校正
                         left = Math.max(margin, Math.min(left, window.innerWidth - popoverWidth - margin));
                         top = Math.max(margin, Math.min(top, window.innerHeight - popoverHeight - margin));
-
                         popoverEl.style.top = `${top}px`;
                         popoverEl.style.left = `${left}px`;
                     }, 300);
@@ -403,9 +385,7 @@
                     return text.replace(regex, '<a href="$2" data-internal-link="true" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">$1</a>');
                 };
 
-                // --- 動態資料更新 (原版邏輯) ---
                 const updateDynamicLinks = async () => {
-                    // 更新大門輪值表
                     const now = new Date();
                     const rocYear = now.getFullYear() - 1911;
                     const month = now.getMonth() + 1;
@@ -419,7 +399,6 @@
                         rosterLink.href = `${baseUrl}${rocYear}/${month}月輪值表.pdf`;
                         rosterLink.originalTitle = rosterLink.originalTitle || "DutyRoster";
                         rosterLink.title = `${rocYear}年${month}月大門輪值表`;
-                        
                         const nextMonthHref = `${baseUrl}${nextRocYear}/${nextMonth}月輪值表.pdf`;
                         try {
                             const response = await fetch(nextMonthHref, { method: 'HEAD' });
@@ -433,59 +412,44 @@
                         }
                     }
 
-                    // 更新資訊課輪值表
                     const infoRosterLink = bookmarks.value.flatMap(c => c.links).find(l => l.title === '資訊課本月輪值表');
                     if (infoRosterLink) {
                         infoRosterLink.title = `資訊課${rocYear}年${month}月輪值表`;
                     }
                 };
 
-                // --- 生命週期鉤子 (Lifecycle Hooks) ---
                 onMounted(async () => {
-                    // 1. 更新動態資料
                     await updateDynamicLinks();
-
-                    // 2. 從 localStorage 載入使用者偏好設定
                     theme.value = localStorage.getItem('theme') || 'light';
+                    document.documentElement.classList.toggle('dark', theme.value === 'dark');
                     isSidebarCollapsed.value = (localStorage.getItem('sidebarState') === 'collapsed');
-                    
-                    // 3. 載入上次選擇的分類，或預設第一個
                     let lastCatId = localStorage.getItem('lastSelectedCategory');
                     const categoryExists = bookmarks.value.some(c => c.id === lastCatId);
                     if (!lastCatId || !categoryExists) {
                         lastCatId = bookmarks.value.find(c => !c.isDirectLink)?.id || null;
                     }
                     selectCategory(lastCatId);
-
-                    // 4. 啟動時鐘
                     updateTime();
                     setInterval(updateTime, 1000);
-                });
-
-                onUpdated(() => {
-                    // 每次 DOM 更新後，重新渲染 Lucide 圖示
-                    lucide.createIcons();
-                });
-
-                // --- 監聽器 (Watchers) ---
-                watch(theme, (newTheme) => {
-                    localStorage.setItem('theme', newTheme);
-                    if (newTheme === 'dark') {
-                        document.documentElement.classList.add('dark');
-                    } else {
-                        document.documentElement.classList.remove('dark');
-                    }
-                    // 確保圖示在主題切換後能立即更新
                     nextTick(() => {
                         lucide.createIcons();
                     });
+                });
+
+                watch([currentCategoryId, theme, isSidebarCollapsed], () => {
+                    renderKey.value++;
+                    nextTick(() => {
+                        lucide.createIcons();
+                    });
+                });
+
+                watch(theme, (newTheme) => {
+                    localStorage.setItem('theme', newTheme);
+                    document.documentElement.classList.toggle('dark', newTheme === 'dark');
                 });
 
                 watch(isSidebarCollapsed, (collapsed) => {
                     localStorage.setItem('sidebarState', collapsed ? 'collapsed' : 'open');
-                    nextTick(() => {
-                        lucide.createIcons();
-                    });
                 });
                 
                 watch(currentCategoryId, (newId) => {
@@ -508,6 +472,7 @@
                     pdfModal,
                     pdfPopover,
                     pdfPopoverState,
+                    renderKey,
                     currentCategory,
                     currentCategoryLinks,
                     selectCategory,
@@ -527,7 +492,6 @@
             }
         });
 
-        // 掛載 Vue 應用
         app.mount('#app');
     </script>
 </body>
