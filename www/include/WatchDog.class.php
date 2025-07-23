@@ -317,7 +317,7 @@ class WatchDog {
     private function sendRegOverdueMessage($to_id, $case_records) {
         $cache = Cache::getInstance();
         $users = $cache->getUserNames();
-        $url = "http://".$this->host_ip.":8080/reg/expire";
+        $url = "http://".$this->host_ip.":8080/reg/expire/";
         if ($to_id !== "ALL") {
             $url .= $to_id;
         }
