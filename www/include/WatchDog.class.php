@@ -271,7 +271,7 @@ class WatchDog {
             Logger::getInstance()->warning(__METHOD__.": 非設定時間內，跳過逾期登記案件檢測。");
             return false;
         }
-        $query_url_base = "http://".$this->host_ip.":8080/reg/expire";
+        $query_url_base = "http://".$this->host_ip.":8080/reg/expire/";
         $query = new Query();
         Logger::getInstance()->info('開始查詢15天內逾期登記案件 ... ');
         $rows = $query->queryOverdueCasesIn15Days();
