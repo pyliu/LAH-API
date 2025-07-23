@@ -393,7 +393,7 @@
                     const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
                     const nextRocYear = nextMonthDate.getFullYear() - 1911;
                     const nextMonth = nextMonthDate.getMonth() + 1;
-                    
+                    // 把所有書籤分類裡的所有連結全部拿出來，攤平成一個大列表，然後在這個大列表中，找出那個標題是 'DutyRoster' 或者 原始標題是 'DutyRoster' 的連結物件。
                     const rosterLink = bookmarks.value.flatMap(c => c.links).find(l => l.title === 'DutyRoster' || l.originalTitle === 'DutyRoster');
                     if (rosterLink) {
                         const baseUrl = "http://220.1.34.18/service/section/人事室/photogallery/輪值表/";
