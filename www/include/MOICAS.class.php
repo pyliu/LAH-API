@@ -52,7 +52,7 @@ class MOICAS
 	/**
 	 * To fix th RM38/RM39 wrong change issue
 	 */
-	public function fixRegWrongChangeCase($year, $code, $num, $trindxFix = true) {
+	public function fixRegWrongChangeCase($year, $code, $num, $trindxFix = false) {
 		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}

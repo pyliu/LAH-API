@@ -93,7 +93,8 @@ switch ($_POST["type"]) {
 		$year = $_POST['year'];
 		$code = $_POST['code'];
 		$num = $_POST['number'];
-		$result = $mock ? $cache->get('fix_reg_wrong_change') : $moicas->fixRegWrongChangeCase($year, $code, $num);
+		$trindx_fix = true;
+		$result = $mock ? $cache->get('fix_reg_wrong_change') : $moicas->fixRegWrongChangeCase($year, $code, $num, $trindx_fix);
 		$cache->set('fix_reg_wrong_change', $result);
 		$status_code = $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL;
 		$message = '更新 '.$year.'-'.$code.'-'.$num.' RM38/RM39 ';
