@@ -52,7 +52,7 @@ class MOICAS
 	/**
 	 * To fix th RM38/RM39 wrong change issue
 	 */
-	public function fixRegWrongChangeCase($year, $code, $num) {
+	public function fixRegWrongChangeCase($year, $code, $num, $trindxFix = true) {
 		if (!$this->db_wrapper->reachable()) {
 			return false;
 		}
@@ -80,7 +80,27 @@ class MOICAS
 		$this->db_wrapper->getDB()->bind(":bv_num", $num);
 		$this->db_wrapper->getDB()->bind(":bv_date", $date_str);
 		$this->db_wrapper->getDB()->bind(":bv_time", $time_str);
-		return $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+		Logger::getInstance()->info(__METHOD__.": 設定 RM39 為 F 及 RM30 為 U ".($result ? '成功' : '失敗'));
+		if ($trindxFix && $result) {
+			Logger::getInstance()->info(__METHOD__.": 一併更改 TRINDX IP_CODE 為 F ... ");
+			$this->db_wrapper->getDB()->parse("
+				UPDATE MOICAT.RINDX
+					SET IP_CODE = 'F'
+				WHERE II03 = :bv_year
+					AND II04_1 = :bv_code
+					AND II04_2 = :bv_num
+			");
+			
+			$this->db_wrapper->getDB()->bind(":bv_year", $year);
+			$this->db_wrapper->getDB()->bind(":bv_code", $code);
+			$this->db_wrapper->getDB()->bind(":bv_num", $num);
+
+			$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+			Logger::getInstance()->info(__METHOD__.": 更新 TRINDX IP_CODE 為 F ".($result ? '成功' : '失敗'));
+		}
+
+		return $result;
 	}
 	/**
 	 * Find empty record that causes user from SUR section can't generate notification application pdf ... 
