@@ -66,7 +66,9 @@ class MOICAS
 		$date_str = implode('', explode('-', $parts[0]));
 		$time_str = implode('', explode(':', $parts[1]));
 
-		$this->db_wrapper->getDB()->parse("
+		$db = $this->db_wrapper->getDB();
+
+		$db->parse("
 			UPDATE MOICAS.CRSMS
 				SET RM38 = '', RM39 = 'F' , RM40 = :bv_date, RM41 = :bv_time, RM42 = '', RM30 = 'U'
 			WHERE RM01 = :bv_year
@@ -75,16 +77,16 @@ class MOICAS
 				AND RM30 NOT IN ('Z', 'F')
 		");
 		
-		$this->db_wrapper->getDB()->bind(":bv_year", $year);
-		$this->db_wrapper->getDB()->bind(":bv_code", $code);
-		$this->db_wrapper->getDB()->bind(":bv_num", $num);
-		$this->db_wrapper->getDB()->bind(":bv_date", $date_str);
-		$this->db_wrapper->getDB()->bind(":bv_time", $time_str);
-		$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+		$db->bind(":bv_year", $year);
+		$db->bind(":bv_code", $code);
+		$db->bind(":bv_num", $num);
+		$db->bind(":bv_date", $date_str);
+		$db->bind(":bv_time", $time_str);
+		$result = $db->execute() === FALSE ? false : true;
 		Logger::getInstance()->info(__METHOD__.": 設定 RM39 為 F 及 RM30 為 U ".($result ? '成功' : '失敗'));
 		if ($trindxFix && $result) {
 			Logger::getInstance()->info(__METHOD__.": 一併更改 TRINDX IP_CODE 為 F ... ");
-			$this->db_wrapper->getDB()->parse("
+			$db->parse("
 				UPDATE MOICAT.RINDX
 					SET IP_CODE = 'F'
 				WHERE II03 = :bv_year
@@ -92,11 +94,11 @@ class MOICAS
 					AND II04_2 = :bv_num
 			");
 			
-			$this->db_wrapper->getDB()->bind(":bv_year", $year);
-			$this->db_wrapper->getDB()->bind(":bv_code", $code);
-			$this->db_wrapper->getDB()->bind(":bv_num", $num);
+			$db->bind(":bv_year", $year);
+			$db->bind(":bv_code", $code);
+			$db->bind(":bv_num", $num);
 
-			$result = $this->db_wrapper->getDB()->execute() === FALSE ? false : true;
+			$result = $db->execute() === FALSE ? false : true;
 			Logger::getInstance()->info(__METHOD__.": 更新 TRINDX IP_CODE 為 F ".($result ? '成功' : '失敗'));
 		}
 
