@@ -70,6 +70,7 @@
         .action-button-visual > span { margin-right: 0.25rem; }
         i[data-lucide] { display: inline-block; vertical-align: -0.2em; line-height: 1; flex-shrink: 0; }
         i[data-lucide]:not(.card-title > i[data-lucide]) { width: 1.25em; height: 1.25em; }
+        i[data-lucide].card-title > i[data-lucide] { width: 2.1em; height: 2.1em; } /* 確保卡片標題圖示大小 */
         #current-category-title > i[data-lucide] { width: 1em; height: 1em; }
         body { background-color: #f3f4f6; color: #1f2937; }
         #sidebar { background-color: #e9ecef; color: #212529; } 
@@ -197,7 +198,7 @@
                 <a v-for="link in currentCategoryLinks" :key="link.href" :href="link.href" :title="link.href" :target="getLinkTarget(link)" :rel="getLinkTarget(link) === '_blank' ? 'noopener noreferrer' : null" :download="isDownloadable(link) ? '' : null" @click="handleLinkClick($event, link)" @mouseenter="handlePdfHover($event, link)" @mouseleave="hidePdfPopover" class="bookmark-card-styled hover:shadow-2xl dark:hover:shadow-lg rounded-xl">
                     <div class="card-content-wrapper">
                         <h5 class="text-xl font-semibold mb-2 flex items-center card-title">
-                            <i v-if="link.icon" :data-lucide="link.icon" class="mr-2" style="width: 2.1em; height: 2.1em;"></i>
+                            <i v-if="link.icon" :data-lucide="link.icon" class="mr-2"></i>
                             <span>{{ link.title }}</span>
                         </h5>
                         <p class="text-sm mb-4 flex-grow" v-html="markdownToHtml(link.description || '點擊以繼續。')"></p>
@@ -283,7 +284,7 @@
                         { title: '地政系統60-桃園外掛', href: 'http://220.1.34.60:9080/LandHA/', description: '地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/', icon: 'server' },
                         { title: '地政系統205-登記課1', href: 'http://220.1.34.205:9080/LandHA/', description: '地政系統登記課操作專屬伺服器 http://220.1.34.205:9080/LandHA/', icon: 'server' },
                         { title: '地政系統206-登記課2', href: 'http://220.1.34.206:9080/LandHA/', description: '地政系統登記課操作專屬伺服器 http://220.1.34.206:9080/LandHA/', icon: 'server' },
-                        { title: '地政系統162-罰鍰裁處專用', href: 'http://220.1.34.162:9080/LandHA/', description: '地政系統給罰鍰裁處專用伺服器 http://220.1.34.162:9080/LandHA/', icon: 'gavel' },
+                        { title: '地政系統162-罰鍰裁處專用', href: 'http://220.1.34.162:9080/LandHA/', description: '地政系統給罰鍰裁處專用伺服器 http://220.1.34.162:9080/LandHA/', icon: 'server' },
                         { title: '地政歷史資料查詢系統', href: 'http://220.1.34.15/NLOWeb/', description: '地政歷史資料查詢系統 http://220.1.34.15/NLOWeb/', icon: 'history' },
                         { title: '土地參考資訊檔查詢系統', href: 'http://220.1.34.213/ref/jsp/security/login.jsp', description: '土地參考資訊檔查詢系統 http://220.1.34.213/ref/jsp/security/login.jsp', icon: 'file-search' },
                         { title: '謄本櫃員機後台管理', href: 'http://220.1.33.117/MGMT/', description: '管理謄本櫃員機會員帳號、顯示統計資料', icon: 'settings-2' },
@@ -295,7 +296,8 @@
                         { title: '內政部-地籍清理', href: 'http://220.1.33.79:8080/TAZQ/index.jsp', description: '內政部地籍清理管理系統 http://220.1.33.79:8080/TAZQ/index.jsp', icon: 'files' },
                         { title: '內政部-線上申辦', href: 'http://220.5.61.17/cms/', description: '內政部線上申辦系統 http://220.5.61.17/cms/', icon: 'file-plus-2' },
                         { title: '內政部-電子產權憑證後台', href: 'https://220.5.61.73/etd-manager/', description: '內政部開發提供電子產權憑證管理功能... https://220.5.61.73/etd-manager/', icon: 'shield-check' },
-                        { title: '內政部-抵押權線上申辦系統管理後台', href: 'https://220.5.61.73/moa-manager/', description: '內政部抵押權線上申辦系統管理後台 ... https://220.5.61.73/moa-manager/', icon: 'file-lock-2' }
+                        { title: '內政部-抵押權線上申辦系統管理後台', href: 'https://220.5.61.73/moa-manager/', description: '內政部抵押權線上申辦系統管理後台 ... https://220.5.61.73/moa-manager/', icon: 'file-lock-2' },
+                        { title: '內政部-地籍總歸戶系統', href: 'https://landowners.land.moi.gov.tw/', description: '個人地籍資料集中查詢平台，整合土地、建物所有權資訊 https://landowners.land.moi.gov.tw/', icon: 'folder-lock' }
                         ],
                     },
                     {
@@ -358,6 +360,8 @@
                         { title: '便民觸控查詢控制台', href: 'http://220.1.34.211:9080/touch/', description: '便民觸控查詢控制台 http://220.1.34.211:9080/touch/', icon: 'monitor' },
                         { title: 'SRMAS 機房天氣圖', href: 'http://220.1.34.75:8080/inf/weather/', description: '機房網路及主要系統狀態顯示 http://220.1.34.75:8080/inf/weather/', icon: 'cloud-sun-rain' },
                         { title: '資訊課休閒時光', href: 'http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/time.html', description: '輕鬆一下 ... 😀', icon: 'smile' },
+                        // 從常用表單下載移動過來的資訊課本月輪值表
+                        { title: '資訊課本月輪值表', href: 'http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf', description: '資訊課本月份每日工作輪值表', icon: 'refresh-ccw-dot' },
                         ],
                     },
                     {
@@ -368,17 +372,17 @@
                         { title: '人事室專屬入口網站', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/index.htm', description: '最新消息、表單下載、職掌業務 ...', icon: 'layout-list' },
                         { title: '人事室各式表單下載', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download.html', description: '提供各式人事相關申請表單下載', icon: 'user' },
                         { title: '差勤更正單', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/107/00%E6%A1%83%E5%9C%92%E5%9C%B0%E6%94%BF%E4%BA%8B%E5%8B%99%E6%89%80%E5%8A%A0%E7%8F%AD%E8%AB%8B%E5%81%87%E6%9B%B4%E6%AD%A3%E7%94%B3%E8%AB%8B%E8%A1%A8.pdf', description: '提供忘刷卡等相關差勤更正申請單下載，請填妥核章後送交人事室辦理。', icon: 'file-pen' },
-                        { title: '差勤系統操作手冊', href: 'http://220.1.34.18/service/section/人事室/pdf//WebITR2/WebITR2.0一般人員操作手冊_2_1_0_32.pdf', description: '提供完整一般同仁 WEBITR 2.0 操作手冊', icon: 'book-open' },
+                        { title: '差勤系統操作手冊', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf//WebITR2/WebITR2.0%E4%B8%80%E8%88%AC%E4%BA%BA%E5%93%A1%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8A_2_1_0_32.pdf', description: '提供完整一般同仁 WEBITR 2.0 操作手冊', icon: 'book-open' },
                         { title: '各式差勤刷卡範例', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/%E5%88%B7%E5%8D%A1%E7%AF%84%E4%BE%8B1030601.pdf', description: '提供各式刷卡範例教學', icon: 'fingerprint' },
-                        { title: '如何查詢差勤記錄', href: 'http://220.1.34.18/service/section/人事室/pdf/WebITR2/查詢出勤記錄教學.pdf', description: '提供簡易差勤記錄查詢步驟', icon: 'history' },
-                        { title: '差勤案件申請取消教學', href: 'http://220.1.34.18/service/section/人事室/pdf/WebITR2/差勤案件申請取消教學.pdf', description: '提供簡易出差加班取消教學', icon: 'calendar-x' },
-                        { title: '費用申請教學', href: 'http://220.1.34.18/service/section/人事室/pdf/WebITR2/費用申請教學.pdf', description: '提供簡易申請差旅費、加班費教學', icon: 'banknote' },
-                        { title: '個人資料相關教學', href: 'http://220.1.34.18/service/section/人事室/pdf/WebITR2/個人資料相關教學.pdf', description: '提供簡易查詢基本資料、修改電子郵件、帳號密碼...等差勤系統功能教學', icon: 'user-cog' },
-                        { title: '請假規定', href: 'http://220.1.34.18/service/section/人事室/pdf/請假和休假/104給假一覽表_002.pdf', description: '提供請假規定PDF檢視', icon: 'file-text' },
-                        { title: '如何查詢休假紀錄', href: 'http://220.1.34.18/service/section/人事室/pdf/WebITR2/如何查詢休假紀錄.pdf', description: '提供簡易查詢已休假天數查詢步驟', icon: 'calendar-search' },
-                        { title: '申請休假教學', href: 'http://220.1.34.18/service/section/人事室/pdf/WebITR2/休假申請教學.pdf', description: '提供簡易申請休假教學', icon: 'calendar-plus' },
-                        { title: '申請公假補休教學', href: 'http://220.1.34.18/service/section/人事室/pdf/WebITR2/公假補休申請教學.pdf', description: '提供簡易申請公假補休教學', icon: 'briefcase' },
-                        { title: '請假出國教學', href: 'http://220.1.34.18/service/section/人事室/pdf/WebITR2/出國請假申請教學.pdf', description: '提供簡易出國請假教學', icon: 'plane' },
+                        { title: '如何查詢差勤記錄', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E6%9F%A5%E8%A9%A2%E5%87%BA%E5%8B%A4%E8%A8%98%E9%8C%84%E6%95%99%E5%AD%B8.pdf', description: '提供簡易差勤記錄查詢步驟', icon: 'history' },
+                        { title: '差勤案件申請取消教學', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%B7%AE%E5%8B%A4%E6%A1%88%E4%BB%B6%E7%94%B3%E8%AB%8B%E5%8F%96%E6%B6%88%E6%95%99%E5%AD%B8.pdf', description: '提供簡易出差加班取消教學', icon: 'calendar-x' },
+                        { title: '費用申請教學', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E8%B2%BB%E7%94%A8%E7%94%B3%E8%AB%8B%E6%95%99%E5%AD%B8.pdf', description: '提供簡易申請差旅費、加班費教學', icon: 'banknote' },
+                        { title: '個人資料相關教學', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%80%8B%E4%BA%BA%E8%B3%87%E6%96%99%E7%9B%B8%E9%97%9C%E6%95%99%E5%AD%B8.pdf', description: '提供簡易查詢基本資料、修改電子郵件、帳號密碼...等差勤系統功能教學', icon: 'user-cog' },
+                        { title: '請假規定', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/%E8%AB%8B%E5%81%87%E5%92%8C%E4%BC%91%E5%81%87/104%E7%B5%A6%E5%81%87%E4%B8%80%E8%A6%BD%E8%A1%A8_002.pdf', description: '提供請假規定PDF檢視', icon: 'file-text' },
+                        { title: '如何查詢休假紀錄', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%A6%82%E4%BD%95%E6%9F%A5%E8%A9%A2%E4%BC%91%E5%81%87%E7%B4%80%E9%8C%84.pdf', description: '提供簡易查詢已休假天數查詢步驟', icon: 'calendar-search' },
+                        { title: '申請休假教學', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E4%BC%91%E5%81%87%E7%94%B3%E8%AB%8B%E6%95%99%E5%AD%B8.pdf', description: '提供簡易申請休假教學', icon: 'calendar-plus' },
+                        { title: '申請公假補休教學', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%85%AC%E5%81%87%E8%A3%9C%E4%BC%91%E7%94%B3%E8%AB%8B%E6%95%99%E5%AD%B8.pdf', description: '提供簡易申請公假補休教學', icon: 'briefcase' },
+                        { title: '請假出國教學', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%87%BA%E5%9C%8B%E8%AB%8B%E5%81%87%E7%94%B3%E8%AB%8B%E6%95%99%E5%AD%B8.pdf', description: '提供簡易出國請假教學', icon: 'plane' },
                         ],
                     },
                     {
@@ -399,7 +403,6 @@
                         { title: '所內電話一覽表', href: 'http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E6%89%80%E5%85%A7%E9%9B%BB%E8%A9%B1%E4%B8%80%E8%A6%BD%E8%A1%A8.pdf', description: '最新事務所內電話一覽表', icon: 'phone-forwarded' },
                         { title: '申請健檢補助費憑證', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/105%E5%81%A5%E6%AA%A2%E6%86%91%E8%AD%89%E7%94%A8%E7%B4%99.pdf', description: '人事室-40歲以上公務人員申請健康檢查補助費憑證用紙(須區域醫院以上醫院)', icon: 'heart-pulse' },
                         { title: '差勤更正單', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/107/00%E6%A1%83%E5%9C%92%E5%9C%B0%E6%94%BF%E4%BA%8B%E5%8B%99%E6%89%80%E5%8A%A0%E7%8F%AD%E8%AB%8B%E5%81%87%E6%9B%B4%E6%AD%A3%E7%94%B3%E8%AB%8B%E8%A1%A8.pdf', description: '人事室-桃園地政事務所加班請假更正申請表', icon: 'file-check-2' },
-                        { title: '資訊課本月輪值表', href: 'http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/資訊課輪值表.pdf', description: '資訊課本月份每日工作輪值表', icon: 'refresh-ccw-dot' },
                         { title: 'DutyRoster', href: 'http://220.1.34.18/service/section/人事室/photogallery/輪值表/114/7月輪值表.pdf', description: '本月份全所關大門輪值班表PDF檢視', icon: 'flashlight' },
                         ],
                     },
@@ -543,7 +546,8 @@
                     const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
                     const nextRocYear = nextMonthDate.getFullYear() - 1911;
                     const nextMonth = nextMonthDate.getMonth() + 1;
-                    // 把所有書籤分類裡的所有連結全部拿出來，攤平成一個大列表，然後在這個大列表中，找出那個標題是 'DutyRoster' 或者 原始標題是 'DutyRoster' 的連結物件。
+                    
+                    // 找到人事室的 DutyRoster 連結
                     const rosterLink = bookmarks.value.flatMap(c => c.links).find(l => l.title === 'DutyRoster' || l.originalTitle === 'DutyRoster');
                     if (rosterLink) {
                         const baseUrl = "http://220.1.34.18/service/section/人事室/photogallery/輪值表/";
@@ -563,13 +567,38 @@
                         }
                     }
 
+                    // 找到資訊課的本月輪值表連結
                     const infoRosterLink = bookmarks.value.flatMap(c => c.links).find(l => l.title === '資訊課本月輪值表');
                     if (infoRosterLink) {
                         infoRosterLink.title = `資訊課${rocYear}年${month}月輪值表`;
+                        // 資訊課輪值表NEXT.pdf 的固定路徑
+                        const infoRosterNextMonthPdfUrl = `http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8NEXT.pdf`;
+                        try {
+                            const response = await fetch(infoRosterNextMonthPdfUrl, { method: 'HEAD' });
+                            if (response.ok) {
+                                infoRosterLink.description = `資訊課本月份每日工作輪值表 | [預覽下個月](${infoRosterNextMonthPdfUrl})`;
+                            } else {
+                                infoRosterLink.description = `資訊課本月份每日工作輪值表`;
+                            }
+                        } catch (e) {
+                            infoRosterLink.description = `資訊課本月份每日工作輪值表`;
+                        }
                     }
                 };
 
                 onMounted(async () => {
+                    // 處理書籤資料移動
+                    const filesCategory = bookmarks.value.find(c => c.id === 'files');
+                    const infoCategory = bookmarks.value.find(c => c.id === 'inf');
+
+                    if (filesCategory && infoCategory) {
+                        const infoRosterIndex = filesCategory.links.findIndex(link => link.title === '資訊課本月輪值表');
+                        if (infoRosterIndex !== -1) {
+                            const [movedLink] = filesCategory.links.splice(infoRosterIndex, 1); // 移除並獲取移動的連結
+                            infoCategory.links.push(movedLink); // 添加到資訊課
+                        }
+                    }
+
                     await updateDynamicLinks();
                     theme.value = localStorage.getItem('theme') || 'light';
                     document.documentElement.classList.toggle('dark', theme.value === 'dark');
