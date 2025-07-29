@@ -157,12 +157,12 @@ class SQLiteUser {
     }
 
     public function getDepartmentUsers($dept, $valid = 'on_board_users') {
-        $all = $dept === '全所';
+        $all = $dept === '全所' || $dept === 'all';
         $no_valid = $valid === 'all_users';
         $sql = "SELECT * FROM user WHERE ".($all ? "1=1" : "unit = :bv_unit");
-        if ($valid === 'on_board_users') {
+        if ($valid === 'on_board_users' || $valid === 'true' || $valid === true) {
             $sql .= " AND ((authority & :disabled_bit) <> :disabled_bit AND offboard_date = '') ";
-        } else if ($valid === 'off_board_users') {
+        } else if ($valid === 'off_board_users' || $valid === false || $valid === 'false') {
             $sql .= " AND ((authority & :disabled_bit) = :disabled_bit OR offboard_date <> '') ";
         }
         $sql .= " ORDER BY id";
