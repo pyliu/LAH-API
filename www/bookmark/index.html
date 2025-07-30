@@ -196,7 +196,12 @@
         #current-category-title > i[data-lucide] { width: 1em; height: 1em; }
 
         /* 書籤內容網格佈局 */
-        #bookmarks-content { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+        #bookmarks-content { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 1.5rem; 
+            position: relative; /* 確保絕對定位的子元素相對於此容器 */
+        }
 
         /* PDF 懸浮預覽樣式 */
         #pdf-popover {
@@ -243,6 +248,38 @@
             color: var(--watermark-text-dark);
         }
         /* --------------------------------------------------------------------- */
+
+        /* 過渡效果的 CSS 類別 */
+        .list-enter-active,
+        .list-leave-active {
+            /* 增加過渡時間到 1.5 秒，使用彈跳的 cubic-bezier 函數 */
+            transition: all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+        }
+        .list-enter-from {
+            opacity: 0;
+            /* 讓進入的卡片從更下方且縮小的狀態進入 */
+            transform: scale(0.5) translateY(200px); 
+        }
+        .list-leave-to {
+            opacity: 0;
+            /* 讓離開的卡片縮小並向上方離開，使其更明顯 */
+            transform: scale(0.5) translateY(-200px); 
+        }
+        /* 確保離開的元素不會影響佈局，並在最上層 */
+        .list-leave-active {
+            position: absolute;
+            z-index: 10; /* 確保離開的元素在最上層 */
+            /* 由於 grid 佈局的特性，當元素被設定為 absolute 時，其佔用的空間會立即被釋放。
+               這使得 translateY 的動畫起點不明顯。
+               儘管 Vue 的 TransitionGroup 會盡力處理，但 grid 的即時重排可能會覆蓋視覺效果。
+               透過大幅增加動畫時間和位移，希望能讓效果更易於察覺。
+            */
+        }
+        /* 確保在過渡期間，網格佈局的元素能夠平滑移動 */
+        .list-move {
+            /* 增加移動過渡時間，並使用相同的緩動函數，保持一致性 */
+            transition: transform 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+        }
     </style>
 </head>
 
@@ -297,8 +334,8 @@
                 </h1>
             </div>
 
-            <!-- 書籤卡片內容 -->
-            <div id="bookmarks-content">
+            <!-- 書籤卡片內容 - 使用 TransitionGroup 包裹 -->
+            <TransitionGroup name="list" tag="div" id="bookmarks-content">
                 <a v-for="link in currentCategoryLinks" :key="link.href" :href="link.href" :title="link.href" :target="getLinkTarget(link)" :rel="getLinkTarget(link) === '_blank' ? 'noopener noreferrer' : null" :download="isDownloadable(link) ? '' : null" @click="handleLinkClick($event, link)" @mouseenter="handlePdfHover($event, link)" @mouseleave="hidePdfPopover" class="bookmark-card-styled hover:shadow-2xl dark:hover:shadow-lg rounded-xl" :class="{ 'highlighted': link.isHighlighted }">
                     <!-- 浮水印：上次存取時間 -->
                     <div v-if="link.isHighlighted && link.lastAccessedTimeFormatted" class="last-accessed-watermark">
@@ -316,7 +353,7 @@
                         </div>
                     </div>
                 </a>
-            </div>
+            </TransitionGroup>
         </main>
 
         <!-- PDF 預覽 Modal -->
@@ -527,6 +564,8 @@
                 const pdfPopover = ref(null);
                 let popoverTimeout = null;
                 // 引入 mainContentKey 來強制重新渲染 main 區塊
+                // 由於現在使用 TransitionGroup，mainContentKey 不再需要強制重新渲染整個 main 區塊
+                // 但保留它以防未來其他用途，或作為觸發某些邏輯的依據
                 const mainContentKey = ref(0); 
 
                 // currentCategory 現在是 computed 屬性，會響應 bookmarks.value 的變化
@@ -608,7 +647,7 @@
                     currentCategoryId.value = id;
                     // 當分類改變時，重新載入並排序連結
                     loadClickCountsAndSortBookmarks(); 
-                    // 遞增 mainContentKey 以強制重新渲染 main 區塊
+                    // 遞增 mainContentKey 以強制重新渲染 main 區塊 (如果需要，但 TransitionGroup 會處理)
                     mainContentKey.value++;
                 };
 
@@ -618,9 +657,9 @@
                     document.documentElement.classList.toggle('dark', theme.value === 'dark');
                     localStorage.setItem('theme', theme.value) 
                     // 在主題切換後，重新載入並排序書籤，確保卡片內容和圖示樣式正確更新
-                    loadClickCountsAndSortBookmarks();
+                    // loadClickCountsAndSortBookmarks();
                     // 遞增 mainContentKey 以強制重新渲染 main 區塊
-                    mainContentKey.value++;
+                    // mainContentKey.value++;
                     setTimeout(() => { location.reload(); }, 50)
                 };
 
