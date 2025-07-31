@@ -10,38 +10,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
-    public function test() {
-        // $spreadsheet = IOFactory::load('test.xlsx');
-        // $worksheet = $spreadsheet->getActiveSheet();
-        // $worksheet->getCell('A1')->setValue('套用樣板測試');
-
-        $spreadsheet = new Spreadsheet();
-        $sheet       = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', '這是第一格');
-        $sheet->getCell('A2')->setValue('這是第2格');
-
-        $writer = new Xlsx($spreadsheet);
-        $expfile = EXPORT_DIR.DIRECTORY_SEPARATOR.'test.xlsx';
-        $writer->save($expfile);
-        unset($writer);
-
-        // $writer = new Xlsx($spreadsheet);
-        // $writer->save('export/hello world.xlsx');
-        ob_end_clean();
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        // header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="test.xlsx"');
-        header('Cache-control: no-cache, pre-check=0, post-check=0, max-age=0');
-        // https://stackoverflow.com/questions/34381816/phpexcel-return-a-corrupted-file
-        // need to add this line to prevent corrupted file
-        ob_end_clean();
-
-        $writer = IOFactory::createWriter(IOFactory::load($expfile), 'Xlsx');
-        $writer->save('php://output');
-        // $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        // $writer->save('php://output');
-        // readfile($expfile);
-    }
 
     private function write_export_tmp_file(&$spreadsheet, $filename = 'tmp.xlsx') {
         // also write a copy to export folder
@@ -123,6 +91,13 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
             '桃園市'.$site.'地政事務所',
             \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
         );
+        if (!empty($params['header'])) {
+            $worksheet->setCellValueExplicit(
+                'A2',
+                $params['header'],
+                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            );
+        }
         $worksheet->getStyle('A'.($count+4).':I'.($count+4))->getAlignment()->setWrapText(true);
         /** json data example
          * 收件字號: '114-HA52-007600',
@@ -154,7 +129,7 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
                 \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
             );
 
-            $worksheet->mergeCells('D'.$row_num.':'.'E'.$row_num);
+            // $worksheet->mergeCells('D'.$row_num.':'.'E'.$row_num);
             $worksheet->setCellValueExplicit(
                 'D'.$row_num,
                 $row['辦理情形'],
@@ -194,10 +169,10 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
         $worksheet->mergeCells('A'.$row_num.':'.'I'.$row_num);
         $worksheet->setCellValueExplicit(
             'A'.$row_num,
-            '填表人                                '.
-            '課長                                  '.
-            '秘書                                  '.
-            '主任                                  ',
+            '填表人                        '.
+            '課長                          '.
+            '秘書                          '.
+            '主任                          ',
             \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
         );
         $worksheet->getRowDimension($row_num)->setRowHeight(30);
@@ -224,7 +199,8 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
         // Logger::getInstance()->info(print_r($_POST, true));
         $params = array(
             "rows" => $_POST['jsons'],
-            "site" => $_POST['site']
+            "site" => $_POST['site'],
+            "header" => $_POST['header']
         );
         // execute command here
         $this->write_sur_tracking_xlsx($params, $title);
