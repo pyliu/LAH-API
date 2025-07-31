@@ -12,6 +12,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 
 class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
 
@@ -121,8 +122,18 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
         // 載入 Excel 模板
         $spreadsheet = IOFactory::load($tpl);
         $worksheet = $spreadsheet->getActiveSheet();
+
         // 設定凍結窗格：凍結第二列 (標題列)，這樣 A3 以下的內容滾動時，第1和第2列會保持可見
         $worksheet->freezePane('A3');
+        // 設定列印標題列：讓第2列在列印時重複顯示
+        $worksheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(2, 2);
+        // 設定列印紙張尺寸為 A4
+        $worksheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
+        // 設定列印時所有欄位適應單一頁面寬度
+        $worksheet->getPageSetup()->setFitToWidth(1);
+        // 設定列印時不限制高度，允許高度超過一頁（即只按寬度縮放）
+        $worksheet->getPageSetup()->setFitToHeight(0);
+
         // 設定辦公室名稱
         $site = $params['site'];
         switch ($params['site']) {
