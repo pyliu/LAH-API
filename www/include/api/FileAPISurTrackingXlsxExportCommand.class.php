@@ -8,31 +8,56 @@ require_once("FileAPICommand.class.php");
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder;
 
 class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
 
+    /**
+     * 將 Spreadsheet 物件寫入到匯出目錄的暫存檔案
+     * @param Spreadsheet $spreadsheet PhpSpreadsheet 物件
+     * @param string $filename 檔案名稱
+     */
     private function write_export_tmp_file(&$spreadsheet, $filename = 'tmp.xlsx') {
-        // also write a copy to export folder
+        // 也複製一份到匯出資料夾
         $writer = new Xlsx($spreadsheet);
         $writer->save(EXPORT_DIR.DIRECTORY_SEPARATOR.$filename);
-        //zipExports();
+        //zipExports(); // 註解掉，如果需要打包功能可啟用
     }
 
+    /**
+     * 將 Spreadsheet 物件直接輸出到 PHP 輸出流供瀏覽器下載
+     * @param Spreadsheet $spreadsheet PhpSpreadsheet 物件
+     * @param string $filename 檔案名稱
+     */
     private function write_php_output(&$spreadsheet, $filename = 'tmp.xlsx') {
+        // 清除所有緩衝區的內容，並關閉輸出緩衝
+        // 注意: 如果之前有其他輸出緩衝內容，此操作會清除它們
         ob_end_clean();
+
+        // 設定 HTTP Header 告知瀏覽器這是 XLSX 檔案並強制下載
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
         header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
         header ('Cache-Control: cache, must-revalidate');
         header ('Pragma: public');
-        //ob_end_clean();
 
+        // 建立寫入器並將內容保存到 PHP 輸出流
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $writer->save('php://output');
     }
 
+    /**
+     * 執行 Excel 匯出操作，設定元資料並輸出檔案
+     * @param Spreadsheet $spreadsheet PhpSpreadsheet 物件
+     * @param array $params 包含匯出所需參數的陣列
+     * @param string $title 匯出檔案的標題
+     */
     private function export(&$spreadsheet, &$params, $title) {
+        // 設定 Excel 檔案的元資料
         $spreadsheet->getProperties()
             ->setCreator("地政智慧控管系統")
             ->setLastModifiedBy("地政智慧控管系統")
@@ -44,37 +69,60 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
             ->setKeywords("office 2007 openxml php xlsx")
             ->setCategory("export");
 
+        // 根據 site 參數設定檔案名稱
         $filename = strtoupper($params['site']).'.xlsx';
         Logger::getInstance()->info('寫入 '.$filename);
+        // 將檔案寫入到伺服器暫存目錄
         $this->write_export_tmp_file($spreadsheet, $filename);
         Logger::getInstance()->info('輸出 RESPONSE STREAM ... ');
+        // 將檔案輸出到瀏覽器
         $this->write_php_output($spreadsheet, $filename);
         Logger::getInstance()->info('輸出 RESPONSE STREAM 完成');
     }
 
+    /**
+     * 為指定儲存格或範圍設定細邊框
+     * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $worksheet 工作表物件
+     * @param string $from 起始儲存格名稱 (e.g., 'A1')
+     * @param string|null $to 結束儲存格名稱 (e.g., 'B2')，如果為 null 則表示單一儲存格
+     */
     private function style_cell_border(&$worksheet, $from, $to = null) {
-        $to = $to ?? $from;
-        $worksheet->getStyle($from.':'.$to)->getBorders()->getTop()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-        $worksheet->getStyle($from.':'.$to)->getBorders()->getBottom()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-        $worksheet->getStyle($from.':'.$to)->getBorders()->getLeft()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-        $worksheet->getStyle($from.':'.$to)->getBorders()->getRight()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        $to = $to ?? $from; // 如果 $to 為空，則設定為 $from (單一儲存格)
+        $worksheet->getStyle($from.':'.$to)->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
+        $worksheet->getStyle($from.':'.$to)->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        $worksheet->getStyle($from.':'.$to)->getBorders()->getLeft()->setBorderStyle(Border::BORDER_THIN);
+        $worksheet->getStyle($from.':'.$to)->getBorders()->getRight()->setBorderStyle(Border::BORDER_THIN);
     }
 
+    /**
+     * 為指定列的 A 到 I 欄位設定邊框
+     * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $worksheet 工作表物件
+     * @param int $row_num 列號
+     */
     private function style_row_border(&$worksheet, $row_num) {
         foreach (range('A', 'I') as $column){
             $this->style_cell_border($worksheet, $column.$row_num);
         }
     }
 
+    /**
+     * 寫入測量案件追蹤資料到 XLSX 檔案
+     * @param array $params 包含資料列、站點和標頭的陣列
+     * @param string $title 匯出檔案的標題
+     */
     private function write_sur_tracking_xlsx(&$params, $title) {
         $count = count($params['rows']);
         Logger::getInstance()->info('查到 '.$count.' 筆資料');
-        // construct tpl path
+
+        // 構建模板檔案路徑
         $tpl = ROOT_DIR.DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'xlsx'.DIRECTORY_SEPARATOR.'sur_tracking.tpl.xlsx';
         Logger::getInstance()->info('讀取 '.$tpl.' 樣板XLSX');
+
+        // 載入 Excel 模板
         $spreadsheet = IOFactory::load($tpl);
         $worksheet = $spreadsheet->getActiveSheet();
-        // set office name
+
+        // 設定辦公室名稱
         $site = $params['site'];
         switch ($params['site']) {
             case 'HA': $site = '桃園'; break;
@@ -89,17 +137,27 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
         $worksheet->setCellValueExplicit(
             'A1',
             '桃園市'.$site.'地政事務所',
-            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            DataType::TYPE_STRING
         );
+
+        // 設定額外標頭
         if (!empty($params['header'])) {
             $worksheet->setCellValueExplicit(
                 'A2',
                 $params['header'],
-                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+                DataType::TYPE_STRING
             );
         }
-        $worksheet->getStyle('A'.($count+4).':I'.($count+4))->getAlignment()->setWrapText(true);
-        /** json data example
+
+        // 設定資料範圍的樣式：文字換行、字體、字體大小、垂直置中
+        // 這是解決樣式跑掉的關鍵部分
+        $data_end_row = $count + 4; // 資料從第 4 列開始，加上資料筆數
+        $worksheet->getStyle('A4:I'.$data_end_row)->getAlignment()->setWrapText(true);
+        // $worksheet->getStyle('A4:I'.$data_end_row)->getFont()->setName('微軟正黑體'); // 設定字體
+        $worksheet->getStyle('A4:I'.$data_end_row)->getFont()->setSize(12); // 設定字體大小
+        $worksheet->getStyle('A4:I'.$data_end_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER); // 垂直置中
+
+        /** JSON 資料範例
          * 收件字號: '114-HA52-007600',
          * 收件時間: '114-03-12 11:18:23',
          * 複丈原因: '鑑界',
@@ -112,97 +170,77 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
          */
         $row_num = 0;
         foreach( $params['rows'] as $index => $row ) {
-            $row_num = $index + 4;  // template has the header and title row, so add 4
-            $worksheet->setCellValueExplicit(
-                'A'.$row_num,
-                $row['收件字號'],
-                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
-            );
-            $worksheet->setCellValueExplicit(
-                'B'.$row_num,
-                $row['收件時間'],
-                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
-            );
-            $worksheet->setCellValueExplicit(
-                'C'.$row_num,
-                $row['複丈原因'],
-                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
-            );
-
-            // $worksheet->mergeCells('D'.$row_num.':'.'E'.$row_num);
-            $worksheet->setCellValueExplicit(
-                'D'.$row_num,
-                $row['辦理情形'],
-                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
-            );
-            $worksheet->setCellValueExplicit(
-                'E'.$row_num,
-                $row['測量員'],
-                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
-            );
-            $worksheet->setCellValueExplicit(
-                'F'.$row_num,
-                $row['延期複丈原因'],
-                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
-            );
-            $worksheet->setCellValueExplicit(
-                'G'.$row_num,
-                $row['複丈時間'],
-                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
-            );
-            $worksheet->setCellValueExplicit(
-                'H'.$row_num,
-                $row['逾期時間'],
-                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
-            );
-            $worksheet->setCellValueExplicit(
-                'I'.$row_num,
-                $row['承辦人簽章'],
-                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
-            );
+            $row_num = $index + 4; // 模板有標頭和標題列 (1-3)，所以資料從第 4 列開始
+            
+            // 寫入各欄位資料，並明確指定為字串類型
+            $worksheet->setCellValueExplicit('A'.$row_num, $row['收件字號'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('B'.$row_num, $row['收件時間'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('C'.$row_num, $row['複丈原因'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('D'.$row_num, $row['辦理情形'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('E'.$row_num, $row['測量員'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('F'.$row_num, $row['延期複丈原因'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('G'.$row_num, $row['複丈時間'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('H'.$row_num, $row['逾期時間'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('I'.$row_num, $row['承辦人簽章'], DataType::TYPE_STRING);
+            
+            // 為當前列設定邊框
             $this->style_row_border($worksheet, $row_num);
-            // row auto height
+            
+            // 設定行高自動調整以適應內容
             $worksheet->getRowDimension($row_num)->setRowHeight(-1);
         }
-        // write last signature row
+
+        // 寫入最後的簽章列
         $row_num += 1;
-        $worksheet->mergeCells('A'.$row_num.':'.'I'.$row_num);
+        $worksheet->mergeCells('A'.$row_num.':'.'I'.$row_num); // 合併儲存格
         $worksheet->setCellValueExplicit(
             'A'.$row_num,
             '填表人                        '.
             '課長                          '.
             '秘書                          '.
             '主任                          ',
-            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+            DataType::TYPE_STRING
         );
-        $worksheet->getRowDimension($row_num)->setRowHeight(30);
+        $worksheet->getRowDimension($row_num)->setRowHeight(30); // 設定簽章列的固定行高
         $worksheet->getStyle('A'.$row_num)
-            ->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $worksheet->getStyle('A'.$row_num)
-            ->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER) // 水平置中
+            ->setVertical(Alignment::VERTICAL_CENTER); // 垂直置中
 
+        // 執行最終的匯出和輸出
         $this->export($spreadsheet, $params, $title);
     }
 
+    /**
+     * 建構子：設定 PhpSpreadsheet 的值綁定器
+     */
     function __construct() {
-        // https://phpspreadsheet.readthedocs.io/en/latest/topics/recipes/#write-a-newline-character-n-in-a-cell-altenter
-        // AdvancedValuebinder.php automatically turns on "wrap text" for the cell when it sees a newline character in a string that you are inserting in a cell. Just like Microsoft Office Excel.
-        \PhpOffice\PhpSpreadsheet\Cell\Cell::setValueBinder( new \PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder() );
+        // 設定 AdvancedValueBinder，使其在儲存格中遇到換行符號時自動啟用「文字換行」
+        \PhpOffice\PhpSpreadsheet\Cell\Cell::setValueBinder( new AdvancedValueBinder() );
     }
 
+    /**
+     * 解構子 (目前為空)
+     */
     function __destruct() {}
 
+    /**
+     * 執行命令的核心方法
+     */
     public function execute() {
-        // title
+        // 匯出檔案的標題
         $title = '測量案件管制清冊';
         Logger::getInstance()->info($title);
-        // Logger::getInstance()->info(print_r($_POST, true));
+        // Logger::getInstance()->info(print_r($_POST, true)); // 除錯用，可視情況啟用
+
+        // 從 $_POST 獲取輸入參數
+        // 建議: 在實際應用中，應對 $_POST 數據進行更嚴格的驗證和淨化
         $params = array(
-            "rows" => $_POST['jsons'],
-            "site" => $_POST['site'],
-            "header" => $_POST['header']
+            "rows" => $_POST['jsons'] ?? [], // 使用 null 合併運算符提供預設空陣列
+            "site" => $_POST['site'] ?? '',
+            "header" => $_POST['header'] ?? ''
         );
-        // execute command here
+        
+        // 執行資料寫入和匯出流程
         $this->write_sur_tracking_xlsx($params, $title);
     }
 }
