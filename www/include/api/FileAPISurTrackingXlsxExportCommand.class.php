@@ -121,7 +121,8 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
         // 載入 Excel 模板
         $spreadsheet = IOFactory::load($tpl);
         $worksheet = $spreadsheet->getActiveSheet();
-
+        // 設定凍結窗格：凍結第二列 (標題列)，這樣 A3 以下的內容滾動時，第1和第2列會保持可見
+        $worksheet->freezePane('A3');
         // 設定辦公室名稱
         $site = $params['site'];
         switch ($params['site']) {
@@ -154,7 +155,7 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
         $worksheet->getStyle('J1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER); // 垂直置中
         $worksheet->setCellValueExplicit(
             'J1', // 產製時間在 J1 欄位
-            '產製時間：' . (date('Y') - 1911) . date('/m/d'), // 轉換為民國年
+            '產製日期：' . (date('Y') - 1911) . date('/m/d'), // 轉換為民國年
             DataType::TYPE_STRING
         );
         // 設定資料範圍的樣式：文字換行、字體、字體大小、垂直置中
