@@ -178,6 +178,7 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
         // $worksheet->getStyle('$range)->getFont()->setName('微軟正黑體'); // 設定字體
         $worksheet->getStyle($range)->getFont()->setSize(14); // 設定字體大小
         $worksheet->getStyle($range)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER); // 垂直置中
+        $worksheet->getStyle('A3:H'.$data_end_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // 水平置中
 
         /** JSON 資料範例
          * 收件年: '114',
