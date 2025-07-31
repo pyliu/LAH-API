@@ -22,6 +22,7 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
      * @param string $filename 檔案名稱
      */
     private function write_export_tmp_file(&$spreadsheet, $filename = 'tmp.xlsx') {
+        @unlink(EXPORT_DIR.DIRECTORY_SEPARATOR.$filename);
         // 也複製一份到匯出資料夾
         $writer = new Xlsx($spreadsheet);
         $writer->save(EXPORT_DIR.DIRECTORY_SEPARATOR.$filename);
