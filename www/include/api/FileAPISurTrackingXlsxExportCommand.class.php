@@ -95,12 +95,12 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
     }
 
     /**
-     * 為指定列的 A 到 I 欄位設定邊框
+     * 為指定列的 A 到 J 欄位設定邊框
      * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $worksheet 工作表物件
      * @param int $row_num 列號
      */
     private function style_row_border(&$worksheet, $row_num) {
-        foreach (range('A', 'I') as $column){
+        foreach (range('A', 'J') as $column){
             $this->style_cell_border($worksheet, $column.$row_num);
         }
     }
@@ -134,54 +134,90 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
             case 'HG': $site = '平鎮'; break;
             case 'HH': $site = '龜山'; break;
         }
-        $worksheet->setCellValueExplicit(
-            'A1',
-            '桃園市'.$site.'地政事務所',
-            DataType::TYPE_STRING
-        );
-
+        // $worksheet->setCellValueExplicit(
+        //     'A1',
+        //     '桃園市'.$site.'地政事務所',
+        //     DataType::TYPE_STRING
+        // );
         // 設定額外標頭
         if (!empty($params['header'])) {
             $worksheet->setCellValueExplicit(
-                'A2',
-                $params['header'],
+                'A1',
+                $site.'所 '.$params['header'],
                 DataType::TYPE_STRING
             );
         }
-
+        // 產製時間在 J1 欄位
+        $worksheet->getStyle('J1')->getAlignment()->setWrapText(false);
+        $worksheet->getStyle('J1')->getFont()->setName('標楷體'); // 設定字體
+        $worksheet->getStyle('J1')->getFont()->setSize(12); // 設定字體大小
+        $worksheet->getStyle('J1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER); // 垂直置中
+        $worksheet->setCellValueExplicit(
+            'J1', // 產製時間在 J1 欄位
+            '產製時間：' . (date('Y') - 1911) . date('/m/d'), // 轉換為民國年
+            DataType::TYPE_STRING
+        );
         // 設定資料範圍的樣式：文字換行、字體、字體大小、垂直置中
         // 這是解決樣式跑掉的關鍵部分
-        $data_end_row = $count + 4; // 資料從第 4 列開始，加上資料筆數
-        $worksheet->getStyle('A4:I'.$data_end_row)->getAlignment()->setWrapText(true);
-        // $worksheet->getStyle('A4:I'.$data_end_row)->getFont()->setName('微軟正黑體'); // 設定字體
-        $worksheet->getStyle('A4:I'.$data_end_row)->getFont()->setSize(12); // 設定字體大小
-        $worksheet->getStyle('A4:I'.$data_end_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER); // 垂直置中
+        $data_end_row = $count + 3; // 資料從第 3 列開始，加上資料筆數
+        $range_head = 'A3:J';
+        $range = $range_head.$data_end_row;
+        $worksheet->getStyle($range)->getAlignment()->setWrapText(true);
+        // $worksheet->getStyle('$range)->getFont()->setName('微軟正黑體'); // 設定字體
+        $worksheet->getStyle($range)->getFont()->setSize(12); // 設定字體大小
+        $worksheet->getStyle($range)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER); // 垂直置中
 
         /** JSON 資料範例
-         * 收件字號: '114-HA52-007600',
-         * 收件時間: '114-03-12 11:18:23',
+         * 收件年: '114',
+         * 收件字: '桃Ｏ建',
+         * 收件號: '007600',
          * 複丈原因: '鑑界',
-         * 辦理情形: '展期',
-         * 測量員: '江ＯＯ',
-         * 延期複丈原因: '',
-         * 複丈時間: '114-08-04 09:00:00',
-         * 逾期時間: '114-08-01 11:18:23',
-         * 承辦人簽章: ''
+         * 收件日期: '114-03-12',
+         * 複丈日期: '114-08-04',
+         * 逾期日期: '114-08-01',
+         * 測量員: '江ＯＯ',,
+         * 處理情形: { // 這裡假設是一個包含布林值的物件
+         *  複核中": true,
+         *  函詢他機關: false,
+         *  召開會議會勘: false,
+         *  延期複丈: false,
+         *  補正、駁回: true
+         * }
          */
         $row_num = 0;
         foreach( $params['rows'] as $index => $row ) {
-            $row_num = $index + 4; // 模板有標頭和標題列 (1-3)，所以資料從第 4 列開始
+            $row_num = $index + 3; // 模板有標頭和標題列 (1-2)，所以資料從第 3 列開始
             
             // 寫入各欄位資料，並明確指定為字串類型
-            $worksheet->setCellValueExplicit('A'.$row_num, $row['收件字號'], DataType::TYPE_STRING);
-            $worksheet->setCellValueExplicit('B'.$row_num, $row['收件時間'], DataType::TYPE_STRING);
-            $worksheet->setCellValueExplicit('C'.$row_num, $row['複丈原因'], DataType::TYPE_STRING);
-            $worksheet->setCellValueExplicit('D'.$row_num, $row['辦理情形'], DataType::TYPE_STRING);
-            $worksheet->setCellValueExplicit('E'.$row_num, $row['測量員'], DataType::TYPE_STRING);
-            $worksheet->setCellValueExplicit('F'.$row_num, $row['延期複丈原因'], DataType::TYPE_STRING);
-            $worksheet->setCellValueExplicit('G'.$row_num, $row['複丈時間'], DataType::TYPE_STRING);
-            $worksheet->setCellValueExplicit('H'.$row_num, $row['逾期時間'], DataType::TYPE_STRING);
-            $worksheet->setCellValueExplicit('I'.$row_num, $row['承辦人簽章'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('A'.$row_num, $row['收件年'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('B'.$row_num, $row['收件字'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('C'.$row_num, $row['收件號'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('D'.$row_num, $row['複丈原因'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('E'.$row_num, $row['收件日期'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('F'.$row_num, $row['複丈日期'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('G'.$row_num, $row['逾期日期'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('H'.$row_num, $row['測量員'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('I'.$row_num, $row['處理情形'], DataType::TYPE_STRING);
+            $worksheet->setCellValueExplicit('J'.$row_num, $row['核章欄'], DataType::TYPE_STRING);
+                        // 處理「處理情形」欄位，動態生成帶有核選框的文字
+            $processingStatusText = '';
+            $processingStatusData = $row['處理情形'] ?? []; // 確保存在
+            
+            // 使用 Unicode 核選框符號: ☐ (未選), ☑ (已選)
+            $processingStatusText .= ($processingStatusData['複核中'] ?? false ? '☑' : '☐') . '複核中       ';
+            $processingStatusText .= ($processingStatusData['函詢他機關'] ?? false ? '☑' : '☐') . '函詢他機關' . "\n";
+            $processingStatusText .= ($processingStatusData['召開會議會勘'] ?? false ? '☑' : '☐') . '召開會議會勘 ';
+            $processingStatusText .= ($processingStatusData['延期複丈'] ?? false ? '☑' : '☐') . '延期複丈' . "\n";
+            $processingStatusText .= ($processingStatusData['補正、駁回'] ?? false ? '☑' : '☐') . '補正、駁回'; // 最後一項不加換行
+
+            $worksheet->setCellValueExplicit(
+                'I'.$row_num, // 假設 I 欄是「處理情形」
+                $processingStatusText,
+                DataType::TYPE_STRING
+            );
+            
+            // 處理「核章欄」
+            $worksheet->setCellValueExplicit('J'.$row_num, $row['核章欄'] ?? '', DataType::TYPE_STRING); // 假設 J 欄是「核章欄」
             
             // 為當前列設定邊框
             $this->style_row_border($worksheet, $row_num);
@@ -192,18 +228,19 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
 
         // 寫入最後的簽章列
         $row_num += 1;
-        $worksheet->mergeCells('A'.$row_num.':'.'I'.$row_num); // 合併儲存格
+        $worksheet->mergeCells('A'.$row_num.':'.'J'.$row_num); // 合併儲存格
         $worksheet->setCellValueExplicit(
             'A'.$row_num,
-            '填表人                        '.
-            '課長                          '.
+            '檢查員                        '.
+            '測量課長                      '.
             '秘書                          '.
             '主任                          ',
             DataType::TYPE_STRING
         );
-        $worksheet->getRowDimension($row_num)->setRowHeight(30); // 設定簽章列的固定行高
+        $worksheet->getRowDimension($row_num)->setRowHeight(45); // 設定簽章列的固定行高
+        $worksheet->getStyle('A'.$row_num)->getFont()->setSize(16); // 設定字體大小
         $worksheet->getStyle('A'.$row_num)
-            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER) // 水平置中
+            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_JUSTIFY)
             ->setVertical(Alignment::VERTICAL_CENTER); // 垂直置中
 
         // 執行最終的匯出和輸出
@@ -228,7 +265,7 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
      */
     public function execute() {
         // 匯出檔案的標題
-        $title = '測量案件管制清冊';
+        $title = '測量案件催辦單';
         Logger::getInstance()->info($title);
         // Logger::getInstance()->info(print_r($_POST, true)); // 除錯用，可視情況啟用
 
