@@ -133,6 +133,9 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
         $worksheet->getPageSetup()->setFitToWidth(1);
         // 設定列印時不限制高度，允許高度超過一頁（即只按寬度縮放）
         $worksheet->getPageSetup()->setFitToHeight(0);
+        // 設定頁腳顯示頁面編號 (例如：第 1 頁，共 3 頁)
+        $worksheet->getHeaderFooter()->setEvenFooter('&C第 &P 頁，共 &N 頁');
+        $worksheet->getHeaderFooter()->setOddFooter('&C第 &P 頁，共 &N 頁');
 
         // 設定辦公室名稱
         $site = $params['site'];
