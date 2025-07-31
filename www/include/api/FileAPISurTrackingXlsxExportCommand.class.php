@@ -162,7 +162,7 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
         // 產製時間在 J1 欄位
         $worksheet->getStyle('J1')->getAlignment()->setWrapText(false);
         $worksheet->getStyle('J1')->getFont()->setName('標楷體'); // 設定字體
-        $worksheet->getStyle('J1')->getFont()->setSize(12); // 設定字體大小
+        $worksheet->getStyle('J1')->getFont()->setSize(14); // 設定字體大小
         $worksheet->getStyle('J1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER); // 垂直置中
         $worksheet->setCellValueExplicit(
             'J1', // 產製時間在 J1 欄位
@@ -176,7 +176,7 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
         $range = $range_head.$data_end_row;
         $worksheet->getStyle($range)->getAlignment()->setWrapText(true);
         // $worksheet->getStyle('$range)->getFont()->setName('微軟正黑體'); // 設定字體
-        $worksheet->getStyle($range)->getFont()->setSize(12); // 設定字體大小
+        $worksheet->getStyle($range)->getFont()->setSize(14); // 設定字體大小
         $worksheet->getStyle($range)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER); // 垂直置中
 
         /** JSON 資料範例
@@ -189,7 +189,7 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
          * 逾期日期: '114-08-01',
          * 測量員: '江ＯＯ',,
          * 處理情形: { // 這裡假設是一個包含布林值的物件
-         *  複核中": true,
+         *  陳核中": true,
          *  函詢他機關: false,
          *  召開會議會勘: false,
          *  延期複丈: false,
@@ -216,7 +216,7 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
             $processingStatusData = $row['處理情形'] ?? []; // 確保存在
             
             // 使用 Unicode 核選框符號: ☐ (未選), ☑ (已選)
-            $processingStatusText .= ($processingStatusData['複核中'] ?? false ? '☑' : '☐') . '複核中       ';
+            $processingStatusText .= ($processingStatusData['陳核中'] ?? false ? '☑' : '☐') . '陳核中       ';
             $processingStatusText .= ($processingStatusData['函詢他機關'] ?? false ? '☑' : '☐') . '函詢他機關' . "\n";
             $processingStatusText .= ($processingStatusData['召開會議會勘'] ?? false ? '☑' : '☐') . '召開會議會勘 ';
             $processingStatusText .= ($processingStatusData['延期複丈'] ?? false ? '☑' : '☐') . '延期複丈' . "\n";
