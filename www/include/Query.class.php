@@ -1684,7 +1684,7 @@ class Query {
 		return $this->db_wrapper->getDB()->fetchAll();
 	}
 	/**
-	 * 取得曾經取消請示案件
+	 * 取得曾經請示(取消)案件
 	 */
 	public function getCancelRM30ECase() {
 		if (!$this->db_wrapper->reachable()) {

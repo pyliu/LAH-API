@@ -204,13 +204,13 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_cancel_ask_case":
-		Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查詢取消請示案件請求");
+		Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查詢請示(取消)案件請求");
 		$begin = $_POST['begin'];
 		$end = $_POST['end'];
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadAskCase($begin, $end) : $prefetch->getAskCase($begin, $end);
 		if (empty($rows)) {
-			Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查無曾經取消請示案件資料");
-			echoJSONResponse('查無曾經取消請示案件');
+			Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查無曾經請示(取消)案件資料");
+			echoJSONResponse('查無曾經請示(取消)案件');
 		} else {
 			$total = count($rows);
 			Logger::getInstance()->info("XHR [reg_cancel_ask_case] 查詢成功($total, $begin ~ $end)");
@@ -219,7 +219,7 @@ switch ($_POST["type"]) {
 				$data = new RegCaseData($row);
 				$baked[] = $data->getBakedData();
 			}
-			echoJSONResponse("查詢成功，找到 $total 筆曾經取消請示案件資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
+			echoJSONResponse("查詢成功，找到 $total 筆曾經請示(取消)案件資料。", STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS, array(
 				"data_count" => $total,
 				"baked" => $baked,
 				'cache_remaining_time' => $prefetch->getAskCaseCacheRemainingTime($begin, $end)
@@ -227,7 +227,7 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_trust_case":
-		Logger::getInstance()->info("XHR [reg_trust_case] 查詢取消請示案件請求");
+		Logger::getInstance()->info("XHR [reg_trust_case] 查詢請示(取消)案件請求");
 		if ($_POST['query'] === 'E') {
 			// 建物所有權部資料
 			$rows = $_POST['reload'] === 'true' ? $prefetch->reloadTrustRebow($_POST['year']) : $prefetch->getTrustRebow($_POST['year']);

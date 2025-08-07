@@ -365,13 +365,13 @@ class Prefetch {
         return $this->getCache()->get(self::KEYS['ALMOST_OVERDUE']);
     }
     /**
-     * 取消請示案件快取剩餘時間
+     * 請示(取消)案件快取剩餘時間
      */
     public function getAskCaseCacheRemainingTime($begin, $end) {
         return $this->getRemainingCacheTimeByKey(self::KEYS['ASK']."_${begin}_${end}");
     }
     /**
-     * 強制重新讀取取消請示案件
+     * 強制重新讀取請示(取消)案件
      */
     public function reloadAskCase($begin, $end) {
         $this->getCache()->del(self::KEYS['ASK']."_${begin}_${end}");
