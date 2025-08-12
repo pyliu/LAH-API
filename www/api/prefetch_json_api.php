@@ -46,7 +46,7 @@ $prefetch = new Prefetch();
 switch ($_POST["type"]) {
 	case "overdue_reg_cases_filtered":
 		Logger::getInstance()->info("XHR [overdue_reg_cases_filtered] 逾期案件查詢請求");
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadNotCloseCase() : $prefetch->getNotCloseCase();
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadOverdueCaseIn15Days() : $prefetch->getOverdueCaseIn15Days();
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [overdue_reg_cases_filtered] 查無逾期資料");
 			echoJSONResponse("查無逾期資料", STATUS_CODE::SUCCESS_WITH_NO_RECORD, array(
