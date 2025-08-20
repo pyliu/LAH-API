@@ -473,7 +473,6 @@ switch ($_POST["type"]) {
 			Logger::getInstance()->info("XHR [reg_fix_case] 查無 ${message} 資料");
 			echoJSONResponse("查無 ${message} 資料");
 		} else {
-			require_once(INC_DIR.DIRECTORY_SEPARATOR.'SQLiteRegFixCaseStore.class.php');
 			$sqlite_db = new SQLiteRegFixCaseStore();
 
 			$total = count($rows);

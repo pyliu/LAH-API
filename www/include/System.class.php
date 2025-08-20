@@ -624,6 +624,15 @@ class System {
         return strtoupper($this->get('SITE'));
     }
 
+    public function getSiteAlphabet() {
+        return $this->getSiteCode()[1];
+    }
+
+    public function getSiteNumber() {
+        $aplhabet = $this->getSiteAlphabet();
+        return ord($aplhabet) - ord('A');
+    }
+
     public function getSiteName($code) {
         switch ($code) {
             case "HA": return "桃園";
