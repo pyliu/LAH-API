@@ -906,7 +906,7 @@ class WatchDog {
                 // 只要符合上述任一條件即可
                 $isCaseMatched = ($match_by_alphabet || $match_by_number || $match_by_ending);
                 // 【修改】除錯輸出，檢查是否「已逾期」
-                $isOverdue = ($deadline_date && $deadline_date < $today) ? '是' : '否';
+                // $isOverdue = ($deadline_date && $deadline_date < $today) ? '是' : '否';
                 // echo "案件 ID: {$id} | 修正期限: " . ($deadline_date ?? '無') . " | 是否逾期: {$isOverdue} | 符合編號規則: " . ($isCaseMatched ? '是' : '否') . "\n";
                 // 4. 核心判斷邏輯
                 // 條件一: $isCaseMatched 必須為 true
@@ -922,7 +922,14 @@ class WatchDog {
             if ($overdueCount > 0) {
                 $host_ip = getLocalhostIP();
                 $url = "http://".$host_ip.":8080/reg/reg-fix-case";
-                $message = "##### 📢 ".$today." 補正到期案件通知\r\n***\r\n⚠ 系統今日找到 {$overdueCount} 件補正到期可駁回案件，請進系統查看案件資料。\r\n\r\n👉 $url";
+                // 【新增】組合案件 ID 列表
+                $caseIdList = "";
+                foreach ($overdueCases as $case) {
+                    $caseIdList .= "- ".$case['RM01'].'-'.$case['RM02'].'-'.$case['RM03']." ".$case['初審人員']."\r\n";
+                }
+                // 【修改】準備通知訊息內容，加入案件 ID 列表
+                $message = "##### 📢 ".$today." 補正到期案件通知\r\n***\r\n⚠ 系統今日找到 {$overdueCount} 件補正到期可駁回案件，請進系統查看案件資料。\r\n\r\n**案件清單：**\r\n{$caseIdList}\r\n👉 $url";
+    
                 $notification = new Notification();
                 $notification->removeOutdatedMessageByTitle('reg', '補正到期案件通知');
                 // send to reg chat channel
