@@ -860,7 +860,7 @@ class WatchDog {
         }
     }
 
-    private function checkFixCaseNotification() {
+    public function checkFixCaseNotification() {
         if ($this->isOnTime($this->checking_schedule["once_a_day"])) {
             // 1. 初始化物件
             $prefetch = new Prefetch();
@@ -870,7 +870,7 @@ class WatchDog {
             $total = count($rows);
             $overdueCases = []; // 【修改】用來存放篩選後「已逾期」的案件
             $overdueCount = 0;   // 【修改】計算已逾期案件的數量
-            $today = date('Y-m-d');
+            $today = date('Ymd');
             // 在迴圈外先取得系統設定，避免重複呼叫
             $siteNumber = System::getInstance()->getSiteNumber();
             $siteAlphabet = System::getInstance()->getSiteAlphabet();
@@ -888,6 +888,9 @@ class WatchDog {
                 $record = $result[0] ?? [];
                 $this_baked['REG_FIX_CASE_RECORD'] = $record;
                 $deadline_date = $record['fix_deadline_date'] ?? null;
+                if (!empty($deadline_date)) {
+                    $deadline_date = date('Ymd', strtotime($deadline_date));
+                }
                 // 【重構】將複雜的判斷式拆分成多個清晰的條件，增加可讀性
                 $rm02 = $row['RM02'] ?? ''; // 確保 RM02 存在
                 $rm99 = $row['RM99'] ?? ''; // 確保 RM99 存在

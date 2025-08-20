@@ -481,7 +481,6 @@ switch ($_POST["type"]) {
 				$data = new RegCaseData($row);
 				$this_baked = $data->getBakedData();
 
-				
 				$id = $this_baked['ID'];
 				// this query goes to SQLite DB
 				$result = $sqlite_db->getRegFixCaseRecord($id);
