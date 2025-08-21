@@ -221,11 +221,11 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
             $processingStatusData = $row['處理情形'] ?? []; // 確保存在
             
             // 使用 Unicode 核選框符號: ☐ (未選), ☑ (已選)
-            $processingStatusText .= ($processingStatusData['陳核中'] ?? false ? '☑' : '☐') . '陳核中       ';
-            $processingStatusText .= ($processingStatusData['函詢他機關'] ?? false ? '☑' : '☐') . '函詢他機關' . "\n";
-            $processingStatusText .= ($processingStatusData['召開會議會勘'] ?? false ? '☑' : '☐') . '召開會議會勘 ';
-            $processingStatusText .= ($processingStatusData['延期複丈'] ?? false ? '☑' : '☐') . '延期複丈' . "\n";
-            $processingStatusText .= ($processingStatusData['補正、駁回'] ?? false ? '☑' : '☐') . '補正、駁回'; // 最後一項不加換行
+            // $processingStatusText .= ($processingStatusData['陳核中'] ?? false ? '☑' : '☐') . '陳核中       ';
+            // $processingStatusText .= ($processingStatusData['函詢他機關'] ?? false ? '☑' : '☐') . '函詢他機關' . "\n";
+            // $processingStatusText .= ($processingStatusData['召開會議會勘'] ?? false ? '☑' : '☐') . '召開會議會勘 ';
+            // $processingStatusText .= ($processingStatusData['延期複丈'] ?? false ? '☑' : '☐') . '延期複丈' . "\n";
+            // $processingStatusText .= ($processingStatusData['補正、駁回'] ?? false ? '☑' : '☐') . '補正、駁回'; // 最後一項不加換行
 
             $worksheet->setCellValueExplicit(
                 'I'.$row_num, // 假設 I 欄是「處理情形」
