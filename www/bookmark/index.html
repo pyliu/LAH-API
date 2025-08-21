@@ -12,906 +12,853 @@
     <meta http-equiv="Expires" content="0">
 
     <!-- 外部函式庫 -->
+    <!-- 確保 lodash.min.js 和 marked.min.js 檔案與 index.html 在同一個目錄 -->
+    <script src="lodash.min.js"></script>
+    <script src="marked.min.js"></script>
     <script src="vue.global.prod.js"></script>
     <script src="lucide.min.js"></script>
     <link href="tailwind.min.css" rel="stylesheet">
 
-    <!-- 自訂樣式 -->
+    <!-- 自訂樣式 (已修正主題切換) -->
     <style>
-        /* CSS 變數定義，用於淺色模式下的預設值 */
         :root {
             --bootstrap-primary: #0d6efd;
             --bootstrap-primary-hover: #0b5ed7;
             --bootstrap-primary-active: #0a58ca;
-            --highlight-bg-light: #fffbe0; /* 淺色模式下的淡黃色背景 */
-            --highlight-border-light: #fcd34d; /* 淺色模式下的黃色邊框 */
-            --watermark-bg-light: rgba(252, 211, 77, 0.8); /* 浮水印背景色 (淺色模式) */
-            --watermark-text-light: #6b4d00; /* 浮水印文字色 (淺色模式) */
-
-            /* 淺色模式下的通用顏色 */
-            --body-bg: #f3f4f6;
-            --body-text: #1f2937;
-            --sidebar-bg: #e9ecef;
-            --sidebar-text: #212529;
-            --sidebar-header-text: #212529;
-            --sidebar-time-h2-text: #212529;
-            --sidebar-time-h2-border: #d1d5db;
-            --sidebar-time-display-bg: #f9fafb;
-            --sidebar-time-display-text: #374151;
-            --main-bg: #f3f4f6;
-            --current-category-title-text: #1f2937;
+            
+            /* 預設為淺色主題 */
+            --highlight-bg: #fffbe0;
+            --highlight-border: #fcd34d;
+            --watermark-bg: rgba(252, 211, 77, 0.1);
+            --watermark-text: rgba(180, 83, 9, 0.2);
+            --body-bg: #f8f9fa;
+            --body-color: #212529;
+            --sidebar-bg: #ffffff;
+            --sidebar-border: #dee2e6;
+            --sidebar-link-color: #495057;
+            --sidebar-link-hover-bg: #e9ecef;
+            --sidebar-link-active-bg: var(--bootstrap-primary);
+            --sidebar-link-active-color: #ffffff;
             --bookmark-card-bg: #ffffff;
-            --card-title-text: #1f2937;
-            --card-description-text: #4b5563;
-            --sidebar-toggle-button-color: #374151;
-            --sidebar-toggle-button-hover-bg: #e5e7eb;
+            --bookmark-card-border: #dee2e6;
+            --bookmark-card-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+            --modal-bg: rgba(0, 0, 0, 0.5);
+            --modal-content-bg: #ffffff;
         }
 
-        /* 深色模式下的 CSS 變數定義，覆蓋淺色模式的預設值 */
-        html.dark {
-            --bootstrap-primary-dark-bg: #0d6efd; /* 確保深色模式下主要顏色一致 */
-            --bootstrap-primary-dark-hover-bg: #3c87fd;
-            --bootstrap-primary-dark-active-bg: #0b5ed7;
-            --highlight-bg-dark: #332a00; /* 深色模式下的淡黃色背景 */
-            --highlight-border-dark: #fcd34d; /* 深色模式下的黃色邊框 */
-            --watermark-bg-dark: rgba(252, 211, 77, 0.4); /* 浮水印背景色 (深色模式) */
-            --watermark-text-dark: #fcd34d; /* 浮水印文字色 (深色模式) */
-
-            /* 深色模式下的通用顏色 */
-            --body-bg: #0f172a;
-            --body-text: #cbd5e1;
-            --sidebar-bg: #1e293b;
-            --sidebar-text: #e2e8f0;
-            --sidebar-header-text: #f1f5f9;
-            --sidebar-time-h2-text: #e2e8f0;
-            --sidebar-time-h2-border: #374151;
-            --sidebar-time-display-bg: #374151;
-            --sidebar-time-display-text: #9ca3af;
-            --main-bg: #0f172a;
-            --current-category-title-text: #f1f5f9;
-            --bookmark-card-bg: #1e293b;
-            --card-title-text: #f1f5f9;
-            --card-description-text: #94a3b8;
-            --sidebar-toggle-button-color: #94a3b8;
-            --sidebar-toggle-button-hover-bg: #334155;
+        [data-theme="dark"] {
+            /* 深色主題變數覆寫 */
+            --highlight-bg: #3a372c;
+            --highlight-border: #a16207;
+            --watermark-bg: rgba(252, 211, 77, 0.05);
+            --watermark-text: rgba(252, 211, 77, 0.1);
+            --body-bg: #121212;
+            --body-color: #e0e0e0;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-border: #333;
+            --sidebar-link-color: #adb5bd;
+            --sidebar-link-hover-bg: #343a40;
+            --bookmark-card-bg: #1e1e1e;
+            --bookmark-card-border: #333;
+            --bookmark-card-shadow: 0 .125rem .25rem rgba(0, 0, 0, .15);
+            --modal-bg: rgba(0, 0, 0, 0.7);
+            --modal-content-bg: #2d2d2d;
         }
 
-        /* 全局樣式 - 使用 CSS 變數並強制優先級 */
         body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            background-color: var(--body-bg) !important;
-            color: var(--body-text) !important;
+            background-color: var(--body-bg);
+            color: var(--body-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        body.modal-open {
+            overflow: hidden;
         }
 
-        body.modal-open { overflow: hidden; }
-
-        /* 滾動條樣式 */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--body-bg) !important; border-radius: 10px; } /* 滾動條軌道顏色跟隨主題 */
-        ::-webkit-scrollbar-thumb { background: #9ca3af !important; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6b7280 !important; }
-        html.dark ::-webkit-scrollbar-thumb { background: #6b7280 !important; }
-        html.dark ::-webkit-scrollbar-thumb:hover { background: #4b5563 !important; }
-
-
-        /* 側邊欄樣式 - 使用 CSS 變數並強制優先級 */
-        #sidebar { 
-            transition: width 0.3s ease-in-out, padding 0.3s ease-in-out; 
-            background-color: var(--sidebar-bg) !important;
-            color: var(--sidebar-text) !important;
+        #sidebar {
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--sidebar-border);
         }
 
-        #sidebar-header .font-semibold { color: var(--sidebar-header-text) !important; }
-        #sidebar-header .font-semibold > i[data-lucide] + span { margin-left: 0.5rem; }
-
-        .sidebar-item {
-            display: flex; align-items: center; justify-content: flex-start;
-            padding: 0.625rem 1rem; border-radius: 0.375rem;
-            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, padding 0.3s ease-in-out;
-            width: 100%; cursor: pointer; overflow: hidden;
-            color: var(--sidebar-text) !important;
+        #sidebar a {
+            color: var(--sidebar-link-color);
         }
 
-        .sidebar-item:hover { background-color: var(--bootstrap-primary-hover) !important; color: #ffffff !important; }
-        html.dark .sidebar-item:hover { background-color: var(--bootstrap-primary-dark-hover-bg) !important; color: #f8fafc !important; }
-
-        .sidebar-item.active { background-color: var(--bootstrap-primary) !important; color: #ffffff !important; }
-        html.dark .sidebar-item.active { background-color: var(--bootstrap-primary-dark-active-bg) !important; color: #f8fafc !important; }
-
-        #sidebar.collapsed .sidebar-item { justify-content: center; padding: 0.625rem 0.5rem; }
-        #sidebar.collapsed #sidebar-header .font-semibold > span,
-        #sidebar.collapsed .sidebar-item > span,
-        #sidebar.collapsed #current-time-section h2,
-        #sidebar.collapsed #current-time-section div { display: none; }
-        #sidebar.collapsed #current-time-section { padding-top: 0; padding-bottom: 0; margin-top:0; margin-bottom:0; }
-        #sidebar.collapsed #sidebar-header .font-semibold { justify-content: center; }
-        #theme-toggle-button { margin-top: auto; }
-
-        /* 目前時間區塊樣式 - 使用 CSS 變數並強制優先級 */
-        #current-time-section h2 { 
-            color: var(--sidebar-time-h2-text) !important; 
-            border-color: var(--sidebar-time-h2-border) !important; 
+        #sidebar a:hover {
+            background-color: var(--sidebar-link-hover-bg);
         }
 
-        #current-time-display { 
-            background-color: var(--sidebar-time-display-bg) !important; 
-            color: var(--sidebar-time-display-text) !important; 
+        #sidebar a.active {
+            background-color: var(--sidebar-link-active-bg);
+            color: var(--sidebar-link-active-color);
         }
 
-        /* 主要內容區塊樣式 - 使用 CSS 變數並強制優先級 */
-        main { 
-            background-color: var(--main-bg) !important; 
+        #bookmarks-content .bookmark-card-styled {
+            background-color: var(--bookmark-card-bg);
+            border: 1px solid var(--bookmark-card-border);
+            box-shadow: var(--bookmark-card-shadow);
         }
 
-        #current-category-title { color: var(--current-category-title-text) !important; }
-        #current-category-title > i[data-lucide] { color: var(--bootstrap-primary) !important; }
-        html.dark #current-category-title > i[data-lucide] { color: var(--bootstrap-primary-dark-hover-bg) !important; }
-
-        /* 書籤卡片樣式 - 使用 CSS 變數並強制優先級 */
-        .bookmark-card-styled {
-            display: block; overflow: hidden;
-            transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
-            text-decoration: none;
-            background-color: var(--bookmark-card-bg) !important;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            color: inherit; /* 保持繼承，由父層 body 控制 */
-            position: relative; /* 為了浮水印的絕對定位 */
+        #bookmarks-content .bookmark-card-styled.highlight {
+            background-color: var(--highlight-bg);
+            border-color: var(--highlight-border);
         }
 
-        .bookmark-card-styled:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        html.dark .bookmark-card-styled:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.7), 0 4px 6px -2px rgba(0,0,0,0.6); }
-
-        .card-content-wrapper { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; height: 100%; }
-        .card-title span { color: var(--card-title-text) !important; }
-        .card-title + p { color: var(--card-description-text) !important; }
-        .card-title > i[data-lucide] { color: var(--bootstrap-primary) !important; }
-        html.dark .card-title > i[data-lucide] { color: var(--bootstrap-primary-dark-hover-bg) !important; }
-
-        /* 動作按鈕樣式 - 使用 CSS 變數並強制優先級 */
-        .action-button-visual {
-            display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;
-            background-color: var(--bootstrap-primary) !important; 
-            color: #ffffff !important;
-            padding-top: 0.5rem; padding-bottom: 0.5rem; padding-left: 1rem; padding-right: 1rem;
+        #bookmarks-content .bookmark-card-styled.recent::before {
+            content: 'RECENT';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--watermark-text);
+            background-color: var(--watermark-bg);
+            padding: 1rem 2rem;
             border-radius: 0.5rem;
-            transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            transition-duration: 300ms;
-            text-align: center;
-        }
-        html.dark .action-button-visual { background-color: var(--bootstrap-primary-dark-bg) !important; color: #f8fafc !important; }
-        .bookmark-card-styled:hover .action-button-visual { background-color: var(--bootstrap-primary-hover) !important; }
-        html.dark .bookmark-card-styled:hover .action-button-visual { background-color: var(--bootstrap-primary-dark-hover-bg) !important; }
-
-        /* 側邊欄開關按鈕樣式 - 使用 CSS 變數並強制優先級 */
-        #sidebar-toggle-button { color: var(--sidebar-toggle-button-color) !important; }
-        #sidebar-toggle-button:hover { background-color: var(--sidebar-toggle-button-hover-bg) !important; }
-
-        /* Lucide 圖示通用樣式 */
-        i[data-lucide] { display: inline-block; vertical-align: -0.2em; line-height: 1; flex-shrink: 0; }
-        i[data-lucide]:not(.card-title > i[data-lucide]) { width: 1.25em; height: 1.25em; }
-        i[data-lucide].card-title > i[data-lucide] { width: 2.1em; height: 2.1em; } /* 確保卡片標題圖示大小 */
-        #current-category-title > i[data-lucide] { width: 1em; height: 1em; }
-
-        /* 書籤內容網格佈局 */
-        #bookmarks-content { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 1.5rem; 
-            position: relative; /* 確保絕對定位的子元素相對於此容器 */
-        }
-
-        /* PDF 懸浮預覽樣式 */
-        #pdf-popover {
             pointer-events: none;
-            transition: opacity 0.2s ease-in-out;
-            width: 297px;
-            height: 415px;
+            z-index: 0;
+            opacity: 0.5;
+        }
+        
+        .modal-backdrop {
+            background-color: var(--modal-bg);
         }
 
-        /* --------------------------------------------------------------------- */
-        /* 統一的淡黃色醒目提示樣式 (前3個最常點擊的卡片) */
-        .bookmark-card-styled.highlighted {
-            background-color: var(--highlight-bg-light) !important; 
-            border: 2px solid var(--highlight-border-light) !important; 
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            transform: translateY(-2px); /* 輕微上浮效果 */
+        .modal-content {
+            background-color: var(--modal-content-bg);
         }
 
-        html.dark .bookmark-card-styled.highlighted {
-            background-color: var(--highlight-bg-dark) !important; 
-            border: 2px solid var(--highlight-border-dark) !important; 
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.7), 0 4px 6px -2px rgba(0,0,0,0.6);
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease;
         }
-
-        /* 浮水印樣式 */
-        .last-accessed-watermark {
-            position: absolute;
-            bottom: 0.75rem; /* 距離底部 */
-            right: 0.75rem; /* 距離右側 */
-            background-color: var(--watermark-bg-light);
-            color: var(--watermark-text-light);
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            font-size: 0.6rem; /* 12px */
-            font-weight: 600;
-            z-index: 10;
-            white-space: nowrap; /* 防止文字換行 */
-            opacity: 0.9;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
-
-        html.dark .last-accessed-watermark {
-            background-color: var(--watermark-bg-dark);
-            color: var(--watermark-text-dark);
-        }
-        /* --------------------------------------------------------------------- */
-
-        /* 過渡效果的 CSS 類別 */
-        .list-enter-active,
-        .list-leave-active {
-            /* 增加過渡時間到 1.5 秒，使用彈跳的 cubic-bezier 函數 */
-            transition: all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
-        }
-        .list-enter-from {
+        .fade-enter-from, .fade-leave-to {
             opacity: 0;
-            /* 讓進入的卡片從更下方且縮小的狀態進入 */
-            transform: scale(0.5) translateY(200px); 
         }
-        .list-leave-to {
+
+        .list-enter-active, .list-leave-active {
+            transition: all 0.5s ease;
+        }
+        .list-enter-from, .list-leave-to {
             opacity: 0;
-            /* 讓離開的卡片縮小並向上方離開，使其更明顯 */
-            transform: scale(0.5) translateY(-200px); 
+            transform: translateY(30px);
         }
-        /* 確保離開的元素不會影響佈局，並在最上層 */
-        .list-leave-active {
-            position: absolute;
-            z-index: 10; /* 確保離開的元素在最上層 */
-            /* 由於 grid 佈局的特性，當元素被設定為 absolute 時，其佔用的空間會立即被釋放。
-               這使得 translateY 的動畫起點不明顯。
-               儘管 Vue 的 TransitionGroup 會盡力處理，但 grid 的即時重排可能會覆蓋視覺效果。
-               透過大幅增加動畫時間和位移，希望能讓效果更易於察覺。
-            */
-        }
-        /* 確保在過渡期間，網格佈局的元素能夠平滑移動 */
         .list-move {
-            /* 增加移動過渡時間，並使用相同的緩動函數，保持一致性 */
-            transition: transform 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+            transition: transform 0.5s ease;
         }
     </style>
 </head>
 
-<body>
+<body class="font-sans antialiased">
     <div id="app" class="flex h-screen overflow-hidden">
-        <!-- 側邊欄 -->
-        <aside id="sidebar" class="p-4 flex flex-col overflow-y-auto shadow-lg z-20" :class="[isSidebarCollapsed ? 'w-16 collapsed' : 'w-48']">
-            <!-- 標題 -->
-            <div id="sidebar-header" class="mb-6">
-                <div class="text-2xl font-semibold flex items-center">
-                    <i data-lucide="link" class="mr-2"></i>
-                    <span v-show="!isSidebarCollapsed">書籤索引</span>
+        <!-- Sidebar -->
+        <aside id="sidebar" :class="['flex-shrink-0 transition-all duration-300', isSidebarCollapsed ? 'w-16' : 'w-48']">
+            <div class="flex flex-col h-full">
+                <!-- Logo -->
+                <div class="p-4 border-b" :style="{ borderColor: 'var(--sidebar-border)' }">
+                    <div class="flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
+                        <h1 v-show="!isSidebarCollapsed" class="ml-2 text-xl font-semibold whitespace-nowrap">書籤索引</h1>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="flex-1 p-2 space-y-1 overflow-y-auto">
+                    <a v-for="category in bookmarks" :key="category.id" href="#"
+                       @click.prevent="selectCategory(category.id)"
+                       :class="['flex items-center p-2 rounded-md transition-colors', { 'active': currentCategoryId === category.id, 'justify-center': isSidebarCollapsed }]">
+                        <i :data-lucide="category.icon" class="w-5 h-5"></i>
+                        <span v-show="!isSidebarCollapsed" class="ml-3">{{ category.category }}</span>
+                    </a>
+                </nav>
+
+                <!-- Footer Controls and Time -->
+                <div class="p-2 border-t" :style="{ borderColor: 'var(--sidebar-border)' }">
+                    <!-- Control Buttons -->
+                    <button @click="toggleTheme" class="w-full flex items-center p-2 rounded-md" :class="{'justify-center': isSidebarCollapsed}" :aria-label="theme === 'dark' ? '切換為淺色模式' : '切換為深色模式'">
+                        <i :data-lucide="theme === 'dark' ? 'sun' : 'moon'" class="w-5 h-5"></i>
+                        <span v-show="!isSidebarCollapsed" class="ml-3">切換主題</span>
+                    </button>
+                    <button @click="toggleFontSize" class="w-full flex items-center p-2 rounded-md" :class="{'justify-center': isSidebarCollapsed}" aria-label="調整字體大小">
+                        <i data-lucide="text" class="w-5 h-5"></i>
+                        <span v-show="!isSidebarCollapsed" class="ml-3">調整字體 ({{ fontSizeLabel }})</span>
+                    </button>
+                    <button @click="toggleSidebar" class="w-full flex items-center p-2 rounded-md" :class="{'justify-center': isSidebarCollapsed}" :aria-label="isSidebarCollapsed ? '展開側邊欄' : '收合側邊欄'">
+                        <i :data-lucide="isSidebarCollapsed ? 'panel-right-open' : 'panel-left-close'" class="w-5 h-5"></i>
+                        <span v-show="!isSidebarCollapsed" class="ml-3">收合側邊欄</span>
+                    </button>
+                    <!-- Time Display -->
+                    <div v-show="!isSidebarCollapsed" class="my-2 text-center">
+                        <p class="text-lg font-medium">{{ currentTime }}</p>
+                        <p class="text-xs text-gray-500">{{ currentDate }}</p>
+                    </div>
                 </div>
             </div>
-
-            <!-- 分類連結 -->
-            <div id="sidebar-links" class="space-y-2 flex-grow">
-                <a v-for="cat in bookmarks" :key="cat.id" :href="cat.isDirectLink ? cat.href : '#'" :title="cat.category" :target="cat.isDirectLink ? '_blank' : null" :rel="cat.isDirectLink ? 'noopener noreferrer' : null" class="sidebar-item" :class="{ 'active': cat.id === currentCategoryId }" @click.prevent="!cat.isDirectLink && selectCategory(cat.id)">
-                    <i :data-lucide="cat.icon" class="mr-2"></i> <!-- 新增間隔 -->
-                    <span v-show="!isSidebarCollapsed">{{ cat.category }}</span>
-                </a>
-            </div>
-            
-            <!-- 目前時間 -->
-            <section id="current-time-section" class="mt-6 mb-2" v-show="!isSidebarCollapsed">
-                <h2 class="text-lg font-semibold mb-2 pb-1 border-b">目前時間</h2>
-                <div id="current-time-display" class="text-sm p-3 rounded-md shadow-sm">
-                    <p class="mb-1">日期：{{ currentDate }}</p>
-                    <p>時間：{{ currentTime }}</p>
-                </div>
-            </section>
-
-            <!-- 主題切換按鈕 -->
-            <button id="theme-toggle-button" class="sidebar-item mt-4" title="切換顯示主題" @click="toggleTheme">
-                <!-- 添加 :key="theme" 確保圖示在主題切換時重新渲染 -->
-                <i :data-lucide="theme === 'dark' ? 'moon' : 'sun'" :key="theme" class="mr-2"></i> <!-- 新增間隔 -->
-                <span v-show="!isSidebarCollapsed">切換主題</span>
-            </button>
         </aside>
 
-        <!-- 主要內容區 -->
-        <main :key="mainContentKey" class="flex-1 p-4 overflow-y-auto">
-            <div class="flex items-center mb-6">
-                <!-- 側邊欄開關 -->
-                <button id="sidebar-toggle-button" class="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 z-30 mr-3" title="開啟/收合側邊欄" @click="toggleSidebar">
-                    <span class="text-xl font-bold w-6 text-center">{{ isSidebarCollapsed ? '☰' : '◀' }}</span>
-                </button>
-                <!-- 目前分類標題 -->
-                <h1 id="current-category-title" class="text-3xl font-bold flex items-center" v-if="currentCategory">
-                    <span>{{ currentCategory.category }}</span>
-                    <!-- <i :data-lucide="currentCategory.icon" class="ml-3"></i> -->
-                </h1>
-            </div>
-
-            <!-- 書籤卡片內容 - 使用 TransitionGroup 包裹 -->
-            <TransitionGroup name="list" tag="div" id="bookmarks-content">
-                <a v-for="link in currentCategoryLinks" :key="link.href" :href="link.href" :title="link.href" :target="getLinkTarget(link)" :rel="getLinkTarget(link) === '_blank' ? 'noopener noreferrer' : null" :download="isDownloadable(link) ? '' : null" @click="handleLinkClick($event, link)" @mouseenter="handlePdfHover($event, link)" @mouseleave="hidePdfPopover" class="bookmark-card-styled hover:shadow-2xl dark:hover:shadow-lg rounded-xl" :class="{ 'highlighted': link.isHighlighted }">
-                    <!-- 浮水印：上次存取時間 -->
-                    <div v-if="link.isHighlighted && link.lastAccessedTimeFormatted" class="last-accessed-watermark">
-                        上次存取: {{ link.lastAccessedTimeFormatted }}
-                    </div>
-                    <div class="card-content-wrapper">
-                        <h5 class="text-xl font-semibold mb-2 flex items-center card-title">
-                            <i v-if="link.icon" :data-lucide="link.icon" class="mr-2"></i>
-                            <span>{{ link.title }}</span>
-                        </h5>
-                        <p class="text-sm mb-4 flex-grow" v-html="markdownToHtml(link.description || '點擊以繼續。')"></p>
-                        <div class="action-button-visual mt-auto font-medium">
-                            <span class="mr-2">{{ getButtonText(link) }}</span> <!-- 新增間隔 -->
-                            <i :data-lucide="getButtonIcon(link)"></i>
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="flex items-center justify-between p-4 border-b" :style="{ borderColor: 'var(--sidebar-border)' }">
+                <h2 class="text-2xl font-bold">{{ currentCategory.category }}</h2>
+            </header>
+            <div id="bookmarks-content" class="flex-1 p-4 overflow-y-auto">
+                <transition-group name="list" tag="div" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+                    <div v-for="link in currentCategoryLinks" :key="link.id"
+                         class="bookmark-card-styled relative rounded-lg p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden"
+                         :class="{ 'highlight': (clickCounts[link.id] || 0) > 10, 'recent': recentLinks.includes(link.id) }">
+                        
+                        <a :href="link.href" :target="getLinkTarget(link.href)" @click="handleLinkClick(link)"
+                           @mouseover="handlePdfHover($event, link.href)" @mouseleave="hidePdfPopover"
+                           class="flex flex-col items-center justify-center w-full h-full z-10">
+                            <i :data-lucide="link.icon || 'globe'" class="w-10 h-10 mb-2 text-blue-500"></i>
+                            <h3 class="font-semibold">{{ link.title }}</h3>
+                            <p v-if="link.description" class="text-xs text-gray-500 mt-1" v-html="markdownToHtml(link.description)"></p>
+                        </a>
+                        
+                        <div v-if="isDownloadable(link.href) || link.href.toLowerCase().endsWith('.pdf')" class="absolute bottom-2 right-2 z-20">
+                            <button @click.stop="openPdfModal(link.href)" v-if="link.href.toLowerCase().endsWith('.pdf')"
+                                    class="p-1.5 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-gray-700 dark:text-gray-200"
+                                    aria-label="預覽PDF">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
                         </div>
                     </div>
-                </a>
-            </TransitionGroup>
+                </transition-group>
+            </div>
         </main>
-
-        <!-- PDF 預覽 Modal -->
-        <div v-if="pdfModal.visible" id="pdf-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4 transition-opacity duration-300" @click.self="closePdfModal">
-            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full h-full max-w-6xl flex flex-col">
-                <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-                    <h3 id="pdf-modal-title" class="text-xl font-semibold text-gray-900 dark:text-white truncate">{{ pdfModal.title }}</h3>
-                    <button id="pdf-modal-close" @click="closePdfModal" class="text-gray-400 bg-transparent hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-                        <!-- <i data-lucide="x" class="w-6 h-6"></i> -->
-                        <span class="text-xl font-bold w-6 text-center">✖</span>
-                        <span class="sr-only">關閉視窗</span>
-                    </button>
-                </div>
-                <div class="p-2 flex-grow">
-                    <iframe id="pdf-iframe" class="w-full h-full border-0" :src="pdfModal.src"></iframe>
-                </div>
-            </div>
-        </div>
         
-        <!-- PDF 懸浮預覽 Popover -->
-        <div id="pdf-popover" ref="pdfPopover" class="hidden fixed z-[100] bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl overflow-hidden">
-            <div class="w-full h-full p-1">
-                <iframe id="pdf-popover-iframe" class="w-full h-full" :src="pdfPopoverState.src"></iframe>
+        <!-- PDF Modal -->
+        <transition name="fade">
+            <div v-if="pdfModal.visible" class="fixed inset-0 z-50 flex items-center justify-center">
+                <div class="modal-backdrop absolute inset-0" @click="closePdfModal"></div>
+                <div class="modal-content relative w-11/12 h-5/6 max-w-6xl rounded-lg shadow-xl flex flex-col">
+                    <header class="flex items-center justify-between p-4 border-b">
+                        <h3 class="font-semibold text-lg">PDF 預覽</h3>
+                        <button @click="closePdfModal" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600" aria-label="關閉">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </header>
+                    <div class="flex-1 p-2">
+                        <iframe :src="pdfModal.url" class="w-full h-full border-0" title="PDF Viewer"></iframe>
+                    </div>
+                </div>
             </div>
+        </transition>
+
+        <!-- PDF Popover -->
+        <div ref="pdfPopover" v-show="pdfPopoverState.visible" 
+             :style="{ top: pdfPopoverState.y + 'px', left: pdfPopoverState.x + 'px' }"
+             class="fixed z-50 w-80 h-96 bg-white border border-gray-300 rounded-lg shadow-lg pointer-events-none">
+            <iframe :src="pdfPopoverState.url" class="w-full h-full border-0" title="PDF Popover"></iframe>
         </div>
     </div>
 
+    <!-- 將書籤資料從 JS 邏輯中分離出來 -->
+    <script id="bookmark-data" type="application/json">
+    [
+        {
+            "category": "共通系統",
+            "id": "common",
+            "icon": "send-horizontal",
+            "links": [
+            { "title": "地所員工知識網", "href": "http://220.1.34.18:8888", "description": "提供公告、各課室專屬區、員工資訊、會議室預約 ... 等功能", "icon": "layout-dashboard" },
+            { "title": "機關內部人事業務系統", "href": "https://webitr.tycg.gov.tw/WebITR/", "description": "桃園市政府差勤系統 https://webitr.tycg.gov.tw/WebITR/", "icon": "clock" },
+            { "title": "公文整合資訊系統", "href": "https://odis.tycg.gov.tw/", "description": "市府公文系統 https://odis.tycg.gov.tw/", "icon": "book-marked" },
+            { "title": "桃園市政府公務雲", "href": "https://tycgcloud.tycg.gov.tw/", "description": "桃園市政府公務雲(內網) https://tycgcloud.tycg.gov.tw/", "icon": "cloud" },
+            { "title": "內外網檔案交換系統", "href": "http://220.1.34.26:8008/", "description": "內網電腦檔案交換至外網的交換系統，外網下載請至 http://220.2.34.17:8008/", "icon": "file-output" },
+            { "title": "工作生活點滴", "href": "http://220.1.34.18/album.asp", "description": "本所電子相簿", "icon": "image-play" },
+            { "title": "智慧控管系統", "href": "http://220.1.34.75:8080/", "description": "提供十多項登記輔助功能以及顯示最新公告及各業務小幫手連結", "icon": "monitor-smartphone" }
+            ]
+        },
+        {
+            "category": "全功能櫃台",
+            "id": "counter",
+            "icon": "concierge-bell",
+            "links": [
+            { "title": "地政系統161-跨縣市", "href": "http://220.1.34.161:9080/LandHA/", "description": "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", "icon": "server-cog" },
+            { "title": "地政系統60-桃園外掛", "href": "http://220.1.34.60:9080/LandHA/", "description": "地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/", "icon": "server" },
+            { "title": "地政系統118-工作站", "href": "http://220.1.34.118:9080/LandHA/", "description": "地政系統工作站操作專屬伺服器 http://220.1.34.118:9080/LandHA/", "icon": "server" },
+            { "title": "地政智慧控管系統", "href": "http://220.1.34.75:8080/reg/", "description": "提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/", "icon": "landmark" },
+            { "title": "地政歷史資料查詢系統", "href": "http://220.1.34.15/NLOWeb/", "description": "地政歷史資料查詢系統 http://220.1.34.15/NLOWeb/", "icon": "history" },
+            { "title": "謄本櫃員機後台管理", "href": "http://220.1.33.117/MGMT/", "description": "管理謄本櫃員機會員帳號、顯示統計資料", "icon": "settings-2" },
+            { "title": "簡訊發送紀錄查詢", "href": "http://220.1.34.75:8080/reg/sms", "description": "提供地政系統傳送地籍異動即時通等簡訊紀錄查詢 http://220.1.34.75:8080/reg/sms", "icon": "message-square-text" },
+            { "title": "登記課專屬入口網站", "href": "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/index.htm", "description": "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", "icon": "layout-list" }
+            ]
+        },
+        {
+            "category": "登記課",
+            "id": "reg",
+            "icon": "file-signature",
+            "links": [
+            { "title": "登記課專屬入口網站", "href": "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B過程/index.htm", "description": "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", "icon": "layout-list" },
+            { "title": "登記課下載區", "href": "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/download.htm", "description": "登記課自行維護之各式檔案下載專區", "icon": "download" },
+            { "title": "地政智慧控管系統", "href": "http://220.1.34.75:8080/reg/", "description": "提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/", "icon": "landmark" },
+            { "title": "地政系統161-跨縣市", "href": "http://220.1.34.161:9080/LandHA/", "description": "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", "icon": "server-cog" },
+            { "title": "地政系統60-桃園外掛", "href": "http://220.1.34.60:9080/LandHA/", "description": "地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/", "icon": "server" },
+            { "title": "地政系統205-登記課1", "href": "http://220.1.34.205:9080/LandHA/", "description": "地政系統登記課操作專屬伺服器 http://220.1.34.205:9080/LandHA/", "icon": "server" },
+            { "title": "地政系統206-登記課2", "href": "http://220.1.34.206:9080/LandHA/", "description": "地政系統登記課操作專屬伺服器 http://220.1.34.206:9080/LandHA/", "icon": "server" },
+            { "title": "地政系統162-罰鍰裁處專用", "href": "http://220.1.34.162:9080/LandHA/", "description": "地政系統給罰鍰裁處專用伺服器 http://220.1.34.162:9080/LandHA/", "icon": "server" },
+            { "title": "地政歷史資料查詢系統", "href": "http://220.1.34.15/NLOWeb/", "description": "地政歷史資料查詢系統 http://220.1.34.15/NLOWeb/", "icon": "history" },
+            { "title": "土地參考資訊檔查詢系統", "href": "http://220.1.34.213/ref/jsp/security/login.jsp", "description": "土地參考資訊檔查詢系統 http://220.1.34.213/ref/jsp/security/login.jsp", "icon": "file-search" },
+            { "title": "謄本櫃員機後台管理", "href": "http://220.1.33.117/MGMT/", "description": "管理謄本櫃員機會員帳號、顯示統計資料", "icon": "settings-2" },
+            { "title": "私法人購置住宅", "href": "http://220.1.33.80/PcQ.aspx", "description": "私法人購置住宅 http://220.1.33.80/PcQ.aspx", "icon": "building" },
+            { "title": "內政部-地籍總歸戶系統", "href": "https://landowners.land.moi.gov.tw/", "description": "個人地籍資料集中查詢平台，整合土地、建物所有權資訊 https://landowners.land.moi.gov.tw/", "icon": "folder-lock" },
+            { "title": "內政部-數位櫃台", "href": "http://220.5.61.14/", "description": "內政部數位櫃臺公務端網站 http://220.5.61.14/", "icon": "monitor-smartphone" },
+            { "title": "內政部-罕用字查詢系統", "href": "http://220.5.61.32/MOILAND/", "description": "內政部開發建置之罕用字查詢系統 http://220.5.61.32/MOILAND/", "icon": "spell-check" },
+            { "title": "內政部-戶役政電子閘門系統", "href": "https://210.241.18.131/", "description": "內政部戶役政電子閘門系統 https://210.241.18.131/", "icon": "door-open" },
+            { "title": "內政部-未辦繼承", "href": "http://220.1.33.37:8091/OIB6/Login.jsp", "description": "內政部未辦繼承登記土地及建物管理系統 http://220.1.33.37:8091/OIB6/Login.jsp", "icon": "user-x" },
+            { "title": "內政部-地籍清理", "href": "http://220.1.33.79:8080/TAZQ/index.jsp", "description": "內政部地籍清理管理系統 http://220.1.33.79:8080/TAZQ/index.jsp", "icon": "files" },
+            { "title": "內政部-線上申辦", "href": "http://220.5.61.17/cms/", "description": "內政部線上申辦系統 http://220.5.61.17/cms/", "icon": "file-plus-2" },
+            { "title": "內政部-電子產權憑證後台", "href": "https://220.5.61.73/etd-manager/", "description": "內政部開發提供電子產權憑證管理功能... https://220.5.61.73/etd-manager/", "icon": "shield-check" },
+            { "title": "內政部-抵押權線上申辦系統管理後台", "href": "https://220.5.61.73/moa-manager/", "description": "內政部抵押權線上申辦系統管理後台 ... https://220.5.61.73/moa-manager/", "icon": "file-lock-2" }
+            ]
+        },
+        {
+            "category": "測量課",
+            "id": "sur",
+            "icon": "ruler",
+            "links": [
+            { "title": "測量課專屬入口網站", "href": "http://220.1.34.18/service/section/%E6%B8%AC%E9%87%8F%E8%AA%B2/index.htm", "description": "法院判決案例、會議紀錄、法令規範、測量成果交換、應用軟體、常用表格 ...", "icon": "layout-list" },
+            { "title": "測量課下載區", "href": "http://220.1.34.18/service/section/%E6%B8%AC%E9%87%8F%E8%AA%B2/feedback.htm", "description": "測量課自行維護之各式檔案下載專區", "icon": "download" },
+            { "title": "地政系統207-測量課1", "href": "http://220.1.34.207:9080/LandHA/", "description": "地政系統測量課操作專屬伺服器 http://220.1.34.207:9080/LandHA/", "icon": "server" },
+            { "title": "地政系統62-測量課2", "href": "http://220.1.34.62:9080/LandHA/", "description": "地政系統測量課操作專屬伺服器 http://220.1.34.62:9080/LandHA/", "icon": "server" },
+            { "title": "建管圖資介接系統", "href": "http://220.1.33.43:8080/Q14Web/", "description": "建物第一次測量-使用執照資訊及竣工圖介接系統 http://220.1.33.43:8080/Q14Web/", "icon": "map" },
+            { "title": "測量逾期案件查詢", "href": "http://220.1.34.75:8080/sur/expire", "description": "測量逾期案件查詢 http://220.1.34.75:8080/sur/expire", "icon": "calendar-clock" },
+            { "title": "重測換狀通知書系統", "href": "http://220.1.34.211:9080/XDT98/", "description": "重測換狀通知書系統 http://220.1.34.211:9080/XDT98/", "icon": "file-text" }
+            ]
+        },
+        {
+            "category": "地價課",
+            "id": "val",
+            "icon": "tags",
+            "links": [
+            { "title": "地價課專屬入口網站", "href": "http://220.1.34.18/service/section/%E8%A1%8C%E6%94%BF%E8%AA%B2/fram.htm", "description": "最新消息、會議紀錄、表單下載 ...", "icon": "layout-list" },
+            { "title": "地價課下載區", "href": "http://220.1.34.18/service/section/%E8%A1%8C%E6%94%BF%E8%AA%B2/fram.htm", "description": "地價課自行維護之各式檔案下載專區", "icon": "download" },
+            { "title": "地政系統156-地價課", "href": "http://220.1.34.156:9080/LandHA/", "description": "地政系統地價課操作專屬伺服器 http://220.1.34.156:9080/LandHA/", "icon": "server" },
+            { "title": "實價登錄案件控管", "href": "http://220.1.34.75:8080/prc/realprice", "description": "實價登錄案件控管頁面 http://220.1.34.75:8080/prc/realprice", "icon": "file-check-2" },
+            { "title": "實價登錄JSON資料解析", "href": "http://220.1.34.75:8080/prc/json-converter", "description": "實價登錄JSON資料解析 http://220.1.34.75:8080/prc/json-converter", "icon": "file-json" },
+            { "title": "不動產交易成交資訊登錄機制系統", "href": "http://220.5.61.195:8080/RPM/", "description": "不動產交易成交資訊登錄機制系統 http://220.5.61.195:8080/RPM/", "icon": "database-zap" },
+            { "title": "五方區估系統", "href": "http://220.1.34.12/TomMis/", "description": "地價區段劃分及區段地價估價作業系統 http://220.1.34.12/TomMis/", "icon": "area-chart" },
+            { "title": "實價登錄清理系統", "href": "http://220.1.34.12/moi_estate/", "description": "實價登錄清理系統 http://220.1.34.12/moi_estate/", "icon": "file-scan" },
+            { "title": "實價登錄簡訊系統", "href": "http://220.1.34.221/", "description": "實價登錄簡訊系統 http://220.1.34.221/", "icon": "message-square-more" }
+            ]
+        },
+        {
+            "category": "行政課",
+            "id": "adm",
+            "icon": "briefcase",
+            "links": [
+            { "title": "行政課專屬入口網站", "href": "http://220.1.34.18/service/section/04/index.htm", "description": "最新消息、年度計畫、公文稽催 ...", "icon": "layout-list" },
+            { "title": "行政課下載區", "href": "http://220.1.34.18/service/section/04/download.htm", "description": "行政課自行維護各式下載專區", "icon": "download" },
+            { "title": "檔案知識庫", "href": "http://220.1.34.18/service/section/archives/archives.html", "description": "檔案作業規劃、檔案應用、檔案分類表、會議記錄 ...", "icon": "archive" },
+            { "title": "地政系統156-行政課", "href": "http://220.1.34.156:9080/LandHA/", "description": "地政系統行政課操作專屬伺服器 http://220.1.34.156:9080/LandHA/", "icon": "server" },
+            { "title": "非都市土地使用編定管理系統", "href": "http://220.1.34.12:8080/LandHA/", "description": "非都市土地使用編定管理系統 http://220.1.34.12:8080/LandHA/", "icon": "map-pin" },
+            { "title": "檔案應用預約申請控管系統", "href": "http://220.1.34.75:8080/adm/file", "description": "民眾檔案應用服務申請控管 http://220.1.34.75:8080/adm/file", "icon": "file-archive" },
+            { "title": "土地參考資訊檔查詢系統", "href": "http://220.1.34.213/ref/jsp/security/login.jsp", "description": "土地參考資訊檔查詢系統 http://220.1.34.213/ref/jsp/security/login.jsp", "icon": "file-search" }
+            ]
+        },
+        {
+            "category": "資訊課",
+            "id": "inf",
+            "icon": "computer",
+            "links": [
+            { "title": "資訊課專屬入口網站", "href": "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/", "description": "最新消息、表單下載、會議記錄 ...", "icon": "layout-list" },
+            { "title": "資訊課表單下載", "href": "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/download.html", "description": "提供各式資訊課申請表單下載", "icon": "download" },
+            { "title": "地政資訊系統監控", "href": "http://220.1.34.75:8080/inf/dashboard", "description": "以儀表板呈現最即時的系統狀態 http://220.1.34.75:8080/inf/dashboard", "icon": "tv" },
+            { "title": "111數發部政府簡訊平台", "href": "https://111.gov.tw/psms_web/", "description": "政府專屬短碼簡訊平臺(外網) https://111.gov.tw/psms_web/", "icon": "message-circle" },
+            { "title": "地政系統17.20-本所測試機", "href": "http://192.168.17.20:9080/LandHA/", "description": "地政系統-跨縣市測試機 http://192.168.17.20:9080/LandHA/", "icon": "server" },
+            { "title": "地政系統17.21-桃園外掛測試機", "href": "http://192.168.17.21:9080/LandHA/", "description": "地政系統-桃園外掛測試機 http://192.168.17.21:9080/LandHA/", "icon": "server" },
+            { "title": "地政系統17.22-跨縣市測試機", "href": "http://192.168.17.22:9080/LandHA/", "description": "地政系統-跨縣市測試機 http://192.168.17.22:9080/LandHA/", "icon": "server" },
+            { "title": "案件辦理情形通知系統", "href": "http://220.1.34.221:8080/SMS98/", "description": "精誠開發之系統透過「中華電信訊息中心API」傳送案件辦理狀態簡訊及電子郵件 http://220.1.34.221:8080/SMS98/", "icon": "message-circle-more" },
+            { "title": "便民觸控查詢控制台", "href": "http://220.1.34.211:9080/touch/", "description": "便民觸控查詢控制台 http://220.1.34.211:9080/touch/", "icon": "monitor" },
+            { "title": "SRMAS 機房天氣圖", "href": "http://220.1.34.75:8080/inf/weather/", "description": "機房網路及主要系統狀態顯示 http://220.1.34.75:8080/inf/weather/", "icon": "cloud-sun-rain" },
+            { "title": "資訊課休閒時光", "href": "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/time.html", "description": "輕鬆一下 ... 😀", "icon": "smile" },
+            { "title": "資訊課本月輪值表", "linkId": "inf-roster", "href": "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf", "description": "資訊課本月份每日工作輪值表", "icon": "refresh-ccw-dot" }
+            ]
+        },
+        {
+            "category": "人事室",
+            "id": "hr",
+            "icon": "users",
+            "links": [
+            { "title": "人事室專屬入口網站", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/index.htm", "description": "最新消息、表單下載、職掌業務 ...", "icon": "layout-list" },
+            { "title": "人事室各式表單下載", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download.html", "description": "提供各式人事相關申請表單下載", "icon": "user" },
+            { "title": "差勤更正單", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/107/00%E6%A1%83%E5%9C%92%E5%9C%B地%E6%94%BF%E4%BA%8B%E5%8B%99%E6%89%80%E5%8A%A0%E7%8F%AD%E8%AB%8B%E5%81%87%E6%9B%B4%E6%AD%A3%E7%94%B3%E8%AB%8B%E8%A1%A8.pdf", "description": "提供忘刷卡等相關差勤更正申請單下載，請填妥核章後送交人事室辦理。", "icon": "file-pen" },
+            { "title": "差勤系統操作手冊", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf//WebITR2/WebITR2.0%E4%B8%80%E8%88%87%E4%BA%BA%E5%93%A1%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8A_2_1_0_32.pdf", "description": "提供完整一般同仁 WEBITR 2.0 操作手冊", "icon": "book-open" },
+            { "title": "各式差勤刷卡範例", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/%E5%88%B7%E5%8D%A1%E7%AF%84%E4%BE%8B1030601.pdf", "description": "提供各式刷卡範例教學", "icon": "fingerprint" },
+            { "title": "如何查詢差勤記錄", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E6%9F%A5%E8%A9%A2%E5%87%BA%E5%8B%A4%E8%A8%98%E9%8C%84%E6%95%99%E5%AD%B8.pdf", "description": "提供簡易差勤記錄查詢步驟", "icon": "history" },
+            { "title": "差勤案件申請取消教學", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%B7%AE%E5%8B%A4%E6%A1%88%E4%BB%B6%E7%94%B3%E8%AB%8B%E5%8F%96%E6%B6%88%E6%95%99%E5%AD%B8.pdf", "description": "提供簡易出差加班取消教學", "icon": "calendar-x" },
+            { "title": "費用申請教學", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E8%B2%BB%E7%94%A8%E7%94%B3%E8%AB%8B%E6%95%99%E5%AD%B8.pdf", "description": "提供簡易申請差旅費、加班費教學", "icon": "banknote" },
+            { "title": "個人資料相關教學", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%80%8B%E4%BA%BA%E8%B3%87%E6%96%99%E7%9B%B8%E9%97%9C%E6%95%99%E5%AD%B8.pdf", "description": "提供簡易查詢基本資料、修改電子郵件、帳號密碼...等差勤系統功能教學", "icon": "user-cog" },
+            { "title": "請假規定", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/%E8%AB%8B%E5%81%87%E5%92%8C%E4%BC%91%E5%81%87/104%E7%B5%A6%E5%81%87%E4%B8%80%E8%A6%BD%E8%A1%A8_002.pdf", "description": "提供請假規定PDF檢視", "icon": "file-text" },
+            { "title": "如何查詢休假紀錄", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%A6%82%E4%BD%95%E6%9F%A5%E8%A9%A2%E4%BC%91%E5%81%87%E7%B4%80%E9%8C%84.pdf", "description": "提供簡易查詢已休假天數查詢步驟", "icon": "calendar-search" },
+            { "title": "申請休假教學", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E4%BC%91%E5%81%87%E7%94%B3%E8%AB%8B%E6%95%99%E5%AD%B8.pdf", "description": "提供簡易申請休假教學", "icon": "calendar-plus" },
+            { "title": "申請公假補休教學", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%85%AC%E5%81%87%E8%A3%9C%E4%BC%91%E7%94%B3%E8%AB%8B%E6%95%99%E5%AD%B8.pdf", "description": "提供簡易申請公假補休教學", "icon": "briefcase" },
+            { "title": "請假出國教學", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%87%BA%E5%9C%8B%E8%AB%8B%E5%81%87%E7%94%B3%E8%AB%8B%E6%95%99%E5%AD%B8.pdf", "description": "提供簡易出國請假教學", "icon": "plane" }
+            ]
+        },
+        {
+            "category": "會計室",
+            "id": "acc",
+            "icon": "calculator",
+            "links": [
+            { "title": "會計室(內部控制)專屬入口網站", "href": "http://220.1.34.18/service/section/%E6%9C%83%E8%A8%88%E5%AE%A4/index.htm", "description": "參考資料、會議紀錄、內控制度 ...", "icon": "layout-list" }
+            ]
+        },
+        {
+            "category": "常用表單",
+            "id": "files",
+            "icon": "file-down",
+            "links": [
+            { "title": "【本所】電腦問題處理表", "href": "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/%E5%B8%B8%E7%94%A8%E8%A1%A8%E6%A0%BC/%E9%9B%BB%E8%85%A6%E4%BD%9C%E6%A5%AD%E7%B3%BB%E7%B5%B1%E4%BD%BF%E7%94%A8%E8%80%85%E5%95%8F%E9%A1%8C%E5%8F%8A%E8%99%95%E7%90%86%E6%83%85%E5%BD%A2%E7%B4%80%E9%8C%84%E8%A1%A8(%E6%A9%AB).doc", "description": "資訊課-電腦問題處理表 ", "icon": "bug" },
+            { "title": "【跨所】跨所案件通報單", "href": "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/%E5%B8%B8%E7%94%A8%E8%A1%A8%E6%A0%BC/%E8%B7%A8%E6%89%80%E6%A1%88%E4%BB%B6%E9%80%9A%E5%A0%B1%E5%96%AE.doc", "description": "資訊課-受理跨所登記案件通報單", "icon": "arrow-right-left" },
+            { "title": "所內電話一覽表", "href": "http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E6%89%80%E5%85%A7%E9%9B%BB%E8%A9%B1%E4%B8%80%E8%A6%BD%E8%A1%A8.pdf", "description": "最新事務所內電話一覽表", "icon": "phone-forwarded" },
+            { "title": "申請健檢補助費憑證", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/105%E5%81%A5%E6%AA%A2%E6%86%91%E8%AD%89%E7%94%A8%E7%B4%99.pdf", "description": "人事室-40歲以上公務人員申請健康檢查補助費憑證用紙(須區域醫院以上醫院)", "icon": "heart-pulse" },
+            { "title": "差勤更正單", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/107/00%E6%A1%83%E5%9C%92%E5%9C%B0%E6%94%BF%E4%BA%8B%E5%8B%99%E6%89%80%E5%8A%A0%E7%8F%AD%E8%AB%8B%E5%81%87%E6%9B%B4%E6%AD%A3%E7%94%B3%E8%AB%8B%E8%A1%A8.pdf", "description": "人事室-桃園地政事務所加班請假更正申請單", "icon": "file-check-2" },
+            { "title": "DutyRoster", "linkId": "main-gate-roster", "href": "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/114/7%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf", "description": "本月份全所關大門輪值班表PDF檢視", "icon": "flashlight" }
+            ]
+        }
+    ]
+    </script>
+    
     <script>
-        const { createApp, ref, reactive, onMounted, computed, watch, nextTick } = Vue;
+        const { createApp, ref, reactive, computed, watch, onMounted, nextTick } = Vue;
+
+        // =================================================================
+        // Composable 函式：將相關邏輯封裝在一起，提高可讀性與複用性
+        // =================================================================
+
+        /**
+         * @description 管理主題（淺色/深色模式）的 Composable
+         */
+        function useTheme() {
+            const getInitialTheme = () => {
+                const storedTheme = localStorage.getItem('theme');
+                if (storedTheme === 'light' || storedTheme === 'dark') {
+                    return storedTheme;
+                }
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return 'dark';
+                }
+                return 'light';
+            };
+
+            const theme = ref(getInitialTheme());
+
+            const applyTheme = (themeValue) => {
+                document.documentElement.dataset.theme = themeValue;
+            };
+
+            const toggleTheme = () => {
+                theme.value = theme.value === 'light' ? 'dark' : 'light';
+            };
+
+            watch(theme, (newTheme) => {
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            }, { immediate: true });
+
+            return { theme, toggleTheme };
+        }
+
+        /**
+         * @description 管理側邊欄狀態的 Composable
+         */
+        function useSidebar() {
+            const isSidebarCollapsed = ref(localStorage.getItem('sidebarCollapsed') === 'true');
+
+            const toggleSidebar = () => {
+                isSidebarCollapsed.value = !isSidebarCollapsed.value;
+            };
+
+            watch(isSidebarCollapsed, (isCollapsed) => {
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            });
+
+            return { isSidebarCollapsed, toggleSidebar };
+        }
+
+        /**
+         * @description 管理即時時鐘的 Composable
+         */
+        function useClock() {
+            const currentTime = ref('');
+            const currentDate = ref('');
+
+            const updateTime = () => {
+                const now = new Date();
+                currentTime.value = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                currentDate.value = now.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
+            };
+
+            onMounted(() => {
+                updateTime();
+                setInterval(updateTime, 1000);
+            });
+
+            return { currentTime, currentDate };
+        }
+        
+        /**
+         * @description 管理字體大小的 Composable
+         */
+        function useFontSize() {
+            const fontSizes = { small: '110%', medium: '120%', large: '130%' };
+            const fontSizeKeys = ['small', 'medium', 'large'];
+            const fontSizeLabels = { small: '小', medium: '中', large: '大' };
+
+            const fontSize = ref(localStorage.getItem('fontSize') || 'small');
+
+            const fontSizeLabel = computed(() => fontSizeLabels[fontSize.value]);
+
+            const applyFontSize = () => {
+                document.documentElement.style.fontSize = fontSizes[fontSize.value];
+            };
+
+            const toggleFontSize = () => {
+                const currentIndex = fontSizeKeys.indexOf(fontSize.value);
+                const nextIndex = (currentIndex + 1) % fontSizeKeys.length;
+                fontSize.value = fontSizeKeys[nextIndex];
+            };
+
+            watch(fontSize, (newSize) => {
+                localStorage.setItem('fontSize', newSize);
+                applyFontSize();
+            });
+
+            onMounted(applyFontSize);
+
+            return { fontSize, fontSizeLabel, toggleFontSize };
+        }
+
+        /**
+         * @description 管理書籤資料與互動的 Composable
+         */
+        function useBookmarks() {
+            // 從 HTML 中讀取原始資料
+            const bookmarksDataEl = document.getElementById('bookmark-data');
+            const rawBookmarksData = JSON.parse(bookmarksDataEl.textContent || '[]');
+
+            /**
+             * @description 同步處理書籤資料：更新當月輪值表、加上唯一 ID
+             * @returns {Array} - 初步處理後的書籤資料
+             */
+            const getInitialBookmarks = () => {
+                const now = new Date();
+                const rocYear = now.getFullYear() - 1911;
+                const currentMonth = now.getMonth() + 1;
+                
+                const bookmarksCopy = JSON.parse(JSON.stringify(rawBookmarksData));
+
+                // 更新 "常用表單下載" 的大門輪值表
+                const filesCategory = bookmarksCopy.find(c => c.id === 'files');
+                if (filesCategory) {
+                    const dutyRosterLink = filesCategory.links.find(l => l.linkId === 'main-gate-roster');
+                    if (dutyRosterLink) {
+                        dutyRosterLink.title = `${rocYear}年${currentMonth}月大門輪值表`;
+                        dutyRosterLink.href = `http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/${rocYear}/${currentMonth}%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
+                        dutyRosterLink.description = `本月份全所關大門輪值班表PDF檢視`; // 移除舊的靜態下月連結
+                    }
+                }
+
+                // 更新 "資訊課" 的輪值表
+                const infCategory = bookmarksCopy.find(c => c.id === 'inf');
+                if (infCategory) {
+                    const infoDutyRosterLink = infCategory.links.find(l => l.linkId === 'inf-roster');
+                    if (infoDutyRosterLink) {
+                        infoDutyRosterLink.title = `資訊課${rocYear}年${currentMonth}月輪值表`;
+                        // 注意：這裡的連結結構與大門輪值表不同，保持原樣
+                        infoDutyRosterLink.href = `http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
+                        infoDutyRosterLink.description = `資訊課本月份每日工作輪值表`; // 移除舊的靜態下月連結
+                    }
+                }
+                
+                // 為每個 link 加上唯一的 ID
+                return bookmarksCopy.map(category => ({
+                    ...category,
+                    links: category.links.map((link, index) => ({
+                        ...link,
+                        id: `${category.id}-${index}`
+                    }))
+                }));
+            };
+            
+            // *** FIX: 將 ref 改為 reactive 以確保深層物件的變更能被偵測 ***
+            const bookmarks = reactive(getInitialBookmarks());
+
+            /**
+             * @description 異步檢查下個月的輪值表是否存在，並更新描述
+             */
+            const checkNextMonthRosters = async () => {
+                const now = new Date();
+                const rocYear = now.getFullYear() - 1911;
+                
+                let nextMonth = now.getMonth() + 2; // getMonth() 是 0-11，所以 +2
+                let nextMonthRocYear = rocYear;
+                if (nextMonth > 12) {
+                    nextMonth = 1;
+                    nextMonthRocYear += 1;
+                }
+
+                // 檢查大門輪值表
+                // *** FIX: 直接從 reactive 物件中尋找，不需 .value ***
+                const mainGateRoster = bookmarks
+                    .find(c => c.id === 'files')?.links
+                    .find(l => l.linkId === 'main-gate-roster');
+                
+                if (mainGateRoster) {
+                    const nextMonthUrl = `http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/${nextMonthRocYear}/${nextMonth}%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
+                    try {
+                        const response = await fetch(nextMonthUrl, { method: 'HEAD' });
+                        if (response.ok) {
+                            mainGateRoster.description += ` | [預覽${nextMonth}月](${nextMonthUrl})`;
+                        }
+                    } catch (error) {
+                        console.warn(`無法檢查下個月的大門輪值表: ${nextMonthUrl}`, error);
+                    }
+                }
+
+                // 檢查資訊課輪值表
+                // *** FIX: 直接從 reactive 物件中尋找，不需 .value ***
+                const infRoster = bookmarks
+                    .find(c => c.id === 'inf')?.links
+                    .find(l => l.linkId === 'inf-roster');
+
+                if (infRoster) {
+                    const nextMonthUrl = `http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8NEXT.pdf`;
+                    try {
+                        const response = await fetch(nextMonthUrl, { method: 'HEAD' });
+                        if (response.ok) {
+                            infRoster.description += ` | [預覽${nextMonth}月](${nextMonthUrl})`;
+                        }
+                    } catch (error) {
+                        console.warn(`無法檢查下個月的資訊課輪值表: ${nextMonthUrl}`, error);
+                    }
+                }
+            };
+
+            // *** FIX: 直接從 reactive 物件中取值，不需 .value ***
+            const currentCategoryId = ref(localStorage.getItem('lastSelectedCategory') || (bookmarks.length > 0 ? bookmarks[0].id : null));
+            const clickCounts = ref(JSON.parse(localStorage.getItem('clickCounts') || '{}'));
+            const recentLinks = ref(JSON.parse(localStorage.getItem('recentLinks') || '[]'));
+            
+            const selectCategory = (id) => {
+                currentCategoryId.value = id;
+            };
+
+            const currentCategory = computed(() => {
+                // *** FIX: 直接從 reactive 物件中尋找，不需 .value ***
+                return bookmarks.find(c => c.id === currentCategoryId.value) || { category: '未分類', links: [] };
+            });
+
+            const currentCategoryLinks = computed(() => {
+                const links = [...(currentCategory.value.links || [])];
+                const mostRecentId = recentLinks.value.length > 0 ? recentLinks.value[0] : null;
+
+                links.sort((a, b) => {
+                    const isAMostRecent = a.id === mostRecentId;
+                    const isBMostRecent = b.id === mostRecentId;
+
+                    if (isAMostRecent && !isBMostRecent) return -1;
+                    if (!isAMostRecent && isBMostRecent) return 1;
+
+                    const countA = clickCounts.value[a.id] || 0;
+                    const countB = clickCounts.value[b.id] || 0;
+                    return countB - countA;
+                });
+
+                return links;
+            });
+            
+            const handleLinkClick = (link) => {
+                clickCounts.value[link.id] = (clickCounts.value[link.id] || 0) + 1;
+                
+                const index = recentLinks.value.indexOf(link.id);
+                if (index > -1) {
+                    recentLinks.value.splice(index, 1);
+                }
+                recentLinks.value.unshift(link.id);
+                if (recentLinks.value.length > 5) {
+                    recentLinks.value.pop();
+                }
+            };
+
+            watch(clickCounts, (newCounts) => {
+                localStorage.setItem('clickCounts', JSON.stringify(newCounts));
+            }, { deep: true });
+
+            watch(recentLinks, (newLinks) => {
+                localStorage.setItem('recentLinks', JSON.stringify(newLinks));
+            }, { deep: true });
+            
+            watch(currentCategoryId, (newId) => {
+                if (newId) {
+                   localStorage.setItem('lastSelectedCategory', newId);
+                }
+            });
+
+            const getLinkTarget = (url) => {
+                try {
+                    const urlObj = new URL(url, window.location.origin);
+                    return urlObj.protocol.startsWith('http') ? '_blank' : '_self';
+                } catch (e) {
+                    return '_blank';
+                }
+            };
+
+            const isDownloadable = (url) => {
+                return /\.(zip|rar|7z|exe|dmg|doc|docx|xls|xlsx|ppt|pptx)$/i.test(url);
+            };
+
+            return { 
+                bookmarks, 
+                currentCategoryId, 
+                selectCategory, 
+                currentCategory, 
+                currentCategoryLinks,
+                clickCounts,
+                recentLinks,
+                handleLinkClick,
+                getLinkTarget,
+                isDownloadable,
+                checkNextMonthRosters // 暴露新函式
+            };
+        }
+
+        /**
+         * @description 管理 PDF 預覽器（彈出視窗與懸浮預覽）的 Composable
+         */
+        function usePdfViewer() {
+            const pdfModal = reactive({ visible: false, url: '' });
+            const pdfPopover = ref(null);
+            const pdfPopoverState = reactive({ visible: false, url: '', x: 0, y: 0 });
+            let popoverTimeout = null;
+
+            const openPdfModal = (url) => {
+                pdfModal.url = `${url}#view=FitH&toolbar=1&navpanes=1`;
+                pdfModal.visible = true;
+            };
+
+            const closePdfModal = () => {
+                pdfModal.visible = false;
+                pdfModal.url = '';
+            };
+
+            const handlePdfHover = (event, url) => {
+                if (!url.toLowerCase().endsWith('.pdf')) return;
+                
+                clearTimeout(popoverTimeout);
+                popoverTimeout = setTimeout(() => {
+                    pdfPopoverState.url = `${url}#view=FitH&toolbar=0&navpanes=0`;
+
+                    const popoverWidth = 320; // Corresponds to w-80 (20rem)
+                    const popoverHeight = 384; // Corresponds to h-96 (24rem)
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+                    const offset = 15; // Small gap from the cursor
+
+                    let finalX = event.clientX + offset;
+                    let finalY = event.clientY + offset;
+
+                    if (finalX + popoverWidth > viewportWidth) {
+                        finalX = event.clientX - popoverWidth - offset;
+                    }
+
+                    if (finalY + popoverHeight > viewportHeight) {
+                        finalY = event.clientY - popoverHeight - offset;
+                    }
+                    
+                    if (finalX < 0) finalX = 0;
+                    if (finalY < 0) finalY = 0;
+
+                    pdfPopoverState.x = finalX;
+                    pdfPopoverState.y = finalY;
+                    pdfPopoverState.visible = true;
+                }, 500); // 延遲 500ms 顯示
+            };
+            
+            const hidePdfPopover = () => {
+                clearTimeout(popoverTimeout);
+                pdfPopoverState.visible = false;
+            };
+
+            watch(() => pdfModal.visible, (isVisible) => {
+                document.body.classList.toggle('modal-open', isVisible);
+            });
+
+            return { pdfModal, pdfPopover, pdfPopoverState, openPdfModal, closePdfModal, handlePdfHover, hidePdfPopover };
+        }
+
+        /**
+         * @description 其他工具函式
+         */
+        function useUtils() {
+            const renderer = new marked.Renderer();
+            const originalLinkRenderer = renderer.link;
+            renderer.link = (href, title, text) => {
+                if (typeof href !== 'string' || !href) {
+                    return text;
+                }
+                
+                const isExternal = href.startsWith('http');
+                const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
+                return `<a href="${href}" title="${title || ''}"${target}>${text}</a>`;
+            };
+            marked.use({ renderer });
+
+            const markdownToHtml = (markdownText) => {
+                if (markdownText && typeof marked !== 'undefined') {
+                    return marked.parse(markdownText, { breaks: true, gfm: true });
+                }
+                return markdownText;
+            };
+            
+            return { markdownToHtml };
+        }
+
+
+        // =================================================================
+        // Vue 應用程式實例
+        // =================================================================
 
         const app = createApp({
             setup() {
-                // --- 響應式狀態 (Reactive State) ---
-                const bookmarks = ref([
-                    {
-                        category: '共通系統網址',
-                        id: 'common',
-                        icon: 'send-horizontal',
-                        links: [
-                        { title: '地所員工知識網', href: 'http://220.1.34.18:8888', description: '提供公告、各課室專屬區、員工資訊、會議室預約 ... 等功能', icon: 'layout-dashboard' },
-                        { title: '機關內部人事業務系統', href: 'https://webitr.tycg.gov.tw/WebITR/', description: '桃園市政府差勤系統 https://webitr.tycg.gov.tw/WebITR/', icon: 'clock' },
-                        { title: '公文整合資訊系統', href: 'https://odis.tycg.gov.tw/', description: '市府公文系統 https://odis.tycg.gov.tw/', icon: 'book-marked' },
-                        { title: '桃園市政府公務雲', href: 'https://tycgcloud.tycg.gov.tw/', description: '桃園市政府公務雲(內網) https://tycgcloud.tycg.gov.tw/', icon: 'cloud' },
-                        { title: '內外網檔案交換系統', href: 'http://220.1.34.26:8008/', description: '內網電腦檔案交換至外網的交換系統，外網下載請至 http://220.2.34.17:8008/', icon: 'file-output' },
-                        { title: '工作生活點滴', href: 'http://220.1.34.18/album.asp', description: '本所電子相簿', icon: 'image-play' },
-                        { title: '智慧控管系統', href: 'http://220.1.34.75:8080/', description: '提供十多項登記輔助功能以及顯示最新公告及各業務小幫手連結', icon: 'monitor-smartphone' },
-                        ],
-                    },
-                    {
-                        category: '全功能櫃台',
-                        id: 'counter',
-                        icon: 'concierge-bell',
-                        links: [
-                        { title: '地政系統161-跨縣市', href: 'http://220.1.34.161:9080/LandHA/', description: '地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/', icon: 'server-cog' },
-                        { title: '地政系統60-桃園外掛', href: 'http://220.1.34.60:9080/LandHA/', description: '地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/', icon: 'server' },
-                        { title: '地政系統118-工作站', href: 'http://220.1.34.118:9080/LandHA/', description: '地政系統工作站操作專屬伺服器 http://220.1.34.118:9080/LandHA/', icon: 'server' },
-                        { title: '地政智慧控管系統', href: 'http://220.1.34.75:8080/reg/', description: '提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/', icon: 'landmark' },
-                        { title: '地政歷史資料查詢系統', href: 'http://220.1.34.15/NLOWeb/', description: '地政歷史資料查詢系統 http://220.1.34.15/NLOWeb/', icon: 'history' },
-                        { title: '謄本櫃員機後台管理', href: 'http://220.1.33.117/MGMT/', description: '管理謄本櫃員機會員帳號、顯示統計資料', icon: 'settings-2' },
-                        { title: '簡訊發送紀錄查詢', href: 'http://220.1.34.75:8080/reg/sms', description: '提供地政系統傳送地籍異動即時通等簡訊紀錄查詢 http://220.1.34.75:8080/reg/sms', icon: 'message-square-text' },
-                        { title: '登記課專屬入口網站', href: 'http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/index.htm', description: '最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影', icon: 'layout-list' },
-                        ],
-                    },
-                    {
-                        category: '登記課',
-                        id: 'reg',
-                        icon: 'file-signature',
-                        links: [
-                        { title: '登記課專屬入口網站', href: 'http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/index.htm', description: '最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影', icon: 'layout-list' },
-                        { title: '登記課下載區', href: 'http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/download.htm', description: '登記課自行維護之各式檔案下載專區', icon: 'download' },
-                        { title: '地政智慧控管系統', href: 'http://220.1.34.75:8080/reg/', description: '提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/', icon: 'landmark' },
-                        { title: '地政系統161-跨縣市', href: 'http://220.1.34.161:9080/LandHA/', description: '地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/', icon: 'server-cog' },
-                        { title: '地政系統60-桃園外掛', href: 'http://220.1.34.60:9080/LandHA/', description: '地政系統桃園外掛操作專屬伺服器 http://220.1.34.60:9080/LandHA/', icon: 'server' },
-                        { title: '地政系統205-登記課1', href: 'http://220.1.34.205:9080/LandHA/', description: '地政系統登記課操作專屬伺服器 http://220.1.34.205:9080/LandHA/', icon: 'server' },
-                        { title: '地政系統206-登記課2', href: 'http://220.1.34.206:9080/LandHA/', description: '地政系統登記課操作專屬伺服器 http://220.1.34.206:9080/LandHA/', icon: 'server' },
-                        { title: '地政系統162-罰鍰裁處專用', href: 'http://220.1.34.162:9080/LandHA/', description: '地政系統給罰鍰裁處專用伺服器 http://220.1.34.162:9080/LandHA/', icon: 'server' },
-                        { title: '地政歷史資料查詢系統', href: 'http://220.1.34.15/NLOWeb/', description: '地政歷史資料查詢系統 http://220.1.34.15/NLOWeb/', icon: 'history' },
-                        { title: '土地參考資訊檔查詢系統', href: 'http://220.1.34.213/ref/jsp/security/login.jsp', description: '土地參考資訊檔查詢系統 http://220.1.34.213/ref/jsp/security/login.jsp', icon: 'file-search' },
-                        { title: '謄本櫃員機後台管理', href: 'http://220.1.33.117/MGMT/', description: '管理謄本櫃員機會員帳號、顯示統計資料', icon: 'settings-2' },
-                        { title: '私法人購置住宅', href: 'http://220.1.33.80/PcQ.aspx', description: '私法人購置住宅 http://220.1.33.80/PcQ.aspx', icon: 'building' },
-                        { title: '內政部-地籍總歸戶系統', href: 'https://landowners.land.moi.gov.tw/', description: '個人地籍資料集中查詢平台，整合土地、建物所有權資訊 https://landowners.land.moi.gov.tw/', icon: 'folder-lock' },
-                        { title: '內政部-數位櫃台', href: 'http://220.5.61.14/', description: '內政部數位櫃臺公務端網站 http://220.5.61.14/', icon: 'monitor-smartphone' },
-                        { title: '內政部-罕用字查詢系統', href: 'http://220.5.61.32/MOILAND/', description: '內政部開發建置之罕用字查詢系統 http://220.5.61.32/MOILAND/', icon: 'spell-check' },
-                        { title: '內政部-戶役政電子閘門系統', href: 'https://210.241.18.131/', description: '內政部戶役政電子閘門系統 https://210.241.18.131/', icon: 'door-open' },
-                        { title: '內政部-未辦繼承', href: 'http://220.1.33.37:8091/OIB6/Login.jsp', description: '內政部未辦繼承登記土地及建物管理系統 http://220.1.33.37:8091/OIB6/Login.jsp', icon: 'user-x' },
-                        { title: '內政部-地籍清理', href: 'http://220.1.33.79:8080/TAZQ/index.jsp', description: '內政部地籍清理管理系統 http://220.1.33.79:8080/TAZQ/index.jsp', icon: 'files' },
-                        { title: '內政部-線上申辦', href: 'http://220.5.61.17/cms/', description: '內政部線上申辦系統 http://220.5.61.17/cms/', icon: 'file-plus-2' },
-                        { title: '內政部-電子產權憑證後台', href: 'https://220.5.61.73/etd-manager/', description: '內政部開發提供電子產權憑證管理功能... https://220.5.61.73/etd-manager/', icon: 'shield-check' },
-                        { title: '內政部-抵押權線上申辦系統管理後台', href: 'https://220.5.61.73/moa-manager/', description: '內政部抵押權線上申辦系統管理後台 ... https://220.5.61.73/moa-manager/', icon: 'file-lock-2' }
-                        ],
-                    },
-                    {
-                        category: '測量課',
-                        id: 'sur',
-                        icon: 'ruler',
-                        links: [
-                        { title: '測量課專屬入口網站', href: 'http://220.1.34.18/service/section/%E6%B8%AC%E9%87%8F%E8%AA%B2/index.htm', description: '法院判決案例、會議紀錄、法令規範、測量成果交換、應用軟體、常用表格 ...', icon: 'layout-list' },
-                        { title: '測量課下載區', href: 'http://220.1.34.18/service/section/%E6%B8%AC%E9%87%8F%E8%AA%B2/feedback.htm', description: '測量課自行維護之各式檔案下載專區', icon: 'download' },
-                        { title: '地政系統207-測量課1', href: 'http://220.1.34.207:9080/LandHA/', description: '地政系統測量課操作專屬伺服器 http://220.1.34.207:9080/LandHA/', icon: 'server' },
-                        { title: '地政系統62-測量課2', href: 'http://220.1.34.62:9080/LandHA/', description: '地政系統測量課操作專屬伺服器 http://220.1.34.62:9080/LandHA/', icon: 'server' },
-                        { title: '建管圖資介接系統', href: 'http://220.1.33.43:8080/Q14Web/', description: '建物第一次測量-使用執照資訊及竣工圖介接系統 http://220.1.33.43:8080/Q14Web/', icon: 'map' },
-                        { title: '測量逾期案件查詢', href: 'http://220.1.34.75:8080/sur/expire', description: '測量逾期案件查詢 http://220.1.34.75:8080/sur/expire', icon: 'calendar-clock' },
-                        { title: '重測換狀通知書系統', href: 'http://220.1.34.211:9080/XDT98/', description: '重測換狀通知書系統 http://220.1.34.211:9080/XDT98/', icon: 'file-text' },
-                        ],
-                    },
-                    {
-                        category: '地價課',
-                        id: 'val',
-                        icon: 'tags',
-                        links: [
-                        { title: '地價課專屬入口網站', href: 'http://220.1.34.18/service/section/%E8%A1%8C%E6%94%BF%E8%AA%B2/fram.htm', description: '最新消息、會議紀錄、表單下載 ...', icon: 'layout-list' },
-                        { title: '地價課下載區', href: 'http://220.1.34.18/service/section/%E8%A1%8C%E6%94%BF%E8%AA%B2/fram.htm', description: '地價課自行維護之各式檔案下載專區', icon: 'download' },
-                        { title: '地政系統156-地價課', href: 'http://220.1.34.156:9080/LandHA/', description: '地政系統地價課操作專屬伺服器 http://220.1.34.156:9080/LandHA/', icon: 'server' },
-                        { title: '實價登錄案件控管', href: 'http://220.1.34.75:8080/prc/realprice', description: '實價登錄案件控管頁面 http://220.1.34.75:8080/prc/realprice', icon: 'file-check-2' },
-                        { title: '實價登錄JSON資料解析', href: 'http://220.1.34.75:8080/prc/json-converter', description: '實價登錄JSON資料解析 http://220.1.34.75:8080/prc/json-converter', icon: 'file-json' },
-                        { title: '不動產交易成交資訊登錄機制系統', href: 'http://220.5.61.195:8080/RPM/', description: '不動產交易成交資訊登錄機制系統 http://220.5.61.195:8080/RPM/', icon: 'database-zap' },
-                        { title: '五方區估系統', href: 'http://220.1.34.12/TomMis/', description: '地價區段劃分及區段地價估價作業系統 http://220.1.34.12/TomMis/', icon: 'area-chart' },
-                        { title: '實價登錄清理系統', href: 'http://220.1.34.12/moi_estate/', description: '實價登錄清理系統 http://220.1.34.12/moi_estate/', icon: 'file-scan' },
-                        { title: '實價登錄簡訊系統', href: 'http://220.1.34.221/', description: '實價登錄簡訊系統 http://220.1.34.221/', icon: 'message-square-more' },
-                        ],
-                    },
-                    {
-                        category: '行政課',
-                        id: 'adm',
-                        icon: 'briefcase',
-                        links: [
-                        { title: '行政課專屬入口網站', href: 'http://220.1.34.18/service/section/04/index.htm', description: '最新消息、年度計畫、公文稽催 ...', icon: 'layout-list' },
-                        { title: '行政課下載區', href: 'http://220.1.34.18/service/section/04/download.htm', description: '行政課自行維護各式下載專區', icon: 'download' },
-                        { title: '檔案知識庫', href: 'http://220.1.34.18/service/section/archives/archives.html', description: '檔案作業規劃、檔案應用、檔案分類表、會議記錄 ...', icon: 'archive' },
-                        { title: '地政系統156-行政課', href: 'http://220.1.34.156:9080/LandHA/', description: '地政系統行政課操作專屬伺服器 http://220.1.34.156:9080/LandHA/', icon: 'server' },
-                        { title: '非都市土地使用編定管理系統', href: 'http://220.1.34.12:8080/LandHA/', description: '非都市土地使用編定管理系統 http://220.1.34.12:8080/LandHA/', icon: 'map-pin' },
-                        { title: '檔案應用預約申請控管系統', href: 'http://220.1.34.75:8080/adm/file', description: '民眾檔案應用服務申請控管 http://220.1.34.75:8080/adm/file', icon: 'file-archive' },
-                        { title: '土地參考資訊檔查詢系統', href: 'http://220.1.34.213/ref/jsp/security/login.jsp', description: '土地參考資訊檔查詢系統 http://220.1.34.213/ref/jsp/security/login.jsp', icon: 'file-search' },
-                        ],
-                    },
-                    {
-                        category: '資訊課',
-                        id: 'inf',
-                        icon: 'computer',
-                        links: [
-                        { title: '資訊課專屬入口網站', href: 'http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/', description: '最新消息、表單下載、會議記錄 ...', icon: 'layout-list' },
-                        { title: '資訊課表單下載', href: 'http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/download.html', description: '提供各式資訊課申請表單下載', icon: 'download' },
-                        { title: '地政資訊系統監控', href: 'http://220.1.34.75:8080/inf/dashboard', description: '以儀表板呈現最即時的系統狀態 http://220.1.34.75:8080/inf/dashboard', icon: 'tv' },
-                        { title: '111數發部政府簡訊平台', href: 'https://111.gov.tw/psms_web/', description: '政府專屬短碼簡訊平臺(外網) https://111.gov.tw/psms_web/', icon: 'message-circle' },
-                        { title: '地政系統17.20-本所測試機', href: 'http://192.168.17.20:9080/LandHA/', description: '地政系統-跨縣市測試機 http://192.168.17.20:9080/LandHA/', icon: 'server' },
-                        { title: '地政系統17.21-桃園外掛測試機', href: 'http://192.168.17.21:9080/LandHA/', description: '地政系統-桃園外掛測試機 http://192.168.17.21:9080/LandHA/', icon: 'server' },
-                        { title: '地政系統17.22-跨縣市測試機', href: 'http://192.168.17.22:9080/LandHA/', description: '地政系統-跨縣市測試機 http://192.168.17.22:9080/LandHA/', icon: 'server' },
-                        { title: '案件辦理情形通知系統', href: 'http://220.1.34.221:8080/SMS98/', description: '精誠開發之系統透過「中華電信訊息中心API」傳送案件辦理狀態簡訊及電子郵件 http://220.1.34.221:8080/SMS98/', icon: 'message-circle-more' },
-                        { title: '便民觸控查詢控制台', href: 'http://220.1.34.211:9080/touch/', description: '便民觸控查詢控制台 http://220.1.34.211:9080/touch/', icon: 'monitor' },
-                        { title: 'SRMAS 機房天氣圖', href: 'http://220.1.34.75:8080/inf/weather/', description: '機房網路及主要系統狀態顯示 http://220.1.34.75:8080/inf/weather/', icon: 'cloud-sun-rain' },
-                        { title: '資訊課休閒時光', href: 'http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/time.html', description: '輕鬆一下 ... 😀', icon: 'smile' },
-                        // 從常用表單下載移動過來的資訊課本月輪值表
-                        { title: '資訊課本月輪值表', href: 'http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf', description: '資訊課本月份每日工作輪值表', icon: 'refresh-ccw-dot' },
-                        ],
-                    },
-                    {
-                        category: '人事室',
-                        id: 'hr',
-                        icon: 'users',
-                        links: [
-                        { title: '人事室專屬入口網站', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/index.htm', description: '最新消息、表單下載、職掌業務 ...', icon: 'layout-list' },
-                        { title: '人事室各式表單下載', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download.html', description: '提供各式人事相關申請表單下載', icon: 'user' },
-                        // 已更新的「差勤更正單」連結
-                        { title: '差勤更正單', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/107/00%E6%A1%83%E5%9C%92%E5%9C%B0%E6%94%BF%E4%BA%8B%E5%8B%99%E6%89%80%E5%8A%A0%E7%8F%AD%E8%AB%8B%E5%81%87%E6%9B%B4%E6%AD%A3%E7%94%B3%E8%AB%8B%E8%A1%A8.pdf', description: '提供忘刷卡等相關差勤更正申請單下載，請填妥核章後送交人事室辦理。', icon: 'file-pen' },
-                        { title: '差勤系統操作手冊', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf//WebITR2/WebITR2.0%E4%B8%80%E8%88%87%E4%BA%BA%E5%93%A1%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8A_2_1_0_32.pdf', description: '提供完整一般同仁 WEBITR 2.0 操作手冊', icon: 'book-open' },
-                        { title: '各式差勤刷卡範例', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/%E5%88%B7%E5%8D%A1%E7%AF%84%E4%BE%8B1030601.pdf', description: '提供各式刷卡範例教學', icon: 'fingerprint' },
-                        { title: '如何查詢差勤記錄', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E6%9F%A5%E8%A9%A2%E5%87%BA%E5%8B%A4%E8%A8%98%E9%8C%84%E6%95%99%E5%AD%B8.pdf', description: '提供簡易差勤記錄查詢步驟', icon: 'history' },
-                        { title: '差勤案件申請取消教學', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%B7%AE%E5%8B%A4%E6%A1%88%E4%BB%B6%E7%94%B3%E8%AB%8B%E5%8F%96%E6%B6%88%E6%95%99%E5%AD%B8.pdf', description: '提供簡易出差加班取消教學', icon: 'calendar-x' },
-                        { title: '費用申請教學', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E8%B2%BB%E7%94%A8%E7%94%B3%E8%AB%8B%E6%95%99%E5%AD%B8.pdf', description: '提供簡易申請差旅費、加班費教學', icon: 'banknote' },
-                        { title: '個人資料相關教學', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%80%8B%E4%BA%BA%E8%B3%87%E6%96%99%E7%9B%B8%E9%97%9C%E6%95%99%E5%AD%B8.pdf', description: '提供簡易查詢基本資料、修改電子郵件、帳號密碼...等差勤系統功能教學', icon: 'user-cog' },
-                        { title: '請假規定', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/%E8%AB%8B%E5%81%87%E5%92%8C%E4%BC%91%E5%81%87/104%E7%B5%A6%E5%81%87%E4%B8%80%E8%A6%BD%E8%A1%A8_002.pdf', description: '提供請假規定PDF檢視', icon: 'file-text' },
-                        { title: '如何查詢休假紀錄', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%A6%82%E4%BD%95%E6%9F%A5%E8%A9%A2%E4%BC%91%E5%81%87%E7%B4%80%E9%8C%84.pdf', description: '提供簡易查詢已休假天數查詢步驟', icon: 'calendar-search' },
-                        { title: '申請休假教學', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E4%BC%91%E5%81%87%E7%94%B3%E8%AB%8B%E6%95%99%E5%AD%B8.pdf', description: '提供簡易申請休假教學', icon: 'calendar-plus' },
-                        { title: '申請公假補休教學', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%85%AC%E5%81%87%E8%A3%9C%E4%BC%91%E7%94%B3%E8%AB%8B%E6%95%99%E5%AD%B8.pdf', description: '提供簡易申請公假補休教學', icon: 'briefcase' },
-                        { title: '請假出國教學', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/pdf/WebITR2/%E5%87%BA%E5%9C%8B%E8%AB%8B%E5%81%87%E7%94%B3%E8%AB%8B%E6%95%99%E5%AD%B8.pdf', description: '提供簡易出國請假教學', icon: 'plane' },
-                        ],
-                    },
-                    {
-                        category: '會計室',
-                        id: 'acc',
-                        icon: 'calculator',
-                        links: [
-                        { title: '會計室(內部控制)專屬入口網站', href: 'http://220.1.34.18/service/section/%E6%9C%83%E8%A8%88%E5%AE%A4/index.htm', description: '參考資料、會議紀錄、內控制度 ...', icon: 'layout-list' },
-                        ],
-                    },
-                    {
-                        category: '常用表單下載',
-                        id: 'files',
-                        icon: 'file-down',
-                        links: [
-                        { title: '【本所】電腦問題處理表', href: 'http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/%E5%B8%B8%E7%94%A8%E8%A1%A8%E6%A0%BC/%E9%9B%BB%E8%85%A6%E4%BD%9C%E6%A5%AD%E7%B3%BB%E7%B5%B1%E4%BD%BF%E7%94%A8%E8%80%85%E5%95%8F%E9%A1%8C%E5%8F%8A%E8%99%95%E7%90%86%E6%83%85%E5%BD%A2%E7%B4%80%E9%8C%84%E8%A1%A8(%E6%A9%AB).doc', description: '資訊課-電腦問題處理表 ', icon: 'bug' },
-                        { title: '【跨所】跨所案件通報單', href: 'http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/%E5%B8%B8%E7%94%A8%E8%A1%A8%E6%A0%BC/%E8%B7%A8%E6%89%80%E6%A1%88%E4%BB%B6%E9%80%9A%E5%A0%B1%E5%96%AE.doc', description: '資訊課-受理跨所登記案件通報單', icon: 'arrow-right-left' },
-                        { title: '所內電話一覽表', href: 'http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E6%89%80%E5%85%A7%E9%9B%BB%E8%A9%B1%E4%B8%80%E8%A6%BD%E8%A1%A8.pdf', description: '最新事務所內電話一覽表', icon: 'phone-forwarded' },
-                        { title: '申請健檢補助費憑證', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/105%E5%81%A5%E6%AA%A2%E6%86%91%E8%AD%89%E7%94%A8%E7%B4%99.pdf', description: '人事室-40歲以上公務人員申請健康檢查補助費憑證用紙(須區域醫院以上醫院)', icon: 'heart-pulse' },
-                        // 將「差勤更正單」加回「常用表單下載」分類
-                        { title: '差勤更正單', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/download/107/00%E6%A1%83%E5%9C%92%E5%9C%B0%E6%94%BF%E4%BA%8B%E5%8B%99%E6%89%80%E5%8A%A0%E7%8F%AD%E8%AB%8B%E5%81%87%E6%9B%B4%E6%AD%A3%E7%94%B3%E8%AB%8B%E8%A1%A8.pdf', description: '人事室-桃園地政事務所加班請假更正申請單', icon: 'file-check-2' },
-                        { title: 'DutyRoster', href: 'http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/114/7%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf', description: '本月份全所關大門輪值班表PDF檢視', icon: 'flashlight' },
-                        ],
-                    },
-                    ]);
-                const currentCategoryId = ref(null);
-                const theme = ref('light');
-                const isSidebarCollapsed = ref(false);
-                const currentTime = ref('');
-                const currentDate = ref('');
-                const pdfModal = reactive({ visible: false, src: '', title: '' });
-                const pdfPopoverState = reactive({ src: '' });
-                const pdfPopover = ref(null);
-                let popoverTimeout = null;
-                // 引入 mainContentKey 來強制重新渲染 main 區塊
-                // 由於現在使用 TransitionGroup，mainContentKey 不再需要強制重新渲染整個 main 區塊
-                // 但保留它以防未來其他用途，或作為觸發某些邏輯的依據
-                const mainContentKey = ref(0); 
+                // 組合所有 Composable 函式
+                const themeManager = useTheme();
+                const sidebarManager = useSidebar();
+                const clockManager = useClock();
+                const fontSizeManager = useFontSize();
+                const bookmarkManager = useBookmarks();
+                const pdfViewerManager = usePdfViewer();
+                const utils = useUtils();
 
-                // currentCategory 現在是 computed 屬性，會響應 bookmarks.value 的變化
-                const currentCategory = computed(() => bookmarks.value.find(c => c.id === currentCategoryId.value));
-                // currentCategoryLinks 也直接依賴 currentCategory，確保響應式更新
-                const currentCategoryLinks = computed(() => {
-                    return currentCategory.value ? currentCategory.value.links : [];
-                });
+                onMounted(() => {
+                    // 頁面掛載後，非同步檢查下個月的輪值表
+                    bookmarkManager.checkNextMonthRosters();
 
-                // 格式化時間戳記為 YYYY/MM/DD HH:mm
-                const formatTimestamp = (timestamp) => {
-                    if (!timestamp) return '';
-                    const date = new Date(timestamp);
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const hours = String(date.getHours()).padStart(2, '0');
-                    const minutes = String(date.getMinutes()).padStart(2, '0');
-                    return `${year}/${month}/${day} ${hours}:${minutes}`;
-                };
-
-                // 根據點擊次數和最近點擊時間載入並排序書籤連結
-                const loadClickCountsAndSortBookmarks = () => {
-                    // 創建 bookmarks 的新拷貝，以確保響應式更新
-                    const updatedBookmarks = bookmarks.value.map(category => {
-                        // 創建 links 陣列的拷貝，並為每個 link 添加臨時屬性
-                        const linksWithTempData = category.links.map((link, index) => {
-                            const clickKey = `link_clicks_${category.id}_${link.href}`;
-                            const storedData = JSON.parse(localStorage.getItem(clickKey) || '{}');
-                            const clicks = parseInt(storedData.clicks || '0', 10);
-                            const lastClickedTimestamp = parseInt(storedData.lastClickedTimestamp || '0', 10);
-                            // 創建 link 的淺拷貝，並添加臨時數據
-                            return { 
-                                ...link, 
-                                clicks, 
-                                lastClickedTimestamp, 
-                                originalIndex: index,
-                                lastAccessedTimeFormatted: lastClickedTimestamp ? formatTimestamp(lastClickedTimestamp) : '' // 格式化時間
-                            };
+                    // 初始化 Lucide Icons
+                    lucide.createIcons();
+                    // 當 DOM 更新後，再次呼叫以渲染動態新增的圖示
+                    watch([
+                        themeManager.theme, 
+                        sidebarManager.isSidebarCollapsed, 
+                        bookmarkManager.currentCategoryLinks
+                    ], () => {
+                        nextTick(() => {
+                            lucide.createIcons();
                         });
-
-                        // 根據最近點擊時間降序排序，如果時間相同則按點擊次數降序，最後按原始索引
-                        linksWithTempData.sort((a, b) => {
-                            if (b.lastClickedTimestamp !== a.lastClickedTimestamp) {
-                                return b.lastClickedTimestamp - a.lastClickedTimestamp; // 最近點擊的排在前面
-                            }
-                            if (b.clicks !== a.clicks) {
-                                return b.clicks - a.clicks; // 點擊次數多的排在前面
-                            }
-                            return a.originalIndex - b.originalIndex; // 保持原始順序
-                        });
-
-                        // 創建新的 links 陣列，並根據排序結果設定 isHighlighted 屬性
-                        const newLinks = linksWithTempData.map((item, index) => {
-                            // 創建 link 的淺拷貝，並移除臨時數據
-                            const cleanLink = { ...item };
-                            delete cleanLink.clicks;
-                            delete cleanLink.originalIndex;
-
-                            // 只有前 3 個點擊次數最多的連結會被標記為醒目提示
-                            // 並且只有當有實際點擊時間戳記時才高亮
-                            if (index < 3 && item.clicks > 0 && item.lastClickedTimestamp > 0) { 
-                                cleanLink.isHighlighted = true;
-                            } else {
-                                cleanLink.isHighlighted = false; // 其他連結不顯示醒目提示
-                            }
-                            return cleanLink;
-                        });
-
-                        // 返回一個新的 category 物件，包含更新後的 links 陣列
-                        return { ...category, links: newLinks };
-                    });
-
-                    // 將更新後的 bookmarks 陣列賦值給響應式引用，觸發 Vue 的響應式更新
-                    bookmarks.value = updatedBookmarks;
-                };
-
-                const selectCategory = (id) => {
-                    currentCategoryId.value = id;
-                    // 當分類改變時，重新載入並排序連結
-                    loadClickCountsAndSortBookmarks(); 
-                    // 遞增 mainContentKey 以強制重新渲染 main 區塊 (如果需要，但 TransitionGroup 會處理)
-                    mainContentKey.value++;
-                };
-
-                const toggleTheme = () => {
-                    theme.value = theme.value === 'light' ? 'dark' : 'light';
-                    // 直接在 document.documentElement 上切換 'dark' class
-                    document.documentElement.classList.toggle('dark', theme.value === 'dark');
-                    localStorage.setItem('theme', theme.value) 
-                    // 在主題切換後，重新載入並排序書籤，確保卡片內容和圖示樣式正確更新
-                    // loadClickCountsAndSortBookmarks();
-                    // 遞增 mainContentKey 以強制重新渲染 main 區塊
-                    // mainContentKey.value++;
-                    setTimeout(() => { location.reload(); }, 50)
-                };
-
-                const toggleSidebar = () => {
-                    isSidebarCollapsed.value = !isSidebarCollapsed.value;
-                };
-
-                const updateTime = () => {
-                    const now = new Date();
-                    currentDate.value = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
-                    currentTime.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-                };
-                
-                const isPdf = (link) => link.href.toLowerCase().endsWith('.pdf');
-                const isDownloadable = (link) => {
-                    if (isPdf(link)) return false;
-                    const extensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'rar', '7z', 'odt', 'ods', 'odp'];
-                    const fileExt = link.href.split('?')[0].split('#')[0].split('.').pop().toLowerCase();
-                    return extensions.includes(fileExt);
-                };
-
-                const getButtonText = (link) => {
-                    if (isPdf(link)) return '預覽';
-                    if (isDownloadable(link)) return '下載';
-                    return '前往';
-                };
-
-                const getButtonIcon = (link) => {
-                    if (isPdf(link)) return 'eye';
-                    if (isDownloadable(link)) return 'download';
-                    return 'arrow-right';
-                };
-                
-                const getLinkTarget = (link) => {
-                    return isPdf(link) ? null : '_blank';
-                };
-
-                const handleLinkClick = (event, link) => {
-                    // 獲取當前分類 ID
-                    const categoryId = currentCategoryId.value; 
-                    if (categoryId && link.href) {
-                        // 構建 localStorage 的鍵
-                        const clickKey = `link_clicks_${categoryId}_${link.href}`;
-                        // 讀取並增加點擊次數，同時更新最近點擊時間戳記
-                        let storedData = JSON.parse(localStorage.getItem(clickKey) || '{}');
-                        let clicks = (storedData.clicks || 0) + 1;
-                        let lastClickedTimestamp = Date.now(); // 記錄當前時間戳記
-                        localStorage.setItem(clickKey, JSON.stringify({ clicks, lastClickedTimestamp }));
-                        // 更新點擊次數後，重新排序當前分類的連結
-                        loadClickCountsAndSortBookmarks();
-                    }
-
-                    // 現有的連結處理邏輯
-                    const internalLink = event.target.closest('[data-internal-link="true"]');
-                    if (internalLink) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        const url = internalLink.getAttribute('href');
-                        const title = internalLink.textContent;
-                        if (url && url.toLowerCase().endsWith('.pdf')) {
-                            openPdfModal(url, title);
-                        } else if (url) {
-                            window.open(url, '_blank', 'noopener,noreferrer');
-                        }
-                        return;
-                    }
-                    if (isPdf(link)) {
-                        event.preventDefault();
-                        openPdfModal(link.href, link.title);
-                    }
-                };
-
-                const openPdfModal = (src, title) => {
-                    pdfModal.src = `${src}#view=FitH&toolbar=1&navpanes=1`;
-                    pdfModal.title = title;
-                    pdfModal.visible = true;
-                };
-
-                const closePdfModal = () => {
-                    pdfModal.visible = false;
-                    pdfModal.src = '';
-                    pdfModal.title = '';
-                };
-
-                const handlePdfHover = (event, link) => {
-                    if (!isPdf(link)) return;
-                    const targetCard = event.currentTarget;
-                    clearTimeout(popoverTimeout);
-                    popoverTimeout = setTimeout(() => {
-                        const cardRect = targetCard.getBoundingClientRect();
-                        pdfPopoverState.src = `${link.href}#view=FitH&toolbar=0&navpanes=0`;
-                        const popoverEl = pdfPopover.value;
-                        popoverEl.classList.remove('hidden');
-                        const popoverWidth = 297;
-                        const popoverHeight = 415;
-                        const margin = 10;
-                        let top = cardRect.top + (cardRect.height / 2) - (popoverHeight / 2);
-                        let left;
-                        const spaceRight = window.innerWidth - cardRect.right;
-                        const spaceLeft = cardRect.left;
-                        if (spaceRight >= popoverWidth + margin) {
-                            left = cardRect.right + margin;
-                        } else if (spaceLeft >= popoverWidth + margin) {
-                            left = cardRect.left - popoverWidth - margin;
-                        } else {
-                            left = spaceRight > spaceLeft ? cardRect.right + margin : cardRect.left - popoverWidth - margin;
-                        }
-                        left = Math.max(margin, Math.min(left, window.innerWidth - popoverWidth - margin));
-                        top = Math.max(margin, Math.min(top, window.innerHeight - popoverHeight - margin));
-                        popoverEl.style.top = `${top}px`;
-                        popoverEl.style.left = `${left}px`;
-                    }, 300);
-                };
-
-                const hidePdfPopover = () => {
-                    clearTimeout(popoverTimeout);
-                    if (pdfPopover.value) {
-                       pdfPopover.value.classList.add('hidden');
-                    }
-                    pdfPopoverState.src = '';
-                };
-                
-                const markdownToHtml = (text) => {
-                    if (!text) return '';
-                    const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
-                    return text.replace(regex, '<a href="$2" data-internal-link="true" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">$1</a>');
-                };
-
-                const updateDynamicLinks = async () => {
-                    const now = new Date();
-                    const rocYear = now.getFullYear() - 1911;
-                    const month = now.getMonth() + 1;
-                    const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-                    const nextRocYear = nextMonthDate.getFullYear() - 1911;
-                    const nextMonth = nextMonthDate.getMonth() + 1;
-                    
-                    // 找到人事室的 DutyRoster 連結
-                    const rosterLink = bookmarks.value.flatMap(c => c.links).find(l => l.title === 'DutyRoster' || l.originalTitle === 'DutyRoster');
-                    if (rosterLink) {
-                        const baseUrl = "http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/";
-                        rosterLink.href = `${baseUrl}${rocYear}/${month}月輪值表.pdf`;
-                        rosterLink.originalTitle = rosterLink.originalTitle || "DutyRoster";
-                        rosterLink.title = `${rocYear}年${month}月大門輪值表`;
-                        const nextMonthHref = `${baseUrl}${nextRocYear}/${nextMonth}月輪值表.pdf`;
-                        try {
-                            const response = await fetch(nextMonthHref, { method: 'HEAD' });
-                            if (response.ok) {
-                                rosterLink.description = `本月份全所關大門輪值班表PDF檢視 | [預覽${nextMonth}月](${nextMonthHref})`;
-                            } else {
-                                rosterLink.description = `本月份全所關大門輪值班表PDF檢視`;
-                            }
-                        } catch (e) {
-                            rosterLink.description = `本月份全所關大門輪值班表PDF檢視`;
-                        }
-                    }
-
-                    // 找到資訊課的本月輪值表連結
-                    const infoRosterLink = bookmarks.value.flatMap(c => c.links).find(l => l.title === '資訊課本月輪值表');
-                    if (infoRosterLink) {
-                        infoRosterLink.title = `資訊課${rocYear}年${month}月輪值表`;
-                        // 資訊課輪值表NEXT.pdf 的固定路徑
-                        const infoRosterNextMonthPdfUrl = `http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8NEXT.pdf`;
-                        try {
-                            const response = await fetch(infoRosterNextMonthPdfUrl, { method: 'HEAD' });
-                            if (response.ok) {
-                                infoRosterLink.description = `資訊課本月份每日工作輪值表 | [預覽下個月](${infoRosterNextMonthPdfUrl})`;
-                            } else {
-                                infoRosterLink.description = `資訊課本月份每日工作輪值表`;
-                            }
-                        } catch (e) {
-                            infoRosterLink.description = `資訊課本月份每日工作輪值表`;
-                        }
-                    }
-                };
-
-                onMounted(async () => {
-                    // 處理書籤資料移動
-                    const filesCategory = bookmarks.value.find(c => c.id === 'files');
-                    const infoCategory = bookmarks.value.find(c => c.id === 'inf');
-
-                    if (filesCategory && infoCategory) {
-                        const infoRosterIndex = filesCategory.links.findIndex(link => link.title === '資訊課本月輪值表');
-                        if (infoRosterIndex !== -1) {
-                            const [movedLink] = filesCategory.links.splice(infoRosterIndex, 1); // 移除並獲取移動的連結
-                            infoCategory.links.push(movedLink); // 添加到資訊課
-                        }
-                    }
-
-                    await updateDynamicLinks();
-                    // 確保在掛載時正確讀取主題並應用 class
-                    theme.value = localStorage.getItem('theme') || 'light';
-                    document.documentElement.classList.toggle('dark', theme.value === 'dark');
-
-                    isSidebarCollapsed.value = (localStorage.getItem('sidebarState') === 'collapsed');
-                    let lastCatId = localStorage.getItem('lastSelectedCategory');
-                    const categoryExists = bookmarks.value.some(c => c.id === lastCatId);
-                    if (!lastCatId || !categoryExists) {
-                        lastCatId = bookmarks.value.find(c => !c.isDirectLink)?.id || null;
-                    }
-                    selectCategory(lastCatId); // 這會觸發 loadClickCountsAndSortBookmarks 和 mainContentKey 遞增
-                    
-                    updateTime();
-                    setInterval(updateTime, 1000);
+                    }, { deep: true, immediate: true });
                 });
 
-                // 監聽 mainContentKey 變化時，在 nextTick 後重新建立 Lucide 圖示
-                watch(mainContentKey, () => {
-                    nextTick(() => {
-                        lucide.createIcons();
-                    });
-                });
-
-                watch(isSidebarCollapsed, (collapsed) => {
-                    localStorage.setItem('sidebarState', collapsed ? 'collapsed' : 'open');
-                });
-                
-                watch(currentCategoryId, (newId) => {
-                    if (newId) {
-                       localStorage.setItem('lastSelectedCategory', newId);
-                    }
-                });
-                
-                watch(() => pdfModal.visible, (isVisible) => {
-                    document.body.classList.toggle('modal-open', isVisible);
-                });
-
+                // 將所有需要暴露給模板的狀態和方法集中返回
                 return {
-                    bookmarks,
-                    currentCategoryId,
-                    theme,
-                    isSidebarCollapsed,
-                    currentTime,
-                    currentDate,
-                    pdfModal,
-                    pdfPopover,
-                    pdfPopoverState,
-                    mainContentKey, // 暴露給模板使用
-                    currentCategory,
-                    currentCategoryLinks, // 現在是 computed
-                    selectCategory,
-                    toggleTheme,
-                    toggleSidebar,
-                    isDownloadable,
-                    getButtonText,
-                    getButtonIcon,
-                    getLinkTarget,
-                    handleLinkClick,
-                    openPdfModal,
-                    closePdfModal,
-                    handlePdfHover,
-                    hidePdfPopover,
-                    markdownToHtml,
+                    ...themeManager,
+                    ...sidebarManager,
+                    ...clockManager,
+                    ...fontSizeManager,
+                    ...bookmarkManager,
+                    ...pdfViewerManager,
+                    ...utils
                 };
             }
         });
@@ -919,4 +866,5 @@
         app.mount('#app');
     </script>
 </body>
+
 </html>
