@@ -240,7 +240,9 @@ class FileAPISurTrackingXlsxExportCommand extends FileAPICommand {
             $this->style_row_border($worksheet, $row_num);
             
             // 設定行高自動調整以適應內容
-            $worksheet->getRowDimension($row_num)->setRowHeight(-1);
+            // $worksheet->getRowDimension($row_num)->setRowHeight(-1);
+            // 【修改處】根據需求，設定固定行高為 60 points (約 80px)，確保內容能完整顯示
+            $worksheet->getRowDimension($row_num)->setRowHeight(60);
         }
 
         // 寫入最後的簽章列
