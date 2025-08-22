@@ -212,7 +212,10 @@
                            class="flex flex-col items-center justify-center w-full h-full z-10">
                             <i :data-lucide="link.icon || 'globe'" class="w-10 h-10 mb-2 text-blue-500"></i>
                             <h3 class="font-semibold">{{ link.title }}</h3>
-                            <p v-if="link.description" class="text-xs text-gray-500 mt-1" v-html="markdownToHtml(link.description)"></p>
+                            <p v-if="link.description || link.nextMonthHtml" class="text-xs text-gray-500 mt-1">
+                                <span v-html="markdownToHtml(link.description)"></span>
+                                <span v-if="link.nextMonthHtml" v-html="link.nextMonthHtml"></span>
+                            </p>
                         </a>
                         
                         <div v-if="isDownloadable(link.href) || link.href.toLowerCase().endsWith('.pdf')" class="absolute bottom-2 right-2 z-20">
@@ -573,12 +576,13 @@
                     }
                 }
                 
-                // 為每個 link 加上唯一的 ID
+                // 為每個 link 加上唯一的 ID 和新的 nextMonthHtml 屬性
                 return bookmarksCopy.map(category => ({
                     ...category,
                     links: category.links.map((link, index) => ({
                         ...link,
-                        id: `${category.id}-${index}`
+                        id: `${category.id}-${index}`,
+                        nextMonthHtml: '' // *** NEW: 初始化 nextMonthHtml 屬性 ***
                     }))
                 }));
             };
@@ -609,8 +613,8 @@
                     try {
                         const response = await fetch(nextMonthUrl, { method: 'HEAD' });
                         if (response.ok) {
-                            const linkHtml = ` | <a href="${nextMonthUrl}" target="_blank" class="text-blue-500 hover:underline">預覽${nextMonth}月</a>`;
-                            mainGateRoster.description += linkHtml;
+                            // *** FIX: 更新 nextMonthHtml 而不是 description ***
+                            mainGateRoster.nextMonthHtml = ` | <a href="${nextMonthUrl}" target="_blank" class="text-blue-500 hover:underline">預覽${nextMonth}月</a>`;
                         }
                     } catch (error) {
                         console.warn(`無法檢查下個月的大門輪值表: ${nextMonthUrl}`, error);
@@ -627,8 +631,8 @@
                     try {
                         const response = await fetch(nextMonthUrl, { method: 'HEAD' });
                         if (response.ok) {
-                            const linkHtml = ` | <a href="${nextMonthUrl}" target="_blank" class="text-blue-500 hover:underline">預覽下月</a>`;
-                            infRoster.description += linkHtml;
+                            // *** FIX: 更新 nextMonthHtml 而不是 description ***
+                            infRoster.nextMonthHtml = ` | <a href="${nextMonthUrl}" target="_blank" class="text-blue-500 hover:underline">預覽下月</a>`;
                         }
                     } catch (error) {
                         console.warn(`無法檢查下個月的資訊課輪值表: ${nextMonthUrl}`, error);
@@ -804,10 +808,17 @@
             marked.use({ renderer });
 
             const markdownToHtml = (markdownText) => {
-                if (markdownText && typeof marked !== 'undefined') {
-                    return marked.parse(markdownText, { breaks: true, gfm: true });
+                if (!markdownText || typeof marked === 'undefined') {
+                    return markdownText || '';
                 }
-                return markdownText;
+
+                // *** FIX: 預處理文字，將純文字網址轉換為 Markdown 連結語法 ***
+                const textWithLinkedUrls = markdownText.replace(
+                    /(?<!\S)(https?:\/\/[^\s<>"']+)/g,
+                    (url) => `[${url}](${url})`
+                );
+
+                return marked.parse(textWithLinkedUrls, { breaks: true, gfm: true });
             };
             
             return { markdownToHtml };
