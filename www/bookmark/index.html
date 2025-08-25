@@ -99,11 +99,6 @@
             box-shadow: var(--bookmark-card-shadow);
         }
 
-        #bookmarks-content .bookmark-card-styled.highlight {
-            background-color: var(--highlight-bg);
-            border-color: var(--highlight-border);
-        }
-
         #bookmarks-content .bookmark-card-styled.recent::before {
             content: 'RECENT';
             position: absolute;
@@ -136,15 +131,15 @@
             opacity: 0;
         }
 
-        .list-enter-active, .list-leave-active {
+        .list-enter-active, .list-leave-active, .list-move {
             transition: all 0.5s ease;
         }
         .list-enter-from, .list-leave-to {
             opacity: 0;
             transform: translateY(30px);
         }
-        .list-move {
-            transition: transform 0.5s ease;
+        .list-leave-active {
+            position: absolute;
         }
     </style>
 </head>
@@ -205,9 +200,10 @@
                 <transition-group name="list" tag="div" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
                     <div v-for="link in currentCategoryLinks" :key="link.id"
                          class="bookmark-card-styled relative rounded-lg p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden"
-                         :class="{ 'highlight': (clickCounts[link.id] || 0) > 10, 'recent': recentLinks.includes(link.id) }">
+                         :class="{ 'recent': recentLinks.includes(link.id) }"
+                         :style="getRecentHighlightStyle(link)">
                         
-                        <a :href="link.href" :target="getLinkTarget(link.href)" @click="handleLinkClick(link)"
+                        <a :href="link.href" :target="getLinkTarget(link.href)" @click.prevent="handleLinkClick(link, $event)"
                            @mouseover="handlePdfHover($event, link.href)" @mouseleave="hidePdfPopover"
                            class="flex flex-col items-center justify-center w-full h-full z-10">
                             <i :data-lucide="link.icon || 'globe'" class="w-10 h-10 mb-2 text-blue-500"></i>
@@ -243,6 +239,24 @@
                     </header>
                     <div class="flex-1 p-2">
                         <iframe :src="pdfModal.url" class="w-full h-full border-0" title="PDF Viewer"></iframe>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- [新增] IFrame Modal -->
+        <transition name="fade">
+            <div v-if="iframeModal.visible" class="fixed inset-0 z-50 flex items-center justify-center">
+                <div class="modal-backdrop absolute inset-0" @click="closeIframeModal"></div>
+                <div class="modal-content relative w-11/12 h-5/6 max-w-7xl rounded-lg shadow-xl flex flex-col">
+                    <header class="flex items-center justify-between p-4 border-b">
+                        <h3 class="font-semibold text-lg truncate pr-4">{{ iframeModal.title }}</h3>
+                        <button @click="closeIframeModal" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 flex-shrink-0" aria-label="關閉">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </header>
+                    <div class="flex-1 p-2">
+                        <iframe :src="iframeModal.url" class="w-full h-full border-0" :title="iframeModal.title"></iframe>
                     </div>
                 </div>
             </div>
@@ -293,7 +307,7 @@
             "id": "reg",
             "icon": "file-signature",
             "links": [
-            { "title": "登記課專屬入口網站", "href": "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B過程/index.htm", "description": "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", "icon": "layout-list" },
+            { "title": "登記課專屬入口網站", "href": "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2%E9%81%8E%E7%A8%8B/index.htm", "description": "最新消息、課務會議、教育訓練、法規新訊、解釋函令、下載專區、地籍清理、活動剪影", "icon": "layout-list" },
             { "title": "登記課下載區", "href": "http://220.1.34.18/service/section/%E7%99%BB%E8%A8%98%E8%AA%B2/download.htm", "description": "登記課自行維護之各式檔案下載專區", "icon": "download" },
             { "title": "地政智慧控管系統", "href": "http://220.1.34.75:8080/reg/", "description": "提供十多項登記案件查詢及控管統計功能的系統 http://220.1.34.75:8080/reg/", "icon": "landmark" },
             { "title": "地政系統161-跨縣市", "href": "http://220.1.34.161:9080/LandHA/", "description": "地政系統跨縣市操作專屬伺服器 http://220.1.34.161:9080/LandHA/", "icon": "server-cog" },
@@ -537,7 +551,7 @@
         /**
          * @description 管理書籤資料與互動的 Composable
          */
-        function useBookmarks() {
+        function useBookmarks(theme, openIframeModal) { // << 修改：接收 openIframeModal
             // 從 HTML 中讀取原始資料
             const bookmarksDataEl = document.getElementById('bookmark-data');
             const rawBookmarksData = JSON.parse(bookmarksDataEl.textContent || '[]');
@@ -654,34 +668,54 @@
 
             const currentCategoryLinks = computed(() => {
                 const links = [...(currentCategory.value.links || [])];
-                const mostRecentId = recentLinks.value.length > 0 ? recentLinks.value[0] : null;
 
                 links.sort((a, b) => {
-                    const isAMostRecent = a.id === mostRecentId;
-                    const isBMostRecent = b.id === mostRecentId;
-
-                    if (isAMostRecent && !isBMostRecent) return -1;
-                    if (!isAMostRecent && isBMostRecent) return 1;
-
-                    const countA = clickCounts.value[a.id] || 0;
-                    const countB = clickCounts.value[b.id] || 0;
-                    return countB - countA;
+                    const indexA = recentLinks.value.indexOf(a.id);
+                    const indexB = recentLinks.value.indexOf(b.id);
+                    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                    if (indexA !== -1) return -1;
+                    if (indexB !== -1) return 1;
+                    return a.title.localeCompare(b.title, 'zh-Hant');
                 });
 
                 return links;
             });
             
-            const handleLinkClick = (link) => {
+            // << 修改：handleLinkClick 接收 event 物件 >>
+            const handleLinkClick = (link, event) => {
+                // 更新點擊次數與最近點擊清單
                 clickCounts.value[link.id] = (clickCounts.value[link.id] || 0) + 1;
-                
                 const index = recentLinks.value.indexOf(link.id);
                 if (index > -1) {
                     recentLinks.value.splice(index, 1);
                 }
                 recentLinks.value.unshift(link.id);
-                if (recentLinks.value.length > 5) {
+                if (recentLinks.value.length > 10) {
                     recentLinks.value.pop();
                 }
+
+                // << 新增：判斷 Ctrl 鍵 >>
+                if (event.ctrlKey) {
+                    // 如果按下了 Ctrl，則在 Modal 中開啟
+                    openIframeModal(link.href, link.title);
+                } else {
+                    // 否則，執行預設行為 (在新分頁或當前頁面開啟)
+                    window.open(link.href, getLinkTarget(link.href));
+                }
+            };
+
+            const getRecentHighlightStyle = (link) => {
+                const index = recentLinks.value.indexOf(link.id);
+                if (index === -1) return {};
+                const opacity = Math.max(0.1, 1 - (index * 0.1));
+                const isDark = theme.value === 'dark';
+                const bgRgb = isDark ? '58, 55, 44' : '255, 251, 224';
+                const borderRgb = isDark ? '161, 98, 7' : '252, 211, 77';
+                return {
+                    backgroundColor: `rgba(${bgRgb}, ${opacity})`,
+                    borderColor: `rgba(${borderRgb}, ${opacity})`,
+                    transition: 'background-color 0.3s, border-color 0.3s'
+                };
             };
 
             watch(clickCounts, (newCounts) => {
@@ -722,7 +756,8 @@
                 handleLinkClick,
                 getLinkTarget,
                 isDownloadable,
-                checkNextMonthRosters
+                checkNextMonthRosters,
+                getRecentHighlightStyle
             };
         }
 
@@ -751,31 +786,21 @@
                 clearTimeout(popoverTimeout);
                 popoverTimeout = setTimeout(() => {
                     pdfPopoverState.url = `${url}#view=FitH&toolbar=0&navpanes=0`;
-
-                    const popoverWidth = 480; // Corresponds to w-80 (20rem)
-                    const popoverHeight = 576; // Corresponds to h-96 (24rem)
+                    const popoverWidth = 480; 
+                    const popoverHeight = 576;
                     const viewportWidth = window.innerWidth;
                     const viewportHeight = window.innerHeight;
-                    const offset = 15; // Small gap from the cursor
-
+                    const offset = 15;
                     let finalX = event.clientX + offset;
                     let finalY = event.clientY + offset;
-
-                    if (finalX + popoverWidth > viewportWidth) {
-                        finalX = event.clientX - popoverWidth - offset;
-                    }
-
-                    if (finalY + popoverHeight > viewportHeight) {
-                        finalY = event.clientY - popoverHeight - offset;
-                    }
-                    
+                    if (finalX + popoverWidth > viewportWidth) finalX = event.clientX - popoverWidth - offset;
+                    if (finalY + popoverHeight > viewportHeight) finalY = event.clientY - popoverHeight - offset;
                     if (finalX < 0) finalX = 0;
                     if (finalY < 0) finalY = 0;
-
                     pdfPopoverState.x = finalX;
                     pdfPopoverState.y = finalY;
                     pdfPopoverState.visible = true;
-                }, 500); // 延遲 500ms 顯示
+                }, 500);
             };
             
             const hidePdfPopover = () => {
@@ -791,16 +816,41 @@
         }
 
         /**
+         * @description [新增] 管理 IFrame Modal 的 Composable
+         */
+        function useIframeModal() {
+            const iframeModal = reactive({ visible: false, url: '', title: '' });
+
+            const openIframeModal = (url, title) => {
+                iframeModal.url = url;
+                iframeModal.title = title || '網頁內容';
+                iframeModal.visible = true;
+            };
+
+            const closeIframeModal = () => {
+                iframeModal.visible = false;
+                iframeModal.url = '';
+                iframeModal.title = '';
+            };
+
+            // 監聽 Modal 可見性，以防止背景滾動
+            watch(() => iframeModal.visible, (isVisible) => {
+                // 只有在沒有其他 modal 打開時才切換 class
+                if (!document.querySelector('.modal-content')) {
+                   document.body.classList.toggle('modal-open', isVisible);
+                }
+            });
+
+            return { iframeModal, openIframeModal, closeIframeModal };
+        }
+
+        /**
          * @description 其他工具函式
          */
         function useUtils() {
             const renderer = new marked.Renderer();
-            const originalLinkRenderer = renderer.link;
             renderer.link = (href, title, text) => {
-                if (typeof href !== 'string' || !href) {
-                    return text;
-                }
-                
+                if (typeof href !== 'string' || !href) return text;
                 const isExternal = href.startsWith('http');
                 const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
                 return `<a href="${href}" title="${title || ''}"${target}>${text}</a>`;
@@ -808,16 +858,11 @@
             marked.use({ renderer });
 
             const markdownToHtml = (markdownText) => {
-                if (!markdownText || typeof marked === 'undefined') {
-                    return markdownText || '';
-                }
-
-                // *** FIX: 預處理文字，將純文字網址轉換為 Markdown 連結語法 ***
+                if (!markdownText || typeof marked === 'undefined') return markdownText || '';
                 const textWithLinkedUrls = markdownText.replace(
                     /(?<!\S)(https?:\/\/[^\s<>"']+)/g,
                     (url) => `[${url}](${url})`
                 );
-
                 return marked.parse(textWithLinkedUrls, { breaks: true, gfm: true });
             };
             
@@ -836,17 +881,14 @@
                 const sidebarManager = useSidebar();
                 const clockManager = useClock();
                 const fontSizeManager = useFontSize();
-                const bookmarkManager = useBookmarks();
                 const pdfViewerManager = usePdfViewer();
+                const iframeModalManager = useIframeModal(); // << 新增
+                const bookmarkManager = useBookmarks(themeManager.theme, iframeModalManager.openIframeModal); // << 修改：傳入 openIframeModal
                 const utils = useUtils();
 
                 onMounted(() => {
-                    // 頁面掛載後，非同步檢查下個月的輪值表
                     bookmarkManager.checkNextMonthRosters();
-
-                    // 初始化 Lucide Icons
                     lucide.createIcons();
-                    // 當 DOM 更新後，再次呼叫以渲染動態新增的圖示
                     watch([
                         themeManager.theme, 
                         sidebarManager.isSidebarCollapsed, 
@@ -866,6 +908,7 @@
                     ...fontSizeManager,
                     ...bookmarkManager,
                     ...pdfViewerManager,
+                    ...iframeModalManager, // << 新增
                     ...utils
                 };
             }
