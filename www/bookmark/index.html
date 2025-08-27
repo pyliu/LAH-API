@@ -244,11 +244,13 @@
             </div>
         </transition>
 
-        <!-- [新增] IFrame Modal -->
+        <!-- IFrame Modal -->
         <transition name="fade">
-            <div v-if="iframeModal.visible" class="fixed inset-0 z-50 flex items-center justify-center">
+            <!-- *** FIX: 在外層容器加上 padding *** -->
+            <div v-if="iframeModal.visible" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
                 <div class="modal-backdrop absolute inset-0" @click="closeIframeModal"></div>
-                <div class="modal-content relative w-11/12 h-5/6 max-w-7xl rounded-lg shadow-xl flex flex-col">
+                <!-- *** FIX: 讓 modal-content 填滿有 padding 的容器 *** -->
+                <div class="modal-content relative w-full h-full rounded-lg shadow-xl flex flex-col">
                     <header class="flex items-center justify-between p-4 border-b">
                         <h3 class="font-semibold text-lg truncate pr-4">{{ iframeModal.title }}</h3>
                         <button @click="closeIframeModal" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 flex-shrink-0" aria-label="關閉">
@@ -439,482 +441,484 @@
     </script>
     
     <script>
-        const { createApp, ref, reactive, computed, watch, onMounted, nextTick } = Vue;
+        document.addEventListener('DOMContentLoaded', () => {
+            const { createApp, ref, reactive, computed, watch, onMounted, nextTick } = Vue;
 
-        // =================================================================
-        // Composable 函式：將相關邏輯封裝在一起，提高可讀性與複用性
-        // =================================================================
-
-        /**
-         * @description 管理主題（淺色/深色模式）的 Composable
-         */
-        function useTheme() {
-            const getInitialTheme = () => {
-                const storedTheme = localStorage.getItem('theme');
-                if (storedTheme === 'light' || storedTheme === 'dark') {
-                    return storedTheme;
-                }
-                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    return 'dark';
-                }
-                return 'light';
-            };
-
-            const theme = ref(getInitialTheme());
-
-            const applyTheme = (themeValue) => {
-                document.documentElement.dataset.theme = themeValue;
-            };
-
-            const toggleTheme = () => {
-                theme.value = theme.value === 'light' ? 'dark' : 'light';
-            };
-
-            watch(theme, (newTheme) => {
-                localStorage.setItem('theme', newTheme);
-                applyTheme(newTheme);
-            }, { immediate: true });
-
-            return { theme, toggleTheme };
-        }
-
-        /**
-         * @description 管理側邊欄狀態的 Composable
-         */
-        function useSidebar() {
-            const isSidebarCollapsed = ref(localStorage.getItem('sidebarCollapsed') === 'true');
-
-            const toggleSidebar = () => {
-                isSidebarCollapsed.value = !isSidebarCollapsed.value;
-            };
-
-            watch(isSidebarCollapsed, (isCollapsed) => {
-                localStorage.setItem('sidebarCollapsed', isCollapsed);
-            });
-
-            return { isSidebarCollapsed, toggleSidebar };
-        }
-
-        /**
-         * @description 管理即時時鐘的 Composable
-         */
-        function useClock() {
-            const currentTime = ref('');
-            const currentDate = ref('');
-
-            const updateTime = () => {
-                const now = new Date();
-                currentTime.value = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-                currentDate.value = now.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
-            };
-
-            onMounted(() => {
-                updateTime();
-                setInterval(updateTime, 1000);
-            });
-
-            return { currentTime, currentDate };
-        }
-        
-        /**
-         * @description 管理字體大小的 Composable
-         */
-        function useFontSize() {
-            const fontSizes = { small: '110%', medium: '120%', large: '130%' };
-            const fontSizeKeys = ['small', 'medium', 'large'];
-            const fontSizeLabels = { small: '小', medium: '中', large: '大' };
-
-            const fontSize = ref(localStorage.getItem('fontSize') || 'small');
-
-            const fontSizeLabel = computed(() => fontSizeLabels[fontSize.value]);
-
-            const applyFontSize = () => {
-                document.documentElement.style.fontSize = fontSizes[fontSize.value];
-            };
-
-            const toggleFontSize = () => {
-                const currentIndex = fontSizeKeys.indexOf(fontSize.value);
-                const nextIndex = (currentIndex + 1) % fontSizeKeys.length;
-                fontSize.value = fontSizeKeys[nextIndex];
-            };
-
-            watch(fontSize, (newSize) => {
-                localStorage.setItem('fontSize', newSize);
-                applyFontSize();
-            });
-
-            onMounted(applyFontSize);
-
-            return { fontSize, fontSizeLabel, toggleFontSize };
-        }
-
-        /**
-         * @description 管理書籤資料與互動的 Composable
-         */
-        function useBookmarks(theme, openIframeModal) { // << 修改：接收 openIframeModal
-            // 從 HTML 中讀取原始資料
-            const bookmarksDataEl = document.getElementById('bookmark-data');
-            const rawBookmarksData = JSON.parse(bookmarksDataEl.textContent || '[]');
+            // =================================================================
+            // Composable 函式：將相關邏輯封裝在一起，提高可讀性與複用性
+            // =================================================================
 
             /**
-             * @description 同步處理書籤資料：更新當月輪值表、加上唯一 ID
-             * @returns {Array} - 初步處理後的書籤資料
+             * @description 管理主題（淺色/深色模式）的 Composable
              */
-            const getInitialBookmarks = () => {
-                const now = new Date();
-                const rocYear = now.getFullYear() - 1911;
-                const currentMonth = now.getMonth() + 1;
-                
-                const bookmarksCopy = JSON.parse(JSON.stringify(rawBookmarksData));
-
-                // 更新 "常用表單下載" 的大門輪值表
-                const filesCategory = bookmarksCopy.find(c => c.id === 'files');
-                if (filesCategory) {
-                    const dutyRosterLink = filesCategory.links.find(l => l.linkId === 'main-gate-roster');
-                    if (dutyRosterLink) {
-                        dutyRosterLink.title = `${rocYear}年${currentMonth}月大門輪值表`;
-                        dutyRosterLink.href = `http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/${rocYear}/${currentMonth}%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
-                        dutyRosterLink.description = `本月份全所關大門輪值班表PDF檢視`;
+            function useTheme() {
+                const getInitialTheme = () => {
+                    const storedTheme = localStorage.getItem('theme');
+                    if (storedTheme === 'light' || storedTheme === 'dark') {
+                        return storedTheme;
                     }
-                }
-
-                // 更新 "資訊課" 的輪值表
-                const infCategory = bookmarksCopy.find(c => c.id === 'inf');
-                if (infCategory) {
-                    const infoDutyRosterLink = infCategory.links.find(l => l.linkId === 'inf-roster');
-                    if (infoDutyRosterLink) {
-                        infoDutyRosterLink.title = `資訊課${rocYear}年${currentMonth}月輪值表`;
-                        // 注意：這裡的連結結構與大門輪值表不同，保持原樣
-                        infoDutyRosterLink.href = `http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
-                        infoDutyRosterLink.description = `資訊課本月份每日工作輪值表`;
+                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                        return 'dark';
                     }
-                }
-                
-                // 為每個 link 加上唯一的 ID 和新的 nextMonthHtml 屬性
-                return bookmarksCopy.map(category => ({
-                    ...category,
-                    links: category.links.map((link, index) => ({
-                        ...link,
-                        id: `${category.id}-${index}`,
-                        nextMonthHtml: '' // *** NEW: 初始化 nextMonthHtml 屬性 ***
-                    }))
-                }));
-            };
-            
-            const bookmarks = reactive(getInitialBookmarks());
+                    return 'light';
+                };
+
+                const theme = ref(getInitialTheme());
+
+                const applyTheme = (themeValue) => {
+                    document.documentElement.dataset.theme = themeValue;
+                };
+
+                const toggleTheme = () => {
+                    theme.value = theme.value === 'light' ? 'dark' : 'light';
+                };
+
+                watch(theme, (newTheme) => {
+                    localStorage.setItem('theme', newTheme);
+                    applyTheme(newTheme);
+                }, { immediate: true });
+
+                return { theme, toggleTheme };
+            }
 
             /**
-             * @description 異步檢查下個月的輪值表是否存在，並更新描述
+             * @description 管理側邊欄狀態的 Composable
              */
-            const checkNextMonthRosters = async () => {
-                const now = new Date();
-                const rocYear = now.getFullYear() - 1911;
-                
-                let nextMonth = now.getMonth() + 2; // getMonth() 是 0-11，所以 +2
-                let nextMonthRocYear = rocYear;
-                if (nextMonth > 12) {
-                    nextMonth = 1;
-                    nextMonthRocYear += 1;
-                }
+            function useSidebar() {
+                const isSidebarCollapsed = ref(localStorage.getItem('sidebarCollapsed') === 'true');
 
-                // 檢查大門輪值表
-                const mainGateRoster = bookmarks
-                    .find(c => c.id === 'files')?.links
-                    .find(l => l.linkId === 'main-gate-roster');
-                
-                if (mainGateRoster) {
-                    const nextMonthUrl = `http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/${nextMonthRocYear}/${nextMonth}%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
-                    try {
-                        const response = await fetch(nextMonthUrl, { method: 'HEAD' });
-                        if (response.ok) {
-                            // *** FIX: 更新 nextMonthHtml 而不是 description ***
-                            mainGateRoster.nextMonthHtml = ` | <a href="${nextMonthUrl}" target="_blank" class="text-blue-500 hover:underline">預覽${nextMonth}月</a>`;
-                        }
-                    } catch (error) {
-                        console.warn(`無法檢查下個月的大門輪值表: ${nextMonthUrl}`, error);
-                    }
-                }
+                const toggleSidebar = () => {
+                    isSidebarCollapsed.value = !isSidebarCollapsed.value;
+                };
 
-                // 檢查資訊課輪值表
-                const infRoster = bookmarks
-                    .find(c => c.id === 'inf')?.links
-                    .find(l => l.linkId === 'inf-roster');
-
-                if (infRoster) {
-                    const nextMonthUrl = `http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8NEXT.pdf`;
-                    try {
-                        const response = await fetch(nextMonthUrl, { method: 'HEAD' });
-                        if (response.ok) {
-                            // *** FIX: 更新 nextMonthHtml 而不是 description ***
-                            infRoster.nextMonthHtml = ` | <a href="${nextMonthUrl}" target="_blank" class="text-blue-500 hover:underline">預覽下月</a>`;
-                        }
-                    } catch (error) {
-                        console.warn(`無法檢查下個月的資訊課輪值表: ${nextMonthUrl}`, error);
-                    }
-                }
-            };
-            
-            const currentCategoryId = ref(localStorage.getItem('lastSelectedCategory') || (bookmarks.length > 0 ? bookmarks[0].id : null));
-            const clickCounts = ref(JSON.parse(localStorage.getItem('clickCounts') || '{}'));
-            const recentLinks = ref(JSON.parse(localStorage.getItem('recentLinks') || '[]'));
-            
-            const selectCategory = (id) => {
-                currentCategoryId.value = id;
-            };
-
-            const currentCategory = computed(() => {
-                return bookmarks.find(c => c.id === currentCategoryId.value) || { category: '未分類', links: [] };
-            });
-
-            const currentCategoryLinks = computed(() => {
-                const links = [...(currentCategory.value.links || [])];
-
-                links.sort((a, b) => {
-                    const indexA = recentLinks.value.indexOf(a.id);
-                    const indexB = recentLinks.value.indexOf(b.id);
-                    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-                    if (indexA !== -1) return -1;
-                    if (indexB !== -1) return 1;
-                    return a.title.localeCompare(b.title, 'zh-Hant');
+                watch(isSidebarCollapsed, (isCollapsed) => {
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
                 });
 
-                return links;
-            });
-            
-            // << 修改：handleLinkClick 接收 event 物件 >>
-            const handleLinkClick = (link, event) => {
-                // 更新點擊次數與最近點擊清單
-                clickCounts.value[link.id] = (clickCounts.value[link.id] || 0) + 1;
-                const index = recentLinks.value.indexOf(link.id);
-                if (index > -1) {
-                    recentLinks.value.splice(index, 1);
-                }
-                recentLinks.value.unshift(link.id);
-                if (recentLinks.value.length > 10) {
-                    recentLinks.value.pop();
-                }
+                return { isSidebarCollapsed, toggleSidebar };
+            }
 
-                // << 新增：判斷 Ctrl 鍵 >>
-                if (event.ctrlKey) {
-                    // 如果按下了 Ctrl，則在 Modal 中開啟
-                    openIframeModal(link.href, link.title);
-                } else {
-                    // 否則，執行預設行為 (在新分頁或當前頁面開啟)
-                    window.open(link.href, getLinkTarget(link.href));
-                }
-            };
+            /**
+             * @description 管理即時時鐘的 Composable
+             */
+            function useClock() {
+                const currentTime = ref('');
+                const currentDate = ref('');
 
-            const getRecentHighlightStyle = (link) => {
-                const index = recentLinks.value.indexOf(link.id);
-                if (index === -1) return {};
-                const opacity = Math.max(0.1, 1 - (index * 0.1));
-                const isDark = theme.value === 'dark';
-                const bgRgb = isDark ? '58, 55, 44' : '255, 251, 224';
-                const borderRgb = isDark ? '161, 98, 7' : '252, 211, 77';
-                return {
-                    backgroundColor: `rgba(${bgRgb}, ${opacity})`,
-                    borderColor: `rgba(${borderRgb}, ${opacity})`,
-                    transition: 'background-color 0.3s, border-color 0.3s'
+                const updateTime = () => {
+                    const now = new Date();
+                    currentTime.value = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                    currentDate.value = now.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
                 };
-            };
-
-            watch(clickCounts, (newCounts) => {
-                localStorage.setItem('clickCounts', JSON.stringify(newCounts));
-            }, { deep: true });
-
-            watch(recentLinks, (newLinks) => {
-                localStorage.setItem('recentLinks', JSON.stringify(newLinks));
-            }, { deep: true });
-            
-            watch(currentCategoryId, (newId) => {
-                if (newId) {
-                   localStorage.setItem('lastSelectedCategory', newId);
-                }
-            });
-
-            const getLinkTarget = (url) => {
-                try {
-                    const urlObj = new URL(url, window.location.origin);
-                    return urlObj.protocol.startsWith('http') ? '_blank' : '_self';
-                } catch (e) {
-                    return '_blank';
-                }
-            };
-
-            const isDownloadable = (url) => {
-                return /\.(zip|rar|7z|exe|dmg|doc|docx|xls|xlsx|ppt|pptx)$/i.test(url);
-            };
-
-            return { 
-                bookmarks, 
-                currentCategoryId, 
-                selectCategory, 
-                currentCategory, 
-                currentCategoryLinks,
-                clickCounts,
-                recentLinks,
-                handleLinkClick,
-                getLinkTarget,
-                isDownloadable,
-                checkNextMonthRosters,
-                getRecentHighlightStyle
-            };
-        }
-
-        /**
-         * @description 管理 PDF 預覽器（彈出視窗與懸浮預覽）的 Composable
-         */
-        function usePdfViewer() {
-            const pdfModal = reactive({ visible: false, url: '' });
-            const pdfPopover = ref(null);
-            const pdfPopoverState = reactive({ visible: false, url: '', x: 0, y: 0 });
-            let popoverTimeout = null;
-
-            const openPdfModal = (url) => {
-                pdfModal.url = `${url}#view=FitH&toolbar=1&navpanes=1`;
-                pdfModal.visible = true;
-            };
-
-            const closePdfModal = () => {
-                pdfModal.visible = false;
-                pdfModal.url = '';
-            };
-
-            const handlePdfHover = (event, url) => {
-                if (!url.toLowerCase().endsWith('.pdf')) return;
-                
-                clearTimeout(popoverTimeout);
-                popoverTimeout = setTimeout(() => {
-                    pdfPopoverState.url = `${url}#view=FitH&toolbar=0&navpanes=0`;
-                    const popoverWidth = 480; 
-                    const popoverHeight = 576;
-                    const viewportWidth = window.innerWidth;
-                    const viewportHeight = window.innerHeight;
-                    const offset = 15;
-                    let finalX = event.clientX + offset;
-                    let finalY = event.clientY + offset;
-                    if (finalX + popoverWidth > viewportWidth) finalX = event.clientX - popoverWidth - offset;
-                    if (finalY + popoverHeight > viewportHeight) finalY = event.clientY - popoverHeight - offset;
-                    if (finalX < 0) finalX = 0;
-                    if (finalY < 0) finalY = 0;
-                    pdfPopoverState.x = finalX;
-                    pdfPopoverState.y = finalY;
-                    pdfPopoverState.visible = true;
-                }, 500);
-            };
-            
-            const hidePdfPopover = () => {
-                clearTimeout(popoverTimeout);
-                pdfPopoverState.visible = false;
-            };
-
-            watch(() => pdfModal.visible, (isVisible) => {
-                document.body.classList.toggle('modal-open', isVisible);
-            });
-
-            return { pdfModal, pdfPopover, pdfPopoverState, openPdfModal, closePdfModal, handlePdfHover, hidePdfPopover };
-        }
-
-        /**
-         * @description [新增] 管理 IFrame Modal 的 Composable
-         */
-        function useIframeModal() {
-            const iframeModal = reactive({ visible: false, url: '', title: '' });
-
-            const openIframeModal = (url, title) => {
-                iframeModal.url = url;
-                iframeModal.title = title || '網頁內容';
-                iframeModal.visible = true;
-            };
-
-            const closeIframeModal = () => {
-                iframeModal.visible = false;
-                iframeModal.url = '';
-                iframeModal.title = '';
-            };
-
-            // 監聽 Modal 可見性，以防止背景滾動
-            watch(() => iframeModal.visible, (isVisible) => {
-                // 只有在沒有其他 modal 打開時才切換 class
-                if (!document.querySelector('.modal-content')) {
-                   document.body.classList.toggle('modal-open', isVisible);
-                }
-            });
-
-            return { iframeModal, openIframeModal, closeIframeModal };
-        }
-
-        /**
-         * @description 其他工具函式
-         */
-        function useUtils() {
-            const renderer = new marked.Renderer();
-            renderer.link = (href, title, text) => {
-                if (typeof href !== 'string' || !href) return text;
-                const isExternal = href.startsWith('http');
-                const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
-                return `<a href="${href}" title="${title || ''}"${target}>${text}</a>`;
-            };
-            marked.use({ renderer });
-
-            const markdownToHtml = (markdownText) => {
-                if (!markdownText || typeof marked === 'undefined') return markdownText || '';
-                const textWithLinkedUrls = markdownText.replace(
-                    /(?<!\S)(https?:\/\/[^\s<>"']+)/g,
-                    (url) => `[${url}](${url})`
-                );
-                return marked.parse(textWithLinkedUrls, { breaks: true, gfm: true });
-            };
-            
-            return { markdownToHtml };
-        }
-
-
-        // =================================================================
-        // Vue 應用程式實例
-        // =================================================================
-
-        const app = createApp({
-            setup() {
-                // 組合所有 Composable 函式
-                const themeManager = useTheme();
-                const sidebarManager = useSidebar();
-                const clockManager = useClock();
-                const fontSizeManager = useFontSize();
-                const pdfViewerManager = usePdfViewer();
-                const iframeModalManager = useIframeModal(); // << 新增
-                const bookmarkManager = useBookmarks(themeManager.theme, iframeModalManager.openIframeModal); // << 修改：傳入 openIframeModal
-                const utils = useUtils();
 
                 onMounted(() => {
-                    bookmarkManager.checkNextMonthRosters();
-                    lucide.createIcons();
-                    watch([
-                        themeManager.theme, 
-                        sidebarManager.isSidebarCollapsed, 
-                        bookmarkManager.currentCategoryLinks
-                    ], () => {
-                        nextTick(() => {
-                            lucide.createIcons();
-                        });
-                    }, { deep: true, immediate: true });
+                    updateTime();
+                    setInterval(updateTime, 1000);
                 });
 
-                // 將所有需要暴露給模板的狀態和方法集中返回
-                return {
-                    ...themeManager,
-                    ...sidebarManager,
-                    ...clockManager,
-                    ...fontSizeManager,
-                    ...bookmarkManager,
-                    ...pdfViewerManager,
-                    ...iframeModalManager, // << 新增
-                    ...utils
+                return { currentTime, currentDate };
+            }
+            
+            /**
+             * @description 管理字體大小的 Composable
+             */
+            function useFontSize() {
+                const fontSizes = { small: '110%', medium: '120%', large: '130%' };
+                const fontSizeKeys = ['small', 'medium', 'large'];
+                const fontSizeLabels = { small: '小', medium: '中', large: '大' };
+
+                const fontSize = ref(localStorage.getItem('fontSize') || 'small');
+
+                const fontSizeLabel = computed(() => fontSizeLabels[fontSize.value]);
+
+                const applyFontSize = () => {
+                    document.documentElement.style.fontSize = fontSizes[fontSize.value];
+                };
+
+                const toggleFontSize = () => {
+                    const currentIndex = fontSizeKeys.indexOf(fontSize.value);
+                    const nextIndex = (currentIndex + 1) % fontSizeKeys.length;
+                    fontSize.value = fontSizeKeys[nextIndex];
+                };
+
+                watch(fontSize, (newSize) => {
+                    localStorage.setItem('fontSize', newSize);
+                    applyFontSize();
+                });
+
+                onMounted(applyFontSize);
+
+                return { fontSize, fontSizeLabel, toggleFontSize };
+            }
+
+            /**
+             * @description 管理書籤資料與互動的 Composable
+             */
+            function useBookmarks(theme, openIframeModal) { // << 修改：接收 openIframeModal
+                // 從 HTML 中讀取原始資料
+                const bookmarksDataEl = document.getElementById('bookmark-data');
+                const rawBookmarksData = JSON.parse(bookmarksDataEl.textContent || '[]');
+
+                /**
+                 * @description 同步處理書籤資料：更新當月輪值表、加上唯一 ID
+                 * @returns {Array} - 初步處理後的書籤資料
+                 */
+                const getInitialBookmarks = () => {
+                    const now = new Date();
+                    const rocYear = now.getFullYear() - 1911;
+                    const currentMonth = now.getMonth() + 1;
+                    
+                    const bookmarksCopy = JSON.parse(JSON.stringify(rawBookmarksData));
+
+                    // 更新 "常用表單下載" 的大門輪值表
+                    const filesCategory = bookmarksCopy.find(c => c.id === 'files');
+                    if (filesCategory) {
+                        const dutyRosterLink = filesCategory.links.find(l => l.linkId === 'main-gate-roster');
+                        if (dutyRosterLink) {
+                            dutyRosterLink.title = `${rocYear}年${currentMonth}月大門輪值表`;
+                            dutyRosterLink.href = `http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/${rocYear}/${currentMonth}%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
+                            dutyRosterLink.description = `本月份全所關大門輪值班表PDF檢視`;
+                        }
+                    }
+
+                    // 更新 "資訊課" 的輪值表
+                    const infCategory = bookmarksCopy.find(c => c.id === 'inf');
+                    if (infCategory) {
+                        const infoDutyRosterLink = infCategory.links.find(l => l.linkId === 'inf-roster');
+                        if (infoDutyRosterLink) {
+                            infoDutyRosterLink.title = `資訊課${rocYear}年${currentMonth}月輪值表`;
+                            // 注意：這裡的連結結構與大門輪值表不同，保持原樣
+                            infoDutyRosterLink.href = `http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
+                            infoDutyRosterLink.description = `資訊課本月份每日工作輪值表`;
+                        }
+                    }
+                    
+                    // 為每個 link 加上唯一的 ID 和新的 nextMonthHtml 屬性
+                    return bookmarksCopy.map(category => ({
+                        ...category,
+                        links: category.links.map((link, index) => ({
+                            ...link,
+                            id: `${category.id}-${index}`,
+                            nextMonthHtml: '' // *** NEW: 初始化 nextMonthHtml 屬性 ***
+                        }))
+                    }));
+                };
+                
+                const bookmarks = reactive(getInitialBookmarks());
+
+                /**
+                 * @description 異步檢查下個月的輪值表是否存在，並更新描述
+                 */
+                const checkNextMonthRosters = async () => {
+                    const now = new Date();
+                    const rocYear = now.getFullYear() - 1911;
+                    
+                    let nextMonth = now.getMonth() + 2; // getMonth() 是 0-11，所以 +2
+                    let nextMonthRocYear = rocYear;
+                    if (nextMonth > 12) {
+                        nextMonth = 1;
+                        nextMonthRocYear += 1;
+                    }
+
+                    // 檢查大門輪值表
+                    const mainGateRoster = bookmarks
+                        .find(c => c.id === 'files')?.links
+                        .find(l => l.linkId === 'main-gate-roster');
+                    
+                    if (mainGateRoster) {
+                        const nextMonthUrl = `http://220.1.34.18/service/section/%E4%BA%BA%E4%BA%8B%E5%AE%A4/photogallery/%E8%BC%AA%E5%80%BC%E8%A1%A8/${nextMonthRocYear}/${nextMonth}%E6%9C%88%E8%BC%AA%E5%80%BC%E8%A1%A8.pdf`;
+                        try {
+                            const response = await fetch(nextMonthUrl, { method: 'HEAD' });
+                            if (response.ok) {
+                                // *** FIX: 更新 nextMonthHtml 而不是 description ***
+                                mainGateRoster.nextMonthHtml = ` | <a href="${nextMonthUrl}" target="_blank" class="text-blue-500 hover:underline">預覽${nextMonth}月</a>`;
+                            }
+                        } catch (error) {
+                            console.warn(`無法檢查下個月的大門輪值表: ${nextMonthUrl}`, error);
+                        }
+                    }
+
+                    // 檢查資訊課輪值表
+                    const infRoster = bookmarks
+                        .find(c => c.id === 'inf')?.links
+                        .find(l => l.linkId === 'inf-roster');
+
+                    if (infRoster) {
+                        const nextMonthUrl = `http://220.1.34.18/service/section/%E8%B3%87%E8%A8%8A%E8%AA%B2/news/%E8%B3%87%E8%A8%8A%E8%AA%B2%E8%BC%AA%E5%80%BC%E8%A1%A8NEXT.pdf`;
+                        try {
+                            const response = await fetch(nextMonthUrl, { method: 'HEAD' });
+                            if (response.ok) {
+                                // *** FIX: 更新 nextMonthHtml 而不是 description ***
+                                infRoster.nextMonthHtml = ` | <a href="${nextMonthUrl}" target="_blank" class="text-blue-500 hover:underline">預覽下月</a>`;
+                            }
+                        } catch (error) {
+                            console.warn(`無法檢查下個月的資訊課輪值表: ${nextMonthUrl}`, error);
+                        }
+                    }
+                };
+                
+                const currentCategoryId = ref(localStorage.getItem('lastSelectedCategory') || (bookmarks.length > 0 ? bookmarks[0].id : null));
+                const clickCounts = ref(JSON.parse(localStorage.getItem('clickCounts') || '{}'));
+                const recentLinks = ref(JSON.parse(localStorage.getItem('recentLinks') || '[]'));
+                
+                const selectCategory = (id) => {
+                    currentCategoryId.value = id;
+                };
+
+                const currentCategory = computed(() => {
+                    return bookmarks.find(c => c.id === currentCategoryId.value) || { category: '未分類', links: [] };
+                });
+
+                const currentCategoryLinks = computed(() => {
+                    const links = [...(currentCategory.value.links || [])];
+
+                    links.sort((a, b) => {
+                        const indexA = recentLinks.value.indexOf(a.id);
+                        const indexB = recentLinks.value.indexOf(b.id);
+                        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                        if (indexA !== -1) return -1;
+                        if (indexB !== -1) return 1;
+                        return a.title.localeCompare(b.title, 'zh-Hant');
+                    });
+
+                    return links;
+                });
+                
+                // << 修改：handleLinkClick 接收 event 物件 >>
+                const handleLinkClick = (link, event) => {
+                    // 更新點擊次數與最近點擊清單
+                    clickCounts.value[link.id] = (clickCounts.value[link.id] || 0) + 1;
+                    const index = recentLinks.value.indexOf(link.id);
+                    if (index > -1) {
+                        recentLinks.value.splice(index, 1);
+                    }
+                    recentLinks.value.unshift(link.id);
+                    if (recentLinks.value.length > 10) {
+                        recentLinks.value.pop();
+                    }
+
+                    // << 新增：判斷 Ctrl 鍵 >>
+                    if (event.ctrlKey) {
+                        // 如果按下了 Ctrl，則在 Modal 中開啟
+                        openIframeModal(link.href, link.title);
+                    } else {
+                        // 否則，執行預設行為 (在新分頁或當前頁面開啟)
+                        window.open(link.href, getLinkTarget(link.href));
+                    }
+                };
+
+                const getRecentHighlightStyle = (link) => {
+                    const index = recentLinks.value.indexOf(link.id);
+                    if (index === -1) return {};
+                    const opacity = Math.max(0.1, 1 - (index * 0.1));
+                    const isDark = theme.value === 'dark';
+                    const bgRgb = isDark ? '58, 55, 44' : '255, 251, 224';
+                    const borderRgb = isDark ? '161, 98, 7' : '252, 211, 77';
+                    return {
+                        backgroundColor: `rgba(${bgRgb}, ${opacity})`,
+                        borderColor: `rgba(${borderRgb}, ${opacity})`,
+                        transition: 'background-color 0.3s, border-color 0.3s'
+                    };
+                };
+
+                watch(clickCounts, (newCounts) => {
+                    localStorage.setItem('clickCounts', JSON.stringify(newCounts));
+                }, { deep: true });
+
+                watch(recentLinks, (newLinks) => {
+                    localStorage.setItem('recentLinks', JSON.stringify(newLinks));
+                }, { deep: true });
+                
+                watch(currentCategoryId, (newId) => {
+                    if (newId) {
+                       localStorage.setItem('lastSelectedCategory', newId);
+                    }
+                });
+
+                const getLinkTarget = (url) => {
+                    try {
+                        const urlObj = new URL(url, window.location.origin);
+                        return urlObj.protocol.startsWith('http') ? '_blank' : '_self';
+                    } catch (e) {
+                        return '_blank';
+                    }
+                };
+
+                const isDownloadable = (url) => {
+                    return /\.(zip|rar|7z|exe|dmg|doc|docx|xls|xlsx|ppt|pptx)$/i.test(url);
+                };
+
+                return { 
+                    bookmarks, 
+                    currentCategoryId, 
+                    selectCategory, 
+                    currentCategory, 
+                    currentCategoryLinks,
+                    clickCounts,
+                    recentLinks,
+                    handleLinkClick,
+                    getLinkTarget,
+                    isDownloadable,
+                    checkNextMonthRosters,
+                    getRecentHighlightStyle
                 };
             }
-        });
 
-        app.mount('#app');
+            /**
+             * @description 管理 PDF 預覽器（彈出視窗與懸浮預覽）的 Composable
+             */
+            function usePdfViewer() {
+                const pdfModal = reactive({ visible: false, url: '' });
+                const pdfPopover = ref(null);
+                const pdfPopoverState = reactive({ visible: false, url: '', x: 0, y: 0 });
+                let popoverTimeout = null;
+
+                const openPdfModal = (url) => {
+                    pdfModal.url = `${url}#view=FitH&toolbar=1&navpanes=1`;
+                    pdfModal.visible = true;
+                };
+
+                const closePdfModal = () => {
+                    pdfModal.visible = false;
+                    pdfModal.url = '';
+                };
+
+                const handlePdfHover = (event, url) => {
+                    if (!url.toLowerCase().endsWith('.pdf')) return;
+                    
+                    clearTimeout(popoverTimeout);
+                    popoverTimeout = setTimeout(() => {
+                        pdfPopoverState.url = `${url}#view=FitH&toolbar=0&navpanes=0`;
+                        const popoverWidth = 480; 
+                        const popoverHeight = 576;
+                        const viewportWidth = window.innerWidth;
+                        const viewportHeight = window.innerHeight;
+                        const offset = 15;
+                        let finalX = event.clientX + offset;
+                        let finalY = event.clientY + offset;
+                        if (finalX + popoverWidth > viewportWidth) finalX = event.clientX - popoverWidth - offset;
+                        if (finalY + popoverHeight > viewportHeight) finalY = event.clientY - popoverHeight - offset;
+                        if (finalX < 0) finalX = 0;
+                        if (finalY < 0) finalY = 0;
+                        pdfPopoverState.x = finalX;
+                        pdfPopoverState.y = finalY;
+                        pdfPopoverState.visible = true;
+                    }, 500);
+                };
+                
+                const hidePdfPopover = () => {
+                    clearTimeout(popoverTimeout);
+                    pdfPopoverState.visible = false;
+                };
+
+                watch(() => pdfModal.visible, (isVisible) => {
+                    document.body.classList.toggle('modal-open', isVisible);
+                });
+
+                return { pdfModal, pdfPopover, pdfPopoverState, openPdfModal, closePdfModal, handlePdfHover, hidePdfPopover };
+            }
+
+            /**
+             * @description [新增] 管理 IFrame Modal 的 Composable
+             */
+            function useIframeModal() {
+                const iframeModal = reactive({ visible: false, url: '', title: '' });
+
+                const openIframeModal = (url, title) => {
+                    iframeModal.url = url;
+                    iframeModal.title = title || '網頁內容';
+                    iframeModal.visible = true;
+                };
+
+                const closeIframeModal = () => {
+                    iframeModal.visible = false;
+                    iframeModal.url = '';
+                    iframeModal.title = '';
+                };
+
+                // 監聽 Modal 可見性，以防止背景滾動
+                watch(() => iframeModal.visible, (isVisible) => {
+                    // 只有在沒有其他 modal 打開時才切換 class
+                    if (!document.querySelector('.modal-content')) {
+                       document.body.classList.toggle('modal-open', isVisible);
+                    }
+                });
+
+                return { iframeModal, openIframeModal, closeIframeModal };
+            }
+
+            /**
+             * @description 其他工具函式
+             */
+            function useUtils() {
+                const renderer = new marked.Renderer();
+                renderer.link = (href, title, text) => {
+                    if (typeof href !== 'string' || !href) return text;
+                    const isExternal = href.startsWith('http');
+                    const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
+                    return `<a href="${href}" title="${title || ''}"${target}>${text}</a>`;
+                };
+                marked.use({ renderer });
+
+                const markdownToHtml = (markdownText) => {
+                    if (!markdownText || typeof marked === 'undefined') return markdownText || '';
+                    const textWithLinkedUrls = markdownText.replace(
+                        /(?<!\S)(https?:\/\/[^\s<>"']+)/g,
+                        (url) => `[${url}](${url})`
+                    );
+                    return marked.parse(textWithLinkedUrls, { breaks: true, gfm: true });
+                };
+                
+                return { markdownToHtml };
+            }
+
+
+            // =================================================================
+            // Vue 應用程式實例
+            // =================================================================
+
+            const app = createApp({
+                setup() {
+                    // 組合所有 Composable 函式
+                    const themeManager = useTheme();
+                    const sidebarManager = useSidebar();
+                    const clockManager = useClock();
+                    const fontSizeManager = useFontSize();
+                    const pdfViewerManager = usePdfViewer();
+                    const iframeModalManager = useIframeModal(); // << 新增
+                    const bookmarkManager = useBookmarks(themeManager.theme, iframeModalManager.openIframeModal); // << 修改：傳入 openIframeModal
+                    const utils = useUtils();
+
+                    onMounted(() => {
+                        bookmarkManager.checkNextMonthRosters();
+                        lucide.createIcons();
+                        watch([
+                            themeManager.theme, 
+                            sidebarManager.isSidebarCollapsed, 
+                            bookmarkManager.currentCategoryLinks
+                        ], () => {
+                            nextTick(() => {
+                                lucide.createIcons();
+                            });
+                        }, { deep: true, immediate: true });
+                    });
+
+                    // 將所有需要暴露給模板的狀態和方法集中返回
+                    return {
+                        ...themeManager,
+                        ...sidebarManager,
+                        ...clockManager,
+                        ...fontSizeManager,
+                        ...bookmarkManager,
+                        ...pdfViewerManager,
+                        ...iframeModalManager, // << 新增
+                        ...utils
+                    };
+                }
+            });
+
+            app.mount('#app');
+        });
     </script>
 </body>
 
