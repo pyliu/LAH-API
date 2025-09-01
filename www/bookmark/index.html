@@ -203,7 +203,8 @@
                          :class="{ 'recent': recentLinks.includes(link.id) }"
                          :style="getRecentHighlightStyle(link)">
                         
-                        <a :href="link.href" :target="getLinkTarget(link.href)" @click.prevent="handleLinkClick(link, $event)"
+                        <!-- *** FIX: 移除 .prevent 修飾符 *** -->
+                        <a :href="link.href" :target="getLinkTarget(link.href)" @click="handleLinkClick(link, $event)"
                            @mouseover="handlePdfHover($event, link.href)" @mouseleave="hidePdfPopover"
                            class="flex flex-col items-center justify-center w-full h-full z-10">
                             <i :data-lucide="link.icon || 'globe'" class="w-10 h-10 mb-2 text-blue-500"></i>
@@ -246,10 +247,8 @@
 
         <!-- IFrame Modal -->
         <transition name="fade">
-            <!-- *** FIX: 在外層容器加上 padding *** -->
             <div v-if="iframeModal.visible" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
                 <div class="modal-backdrop absolute inset-0" @click="closeIframeModal"></div>
-                <!-- *** FIX: 讓 modal-content 填滿有 padding 的容器 *** -->
                 <div class="modal-content relative w-full h-full rounded-lg shadow-xl flex flex-col">
                     <header class="flex items-center justify-between p-4 border-b">
                         <h3 class="font-semibold text-lg truncate pr-4">{{ iframeModal.title }}</h3>
@@ -684,8 +683,19 @@
                     return links;
                 });
                 
-                // << 修改：handleLinkClick 接收 event 物件 >>
+                // *** FIX: 修改點擊事件處理邏輯以解決巢狀連結問題 ***
                 const handleLinkClick = (link, event) => {
+                    const clickedAnchor = event.target.closest('a');
+
+                    // 如果點擊的是巢狀的 <a> 標籤，且它不是卡片本身，就讓瀏覽器正常處理
+                    if (clickedAnchor && clickedAnchor !== event.currentTarget) {
+                        return;
+                    }
+                    
+                    // 阻止卡片本身的預設導航行為
+                    event.preventDefault();
+
+                    // --- 以下為原有的邏輯 ---
                     // 更新點擊次數與最近點擊清單
                     clickCounts.value[link.id] = (clickCounts.value[link.id] || 0) + 1;
                     const index = recentLinks.value.indexOf(link.id);
@@ -697,7 +707,7 @@
                         recentLinks.value.pop();
                     }
 
-                    // << 新增：判斷 Ctrl 鍵 >>
+                    // 判斷 Ctrl 鍵
                     if (event.ctrlKey) {
                         // 如果按下了 Ctrl，則在 Modal 中開啟
                         openIframeModal(link.href, link.title);
@@ -923,3 +933,4 @@
 </body>
 
 </html>
+
