@@ -1086,6 +1086,7 @@ switch ($_POST["type"]) {
 			);
 			$result = $sqlite_db->replace($row);
 			$message = "更新 $id 登記已結案件領狀資料".($result ? '成功' : '失敗');
+			Logger::getInstance()->info("XHR [upd_reg_cert_taken_date] $message");
 			echoJSONResponse($message, $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
 		}
 		break;
