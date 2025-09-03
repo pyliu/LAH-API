@@ -67,6 +67,8 @@ class SQLiteRegUntakenStore {
     }
 
     public function replace(&$row) {
+        // Logger::getInstance()->warning(__METHOD__.": 進行 replace ".$row['case_no']);
+        // Logger::getInstance()->warning(__METHOD__.": 進行 replace row data ".print_r($row, true));
         $stm = $this->db->prepare("
             REPLACE INTO ".$this->tbl_name." ('case_no', 'taken_date', 'taken_status', 'lent_date', 'borrower', 'return_date', 'note')
             VALUES (:case_no, :taken_date, :taken_status, :lent_date, :borrower, :return_date, :note)
