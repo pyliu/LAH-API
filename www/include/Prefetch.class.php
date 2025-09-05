@@ -1661,7 +1661,7 @@ class Prefetch {
                 return array();
             }
         }
-        return $this->getCache()->get(self::KEYS['REG_NOT_DONE_CASE']);
+        return $this->getCache()->get($cache_key);
     }
     
     /**
