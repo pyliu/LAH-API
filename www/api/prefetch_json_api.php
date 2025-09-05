@@ -522,14 +522,13 @@ switch ($_POST["type"]) {
 				// this query goes to SQLite DB, return array of result
 				$result = $sqlite_db->getRegAuthChecksRecord($id);
 				$this_baked['CASE_NOTIFY_RAW'] = $result;
+				// default is 0 that means the case don't need to notify applicant
+				$this_baked['CASE_NOTIFY_AUTHORITY'] = 0;
+				$this_baked['CASE_NOTIFY_NOTE'] = '';
 				if (is_array($result) && count($result) === 1) {
 					$auth = $result[0];
 					$this_baked['CASE_NOTIFY_AUTHORITY'] = $auth['authority'];
 					$this_baked['CASE_NOTIFY_NOTE'] = $auth['note'];
-				} else{
-					// default is 0 that means the case don't need to notify applicant
-					$this_baked['CASE_NOTIFY_AUTHORITY'] = 0;
-					$this_baked['CASE_NOTIFY_NOTE'] = '';
 				}
 
 				$baked[] = $this_baked;
