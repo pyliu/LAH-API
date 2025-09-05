@@ -497,11 +497,13 @@ switch ($_POST["type"]) {
 		}
 		break;
 	case "reg_not_done_case":
-		Logger::getInstance()->info("XHR [reg_not_done_case] 查詢未結案登記案件請求");
-		$message = "未結案登記案件查詢";
-		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRegNotDoneCase() : $prefetch->getRegNotDoneCase();
-		$cache_remaining = $prefetch->getRegNotDoneCaseCacheRemainingTime();
-		
+		Logger::getInstance()->info("XHR [reg_not_done_case] 查詢已結案未歸檔登記案件請求");
+		$message = "已結案未歸檔登記案件查詢";
+		$st = $_POST['start'];
+		$ed = $_POST['end'];
+		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRegNotDoneCase($st, $ed) : $prefetch->getRegNotDoneCase($st, $ed);
+		$cache_remaining = $prefetch->getRegNotDoneCaseCacheRemainingTime($st, $ed);
+
 		if (empty($rows)) {
 			Logger::getInstance()->info("XHR [reg_not_done_case] 查無 ${message} 資料");
 			echoJSONResponse("查無 ${message} 資料");
