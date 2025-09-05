@@ -1654,8 +1654,8 @@ class Prefetch {
 
                 $db->execute();
                 $result = $db->fetchAll();
-                $this->getCache()->set(self::KEYS['REG_NOT_DONE_CASE'], $result, $expire_duration);
-                Logger::getInstance()->info("[".self::KEYS['REG_NOT_DONE_CASE']."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
+                $this->getCache()->set($cache_key, $result, $expire_duration);
+                Logger::getInstance()->info("[".$cache_key."] 快取資料已更新 ( ".count($result)." 筆，預計 ${expire_duration} 秒後到期)");
                 return $result;
             } else {
                 return array();
