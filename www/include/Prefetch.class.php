@@ -1617,9 +1617,10 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getRegNotDoneCase($st = '', $ed = '', $expire_duration = 86400) {
-        if ($this->getCache()->isExpired(self::KEYS['REG_NOT_DONE_CASE'])) {
-            Logger::getInstance()->info('['.self::KEYS['REG_NOT_DONE_CASE'].'] 快取資料已失效，重新擷取 ... ');
-            if ($this->isDBReachable(self::KEYS['REG_NOT_DONE_CASE'])) {
+        $cache_key = self::KEYS['REG_NOT_DONE_CASE'].$st.$ed;
+        if ($this->getCache()->isExpired($cache_key)) {
+            Logger::getInstance()->info('['.$cache_key.'] 快取資料已失效，重新擷取 ... ');
+            if ($this->isDBReachable($cache_key)) {
                 $db = $this->getOraDB();
 
 
