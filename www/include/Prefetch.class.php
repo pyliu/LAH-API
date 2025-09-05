@@ -400,7 +400,7 @@ class Prefetch {
                     ORDER BY t.RM01, t.RM02, t.RM03, t.RM83, t.RM07_1
                 ");
                 
-                $office = $this->getSystemConfig()->get('SITE');    // e.g. HB
+                $office = $this->site;    // e.g. HA
                 $db->bind(":bv_office_end", $office[1]);
                 $db->bind(":bv_office", $office);
                 $db->bind(":bv_begin", $begin);
@@ -1612,18 +1612,26 @@ class Prefetch {
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
 	public function getRegNotDoneCase($expire_duration = 86400) {
-        global $site_code; // should from GlobalConstants.inc.php
         if ($this->getCache()->isExpired(self::KEYS['REG_NOT_DONE_CASE'])) {
             Logger::getInstance()->info('['.self::KEYS['REG_NOT_DONE_CASE'].'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['REG_NOT_DONE_CASE'])) {
                 $db = $this->getOraDB();
+                // $db->parse("
+                //     SELECT *
+                //     FROM MOICAS.CRSMS 
+                //     LEFT JOIN MOIADM.RKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
+                //     LEFT JOIN MOICAS.CABRP ON AB01 = RM24
+                //     WHERE RM31 IS NULL AND (RM99 IS NULL OR (RM99 = 'Y' AND RM101 = :bv_site))
+                //     ORDER BY RM07_1, RM07_2 DESC
+                // ");
                 $db->parse("
-                    SELECT *
-                    FROM MOICAS.CRSMS 
-                    LEFT JOIN MOIADM.RKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
-                    LEFT JOIN MOICAS.CABRP ON AB01 = RM24
-                    WHERE RM31 IS NULL AND (RM99 IS NULL OR (RM99 = 'Y' AND RM101 = :bv_site))
-                    ORDER BY RM07_1, RM07_2 DESC
+                    select * from MOICAS.CRSMS t
+                    left join MOIADM.RKEYN r ON r.KCDE_1 = '06' AND t.RM09 = r.KCDE_2
+                    where 1=1
+                    and (rm99 is null or rm101 = :bv_site)
+                    and rm31 in ('A', 'B', 'D')
+                    and rm30 <> 'Z'
+                    order by rm07_1, rm07_2 desc
                 ");
                 $db->bind(":bv_site", $this->site);
                 $db->execute();
