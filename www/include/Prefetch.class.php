@@ -1595,45 +1595,62 @@ class Prefetch {
     }
 
     /**
-     * 未結案登記案件查詢快取剩餘時間
+     * 辦畢通知登記案件查詢快取剩餘時間
      */
-    public function getRegNotDoneCaseCacheRemainingTime() {
-        return $this->getRemainingCacheTimeByKey(self::KEYS['REG_NOT_DONE_CASE']);
+    public function getRegNotDoneCaseCacheRemainingTime($st = '', $ed = '') {
+        return $this->getRemainingCacheTimeByKey(self::KEYS['REG_NOT_DONE_CASE'].$st.$ed);
     }
     /**
-     * 強制重新讀取未結案登記案件查詢
+     * 強制重新讀取辦畢通知登記案件查詢
      */
-    public function reloadRegNotDoneCase() {
-        $this->getCache()->del(self::KEYS['REG_NOT_DONE_CASE']);
-        return $this->getRegNotDoneCase();
+    public function reloadRegNotDoneCase($st = '', $ed = '') {
+        $this->getCache()->del(self::KEYS['REG_NOT_DONE_CASE'].$st.$ed);
+        return $this->getRegNotDoneCase($st, $ed);
     }
     /**
-	 * 取得未結案登記案件查詢
+	 * 取得辦畢通知登記案件查詢(登記課要求變更為"已結案未歸檔"案件)，只取3個月內案件
+     * 
+     * 若查詢失敗請確認 php.ini 中的 `memory_limit` 是否需要加大設定
+     * 目前測試 512MB 可查詢約 1 萬筆資料
+     * 若仍無法查詢，請縮小日期區間
+     * 
      * default cache time is 24 hours * 60 minutes * 60 seconds = 86400 seconds
 	 */
-	public function getRegNotDoneCase($expire_duration = 86400) {
+	public function getRegNotDoneCase($st = '', $ed = '', $expire_duration = 86400) {
         if ($this->getCache()->isExpired(self::KEYS['REG_NOT_DONE_CASE'])) {
             Logger::getInstance()->info('['.self::KEYS['REG_NOT_DONE_CASE'].'] 快取資料已失效，重新擷取 ... ');
             if ($this->isDBReachable(self::KEYS['REG_NOT_DONE_CASE'])) {
                 $db = $this->getOraDB();
-                // $db->parse("
-                //     SELECT *
-                //     FROM MOICAS.CRSMS 
-                //     LEFT JOIN MOIADM.RKEYN ON KCDE_1 = '06' AND RM09 = KCDE_2
-                //     LEFT JOIN MOICAS.CABRP ON AB01 = RM24
-                //     WHERE RM31 IS NULL AND (RM99 IS NULL OR (RM99 = 'Y' AND RM101 = :bv_site))
-                //     ORDER BY RM07_1, RM07_2 DESC
-                // ");
+
+
+                // 使用 DateTime 物件以確保日期計算的準確性 (例如：閏年)
+                $today = new \DateTime();
+                if (empty($ed)) {
+                    // 結束日期 ($ed) 為今天
+                    $ed = ((int)$today->format('Y') - 1911) . $today->format('md');
+                }
+                if (empty($st)) {
+                    // 開始日期 ($st) 為3個月前的同一天(過大區間會造成QUERY失敗)
+                    // 使用 clone 避免修改原始的 $today 物件
+                    $start_date_obj = (clone $today)->sub(new \DateInterval('P3M'));
+                    $st = ((int)$start_date_obj->format('Y') - 1911) . $start_date_obj->format('md');
+                }
+
                 $db->parse("
                     select * from MOICAS.CRSMS t
                     left join MOIADM.RKEYN r ON r.KCDE_1 = '06' AND t.RM09 = r.KCDE_2
+                    left join MOICAS.CABRP ON AB01 = RM24
                     where 1=1
+                    and rm07_1 between :bv_st and :bv_ed
                     and (rm99 is null or rm101 = :bv_site)
                     and rm31 in ('A', 'B', 'D')
                     and rm30 <> 'Z'
                     order by rm07_1, rm07_2 desc
                 ");
                 $db->bind(":bv_site", $this->site);
+                $db->bind(":bv_st", $st);
+                $db->bind(":bv_ed", $ed);
+
                 $db->execute();
                 $result = $db->fetchAll();
                 $this->getCache()->set(self::KEYS['REG_NOT_DONE_CASE'], $result, $expire_duration);
