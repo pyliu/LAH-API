@@ -543,8 +543,8 @@ switch ($_POST["type"]) {
 
 		break;
 	case "reg_untaken_case":
-		Logger::getInstance()->info("XHR [reg_untaken_case] 查詢結案未歸檔登記案件請求");
-		$message = "結案未歸檔登記案件查詢";
+		Logger::getInstance()->info("XHR [reg_untaken_case] 查詢結案登記案件請求");
+		$message = "結案登記案件查詢";
 		$st = $_POST['start'];
 		$ed = $_POST['end'];
 		$rows = $_POST['reload'] === 'true' ? $prefetch->reloadRegUntakenCase($st, $ed) : $prefetch->getRegUntakenCase($st, $ed);

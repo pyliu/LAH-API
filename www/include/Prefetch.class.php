@@ -1693,7 +1693,7 @@ class Prefetch {
                     where RM07_1 between :bv_st and :bv_ed
                     and (rm99 is null or rm101 = :bv_site)
                     and rm31 in ('A', 'B', 'D')
-                    and rm30 <> 'Z'
+                    --and rm30 <> 'Z'
                     order by rm07_1, rm07_2 desc
                 ");
                 $db->bind(":bv_site", $this->site);
