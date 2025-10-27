@@ -244,10 +244,13 @@ class Scheduler {
             $col2 = $formatted_links[1] ?? '';
             $message .= "| $col1 | $col2 |\n";
         }
-        // send message
-        $notification = new Notification();
+        // send message to all admins and reg/inf group
+        $sqlite_user = new SQLiteUser();
+        $admins = $sqlite_user->getAdmins();
+        foreach ($admins as $admin) {
+            $this->addNotification($message, $admin['id'], "跨所案件同步檢測");
+        }
         foreach (['reg', 'inf'] as $channel) {
-            // $notification->removeOutdatedMessageByTitle($channel, "跨所案件同步檢測");
             $this->addNotification($message, $channel, "跨所案件同步檢測");
         }
     }
