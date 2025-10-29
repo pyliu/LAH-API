@@ -10,6 +10,31 @@ class MOICAS
 	private $site = 'HA';
 	private $site_number = 1;
 
+	private function checkCaseID(&$id) {
+		$id = str_replace('-', '', $id);
+		if (!empty($id)) {
+			$year = substr($id, 0, 3);
+			$code = substr($id, 3, 4);
+			$number = str_pad(substr($id, 7, 6), 6, "0", STR_PAD_LEFT);
+			if (
+				preg_match("/^[0-9A-Za-z]{3}$/i", $year) &&
+				preg_match("/^[0-9A-Za-z]{4}$/i", $code) &&
+				preg_match("/^[0-9A-Za-z]{6}$/i", $number)
+			) {
+				Logger::getInstance()->info(__METHOD__.": $id passed the id verification.");
+				$nid = $year.$code.$number;
+				if ($id != $nid) {
+					// recomposition the $id
+					$id = $nid;
+					Logger::getInstance()->info(__METHOD__.": update the case id to '$nid'.");
+				}
+				return true;
+			}
+		}
+		Logger::getInstance()->warning(__METHOD__.": $id failed the id verification.");
+		return false;
+	}
+
 	function __construct() {
 		$this->db_wrapper = new OraDBWrapper();
 		$this->site = strtoupper(System::getInstance()->get('SITE')) ?? 'HA';
@@ -19,6 +44,46 @@ class MOICAS
 
 	function __destruct() {
 		$this->db_wrapper = null;
+	}
+	/**
+	 * Public interface for 檢測本地端案件是否存在
+	 */
+	public function checkCaseExists($id) {
+		if (!$this->db_wrapper->reachable()) {
+			return -1;
+		}
+
+		if (!$this->checkCaseID($id)) {
+			return -1;
+		}
+		
+		$year = substr($id, 0, 3);
+		$code = substr($id, 3, 4);
+		$num = substr($id, 7, 6);
+		$db_user = "MOICAS";
+
+		Logger::getInstance()->info(__METHOD__.": 找本地 $db_user.CRSMS 的案件資料【$year, $code, $num"."】");
+
+		$this->db_wrapper->getDB()->parse("
+			SELECT * FROM $db_user.CRSMS t
+			WHERE 1=1
+				AND RM01 = :bv_year
+				AND RM02 = :bv_code
+				AND RM03 = :bv_number
+		");
+		$this->db_wrapper->getDB()->bind(":bv_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_number", $num);
+		$this->db_wrapper->getDB()->execute();
+		$row = $this->db_wrapper->getDB()->fetch(true);
+
+		// 無此資料
+		if (empty($row)) {
+			Logger::getInstance()->warning(__METHOD__.": 本地 $db_user.CRSMS 查無 $year-$code-$num 案件資料");
+			return false;
+		}
+
+		return true;
 	}
 	/**
 	 * 調教資料集，解決SQL查詢表格過慢問題
