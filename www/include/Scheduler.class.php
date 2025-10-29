@@ -202,7 +202,7 @@ class Scheduler {
                     // -2 means remote db has no such case
                     // -3 means local db has no such case
                     // otherwise returns case data array
-                } while($result !== -3);
+                } while($result === -3);
             }
         }
         $this->sendFindXCaseFailuresNotification($found);
