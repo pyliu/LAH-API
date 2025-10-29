@@ -403,9 +403,9 @@ class Scheduler {
                  */
                 $this->fetchMonitorMail();
                 /**
-                 * 避免回寫失效問題
+                 * 避免回寫失效問題(因為安全性問題取消執行)
                  */
-                $this->fixXCaseFailures();
+                // $this->fixXCaseFailures();
             } else {
                 // Logger::getInstance()->info(__METHOD__.": 每10分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
