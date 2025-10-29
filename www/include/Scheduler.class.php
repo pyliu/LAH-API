@@ -184,34 +184,37 @@ class Scheduler {
         foreach ($filtered_codes as $code) {
             $latestNum = $xcase->getLocalDBMaxNumByWord($code);
             if ($latestNum > 0) {
-                // $result = false;
-                // $step = 10;
-                // do {
-                //     $nextNum = str_pad($latestNum + $step, 6, '0', STR_PAD_LEFT);
-                //     // e.g. 114HAB1017600
-                //     $nextCaseID = $this_year.$code.$nextNum;
-                //     Logger::getInstance()->info(__METHOD__.": 檢查 $nextCaseID 是否可以新增到本地資料庫。");
-                //     $result = $xcase->checkLocalCaseExists($nextCaseID);
-                //     if ($result === true) {
-                //         $done[] = "$this_year-$code-$nextNum";
-                //         Logger::getInstance()->info(__METHOD__.": $nextCaseID 已成功新增到本地資料庫。");
-                //     } else {
-                //         Logger::getInstance()->info(__METHOD__.": $nextCaseID 是否可以新增到本地資料庫。");
-                //     }
-                //     $step += 10;
-                // } while($result === true);
+                $result = false;
+                $step = 10;
+                do {
+                    $nextNum = str_pad($latestNum + $step, 6, '0', STR_PAD_LEFT);
+                    // e.g. 114HAB1017600
+                    $nextCaseID = $this_year.$code.$nextNum;
+                    Logger::getInstance()->info(__METHOD__.": 檢查 $nextCaseID 在本地資料庫的狀態。");
+                    $result = $xcase->getXCaseDiff($nextCaseID);
+                    // -3 means local db has no such case
+                    if ($result === -3) {
+                        $found[] = "$this_year-$code-$nextNum";
+                        Logger::getInstance()->info(__METHOD__.": 找到 $nextCaseID 未存在於本地資料庫。");
+                    }
+                    $step += 10;
+                    // -1 means db not reachable or case id format is not correct
+                    // -2 means remote db has no such case
+                    // -3 means local db has no such case
+                    // otherwise returns case data array
+                } while($result !== -3);
             }
         }
-        $this->sendFindXCaseFailuresNotification($done);
+        $this->sendFindXCaseFailuresNotification($found);
     }
 
-    private function sendFindXCaseFailuresNotification($done) {
-        if (empty($done)) {
+    private function sendFindXCaseFailuresNotification($found) {
+        if (empty($found)) {
             return;
         }
         $host_ip = getLocalhostIP();
         $base_url = "http://".$host_ip.":8080/reg/case/";
-        $message = "##### ✨ 智慧監控系統已找到下列跨所案件(".count($done)."件)未回寫問題：\n***\n";
+        $message = "##### ✨ 智慧監控系統已找到下列跨所案件(".count($found)."件)未回寫問題：\n***\n";
         // // 1. 將案件陣列 $done 每 2 個一組，分割成一個新的二維陣列 $chunks
         // $chunks = array_chunk($done, 2);
         // // 2. 遍歷這個包含「案件對」的新陣列
@@ -229,7 +232,7 @@ class Scheduler {
         $message .= "| 　 | 　 |\n";
         $message .= "| :--- | :--- |\n";
         // 2. 將案件陣列每 2 個一組
-        $chunks = array_chunk($done, 2);
+        $chunks = array_chunk($found, 2);
         // 3. 遍歷案件組，產生表格的每一列 (row)
         foreach ($chunks as $chunk) {
             $formatted_links = [];
@@ -244,6 +247,7 @@ class Scheduler {
             $col2 = $formatted_links[1] ?? '';
             $message .= "| $col1 | $col2 |\n";
         }
+        $message = "\n***\n##### ⚠ 請至 系管管理面板 / 同步登記案件 功能進行同步修正。\n\n";
         // send message to all admins and inf group
         $sqlite_user = new SQLiteUser();
         $admins = $sqlite_user->getAdmins();
@@ -496,7 +500,7 @@ class Scheduler {
                 /** 
                  * 偵測回寫失效問題
                  */
-                // $this->findXCaseFailures();
+                $this->findXCaseFailures();
             } else {
                 // Logger::getInstance()->info(__METHOD__.": 每10分鐘的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }
