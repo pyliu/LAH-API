@@ -179,7 +179,7 @@ class Scheduler {
             return strpos($code, $site) !== 0;
         });
         global $this_year;
-        $done = [];
+        $found = [];
         $xcase = new XCase();
         foreach ($filtered_codes as $code) {
             $latestNum = $xcase->getLocalDBMaxNumByWord($code);
