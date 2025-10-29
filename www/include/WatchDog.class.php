@@ -775,13 +775,13 @@ class WatchDog {
                     $notification->removeOutdatedMessageByTitle('reg', '地政系統跨域服務監測');
 
                     // send to reg chat channel
-                    $this->addNotification($message, "reg", '地政系統跨域服務監測');
+                    // $this->addNotification($message, "reg", '地政系統跨域服務監測');
                 } else {
                     if ($prevTicketFlag) {
                         $message = "##### 🟢 ".$this->date."  ".$this->time." 地政系統跨域服務皆已回復。";
                         // $message .= "\r\n***\r\n詳情請參考 👉 $url";
-                        // send to lds chat channel
-                        $this->addNotification($message, "reg", '地政系統跨域服務監測');
+                        // send to reg chat channel
+                        // $this->addNotification($message, "reg", '地政系統跨域服務監測');
                     }
                     // clear ticket
                     @unlink($ticket);
