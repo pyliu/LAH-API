@@ -456,6 +456,16 @@ switch ($_POST["type"]) {
                 $one_month_ago_datetime = new DateTime("-1 months");
                 $offset = $current_datetime->diff($one_month_ago_datetime)->days * $day_seconds;
                 $arr = $sqlite->getRecentDownRecordsByTimestamp($offset);
+            } else if ($_POST['opt'] == 'quater') {
+                // (季 = 3 個月) ---
+                $three_months_ago_datetime = new DateTime("-3 months");
+                $offset = $current_datetime->diff($three_months_ago_datetime)->days * $day_seconds;
+                $arr = $sqlite->getRecentDownRecordsByTimestamp($offset);
+            } else if ($_POST['opt'] == 'half-year') {
+                // (半年 = 6 個月) ---
+                $six_months_ago_datetime = new DateTime("-6 months");
+                $offset = $current_datetime->diff($six_months_ago_datetime)->days * $day_seconds;
+                $arr = $sqlite->getRecentDownRecordsByTimestamp($offset);
             } else if ($_POST['opt'] == 'year') {
                 $one_years_ago_datetime = new DateTime("-1 years");
                 $offset = $current_datetime->diff($one_years_ago_datetime)->days * $day_seconds;
