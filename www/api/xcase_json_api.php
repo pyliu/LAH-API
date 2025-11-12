@@ -127,6 +127,16 @@ switch ($_POST["type"]) {
 			echo json_encode($result, 0);
 		}
 		break;
+	case "find_xcase_writeback_failures":
+		Logger::getInstance()->info("XHR [find_xcase_writeback_failures] 查詢跨所回寫失敗案件請求");
+		$found = $mock ? $cache->get('find_xcase_writeback_failures') : $xcase->findFailureXCases();
+		$cache->set('find_xcase_writeback_failures', $found);
+		$status = empty($found) ? STATUS_CODE::SUCCESS_WITH_NO_RECORD : STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS;
+		$message = "找到 ".count($found)." 筆跨所回寫失敗案件";
+		echoJSONResponse($message, $status, array(
+			"raw" => $found
+		));
+		break;
 	case "inst_xcase":
 		Logger::getInstance()->info("XHR [inst_xcase] 插入遠端案件【".$_POST["id"]."】請求");
 		$result_flag = $mock ? $cache->get('inst_xcase') : $xcase->instXCase($_POST["id"]);

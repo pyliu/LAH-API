@@ -470,6 +470,7 @@ class XCase {
 						} while($result === -3);
 				}
 		}
+		// returns id list
 		return $found;
 	}
 
@@ -498,9 +499,9 @@ class XCase {
 			FROM $db_user.CRSMS t
 			WHERE RM01 = :bv_rm01_year AND RM02 = :bv_rm02_code AND RM03 = :bv_rm03_number
 		");
-        $this->db_wrapper->getDB()->bind(":bv_rm01_year", $year);
-        $this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
-        $this->db_wrapper->getDB()->bind(":bv_rm03_number", $num);
+		$this->db_wrapper->getDB()->bind(":bv_rm01_year", $year);
+		$this->db_wrapper->getDB()->bind(":bv_rm02_code", $code);
+		$this->db_wrapper->getDB()->bind(":bv_rm03_number", $num);
 		$this->db_wrapper->getDB()->execute();
 		$remote_row = $this->db_wrapper->getDB()->fetch($raw);
 
