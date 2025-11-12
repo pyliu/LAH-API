@@ -170,7 +170,15 @@ class Scheduler {
 
     private function findXCaseFailures() {
         $xcase = new XCase();
-        $found = $xcase->findFailureXCases();
+        $info = $xcase->findFailureXCases();
+        $found = [];
+        foreach ($info as $codeArray) {
+            $tmp = array_merge($found, $codeArray['foundIds']);
+            // 2. 移除重複值
+            $unique_array = array_unique($tmp);
+            // 注意：array_unique() 會保留舊的鍵，通常會使用 array_values() 來重設索引鍵
+            $found = array_values($unique_array);
+        }
         $this->sendFindXCaseFailuresNotification($found);
     }
 

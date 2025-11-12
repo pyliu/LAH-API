@@ -445,9 +445,13 @@ class XCase {
 				return strpos($code, $site) !== 0;
 		});
 		global $this_year;
-		$found = [];
+		$info = array();
 		foreach ($filtered_codes as $code) {
 				$latestNum = $this->getLocalDBMaxNumByWord($code);
+				$info[$code] = array(
+					"localMax" => $latestNum,
+					"foundIds" => []
+				);
 				if ($latestNum > 0) {
 						$result = false;
 						$step = 10;
@@ -459,7 +463,7 @@ class XCase {
 								$result = $this->getXCaseDiff($nextCaseID);
 								// -3 means local db has no such case
 								if ($result === -3) {
-										$found[] = "$this_year-$code-$nextNum";
+										$info[$code]['foundIds'][] = "$this_year-$code-$nextNum";
 										Logger::getInstance()->info(__METHOD__.": 找到 $nextCaseID 未存在於本地資料庫。");
 								}
 								$step += 10;
@@ -470,8 +474,8 @@ class XCase {
 						} while($result === -3);
 				}
 		}
-		// returns id list
-		return $found;
+		// returns info array
+		return $info;
 	}
 
 	public function getXCaseDiff($id, $raw = false) {

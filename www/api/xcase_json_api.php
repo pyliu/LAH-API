@@ -129,12 +129,33 @@ switch ($_POST["type"]) {
 		break;
 	case "find_xcase_writeback_failures":
 		Logger::getInstance()->info("XHR [find_xcase_writeback_failures] 查詢跨所回寫失敗案件請求");
-		$found = $mock ? $cache->get('find_xcase_writeback_failures') : $xcase->findFailureXCases();
-		$cache->set('find_xcase_writeback_failures', $found);
+		$info = $mock ? $cache->get('find_xcase_writeback_failures') : $xcase->findFailureXCases();
+		$cache->set('find_xcase_writeback_failures', $info);
+
+		/**
+		 * ex.
+		 * info: [
+		 * 	'HBA1' => [
+		 *    'localMax' => '000000',
+		 *    'foundIds' => []
+		 *  ],
+		 *  'HCA1' ...
+		 * ]
+		 */
+		$found = [];
+		foreach ($info as $codeArray) {
+				$tmp = array_merge($found, $codeArray['foundIds']);
+				// 2. 移除重複值
+				$unique_array = array_unique($tmp);
+				// 注意：array_unique() 會保留舊的鍵，通常會使用 array_values() 來重設索引鍵
+				$found = array_values($unique_array);
+		}
+
 		$status = empty($found) ? STATUS_CODE::SUCCESS_WITH_NO_RECORD : STATUS_CODE::SUCCESS_WITH_MULTIPLE_RECORDS;
 		$message = "找到 ".count($found)." 筆跨所回寫失敗案件";
 		echoJSONResponse($message, $status, array(
-			"raw" => $found
+			"found" => $found,
+			"raw" => $info
 		));
 		break;
 	case "inst_xcase":
