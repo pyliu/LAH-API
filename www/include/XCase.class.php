@@ -558,7 +558,7 @@ class XCase {
 		}
 
 		if (!$this->checkCaseID($id)) {
-            return -1;
+      return -1;
 		}
 
 		$year = substr($id, 0, 3);
