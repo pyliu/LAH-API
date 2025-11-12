@@ -169,42 +169,8 @@ class Scheduler {
     }
 
     private function findXCaseFailures() {
-        $codes = array_keys(REG_CODE["本所收件"]);
-        $site = System::getInstance()->getSiteCode();
-        // 過濾掉本所收本所的跨所收件碼
-        $filtered_codes = array_filter($codes, function($code) use ($site) {
-            // 檢查 $code 字串的開頭是否為 $site
-            // strpos() 的回傳值若為 0，代表 $site 就在字串的開頭
-            // 我們要保留的是「開頭不是 $site」的元素，所以條件是 !== 0
-            return strpos($code, $site) !== 0;
-        });
-        global $this_year;
-        $found = [];
         $xcase = new XCase();
-        foreach ($filtered_codes as $code) {
-            $latestNum = $xcase->getLocalDBMaxNumByWord($code);
-            if ($latestNum > 0) {
-                $result = false;
-                $step = 10;
-                do {
-                    $nextNum = str_pad($latestNum + $step, 6, '0', STR_PAD_LEFT);
-                    // e.g. 114HAB1017600
-                    $nextCaseID = $this_year.$code.$nextNum;
-                    Logger::getInstance()->info(__METHOD__.": 檢查 $nextCaseID 在本地資料庫的狀態。");
-                    $result = $xcase->getXCaseDiff($nextCaseID);
-                    // -3 means local db has no such case
-                    if ($result === -3) {
-                        $found[] = "$this_year-$code-$nextNum";
-                        Logger::getInstance()->info(__METHOD__.": 找到 $nextCaseID 未存在於本地資料庫。");
-                    }
-                    $step += 10;
-                    // -1 means db not reachable or case id format is not correct
-                    // -2 means remote db has no such case
-                    // -3 means local db has no such case
-                    // otherwise returns case data array
-                } while($result === -3);
-            }
-        }
+        $found = $xcase->findFailureXCases();
         $this->sendFindXCaseFailuresNotification($found);
     }
 
