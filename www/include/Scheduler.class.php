@@ -221,7 +221,7 @@ class Scheduler {
             $col2 = $formatted_links[1] ?? '';
             $message .= "| $col1 | $col2 |\n";
         }
-        $message = "\n***\n##### ⚠ 請至 系管管理面板 / 同步登記案件 功能進行同步修正。\n\n";
+        $message .= "\n***\n##### ⚠ 請至 系管管理面板 / 同步登記案件 功能進行同步修正。\n\n";
         // send message to all admins and inf group
         $sqlite_user = new SQLiteUser();
         $admins = $sqlite_user->getAdmins();
