@@ -67,8 +67,8 @@ switch ($_POST["type"]) {
         echoJSONResponse($msg, $result ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::DEFAULT_FAIL);
         break;
     case "set_webap_jndi":
-        $local = $_POST['local'] ?? 2500;
-        $xalocal = $_POST['xalocal'] ?? 990;
+        $local = $_POST['local'] ?? 3000;
+        $xalocal = $_POST['xalocal'] ?? 1250;
         $local_ok = $system->setWebAPJndiLocal($local);
         $xalocal_ok = $system->setWebAPJndiXaLocal($xalocal);
         $message = "設定 WEBAP_JNDI_LOCAL $local ".($local_ok ? '成功' : '失敗');

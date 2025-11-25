@@ -608,7 +608,7 @@ class System {
     }
 
     public function getWebAPJndiLocal() {
-        return $this->get('WEBAP_JNDI_LOCAL') ?? 2500;
+        return $this->get('WEBAP_JNDI_LOCAL') ?? 3000;
     }
 
     public function getWebAPIp() {
