@@ -296,4 +296,16 @@ class Notification {
         }
         return false;
     }
+
+    public function removeOutdatedMessageByContent($channel, $content) {
+        Logger::getInstance()->info(__METHOD__.': 準備刪除「'.$channel.'」頻道內容為「'.$content.'」的訊息');
+        if ($this->prepareDB($channel)) {
+            $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));
+            if ($stm = $db->prepare("DELETE FROM message WHERE content = :bv_content")) {
+                $stm->bindParam(':bv_content', $content);
+                return $stm->execute() === FALSE ? false : true;
+            }
+        }
+        return false;
+    }
 }
