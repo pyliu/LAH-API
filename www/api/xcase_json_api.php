@@ -73,6 +73,20 @@ switch ($_POST["type"]) {
 		$result_flag = $mock ? $cache->get('fix_xcase') : $xcase->fixProblematicXCases($_POST["id"]);
 		$cache->set('fix_xcase', $result_flag);
 		if ($result_flag) {
+			try {
+				$notify = new Notification();
+				$channel = 'inf';
+				Logger::getInstance()->info('新增「修正登記案件跨所註記」訊息至 '.$channel.' 頻道。');
+				$notify->addMessage($channel, array(
+						'title' => '修正登記案件跨所註記',
+						'content' => '已修正 '.$_POST["id"].' 登記案件之跨所註記。',
+						'priority' => 3,
+						'sender' => 'system',
+						'from_ip' => $client_ip
+				));
+			} catch (Exception $e) {
+				Logger::getInstance()->error("XHR [fix_xcase] 無法新增通知訊息至 inf 頻道。【".$_POST["id"]."】 ".$e->getMessage());
+			}
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => "0",
@@ -89,6 +103,20 @@ switch ($_POST["type"]) {
 		$result_flag = $mock ? $cache->get('fix_xcase_val') : $xcase->fixPSCRNProblematicXCases($_POST["id"]);
 		$cache->set('fix_xcase_val', $result_flag);
 		if ($result_flag) {
+			try {
+			$notify = new Notification();
+			$channel = 'inf';
+			Logger::getInstance()->info('新增「修正地價案件跨所註記」訊息至 '.$channel.' 頻道。');
+			$notify->addMessage($channel, array(
+					'title' => '修正地價案件跨所註記',
+					'content' => '已修正 '.$_POST["id"].' 地價案件之跨所註記。',
+					'priority' => 3,
+					'sender' => 'system',
+					'from_ip' => $client_ip
+			));
+			} catch (Exception $e) {
+				Logger::getInstance()->error("XHR [fix_xcase_val] 無法新增通知訊息至 inf 頻道。【".$_POST["id"]."】 ".$e->getMessage());
+			}
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => "0",
