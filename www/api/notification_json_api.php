@@ -26,7 +26,7 @@ switch ($_POST["type"]) {
                     continue;
                 }
             }
-            Logger::getInstance()->info('新增公告訊息至 '.$channel.' 頻道。');
+            Logger::getInstance()->info('新增訊息至 '.$channel.' 頻道。');
             $lastId = $notify->addMessage($channel, array(
                 'title' => $title,
                 'content' => trim($_POST['content']),
@@ -35,7 +35,7 @@ switch ($_POST["type"]) {
                 'sender' => $_POST['sender'] ?? 'UNKNOWN',
                 'from_ip' => $_POST['from_ip']
             ));
-            Logger::getInstance()->info('新增公告訊息「'.$title.'」至 '.$channel.' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
+            Logger::getInstance()->info('新增訊息「'.$title.'」至 '.$channel.' 頻道。 ('.($lastId === false ? '失敗' : '成功').')');
             if ($lastId === false) {
                 $fail++;
             } else {
