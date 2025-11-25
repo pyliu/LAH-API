@@ -225,11 +225,14 @@ class Scheduler {
         // send message to all admins and inf group
         $sqlite_user = new SQLiteUser();
         $admins = $sqlite_user->getAdmins();
+        global $today;
+        $notify = new Notification();
         foreach ($admins as $admin) {
-            $this->addNotification($message, $admin['id'], "跨所案件同步檢測");
+            $this->addNotification($message, $admin['id'], "$today 跨所案件同步檢測");
         }
         foreach (['inf'] as $channel) {
-            $this->addNotification($message, $channel, "跨所案件同步檢測");
+            $notify->removeOutdatedMessageByTitle($channel, "$today 跨所案件同步檢測");
+            $this->addNotification($message, $channel, "$today 跨所案件同步檢測");
         }
     }
 
