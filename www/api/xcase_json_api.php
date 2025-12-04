@@ -191,6 +191,21 @@ switch ($_POST["type"]) {
 		$result_flag = $mock ? $cache->get('inst_xcase') : $xcase->instXCase($_POST["id"]);
 		$cache->set('inst_xcase', $result_flag);
 		if ($result_flag === true) {
+			// notify inf section to know fix the writeback issue
+			try {
+				$notify = new Notification();
+				$channel = 'inf';
+				Logger::getInstance()->info('XHR [inst_xcase] 新增「修正跨所案件未回寫」訊息至 '.$channel.' 頻道。');
+				$notify->addMessage($channel, array(
+						'title' => '修正跨所案件未回寫',
+						'content' => '已修正 '.$_POST["id"].' 未回寫跨所登記案件。',
+						'priority' => 3,
+						'sender' => 'system',
+						'from_ip' => $client_ip
+				));
+			} catch (Exception $e) {
+				Logger::getInstance()->error("XHR [inst_xcase] 無法新增通知訊息至 inf 頻道。【".$_POST["id"]."】 ".$e->getMessage());
+			}
 			$result = array(
 				"status" => STATUS_CODE::SUCCESS_NORMAL,
 				"data_count" => "0",
