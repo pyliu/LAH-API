@@ -339,8 +339,7 @@ class Scheduler {
             'sender' => '系統排程',
             'from_ip' => getLocalhostIP()
         );
-        $skip_announcement_convertion = true;
-        $lastId = $notify->addMessage($to_id, $payload, $skip_announcement_convertion);
+        $lastId = $notify->addMessage($to_id, $payload);
         $nameTag = rtrim("$to_id:".$users[$to_id], ":");
         if ($lastId === false || empty($lastId)) {
             Logger::getInstance()->warning("訊息無法送出給 $nameTag");

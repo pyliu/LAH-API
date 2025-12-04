@@ -146,7 +146,7 @@ class Notification {
         return false;
     }
 
-    public function addMessage($channel, $payload, $skip_announcement_convert = false) {
+    public function addMessage($channel, $payload, $skip_announcement_convert = true) {
         if (empty($channel) || !is_array($payload) || empty($payload)) {
             Logger::getInstance()->error(__METHOD__.': required param is missing. ('.$channel.')');
             return false;
