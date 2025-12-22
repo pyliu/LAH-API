@@ -152,8 +152,10 @@ class Notification {
             return false;
         }
         // 公告頻道轉換
-        if (!$skip_announcement_convert && in_array($channel, array('all', 'hr', 'acc', 'adm', 'reg', 'sur', 'val', 'inf', 'supervisor'))) {
-            $channel = $channel === 'all' ? 'announcement' : 'announcement_'.$channel;
+        if ($channel === 'all') {
+            $channel = 'announcement';
+        } else if (!$skip_announcement_convert && in_array($channel, array('all', 'hr', 'acc', 'adm', 'reg', 'sur', 'val', 'inf', 'supervisor'))) {
+            $channel = 'announcement_'.$channel;
         }
         if ($this->prepareDB($channel)) {
             $db = new SQLite3(SQLiteDBFactory::getMessageDB($this->ws_db_path.DIRECTORY_SEPARATOR.$channel.'.db'));

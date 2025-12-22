@@ -46,6 +46,33 @@ switch ($_POST["type"]) {
 			"raw" => $rows
 		));
 		break;
+	case "rxyz":
+		// 查詢權狀對應檔名
+		// Logger::getInstance()->info("XHR [rxyz] get RXYZ record request.");
+		// $st = $_POST['st'];
+		// $ed = $_POST['ed'];
+		// $reload = $_POST['reload'] === 'true';
+		// // Logger::getInstance()->info("XHR [rxyz] reload flag $reload");
+		// $cache_key = 'moicad_rxyz'.$st.$ed;
+		// if ($reload && !$mock) {
+		// 	// Logger::getInstance()->info("XHR [rxyz] RELOAD!");
+		// 	$rows = $moicad->getREGA($st, $ed);
+		// } else {
+		// 	// Logger::getInstance()->info("XHR [rxyz] CACHED!");
+		// 	$rows = $cache->get($cache_key);
+		// 	if ($cache->isExpired($cache_key) && !$mock) {
+		// 		// Logger::getInstance()->info("XHR [rxyz] Refresh CACHE!");
+		// 		$rows = $moicad->getREGA($st, $ed);
+		// 	}
+		// }
+		// $cache->set($cache_key, $rows);
+		// $message = is_array($rows) ? "$st ~ $ed 查到 MOICAD.RXYZ 裡有 ".count($rows)." 筆資料" : '查詢 MOICAD.RXYZ 失敗';
+		// $status_code = is_array($rows) ? STATUS_CODE::SUCCESS_NORMAL : STATUS_CODE::FAIL_DB_ERROR;
+		// Logger::getInstance()->info("XHR [rxyz] $message");
+		// echoJSONResponse($message, $status_code, array(
+		// 	"raw" => $rows
+		// ));
+		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
