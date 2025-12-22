@@ -438,4 +438,76 @@ class StatsOracle {
         $this->db_wrapper->getDB()->execute();
         return $this->db_wrapper->getDB()->fetchAll();
     }
+    /**
+     * 百歲人瑞所有權人統計
+     */
+    public function getHundredYearsOwnerData($birth_year, $type) {
+        if (!$this->db_wrapper->reachable()) {
+            return false;
+        }
+        if (!in_array($type, ['land', 'building'])) {
+            Logger::getInstance()->error(__METHOD__.": type $type 不正確。 [僅支援 land(土地)、building(建物)]");
+            return false;
+        }
+        $birth_year_padded = str_pad($birth_year, 3, "0", STR_PAD_LEFT);
+        if ($type === 'land') {
+            $this->db_wrapper->getDB()->parse("
+                -- 民國15年出生之土地所有權人資料(百歲人瑞資料查詢)
+                select
+                r.GG00 AS \"資料集代號\",
+                t.BA48 AS \"段號\",
+                u.KNAME AS \"段名\",
+                t.BA49 AS \"地號\",
+                t.BB01 AS \"登次\",
+                t.BB15_1 AS \"權利範圍類別\",
+                t.BB15_2 AS \"分母\",
+                t.BB15_3 AS \"分子\",
+                t.BB09 AS \"所有權人統編\",
+                s.LNAM AS \"所有權人姓名\",
+                t.BB05 AS \"登記日期\",
+                t.BB07 AS \"登記原因發生日期\",
+                s.ladr AS \"住址\",
+                r.GG30_1 AS \"其他登記事項代碼\",
+                r.GG30_2 AS \"其他登記事項內容\",
+                s.Lbir_2 AS \"出生日期\"
+                --SUBSTR(s.Lbir_2, 1, 3) AS \"出生年\"
+                from MOICAD.RBLOW t
+                left join MOICAD.RLNID s ON t.BB09 = s.lidn
+                left join MOIADM.RKEYN_ALL u ON u.kcde_1 = '48' AND t.BA48 = u.kcde_4 AND  u.Kcde_2 = 'H'
+                left join MOICAD.RGALL r ON r.GG01 = t.BB01 AND r.GG48 = t.BA48 AND r.GG49 = t.BA49
+                where BB09 NOT LIKE '*%' AND s.lbir_2 IS NOT NULL AND s.LBIR_2 BETWEEN :bv_by || '0101' and :bv_by || '1231'
+                ORDER BY t.BA48, t.BA49, s.Lbir_2
+            ");
+        } else {
+            $this->db_wrapper->getDB()->parse("
+                -- 民國15年出生之建物所有權人資料(百歲人瑞資料查詢)
+                select
+                r.GG00 AS \"資料集代號\",
+                t.ED48 AS \"段號\",
+                u.KNAME AS \"段名\",
+                t.ED49 AS \"建號\",
+                t.EE01 AS \"登次\",
+                t.EE15_1 AS \"權利範圍類別\",
+                t.EE15_2 AS \"分母\",
+                t.EE15_3 AS \"分子\",
+                t.EE09 AS \"所有權人統編\",
+                s.LNAM AS \"所有權人姓名\",
+                t.EE05 AS \"登記日期\",
+                t.EE07 AS \"登記原因發生日期\",
+                r.GG30_1 AS \"其他登記事項代碼\",
+                r.GG30_2 AS \"其他登記事項內容\",
+                s.Lbir_2 AS \"出生日期\"
+                --SUBSTR(s.Lbir_2, 1, 3) AS \"出生年\"
+                from MOICAD.REBOW t
+                left join MOICAD.RLNID s ON t.EE09 = s.lidn
+                left join MOIADM.RKEYN_ALL u ON u.kcde_1 = '48' AND t.ED48 = u.kcde_4 AND  u.Kcde_2 = 'H'
+                left join MOICAD.RGALL r ON r.GG01 = t.EE01 AND r.GG48 = t.ED48 AND r.GG49 = t.ED49
+                where t.EE09 NOT LIKE '*%' AND s.lbir_2 IS NOT NULL AND s.LBIR_2 BETWEEN :bv_by || '0101' and :bv_by || '1231'
+                ORDER BY t.ED48, t.ED49, s.Lbir_2
+            ");
+        }
+        $this->db_wrapper->getDB()->bind(":bv_by", $birth_year_padded);
+        $this->db_wrapper->getDB()->execute();
+        return $this->db_wrapper->getDB()->fetchAll();
+    }
 }
