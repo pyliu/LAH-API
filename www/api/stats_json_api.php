@@ -528,22 +528,23 @@ switch ($_POST["type"]) {
             echoJSONResponse($error);
         }
         break;
-    case "stats_reg_hundred_years_owner_data":
+    case "stats_reg_owner_data":
         $birth_year = $this_year - 100;
-        if (!empty($_POST['birth_year'])) {
+        if ($_POST['birth_year'] > 0) {
             $birth_year = intval($_POST['birth_year']);
         }
-        Logger::getInstance()->info("XHR [stats_reg_hundred_years_owner_data] 準備取的取百歲人瑞所有權人 ".$_POST["owner_type"]." 資料，出生年：".$birth_year." ...");
-        $arr = $mock ? $cache->get('stats_reg_hundred_years_owner_data') : $stats->getHundredYearsOwnerData($birth_year, $_POST['owner_type']);
-        $cache->set('stats_reg_hundred_years_owner_data', $arr);
+        Logger::getInstance()->info("XHR [stats_reg_owner_data] 準備取得所有權人 ".$_POST["owner_type"]." 資料，出生年：".$birth_year." ...");
+        $arr = $mock ? $cache->get('stats_reg_owner_data') : $stats->getHundredYearsOwnerData($birth_year, $_POST['owner_type']);
+        $cache->set('stats_reg_owner_data', $arr);
         if (is_array($arr)) {
             $count = count($arr);
+            Logger::getInstance()->info("XHR [stats_reg_owner_data] 取得 $count 筆 ".$_POST["owner_type"]." 所有權人資料成功。");
             echoJSONResponse("取得 $count 筆 ".$_POST["owner_type"]." 資料。", STATUS_CODE::SUCCESS_NORMAL, array(
                 "raw" => $arr
             ));
         } else {
-            $error = "取得百歲人瑞所有權人 ".$_POST["owner_type"]." 資料 ".$birth_year." 失敗。";
-            Logger::getInstance()->error("XHR [stats_reg_hundred_years_owner_data] $error");
+            $error = "取得 ".$birth_year." 出生所有權人 ".$_POST["owner_type"]." 資料失敗。";
+            Logger::getInstance()->error("XHR [stats_reg_owner_data] $error");
             echoJSONResponse($error);
         }
         break;
