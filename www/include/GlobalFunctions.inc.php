@@ -523,22 +523,28 @@ function getCPUInfo() {
     return $cpuInfo;
 }
 
-function getDividedCaseId ($text) {
-    // 定義正規表達式模式
-    // (\d{3})      : 第1組，抓取前 3 個數字 (年份，如 114)
-    // ([A-Z0-9]{4}): 第2組，抓取中間 4 個英數字 (字號，如 HDA1)
-    // (\d{6})      : 第3組，抓取後 6 個數字 (流水號，如 020670)// 1. 定義正則表達式
-    $pattern = '/(\d{3})([A-Z0-9]{4})(\d{6})/';
-    // 2. 定義替換格式 ($1-$2-$3)
-    $replacement = '$1-$2-$3';
-    // 3. 執行替換並 "回傳" 結果
-    // 如果輸入是純號碼 "114HDA1020670"，會回傳 "114-HDA1-020670"
-    return preg_replace($pattern, $replacement, $text);
+function getDividedCaseId ($text) {// 加上 ^ 和 $，表示必須「從頭到尾完全符合」這個格式
+    // 格式：3位數字 + 4位英數 + 6位數字
+    $pattern = '/^(\d{3})([A-Z0-9]{4})(\d{6})$/';
+    // 先檢查是否符合格式
+    if (preg_match($pattern, $text)) {
+        // 符合：回傳格式化後的字串 (114-HDA1-020670)
+        return preg_replace($pattern, '$1-$2-$3', $text);
+    } else {
+        // 不符合：回傳 false 或 null，代表這是無效的 ID
+        return false;
+    }
 }
 
 function getMDCaseLink($case_id) {
     $host_ip = getLocalhostIP();
     $case_query_base_url = "http://".$host_ip.":8080/reg/case";
     $clean_case_id = getDividedCaseId($case_id);
-    return "[$clean_case_id]($case_query_base_url/$clean_case_id)";
+    if ($clean_case_id) {
+        // 如果 $display_text 存在 (非 false)，代表是合格的 Case ID -> 產生連結
+        return "[$clean_case_id]($case_query_base_url/$clean_case_id)";
+    } else {
+        // 如果是不合格的 ID (例如空值、亂碼、一般文字) -> 直接回傳原始文字，不加連結
+        return $case_id;
+    }
 }
