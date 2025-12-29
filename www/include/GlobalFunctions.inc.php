@@ -527,21 +527,18 @@ function getDividedCaseId ($text) {
     // 定義正規表達式模式
     // (\d{3})      : 第1組，抓取前 3 個數字 (年份，如 114)
     // ([A-Z0-9]{4}): 第2組，抓取中間 4 個英數字 (字號，如 HDA1)
-    // (\d{6})      : 第3組，抓取後 6 個數字 (流水號，如 020670)
+    // (\d{6})      : 第3組，抓取後 6 個數字 (流水號，如 020670)// 1. 定義正則表達式
     $pattern = '/(\d{3})([A-Z0-9]{4})(\d{6})/';
-
-    // 定義替換格式，使用 $1-$2-$3 加入連字號
+    // 2. 定義替換格式 ($1-$2-$3)
     $replacement = '$1-$2-$3';
-
-    // 執行替換
-    $result = preg_replace($pattern, $replacement, $text);
-
-    // 輸出結果
-    echo $result;
+    // 3. 執行替換並 "回傳" 結果
+    // 如果輸入是純號碼 "114HDA1020670"，會回傳 "114-HDA1-020670"
+    return preg_replace($pattern, $replacement, $text);
 }
 
 function getMDCaseLink($case_id) {
     $host_ip = getLocalhostIP();
-    $case_query_base_url = "http://".$host_ip.":8080/reg/case/";
-    return "[$case_id]($case_query_base_url$case_id)";
+    $case_query_base_url = "http://".$host_ip.":8080/reg/case";
+    $clean_case_id = getDividedCaseId($case_id);
+    return "[$clean_case_id]($case_query_base_url/$clean_case_id)";
 }
