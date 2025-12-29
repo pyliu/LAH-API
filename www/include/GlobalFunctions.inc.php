@@ -539,3 +539,9 @@ function getDividedCaseId ($text) {
     // 輸出結果
     echo $result;
 }
+
+function getMDCaseLink($case_id) {
+    $host_ip = getLocalhostIP();
+    $case_query_base_url = "http://".$host_ip.":8080/reg/case/";
+    return "[$case_id]($case_query_base_url$case_id)";
+}

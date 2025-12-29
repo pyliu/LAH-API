@@ -77,9 +77,10 @@ switch ($_POST["type"]) {
 				$notify = new Notification();
 				$channel = 'inf';
 				Logger::getInstance()->info('新增「修正登記案件跨所註記」訊息至 '.$channel.' 頻道。');
+				$md_case_link = getMDCaseLink(getDividedCaseId($_POST['id']));
 				$notify->addMessage($channel, array(
 						'title' => '修正登記案件跨所註記',
-						'content' => '##### ✔ 已修正 '.getDividedCaseId($_POST['id']).' 登記案件之跨所註記。',
+						'content' => "##### ✔ 已修正 $md_case_link 登記案件之跨所註記。",
 						'priority' => 3,
 						'sender' => '系統管理者',
 						'from_ip' => $client_ip
@@ -107,9 +108,10 @@ switch ($_POST["type"]) {
 				$notify = new Notification();
 				$channel = 'inf';
 				Logger::getInstance()->info('新增「修正地價案件跨所註記」訊息至 '.$channel.' 頻道。');
+				$md_case_link = getMDCaseLink(getDividedCaseId($_POST['id']));
 				$notify->addMessage($channel, array(
 						'title' => '修正地價案件跨所註記',
-						'content' => '##### ✔ 已修正 '.getDividedCaseId($_POST['id']).' 地價案件之跨所註記。',
+						'content' => "##### ✔ 已修正 $md_case_link 地價案件之跨所註記。",
 						'priority' => 3,
 						'sender' => '系統管理者',
 						'from_ip' => $client_ip
@@ -196,9 +198,10 @@ switch ($_POST["type"]) {
 				$notify = new Notification();
 				$channel = 'inf';
 				Logger::getInstance()->info('XHR [inst_xcase] 新增「修正跨所案件未回寫」訊息至 '.$channel.' 頻道。');
+				$md_case_link = getMDCaseLink(getDividedCaseId($_POST['id']));
 				$notify->addMessage($channel, array(
 						'title' => '修正跨所案件未回寫',
-						'content' => '##### ✔ 已修正 '.getDividedCaseId($_POST['id']).' 未回寫跨所登記案件。',
+						'content' => "##### ✔ 已修正 $md_case_link 未回寫跨所登記案件。",
 						'priority' => 3,
 						'sender' => '系統管理者',
 						'from_ip' => $client_ip
