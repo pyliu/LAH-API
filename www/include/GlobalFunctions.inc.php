@@ -536,15 +536,15 @@ function getDividedCaseId ($text) {// 加上 ^ 和 $，表示必須「從頭到�
     }
 }
 
-function getMDCaseLink($case_id) {
+function getMDCaseLink($text) {
     $host_ip = getLocalhostIP();
     $case_query_base_url = "http://".$host_ip.":8080/reg/case";
-    $clean_case_id = getDividedCaseId($case_id);
+    $clean_case_id = getDividedCaseId($text);
     if ($clean_case_id) {
         // 如果 $display_text 存在 (非 false)，代表是合格的 Case ID -> 產生連結
         return "[$clean_case_id]($case_query_base_url/$clean_case_id)";
     } else {
         // 如果是不合格的 ID (例如空值、亂碼、一般文字) -> 直接回傳原始文字，不加連結
-        return $case_id;
+        return $text;
     }
 }
