@@ -522,3 +522,20 @@ function getCPUInfo() {
     }
     return $cpuInfo;
 }
+
+function getDividedCaseId ($text) {
+    // 定義正規表達式模式
+    // (\d{3})      : 第1組，抓取前 3 個數字 (年份，如 114)
+    // ([A-Z0-9]{4}): 第2組，抓取中間 4 個英數字 (字號，如 HDA1)
+    // (\d{6})      : 第3組，抓取後 6 個數字 (流水號，如 020670)
+    $pattern = '/(\d{3})([A-Z0-9]{4})(\d{6})/';
+
+    // 定義替換格式，使用 $1-$2-$3 加入連字號
+    $replacement = '$1-$2-$3';
+
+    // 執行替換
+    $result = preg_replace($pattern, $replacement, $text);
+
+    // 輸出結果
+    echo $result;
+}
