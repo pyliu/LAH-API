@@ -373,6 +373,21 @@ switch ($_POST["type"]) {
 			));
 		}
         break;
+    case "ad_valid_users":
+        Logger::getInstance()->info("XHR [ad_valid_users] 取得所有AD有效使用者資料請求");
+        $ad = new AdService();
+        $users = $ad->getValidUsers();
+        if (empty($users)) {
+            Logger::getInstance()->info("XHR [ad_valid_users] 查無AD有效使用者資料。");
+            echoJSONResponse("查無AD有效使用者資料。");
+        } else {
+            Logger::getInstance()->info("XHR [ad_valid_users] 查詢AD有效使用者資料成功。");
+            echoJSONResponse('查詢AD有效使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($users),
+                "raw" => $users
+            ));
+        }
+        break;
     default:
 		Logger::getInstance()->warning("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
