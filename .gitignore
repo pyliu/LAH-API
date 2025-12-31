@@ -31,3 +31,7 @@ node_modules
 **/monitor/*
 **/pdf/*
 **/thunder-tests/*
+**/include/config/AD.php
+**/include/config/AD.VALID.php
+**/include/config/AD.INVALID.php
+**/include/config/AD.ALL.php
