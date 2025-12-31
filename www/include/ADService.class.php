@@ -6,11 +6,11 @@ use RuntimeException;
  * Class AdService
  * 負責處理與 Active Directory (LDAP) 的連線與查詢
  * * 修改紀錄:
- * - [Log] 增加大量詳細 Log (使用 [AdService] 前綴) 以利 Debug
- * - [New] 新增 raw 欄位，包含詳細的 AD 原始屬性
- * - [New] getValidUsers/getInvalidUsers/getAllUsers 支援快取讀取
- * - [New] 增加 $force 參數，控制是否強制重新讀取 AD
- * - [Update] 當快取過期 (>1天) 時自動重新抓取並儲存
+ * - [Fix] 移除強制 LDAPS 邏輯，改回預設 Port 389 以修復 "Can't contact LDAP server"
+ * - [Feature] connectAndBind 支援 $requireSecure 參數
+ * - 若為一般查詢，使用標準 LDAP
+ * - 若涉及密碼修改，嘗試使用 STARTTLS 或 LDAPS
+ * - [Log] 詳細日誌記錄
  */
 class AdService
 {
@@ -72,13 +72,81 @@ class AdService
         }
 
         $this->host = $config['AD_HOST'];
-        $this->port = (int)($config['AD_PORT'] ?? 389);
+        // 預設改回 389，因為您的環境不支援 636
+        $this->port = (int)($config['AD_PORT'] ?? 389); 
         $this->baseDn = $config['BASE_DN'];
         $this->bindUser = $config['QUERY_USER'];
         $this->bindPass = $config['QUERY_PASSWORD'];
         
-        // Log 設定摘要 (遮蔽密碼)
-        $this->logger->info("[AdService] 設定載入完成: Host={$this->host}, User={$this->bindUser}, BaseDN={$this->baseDn}");
+        $this->logger->info("[AdService] 設定載入完成: Host={$this->host}:{$this->port}, BaseDN={$this->baseDn}");
+    }
+
+    /**
+     * [內部方法] 建立 LDAP 連線並綁定 (Bind)
+     * @param bool $requireSecure 是否需要加密連線 (例如重設密碼時)
+     * @return resource LDAP Link Identifier
+     */
+    private function connectAndBind(bool $requireSecure = false)
+    {
+        $host = $this->host;
+        $port = $this->port;
+        $protocol = "ldap://";
+
+        // 判斷是否需要加密連線
+        if ($requireSecure) {
+            $this->logger->info("[AdService] 操作需要安全連線...");
+            
+            // 策略 1: 如果 Config 已經是 636，就用 LDAPS
+            if ($port == 636) {
+                $protocol = "ldaps://";
+            }
+            // 策略 2: 如果是 389，稍後嘗試 STARTTLS (下面實作)
+        } else {
+            // 如果 Config 指定 636，還是得用 LDAPS
+            if ($port == 636) {
+                $protocol = "ldaps://";
+            }
+        }
+
+        // 處理 Host 字串，避免重複協定頭
+        if (stripos($host, 'ldap://') !== false || stripos($host, 'ldaps://') !== false) {
+            $connStr = $host; // 使用者設定檔已包含協定
+        } else {
+            $connStr = $protocol . $host;
+        }
+
+        $this->logger->info("[AdService] 開始連線至: {$connStr}:{$port}");
+
+        // 設定忽略憑證檢查 (避免自簽憑證問題)
+        putenv('LDAPTLS_REQCERT=never'); 
+
+        $conn = ldap_connect($connStr, $port);
+        if (!$conn) throw new RuntimeException("無法連線至 AD 伺服器: " . $connStr);
+
+        ldap_set_option($conn, LDAP_OPT_PROTOCOL_VERSION, 3);
+        ldap_set_option($conn, LDAP_OPT_REFERRALS, 0);
+        ldap_set_option($conn, LDAP_OPT_TIMELIMIT, 15);
+        @ldap_set_option(null, LDAP_OPT_X_TLS_REQUIRE_CERT, 0); 
+
+        // [關鍵修改] 如果需要安全連線，且目前是 Port 389，嘗試升級為 TLS
+        if ($requireSecure && $port == 389) {
+            $this->logger->info("[AdService] 嘗試啟動 STARTTLS 加密...");
+            if (!@ldap_start_tls($conn)) {
+                $err = ldap_error($conn);
+                $this->logger->warning("[AdService] STARTTLS 失敗: $err。若此操作涉及修改密碼可能會被 AD 拒絕。");
+                // 這裡不拋出例外，嘗試繼續 Bind，因為有些寬鬆的 AD 環境可能允許
+            } else {
+                $this->logger->info("[AdService] STARTTLS 啟動成功");
+            }
+        }
+
+        if (!@ldap_bind($conn, $this->bindUser, $this->bindPass)) {
+            $this->logger->error("[AdService] AD Bind 失敗 (User: {$this->bindUser})");
+            throw new RuntimeException("AD 認證失敗: " . ldap_error($conn));
+        }
+        $this->logger->info("[AdService] AD Bind 成功");
+        
+        return $conn;
     }
 
     private function convertWindowsTimeToStr(string $adTime): string
@@ -121,8 +189,6 @@ class AdService
 
     /**
      * [內部方法] 嘗試從快取檔案讀取資料
-     * @param string $filename 檔案名稱 (e.g., AD.VALID.php)
-     * @return array|null 若快取有效回傳 ['data' => ...], 否則回傳 null
      */
     private function loadFromCache(string $filename): ?array
     {
@@ -132,7 +198,6 @@ class AdService
         if (file_exists($filepath)) {
             $cache = require $filepath;
             
-            // 檢查快取結構與時效
             if (is_array($cache) && isset($cache['timestamp'], $cache['data'])) {
                 $age = time() - $cache['timestamp'];
                 
@@ -149,115 +214,6 @@ class AdService
             $this->logger->info("[AdService] 快取檔案不存在。");
         }
         return null;
-    }
-
-    /**
-     * 取得所有有效使用者 (未停用)
-     * @param bool $force 是否強制重新讀取 AD (預設 false: 優先讀快取)
-     * @return array
-     */
-    public function getValidUsers(bool $force = false): array
-    {
-        $filename = 'AD.VALID.php';
-        $this->logger->info("[AdService] 請求取得【有效使用者】(Force: " . ($force ? 'Yes' : 'No') . ")");
-
-        // 1. 嘗試讀取快取
-        if (!$force) {
-            $cachedData = $this->loadFromCache($filename);
-            if ($cachedData !== null) {
-                return $cachedData;
-            }
-        }
-
-        // 2. 快取無效或強制更新 -> 連線 AD
-        $filter = '(&(objectClass=user)(objectCategory=person)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))';
-        $data = $this->fetchUsersByFilter($filter, "取得有效使用者");
-
-        // 3. 自動更新快取
-        $this->saveToConfigFile($filename, $data);
-
-        return $data;
-    }
-
-    /**
-     * 取得並儲存所有有效使用者 (強制更新)
-     */
-    public function saveValidUsers(): bool
-    {
-        $this->logger->info("[AdService] 手動觸發儲存【有效使用者】...");
-        // 呼叫 getValidUsers(true) 強制抓新資料並儲存
-        $data = $this->getValidUsers(true);
-        return !empty($data);
-    }
-
-    /**
-     * 取得所有停用使用者 (已停用)
-     * @param bool $force 是否強制重新讀取 AD (預設 false)
-     * @return array
-     */
-    public function getInvalidUsers(bool $force = false): array
-    {
-        $filename = 'AD.INVALID.php';
-        $this->logger->info("[AdService] 請求取得【停用使用者】(Force: " . ($force ? 'Yes' : 'No') . ")");
-
-        if (!$force) {
-            $cachedData = $this->loadFromCache($filename);
-            if ($cachedData !== null) {
-                return $cachedData;
-            }
-        }
-
-        $filter = '(&(objectClass=user)(objectCategory=person)(userAccountControl:1.2.840.113556.1.4.803:=2))';
-        $data = $this->fetchUsersByFilter($filter, "取得停用使用者");
-        
-        $this->saveToConfigFile($filename, $data);
-
-        return $data;
-    }
-
-    /**
-     * 取得並儲存所有停用使用者 (強制更新)
-     */
-    public function saveInvalidUsers(): bool
-    {
-        $this->logger->info("[AdService] 手動觸發儲存【停用使用者】...");
-        $data = $this->getInvalidUsers(true);
-        return !empty($data);
-    }
-
-    /**
-     * 取得所有使用者 (含有效與停用)
-     * @param bool $force 是否強制重新讀取 AD (預設 false)
-     * @return array
-     */
-    public function getAllUsers(bool $force = false): array
-    {
-        $filename = 'AD.ALL.php';
-        $this->logger->info("[AdService] 請求取得【所有使用者】(Force: " . ($force ? 'Yes' : 'No') . ")");
-
-        if (!$force) {
-            $cachedData = $this->loadFromCache($filename);
-            if ($cachedData !== null) {
-                return $cachedData;
-            }
-        }
-
-        $filter = '(&(objectClass=user)(objectCategory=person))';
-        $data = $this->fetchUsersByFilter($filter, "取得所有使用者");
-        
-        $this->saveToConfigFile($filename, $data);
-
-        return $data;
-    }
-
-    /**
-     * 取得並儲存所有使用者 (強制更新)
-     */
-    public function saveAllUsers(): bool
-    {
-        $this->logger->info("[AdService] 手動觸發儲存【所有使用者】...");
-        $data = $this->getAllUsers(true);
-        return !empty($data);
     }
 
     /**
@@ -297,6 +253,179 @@ class AdService
         }
     }
 
+    // ==========================================
+    // Public User Fetching Methods
+    // ==========================================
+
+    /**
+     * 取得所有有效使用者 (未停用)
+     */
+    public function getValidUsers(bool $force = false): array
+    {
+        $filename = 'AD.VALID.php';
+        $this->logger->info("[AdService] 請求取得【有效使用者】(Force: " . ($force ? 'Yes' : 'No') . ")");
+
+        if (!$force) {
+            $cachedData = $this->loadFromCache($filename);
+            if ($cachedData !== null) return $cachedData;
+        }
+
+        // Filter: 未停用
+        $filter = '(&(objectClass=user)(objectCategory=person)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))';
+        $data = $this->fetchUsersByFilter($filter, "取得有效使用者");
+        $this->saveToConfigFile($filename, $data);
+        return $data;
+    }
+
+    public function saveValidUsers(): bool
+    {
+        $this->logger->info("[AdService] 手動觸發儲存【有效使用者】...");
+        return !empty($this->getValidUsers(true));
+    }
+
+    /**
+     * 取得所有停用使用者 (已停用)
+     */
+    public function getInvalidUsers(bool $force = false): array
+    {
+        $filename = 'AD.INVALID.php';
+        $this->logger->info("[AdService] 請求取得【停用使用者】(Force: " . ($force ? 'Yes' : 'No') . ")");
+
+        if (!$force) {
+            $cachedData = $this->loadFromCache($filename);
+            if ($cachedData !== null) return $cachedData;
+        }
+
+        // Filter: 已停用
+        $filter = '(&(objectClass=user)(objectCategory=person)(userAccountControl:1.2.840.113556.1.4.803:=2))';
+        $data = $this->fetchUsersByFilter($filter, "取得停用使用者");
+        $this->saveToConfigFile($filename, $data);
+        return $data;
+    }
+
+    public function saveInvalidUsers(): bool
+    {
+        $this->logger->info("[AdService] 手動觸發儲存【停用使用者】...");
+        return !empty($this->getInvalidUsers(true));
+    }
+
+    /**
+     * 取得所有使用者 (含有效與停用)
+     */
+    public function getAllUsers(bool $force = false): array
+    {
+        $filename = 'AD.ALL.php';
+        $this->logger->info("[AdService] 請求取得【所有使用者】(Force: " . ($force ? 'Yes' : 'No') . ")");
+
+        if (!$force) {
+            $cachedData = $this->loadFromCache($filename);
+            if ($cachedData !== null) return $cachedData;
+        }
+
+        $filter = '(&(objectClass=user)(objectCategory=person))';
+        $data = $this->fetchUsersByFilter($filter, "取得所有使用者");
+        $this->saveToConfigFile($filename, $data);
+        return $data;
+    }
+
+    public function saveAllUsers(): bool
+    {
+        $this->logger->info("[AdService] 手動觸發儲存【所有使用者】...");
+        return !empty($this->getAllUsers(true));
+    }
+
+    /**
+     * [Feature 1] 取得被鎖定 (Locked Out) 但未停用的使用者
+     */
+    public function getLockedUsers(bool $force = false): array
+    {
+        $filename = 'AD.LOCKED.php';
+        $this->logger->info("[AdService] 請求取得【鎖定使用者】(Force: " . ($force ? 'Yes' : 'No') . ")");
+
+        if (!$force) {
+            $cachedData = $this->loadFromCache($filename);
+            if ($cachedData !== null) return $cachedData;
+        }
+
+        // Filter: 未停用 AND (lockoutTime>=1 AND lockoutTime!=0)
+        $filter = '(&(objectClass=user)(objectCategory=person)(!(userAccountControl:1.2.840.113556.1.4.803:=2))(&(lockoutTime>=1)(!(lockoutTime=0))))';
+        
+        $data = $this->fetchUsersByFilter($filter, "取得鎖定使用者");
+        $this->saveToConfigFile($filename, $data);
+        return $data;
+    }
+
+    public function saveLockedUsers(): bool
+    {
+        $this->logger->info("[AdService] 手動觸發儲存【鎖定使用者】...");
+        return !empty($this->getLockedUsers(true));
+    }
+
+    // ==========================================
+    // Management Methods (Unlock / Reset PW)
+    // ==========================================
+
+    /**
+     * [Feature 2] 解鎖使用者並可選重設密碼
+     * @param string $account 使用者帳號 (sAMAccountName)
+     * @param string|null $newPassword (Optional) 若提供，則同時重設密碼
+     * @return bool
+     */
+    public function unlockUser(string $account, ?string $newPassword = null): bool
+    {
+        $conn = null;
+        try {
+            $this->logger->info("[AdService] 嘗試解鎖使用者: {$account}" . ($newPassword ? " (含重設密碼)" : ""));
+            
+            // 只有在需要重設密碼時，才要求加密連線 (STARTTLS or LDAPS)
+            $requireSecure = ($newPassword !== null);
+            
+            $conn = $this->connectAndBind($requireSecure);
+
+            // 1. 尋找使用者的 DN
+            $filter = "(&(objectClass=user)(objectCategory=person)(sAMAccountName={$account}))";
+            $result = ldap_search($conn, $this->baseDn, $filter, ['dn']);
+            $entries = ldap_get_entries($conn, $result);
+
+            if ($entries['count'] == 0) {
+                throw new RuntimeException("找不到使用者: {$account}");
+            }
+
+            $userDn = $entries[0]['dn'];
+            $modifications = [];
+
+            // 2. 準備解鎖動作: 將 lockoutTime 設為 0
+            $modifications['lockoutTime'] = 0;
+
+            // 3. 準備密碼重設動作 (如果有的話)
+            if ($newPassword !== null) {
+                // AD 密碼必須用引號包起來，並轉為 UTF-16LE
+                $quotedPassword = "\"" . $newPassword . "\"";
+                $encodedPwd = iconv("UTF-8", "UTF-16LE", $quotedPassword);
+                $modifications['unicodePwd'] = $encodedPwd;
+            }
+
+            // 4. 執行修改
+            if (@ldap_modify($conn, $userDn, $modifications)) {
+                $this->logger->info("[AdService] 使用者 {$account} 解鎖成功" . ($newPassword ? "/密碼已重設" : ""));
+                return true;
+            } else {
+                $error = ldap_error($conn);
+                throw new RuntimeException("修改失敗: {$error}。");
+            }
+
+        } catch (\Exception $e) {
+            $this->logger->error("[AdService] 解鎖使用者失敗: " . $e->getMessage());
+            throw $e;
+        } finally {
+            if ($conn) @ldap_unbind($conn);
+        }
+    }
+
+    // ==========================================
+    // Core Fetching Logic
+    // ==========================================
+
     /**
      * [核心方法] 根據過濾條件搜尋並解析使用者
      */
@@ -304,19 +433,8 @@ class AdService
     {
         $conn = null;
         try {
-            $this->logger->info("[AdService] {$logAction}: 開始連線至 AD ({$this->host}:{$this->port})...");
-            $conn = ldap_connect($this->host, $this->port);
-            if (!$conn) throw new RuntimeException("無法連線至 AD 伺服器: " . $this->host);
-
-            ldap_set_option($conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-            ldap_set_option($conn, LDAP_OPT_REFERRALS, 0);
-            ldap_set_option($conn, LDAP_OPT_TIMELIMIT, 15);
-
-            if (!@ldap_bind($conn, $this->bindUser, $this->bindPass)) {
-                $this->logger->error("[AdService] {$logAction}: AD Bind 失敗 (User: {$this->bindUser})");
-                throw new RuntimeException("AD 認證失敗: " . ldap_error($conn));
-            }
-            $this->logger->info("[AdService] {$logAction}: AD Bind 成功");
+            // 一般查詢，不需要加密連線 (False)
+            $conn = $this->connectAndBind(false);
 
             // --- [Step 1] 預先抓取群組中文描述對照表 ---
             $groupDescMap = $this->fetchGroupDescriptions($conn);
