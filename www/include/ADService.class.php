@@ -6,10 +6,11 @@ use RuntimeException;
  * Class AdService
  * 負責處理與 Active Directory (LDAP) 的連線與查詢
  * * 修改紀錄:
+ * - [Feature] 新增 getRoleStatistics() 統計每個權限群組的成員與數量
+ * - [Feature] 新增 getMultiDepartmentUsers() 找出隸屬多個部門的使用者
  * - [Fix] 移除強制 LDAPS 邏輯，改回預設 Port 389 以修復 "Can't contact LDAP server"
  * - [Feature] connectAndBind 支援 $requireSecure 參數
- * - 若為一般查詢，使用標準 LDAP
- * - 若涉及密碼修改，嘗試使用 STARTTLS 或 LDAPS
+ * - [New] 新增 getLockedUsers() / unlockUser()
  * - [Log] 詳細日誌記錄
  */
 class AdService
@@ -133,7 +134,7 @@ class AdService
             $this->logger->info("[AdService] 嘗試啟動 STARTTLS 加密...");
             if (!@ldap_start_tls($conn)) {
                 $err = ldap_error($conn);
-                $this->logger->warning("[AdService] STARTTLS 失敗: $err 。若此操作涉及修改密碼可能會被 AD 拒絕。");
+                $this->logger->warning("[AdService] STARTTLS 失敗: $err。若此操作涉及修改密碼可能會被 AD 拒絕。");
                 // 這裡不拋出例外，嘗試繼續 Bind，因為有些寬鬆的 AD 環境可能允許
             } else {
                 $this->logger->info("[AdService] STARTTLS 啟動成功");
@@ -359,6 +360,86 @@ class AdService
     {
         $this->logger->info("[AdService] 手動觸發儲存【鎖定使用者】...");
         return !empty($this->getLockedUsers(true));
+    }
+
+    /**
+     * [Feature 3] 取得擁有個部門(課室)以上的使用者
+     * 該功能依賴 getValidUsers 的快取資料進行過濾
+     * @param bool $force 是否強制重新讀取 AD
+     * @return array
+     */
+    public function getMultiDepartmentUsers(bool $force = false): array
+    {
+        $this->logger->info("[AdService] 請求取得【多部門使用者】...");
+        
+        // 1. 先取得所有有效使用者 (使用既有的快取或重新讀取)
+        $users = $this->getValidUsers($force);
+        
+        // 2. 過濾部門數量 > 1 的使用者
+        $multiDeptUsers = array_filter($users, function($user) {
+            // department 是一個陣列 (e.g., ['測量課', '資訊課'])
+            return is_array($user['department']) && count($user['department']) > 1;
+        });
+
+        // 3. 重置陣列索引，讓回傳的 JSON 是 array 而不是 object
+        $results = array_values($multiDeptUsers);
+        
+        $this->logger->info("[AdService] 篩選完成，共有 " . count($results) . " 位使用者擁有多個部門。");
+        
+        return $results;
+    }
+
+    /**
+     * [Feature 4] 統計每個權限群組(Role)的成員
+     * @param bool $force 是否強制重新讀取
+     * @return array 
+     * [
+     * 'RR02' => [
+     * 'code' => 'RR02',
+     * 'name' => '登記系統',
+     * 'count' => 10,
+     * 'accounts' => ['HA01', 'HA02', ...]
+     * ],
+     * ...
+     * ]
+     */
+    public function getRoleStatistics(bool $force = false): array
+    {
+        $this->logger->info("[AdService] 請求取得【權限群組成員統計】...");
+        
+        // 1. 取得所有有效使用者
+        $users = $this->getValidUsers($force);
+        $stats = [];
+
+        // 2. 遍歷使用者並歸類
+        foreach ($users as $user) {
+             // user['roles'] 結構: ['RR02' => '登記系統', 'AI01' => '行政作業']
+             if (!empty($user['roles']) && is_array($user['roles'])) {
+                 foreach ($user['roles'] as $code => $desc) {
+                     // 初始化該群組的統計結構
+                     if (!isset($stats[$code])) {
+                         $stats[$code] = [
+                             'code' => $code,
+                             'name' => $desc,
+                             'count' => 0,
+                             'accounts' => []
+                         ];
+                     }
+                     
+                     // 將使用者帳號加入清單 (避免重複)
+                     if (!in_array($user['id'], $stats[$code]['accounts'])) {
+                         $stats[$code]['accounts'][] = $user['id'];
+                         $stats[$code]['count']++;
+                     }
+                 }
+             }
+        }
+        
+        // 3. 依照群組代碼排序 (可選)
+        ksort($stats);
+
+        $this->logger->info("[AdService] 統計完成，共分析出 " . count($stats) . " 個權限群組。");
+        return $stats;
     }
 
     // ==========================================
