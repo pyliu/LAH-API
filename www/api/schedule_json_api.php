@@ -8,14 +8,17 @@
 // =========================================================================
 // [Fix] 防止 ECONNRESET: 解除執行時間與記憶體限制
 // =========================================================================
-// 排程任務通常需要較長時間，避免被 PHP 預設的 30 秒限制殺掉
-if (function_exists('set_time_limit')) {
-    set_time_limit(0); // 0 代表無限時
-}
 // 如果排程資料量大，可能需要更多記憶體 (視主機狀況調整，例如 512M 或 -1 無限制)
-ini_set('memory_limit', '512M'); 
-// 即使 Client 斷線 (例如瀏覽器關閉或 axios timeout)，讓 PHP 繼續在背景跑完重要任務
-ignore_user_abort(true);
+ini_set('memory_limit', '512M');
+if (isset($_POST['type'])) {
+    $type = $_POST['type']; // 檢查是否以數字開頭
+    if (preg_match('/^[0-9]/', $type)) {
+        // 排程任務通常需要較長時間，避免被 PHP 預設的 30 秒限制殺掉
+        set_time_limit(0); // 0 代表無限時
+        // 即使 Client 斷線 (例如瀏覽器關閉或 axios timeout)，讓 PHP 繼續在背景跑完重要任務
+        ignore_user_abort(true);
+    }
+}
 // =========================================================================
 
 // 1. 載入系統初始化設定 (包含 Autoloader, Global Constants 等)
