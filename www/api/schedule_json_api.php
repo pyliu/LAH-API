@@ -5,19 +5,34 @@
  * 並呼叫 Scheduler 類別執行對應週期的維護工作。
  */
 
+// =========================================================================
+// [Fix] 防止 ECONNRESET: 解除執行時間與記憶體限制
+// =========================================================================
+// 排程任務通常需要較長時間，避免被 PHP 預設的 30 秒限制殺掉
+if (function_exists('set_time_limit')) {
+    set_time_limit(0); // 0 代表無限時
+}
+// 如果排程資料量大，可能需要更多記憶體 (視主機狀況調整，例如 512M 或 -1 無限制)
+ini_set('memory_limit', '512M'); 
+// 即使 Client 斷線 (例如瀏覽器關閉或 axios timeout)，讓 PHP 繼續在背景跑完重要任務
+ignore_user_abort(true);
+// =========================================================================
+
 // 1. 載入系統初始化設定 (包含 Autoloader, Global Constants 等)
 require_once(dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "include" . DIRECTORY_SEPARATOR . "init.php");
 
 // 2. 獲取請求類型，若未設定則預設為空字串
+// PHP 7.0+ 支援 ?? 運算子，PHP 7.3 可用
 $type = $_POST["type"] ?? '';
 
 // 3. 記錄 API 請求開始 (包含來源 IP，方便追蹤是誰觸發的)
+// 注意: 若前端斷線，這裡仍會記錄到開始
 Logger::getInstance()->info("XHR [schedule_api] 接收到排程請求: type={$type} (From: {$client_ip})");
 
 // 4. 初始化排程器
 try {
     $scheduler = new Scheduler();
-} catch (Exception $e) {
+} catch (Throwable $e) { // PHP 7+ 建議使用 Throwable 以捕獲 Fatal Error 和 Exception
     Logger::getInstance()->error("XHR [schedule_api] Scheduler 初始化失敗: " . $e->getMessage());
     echoJSONResponse("Scheduler 初始化失敗", STATUS_CODE::DEFAULT_FAIL);
     exit;
@@ -28,16 +43,16 @@ switch ($type) {
     // -------------------------------------------------------------------------
     // 常規排程 (通常每 5 分鐘觸發一次，檢查所有週期任務)
     // -------------------------------------------------------------------------
-    case "regular": // 修正拼字
-    case "reqular": // 相容舊版拼字 (typo)
+    case "regular":
         Logger::getInstance()->info("XHR [schedule_api] 開始執行常規檢查 (do all jobs)...");
         try {
             // Scheduler->do() 會自動依序檢查所有週期的 Ticket
+            // 這邊最容易因為執行太久導致 Timeout
             $scheduler->do();
             
             Logger::getInstance()->info("XHR [schedule_api] 常規檢查執行完成。");
             echoJSONResponse('正常(regular)排程已執行完成。', STATUS_CODE::SUCCESS_NORMAL);
-        } catch (Exception $e) {
+        } catch (Throwable $e) { // 改用 Throwable 捕獲所有層級錯誤
             Logger::getInstance()->error("XHR [schedule_api] 常規檢查執行發生例外: " . $e->getMessage());
             echoJSONResponse("常規檢查執行失敗: " . $e->getMessage(), STATUS_CODE::DEFAULT_FAIL);
         }
@@ -115,7 +130,7 @@ function executeJobAndRespond(Scheduler $scheduler, string $methodName, string $
             echoJSONResponse($msg, STATUS_CODE::DEFAULT_FAIL);
         }
 
-    } catch (Exception $e) {
+    } catch (Throwable $e) { // 改用 Throwable
         $errorMsg = "{$jobName} 執行發生例外: " . $e->getMessage();
         Logger::getInstance()->error("XHR [schedule_api] 錯誤: {$errorMsg}");
         echoJSONResponse($errorMsg, STATUS_CODE::DEFAULT_FAIL);
