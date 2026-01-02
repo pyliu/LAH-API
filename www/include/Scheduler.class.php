@@ -12,13 +12,13 @@ require_once(dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'include' . DIRE
 class Scheduler
 {
     /** @var string 暫存目錄路徑 */
-    private string $tmp;
+    private $tmp;
 
     /** @var array 紀錄各排程上次執行時間的檔案路徑對映表 */
-    private array $tickets;
+    private $tickets;
 
     /** @var array 定義特定任務的執行時段 (如上班時間) */
-    private array $schedule = array(
+    private $schedule = array(
         "office" => [
             'Sun' => [],
             'Mon' => ['07:30 AM' => '05:30 PM'],
@@ -239,7 +239,7 @@ class Scheduler
      * @param callable $callback 實際執行的任務函式
      * @return bool 是否成功執行
      */
-    private function executeJob(string $ticketKey, string $nextTimeInterval, callable $callback): bool
+    private function executeJob($ticketKey, $nextTimeInterval, callable $callback): bool
     {
         try {
             $ticketFile = $this->tickets[$ticketKey];

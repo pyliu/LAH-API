@@ -1,14 +1,5 @@
 <?php
 require_once(dirname(dirname(__FILE__))."/include/init.php");
-require_once(ROOT_DIR."/include/Cache.class.php");
-require_once(ROOT_DIR."/include/System.class.php");
-require_once(ROOT_DIR."/include/StatsOracle.class.php");
-require_once(ROOT_DIR."/include/StatsSQLite.class.php");
-require_once(ROOT_DIR."/include/SQLiteConnectivity.class.php");
-require_once(ROOT_DIR."/include/RegCaseData.class.php");
-require_once(ROOT_DIR."/include/SQLiteOFFICESSTATS.class.php");
-require_once(ROOT_DIR."/include/SQLiteAPConnectionHistory.class.php");
-require_once(ROOT_DIR."/include/Scheduler.class.php");
 
 $stats = new StatsOracle();
 $stats_sqlite3 = new StatsSQLite();

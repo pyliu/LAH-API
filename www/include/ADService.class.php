@@ -1,32 +1,35 @@
 <?php
 require_once("init.php");
-use RuntimeException;
+// use RuntimeException; // 保留，但確保舊版 PHP 也能使用 Exception
 
 /**
  * Class AdService
  * 負責處理與 Active Directory (LDAP) 的連線與查詢
- * * 修改紀錄:
- * - [Feature] 新增 getRoleStatistics() 統計每個權限群組的成員與數量
- * - [Feature] 新增 getMultiDepartmentUsers() 找出隸屬多個部門的使用者
- * - [Fix] 移除強制 LDAPS 邏輯，改回預設 Port 389 以修復 "Can't contact LDAP server"
- * - [Feature] connectAndBind 支援 $requireSecure 參數
- * - [New] 新增 getLockedUsers() / unlockUser()
- * - [Log] 詳細日誌記錄
+ * * [相容性修正]
+ * - 移除 PHP 7.4+ Typed Properties (private string $host -> private $host)
+ * - 移除 PHP 7.1+ Return Type Hints (: array, : void)
+ * - 移除 PHP 7.1+ Nullable Types (?string)
+ * - 移除 PHP 7.1+ Constant Visibility (private const -> const)
  */
 class AdService
 {
     private $logger;
     
-    private string $host;
-    private int $port;
-    private string $baseDn;
-    private string $bindUser;
-    private string $bindPass;
+    // 移除型別宣告以相容舊版 PHP
+    private $host;
+    private $port;
+    private $baseDn;
+    private $bindUser;
+    private $bindPass;
 
     // 快取有效期 (秒) - 1天
-    private const CACHE_TTL = 86400;
+    // 移除 private 可視性宣告 (PHP < 7.1 不支援)
+    const CACHE_TTL = 86400;
 
-    public function __construct(array $config = [])
+    /**
+     * @param array $config
+     */
+    public function __construct($config = [])
     {
         $this->logger = Logger::getInstance();
 
@@ -43,7 +46,7 @@ class AdService
         $this->validateAndLoadConfig($config);
     }
 
-    private function loadDefaultConfig(): array
+    private function loadDefaultConfig()
     {
         $candidates = [
             __DIR__ . '/config/AD.php',
@@ -63,7 +66,7 @@ class AdService
         throw new RuntimeException("AdService 初始化失敗: 找不到設定檔。");
     }
 
-    private function validateAndLoadConfig(array $config): void
+    private function validateAndLoadConfig($config)
     {
         $requiredKeys = ['AD_HOST', 'BASE_DN', 'QUERY_USER', 'QUERY_PASSWORD'];
         foreach ($requiredKeys as $key) {
@@ -73,8 +76,8 @@ class AdService
         }
 
         $this->host = $config['AD_HOST'];
-        // 預設改回 389，因為您的環境不支援 636
-        $this->port = (int)($config['AD_PORT'] ?? 389); 
+        // 預設改回 389
+        $this->port = isset($config['AD_PORT']) ? (int)$config['AD_PORT'] : 389; 
         $this->baseDn = $config['BASE_DN'];
         $this->bindUser = $config['QUERY_USER'];
         $this->bindPass = $config['QUERY_PASSWORD'];
@@ -84,10 +87,10 @@ class AdService
 
     /**
      * [內部方法] 建立 LDAP 連線並綁定 (Bind)
-     * @param bool $requireSecure 是否需要加密連線 (例如重設密碼時)
+     * @param bool $requireSecure 是否需要加密連線
      * @return resource LDAP Link Identifier
      */
-    private function connectAndBind(bool $requireSecure = false)
+    private function connectAndBind($requireSecure = false)
     {
         $host = $this->host;
         $port = $this->port;
@@ -97,13 +100,10 @@ class AdService
         if ($requireSecure) {
             $this->logger->info("[AdService] 操作需要安全連線...");
             
-            // 策略 1: 如果 Config 已經是 636，就用 LDAPS
             if ($port == 636) {
                 $protocol = "ldaps://";
             }
-            // 策略 2: 如果是 389，稍後嘗試 STARTTLS (下面實作)
         } else {
-            // 如果 Config 指定 636，還是得用 LDAPS
             if ($port == 636) {
                 $protocol = "ldaps://";
             }
@@ -111,14 +111,13 @@ class AdService
 
         // 處理 Host 字串，避免重複協定頭
         if (stripos($host, 'ldap://') !== false || stripos($host, 'ldaps://') !== false) {
-            $connStr = $host; // 使用者設定檔已包含協定
+            $connStr = $host; 
         } else {
             $connStr = $protocol . $host;
         }
 
         $this->logger->info("[AdService] 開始連線至: {$connStr}:{$port}");
 
-        // 設定忽略憑證檢查 (避免自簽憑證問題)
         putenv('LDAPTLS_REQCERT=never'); 
 
         $conn = ldap_connect($connStr, $port);
@@ -129,13 +128,12 @@ class AdService
         ldap_set_option($conn, LDAP_OPT_TIMELIMIT, 15);
         @ldap_set_option(null, LDAP_OPT_X_TLS_REQUIRE_CERT, 0); 
 
-        // [關鍵修改] 如果需要安全連線，且目前是 Port 389，嘗試升級為 TLS
+        // 嘗試 STARTTLS
         if ($requireSecure && $port == 389) {
             $this->logger->info("[AdService] 嘗試啟動 STARTTLS 加密...");
             if (!@ldap_start_tls($conn)) {
                 $err = ldap_error($conn);
                 $this->logger->warning("[AdService] STARTTLS 失敗: $err 。若此操作涉及修改密碼可能會被 AD 拒絕。");
-                // 這裡不拋出例外，嘗試繼續 Bind，因為有些寬鬆的 AD 環境可能允許
             } else {
                 $this->logger->info("[AdService] STARTTLS 啟動成功");
             }
@@ -150,7 +148,7 @@ class AdService
         return $conn;
     }
 
-    private function convertWindowsTimeToStr(string $adTime): string
+    private function convertWindowsTimeToStr($adTime)
     {
         if ($adTime == '0' || $adTime == '') {
             return '';
@@ -166,7 +164,7 @@ class AdService
     /**
      * [內部方法] 抓取系統中所有群組的 CN 與 Description 對照表
      */
-    private function fetchGroupDescriptions($conn): array
+    private function fetchGroupDescriptions($conn)
     {
         $this->logger->info("[AdService] 開始抓取群組 (Group) 描述對照表...");
         $groupMap = [];
@@ -177,8 +175,8 @@ class AdService
         if ($result) {
             $entries = ldap_get_entries($conn, $result);
             for ($i = 0; $i < $entries['count']; $i++) {
-                $cn = $entries[$i]['cn'][0] ?? '';
-                $desc = $entries[$i]['description'][0] ?? '';
+                $cn = isset($entries[$i]['cn'][0]) ? $entries[$i]['cn'][0] : '';
+                $desc = isset($entries[$i]['description'][0]) ? $entries[$i]['description'][0] : '';
                 if ($cn && $desc) {
                     $groupMap[$cn] = $desc;
                 }
@@ -191,7 +189,7 @@ class AdService
     /**
      * [內部方法] 嘗試從快取檔案讀取資料
      */
-    private function loadFromCache(string $filename): ?array
+    private function loadFromCache($filename)
     {
         $filepath = __DIR__ . '/config/' . $filename;
         $this->logger->info("[AdService] 檢查快取檔案: {$filepath}");
@@ -220,7 +218,7 @@ class AdService
     /**
      * [內部方法] 將陣列儲存為 PHP 設定檔
      */
-    private function saveToConfigFile(string $filename, array $data): bool
+    private function saveToConfigFile($filename, $data)
     {
         try {
             $dir = __DIR__ . '/config';
@@ -248,7 +246,7 @@ class AdService
 
             $this->logger->info("[AdService] 成功儲存 AD 資料至: $filename (共 " . count($data) . " 筆)");
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error("[AdService] 儲存 AD 設定檔失敗 [$filename]: " . $e->getMessage());
             return false;
         }
@@ -260,8 +258,10 @@ class AdService
 
     /**
      * 取得所有有效使用者 (未停用)
+     * @param bool $force
+     * @return array
      */
-    public function getValidUsers(bool $force = false): array
+    public function getValidUsers($force = false)
     {
         $filename = 'AD.VALID.php';
         $this->logger->info("[AdService] 請求取得【有效使用者】(Force: " . ($force ? 'Yes' : 'No') . ")");
@@ -278,7 +278,7 @@ class AdService
         return $data;
     }
 
-    public function saveValidUsers(): bool
+    public function saveValidUsers()
     {
         $this->logger->info("[AdService] 手動觸發儲存【有效使用者】...");
         return !empty($this->getValidUsers(true));
@@ -287,7 +287,7 @@ class AdService
     /**
      * 取得所有停用使用者 (已停用)
      */
-    public function getInvalidUsers(bool $force = false): array
+    public function getInvalidUsers($force = false)
     {
         $filename = 'AD.INVALID.php';
         $this->logger->info("[AdService] 請求取得【停用使用者】(Force: " . ($force ? 'Yes' : 'No') . ")");
@@ -304,7 +304,7 @@ class AdService
         return $data;
     }
 
-    public function saveInvalidUsers(): bool
+    public function saveInvalidUsers()
     {
         $this->logger->info("[AdService] 手動觸發儲存【停用使用者】...");
         return !empty($this->getInvalidUsers(true));
@@ -313,7 +313,7 @@ class AdService
     /**
      * 取得所有使用者 (含有效與停用)
      */
-    public function getAllUsers(bool $force = false): array
+    public function getAllUsers($force = false)
     {
         $filename = 'AD.ALL.php';
         $this->logger->info("[AdService] 請求取得【所有使用者】(Force: " . ($force ? 'Yes' : 'No') . ")");
@@ -329,7 +329,7 @@ class AdService
         return $data;
     }
 
-    public function saveAllUsers(): bool
+    public function saveAllUsers()
     {
         $this->logger->info("[AdService] 手動觸發儲存【所有使用者】...");
         return !empty($this->getAllUsers(true));
@@ -338,7 +338,7 @@ class AdService
     /**
      * [Feature 1] 取得被鎖定 (Locked Out) 但未停用的使用者
      */
-    public function getLockedUsers(bool $force = false): array
+    public function getLockedUsers($force = false)
     {
         $filename = 'AD.LOCKED.php';
         $this->logger->info("[AdService] 請求取得【鎖定使用者】(Force: " . ($force ? 'Yes' : 'No') . ")");
@@ -356,7 +356,7 @@ class AdService
         return $data;
     }
 
-    public function saveLockedUsers(): bool
+    public function saveLockedUsers()
     {
         $this->logger->info("[AdService] 手動觸發儲存【鎖定使用者】...");
         return !empty($this->getLockedUsers(true));
@@ -364,11 +364,8 @@ class AdService
 
     /**
      * [Feature 3] 取得擁有個部門(課室)以上的使用者
-     * 該功能依賴 getValidUsers 的快取資料進行過濾
-     * @param bool $force 是否強制重新讀取 AD
-     * @return array
      */
-    public function getMultiDepartmentUsers(bool $force = false): array
+    public function getMultiDepartmentUsers($force = false)
     {
         $this->logger->info("[AdService] 請求取得【多部門使用者】...");
         
@@ -391,19 +388,8 @@ class AdService
 
     /**
      * [Feature 4] 統計每個權限群組(Role)的成員
-     * @param bool $force 是否強制重新讀取
-     * @return array 
-     * [
-     * 'RR02' => [
-     * 'code' => 'RR02',
-     * 'name' => '登記系統',
-     * 'count' => 10,
-     * 'accounts' => ['HA01', 'HA02', ...]
-     * ],
-     * ...
-     * ]
      */
-    public function getRoleStatistics(bool $force = false): array
+    public function getRoleStatistics($force = false)
     {
         $this->logger->info("[AdService] 請求取得【權限群組成員統計】...");
         
@@ -448,11 +434,12 @@ class AdService
 
     /**
      * [Feature 2] 解鎖使用者並可選重設密碼
+     * [相容性] 移除 ?string 與 : bool
      * @param string $account 使用者帳號 (sAMAccountName)
      * @param string|null $newPassword (Optional) 若提供，則同時重設密碼
      * @return bool
      */
-    public function unlockUser(string $account, ?string $newPassword = null): bool
+    public function unlockUser($account, $newPassword = null)
     {
         $conn = null;
         try {
@@ -495,7 +482,7 @@ class AdService
                 throw new RuntimeException("修改失敗: {$error}。");
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error("[AdService] 解鎖使用者失敗: " . $e->getMessage());
             throw $e;
         } finally {
@@ -510,7 +497,7 @@ class AdService
     /**
      * [核心方法] 根據過濾條件搜尋並解析使用者
      */
-    private function fetchUsersByFilter(string $filter, string $logAction): array
+    private function fetchUsersByFilter($filter, $logAction)
     {
         $conn = null;
         try {
@@ -544,7 +531,7 @@ class AdService
             if (!$result) throw new RuntimeException("AD 搜尋失敗: " . ldap_error($conn));
 
             $entries = ldap_get_entries($conn, $result);
-            $rawCount = $entries['count'] ?? 0;
+            $rawCount = isset($entries['count']) ? $entries['count'] : 0;
             $this->logger->info("[AdService] {$logAction}: 搜尋完成，共找到 {$rawCount} 筆原始資料，開始解析...");
             
             $users = [];
@@ -552,24 +539,24 @@ class AdService
             for ($i = 0; $i < $entries['count']; $i++) {
                 $entry = $entries[$i];
                 
-                $account = $entry['samaccountname'][0] ?? '';
-                $name = $entry['description'][0] ?? ''; 
+                $account = isset($entry['samaccountname'][0]) ? $entry['samaccountname'][0] : '';
+                $name = isset($entry['description'][0]) ? $entry['description'][0] : ''; 
                 
-                $lastLoginTime = $this->convertWindowsTimeToStr($entry['lastlogon'][0] ?? '0');
-                $pwdLastSetTime = $this->convertWindowsTimeToStr($entry['pwdlastset'][0] ?? '0');
+                $lastLoginTime = $this->convertWindowsTimeToStr(isset($entry['lastlogon'][0]) ? $entry['lastlogon'][0] : '0');
+                $pwdLastSetTime = $this->convertWindowsTimeToStr(isset($entry['pwdlastset'][0]) ? $entry['pwdlastset'][0] : '0');
 
                 $raw = [
-                    'whencreated'        => $entry['whencreated'][0] ?? '',
-                    'whenchanged'        => $entry['whenchanged'][0] ?? '',
-                    'pwdlastset'         => $entry['pwdlastset'][0] ?? '',
-                    'lastlogon'          => $entry['lastlogon'][0] ?? '',
-                    'lastlogontimestamp' => $entry['lastlogontimestamp'][0] ?? '',
-                    'badpwdcount'        => $entry['badpwdcount'][0] ?? '',
-                    'badpasswordtime'    => $entry['badpasswordtime'][0] ?? '',
-                    'accountexpires'     => $entry['accountexpires'][0] ?? '',
-                    'lockouttime'        => $entry['lockouttime'][0] ?? '',
-                    'useraccountcontrol' => $entry['useraccountcontrol'][0] ?? '',
-                    'primarygroupid'     => $entry['primarygroupid'][0] ?? '',
+                    'whencreated'        => isset($entry['whencreated'][0]) ? $entry['whencreated'][0] : '',
+                    'whenchanged'        => isset($entry['whenchanged'][0]) ? $entry['whenchanged'][0] : '',
+                    'pwdlastset'         => isset($entry['pwdlastset'][0]) ? $entry['pwdlastset'][0] : '',
+                    'lastlogon'          => isset($entry['lastlogon'][0]) ? $entry['lastlogon'][0] : '',
+                    'lastlogontimestamp' => isset($entry['lastlogontimestamp'][0]) ? $entry['lastlogontimestamp'][0] : '',
+                    'badpwdcount'        => isset($entry['badpwdcount'][0]) ? $entry['badpwdcount'][0] : '',
+                    'badpasswordtime'    => isset($entry['badpasswordtime'][0]) ? $entry['badpasswordtime'][0] : '',
+                    'accountexpires'     => isset($entry['accountexpires'][0]) ? $entry['accountexpires'][0] : '',
+                    'lockouttime'        => isset($entry['lockouttime'][0]) ? $entry['lockouttime'][0] : '',
+                    'useraccountcontrol' => isset($entry['useraccountcontrol'][0]) ? $entry['useraccountcontrol'][0] : '',
+                    'primarygroupid'     => isset($entry['primarygroupid'][0]) ? $entry['primarygroupid'][0] : '',
                 ];
 
                 $roles = []; 
@@ -616,7 +603,7 @@ class AdService
             $this->logger->info("[AdService] {$logAction}: 解析完成，共回傳 {$finalCount} 筆使用者資料");
             return $users;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error("[AdService] {$logAction} 發生錯誤: " . $e->getMessage());
             throw $e;
         } finally {
