@@ -606,6 +606,17 @@ class SQLiteUser {
         }
     }
 
+    public function updateName($id, $name) {
+        if ($stm = $this->db->prepare("UPDATE user SET name = :name WHERE id = :id")) {
+            $stm->bindParam(':name', $name);
+            $stm->bindParam(':id', $id);
+            return $stm->execute() === FALSE ? false : true;
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 更新姓名(${id}, ${name})資料失敗！");
+            return false;
+        }
+    }
+
     public function getAuthorityList() {
         if($stmt = $this->db->prepare("
             SELECT
