@@ -87,6 +87,23 @@ class Scheduler {
         }
     }
 
+    private function syncAdUsersToLocalDB() {
+        Logger::getInstance()->info(__METHOD__.': 同步 AD 使用者至 SQLite 排程啟動。');
+        $sqlite_user = new SQLiteUser();
+        // syncAdUsers() without arguments will fetch from ADService internally
+        $stats = $sqlite_user->syncAdUsers();
+        
+        if ($stats !== false) {
+            $msg = sprintf(
+                "同步完成。新增: %d, 更新: %d, 跳過: %d, 失敗: %d, 離職: %d",
+                $stats['added'], $stats['updated'], $stats['skipped'], $stats['failed'], $stats['offboarded']
+            );
+            Logger::getInstance()->info(__METHOD__.": $msg");
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 同步 AD 使用者失敗 (回傳 false)。");
+        }
+    }
+
     private function importUserFromL3HWEB() {
         Logger::getInstance()->info(__METHOD__.': 匯入L3HWEB使用者資料排程啟動。');
         $sysauth1 = new SQLiteSYSAUTH1();
@@ -628,6 +645,10 @@ class Scheduler {
                 $this->importOFFICES();
                 $this->importUserFromL3HWEB();
                 $this->analyzeTables();
+                /**
+                 * 同步AD使用者至本地資料庫
+                 */
+                $this->syncAdUsersToLocalDB();
             } else {
                 // Logger::getInstance()->info(__METHOD__.": 每24小時的排程將於 ".date("Y-m-d H:i:s", $ticketTs)." 後執行。");
             }

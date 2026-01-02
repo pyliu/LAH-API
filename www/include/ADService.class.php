@@ -134,7 +134,7 @@ class AdService
             $this->logger->info("[AdService] 嘗試啟動 STARTTLS 加密...");
             if (!@ldap_start_tls($conn)) {
                 $err = ldap_error($conn);
-                $this->logger->warning("[AdService] STARTTLS 失敗: $err。若此操作涉及修改密碼可能會被 AD 拒絕。");
+                $this->logger->warning("[AdService] STARTTLS 失敗: $err 。若此操作涉及修改密碼可能會被 AD 拒絕。");
                 // 這裡不拋出例外，嘗試繼續 Bind，因為有些寬鬆的 AD 環境可能允許
             } else {
                 $this->logger->info("[AdService] STARTTLS 啟動成功");

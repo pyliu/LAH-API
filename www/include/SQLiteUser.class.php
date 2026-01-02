@@ -635,4 +635,132 @@ class SQLiteUser {
         }
         return false;
     }
+
+    /**
+     * 根據 AD 清單同步使用者資料 (新增、更新姓名、停用離職人員)
+     * @param array $ad_users 來自 AdService::getValidUsers() 的陣列
+     * @return array 統計結果
+     */
+    public function syncAdUsers(array $ad_users = []) {
+        // 如果傳入的陣列為空，嘗試主動從 ADService 獲取
+        if (empty($ad_users)) {
+            $ad = new AdService();
+            Logger::getInstance()->info(__METHOD__.": 嘗試重新取得 AD 使用者清單...");
+            $ad_users = $ad->getValidUsers();
+            if (empty($ad_users)) {
+                Logger::getInstance()->error(__METHOD__.": 重新取得 AD 使用者清單為空，無法進行同步作業。");
+                return false;
+            }
+        }
+
+        $stats = ['added' => 0, 'updated' => 0, 'skipped' => 0, 'failed' => 0, 'offboarded' => 0];
+        
+        // 1. 建立 AD 使用者 ID 對照表 (Lookup Table)
+        $ad_user_ids = [];
+        foreach ($ad_users as $user) {
+            $ad_user_ids[$user['id']] = true;
+        }
+
+        // 2. 處理 AD 清單中的使用者 (新增或更新)
+        foreach ($ad_users as $user) {
+            $id = $user['id'];
+            $name = $user['name']; // AD 中文姓名
+            
+            // 嘗試從 SQLite 取得該使用者
+            $local_rows = $this->getUser($id);
+            
+            if (empty($local_rows)) {
+                // Case 1: SQLite 沒有該使用者 -> 執行新增
+                
+                // 處理部門欄位 (AD是陣列，SQLite是字串)
+                // 規則：優先找 "課" 結尾的群組，找不到則歸類為 "行政課"
+                $unit = '行政課';
+                if (!empty($user['department']) && is_array($user['department'])) {
+                    foreach ($user['department'] as $dept) {
+                        // 使用 mb_substr 確保中文字元處理正確
+                        if (mb_substr($dept, -1, 1, 'UTF-8') === '課') {
+                            $unit = $dept;
+                            break; // 找到第一個符合的就使用並跳出
+                        }
+                    }
+                }
+
+                $new_user_data = array(
+                    'id' => $id,
+                    'name' => $name,
+                    'sex' => 1,          // 預設值
+                    'addr' => '',
+                    'tel' => '',
+                    'ext' => '411',      // 預設分機
+                    'cell' => '',
+                    'unit' => $unit,
+                    'title' => '其他',   // 預設職稱
+                    'work' => '',
+                    'exam' => '',
+                    'education' => '',
+                    'onboard_date' => date('Y/m/d'), // 預設今日報到
+                    'ip' => '',
+                    'authority' => 0,    // 預設無特殊權限
+                    'birthday' => ''
+                );
+                
+                if ($this->addUser($new_user_data)) {
+                    Logger::getInstance()->info(__METHOD__.": [Sync] 新增 AD 使用者 {$id} ({$name}, {$unit}) 成功");
+                    $stats['added']++;
+                } else {
+                    Logger::getInstance()->error(__METHOD__.": [Sync] 新增 AD 使用者 {$id} 失敗");
+                    $stats['failed']++;
+                }
+                
+            } else {
+                // Case 2: 使用者已存在 -> 檢查姓名是否變更
+                $local_user = $local_rows[0];
+                $current_name = $local_user['name'];
+                
+                // 檢查是否需要復職 (如果 SQLite 是離職狀態但 AD 是有效狀態)
+                if (!empty($local_user['offboard_date'])) {
+                     if ($this->onboardUser($id)) {
+                         Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$id} 復職成功");
+                         // 復職後繼續檢查名字
+                     } else {
+                         Logger::getInstance()->error(__METHOD__.": [Sync] 使用者 {$id} 復職失敗");
+                     }
+                }
+
+                if ($current_name !== $name) {
+                    if ($this->updateName($id, $name)) {
+                        Logger::getInstance()->info(__METHOD__.": [Sync] 更新使用者 {$id} 姓名 ({$current_name} -> {$name}) 成功");
+                        $stats['updated']++;
+                    } else {
+                        Logger::getInstance()->error(__METHOD__.": [Sync] 更新使用者 {$id} 姓名失敗");
+                        $stats['failed']++;
+                    }
+                } else {
+                    $stats['skipped']++;
+                }
+            }
+        }
+
+        // 3. 處理 SQLite 中未在 AD 有效名單出現的在職使用者 (執行停用)
+        $onboard_users = $this->getOnboardUsers();
+        if ($onboard_users) {
+            foreach ($onboard_users as $local_user) {
+                $local_id = $local_user['id'];
+                
+                // 如果這個 SQLite 使用者 ID 不在 AD 的有效 ID 清單中
+                if (!isset($ad_user_ids[$local_id])) {
+                    // 執行離職設定
+                    if ($this->offboardUser($local_id)) {
+                        Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$local_id} ({$local_user['name']}) 不在 AD 有效名單中，已設為離職");
+                        $stats['offboarded']++;
+                    } else {
+                        Logger::getInstance()->error(__METHOD__.": [Sync] 設定使用者 {$local_id} 離職失敗");
+                        $stats['failed']++;
+                    }
+                }
+            }
+        }
+        
+        return $stats;
+    }
 }
