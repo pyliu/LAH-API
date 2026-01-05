@@ -388,6 +388,21 @@ switch ($_POST["type"]) {
             ));
         }
         break;
+    case "unlock_user":
+        Logger::getInstance()->info("XHR [unlock_user] 解鎖使用者資料請求");
+        $ad = new AdService();
+        $result = $ad->unlockUser($_POST["id"], $_POST["password"]);
+        if ($result === true) {
+            $msg = "解鎖使用者資料成功";
+            Logger::getInstance()->info("XHR [unlock_user] $msg 。");
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $result
+            ));
+        } else {
+            Logger::getInstance()->error("XHR [unlock_user] 解鎖使用者資料失敗。");
+            echoJSONResponse("解鎖使用者資料失敗");
+        }
+        break;
     default:
 		Logger::getInstance()->warning("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);

@@ -460,10 +460,10 @@ class AdService
     {
         $conn = null;
         try {
-            $this->logger->info("[AdService] 嘗試解鎖使用者: {$account}" . ($newPassword ? " (含重設密碼)" : ""));
+            $this->logger->info("[AdService] 嘗試解鎖使用者: {$account}" . (!empty($newPassword) ? " (含重設密碼)" : ""));
             
             // 只有在需要重設密碼時，才要求加密連線 (STARTTLS or LDAPS)
-            $requireSecure = ($newPassword !== null);
+            $requireSecure = !empty($newPassword);
             
             $conn = $this->connectAndBind($requireSecure);
 
@@ -483,7 +483,7 @@ class AdService
             $modifications['lockoutTime'] = 0;
 
             // 3. 準備密碼重設動作 (如果有的話)
-            if ($newPassword !== null) {
+            if (!empty($newPassword)) {
                 // AD 密碼必須用引號包起來，並轉為 UTF-16LE
                 $quotedPassword = "\"" . $newPassword . "\"";
                 $encodedPwd = iconv("UTF-8", "UTF-16LE", $quotedPassword);
@@ -492,7 +492,7 @@ class AdService
 
             // 4. 執行修改
             if (@ldap_modify($conn, $userDn, $modifications)) {
-                $this->logger->info("[AdService] 使用者 {$account} 解鎖成功" . ($newPassword ? "密碼已重設" : ""));
+                $this->logger->info("[AdService] 使用者 {$account} 解鎖成功" . (!empty($newPassword) ? "/密碼已重設" : ""));
                 return true;
             } else {
                 $error = ldap_error($conn);
