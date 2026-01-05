@@ -22,6 +22,10 @@ class AdService
     private $bindUser;
     private $bindPass;
 
+    // 新增：AD Agent 設定
+    private $agentUrl;
+    private $agentKey;
+
     // 快取有效期 (秒) - 1天
     // 移除 private 可視性宣告 (PHP < 7.1 不支援)
     const CACHE_TTL = 86400;
@@ -81,6 +85,10 @@ class AdService
         $this->baseDn = $config['BASE_DN'];
         $this->bindUser = $config['QUERY_USER'];
         $this->bindPass = $config['QUERY_PASSWORD'];
+
+        // 載入 Agent 設定 (如果有的話)
+        $this->agentUrl = isset($config['AD_AGENT_URL']) ? $config['AD_AGENT_URL'] : 'http://127.0.0.1:8888/reset-password';
+        $this->agentKey = isset($config['AD_AGENT_KEY']) ? $config['AD_AGENT_KEY'] : 'YOUR_SECRET_KEY_123456';
         
         $this->logger->info("[AdService] 設定載入完成: Host={$this->host}:{$this->port}, BaseDN={$this->baseDn}");
     }
@@ -133,7 +141,11 @@ class AdService
             $this->logger->info("[AdService] 嘗試啟動 STARTTLS 加密...");
             if (!@ldap_start_tls($conn)) {
                 $err = ldap_error($conn);
-                $this->logger->warning("[AdService] STARTTLS 失敗: $err 。若此操作涉及修改密碼可能會被 AD 拒絕。");
+                $msg = "[AdService] STARTTLS 失敗: $err (Server is unavailable 可能代表憑證不信任或不支援 TLS)";
+                $this->logger->error($msg);
+                
+                // [關鍵修正] 如果操作要求安全連線 (如改密碼)，但 TLS 失敗，必須立即停止
+                throw new RuntimeException("無法建立加密連線 (STARTTLS 失敗)。請檢查 AD 憑證或改用 LDAPS (Port 636)。錯誤: $err");
             } else {
                 $this->logger->info("[AdService] STARTTLS 啟動成功");
             }
@@ -363,8 +375,8 @@ class AdService
     }
 
     /**
-     * [Feature 3] 取得屬於多個課室(以 XX課 結尾)的使用者
-     * 篩選規則：department 陣列中，結尾為 "課" 的項目數量大於 1
+     * [Feature 3] 取得屬於多個課室(以 XX課 或 XX室 結尾)的使用者
+     * 篩選規則：department 陣列中，結尾為 "課" 或 "室" 的項目數量大於 1
      * @param bool $force
      * @return array
      */
@@ -451,7 +463,7 @@ class AdService
 
     /**
      * [Feature 2] 解鎖使用者並可選重設密碼
-     * [相容性] 移除 ?string 與 : bool
+     * [重構] 若有新密碼，使用 Agent 進行修改；解鎖則繼續使用 LDAP
      * @param string $account 使用者帳號 (sAMAccountName)
      * @param string|null $newPassword (Optional) 若提供，則同時重設密碼
      * @return bool
@@ -460,14 +472,21 @@ class AdService
     {
         $conn = null;
         try {
-            $this->logger->info("[AdService] 嘗試解鎖使用者: {$account}" . (!empty($newPassword) ? " (含重設密碼)" : ""));
-            
-            // 只有在需要重設密碼時，才要求加密連線 (STARTTLS or LDAPS)
-            $requireSecure = !empty($newPassword);
-            
-            $conn = $this->connectAndBind($requireSecure);
+            // 1. 若有提供新密碼，先呼叫 AD Agent 進行修改 (避開 PHP SSL 問題)
+            if (!empty($newPassword)) {
+                $this->logger->info("[AdService] 檢測到密碼重設請求，嘗試呼叫 AD Agent...");
+                $this->callPasswordAgent($account, $newPassword);
+                $this->logger->info("[AdService] AD Agent 密碼重設成功");
+            }
 
-            // 1. 尋找使用者的 DN
+            // 2. 執行解鎖 (lockoutTime = 0)
+            // 解鎖不需要 SSL，所以這裡照舊使用 LDAP 連線
+            $this->logger->info("[AdService] 嘗試解鎖使用者: {$account}");
+            
+            // 解鎖不需要安全連線
+            $conn = $this->connectAndBind(false);
+
+            // 尋找使用者的 DN
             $filter = "(&(objectClass=user)(objectCategory=person)(sAMAccountName={$account}))";
             $result = ldap_search($conn, $this->baseDn, $filter, ['dn']);
             $entries = ldap_get_entries($conn, $result);
@@ -479,20 +498,12 @@ class AdService
             $userDn = $entries[0]['dn'];
             $modifications = [];
 
-            // 2. 準備解鎖動作: 將 lockoutTime 設為 0
+            // 準備解鎖動作: 將 lockoutTime 設為 0
             $modifications['lockoutTime'] = 0;
 
-            // 3. 準備密碼重設動作 (如果有的話)
-            if (!empty($newPassword)) {
-                // AD 密碼必須用引號包起來，並轉為 UTF-16LE
-                $quotedPassword = "\"" . $newPassword . "\"";
-                $encodedPwd = iconv("UTF-8", "UTF-16LE", $quotedPassword);
-                $modifications['unicodePwd'] = $encodedPwd;
-            }
-
-            // 4. 執行修改
+            // 執行修改
             if (@ldap_modify($conn, $userDn, $modifications)) {
-                $this->logger->info("[AdService] 使用者 {$account} 解鎖成功" . (!empty($newPassword) ? "/密碼已重設" : ""));
+                $this->logger->info("[AdService] 使用者 {$account} 解鎖成功");
                 return true;
             } else {
                 $error = ldap_error($conn);
@@ -500,11 +511,76 @@ class AdService
             }
 
         } catch (Exception $e) {
-            $this->logger->error("[AdService] 解鎖使用者失敗: " . $e->getMessage());
+            $this->logger->error("[AdService] 解鎖/重設失敗: " . $e->getMessage());
             throw $e;
         } finally {
             if ($conn) @ldap_unbind($conn);
         }
+    }
+
+    /**
+     * [內部方法] 呼叫 PowerShell Agent 進行密碼修改
+     */
+    private function callPasswordAgent($account, $password)
+    {
+        $url = $this->agentUrl;
+        $key = $this->agentKey;
+
+        // Log initiation
+        $this->logger->info("[AdService][Agent] 準備呼叫 AD Agent 重設密碼。URL: {$url}, 帳號: {$account}");
+
+        $payload = json_encode([
+            'secret'   => $key,
+            'account'  => $account,
+            'password' => $password
+        ]);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+             $this->logger->error("[AdService][Agent] JSON Encoding 失敗: " . json_last_error_msg());
+             throw new RuntimeException("JSON Encoding Error");
+        }
+
+        $this->logger->info("[AdService][Agent] Payload 建立完成，長度: " . strlen($payload));
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        // Add verbose debug info if needed, but standard logger is safer for prod.
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($payload)
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // 10秒逾時
+
+        $this->logger->info("[AdService][Agent] cURL 執行中...");
+        
+        $result = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErrNo = curl_errno($ch);
+        $curlError = curl_error($ch);
+        
+        // Log cURL info
+        $this->logger->info("[AdService][Agent] cURL 結束。HTTP Code: {$httpCode}, ErrNo: {$curlErrNo}");
+
+        if ($curlErrNo) {
+            $this->logger->error("[AdService][Agent] cURL 連線錯誤: {$curlError}");
+            curl_close($ch);
+            throw new RuntimeException("無法連線至 AD Agent: $curlError");
+        }
+        curl_close($ch);
+
+        // Log raw response
+        $this->logger->info("[AdService][Agent] Agent 回傳原始資料: " . $result);
+
+        if ($httpCode !== 200) {
+            $decoded = json_decode($result, true);
+            $msg = isset($decoded['message']) ? $decoded['message'] : "HTTP $httpCode";
+            $this->logger->error("[AdService][Agent] Agent 回傳錯誤代碼 {$httpCode}: {$msg}");
+            throw new RuntimeException("AD Agent 拒絕請求: $msg");
+        }
+        
+        $this->logger->info("[AdService][Agent] 密碼重設流程成功完成。");
     }
 
     // ==========================================
