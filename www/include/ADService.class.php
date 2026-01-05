@@ -462,6 +462,34 @@ class AdService
     // ==========================================
 
     /**
+     * [Feature 5] 修改使用者密碼 (單純改密碼)
+     * 使用 AD Agent 進行修改以避開 PHP SSL 問題
+     * @param string $account 使用者帳號 (sAMAccountName)
+     * @param string $newPassword 新密碼
+     * @return bool
+     */
+    public function changeUserPassword($account, $newPassword)
+    {
+        try {
+            if (empty($account) || empty($newPassword)) {
+                throw new RuntimeException("帳號或密碼不能為空。");
+            }
+
+            $this->logger->info("[AdService] 收到修改密碼請求: {$account}");
+            
+            // 直接呼叫 Agent 進行密碼重設
+            $this->callPasswordAgent($account, $newPassword);
+            
+            $this->logger->info("[AdService] 使用者 {$account} 密碼修改成功");
+            return true;
+
+        } catch (Exception $e) {
+            $this->logger->error("[AdService] 修改密碼失敗: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
      * [Feature 2] 解鎖使用者並可選重設密碼
      * [重構] 若有新密碼，使用 Agent 進行修改；解鎖則繼續使用 LDAP
      * @param string $account 使用者帳號 (sAMAccountName)
