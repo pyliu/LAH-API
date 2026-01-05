@@ -387,51 +387,52 @@ switch ($_POST["type"]) {
             echoJSONResponse("AD 認證失敗。");
         }
         break;
-    case "ad_valid_users":
-        Logger::getInstance()->info("XHR [ad_valid_users] 取得所有AD有效使用者資料請求");
+    case "ad_users_valid":
+        Logger::getInstance()->info("XHR [ad_users_valid] 取得所有AD有效使用者資料請求");
         $ad = new AdService();
         $users = $ad->getValidUsers();
         if (empty($users)) {
-            Logger::getInstance()->info("XHR [ad_valid_users] 查無AD有效使用者資料。");
+            Logger::getInstance()->info("XHR [ad_users_valid] 查無AD有效使用者資料。");
             echoJSONResponse("查無AD有效使用者資料。");
         } else {
-            Logger::getInstance()->info("XHR [ad_valid_users] 查詢AD有效使用者資料成功。");
+            Logger::getInstance()->info("XHR [ad_users_valid] 查詢AD有效使用者資料成功。");
             echoJSONResponse('查詢AD有效使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
                 "data_count" => count($users),
                 "raw" => $users
             ));
         }
         break;
-    case "reset_ad_pw":
-    case "unlock_ad_user":
-        Logger::getInstance()->info("XHR [unlock_user] 解鎖使用者資料請求");
+    case "ad_users_locked":
+        Logger::getInstance()->info("XHR [ad_users_locked] 查詢鎖定使用者資料請求");
+        $ad = new AdService();
+        $users = $ad->getLockedUsers();
+        if (empty($users)) {
+            Logger::getInstance()->info("XHR [ad_users_locked] 查無鎖定使用者資料。");
+            echoJSONResponse("查無鎖定使用者資料。");
+        } else {
+            Logger::getInstance()->info("XHR [ad_users_locked] 查詢鎖定使用者資料成功。");
+            echoJSONResponse('查詢鎖定使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($users),
+                "raw" => $users
+            ));
+        }
+        break;
+    case "ad_pw_reset":
+    case "ad_user_unlock":
+        $type = $_POST["type"];
+        Logger::getInstance()->info("XHR [$type] 解鎖使用者資料請求");
         $ad = new AdService();
         $result = $ad->unlockUser($_POST["id"], $_POST["password"]);
         if ($result === true) {
             $msg = empty($_POST["password"]) ? "解鎖使用者資料成功" : "解鎖並重設使用者密碼成功";
-            Logger::getInstance()->info("XHR [unlock_user] $msg 。");
+            Logger::getInstance()->info("XHR [$type] $msg 。");
             echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
                 "raw" => $result
             ));
         } else {
             $msg = empty($_POST["password"]) ? "解鎖使用者資料失敗。" : "解鎖並重設使用者密碼失敗";
-            Logger::getInstance()->error("XHR [unlock_user] $msg");
+            Logger::getInstance()->error("XHR [$type] $msg");
             echoJSONResponse($msg);
-        }
-        break;
-    case "locked_users":
-        Logger::getInstance()->info("XHR [locked_users] 查詢鎖定使用者資料請求");
-        $ad = new AdService();
-        $users = $ad->getLockedUsers();
-        if (empty($users)) {
-            Logger::getInstance()->info("XHR [locked_users] 查無鎖定使用者資料。");
-            echoJSONResponse("查無鎖定使用者資料。");
-        } else {
-            Logger::getInstance()->info("XHR [locked_users] 查詢鎖定使用者資料成功。");
-            echoJSONResponse('查詢鎖定使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
-                "data_count" => count($users),
-                "raw" => $users
-            ));
         }
         break;
     default:
