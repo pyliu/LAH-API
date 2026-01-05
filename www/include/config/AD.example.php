@@ -6,13 +6,12 @@
 return [
     'AD_HOST'        => 'XXX.XXX.XXX.XXX',
     'AD_PORT'        => 389, // 一般 LDAP: 389, LDAPS: 636
-    
     // Base DN: 搜尋的起始節點
     'BASE_DN'        => 'DC=example,DC=com', // 請修改為實際網域
-    
     // 具有管理權限的帳號 (Bind DN 或 user@domain)
     'QUERY_USER'     => 'reader@example.com', 
-    
     // 密碼
     'QUERY_PASSWORD' => 'your_secure_password',
+    'AD_AGENT_URL' => 'http://XXX.XXX.XXX.XXX:8888/reset-password',
+    'AD_AGENT_KEY' => 'YOUR_SECRET_KEY_123456', // 需與 ps1 內的 SharedSecret 一致
 ];
