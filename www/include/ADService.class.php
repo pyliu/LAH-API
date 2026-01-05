@@ -475,7 +475,7 @@ class AdService
                 throw new RuntimeException("帳號或密碼不能為空。");
             }
 
-            $this->logger->info("[AdService] 收到修改密碼請求: {$account}，準備呼叫 AD Agent...");
+            $this->logger->info("[AdService] 收到修改密碼請求: {$account}");
             
             // 直接呼叫 Agent 進行密碼重設
             $this->callPasswordAgent($account, $newPassword);
@@ -486,6 +486,206 @@ class AdService
         } catch (Exception $e) {
             $this->logger->error("[AdService] 修改密碼失敗: " . $e->getMessage());
             throw $e;
+        }
+    }
+
+    /**
+     * [Feature 7] 取得單一使用者資訊 (無需密碼驗證)
+     * @param string $account 帳號 (sAMAccountName)
+     * @return array|bool 成功回傳使用者資料，失敗回傳 false
+     */
+    public function getUser($account)
+    {
+        if (empty($account)) {
+            return false;
+        }
+
+        $conn = null;
+        try {
+            // 1. 連線 AD (使用 Service Account)
+            $conn = $this->connectAndBind(false);
+
+            // 2. 抓取群組描述，用於解析部門與權限
+            $groupDescMap = $this->fetchGroupDescriptions($conn);
+
+            $filter = "(&(objectClass=user)(objectCategory=person)(sAMAccountName={$account}))";
+            $attributes = ['dn', 'samaccountname', 'displayname', 'description', 'memberof'];
+
+            $result = ldap_search($conn, $this->baseDn, $filter, $attributes);
+            if (!$result) {
+                $this->logger->error("[AdService] getUser 搜尋失敗: " . ldap_error($conn));
+                return false;
+            }
+
+            $entries = ldap_get_entries($conn, $result);
+            if ($entries['count'] == 0) {
+                $this->logger->warning("[AdService] getUser 找不到使用者: {$account}");
+                return false;
+            }
+
+            $userInfo = $entries[0];
+
+            // 3. 解析部門與權限 (邏輯同 authenticate)
+            $units = [];
+            $roles = [];
+
+            if (isset($userInfo['memberof'])) {
+                $memberOfList = $userInfo['memberof'];
+                if (isset($memberOfList['count'])) unset($memberOfList['count']);
+
+                foreach ($memberOfList as $dn) {
+                    if (preg_match('/^CN=([^,]+),/', $dn, $matches)) {
+                        $cnName = $matches[1];
+                        
+                        // 解析權限 (OU=APPS)
+                        if (strpos($dn, 'OU=APPS') !== false) {
+                            if (isset($groupDescMap[$cnName])) {
+                                $roles[$cnName] = $groupDescMap[$cnName];
+                            } else {
+                                $roles[$cnName] = $cnName;
+                            }
+                        } 
+                        // 解析部門 (CN=Users)
+                        elseif (strpos($dn, 'CN=Users') !== false) {
+                            $deptName = isset($groupDescMap[$cnName]) ? $groupDescMap[$cnName] : $cnName;
+                            // 判斷字尾是否為 '課' 或 '室'
+                            $suffix = mb_substr($deptName, -1, 1, 'UTF-8');
+                            if ($suffix === '課' || $suffix === '室') {
+                                $units[] = $deptName;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 4. 決定顯示名稱 (Description > DisplayName > Account)
+            $displayName = isset($userInfo['description'][0]) ? $userInfo['description'][0] : '';
+            if (empty($displayName)) {
+                $displayName = isset($userInfo['displayname'][0]) ? $userInfo['displayname'][0] : $account;
+            }
+
+            $this->logger->info("[AdService] getUser 成功取得使用者資訊: {$account}");
+
+            return [
+                'id'         => isset($userInfo['samaccountname'][0]) ? $userInfo['samaccountname'][0] : $account,
+                'name'       => $displayName,
+                'department' => $units,
+                'roles'      => $roles
+            ];
+
+        } catch (Exception $e) {
+            $this->logger->error("[AdService] getUser 發生例外: " . $e->getMessage());
+            return false;
+        } finally {
+            if ($conn) @ldap_unbind($conn);
+        }
+    }
+
+    /**
+     * [Feature 6] 驗證使用者帳號密碼 (登入檢查)
+     * @param string $account 帳號 (sAMAccountName)
+     * @param string $password 密碼
+     * @return array|bool 驗證成功回傳使用者基本資料，失敗回傳 false
+     */
+    public function authenticate($account, $password)
+    {
+        // 1. 基本檢查
+        if (empty($account) || empty($password)) {
+            $this->logger->warning("[AdService] 登入驗證失敗: 帳號或密碼為空");
+            return false;
+        }
+
+        $conn = null;
+        try {
+            // 2. 先用 Service Account 連線，取得目標使用者的 DN
+            // (通常一般連線不需要 SSL 即可搜尋)
+            $conn = $this->connectAndBind(false);
+
+            // [新增] 先抓取群組描述，用於解析部門與權限
+            $groupDescMap = $this->fetchGroupDescriptions($conn);
+
+            $filter = "(&(objectClass=user)(objectCategory=person)(sAMAccountName={$account}))";
+            // [修改] 加入 memberof 屬性以解析部門與權限，移除 mail, title 以節省資源
+            $attributes = ['dn', 'samaccountname', 'displayname', 'description', 'memberof'];
+            
+            $result = ldap_search($conn, $this->baseDn, $filter, $attributes);
+            
+            if (!$result) {
+                $this->logger->error("[AdService] 登入搜尋失敗: " . ldap_error($conn));
+                return false;
+            }
+
+            $entries = ldap_get_entries($conn, $result);
+
+            if ($entries['count'] == 0) {
+                $this->logger->warning("[AdService] 登入驗證失敗: 找不到使用者 {$account}");
+                return false;
+            }
+
+            $userDn = $entries[0]['dn'];
+            $userInfo = $entries[0];
+
+            // 3. 嘗試用該使用者的 DN 與輸入的密碼進行 Bind
+            // 使用 @ 抑制錯誤，因為密碼錯誤時 PHP LDAP 會發出 Warning
+            if (@ldap_bind($conn, $userDn, $password)) {
+                $this->logger->info("[AdService] 使用者 {$account} 登入驗證成功");
+                
+                // [新增] 解析部門與權限 (參考 fetchUsersByFilter 的邏輯)
+                $units = [];
+                $roles = [];
+
+                if (isset($userInfo['memberof'])) {
+                    $memberOfList = $userInfo['memberof'];
+                    if (isset($memberOfList['count'])) unset($memberOfList['count']);
+
+                    foreach ($memberOfList as $dn) {
+                        if (preg_match('/^CN=([^,]+),/', $dn, $matches)) {
+                            $cnName = $matches[1];
+                            
+                            // 1. 解析權限 (OU=APPS)
+                            if (strpos($dn, 'OU=APPS') !== false) {
+                                if (isset($groupDescMap[$cnName])) {
+                                    $roles[$cnName] = $groupDescMap[$cnName];
+                                } else {
+                                    $roles[$cnName] = $cnName;
+                                }
+                            } 
+                            // 2. 解析部門 (CN=Users)
+                            elseif (strpos($dn, 'CN=Users') !== false) {
+                                $deptName = isset($groupDescMap[$cnName]) ? $groupDescMap[$cnName] : $cnName;
+                                // 判斷字尾是否為 '課' 或 '室'
+                                $suffix = mb_substr($deptName, -1, 1, 'UTF-8');
+                                if ($suffix === '課' || $suffix === '室') {
+                                    $units[] = $deptName;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 4. 驗證成功，回傳基本資料
+                // 優先使用 description，若無則使用 displayname，再無則使用帳號
+                $displayName = isset($userInfo['description'][0]) ? $userInfo['description'][0] : '';
+                if (empty($displayName)) {
+                    $displayName = isset($userInfo['displayname'][0]) ? $userInfo['displayname'][0] : $account;
+                }
+
+                return [
+                    'id'         => isset($userInfo['samaccountname'][0]) ? $userInfo['samaccountname'][0] : $account,
+                    'name'       => $displayName,
+                    'department' => $units, // 部門列表
+                    'roles'      => $roles  // [新增] 權限列表 (Key => Description)
+                ];
+            } else {
+                $this->logger->warning("[AdService] 登入驗證失敗: 密碼錯誤 ({$account})");
+                return false;
+            }
+
+        } catch (Exception $e) {
+            $this->logger->error("[AdService] 登入驗證發生例外: " . $e->getMessage());
+            return false;
+        } finally {
+            if ($conn) @ldap_unbind($conn);
         }
     }
 
@@ -501,8 +701,10 @@ class AdService
         $conn = null;
         try {
             // 1. 若有提供新密碼，先呼叫 AD Agent 進行修改 (避開 PHP SSL 問題)
-            if (!empty($newPassword) && !empty($account)) {
-                $this->changeUserPassword($account, $newPassword);
+            if (!empty($newPassword)) {
+                $this->logger->info("[AdService] 檢測到密碼重設請求，嘗試呼叫 AD Agent...");
+                $this->callPasswordAgent($account, $newPassword);
+                $this->logger->info("[AdService] AD Agent 密碼重設成功");
             }
 
             // 2. 執行解鎖 (lockoutTime = 0)
@@ -697,10 +899,11 @@ class AdService
                                 }
                             } 
                             elseif (strpos($dn, 'CN=Users') !== false) {
-                                if (isset($groupDescMap[$cnName])) {
-                                    $units[] = $groupDescMap[$cnName];
-                                } else {
-                                    $units[] = $cnName;
+                                // [修改] 加入 '課' 或 '室' 的過濾條件
+                                $deptName = isset($groupDescMap[$cnName]) ? $groupDescMap[$cnName] : $cnName;
+                                $suffix = mb_substr($deptName, -1, 1, 'UTF-8');
+                                if ($suffix === '課' || $suffix === '室') {
+                                    $units[] = $deptName;
                                 }
                             }
                         }

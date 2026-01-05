@@ -373,6 +373,20 @@ switch ($_POST["type"]) {
 			));
 		}
         break;
+	case "ad_authentication":
+        Logger::getInstance()->info("XHR [ad_authentication] AD 認證請求");
+        $ad = new AdService();
+        $result = $ad->authenticate($_POST["id"], $_POST["password"]);
+        if ($result === true) {
+            Logger::getInstance()->info("XHR [ad_authentication] AD 認證成功。");
+            echoJSONResponse("AD 認證成功。", STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $result
+            ));
+        } else {
+            Logger::getInstance()->info("XHR [ad_authentication] AD 認證失敗。");
+            echoJSONResponse("AD 認證失敗。");
+        }
+        break;
     case "ad_valid_users":
         Logger::getInstance()->info("XHR [ad_valid_users] 取得所有AD有效使用者資料請求");
         $ad = new AdService();
