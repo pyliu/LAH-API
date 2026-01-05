@@ -475,7 +475,7 @@ class AdService
                 throw new RuntimeException("帳號或密碼不能為空。");
             }
 
-            $this->logger->info("[AdService] 收到修改密碼請求: {$account}");
+            $this->logger->info("[AdService] 收到修改密碼請求: {$account}，準備呼叫 AD Agent...");
             
             // 直接呼叫 Agent 進行密碼重設
             $this->callPasswordAgent($account, $newPassword);
@@ -501,10 +501,8 @@ class AdService
         $conn = null;
         try {
             // 1. 若有提供新密碼，先呼叫 AD Agent 進行修改 (避開 PHP SSL 問題)
-            if (!empty($newPassword)) {
-                $this->logger->info("[AdService] 檢測到密碼重設請求，嘗試呼叫 AD Agent...");
-                $this->callPasswordAgent($account, $newPassword);
-                $this->logger->info("[AdService] AD Agent 密碼重設成功");
+            if (!empty($newPassword) && !empty($account)) {
+                $this->changeUserPassword($account, $newPassword);
             }
 
             // 2. 執行解鎖 (lockoutTime = 0)
