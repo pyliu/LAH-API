@@ -403,6 +403,21 @@ switch ($_POST["type"]) {
             echoJSONResponse("解鎖使用者資料失敗");
         }
         break;
+    case "locked_users":
+        Logger::getInstance()->info("XHR [locked_users] 查詢鎖定使用者資料請求");
+        $ad = new AdService();
+        $users = $ad->getLockedUsers();
+        if (empty($users)) {
+            Logger::getInstance()->info("XHR [locked_users] 查無鎖定使用者資料。");
+            echoJSONResponse("查無鎖定使用者資料。");
+        } else {
+            Logger::getInstance()->info("XHR [locked_users] 查詢鎖定使用者資料成功。");
+            echoJSONResponse('查詢鎖定使用者資料成功', STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($users),
+                "raw" => $users
+            ));
+        }
+        break;
     default:
 		Logger::getInstance()->warning("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
