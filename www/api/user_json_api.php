@@ -435,6 +435,21 @@ switch ($_POST["type"]) {
             echoJSONResponse($msg);
         }
         break;
+    case "ad_user_info":
+        Logger::getInstance()->info("XHR [ad_user_info] 查詢使用者資料【".$_POST["id"]."】請求");
+        $ad = new AdService();
+        $result = $ad->getUser($_POST["id"]);
+        if (empty($result)) {
+            Logger::getInstance()->info("XHR [ad_user_info] 查無 ".$_POST["id"]." 資料。");
+            echoJSONResponse("查無 ".$_POST["id"]." 資料。");
+        } else {
+            Logger::getInstance()->info("XHR [ad_user_info] 查詢 ".$_POST["id"]." 成功。");
+            echoJSONResponse("查詢 ".$_POST["id"]." 成功", STATUS_CODE::SUCCESS_NORMAL, array(
+                "data_count" => count($result),
+                "raw" => $result
+            ));
+        }
+        break;
     default:
 		Logger::getInstance()->warning("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
