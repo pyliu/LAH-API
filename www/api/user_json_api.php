@@ -388,6 +388,21 @@ switch ($_POST["type"]) {
             ));
         }
         break;
+    case "change_user_password":
+        Logger::getInstance()->info("XHR [change_user_password] 修改使用者密碼請求");
+        $ad = new AdService();
+        $result = $ad->changeUserPassword($_POST["id"], $_POST["password"]);
+        if ($result === true) {
+            $msg = "修改使用者密碼成功";
+            Logger::getInstance()->info("XHR [change_user_password] $msg 。");
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $result
+            ));
+        } else {
+            Logger::getInstance()->error("XHR [change_user_password] 修改使用者密碼失敗。");
+            echoJSONResponse("修改使用者密碼失敗");
+        }
+        break;
     case "unlock_user":
         Logger::getInstance()->info("XHR [unlock_user] 解鎖使用者資料請求");
         $ad = new AdService();
