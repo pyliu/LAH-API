@@ -389,7 +389,7 @@ switch ($_POST["type"]) {
         }
         break;
     case "reset_ad_pw":
-    case "unlock_user":
+    case "unlock_ad_user":
         Logger::getInstance()->info("XHR [unlock_user] 解鎖使用者資料請求");
         $ad = new AdService();
         $result = $ad->unlockUser($_POST["id"], $_POST["password"]);
