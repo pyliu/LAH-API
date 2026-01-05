@@ -363,25 +363,42 @@ class AdService
     }
 
     /**
-     * [Feature 3] 取得擁有個部門(課室)以上的使用者
+     * [Feature 3] 取得屬於多個課室(以 XX課 結尾)的使用者
+     * 篩選規則：department 陣列中，結尾為 "課" 的項目數量大於 1
+     * @param bool $force
+     * @return array
      */
     public function getMultiDepartmentUsers($force = false)
     {
-        $this->logger->info("[AdService] 請求取得【多部門使用者】...");
+        $this->logger->info("[AdService] 請求取得【多單位使用者(XX課/XX室)】...");
         
-        // 1. 先取得所有有效使用者 (使用既有的快取或重新讀取)
+        // 1. 取得有效使用者
         $users = $this->getValidUsers($force);
-        
-        // 2. 過濾部門數量 > 1 的使用者
-        $multiDeptUsers = array_filter($users, function($user) {
-            // department 是一個陣列 (e.g., ['測量課', '資訊課'])
-            return is_array($user['department']) && count($user['department']) > 1;
-        });
+        $results = [];
 
-        // 3. 重置陣列索引，讓回傳的 JSON 是 array 而不是 object
-        $results = array_values($multiDeptUsers);
+        foreach ($users as $user) {
+            if (empty($user['department']) || !is_array($user['department'])) {
+                continue;
+            }
+
+            // 計算結尾為 "課" 或 "室" 的部門數量
+            $validDeptCount = 0;
+            foreach ($user['department'] as $dept) {
+                // 檢查字串結尾是否為 "課" 或 "室"
+                // 使用 mb_substr 處理 UTF-8 多字節字串
+                $suffix = mb_substr($dept, -1, 1, 'UTF-8');
+                if ($suffix === '課' || $suffix === '室') {
+                    $validDeptCount++;
+                }
+            }
+
+            // 若符合條件的數量大於 1，則加入結果
+            if ($validDeptCount > 1) {
+                $results[] = $user;
+            }
+        }
         
-        $this->logger->info("[AdService] 篩選完成，共有 " . count($results) . " 位使用者擁有多個部門。");
+        $this->logger->info("[AdService] 多單位(XX課/XX室)篩選完成，共有 " . count($results) . " 位使用者符合條件。");
         
         return $results;
     }
@@ -475,7 +492,7 @@ class AdService
 
             // 4. 執行修改
             if (@ldap_modify($conn, $userDn, $modifications)) {
-                $this->logger->info("[AdService] 使用者 {$account} 解鎖成功" . ($newPassword ? "/密碼已重設" : ""));
+                $this->logger->info("[AdService] 使用者 {$account} 解鎖成功" . ($newPassword ? "密碼已重設" : ""));
                 return true;
             } else {
                 $error = ldap_error($conn);
