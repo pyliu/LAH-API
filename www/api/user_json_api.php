@@ -331,6 +331,19 @@ switch ($_POST["type"]) {
             echoJSONResponse("更新部門 ".$_POST["id"].", ".$_POST["dept"]." 失敗。");
         }
         break;
+    case "upd_ip":
+        Logger::getInstance()->info("XHR [upd_ip] 更新IP位址【".$_POST["id"].", ".$_POST["ip"]."】請求");
+        $sqlite_user = new SQLiteUser();
+        $result = $sqlite_user->updateIP($_POST["id"], $_POST["ip"]);
+        if ($result) {
+            $msg = "更新IP位址 ".$_POST["id"].", ".$_POST["ip"]." 成功。";
+            Logger::getInstance()->info("XHR [upd_ip] ".$msg);
+            echoJSONResponse($msg, STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            Logger::getInstance()->info("XHR [upd_ip] 更新IP位址 ".$_POST["id"].", ".$_POST["ip"]." 失敗。");
+            echoJSONResponse("更新IP位址 ".$_POST["id"].", ".$_POST["ip"]." 失敗。");
+        }
+        break;
 	case "my_info":
 	case "authentication":
         $query_ip = empty($_POST['ip']) ? $client_ip : $_POST['ip'];

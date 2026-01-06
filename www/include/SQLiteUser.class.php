@@ -617,6 +617,42 @@ class SQLiteUser {
         }
     }
 
+    /**
+     * 更新使用者 IP (嚴格限制僅能使用內部 IP)
+     * @param string $id 使用者 ID
+     * @param string $ip 內部 IP 位址 (IPv4)
+     * @return bool
+     */
+    public function updateIp($id, $ip) {
+        // 1. 基礎 IP 格式驗證 (IPv4)
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            Logger::getInstance()->warning(__METHOD__.": 更新失敗 - 無效的 IP 格式 ($ip)");
+            return false;
+        }
+
+        // 2. 嚴格檢查：必須是內部 IP (Private IP) 或保留 IP (Reserved/Loopback)
+        // filter_var 若帶有 NO_PRIV_RANGE 旗標：
+        // - 如果是 Public IP -> 回傳 IP 字串 (判定為 True)
+        // - 如果是 Private IP -> 回傳 False
+        // 所以我們要確保結果為 False
+        $is_public = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+        
+        if ($is_public !== false) {
+            Logger::getInstance()->warning(__METHOD__.": 更新失敗 - 拒絕非內部 IP ($ip)");
+            return false;
+        }
+
+        // 3. 執行更新
+        if ($stm = $this->db->prepare("UPDATE user SET ip = :ip WHERE id = :id")) {
+            $stm->bindParam(':ip', $ip);
+            $stm->bindParam(':id', $id);
+            return $stm->execute() === FALSE ? false : true;
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 更新 IP ($id, $ip) 資料失敗！");
+            return false;
+        }
+    }
+
     public function getAuthorityList() {
         if($stmt = $this->db->prepare("
             SELECT
