@@ -653,16 +653,20 @@ class SQLiteUser {
             }
         }
 
+        $site_code = System::getInstance()->getSiteCode();
+
         $stats = ['added' => 0, 'updated' => 0, 'skipped' => 0, 'failed' => 0, 'offboarded' => 0];
         
         // 1. 建立 AD 使用者 ID 對照表 (Lookup Table)
         $ad_user_ids = [];
         foreach ($ad_users as $user) {
+            if (!isset($user['id']) || !startsWith($user['id'], $site_code)) continue;
             $ad_user_ids[$user['id']] = true;
         }
 
         // 2. 處理 AD 清單中的使用者 (新增或更新)
         foreach ($ad_users as $user) {
+            if (!isset($user['id']) || !startsWith($user['id'], $site_code)) continue;
             $id = $user['id'];
             $name = $user['name']; // AD 中文姓名
             
@@ -673,12 +677,12 @@ class SQLiteUser {
                 // Case 1: SQLite 沒有該使用者 -> 執行新增
                 
                 // 處理部門欄位 (AD是陣列，SQLite是字串)
-                // 規則：優先找 "課" 結尾的群組，找不到則歸類為 "行政課"
-                $unit = '行政課';
+                // 規則：優先找 "課" 結尾的群組，找不到則歸類為 "人事室"
+                $unit = '人事室';
                 if (!empty($user['department']) && is_array($user['department'])) {
                     foreach ($user['department'] as $dept) {
                         // 使用 mb_substr 確保中文字元處理正確
-                        if (mb_substr($dept, -1, 1, 'UTF-8') === '課') {
+                        if (mb_substr($dept, -1, 1, 'UTF-8') === '課' || mb_substr($dept, -1, 1, 'UTF-8') === '室') {
                             $unit = $dept;
                             break; // 找到第一個符合的就使用並跳出
                         }
