@@ -471,6 +471,41 @@ switch ($_POST["type"]) {
             echoJSONResponse("更新AD設定失敗。");
         }
         break;
+    case "ad_test_connection":
+        Logger::getInstance()->info("XHR [ad_test_connection] 測試AD連線請求");
+        $ad = new AdService();
+        $arr = $ad->testConnection($_POST["config"]);
+        Logger::getInstance()->info("XHR [ad_test_connection] ".$arr['message']);
+        if ($arr['status'] === true) {
+            echoJSONResponse($arr['message'], STATUS_CODE::SUCCESS_NORMAL, array(
+                "raw" => $arr
+            ));
+        } else {
+            echoJSONResponse($arr['message'], STATUS_CODE::DEFAULT_FAIL, array(
+                "raw" => $arr
+            ));
+        }
+        break;
+    case "ad_sync_users":
+        Logger::getInstance()->info("XHR [ad_sync_users] 同步AD使用者請求");
+        $sqlite_user = new SQLiteUser();
+        // syncAdUsers() 不帶參數時，內部會自動 new AdService() 去抓取資料
+        // $stats = ['added' => 0, 'updated' => 0, 'skipped' => 0, 'failed' => 0, 'offboarded' => 0];
+        $stats = $sqlite_user->syncAdUsers();
+        // 組合訊息
+        $message = sprintf(
+            "同步完成：新增 %d 位、更新 %d 位、略過 %d 位、失敗 %d 位、離職 %d 位。",
+            $stats['added'],
+            $stats['updated'],
+            $stats['skipped'],
+            $stats['failed'],
+            $stats['offboarded']
+        );
+        Logger::getInstance()->info("XHR [ad_sync_users] $message");
+        echoJSONResponse($message, STATUS_CODE::SUCCESS_NORMAL, array(
+            "raw" => $stats
+        ));
+        break;
     default:
 		Logger::getInstance()->warning("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
