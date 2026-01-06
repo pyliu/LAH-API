@@ -52,8 +52,24 @@ class AdService
 
     private function loadDefaultConfig()
     {
+        // 定義主要設定檔與範例檔路徑
+        $configDir = __DIR__ . '/config';
+        $mainConfigPath = $configDir . '/AD.php';
+        $exampleConfigPath = $configDir . '/AD.example.php';
+
+        // 1. [新增] 自動複製機制
+        // 若設定檔不存在但範例檔存在，嘗試自動複製
+        if (!file_exists($mainConfigPath) && file_exists($exampleConfigPath)) {
+            $this->logger->warning("[AdService] 找不到設定檔 AD.php，嘗試從 AD.example.php 建立預設檔案...");
+            if (copy($exampleConfigPath, $mainConfigPath)) {
+                $this->logger->info("[AdService] 成功建立設定檔: $mainConfigPath (請務必修改內容)");
+            } else {
+                $this->logger->error("[AdService] 無法建立設定檔，權限不足或路徑錯誤。請手動複製 AD.example.php 為 AD.php");
+            }
+        }
+
         $candidates = [
-            __DIR__ . '/config/AD.php',
+            $mainConfigPath,
             __DIR__ . '/../../config/AD.php'
         ];
 
@@ -67,15 +83,38 @@ class AdService
                 return $config;
             }
         }
-        throw new RuntimeException("AdService 初始化失敗: 找不到設定檔。");
+        throw new RuntimeException("AdService 初始化失敗: 找不到設定檔 (已嘗試自動複製但失敗或無範例檔)。");
     }
 
     private function validateAndLoadConfig($config)
     {
+        // 1. 驗證必要欄位存在
         $requiredKeys = ['AD_HOST', 'BASE_DN', 'QUERY_USER', 'QUERY_PASSWORD'];
         foreach ($requiredKeys as $key) {
             if (empty($config[$key])) {
                 throw new RuntimeException("AdService 設定錯誤: 缺少 '{$key}'。");
+            }
+        }
+
+        // 2. [新增] 驗證是否與範例檔相同 (防止使用預設值)
+        $examplePath = __DIR__ . '/config/AD.example.php';
+        if (file_exists($examplePath)) {
+            $exampleConfig = require $examplePath;
+            if (is_array($exampleConfig)) {
+                $isDefault = true;
+                // 比對關鍵欄位是否與範例檔完全一致
+                foreach ($requiredKeys as $key) {
+                    if (!isset($exampleConfig[$key]) || $config[$key] !== $exampleConfig[$key]) {
+                        $isDefault = false;
+                        break;
+                    }
+                }
+
+                if ($isDefault) {
+                    $msg = "AdService 安全警告: 偵測到您正在使用 AD.example.php 的預設設定。請修改 config/AD.php 中的設定值 (如 AD_HOST, QUERY_USER 等) 以確保運作正常與安全。";
+                    $this->logger->error("[AdService] $msg");
+                    throw new RuntimeException($msg);
+                }
             }
         }
 
