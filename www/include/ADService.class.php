@@ -26,6 +26,9 @@ class AdService
     private $agentUrl;
     private $agentKey;
 
+    // 設定檔路徑
+    private $configPath;
+
     // 快取有效期 (秒) - 1天
     // 移除 private 可視性宣告 (PHP < 7.1 不支援)
     const CACHE_TTL = 86400;
@@ -36,6 +39,7 @@ class AdService
     public function __construct($config = [])
     {
         $this->logger = Logger::getInstance();
+        $this->configPath = __DIR__ . '/config/AD.php'; // 初始化設定檔路徑
 
         if (!extension_loaded('ldap')) {
             $this->logger->error("[AdService] 環境錯誤: PHP LDAP 擴充套件未啟用");
@@ -53,23 +57,21 @@ class AdService
     private function loadDefaultConfig()
     {
         // 定義主要設定檔與範例檔路徑
-        $configDir = __DIR__ . '/config';
-        $mainConfigPath = $configDir . '/AD.php';
-        $exampleConfigPath = $configDir . '/AD.example.php';
+        $exampleConfigPath = __DIR__ . '/config/AD.example.php';
 
         // 1. [新增] 自動複製機制
         // 若設定檔不存在但範例檔存在，嘗試自動複製
-        if (!file_exists($mainConfigPath) && file_exists($exampleConfigPath)) {
+        if (!file_exists($this->configPath) && file_exists($exampleConfigPath)) {
             $this->logger->warning("[AdService] 找不到設定檔 AD.php，嘗試從 AD.example.php 建立預設檔案...");
-            if (copy($exampleConfigPath, $mainConfigPath)) {
-                $this->logger->info("[AdService] 成功建立設定檔: $mainConfigPath (請務必修改內容)");
+            if (copy($exampleConfigPath, $this->configPath)) {
+                $this->logger->info("[AdService] 成功建立設定檔: {$this->configPath} (請務必修改內容)");
             } else {
                 $this->logger->error("[AdService] 無法建立設定檔，權限不足或路徑錯誤。請手動複製 AD.example.php 為 AD.php");
             }
         }
 
         $candidates = [
-            $mainConfigPath,
+            $this->configPath,
             __DIR__ . '/../../config/AD.php'
         ];
 
@@ -130,6 +132,114 @@ class AdService
         $this->agentKey = isset($config['AD_AGENT_KEY']) ? $config['AD_AGENT_KEY'] : 'YOUR_SECRET_KEY_123456';
         
         $this->logger->info("[AdService] 設定載入完成: Host={$this->host}:{$this->port}, BaseDN={$this->baseDn}");
+    }
+
+    /**
+     * [Feature 9] 讀取目前的 AD 設定檔內容
+     * @return array 設定檔內容陣列，若讀取失敗則回傳空陣列
+     */
+    public function getConfig()
+    {
+        if (file_exists($this->configPath)) {
+            $config = require $this->configPath;
+            if (is_array($config)) {
+                return $config;
+            }
+        }
+        return [];
+    }
+
+    /**
+     * [Feature 8] 更新並儲存 AD 設定檔
+     * 將傳入的設定陣列合併至 config/AD.php，並即時更新當前實例
+     * @param array $newSettings 要更新的設定值 (例如 ['AD_HOST' => '1.2.3.4'])
+     * @return bool 成功回傳 true，失敗回傳 false
+     */
+    public function updateConfig($newSettings)
+    {
+        if (!is_array($newSettings)) {
+            $this->logger->error("[AdService] updateConfig 失敗: 參數必須為陣列");
+            return false;
+        }
+
+        // 定義允許更新的欄位白名單
+        $allowedKeys = [
+            'AD_HOST', 
+            'AD_PORT', 
+            'BASE_DN', 
+            'QUERY_USER', 
+            'QUERY_PASSWORD', 
+            'AD_AGENT_URL', 
+            'AD_AGENT_KEY'
+        ];
+
+        // 進行嚴格驗證
+        foreach ($newSettings as $key => $value) {
+            // 1. 檢查是否為未知欄位
+            if (!in_array($key, $allowedKeys)) {
+                $this->logger->error("[AdService] updateConfig 驗證失敗: 發現未授權的設定欄位 '{$key}'");
+                return false;
+            }
+
+            // 2. 針對各欄位進行格式檢查
+            switch ($key) {
+                case 'AD_HOST':
+                case 'BASE_DN':
+                case 'QUERY_USER':
+                case 'QUERY_PASSWORD':
+                case 'AD_AGENT_KEY':
+                    if (empty($value) || !is_string($value)) {
+                        $this->logger->error("[AdService] updateConfig 驗證失敗: '{$key}' 必須為非空字串");
+                        return false;
+                    }
+                    break;
+                case 'AD_PORT':
+                    if (!is_numeric($value)) {
+                        $this->logger->error("[AdService] updateConfig 驗證失敗: '{$key}' 必須為數字");
+                        return false;
+                    }
+                    break;
+                case 'AD_AGENT_URL':
+                    if (!filter_var($value, FILTER_VALIDATE_URL)) {
+                        $this->logger->error("[AdService] updateConfig 驗證失敗: '{$key}' URL 格式無效 ({$value})");
+                        return false;
+                    }
+                    break;
+            }
+        }
+
+        try {
+            // 1. 讀取舊設定
+            $currentConfig = [];
+            if (file_exists($this->configPath)) {
+                $loaded = require $this->configPath;
+                if (is_array($loaded)) {
+                    $currentConfig = $loaded;
+                }
+            }
+
+            // 2. 合併新設定 (新值覆蓋舊值)
+            $finalConfig = array_merge($currentConfig, $newSettings);
+
+            // 3. 寫入檔案
+            // 使用 var_export 產生可執行的 PHP 陣列代碼
+            $content = "<?php\n\n// Auto-generated by AdService::updateConfig at " . date('Y-m-d H:i:s') . "\nreturn " . var_export($finalConfig, true) . ";\n";
+            
+            if (file_put_contents($this->configPath, $content) === false) {
+                throw new RuntimeException("無法寫入設定檔: {$this->configPath} (請檢查權限)");
+            }
+
+            $this->logger->info("[AdService] 設定檔已更新: {$this->configPath}");
+
+            // 4. 重新載入設定到當前實例 (這會驗證必要欄位是否遺失或是否與範例檔相同)
+            $this->validateAndLoadConfig($finalConfig);
+            
+            return true;
+
+        } catch (Exception $e) {
+            $this->logger->error("[AdService] updateConfig 發生錯誤: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
