@@ -150,6 +150,38 @@ class AdService
     }
 
     /**
+     * [Feature 10] 測試 AD 連線狀態
+     * 嘗試使用當前設定或傳入的設定進行一次 Bind 操作
+     * @param array $testConfig (Optional) 若提供，則使用此設定進行測試，格式需與 AD.php 相同
+     * @return array ['status' => bool, 'message' => string]
+     */
+    public function testConnection($testConfig = [])
+    {
+        $conn = null;
+        try {
+            // 決定顯示在 Log 的資訊 (優先使用測試參數)
+            $host = !empty($testConfig['AD_HOST']) ? $testConfig['AD_HOST'] : $this->host;
+            $port = !empty($testConfig['AD_PORT']) ? $testConfig['AD_PORT'] : $this->port;
+            $user = !empty($testConfig['QUERY_USER']) ? $testConfig['QUERY_USER'] : $this->bindUser;
+
+            $this->logger->info("[AdService] 執行連線測試: Host={$host}:{$port}, User={$user}");
+            
+            // 嘗試建立一般連線 (False = 不強制 SSL)，並傳入測試設定
+            $conn = $this->connectAndBind(false, $testConfig);
+            
+            // 如果能走到這裡代表 Bind 成功
+            $this->logger->info("[AdService] 連線測試成功");
+            return ['status' => true, 'message' => 'AD 連線與認證成功'];
+
+        } catch (Exception $e) {
+            $this->logger->error("[AdService] 連線測試失敗: " . $e->getMessage());
+            return ['status' => false, 'message' => $e->getMessage()];
+        } finally {
+            if ($conn) @ldap_unbind($conn);
+        }
+    }
+
+    /**
      * [Feature 8] 更新並儲存 AD 設定檔
      * 將傳入的設定陣列合併至 config/AD.php，並即時更新當前實例
      * @param array $newSettings 要更新的設定值 (例如 ['AD_HOST' => '1.2.3.4'])
@@ -245,12 +277,17 @@ class AdService
     /**
      * [內部方法] 建立 LDAP 連線並綁定 (Bind)
      * @param bool $requireSecure 是否需要加密連線
+     * @param array $customConfig (Optional) 覆蓋用的設定陣列，若提供則使用其中的值 (AD_HOST, AD_PORT...)
      * @return resource LDAP Link Identifier
      */
-    private function connectAndBind($requireSecure = false)
+    private function connectAndBind($requireSecure = false, $customConfig = [])
     {
-        $host = $this->host;
-        $port = $this->port;
+        // 優先使用 customConfig 中的值，若無則使用類別屬性 (既有設定)
+        $host = !empty($customConfig['AD_HOST']) ? $customConfig['AD_HOST'] : $this->host;
+        $port = !empty($customConfig['AD_PORT']) ? (int)$customConfig['AD_PORT'] : $this->port;
+        $bindUser = !empty($customConfig['QUERY_USER']) ? $customConfig['QUERY_USER'] : $this->bindUser;
+        $bindPass = !empty($customConfig['QUERY_PASSWORD']) ? $customConfig['QUERY_PASSWORD'] : $this->bindPass;
+
         $protocol = "ldap://";
 
         // 判斷是否需要加密連線
@@ -300,8 +337,8 @@ class AdService
             }
         }
 
-        if (!@ldap_bind($conn, $this->bindUser, $this->bindPass)) {
-            $this->logger->error("[AdService] AD Bind 失敗 (User: {$this->bindUser})");
+        if (!@ldap_bind($conn, $bindUser, $bindPass)) {
+            $this->logger->error("[AdService] AD Bind 失敗 (User: {$bindUser})");
             throw new RuntimeException("AD 認證失敗: " . ldap_error($conn));
         }
         $this->logger->info("[AdService] AD Bind 成功");
