@@ -450,6 +450,27 @@ switch ($_POST["type"]) {
             ));
         }
         break;
+    case "ad_config":
+        Logger::getInstance()->info("XHR [ad_config] 取得AD設定請求");
+        $ad = new AdService();
+        $result = $ad->getConfig();
+        Logger::getInstance()->info("XHR [ad_config] 取得AD設定成功");
+        echoJSONResponse("取得AD設定成功", STATUS_CODE::SUCCESS_NORMAL, array(
+            "raw" => $result
+        ));
+        break;
+    case "ad_update_config":
+        Logger::getInstance()->info("XHR [ad_update_config] 更新AD設定請求");
+        $ad = new AdService();
+        $result = $ad->updateConfig($_POST["config"]);
+        if ($result === true) {
+            Logger::getInstance()->info("XHR [ad_update_config] 更新AD設定成功。");
+            echoJSONResponse("更新AD設定成功。", STATUS_CODE::SUCCESS_NORMAL);
+        } else {
+            Logger::getInstance()->error("XHR [ad_update_config] 更新AD設定失敗。");
+            echoJSONResponse("更新AD設定失敗。");
+        }
+        break;
     default:
 		Logger::getInstance()->warning("不支援的查詢型態【".$_POST["type"]."】");
 		echoJSONResponse("不支援的查詢型態【".$_POST["type"]."】", STATUS_CODE::UNSUPPORT_FAIL);
