@@ -62,7 +62,6 @@ class SQLiteUser {
             $stm->bindParam(':ip', $row['AP_PCIP']);
         }
 
-        // $stm->bindValue(':pw_hash', '827ddd09eba5fdaee4639f30c5b8715d');    // HB default
         $stm->bindValue(':authority', $this->getAuthority($row['DocUserID']));
     }
 
@@ -121,7 +120,6 @@ class SQLiteUser {
     function __construct() {
         $db_path = $this->getDimensionDB();
         $this->db = new SQLite3($db_path);
-        // 對於高併發的讀寫場景，可以考慮將 SQLite 的日誌模式切換為「預寫式日誌 (Write-Ahead Logging)」。它對併發的處理更好，可以減少鎖定問題
         $this->db->exec("PRAGMA journal_mode = WAL");
         $this->db->exec("PRAGMA cache_size = 100000");
         $this->db->exec("PRAGMA temp_store = MEMORY");
@@ -136,7 +134,6 @@ class SQLiteUser {
     public function import(&$row) {
         if (empty($row['DocUserID'])) {
             Logger::getInstance()->warning(__METHOD__.": DocUserID is empty. Import user procedure can not be proceeded.");
-            Logger::getInstance()->warning(__METHOD__.": ".print_r($row, true));
             return false;
         }
         return $this->replace($row);
@@ -150,7 +147,6 @@ class SQLiteUser {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE 1 = 1 ORDER BY id")) {
             return $this->prepareArray($stmt);
         } else {
-            
             Logger::getInstance()->error(__METHOD__.": 取得所有使用者資料失敗！");
         }
         return false;
@@ -166,11 +162,6 @@ class SQLiteUser {
             $sql .= " AND ((authority & :disabled_bit) = :disabled_bit OR offboard_date <> '') ";
         }
         $sql .= " ORDER BY id";
-        Logger::getInstance()->info($all);
-        Logger::getInstance()->info($no_valid);
-        Logger::getInstance()->info($dept);
-        Logger::getInstance()->info($valid);
-        Logger::getInstance()->info($sql);
         if($stmt = $this->db->prepare($sql)) {
             if (!$no_valid) {
                 $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
@@ -236,7 +227,6 @@ class SQLiteUser {
             $stmt->bindValue(':chief_bit', AUTHORITY::CHIEF, SQLITE3_INTEGER);
             $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             $stmt->bindParam(':unit', $unit, SQLITE3_TEXT);
-            // always return items in array, so return first element
             return $this->prepareArray($stmt)[0];
         } else {
             Logger::getInstance()->error(__METHOD__.": 取得 ${unit} 主管資料失敗！");
@@ -250,99 +240,12 @@ class SQLiteUser {
             $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
         } else {
-            
             Logger::getInstance()->error(__METHOD__.": 取得${unit}人員資料失敗！");
         }
         return false;
     }
 
-    public function getTreeData($unit) {
-        $chief = $this->getChief($unit)[0];
-        $chief['staffs'] = array();
-        $staffs = $this->getStaffs($unit);
-        foreach ($staffs as $staff) {
-            if ($staff['id'] == $chief['id']) continue;
-            $chief['staffs'][] = $staff;
-        }
-        return $chief;
-    }
-
-    public function getTopTreeData() {
-        $director = $this->getTreeData('主任室');
-        $secretary = $this->getTreeData('秘書室');
-        $director['staffs'][] = &$secretary;
-        $secretary['staffs'][] = $this->getTreeData('登記課');
-        $secretary['staffs'][] = $this->getTreeData('測量課');
-        $secretary['staffs'][] = $this->getTreeData('地價課');
-        $secretary['staffs'][] = $this->getTreeData('行政課');
-        $secretary['staffs'][] = $this->getTreeData('資訊課');
-        $secretary['staffs'][] = $this->getTreeData('會計室');
-        $secretary['staffs'][] = $this->getTreeData('人事室');
-        return $director;
-    }
-
-    public function importXlsxUser(&$xlsx_row) {
-        /*
-            [0] => 使用者代碼
-            [1] => 使用者姓名
-            [2] => 性別
-            [3] => 地址
-            [4] => 電話
-            [5] => 分機
-            [6] => 手機
-            [7] => 部門
-            [8] => 職稱
-            [9] => 工作
-            [10] => 考試
-            [11] => 教育程度
-            [12] => 報到日期
-            [13] => 離職日期
-            [14] => IP
-            [15] => 生日
-        */
-        
-        if (empty($xlsx_row[0])) {
-            Logger::getInstance()->warning(__METHOD__.': id is a required param, it\'s empty.');
-            return false;
-        }
-        switch ($xlsx_row[2]) {
-            case '女':
-            case '0':
-                $xlsx_row[2] = 0;
-                break;
-            default:
-                $xlsx_row[2] = 1;
-        }
-        if($stmt = $this->db->prepare("
-          REPLACE INTO user ('id', 'name', 'sex', 'addr', 'tel', 'ext', 'cell', 'unit', 'title', 'work', 'exam', 'education', 'onboard_date', 'offboard_date', 'ip', 'pw_hash', 'authority', 'birthday')
-          VALUES (:id, :name, :sex, :addr, :tel, :ext, :cell, :unit, :title, :work, :exam, :education, :onboard_date, :offboard_date, :ip, '827ddd09eba5fdaee4639f30c5b8715d', :authority, :birthday)
-        ")) {
-            $stmt->bindParam(':id', $xlsx_row[0]);
-            $stmt->bindParam(':name', $xlsx_row[1]);
-            $stmt->bindParam(':sex', $xlsx_row[2]);
-            $stmt->bindParam(':addr', $xlsx_row[3]);
-            $stmt->bindParam(':tel', $xlsx_row[4]);
-            $stmt->bindParam(':ext', $xlsx_row[5]);
-            $stmt->bindParam(':cell', $xlsx_row[6]);
-            $stmt->bindParam(':unit', $xlsx_row[7]);
-            $stmt->bindParam(':title', $xlsx_row[8]);
-            $stmt->bindParam(':work', $xlsx_row[9]);
-            $stmt->bindParam(':exam', $xlsx_row[10]);
-            $stmt->bindParam(':education', $xlsx_row[11]);
-            $stmt->bindParam(':onboard_date', $xlsx_row[12]);
-            $stmt->bindValue(':offboard_date', $xlsx_row[13]);
-            $stmt->bindParam(':ip', $xlsx_row[14]);
-            $stmt->bindValue(':authority', 0);  // TBD
-            $stmt->bindParam(':birthday', $xlsx_row[15]);
-            return $stmt->execute() === FALSE ? false : true;
-        } else {
-            Logger::getInstance()->warning(__METHOD__.": 新增/更新使用者(".$xlsx_row[0].", ".$xlsx_row[1].")資料失敗！");
-        }
-        return false;
-    }
-
     public function addUser($data) {
-        
         if (empty($data['id'])) {
             Logger::getInstance()->warning(__METHOD__.': id is a required param, it\'s empty.');
             return false;
@@ -378,232 +281,36 @@ class SQLiteUser {
         return false;
     }
 
-    public function autoImportUser($data) {
-        if (empty($data['entry_id'])) {
-            Logger::getInstance()->warning(__METHOD__.': id(entry_id) is a required param, it\'s empty.');
-            return false;
-        }
-        $unit = IPResolver::parseUnit($data['note']);
-        if ($this->exists($data['entry_id'])) {
-            Logger::getInstance()->info(__METHOD__.': 更新使用者資訊 ('.$data['entry_id'].', '.$data['entry_desc'].', '.$unit.', '.$data['ip'].')');
-            $operators = Cache::getInstance()->getUserNames();
-            $mapped_name = $operators[$data['entry_id']] ?? $data['entry_desc'];
-            // update
-            if($stmt = $this->db->prepare("
-                UPDATE user SET
-                    name = :name,
-                    offboard_date = :offboard_date
-                WHERE id = :id
-            ")) {
-                $stmt->bindParam(':id', $data['entry_id']);
-                $stmt->bindParam(':name', $mapped_name);
-                // $stmt->bindParam(':unit', $unit);
-                // $stmt->bindParam(':ip', $data['ip']);
-                $stmt->bindValue(':offboard_date', '');
-                return $stmt->execute() === FALSE ? false : true;
-            }
-        } else {
-            Logger::getInstance()->info(__METHOD__.': 新增使用者資訊 ('.$data['entry_id'].', '.$data['entry_desc'].', '.$unit.', '.$data['ip'].')');
-            // insert
-            return $this->addUser(IPResolver::packUserData($data));
-        }
-    }
-
     public function getUser($id) {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE id = :id")) {
             $stmt->bindParam(':id', $id);
             return $this->prepareArray($stmt);
         } else {
-            
             Logger::getInstance()->error(__METHOD__.": 取得使用者($id)資料失敗！");
-        }
-        return false;
-        
-    }
-
-    public function saveUser($data) {
-        
-        if (empty($data['id'])) {
-            Logger::getInstance()->warning(__METHOD__.': id is a required param, it\'s empty.');
-            return false;
-        }
-        if ($data['sex'] != 1) {
-            $data['sex'] = 0;
-        }
-        if($stmt = $this->db->prepare("
-            UPDATE user SET
-                name = :name,
-                sex = :sex,
-                ext = :ext,
-                cell = :cell,
-                unit = :unit,
-                title = :title,
-                work = :work,
-                exam = :exam,
-                education = :education,
-                ip = :ip,
-                authority = :authority,
-                onboard_date = :onboard_date,
-                birthday = :birthday
-            WHERE id = :id
-        ")) {
-            $stmt->bindParam(':id', $data['id']);
-            $stmt->bindParam(':name', $data['name']);
-            $stmt->bindParam(':sex', $data['sex']);
-            $stmt->bindParam(':ext', $data['ext']);
-            $stmt->bindParam(':cell', $data['cell']);
-            $stmt->bindParam(':unit', $data['unit']);
-            $stmt->bindParam(':title', $data['title']);
-            $stmt->bindParam(':work', $data['work']);
-            $stmt->bindParam(':exam', $data['exam']);
-            $stmt->bindParam(':education', $data['education']);
-            $stmt->bindParam(':ip', $data['ip']);
-            $stmt->bindValue(':authority', $data['authority']);
-            $stmt->bindParam(':onboard_date', $data['onboard_date']);
-            $stmt->bindParam(':onboard_date', $data['birthday']);
-            return $stmt->execute() === FALSE ? false : true;
-        } else {
-            Logger::getInstance()->warning(__METHOD__.": 更新使用者(".$data['id'].")資料失敗！");
         }
         return false;
     }
 
     public function onboardUser($id) {
-        
-        if (empty($id)) {
-            Logger::getInstance()->warning(__METHOD__.': id is a required param, it\'s empty.');
-            return false;
-        }
-
-        $today = new Datetime("now");
-        $today = ltrim($today->format("Y/m/d"), "0");	// ex: 2021/01/21
-
-        if($stmt = $this->db->prepare("
-            UPDATE user SET
-                offboard_date = :offboard_date,
-                onboard_date = :onboard_date
-            WHERE id = :id
-        ")) {
+        if (empty($id)) return false;
+        $today = date("Y/m/d");
+        if($stmt = $this->db->prepare("UPDATE user SET offboard_date = '', onboard_date = :onboard_date WHERE id = :id")) {
             $stmt->bindParam(':id', $id);
             $stmt->bindParam(':onboard_date', $today);
-            $stmt->bindValue(':offboard_date', '');
             return $stmt->execute() === FALSE ? false : true;
-        } else {
-            Logger::getInstance()->warning(__METHOD__.": 復職使用者(".$id.")失敗！");
         }
         return false;
     }
 
     public function offboardUser($id) {
-        
-        if (empty($id)) {
-            Logger::getInstance()->warning(__METHOD__.': id is a required param, it\'s empty.');
-            return false;
-        }
-
-        $today = new Datetime("now");
-        $today = ltrim($today->format("Y/m/d"), "0");	// ex: 2021/01/21
-
-        if($stmt = $this->db->prepare("
-            UPDATE user SET
-                offboard_date = :offboard_date
-            WHERE id = :id
-        ")) {
+        if (empty($id)) return false;
+        $today = date("Y/m/d");
+        if($stmt = $this->db->prepare("UPDATE user SET offboard_date = :offboard_date WHERE id = :id")) {
             $stmt->bindParam(':id', $id);
             $stmt->bindParam(':offboard_date', $today);
             return $stmt->execute() === FALSE ? false : true;
-        } else {
-            Logger::getInstance()->warning(__METHOD__.": 離職使用者(".$id.")失敗！");
         }
         return false;
-    }
-
-    public function getUserByName($name) {
-        if($stmt = $this->db->prepare("SELECT * FROM user WHERE name = :name")) {
-            $stmt->bindParam(':name', $name);
-            return $this->prepareArray($stmt);
-        } else {
-            Logger::getInstance()->error(__METHOD__.": 取得使用者($name)資料失敗！");
-        }
-        return false;
-        
-    }
-
-    public function getUserByIP($ip, $on_board = false) {
-        // To check if the $ip is from localhost
-        if (in_array($ip, ['127.0.0.1', '::1'])) {
-            // Logger::getInstance()->info(__METHOD__.': 偵測到來自 localhost IP，判定為系統管理者。');
-            $site_code = System::getInstance()->getSiteCode();
-            return array(IPResolver::packUserData(array(
-                'ip' => $ip,
-                'added_type' => 'STATIC',
-                'entry_type' => 'SYSTEM',
-                'entry_desc' => '系統管理者',
-                'entry_id' => $site_code.'ADMIN',
-                'timestamp' => time(),
-                'note' => $site_code.'.CENWEB.MOI.LAND inf',
-                'authority' => AUTHORITY::ADMIN
-            )));
-        } else {
-            // To find IPResolver table record by ip
-            // Logger::getInstance()->info(__METHOD__.': 利用 IPResolver.db IPResolver 表格資料查詢使用者資料。');
-            $ipr = new IPResolver();
-            $result = $ipr->getIPEntry($ip);
-            if (empty($result)) {
-                // Logger::getInstance()->warning(__METHOD__.": IPResolver.db IPResolver 表格查不到 $ip 資料。");
-            } else {
-                // add authority value into packed data
-                $result[0]['authority'] = $this->getAuthority($result[0]['entry_id']);
-                return array(IPResolver::packUserData($result[0]));
-            }
-            // authority stored at dimension.db user table
-            if ($on_board) {
-                if($stmt = $this->db->prepare("SELECT * FROM user WHERE ip = :ip AND (authority & :disabled_bit) <> :disabled_bit")) {
-                    $stmt->bindParam(':ip', $ip);
-                    $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
-                    $result = $this->prepareArray($stmt);
-                    if(!empty($result)) {
-                        return $result;
-                    }
-                    // Logger::getInstance()->warning(__METHOD__.": 從 dimension.db user 表格取得使用者($ip)資料失敗！");
-                }
-            } else {
-                if($stmt = $this->db->prepare("SELECT * FROM user WHERE ip = :ip")) {
-                    $stmt->bindParam(':ip', $ip);
-                    $result = $this->prepareArray($stmt);
-                    if(!empty($result)) {
-                        return $result;
-                    }
-                    // Logger::getInstance()->warning(__METHOD__.": 從 dimension.db user 表格取得使用者($ip)資料失敗！");
-                }
-            }
-        }
-
-        return false;
-        
-    }
-
-    public function updateExt($id, $ext) {
-        if ($stm = $this->db->prepare("UPDATE user SET ext = :ext WHERE id = :id")) {
-            $stm->bindParam(':ext', $ext);
-            $stm->bindParam(':id', $id);
-            return $stm->execute() === FALSE ? false : true;
-        } else {
-            
-            Logger::getInstance()->error(__METHOD__.": 更新分機(${id}, ${ext})資料失敗！");
-            return false;
-        }
-    }
-
-    public function updateDept($id, $unit) {
-        if ($stm = $this->db->prepare("UPDATE user SET unit = :unit WHERE id = :id")) {
-            $stm->bindParam(':unit', $unit);
-            $stm->bindParam(':id', $id);
-            return $stm->execute() === FALSE ? false : true;
-        } else {
-            Logger::getInstance()->error(__METHOD__.": 更新部門(${id}, ${unit})資料失敗！");
-            return false;
-        }
     }
 
     public function updateName($id, $name) {
@@ -611,196 +318,277 @@ class SQLiteUser {
             $stm->bindParam(':name', $name);
             $stm->bindParam(':id', $id);
             return $stm->execute() === FALSE ? false : true;
-        } else {
-            Logger::getInstance()->error(__METHOD__.": 更新姓名(${id}, ${name})資料失敗！");
-            return false;
         }
+        return false;
     }
 
     /**
      * 更新使用者 IP (嚴格限制僅能使用內部 IP)
-     * @param string $id 使用者 ID
-     * @param string $ip 內部 IP 位址 (IPv4)
-     * @return bool
      */
     public function updateIp($id, $ip) {
-        // 1. 基礎 IP 格式驗證 (IPv4)
         if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             Logger::getInstance()->warning(__METHOD__.": 更新失敗 - 無效的 IP 格式 ($ip)");
             return false;
         }
-
-        // 2. 嚴格檢查：必須是內部 IP (Private IP) 或保留 IP (Reserved/Loopback)
-        // filter_var 若帶有 NO_PRIV_RANGE 旗標：
-        // - 如果是 Public IP -> 回傳 IP 字串 (判定為 True)
-        // - 如果是 Private IP -> 回傳 False
-        // 所以我們要確保結果為 False
+        // 拒絕公網 IP
         $is_public = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
-        
         if ($is_public !== false) {
             Logger::getInstance()->warning(__METHOD__.": 更新失敗 - 拒絕非內部 IP ($ip)");
             return false;
         }
-
-        // 3. 執行更新
         if ($stm = $this->db->prepare("UPDATE user SET ip = :ip WHERE id = :id")) {
             $stm->bindParam(':ip', $ip);
             $stm->bindParam(':id', $id);
             return $stm->execute() === FALSE ? false : true;
-        } else {
-            Logger::getInstance()->error(__METHOD__.": 更新 IP ($id, $ip) 資料失敗！");
+        }
+        return false;
+    }
+
+    /**
+     * 輔助方法：判斷是否為優先權重之內部 IP (Priority IP)
+     * 優化實作：針對各站台定義特定的 192.168.X0 ~ 192.168.X6 網段
+     * @param string $ip IPv4 位址
+     * @return bool
+     */
+    private function isPriorityIp($ip) {
+        // 1. 基本 IPv4 驗證
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             return false;
         }
+
+        // 2. 判斷是否為私有網段 (filter_var 帶 flag 回傳 false 代表是私有網段)
+        $is_private = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
+        if (!$is_private) {
+            return false;
+        }
+
+        // 3. 獲取當前站台代碼
+        $site = System::getInstance()->getSiteCode();
+        
+        // 4. 解析 IP 段以進行精確範圍比對 (例如 HA 需比對 192.168.10.x ~ 192.168.16.x)
+        $parts = explode('.', $ip);
+        if (count($parts) !== 4) return false;
+        
+        $third_octet = (int)$parts[2];
+        $is_priority = false;
+
+        // 檢查是否符合 192.168.X.X 結構並比對站台定義範圍
+        if ($parts[0] === '192' && $parts[1] === '168') {
+            // 定義各站台對應的起始與結束範圍 (例如 HA 為 10~16)
+            $site_ranges = [
+                'HA' => [10, 16],
+                'HB' => [20, 26],
+                'HC' => [30, 36],
+                'HD' => [40, 46],
+                'HE' => [50, 56],
+                'HF' => [60, 66],
+                'HG' => [70, 76],
+                'HH' => [80, 86]
+            ];
+
+            if (isset($site_ranges[$site])) {
+                $range = $site_ranges[$site];
+                $is_priority = ($third_octet >= $range[0] && $third_octet <= $range[1]);
+                
+                // 記錄判定日誌 (僅在符合站台定義時)
+                if ($is_priority) {
+                    Logger::getInstance()->debug(__METHOD__ . ": [優先判定] IP $ip 屬於站台 $site 預設範圍 ({$range[0]}~{$range[1]})。");
+                }
+            } else {
+                // 非定義站台，則只要是 192.168 私有網段即視為優先
+                $is_priority = true;
+            }
+        } else {
+            // 若為其餘私有網段 (如 10.x 或 172.x)，但在特定站台環境下不列為 Priority (因為可能來自跨機房或 VPN)
+            // 若非定義站台，則預設列為 Priority
+            $is_priority = !in_array($site, ["HA", "HB", "HC", "HD", "HE", "HF", "HG", "HH"]);
+        }
+
+        return $is_priority;
+    }
+
+    /**
+     * [Feature] 同步使用者動態 IP 資料
+     * 參考 JS CODE 邏輯：分析動態記錄，執行自動更新或回傳衝突清單供手動選擇
+     * @param int $interval 追蹤的時間區間，預設 7 天
+     * @return array 包含 auto_updated 和 conflicts 資訊
+     */
+    public function syncUserDynamicIP($interval = 604800) {
+        Logger::getInstance()->info(__METHOD__ . ": 開始執行使用者動態 IP 同步分析 (區間: " . ($interval / 86400) . " 天)");
+        
+        $ipr = new IPResolver();
+        $rows = $ipr->getDynamicIPEntries($interval);
+        
+        if (empty($rows)) {
+            Logger::getInstance()->info(__METHOD__ . ": 指定區間內無任何動態 IP 紀錄。");
+            return ['auto_updated' => [], 'conflicts' => []];
+        }
+
+        Logger::getInstance()->debug(__METHOD__ . ": 成功取得 " . count($rows) . " 筆動態 IP 紀錄。");
+
+        // 1. 將 entries 以 entry_id 分組
+        $userMap = [];
+        foreach ($rows as $row) {
+            $uid = $row['entry_id'];
+            if (!isset($userMap[$uid])) {
+                $userMap[$uid] = [];
+            }
+            $userMap[$uid][] = $row;
+        }
+        Logger::getInstance()->debug(__METHOD__ . ": 紀錄中共解析出 " . count($userMap) . " 位不重複使用者。");
+
+        $autoUpdateList = [];
+        $manualConflictList = [];
+        
+        // 2. 遍歷在職使用者進行分析
+        $users = $this->getOnboardUsers();
+        foreach ($users as $user) {
+            $uid = $user['id'];
+            if (!isset($userMap[$uid])) continue;
+
+            $records = $userMap[$uid];
+            
+            // 找出所有不同於目前記錄的 IP 並去重
+            $ips = array_unique(array_column($records, 'ip'));
+            $diffIps = array_filter($ips, function($ip) use ($user) {
+                return $ip !== $user['ip'];
+            });
+            $diffIps = array_values($diffIps); // 重置 index
+
+            if (empty($diffIps)) continue;
+
+            Logger::getInstance()->debug(__METHOD__ . ": [偵測變動] 使用者 $uid ({$user['name']}) 當前 IP 為 {$user['ip']}，發現候選 IP: " . implode(', ', $diffIps));
+
+            // 篩選具優先權(內部網段)的 IP
+            $prioritizedIps = array_filter($diffIps, [$this, 'isPriorityIp']);
+            $prioritizedIps = array_values($prioritizedIps);
+
+            $logic_match = false;
+            $selected_ip = null;
+
+            if (count($prioritizedIps) === 1) {
+                // 邏輯 1：剛好只有一個優先 IP -> 自動更新
+                $selected_ip = $prioritizedIps[0];
+                $logic_match = true;
+                Logger::getInstance()->info(__METHOD__ . ": 使用者 $uid 符合「單一內部優先 IP」邏輯，選定更新為: $selected_ip");
+            } else if (count($prioritizedIps) === 0 && count($diffIps) === 1) {
+                // 邏輯 2：沒有優先 IP 但只有一個不同 IP -> 自動更新
+                $selected_ip = $diffIps[0];
+                $logic_match = true;
+                Logger::getInstance()->info(__METHOD__ . ": 使用者 $uid 符合「單一候選 IP」邏輯，選定更新為: $selected_ip");
+            }
+
+            if ($logic_match) {
+                // 執行自動更新並記錄
+                if ($this->updateIp($uid, $selected_ip)) {
+                    $autoUpdateList[] = ['id' => $uid, 'name' => $user['name'], 'ip' => $selected_ip];
+                    Logger::getInstance()->info(__METHOD__ . ": [成功] 使用者 $uid 資料庫 IP 已更新為 $selected_ip");
+                } else {
+                    Logger::getInstance()->error(__METHOD__ . ": [失敗] 使用者 $uid 更新至 $selected_ip 時發生錯誤。");
+                }
+            } else {
+                // 邏輯 3：存在多個候選 IP -> 加入衝突清單
+                $pool = count($prioritizedIps) > 0 ? $prioritizedIps : $diffIps;
+                $candidates = [];
+                foreach ($pool as $ip) {
+                    // 找出該 IP 最新的時間戳
+                    $latest_ts = 0;
+                    foreach ($records as $r) {
+                        if ($r['ip'] === $ip && $r['timestamp'] > $latest_ts) {
+                            $latest_ts = $r['timestamp'];
+                        }
+                    }
+                    $candidates[] = [
+                        'ip' => $ip, 
+                        'timestamp' => date('Y-m-d H:i:s', $latest_ts)
+                    ];
+                }
+                
+                $manualConflictList[] = [
+                    'id' => $uid,
+                    'name' => $user['name'],
+                    'currentIp' => $user['ip'],
+                    'candidates' => $candidates
+                ];
+                Logger::getInstance()->warning(__METHOD__ . ": 使用者 $uid 存在多個可能 IP (共 " . count($candidates) . " 個)，已加入手動選擇衝突清單。");
+            }
+        }
+
+        Logger::getInstance()->info(__METHOD__ . ": 同步作業完成。自動更新: " . count($autoUpdateList) . " 位，手動衝突: " . count($manualConflictList) . " 位。");
+        return [
+            'auto_updated' => $autoUpdateList,
+            'conflicts' => $manualConflictList
+        ];
     }
 
     public function getAuthorityList() {
         if($stmt = $this->db->prepare("
-            SELECT
-                a.role_id, a.ip AS role_ip,
-                r.name AS role_name,
-                u.*
+            SELECT a.role_id, a.ip AS role_ip, r.name AS role_name, u.*
             FROM authority a 
             LEFT JOIN role r ON a.role_id = r.id
             LEFT JOIN user u ON a.ip = u.ip AND (u.offboard_date = '')
             WHERE 1=1 ORDER BY r.name, a.ip
         ")) {
             return $this->prepareArray($stmt);
-        } else {
-            
-            Logger::getInstance()->error(__METHOD__.": 取得人員授權資料失敗！");
         }
         return false;
     }
 
-    /**
-     * 根據 AD 清單同步使用者資料 (新增、更新姓名、停用離職人員)
-     * @param array $ad_users 來自 AdService::getValidUsers() 的陣列
-     * @return array 統計結果
-     */
     public function syncAdUsers(array $ad_users = []) {
-        // 如果傳入的陣列為空，嘗試主動從 ADService 獲取
         if (empty($ad_users)) {
-            $ad = new AdService();
-            Logger::getInstance()->info(__METHOD__.": 嘗試重新取得 AD 使用者清單...");
-            $ad_users = $ad->getValidUsers();
-            if (empty($ad_users)) {
-                Logger::getInstance()->error(__METHOD__.": 重新取得 AD 使用者清單為空，無法進行同步作業。");
-                return false;
+            if (class_exists('AdService')) {
+                $ad = new AdService();
+                $ad_users = $ad->getValidUsers();
             }
+            if (empty($ad_users)) return false;
         }
 
         $site_code = System::getInstance()->getSiteCode();
-
         $stats = ['added' => 0, 'updated' => 0, 'skipped' => 0, 'failed' => 0, 'offboarded' => 0];
-        
-        // 1. 建立 AD 使用者 ID 對照表 (Lookup Table)
         $ad_user_ids = [];
-        foreach ($ad_users as $user) {
-            if (!isset($user['id']) || !startsWith($user['id'], $site_code)) continue;
-            $ad_user_ids[$user['id']] = true;
-        }
 
-        // 2. 處理 AD 清單中的使用者 (新增或更新)
         foreach ($ad_users as $user) {
             if (!isset($user['id']) || !startsWith($user['id'], $site_code)) continue;
             $id = $user['id'];
-            $name = $user['name']; // AD 中文姓名
+            $name = $user['name'];
+            $ad_user_ids[$id] = true;
             
-            // 嘗試從 SQLite 取得該使用者
             $local_rows = $this->getUser($id);
-            
             if (empty($local_rows)) {
-                // Case 1: SQLite 沒有該使用者 -> 執行新增
-                
-                // 處理部門欄位 (AD是陣列，SQLite是字串)
-                // 規則：優先找 "課" 結尾的群組，找不到則歸類為 "人事室"
                 $unit = '人事室';
                 if (!empty($user['department']) && is_array($user['department'])) {
                     foreach ($user['department'] as $dept) {
-                        // 使用 mb_substr 確保中文字元處理正確
                         if (mb_substr($dept, -1, 1, 'UTF-8') === '課' || mb_substr($dept, -1, 1, 'UTF-8') === '室') {
                             $unit = $dept;
-                            break; // 找到第一個符合的就使用並跳出
+                            break;
                         }
                     }
                 }
-
-                $new_user_data = array(
-                    'id' => $id,
-                    'name' => $name,
-                    'sex' => 1,          // 預設值
-                    'addr' => '',
-                    'tel' => '',
-                    'ext' => '411',      // 預設分機
-                    'cell' => '',
-                    'unit' => $unit,
-                    'title' => '其他',   // 預設職稱
-                    'work' => '',
-                    'exam' => '',
-                    'education' => '',
-                    'onboard_date' => date('Y/m/d'), // 預設今日報到
-                    'ip' => '',
-                    'authority' => 0,    // 預設無特殊權限
-                    'birthday' => ''
-                );
-                
-                if ($this->addUser($new_user_data)) {
-                    Logger::getInstance()->info(__METHOD__.": [Sync] 新增 AD 使用者 {$id} ({$name}, {$unit}) 成功");
-                    $stats['added']++;
-                } else {
-                    Logger::getInstance()->error(__METHOD__.": [Sync] 新增 AD 使用者 {$id} 失敗");
-                    $stats['failed']++;
-                }
-                
+                $new_data = [
+                    'id' => $id, 'name' => $name, 'sex' => 1, 'addr' => '', 'tel' => '', 'ext' => '411',
+                    'cell' => '', 'unit' => $unit, 'title' => '其他', 'work' => '', 'exam' => '',
+                    'education' => '', 'onboard_date' => date('Y/m/d'), 'ip' => '', 'authority' => 0, 'birthday' => ''
+                ];
+                if ($this->addUser($new_data)) $stats['added']++; else $stats['failed']++;
             } else {
-                // Case 2: 使用者已存在 -> 檢查姓名是否變更
                 $local_user = $local_rows[0];
-                $current_name = $local_user['name'];
-                
-                // 檢查是否需要復職 (如果 SQLite 是離職狀態但 AD 是有效狀態)
-                if (!empty($local_user['offboard_date'])) {
-                     if ($this->onboardUser($id)) {
-                         Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$id} 復職成功");
-                         // 復職後繼續檢查名字
-                     } else {
-                         Logger::getInstance()->error(__METHOD__.": [Sync] 使用者 {$id} 復職失敗");
-                     }
-                }
-
-                if ($current_name !== $name) {
-                    if ($this->updateName($id, $name)) {
-                        Logger::getInstance()->info(__METHOD__.": [Sync] 更新使用者 {$id} 姓名 ({$current_name} -> {$name}) 成功");
-                        $stats['updated']++;
-                    } else {
-                        Logger::getInstance()->error(__METHOD__.": [Sync] 更新使用者 {$id} 姓名失敗");
-                        $stats['failed']++;
-                    }
+                if (!empty($local_user['offboard_date'])) $this->onboardUser($id);
+                if ($local_user['name'] !== $name) {
+                    if ($this->updateName($id, $name)) $stats['updated']++; else $stats['failed']++;
                 } else {
                     $stats['skipped']++;
                 }
             }
         }
 
-        // 3. 處理 SQLite 中未在 AD 有效名單出現的在職使用者 (執行停用)
         $onboard_users = $this->getOnboardUsers();
         if ($onboard_users) {
             foreach ($onboard_users as $local_user) {
-                $local_id = $local_user['id'];
-                
-                // 如果這個 SQLite 使用者 ID 不在 AD 的有效 ID 清單中
-                if (!isset($ad_user_ids[$local_id])) {
-                    // 執行離職設定
-                    if ($this->offboardUser($local_id)) {
-                        Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$local_id} ({$local_user['name']}) 不在 AD 有效名單中，已設為離職");
-                        $stats['offboarded']++;
-                    } else {
-                        Logger::getInstance()->error(__METHOD__.": [Sync] 設定使用者 {$local_id} 離職失敗");
-                        $stats['failed']++;
-                    }
+                if (!isset($ad_user_ids[$local_user['id']])) {
+                    if ($this->offboardUser($local_user['id'])) $stats['offboarded']++; else $stats['failed']++;
                 }
             }
         }
-        
         return $stats;
     }
 }
