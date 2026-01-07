@@ -70,10 +70,7 @@ class Scheduler
         );
     }
 
-    public function __destruct()
-    {
-        // 解構子 (保留擴充空間)
-    }
+    public function __destruct() {}
 
     /**
      * 主要執行入口
@@ -83,11 +80,12 @@ class Scheduler
     {
         Logger::getInstance()->info(__METHOD__ . ": Scheduler 開始執行。");
         
-        // 依照時間長度由大到小檢查，避免小週期任務搶佔資源
+        // 依照時間長度由大到小檢查
         $this->doOneDayJobs();
         $this->doHalfDayJobs();
         $this->do8HoursJobs();
         $this->do4HoursJobs();
+        $this->do2HoursJobs(); // [補回] 漏掉的 2 小時呼叫
         $this->do1HourJobs();
         $this->do30minsJobs();
         $this->do15minsJobs();
@@ -100,7 +98,6 @@ class Scheduler
     // =========================================================================
     //  排程週期檢查方法 (Public Schedule Methods)
     // =========================================================================
-
     /**
      * 執行 5 分鐘週期任務
      * - 檢查全國地所連線狀態 (僅上班時間)
@@ -113,7 +110,6 @@ class Scheduler
             }
         });
     }
-
     /**
      * 執行 10 分鐘週期任務
      */
@@ -124,7 +120,6 @@ class Scheduler
             $this->findXCaseFailures();
         });
     }
-
     /**
      * 執行 15 分鐘週期任務
      * - 檢查系統內部連線 (Connectivity Check)
@@ -136,7 +131,6 @@ class Scheduler
             $conn->check();
         });
     }
-
     /**
      * 執行 30 分鐘週期任務
      */
@@ -146,7 +140,6 @@ class Scheduler
             // 目前無任務
         });
     }
-
     /**
      * 執行 1 小時週期任務
      */
@@ -156,7 +149,13 @@ class Scheduler
             // 目前無任務
         });
     }
-
+    // [補回] 漏掉的 2 小時任務定義
+    public function do2HoursJobs(): bool
+    {
+        return $this->executeJob('2h', '+120 mins', function() {
+            // 預留給中週期任務
+        });
+    }
     /**
      * 執行 4 小時週期任務
      */
@@ -166,7 +165,6 @@ class Scheduler
             // 目前無任務
         });
     }
-
     /**
      * 執行 8 小時週期任務
      */
@@ -176,7 +174,6 @@ class Scheduler
             // 目前無任務
         });
     }
-
     /**
      * 執行 12 小時週期任務
      */
@@ -186,7 +183,6 @@ class Scheduler
             // 目前無任務
         });
     }
-
     /**
      * 執行 24 小時週期任務 (每日維護)
      */
@@ -215,9 +211,6 @@ class Scheduler
             $this->importUserFromL3HWEB();
             $this->syncAdUsersToLocalDB(); 
             $this->syncUserIPs();          // 同步使用者動態 IP (86400s = 1day)
-            
-            // 4. 資料庫優化
-            $this->analyzeTables();
         });
     }
 
@@ -322,7 +315,7 @@ class Scheduler
                 $message .= "***\n⚠ 請聯繫資訊人員或至「員工管理頁面」進行手動確認與更新。";
 
                 $title = "您的 IP 同步衝突提醒";
-                $this->removeNotificationByTitle($title, 'inf');
+                $this->removeNotificationByTitle($title, $uid);
                 // 發送給該使用者 id (如: HA10013859)
                 $this->addNotification($message, $uid, $title);
                 
@@ -402,11 +395,6 @@ class Scheduler
         
         $imapServer = new MonitorMail();
         $imapServer->removeOutdatedMails();
-    }
-
-    private function analyzeTables()
-    {
-        // 預留優化空間
     }
 
     // =========================================================================
@@ -503,7 +491,6 @@ class Scheduler
     private function addNotification($message, $to_id, $title = '系統排程訊息')
     {
         if (empty($to_id)) return false;
-        $users = Cache::getInstance()->getUserNames();
         $notify = new Notification();
         $payload = array(
             'title' => $title, 'content' => trim($message), 'priority' => 3,
