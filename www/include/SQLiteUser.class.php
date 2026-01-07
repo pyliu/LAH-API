@@ -5,6 +5,10 @@ require_once('IPResolver.class.php');
 require_once('DynamicSQLite.class.php');
 require_once('Cache.class.php');
 
+/**
+ * Class SQLiteUser
+ * 處理本地 SQLite (dimension.db) 中的使用者資料維護與查詢
+ */
 class SQLiteUser {
     private $db;
 
@@ -14,30 +18,29 @@ class SQLiteUser {
     }
 
     private function bindUserParams(&$stm, &$row) {
-
         if ($stm === false) {
             Logger::getInstance()->error(__METHOD__.": bindUserParams because of \$stm is false.");
             return;
         }
         
-        // remove additional prefix by previous data in ora db
-        $row['AP_USER_NAME'] = preg_replace("/(桃園所|中壢所|大溪所|楊梅所|蘆竹所|八德所|平鎮所|龜山所|桃園|中壢|大溪|楊梅|蘆竹|八德|平鎮|龜山)/i", '', $row['AP_USER_NAME']);
+        // 移除舊資料中可能存在的單位前綴
+        $row['AP_USER_NAME'] = preg_replace("/(桃園所|中壢所|大溪所|楊梅所|蘆竹所|八德所|平鎮所|龜山所|桃園|中壢|大溪|楊梅|蘆竹|八德|平鎮|龜山)/i", '', $row['AP_USER_NAME'] ?? '');
         
         $stm->bindParam(':id', $row['DocUserID']);
         $stm->bindParam(':name', $row['AP_USER_NAME']);
-        $stm->bindValue(':sex', $row['AP_SEX'] == '男' ? 1 : 0);
+        $stm->bindValue(':sex', ($row['AP_SEX'] ?? '') == '男' ? 1 : 0);
         $stm->bindParam(':addr', $row['AP_ADR']);
         $stm->bindParam(':tel', $row['AP_TEL'], SQLITE3_TEXT);
-        $stm->bindValue(':ext', empty($row['AP_EXT']) ? '411' : $row['AP_EXT'], SQLITE3_TEXT); // 總機 411
+        $stm->bindValue(':ext', empty($row['AP_EXT']) ? '411' : $row['AP_EXT'], SQLITE3_TEXT); // 預設總機 411
         $stm->bindParam(':cell', $row['AP_SEL'], SQLITE3_TEXT);
         $stm->bindParam(':unit', $row['AP_UNIT_NAME']);
         $stm->bindParam(':title', $row['AP_JOB']);
-        $stm->bindValue(':work', empty($row['unitname2']) ? $row['AP_WORK'] : $row['unitname2']);
+        $stm->bindValue(':work', empty($row['unitname2']) ? ($row['AP_WORK'] ?? '') : $row['unitname2']);
         $stm->bindParam(':exam', $row['AP_TEST']);
         $stm->bindParam(':education', $row['AP_HI_SCHOOL']);
         $stm->bindParam(':birthday', $row['AP_BIRTH']);
 
-        $tokens = preg_split("/\s+/", $row['AP_ON_DATE']);
+        $tokens = preg_split("/\s+/", $row['AP_ON_DATE'] ?? '');
         if (count($tokens) == 3) {
             $rewrite = $tokens[2]."/".str_pad($tokens[0], 2, '0', STR_PAD_LEFT)."/".str_pad($tokens[1], 2, '0', STR_PAD_LEFT);
             $stm->bindParam(':onboard_date', $rewrite);
@@ -45,13 +48,13 @@ class SQLiteUser {
             $stm->bindParam(':onboard_date', $row['AP_ON_DATE']);
         }
         
-        // clean up AP_OFF_DATE when AP_OFF_JOB flag is N
-        if ($row['AP_OFF_JOB'] !== 'Y') {
+        // 處理離職日期
+        if (($row['AP_OFF_JOB'] ?? '') !== 'Y') {
             $row['AP_OFF_DATE'] = '';
         } else if (empty($row['AP_OFF_DATE']) && $row['AP_OFF_JOB'] == 'Y') {
             $tw_date = new Datetime("now");
             $tw_date->modify("-1911 year");
-            $today = ltrim($tw_date->format("Y/m/d"), "0");	// ex: 110/03/11
+            $today = ltrim($tw_date->format("Y/m/d"), "0");
             $row['AP_OFF_DATE'] = $today;
         }
         $stm->bindParam(':offboard_date', $row['AP_OFF_DATE']);
@@ -250,7 +253,7 @@ class SQLiteUser {
             Logger::getInstance()->warning(__METHOD__.': id is a required param, it\'s empty.');
             return false;
         }
-        if ($data['sex'] != 1) {
+        if (($data['sex'] ?? 0) != 1) {
             $data['sex'] = 0;
         }
         if($stmt = $this->db->prepare("
@@ -276,7 +279,7 @@ class SQLiteUser {
             $stmt->bindParam(':birthday', $data['birthday']);
             return $stmt->execute() === FALSE ? false : true;
         } else {
-            Logger::getInstance()->warning(__METHOD__.": 新增使用者(".$data['id'].", ".$data['name'].")資料失敗！");
+            Logger::getInstance()->warning(__METHOD__.": 新增使用者(".$data['id'].", ".($data['name'] ?? '').")資料失敗！");
         }
         return false;
     }
@@ -287,6 +290,66 @@ class SQLiteUser {
             return $this->prepareArray($stmt);
         } else {
             Logger::getInstance()->error(__METHOD__.": 取得使用者($id)資料失敗！");
+        }
+        return false;
+    }
+
+    /**
+     * 根據使用者姓名搜尋資料
+     */
+    public function getUserByName($name) {
+        if($stmt = $this->db->prepare("SELECT * FROM user WHERE name = :name")) {
+            $stmt->bindParam(':name', $name);
+            return $this->prepareArray($stmt);
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 取得使用者($name)資料失敗！");
+        }
+        return false;
+    }
+
+    /**
+     * 根據 IP 取得使用者資訊 (含 Localhost 判定與 IPResolver 整合)
+     */
+    public function getUserByIP($ip, $on_board = false) {
+        // 1. 檢查是否為 localhost (判定為系統管理者)
+        if (in_array($ip, ['127.0.0.1', '::1'])) {
+            $site_code = System::getInstance()->getSiteCode();
+            return array(IPResolver::packUserData(array(
+                'ip' => $ip,
+                'added_type' => 'STATIC',
+                'entry_type' => 'SYSTEM',
+                'entry_desc' => '系統管理者',
+                'entry_id' => $site_code.'ADMIN',
+                'timestamp' => time(),
+                'note' => $site_code.'.CENWEB.MOI.LAND inf',
+                'authority' => AUTHORITY::ADMIN
+            )));
+        } else {
+            // 2. 嘗試從 IPResolver 動態記錄中尋找使用者
+            $ipr = new IPResolver();
+            $result = $ipr->getIPEntry($ip);
+            if (!empty($result)) {
+                $result[0]['authority'] = $this->getAuthority($result[0]['entry_id']);
+                return array(IPResolver::packUserData($result[0]));
+            }
+
+            // 3. 從本地 user 表格中根據 IP 欄位比對尋找
+            if ($on_board) {
+                // 僅限在職
+                if($stmt = $this->db->prepare("SELECT * FROM user WHERE ip = :ip AND (authority & :disabled_bit) <> :disabled_bit AND offboard_date = ''")) {
+                    $stmt->bindParam(':ip', $ip);
+                    $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
+                    $result = $this->prepareArray($stmt);
+                    if(!empty($result)) return $result;
+                }
+            } else {
+                // 不限狀態
+                if($stmt = $this->db->prepare("SELECT * FROM user WHERE ip = :ip")) {
+                    $stmt->bindParam(':ip', $ip);
+                    $result = $this->prepareArray($stmt);
+                    if(!empty($result)) return $result;
+                }
+            }
         }
         return false;
     }
@@ -330,7 +393,6 @@ class SQLiteUser {
             Logger::getInstance()->warning(__METHOD__.": 更新失敗 - 無效的 IP 格式 ($ip)");
             return false;
         }
-        // 拒絕公網 IP
         $is_public = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
         if ($is_public !== false) {
             Logger::getInstance()->warning(__METHOD__.": 更新失敗 - 拒絕非內部 IP ($ip)");
@@ -346,120 +408,76 @@ class SQLiteUser {
 
     /**
      * 輔助方法：判斷是否為優先權重之內部 IP (Priority IP)
-     * 優化實作：針對各站台定義特定的 192.168.X0 ~ 192.168.X6 網段
-     * @param string $ip IPv4 位址
-     * @return bool
      */
     private function isPriorityIp($ip) {
-        // 1. 基本 IPv4 驗證
-        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            return false;
-        }
-
-        // 2. 判斷是否為私有網段 (filter_var 帶 flag 回傳 false 代表是私有網段)
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) return false;
         $is_private = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
-        if (!$is_private) {
-            return false;
-        }
+        if (!$is_private) return false;
 
-        // 3. 獲取當前站台代碼
         $site = System::getInstance()->getSiteCode();
-        
-        // 4. 解析 IP 段以進行精確範圍比對 (例如 HA 需比對 192.168.10.x ~ 192.168.16.x)
         $parts = explode('.', $ip);
         if (count($parts) !== 4) return false;
         
         $third_octet = (int)$parts[2];
         $is_priority = false;
 
-        // 檢查是否符合 192.168.X.X 結構並比對站台定義範圍
         if ($parts[0] === '192' && $parts[1] === '168') {
-            // 定義各站台對應的起始與結束範圍 (例如 HA 為 10~16)
             $site_ranges = [
-                'HA' => [10, 16],
-                'HB' => [20, 26],
-                'HC' => [30, 36],
-                'HD' => [40, 46],
-                'HE' => [50, 56],
-                'HF' => [60, 66],
-                'HG' => [70, 76],
-                'HH' => [80, 86]
+                'HA' => [10, 16], 'HB' => [20, 26], 'HC' => [30, 36], 'HD' => [40, 46],
+                'HE' => [50, 56], 'HF' => [60, 66], 'HG' => [70, 76], 'HH' => [80, 86]
             ];
 
             if (isset($site_ranges[$site])) {
                 $range = $site_ranges[$site];
                 $is_priority = ($third_octet >= $range[0] && $third_octet <= $range[1]);
-                
-                // 記錄判定日誌 (僅在符合站台定義時)
                 if ($is_priority) {
                     Logger::getInstance()->debug(__METHOD__ . ": [優先判定] IP $ip 屬於站台 $site 預設範圍 ({$range[0]}~{$range[1]})。");
                 }
             } else {
-                // 非定義站台，則只要是 192.168 私有網段即視為優先
                 $is_priority = true;
             }
         } else {
-            // 若為其餘私有網段 (如 10.x 或 172.x)，但在特定站台環境下不列為 Priority (因為可能來自跨機房或 VPN)
-            // 若非定義站台，則預設列為 Priority
             $is_priority = !in_array($site, ["HA", "HB", "HC", "HD", "HE", "HF", "HG", "HH"]);
         }
-
         return $is_priority;
     }
 
     /**
      * [Feature] 同步使用者動態 IP 資料
-     * 參考 JS CODE 邏輯：分析動態記錄，執行自動更新或回傳衝突清單供手動選擇
-     * @param int $interval 追蹤的時間區間，預設 7 天
-     * @return array 包含 auto_updated 和 conflicts 資訊
      */
     public function syncUserDynamicIP($interval = 604800) {
         Logger::getInstance()->info(__METHOD__ . ": 開始執行使用者動態 IP 同步分析 (區間: " . ($interval / 86400) . " 天)");
-        
         $ipr = new IPResolver();
         $rows = $ipr->getDynamicIPEntries($interval);
         
         if (empty($rows)) {
-            Logger::getInstance()->info(__METHOD__ . ": 指定區間內無任何動態 IP 紀錄。");
             return ['auto_updated' => [], 'conflicts' => []];
         }
 
-        Logger::getInstance()->debug(__METHOD__ . ": 成功取得 " . count($rows) . " 筆動態 IP 紀錄。");
-
-        // 1. 將 entries 以 entry_id 分組
         $userMap = [];
         foreach ($rows as $row) {
             $uid = $row['entry_id'];
-            if (!isset($userMap[$uid])) {
-                $userMap[$uid] = [];
-            }
+            if (!isset($userMap[$uid])) $userMap[$uid] = [];
             $userMap[$uid][] = $row;
         }
-        Logger::getInstance()->debug(__METHOD__ . ": 紀錄中共解析出 " . count($userMap) . " 位不重複使用者。");
 
         $autoUpdateList = [];
         $manualConflictList = [];
-        
-        // 2. 遍歷在職使用者進行分析
         $users = $this->getOnboardUsers();
+        
         foreach ($users as $user) {
             $uid = $user['id'];
             if (!isset($userMap[$uid])) continue;
 
             $records = $userMap[$uid];
-            
-            // 找出所有不同於目前記錄的 IP 並去重
             $ips = array_unique(array_column($records, 'ip'));
             $diffIps = array_filter($ips, function($ip) use ($user) {
                 return $ip !== $user['ip'];
             });
-            $diffIps = array_values($diffIps); // 重置 index
+            $diffIps = array_values($diffIps);
 
             if (empty($diffIps)) continue;
 
-            Logger::getInstance()->debug(__METHOD__ . ": [偵測變動] 使用者 $uid ({$user['name']}) 當前 IP 為 {$user['ip']}，發現候選 IP: " . implode(', ', $diffIps));
-
-            // 篩選具優先權(內部網段)的 IP
             $prioritizedIps = array_filter($diffIps, [$this, 'isPriorityIp']);
             $prioritizedIps = array_values($prioritizedIps);
 
@@ -467,58 +485,33 @@ class SQLiteUser {
             $selected_ip = null;
 
             if (count($prioritizedIps) === 1) {
-                // 邏輯 1：剛好只有一個優先 IP -> 自動更新
                 $selected_ip = $prioritizedIps[0];
                 $logic_match = true;
-                Logger::getInstance()->info(__METHOD__ . ": 使用者 $uid 符合「單一內部優先 IP」邏輯，選定更新為: $selected_ip");
             } else if (count($prioritizedIps) === 0 && count($diffIps) === 1) {
-                // 邏輯 2：沒有優先 IP 但只有一個不同 IP -> 自動更新
                 $selected_ip = $diffIps[0];
                 $logic_match = true;
-                Logger::getInstance()->info(__METHOD__ . ": 使用者 $uid 符合「單一候選 IP」邏輯，選定更新為: $selected_ip");
             }
 
             if ($logic_match) {
-                // 執行自動更新並記錄
                 if ($this->updateIp($uid, $selected_ip)) {
                     $autoUpdateList[] = ['id' => $uid, 'name' => $user['name'], 'ip' => $selected_ip];
-                    Logger::getInstance()->info(__METHOD__ . ": [成功] 使用者 $uid 資料庫 IP 已更新為 $selected_ip");
-                } else {
-                    Logger::getInstance()->error(__METHOD__ . ": [失敗] 使用者 $uid 更新至 $selected_ip 時發生錯誤。");
                 }
             } else {
-                // 邏輯 3：存在多個候選 IP -> 加入衝突清單
                 $pool = count($prioritizedIps) > 0 ? $prioritizedIps : $diffIps;
                 $candidates = [];
                 foreach ($pool as $ip) {
-                    // 找出該 IP 最新的時間戳
                     $latest_ts = 0;
                     foreach ($records as $r) {
-                        if ($r['ip'] === $ip && $r['timestamp'] > $latest_ts) {
-                            $latest_ts = $r['timestamp'];
-                        }
+                        if ($r['ip'] === $ip && $r['timestamp'] > $latest_ts) $latest_ts = $r['timestamp'];
                     }
-                    $candidates[] = [
-                        'ip' => $ip, 
-                        'timestamp' => date('Y-m-d H:i:s', $latest_ts)
-                    ];
+                    $candidates[] = ['ip' => $ip, 'timestamp' => date('Y-m-d H:i:s', $latest_ts)];
                 }
-                
                 $manualConflictList[] = [
-                    'id' => $uid,
-                    'name' => $user['name'],
-                    'currentIp' => $user['ip'],
-                    'candidates' => $candidates
+                    'id' => $uid, 'name' => $user['name'], 'currentIp' => $user['ip'], 'candidates' => $candidates
                 ];
-                Logger::getInstance()->warning(__METHOD__ . ": 使用者 $uid 存在多個可能 IP (共 " . count($candidates) . " 個)，已加入手動選擇衝突清單。");
             }
         }
-
-        Logger::getInstance()->info(__METHOD__ . ": 同步作業完成。自動更新: " . count($autoUpdateList) . " 位，手動衝突: " . count($manualConflictList) . " 位。");
-        return [
-            'auto_updated' => $autoUpdateList,
-            'conflicts' => $manualConflictList
-        ];
+        return ['auto_updated' => $autoUpdateList, 'conflicts' => $manualConflictList];
     }
 
     public function getAuthorityList() {
@@ -536,10 +529,8 @@ class SQLiteUser {
 
     public function syncAdUsers(array $ad_users = []) {
         if (empty($ad_users)) {
-            if (class_exists('AdService')) {
-                $ad = new AdService();
-                $ad_users = $ad->getValidUsers();
-            }
+            $ad = new AdService();
+            $ad_users = $ad->getValidUsers();
             if (empty($ad_users)) return false;
         }
 
