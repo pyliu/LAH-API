@@ -703,6 +703,14 @@ class SQLiteUser {
 
     /**
      * 與 AD 使用者清單同步
+     * 核心邏輯：
+     * 1. 若 AD 有新使用者則自動新增。
+     * 2. 若 AD 中標記活躍但本地為離職，執行復職邏輯。
+     * 3. 檢查姓名變動。
+     * 4. 檢查部門變動：若 AD 有多個部門，僅在本地為空時更新；若 AD 僅一個部門，則同步更新。
+     * 5. 若本地在職人員不在 AD 有效名單中，則設為離職並關閉權限。
+     * @param array $ad_users (選用) 外部傳入的 AD 使用者陣列，若無則自動呼叫 AdService 抓取
+     * @return array|bool 同步統計結果 (含 detail 詳細紀錄)，失敗回傳 false
      */
     public function syncAdUsers(array $ad_users = []) {
         Logger::getInstance()->info(__METHOD__.": [Sync] 開始 AD 同步作業...");
@@ -721,13 +729,21 @@ class SQLiteUser {
         }
 
         $site_code = System::getInstance()->getSiteCode();
-        $stats = ['added' => 0, 'updated' => 0, 'skipped' => 0, 'failed' => 0, 'offboarded' => 0];
+        // 初始化統計資訊與詳細操作紀錄
+        $stats = [
+            'added' => 0, 
+            'updated' => 0, 
+            'skipped' => 0, 
+            'failed' => 0, 
+            'offboarded' => 0,
+            'detail' => []
+        ];
         $ad_user_ids = []; 
 
         // [步驟 2] 遍歷 AD 有效名單執行同步
         foreach ($ad_users as $user) {
             if (!isset($user['id'])) {
-                Logger::getInstance()->debug(__METHOD__.": [Sync] AD 筆數遺漏 ID 欄位，跳過。資料: " . json_encode($user));
+                Logger::getInstance()->debug(__METHOD__.": [Sync] AD 筆數遺漏 ID 欄位，跳過。");
                 continue;
             }
             
@@ -740,48 +756,92 @@ class SQLiteUser {
             $name = $user['name'];
             $ad_user_ids[$id] = true; // 標記為 AD 有效
             
+            // 解析 AD 回傳的所有有效部門資訊
+            $ad_potential_units = [];
+            if (!empty($user['department']) && is_array($user['department'])) {
+                foreach ($user['department'] as $dept) {
+                    if (mb_substr($dept, -1, 1, 'UTF-8') === '課' || mb_substr($dept, -1, 1, 'UTF-8') === '室') {
+                        $ad_potential_units[] = $dept;
+                    }
+                }
+            }
+            
+            $target_ad_unit = !empty($ad_potential_units) ? $ad_potential_units[0] : '人事室';
+            $has_multi_ad_units = count($ad_potential_units) > 1;
+
             $local_rows = $this->getUser($id);
             
             if (empty($local_rows)) {
                 // 情境 A: 新進人員
-                $unit = '人事室'; 
-                if (!empty($user['department']) && is_array($user['department'])) {
-                    foreach ($user['department'] as $dept) {
-                        if (mb_substr($dept, -1, 1, 'UTF-8') === '課' || mb_substr($dept, -1, 1, 'UTF-8') === '室') {
-                            $unit = $dept;
-                            break;
-                        }
-                    }
-                }
-                
                 $new_data = [
                     'id' => $id, 'name' => $name, 'sex' => 1, 'addr' => '', 'tel' => '', 'ext' => '411',
-                    'cell' => '', 'unit' => $unit, 'title' => '其他', 'work' => '', 'exam' => '',
+                    'cell' => '', 'unit' => $target_ad_unit, 'title' => '其他', 'work' => '', 'exam' => '',
                     'education' => '', 'onboard_date' => date('Y/m/d'), 'ip' => '', 'authority' => 0, 'birthday' => ''
                 ];
                 
                 if ($this->addUser($new_data)) {
-                    Logger::getInstance()->info(__METHOD__.": [Sync] 成功新增 AD 使用者 {$id} ({$name})");
+                    Logger::getInstance()->info(__METHOD__.": [Sync] 成功新增 AD 使用者 {$id} ({$name}, {$target_ad_unit})");
                     $stats['added']++; 
+                    $stats['detail'][] = "[新增] {$id} ({$name}, {$target_ad_unit})";
                 } else {
                     $stats['failed']++;
+                    $stats['detail'][] = "[失敗] 無法新增使用者 {$id} ({$name})";
                 }
             } else {
                 // 情境 B: 現有人員
                 $local_user = $local_rows[0];
+                $has_change = false;
                 
+                // B-1. 復職檢查
                 if (!empty($local_user['offboard_date'])) {
                     $this->onboardUser($id);
-                    Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$id} ({$name}) 偵測到復職，已更新狀態為在職並恢復權限");
+                    Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$id} ({$name}) 偵測到復職");
+                    $stats['detail'][] = "[復職] {$id} ({$name})";
+                    $has_change = true;
                 }
                 
+                // B-2. 姓名變動檢查
                 if ($local_user['name'] !== $name) {
                     if ($this->updateName($id, $name)) {
                         Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$id} 姓名變更: {$local_user['name']} -> {$name}");
-                        $stats['updated']++; 
+                        $stats['detail'][] = "[更新姓名] {$id}: {$local_user['name']} -> {$name}";
+                        $has_change = true;
                     } else {
                         $stats['failed']++;
                     }
+                }
+
+                // B-3. 部門變動檢查
+                $current_local_unit = trim($local_user['unit']);
+                if ($current_local_unit !== $target_ad_unit) {
+                    $should_update_dept = false;
+                    $skip_reason = "";
+                    
+                    if ($has_multi_ad_units) {
+                        if (empty($current_local_unit) || $current_local_unit === '未分配' || $current_local_unit === '人事室') {
+                            $should_update_dept = true;
+                        } else {
+                            $skip_reason = "擁有多個 AD 部門且本地已有值";
+                        }
+                    } else {
+                        $should_update_dept = true;
+                    }
+
+                    if ($should_update_dept) {
+                        if ($this->updateDept($id, $target_ad_unit)) {
+                            Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$id} 部門更新: {$current_local_unit} -> {$target_ad_unit}");
+                            $stats['detail'][] = "[更新部門] {$id} ({$name}): {$current_local_unit} -> {$target_ad_unit}";
+                            $has_change = true;
+                        } else {
+                            $stats['failed']++;
+                        }
+                    } else if (!empty($skip_reason)) {
+                        $stats['detail'][] = "[略過部門更新] {$id} ({$name}): {$skip_reason}";
+                    }
+                }
+
+                if ($has_change) {
+                    $stats['updated']++;
                 } else {
                     $stats['skipped']++;
                 }
@@ -793,27 +853,22 @@ class SQLiteUser {
         $onboard_users = $this->getOnboardUsers();
         
         if ($onboard_users) {
-            Logger::getInstance()->debug(__METHOD__.": [Sync] 目前本地在職人員共 " . count($onboard_users) . " 人");
-            
             foreach ($onboard_users as $local_user) {
                 $uid = $local_user['id'];
-                
                 if (!isset($ad_user_ids[$uid])) {
-                    Logger::getInstance()->info(__METHOD__.": [Sync] 偵測到 ID $uid 不在 AD 有效名單中，執行離職流程。");
                     if ($this->offboardUser($uid)) {
-                        Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$uid} ({$local_user['name']}) 已設為離職並停用權限");
+                        Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$uid} ({$local_user['name']}) 已設為離職");
                         $stats['offboarded']++; 
+                        $stats['detail'][] = "[離職] {$uid} ({$local_user['name']})";
                     } else {
-                        Logger::getInstance()->error(__METHOD__.": [Sync] 使用者 {$uid} 設定離職失敗。");
                         $stats['failed']++;
+                        $stats['detail'][] = "[失敗] 無法將 {$uid} 設為離職";
                     }
                 }
             }
-        } else {
-            Logger::getInstance()->warning(__METHOD__.": [Sync] 本地在職人員名單為空，請檢查 getOnboardUsers 邏輯。");
         }
         
-        Logger::getInstance()->info(__METHOD__.": [Sync] AD 同步完成。總計 - 新增: {$stats['added']}, 更新: {$stats['updated']}, 離職: {$stats['offboarded']}, 失敗: {$stats['failed']}");
+        Logger::getInstance()->info(__METHOD__.": [Sync] AD 同步完成。");
         return $stats;
     }
 }
