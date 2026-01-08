@@ -85,7 +85,7 @@ class Scheduler
         $this->doHalfDayJobs();
         $this->do8HoursJobs();
         $this->do4HoursJobs();
-        $this->do2HoursJobs(); // [補回] 漏掉的 2 小時呼叫
+        $this->do2HoursJobs(); // 檢查 2 小時排程
         $this->do1HourJobs();
         $this->do30minsJobs();
         $this->do15minsJobs();
@@ -98,6 +98,7 @@ class Scheduler
     // =========================================================================
     //  排程週期檢查方法 (Public Schedule Methods)
     // =========================================================================
+
     /**
      * 執行 5 分鐘週期任務
      * - 檢查全國地所連線狀態 (僅上班時間)
@@ -110,6 +111,7 @@ class Scheduler
             }
         });
     }
+
     /**
      * 執行 10 分鐘週期任務
      */
@@ -120,9 +122,9 @@ class Scheduler
             $this->findXCaseFailures();
         });
     }
+
     /**
      * 執行 15 分鐘週期任務
-     * - 檢查系統內部連線 (Connectivity Check)
      */
     public function do15minsJobs(): bool
     {
@@ -131,6 +133,7 @@ class Scheduler
             $conn->check();
         });
     }
+
     /**
      * 執行 30 分鐘週期任務
      */
@@ -140,6 +143,7 @@ class Scheduler
             // 目前無任務
         });
     }
+
     /**
      * 執行 1 小時週期任務
      */
@@ -149,13 +153,17 @@ class Scheduler
             // 目前無任務
         });
     }
-    // [補回] 漏掉的 2 小時任務定義
+
+    /**
+     * 執行 2 小時週期任務
+     */
     public function do2HoursJobs(): bool
     {
         return $this->executeJob('2h', '+120 mins', function() {
             // 預留給中週期任務
         });
     }
+
     /**
      * 執行 4 小時週期任務
      */
@@ -165,6 +173,7 @@ class Scheduler
             // 目前無任務
         });
     }
+
     /**
      * 執行 8 小時週期任務
      */
@@ -174,6 +183,7 @@ class Scheduler
             // 目前無任務
         });
     }
+
     /**
      * 執行 12 小時週期任務
      */
@@ -183,6 +193,7 @@ class Scheduler
             // 目前無任務
         });
     }
+
     /**
      * 執行 24 小時週期任務 (每日維護)
      */
@@ -268,10 +279,18 @@ class Scheduler
         $sysauth1->importFromL3HWEBDB();
     }
 
+    /**
+     * 從 AD (Active Directory) 同步使用者至本地 SQLite
+     * - 會呼叫 AdService 取得最新清單
+     * - 若本地無資料則新增，有資料則更新
+     * - 若 AD 有效名單無此人但本地在職，則設為離職
+     * - [新功能] 同步完成後將報告傳送至 inf 頻道並清除舊訊息
+     */
     private function syncAdUsersToLocalDB()
     {
         Logger::getInstance()->info(__METHOD__ . ': 同步 AD 使用者至 SQLite 排程啟動。');
         $sqlite_user = new SQLiteUser();
+        // syncAdUsers() 不帶參數時，內部會自動 new AdService() 去抓取資料
         $stats = $sqlite_user->syncAdUsers();
         
         if ($stats !== false) {
@@ -280,6 +299,21 @@ class Scheduler
                 $stats['added'], $stats['updated'], $stats['skipped'], $stats['failed'], $stats['offboarded']
             );
             Logger::getInstance()->info(__METHOD__ . ": $msg");
+
+            // 準備發送報告至 inf 頻道
+            $title = "智慧控管系統 AD 使用者同步報告";
+            $report = "##### 智慧控管系統 👤 AD 使用者同步完成報告：\n***\n";
+            $report .= "- **新增人員**: " . $stats['added'] . "\n";
+            $report .= "- **姓名更新**: " . $stats['updated'] . "\n";
+            $report .= "- **設為離職**: " . $stats['offboarded'] . "\n";
+            $report .= "- **跳過(無異動)**: " . $stats['skipped'] . "\n";
+            $report .= "- **處理失敗**: " . $stats['failed'] . "\n";
+            $report .= "\n***\n同步時間: " . date('Y-m-d H:i:s');
+
+            // 清除舊報告並發送新報告
+            $this->removeNotificationByTitle($title, 'inf');
+            $this->addNotification($report, 'inf', $title);
+
         } else {
             Logger::getInstance()->error(__METHOD__ . ": 同步 AD 使用者失敗。");
         }
@@ -315,8 +349,9 @@ class Scheduler
                 $message .= "***\n⚠ 請聯繫資訊人員或至「員工管理頁面」進行手動確認與更新。";
 
                 $title = "您的 IP 同步衝突提醒";
+                // 移除 $uid 頻道的舊衝突訊息
                 $this->removeNotificationByTitle($title, $uid);
-                // 發送給該使用者 id (如: HA10013859)
+                // 發送個人化通知給該使用者
                 $this->addNotification($message, $uid, $title);
                 
                 Logger::getInstance()->info(__METHOD__ . ": 已對使用者 {$uid} ({$uname}) 發送衝突提醒。");
@@ -396,6 +431,8 @@ class Scheduler
         $imapServer = new MonitorMail();
         $imapServer->removeOutdatedMails();
     }
+
+    private function analyzeTables() {}
 
     // =========================================================================
     //  具體任務實作 - 監控與檢測 (Monitoring & Check Tasks)
@@ -479,25 +516,42 @@ class Scheduler
         $this->addNotification($message, 'inf', $title);
     }
 
+    /**
+     * 根據標題移除通知訊息
+     * @param string $title 訊息標題
+     * @param string $to_id 接收者 ID 或群組
+     * @return bool
+     */
     private function removeNotificationByTitle($title, $to_id)
     {
         if (empty($to_id)) return false;
         $notify = new Notification();
         $removed = $notify->removeOutdatedMessageByTitle($to_id, $title);
-        if ($removed) Logger::getInstance()->info("\"$title\"訊息已從 $to_id 刪除");
+        if ($removed) Logger::getInstance()->info("\"$title\" 訊息已從 $to_id 刪除");
         return $removed;
     }
 
+    /**
+     * 發送系統通知的輔助方法
+     * @param string $message 訊息內容
+     * @param string $to_id 接收者 ID 或群組
+     * @param string $title 標題
+     * @return string|false 成功回傳 message ID
+     */
     private function addNotification($message, $to_id, $title = '系統排程訊息')
     {
         if (empty($to_id)) return false;
         $notify = new Notification();
         $payload = array(
-            'title' => $title, 'content' => trim($message), 'priority' => 3,
-            'expire_datetime' => '', 'sender' => '系統排程', 'from_ip' => getLocalhostIP()
+            'title' => $title, 
+            'content' => trim($message), 
+            'priority' => 3,
+            'expire_datetime' => '', 
+            'sender' => '系統排程', 
+            'from_ip' => getLocalhostIP()
         );
         $lastId = $notify->addMessage($to_id, $payload);
-        if ($lastId) Logger::getInstance()->info("訊息已送出給 $to_id");
+        if ($lastId) Logger::getInstance()->info("訊息($lastId)已送出給 $to_id");
         return $lastId;
     }
 }
