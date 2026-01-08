@@ -272,6 +272,8 @@ class SQLiteUser {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :disabled_bit) <> :disabled_bit AND offboard_date = '' ORDER BY id")) {
             $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 取得在職使用者資料失敗！");
         }
         return false;
     }
@@ -283,6 +285,8 @@ class SQLiteUser {
         if($stmt = $this->db->prepare("SELECT * FROM user WHERE (authority & :disabled_bit) = :disabled_bit OR offboard_date <> '' ORDER BY id")) {
             $stmt->bindValue(':disabled_bit', AUTHORITY::DISABLED, SQLITE3_INTEGER);
             return $this->prepareArray($stmt);
+        } else {
+            Logger::getInstance()->error(__METHOD__.": 取得離職使用者資料失敗！");
         }
         return false;
     }
@@ -399,7 +403,7 @@ class SQLiteUser {
     }
 
     /**
-     * [恢復] 儲存/更新使用者詳細資料
+     * 儲存/更新使用者詳細資料
      */
     public function saveUser($data) {
         if (empty($data['id'])) {
@@ -438,7 +442,7 @@ class SQLiteUser {
             $stmt->bindParam(':ip', $data['ip']);
             $stmt->bindValue(':authority', $data['authority']);
             $stmt->bindParam(':onboard_date', $data['onboard_date']);
-            $stmt->bindParam(':birthday', $data['birthday']); // [修正] 之前綁定到 onboard_date
+            $stmt->bindParam(':birthday', $data['birthday']);
             return $stmt->execute() === FALSE ? false : true;
         }
         return false;
@@ -546,7 +550,7 @@ class SQLiteUser {
     }
 
     /**
-     * [恢復] 更新使用者分機
+     * 更新使用者分機
      */
     public function updateExt($id, $ext) {
         if ($stm = $this->db->prepare("UPDATE user SET ext = :ext WHERE id = :id")) {
@@ -558,7 +562,7 @@ class SQLiteUser {
     }
 
     /**
-     * [恢復] 更新使用者單位
+     * 更新使用者單位
      */
     public function updateDept($id, $unit) {
         if ($stm = $this->db->prepare("UPDATE user SET unit = :unit WHERE id = :id")) {
@@ -683,52 +687,124 @@ class SQLiteUser {
         return false;
     }
 
+    /**
+     * 與 AD 使用者清單同步
+     * 核心邏輯：
+     * 1. 建立 AD 到 SQLite 的新增與姓名更新。
+     * 2. 若使用者不在 AD 且在本地為「在職」，則設為「離職」。
+     * * @param array $ad_users (選用) 外部傳入的 AD 使用者陣列，若無則自動呼叫 AdService 抓取
+     * @return array|bool 同步統計結果，失敗回傳 false
+     */
     public function syncAdUsers(array $ad_users = []) {
+        // [步驟 1] 若未傳入資料，嘗試透過 AdService 取得 AD 中所有有效使用者
         if (empty($ad_users)) {
-            $ad = new AdService();
-            $ad_users = $ad->getValidUsers();
+            if (class_exists('AdService')) {
+                $ad = new AdService();
+                $ad_users = $ad->getValidUsers();
+            }
             if (empty($ad_users)) return false;
         }
 
         $site_code = System::getInstance()->getSiteCode();
         $stats = ['added' => 0, 'updated' => 0, 'skipped' => 0, 'failed' => 0, 'offboarded' => 0];
-        $ad_user_ids = [];
+        $ad_user_ids = []; // 用於記錄 AD 中出現的所有 ID，最後比對離職人員
 
+        // [步驟 2] 遍歷 AD 使用者名單，執行「新增」或「更新」邏輯
         foreach ($ad_users as $user) {
+            // 過濾非本所人員 (根據 ID 前綴判定，如 HA 開頭)
             if (!isset($user['id']) || !startsWith($user['id'], $site_code)) continue;
-            $id = $user['id']; $name = $user['name']; $ad_user_ids[$id] = true;
             
+            $id = $user['id'];
+            $name = $user['name'];
+            $ad_user_ids[$id] = true; // 標記此 ID 在 AD 為活耀狀態
+            
+            // 檢查本地資料庫是否已有此人
             $local_rows = $this->getUser($id);
+            
             if (empty($local_rows)) {
-                $unit = '人事室';
+                // 情境 A: 本地無資料 -> 執行「新增」
+                
+                // 根據 AD 回傳的部門陣列，尋找第一個以「課」或「室」結尾的部門作為主單位
+                $unit = '人事室'; // 預設值
                 if (!empty($user['department']) && is_array($user['department'])) {
                     foreach ($user['department'] as $dept) {
-                        if (mb_substr($dept, -1, 1, 'UTF-8') === '課' || mb_substr($dept, -1, 1, 'UTF-8') === '室') { $unit = $dept; break; }
+                        if (mb_substr($dept, -1, 1, 'UTF-8') === '課' || mb_substr($dept, -1, 1, 'UTF-8') === '室') {
+                            $unit = $dept;
+                            break;
+                        }
                     }
                 }
+                
+                // 初始化新使用者資料結構
                 $new_data = [
-                    'id' => $id, 'name' => $name, 'sex' => 1, 'addr' => '', 'tel' => '', 'ext' => '411',
-                    'cell' => '', 'unit' => $unit, 'title' => '其他', 'work' => '', 'exam' => '',
-                    'education' => '', 'onboard_date' => date('Y/m/d'), 'ip' => '', 'authority' => 0, 'birthday' => ''
+                    'id' => $id, 
+                    'name' => $name, 
+                    'sex' => 1, 
+                    'addr' => '', 
+                    'tel' => '', 
+                    'ext' => '411',
+                    'cell' => '', 
+                    'unit' => $unit, 
+                    'title' => '其他', 
+                    'work' => '', 
+                    'exam' => '',
+                    'education' => '', 
+                    'onboard_date' => date('Y/m/d'), 
+                    'ip' => '', 
+                    'authority' => 0, 
+                    'birthday' => ''
                 ];
-                if ($this->addUser($new_data)) $stats['added']++; else $stats['failed']++;
+                
+                if ($this->addUser($new_data)) {
+                    Logger::getInstance()->info(__METHOD__.": [Sync] 成功新增 AD 使用者 {$id} ({$name})");
+                    $stats['added']++; 
+                } else {
+                    $stats['failed']++;
+                }
             } else {
+                // 情境 B: 本地已有資料 -> 執行「狀態檢查」與「資料更新」
                 $local_user = $local_rows[0];
-                if (!empty($local_user['offboard_date'])) $this->onboardUser($id);
+                
+                // B-1. 若本地標記為離職但 AD 仍有效，執行「復職/重新報到」
+                if (!empty($local_user['offboard_date'])) {
+                    $this->onboardUser($id);
+                    Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$id} ({$name}) 偵測到復職，已更新狀態為在職");
+                }
+                
+                // B-2. 檢查姓名是否有變動
                 if ($local_user['name'] !== $name) {
-                    if ($this->updateName($id, $name)) $stats['updated']++; else $stats['failed']++;
-                } else { $stats['skipped']++; }
+                    if ($this->updateName($id, $name)) {
+                        Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$id} 姓名變更: {$local_user['name']} -> {$name}");
+                        $stats['updated']++; 
+                    } else {
+                        $stats['failed']++;
+                    }
+                } else {
+                    // 姓名與狀態均無變動，跳過
+                    $stats['skipped']++;
+                }
             }
         }
 
+        // [步驟 3] 執行「離職處理」: 檢查本地在職人員是否已從 AD 消失
         $onboard_users = $this->getOnboardUsers();
         if ($onboard_users) {
             foreach ($onboard_users as $local_user) {
-                if (!isset($ad_user_ids[$local_user['id']])) {
-                    if ($this->offboardUser($local_user['id'])) $stats['offboarded']++; else $stats['failed']++;
+                $uid = $local_user['id'];
+                
+                // 如果本地 ID 不在剛才統計的 AD 活耀 ID 清單中
+                if (!isset($ad_user_ids[$uid])) {
+                    // 執行離職設定
+                    if ($this->offboardUser($uid)) {
+                        Logger::getInstance()->info(__METHOD__.": [Sync] 使用者 {$uid} ({$local_user['name']}) 已不在 AD 有效名單，設為離職");
+                        $stats['offboarded']++; 
+                    } else {
+                        $stats['failed']++;
+                    }
                 }
             }
         }
+        
         return $stats;
     }
 }
