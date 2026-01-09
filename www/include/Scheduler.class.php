@@ -302,7 +302,7 @@ class Scheduler
 
             // 準備發送報告至 inf 頻道
             $title = "智慧控管系統 AD 使用者同步報告";
-            $report = "##### 智慧控管系統 👤 AD 使用者同步完成報告：\n***\n";
+            $report = "###### 智慧控管系統 👤 AD 使用者同步完成報告：\n***\n";
             $report .= "- **新增人員**: " . $stats['added'] . "\n";
             $report .= "- **姓名更新**: " . $stats['updated'] . "\n";
             $report .= "- **設為離職**: " . $stats['offboarded'] . "\n";
@@ -338,25 +338,25 @@ class Scheduler
         Logger::getInstance()->info(__METHOD__ . ": 同步作業結束。自動更新: $auto_count 人，偵測到衝突: $conflict_count 人。");
 
         // 若有衝突，逐一發送系統通知給該使用者
-        if ($conflict_count > 0) {
-            foreach ($result['conflicts'] as $conflict) {
-                $uid = $conflict['id'];
-                $uname = $conflict['name'];
-                $currentIp = $conflict['currentIp'];
+        // if ($conflict_count > 0) {
+        //     foreach ($result['conflicts'] as $conflict) {
+        //         $uid = $conflict['id'];
+        //         $uname = $conflict['name'];
+        //         $currentIp = $conflict['currentIp'];
 
-                $message = "##### 🛰️ 智慧監控系統偵測到您有多個 IP 紀錄存在：\n***\n";
-                $message .= "您好 **{$uname}**，系統偵測到您的電腦目前使用的 IP 與主機紀錄 [{$currentIp}] 不符，且發現多個可能的候選 IP，無法自動完成同步。\n\n";
-                $message .= "***\n⚠ 請聯繫資訊人員或至「員工管理頁面」進行手動確認與更新。";
+        //         $message = "###### 🛰️ 智慧監控系統偵測到您有多個 IP 紀錄存在：\n***\n";
+        //         $message .= "您好 **{$uname}**，系統偵測到您的電腦目前使用的 IP 與主機紀錄 [{$currentIp}] 不符，且發現多個可能的候選 IP，無法自動完成同步。\n\n";
+        //         $message .= "***\n⚠ 請聯繫資訊人員至「員工管理」頁面進行手動確認與更新。";
 
-                $title = "您的 IP 同步衝突提醒";
-                // 移除 $uid 頻道的舊衝突訊息
-                $this->removeNotificationByTitle($title, $uid);
-                // 發送個人化通知給該使用者
-                $this->addNotification($message, $uid, $title);
+        //         $title = "您的 IP 同步衝突提醒";
+        //         // 移除 $uid 頻道的舊衝突訊息
+        //         $this->removeNotificationByTitle($title, $uid);
+        //         // 發送個人化通知給該使用者
+        //         $this->addNotification($message, $uid, $title);
                 
-                Logger::getInstance()->info(__METHOD__ . ": 已對使用者 {$uid} ({$uname}) 發送衝突提醒。");
-            }
-        }
+        //         Logger::getInstance()->info(__METHOD__ . ": 已對使用者 {$uid} ({$uname}) 發送衝突提醒。");
+        //     }
+        // }
     }
 
     private function importRKEYN()
