@@ -1,11 +1,12 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v9.1 (Business Hours Monitoring Update)
+    版本：v12.1 (Syntax Compatibility Fix)
     修正：
-    1. 新增時段監控：僅在週一至週五 08:00 - 17:00 執行自動健康檢查。
-    2. 維持 v9.0 的佇列堵塞監控、系統過濾、初始離線排除、解析器相容性。
-    3. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
+    1. 修正 ConvertTo-SimpleJson 中的 return if 語法錯誤（PS 2.0 不支援將 if 當作運算式）。
+    2. 強化代碼縮排與大括號相容性，避免解析器報錯。
+    3. 維持 v12.0 的所有功能：自癒通知、位元遮罩解析、殭屍清理。
+    4. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
 #>
 
 # -------------------------------------------------------------------------
@@ -22,57 +23,59 @@ $notifyEndpoint     = "/api/notification_json_api.php"
 $notifyUrl          = "http://$notifyIp$notifyEndpoint"
 $notifyChannels     = @("HA10013859")
 
-# --- 監控頻率與告警門檻 ---
-$checkIntervalSec   = 60                  # 巡檢間隔 60 秒
-$errorThreshold     = 5                   # 狀態異常連續 5 次才送通知
-
-# --- 監控時段設定 (週一至週五 08:00-17:00) ---
+# --- 監控時段與頻率 ---
+$checkIntervalSec   = 60                  
+$errorThreshold     = 5                   
 $monitorStartHour   = 8
 $monitorEndHour     = 17
 $monitorDays        = @("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+# --- 智慧自癒設定 ---
+$enableAutoCleanup  = $true               
+$zombieTimeMinutes  = 10                  
+$enableAutoHeal     = $true               
+$maxStuckPrinters   = 3                   
 
 # --- 佇列監控設定 ---
 $queueThreshold     = 20                  
 $queueStuckLimit    = 5                   
 
-# 虛擬印表機過濾關鍵字
-$excludeKeywords    = @(
-    "Microsoft Print to PDF",
-    "Microsoft XPS Document Writer",
-    "Fax",
-    "OneNote",
-    "Send To OneNote",
-    "Microsoft Shared Fax Driver"
-)
+# 虛擬印表機過濾
+$excludeKeywords    = @("PDF", "XPS", "Fax", "OneNote", "Microsoft Shared Fax")
 
 # 全局狀態變數
 $global:PrinterStateCache   = New-Object System.Collections.Hashtable
 $global:PrinterErrorCount   = New-Object System.Collections.Hashtable 
 $global:ExcludedPrinters    = New-Object System.Collections.Hashtable 
-$global:IsFirstRun          = $true
-
-# 佇列監控專用狀態表
 $global:QueueStuckCount     = New-Object System.Collections.Hashtable 
 $global:LastQueueCount      = New-Object System.Collections.Hashtable 
+$global:IsFirstRun          = $true
 
 # -------------------------------------------------------------------------
-# 2. 核心函數庫 (PS 2.0 底層相容)
+# 2. 核心函數庫 (修正後的相容語法)
 # -------------------------------------------------------------------------
 
 function ConvertTo-SimpleJson {
     param($InputObject)
+    
     if ($null -eq $InputObject) { return "null" }
+    
     if ($InputObject -is [string]) {
         $escaped = $InputObject.Replace('\', '\\').Replace('"', '\"')
         return """$escaped"""
     }
+    
     if ($InputObject -is [System.Boolean]) {
         if ($InputObject) { return "true" } else { return "false" }
     }
+    
     if ($InputObject -is [System.ValueType]) {
         return $InputObject.ToString().ToLower()
     }
+    
     $type = $InputObject.GetType()
+    
+    # 處理字典
     if ($null -ne $type.GetInterface("IDictionary")) {
         $pairs = New-Object System.Collections.Generic.List[string]
         foreach ($key in $InputObject.Keys) {
@@ -81,6 +84,8 @@ function ConvertTo-SimpleJson {
         }
         return "{" + [string]::Join(",", $pairs) + "}"
     }
+    
+    # 處理集合
     if ($null -ne $type.GetInterface("IEnumerable")) {
         $elements = New-Object System.Collections.Generic.List[string]
         foreach ($item in $InputObject) {
@@ -88,20 +93,25 @@ function ConvertTo-SimpleJson {
         }
         return "[" + [string]::Join(",", $elements) + "]"
     }
+    
+    # 處理物件
     $objPairs = New-Object System.Collections.Generic.List[string]
     try {
         foreach ($prop in $InputObject.PSObject.Properties) {
-            $n = $prop.Name
-            $v = $prop.Value
-            $objPairs.Add("""$n"":" + (ConvertTo-SimpleJson $v))
+            $pName = $prop.Name
+            $pVal  = $prop.Value
+            $objPairs.Add("""$pName"":" + (ConvertTo-SimpleJson $pVal))
         }
     } catch {
         return """$($InputObject.ToString())"""
     }
+    
+    # 修正點：不可在 return 後直接接 if，需分開寫
     if ($objPairs.Count -gt 0) {
         return "{" + [string]::Join(",", $objPairs) + "}"
+    } else {
+        return """$($InputObject.ToString())"""
     }
-    return """$($InputObject.ToString())"""
 }
 
 function Write-ApiLog {
@@ -112,9 +122,9 @@ function Write-ApiLog {
         $fullPath = Join-Path $logPath "PrintApi_$today.log"
         $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         $logEntry = "[$timestamp] $message"
+        
         if (Test-Path $fullPath) {
-            $file = Get-Item $fullPath
-            if ($file.Length -ge $maxLogSizeBytes) {
+            if ((Get-Item $fullPath).Length -ge $maxLogSizeBytes) {
                 if (Test-Path "$fullPath.$maxHistory") { Remove-Item "$fullPath.$maxHistory" -Force }
                 for ($i = $maxHistory - 1; $i -ge 1; $i--) {
                     $src = "$fullPath.$i"; $dest = "$fullPath.$($i + 1)"
@@ -130,26 +140,44 @@ function Write-ApiLog {
 function Send-SysAdminNotify {
     param([Parameter(Mandatory=$true)][string]$content, [string]$title = "印表機系統通知")
     try {
-        $localIp = "127.0.0.1"
-        $configs = Get-WmiObject Win32_NetworkAdapterConfiguration | Where-Object { $_.IPEnabled -and $_.IPAddress }
-        if ($null -ne $configs) {
-            $firstConfig = if ($configs -is [array]) { $configs[0] } else { $configs }
-            if ($null -ne $firstConfig -and $null -ne $firstConfig.IPAddress) { $localIp = $firstConfig.IPAddress[0] }
-        }
-        $fields = @{ "type"="add_notification"; "title"=$title; "content"=$content; "priority"="3"; "sender"="$($env:COMPUTERNAME) ($localIp)"; "from_ip"=$localIp }
+        $fields = @{ "type"="add_notification"; "title"=$title; "content"=$content; "priority"="3"; "sender"="$($env:COMPUTERNAME)"; "from_ip"="127.0.0.1" }
         $encodedParts = New-Object System.Collections.Generic.List[string]
         foreach ($key in $fields.Keys) { $encodedParts.Add("$key=$([System.Uri]::EscapeDataString($fields[$key]))") }
         if ($null -ne $notifyChannels) { foreach ($chan in $notifyChannels) { $encodedParts.Add("channels[]=$([System.Uri]::EscapeDataString($chan))") } }
         $postBody = [string]::Join("&", $encodedParts)
-
+        
         $wc = New-Object System.Net.WebClient
         $wc.Headers.Add("Content-Type", "application/x-www-form-urlencoded")
         $wc.Encoding = [System.Text.Encoding]::UTF8
-        Write-ApiLog ">>> [通知稽核] 標題: $title | 內容: $content"
+        Write-ApiLog ">>> [通知稽核] $title"
         [void]$wc.UploadString($notifyUrl, "POST", $postBody)
-        Write-ApiLog ">>> [通知成功] 訊息傳送完成。"
+    } catch { Write-ApiLog ">>> [通知失敗] $($_.Exception.Message)" }
+}
+
+function Invoke-SpoolerSelfHealing {
+    param([string]$reason)
+    Write-ApiLog "!!! [自癒啟動] 原因: $reason"
+    $startMsg = "系統偵測到嚴重異常 ($reason)，正在自動執行深度修復流程。"
+    Send-SysAdminNotify -title "?? 系統自動自癒啟動" -content $startMsg
+    
+    try {
+        Write-ApiLog ">>> [自癒] 停止 Spooler..."
+        Stop-Service "Spooler" -Force
+        Start-Sleep -Seconds 3
+        
+        $spoolPath = "C:\Windows\System32\spool\PRINTERS"
+        if (Test-Path $spoolPath) { 
+            Write-ApiLog ">>> [自癒] 清理暫存檔..."
+            Get-ChildItem -Path "$spoolPath\*" -Include *.* -Force | Remove-Item -Force 
+        }
+        
+        Write-ApiLog ">>> [自癒] 重啟服務..."
+        Start-Service "Spooler"
+        Write-ApiLog ">>> [自癒成功] Spooler 已恢復。"
+        Send-SysAdminNotify -title "? 系統自動自癒完成" -content "服務已重啟並清理暫存檔。"
     } catch {
-        Write-ApiLog ">>> [通知失敗] 錯誤: $($_.Exception.Message)"
+        Write-ApiLog "!!! [自癒失敗] $($_.Exception.Message)"
+        Send-SysAdminNotify -title "? 系統自動自癒失敗" -content "錯誤: $($_.Exception.Message)"
     }
 }
 
@@ -157,227 +185,149 @@ function Get-PrinterStatusData {
     $results = New-Object System.Collections.Generic.List[Object]
     $wmiPrinters = Get-WmiObject -Class Win32_Printer
     foreach ($p in $wmiPrinters) {
-        $pName = $p.Name
-        $shouldSkip = $false
-        foreach ($keyword in $excludeKeywords) {
-            if ($pName -like "*$keyword*") { $shouldSkip = $true; break }
-        }
+        $pName = $p.Name; $shouldSkip = $false
+        foreach ($kw in $excludeKeywords) { if ($pName -like "*$kw*") { $shouldSkip=$true; break } }
         if ($shouldSkip) { continue }
 
-        $status = "Unknown"
-        if ($p.WorkOffline) { $status = "Offline" }
-        else {
+        $errorList = New-Object System.Collections.Generic.List[string]
+        $isOffline = $false; $isHardwareError = $false
+        if ($p.WorkOffline) { $isOffline = $true }
+
+        $errState = $p.DetectedErrorState
+        if ($null -ne $errState) {
+            if (($errState -band 16) -eq 16) { $errorList.Add("缺紙"); $isHardwareError = $true }
+            if (($errState -band 128) -eq 128) { $errorList.Add("機蓋開啟"); $isHardwareError = $true }
+            if (($errState -band 256) -eq 256) { $errorList.Add("夾紙"); $isHardwareError = $true }
+            if (($errState -band 512) -eq 512) { $isOffline = $true }
+            if (($errState -band 1024) -eq 1024) { $errorList.Add("硬體故障"); $isHardwareError = $true }
+        }
+
+        $finalStatus = "Ready"
+        if ($isHardwareError) { 
+            $finalStatus = "Error (" + [string]::Join(", ", $errorList) + ")" 
+        } elseif ($isOffline) { 
+            $finalStatus = "Offline" 
+        } else {
             switch ($p.PrinterStatus) {
-                1 { $status = "Error" }
-                2 { $status = "Error" }
-                3 { $status = "Ready" }
-                4 { $status = "Printing" }
-                5 { $status = "Warmup" }
-                7 { $status = "Offline" }
-                default { $status = "Warning/Busy" }
+                1 { $finalStatus = "Error (未知)" }
+                2 { $finalStatus = "Error (其他)" }
+                4 { $finalStatus = "Printing" }
+                5 { $finalStatus = "Warmup" }
+                default { $finalStatus = "Ready" }
             }
         }
+
         $obj = New-Object PSObject
         $obj | Add-Member NoteProperty Name $pName
-        $obj | Add-Member NoteProperty Status $status
+        $obj | Add-Member NoteProperty Status $finalStatus
         $obj | Add-Member NoteProperty Jobs $p.JobCount
-        $obj | Add-Member NoteProperty Port $p.PortName
         $results.Add($obj)
     }
     return $results
 }
 
 function Test-PrinterHealth {
-    Write-ApiLog ">>> [監控] 開始健康檢查巡檢..."
+    Write-ApiLog ">>> [監控] 巡檢開始..."
     $printers = Get-PrinterStatusData
     $batchAlerts = New-Object System.Collections.Generic.List[string]
-    
+    $stuckPrinters = 0
+
+    if ($enableAutoCleanup) {
+        $zombies = Get-WmiObject -Class Win32_PrintJob | Where-Object { ($_.JobStatus -like "*Error*" -or $_.JobStatus -like "*Deleting*") }
+        if ($null -ne $zombies) {
+            foreach ($z in $zombies) { 
+                $batchAlerts.Add("?? [自癒] 已清理卡住作業: $($z.JobId)")
+                $z.Delete() 
+            }
+        }
+    }
+
     foreach ($p in $printers) {
         $name = $p.Name; $pStatus = $p.Status.ToString(); $pJobs = $p.Jobs
-        
-        # --- 1. 初始排除邏輯 ---
         if ($global:IsFirstRun) {
             if ($pStatus -eq "Offline") { $global:ExcludedPrinters[$name] = $true }
-            else { $global:PrinterStateCache[$name] = "OK" }
-            $global:LastQueueCount[$name] = $pJobs
-            $global:QueueStuckCount[$name] = 0
-            continue
+            $global:LastQueueCount[$name] = $pJobs; continue
         }
-
-        # --- 2. 處理初始排除重納監控 ---
         if ($global:ExcludedPrinters.ContainsKey($name)) {
-            if ($pStatus -eq "Ready" -or $pStatus -eq "Printing" -or $pStatus -eq "Warmup") {
-                $global:ExcludedPrinters.Remove($name)
-                $global:PrinterStateCache[$name] = "OK"
-                $global:PrinterErrorCount[$name] = 0
-                Write-ApiLog ">>> [監控] $name 已上線，重新開始監控。"
-            }
+            if ($pStatus -like "Ready*" -or $pStatus -eq "Printing") { $global:ExcludedPrinters.Remove($name) }
             continue
         }
 
-        # --- 3. 狀態異常監控 (Error/Warning) ---
-        $isErrorState = ($pStatus -eq "Error") -or ($pStatus -eq "Warning/Busy")
-        $errCount = 0
-        if ($global:PrinterErrorCount.ContainsKey($name)) { $errCount = $global:PrinterErrorCount[$name] }
-
-        if ($isErrorState) {
-            $errCount++
-            $global:PrinterErrorCount[$name] = $errCount
-            Write-ApiLog ">>> [監控] $name 異常計數: $errCount"
-            if ($errCount -eq $errorThreshold) {
-                $batchAlerts.Add("● [狀態告警] 印表機 [$name] 連續異常。目前狀態: $pStatus")
-                $global:PrinterStateCache[$name] = "ERROR"
-            }
+        if ($pStatus -like "Error*") {
+            $global:PrinterErrorCount[$name]++
+            if ($global:PrinterErrorCount[$name] -eq $errorThreshold) { $batchAlerts.Add("● [異常] 印表機 [$name] $pStatus") }
         } else {
-            if ($errCount -ge $errorThreshold) {
-                $msgSuffix = if ($pStatus -eq "Offline") { "已離線" } else { "已恢復正常" }
-                $batchAlerts.Add("○ [恢復] 印表機 [$name] $msgSuffix。")
-            }
+            if ($global:PrinterErrorCount[$name] -ge $errorThreshold) { $batchAlerts.Add("○ [恢復] 印表機 [$name] 已恢復正常。") }
             $global:PrinterErrorCount[$name] = 0
         }
 
-        # --- 4. 佇列堵塞監控 ---
-        $lastJobs = 0
-        if ($global:LastQueueCount.ContainsKey($name)) { $lastJobs = $global:LastQueueCount[$name] }
-        $stuckCount = 0
-        if ($global:QueueStuckCount.ContainsKey($name)) { $stuckCount = $global:QueueStuckCount[$name] }
-
-        if ($pJobs -ge $queueThreshold) {
-            if ($pJobs -ge $lastJobs) {
-                $stuckCount++
-                $global:QueueStuckCount[$name] = $stuckCount
-                Write-ApiLog ">>> [佇列監控] $name 佇列累積: $pJobs 案 (連續未減少: $stuckCount 次)"
-                if ($stuckCount -eq $queueStuckLimit) {
-                    $batchAlerts.Add("?? [佇列堵塞] 印表機 [$name] 佇列堆積且長時間未減少 ($pJobs 案)。")
-                }
-            } else { $global:QueueStuckCount[$name] = 0 }
+        if ($pJobs -ge $queueThreshold -and $pJobs -ge $global:LastQueueCount[$name]) {
+            $global:QueueStuckCount[$name]++
+            if ($global:QueueStuckCount[$name] -eq $queueStuckLimit) {
+                $batchAlerts.Add("?? [堵塞] 印表機 [$name] 佇列停滯 ($pJobs 案)。")
+                $stuckPrinters++
+            }
         } else { $global:QueueStuckCount[$name] = 0 }
         $global:LastQueueCount[$name] = $pJobs
     }
-    
-    if ($global:IsFirstRun) {
-        Write-ApiLog ">>> [監控] 初始基準建立完成。"
-        $global:IsFirstRun = $false
-        return
+
+    if ($enableAutoHeal -and $stuckPrinters -ge $maxStuckPrinters) { 
+        Invoke-SpoolerSelfHealing -reason "多台印表機同時堵塞"
+        return 
     }
 
-    if ($batchAlerts.Count -gt 0) { 
-        Send-SysAdminNotify -content ([string]::Join("`n", $batchAlerts)) -title "印表機維護摘要" 
-    }
+    if ($global:IsFirstRun) { $global:IsFirstRun = $false; return }
+    if ($batchAlerts.Count -gt 0) { Send-SysAdminNotify -content ([string]::Join("`n", $batchAlerts)) -title "印表機維護摘要" }
 }
 
 # -------------------------------------------------------------------------
-# 3. 主程序 (HttpListener 持久監聽)
+# 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://*:$port/")
-try {
-    $listener.Start()
-    Write-ApiLog "--- API 伺服器 v9.1 上線 (工作時段監控已啟用) ---"
-} catch {
-    Write-ApiLog "!!! [錯誤] 啟動失敗: $($_.Exception.Message)"; exit
-}
+try { $listener.Start(); Write-ApiLog "--- 伺服器 v12.1 上線 (相容性修正完畢) ---" } catch { exit }
 
-$nextCheckTime = Get-Date
-$nextHeartbeatTime = Get-Date
-$contextTask = $null
+$nextCheck = Get-Date; $nextHeart = Get-Date; $contextTask = $null
 
 while ($listener.IsListening) {
     try {
         $now = Get-Date
-        
-        # A. 存活心跳紀錄 (每 60 秒)
-        if ($now -ge $nextHeartbeatTime) {
-            Write-ApiLog "[存活檢查] 伺服器運作中。監聽埠口: $port"
-            $nextHeartbeatTime = $now.AddSeconds(60)
-        }
-        
-        # B. 定時健康檢查 (含時段判斷)
-        if ($now -ge $nextCheckTime) {
-            # 判斷是否在監控時段內 (週一至五, 08-17)
-            $dayOfWeek = $now.DayOfWeek.ToString()
-            $hour = $now.Hour
-            
-            $isMonitorDay = $false
-            foreach ($d in $monitorDays) { if ($d -eq $dayOfWeek) { $isMonitorDay = $true; break } }
-            
-            $isMonitorHour = ($hour -ge $monitorStartHour) -and ($hour -lt $monitorEndHour)
-            
-            if ($isMonitorDay -and $isMonitorHour) {
+        if ($now -ge $nextHeart) { Write-ApiLog "[存活] 監聽中..."; $nextHeart = $now.AddSeconds(60) }
+        if ($now -ge $nextCheck) {
+            $day = $now.DayOfWeek.ToString()
+            if (($now.Hour -ge $monitorStartHour) -and ($now.Hour -lt $monitorEndHour) -and ($monitorDays -contains $day)) {
                 Test-PrinterHealth
-            } else {
-                Write-ApiLog ">>> [監控時段] 目前非辦公時段 ($dayOfWeek $hour:00)，跳過自動巡檢。"
-            }
-            $nextCheckTime = (Get-Date).AddSeconds($checkIntervalSec)
+            } else { Write-ApiLog ">>> [非工作時段] 跳過巡檢。" }
+            $nextCheck = $now.AddSeconds($checkIntervalSec)
         }
 
-        # C. HTTP API 請求處理
         if ($null -eq $contextTask) { $contextTask = $listener.BeginGetContext($null, $null) }
         if (-not $contextTask.AsyncWaitHandle.WaitOne(1000)) { continue }
 
-        $context = $listener.EndGetContext($contextTask)
-        $contextTask = $null 
-        
-        $request  = $context.Request
-        $response = $context.Response
-        $clientIP = $request.RemoteEndPoint.ToString()
-        $urlPath  = $request.Url.AbsolutePath.ToLower()
-        Write-ApiLog ">>> [連線] 來自: $clientIP | 路徑: $urlPath"
+        $context = $listener.EndGetContext($contextTask); $contextTask = $null
+        $request = $context.Request; $response = $context.Response; $path = $request.Url.AbsolutePath.ToLower()
+        Write-ApiLog ">>> [請求] 來自: $($request.RemoteEndPoint) 路徑: $path"
 
-        $resultData = New-Object System.Collections.Hashtable
-        $resultData["success"] = $false
-        $resultData["message"] = ""
-        $resultData["data"]    = $null
-
-        $incomingKey = $request.Headers["X-API-KEY"]
-        if ($incomingKey -ne $apiKey) {
-            $response.StatusCode = 401
-            $resultData["message"] = "Unauthorized"
-        } else {
-            if ($urlPath -eq "/printers") { 
-                $resultData["data"] = Get-PrinterStatusData; $resultData["success"] = $true 
-            }
-            elseif ($urlPath -eq "/printer/status") {
+        $res = @{ "success"=$false; "message"=""; "data"=$null }
+        if ($request.Headers["X-API-KEY"] -ne $apiKey) { $response.StatusCode = 401 }
+        else {
+            if ($path -eq "/printers") { $res.data = Get-PrinterStatusData; $res.success = $true }
+            elseif ($path -eq "/printer/clear") {
                 $pName = $request.QueryString["name"]
-                $target = Get-PrinterStatusData | Where-Object { $_.Name -eq $pName }
-                if ($null -ne $target) { $resultData["data"] = $target; $resultData["success"] = $true }
-                else { $resultData["message"] = "Printer not found" }
+                $jobs = Get-WmiObject Win32_PrintJob | Where-Object { $_.Name -like "*$pName*" }
+                if ($jobs) { foreach($j in $jobs){$j.Delete()} }
+                $res.success = $true; Send-SysAdminNotify -content "[$pName] 手動清理完成。" -title "手動操作"
             }
-            elseif ($urlPath -eq "/printer/refresh") {
-                $pName = $request.QueryString["name"]
-                $pObj = Get-WmiObject -Class Win32_Printer | Where-Object { $_.Name -eq $pName }
-                if ($null -ne $pObj) {
-                    $pObj.Pause(); Start-Sleep -Milliseconds 500; $pObj.Resume()
-                    $resultData["success"] = $true
-                    Send-SysAdminNotify -content "API：印表機 [$pName] 手動重新整理。" -title "維護操作"
-                } else { $resultData["message"] = "Printer not found" }
+            elseif ($path -eq "/service/self-heal") {
+                Invoke-SpoolerSelfHealing -reason "管理員遠端發動深度修復"; $res.success = $true
             }
-            elseif ($urlPath -eq "/printer/clear") {
-                $pName = $request.QueryString["name"]
-                $jobs = Get-WmiObject -Class Win32_PrintJob | Where-Object { $_.Name -like "*$pName*" }
-                $jobCount = if ($null -eq $jobs) { 0 } elseif ($jobs -is [array]) { $jobs.Count } else { 1 }
-                if ($jobCount -gt 0) { foreach ($job in $jobs) { $job.Delete() } }
-                $resultData["success"] = $true
-                Send-SysAdminNotify -content "API：印表機 [$pName] 佇列已清除。" -title "隊列操作"
-            }
-            elseif ($urlPath -eq "/service/restart-spooler") {
-                try {
-                    Restart-Service "Spooler" -Force
-                    $resultData["success"] = $true
-                    Send-SysAdminNotify -content "API：Spooler 服務已成功重啟。" -title "服務操作"
-                } catch { Write-ApiLog "!!! [服務操作失敗] $($_.Exception.Message)" }
-            }
-            else { $response.StatusCode = 404; $resultData["message"] = "Not Found" }
+            else { $response.StatusCode = 404 }
         }
 
-        $jsonResponse = ConvertTo-SimpleJson $resultData
-        $buffer = [System.Text.Encoding]::UTF8.GetBytes($jsonResponse)
-        $response.ContentType = "application/json; charset=utf-8"
-        $response.OutputStream.Write($buffer, 0, $buffer.Length)
-        $response.Close()
-        Write-ApiLog "<<< [完成] $clientIP 的請求處理週期結束。"
-    } catch {
-        Write-ApiLog "!!! [重大錯誤] $($_.Exception.Message)"
-        if ($null -ne $contextTask) { $contextTask = $null } 
+        $buffer = [System.Text.Encoding]::UTF8.GetBytes((ConvertTo-SimpleJson $res))
+        $response.ContentType = "application/json"; $response.OutputStream.Write($buffer, 0, $buffer.Length); $response.Close()
+    } catch { 
+        Write-ApiLog "!!! [錯誤] $($_.Exception.Message)"
+        $contextTask = $null 
     }
 }
