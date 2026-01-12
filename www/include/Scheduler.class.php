@@ -311,8 +311,9 @@ class Scheduler
             $report .= "\n***\n同步時間: " . date('Y-m-d H:i:s');
 
             // 清除舊報告並發送新報告
-            $this->removeNotificationByTitle($title, 'inf');
-            $this->addNotification($report, 'inf', $title);
+            $concernedChannel = 'HA10013859';
+            $this->removeNotificationByTitle($title, $concernedChannel);
+            $this->addNotification($report, $concernedChannel, $title);
 
         } else {
             Logger::getInstance()->error(__METHOD__ . ": 同步 AD 使用者失敗。");
