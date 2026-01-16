@@ -397,7 +397,7 @@ class WatchDog {
             $url .= '?reviewer='.$to_id;
         }
         $displayName = $to_id === "ALL" ? "登記課" : "您";
-        $content = "##### 📢 ".$this->date."  ".$this->time." ".$displayName."目前有 ".count($case_records)." 件到期公告案件:<br/><br/>🔴 ".implode("<br/>🔴 ", $case_records)."<br/><br/>👉 請前往智慧控管系統 <b>[公告案件頁面](".$url.")</b> 查看詳細資料。";
+        $content = "📢 ".$this->date."  ".$this->time." ".$displayName."目前有 ".count($case_records)." 件到期公告案件:<br/><br/>🔴 ".implode("<br/>🔴 ", $case_records)."<br/><br/>👉 請前往智慧控管系統 <b>[公告案件頁面](".$url.")</b> 查看詳細資料。";
         if ($to_id === "ALL") {
             // remove outdated messages
             $notification->removeOutdatedMessageByTitle('reg', '登記課公告到期案件彙總');
@@ -714,7 +714,7 @@ class WatchDog {
                 if ($total > 0) {
                     $host_ip = getLocalhostIP();
                     $url = "http://".$host_ip.":8080/reg/foreigner-inheritance-restriction";
-                    $message = "##### 📢 ".$this->date."  ".$this->time." 外國人繼承限制通知\r\n***\r\n⚠ 系統今日找到 $total 件外國人繼承限制需進行處理(逾期或半年內即將到期)，請進系統查看案件資料。\r\n\r\n👉 $url\r\n\r\n⭐ 如欲解除列管請於地政系統將該案件之其他登記事項加入「移請財政部國有財產署公開標售」一般註記事項。";
+                    $message = "📢 ".$this->date."  ".$this->time." 外國人繼承限制通知\r\n***\r\n⚠ 系統今日找到 $total 件外國人繼承限制需進行處理(逾期或半年內即將到期)，請進系統查看案件資料。\r\n\r\n👉 $url\r\n\r\n⭐ 如欲解除列管請於地政系統將該案件之其他登記事項加入「移請財政部國有財產署公開標售」一般註記事項。";
                     $notification = new Notification();
                     $notification->removeOutdatedMessageByTitle('reg', '外國人繼承限制通知');
                     // send to reg chat channel
@@ -763,7 +763,7 @@ class WatchDog {
                 if ($downCount > 0) {
                     // mark detected down last time
                     file_put_contents($ticket, serialize($downOffices));
-                    $message = "##### ⚠ ".$this->date."  ".$this->time." 地政系統跨域服務離線\r\n***\r\n👉 目前有 $downCount 個地所伺服器偵測為離線。\r\n\r\n";
+                    $message = "⚠ ".$this->date."  ".$this->time." 地政系統跨域服務離線\r\n***\r\n👉 目前有 $downCount 個地所伺服器偵測為離線。\r\n\r\n";
                     foreach ($downOffices as $downOffice) {
                         $message .= "🔴 ".$downOffice['id']." ".$downOffice['name']." (檢測時間：".timestampToDate($downOffice['timestamp'], 'TW', 'H:i:s').")\r\n";
                     }
@@ -777,7 +777,7 @@ class WatchDog {
                     // $this->addNotification($message, "reg", '地政系統跨域服務監測');
                 } else {
                     if ($prevTicketFlag) {
-                        $message = "##### 🟢 ".$this->date."  ".$this->time." 地政系統跨域服務皆已回復。";
+                        $message = "🟢 ".$this->date."  ".$this->time." 地政系統跨域服務皆已回復。";
                         // $message .= "\r\n***\r\n詳情請參考 👉 $url";
                         // send to reg chat channel
                         // $this->addNotification($message, "reg", '地政系統跨域服務監測');
@@ -845,12 +845,12 @@ class WatchDog {
         if (count($records) > 0) {
             $host_ip = getLocalhostIP();
             $url = "http://".$host_ip.":8080/reg/case/";
-            $content = "##### ⚠ 私人設定警訊通知\r\n\r\n";
+            $content = "⚠ 私人設定警訊通知\r\n\r\n";
             foreach ($records as $record) {
                 $id = $record['RM01']."-".$record['RM02']."-".$record['RM03'];
                 $content .= "- [".$id."](".$url.$id.") ".$record['RM09_CHT']." ".$record['RM18']." ".$record['RM19']."\r\n";
             }
-            $content .= "\r\n\r\n##### 請注意上述案件以免詐騙案件發生 ❗";
+            $content .= "\r\n\r\n⚠ 請注意上述案件以免詐騙案件發生 ❗";
             // $notification = new Notification();
             // $notification->removeOutdatedMessageByTitle('reg', '登記土地建物統計資料通知');
             // send notification to 登記課
@@ -930,7 +930,7 @@ class WatchDog {
                     $caseIdList .= "- [".$case['RM01'].'-'.$case['RM02'].'-'.$case['RM03']." ".$case['初審人員']."](http://".$host_ip.":8080/reg/case/".$case['ID']."/)\r\n";
                 }
                 // 【修改】準備通知訊息內容，加入案件 ID 列表
-                $message = "##### 📢 補正到期案件通知\r\n***\r\n⚠ 系統今日找到 {$overdueCount} 件補正到期可駁回案件，請進系統查看案件資料。\r\n\r\n**案件清單：**\r\n{$caseIdList}\r\n👉 $url";
+                $message = "📢 補正到期案件通知\r\n***\r\n⚠ 系統今日找到 {$overdueCount} 件補正到期可駁回案件，請進系統查看案件資料。\r\n\r\n**案件清單：**\r\n{$caseIdList}\r\n👉 $url";
                 $notification = new Notification();
                 $notification->removeOutdatedMessageByTitle('reg', '補正到期案件通知');
                 // send to reg chat channel
@@ -999,7 +999,7 @@ class WatchDog {
     public function testSendNotification() {
         $host_ip = getLocalhostIP();
         $url = "http://".$host_ip.":8080/reg/foreigner-inheritance-restriction";
-        $message = "##### 📢 ".$this->date."  ".$this->time." 外國人繼承限制通知\r\n***\r\n⚠ 系統今日找到 5 件外國人繼承限制需進行處理(逾期或半年內即將到期)，請進系統查看案件資料。\r\n\r\n👉 $url";
+        $message = "📢 ".$this->date."  ".$this->time." 外國人繼承限制通知\r\n***\r\n⚠ 系統今日找到 5 件外國人繼承限制需進行處理(逾期或半年內即將到期)，請進系統查看案件資料。\r\n\r\n👉 $url";
         $notification = new Notification();
         $notification->removeOutdatedMessageByTitle('reg', '外國人繼承限制通知');
         // send to reg chat channel
