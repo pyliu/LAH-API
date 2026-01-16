@@ -484,6 +484,10 @@ class Scheduler
 
     private function findXCaseFailures()
     {
+        if (!$this->isOn($this->schedule["office_check"])) {
+            Logger::getInstance()->info(__METHOD__ . ": 跨所案件檢測僅於上班時間執行，跳過本次排程。");
+            return;
+        }
         $xcase = new XCase();
         $info = $xcase->findFailureXCases();
         $found = [];
