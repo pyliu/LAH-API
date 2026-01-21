@@ -618,8 +618,14 @@ class SQLiteUser {
         $third_octet = (int)$parts[2];
         if ($parts[0] === '192' && $parts[1] === '168') {
             $site_ranges = [
-                'HA' => [10, 16], 'HB' => [20, 26], 'HC' => [30, 36], 'HD' => [40, 46],
-                'HE' => [50, 56], 'HF' => [60, 66], 'HG' => [70, 76], 'HH' => [80, 86]
+                'HA' => [10, 19],
+                'HB' => [20, 29],
+                'HC' => [30, 39],
+                'HD' => [40, 49],
+                'HE' => [50, 59],
+                'HF' => [60, 69],
+                'HG' => [70, 79],
+                'HH' => [80, 89]
             ];
             if (isset($site_ranges[$site])) {
                 $range = $site_ranges[$site];
