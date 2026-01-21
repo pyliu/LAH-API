@@ -1,23 +1,19 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v13.5 (Duplex Error Handling Update)
+    版本：v13.6 (CORS Support Update)
     修正：
-    1. 優化雙面列印設定的錯誤處理：當驅動程式不支援 Set-PrintConfiguration 時，記錄警告並繼續列印，而非報錯。
-    2. 維持 v13.4 的 PDF 上傳、指定閱讀器、自癒通知與所有監控功能。
-    3. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
+    1. 新增 CORS 支援：回應標頭加入 Access-Control-Allow-Origin: *。
+    2. 處理 OPTIONS 預檢請求：在驗證 API Key 前優先回應 OPTIONS，確保瀏覽器跨域請求成功。
+    3. 維持 v13.5 的雙面列印容錯、PDF 上傳、自癒通知與所有監控功能。
+    4. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
 .NOTES
     ?? 雙面列印注意事項：
     此功能依賴 'Set-PrintConfiguration' 指令，通常僅內建於 Windows Server 2012 及以上版本。
     若在 Windows Server 2008 R2/SP2 上執行，雙面列印參數將被忽略（日誌會顯示警告），但列印動作仍會執行（依預設值）。
 
     ?? PDF 上傳列印測試指令 (CMD)
-    :: 雙面列印 (長邊翻頁)
     curl -v -X POST -H "X-API-KEY: %API_KEY%" --data-binary "@test.pdf" "http://%SERVER_IP%:8888/printer/print-pdf?name=PrinterName&duplex=long"
-
-    ?? 關於雙面列印錯誤：
-    若日誌出現 "[設定警告] 無法變更雙面設定"，代表該印表機驅動程式不支援透過 API 動態修改設定。
-    此時系統會自動忽略該參數，並依印表機目前的預設值進行列印。
 #>
 
 # -------------------------------------------------------------------------
@@ -31,10 +27,7 @@ $maxLogSizeBytes    = 10MB
 $maxHistory         = 5                          
 $logRetentionDays   = 7                   
 
-# --- [新增] PDF 閱讀器路徑 (請依實際安裝位置修改) ---
-# 常見路徑參考：
-# Foxit: "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe"
-# Adobe: "C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe"
+# --- PDF 閱讀器路徑 ---
 $pdfReaderPath      = "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe"
 
 $notifyIp           = "220.1.34.75"
@@ -278,7 +271,7 @@ function Test-PrinterHealth {
 # -------------------------------------------------------------------------
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://*:$port/")
-try { $listener.Start(); Write-ApiLog "--- 伺服器 v13.5 上線 (雙面列印設定警告優化) ---" } catch { exit }
+try { $listener.Start(); Write-ApiLog "--- 伺服器 v13.6 上線 (CORS 支援已啟用) ---" } catch { exit }
 
 $nextCheck = Get-Date; $nextHeart = Get-Date; $contextTask = $null
 
@@ -300,6 +293,19 @@ while ($listener.IsListening) {
         $context = $listener.EndGetContext($contextTask); $contextTask = $null
         $request = $context.Request; $response = $context.Response; $path = $request.Url.AbsolutePath.ToLower()
         Write-ApiLog ">>> [請求] 來自: $($request.RemoteEndPoint) 路徑: $path"
+
+        # --- [CORS] 跨域標頭設定 ---
+        $response.AddHeader("Access-Control-Allow-Origin", "*")
+        $response.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        $response.AddHeader("Access-Control-Allow-Headers", "Content-Type, X-API-KEY, client_ip")
+
+        # --- [CORS] OPTIONS 預檢請求處理 ---
+        if ($request.HttpMethod -eq "OPTIONS") {
+            $response.StatusCode = 200
+            $response.Close()
+            Write-ApiLog ">>> [CORS] 預檢請求通過"
+            continue
+        }
 
         $res = @{ "success"=$false; "message"=""; "data"=$null }
         if ($request.Headers["X-API-KEY"] -ne $apiKey) { $response.StatusCode = 401 }
