@@ -1,0 +1,11 @@
+﻿C:\scripts\Printer_API_Agent.ps1
+
+建立基本工作排程，執行者 SYSTEM，不論是否登入都要執行，系統啟動時
+
+執行程式
+C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe
+
+參數
+-ExecutionPolicy Bypass -File "C:\scripts\Printer_API_Agent.ps1"
+
+要注意修改 Foxit PDF Reader 路徑

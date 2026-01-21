@@ -1,12 +1,23 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v12.5 (Sender IP Identification Update)
+    版本：v13.5 (Duplex Error Handling Update)
     修正：
-    1. 強化通知識別：在發送通知的 sender 欄位加入主機 IP，方便管理端辨識來源。
-    2. 維持 v12.4 的 API 路由修復與特殊字元印表機名稱支援。
-    3. 整合 v12.1+ 的自癒通知、位元遮罩解析、殭屍清理與手動排除清單。
-    4. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
+    1. 優化雙面列印設定的錯誤處理：當驅動程式不支援 Set-PrintConfiguration 時，記錄警告並繼續列印，而非報錯。
+    2. 維持 v13.4 的 PDF 上傳、指定閱讀器、自癒通知與所有監控功能。
+    3. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
+.NOTES
+    ?? 雙面列印注意事項：
+    此功能依賴 'Set-PrintConfiguration' 指令，通常僅內建於 Windows Server 2012 及以上版本。
+    若在 Windows Server 2008 R2/SP2 上執行，雙面列印參數將被忽略（日誌會顯示警告），但列印動作仍會執行（依預設值）。
+
+    ?? PDF 上傳列印測試指令 (CMD)
+    :: 雙面列印 (長邊翻頁)
+    curl -v -X POST -H "X-API-KEY: %API_KEY%" --data-binary "@test.pdf" "http://%SERVER_IP%:8888/printer/print-pdf?name=PrinterName&duplex=long"
+
+    ?? 關於雙面列印錯誤：
+    若日誌出現 "[設定警告] 無法變更雙面設定"，代表該印表機驅動程式不支援透過 API 動態修改設定。
+    此時系統會自動忽略該參數，並依印表機目前的預設值進行列印。
 #>
 
 # -------------------------------------------------------------------------
@@ -15,8 +26,16 @@
 $port               = 8888
 $apiKey             = "YourSecretApiKey123"      
 $logPath            = "C:\Temp"
+$uploadPath         = "C:\Temp\Uploads"           
 $maxLogSizeBytes    = 10MB                       
 $maxHistory         = 5                          
+$logRetentionDays   = 7                   
+
+# --- [新增] PDF 閱讀器路徑 (請依實際安裝位置修改) ---
+# 常見路徑參考：
+# Foxit: "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe"
+# Adobe: "C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe"
+$pdfReaderPath      = "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe"
 
 $notifyIp           = "220.1.34.75"
 $notifyEndpoint     = "/api/notification_json_api.php"
@@ -30,7 +49,7 @@ $monitorStartHour   = 8
 $monitorEndHour     = 17
 $monitorDays        = @("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 
-# --- 智慧自癒設定 (Self-Healing) ---
+# --- 智慧自癒設定 ---
 $enableAutoCleanup  = $true               
 $zombieTimeMinutes  = 10                  
 $enableAutoHeal     = $true               
@@ -43,7 +62,7 @@ $queueStuckLimit    = 5
 # --- 印表機排除設定 ---
 $excludeKeywords    = @("PDF", "XPS", "Fax", "OneNote", "Microsoft Shared Fax")
 $manualExcludePrinters = @(
-    "DocuPrint C5005 d",
+    "範例印表機名稱_A",
     "範例印表機名稱_B"
 )
 
@@ -62,46 +81,31 @@ $global:IsFirstRun          = $true
 function ConvertTo-SimpleJson {
     param($InputObject)
     if ($null -eq $InputObject) { return "null" }
-    if ($InputObject -is [string]) {
-        $escaped = $InputObject.Replace('\', '\\').Replace('"', '\"')
-        return """$escaped"""
-    }
-    if ($InputObject -is [System.Boolean]) {
-        if ($InputObject) { return "true" } else { return "false" }
-    }
-    if ($InputObject -is [System.ValueType]) {
-        return $InputObject.ToString().ToLower()
-    }
+    if ($InputObject -is [string]) { return """$($InputObject.Replace('\', '\\').Replace('"', '\"'))""" }
+    if ($InputObject -is [System.Boolean]) { if ($InputObject) { return "true" } else { return "false" } }
+    if ($InputObject -is [System.ValueType]) { return $InputObject.ToString().ToLower() }
+    
     $type = $InputObject.GetType()
     if ($null -ne $type.GetInterface("IDictionary")) {
         $pairs = New-Object System.Collections.Generic.List[string]
-        foreach ($key in $InputObject.Keys) {
-            $val = $InputObject[$key]
-            $pairs.Add("""$key"":" + (ConvertTo-SimpleJson $val))
-        }
+        foreach ($key in $InputObject.Keys) { $pairs.Add("""$key"":" + (ConvertTo-SimpleJson $InputObject[$key])) }
         return "{" + [string]::Join(",", $pairs) + "}"
     }
     if ($null -ne $type.GetInterface("IEnumerable")) {
         $elements = New-Object System.Collections.Generic.List[string]
-        foreach ($item in $InputObject) {
-            $elements.Add((ConvertTo-SimpleJson $item))
-        }
+        foreach ($item in $InputObject) { $elements.Add((ConvertTo-SimpleJson $item)) }
         return "[" + [string]::Join(",", $elements) + "]"
     }
+    
     $objPairs = New-Object System.Collections.Generic.List[string]
     try {
-        foreach ($prop in $InputObject.PSObject.Properties) {
-            $pName = $prop.Name
-            $pVal  = $prop.Value
-            $objPairs.Add("""$pName"":" + (ConvertTo-SimpleJson $pVal))
-        }
-    } catch {
-        return """$($InputObject.ToString())"""
-    }
-    if ($objPairs.Count -gt 0) {
-        return "{" + [string]::Join(",", $objPairs) + "}"
-    } else {
-        return """$($InputObject.ToString())"""
+        foreach ($prop in $InputObject.PSObject.Properties) { $objPairs.Add("""$($prop.Name)"":" + (ConvertTo-SimpleJson $prop.Value)) }
+    } catch { return """$($InputObject.ToString())""" }
+    
+    if ($objPairs.Count -gt 0) { 
+        return "{" + [string]::Join(",", $objPairs) + "}" 
+    } else { 
+        return """$($InputObject.ToString())""" 
     }
 }
 
@@ -109,10 +113,12 @@ function Write-ApiLog {
     param([string]$message)
     try {
         if (-not (Test-Path $logPath)) { [void](New-Item -ItemType Directory -Path $logPath -Force) }
+        if (-not (Test-Path $uploadPath)) { [void](New-Item -ItemType Directory -Path $uploadPath -Force) } 
+        
         $today = Get-Date -Format "yyyy-MM-dd"
         $fullPath = Join-Path $logPath "PrintApi_$today.log"
-        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-        $logEntry = "[$timestamp] $message"
+        $logEntry = "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] $message"
+        
         if (Test-Path $fullPath) {
             if ((Get-Item $fullPath).Length -ge $maxLogSizeBytes) {
                 if (Test-Path "$fullPath.$maxHistory") { Remove-Item "$fullPath.$maxHistory" -Force }
@@ -127,67 +133,61 @@ function Write-ApiLog {
     } catch {}
 }
 
+function Cleanup-OldLogs {
+    try {
+        if (Test-Path $logPath) {
+            $limitDate = (Get-Date).AddDays(-$logRetentionDays)
+            $oldFiles = Get-ChildItem -Path $logPath -Filter "PrintApi_*.log*" | Where-Object { $_.LastWriteTime -lt $limitDate }
+            if ($null -ne $oldFiles) {
+                foreach ($file in $oldFiles) {
+                    Write-ApiLog ">>> [日誌清理] 刪除過期日誌: $($file.Name)"
+                    Remove-Item $file.FullName -Force
+                }
+            }
+            if (Test-Path $uploadPath) {
+                $oldPdfs = Get-ChildItem -Path $uploadPath -Filter "*.pdf" | Where-Object { $_.CreationTime -lt (Get-Date).AddDays(-1) }
+                if ($null -ne $oldPdfs) { foreach ($pdf in $oldPdfs) { Remove-Item $pdf.FullName -Force } }
+            }
+        }
+    } catch {}
+}
+
 function Send-SysAdminNotify {
     param([Parameter(Mandatory=$true)][string]$content, [string]$title = "印表機系統通知")
     try {
-        # --- 自動獲取本機 IP 以供識別 ---
         $localIp = "127.0.0.1"
         try {
             $ipConfig = Get-WmiObject Win32_NetworkAdapterConfiguration | Where-Object { $_.IPEnabled -and $_.IPAddress }
             if ($null -ne $ipConfig) {
-                if ($ipConfig -is [array]) { $localIp = $ipConfig[0].IPAddress[0] }
-                else { $localIp = $ipConfig.IPAddress[0] }
+                if ($ipConfig -is [array]) { $localIp = $ipConfig[0].IPAddress[0] } else { $localIp = $ipConfig.IPAddress[0] }
             }
         } catch { }
-
-        # --- 設定發送者為：主機名 (IP) ---
-        $fields = @{ 
-            "type"     = "add_notification"; 
-            "title"    = $title; 
-            "content"  = $content; 
-            "priority" = "3"; 
-            "sender"   = "$($env:COMPUTERNAME) ($localIp)"; 
-            "from_ip"  = $localIp 
-        }
-
+        $fields = @{ "type"="add_notification"; "title"=$title; "content"=$content; "priority"="3"; "sender"="$($env:COMPUTERNAME) ($localIp)"; "from_ip"=$localIp }
         $encodedParts = New-Object System.Collections.Generic.List[string]
         foreach ($key in $fields.Keys) { $encodedParts.Add("$key=$([System.Uri]::EscapeDataString($fields[$key]))") }
         if ($null -ne $notifyChannels) { foreach ($chan in $notifyChannels) { $encodedParts.Add("channels[]=$([System.Uri]::EscapeDataString($chan))") } }
         $postBody = [string]::Join("&", $encodedParts)
-        
         $wc = New-Object System.Net.WebClient
         $wc.Headers.Add("Content-Type", "application/x-www-form-urlencoded")
         $wc.Encoding = [System.Text.Encoding]::UTF8
-        Write-ApiLog ">>> [準備發送通知] 標題: $title | 來源: $($fields.sender)"
+        Write-ApiLog ">>> [準備發送通知] 標題: $title"
         [void]$wc.UploadString($notifyUrl, "POST", $postBody)
-        Write-ApiLog ">>> [通知發送成功] 標題: $title"
-    } catch { 
-        Write-ApiLog "!!! [通知發送失敗] 標題: $title | 錯誤: $($_.Exception.Message)" 
-    }
+        Write-ApiLog ">>> [通知發送成功]"
+    } catch { Write-ApiLog "!!! [通知發送失敗] $($_.Exception.Message)" }
 }
 
 function Invoke-SpoolerSelfHealing {
     param([string]$reason)
-    Write-ApiLog "!!! [自癒啟動] 原因: $reason"
+    Write-ApiLog "!!! [自癒啟動] $reason"
     $startMsg = "系統偵測到嚴重異常 ($reason)，正在自動執行深度修復流程。"
     Send-SysAdminNotify -title "?? 系統自動自癒啟動" -content $startMsg
     try {
-        Write-ApiLog ">>> [自癒] 停止 Spooler..."
-        Stop-Service "Spooler" -Force
-        Start-Sleep -Seconds 3
+        Stop-Service "Spooler" -Force; Start-Sleep -Seconds 3
         $spoolPath = "C:\Windows\System32\spool\PRINTERS"
-        if (Test-Path $spoolPath) { 
-            Write-ApiLog ">>> [自癒] 清理暫存檔..."
-            Get-ChildItem -Path "$spoolPath\*" -Include *.* -Force | Remove-Item -Force 
-        }
-        Write-ApiLog ">>> [自癒] 重啟服務..."
+        if (Test-Path $spoolPath) { Get-ChildItem -Path "$spoolPath\*" -Include *.* -Force | Remove-Item -Force }
         Start-Service "Spooler"
-        Write-ApiLog ">>> [自癒成功] Spooler 已恢復。"
         Send-SysAdminNotify -title "? 系統自動自癒完成" -content "服務已重啟並清理暫存檔。"
-    } catch {
-        Write-ApiLog "!!! [自癒失敗] $($_.Exception.Message)"
-        Send-SysAdminNotify -title "? 系統自動自癒失敗" -content "錯誤: $($_.Exception.Message)"
-    }
+    } catch { Send-SysAdminNotify -title "? 系統自動自癒失敗" -content "錯誤: $($_.Exception.Message)" }
 }
 
 function Get-PrinterStatusData {
@@ -211,18 +211,13 @@ function Get-PrinterStatusData {
             if (($errState -band 512) -eq 512) { $isOffline = $true }
             if (($errState -band 1024) -eq 1024) { $errorList.Add("硬體故障"); $isHardwareError = $true }
         }
-
         $finalStatus = "Ready"
-        if ($isHardwareError) { 
-            $finalStatus = "Error (" + [string]::Join(", ", $errorList) + ")" 
-        } elseif ($isOffline) { 
-            $finalStatus = "Offline" 
-        } else {
+        if ($isHardwareError) { $finalStatus = "Error (" + [string]::Join(", ", $errorList) + ")" }
+        elseif ($isOffline) { $finalStatus = "Offline" }
+        else {
             switch ($p.PrinterStatus) {
-                1 { $finalStatus = "Error (未知)" }
-                2 { $finalStatus = "Error (其他)" }
-                4 { $finalStatus = "Printing" }
-                5 { $finalStatus = "Warmup" }
+                1 { $finalStatus = "Error (未知)" } 2 { $finalStatus = "Error (其他)" }
+                4 { $finalStatus = "Printing" } 5 { $finalStatus = "Warmup" }
                 default { $finalStatus = "Ready" }
             }
         }
@@ -236,6 +231,7 @@ function Get-PrinterStatusData {
 }
 
 function Test-PrinterHealth {
+    Cleanup-OldLogs
     Write-ApiLog ">>> [監控] 巡檢開始..."
     $printers = Get-PrinterStatusData
     $batchAlerts = New-Object System.Collections.Generic.List[string]
@@ -243,10 +239,7 @@ function Test-PrinterHealth {
     if ($enableAutoCleanup) {
         $zombies = Get-WmiObject -Class Win32_PrintJob | Where-Object { ($_.JobStatus -like "*Error*" -or $_.JobStatus -like "*Deleting*") }
         if ($null -ne $zombies) {
-            foreach ($z in $zombies) { 
-                $batchAlerts.Add("?? [自癒] 已清理卡住作業: $($z.JobId) (印表機: $($z.Name))")
-                $z.Delete() 
-            }
+            foreach ($z in $zombies) { $batchAlerts.Add("?? [自癒] 清理卡住作業: $($z.JobId)"); $z.Delete() }
         }
     }
     foreach ($p in $printers) {
@@ -275,12 +268,9 @@ function Test-PrinterHealth {
         } else { $global:QueueStuckCount[$name] = 0 }
         $global:LastQueueCount[$name] = $pJobs
     }
-    if ($enableAutoHeal -and $stuckPrinters -ge $maxStuckPrinters) { 
-        Invoke-SpoolerSelfHealing -reason "多台印表機同時堵塞"
-        return 
-    }
+    if ($enableAutoHeal -and $stuckPrinters -ge $maxStuckPrinters) { Invoke-SpoolerSelfHealing -reason "多台印表機同時堵塞"; return }
     if ($global:IsFirstRun) { $global:IsFirstRun = $false; return }
-    if ($batchAlerts.Count -gt 0) { Send-SysAdminNotify -content ([string]::Join("`n", $batchAlerts)) -title "印表機維護摘要" }
+    # 停用維護摘要通知: if ($batchAlerts.Count -gt 0) { Send-SysAdminNotify -content ([string]::Join("`n", $batchAlerts)) -title "印表機維護摘要" }
 }
 
 # -------------------------------------------------------------------------
@@ -288,7 +278,7 @@ function Test-PrinterHealth {
 # -------------------------------------------------------------------------
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://*:$port/")
-try { $listener.Start(); Write-ApiLog "--- 伺服器 v12.5 上線 (IP 識別功能已啟用) ---" } catch { exit }
+try { $listener.Start(); Write-ApiLog "--- 伺服器 v13.5 上線 (雙面列印設定警告優化) ---" } catch { exit }
 
 $nextCheck = Get-Date; $nextHeart = Get-Date; $contextTask = $null
 
@@ -317,6 +307,80 @@ while ($listener.IsListening) {
             if ($path -eq "/printers") { 
                 $res.data = Get-PrinterStatusData; $res.success = $true 
             }
+            elseif ($path -eq "/printer/print-pdf") {
+                if ($request.HttpMethod -eq "POST") {
+                    $pName = $request.QueryString["name"]
+                    $pObj = Get-WmiObject Win32_Printer | Where-Object { $_.Name -eq $pName }
+                    
+                    if ($null -ne $pObj) {
+                        # --- 雙面列印 (容錯版) ---
+                        $duplexReq = $request.QueryString["duplex"]
+                        $restoreDuplex = $false
+                        $oldDuplexMode = $null
+                        
+                        if ($null -ne $duplexReq) {
+                            if (Get-Command Set-PrintConfiguration -ErrorAction SilentlyContinue) {
+                                try {
+                                    $currentCfg = Get-PrintConfiguration -PrinterName $pName -ErrorAction Stop
+                                    $oldDuplexMode = $currentCfg.DuplexingMode
+                                    $targetMode = "OneSided"
+                                    if ($duplexReq -eq "1" -or $duplexReq -eq "long") { $targetMode = "TwoSidedLongEdge" }
+                                    elseif ($duplexReq -eq "2" -or $duplexReq -eq "short") { $targetMode = "TwoSidedShortEdge" }
+                                    
+                                    if ($oldDuplexMode -ne $targetMode) {
+                                        Write-ApiLog ">>> [設定] 嘗試切換雙面模式: $targetMode"
+                                        Set-PrintConfiguration -PrinterName $pName -DuplexingMode $targetMode -ErrorAction Stop
+                                        $restoreDuplex = $true
+                                    }
+                                } catch { 
+                                    Write-ApiLog ">>> [設定警告] 無法變更雙面設定 (驅動可能不支援): $($_.Exception.Message)。將依預設值列印。" 
+                                }
+                            } else { Write-ApiLog ">>> [忽略] 系統不支援 Set-PrintConfiguration" }
+                        }
+
+                        $fileName = "Upload_$(Get-Date -Format 'yyyyMMdd_HHmmss').pdf"
+                        $savePath = Join-Path $uploadPath $fileName
+                        Write-ApiLog ">>> [上傳] 接收 PDF: $fileName"
+                        
+                        $fs = New-Object System.IO.FileStream($savePath, [System.IO.FileMode]::Create)
+                        $buffer = New-Object byte[] 8192
+                        do {
+                            $read = $request.InputStream.Read($buffer, 0, $buffer.Length)
+                            if ($read -gt 0) { $fs.Write($buffer, 0, $read) }
+                        } while ($read -gt 0)
+                        $fs.Close()
+                        
+                        Write-ApiLog ">>> [列印] 調用 PDF 閱讀器..."
+                        try {
+                            if ((Test-Path $pdfReaderPath) -eq $true) {
+                                Write-ApiLog ">>> [列印] 使用指定程式: $pdfReaderPath"
+                                $argList = "/t ""$savePath"" ""$pName"""
+                                $proc = Start-Process -FilePath $pdfReaderPath -ArgumentList $argList -PassThru -WindowStyle Hidden
+                                $proc.WaitForExit(10000)
+                            } else {
+                                Write-ApiLog ">>> [列印] 嘗試 Shell PrintTo..."
+                                $proc = Start-Process -FilePath $savePath -Verb PrintTo -ArgumentList """$pName""" -PassThru -WindowStyle Hidden
+                                $proc.WaitForExit(10000)
+                            }
+                            
+                            $res.success = $true
+                            $res.message = "PDF 已傳送至列印佇列"
+                            Send-SysAdminNotify -content "API：PDF 上傳並發送至 [$pName] (雙面:$($null -ne $duplexReq))。" -title "遠端列印"
+                        } catch {
+                            $res.message = "列印啟動失敗: $($_.Exception.Message)"
+                            Write-ApiLog "!!! [列印錯誤] $($_.Exception.Message)"
+                        }
+
+                        if ($restoreDuplex) {
+                            try {
+                                Write-ApiLog ">>> [還原] 恢復雙面設定: $oldDuplexMode"
+                                Set-PrintConfiguration -PrinterName $pName -DuplexingMode $oldDuplexMode -ErrorAction SilentlyContinue
+                            } catch {}
+                        }
+
+                    } else { $res.message = "找不到指定的印表機: $pName" }
+                } else { $res.message = "僅支援 POST 方法" }
+            }
             elseif ($path -eq "/printer/status") {
                 $pName = $request.QueryString["name"]
                 $all = Get-PrinterStatusData
@@ -338,7 +402,7 @@ while ($listener.IsListening) {
                 $pName = $request.QueryString["name"]
                 $jobs = Get-WmiObject Win32_PrintJob | Where-Object { $_.Name -like "*$pName*" }
                 if ($jobs) { foreach($j in $jobs){$j.Delete()} }
-                $res.success = $true; Send-SysAdminNotify -content "[$pName] 佇列已清除。" -title "手動操作"
+                $res.success = $true; Send-SysAdminNotify -content "[$pName] 手動清理完成。" -title "手動操作"
             }
             elseif ($path -eq "/service/restart-spooler") {
                 try {
