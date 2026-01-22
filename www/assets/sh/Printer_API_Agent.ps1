@@ -1,19 +1,15 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v13.6 (CORS Support Update)
+    版本：v14.5 (Power Status Detection via ICMP)
     修正：
-    1. 新增 CORS 支援：回應標頭加入 Access-Control-Allow-Origin: *。
-    2. 處理 OPTIONS 預檢請求：在驗證 API Key 前優先回應 OPTIONS，確保瀏覽器跨域請求成功。
-    3. 維持 v13.5 的雙面列印容錯、PDF 上傳、自癒通知與所有監控功能。
+    1. 新增網路存活偵測：利用 ICMP Ping 區分「真正斷電」與「軟體離線」。
+    2. 優化狀態描述：依據 Ping 結果回傳 "可能未開機" 或 "網路通暢" 等精確資訊。
+    3. 維持 v14.4 的所有功能：PDF 上傳、雙面列印、自癒通知、日誌清理與 PS 2.0 相容。
     4. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
 .NOTES
-    ?? 雙面列印注意事項：
-    此功能依賴 'Set-PrintConfiguration' 指令，通常僅內建於 Windows Server 2012 及以上版本。
-    若在 Windows Server 2008 R2/SP2 上執行，雙面列印參數將被忽略（日誌會顯示警告），但列印動作仍會執行（依預設值）。
-
-    ?? PDF 上傳列印測試指令 (CMD)
-    curl -v -X POST -H "X-API-KEY: %API_KEY%" --data-binary "@test.pdf" "http://%SERVER_IP%:8888/printer/print-pdf?name=PrinterName&duplex=long"
+    ?? 測試指令
+    curl -H "X-API-KEY: %API_KEY%" http://%SERVER_IP%:8888/printers
 #>
 
 # -------------------------------------------------------------------------
@@ -27,8 +23,14 @@ $maxLogSizeBytes    = 10MB
 $maxHistory         = 5                          
 $logRetentionDays   = 7                   
 
-# --- PDF 閱讀器路徑 ---
-$pdfReaderPath      = "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe"
+# --- PDF 閱讀器路徑清單 ---
+$pdfReaderPaths     = @(
+    "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
+    "C:\Program Files\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
+    "C:\FoxitReader\Foxit Reader.exe",
+    "C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe",
+    "C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe"
+)
 
 $notifyIp           = "220.1.34.75"
 $notifyEndpoint     = "/api/notification_json_api.php"
@@ -66,6 +68,7 @@ $global:ExcludedPrinters    = New-Object System.Collections.Hashtable
 $global:QueueStuckCount     = New-Object System.Collections.Hashtable 
 $global:LastQueueCount      = New-Object System.Collections.Hashtable 
 $global:IsFirstRun          = $true
+$global:ValidPdfReader      = $null
 
 # -------------------------------------------------------------------------
 # 2. 核心函數庫
@@ -185,7 +188,22 @@ function Invoke-SpoolerSelfHealing {
 
 function Get-PrinterStatusData {
     $results = New-Object System.Collections.Generic.List[Object]
+    
+    $portMap = @{}
+    try {
+        $tcpPorts = Get-WmiObject -Class Win32_TCPIPPrinterPort -ErrorAction SilentlyContinue
+        if ($null -ne $tcpPorts) {
+            foreach ($tp in $tcpPorts) {
+                if ($null -ne $tp.Name) { $portMap[$tp.Name] = $tp.HostAddress }
+            }
+        }
+    } catch {}
+
     $wmiPrinters = Get-WmiObject -Class Win32_Printer
+    
+    # 初始化 Ping 物件 (複用以節省資源)
+    $pingSender = New-Object System.Net.NetworkInformation.Ping
+
     foreach ($p in $wmiPrinters) {
         $pName = $p.Name; $shouldSkip = $false
         foreach ($kw in $excludeKeywords) { if ($pName -like "*$kw*") { $shouldSkip=$true; break } }
@@ -204,20 +222,55 @@ function Get-PrinterStatusData {
             if (($errState -band 512) -eq 512) { $isOffline = $true }
             if (($errState -band 1024) -eq 1024) { $errorList.Add("硬體故障"); $isHardwareError = $true }
         }
+        
         $finalStatus = "Ready"
-        if ($isHardwareError) { $finalStatus = "Error (" + [string]::Join(", ", $errorList) + ")" }
-        elseif ($isOffline) { $finalStatus = "Offline" }
-        else {
+        if ($isHardwareError) { 
+            $finalStatus = "Error (" + [string]::Join(", ", $errorList) + ")" 
+        } elseif ($isOffline) { 
+            $finalStatus = "Offline" 
+        } else {
             switch ($p.PrinterStatus) {
-                1 { $finalStatus = "Error (未知)" } 2 { $finalStatus = "Error (其他)" }
-                4 { $finalStatus = "Printing" } 5 { $finalStatus = "Warmup" }
+                1 { $finalStatus = "Error (未知 - 可能原因: 驅動限制/SNMP受阻/特殊硬體狀態)" }
+                2 { $finalStatus = "Error (其他 - 請檢查設備面板)" }
+                4 { $finalStatus = "Printing" }
+                5 { $finalStatus = "Warmup" }
                 default { $finalStatus = "Ready" }
             }
         }
+        
+        # --- IP 解析與存活偵測 ---
+        $pPort = $p.PortName
+        $pIP = ""
+        if ($portMap.ContainsKey($pPort)) { $pIP = $portMap[$pPort] } else { $pIP = $pPort }
+        
+        # [新增] 針對 IPv4 進行快速 Ping 檢測 (Timeout 200ms)
+        if ($pIP -match "^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$") {
+            try {
+                $reply = $pingSender.Send($pIP, 200)
+                if ($reply.Status -ne "Success") {
+                    # Ping 失敗
+                    if ($finalStatus -eq "Offline") {
+                        $finalStatus = "Offline (無回應 - 可能未開機)"
+                    } elseif ($finalStatus -like "Ready*") {
+                        $finalStatus = "Warning (無回應 - 可能斷線或未開機)"
+                    }
+                } else {
+                    # Ping 成功
+                    if ($finalStatus -eq "Offline") {
+                        $finalStatus = "Offline (軟體離線 - 網路通暢)"
+                    }
+                }
+            } catch { 
+                # Ping 發生錯誤 (如 DNS 解析失敗)
+                if ($finalStatus -eq "Offline") { $finalStatus = "Offline (網路錯誤)" }
+            }
+        }
+
         $obj = New-Object PSObject
         $obj | Add-Member NoteProperty Name $pName
         $obj | Add-Member NoteProperty Status $finalStatus
         $obj | Add-Member NoteProperty Jobs $p.JobCount
+        $obj | Add-Member NoteProperty IP $pIP
         $results.Add($obj)
     }
     return $results
@@ -238,7 +291,7 @@ function Test-PrinterHealth {
     foreach ($p in $printers) {
         $name = $p.Name; $pStatus = $p.Status.ToString(); $pJobs = $p.Jobs
         if ($global:IsFirstRun) {
-            if ($pStatus -eq "Offline") { $global:ExcludedPrinters[$name] = $true }
+            if ($pStatus -like "Offline*") { $global:ExcludedPrinters[$name] = $true }
             $global:LastQueueCount[$name] = $pJobs; continue
         }
         if ($global:ExcludedPrinters.ContainsKey($name)) {
@@ -269,9 +322,21 @@ function Test-PrinterHealth {
 # -------------------------------------------------------------------------
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
+Write-ApiLog "--- 系統初始化: 正在搜尋 PDF 閱讀器 ---"
+foreach ($path in $pdfReaderPaths) {
+    if (Test-Path $path) {
+        $global:ValidPdfReader = $path
+        Write-ApiLog "[系統初始化] 已鎖定 PDF 閱讀器: $path"
+        break
+    }
+}
+if ($null -eq $global:ValidPdfReader) {
+    Write-ApiLog "[系統初始化] 警告: 未偵測到指定清單中的閱讀器，後續列印將降級使用系統預設關聯。"
+}
+
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://*:$port/")
-try { $listener.Start(); Write-ApiLog "--- 伺服器 v13.6 上線 (CORS 支援已啟用) ---" } catch { exit }
+try { $listener.Start(); Write-ApiLog "--- 伺服器 v14.5 上線 (Ping 存活偵測功能已啟用) ---" } catch { exit }
 
 $nextCheck = Get-Date; $nextHeart = Get-Date; $contextTask = $null
 
@@ -294,17 +359,14 @@ while ($listener.IsListening) {
         $request = $context.Request; $response = $context.Response; $path = $request.Url.AbsolutePath.ToLower()
         Write-ApiLog ">>> [請求] 來自: $($request.RemoteEndPoint) 路徑: $path"
 
-        # --- [CORS] 跨域標頭設定 ---
+        # --- [CORS] ---
         $response.AddHeader("Access-Control-Allow-Origin", "*")
         $response.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        $response.AddHeader("Access-Control-Allow-Headers", "Content-Type, X-API-KEY, client_ip")
+        $response.AddHeader("Access-Control-Allow-Headers", "*") 
 
-        # --- [CORS] OPTIONS 預檢請求處理 ---
         if ($request.HttpMethod -eq "OPTIONS") {
-            $response.StatusCode = 200
-            $response.Close()
-            Write-ApiLog ">>> [CORS] 預檢請求通過"
-            continue
+            $response.StatusCode = 200; $response.Close()
+            Write-ApiLog ">>> [CORS] 預檢請求通過"; continue
         }
 
         $res = @{ "success"=$false; "message"=""; "data"=$null }
@@ -313,16 +375,24 @@ while ($listener.IsListening) {
             if ($path -eq "/printers") { 
                 $res.data = Get-PrinterStatusData; $res.success = $true 
             }
+            elseif ($path -eq "/server/logs") {
+                $todayLog = Join-Path $logPath "PrintApi_$(Get-Date -Format 'yyyy-MM-dd').log"
+                if (Test-Path $todayLog) {
+                    $linesReq = $request.QueryString["lines"]
+                    $count = 100
+                    if ($null -ne $linesReq -and $linesReq -match "^\d+$") { $count = [int]$linesReq }
+                    $logContent = Get-Content $todayLog | Select-Object -Last $count
+                    $res.data = $logContent; $res.success = $true; $res.message = "已讀取最後 $count 行"
+                } else { $res.message = "今日尚無日誌檔案" }
+            }
             elseif ($path -eq "/printer/print-pdf") {
                 if ($request.HttpMethod -eq "POST") {
                     $pName = $request.QueryString["name"]
                     $pObj = Get-WmiObject Win32_Printer | Where-Object { $_.Name -eq $pName }
                     
                     if ($null -ne $pObj) {
-                        # --- 雙面列印 (容錯版) ---
                         $duplexReq = $request.QueryString["duplex"]
-                        $restoreDuplex = $false
-                        $oldDuplexMode = $null
+                        $restoreDuplex = $false; $oldDuplexMode = $null
                         
                         if ($null -ne $duplexReq) {
                             if (Get-Command Set-PrintConfiguration -ErrorAction SilentlyContinue) {
@@ -334,14 +404,12 @@ while ($listener.IsListening) {
                                     elseif ($duplexReq -eq "2" -or $duplexReq -eq "short") { $targetMode = "TwoSidedShortEdge" }
                                     
                                     if ($oldDuplexMode -ne $targetMode) {
-                                        Write-ApiLog ">>> [設定] 嘗試切換雙面模式: $targetMode"
+                                        Write-ApiLog ">>> [設定] 切換雙面模式: $targetMode"
                                         Set-PrintConfiguration -PrinterName $pName -DuplexingMode $targetMode -ErrorAction Stop
                                         $restoreDuplex = $true
                                     }
-                                } catch { 
-                                    Write-ApiLog ">>> [設定警告] 無法變更雙面設定 (驅動可能不支援): $($_.Exception.Message)。將依預設值列印。" 
-                                }
-                            } else { Write-ApiLog ">>> [忽略] 系統不支援 Set-PrintConfiguration" }
+                                } catch { Write-ApiLog ">>> [設定警告] 無法變更雙面設定: $($_.Exception.Message)" }
+                            } else { Write-ApiLog ">>> [忽略] 不支援 Set-PrintConfiguration" }
                         }
 
                         $fileName = "Upload_$(Get-Date -Format 'yyyyMMdd_HHmmss').pdf"
@@ -353,37 +421,33 @@ while ($listener.IsListening) {
                         do {
                             $read = $request.InputStream.Read($buffer, 0, $buffer.Length)
                             if ($read -gt 0) { $fs.Write($buffer, 0, $read) }
-                        } while ($read -gt 0)
-                        $fs.Close()
+                        } while ($read -gt 0); $fs.Close()
                         
                         Write-ApiLog ">>> [列印] 調用 PDF 閱讀器..."
                         try {
-                            if ((Test-Path $pdfReaderPath) -eq $true) {
-                                Write-ApiLog ">>> [列印] 使用指定程式: $pdfReaderPath"
+                            if ($null -ne $global:ValidPdfReader) {
+                                Write-ApiLog ">>> [列印] 使用快取路徑: $($global:ValidPdfReader)"
                                 $argList = "/t ""$savePath"" ""$pName"""
-                                $proc = Start-Process -FilePath $pdfReaderPath -ArgumentList $argList -PassThru -WindowStyle Hidden
+                                $proc = Start-Process -FilePath $global:ValidPdfReader -ArgumentList $argList -PassThru -WindowStyle Hidden
                                 $proc.WaitForExit(10000)
                             } else {
-                                Write-ApiLog ">>> [列印] 嘗試 Shell PrintTo..."
+                                Write-ApiLog ">>> [列印] 嘗試 Shell PrintTo (未偵測到指定閱讀器)..."
                                 $proc = Start-Process -FilePath $savePath -Verb PrintTo -ArgumentList """$pName""" -PassThru -WindowStyle Hidden
                                 $proc.WaitForExit(10000)
                             }
-                            
-                            $res.success = $true
-                            $res.message = "PDF 已傳送至列印佇列"
+                            $res.success = $true; $res.message = "PDF 已傳送至列印佇列"
                             Send-SysAdminNotify -content "API：PDF 上傳並發送至 [$pName] (雙面:$($null -ne $duplexReq))。" -title "遠端列印"
                         } catch {
-                            $res.message = "列印啟動失敗: $($_.Exception.Message)"
+                            $res.message = "列印失敗: $($_.Exception.Message)"
                             Write-ApiLog "!!! [列印錯誤] $($_.Exception.Message)"
                         }
 
                         if ($restoreDuplex) {
                             try {
-                                Write-ApiLog ">>> [還原] 恢復雙面設定: $oldDuplexMode"
+                                Write-ApiLog ">>> [還原] 恢復雙面設定"
                                 Set-PrintConfiguration -PrinterName $pName -DuplexingMode $oldDuplexMode -ErrorAction SilentlyContinue
                             } catch {}
                         }
-
                     } else { $res.message = "找不到指定的印表機: $pName" }
                 } else { $res.message = "僅支援 POST 方法" }
             }
