@@ -1,5 +1,6 @@
 <#
 .SYNOPSIS
+<<<<<<< HEAD
     ¸ê²`¨t²Î¾ã¦X¤uµ{®v¹ê§@ª©¥» - Print Server HTTP API & Proactive Monitor
     ª©¥»¡Gv14.5 (Power Status Detection via ICMP)
     ­×¥¿¡G
@@ -10,10 +11,26 @@
 .NOTES
     ?? ´ú¸Õ«ü¥O
     curl -H "X-API-KEY: %API_KEY%" http://%SERVER_IP%:8888/printers
+=======
+    è³‡æ·±ç³»çµ±æ•´åˆå·¥ç¨‹å¸«å¯¦ä½œç‰ˆæœ¬ - Print Server HTTP API & Proactive Monitor
+    ç‰ˆæœ¬ï¼šv13.6 (CORS Support Update)
+    ä¿®æ­£ï¼š
+    1. æ–°å¢ CORS æ”¯æ´ï¼šå›æ‡‰æ¨™é ­åŠ å…¥ Access-Control-Allow-Origin: *ã€‚
+    2. è™•ç† OPTIONS é æª¢è«‹æ±‚ï¼šåœ¨é©—è­‰ API Key å‰å„ªå…ˆå›æ‡‰ OPTIONSï¼Œç¢ºä¿ç€è¦½å™¨è·¨åŸŸè«‹æ±‚æˆåŠŸã€‚
+    3. ç¶­æŒ v13.5 çš„é›™é¢åˆ—å°å®¹éŒ¯ã€PDF ä¸Šå‚³ã€è‡ªç™’é€šçŸ¥èˆ‡æ‰€æœ‰ç›£æ§åŠŸèƒ½ã€‚
+    4. å®Œå…¨ç›¸å®¹ PowerShell 2.0 (Windows Server 2008 SP2) è‡³ 2019ã€‚
+.NOTES
+    ?? é›™é¢åˆ—å°æ³¨æ„äº‹é …ï¼š
+    æ­¤åŠŸèƒ½ä¾è³´ 'Set-PrintConfiguration' æŒ‡ä»¤ï¼Œé€šå¸¸åƒ…å…§å»ºæ–¼ Windows Server 2012 åŠä»¥ä¸Šç‰ˆæœ¬ã€‚
+    è‹¥åœ¨ Windows Server 2008 R2/SP2 ä¸ŠåŸ·è¡Œï¼Œé›™é¢åˆ—å°åƒæ•¸å°‡è¢«å¿½ç•¥ï¼ˆæ—¥èªŒæœƒé¡¯ç¤ºè­¦å‘Šï¼‰ï¼Œä½†åˆ—å°å‹•ä½œä»æœƒåŸ·è¡Œï¼ˆä¾é è¨­å€¼ï¼‰ã€‚
+
+    ?? PDF ä¸Šå‚³åˆ—å°æ¸¬è©¦æŒ‡ä»¤ (CMD)
+    curl -v -X POST -H "X-API-KEY: %API_KEY%" --data-binary "@test.pdf" "http://%SERVER_IP%:8888/printer/print-pdf?name=PrinterName&duplex=long"
+>>>>>>> 8bdf81439113f6b595bf50628a6547f6a61cdf74
 #>
 
 # -------------------------------------------------------------------------
-# 1. °òÂ¦³]©w°Ï
+# 1. åŸºç¤è¨­å®šå€
 # -------------------------------------------------------------------------
 $port               = 8888
 $apiKey             = "YourSecretApiKey123"      
@@ -23,6 +40,7 @@ $maxLogSizeBytes    = 10MB
 $maxHistory         = 5                          
 $logRetentionDays   = 7                   
 
+<<<<<<< HEAD
 # --- PDF ¾\Åª¾¹¸ô®|²M³æ ---
 $pdfReaderPaths     = @(
     "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
@@ -31,37 +49,41 @@ $pdfReaderPaths     = @(
     "C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe",
     "C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe"
 )
+=======
+# --- PDF é–±è®€å™¨è·¯å¾‘ ---
+$pdfReaderPath      = "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe"
+>>>>>>> 8bdf81439113f6b595bf50628a6547f6a61cdf74
 
 $notifyIp           = "220.1.34.75"
 $notifyEndpoint     = "/api/notification_json_api.php"
 $notifyUrl          = "http://$notifyIp$notifyEndpoint"
 $notifyChannels     = @("HA10013859")
 
-# --- ºÊ±±®É¬q»PÀW²v ---
+# --- ç›£æ§æ™‚æ®µèˆ‡é »ç‡ ---
 $checkIntervalSec   = 60                  
 $errorThreshold     = 5                   
 $monitorStartHour   = 8
 $monitorEndHour     = 17
 $monitorDays        = @("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 
-# --- ´¼¼z¦ÛÂ¡³]©w ---
+# --- æ™ºæ…§è‡ªç™’è¨­å®š ---
 $enableAutoCleanup  = $true               
 $zombieTimeMinutes  = 10                  
 $enableAutoHeal     = $true               
 $maxStuckPrinters   = 3                   
 
-# --- ¦î¦CºÊ±±³]©w ---
+# --- ä½‡åˆ—ç›£æ§è¨­å®š ---
 $queueThreshold     = 20                  
 $queueStuckLimit    = 5                   
 
-# --- ¦Lªí¾÷±Æ°£³]©w ---
+# --- å°è¡¨æ©Ÿæ’é™¤è¨­å®š ---
 $excludeKeywords    = @("PDF", "XPS", "Fax", "OneNote", "Microsoft Shared Fax")
 $manualExcludePrinters = @(
-    "½d¨Ò¦Lªí¾÷¦WºÙ_A",
-    "½d¨Ò¦Lªí¾÷¦WºÙ_B"
+    "ç¯„ä¾‹å°è¡¨æ©Ÿåç¨±_A",
+    "ç¯„ä¾‹å°è¡¨æ©Ÿåç¨±_B"
 )
 
-# ¥ş§½ª¬ºAÅÜ¼Æ
+# å…¨å±€ç‹€æ…‹è®Šæ•¸
 $global:PrinterStateCache   = New-Object System.Collections.Hashtable
 $global:PrinterErrorCount   = New-Object System.Collections.Hashtable 
 $global:ExcludedPrinters    = New-Object System.Collections.Hashtable 
@@ -71,7 +93,7 @@ $global:IsFirstRun          = $true
 $global:ValidPdfReader      = $null
 
 # -------------------------------------------------------------------------
-# 2. ®Ö¤ß¨ç¼Æ®w
+# 2. æ ¸å¿ƒå‡½æ•¸åº«
 # -------------------------------------------------------------------------
 
 function ConvertTo-SimpleJson {
@@ -136,7 +158,7 @@ function Cleanup-OldLogs {
             $oldFiles = Get-ChildItem -Path $logPath -Filter "PrintApi_*.log*" | Where-Object { $_.LastWriteTime -lt $limitDate }
             if ($null -ne $oldFiles) {
                 foreach ($file in $oldFiles) {
-                    Write-ApiLog ">>> [¤é»x²M²z] §R°£¹L´Á¤é»x: $($file.Name)"
+                    Write-ApiLog ">>> [æ—¥èªŒæ¸…ç†] åˆªé™¤éæœŸæ—¥èªŒ: $($file.Name)"
                     Remove-Item $file.FullName -Force
                 }
             }
@@ -149,7 +171,7 @@ function Cleanup-OldLogs {
 }
 
 function Send-SysAdminNotify {
-    param([Parameter(Mandatory=$true)][string]$content, [string]$title = "¦Lªí¾÷¨t²Î³qª¾")
+    param([Parameter(Mandatory=$true)][string]$content, [string]$title = "å°è¡¨æ©Ÿç³»çµ±é€šçŸ¥")
     try {
         $localIp = "127.0.0.1"
         try {
@@ -166,24 +188,24 @@ function Send-SysAdminNotify {
         $wc = New-Object System.Net.WebClient
         $wc.Headers.Add("Content-Type", "application/x-www-form-urlencoded")
         $wc.Encoding = [System.Text.Encoding]::UTF8
-        Write-ApiLog ">>> [·Ç³Æµo°e³qª¾] ¼ĞÃD: $title"
+        Write-ApiLog ">>> [æº–å‚™ç™¼é€é€šçŸ¥] æ¨™é¡Œ: $title"
         [void]$wc.UploadString($notifyUrl, "POST", $postBody)
-        Write-ApiLog ">>> [³qª¾µo°e¦¨¥\]"
-    } catch { Write-ApiLog "!!! [³qª¾µo°e¥¢±Ñ] $($_.Exception.Message)" }
+        Write-ApiLog ">>> [é€šçŸ¥ç™¼é€æˆåŠŸ]"
+    } catch { Write-ApiLog "!!! [é€šçŸ¥ç™¼é€å¤±æ•—] $($_.Exception.Message)" }
 }
 
 function Invoke-SpoolerSelfHealing {
     param([string]$reason)
-    Write-ApiLog "!!! [¦ÛÂ¡±Ò°Ê] $reason"
-    $startMsg = "¨t²Î°»´ú¨ìÄY­«²§±` ($reason)¡A¥¿¦b¦Û°Ê°õ¦æ²`«×­×´_¬yµ{¡C"
-    Send-SysAdminNotify -title "?? ¨t²Î¦Û°Ê¦ÛÂ¡±Ò°Ê" -content $startMsg
+    Write-ApiLog "!!! [è‡ªç™’å•Ÿå‹•] $reason"
+    $startMsg = "ç³»çµ±åµæ¸¬åˆ°åš´é‡ç•°å¸¸ ($reason)ï¼Œæ­£åœ¨è‡ªå‹•åŸ·è¡Œæ·±åº¦ä¿®å¾©æµç¨‹ã€‚"
+    Send-SysAdminNotify -title "?? ç³»çµ±è‡ªå‹•è‡ªç™’å•Ÿå‹•" -content $startMsg
     try {
         Stop-Service "Spooler" -Force; Start-Sleep -Seconds 3
         $spoolPath = "C:\Windows\System32\spool\PRINTERS"
         if (Test-Path $spoolPath) { Get-ChildItem -Path "$spoolPath\*" -Include *.* -Force | Remove-Item -Force }
         Start-Service "Spooler"
-        Send-SysAdminNotify -title "? ¨t²Î¦Û°Ê¦ÛÂ¡§¹¦¨" -content "ªA°È¤w­«±Ò¨Ã²M²z¼È¦sÀÉ¡C"
-    } catch { Send-SysAdminNotify -title "? ¨t²Î¦Û°Ê¦ÛÂ¡¥¢±Ñ" -content "¿ù»~: $($_.Exception.Message)" }
+        Send-SysAdminNotify -title "? ç³»çµ±è‡ªå‹•è‡ªç™’å®Œæˆ" -content "æœå‹™å·²é‡å•Ÿä¸¦æ¸…ç†æš«å­˜æª”ã€‚"
+    } catch { Send-SysAdminNotify -title "? ç³»çµ±è‡ªå‹•è‡ªç™’å¤±æ•—" -content "éŒ¯èª¤: $($_.Exception.Message)" }
 }
 
 function Get-PrinterStatusData {
@@ -216,11 +238,11 @@ function Get-PrinterStatusData {
         if ($p.WorkOffline) { $isOffline = $true }
         $errState = $p.DetectedErrorState
         if ($null -ne $errState) {
-            if (($errState -band 16) -eq 16) { $errorList.Add("¯Ê¯È"); $isHardwareError = $true }
-            if (($errState -band 128) -eq 128) { $errorList.Add("¾÷»\¶}±Ò"); $isHardwareError = $true }
-            if (($errState -band 256) -eq 256) { $errorList.Add("§¨¯È"); $isHardwareError = $true }
+            if (($errState -band 16) -eq 16) { $errorList.Add("ç¼ºç´™"); $isHardwareError = $true }
+            if (($errState -band 128) -eq 128) { $errorList.Add("æ©Ÿè“‹é–‹å•Ÿ"); $isHardwareError = $true }
+            if (($errState -band 256) -eq 256) { $errorList.Add("å¤¾ç´™"); $isHardwareError = $true }
             if (($errState -band 512) -eq 512) { $isOffline = $true }
-            if (($errState -band 1024) -eq 1024) { $errorList.Add("µwÅé¬G»Ù"); $isHardwareError = $true }
+            if (($errState -band 1024) -eq 1024) { $errorList.Add("ç¡¬é«”æ•…éšœ"); $isHardwareError = $true }
         }
         
         $finalStatus = "Ready"
@@ -230,10 +252,15 @@ function Get-PrinterStatusData {
             $finalStatus = "Offline" 
         } else {
             switch ($p.PrinterStatus) {
+<<<<<<< HEAD
                 1 { $finalStatus = "Error (¥¼ª¾ - ¥i¯à­ì¦]: ÅX°Ê­­¨î/SNMP¨üªı/¯S®íµwÅéª¬ºA)" }
                 2 { $finalStatus = "Error (¨ä¥L - ½ĞÀË¬d³]³Æ­±ªO)" }
                 4 { $finalStatus = "Printing" }
                 5 { $finalStatus = "Warmup" }
+=======
+                1 { $finalStatus = "Error (æœªçŸ¥)" } 2 { $finalStatus = "Error (å…¶ä»–)" }
+                4 { $finalStatus = "Printing" } 5 { $finalStatus = "Warmup" }
+>>>>>>> 8bdf81439113f6b595bf50628a6547f6a61cdf74
                 default { $finalStatus = "Ready" }
             }
         }
@@ -278,14 +305,14 @@ function Get-PrinterStatusData {
 
 function Test-PrinterHealth {
     Cleanup-OldLogs
-    Write-ApiLog ">>> [ºÊ±±] ¨µÀË¶}©l..."
+    Write-ApiLog ">>> [ç›£æ§] å·¡æª¢é–‹å§‹..."
     $printers = Get-PrinterStatusData
     $batchAlerts = New-Object System.Collections.Generic.List[string]
     $stuckPrinters = 0
     if ($enableAutoCleanup) {
         $zombies = Get-WmiObject -Class Win32_PrintJob | Where-Object { ($_.JobStatus -like "*Error*" -or $_.JobStatus -like "*Deleting*") }
         if ($null -ne $zombies) {
-            foreach ($z in $zombies) { $batchAlerts.Add("?? [¦ÛÂ¡] ²M²z¥d¦í§@·~: $($z.JobId)"); $z.Delete() }
+            foreach ($z in $zombies) { $batchAlerts.Add("?? [è‡ªç™’] æ¸…ç†å¡ä½ä½œæ¥­: $($z.JobId)"); $z.Delete() }
         }
     }
     foreach ($p in $printers) {
@@ -300,27 +327,27 @@ function Test-PrinterHealth {
         }
         if ($pStatus -like "Error*") {
             $global:PrinterErrorCount[$name]++
-            if ($global:PrinterErrorCount[$name] -eq $errorThreshold) { $batchAlerts.Add("¡´ [²§±`] ¦Lªí¾÷ [$name] $pStatus") }
+            if ($global:PrinterErrorCount[$name] -eq $errorThreshold) { $batchAlerts.Add("â— [ç•°å¸¸] å°è¡¨æ©Ÿ [$name] $pStatus") }
         } else {
-            if ($global:PrinterErrorCount[$name] -ge $errorThreshold) { $batchAlerts.Add("¡³ [«ì´_] ¦Lªí¾÷ [$name] ¤w«ì´_¥¿±`¡C") }
+            if ($global:PrinterErrorCount[$name] -ge $errorThreshold) { $batchAlerts.Add("â—‹ [æ¢å¾©] å°è¡¨æ©Ÿ [$name] å·²æ¢å¾©æ­£å¸¸ã€‚") }
             $global:PrinterErrorCount[$name] = 0
         }
         if ($pJobs -ge $queueThreshold -and $pJobs -ge $global:LastQueueCount[$name]) {
             $global:QueueStuckCount[$name]++
             if ($global:QueueStuckCount[$name] -eq $queueStuckLimit) {
-                $batchAlerts.Add("?? [°ô¶ë] ¦Lªí¾÷ [$name] ¦î¦C°±º¢ ($pJobs ®×)¡C")
+                $batchAlerts.Add("?? [å µå¡] å°è¡¨æ©Ÿ [$name] ä½‡åˆ—åœæ»¯ ($pJobs æ¡ˆ)ã€‚")
                 $stuckPrinters++
             }
         } else { $global:QueueStuckCount[$name] = 0 }
         $global:LastQueueCount[$name] = $pJobs
     }
-    if ($enableAutoHeal -and $stuckPrinters -ge $maxStuckPrinters) { Invoke-SpoolerSelfHealing -reason "¦h¥x¦Lªí¾÷¦P®É°ô¶ë"; return }
+    if ($enableAutoHeal -and $stuckPrinters -ge $maxStuckPrinters) { Invoke-SpoolerSelfHealing -reason "å¤šå°å°è¡¨æ©ŸåŒæ™‚å µå¡"; return }
     if ($global:IsFirstRun) { $global:IsFirstRun = $false; return }
-    # °±¥ÎºûÅ@ºK­n³qª¾: if ($batchAlerts.Count -gt 0) { Send-SysAdminNotify -content ([string]::Join("`n", $batchAlerts)) -title "¦Lªí¾÷ºûÅ@ºK­n" }
+    # åœç”¨ç¶­è­·æ‘˜è¦é€šçŸ¥: if ($batchAlerts.Count -gt 0) { Send-SysAdminNotify -content ([string]::Join("`n", $batchAlerts)) -title "å°è¡¨æ©Ÿç¶­è­·æ‘˜è¦" }
 }
 
 # -------------------------------------------------------------------------
-# 3. ¥Dµ{§Ç (HttpListener)
+# 3. ä¸»ç¨‹åº (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "--- ¨t²Îªì©l¤Æ: ¥¿¦b·j´M PDF ¾\Åª¾¹ ---"
 foreach ($path in $pdfReaderPaths) {
@@ -336,19 +363,23 @@ if ($null -eq $global:ValidPdfReader) {
 
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://*:$port/")
+<<<<<<< HEAD
 try { $listener.Start(); Write-ApiLog "--- ¦øªA¾¹ v14.5 ¤W½u (Ping ¦s¬¡°»´ú¥\¯à¤w±Ò¥Î) ---" } catch { exit }
+=======
+try { $listener.Start(); Write-ApiLog "--- ä¼ºæœå™¨ v13.6 ä¸Šç·š (CORS æ”¯æ´å·²å•Ÿç”¨) ---" } catch { exit }
+>>>>>>> 8bdf81439113f6b595bf50628a6547f6a61cdf74
 
 $nextCheck = Get-Date; $nextHeart = Get-Date; $contextTask = $null
 
 while ($listener.IsListening) {
     try {
         $now = Get-Date
-        if ($now -ge $nextHeart) { Write-ApiLog "[¦s¬¡] ºÊÅ¥¤¤..."; $nextHeart = $now.AddSeconds(60) }
+        if ($now -ge $nextHeart) { Write-ApiLog "[å­˜æ´»] ç›£è½ä¸­..."; $nextHeart = $now.AddSeconds(60) }
         if ($now -ge $nextCheck) {
             $day = $now.DayOfWeek.ToString()
             if (($now.Hour -ge $monitorStartHour) -and ($now.Hour -lt $monitorEndHour) -and ($monitorDays -contains $day)) {
                 Test-PrinterHealth
-            } else { Write-ApiLog ">>> [«D¤u§@®É¬q] ¸õ¹L¨µÀË¡C" }
+            } else { Write-ApiLog ">>> [éå·¥ä½œæ™‚æ®µ] è·³éå·¡æª¢ã€‚" }
             $nextCheck = $now.AddSeconds($checkIntervalSec)
         }
 
@@ -357,8 +388,9 @@ while ($listener.IsListening) {
 
         $context = $listener.EndGetContext($contextTask); $contextTask = $null
         $request = $context.Request; $response = $context.Response; $path = $request.Url.AbsolutePath.ToLower()
-        Write-ApiLog ">>> [½Ğ¨D] ¨Ó¦Û: $($request.RemoteEndPoint) ¸ô®|: $path"
+        Write-ApiLog ">>> [è«‹æ±‚] ä¾†è‡ª: $($request.RemoteEndPoint) è·¯å¾‘: $path"
 
+<<<<<<< HEAD
         # --- [CORS] ---
         $response.AddHeader("Access-Control-Allow-Origin", "*")
         $response.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -367,6 +399,19 @@ while ($listener.IsListening) {
         if ($request.HttpMethod -eq "OPTIONS") {
             $response.StatusCode = 200; $response.Close()
             Write-ApiLog ">>> [CORS] ¹wÀË½Ğ¨D³q¹L"; continue
+=======
+        # --- [CORS] è·¨åŸŸæ¨™é ­è¨­å®š ---
+        $response.AddHeader("Access-Control-Allow-Origin", "*")
+        $response.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        $response.AddHeader("Access-Control-Allow-Headers", "*")
+
+        # --- [CORS] OPTIONS é æª¢è«‹æ±‚è™•ç† ---
+        if ($request.HttpMethod -eq "OPTIONS") {
+            $response.StatusCode = 200
+            $response.Close()
+            Write-ApiLog ">>> [CORS] é æª¢è«‹æ±‚é€šé"
+            continue
+>>>>>>> 8bdf81439113f6b595bf50628a6547f6a61cdf74
         }
 
         $res = @{ "success"=$false; "message"=""; "data"=$null }
@@ -391,6 +436,10 @@ while ($listener.IsListening) {
                     $pObj = Get-WmiObject Win32_Printer | Where-Object { $_.Name -eq $pName }
                     
                     if ($null -ne $pObj) {
+<<<<<<< HEAD
+=======
+                        # --- é›™é¢åˆ—å° (å®¹éŒ¯ç‰ˆ) ---
+>>>>>>> 8bdf81439113f6b595bf50628a6547f6a61cdf74
                         $duplexReq = $request.QueryString["duplex"]
                         $restoreDuplex = $false; $oldDuplexMode = $null
                         
@@ -404,17 +453,28 @@ while ($listener.IsListening) {
                                     elseif ($duplexReq -eq "2" -or $duplexReq -eq "short") { $targetMode = "TwoSidedShortEdge" }
                                     
                                     if ($oldDuplexMode -ne $targetMode) {
+<<<<<<< HEAD
                                         Write-ApiLog ">>> [³]©w] ¤Á´«Âù­±¼Ò¦¡: $targetMode"
                                         Set-PrintConfiguration -PrinterName $pName -DuplexingMode $targetMode -ErrorAction Stop
                                         $restoreDuplex = $true
                                     }
                                 } catch { Write-ApiLog ">>> [³]©wÄµ§i] µLªkÅÜ§óÂù­±³]©w: $($_.Exception.Message)" }
                             } else { Write-ApiLog ">>> [©¿²¤] ¤£¤ä´© Set-PrintConfiguration" }
+=======
+                                        Write-ApiLog ">>> [è¨­å®š] å˜—è©¦åˆ‡æ›é›™é¢æ¨¡å¼: $targetMode"
+                                        Set-PrintConfiguration -PrinterName $pName -DuplexingMode $targetMode -ErrorAction Stop
+                                        $restoreDuplex = $true
+                                    }
+                                } catch { 
+                                    Write-ApiLog ">>> [è¨­å®šè­¦å‘Š] ç„¡æ³•è®Šæ›´é›™é¢è¨­å®š (é©…å‹•å¯èƒ½ä¸æ”¯æ´): $($_.Exception.Message)ã€‚å°‡ä¾é è¨­å€¼åˆ—å°ã€‚" 
+                                }
+                            } else { Write-ApiLog ">>> [å¿½ç•¥] ç³»çµ±ä¸æ”¯æ´ Set-PrintConfiguration" }
+>>>>>>> 8bdf81439113f6b595bf50628a6547f6a61cdf74
                         }
 
                         $fileName = "Upload_$(Get-Date -Format 'yyyyMMdd_HHmmss').pdf"
                         $savePath = Join-Path $uploadPath $fileName
-                        Write-ApiLog ">>> [¤W¶Ç] ±µ¦¬ PDF: $fileName"
+                        Write-ApiLog ">>> [ä¸Šå‚³] æ¥æ”¶ PDF: $fileName"
                         
                         $fs = New-Object System.IO.FileStream($savePath, [System.IO.FileMode]::Create)
                         $buffer = New-Object byte[] 8192
@@ -423,14 +483,20 @@ while ($listener.IsListening) {
                             if ($read -gt 0) { $fs.Write($buffer, 0, $read) }
                         } while ($read -gt 0); $fs.Close()
                         
-                        Write-ApiLog ">>> [¦C¦L] ½Õ¥Î PDF ¾\Åª¾¹..."
+                        Write-ApiLog ">>> [åˆ—å°] èª¿ç”¨ PDF é–±è®€å™¨..."
                         try {
+<<<<<<< HEAD
                             if ($null -ne $global:ValidPdfReader) {
                                 Write-ApiLog ">>> [¦C¦L] ¨Ï¥Î§Ö¨ú¸ô®|: $($global:ValidPdfReader)"
+=======
+                            if ((Test-Path $pdfReaderPath) -eq $true) {
+                                Write-ApiLog ">>> [åˆ—å°] ä½¿ç”¨æŒ‡å®šç¨‹å¼: $pdfReaderPath"
+>>>>>>> 8bdf81439113f6b595bf50628a6547f6a61cdf74
                                 $argList = "/t ""$savePath"" ""$pName"""
                                 $proc = Start-Process -FilePath $global:ValidPdfReader -ArgumentList $argList -PassThru -WindowStyle Hidden
                                 $proc.WaitForExit(10000)
                             } else {
+<<<<<<< HEAD
                                 Write-ApiLog ">>> [¦C¦L] ¹Á¸Õ Shell PrintTo (¥¼°»´ú¨ì«ü©w¾\Åª¾¹)..."
                                 $proc = Start-Process -FilePath $savePath -Verb PrintTo -ArgumentList """$pName""" -PassThru -WindowStyle Hidden
                                 $proc.WaitForExit(10000)
@@ -440,16 +506,39 @@ while ($listener.IsListening) {
                         } catch {
                             $res.message = "¦C¦L¥¢±Ñ: $($_.Exception.Message)"
                             Write-ApiLog "!!! [¦C¦L¿ù»~] $($_.Exception.Message)"
+=======
+                                Write-ApiLog ">>> [åˆ—å°] å˜—è©¦ Shell PrintTo..."
+                                $proc = Start-Process -FilePath $savePath -Verb PrintTo -ArgumentList """$pName""" -PassThru -WindowStyle Hidden
+                                $proc.WaitForExit(10000)
+                            }
+                            
+                            $res.success = $true
+                            $res.message = "PDF å·²å‚³é€è‡³åˆ—å°ä½‡åˆ—"
+                            Send-SysAdminNotify -content "APIï¼šPDF ä¸Šå‚³ä¸¦ç™¼é€è‡³ [$pName] (é›™é¢:$($null -ne $duplexReq))ã€‚" -title "é ç«¯åˆ—å°"
+                        } catch {
+                            $res.message = "åˆ—å°å•Ÿå‹•å¤±æ•—: $($_.Exception.Message)"
+                            Write-ApiLog "!!! [åˆ—å°éŒ¯èª¤] $($_.Exception.Message)"
+>>>>>>> 8bdf81439113f6b595bf50628a6547f6a61cdf74
                         }
 
                         if ($restoreDuplex) {
                             try {
+<<<<<<< HEAD
                                 Write-ApiLog ">>> [ÁÙ­ì] «ì´_Âù­±³]©w"
                                 Set-PrintConfiguration -PrinterName $pName -DuplexingMode $oldDuplexMode -ErrorAction SilentlyContinue
                             } catch {}
                         }
                     } else { $res.message = "§ä¤£¨ì«ü©wªº¦Lªí¾÷: $pName" }
                 } else { $res.message = "¶È¤ä´© POST ¤èªk" }
+=======
+                                Write-ApiLog ">>> [é‚„åŸ] æ¢å¾©é›™é¢è¨­å®š: $oldDuplexMode"
+                                Set-PrintConfiguration -PrinterName $pName -DuplexingMode $oldDuplexMode -ErrorAction SilentlyContinue
+                            } catch {}
+                        }
+
+                    } else { $res.message = "æ‰¾ä¸åˆ°æŒ‡å®šçš„å°è¡¨æ©Ÿ: $pName" }
+                } else { $res.message = "åƒ…æ”¯æ´ POST æ–¹æ³•" }
+>>>>>>> 8bdf81439113f6b595bf50628a6547f6a61cdf74
             }
             elseif ($path -eq "/printer/status") {
                 $pName = $request.QueryString["name"]
@@ -457,7 +546,7 @@ while ($listener.IsListening) {
                 $target = $null
                 foreach($item in $all) { if($item.Name -eq $pName) { $target = $item; break } }
                 if ($null -ne $target) { $res.data = $target; $res.success = $true }
-                else { $res.message = "§ä¤£¨ì«ü©wªº¦Lªí¾÷" }
+                else { $res.message = "æ‰¾ä¸åˆ°æŒ‡å®šçš„å°è¡¨æ©Ÿ" }
             }
             elseif ($path -eq "/printer/refresh") {
                 $pName = $request.QueryString["name"]
@@ -465,35 +554,35 @@ while ($listener.IsListening) {
                 if ($null -ne $pObj) {
                     $pObj.Pause(); Start-Sleep -Milliseconds 500; $pObj.Resume()
                     $res.success = $true
-                    Send-SysAdminNotify -content "API¡G¦Lªí¾÷ [$pName] ¤â°Ê­«·s¾ã²z¦¨¥\¡C" -title "ºûÅ@¾Ş§@"
-                } else { $res.message = "§ä¤£¨ì«ü©wªº¦Lªí¾÷" }
+                    Send-SysAdminNotify -content "APIï¼šå°è¡¨æ©Ÿ [$pName] æ‰‹å‹•é‡æ–°æ•´ç†æˆåŠŸã€‚" -title "ç¶­è­·æ“ä½œ"
+                } else { $res.message = "æ‰¾ä¸åˆ°æŒ‡å®šçš„å°è¡¨æ©Ÿ" }
             }
             elseif ($path -eq "/printer/clear") {
                 $pName = $request.QueryString["name"]
                 $jobs = Get-WmiObject Win32_PrintJob | Where-Object { $_.Name -like "*$pName*" }
                 if ($jobs) { foreach($j in $jobs){$j.Delete()} }
-                $res.success = $true; Send-SysAdminNotify -content "[$pName] ¤â°Ê²M²z§¹¦¨¡C" -title "¤â°Ê¾Ş§@"
+                $res.success = $true; Send-SysAdminNotify -content "[$pName] æ‰‹å‹•æ¸…ç†å®Œæˆã€‚" -title "æ‰‹å‹•æ“ä½œ"
             }
             elseif ($path -eq "/service/restart-spooler") {
                 try {
                     Restart-Service "Spooler" -Force
                     $res.success = $true
-                    Send-SysAdminNotify -content "API¡GSpooler ªA°È¤w­«±Ò¡C" -title "ªA°È¾Ş§@"
-                } catch { Write-ApiLog "!!! [­«±Ò¥¢±Ñ] $($_.Exception.Message)" }
+                    Send-SysAdminNotify -content "APIï¼šSpooler æœå‹™å·²é‡å•Ÿã€‚" -title "æœå‹™æ“ä½œ"
+                } catch { Write-ApiLog "!!! [é‡å•Ÿå¤±æ•—] $($_.Exception.Message)" }
             }
             elseif ($path -eq "/service/self-heal") {
-                Invoke-SpoolerSelfHealing -reason "ºŞ²z­û»·ºİµo°Ê²`«×­×´_"; $res.success = $true
+                Invoke-SpoolerSelfHealing -reason "ç®¡ç†å“¡é ç«¯ç™¼å‹•æ·±åº¦ä¿®å¾©"; $res.success = $true
             }
             else { 
                 $response.StatusCode = 404 
-                Write-ApiLog "!!! [¸ô®|¿ù»~] µLªk¿ëÃÑªº¸ô®|: $path"
+                Write-ApiLog "!!! [è·¯å¾‘éŒ¯èª¤] ç„¡æ³•è¾¨è­˜çš„è·¯å¾‘: $path"
             }
         }
 
         $buffer = [System.Text.Encoding]::UTF8.GetBytes((ConvertTo-SimpleJson $res))
         $response.ContentType = "application/json"; $response.OutputStream.Write($buffer, 0, $buffer.Length); $response.Close()
     } catch { 
-        Write-ApiLog "!!! [¨t²Î¿ù»~] $($_.Exception.Message)"
+        Write-ApiLog "!!! [ç³»çµ±éŒ¯èª¤] $($_.Exception.Message)"
         $contextTask = $null 
     }
 }
