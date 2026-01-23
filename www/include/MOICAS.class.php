@@ -807,4 +807,26 @@ class MOICAS
 
 		return $arr;
 	}
+
+	public function getCounterPrinterMap() {
+		if (!$this->db_wrapper->reachable()) {
+			return array();
+		}
+		$this->db_wrapper->getDB()->parse("
+			Select CP.*, S1.USER_NAME
+				From MOICAS.CER_PRINTER CP
+				Left Join SSYSAUTH1 S1
+					On CP.USER_ID = S1.USER_ID
+			Where 1 = 1
+				AND S1.VALID = '1'
+			Order By CP.USER_ID
+		");
+		
+		$this->db_wrapper->getDB()->execute();
+		$arr = $this->db_wrapper->getDB()->fetchAll();
+
+		Logger::getInstance()->info(__METHOD__.": 取得目前地政系統人員使用印表機對應表：".count($arr)." 筆。");
+
+		return $arr;
+	}
 }
