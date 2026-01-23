@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v15.1 (Network Stream Write Fix)
+    版本：v15.2 (Comment Field Support)
     修正：
-    1. 修正 "指定的網路名稱無法使用" 錯誤：當客戶端提前斷線時，不再視為系統重大錯誤，改為記錄連線中斷警告。
-    2. 優化回應寫入流程：將 OutputStream.Write 包裹於獨立 try-catch 區塊。
+    1. 新增 "Comment" (註解) 欄位至 API 回傳資料。
+    2. 修正 "指定的網路名稱無法使用" 錯誤處理 (v15.1)。
     3. 維持 v15.0 的 Clean Status、ErrorDetails、PDF 上傳與自癒功能。
     4. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
 .NOTES
@@ -243,10 +243,8 @@ function Get-PrinterStatusData {
                 4 { $finalStatus = "Printing" }
                 5 { $finalStatus = "Warmup" }
                 default { 
-                    $finalStatus = "Ready" # Default as Warning/Busy is 3, treated as Ready usually
-                    if ($p.PrinterStatus -ne 3) {
-                       $finalStatus = "Warning" # Other states
-                    }
+                    $finalStatus = "Ready" 
+                    if ($p.PrinterStatus -ne 3) { $finalStatus = "Warning" }
                 }
             }
         }
@@ -283,6 +281,10 @@ function Get-PrinterStatusData {
         $pLocation = ""
         if ($null -ne $p.Location) { $pLocation = $p.Location }
         
+        # --- [新增] 註解欄位 ---
+        $pComment = ""
+        if ($null -ne $p.Comment) { $pComment = $p.Comment }
+        
         $pDriver = ""
         if ($null -ne $p.DriverName) { $pDriver = $p.DriverName }
         
@@ -295,6 +297,7 @@ function Get-PrinterStatusData {
         $obj | Add-Member NoteProperty Jobs $jobCount
         $obj | Add-Member NoteProperty IP $pIP
         $obj | Add-Member NoteProperty Location $pLocation
+        $obj | Add-Member NoteProperty Comment $pComment # Add Comment field
         $obj | Add-Member NoteProperty Driver $pDriver
         $obj | Add-Member NoteProperty PortName $pPort
         $obj | Add-Member NoteProperty ShareName $pShareName
@@ -368,7 +371,7 @@ if ($null -eq $global:ValidPdfReader) {
 
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://*:$port/")
-try { $listener.Start(); Write-ApiLog "--- 伺服器 v15.1 上線 (網路斷線容錯修正) ---" } catch { exit }
+try { $listener.Start(); Write-ApiLog "--- 伺服器 v15.2 上線 (註解欄位支援) ---" } catch { exit }
 
 $nextCheck = Get-Date; $nextHeart = Get-Date; $contextTask = $null
 
@@ -534,7 +537,6 @@ while ($listener.IsListening) {
         $buffer = [System.Text.Encoding]::UTF8.GetBytes((ConvertTo-SimpleJson $res))
         $response.ContentType = "application/json"
         
-        # [修正] 將回應寫入邏輯包覆於 try-catch，忽略客戶端提前斷線錯誤
         try {
             $response.ContentLength64 = $buffer.Length
             $response.OutputStream.Write($buffer, 0, $buffer.Length)
