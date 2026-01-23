@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v14.5 (Power Status Detection via ICMP)
+    版本：v15.1 (Network Stream Write Fix)
     修正：
-    1. 新增網路存活偵測：利用 ICMP Ping 區分「真正斷電」與「軟體離線」。
-    2. 優化狀態描述：依據 Ping 結果回傳 "可能未開機" 或 "網路通暢" 等精確資訊。
-    3. 維持 v14.4 的所有功能：PDF 上傳、雙面列印、自癒通知、日誌清理與 PS 2.0 相容。
+    1. 修正 "指定的網路名稱無法使用" 錯誤：當客戶端提前斷線時，不再視為系統重大錯誤，改為記錄連線中斷警告。
+    2. 優化回應寫入流程：將 OutputStream.Write 包裹於獨立 try-catch 區塊。
+    3. 維持 v15.0 的 Clean Status、ErrorDetails、PDF 上傳與自癒功能。
     4. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
 .NOTES
     ?? 測試指令
@@ -201,7 +201,6 @@ function Get-PrinterStatusData {
 
     $wmiPrinters = Get-WmiObject -Class Win32_Printer
     
-    # 初始化 Ping 物件 (複用以節省資源)
     $pingSender = New-Object System.Net.NetworkInformation.Ping
 
     foreach ($p in $wmiPrinters) {
@@ -224,53 +223,82 @@ function Get-PrinterStatusData {
         }
         
         $finalStatus = "Ready"
+        $errDetails = ""
+        
         if ($isHardwareError) { 
-            $finalStatus = "Error (" + [string]::Join(", ", $errorList) + ")" 
+            $finalStatus = "Error"
+            $errDetails = [string]::Join(", ", $errorList)
         } elseif ($isOffline) { 
             $finalStatus = "Offline" 
         } else {
             switch ($p.PrinterStatus) {
-                1 { $finalStatus = "Error (未知 - 可能原因: 驅動限制/SNMP受阻/特殊硬體狀態)" }
-                2 { $finalStatus = "Error (其他 - 請檢查設備面板)" }
+                1 { 
+                    $finalStatus = "Error"
+                    $errDetails = "未知 - 可能原因: 驅動限制/SNMP受阻/特殊硬體狀態"
+                }
+                2 { 
+                    $finalStatus = "Error"
+                    $errDetails = "其他 - 請檢查設備面板"
+                }
                 4 { $finalStatus = "Printing" }
                 5 { $finalStatus = "Warmup" }
-                default { $finalStatus = "Ready" }
+                default { 
+                    $finalStatus = "Ready" # Default as Warning/Busy is 3, treated as Ready usually
+                    if ($p.PrinterStatus -ne 3) {
+                       $finalStatus = "Warning" # Other states
+                    }
+                }
             }
         }
         
-        # --- IP 解析與存活偵測 ---
         $pPort = $p.PortName
         $pIP = ""
         if ($portMap.ContainsKey($pPort)) { $pIP = $portMap[$pPort] } else { $pIP = $pPort }
         
-        # [新增] 針對 IPv4 進行快速 Ping 檢測 (Timeout 200ms)
         if ($pIP -match "^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$") {
             try {
                 $reply = $pingSender.Send($pIP, 200)
                 if ($reply.Status -ne "Success") {
-                    # Ping 失敗
                     if ($finalStatus -eq "Offline") {
-                        $finalStatus = "Offline (無回應 - 可能未開機)"
+                        $errDetails = "無回應 - 可能未開機"
                     } elseif ($finalStatus -like "Ready*") {
-                        $finalStatus = "Warning (無回應 - 可能斷線或未開機)"
+                        $finalStatus = "Warning"
+                        $errDetails = "無回應 - 可能斷線或未開機"
                     }
                 } else {
-                    # Ping 成功
                     if ($finalStatus -eq "Offline") {
-                        $finalStatus = "Offline (軟體離線 - 網路通暢)"
+                        $errDetails = "軟體離線 - 網路通暢"
                     }
                 }
             } catch { 
-                # Ping 發生錯誤 (如 DNS 解析失敗)
-                if ($finalStatus -eq "Offline") { $finalStatus = "Offline (網路錯誤)" }
+                if ($finalStatus -eq "Offline") { 
+                    $errDetails = "網路錯誤"
+                }
             }
         }
+
+        $jobCount = 0
+        if ($null -ne $p.JobCount) { $jobCount = $p.JobCount }
+        
+        $pLocation = ""
+        if ($null -ne $p.Location) { $pLocation = $p.Location }
+        
+        $pDriver = ""
+        if ($null -ne $p.DriverName) { $pDriver = $p.DriverName }
+        
+        $pShareName = ""
+        if ($p.Shared) { $pShareName = $p.ShareName }
 
         $obj = New-Object PSObject
         $obj | Add-Member NoteProperty Name $pName
         $obj | Add-Member NoteProperty Status $finalStatus
-        $obj | Add-Member NoteProperty Jobs $p.JobCount
+        $obj | Add-Member NoteProperty Jobs $jobCount
         $obj | Add-Member NoteProperty IP $pIP
+        $obj | Add-Member NoteProperty Location $pLocation
+        $obj | Add-Member NoteProperty Driver $pDriver
+        $obj | Add-Member NoteProperty PortName $pPort
+        $obj | Add-Member NoteProperty ShareName $pShareName
+        $obj | Add-Member NoteProperty ErrorDetails $errDetails 
         $results.Add($obj)
     }
     return $results
@@ -289,7 +317,7 @@ function Test-PrinterHealth {
         }
     }
     foreach ($p in $printers) {
-        $name = $p.Name; $pStatus = $p.Status.ToString(); $pJobs = $p.Jobs
+        $name = $p.Name; $pStatus = $p.Status; $pJobs = $p.Jobs; $pDetails = $p.ErrorDetails
         if ($global:IsFirstRun) {
             if ($pStatus -like "Offline*") { $global:ExcludedPrinters[$name] = $true }
             $global:LastQueueCount[$name] = $pJobs; continue
@@ -298,9 +326,13 @@ function Test-PrinterHealth {
             if ($pStatus -like "Ready*" -or $pStatus -eq "Printing") { $global:ExcludedPrinters.Remove($name) }
             continue
         }
-        if ($pStatus -like "Error*") {
+        if ($pStatus -eq "Error" -or $pStatus -eq "Warning") {
             $global:PrinterErrorCount[$name]++
-            if ($global:PrinterErrorCount[$name] -eq $errorThreshold) { $batchAlerts.Add("● [異常] 印表機 [$name] $pStatus") }
+            if ($global:PrinterErrorCount[$name] -eq $errorThreshold) { 
+                $msg = "● [異常] 印表機 [$name] $pStatus"
+                if ($pDetails -ne "") { $msg += " ($pDetails)" }
+                $batchAlerts.Add($msg) 
+            }
         } else {
             if ($global:PrinterErrorCount[$name] -ge $errorThreshold) { $batchAlerts.Add("○ [恢復] 印表機 [$name] 已恢復正常。") }
             $global:PrinterErrorCount[$name] = 0
@@ -336,7 +368,7 @@ if ($null -eq $global:ValidPdfReader) {
 
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://*:$port/")
-try { $listener.Start(); Write-ApiLog "--- 伺服器 v14.5 上線 (Ping 存活偵測功能已啟用) ---" } catch { exit }
+try { $listener.Start(); Write-ApiLog "--- 伺服器 v15.1 上線 (網路斷線容錯修正) ---" } catch { exit }
 
 $nextCheck = Get-Date; $nextHeart = Get-Date; $contextTask = $null
 
@@ -373,7 +405,8 @@ while ($listener.IsListening) {
         if ($request.Headers["X-API-KEY"] -ne $apiKey) { $response.StatusCode = 401 }
         else {
             if ($path -eq "/printers") { 
-                $res.data = Get-PrinterStatusData; $res.success = $true 
+                $res.data = Get-PrinterStatusData; $res.success = $true
+                $res.message = "已成功取得所有印表機列表"
             }
             elseif ($path -eq "/server/logs") {
                 $todayLog = Join-Path $logPath "PrintApi_$(Get-Date -Format 'yyyy-MM-dd').log"
@@ -382,7 +415,7 @@ while ($listener.IsListening) {
                     $count = 100
                     if ($null -ne $linesReq -and $linesReq -match "^\d+$") { $count = [int]$linesReq }
                     $logContent = Get-Content $todayLog | Select-Object -Last $count
-                    $res.data = $logContent; $res.success = $true; $res.message = "已讀取最後 $count 行"
+                    $res.data = $logContent; $res.success = $true; $res.message = "已讀取最後 $count 行日誌"
                 } else { $res.message = "今日尚無日誌檔案" }
             }
             elseif ($path -eq "/printer/print-pdf") {
@@ -456,7 +489,10 @@ while ($listener.IsListening) {
                 $all = Get-PrinterStatusData
                 $target = $null
                 foreach($item in $all) { if($item.Name -eq $pName) { $target = $item; break } }
-                if ($null -ne $target) { $res.data = $target; $res.success = $true }
+                if ($null -ne $target) { 
+                    $res.data = $target; $res.success = $true
+                    $res.message = "已成功取得印表機 [$pName] 狀態"
+                }
                 else { $res.message = "找不到指定的印表機" }
             }
             elseif ($path -eq "/printer/refresh") {
@@ -465,6 +501,7 @@ while ($listener.IsListening) {
                 if ($null -ne $pObj) {
                     $pObj.Pause(); Start-Sleep -Milliseconds 500; $pObj.Resume()
                     $res.success = $true
+                    $res.message = "印表機 [$pName] 重新整理指令已執行"
                     Send-SysAdminNotify -content "API：印表機 [$pName] 手動重新整理成功。" -title "維護操作"
                 } else { $res.message = "找不到指定的印表機" }
             }
@@ -472,17 +509,21 @@ while ($listener.IsListening) {
                 $pName = $request.QueryString["name"]
                 $jobs = Get-WmiObject Win32_PrintJob | Where-Object { $_.Name -like "*$pName*" }
                 if ($jobs) { foreach($j in $jobs){$j.Delete()} }
-                $res.success = $true; Send-SysAdminNotify -content "[$pName] 手動清理完成。" -title "手動操作"
+                $res.success = $true
+                $res.message = "印表機 [$pName] 佇列清除指令已執行"
+                Send-SysAdminNotify -content "[$pName] 手動清理完成。" -title "手動操作"
             }
             elseif ($path -eq "/service/restart-spooler") {
                 try {
                     Restart-Service "Spooler" -Force
                     $res.success = $true
+                    $res.message = "Spooler 服務已成功重啟"
                     Send-SysAdminNotify -content "API：Spooler 服務已重啟。" -title "服務操作"
                 } catch { Write-ApiLog "!!! [重啟失敗] $($_.Exception.Message)" }
             }
             elseif ($path -eq "/service/self-heal") {
                 Invoke-SpoolerSelfHealing -reason "管理員遠端發動深度修復"; $res.success = $true
+                $res.message = "深度自癒流程已啟動"
             }
             else { 
                 $response.StatusCode = 404 
@@ -491,7 +532,18 @@ while ($listener.IsListening) {
         }
 
         $buffer = [System.Text.Encoding]::UTF8.GetBytes((ConvertTo-SimpleJson $res))
-        $response.ContentType = "application/json"; $response.OutputStream.Write($buffer, 0, $buffer.Length); $response.Close()
+        $response.ContentType = "application/json"
+        
+        # [修正] 將回應寫入邏輯包覆於 try-catch，忽略客戶端提前斷線錯誤
+        try {
+            $response.ContentLength64 = $buffer.Length
+            $response.OutputStream.Write($buffer, 0, $buffer.Length)
+            $response.Close()
+            Write-ApiLog "<<< [完成] $clientIP 的請求處理週期結束。"
+        } catch {
+            Write-ApiLog ">>> [連線中斷] 客戶端 $clientIP 在回應傳輸前斷開 ($($_.Exception.Message))"
+        }
+
     } catch { 
         Write-ApiLog "!!! [系統錯誤] $($_.Exception.Message)"
         $contextTask = $null 
