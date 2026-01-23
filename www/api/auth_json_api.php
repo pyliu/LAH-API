@@ -25,8 +25,7 @@ switch ($_POST["type"]) {
 		// $message = "PHP 取得 API 伺服器 IP 位址 => ".preg_replace('/[\n\s]+/i', ' ', print_r($ips, true));
 		// Logger::getInstance()->info("XHR [login] $message");
 		// Logger::getInstance()->info("XHR [login] APACHE API 伺服器端點資訊： ".$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']);
-
-    echoJSONResponse('取得 '.$_POST['req_ip'].' 登入資訊', STATUS_CODE::SUCCESS_NORMAL, array(
+		$configs = array(
 			"server" => $_SERVER,
 			"ips" => getLocalhostIPs(),
 			"user" => $_SESSION["myinfo"],
@@ -49,12 +48,16 @@ switch ($_POST["type"]) {
 					'password' => $system->get('MONITOR_MAIL_PASSWORD'),
 					'ssl' => $system->get('MONITOR_MAIL_SSL') === 'true'
 				),
+				// 將 monitor_printers 直接傳回前端，由前端負責解析 JSON
+				'monitor_printers' => $system->get('MONITOR_PRINTERS') ?? '',
 				'API_SERVER_IP' => $system->get('API_SERVER_IP'),
 				'API_SERVER_PORT' => $system->get('API_SERVER_PORT'),
 				'WS_SERVER_IP' => $system->get('WS_SERVER_IP'),
 				'WS_SERVER_PORT' => $system->get('WS_SERVER_PORT')
 			)
-        ));
+		);
+		Logger::getInstance()->info("XHR [login] config 資訊：\n".print_r($configs, true));
+    echoJSONResponse('取得 '.$_POST['req_ip'].' 登入資訊', STATUS_CODE::SUCCESS_NORMAL, $configs);
 		break;
 	default:
 		Logger::getInstance()->error("不支援的查詢型態【".$_POST["type"]."】");
