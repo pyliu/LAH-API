@@ -1,15 +1,21 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v15.2 (Comment Field Support)
+    版本：v16.1 (Cron List Syntax Support)
     修正：
-    1. 新增 "Comment" (註解) 欄位至 API 回傳資料。
-    2. 修正 "指定的網路名稱無法使用" 錯誤處理 (v15.1)。
-    3. 維持 v15.0 的 Clean Status、ErrorDetails、PDF 上傳與自癒功能。
-    4. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
+    1. 更新 Cron 排程設定範例：支援 "30 7,18 * * *" (指定多個時間點) 語法。
+    2. 維持 v15.x/v16.0 的所有功能：API 訊息優化、PDF 上傳、自癒通知與監控。
+    3. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
 .NOTES
-    ?? 測試指令
-    curl -H "X-API-KEY: %API_KEY%" http://%SERVER_IP%:8888/printers
+    ?? Cron 語法教學:
+    - 指定多個時間點 (列表): 使用逗號 ","
+      "30 7,18 * * *"  -> 每天 07:30 和 18:30 執行
+    
+    - 指定間隔 (頻率): 使用斜線 "/"
+      "0 */4 * * *"    -> 每 4 小時執行一次 (0, 4, 8, 12...)
+    
+    - 指定範圍: 使用連字號 "-"
+      "0 9-18 * * *"   -> 每天 09:00 到 18:00 的整點執行
 #>
 
 # -------------------------------------------------------------------------
@@ -23,7 +29,7 @@ $maxLogSizeBytes    = 10MB
 $maxHistory         = 5                          
 $logRetentionDays   = 7                   
 
-# --- PDF 閱讀器路徑清單 ---
+# --- PDF 閱讀器路徑 ---
 $pdfReaderPaths     = @(
     "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
     "C:\Program Files\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
@@ -50,6 +56,11 @@ $zombieTimeMinutes  = 10
 $enableAutoHeal     = $true               
 $maxStuckPrinters   = 3                   
 
+# --- 排程深度自癒設定 (Cron) ---
+$enableScheduledHeal = $true
+# 每天 07:30 與 18:30 執行
+$scheduledHealCron   = "30 7,18 * * *"
+
 # --- 佇列監控設定 ---
 $queueThreshold     = 20                  
 $queueStuckLimit    = 5                   
@@ -69,6 +80,7 @@ $global:QueueStuckCount     = New-Object System.Collections.Hashtable
 $global:LastQueueCount      = New-Object System.Collections.Hashtable 
 $global:IsFirstRun          = $true
 $global:ValidPdfReader      = $null
+$global:LastCronRunTime     = $null 
 
 # -------------------------------------------------------------------------
 # 2. 核心函數庫
@@ -163,13 +175,27 @@ function Send-SysAdminNotify {
         foreach ($key in $fields.Keys) { $encodedParts.Add("$key=$([System.Uri]::EscapeDataString($fields[$key]))") }
         if ($null -ne $notifyChannels) { foreach ($chan in $notifyChannels) { $encodedParts.Add("channels[]=$([System.Uri]::EscapeDataString($chan))") } }
         $postBody = [string]::Join("&", $encodedParts)
-        $wc = New-Object System.Net.WebClient
-        $wc.Headers.Add("Content-Type", "application/x-www-form-urlencoded")
-        $wc.Encoding = [System.Text.Encoding]::UTF8
+        
         Write-ApiLog ">>> [準備發送通知] 標題: $title"
-        [void]$wc.UploadString($notifyUrl, "POST", $postBody)
-        Write-ApiLog ">>> [通知發送成功]"
-    } catch { Write-ApiLog "!!! [通知發送失敗] $($_.Exception.Message)" }
+        
+        $req = [System.Net.WebRequest]::Create($notifyUrl)
+        $req.Method = "POST"
+        $req.ContentType = "application/x-www-form-urlencoded"
+        $req.Timeout = 500  
+        
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($postBody)
+        $req.ContentLength = $bytes.Length
+        $reqStream = $req.GetRequestStream()
+        $reqStream.Write($bytes, 0, $bytes.Length)
+        $reqStream.Close()
+        
+        $resp = $req.GetResponse()
+        $resp.Close()
+        
+        Write-ApiLog ">>> [通知發送成功] 標題: $title"
+    } catch { 
+        Write-ApiLog "!!! [通知發送失敗] 標題: $title | 錯誤: $($_.Exception.Message) (可能是逾時)" 
+    }
 }
 
 function Invoke-SpoolerSelfHealing {
@@ -186,21 +212,49 @@ function Invoke-SpoolerSelfHealing {
     } catch { Send-SysAdminNotify -title "? 系統自動自癒失敗" -content "錯誤: $($_.Exception.Message)" }
 }
 
+# --- [維持] Cron 解析函數 (支援 List, Step, Range) ---
+function Test-CronMatch {
+    param($cronExpression, $currentTime)
+    if ([string]::IsNullOrEmpty($cronExpression)) { return $false }
+    $parts = $cronExpression.Split(" ")
+    if ($parts.Count -ne 5) { Write-ApiLog "!!! [Cron錯誤] 格式無效: $cronExpression"; return $false }
+    
+    $min = $parts[0]; $hour = $parts[1]; $dom = $parts[2]; $month = $parts[3]; $dow = $parts[4]
+    $curMin = $currentTime.Minute; $curHour = $currentTime.Hour; $curDom = $currentTime.Day; $curMonth = $currentTime.Month; $curDow = [int]$currentTime.DayOfWeek
+    
+    function Check-Field($pattern, $value) {
+        if ($pattern -eq "*") { return $true }
+        if ($pattern -match "^(\*|\d+)/(\d+)$") { 
+            $step = [int]$matches[2]
+            return ($value % $step) -eq 0
+        }
+        # 支援逗號清單 (如 7,18)
+        if ($pattern -match ",") { 
+            $list = $pattern.Split(",")
+            foreach ($item in $list) { if ([int]$item -eq $value) { return $true } }
+            return $false
+        }
+        if ($pattern -match "^(\d+)-(\d+)$") { 
+            $start = [int]$matches[1]; $end = [int]$matches[2]
+            return ($value -ge $start) -and ($value -le $end)
+        }
+        return [int]$pattern -eq $value
+    }
+    
+    return (Check-Field $min $curMin) -and (Check-Field $hour $curHour) -and (Check-Field $dom $curDom) -and (Check-Field $month $curMonth) -and (Check-Field $dow $curDow)
+}
+
 function Get-PrinterStatusData {
     $results = New-Object System.Collections.Generic.List[Object]
-    
     $portMap = @{}
     try {
         $tcpPorts = Get-WmiObject -Class Win32_TCPIPPrinterPort -ErrorAction SilentlyContinue
         if ($null -ne $tcpPorts) {
-            foreach ($tp in $tcpPorts) {
-                if ($null -ne $tp.Name) { $portMap[$tp.Name] = $tp.HostAddress }
-            }
+            foreach ($tp in $tcpPorts) { if ($null -ne $tp.Name) { $portMap[$tp.Name] = $tp.HostAddress } }
         }
     } catch {}
 
     $wmiPrinters = Get-WmiObject -Class Win32_Printer
-    
     $pingSender = New-Object System.Net.NetworkInformation.Ping
 
     foreach ($p in $wmiPrinters) {
@@ -232,14 +286,8 @@ function Get-PrinterStatusData {
             $finalStatus = "Offline" 
         } else {
             switch ($p.PrinterStatus) {
-                1 { 
-                    $finalStatus = "Error"
-                    $errDetails = "未知 - 可能原因: 驅動限制/SNMP受阻/特殊硬體狀態"
-                }
-                2 { 
-                    $finalStatus = "Error"
-                    $errDetails = "其他 - 請檢查設備面板"
-                }
+                1 { $finalStatus = "Error"; $errDetails = "未知 - 可能原因: 驅動限制/SNMP受阻/特殊硬體狀態" }
+                2 { $finalStatus = "Error"; $errDetails = "其他 - 請檢查設備面板" }
                 4 { $finalStatus = "Printing" }
                 5 { $finalStatus = "Warmup" }
                 default { 
@@ -249,47 +297,28 @@ function Get-PrinterStatusData {
             }
         }
         
-        $pPort = $p.PortName
-        $pIP = ""
+        $pPort = $p.PortName; $pIP = ""
         if ($portMap.ContainsKey($pPort)) { $pIP = $portMap[$pPort] } else { $pIP = $pPort }
         
         if ($pIP -match "^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$") {
             try {
                 $reply = $pingSender.Send($pIP, 200)
                 if ($reply.Status -ne "Success") {
-                    if ($finalStatus -eq "Offline") {
-                        $errDetails = "無回應 - 可能未開機"
-                    } elseif ($finalStatus -like "Ready*") {
-                        $finalStatus = "Warning"
-                        $errDetails = "無回應 - 可能斷線或未開機"
-                    }
+                    if ($finalStatus -eq "Offline") { $errDetails = "無回應 - 可能未開機" }
+                    elseif ($finalStatus -like "Ready*") { $finalStatus = "Warning"; $errDetails = "無回應 - 可能斷線或未開機" }
                 } else {
-                    if ($finalStatus -eq "Offline") {
-                        $errDetails = "軟體離線 - 網路通暢"
-                    }
+                    if ($finalStatus -eq "Offline") { $errDetails = "軟體離線 - 網路通暢" }
                 }
             } catch { 
-                if ($finalStatus -eq "Offline") { 
-                    $errDetails = "網路錯誤"
-                }
+                if ($finalStatus -eq "Offline") { $errDetails = "網路錯誤" }
             }
         }
 
-        $jobCount = 0
-        if ($null -ne $p.JobCount) { $jobCount = $p.JobCount }
-        
-        $pLocation = ""
-        if ($null -ne $p.Location) { $pLocation = $p.Location }
-        
-        # --- [新增] 註解欄位 ---
-        $pComment = ""
-        if ($null -ne $p.Comment) { $pComment = $p.Comment }
-        
-        $pDriver = ""
-        if ($null -ne $p.DriverName) { $pDriver = $p.DriverName }
-        
-        $pShareName = ""
-        if ($p.Shared) { $pShareName = $p.ShareName }
+        $jobCount = 0; if ($null -ne $p.JobCount) { $jobCount = $p.JobCount }
+        $pLocation = ""; if ($null -ne $p.Location) { $pLocation = $p.Location }
+        $pComment = ""; if ($null -ne $p.Comment) { $pComment = $p.Comment }
+        $pDriver = ""; if ($null -ne $p.DriverName) { $pDriver = $p.DriverName }
+        $pShareName = ""; if ($p.Shared) { $pShareName = $p.ShareName }
 
         $obj = New-Object PSObject
         $obj | Add-Member NoteProperty Name $pName
@@ -297,7 +326,7 @@ function Get-PrinterStatusData {
         $obj | Add-Member NoteProperty Jobs $jobCount
         $obj | Add-Member NoteProperty IP $pIP
         $obj | Add-Member NoteProperty Location $pLocation
-        $obj | Add-Member NoteProperty Comment $pComment # Add Comment field
+        $obj | Add-Member NoteProperty Comment $pComment
         $obj | Add-Member NoteProperty Driver $pDriver
         $obj | Add-Member NoteProperty PortName $pPort
         $obj | Add-Member NoteProperty ShareName $pShareName
@@ -371,7 +400,7 @@ if ($null -eq $global:ValidPdfReader) {
 
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://*:$port/")
-try { $listener.Start(); Write-ApiLog "--- 伺服器 v15.2 上線 (註解欄位支援) ---" } catch { exit }
+try { $listener.Start(); Write-ApiLog "--- 伺服器 v16.1 上線 (Cron List 支援) ---" } catch { exit }
 
 $nextCheck = Get-Date; $nextHeart = Get-Date; $contextTask = $null
 
@@ -379,12 +408,25 @@ while ($listener.IsListening) {
     try {
         $now = Get-Date
         if ($now -ge $nextHeart) { Write-ApiLog "[存活] 監聽中..."; $nextHeart = $now.AddSeconds(60) }
+        
+        # 定時健康檢查
         if ($now -ge $nextCheck) {
             $day = $now.DayOfWeek.ToString()
             if (($now.Hour -ge $monitorStartHour) -and ($now.Hour -lt $monitorEndHour) -and ($monitorDays -contains $day)) {
                 Test-PrinterHealth
             } else { Write-ApiLog ">>> [非工作時段] 跳過巡檢。" }
             $nextCheck = $now.AddSeconds($checkIntervalSec)
+        }
+
+        # --- Cron 排程深度自癒 ---
+        if ($enableScheduledHeal) {
+            if ($global:LastCronRunTime -eq $null -or ($now.Minute -ne $global:LastCronRunTime.Minute -or $now.Hour -ne $global:LastCronRunTime.Hour)) {
+                if (Test-CronMatch $scheduledHealCron $now) {
+                    Write-ApiLog ">>> [排程] Cron 觸發 ($scheduledHealCron)，執行深度自癒。"
+                    Invoke-SpoolerSelfHealing -reason "Cron 排程自動維護"
+                    $global:LastCronRunTime = $now
+                }
+            }
         }
 
         if ($null -eq $contextTask) { $contextTask = $listener.BeginGetContext($null, $null) }
