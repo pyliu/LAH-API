@@ -1,21 +1,15 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v16.1 (Cron List Syntax Support)
+    版本：v16.0 (UTF-8 Encoding Fix for Legacy Server)
     修正：
-    1. 更新 Cron 排程設定範例：支援 "30 7,18 * * *" (指定多個時間點) 語法。
-    2. 維持 v15.x/v16.0 的所有功能：API 訊息優化、PDF 上傳、自癒通知與監控。
-    3. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
+    1. 解決 BIG5 系統下的中文亂碼問題：新增 Get-Utf8QueryParam 函數。
+    2. 強制對 URL 參數進行 UTF-8 解碼，確保印表機名稱 (如 "EPSON(中文)") 能被正確識別。
+    3. 維持 v15.4 的排程自癒、API 訊息優化、PDF 上傳與完整監控功能。
+    4. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
 .NOTES
-    ?? Cron 語法教學:
-    - 指定多個時間點 (列表): 使用逗號 ","
-      "30 7,18 * * *"  -> 每天 07:30 和 18:30 執行
-    
-    - 指定間隔 (頻率): 使用斜線 "/"
-      "0 */4 * * *"    -> 每 4 小時執行一次 (0, 4, 8, 12...)
-    
-    - 指定範圍: 使用連字號 "-"
-      "0 9-18 * * *"   -> 每天 09:00 到 18:00 的整點執行
+    ?? 測試指令
+    curl -H "X-API-KEY: %API_KEY%" "http://%SERVER_IP%:8888/printer/status?name=EPSON%20%E6%B8%AC%E8%A9%A6"
 #>
 
 # -------------------------------------------------------------------------
@@ -29,7 +23,7 @@ $maxLogSizeBytes    = 10MB
 $maxHistory         = 5                          
 $logRetentionDays   = 7                   
 
-# --- PDF 閱讀器路徑 ---
+# --- PDF 閱讀器路徑清單 ---
 $pdfReaderPaths     = @(
     "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
     "C:\Program Files\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
@@ -58,7 +52,6 @@ $maxStuckPrinters   = 3
 
 # --- 排程深度自癒設定 (Cron) ---
 $enableScheduledHeal = $true
-# 每天 07:30 與 18:30 執行
 $scheduledHealCron   = "30 7,18 * * *"
 
 # --- 佇列監控設定 ---
@@ -212,7 +205,6 @@ function Invoke-SpoolerSelfHealing {
     } catch { Send-SysAdminNotify -title "? 系統自動自癒失敗" -content "錯誤: $($_.Exception.Message)" }
 }
 
-# --- [維持] Cron 解析函數 (支援 List, Step, Range) ---
 function Test-CronMatch {
     param($cronExpression, $currentTime)
     if ([string]::IsNullOrEmpty($cronExpression)) { return $false }
@@ -228,7 +220,6 @@ function Test-CronMatch {
             $step = [int]$matches[2]
             return ($value % $step) -eq 0
         }
-        # 支援逗號清單 (如 7,18)
         if ($pattern -match ",") { 
             $list = $pattern.Split(",")
             foreach ($item in $list) { if ([int]$item -eq $value) { return $true } }
@@ -326,7 +317,7 @@ function Get-PrinterStatusData {
         $obj | Add-Member NoteProperty Jobs $jobCount
         $obj | Add-Member NoteProperty IP $pIP
         $obj | Add-Member NoteProperty Location $pLocation
-        $obj | Add-Member NoteProperty Comment $pComment
+        $obj | Add-Member NoteProperty Comment $pComment 
         $obj | Add-Member NoteProperty Driver $pDriver
         $obj | Add-Member NoteProperty PortName $pPort
         $obj | Add-Member NoteProperty ShareName $pShareName
@@ -334,6 +325,19 @@ function Get-PrinterStatusData {
         $results.Add($obj)
     }
     return $results
+}
+
+# --- [新增] UTF-8 參數讀取函數 ---
+# 解決 legacy system (BIG5) 下解析 UTF-8 URL encoded string 的亂碼問題
+function Get-Utf8QueryParam {
+    param($request, $key)
+    # 直接讀取 Raw Query
+    $query = $request.Url.Query
+    if ($query -match "[?&]$key=([^&]*)") {
+        # 使用標準 UnescapeDataString (支援 UTF-8)
+        return [System.Uri]::UnescapeDataString($matches[1])
+    }
+    return $null
 }
 
 function Test-PrinterHealth {
@@ -400,7 +404,7 @@ if ($null -eq $global:ValidPdfReader) {
 
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://*:$port/")
-try { $listener.Start(); Write-ApiLog "--- 伺服器 v16.1 上線 (Cron List 支援) ---" } catch { exit }
+try { $listener.Start(); Write-ApiLog "--- 伺服器 v16.0 上線 (UTF-8 編碼強制修復版) ---" } catch { exit }
 
 $nextCheck = Get-Date; $nextHeart = Get-Date; $contextTask = $null
 
@@ -456,7 +460,7 @@ while ($listener.IsListening) {
             elseif ($path -eq "/server/logs") {
                 $todayLog = Join-Path $logPath "PrintApi_$(Get-Date -Format 'yyyy-MM-dd').log"
                 if (Test-Path $todayLog) {
-                    $linesReq = $request.QueryString["lines"]
+                    $linesReq = Get-Utf8QueryParam $request "lines" # [修正]
                     $count = 100
                     if ($null -ne $linesReq -and $linesReq -match "^\d+$") { $count = [int]$linesReq }
                     $logContent = Get-Content $todayLog | Select-Object -Last $count
@@ -465,11 +469,11 @@ while ($listener.IsListening) {
             }
             elseif ($path -eq "/printer/print-pdf") {
                 if ($request.HttpMethod -eq "POST") {
-                    $pName = $request.QueryString["name"]
+                    $pName = Get-Utf8QueryParam $request "name" # [修正]
                     $pObj = Get-WmiObject Win32_Printer | Where-Object { $_.Name -eq $pName }
                     
                     if ($null -ne $pObj) {
-                        $duplexReq = $request.QueryString["duplex"]
+                        $duplexReq = Get-Utf8QueryParam $request "duplex" # [修正]
                         $restoreDuplex = $false; $oldDuplexMode = $null
                         
                         if ($null -ne $duplexReq) {
@@ -530,7 +534,7 @@ while ($listener.IsListening) {
                 } else { $res.message = "僅支援 POST 方法" }
             }
             elseif ($path -eq "/printer/status") {
-                $pName = $request.QueryString["name"]
+                $pName = Get-Utf8QueryParam $request "name" # [修正]
                 $all = Get-PrinterStatusData
                 $target = $null
                 foreach($item in $all) { if($item.Name -eq $pName) { $target = $item; break } }
@@ -541,7 +545,7 @@ while ($listener.IsListening) {
                 else { $res.message = "找不到指定的印表機" }
             }
             elseif ($path -eq "/printer/refresh") {
-                $pName = $request.QueryString["name"]
+                $pName = Get-Utf8QueryParam $request "name" # [修正]
                 $pObj = Get-WmiObject -Class Win32_Printer | Where-Object { $_.Name -eq $pName }
                 if ($null -ne $pObj) {
                     $pObj.Pause(); Start-Sleep -Milliseconds 500; $pObj.Resume()
@@ -551,7 +555,7 @@ while ($listener.IsListening) {
                 } else { $res.message = "找不到指定的印表機" }
             }
             elseif ($path -eq "/printer/clear") {
-                $pName = $request.QueryString["name"]
+                $pName = Get-Utf8QueryParam $request "name" # [修正]
                 $jobs = Get-WmiObject Win32_PrintJob | Where-Object { $_.Name -like "*$pName*" }
                 if ($jobs) { foreach($j in $jobs){$j.Delete()} }
                 $res.success = $true
