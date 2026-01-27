@@ -54,7 +54,7 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Print Server Monitor</h1>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v1.8 (Edit Meta)</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v1.9 (Location Filter)</p>
                     </div>
                 </div>
 
@@ -78,7 +78,7 @@
                                    class="pl-9 pr-3 py-1.5 text-sm rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 w-28 transition-colors">
                         </div>
                     </div>
-                    <!-- 綁定 disabled 屬性，若設定無效則禁用 -->
+                    <!-- 綁定 disabled 屬性 -->
                     <button @click="fetchPrinters(true)" :disabled="loading || !isConfigValid"
                             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-blue-500/20 disabled:shadow-none">
                         <i class="fa-solid fa-rotate" :class="{'fa-spin': loading}"></i>
@@ -160,14 +160,28 @@
             <!-- 右側內容區 -->
             <section class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 relative transition-colors">
                 
-                <!-- 搜尋與篩選 -->
-                <div class="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
-                    <div class="relative w-full sm:w-96">
-                        <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-search"></i></span>
-                        <input type="text" v-model="searchQuery" placeholder="搜尋名稱、IP、狀態..." 
-                               class="w-full pl-10 pr-4 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors">
+                <!-- 搜尋與篩選列 (RWD: 手機直排 / 桌面橫排) -->
+                <div class="mb-6 flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center">
+                    <div class="flex flex-col sm:flex-row gap-4 w-full xl:w-auto">
+                        <!-- 搜尋框 -->
+                        <div class="relative w-full sm:w-80">
+                            <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-search"></i></span>
+                            <input type="text" v-model="searchQuery" placeholder="搜尋名稱、IP、狀態..." 
+                                   class="w-full pl-10 pr-4 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors">
+                        </div>
+                        <!-- [新增] 位置篩選 -->
+                        <div class="relative w-full sm:w-64">
+                            <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-location-dot"></i></span>
+                            <select v-model="filterLocation" class="w-full pl-10 pr-8 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors appearance-none cursor-pointer">
+                                <option value="">所有位置 ({{ uniqueLocations.length }})</option>
+                                <option v-for="loc in uniqueLocations" :key="loc" :value="loc">{{ loc }}</option>
+                            </select>
+                            <span class="absolute right-3 top-3 text-slate-400 pointer-events-none"><i class="fa-solid fa-chevron-down text-xs"></i></span>
+                        </div>
                     </div>
-                    <div class="flex gap-2 flex-wrap justify-center">
+                    
+                    <!-- 狀態篩選按鈕 -->
+                    <div class="flex gap-2 flex-wrap justify-start">
                          <button @click="filterStatus = ''" 
                             :class="filterStatus === '' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" 
                             class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">全部</button>
@@ -243,7 +257,6 @@
                                 <button @click="refreshPrinter(p.Name)" title="重新整理連線" class="bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 text-xs py-2 rounded border border-slate-200 dark:border-slate-600 transition-colors">
                                     <i class="fa-solid fa-sync"></i> 刷新
                                 </button>
-                                <!-- [新增] 編輯按鈕 -->
                                 <button @click="openEditModal(p)" title="編輯資訊" class="bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 text-xs py-2 rounded border border-yellow-200 dark:border-yellow-800 transition-colors">
                                     <i class="fa-solid fa-pen-to-square"></i> 編輯
                                 </button>
@@ -274,7 +287,7 @@
             </section>
         </main>
 
-        <!-- Edit Info Modal (新增) -->
+        <!-- Edit Info Modal -->
         <transition name="fade">
             <div v-if="showEditModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden transition-colors">
@@ -384,7 +397,7 @@
 
         createApp({
             setup() {
-                // 狀態變數: 優先從 localStorage 讀取
+                // 狀態變數
                 const config = ref({
                     ip: localStorage.getItem('ps_server_ip') || '',
                     key: localStorage.getItem('ps_api_key') || ''
@@ -398,6 +411,7 @@
                 const lastUpdated = ref('');
                 const searchQuery = ref('');
                 const filterStatus = ref('');
+                const filterLocation = ref('');
                 
                 // Edit Modal
                 const showEditModal = ref(false);
@@ -420,19 +434,16 @@
 
                 let pollTimer = null;
 
-                // 驗證設定是否完整
                 const isConfigValid = computed(() => {
                     return config.value.ip && config.value.ip.trim() !== '' && 
                            config.value.key && config.value.key.trim() !== '';
                 });
 
-                // 儲存設定 (IP, Key)
                 watch(config, (newVal) => {
                     localStorage.setItem('ps_server_ip', newVal.ip);
                     localStorage.setItem('ps_api_key', newVal.key);
                 }, { deep: true });
 
-                // 儲存設定 (AutoRefresh) 並觸發輪詢
                 watch(autoRefresh, (newVal) => {
                     localStorage.setItem('ps_auto_refresh', newVal);
                     if (newVal && isConfigValid.value) {
@@ -449,7 +460,6 @@
                     }
                 });
 
-                // 深色模式邏輯
                 watch(darkMode, (val) => {
                     localStorage.setItem('ps_dark_mode', val);
                     if (val) document.documentElement.classList.add('dark');
@@ -499,7 +509,11 @@
                     }
                 };
 
-                // 篩選邏輯
+                const uniqueLocations = computed(() => {
+                    const locs = printers.value.map(p => p.Location).filter(l => l && l.trim() !== '');
+                    return [...new Set(locs)].sort();
+                });
+
                 const filteredPrinters = computed(() => {
                     return printers.value.filter(p => {
                         const matchQuery = 
@@ -513,7 +527,9 @@
                         else if (filterStatus.value === 'Warning') matchStatus = p.Status.includes('Warning');
                         else if (filterStatus.value === 'Issue') matchStatus = p.Status === 'Error' || p.Status.includes('Warning');
 
-                        return matchQuery && matchStatus;
+                        const matchLocation = filterLocation.value === '' ? true : p.Location === filterLocation.value;
+
+                        return matchQuery && matchStatus && matchLocation;
                     });
                 });
 
@@ -576,7 +592,6 @@
                      } catch(e) { } finally { loading.value = false; }
                 };
 
-                // [新增] 編輯資訊功能
                 const openEditModal = (printer) => {
                     editTarget.value = printer;
                     editLocation.value = printer.Location || '';
@@ -665,7 +680,6 @@
                     }
                 };
 
-                // Toast Helper
                 const toast = (text, bg = "#3b82f6") => {
                     Toastify({
                         text: text,
@@ -678,7 +692,6 @@
                 const success = (text) => toast(text, "#10b981");
                 const error = (text) => toast(text, "#ef4444");
 
-                // Init
                 onMounted(() => {
                     if (isConfigValid.value) {
                         fetchPrinters();
@@ -690,11 +703,11 @@
 
                 return {
                     config, printers, loading, lastUpdated, autoRefresh, darkMode, isConfigValid,
-                    searchQuery, filterStatus, filteredPrinters, errorCount,
+                    searchQuery, filterStatus, filterLocation, uniqueLocations, filteredPrinters, errorCount,
                     getStatusColor, toggleDarkMode,
                     fetchPrinters, 
                     clearQueue, refreshPrinter, restartSpooler, selfHeal, restartScript, 
-                    showEditModal, editTarget, editLocation, editComment, saving, openEditModal, submitEdit, // Edit Meta
+                    showEditModal, editTarget, editLocation, editComment, saving, openEditModal, submitEdit, 
                     showPdfModal, selectedPrinter, pdfDuplex, uploading, fileInput, openPdfModal, submitPdf,
                     showLogModal, logData, logsLoading, showLogs, fetchLogs
                 };
