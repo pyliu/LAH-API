@@ -1,14 +1,14 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v16.6 (Script Self-Restart API)
+    版本：v16.7 (Printer Metadata Update Support)
     修正：
-    1. 新增 /server/restart-script 接口：允許透過 API 觸發腳本自我重啟 (釋放 Port -> 啟動新實例 -> 關閉舊實例)。
-    2. 維持 v16.5 的所有設定：清空預設頻道、07:30 排程自癒。
+    1. 新增 /printer/update 接口：允許透過 API 更改印表機的 "位置(Location)" 與 "備註(Comment)"。
+    2. 維持 v16.6 的腳本重啟、CORS、自癒與所有監控功能。
     3. 完全相容 PowerShell 2.0 (Windows Server 2008 SP2) 至 2019。
 .NOTES
-    ?? 重啟腳本測試指令
-    curl -H "X-API-KEY: %API_KEY%" http://%SERVER_IP%:8888/server/restart-script
+    ?? 測試指令 (更新位置與備註)
+    curl -H "X-API-KEY: %API_KEY%" "http://%SERVER_IP%:8888/printer/update?name=PrinterName&location=NewLocation&comment=NewComment"
 #>
 
 # -------------------------------------------------------------------------
@@ -35,7 +35,7 @@ $pdfReaderPaths     = @(
 $notifyIp           = "220.1.34.75"
 $notifyEndpoint     = "/api/notification_json_api.php"
 $notifyUrl          = "http://$notifyIp$notifyEndpoint"
-$notifyChannels     = @("HA10013859")                     # 預設不發送給特定頻道
+$notifyChannels     = @()                     # 預設不發送給特定頻道
 
 # [設定] 通知伺服器健康檢查
 $enableNotifyHealthCheck = $true      # 開關：是否在啟動時檢查伺服器存活
@@ -182,9 +182,7 @@ function Send-SysAdminNotify {
         $fields = @{ "type"="add_notification"; "title"=$title; "content"=$content; "priority"="3"; "sender"="$($env:COMPUTERNAME) ($localIp)"; "from_ip"=$localIp }
         $encodedParts = New-Object System.Collections.Generic.List[string]
         foreach ($key in $fields.Keys) { $encodedParts.Add("$key=$([System.Uri]::EscapeDataString($fields[$key]))") }
-        # 此時 $notifyChannels 確定不為空
-        foreach ($chan in $notifyChannels) { $encodedParts.Add("channels[]=$([System.Uri]::EscapeDataString($chan))") }
-        
+        if ($null -ne $notifyChannels) { foreach ($chan in $notifyChannels) { $encodedParts.Add("channels[]=$([System.Uri]::EscapeDataString($chan))") } }
         $postBody = [string]::Join("&", $encodedParts)
         
         Write-ApiLog ">>> [準備發送通知] 標題: $title"
@@ -441,10 +439,9 @@ if ($enableNotifyHealthCheck) {
 
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://*:$port/")
-try { $listener.Start(); Write-ApiLog "--- 伺服器 v16.6 上線 (重啟腳本功能已啟用) ---" } catch { exit }
+try { $listener.Start(); Write-ApiLog "--- 伺服器 v16.7 上線 (印表機資料更新支援) ---" } catch { exit }
 
 $nextCheck = Get-Date; $nextHeart = Get-Date; $contextTask = $null
-$restartScript = $false
 
 while ($listener.IsListening) {
     try {
@@ -506,11 +503,35 @@ while ($listener.IsListening) {
                 } else { $res.message = "今日尚無日誌檔案" }
             }
             elseif ($path -eq "/server/restart-script") {
-                # --- [新增] 自我重啟接口 ---
                 $res.success = $true
                 $res.message = "API 伺服器正在重新啟動中..."
                 Write-ApiLog ">>> [系統操作] 收到重啟指令 (Restart Script)"
                 $restartScript = $true
+            }
+            elseif ($path -eq "/printer/update") {
+                # --- [新功能] 更新印表機資料 ---
+                $pName = Get-Utf8QueryParam $request "name"
+                $pLoc  = Get-Utf8QueryParam $request "location"
+                $pCom  = Get-Utf8QueryParam $request "comment"
+                
+                $pObj = Get-WmiObject -Class Win32_Printer | Where-Object { $_.Name -eq $pName }
+                if ($null -ne $pObj) {
+                    $updates = @()
+                    if ($null -ne $pLoc) { $pObj.Location = $pLoc; $updates += "位置" }
+                    if ($null -ne $pCom) { $pObj.Comment = $pCom; $updates += "備註" }
+                    
+                    if ($updates.Count -gt 0) {
+                        try {
+                            $pObj.Put() # WMI Commit
+                            $res.success = $true
+                            $res.message = "印表機 [$pName] 資料更新成功 (" + [string]::Join(", ", $updates) + ")"
+                            Send-SysAdminNotify -content "API：印表機 [$pName] 基本資料已更新。" -title "資產管理"
+                        } catch {
+                            $res.message = "更新失敗: $($_.Exception.Message)"
+                            Write-ApiLog "!!! [更新錯誤] $($_.Exception.Message)"
+                        }
+                    } else { $res.message = "未提供需更新的欄位 (location 或 comment)" }
+                } else { $res.message = "找不到指定的印表機" }
             }
             elseif ($path -eq "/printer/print-pdf") {
                 if ($request.HttpMethod -eq "POST") {
