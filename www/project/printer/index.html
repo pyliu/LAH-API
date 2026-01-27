@@ -54,7 +54,7 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Print Server Monitor</h1>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v1.7 (Input Validation)</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v1.8 (Edit Meta)</p>
                     </div>
                 </div>
 
@@ -239,14 +239,18 @@
                             </div>
 
                             <!-- 操作按鈕 -->
-                            <div class="flex gap-2 mt-auto pt-2 border-t border-slate-100 dark:border-slate-700">
-                                <button @click="refreshPrinter(p.Name)" title="重新整理連線" class="flex-1 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 text-xs py-2 rounded border border-slate-200 dark:border-slate-600 transition-colors">
+                            <div class="grid grid-cols-4 gap-2 mt-auto pt-2 border-t border-slate-100 dark:border-slate-700">
+                                <button @click="refreshPrinter(p.Name)" title="重新整理連線" class="bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 text-xs py-2 rounded border border-slate-200 dark:border-slate-600 transition-colors">
                                     <i class="fa-solid fa-sync"></i> 刷新
                                 </button>
-                                <button @click="openPdfModal(p)" title="上傳 PDF 列印" class="flex-1 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-300 text-xs py-2 rounded border border-blue-200 dark:border-blue-800 transition-colors">
+                                <!-- [新增] 編輯按鈕 -->
+                                <button @click="openEditModal(p)" title="編輯資訊" class="bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 text-xs py-2 rounded border border-yellow-200 dark:border-yellow-800 transition-colors">
+                                    <i class="fa-solid fa-pen-to-square"></i> 編輯
+                                </button>
+                                <button @click="openPdfModal(p)" title="上傳 PDF 列印" class="bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-300 text-xs py-2 rounded border border-blue-200 dark:border-blue-800 transition-colors">
                                     <i class="fa-solid fa-file-pdf"></i> 列印
                                 </button>
-                                <button @click="clearQueue(p.Name)" title="清除佇列" class="flex-1 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-300 text-xs py-2 rounded border border-red-200 dark:border-red-800 transition-colors">
+                                <button @click="clearQueue(p.Name)" title="清除佇列" class="bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-300 text-xs py-2 rounded border border-red-200 dark:border-red-800 transition-colors">
                                     <i class="fa-solid fa-trash"></i> 清除
                                 </button>
                             </div>
@@ -269,6 +273,40 @@
                 </div>
             </section>
         </main>
+
+        <!-- Edit Info Modal (新增) -->
+        <transition name="fade">
+            <div v-if="showEditModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden transition-colors">
+                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-pen-to-square mr-2 text-yellow-500"></i>編輯印表機資訊</h3>
+                        <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-sm text-yellow-800 dark:text-yellow-200 mb-4 border border-yellow-100 dark:border-yellow-900/50">
+                            <span class="font-bold">目標：</span> {{ editTarget?.Name }}
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">位置 (Location)</label>
+                            <input type="text" v-model="editLocation" class="block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors shadow-sm" placeholder="例如：2F 會議室">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">備註 (Comment)</label>
+                            <textarea v-model="editComment" rows="3" class="block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors shadow-sm" placeholder="例如：資產編號 A12345"></textarea>
+                        </div>
+                    </div>
+                    <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
+                        <button @click="showEditModal = false" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium">取消</button>
+                        <button @click="submitEdit" :disabled="saving" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-yellow-500/20">
+                            <i v-if="saving" class="fa-solid fa-spinner fa-spin"></i>
+                            {{ saving ? '儲存中...' : '儲存變更' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
 
         <!-- PDF 上傳 Modal -->
         <transition name="fade">
@@ -352,7 +390,6 @@
                     key: localStorage.getItem('ps_api_key') || ''
                 });
                 
-                // 自動讀取上次的自動更新設定 (預設為 false)
                 const autoRefresh = ref(localStorage.getItem('ps_auto_refresh') === 'true');
                 const darkMode = ref(localStorage.getItem('ps_dark_mode') === 'true');
 
@@ -362,6 +399,13 @@
                 const searchQuery = ref('');
                 const filterStatus = ref('');
                 
+                // Edit Modal
+                const showEditModal = ref(false);
+                const editTarget = ref(null);
+                const editLocation = ref('');
+                const editComment = ref('');
+                const saving = ref(false);
+
                 // PDF Modal
                 const showPdfModal = ref(false);
                 const selectedPrinter = ref(null);
@@ -397,7 +441,6 @@
                     } else {
                         stopPolling();
                         if (newVal && !isConfigValid.value) {
-                            // 如果嘗試開啟但設定無效，自動關閉
                             setTimeout(() => autoRefresh.value = false, 100);
                             error("請先完成連線設定");
                         } else {
@@ -523,21 +566,42 @@
                     await performAction(`/service/self-heal`, "深度自癒流程已啟動");
                 };
 
-                // [新增] 重啟 API 腳本
                 const restartScript = async () => {
                      if (!confirm("確定要重啟 API 監控服務嗎？(連線將會短暫中斷)")) return;
-                     // 這裡不需要 performAction 因為重啟後無法馬上得到 response
                      loading.value = true;
                      try {
-                        // 使用 fetch 送出請求後不等回應 (因為服務會斷線)
                         axios.get(getApiUrl('/server/restart-script'), { headers: { 'X-API-KEY': config.value.key } }).catch(() => {});
                         success("重啟指令已發送，請稍候...");
-                        setTimeout(() => fetchPrinters(), 5000); // 5秒後重試連線
-                     } catch(e) {
-                         // ignore
-                     } finally {
-                         loading.value = false;
-                     }
+                        setTimeout(() => fetchPrinters(), 5000); 
+                     } catch(e) { } finally { loading.value = false; }
+                };
+
+                // [新增] 編輯資訊功能
+                const openEditModal = (printer) => {
+                    editTarget.value = printer;
+                    editLocation.value = printer.Location || '';
+                    editComment.value = printer.Comment || '';
+                    showEditModal.value = true;
+                };
+
+                const submitEdit = async () => {
+                    if(!editTarget.value) return;
+                    saving.value = true;
+                    try {
+                        const url = getApiUrl(`/printer/update?name=${encodeURIComponent(editTarget.value.Name)}&location=${encodeURIComponent(editLocation.value)}&comment=${encodeURIComponent(editComment.value)}`);
+                        const res = await axios.get(url, { headers: { 'X-API-KEY': config.value.key } });
+                        if (res.data.success) {
+                            success("印表機資訊已更新");
+                            showEditModal.value = false;
+                            fetchPrinters(false);
+                        } else {
+                            error(res.data.message);
+                        }
+                    } catch(err) {
+                        error("更新失敗: " + err.message);
+                    } finally {
+                        saving.value = false;
+                    }
                 };
 
                 const openPdfModal = (printer) => {
@@ -629,7 +693,8 @@
                     searchQuery, filterStatus, filteredPrinters, errorCount,
                     getStatusColor, toggleDarkMode,
                     fetchPrinters, 
-                    clearQueue, refreshPrinter, restartSpooler, selfHeal, restartScript, // <--- 已補上
+                    clearQueue, refreshPrinter, restartSpooler, selfHeal, restartScript, 
+                    showEditModal, editTarget, editLocation, editComment, saving, openEditModal, submitEdit, // Edit Meta
                     showPdfModal, selectedPrinter, pdfDuplex, uploading, fileInput, openPdfModal, submitPdf,
                     showLogModal, logData, logsLoading, showLogs, fetchLogs
                 };
