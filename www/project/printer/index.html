@@ -28,11 +28,17 @@
     </script>
 
     <style>
-        [v-cloak] { display: none; }
+        /* [關鍵修正] 加上 !important 防止 Tailwind 覆蓋 */
+        [v-cloak] { display: none !important; }
+        
         .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
         .fade-enter-from, .fade-leave-to { opacity: 0; }
         
-        /* 自訂捲軸 (支援深色) */
+        /* 初始載入畫面的過渡效果 */
+        #init-loading { transition: opacity 0.5s ease-out; }
+        .fade-out { opacity: 0; pointer-events: none; }
+        
+        /* 自訂捲軸 */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         .dark ::-webkit-scrollbar-track { background: #1e293b; }
@@ -42,6 +48,19 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 font-sans h-screen flex flex-col overflow-hidden transition-colors duration-300">
+
+    <!-- 初始資源載入遮罩 -->
+    <div id="init-loading" class="fixed inset-0 bg-slate-50 dark:bg-slate-950 z-[100] flex flex-col items-center justify-center">
+        <div class="text-center">
+            <!-- 簡易 Spinner SVG -->
+            <svg class="animate-spin h-12 w-12 text-blue-600 mb-4 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <h2 class="text-xl font-bold text-slate-700 dark:text-slate-200">系統資源讀取中...</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">正在初始化 Print Server Monitor 儀表板</p>
+        </div>
+    </div>
 
     <div id="app" v-cloak class="flex-1 flex flex-col h-full">
         
@@ -54,7 +73,7 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Print Server Monitor</h1>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v1.9 (Location Filter)</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v2.3 (Hybrid Sync)</p>
                     </div>
                 </div>
 
@@ -160,7 +179,7 @@
             <!-- 右側內容區 -->
             <section class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 relative transition-colors">
                 
-                <!-- 搜尋與篩選列 (RWD: 手機直排 / 桌面橫排) -->
+                <!-- 搜尋與篩選列 -->
                 <div class="mb-6 flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center">
                     <div class="flex flex-col sm:flex-row gap-4 w-full xl:w-auto">
                         <!-- 搜尋框 -->
@@ -169,7 +188,7 @@
                             <input type="text" v-model="searchQuery" placeholder="搜尋名稱、IP、狀態..." 
                                    class="w-full pl-10 pr-4 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors">
                         </div>
-                        <!-- [新增] 位置篩選 -->
+                        <!-- 位置篩選 -->
                         <div class="relative w-full sm:w-64">
                             <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-location-dot"></i></span>
                             <select v-model="filterLocation" class="w-full pl-10 pr-8 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors appearance-none cursor-pointer">
@@ -252,18 +271,18 @@
                                 <div v-if="p.PortName" class="truncate"><i class="fa-solid fa-plug w-4"></i> {{ p.PortName }}</div>
                             </div>
 
-                            <!-- 操作按鈕 -->
+                            <!-- 操作按鈕 [修正] 加入 disabled 綁定 -->
                             <div class="grid grid-cols-4 gap-2 mt-auto pt-2 border-t border-slate-100 dark:border-slate-700">
-                                <button @click="refreshPrinter(p.Name)" title="重新整理連線" class="bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 text-xs py-2 rounded border border-slate-200 dark:border-slate-600 transition-colors">
-                                    <i class="fa-solid fa-sync"></i> 刷新
+                                <button @click="refreshPrinter(p.Name)" :disabled="loading" title="重新整理連線" class="bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 text-xs py-2 rounded border border-slate-200 dark:border-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fa-solid fa-sync" :class="{'fa-spin': loading}"></i> 刷新
                                 </button>
-                                <button @click="openEditModal(p)" title="編輯資訊" class="bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 text-xs py-2 rounded border border-yellow-200 dark:border-yellow-800 transition-colors">
+                                <button @click="openEditModal(p)" :disabled="loading" title="編輯資訊" class="bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 text-xs py-2 rounded border border-yellow-200 dark:border-yellow-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                     <i class="fa-solid fa-pen-to-square"></i> 編輯
                                 </button>
-                                <button @click="openPdfModal(p)" title="上傳 PDF 列印" class="bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-300 text-xs py-2 rounded border border-blue-200 dark:border-blue-800 transition-colors">
+                                <button @click="openPdfModal(p)" :disabled="loading" title="上傳 PDF 列印" class="bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-300 text-xs py-2 rounded border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                     <i class="fa-solid fa-file-pdf"></i> 列印
                                 </button>
-                                <button @click="clearQueue(p.Name)" title="清除佇列" class="bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-300 text-xs py-2 rounded border border-red-200 dark:border-red-800 transition-colors">
+                                <button @click="clearQueue(p.Name)" :disabled="loading" title="清除佇列" class="bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-300 text-xs py-2 rounded border border-red-200 dark:border-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                     <i class="fa-solid fa-trash"></i> 清除
                                 </button>
                             </div>
@@ -299,12 +318,10 @@
                         <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-sm text-yellow-800 dark:text-yellow-200 mb-4 border border-yellow-100 dark:border-yellow-900/50">
                             <span class="font-bold">目標：</span> {{ editTarget?.Name }}
                         </div>
-
                         <div>
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">位置 (Location)</label>
                             <input type="text" v-model="editLocation" class="block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors shadow-sm" placeholder="例如：2F 會議室">
                         </div>
-
                         <div>
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">備註 (Comment)</label>
                             <textarea v-model="editComment" rows="3" class="block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors shadow-sm" placeholder="例如：資產編號 A12345"></textarea>
@@ -321,7 +338,7 @@
             </div>
         </transition>
 
-        <!-- PDF 上傳 Modal -->
+        <!-- PDF Modal -->
         <transition name="fade">
             <div v-if="showPdfModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden transition-colors">
@@ -397,12 +414,13 @@
 
         createApp({
             setup() {
-                // 狀態變數
+                // 狀態變數: 優先從 localStorage 讀取
                 const config = ref({
                     ip: localStorage.getItem('ps_server_ip') || '',
                     key: localStorage.getItem('ps_api_key') || ''
                 });
                 
+                // 自動讀取上次的自動更新設定 (預設為 false)
                 const autoRefresh = ref(localStorage.getItem('ps_auto_refresh') === 'true');
                 const darkMode = ref(localStorage.getItem('ps_dark_mode') === 'true');
 
@@ -481,6 +499,25 @@
 
                 const getApiUrl = (path) => `http://${config.value.ip}:8888${path}`;
 
+                const fetchSinglePrinter = async (name) => {
+                    try {
+                        const res = await axios.get(getApiUrl(`/printer/status?name=${encodeURIComponent(name)}`), {
+                            headers: { 'X-API-KEY': config.value.key }
+                        });
+                        
+                        if (res.data.success && res.data.data) {
+                            const newPrinterData = res.data.data;
+                            const idx = printers.value.findIndex(p => p.Name === name);
+                            if (idx !== -1) {
+                                printers.value[idx] = newPrinterData;
+                            }
+                            lastUpdated.value = new Date().toLocaleString();
+                        }
+                    } catch (err) {
+                        console.error("Failed to refresh single printer", err);
+                    }
+                };
+
                 const fetchPrinters = async (showToast = false) => {
                     if (!isConfigValid.value) {
                         if (showToast) error("請輸入完整的伺服器 IP 與 API Key");
@@ -506,6 +543,12 @@
                         autoRefresh.value = false; 
                     } finally {
                         loading.value = false;
+                        
+                        const loader = document.getElementById('init-loading');
+                        if (loader) {
+                            loader.classList.add('fade-out');
+                            setTimeout(() => loader.remove(), 500);
+                        }
                     }
                 };
 
@@ -544,7 +587,7 @@
                     return isBorder ? 'bg-amber-500' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400';
                 };
 
-                const performAction = async (endpoint, successMsg) => {
+                const performAction = async (endpoint, successMsg, targetPrinterName = null) => {
                     loading.value = true;
                     try {
                         const res = await axios.get(getApiUrl(endpoint), {
@@ -552,7 +595,11 @@
                         });
                         if (res.data.success) {
                             success(res.data.message || successMsg);
-                            fetchPrinters(false);
+                            if (targetPrinterName) {
+                                fetchSinglePrinter(targetPrinterName);
+                            } else {
+                                fetchPrinters(false);
+                            }
                         } else {
                             error(res.data.message);
                         }
@@ -565,11 +612,11 @@
 
                 const clearQueue = async (name) => {
                     if (!confirm(`確定要清除 [${name}] 的所有工作嗎？`)) return;
-                    await performAction(`/printer/clear?name=${encodeURIComponent(name)}`, "佇列已清除");
+                    await performAction(`/printer/clear?name=${encodeURIComponent(name)}`, "佇列已清除", name);
                 };
 
                 const refreshPrinter = async (name) => {
-                    await performAction(`/printer/refresh?name=${encodeURIComponent(name)}`, "重新整理指令已發送");
+                    await performAction(`/printer/refresh?name=${encodeURIComponent(name)}`, "重新整理指令已發送", name);
                 };
 
                 const restartSpooler = async () => {
@@ -608,7 +655,9 @@
                         if (res.data.success) {
                             success("印表機資訊已更新");
                             showEditModal.value = false;
-                            fetchPrinters(false);
+                            // 樂觀更新
+                            editTarget.value.Location = editLocation.value;
+                            editTarget.value.Comment = editComment.value;
                         } else {
                             error(res.data.message);
                         }
@@ -643,6 +692,7 @@
                             success("PDF 已成功發送至列印佇列");
                             showPdfModal.value = false;
                             fileInput.value.value = '';
+                            setTimeout(() => fetchSinglePrinter(selectedPrinter.value.Name), 1000);
                         } else {
                             error(res.data.message);
                         }
@@ -693,6 +743,14 @@
                 const error = (text) => toast(text, "#ef4444");
 
                 onMounted(() => {
+                    if (!isConfigValid.value) {
+                         const loader = document.getElementById('init-loading');
+                         if (loader) {
+                            loader.classList.add('fade-out');
+                            setTimeout(() => loader.remove(), 500);
+                        }
+                    }
+
                     if (isConfigValid.value) {
                         fetchPrinters();
                         if (autoRefresh.value) {
@@ -705,7 +763,7 @@
                     config, printers, loading, lastUpdated, autoRefresh, darkMode, isConfigValid,
                     searchQuery, filterStatus, filterLocation, uniqueLocations, filteredPrinters, errorCount,
                     getStatusColor, toggleDarkMode,
-                    fetchPrinters, 
+                    fetchPrinters, fetchSinglePrinter,
                     clearQueue, refreshPrinter, restartSpooler, selfHeal, restartScript, 
                     showEditModal, editTarget, editLocation, editComment, saving, openEditModal, submitEdit, 
                     showPdfModal, selectedPrinter, pdfDuplex, uploading, fileInput, openPdfModal, submitPdf,
