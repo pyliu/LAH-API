@@ -5,22 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>印表機伺服器監控中心</title>
     
-    <!-- [離線模式] 載入本地整合後的資源 -->
     <link rel="stylesheet" href="offline/bundle.css">
     <script src="offline/tailwind.js"></script>
     <script src="offline/bundle.js"></script>
 
-    <!-- Tailwind 設定 -->
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        slate: {
-                            850: '#1e293b',
-                            950: '#0f172a'
-                        }
+                        slate: { 850: '#1e293b', 950: '#0f172a' }
                     }
                 }
             }
@@ -30,28 +25,51 @@
     <style>
         [v-cloak] { display: none !important; }
         
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
-        
         #init-loading { transition: opacity 0.5s ease-out; }
         .fade-out { opacity: 0; pointer-events: none; }
         
-        /* [修正] 列表過渡動畫設定為 1s (慢速) */
-        .list-move, 
-        .list-enter-active,
-        .list-leave-active {
-            transition: all 1s cubic-bezier(0.55, 0, 0.1, 1);
+        /* --- [核心優化] 儀表板移動動畫系統 --- */
+        
+        /* 1. 移動中的元素 (Reordering) */
+        .list-move {
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1); /* 慢速、平滑 */
+            z-index: 10; /* 移動時層級較高，避免被遮擋 */
         }
-        .list-enter-from,
+
+        /* 2. 新增的元素 (Enter) */
+        .list-enter-active {
+            transition: all 1.2s ease-out;
+            transition-delay: 0.1s; /* 稍微延遲，讓移動的先走 */
+        }
+        .list-enter-from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.9);
+        }
+
+        /* 3. 移除的元素 (Leave) */
+        .list-leave-active {
+            transition: all 0.8s ease-in;
+            position: absolute; /* [關鍵] 讓元素脫離排版，後方元素才能滑過來 */
+            z-index: 0; /* 沉到底部 */
+            
+            /* 修正 Grid Absolute 定位問題：限制寬度以免跑版 */
+            width: calc(100% - 2rem); /* 扣除 padding/gap 的估算值，視 RWD 調整 */
+        }
+        @media (min-width: 1280px) { .list-leave-active { width: calc(50% - 1.5rem); } } /* 2 cols */
+        @media (min-width: 1536px) { .list-leave-active { width: calc(33.333% - 1.5rem); } } /* 3 cols */
+
         .list-leave-to {
             opacity: 0;
-            transform: scale(0.95) translateY(10px);
+            transform: scale(0.8);
         }
-        .list-leave-active {
-            position: absolute;
-            width: 100%; /* 避免 Grid 布局在移除時跳動 */
+
+        /* 確保容器有定位基準 */
+        .printer-grid-container {
+            position: relative;
         }
-        
+
+        /* ------------------------------------- */
+
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         .dark ::-webkit-scrollbar-track { background: #1e293b; }
@@ -62,7 +80,6 @@
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 font-sans h-screen flex flex-col overflow-hidden transition-colors duration-300">
 
-    <!-- 初始資源載入遮罩 -->
     <div id="init-loading" class="fixed inset-0 bg-slate-50 dark:bg-slate-950 z-[100] flex flex-col items-center justify-center">
         <div class="text-center">
             <svg class="animate-spin h-12 w-12 text-blue-600 mb-4 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -76,7 +93,6 @@
 
     <div id="app" v-cloak class="flex-1 flex flex-col h-full">
         
-        <!-- 頂部導航列 -->
         <header class="bg-white dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-800 z-20 transition-colors">
             <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -85,34 +101,29 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Print Server Monitor</h1>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v3.3 (Full Integrated)</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v3.4 (Cinematic UI)</p>
                     </div>
                 </div>
 
-                <!-- 連線設定區 -->
                 <div class="flex items-center gap-3 bg-slate-100 dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors">
-                    
-                    <button @click="toggleDarkMode" class="w-8 h-8 rounded-full bg-white dark:bg-slate-700 text-slate-600 dark:text-yellow-400 shadow-sm border border-slate-200 dark:border-slate-600 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-all mr-2" :title="darkMode ? '切換為亮色' : '切換為深色'">
+                    <button @click="toggleDarkMode" class="w-8 h-8 rounded-full bg-white dark:bg-slate-700 text-slate-600 dark:text-yellow-400 shadow-sm border border-slate-200 dark:border-slate-600 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-all mr-2">
                         <i class="fa-solid" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
                     </button>
 
-                    <!-- 伺服器切換器 -->
                     <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fa-solid fa-server text-slate-400"></i>
                         </div>
                         <select v-model="currentServerId" @change="switchServer" class="pl-9 pr-8 py-1.5 text-sm rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 w-48 transition-colors appearance-none cursor-pointer">
                             <option value="" disabled>請選擇伺服器</option>
-                            <option v-for="srv in servers" :key="srv.id" :value="srv.id">
-                                {{ srv.name }} ({{ srv.ip }})
-                            </option>
+                            <option v-for="srv in servers" :key="srv.id" :value="srv.id">{{ srv.name }} ({{ srv.ip }})</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
                             <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
                         </div>
                     </div>
 
-                    <button @click="openServerManager" class="bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded text-sm font-medium transition-colors" title="管理伺服器列表">
+                    <button @click="openServerManager" class="bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded text-sm font-medium transition-colors">
                         <i class="fa-solid fa-gear"></i>
                     </button>
 
@@ -122,16 +133,14 @@
                         <span class="hidden sm:inline">連線</span>
                     </button>
                     
-                    <!-- [修正] 自動更新設定區塊 (含秒數輸入) -->
                     <div class="flex items-center ml-2 border-l border-slate-300 dark:border-slate-600 pl-3 gap-2">
-                        <label class="inline-flex items-center cursor-pointer" title="開啟自動更新">
+                        <label class="inline-flex items-center cursor-pointer" title="開啟/關閉自動更新">
                             <input type="checkbox" v-model="autoRefresh" :disabled="!isConfigValid" class="sr-only peer">
                             <div class="relative w-9 h-5 bg-gray-200 dark:bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
                         </label>
-                        <div v-if="autoRefresh" class="flex items-center transition-all animate-fade-in-right">
-                            <!-- 秒數輸入框 -->
-                            <input type="number" v-model.lazy="refreshInterval" @change="validateInterval" min="60" class="w-14 px-1 py-0.5 text-xs text-center border rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:ring-1 focus:ring-blue-500 outline-none" title="更新間隔 (秒)">
-                            <span class="text-xs text-slate-500 dark:text-slate-400 ml-1">秒</span>
+                        <div v-if="autoRefresh" class="flex items-center transition-all animate-fade-in-right bg-white dark:bg-slate-700 rounded border border-slate-300 dark:border-slate-600 px-1">
+                            <input type="number" v-model.lazy="refreshInterval" @change="validateInterval" min="60" class="w-10 px-0.5 py-0.5 text-xs text-center bg-transparent border-none text-slate-700 dark:text-slate-200 focus:ring-0" title="更新頻率">
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 mr-1">s</span>
                         </div>
                         <span v-else class="text-xs font-medium text-gray-700 dark:text-slate-300" :class="{'opacity-50': !isConfigValid}">自動</span>
                     </div>
@@ -139,10 +148,8 @@
             </div>
         </header>
 
-        <!-- 主內容區 -->
         <main class="flex-1 overflow-hidden flex flex-col md:flex-row max-w-8xl mx-auto w-full">
             
-            <!-- 左側側邊欄 -->
             <aside class="w-full md:w-64 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 overflow-y-auto flex-shrink-0 transition-colors">
                 <div class="mb-6">
                     <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">伺服器全域操作</h3>
@@ -194,7 +201,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mb-6">
                     <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">相關檔案下載</h3>
                     <div class="space-y-2">
@@ -207,26 +214,21 @@
                         </a>
                     </div>
                 </div>
-
+                
                 <div class="text-xs text-slate-400 dark:text-slate-500 text-center mt-auto pb-4">
                     最後更新: {{ lastUpdated || '尚未連線' }}
                 </div>
             </aside>
 
-            <!-- 右側內容區 -->
             <section class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 relative transition-colors">
                 
-                <!-- 搜尋與篩選列 -->
                 <div class="mb-6 flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center">
                     <div class="flex flex-col sm:flex-row gap-4 w-full xl:w-auto">
-                        <!-- 搜尋框 -->
                         <div class="relative w-full sm:w-60">
                             <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-search"></i></span>
                             <input type="text" v-model="searchQuery" placeholder="搜尋名稱、IP、狀態..." 
                                    class="w-full pl-10 pr-4 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors text-sm">
                         </div>
-                        
-                        <!-- 位置篩選 -->
                         <div class="relative w-full sm:w-48">
                             <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-location-dot"></i></span>
                             <select v-model="filterLocation" class="w-full pl-10 pr-8 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors appearance-none cursor-pointer text-sm">
@@ -235,8 +237,6 @@
                             </select>
                             <span class="absolute right-3 top-3 text-slate-400 pointer-events-none"><i class="fa-solid fa-chevron-down text-xs"></i></span>
                         </div>
-
-                        <!-- 排序功能 -->
                         <div class="flex items-center gap-1 w-full sm:w-auto">
                             <div class="relative flex-1 sm:w-40">
                                 <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-arrow-down-short-wide"></i></span>
@@ -257,33 +257,17 @@
                         </div>
                     </div>
                     
-                    <!-- 狀態篩選按鈕 -->
                     <div class="flex gap-2 flex-wrap justify-start mt-2 xl:mt-0">
-                         <button @click="filterStatus = ''" 
-                            :class="filterStatus === '' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" 
-                            class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">全部</button>
-                         
-                         <button @click="filterStatus = 'Ready'" 
-                            :class="filterStatus === 'Ready' ? 'bg-emerald-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" 
-                            class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">就緒</button>
-
-                         <button @click="filterStatus = 'Issue'" 
-                            :class="filterStatus === 'Issue' ? 'bg-orange-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" 
-                            class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常+警告</button>
-                         
-                         <button @click="filterStatus = 'Error'" 
-                            :class="filterStatus === 'Error' ? 'bg-red-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" 
-                            class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常</button>
-                         
-                         <button @click="filterStatus = 'Warning'" 
-                            :class="filterStatus === 'Warning' ? 'bg-amber-500 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" 
-                            class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">警告</button>
+                         <button @click="filterStatus = ''" :class="filterStatus === '' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">全部</button>
+                         <button @click="filterStatus = 'Ready'" :class="filterStatus === 'Ready' ? 'bg-emerald-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">就緒</button>
+                         <button @click="filterStatus = 'Issue'" :class="filterStatus === 'Issue' ? 'bg-orange-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常+警告</button>
+                         <button @click="filterStatus = 'Error'" :class="filterStatus === 'Error' ? 'bg-red-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常</button>
+                         <button @click="filterStatus = 'Warning'" :class="filterStatus === 'Warning' ? 'bg-amber-500 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">警告</button>
                     </div>
                 </div>
 
-                <!-- 列表 Grid (transition-group) -->
-                <transition-group name="list" tag="div" v-if="filteredPrinters.length > 0" class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4 pb-20 relative">
-                    <div v-for="p in filteredPrinters" :key="p.Name" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-all relative group">
+                <transition-group name="list" tag="div" v-if="filteredPrinters.length > 0" class="printer-grid-container grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4 pb-20">
+                    <div v-for="p in filteredPrinters" :key="p.Name" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-all relative group h-full">
                         
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl" :class="getStatusColor(p.Status, true)"></div>
 
@@ -325,7 +309,6 @@
                                 <div v-if="p.PortName" class="truncate"><i class="fa-solid fa-plug w-4"></i> {{ p.PortName }}</div>
                             </div>
 
-                            <!-- 操作按鈕 -->
                             <div class="grid grid-cols-4 gap-2 mt-auto pt-2 border-t border-slate-100 dark:border-slate-700">
                                 <button @click="refreshPrinter(p.Name)" :disabled="loading" title="重新整理連線" class="bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 text-xs py-2 rounded border border-slate-200 dark:border-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                     <i class="fa-solid fa-sync" :class="{'fa-spin': loading}"></i> 刷新
@@ -345,13 +328,11 @@
                     </div>
                 </transition-group>
 
-                <!-- 無資料顯示 -->
                 <div v-else-if="!loading" class="flex flex-col items-center justify-center h-96 text-slate-400 dark:text-slate-600">
                     <i class="fa-solid fa-ghost text-4xl mb-4"></i>
                     <p>找不到符合的印表機</p>
                 </div>
                 
-                <!-- 載入中遮罩 -->
                 <div v-if="loading && printers.length === 0" class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10">
                     <div class="flex flex-col items-center">
                         <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-3"></i>
@@ -361,7 +342,6 @@
             </section>
         </main>
 
-        <!-- Server Manager Modal -->
         <transition name="fade">
             <div v-if="showServerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transition-colors flex flex-col max-h-[90vh]">
@@ -370,7 +350,6 @@
                         <button @click="showServerModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fa-solid fa-xmark text-xl"></i></button>
                     </div>
                     <div class="flex-1 overflow-y-auto p-6">
-                        <!-- 編輯區 -->
                         <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700 mb-6">
                             <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">{{ editingServer.id ? '編輯伺服器' : '新增伺服器' }}</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
@@ -383,7 +362,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- 列表區 -->
                         <div v-if="servers.length === 0" class="text-center py-8 text-slate-400"><i class="fa-solid fa-database text-3xl mb-2"></i><p>尚無伺服器設定，請新增。</p></div>
                         <div v-else class="space-y-2">
                             <div v-for="srv in servers" :key="srv.id" class="flex items-center justify-between p-3 bg-white dark:bg-slate-700/50 border border-slate-100 dark:border-slate-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 transition-colors group">
@@ -403,7 +381,6 @@
             </div>
         </transition>
 
-        <!-- Edit Info Modal -->
         <transition name="fade">
             <div v-if="showEditModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden transition-colors">
@@ -435,7 +412,6 @@
             </div>
         </transition>
 
-        <!-- PDF Modal -->
         <transition name="fade">
             <div v-if="showPdfModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden transition-colors">
@@ -482,7 +458,6 @@
             </div>
         </transition>
 
-        <!-- Log Viewer Modal -->
         <transition name="fade">
             <div v-if="showLogModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col transition-colors">
@@ -503,7 +478,6 @@
 
     </div>
 
-    <!-- Toastify JS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <script>
@@ -511,7 +485,7 @@
 
         createApp({
             setup() {
-                // 狀態變數
+                // State
                 const config = ref({ ip: '', key: '' });
                 const autoRefresh = ref(localStorage.getItem('ps_auto_refresh') === 'true');
                 const refreshInterval = ref(parseInt(localStorage.getItem('ps_refresh_interval')) || 60);
@@ -559,8 +533,9 @@
 
                 let pollTimer = null;
 
-                const isConfigValid = computed(() => config.value.ip && config.value.key);
+                const isConfigValid = computed(() => config.value.ip && config.value.ip.trim() !== '' && config.value.key && config.value.key.trim() !== '');
 
+                // Watchers
                 watch(currentServerId, (newId) => {
                     const srv = servers.value.find(s => s.id === newId);
                     if (srv) {
@@ -604,10 +579,11 @@
 
                 const toggleDarkMode = () => darkMode.value = !darkMode.value;
 
+                // Polling Logic
                 const validateInterval = () => {
                     if (refreshInterval.value < 60) refreshInterval.value = 60;
                     localStorage.setItem('ps_refresh_interval', refreshInterval.value);
-                    if (autoRefresh.value) startPolling();
+                    if (autoRefresh.value) startPolling(); // Restart timer with new interval
                 };
 
                 function startPolling() {
@@ -775,6 +751,7 @@
                     return isBorder ? 'bg-amber-500' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400';
                 };
 
+                // Actions
                 const performAction = async (endpoint, successMsg, targetPrinterName = null) => {
                     loading.value = true;
                     try {
