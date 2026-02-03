@@ -1,12 +1,8 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.8 (RawUrl Parsing & Debug Logging)
-    修正：
-    1. 解決中文亂碼問題：改用 RawUrl 解析參數，避開 .NET 舊版 Uri 類別自動錯誤解碼的問題。
-    2. 增加詳細 API 除錯日誌：明確記錄接收到的參數與解碼結果。
-    3. 維持 v17.x 所有功能：TCP 偵測、防火牆自動開通、重啟保護、CORS、自癒。
-
+    版本：v17.9 (Full Documentation & Data Timestamp)
+    
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
 
@@ -243,7 +239,6 @@ function Test-CronMatch {
     if ([string]::IsNullOrEmpty($cron)) { return $false }
     $parts = $cron.Split(" "); if ($parts.Count -ne 5) { return $false }
     $min=$parts[0]; $hour=$parts[1]; $dom=$parts[2]; $month=$parts[3]; $dow=$parts[4]
-    
     function Check($p, $v) {
         if ($p -eq "*") { return $true }
         if ($p -match "^(\*|\d+)/(\d+)$") { return ($v % [int]$matches[2]) -eq 0 }
@@ -253,19 +248,13 @@ function Test-CronMatch {
     return (Check $min $now.Minute) -and (Check $hour $now.Hour) -and (Check $dom $now.Day) -and (Check $month $now.Month) -and (Check $dow [int]$now.DayOfWeek)
 }
 
-function Get-Utf8QueryParam {
+function Get-Utf8QueryParam { 
     param($request, $key)
     $rawUrl = $request.RawUrl
-    # 匹配 key=value 直到下一個 & 或結束
     if ($rawUrl -match "[?&]$key=([^&]*)") {
         $encodedVal = $matches[1]
-        # 將 + 轉回 %20 (HttpListener 的 RawUrl 可能保留 +)
         $encodedVal = $encodedVal.Replace("+", "%20")
-        try {
-            return [System.Uri]::UnescapeDataString($encodedVal)
-        } catch {
-            return $null
-        }
+        try { return [System.Uri]::UnescapeDataString($encodedVal) } catch { return $null }
     }
     return $null
 }
@@ -273,6 +262,8 @@ function Get-Utf8QueryParam {
 function Get-PrinterStatusData {
     $results = New-Object System.Collections.Generic.List[Object]
     $portMap = @{}
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
     try { $tcpPorts = Get-WmiObject -Class Win32_TCPIPPrinterPort -ErrorAction SilentlyContinue; if($tcpPorts){ foreach($t in $tcpPorts){ if($t.Name){$portMap[$t.Name]=$t.HostAddress} } } } catch {}
     $wmiPrinters = Get-WmiObject -Class Win32_Printer
 
@@ -316,6 +307,7 @@ function Get-PrinterStatusData {
         $obj | Add-Member NoteProperty PortName $p.PortName
         $obj | Add-Member NoteProperty ShareName ($p.ShareName -as [string])
         $obj | Add-Member NoteProperty ErrorDetails $errDetails 
+        $obj | Add-Member NoteProperty LastUpdated $timestamp
         $results.Add($obj)
     }
     return $results
@@ -362,7 +354,7 @@ function Test-PrinterHealth {
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.8 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.9 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
