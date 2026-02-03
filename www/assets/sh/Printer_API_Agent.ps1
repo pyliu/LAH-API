@@ -1,33 +1,49 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.4 (Full Logging Update)
+    版本：v17.8 (RawUrl Parsing & Debug Logging)
     修正：
-    1. 升級 Write-ApiLog 函數：支援 -Color 參數，整合 Write-Host 功能。
-    2. 全面替換 Write-Host：將防火牆設定、系統啟動、錯誤提示等所有控制台訊息同步寫入 Log 檔案。
-    3. 維持 v17.3 的所有功能：TCP 偵測 (Zero-Ping)、防火牆自動開通、啟動重試、CORS、PDF 上傳、自癒功能。
+    1. 解決中文亂碼問題：改用 RawUrl 解析參數，避開 .NET 舊版 Uri 類別自動錯誤解碼的問題。
+    2. 增加詳細 API 除錯日誌：明確記錄接收到的參數與解碼結果。
+    3. 維持 v17.x 所有功能：TCP 偵測、防火牆自動開通、重啟保護、CORS、自癒。
 
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
 
     1. [列印作業自癒] 清除殭屍作業
-       - 觸發：每次巡檢 (每分鐘)
-       - 條件：作業狀態為 Error 或 Deleting
-       - 動作：自動刪除該作業，防止卡單
+       - 觸發機制：每次巡檢 (每分鐘執行一次)
+       - 判斷條件：作業狀態為 Error (錯誤) 或 Deleting (刪除中但卡住)
+       - 執行動作：自動呼叫 WMI Delete() 刪除該作業，防止單一壞檔卡住整台印表機佇列
 
-    2. [列印服務自癒] 偵測堵塞並重啟服務 (被動)
-       - 觸發：佇列監控
-       - 條件：佇列數 > $queueThreshold (20) 且 數量無變化 且 堵塞印表機數 > $maxStuckPrinters (3)
-       - 動作：停止 Spooler -> 清空 C:\Windows\System32\spool\PRINTERS -> 重啟 Spooler -> 發送通知
+    2. [列印服務自癒] 偵測堵塞並重啟服務 (被動修復)
+       - 觸發機制：佇列監控
+       - 判斷條件：
+         (1) 單台印表機佇列數超過 $queueThreshold (預設 20)
+         (2) 且該數量與上次檢查時相同 (代表完全沒有消化)
+         (3) 且發生堵塞的印表機數量超過 $maxStuckPrinters (預設 3)
+       - 執行動作：
+         (1) 停止 Spooler 服務
+         (2) 強制清空 C:\Windows\System32\spool\PRINTERS 下所有暫存檔 (.SPL, .SHD)
+         (3) 重新啟動 Spooler 服務
+         (4) 發送通知給管理員
 
-    3. [系統健康維護] 排程環境重置 (主動)
-       - 觸發：Cron 排程 ($scheduledHealCron，預設 07:30)
-       - 動作：執行完整的服務重啟與暫存檔清理，預防記憶體洩漏或長期運作的不穩定
+    3. [系統健康維護] 排程環境重置 (主動預防)
+       - 觸發機制：Cron 排程表達式 ($scheduledHealCron，預設 "30 7 * * *" 即每天 07:30)
+       - 執行動作：執行完整的服務重啟與暫存檔清理
+       - 目的：預防 Windows Spooler 長期運作可能產生的記憶體洩漏 (Memory Leak) 或暫存檔碎片化導致的不穩定
 
-    4. [腳本自身韌性]
-       - 啟動重試：若 Port 8888 被佔用，自動重試 5 次 (解決 Restart Script 後 Port 未釋放問題)
-       - 防火牆自動開通：啟動時自動檢查並嘗試加入 TCP 8888 入站規則
-       - 通知防卡死：發送通知前先偵測通知伺服器 TCP Port，若離線則直接跳過，避免 Script 卡在 Timeout
+    4. [腳本自身韌性] (Script Resilience)
+       - 啟動重試：若 Port 8888 被佔用 (通常發生在剛重啟腳本時 Port 尚未釋放)，會自動重試 5 次，每次間隔 2 秒
+       - 防火牆自動開通：腳本啟動時會自動檢查並嘗試加入 TCP 8888 入站規則，防止因防火牆設定遺失導致無法連線
+       - 通知防卡死：發送 HTTP 通知前先偵測通知伺服器 TCP Port，若離線則直接跳過，避免 Script 卡在 WebRequest Timeout
+       - 錯誤隔離：API 處理與主監控迴圈皆有 Try-Catch 包覆，確保單一錯誤不會導致整個監控服務崩潰
+
+    5. [資安合規與 SOC 友善設計 (Zero-Ping)]
+       - 目的：避免頻繁的 ICMP 請求被防火牆或 SOC (資安維運中心) 誤判為內網掃描 (Ping Sweep) 攻擊
+       - 實作方式：本腳本已移除所有 ICMP Echo Request (Ping) 操作
+       - 印表機偵測：改為建立 TCP 連線至 Port 9100 (標準 RAW 列印埠)，這能更精確確認「列印服務」是否就緒，而非僅確認主機存活
+       - 通知伺服器偵測：改為建立 TCP 連線至 Port 80 (HTTP)，確認 Web 服務是否存活
+       - 效益：這些連線在防火牆日誌中會被視為正常的應用層業務流量，而非惡意的網路探測行為
 
 .NOTES
     ?? 測試指令
@@ -59,7 +75,7 @@ $notifyIp           = "220.1.34.75"
 $notifyPort         = 80
 $notifyEndpoint     = "/api/notification_json_api.php"
 $notifyUrl          = "http://$notifyIp$notifyEndpoint"
-$notifyChannels     = @("HA10013859")
+$notifyChannels     = @()
 
 # [設定] 通知伺服器健康檢查
 $enableNotifyHealthCheck = $true
@@ -136,37 +152,22 @@ function ConvertTo-SimpleJson {
     if ($objPairs.Count -gt 0) { return "{" + [string]::Join(",", $objPairs) + "}" } else { return """$($InputObject.ToString())""" }
 }
 
-# --- [修正] Write-ApiLog 支援顏色參數 ---
 function Write-ApiLog {
-    param(
-        [string]$message,
-        [ConsoleColor]$Color = "Gray"
-    )
+    param([string]$message, [ConsoleColor]$Color = "Gray")
     try {
         if (-not (Test-Path $logPath)) { [void](New-Item -ItemType Directory -Path $logPath -Force) }
         $today = Get-Date -Format "yyyy-MM-dd"
         $fullPath = Join-Path $logPath "PrintApi_$today.log"
         $logEntry = "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] $message"
-        
-        # 記錄到檔案
         if (Test-Path $fullPath) {
             if ((Get-Item $fullPath).Length -ge $maxLogSizeBytes) {
                 if (Test-Path "$fullPath.$maxHistory") { Remove-Item "$fullPath.$maxHistory" -Force }
-                for ($i = $maxHistory - 1; $i -ge 1; $i--) {
-                    $src = "$fullPath.$i"; $dest = "$fullPath.$($i + 1)"
-                    if (Test-Path $src) { Move-Item $src $dest -Force }
-                }
+                for ($i = $maxHistory - 1; $i -ge 1; $i--) { $src = "$fullPath.$i"; $dest = "$fullPath.$($i + 1)"; if (Test-Path $src) { Move-Item $src $dest -Force } }
                 Move-Item $fullPath "$fullPath.1" -Force
             }
         }
         Add-Content -Path $fullPath -Value $logEntry
-        
-        # 輸出到主控台
-        if ($Color -ne "Gray") {
-            Write-Host $logEntry -ForegroundColor $Color
-        } else {
-            Write-Host $logEntry
-        }
+        if ($Color -ne "Gray") { Write-Host $logEntry -ForegroundColor $Color } else { Write-Host $logEntry }
     } catch {}
 }
 
@@ -184,19 +185,14 @@ function Setup-FirewallRule {
     param([int]$targetPort)
     Write-ApiLog "正在檢查防火牆規則 Port $targetPort..." -Color Yellow
     try {
-        # 使用 netsh (相容舊版 Windows)
         $ruleName = "PrintApiServer_Port_$targetPort"
         $check = netsh advfirewall firewall show rule name="$ruleName" 2>&1
         if ($check -match "No rules match") {
             Write-ApiLog ">>> 防火牆規則不存在，正在建立..." -Color Cyan
             netsh advfirewall firewall add rule name="$ruleName" dir=in action=allow protocol=TCP localport=$targetPort
             Write-ApiLog "[系統初始化] 已自動建立防火牆規則: $ruleName"
-        } else {
-            Write-ApiLog ">>> 防火牆規則已存在。" -Color Green
-        }
-    } catch {
-        Write-ApiLog "!!! [防火牆設定失敗] 請手動執行: netsh advfirewall firewall add rule name=""PrintApi"" dir=in action=allow protocol=TCP localport=$targetPort" -Color Red
-    }
+        } else { Write-ApiLog ">>> 防火牆規則已存在。" -Color Green }
+    } catch { Write-ApiLog "!!! [防火牆設定失敗] 請手動執行 netsh" -Color Red }
 }
 
 function Test-TcpConnection {
@@ -257,7 +253,22 @@ function Test-CronMatch {
     return (Check $min $now.Minute) -and (Check $hour $now.Hour) -and (Check $dom $now.Day) -and (Check $month $now.Month) -and (Check $dow [int]$now.DayOfWeek)
 }
 
-function Get-Utf8QueryParam { param($r, $k); if ($r.Url.Query -match "[?&]$k=([^&]*)") { return [System.Uri]::UnescapeDataString($matches[1]) }; return $null }
+function Get-Utf8QueryParam {
+    param($request, $key)
+    $rawUrl = $request.RawUrl
+    # 匹配 key=value 直到下一個 & 或結束
+    if ($rawUrl -match "[?&]$key=([^&]*)") {
+        $encodedVal = $matches[1]
+        # 將 + 轉回 %20 (HttpListener 的 RawUrl 可能保留 +)
+        $encodedVal = $encodedVal.Replace("+", "%20")
+        try {
+            return [System.Uri]::UnescapeDataString($encodedVal)
+        } catch {
+            return $null
+        }
+    }
+    return $null
+}
 
 function Get-PrinterStatusData {
     $results = New-Object System.Collections.Generic.List[Object]
@@ -351,7 +362,7 @@ function Test-PrinterHealth {
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.4 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.8 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
@@ -389,8 +400,7 @@ while (-not $started -and $retryCount -lt 5) {
 if (-not $started) {
     Write-ApiLog "`n[嚴重錯誤] 服務啟動失敗！Port $port 可能被佔用或權限不足。" -Color Red
     Write-ApiLog "請嘗試以「系統管理員身分」執行，或檢查是否有殘留的 PowerShell 程序。"
-    Write-ApiLog "按 Enter 鍵離開..."
-    $null = Read-Host
+    Write-ApiLog "程式將立即終止。"
     exit
 }
 
@@ -400,7 +410,7 @@ $nextCheck = Get-Date; $nextHeart = Get-Date; $contextTask = $null
 while ($listener.IsListening) {
     try {
         $now = Get-Date
-        if ($now -ge $nextHeart) { Write-ApiLog "." -Color DarkGray; $nextHeart = $now.AddSeconds(60) } # 存活心跳
+        if ($now -ge $nextHeart) { Write-ApiLog "[Heartbeat] 服務運作中..." -Color DarkGray; $nextHeart = $now.AddSeconds(60) } 
         
         # 監控邏輯
         if ($now -ge $nextCheck) {
@@ -460,17 +470,20 @@ while ($listener.IsListening) {
             }
             elseif ($path -eq "/printer/update") {
                 $n=Get-Utf8QueryParam $req "name"; $l=Get-Utf8QueryParam $req "location"; $c=Get-Utf8QueryParam $req "comment"
+                # [新增] 除錯日誌
+                Write-ApiLog ">>> [DEBUG] Update: Name='$n', Loc='$l', Com='$c'"
+                
                 $p=Get-WmiObject Win32_Printer|Where{$_.Name -eq $n}
                 if($p){
                     if($l){$p.Location=$l}; if($c){$p.Comment=$c}
                     try{$p.Put(); $out.success=$true; $out.message="Updated"}catch{$out.message=$_.Exception.Message}
-                } else { $out.message = "Not Found" }
+                } else { $out.message = "Not Found: $n" }
             }
-            # ... (保留其他 API 邏輯：print-pdf, status, refresh, clear, restart-spooler, self-heal) ...
-            # 為節省篇幅，此處邏輯與 v17.2 相同，請確保複製完整代碼
             elseif ($path -eq "/printer/print-pdf") {
                 if ($req.HttpMethod -eq "POST") {
                     $n = Get-Utf8QueryParam $req "name"
+                    Write-ApiLog ">>> [DEBUG] PrintPDF: Name='$n'"
+                    
                     $p = Get-WmiObject Win32_Printer | Where {$_.Name -eq $n}
                     if ($p) {
                          $dup = Get-Utf8QueryParam $req "duplex"
@@ -505,23 +518,26 @@ while ($listener.IsListening) {
                          } catch { $out.message=$_.Exception.Message }
 
                          if ($restoreDup) { try{ Set-PrintConfiguration -PrinterName $n -DuplexingMode $oldDup }catch{} }
-                    } else { $out.message = "Not Found" }
+                    } else { $out.message = "Not Found: $n" }
                 }
             }
             elseif ($path -eq "/printer/status") {
                 $n = Get-Utf8QueryParam $req "name"
+                Write-ApiLog ">>> [DEBUG] Status: Name='$n'"
                 $data = Get-PrinterStatusData
                 foreach($item in $data){if($item.Name -eq $n){$out.data=$item; $out.success=$true; break}}
             }
             elseif ($path -eq "/printer/refresh") {
                 $n = Get-Utf8QueryParam $req "name"
+                Write-ApiLog ">>> [DEBUG] Refresh: Name='$n'"
                 $p = Get-WmiObject Win32_Printer | Where {$_.Name -eq $n}
                 if($p){ $p.Pause(); Start-Sleep -m 500; $p.Resume(); $out.success=$true }
             }
             elseif ($path -eq "/printer/clear") {
                 $n = Get-Utf8QueryParam $req "name"
+                Write-ApiLog ">>> [DEBUG] Clear: Name='$n'"
                 $js = Get-WmiObject Win32_PrintJob | Where {$_.Name -like "*$n*"}
-                if($js){ foreach($j in $js){$j.Delete()}; $out.success=$true } else { $out.success=$true } # No jobs is also success
+                if($js){ foreach($j in $js){$j.Delete()}; $out.success=$true } else { $out.success=$true } 
             }
             elseif ($path -eq "/service/restart-spooler") {
                 try { Restart-Service "Spooler" -Force; $out.success=$true } catch { $out.message=$_.Exception.Message }
@@ -550,6 +566,7 @@ while ($listener.IsListening) {
         if ($restartComputer) {
             Write-ApiLog ">>> 關機中..."
             try { $listener.Stop(); $listener.Close() } catch {}
+            if ($enableAdminNotifications) { Send-SysAdminNotify -content "API：收到管理員指令，伺服器即將在 5 秒後重新啟動。" -title "系統操作" }
             Start-Process "shutdown.exe" -ArgumentList "/r /t 5 /f /d p:4:1"
             exit
         }
