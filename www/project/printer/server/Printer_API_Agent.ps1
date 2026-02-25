@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.9 (Full Documentation & Data Timestamp)
+    版本：v17.10 (加入硬體錯誤代碼人類可讀翻譯 mapping)
     
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
@@ -71,7 +71,7 @@ $notifyIp           = "220.1.34.75"
 $notifyPort         = 80
 $notifyEndpoint     = "/api/notification_json_api.php"
 $notifyUrl          = "http://$notifyIp$notifyEndpoint"
-$notifyChannels     = @()
+$notifyChannels     = @("HA10013859")
 
 # [設定] 通知伺服器健康檢查
 $enableNotifyHealthCheck = $true
@@ -275,13 +275,36 @@ function Get-PrinterStatusData {
         if ($shouldSkip) { continue }
 
         $errDetails = ""; $finalStatus = "Ready"
-        if ($p.WorkOffline) { $finalStatus = "Offline" }
-        elseif ($p.DetectedErrorState -ne 0) { $finalStatus = "Error"; $errDetails = "硬體偵測錯誤代碼: $($p.DetectedErrorState)" }
+        if ($p.WorkOffline) { 
+            $finalStatus = "Offline" 
+        }
+        elseif ($p.DetectedErrorState -ne 0) { 
+            # ---------------------------------------------------------
+            # [版本 17.10 新增] 硬體錯誤代碼人類可讀翻譯 (WMI Mapping)
+            # ---------------------------------------------------------
+            $finalStatus = "Error"
+            switch ($p.DetectedErrorState) {
+                0  { $errDetails = "未知狀態 (Unknown)" }
+                1  { $errDetails = "其他錯誤 (Other)" }
+                2  { $finalStatus = "Ready"; $errDetails = "無錯誤" }
+                3  { $finalStatus = "Warning"; $errDetails = "紙張即將用盡 (Low Paper)" } # 降級為警告
+                4  { $errDetails = "缺紙 (No Paper)" }
+                5  { $finalStatus = "Warning"; $errDetails = "碳粉/墨水不足 (Low Toner)" } # 降級為警告
+                6  { $errDetails = "碳粉/墨水耗盡 (No Toner)" }
+                7  { $errDetails = "機殼門未關 (Door Open)" }
+                8  { $errDetails = "卡紙 (Jammed)" }
+                9  { $errDetails = "硬體離線/未連線 (Offline)" } # 這就是你在儀表板上看到的代碼 9
+                10 { $errDetails = "需要維修保養 (Service Requested)" }
+                11 { $errDetails = "出紙匣已滿 (Output Bin Full)" }
+                default { $errDetails = "硬體異常代碼: $($p.DetectedErrorState)" }
+            }
+        }
         else {
             switch ($p.PrinterStatus) {
-                1 { $finalStatus = "Error"; $errDetails = "未知 - 驅動/SNMP異常" }
-                2 { $finalStatus = "Error"; $errDetails = "其他錯誤" }
-                4 { $finalStatus = "Printing" } 5 { $finalStatus = "Warmup" }
+                1 { $finalStatus = "Error"; $errDetails = "未知 - 驅動或SNMP通訊異常" }
+                2 { $finalStatus = "Error"; $errDetails = "其他錯誤 (PrinterStatus: 2)" }
+                4 { $finalStatus = "Printing" } 
+                5 { $finalStatus = "Warmup" }
                 default { $finalStatus = "Ready"; if($p.PrinterStatus -ne 3){$finalStatus="Warning"} }
             }
         }
@@ -289,10 +312,10 @@ function Get-PrinterStatusData {
         $pIP = if ($portMap.ContainsKey($p.PortName)) { $portMap[$p.PortName] } else { $p.PortName }
         if ($pIP -match "^\d+\.\d+\.\d+\.\d+$") {
             if (-not (Test-TcpConnection $pIP 9100 200)) {
-                if ($finalStatus -eq "Offline") { $errDetails = "無回應 (TCP/9100)" }
+                if ($finalStatus -eq "Offline") { $errDetails = "無回應 (TCP/9100 不通)" }
                 elseif ($finalStatus -like "Ready*") { $finalStatus = "Warning"; $errDetails = "無回應 - 可能斷線" }
             } else {
-                if ($finalStatus -eq "Offline") { $errDetails = "軟體離線 - 網路通暢" }
+                if ($finalStatus -eq "Offline") { $errDetails = "軟體狀態離線 - 但實體網路通暢" }
             }
         }
 
@@ -354,7 +377,7 @@ function Test-PrinterHealth {
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.9 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.10 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
@@ -462,7 +485,6 @@ while ($listener.IsListening) {
             }
             elseif ($path -eq "/printer/update") {
                 $n=Get-Utf8QueryParam $req "name"; $l=Get-Utf8QueryParam $req "location"; $c=Get-Utf8QueryParam $req "comment"
-                # [新增] 除錯日誌
                 Write-ApiLog ">>> [DEBUG] Update: Name='$n', Loc='$l', Com='$c'"
                 
                 $p=Get-WmiObject Win32_Printer|Where{$_.Name -eq $n}
@@ -479,7 +501,6 @@ while ($listener.IsListening) {
                     $p = Get-WmiObject Win32_Printer | Where {$_.Name -eq $n}
                     if ($p) {
                          $dup = Get-Utf8QueryParam $req "duplex"
-                         # ... (Set Duplex Logic) ...
                          if ($dup) {
                             if (Get-Command Set-PrintConfiguration -ErrorAction SilentlyContinue) {
                                 try {
