@@ -192,11 +192,11 @@
                         </div>
                     </div>
                     <div class="flex gap-2 flex-wrap justify-start mt-2 xl:mt-0">
-                         <button @click="filterStatus = ''" :class="filterStatus === '' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">全部</button>
-                         <button @click="filterStatus = 'Ready'" :class="filterStatus === 'Ready' ? 'bg-emerald-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">就緒</button>
-                         <button @click="filterStatus = 'Issue'" :class="filterStatus === 'Issue' ? 'bg-orange-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常+警告</button>
-                         <button @click="filterStatus = 'Error'" :class="filterStatus === 'Error' ? 'bg-red-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常</button>
-                         <button @click="filterStatus = 'Warning'" :class="filterStatus === 'Warning' ? 'bg-amber-500 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">警告</button>
+                         <button @click="filterStatus = ''" :class="filterStatus === '' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm flex items-center gap-1.5">全部 <span class="bg-black/10 dark:bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] leading-none">{{ statusCounts.all }}</span></button>
+                         <button @click="filterStatus = 'Ready'" :class="filterStatus === 'Ready' ? 'bg-emerald-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm flex items-center gap-1.5">就緒 <span class="bg-black/10 dark:bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] leading-none">{{ statusCounts.ready }}</span></button>
+                         <button @click="filterStatus = 'Issue'" :class="filterStatus === 'Issue' ? 'bg-orange-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm flex items-center gap-1.5">異常+警告 <span class="bg-black/10 dark:bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] leading-none">{{ statusCounts.issue }}</span></button>
+                         <button @click="filterStatus = 'Error'" :class="filterStatus === 'Error' ? 'bg-red-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm flex items-center gap-1.5">異常 <span class="bg-black/10 dark:bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] leading-none">{{ statusCounts.error }}</span></button>
+                         <button @click="filterStatus = 'Warning'" :class="filterStatus === 'Warning' ? 'bg-amber-500 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm flex items-center gap-1.5">警告 <span class="bg-black/10 dark:bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] leading-none">{{ statusCounts.warning }}</span></button>
                     </div>
                 </div>
 
@@ -734,16 +734,38 @@
                 };
 
                 const uniqueLocations = computed(() => [...new Set(printers.value.map(p => p.Location).filter(l => l))].sort());
-                const filteredPrinters = computed(() => {
+                
+                // 先過濾出符合「搜尋關鍵字」與「位置」的印表機基礎清單
+                const baseFilteredPrinters = computed(() => {
                     return printers.value.filter(p => {
                         const matchQ = p.Name.toLowerCase().includes(searchQuery.value.toLowerCase()) || p.IP.includes(searchQuery.value);
-                        let matchS = true;
-                        if (filterStatus.value === 'Ready') matchS = p.Status === 'Ready';
-                        else if (filterStatus.value === 'Error') matchS = p.Status === 'Error';
-                        else if (filterStatus.value === 'Warning') matchS = p.Status.includes('Warning');
-                        else if (filterStatus.value === 'Issue') matchS = p.Status === 'Error' || p.Status.includes('Warning');
                         const matchL = filterLocation.value ? p.Location === filterLocation.value : true;
-                        return matchQ && matchS && matchL;
+                        return matchQ && matchL;
+                    });
+                });
+
+                // 基於基礎清單，計算各個狀態的數量
+                const statusCounts = computed(() => {
+                    const counts = { all: 0, ready: 0, issue: 0, error: 0, warning: 0 };
+                    baseFilteredPrinters.value.forEach(p => {
+                        counts.all++;
+                        if (p.Status === 'Ready') counts.ready++;
+                        else if (p.Status === 'Error') counts.error++;
+                        else if (p.Status.includes('Warning')) counts.warning++;
+                        
+                        if (p.Status === 'Error' || p.Status.includes('Warning')) counts.issue++;
+                    });
+                    return counts;
+                });
+
+                // 最後的畫面清單，加入狀態篩選與排序
+                const filteredPrinters = computed(() => {
+                    return baseFilteredPrinters.value.filter(p => {
+                        if (filterStatus.value === 'Ready') return p.Status === 'Ready';
+                        if (filterStatus.value === 'Error') return p.Status === 'Error';
+                        if (filterStatus.value === 'Warning') return p.Status.includes('Warning');
+                        if (filterStatus.value === 'Issue') return p.Status === 'Error' || p.Status.includes('Warning');
+                        return true; // filterStatus === ''
                     }).sort((a,b) => {
                         let valA = a[sortBy.value]||'', valB = b[sortBy.value]||'';
                         // Status Priority Sorting
@@ -770,6 +792,7 @@
                         return sortDesc.value ? (valA<valB?1:-1) : (valA>valB?1:-1);
                     });
                 });
+                
                 const errorCount = computed(() => printers.value.filter(p => p.Status === 'Error' || p.Status.includes('Warning')).length);
 
                 const getStatusColor = (s, b) => {
@@ -799,7 +822,7 @@
                     showPdfModal, selectedPrinter, pdfDuplex, uploading, fileInput, openPdfModal, submitPdf,
                     showLogModal, logData, logsLoading, showLogs, fetchLogs, downloadFiles, handleDownload,
                     uniqueLocations, filteredPrinters, errorCount, getStatusColor,
-                    showAdvancedOps, currentServer, connectionError
+                    showAdvancedOps, currentServer, connectionError, statusCounts
                 };
             }
         }).mount('#app');
