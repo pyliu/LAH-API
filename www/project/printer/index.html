@@ -235,8 +235,40 @@
                         </div>
                     </div>
                 </transition-group>
-                <div v-else-if="!loading" class="flex flex-col items-center justify-center h-96 text-slate-400 dark:text-slate-600"><i class="fa-solid fa-ghost text-4xl mb-4"></i><p>找不到符合的印表機</p></div>
-                <div v-if="loading && printers.length === 0" class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10"><div class="flex flex-col items-center"><i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-3"></i><p class="text-sm text-slate-500 dark:text-slate-400 font-medium">正在連線至 API...</p></div></div>
+                
+                <div v-else-if="!isConfigValid && !isDemoMode && !loading" class="flex flex-col items-center justify-center h-96 text-slate-400 dark:text-slate-500">
+                    <div class="bg-slate-200 dark:bg-slate-800 p-6 rounded-full mb-4 shadow-inner">
+                        <i class="fa-solid fa-link-slash text-5xl text-slate-400 dark:text-slate-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-slate-600 dark:text-slate-300">尚未連線至伺服器</h3>
+                    <p class="text-sm text-center max-w-sm">請於上方選擇目標伺服器並點擊「連線」以取得監控狀態。若無伺服器清單，請先點擊齒輪新增配置。</p>
+                </div>
+                <div v-else-if="connectionError && !loading" class="flex flex-col items-center justify-center h-96 text-red-500 dark:text-red-400">
+                    <i class="fa-solid fa-triangle-exclamation text-5xl mb-4 opacity-80"></i>
+                    <h3 class="text-xl font-bold mb-2">伺服器連線失敗</h3>
+                    <p class="text-sm">無法取得印表機資料，請確認伺服器是否開機，或 API 金鑰設定是否正確。</p>
+                </div>
+                <div v-else-if="!loading" class="flex flex-col items-center justify-center h-96 text-slate-400 dark:text-slate-600">
+                    <i class="fa-solid fa-ghost text-4xl mb-4"></i>
+                    <p>找不到符合的印表機</p>
+                </div>
+
+                <div v-if="loading && printers.length === 0" class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10">
+                    <div class="flex flex-col items-center">
+                        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-4"></i>
+                        <p class="text-sm text-slate-700 dark:text-slate-300 font-bold mb-3">正在連線並讀取狀態...</p>
+                        <div v-if="currentServer" class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-4 py-2 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                            <i class="fa-solid fa-server text-blue-500 animate-pulse"></i>
+                            <span class="font-medium text-slate-700 dark:text-slate-200">{{ currentServer.name }}</span>
+                            <span class="font-mono text-[10px] bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-600">{{ currentServer.ip }}</span>
+                        </div>
+                        <div v-else-if="isDemoMode" class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-4 py-2 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                            <i class="fa-solid fa-server text-blue-500 animate-pulse"></i>
+                            <span class="font-medium text-slate-700 dark:text-slate-200">DEMO Server</span>
+                            <span class="font-mono text-[10px] bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-600">127.0.0.1</span>
+                        </div>
+                    </div>
+                </div>
             </section>
         </main>
 
@@ -310,10 +342,21 @@
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        const { createApp, ref, computed, onMounted, watch } = Vue;
+        (function() {
+            const { createApp, ref, computed, onMounted, watch } = Vue;
 
-        createApp({
-            setup() {
+            createApp({
+                setup() {
+                    // 用於判斷錯誤是否為 Axios 取消事件
+                    const isCancel = (err) => (typeof axios !== 'undefined' && axios.isCancel && axios.isCancel(err)) || err.name === 'CanceledError' || err.code === 'ERR_CANCELED';
+                
+                // 全域的 AbortController
+                let abortController = new AbortController();
+                const cancelPendingRequests = () => {
+                    abortController.abort(); // 取消所有未完成的請求
+                    abortController = new AbortController(); // 重新建立新的控制器供下次使用
+                };
+
                 const isDemoMode = ref(new URLSearchParams(window.location.search).get('demo') === '1');
                 const config = ref({ ip: '', key: '' });
                 const autoRefresh = ref(localStorage.getItem('ps_auto_refresh') === 'true');
@@ -348,7 +391,10 @@
                 const showLogModal = ref(false);
                 const logData = ref('');
                 const logsLoading = ref(false);
+                const connectionError = ref(false);
                 
+                const currentServer = computed(() => servers.value.find(s => s.id === currentServerId.value));
+
                 const downloadFiles = [
                     { name: '列印伺服器監控腳本', url: 'server/Printer_API_Agent.ps1', icon: 'fa-solid fa-terminal text-blue-500' },
                     { name: '簡易說明', url: 'server/Printer_API_Agent.txt', icon: 'fa-regular fa-file-lines text-slate-500' },
@@ -378,6 +424,14 @@
                 const isConfigValid = computed(() => isDemoMode.value || (config.value.ip && config.value.key));
 
                 watch(currentServerId, (newId) => {
+                    // 切換伺服器時，自動取消所有尚未完成的 Axios 請求
+                    cancelPendingRequests();
+
+                    // 清空舊的資料與更新時間，確保 Loading 畫面能正常顯示
+                    printers.value = [];
+                    lastUpdated.value = '';
+                    connectionError.value = false;
+
                     const srv = servers.value.find(s => s.id === newId);
                     if (srv) { 
                         config.value.ip = srv.ip; config.value.key = srv.key; 
@@ -433,24 +487,38 @@
                     resetEdit(); toast("儲存成功", "#10b981");
                 };
                 const removeServer = (id) => { if (confirm("刪除？")) { servers.value = servers.value.filter(s => s.id !== id); saveServers(); if (currentServerId.value === id) { currentServerId.value = ''; printers.value = []; } } };
-                const useServer = (srv) => { currentServerId.value = srv.id; showServerModal.value = false; fetchPrinters(true); };
-                const switchServer = () => { if (currentServerId.value) fetchPrinters(true); };
+                
+                const useServer = (srv) => { 
+                    currentServerId.value = srv.id; 
+                    showServerModal.value = false; 
+                    // fetchPrinters 會由 watch 自動觸發，這裡不需要呼叫避免重複請求
+                };
+                
+                const switchServer = () => { 
+                    // select 下拉選單變化時，由 watch 自動處理。
+                };
 
                 const fetchSinglePrinter = async (name) => {
                     if (isDemoMode.value) return; 
                     try {
-                        const res = await axios.get(getApiUrl(`/printer/status?name=${encodeURIComponent(name)}`), { headers: { 'X-API-KEY': config.value.key } });
+                        const res = await axios.get(getApiUrl(`/printer/status?name=${encodeURIComponent(name)}`), { 
+                            headers: { 'X-API-KEY': config.value.key },
+                            signal: abortController.signal
+                        });
                         if (res.data.success) {
                             const idx = printers.value.findIndex(p => p.Name === name);
                             if (idx !== -1) printers.value[idx] = res.data.data;
                             if (res.data.data.LastUpdated) lastUpdated.value = res.data.data.LastUpdated;
                         }
-                    } catch (e) { console.error(e); }
+                    } catch (e) { 
+                        if (!isCancel(e)) console.error(e); 
+                    }
                 };
 
                 const fetchPrinters = async (showToast = false) => {
                     if (!isConfigValid.value) { if (showToast) error("請選擇伺服器"); return; }
                     loading.value = true;
+                    connectionError.value = false;
                     if (autoRefresh.value) countdown.value = refreshInterval.value;
                     
                     if (isDemoMode.value) {
@@ -471,17 +539,36 @@
                         }, 800);
                         return;
                     }
+
+                    let cancelled = false;
                     try {
-                        const res = await axios.get(getApiUrl('/printers'), { headers: { 'X-API-KEY': config.value.key } });
+                        const res = await axios.get(getApiUrl('/printers'), { 
+                            headers: { 'X-API-KEY': config.value.key },
+                            signal: abortController.signal
+                        });
                         if (res.data.success) {
                             printers.value = res.data.data;
                             if (printers.value.length > 0 && printers.value[0].LastUpdated) lastUpdated.value = printers.value[0].LastUpdated;
                             if (showToast) success("連線成功");
-                        } else { error(res.data.message); }
-                    } catch (err) { error("連線失敗"); autoRefresh.value = false; }
+                        } else { 
+                            error(res.data.message); 
+                            connectionError.value = true;
+                            printers.value = [];
+                            lastUpdated.value = '';
+                        }
+                    } catch (err) { 
+                        if (isCancel(err)) { cancelled = true; return; } // 若被取消則標記並返回
+                        error("連線失敗"); 
+                        autoRefresh.value = false; 
+                        connectionError.value = true;
+                        printers.value = [];
+                        lastUpdated.value = '';
+                    }
                     finally { 
-                        loading.value = false;
-                        const l = document.getElementById('init-loading'); if(l) { l.classList.add('fade-out'); setTimeout(()=>l.remove(),500); }
+                        if (!cancelled) {
+                            loading.value = false;
+                            const l = document.getElementById('init-loading'); if(l) { l.classList.add('fade-out'); setTimeout(()=>l.remove(),500); }
+                        }
                     }
                 };
 
@@ -505,23 +592,39 @@
                         }, 600);
                         return;
                     }
+                    
+                    let cancelled = false;
                     try {
-                        const res = await axios.get(getApiUrl(endpoint), { headers: { 'X-API-KEY': config.value.key } });
+                        const res = await axios.get(getApiUrl(endpoint), { 
+                            headers: { 'X-API-KEY': config.value.key },
+                            signal: abortController.signal
+                        });
                         if (res.data.success) {
                             success(res.data.message || successMsg);
                             if (targetName) fetchSinglePrinter(targetName); else fetchPrinters(false);
                         } else { error(res.data.message); }
-                    } catch (err) { error("失敗: " + err.message); } finally { loading.value = false; }
+                    } catch (err) { 
+                        if (isCancel(err)) { cancelled = true; return; }
+                        error("失敗: " + err.message); 
+                    } finally { 
+                        if (!cancelled) loading.value = false; 
+                    }
                 };
 
                 const clearQueue = (name) => { if(confirm("清除佇列？")) performAction(`/printer/clear?name=${encodeURIComponent(name)}`, "佇列已清除", name); };
                 const refreshPrinter = (name) => performAction(`/printer/refresh?name=${encodeURIComponent(name)}`, "指令已發送", name);
                 const restartSpooler = () => { if(confirm("重啟 Spooler？")) performAction(`/service/restart-spooler`, "服務重啟中"); };
                 const selfHeal = () => { if(confirm("執行深度自癒？")) performAction(`/service/self-heal`, "自癒流程啟動"); };
+                
                 const restartScript = () => { 
                     if(confirm("重啟 API？")) {
                         if(isDemoMode.value) return toast("Demo 模式無法重啟", "#f59e0b");
-                        axios.get(getApiUrl('/server/restart-script'), { headers: { 'X-API-KEY': config.value.key } }).catch(()=>{});
+                        axios.get(getApiUrl('/server/restart-script'), { 
+                            headers: { 'X-API-KEY': config.value.key },
+                            signal: abortController.signal
+                        }).catch(e => {
+                            if (!isCancel(e)) console.error(e);
+                        });
                         success("重啟中..."); setTimeout(()=>fetchPrinters(), 5000);
                     }
                 };
@@ -529,16 +632,22 @@
                 const restartServer = () => {
                     if(confirm("警告：這將會重新啟動整台實體伺服器/虛擬機。所有服務將會中斷。確定要繼續嗎？")) {
                         if(isDemoMode.value) return toast("Demo 模式無法重啟電腦", "#f59e0b");
-                        axios.get(getApiUrl('/server/restart-computer'), { headers: { 'X-API-KEY': config.value.key } })
-                            .then(res => {
-                                if(res.data.success) success("重啟指令已發送 (5秒後重啟)");
-                                else error(res.data.message);
-                            })
-                            .catch(e => error("重啟失敗: " + e.message));
+                        axios.get(getApiUrl('/server/restart-computer'), { 
+                            headers: { 'X-API-KEY': config.value.key },
+                            signal: abortController.signal
+                        })
+                        .then(res => {
+                            if(res.data.success) success("重啟指令已發送 (5秒後重啟)");
+                            else error(res.data.message);
+                        })
+                        .catch(e => {
+                            if (!isCancel(e)) error("重啟失敗: " + e.message);
+                        });
                     }
                 };
 
                 const openEditModal = (p) => { editTarget.value = p; editLocation.value = p.Location||''; editComment.value = p.Comment||''; showEditModal.value = true; };
+                
                 const submitEdit = async () => {
                     if (isDemoMode.value) {
                         editTarget.value.Location = editLocation.value;
@@ -546,18 +655,29 @@
                         showEditModal.value = false; success("[Demo] 更新成功"); return;
                     }
                     saving.value = true;
+                    
+                    let cancelled = false;
                     try {
                         const url = getApiUrl(`/printer/update?name=${encodeURIComponent(editTarget.value.Name)}&location=${encodeURIComponent(editLocation.value)}&comment=${encodeURIComponent(editComment.value)}`);
-                        const res = await axios.get(url, { headers: { 'X-API-KEY': config.value.key } });
+                        const res = await axios.get(url, { 
+                            headers: { 'X-API-KEY': config.value.key },
+                            signal: abortController.signal
+                        });
                         if (res.data.success) {
                             success("更新成功"); showEditModal.value = false;
                             // Optimistic update
                             editTarget.value.Location = editLocation.value; editTarget.value.Comment = editComment.value;
                         } else error(res.data.message);
-                    } catch(e) { error(e.message); } finally { saving.value = false; }
+                    } catch(e) { 
+                        if (isCancel(e)) { cancelled = true; return; }
+                        error(e.message); 
+                    } finally { 
+                        if (!cancelled) saving.value = false; 
+                    }
                 };
 
                 const openPdfModal = (p) => { selectedPrinter.value = p; pdfDuplex.value = "0"; showPdfModal.value = true; };
+                
                 const submitPdf = async () => {
                     if (!fileInput.value.files[0]) return error("請選擇檔案");
                     uploading.value = true;
@@ -565,15 +685,26 @@
                         setTimeout(() => { success("[Demo] PDF 已列印"); showPdfModal.value = false; uploading.value = false; }, 1000);
                         return;
                     }
+                    
+                    let cancelled = false;
                     try {
                         const url = getApiUrl(`/printer/print-pdf?name=${encodeURIComponent(selectedPrinter.value.Name)}&duplex=${pdfDuplex.value}`);
-                        const res = await axios.post(url, fileInput.value.files[0], { headers: { 'X-API-KEY': config.value.key, 'Content-Type': 'application/pdf' } });
+                        const res = await axios.post(url, fileInput.value.files[0], { 
+                            headers: { 'X-API-KEY': config.value.key, 'Content-Type': 'application/pdf' },
+                            signal: abortController.signal
+                        });
                         if (res.data.success) { success("PDF 已傳送"); showPdfModal.value = false; setTimeout(() => fetchSinglePrinter(selectedPrinter.value.Name), 1000); }
                         else error(res.data.message);
-                    } catch(e) { error(e.message); } finally { uploading.value = false; }
+                    } catch(e) { 
+                        if (isCancel(e)) { cancelled = true; return; }
+                        error(e.message); 
+                    } finally { 
+                        if (!cancelled) uploading.value = false; 
+                    }
                 };
 
                 const showLogs = () => { showLogModal.value = true; fetchLogs(); };
+                
                 const fetchLogs = async () => {
                     logsLoading.value = true;
                     if (isDemoMode.value) {
@@ -583,13 +714,23 @@
                         }, 500);
                         return;
                     }
+                    
+                    let cancelled = false;
                     try {
-                        const res = await axios.get(getApiUrl('/server/logs?lines=500'), { headers: { 'X-API-KEY': config.value.key } });
+                        const res = await axios.get(getApiUrl('/server/logs?lines=500'), { 
+                            headers: { 'X-API-KEY': config.value.key },
+                            signal: abortController.signal
+                        });
                         if (res.data.success) {
                             logData.value = Array.isArray(res.data.data) ? res.data.data.join('\n') : res.data.data;
                             setTimeout(() => { const el = document.getElementById('logContent'); if(el) el.scrollTop = el.scrollHeight; }, 100);
                         } else logData.value = res.data.message;
-                    } catch(e) { logData.value = e.message; } finally { logsLoading.value = false; }
+                    } catch(e) { 
+                        if (isCancel(e)) { cancelled = true; return; }
+                        logData.value = e.message; 
+                    } finally { 
+                        if (!cancelled) logsLoading.value = false; 
+                    }
                 };
 
                 const uniqueLocations = computed(() => [...new Set(printers.value.map(p => p.Location).filter(l => l))].sort());
@@ -658,10 +799,11 @@
                     showPdfModal, selectedPrinter, pdfDuplex, uploading, fileInput, openPdfModal, submitPdf,
                     showLogModal, logData, logsLoading, showLogs, fetchLogs, downloadFiles, handleDownload,
                     uniqueLocations, filteredPrinters, errorCount, getStatusColor,
-                    showAdvancedOps // [NEW] for advanced ops toggle
+                    showAdvancedOps, currentServer, connectionError
                 };
             }
         }).mount('#app');
+        })();
     </script>
 </body>
 </html>
