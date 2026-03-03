@@ -1,45 +1,19 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.13 (Printlog Parser Fix - Encoding Resilience)
+    版本：v17.16 (StreamReader Parser & Type Compatibility Fix)
+    修正：
+    1. 徹底重構 Get-PrintLogs 解析引擎：改用 StreamReader 逐行讀取 (ReadLine)，將記憶體消耗降至最低，解決大檔案分割時導致的「引數類型不相容」與卡頓問題。
+    2. 移除嚴格型別宣告 [regex] 與 Generic.List，全面改用原生 -match 與 ArrayList，確保與舊版 Windows Server 完全相容。
+    3. 保留 FileShare.ReadWrite 機制，防止讀取時遇到列印程式寫入而鎖定。
     
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
-
-    1. [列印作業自癒] 清除殭屍作業
-       - 觸發機制：每次巡檢 (每分鐘執行一次)
-       - 判斷條件：作業狀態為 Error (錯誤) 或 Deleting (刪除中但卡住)
-       - 執行動作：自動呼叫 WMI Delete() 刪除該作業，防止單一壞檔卡住整台印表機佇列
-
-    2. [列印服務自癒] 偵測堵塞並重啟服務 (被動修復)
-       - 觸發機制：佇列監控
-       - 判斷條件：
-         (1) 單台印表機佇列數超過 $queueThreshold (預設 20)
-         (2) 且該數量與上次檢查時相同 (代表完全沒有消化)
-         (3) 且發生堵塞的印表機數量超過 $maxStuckPrinters (預設 3)
-       - 執行動作：
-         (1) 停止 Spooler 服務
-         (2) 強制清空 C:\Windows\System32\spool\PRINTERS 下所有暫存檔 (.SPL, .SHD)
-         (3) 重新啟動 Spooler 服務
-         (4) 發送通知給管理員
-
-    3. [系統健康維護] 排程環境重置 (主動預防)
-       - 觸發機制：Cron 排程表達式 ($scheduledHealCron，預設 "30 7 * * *" 即每天 07:30)
-       - 執行動作：執行完整的服務重啟與暫存檔清理
-       - 目的：預防 Windows Spooler 長期運作可能產生的記憶體洩漏 (Memory Leak) 或暫存檔碎片化導致的不穩定
-
-    4. [腳本自身韌性] (Script Resilience)
-       - 啟動重試：若 Port 8888 被佔用 (通常發生在剛重啟腳本時 Port 尚未釋放)，會自動重試 5 次，每次間隔 2 秒
-       - 防火牆自動開通：腳本啟動時會自動檢查並嘗試加入 TCP 8888 入站規則，防止因防火牆設定遺失導致無法連線
-       - 通知防卡死：發送 HTTP 通知前先偵測通知伺服器 TCP Port，若離線則直接跳過，避免 Script 卡在 WebRequest Timeout
-       - 錯誤隔離：API 處理與主監控迴圈皆有 Try-Catch 包覆，確保單一錯誤不會導致整個監控服務崩潰
-
-    5. [資安合規與 SOC 友善設計 (Zero-Ping)]
-       - 目的：避免頻繁的 ICMP 請求被防火牆或 SOC (資安維運中心) 誤判為內網掃描 (Ping Sweep) 攻擊
-       - 實作方式：本腳本已移除所有 ICMP Echo Request (Ping) 操作
-       - 印表機偵測：改為建立 TCP 連線至 Port 9100 (標準 RAW 列印埠)，這能更精確確認「列印服務」是否就緒，而非僅確認主機存活
-       - 通知伺服器偵測：改為建立 TCP 連線至 Port 80 (HTTP)，確認 Web 服務是否存活
-       - 效益：這些連線在防火牆日誌中會被視為正常的應用層業務流量，而非惡意的網路探測行為
+    1. [列印作業自癒] 清除殭屍作業 (狀態 Error/Deleting)
+    2. [列印服務自癒] 偵測堵塞 ($queueThreshold) 並重啟 Spooler
+    3. [系統健康維護] 排程環境重置 (Cron: $scheduledHealCron)
+    4. [腳本韌性] 啟動重試、防火牆開通、通知防卡死 (TCP Check)
+    5. [資安合規] Zero-Ping (使用 TCP 9100/80 偵測)
 
 .NOTES
     ?? 測試指令
@@ -120,6 +94,10 @@ $global:IsNotifyServerOnline = $true
 $restartScript = $false
 $restartComputer = $false
 
+# --- 列印紀錄快取變數 ---
+$global:PrintLogCache = @()
+$global:PrintLogLastWriteTime = [DateTime]::MinValue
+
 # -------------------------------------------------------------------------
 # 2. 核心函數庫
 # -------------------------------------------------------------------------
@@ -127,7 +105,11 @@ $restartComputer = $false
 function ConvertTo-SimpleJson {
     param($InputObject)
     if ($null -eq $InputObject) { return "null" }
-    if ($InputObject -is [string]) { return """$($InputObject.Replace('\', '\\').Replace('"', '\"'))""" }
+    
+    if ($InputObject -is [string]) { 
+        $escapedStr = $InputObject.Replace('\', '\\').Replace('"', '\"').Replace("`n", "\n").Replace("`r", "\r").Replace("`t", "\t")
+        return """$escapedStr""" 
+    }
     if ($InputObject -is [System.Boolean]) { if ($InputObject) { return "true" } else { return "false" } }
     if ($InputObject -is [System.ValueType]) { return $InputObject.ToString().ToLower() }
     
@@ -369,66 +351,90 @@ function Test-PrinterHealth {
     if ($batchAlerts.Count -gt 0 -and $enableAdminNotifications) { Send-SysAdminNotify -content ([string]::Join("`n", $batchAlerts)) -title "印表機告警" }
 }
 
-# --- [新增] 解析當日列印紀錄函數 (具備防呆與精準解析) ---
+# --- 解析當日列印紀錄函數 (超級效能逐行讀取版) ---
 function Get-PrintLogs {
-    $results = New-Object System.Collections.Generic.List[Object]
-    
-    # 防呆：檢查檔案是否存在，若不存在則拋出明確例外
     if (-not (Test-Path $printLogFilePath -PathType Leaf)) {
         throw "找不到紀錄檔 $printLogFilePath，無法提供列印清單。"
     }
 
-    # 強制使用 en-US 語系，確保解析出來的月份縮寫(如 Mar) 能對應
-    $enUS = New-Object System.Globalization.CultureInfo("en-US")
-    $now = Get-Date
-    $todayMonthStr  = $now.ToString("MMM", $enUS) # 產出如 "Mar"
-    $todayDay       = $now.Day                    # 產出整數如 3
-    $todayYearStr   = $now.ToString("yyyy")       # 產出如 "2026"
-    $todayFormatted = $now.ToString("yyyy-MM-dd")
+    $currentFileInfo = Get-Item $printLogFilePath -ErrorAction Stop
+    $currentWriteTime = $currentFileInfo.LastWriteTime
 
-    # 關鍵修正：移除 -Encoding 參數，避免讀取 Big5 檔案時中文變成亂碼導致比對失敗
-    $lines = Get-Content -Path $printLogFilePath
-    
-    for ($i = 0; $i -lt $lines.Count; $i++) {
-        $line = $lines[$i]
+    # 若檔案更新，或是快取為空，重新解析
+    if ($global:PrintLogCache -eq $null -or $global:PrintLogCache.Length -eq 0 -or $currentWriteTime -gt $global:PrintLogLastWriteTime) {
+        Write-ApiLog ">>> [Cache] 紀錄檔已更新或無快取，開始重新解析..." -Color Cyan
         
-        # 避開前面的中文字元，直接在整行中尋找英文時間格式
-        # 匹配範例: Tue Mar 03 14:42:18 CST 2026
-        if ($line -match "([a-zA-Z]{3}\s+[a-zA-Z]{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+.+?\d{4})") {
-            $timeStr = $matches[1]
+        # [修正] 使用最穩定的 ArrayList，避免舊版 PS 的型別不相容問題
+        $results = New-Object System.Collections.ArrayList
+        
+        $enUS = New-Object System.Globalization.CultureInfo("en-US")
+        $now = Get-Date
+        $todayMonthStr  = $now.ToString("MMM", $enUS) # "Mar"
+        $todayDay       = $now.Day                    # 3
+        $todayYearStr   = $now.ToString("yyyy")       # "2026"
+        $todayFormatted = $now.ToString("yyyy-MM-dd")
+
+        # 逐行讀取變數準備
+        $fs = $null
+        $sr = $null
+
+        try {
+            $fs = New-Object System.IO.FileStream($printLogFilePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+            $sr = New-Object System.IO.StreamReader($fs, [System.Text.Encoding]::Default)
             
-            # 驗證是否為當日 (容許 Mar 03 或是 Mar  3)
-            if ($timeStr -match "$todayMonthStr\s+0?$todayDay\b" -and $timeStr -match "$todayYearStr$") {
+            # [關鍵修正] 使用 StreamReader 逐行讀取 (O(1) 記憶體消耗，極速)
+            while (-not $sr.EndOfStream) {
+                $line = $sr.ReadLine()
                 
-                $timeMatch = [regex]::Match($timeStr, "\d{2}:\d{2}:\d{2}")
-                $time = if ($timeMatch.Success) { $timeMatch.Value } else { "" }
-                
-                if ($i + 1 -lt $lines.Count) {
-                    $dataLine = $lines[$i + 1].Trim()
+                # 避開前面的中文字元，直接尋找英文時間格式
+                if ($line -match "([a-zA-Z]{3}\s+[a-zA-Z]{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+.+?\d{4})") {
+                    $timeStr = $matches[1]
                     
-                    # 匹配 PDF 路徑與印表機名稱
-                    # 格式範例: "C:/PDFPrint.bat" /n /t /h "Z:/temp/HA80021948.pdf" "EPSON(M7150DN)-12"
-                    if ($dataLine -match '(?i)"([^"]+\.pdf)"\s+"([^"]+)"') {
-                        $obj = New-Object PSObject
-                        $obj | Add-Member NoteProperty date $todayFormatted
-                        $obj | Add-Member NoteProperty time $time
-                        $obj | Add-Member NoteProperty path $matches[1]
-                        $obj | Add-Member NoteProperty printer $matches[2]
-                        $results.Add($obj)
+                    # 驗證是否為當日 (容許 Mar 03 或是 Mar  3)
+                    if ($timeStr -match "$todayMonthStr\s+0?$todayDay\b" -and $timeStr -match "$todayYearStr$") {
+                        
+                        $time = ""
+                        if ($timeStr -match "(\d{2}:\d{2}:\d{2})") {
+                            $time = $matches[1]
+                        }
+                        
+                        # 如果是當日，讀取下一行尋找資料
+                        if (-not $sr.EndOfStream) {
+                            $dataLine = $sr.ReadLine()
+                            if ($dataLine -match '(?i)"([^"]+\.pdf)"\s+"([^"]+)"') {
+                                $obj = New-Object PSObject
+                                $obj | Add-Member NoteProperty date $todayFormatted
+                                $obj | Add-Member NoteProperty time $time
+                                $obj | Add-Member NoteProperty path $matches[1]
+                                $obj | Add-Member NoteProperty printer $matches[2]
+                                
+                                # 加入陣列並抑制輸出
+                                [void]$results.Add($obj)
+                            }
+                        }
                     }
                 }
             }
+        } catch {
+            throw "讀取檔案失敗: $($_.Exception.Message)"
+        } finally {
+            if ($null -ne $sr) { $sr.Close(); $sr.Dispose() }
+            if ($null -ne $fs) { $fs.Close(); $fs.Dispose() }
         }
+        
+        $global:PrintLogCache = $results.ToArray()
+        $global:PrintLogLastWriteTime = $currentWriteTime
+        Write-ApiLog ">>> [Cache] 解析完成，已快取 $($global:PrintLogCache.Length) 筆當日紀錄。" -Color Green
     }
     
-    return $results
+    return $global:PrintLogCache
 }
 
 # -------------------------------------------------------------------------
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.13 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.16 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
@@ -525,16 +531,15 @@ while ($listener.IsListening) {
                 } else { $out.message = "No Log" }
             }
             elseif ($path -eq "/server/printlog") {
-                Write-ApiLog ">>> [DEBUG] 讀取全域當日列印紀錄"
                 try {
                     $logData = @(Get-PrintLogs)
                     $out.data = $logData
                     $out.success = $true
                     
-                    if ($logData.Count -eq 0) {
+                    if ($logData.Length -eq 0) {
                         $out.message = "當日 ($((Get-Date).ToString('yyyy-MM-dd'))) 尚無任何列印紀錄。"
                     } else {
-                        $out.message = "已成功讀取當日列印紀錄，共 $($logData.Count) 筆。"
+                        $out.message = "已成功讀取當日列印紀錄，共 $($logData.Length) 筆。"
                     }
                 } catch {
                     $out.success = $false
@@ -544,7 +549,6 @@ while ($listener.IsListening) {
             }
             elseif ($path -eq "/printer/printed") {
                 $n = Get-Utf8QueryParam $req "name"
-                Write-ApiLog ">>> [DEBUG] 讀取單機當日列印紀錄: Name='$n'"
                 
                 if ([string]::IsNullOrEmpty($n)) {
                     $out.success = $false
@@ -552,7 +556,8 @@ while ($listener.IsListening) {
                 } else {
                     try {
                         $allLogs = @(Get-PrintLogs)
-                        $printedArray = New-Object System.Collections.Generic.List[Object]
+                        # 使用 ArrayList 確保新增元素時不會報錯
+                        $printedArray = New-Object System.Collections.ArrayList
                         
                         foreach ($log in $allLogs) {
                             if ($log.printer -eq $n) {
@@ -560,13 +565,13 @@ while ($listener.IsListening) {
                                 $item | Add-Member NoteProperty date $log.date
                                 $item | Add-Member NoteProperty time $log.time
                                 $item | Add-Member NoteProperty path $log.path
-                                $printedArray.Add($item)
+                                [void]$printedArray.Add($item)
                             }
                         }
                         
                         $resultObj = New-Object PSObject
                         $resultObj | Add-Member NoteProperty printer $n
-                        $resultObj | Add-Member NoteProperty printed $printedArray
+                        $resultObj | Add-Member NoteProperty printed $printedArray.ToArray()
                         
                         $out.data = @($resultObj)
                         $out.success = $true
