@@ -1,11 +1,12 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.18 (Full Documentation Restored & Cron Log Rotation)
+    版本：v17.19 (Added Re-print API & Full History Tracking)
     修正：
-    1. 恢復並永久保留完整的腳本首部註解說明，以便追蹤歷史與機制。
-    2. 包含 v17.17 的 Rotate-PrintLog 機制：在 Cron 執行深度自癒時，自動備份 C:\printlog 至 C:\Temp 並保留 7 份。
-    3. 包含 v17.16 的 StreamReader 記憶體優化與無鎖定防呆解析法。
+    1. 新增 /printer/re-print API，允許傳入 name (印表機) 與 path (檔案路徑) 來重新列印該檔案。
+    2. 嚴格保留完整的腳本首部註解說明，確保修改歷程可被追蹤。
+    3. 包含 v17.17 的 Rotate-PrintLog 機制：在 Cron 執行深度自癒時，自動備份 C:\printlog 至 C:\Temp 並保留 7 份。
+    4. 包含 v17.16 的 StreamReader 記憶體優化與無鎖定防呆解析法。
     
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
@@ -198,23 +199,16 @@ function Cleanup-OldLogs {
 function Rotate-PrintLog {
     if (-not (Test-Path $printLogFilePath -PathType Leaf)) { return }
     
-    # 建立備份檔名 (例如: printlog.20260303)
     $backupName = "printlog.$((Get-Date).ToString('yyyyMMdd'))"
     $backupPath = Join-Path $logPath $backupName
 
     try {
-        # 如果當天已存在同名備份，先刪除以免 Move-Item 報錯
         if (Test-Path $backupPath) { Remove-Item $backupPath -Force }
-        
-        # 使用 Move-Item 以確保原子性操作 (避免複製與清空之間的寫入遺失)
         Move-Item -Path $printLogFilePath -Destination $backupPath -Force
-        
-        # 立刻重建一個空的 printlog，防止依賴該檔的程式拋錯
         New-Item -Path $printLogFilePath -ItemType File -Force | Out-Null
         
         Write-ApiLog ">>> [系統維護] 已備份並重置列印紀錄 -> $backupName" -Color Green
         
-        # 清除過期的 printlog 備份 (超過 7 天)
         $limitDate = (Get-Date).AddDays(-7)
         $oldLogs = Get-ChildItem -Path $logPath -Filter "printlog.*" | Where-Object { $_.LastWriteTime -lt $limitDate }
         if ($oldLogs) {
@@ -224,10 +218,8 @@ function Rotate-PrintLog {
             }
         }
         
-        # 強制清除記憶體快取，確保下次 API 呼叫讀取最新的空白檔
         $global:PrintLogCache = @()
         $global:PrintLogLastWriteTime = [DateTime]::MinValue
-        
     } catch {
         Write-ApiLog "!!! [系統維護] 備份 printlog 失敗: $($_.Exception.Message)" -Color Red
     }
@@ -422,7 +414,6 @@ function Test-PrinterHealth {
     if ($batchAlerts.Count -gt 0 -and $enableAdminNotifications) { Send-SysAdminNotify -content ([string]::Join("`n", $batchAlerts)) -title "印表機告警" }
 }
 
-# --- 解析當日列印紀錄函數 (超級效能逐行讀取版) ---
 function Get-PrintLogs {
     if (-not (Test-Path $printLogFilePath -PathType Leaf)) {
         throw "找不到紀錄檔 $printLogFilePath，無法提供列印清單。"
@@ -431,11 +422,9 @@ function Get-PrintLogs {
     $currentFileInfo = Get-Item $printLogFilePath -ErrorAction Stop
     $currentWriteTime = $currentFileInfo.LastWriteTime
 
-    # 若檔案更新，或是快取為空，重新解析
     if ($global:PrintLogCache -eq $null -or $global:PrintLogCache.Length -eq 0 -or $currentWriteTime -gt $global:PrintLogLastWriteTime) {
         Write-ApiLog ">>> [Cache] 紀錄檔已更新或無快取，開始重新解析..." -Color Cyan
         
-        # 使用最穩定的 ArrayList
         $results = New-Object System.Collections.ArrayList
         
         $enUS = New-Object System.Globalization.CultureInfo("en-US")
@@ -445,7 +434,6 @@ function Get-PrintLogs {
         $todayYearStr   = $now.ToString("yyyy")       # "2026"
         $todayFormatted = $now.ToString("yyyy-MM-dd")
 
-        # 逐行讀取變數準備
         $fs = $null
         $sr = $null
 
@@ -453,23 +441,14 @@ function Get-PrintLogs {
             $fs = New-Object System.IO.FileStream($printLogFilePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
             $sr = New-Object System.IO.StreamReader($fs, [System.Text.Encoding]::Default)
             
-            # 使用 StreamReader 逐行讀取 (O(1) 記憶體消耗，極速)
             while (-not $sr.EndOfStream) {
                 $line = $sr.ReadLine()
-                
-                # 避開前面的中文字元，直接尋找英文時間格式
                 if ($line -match "([a-zA-Z]{3}\s+[a-zA-Z]{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+.+?\d{4})") {
                     $timeStr = $matches[1]
-                    
-                    # 驗證是否為當日 (容許 Mar 03 或是 Mar  3)
                     if ($timeStr -match "$todayMonthStr\s+0?$todayDay\b" -and $timeStr -match "$todayYearStr$") {
-                        
                         $time = ""
-                        if ($timeStr -match "(\d{2}:\d{2}:\d{2})") {
-                            $time = $matches[1]
-                        }
+                        if ($timeStr -match "(\d{2}:\d{2}:\d{2})") { $time = $matches[1] }
                         
-                        # 如果是當日，讀取下一行尋找資料
                         if (-not $sr.EndOfStream) {
                             $dataLine = $sr.ReadLine()
                             if ($dataLine -match '(?i)"([^"]+\.pdf)"\s+"([^"]+)"') {
@@ -478,8 +457,6 @@ function Get-PrintLogs {
                                 $obj | Add-Member NoteProperty time $time
                                 $obj | Add-Member NoteProperty path $matches[1]
                                 $obj | Add-Member NoteProperty printer $matches[2]
-                                
-                                # 加入陣列並抑制輸出
                                 [void]$results.Add($obj)
                             }
                         }
@@ -505,7 +482,7 @@ function Get-PrintLogs {
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.18 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.19 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
@@ -569,10 +546,7 @@ while ($listener.IsListening) {
             if ($global:LastCronRunTime -eq $null -or ($now.Minute -ne $global:LastCronRunTime.Minute -or $now.Hour -ne $global:LastCronRunTime.Hour)) {
                 if (Test-CronMatch $scheduledHealCron $now) {
                     Invoke-SpoolerSelfHealing -reason "Cron 排程"
-                    
-                    # [新增] 在 Cron 觸發時一併執行 printlog 輪替清理
                     Rotate-PrintLog
-                    
                     $global:LastCronRunTime = $now
                 }
             }
@@ -631,7 +605,6 @@ while ($listener.IsListening) {
                 } else {
                     try {
                         $allLogs = @(Get-PrintLogs)
-                        # 使用 ArrayList 確保新增元素時不會報錯
                         $printedArray = New-Object System.Collections.ArrayList
                         
                         foreach ($log in $allLogs) {
@@ -660,6 +633,60 @@ while ($listener.IsListening) {
                         $out.success = $false
                         $out.message = $_.Exception.Message
                         Write-ApiLog "!!! [Error] $($_.Exception.Message)"
+                    }
+                }
+            }
+            # --- [新增] 重新列印已存在的檔案 ---
+            elseif ($path -eq "/printer/re-print") {
+                $n = Get-Utf8QueryParam $req "name"
+                $fPath = Get-Utf8QueryParam $req "path"
+                Write-ApiLog ">>> [DEBUG] Re-Print: Name='$n', Path='$fPath'"
+                
+                if ([string]::IsNullOrEmpty($n) -or [string]::IsNullOrEmpty($fPath)) {
+                    $out.success = $false
+                    $out.message = "缺少 name 或 path 參數，無法執行重印。"
+                } else {
+                    $p = Get-WmiObject Win32_Printer | Where {$_.Name -eq $n}
+                    if ($p) {
+                        # 檢查檔案是否存在於伺服器上
+                        if (-not (Test-Path $fPath -PathType Leaf)) {
+                            $out.success = $false
+                            $out.message = "伺服器上找不到指定的檔案: $fPath"
+                        } else {
+                            $dup = Get-Utf8QueryParam $req "duplex"
+                            $restoreDup = $false
+                            $oldDup = $null
+                            if ($dup) {
+                                if (Get-Command Set-PrintConfiguration -ErrorAction SilentlyContinue) {
+                                    try {
+                                        $cfg = Get-PrintConfiguration -PrinterName $n -ErrorAction Stop
+                                        $oldDup = $cfg.DuplexingMode
+                                        $tDup = "OneSided"
+                                        if ($dup -eq "1" -or $dup -eq "long") { $tDup = "TwoSidedLongEdge" }
+                                        elseif ($dup -eq "2" -or $dup -eq "short") { $tDup = "TwoSidedShortEdge" }
+                                        if ($oldDup -ne $tDup) { Set-PrintConfiguration -PrinterName $n -DuplexingMode $tDup; $restoreDup=$true }
+                                    } catch {}
+                                }
+                            }
+
+                            try {
+                                if ($global:ValidPdfReader) {
+                                    Start-Process -FilePath $global:ValidPdfReader -ArgumentList "/t `"$fPath`" `"$n`"" -WindowStyle Hidden
+                                } else {
+                                    Start-Process -FilePath $fPath -Verb PrintTo -ArgumentList "`"$n`"" -WindowStyle Hidden
+                                }
+                                $out.success = $true
+                                $out.message = "已成功發送指令至印表機 [$n] 重新列印: $fPath"
+                            } catch {
+                                $out.success = $false
+                                $out.message = "列印失敗: $($_.Exception.Message)"
+                            }
+
+                            if ($restoreDup) { try{ Set-PrintConfiguration -PrinterName $n -DuplexingMode $oldDup }catch{} }
+                        }
+                    } else {
+                        $out.success = $false
+                        $out.message = "找不到指定的印表機: $n"
                     }
                 }
             }
