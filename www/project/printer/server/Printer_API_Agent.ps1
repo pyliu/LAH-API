@@ -1,19 +1,51 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.16 (StreamReader Parser & Type Compatibility Fix)
+    版本：v17.18 (Full Documentation Restored & Cron Log Rotation)
     修正：
-    1. 徹底重構 Get-PrintLogs 解析引擎：改用 StreamReader 逐行讀取 (ReadLine)，將記憶體消耗降至最低，解決大檔案分割時導致的「引數類型不相容」與卡頓問題。
-    2. 移除嚴格型別宣告 [regex] 與 Generic.List，全面改用原生 -match 與 ArrayList，確保與舊版 Windows Server 完全相容。
-    3. 保留 FileShare.ReadWrite 機制，防止讀取時遇到列印程式寫入而鎖定。
+    1. 恢復並永久保留完整的腳本首部註解說明，以便追蹤歷史與機制。
+    2. 包含 v17.17 的 Rotate-PrintLog 機制：在 Cron 執行深度自癒時，自動備份 C:\printlog 至 C:\Temp 並保留 7 份。
+    3. 包含 v17.16 的 StreamReader 記憶體優化與無鎖定防呆解析法。
     
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
-    1. [列印作業自癒] 清除殭屍作業 (狀態 Error/Deleting)
-    2. [列印服務自癒] 偵測堵塞 ($queueThreshold) 並重啟 Spooler
-    3. [系統健康維護] 排程環境重置 (Cron: $scheduledHealCron)
-    4. [腳本韌性] 啟動重試、防火牆開通、通知防卡死 (TCP Check)
-    5. [資安合規] Zero-Ping (使用 TCP 9100/80 偵測)
+
+    1. [列印作業自癒] 清除殭屍作業
+       - 觸發機制：每次巡檢 (每分鐘執行一次)
+       - 判斷條件：作業狀態為 Error (錯誤) 或 Deleting (刪除中但卡住)
+       - 執行動作：自動呼叫 WMI Delete() 刪除該作業，防止單一壞檔卡住整台印表機佇列
+
+    2. [列印服務自癒] 偵測堵塞並重啟服務 (被動修復)
+       - 觸發機制：佇列監控
+       - 判斷條件：
+         (1) 單台印表機佇列數超過 $queueThreshold (預設 20)
+         (2) 且該數量與上次檢查時相同 (代表完全沒有消化)
+         (3) 且發生堵塞的印表機數量超過 $maxStuckPrinters (預設 3)
+       - 執行動作：
+         (1) 停止 Spooler 服務
+         (2) 強制清空 C:\Windows\System32\spool\PRINTERS 下所有暫存檔 (.SPL, .SHD)
+         (3) 重新啟動 Spooler 服務
+         (4) 發送通知給管理員
+
+    3. [系統健康維護] 排程環境重置與日誌輪替 (主動預防)
+       - 觸發機制：Cron 排程表達式 ($scheduledHealCron，預設 "30 7 * * *" 即每天 07:30)
+       - 執行動作：
+         (1) 執行完整的服務重啟與暫存檔清理，預防 Windows Spooler 記憶體洩漏 (Memory Leak)。
+         (2) 自動將 C:\printlog 重命名為 printlog.YYYYMMDD 並備份至 C:\Temp。
+         (3) 自動掃描並刪除 C:\Temp 下超過 7 天的舊 printlog 備份檔，防止磁碟空間耗盡。
+
+    4. [腳本自身韌性] (Script Resilience)
+       - 啟動重試：若 Port 8888 被佔用 (通常發生在剛重啟腳本時 Port 尚未釋放)，會自動重試 5 次，每次間隔 2 秒
+       - 防火牆自動開通：腳本啟動時會自動檢查並嘗試加入 TCP 8888 入站規則，防止因防火牆設定遺失導致無法連線
+       - 通知防卡死：發送 HTTP 通知前先偵測通知伺服器 TCP Port，若離線則直接跳過，避免 Script 卡在 WebRequest Timeout
+       - 錯誤隔離：API 處理與主監控迴圈皆有 Try-Catch 包覆，確保單一錯誤不會導致整個監控服務崩潰
+
+    5. [資安合規與 SOC 友善設計 (Zero-Ping)]
+       - 目的：避免頻繁的 ICMP 請求被防火牆或 SOC (資安維運中心) 誤判為內網掃描 (Ping Sweep) 攻擊
+       - 實作方式：本腳本已移除所有 ICMP Echo Request (Ping) 操作
+       - 印表機偵測：改為建立 TCP 連線至 Port 9100 (標準 RAW 列印埠)，這能更精確確認「列印服務」是否就緒，而非僅確認主機存活
+       - 通知伺服器偵測：改為建立 TCP 連線至 Port 80 (HTTP)，確認 Web 服務是否存活
+       - 效益：這些連線在防火牆日誌中會被視為正常的應用層業務流量，而非惡意的網路探測行為
 
 .NOTES
     ?? 測試指令
@@ -160,6 +192,45 @@ function Cleanup-OldLogs {
             if ($null -ne $oldFiles) { foreach ($file in $oldFiles) { Remove-Item $file.FullName -Force } }
         }
     } catch {}
+}
+
+# --- 備份與清理 printlog 檔案函數 ---
+function Rotate-PrintLog {
+    if (-not (Test-Path $printLogFilePath -PathType Leaf)) { return }
+    
+    # 建立備份檔名 (例如: printlog.20260303)
+    $backupName = "printlog.$((Get-Date).ToString('yyyyMMdd'))"
+    $backupPath = Join-Path $logPath $backupName
+
+    try {
+        # 如果當天已存在同名備份，先刪除以免 Move-Item 報錯
+        if (Test-Path $backupPath) { Remove-Item $backupPath -Force }
+        
+        # 使用 Move-Item 以確保原子性操作 (避免複製與清空之間的寫入遺失)
+        Move-Item -Path $printLogFilePath -Destination $backupPath -Force
+        
+        # 立刻重建一個空的 printlog，防止依賴該檔的程式拋錯
+        New-Item -Path $printLogFilePath -ItemType File -Force | Out-Null
+        
+        Write-ApiLog ">>> [系統維護] 已備份並重置列印紀錄 -> $backupName" -Color Green
+        
+        # 清除過期的 printlog 備份 (超過 7 天)
+        $limitDate = (Get-Date).AddDays(-7)
+        $oldLogs = Get-ChildItem -Path $logPath -Filter "printlog.*" | Where-Object { $_.LastWriteTime -lt $limitDate }
+        if ($oldLogs) {
+            foreach ($file in $oldLogs) {
+                Remove-Item $file.FullName -Force
+                Write-ApiLog ">>> [系統維護] 已刪除過期備份檔 -> $($file.Name)" -Color DarkGray
+            }
+        }
+        
+        # 強制清除記憶體快取，確保下次 API 呼叫讀取最新的空白檔
+        $global:PrintLogCache = @()
+        $global:PrintLogLastWriteTime = [DateTime]::MinValue
+        
+    } catch {
+        Write-ApiLog "!!! [系統維護] 備份 printlog 失敗: $($_.Exception.Message)" -Color Red
+    }
 }
 
 function Setup-FirewallRule {
@@ -364,7 +435,7 @@ function Get-PrintLogs {
     if ($global:PrintLogCache -eq $null -or $global:PrintLogCache.Length -eq 0 -or $currentWriteTime -gt $global:PrintLogLastWriteTime) {
         Write-ApiLog ">>> [Cache] 紀錄檔已更新或無快取，開始重新解析..." -Color Cyan
         
-        # [修正] 使用最穩定的 ArrayList，避免舊版 PS 的型別不相容問題
+        # 使用最穩定的 ArrayList
         $results = New-Object System.Collections.ArrayList
         
         $enUS = New-Object System.Globalization.CultureInfo("en-US")
@@ -382,7 +453,7 @@ function Get-PrintLogs {
             $fs = New-Object System.IO.FileStream($printLogFilePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
             $sr = New-Object System.IO.StreamReader($fs, [System.Text.Encoding]::Default)
             
-            # [關鍵修正] 使用 StreamReader 逐行讀取 (O(1) 記憶體消耗，極速)
+            # 使用 StreamReader 逐行讀取 (O(1) 記憶體消耗，極速)
             while (-not $sr.EndOfStream) {
                 $line = $sr.ReadLine()
                 
@@ -434,7 +505,7 @@ function Get-PrintLogs {
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.16 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.18 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
@@ -493,11 +564,15 @@ while ($listener.IsListening) {
             $nextCheck = $now.AddSeconds($checkIntervalSec)
         }
 
-        # Cron 排程
+        # Cron 排程 (觸發深度自癒與檔案輪替)
         if ($enableScheduledHeal) {
             if ($global:LastCronRunTime -eq $null -or ($now.Minute -ne $global:LastCronRunTime.Minute -or $now.Hour -ne $global:LastCronRunTime.Hour)) {
                 if (Test-CronMatch $scheduledHealCron $now) {
                     Invoke-SpoolerSelfHealing -reason "Cron 排程"
+                    
+                    # [新增] 在 Cron 觸發時一併執行 printlog 輪替清理
+                    Rotate-PrintLog
+                    
                     $global:LastCronRunTime = $now
                 }
             }
