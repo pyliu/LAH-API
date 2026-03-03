@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.20 (Embed Printed Logs in Printers API)
+    版本：v17.30 (PDF Preview & Binary Stream Support)
     修正：
-    1. 優化 Get-PrinterStatusData：現在 /printers 與 /printer/status 的回傳結果中，會自動包含 printed 陣列 (該印表機當日的列印歷史紀錄)。
-    2. 新增 /printer/re-print API，允許傳入 name (印表機) 與 path (檔案路徑) 來重新列印該檔案。
-    3. 嚴格保留完整的腳本首部註解說明，確保修改歷程可被追蹤。
-    4. 包含 v17.17 的 Rotate-PrintLog 機制：在 Cron 執行深度自癒時，自動備份 C:\printlog 至 C:\Temp 並保留 7 份。
-    5. 包含 v17.16 的 StreamReader 記憶體優化與無鎖定防呆解析法。
+    1. 新增 `/printer/preview` API：支援直接回傳 PDF 二進位流 (application/pdf) 供前端 iframe 渲染預覽。
+    2. 優化 HTTP 回應處理邏輯：加入 `$handledBinary` 旗標，允許 API 繞過 JSON 序列化，直接拋出原生檔案。
+    3. 承襲 v17.20：包含 `/printer/re-print` 與 `printed` 當日列印紀錄陣列功能。
+    4. 承襲 v17.17：Cron 深度自癒時的 printlog 備份與 7 天輪替機制。
+    5. 承襲 v17.16：StreamReader 無鎖定高效率記憶體讀取法。
     
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
@@ -379,7 +379,7 @@ function Get-PrinterStatusData {
     $portMap = @{}
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
-    # [新增] 預先載入並分組當日列印紀錄，以提升效能 (O(1) 尋找)
+    # 預先載入並分組當日列印紀錄，以提升效能 (O(1) 尋找)
     $logsByPrinter = @{}
     try {
         if (Test-Path $printLogFilePath -PathType Leaf) {
@@ -430,7 +430,7 @@ function Get-PrinterStatusData {
         }
         else {
             switch ($p.PrinterStatus) {
-                1 { $finalStatus = "Error"; $errDetails = "未知 - 驅動/SNMP異常" }
+                1 { $finalStatus = "Error"; $errDetails = "未知 - 驅提/SNMP異常" }
                 2 { $finalStatus = "Error"; $errDetails = "其他錯誤" }
                 4 { $finalStatus = "Printing" } 5 { $finalStatus = "Warmup" }
                 default { $finalStatus = "Ready"; if($p.PrinterStatus -ne 3){$finalStatus="Warning"} }
@@ -447,7 +447,7 @@ function Get-PrinterStatusData {
             }
         }
 
-        # [新增] 提取該印表機的專屬列印紀錄
+        # 提取該印表機的專屬列印紀錄
         $printedArray = @()
         if ($logsByPrinter.ContainsKey($pName)) {
             $printedArray = $logsByPrinter[$pName].ToArray()
@@ -464,7 +464,7 @@ function Get-PrinterStatusData {
         $obj | Add-Member NoteProperty PortName $p.PortName
         $obj | Add-Member NoteProperty ShareName ($p.ShareName -as [string])
         $obj | Add-Member NoteProperty ErrorDetails $errDetails 
-        $obj | Add-Member NoteProperty printed $printedArray # 內嵌當日列印紀錄陣列
+        $obj | Add-Member NoteProperty printed $printedArray
         $obj | Add-Member NoteProperty LastUpdated $timestamp
         $results.Add($obj)
     }
@@ -512,7 +512,7 @@ function Test-PrinterHealth {
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.20 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.30 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
@@ -597,6 +597,8 @@ while ($listener.IsListening) {
         if ($req.HttpMethod -eq "OPTIONS") { $res.StatusCode = 200; $res.Close(); continue }
 
         $out = @{ "success"=$false; "message"=""; "data"=$null }
+        $handledBinary = $false
+        
         if ($req.Headers["X-API-KEY"] -ne $apiKey) { $res.StatusCode = 401 }
         else {
             if ($path -eq "/printers") { 
@@ -804,17 +806,44 @@ while ($listener.IsListening) {
             elseif ($path -eq "/service/self-heal") {
                 Invoke-SpoolerSelfHealing -reason "API Trigger"; $out.success=$true
             }
+            elseif ($path -eq "/printer/preview") {
+                $fPath = Get-Utf8QueryParam $req "path"
+                Write-ApiLog ">>> [DEBUG] Preview PDF: Path='$fPath'"
+                
+                if ([string]::IsNullOrEmpty($fPath) -or -not (Test-Path $fPath -PathType Leaf)) {
+                    $out.success = $false
+                    $out.message = "找不到檔案，可能已被系統自動清理: $fPath"
+                } else {
+                    try {
+                        $fileBytes = [System.IO.File]::ReadAllBytes($fPath)
+                        $res.ContentType = "application/pdf"
+                        $res.AddHeader("Access-Control-Expose-Headers", "Content-Disposition")
+                        $res.AddHeader("Content-Disposition", "inline; filename=`"preview.pdf`"")
+                        $res.ContentLength64 = $fileBytes.Length
+                        $res.OutputStream.Write($fileBytes, 0, $fileBytes.Length)
+                        $res.Close()
+                        $handledBinary = $true
+                        Write-ApiLog ">>> [DEBUG] Preview PDF 回傳成功 ($($fileBytes.Length) bytes)"
+                    } catch {
+                        $out.success = $false
+                        $out.message = "檔案讀取失敗: $($_.Exception.Message)"
+                    }
+                }
+            }
             else { $res.StatusCode = 404 }
         }
 
-        $json = ConvertTo-SimpleJson $out
-        $buf = [System.Text.Encoding]::UTF8.GetBytes($json)
-        $res.ContentType = "application/json"
-        try {
-            $res.ContentLength64 = $buf.Length
-            $res.OutputStream.Write($buf, 0, $buf.Length)
-            $res.Close()
-        } catch { Write-ApiLog ">>> [Warn] Client disconnected early" }
+        # 如果沒有被宣告處理為二進位流 ($handledBinary = $false)，則走原有的 JSON 輸出模式
+        if (-not $handledBinary) {
+            $json = ConvertTo-SimpleJson $out
+            $buf = [System.Text.Encoding]::UTF8.GetBytes($json)
+            $res.ContentType = "application/json"
+            try {
+                $res.ContentLength64 = $buf.Length
+                $res.OutputStream.Write($buf, 0, $buf.Length)
+                $res.Close()
+            } catch { Write-ApiLog ">>> [Warn] Client disconnected early" }
+        }
 
         if ($restartScript) {
             Write-ApiLog ">>> 重啟中..."
