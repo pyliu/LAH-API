@@ -24,7 +24,7 @@
             <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-2">
                     <div class="bg-purple-600 text-white p-2 rounded"><i class="fa-solid fa-stethoscope"></i></div>
-                    <h1 class="text-xl font-bold tracking-tight">API 診斷工具 v1.2</h1>
+                    <h1 class="text-xl font-bold tracking-tight">API 診斷工具 v1.3</h1>
                 </div>
 
                 <div class="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200">
@@ -92,7 +92,8 @@
                             </div>
                             
                             <button @click="runSingleTest(index)" :disabled="loading || (test.requirePrinter && !selectedPrinter)" 
-                                    class="text-gray-400 hover:text-blue-600 disabled:opacity-30">
+                                    class="text-gray-400 hover:text-blue-600 disabled:opacity-30"
+                                    :title="test.requirePrinter && !selectedPrinter ? '請先選擇印表機' : '執行測試'">
                                 <i class="fa-solid fa-play"></i>
                             </button>
                         </div>
@@ -134,14 +135,16 @@
                 const selectedPrinter = ref(null);
                 const logs = ref([]);
 
-                // 測試案例定義 (新增重啟電腦與更新資訊)
+                // 測試案例定義 (新增列印紀錄讀取相關 API)
                 const testCases = ref([
                     { name: '取得印表機列表', endpoint: '/printers', method: 'GET', requirePrinter: false, status: 'idle' },
                     { name: '查詢單一狀態', endpoint: '/printer/status', method: 'GET', requirePrinter: true, status: 'idle' },
                     { name: '重新整理 (Refresh)', endpoint: '/printer/refresh', method: 'GET', requirePrinter: true, status: 'idle' },
                     { name: '清除佇列 (Clear)', endpoint: '/printer/clear', method: 'GET', requirePrinter: true, status: 'idle' },
                     { name: '更新資訊 (Meta)', endpoint: '/printer/update', method: 'GET', requirePrinter: true, params: { location: 'Test_Loc', comment: 'Test_Comment' }, status: 'idle' },
-                    { name: '讀取伺服器日誌', endpoint: '/server/logs', method: 'GET', requirePrinter: false, params: { lines: 10 }, status: 'idle' },
+                    { name: '取得目標印表機當日紀錄', endpoint: '/printer/printed', method: 'GET', requirePrinter: true, status: 'idle' }, // [NEW] v17.11
+                    { name: '取得伺服器全域列印紀錄', endpoint: '/server/printlog', method: 'GET', requirePrinter: false, status: 'idle' }, // [NEW] v17.11
+                    { name: '讀取伺服器系統日誌', endpoint: '/server/logs', method: 'GET', requirePrinter: false, params: { lines: 10 }, status: 'idle' },
                     { name: '自癒功能測試', endpoint: '/service/self-heal', method: 'GET', requirePrinter: false, status: 'idle' },
                     { name: '重啟 Spooler', endpoint: '/service/restart-spooler', method: 'GET', requirePrinter: false, status: 'idle' },
                     { name: '重啟電腦 (Restart OS)', endpoint: '/server/restart-computer', method: 'GET', requirePrinter: false, status: 'idle' }
@@ -213,7 +216,7 @@
                     test.status = 'running';
                     
                     let url = getUrl(test.endpoint);
-                    let params = test.params || {};
+                    let params = test.params ? { ...test.params } : {};
 
                     // 若需要印表機名稱，自動附加
                     if (test.requirePrinter) {
@@ -225,7 +228,7 @@
                         params['name'] = selectedPrinter.value.Name;
                     }
 
-                    addLog(`> [${test.method}] ${test.endpoint} ${JSON.stringify(params)}`, 'text-cyan-300');
+                    addLog(`> [${test.method}] ${test.endpoint} ${Object.keys(params).length > 0 ? JSON.stringify(params) : ''}`, 'text-cyan-300');
 
                     try {
                         const res = await axios({
@@ -244,7 +247,7 @@
                         test.status = isSuccess ? 'success' : 'error';
                     } catch (err) {
                         addLog(`Request Error: ${err.message}`, 'text-red-500');
-                        if (err.response) {
+                        if (err.response && err.response.data) {
                             addLog(`Response Data: ${JSON.stringify(err.response.data)}`, 'text-red-400');
                         }
                         test.status = 'error';

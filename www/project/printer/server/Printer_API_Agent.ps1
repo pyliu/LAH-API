@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.10 (加入硬體錯誤代碼人類可讀翻譯 mapping)
+    版本：v17.13 (Printlog Parser Fix - Encoding Resilience)
     
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
@@ -56,6 +56,9 @@ $uploadPath         = "C:\Temp\Uploads"
 $maxLogSizeBytes    = 10MB                       
 $maxHistory         = 5                          
 $logRetentionDays   = 7                   
+
+# --- 列印紀錄檔路徑 ---
+$printLogFilePath   = "C:\printlog"
 
 # --- PDF 閱讀器路徑 ---
 $pdfReaderPaths     = @(
@@ -275,36 +278,29 @@ function Get-PrinterStatusData {
         if ($shouldSkip) { continue }
 
         $errDetails = ""; $finalStatus = "Ready"
-        if ($p.WorkOffline) { 
-            $finalStatus = "Offline" 
-        }
+        if ($p.WorkOffline) { $finalStatus = "Offline" }
         elseif ($p.DetectedErrorState -ne 0) { 
-            # ---------------------------------------------------------
-            # [版本 17.10 新增] 硬體錯誤代碼人類可讀翻譯 (WMI Mapping)
-            # ---------------------------------------------------------
             $finalStatus = "Error"
             switch ($p.DetectedErrorState) {
-                0  { $errDetails = "未知狀態 (Unknown)" }
-                1  { $errDetails = "其他錯誤 (Other)" }
-                2  { $finalStatus = "Ready"; $errDetails = "無錯誤" }
-                3  { $finalStatus = "Warning"; $errDetails = "紙張即將用盡 (Low Paper)" } # 降級為警告
-                4  { $errDetails = "缺紙 (No Paper)" }
-                5  { $finalStatus = "Warning"; $errDetails = "碳粉/墨水不足 (Low Toner)" } # 降級為警告
-                6  { $errDetails = "碳粉/墨水耗盡 (No Toner)" }
-                7  { $errDetails = "機殼門未關 (Door Open)" }
-                8  { $errDetails = "卡紙 (Jammed)" }
-                9  { $errDetails = "硬體離線/未連線 (Offline)" } # 這就是你在儀表板上看到的代碼 9
-                10 { $errDetails = "需要維修保養 (Service Requested)" }
-                11 { $errDetails = "出紙匣已滿 (Output Bin Full)" }
-                default { $errDetails = "硬體異常代碼: $($p.DetectedErrorState)" }
+                1  { $errDetails = "1: 狀態不明" }
+                2  { $errDetails = "2: 其他錯誤" }
+                3  { $errDetails = "3: 無錯誤" }
+                4  { $errDetails = "4: 缺紙" }
+                5  { $errDetails = "5: 碳粉不足" }
+                6  { $errDetails = "6: 缺碳粉" }
+                7  { $errDetails = "7: 機門開啟" }
+                8  { $errDetails = "8: 夾紙" }
+                9  { $errDetails = "9: 離線" }
+                10 { $errDetails = "10: 服務請求" }
+                11 { $errDetails = "11: 輸出紙匣已滿" }
+                default { $errDetails = "硬體偵測錯誤代碼: $($p.DetectedErrorState)" }
             }
         }
         else {
             switch ($p.PrinterStatus) {
-                1 { $finalStatus = "Error"; $errDetails = "未知 - 驅動或SNMP通訊異常" }
-                2 { $finalStatus = "Error"; $errDetails = "其他錯誤 (PrinterStatus: 2)" }
-                4 { $finalStatus = "Printing" } 
-                5 { $finalStatus = "Warmup" }
+                1 { $finalStatus = "Error"; $errDetails = "未知 - 驅動/SNMP異常" }
+                2 { $finalStatus = "Error"; $errDetails = "其他錯誤" }
+                4 { $finalStatus = "Printing" } 5 { $finalStatus = "Warmup" }
                 default { $finalStatus = "Ready"; if($p.PrinterStatus -ne 3){$finalStatus="Warning"} }
             }
         }
@@ -312,10 +308,10 @@ function Get-PrinterStatusData {
         $pIP = if ($portMap.ContainsKey($p.PortName)) { $portMap[$p.PortName] } else { $p.PortName }
         if ($pIP -match "^\d+\.\d+\.\d+\.\d+$") {
             if (-not (Test-TcpConnection $pIP 9100 200)) {
-                if ($finalStatus -eq "Offline") { $errDetails = "無回應 (TCP/9100 不通)" }
+                if ($finalStatus -eq "Offline") { $errDetails = "無回應 (TCP/9100)" }
                 elseif ($finalStatus -like "Ready*") { $finalStatus = "Warning"; $errDetails = "無回應 - 可能斷線" }
             } else {
-                if ($finalStatus -eq "Offline") { $errDetails = "軟體狀態離線 - 但實體網路通暢" }
+                if ($finalStatus -eq "Offline") { $errDetails = "軟體離線 - 網路通暢" }
             }
         }
 
@@ -373,11 +369,66 @@ function Test-PrinterHealth {
     if ($batchAlerts.Count -gt 0 -and $enableAdminNotifications) { Send-SysAdminNotify -content ([string]::Join("`n", $batchAlerts)) -title "印表機告警" }
 }
 
+# --- [新增] 解析當日列印紀錄函數 (具備防呆與精準解析) ---
+function Get-PrintLogs {
+    $results = New-Object System.Collections.Generic.List[Object]
+    
+    # 防呆：檢查檔案是否存在，若不存在則拋出明確例外
+    if (-not (Test-Path $printLogFilePath -PathType Leaf)) {
+        throw "找不到紀錄檔 $printLogFilePath，無法提供列印清單。"
+    }
+
+    # 強制使用 en-US 語系，確保解析出來的月份縮寫(如 Mar) 能對應
+    $enUS = New-Object System.Globalization.CultureInfo("en-US")
+    $now = Get-Date
+    $todayMonthStr  = $now.ToString("MMM", $enUS) # 產出如 "Mar"
+    $todayDay       = $now.Day                    # 產出整數如 3
+    $todayYearStr   = $now.ToString("yyyy")       # 產出如 "2026"
+    $todayFormatted = $now.ToString("yyyy-MM-dd")
+
+    # 關鍵修正：移除 -Encoding 參數，避免讀取 Big5 檔案時中文變成亂碼導致比對失敗
+    $lines = Get-Content -Path $printLogFilePath
+    
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        $line = $lines[$i]
+        
+        # 避開前面的中文字元，直接在整行中尋找英文時間格式
+        # 匹配範例: Tue Mar 03 14:42:18 CST 2026
+        if ($line -match "([a-zA-Z]{3}\s+[a-zA-Z]{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+.+?\d{4})") {
+            $timeStr = $matches[1]
+            
+            # 驗證是否為當日 (容許 Mar 03 或是 Mar  3)
+            if ($timeStr -match "$todayMonthStr\s+0?$todayDay\b" -and $timeStr -match "$todayYearStr$") {
+                
+                $timeMatch = [regex]::Match($timeStr, "\d{2}:\d{2}:\d{2}")
+                $time = if ($timeMatch.Success) { $timeMatch.Value } else { "" }
+                
+                if ($i + 1 -lt $lines.Count) {
+                    $dataLine = $lines[$i + 1].Trim()
+                    
+                    # 匹配 PDF 路徑與印表機名稱
+                    # 格式範例: "C:/PDFPrint.bat" /n /t /h "Z:/temp/HA80021948.pdf" "EPSON(M7150DN)-12"
+                    if ($dataLine -match '(?i)"([^"]+\.pdf)"\s+"([^"]+)"') {
+                        $obj = New-Object PSObject
+                        $obj | Add-Member NoteProperty date $todayFormatted
+                        $obj | Add-Member NoteProperty time $time
+                        $obj | Add-Member NoteProperty path $matches[1]
+                        $obj | Add-Member NoteProperty printer $matches[2]
+                        $results.Add($obj)
+                    }
+                }
+            }
+        }
+    }
+    
+    return $results
+}
+
 # -------------------------------------------------------------------------
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.10 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.13 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
@@ -472,6 +523,65 @@ while ($listener.IsListening) {
                     $cnt = 100; $l = Get-Utf8QueryParam $req "lines"; if($l -match "^\d+$"){$cnt=[int]$l}
                     $out.data = Get-Content $logF | Select-Object -Last $cnt; $out.success = $true
                 } else { $out.message = "No Log" }
+            }
+            elseif ($path -eq "/server/printlog") {
+                Write-ApiLog ">>> [DEBUG] 讀取全域當日列印紀錄"
+                try {
+                    $logData = @(Get-PrintLogs)
+                    $out.data = $logData
+                    $out.success = $true
+                    
+                    if ($logData.Count -eq 0) {
+                        $out.message = "當日 ($((Get-Date).ToString('yyyy-MM-dd'))) 尚無任何列印紀錄。"
+                    } else {
+                        $out.message = "已成功讀取當日列印紀錄，共 $($logData.Count) 筆。"
+                    }
+                } catch {
+                    $out.success = $false
+                    $out.message = $_.Exception.Message
+                    Write-ApiLog "!!! [Error] $($_.Exception.Message)"
+                }
+            }
+            elseif ($path -eq "/printer/printed") {
+                $n = Get-Utf8QueryParam $req "name"
+                Write-ApiLog ">>> [DEBUG] 讀取單機當日列印紀錄: Name='$n'"
+                
+                if ([string]::IsNullOrEmpty($n)) {
+                    $out.success = $false
+                    $out.message = "缺少 name 參數，無法查詢該印表機紀錄。"
+                } else {
+                    try {
+                        $allLogs = @(Get-PrintLogs)
+                        $printedArray = New-Object System.Collections.Generic.List[Object]
+                        
+                        foreach ($log in $allLogs) {
+                            if ($log.printer -eq $n) {
+                                $item = New-Object PSObject
+                                $item | Add-Member NoteProperty date $log.date
+                                $item | Add-Member NoteProperty time $log.time
+                                $item | Add-Member NoteProperty path $log.path
+                                $printedArray.Add($item)
+                            }
+                        }
+                        
+                        $resultObj = New-Object PSObject
+                        $resultObj | Add-Member NoteProperty printer $n
+                        $resultObj | Add-Member NoteProperty printed $printedArray
+                        
+                        $out.data = @($resultObj)
+                        $out.success = $true
+                        
+                        if ($printedArray.Count -eq 0) {
+                            $out.message = "印表機 [$n] 當日尚無任何列印紀錄。"
+                        } else {
+                            $out.message = "已成功讀取印表機 [$n] 的紀錄，共印過 $($printedArray.Count) 筆檔案。"
+                        }
+                    } catch {
+                        $out.success = $false
+                        $out.message = $_.Exception.Message
+                        Write-ApiLog "!!! [Error] $($_.Exception.Message)"
+                    }
+                }
             }
             elseif ($path -eq "/server/restart-script") {
                 $out.success = $true; $out.message = "Restarting..."
