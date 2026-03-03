@@ -1,12 +1,13 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.19 (Added Re-print API & Full History Tracking)
+    版本：v17.20 (Embed Printed Logs in Printers API)
     修正：
-    1. 新增 /printer/re-print API，允許傳入 name (印表機) 與 path (檔案路徑) 來重新列印該檔案。
-    2. 嚴格保留完整的腳本首部註解說明，確保修改歷程可被追蹤。
-    3. 包含 v17.17 的 Rotate-PrintLog 機制：在 Cron 執行深度自癒時，自動備份 C:\printlog 至 C:\Temp 並保留 7 份。
-    4. 包含 v17.16 的 StreamReader 記憶體優化與無鎖定防呆解析法。
+    1. 優化 Get-PrinterStatusData：現在 /printers 與 /printer/status 的回傳結果中，會自動包含 printed 陣列 (該印表機當日的列印歷史紀錄)。
+    2. 新增 /printer/re-print API，允許傳入 name (印表機) 與 path (檔案路徑) 來重新列印該檔案。
+    3. 嚴格保留完整的腳本首部註解說明，確保修改歷程可被追蹤。
+    4. 包含 v17.17 的 Rotate-PrintLog 機制：在 Cron 執行深度自癒時，自動備份 C:\printlog 至 C:\Temp 並保留 7 份。
+    5. 包含 v17.16 的 StreamReader 記憶體優化與無鎖定防呆解析法。
     
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
@@ -307,113 +308,7 @@ function Get-Utf8QueryParam {
     return $null
 }
 
-function Get-PrinterStatusData {
-    $results = New-Object System.Collections.Generic.List[Object]
-    $portMap = @{}
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-
-    try { $tcpPorts = Get-WmiObject -Class Win32_TCPIPPrinterPort -ErrorAction SilentlyContinue; if($tcpPorts){ foreach($t in $tcpPorts){ if($t.Name){$portMap[$t.Name]=$t.HostAddress} } } } catch {}
-    $wmiPrinters = Get-WmiObject -Class Win32_Printer
-
-    foreach ($p in $wmiPrinters) {
-        $pName = $p.Name; $shouldSkip = $false
-        foreach ($kw in $excludeKeywords) { if ($pName -like "*$kw*") { $shouldSkip=$true; break } }
-        if ($shouldSkip) { continue }
-        foreach ($exName in $manualExcludePrinters) { if ($pName -eq $exName) { $shouldSkip=$true; break } }
-        if ($shouldSkip) { continue }
-
-        $errDetails = ""; $finalStatus = "Ready"
-        if ($p.WorkOffline) { $finalStatus = "Offline" }
-        elseif ($p.DetectedErrorState -ne 0) { 
-            $finalStatus = "Error"
-            switch ($p.DetectedErrorState) {
-                1  { $errDetails = "1: 狀態不明" }
-                2  { $errDetails = "2: 其他錯誤" }
-                3  { $errDetails = "3: 無錯誤" }
-                4  { $errDetails = "4: 缺紙" }
-                5  { $errDetails = "5: 碳粉不足" }
-                6  { $errDetails = "6: 缺碳粉" }
-                7  { $errDetails = "7: 機門開啟" }
-                8  { $errDetails = "8: 夾紙" }
-                9  { $errDetails = "9: 離線" }
-                10 { $errDetails = "10: 服務請求" }
-                11 { $errDetails = "11: 輸出紙匣已滿" }
-                default { $errDetails = "硬體偵測錯誤代碼: $($p.DetectedErrorState)" }
-            }
-        }
-        else {
-            switch ($p.PrinterStatus) {
-                1 { $finalStatus = "Error"; $errDetails = "未知 - 驅動/SNMP異常" }
-                2 { $finalStatus = "Error"; $errDetails = "其他錯誤" }
-                4 { $finalStatus = "Printing" } 5 { $finalStatus = "Warmup" }
-                default { $finalStatus = "Ready"; if($p.PrinterStatus -ne 3){$finalStatus="Warning"} }
-            }
-        }
-        
-        $pIP = if ($portMap.ContainsKey($p.PortName)) { $portMap[$p.PortName] } else { $p.PortName }
-        if ($pIP -match "^\d+\.\d+\.\d+\.\d+$") {
-            if (-not (Test-TcpConnection $pIP 9100 200)) {
-                if ($finalStatus -eq "Offline") { $errDetails = "無回應 (TCP/9100)" }
-                elseif ($finalStatus -like "Ready*") { $finalStatus = "Warning"; $errDetails = "無回應 - 可能斷線" }
-            } else {
-                if ($finalStatus -eq "Offline") { $errDetails = "軟體離線 - 網路通暢" }
-            }
-        }
-
-        $obj = New-Object PSObject
-        $obj | Add-Member NoteProperty Name $pName
-        $obj | Add-Member NoteProperty Status $finalStatus
-        $obj | Add-Member NoteProperty Jobs ($p.JobCount -as [int])
-        $obj | Add-Member NoteProperty IP $pIP
-        $obj | Add-Member NoteProperty Location ($p.Location -as [string])
-        $obj | Add-Member NoteProperty Comment ($p.Comment -as [string])
-        $obj | Add-Member NoteProperty Driver ($p.DriverName -as [string])
-        $obj | Add-Member NoteProperty PortName $p.PortName
-        $obj | Add-Member NoteProperty ShareName ($p.ShareName -as [string])
-        $obj | Add-Member NoteProperty ErrorDetails $errDetails 
-        $obj | Add-Member NoteProperty LastUpdated $timestamp
-        $results.Add($obj)
-    }
-    return $results
-}
-
-function Test-PrinterHealth {
-    Cleanup-OldLogs
-    $printers = Get-PrinterStatusData
-    $batchAlerts = New-Object System.Collections.Generic.List[string]
-    $stuck = 0
-    
-    if ($enableAutoCleanup) {
-        $zombies = Get-WmiObject Win32_PrintJob | Where-Object { $_.JobStatus -like "*Error*" -or $_.JobStatus -like "*Deleting*" }
-        if ($zombies) { foreach($z in $zombies){ $batchAlerts.Add("自癒清理: $($z.JobId)"); $z.Delete() } }
-    }
-
-    foreach ($p in $printers) {
-        $n = $p.Name; $s = $p.Status; $j = $p.Jobs
-        if ($global:IsFirstRun) { if($s -like "Offline*"){$global:ExcludedPrinters[$n]=$true}; $global:LastQueueCount[$n]=$j; continue }
-        if ($global:ExcludedPrinters.ContainsKey($n)) { if($s -eq "Ready" -or $s -eq "Printing"){$global:ExcludedPrinters.Remove($n)}; continue }
-        
-        if ($s -eq "Error" -or $s -eq "Warning") {
-            $global:PrinterErrorCount[$n]++
-            if ($global:PrinterErrorCount[$n] -eq $errorThreshold) { 
-                $msg = "● [異常] $n $s"; if($p.ErrorDetails){$msg+=" ($($p.ErrorDetails))"}; $batchAlerts.Add($msg) 
-            }
-        } else {
-            if ($global:PrinterErrorCount[$n] -ge $errorThreshold) { $batchAlerts.Add("○ [恢復] $n") }
-            $global:PrinterErrorCount[$n] = 0
-        }
-        if ($j -ge $queueThreshold -and $j -ge $global:LastQueueCount[$n]) {
-            $global:QueueStuckCount[$n]++
-            if ($global:QueueStuckCount[$n] -eq $queueStuckLimit) { $batchAlerts.Add("?? [堵塞] $n 佇列停滯"); $stuck++ }
-        } else { $global:QueueStuckCount[$n] = 0 }
-        $global:LastQueueCount[$n] = $j
-    }
-
-    if ($enableAutoHeal -and $stuck -ge $maxStuckPrinters) { Invoke-SpoolerSelfHealing -reason "多台堵塞" }
-    if ($global:IsFirstRun) { $global:IsFirstRun = $false; return }
-    if ($batchAlerts.Count -gt 0 -and $enableAdminNotifications) { Send-SysAdminNotify -content ([string]::Join("`n", $batchAlerts)) -title "印表機告警" }
-}
-
+# --- 解析當日列印紀錄函數 (超級效能逐行讀取版) ---
 function Get-PrintLogs {
     if (-not (Test-Path $printLogFilePath -PathType Leaf)) {
         throw "找不到紀錄檔 $printLogFilePath，無法提供列印清單。"
@@ -478,11 +373,146 @@ function Get-PrintLogs {
     return $global:PrintLogCache
 }
 
+# --- 獲取所有印表機狀態 (包含附掛當日列印紀錄) ---
+function Get-PrinterStatusData {
+    $results = New-Object System.Collections.Generic.List[Object]
+    $portMap = @{}
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+    # [新增] 預先載入並分組當日列印紀錄，以提升效能 (O(1) 尋找)
+    $logsByPrinter = @{}
+    try {
+        if (Test-Path $printLogFilePath -PathType Leaf) {
+            $allLogs = @(Get-PrintLogs)
+            foreach ($log in $allLogs) {
+                if (-not $logsByPrinter.ContainsKey($log.printer)) {
+                    $logsByPrinter[$log.printer] = New-Object System.Collections.ArrayList
+                }
+                $item = New-Object PSObject
+                $item | Add-Member NoteProperty date $log.date
+                $item | Add-Member NoteProperty time $log.time
+                $item | Add-Member NoteProperty path $log.path
+                [void]$logsByPrinter[$log.printer].Add($item)
+            }
+        }
+    } catch { 
+        # 即使找不到檔案或解析失敗，也不中斷主要的印表機列表讀取
+    }
+
+    try { $tcpPorts = Get-WmiObject -Class Win32_TCPIPPrinterPort -ErrorAction SilentlyContinue; if($tcpPorts){ foreach($t in $tcpPorts){ if($t.Name){$portMap[$t.Name]=$t.HostAddress} } } } catch {}
+    $wmiPrinters = Get-WmiObject -Class Win32_Printer
+
+    foreach ($p in $wmiPrinters) {
+        $pName = $p.Name; $shouldSkip = $false
+        foreach ($kw in $excludeKeywords) { if ($pName -like "*$kw*") { $shouldSkip=$true; break } }
+        if ($shouldSkip) { continue }
+        foreach ($exName in $manualExcludePrinters) { if ($pName -eq $exName) { $shouldSkip=$true; break } }
+        if ($shouldSkip) { continue }
+
+        $errDetails = ""; $finalStatus = "Ready"
+        if ($p.WorkOffline) { $finalStatus = "Offline" }
+        elseif ($p.DetectedErrorState -ne 0) { 
+            $finalStatus = "Error"
+            switch ($p.DetectedErrorState) {
+                1  { $errDetails = "1: 狀態不明" }
+                2  { $errDetails = "2: 其他錯誤" }
+                3  { $errDetails = "3: 無錯誤" }
+                4  { $errDetails = "4: 缺紙" }
+                5  { $errDetails = "5: 碳粉不足" }
+                6  { $errDetails = "6: 缺碳粉" }
+                7  { $errDetails = "7: 機門開啟" }
+                8  { $errDetails = "8: 夾紙" }
+                9  { $errDetails = "9: 離線" }
+                10 { $errDetails = "10: 服務請求" }
+                11 { $errDetails = "11: 輸出紙匣已滿" }
+                default { $errDetails = "硬體偵測錯誤代碼: $($p.DetectedErrorState)" }
+            }
+        }
+        else {
+            switch ($p.PrinterStatus) {
+                1 { $finalStatus = "Error"; $errDetails = "未知 - 驅動/SNMP異常" }
+                2 { $finalStatus = "Error"; $errDetails = "其他錯誤" }
+                4 { $finalStatus = "Printing" } 5 { $finalStatus = "Warmup" }
+                default { $finalStatus = "Ready"; if($p.PrinterStatus -ne 3){$finalStatus="Warning"} }
+            }
+        }
+        
+        $pIP = if ($portMap.ContainsKey($p.PortName)) { $portMap[$p.PortName] } else { $p.PortName }
+        if ($pIP -match "^\d+\.\d+\.\d+\.\d+$") {
+            if (-not (Test-TcpConnection $pIP 9100 200)) {
+                if ($finalStatus -eq "Offline") { $errDetails = "無回應 (TCP/9100)" }
+                elseif ($finalStatus -like "Ready*") { $finalStatus = "Warning"; $errDetails = "無回應 - 可能斷線" }
+            } else {
+                if ($finalStatus -eq "Offline") { $errDetails = "軟體離線 - 網路通暢" }
+            }
+        }
+
+        # [新增] 提取該印表機的專屬列印紀錄
+        $printedArray = @()
+        if ($logsByPrinter.ContainsKey($pName)) {
+            $printedArray = $logsByPrinter[$pName].ToArray()
+        }
+
+        $obj = New-Object PSObject
+        $obj | Add-Member NoteProperty Name $pName
+        $obj | Add-Member NoteProperty Status $finalStatus
+        $obj | Add-Member NoteProperty Jobs ($p.JobCount -as [int])
+        $obj | Add-Member NoteProperty IP $pIP
+        $obj | Add-Member NoteProperty Location ($p.Location -as [string])
+        $obj | Add-Member NoteProperty Comment ($p.Comment -as [string])
+        $obj | Add-Member NoteProperty Driver ($p.DriverName -as [string])
+        $obj | Add-Member NoteProperty PortName $p.PortName
+        $obj | Add-Member NoteProperty ShareName ($p.ShareName -as [string])
+        $obj | Add-Member NoteProperty ErrorDetails $errDetails 
+        $obj | Add-Member NoteProperty printed $printedArray # 內嵌當日列印紀錄陣列
+        $obj | Add-Member NoteProperty LastUpdated $timestamp
+        $results.Add($obj)
+    }
+    return $results
+}
+
+function Test-PrinterHealth {
+    Cleanup-OldLogs
+    $printers = Get-PrinterStatusData
+    $batchAlerts = New-Object System.Collections.Generic.List[string]
+    $stuck = 0
+    
+    if ($enableAutoCleanup) {
+        $zombies = Get-WmiObject Win32_PrintJob | Where-Object { $_.JobStatus -like "*Error*" -or $_.JobStatus -like "*Deleting*" }
+        if ($zombies) { foreach($z in $zombies){ $batchAlerts.Add("自癒清理: $($z.JobId)"); $z.Delete() } }
+    }
+
+    foreach ($p in $printers) {
+        $n = $p.Name; $s = $p.Status; $j = $p.Jobs
+        if ($global:IsFirstRun) { if($s -like "Offline*"){$global:ExcludedPrinters[$n]=$true}; $global:LastQueueCount[$n]=$j; continue }
+        if ($global:ExcludedPrinters.ContainsKey($n)) { if($s -eq "Ready" -or $s -eq "Printing"){$global:ExcludedPrinters.Remove($n)}; continue }
+        
+        if ($s -eq "Error" -or $s -eq "Warning") {
+            $global:PrinterErrorCount[$n]++
+            if ($global:PrinterErrorCount[$n] -eq $errorThreshold) { 
+                $msg = "● [異常] $n $s"; if($p.ErrorDetails){$msg+=" ($($p.ErrorDetails))"}; $batchAlerts.Add($msg) 
+            }
+        } else {
+            if ($global:PrinterErrorCount[$n] -ge $errorThreshold) { $batchAlerts.Add("○ [恢復] $n") }
+            $global:PrinterErrorCount[$n] = 0
+        }
+        if ($j -ge $queueThreshold -and $j -ge $global:LastQueueCount[$n]) {
+            $global:QueueStuckCount[$n]++
+            if ($global:QueueStuckCount[$n] -eq $queueStuckLimit) { $batchAlerts.Add("?? [堵塞] $n 佇列停滯"); $stuck++ }
+        } else { $global:QueueStuckCount[$n] = 0 }
+        $global:LastQueueCount[$n] = $j
+    }
+
+    if ($enableAutoHeal -and $stuck -ge $maxStuckPrinters) { Invoke-SpoolerSelfHealing -reason "多台堵塞" }
+    if ($global:IsFirstRun) { $global:IsFirstRun = $false; return }
+    if ($batchAlerts.Count -gt 0 -and $enableAdminNotifications) { Send-SysAdminNotify -content ([string]::Join("`n", $batchAlerts)) -title "印表機告警" }
+}
+
 # -------------------------------------------------------------------------
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.19 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.20 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
@@ -636,7 +666,6 @@ while ($listener.IsListening) {
                     }
                 }
             }
-            # --- [新增] 重新列印已存在的檔案 ---
             elseif ($path -eq "/printer/re-print") {
                 $n = Get-Utf8QueryParam $req "name"
                 $fPath = Get-Utf8QueryParam $req "path"
