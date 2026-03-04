@@ -67,7 +67,7 @@
                             <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Print Server Monitor</h1>
                             <span v-if="isDemoMode" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-sm">DEMO MODE</span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.2</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.2 (Records UI)</p>
                     </div>
                 </div>
 
@@ -107,6 +107,7 @@
         </header>
 
         <main class="flex-1 overflow-hidden flex flex-col md:flex-row max-w-8xl mx-auto w-full">
+            <!-- Sidebar -->
             <aside class="w-full md:w-64 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 overflow-y-auto flex-shrink-0 transition-colors">
                 <div class="mb-6">
                     <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">伺服器全域操作</h3>
@@ -124,7 +125,6 @@
                             <p class="text-xs text-slate-400 mt-1">查看最近 500 行紀錄</p>
                         </button>
 
-                        <!-- 進階操作區塊 -->
                         <button @click="showAdvancedOps = !showAdvancedOps" class="w-full py-2 text-xs text-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 border border-dashed border-slate-300 dark:border-slate-600 rounded hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all mt-4 mb-2 flex items-center justify-center gap-2">
                             <i class="fa-solid" :class="showAdvancedOps ? 'fa-angle-up' : 'fa-angle-down'"></i>
                             {{ showAdvancedOps ? '隱藏高風險操作' : '顯示進階系統操作' }}
@@ -141,7 +141,6 @@
                                 </button>
                             </div>
                         </transition>
-
                     </div>
                 </div>
                 <div class="mb-6">
@@ -162,6 +161,7 @@
                 <div class="text-xs text-slate-400 dark:text-slate-500 text-center mt-auto pb-4">最後更新: {{ lastUpdated || '尚未連線' }}</div>
             </aside>
 
+            <!-- Main Content -->
             <section class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 relative transition-colors">
                 <div class="mb-6 flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center">
                     <div class="flex flex-col sm:flex-row gap-4 w-full xl:w-auto">
@@ -192,18 +192,18 @@
                         </div>
                     </div>
                     <div class="flex gap-2 flex-wrap justify-start mt-2 xl:mt-0">
-                         <button @click="filterStatus = ''" :class="filterStatus === '' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm flex items-center gap-1.5">全部 <span class="bg-black/10 dark:bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] leading-none">{{ statusCounts.all }}</span></button>
-                         <button @click="filterStatus = 'Ready'" :class="filterStatus === 'Ready' ? 'bg-emerald-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm flex items-center gap-1.5">就緒 <span class="bg-black/10 dark:bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] leading-none">{{ statusCounts.ready }}</span></button>
-                         <button @click="filterStatus = 'Issue'" :class="filterStatus === 'Issue' ? 'bg-orange-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm flex items-center gap-1.5">異常+警告 <span class="bg-black/10 dark:bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] leading-none">{{ statusCounts.issue }}</span></button>
-                         <button @click="filterStatus = 'Error'" :class="filterStatus === 'Error' ? 'bg-red-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm flex items-center gap-1.5">異常 <span class="bg-black/10 dark:bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] leading-none">{{ statusCounts.error }}</span></button>
-                         <button @click="filterStatus = 'Warning'" :class="filterStatus === 'Warning' ? 'bg-amber-500 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm flex items-center gap-1.5">警告 <span class="bg-black/10 dark:bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] leading-none">{{ statusCounts.warning }}</span></button>
+                         <button @click="filterStatus = ''" :class="filterStatus === '' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">全部</button>
+                         <button @click="filterStatus = 'Ready'" :class="filterStatus === 'Ready' ? 'bg-emerald-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">就緒</button>
+                         <button @click="filterStatus = 'Issue'" :class="filterStatus === 'Issue' ? 'bg-orange-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常+警告</button>
+                         <button @click="filterStatus = 'Error'" :class="filterStatus === 'Error' ? 'bg-red-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常</button>
+                         <button @click="filterStatus = 'Warning'" :class="filterStatus === 'Warning' ? 'bg-amber-500 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">警告</button>
                     </div>
                 </div>
 
                 <transition-group name="list" tag="div" v-if="filteredPrinters.length > 0" class="printer-grid-container grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4 pb-20">
-                    <div v-for="p in filteredPrinters" :key="p.Name" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-all relative group flex flex-col h-full">
+                    <div v-for="p in filteredPrinters" :key="p.Name" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-all relative group h-full flex flex-col">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl" :class="getStatusColor(p.Status, true)"></div>
-                        <div class="pl-3 flex flex-col h-full">
+                        <div class="pl-3 flex-1 flex flex-col">
                             <div class="flex justify-between items-start mb-2">
                                 <div class="overflow-hidden">
                                     <h3 class="font-bold text-slate-800 dark:text-slate-100 text-lg truncate pr-2" :title="p.Name">{{ p.Name }}</h3>
@@ -225,64 +225,29 @@
                                 <div v-if="p.Driver" class="truncate col-span-2" :title="p.Driver"><i class="fa-solid fa-microchip w-4"></i> {{ p.Driver }}</div>
                                 <div v-if="p.PortName" class="truncate"><i class="fa-solid fa-plug w-4"></i> {{ p.PortName }}</div>
                             </div>
-                            <!-- 動態按鈕列 -->
-                            <div class="flex gap-1.5 mt-auto pt-2 border-t border-slate-100 dark:border-slate-700 text-[11px] xl:text-xs">
-                                <button @click="refreshPrinter(p.Name)" :disabled="loading" class="flex-1 min-w-0 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 py-2 rounded border border-slate-200 dark:border-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center truncate px-1"><i class="fa-solid fa-sync block mb-1 sm:inline sm:mb-0 sm:mr-1" :class="{'fa-spin': loading}"></i> 刷新</button>
-                                <button @click="openEditModal(p)" :disabled="loading" class="flex-1 min-w-0 bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 py-2 rounded border border-yellow-200 dark:border-yellow-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center truncate px-1"><i class="fa-solid fa-pen-to-square block mb-1 sm:inline sm:mb-0 sm:mr-1"></i> 編輯</button>
+                            
+                            <!-- 底部按鈕區 (Flex Wrap 自適應) -->
+                            <div class="flex flex-wrap gap-2 mt-auto pt-2 border-t border-slate-100 dark:border-slate-700">
+                                <button @click="refreshPrinter(p.Name)" :disabled="loading" class="flex-1 min-w-[60px] bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 text-xs py-2 rounded border border-slate-200 dark:border-slate-600 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-sync" :class="{'fa-spin': loading}"></i> 刷新</button>
+                                <button @click="openEditModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 text-xs py-2 rounded border border-yellow-200 dark:border-yellow-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-pen-to-square"></i> 編輯</button>
+                                <button v-if="p.Status === 'Ready'" @click="openPdfModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-300 text-xs py-2 rounded border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-file-pdf"></i> 列印</button>
                                 
-                                <template v-if="p.Status === 'Ready'">
-                                    <button @click="openPdfModal(p)" :disabled="loading" class="flex-1 min-w-0 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-300 py-2 rounded border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center truncate px-1"><i class="fa-solid fa-file-arrow-up block mb-1 sm:inline sm:mb-0 sm:mr-1"></i> 上傳</button>
-                                    <button @click="openHistoryModal(p)" :disabled="loading" class="flex-1 min-w-0 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 py-2 rounded border border-purple-200 dark:border-purple-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center px-1 relative">
-                                        <div class="truncate w-full">
-                                            <i class="fa-solid fa-clock-rotate-left block mb-1 sm:inline sm:mb-0 sm:mr-1"></i> 紀錄
-                                        </div>
-                                        <span v-if="p.printed?.length > 0" class="absolute -top-1.5 -right-1.5 bg-purple-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full shadow-md z-10">{{ p.printed.length }}</span>
-                                    </button>
-                                </template>
-                                <div v-else class="flex-[2] min-w-0"></div>
+                                <!-- [新增] 只有在有紀錄時才顯示此按鈕 -->
+                                <button v-if="p.printed && p.printed.length > 0" @click="openRecordModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-xs py-2 px-2 rounded border border-purple-200 dark:border-purple-800 transition-colors disabled:opacity-50 whitespace-nowrap font-medium flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-clock-rotate-left"></i> 紀錄 <span class="bg-purple-200 text-purple-800 dark:bg-purple-800 dark:text-purple-200 rounded-full px-1.5 py-0.5 text-[10px] leading-none">{{ p.printed.length }}</span>
+                                </button>
                                 
-                                <button @click="clearQueue(p.Name)" :disabled="loading" class="flex-1 min-w-0 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-300 py-2 rounded border border-red-200 dark:border-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center truncate px-1"><i class="fa-solid fa-trash block mb-1 sm:inline sm:mb-0 sm:mr-1"></i> 清除</button>
+                                <button @click="clearQueue(p.Name)" :disabled="loading" class="flex-1 min-w-[60px] bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-300 text-xs py-2 rounded border border-red-200 dark:border-red-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-trash"></i> 清除</button>
                             </div>
                         </div>
                     </div>
                 </transition-group>
-                
-                <div v-else-if="!isConfigValid && !isDemoMode && !loading" class="flex flex-col items-center justify-center h-96 text-slate-400 dark:text-slate-500">
-                    <div class="bg-slate-200 dark:bg-slate-800 p-6 rounded-full mb-4 shadow-inner">
-                        <i class="fa-solid fa-link-slash text-5xl text-slate-400 dark:text-slate-500"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 text-slate-600 dark:text-slate-300">尚未連線至伺服器</h3>
-                    <p class="text-sm text-center max-w-sm">請於上方選擇目標伺服器並點擊「連線」以取得監控狀態。若無伺服器清單，請先點擊齒輪新增配置。</p>
-                </div>
-                <div v-else-if="connectionError && !loading" class="flex flex-col items-center justify-center h-96 text-red-500 dark:text-red-400">
-                    <i class="fa-solid fa-triangle-exclamation text-5xl mb-4 opacity-80"></i>
-                    <h3 class="text-xl font-bold mb-2">伺服器連線失敗</h3>
-                    <p class="text-sm">無法取得印表機資料，請確認伺服器是否開機，或 API 金鑰設定是否正確。</p>
-                </div>
-                <div v-else-if="!loading" class="flex flex-col items-center justify-center h-96 text-slate-400 dark:text-slate-600">
-                    <i class="fa-solid fa-ghost text-4xl mb-4"></i>
-                    <p>找不到符合的印表機</p>
-                </div>
-
-                <div v-if="loading && printers.length === 0" class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10">
-                    <div class="flex flex-col items-center">
-                        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-4"></i>
-                        <p class="text-sm text-slate-700 dark:text-slate-300 font-bold mb-3">正在連線並讀取狀態...</p>
-                        <div v-if="currentServer" class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-4 py-2 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
-                            <i class="fa-solid fa-server text-blue-500 animate-pulse"></i>
-                            <span class="font-medium text-slate-700 dark:text-slate-200">{{ currentServer.name }}</span>
-                            <span class="font-mono text-[10px] bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-600">{{ currentServer.ip }}</span>
-                        </div>
-                        <div v-else-if="isDemoMode" class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-4 py-2 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
-                            <i class="fa-solid fa-server text-blue-500 animate-pulse"></i>
-                            <span class="font-medium text-slate-700 dark:text-slate-200">DEMO Server</span>
-                            <span class="font-mono text-[10px] bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-600">127.0.0.1</span>
-                        </div>
-                    </div>
-                </div>
+                <div v-else-if="!loading" class="flex flex-col items-center justify-center h-96 text-slate-400 dark:text-slate-600"><i class="fa-solid fa-ghost text-4xl mb-4"></i><p>找不到符合的印表機</p></div>
+                <div v-if="loading && printers.length === 0" class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10"><div class="flex flex-col items-center"><i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-3"></i><p class="text-sm text-slate-500 dark:text-slate-400 font-medium">正在連線至 API...</p></div></div>
             </section>
         </main>
 
+        <!-- Server Manager Modal -->
         <transition name="fade">
             <div v-if="showServerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transition-colors flex flex-col max-h-[90vh]">
@@ -309,6 +274,7 @@
             </div>
         </transition>
 
+        <!-- Edit Meta Modal -->
         <transition name="fade">
             <div v-if="showEditModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden transition-colors">
@@ -323,10 +289,11 @@
             </div>
         </transition>
 
+        <!-- Print PDF Modal -->
         <transition name="fade">
             <div v-if="showPdfModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden transition-colors">
-                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900"><h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-file-arrow-up mr-2 text-blue-600 dark:text-blue-400"></i>上傳 PDF 列印</h3><button @click="showPdfModal = false" :disabled="uploading" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"><i class="fa-solid fa-xmark"></i></button></div>
+                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900"><h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-print mr-2 text-blue-600 dark:text-blue-400"></i>上傳 PDF 列印</h3><button @click="showPdfModal = false" :disabled="uploading" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"><i class="fa-solid fa-xmark"></i></button></div>
                     <div class="p-6 space-y-4">
                         <div class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg text-sm text-blue-800 dark:text-blue-200 mb-4"><span class="font-bold">目標：</span> {{ selectedPrinter?.Name }}</div>
                         <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">選擇檔案</label><input type="file" ref="fileInput" accept=".pdf" class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900/50 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-800 transition-all border border-slate-200 dark:border-slate-600 rounded-lg cursor-pointer bg-white dark:bg-slate-700"></div>
@@ -340,87 +307,44 @@
             </div>
         </transition>
 
-        <!-- 歷史列印紀錄 Modal -->
+        <!-- [新增] 今日列印紀錄 (Records) 預覽/重印 Modal -->
         <transition name="fade">
-            <div v-if="showHistoryModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div v-if="showRecordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transition-colors flex flex-col max-h-[85vh]">
                     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
-                        <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center">
-                            <i class="fa-solid fa-clock-rotate-left mr-2 text-purple-600 dark:text-purple-400"></i>當日列印紀錄
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200 truncate pr-4">
+                            <i class="fa-solid fa-clock-rotate-left mr-2 text-purple-500"></i>今日列印紀錄 - {{ selectedPrinter?.Name }}
                         </h3>
-                        <button @click="showHistoryModal = false" :disabled="reprintingPath !== ''" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"><i class="fa-solid fa-xmark"></i></button>
+                        <button @click="showRecordModal = false" :disabled="recordActionLoading" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-50 flex-shrink-0">
+                            <i class="fa-solid fa-xmark text-xl"></i>
+                        </button>
                     </div>
                     
-                    <div class="p-6 flex-1 overflow-y-auto">
-                        <div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg text-sm text-purple-800 dark:text-purple-200 mb-4 border border-purple-100 dark:border-purple-900/50 flex justify-between items-center">
-                            <span><span class="font-bold">目標印表機：</span> {{ historyPrinter?.Name }}</span>
-                            <span class="text-xs font-mono bg-white dark:bg-slate-800 px-2 py-1 rounded">{{ new Date().toLocaleDateString('zh-TW') }}</span>
+                    <div class="overflow-y-auto p-4 sm:p-6 space-y-3 bg-slate-50 dark:bg-slate-900/50 flex-1">
+                        <div v-if="!selectedPrinter?.printed || selectedPrinter.printed.length === 0" class="text-center text-slate-500 py-8">
+                            <i class="fa-solid fa-folder-open text-3xl mb-2 text-slate-300 dark:text-slate-600"></i>
+                            <p>無任何列印紀錄</p>
                         </div>
-                        
-                        <div v-if="!historyPrinter?.printed || historyPrinter.printed.length === 0" class="text-center py-10 text-slate-400 dark:text-slate-500 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
-                            <i class="fa-solid fa-box-open text-4xl mb-3"></i>
-                            <p class="text-sm">今日尚無任何列印紀錄</p>
-                        </div>
-                        
-                        <div v-else class="space-y-2">
-                            <div v-for="(file, idx) in historyPrinter.printed.slice().reverse()" :key="idx" class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-lg group hover:border-purple-300 dark:hover:border-purple-500 transition-colors gap-3">
-                                <div class="overflow-hidden">
-                                    <div class="text-[11px] text-slate-500 dark:text-slate-400 font-mono mb-0.5"><i class="fa-regular fa-clock mr-1"></i>{{ file.time }}</div>
-                                    <div class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate" :title="file.path">{{ getFileName(file.path) }}</div>
-                                </div>
-                                
-                                <div class="flex items-center gap-2 justify-end">
-                                    <button @click="previewFile(file)" class="flex-shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-500 rounded text-xs font-medium hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 dark:hover:bg-blue-900/40 dark:hover:text-blue-300 transition-colors flex items-center gap-1.5 shadow-sm">
-                                        <i class="fa-solid fa-eye text-slate-400 group-hover:text-blue-600"></i>
-                                        <span>預覽</span>
-                                    </button>
-                                    <button @click="reprintFile(file)" :disabled="reprintingPath === file.path" class="flex-shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-500 rounded text-xs font-medium hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 dark:hover:bg-purple-900/40 dark:hover:text-purple-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-sm">
-                                        <i v-if="reprintingPath === file.path" class="fa-solid fa-spinner fa-spin text-purple-600"></i>
-                                        <i v-else class="fa-solid fa-print text-slate-400 group-hover:text-purple-600"></i> 
-                                        <span>重印</span>
-                                    </button>
-                                </div>
+                        <div v-else v-for="(record, idx) in selectedPrinter.printed" :key="idx" class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                            <div class="overflow-hidden w-full">
+                                <div class="text-xs text-slate-400 font-mono mb-1"><i class="fa-regular fa-clock mr-1"></i>{{ record.time }}</div>
+                                <div class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate cursor-help" :title="record.path">{{ getFileName(record.path) }}</div>
+                            </div>
+                            <div class="flex gap-2 flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+                                <button @click="previewFile(record.path)" :disabled="recordActionLoading" class="flex-1 sm:flex-none px-3 py-1.5 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 rounded border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50">
+                                    <i class="fa-solid fa-eye"></i> 預覽
+                                </button>
+                                <button @click="reprintFile(selectedPrinter.Name, record.path)" :disabled="recordActionLoading" class="flex-1 sm:flex-none px-3 py-1.5 text-xs bg-purple-50 text-purple-600 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 dark:text-purple-400 rounded border border-purple-200 dark:border-purple-800 transition-colors disabled:opacity-50">
+                                    <i class="fa-solid fa-print"></i> 重印
+                                </button>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
-                        <button @click="showHistoryModal = false" :disabled="reprintingPath !== ''" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">關閉視窗</button>
-                    </div>
                 </div>
             </div>
         </transition>
 
-        <!-- PDF 預覽 Modal -->
-        <transition name="fade">
-            <div v-if="showPreviewModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden transition-colors border border-slate-200 dark:border-slate-700">
-                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900 flex-shrink-0">
-                        <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center truncate">
-                            <i class="fa-solid fa-eye mr-2 text-blue-600 dark:text-blue-400"></i>檔案預覽 
-                            <span class="ml-2 text-sm font-mono text-slate-500 truncate hidden sm:inline">- {{ getFileName(currentPreviewFile?.path) }}</span>
-                        </h3>
-                        <div class="flex items-center gap-3">
-                            <button @click="reprintFromPreview" :disabled="reprintingPath !== ''" class="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm font-medium transition-colors shadow-sm shadow-purple-500/30 flex items-center gap-2">
-                                <i class="fa-solid fa-print"></i> 直接重印
-                            </button>
-                            <div class="w-px h-6 bg-slate-300 dark:bg-slate-600"></div>
-                            <button @click="closePreview" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
-                        </div>
-                    </div>
-                    
-                    <div class="flex-1 bg-slate-200 dark:bg-slate-950 relative">
-                        <div v-if="previewLoading" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
-                            <i class="fa-solid fa-spinner fa-spin text-4xl mb-4 text-blue-500"></i>
-                            <p class="font-bold">正在向伺服器提取檔案...</p>
-                            <p class="text-xs mt-2 opacity-70">根據檔案大小與網路速度可能需要數秒時間</p>
-                        </div>
-                        <iframe v-if="previewUrl" :src="previewUrl" class="w-full h-full border-0 shadow-inner"></iframe>
-                    </div>
-                </div>
-            </div>
-        </transition>
-
+        <!-- System Logs Modal -->
         <transition name="fade">
             <div v-if="showLogModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col transition-colors">
@@ -434,19 +358,10 @@
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        (function() {
-            const { createApp, ref, computed, onMounted, watch } = Vue;
+        const { createApp, ref, computed, onMounted, watch } = Vue;
 
-            createApp({
-                setup() {
-                    const isCancel = (err) => (typeof axios !== 'undefined' && axios.isCancel && axios.isCancel(err)) || err.name === 'CanceledError' || err.code === 'ERR_CANCELED';
-                
-                let abortController = new AbortController();
-                const cancelPendingRequests = () => {
-                    abortController.abort(); 
-                    abortController = new AbortController(); 
-                };
-
+        createApp({
+            setup() {
                 const isDemoMode = ref(new URLSearchParams(window.location.search).get('demo') === '1');
                 const config = ref({ ip: '', key: '' });
                 const autoRefresh = ref(localStorage.getItem('ps_auto_refresh') === 'true');
@@ -461,13 +376,14 @@
                 const searchQuery = ref('');
                 const filterStatus = ref('');
                 const filterLocation = ref('');
-                const sortBy = ref('IP');
+                const sortBy = ref('IP'); // Default sort by IP
                 const sortDesc = ref(false);
                 const servers = ref([]);
                 const currentServerId = ref('');
                 
                 const showServerModal = ref(false);
                 const editingServer = ref({ id: null, name: '', ip: '', key: '' });
+                
                 const showEditModal = ref(false);
                 const editTarget = ref(null);
                 const editLocation = ref('');
@@ -480,27 +396,19 @@
                 const uploading = ref(false);
                 const fileInput = ref(null);
                 
-                const showHistoryModal = ref(false);
-                const historyPrinter = ref(null);
-                const reprintingPath = ref('');
-                
-                const showPreviewModal = ref(false);
-                const previewUrl = ref('');
-                const previewLoading = ref(false);
-                const currentPreviewFile = ref(null);
-                
                 const showLogModal = ref(false);
                 const logData = ref('');
                 const logsLoading = ref(false);
-                const connectionError = ref(false);
-                
-                const currentServer = computed(() => servers.value.find(s => s.id === currentServerId.value));
 
+                // [新增] 紀錄與預覽相關狀態
+                const showRecordModal = ref(false);
+                const recordActionLoading = ref(false);
+                
                 const downloadFiles = [
                     { name: '列印伺服器監控腳本', url: 'server/Printer_API_Agent.ps1', icon: 'fa-solid fa-terminal text-blue-500' },
-                    { name: '簡易說明', url: 'server/Printer_API_Agent.txt', icon: 'fa-regular fa-file-lines text-slate-500' },
-                    { name: 'API 測試指令集', url: 'server/Printer_API_Agent_API測試指令集.pdf', icon: 'fa-solid fa-file-pdf text-red-500' },
-                    { name: '部署指南', url: 'server/Printer_API_Agent_Windows_Server_部署指南.pdf', icon: 'fa-solid fa-book text-emerald-500' }
+                    { name: '環境設定檔範例 (.example)', url: 'server/Printer_API_Agent.example', icon: 'fa-solid fa-gear text-slate-500' },
+                    { name: 'API 測試指令集', url: 'server/Printer_API_Agent_API測試指令集_v17.40.md', icon: 'fa-solid fa-file-code text-red-500' },
+                    { name: '部署指南', url: 'server/Printer_API_Agent_Windows_Server_部署指南_v17.40.md', icon: 'fa-solid fa-book text-emerald-500' }
                 ];
                 let pollTimer = null;
 
@@ -510,19 +418,6 @@
                     const mocks = [];
                     for(let i=1; i<=12; i++) {
                         const s = statuses[Math.floor(Math.random() * statuses.length)];
-                        
-                        const mockPrinted = [];
-                        if (Math.random() > 0.4) {
-                            const count = Math.floor(Math.random() * 5) + 1;
-                            for(let j=0; j<count; j++) {
-                                mockPrinted.push({
-                                    date: new Date().toISOString().split('T')[0],
-                                    time: `0${Math.floor(Math.random() * 8) + 9}:${Math.floor(Math.random() * 50) + 10}:${Math.floor(Math.random() * 50) + 10}`,
-                                    path: `C:\\Temp\\Uploads\\Mock_Document_${Math.floor(Math.random() * 1000)}.pdf`
-                                });
-                            }
-                        }
-
                         mocks.push({
                             Name: `Office-Printer-${String(i).padStart(2,'0')}`,
                             Status: s, Jobs: s==='Printing' ? Math.floor(Math.random()*5)+1 : 0, IP: `192.168.1.${100+i}`,
@@ -530,7 +425,11 @@
                             Driver: 'HP Universal Printing PCL 6', PortName: `IP_192.168.1.${100+i}`, ShareName: `PRINTER_${i}`,
                             ErrorDetails: s==='Error' ? '缺紙 (Tray 2)' : (s==='Warning' ? '碳粉存量低' : ''),
                             LastUpdated: new Date().toLocaleString(),
-                            printed: mockPrinted 
+                            // 模擬部分印表機有列印紀錄
+                            printed: Math.random() > 0.5 ? [
+                                { date: '2026-03-04', time: '08:15:22', path: 'C:/PDFPrint/report_q1.pdf' },
+                                { date: '2026-03-04', time: '09:30:10', path: '\\\\192.168.1.100\\share\\invoice_2026.pdf' }
+                            ] : []
                         });
                     }
                     return mocks;
@@ -539,11 +438,6 @@
                 const isConfigValid = computed(() => isDemoMode.value || (config.value.ip && config.value.key));
 
                 watch(currentServerId, (newId) => {
-                    cancelPendingRequests();
-                    printers.value = [];
-                    lastUpdated.value = '';
-                    connectionError.value = false;
-
                     const srv = servers.value.find(s => s.id === newId);
                     if (srv) { 
                         config.value.ip = srv.ip; config.value.key = srv.key; 
@@ -599,33 +493,30 @@
                     resetEdit(); toast("儲存成功", "#10b981");
                 };
                 const removeServer = (id) => { if (confirm("刪除？")) { servers.value = servers.value.filter(s => s.id !== id); saveServers(); if (currentServerId.value === id) { currentServerId.value = ''; printers.value = []; } } };
-                const useServer = (srv) => { currentServerId.value = srv.id; showServerModal.value = false; };
-                const switchServer = () => { };
+                const useServer = (srv) => { currentServerId.value = srv.id; showServerModal.value = false; fetchPrinters(true); };
+                const switchServer = () => { if (currentServerId.value) fetchPrinters(true); };
 
                 const fetchSinglePrinter = async (name) => {
                     if (isDemoMode.value) return; 
                     try {
-                        const res = await axios.get(getApiUrl(`/printer/status?name=${encodeURIComponent(name)}`), { 
-                            headers: { 'X-API-KEY': config.value.key },
-                            signal: abortController.signal
-                        });
+                        const res = await axios.get(getApiUrl(`/printer/status?name=${encodeURIComponent(name)}`), { headers: { 'X-API-KEY': config.value.key } });
                         if (res.data.success) {
                             const idx = printers.value.findIndex(p => p.Name === name);
-                            if (idx !== -1) printers.value[idx] = res.data.data;
-                            if (res.data.data.LastUpdated) lastUpdated.value = res.data.data.LastUpdated;
-                            if (showHistoryModal.value && historyPrinter.value && historyPrinter.value.Name === name) {
-                                historyPrinter.value = res.data.data;
+                            if (idx !== -1) {
+                                printers.value[idx] = res.data.data;
+                                // 若正在查看該印表機紀錄，同步更新
+                                if (showRecordModal.value && selectedPrinter.value?.Name === name) {
+                                    selectedPrinter.value = res.data.data;
+                                }
                             }
+                            if (res.data.data.LastUpdated) lastUpdated.value = res.data.data.LastUpdated;
                         }
-                    } catch (e) { 
-                        if (!isCancel(e)) console.error(e); 
-                    }
+                    } catch (e) { console.error(e); }
                 };
 
                 const fetchPrinters = async (showToast = false) => {
                     if (!isConfigValid.value) { if (showToast) error("請選擇伺服器"); return; }
                     loading.value = true;
-                    connectionError.value = false;
                     if (autoRefresh.value) countdown.value = refreshInterval.value;
                     
                     if (isDemoMode.value) {
@@ -646,40 +537,32 @@
                         }, 800);
                         return;
                     }
-
-                    let cancelled = false;
                     try {
-                        const res = await axios.get(getApiUrl('/printers'), { 
-                            headers: { 'X-API-KEY': config.value.key },
-                            signal: abortController.signal
-                        });
+                        const res = await axios.get(getApiUrl('/printers'), { headers: { 'X-API-KEY': config.value.key } });
                         if (res.data.success) {
                             printers.value = res.data.data;
                             if (printers.value.length > 0 && printers.value[0].LastUpdated) lastUpdated.value = printers.value[0].LastUpdated;
                             if (showToast) success("連線成功");
-                        } else { 
-                            error(res.data.message); 
-                            connectionError.value = true;
-                            printers.value = [];
-                            lastUpdated.value = '';
-                        }
-                    } catch (err) { 
-                        if (isCancel(err)) { cancelled = true; return; }
-                        error("連線失敗"); 
-                        autoRefresh.value = false; 
-                        connectionError.value = true;
-                        printers.value = [];
-                        lastUpdated.value = '';
-                    }
+                            
+                            // 若紀錄視窗開著，同步更新內部資料
+                            if (showRecordModal.value && selectedPrinter.value) {
+                                const updatedP = printers.value.find(x => x.Name === selectedPrinter.value.Name);
+                                if (updatedP) selectedPrinter.value = updatedP;
+                            }
+                        } else { error(res.data.message); }
+                    } catch (err) { error("連線失敗"); autoRefresh.value = false; }
                     finally { 
-                        if (!cancelled) {
-                            loading.value = false;
-                            const l = document.getElementById('init-loading'); if(l) { l.classList.add('fade-out'); setTimeout(()=>l.remove(),500); }
-                        }
+                        loading.value = false;
+                        const l = document.getElementById('init-loading'); if(l) { l.classList.add('fade-out'); setTimeout(()=>l.remove(),500); }
                     }
                 };
 
-                const handleDownload = (e) => { if (isDemoMode.value) { e.preventDefault(); toast("Demo 模式無法下載檔案", "#f59e0b"); } };
+                const handleDownload = (e) => {
+                    if (isDemoMode.value) {
+                        e.preventDefault();
+                        toast("Demo 模式無法下載檔案", "#f59e0b");
+                    }
+                };
 
                 const performAction = async (endpoint, successMsg, targetName = null) => {
                     loading.value = true;
@@ -694,37 +577,23 @@
                         }, 600);
                         return;
                     }
-                    
-                    let cancelled = false;
                     try {
-                        const res = await axios.get(getApiUrl(endpoint), { 
-                            headers: { 'X-API-KEY': config.value.key },
-                            signal: abortController.signal
-                        });
+                        const res = await axios.get(getApiUrl(endpoint), { headers: { 'X-API-KEY': config.value.key } });
                         if (res.data.success) {
                             success(res.data.message || successMsg);
                             if (targetName) fetchSinglePrinter(targetName); else fetchPrinters(false);
                         } else { error(res.data.message); }
-                    } catch (err) { 
-                        if (isCancel(err)) { cancelled = true; return; }
-                        error("失敗: " + err.message); 
-                    } finally { 
-                        if (!cancelled) loading.value = false; 
-                    }
+                    } catch (err) { error("失敗: " + err.message); } finally { loading.value = false; }
                 };
 
                 const clearQueue = (name) => { if(confirm("清除佇列？")) performAction(`/printer/clear?name=${encodeURIComponent(name)}`, "佇列已清除", name); };
                 const refreshPrinter = (name) => performAction(`/printer/refresh?name=${encodeURIComponent(name)}`, "指令已發送", name);
                 const restartSpooler = () => { if(confirm("重啟 Spooler？")) performAction(`/service/restart-spooler`, "服務重啟中"); };
                 const selfHeal = () => { if(confirm("執行深度自癒？")) performAction(`/service/self-heal`, "自癒流程啟動"); };
-                
                 const restartScript = () => { 
                     if(confirm("重啟 API？")) {
                         if(isDemoMode.value) return toast("Demo 模式無法重啟", "#f59e0b");
-                        axios.get(getApiUrl('/server/restart-script'), { 
-                            headers: { 'X-API-KEY': config.value.key },
-                            signal: abortController.signal
-                        }).catch(e => { if (!isCancel(e)) console.error(e); });
+                        axios.get(getApiUrl('/server/restart-script'), { headers: { 'X-API-KEY': config.value.key } }).catch(()=>{});
                         success("重啟中..."); setTimeout(()=>fetchPrinters(), 5000);
                     }
                 };
@@ -732,202 +601,158 @@
                 const restartServer = () => {
                     if(confirm("警告：這將會重新啟動整台實體伺服器/虛擬機。所有服務將會中斷。確定要繼續嗎？")) {
                         if(isDemoMode.value) return toast("Demo 模式無法重啟電腦", "#f59e0b");
-                        axios.get(getApiUrl('/server/restart-computer'), { 
-                            headers: { 'X-API-KEY': config.value.key },
-                            signal: abortController.signal
-                        })
-                        .then(res => { if(res.data.success) success("重啟指令已發送 (5秒後重啟)"); else error(res.data.message); })
-                        .catch(e => { if (!isCancel(e)) error("重啟失敗: " + e.message); });
+                        axios.get(getApiUrl('/server/restart-computer'), { headers: { 'X-API-KEY': config.value.key } })
+                            .then(res => {
+                                if(res.data.success) success("重啟指令已發送 (5秒後重啟)");
+                                else error(res.data.message);
+                            })
+                            .catch(e => error("重啟失敗: " + e.message));
                     }
                 };
 
                 const openEditModal = (p) => { editTarget.value = p; editLocation.value = p.Location||''; editComment.value = p.Comment||''; showEditModal.value = true; };
-                
                 const submitEdit = async () => {
                     if (isDemoMode.value) {
-                        editTarget.value.Location = editLocation.value; editTarget.value.Comment = editComment.value;
+                        editTarget.value.Location = editLocation.value;
+                        editTarget.value.Comment = editComment.value;
                         showEditModal.value = false; success("[Demo] 更新成功"); return;
                     }
                     saving.value = true;
-                    let cancelled = false;
                     try {
                         const url = getApiUrl(`/printer/update?name=${encodeURIComponent(editTarget.value.Name)}&location=${encodeURIComponent(editLocation.value)}&comment=${encodeURIComponent(editComment.value)}`);
-                        const res = await axios.get(url, { headers: { 'X-API-KEY': config.value.key }, signal: abortController.signal });
+                        const res = await axios.get(url, { headers: { 'X-API-KEY': config.value.key } });
                         if (res.data.success) {
                             success("更新成功"); showEditModal.value = false;
                             editTarget.value.Location = editLocation.value; editTarget.value.Comment = editComment.value;
                         } else error(res.data.message);
-                    } catch(e) { if (isCancel(e)) { cancelled = true; return; } error(e.message); 
-                    } finally { if (!cancelled) saving.value = false; }
+                    } catch(e) { error(e.message); } finally { saving.value = false; }
                 };
 
                 const openPdfModal = (p) => { selectedPrinter.value = p; pdfDuplex.value = "0"; showPdfModal.value = true; };
-                
                 const submitPdf = async () => {
                     if (!fileInput.value.files[0]) return error("請選擇檔案");
                     uploading.value = true;
-                    if (isDemoMode.value) { setTimeout(() => { success("[Demo] PDF 已列印"); showPdfModal.value = false; uploading.value = false; }, 1000); return; }
-                    
-                    let cancelled = false;
-                    try {
-                        const url = getApiUrl(`/printer/print-pdf?name=${encodeURIComponent(selectedPrinter.value.Name)}&duplex=${pdfDuplex.value}`);
-                        const res = await axios.post(url, fileInput.value.files[0], { 
-                            headers: { 'X-API-KEY': config.value.key, 'Content-Type': 'application/pdf' }, signal: abortController.signal 
-                        });
-                        if (res.data.success) { success("PDF 已傳送"); showPdfModal.value = false; setTimeout(() => fetchSinglePrinter(selectedPrinter.value.Name), 1000); }
-                        else error(res.data.message);
-                    } catch(e) { if (isCancel(e)) { cancelled = true; return; } error(e.message); 
-                    } finally { if (!cancelled) uploading.value = false; }
-                };
-
-                const openHistoryModal = (p) => {
-                    historyPrinter.value = p;
-                    showHistoryModal.value = true;
-                };
-
-                const getFileName = (path) => {
-                    if (!path) return '未知檔案';
-                    return path.split('\\').pop().split('/').pop();
-                };
-
-                // --- 檔案預覽與重新列印邏輯 ---
-                const previewFile = async (file) => {
-                    if (isDemoMode.value) return toast("Demo 模式無法進行真實預覽", "#f59e0b");
-                    
-                    previewLoading.value = true;
-                    previewUrl.value = '';
-                    currentPreviewFile.value = file;
-                    showPreviewModal.value = true;
-                    
-                    let cancelled = false;
-                    try {
-                        const url = getApiUrl(`/printer/preview?path=${encodeURIComponent(file.path)}`);
-                        const res = await axios.get(url, {
-                            headers: { 'X-API-KEY': config.value.key },
-                            responseType: 'blob',
-                            signal: abortController.signal
-                        });
-                        
-                        if (res.data.type === 'application/json') {
-                            const text = await res.data.text();
-                            const json = JSON.parse(text);
-                            error(json.message || "預覽失敗，檔案可能不存在");
-                            showPreviewModal.value = false;
-                            return;
-                        }
-                        
-                        const blob = new Blob([res.data], { type: 'application/pdf' });
-                        previewUrl.value = URL.createObjectURL(blob);
-                    } catch (e) {
-                        if (isCancel(e)) { cancelled = true; return; }
-                        
-                        if (e.response && e.response.data && e.response.data.type === 'application/json') {
-                            const text = await e.response.data.text();
-                            const json = JSON.parse(text);
-                            error(json.message || "無法取得預覽");
-                        } else {
-                            error("無法取得預覽: " + e.message);
-                        }
-                        showPreviewModal.value = false;
-                    } finally {
-                        if (!cancelled) previewLoading.value = false;
-                    }
-                };
-
-                const closePreview = () => {
-                    showPreviewModal.value = false;
-                    if (previewUrl.value) {
-                        URL.revokeObjectURL(previewUrl.value);
-                        previewUrl.value = '';
-                    }
-                    currentPreviewFile.value = null;
-                };
-
-                const reprintFromPreview = () => {
-                    if (currentPreviewFile.value) {
-                        reprintFile(currentPreviewFile.value);
-                        closePreview();
-                    }
-                };
-
-                const reprintFile = async (file) => {
                     if (isDemoMode.value) {
-                        reprintingPath.value = file.path;
-                        setTimeout(() => {
-                            success(`[Demo] 檔案 [${getFileName(file.path)}] 已發送重印指令`);
-                            reprintingPath.value = '';
-                        }, 1200);
+                        setTimeout(() => { success("[Demo] PDF 已列印"); showPdfModal.value = false; uploading.value = false; }, 1000);
                         return;
                     }
-
-                    reprintingPath.value = file.path;
-                    let cancelled = false;
                     try {
-                        const url = getApiUrl(`/printer/re-print?name=${encodeURIComponent(historyPrinter.value.Name)}&path=${encodeURIComponent(file.path)}`);
+                        const url = getApiUrl(`/printer/print-pdf?name=${encodeURIComponent(selectedPrinter.value.Name)}&duplex=${pdfDuplex.value}`);
+                        const res = await axios.post(url, fileInput.value.files[0], { headers: { 'X-API-KEY': config.value.key, 'Content-Type': 'application/pdf' } });
+                        if (res.data.success) { success("PDF 已傳送"); showPdfModal.value = false; setTimeout(() => fetchSinglePrinter(selectedPrinter.value.Name), 1000); }
+                        else error(res.data.message);
+                    } catch(e) { error(e.message); } finally { uploading.value = false; }
+                };
+
+                // [新增] 紀錄與預覽控制邏輯
+                const openRecordModal = (p) => { selectedPrinter.value = p; showRecordModal.value = true; };
+                
+                const getFileName = (path) => {
+                    if (!path) return "未知檔案";
+                    return path.split(/[\\/]/).pop();
+                };
+
+                const previewFile = async (path) => {
+                    if (isDemoMode.value) return toast("Demo 模式無法預覽伺服器檔案", "#f59e0b");
+                    recordActionLoading.value = true;
+                    toast("向伺服器請求預覽資料...", "#3b82f6");
+                    try {
+                        const url = getApiUrl(`/printer/preview`);
                         const res = await axios.get(url, {
                             headers: { 'X-API-KEY': config.value.key },
-                            signal: abortController.signal
+                            params: { path: path },
+                            responseType: 'blob' // 接收二進位流
                         });
+                        
+                        if (res.headers['content-type'] && res.headers['content-type'].includes('application/pdf')) {
+                            const blobUrl = URL.createObjectURL(res.data);
+                            window.open(blobUrl, '_blank');
+                            success("預覽文件已開啟");
+                        } else {
+                            // 若不是 PDF，通常是伺服器回傳了 JSON 錯誤訊息
+                            const text = await res.data.text();
+                            try {
+                                const errObj = JSON.parse(text);
+                                error(errObj.message || "預覽失敗");
+                            } catch {
+                                error("預覽失敗 (資料格式不符)");
+                            }
+                        }
+                    } catch (err) {
+                        error("無法取得預覽，請確認檔案是否存在");
+                    } finally {
+                        recordActionLoading.value = false;
+                    }
+                };
 
+                const reprintFile = async (printerName, path) => {
+                    if (isDemoMode.value) return toast("Demo 模式無法重印檔案", "#f59e0b");
+                    if (!confirm("確定要將此檔案送至印表機重新列印嗎？")) return;
+                    recordActionLoading.value = true;
+                    try {
+                        const url = getApiUrl(`/printer/re-print`);
+                        const res = await axios.get(url, {
+                            headers: { 'X-API-KEY': config.value.key },
+                            params: { name: printerName, path: path }
+                        });
                         if (res.data.success) {
                             success("已成功發送重印指令");
-                            setTimeout(() => fetchSinglePrinter(historyPrinter.value.Name), 1000);
+                            setTimeout(() => fetchSinglePrinter(printerName), 1000);
                         } else {
                             error(res.data.message);
                         }
-                    } catch (e) {
-                        if (isCancel(e)) { cancelled = true; return; }
-                        error("重印失敗: " + e.message);
+                    } catch (err) {
+                        error("重印請求失敗: " + err.message);
                     } finally {
-                        if (!cancelled) reprintingPath.value = '';
+                        recordActionLoading.value = false;
                     }
                 };
 
                 const showLogs = () => { showLogModal.value = true; fetchLogs(); };
-                
                 const fetchLogs = async () => {
                     logsLoading.value = true;
-                    if (isDemoMode.value) { setTimeout(() => { logData.value = `[${new Date().toLocaleTimeString()}] >>> [Demo] System Initialized\n... (Simulation)`; logsLoading.value = false; }, 500); return; }
-                    let cancelled = false;
+                    if (isDemoMode.value) {
+                        setTimeout(() => {
+                            logData.value = `[${new Date().toLocaleTimeString()}] >>> [Demo] System Initialized\n[${new Date().toLocaleTimeString()}] >>> [Demo] Monitor Started\n... (Simulation)`;
+                            logsLoading.value = false;
+                        }, 500);
+                        return;
+                    }
                     try {
-                        const res = await axios.get(getApiUrl('/server/logs?lines=500'), { headers: { 'X-API-KEY': config.value.key }, signal: abortController.signal });
-                        if (res.data.success) { logData.value = Array.isArray(res.data.data) ? res.data.data.join('\n') : res.data.data; setTimeout(() => { const el = document.getElementById('logContent'); if(el) el.scrollTop = el.scrollHeight; }, 100); } 
-                        else logData.value = res.data.message;
-                    } catch(e) { if (isCancel(e)) { cancelled = true; return; } logData.value = e.message; 
-                    } finally { if (!cancelled) logsLoading.value = false; }
+                        const res = await axios.get(getApiUrl('/server/logs?lines=500'), { headers: { 'X-API-KEY': config.value.key } });
+                        if (res.data.success) {
+                            logData.value = Array.isArray(res.data.data) ? res.data.data.join('\n') : res.data.data;
+                            setTimeout(() => { const el = document.getElementById('logContent'); if(el) el.scrollTop = el.scrollHeight; }, 100);
+                        } else logData.value = res.data.message;
+                    } catch(e) { logData.value = e.message; } finally { logsLoading.value = false; }
                 };
 
                 const uniqueLocations = computed(() => [...new Set(printers.value.map(p => p.Location).filter(l => l))].sort());
-                const baseFilteredPrinters = computed(() => {
+                const filteredPrinters = computed(() => {
                     return printers.value.filter(p => {
                         const matchQ = p.Name.toLowerCase().includes(searchQuery.value.toLowerCase()) || p.IP.includes(searchQuery.value);
+                        let matchS = true;
+                        if (filterStatus.value === 'Ready') matchS = p.Status === 'Ready';
+                        else if (filterStatus.value === 'Error') matchS = p.Status === 'Error';
+                        else if (filterStatus.value === 'Warning') matchS = p.Status.includes('Warning');
+                        else if (filterStatus.value === 'Issue') matchS = p.Status === 'Error' || p.Status.includes('Warning');
                         const matchL = filterLocation.value ? p.Location === filterLocation.value : true;
-                        return matchQ && matchL;
-                    });
-                });
-                const statusCounts = computed(() => {
-                    const counts = { all: 0, ready: 0, issue: 0, error: 0, warning: 0 };
-                    baseFilteredPrinters.value.forEach(p => {
-                        counts.all++;
-                        if (p.Status === 'Ready') counts.ready++;
-                        else if (p.Status === 'Error') counts.error++;
-                        else if (p.Status.includes('Warning')) counts.warning++;
-                        if (p.Status === 'Error' || p.Status.includes('Warning')) counts.issue++;
-                    });
-                    return counts;
-                });
-                const filteredPrinters = computed(() => {
-                    return baseFilteredPrinters.value.filter(p => {
-                        if (filterStatus.value === 'Ready') return p.Status === 'Ready';
-                        if (filterStatus.value === 'Error') return p.Status === 'Error';
-                        if (filterStatus.value === 'Warning') return p.Status.includes('Warning');
-                        if (filterStatus.value === 'Issue') return p.Status === 'Error' || p.Status.includes('Warning');
-                        return true; 
+                        return matchQ && matchS && matchL;
                     }).sort((a,b) => {
                         let valA = a[sortBy.value]||'', valB = b[sortBy.value]||'';
+                        // Status Priority Sorting
                         if (sortBy.value === 'Status') {
-                             const getWeight = (s) => { s = s.toLowerCase(); if (s === 'ready') return 50; if (s.includes('printing') || s.includes('warmup')) return 40; if (s.includes('warning')) return 30; if (s.includes('offline')) return 20; if (s.includes('error')) return 10; return 0; };
-                             const wA = getWeight(valA), wB = getWeight(valB);
+                             const getWeight = (s) => {
+                                 s = s.toLowerCase();
+                                 if (s === 'ready') return 50; 
+                                 if (s.includes('printing') || s.includes('warmup')) return 40;
+                                 if (s.includes('warning')) return 30;
+                                 if (s.includes('offline')) return 20;
+                                 if (s.includes('error')) return 10; 
+                                 return 0; 
+                             };
+                             const wA = getWeight(valA);
+                             const wB = getWeight(valB);
                              if (wA !== wB) return sortDesc.value ? wB - wA : wA - wB; 
                              return a.Name.localeCompare(b.Name);
                         }
@@ -966,15 +791,13 @@
                     fetchPrinters, fetchSinglePrinter, clearQueue, refreshPrinter, restartSpooler, selfHeal, restartScript, restartServer, 
                     showEditModal, editTarget, editLocation, editComment, saving, openEditModal, submitEdit, 
                     showPdfModal, selectedPrinter, pdfDuplex, uploading, fileInput, openPdfModal, submitPdf,
-                    showHistoryModal, historyPrinter, reprintingPath, openHistoryModal, reprintFile, getFileName,
-                    showPreviewModal, previewUrl, previewLoading, currentPreviewFile, previewFile, closePreview, reprintFromPreview,
+                    showRecordModal, openRecordModal, recordActionLoading, getFileName, previewFile, reprintFile,
                     showLogModal, logData, logsLoading, showLogs, fetchLogs, downloadFiles, handleDownload,
                     uniqueLocations, filteredPrinters, errorCount, getStatusColor,
-                    showAdvancedOps, currentServer, connectionError, statusCounts
+                    showAdvancedOps
                 };
             }
         }).mount('#app');
-        })();
     </script>
 </body>
 </html>
