@@ -51,5 +51,5 @@ QUEUE_THRESHOLD=20
 QUEUE_STUCK_LIMIT=5
 
 # --- 6. 排除項目 (以逗號分隔) ---
-EXCLUDE_KEYWORDS=PDF, XPS, Fax, OneNote, Microsoft Shared Fax
+EXCLUDE_KEYWORDS=PDF, XPS, Fax, OneNote, Microsoft Shared Fax, Z_PRINT(空白)
 MANUAL_EXCLUDE_PRINTERS=範例印表機名稱_A, 範例印表機名稱_B
