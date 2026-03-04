@@ -71,7 +71,7 @@
                             <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Print Server Monitor</h1>
                             <span v-if="isDemoMode" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-sm">DEMO MODE</span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.4 (穩定版)</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.5 (全域紀錄版)</p>
                     </div>
                 </div>
 
@@ -124,6 +124,19 @@
                             <div class="flex items-center justify-between"><span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400 group-disabled:text-slate-400">深度自癒修復</span><i class="fa-solid fa-suitcase-medical text-slate-400 group-hover:text-red-500 group-disabled:text-slate-300"></i></div>
                             <p class="text-xs text-slate-400 mt-1">清空暫存並重置環境</p>
                         </button>
+                        
+                        <!-- [新增] 全域列印紀錄按鈕 (若無紀錄則隱藏) -->
+                        <button v-if="allPrintedRecords.length > 0" @click="showGlobalRecordModal = true" :disabled="loading || (!isConfigValid && !isDemoMode)" class="w-full text-left px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:shadow-md hover:border-purple-300 dark:hover:border-purple-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
+                            <div class="flex items-center justify-between">
+                                <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-disabled:text-slate-400">全域列印紀錄</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300 text-[10px] px-2 py-0.5 rounded-full font-bold">{{ allPrintedRecords.length }}</span>
+                                    <i class="fa-solid fa-list-ul text-slate-400 group-hover:text-purple-500 group-disabled:text-slate-300"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">檢視今日所有印表機歷史</p>
+                        </button>
+
                         <button @click="showLogs" :disabled="loading || (!isConfigValid && !isDemoMode)" class="w-full text-left px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
                             <div class="flex items-center justify-between"><span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-disabled:text-slate-400">檢視系統日誌</span><i class="fa-solid fa-file-lines text-slate-400 group-hover:text-emerald-500 group-disabled:text-slate-300"></i></div>
                             <p class="text-xs text-slate-400 mt-1">查看最近 500 行紀錄</p>
@@ -231,13 +244,12 @@
                                 <div v-if="p.PortName" class="truncate"><i class="fa-solid fa-plug w-4"></i> {{ p.PortName }}</div>
                             </div>
                             
-                            <!-- 底部按鈕區 (Flex Wrap 自適應) -->
+                            <!-- 底部按鈕區 -->
                             <div class="flex flex-wrap gap-2 mt-auto pt-2 border-t border-slate-100 dark:border-slate-700">
                                 <button @click="refreshPrinter(p.Name)" :disabled="loading" class="flex-1 min-w-[60px] bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 text-xs py-2 rounded border border-slate-200 dark:border-slate-600 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-sync" :class="{'fa-spin': loading}"></i> 刷新</button>
                                 <button @click="openEditModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 text-xs py-2 rounded border border-yellow-200 dark:border-yellow-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-pen-to-square"></i> 編輯</button>
                                 <button v-if="p.Status === 'Ready'" @click="openPdfModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-300 text-xs py-2 rounded border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-file-pdf"></i> 列印</button>
                                 
-                                <!-- 只有在有紀錄時才顯示此按鈕 -->
                                 <button v-if="p.printed && p.printed.length > 0" @click="openRecordModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-xs py-2 px-2 rounded border border-purple-200 dark:border-purple-800 transition-colors disabled:opacity-50 whitespace-nowrap font-medium flex items-center justify-center gap-1">
                                     <i class="fa-solid fa-clock-rotate-left"></i> 紀錄 <span class="bg-purple-200 text-purple-800 dark:bg-purple-800 dark:text-purple-200 rounded-full px-1.5 py-0.5 text-[10px] leading-none">{{ p.printed.length }}</span>
                                 </button>
@@ -312,7 +324,7 @@
             </div>
         </transition>
 
-        <!-- 4. 今日列印紀錄 (Records) Modal -->
+        <!-- 4. 單一印表機 列印紀錄 (Records) Modal -->
         <transition name="fade">
             <div v-if="showRecordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transition-colors flex flex-col max-h-[85vh]">
@@ -349,7 +361,45 @@
             </div>
         </transition>
 
-        <!-- 5. PDF 預覽 iframe Modal (高層級 z-[60] 覆蓋在紀錄之上) -->
+        <!-- 5. [新增] 全域列印紀錄 (Global Records) Modal -->
+        <transition name="fade">
+            <div v-if="showGlobalRecordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden transition-colors flex flex-col max-h-[85vh]">
+                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200 truncate pr-4">
+                            <i class="fa-solid fa-list-ul mr-2 text-purple-500"></i>今日全域列印紀錄
+                        </h3>
+                        <button @click="showGlobalRecordModal = false" :disabled="recordActionLoading" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-50 flex-shrink-0">
+                            <i class="fa-solid fa-xmark text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-y-auto p-4 sm:p-6 space-y-3 bg-slate-50 dark:bg-slate-900/50 flex-1">
+                        <div v-for="(record, idx) in allPrintedRecords" :key="idx" class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                            <div class="overflow-hidden w-full flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <div class="text-xs text-slate-400 font-mono"><i class="fa-regular fa-clock mr-1"></i>{{ record.time }}</div>
+                                    <div class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded truncate max-w-[150px] sm:max-w-[200px]" :title="record.printerName">
+                                        <i class="fa-solid fa-print mr-1"></i>{{ record.printerName }}
+                                    </div>
+                                </div>
+                                <div class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate cursor-help" :title="record.path">{{ getFileName(record.path) }}</div>
+                            </div>
+                            <div class="flex gap-2 flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+                                <button @click="previewFile(record.path)" :disabled="recordActionLoading" class="flex-1 sm:flex-none px-3 py-1.5 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 rounded border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50">
+                                    <i class="fa-solid fa-eye"></i> 預覽
+                                </button>
+                                <button @click="reprintFile(record.printerName, record.path)" :disabled="recordActionLoading" class="flex-1 sm:flex-none px-3 py-1.5 text-xs bg-purple-50 text-purple-600 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 dark:text-purple-400 rounded border border-purple-200 dark:border-purple-800 transition-colors disabled:opacity-50" title="傳送至原印表機重印">
+                                    <i class="fa-solid fa-print"></i> 重印
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 6. PDF 預覽 iframe Modal (高層級 z-[60] 覆蓋在紀錄之上) -->
         <transition name="fade">
             <div v-if="showPreviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-2 sm:p-6">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden transition-colors border border-slate-200 dark:border-slate-700">
@@ -377,7 +427,7 @@
             </div>
         </transition>
 
-        <!-- 6. System Logs Modal -->
+        <!-- 7. System Logs Modal -->
         <transition name="fade">
             <div v-if="showLogModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col transition-colors">
@@ -409,8 +459,8 @@
                 const searchQuery = ref('');
                 const filterStatus = ref('');
                 const filterLocation = ref('');
-                const sortBy = ref('IP'); 
-                const sortDesc = ref(false);
+                const sortBy = ref('Printed');
+                const sortDesc = ref(true);
                 const servers = ref([]);
                 const currentServerId = ref('');
                 
@@ -433,17 +483,19 @@
                 const logData = ref('');
                 const logsLoading = ref(false);
 
+                // 單一印表機紀錄狀態
                 const showRecordModal = ref(false);
                 const recordActionLoading = ref(false);
+
+                // [新增] 全域印表機紀錄狀態
+                const showGlobalRecordModal = ref(false);
                 
-                // [更新] Iframe 預覽相關狀態
                 const showPreviewModal = ref(false);
                 const previewPdfUrl = ref('');
                 const previewFileName = ref('');
 
                 const closePreviewModal = () => {
                     showPreviewModal.value = false;
-                    // 延遲釋放 Blob URL 以免 iframe 關閉動畫時畫面突然破圖
                     setTimeout(() => {
                         if (previewPdfUrl.value) {
                             URL.revokeObjectURL(previewPdfUrl.value);
@@ -455,8 +507,8 @@
                 const downloadFiles = [
                     { name: '列印伺服器監控腳本', url: 'server/Printer_API_Agent.ps1', icon: 'fa-solid fa-terminal text-blue-500' },
                     { name: '環境設定檔範例 (.example)', url: 'server/Printer_API_Agent.example', icon: 'fa-solid fa-gear text-slate-500' },
-                    { name: 'API 測試指令集', url: 'server/Printer_API_Agent_API測試指令集.pdf', icon: 'fa-solid fa-file-code text-red-500' },
-                    { name: '部署指南', url: 'server/Printer_API_Agent_Windows_Server_部署指南.pdf', icon: 'fa-solid fa-book text-emerald-500' }
+                    { name: 'API 測試指令集', url: 'server/Printer_API_Agent_API測試指令集.pdf', icon: 'fa-solid fa-file-pdf text-red-500' },
+                    { name: '部署指南', url: 'server/Printer_API_Agent_Windows_Server_部署指南.pdf', icon: 'fa-solid fa-file-pdf text-emerald-500' }
                 ];
                 let pollTimer = null;
 
@@ -489,7 +541,7 @@
                     if (srv) { 
                         config.value.ip = srv.ip; config.value.key = srv.key; 
                         localStorage.setItem('ps_last_server_id', newId); 
-                        printers.value = []; // 切換標的時，立刻清空畫面舊資料避免殘影
+                        printers.value = []; 
                         fetchPrinters(true); 
                         if (autoRefresh.value) startPolling();
                     }
@@ -561,6 +613,16 @@
                     } catch (e) { console.error(e); }
                 };
 
+                const applyDefaultSortFallback = () => {
+                    if (sortBy.value === 'Printed') {
+                        const totalPrinted = printers.value.reduce((sum, p) => sum + (p.printed ? p.printed.length : 0), 0);
+                        if (totalPrinted === 0) {
+                            sortBy.value = 'IP';
+                            sortDesc.value = false;
+                        }
+                    }
+                };
+
                 const fetchPrinters = async (showToast = false) => {
                     if (!isConfigValid.value) { if (showToast) error("請選擇伺服器"); return; }
                     loading.value = true;
@@ -577,6 +639,9 @@
                                     }
                                 });
                             }
+                            
+                            applyDefaultSortFallback(); 
+
                             lastUpdated.value = new Date().toLocaleString();
                             if (showToast) success("Demo 連線成功");
                             loading.value = false;
@@ -588,6 +653,9 @@
                         const res = await axios.get(getApiUrl('/printers'), { headers: { 'X-API-KEY': config.value.key } });
                         if (res.data.success) {
                             printers.value = res.data.data;
+                            
+                            applyDefaultSortFallback(); 
+
                             if (printers.value.length > 0 && printers.value[0].LastUpdated) lastUpdated.value = printers.value[0].LastUpdated;
                             if (showToast) success("連線成功");
                             
@@ -697,7 +765,6 @@
                     return path.split(/[\\/]/).pop();
                 };
 
-                // [修改] 停止呼叫 window.open，改為完全在 Modal 內渲染 iframe
                 const previewFile = async (path) => {
                     if (isDemoMode.value) return toast("Demo 模式無法預覽伺服器檔案", "#f59e0b");
                     recordActionLoading.value = true;
@@ -707,17 +774,14 @@
                         const res = await axios.get(url, {
                             headers: { 'X-API-KEY': config.value.key },
                             params: { path: path },
-                            responseType: 'blob' // 接收二進位流
+                            responseType: 'blob' 
                         });
                         
                         if (res.headers['content-type'] && res.headers['content-type'].includes('application/pdf')) {
                             const blobUrl = URL.createObjectURL(res.data);
-                            
-                            // 設定變數並展開 iframe Modal，不再開啟新分頁
                             previewPdfUrl.value = blobUrl;
                             previewFileName.value = getFileName(path);
                             showPreviewModal.value = true;
-                            
                             success("預覽載入完成");
                         } else {
                             const text = await res.data.text();
@@ -737,7 +801,7 @@
 
                 const reprintFile = async (printerName, path) => {
                     if (isDemoMode.value) return toast("Demo 模式無法重印檔案", "#f59e0b");
-                    if (!confirm("確定要將此檔案送至印表機重新列印嗎？")) return;
+                    if (!confirm("確定要將此檔案送至原印表機重新列印嗎？")) return;
                     recordActionLoading.value = true;
                     try {
                         const url = getApiUrl(`/printer/re-print`);
@@ -782,6 +846,24 @@
                 const countIssue = computed(() => printers.value.filter(p => p.Status === 'Error' || p.Status?.includes('Warning')).length);
                 const countError = computed(() => printers.value.filter(p => p.Status === 'Error').length);
                 const countWarning = computed(() => printers.value.filter(p => p.Status?.includes('Warning')).length);
+
+                // [新增] 計算全域所有列印紀錄的 Computed 變數
+                const allPrintedRecords = computed(() => {
+                    const records = [];
+                    printers.value.forEach(p => {
+                        if (p.printed && p.printed.length > 0) {
+                            p.printed.forEach(r => {
+                                records.push({ ...r, printerName: p.Name });
+                            });
+                        }
+                    });
+                    // 依時間降冪排序 (最新的在最前面)
+                    return records.sort((a, b) => {
+                        const timeA = a.time || '';
+                        const timeB = b.time || '';
+                        return timeB.localeCompare(timeA);
+                    });
+                });
 
                 const uniqueLocations = computed(() => [...new Set(printers.value.map(p => p.Location).filter(l => l))].sort());
                 const filteredPrinters = computed(() => {
@@ -849,6 +931,7 @@
                     config, servers, currentServerId, showServerModal, editingServer, printers, loading, lastUpdated, autoRefresh, darkMode, isConfigValid, isDemoMode,
                     searchQuery, filterStatus, filterLocation, uniqueLocations, filteredPrinters, errorCount, sortBy, sortDesc, refreshInterval, validateInterval, countdown,
                     countAll, countReady, countIssue, countError, countWarning,
+                    allPrintedRecords, showGlobalRecordModal, // 導出全域紀錄相關變數
                     getStatusColor, toggleDarkMode, openServerManager, saveServer, removeServer, useServer, resetEdit, editServer, switchServer,
                     fetchPrinters, fetchSinglePrinter, clearQueue, refreshPrinter, restartSpooler, selfHeal, restartScript, restartServer, 
                     showEditModal, editTarget, editLocation, editComment, saving, openEditModal, submitEdit, 
