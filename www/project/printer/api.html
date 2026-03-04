@@ -13,18 +13,21 @@
     <style>
         [v-cloak] { display: none; }
         .console-line { font-family: 'Consolas', 'Monaco', monospace; }
+        /* Modal 淡入淡出動畫 */
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 h-screen flex flex-col font-sans">
 
-    <div id="app" v-cloak class="flex flex-col h-full">
+    <div id="app" v-cloak class="flex flex-col h-full relative">
         
         <!-- 頂部設定列 -->
         <header class="bg-white border-b border-gray-200 p-4 shadow-sm z-10">
             <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-2">
                     <div class="bg-purple-600 text-white p-2 rounded"><i class="fa-solid fa-stethoscope"></i></div>
-                    <h1 class="text-xl font-bold tracking-tight">API 診斷工具 v1.5</h1>
+                    <h1 class="text-xl font-bold tracking-tight">API 診斷工具 v1.6 (Modal 版)</h1>
                 </div>
 
                 <div class="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200">
@@ -139,8 +142,36 @@
                     </div>
                 </div>
             </section>
-
         </main>
+
+        <!-- PDF 預覽 iframe Modal (測試工具用) -->
+        <transition name="fade">
+            <div v-if="showPreviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-2 sm:p-6">
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden transition-colors border border-gray-200">
+                    <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                        <h3 class="font-bold text-gray-700 truncate pr-4 flex items-center text-sm sm:text-base">
+                            <i class="fa-solid fa-file-pdf mr-2 text-red-500"></i>
+                            API 預覽測試 - {{ previewFileName }}
+                        </h3>
+                        <div class="flex gap-2 flex-shrink-0">
+                            <a :href="previewPdfUrl" :download="previewFileName" class="text-gray-500 hover:text-blue-600 p-1.5 rounded transition-colors bg-gray-200 hover:bg-gray-300" title="下載檔案">
+                                <i class="fa-solid fa-download"></i>
+                            </a>
+                            <button @click="closePreviewModal" class="text-gray-500 hover:text-red-600 p-1.5 rounded transition-colors bg-gray-200 hover:bg-gray-300" title="關閉預覽">
+                                <i class="fa-solid fa-xmark text-lg leading-none"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex-1 bg-gray-300 w-full relative">
+                        <iframe v-if="previewPdfUrl" :src="previewPdfUrl" class="absolute inset-0 w-full h-full border-0" title="PDF Preview"></iframe>
+                        <div v-else class="absolute inset-0 flex items-center justify-center text-gray-500">
+                            <i class="fa-solid fa-circle-notch fa-spin text-2xl mr-2"></i> 正在載入文件...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
     </div>
 
     <script>
@@ -161,6 +192,21 @@
                 const selectedFilePath = ref(""); // 儲存選中的歷史檔案路徑
                 const logs = ref([]);
 
+                // Iframe Modal 控制狀態
+                const showPreviewModal = ref(false);
+                const previewPdfUrl = ref('');
+                const previewFileName = ref('');
+
+                const closePreviewModal = () => {
+                    showPreviewModal.value = false;
+                    setTimeout(() => {
+                        if (previewPdfUrl.value) {
+                            URL.revokeObjectURL(previewPdfUrl.value);
+                            previewPdfUrl.value = '';
+                        }
+                    }, 300);
+                };
+
                 // 當切換印表機時，自動選取第一個印過的檔案 (如果有)
                 watch(selectedPrinter, (newPrinter) => {
                     if (newPrinter && newPrinter.printed && newPrinter.printed.length > 0) {
@@ -170,13 +216,13 @@
                     }
                 });
 
-                // 測試案例定義 (新增 Preview 並設定 requirePath 標籤)
+                // 測試案例定義
                 const testCases = ref([
                     { name: '取得印表機列表', endpoint: '/printers', method: 'GET', requirePrinter: false, requirePath: false, status: 'idle' },
                     { name: '查詢單一狀態', endpoint: '/printer/status', method: 'GET', requirePrinter: true, requirePath: false, status: 'idle' },
                     { name: '重新整理 (Refresh)', endpoint: '/printer/refresh', method: 'GET', requirePrinter: true, requirePath: false, status: 'idle' },
-                    { name: '預覽列印檔案 (Preview)', endpoint: '/printer/preview', method: 'GET', requirePrinter: false, requirePath: true, isBinary: true, status: 'idle' }, // [NEW] v17.30
-                    { name: '重新列印紀錄檔案 (Re-print)', endpoint: '/printer/re-print', method: 'GET', requirePrinter: true, requirePath: true, status: 'idle' }, // [NEW] 動態路徑
+                    { name: '預覽列印檔案 (Preview)', endpoint: '/printer/preview', method: 'GET', requirePrinter: false, requirePath: true, isBinary: true, status: 'idle' },
+                    { name: '重新列印紀錄檔案 (Re-print)', endpoint: '/printer/re-print', method: 'GET', requirePrinter: true, requirePath: true, status: 'idle' }, 
                     { name: '取得目標印表機當日紀錄', endpoint: '/printer/printed', method: 'GET', requirePrinter: true, requirePath: false, status: 'idle' },
                     { name: '取得伺服器全域列印紀錄', endpoint: '/server/printlog', method: 'GET', requirePrinter: false, requirePath: false, status: 'idle' },
                     { name: '清除佇列 (Clear)', endpoint: '/printer/clear', method: 'GET', requirePrinter: true, requirePath: false, status: 'idle' },
@@ -304,10 +350,13 @@
                             if (res.headers['content-type'] && res.headers['content-type'].includes('application/pdf')) {
                                 addLog(`< ${res.status} 成功接收二進位流 (大小: ${res.data.size} bytes)`, 'text-green-500 font-bold');
                                 
-                                // 產生暫時的 Blob URL 並在新分頁打開
+                                // 呼叫 Modal 顯示，不再開啟新分頁
                                 const blobUrl = URL.createObjectURL(res.data);
-                                window.open(blobUrl, '_blank');
-                                addLog(`[Preview] 已在新分頁中彈出預覽 PDF。`, 'text-purple-300');
+                                previewPdfUrl.value = blobUrl;
+                                previewFileName.value = getFileName(selectedFilePath.value);
+                                showPreviewModal.value = true;
+                                
+                                addLog(`[Preview] 已在彈出視窗中渲染 PDF。`, 'text-purple-300');
                                 
                                 test.status = 'success';
                             } else {
@@ -362,7 +411,7 @@
                         const test = testCases.value[i];
                         if (i === 0) continue; // 跳過連線讀取列表
                         if (test.endpoint.includes('restart') || test.endpoint.includes('clear')) continue; // 跳過破壞性操作
-                        if (test.isBinary) continue; // 跳過預覽，避免彈出一堆新視窗
+                        if (test.isBinary) continue; // 跳過預覽，避免彈出一堆 Modal
                         
                         await runSingleTest(i);
                         await new Promise(r => setTimeout(r, 600)); // 延遲讓視覺更順暢
@@ -382,6 +431,7 @@
 
                 return {
                     config, loading, printers, selectedPrinter, selectedFilePath, logs, testCases,
+                    showPreviewModal, previewPdfUrl, previewFileName, closePreviewModal, // 導出變數
                     initConnection, runSingleTest, runAllTests, clearLog, getTestClass, getFileName, getRunTitle
                 };
             }

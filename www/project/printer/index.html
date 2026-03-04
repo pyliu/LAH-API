@@ -34,6 +34,10 @@
         .list-enter-from { opacity: 0; transform: translateY(30px); }
         .list-leave-to { opacity: 0; transform: translateY(-30px); }
         
+        /* Modal 淡入淡出動畫 */
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         .dark ::-webkit-scrollbar-track { background: #1e293b; }
@@ -67,7 +71,7 @@
                             <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Print Server Monitor</h1>
                             <span v-if="isDemoMode" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-sm">DEMO MODE</span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.2 (Records UI)</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.4 (穩定版)</p>
                     </div>
                 </div>
 
@@ -193,11 +197,11 @@
                         </div>
                     </div>
                     <div class="flex gap-2 flex-wrap justify-start mt-2 xl:mt-0">
-                         <button @click="filterStatus = ''" :class="filterStatus === '' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">全部</button>
-                         <button @click="filterStatus = 'Ready'" :class="filterStatus === 'Ready' ? 'bg-emerald-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">就緒</button>
-                         <button @click="filterStatus = 'Issue'" :class="filterStatus === 'Issue' ? 'bg-orange-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常+警告</button>
-                         <button @click="filterStatus = 'Error'" :class="filterStatus === 'Error' ? 'bg-red-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常</button>
-                         <button @click="filterStatus = 'Warning'" :class="filterStatus === 'Warning' ? 'bg-amber-500 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">警告</button>
+                         <button @click="filterStatus = ''" :class="filterStatus === '' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">全部 ({{ countAll }})</button>
+                         <button @click="filterStatus = 'Ready'" :class="filterStatus === 'Ready' ? 'bg-emerald-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">就緒 ({{ countReady }})</button>
+                         <button @click="filterStatus = 'Issue'" :class="filterStatus === 'Issue' ? 'bg-orange-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常+警告 ({{ countIssue }})</button>
+                         <button @click="filterStatus = 'Error'" :class="filterStatus === 'Error' ? 'bg-red-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">異常 ({{ countError }})</button>
+                         <button @click="filterStatus = 'Warning'" :class="filterStatus === 'Warning' ? 'bg-amber-500 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'" class="px-3 py-1 text-xs rounded-full border transition-all shadow-sm">警告 ({{ countWarning }})</button>
                     </div>
                 </div>
 
@@ -233,7 +237,7 @@
                                 <button @click="openEditModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 text-xs py-2 rounded border border-yellow-200 dark:border-yellow-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-pen-to-square"></i> 編輯</button>
                                 <button v-if="p.Status === 'Ready'" @click="openPdfModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-300 text-xs py-2 rounded border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-file-pdf"></i> 列印</button>
                                 
-                                <!-- [新增] 只有在有紀錄時才顯示此按鈕 -->
+                                <!-- 只有在有紀錄時才顯示此按鈕 -->
                                 <button v-if="p.printed && p.printed.length > 0" @click="openRecordModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-xs py-2 px-2 rounded border border-purple-200 dark:border-purple-800 transition-colors disabled:opacity-50 whitespace-nowrap font-medium flex items-center justify-center gap-1">
                                     <i class="fa-solid fa-clock-rotate-left"></i> 紀錄 <span class="bg-purple-200 text-purple-800 dark:bg-purple-800 dark:text-purple-200 rounded-full px-1.5 py-0.5 text-[10px] leading-none">{{ p.printed.length }}</span>
                                 </button>
@@ -248,9 +252,9 @@
             </section>
         </main>
 
-        <!-- Server Manager Modal -->
+        <!-- 1. Server Manager Modal -->
         <transition name="fade">
-            <div v-if="showServerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div v-if="showServerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transition-colors flex flex-col max-h-[90vh]">
                     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900"><h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-server mr-2 text-blue-500"></i>伺服器管理</h3><button @click="showServerModal = false" :disabled="loading" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-50"><i class="fa-solid fa-xmark text-xl"></i></button></div>
                     <div class="flex-1 overflow-y-auto p-6">
@@ -275,9 +279,9 @@
             </div>
         </transition>
 
-        <!-- Edit Meta Modal -->
+        <!-- 2. Edit Meta Modal -->
         <transition name="fade">
-            <div v-if="showEditModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div v-if="showEditModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden transition-colors">
                     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900"><h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-pen-to-square mr-2 text-yellow-500"></i>編輯資訊</h3><button @click="showEditModal = false" :disabled="saving" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"><i class="fa-solid fa-xmark"></i></button></div>
                     <div class="p-6 space-y-4">
@@ -290,9 +294,9 @@
             </div>
         </transition>
 
-        <!-- Print PDF Modal -->
+        <!-- 3. Print PDF Modal -->
         <transition name="fade">
-            <div v-if="showPdfModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div v-if="showPdfModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden transition-colors">
                     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900"><h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-print mr-2 text-blue-600 dark:text-blue-400"></i>上傳 PDF 列印</h3><button @click="showPdfModal = false" :disabled="uploading" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"><i class="fa-solid fa-xmark"></i></button></div>
                     <div class="p-6 space-y-4">
@@ -308,9 +312,9 @@
             </div>
         </transition>
 
-        <!-- [新增] 今日列印紀錄 (Records) 預覽/重印 Modal -->
+        <!-- 4. 今日列印紀錄 (Records) Modal -->
         <transition name="fade">
-            <div v-if="showRecordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div v-if="showRecordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transition-colors flex flex-col max-h-[85vh]">
                     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
                         <h3 class="font-bold text-slate-700 dark:text-slate-200 truncate pr-4">
@@ -345,9 +349,37 @@
             </div>
         </transition>
 
-        <!-- System Logs Modal -->
+        <!-- 5. PDF 預覽 iframe Modal (高層級 z-[60] 覆蓋在紀錄之上) -->
         <transition name="fade">
-            <div v-if="showLogModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div v-if="showPreviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-2 sm:p-6">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden transition-colors border border-slate-200 dark:border-slate-700">
+                    <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200 truncate pr-4 flex items-center text-sm sm:text-base">
+                            <i class="fa-solid fa-file-pdf mr-2 text-red-500"></i>
+                            預覽檔案 - {{ previewFileName }}
+                        </h3>
+                        <div class="flex gap-2 flex-shrink-0">
+                            <a :href="previewPdfUrl" :download="previewFileName" class="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 p-1.5 rounded transition-colors bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700" title="下載檔案">
+                                <i class="fa-solid fa-download"></i>
+                            </a>
+                            <button @click="closePreviewModal" class="text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 p-1.5 rounded transition-colors bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700" title="關閉預覽">
+                                <i class="fa-solid fa-xmark text-lg leading-none"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex-1 bg-slate-300 dark:bg-slate-950 w-full relative">
+                        <iframe v-if="previewPdfUrl" :src="previewPdfUrl" class="absolute inset-0 w-full h-full border-0" title="PDF Preview"></iframe>
+                        <div v-else class="absolute inset-0 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                            <i class="fa-solid fa-circle-notch fa-spin text-2xl mr-2"></i> 正在載入文件...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 6. System Logs Modal -->
+        <transition name="fade">
+            <div v-if="showLogModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col transition-colors">
                     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900"><h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-terminal mr-2 text-emerald-600"></i>伺服器日誌</h3><div class="flex items-center gap-3"><button @click="fetchLogs" :disabled="logsLoading" class="text-sm text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50"><i class="fa-solid fa-sync mr-1" :class="{'fa-spin': logsLoading}"></i>重新整理</button><button @click="showLogModal = false" :disabled="logsLoading" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-50"><i class="fa-solid fa-xmark text-xl"></i></button></div></div>
                     <div class="flex-1 overflow-auto bg-slate-900 p-4 font-mono text-xs text-green-400 leading-relaxed whitespace-pre-wrap" id="logContent"><div v-if="logsLoading" class="text-center py-10 text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl"></i><br>載入中...</div><div v-else>{{ logData || '暫無日誌資料...' }}</div></div>
@@ -377,7 +409,7 @@
                 const searchQuery = ref('');
                 const filterStatus = ref('');
                 const filterLocation = ref('');
-                const sortBy = ref('IP'); // Default sort by IP
+                const sortBy = ref('IP'); 
                 const sortDesc = ref(false);
                 const servers = ref([]);
                 const currentServerId = ref('');
@@ -401,9 +433,24 @@
                 const logData = ref('');
                 const logsLoading = ref(false);
 
-                // [新增] 紀錄與預覽相關狀態
                 const showRecordModal = ref(false);
                 const recordActionLoading = ref(false);
+                
+                // [更新] Iframe 預覽相關狀態
+                const showPreviewModal = ref(false);
+                const previewPdfUrl = ref('');
+                const previewFileName = ref('');
+
+                const closePreviewModal = () => {
+                    showPreviewModal.value = false;
+                    // 延遲釋放 Blob URL 以免 iframe 關閉動畫時畫面突然破圖
+                    setTimeout(() => {
+                        if (previewPdfUrl.value) {
+                            URL.revokeObjectURL(previewPdfUrl.value);
+                            previewPdfUrl.value = '';
+                        }
+                    }, 300);
+                };
                 
                 const downloadFiles = [
                     { name: '列印伺服器監控腳本', url: 'server/Printer_API_Agent.ps1', icon: 'fa-solid fa-terminal text-blue-500' },
@@ -426,7 +473,6 @@
                             Driver: 'HP Universal Printing PCL 6', PortName: `IP_192.168.1.${100+i}`, ShareName: `PRINTER_${i}`,
                             ErrorDetails: s==='Error' ? '缺紙 (Tray 2)' : (s==='Warning' ? '碳粉存量低' : ''),
                             LastUpdated: new Date().toLocaleString(),
-                            // 模擬部分印表機有列印紀錄
                             printed: Math.random() > 0.5 ? [
                                 { date: '2026-03-04', time: '08:15:22', path: 'C:/PDFPrint/report_q1.pdf' },
                                 { date: '2026-03-04', time: '09:30:10', path: '\\\\192.168.1.100\\share\\invoice_2026.pdf' }
@@ -443,7 +489,7 @@
                     if (srv) { 
                         config.value.ip = srv.ip; config.value.key = srv.key; 
                         localStorage.setItem('ps_last_server_id', newId); 
-                        printers.value = []; // [新增] 切換標的時，立刻清空畫面舊資料避免殘影
+                        printers.value = []; // 切換標的時，立刻清空畫面舊資料避免殘影
                         fetchPrinters(true); 
                         if (autoRefresh.value) startPolling();
                     }
@@ -506,7 +552,6 @@
                             const idx = printers.value.findIndex(p => p.Name === name);
                             if (idx !== -1) {
                                 printers.value[idx] = res.data.data;
-                                // 若正在查看該印表機紀錄，同步更新
                                 if (showRecordModal.value && selectedPrinter.value?.Name === name) {
                                     selectedPrinter.value = res.data.data;
                                 }
@@ -546,7 +591,6 @@
                             if (printers.value.length > 0 && printers.value[0].LastUpdated) lastUpdated.value = printers.value[0].LastUpdated;
                             if (showToast) success("連線成功");
                             
-                            // 若紀錄視窗開著，同步更新內部資料
                             if (showRecordModal.value && selectedPrinter.value) {
                                 const updatedP = printers.value.find(x => x.Name === selectedPrinter.value.Name);
                                 if (updatedP) selectedPrinter.value = updatedP;
@@ -646,7 +690,6 @@
                     } catch(e) { error(e.message); } finally { uploading.value = false; }
                 };
 
-                // [新增] 紀錄與預覽控制邏輯
                 const openRecordModal = (p) => { selectedPrinter.value = p; showRecordModal.value = true; };
                 
                 const getFileName = (path) => {
@@ -654,6 +697,7 @@
                     return path.split(/[\\/]/).pop();
                 };
 
+                // [修改] 停止呼叫 window.open，改為完全在 Modal 內渲染 iframe
                 const previewFile = async (path) => {
                     if (isDemoMode.value) return toast("Demo 模式無法預覽伺服器檔案", "#f59e0b");
                     recordActionLoading.value = true;
@@ -668,10 +712,14 @@
                         
                         if (res.headers['content-type'] && res.headers['content-type'].includes('application/pdf')) {
                             const blobUrl = URL.createObjectURL(res.data);
-                            window.open(blobUrl, '_blank');
-                            success("預覽文件已開啟");
+                            
+                            // 設定變數並展開 iframe Modal，不再開啟新分頁
+                            previewPdfUrl.value = blobUrl;
+                            previewFileName.value = getFileName(path);
+                            showPreviewModal.value = true;
+                            
+                            success("預覽載入完成");
                         } else {
-                            // 若不是 PDF，通常是伺服器回傳了 JSON 錯誤訊息
                             const text = await res.data.text();
                             try {
                                 const errObj = JSON.parse(text);
@@ -729,23 +777,28 @@
                     } catch(e) { logData.value = e.message; } finally { logsLoading.value = false; }
                 };
 
+                const countAll = computed(() => printers.value.length);
+                const countReady = computed(() => printers.value.filter(p => p.Status === 'Ready').length);
+                const countIssue = computed(() => printers.value.filter(p => p.Status === 'Error' || p.Status?.includes('Warning')).length);
+                const countError = computed(() => printers.value.filter(p => p.Status === 'Error').length);
+                const countWarning = computed(() => printers.value.filter(p => p.Status?.includes('Warning')).length);
+
                 const uniqueLocations = computed(() => [...new Set(printers.value.map(p => p.Location).filter(l => l))].sort());
                 const filteredPrinters = computed(() => {
                     return printers.value.filter(p => {
-                        const matchQ = p.Name.toLowerCase().includes(searchQuery.value.toLowerCase()) || p.IP.includes(searchQuery.value);
+                        const matchQ = (p.Name || '').toLowerCase().includes(searchQuery.value.toLowerCase()) || (p.IP || '').includes(searchQuery.value);
                         let matchS = true;
                         if (filterStatus.value === 'Ready') matchS = p.Status === 'Ready';
                         else if (filterStatus.value === 'Error') matchS = p.Status === 'Error';
-                        else if (filterStatus.value === 'Warning') matchS = p.Status.includes('Warning');
-                        else if (filterStatus.value === 'Issue') matchS = p.Status === 'Error' || p.Status.includes('Warning');
+                        else if (filterStatus.value === 'Warning') matchS = p.Status?.includes('Warning');
+                        else if (filterStatus.value === 'Issue') matchS = p.Status === 'Error' || p.Status?.includes('Warning');
                         const matchL = filterLocation.value ? p.Location === filterLocation.value : true;
                         return matchQ && matchS && matchL;
                     }).sort((a,b) => {
                         let valA = a[sortBy.value]||'', valB = b[sortBy.value]||'';
-                        // Status Priority Sorting
                         if (sortBy.value === 'Status') {
                              const getWeight = (s) => {
-                                 s = s.toLowerCase();
+                                 s = (s || '').toLowerCase();
                                  if (s === 'ready') return 50; 
                                  if (s.includes('printing') || s.includes('warmup')) return 40;
                                  if (s.includes('warning')) return 30;
@@ -756,7 +809,7 @@
                              const wA = getWeight(valA);
                              const wB = getWeight(valB);
                              if (wA !== wB) return sortDesc.value ? wB - wA : wA - wB; 
-                             return a.Name.localeCompare(b.Name);
+                             return (a.Name || '').localeCompare(b.Name || '');
                         }
                         if(sortBy.value==='IP') {
                              const iA=valA.split('.').map(Number), iB=valB.split('.').map(Number);
@@ -771,9 +824,10 @@
                         return sortDesc.value ? (valA<valB?1:-1) : (valA>valB?1:-1);
                     });
                 });
-                const errorCount = computed(() => printers.value.filter(p => p.Status === 'Error' || p.Status.includes('Warning')).length);
+                const errorCount = computed(() => printers.value.filter(p => p.Status === 'Error' || p.Status?.includes('Warning')).length);
 
                 const getStatusColor = (s, b) => {
+                    if (!s) return b ? 'bg-slate-400' : 'bg-slate-200 text-slate-600';
                     if (s === 'Ready') return b ? 'bg-emerald-500' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400';
                     if (s === 'Printing') return b ? 'bg-blue-500' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 animate-pulse';
                     if (s === 'Offline') return b ? 'bg-slate-400' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400';
@@ -794,13 +848,14 @@
                 return {
                     config, servers, currentServerId, showServerModal, editingServer, printers, loading, lastUpdated, autoRefresh, darkMode, isConfigValid, isDemoMode,
                     searchQuery, filterStatus, filterLocation, uniqueLocations, filteredPrinters, errorCount, sortBy, sortDesc, refreshInterval, validateInterval, countdown,
+                    countAll, countReady, countIssue, countError, countWarning,
                     getStatusColor, toggleDarkMode, openServerManager, saveServer, removeServer, useServer, resetEdit, editServer, switchServer,
                     fetchPrinters, fetchSinglePrinter, clearQueue, refreshPrinter, restartSpooler, selfHeal, restartScript, restartServer, 
                     showEditModal, editTarget, editLocation, editComment, saving, openEditModal, submitEdit, 
                     showPdfModal, selectedPrinter, pdfDuplex, uploading, fileInput, openPdfModal, submitPdf,
                     showRecordModal, openRecordModal, recordActionLoading, getFileName, previewFile, reprintFile,
+                    showPreviewModal, previewPdfUrl, previewFileName, closePreviewModal,
                     showLogModal, logData, logsLoading, showLogs, fetchLogs, downloadFiles, handleDownload,
-                    uniqueLocations, filteredPrinters, errorCount, getStatusColor,
                     showAdvancedOps
                 };
             }
