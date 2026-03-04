@@ -182,6 +182,7 @@
                                     <option value="Name">名稱</option>
                                     <option value="Status">狀態</option>
                                     <option value="Jobs">佇列數</option>
+                                    <option value="Printed">已列印數</option>
                                     <option value="Location">位置</option>
                                     <option value="PortName">連接埠</option>
                                     <option value="Driver">驅動程式</option>
@@ -442,6 +443,7 @@
                     if (srv) { 
                         config.value.ip = srv.ip; config.value.key = srv.key; 
                         localStorage.setItem('ps_last_server_id', newId); 
+                        printers.value = []; // [新增] 切換標的時，立刻清空畫面舊資料避免殘影
                         fetchPrinters(true); 
                         if (autoRefresh.value) startPolling();
                     }
@@ -761,6 +763,11 @@
                              if(iA.length===4 && iB.length===4) for(let i=0;i<4;i++) if(iA[i]!==iB[i]) return sortDesc.value ? iB[i]-iA[i] : iA[i]-iB[i];
                         }
                         if(sortBy.value==='Jobs') return sortDesc.value ? valB-valA : valA-valB;
+                        if(sortBy.value==='Printed') {
+                             const pA = a.printed ? a.printed.length : 0;
+                             const pB = b.printed ? b.printed.length : 0;
+                             return sortDesc.value ? pB-pA : pA-pB;
+                        }
                         return sortDesc.value ? (valA<valB?1:-1) : (valA>valB?1:-1);
                     });
                 });
