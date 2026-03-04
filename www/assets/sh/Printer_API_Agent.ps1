@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Print Server HTTP API & Proactive Monitor
-    版本：v17.30 (PDF Preview & Binary Stream Support)
+    版本：v17.40 (External .env Configuration)
     修正：
-    1. 新增 `/printer/preview` API：支援直接回傳 PDF 二進位流 (application/pdf) 供前端 iframe 渲染預覽。
-    2. 優化 HTTP 回應處理邏輯：加入 `$handledBinary` 旗標，允許 API 繞過 JSON 序列化，直接拋出原生檔案。
-    3. 承襲 v17.20：包含 `/printer/re-print` 與 `printed` 當日列印紀錄陣列功能。
-    4. 承襲 v17.17：Cron 深度自癒時的 printlog 備份與 7 天輪替機制。
-    5. 承襲 v17.16：StreamReader 無鎖定高效率記憶體讀取法。
+    1. 引入外部 `Printer_API_Agent.env` 設定檔機制，解耦所有硬編碼 (Hardcoded) 的變數設定。
+    2. 內建自動防呆型別轉換與安全預設值 (Fallback mechanisms)。
+    3. 新增 `/printer/preview` API：支援直接回傳 PDF 二進位流 (application/pdf)。
+    4. 優化 HTTP 回應處理邏輯：加入 `$handledBinary` 旗標。
+    5. 包含 UNC 網路芳鄰預先認證通道，解決 UAC Session 隔離問題。
     
 .DESCRIPTION
     本腳本具備多層次自我檢查與自動修復機制 (Self-Healing & Resilience)：
@@ -37,83 +37,107 @@
          (3) 自動掃描並刪除 C:\Temp 下超過 7 天的舊 printlog 備份檔，防止磁碟空間耗盡。
 
     4. [腳本自身韌性] (Script Resilience)
-       - 啟動重試：若 Port 8888 被佔用 (通常發生在剛重啟腳本時 Port 尚未釋放)，會自動重試 5 次，每次間隔 2 秒
-       - 防火牆自動開通：腳本啟動時會自動檢查並嘗試加入 TCP 8888 入站規則，防止因防火牆設定遺失導致無法連線
-       - 通知防卡死：發送 HTTP 通知前先偵測通知伺服器 TCP Port，若離線則直接跳過，避免 Script 卡在 WebRequest Timeout
-       - 錯誤隔離：API 處理與主監控迴圈皆有 Try-Catch 包覆，確保單一錯誤不會導致整個監控服務崩潰
+       - 啟動重試：若 Port 8888 被佔用，會自動重試 5 次，每次間隔 2 秒
+       - 防火牆自動開通：腳本啟動時會自動檢查並嘗試加入 TCP 8888 入站規則
+       - 通知防卡死：發送 HTTP 通知前先偵測通知伺服器 TCP Port，避免卡在 WebRequest Timeout
+       - 錯誤隔離：API 處理與主監控迴圈皆有 Try-Catch 包覆
 
     5. [資安合規與 SOC 友善設計 (Zero-Ping)]
-       - 目的：避免頻繁的 ICMP 請求被防火牆或 SOC (資安維運中心) 誤判為內網掃描 (Ping Sweep) 攻擊
-       - 實作方式：本腳本已移除所有 ICMP Echo Request (Ping) 操作
-       - 印表機偵測：改為建立 TCP 連線至 Port 9100 (標準 RAW 列印埠)，這能更精確確認「列印服務」是否就緒，而非僅確認主機存活
-       - 通知伺服器偵測：改為建立 TCP 連線至 Port 80 (HTTP)，確認 Web 服務是否存活
-       - 效益：這些連線在防火牆日誌中會被視為正常的應用層業務流量，而非惡意的網路探測行為
-
-.NOTES
-    ?? 測試指令
-    curl -H "X-API-KEY: %API_KEY%" http://%SERVER_IP%:8888/printers
+       - 目的：避免頻繁的 ICMP 請求被防火牆或 SOC (資安維運中心) 誤判為內網掃描攻擊
+       - 實作方式：本腳本已移除所有 ICMP Echo Request (Ping) 操作，改用 TCP 9100/80 探測
 #>
 
 # -------------------------------------------------------------------------
-# 1. 基礎設定區
+# 1. 基礎設定區 (由 Printer_API_Agent.env 外部載入，並具備防呆預設值)
 # -------------------------------------------------------------------------
-$port               = 8888
-$apiKey             = "YourSecretApiKey123"      
-$logPath            = "C:\Temp"
-$uploadPath         = "C:\Temp\Uploads"           
-$maxLogSizeBytes    = 10MB                       
-$maxHistory         = 5                          
-$logRetentionDays   = 7                   
 
-# --- 列印紀錄檔路徑 ---
-$printLogFilePath   = "C:\printlog"
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot } elseif ($MyInvocation.MyCommand.Path) { Split-Path $MyInvocation.MyCommand.Path } else { $PWD.Path }
+$envFile = Join-Path $scriptDir "Printer_API_Agent.env"
+$envConfig = @{}
 
-# --- PDF 閱讀器路徑 ---
-$pdfReaderPaths     = @(
+# 嘗試讀取 .env 檔案
+if (Test-Path $envFile) {
+    try {
+        foreach ($line in Get-Content $envFile -Encoding UTF8) {
+            $line = $line.Trim()
+            if ($line.StartsWith("#") -or $line -eq "") { continue }
+            $parts = $line -split '=', 2
+            if ($parts.Length -eq 2) {
+                $key = $parts[0].Trim()
+                $val = $parts[1].Trim()
+                # 脫除字串雙引號與單引號
+                if ($val -match '^"(.*)"$') { $val = $matches[1] }
+                elseif ($val -match "^'(.*)'$") { $val = $matches[1] }
+                $envConfig[$key] = $val
+            }
+        }
+        Write-Host ">>> [System] 已成功載入外部設定檔: Printer_API_Agent.env" -ForegroundColor Cyan
+    } catch {
+        Write-Host "!!! [System] 讀取 Printer_API_Agent.env 失敗，將降級使用系統預設值" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "--- [System] 未找到 Printer_API_Agent.env 檔案，將使用系統內建預設設定 ---" -ForegroundColor DarkGray
+}
+
+# 智慧型別轉換輔助函數
+function Get-EnvString($key, $default) { if ($envConfig.Contains($key) -and $envConfig[$key] -ne '') { return $envConfig[$key] } return $default }
+function Get-EnvInt($key, $default) { if ($envConfig.Contains($key) -and $envConfig[$key] -match '^\d+$') { return [int]$envConfig[$key] } return $default }
+function Get-EnvBool($key, $default) { if ($envConfig.Contains($key) -and $envConfig[$key] -ne '') { return ($envConfig[$key] -match '^(true|1|yes)$') } return $default }
+function Get-EnvArray($key, [string[]]$default) { if ($envConfig.Contains($key) -and $envConfig[$key] -ne '') { return @($envConfig[$key] -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }) } return $default }
+
+# ----------------- 變數映射開始 -----------------
+$port               = Get-EnvInt "PORT" 8888
+$apiKey             = Get-EnvString "API_KEY" "YourSecretApiKey123"      
+$logPath            = Get-EnvString "LOG_PATH" "C:\Temp"
+$uploadPath         = Get-EnvString "UPLOAD_PATH" "C:\Temp\Uploads"           
+$maxLogSizeBytes    = Get-EnvInt "MAX_LOG_SIZE_BYTES" 10485760 # 預設 10MB                       
+$maxHistory         = Get-EnvInt "MAX_HISTORY" 5                          
+$logRetentionDays   = Get-EnvInt "LOG_RETENTION_DAYS" 7                   
+
+$printLogFilePath   = Get-EnvString "PRINT_LOG_FILE_PATH" "C:\printlog"
+
+$defaultPdfReaders  = @(
     "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
     "C:\Program Files\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
     "C:\FoxitReader\Foxit Reader.exe",
     "C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe",
     "C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe"
 )
+$pdfReaderPaths     = Get-EnvArray "PDF_READER_PATHS" $defaultPdfReaders
 
-# --- 通知伺服器設定 ---
-$notifyIp           = "220.1.34.75"
-$notifyPort         = 80
-$notifyEndpoint     = "/api/notification_json_api.php"
+$notifyIp           = Get-EnvString "NOTIFY_IP" "220.1.34.75"
+$notifyPort         = Get-EnvInt "NOTIFY_PORT" 80
+$notifyEndpoint     = Get-EnvString "NOTIFY_ENDPOINT" "/api/notification_json_api.php"
 $notifyUrl          = "http://$notifyIp$notifyEndpoint"
-$notifyChannels     = @("HA10013859")
+$notifyChannels     = Get-EnvArray "NOTIFY_CHANNELS" @("HA10013859")
 
-# [設定] 通知伺服器健康檢查
-$enableNotifyHealthCheck = $true
-$notifyTimeoutMs         = 1000
+$enableNotifyHealthCheck  = Get-EnvBool "ENABLE_NOTIFY_HEALTH_CHECK" $true
+$notifyTimeoutMs          = Get-EnvInt "NOTIFY_TIMEOUT_MS" 1000
+$enableAdminNotifications = Get-EnvBool "ENABLE_ADMIN_NOTIFICATIONS" $false    
 
-# [設定] Admin 通知開關
-$enableAdminNotifications = $false    
+$checkIntervalSec   = Get-EnvInt "CHECK_INTERVAL_SEC" 60                  
+$errorThreshold     = Get-EnvInt "ERROR_THRESHOLD" 5                   
+$monitorStartHour   = Get-EnvInt "MONITOR_START_HOUR" 8
+$monitorEndHour     = Get-EnvInt "MONITOR_END_HOUR" 17
+$monitorDays        = Get-EnvArray "MONITOR_DAYS" @("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 
-# --- 監控設定 ---
-$checkIntervalSec   = 60                  
-$errorThreshold     = 5                   
-$monitorStartHour   = 8
-$monitorEndHour     = 17
-$monitorDays        = @("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+$enableAutoCleanup  = Get-EnvBool "ENABLE_AUTO_CLEANUP" $true               
+$zombieTimeMinutes  = Get-EnvInt "ZOMBIE_TIME_MINUTES" 10                  
+$enableAutoHeal     = Get-EnvBool "ENABLE_AUTO_HEAL" $true               
+$maxStuckPrinters   = Get-EnvInt "MAX_STUCK_PRINTERS" 3                   
+$enableScheduledHeal= Get-EnvBool "ENABLE_SCHEDULED_HEAL" $true
+$scheduledHealCron  = Get-EnvString "SCHEDULED_HEAL_CRON" "30 7 * * *"       
+$queueThreshold     = Get-EnvInt "QUEUE_THRESHOLD" 20                  
+$queueStuckLimit    = Get-EnvInt "QUEUE_STUCK_LIMIT" 5                   
 
-# --- 自癒設定 ---
-$enableAutoCleanup  = $true               
-$zombieTimeMinutes  = 10                  
-$enableAutoHeal     = $true               
-$maxStuckPrinters   = 3                   
-$enableScheduledHeal = $true
-$scheduledHealCron   = "30 7 * * *"       
-$queueThreshold     = 20                  
-$queueStuckLimit    = 5                   
+$excludeKeywords    = Get-EnvArray "EXCLUDE_KEYWORDS" @("PDF", "XPS", "Fax", "OneNote", "Microsoft Shared Fax")
+$manualExcludePrinters = Get-EnvArray "MANUAL_EXCLUDE_PRINTERS" @("範例印表機名稱_A", "範例印表機名稱_B")
 
-# --- 排除設定 ---
-$excludeKeywords    = @("PDF", "XPS", "Fax", "OneNote", "Microsoft Shared Fax")
-$manualExcludePrinters = @(
-    "範例印表機名稱_A",
-    "範例印表機名稱_B"
-)
+$enableDriveMapping = Get-EnvBool "ENABLE_DRIVE_MAPPING" $true
+$mappedDriveLetter  = Get-EnvString "MAPPED_DRIVE_LETTER" "Z:"
+$mappedDriveUncPath = Get-EnvString "MAPPED_DRIVE_UNC_PATH" "\\220.1.34.43\land_adm_web_ha\cer"
+$networkUsername    = Get-EnvString "NETWORK_USERNAME" ""
+$networkPassword    = Get-EnvString "NETWORK_PASSWORD" ""
 
 # 全局狀態變數
 $global:PrinterStateCache   = New-Object System.Collections.Hashtable
@@ -306,6 +330,22 @@ function Get-Utf8QueryParam {
         try { return [System.Uri]::UnescapeDataString($encodedVal) } catch { return $null }
     }
     return $null
+}
+
+# --- 路徑轉換函數 (處理正斜線與 UNC 對應) ---
+function Resolve-VirtualPath {
+    param([string]$rawPath)
+    if ([string]::IsNullOrEmpty($rawPath)) { return $null }
+    
+    # 1. 統一將正斜線轉換為 Windows 標準反斜線
+    $path = $rawPath.Replace("/", "\")
+    
+    # 2. 如果啟用對應，且路徑以指定的磁碟機代號開頭 (不分大小寫)，則替換為 UNC 路徑
+    if ($enableDriveMapping -and $path -match "^(?i)$([regex]::Escape($mappedDriveLetter))\\?(.*)$") {
+        $path = Join-Path $mappedDriveUncPath $matches[1]
+    }
+    
+    return $path
 }
 
 # --- 解析當日列印紀錄函數 (超級效能逐行讀取版) ---
@@ -512,7 +552,7 @@ function Test-PrinterHealth {
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Print Server API & Monitor v17.30 " -Color Cyan
+Write-ApiLog " Print Server API & Monitor v17.40 " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 # A. 防火牆設定
@@ -527,6 +567,19 @@ else { Write-ApiLog "PDF Reader: Not Found (Fallback to Shell)" -Color Yellow }
 if ($enableNotifyHealthCheck) {
     if (Test-TcpConnection $notifyIp $notifyPort $notifyTimeoutMs) { Write-ApiLog "Notify Server: OK" -Color Green }
     else { $global:IsNotifyServerOnline = $false; Write-ApiLog "Notify Server: Offline (Notifications Disabled)" -Color Red }
+}
+
+# 網路芳鄰預先認證 (解決 UNC 權限存取拒絕問題)
+if ($enableDriveMapping -and -not [string]::IsNullOrEmpty($networkUsername)) {
+    Write-ApiLog "正在建立 UNC 網路路徑認證 ($mappedDriveUncPath)..." -Color Yellow
+    try { net use "$mappedDriveUncPath" /delete /y 2>&1 | Out-Null } catch {}
+    try {
+        $cmd = "net use `"$mappedDriveUncPath`" `"$networkPassword`" /user:`"$networkUsername`" /persistent:no"
+        Invoke-Expression $cmd 2>&1 | Out-Null
+        Write-ApiLog ">>> UNC 網路路徑認證成功！" -Color Green
+    } catch {
+        Write-ApiLog "!!! UNC 網路路徑認證失敗: $($_.Exception.Message)" -Color Red
+    }
 }
 
 # D. 啟動 Web Server (含重試機制)
@@ -670,10 +723,27 @@ while ($listener.IsListening) {
             }
             elseif ($path -eq "/printer/re-print") {
                 $n = Get-Utf8QueryParam $req "name"
-                $fPath = Get-Utf8QueryParam $req "path"
+                $rawPath = Get-Utf8QueryParam $req "path"
+                $fPath = Resolve-VirtualPath $rawPath
                 Write-ApiLog ">>> [DEBUG] Re-Print: Name='$n', Path='$fPath'"
                 
-                if ([string]::IsNullOrEmpty($n) -or [string]::IsNullOrEmpty($fPath)) {
+                # --- [資安防護] 驗證該檔案是否真的存在於今日的列印紀錄中 ---
+                $isAuthorized = $false
+                if (-not [string]::IsNullOrEmpty($rawPath)) {
+                    $logs = @(Get-PrintLogs)
+                    $normRaw = $rawPath.Replace("/", "\")
+                    foreach ($log in $logs) {
+                        if ($log.path.Replace("/", "\") -eq $normRaw) { $isAuthorized = $true; break }
+                    }
+                }
+
+                if (-not $isAuthorized) {
+                    $out.success = $false
+                    $out.message = "安全性阻擋：拒絕重印未列於當日紀錄中的檔案。"
+                    Write-ApiLog "!!! [SECURITY] 嘗試重印未授權的檔案: $rawPath" -Color Red
+                    $res.StatusCode = 403
+                }
+                elseif ([string]::IsNullOrEmpty($n) -or [string]::IsNullOrEmpty($fPath)) {
                     $out.success = $false
                     $out.message = "缺少 name 或 path 參數，無法執行重印。"
                 } else {
@@ -682,7 +752,8 @@ while ($listener.IsListening) {
                         # 檢查檔案是否存在於伺服器上
                         if (-not (Test-Path $fPath -PathType Leaf)) {
                             $out.success = $false
-                            $out.message = "伺服器上找不到指定的檔案: $fPath"
+                            $out.message = "伺服器上找不到指定的檔案 (或權限不足): $fPath"
+                            Write-ApiLog "!!! [DEBUG] Re-Print 找不到檔案: $fPath" -Color Yellow
                         } else {
                             $dup = Get-Utf8QueryParam $req "duplex"
                             $restoreDup = $false
@@ -807,12 +878,30 @@ while ($listener.IsListening) {
                 Invoke-SpoolerSelfHealing -reason "API Trigger"; $out.success=$true
             }
             elseif ($path -eq "/printer/preview") {
-                $fPath = Get-Utf8QueryParam $req "path"
+                $rawPath = Get-Utf8QueryParam $req "path"
+                $fPath = Resolve-VirtualPath $rawPath
                 Write-ApiLog ">>> [DEBUG] Preview PDF: Path='$fPath'"
                 
-                if ([string]::IsNullOrEmpty($fPath) -or -not (Test-Path $fPath -PathType Leaf)) {
+                # --- [資安防護] 驗證該檔案是否真的存在於今日的列印紀錄中 ---
+                $isAuthorized = $false
+                if (-not [string]::IsNullOrEmpty($rawPath)) {
+                    $logs = @(Get-PrintLogs)
+                    $normRaw = $rawPath.Replace("/", "\")
+                    foreach ($log in $logs) {
+                        if ($log.path.Replace("/", "\") -eq $normRaw) { $isAuthorized = $true; break }
+                    }
+                }
+
+                if (-not $isAuthorized) {
                     $out.success = $false
-                    $out.message = "找不到檔案，可能已被系統自動清理: $fPath"
+                    $out.message = "安全性阻擋：拒絕預覽未列於當日紀錄中的檔案。"
+                    Write-ApiLog "!!! [SECURITY] 嘗試預覽未授權的檔案: $rawPath" -Color Red
+                    $res.StatusCode = 403
+                }
+                elseif ([string]::IsNullOrEmpty($fPath) -or -not (Test-Path $fPath -PathType Leaf)) {
+                    $out.success = $false
+                    $out.message = "找不到檔案，可能已被清理或無權限存取該路徑: $fPath"
+                    Write-ApiLog "!!! [DEBUG] Preview 找不到檔案: $fPath" -Color Yellow
                 } else {
                     try {
                         $fileBytes = [System.IO.File]::ReadAllBytes($fPath)

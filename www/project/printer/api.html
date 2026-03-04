@@ -24,7 +24,7 @@
             <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-2">
                     <div class="bg-purple-600 text-white p-2 rounded"><i class="fa-solid fa-stethoscope"></i></div>
-                    <h1 class="text-xl font-bold tracking-tight">API 診斷工具 v1.4</h1>
+                    <h1 class="text-xl font-bold tracking-tight">API 診斷工具 v1.5</h1>
                 </div>
 
                 <div class="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200">
@@ -42,34 +42,54 @@
         <main class="flex-1 overflow-hidden flex flex-col md:flex-row max-w-7xl mx-auto w-full p-4 gap-4">
             
             <!-- 左側：控制與印表機選擇 -->
-            <aside class="w-full md:w-1/3 flex flex-col gap-4">
+            <aside class="w-full md:w-1/3 flex flex-col gap-4 overflow-y-auto pr-1">
                 
                 <!-- 1. 目標選擇 -->
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex-shrink-0">
                     <h2 class="font-bold text-gray-700 mb-3 border-b pb-2"><i class="fa-solid fa-bullseye text-red-500 mr-2"></i>測試目標</h2>
                     
                     <div v-if="printers.length === 0" class="text-center text-gray-400 py-4">
                         請先連線以取得印表機列表
                     </div>
-                    <div v-else>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">選擇測試用的印表機</label>
-                        <select v-model="selectedPrinter" class="w-full p-2 border rounded mb-2 bg-gray-50 text-sm">
-                            <option v-for="p in printers" :value="p">{{ p.Name }} ({{ p.Status }})</option>
-                        </select>
-                        <div v-if="selectedPrinter" class="text-xs text-gray-500 space-y-1 bg-gray-50 p-2 rounded">
-                            <p>IP: {{ selectedPrinter.IP }}</p>
-                            <p>Driver: {{ selectedPrinter.Driver }}</p>
-                            <p>LastUpdated: {{ selectedPrinter.LastUpdated }}</p>
+                    <div v-else class="space-y-3">
+                        <!-- 印表機選擇 -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">選擇測試用的印表機</label>
+                            <select v-model="selectedPrinter" class="w-full p-2 border rounded bg-gray-50 text-sm focus:ring-2 focus:ring-purple-500 outline-none cursor-pointer">
+                                <option v-for="p in printers" :value="p">{{ p.Name }} ({{ p.Status }})</option>
+                            </select>
+                            <div v-if="selectedPrinter" class="text-xs text-gray-500 space-y-1 bg-gray-50 p-2 rounded mt-2 border border-gray-100">
+                                <p><i class="fa-solid fa-network-wired w-4 text-center"></i> IP: {{ selectedPrinter.IP }}</p>
+                                <p><i class="fa-solid fa-microchip w-4 text-center"></i> Driver: {{ selectedPrinter.Driver }}</p>
+                                <p><i class="fa-regular fa-clock w-4 text-center"></i> Updated: {{ selectedPrinter.LastUpdated }}</p>
+                            </div>
+                        </div>
+
+                        <!-- 動態檔案路徑選擇 (供 Preview 與 Re-print 使用) -->
+                        <div v-if="selectedPrinter">
+                            <label class="block text-xs font-bold text-gray-500 mb-1">選擇要測試的紀錄檔案 (路徑參數)</label>
+                            <div v-if="selectedPrinter.printed && selectedPrinter.printed.length > 0">
+                                <select v-model="selectedFilePath" class="w-full p-2 border rounded bg-blue-50/50 text-xs border-blue-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                                    <option value="" disabled>請選擇已列印過的檔案...</option>
+                                    <option v-for="(f, idx) in selectedPrinter.printed" :key="idx" :value="f.path" :title="f.path">
+                                        [{{ f.time }}] {{ getFileName(f.path) }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div v-else class="text-xs text-orange-600 bg-orange-50 p-2 rounded border border-orange-100 flex items-start gap-2">
+                                <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+                                <span>該印表機今日尚無列印紀錄。包含「預覽 (Preview)」與「重印 (Re-print)」的測試項目將無法執行。</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 2. 測試項目列表 -->
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex-1 overflow-y-auto">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex-1">
                     <div class="flex justify-between items-center mb-3 border-b pb-2">
                         <h2 class="font-bold text-gray-700"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>測試項目</h2>
-                        <button v-if="printers.length > 0" @click="runAllTests" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">
-                            <i class="fa-solid fa-play mr-1"></i>全部執行
+                        <button v-if="printers.length > 0" @click="runAllTests" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition-colors">
+                            <i class="fa-solid fa-play mr-1"></i>批次執行
                         </button>
                     </div>
 
@@ -86,14 +106,18 @@
                                     <i v-if="test.status === 'error'" class="fa-solid fa-circle-xmark text-red-500"></i>
                                 </div>
                                 <div>
-                                    <div class="text-sm font-bold">{{ test.name }}</div>
+                                    <div class="text-sm font-bold flex items-center gap-2">
+                                        {{ test.name }}
+                                        <span v-if="test.isBinary" class="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">PDF 流</span>
+                                    </div>
                                     <div class="text-xs opacity-70 font-mono">{{ test.endpoint }}</div>
                                 </div>
                             </div>
                             
-                            <button @click="runSingleTest(index)" :disabled="loading || (test.requirePrinter && !selectedPrinter)" 
-                                    class="text-gray-400 hover:text-blue-600 disabled:opacity-30"
-                                    :title="test.requirePrinter && !selectedPrinter ? '請先選擇印表機' : '執行測試'">
+                            <button @click="runSingleTest(index)" 
+                                    :disabled="loading || (test.requirePrinter && !selectedPrinter) || (test.requirePath && !selectedFilePath)" 
+                                    class="text-gray-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    :title="getRunTitle(test)">
                                 <i class="fa-solid fa-play"></i>
                             </button>
                         </div>
@@ -104,12 +128,13 @@
             <!-- 右側：控制台日誌 -->
             <section class="w-full md:w-2/3 bg-gray-900 rounded-lg shadow-lg flex flex-col overflow-hidden">
                 <div class="bg-gray-800 p-3 flex justify-between items-center border-b border-gray-700">
-                    <span class="text-gray-300 text-sm font-mono"><i class="fa-solid fa-terminal mr-2"></i>Console Output</span>
-                    <button @click="clearLog" class="text-xs text-gray-500 hover:text-gray-300"><i class="fa-solid fa-trash"></i> Clear</button>
+                    <span class="text-gray-300 text-sm font-mono"><i class="fa-solid fa-terminal mr-2 text-green-400"></i>Console Output</span>
+                    <button @click="clearLog" class="text-xs text-gray-400 hover:text-white transition-colors bg-gray-700 px-2 py-1 rounded"><i class="fa-solid fa-trash mr-1"></i>Clear</button>
                 </div>
-                <div id="console-box" class="flex-1 overflow-y-auto p-4 space-y-1 font-mono text-xs">
-                    <div v-for="(log, i) in logs" :key="i" :class="log.type">
-                        <span class="opacity-50 mr-2">[{{ log.time }}]</span>
+                <div id="console-box" class="flex-1 overflow-y-auto p-4 space-y-1 font-mono text-xs leading-relaxed">
+                    <div v-if="logs.length === 0" class="text-gray-600 italic">等待執行測試...</div>
+                    <div v-for="(log, i) in logs" :key="i" :class="log.type" class="break-all">
+                        <span class="opacity-50 mr-2 select-none">[{{ log.time }}]</span>
                         <span v-html="log.msg"></span>
                     </div>
                 </div>
@@ -119,7 +144,7 @@
     </div>
 
     <script>
-        const { createApp, ref, reactive, nextTick, onMounted } = Vue;
+        const { createApp, ref, reactive, nextTick, watch } = Vue;
 
         createApp({
             setup() {
@@ -133,23 +158,46 @@
                 const loading = ref(false);
                 const printers = ref([]);
                 const selectedPrinter = ref(null);
+                const selectedFilePath = ref(""); // 儲存選中的歷史檔案路徑
                 const logs = ref([]);
 
-                // 測試案例定義 (新增 Re-print API)
+                // 當切換印表機時，自動選取第一個印過的檔案 (如果有)
+                watch(selectedPrinter, (newPrinter) => {
+                    if (newPrinter && newPrinter.printed && newPrinter.printed.length > 0) {
+                        selectedFilePath.value = newPrinter.printed[0].path;
+                    } else {
+                        selectedFilePath.value = "";
+                    }
+                });
+
+                // 測試案例定義 (新增 Preview 並設定 requirePath 標籤)
                 const testCases = ref([
-                    { name: '取得印表機列表', endpoint: '/printers', method: 'GET', requirePrinter: false, status: 'idle' },
-                    { name: '查詢單一狀態', endpoint: '/printer/status', method: 'GET', requirePrinter: true, status: 'idle' },
-                    { name: '重新整理 (Refresh)', endpoint: '/printer/refresh', method: 'GET', requirePrinter: true, status: 'idle' },
-                    { name: '清除佇列 (Clear)', endpoint: '/printer/clear', method: 'GET', requirePrinter: true, status: 'idle' },
-                    { name: '更新資訊 (Meta)', endpoint: '/printer/update', method: 'GET', requirePrinter: true, params: { location: 'Test_Loc', comment: 'Test_Comment' }, status: 'idle' },
-                    { name: '重新列印指定檔案 (Re-print)', endpoint: '/printer/re-print', method: 'GET', requirePrinter: true, params: { path: 'C:/test.pdf' }, status: 'idle' }, // [NEW] v17.19
-                    { name: '取得目標印表機當日紀錄', endpoint: '/printer/printed', method: 'GET', requirePrinter: true, status: 'idle' },
-                    { name: '取得伺服器全域列印紀錄', endpoint: '/server/printlog', method: 'GET', requirePrinter: false, status: 'idle' },
-                    { name: '讀取伺服器系統日誌', endpoint: '/server/logs', method: 'GET', requirePrinter: false, params: { lines: 10 }, status: 'idle' },
-                    { name: '自癒功能測試', endpoint: '/service/self-heal', method: 'GET', requirePrinter: false, status: 'idle' },
-                    { name: '重啟 Spooler', endpoint: '/service/restart-spooler', method: 'GET', requirePrinter: false, status: 'idle' },
-                    { name: '重啟電腦 (Restart OS)', endpoint: '/server/restart-computer', method: 'GET', requirePrinter: false, status: 'idle' }
+                    { name: '取得印表機列表', endpoint: '/printers', method: 'GET', requirePrinter: false, requirePath: false, status: 'idle' },
+                    { name: '查詢單一狀態', endpoint: '/printer/status', method: 'GET', requirePrinter: true, requirePath: false, status: 'idle' },
+                    { name: '重新整理 (Refresh)', endpoint: '/printer/refresh', method: 'GET', requirePrinter: true, requirePath: false, status: 'idle' },
+                    { name: '預覽列印檔案 (Preview)', endpoint: '/printer/preview', method: 'GET', requirePrinter: false, requirePath: true, isBinary: true, status: 'idle' }, // [NEW] v17.30
+                    { name: '重新列印紀錄檔案 (Re-print)', endpoint: '/printer/re-print', method: 'GET', requirePrinter: true, requirePath: true, status: 'idle' }, // [NEW] 動態路徑
+                    { name: '取得目標印表機當日紀錄', endpoint: '/printer/printed', method: 'GET', requirePrinter: true, requirePath: false, status: 'idle' },
+                    { name: '取得伺服器全域列印紀錄', endpoint: '/server/printlog', method: 'GET', requirePrinter: false, requirePath: false, status: 'idle' },
+                    { name: '清除佇列 (Clear)', endpoint: '/printer/clear', method: 'GET', requirePrinter: true, requirePath: false, status: 'idle' },
+                    { name: '更新資訊 (Meta)', endpoint: '/printer/update', method: 'GET', requirePrinter: true, requirePath: false, params: { location: 'Test_Loc', comment: 'Test_Comment' }, status: 'idle' },
+                    { name: '讀取伺服器系統日誌', endpoint: '/server/logs', method: 'GET', requirePrinter: false, requirePath: false, params: { lines: 10 }, status: 'idle' },
+                    { name: '自癒功能測試', endpoint: '/service/self-heal', method: 'GET', requirePrinter: false, requirePath: false, status: 'idle' },
+                    { name: '重啟 Spooler', endpoint: '/service/restart-spooler', method: 'GET', requirePrinter: false, requirePath: false, status: 'idle' },
+                    { name: '重啟電腦 (Restart OS)', endpoint: '/server/restart-computer', method: 'GET', requirePrinter: false, requirePath: false, status: 'idle' }
                 ]);
+
+                // 擷取檔名，讓下拉選單比較好讀
+                const getFileName = (path) => {
+                    if (!path) return "未知檔案";
+                    return path.split(/[\\/]/).pop();
+                };
+
+                const getRunTitle = (test) => {
+                    if (test.requirePrinter && !selectedPrinter.value) return "請先選擇目標印表機";
+                    if (test.requirePath && !selectedFilePath.value) return "該印表機無列印紀錄，無法執行需要路徑的測試";
+                    return "執行此測試";
+                };
 
                 // 儲存設定
                 const saveConfig = () => {
@@ -219,19 +267,60 @@
                     let url = getUrl(test.endpoint);
                     let params = test.params ? { ...test.params } : {};
 
-                    // 若需要印表機名稱，自動附加
+                    // 動態附加印表機名稱
                     if (test.requirePrinter) {
                         if (!selectedPrinter.value) {
-                            addLog(`Skipping ${test.name}: No printer selected`, 'text-gray-500');
+                            addLog(`Skipping ${test.name}: 未選擇印表機`, 'text-gray-500');
                             test.status = 'idle';
                             return;
                         }
                         params['name'] = selectedPrinter.value.Name;
                     }
 
+                    // 動態附加檔案路徑
+                    if (test.requirePath) {
+                        if (!selectedFilePath.value) {
+                            addLog(`Skipping ${test.name}: 無檔案路徑可供測試`, 'text-red-400');
+                            test.status = 'error';
+                            return;
+                        }
+                        params['path'] = selectedFilePath.value;
+                    }
+
                     addLog(`> [${test.method}] ${test.endpoint} ${Object.keys(params).length > 0 ? JSON.stringify(params) : ''}`, 'text-cyan-300');
 
                     try {
+                        // 特殊處理：二進位流 (PDF 預覽)
+                        if (test.isBinary) {
+                            const res = await axios({
+                                method: test.method,
+                                url: url,
+                                headers: { 'X-API-KEY': config.key },
+                                params: params,
+                                responseType: 'blob' // 關鍵：指示 axios 接收二進位資料
+                            });
+
+                            // 檢查是否成功回傳 PDF (透過 Content-Type 判斷)
+                            if (res.headers['content-type'] && res.headers['content-type'].includes('application/pdf')) {
+                                addLog(`< ${res.status} 成功接收二進位流 (大小: ${res.data.size} bytes)`, 'text-green-500 font-bold');
+                                
+                                // 產生暫時的 Blob URL 並在新分頁打開
+                                const blobUrl = URL.createObjectURL(res.data);
+                                window.open(blobUrl, '_blank');
+                                addLog(`[Preview] 已在新分頁中彈出預覽 PDF。`, 'text-purple-300');
+                                
+                                test.status = 'success';
+                            } else {
+                                // 如果不是 PDF，通常是伺服器回傳了 JSON 格式的錯誤訊息
+                                const textData = await res.data.text();
+                                addLog(`< ${res.status} 請求失敗 (未收到 PDF)`, 'text-red-500');
+                                addLog(textData, 'text-red-300');
+                                test.status = 'error';
+                            }
+                            return;
+                        }
+
+                        // 一般 JSON 處理
                         const res = await axios({
                             method: test.method,
                             url: url,
@@ -248,8 +337,15 @@
                         test.status = isSuccess ? 'success' : 'error';
                     } catch (err) {
                         addLog(`Request Error: ${err.message}`, 'text-red-500');
+                        
                         if (err.response && err.response.data) {
-                            addLog(`Response Data: ${JSON.stringify(err.response.data)}`, 'text-red-400');
+                            if (err.response.data instanceof Blob) {
+                                // 如果錯誤被封裝在 Blob 中 (因為 isBinary 時設定了 responseType: 'blob')
+                                const textError = await err.response.data.text();
+                                addLog(`Response Error: ${textError}`, 'text-red-400');
+                            } else {
+                                addLog(`Response Data: ${JSON.stringify(err.response.data)}`, 'text-red-400');
+                            }
                         }
                         test.status = 'error';
                     }
@@ -258,17 +354,18 @@
                 // 3. 執行所有測試 (循序)
                 const runAllTests = async () => {
                     if (!selectedPrinter.value) return alert("請先選擇一台測試用的印表機");
-                    if (!confirm("確定要對所選印表機執行一系列測試嗎？(危險操作如重啟電腦將被跳過)")) return;
+                    if (!confirm("確定要對所選印表機執行一系列測試嗎？\n(注意：破壞性與彈出視窗的操作將被自動跳過)")) return;
 
                     addLog("--- 開始全自動測試 ---", 'text-white border-t border-gray-600 pt-2 mt-2');
                     
                     for (let i = 0; i < testCases.value.length; i++) {
                         const test = testCases.value[i];
-                        if (i === 0) continue; // Skip list fetch
-                        if (test.endpoint.includes('restart')) continue; // Skip destructive restarts in batch mode
+                        if (i === 0) continue; // 跳過連線讀取列表
+                        if (test.endpoint.includes('restart') || test.endpoint.includes('clear')) continue; // 跳過破壞性操作
+                        if (test.isBinary) continue; // 跳過預覽，避免彈出一堆新視窗
                         
                         await runSingleTest(i);
-                        await new Promise(r => setTimeout(r, 500)); 
+                        await new Promise(r => setTimeout(r, 600)); // 延遲讓視覺更順暢
                     }
                     
                     addLog("--- 測試結束 ---", 'text-white border-b border-gray-600 pb-2 mb-2');
@@ -284,8 +381,8 @@
                 };
 
                 return {
-                    config, loading, printers, selectedPrinter, logs, testCases,
-                    initConnection, runSingleTest, runAllTests, clearLog, getTestClass
+                    config, loading, printers, selectedPrinter, selectedFilePath, logs, testCases,
+                    initConnection, runSingleTest, runAllTests, clearLog, getTestClass, getFileName, getRunTitle
                 };
             }
         }).mount('#app');

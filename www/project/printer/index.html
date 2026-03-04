@@ -225,7 +225,7 @@
                                 <div v-if="p.Driver" class="truncate col-span-2" :title="p.Driver"><i class="fa-solid fa-microchip w-4"></i> {{ p.Driver }}</div>
                                 <div v-if="p.PortName" class="truncate"><i class="fa-solid fa-plug w-4"></i> {{ p.PortName }}</div>
                             </div>
-                            <!-- 動態按鈕列 (使用 Flex-1 排列) -->
+                            <!-- 動態按鈕列 -->
                             <div class="flex gap-1.5 mt-auto pt-2 border-t border-slate-100 dark:border-slate-700 text-[11px] xl:text-xs">
                                 <button @click="refreshPrinter(p.Name)" :disabled="loading" class="flex-1 min-w-0 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 py-2 rounded border border-slate-200 dark:border-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center truncate px-1"><i class="fa-solid fa-sync block mb-1 sm:inline sm:mb-0 sm:mr-1" :class="{'fa-spin': loading}"></i> 刷新</button>
                                 <button @click="openEditModal(p)" :disabled="loading" class="flex-1 min-w-0 bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 py-2 rounded border border-yellow-200 dark:border-yellow-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center truncate px-1"><i class="fa-solid fa-pen-to-square block mb-1 sm:inline sm:mb-0 sm:mr-1"></i> 編輯</button>
@@ -236,11 +236,10 @@
                                         <div class="truncate w-full">
                                             <i class="fa-solid fa-clock-rotate-left block mb-1 sm:inline sm:mb-0 sm:mr-1"></i> 紀錄
                                         </div>
-                                        <!-- 顯示印過幾筆檔案的小圓點提示 (增加 Z-index 與微調對齊) -->
                                         <span v-if="p.printed?.length > 0" class="absolute -top-1.5 -right-1.5 bg-purple-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full shadow-md z-10">{{ p.printed.length }}</span>
                                     </button>
                                 </template>
-                                <div v-else class="flex-[2] min-w-0"></div> <!-- 如果狀態不是 Ready 則保留佔位區塊 -->
+                                <div v-else class="flex-[2] min-w-0"></div>
                                 
                                 <button @click="clearQueue(p.Name)" :disabled="loading" class="flex-1 min-w-0 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-300 py-2 rounded border border-red-200 dark:border-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center truncate px-1"><i class="fa-solid fa-trash block mb-1 sm:inline sm:mb-0 sm:mr-1"></i> 清除</button>
                             </div>
@@ -341,10 +340,10 @@
             </div>
         </transition>
 
-        <!-- 新增: 歷史列印紀錄 Modal -->
+        <!-- 歷史列印紀錄 Modal -->
         <transition name="fade">
             <div v-if="showHistoryModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transition-colors flex flex-col max-h-[85vh]">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transition-colors flex flex-col max-h-[85vh]">
                     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
                         <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center">
                             <i class="fa-solid fa-clock-rotate-left mr-2 text-purple-600 dark:text-purple-400"></i>當日列印紀錄
@@ -358,30 +357,65 @@
                             <span class="text-xs font-mono bg-white dark:bg-slate-800 px-2 py-1 rounded">{{ new Date().toLocaleDateString('zh-TW') }}</span>
                         </div>
                         
-                        <!-- 歷史紀錄清單 -->
                         <div v-if="!historyPrinter?.printed || historyPrinter.printed.length === 0" class="text-center py-10 text-slate-400 dark:text-slate-500 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
                             <i class="fa-solid fa-box-open text-4xl mb-3"></i>
                             <p class="text-sm">今日尚無任何列印紀錄</p>
                         </div>
                         
                         <div v-else class="space-y-2">
-                            <!-- 以時間反序排列展示 -->
-                            <div v-for="(file, idx) in historyPrinter.printed.slice().reverse()" :key="idx" class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-lg group hover:border-purple-300 dark:hover:border-purple-500 transition-colors">
-                                <div class="overflow-hidden mr-3">
+                            <div v-for="(file, idx) in historyPrinter.printed.slice().reverse()" :key="idx" class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-lg group hover:border-purple-300 dark:hover:border-purple-500 transition-colors gap-3">
+                                <div class="overflow-hidden">
                                     <div class="text-[11px] text-slate-500 dark:text-slate-400 font-mono mb-0.5"><i class="fa-regular fa-clock mr-1"></i>{{ file.time }}</div>
                                     <div class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate" :title="file.path">{{ getFileName(file.path) }}</div>
                                 </div>
-                                <button @click="reprintFile(file)" :disabled="reprintingPath === file.path" class="flex-shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-500 rounded text-xs font-medium hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 dark:hover:bg-purple-900/40 dark:hover:text-purple-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-sm">
-                                    <i v-if="reprintingPath === file.path" class="fa-solid fa-spinner fa-spin text-purple-600"></i>
-                                    <i v-else class="fa-solid fa-print text-slate-400 group-hover:text-purple-600"></i> 
-                                    <span>重印</span>
-                                </button>
+                                
+                                <div class="flex items-center gap-2 justify-end">
+                                    <button @click="previewFile(file)" class="flex-shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-500 rounded text-xs font-medium hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 dark:hover:bg-blue-900/40 dark:hover:text-blue-300 transition-colors flex items-center gap-1.5 shadow-sm">
+                                        <i class="fa-solid fa-eye text-slate-400 group-hover:text-blue-600"></i>
+                                        <span>預覽</span>
+                                    </button>
+                                    <button @click="reprintFile(file)" :disabled="reprintingPath === file.path" class="flex-shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-500 rounded text-xs font-medium hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 dark:hover:bg-purple-900/40 dark:hover:text-purple-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-sm">
+                                        <i v-if="reprintingPath === file.path" class="fa-solid fa-spinner fa-spin text-purple-600"></i>
+                                        <i v-else class="fa-solid fa-print text-slate-400 group-hover:text-purple-600"></i> 
+                                        <span>重印</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
                         <button @click="showHistoryModal = false" :disabled="reprintingPath !== ''" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">關閉視窗</button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- PDF 預覽 Modal -->
+        <transition name="fade">
+            <div v-if="showPreviewModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden transition-colors border border-slate-200 dark:border-slate-700">
+                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900 flex-shrink-0">
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center truncate">
+                            <i class="fa-solid fa-eye mr-2 text-blue-600 dark:text-blue-400"></i>檔案預覽 
+                            <span class="ml-2 text-sm font-mono text-slate-500 truncate hidden sm:inline">- {{ getFileName(currentPreviewFile?.path) }}</span>
+                        </h3>
+                        <div class="flex items-center gap-3">
+                            <button @click="reprintFromPreview" :disabled="reprintingPath !== ''" class="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm font-medium transition-colors shadow-sm shadow-purple-500/30 flex items-center gap-2">
+                                <i class="fa-solid fa-print"></i> 直接重印
+                            </button>
+                            <div class="w-px h-6 bg-slate-300 dark:bg-slate-600"></div>
+                            <button @click="closePreview" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 bg-slate-200 dark:bg-slate-950 relative">
+                        <div v-if="previewLoading" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
+                            <i class="fa-solid fa-spinner fa-spin text-4xl mb-4 text-blue-500"></i>
+                            <p class="font-bold">正在向伺服器提取檔案...</p>
+                            <p class="text-xs mt-2 opacity-70">根據檔案大小與網路速度可能需要數秒時間</p>
+                        </div>
+                        <iframe v-if="previewUrl" :src="previewUrl" class="w-full h-full border-0 shadow-inner"></iframe>
                     </div>
                 </div>
             </div>
@@ -446,10 +480,14 @@
                 const uploading = ref(false);
                 const fileInput = ref(null);
                 
-                // 新增：歷史紀錄與重印的相關變數
                 const showHistoryModal = ref(false);
                 const historyPrinter = ref(null);
                 const reprintingPath = ref('');
+                
+                const showPreviewModal = ref(false);
+                const previewUrl = ref('');
+                const previewLoading = ref(false);
+                const currentPreviewFile = ref(null);
                 
                 const showLogModal = ref(false);
                 const logData = ref('');
@@ -473,7 +511,6 @@
                     for(let i=1; i<=12; i++) {
                         const s = statuses[Math.floor(Math.random() * statuses.length)];
                         
-                        // Demo 模式產生模擬的 printed 歷史檔案陣列
                         const mockPrinted = [];
                         if (Math.random() > 0.4) {
                             const count = Math.floor(Math.random() * 5) + 1;
@@ -493,7 +530,7 @@
                             Driver: 'HP Universal Printing PCL 6', PortName: `IP_192.168.1.${100+i}`, ShareName: `PRINTER_${i}`,
                             ErrorDetails: s==='Error' ? '缺紙 (Tray 2)' : (s==='Warning' ? '碳粉存量低' : ''),
                             LastUpdated: new Date().toLocaleString(),
-                            printed: mockPrinted // 加入假資料
+                            printed: mockPrinted 
                         });
                     }
                     return mocks;
@@ -576,7 +613,6 @@
                             const idx = printers.value.findIndex(p => p.Name === name);
                             if (idx !== -1) printers.value[idx] = res.data.data;
                             if (res.data.data.LastUpdated) lastUpdated.value = res.data.data.LastUpdated;
-                            // 如果當前有開歷史 Modal，且是這台印表機，同步更新陣列資料
                             if (showHistoryModal.value && historyPrinter.value && historyPrinter.value.Name === name) {
                                 historyPrinter.value = res.data.data;
                             }
@@ -744,7 +780,6 @@
                     } finally { if (!cancelled) uploading.value = false; }
                 };
 
-                // --- 歷史紀錄相關函數 ---
                 const openHistoryModal = (p) => {
                     historyPrinter.value = p;
                     showHistoryModal.value = true;
@@ -752,8 +787,67 @@
 
                 const getFileName = (path) => {
                     if (!path) return '未知檔案';
-                    // 兼容 Windows 與 Unix 的路徑分隔符號
                     return path.split('\\').pop().split('/').pop();
+                };
+
+                // --- 檔案預覽與重新列印邏輯 ---
+                const previewFile = async (file) => {
+                    if (isDemoMode.value) return toast("Demo 模式無法進行真實預覽", "#f59e0b");
+                    
+                    previewLoading.value = true;
+                    previewUrl.value = '';
+                    currentPreviewFile.value = file;
+                    showPreviewModal.value = true;
+                    
+                    let cancelled = false;
+                    try {
+                        const url = getApiUrl(`/printer/preview?path=${encodeURIComponent(file.path)}`);
+                        const res = await axios.get(url, {
+                            headers: { 'X-API-KEY': config.value.key },
+                            responseType: 'blob',
+                            signal: abortController.signal
+                        });
+                        
+                        if (res.data.type === 'application/json') {
+                            const text = await res.data.text();
+                            const json = JSON.parse(text);
+                            error(json.message || "預覽失敗，檔案可能不存在");
+                            showPreviewModal.value = false;
+                            return;
+                        }
+                        
+                        const blob = new Blob([res.data], { type: 'application/pdf' });
+                        previewUrl.value = URL.createObjectURL(blob);
+                    } catch (e) {
+                        if (isCancel(e)) { cancelled = true; return; }
+                        
+                        if (e.response && e.response.data && e.response.data.type === 'application/json') {
+                            const text = await e.response.data.text();
+                            const json = JSON.parse(text);
+                            error(json.message || "無法取得預覽");
+                        } else {
+                            error("無法取得預覽: " + e.message);
+                        }
+                        showPreviewModal.value = false;
+                    } finally {
+                        if (!cancelled) previewLoading.value = false;
+                    }
+                };
+
+                const closePreview = () => {
+                    showPreviewModal.value = false;
+                    if (previewUrl.value) {
+                        URL.revokeObjectURL(previewUrl.value);
+                        previewUrl.value = '';
+                    }
+                    currentPreviewFile.value = null;
+                };
+
+                const reprintFromPreview = () => {
+                    if (currentPreviewFile.value) {
+                        reprintFile(currentPreviewFile.value);
+                        closePreview();
+                    }
                 };
 
                 const reprintFile = async (file) => {
@@ -777,7 +871,6 @@
 
                         if (res.data.success) {
                             success("已成功發送重印指令");
-                            // 一秒後刷新這台印表機狀態，通常這時候 Jobs 數量會上升
                             setTimeout(() => fetchSinglePrinter(historyPrinter.value.Name), 1000);
                         } else {
                             error(res.data.message);
@@ -874,6 +967,7 @@
                     showEditModal, editTarget, editLocation, editComment, saving, openEditModal, submitEdit, 
                     showPdfModal, selectedPrinter, pdfDuplex, uploading, fileInput, openPdfModal, submitPdf,
                     showHistoryModal, historyPrinter, reprintingPath, openHistoryModal, reprintFile, getFileName,
+                    showPreviewModal, previewUrl, previewLoading, currentPreviewFile, previewFile, closePreview, reprintFromPreview,
                     showLogModal, logData, logsLoading, showLogs, fetchLogs, downloadFiles, handleDownload,
                     uniqueLocations, filteredPrinters, errorCount, getStatusColor,
                     showAdvancedOps, currentServer, connectionError, statusCounts
