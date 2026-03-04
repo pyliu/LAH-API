@@ -71,7 +71,7 @@
                             <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Print Server Monitor</h1>
                             <span v-if="isDemoMode" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-sm">DEMO MODE</span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.5 (全域紀錄版)</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.7 (紀錄搜尋版)</p>
                     </div>
                 </div>
 
@@ -125,10 +125,10 @@
                             <p class="text-xs text-slate-400 mt-1">清空暫存並重置環境</p>
                         </button>
                         
-                        <!-- [新增] 全域列印紀錄按鈕 (若無紀錄則隱藏) -->
+                        <!-- 地政系統列印紀錄按鈕 (若無紀錄則隱藏) -->
                         <button v-if="allPrintedRecords.length > 0" @click="showGlobalRecordModal = true" :disabled="loading || (!isConfigValid && !isDemoMode)" class="w-full text-left px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:shadow-md hover:border-purple-300 dark:hover:border-purple-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
                             <div class="flex items-center justify-between">
-                                <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-disabled:text-slate-400">全域列印紀錄</span>
+                                <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-disabled:text-slate-400">地政系統列印紀錄</span>
                                 <div class="flex items-center gap-2">
                                     <span class="bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300 text-[10px] px-2 py-0.5 rounded-full font-bold">{{ allPrintedRecords.length }}</span>
                                     <i class="fa-solid fa-list-ul text-slate-400 group-hover:text-purple-500 group-disabled:text-slate-300"></i>
@@ -182,7 +182,7 @@
             <section class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 relative transition-colors">
                 <div class="mb-6 flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center">
                     <div class="flex flex-col sm:flex-row gap-4 w-full xl:w-auto">
-                        <div class="relative w-full sm:w-60"><span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-search"></i></span><input type="text" v-model="searchQuery" placeholder="搜尋名稱、IP、狀態..." class="w-full pl-10 pr-4 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors text-sm"></div>
+                        <div class="relative w-full sm:w-60"><span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-search"></i></span><input type="text" v-model="searchQuery" placeholder="搜尋名稱、IP、備註..." class="w-full pl-10 pr-4 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors text-sm"></div>
                         <div class="relative w-full sm:w-48">
                             <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-location-dot"></i></span>
                             <select v-model="filterLocation" class="w-full pl-10 pr-8 py-2 rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors appearance-none cursor-pointer text-sm">
@@ -361,21 +361,38 @@
             </div>
         </transition>
 
-        <!-- 5. [新增] 全域列印紀錄 (Global Records) Modal -->
+        <!-- 5. [新增/更新] 地政系統列印紀錄 (Global Records) Modal 支援搜尋 -->
         <transition name="fade">
             <div v-if="showGlobalRecordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden transition-colors flex flex-col max-h-[85vh]">
                     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
                         <h3 class="font-bold text-slate-700 dark:text-slate-200 truncate pr-4">
-                            <i class="fa-solid fa-list-ul mr-2 text-purple-500"></i>今日全域列印紀錄
+                            <i class="fa-solid fa-list-ul mr-2 text-purple-500"></i>今日地政系統列印紀錄
                         </h3>
                         <button @click="showGlobalRecordModal = false" :disabled="recordActionLoading" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-50 flex-shrink-0">
                             <i class="fa-solid fa-xmark text-xl"></i>
                         </button>
                     </div>
                     
+                    <!-- 搜尋列區塊 -->
+                    <div class="px-4 sm:px-6 py-3 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+                        <div class="relative w-full">
+                            <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-search"></i></span>
+                            <input type="text" v-model="globalRecordSearchQuery" placeholder="搜尋檔名、印表機名稱或時間..." class="w-full pl-10 pr-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-white focus:ring-purple-500 focus:border-purple-500 shadow-sm transition-colors text-sm outline-none">
+                            <button v-if="globalRecordSearchQuery" @click="globalRecordSearchQuery = ''" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                                <i class="fa-solid fa-circle-xmark text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
                     <div class="overflow-y-auto p-4 sm:p-6 space-y-3 bg-slate-50 dark:bg-slate-900/50 flex-1">
-                        <div v-for="(record, idx) in allPrintedRecords" :key="idx" class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                        <!-- 無搜尋結果提示 -->
+                        <div v-if="filteredGlobalRecords.length === 0" class="text-center text-slate-500 py-10">
+                            <i class="fa-solid fa-magnifying-glass text-4xl mb-3 text-slate-300 dark:text-slate-600"></i>
+                            <p>{{ globalRecordSearchQuery ? '找不到符合關鍵字的紀錄' : '無任何列印紀錄' }}</p>
+                        </div>
+                        
+                        <div v-else v-for="(record, idx) in filteredGlobalRecords" :key="idx" class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
                             <div class="overflow-hidden w-full flex-1">
                                 <div class="flex items-center gap-2 mb-1">
                                     <div class="text-xs text-slate-400 font-mono"><i class="fa-regular fa-clock mr-1"></i>{{ record.time }}</div>
@@ -483,16 +500,23 @@
                 const logData = ref('');
                 const logsLoading = ref(false);
 
-                // 單一印表機紀錄狀態
                 const showRecordModal = ref(false);
                 const recordActionLoading = ref(false);
 
-                // [新增] 全域印表機紀錄狀態
+                // 全域紀錄狀態
                 const showGlobalRecordModal = ref(false);
+                const globalRecordSearchQuery = ref(''); // 新增：全域搜尋字串
                 
                 const showPreviewModal = ref(false);
                 const previewPdfUrl = ref('');
                 const previewFileName = ref('');
+
+                // 每次關閉全域紀錄 Modal 時，自動清空搜尋條件
+                watch(showGlobalRecordModal, (newVal) => {
+                    if (!newVal) {
+                        globalRecordSearchQuery.value = '';
+                    }
+                });
 
                 const closePreviewModal = () => {
                     showPreviewModal.value = false;
@@ -527,7 +551,8 @@
                             LastUpdated: new Date().toLocaleString(),
                             printed: Math.random() > 0.5 ? [
                                 { date: '2026-03-04', time: '08:15:22', path: 'C:/PDFPrint/report_q1.pdf' },
-                                { date: '2026-03-04', time: '09:30:10', path: '\\\\192.168.1.100\\share\\invoice_2026.pdf' }
+                                { date: '2026-03-04', time: '09:30:10', path: '\\\\192.168.1.100\\share\\invoice_2026.pdf' },
+                                { date: '2026-03-04', time: '11:45:00', path: 'D:/LandDocs/Title_Transfer_001.pdf' }
                             ] : []
                         });
                     }
@@ -847,7 +872,6 @@
                 const countError = computed(() => printers.value.filter(p => p.Status === 'Error').length);
                 const countWarning = computed(() => printers.value.filter(p => p.Status?.includes('Warning')).length);
 
-                // [新增] 計算全域所有列印紀錄的 Computed 變數
                 const allPrintedRecords = computed(() => {
                     const records = [];
                     printers.value.forEach(p => {
@@ -857,7 +881,6 @@
                             });
                         }
                     });
-                    // 依時間降冪排序 (最新的在最前面)
                     return records.sort((a, b) => {
                         const timeA = a.time || '';
                         const timeB = b.time || '';
@@ -865,10 +888,24 @@
                     });
                 });
 
+                // [新增] 負責過濾全域紀錄的 Computed 變數
+                const filteredGlobalRecords = computed(() => {
+                    if (!globalRecordSearchQuery.value) return allPrintedRecords.value;
+                    const q = globalRecordSearchQuery.value.toLowerCase();
+                    return allPrintedRecords.value.filter(r => {
+                        const fname = getFileName(r.path).toLowerCase();
+                        const pname = (r.printerName || '').toLowerCase();
+                        const t = (r.time || '').toLowerCase();
+                        return fname.includes(q) || pname.includes(q) || t.includes(q);
+                    });
+                });
+
                 const uniqueLocations = computed(() => [...new Set(printers.value.map(p => p.Location).filter(l => l))].sort());
                 const filteredPrinters = computed(() => {
                     return printers.value.filter(p => {
-                        const matchQ = (p.Name || '').toLowerCase().includes(searchQuery.value.toLowerCase()) || (p.IP || '').includes(searchQuery.value);
+                        const matchQ = (p.Name || '').toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+                                       (p.IP || '').includes(searchQuery.value) ||
+                                       (p.Comment || '').toLowerCase().includes(searchQuery.value.toLowerCase());
                         let matchS = true;
                         if (filterStatus.value === 'Ready') matchS = p.Status === 'Ready';
                         else if (filterStatus.value === 'Error') matchS = p.Status === 'Error';
@@ -931,7 +968,7 @@
                     config, servers, currentServerId, showServerModal, editingServer, printers, loading, lastUpdated, autoRefresh, darkMode, isConfigValid, isDemoMode,
                     searchQuery, filterStatus, filterLocation, uniqueLocations, filteredPrinters, errorCount, sortBy, sortDesc, refreshInterval, validateInterval, countdown,
                     countAll, countReady, countIssue, countError, countWarning,
-                    allPrintedRecords, showGlobalRecordModal, // 導出全域紀錄相關變數
+                    allPrintedRecords, showGlobalRecordModal, globalRecordSearchQuery, filteredGlobalRecords, // 導出搜尋狀態
                     getStatusColor, toggleDarkMode, openServerManager, saveServer, removeServer, useServer, resetEdit, editServer, switchServer,
                     fetchPrinters, fetchSinglePrinter, clearQueue, refreshPrinter, restartSpooler, selfHeal, restartScript, restartServer, 
                     showEditModal, editTarget, editLocation, editComment, saving, openEditModal, submitEdit, 
