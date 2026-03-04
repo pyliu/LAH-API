@@ -59,7 +59,7 @@
         </div>
     </div>
 
-    <div id="app" v-cloak class="flex-1 flex flex-col h-full">
+    <div id="app" v-cloak class="flex-1 flex flex-col h-full relative">
         
         <!-- Header -->
         <header class="bg-white dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-800 z-20 transition-colors">
@@ -71,7 +71,7 @@
                             <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Print Server Monitor</h1>
                             <span v-if="isDemoMode" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-sm">DEMO MODE</span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.7</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">系統維運儀表板 v4.8 (版面修復版)</p>
                     </div>
                 </div>
 
@@ -80,7 +80,7 @@
 
                     <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-server text-slate-400"></i></div>
-                        <select v-model="currentServerId" @change="switchServer" :disabled="isDemoMode" class="pl-9 pr-8 py-1.5 text-sm rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 w-48 transition-colors appearance-none cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed">
+                        <select v-model="currentServerId" @change="switchServer" :disabled="isDemoMode" class="pl-9 pr-8 py-1.5 text-sm rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-blue-500 focus:border-blue-50 w-48 transition-colors appearance-none cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed">
                             <option value="" disabled>請選擇伺服器</option>
                             <option v-for="srv in servers" :key="srv.id" :value="srv.id">{{ srv.name }} ({{ srv.ip }})</option>
                         </select>
@@ -219,6 +219,7 @@
                 </div>
 
                 <transition-group name="list" tag="div" v-if="filteredPrinters.length > 0" class="printer-grid-container grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4 pb-20">
+                    <!-- 修正: 確保卡片結構與 v-for 正確 -->
                     <div v-for="p in filteredPrinters" :key="p.Name" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-all relative group h-full flex flex-col">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl" :class="getStatusColor(p.Status, true)"></div>
                         <div class="pl-3 flex-1 flex flex-col">
@@ -235,8 +236,14 @@
                                     <div class="text-[10px] text-slate-400 dark:text-slate-500 uppercase">佇列數</div>
                                 </div>
                             </div>
-                            <div v-if="p.ErrorDetails" class="mb-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-xs px-2 py-1.5 rounded border border-red-100 dark:border-red-900/50 flex items-start gap-2"><i class="fa-solid fa-triangle-exclamation mt-0.5"></i><span>{{ p.ErrorDetails }}</span></div>
-                            <div v-if="p.Comment" class="mb-3 text-xs text-slate-500 dark:text-slate-400 italic"><i class="fa-regular fa-comment-dots mr-1"></i>{{ p.Comment }}</div>
+                            
+                            <div v-if="p.ErrorDetails" class="mb-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-xs px-2 py-1.5 rounded border border-red-100 dark:border-red-900/50 flex items-start gap-2">
+                                <i class="fa-solid fa-triangle-exclamation mt-0.5"></i><span>{{ p.ErrorDetails }}</span>
+                            </div>
+                            <div v-if="p.Comment" class="mb-3 text-xs text-slate-500 dark:text-slate-400 italic">
+                                <i class="fa-regular fa-comment-dots mr-1"></i>{{ p.Comment }}
+                            </div>
+                            
                             <div class="grid grid-cols-2 gap-y-1 text-xs text-slate-500 dark:text-slate-400 mb-4 border-t border-slate-100 dark:border-slate-700 pt-2">
                                 <div v-if="p.Location" class="truncate" :title="p.Location"><i class="fa-solid fa-location-dot w-4"></i> {{ p.Location }}</div>
                                 <div v-if="p.ShareName" class="truncate" :title="p.ShareName"><i class="fa-solid fa-share-nodes w-4"></i> {{ p.ShareName }}</div>
@@ -250,7 +257,7 @@
                                 <button @click="openEditModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 text-xs py-2 rounded border border-yellow-200 dark:border-yellow-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-pen-to-square"></i> 編輯</button>
                                 <button v-if="p.Status === 'Ready'" @click="openPdfModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-300 text-xs py-2 rounded border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50 whitespace-nowrap"><i class="fa-solid fa-file-pdf"></i> 列印</button>
                                 
-                                <button v-if="p.printed && p.printed.length > 0" @click="openRecordModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-xs py-2 px-2 rounded border border-purple-200 dark:border-purple-800 transition-colors disabled:opacity-50 whitespace-nowrap font-medium flex items-center justify-center gap-1" title="地政系統列印紀錄">
+                                <button v-if="p.printed && p.printed.length > 0" @click="openRecordModal(p)" :disabled="loading" class="flex-1 min-w-[60px] bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-xs py-2 px-2 rounded border border-purple-200 dark:border-purple-800 transition-colors disabled:opacity-50 whitespace-nowrap font-medium flex items-center justify-center gap-1">
                                     <i class="fa-solid fa-clock-rotate-left"></i> 紀錄 <span class="bg-purple-200 text-purple-800 dark:bg-purple-800 dark:text-purple-200 rounded-full px-1.5 py-0.5 text-[10px] leading-none">{{ p.printed.length }}</span>
                                 </button>
                                 
@@ -259,8 +266,20 @@
                         </div>
                     </div>
                 </transition-group>
-                <div v-else-if="!loading" class="flex flex-col items-center justify-center h-96 text-slate-400 dark:text-slate-600"><i class="fa-solid fa-ghost text-4xl mb-4"></i><p>找不到符合的印表機</p></div>
-                <div v-if="loading && printers.length === 0" class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10"><div class="flex flex-col items-center"><i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-3"></i><p class="text-sm text-slate-500 dark:text-slate-400 font-medium">正在連線至 API...</p></div></div>
+                
+                <!-- 修正: 確保 v-else-if 與上方的 transition-group 連接正確 -->
+                <div v-else-if="!loading" class="flex flex-col items-center justify-center h-96 text-slate-400 dark:text-slate-600">
+                    <i class="fa-solid fa-ghost text-4xl mb-4"></i>
+                    <p>找不到符合的印表機</p>
+                </div>
+                
+                <!-- 讀取中覆蓋層 -->
+                <div v-if="loading && printers.length === 0" class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10">
+                    <div class="flex flex-col items-center">
+                        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-3"></i>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">正在連線至 API...</p>
+                    </div>
+                </div>
             </section>
         </main>
 
@@ -338,11 +357,11 @@
                     </div>
                     
                     <div class="overflow-y-auto p-4 sm:p-6 space-y-3 bg-slate-50 dark:bg-slate-900/50 flex-1">
-                        <div v-if="!selectedPrinter?.printed || selectedPrinter.printed.length === 0" class="text-center text-slate-500 py-8">
+                        <div v-if="!sortedSinglePrinterRecords || sortedSinglePrinterRecords.length === 0" class="text-center text-slate-500 py-8">
                             <i class="fa-solid fa-folder-open text-3xl mb-2 text-slate-300 dark:text-slate-600"></i>
                             <p>無任何列印紀錄</p>
                         </div>
-                        <div v-else v-for="(record, idx) in selectedPrinter.printed" :key="idx" class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                        <div v-else v-for="(record, idx) in sortedSinglePrinterRecords" :key="idx" class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
                             <div class="overflow-hidden w-full">
                                 <div class="text-xs text-slate-400 font-mono mb-1"><i class="fa-regular fa-clock mr-1"></i>{{ record.time }}</div>
                                 <div class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate cursor-help" :title="record.path">{{ getFileName(record.path) }}</div>
@@ -361,7 +380,7 @@
             </div>
         </transition>
 
-        <!-- 5. [新增/更新] 地政系統列印紀錄 (Global Records) Modal 支援搜尋 -->
+        <!-- 5. 地政系統列印紀錄 (Global Records) Modal 支援搜尋 -->
         <transition name="fade">
             <div v-if="showGlobalRecordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden transition-colors flex flex-col max-h-[85vh]">
@@ -500,12 +519,23 @@
                 const logData = ref('');
                 const logsLoading = ref(false);
 
+                // 單一印表機紀錄狀態
                 const showRecordModal = ref(false);
                 const recordActionLoading = ref(false);
 
+                // [新增] 將單一印表機紀錄根據時間反向排序 (最新在上)
+                const sortedSinglePrinterRecords = computed(() => {
+                    if (!selectedPrinter.value || !selectedPrinter.value.printed) return [];
+                    return [...selectedPrinter.value.printed].sort((a, b) => {
+                        const timeA = a.time || '';
+                        const timeB = b.time || '';
+                        return timeB.localeCompare(timeA);
+                    });
+                });
+
                 // 全域紀錄狀態
                 const showGlobalRecordModal = ref(false);
-                const globalRecordSearchQuery = ref(''); // 新增：全域搜尋字串
+                const globalRecordSearchQuery = ref('');
                 
                 const showPreviewModal = ref(false);
                 const previewPdfUrl = ref('');
@@ -888,7 +918,6 @@
                     });
                 });
 
-                // [新增] 負責過濾全域紀錄的 Computed 變數
                 const filteredGlobalRecords = computed(() => {
                     if (!globalRecordSearchQuery.value) return allPrintedRecords.value;
                     const q = globalRecordSearchQuery.value.toLowerCase();
@@ -968,12 +997,12 @@
                     config, servers, currentServerId, showServerModal, editingServer, printers, loading, lastUpdated, autoRefresh, darkMode, isConfigValid, isDemoMode,
                     searchQuery, filterStatus, filterLocation, uniqueLocations, filteredPrinters, errorCount, sortBy, sortDesc, refreshInterval, validateInterval, countdown,
                     countAll, countReady, countIssue, countError, countWarning,
-                    allPrintedRecords, showGlobalRecordModal, globalRecordSearchQuery, filteredGlobalRecords, // 導出搜尋狀態
+                    allPrintedRecords, showGlobalRecordModal, globalRecordSearchQuery, filteredGlobalRecords,
                     getStatusColor, toggleDarkMode, openServerManager, saveServer, removeServer, useServer, resetEdit, editServer, switchServer,
                     fetchPrinters, fetchSinglePrinter, clearQueue, refreshPrinter, restartSpooler, selfHeal, restartScript, restartServer, 
                     showEditModal, editTarget, editLocation, editComment, saving, openEditModal, submitEdit, 
                     showPdfModal, selectedPrinter, pdfDuplex, uploading, fileInput, openPdfModal, submitPdf,
-                    showRecordModal, openRecordModal, recordActionLoading, getFileName, previewFile, reprintFile,
+                    showRecordModal, openRecordModal, recordActionLoading, getFileName, previewFile, reprintFile, sortedSinglePrinterRecords,
                     showPreviewModal, previewPdfUrl, previewFileName, closePreviewModal,
                     showLogModal, logData, logsLoading, showLogs, fetchLogs, downloadFiles, handleDownload,
                     showAdvancedOps
