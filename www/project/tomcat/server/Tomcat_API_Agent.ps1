@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     資深系統整合工程師實作版本 - Tomcat Server HTTP API Agent
-    版本：v1.9 (全功能最終版：支援 Stdout/Stderr 動態高效讀取與完整防護)
+    版本：v2.1 (預設 Port 18888，支援高效率日誌讀取與完整防護)
 #>
 
 # -------------------------------------------------------------------------
@@ -39,7 +39,7 @@ function Get-EnvBool($key, $default) { if ($envConfig.Contains($key) -and $envCo
 function Get-EnvArray($key, [string[]]$default) { if ($envConfig.Contains($key) -and $envConfig[$key] -ne '') { return @($envConfig[$key] -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }) } return $default }
 
 # --- 變數映射 ---
-$port               = Get-EnvInt "PORT" 8888
+$port               = Get-EnvInt "PORT" 18888
 $apiKey             = Get-EnvString "API_KEY" "TomcatSecretKey123!"      
 $logPath            = Get-EnvString "LOG_PATH" "C:\Temp\TomcatApiLogs"
 $maxLogSizeBytes    = Get-EnvInt "MAX_LOG_SIZE_BYTES" 10485760 # 10MB                       
@@ -122,7 +122,6 @@ function Cleanup-OldLogs {
     try {
         if (Test-Path $logPath) {
             $limitDate = (Get-Date).AddDays(-$logRetentionDays)
-            # 自動清理舊的文字日誌與舊的 ZIP 壓縮檔
             $oldFiles = Get-ChildItem -Path $logPath -Include "TomcatApi_*.log*", "tomcat_logs_*.zip" -Recurse | Where-Object { $_.LastWriteTime -lt $limitDate }
             if ($oldFiles) { foreach ($f in $oldFiles) { Remove-Item $f.FullName -Force } }
         }
@@ -241,7 +240,7 @@ function Clear-ZombiePort {
 # 3. 主程序 (HttpListener)
 # -------------------------------------------------------------------------
 Write-ApiLog "----------------------------------------" -Color Cyan
-Write-ApiLog " Tomcat API Agent v1.9 (Port: $port) " -Color Cyan
+Write-ApiLog " Tomcat API Agent v2.1 (Port: $port) " -Color Cyan
 Write-ApiLog "----------------------------------------" -Color Cyan
 
 Setup-FirewallRule $port
@@ -294,7 +293,6 @@ while ($listener.IsListening) {
         $res.AddHeader("Access-Control-Allow-Headers", "*") 
         if ($req.HttpMethod -eq "OPTIONS") { $res.StatusCode = 200; $res.Close(); continue }
 
-        # 這裡加入 $handledBinary 變數，用於切換一般 JSON 與二進位檔案下載
         $out = @{ "success"=$false; "message"=""; "data"=$null }
         $handledBinary = $false
 
@@ -370,16 +368,12 @@ while ($listener.IsListening) {
                 if ($enableAdminNotifications) { Send-SysAdminNotify -title "Tomcat 重啟通知" -content "管理員已成功透過遠端 API 重啟 Tomcat 服務。" }
             } catch { $out.message = "重啟失敗: $($_.Exception.Message)" }
         } 
-        
-        # ==========================================
-        # ?? 動態讀取日誌 (支援 Catalina, Stdout, Stderr)
-        # ==========================================
         elseif ($path -eq "/tomcat/logs") {
             $logDate = Get-Date -Format "yyyy-MM-dd"
             $reqType = Get-Utf8QueryParam $req "type"
             $targetFile = $null
 
-            # 依據 type 參數尋找最新的對應日誌檔
+            # 動態匹配日誌檔案 (Catalina, Stdout, Stderr)
             if ($reqType -eq "stdout") {
                 $files = Get-ChildItem -Path "$tomcatDir\logs" -Filter "*stdout*$logDate.log" -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
                 if ($files) { $targetFile = $files[0].FullName }
@@ -387,7 +381,6 @@ while ($listener.IsListening) {
                 $files = Get-ChildItem -Path "$tomcatDir\logs" -Filter "*stderr*$logDate.log" -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
                 if ($files) { $targetFile = $files[0].FullName }
             } else {
-                # 預設為 catalina 日誌
                 $targetFile = Join-Path $tomcatDir "logs\catalina.$logDate.log"
                 if (-not (Test-Path $targetFile)) { $targetFile = Join-Path $tomcatDir "logs\catalina.out" }
             }
@@ -398,7 +391,7 @@ while ($listener.IsListening) {
                 if ($l -match "^\d+$") { $cnt = [int]$l }
                 
                 try {
-                    # 使用 -Tail 進行極速檔案末端讀取，不吃記憶體
+                    # 使用 -Tail 進行極速檔案末端讀取
                     $out.data = Get-Content $targetFile -Tail $cnt -Encoding Default -ErrorAction Stop
                     $out.success = $true
                     $out.message = "日誌讀取完成"
@@ -428,10 +421,6 @@ while ($listener.IsListening) {
                 } else { $out.success = $true; $out.message = "未發現 Dump 檔案" }
             } catch { $out.message = "刪除失敗: $($_.Exception.Message)" }
         } 
-        
-        # ==========================================
-        # ?? 打包下載日誌功能
-        # ==========================================
         elseif ($path -eq "/tomcat/download-logs") {
             Write-ApiLog ">>> [下載任務] 開始打包 Tomcat 日誌..." -Color Cyan
             try {
@@ -439,36 +428,28 @@ while ($listener.IsListening) {
                 $zipPath = Join-Path $logPath $zipName
                 
                 $tempFolder = Join-Path $logPath "temp_zip_$([guid]::NewGuid().ToString().Substring(0,8))"
-                Write-ApiLog " -> [1/4] 建立防鎖死暫存區..."
                 New-Item -ItemType Directory -Path $tempFolder -Force | Out-Null
-                
-                Write-ApiLog " -> [2/4] 正在將日誌複製至暫存區..."
                 Copy-Item -Path "$tomcatDir\logs\*" -Destination $tempFolder -Recurse -Force -ErrorAction SilentlyContinue
                 
                 if ((Get-ChildItem -Path $tempFolder).Count -eq 0) {
                     New-Item -ItemType File -Path "$tempFolder\no_logs_found.txt" -Value "No log files were found." | Out-Null
                 }
 
-                Write-ApiLog " -> [3/4] 執行 ZIP 壓縮中 (依檔案大小可能需要數十秒)..." -Color Yellow
+                Write-ApiLog " -> 執行 ZIP 壓縮中..." -Color Yellow
                 Compress-Archive -Path "$tempFolder\*" -DestinationPath $zipPath -Force
-                
-                Write-ApiLog " -> 正在清理暫存區..."
                 Remove-Item -Path $tempFolder -Recurse -Force -ErrorAction SilentlyContinue
 
                 if (Test-Path $zipPath) {
-                    Write-ApiLog " -> [4/4] 壓縮成功，開始轉換為二進位串流回傳給前端..." -Color Green
                     $fileBytes = [System.IO.File]::ReadAllBytes($zipPath)
-                    
                     $res.ContentType = "application/zip"
                     $res.AddHeader("Content-Disposition", "attachment; filename=`"$zipName`"")
                     $res.ContentLength64 = $fileBytes.Length
                     $res.OutputStream.Write($fileBytes, 0, $fileBytes.Length)
                     $res.Close()
-                    
                     $handledBinary = $true 
-                    Write-ApiLog ">>> [下載任務] 日誌壓縮檔 ($zipName) 傳輸完畢！" -Color Green
+                    Write-ApiLog ">>> [下載任務] 日誌壓縮檔傳輸完畢！" -Color Green
                 } else {
-                    $out.message = "壓縮檔建立失敗 (可能權限不足)"
+                    $out.message = "壓縮檔建立失敗"
                     Write-ApiLog "!!! [下載任務] 壓縮檔建立失敗" -Color Red
                 }
             } catch {
@@ -480,9 +461,7 @@ while ($listener.IsListening) {
             $res.StatusCode = 404 
         }
 
-        # ==========================================
-        # 一般 JSON 輸出
-        # ==========================================
+        # 處理 JSON 輸出
         if (-not $handledBinary) {
             $json = ConvertTo-SimpleJson $out
             $buf = [System.Text.Encoding]::UTF8.GetBytes($json)
@@ -491,9 +470,7 @@ while ($listener.IsListening) {
             try { $res.OutputStream.Write($buf, 0, $buf.Length); $res.Close() } catch {}
         }
 
-        # ==========================================
-        # ?? 程序重啟與關機邏輯
-        # ==========================================
+        # 系統指令
         if ($restartScript) {
             Write-ApiLog ">>> 準備重新啟動 Agent..." -Color Yellow
             try { $listener.Abort() } catch {} 
